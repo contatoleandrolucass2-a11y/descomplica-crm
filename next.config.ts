@@ -1,0 +1,14 @@
+/**
+ * Next.js configuration — descomplica-platform, Milestone 1 baseline.
+ *
+ * Mantido mínimo intencionalmente. Headers de segurança (CSP, X-Frame-Options,
+ * Referrer-Policy, etc.) são adicionados no Milestone 3 via middleware.
+ * Referência: AUTH_SECURITY.md > HTTP Security Headers
+ */
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+};
+
+export default nextConfig;

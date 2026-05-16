@@ -1,0 +1,17 @@
+/**
+ * Estilos globais — descomplica-platform.
+ *
+ * Carrega Tailwind v4 e declara a camada base de tokens via @theme.
+ * Todos os tokens de cor, espaçamento e tipografia usados na aplicação
+ * são declarados aqui. Nenhum estilo específico de componente vive neste arquivo.
+ *
+ * Nota CSP: sem estilos inline nem injeção de estilo em runtime — preserva
+ * compatibilidade com a Content-Security-Policy estrita aplicada no Milestone 3.
+ * Referência: AUTH_SECURITY.md > HTTP Security Headers
+ */
+@import "tailwindcss";
+
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+}
