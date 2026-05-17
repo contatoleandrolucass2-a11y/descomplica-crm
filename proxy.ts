@@ -23,12 +23,23 @@
 //     headers required by @supabase/ssr. This file just wires the
 //     helper into Next.js and forwards its response.
 //
-// Out of scope for M3.3:
+// Security headers (M3.4):
 //   - HTTP security headers (CSP, HSTS, X-Frame-Options,
-//     Referrer-Policy, X-Content-Type-Options) are added in M3.4
-//     via lib/security/headers.ts. This file intentionally does
-//     NOT import or apply applySecurityHeaders yet because that
-//     module does not exist until M3.4.
+//     Referrer-Policy, X-Content-Type-Options, Permissions-Policy)
+//     are now applied via applySecurityHeaders from
+//     lib/security/headers.ts. The policy itself lives there so
+//     this file stays focused on session refresh wiring. The call
+//     happens AFTER updateSession so the cookies and anti-cache
+//     headers placed by @supabase/ssr are not overwritten.
+//   - The production-mode gate combines NODE_ENV with a runtime
+//     check that the request is actually over HTTPS. Running a
+//     local prod build over plain HTTP must NOT emit HSTS or
+//     upgrade-insecure-requests, because those headers would
+//     poison the browser cache against plain-HTTP access to other
+//     local services. The combined gate is the only safe signal
+//     for "we are serving real production traffic".
+//
+// Out of scope (M4+):
 //   - No redirects. Real route protection enforcement (per
 //     ROUTE_PROTECTION.md and the B10 verification gate) is
 //     deferred to M4+ once login and verification-pending
@@ -55,10 +66,17 @@
 //     common static asset extensions for the same reason.
 
 import { updateSession } from "@/lib/auth/supabase/middleware";
+import { applySecurityHeaders } from "@/lib/security/headers";
 import type { NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {
   const { response } = await updateSession(request);
+
+  const isSecureProduction =
+    process.env.NODE_ENV === "production" && request.nextUrl.protocol === "https:";
+
+  applySecurityHeaders(response.headers, { isProd: isSecureProduction });
+
   return response;
 }
 
