@@ -74,6 +74,7 @@ export type DashboardPayload = {
   };
   generatedAt: string;
   referenceDate: string;
+  monthComparisonMode?: "same_day_mtd";
   timezone: string;
   source: string;
   realizedFunnel?: RealizedFunnel;

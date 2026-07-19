@@ -88,6 +88,7 @@ export const demoDashboard: DashboardPayload = {
   },
   generatedAt: "2026-07-18T18:00:00.000Z",
   referenceDate: "2026-07-18",
+  monthComparisonMode: "same_day_mtd",
   timezone: "America/Sao_Paulo",
   source: "Prévia demonstrativa",
   realizedFunnel: {

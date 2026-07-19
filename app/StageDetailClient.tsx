@@ -137,7 +137,10 @@ export function StageDetailClient({
     : null;
   const conversion = previousValue && previousValue > 0 ? current / previousValue : null;
   const ringRate = Math.min(Math.max(goal > 0 ? goalRate : conversion ?? (current > 0 ? 1 : 0), 0), 1);
-  const monthLabels = getMonthToDateLabels(dashboard?.referenceDate);
+  const monthComparisonReady = dashboard?.monthComparisonMode === "same_day_mtd";
+  const monthLabels = getMonthToDateLabels(
+    monthComparisonReady ? dashboard?.referenceDate : undefined,
+  );
 
   const comparisonRows: PeriodComparisonRow[] = (() => {
     if (!metric) return [];
@@ -289,7 +292,11 @@ export function StageDetailClient({
         <section className="stage-detail-grid">
           <article className="history-card">
             <div className="section-heading"><div><p className="eyebrow">Evolução</p><h2>Comparativo entre períodos</h2></div></div>
-            <p className="comparison-helper">Mês compara o dia 1 até a mesma data nos dois períodos.</p>
+            <p className="comparison-helper">
+              {monthComparisonReady
+                ? "Mês compara o dia 1 até a mesma data nos dois períodos."
+                : "Aguardando a próxima sincronização do Salesforce para aplicar o período equivalente."}
+            </p>
             <PeriodComparisonTable rows={comparisonRows} label={`Comparativo de ${stage.label}`} />
           </article>
 

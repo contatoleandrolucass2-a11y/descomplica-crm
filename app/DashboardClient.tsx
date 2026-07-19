@@ -136,7 +136,7 @@ function RealizedMetricTable({
 }: {
   label: string;
   metric: RealizedFunnelMetric;
-  referenceDate: string;
+  referenceDate?: string;
 }) {
   const monthLabels = getMonthToDateLabels(referenceDate);
   const rows: PeriodComparisonRow[] = [
@@ -682,7 +682,9 @@ export function DashboardClient({
               </div>
             </div>
             <p className="realized-note">
-              Comparativo mensal usa o dia 1 até a mesma data nos dois meses.
+              {dashboard.monthComparisonMode === "same_day_mtd"
+                ? "Comparativo mensal usa o dia 1 até a mesma data nos dois meses. "
+                : "Último relatório ainda usa o mês anterior completo. A próxima sincronização aplicará o período equivalente. "}
               Vendas seguem a regra operacional sem CANAL IMOB.
             </p>
             <div className="realized-grid">
@@ -691,7 +693,11 @@ export function DashboardClient({
                   key={stage.key}
                   label={stage.label}
                   metric={dashboard.realizedFunnel![stage.key]}
-                  referenceDate={dashboard.referenceDate}
+                  referenceDate={
+                    dashboard.monthComparisonMode === "same_day_mtd"
+                      ? dashboard.referenceDate
+                      : undefined
+                  }
                 />
               ))}
             </div>
