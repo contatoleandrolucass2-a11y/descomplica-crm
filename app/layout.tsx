@@ -26,6 +26,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "Descomplica CRM | Inteligência comercial",
     description:
       "Relatório consolidado de desempenho comercial integrado ao Salesforce.",
+    icons: {
+      icon: "/favicon.svg",
+    },
     openGraph: {
       title: "Descomplica CRM",
       description: "Relatório consolidado da equipe integrado ao Salesforce.",

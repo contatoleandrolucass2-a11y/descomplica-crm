@@ -1,0 +1,56 @@
+import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
+import { getDb } from "@/db";
+import { collaboratorDashboards } from "@/db/schema";
+import { requireChatGPTUser } from "./chatgpt-auth";
+import { demoDashboard } from "./demo-data";
+import type { DashboardPayload } from "./types";
+
+const COMPLETE_REPORT_EMAIL = "relatorio-completo@descomplicapro.com.br";
+
+async function isLocalPreview() {
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("host") ?? "";
+  return host.startsWith("localhost") || host.startsWith("127.0.0.1");
+}
+
+export async function loadDashboardPageData(returnTo: string) {
+  const localPreview = await isLocalPreview();
+  const user = localPreview
+    ? {
+        email: "leandro@descomplicapro.com.br",
+        displayName: "Leandro Lucas",
+        fullName: "Leandro Lucas",
+      }
+    : await requireChatGPTUser(returnTo);
+
+  let dashboard: DashboardPayload | null = null;
+  let dataStatus: "live" | "demo" | "waiting" = "waiting";
+
+  if (localPreview) {
+    dashboard = demoDashboard;
+    dataStatus = "demo";
+  } else {
+    try {
+      const [record] = await getDb()
+        .select()
+        .from(collaboratorDashboards)
+        .where(eq(collaboratorDashboards.email, COMPLETE_REPORT_EMAIL))
+        .limit(1);
+
+      if (record) {
+        dashboard = JSON.parse(record.payloadJson) as DashboardPayload;
+        dataStatus = "live";
+      }
+    } catch {
+      dataStatus = "waiting";
+    }
+  }
+
+  return {
+    dashboard,
+    dataStatus,
+    signedInEmail: user.email,
+    signedInName: user.fullName ?? user.displayName,
+  };
+}

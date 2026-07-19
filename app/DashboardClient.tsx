@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { StageNavigation } from "./StageNavigation";
+import { ACTION_PLANS, STAGES } from "./stage-config";
 import type {
   DashboardPayload,
   DashboardViewKey,
@@ -28,24 +30,6 @@ const PERIODS: Array<{ key: PeriodKey; label: string }> = [
   { key: "today", label: "Hoje" },
 ];
 
-const METRICS = [
-  {
-    key: "opportunities",
-    label: "Oportunidades",
-    short: "Oportunidades",
-    color: "#2563eb",
-  },
-  {
-    key: "appointments",
-    label: "Agendamentos",
-    short: "Agendamentos",
-    color: "#0891b2",
-  },
-  { key: "visits", label: "Visitas", short: "Visitas", color: "#7c3aed" },
-  { key: "folders", label: "Pastas", short: "Pastas", color: "#d97706" },
-  { key: "sales", label: "Vendas", short: "Vendas", color: "#059669" },
-] as const;
-
 const REALIZED_STAGES = [
   { key: "agendamentos", label: "Agendamentos realizados" },
   { key: "visitas", label: "Visitas realizadas" },
@@ -62,19 +46,6 @@ const REALIZED_PERIODS = [
   { key: "ontem", label: "Ontem" },
   { key: "hoje", label: "Hoje", goal: "dia", rate: "realizado_meta_dia" },
 ] as const;
-
-const ACTION_PLANS: Record<(typeof METRICS)[number]["key"], string> = {
-  opportunities:
-    "Reforçar captação e redistribuir oportunidades sem atendimento.",
-  appointments:
-    "Aumentar cadência de contato e confirmar interesse antes do agendamento.",
-  visits:
-    "Confirmar agenda com antecedência e remarcar faltas no mesmo dia.",
-  folders:
-    "Mapear pendências e fazer mutirão diário de documentos.",
-  sales:
-    "Priorizar propostas quentes, tratar objeções e fechar próximo passo com prazo.",
-};
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(
@@ -212,6 +183,7 @@ function StageDonut({
   goalRate,
   color,
   index,
+  href,
 }: {
   label: string;
   value: number;
@@ -220,6 +192,7 @@ function StageDonut({
   goalRate: number;
   color: string;
   index: number;
+  href: string;
 }) {
   const ringRate = conversion === null ? (value > 0 ? 1 : 0) : conversion;
   const safeRingRate = Math.min(Math.max(ringRate, 0), 1);
@@ -266,6 +239,9 @@ function StageDonut({
         <strong>{assessment.title}</strong>
         <small>{assessment.text}</small>
       </div>
+      <a className="stage-detail-link" href={href}>
+        Abrir análise <span aria-hidden="true">→</span>
+      </a>
     </article>
   );
 }
@@ -320,7 +296,7 @@ export function DashboardClient({
         };
         if (status.generatedAt && status.generatedAt !== previousGeneratedAt) {
           const synced = encodeURIComponent(status.generatedAt);
-          window.location.replace(`/?synced=${synced}`);
+          window.location.replace(`${window.location.pathname}?synced=${synced}`);
           return;
         }
       }
@@ -363,7 +339,7 @@ export function DashboardClient({
 
   const conversions = useMemo(() => {
     if (!active) return [];
-    const values = METRICS.map((item) => ({
+    const values = STAGES.map((item) => ({
       ...item,
       value: active.metrics[item.key].current[period],
       goal: active.metrics[item.key].goal[period],
@@ -372,7 +348,7 @@ export function DashboardClient({
     const max = Math.max(...values.map((item) => item.value), 1);
     return values.map((item, index) => ({
       ...item,
-      width: Math.max(34, (item.value / max) * 100),
+      width: 58 + Math.sqrt(item.value / max) * 42,
       rate:
         index === 0 || values[index - 1].value === 0
           ? null
@@ -494,6 +470,8 @@ export function DashboardClient({
           </div>
         </section>
 
+        <StageNavigation />
+
         <nav className="view-tabs" role="tablist" aria-label="Visualizações">
           {VIEW_ORDER.map((key) => {
             const item = dashboard.views[key];
@@ -558,6 +536,7 @@ export function DashboardClient({
                 goalRate={item.goalRate}
                 color={item.color}
                 index={index}
+                href={`/etapas/${item.slug}`}
               />
             ))}
           </div>
@@ -573,30 +552,35 @@ export function DashboardClient({
               <span>{PERIODS.find((item) => item.key === period)?.label}</span>
             </div>
             <p className="chart-subtitle">
-              Largura proporcional ao volume. Conversão contra a etapa anterior.
+              Escala visual suavizada para leitura. Valores e conversões são exatos.
             </p>
             <div className="sales-funnel" role="list" aria-label="Funil de vendas por etapa">
-              {conversions.map((item) => (
-                <div
+              {conversions.map((item, index) => (
+                <a
                   className="funnel-stage"
                   key={item.key}
                   role="listitem"
+                  href={`/etapas/${item.slug}`}
                   aria-label={`${item.label}: ${formatNumber(item.value)}`}
                   style={{
                     width: `${item.width}%`,
-                    "--stage-color": item.color,
+                    "--funnel-color": item.funnelColor,
                   } as React.CSSProperties}
                 >
-                  <span>{item.short}</span>
+                  <span className="funnel-stage-name">
+                    <b>{String(index + 1).padStart(2, "0")}</b>
+                    {item.short}
+                  </span>
                   <strong>{formatNumber(item.value)}</strong>
-                  <small>
+                  <small className="funnel-rate">
                     {item.rate === null
                       ? item.value > 0
                         ? "Base 100%"
                         : "Sem dados"
                       : `${formatNumber(item.rate * 100)}%`}
                   </small>
-                </div>
+                  <span className="funnel-open" aria-hidden="true">→</span>
+                </a>
               ))}
             </div>
           </article>
