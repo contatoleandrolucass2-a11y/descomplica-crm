@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   DashboardPayload,
   DashboardViewKey,
   MetricSnapshot,
   PeriodKey,
+  RealizedFunnelMetric,
 } from "./types";
 
 type Props = {
@@ -35,6 +36,23 @@ const METRICS = [
   { key: "sales", label: "Vendas", short: "Vendas" },
 ] as const;
 
+const REALIZED_STAGES = [
+  { key: "agendamentos", label: "Agendamentos realizados" },
+  { key: "visitas", label: "Visitas realizadas" },
+  { key: "pastas", label: "Pastas realizadas" },
+  { key: "vendas", label: "Vendas realizadas" },
+] as const;
+
+const REALIZED_PERIODS = [
+  { key: "mesAnterior", label: "Mês anterior" },
+  { key: "mesAtual", label: "Mês atual", goal: "mes", rate: "realizado_meta_mes" },
+  { key: "ultimos14Dias", label: "Últimos 14 dias" },
+  { key: "ultimos7Dias", label: "Últimos 7 dias" },
+  { key: "estaSemana", label: "Esta semana", goal: "semana", rate: "realizado_meta_semana" },
+  { key: "ontem", label: "Ontem" },
+  { key: "hoje", label: "Hoje", goal: "dia", rate: "realizado_meta_dia" },
+] as const;
+
 function formatNumber(value: number) {
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(
     value,
@@ -47,6 +65,13 @@ function formatCurrency(value: number) {
     currency: "BRL",
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function formatPercent(value: number) {
+  return `${new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value * 100)}%`;
 }
 
 function formatDate(value: string) {
@@ -75,6 +100,40 @@ function ProgressRing({ value }: { value: number }) {
   );
 }
 
+function RealizedMetricTable({
+  label,
+  metric,
+}: {
+  label: string;
+  metric: RealizedFunnelMetric;
+}) {
+  return (
+    <article className="realized-card">
+      <h3>{label}</h3>
+      <div className="realized-table" role="table" aria-label={label}>
+        <div className="realized-row realized-head" role="row">
+          <span role="columnheader">Período</span>
+          <span role="columnheader">Realizado</span>
+          <span role="columnheader">Meta</span>
+          <span role="columnheader">% da meta</span>
+        </div>
+        {REALIZED_PERIODS.map((item) => (
+          <div className="realized-row" role="row" key={item.key}>
+            <span role="cell">{item.label}</span>
+            <strong role="cell">{formatNumber(metric[item.key])}</strong>
+            <span role="cell">
+              {item.goal ? formatNumber(metric.metas[item.goal]) : "—"}
+            </span>
+            <span role="cell" className={item.rate ? "rate" : "muted-rate"}>
+              {item.rate ? formatPercent(metric[item.rate]) : "—"}
+            </span>
+          </div>
+        ))}
+      </div>
+    </article>
+  );
+}
+
 export function DashboardClient({
   dashboard,
   dataStatus,
@@ -83,6 +142,79 @@ export function DashboardClient({
 }: Props) {
   const [activeView, setActiveView] = useState<DashboardViewKey>("all");
   const [period, setPeriod] = useState<PeriodKey>("month");
+  const [refreshState, setRefreshState] = useState<
+    "idle" | "starting" | "polling" | "error"
+  >("idle");
+  const [refreshMessage, setRefreshMessage] = useState("");
+  const autoRefreshStarted = useRef(false);
+
+  const refreshSalesforce = useCallback(async () => {
+    if (
+      !dashboard ||
+      dataStatus !== "live" ||
+      refreshState === "starting" ||
+      refreshState === "polling"
+    ) return;
+
+    const previousGeneratedAt = dashboard.generatedAt;
+    setRefreshState("starting");
+    setRefreshMessage("Solicitando dados atuais ao Salesforce…");
+
+    try {
+      const response = await fetch("/api/refresh/salesforce", {
+        method: "POST",
+        cache: "no-store",
+      });
+      if (!response.ok && response.status !== 409) {
+        throw new Error("refresh_rejected");
+      }
+
+      setRefreshState("polling");
+      setRefreshMessage("Salesforce atualizando os seis relatórios…");
+
+      for (let attempt = 0; attempt < 96; attempt += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 5000));
+        const statusResponse = await fetch("/api/dashboard/status", {
+          cache: "no-store",
+        });
+        if (!statusResponse.ok) continue;
+
+        const status = (await statusResponse.json()) as {
+          generatedAt?: string;
+        };
+        if (status.generatedAt && status.generatedAt !== previousGeneratedAt) {
+          const synced = encodeURIComponent(status.generatedAt);
+          window.location.replace(`/?synced=${synced}`);
+          return;
+        }
+      }
+
+      setRefreshState("idle");
+      setRefreshMessage(
+        "A atualização continua em processamento. Tente novamente em instantes.",
+      );
+    } catch {
+      setRefreshState("error");
+      setRefreshMessage("Não foi possível iniciar a atualização. Tente novamente.");
+    }
+  }, [dashboard, dataStatus, refreshState]);
+
+  useEffect(() => {
+    if (!dashboard || dataStatus !== "live" || autoRefreshStarted.current) return;
+
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("synced") === dashboard.generatedAt) {
+      url.searchParams.delete("synced");
+      window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+      return;
+    }
+
+    autoRefreshStarted.current = true;
+    const timer = window.setTimeout(() => {
+      void refreshSalesforce();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [dashboard, dataStatus, refreshSalesforce]);
 
   const active = dashboard?.views[activeView] ?? null;
   const sales = active?.metrics.sales;
@@ -170,9 +302,27 @@ export function DashboardClient({
             </p>
           </div>
           <div className="snapshot-meta">
-            <span>Última atualização</span>
+            <span>Atualizado em</span>
             <strong>{formatDate(dashboard.generatedAt)}</strong>
             <small>{dashboard.source}</small>
+            <button
+              className="refresh-button"
+              type="button"
+              onClick={() => {
+                if (refreshState === "error") setRefreshState("idle");
+                void refreshSalesforce();
+              }}
+              disabled={refreshState === "starting" || refreshState === "polling"}
+            >
+              {refreshState === "starting" || refreshState === "polling"
+                ? "Atualizando…"
+                : "Atualizar"}
+            </button>
+            {refreshMessage ? (
+              <small className={`refresh-message ${refreshState}`}>
+                {refreshMessage}
+              </small>
+            ) : null}
           </div>
         </section>
 
@@ -349,6 +499,40 @@ export function DashboardClient({
             )}
           </article>
         </section>
+
+        {dashboard.realizedFunnel ? (
+          <section className="realized-section" aria-labelledby="realized-title">
+            <div className="section-heading realized-heading">
+              <div>
+                <p className="eyebrow">Detalhamento operacional</p>
+                <h2 id="realized-title">Realizado Funil</h2>
+              </div>
+              <div className="team-summary" aria-label="Resumo da equipe">
+                <span>
+                  <strong>{formatNumber(dashboard.realizedFunnel.resumo.corretores)}</strong>
+                  Corretores
+                </span>
+                <span>
+                  <strong>{formatNumber(dashboard.realizedFunnel.resumo.gerentes)}</strong>
+                  Gerentes
+                </span>
+              </div>
+            </div>
+            <p className="realized-note">
+              Vendas seguem a regra operacional sem CANAL IMOB. As três abas
+              acima mantêm a comparação com, sem e geral.
+            </p>
+            <div className="realized-grid">
+              {REALIZED_STAGES.map((stage) => (
+                <RealizedMetricTable
+                  key={stage.key}
+                  label={stage.label}
+                  metric={dashboard.realizedFunnel![stage.key]}
+                />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <footer className="dashboard-footer">
           <span>Descomplica CRM · Dados consolidados do Salesforce</span>

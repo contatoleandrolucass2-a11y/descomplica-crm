@@ -28,6 +28,35 @@ export type DashboardView = {
   topDevelopments: Array<{ name: string; total: number }>;
 };
 
+export type RealizedFunnelMetric = {
+  mesAnterior: number;
+  mesAtual: number;
+  ultimos14Dias: number;
+  ultimos7Dias: number;
+  estaSemana: number;
+  ontem: number;
+  hoje: number;
+  metas: {
+    mes: number;
+    semana: number;
+    dia: number;
+  };
+  realizado_meta_mes: number;
+  realizado_meta_semana: number;
+  realizado_meta_dia: number;
+};
+
+export type RealizedFunnel = {
+  resumo: {
+    corretores: number;
+    gerentes: number;
+  };
+  agendamentos: RealizedFunnelMetric;
+  visitas: RealizedFunnelMetric;
+  pastas: RealizedFunnelMetric;
+  vendas: RealizedFunnelMetric;
+};
+
 export type DashboardPayload = {
   collaborator: {
     email: string;
@@ -39,5 +68,6 @@ export type DashboardPayload = {
   referenceDate: string;
   timezone: string;
   source: string;
+  realizedFunnel?: RealizedFunnel;
   views: Record<DashboardViewKey, DashboardView>;
 };

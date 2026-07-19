@@ -17,6 +17,28 @@ function metric(
   };
 }
 
+function realizedMetric(
+  values: [number, number, number, number, number, number, number],
+  goals: [number, number, number],
+) {
+  const [mesAnterior, mesAtual, ultimos14Dias, ultimos7Dias, estaSemana, ontem, hoje] =
+    values;
+  const [mes, semana, dia] = goals;
+  return {
+    mesAnterior,
+    mesAtual,
+    ultimos14Dias,
+    ultimos7Dias,
+    estaSemana,
+    ontem,
+    hoje,
+    metas: { mes, semana, dia },
+    realizado_meta_mes: mes ? mesAtual / mes : 0,
+    realizado_meta_semana: semana ? estaSemana / semana : 0,
+    realizado_meta_dia: dia ? hoje / dia : 0,
+  };
+}
+
 function view(
   key: DashboardViewKey,
   label: string,
@@ -59,6 +81,16 @@ export const demoDashboard: DashboardPayload = {
   referenceDate: "2026-07-18",
   timezone: "America/Sao_Paulo",
   source: "Prévia demonstrativa",
+  realizedFunnel: {
+    resumo: { corretores: 22, gerentes: 4 },
+    agendamentos: realizedMetric(
+      [137, 139, 107, 74, 60, 24, 7],
+      [682, 154, 22],
+    ),
+    visitas: realizedMetric([55, 39, 34, 22, 9, 2, 0], [341, 77, 11]),
+    pastas: realizedMetric([71, 30, 28, 16, 15, 3, 2], [307, 70, 10]),
+    vendas: realizedMetric([19, 3, 2, 2, 2, 0, 1], [22, 4.97, 0.71]),
+  },
   views: {
     with_canal_imob: view(
       "with_canal_imob",
