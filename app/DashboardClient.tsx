@@ -29,11 +29,21 @@ const PERIODS: Array<{ key: PeriodKey; label: string }> = [
 ];
 
 const METRICS = [
-  { key: "opportunities", label: "Oportunidades", short: "Oportunidades" },
-  { key: "appointments", label: "Agendamentos", short: "Agendamentos" },
-  { key: "visits", label: "Visitas", short: "Visitas" },
-  { key: "folders", label: "Pastas", short: "Pastas" },
-  { key: "sales", label: "Vendas", short: "Vendas" },
+  {
+    key: "opportunities",
+    label: "Oportunidades",
+    short: "Oportunidades",
+    color: "#2563eb",
+  },
+  {
+    key: "appointments",
+    label: "Agendamentos",
+    short: "Agendamentos",
+    color: "#0891b2",
+  },
+  { key: "visits", label: "Visitas", short: "Visitas", color: "#7c3aed" },
+  { key: "folders", label: "Pastas", short: "Pastas", color: "#d97706" },
+  { key: "sales", label: "Vendas", short: "Vendas", color: "#059669" },
 ] as const;
 
 const REALIZED_STAGES = [
@@ -87,15 +97,23 @@ function progress(metric: MetricSnapshot, period: PeriodKey) {
   return goal > 0 ? metric.current[period] / goal : 0;
 }
 
-function ProgressRing({ value }: { value: number }) {
+function ProgressRing({
+  value,
+  label,
+  display,
+}: {
+  value: number;
+  label?: string;
+  display?: string;
+}) {
   const safeValue = Math.min(Math.max(value, 0), 1);
   return (
     <span
       className="progress-ring"
-      aria-label={`${formatNumber(value * 100)}% da meta`}
+      aria-label={label ?? `${formatNumber(value * 100)}% da meta`}
       style={{ "--progress": `${safeValue * 360}deg` } as React.CSSProperties}
     >
-      <span>{formatNumber(value * 100)}%</span>
+      <span>{display ?? `${formatNumber(value * 100)}%`}</span>
     </span>
   );
 }
@@ -129,6 +147,66 @@ function RealizedMetricTable({
             </span>
           </div>
         ))}
+      </div>
+    </article>
+  );
+}
+
+function StageDonut({
+  label,
+  value,
+  conversion,
+  goal,
+  goalRate,
+  color,
+  index,
+}: {
+  label: string;
+  value: number;
+  conversion: number | null;
+  goal: number;
+  goalRate: number;
+  color: string;
+  index: number;
+}) {
+  const ringRate = conversion === null ? (value > 0 ? 1 : 0) : conversion;
+  const safeRingRate = Math.min(Math.max(ringRate, 0), 1);
+  const conversionLabel =
+    conversion === null
+      ? value > 0
+        ? "Base do funil"
+        : "Sem base"
+      : `${formatNumber(conversion * 100)}% conversão`;
+
+  return (
+    <article
+      className="metric-card donut-card"
+      style={{
+        "--stage-color": color,
+        "--donut-progress": `${safeRingRate * 360}deg`,
+      } as React.CSSProperties}
+    >
+      <div className="metric-card-head">
+        <span className="stage-number">{String(index + 1).padStart(2, "0")}</span>
+        <span>{label}</span>
+      </div>
+      <div
+        className="stage-donut"
+        role="img"
+        aria-label={`${label}: ${formatNumber(value)}. ${conversionLabel}.`}
+      >
+        <div>
+          <strong>{formatNumber(value)}</strong>
+          <span>{conversionLabel}</span>
+        </div>
+      </div>
+      <div className="donut-meta">
+        <span>
+          Meta <strong>{formatNumber(goal)}</strong>
+        </span>
+        <span>
+          Realizado <strong>{goal > 0 ? `${formatNumber(goalRate * 100)}%` : "—"}</strong>
+        </span>
       </div>
     </article>
   );
@@ -228,17 +306,43 @@ export function DashboardClient({
     const values = METRICS.map((item) => ({
       ...item,
       value: active.metrics[item.key].current[period],
+      goal: active.metrics[item.key].goal[period],
+      goalRate: progress(active.metrics[item.key], period),
     }));
     const max = Math.max(...values.map((item) => item.value), 1);
     return values.map((item, index) => ({
       ...item,
-      width: Math.max(18, (item.value / max) * 100),
+      width: Math.max(34, (item.value / max) * 100),
       rate:
         index === 0 || values[index - 1].value === 0
           ? null
           : item.value / values[index - 1].value,
     }));
   }, [active, period]);
+
+  const funnelSummary = useMemo(() => {
+    const first = conversions[0];
+    const last = conversions[conversions.length - 1];
+    const stages = conversions.slice(1).map((item, index) => ({
+      ...item,
+      previousLabel: conversions[index].label,
+      loss: Math.max(conversions[index].value - item.value, 0),
+    }));
+    const bottleneck = stages.reduce<(typeof stages)[number] | null>(
+      (lowest, item) => {
+        if (item.rate === null) return lowest;
+        if (!lowest || lowest.rate === null || item.rate < lowest.rate) return item;
+        return lowest;
+      },
+      null,
+    );
+
+    return {
+      totalRate:
+        first && last && first.value > 0 ? last.value / first.value : null,
+      bottleneck,
+    };
+  }, [conversions]);
 
   if (!dashboard || !active) {
     return (
@@ -376,17 +480,32 @@ export function DashboardClient({
             <div className="goal-copy">
               <span className="card-label">Meta de vendas</span>
               <h2>
-                {salesGap > 0
+                {sales.goal[period] <= 0
+                  ? "Meta de vendas ainda não definida."
+                  : salesGap > 0
                   ? `Faltam ${formatNumber(salesGap)} vendas para a meta.`
                   : "Meta atingida. Continue avançando."}
               </h2>
               <p>
-                A equipe realizou <strong>{formatNumber(sales.current[period])}</strong>{" "}
-                de <strong>{formatNumber(sales.goal[period])}</strong> vendas no
-                período selecionado.
+                {sales.goal[period] > 0 ? (
+                  <>
+                    A equipe realizou <strong>{formatNumber(sales.current[period])}</strong>{" "}
+                    de <strong>{formatNumber(sales.goal[period])}</strong> vendas no
+                    período selecionado.
+                  </>
+                ) : (
+                  <>
+                    A equipe realizou <strong>{formatNumber(sales.current[period])}</strong>{" "}
+                    vendas no período selecionado.
+                  </>
+                )}
               </p>
             </div>
-            <ProgressRing value={salesProgress} />
+            <ProgressRing
+              value={salesProgress}
+              label={sales.goal[period] > 0 ? undefined : "Meta não definida"}
+              display={sales.goal[period] > 0 ? undefined : "—"}
+            />
             <dl className="goal-stats">
               <div>
                 <dt>VGV realizado</dt>
@@ -422,27 +541,28 @@ export function DashboardClient({
           </article>
         </section>
 
-        <section className="metric-grid" aria-label="Indicadores do funil">
-          {METRICS.map((item) => {
-            const metric = active.metrics[item.key];
-            const value = metric.current[period];
-            const goal = metric.goal[period];
-            const rate = progress(metric, period);
-            return (
-              <article className="metric-card" key={item.key}>
-                <div>
-                  <span>{item.label}</span>
-                  <strong>{formatNumber(value)}</strong>
-                </div>
-                <p>
-                  Meta {formatNumber(goal)} · {formatNumber(rate * 100)}%
-                </p>
-                <div className="metric-progress" aria-hidden="true">
-                  <span style={{ width: `${Math.min(rate, 1) * 100}%` }} />
-                </div>
-              </article>
-            );
-          })}
+        <section className="stage-section" aria-labelledby="stage-title">
+          <div className="stage-section-heading">
+            <div>
+              <p className="eyebrow">Pulso do funil</p>
+              <h2 id="stage-title">Conversão por etapa</h2>
+            </div>
+            <p>Rosca = avanço sobre a etapa anterior · Meta = período selecionado</p>
+          </div>
+          <div className="metric-grid" aria-label="Indicadores do funil">
+            {conversions.map((item, index) => (
+              <StageDonut
+                key={item.key}
+                label={item.label}
+                value={item.value}
+                conversion={item.rate}
+                goal={item.goal}
+                goalRate={item.goalRate}
+                color={item.color}
+                index={index}
+              />
+            ))}
+          </div>
         </section>
 
         <section className="analysis-grid">
@@ -454,49 +574,82 @@ export function DashboardClient({
               </div>
               <span>{PERIODS.find((item) => item.key === period)?.label}</span>
             </div>
-            <div className="funnel-list">
+            <p className="chart-subtitle">
+              Largura proporcional ao volume. Conversão contra a etapa anterior.
+            </p>
+            <div className="sales-funnel" role="list" aria-label="Funil de vendas por etapa">
               {conversions.map((item) => (
-                <div className="funnel-row" key={item.key}>
-                  <div className="funnel-label">
-                    <span>{item.short}</span>
-                    <strong>{formatNumber(item.value)}</strong>
-                  </div>
-                  <div className="funnel-track">
-                    <span style={{ width: `${item.width}%` }} />
-                  </div>
+                <div
+                  className="funnel-stage"
+                  key={item.key}
+                  role="listitem"
+                  aria-label={`${item.label}: ${formatNumber(item.value)}`}
+                  style={{
+                    width: `${item.width}%`,
+                    "--stage-color": item.color,
+                  } as React.CSSProperties}
+                >
+                  <span>{item.short}</span>
+                  <strong>{formatNumber(item.value)}</strong>
                   <small>
                     {item.rate === null
-                      ? "Base do funil"
-                      : `${formatNumber(item.rate * 100)}% de conversão`}
+                      ? item.value > 0
+                        ? "Base 100%"
+                        : "Sem dados"
+                      : `${formatNumber(item.rate * 100)}%`}
                   </small>
                 </div>
               ))}
             </div>
           </article>
 
-          <article className="ranking-card">
+          <article className="efficiency-card">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Concentração</p>
-                <h2>Empreendimentos em destaque</h2>
+                <p className="eyebrow">Diagnóstico</p>
+                <h2>Eficiência do funil</h2>
               </div>
             </div>
-            {active.topDevelopments.length ? (
-              <ol className="ranking-list">
-                {active.topDevelopments.map((item, index) => (
-                  <li key={item.name}>
-                    <span>{index + 1}</span>
-                    <div>
-                      <strong>{item.name}</strong>
-                      <small>Registros no período</small>
-                    </div>
-                    <b>{formatNumber(item.total)}</b>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="muted">Nenhum empreendimento no período.</p>
-            )}
+            <div className="efficiency-hero">
+              <span>Conversão total</span>
+              <strong>
+                {funnelSummary.totalRate === null
+                  ? "—"
+                  : `${formatNumber(funnelSummary.totalRate * 100)}%`}
+              </strong>
+              <small>Oportunidades → vendas</small>
+            </div>
+            <div className="insight-grid">
+              <div>
+                <span>Gargalo principal</span>
+                <strong>
+                  {funnelSummary.bottleneck
+                    ? `${funnelSummary.bottleneck.previousLabel} → ${funnelSummary.bottleneck.label}`
+                    : "Sem base suficiente"}
+                </strong>
+                <small>
+                  {funnelSummary.bottleneck?.rate === null || !funnelSummary.bottleneck
+                    ? "Aguardando volume"
+                    : `${formatNumber(funnelSummary.bottleneck.rate * 100)}% converte · ${formatNumber(funnelSummary.bottleneck.loss)} não avançaram`}
+                </small>
+              </div>
+              <div>
+                <span>Meta de vendas</span>
+                <strong>
+                  {sales.goal[period] > 0 ? `${formatNumber(salesProgress * 100)}%` : "—"}
+                </strong>
+                <small>
+                  {sales.goal[period] > 0
+                    ? `${formatNumber(sales.current[period])} de ${formatNumber(sales.goal[period])}`
+                    : `Meta não definida · ${formatNumber(sales.current[period])} vendas`}
+                </small>
+              </div>
+              <div>
+                <span>VGV realizado</span>
+                <strong>{formatCurrency(active.salesValue[period])}</strong>
+                <small>{PERIODS.find((item) => item.key === period)?.label}</small>
+              </div>
+            </div>
           </article>
         </section>
 
