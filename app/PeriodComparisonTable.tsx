@@ -7,6 +7,30 @@ export type PeriodComparisonRow = {
   goal?: number;
 };
 
+export function getMonthToDateLabels(referenceDate?: string) {
+  const match = referenceDate?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    return { previous: "Mês anterior", current: "Mês atual" };
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) {
+    return { previous: "Mês anterior", current: "Mês atual" };
+  }
+
+  const previousMonthLastDay = new Date(Date.UTC(year, month - 1, 0)).getUTCDate();
+  const previousCutoff = Math.min(day, previousMonthLastDay);
+  const range = (cutoff: number) =>
+    cutoff === 1 ? "dia 1" : `dias 1–${cutoff}`;
+
+  return {
+    previous: `Mês anterior · ${range(previousCutoff)}`,
+    current: `Mês atual · ${range(day)}`,
+  };
+}
+
 function formatNumber(value: number) {
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(value);
 }

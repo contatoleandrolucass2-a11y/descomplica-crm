@@ -1282,6 +1282,12 @@ a {
   width: 100%;
 }
 
+.comparison-helper {
+  margin: -8px 0 20px;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
 .comparison-table {
   display: grid;
   min-width: 760px;

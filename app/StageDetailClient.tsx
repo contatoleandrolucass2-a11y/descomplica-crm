@@ -2,7 +2,11 @@
 
 /* eslint-disable @next/next/no-html-link-for-pages -- Native links avoid a Vinext hydration bug. */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PeriodComparisonTable, type PeriodComparisonRow } from "./PeriodComparisonTable";
+import {
+  getMonthToDateLabels,
+  PeriodComparisonTable,
+  type PeriodComparisonRow,
+} from "./PeriodComparisonTable";
 import { StageNavigation } from "./StageNavigation";
 import { ACTION_PLANS, STAGES, type StageConfig } from "./stage-config";
 import type { DashboardPayload, DashboardViewKey, PeriodKey } from "./types";
@@ -133,15 +137,16 @@ export function StageDetailClient({
     : null;
   const conversion = previousValue && previousValue > 0 ? current / previousValue : null;
   const ringRate = Math.min(Math.max(goal > 0 ? goalRate : conversion ?? (current > 0 ? 1 : 0), 0), 1);
+  const monthLabels = getMonthToDateLabels(dashboard?.referenceDate);
 
   const comparisonRows: PeriodComparisonRow[] = (() => {
     if (!metric) return [];
     return [
       {
         label: "Mês",
-        previousLabel: "Mês anterior",
+        previousLabel: monthLabels.previous,
         previous: metric.previousMonth ?? null,
-        currentLabel: "Mês atual",
+        currentLabel: monthLabels.current,
         current: metric.current.month,
         goal: metric.goal.month,
       },
@@ -284,6 +289,7 @@ export function StageDetailClient({
         <section className="stage-detail-grid">
           <article className="history-card">
             <div className="section-heading"><div><p className="eyebrow">Evolução</p><h2>Comparativo entre períodos</h2></div></div>
+            <p className="comparison-helper">Mês compara o dia 1 até a mesma data nos dois períodos.</p>
             <PeriodComparisonTable rows={comparisonRows} label={`Comparativo de ${stage.label}`} />
           </article>
 

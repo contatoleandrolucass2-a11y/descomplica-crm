@@ -1,7 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PeriodComparisonTable, type PeriodComparisonRow } from "./PeriodComparisonTable";
+import {
+  getMonthToDateLabels,
+  PeriodComparisonTable,
+  type PeriodComparisonRow,
+} from "./PeriodComparisonTable";
 import { StageNavigation } from "./StageNavigation";
 import { ACTION_PLANS, STAGES } from "./stage-config";
 import type {
@@ -128,16 +132,19 @@ function stageAssessment(value: number, goal: number, goalRate: number) {
 function RealizedMetricTable({
   label,
   metric,
+  referenceDate,
 }: {
   label: string;
   metric: RealizedFunnelMetric;
+  referenceDate: string;
 }) {
+  const monthLabels = getMonthToDateLabels(referenceDate);
   const rows: PeriodComparisonRow[] = [
     {
       label: "Mês",
-      previousLabel: "Mês anterior",
+      previousLabel: monthLabels.previous,
       previous: metric.mesAnterior,
-      currentLabel: "Mês atual",
+      currentLabel: monthLabels.current,
       current: metric.mesAtual,
       goal: metric.metas.mes,
     },
@@ -675,8 +682,8 @@ export function DashboardClient({
               </div>
             </div>
             <p className="realized-note">
-              Vendas seguem a regra operacional sem CANAL IMOB. As três abas
-              acima mantêm a comparação com, sem e geral.
+              Comparativo mensal usa o dia 1 até a mesma data nos dois meses.
+              Vendas seguem a regra operacional sem CANAL IMOB.
             </p>
             <div className="realized-grid">
               {REALIZED_STAGES.map((stage) => (
@@ -684,6 +691,7 @@ export function DashboardClient({
                   key={stage.key}
                   label={stage.label}
                   metric={dashboard.realizedFunnel![stage.key]}
+                  referenceDate={dashboard.referenceDate}
                 />
               ))}
             </div>
