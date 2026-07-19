@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-html-link-for-pages -- Native links avoid a Vinext hydration bug. */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PeriodComparisonTable, type PeriodComparisonRow } from "./PeriodComparisonTable";
 import { StageNavigation } from "./StageNavigation";
 import { ACTION_PLANS, STAGES, type StageConfig } from "./stage-config";
 import type { DashboardPayload, DashboardViewKey, PeriodKey } from "./types";
@@ -133,17 +134,52 @@ export function StageDetailClient({
   const conversion = previousValue && previousValue > 0 ? current / previousValue : null;
   const ringRate = Math.min(Math.max(goal > 0 ? goalRate : conversion ?? (current > 0 ? 1 : 0), 0), 1);
 
-  const history = (() => {
+  const comparisonRows: PeriodComparisonRow[] = (() => {
     if (!metric) return [];
-    const points = [
-      { label: "Mês anterior", value: metric.previousMonth ?? 0 },
-      { label: "Mês atual", value: metric.current.month },
-      { label: "Últimos 14 dias", value: metric.last14Days ?? 0 },
-      { label: "Últimos 7 dias", value: metric.last7Days ?? metric.current.week },
-      { label: "Hoje", value: metric.current.today },
+    return [
+      {
+        label: "Mês",
+        previousLabel: "Mês anterior",
+        previous: metric.previousMonth ?? null,
+        currentLabel: "Mês atual",
+        current: metric.current.month,
+        goal: metric.goal.month,
+      },
+      {
+        label: "14 dias",
+        previousLabel: "14 dias anteriores",
+        previous: metric.previous14Days ?? null,
+        currentLabel: "Últimos 14 dias",
+        current: metric.last14Days ?? 0,
+      },
+      {
+        label: "7 dias",
+        previousLabel: "7 dias anteriores",
+        previous:
+          metric.previous7Days ??
+          (metric.last14Days !== undefined && metric.last7Days !== undefined
+            ? Math.max(metric.last14Days - metric.last7Days, 0)
+            : null),
+        currentLabel: "Últimos 7 dias",
+        current: metric.last7Days ?? metric.current.week,
+      },
+      {
+        label: "Semana",
+        previousLabel: "Semana passada",
+        previous: metric.previousWeek ?? null,
+        currentLabel: "Esta semana",
+        current: metric.currentWeek ?? metric.current.week,
+        goal: metric.goal.week,
+      },
+      {
+        label: "Dia",
+        previousLabel: "Ontem",
+        previous: metric.yesterday ?? null,
+        currentLabel: "Hoje",
+        current: metric.current.today,
+        goal: metric.goal.today,
+      },
     ];
-    const max = Math.max(...points.map((item) => item.value), 1);
-    return points.map((item) => ({ ...item, width: (item.value / max) * 100 }));
   })();
 
   if (!dashboard || !active || !metric) {
@@ -247,10 +283,8 @@ export function StageDetailClient({
 
         <section className="stage-detail-grid">
           <article className="history-card">
-            <div className="section-heading"><div><p className="eyebrow">Evolução</p><h2>Comparativo de volume</h2></div></div>
-            <div className="history-bars">
-              {history.map((item) => <div className="history-row" key={item.label}><span>{item.label}</span><div><i style={{ width: `${item.width}%`, background: stage.color }} /></div><strong>{formatNumber(item.value)}</strong></div>)}
-            </div>
+            <div className="section-heading"><div><p className="eyebrow">Evolução</p><h2>Comparativo entre períodos</h2></div></div>
+            <PeriodComparisonTable rows={comparisonRows} label={`Comparativo de ${stage.label}`} />
           </article>
 
           <article className="stage-action-card">

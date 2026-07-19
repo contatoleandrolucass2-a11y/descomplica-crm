@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PeriodComparisonTable, type PeriodComparisonRow } from "./PeriodComparisonTable";
 import { StageNavigation } from "./StageNavigation";
 import { ACTION_PLANS, STAGES } from "./stage-config";
 import type {
@@ -37,16 +38,6 @@ const REALIZED_STAGES = [
   { key: "vendas", label: "Vendas realizadas" },
 ] as const;
 
-const REALIZED_PERIODS = [
-  { key: "mesAnterior", label: "Mês anterior" },
-  { key: "mesAtual", label: "Mês atual", goal: "mes", rate: "realizado_meta_mes" },
-  { key: "ultimos14Dias", label: "Últimos 14 dias" },
-  { key: "ultimos7Dias", label: "Últimos 7 dias" },
-  { key: "estaSemana", label: "Esta semana", goal: "semana", rate: "realizado_meta_semana" },
-  { key: "ontem", label: "Ontem" },
-  { key: "hoje", label: "Hoje", goal: "dia", rate: "realizado_meta_dia" },
-] as const;
-
 function formatNumber(value: number) {
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(
     value,
@@ -59,13 +50,6 @@ function formatCurrency(value: number) {
     currency: "BRL",
     maximumFractionDigits: 0,
   }).format(value);
-}
-
-function formatPercent(value: number) {
-  return `${new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value * 100)}%`;
 }
 
 function salesGapText(value: number, surpassed = false) {
@@ -148,29 +132,53 @@ function RealizedMetricTable({
   label: string;
   metric: RealizedFunnelMetric;
 }) {
+  const rows: PeriodComparisonRow[] = [
+    {
+      label: "Mês",
+      previousLabel: "Mês anterior",
+      previous: metric.mesAnterior,
+      currentLabel: "Mês atual",
+      current: metric.mesAtual,
+      goal: metric.metas.mes,
+    },
+    {
+      label: "14 dias",
+      previousLabel: "14 dias anteriores",
+      previous: metric.ultimos14DiasAnteriores ?? null,
+      currentLabel: "Últimos 14 dias",
+      current: metric.ultimos14Dias,
+    },
+    {
+      label: "7 dias",
+      previousLabel: "7 dias anteriores",
+      previous:
+        metric.ultimos7DiasAnteriores ??
+        Math.max(metric.ultimos14Dias - metric.ultimos7Dias, 0),
+      currentLabel: "Últimos 7 dias",
+      current: metric.ultimos7Dias,
+    },
+    {
+      label: "Semana",
+      previousLabel: "Semana passada",
+      previous: metric.semanaPassada ?? null,
+      currentLabel: "Esta semana",
+      current: metric.estaSemana,
+      goal: metric.metas.semana,
+    },
+    {
+      label: "Dia",
+      previousLabel: "Ontem",
+      previous: metric.ontem,
+      currentLabel: "Hoje",
+      current: metric.hoje,
+      goal: metric.metas.dia,
+    },
+  ];
+
   return (
     <article className="realized-card">
       <h3>{label}</h3>
-      <div className="realized-table" role="table" aria-label={label}>
-        <div className="realized-row realized-head" role="row">
-          <span role="columnheader">Período</span>
-          <span role="columnheader">Realizado</span>
-          <span role="columnheader">Meta</span>
-          <span role="columnheader">% da meta</span>
-        </div>
-        {REALIZED_PERIODS.map((item) => (
-          <div className="realized-row" role="row" key={item.key}>
-            <span role="cell">{item.label}</span>
-            <strong role="cell">{formatNumber(metric[item.key])}</strong>
-            <span role="cell">
-              {item.goal ? formatNumber(metric.metas[item.goal]) : "—"}
-            </span>
-            <span role="cell" className={item.rate ? "rate" : "muted-rate"}>
-              {item.rate ? formatPercent(metric[item.rate]) : "—"}
-            </span>
-          </div>
-        ))}
-      </div>
+      <PeriodComparisonTable rows={rows} label={label} />
     </article>
   );
 }

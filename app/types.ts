@@ -4,8 +4,13 @@ export type MetricSnapshot = {
   current: Record<PeriodKey, number>;
   goal: Record<PeriodKey, number>;
   previousMonth?: number;
+  previous14Days?: number;
   last7Days?: number;
   last14Days?: number;
+  previous7Days?: number;
+  previousWeek?: number;
+  currentWeek?: number;
+  yesterday?: number;
 };
 
 export type DashboardViewKey =
@@ -31,8 +36,11 @@ export type DashboardView = {
 export type RealizedFunnelMetric = {
   mesAnterior: number;
   mesAtual: number;
+  ultimos14DiasAnteriores?: number;
   ultimos14Dias: number;
+  ultimos7DiasAnteriores?: number;
   ultimos7Dias: number;
+  semanaPassada?: number;
   estaSemana: number;
   ontem: number;
   hoje: number;

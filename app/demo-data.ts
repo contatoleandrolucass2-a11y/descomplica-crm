@@ -8,12 +8,18 @@ function metric(
   goalWeek: number,
   goalToday: number,
 ) {
+  const last14Days = Math.max(week, Math.round(week * 1.75));
   return {
     current: { month, week, today },
     goal: { month: goalMonth, week: goalWeek, today: goalToday },
     previousMonth: Math.max(0, Math.round(month * 0.82)),
+    previous14Days: Math.max(0, Math.round(last14Days * 0.78)),
     last7Days: week,
-    last14Days: Math.max(week, Math.round(week * 1.75)),
+    last14Days,
+    previous7Days: Math.max(0, last14Days - week),
+    previousWeek: Math.max(0, Math.round(week * 0.82)),
+    currentWeek: week,
+    yesterday: Math.max(0, Math.round(today * 0.6)),
   };
 }
 
@@ -27,8 +33,11 @@ function realizedMetric(
   return {
     mesAnterior,
     mesAtual,
+    ultimos14DiasAnteriores: Math.max(0, Math.round(ultimos14Dias * 0.78)),
     ultimos14Dias,
+    ultimos7DiasAnteriores: Math.max(0, ultimos14Dias - ultimos7Dias),
     ultimos7Dias,
+    semanaPassada: Math.max(0, ultimos14Dias - ultimos7Dias),
     estaSemana,
     ontem,
     hoje,
