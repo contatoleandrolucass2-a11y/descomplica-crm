@@ -267,21 +267,29 @@ type MonthlyFunnelStage = (typeof STAGES)[number] & {
   rate: number | null;
 };
 
+const FUNNEL_STAGE_COLORS = [
+  "#ff3f61",
+  "#ffa63d",
+  "#d7ed35",
+  "#38db7d",
+  "#3ea7eb",
+] as const;
+
+const FUNNEL_STAGE_WIDTHS = [100, 84, 70, 57, 44] as const;
+
 function buildMonthlyFunnel(
   valueFor: (stage: (typeof STAGES)[number]) => number | null,
 ): MonthlyFunnelStage[] {
   const values = STAGES.map((stage) => valueFor(stage));
-  const base = Math.max(values[0] ?? 0, ...values.map((value) => value ?? 0), 1);
 
   return STAGES.map((stage, index) => {
     const value = values[index];
     const previousValue = index > 0 ? values[index - 1] : null;
-    const ratio = value === null ? 0 : Math.min(Math.max(value / base, 0), 1);
 
     return {
       ...stage,
       value,
-      width: value === null ? 54 : 54 + Math.sqrt(ratio) * 46,
+      width: FUNNEL_STAGE_WIDTHS[index],
       rate:
         index === 0 || value === null || previousValue === null || previousValue <= 0
           ? null
@@ -345,7 +353,7 @@ function MonthlyFunnel({
               style={
                 {
                   width: `${item.width}%`,
-                  "--funnel-color": item.funnelColor,
+                  "--funnel-color": FUNNEL_STAGE_COLORS[index],
                 } as React.CSSProperties
               }
             >
