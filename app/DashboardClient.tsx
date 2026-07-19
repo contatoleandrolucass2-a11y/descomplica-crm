@@ -63,6 +63,19 @@ const REALIZED_PERIODS = [
   { key: "hoje", label: "Hoje", goal: "dia", rate: "realizado_meta_dia" },
 ] as const;
 
+const ACTION_PLANS: Record<(typeof METRICS)[number]["key"], string> = {
+  opportunities:
+    "Reforçar captação e redistribuir oportunidades sem atendimento.",
+  appointments:
+    "Aumentar cadência de contato e confirmar interesse antes do agendamento.",
+  visits:
+    "Confirmar agenda com antecedência e remarcar faltas no mesmo dia.",
+  folders:
+    "Mapear pendências e fazer mutirão diário de documentos.",
+  sales:
+    "Priorizar propostas quentes, tratar objeções e fechar próximo passo com prazo.",
+};
+
 function formatNumber(value: number) {
   return new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 }).format(
     value,
@@ -84,6 +97,17 @@ function formatPercent(value: number) {
   }).format(value * 100)}%`;
 }
 
+function salesGapText(value: number, surpassed = false) {
+  if (surpassed) {
+    return value === 1
+      ? "Meta superada em 1 venda"
+      : `Meta superada em ${formatNumber(value)} vendas`;
+  }
+  return value === 1
+    ? "Falta 1 venda"
+    : `Faltam ${formatNumber(value)} vendas`;
+}
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
@@ -97,25 +121,53 @@ function progress(metric: MetricSnapshot, period: PeriodKey) {
   return goal > 0 ? metric.current[period] / goal : 0;
 }
 
-function ProgressRing({
-  value,
-  label,
-  display,
-}: {
-  value: number;
-  label?: string;
-  display?: string;
-}) {
-  const safeValue = Math.min(Math.max(value, 0), 1);
-  return (
-    <span
-      className="progress-ring"
-      aria-label={label ?? `${formatNumber(value * 100)}% da meta`}
-      style={{ "--progress": `${safeValue * 360}deg` } as React.CSSProperties}
-    >
-      <span>{display ?? `${formatNumber(value * 100)}%`}</span>
-    </span>
-  );
+function stageAssessment(value: number, goal: number, goalRate: number) {
+  if (goal <= 0) {
+    return value > 0
+      ? {
+          tone: "neutral",
+          title: "Sem meta definida",
+          text: `${formatNumber(value)} registros no período para acompanhar.`,
+        }
+      : {
+          tone: "neutral",
+          title: "Sem movimento",
+          text: "Nenhum registro e nenhuma meta definida no período.",
+        };
+  }
+
+  const gap = Math.max(goal - value, 0);
+  const surplus = Math.max(value - goal, 0);
+
+  if (goalRate >= 1) {
+    return {
+      tone: "strong",
+      title: "Meta atingida",
+      text:
+        surplus > 0
+          ? `Superou a meta em ${formatNumber(surplus)}.`
+          : "Volume planejado alcançado.",
+    };
+  }
+  if (goalRate >= 0.8) {
+    return {
+      tone: "healthy",
+      title: "Próximo da meta",
+      text: `Faltam ${formatNumber(gap)} para atingir o objetivo.`,
+    };
+  }
+  if (goalRate >= 0.5) {
+    return {
+      tone: "attention",
+      title: "Ritmo em atenção",
+      text: `Gap atual de ${formatNumber(gap)} no período.`,
+    };
+  }
+  return {
+    tone: "critical",
+    title: "Gap relevante",
+    text: `Faltam ${formatNumber(gap)} para a meta do período.`,
+  };
 }
 
 function RealizedMetricTable({
@@ -177,6 +229,7 @@ function StageDonut({
         ? "Base do funil"
         : "Sem base"
       : `${formatNumber(conversion * 100)}% conversão`;
+  const assessment = stageAssessment(value, goal, goalRate);
 
   return (
     <article
@@ -207,6 +260,11 @@ function StageDonut({
         <span>
           Realizado <strong>{goal > 0 ? `${formatNumber(goalRate * 100)}%` : "—"}</strong>
         </span>
+      </div>
+      <div className={`stage-assessment ${assessment.tone}`}>
+        <span>Parecer</span>
+        <strong>{assessment.title}</strong>
+        <small>{assessment.text}</small>
       </div>
     </article>
   );
@@ -296,9 +354,11 @@ export function DashboardClient({
 
   const active = dashboard?.views[activeView] ?? null;
   const sales = active?.metrics.sales;
-  const salesProgress = sales ? progress(sales, period) : 0;
   const salesGap = sales
     ? Math.max(0, sales.goal[period] - sales.current[period])
+    : 0;
+  const salesSurplus = sales
+    ? Math.max(0, sales.current[period] - sales.goal[period])
     : 0;
 
   const conversions = useMemo(() => {
@@ -343,6 +403,10 @@ export function DashboardClient({
       bottleneck,
     };
   }, [conversions]);
+
+  const actionPlan = funnelSummary.bottleneck
+    ? ACTION_PLANS[funnelSummary.bottleneck.key]
+    : ACTION_PLANS.opportunities;
 
   if (!dashboard || !active) {
     return (
@@ -475,79 +539,13 @@ export function DashboardClient({
           </div>
         </section>
 
-        <section className="hero-grid">
-          <article className="goal-card">
-            <div className="goal-copy">
-              <span className="card-label">Meta de vendas</span>
-              <h2>
-                {sales.goal[period] <= 0
-                  ? "Meta de vendas ainda não definida."
-                  : salesGap > 0
-                  ? `Faltam ${formatNumber(salesGap)} vendas para a meta.`
-                  : "Meta atingida. Continue avançando."}
-              </h2>
-              <p>
-                {sales.goal[period] > 0 ? (
-                  <>
-                    A equipe realizou <strong>{formatNumber(sales.current[period])}</strong>{" "}
-                    de <strong>{formatNumber(sales.goal[period])}</strong> vendas no
-                    período selecionado.
-                  </>
-                ) : (
-                  <>
-                    A equipe realizou <strong>{formatNumber(sales.current[period])}</strong>{" "}
-                    vendas no período selecionado.
-                  </>
-                )}
-              </p>
-            </div>
-            <ProgressRing
-              value={salesProgress}
-              label={sales.goal[period] > 0 ? undefined : "Meta não definida"}
-              display={sales.goal[period] > 0 ? undefined : "—"}
-            />
-            <dl className="goal-stats">
-              <div>
-                <dt>VGV realizado</dt>
-                <dd>{formatCurrency(active.salesValue[period])}</dd>
-              </div>
-              <div>
-                <dt>Últimos 7 dias</dt>
-                <dd>{formatNumber(sales.last7Days ?? 0)}</dd>
-              </div>
-              <div>
-                <dt>Mês anterior</dt>
-                <dd>{formatNumber(sales.previousMonth ?? 0)}</dd>
-              </div>
-            </dl>
-          </article>
-
-          <article className="channel-card">
-            <span className="card-label">Leitura da visualização</span>
-            <h3>{active.label}</h3>
-            <p>
-              {activeView === "all"
-                ? "Esta visão consolida todas as origens. Use as outras abas para separar o impacto do CANAL IMOB."
-                : activeView === "with_canal_imob"
-                  ? "Considera oportunidades, pastas e vendas cuja imobiliária contém CANAL IMOB."
-                  : "Remove oportunidades, pastas e vendas cuja imobiliária contém CANAL IMOB."}
-            </p>
-            <div className="channel-total">
-              <span>Oportunidades</span>
-              <strong>
-                {formatNumber(active.metrics.opportunities.current[period])}
-              </strong>
-            </div>
-          </article>
-        </section>
-
         <section className="stage-section" aria-labelledby="stage-title">
           <div className="stage-section-heading">
             <div>
               <p className="eyebrow">Pulso do funil</p>
               <h2 id="stage-title">Conversão por etapa</h2>
             </div>
-            <p>Rosca = avanço sobre a etapa anterior · Meta = período selecionado</p>
+            <p>Rosca = avanço entre etapas · Parecer = realizado frente à meta</p>
           </div>
           <div className="metric-grid" aria-label="Indicadores do funil">
             {conversions.map((item, index) => (
@@ -621,6 +619,23 @@ export function DashboardClient({
             </div>
             <div className="insight-grid">
               <div>
+                <span>Gap para meta de vendas</span>
+                <strong>
+                  {sales.goal[period] <= 0
+                    ? "Meta não definida"
+                    : salesGap > 0
+                      ? salesGapText(salesGap)
+                      : salesSurplus > 0
+                        ? salesGapText(salesSurplus, true)
+                        : "Meta atingida"}
+                </strong>
+                <small>
+                  {sales.goal[period] > 0
+                    ? `${formatNumber(sales.current[period])} realizadas de ${formatNumber(sales.goal[period])}`
+                    : `${formatNumber(sales.current[period])} vendas realizadas no período`}
+                </small>
+              </div>
+              <div>
                 <span>Gargalo principal</span>
                 <strong>
                   {funnelSummary.bottleneck
@@ -633,15 +648,11 @@ export function DashboardClient({
                     : `${formatNumber(funnelSummary.bottleneck.rate * 100)}% converte · ${formatNumber(funnelSummary.bottleneck.loss)} não avançaram`}
                 </small>
               </div>
-              <div>
-                <span>Meta de vendas</span>
-                <strong>
-                  {sales.goal[period] > 0 ? `${formatNumber(salesProgress * 100)}%` : "—"}
-                </strong>
+              <div className="action-plan">
+                <span>Plano de ação</span>
+                <strong>{actionPlan}</strong>
                 <small>
-                  {sales.goal[period] > 0
-                    ? `${formatNumber(sales.current[period])} de ${formatNumber(sales.goal[period])}`
-                    : `Meta não definida · ${formatNumber(sales.current[period])} vendas`}
+                  Prioridade definida pelo menor avanço entre etapas no filtro atual.
                 </small>
               </div>
               <div>
