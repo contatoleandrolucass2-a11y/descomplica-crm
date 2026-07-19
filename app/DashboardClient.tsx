@@ -261,6 +261,118 @@ function StageDonut({
   );
 }
 
+type MonthlyFunnelStage = (typeof STAGES)[number] & {
+  value: number | null;
+  width: number;
+  rate: number | null;
+};
+
+function buildMonthlyFunnel(
+  valueFor: (stage: (typeof STAGES)[number]) => number | null,
+): MonthlyFunnelStage[] {
+  const values = STAGES.map((stage) => valueFor(stage));
+  const base = Math.max(values[0] ?? 0, ...values.map((value) => value ?? 0), 1);
+
+  return STAGES.map((stage, index) => {
+    const value = values[index];
+    const previousValue = index > 0 ? values[index - 1] : null;
+    const ratio = value === null ? 0 : Math.min(Math.max(value / base, 0), 1);
+
+    return {
+      ...stage,
+      value,
+      width: value === null ? 54 : 54 + Math.sqrt(ratio) * 46,
+      rate:
+        index === 0 || value === null || previousValue === null || previousValue <= 0
+          ? null
+          : value / previousValue,
+    };
+  });
+}
+
+function MonthlyFunnel({
+  label,
+  periodLabel,
+  stages,
+  tone,
+}: {
+  label: string;
+  periodLabel: string;
+  stages: MonthlyFunnelStage[];
+  tone: "current" | "previous";
+}) {
+  const opportunities = stages[0]?.value ?? null;
+  const sales = stages[stages.length - 1]?.value ?? null;
+  const totalRate =
+    opportunities !== null && opportunities > 0 && sales !== null
+      ? sales / opportunities
+      : null;
+
+  return (
+    <section className={`monthly-funnel ${tone}`} aria-label={`${label}: ${periodLabel}`}>
+      <header className="monthly-funnel-head">
+        <div>
+          <span>{label}</span>
+          <strong>{periodLabel}</strong>
+        </div>
+        <div className="monthly-funnel-result">
+          <span>Conversão total</span>
+          <strong>{totalRate === null ? "—" : `${formatNumber(totalRate * 100)}%`}</strong>
+        </div>
+      </header>
+
+      <div className="sales-funnel" role="list" aria-label={`Etapas de ${label.toLowerCase()}`}>
+        {stages.map((item, index) => {
+          const valueLabel = item.value === null ? "—" : formatNumber(item.value);
+          const rateLabel =
+            index === 0
+              ? item.value === null
+                ? "Sem dados"
+                : item.value > 0
+                  ? "Base 100%"
+                  : "Base 0%"
+              : item.rate === null
+                ? "Sem base"
+                : `${formatNumber(item.rate * 100)}%`;
+
+          return (
+            <a
+              className="funnel-stage"
+              key={item.key}
+              role="listitem"
+              href={`/etapas/${item.slug}`}
+              aria-label={`${item.label}: ${valueLabel}. ${rateLabel}. Abrir análise.`}
+              style={
+                {
+                  width: `${item.width}%`,
+                  "--funnel-color": item.funnelColor,
+                } as React.CSSProperties
+              }
+            >
+              <span className="funnel-stage-name">
+                <b>{String(index + 1).padStart(2, "0")}</b>
+                {item.short}
+              </span>
+              <strong>{valueLabel}</strong>
+              <small className="funnel-rate">{rateLabel}</small>
+              <span className="funnel-open" aria-hidden="true">→</span>
+            </a>
+          );
+        })}
+      </div>
+
+      <footer className="monthly-funnel-foot">
+        <span>
+          Oportunidades <strong>{opportunities === null ? "—" : formatNumber(opportunities)}</strong>
+        </span>
+        <span>
+          Vendas <strong>{sales === null ? "—" : formatNumber(sales)}</strong>
+        </span>
+      </footer>
+    </section>
+  );
+}
+
 export function DashboardClient({
   dashboard,
   dataStatus,
@@ -394,6 +506,23 @@ export function DashboardClient({
       bottleneck,
     };
   }, [conversions]);
+
+  const monthlyFunnels = useMemo(() => {
+    if (!active) return { current: [], previous: [] };
+    return {
+      current: buildMonthlyFunnel(
+        (stage) => active.metrics[stage.key].current.month,
+      ),
+      previous: buildMonthlyFunnel(
+        (stage) => active.metrics[stage.key].previousMonth ?? null,
+      ),
+    };
+  }, [active]);
+
+  const monthLabels =
+    dashboard?.monthComparisonMode === "same_day_mtd"
+      ? getMonthToDateLabels(dashboard.referenceDate)
+      : { current: "Mês atual", previous: "Mês anterior" };
 
   const actionPlan = funnelSummary.bottleneck
     ? ACTION_PLANS[funnelSummary.bottleneck.key]
@@ -558,45 +687,32 @@ export function DashboardClient({
         </section>
 
         <section className="analysis-grid">
-          <article className="funnel-card">
+          <article className="funnel-card comparison-funnel-card">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Conversão</p>
-                <h2>Funil por etapa</h2>
+                <p className="eyebrow">Comparativo mensal</p>
+                <h2>Funis lado a lado</h2>
               </div>
-              <span>{PERIODS.find((item) => item.key === period)?.label}</span>
+              <span>Mês atual × mês anterior</span>
             </div>
             <p className="chart-subtitle">
-              Escala visual suavizada para leitura. Valores e conversões são exatos.
+              {dashboard.monthComparisonMode === "same_day_mtd"
+                ? "Mesmos dias nos dois meses. Valores e conversões são exatos."
+                : "Comparativo mensal disponível; a próxima sincronização aplicará os mesmos dias nos dois meses."}
             </p>
-            <div className="sales-funnel" role="list" aria-label="Funil de vendas por etapa">
-              {conversions.map((item, index) => (
-                <a
-                  className="funnel-stage"
-                  key={item.key}
-                  role="listitem"
-                  href={`/etapas/${item.slug}`}
-                  aria-label={`${item.label}: ${formatNumber(item.value)}`}
-                  style={{
-                    width: `${item.width}%`,
-                    "--funnel-color": item.funnelColor,
-                  } as React.CSSProperties}
-                >
-                  <span className="funnel-stage-name">
-                    <b>{String(index + 1).padStart(2, "0")}</b>
-                    {item.short}
-                  </span>
-                  <strong>{formatNumber(item.value)}</strong>
-                  <small className="funnel-rate">
-                    {item.rate === null
-                      ? item.value > 0
-                        ? "Base 100%"
-                        : "Sem dados"
-                      : `${formatNumber(item.rate * 100)}%`}
-                  </small>
-                  <span className="funnel-open" aria-hidden="true">→</span>
-                </a>
-              ))}
+            <div className="funnel-comparison-grid">
+              <MonthlyFunnel
+                label="Mês atual"
+                periodLabel={monthLabels.current}
+                stages={monthlyFunnels.current}
+                tone="current"
+              />
+              <MonthlyFunnel
+                label="Mês anterior"
+                periodLabel={monthLabels.previous}
+                stages={monthlyFunnels.previous}
+                tone="previous"
+              />
             </div>
           </article>
 
