@@ -86,6 +86,17 @@ export async function POST(request: Request) {
     ),
   );
 
+  const currentEmails = collaborators.map((dashboard) =>
+    dashboard.collaborator.email.toLowerCase().trim(),
+  );
+  const emailPlaceholders = currentEmails.map(() => "?").join(", ");
+  statements.push(
+    runtime.DB.prepare(
+      `DELETE FROM collaborator_dashboards
+       WHERE email NOT IN (${emailPlaceholders})`,
+    ).bind(...currentEmails),
+  );
+
   statements.push(
     runtime.DB.prepare(
       `INSERT INTO ingestion_runs

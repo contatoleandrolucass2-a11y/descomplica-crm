@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { getDb } from "@/db";
 import { collaboratorDashboards } from "@/db/schema";
+import { aggregateDashboards } from "./aggregate-dashboard";
 import { DashboardClient } from "./DashboardClient";
 import { requireChatGPTUser } from "./chatgpt-auth";
 import { demoDashboard } from "./demo-data";
@@ -33,14 +33,13 @@ export default async function Home() {
     dataStatus = "demo";
   } else {
     try {
-      const [record] = await getDb()
-        .select()
-        .from(collaboratorDashboards)
-        .where(eq(collaboratorDashboards.email, user.email.toLowerCase()))
-        .limit(1);
+      const records = await getDb().select().from(collaboratorDashboards);
+      const dashboards = records.map(
+        (record) => JSON.parse(record.payloadJson) as DashboardPayload,
+      );
+      dashboard = aggregateDashboards(dashboards);
 
-      if (record) {
-        dashboard = JSON.parse(record.payloadJson) as DashboardPayload;
+      if (dashboard) {
         dataStatus = "live";
       }
     } catch {
@@ -54,6 +53,7 @@ export default async function Home() {
       dataStatus={dataStatus}
       signedInEmail={user.email}
       signedInName={user.fullName ?? user.displayName}
+      isConsolidated={!localPreview}
     />
   );
 }
