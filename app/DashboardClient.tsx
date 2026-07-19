@@ -116,9 +116,9 @@ export function DashboardClient({
           <p className="eyebrow">Descomplica CRM</p>
           <h1>Seu painel está pronto para receber os dados.</h1>
           <p>
-            O acesso de <strong>{signedInEmail}</strong> foi reconhecido, mas a
-            primeira sincronização do Salesforce ainda não chegou. Assim que a
-            automação rodar, seus resultados aparecerão aqui.
+            O acesso de <strong>{signedInEmail}</strong> foi reconhecido, mas o
+            relatório completo do Salesforce ainda não chegou. Assim que a
+            automação rodar, os resultados da equipe aparecerão aqui.
           </p>
           <span className="status-pill waiting">Aguardando sincronização</span>
         </section>
@@ -162,11 +162,11 @@ export function DashboardClient({
       <main className="dashboard-shell">
         <section className="page-intro">
           <div>
-            <p className="eyebrow">Meu desempenho</p>
-            <h1>Olá, {dashboard.collaborator.name.split(" ")[0]}.</h1>
+            <p className="eyebrow">Visão consolidada</p>
+            <h1>Relatório completo da equipe.</h1>
             <p>
-              Seus resultados do funil, separados por origem e atualizados
-              automaticamente.
+              Resultados de todos os colaboradores, separados por origem e
+              atualizados automaticamente pelo Salesforce.
             </p>
           </div>
           <div className="snapshot-meta">
@@ -231,7 +231,7 @@ export function DashboardClient({
                   : "Meta atingida. Continue avançando."}
               </h2>
               <p>
-                Você realizou <strong>{formatNumber(sales.current[period])}</strong>{" "}
+                A equipe realizou <strong>{formatNumber(sales.current[period])}</strong>{" "}
                 de <strong>{formatNumber(sales.goal[period])}</strong> vendas no
                 período selecionado.
               </p>
@@ -351,7 +351,7 @@ export function DashboardClient({
         </section>
 
         <footer className="dashboard-footer">
-          <span>Descomplica CRM · Dados individuais do Salesforce</span>
+          <span>Descomplica CRM · Dados consolidados do Salesforce</span>
           <span>{signedInEmail}</span>
         </footer>
       </main>

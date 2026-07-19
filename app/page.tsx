@@ -9,6 +9,8 @@ import type { DashboardPayload } from "./types";
 
 export const dynamic = "force-dynamic";
 
+const COMPLETE_REPORT_EMAIL = "relatorio-completo@descomplicapro.com.br";
+
 async function isLocalPreview() {
   const requestHeaders = await headers();
   const host = requestHeaders.get("host") ?? "";
@@ -36,7 +38,7 @@ export default async function Home() {
       const [record] = await getDb()
         .select()
         .from(collaboratorDashboards)
-        .where(eq(collaboratorDashboards.email, user.email.toLowerCase()))
+        .where(eq(collaboratorDashboards.email, COMPLETE_REPORT_EMAIL))
         .limit(1);
 
       if (record) {

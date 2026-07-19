@@ -19,23 +19,23 @@ export async function generateMetadata(): Promise<Metadata> {
   const forwardedProtocol = requestHeaders.get("x-forwarded-proto");
   const protocol = forwardedProtocol ?? (host.startsWith("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
-  const imageUrl = new URL("/og.png", origin).toString();
+  const imageUrl = new URL("/og-v2.png", origin).toString();
 
   return {
     metadataBase: new URL(origin),
     title: "Descomplica CRM | Inteligência comercial",
     description:
-      "Painel individual de desempenho comercial integrado ao Salesforce.",
+      "Relatório consolidado de desempenho comercial integrado ao Salesforce.",
     openGraph: {
       title: "Descomplica CRM",
-      description: "Inteligência comercial integrada ao Salesforce.",
+      description: "Relatório consolidado da equipe integrado ao Salesforce.",
       type: "website",
       images: [{ url: imageUrl, width: 1733, height: 909 }],
     },
     twitter: {
       card: "summary_large_image",
       title: "Descomplica CRM",
-      description: "Inteligência comercial integrada ao Salesforce.",
+      description: "Relatório consolidado da equipe integrado ao Salesforce.",
       images: [imageUrl],
     },
   };
