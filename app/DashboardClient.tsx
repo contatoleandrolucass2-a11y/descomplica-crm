@@ -13,7 +13,6 @@ type Props = {
   dataStatus: "live" | "demo" | "waiting";
   signedInEmail: string;
   signedInName: string;
-  isConsolidated?: boolean;
 };
 
 const VIEW_ORDER: DashboardViewKey[] = [
@@ -81,7 +80,6 @@ export function DashboardClient({
   dataStatus,
   signedInEmail,
   signedInName,
-  isConsolidated = false,
 }: Props) {
   const [activeView, setActiveView] = useState<DashboardViewKey>("all");
   const [period, setPeriod] = useState<PeriodKey>("month");
@@ -164,18 +162,11 @@ export function DashboardClient({
       <main className="dashboard-shell">
         <section className="page-intro">
           <div>
-            <p className="eyebrow">
-              {isConsolidated ? "Visão consolidada" : "Meu desempenho"}
-            </p>
-            <h1>
-              {isConsolidated
-                ? "Relatório completo da equipe."
-                : `Olá, ${dashboard.collaborator.name.split(" ")[0]}.`}
-            </h1>
+            <p className="eyebrow">Meu desempenho</p>
+            <h1>Olá, {dashboard.collaborator.name.split(" ")[0]}.</h1>
             <p>
-              {isConsolidated
-                ? "Resultados de todos os colaboradores, separados por origem e atualizados automaticamente."
-                : "Seus resultados do funil, separados por origem e atualizados automaticamente."}
+              Seus resultados do funil, separados por origem e atualizados
+              automaticamente.
             </p>
           </div>
           <div className="snapshot-meta">
@@ -240,8 +231,7 @@ export function DashboardClient({
                   : "Meta atingida. Continue avançando."}
               </h2>
               <p>
-                {isConsolidated ? "A equipe realizou" : "Você realizou"}{" "}
-                <strong>{formatNumber(sales.current[period])}</strong>{" "}
+                Você realizou <strong>{formatNumber(sales.current[period])}</strong>{" "}
                 de <strong>{formatNumber(sales.goal[period])}</strong> vendas no
                 período selecionado.
               </p>
@@ -361,7 +351,7 @@ export function DashboardClient({
         </section>
 
         <footer className="dashboard-footer">
-          <span>Descomplica CRM · Dados consolidados do Salesforce</span>
+          <span>Descomplica CRM · Dados individuais do Salesforce</span>
           <span>{signedInEmail}</span>
         </footer>
       </main>
