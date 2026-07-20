@@ -311,11 +311,13 @@ function MonthlyFunnel({
   stages: MonthlyFunnelStage[];
   tone: "current" | "previous" | "goal";
 }) {
+  const [showConversions, setShowConversions] = useState(false);
   const sales = stages[stages.length - 1]?.value ?? null;
-  const stageY = [58, 162, 266, 370, 474];
+  const stageY = [52, 134, 216, 298, 380];
   const stageHalfWidths = stages.map((item) => (104 * item.width) / 100);
   const markerLeft = `funnel-arrow-left-${tone}`;
   const markerRight = `funnel-arrow-right-${tone}`;
+  const conversionMapId = `conversion-map-${tone}`;
 
   const conversionLabel = (from: number | null, to: number | null, self = false) => {
     if (from === null || to === null) return "—";
@@ -337,9 +339,10 @@ function MonthlyFunnel({
       </header>
 
       <div className="sales-funnel" aria-label={`Etapas de ${label.toLowerCase()}`}>
-        <svg
-          className="funnel-arrow-map"
-          viewBox="0 0 420 532"
+        {showConversions ? <svg
+          id={conversionMapId}
+          className="funnel-arrow-map visible"
+          viewBox="0 0 420 458"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
@@ -391,7 +394,7 @@ function MonthlyFunnel({
               </g>
             );
           })}
-        </svg>
+        </svg> : null}
 
         <div className="funnel-stage-stack" role="list">
           {stages.map((item, index) => {
@@ -416,6 +419,15 @@ function MonthlyFunnel({
             );
           })}
         </div>
+        <button
+          className={`conversion-toggle ${showConversions ? "active" : ""}`}
+          type="button"
+          aria-controls={conversionMapId}
+          aria-expanded={showConversions}
+          onClick={() => setShowConversions((visible) => !visible)}
+        >
+          Conversão
+        </button>
       </div>
     </section>
   );

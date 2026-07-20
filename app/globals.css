@@ -900,7 +900,7 @@ a {
 
 .sales-funnel {
   position: relative;
-  height: 532px;
+  height: 458px;
   overflow: hidden;
   padding: 0 8px;
   background:
@@ -915,6 +915,15 @@ a {
   width: 100%;
   height: 100%;
   overflow: visible;
+}
+
+.funnel-arrow-map.visible {
+  animation: reveal-conversions 220ms ease-out both;
+}
+
+@keyframes reveal-conversions {
+  from { opacity: 0; transform: scale(0.985); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .funnel-curve path {
@@ -969,11 +978,43 @@ a {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 36px;
+  gap: 14px;
   justify-items: center;
   width: 52%;
   margin: 0 auto;
-  padding-top: 22px;
+  padding-top: 18px;
+}
+
+.conversion-toggle {
+  position: absolute;
+  z-index: 2;
+  bottom: 10px;
+  left: 50%;
+  min-width: 112px;
+  padding: 8px 16px;
+  transform: translateX(-50%);
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 92%, #dce9f0 8%);
+  box-shadow: 0 5px 16px rgba(16, 40, 74, 0.08);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.conversion-toggle:hover,
+.conversion-toggle.active {
+  color: #087f8f;
+  border-color: rgba(8, 143, 160, 0.38);
+  background: color-mix(in srgb, var(--surface) 84%, #9ce8ed 16%);
+}
+
+.conversion-toggle:focus-visible {
+  outline: 3px solid rgba(34, 201, 204, 0.3);
+  outline-offset: 2px;
 }
 
 .funnel-stage {
@@ -1902,7 +1943,7 @@ a {
   }
 
   .sales-funnel {
-    height: 532px;
+    height: 458px;
     padding-right: 8px;
     padding-left: 8px;
   }
