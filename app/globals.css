@@ -15,6 +15,25 @@
   --shadow: 0 20px 60px rgba(25, 48, 80, 0.1);
 }
 
+:root[data-theme="balanced"] {
+  --ink: #132943;
+  --ink-soft: #53687d;
+  --surface: #f8fbfc;
+  --surface-soft: #dfe9ed;
+  --line: #c6d5dd;
+  --shadow: 0 20px 60px rgba(14, 41, 59, 0.14);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #eef6ff;
+  --ink-soft: #a9bad0;
+  --surface: #10243a;
+  --surface-soft: #061524;
+  --line: #29435b;
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -65,6 +84,35 @@ a {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.theme-switch {
+  display: flex;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.theme-switch button {
+  padding: 6px 9px;
+  color: #b9c8dc;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.65rem;
+}
+
+.theme-switch button.active {
+  color: #071a31;
+  background: var(--lime);
 }
 
 .brand-link {
@@ -802,7 +850,7 @@ a {
   overflow: hidden;
   border: 1px solid #d9e6ef;
   border-radius: 22px;
-  background: #f7fafc;
+  background: var(--surface);
 }
 
 .monthly-funnel.current {
@@ -812,13 +860,13 @@ a {
 
 .monthly-funnel.previous {
   border-color: #d8e0e9;
-  background: #f4f7fa;
+  background: color-mix(in srgb, var(--surface) 86%, #8799aa 14%);
   box-shadow: inset 0 3px 0 #8394a9;
 }
 
 .monthly-funnel.goal {
   border-color: rgba(111, 160, 53, 0.28);
-  background: #f7faef;
+  background: color-mix(in srgb, var(--surface) 90%, #dff3b4 10%);
   box-shadow: inset 0 3px 0 #91bd45;
 }
 
@@ -827,13 +875,12 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  min-height: 82px;
+  min-height: 72px;
   padding: 18px 20px 14px;
   border-bottom: 1px solid #dce6ee;
 }
 
-.monthly-funnel-head > div:first-child,
-.monthly-funnel-result {
+.monthly-funnel-head > div:first-child {
   display: grid;
   gap: 4px;
 }
@@ -851,47 +898,89 @@ a {
   line-height: 1.25;
 }
 
-.monthly-funnel-result {
-  flex: 0 0 auto;
-  text-align: right;
-}
-
-.monthly-funnel-result strong {
-  color: #087f8f;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 1.25rem;
-  letter-spacing: -0.06em;
-}
-
-.monthly-funnel.previous .monthly-funnel-result strong {
-  color: #52677f;
-}
-
-.monthly-funnel.goal .monthly-funnel-result strong {
-  color: #628d28;
-}
-
 .sales-funnel {
   display: grid;
-  gap: 8px;
-  justify-items: center;
-  min-height: 408px;
-  padding: 20px 10px 24px;
+  gap: 9px;
+  min-height: 510px;
+  padding: 16px 10px 22px;
   background:
     radial-gradient(circle at 50% 0%, rgba(34, 201, 204, 0.09), transparent 55%),
     transparent;
+}
+
+.funnel-indicator-head,
+.funnel-stage-row {
+  display: grid;
+  grid-template-columns: minmax(78px, 0.82fr) minmax(142px, 1.7fr) minmax(78px, 0.82fr);
+  gap: 7px;
+  align-items: center;
+  width: 100%;
+}
+
+.funnel-indicator-head {
+  padding: 0 2px 3px;
+  color: var(--ink-soft);
+  font-size: 0.53rem;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.funnel-stage-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.funnel-side-indicator {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 4px;
+  color: var(--ink-soft);
+  border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  text-align: center;
+}
+
+.funnel-side-indicator span {
+  overflow: hidden;
+  font-size: 0.48rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.funnel-side-indicator strong {
+  color: var(--ink);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.58rem;
+  white-space: nowrap;
+}
+
+.funnel-side-indicator b {
+  color: #087f8f;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.7rem;
+}
+
+.funnel-side-indicator.right b {
+  color: #6b56c8;
 }
 
 .funnel-stage {
   position: relative;
   display: grid;
   isolation: isolate;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
   gap: 6px;
   align-items: center;
   min-height: 68px;
   overflow: hidden;
-  padding: 10px clamp(13px, 1.7vw, 22px) 18px;
+  padding: 14px 8px 10px;
   color: white;
   border-radius: 48% 48% 18% 18% / 18% 18% 12% 12%;
   background:
@@ -904,6 +993,7 @@ a {
   clip-path: polygon(0 7%, 100% 7%, 90% 87%, 85% 98%, 15% 98%, 10% 87%);
   text-decoration: none;
   filter: drop-shadow(0 8px 8px rgba(9, 37, 61, 0.16));
+  text-align: center;
   transition: width 300ms ease, filter 180ms ease, transform 180ms ease;
 }
 
@@ -922,17 +1012,12 @@ a {
   content: "";
 }
 
-.funnel-stage:nth-child(3) {
+.funnel-stage-row:nth-of-type(4) .funnel-stage {
   color: #173b4f;
 }
 
-.funnel-stage:nth-child(3) strong {
+.funnel-stage-row:nth-of-type(4) .funnel-stage strong {
   text-shadow: none;
-}
-
-.funnel-stage:nth-child(3) .funnel-stage-name b {
-  border-color: rgba(23, 59, 79, 0.18);
-  background: rgba(255, 255, 255, 0.24);
 }
 
 .funnel-stage:hover {
@@ -942,75 +1027,40 @@ a {
 
 .funnel-stage-name {
   z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: block;
   overflow: hidden;
-  font-size: 0.64rem;
+  font-size: 0.6rem;
   font-weight: 720;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.funnel-stage-name b {
-  display: grid;
-  flex: 0 0 auto;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.12);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.62rem;
-}
-
 .funnel-stage strong {
   z-index: 1;
   font-family: var(--font-geist-mono), monospace;
-  font-size: 0.94rem;
+  font-size: 1rem;
   text-shadow: 0 1px 2px rgba(10, 36, 60, 0.24);
 }
 
-.funnel-rate {
-  position: absolute;
-  z-index: 1;
-  bottom: 7px;
-  left: 50%;
-  padding: 0;
-  transform: translateX(-50%);
-  text-align: center;
-  font-size: 0.55rem;
-  font-weight: 700;
-  white-space: nowrap;
-  opacity: 0.86;
+.automatic-update { color: #087f8f; font-weight: 700; }
+
+:root[data-theme="dark"] .dashboard-shell article,
+:root[data-theme="dark"] .view-tabs,
+:root[data-theme="dark"] .view-summary,
+:root[data-theme="dark"] .stage-section,
+:root[data-theme="dark"] .realized-card,
+:root[data-theme="dark"] .monthly-funnel {
+  background-color: var(--surface);
+  border-color: var(--line);
 }
 
-.funnel-open {
-  display: none;
+:root[data-theme="dark"] .monthly-funnel.previous,
+:root[data-theme="dark"] .monthly-funnel.goal {
+  background: var(--surface);
 }
 
-.monthly-funnel-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 20px 15px;
-  color: var(--ink-soft);
-  border-top: 1px solid #dce6ee;
-  font-size: 0.68rem;
-}
-
-.monthly-funnel-foot span {
-  display: flex;
-  gap: 6px;
-  align-items: baseline;
-}
-
-.monthly-funnel-foot strong {
-  color: var(--ink);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 0.82rem;
+:root[data-theme="dark"] .funnel-side-indicator {
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .stage-page-intro h1 {
@@ -1718,6 +1768,11 @@ a {
     padding: 14px 18px;
   }
 
+  .topbar-actions {
+    align-items: flex-end;
+    flex-direction: column-reverse;
+  }
+
   .account-block .status-pill,
   .account-block > div:nth-last-child(2) {
     display: none;
@@ -1842,15 +1897,31 @@ a {
   }
 
   .sales-funnel {
-    min-height: 350px;
+    min-height: 580px;
     padding-right: 8px;
     padding-left: 8px;
   }
 
+  .funnel-indicator-head {
+    display: none;
+  }
+
+  .funnel-stage-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .funnel-stage-slot {
+    grid-column: 1 / -1;
+  }
+
   .funnel-stage {
-    grid-template-columns: minmax(0, 1fr) auto;
     min-height: 64px;
-    padding: 10px 14px 17px;
+    padding: 14px 8px 10px;
+  }
+
+  .funnel-side-indicator {
+    padding: 7px 5px;
   }
 
   .stage-detail-hero {

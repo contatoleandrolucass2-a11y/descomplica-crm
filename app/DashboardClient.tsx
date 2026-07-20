@@ -267,6 +267,8 @@ type MonthlyFunnelStage = (typeof STAGES)[number] & {
   rate: number | null;
 };
 
+type ThemeMode = "light" | "balanced" | "dark";
+
 const FUNNEL_STAGE_COLORS = [
   "#ff3f61",
   "#ffa63d",
@@ -303,22 +305,23 @@ function MonthlyFunnel({
   periodLabel,
   stages,
   tone,
-  summaryLabel = "Conversão total",
-  summaryValue,
 }: {
   label: string;
   periodLabel: string;
   stages: MonthlyFunnelStage[];
   tone: "current" | "previous" | "goal";
-  summaryLabel?: string;
-  summaryValue?: string;
 }) {
-  const opportunities = stages[0]?.value ?? null;
   const sales = stages[stages.length - 1]?.value ?? null;
-  const totalRate =
-    opportunities !== null && opportunities > 0 && sales !== null
-      ? sales / opportunities
-      : null;
+
+  const conversionLabel = (from: number | null, to: number | null, self = false) => {
+    if (from === null || to === null) return "—";
+    if (self) return "100%";
+    if (from <= 0) return "—";
+    return `${formatNumber((to / from) * 100)}%`;
+  };
+
+  const valueFlow = (from: number | null, to: number | null) =>
+    `${from === null ? "—" : formatNumber(from)} → ${to === null ? "—" : formatNumber(to)}`;
 
   return (
     <section className={`monthly-funnel ${tone}`} aria-label={`${label}: ${periodLabel}`}>
@@ -327,63 +330,57 @@ function MonthlyFunnel({
           <span>{label}</span>
           <strong>{periodLabel}</strong>
         </div>
-        <div className="monthly-funnel-result">
-          <span>{summaryLabel}</span>
-          <strong>
-            {summaryValue ??
-              (totalRate === null ? "—" : `${formatNumber(totalRate * 100)}%`)}
-          </strong>
-        </div>
       </header>
 
       <div className="sales-funnel" role="list" aria-label={`Etapas de ${label.toLowerCase()}`}>
+        <div className="funnel-indicator-head" aria-hidden="true">
+          <span>Próxima fase</span>
+          <span>Etapa</span>
+          <span>Até a venda</span>
+        </div>
         {stages.map((item, index) => {
           const valueLabel = item.value === null ? "—" : formatNumber(item.value);
-          const rateLabel =
-            index === 0
-              ? item.value === null
-                ? "Sem dados"
-                : item.value > 0
-                  ? "Base 100%"
-                  : "Base 0%"
-              : item.rate === null
-                ? "Sem base"
-                : `${formatNumber(item.rate * 100)}%`;
+          const next = stages[Math.min(index + 1, stages.length - 1)];
+          const isSales = index === stages.length - 1;
 
           return (
-            <a
-              className="funnel-stage"
-              key={item.key}
-              role="listitem"
-              href={`/etapas/${item.slug}`}
-              aria-label={`${item.label}: ${valueLabel}. ${rateLabel}. Abrir análise.`}
-              style={
-                {
-                  width: `${item.width}%`,
-                  "--funnel-color": FUNNEL_STAGE_COLORS[index],
-                } as React.CSSProperties
-              }
-            >
-              <span className="funnel-stage-name">
-                <b>{String(index + 1).padStart(2, "0")}</b>
-                {item.short}
-              </span>
-              <strong>{valueLabel}</strong>
-              <small className="funnel-rate">{rateLabel}</small>
-              <span className="funnel-open" aria-hidden="true">→</span>
-            </a>
+            <div className="funnel-stage-row" key={item.key} role="listitem">
+              <div
+                className="funnel-side-indicator left"
+                title={`${item.label} para ${next.label}`}
+              >
+                <span>{item.short} → {next.short}</span>
+                <strong>{valueFlow(item.value, next.value)}</strong>
+                <b>{conversionLabel(item.value, next.value, isSales)}</b>
+              </div>
+              <div className="funnel-stage-slot">
+                <a
+                  className="funnel-stage"
+                  href={`/etapas/${item.slug}`}
+                  aria-label={`${item.label}: ${valueLabel}. Abrir análise.`}
+                  style={
+                    {
+                      width: `${item.width}%`,
+                      "--funnel-color": FUNNEL_STAGE_COLORS[index],
+                    } as React.CSSProperties
+                  }
+                >
+                  <span className="funnel-stage-name">{item.short}</span>
+                  <strong>{valueLabel}</strong>
+                </a>
+              </div>
+              <div
+                className="funnel-side-indicator right"
+                title={`${item.label} para Vendas`}
+              >
+                <span>{item.short} → Vendas</span>
+                <strong>{valueFlow(item.value, sales)}</strong>
+                <b>{conversionLabel(item.value, sales, isSales)}</b>
+              </div>
+            </div>
           );
         })}
       </div>
-
-      <footer className="monthly-funnel-foot">
-        <span>
-          Oportunidades <strong>{opportunities === null ? "—" : formatNumber(opportunities)}</strong>
-        </span>
-        <span>
-          Vendas <strong>{sales === null ? "—" : formatNumber(sales)}</strong>
-        </span>
-      </footer>
     </section>
   );
 }
@@ -400,7 +397,21 @@ export function DashboardClient({
     "idle" | "starting" | "polling" | "error"
   >("idle");
   const [refreshMessage, setRefreshMessage] = useState("");
+  const [theme, setTheme] = useState<ThemeMode>("light");
   const autoRefreshStarted = useRef(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("descomplica-theme") as ThemeMode | null;
+    if (saved === "light" || saved === "balanced" || saved === "dark") {
+      const timer = window.setTimeout(() => setTheme(saved), 0);
+      return () => window.clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem("descomplica-theme", theme);
+  }, [theme]);
 
   const refreshSalesforce = useCallback(async () => {
     if (
@@ -469,6 +480,23 @@ export function DashboardClient({
     }, 0);
     return () => window.clearTimeout(timer);
   }, [dashboard, dataStatus, refreshSalesforce]);
+
+  useEffect(() => {
+    if (!dashboard || dataStatus !== "live") return;
+    const timer = window.setInterval(async () => {
+      try {
+        const response = await fetch("/api/dashboard/status", { cache: "no-store" });
+        if (!response.ok) return;
+        const status = (await response.json()) as { generatedAt?: string };
+        if (status.generatedAt && status.generatedAt !== dashboard.generatedAt) {
+          window.location.replace(`${window.location.pathname}?synced=${encodeURIComponent(status.generatedAt)}`);
+        }
+      } catch {
+        // A próxima verificação tenta novamente sem interromper o painel.
+      }
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, [dashboard, dataStatus]);
 
   const active = dashboard?.views[activeView] ?? null;
   const sales = active?.metrics.sales;
@@ -581,7 +609,25 @@ export function DashboardClient({
             <span>Inteligência comercial</span>
           </div>
         </div>
-        <div className="account-block">
+        <div className="topbar-actions">
+          <div className="theme-switch" role="group" aria-label="Tema do painel">
+            {([
+              ["light", "Claro"],
+              ["balanced", "Médio"],
+              ["dark", "Escuro"],
+            ] as const).map(([key, text]) => (
+              <button
+                key={key}
+                type="button"
+                className={theme === key ? "active" : ""}
+                aria-pressed={theme === key}
+                onClick={() => setTheme(key)}
+              >
+                {text}
+              </button>
+            ))}
+          </div>
+          <div className="account-block">
           <span className={`status-pill ${dataStatus}`}>{statusLabel}</span>
           <div>
             <strong>{dashboard.collaborator.name || signedInName}</strong>
@@ -593,6 +639,7 @@ export function DashboardClient({
               .slice(0, 2)
               .map((part) => part[0])
               .join("")}
+          </div>
           </div>
         </div>
       </header>
@@ -611,6 +658,7 @@ export function DashboardClient({
             <span>Atualizado em</span>
             <strong>{formatDate(dashboard.generatedAt)}</strong>
             <small>{dashboard.source}</small>
+            <small className="automatic-update">Automático na virada de cada hora</small>
             <button
               className="refresh-button"
               type="button"
@@ -720,24 +768,22 @@ export function DashboardClient({
             </p>
             <div className="funnel-comparison-grid">
               <MonthlyFunnel
-                label="Mês atual"
-                periodLabel={monthLabels.current}
-                stages={monthlyFunnels.current}
-                tone="current"
-              />
-              <MonthlyFunnel
                 label="Mês anterior"
                 periodLabel={monthLabels.previous}
                 stages={monthlyFunnels.previous}
                 tone="previous"
               />
               <MonthlyFunnel
+                label="Mês atual"
+                periodLabel={monthLabels.current}
+                stages={monthlyFunnels.current}
+                tone="current"
+              />
+              <MonthlyFunnel
                 label="Meta atual"
                 periodLabel="Meta projetada deste mês"
                 stages={monthlyFunnels.goal}
                 tone="goal"
-                summaryLabel="Meta de vendas"
-                summaryValue={formatNumber(active.metrics.sales.goal.month)}
               />
             </div>
           </article>
