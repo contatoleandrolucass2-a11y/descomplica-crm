@@ -900,9 +900,9 @@ a {
 
 .sales-funnel {
   position: relative;
-  height: 458px;
+  height: 372px;
   overflow: hidden;
-  padding: 0 8px;
+  padding: 0 8px 22px;
   background:
     radial-gradient(circle at 50% 0%, rgba(34, 201, 204, 0.09), transparent 55%),
     transparent;
@@ -978,38 +978,34 @@ a {
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 14px;
+  gap: 5px;
   justify-items: center;
   width: 52%;
   margin: 0 auto;
-  padding-top: 18px;
+  padding-top: 10px;
 }
 
 .conversion-toggle {
   position: absolute;
   z-index: 2;
-  bottom: 10px;
-  left: 50%;
-  min-width: 112px;
-  padding: 8px 16px;
-  transform: translateX(-50%);
+  right: 18px;
+  bottom: 8px;
+  padding: 2px 0;
   color: var(--ink-soft);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface) 92%, #dce9f0 8%);
-  box-shadow: 0 5px 16px rgba(16, 40, 74, 0.08);
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
   cursor: pointer;
   font-size: 0.68rem;
   font-weight: 760;
   letter-spacing: 0.04em;
-  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+  transition: color 160ms ease, border-color 160ms ease;
 }
 
 .conversion-toggle:hover,
 .conversion-toggle.active {
   color: #087f8f;
-  border-color: rgba(8, 143, 160, 0.38);
-  background: color-mix(in srgb, var(--surface) 84%, #9ce8ed 16%);
+  border-bottom-color: currentColor;
 }
 
 .conversion-toggle:focus-visible {
@@ -1024,9 +1020,9 @@ a {
   grid-template-columns: 1fr;
   gap: 6px;
   align-items: center;
-  min-height: 68px;
+  min-height: 62px;
   overflow: hidden;
-  padding: 14px 8px 10px;
+  padding: 12px 8px 8px;
   color: white;
   border-radius: 48% 48% 18% 18% / 18% 18% 12% 12%;
   background:

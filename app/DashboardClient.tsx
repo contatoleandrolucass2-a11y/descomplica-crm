@@ -270,11 +270,11 @@ type MonthlyFunnelStage = (typeof STAGES)[number] & {
 type ThemeMode = "light" | "balanced" | "dark";
 
 const FUNNEL_STAGE_COLORS = [
-  "#ff3f61",
-  "#ffa63d",
-  "#d7ed35",
-  "#38db7d",
-  "#3ea7eb",
+  "#ff315f",
+  "#ff9f24",
+  "#f0dc20",
+  "#25c9dc",
+  "#12c878",
 ] as const;
 
 const FUNNEL_STAGE_WIDTHS = [100, 84, 70, 57, 44] as const;
@@ -313,7 +313,7 @@ function MonthlyFunnel({
 }) {
   const [showConversions, setShowConversions] = useState(false);
   const sales = stages[stages.length - 1]?.value ?? null;
-  const stageY = [52, 134, 216, 298, 380];
+  const stageY = [42, 109, 176, 243, 310];
   const stageHalfWidths = stages.map((item) => (104 * item.width) / 100);
   const markerLeft = `funnel-arrow-left-${tone}`;
   const markerRight = `funnel-arrow-right-${tone}`;
@@ -342,7 +342,7 @@ function MonthlyFunnel({
         {showConversions ? <svg
           id={conversionMapId}
           className="funnel-arrow-map visible"
-          viewBox="0 0 420 458"
+          viewBox="0 0 420 372"
           preserveAspectRatio="none"
           aria-hidden="true"
         >
