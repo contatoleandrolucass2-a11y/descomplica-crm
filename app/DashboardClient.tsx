@@ -312,6 +312,10 @@ function MonthlyFunnel({
   tone: "current" | "previous" | "goal";
 }) {
   const sales = stages[stages.length - 1]?.value ?? null;
+  const stageY = [58, 162, 266, 370, 474];
+  const stageHalfWidths = stages.map((item) => (104 * item.width) / 100);
+  const markerLeft = `funnel-arrow-left-${tone}`;
+  const markerRight = `funnel-arrow-right-${tone}`;
 
   const conversionLabel = (from: number | null, to: number | null, self = false) => {
     if (from === null || to === null) return "—";
@@ -332,54 +336,86 @@ function MonthlyFunnel({
         </div>
       </header>
 
-      <div className="sales-funnel" role="list" aria-label={`Etapas de ${label.toLowerCase()}`}>
-        <div className="funnel-indicator-head" aria-hidden="true">
-          <span>Próxima fase</span>
-          <span>Etapa</span>
-          <span>Até a venda</span>
-        </div>
-        {stages.map((item, index) => {
-          const valueLabel = item.value === null ? "—" : formatNumber(item.value);
-          const next = stages[Math.min(index + 1, stages.length - 1)];
-          const isSales = index === stages.length - 1;
+      <div className="sales-funnel" aria-label={`Etapas de ${label.toLowerCase()}`}>
+        <svg
+          className="funnel-arrow-map"
+          viewBox="0 0 420 532"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <marker id={markerLeft} markerWidth="7" markerHeight="7" refX="5.4" refY="3.5" orient="auto">
+              <path d="M0 0 L7 3.5 L0 7 Z" className="arrow-head left" />
+            </marker>
+            <marker id={markerRight} markerWidth="7" markerHeight="7" refX="5.4" refY="3.5" orient="auto">
+              <path d="M0 0 L7 3.5 L0 7 Z" className="arrow-head right" />
+            </marker>
+          </defs>
 
-          return (
-            <div className="funnel-stage-row" key={item.key} role="listitem">
-              <div
-                className="funnel-side-indicator left"
-                title={`${item.label} para ${next.label}`}
+          {stages.slice(0, -1).map((item, index) => {
+            const next = stages[index + 1];
+            const startX = 210 - stageHalfWidths[index];
+            const endX = 210 - stageHalfWidths[index + 1];
+            const startY = stageY[index] + 18;
+            const endY = stageY[index + 1] - 18;
+            const midY = (startY + endY) / 2;
+            return (
+              <g className="funnel-curve left" key={`next-${item.key}`}>
+                <path
+                  d={`M ${startX} ${startY} C 74 ${startY}, 74 ${endY}, ${endX} ${endY}`}
+                  markerEnd={`url(#${markerLeft})`}
+                />
+                <text x="45" y={midY - 5} textAnchor="middle">
+                  <tspan x="45">{valueFlow(item.value, next.value)}</tspan>
+                  <tspan className="rate" x="45" dy="14">{conversionLabel(item.value, next.value)}</tspan>
+                </text>
+              </g>
+            );
+          })}
+
+          {stages.slice(0, -1).map((item, index) => {
+            const startX = 210 + stageHalfWidths[index];
+            const endX = 210 + stageHalfWidths[stages.length - 1];
+            const curveX = 404 - index * 14;
+            const targetY = stageY[stages.length - 1] - 15 + index * 8;
+            return (
+              <g className="funnel-curve right" key={`sale-${item.key}`}>
+                <path
+                  d={`M ${startX} ${stageY[index]} C ${curveX} ${stageY[index]}, ${curveX} ${targetY}, ${endX} ${targetY}`}
+                  markerEnd={`url(#${markerRight})`}
+                />
+                <text x={curveX - 23} y={stageY[index] - 8} textAnchor="middle">
+                  <tspan x={curveX - 23}>{valueFlow(item.value, sales)}</tspan>
+                  <tspan className="rate" x={curveX - 23} dy="14">{conversionLabel(item.value, sales)}</tspan>
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+
+        <div className="funnel-stage-stack" role="list">
+          {stages.map((item, index) => {
+            const valueLabel = item.value === null ? "—" : formatNumber(item.value);
+            return (
+              <a
+                className="funnel-stage"
+                key={item.key}
+                role="listitem"
+                href={`/etapas/${item.slug}`}
+                aria-label={`${item.label}: ${valueLabel}. Abrir análise.`}
+                style={
+                  {
+                    width: `${item.width}%`,
+                    "--funnel-color": FUNNEL_STAGE_COLORS[index],
+                  } as React.CSSProperties
+                }
               >
-                <span>{item.short} → {next.short}</span>
-                <strong>{valueFlow(item.value, next.value)}</strong>
-                <b>{conversionLabel(item.value, next.value, isSales)}</b>
-              </div>
-              <div className="funnel-stage-slot">
-                <a
-                  className="funnel-stage"
-                  href={`/etapas/${item.slug}`}
-                  aria-label={`${item.label}: ${valueLabel}. Abrir análise.`}
-                  style={
-                    {
-                      width: `${item.width}%`,
-                      "--funnel-color": FUNNEL_STAGE_COLORS[index],
-                    } as React.CSSProperties
-                  }
-                >
-                  <span className="funnel-stage-name">{item.short}</span>
-                  <strong>{valueLabel}</strong>
-                </a>
-              </div>
-              <div
-                className="funnel-side-indicator right"
-                title={`${item.label} para Vendas`}
-              >
-                <span>{item.short} → Vendas</span>
-                <strong>{valueFlow(item.value, sales)}</strong>
-                <b>{conversionLabel(item.value, sales, isSales)}</b>
-              </div>
-            </div>
-          );
-        })}
+                <span className="funnel-stage-name">{item.short}</span>
+                <strong>{valueLabel}</strong>
+              </a>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -759,7 +795,7 @@ export function DashboardClient({
                 <p className="eyebrow">Comparativo mensal</p>
                 <h2>Realizado e meta lado a lado</h2>
               </div>
-              <span>Atual × anterior × meta</span>
+              <span>Anterior × atual × meta</span>
             </div>
             <p className="chart-subtitle">
               {dashboard.monthComparisonMode === "same_day_mtd"
