@@ -303,11 +303,15 @@ function MonthlyFunnel({
   periodLabel,
   stages,
   tone,
+  summaryLabel = "Conversão total",
+  summaryValue,
 }: {
   label: string;
   periodLabel: string;
   stages: MonthlyFunnelStage[];
-  tone: "current" | "previous";
+  tone: "current" | "previous" | "goal";
+  summaryLabel?: string;
+  summaryValue?: string;
 }) {
   const opportunities = stages[0]?.value ?? null;
   const sales = stages[stages.length - 1]?.value ?? null;
@@ -324,8 +328,11 @@ function MonthlyFunnel({
           <strong>{periodLabel}</strong>
         </div>
         <div className="monthly-funnel-result">
-          <span>Conversão total</span>
-          <strong>{totalRate === null ? "—" : `${formatNumber(totalRate * 100)}%`}</strong>
+          <span>{summaryLabel}</span>
+          <strong>
+            {summaryValue ??
+              (totalRate === null ? "—" : `${formatNumber(totalRate * 100)}%`)}
+          </strong>
         </div>
       </header>
 
@@ -516,13 +523,16 @@ export function DashboardClient({
   }, [conversions]);
 
   const monthlyFunnels = useMemo(() => {
-    if (!active) return { current: [], previous: [] };
+    if (!active) return { current: [], previous: [], goal: [] };
     return {
       current: buildMonthlyFunnel(
         (stage) => active.metrics[stage.key].current.month,
       ),
       previous: buildMonthlyFunnel(
         (stage) => active.metrics[stage.key].previousMonth ?? null,
+      ),
+      goal: buildMonthlyFunnel(
+        (stage) => active.metrics[stage.key].goal.month,
       ),
     };
   }, [active]);
@@ -699,9 +709,9 @@ export function DashboardClient({
             <div className="section-heading">
               <div>
                 <p className="eyebrow">Comparativo mensal</p>
-                <h2>Funis lado a lado</h2>
+                <h2>Realizado e meta lado a lado</h2>
               </div>
-              <span>Mês atual × mês anterior</span>
+              <span>Atual × anterior × meta</span>
             </div>
             <p className="chart-subtitle">
               {dashboard.monthComparisonMode === "same_day_mtd"
@@ -721,6 +731,14 @@ export function DashboardClient({
                 stages={monthlyFunnels.previous}
                 tone="previous"
               />
+              <MonthlyFunnel
+                label="Meta atual"
+                periodLabel="Meta projetada deste mês"
+                stages={monthlyFunnels.goal}
+                tone="goal"
+                summaryLabel="Meta de vendas"
+                summaryValue={formatNumber(active.metrics.sales.goal.month)}
+              />
             </div>
           </article>
 
@@ -731,57 +749,59 @@ export function DashboardClient({
                 <h2>Eficiência do funil</h2>
               </div>
             </div>
-            <div className="efficiency-hero">
-              <span>Conversão total</span>
-              <strong>
-                {funnelSummary.totalRate === null
-                  ? "—"
-                  : `${formatNumber(funnelSummary.totalRate * 100)}%`}
-              </strong>
-              <small>Oportunidades → vendas</small>
-            </div>
-            <div className="insight-grid">
-              <div>
-                <span>Gap para meta de vendas</span>
+            <div className="efficiency-horizontal">
+              <div className="efficiency-hero">
+                <span>Conversão total</span>
                 <strong>
-                  {sales.goal[period] <= 0
-                    ? "Meta não definida"
-                    : salesGap > 0
-                      ? salesGapText(salesGap)
-                      : salesSurplus > 0
-                        ? salesGapText(salesSurplus, true)
-                        : "Meta atingida"}
+                  {funnelSummary.totalRate === null
+                    ? "—"
+                    : `${formatNumber(funnelSummary.totalRate * 100)}%`}
                 </strong>
-                <small>
-                  {sales.goal[period] > 0
-                    ? `${formatNumber(sales.current[period])} realizadas de ${formatNumber(sales.goal[period])}`
-                    : `${formatNumber(sales.current[period])} vendas realizadas no período`}
-                </small>
+                <small>Oportunidades → vendas</small>
               </div>
-              <div>
-                <span>Gargalo principal</span>
-                <strong>
-                  {funnelSummary.bottleneck
-                    ? `${funnelSummary.bottleneck.previousLabel} → ${funnelSummary.bottleneck.label}`
-                    : "Sem base suficiente"}
-                </strong>
-                <small>
-                  {funnelSummary.bottleneck?.rate === null || !funnelSummary.bottleneck
-                    ? "Aguardando volume"
-                    : `${formatNumber(funnelSummary.bottleneck.rate * 100)}% converte · ${formatNumber(funnelSummary.bottleneck.loss)} não avançaram`}
-                </small>
-              </div>
-              <div className="action-plan">
-                <span>Plano de ação</span>
-                <strong>{actionPlan}</strong>
-                <small>
-                  Prioridade definida pelo menor avanço entre etapas no filtro atual.
-                </small>
-              </div>
-              <div>
-                <span>VGV realizado</span>
-                <strong>{formatCurrency(active.salesValue[period])}</strong>
-                <small>{PERIODS.find((item) => item.key === period)?.label}</small>
+              <div className="insight-grid">
+                <div>
+                  <span>Gap para meta de vendas</span>
+                  <strong>
+                    {sales.goal[period] <= 0
+                      ? "Meta não definida"
+                      : salesGap > 0
+                        ? salesGapText(salesGap)
+                        : salesSurplus > 0
+                          ? salesGapText(salesSurplus, true)
+                          : "Meta atingida"}
+                  </strong>
+                  <small>
+                    {sales.goal[period] > 0
+                      ? `${formatNumber(sales.current[period])} realizadas de ${formatNumber(sales.goal[period])}`
+                      : `${formatNumber(sales.current[period])} vendas realizadas no período`}
+                  </small>
+                </div>
+                <div>
+                  <span>Gargalo principal</span>
+                  <strong>
+                    {funnelSummary.bottleneck
+                      ? `${funnelSummary.bottleneck.previousLabel} → ${funnelSummary.bottleneck.label}`
+                      : "Sem base suficiente"}
+                  </strong>
+                  <small>
+                    {funnelSummary.bottleneck?.rate === null || !funnelSummary.bottleneck
+                      ? "Aguardando volume"
+                      : `${formatNumber(funnelSummary.bottleneck.rate * 100)}% converte · ${formatNumber(funnelSummary.bottleneck.loss)} não avançaram`}
+                  </small>
+                </div>
+                <div className="action-plan">
+                  <span>Plano de ação</span>
+                  <strong>{actionPlan}</strong>
+                  <small>
+                    Prioridade definida pelo menor avanço entre etapas no filtro atual.
+                  </small>
+                </div>
+                <div>
+                  <span>VGV realizado</span>
+                  <strong>{formatCurrency(active.salesValue[period])}</strong>
+                  <small>{PERIODS.find((item) => item.key === period)?.label}</small>
+                </div>
               </div>
             </div>
           </article>
