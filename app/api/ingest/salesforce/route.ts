@@ -2,8 +2,8 @@ import { env } from "cloudflare:workers";
 import type { DashboardPayload } from "../../../types";
 
 type RuntimeEnv = {
-  DB?: D1Database;
   INGEST_SECRET?: string;
+  SALESFORCE_INGEST_URL?: string;
 };
 
 type IngestPayload = {
@@ -23,10 +23,6 @@ export async function POST(request: Request) {
 
   if (!expected || authorization !== `Bearer ${expected}`) {
     return unauthorized();
-  }
-
-  if (!runtime.DB) {
-    return Response.json({ error: "database_unavailable" }, { status: 503 });
   }
 
   let body: IngestPayload;
@@ -62,47 +58,14 @@ export async function POST(request: Request) {
     }
   }
 
-  const statements = collaborators.map((dashboard) =>
-    runtime.DB!.prepare(
-      `INSERT INTO collaborator_dashboards
-        (email, name, manager, role, generated_at, reference_date, payload_json, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-       ON CONFLICT(email) DO UPDATE SET
-         name = excluded.name,
-         manager = excluded.manager,
-         role = excluded.role,
-         generated_at = excluded.generated_at,
-         reference_date = excluded.reference_date,
-         payload_json = excluded.payload_json,
-         updated_at = CURRENT_TIMESTAMP`,
-    ).bind(
-      dashboard.collaborator.email.toLowerCase().trim(),
-      dashboard.collaborator.name.trim(),
-      dashboard.collaborator.manager?.trim() ?? "",
-      dashboard.collaborator.role?.trim() ?? "Colaborador",
-      dashboard.generatedAt,
-      dashboard.referenceDate,
-      JSON.stringify(dashboard),
-    ),
-  );
-
-  statements.push(
-    runtime.DB.prepare(
-      `INSERT INTO ingestion_runs
-        (workflow, generated_at, collaborator_count, created_at)
-       VALUES (?, ?, ?, CURRENT_TIMESTAMP)`,
-    ).bind(
-      body.workflow?.trim() || "Funil de Vendas",
-      body.generatedAt || new Date().toISOString(),
-      collaborators.length,
-    ),
-  );
-
-  await runtime.DB.batch(statements);
-
-  return Response.json({
-    ok: true,
-    collaborators: collaborators.length,
-    receivedAt: new Date().toISOString(),
+  const persistUrl = runtime.SALESFORCE_INGEST_URL?.trim() ||
+    "https://n8n.descomplicapro.com.br/webhook/persistir-funil-salesforce";
+  const response = await fetch(persistUrl, {
+    method: "POST",
+    headers: { authorization: `Bearer ${expected}`, "content-type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15_000),
   });
+  if (!response.ok) return Response.json({ error: "persistence_rejected" }, { status: 502 });
+  return Response.json({ ok: true, collaborators: collaborators.length, receivedAt: new Date().toISOString() });
 }

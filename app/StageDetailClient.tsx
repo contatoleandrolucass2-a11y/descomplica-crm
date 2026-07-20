@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-html-link-for-pages -- Native links avoid a Vinext hydration bug. */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   getMonthToDateLabels,
   PeriodComparisonTable,
@@ -63,7 +63,6 @@ export function StageDetailClient({
     "idle" | "starting" | "polling" | "error"
   >("idle");
   const [refreshMessage, setRefreshMessage] = useState("");
-  const autoRefreshStarted = useRef(false);
 
   const refreshSalesforce = useCallback(async () => {
     if (
@@ -107,21 +106,6 @@ export function StageDetailClient({
       setRefreshMessage("Não foi possível iniciar a atualização. Tente novamente.");
     }
   }, [dashboard, dataStatus, refreshState]);
-
-  useEffect(() => {
-    if (!dashboard || dataStatus !== "live" || autoRefreshStarted.current) return;
-
-    const url = new URL(window.location.href);
-    if (url.searchParams.get("synced") === dashboard.generatedAt) {
-      url.searchParams.delete("synced");
-      window.history.replaceState({}, "", `${url.pathname}${url.search}`);
-      return;
-    }
-
-    autoRefreshStarted.current = true;
-    const timer = window.setTimeout(() => void refreshSalesforce(), 0);
-    return () => window.clearTimeout(timer);
-  }, [dashboard, dataStatus, refreshSalesforce]);
 
   const stageIndex = STAGES.findIndex((item) => item.key === stage.key);
   const previousStage = stageIndex > 0 ? STAGES[stageIndex - 1] : null;

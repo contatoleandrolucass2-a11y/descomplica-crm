@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   getMonthToDateLabels,
   PeriodComparisonTable,
@@ -446,7 +446,6 @@ export function DashboardClient({
   >("idle");
   const [refreshMessage, setRefreshMessage] = useState("");
   const [theme, setTheme] = useState<ThemeMode>("light");
-  const autoRefreshStarted = useRef(false);
 
   useEffect(() => {
     const saved = window.localStorage.getItem("descomplica-theme") as ThemeMode | null;
@@ -511,23 +510,6 @@ export function DashboardClient({
       setRefreshMessage("Não foi possível iniciar a atualização. Tente novamente.");
     }
   }, [dashboard, dataStatus, refreshState]);
-
-  useEffect(() => {
-    if (!dashboard || dataStatus !== "live" || autoRefreshStarted.current) return;
-
-    const url = new URL(window.location.href);
-    if (url.searchParams.get("synced") === dashboard.generatedAt) {
-      url.searchParams.delete("synced");
-      window.history.replaceState({}, "", `${url.pathname}${url.search}`);
-      return;
-    }
-
-    autoRefreshStarted.current = true;
-    const timer = window.setTimeout(() => {
-      void refreshSalesforce();
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [dashboard, dataStatus, refreshSalesforce]);
 
   useEffect(() => {
     if (!dashboard || dataStatus !== "live") return;
