@@ -2,7 +2,6 @@ import { eq } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import { getDb } from "@/db";
 import { collaboratorDashboards } from "@/db/schema";
-import { getChatGPTUser } from "../../../chatgpt-auth";
 
 const COMPLETE_REPORT_EMAIL = "relatorio-completo@descomplicapro.com.br";
 
@@ -14,11 +13,6 @@ type RuntimeEnv = {
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const user = await getChatGPTUser();
-  if (!user) {
-    return Response.json({ error: "unauthorized" }, { status: 401 });
-  }
-
   try {
     const runtime = env as unknown as RuntimeEnv;
     const baseUrl = runtime.SUPABASE_URL?.trim();

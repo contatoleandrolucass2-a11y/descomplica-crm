@@ -3,7 +3,6 @@ import { env } from "cloudflare:workers";
 import { headers } from "next/headers";
 import { getDb } from "@/db";
 import { collaboratorDashboards } from "@/db/schema";
-import { requireChatGPTUser } from "./chatgpt-auth";
 import { demoDashboard } from "./demo-data";
 import type { DashboardPayload } from "./types";
 
@@ -42,15 +41,13 @@ async function isLocalPreview() {
   return host.startsWith("localhost") || host.startsWith("127.0.0.1");
 }
 
-export async function loadDashboardPageData(returnTo: string) {
+export async function loadDashboardPageData(_returnTo: string) {
   const localPreview = await isLocalPreview();
-  const user = localPreview
-    ? {
-        email: "leandro@descomplicapro.com.br",
-        displayName: "Leandro Lucas",
-        fullName: "Leandro Lucas",
-      }
-    : await requireChatGPTUser(returnTo);
+  const user = {
+    email: "relatorio-completo@descomplicapro.com.br",
+    displayName: "Equipe Descomplica",
+    fullName: "Equipe Descomplica",
+  };
 
   let dashboard: DashboardPayload | null = null;
   let dataStatus: "live" | "demo" | "waiting" = "waiting";

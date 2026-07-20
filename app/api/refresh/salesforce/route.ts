@@ -1,5 +1,4 @@
 import { env } from "cloudflare:workers";
-import { getChatGPTUser } from "../../../chatgpt-auth";
 
 type RuntimeEnv = {
   INGEST_SECRET?: string;
@@ -10,11 +9,6 @@ const DEFAULT_REFRESH_URL =
   "https://n8n.descomplicapro.com.br/webhook/atualizar-funil-salesforce";
 
 export async function POST() {
-  const user = await getChatGPTUser();
-  if (!user) {
-    return Response.json({ error: "unauthorized" }, { status: 401 });
-  }
-
   const runtime = env as unknown as RuntimeEnv;
   const secret = runtime.INGEST_SECRET?.trim();
   if (!secret) {
