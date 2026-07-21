@@ -1,7 +1,7 @@
 "use client";
 
 /* eslint-disable @next/next/no-html-link-for-pages -- Native links avoid a Vinext hydration bug. */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   getMonthToDateLabels,
   PeriodComparisonTable,
@@ -9,7 +9,9 @@ import {
 } from "./PeriodComparisonTable";
 import { StageNavigation } from "./StageNavigation";
 import { ACTION_PLANS, STAGES, type StageConfig } from "./stage-config";
-import type { DashboardPayload, DashboardViewKey, PeriodKey } from "./types";
+import { DashboardFilters, useDashboardFilters } from "./DashboardFilters";
+import { buildFilteredView } from "./dashboard-filtering";
+import type { DashboardPayload, PeriodKey } from "./types";
 
 type Props = {
   dashboard: DashboardPayload | null;
@@ -18,12 +20,6 @@ type Props = {
   signedInName: string;
   stage: StageConfig;
 };
-
-const VIEW_ORDER: DashboardViewKey[] = [
-  "with_canal_imob",
-  "without_canal_imob",
-  "all",
-];
 
 const PERIODS: Array<{ key: PeriodKey; label: string }> = [
   { key: "month", label: "Mês" },
@@ -57,12 +53,12 @@ export function StageDetailClient({
   signedInName,
   stage,
 }: Props) {
-  const [activeView, setActiveView] = useState<DashboardViewKey>("all");
   const [period, setPeriod] = useState<PeriodKey>("month");
   const [refreshState, setRefreshState] = useState<
     "idle" | "starting" | "polling" | "error"
   >("idle");
   const [refreshMessage, setRefreshMessage] = useState("");
+  const { selection, setSelection } = useDashboardFilters();
 
   const refreshSalesforce = useCallback(async () => {
     if (
@@ -110,7 +106,10 @@ export function StageDetailClient({
   const stageIndex = STAGES.findIndex((item) => item.key === stage.key);
   const previousStage = stageIndex > 0 ? STAGES[stageIndex - 1] : null;
   const nextStage = stageIndex < STAGES.length - 1 ? STAGES[stageIndex + 1] : null;
-  const active = dashboard?.views[activeView] ?? null;
+  const active = useMemo(
+    () => (dashboard ? buildFilteredView(dashboard, selection) : null),
+    [dashboard, selection],
+  );
   const metric = active?.metrics[stage.key] ?? null;
   const current = metric?.current[period] ?? 0;
   const goal = metric?.goal[period] ?? 0;
@@ -235,17 +234,11 @@ export function StageDetailClient({
 
         <StageNavigation active={stage.slug} />
 
-        <nav className="view-tabs" role="tablist" aria-label="Visualizações">
-          {VIEW_ORDER.map((key) => {
-            const item = dashboard.views[key];
-            return (
-              <button key={key} type="button" role="tab" aria-selected={activeView === key} className={activeView === key ? "active" : ""} onClick={() => setActiveView(key)}>
-                <span>{item.label}</span>
-                <small>{key === "with_canal_imob" ? "Canal parceiro" : key === "without_canal_imob" ? "Operação própria" : "Todos os dados"}</small>
-              </button>
-            );
-          })}
-        </nav>
+        <DashboardFilters
+          data={dashboard.filterData}
+          selection={selection}
+          onChange={setSelection}
+        />
 
         <section className="view-summary stage-view-summary" role="tabpanel">
           <div><p className="eyebrow">{active.label}</p><h2>{active.description}</h2></div>

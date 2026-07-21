@@ -33,6 +33,35 @@ export type DashboardView = {
   topDevelopments: Array<{ name: string; total: number }>;
 };
 
+export type DashboardFilterSelection = {
+  salesChannels: string[];
+  managers: string[];
+  owners: string[];
+  companies: string[];
+};
+
+export type DashboardFilterRecord = {
+  key: string;
+  date: string | null;
+  owner: string;
+  manager: string;
+  salesChannel: string;
+  company: string;
+  development: string;
+  amount: number;
+};
+
+export type DashboardFilterData = {
+  options: DashboardFilterSelection;
+  records: {
+    opportunities: DashboardFilterRecord[];
+    appointments: DashboardFilterRecord[];
+    visits: DashboardFilterRecord[];
+    folders: DashboardFilterRecord[];
+    sales: DashboardFilterRecord[];
+  };
+};
+
 export type RealizedFunnelMetric = {
   mesAnterior: number;
   mesAtual: number;
@@ -77,6 +106,7 @@ export type DashboardPayload = {
   monthComparisonMode?: "same_day_mtd";
   timezone: string;
   source: string;
+  filterData?: DashboardFilterData;
   realizedFunnel?: RealizedFunnel;
   views: Record<DashboardViewKey, DashboardView>;
 };

@@ -8,9 +8,13 @@ import {
 } from "./PeriodComparisonTable";
 import { StageNavigation } from "./StageNavigation";
 import { ACTION_PLANS, STAGES } from "./stage-config";
+import { DashboardFilters, useDashboardFilters } from "./DashboardFilters";
+import {
+  buildFilteredRealizedFunnel,
+  buildFilteredView,
+} from "./dashboard-filtering";
 import type {
   DashboardPayload,
-  DashboardViewKey,
   MetricSnapshot,
   PeriodKey,
   RealizedFunnelMetric,
@@ -22,12 +26,6 @@ type Props = {
   signedInEmail: string;
   signedInName: string;
 };
-
-const VIEW_ORDER: DashboardViewKey[] = [
-  "with_canal_imob",
-  "without_canal_imob",
-  "all",
-];
 
 const PERIODS: Array<{ key: PeriodKey; label: string }> = [
   { key: "month", label: "Mês" },
@@ -439,13 +437,13 @@ export function DashboardClient({
   signedInEmail,
   signedInName,
 }: Props) {
-  const [activeView, setActiveView] = useState<DashboardViewKey>("all");
   const [period, setPeriod] = useState<PeriodKey>("month");
   const [refreshState, setRefreshState] = useState<
     "idle" | "starting" | "polling" | "error"
   >("idle");
   const [refreshMessage, setRefreshMessage] = useState("");
   const [theme, setTheme] = useState<ThemeMode>("light");
+  const { selection, setSelection } = useDashboardFilters();
 
   useEffect(() => {
     const saved = window.localStorage.getItem("descomplica-theme") as ThemeMode | null;
@@ -528,7 +526,16 @@ export function DashboardClient({
     return () => window.clearInterval(timer);
   }, [dashboard, dataStatus]);
 
-  const active = dashboard?.views[activeView] ?? null;
+  const active = useMemo(
+    () => (dashboard ? buildFilteredView(dashboard, selection) : null),
+    [dashboard, selection],
+  );
+  const realizedFunnel = useMemo(
+    () => dashboard && active
+      ? buildFilteredRealizedFunnel(dashboard, active, selection)
+      : undefined,
+    [active, dashboard, selection],
+  );
   const sales = active?.metrics.sales;
   const salesGap = sales
     ? Math.max(0, sales.goal[period] - sales.current[period])
@@ -712,30 +719,11 @@ export function DashboardClient({
 
         <StageNavigation />
 
-        <nav className="view-tabs" role="tablist" aria-label="Visualizações">
-          {VIEW_ORDER.map((key) => {
-            const item = dashboard.views[key];
-            return (
-              <button
-                key={key}
-                type="button"
-                role="tab"
-                aria-selected={activeView === key}
-                className={activeView === key ? "active" : ""}
-                onClick={() => setActiveView(key)}
-              >
-                <span>{item.label}</span>
-                <small>
-                  {key === "with_canal_imob"
-                    ? "Canal parceiro"
-                    : key === "without_canal_imob"
-                      ? "Operação própria"
-                      : "Todos os dados"}
-                </small>
-              </button>
-            );
-          })}
-        </nav>
+        <DashboardFilters
+          data={dashboard.filterData}
+          selection={selection}
+          onChange={setSelection}
+        />
 
         <section className="view-summary" role="tabpanel">
           <div>
@@ -883,7 +871,7 @@ export function DashboardClient({
           </article>
         </section>
 
-        {dashboard.realizedFunnel ? (
+        {realizedFunnel ? (
           <section className="realized-section" aria-labelledby="realized-title">
             <div className="section-heading realized-heading">
               <div>
@@ -892,11 +880,11 @@ export function DashboardClient({
               </div>
               <div className="team-summary" aria-label="Resumo da equipe">
                 <span>
-                  <strong>{formatNumber(dashboard.realizedFunnel.resumo.corretores)}</strong>
+                  <strong>{formatNumber(realizedFunnel.resumo.corretores)}</strong>
                   Corretores
                 </span>
                 <span>
-                  <strong>{formatNumber(dashboard.realizedFunnel.resumo.gerentes)}</strong>
+                  <strong>{formatNumber(realizedFunnel.resumo.gerentes)}</strong>
                   Gerentes
                 </span>
               </div>
@@ -905,14 +893,14 @@ export function DashboardClient({
               {dashboard.monthComparisonMode === "same_day_mtd"
                 ? "Comparativo mensal usa o dia 1 até a mesma data nos dois meses. "
                 : "Último relatório ainda usa o mês anterior completo. A próxima sincronização aplicará o período equivalente. "}
-              Vendas seguem a regra operacional sem CANAL IMOB.
+              Todos os indicadores respondem às seleções ativas.
             </p>
             <div className="realized-grid">
               {REALIZED_STAGES.map((stage) => (
                 <RealizedMetricTable
                   key={stage.key}
                   label={stage.label}
-                  metric={dashboard.realizedFunnel![stage.key]}
+                  metric={realizedFunnel[stage.key]}
                   referenceDate={
                     dashboard.monthComparisonMode === "same_day_mtd"
                       ? dashboard.referenceDate
