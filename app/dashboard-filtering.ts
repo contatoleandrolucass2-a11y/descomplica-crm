@@ -176,7 +176,7 @@ export function buildFilteredView(
   return {
     key: "all",
     label: "Resultado filtrado",
-    description: `${filterCount(selection)} seleção${filterCount(selection) === 1 ? " ativa" : "ões ativas"} em todo o funil.`,
+    description: `${filterCount(selection)} ${filterCount(selection) === 1 ? "seleção ativa" : "seleções ativas"} em todo o funil.`,
     metrics,
     salesValue: periodAmount(records.sales, dashboard.referenceDate),
     topDevelopments: topDevelopments([

@@ -140,7 +140,7 @@ export function DashboardFilters({
           <strong>Refine todo o funil</strong>
         </div>
         <div className="filters-status">
-          <span>{total ? `${total} seleção${total === 1 ? "" : "ões"}` : "Todos os dados"}</span>
+          <span>{total ? `${total} ${total === 1 ? "seleção" : "seleções"}` : "Todos os dados"}</span>
           {total ? <button type="button" onClick={() => onChange(EMPTY_FILTER_SELECTION)}>Limpar tudo</button> : null}
         </div>
       </div>
