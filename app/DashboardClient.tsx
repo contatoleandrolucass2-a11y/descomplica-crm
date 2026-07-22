@@ -695,7 +695,7 @@ export function DashboardClient({
             <span>Atualizado em</span>
             <strong>{formatDate(dashboard.generatedAt)}</strong>
             <small>{dashboard.source}</small>
-            <small className="automatic-update">Automático na virada de cada hora</small>
+            <small className="automatic-update">Automático a cada 30 minutos</small>
             <button
               className="refresh-button"
               type="button"
