@@ -307,7 +307,7 @@ function MonthlyFunnel({
   label: string;
   periodLabel: string;
   stages: MonthlyFunnelStage[];
-  tone: "current" | "previous" | "goal";
+  tone: "historical" | "current" | "previous" | "goal";
 }) {
   const [showConversions, setShowConversions] = useState(false);
   const sales = stages[stages.length - 1]?.value ?? null;
@@ -588,8 +588,11 @@ export function DashboardClient({
   }, [conversions]);
 
   const monthlyFunnels = useMemo(() => {
-    if (!active) return { current: [], previous: [], goal: [] };
+    if (!active) return { historical: [], current: [], previous: [], goal: [] };
     return {
+      historical: buildMonthlyFunnel(
+        (stage) => active.metrics[stage.key].last3ClosedMonthsAverage ?? null,
+      ),
       current: buildMonthlyFunnel(
         (stage) => active.metrics[stage.key].current.month,
       ),
@@ -777,7 +780,7 @@ export function DashboardClient({
                 <p className="eyebrow">Comparativo mensal</p>
                 <h2>Realizado e meta lado a lado</h2>
               </div>
-              <span>Anterior × atual × meta</span>
+              <span>Média × anterior × atual × meta</span>
             </div>
             <p className="chart-subtitle">
               {dashboard.monthComparisonMode === "same_day_mtd"
@@ -785,6 +788,12 @@ export function DashboardClient({
                 : "Comparativo mensal disponível; a próxima sincronização aplicará os mesmos dias nos dois meses."}
             </p>
             <div className="funnel-comparison-grid">
+              <MonthlyFunnel
+                label="Média histórica"
+                periodLabel="Últimos 3 meses fechados"
+                stages={monthlyFunnels.historical}
+                tone="historical"
+              />
               <MonthlyFunnel
                 label="Mês anterior"
                 periodLabel={monthLabels.previous}

@@ -4,6 +4,7 @@ export type MetricSnapshot = {
   current: Record<PeriodKey, number>;
   goal: Record<PeriodKey, number>;
   previousMonth?: number;
+  last3ClosedMonthsAverage?: number;
   previous14Days?: number;
   last7Days?: number;
   last14Days?: number;
