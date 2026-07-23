@@ -89,9 +89,21 @@ function periodCounts(records: DashboardFilterRecord[], referenceDate: string) {
     const end = new Date(today.getFullYear(), today.getMonth() - offset + 1, 0);
     return count(start, end);
   });
+  const yearClosedMonths = Array.from(
+    { length: today.getMonth() },
+    (_, monthIndex) => {
+      const start = new Date(today.getFullYear(), monthIndex, 1);
+      const end = new Date(today.getFullYear(), monthIndex + 1, 0);
+      return count(start, end);
+    },
+  );
 
   return {
     previousMonth: count(previousMonthStart, previousMonthEnd),
+    yearClosedMonthsAverage: yearClosedMonths.length
+      ? yearClosedMonths.reduce((total, value) => total + value, 0) /
+        yearClosedMonths.length
+      : null,
     last3ClosedMonthsAverage:
       last3ClosedMonths.reduce((total, value) => total + value, 0) /
       last3ClosedMonths.length,
@@ -121,6 +133,7 @@ function metricFromRecords(
     },
     goal: { ...base.goal },
     previousMonth: counts.previousMonth,
+    yearClosedMonthsAverage: counts.yearClosedMonthsAverage,
     last3ClosedMonthsAverage: counts.last3ClosedMonthsAverage,
     previous14Days: counts.previous14Days,
     last14Days: counts.last14Days,

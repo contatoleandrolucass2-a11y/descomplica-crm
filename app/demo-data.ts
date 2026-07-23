@@ -13,6 +13,7 @@ function metric(
     current: { month, week, today },
     goal: { month: goalMonth, week: goalWeek, today: goalToday },
     previousMonth: Math.max(0, Math.round(month * 0.82)),
+    yearClosedMonthsAverage: Math.max(0, Math.round(month * 0.84)),
     last3ClosedMonthsAverage: Math.max(0, Math.round(month * 0.88)),
     previous14Days: Math.max(0, Math.round(last14Days * 0.78)),
     last7Days: week,

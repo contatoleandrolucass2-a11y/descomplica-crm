@@ -307,7 +307,7 @@ function MonthlyFunnel({
   label: string;
   periodLabel: string;
   stages: MonthlyFunnelStage[];
-  tone: "historical" | "current" | "previous" | "goal";
+  tone: "year" | "historical" | "previous" | "goal" | "pace" | "current";
 }) {
   const [showConversions, setShowConversions] = useState(false);
   const sales = stages[stages.length - 1]?.value ?? null;
@@ -588,13 +588,18 @@ export function DashboardClient({
   }, [conversions]);
 
   const monthlyFunnels = useMemo(() => {
-    if (!active) return { historical: [], current: [], previous: [], goal: [] };
+    if (!active || !dashboard) {
+      return { year: [], historical: [], previous: [], goal: [], pace: [], current: [] };
+    }
+    const [year, month, day] = dashboard.referenceDate.split("-").map(Number);
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const elapsedRate = daysInMonth > 0 ? Math.min(day / daysInMonth, 1) : 0;
     return {
+      year: buildMonthlyFunnel(
+        (stage) => active.metrics[stage.key].yearClosedMonthsAverage ?? null,
+      ),
       historical: buildMonthlyFunnel(
         (stage) => active.metrics[stage.key].last3ClosedMonthsAverage ?? null,
-      ),
-      current: buildMonthlyFunnel(
-        (stage) => active.metrics[stage.key].current.month,
       ),
       previous: buildMonthlyFunnel(
         (stage) => active.metrics[stage.key].previousMonth ?? null,
@@ -602,8 +607,19 @@ export function DashboardClient({
       goal: buildMonthlyFunnel(
         (stage) => active.metrics[stage.key].goal.month,
       ),
+      pace: buildMonthlyFunnel(
+        (stage) => active.metrics[stage.key].goal.month * elapsedRate,
+      ),
+      current: buildMonthlyFunnel(
+        (stage) => active.metrics[stage.key].current.month,
+      ),
     };
-  }, [active]);
+  }, [active, dashboard]);
+
+  const paceSales = monthlyFunnels.pace.at(-1)?.value ?? null;
+  const currentSales = monthlyFunnels.current.at(-1)?.value ?? null;
+  const paceSalesGap =
+    paceSales !== null && currentSales !== null ? currentSales - paceSales : null;
 
   const monthLabels =
     dashboard?.monthComparisonMode === "same_day_mtd"
@@ -780,16 +796,20 @@ export function DashboardClient({
                 <p className="eyebrow">Comparativo mensal</p>
                 <h2>Realizado e meta lado a lado</h2>
               </div>
-              <span>Média × anterior × atual × meta</span>
+              <span>Histórico × planejamento × realizado</span>
             </div>
             <p className="chart-subtitle">
-              {dashboard.monthComparisonMode === "same_day_mtd"
-                ? "Mesmos dias nos dois meses. Valores e conversões são exatos."
-                : "Comparativo mensal disponível; a próxima sincronização aplicará os mesmos dias nos dois meses."}
+              Médias usam somente meses fechados. Meta esperada considera dias corridos até hoje.
             </p>
             <div className="funnel-comparison-grid">
               <MonthlyFunnel
-                label="Média histórica"
+                label="Média do ano"
+                periodLabel={`Meses fechados de ${dashboard.referenceDate.slice(0, 4)}`}
+                stages={monthlyFunnels.year}
+                tone="year"
+              />
+              <MonthlyFunnel
+                label="Média últimos 3 meses"
                 periodLabel="Últimos 3 meses fechados"
                 stages={monthlyFunnels.historical}
                 tone="historical"
@@ -801,18 +821,39 @@ export function DashboardClient({
                 tone="previous"
               />
               <MonthlyFunnel
-                label="Mês atual"
-                periodLabel={monthLabels.current}
-                stages={monthlyFunnels.current}
-                tone="current"
-              />
-              <MonthlyFunnel
                 label="Meta atual"
                 periodLabel="Meta projetada deste mês"
                 stages={monthlyFunnels.goal}
                 tone="goal"
               />
+              <MonthlyFunnel
+                label="Meta esperada até hoje"
+                periodLabel={`Ritmo esperado · dias 1–${dashboard.referenceDate.slice(-2).replace(/^0/, "")}`}
+                stages={monthlyFunnels.pace}
+                tone="pace"
+              />
+              <MonthlyFunnel
+                label="Mês atual"
+                periodLabel={monthLabels.current}
+                stages={monthlyFunnels.current}
+                tone="current"
+              />
             </div>
+            {paceSalesGap !== null && paceSales !== null && currentSales !== null ? (
+              <div className={`pace-readout ${paceSalesGap >= 0 ? "ahead" : "behind"}`}>
+                <div>
+                  <span>Ritmo de vendas</span>
+                  <strong>
+                    {paceSalesGap >= 0
+                      ? `${formatNumber(paceSalesGap)} acima do esperado`
+                      : `${formatNumber(Math.abs(paceSalesGap))} abaixo do esperado`}
+                  </strong>
+                </div>
+                <small>
+                  {formatNumber(currentSales)} realizadas · {formatNumber(paceSales)} esperadas até hoje
+                </small>
+              </div>
+            ) : null}
           </article>
 
           <article className="efficiency-card">
