@@ -92,6 +92,26 @@ a {
   gap: 16px;
 }
 
+.site-menu { display: flex; align-items: center; gap: 6px; margin-right: 8px; }
+.site-menu > a, .site-menu-dropdown > button { color: #d8e4f5; padding: 8px 10px; border: 0; border-radius: 9px; background: transparent; text-decoration: none; font-size: .78rem; cursor: pointer; }
+.site-menu > a:hover, .site-menu-dropdown > button:hover, .site-menu-dropdown:focus-within > button { color: white; background: rgba(255,255,255,.1); }
+.site-menu-dropdown { position: relative; }
+.site-menu-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 20; display: grid; min-width: 190px; padding: 7px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); opacity: 0; visibility: hidden; transform: translateY(-5px); transition: .18s ease; }
+.site-menu-dropdown:hover .site-menu-panel, .site-menu-dropdown:focus-within .site-menu-panel { opacity: 1; visibility: visible; transform: translateY(0); }
+.site-menu-panel a { padding: 10px 12px; color: var(--ink); border-radius: 8px; text-decoration: none; font-size: .8rem; }
+.site-menu-panel a:hover { background: var(--surface-soft); }
+.settings-shell { min-height: 100vh; padding: 22px clamp(20px, 5vw, 80px); background: var(--surface-soft); }
+.settings-shell > .site-menu { justify-content: flex-end; color: var(--ink); }
+.settings-shell > .site-menu > a, .settings-shell .site-menu-dropdown > button { color: var(--ink); }
+.settings-card { width: min(680px, 100%); margin: 65px auto; padding: clamp(25px, 5vw, 55px); border: 1px solid var(--line); border-radius: 24px; background: var(--surface); box-shadow: var(--shadow); }
+.settings-card h1 { margin: 0 0 12px; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -.05em; }
+.settings-card > p:not(.eyebrow) { color: var(--ink-soft); line-height: 1.6; }
+.primary-link { display: inline-flex; align-items: center; justify-content: center; margin-top: 20px; padding: 12px 18px; color: #071a31; border: 0; border-radius: 11px; background: var(--lime); font-weight: 750; text-decoration: none; cursor: pointer; }
+.settings-form { display: grid; gap: 16px; margin-top: 24px; }
+.settings-form label { display: grid; gap: 7px; color: var(--ink-soft); font-size: .82rem; font-weight: 650; }
+.settings-form input { width: 100%; padding: 12px 13px; color: var(--ink); border: 1px solid var(--line); border-radius: 10px; background: var(--surface-soft); font: inherit; }
+.settings-message { min-height: 1.4em; color: var(--ink-soft); font-size: .82rem; }
+
 .theme-switch {
   display: flex;
   padding: 3px;

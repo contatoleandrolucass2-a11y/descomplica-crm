@@ -7,6 +7,7 @@ import {
   type PeriodComparisonRow,
 } from "./PeriodComparisonTable";
 import { StageNavigation } from "./StageNavigation";
+import { SiteMenu } from "./SiteMenu";
 import { ACTION_PLANS, STAGES } from "./stage-config";
 import { DashboardFilters, useDashboardFilters } from "./DashboardFilters";
 import {
@@ -666,6 +667,7 @@ export function DashboardClient({
           </div>
         </div>
         <div className="topbar-actions">
+          <SiteMenu />
           <div className="theme-switch" role="group" aria-label="Tema do painel">
             {([
               ["light", "Claro"],

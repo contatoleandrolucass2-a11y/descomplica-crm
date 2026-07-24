@@ -35,6 +35,32 @@ async function loadSupabaseDashboard(): Promise<DashboardPayload | null> {
   return payload?.views ? payload : null;
 }
 
+async function loadSupabaseGoals() {
+  const runtime = env as unknown as SupabaseRuntime;
+  const baseUrl = runtime.SUPABASE_URL?.trim();
+  const apiKey = runtime.SUPABASE_ANON_KEY?.trim();
+  if (!baseUrl || !apiKey) return null;
+  const response = await fetch(`${baseUrl}/rest/v1/crm_funnel_goals?select=*&id=eq.default&limit=1`, {
+    headers: { apikey: apiKey, authorization: `Bearer ${apiKey}` }, cache: "no-store",
+  });
+  if (!response.ok) return null;
+  const rows = await response.json() as Array<Record<string, unknown>>;
+  return rows[0] ?? null;
+}
+
+function applyConfiguredGoals(dashboard: DashboardPayload, goals: Record<string, unknown> | null) {
+  if (!goals) return dashboard;
+  const map = { opportunities: "opportunities", appointments: "appointments", visits: "visits", folders: "folders", sales: "sales" } as const;
+  const views = Object.fromEntries(Object.entries(dashboard.views).map(([key, view]) => {
+    const metrics = Object.fromEntries(Object.entries(view.metrics).map(([stage, metric]) => {
+      const configured = Number(goals[map[stage as keyof typeof map]]);
+      return [stage, Number.isFinite(configured) ? { ...metric, goal: { ...metric.goal, month: configured } } : metric];
+    }));
+    return [key, { ...view, metrics }];
+  })) as DashboardPayload["views"];
+  return { ...dashboard, views };
+}
+
 async function isLocalPreview() {
   const requestHeaders = await headers();
   const host = requestHeaders.get("host") ?? "";
@@ -59,6 +85,7 @@ export async function loadDashboardPageData(_returnTo: string) {
     try {
       dashboard = await loadSupabaseDashboard();
       if (dashboard) {
+        dashboard = applyConfiguredGoals(dashboard, await loadSupabaseGoals());
         dataStatus = "live";
       }
     } catch {
