@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { supabaseAuthUser, supabaseRuntime } from "../../../auth-server";
+import { supabaseRuntime } from "../../../auth-server";
 
 export const dynamic = "force-dynamic";
 const fields = ["opportunities", "appointments", "visits", "folders", "sales"] as const;
@@ -15,9 +14,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const config = supabaseRuntime();
-  const token = (await cookies()).get("sb-access-token")?.value;
-  const user = token ? await supabaseAuthUser(decodeURIComponent(token)) : null;
-  if (!config || !user || !token) return Response.json({ error: "unauthorized" }, { status: 401 });
+  if (!config) return Response.json({ error: "database_unavailable" }, { status: 503 });
   let body: Record<string, unknown>;
   try { body = await request.json(); } catch { return Response.json({ error: "invalid_json" }, { status: 400 }); }
   const values: Record<string, number> = {};
@@ -28,8 +25,8 @@ export async function POST(request: Request) {
   }
   const response = await fetch(`${config.url}/rest/v1/crm_funnel_goals`, {
     method: "POST",
-    headers: { apikey: config.key, authorization: `Bearer ${decodeURIComponent(token)}`, "content-type": "application/json", Prefer: "resolution=merge-duplicates,return=representation" },
-    body: JSON.stringify({ id: "default", effective_month: new Date().toISOString().slice(0, 7) + "-01", ...values, updated_by: user.email ?? null, updated_at: new Date().toISOString() }),
+    headers: { apikey: config.key, authorization: `Bearer ${config.key}`, "content-type": "application/json", Prefer: "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify({ id: "default", effective_month: new Date().toISOString().slice(0, 7) + "-01", ...values, updated_by: "configuracoes-publicas", updated_at: new Date().toISOString() }),
     cache: "no-store",
   });
   if (!response.ok) return Response.json({ error: "goals_save_failed" }, { status: 502 });
