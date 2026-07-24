@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   for (const field of fields) {
     const value = Number(body[field]);
     if (!Number.isFinite(value) || value < 0 || value > 10000000) return Response.json({ error: `invalid_${field}` }, { status: 400 });
-    values[field] = Math.round(value);
+    values[field] = value;
   }
   const response = await fetch(`${config.url}/rest/v1/crm_funnel_goals`, {
     method: "POST",
