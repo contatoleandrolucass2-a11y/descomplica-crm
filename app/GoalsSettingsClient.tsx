@@ -14,6 +14,14 @@ const stages = [
 ] as const;
 
 type Values = Record<(typeof stages)[number]["key"], number | "">;
+const brokerMinimumFields = [
+  { key: "month_1", label: "1º mês" },
+  { key: "month_2", label: "2º mês" },
+  { key: "month_3", label: "3º mês" },
+  { key: "month_4_plus", label: "4º mês ou mais" },
+] as const;
+type BrokerMinimums = Record<(typeof brokerMinimumFields)[number]["key"], number | "">;
+type BrokerWeeklyTargets = { appointments: number | ""; visits: number | "" };
 
 const formatWhole = (value: number) =>
   new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.round(value));
@@ -26,6 +34,13 @@ export function GoalsSettingsClient() {
   const [message, setMessage] = useState("Carregando metas atuais…");
   const [saving, setSaving] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [brokerMinimums, setBrokerMinimums] = useState<BrokerMinimums>({
+    month_1: 4,
+    month_2: 6,
+    month_3: 8,
+    month_4_plus: 10,
+  });
+  const [brokerWeeklyTargets, setBrokerWeeklyTargets] = useState<BrokerWeeklyTargets>({ appointments: 6, visits: 2 });
 
   useEffect(() => {
     fetch("/api/settings/goals", { cache: "no-store" })
@@ -46,6 +61,13 @@ export function GoalsSettingsClient() {
             }),
           );
           setUpdatedAt(row.updated_at ?? null);
+          const loadedMinimums = row.broker_minimums && typeof row.broker_minimums === "object" ? row.broker_minimums as Record<string, unknown> : {};
+          setBrokerMinimums(Object.fromEntries(brokerMinimumFields.map(({ key }) => [key, Number.isFinite(Number(loadedMinimums[key])) ? Number(loadedMinimums[key]) : 0])) as BrokerMinimums);
+          const loadedWeekly = row.broker_weekly_targets && typeof row.broker_weekly_targets === "object" ? row.broker_weekly_targets as Record<string, unknown> : {};
+          setBrokerWeeklyTargets({
+            appointments: Number.isFinite(Number(loadedWeekly.appointments)) ? Number(loadedWeekly.appointments) : 0,
+            visits: Number.isFinite(Number(loadedWeekly.visits)) ? Number(loadedWeekly.visits) : 0,
+          });
         }
         setMessage("");
       })
@@ -75,7 +97,15 @@ export function GoalsSettingsClient() {
     const response = await fetch("/api/settings/goals", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...payload, rates: rates.map((rate) => Number(rate) || 0) }),
+      body: JSON.stringify({
+        ...payload,
+        rates: rates.map((rate) => Number(rate) || 0),
+        broker_minimums: Object.fromEntries(brokerMinimumFields.map(({ key }) => [key, Number(brokerMinimums[key]) || 0])),
+        broker_weekly_targets: {
+          appointments: Number(brokerWeeklyTargets.appointments) || 0,
+          visits: Number(brokerWeeklyTargets.visits) || 0,
+        },
+      }),
     });
     setSaving(false);
     if (response.ok) {
@@ -198,6 +228,47 @@ export function GoalsSettingsClient() {
           <p className="goal-save-message" role="status">{message}</p>
           {updatedAt ? <small className="goal-updated-at">Última alteração: {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(updatedAt))}</small> : null}
         </aside>
+
+        <section className="goal-panel goal-productivity-panel">
+          <header><span>04</span><div><p>Gestão de equipe</p><h2>Meta mínima por gerente</h2></div></header>
+          <p className="goal-panel-note">Quantidade mínima de corretores ativos sob cada gerente, por tempo de casa.</p>
+          <div className="goal-productivity-layout">
+            <div className="goal-productivity-block">
+              <div className="goal-productivity-block-heading"><strong>Corretores por gerente</strong><small>Meta mensal editável</small></div>
+              <div className="goal-productivity-fields">
+                {brokerMinimumFields.map(({ key, label }) => (
+                  <label className="goal-productivity-field" key={key}>
+                    <span>{label}</span>
+                    <input
+                      aria-label={`Meta mínima de corretores no ${label}`}
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={brokerMinimums[key]}
+                      onChange={(event) => setBrokerMinimums((current) => ({ ...current, [key]: event.target.value === "" ? "" : Number(event.target.value) }))}
+                    />
+                    <small>corretores</small>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="goal-productivity-block">
+              <div className="goal-productivity-block-heading"><strong>Por corretor</strong><small>Meta semanal editável</small></div>
+              <div className="goal-productivity-fields goal-productivity-fields-two">
+                <label className="goal-productivity-field">
+                  <span>Agendamentos</span>
+                  <input aria-label="Agendamentos por corretor por semana" type="number" min="0" step="1" value={brokerWeeklyTargets.appointments} onChange={(event) => setBrokerWeeklyTargets((current) => ({ ...current, appointments: event.target.value === "" ? "" : Number(event.target.value) }))} />
+                  <small>por semana</small>
+                </label>
+                <label className="goal-productivity-field">
+                  <span>Visitas</span>
+                  <input aria-label="Visitas por corretor por semana" type="number" min="0" step="1" value={brokerWeeklyTargets.visits} onChange={(event) => setBrokerWeeklyTargets((current) => ({ ...current, visits: event.target.value === "" ? "" : Number(event.target.value) }))} />
+                  <small>por semana</small>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
       </form>
     </main>
   );
