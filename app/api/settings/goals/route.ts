@@ -1,7 +1,7 @@
 import { supabaseRuntime } from "../../../auth-server";
 
 export const dynamic = "force-dynamic";
-const fields = ["opportunities", "appointments", "visits", "folders", "sales"] as const;
+const fields = ["opportunities", "appointments", "visits", "folders", "approved_folders", "sales"] as const;
 
 export async function GET() {
   const config = supabaseRuntime();
