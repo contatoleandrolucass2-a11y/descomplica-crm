@@ -23,10 +23,16 @@ export async function POST(request: Request) {
     if (!Number.isFinite(value) || value < 0 || value > 10000000) return Response.json({ error: `invalid_${field}` }, { status: 400 });
     values[field] = value;
   }
+  const rates = Array.isArray(body.rates)
+    ? body.rates.map(Number)
+    : [];
+  if (rates.length !== 5 || rates.some((value) => !Number.isFinite(value) || value < 0 || value > 10000)) {
+    return Response.json({ error: "invalid_rates" }, { status: 400 });
+  }
   const response = await fetch(`${config.url}/rest/v1/crm_funnel_goals`, {
     method: "POST",
     headers: { apikey: config.key, authorization: `Bearer ${config.key}`, "content-type": "application/json", Prefer: "resolution=merge-duplicates,return=representation" },
-    body: JSON.stringify({ id: "default", effective_month: new Date().toISOString().slice(0, 7) + "-01", ...values, updated_by: "configuracoes-publicas", updated_at: new Date().toISOString() }),
+    body: JSON.stringify({ id: "default", effective_month: new Date().toISOString().slice(0, 7) + "-01", ...values, rates, updated_by: "configuracoes-publicas", updated_at: new Date().toISOString() }),
     cache: "no-store",
   });
   if (!response.ok) return Response.json({ error: "goals_save_failed" }, { status: 502 });
