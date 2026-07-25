@@ -1,14 +1,26 @@
 /**
- * Página raiz — superfície de validação do Milestone 1.
+ * Root route (/) — session-based routing (M6.5).
  *
- * Existe apenas para confirmar que o pipeline Next.js + TypeScript + Tailwind v4
- * compila e renderiza corretamente. Será substituída pela lógica real de
- * landing ou redirect em um milestone posterior.
+ * Decides ONLY by authentication (auth.getUser()), never by role/permission:
+ * an authenticated user without a role would be sent to /login anyway by the
+ * (protected) layout guard (M6.1) when it reaches /app. Resolving that here
+ * would duplicate logic that already lives in the protected layout.
  */
-export default function RootPage() {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50">
-      <p className="text-lg font-medium text-slate-900">descomplica-platform</p>
-    </main>
-  );
+
+import { redirect } from "next/navigation";
+
+import { createClient } from "@/lib/auth/supabase/server";
+
+export default async function RootPage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  redirect("/app");
 }
