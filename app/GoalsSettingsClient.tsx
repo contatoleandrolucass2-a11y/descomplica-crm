@@ -29,6 +29,12 @@ const productiveMetrics = [
   { key: "sales", label: "Meta vendas", color: "#4386ef" },
 ] as const;
 type ProductiveTeamTargets = Record<(typeof productiveMetrics)[number]["key"], number | "">;
+const weeklyProductivityMetrics = [
+  { key: "appointments", stageIndex: 1, label: "Agendamentos", color: "#20b9c3" },
+  { key: "visits", stageIndex: 2, label: "Visitas", color: "#f2c94c" },
+  { key: "folders", stageIndex: 3, label: "Pastas", color: "#42d995" },
+  { key: "sales", stageIndex: 5, label: "Vendas", color: "#4386ef" },
+] as const;
 
 const formatWhole = (value: number) =>
   new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.round(value));
@@ -75,6 +81,7 @@ export function GoalsSettingsClient() {
   const businessDaysElapsed = calendar.filter((day) => day?.business && day.elapsed).length;
   const businessDaysRemaining = Math.max(businessDays - businessDaysElapsed, 0);
   const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(today);
+  const businessWeeks = Math.max(businessDays / 5, 1);
 
   useEffect(() => {
     fetch("/api/settings/goals", { cache: "no-store" })
@@ -336,6 +343,25 @@ export function GoalsSettingsClient() {
                 <span className="goal-productive-label">{label}</span>
                 <div className="goal-productive-input"><input aria-label={`${label} da equipe produtiva`} type="number" min="0" max="100" step="1" value={productiveTeamTargets[key]} onChange={(event) => setProductiveTeamTargets((current) => ({ ...current, [key]: event.target.value === "" ? "" : Number(event.target.value) }))} /><b>%</b></div>
               </label>;
+            })}
+          </div>
+        </section>
+
+        <section className="goal-panel goal-weekly-panel">
+          <header><span>07</span><div><p>Ritmo de execução</p><h2>Equipe produtiva por semana</h2></div><small className="goal-weekly-context">Meta mensal ÷ {businessWeeks.toFixed(1).replace(".", ",")} semanas úteis</small></header>
+          <p className="goal-panel-note">Indicador volátil: ajuste qualquer percentual ou meta do funil e os alvos semanais mudam na hora.</p>
+          <div className="goal-weekly-grid">
+            {weeklyProductivityMetrics.map(({ key, stageIndex, label, color }) => {
+              const productivity = Number(productiveTeamTargets[key]) || 0;
+              const monthlyGoal = computedValues[stageIndex];
+              const weeklyGoal = Math.ceil((monthlyGoal * productivity) / 100 / businessWeeks);
+              return <div className="goal-weekly-card" key={key} style={{ "--weekly-color": color } as React.CSSProperties}>
+                <div className="goal-weekly-card-top"><span>{label}</span><b>{productivity}%</b></div>
+                <strong>{formatWhole(weeklyGoal)}</strong>
+                <small>meta equipe / semana</small>
+                <div className="goal-weekly-bar"><i style={{ width: `${Math.min(productivity, 100)}%` }} /></div>
+                <em>{formatWhole(monthlyGoal)} no mês · piso {productivity}%</em>
+              </div>;
             })}
           </div>
         </section>
