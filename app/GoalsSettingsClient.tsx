@@ -73,8 +73,9 @@ function buildWeekBuckets(reference: Date) {
       label: `${index + 1}ª semana`,
       range: `${daysInMonth[0].getDate()}–${daysInMonth[daysInMonth.length - 1].getDate()}`,
       businessDays: daysInMonth.filter(isBusinessDay).length,
+      current: daysInMonth.some((date) => date.toDateString() === reference.toDateString()),
     };
-  }).filter((week): week is { label: string; range: string; businessDays: number } => week !== null);
+  }).filter((week): week is { label: string; range: string; businessDays: number; current: boolean } => week !== null);
 }
 
 function allocateWeekly(total: number, weights: number[]) {
@@ -93,6 +94,36 @@ function allocateWeekly(total: number, weights: number[]) {
       }
     });
   return result;
+}
+
+function buildSequentialWeekly(monthlyValues: number[], weights: number[]) {
+  const monthly = monthlyValues.map((value) => Math.max(Math.round(value), 0));
+  const weekly = monthly.map(() => weights.map(() => 0));
+  if (monthly.length === 0 || weights.length === 0) return weekly;
+
+  weekly[0] = allocateWeekly(monthly[0], weights);
+
+  for (let stageIndex = 1; stageIndex < monthly.length; stageIndex += 1) {
+    const previousTarget = monthly[stageIndex - 1];
+    const currentTarget = monthly[stageIndex];
+    let previousCumulative = 0;
+    let currentCumulative = 0;
+
+    for (let weekIndex = 0; weekIndex < weights.length; weekIndex += 1) {
+      previousCumulative += weekly[stageIndex - 1][weekIndex];
+      const supportedCumulative = previousTarget > 0
+        ? Math.min(currentTarget, Math.floor((previousCumulative * currentTarget) / previousTarget + Number.EPSILON))
+        : 0;
+      const nextCumulative = weekIndex === weights.length - 1 && previousCumulative >= previousTarget
+        ? currentTarget
+        : supportedCumulative;
+
+      weekly[stageIndex][weekIndex] = Math.max(nextCumulative - currentCumulative, 0);
+      currentCumulative = nextCumulative;
+    }
+  }
+
+  return weekly;
 }
 
 export function GoalsSettingsClient() {
@@ -127,11 +158,20 @@ export function GoalsSettingsClient() {
     return output;
   }, [rates, values.sales]);
   const weekBuckets = useMemo(() => buildWeekBuckets(today), [today]);
-  const weeklyDistribution = useMemo(() => stages.map((stage, index) => ({
-    ...stage,
-    monthly: computedValues[index],
-    weekly: allocateWeekly(computedValues[index], weekBuckets.map((week) => week.businessDays)),
-  })), [computedValues, weekBuckets]);
+  const weeklyDistribution = useMemo(() => {
+    const sequential = buildSequentialWeekly(computedValues, weekBuckets.map((week) => week.businessDays));
+    return stages.map((stage, index) => {
+      let cumulative = 0;
+      return {
+        ...stage,
+        monthly: Math.max(Math.round(computedValues[index]), 0),
+        weekly: sequential[index].map((value) => {
+          cumulative += value;
+          return { value, cumulative };
+        }),
+      };
+    });
+  }, [computedValues, weekBuckets]);
 
   useEffect(() => {
     fetch("/api/settings/goals", { cache: "no-store" })
@@ -389,16 +429,16 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-weekly-panel">
-          <header><span>07</span><div><p>Ritmo de execução</p><h2>Distribuição semanal do funil</h2></div><small className="goal-weekly-context">6 etapas · {weekBuckets.length} semanas no mês</small></header>
-          <p className="goal-panel-note">Meta mensal distribuída pelos dias úteis de cada semana. Qualquer mudança acima atualiza esta grade automaticamente.</p>
-          <div className="goal-weekly-distribution" role="table" aria-label="Distribuição semanal das metas do funil">
-            <div className="goal-weekly-table-row goal-weekly-table-head" role="row"><span role="columnheader">Etapa</span>{weekBuckets.map((week) => <span role="columnheader" key={week.label}>{week.label}<small>{week.range}</small></span>)}</div>
+          <header><span>07</span><div><p>Ritmo de execução</p><h2>Rota acumulada do funil</h2></div><small className="goal-weekly-context">6 etapas · sequência protegida</small></header>
+          <p className="goal-panel-note">Meta acumulada ao fim de cada semana. Etapa seguinte só avança quando volume anterior sustenta a conversão.</p>
+          <div className="goal-weekly-distribution" role="table" aria-label="Rota acumulada semanal das metas do funil" style={{ "--week-count": weekBuckets.length } as React.CSSProperties}>
+            <div className="goal-weekly-table-row goal-weekly-table-head" role="row"><span role="columnheader">Etapa</span>{weekBuckets.map((week) => <span className={week.current ? "current" : ""} role="columnheader" key={week.label}>{week.label}<small>{week.range}</small>{week.current ? <em>Agora</em> : null}</span>)}</div>
             {weeklyDistribution.map((stage) => <div className="goal-weekly-table-row" role="row" key={stage.key}>
               <span className="goal-weekly-stage" role="rowheader"><i style={{ background: stage.color }} />{stage.label}<small>{formatWhole(stage.monthly)} no mês</small></span>
-              {stage.weekly.map((value, index) => <strong role="cell" key={`${stage.key}-${index}`}>{formatWhole(value)}</strong>)}
+              {stage.weekly.map((week, index) => <strong className={weekBuckets[index]?.current ? "current" : ""} role="cell" key={`${stage.key}-${index}`}><b>{formatWhole(week.cumulative)}</b><small>+{formatWhole(week.value)} na semana</small></strong>)}
             </div>)}
           </div>
-          <div className="goal-weekly-legend"><span>Distribuição ponderada por dias úteis</span><strong>Soma das semanas = meta mensal</strong></div>
+          <div className="goal-weekly-legend"><span>Número grande = meta acumulada · +N = esforço da semana</span><strong>Venda só após base necessária</strong></div>
         </section>
       </form>
     </main>
