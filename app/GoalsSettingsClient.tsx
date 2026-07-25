@@ -298,6 +298,29 @@ export function GoalsSettingsClient() {
               </label>
             ))}
           </div>
+          <div className="goal-sales-target">
+            <div><strong>Meta de vendas</strong><small>unidades no mês</small></div>
+            <label className="goal-sales-input">
+              <input
+                aria-label="Meta mensal de vendas"
+                type="number"
+                min="0"
+                step="1"
+                value={values.sales}
+                placeholder="0"
+                onChange={(event) => setValues((current) => ({
+                  ...current,
+                  sales: event.target.value === "" ? "" : Number(event.target.value),
+                }))}
+              />
+              <span>vendas</span>
+            </label>
+          </div>
+          <button className="goal-save-button" type="submit" disabled={saving}>
+            {saving ? "Salvando…" : "Salvar e aplicar no Dashboard"}
+          </button>
+          <p className="goal-save-message" role="status">{message}</p>
+          {updatedAt ? <small className="goal-updated-at">Última alteração: {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(updatedAt))}</small> : null}
         </aside>
 
         <section className="goal-panel goal-preview-panel">
@@ -342,32 +365,8 @@ export function GoalsSettingsClient() {
           </div>
         </section>
 
-        <aside className="goal-panel goal-summary-panel">
-          <header><span>03</span><div><p>Leitura rápida</p><h2>Resumo executivo</h2></div></header>
-          <div className="goal-summary-spotlight">
-            <small>Meta de vendas</small>
-            <strong>{formatWhole(computedValues[5])}</strong>
-            <span>unidades no mês</span>
-          </div>
-          <div className="goal-summary-grid">
-            <div><small>Oportunidades</small><strong>{formatWhole(computedValues[0])}</strong></div>
-            <div><small>Conversão total</small><strong>{totalConversion.toFixed(1).replace(".", ",")}%</strong></div>
-            <div><small>Agendamentos</small><strong>{formatWhole(computedValues[1])}</strong></div>
-            <div><small>Pastas aprovadas</small><strong>{formatWhole(computedValues[4])}</strong></div>
-          </div>
-          <div className="goal-formula-note">
-            <strong>Lógica Planilha3</strong>
-            <span>Venda vira base. Cada percentual projeta etapa anterior.</span>
-          </div>
-          <button className="goal-save-button" type="submit" disabled={saving}>
-            {saving ? "Salvando…" : "Salvar e aplicar no Dashboard"}
-          </button>
-          <p className="goal-save-message" role="status">{message}</p>
-          {updatedAt ? <small className="goal-updated-at">Última alteração: {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(updatedAt))}</small> : null}
-        </aside>
-
         <section className="goal-panel goal-weekly-panel">
-          <header><span>04</span><div><p>Ritmo de execução</p><h2>Rota acumulada do funil</h2></div><small className="goal-weekly-context">6 etapas · sequência protegida</small></header>
+          <header><span>03</span><div><p>Ritmo de execução</p><h2>Rota acumulada do funil</h2></div><small className="goal-weekly-context">6 etapas · sequência protegida</small></header>
           <p className="goal-panel-note">Meta acumulada ao fim de cada semana. Etapa seguinte só avança quando volume anterior sustenta a conversão.</p>
           <div className="goal-weekly-distribution" role="table" aria-label="Rota acumulada semanal das metas do funil" style={{ "--week-count": weekBuckets.length } as React.CSSProperties}>
             <div className="goal-weekly-table-row goal-weekly-table-head" role="row"><span role="columnheader">Etapa</span>{weekBuckets.map((week) => <span className={week.current ? "current" : ""} role="columnheader" key={week.label}>{week.label}<small>{week.range}</small>{week.current ? <em>Agora</em> : null}</span>)}</div>
@@ -380,7 +379,7 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-productivity-panel">
-          <header><span>05</span><div><p>Gestão de equipe</p><h2>Meta mínima por gerente</h2></div></header>
+          <header><span>04</span><div><p>Gestão de equipe</p><h2>Meta mínima por gerente</h2></div></header>
           <p className="goal-panel-note">Quantidade mínima de corretores ativos sob cada gerente, por tempo de casa.</p>
           <div className="goal-productivity-layout">
             <div className="goal-productivity-block">
@@ -421,7 +420,7 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-calendar-panel">
-          <header><span>06</span><div><p>Cadência comercial</p><h2>Dias úteis e produtividade</h2></div></header>
+          <header><span>05</span><div><p>Cadência comercial</p><h2>Dias úteis e produtividade</h2></div></header>
           <div className="goal-calendar-layout">
             <div className="goal-calendar-card">
               <div className="goal-calendar-heading"><div><strong>{monthLabel}</strong><small>Segunda a sexta contam como dia útil</small></div><span>{businessDays} dias úteis</span></div>
@@ -439,7 +438,7 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-productive-panel">
-          <header><span>07</span><div><p>Indicador de equipe</p><h2>Equipe produtiva</h2></div></header>
+          <header><span>06</span><div><p>Indicador de equipe</p><h2>Equipe produtiva</h2></div></header>
           <p className="goal-panel-note">Defina o percentual mínimo de equipe produtiva esperado em cada etapa.</p>
           <div className="goal-productive-grid">
             {productiveMetrics.map(({ key, label, color }) => {
