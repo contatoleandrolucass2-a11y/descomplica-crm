@@ -22,9 +22,35 @@ const brokerMinimumFields = [
 ] as const;
 type BrokerMinimums = Record<(typeof brokerMinimumFields)[number]["key"], number | "">;
 type BrokerWeeklyTargets = { appointments: number | ""; visits: number | "" };
+const productiveMetrics = [
+  { key: "appointments", label: "Meta agendamentos", color: "#20b9c3" },
+  { key: "visits", label: "Meta visitas", color: "#f2c94c" },
+  { key: "folders", label: "Meta pastas", color: "#42d995" },
+  { key: "sales", label: "Meta vendas", color: "#4386ef" },
+] as const;
+type ProductiveTeamTargets = Record<(typeof productiveMetrics)[number]["key"], number | "">;
 
 const formatWhole = (value: number) =>
   new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.round(value));
+
+function isBusinessDay(date: Date) {
+  const day = date.getDay();
+  return day !== 0 && day !== 6;
+}
+
+function buildMonthCalendar(reference: Date) {
+  const year = reference.getFullYear();
+  const month = reference.getMonth();
+  const first = new Date(year, month, 1);
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  const leading = first.getDay() === 0 ? 6 : first.getDay() - 1;
+  return Array.from({ length: leading + totalDays }, (_, index) => {
+    if (index < leading) return null;
+    const day = index - leading + 1;
+    const date = new Date(year, month, day);
+    return { day, business: isBusinessDay(date), elapsed: date <= reference, today: date.toDateString() === reference.toDateString() };
+  });
+}
 
 export function GoalsSettingsClient() {
   const [values, setValues] = useState<Values>(
@@ -41,6 +67,14 @@ export function GoalsSettingsClient() {
     month_4_plus: 10,
   });
   const [brokerWeeklyTargets, setBrokerWeeklyTargets] = useState<BrokerWeeklyTargets>({ appointments: 6, visits: 2 });
+  const [productiveTeamTargets, setProductiveTeamTargets] = useState<ProductiveTeamTargets>({ appointments: 100, visits: 100, folders: 100, sales: 60 });
+  const [today] = useState(() => new Date());
+
+  const calendar = useMemo(() => buildMonthCalendar(today), [today]);
+  const businessDays = calendar.filter((day) => day?.business).length;
+  const businessDaysElapsed = calendar.filter((day) => day?.business && day.elapsed).length;
+  const businessDaysRemaining = Math.max(businessDays - businessDaysElapsed, 0);
+  const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(today);
 
   useEffect(() => {
     fetch("/api/settings/goals", { cache: "no-store" })
@@ -68,6 +102,8 @@ export function GoalsSettingsClient() {
             appointments: Number.isFinite(Number(loadedWeekly.appointments)) ? Number(loadedWeekly.appointments) : 0,
             visits: Number.isFinite(Number(loadedWeekly.visits)) ? Number(loadedWeekly.visits) : 0,
           });
+          const loadedProductive = row.productive_team_targets && typeof row.productive_team_targets === "object" ? row.productive_team_targets as Record<string, unknown> : {};
+          setProductiveTeamTargets(Object.fromEntries(productiveMetrics.map(({ key }) => [key, Number.isFinite(Number(loadedProductive[key])) ? Number(loadedProductive[key]) : 0])) as ProductiveTeamTargets);
         }
         setMessage("");
       })
@@ -105,6 +141,7 @@ export function GoalsSettingsClient() {
           appointments: Number(brokerWeeklyTargets.appointments) || 0,
           visits: Number(brokerWeeklyTargets.visits) || 0,
         },
+        productive_team_targets: Object.fromEntries(productiveMetrics.map(({ key }) => [key, Number(productiveTeamTargets[key]) || 0])),
       }),
     });
     setSaving(false);
@@ -267,6 +304,39 @@ export function GoalsSettingsClient() {
                 </label>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="goal-panel goal-calendar-panel">
+          <header><span>05</span><div><p>Cadência comercial</p><h2>Dias úteis e produtividade</h2></div></header>
+          <div className="goal-calendar-layout">
+            <div className="goal-calendar-card">
+              <div className="goal-calendar-heading"><div><strong>{monthLabel}</strong><small>Segunda a sexta contam como dia útil</small></div><span>{businessDays} dias úteis</span></div>
+              <div className="goal-calendar-week"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span></div>
+              <div className="goal-calendar-grid">
+                {calendar.map((item, index) => item ? <span className={`${item.business ? "business" : "weekend"} ${item.today ? "today" : ""}`} key={item.day}>{item.day}</span> : <i aria-hidden="true" key={`blank-${index}`} />)}
+              </div>
+            </div>
+            <div className="goal-calendar-insights">
+              <div><small>Dias úteis no mês</small><strong>{businessDays}</strong><span>base da meta mensal</span></div>
+              <div><small>Dias já passados</small><strong>{businessDaysElapsed}</strong><span>{businessDaysRemaining} restantes</span></div>
+              <div className="goal-calendar-rule"><small>Meta de agendamentos</small><strong>1 por dia útil / corretor</strong><span>{businessDays} agendamentos por corretor no mês</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section className="goal-panel goal-productive-panel">
+          <header><span>06</span><div><p>Indicador de equipe</p><h2>Equipe produtiva</h2></div></header>
+          <p className="goal-panel-note">Defina o percentual mínimo de equipe produtiva esperado em cada etapa.</p>
+          <div className="goal-productive-grid">
+            {productiveMetrics.map(({ key, label, color }) => {
+              const value = Number(productiveTeamTargets[key]) || 0;
+              return <label className="goal-productive-card" key={key} style={{ "--productive-color": color } as React.CSSProperties}>
+                <div className="goal-donut" style={{ "--productive-rate": `${Math.min(value, 100)}%` } as React.CSSProperties}><div><strong>{formatWhole(value)}%</strong><span>equipe produtiva</span></div></div>
+                <span className="goal-productive-label">{label}</span>
+                <div className="goal-productive-input"><input aria-label={`${label} da equipe produtiva`} type="number" min="0" max="100" step="1" value={productiveTeamTargets[key]} onChange={(event) => setProductiveTeamTargets((current) => ({ ...current, [key]: event.target.value === "" ? "" : Number(event.target.value) }))} /><b>%</b></div>
+              </label>;
+            })}
           </div>
         </section>
       </form>

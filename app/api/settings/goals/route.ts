@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 const fields = ["opportunities", "appointments", "visits", "folders", "approved_folders", "sales"] as const;
 const brokerMinimumKeys = ["month_1", "month_2", "month_3", "month_4_plus"] as const;
 const brokerWeeklyKeys = ["appointments", "visits"] as const;
+const productiveTeamKeys = ["appointments", "visits", "folders", "sales"] as const;
 
 function parseIntegerMap(input: unknown, keys: readonly string[]) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
@@ -47,10 +48,14 @@ export async function POST(request: Request) {
   if (!brokerMinimums) return Response.json({ error: "invalid_broker_minimums" }, { status: 400 });
   const brokerWeeklyTargets = parseIntegerMap(body.broker_weekly_targets, brokerWeeklyKeys);
   if (!brokerWeeklyTargets) return Response.json({ error: "invalid_broker_weekly_targets" }, { status: 400 });
+  const productiveTeamTargets = parseIntegerMap(body.productive_team_targets, productiveTeamKeys);
+  if (!productiveTeamTargets || Object.values(productiveTeamTargets).some((value) => value > 100)) {
+    return Response.json({ error: "invalid_productive_team_targets" }, { status: 400 });
+  }
   const response = await fetch(`${config.url}/rest/v1/crm_funnel_goals`, {
     method: "POST",
     headers: { apikey: config.key, authorization: `Bearer ${config.key}`, "content-type": "application/json", Prefer: "resolution=merge-duplicates,return=representation" },
-    body: JSON.stringify({ id: "default", effective_month: new Date().toISOString().slice(0, 7) + "-01", ...values, rates, broker_minimums: brokerMinimums, broker_weekly_targets: brokerWeeklyTargets, updated_by: "configuracoes-publicas", updated_at: new Date().toISOString() }),
+    body: JSON.stringify({ id: "default", effective_month: new Date().toISOString().slice(0, 7) + "-01", ...values, rates, broker_minimums: brokerMinimums, broker_weekly_targets: brokerWeeklyTargets, productive_team_targets: productiveTeamTargets, updated_by: "configuracoes-publicas", updated_at: new Date().toISOString() }),
     cache: "no-store",
   });
   if (!response.ok) return Response.json({ error: "goals_save_failed" }, { status: 502 });
