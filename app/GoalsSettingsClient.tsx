@@ -365,8 +365,27 @@ export function GoalsSettingsClient() {
           </div>
         </section>
 
+        <section className="goal-panel goal-conversion-panel">
+          <header><span>03</span><div><p>Leitura do funil</p><h2>Conversões por etapa</h2></div><small className="goal-weekly-context">Origem → destino</small></header>
+          <p className="goal-panel-note">Veja o avanço de cada etapa e quanto dela chega até a venda. Os valores acompanham a projeção acima.</p>
+          <div className="goal-conversion-table" role="table" aria-label="Conversões entre etapas e até vendas">
+            <div className="goal-conversion-row goal-conversion-head" role="row"><span role="columnheader">Etapa</span><span role="columnheader">Próxima etapa</span><span role="columnheader">Até vendas</span></div>
+            {stages.slice(0, -1).map((stage, index) => {
+              const currentValue = computedValues[index];
+              const nextValue = computedValues[index + 1];
+              const nextConversion = currentValue > 0 ? (nextValue / currentValue) * 100 : 0;
+              const salesConversion = currentValue > 0 ? (computedValues[computedValues.length - 1] / currentValue) * 100 : 0;
+              return <div className="goal-conversion-row" role="row" key={stage.key}>
+                <span className="goal-conversion-stage" role="rowheader"><i style={{ background: stage.color }} />{stage.label}</span>
+                <span className="goal-conversion-cell" role="cell"><small>{stage.short} → {stages[index + 1].short}</small><b>{formatWhole(currentValue)} → {formatWhole(nextValue)}</b><strong>{nextConversion.toFixed(1).replace(".", ",")}%</strong></span>
+                <span className="goal-conversion-cell goal-conversion-sales" role="cell"><small>{stage.short} → Venda</small><b>{formatWhole(currentValue)} → {formatWhole(computedValues[computedValues.length - 1])}</b><strong>{salesConversion.toFixed(1).replace(".", ",")}%</strong></span>
+              </div>;
+            })}
+          </div>
+        </section>
+
         <section className="goal-panel goal-weekly-panel">
-          <header><span>03</span><div><p>Ritmo de execução</p><h2>Rota acumulada do funil</h2></div><small className="goal-weekly-context">6 etapas · sequência protegida</small></header>
+          <header><span>04</span><div><p>Ritmo de execução</p><h2>Rota acumulada do funil</h2></div><small className="goal-weekly-context">6 etapas · sequência protegida</small></header>
           <p className="goal-panel-note">Meta acumulada ao fim de cada semana. Etapa seguinte só avança quando volume anterior sustenta a conversão.</p>
           <div className="goal-weekly-distribution" role="table" aria-label="Rota acumulada semanal das metas do funil" style={{ "--week-count": weekBuckets.length } as React.CSSProperties}>
             <div className="goal-weekly-table-row goal-weekly-table-head" role="row"><span role="columnheader">Etapa</span>{weekBuckets.map((week) => <span className={week.current ? "current" : ""} role="columnheader" key={week.label}>{week.label}<small>{week.range}</small>{week.current ? <em>Agora</em> : null}</span>)}</div>
@@ -379,7 +398,7 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-productivity-panel">
-          <header><span>04</span><div><p>Gestão de equipe</p><h2>Meta mínima por gerente</h2></div></header>
+          <header><span>05</span><div><p>Gestão de equipe</p><h2>Meta mínima por gerente</h2></div></header>
           <p className="goal-panel-note">Quantidade mínima de corretores ativos sob cada gerente, por tempo de casa.</p>
           <div className="goal-productivity-layout">
             <div className="goal-productivity-block">
@@ -420,7 +439,7 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-calendar-panel">
-          <header><span>05</span><div><p>Cadência comercial</p><h2>Dias úteis e produtividade</h2></div></header>
+          <header><span>06</span><div><p>Cadência comercial</p><h2>Dias úteis e produtividade</h2></div></header>
           <div className="goal-calendar-layout">
             <div className="goal-calendar-card">
               <div className="goal-calendar-heading"><div><strong>{monthLabel}</strong><small>Segunda a sexta contam como dia útil</small></div><span>{businessDays} dias úteis</span></div>
@@ -438,7 +457,7 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-productive-panel">
-          <header><span>06</span><div><p>Indicador de equipe</p><h2>Equipe produtiva</h2></div></header>
+          <header><span>07</span><div><p>Indicador de equipe</p><h2>Equipe produtiva</h2></div></header>
           <p className="goal-panel-note">Defina o percentual mínimo de equipe produtiva esperado em cada etapa.</p>
           <div className="goal-productive-grid">
             {productiveMetrics.map(({ key, label, color }) => {
