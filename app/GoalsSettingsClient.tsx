@@ -29,13 +29,6 @@ const productiveMetrics = [
   { key: "sales", label: "Meta vendas", color: "#4386ef" },
 ] as const;
 type ProductiveTeamTargets = Record<(typeof productiveMetrics)[number]["key"], number | "">;
-const weeklyProductivityMetrics = [
-  { key: "appointments", stageIndex: 1, label: "Agendamentos", color: "#20b9c3" },
-  { key: "visits", stageIndex: 2, label: "Visitas", color: "#f2c94c" },
-  { key: "folders", stageIndex: 3, label: "Pastas", color: "#42d995" },
-  { key: "sales", stageIndex: 5, label: "Vendas", color: "#4386ef" },
-] as const;
-
 const formatWhole = (value: number) =>
   new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.round(value));
 
@@ -56,6 +49,50 @@ function buildMonthCalendar(reference: Date) {
     const date = new Date(year, month, day);
     return { day, business: isBusinessDay(date), elapsed: date <= reference, today: date.toDateString() === reference.toDateString() };
   });
+}
+
+function buildWeekBuckets(reference: Date) {
+  const year = reference.getFullYear();
+  const month = reference.getMonth();
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  const mondayOffset = first.getDay() === 0 ? 6 : first.getDay() - 1;
+  const firstMonday = new Date(year, month, 1 - mondayOffset);
+  return Array.from({ length: 6 }, (_, index) => {
+    const start = new Date(firstMonday);
+    start.setDate(firstMonday.getDate() + index * 7);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const daysInMonth = Array.from({ length: 7 }, (_, dayIndex) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + dayIndex);
+      return date;
+    }).filter((date) => date >= first && date <= last);
+    if (daysInMonth.length === 0) return null;
+    return {
+      label: `${index + 1}ª semana`,
+      range: `${daysInMonth[0].getDate()}–${daysInMonth[daysInMonth.length - 1].getDate()}`,
+      businessDays: daysInMonth.filter(isBusinessDay).length,
+    };
+  }).filter((week): week is { label: string; range: string; businessDays: number } => week !== null);
+}
+
+function allocateWeekly(total: number, weights: number[]) {
+  const roundedTotal = Math.max(Math.round(total), 0);
+  const weightTotal = weights.reduce((sum, value) => sum + value, 0);
+  if (roundedTotal === 0 || weightTotal === 0) return weights.map(() => 0);
+  const raw = weights.map((weight) => roundedTotal * weight / weightTotal);
+  const result = raw.map(Math.floor);
+  let remaining = roundedTotal - result.reduce((sum, value) => sum + value, 0);
+  raw.map((value, index) => ({ index, remainder: value - result[index] }))
+    .sort((left, right) => right.remainder - left.remainder)
+    .forEach(({ index }) => {
+      if (remaining > 0) {
+        result[index] += 1;
+        remaining -= 1;
+      }
+    });
+  return result;
 }
 
 export function GoalsSettingsClient() {
@@ -81,7 +118,20 @@ export function GoalsSettingsClient() {
   const businessDaysElapsed = calendar.filter((day) => day?.business && day.elapsed).length;
   const businessDaysRemaining = Math.max(businessDays - businessDaysElapsed, 0);
   const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(today);
-  const businessWeeks = Math.max(businessDays / 5, 1);
+  const computedValues = useMemo(() => {
+    const output = Array<number>(stages.length).fill(0);
+    output[stages.length - 1] = Number(values.sales) || 0;
+    for (let index = stages.length - 2; index >= 0; index -= 1) {
+      output[index] = output[index + 1] * ((Number(rates[index]) || 0) / 100);
+    }
+    return output;
+  }, [rates, values.sales]);
+  const weekBuckets = useMemo(() => buildWeekBuckets(today), [today]);
+  const weeklyDistribution = useMemo(() => stages.map((stage, index) => ({
+    ...stage,
+    monthly: computedValues[index],
+    weekly: allocateWeekly(computedValues[index], weekBuckets.map((week) => week.businessDays)),
+  })), [computedValues, weekBuckets]);
 
   useEffect(() => {
     fetch("/api/settings/goals", { cache: "no-store" })
@@ -116,15 +166,6 @@ export function GoalsSettingsClient() {
       })
       .catch(() => setMessage("Não foi possível carregar as metas."));
   }, []);
-
-  const computedValues = useMemo(() => {
-    const output = Array<number>(stages.length).fill(0);
-    output[stages.length - 1] = Number(values.sales) || 0;
-    for (let index = stages.length - 2; index >= 0; index -= 1) {
-      output[index] = output[index + 1] * ((Number(rates[index]) || 0) / 100);
-    }
-    return output;
-  }, [rates, values.sales]);
 
   const totalConversion = computedValues[0] > 0
     ? (computedValues[computedValues.length - 1] / computedValues[0]) * 100
@@ -348,22 +389,16 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-weekly-panel">
-          <header><span>07</span><div><p>Ritmo de execução</p><h2>Equipe produtiva por semana</h2></div><small className="goal-weekly-context">Meta mensal ÷ {businessWeeks.toFixed(1).replace(".", ",")} semanas úteis</small></header>
-          <p className="goal-panel-note">Indicador volátil: ajuste qualquer percentual ou meta do funil e os alvos semanais mudam na hora.</p>
-          <div className="goal-weekly-grid">
-            {weeklyProductivityMetrics.map(({ key, stageIndex, label, color }) => {
-              const productivity = Number(productiveTeamTargets[key]) || 0;
-              const monthlyGoal = computedValues[stageIndex];
-              const weeklyGoal = Math.ceil((monthlyGoal * productivity) / 100 / businessWeeks);
-              return <div className="goal-weekly-card" key={key} style={{ "--weekly-color": color } as React.CSSProperties}>
-                <div className="goal-weekly-card-top"><span>{label}</span><b>{productivity}%</b></div>
-                <strong>{formatWhole(weeklyGoal)}</strong>
-                <small>meta equipe / semana</small>
-                <div className="goal-weekly-bar"><i style={{ width: `${Math.min(productivity, 100)}%` }} /></div>
-                <em>{formatWhole(monthlyGoal)} no mês · piso {productivity}%</em>
-              </div>;
-            })}
+          <header><span>07</span><div><p>Ritmo de execução</p><h2>Distribuição semanal do funil</h2></div><small className="goal-weekly-context">6 etapas · {weekBuckets.length} semanas no mês</small></header>
+          <p className="goal-panel-note">Meta mensal distribuída pelos dias úteis de cada semana. Qualquer mudança acima atualiza esta grade automaticamente.</p>
+          <div className="goal-weekly-distribution" role="table" aria-label="Distribuição semanal das metas do funil">
+            <div className="goal-weekly-table-row goal-weekly-table-head" role="row"><span role="columnheader">Etapa</span>{weekBuckets.map((week) => <span role="columnheader" key={week.label}>{week.label}<small>{week.range}</small></span>)}</div>
+            {weeklyDistribution.map((stage) => <div className="goal-weekly-table-row" role="row" key={stage.key}>
+              <span className="goal-weekly-stage" role="rowheader"><i style={{ background: stage.color }} />{stage.label}<small>{formatWhole(stage.monthly)} no mês</small></span>
+              {stage.weekly.map((value, index) => <strong role="cell" key={`${stage.key}-${index}`}>{formatWhole(value)}</strong>)}
+            </div>)}
           </div>
+          <div className="goal-weekly-legend"><span>Distribuição ponderada por dias úteis</span><strong>Soma das semanas = meta mensal</strong></div>
         </section>
       </form>
     </main>
