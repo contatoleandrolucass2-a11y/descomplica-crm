@@ -312,10 +312,6 @@ function MonthlyFunnel({
 }) {
   const [showConversions, setShowConversions] = useState(false);
   const sales = stages[stages.length - 1]?.value ?? null;
-  const stageY = [42, 109, 176, 243, 310];
-  const stageHalfWidths = stages.map((item) => (104 * item.width) / 100);
-  const markerLeft = `funnel-arrow-left-${tone}`;
-  const markerRight = `funnel-arrow-right-${tone}`;
   const conversionMapId = `conversion-map-${tone}`;
 
   const conversionLabel = (from: number | null, to: number | null, self = false) => {
@@ -328,6 +324,19 @@ function MonthlyFunnel({
   const valueFlow = (from: number | null, to: number | null) =>
     `${from === null ? "—" : formatNumber(from)} → ${to === null ? "—" : formatNumber(to)}`;
 
+  const conversionRows = stages.slice(0, -1).map((item, index) => {
+    const next = stages[index + 1];
+    return {
+      index,
+      item,
+      next,
+      nextFlow: valueFlow(item.value, next.value),
+      nextRate: conversionLabel(item.value, next.value),
+      saleFlow: valueFlow(item.value, sales),
+      saleRate: conversionLabel(item.value, sales),
+    };
+  });
+
   return (
     <section className={`monthly-funnel ${tone}`} aria-label={`${label}: ${periodLabel}`}>
       <header className="monthly-funnel-head">
@@ -335,66 +344,13 @@ function MonthlyFunnel({
           <span>{label}</span>
           <strong>{periodLabel}</strong>
         </div>
+        <div className="monthly-funnel-total">
+          <span>Conversão total</span>
+          <strong>{conversionLabel(stages[0]?.value ?? null, sales)}</strong>
+        </div>
       </header>
 
-      <div className="sales-funnel" aria-label={`Etapas de ${label.toLowerCase()}`}>
-        {showConversions ? <svg
-          id={conversionMapId}
-          className="funnel-arrow-map visible"
-          viewBox="0 0 420 372"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <defs>
-            <marker id={markerLeft} markerWidth="7" markerHeight="7" refX="5.4" refY="3.5" orient="auto">
-              <path d="M0 0 L7 3.5 L0 7 Z" className="arrow-head left" />
-            </marker>
-            <marker id={markerRight} markerWidth="7" markerHeight="7" refX="5.4" refY="3.5" orient="auto">
-              <path d="M0 0 L7 3.5 L0 7 Z" className="arrow-head right" />
-            </marker>
-          </defs>
-
-          {stages.slice(0, -1).map((item, index) => {
-            const next = stages[index + 1];
-            const startX = 210 - stageHalfWidths[index];
-            const endX = 210 - stageHalfWidths[index + 1];
-            const startY = stageY[index] + 18;
-            const endY = stageY[index + 1] - 18;
-            const midY = (startY + endY) / 2;
-            return (
-              <g className="funnel-curve left" key={`next-${item.key}`}>
-                <path
-                  d={`M ${startX} ${startY} C 74 ${startY}, 74 ${endY}, ${endX} ${endY}`}
-                  markerEnd={`url(#${markerLeft})`}
-                />
-                <text x="45" y={midY - 5} textAnchor="middle">
-                  <tspan x="45">{valueFlow(item.value, next.value)}</tspan>
-                  <tspan className="rate" x="45" dy="14">{conversionLabel(item.value, next.value)}</tspan>
-                </text>
-              </g>
-            );
-          })}
-
-          {stages.slice(0, -1).map((item, index) => {
-            const startX = 210 + stageHalfWidths[index];
-            const endX = 210 + stageHalfWidths[stages.length - 1];
-            const curveX = 404 - index * 14;
-            const targetY = stageY[stages.length - 1] - 15 + index * 8;
-            return (
-              <g className="funnel-curve right" key={`sale-${item.key}`}>
-                <path
-                  d={`M ${startX} ${stageY[index]} C ${curveX} ${stageY[index]}, ${curveX} ${targetY}, ${endX} ${targetY}`}
-                  markerEnd={`url(#${markerRight})`}
-                />
-                <text x={curveX - 23} y={stageY[index] - 8} textAnchor="middle">
-                  <tspan x={curveX - 23}>{valueFlow(item.value, sales)}</tspan>
-                  <tspan className="rate" x={curveX - 23} dy="14">{conversionLabel(item.value, sales)}</tspan>
-                </text>
-              </g>
-            );
-          })}
-        </svg> : null}
-
+      <div className={`sales-funnel ${showConversions ? "expanded" : ""}`} aria-label={`Etapas de ${label.toLowerCase()}`}>
         <div className="funnel-stage-stack" role="list">
           {stages.map((item, index) => {
             const valueLabel = item.value === null ? "—" : formatNumber(item.value);
@@ -427,6 +383,39 @@ function MonthlyFunnel({
         >
           Conversão
         </button>
+        {showConversions ? (
+          <div
+            className="funnel-conversion-drawer"
+            id={conversionMapId}
+            role="region"
+            aria-label={`Conversões de ${label.toLowerCase()}`}
+            aria-live="polite"
+          >
+            <div className="funnel-conversion-head">
+              <span>Etapa</span>
+              <span>Próxima etapa</span>
+              <span>Até vendas</span>
+            </div>
+            {conversionRows.map((row) => (
+              <div className="funnel-conversion-row" key={row.item.key}>
+                <strong className="funnel-conversion-source">
+                  <i aria-hidden="true" style={{ background: FUNNEL_STAGE_COLORS[row.index] }} />
+                  {row.item.short}
+                </strong>
+                <div className="funnel-conversion-chip next">
+                  <small>{row.item.short} → {row.next.short}</small>
+                  <span>{row.nextFlow}</span>
+                  <b>{row.nextRate}</b>
+                </div>
+                <div className="funnel-conversion-chip sale">
+                  <small>{row.item.short} → Vendas</small>
+                  <span>{row.saleFlow}</span>
+                  <b>{row.saleRate}</b>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   );

@@ -12,6 +12,7 @@ const stages = [
   { key: "approved_folders", label: "Pastas aprovadas", short: "Pasta aprovada", color: "#3bd48d" },
   { key: "sales", label: "Vendas", short: "Venda", color: "#168bd2" },
 ] as const;
+const goalStageWidths = [100, 90, 80, 70, 60, 50] as const;
 
 type Values = Record<(typeof stages)[number]["key"], number | "">;
 const brokerMinimumFields = [
@@ -300,33 +301,44 @@ export function GoalsSettingsClient() {
         </aside>
 
         <section className="goal-panel goal-preview-panel">
-          <header><span>02</span><div><p>Resultado automático</p><h2>Funil projetado</h2></div></header>
+          <header><span>02</span><div><p>Resultado automático</p><h2>Funil projetado</h2></div><div className="goal-funnel-total"><small>Conversão total</small><strong>{totalConversion.toFixed(1).replace(".", ",")}%</strong></div></header>
           <div className="goal-premium-funnel">
-            {stages.map((stage, index) => (
-              <div
-                className="goal-premium-stage"
+            {stages.map((stage, index) => {
+              const nextValue = computedValues[index + 1];
+              const conversion = index < stages.length - 1 && computedValues[index] > 0
+                ? (nextValue / computedValues[index]) * 100
+                : null;
+              return <div
+                className="goal-premium-step"
                 key={stage.key}
-                style={{ "--stage-color": stage.color } as React.CSSProperties}
+                style={{ "--stage-width": `${goalStageWidths[index]}%` } as React.CSSProperties}
               >
-                <span>{stage.label}</span>
-                {index === stages.length - 1 ? (
-                  <input
-                    aria-label="Meta de vendas"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={values.sales}
-                    placeholder="0"
-                    onChange={(event) => setValues((current) => ({
-                      ...current,
-                      sales: event.target.value === "" ? "" : Number(event.target.value),
-                    }))}
-                  />
-                ) : (
-                  <output>{formatWhole(computedValues[index])}</output>
-                )}
-              </div>
-            ))}
+                <div className="goal-premium-stage" style={{ "--stage-color": stage.color } as React.CSSProperties}>
+                  <span>{stage.label}</span>
+                  {index === stages.length - 1 ? (
+                    <input
+                      aria-label="Meta de vendas"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={values.sales}
+                      placeholder="0"
+                      onChange={(event) => setValues((current) => ({
+                        ...current,
+                        sales: event.target.value === "" ? "" : Number(event.target.value),
+                      }))}
+                    />
+                  ) : (
+                    <output>{formatWhole(computedValues[index])}</output>
+                  )}
+                </div>
+                {conversion !== null ? <div className="goal-premium-conversion" aria-label={`Conversão de ${stage.label} para ${stages[index + 1].label}: ${conversion.toFixed(1)} por cento`}>
+                  <span aria-hidden="true">↓</span>
+                  <b>{formatWhole(computedValues[index])} → {formatWhole(nextValue)}</b>
+                  <strong>{conversion.toFixed(1).replace(".", ",")}%</strong>
+                </div> : null}
+              </div>;
+            })}
           </div>
         </section>
 
@@ -354,8 +366,21 @@ export function GoalsSettingsClient() {
           {updatedAt ? <small className="goal-updated-at">Última alteração: {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(updatedAt))}</small> : null}
         </aside>
 
+        <section className="goal-panel goal-weekly-panel">
+          <header><span>04</span><div><p>Ritmo de execução</p><h2>Rota acumulada do funil</h2></div><small className="goal-weekly-context">6 etapas · sequência protegida</small></header>
+          <p className="goal-panel-note">Meta acumulada ao fim de cada semana. Etapa seguinte só avança quando volume anterior sustenta a conversão.</p>
+          <div className="goal-weekly-distribution" role="table" aria-label="Rota acumulada semanal das metas do funil" style={{ "--week-count": weekBuckets.length } as React.CSSProperties}>
+            <div className="goal-weekly-table-row goal-weekly-table-head" role="row"><span role="columnheader">Etapa</span>{weekBuckets.map((week) => <span className={week.current ? "current" : ""} role="columnheader" key={week.label}>{week.label}<small>{week.range}</small>{week.current ? <em>Agora</em> : null}</span>)}</div>
+            {weeklyDistribution.map((stage) => <div className="goal-weekly-table-row" role="row" key={stage.key}>
+              <span className="goal-weekly-stage" role="rowheader"><i style={{ background: stage.color }} />{stage.label}<small>{formatWhole(stage.monthly)} no mês</small></span>
+              {stage.weekly.map((week, index) => <strong className={weekBuckets[index]?.current ? "current" : ""} role="cell" key={`${stage.key}-${index}`}><b>{formatWhole(week.cumulative)}</b><small>+{formatWhole(week.value)} na semana</small></strong>)}
+            </div>)}
+          </div>
+          <div className="goal-weekly-legend"><span>Número grande = meta acumulada · +N = esforço da semana</span><strong>Venda só após base necessária</strong></div>
+        </section>
+
         <section className="goal-panel goal-productivity-panel">
-          <header><span>04</span><div><p>Gestão de equipe</p><h2>Meta mínima por gerente</h2></div></header>
+          <header><span>05</span><div><p>Gestão de equipe</p><h2>Meta mínima por gerente</h2></div></header>
           <p className="goal-panel-note">Quantidade mínima de corretores ativos sob cada gerente, por tempo de casa.</p>
           <div className="goal-productivity-layout">
             <div className="goal-productivity-block">
@@ -396,7 +421,7 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-calendar-panel">
-          <header><span>05</span><div><p>Cadência comercial</p><h2>Dias úteis e produtividade</h2></div></header>
+          <header><span>06</span><div><p>Cadência comercial</p><h2>Dias úteis e produtividade</h2></div></header>
           <div className="goal-calendar-layout">
             <div className="goal-calendar-card">
               <div className="goal-calendar-heading"><div><strong>{monthLabel}</strong><small>Segunda a sexta contam como dia útil</small></div><span>{businessDays} dias úteis</span></div>
@@ -414,7 +439,7 @@ export function GoalsSettingsClient() {
         </section>
 
         <section className="goal-panel goal-productive-panel">
-          <header><span>06</span><div><p>Indicador de equipe</p><h2>Equipe produtiva</h2></div></header>
+          <header><span>07</span><div><p>Indicador de equipe</p><h2>Equipe produtiva</h2></div></header>
           <p className="goal-panel-note">Defina o percentual mínimo de equipe produtiva esperado em cada etapa.</p>
           <div className="goal-productive-grid">
             {productiveMetrics.map(({ key, label, color }) => {
@@ -428,18 +453,6 @@ export function GoalsSettingsClient() {
           </div>
         </section>
 
-        <section className="goal-panel goal-weekly-panel">
-          <header><span>07</span><div><p>Ritmo de execução</p><h2>Rota acumulada do funil</h2></div><small className="goal-weekly-context">6 etapas · sequência protegida</small></header>
-          <p className="goal-panel-note">Meta acumulada ao fim de cada semana. Etapa seguinte só avança quando volume anterior sustenta a conversão.</p>
-          <div className="goal-weekly-distribution" role="table" aria-label="Rota acumulada semanal das metas do funil" style={{ "--week-count": weekBuckets.length } as React.CSSProperties}>
-            <div className="goal-weekly-table-row goal-weekly-table-head" role="row"><span role="columnheader">Etapa</span>{weekBuckets.map((week) => <span className={week.current ? "current" : ""} role="columnheader" key={week.label}>{week.label}<small>{week.range}</small>{week.current ? <em>Agora</em> : null}</span>)}</div>
-            {weeklyDistribution.map((stage) => <div className="goal-weekly-table-row" role="row" key={stage.key}>
-              <span className="goal-weekly-stage" role="rowheader"><i style={{ background: stage.color }} />{stage.label}<small>{formatWhole(stage.monthly)} no mês</small></span>
-              {stage.weekly.map((week, index) => <strong className={weekBuckets[index]?.current ? "current" : ""} role="cell" key={`${stage.key}-${index}`}><b>{formatWhole(week.cumulative)}</b><small>+{formatWhole(week.value)} na semana</small></strong>)}
-            </div>)}
-          </div>
-          <div className="goal-weekly-legend"><span>Número grande = meta acumulada · +N = esforço da semana</span><strong>Venda só após base necessária</strong></div>
-        </section>
       </form>
     </main>
   );
