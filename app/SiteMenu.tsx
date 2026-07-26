@@ -1,4 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
+import { ThemeSwitch } from "./ThemeSwitch";
+
 export function SiteMenu() {
   return (
     <nav className="site-menu" aria-label="Navegação principal">
@@ -10,6 +12,7 @@ export function SiteMenu() {
           <a href="/configuracoes/metas">Configurar metas</a>
         </div>
       </div>
+      <ThemeSwitch />
     </nav>
   );
 }

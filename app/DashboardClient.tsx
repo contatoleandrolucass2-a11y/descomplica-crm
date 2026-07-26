@@ -266,8 +266,6 @@ type MonthlyFunnelStage = (typeof STAGES)[number] & {
   rate: number | null;
 };
 
-type ThemeMode = "light" | "balanced" | "dark";
-
 const FUNNEL_STAGE_COLORS = [
   "#ff315f",
   "#ff9f24",
@@ -432,21 +430,7 @@ export function DashboardClient({
     "idle" | "starting" | "polling" | "error"
   >("idle");
   const [refreshMessage, setRefreshMessage] = useState("");
-  const [theme, setTheme] = useState<ThemeMode>("light");
   const { selection, setSelection } = useDashboardFilters();
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem("descomplica-theme") as ThemeMode | null;
-    if (saved === "light" || saved === "balanced" || saved === "dark") {
-      const timer = window.setTimeout(() => setTheme(saved), 0);
-      return () => window.clearTimeout(timer);
-    }
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem("descomplica-theme", theme);
-  }, [theme]);
 
   const refreshSalesforce = useCallback(async () => {
     if (
@@ -657,23 +641,6 @@ export function DashboardClient({
         </div>
         <div className="topbar-actions">
           <SiteMenu />
-          <div className="theme-switch" role="group" aria-label="Tema do painel">
-            {([
-              ["light", "Claro"],
-              ["balanced", "Médio"],
-              ["dark", "Escuro"],
-            ] as const).map(([key, text]) => (
-              <button
-                key={key}
-                type="button"
-                className={theme === key ? "active" : ""}
-                aria-pressed={theme === key}
-                onClick={() => setTheme(key)}
-              >
-                {text}
-              </button>
-            ))}
-          </div>
           <div className="account-block">
           <span className={`status-pill ${dataStatus}`}>{statusLabel}</span>
           <div>

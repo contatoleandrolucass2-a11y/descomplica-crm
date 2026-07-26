@@ -8,6 +8,7 @@ import {
   type PeriodComparisonRow,
 } from "./PeriodComparisonTable";
 import { StageNavigation } from "./StageNavigation";
+import { SiteMenu } from "./SiteMenu";
 import { ACTION_PLANS, STAGES, type StageConfig } from "./stage-config";
 import { DashboardFilters, useDashboardFilters } from "./DashboardFilters";
 import { buildFilteredView } from "./dashboard-filtering";
@@ -205,11 +206,14 @@ export function StageDetailClient({
           <div className="brand-mark" aria-hidden="true">D</div>
           <div><strong>Descomplica</strong><span>Inteligência comercial</span></div>
         </a>
-        <div className="account-block">
-          <span className={`status-pill ${dataStatus}`}>{statusLabel}</span>
-          <div><strong>{dashboard.collaborator.name || signedInName}</strong><span>{dashboard.collaborator.manager}</span></div>
-          <div className="avatar" aria-hidden="true">
-            {(dashboard.collaborator.name || signedInName).split(" ").slice(0, 2).map((part) => part[0]).join("")}
+        <div className="topbar-actions">
+          <SiteMenu />
+          <div className="account-block">
+            <span className={`status-pill ${dataStatus}`}>{statusLabel}</span>
+            <div><strong>{dashboard.collaborator.name || signedInName}</strong><span>{dashboard.collaborator.manager}</span></div>
+            <div className="avatar" aria-hidden="true">
+              {(dashboard.collaborator.name || signedInName).split(" ").slice(0, 2).map((part) => part[0]).join("")}
+            </div>
           </div>
         </div>
       </header>

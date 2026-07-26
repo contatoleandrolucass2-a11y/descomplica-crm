@@ -286,6 +286,202 @@ a {
   background: var(--lime);
 }
 
+.site-menu .theme-switch {
+  margin-left: 4px;
+}
+
+.settings-shell .theme-switch {
+  border-color: var(--line);
+  background: var(--surface);
+}
+
+.settings-shell .theme-switch button {
+  color: var(--ink-soft);
+}
+
+.settings-shell .theme-switch button.active {
+  color: #071a31;
+}
+
+:root[data-theme="balanced"] .goal-page-shell {
+  background:
+    radial-gradient(circle at 10% 5%, rgba(38, 198, 218, .1), transparent 26rem),
+    radial-gradient(circle at 92% 12%, rgba(199, 243, 107, .08), transparent 24rem),
+    var(--surface-soft);
+}
+
+:root[data-theme="balanced"] .goal-panel {
+  border-color: var(--line);
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .goal-page-shell {
+  background:
+    radial-gradient(circle at 10% 5%, rgba(38, 198, 218, .08), transparent 25rem),
+    radial-gradient(circle at 92% 12%, rgba(199, 243, 107, .05), transparent 24rem),
+    var(--surface-soft);
+}
+
+:root[data-theme="dark"] .goal-page-hero h1,
+:root[data-theme="dark"] .goal-panel > header h2,
+:root[data-theme="dark"] .goal-rate-copy strong,
+:root[data-theme="dark"] .goal-sales-target strong,
+:root[data-theme="dark"] .goal-productivity-block-heading strong,
+:root[data-theme="dark"] .goal-productivity-field span,
+:root[data-theme="dark"] .goal-calendar-heading strong,
+:root[data-theme="dark"] .goal-calendar-insights strong,
+:root[data-theme="dark"] .goal-productive-label,
+:root[data-theme="dark"] .goal-weekly-stage,
+:root[data-theme="dark"] .goal-weekly-table-row > strong b,
+:root[data-theme="dark"] .goal-conversion-stage > strong {
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .goal-panel {
+  border-color: var(--line);
+  background: var(--surface);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, .2);
+}
+
+:root[data-theme="dark"] :where(
+  .goal-rate-card,
+  .goal-sales-target,
+  .goal-conversion-stage,
+  .goal-productivity-block,
+  .goal-productivity-field,
+  .goal-calendar-layout,
+  .goal-productive-grid,
+  .goal-productive-target,
+  .goal-weekly-distribution
+) {
+  border-color: var(--line);
+  background: color-mix(in srgb, var(--surface) 78%, var(--surface-soft));
+}
+
+:root[data-theme="dark"] .goal-productive-card {
+  border-color: var(--line);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--productive-color) 13%, var(--surface)) 0,
+    var(--surface) 64%
+  );
+}
+
+:root[data-theme="dark"] .goal-donut::before,
+:root[data-theme="dark"] .goal-productive-target,
+:root[data-theme="dark"] .goal-rate-input,
+:root[data-theme="dark"] .goal-sales-input {
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .goal-weekly-table-head {
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--surface) 70%, var(--surface-soft));
+}
+
+:root[data-theme="dark"] .history-card {
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .history-row > div {
+  background: var(--surface-soft);
+}
+
+:where(
+  .realized-card,
+  .metric-card,
+  .monthly-funnel,
+  .view-summary,
+  .efficiency-card,
+  .history-card,
+  .stage-action-card,
+  .settings-card,
+  .goal-rate-card,
+  .goal-productivity-field,
+  .goal-productive-card,
+  .goal-premium-stage
+) {
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+.goal-donut,
+.donut,
+.funnel-stage {
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+@media (hover: hover) {
+  :where(
+    .realized-card,
+    .metric-card,
+    .monthly-funnel,
+    .view-summary,
+    .efficiency-card,
+    .history-card,
+    .stage-action-card,
+    .settings-card,
+    .goal-rate-card,
+    .goal-productivity-field,
+    .goal-productive-card
+  ):hover {
+    z-index: 2;
+    border-color: color-mix(in srgb, var(--cyan) 52%, var(--line));
+    box-shadow: 0 20px 44px rgba(7, 51, 73, .16);
+    transform: translateY(-4px);
+  }
+
+  .goal-productive-card:hover .goal-donut,
+  .metric-card:hover .donut,
+  .monthly-funnel:hover .funnel-stage {
+    filter: saturate(1.12) brightness(1.04);
+    transform: scale(1.055);
+  }
+
+  .goal-premium-stage:hover {
+    filter: saturate(1.12) brightness(1.05);
+    transform: translateY(-2px) scale(1.015);
+  }
+
+  .goal-weekly-table-row:not(.goal-weekly-table-head):hover {
+    background: color-mix(in srgb, var(--cyan) 7%, var(--surface));
+  }
+}
+
+:where(
+  .goal-rate-card,
+  .goal-productivity-field,
+  .goal-productive-card
+):focus-within {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(34, 201, 204, .16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-menu {
+    flex-wrap: wrap;
+    margin-right: 0;
+  }
+
+  .site-menu .theme-switch {
+    margin-left: 0;
+  }
+}
+
 .brand-link {
   text-decoration: none;
 }
