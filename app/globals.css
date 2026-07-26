@@ -450,6 +450,19 @@ a {
   color: #7cebe5;
 }
 
+:root[data-theme="dark"] :where(
+  .goal-rate-input input,
+  .goal-rate-input b,
+  .goal-sales-input input,
+  .goal-productivity-field input,
+  .goal-productive-input input,
+  .goal-productive-input b,
+  .goal-donut strong,
+  .goal-calendar-insights strong
+) {
+  color: #fff;
+}
+
 :root[data-theme="dark"] .goal-weekly-table-row {
   border-color: var(--line);
 }
