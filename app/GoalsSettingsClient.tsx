@@ -30,6 +30,11 @@ const productiveMetrics = [
   { key: "sales", label: "Vendas", color: "#4386ef" },
 ] as const;
 type ProductiveTeamTargets = Record<(typeof productiveMetrics)[number]["key"], number | "">;
+type GoalProfile = "dv" | "parcerias";
+const goalProfiles: Array<{ key: GoalProfile; label: string; href: string }> = [
+  { key: "dv", label: "Meta DV", href: "/configuracoes/metas" },
+  { key: "parcerias", label: "Meta Canal Parcerias", href: "/configuracoes/metas/parcerias" },
+];
 const formatWhole = (value: number) =>
   new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.round(value));
 const formatRatio = (value: number) =>
@@ -129,7 +134,7 @@ function buildSequentialWeekly(monthlyValues: number[], weights: number[]) {
   return weekly;
 }
 
-export function GoalsSettingsClient() {
+export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile }) {
   const [values, setValues] = useState<Values>(
     Object.fromEntries(stages.map(({ key }) => [key, ""])) as Values,
   );
@@ -210,7 +215,7 @@ export function GoalsSettingsClient() {
   }, [computedValues, weekBuckets]);
 
   useEffect(() => {
-    fetch("/api/settings/goals", { cache: "no-store" })
+    fetch(`/api/settings/goals?profile=${profile}`, { cache: "no-store" })
       .then((response) => response.json())
       .then((row) => {
         if (row) {
@@ -242,7 +247,7 @@ export function GoalsSettingsClient() {
         setMessage("");
       })
       .catch(() => setMessage("Não foi possível carregar as metas. Atualize a página e tente novamente."));
-  }, []);
+  }, [profile]);
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
@@ -251,7 +256,7 @@ export function GoalsSettingsClient() {
     const payload = Object.fromEntries(
       stages.map(({ key }, index) => [key, Math.round(computedValues[index])]),
     );
-    const response = await fetch("/api/settings/goals", {
+    const response = await fetch(`/api/settings/goals?profile=${profile}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -290,6 +295,14 @@ export function GoalsSettingsClient() {
         <div>
           <p className="goal-kicker">Metas comerciais</p>
           <h1>Planejamento de metas</h1>
+          <nav className="goal-profile-tabs" aria-label="Selecionar canal da meta">
+            {goalProfiles.map((item) => (
+              <a className={item.key === profile ? "active" : ""} href={item.href} aria-current={item.key === profile ? "page" : undefined} key={item.key}>
+                <span>{item.label}</span>
+                <small>{item.key === "dv" ? "Operação própria" : "Canal de parceiros"}</small>
+              </a>
+            ))}
+          </nav>
         </div>
         <div className="goal-hero-actions">
           <button className="goal-save-button" type="submit" form="goal-settings-form" disabled={saving}>

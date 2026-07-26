@@ -5,6 +5,15 @@ const fields = ["opportunities", "appointments", "visits", "folders", "approved_
 const brokerMinimumKeys = ["month_1", "month_2", "month_3", "month_4_plus"] as const;
 const brokerWeeklyKeys = ["appointments", "visits", "folders"] as const;
 const productiveTeamKeys = ["appointments", "visits", "folders", "sales"] as const;
+const profileIds = {
+  dv: "default",
+  parcerias: "canal_parcerias",
+} as const;
+
+function resolveProfile(request: Request) {
+  const profile = new URL(request.url).searchParams.get("profile") ?? "dv";
+  return profile in profileIds ? profile as keyof typeof profileIds : null;
+}
 
 function parseIntegerMap(input: unknown, keys: readonly string[]) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
@@ -18,10 +27,12 @@ function parseIntegerMap(input: unknown, keys: readonly string[]) {
   return output;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const config = supabaseRuntime();
   if (!config) return Response.json({ error: "database_unavailable" }, { status: 503 });
-  const response = await fetch(`${config.url}/rest/v1/crm_funnel_goals?select=*&id=eq.default&limit=1`, { headers: { apikey: config.key, authorization: `Bearer ${config.key}` }, cache: "no-store" });
+  const profile = resolveProfile(request);
+  if (!profile) return Response.json({ error: "invalid_profile" }, { status: 400 });
+  const response = await fetch(`${config.url}/rest/v1/crm_funnel_goals?select=*&id=eq.${profileIds[profile]}&limit=1`, { headers: { apikey: config.key, authorization: `Bearer ${config.key}` }, cache: "no-store" });
   if (!response.ok) return Response.json({ error: "goals_unavailable" }, { status: 502 });
   const rows = await response.json();
   return Response.json(rows[0] ?? null, { headers: { "cache-control": "no-store" } });
@@ -30,6 +41,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const config = supabaseRuntime();
   if (!config) return Response.json({ error: "database_unavailable" }, { status: 503 });
+  const profile = resolveProfile(request);
+  if (!profile) return Response.json({ error: "invalid_profile" }, { status: 400 });
   let body: Record<string, unknown>;
   try { body = await request.json(); } catch { return Response.json({ error: "invalid_json" }, { status: 400 }); }
   const values: Record<string, number> = {};
@@ -55,7 +68,7 @@ export async function POST(request: Request) {
   const response = await fetch(`${config.url}/rest/v1/crm_funnel_goals`, {
     method: "POST",
     headers: { apikey: config.key, authorization: `Bearer ${config.key}`, "content-type": "application/json", Prefer: "resolution=merge-duplicates,return=representation" },
-    body: JSON.stringify({ id: "default", effective_month: new Date().toISOString().slice(0, 7) + "-01", ...values, rates, broker_minimums: brokerMinimums, broker_weekly_targets: brokerWeeklyTargets, productive_team_targets: productiveTeamTargets, updated_by: "configuracoes-publicas", updated_at: new Date().toISOString() }),
+    body: JSON.stringify({ id: profileIds[profile], effective_month: new Date().toISOString().slice(0, 7) + "-01", ...values, rates, broker_minimums: brokerMinimums, broker_weekly_targets: brokerWeeklyTargets, productive_team_targets: productiveTeamTargets, updated_by: `configuracoes-publicas-${profile}`, updated_at: new Date().toISOString() }),
     cache: "no-store",
   });
   if (!response.ok) return Response.json({ error: "goals_save_failed" }, { status: 502 });

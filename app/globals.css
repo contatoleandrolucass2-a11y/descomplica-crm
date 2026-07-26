@@ -3179,3 +3179,82 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Navegação interna das metas: DV e Canal Parcerias */
+.goal-profile-tabs {
+  display: flex;
+  gap: 6px;
+  width: fit-content;
+  margin-top: 13px;
+  padding: 5px;
+  border: 1px solid #d4e2e9;
+  border-radius: 15px;
+  background: rgba(255,255,255,.78);
+  box-shadow: 0 8px 22px rgba(15,47,70,.07);
+}
+
+.goal-profile-tabs a {
+  display: grid;
+  gap: 1px;
+  min-width: 164px;
+  padding: 8px 13px;
+  color: #52677d;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  text-decoration: none;
+  transition: color 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.goal-profile-tabs a span { font-size: .78rem; font-weight: 850; }
+.goal-profile-tabs a small { color: #74879a; font-size: .64rem; }
+
+.goal-profile-tabs a.active {
+  color: #fff;
+  border-color: rgba(82,230,216,.8);
+  background: linear-gradient(135deg, #0d7480, #123b63);
+  box-shadow: 0 8px 18px rgba(13,84,106,.2);
+}
+
+.goal-profile-tabs a.active small { color: #c9fbf6; }
+
+:root[data-theme="dark"] .goal-profile-tabs {
+  border-color: var(--line);
+  background: rgba(8,30,50,.72);
+  box-shadow: 0 10px 24px rgba(0,0,0,.2);
+}
+
+:root[data-theme="dark"] .goal-profile-tabs a { color: #b8cbe0; }
+:root[data-theme="dark"] .goal-profile-tabs a small { color: #8298ae; }
+
+:root[data-theme="dark"] .goal-profile-tabs a.active {
+  color: #fff;
+  border-color: #39d8d0;
+  background: linear-gradient(135deg, #0d7984, #174878);
+  box-shadow: 0 0 0 1px rgba(57,216,208,.14), 0 10px 24px rgba(0,0,0,.24);
+}
+
+:root[data-theme="dark"] .goal-profile-tabs a.active small { color: #c9fbf6; }
+
+@media (hover: hover) {
+  .goal-profile-tabs a:not(.active):hover {
+    color: #075f71;
+    border-color: rgba(20,164,174,.28);
+    background: rgba(34,190,194,.08);
+    transform: translateY(-1px);
+  }
+
+  :root[data-theme="dark"] .goal-profile-tabs a:not(.active):hover {
+    color: #e8fbff;
+    border-color: rgba(82,230,216,.34);
+    background: rgba(40,185,195,.12);
+  }
+}
+
+@media (max-width: 760px) {
+  .goal-profile-tabs { width: 100%; }
+  .goal-profile-tabs a { flex: 1; min-width: 0; }
+}
+
+@media (max-width: 420px) {
+  .goal-profile-tabs { flex-direction: column; }
+}
