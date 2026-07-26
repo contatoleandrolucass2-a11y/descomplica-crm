@@ -5,12 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import { SiteMenu } from "./SiteMenu";
 
 const stages = [
-  { key: "opportunities", label: "Oportunidades", short: "Oportunidade", color: "#ff426b", text: "#071a31" },
-  { key: "appointments", label: "Agendamentos", short: "Agendamento", color: "#ffab42", text: "#071a31" },
-  { key: "visits", label: "Visitas", short: "Visita", color: "#f2dd2f", text: "#071a31" },
-  { key: "folders", label: "Pastas", short: "Pasta", color: "#34c5d7", text: "#071a31" },
-  { key: "approved_folders", label: "Pastas aprovadas", short: "Pasta aprovada", color: "#3bd48d", text: "#071a31" },
-  { key: "sales", label: "Vendas", short: "Venda", color: "#168bd2", text: "#071a31" },
+  { key: "opportunities", label: "Oportunidades", short: "Oportunidade", color: "#173b68", text: "#ffffff" },
+  { key: "appointments", label: "Agendamentos", short: "Agendamento", color: "#155e75", text: "#ffffff" },
+  { key: "visits", label: "Visitas", short: "Visita", color: "#0e7490", text: "#ffffff" },
+  { key: "folders", label: "Pastas", short: "Pasta", color: "#0891b2", text: "#ffffff" },
+  { key: "approved_folders", label: "Pastas aprovadas", short: "Pasta aprovada", color: "#0f766e", text: "#ffffff" },
+  { key: "sales", label: "Vendas", short: "Venda", color: "#059669", text: "#ffffff" },
 ] as const;
 const goalStageWidths = [100, 90, 80, 70, 60, 50] as const;
 
@@ -214,10 +214,6 @@ export function GoalsSettingsClient() {
       .catch(() => setMessage("Não foi possível carregar as metas. Atualize a página e tente novamente."));
   }, []);
 
-  const totalConversion = displayedValues[0] > 0
-    ? (displayedValues[displayedValues.length - 1] / displayedValues[0]) * 100
-    : 0;
-
   async function save(event: React.FormEvent) {
     event.preventDefault();
     setSaving(true);
@@ -331,14 +327,10 @@ export function GoalsSettingsClient() {
         </aside>
 
         <section className="goal-panel goal-preview-panel">
-          <header><span>02</span><div><p>Projeção calculada</p><h2>Funil da meta</h2></div><div className="goal-funnel-total"><small>Conversão do funil</small><strong>{totalConversion.toFixed(1).replace(".", ",")}%</strong></div></header>
+          <header><span>02</span><div><p>Projeção calculada</p><h2>Funil da meta</h2></div></header>
           <div className="goal-premium-funnel">
             {stages.map((stage, index) => {
               const currentValue = displayedValues[index];
-              const nextValue = displayedValues[index + 1];
-              const conversion = index < stages.length - 1 && currentValue > 0
-                ? (nextValue / currentValue) * 100
-                : null;
               return <div
                 className="goal-premium-step"
                 key={stage.key}
@@ -348,11 +340,6 @@ export function GoalsSettingsClient() {
                   <span>{stage.label}</span>
                   <output>{formatWhole(currentValue)}</output>
                 </div>
-                {conversion !== null ? <div className="goal-premium-conversion" aria-label={`Conversão de ${stage.label} para ${stages[index + 1].label}: ${conversion.toFixed(1)} por cento`}>
-                  <span aria-hidden="true">↓</span>
-                  <b>{formatWhole(currentValue)} → {formatWhole(nextValue)}</b>
-                  <strong>{conversion.toFixed(1).replace(".", ",")}%</strong>
-                </div> : null}
               </div>;
             })}
           </div>
