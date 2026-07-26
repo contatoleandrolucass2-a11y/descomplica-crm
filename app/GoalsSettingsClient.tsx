@@ -40,7 +40,7 @@ function isBusinessDay(date: Date) {
   return day !== 0 && day !== 6;
 }
 
-function buildMonthCalendar(reference: Date) {
+function buildMonthCalendar(reference: Date, today: Date) {
   const year = reference.getFullYear();
   const month = reference.getMonth();
   const first = new Date(year, month, 1);
@@ -50,11 +50,11 @@ function buildMonthCalendar(reference: Date) {
     if (index < leading) return null;
     const day = index - leading + 1;
     const date = new Date(year, month, day);
-    return { day, business: isBusinessDay(date), elapsed: date <= reference, today: date.toDateString() === reference.toDateString() };
+    return { day, business: isBusinessDay(date), elapsed: date <= today, today: date.toDateString() === today.toDateString() };
   });
 }
 
-function buildWeekBuckets(reference: Date) {
+function buildWeekBuckets(reference: Date, today: Date) {
   const year = reference.getFullYear();
   const month = reference.getMonth();
   const first = new Date(year, month, 1);
@@ -76,7 +76,7 @@ function buildWeekBuckets(reference: Date) {
       label: `${index + 1}ª semana`,
       range: `${daysInMonth[0].getDate()}–${daysInMonth[daysInMonth.length - 1].getDate()}`,
       businessDays: daysInMonth.filter(isBusinessDay).length,
-      current: daysInMonth.some((date) => date.toDateString() === reference.toDateString()),
+      current: daysInMonth.some((date) => date.toDateString() === today.toDateString()),
     };
   }).filter((week): week is { label: string; range: string; businessDays: number; current: boolean } => week !== null);
 }
@@ -146,12 +146,27 @@ export function GoalsSettingsClient() {
   const [brokerWeeklyTargets, setBrokerWeeklyTargets] = useState<BrokerWeeklyTargets>({ appointments: 6, visits: 2 });
   const [productiveTeamTargets, setProductiveTeamTargets] = useState<ProductiveTeamTargets>({ appointments: 100, visits: 100, folders: 100, sales: 60 });
   const [today] = useState(() => new Date());
+  const [calendarReference, setCalendarReference] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
+  const calendarMonths = useMemo(
+    () => Array.from({ length: 12 }, (_, month) => ({
+      month,
+      label: new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(new Date(2024, month, 1)),
+    })),
+    [],
+  );
+  const calendarYears = useMemo(
+    () => Array.from({ length: 11 }, (_, index) => today.getFullYear() - 5 + index),
+    [today],
+  );
 
-  const calendar = useMemo(() => buildMonthCalendar(today), [today]);
+  const calendar = useMemo(() => buildMonthCalendar(calendarReference, today), [calendarReference, today]);
   const businessDays = calendar.filter((day) => day?.business).length;
   const businessDaysElapsed = calendar.filter((day) => day?.business && day.elapsed).length;
   const businessDaysRemaining = Math.max(businessDays - businessDaysElapsed, 0);
-  const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(today);
+  const monthLabel = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(calendarReference);
   const computedValues = useMemo(() => {
     const output = Array<number>(stages.length).fill(0);
     output[stages.length - 1] = Number(values.sales) || 0;
@@ -164,7 +179,7 @@ export function GoalsSettingsClient() {
     () => computedValues.map((value) => Math.max(Math.round(value), 0)),
     [computedValues],
   );
-  const weekBuckets = useMemo(() => buildWeekBuckets(today), [today]);
+  const weekBuckets = useMemo(() => buildWeekBuckets(calendarReference, today), [calendarReference, today]);
   const weeklyDistribution = useMemo(() => {
     const sequential = buildSequentialWeekly(computedValues, weekBuckets.map((week) => week.businessDays));
     return stages.map((stage, index) => {
@@ -419,14 +434,41 @@ export function GoalsSettingsClient() {
           <header><span>06</span><div><p>Calendário do mês</p><h2>Dias úteis estimados</h2></div></header>
           <div className="goal-calendar-layout">
             <div className="goal-calendar-card">
-              <div className="goal-calendar-heading"><div><strong>{monthLabel}</strong><small>Segunda a sexta · feriados não descontados</small></div><span>{businessDays} dias úteis</span></div>
+              <div className="goal-calendar-heading">
+                <div><strong>{monthLabel}</strong><small>Segunda a sexta · feriados não descontados</small></div>
+                <div className="goal-calendar-actions">
+                  <span>{businessDays} dias úteis</span>
+                  <div className="goal-calendar-filters">
+                    <label>
+                      <span>Mês</span>
+                      <select
+                        aria-label="Selecionar mês"
+                        value={calendarReference.getMonth()}
+                        onChange={(event) => setCalendarReference(new Date(calendarReference.getFullYear(), Number(event.target.value), 1))}
+                      >
+                        {calendarMonths.map(({ month, label }) => <option key={month} value={month}>{label}</option>)}
+                      </select>
+                    </label>
+                    <label>
+                      <span>Ano</span>
+                      <select
+                        aria-label="Selecionar ano"
+                        value={calendarReference.getFullYear()}
+                        onChange={(event) => setCalendarReference(new Date(Number(event.target.value), calendarReference.getMonth(), 1))}
+                      >
+                        {calendarYears.map((year) => <option key={year} value={year}>{year}</option>)}
+                      </select>
+                    </label>
+                  </div>
+                </div>
+              </div>
               <div className="goal-calendar-week"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>
               <div className="goal-calendar-grid">
                 {calendar.map((item, index) => item ? <span className={`${item.business ? "business" : "weekend"} ${item.today ? "today" : ""}`} key={item.day}>{item.day}</span> : <i aria-hidden="true" key={`blank-${index}`} />)}
               </div>
             </div>
             <div className="goal-calendar-insights">
-              <div><small>Total de dias úteis</small><strong>{businessDays}</strong><span>no mês atual</span></div>
+              <div><small>Total de dias úteis</small><strong>{businessDays}</strong><span>no mês selecionado</span></div>
               <div><small>Dias úteis passados</small><strong>{businessDaysElapsed}</strong><span>{businessDaysRemaining} restantes</span></div>
               <div className="goal-calendar-rule"><small>Ritmo por corretor</small><strong>1 por dia útil</strong><span>{businessDays} agendamentos no mês</span></div>
             </div>
