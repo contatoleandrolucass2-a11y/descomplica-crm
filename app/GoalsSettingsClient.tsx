@@ -419,16 +419,16 @@ export function GoalsSettingsClient() {
           <header><span>06</span><div><p>Calendário do mês</p><h2>Dias úteis estimados</h2></div></header>
           <div className="goal-calendar-layout">
             <div className="goal-calendar-card">
-              <div className="goal-calendar-heading"><div><strong>{monthLabel}</strong><small>Segunda a sexta; feriados não são descontados</small></div><span>{businessDays} dias no cálculo</span></div>
+              <div className="goal-calendar-heading"><div><strong>{monthLabel}</strong><small>Segunda a sexta · feriados não descontados</small></div><span>{businessDays} dias úteis</span></div>
               <div className="goal-calendar-week"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span></div>
               <div className="goal-calendar-grid">
                 {calendar.map((item, index) => item ? <span className={`${item.business ? "business" : "weekend"} ${item.today ? "today" : ""}`} key={item.day}>{item.day}</span> : <i aria-hidden="true" key={`blank-${index}`} />)}
               </div>
             </div>
             <div className="goal-calendar-insights">
-              <div><small>Dias estimados no mês</small><strong>{businessDays}</strong><span>segunda a sexta</span></div>
-              <div><small>Dias estimados passados</small><strong>{businessDaysElapsed}</strong><span>{businessDaysRemaining} restantes</span></div>
-              <div className="goal-calendar-rule"><small>Agendamentos por corretor</small><strong>1 por dia útil</strong><span>{businessDays} agendamentos no mês</span></div>
+              <div><small>Total de dias úteis</small><strong>{businessDays}</strong><span>no mês atual</span></div>
+              <div><small>Dias úteis passados</small><strong>{businessDaysElapsed}</strong><span>{businessDaysRemaining} restantes</span></div>
+              <div className="goal-calendar-rule"><small>Ritmo por corretor</small><strong>1 por dia útil</strong><span>{businessDays} agendamentos no mês</span></div>
             </div>
           </div>
         </section>
@@ -440,7 +440,7 @@ export function GoalsSettingsClient() {
             {productiveMetrics.map(({ key, label, color }) => {
               const value = Number(productiveTeamTargets[key]) || 0;
               return <label className="goal-productive-card" key={key} style={{ "--productive-color": color } as React.CSSProperties}>
-                <div className="goal-donut" style={{ "--productive-rate": `${Math.min(value, 100)}%` } as React.CSSProperties}><div><strong>{formatWhole(value)}%</strong><span>da equipe</span></div></div>
+                <div className="goal-donut" style={{ "--productive-rate": `${Math.min(value, 100)}%` } as React.CSSProperties}><div><strong>{formatWhole(value)}%</strong></div></div>
                 <span className="goal-productive-label">{label}</span>
                 <div className="goal-productive-input"><input aria-label={`${label} da equipe produtiva`} type="number" min="0" max="100" step="1" value={productiveTeamTargets[key]} onChange={(event) => setProductiveTeamTargets((current) => ({ ...current, [key]: event.target.value === "" ? "" : Number(event.target.value) }))} /><b>%</b></div>
               </label>;
