@@ -59,11 +59,11 @@ function buildWeekBuckets(reference: Date, today: Date) {
   const month = reference.getMonth();
   const first = new Date(year, month, 1);
   const last = new Date(year, month + 1, 0);
-  const mondayOffset = first.getDay() === 0 ? 6 : first.getDay() - 1;
-  const firstMonday = new Date(year, month, 1 - mondayOffset);
+  const sundayOffset = first.getDay();
+  const firstSunday = new Date(year, month, 1 - sundayOffset);
   return Array.from({ length: 6 }, (_, index) => {
-    const start = new Date(firstMonday);
-    start.setDate(firstMonday.getDate() + index * 7);
+    const start = new Date(firstSunday);
+    start.setDate(firstSunday.getDate() + index * 7);
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
     const daysInMonth = Array.from({ length: 7 }, (_, dayIndex) => {
