@@ -168,7 +168,7 @@ a {
 .goal-hero-status div { display: grid; gap: 2px; }.goal-hero-status small { color: #6a7c91; font-size: .68rem; }.goal-hero-status strong { color: #10284a; font-size: .82rem; }
 .goal-studio {
   display: grid;
-  grid-template-columns: minmax(320px, .9fr) minmax(480px, 1.1fr);
+  grid-template-columns: minmax(300px, .82fr) minmax(440px, 1.18fr) minmax(360px, .95fr);
   gap: 18px;
   width: min(1460px, calc(100% - 40px));
   margin: 0 auto;
@@ -200,10 +200,10 @@ a {
 .goal-premium-conversion > span { color: #0c9baa; font-size: .88rem; font-weight: 900; line-height: 1; }
 .goal-premium-conversion b { color: #60758b; font-size: .58rem; font-weight: 700; }
 .goal-premium-conversion strong { padding: 3px 7px; color: #087c8d; border: 1px solid #cce8e7; border-radius: 999px; background: #eefaf8; font-size: .61rem; }
-.goal-conversion-panel { grid-column: 1 / -1; }
+.goal-conversion-panel { grid-column: auto; }
 .goal-conversion-panel > header { position: relative; }
 .goal-conversion-table { overflow: hidden; border: 1px solid #dfe8ef; border-radius: 16px; background: #f7f9fc; }
-.goal-conversion-row { display: grid; grid-template-columns: minmax(205px, 1.1fr) minmax(220px, 1fr) minmax(220px, 1fr); align-items: center; border-top: 1px solid #e2e9f0; }
+.goal-conversion-row { display: grid; grid-template-columns: minmax(105px, .85fr) minmax(118px, 1fr) minmax(118px, 1fr); align-items: center; border-top: 1px solid #e2e9f0; }
 .goal-conversion-row:first-child { border-top: 0; }
 .goal-conversion-row > span { min-height: 58px; padding: 12px 14px; }
 .goal-conversion-head { color: #6f8195; background: #edf3f7; font-size: .63rem; font-weight: 850; text-transform: uppercase; }
@@ -222,7 +222,7 @@ a {
 .goal-formula-note { display: grid; gap: 5px; margin-top: 12px; padding: 14px; border: 1px solid #d7e8e5; border-radius: 14px; background: #f0faf7; }.goal-formula-note strong { color: #146b5a; font-size: .72rem; }.goal-formula-note span { color: #54746d; font-size: .68rem; line-height: 1.45; }
 .goal-save-button { width: 100%; margin-top: auto; padding: 14px 16px; color: #071a31; border: 0; border-radius: 13px; background: #c7f36b; box-shadow: 0 12px 25px rgba(116,154,48,.2); font-weight: 850; cursor: pointer; transition: transform .18s, box-shadow .18s; }.goal-save-button:hover { transform: translateY(-2px); box-shadow: 0 16px 30px rgba(116,154,48,.27); }.goal-save-button:disabled { opacity: .65; cursor: wait; transform: none; }
 .goal-save-message { min-height: 20px; margin: 11px 0 0; color: #52677e; font-size: .68rem; line-height: 1.45; }.goal-updated-at { margin-top: 2px; color: #8a98a8; font-size: .61rem; }
-@media (max-width: 1120px) { .goal-studio { grid-template-columns: minmax(270px,.85fr) minmax(390px,1.15fr); }.goal-summary-panel { grid-column: 1 / -1; }.goal-summary-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }.goal-summary-panel > header { grid-column: 1 / -1; }.goal-summary-spotlight { margin-top: 0; }.goal-summary-grid { margin-top: 0; }.goal-formula-note, .goal-save-button, .goal-save-message, .goal-updated-at { grid-column: 1 / -1; }.goal-save-button { margin-top: 4px; } }
+@media (max-width: 1120px) { .goal-studio { grid-template-columns: minmax(270px,.85fr) minmax(390px,1.15fr); }.goal-conversion-panel { grid-column: 1 / -1; }.goal-summary-panel { grid-column: 1 / -1; }.goal-summary-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }.goal-summary-panel > header { grid-column: 1 / -1; }.goal-summary-spotlight { margin-top: 0; }.goal-summary-grid { margin-top: 0; }.goal-formula-note, .goal-save-button, .goal-save-message, .goal-updated-at { grid-column: 1 / -1; }.goal-save-button { margin-top: 4px; } }
 @media (max-width: 760px) { .goal-page-topbar { align-items: flex-start; gap: 12px; flex-direction: column; }.goal-page-topbar .site-menu { width: 100%; justify-content: space-between; }.goal-page-hero { align-items: flex-start; flex-direction: column; width: min(100% - 28px, 1460px); padding-top: 30px; }.goal-hero-status { width: 100%; }.goal-studio { grid-template-columns: 1fr; width: min(100% - 28px, 1460px); }.goal-summary-panel { grid-column: auto; display: flex; }.goal-panel { padding: 20px; border-radius: 20px; }.goal-premium-stage { min-height: 66px; }.goal-premium-stage:nth-child(6) { --stage-width: 58%; } }
 .goal-productivity-panel { grid-column: 1 / -1; }
 .goal-productivity-layout { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; }
