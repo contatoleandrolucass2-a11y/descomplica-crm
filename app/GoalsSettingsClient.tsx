@@ -204,23 +204,24 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
     return columns;
   }, [weekBuckets]);
   const weeklyDistribution = useMemo(() => {
-    const sequential = buildSequentialWeekly(computedValues, weekBuckets.map((week) => week.businessDays));
-    return stages.map((stage, index) => {
+    const distributionStages = isPartnerships ? stages.slice(visibleStageOffset) : stages;
+    const distributionValues = isPartnerships ? computedValues.slice(visibleStageOffset) : computedValues;
+    const sequential = buildSequentialWeekly(distributionValues, weekBuckets.map((week) => week.businessDays));
+    return distributionStages.map((stage, index) => {
+      const globalIndex = visibleStageOffset + index;
       let cumulative = 0;
       return {
         ...stage,
-        globalIndex: index,
-        monthly: Math.max(Math.round(computedValues[index]), 0),
+        globalIndex,
+        monthly: Math.max(Math.round(computedValues[globalIndex]), 0),
         weekly: sequential[index].map((value) => {
           cumulative += value;
           return { value, cumulative };
         }),
       };
     });
-  }, [computedValues, weekBuckets]);
-  const visibleWeeklyDistribution = isPartnerships
-    ? weeklyDistribution.slice(visibleStageOffset)
-    : weeklyDistribution;
+  }, [computedValues, isPartnerships, visibleStageOffset, weekBuckets]);
+  const visibleWeeklyDistribution = weeklyDistribution;
 
   useEffect(() => {
     fetch(`/api/settings/goals?profile=${profile}`, { cache: "no-store" })

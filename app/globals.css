@@ -736,8 +736,7 @@ a {
     .goal-sales-target,
     .goal-productivity-field,
     .goal-productive-card,
-    .goal-conversion-row,
-    .goal-calendar-layout
+    .goal-conversion-row
   ):hover {
     z-index: 2;
     border-color: color-mix(in srgb, var(--cyan) 52%, var(--line));
@@ -758,9 +757,17 @@ a {
 
   .goal-calendar-grid > span:hover {
     z-index: 2;
-    filter: saturate(1.18) brightness(1.05);
-    transform: scale(1.14);
-    box-shadow: 0 7px 16px rgba(7, 91, 103, .18);
+    border-color: color-mix(in srgb, var(--cyan) 72%, var(--line));
+    filter: saturate(1.12) brightness(1.05);
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--cyan) 30%, transparent), 0 7px 16px rgba(7, 91, 103, .18);
+  }
+
+  .goal-calendar-insights > div:hover {
+    z-index: 2;
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--cyan) 62%, var(--line)), 0 8px 18px rgba(7, 91, 103, .14);
+    filter: brightness(1.05);
+    transform: translateY(-2px);
   }
 
   .goal-conversion-cell:hover {
@@ -791,8 +798,7 @@ a {
     .goal-productivity-block,
     .goal-productivity-field,
     .goal-productive-card,
-    .goal-conversion-row,
-    .goal-calendar-layout
+    .goal-conversion-row
   ):hover {
     border-color: #49dcd2;
     background: linear-gradient(135deg, rgba(27, 161, 160, .3), rgba(13, 73, 85, .7));
@@ -807,6 +813,23 @@ a {
     background: rgba(52, 211, 200, .13);
     box-shadow: inset 3px 0 #49dcd2;
     filter: brightness(1.12);
+  }
+}
+
+.goal-calendar-insights > div {
+  transition: box-shadow 180ms ease, filter 180ms ease, transform 180ms ease;
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .goal-calendar-grid > span:hover {
+    border-color: #49dcd2;
+    box-shadow: 0 0 0 2px rgba(73, 220, 210, .3), 0 8px 18px rgba(0, 0, 0, .28);
+    filter: brightness(1.16) saturate(1.12);
+  }
+
+  :root[data-theme="dark"] .goal-calendar-insights > div:hover {
+    box-shadow: inset 0 0 0 2px #49dcd2, 0 10px 22px rgba(0, 0, 0, .3);
+    filter: brightness(1.15);
   }
 }
 
