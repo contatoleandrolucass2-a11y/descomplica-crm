@@ -237,8 +237,8 @@ a {
 .goal-productivity-field input:focus { border-bottom-color: #087c8d; }
 .goal-productivity-field small { color: #52667d; font-size: .68rem; }
 @media (max-width: 760px) { .goal-productivity-layout { grid-template-columns: 1fr; }.goal-productivity-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.goal-calendar-panel { grid-column: 1; align-self: start; height: fit-content; }
-.goal-productive-panel { grid-column: 2 / span 2; display: flex; flex-direction: column; align-self: start; }
+.goal-calendar-panel { grid-column: 1; align-self: stretch; height: auto; }
+.goal-productive-panel { grid-column: 2 / span 2; display: flex; flex-direction: column; align-self: stretch; height: auto; }
 .goal-calendar-layout { display: grid; flex: 1; grid-template-columns: 1fr; align-items: stretch; gap: 12px; overflow: hidden; padding: 14px; border: 1px solid #dbe5ed; border-radius: 16px; background: #f7fafc; }
 .goal-calendar-card { display: flex; flex-direction: column; justify-content: center; padding: 0; border: 0; border-radius: 0; background: transparent; }
 .goal-calendar-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }.goal-calendar-heading div { display: grid; gap: 3px; }.goal-calendar-heading strong { color: #18304e; font-size: .9rem; text-transform: capitalize; }.goal-calendar-heading small { color: #52667d; font-size: .64rem; line-height: 1.35; }.goal-calendar-heading > span { padding: 6px 9px; color: #087c8d; border-radius: 999px; background: #e4f7f6; font-size: .64rem; font-weight: 850; white-space: nowrap; }
