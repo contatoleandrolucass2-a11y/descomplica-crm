@@ -440,9 +440,12 @@ export function GoalsSettingsClient() {
             {productiveMetrics.map(({ key, label, color }) => {
               const value = Number(productiveTeamTargets[key]) || 0;
               return <label className="goal-productive-card" key={key} style={{ "--productive-color": color } as React.CSSProperties}>
-                <div className="goal-donut" style={{ "--productive-rate": `${Math.min(value, 100)}%` } as React.CSSProperties}><div><strong>{formatWhole(value)}%</strong></div></div>
                 <span className="goal-productive-label">{label}</span>
-                <div className="goal-productive-input"><input aria-label={`${label} da equipe produtiva`} type="number" min="0" max="100" step="1" value={productiveTeamTargets[key]} onChange={(event) => setProductiveTeamTargets((current) => ({ ...current, [key]: event.target.value === "" ? "" : Number(event.target.value) }))} /><b>%</b></div>
+                <div className="goal-donut" style={{ "--productive-rate": `${Math.min(value, 100)}%` } as React.CSSProperties}><div><strong>{formatWhole(value)}%</strong></div></div>
+                <div className="goal-productive-target">
+                  <small>Meta mínima</small>
+                  <div className="goal-productive-input"><input aria-label={`${label} da equipe produtiva`} type="number" min="0" max="100" step="1" value={productiveTeamTargets[key]} onChange={(event) => setProductiveTeamTargets((current) => ({ ...current, [key]: event.target.value === "" ? "" : Number(event.target.value) }))} /><b>%</b></div>
+                </div>
               </label>;
             })}
           </div>
