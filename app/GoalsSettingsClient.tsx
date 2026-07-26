@@ -135,6 +135,10 @@ function buildSequentialWeekly(monthlyValues: number[], weights: number[]) {
 }
 
 export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile }) {
+  const isPartnerships = profile === "parcerias";
+  const visibleStageOffset = isPartnerships ? 2 : 0;
+  const visibleStages = isPartnerships ? stages.slice(visibleStageOffset) : stages;
+  const visibleProductiveMetrics = isPartnerships ? productiveMetrics.slice(1) : productiveMetrics;
   const [values, setValues] = useState<Values>(
     Object.fromEntries(stages.map(({ key }) => [key, ""])) as Values,
   );
@@ -205,6 +209,7 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
       let cumulative = 0;
       return {
         ...stage,
+        globalIndex: index,
         monthly: Math.max(Math.round(computedValues[index]), 0),
         weekly: sequential[index].map((value) => {
           cumulative += value;
@@ -213,6 +218,9 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
       };
     });
   }, [computedValues, weekBuckets]);
+  const visibleWeeklyDistribution = isPartnerships
+    ? weeklyDistribution.slice(visibleStageOffset)
+    : weeklyDistribution;
 
   useEffect(() => {
     fetch(`/api/settings/goals?profile=${profile}`, { cache: "no-store" })
@@ -256,19 +264,23 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
     const payload = Object.fromEntries(
       stages.map(({ key }, index) => [key, Math.round(computedValues[index])]),
     );
+    if (isPartnerships) {
+      payload.opportunities = 0;
+      payload.appointments = 0;
+    }
     const response = await fetch(`/api/settings/goals?profile=${profile}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         ...payload,
-        rates: rates.map((rate) => Number(rate) || 0),
+        rates: rates.map((rate, index) => isPartnerships && index < visibleStageOffset ? 0 : Number(rate) || 0),
         broker_minimums: Object.fromEntries(brokerMinimumFields.map(({ key }) => [key, Number(brokerMinimums[key]) || 0])),
         broker_weekly_targets: {
-          appointments: Number(brokerWeeklyTargets.appointments) || 0,
+          appointments: isPartnerships ? 0 : Number(brokerWeeklyTargets.appointments) || 0,
           visits: Number(brokerWeeklyTargets.visits) || 0,
           folders: Number(brokerWeeklyTargets.folders) || 0,
         },
-        productive_team_targets: Object.fromEntries(productiveMetrics.map(({ key }) => [key, Number(productiveTeamTargets[key]) || 0])),
+        productive_team_targets: Object.fromEntries(productiveMetrics.map(({ key }) => [key, isPartnerships && key === "appointments" ? 0 : Number(productiveTeamTargets[key]) || 0])),
       }),
     });
     setSaving(false);
@@ -318,12 +330,14 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
           <header><span>01</span><div><p>Configuração</p><h2>Volume necessário por etapa</h2></div></header>
           <p className="goal-panel-note">Informe quantas vezes uma etapa precisa ser maior que a etapa seguinte.</p>
           <div className="goal-rate-list">
-            {stages.slice(0, -1).map((stage, index) => (
+            {visibleStages.slice(0, -1).map((stage, localIndex) => {
+              const index = visibleStageOffset + localIndex;
+              return (
               <label className="goal-rate-card" key={stage.key}>
-                <span className="goal-rate-index">{String(index + 1).padStart(2, "0")}</span>
+                <span className="goal-rate-index">{String(localIndex + 1).padStart(2, "0")}</span>
                 <span className="goal-rate-copy">
                   <strong>{stage.short}</strong>
-                  <small>para cada {stages[index + 1].short.toLowerCase()}</small>
+                  <small>para cada {visibleStages[localIndex + 1].short.toLowerCase()}</small>
                   <em>{Number(rates[index]) > 0 ? `≈ ${formatRatio(Number(rates[index]))} para 1` : "Informe o percentual"}</em>
                 </span>
                 <span className="goal-rate-input">
@@ -345,7 +359,8 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
                   <b>%</b>
                 </span>
               </label>
-            ))}
+              );
+            })}
           </div>
           <div className="goal-sales-target">
             <div><strong>Meta de vendas</strong><small>Total desejado no mês</small></div>
@@ -370,12 +385,13 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
         <section className="goal-panel goal-preview-panel">
           <header><span>02</span><div><p>Projeção calculada</p><h2>Funil da meta</h2></div></header>
           <div className="goal-premium-funnel">
-            {stages.map((stage, index) => {
+            {visibleStages.map((stage, localIndex) => {
+              const index = visibleStageOffset + localIndex;
               const currentValue = displayedValues[index];
               return <div
                 className="goal-premium-step"
                 key={stage.key}
-                style={{ "--stage-width": `${goalStageWidths[index]}%` } as React.CSSProperties}
+                style={{ "--stage-width": `${isPartnerships ? 100 - localIndex * 14 : goalStageWidths[index]}%` } as React.CSSProperties}
               >
                 <div className="goal-premium-stage" style={{ "--stage-color": stage.color, "--stage-text": stage.text } as React.CSSProperties}>
                   <span>{stage.label}</span>
@@ -391,14 +407,15 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
           <p className="goal-panel-note">Compare o avanço para a próxima etapa e o resultado até a venda.</p>
           <div className="goal-conversion-table" role="table" aria-label="Conversões entre etapas e até vendas">
             <div className="goal-conversion-row goal-conversion-head" role="row"><span role="columnheader">Etapa</span><span role="columnheader">Próxima etapa</span><span role="columnheader">Até a venda</span></div>
-            {stages.slice(0, -1).map((stage, index) => {
+            {visibleStages.slice(0, -1).map((stage, localIndex) => {
+              const index = visibleStageOffset + localIndex;
               const currentValue = displayedValues[index];
               const nextValue = displayedValues[index + 1];
               const nextConversion = currentValue > 0 ? (nextValue / currentValue) * 100 : 0;
               const salesConversion = currentValue > 0 ? (displayedValues[displayedValues.length - 1] / currentValue) * 100 : 0;
               return <div className="goal-conversion-row" role="row" key={stage.key}>
                 <span className="goal-conversion-stage" role="rowheader"><i style={{ background: stage.color }} />{stage.short}</span>
-                <span className="goal-conversion-cell" role="cell"><small>{stage.short} → {stages[index + 1].short}</small><b>{formatWhole(currentValue)} → {formatWhole(nextValue)}</b><strong>{nextConversion.toFixed(1).replace(".", ",")}%</strong></span>
+                <span className="goal-conversion-cell" role="cell"><small>{stage.short} → {visibleStages[localIndex + 1].short}</small><b>{formatWhole(currentValue)} → {formatWhole(nextValue)}</b><strong>{nextConversion.toFixed(1).replace(".", ",")}%</strong></span>
                 <span className="goal-conversion-cell goal-conversion-sales" role="cell"><small>{stage.short} → Venda</small><b>{formatWhole(currentValue)} → {formatWhole(displayedValues[displayedValues.length - 1])}</b><strong>{salesConversion.toFixed(1).replace(".", ",")}%</strong></span>
               </div>;
             })}
@@ -406,7 +423,7 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
         </section>
 
         <section className="goal-panel goal-weekly-panel">
-          <header><span>04</span><div><p>Metas semanais</p><h2>Acompanhamento por semana</h2></div><small className="goal-weekly-context">6 etapas · metas acumuladas</small></header>
+          <header><span>04</span><div><p>Metas semanais</p><h2>Acompanhamento por semana</h2></div><small className="goal-weekly-context">{visibleStages.length} etapas · metas acumuladas</small></header>
           <p className="goal-panel-note">Cada coluna mostra a meta acumulada até o fim da semana. O valor menor indica quanto produzir naquela semana.</p>
           <div
             className="goal-weekly-distribution"
@@ -424,11 +441,11 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
                 ? <span className={`goal-weekly-projection ${hoveredWeeklyColumn === column.key ? "column-active" : ""}`} role="columnheader" key={column.key} onMouseEnter={() => setHoveredWeeklyColumn(column.key)}>Meta até hoje<small>{businessDaysElapsed} de {businessDays} dias úteis</small><em>Projeção</em></span>
                 : <span className={`${column.week.current ? "current" : ""} ${hoveredWeeklyColumn === column.key ? "column-active" : ""}`} aria-current={column.week.current ? "date" : undefined} role="columnheader" key={column.key} onMouseEnter={() => setHoveredWeeklyColumn(column.key)}>{column.week.current ? "Semana atual" : column.week.label}<small>{column.week.range}</small>{column.week.current ? <em>Agora</em> : null}</span>)}
             </div>
-            {weeklyDistribution.map((stage, stageIndex) => <div className={`goal-weekly-table-row ${hoveredWeeklyRow === stage.key ? "row-active" : ""}`} role="row" key={stage.key} onMouseEnter={() => setHoveredWeeklyRow(stage.key)}>
+            {visibleWeeklyDistribution.map((stage) => <div className={`goal-weekly-table-row ${hoveredWeeklyRow === stage.key ? "row-active" : ""}`} role="row" key={stage.key} onMouseEnter={() => setHoveredWeeklyRow(stage.key)}>
               <span className={`goal-weekly-stage ${hoveredWeeklyColumn === "stage" ? "column-active" : ""}`} role="rowheader" onMouseEnter={() => setHoveredWeeklyColumn("stage")}><i style={{ background: stage.color }} />{stage.label}<small>{formatWhole(stage.monthly)} no mês</small></span>
               {weeklyColumns.map((column) => {
                 if (column.type === "projection") {
-                  return <strong className={`goal-weekly-projection ${hoveredWeeklyColumn === column.key ? "column-active" : ""}`} role="cell" key={`${stage.key}-${column.key}`} onMouseEnter={() => setHoveredWeeklyColumn(column.key)}><b>{formatWhole(projectedValues[stageIndex])}</b><small>esperado até hoje</small></strong>;
+                  return <strong className={`goal-weekly-projection ${hoveredWeeklyColumn === column.key ? "column-active" : ""}`} role="cell" key={`${stage.key}-${column.key}`} onMouseEnter={() => setHoveredWeeklyColumn(column.key)}><b>{formatWhole(projectedValues[stage.globalIndex])}</b><small>esperado até hoje</small></strong>;
                 }
                 const week = stage.weekly[column.weekIndex];
                 return <strong className={`${column.week.current ? "current" : ""} ${hoveredWeeklyColumn === column.key ? "column-active" : ""}`} role="cell" key={`${stage.key}-${column.key}`} onMouseEnter={() => setHoveredWeeklyColumn(column.key)}><b>{formatWhole(week.cumulative)}</b><small>+{formatWhole(week.value)} na semana</small></strong>;
@@ -440,23 +457,23 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
 
         <div className="goal-team-row">
           <section className="goal-panel goal-productivity-panel goal-brokers-panel">
-            <header><span>05</span><div><p>Equipe de vendas</p><h2>Corretores por gerente</h2></div></header>
-            <p className="goal-panel-note">Defina quantos corretores cada gerente deve manter ativos, conforme o tempo de casa.</p>
+            <header><span>05</span><div><p>Equipe de vendas</p><h2>{isPartnerships ? "Imobiliárias por coordenador" : "Corretores por gerente"}</h2></div></header>
+            <p className="goal-panel-note">{isPartnerships ? "Defina quantas imobiliárias cada coordenador deve manter ativas, conforme o tempo de parceria." : "Defina quantos corretores cada gerente deve manter ativos, conforme o tempo de casa."}</p>
             <div className="goal-productivity-block">
-              <div className="goal-productivity-block-heading"><strong>Meta por tempo de casa</strong><small>corretores por gerente</small></div>
+              <div className="goal-productivity-block-heading"><strong>{isPartnerships ? "Meta por tempo de parceria" : "Meta por tempo de casa"}</strong><small>{isPartnerships ? "imobiliárias por coordenador" : "corretores por gerente"}</small></div>
               <div className="goal-productivity-fields">
                 {brokerMinimumFields.map(({ key, label }) => (
                   <label className="goal-productivity-field" key={key}>
                     <span>{label}</span>
                     <input
-                      aria-label={`Meta mínima de corretores no ${label}`}
+                      aria-label={`Meta mínima de ${isPartnerships ? "imobiliárias" : "corretores"} no ${label}`}
                       type="number"
                       min="0"
                       step="1"
                       value={brokerMinimums[key]}
                       onChange={(event) => setBrokerMinimums((current) => ({ ...current, [key]: event.target.value === "" ? "" : Number(event.target.value) }))}
                     />
-                    <small>corretores</small>
+                    <small>{isPartnerships ? "imobiliárias" : "corretores"}</small>
                   </label>
                 ))}
               </div>
@@ -464,24 +481,24 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
           </section>
 
           <section className="goal-panel goal-productivity-panel goal-broker-production-panel">
-            <header><span>06</span><div><p>Ritmo semanal</p><h2>Produção por corretor</h2></div></header>
-            <p className="goal-panel-note">Defina a produção semanal esperada de cada corretor.</p>
+            <header><span>06</span><div><p>Ritmo semanal</p><h2>Produção por {isPartnerships ? "imobiliária" : "corretor"}</h2></div></header>
+            <p className="goal-panel-note">Defina a produção semanal esperada de cada {isPartnerships ? "imobiliária" : "corretor"}.</p>
             <div className="goal-productivity-block">
-              <div className="goal-productivity-block-heading"><strong>Produção por corretor</strong><small>meta semanal</small></div>
-              <div className="goal-productivity-fields goal-productivity-fields-three">
-                <label className="goal-productivity-field">
+              <div className="goal-productivity-block-heading"><strong>Produção por {isPartnerships ? "imobiliária" : "corretor"}</strong><small>meta semanal</small></div>
+              <div className={`goal-productivity-fields ${isPartnerships ? "goal-productivity-fields-two" : "goal-productivity-fields-three"}`}>
+                {!isPartnerships ? <label className="goal-productivity-field">
                   <span>Agendamentos</span>
                   <input aria-label="Agendamentos por corretor por semana" type="number" min="0" step="1" value={brokerWeeklyTargets.appointments} onChange={(event) => setBrokerWeeklyTargets((current) => ({ ...current, appointments: event.target.value === "" ? "" : Number(event.target.value) }))} />
                   <small>por semana</small>
-                </label>
+                </label> : null}
                 <label className="goal-productivity-field">
                   <span>Visitas</span>
-                  <input aria-label="Visitas por corretor por semana" type="number" min="0" step="1" value={brokerWeeklyTargets.visits} onChange={(event) => setBrokerWeeklyTargets((current) => ({ ...current, visits: event.target.value === "" ? "" : Number(event.target.value) }))} />
+                  <input aria-label={`Visitas por ${isPartnerships ? "imobiliária" : "corretor"} por semana`} type="number" min="0" step="1" value={brokerWeeklyTargets.visits} onChange={(event) => setBrokerWeeklyTargets((current) => ({ ...current, visits: event.target.value === "" ? "" : Number(event.target.value) }))} />
                   <small>por semana</small>
                 </label>
                 <label className="goal-productivity-field">
                   <span>Pastas</span>
-                  <input aria-label="Pastas por corretor por semana" type="number" min="0" step="1" value={brokerWeeklyTargets.folders} onChange={(event) => setBrokerWeeklyTargets((current) => ({ ...current, folders: event.target.value === "" ? "" : Number(event.target.value) }))} />
+                  <input aria-label={`Pastas por ${isPartnerships ? "imobiliária" : "corretor"} por semana`} type="number" min="0" step="1" value={brokerWeeklyTargets.folders} onChange={(event) => setBrokerWeeklyTargets((current) => ({ ...current, folders: event.target.value === "" ? "" : Number(event.target.value) }))} />
                   <small>por semana</small>
                 </label>
               </div>
@@ -529,7 +546,7 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
             <div className="goal-calendar-insights">
               <div><small>Total de dias úteis</small><strong>{businessDays}</strong><span>no mês selecionado</span></div>
               <div><small>Dias úteis passados</small><strong>{businessDaysElapsed}</strong><span>{businessDaysRemaining} restantes</span></div>
-              <div className="goal-calendar-rule"><small>Ritmo por corretor</small><strong>1 por dia útil</strong><span>{businessDays} agendamentos no mês</span></div>
+              <div className="goal-calendar-rule"><small>{isPartnerships ? "Ritmo de visitas" : "Ritmo por corretor"}</small><strong>1 por dia útil</strong><span>{businessDays} {isPartnerships ? "visitas" : "agendamentos"} no mês</span></div>
             </div>
           </div>
         </section>
@@ -537,8 +554,8 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
         <section className="goal-panel goal-productive-panel">
           <header><span>08</span><div><p>Produtividade</p><h2>Equipe que deve atingir a meta</h2></div></header>
           <p className="goal-panel-note">Defina a porcentagem mínima da equipe que deve atingir cada meta.</p>
-          <div className="goal-productive-grid">
-            {productiveMetrics.map(({ key, label, color }) => {
+          <div className={`goal-productive-grid ${isPartnerships ? "goal-productive-grid-three" : ""}`}>
+            {visibleProductiveMetrics.map(({ key, label, color }) => {
               const value = Number(productiveTeamTargets[key]) || 0;
               return <label className="goal-productive-card" key={key} style={{ "--productive-color": color } as React.CSSProperties}>
                 <span className="goal-productive-label">{label}</span>
