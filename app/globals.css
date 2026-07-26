@@ -285,6 +285,41 @@ a {
 @media (max-width: 760px) { .goal-weekly-panel > header { align-items: flex-start; flex-wrap: wrap; }.goal-weekly-context { width: 100%; margin: 0; }.goal-weekly-legend { align-items: flex-start; flex-direction: column; }.goal-weekly-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 420px) { .goal-productive-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.goal-calendar-insights { grid-template-columns: 1fr; }.goal-calendar-insights > div { border-right: 0; border-bottom: 1px solid #dbe5ed; }.goal-calendar-insights > div:last-child { border-bottom: 0; }.goal-calendar-insights .goal-calendar-rule { grid-column: auto; }.goal-calendar-heading { align-items: stretch; flex-direction: column; }.goal-calendar-actions { align-items: stretch; }.goal-calendar-filters { width: 100%; }.goal-calendar-filters label { flex: 1; }.goal-calendar-filters select { width: 100%; } }
 
+/* Compact density for the complete goals page. */
+.goal-page-shell { padding-bottom: 24px; }
+.goal-page-topbar { min-height: 64px; padding-block: 8px; }
+.goal-page-hero { gap: 16px; padding: 12px 0 10px; }
+.goal-kicker { margin-bottom: 5px; }
+.goal-hero-actions .goal-save-button { padding: 9px 18px; }
+.goal-studio { gap: 10px; }
+.goal-page-shell .goal-panel { padding: 12px 14px; border-radius: 16px; }
+.goal-page-shell .goal-panel > header { gap: 8px; padding-bottom: 8px; }
+.goal-page-shell .goal-panel > header > span { width: 31px; height: 31px; border-radius: 9px; }
+.goal-page-shell .goal-panel-note { margin: 7px 0; line-height: 1.3; }
+.goal-page-shell .goal-rate-list { gap: 5px; }
+.goal-page-shell .goal-rate-card { min-height: 48px; padding: 5px 8px; }
+.goal-page-shell .goal-sales-target { margin-top: 7px; padding: 7px 9px; }
+.goal-page-shell .goal-premium-funnel { grid-template-rows: repeat(6, minmax(48px, 1fr)); gap: 2px; padding-top: 7px; }
+.goal-page-shell .goal-conversion-table { gap: 4px; }
+.goal-page-shell .goal-conversion-row { gap: 5px; padding: 6px 7px; border-radius: 11px; }
+.goal-page-shell .goal-conversion-cell { min-height: 53px; padding: 6px 7px; }
+.goal-page-shell .goal-productivity-layout { gap: 10px; }
+.goal-page-shell .goal-productivity-block { padding: 10px; border-radius: 14px; }
+.goal-page-shell .goal-productivity-block-heading { margin-bottom: 7px; }
+.goal-page-shell .goal-productivity-fields { gap: 6px; }
+.goal-page-shell .goal-productivity-field { gap: 3px; padding: 8px; border-radius: 11px; }
+.goal-page-shell .goal-calendar-layout { gap: 5px; padding: 8px; border-radius: 13px; }
+.goal-page-shell .goal-calendar-heading { margin-bottom: 5px; }
+.goal-page-shell .goal-calendar-actions { gap: 4px !important; }
+.goal-page-shell .goal-calendar-insights > div { min-height: 64px; padding: 5px 4px; }
+.goal-page-shell .goal-productive-panel .goal-panel-note { margin: 6px 0 7px; }
+.goal-page-shell .goal-productive-grid { border-radius: 14px; }
+.goal-page-shell .goal-productive-card { gap: 7px; padding: 9px 8px; border-top-width: 4px; }
+.goal-page-shell .goal-productive-target { padding: 5px 8px; border-radius: 10px; }
+.goal-page-shell .goal-weekly-table-row > span,
+.goal-page-shell .goal-weekly-table-row > strong { min-height: 48px; padding: 8px 10px; }
+.goal-page-shell .goal-weekly-legend { margin-top: 7px; }
+
 .theme-switch {
   display: flex;
   padding: 3px;
