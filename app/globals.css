@@ -215,6 +215,24 @@ a {
 .goal-conversion-cell b { color: #18304e; font-family: var(--font-geist-mono), monospace; font-size: .76rem; white-space: nowrap; }
 .goal-conversion-cell strong { justify-self: end; padding: 5px 8px; color: #087c8d; border: 1px solid #bcdedb; border-radius: 999px; background: #eefaf8; font-size: .73rem; white-space: nowrap; }
 .goal-conversion-sales strong { color: #6849d8; border-color: #ded7ff; background: #f3efff; }
+.goal-controls-panel,
+.goal-preview-panel,
+.goal-conversion-panel { padding: 14px 16px; }
+.goal-controls-panel > header,
+.goal-preview-panel > header,
+.goal-conversion-panel > header { padding-bottom: 10px; }
+.goal-controls-panel .goal-panel-note,
+.goal-conversion-panel .goal-panel-note { margin: 10px 0; line-height: 1.35; }
+.goal-controls-panel .goal-rate-list { grid-template-rows: repeat(5, minmax(52px, auto)); gap: 6px; }
+.goal-controls-panel .goal-rate-card { min-height: 52px; padding: 6px 9px; }
+.goal-controls-panel .goal-sales-target { margin-top: 9px; padding: 9px 11px; }
+.goal-controls-panel .goal-sales-input { min-height: 38px; padding-block: 5px; }
+.goal-preview-panel .goal-premium-funnel { grid-template-rows: repeat(6, minmax(52px, 1fr)); gap: 3px; padding: 10px 4px 0; }
+.goal-preview-panel .goal-premium-stage { padding-block: 5px; }
+.goal-conversion-panel .goal-conversion-table { gap: 5px; }
+.goal-conversion-panel .goal-conversion-row { gap: 6px; padding: 7px 8px; }
+.goal-conversion-panel .goal-conversion-stage { padding-bottom: 1px; }
+.goal-conversion-panel .goal-conversion-cell { min-height: 58px; padding: 7px 8px; }
 @media (max-width: 420px) { .goal-conversion-row { grid-template-columns: 1fr; }.goal-conversion-stage { grid-column: auto; }.goal-conversion-cell { min-height: 62px; } }
 .goal-summary-panel { display: flex; flex-direction: column; }
 .goal-summary-spotlight { display: grid; gap: 5px; margin-top: 18px; padding: 20px; color: #fff; border-radius: 18px; background: linear-gradient(135deg, #071a31, #123a5d); box-shadow: 0 18px 35px rgba(7,26,49,.18); }.goal-summary-spotlight small { color: #9dc1d8; font-size: .7rem; }.goal-summary-spotlight strong { font-size: 3rem; line-height: 1; letter-spacing: -.06em; }.goal-summary-spotlight span { color: #c1d4e2; font-size: .7rem; }
