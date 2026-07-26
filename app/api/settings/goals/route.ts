@@ -3,7 +3,7 @@ import { supabaseRuntime } from "../../../auth-server";
 export const dynamic = "force-dynamic";
 const fields = ["opportunities", "appointments", "visits", "folders", "approved_folders", "sales"] as const;
 const brokerMinimumKeys = ["month_1", "month_2", "month_3", "month_4_plus"] as const;
-const brokerWeeklyKeys = ["appointments", "visits"] as const;
+const brokerWeeklyKeys = ["appointments", "visits", "folders"] as const;
 const productiveTeamKeys = ["appointments", "visits", "folders", "sales"] as const;
 
 function parseIntegerMap(input: unknown, keys: readonly string[]) {

@@ -244,6 +244,9 @@ a {
 @media (max-width: 900px) { .goal-studio { grid-template-columns: 1fr; width: min(100% - 28px, 760px); }.goal-panel { padding: 20px; }.goal-conversion-panel { grid-column: auto; } }
 @media (max-width: 760px) { .goal-page-topbar { align-items: flex-start; gap: 12px; flex-direction: column; }.goal-page-topbar .site-menu { width: 100%; justify-content: space-between; }.goal-page-hero { align-items: flex-start; flex-direction: column; width: min(100% - 28px, 1460px); padding-top: 24px; }.goal-hero-actions { width: 100%; min-width: 0; justify-items: stretch; }.goal-hero-actions .goal-save-button { width: 100%; min-width: 0; }.goal-hero-actions .goal-save-message, .goal-hero-actions .goal-updated-at { text-align: left; }.goal-studio { grid-template-columns: 1fr; width: min(100% - 28px, 1460px); }.goal-summary-panel { grid-column: auto; display: flex; }.goal-panel { padding: 20px; border-radius: 18px; }.goal-premium-funnel { grid-template-rows: repeat(6, minmax(58px, 1fr)); }.goal-premium-stage { min-height: 58px; }.goal-premium-stage:nth-child(6) { --stage-width: 58%; } }
 .goal-productivity-panel { grid-column: 1 / -1; }
+.goal-team-row { display: grid; grid-column: 1 / -1; grid-template-columns: 1.2fr .8fr; align-items: stretch; gap: 10px; }
+.goal-team-row .goal-productivity-panel { grid-column: auto; }
+.goal-team-row .goal-productivity-block { height: calc(100% - 1px); }
 .goal-productivity-layout { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; }
 .goal-productivity-block { padding: 18px; border: 1px solid #e0e8ef; border-radius: 18px; background: #f7f9fc; }
 .goal-productivity-block-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
@@ -251,12 +254,14 @@ a {
 .goal-productivity-block-heading small { color: #52667d; font-size: .7rem; }
 .goal-productivity-fields { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
 .goal-productivity-fields-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.goal-productivity-fields-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .goal-productivity-field { display: grid; justify-items: center; gap: 5px; min-width: 0; padding: 12px; border: 1px solid #d7e1ea; border-radius: 13px; background: #fff; text-align: center; }
 .goal-productivity-field span { overflow: hidden; color: #52677e; font-size: .68rem; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
 .goal-productivity-field input { width: 100%; padding: 2px 0; color: #087c8d; border: 0; border-bottom: 2px solid #b8dfe3; outline: 0; background: transparent; font-size: 1.45rem; font-weight: 900; text-align: center; }
 .goal-productivity-field input:focus { border-bottom-color: #087c8d; }
 .goal-productivity-field small { color: #52667d; font-size: .68rem; }
-@media (max-width: 760px) { .goal-productivity-layout { grid-template-columns: 1fr; }.goal-productivity-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .goal-team-row { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .goal-productivity-layout { grid-template-columns: 1fr; }.goal-productivity-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }.goal-productivity-fields-three { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .goal-calendar-panel { display: flex; grid-column: 1; flex-direction: column; align-self: stretch; height: auto; }
 .goal-productive-panel { grid-column: 2 / span 2; display: flex; flex-direction: column; align-self: stretch; height: auto; }
 .goal-calendar-layout { display: grid; flex: 1; grid-template-columns: 1fr; align-items: stretch; gap: 8px; overflow: hidden; padding: 12px; border: 1px solid #dbe5ed; border-radius: 16px; background: #f7fafc; transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
@@ -273,7 +278,18 @@ a {
 .goal-weekly-panel { grid-column: 1 / -1; }
 .goal-weekly-panel > header { position: relative; }.goal-weekly-context { margin-left: auto; color: #087c8d; font-size: .7rem; font-weight: 800; }
 .goal-weekly-distribution { overflow-x: auto; border: 1px solid #dfe8ef; border-radius: 16px; background: #f7f9fc; }.goal-weekly-table-row { display: grid; grid-template-columns: minmax(205px, 1.55fr) repeat(5, minmax(98px, 1fr)); min-width: 700px; align-items: center; border-top: 1px solid #e2e9f0; }.goal-weekly-table-row:first-child { border-top: 0; }.goal-weekly-table-row > span, .goal-weekly-table-row > strong { min-height: 58px; padding: 12px 13px; }.goal-weekly-table-head { color: #52667d; background: #edf3f7; font-size: .68rem; font-weight: 850; text-align: center; text-transform: uppercase; }.goal-weekly-table-head > span:first-child { text-align: left; }.goal-weekly-table-head small { display: block; margin-top: 3px; color: #60758b; font-size: .66rem; font-weight: 650; text-transform: none; }.goal-weekly-stage { display: flex; align-items: center; gap: 8px; color: #18304e; font-size: .76rem; font-weight: 800; }.goal-weekly-stage i { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; }.goal-weekly-stage small { margin-left: auto; color: #52667d; font-size: .66rem; font-weight: 650; }.goal-weekly-table-row > strong { color: #10284a; border-left: 1px solid #e2e9f0; font-family: var(--font-geist-mono), monospace; font-size: 1.08rem; text-align: center; }.goal-weekly-legend { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; color: #52667d; font-size: .7rem; }.goal-weekly-legend strong { color: #087c8d; }
-.goal-weekly-table-row { grid-template-columns: minmax(205px, 1.55fr) repeat(var(--week-count), minmax(108px, 1fr)); }
+.goal-weekly-table-row { grid-template-columns: minmax(205px, 1.55fr) minmax(132px, 1fr) repeat(var(--week-count), minmax(108px, 1fr)); }
+.goal-weekly-table-head > .goal-weekly-projection,
+.goal-weekly-table-row > .goal-weekly-projection {
+  color: #063c46;
+  border-left: 1px solid #8bded6;
+  border-right: 1px solid #8bded6;
+  background: linear-gradient(180deg, #dff9f5, #c8f1eb);
+  box-shadow: inset 0 3px #20b9c3;
+}
+.goal-weekly-table-head > .goal-weekly-projection em { color: #fff; background: #087c8d; }
+.goal-weekly-table-row > .goal-weekly-projection b { color: #086f7d; font-size: 1.2rem; }
+.goal-weekly-table-row > .goal-weekly-projection small { color: #34727a; }
 .goal-weekly-table-head > span { position: relative; }
 .goal-weekly-table-head > span.current { color: #087c8d; background: #dff7f4; }
 .goal-weekly-table-head em { display: inline-block; margin-top: 5px; padding: 2px 7px; border-radius: 999px; color: #fff; background: #0c7d88; font-size: .64rem; font-style: normal; letter-spacing: .04em; }
@@ -563,6 +579,23 @@ a {
   color: #9ce9e2;
 }
 
+:root[data-theme="dark"] .goal-weekly-table-head > .goal-weekly-projection,
+:root[data-theme="dark"] .goal-weekly-table-row > .goal-weekly-projection {
+  color: #eafffc;
+  border-color: #29bdb4;
+  background: linear-gradient(180deg, rgba(27, 157, 151, .34), rgba(13, 109, 108, .24));
+  box-shadow: inset 0 3px #4ce3d8, 0 0 24px rgba(76, 227, 216, .08);
+}
+
+:root[data-theme="dark"] .goal-weekly-table-row > .goal-weekly-projection b {
+  color: #f1fffd;
+}
+
+:root[data-theme="dark"] .goal-weekly-table-row > .goal-weekly-projection small,
+:root[data-theme="dark"] .goal-weekly-table-head > .goal-weekly-projection small {
+  color: #a8eee8;
+}
+
 :root[data-theme="dark"] .history-card {
   background: var(--surface);
 }
@@ -648,6 +681,29 @@ a {
 
   .goal-weekly-table-row:not(.goal-weekly-table-head):hover {
     background: color-mix(in srgb, var(--cyan) 7%, var(--surface));
+  }
+
+  :root[data-theme="dark"] :where(
+    .goal-rate-card,
+    .goal-productivity-block,
+    .goal-productivity-field,
+    .goal-productive-card,
+    .goal-conversion-row,
+    .goal-calendar-layout
+  ):hover {
+    border-color: #49dcd2;
+    background-color: color-mix(in srgb, #21c7c4 12%, var(--surface));
+    box-shadow:
+      0 0 0 1px rgba(73, 220, 210, .32),
+      0 18px 38px rgba(0, 0, 0, .38),
+      0 0 28px rgba(73, 220, 210, .14);
+    filter: brightness(1.12);
+  }
+
+  :root[data-theme="dark"] .goal-weekly-table-row:not(.goal-weekly-table-head):hover {
+    background: rgba(52, 211, 200, .13);
+    box-shadow: inset 3px 0 #49dcd2;
+    filter: brightness(1.12);
   }
 }
 
