@@ -259,15 +259,17 @@ export function GoalsSettingsClient() {
         <div>
           <p className="goal-kicker">Metas comerciais</p>
           <h1>Planejamento de metas</h1>
-          <p>Defina a meta de vendas e os percentuais. O sistema calcula todas as etapas do funil.</p>
         </div>
-        <div className="goal-hero-status">
-          <span className="goal-live-dot" />
-          <div><small>Em uso no painel</small><strong>Meta mensal</strong></div>
+        <div className="goal-hero-actions">
+          <button className="goal-save-button" type="submit" form="goal-settings-form" disabled={saving}>
+            {saving ? "Salvando…" : "Salvar metas e atualizar painel"}
+          </button>
+          <p className="goal-save-message" role="status">{message}</p>
+          {updatedAt ? <small className="goal-updated-at">Salvo em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(updatedAt))}</small> : null}
         </div>
       </section>
 
-      <form className="goal-studio" onSubmit={save}>
+      <form id="goal-settings-form" className="goal-studio" onSubmit={save}>
         <aside className="goal-panel goal-controls-panel">
           <header><span>01</span><div><p>Configuração</p><h2>Volume necessário por etapa</h2></div></header>
           <p className="goal-panel-note">Informe quantas vezes uma etapa precisa ser maior que a etapa seguinte.</p>
@@ -319,11 +321,6 @@ export function GoalsSettingsClient() {
               <span>vendas</span>
             </label>
           </div>
-          <button className="goal-save-button" type="submit" disabled={saving}>
-            {saving ? "Salvando…" : "Salvar metas e atualizar painel"}
-          </button>
-          <p className="goal-save-message" role="status">{message}</p>
-          {updatedAt ? <small className="goal-updated-at">Salvo em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(updatedAt))}</small> : null}
         </aside>
 
         <section className="goal-panel goal-preview-panel">
