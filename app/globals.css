@@ -169,7 +169,7 @@ a {
 .goal-studio {
   display: grid;
   grid-template-columns: minmax(300px, .82fr) minmax(440px, 1.18fr) minmax(360px, .95fr);
-  align-items: start;
+  align-items: stretch;
   gap: 18px;
   width: min(1460px, calc(100% - 40px));
   margin: 0 auto;
@@ -193,11 +193,11 @@ a {
 .goal-rate-input input { width: 54px; color: #087c8d; border: 0; outline: 0; background: transparent; font-size: 1rem; font-weight: 900; text-align: right; font-variant-numeric: tabular-nums; }.goal-rate-input b { color: #087c8d; font-size: .72rem; }
 .goal-sales-target { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 16px; padding: 15px; border: 1px solid #c7e2de; border-radius: 15px; background: #f0faf7; }.goal-sales-target > div { display: grid; gap: 3px; }.goal-sales-target strong { color: #18304e; font-size: .8rem; }.goal-sales-target small { color: #52667d; font-size: .68rem; }.goal-sales-input { display: flex; align-items: baseline; gap: 6px; min-height: 44px; padding: 8px 10px; border: 1px solid #a8d4cf; border-radius: 11px; background: #fff; }.goal-sales-input input { width: 62px; color: #087c8d; border: 0; outline: 0; background: transparent; font-family: var(--font-geist-mono), monospace; font-size: 1.25rem; font-weight: 900; text-align: right; }.goal-sales-input span { color: #52667d; font-size: .68rem; font-weight: 700; }
 .goal-controls-panel .goal-save-button { margin-top: 16px; }
-.goal-preview-panel { overflow: hidden; background: linear-gradient(155deg, #fff 0%, #f7fbfc 58%, #edf7f2 100%); }
+.goal-preview-panel { display: flex; flex-direction: column; overflow: hidden; background: linear-gradient(155deg, #fff 0%, #f7fbfc 58%, #edf7f2 100%); }
 .goal-funnel-total { display: grid !important; gap: 2px !important; margin-left: auto; text-align: right; }
 .goal-funnel-total small { color: #52667d; font-size: .68rem; }
 .goal-funnel-total strong { color: #087c8d; font-family: var(--font-geist-mono), monospace; font-size: 1rem; }
-.goal-premium-funnel { display: grid; justify-items: center; gap: 4px; padding: 18px 4px 2px; }
+.goal-premium-funnel { display: grid; flex: 1; align-content: end; justify-items: center; gap: 4px; padding: 18px 4px 2px; }
 .goal-premium-step { display: grid; justify-items: center; width: var(--stage-width); }
 .goal-premium-stage { position: relative; display: grid; place-items: center; gap: 3px; width: 100%; min-height: 64px; padding: 8px 18px; color: var(--stage-text); border: 1px solid rgba(255,255,255,.2); border-radius: 17px 17px 13px 13px; background: linear-gradient(115deg, rgba(255,255,255,.19), transparent 52%), var(--stage-color); clip-path: polygon(3% 0, 97% 0, 90% 100%, 10% 100%); box-shadow: inset 0 2px rgba(255,255,255,.2), 0 7px 16px color-mix(in srgb, var(--stage-color) 15%, transparent); text-shadow: none; }
 .goal-premium-stage > span { font-size: .76rem; font-weight: 850; }.goal-premium-stage output, .goal-premium-stage input { width: 100%; padding: 0; color: inherit; border: 0; outline: 0; background: transparent; font-size: clamp(1.28rem, 1.8vw, 1.62rem); font-weight: 900; text-align: center; font-variant-numeric: tabular-nums; text-shadow: none; }.goal-premium-stage input::placeholder { color: currentColor; opacity: .65; }
