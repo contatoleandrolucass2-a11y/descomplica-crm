@@ -245,8 +245,7 @@ a {
 @media (max-width: 760px) { .goal-page-topbar { align-items: flex-start; gap: 12px; flex-direction: column; }.goal-page-topbar .site-menu { width: 100%; justify-content: space-between; }.goal-page-hero { align-items: flex-start; flex-direction: column; width: min(100% - 28px, 1460px); padding-top: 24px; }.goal-hero-actions { width: 100%; min-width: 0; justify-items: stretch; }.goal-hero-actions .goal-save-button { width: 100%; min-width: 0; }.goal-hero-actions .goal-save-message, .goal-hero-actions .goal-updated-at { text-align: left; }.goal-studio { grid-template-columns: 1fr; width: min(100% - 28px, 1460px); }.goal-summary-panel { grid-column: auto; display: flex; }.goal-panel { padding: 20px; border-radius: 18px; }.goal-premium-funnel { grid-template-rows: repeat(6, minmax(58px, 1fr)); }.goal-premium-stage { min-height: 58px; }.goal-premium-stage:nth-child(6) { --stage-width: 58%; } }
 .goal-productivity-panel { grid-column: 1 / -1; }
 .goal-team-row { display: grid; grid-column: 1 / -1; grid-template-columns: 1.2fr .8fr; align-items: stretch; gap: 10px; }
-.goal-team-row .goal-productivity-panel { grid-column: auto; }
-.goal-team-row .goal-productivity-block { height: calc(100% - 1px); }
+.goal-team-row .goal-productivity-panel { grid-column: auto; min-height: 0; overflow: hidden; }
 .goal-productivity-layout { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; }
 .goal-productivity-block { padding: 18px; border: 1px solid #e0e8ef; border-radius: 18px; background: #f7f9fc; }
 .goal-productivity-block-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
@@ -290,6 +289,24 @@ a {
 .goal-weekly-table-head > .goal-weekly-projection em { color: #fff; background: #087c8d; }
 .goal-weekly-table-row > .goal-weekly-projection b { color: #086f7d; font-size: 1.2rem; }
 .goal-weekly-table-row > .goal-weekly-projection small { color: #34727a; }
+.goal-weekly-table-row > .column-active {
+  position: relative;
+  z-index: 1;
+  background: color-mix(in srgb, var(--cyan) 14%, var(--surface));
+  box-shadow: inset 2px 0 color-mix(in srgb, var(--cyan) 62%, transparent), inset -2px 0 color-mix(in srgb, var(--cyan) 62%, transparent);
+}
+.goal-weekly-table-row.row-active {
+  position: relative;
+  z-index: 2;
+  background: color-mix(in srgb, var(--cyan) 13%, var(--surface));
+  box-shadow: inset 4px 0 var(--cyan), 0 8px 20px rgba(7, 51, 73, .12);
+  filter: brightness(1.04);
+}
+.goal-weekly-table-row.row-active > .column-active {
+  z-index: 3;
+  background: color-mix(in srgb, var(--cyan) 25%, var(--surface));
+  box-shadow: inset 2px 0 var(--cyan), inset -2px 0 var(--cyan), 0 0 20px color-mix(in srgb, var(--cyan) 20%, transparent);
+}
 .goal-weekly-table-head > span { position: relative; }
 .goal-weekly-table-head > span.current { color: #087c8d; background: #dff7f4; }
 .goal-weekly-table-head em { display: inline-block; margin-top: 5px; padding: 2px 7px; border-radius: 999px; color: #fff; background: #0c7d88; font-size: .64rem; font-style: normal; letter-spacing: .04em; }
@@ -614,6 +631,7 @@ a {
   .stage-action-card,
   .settings-card,
   .goal-rate-card,
+  .goal-sales-target,
   .goal-productivity-field,
   .goal-productive-card,
   .goal-conversion-cell,
@@ -643,6 +661,7 @@ a {
     .stage-action-card,
     .settings-card,
     .goal-rate-card,
+    .goal-sales-target,
     .goal-productivity-field,
     .goal-productive-card,
     .goal-conversion-row,
@@ -685,6 +704,7 @@ a {
 
   :root[data-theme="dark"] :where(
     .goal-rate-card,
+    .goal-sales-target,
     .goal-productivity-block,
     .goal-productivity-field,
     .goal-productive-card,

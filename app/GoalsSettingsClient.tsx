@@ -145,6 +145,8 @@ export function GoalsSettingsClient() {
   });
   const [brokerWeeklyTargets, setBrokerWeeklyTargets] = useState<BrokerWeeklyTargets>({ appointments: 6, visits: 2, folders: 1 });
   const [productiveTeamTargets, setProductiveTeamTargets] = useState<ProductiveTeamTargets>({ appointments: 100, visits: 100, folders: 100, sales: 60 });
+  const [hoveredWeeklyColumn, setHoveredWeeklyColumn] = useState<string | null>(null);
+  const [hoveredWeeklyRow, setHoveredWeeklyRow] = useState<string | null>(null);
   const [today] = useState(() => new Date());
   const [calendarReference, setCalendarReference] = useState(() => {
     const now = new Date();
@@ -186,6 +188,12 @@ export function GoalsSettingsClient() {
     [businessDays, businessDaysElapsed, computedValues],
   );
   const weekBuckets = useMemo(() => buildWeekBuckets(calendarReference, today), [calendarReference, today]);
+  const weeklyColumns = useMemo(() => {
+    const columns = weekBuckets.map((week, index) => ({ type: "week" as const, key: `week-${index}`, week, weekIndex: index }));
+    const currentIndex = weekBuckets.findIndex((week) => week.current);
+    columns.splice(currentIndex >= 0 ? currentIndex : 0, 0, { type: "projection" as const, key: "projection", week: null, weekIndex: -1 });
+    return columns;
+  }, [weekBuckets]);
   const weeklyDistribution = useMemo(() => {
     const sequential = buildSequentialWeekly(computedValues, weekBuckets.map((week) => week.businessDays));
     return stages.map((stage, index) => {
@@ -387,16 +395,31 @@ export function GoalsSettingsClient() {
         <section className="goal-panel goal-weekly-panel">
           <header><span>04</span><div><p>Metas semanais</p><h2>Acompanhamento por semana</h2></div><small className="goal-weekly-context">6 etapas · metas acumuladas</small></header>
           <p className="goal-panel-note">Cada coluna mostra a meta acumulada até o fim da semana. O valor menor indica quanto produzir naquela semana.</p>
-          <div className="goal-weekly-distribution" role="table" aria-label="Rota acumulada semanal das metas do funil" style={{ "--week-count": weekBuckets.length } as React.CSSProperties}>
+          <div
+            className="goal-weekly-distribution"
+            role="table"
+            aria-label="Rota acumulada semanal das metas do funil"
+            style={{ "--week-count": weekBuckets.length } as React.CSSProperties}
+            onMouseLeave={() => {
+              setHoveredWeeklyColumn(null);
+              setHoveredWeeklyRow(null);
+            }}
+          >
             <div className="goal-weekly-table-row goal-weekly-table-head" role="row">
-              <span role="columnheader">Etapa</span>
-              <span className="goal-weekly-projection" role="columnheader">Meta até hoje<small>{businessDaysElapsed} de {businessDays} dias úteis</small><em>Projeção</em></span>
-              {weekBuckets.map((week) => <span className={week.current ? "current" : ""} role="columnheader" key={week.label}>{week.label}<small>{week.range}</small>{week.current ? <em>Agora</em> : null}</span>)}
+              <span className={hoveredWeeklyColumn === "stage" ? "column-active" : ""} role="columnheader" onMouseEnter={() => setHoveredWeeklyColumn("stage")}>Etapa</span>
+              {weeklyColumns.map((column) => column.type === "projection"
+                ? <span className={`goal-weekly-projection ${hoveredWeeklyColumn === column.key ? "column-active" : ""}`} role="columnheader" key={column.key} onMouseEnter={() => setHoveredWeeklyColumn(column.key)}>Meta até hoje<small>{businessDaysElapsed} de {businessDays} dias úteis</small><em>Projeção</em></span>
+                : <span className={`${column.week.current ? "current" : ""} ${hoveredWeeklyColumn === column.key ? "column-active" : ""}`} role="columnheader" key={column.key} onMouseEnter={() => setHoveredWeeklyColumn(column.key)}>{column.week.label}<small>{column.week.range}</small>{column.week.current ? <em>Agora</em> : null}</span>)}
             </div>
-            {weeklyDistribution.map((stage, stageIndex) => <div className="goal-weekly-table-row" role="row" key={stage.key}>
-              <span className="goal-weekly-stage" role="rowheader"><i style={{ background: stage.color }} />{stage.label}<small>{formatWhole(stage.monthly)} no mês</small></span>
-              <strong className="goal-weekly-projection" role="cell"><b>{formatWhole(projectedValues[stageIndex])}</b><small>esperado até hoje</small></strong>
-              {stage.weekly.map((week, index) => <strong className={weekBuckets[index]?.current ? "current" : ""} role="cell" key={`${stage.key}-${index}`}><b>{formatWhole(week.cumulative)}</b><small>+{formatWhole(week.value)} na semana</small></strong>)}
+            {weeklyDistribution.map((stage, stageIndex) => <div className={`goal-weekly-table-row ${hoveredWeeklyRow === stage.key ? "row-active" : ""}`} role="row" key={stage.key} onMouseEnter={() => setHoveredWeeklyRow(stage.key)}>
+              <span className={`goal-weekly-stage ${hoveredWeeklyColumn === "stage" ? "column-active" : ""}`} role="rowheader" onMouseEnter={() => setHoveredWeeklyColumn("stage")}><i style={{ background: stage.color }} />{stage.label}<small>{formatWhole(stage.monthly)} no mês</small></span>
+              {weeklyColumns.map((column) => {
+                if (column.type === "projection") {
+                  return <strong className={`goal-weekly-projection ${hoveredWeeklyColumn === column.key ? "column-active" : ""}`} role="cell" key={`${stage.key}-${column.key}`} onMouseEnter={() => setHoveredWeeklyColumn(column.key)}><b>{formatWhole(projectedValues[stageIndex])}</b><small>esperado até hoje</small></strong>;
+                }
+                const week = stage.weekly[column.weekIndex];
+                return <strong className={`${column.week.current ? "current" : ""} ${hoveredWeeklyColumn === column.key ? "column-active" : ""}`} role="cell" key={`${stage.key}-${column.key}`} onMouseEnter={() => setHoveredWeeklyColumn(column.key)}><b>{formatWhole(week.cumulative)}</b><small>+{formatWhole(week.value)} na semana</small></strong>;
+              })}
             </div>)}
           </div>
           <div className="goal-weekly-legend"><span>Valor principal = meta acumulada · +N = meta da semana</span><strong>Cada etapa respeita o volume da etapa anterior</strong></div>
