@@ -325,7 +325,7 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
         </div>
       </section>
 
-      <form id="goal-settings-form" className="goal-studio" onSubmit={save}>
+      <form id="goal-settings-form" className={`goal-studio ${isPartnerships ? "goal-studio-partnerships" : ""}`} onSubmit={save}>
         <aside className="goal-panel goal-controls-panel">
           <header><span>01</span><div><p>Configuração</p><h2>Volume necessário por etapa</h2></div></header>
           <p className="goal-panel-note">Informe quantas vezes uma etapa precisa ser maior que a etapa seguinte.</p>
