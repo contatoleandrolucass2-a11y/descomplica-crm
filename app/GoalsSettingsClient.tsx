@@ -262,7 +262,7 @@ export function GoalsSettingsClient() {
         </div>
         <div className="goal-hero-actions">
           <button className="goal-save-button" type="submit" form="goal-settings-form" disabled={saving}>
-            {saving ? "Salvando…" : "Salvar metas e atualizar painel"}
+            {saving ? "Salvando…" : "Salvar"}
           </button>
           <p className="goal-save-message" role="status">{message}</p>
           {updatedAt ? <small className="goal-updated-at">Salvo em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(updatedAt))}</small> : null}
