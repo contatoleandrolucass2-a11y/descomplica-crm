@@ -45,7 +45,7 @@ function buildMonthCalendar(reference: Date) {
   const month = reference.getMonth();
   const first = new Date(year, month, 1);
   const totalDays = new Date(year, month + 1, 0).getDate();
-  const leading = first.getDay() === 0 ? 6 : first.getDay() - 1;
+  const leading = first.getDay();
   return Array.from({ length: leading + totalDays }, (_, index) => {
     if (index < leading) return null;
     const day = index - leading + 1;
@@ -420,7 +420,7 @@ export function GoalsSettingsClient() {
           <div className="goal-calendar-layout">
             <div className="goal-calendar-card">
               <div className="goal-calendar-heading"><div><strong>{monthLabel}</strong><small>Segunda a sexta · feriados não descontados</small></div><span>{businessDays} dias úteis</span></div>
-              <div className="goal-calendar-week"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span></div>
+              <div className="goal-calendar-week"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>
               <div className="goal-calendar-grid">
                 {calendar.map((item, index) => item ? <span className={`${item.business ? "business" : "weekend"} ${item.today ? "today" : ""}`} key={item.day}>{item.day}</span> : <i aria-hidden="true" key={`blank-${index}`} />)}
               </div>
