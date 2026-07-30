@@ -8,6 +8,7 @@
  * access, no environment reads, no local storage, no cookie manipulation.
  */
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { initialSignupActionState, signupAction } from "@/lib/auth/actions/signup";
@@ -116,6 +117,13 @@ export function RegisterForm() {
             {isPending ? "Criando conta..." : "Criar conta"}
           </button>
         </form>
+
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Já tem conta?{" "}
+          <Link href="/login" className="font-medium text-blue-900 hover:underline">
+            Entrar
+          </Link>
+        </p>
       </div>
     </div>
   );

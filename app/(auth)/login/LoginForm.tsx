@@ -8,6 +8,7 @@
  * environment reads, no local storage, no cookie manipulation.
  */
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { initialLoginActionState, loginAction } from "@/lib/auth/actions/login";
@@ -65,6 +66,13 @@ export function LoginForm() {
             {isPending ? "Entrando..." : "Entrar"}
           </button>
         </form>
+
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Ainda não tem conta?{" "}
+          <Link href="/register" className="font-medium text-blue-900 hover:underline">
+            Criar conta
+          </Link>
+        </p>
       </div>
     </div>
   );
