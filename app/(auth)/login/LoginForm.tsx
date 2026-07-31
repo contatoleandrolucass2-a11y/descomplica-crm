@@ -11,7 +11,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { initialLoginActionState, loginAction } from "@/lib/auth/actions/login";
+import { loginAction } from "@/lib/auth/actions/login";
+import { initialLoginActionState } from "@/lib/auth/actions/login-state";
 
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState(loginAction, initialLoginActionState);

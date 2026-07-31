@@ -18,6 +18,7 @@
  * - Navigation after a successful call is left entirely to the caller.
  */
 
+import type { SignupActionState, SignupFieldErrors } from "@/lib/auth/actions/signup-state";
 import { signupSchema } from "@/lib/auth/schemas/signup";
 import { createClient } from "@/lib/auth/supabase/server";
 
@@ -26,21 +27,6 @@ const GENERIC_FAILURE_MESSAGE =
 
 const GENERIC_SUCCESS_MESSAGE =
   "Cadastro recebido. Verifique seu e-mail ou faça login se sua conta já estiver ativa.";
-
-export type SignupFieldErrors = Partial<
-  Record<"name" | "email" | "password" | "confirmPassword", string[]>
->;
-
-export type SignupActionState = {
-  success: boolean;
-  message: string;
-  fieldErrors?: SignupFieldErrors;
-};
-
-export const initialSignupActionState: SignupActionState = {
-  success: false,
-  message: "",
-};
 
 export async function signupAction(
   _prevState: SignupActionState,

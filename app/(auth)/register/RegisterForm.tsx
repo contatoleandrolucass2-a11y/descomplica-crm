@@ -11,7 +11,8 @@
 import Link from "next/link";
 import { useActionState } from "react";
 
-import { initialSignupActionState, signupAction } from "@/lib/auth/actions/signup";
+import { signupAction } from "@/lib/auth/actions/signup";
+import { initialSignupActionState } from "@/lib/auth/actions/signup-state";
 
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(signupAction, initialSignupActionState);

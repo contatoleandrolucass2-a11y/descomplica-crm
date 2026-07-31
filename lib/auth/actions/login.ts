@@ -23,20 +23,12 @@
 
 import { redirect } from "next/navigation";
 
+import type { LoginActionState } from "@/lib/auth/actions/login-state";
 import { loginSchema } from "@/lib/auth/schemas/login";
 import { createClient } from "@/lib/auth/supabase/server";
 
 const GENERIC_FAILURE_MESSAGE =
   "Não foi possível autenticar. Verifique suas credenciais e tente novamente.";
-
-export type LoginActionState = {
-  status: "idle" | "error";
-  message?: string;
-};
-
-export const initialLoginActionState: LoginActionState = {
-  status: "idle",
-};
 
 export async function loginAction(
   _prevState: LoginActionState,
