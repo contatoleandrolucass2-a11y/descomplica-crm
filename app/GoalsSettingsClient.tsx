@@ -305,24 +305,39 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
       </header>
 
       <section className="goal-page-hero">
-        <div>
+        <div className="goal-hero-copy">
           <p className="goal-kicker">Metas comerciais</p>
           <h1>Planejamento de metas</h1>
-          <nav className="goal-profile-tabs" aria-label="Selecionar canal da meta">
-            {goalProfiles.map((item) => (
-              <a className={item.key === profile ? "active" : ""} href={item.href} aria-current={item.key === profile ? "page" : undefined} key={item.key}>
-                <span>{item.label}</span>
-                <small>{item.key === "dv" ? "Operação própria" : "Canal de parceiros"}</small>
-              </a>
-            ))}
-          </nav>
         </div>
-        <div className="goal-hero-actions">
-          <button className="goal-save-button" type="submit" form="goal-settings-form" disabled={saving}>
-            {saving ? "Salvando…" : "Salvar"}
-          </button>
-          <p className="goal-save-message" role="status">{message}</p>
-          {updatedAt ? <small className="goal-updated-at">Salvo em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(updatedAt))}</small> : null}
+        <div className="goal-command-center">
+          <div className="goal-channel-switcher">
+            <div className="goal-channel-label">
+              <small>Plano comercial</small>
+              <strong>Escolha o canal</strong>
+            </div>
+            <nav className="goal-profile-tabs" aria-label="Selecionar canal da meta">
+              {goalProfiles.map((item) => (
+                <a className={item.key === profile ? "active" : ""} href={item.href} aria-current={item.key === profile ? "page" : undefined} key={item.key}>
+                  <i aria-hidden="true" />
+                  <span>{item.key === "dv" ? "Direcional Vendas" : "Canal Parcerias"}</span>
+                  <small>{item.key === "dv" ? "Equipe interna" : "Imobiliárias parceiras"}</small>
+                </a>
+              ))}
+            </nav>
+          </div>
+          <div className="goal-hero-actions">
+            <div className="goal-save-state">
+              <i aria-hidden="true" />
+              <div>
+                <p className="goal-save-message" role="status">{message}</p>
+                {updatedAt ? <small className="goal-updated-at">Atualizado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(updatedAt))}</small> : null}
+              </div>
+            </div>
+            <button className="goal-save-button" type="submit" form="goal-settings-form" disabled={saving}>
+              <span aria-hidden="true">{saving ? "…" : "✓"}</span>
+              {saving ? "Aplicando" : "Aplicar metas"}
+            </button>
+          </div>
         </div>
       </section>
 
