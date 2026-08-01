@@ -350,11 +350,10 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
               const index = visibleStageOffset + localIndex;
               return (
               <label className="goal-rate-card" key={stage.key}>
-                <span className="goal-rate-index">{String(localIndex + 1).padStart(2, "0")}</span>
                 <span className="goal-rate-copy">
                   <strong>{stage.short}</strong>
-                  <small>para cada {visibleStages[localIndex + 1].short.toLowerCase()}</small>
-                  <em>{Number(rates[index]) > 0 ? `≈ ${formatRatio(Number(rates[index]))} para 1` : "Informe o percentual"}</em>
+                  <small>Meta para gerar 1 {visibleStages[localIndex + 1].short.toLowerCase()}</small>
+                  <em>{Number(rates[index]) > 0 ? `${formatRatio(Number(rates[index]))} para 1` : "Defina o percentual"}</em>
                 </span>
                 <span className="goal-rate-input">
                   <input
