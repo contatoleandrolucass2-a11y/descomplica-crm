@@ -295,7 +295,7 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
   }
 
   return (
-    <main className={`goal-page-shell ${isPartnerships ? "goal-page-shell-partnerships" : ""}`}>
+    <main className="goal-page-shell">
       <header className="goal-page-topbar">
         <a className="goal-brand" href="/" aria-label="Voltar ao Dashboard">
           <span>D</span>
