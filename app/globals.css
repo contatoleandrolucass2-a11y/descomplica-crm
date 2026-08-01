@@ -3586,6 +3586,191 @@ a {
   .goal-hero-actions .goal-save-button { width: 100%; }
 }
 
+/* Identidade visual do Canal Parcerias: âmbar e laranja. */
+.goal-page-shell-partnerships {
+  --cyan: #f59e0b;
+  background:
+    radial-gradient(circle at 10% 5%, rgba(245, 158, 11, .13), transparent 26rem),
+    radial-gradient(circle at 92% 12%, rgba(251, 113, 30, .1), transparent 24rem),
+    var(--surface-soft);
+}
+
+.goal-page-shell-partnerships .goal-kicker,
+.goal-page-shell-partnerships .goal-rate-copy em,
+.goal-page-shell-partnerships .goal-rate-input input,
+.goal-page-shell-partnerships .goal-rate-input b,
+.goal-page-shell-partnerships .goal-sales-input input,
+.goal-page-shell-partnerships .goal-funnel-total strong,
+.goal-page-shell-partnerships .goal-productivity-field input,
+.goal-page-shell-partnerships .goal-productive-input input,
+.goal-page-shell-partnerships .goal-productive-input b,
+.goal-page-shell-partnerships .goal-weekly-context,
+.goal-page-shell-partnerships .goal-weekly-legend strong {
+  color: #d96b08;
+}
+
+.goal-page-shell-partnerships .goal-controls-panel { border-top-color: #f59e0b; }
+
+.goal-page-shell-partnerships .goal-panel > header > span {
+  color: #b45309;
+  background: #fff1dc;
+}
+
+.goal-page-shell-partnerships .goal-rate-card:focus-within,
+.goal-page-shell-partnerships .goal-productivity-field:focus-within {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, .15);
+}
+
+.goal-page-shell-partnerships .goal-sales-target {
+  border-color: #f2c58c;
+  background: #fff8ed;
+}
+
+.goal-page-shell-partnerships .goal-sales-input {
+  border-color: #eab66f;
+}
+
+.goal-page-shell-partnerships .goal-conversion-cell:not(.goal-conversion-sales) strong {
+  color: #c45f08;
+  border-color: #f1c287;
+  background: #fff5e7;
+}
+
+.goal-page-shell-partnerships .goal-calendar-actions > span {
+  color: #b45309;
+  background: #fff0d8;
+}
+
+.goal-page-shell-partnerships .goal-calendar-grid > .business {
+  color: #a94d07;
+  border-color: #f4bd72;
+  background: #fff2df;
+}
+
+.goal-page-shell-partnerships .goal-calendar-grid > .today {
+  color: #fff;
+  border-color: #e56e08;
+  background: #e56e08;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, .2);
+}
+
+.goal-page-shell-partnerships .goal-calendar-insights .goal-calendar-rule {
+  border-color: #f2c997;
+  background: #fff6e9;
+}
+
+.goal-page-shell-partnerships .goal-calendar-rule strong { color: #b45309; }
+
+.goal-page-shell-partnerships .goal-profile-tabs a.active i {
+  border-color: #f59e0b;
+  background: #f59e0b;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, .16);
+}
+
+.goal-page-shell-partnerships .goal-profile-tabs a.active::after {
+  background: linear-gradient(90deg, #f59e0b, #fb7130);
+  box-shadow: 0 0 14px rgba(245, 158, 11, .3);
+}
+
+.goal-page-shell-partnerships .goal-save-state > i {
+  background: #f59e0b;
+  box-shadow: 0 0 0 5px rgba(245, 158, 11, .14);
+}
+
+.goal-page-shell-partnerships .goal-hero-actions .goal-save-button {
+  border-color: rgba(255, 190, 92, .62);
+  background: linear-gradient(135deg, #d86b08, #9a3f08);
+  box-shadow: 0 10px 24px rgba(154, 63, 8, .2);
+}
+
+.goal-page-shell-partnerships .goal-hero-actions .goal-save-button > span {
+  color: #6c2b06;
+  background: #ffd18a;
+}
+
+.goal-page-shell-partnerships .goal-weekly-table-head > .goal-weekly-projection,
+.goal-page-shell-partnerships .goal-weekly-table-row > .goal-weekly-projection {
+  border-color: #ffb347;
+  background: linear-gradient(145deg, #b85b09, #7c3508);
+  box-shadow: inset 0 3px #ffc56d, 0 0 20px rgba(245, 158, 11, .18);
+}
+
+.goal-page-shell-partnerships .goal-weekly-table-head > .goal-weekly-projection em {
+  background: #c45f08;
+}
+
+:root[data-theme="dark"] .goal-page-shell-partnerships {
+  background:
+    radial-gradient(circle at 10% 5%, rgba(245, 158, 11, .1), transparent 25rem),
+    radial-gradient(circle at 92% 12%, rgba(251, 113, 30, .06), transparent 24rem),
+    var(--surface-soft);
+}
+
+:root[data-theme="dark"] .goal-page-shell-partnerships .goal-panel > header > span {
+  color: #ffd28b;
+  background: rgba(245, 158, 11, .14);
+}
+
+:root[data-theme="dark"] .goal-page-shell-partnerships .goal-conversion-cell:not(.goal-conversion-sales) strong {
+  color: #ffbd63;
+  border-color: rgba(245, 158, 11, .42);
+  background: rgba(245, 158, 11, .13);
+}
+
+:root[data-theme="dark"] .goal-page-shell-partnerships .goal-calendar-grid > .business {
+  color: #ffd99b;
+  border-color: rgba(245, 158, 11, .48);
+  background: rgba(245, 158, 11, .14);
+}
+
+:root[data-theme="dark"] .goal-page-shell-partnerships .goal-calendar-grid > .today {
+  color: #3d1904;
+  border-color: #ffb84d;
+  background: #ffb84d;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, .2);
+}
+
+:root[data-theme="dark"] .goal-page-shell-partnerships .goal-calendar-insights .goal-calendar-rule {
+  border-color: rgba(245, 158, 11, .3);
+  background: rgba(245, 158, 11, .1);
+}
+
+:root[data-theme="dark"] .goal-page-shell-partnerships .goal-calendar-rule strong,
+:root[data-theme="dark"] .goal-page-shell-partnerships .goal-calendar-actions > span {
+  color: #ffc66f;
+}
+
+@media (hover: hover) {
+  .goal-page-shell-partnerships .goal-hero-actions .goal-save-button:hover {
+    border-color: #ffd08a;
+    background: linear-gradient(135deg, #ef7d12, #b94c08);
+    box-shadow: 0 14px 30px rgba(154, 63, 8, .28), 0 0 22px rgba(245, 158, 11, .2);
+  }
+
+  :root[data-theme="dark"] .goal-page-shell-partnerships :where(
+    .goal-rate-card,
+    .goal-sales-target,
+    .goal-productivity-block,
+    .goal-productivity-field,
+    .goal-productive-card,
+    .goal-conversion-row
+  ):hover {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, rgba(181, 87, 8, .3), rgba(100, 47, 8, .68));
+    box-shadow: 0 0 0 1px rgba(245, 158, 11, .3), 0 18px 38px rgba(0, 0, 0, .38), 0 0 28px rgba(245, 158, 11, .15);
+  }
+
+  :root[data-theme="dark"] .goal-page-shell-partnerships .goal-calendar-grid > span:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, .32), 0 8px 18px rgba(0, 0, 0, .28);
+  }
+
+  :root[data-theme="dark"] .goal-page-shell-partnerships .goal-calendar-insights > div:hover {
+    box-shadow: inset 0 0 0 2px #f59e0b, 0 10px 22px rgba(0, 0, 0, .3);
+  }
+}
+
 .goal-studio-partnerships .goal-conversion-panel .goal-panel-note {
   margin-block: 6px;
 }
