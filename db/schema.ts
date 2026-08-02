@@ -19,3 +19,10 @@ export const ingestionRuns = sqliteTable("ingestion_runs", {
   collaboratorCount: integer("collaborator_count").notNull(),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const pointGoals = sqliteTable("point_goals", {
+  id: text("id").primaryKey(),
+  weightsJson: text("weights_json").notNull(),
+  targetsJson: text("targets_json").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

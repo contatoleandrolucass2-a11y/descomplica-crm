@@ -10,6 +10,7 @@ export function SiteMenu() {
         <div className="site-menu-panel">
           <a href="/configuracoes">Visão geral</a>
           <a href="/configuracoes/metas">Configurar metas</a>
+          <a href="/configuracoes/metas/pontos">Metas por pontos</a>
         </div>
       </div>
       <ThemeSwitch />

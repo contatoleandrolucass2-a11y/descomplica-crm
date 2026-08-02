@@ -31,9 +31,10 @@ const productiveMetrics = [
 ] as const;
 type ProductiveTeamTargets = Record<(typeof productiveMetrics)[number]["key"], number | "">;
 type GoalProfile = "dv" | "parcerias";
-const goalProfiles: Array<{ key: GoalProfile; label: string; href: string }> = [
-  { key: "dv", label: "Meta DV", href: "/configuracoes/metas" },
-  { key: "parcerias", label: "Meta Canal Parcerias", href: "/configuracoes/metas/parcerias" },
+const goalProfiles: Array<{ key: GoalProfile | "pontos"; label: string; description: string; href: string }> = [
+  { key: "dv", label: "Direcional Vendas", description: "Equipe interna", href: "/configuracoes/metas" },
+  { key: "parcerias", label: "Canal Parcerias", description: "Imobiliárias parceiras", href: "/configuracoes/metas/parcerias" },
+  { key: "pontos", label: "Meta por pontos", description: "Pontuação comercial", href: "/configuracoes/metas/pontos" },
 ];
 const formatWhole = (value: number) =>
   new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(Math.round(value));
@@ -319,8 +320,8 @@ export function GoalsSettingsClient({ profile = "dv" }: { profile?: GoalProfile 
               {goalProfiles.map((item) => (
                 <a className={item.key === profile ? "active" : ""} href={item.href} aria-current={item.key === profile ? "page" : undefined} key={item.key}>
                   <i aria-hidden="true" />
-                  <span>{item.key === "dv" ? "Direcional Vendas" : "Canal Parcerias"}</span>
-                  <small>{item.key === "dv" ? "Equipe interna" : "Imobiliárias parceiras"}</small>
+                  <span>{item.label}</span>
+                  <small>{item.description}</small>
                 </a>
               ))}
             </nav>
