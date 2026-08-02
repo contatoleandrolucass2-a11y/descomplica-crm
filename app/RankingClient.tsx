@@ -67,10 +67,6 @@ function isTargetAgency(record: DashboardFilterRecord) {
     .some((value) => normalized(typeof value === "string" ? value : undefined).includes(target));
 }
 
-function initials(name: string) {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
-}
-
 function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, period: RankingPeriod) {
   const data = dashboard.filterData?.records;
   if (!data) return [];
@@ -154,9 +150,8 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
             <div className="ranking-list" role="list">
               {visible.map((item, index) => <article className={index < 3 ? `ranking-row top-${index + 1}` : "ranking-row"} role="listitem" key={item.name}>
                 <div className="ranking-row-rank"><strong>{index + 1}</strong><small>º</small></div>
-                <div className="ranking-person"><i>{initials(item.name)}</i><span><strong>{item.name}</strong><small>{item.manager}</small></span></div>
+                <div className="ranking-person"><span><strong>{item.name}</strong><small>{item.manager}</small></span></div>
                 <div className="ranking-production">
-                  <small>Quantidade e pontos por etapa</small>
                   <div className="ranking-activity">
                     <span><small>Agendamentos</small><b>{number.format(item.schedule)}</b><em>{number.format(item.schedule * weights.schedule)} pts</em></span>
                     <span><small>Visitas</small><b>{number.format(item.visit)}</b><em>{number.format(item.visit * weights.visit)} pts</em></span>
