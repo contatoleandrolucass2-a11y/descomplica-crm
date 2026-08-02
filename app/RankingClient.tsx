@@ -146,7 +146,6 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
               <h2>{visible[index].name}</h2>
               <p>{visible[index].manager}</p>
               <div className="ranking-podium-score"><strong>{number.format(visible[index].total)}</strong><small>pontos</small></div>
-              <span className="ranking-pedestal" aria-hidden="true">{index + 1}º</span>
             </article> : null)}
           </section>
 
