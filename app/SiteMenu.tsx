@@ -5,6 +5,7 @@ export function SiteMenu() {
   return (
     <nav className="site-menu" aria-label="Navegação principal">
       <a href="/">Dashboard</a>
+      <a href="/ranking">Ranking</a>
       <div className="site-menu-dropdown">
         <button type="button" aria-haspopup="true">Configurações <span aria-hidden="true">⌄</span></button>
         <div className="site-menu-panel">
