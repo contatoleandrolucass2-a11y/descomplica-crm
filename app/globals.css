@@ -3607,7 +3607,7 @@ a {
 
 .points-studio {
   display: grid;
-  grid-template-columns: minmax(320px, .72fr) minmax(560px, 1.28fr);
+  grid-template-columns: 1fr;
   align-items: stretch;
   gap: 14px;
   width: min(1460px, calc(100% - 40px));
@@ -3672,14 +3672,15 @@ a {
 .points-panel-heading > small { margin-left: auto; color: #087c8d; font-size: .64rem; font-weight: 800; white-space: nowrap; }
 .points-panel-note { margin: 9px 0; color: #52667d; font-size: .72rem; line-height: 1.4; }
 
-.points-metric-list { display: grid; gap: 6px; }
+.points-metric-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .points-metric-card {
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) 94px;
+  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-rows: auto auto;
   align-items: center;
   gap: 9px;
-  min-height: 55px;
-  padding: 6px 8px;
+  min-height: 104px;
+  padding: 9px;
   border: 1px solid #dbe5ed;
   border-left: 3px solid var(--metric-color);
   border-radius: 12px;
@@ -3702,8 +3703,9 @@ a {
 .points-metric-card strong { overflow: hidden; color: #18304e; font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
 .points-metric-card small { color: #66798d; font-size: .6rem; }
 .points-value-editor {
+  grid-column: 1 / -1;
   display: flex;
-  width: 94px;
+  width: 100%;
   height: 40px;
   align-items: center;
   justify-content: center;
@@ -3900,6 +3902,7 @@ a {
 @media (max-width: 1120px) {
   .points-studio { grid-template-columns: 1fr; }
   .points-result-panel { grid-column: auto; }
+  .points-metric-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 760px) {
@@ -3908,9 +3911,11 @@ a {
   .points-equation { grid-template-columns: 1fr; }
   .points-equation > div { min-height: 112px; }
   .points-equation > b { justify-self: center; transform: rotate(90deg); }
+  .points-metric-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 430px) {
+  .points-metric-list { grid-template-columns: 1fr; }
   .points-target-grid { grid-template-columns: 1fr; }
   .points-target-card:last-child { grid-column: auto; }
   .points-panel-heading > small { display: none; }
