@@ -205,7 +205,39 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
             </div>
           </section>
 
-          <section className="ranking-method"><strong>Como os pontos são calculados</strong><span>Registros × peso de cada ação</span><b>+</b><span>Bônus pela conversão individual de agendamento em visita</span><span className="ranking-tiebreak">Desempate: visitas → conversão Agenda/Visita → pastas aprovadas → conversão Visita/Pasta → vendas → conversão Pasta/Venda.</span><a href="#point-settings-form">Ajustar pontos ↑</a></section>
+          <section className="ranking-explainer">
+            <header><div><p className="goal-kicker">Entenda seu resultado</p><h2>Como seu lugar no ranking é calculado</h2></div><a href="#point-settings-form">Ver valores dos pontos ↑</a></header>
+            <div className="ranking-explainer-grid">
+              <article>
+                <span className="ranking-explainer-number">1</span>
+                <div><h3>Primeiro, somamos seus pontos</h3><p>Cada resultado registrado no Salesforce vale uma quantidade de pontos. Quanto mais você produz, mais pontos ganha.</p></div>
+                <ul className="ranking-weight-list">
+                  <li><strong>Agendamento</strong><span>{number.format(weights.schedule)} ponto{weights.schedule === 1 ? "" : "s"}</span></li>
+                  <li><strong>Visita</strong><span>{number.format(weights.visit)} pontos</span></li>
+                  <li><strong>Pasta aprovada</strong><span>{number.format(weights.approvedFolder)} pontos</span></li>
+                  <li><strong>Venda</strong><span>{number.format(weights.sale)} pontos</span></li>
+                </ul>
+              </article>
+              <article>
+                <span className="ranking-explainer-number">2</span>
+                <div><h3>Depois, você pode ganhar um bônus</h3><p>O sistema vê quantos agendamentos viraram visitas. Essa porcentagem usa somente as quantidades reais do Salesforce.</p></div>
+                <div className="ranking-example"><small>Exemplo fácil</small><p><strong>23 pontos</strong><b>×</b><strong>40% de conversão</strong><b>=</b><strong>9 pontos de bônus</strong></p><mark>23 + 9 = 32 pontos no total</mark><span>O bônus sempre é arredondado para baixo.</span></div>
+              </article>
+              <article className="ranking-tiebreak-card">
+                <span className="ranking-explainer-number">3</span>
+                <div><h3>Se duas pessoas tiverem os mesmos pontos</h3><p>Comparamos um item de cada vez. Assim que alguém tiver um resultado maior, o empate termina.</p></div>
+                <ol>
+                  <li><b>Mais visitas</b><span>Quem fez mais visitas fica na frente.</span></li>
+                  <li><b>Melhor conversão de agendamento em visita</b><span>Quem transformou mais agendamentos em visitas fica na frente.</span></li>
+                  <li><b>Mais pastas aprovadas</b><span>Quem teve mais pastas aprovadas fica na frente.</span></li>
+                  <li><b>Melhor conversão de visita em pasta</b><span>Quem transformou mais visitas em pastas fica na frente.</span></li>
+                  <li><b>Mais vendas</b><span>Quem vendeu mais fica na frente.</span></li>
+                  <li><b>Melhor conversão de pasta aprovada em venda</b><span>Quem transformou mais pastas aprovadas em vendas fica na frente.</span></li>
+                </ol>
+                <small className="ranking-final-tie">Se tudo continuar igual, usamos a ordem alfabética.</small>
+              </article>
+            </div>
+          </section>
         </>
       ) : <section className="ranking-empty"><span>R</span><h2>Nenhum resultado neste período</h2><p>Nenhum registro da imobiliária {TARGET_AGENCY} encontrado. Altere período ou aguarde próxima sincronização do Salesforce.</p></section>}
     </section>
