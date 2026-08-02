@@ -156,18 +156,18 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
                 <div className="ranking-row-rank"><strong>{index + 1}</strong><small>º</small></div>
                 <div className="ranking-person"><i>{initials(item.name)}</i><span><strong>{item.name}</strong><small>{item.manager}</small></span></div>
                 <div className="ranking-production">
-                  <small>Produção no período</small>
+                  <small>Quantidade e pontos por etapa</small>
                   <div className="ranking-activity">
-                    <span><b>{number.format(item.schedule)}</b><small>Agendas</small></span>
-                    <span><b>{number.format(item.visit)}</b><small>Visitas</small></span>
-                    <span><b>{number.format(item.approvedFolder)}</b><small>Pastas</small></span>
-                    <span><b>{number.format(item.sale)}</b><small>Vendas</small></span>
+                    <span><small>Agendamentos</small><b>{number.format(item.schedule)}</b><em>{number.format(item.schedule * weights.schedule)} pts</em></span>
+                    <span><small>Visitas</small><b>{number.format(item.visit)}</b><em>{number.format(item.visit * weights.visit)} pts</em></span>
+                    <span><small>Pastas aprov.</small><b>{number.format(item.approvedFolder)}</b><em>{number.format(item.approvedFolder * weights.approvedFolder)} pts</em></span>
+                    <span><small>Vendas</small><b>{number.format(item.sale)}</b><em>{number.format(item.sale * weights.sale)} pts</em></span>
                   </div>
                 </div>
                 <div className="ranking-row-result">
-                  <small>Resultado</small>
+                  <small>Total</small>
                   <strong>{number.format(item.total)}<span> pts</span></strong>
-                  <p><span>+{number.format(item.bonus)} bônus</span><span>{percent.format(item.conversion * 100)}% conversão</span></p>
+                  <p><span>{number.format(item.baseScore)} pts produção</span><span>+{number.format(item.bonus)} pts bônus</span><span>{percent.format(item.conversion * 100)}% conversão</span></p>
                 </div>
               </article>)}
             </div>
