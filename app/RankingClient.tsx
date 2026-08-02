@@ -92,7 +92,6 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
       if (line) line[key] += 1;
     });
   };
-  add(data.opportunities, "roulette");
   add(data.appointments, "schedule");
   add(data.visits, "visit");
   add(data.folders, "approvedFolder");
