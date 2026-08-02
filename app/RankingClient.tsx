@@ -176,15 +176,27 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
       {visible.length ? (
         <>
           <section className="ranking-podium" aria-label="Pódio do ranking">
-            {[1, 0, 2].map((index) => visible[index] ? <article className={`place-${index + 1}`} style={{ "--podium-progress": `${Math.min((visible[index].total / Math.max(visible[0].total, 1)) * 100, 100)}%` } as React.CSSProperties} key={visible[index].name}>
-              <span className="ranking-medal">{index === 0 ? "Ouro" : index === 1 ? "Prata" : "Bronze"}</span>
-              <i className="ranking-crest" aria-label={`${index + 1}º lugar`}><b>{index + 1}</b><small>º</small></i>
-              <span className="ranking-place-label">{index === 0 ? "Líder do ranking" : index === 1 ? "Vice-líder" : "Top 3"}</span>
-              <h2>{visible[index].name}</h2>
-              <p>{visible[index].manager}</p>
-              <div className="ranking-podium-score"><strong>{number.format(visible[index].total)}</strong><small>pontos</small></div>
-              <div className="ranking-podium-chase"><i aria-hidden="true"><span /></i>{index === 0 ? <p><strong>Na liderança</strong><span>Defenda o topo</span></p> : <p><strong>{number.format(Math.max(visible[0].total - visible[index].total, 0))} pontos para o líder</strong><span>Próximo alvo: {visible[0].name}</span></p>}</div>
-            </article> : null)}
+            {[1, 0, 2].map((index) => {
+              const item = visible[index];
+              if (!item) return null;
+              const target = index > 0 ? visible[index - 1] : null;
+              const gap = target ? Math.max(target.total - item.total, 0) : 0;
+              const progress = target ? Math.min((item.total / Math.max(target.total, 1)) * 100, 100) : 100;
+              const chaseTitle = gap === 0
+                ? "Empate em pontos"
+                : index === 1
+                  ? `${number.format(gap)} ${gap === 1 ? "ponto" : "pontos"} para assumir a liderança`
+                  : `${number.format(gap)} ${gap === 1 ? "ponto" : "pontos"} para conquistar o 2º lugar`;
+              return <article className={`place-${index + 1}`} style={{ "--podium-progress": `${progress}%` } as React.CSSProperties} key={item.name}>
+                <span className="ranking-medal">{index === 0 ? "Ouro" : index === 1 ? "Prata" : "Bronze"}</span>
+                <i className="ranking-crest" aria-label={`${index + 1}º lugar`}><b>{index + 1}</b><small>º</small></i>
+                <span className="ranking-place-label">{index === 0 ? "Líder do ranking" : index === 1 ? "Vice-líder" : "Top 3"}</span>
+                <h2>{item.name}</h2>
+                <p>{item.manager}</p>
+                <div className="ranking-podium-score"><strong>{number.format(item.total)}</strong><small>pontos</small></div>
+                <div className="ranking-podium-chase"><i aria-hidden="true"><span /></i>{index === 0 ? <p><strong>Na liderança</strong><span>Defenda o topo</span></p> : <p><strong>{chaseTitle}</strong><span>{gap === 0 ? "Vença no próximo critério de desempate" : `Próximo alvo: ${target?.name}`}</span></p>}</div>
+              </article>;
+            })}
           </section>
 
           <section className="ranking-list-card">
