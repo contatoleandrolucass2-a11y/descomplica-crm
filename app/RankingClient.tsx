@@ -53,7 +53,15 @@ function isInPeriod(record: DashboardFilterRecord, period: RankingPeriod, refere
 }
 
 function ownerName(record: DashboardFilterRecord) {
-  return record.owner.trim();
+  return formatPersonName(record.owner);
+}
+
+function formatPersonName(value: string | undefined) {
+  const connectors = new Set(["da", "das", "de", "do", "dos", "e"]);
+  return (value ?? "").trim().toLocaleLowerCase("pt-BR").split(/\s+/).filter(Boolean).map((word, index) => {
+    if (index > 0 && connectors.has(word)) return word;
+    return word.replace(/(^|[-'])(\p{L})/gu, (_, separator: string, letter: string) => `${separator}${letter.toLocaleUpperCase("pt-BR")}`);
+  }).join(" ");
 }
 
 function normalized(value: string | undefined) {
@@ -83,11 +91,12 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
     const name = ownerName(record);
     if (!name) return null;
     const key = name.toLocaleLowerCase("pt-BR");
+    const manager = formatPersonName(record.manager) || "Sem gerente";
     if (!lines.has(key)) {
-      lines.set(key, { name, manager: record.manager || "Sem gerente", roulette: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0, baseScore: 0, bonus: 0, total: 0, conversion: 0 });
+      lines.set(key, { name, manager, roulette: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0, baseScore: 0, bonus: 0, total: 0, conversion: 0 });
     }
     const line = lines.get(key)!;
-    if (line.manager === "Sem gerente" && record.manager) line.manager = record.manager;
+    if (line.manager === "Sem gerente" && manager !== "Sem gerente") line.manager = manager;
     return line;
   };
   const add = (records: DashboardFilterRecord[], key: "roulette" | "schedule" | "visit" | "approvedFolder" | "sale") => {
