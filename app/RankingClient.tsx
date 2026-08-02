@@ -1,8 +1,5 @@
 "use client";
-/* eslint-disable @next/next/no-html-link-for-pages */
-
 import { useMemo, useState } from "react";
-import { SiteMenu } from "./SiteMenu";
 import type { DashboardFilterRecord, DashboardPayload } from "./types";
 
 export type RankingWeights = {
@@ -29,6 +26,7 @@ type ScoreLine = {
 };
 
 const periodLabels: Record<RankingPeriod, string> = { month: "Mês atual", week: "Esta semana", today: "Hoje" };
+const TARGET_AGENCY = "DIRECIONAL VENDAS SPC";
 const number = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 const percent = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
@@ -58,6 +56,17 @@ function ownerName(record: DashboardFilterRecord) {
   return record.owner.trim();
 }
 
+function normalized(value: string | undefined) {
+  return (value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleUpperCase("pt-BR").trim();
+}
+
+function isTargetAgency(record: DashboardFilterRecord) {
+  const target = normalized(TARGET_AGENCY);
+  const raw = record as DashboardFilterRecord & Record<string, unknown>;
+  return [record.realEstateAgency, record.salesChannel, record.company, raw["Imobiliária"], raw.Imobiliaria]
+    .some((value) => normalized(typeof value === "string" ? value : undefined).includes(target));
+}
+
 function initials(name: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 }
@@ -78,7 +87,7 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
     return line;
   };
   const add = (records: DashboardFilterRecord[], key: "roulette" | "schedule" | "visit" | "approvedFolder" | "sale") => {
-    records.filter((record) => isInPeriod(record, period, dashboard.referenceDate)).forEach((record) => {
+    records.filter((record) => isTargetAgency(record) && isInPeriod(record, period, dashboard.referenceDate)).forEach((record) => {
       const line = ensure(record);
       if (line) line[key] += 1;
     });
@@ -97,7 +106,7 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
   }).sort((a, b) => b.total - a.total || b.sale - a.sale || b.approvedFolder - a.approvedFolder || a.name.localeCompare(b.name, "pt-BR"));
 }
 
-export function RankingClient({ dashboard, dataStatus, weights }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights }) {
+export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights }) {
   const [period, setPeriod] = useState<RankingPeriod>("month");
   const [manager, setManager] = useState("all");
   const [query, setQuery] = useState("");
@@ -109,16 +118,11 @@ export function RankingClient({ dashboard, dataStatus, weights }: { dashboard: D
   const averageConversion = visible.length ? visible.reduce((total, item) => total + item.conversion, 0) / visible.length : 0;
 
   return (
-    <main className="ranking-shell">
-      <header className="goal-page-topbar">
-        <a className="goal-brand" href="/" aria-label="Voltar ao Dashboard"><span>D</span><div><strong>Descomplica</strong><small>Inteligência comercial</small></div></a>
-        <SiteMenu />
-      </header>
-
-      <section className="ranking-hero">
-        <div><p className="goal-kicker">Performance comercial</p><h1>Ranking da equipe</h1><p>Pontuação calculada com os dados atualizados do Salesforce.</p></div>
+    <section className="points-ranking-board">
+      <header className="points-ranking-heading">
+        <div><p className="goal-kicker">Performance comercial</p><h2>Ranking da equipe</h2><span>Somente registros da imobiliária <strong>{TARGET_AGENCY}</strong>.</span></div>
         <div className="ranking-source"><i aria-hidden="true" /><span><small>{dataStatus === "live" ? "Dados sincronizados" : dataStatus === "demo" ? "Dados de demonstração" : "Aguardando dados"}</small><strong>{dashboard ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(dashboard.generatedAt)) : "—"}</strong></span></div>
-      </section>
+      </header>
 
       <section className="ranking-toolbar" aria-label="Filtros do ranking">
         <div className="ranking-periods">{(Object.keys(periodLabels) as RankingPeriod[]).map((key) => <button className={period === key ? "active" : ""} type="button" onClick={() => setPeriod(key)} key={key}>{periodLabels[key]}</button>)}</div>
@@ -149,9 +153,9 @@ export function RankingClient({ dashboard, dataStatus, weights }: { dashboard: D
             </div>
           </section>
 
-          <section className="ranking-method"><strong>Como os pontos são calculados</strong><span>Registros × peso de cada ação</span><b>+</b><span>Bônus pela conversão individual de agendamento em visita</span><a href="/configuracoes/metas/pontos">Configurar pontos →</a></section>
+          <section className="ranking-method"><strong>Como os pontos são calculados</strong><span>Registros × peso de cada ação</span><b>+</b><span>Bônus pela conversão individual de agendamento em visita</span><a href="#point-settings-form">Ajustar pontos ↑</a></section>
         </>
-      ) : <section className="ranking-empty"><span>R</span><h2>Nenhum resultado neste período</h2><p>Altere o período ou os filtros. O ranking aparecerá assim que os registros do Salesforce estiverem disponíveis.</p></section>}
-    </main>
+      ) : <section className="ranking-empty"><span>R</span><h2>Nenhum resultado neste período</h2><p>Nenhum registro da imobiliária {TARGET_AGENCY} encontrado. Altere período ou aguarde próxima sincronização do Salesforce.</p></section>}
+    </section>
   );
 }

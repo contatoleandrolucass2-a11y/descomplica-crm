@@ -49,6 +49,7 @@ export type DashboardFilterRecord = {
   manager: string;
   salesChannel: string;
   company: string;
+  realEstateAgency?: string;
   development: string;
   amount: number;
 };

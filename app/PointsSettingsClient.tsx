@@ -2,7 +2,9 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Native navigation matches existing Vinext routes. */
 
 import { useEffect, useMemo, useState } from "react";
+import { RankingBoard, type RankingWeights } from "./RankingClient";
 import { SiteMenu } from "./SiteMenu";
+import type { DashboardPayload } from "./types";
 
 const metrics = [
   { key: "roulette", label: "Roleta", short: "R", color: "#2563eb" },
@@ -31,11 +33,15 @@ export function PointsSettingsClient({
   appointments,
   visits,
   sourceUpdatedAt,
+  dashboard,
+  dataStatus,
 }: {
   conversionRate: number;
   appointments: number;
   visits: number;
   sourceUpdatedAt: string | null;
+  dashboard: DashboardPayload | null;
+  dataStatus: "live" | "demo" | "waiting";
 }) {
   const [weights, setWeights] = useState<MetricValues>(defaultWeights);
   const [message, setMessage] = useState("Carregando pontuação…");
@@ -65,6 +71,10 @@ export function PointsSettingsClient({
   const conversionBonus = Math.floor(basePoints * conversionRate);
   const finalResult = basePoints + conversionBonus;
   const conversionPercent = conversionRate * 100;
+  const rankingWeights = useMemo(
+    () => Object.fromEntries(metrics.map(({ key }) => [key, Number(weights[key]) || 0])) as RankingWeights,
+    [weights],
+  );
 
   function changeValue(setter: React.Dispatch<React.SetStateAction<MetricValues>>, key: MetricKey, value: string) {
     setter((current) => ({ ...current, [key]: value === "" ? "" : Math.max(Math.floor(Number(value) || 0), 0) }));
@@ -160,6 +170,8 @@ export function PointsSettingsClient({
           <div className="points-result-breakdown"><span><i className="base" />Base {formatWhole(basePoints)}</span><span><i className="bonus" />Conversão +{formatWhole(conversionBonus)}</span></div>
         </section>
       </form>
+
+      <RankingBoard dashboard={dashboard} dataStatus={dataStatus} weights={rankingWeights} />
     </main>
   );
 }
