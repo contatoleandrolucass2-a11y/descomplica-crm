@@ -139,7 +139,15 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
           </section>
 
           <section className="ranking-podium" aria-label="Pódio do ranking">
-            {[1, 0, 2].map((index) => visible[index] ? <article className={`place-${index + 1}`} key={visible[index].name}><span className="ranking-medal">{index + 1}º</span><i>{initials(visible[index].name)}</i><h2>{visible[index].name}</h2><p>{visible[index].manager}</p><strong>{number.format(visible[index].total)}</strong><small>pontos</small></article> : null)}
+            {[1, 0, 2].map((index) => visible[index] ? <article className={`place-${index + 1}`} key={visible[index].name}>
+              <span className="ranking-medal">{index === 0 ? "Ouro" : index === 1 ? "Prata" : "Bronze"}</span>
+              <i className="ranking-crest" aria-label={`${index + 1}º lugar`}><b>{index + 1}</b><small>º</small></i>
+              <span className="ranking-place-label">{index === 0 ? "Líder do ranking" : index === 1 ? "Vice-líder" : "Top 3"}</span>
+              <h2>{visible[index].name}</h2>
+              <p>{visible[index].manager}</p>
+              <div className="ranking-podium-score"><strong>{number.format(visible[index].total)}</strong><small>pontos</small></div>
+              <span className="ranking-pedestal" aria-hidden="true">{index + 1}º</span>
+            </article> : null)}
           </section>
 
           <section className="ranking-table-card">
