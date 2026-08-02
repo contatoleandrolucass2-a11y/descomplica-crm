@@ -149,13 +149,27 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
             </article> : null)}
           </section>
 
-          <section className="ranking-table-card">
+          <section className="ranking-list-card">
             <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por colaborador</h2></div><span>{periodLabels[period]} · {visible.length} participantes</span></header>
-            <div className="ranking-table-wrap">
-              <table className="ranking-table">
-                <thead><tr><th>Posição</th><th>Colaborador</th><th>Roleta</th><th>Agenda</th><th>Visitas</th><th>Pastas aprovadas</th><th>Vendas</th><th>Conversão</th><th>Bônus</th><th>Total</th></tr></thead>
-                <tbody>{visible.map((item, index) => <tr key={item.name}><td><b className={index < 3 ? `top top-${index + 1}` : ""}>{index + 1}º</b></td><td><div className="ranking-person"><i>{initials(item.name)}</i><span><strong>{item.name}</strong><small>{item.manager}</small></span></div></td><td>{number.format(item.roulette)}</td><td>{number.format(item.schedule)}</td><td>{number.format(item.visit)}</td><td>{number.format(item.approvedFolder)}</td><td><strong>{number.format(item.sale)}</strong></td><td>{percent.format(item.conversion * 100)}%</td><td className="ranking-bonus">+{number.format(item.bonus)}</td><td><strong className="ranking-total">{number.format(item.total)}</strong></td></tr>)}</tbody>
-              </table>
+            <div className="ranking-list" role="list">
+              {visible.map((item, index) => <article className={index < 3 ? `ranking-row top-${index + 1}` : "ranking-row"} role="listitem" key={item.name}>
+                <div className="ranking-row-rank"><strong>{index + 1}</strong><small>º</small></div>
+                <div className="ranking-person"><i>{initials(item.name)}</i><span><strong>{item.name}</strong><small>{item.manager}</small></span></div>
+                <div className="ranking-production">
+                  <small>Produção no período</small>
+                  <div className="ranking-activity">
+                    <span><b>{number.format(item.schedule)}</b><small>Agendas</small></span>
+                    <span><b>{number.format(item.visit)}</b><small>Visitas</small></span>
+                    <span><b>{number.format(item.approvedFolder)}</b><small>Pastas</small></span>
+                    <span><b>{number.format(item.sale)}</b><small>Vendas</small></span>
+                  </div>
+                </div>
+                <div className="ranking-row-result">
+                  <small>Resultado</small>
+                  <strong>{number.format(item.total)}<span> pts</span></strong>
+                  <p><span>+{number.format(item.bonus)} bônus</span><span>{percent.format(item.conversion * 100)}% conversão</span></p>
+                </div>
+              </article>)}
             </div>
           </section>
 
