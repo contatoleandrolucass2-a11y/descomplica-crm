@@ -38,7 +38,6 @@ export function PointsSettingsClient({
   sourceUpdatedAt: string | null;
 }) {
   const [weights, setWeights] = useState<MetricValues>(defaultWeights);
-  const [targets, setTargets] = useState<MetricValues>(defaultTargets);
   const [message, setMessage] = useState("Carregando pontuação…");
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -53,9 +52,6 @@ export function PointsSettingsClient({
         if (row?.weights) {
           setWeights(Object.fromEntries(metrics.map(({ key }) => [key, Number(row.weights[key]) || 0])) as MetricValues);
         }
-        if (row?.targets) {
-          setTargets(Object.fromEntries(metrics.map(({ key }) => [key, Number(row.targets[key]) || 0])) as MetricValues);
-        }
         setUpdatedAt(row?.updated_at ?? null);
         setMessage("");
       })
@@ -68,10 +64,6 @@ export function PointsSettingsClient({
   );
   const conversionBonus = Math.floor(basePoints * conversionRate);
   const finalResult = basePoints + conversionBonus;
-  const targetLoad = useMemo(
-    () => metrics.reduce((total, { key }) => total + (Number(weights[key]) || 0) * (Number(targets[key]) || 0), 0),
-    [targets, weights],
-  );
   const conversionPercent = conversionRate * 100;
 
   function changeValue(setter: React.Dispatch<React.SetStateAction<MetricValues>>, key: MetricKey, value: string) {
@@ -87,7 +79,7 @@ export function PointsSettingsClient({
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         weights: Object.fromEntries(metrics.map(({ key }) => [key, Number(weights[key]) || 0])),
-        targets: Object.fromEntries(metrics.map(({ key }) => [key, Number(targets[key]) || 0])),
+        targets: defaultTargets,
       }),
     });
     setSaving(false);
@@ -137,36 +129,24 @@ export function PointsSettingsClient({
 
       <form id="point-settings-form" className="points-studio" onSubmit={save}>
         <section className="points-panel points-editor-panel">
-          <header className="points-panel-heading"><span>01</span><div><p>Configuração</p><h2>Pontos por ação</h2></div><small>Soma automática</small></header>
-          <p className="points-panel-note">Defina quanto vale cada avanço comercial.</p>
+          <header className="points-panel-heading"><span>01</span><div><p>Configuração</p><h2>Pontos por ação</h2></div><small>Clique e edite</small></header>
+          <p className="points-panel-note">Edite livremente o valor de cada avanço comercial.</p>
           <div className="points-metric-list">
             {metrics.map((metric) => (
               <label className="points-metric-card" style={{ "--metric-color": metric.color } as React.CSSProperties} key={metric.key}>
                 <i aria-hidden="true">{metric.short}</i><span><strong>{metric.label}</strong><small>pontos por registro</small></span>
-                <input aria-label={`Pontos de ${metric.label}`} type="number" min="0" max="100000" step="1" value={weights[metric.key]} onChange={(event) => changeValue(setWeights, metric.key, event.target.value)} />
+                <span className="points-value-editor">
+                  <input aria-label={`Pontos de ${metric.label}`} type="number" min="0" max="100000" step="1" value={weights[metric.key]} onChange={(event) => changeValue(setWeights, metric.key, event.target.value)} />
+                  <b>pts</b>
+                </span>
               </label>
             ))}
           </div>
           <div className="points-subtotal"><span>Pontos-base</span><strong>{formatWhole(basePoints)}</strong></div>
         </section>
 
-        <section className="points-panel points-target-panel">
-          <header className="points-panel-heading"><span>02</span><div><p>Indicadores</p><h2>Meta por indicador</h2></div><small>Todos editáveis</small></header>
-          <p className="points-panel-note">Informe a quantidade desejada de cada indicador.</p>
-          <div className="points-target-grid">
-            {metrics.map((metric) => (
-              <label className="points-target-card" style={{ "--metric-color": metric.color } as React.CSSProperties} key={metric.key}>
-                <span><i aria-hidden="true" />{metric.label}</span>
-                <input aria-label={`Meta de ${metric.label}`} type="number" min="0" max="100000" step="1" value={targets[metric.key]} onChange={(event) => changeValue(setTargets, metric.key, event.target.value)} />
-                <small>meta</small>
-              </label>
-            ))}
-          </div>
-          <div className="points-subtotal subtle"><span>Pontos previstos pelas metas</span><strong>{formatWhole(targetLoad)}</strong></div>
-        </section>
-
         <section className="points-panel points-result-panel">
-          <header className="points-panel-heading"><span>03</span><div><p>Cálculo automático</p><h2>Resultado</h2></div><small>Atualiza na hora</small></header>
+          <header className="points-panel-heading"><span>02</span><div><p>Cálculo automático</p><h2>Resultado</h2></div><small>Atualiza na hora</small></header>
           <div className="points-conversion-source">
             <div><span>Conversão Agendamento → Visita</span><strong>{formatPercent(conversionPercent)}%</strong></div>
             <small>{formatWhole(appointments)} agendamentos · {formatWhole(visits)} visitas{sourceUpdatedAt ? ` · dados de ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(sourceUpdatedAt))}` : ""}</small>

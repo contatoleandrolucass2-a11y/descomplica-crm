@@ -3607,7 +3607,7 @@ a {
 
 .points-studio {
   display: grid;
-  grid-template-columns: minmax(270px, .82fr) minmax(270px, .82fr) minmax(430px, 1.36fr);
+  grid-template-columns: minmax(320px, .72fr) minmax(560px, 1.28fr);
   align-items: stretch;
   gap: 14px;
   width: min(1460px, calc(100% - 40px));
@@ -3675,7 +3675,7 @@ a {
 .points-metric-list { display: grid; gap: 6px; }
 .points-metric-card {
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) 66px;
+  grid-template-columns: 30px minmax(0, 1fr) 94px;
   align-items: center;
   gap: 9px;
   min-height: 55px;
@@ -3701,6 +3701,20 @@ a {
 .points-metric-card > span { display: grid; gap: 1px; min-width: 0; }
 .points-metric-card strong { overflow: hidden; color: #18304e; font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
 .points-metric-card small { color: #66798d; font-size: .6rem; }
+.points-value-editor {
+  display: flex;
+  width: 94px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 7px;
+  border: 1px solid #cfdae5;
+  border-radius: 10px;
+  background: #fff;
+  cursor: text;
+}
+.points-value-editor b { color: #718498; font-size: .58rem; }
 .points-metric-card input,
 .points-target-card input {
   min-width: 0;
@@ -3713,7 +3727,7 @@ a {
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
-.points-metric-card input { width: 66px; height: 38px; border-radius: 10px; font-size: 1rem; }
+.points-metric-card input { width: 54px; height: 36px; padding: 0; border: 0; border-radius: 0; font-size: 1rem; }
 .points-metric-card:focus-within,
 .points-target-card:focus-within {
   border-color: var(--metric-color);
@@ -3871,6 +3885,7 @@ a {
 :root[data-theme="dark"] .points-target-card { border-top-color: var(--metric-color); border-left-color: #294a63; }
 :root[data-theme="dark"] .points-metric-card input,
 :root[data-theme="dark"] .points-target-card input { color: #fff; border-color: #3b5b73; background: #102a42; }
+:root[data-theme="dark"] .points-value-editor { border-color: #3b5b73; background: #102a42; }
 :root[data-theme="dark"] .points-subtotal.subtle { color: #eaf8ff; border-color: #31516c; background: #0b2136; }
 :root[data-theme="dark"] .points-conversion-source { border-color: #207c82; background: rgba(10, 70, 78, .35); }
 :root[data-theme="dark"] .points-conversion-source span { color: #d9f8f5; }
@@ -3883,8 +3898,8 @@ a {
 :root[data-theme="dark"] .points-rounding-note i { background: #15334b; }
 
 @media (max-width: 1120px) {
-  .points-studio { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .points-result-panel { grid-column: 1 / -1; }
+  .points-studio { grid-template-columns: 1fr; }
+  .points-result-panel { grid-column: auto; }
 }
 
 @media (max-width: 760px) {
