@@ -179,7 +179,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
 
       <section className="ranking-toolbar" aria-label="Filtros do ranking">
         <div className="ranking-periods">{presentationPeriods.map((key) => <button className={period === key ? "active" : ""} type="button" onClick={() => { setIsPresentationActive(false); setPeriod(key); setCollaborator("all"); }} key={key}>{periodLabels[key]}</button>)}</div>
-        <label className="ranking-search"><span>Colaborador</span><select value={collaborator} onChange={(event) => setCollaborator(event.target.value)}><option value="all">Todos os colaboradores</option>{collaborators.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
+        <label className="ranking-search"><span>Corretor</span><select value={collaborator} onChange={(event) => setCollaborator(event.target.value)}><option value="all">Todos os corretores</option>{collaborators.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
         <label className="ranking-manager"><span>Gerente</span><select value={manager} onChange={(event) => { setManager(event.target.value); setCollaborator("all"); }}><option value="all">Todos os gerentes</option>{managers.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
       </section>
 
@@ -210,7 +210,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
           </section>
 
           <section className="ranking-list-card">
-            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por colaborador</h2></div><p className="ranking-list-insights"><span>{periodLabels[period]}</span><b>·</b><span><strong>{number.format(visible.length)}</strong> participantes</span><b>·</b><span>Média <strong>{number.format(average)}</strong> pontos</span><b>·</b><span>Conversão média de agendamentos para visitas: <strong>{percent.format(averageConversion * 100)}%</strong></span></p></header>
+            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por corretor</h2></div><p className="ranking-list-insights"><span>{periodLabels[period]}</span><b>·</b><span><strong>{number.format(visible.length)}</strong> participantes</span><b>·</b><span>Média <strong>{number.format(average)}</strong> pontos</span><b>·</b><span>Conversão média de agendamentos para visitas: <strong>{percent.format(averageConversion * 100)}%</strong></span></p></header>
             <div className="ranking-list" role="list">
               {visible.map((item, index) => <article className={index < 3 ? `ranking-row top-${index + 1}` : "ranking-row"} role="listitem" key={item.name}>
                 <div className="ranking-row-rank"><strong>{index + 1}</strong><small>º</small></div>
