@@ -19,8 +19,6 @@ type MetricValues = Record<MetricKey, number | "">;
 
 const defaultWeights: MetricValues = { roulette: 1, schedule: 1, visit: 7, approvedFolder: 4, sale: 10 };
 const defaultTargets: MetricValues = { roulette: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0 };
-const formatWhole = (value: number) => new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format(value);
-const formatPercent = (value: number) => new Intl.NumberFormat("pt-BR", { minimumFractionDigits: value % 1 ? 1 : 0, maximumFractionDigits: 1 }).format(value);
 
 const navigation = [
   { label: "Direcional Vendas", description: "Equipe interna", href: "/configuracoes/metas" },
@@ -64,13 +62,6 @@ export function PointsSettingsClient({
       .catch(() => setMessage("Valores padrão em uso. Salve para registrar sua configuração."));
   }, []);
 
-  const basePoints = useMemo(
-    () => metrics.reduce((total, { key }) => total + (Number(weights[key]) || 0), 0),
-    [weights],
-  );
-  const conversionBonus = Math.floor(basePoints * conversionRate);
-  const finalResult = basePoints + conversionBonus;
-  const conversionPercent = conversionRate * 100;
   const rankingWeights = useMemo(
     () => Object.fromEntries(metrics.map(({ key }) => [key, Number(weights[key]) || 0])) as RankingWeights,
     [weights],
@@ -154,24 +145,9 @@ export function PointsSettingsClient({
           </div>
         </section>
 
-        <section className="points-panel points-result-panel">
-          <header className="points-panel-heading"><span>02</span><div><p>Cálculo automático</p><h2>Resultado</h2></div><small>Atualiza na hora</small></header>
-          <div className="points-conversion-source">
-            <div><span>Conversão Agendamento → Visita</span><strong>{formatPercent(conversionPercent)}%</strong></div>
-            <small>{formatWhole(appointments)} agendamentos · {formatWhole(visits)} visitas{sourceUpdatedAt ? ` · dados de ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(sourceUpdatedAt))}` : ""}</small>
-          </div>
-          <div className="points-equation" aria-label={`${basePoints} mais ${conversionBonus} igual a ${finalResult}`}>
-            <div><span>Pontos-base</span><strong>{formatWhole(basePoints)}</strong></div><b aria-hidden="true">+</b>
-            <div><span>Bônus da conversão</span><strong>{formatWhole(conversionBonus)}</strong><small>{formatWhole(basePoints)} × {formatPercent(conversionPercent)}%</small></div><b aria-hidden="true">=</b>
-            <div className="points-equation-result"><span>Resultado final</span><output>{formatWhole(finalResult)}</output></div>
-          </div>
-          <div className="points-rounding-note"><i aria-hidden="true">↓</i><span>Resultado da conversão sempre arredondado para baixo, sem casas decimais.</span></div>
-          <div className="points-score-band" style={{ "--base-width": `${Math.min((basePoints / Math.max(finalResult, 1)) * 100, 100)}%` } as React.CSSProperties}><span /><i /></div>
-          <div className="points-result-breakdown"><span><i className="base" />Base {formatWhole(basePoints)}</span><span><i className="bonus" />Conversão +{formatWhole(conversionBonus)}</span></div>
-        </section>
       </form>
 
-      <RankingBoard dashboard={dashboard} dataStatus={dataStatus} weights={rankingWeights} />
+      <RankingBoard dashboard={dashboard} dataStatus={dataStatus} weights={rankingWeights} conversionData={{ rate: conversionRate, appointments, visits, updatedAt: sourceUpdatedAt }} />
     </main>
   );
 }

@@ -135,7 +135,7 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
   );
 }
 
-export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights }) {
+export function RankingBoard({ dashboard, dataStatus, weights, conversionData }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights; conversionData?: { rate: number; appointments: number; visits: number; updatedAt: string | null } }) {
   const [period, setPeriod] = useState<RankingPeriod>("month");
   const [manager, setManager] = useState("all");
   const [collaborator, setCollaborator] = useState("all");
@@ -145,6 +145,10 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
   const visible = ranking.filter((item) => (manager === "all" || item.manager === manager) && (collaborator === "all" || item.name === collaborator));
   const average = visible.length ? visible.reduce((total, item) => total + item.total, 0) / visible.length : 0;
   const averageConversion = visible.length ? visible.reduce((total, item) => total + item.conversion, 0) / visible.length : 0;
+  const configuredBase = Object.values(weights).reduce((total, value) => total + value, 0);
+  const currentConversion = conversionData?.rate ?? averageConversion;
+  const configuredBonus = Math.floor(configuredBase * currentConversion);
+  const configuredTotal = configuredBase + configuredBonus;
   const summary = visible.reduce((total, item) => ({
     roulette: total.roulette + item.roulette,
     schedule: total.schedule + item.schedule,
@@ -159,7 +163,7 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
   return (
     <section className="points-ranking-board">
       <header className="points-ranking-heading">
-        <div><p className="goal-kicker">Performance comercial</p><h2>Ranking da equipe</h2><span>Somente registros da imobiliária <strong>{TARGET_AGENCY}</strong>.</span></div>
+        <div><p className="goal-kicker">Performance comercial</p><h2>Ranking da equipe</h2></div>
         <div className="ranking-source"><i aria-hidden="true" /><span><small>{dataStatus === "live" ? "Dados sincronizados" : dataStatus === "demo" ? "Dados de demonstração" : "Aguardando dados"}</small><strong>{dashboard ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(dashboard.generatedAt)) : "—"}</strong></span></div>
       </header>
 
@@ -172,13 +176,14 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
       {visible.length ? (
         <>
           <section className="ranking-podium" aria-label="Pódio do ranking">
-            {[1, 0, 2].map((index) => visible[index] ? <article className={`place-${index + 1}`} key={visible[index].name}>
+            {[1, 0, 2].map((index) => visible[index] ? <article className={`place-${index + 1}`} style={{ "--podium-progress": `${Math.min((visible[index].total / Math.max(visible[0].total, 1)) * 100, 100)}%` } as React.CSSProperties} key={visible[index].name}>
               <span className="ranking-medal">{index === 0 ? "Ouro" : index === 1 ? "Prata" : "Bronze"}</span>
               <i className="ranking-crest" aria-label={`${index + 1}º lugar`}><b>{index + 1}</b><small>º</small></i>
               <span className="ranking-place-label">{index === 0 ? "Líder do ranking" : index === 1 ? "Vice-líder" : "Top 3"}</span>
               <h2>{visible[index].name}</h2>
               <p>{visible[index].manager}</p>
               <div className="ranking-podium-score"><strong>{number.format(visible[index].total)}</strong><small>pontos</small></div>
+              <div className="ranking-podium-chase"><i aria-hidden="true"><span /></i>{index === 0 ? <p><strong>Na liderança</strong><span>Defenda o topo</span></p> : <p><strong>{number.format(Math.max(visible[0].total - visible[index].total, 0))} pontos para o líder</strong><span>Próximo alvo: {visible[0].name}</span></p>}</div>
             </article> : null)}
           </section>
 
@@ -234,8 +239,17 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
               </article>
               <article>
                 <span className="ranking-explainer-number">2</span>
-                <div><h3>Depois, você pode ganhar um bônus</h3><p>O sistema vê quantos agendamentos viraram visitas. Essa porcentagem usa somente as quantidades reais do Salesforce.</p></div>
-                <div className="ranking-example"><small>Exemplo fácil</small><p><strong>23 pontos</strong><b>×</b><strong>40% de conversão</strong><b>=</b><strong>9 pontos de bônus</strong></p><mark>23 + 9 = 32 pontos no total</mark><span>O bônus sempre é arredondado para baixo.</span></div>
+                <div><h3>Depois, sua conversão gera um bônus</h3><p>Usamos números reais do Salesforce para descobrir quantos agendamentos viraram visitas. Quanto maior essa conversão, maior seu bônus.</p></div>
+                <div className="ranking-bonus-story">
+                  <div className="ranking-bonus-source"><span>Conversão atual</span><strong>{percent.format(currentConversion * 100)}%</strong><small>{number.format(conversionData?.appointments ?? summary.schedule)} agendamentos → {number.format(conversionData?.visits ?? summary.visit)} visitas</small></div>
+                  <ol>
+                    <li><b>1. Calcule a conversão</b><span>{number.format(conversionData?.visits ?? summary.visit)} visitas ÷ {number.format(conversionData?.appointments ?? summary.schedule)} agendamentos = {percent.format(currentConversion * 100)}%</span></li>
+                    <li><b>2. Calcule o bônus</b><span>{number.format(configuredBase)} pontos × {percent.format(currentConversion * 100)}% = {number.format(configuredBonus)} pontos</span></li>
+                    <li><b>3. Some tudo</b><span>{number.format(configuredBase)} pontos + {number.format(configuredBonus)} de bônus = {number.format(configuredTotal)} pontos</span></li>
+                  </ol>
+                  <mark>{number.format(configuredTotal)} pontos no resultado final</mark>
+                  <span>Bônus sempre arredondado para baixo{conversionData?.updatedAt ? ` · Salesforce atualizado em ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(conversionData.updatedAt))}` : ""}.</span>
+                </div>
               </article>
               <article className="ranking-tiebreak-card">
                 <span className="ranking-explainer-number">3</span>
