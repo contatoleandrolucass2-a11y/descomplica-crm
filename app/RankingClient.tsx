@@ -129,6 +129,7 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
   const average = visible.length ? visible.reduce((total, item) => total + item.total, 0) / visible.length : 0;
   const averageConversion = visible.length ? visible.reduce((total, item) => total + item.conversion, 0) / visible.length : 0;
   const summary = visible.reduce((total, item) => ({
+    roulette: total.roulette + item.roulette,
     schedule: total.schedule + item.schedule,
     visit: total.visit + item.visit,
     approvedFolder: total.approvedFolder + item.approvedFolder,
@@ -136,7 +137,7 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
     baseScore: total.baseScore + item.baseScore,
     bonus: total.bonus + item.bonus,
     points: total.points + item.total,
-  }), { schedule: 0, visit: 0, approvedFolder: 0, sale: 0, baseScore: 0, bonus: 0, points: 0 });
+  }), { roulette: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0, baseScore: 0, bonus: 0, points: 0 });
 
   return (
     <section className="points-ranking-board">
@@ -179,6 +180,7 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
                 <div className="ranking-person"><span><strong>{item.name}</strong><small>{item.manager}</small></span></div>
                 <div className="ranking-production">
                   <div className="ranking-activity">
+                    <span><small>Roleta</small><b>{number.format(item.roulette)}</b><em>{number.format(item.roulette * weights.roulette)} pts</em><mark>Aguardando relatório</mark></span>
                     <span><small>Agendamentos</small><b>{number.format(item.schedule)}</b><em>{number.format(item.schedule * weights.schedule)} pts</em><mark>→ Visitas {formatRate(item.visit, item.schedule)}</mark></span>
                     <span><small>Visitas</small><b>{number.format(item.visit)}</b><em>{number.format(item.visit * weights.visit)} pts</em><mark>→ Pastas {formatRate(item.approvedFolder, item.visit)}</mark></span>
                     <span><small>Pastas aprov.</small><b>{number.format(item.approvedFolder)}</b><em>{number.format(item.approvedFolder * weights.approvedFolder)} pts</em><mark>→ Vendas {formatRate(item.sale, item.approvedFolder)}</mark></span>
@@ -197,6 +199,7 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
           <section className="ranking-summary">
             <header><div><p className="goal-kicker">Resumo do ranking</p><h2>Resultado consolidado</h2></div><span>{periodLabels[period]} · {visible.length} participantes</span></header>
             <div className="ranking-summary-grid">
+              <article><small>Roleta</small><strong>{number.format(summary.roulette)}</strong><em>{number.format(summary.roulette * weights.roulette)} pts</em><span>Aguardando relatório</span></article>
               <article><small>Agendamentos</small><strong>{number.format(summary.schedule)}</strong><em>{number.format(summary.schedule * weights.schedule)} pts</em><span>→ Visitas {formatRate(summary.visit, summary.schedule)}</span></article>
               <article><small>Visitas</small><strong>{number.format(summary.visit)}</strong><em>{number.format(summary.visit * weights.visit)} pts</em><span>→ Pastas {formatRate(summary.approvedFolder, summary.visit)}</span></article>
               <article><small>Pastas aprovadas</small><strong>{number.format(summary.approvedFolder)}</strong><em>{number.format(summary.approvedFolder * weights.approvedFolder)} pts</em><span>→ Vendas {formatRate(summary.sale, summary.approvedFolder)}</span></article>
@@ -212,6 +215,7 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
                 <span className="ranking-explainer-number">1</span>
                 <div><h3>Primeiro, somamos seus pontos</h3><p>Cada resultado registrado no Salesforce vale uma quantidade de pontos. Quanto mais você produz, mais pontos ganha.</p></div>
                 <ul className="ranking-weight-list">
+                  <li><strong>Roleta</strong><span>{number.format(weights.roulette)} ponto{weights.roulette === 1 ? "" : "s"}</span></li>
                   <li><strong>Agendamento</strong><span>{number.format(weights.schedule)} ponto{weights.schedule === 1 ? "" : "s"}</span></li>
                   <li><strong>Visita</strong><span>{number.format(weights.visit)} pontos</span></li>
                   <li><strong>Pasta aprovada</strong><span>{number.format(weights.approvedFolder)} pontos</span></li>
@@ -234,7 +238,6 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
                   <li><b>Mais vendas</b><span>Quem vendeu mais fica na frente.</span></li>
                   <li><b>Melhor conversão de pasta aprovada em venda</b><span>Quem transformou mais pastas aprovadas em vendas fica na frente.</span></li>
                 </ol>
-                <small className="ranking-final-tie">Se tudo continuar igual, usamos a ordem alfabética.</small>
               </article>
             </div>
           </section>
