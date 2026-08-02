@@ -180,11 +180,11 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
                 <div className="ranking-person"><span><strong>{item.name}</strong><small>{item.manager}</small></span></div>
                 <div className="ranking-production">
                   <div className="ranking-activity">
-                    <span><small>Roleta</small><b>{number.format(item.roulette)}</b><em>{number.format(item.roulette * weights.roulette)} pts</em><mark>Aguardando relatório</mark></span>
-                    <span><small>Agendamentos</small><b>{number.format(item.schedule)}</b><em>{number.format(item.schedule * weights.schedule)} pts</em><mark>→ Visitas {formatRate(item.visit, item.schedule)}</mark></span>
-                    <span><small>Visitas</small><b>{number.format(item.visit)}</b><em>{number.format(item.visit * weights.visit)} pts</em><mark>→ Pastas {formatRate(item.approvedFolder, item.visit)}</mark></span>
-                    <span><small>Pastas aprov.</small><b>{number.format(item.approvedFolder)}</b><em>{number.format(item.approvedFolder * weights.approvedFolder)} pts</em><mark>→ Vendas {formatRate(item.sale, item.approvedFolder)}</mark></span>
-                    <span><small>Vendas</small><b>{number.format(item.sale)}</b><em>{number.format(item.sale * weights.sale)} pts</em><mark>Agenda → Venda {formatRate(item.sale, item.schedule)}</mark></span>
+                    <span className="no-conversion"><small>Roleta</small><b>{number.format(item.roulette)}</b><em>{number.format(item.roulette * weights.roulette)} pts</em></span>
+                    <span className="no-conversion"><small>Agendamentos</small><b>{number.format(item.schedule)}</b><em>{number.format(item.schedule * weights.schedule)} pts</em></span>
+                    <span><small>Visitas</small><b>{number.format(item.visit)}</b><em>{number.format(item.visit * weights.visit)} pts</em><mark>Agendamentos → Visitas {formatRate(item.visit, item.schedule)}</mark></span>
+                    <span><small>Pastas aprov.</small><b>{number.format(item.approvedFolder)}</b><em>{number.format(item.approvedFolder * weights.approvedFolder)} pts</em><mark>Visitas → Pastas {formatRate(item.approvedFolder, item.visit)}</mark></span>
+                    <span><small>Vendas</small><b>{number.format(item.sale)}</b><em>{number.format(item.sale * weights.sale)} pts</em><mark>Pastas → Vendas {formatRate(item.sale, item.approvedFolder)}</mark></span>
                   </div>
                 </div>
                 <div className="ranking-row-result">
@@ -199,11 +199,11 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
           <section className="ranking-summary">
             <header><div><p className="goal-kicker">Resumo do ranking</p><h2>Resultado consolidado</h2></div><span>{periodLabels[period]} · {visible.length} participantes</span></header>
             <div className="ranking-summary-grid">
-              <article><small>Roleta</small><strong>{number.format(summary.roulette)}</strong><em>{number.format(summary.roulette * weights.roulette)} pts</em><span>Aguardando relatório</span></article>
-              <article><small>Agendamentos</small><strong>{number.format(summary.schedule)}</strong><em>{number.format(summary.schedule * weights.schedule)} pts</em><span>→ Visitas {formatRate(summary.visit, summary.schedule)}</span></article>
-              <article><small>Visitas</small><strong>{number.format(summary.visit)}</strong><em>{number.format(summary.visit * weights.visit)} pts</em><span>→ Pastas {formatRate(summary.approvedFolder, summary.visit)}</span></article>
-              <article><small>Pastas aprovadas</small><strong>{number.format(summary.approvedFolder)}</strong><em>{number.format(summary.approvedFolder * weights.approvedFolder)} pts</em><span>→ Vendas {formatRate(summary.sale, summary.approvedFolder)}</span></article>
-              <article><small>Vendas</small><strong>{number.format(summary.sale)}</strong><em>{number.format(summary.sale * weights.sale)} pts</em><span>Agenda → Venda {formatRate(summary.sale, summary.schedule)}</span></article>
+              <article className="no-conversion"><small>Roleta</small><strong>{number.format(summary.roulette)}</strong><em>{number.format(summary.roulette * weights.roulette)} pts</em></article>
+              <article className="no-conversion"><small>Agendamentos</small><strong>{number.format(summary.schedule)}</strong><em>{number.format(summary.schedule * weights.schedule)} pts</em></article>
+              <article><small>Visitas</small><strong>{number.format(summary.visit)}</strong><em>{number.format(summary.visit * weights.visit)} pts</em><span>Agendamentos → Visitas {formatRate(summary.visit, summary.schedule)}</span></article>
+              <article><small>Pastas aprovadas</small><strong>{number.format(summary.approvedFolder)}</strong><em>{number.format(summary.approvedFolder * weights.approvedFolder)} pts</em><span>Visitas → Pastas {formatRate(summary.approvedFolder, summary.visit)}</span></article>
+              <article><small>Vendas</small><strong>{number.format(summary.sale)}</strong><em>{number.format(summary.sale * weights.sale)} pts</em><span>Pastas → Vendas {formatRate(summary.sale, summary.approvedFolder)}</span></article>
               <article className="ranking-summary-total"><small>Pontuação total</small><strong>{number.format(summary.points)}</strong><em>pontos</em><span>{number.format(summary.baseScore)} produção + {number.format(summary.bonus)} bônus</span></article>
             </div>
           </section>
