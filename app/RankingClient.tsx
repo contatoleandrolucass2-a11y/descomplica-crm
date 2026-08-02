@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { DashboardFilterRecord, DashboardPayload } from "./types";
 
 export type RankingWeights = {
@@ -26,6 +26,7 @@ type ScoreLine = {
 };
 
 const periodLabels: Record<RankingPeriod, string> = { month: "Mês atual", lastWeek: "Semana passada", week: "Esta semana", today: "Hoje" };
+const presentationPeriods = Object.keys(periodLabels) as RankingPeriod[];
 const TARGET_AGENCY = "DIRECIONAL VENDAS SPC";
 const number = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 const percent = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -137,8 +138,17 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
 
 export function RankingBoard({ dashboard, dataStatus, weights, conversionData }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights; conversionData?: { rate: number; appointments: number; visits: number; updatedAt: string | null } }) {
   const [period, setPeriod] = useState<RankingPeriod>("month");
+  const [isPresentationActive, setIsPresentationActive] = useState(true);
   const [manager, setManager] = useState("all");
   const [collaborator, setCollaborator] = useState("all");
+  useEffect(() => {
+    if (!isPresentationActive) return;
+    const timer = window.setInterval(() => {
+      setPeriod((current) => presentationPeriods[(presentationPeriods.indexOf(current) + 1) % presentationPeriods.length]);
+      setCollaborator("all");
+    }, 10_000);
+    return () => window.clearInterval(timer);
+  }, [isPresentationActive]);
   const ranking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period) : [], [dashboard, weights, period]);
   const managers = useMemo(() => [...new Set(ranking.map((item) => item.manager))].sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking]);
   const collaborators = useMemo(() => ranking.filter((item) => manager === "all" || item.manager === manager).map((item) => item.name).sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking, manager]);
@@ -168,7 +178,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
       </header>
 
       <section className="ranking-toolbar" aria-label="Filtros do ranking">
-        <div className="ranking-periods">{(Object.keys(periodLabels) as RankingPeriod[]).map((key) => <button className={period === key ? "active" : ""} type="button" onClick={() => { setPeriod(key); setCollaborator("all"); }} key={key}>{periodLabels[key]}</button>)}</div>
+        <div className="ranking-periods">{presentationPeriods.map((key) => <button className={period === key ? "active" : ""} type="button" onClick={() => { setIsPresentationActive(false); setPeriod(key); setCollaborator("all"); }} key={key}>{periodLabels[key]}</button>)}</div>
         <label className="ranking-search"><span>Colaborador</span><select value={collaborator} onChange={(event) => setCollaborator(event.target.value)}><option value="all">Todos os colaboradores</option>{collaborators.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
         <label className="ranking-manager"><span>Gerente</span><select value={manager} onChange={(event) => { setManager(event.target.value); setCollaborator("all"); }}><option value="all">Todos os gerentes</option>{managers.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
       </section>
