@@ -289,6 +289,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
           </section>
         </>
       ) : <section className="ranking-empty"><span>R</span><h2>Nenhum resultado neste período</h2><p>Nenhum registro da imobiliária {TARGET_AGENCY} encontrado. Altere período ou aguarde próxima sincronização do Salesforce.</p></section>}
+      <footer className="ranking-help-footer">Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</footer>
     </section>
   );
 }
