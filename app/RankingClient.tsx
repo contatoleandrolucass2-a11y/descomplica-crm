@@ -10,7 +10,7 @@ export type RankingWeights = {
   sale: number;
 };
 
-type RankingPeriod = "month" | "week" | "today";
+type RankingPeriod = "month" | "lastWeek" | "week" | "today";
 type ScoreLine = {
   name: string;
   manager: string;
@@ -25,7 +25,7 @@ type ScoreLine = {
   conversion: number;
 };
 
-const periodLabels: Record<RankingPeriod, string> = { month: "Mês atual", week: "Esta semana", today: "Hoje" };
+const periodLabels: Record<RankingPeriod, string> = { month: "Mês atual", lastWeek: "Semana passada", week: "Esta semana", today: "Hoje" };
 const TARGET_AGENCY = "DIRECIONAL VENDAS SPC";
 const number = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 const percent = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -49,6 +49,14 @@ function isInPeriod(record: DashboardFilterRecord, period: RankingPeriod, refere
   const reference = localDate(referenceDate);
   if (period === "today") return date.getTime() === reference.getTime();
   if (period === "week") return date >= startOfWeek(reference) && date <= reference;
+  if (period === "lastWeek") {
+    const currentWeekStart = startOfWeek(reference);
+    const previousWeekStart = new Date(currentWeekStart);
+    const previousWeekEnd = new Date(currentWeekStart);
+    previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+    previousWeekEnd.setDate(previousWeekEnd.getDate() - 1);
+    return date >= previousWeekStart && date <= previousWeekEnd;
+  }
   return date.getFullYear() === reference.getFullYear() && date.getMonth() === reference.getMonth() && date <= reference;
 }
 
@@ -175,7 +183,7 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
           </section>
 
           <section className="ranking-list-card">
-            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por colaborador</h2></div><p className="ranking-list-insights"><span>{periodLabels[period]}</span><b>·</b><span><strong>{number.format(visible.length)}</strong> participantes</span><b>·</b><span>Média <strong>{number.format(average)}</strong> pontos</span><b>·</b><span>Conversão média <strong>{percent.format(averageConversion * 100)}%</strong></span></p></header>
+            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por colaborador</h2></div><p className="ranking-list-insights"><span>{periodLabels[period]}</span><b>·</b><span><strong>{number.format(visible.length)}</strong> participantes</span><b>·</b><span>Média <strong>{number.format(average)}</strong> pontos</span><b>·</b><span>Conversão média de agendamentos para visitas: <strong>{percent.format(averageConversion * 100)}%</strong></span></p></header>
             <div className="ranking-list" role="list">
               {visible.map((item, index) => <article className={index < 3 ? `ranking-row top-${index + 1}` : "ranking-row"} role="listitem" key={item.name}>
                 <div className="ranking-row-rank"><strong>{index + 1}</strong><small>º</small></div>
