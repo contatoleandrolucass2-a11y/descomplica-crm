@@ -142,7 +142,6 @@ export function PointsSettingsClient({
               </label>
             ))}
           </div>
-          <div className="points-subtotal"><span>Pontos-base</span><strong>{formatWhole(basePoints)}</strong></div>
         </section>
 
         <section className="points-panel points-result-panel">

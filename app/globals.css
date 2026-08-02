@@ -3737,21 +3737,6 @@ a {
   transform: translateY(-1px);
 }
 
-.points-subtotal {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 8px;
-  padding: 9px 11px;
-  color: #fff;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #113a5a, #0c7d8d);
-}
-.points-subtotal span { font-size: .7rem; font-weight: 750; }
-.points-subtotal strong { font-family: var(--font-geist-mono), monospace; font-size: 1.25rem; }
-.points-subtotal.subtle { color: #18304e; border: 1px solid #d6e2eb; background: #edf4f7; }
-
 .points-target-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 .points-target-card {
   position: relative;
@@ -3888,7 +3873,6 @@ a {
 :root[data-theme="dark"] .points-metric-card input,
 :root[data-theme="dark"] .points-target-card input { color: #fff; border-color: #3b5b73; background: #102a42; }
 :root[data-theme="dark"] .points-value-editor { border-color: #3b5b73; background: #102a42; }
-:root[data-theme="dark"] .points-subtotal.subtle { color: #eaf8ff; border-color: #31516c; background: #0b2136; }
 :root[data-theme="dark"] .points-conversion-source { border-color: #207c82; background: rgba(10, 70, 78, .35); }
 :root[data-theme="dark"] .points-conversion-source span { color: #d9f8f5; }
 :root[data-theme="dark"] .points-conversion-source small { color: #9cb7c9; }
