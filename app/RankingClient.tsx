@@ -130,11 +130,11 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
 export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights }) {
   const [period, setPeriod] = useState<RankingPeriod>("month");
   const [manager, setManager] = useState("all");
-  const [query, setQuery] = useState("");
+  const [collaborator, setCollaborator] = useState("all");
   const ranking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period) : [], [dashboard, weights, period]);
   const managers = useMemo(() => [...new Set(ranking.map((item) => item.manager))].sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking]);
-  const visible = ranking.filter((item) => (manager === "all" || item.manager === manager) && item.name.toLocaleLowerCase("pt-BR").includes(query.trim().toLocaleLowerCase("pt-BR")));
-  const leader = visible[0];
+  const collaborators = useMemo(() => ranking.filter((item) => manager === "all" || item.manager === manager).map((item) => item.name).sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking, manager]);
+  const visible = ranking.filter((item) => (manager === "all" || item.manager === manager) && (collaborator === "all" || item.name === collaborator));
   const average = visible.length ? visible.reduce((total, item) => total + item.total, 0) / visible.length : 0;
   const averageConversion = visible.length ? visible.reduce((total, item) => total + item.conversion, 0) / visible.length : 0;
   const summary = visible.reduce((total, item) => ({
@@ -156,20 +156,13 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
       </header>
 
       <section className="ranking-toolbar" aria-label="Filtros do ranking">
-        <div className="ranking-periods">{(Object.keys(periodLabels) as RankingPeriod[]).map((key) => <button className={period === key ? "active" : ""} type="button" onClick={() => setPeriod(key)} key={key}>{periodLabels[key]}</button>)}</div>
-        <label className="ranking-search"><span>Buscar</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nome do colaborador" /></label>
-        <label className="ranking-manager"><span>Gerente</span><select value={manager} onChange={(event) => setManager(event.target.value)}><option value="all">Todos os gerentes</option>{managers.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
+        <div className="ranking-periods">{(Object.keys(periodLabels) as RankingPeriod[]).map((key) => <button className={period === key ? "active" : ""} type="button" onClick={() => { setPeriod(key); setCollaborator("all"); }} key={key}>{periodLabels[key]}</button>)}</div>
+        <label className="ranking-search"><span>Colaborador</span><select value={collaborator} onChange={(event) => setCollaborator(event.target.value)}><option value="all">Todos os colaboradores</option>{collaborators.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
+        <label className="ranking-manager"><span>Gerente</span><select value={manager} onChange={(event) => { setManager(event.target.value); setCollaborator("all"); }}><option value="all">Todos os gerentes</option>{managers.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
       </section>
 
       {visible.length ? (
         <>
-          <section className="ranking-overview">
-            <article><small>Líder do período</small><strong>{leader?.name}</strong><span>{number.format(leader?.total ?? 0)} pontos</span></article>
-            <article><small>Participantes</small><strong>{number.format(visible.length)}</strong><span>com produção registrada</span></article>
-            <article><small>Média de pontos</small><strong>{number.format(average)}</strong><span>por colaborador</span></article>
-            <article><small>Conversão média</small><strong>{percent.format(averageConversion * 100)}%</strong><span>agendamento → visita</span></article>
-          </section>
-
           <section className="ranking-podium" aria-label="Pódio do ranking">
             {[1, 0, 2].map((index) => visible[index] ? <article className={`place-${index + 1}`} key={visible[index].name}>
               <span className="ranking-medal">{index === 0 ? "Ouro" : index === 1 ? "Prata" : "Bronze"}</span>
@@ -182,7 +175,7 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
           </section>
 
           <section className="ranking-list-card">
-            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por colaborador</h2></div><span>{periodLabels[period]} · {visible.length} participantes</span></header>
+            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por colaborador</h2></div><p className="ranking-list-insights"><span>{periodLabels[period]}</span><b>·</b><span><strong>{number.format(visible.length)}</strong> participantes</span><b>·</b><span>Média <strong>{number.format(average)}</strong> pontos</span><b>·</b><span>Conversão média <strong>{percent.format(averageConversion * 100)}%</strong></span></p></header>
             <div className="ranking-list" role="list">
               {visible.map((item, index) => <article className={index < 3 ? `ranking-row top-${index + 1}` : "ranking-row"} role="listitem" key={item.name}>
                 <div className="ranking-row-rank"><strong>{index + 1}</strong><small>º</small></div>
