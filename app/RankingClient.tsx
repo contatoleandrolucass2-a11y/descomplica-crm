@@ -67,6 +67,14 @@ function isTargetAgency(record: DashboardFilterRecord) {
     .some((value) => normalized(typeof value === "string" ? value : undefined).includes(target));
 }
 
+function rate(numerator: number, denominator: number) {
+  return denominator > 0 ? numerator / denominator : 0;
+}
+
+function formatRate(numerator: number, denominator: number) {
+  return `${percent.format(rate(numerator, denominator) * 100)}%`;
+}
+
 function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, period: RankingPeriod) {
   const data = dashboard.filterData?.records;
   if (!data) return [];
@@ -95,10 +103,19 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
 
   return [...lines.values()].map((line) => {
     const baseScore = line.roulette * weights.roulette + line.schedule * weights.schedule + line.visit * weights.visit + line.approvedFolder * weights.approvedFolder + line.sale * weights.sale;
-    const conversion = line.schedule ? line.visit / line.schedule : 0;
+    const conversion = rate(line.visit, line.schedule);
     const bonus = Math.floor(baseScore * conversion);
     return { ...line, baseScore, conversion, bonus, total: baseScore + bonus };
-  }).sort((a, b) => b.total - a.total || b.sale - a.sale || b.approvedFolder - a.approvedFolder || a.name.localeCompare(b.name, "pt-BR"));
+  }).sort((a, b) =>
+    b.total - a.total ||
+    b.visit - a.visit ||
+    rate(b.visit, b.schedule) - rate(a.visit, a.schedule) ||
+    b.approvedFolder - a.approvedFolder ||
+    rate(b.approvedFolder, b.visit) - rate(a.approvedFolder, a.visit) ||
+    b.sale - a.sale ||
+    rate(b.sale, b.approvedFolder) - rate(a.sale, a.approvedFolder) ||
+    a.name.localeCompare(b.name, "pt-BR")
+  );
 }
 
 export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights }) {
@@ -111,6 +128,15 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
   const leader = visible[0];
   const average = visible.length ? visible.reduce((total, item) => total + item.total, 0) / visible.length : 0;
   const averageConversion = visible.length ? visible.reduce((total, item) => total + item.conversion, 0) / visible.length : 0;
+  const summary = visible.reduce((total, item) => ({
+    schedule: total.schedule + item.schedule,
+    visit: total.visit + item.visit,
+    approvedFolder: total.approvedFolder + item.approvedFolder,
+    sale: total.sale + item.sale,
+    baseScore: total.baseScore + item.baseScore,
+    bonus: total.bonus + item.bonus,
+    points: total.points + item.total,
+  }), { schedule: 0, visit: 0, approvedFolder: 0, sale: 0, baseScore: 0, bonus: 0, points: 0 });
 
   return (
     <section className="points-ranking-board">
@@ -153,10 +179,10 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
                 <div className="ranking-person"><span><strong>{item.name}</strong><small>{item.manager}</small></span></div>
                 <div className="ranking-production">
                   <div className="ranking-activity">
-                    <span><small>Agendamentos</small><b>{number.format(item.schedule)}</b><em>{number.format(item.schedule * weights.schedule)} pts</em></span>
-                    <span><small>Visitas</small><b>{number.format(item.visit)}</b><em>{number.format(item.visit * weights.visit)} pts</em></span>
-                    <span><small>Pastas aprov.</small><b>{number.format(item.approvedFolder)}</b><em>{number.format(item.approvedFolder * weights.approvedFolder)} pts</em></span>
-                    <span><small>Vendas</small><b>{number.format(item.sale)}</b><em>{number.format(item.sale * weights.sale)} pts</em></span>
+                    <span><small>Agendamentos</small><b>{number.format(item.schedule)}</b><em>{number.format(item.schedule * weights.schedule)} pts</em><mark>→ Visitas {formatRate(item.visit, item.schedule)}</mark></span>
+                    <span><small>Visitas</small><b>{number.format(item.visit)}</b><em>{number.format(item.visit * weights.visit)} pts</em><mark>→ Pastas {formatRate(item.approvedFolder, item.visit)}</mark></span>
+                    <span><small>Pastas aprov.</small><b>{number.format(item.approvedFolder)}</b><em>{number.format(item.approvedFolder * weights.approvedFolder)} pts</em><mark>→ Vendas {formatRate(item.sale, item.approvedFolder)}</mark></span>
+                    <span><small>Vendas</small><b>{number.format(item.sale)}</b><em>{number.format(item.sale * weights.sale)} pts</em><mark>Agenda → Venda {formatRate(item.sale, item.schedule)}</mark></span>
                   </div>
                 </div>
                 <div className="ranking-row-result">
@@ -168,7 +194,18 @@ export function RankingBoard({ dashboard, dataStatus, weights }: { dashboard: Da
             </div>
           </section>
 
-          <section className="ranking-method"><strong>Como os pontos são calculados</strong><span>Registros × peso de cada ação</span><b>+</b><span>Bônus pela conversão individual de agendamento em visita</span><a href="#point-settings-form">Ajustar pontos ↑</a></section>
+          <section className="ranking-summary">
+            <header><div><p className="goal-kicker">Resumo do ranking</p><h2>Resultado consolidado</h2></div><span>{periodLabels[period]} · {visible.length} participantes</span></header>
+            <div className="ranking-summary-grid">
+              <article><small>Agendamentos</small><strong>{number.format(summary.schedule)}</strong><em>{number.format(summary.schedule * weights.schedule)} pts</em><span>→ Visitas {formatRate(summary.visit, summary.schedule)}</span></article>
+              <article><small>Visitas</small><strong>{number.format(summary.visit)}</strong><em>{number.format(summary.visit * weights.visit)} pts</em><span>→ Pastas {formatRate(summary.approvedFolder, summary.visit)}</span></article>
+              <article><small>Pastas aprovadas</small><strong>{number.format(summary.approvedFolder)}</strong><em>{number.format(summary.approvedFolder * weights.approvedFolder)} pts</em><span>→ Vendas {formatRate(summary.sale, summary.approvedFolder)}</span></article>
+              <article><small>Vendas</small><strong>{number.format(summary.sale)}</strong><em>{number.format(summary.sale * weights.sale)} pts</em><span>Agenda → Venda {formatRate(summary.sale, summary.schedule)}</span></article>
+              <article className="ranking-summary-total"><small>Pontuação total</small><strong>{number.format(summary.points)}</strong><em>pontos</em><span>{number.format(summary.baseScore)} produção + {number.format(summary.bonus)} bônus</span></article>
+            </div>
+          </section>
+
+          <section className="ranking-method"><strong>Como os pontos são calculados</strong><span>Registros × peso de cada ação</span><b>+</b><span>Bônus pela conversão individual de agendamento em visita</span><span className="ranking-tiebreak">Desempate: visitas → conversão Agenda/Visita → pastas aprovadas → conversão Visita/Pasta → vendas → conversão Pasta/Venda.</span><a href="#point-settings-form">Ajustar pontos ↑</a></section>
         </>
       ) : <section className="ranking-empty"><span>R</span><h2>Nenhum resultado neste período</h2><p>Nenhum registro da imobiliária {TARGET_AGENCY} encontrado. Altere período ou aguarde próxima sincronização do Salesforce.</p></section>}
     </section>
