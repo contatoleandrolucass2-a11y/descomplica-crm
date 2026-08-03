@@ -278,8 +278,8 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
             <header><div><p className="goal-kicker">Entenda seu resultado</p><h2>Como seu lugar no ranking é calculado</h2></div><a href="#point-settings-form">Ver valores dos pontos ↑</a></header>
             <div className="ranking-explainer-grid">
               <article>
-                <span className="ranking-explainer-number">1</span>
-                <div><h3>Primeiro, somamos seus pontos</h3><p>Cada resultado registrado no Salesforce vale uma quantidade de pontos. Quanto mais você produz, mais pontos ganha.</p></div>
+                <div className="ranking-explainer-title"><span className="ranking-explainer-number">1</span><h3>Primeiro, somamos seus pontos</h3></div>
+                <p>Cada resultado registrado no Salesforce vale uma quantidade de pontos. Quanto mais você produz, mais pontos ganha.</p>
                 <ul className="ranking-weight-list">
                   <li><strong>Roleta</strong><span>{number.format(weights.roulette)} ponto{weights.roulette === 1 ? "" : "s"}</span></li>
                   <li><strong>Agendamento</strong><span>{number.format(weights.schedule)} ponto{weights.schedule === 1 ? "" : "s"}</span></li>
@@ -289,22 +289,21 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
                 </ul>
               </article>
               <article>
-                <span className="ranking-explainer-number">2</span>
-                <div><h3>Depois, sua conversão gera um bônus</h3><p>Usamos números reais do Salesforce para descobrir quantos agendamentos viraram visitas. Quanto maior essa conversão, maior seu bônus.</p></div>
+                <div className="ranking-explainer-title"><span className="ranking-explainer-number">2</span><h3>Depois, sua conversão gera um bônus</h3></div>
+                <p>Usamos números reais do Salesforce para descobrir quantos agendamentos viraram visitas. Quanto maior essa conversão, maior seu bônus.</p>
                 <div className="ranking-bonus-story">
                   <div className="ranking-bonus-source"><span>Conversão atual</span><strong>{percent.format(currentConversion * 100)}%</strong><small>{number.format(conversionData?.appointments ?? summary.schedule)} agendamentos → {number.format(conversionData?.visits ?? summary.visit)} visitas</small></div>
                   <ol>
                     <li><b>1. Calcule a conversão</b><span>{number.format(conversionData?.visits ?? summary.visit)} visitas ÷ {number.format(conversionData?.appointments ?? summary.schedule)} agendamentos = {percent.format(currentConversion * 100)}%</span></li>
-                    <li><b>2. Calcule o bônus</b><span>{number.format(configuredBase)} pontos × {percent.format(currentConversion * 100)}% = {number.format(configuredBonus)} pontos</span></li>
+                    <li className="ranking-bonus-rounding"><b>2. Calcule o bônus</b><span>{number.format(configuredBase)} pontos × {percent.format(currentConversion * 100)}% = {number.format(configuredBonus)} pontos</span><small>O resultado do bônus sempre arredondado para baixo</small></li>
                     <li><b>3. Some tudo</b><span>{number.format(configuredBase)} pontos + {number.format(configuredBonus)} de bônus = {number.format(configuredTotal)} pontos</span></li>
                   </ol>
                   <mark>{number.format(configuredTotal)} pontos no resultado final</mark>
-                  <span>Bônus sempre arredondado para baixo{conversionData?.updatedAt ? ` · Salesforce atualizado em ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(conversionData.updatedAt))}` : ""}.</span>
                 </div>
               </article>
               <article className="ranking-tiebreak-card">
-                <span className="ranking-explainer-number">3</span>
-                <div><h3>Se duas pessoas tiverem os mesmos pontos</h3><p>Comparamos um item de cada vez. Assim que alguém tiver um resultado maior, o empate termina.</p></div>
+                <div className="ranking-explainer-title"><span className="ranking-explainer-number">3</span><h3>Se duas ou mais pessoas tiverem os mesmos pontos</h3></div>
+                <p>Comparamos um item de cada vez. Assim que alguém tiver um resultado maior, o empate termina.</p>
                 <ol>
                   <li><b>Mais visitas</b><span>Quem fez mais visitas fica na frente.</span></li>
                   <li><b>Melhor conversão de agendamento em visita</b><span>Quem transformou mais agendamentos em visitas fica na frente.</span></li>
