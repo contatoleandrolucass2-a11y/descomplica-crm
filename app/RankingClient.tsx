@@ -190,7 +190,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
   return (
     <section className="points-ranking-board">
       <header className="points-ranking-heading">
-        <div><p className="goal-kicker">Performance comercial</p><h2>Ranking da equipe</h2></div>
+        <div><h2>Performance comercial <span>— Ranking dos corretores</span></h2></div>
         <div className="ranking-source"><i aria-hidden="true" /><span><small>{dataStatus === "live" ? "Dados sincronizados" : dataStatus === "demo" ? "Dados de demonstração" : "Aguardando dados"}</small><strong>{dashboard ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(dashboard.generatedAt)) : "—"}</strong></span></div>
       </header>
 
