@@ -7,11 +7,11 @@ import { SiteMenu } from "./SiteMenu";
 import type { DashboardPayload } from "./types";
 
 const metrics = [
-  { key: "roulette", label: "Roleta", short: "R", color: "#2563eb" },
-  { key: "schedule", label: "Agenda", short: "A", color: "#0e7490" },
-  { key: "visit", label: "Visita", short: "V", color: "#eab308" },
-  { key: "approvedFolder", label: "Pasta aprovada", short: "P", color: "#14b8a6" },
-  { key: "sale", label: "Venda", short: "V", color: "#059669" },
+  { key: "roulette", label: "Roleta", color: "#2563eb" },
+  { key: "schedule", label: "Agenda", color: "#0e7490" },
+  { key: "visit", label: "Visita", color: "#eab308" },
+  { key: "approvedFolder", label: "Pasta aprovada", color: "#14b8a6" },
+  { key: "sale", label: "Venda", color: "#059669" },
 ] as const;
 
 type MetricKey = (typeof metrics)[number]["key"];
@@ -135,7 +135,7 @@ export function PointsSettingsClient({
           <div className="points-metric-list">
             {metrics.map((metric) => (
               <label className="points-metric-card" style={{ "--metric-color": metric.color } as React.CSSProperties} key={metric.key}>
-                <i aria-hidden="true">{metric.short}</i><span><strong>{metric.label}</strong><small>pontos por registro</small></span>
+                <span><strong>{metric.label}</strong><small>pontos por registro</small></span>
                 <span className="points-value-editor">
                   <input aria-label={`Pontos de ${metric.label}`} type="number" min="0" max="100000" step="1" value={weights[metric.key]} onChange={(event) => changeValue(setWeights, metric.key, event.target.value)} />
                   <b>pts</b>
