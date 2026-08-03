@@ -112,7 +112,7 @@ function formatRate(numerator: number, denominator: number) {
 }
 
 function TeamProductivityGauge({ label, value, active, total, color }: { label: string; value: number; active: number; total: number; color: string }) {
-  const angle = -90 + (Math.min(Math.max(value, 0), 100) * 1.8);
+  const angle = -180 + (Math.min(Math.max(value, 0), 100) * 1.8);
   return <article className="ranking-productivity-gauge" style={{ "--gauge-color": color } as React.CSSProperties}>
     <header><span>{label}</span><small>{active} de {total}</small></header>
     <div className="ranking-gauge-visual" aria-label={`${label}: ${value}% de produtividade`} role="img">
@@ -120,7 +120,7 @@ function TeamProductivityGauge({ label, value, active, total, color }: { label: 
         <path className="ranking-gauge-track" d="M 18 96 A 82 82 0 0 1 182 96" pathLength="100" />
         <path className="ranking-gauge-progress" d="M 18 96 A 82 82 0 0 1 182 96" pathLength="100" style={{ strokeDasharray: `${value} 100` }} />
       </svg>
-      <i className="ranking-gauge-needle" style={{ transform: `translateX(-50%) rotate(${angle}deg)` }}><span /></i>
+      <i className="ranking-gauge-needle" style={{ transform: `rotate(${angle}deg)` }}><span /></i>
       <strong>{value}<small>%</small></strong>
     </div>
     <footer><span>0</span><b>{active ? "Time ativo" : "Sem produção"}</b><span>100</span></footer>
