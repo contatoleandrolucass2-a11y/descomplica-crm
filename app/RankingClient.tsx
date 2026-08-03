@@ -27,6 +27,7 @@ type ScoreLine = {
 
 const periodLabels: Record<RankingPeriod, string> = { month: "Mês atual", lastWeek: "Semana passada", week: "Esta semana", today: "Hoje" };
 const presentationPeriods = Object.keys(periodLabels) as RankingPeriod[];
+const monthLabels = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const TARGET_AGENCY = "DIRECIONAL VENDAS SPC";
 const number = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 const percent = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -44,9 +45,13 @@ function startOfWeek(value: Date) {
   return result;
 }
 
-function isInPeriod(record: DashboardFilterRecord, period: RankingPeriod, referenceDate: string) {
+function isInPeriod(record: DashboardFilterRecord, period: RankingPeriod, referenceDate: string, selectedYear = "", selectedMonth = "") {
   if (!record.date) return false;
   const date = localDate(record.date);
+  if (selectedYear) {
+    if (date.getFullYear() !== Number(selectedYear)) return false;
+    return !selectedMonth || date.getMonth() + 1 === Number(selectedMonth);
+  }
   const reference = localDate(referenceDate);
   if (period === "today") return date.getTime() === reference.getTime();
   if (period === "week") return date >= startOfWeek(reference) && date <= reference;
@@ -92,7 +97,7 @@ function formatRate(numerator: number, denominator: number) {
   return `${percent.format(rate(numerator, denominator) * 100)}%`;
 }
 
-function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, period: RankingPeriod) {
+function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, period: RankingPeriod, selectedYear = "", selectedMonth = "") {
   const data = dashboard.filterData?.records;
   if (!data) return [];
   const lines = new Map<string, ScoreLine>();
@@ -109,7 +114,7 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
     return line;
   };
   const add = (records: DashboardFilterRecord[], key: "roulette" | "schedule" | "visit" | "approvedFolder" | "sale") => {
-    records.filter((record) => isTargetAgency(record) && isInPeriod(record, period, dashboard.referenceDate)).forEach((record) => {
+    records.filter((record) => isTargetAgency(record) && isInPeriod(record, period, dashboard.referenceDate, selectedYear, selectedMonth)).forEach((record) => {
       const line = ensure(record);
       if (line) line[key] += 1;
     });
@@ -139,6 +144,8 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
 export function RankingBoard({ dashboard, dataStatus, weights, conversionData }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights; conversionData?: { rate: number; appointments: number; visits: number; updatedAt: string | null } }) {
   const [period, setPeriod] = useState<RankingPeriod>("month");
   const [isPresentationActive, setIsPresentationActive] = useState(true);
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
   const [manager, setManager] = useState("all");
   const [collaborator, setCollaborator] = useState("all");
   useEffect(() => {
@@ -149,7 +156,14 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
     }, 10_000);
     return () => window.clearInterval(timer);
   }, [isPresentationActive]);
-  const ranking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period) : [], [dashboard, weights, period]);
+  const datedRecords = useMemo(() => dashboard?.filterData
+    ? Object.values(dashboard.filterData.records).flat().filter((record) => isTargetAgency(record) && record.date)
+    : [], [dashboard]);
+  const availableYears = useMemo(() => [...new Set(datedRecords.map((record) => localDate(record.date!).getFullYear()))].sort((a, b) => b - a), [datedRecords]);
+  const availableMonths = useMemo(() => selectedYear
+    ? [...new Set(datedRecords.filter((record) => localDate(record.date!).getFullYear() === Number(selectedYear)).map((record) => localDate(record.date!).getMonth() + 1))].sort((a, b) => a - b)
+    : [], [datedRecords, selectedYear]);
+  const ranking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period, selectedYear, selectedMonth) : [], [dashboard, weights, period, selectedYear, selectedMonth]);
   const managers = useMemo(() => [...new Set(ranking.map((item) => item.manager))].sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking]);
   const collaborators = useMemo(() => ranking.filter((item) => manager === "all" || item.manager === manager).map((item) => item.name).sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking, manager]);
   const visible = ranking.filter((item) => (manager === "all" || item.manager === manager) && (collaborator === "all" || item.name === collaborator));
@@ -159,6 +173,9 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
   const currentConversion = conversionData?.rate ?? averageConversion;
   const configuredBonus = Math.floor(configuredBase * currentConversion);
   const configuredTotal = configuredBase + configuredBonus;
+  const activePeriodLabel = selectedYear
+    ? selectedMonth ? `${monthLabels[Number(selectedMonth) - 1]} de ${selectedYear}` : `Ano ${selectedYear}`
+    : periodLabels[period];
   const summary = visible.reduce((total, item) => ({
     roulette: total.roulette + item.roulette,
     schedule: total.schedule + item.schedule,
@@ -178,7 +195,19 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
       </header>
 
       <section className="ranking-toolbar" aria-label="Filtros do ranking">
-        <div className="ranking-periods">{presentationPeriods.map((key) => <button className={period === key ? "active" : ""} type="button" onClick={() => { setIsPresentationActive(false); setPeriod(key); setCollaborator("all"); }} key={key}>{periodLabels[key]}</button>)}</div>
+        <div className="ranking-period-control">
+          <div className="ranking-date-filters" aria-label="Período personalizado">
+            <select className={selectedYear ? "active" : ""} aria-label="Filtrar por ano" value={selectedYear} onChange={(event) => { setIsPresentationActive(false); setSelectedYear(event.target.value); setSelectedMonth(""); setCollaborator("all"); }}>
+              <option value="">Ano</option>
+              {availableYears.map((year) => <option value={year} key={year}>{year}</option>)}
+            </select>
+            <select className={selectedMonth ? "active" : ""} aria-label="Filtrar por mês" value={selectedMonth} disabled={!selectedYear} onChange={(event) => { setIsPresentationActive(false); setSelectedMonth(event.target.value); setCollaborator("all"); }}>
+              <option value="">Mês</option>
+              {availableMonths.map((month) => <option value={month} key={month}>{monthLabels[month - 1]}</option>)}
+            </select>
+          </div>
+          <div className="ranking-periods">{presentationPeriods.map((key) => <button className={!selectedYear && period === key ? "active" : ""} type="button" onClick={() => { setIsPresentationActive(false); setSelectedYear(""); setSelectedMonth(""); setPeriod(key); setCollaborator("all"); }} key={key}>{periodLabels[key]}</button>)}</div>
+        </div>
         <label className="ranking-search"><span>Corretor</span><select value={collaborator} onChange={(event) => setCollaborator(event.target.value)}><option value="all">Todos os corretores</option>{collaborators.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
         <label className="ranking-manager"><span>Gerente</span><select value={manager} onChange={(event) => { setManager(event.target.value); setCollaborator("all"); }}><option value="all">Todos os gerentes</option>{managers.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
       </section>
@@ -210,7 +239,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
           </section>
 
           <section className="ranking-list-card">
-            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por corretor</h2></div><p className="ranking-list-insights"><span>{periodLabels[period]}</span><b>·</b><span><strong>{number.format(visible.length)}</strong> participantes</span><b>·</b><span>Média <strong>{number.format(average)}</strong> pontos</span><b>·</b><span>Conversão média de agendamentos para visitas: <strong>{percent.format(averageConversion * 100)}%</strong></span></p></header>
+            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por corretor</h2></div><p className="ranking-list-insights"><span>{activePeriodLabel}</span><b>·</b><span><strong>{number.format(visible.length)}</strong> participantes</span><b>·</b><span>Média <strong>{number.format(average)}</strong> pontos</span><b>·</b><span>Conversão média de agendamentos para visitas: <strong>{percent.format(averageConversion * 100)}%</strong></span></p></header>
             <div className="ranking-list" role="list">
               {visible.map((item, index) => <article className={index < 3 ? `ranking-row top-${index + 1}` : "ranking-row"} role="listitem" key={item.name}>
                 <div className="ranking-row-rank"><strong>{index + 1}</strong><small>º</small></div>
@@ -234,7 +263,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
           </section>
 
           <section className="ranking-summary">
-            <header><div><p className="goal-kicker">Resumo do ranking</p><h2>Resultado consolidado</h2></div><span>{periodLabels[period]} · {visible.length} participantes</span></header>
+            <header><div><p className="goal-kicker">Resumo do ranking</p><h2>Resultado consolidado</h2></div><span>{activePeriodLabel} · {visible.length} participantes</span></header>
             <div className="ranking-summary-grid">
               <article className="no-conversion"><small>Roleta</small><strong>{number.format(summary.roulette)}</strong><em>{number.format(summary.roulette * weights.roulette)} pts</em></article>
               <article className="no-conversion"><small>Agendamentos</small><strong>{number.format(summary.schedule)}</strong><em>{number.format(summary.schedule * weights.schedule)} pts</em></article>
