@@ -111,6 +111,22 @@ function formatRate(numerator: number, denominator: number) {
   return `${percent.format(rate(numerator, denominator) * 100)}%`;
 }
 
+function TeamProductivityGauge({ label, value, active, total, color }: { label: string; value: number; active: number; total: number; color: string }) {
+  const angle = -90 + (Math.min(Math.max(value, 0), 100) * 1.8);
+  return <article className="ranking-productivity-gauge" style={{ "--gauge-color": color } as React.CSSProperties}>
+    <header><span>{label}</span><small>{active} de {total}</small></header>
+    <div className="ranking-gauge-visual" aria-label={`${label}: ${value}% de produtividade`} role="img">
+      <svg viewBox="0 0 200 112" aria-hidden="true">
+        <path className="ranking-gauge-track" d="M 18 96 A 82 82 0 0 1 182 96" pathLength="100" />
+        <path className="ranking-gauge-progress" d="M 18 96 A 82 82 0 0 1 182 96" pathLength="100" style={{ strokeDasharray: `${value} 100` }} />
+      </svg>
+      <i className="ranking-gauge-needle" style={{ transform: `translateX(-50%) rotate(${angle}deg)` }}><span /></i>
+      <strong>{value}<small>%</small></strong>
+    </div>
+    <footer><span>0</span><b>{active ? "Time ativo" : "Sem produção"}</b><span>100</span></footer>
+  </article>;
+}
+
 function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, period: RankingPeriod, selectedYears: string[] = [], selectedMonths: string[] = []) {
   const data = dashboard.filterData?.records;
   if (!data) return [];
@@ -200,6 +216,16 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
     bonus: total.bonus + item.bonus,
     points: total.points + item.total,
   }), { roulette: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0, baseScore: 0, bonus: 0, points: 0 });
+  const productivity = [
+    { key: "roulette" as const, label: "Roleta", color: "#6f73ff" },
+    { key: "schedule" as const, label: "Agendamento", color: "#20b9c3" },
+    { key: "visit" as const, label: "Visita", color: "#f6c945" },
+    { key: "approvedFolder" as const, label: "Pasta aprovada", color: "#3bd394" },
+    { key: "sale" as const, label: "Venda", color: "#16b879" },
+  ].map((metric) => {
+    const active = visible.filter((item) => item[metric.key] > 0).length;
+    return { ...metric, active, value: visible.length ? Math.round((active / visible.length) * 100) : 0 };
+  });
 
   return (
     <section className="points-ranking-board">
@@ -321,6 +347,16 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
                   <li><b>Melhor conversão de pasta aprovada em venda</b><span>Quem transformou mais pastas aprovadas em vendas fica na frente.</span></li>
                 </ol>
               </article>
+            </div>
+          </section>
+
+          <section className="ranking-productivity" aria-labelledby="team-productivity-title">
+            <header>
+              <div><p className="goal-kicker">Pulso da equipe</p><h2 id="team-productivity-title">Produtividade do time</h2></div>
+              <p>Percentual de corretores com pelo menos um resultado no período selecionado.</p>
+            </header>
+            <div className="ranking-productivity-grid">
+              {productivity.map((metric) => <TeamProductivityGauge {...metric} total={visible.length} key={metric.key} />)}
             </div>
           </section>
         </>
