@@ -11,9 +11,11 @@ export type RankingWeights = {
 };
 
 type RankingPeriod = "month" | "lastWeek" | "week" | "today";
+type RankingScope = "brokers" | "managers";
 type ScoreLine = {
   name: string;
   manager: string;
+  memberCount: number;
   roulette: number;
   schedule: number;
   visit: number;
@@ -145,20 +147,23 @@ function TeamProductivityGauge({ label, value, active, total, color }: { label: 
   </article>;
 }
 
-function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, period: RankingPeriod, selectedYears: string[] = [], selectedMonths: string[] = []) {
+function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, period: RankingPeriod, scope: RankingScope, selectedYears: string[] = [], selectedMonths: string[] = []) {
   const data = dashboard.filterData?.records;
   if (!data) return [];
-  const lines = new Map<string, ScoreLine>();
+  const lines = new Map<string, ScoreLine & { members: Set<string> }>();
   const ensure = (record: DashboardFilterRecord) => {
-    const name = ownerName(record);
+    const owner = ownerName(record);
+    const recordManager = formatPersonName(record.manager);
+    const name = scope === "brokers" ? owner : recordManager;
     if (!name) return null;
     const key = name.toLocaleLowerCase("pt-BR");
-    const manager = formatPersonName(record.manager) || "Sem gerente";
+    const manager = recordManager || "Sem gerente";
     if (!lines.has(key)) {
-      lines.set(key, { name, manager, roulette: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0, baseScore: 0, bonus: 0, total: 0, conversion: 0 });
+      lines.set(key, { name, manager, memberCount: 0, members: new Set<string>(), roulette: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0, baseScore: 0, bonus: 0, total: 0, conversion: 0 });
     }
     const line = lines.get(key)!;
     if (line.manager === "Sem gerente" && manager !== "Sem gerente") line.manager = manager;
+    if (owner) line.members.add(owner);
     return line;
   };
   const add = (records: DashboardFilterRecord[], key: "roulette" | "schedule" | "visit" | "approvedFolder" | "sale") => {
@@ -176,7 +181,21 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
     const baseScore = line.roulette * weights.roulette + line.schedule * weights.schedule + line.visit * weights.visit + line.approvedFolder * weights.approvedFolder + line.sale * weights.sale;
     const conversion = rate(line.visit, line.schedule);
     const bonus = Math.floor(baseScore * conversion);
-    return { ...line, baseScore, conversion, bonus, total: baseScore + bonus };
+    const memberCount = line.members.size;
+    return {
+      name: line.name,
+      manager: scope === "brokers" ? line.manager : `Equipe com ${memberCount} ${memberCount === 1 ? "corretor" : "corretores"}`,
+      memberCount,
+      roulette: line.roulette,
+      schedule: line.schedule,
+      visit: line.visit,
+      approvedFolder: line.approvedFolder,
+      sale: line.sale,
+      baseScore,
+      conversion,
+      bonus,
+      total: baseScore + bonus,
+    };
   }).sort((a, b) =>
     b.total - a.total ||
     b.visit - a.visit ||
@@ -190,6 +209,7 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
 }
 
 export function RankingBoard({ dashboard, dataStatus, weights, conversionData }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights; conversionData?: { rate: number; appointments: number; visits: number; updatedAt: string | null } }) {
+  const [scope, setScope] = useState<RankingScope>("brokers");
   const [period, setPeriod] = useState<RankingPeriod>("month");
   const [isPresentationActive, setIsPresentationActive] = useState(true);
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
@@ -211,10 +231,12 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
   const availableMonths = useMemo(() => selectedYears.length
     ? [...new Set(datedRecords.filter((record) => selectedYears.includes(String(localDate(record.date!).getFullYear()))).map((record) => localDate(record.date!).getMonth() + 1))].sort((a, b) => a - b)
     : [], [datedRecords, selectedYears]);
-  const ranking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period, selectedYears, selectedMonths) : [], [dashboard, weights, period, selectedYears, selectedMonths]);
-  const managers = useMemo(() => [...new Set(ranking.map((item) => item.manager))].sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking]);
+  const ranking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period, scope, selectedYears, selectedMonths) : [], [dashboard, weights, period, scope, selectedYears, selectedMonths]);
+  const managers = useMemo(() => [...new Set(ranking.map((item) => scope === "brokers" ? item.manager : item.name))].sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking, scope]);
   const collaborators = useMemo(() => ranking.filter((item) => !selectedManagers.length || selectedManagers.includes(item.manager)).map((item) => item.name).sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking, selectedManagers]);
-  const visible = ranking.filter((item) => (!selectedManagers.length || selectedManagers.includes(item.manager)) && (!selectedCollaborators.length || selectedCollaborators.includes(item.name)));
+  const visible = ranking.filter((item) => scope === "brokers"
+    ? (!selectedManagers.length || selectedManagers.includes(item.manager)) && (!selectedCollaborators.length || selectedCollaborators.includes(item.name))
+    : (!selectedManagers.length || selectedManagers.includes(item.name)));
   const average = visible.length ? visible.reduce((total, item) => total + item.total, 0) / visible.length : 0;
   const averageConversion = visible.length ? visible.reduce((total, item) => total + item.conversion, 0) / visible.length : 0;
   const configuredBase = Object.values(weights).reduce((total, value) => total + value, 0);
@@ -244,15 +266,38 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
     const active = visible.filter((item) => item[metric.key] > 0).length;
     return { ...metric, active, value: visible.length ? Math.round((active / visible.length) * 100) : 0 };
   });
+  const isBrokerRanking = scope === "brokers";
+  const participantLabel = isBrokerRanking ? "corretores" : "gerentes";
+  const participantSingular = isBrokerRanking ? "corretor" : "gerente";
+  const scopeTitle = isBrokerRanking ? "Ranking dos corretores" : "Ranking dos gerentes";
+
+  const changeScope = (nextScope: RankingScope) => {
+    setScope(nextScope);
+    setSelectedManagers([]);
+    setSelectedCollaborators([]);
+  };
 
   return (
     <section className="points-ranking-board">
       <header className="points-ranking-heading">
-        <div><h2>Performance comercial <span>— Ranking dos corretores</span></h2></div>
+        <div><h2>Performance comercial <span>— {scopeTitle}</span></h2></div>
         <div className="ranking-source"><i aria-hidden="true" /><span><small>{dataStatus === "live" ? "Dados sincronizados" : dataStatus === "demo" ? "Dados de demonstração" : "Aguardando dados"}</small><strong>{dashboard ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" }).format(new Date(dashboard.generatedAt)) : "—"}</strong></span></div>
       </header>
 
-      <section className="ranking-toolbar" aria-label="Filtros do ranking">
+      <nav className="ranking-scope-tabs" aria-label="Escolher visão do ranking">
+        <button type="button" className={isBrokerRanking ? "active" : ""} aria-pressed={isBrokerRanking} onClick={() => changeScope("brokers")}>
+          <span className="ranking-scope-icon" aria-hidden="true">C</span>
+          <span><strong>Ranking dos corretores</strong><small>Desempenho individual</small></span>
+          <i aria-hidden="true">→</i>
+        </button>
+        <button type="button" className={!isBrokerRanking ? "active" : ""} aria-pressed={!isBrokerRanking} onClick={() => changeScope("managers")}>
+          <span className="ranking-scope-icon" aria-hidden="true">G</span>
+          <span><strong>Ranking dos gerentes</strong><small>Resultado consolidado das equipes</small></span>
+          <i aria-hidden="true">→</i>
+        </button>
+      </nav>
+
+      <section className={`ranking-toolbar${isBrokerRanking ? "" : " manager-mode"}`} aria-label="Filtros do ranking">
         <div className="ranking-period-control">
           <div className="ranking-date-filters" aria-label="Período personalizado">
             <MultiFilter label="Filtrar por ano" allLabel="Ano" values={selectedYears} options={availableYears.map((year) => ({ value: String(year), label: String(year) }))} onChange={(values) => { setIsPresentationActive(false); setSelectedYears(values); setSelectedMonths([]); setSelectedCollaborators([]); }} />
@@ -260,7 +305,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
           </div>
           <div className="ranking-periods">{presentationPeriods.map((key) => <button className={!selectedYears.length && period === key ? "active" : ""} type="button" onClick={() => { setIsPresentationActive(false); setSelectedYears([]); setSelectedMonths([]); setPeriod(key); setSelectedCollaborators([]); }} key={key}>{periodLabels[key]}</button>)}</div>
         </div>
-        <MultiFilter label="Filtrar por corretor" allLabel="Todos os corretores" values={selectedCollaborators} options={collaborators.map((name) => ({ value: name, label: name }))} onChange={setSelectedCollaborators} />
+        {isBrokerRanking ? <MultiFilter label="Filtrar por corretor" allLabel="Todos os corretores" values={selectedCollaborators} options={collaborators.map((name) => ({ value: name, label: name }))} onChange={setSelectedCollaborators} /> : null}
         <MultiFilter label="Filtrar por gerente" allLabel="Todos os gerentes" values={selectedManagers} options={managers.map((name) => ({ value: name, label: name }))} onChange={(values) => { setSelectedManagers(values); setSelectedCollaborators([]); }} />
       </section>
 
@@ -291,7 +336,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
           </section>
 
           <section className="ranking-list-card">
-            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por corretor</h2></div><p className="ranking-list-insights"><span>{activePeriodLabel}</span><b>·</b><span><strong>{number.format(visible.length)}</strong> participantes</span><b>·</b><span>Média <strong>{number.format(average)}</strong> pontos</span><b>·</b><span>Conversão média de agendamentos para visitas: <strong>{percent.format(averageConversion * 100)}%</strong></span></p></header>
+            <header><div><p className="goal-kicker">Placar completo</p><h2>Desempenho por {participantSingular}</h2></div><p className="ranking-list-insights"><span>{activePeriodLabel}</span><b>·</b><span><strong>{number.format(visible.length)}</strong> {participantLabel}</span><b>·</b><span>Média <strong>{number.format(average)}</strong> pontos</span><b>·</b><span>Conversão média de agendamentos para visitas: <strong>{percent.format(averageConversion * 100)}%</strong></span></p></header>
             <div className="ranking-list" role="list">
               {visible.map((item, index) => <article className={index < 3 ? `ranking-row top-${index + 1}` : "ranking-row"} role="listitem" key={item.name}>
                 <div className="ranking-row-rank"><strong>{index + 1}</strong><small>º</small></div>
@@ -315,7 +360,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
           </section>
 
           <section className="ranking-summary">
-            <header><div><p className="goal-kicker">Resumo do ranking</p><h2>Resultado consolidado</h2></div><span>{activePeriodLabel} · {visible.length} participantes</span></header>
+            <header><div><p className="goal-kicker">Resumo do ranking</p><h2>Resultado consolidado</h2></div><span>{activePeriodLabel} · {visible.length} {participantLabel}</span></header>
             <div className="ranking-summary-grid">
               <article className="no-conversion"><small>Roleta</small><strong>{number.format(summary.roulette)}</strong><em>{number.format(summary.roulette * weights.roulette)} pts</em></article>
               <article className="no-conversion"><small>Agendamentos</small><strong>{number.format(summary.schedule)}</strong><em>{number.format(summary.schedule * weights.schedule)} pts</em></article>
@@ -331,7 +376,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
             <div className="ranking-explainer-grid">
               <article>
                 <div className="ranking-explainer-title"><span className="ranking-explainer-number">1</span><h3>Primeiro, somamos seus pontos</h3></div>
-                <p>Cada resultado registrado vale uma quantidade de pontos. Quanto mais você produz, mais pontos ganha.</p>
+                <p>{isBrokerRanking ? "Cada resultado registrado vale uma quantidade de pontos. Quanto mais você produz, mais pontos ganha." : "Somamos os resultados de todos os corretores da equipe. Quanto mais a equipe produz, mais pontos o gerente ganha."}</p>
                 <ul className="ranking-weight-list">
                   <li><strong>Roleta</strong><span>{number.format(weights.roulette)} ponto{weights.roulette === 1 ? "" : "s"}</span></li>
                   <li><strong>Agendamento</strong><span>{number.format(weights.schedule)} ponto{weights.schedule === 1 ? "" : "s"}</span></li>
@@ -341,8 +386,8 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
                 </ul>
               </article>
               <article>
-                <div className="ranking-explainer-title"><span className="ranking-explainer-number">2</span><h3>Depois, sua conversão gera um bônus</h3></div>
-                <p>Usamos os resultados reais para descobrir quantos agendamentos viraram visitas. Quanto maior essa conversão, maior seu bônus.</p>
+                <div className="ranking-explainer-title"><span className="ranking-explainer-number">2</span><h3>Depois, {isBrokerRanking ? "sua conversão" : "a conversão da equipe"} gera um bônus</h3></div>
+                <p>Usamos os resultados reais para descobrir quantos agendamentos viraram visitas. Quanto maior essa conversão, maior o bônus.</p>
                 <div className="ranking-bonus-story">
                   <div className="ranking-bonus-source"><span>Conversão atual</span><strong>{percent.format(currentConversion * 100)}%</strong><small>{number.format(conversionData?.appointments ?? summary.schedule)} agendamentos → {number.format(conversionData?.visits ?? summary.visit)} visitas</small></div>
                   <ol>
@@ -371,7 +416,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
           <section className="ranking-productivity" aria-labelledby="team-productivity-title">
             <header>
               <div><p className="goal-kicker">Pulso da equipe</p><h2 id="team-productivity-title">Produtividade do time</h2></div>
-              <p>Percentual de corretores com pelo menos um resultado no período selecionado.</p>
+              <p>Percentual de {participantLabel} com pelo menos um resultado no período selecionado.</p>
             </header>
             <div className="ranking-productivity-grid">
               {productivity.map((metric) => <TeamProductivityGauge {...metric} total={visible.length} key={metric.key} />)}
