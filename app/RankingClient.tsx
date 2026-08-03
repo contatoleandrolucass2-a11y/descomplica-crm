@@ -232,6 +232,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
     ? [...new Set(datedRecords.filter((record) => selectedYears.includes(String(localDate(record.date!).getFullYear()))).map((record) => localDate(record.date!).getMonth() + 1))].sort((a, b) => a - b)
     : [], [datedRecords, selectedYears]);
   const ranking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period, scope, selectedYears, selectedMonths) : [], [dashboard, weights, period, scope, selectedYears, selectedMonths]);
+  const brokerRanking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period, "brokers", selectedYears, selectedMonths) : [], [dashboard, weights, period, selectedYears, selectedMonths]);
   const managers = useMemo(() => [...new Set(ranking.map((item) => scope === "brokers" ? item.manager : item.name))].sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking, scope]);
   const collaborators = useMemo(() => ranking.filter((item) => !selectedManagers.length || selectedManagers.includes(item.manager)).map((item) => item.name).sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking, selectedManagers]);
   const visible = ranking.filter((item) => scope === "brokers"
@@ -256,6 +257,9 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
     bonus: total.bonus + item.bonus,
     points: total.points + item.total,
   }), { roulette: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0, baseScore: 0, bonus: 0, points: 0 });
+  const productivityBrokers = scope === "brokers"
+    ? visible
+    : brokerRanking.filter((item) => !selectedManagers.length || selectedManagers.includes(item.manager));
   const productivity = [
     { key: "roulette" as const, label: "Roleta", color: "#6f73ff" },
     { key: "schedule" as const, label: "Agendamento", color: "#20b9c3" },
@@ -263,8 +267,8 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
     { key: "approvedFolder" as const, label: "Pasta aprovada", color: "#3bd394" },
     { key: "sale" as const, label: "Venda", color: "#16b879" },
   ].map((metric) => {
-    const active = visible.filter((item) => item[metric.key] > 0).length;
-    return { ...metric, active, value: visible.length ? Math.round((active / visible.length) * 100) : 0 };
+    const active = productivityBrokers.filter((item) => item[metric.key] > 0).length;
+    return { ...metric, active, value: productivityBrokers.length ? Math.round((active / productivityBrokers.length) * 100) : 0 };
   });
   const isBrokerRanking = scope === "brokers";
   const participantLabel = isBrokerRanking ? "corretores" : "gerentes";
@@ -416,10 +420,10 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
           <section className="ranking-productivity" aria-labelledby="team-productivity-title">
             <header>
               <div><p className="goal-kicker">Pulso da equipe</p><h2 id="team-productivity-title">Produtividade do time</h2></div>
-              <p>Percentual de {participantLabel} com pelo menos um resultado no período selecionado.</p>
+              <p>Percentual de corretores com pelo menos um resultado no período selecionado.</p>
             </header>
             <div className="ranking-productivity-grid">
-              {productivity.map((metric) => <TeamProductivityGauge {...metric} total={visible.length} key={metric.key} />)}
+              {productivity.map((metric) => <TeamProductivityGauge {...metric} total={productivityBrokers.length} key={metric.key} />)}
             </div>
           </section>
         </>
