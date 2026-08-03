@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import type { DashboardFilterRecord, DashboardPayload } from "./types";
 
 export type RankingWeights = {
@@ -111,17 +111,35 @@ function formatRate(numerator: number, denominator: number) {
   return `${percent.format(rate(numerator, denominator) * 100)}%`;
 }
 
+function mixHexColor(source: string, target: string, amount: number) {
+  const parse = (hex: string) => [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16));
+  const [sourceRed, sourceGreen, sourceBlue] = parse(source);
+  const [targetRed, targetGreen, targetBlue] = parse(target);
+  return `rgb(${Math.round(sourceRed + (targetRed - sourceRed) * amount)}, ${Math.round(sourceGreen + (targetGreen - sourceGreen) * amount)}, ${Math.round(sourceBlue + (targetBlue - sourceBlue) * amount)})`;
+}
+
 function TeamProductivityGauge({ label, value, active, total, color }: { label: string; value: number; active: number; total: number; color: string }) {
-  const angle = -180 + (Math.min(Math.max(value, 0), 100) * 1.8);
+  const safeValue = Math.min(Math.max(value, 0), 100);
+  const angle = -180 + (safeValue * 1.8);
+  const gradientId = `ranking-gauge-${useId().replace(/:/g, "")}`;
+  const lightColor = mixHexColor(color, "#ffffff", .38);
+  const darkColor = mixHexColor(color, "#061a2b", .2);
   return <article className="ranking-productivity-gauge" style={{ "--gauge-color": color } as React.CSSProperties}>
     <header><span>{label}</span><small>{active} de {total}</small></header>
     <div className="ranking-gauge-visual" aria-label={`${label}: ${value}% de produtividade`} role="img">
       <svg viewBox="0 0 200 112" aria-hidden="true">
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={lightColor} />
+            <stop offset="52%" stopColor={color} />
+            <stop offset="100%" stopColor={darkColor} />
+          </linearGradient>
+        </defs>
         <path className="ranking-gauge-track" d="M 18 96 A 82 82 0 0 1 182 96" pathLength="100" />
-        <path className="ranking-gauge-progress" d="M 18 96 A 82 82 0 0 1 182 96" pathLength="100" style={{ strokeDasharray: `${value} 100` }} />
+        <path className="ranking-gauge-progress" d="M 18 96 A 82 82 0 0 1 182 96" pathLength="100" style={{ stroke: `url(#${gradientId})`, strokeDasharray: `${safeValue} 100` }} />
       </svg>
-      <i className="ranking-gauge-needle" style={{ transform: `rotate(${angle}deg)` }}><span /></i>
-      <strong>{value}<small>%</small></strong>
+      <i className="ranking-gauge-needle" style={{ transform: `rotate(${angle}deg)` }} />
+      <strong>{safeValue}<small>%</small></strong>
     </div>
     <footer><span>0</span><b>{active ? "Time ativo" : "Sem produção"}</b><span>100</span></footer>
   </article>;

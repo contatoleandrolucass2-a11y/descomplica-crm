@@ -4209,21 +4209,20 @@ a {
 .ranking-gauge-visual svg { display:block; width:100%; height:100%; overflow:visible; }
 .ranking-gauge-track,.ranking-gauge-progress { fill:none; stroke-width:16; stroke-linecap:round; }
 .ranking-gauge-track { stroke:color-mix(in srgb,var(--rank-muted) 17%,transparent); }
-.ranking-gauge-progress { stroke:var(--gauge-color); filter:drop-shadow(0 5px 7px color-mix(in srgb,var(--gauge-color) 35%,transparent)); transition:stroke-dasharray .45s ease; }
+.ranking-gauge-progress { filter:drop-shadow(0 5px 7px color-mix(in srgb,var(--gauge-color) 35%,transparent)); transition:stroke-dasharray .45s ease; }
 .ranking-gauge-needle {
   position:absolute;
   left:50%;
   bottom:9%;
   width:40%;
   height:3px;
-  z-index:2;
+  z-index:1;
   border-radius:999px;
-  background:linear-gradient(90deg,var(--rank-text) 0 82%,transparent 82%);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--gauge-color) 52%,white) 0 82%,transparent 82%);
   transform-origin:0 50%;
   transition:transform .5s cubic-bezier(.22,1,.36,1);
 }
-.ranking-gauge-needle span { position:absolute; left:-6px; top:50%; width:12px; height:12px; border:3px solid var(--gauge-color); border-radius:50%; background:var(--rank-card); transform:translateY(-50%); }
-.ranking-gauge-visual > strong { position:absolute; left:50%; bottom:5%; z-index:3; color:var(--rank-text); font-family:var(--font-geist-mono),monospace; font-size:1.55rem; line-height:1; text-shadow:0 2px 8px var(--rank-card); transform:translateX(-50%); }
+.ranking-gauge-visual > strong { position:absolute; left:50%; bottom:2%; z-index:3; min-width:64px; padding:3px 7px; color:var(--rank-text); font-family:var(--font-geist-mono),monospace; font-size:1.55rem; line-height:1; text-align:center; text-shadow:0 2px 8px var(--rank-card); border-radius:999px; background:color-mix(in srgb,var(--rank-card) 90%,transparent); transform:translateX(-50%); }
 .ranking-gauge-visual > strong small { margin-left:1px; color:var(--gauge-color); font-size:.68rem; }
 .ranking-productivity-gauge > footer { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:6px; margin-top:-2px; color:var(--rank-muted); font-size:.57rem; }
 .ranking-productivity-gauge > footer b { color:var(--gauge-color); font-size:.62rem; text-align:center; }
