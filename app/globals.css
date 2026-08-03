@@ -4098,3 +4098,53 @@ a {
 @media (max-width:760px) { .ranking-bonus-story li.ranking-bonus-rounding { grid-template-columns:1fr; }.ranking-bonus-rounding small { padding:7px 0 0; text-align:left; white-space:normal; border-top:1px solid var(--rank-border); border-left:0; } }
 @media (max-width:480px) { .ranking-overview { grid-template-columns:1fr; }.ranking-hero h1 { font-size:2.65rem; } }
 @media (max-width:760px) { .points-ranking-board { width:min(100% - 24px,1720px); padding:14px; }.points-ranking-heading { align-items:start; flex-direction:column; }.points-ranking-heading h2 { font-size:clamp(1rem,5vw,1.35rem); }.points-ranking-board .ranking-toolbar,.points-ranking-board .ranking-overview,.points-ranking-board .ranking-podium,.points-ranking-board .ranking-list-card,.points-ranking-board .ranking-summary,.points-ranking-board .ranking-explainer,.points-ranking-board .ranking-empty { width:100%; } }
+
+/* Ranking: edição e explicações compactas, sem perder legibilidade. */
+.points-metric-card {
+  grid-template-rows:auto 34px;
+  gap:4px;
+  min-height:64px;
+  padding:7px 10px;
+}
+.points-metric-card > span { gap:0; }
+.points-value-editor { height:34px; }
+
+.ranking-bonus-story li {
+  grid-template-columns:minmax(150px,1fr) auto minmax(150px,1fr);
+  align-items:center;
+}
+.ranking-bonus-story li:not(.ranking-bonus-rounding)::after { content:""; }
+.ranking-bonus-story li b { justify-self:start; }
+.ranking-bonus-story li span {
+  justify-self:center;
+  text-align:center;
+  white-space:nowrap;
+}
+.ranking-bonus-story li.ranking-bonus-rounding {
+  grid-template-columns:minmax(150px,1fr) auto minmax(150px,1fr);
+}
+.ranking-bonus-rounding small { justify-self:end; }
+
+.ranking-tiebreak-card ol { gap:6px; }
+.ranking-tiebreak-card li {
+  align-content:center;
+  gap:2px;
+  min-height:58px;
+  padding:8px 10px 8px 42px;
+}
+.ranking-tiebreak-card li::before {
+  top:50%;
+  left:10px;
+  transform:translateY(-50%);
+}
+.ranking-tiebreak-card li b { line-height:1.2; }
+.ranking-tiebreak-card li span { line-height:1.25; }
+
+@media (max-width:760px) {
+  .ranking-bonus-story li,
+  .ranking-bonus-story li.ranking-bonus-rounding { grid-template-columns:1fr; }
+  .ranking-bonus-story li:not(.ranking-bonus-rounding)::after { display:none; }
+  .ranking-bonus-story li b,
+  .ranking-bonus-story li span,
+  .ranking-bonus-rounding small { justify-self:stretch; text-align:left; white-space:normal; }
+}

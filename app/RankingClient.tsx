@@ -287,7 +287,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
             <div className="ranking-explainer-grid">
               <article>
                 <div className="ranking-explainer-title"><span className="ranking-explainer-number">1</span><h3>Primeiro, somamos seus pontos</h3></div>
-                <p>Cada resultado registrado no Salesforce vale uma quantidade de pontos. Quanto mais você produz, mais pontos ganha.</p>
+                <p>Cada resultado registrado vale uma quantidade de pontos. Quanto mais você produz, mais pontos ganha.</p>
                 <ul className="ranking-weight-list">
                   <li><strong>Roleta</strong><span>{number.format(weights.roulette)} ponto{weights.roulette === 1 ? "" : "s"}</span></li>
                   <li><strong>Agendamento</strong><span>{number.format(weights.schedule)} ponto{weights.schedule === 1 ? "" : "s"}</span></li>
@@ -298,7 +298,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
               </article>
               <article>
                 <div className="ranking-explainer-title"><span className="ranking-explainer-number">2</span><h3>Depois, sua conversão gera um bônus</h3></div>
-                <p>Usamos números reais do Salesforce para descobrir quantos agendamentos viraram visitas. Quanto maior essa conversão, maior seu bônus.</p>
+                <p>Usamos os resultados reais para descobrir quantos agendamentos viraram visitas. Quanto maior essa conversão, maior seu bônus.</p>
                 <div className="ranking-bonus-story">
                   <div className="ranking-bonus-source"><span>Conversão atual</span><strong>{percent.format(currentConversion * 100)}%</strong><small>{number.format(conversionData?.appointments ?? summary.schedule)} agendamentos → {number.format(conversionData?.visits ?? summary.visit)} visitas</small></div>
                   <ol>
@@ -324,7 +324,7 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
             </div>
           </section>
         </>
-      ) : <section className="ranking-empty"><span>R</span><h2>Nenhum resultado neste período</h2><p>Nenhum registro da imobiliária {TARGET_AGENCY} encontrado. Altere período ou aguarde próxima sincronização do Salesforce.</p></section>}
+      ) : <section className="ranking-empty"><span>R</span><h2>Nenhum resultado neste período</h2><p>Nenhum registro da imobiliária {TARGET_AGENCY} encontrado. Altere o período ou aguarde a próxima sincronização dos dados.</p></section>}
       <footer className="ranking-help-footer"><span>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</span></footer>
     </section>
   );

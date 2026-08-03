@@ -135,7 +135,7 @@ export function PointsSettingsClient({
           <div className="points-metric-list">
             {metrics.map((metric) => (
               <label className="points-metric-card" style={{ "--metric-color": metric.color } as React.CSSProperties} key={metric.key}>
-                <span><strong>{metric.label}</strong><small>pontos por registro</small></span>
+                <span><strong>{metric.label}</strong></span>
                 <span className="points-value-editor">
                   <input aria-label={`Pontos de ${metric.label}`} type="number" min="0" max="100000" step="1" value={weights[metric.key]} onChange={(event) => changeValue(setWeights, metric.key, event.target.value)} />
                   <b>pts</b>
