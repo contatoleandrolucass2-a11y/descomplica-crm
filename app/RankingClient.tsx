@@ -25,6 +25,20 @@ type ScoreLine = {
   conversion: number;
 };
 
+type MultiFilterOption = { value: string; label: string };
+
+function MultiFilter({ label, allLabel, values, options, disabled = false, onChange }: { label: string; allLabel: string; values: string[]; options: MultiFilterOption[]; disabled?: boolean; onChange: (values: string[]) => void }) {
+  const selectedLabels = options.filter((option) => values.includes(option.value)).map((option) => option.label);
+  const summary = selectedLabels.length === 0 ? allLabel : selectedLabels.length === 1 ? selectedLabels[0] : `${selectedLabels.length} selecionados`;
+  return <details className={`ranking-multi-filter${values.length ? " active" : ""}${disabled ? " disabled" : ""}`}>
+    <summary aria-label={label}>{summary}</summary>
+    <div className="ranking-multi-menu">
+      <button type="button" className={!values.length ? "selected" : ""} onClick={() => onChange([])}>{allLabel}</button>
+      {options.map((option) => <label key={option.value}><input type="checkbox" checked={values.includes(option.value)} onChange={() => onChange(values.includes(option.value) ? values.filter((value) => value !== option.value) : [...values, option.value])} /><span>{option.label}</span></label>)}
+    </div>
+  </details>;
+}
+
 const periodLabels: Record<RankingPeriod, string> = { month: "Mês atual", lastWeek: "Semana passada", week: "Esta semana", today: "Hoje" };
 const presentationPeriods = Object.keys(periodLabels) as RankingPeriod[];
 const monthLabels = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
@@ -45,12 +59,12 @@ function startOfWeek(value: Date) {
   return result;
 }
 
-function isInPeriod(record: DashboardFilterRecord, period: RankingPeriod, referenceDate: string, selectedYear = "", selectedMonth = "") {
+function isInPeriod(record: DashboardFilterRecord, period: RankingPeriod, referenceDate: string, selectedYears: string[] = [], selectedMonths: string[] = []) {
   if (!record.date) return false;
   const date = localDate(record.date);
-  if (selectedYear) {
-    if (date.getFullYear() !== Number(selectedYear)) return false;
-    return !selectedMonth || date.getMonth() + 1 === Number(selectedMonth);
+  if (selectedYears.length) {
+    if (!selectedYears.includes(String(date.getFullYear()))) return false;
+    return !selectedMonths.length || selectedMonths.includes(String(date.getMonth() + 1));
   }
   const reference = localDate(referenceDate);
   if (period === "today") return date.getTime() === reference.getTime();
@@ -97,7 +111,7 @@ function formatRate(numerator: number, denominator: number) {
   return `${percent.format(rate(numerator, denominator) * 100)}%`;
 }
 
-function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, period: RankingPeriod, selectedYear = "", selectedMonth = "") {
+function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, period: RankingPeriod, selectedYears: string[] = [], selectedMonths: string[] = []) {
   const data = dashboard.filterData?.records;
   if (!data) return [];
   const lines = new Map<string, ScoreLine>();
@@ -114,7 +128,7 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
     return line;
   };
   const add = (records: DashboardFilterRecord[], key: "roulette" | "schedule" | "visit" | "approvedFolder" | "sale") => {
-    records.filter((record) => isTargetAgency(record) && isInPeriod(record, period, dashboard.referenceDate, selectedYear, selectedMonth)).forEach((record) => {
+    records.filter((record) => isTargetAgency(record) && isInPeriod(record, period, dashboard.referenceDate, selectedYears, selectedMonths)).forEach((record) => {
       const line = ensure(record);
       if (line) line[key] += 1;
     });
@@ -144,15 +158,15 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
 export function RankingBoard({ dashboard, dataStatus, weights, conversionData }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights; conversionData?: { rate: number; appointments: number; visits: number; updatedAt: string | null } }) {
   const [period, setPeriod] = useState<RankingPeriod>("month");
   const [isPresentationActive, setIsPresentationActive] = useState(true);
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedMonth, setSelectedMonth] = useState("");
-  const [manager, setManager] = useState("all");
-  const [collaborator, setCollaborator] = useState("all");
+  const [selectedYears, setSelectedYears] = useState<string[]>([]);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
+  const [selectedManagers, setSelectedManagers] = useState<string[]>([]);
+  const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
   useEffect(() => {
     if (!isPresentationActive) return;
     const timer = window.setInterval(() => {
       setPeriod((current) => presentationPeriods[(presentationPeriods.indexOf(current) + 1) % presentationPeriods.length]);
-      setCollaborator("all");
+      setSelectedCollaborators([]);
     }, 10_000);
     return () => window.clearInterval(timer);
   }, [isPresentationActive]);
@@ -160,21 +174,21 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
     ? Object.values(dashboard.filterData.records).flat().filter((record) => isTargetAgency(record) && record.date)
     : [], [dashboard]);
   const availableYears = useMemo(() => [...new Set(datedRecords.map((record) => localDate(record.date!).getFullYear()))].sort((a, b) => b - a), [datedRecords]);
-  const availableMonths = useMemo(() => selectedYear
-    ? [...new Set(datedRecords.filter((record) => localDate(record.date!).getFullYear() === Number(selectedYear)).map((record) => localDate(record.date!).getMonth() + 1))].sort((a, b) => a - b)
-    : [], [datedRecords, selectedYear]);
-  const ranking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period, selectedYear, selectedMonth) : [], [dashboard, weights, period, selectedYear, selectedMonth]);
+  const availableMonths = useMemo(() => selectedYears.length
+    ? [...new Set(datedRecords.filter((record) => selectedYears.includes(String(localDate(record.date!).getFullYear()))).map((record) => localDate(record.date!).getMonth() + 1))].sort((a, b) => a - b)
+    : [], [datedRecords, selectedYears]);
+  const ranking = useMemo(() => dashboard ? buildRanking(dashboard, weights, period, selectedYears, selectedMonths) : [], [dashboard, weights, period, selectedYears, selectedMonths]);
   const managers = useMemo(() => [...new Set(ranking.map((item) => item.manager))].sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking]);
-  const collaborators = useMemo(() => ranking.filter((item) => manager === "all" || item.manager === manager).map((item) => item.name).sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking, manager]);
-  const visible = ranking.filter((item) => (manager === "all" || item.manager === manager) && (collaborator === "all" || item.name === collaborator));
+  const collaborators = useMemo(() => ranking.filter((item) => !selectedManagers.length || selectedManagers.includes(item.manager)).map((item) => item.name).sort((a, b) => a.localeCompare(b, "pt-BR")), [ranking, selectedManagers]);
+  const visible = ranking.filter((item) => (!selectedManagers.length || selectedManagers.includes(item.manager)) && (!selectedCollaborators.length || selectedCollaborators.includes(item.name)));
   const average = visible.length ? visible.reduce((total, item) => total + item.total, 0) / visible.length : 0;
   const averageConversion = visible.length ? visible.reduce((total, item) => total + item.conversion, 0) / visible.length : 0;
   const configuredBase = Object.values(weights).reduce((total, value) => total + value, 0);
   const currentConversion = conversionData?.rate ?? averageConversion;
   const configuredBonus = Math.floor(configuredBase * currentConversion);
   const configuredTotal = configuredBase + configuredBonus;
-  const activePeriodLabel = selectedYear
-    ? selectedMonth ? `${monthLabels[Number(selectedMonth) - 1]} de ${selectedYear}` : `Ano ${selectedYear}`
+  const activePeriodLabel = selectedYears.length
+    ? selectedMonths.length ? `${selectedMonths.length === 1 ? monthLabels[Number(selectedMonths[0]) - 1] : `${selectedMonths.length} meses`} · ${selectedYears.length === 1 ? selectedYears[0] : `${selectedYears.length} anos`}` : selectedYears.length === 1 ? `Ano ${selectedYears[0]}` : `${selectedYears.length} anos`
     : periodLabels[period];
   const summary = visible.reduce((total, item) => ({
     roulette: total.roulette + item.roulette,
@@ -197,19 +211,13 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
       <section className="ranking-toolbar" aria-label="Filtros do ranking">
         <div className="ranking-period-control">
           <div className="ranking-date-filters" aria-label="Período personalizado">
-            <select className={selectedYear ? "active" : ""} aria-label="Filtrar por ano" value={selectedYear} onChange={(event) => { setIsPresentationActive(false); setSelectedYear(event.target.value); setSelectedMonth(""); setCollaborator("all"); }}>
-              <option value="">Ano</option>
-              {availableYears.map((year) => <option value={year} key={year}>{year}</option>)}
-            </select>
-            <select className={selectedMonth ? "active" : ""} aria-label="Filtrar por mês" value={selectedMonth} disabled={!selectedYear} onChange={(event) => { setIsPresentationActive(false); setSelectedMonth(event.target.value); setCollaborator("all"); }}>
-              <option value="">Mês</option>
-              {availableMonths.map((month) => <option value={month} key={month}>{monthLabels[month - 1]}</option>)}
-            </select>
+            <MultiFilter label="Filtrar por ano" allLabel="Ano" values={selectedYears} options={availableYears.map((year) => ({ value: String(year), label: String(year) }))} onChange={(values) => { setIsPresentationActive(false); setSelectedYears(values); setSelectedMonths([]); setSelectedCollaborators([]); }} />
+            <MultiFilter label="Filtrar por mês" allLabel="Mês" values={selectedMonths} options={availableMonths.map((month) => ({ value: String(month), label: monthLabels[month - 1] }))} disabled={!selectedYears.length} onChange={(values) => { setIsPresentationActive(false); setSelectedMonths(values); setSelectedCollaborators([]); }} />
           </div>
-          <div className="ranking-periods">{presentationPeriods.map((key) => <button className={!selectedYear && period === key ? "active" : ""} type="button" onClick={() => { setIsPresentationActive(false); setSelectedYear(""); setSelectedMonth(""); setPeriod(key); setCollaborator("all"); }} key={key}>{periodLabels[key]}</button>)}</div>
+          <div className="ranking-periods">{presentationPeriods.map((key) => <button className={!selectedYears.length && period === key ? "active" : ""} type="button" onClick={() => { setIsPresentationActive(false); setSelectedYears([]); setSelectedMonths([]); setPeriod(key); setSelectedCollaborators([]); }} key={key}>{periodLabels[key]}</button>)}</div>
         </div>
-        <label className="ranking-search"><span>Corretor</span><select value={collaborator} onChange={(event) => setCollaborator(event.target.value)}><option value="all">Todos os corretores</option>{collaborators.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
-        <label className="ranking-manager"><span>Gerente</span><select value={manager} onChange={(event) => { setManager(event.target.value); setCollaborator("all"); }}><option value="all">Todos os gerentes</option>{managers.map((name) => <option value={name} key={name}>{name}</option>)}</select></label>
+        <MultiFilter label="Filtrar por corretor" allLabel="Todos os corretores" values={selectedCollaborators} options={collaborators.map((name) => ({ value: name, label: name }))} onChange={setSelectedCollaborators} />
+        <MultiFilter label="Filtrar por gerente" allLabel="Todos os gerentes" values={selectedManagers} options={managers.map((name) => ({ value: name, label: name }))} onChange={(values) => { setSelectedManagers(values); setSelectedCollaborators([]); }} />
       </section>
 
       {visible.length ? (
