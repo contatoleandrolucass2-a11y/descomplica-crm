@@ -4003,8 +4003,10 @@ a {
 .points-panel-note { font-size:.79rem; }
 .points-metric-card strong { font-size:.84rem; }
 .points-metric-card small { font-size:.66rem; }
+.points-value-editor { overflow:hidden; }
 .points-value-editor b { font-size:.64rem; }
-.points-metric-card input { font-size:1.1rem; }
+.points-metric-card input { height:30px; font-size:1.1rem; background:transparent; }
+:root[data-theme="dark"] .points-metric-card input { background:transparent; }
 .points-ranking-heading h2 { font-size:clamp(1.2rem,1.9vw,1.9rem); }
 .points-ranking-heading>div:first-child>span { font-size:.92rem; }
 .ranking-source small { font-size:.72rem; }
