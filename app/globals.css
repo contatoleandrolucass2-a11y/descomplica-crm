@@ -40,17 +40,27 @@
 
 html {
   background: var(--surface-soft);
-  font-size: 20px;
+  font-size: clamp(14px, 0.75vw, 16px);
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
+  min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  overflow-x: clip;
   color: var(--ink);
   background:
     radial-gradient(circle at 8% 0%, rgba(34, 201, 204, 0.09), transparent 26rem),
     var(--surface-soft);
   font-family: var(--font-geist-sans), Arial, sans-serif;
+}
+
+@media (max-width: 760px) {
+  html {
+    font-size: 16px;
+  }
 }
 
 button {
