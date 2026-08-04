@@ -46,7 +46,7 @@ Abra o Docker Desktop antes de iniciar o Supabase. Em outra plataforma, use os i
 ## Instalação local
 
 ```bash
-git clone <URL-PRIVADA-DO-REPOSITORIO>
+git clone https://github.com/contatoleandrolucass2-a11y/descomplica-crm.git
 cd descomplica-crm
 nvm use
 pnpm install --frozen-lockfile

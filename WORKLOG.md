@@ -130,4 +130,5 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 
 - Checkpoint local criado na branch `chore/environment-preparation`: `dcb4257` (toolchain/dependências) e `217da89` (CI).
 - Todos os gates foram repetidos após documentação e formatação; Supabase reiniciou limpo e foi encerrado com backup local preservado.
-- Único bloqueio externo: `gh auth status` informa ausência de sessão. O conector GitHub autenticado não oferece criação de repositório. Executar `gh auth login` e então criar/enviar o repositório privado antes de abrir a migração.
+- Autenticação `gh` validada em 2026-08-04. Repositório privado criado em `contatoleandrolucass2-a11y/descomplica-crm`, com `main` definida como branch padrão.
+- Branch `chore/environment-preparation`, tags de checkpoint e workflow CI serão enviados neste checkpoint remoto. Migração permanece fechada até a execução verde da CI.

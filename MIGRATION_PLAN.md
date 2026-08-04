@@ -10,7 +10,7 @@
 - [x] Fixar arquitetura e dependências da base final.
 - [x] Fazer lint, typecheck, testes, auditoria e build da base final.
 - [x] Criar checkpoint Git local da preparação.
-- [ ] Criar repositório privado e enviar a branch; bloqueado somente por autenticação do `gh`.
+- [x] Criar repositório GitHub privado e enviar a branch de preparação.
 
 Nenhuma etapa abaixo começa antes do fechamento do Gate 0.
 
