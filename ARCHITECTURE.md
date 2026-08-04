@@ -30,6 +30,7 @@ flowchart LR
 9. **Dashboard normalizado.** O read model separa snapshot, visão, métricas e ranking de empreendimentos. A UI lê com a sessão SSR e nunca usa fallback demonstrativo.
 10. **Metas mensais auditadas.** Os funis DV e parcerias compartilham uma tabela tipada por perfil/mês. A escrita ocorre por Server Action e RPC, que recalcula as etapas e audita atomicamente.
 11. **Pontos normalizados.** Pesos e objetivos do ranking são linhas tipadas, legíveis por `crm.ranking.view`; a substituição integral exige `crm.settings.manage` e gera auditoria.
+12. **Ranking recalculável.** O read model guarda atividades por corretor/período, não pontuações finais. Corretores e gerentes são classificados com os pesos atuais, sem regravar o snapshot.
 
 ## Fronteiras de segredo
 
@@ -37,7 +38,7 @@ Chaves públicas do Supabase podem chegar ao navegador e permanecem limitadas po
 
 ## Próximas decisões da migração
 
-- Read model PostgreSQL para ranking e detalhes das etapas.
+- Read model PostgreSQL para detalhes das etapas.
 - Contratos de ingestão e Salesforce com autenticação, autorização, rate limiting, timeout, retry e auditoria.
 - Estratégia de dados seed/demonstração separada dos dados reais.
 

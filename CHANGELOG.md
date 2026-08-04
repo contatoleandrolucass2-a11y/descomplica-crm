@@ -21,6 +21,8 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Server Action e RPC de metas protegidas por `crm.settings.manage`, RLS e auditoria atômica.
 - Configuração normalizada de pesos e objetivos das sete atividades do ranking.
 - Server Action e RPC de pontos com substituição integral, validação e auditoria atômica.
+- Ranking server-rendered de corretores e gerentes, com quatro períodos, pódio e placar completo.
+- Read model normalizado de atividades do ranking, recalculado com os pesos atuais.
 
 ### Alterado
 
@@ -40,3 +42,4 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Mutações administrativas protegidas por guarda server-side, RPC hierárquica e auditoria no banco.
 - Escrita direta das metas revogada para o navegador; perfil inativo ou sem permissão falha fechado.
 - Pesos do ranking expostos somente para leitores autorizados; escrita direta permanece revogada.
+- Snapshots e participantes do ranking protegidos por `crm.ranking.view`, sem fallback demonstrativo.

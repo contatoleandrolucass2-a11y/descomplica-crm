@@ -222,3 +222,20 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Conta e configuração temporárias foram removidas por `supabase db reset`.
 - Gates finais repetidos: instalação congelada, formatação, lint, tipos, 14 testes Vitest, build, 103 testes pgTAP, schema lint e advisors aprovados.
 - Segurança final: auditoria pnpm sem vulnerabilidades, Gitleaks sem achados na árvore e em 175 commits, OSV-Scanner sem achados em 514 pacotes.
+
+### Encerramento do incremento de pontos
+
+- PR #8 mesclada na `main` em `40982e7`; GitHub Actions run `30879627188` aprovou a branch e run `30879687370` aprovou a `main`.
+- Branch `feat/gate2-ranking-read-model` criada a partir da `main` atualizada.
+
+## 2026-08-04 — Gate 2: ranking
+
+- O `RankingClient` original foi analisado: quatro períodos, corretores/gerentes, sete atividades ponderadas, bônus por conversão e critérios de desempate.
+- Migration `20260804050720_ranking_read_model.sql` criou snapshots e atividades por corretor/período, sem seed, JSON ou pontuação final congelada.
+- A aplicação combina as atividades com os pesos atuais, calcula bônus, ordena corretores e agrega gerentes antes da pontuação.
+- `/app/ranking` substituiu o placeholder por Server Component com pódio, resumo, placar, quatro períodos, duas visões e estado vazio sem dados demo.
+- Reset integral das nove migrations e 128 testes pgTAP passaram. ESLint, TypeScript, 18 testes Vitest e build de 21 páginas também passaram.
+- QA autenticada confirmou três corretores, duas equipes, troca de mês para hoje, URL, placar e cálculo. Documento e `scrollWidth` ficaram em 1280 px, sem warning no servidor.
+- Conta, pesos e snapshot temporários foram removidos por `supabase db reset`.
+- Gates finais repetidos: instalação congelada, formatação, lint, tipos, 18 testes Vitest, build, 128 testes pgTAP, schema lint e advisors aprovados.
+- Segurança final: auditoria pnpm sem vulnerabilidades, Gitleaks sem achados na árvore e em 176 commits, OSV-Scanner sem achados em 514 pacotes.
