@@ -134,4 +134,7 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Branch `chore/environment-preparation` e três tags de checkpoint enviadas. PR draft #1 aberta contra `main`.
 - GitHub Actions run `30875961593`: aprovado em 54 segundos. Instalação congelada, lint, typecheck, 4 testes, auditoria e build passaram.
 - A segunda execução verde apontou runtime Node 20 depreciado nas actions v4. `actions/checkout` foi atualizado para v7.0.1 e `actions/setup-node` para v7.0.0, ambas fixadas por SHA completo para reduzir risco de alteração de tag.
+- GitHub Actions run `30876134775`: aprovado em 50 segundos com actions v7 e sem a anotação de runtime depreciado.
+- Dependabot alerts e security updates habilitados; branches passam a ser apagadas automaticamente após merge.
+- Proteção da `main` não foi habilitada: a API exige GitHub Pro para este repositório privado. O projeto permaneceu privado e nenhum plano/cobrança foi alterado. Pull request e CI continuam sendo o fluxo obrigatório documentado.
 - Gate 0 encerrado. A migração funcional pode começar em nova etapa/branch, mantendo a PR de preparação isolada.
