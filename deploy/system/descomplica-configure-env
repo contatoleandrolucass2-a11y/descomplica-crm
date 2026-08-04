@@ -47,6 +47,8 @@ readonly -a managed_keys=(
   NEXT_PUBLIC_SUPABASE_URL
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   APP_ORIGIN
+  SALESFORCE_INGEST_ENABLED
+  SALESFORCE_REFRESH_ENABLED
   SUPABASE_SECRET_KEY
   SALESFORCE_INGEST_SECRET
   SALESFORCE_REFRESH_URL
@@ -99,6 +101,21 @@ confirm() {
   done
 }
 
+prompt_capability() {
+  local key="$1"
+  local prompt="$2"
+  local default_answer="no"
+
+  if [[ "${values[${key}]:-}" == "true" ]]; then
+    default_answer="yes"
+  fi
+  if confirm "${prompt}" "${default_answer}"; then
+    values["${key}"]="true"
+  else
+    values["${key}"]="false"
+  fi
+}
+
 validate_supabase_url() {
   node -e '
     let input = "";
@@ -130,6 +147,10 @@ validate_publishable_key() {
 
 validate_secret_key() {
   [[ "$1" =~ ^sb_secret_[A-Za-z0-9_-]{20,}$ ]]
+}
+
+validate_machine_secret() {
+  [[ "$1" =~ ^[A-Za-z0-9_-]{32,}$ ]]
 }
 
 validate_refresh_url() {
@@ -193,6 +214,18 @@ prompt_value() {
   done
 }
 
+ensure_machine_secret() {
+  local key="$1"
+
+  if [[ -n "${values[${key}]:-}" ]] && validate_machine_secret "${values[${key}]}"; then
+    printf '%s existente foi preservado.\n' "${key}"
+    return 0
+  fi
+
+  values["${key}"]="$(openssl rand -hex 32)"
+  printf '%s foi gerado com entropia criptográfica.\n' "${key}"
+}
+
 load_existing_values
 
 if [[ -z "${values[IMAGE_TAG]:-}" || ! "${values[IMAGE_TAG]}" =~ ^[0-9a-f]{7,64}$ ]]; then
@@ -204,6 +237,11 @@ values[APP_ORIGIN]="${application_origin}"
 printf 'Configuração segura do ambiente de produção do Descomplica CRM.\n'
 printf 'Valores secretos são lidos sem eco e nunca são exibidos no resumo.\n\n'
 
+prompt_capability SALESFORCE_INGEST_ENABLED 'Ativar a ingestão Salesforce?'
+prompt_capability SALESFORCE_REFRESH_ENABLED 'Ativar a atualização Salesforce sob demanda?'
+
+printf '\n'
+
 prompt_value \
   NEXT_PUBLIC_SUPABASE_URL \
   'NEXT_PUBLIC_SUPABASE_URL (URL HTTPS do projeto, *.supabase.co)' \
@@ -214,28 +252,26 @@ prompt_value \
   'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (prefixo sb_publishable_)' \
   yes \
   validate_publishable_key
-prompt_value \
-  SUPABASE_SECRET_KEY \
-  'SUPABASE_SECRET_KEY (prefixo sb_secret_)' \
-  yes \
-  validate_secret_key
 
-printf '\nSALESFORCE_REFRESH_URL é a URL HTTPS do webhook da automação externa\n'
-printf 'responsável por iniciar a extração no Salesforce (n8n ou substituto implantado).\n'
-printf 'Ela deve ser obtida no serviço de automação; não existe fallback no CRM.\n'
-prompt_value \
-  SALESFORCE_REFRESH_URL \
-  'SALESFORCE_REFRESH_URL' \
-  no \
-  validate_refresh_url
-
-if [[ -z "${values[SALESFORCE_INGEST_SECRET]:-}" ]]; then
-  values[SALESFORCE_INGEST_SECRET]="$(openssl rand -hex 32)"
-  printf 'SALESFORCE_INGEST_SECRET foi gerado com entropia criptográfica.\n'
+if [[ "${values[SALESFORCE_INGEST_ENABLED]}" == "true" ]]; then
+  prompt_value \
+    SUPABASE_SECRET_KEY \
+    'SUPABASE_SECRET_KEY (prefixo sb_secret_)' \
+    yes \
+    validate_secret_key
+  ensure_machine_secret SALESFORCE_INGEST_SECRET
 fi
-if [[ -z "${values[SALESFORCE_REFRESH_SECRET]:-}" ]]; then
-  values[SALESFORCE_REFRESH_SECRET]="$(openssl rand -hex 32)"
-  printf 'SALESFORCE_REFRESH_SECRET foi gerado com entropia criptográfica.\n'
+
+if [[ "${values[SALESFORCE_REFRESH_ENABLED]}" == "true" ]]; then
+  printf '\nSALESFORCE_REFRESH_URL é a URL HTTPS do webhook da automação externa\n'
+  printf 'responsável por iniciar a extração no Salesforce (n8n ou substituto implantado).\n'
+  printf 'Ela deve ser obtida no serviço de automação; não existe fallback no CRM.\n'
+  prompt_value \
+    SALESFORCE_REFRESH_URL \
+    'SALESFORCE_REFRESH_URL' \
+    no \
+    validate_refresh_url
+  ensure_machine_secret SALESFORCE_REFRESH_SECRET
 fi
 
 if [[ -n "${values[MASTER_USER_ID]:-}" ]]; then
@@ -264,10 +300,12 @@ temporary_environment_file="$(mktemp --tmpdir="${environment_directory}" .produc
   printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "${values[NEXT_PUBLIC_SUPABASE_URL]}"
   printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "${values[NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY]}"
   printf 'APP_ORIGIN=%s\n' "${values[APP_ORIGIN]}"
-  printf 'SUPABASE_SECRET_KEY=%s\n' "${values[SUPABASE_SECRET_KEY]}"
-  printf 'SALESFORCE_INGEST_SECRET=%s\n' "${values[SALESFORCE_INGEST_SECRET]}"
-  printf 'SALESFORCE_REFRESH_URL=%s\n' "${values[SALESFORCE_REFRESH_URL]}"
-  printf 'SALESFORCE_REFRESH_SECRET=%s\n' "${values[SALESFORCE_REFRESH_SECRET]}"
+  printf 'SALESFORCE_INGEST_ENABLED=%s\n' "${values[SALESFORCE_INGEST_ENABLED]}"
+  printf 'SALESFORCE_REFRESH_ENABLED=%s\n' "${values[SALESFORCE_REFRESH_ENABLED]}"
+  printf 'SUPABASE_SECRET_KEY=%s\n' "${values[SUPABASE_SECRET_KEY]:-}"
+  printf 'SALESFORCE_INGEST_SECRET=%s\n' "${values[SALESFORCE_INGEST_SECRET]:-}"
+  printf 'SALESFORCE_REFRESH_URL=%s\n' "${values[SALESFORCE_REFRESH_URL]:-}"
+  printf 'SALESFORCE_REFRESH_SECRET=%s\n' "${values[SALESFORCE_REFRESH_SECRET]:-}"
   if [[ -n "${values[MASTER_USER_ID]:-}" ]]; then
     printf 'MASTER_USER_ID=%s\n' "${values[MASTER_USER_ID]}"
   fi

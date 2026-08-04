@@ -10,7 +10,12 @@ Encontrados no CRM original: plugins Cloudflare/Vite, Wrangler, Vinext, binding 
 
 ## Salesforce
 
-O refresh foi reescrito como Route Handler com sessão, `crm.salesforce.refresh`, validação de origem, lock, cooldown, timeout, erros sanitizados e auditoria. A URL não tem fallback: deve vir do ambiente e usar HTTPS fora do desenvolvimento. Nenhuma chamada real de produção foi executada.
+Ingestão e refresh possuem flags server-side independentes e desativadas por
+padrão. O refresh mantém sessão, `crm.salesforce.refresh`, validação de origem,
+proteção de URL, lock, cooldown, timeout, erros sanitizados e auditoria. A URL
+não tem fallback: deve vir do ambiente e usar HTTPS fora do desenvolvimento.
+Com a capacidade desativada ou incompleta, nenhuma chamada externa ocorre.
+Nenhuma chamada real de produção foi executada.
 
 ## Ingestão/n8n
 

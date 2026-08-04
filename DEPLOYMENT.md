@@ -11,7 +11,8 @@ VPS Hostinger KVM 1, Ubuntu 24.04 LTS, aplicação Next.js `standalone`, Docker 
 - Node 24.19.x, pnpm 11.20.x, Docker Engine e Docker Compose.
 - Nginx, certificado TLS e rotação de logs.
 - Variáveis de ambiente em arquivo com permissão restrita ou gerenciador de segredos.
-- `APP_ORIGIN`, secret key Supabase e Bearers Salesforce distintos por ambiente, nunca presentes no artefato.
+- `APP_ORIGIN` e flags Salesforce explícitas; segredos distintos por ambiente
+  somente para capacidades ativadas, nunca presentes no artefato.
 - Backup validado antes de cada alteração de banco.
 
 ## Artefato
@@ -86,16 +87,49 @@ sudo visudo -cf /etc/sudoers.d/descomplica-configure-env
 
 O operador `deploy` pode então executar
 `sudo /usr/local/sbin/descomplica-configure-env`. O assistente lê chaves sem
-eco, valida a URL e os prefixos atuais do Supabase, gera Bearers Salesforce com
-entropia criptográfica, preserva valores válidos em reexecuções e substitui
-`/etc/descomplica-crm/production.env` atomicamente com `root:deploy` e `0640`.
-Ele não inicia containers nem mostra o arquivo final.
+eco e pergunta primeiro quais capacidades Salesforce serão ativadas. Segredos
+e URL são solicitados ou gerados somente para capacidades ativas; valores já
+existentes de capacidades desativadas permanecem preservados sem serem
+solicitados. A substituição de `/etc/descomplica-crm/production.env` é atômica,
+com `root:deploy` e `0640`. O assistente não inicia containers nem mostra o
+arquivo final.
 
 `SALESFORCE_REFRESH_URL` não é derivada pelo CRM: é a URL HTTPS publicada pela
 automação externa que inicia a extração Salesforce (n8n ou seu substituto). A
 URL deve ser obtida nesse serviço e não pode conter credenciais embutidas. O
 `MASTER_USER_ID` só é solicitado quando o operador confirma que o bootstrap
 manual documentado em `docs/runbooks/bootstrap-master.md` ainda é necessário.
+
+Para o primeiro lançamento, use explicitamente:
+
+```dotenv
+SALESFORCE_INGEST_ENABLED=false
+SALESFORCE_REFRESH_ENABLED=false
+```
+
+Nesse estado, `SUPABASE_SECRET_KEY`, `SALESFORCE_INGEST_SECRET`,
+`SALESFORCE_REFRESH_URL` e `SALESFORCE_REFRESH_SECRET` podem permanecer vazias.
+Os endpoints respondem `503`, nenhum cliente privilegiado ou webhook é
+acionado e a ação de refresh aparece indisponível para usuários autorizados.
+Somente o valor literal `true` ativa cada capacidade.
+
+## URLs do Supabase Auth
+
+No painel Supabase, em **Authentication → URL Configuration**, a configuração
+de produção atual é estritamente:
+
+| Campo                         | Valor/caminho necessário                    |
+| ----------------------------- | ------------------------------------------- |
+| Site URL                      | `https://crm.descomplicapro.com.br`         |
+| Login por senha               | nenhum redirect Supabase; página `/login`   |
+| Confirmação de cadastro       | Site URL, pois `signUp` não define redirect |
+| Callback OAuth/magic link     | inexistente no código atual                 |
+| Recuperação/troca de senha    | inexistente no código atual                 |
+| Additional Redirect URLs prod | nenhuma URL adicional                       |
+
+Não autorize wildcard de produção nem caminhos hipotéticos. Quando callback,
+OAuth, magic link ou recuperação forem implementados, o respectivo caminho
+exato deverá entrar na allowlist no mesmo incremento.
 
 Para rollback, selecione uma imagem imutável que permaneça no host e não faça
 novo build:
@@ -105,6 +139,11 @@ export IMAGE_TAG=<sha-anterior>
 docker compose --env-file /etc/descomplica-crm/production.env up -d --no-build
 curl --fail --silent http://127.0.0.1:3000/api/health
 ```
+
+O rollback deve restaurar também a cópia anterior de `production.env`. Se a
+imagem anterior não reconhecer as flags, preserve a imagem smoke atual e não a
+substitua até que o healthcheck e o comportamento dos endpoints estejam
+validados.
 
 Enquanto DNS e certificado não estiverem prontos, habilite somente
 `deploy/nginx/crm.descomplicapro.com.br.http.conf`, que atende o desafio ACME e
