@@ -25,6 +25,8 @@ flowchart LR
 4. **Autorização em profundidade.** Menus e páginas respeitam permissões, mas APIs, Server Actions e RLS também as impõem.
 5. **Deploy `standalone` em VPS.** PM2 é suficiente para o KVM 1 e reduz a sobrecarga de runtime. Docker continua necessário para o Supabase local, não para executar o app na VPS.
 6. **Versões exatas.** `package.json` e lockfile fixam a base homologada; atualizações futuras serão seletivas e testadas.
+7. **Catálogo autorizado.** `app_pages` é a fonte da navegação. RLS filtra páginas pela permissão efetiva; guardas de rota e RPCs continuam sendo as fronteiras de segurança.
+8. **Provisionamento mínimo.** Novas contas Auth recebem perfil ativo e papel `user`. O painel só modifica alvos abaixo do nível do ator e toda mutação é auditada.
 
 ## Fronteiras de segredo
 
@@ -32,9 +34,8 @@ Chaves públicas do Supabase podem chegar ao navegador e permanecem limitadas po
 
 ## Próximas decisões da migração
 
-- Catálogo dinâmico de páginas e permissões.
 - Modelo PostgreSQL para metas, pontos e dashboard.
 - Contratos de ingestão e Salesforce com autenticação, autorização, rate limiting, timeout, retry e auditoria.
 - Estratégia de dados seed/demonstração separada dos dados reais.
 
-Essas decisões serão implementadas somente após o checkpoint da preparação.
+Essas decisões serão implementadas incrementalmente nas próximas branches.

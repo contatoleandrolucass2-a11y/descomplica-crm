@@ -16,10 +16,12 @@ Gate 0 encerrado em 2026-08-04 após CI remota verde na PR draft #1. As próxima
 
 ## Gate 1 — estrutura e permissões
 
-1. Catalogar todas as rotas, páginas, APIs e componentes do CRM.
-2. Definir catálogo dinâmico de páginas e matriz de permissões.
-3. Implementar painel administrativo de usuários, papéis e permissões com auditoria.
-4. Criar testes de autorização por papel e por override.
+- [x] Catalogar todas as rotas, páginas, APIs e componentes do CRM.
+- [x] Definir catálogo dinâmico de páginas e matriz de permissões.
+- [x] Implementar painel administrativo inicial de usuários, papéis e permissões com auditoria.
+- [x] Criar testes de autorização por papel, status e override.
+
+Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende dos gates locais e da CI do pull request.
 
 ## Gate 2 — banco e APIs
 
