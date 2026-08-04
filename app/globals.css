@@ -15,3 +15,119 @@
   --color-background: #ffffff;
   --color-foreground: #171717;
 }
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+header,
+main,
+section,
+article,
+aside,
+nav,
+div,
+input,
+button,
+select,
+textarea {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: 160ms;
+  transition-timing-function: ease-out;
+}
+
+:focus-visible {
+  outline: 3px solid #06b6d4;
+  outline-offset: 3px;
+}
+
+:root[data-theme="balanced"] body,
+:root[data-theme="balanced"] .bg-slate-50 {
+  background-color: #e8f0f3;
+}
+
+:root[data-theme="balanced"] .bg-white {
+  background-color: #f8fbfc;
+}
+
+:root[data-theme="balanced"] .ring-slate-200 {
+  --tw-ring-color: #bfd0d8;
+}
+
+:root[data-theme="balanced"] .border-slate-200 {
+  border-color: #bfd0d8;
+}
+
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .bg-slate-50 {
+  background-color: #071c2a;
+}
+
+:root[data-theme="dark"] .bg-white {
+  background-color: #102a42;
+}
+
+:root[data-theme="dark"] .bg-slate-100 {
+  background-color: #173953;
+}
+
+:root[data-theme="dark"] .bg-slate-950 {
+  background-color: #030f18;
+}
+
+:root[data-theme="dark"] .text-slate-950,
+:root[data-theme="dark"] .text-slate-900 {
+  color: #f4fbff;
+}
+
+:root[data-theme="dark"] .text-slate-700,
+:root[data-theme="dark"] .text-slate-600 {
+  color: #c0d2df;
+}
+
+:root[data-theme="dark"] .text-slate-500,
+:root[data-theme="dark"] .text-slate-400 {
+  color: #98afc0;
+}
+
+:root[data-theme="dark"] .border-slate-200,
+:root[data-theme="dark"] .border-slate-300 {
+  border-color: #31516c;
+}
+
+:root[data-theme="dark"] .ring-slate-200 {
+  --tw-ring-color: #31516c;
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea {
+  border-color: #3b5b73;
+  background-color: #0b2136;
+  color: #f4fbff;
+}
+
+:root[data-theme="dark"] .hover\:bg-slate-50:hover,
+:root[data-theme="dark"] .hover\:bg-slate-100:hover {
+  background-color: #173953;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body,
+  header,
+  main,
+  section,
+  article,
+  aside,
+  nav,
+  div,
+  input,
+  button,
+  select,
+  textarea {
+    transition-duration: 0.01ms;
+  }
+}

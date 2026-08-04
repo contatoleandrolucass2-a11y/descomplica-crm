@@ -132,6 +132,7 @@ O diretório `.next/standalone` é o artefato de runtime. O fluxo completo de Ho
 - [docs/RANKING.md](docs/RANKING.md): atividades, cálculo, filtros e consolidação do ranking.
 - [docs/STAGE_DETAILS.md](docs/STAGE_DETAILS.md): indicadores, comparações e navegação das etapas.
 - [docs/INGESTION.md](docs/INGESTION.md): contrato versionado, refresh, idempotência e rotação de segredos.
+- [docs/INTERFACE.md](docs/INTERFACE.md): navegação ativa, temas e critérios de acessibilidade do shell.
 - [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md): integrações encontradas e política de migração.
 - [docs/BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md): backup e restauração.
 - [CONTRIBUTING.md](CONTRIBUTING.md): fluxo de branch, commits e qualidade.
