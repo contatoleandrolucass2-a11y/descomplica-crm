@@ -17,6 +17,8 @@
 6. Toda tabela do schema exposto tem grants mínimos e RLS ativada/testada.
 7. Integrações externas usam timeout, limite de payload, retry limitado, auditoria e erros sem detalhes internos.
 8. O bootstrap do master usa conexão PostgreSQL privilegiada e não é publicado pela aplicação.
+9. Usuários inativos não recebem contexto de autorização; o helper efetivo de permissões também os bloqueia dentro da RLS.
+10. Alterações de papel, exceção, status e visibilidade passam por RPCs auditadas e respeitam hierarquia estrita.
 
 ## Verificações locais
 
@@ -26,6 +28,8 @@ pnpm security:secrets
 pnpm security:secrets:history
 pnpm security:osv
 pnpm exec supabase db lint --local
+pnpm exec supabase db advisors --local --type security
+pnpm exec supabase db advisors --local --type performance
 pnpm exec supabase inspect db table-sizes --local
 ```
 

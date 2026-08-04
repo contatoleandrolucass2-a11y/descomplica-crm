@@ -148,3 +148,25 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - GitHub confirmou `visibility: public`; código, histórico, tags, issues, pull requests e Actions passaram a ser acessíveis publicamente.
 - Nenhuma configuração de produção, plano ou cobrança foi alterada.
 - A proteção da `main`, antes indisponível no plano para repositório privado, tornou-se tecnicamente disponível; não foi alterada porque o pedido se limitou à visibilidade.
+
+## 2026-08-04 — início do Gate 1
+
+- Branch `feat/gate1-page-catalog` criada a partir da `main` pública e verde.
+- CRM original inventariado: sete superfícies de página, cinco etapas dinâmicas, nove componentes reutilizáveis e oito endpoints.
+- O login Supabase SSR permanece como autenticação única. As três APIs manuais de autenticação do CRM serão descartadas.
+- Menu estático será substituído por catálogo PostgreSQL associado a permissões efetivas. Cloudflare, D1, Vinext, Vite, Wrangler e dados demo continuam proibidos.
+- Inventário detalhado: `docs/CRM_INVENTORY.md`.
+
+### Catálogo, autorização e painel administrativo
+
+- Migration `20260804041218_page_catalog_and_crm_permissions.sql` criada com 9 novas permissões, catálogo de 14 páginas, grants explícitos, RLS e RPC auditada de visibilidade.
+- Novas contas Auth recebem perfil e papel `user`; contas existentes são preenchidas de forma idempotente. Usuário inativo não obtém contexto nem permissões efetivas.
+- Painel `/admin/usuarios` permite atribuição de papéis, exceções `allow`/`deny`, remoção de exceções e ativação/desativação dentro da hierarquia.
+- Painel `/admin/paginas` controla visibilidade do catálogo. A navegação protegida consulta apenas páginas ativas autorizadas pela RLS.
+- Todas as rotas CRM inventariadas existem sob `/app` e possuem guarda server-side específica; conteúdo funcional ainda será migrado por domínio.
+- As três policies SELECT duplicadas preexistentes foram consolidadas. Advisors locais de segurança e performance passaram sem achados.
+- Reset integral das cinco migrations aprovado. `supabase test db`: 26 testes aprovados; `supabase db lint`: sem erros.
+- Build `standalone` gerou 21 páginas. Smoke sem sessão confirmou `/login` e `/register` com HTTP 200 e todas as rotas protegidas redirecionando para `/login`.
+- O primeiro processo `standalone` foi iniciado sem as variáveis públicas do Supabase e respondeu 500; a repetição com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` locais passou. Nenhum segredo foi exibido ou persistido.
+- Checkpoint funcional criado em `800ba10` e publicado na branch `feat/gate1-page-catalog`.
+- PR draft #5 aberta contra `main`; GitHub Actions run `30877794127` aprovou o workflow `validate` em 39 segundos.

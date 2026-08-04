@@ -9,7 +9,11 @@ export const metadata = {
   title: "Painel inicial",
 };
 
-export default function AppHomePage() {
+import { enforcePermission } from "@/lib/authorization/enforce";
+
+export default async function AppHomePage() {
+  await enforcePermission("crm.dashboard.view");
+
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-16">
       <div className="mx-auto max-w-2xl">
@@ -34,7 +38,7 @@ export default function AppHomePage() {
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <h2 className="font-medium text-slate-900">Próximas áreas</h2>
             <p className="mt-1 text-sm text-slate-600">
-              As próximas telas serão liberadas conforme as permissões declaradas no sistema.
+              Use a navegação autorizada acima para acessar etapas, ranking e configurações.
             </p>
           </div>
         </div>

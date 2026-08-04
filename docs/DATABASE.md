@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema da base de login usa PostgreSQL 17 no Supabase local. Existem quatro migrations versionadas. A validação local encontrou sete tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis e oito permissões.
+O schema usa PostgreSQL 17 no Supabase local. Existem cinco migrations versionadas. A validação local encontrou oito tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 14 páginas.
 
 ## Migrations
 
@@ -10,6 +10,7 @@ O schema da base de login usa PostgreSQL 17 no Supabase local. Existem quatro mi
 2. `20260522010552_access_control_admin_functions.sql`: funções administrativas e bootstrap master.
 3. `20260527120000_authorization_context_rpc.sql`: contexto efetivo de autorização.
 4. `20260721120000_fix_remove_user_permission_override_ambiguity.sql`: correção de ambiguidade em override.
+5. `20260804041218_page_catalog_and_crm_permissions.sql`: catálogo de páginas, permissões CRM, provisionamento de contas, bloqueio de inativos e RPCs administrativas.
 
 ## Desenvolvimento local
 
@@ -17,13 +18,16 @@ O schema da base de login usa PostgreSQL 17 no Supabase local. Existem quatro mi
 pnpm db:start
 pnpm exec supabase migration list --local
 pnpm exec supabase db lint --local
+pnpm db:test
+pnpm exec supabase db advisors --local --type security
+pnpm exec supabase db advisors --local --type performance
 pnpm exec supabase db reset
 pnpm db:stop
 ```
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` está configurado e o runner pgTAP inicia corretamente, mas a base original não contém testes SQL. A cobertura inicial vive no Vitest; a migração de cada domínio do CRM deverá adicionar testes pgTAP para schema, grants e policies.
+`supabase test db` executa 26 testes pgTAP do Gate 1 sobre schema, grants, policies, provisionamento, usuários inativos e RPCs auditadas. Cada novo domínio do CRM deve ampliar essa cobertura.
 
 ## RLS e grants
 
@@ -36,7 +40,7 @@ RLS e grants são camadas complementares. Cada nova tabela exposta precisa:
 - teste com usuário autorizado e não autorizado;
 - auditoria para alterações administrativas.
 
-Os advisors locais não apontaram erro de segurança. O advisor de performance registrou múltiplas policies permissivas de `SELECT` em `profiles`, `user_permission_overrides` e `user_roles`; isso é dívida de desempenho preexistente a revisar durante a migração, sem afrouxar autorização.
+Os advisors locais de segurança e performance não apontam problemas. As três policies permissivas duplicadas da base de login foram consolidadas sem alterar a regra self-or-manager.
 
 ## D1 para PostgreSQL
 

@@ -1,6 +1,6 @@
 # Descomplica CRM
 
-Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM serão migradas de forma controlada. Esta branch contém somente a preparação obrigatória do ambiente. A migração funcional ainda não começou.
+Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM são migradas de forma controlada. O Gate 1 já inclui catálogo dinâmico de páginas, navegação autorizada, provisionamento mínimo de novos usuários e painel administrativo inicial.
 
 ## Arquitetura alvo
 
@@ -81,6 +81,9 @@ Para reconstruir o banco do zero com as migrations versionadas:
 pnpm exec supabase db reset
 pnpm exec supabase migration list --local
 pnpm exec supabase db lint --local
+pnpm db:test
+pnpm exec supabase db advisors --local --type security
+pnpm exec supabase db advisors --local --type performance
 ```
 
 O bootstrap inicial do usuário `master` é uma operação privilegiada e separada. Siga [docs/runbooks/bootstrap-master.md](docs/runbooks/bootstrap-master.md); nunca transforme esse procedimento em endpoint público.
@@ -117,6 +120,7 @@ O diretório `.next/standalone` é o artefato de runtime. O fluxo completo de Ho
 - [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md): inventário dos dois projetos e da base final.
 - [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md): ferramentas e reconstrução do ambiente.
 - [docs/DATABASE.md](docs/DATABASE.md): migrations, RLS e procedimentos de banco.
+- [docs/AUTHORIZATION_MATRIX.md](docs/AUTHORIZATION_MATRIX.md): papéis, páginas e operações administrativas.
 - [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md): integrações encontradas e política de migração.
 - [docs/BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md): backup e restauração.
 - [CONTRIBUTING.md](CONTRIBUTING.md): fluxo de branch, commits e qualidade.
