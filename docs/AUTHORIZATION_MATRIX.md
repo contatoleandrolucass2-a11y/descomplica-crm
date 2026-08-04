@@ -40,3 +40,5 @@ As páginas de metas exigem `crm.settings.manage` na rota e na Server Action. A 
 As tabelas de pontos aceitam leitura com `crm.ranking.view` ou `crm.settings.manage`. A rota de configuração e a RPC de substituição exigem `crm.settings.manage`; negar `crm.ranking.view` remove a leitura para papéis comerciais sem permissão administrativa.
 
 O read model do ranking exige `crm.ranking.view` na rota e nas duas policies RLS. A tabela não expõe escrita a `authenticated`; o papel `service_role` fica reservado à futura ingestão server-side, sem ser usado no bundle da aplicação.
+
+Cada detalhe de etapa exige `crm.stages.view` e reutiliza as tabelas do dashboard, cuja RLS exige `crm.dashboard.view`. Os papéis comerciais recebem ambas por padrão; um override `deny` em qualquer camada faz a leitura falhar fechada.

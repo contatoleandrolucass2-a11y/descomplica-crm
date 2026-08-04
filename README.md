@@ -1,6 +1,6 @@
 # Descomplica CRM
 
-Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM são migradas de forma controlada. O Gate 1 inclui catálogo dinâmico de páginas, navegação autorizada e painel administrativo. O Gate 2 inclui dashboard, metas, pontos e ranking em PostgreSQL normalizado.
+Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM são migradas de forma controlada. O Gate 1 inclui catálogo dinâmico de páginas, navegação autorizada e painel administrativo. O Gate 2 inclui dashboard, metas, pontos, ranking e detalhes das etapas em PostgreSQL normalizado.
 
 ## Arquitetura alvo
 
@@ -125,6 +125,7 @@ O diretório `.next/standalone` é o artefato de runtime. O fluxo completo de Ho
 - [docs/FUNNEL_GOALS.md](docs/FUNNEL_GOALS.md): metas mensais, cálculo, escrita auditada e testes.
 - [docs/POINT_SETTINGS.md](docs/POINT_SETTINGS.md): pesos/objetivos do ranking e substituição auditada.
 - [docs/RANKING.md](docs/RANKING.md): atividades, cálculo, filtros e consolidação do ranking.
+- [docs/STAGE_DETAILS.md](docs/STAGE_DETAILS.md): indicadores, comparações e navegação das etapas.
 - [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md): integrações encontradas e política de migração.
 - [docs/BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md): backup e restauração.
 - [CONTRIBUTING.md](CONTRIBUTING.md): fluxo de branch, commits e qualidade.

@@ -239,3 +239,20 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Conta, pesos e snapshot temporários foram removidos por `supabase db reset`.
 - Gates finais repetidos: instalação congelada, formatação, lint, tipos, 18 testes Vitest, build, 128 testes pgTAP, schema lint e advisors aprovados.
 - Segurança final: auditoria pnpm sem vulnerabilidades, Gitleaks sem achados na árvore e em 176 commits, OSV-Scanner sem achados em 514 pacotes.
+
+### Encerramento do incremento de ranking
+
+- PR #9 mesclada na `main` em `ced2e14`; GitHub Actions run `30880051063` aprovou a branch e run `30880105833` aprovou a `main` após o merge.
+- Branch `feat/gate2-stage-details` criada a partir da `main` atualizada.
+
+## 2026-08-04 — Gate 2: detalhes das etapas
+
+- `StageDetailClient` foi analisado e reduzido ao contrato persistido: cinco etapas, três visões, três períodos, metas, conversões e cinco janelas comparativas.
+- As rotas reutilizam `crm_dashboard_metrics`; nenhuma tabela ou cópia JSON adicional foi criada.
+- `/app/etapas/[stage]` substituiu o placeholder por Server Component com atingimento, gap, conversão, histórico, plano de ação e navegação sequencial.
+- Slugs inválidos retornam 404; `crm.stages.view` protege a rota e a RLS do dashboard continua protegendo os dados.
+- ESLint, TypeScript, 21 testes Vitest e build de 21 páginas passaram.
+- QA autenticada confirmou `Visitas` com 45/60, conversão de 56,3%, filtros Canal Imob/semana e navegação até `Vendas`. Sem overflow ou warning no servidor.
+- Conta e snapshot temporários foram removidos por `supabase db reset`.
+- Gates finais repetidos: instalação congelada, formatação, lint, tipos, 21 testes Vitest, build e 128 testes pgTAP aprovados. O schema lint reportou apenas falsos positivos conhecidos da extensão pgTAP; advisors de segurança e performance não encontraram problemas.
+- Segurança final: auditoria pnpm sem vulnerabilidades, Gitleaks sem achados na árvore e em 177 commits, OSV-Scanner sem achados em 514 pacotes.
