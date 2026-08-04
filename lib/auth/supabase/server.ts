@@ -20,7 +20,7 @@
 //
 // Env vars used:
 //   - NEXT_PUBLIC_SUPABASE_URL (public)
-//   - NEXT_PUBLIC_SUPABASE_ANON_KEY (public, RLS-bounded)
+//   - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (public, RLS-bounded)
 // SUPABASE_SERVICE_ROLE_KEY is NOT used here and must never be referenced
 // from this file.
 
@@ -32,7 +32,7 @@ export async function createClient() {
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {

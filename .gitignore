@@ -19,10 +19,17 @@
 
 # production
 /build
+/dist
+/.wrangler
 
 # misc
 .DS_Store
+__MACOSX/
+._*
 *.pem
+*.key
+*.p12
+*.zip
 
 # debug
 npm-debug.log*
@@ -36,6 +43,10 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# local Supabase state
+/supabase/.branches
+/supabase/.temp
 
 # typescript
 *.tsbuildinfo

@@ -8,7 +8,7 @@
 //
 // Env vars used:
 //   - NEXT_PUBLIC_SUPABASE_URL (public)
-//   - NEXT_PUBLIC_SUPABASE_ANON_KEY (public, RLS-bounded)
+//   - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (public, RLS-bounded)
 // SUPABASE_SERVICE_ROLE_KEY is server-only and must never be referenced
 // from this file or from any other module that this file imports.
 
@@ -17,6 +17,6 @@ import { createBrowserClient } from "@supabase/ssr";
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
   );
 }
