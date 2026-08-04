@@ -15,6 +15,8 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Painel administrativo inicial para papéis, exceções, status de usuários e visibilidade de páginas.
 - Provisionamento automático de perfil e papel mínimo para novas contas Supabase Auth.
 - Rotas protegidas para todas as superfícies inventariadas do CRM.
+- Dashboard comercial server-rendered com três visões, três períodos, metas, conversões e destaques.
+- Read model PostgreSQL normalizado do dashboard com quatro tabelas, constraints, grants e RLS.
 
 ### Alterado
 
@@ -22,6 +24,7 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Supabase SSR passou a usar a publishable key e validação de claims no middleware.
 - Política de scripts de instalação e overrides transitivos de segurança centralizados no workspace pnpm.
 - Policies SELECT duplicadas consolidadas sem ampliar acesso.
+- Dependências D1/JSON e `sf_relatorio_resumo` removidas do caminho de leitura do dashboard.
 
 ### Segurança
 
