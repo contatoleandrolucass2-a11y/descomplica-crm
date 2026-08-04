@@ -21,7 +21,7 @@ O parâmetro `stage` aceita cinco slugs: `oportunidades`, `agendamentos`, `visit
 | Componente              | Responsabilidade                               | Decisão                                        |
 | ----------------------- | ---------------------------------------------- | ---------------------------------------------- |
 | `DashboardClient`       | KPIs, funil, progresso, atualização Salesforce | migrar após substituir APIs e dados demo       |
-| `StageDetailClient`     | Detalhe e comparação por etapa                 | migrar junto do dashboard                      |
+| `StageDetailClient`     | Detalhe e comparação por etapa                 | migrado sobre o read model do dashboard        |
 | `RankingClient`         | Pontuação, conversões, filtros e produtividade | migrado para ranking server-rendered           |
 | `GoalsSettingsClient`   | Edição de metas mensais/semanais/diárias       | migrado para Server Component + Server Action  |
 | `PointsSettingsClient`  | Pesos e metas de pontuação                     | migrado para Server Component + Server Action  |

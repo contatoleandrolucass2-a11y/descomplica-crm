@@ -31,6 +31,7 @@ flowchart LR
 10. **Metas mensais auditadas.** Os funis DV e parcerias compartilham uma tabela tipada por perfil/mês. A escrita ocorre por Server Action e RPC, que recalcula as etapas e audita atomicamente.
 11. **Pontos normalizados.** Pesos e objetivos do ranking são linhas tipadas, legíveis por `crm.ranking.view`; a substituição integral exige `crm.settings.manage` e gera auditoria.
 12. **Ranking recalculável.** O read model guarda atividades por corretor/período, não pontuações finais. Corretores e gerentes são classificados com os pesos atuais, sem regravar o snapshot.
+13. **Etapas sem duplicação.** As cinco análises detalhadas leem as mesmas métricas autorizadas do dashboard; não existe uma segunda fonte ou tabela derivada para a mesma informação.
 
 ## Fronteiras de segredo
 
@@ -38,7 +39,7 @@ Chaves públicas do Supabase podem chegar ao navegador e permanecem limitadas po
 
 ## Próximas decisões da migração
 
-- Read model PostgreSQL para detalhes das etapas.
+- Contratos autenticados de ingestão e atualização Salesforce.
 - Contratos de ingestão e Salesforce com autenticação, autorização, rate limiting, timeout, retry e auditoria.
 - Estratégia de dados seed/demonstração separada dos dados reais.
 

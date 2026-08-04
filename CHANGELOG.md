@@ -23,6 +23,7 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Server Action e RPC de pontos com substituição integral, validação e auditoria atômica.
 - Ranking server-rendered de corretores e gerentes, com quatro períodos, pódio e placar completo.
 - Read model normalizado de atividades do ranking, recalculado com os pesos atuais.
+- Detalhes server-rendered das cinco etapas com visões, períodos, conversão e comparações históricas.
 
 ### Alterado
 
