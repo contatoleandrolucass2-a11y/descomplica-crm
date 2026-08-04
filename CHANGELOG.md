@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Adiciona implantação Docker Compose do build Next.js standalone, limitada a
+  loopback, com healthcheck, limites de recursos, logs rotacionados e rollback
+  por tag imutável.
+- Adiciona endpoint de liveness e configurações Nginx separadas para a fase HTTP
+  segura e para a ativação posterior de HTTPS.
+
 Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ## [Não publicado]

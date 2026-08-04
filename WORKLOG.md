@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-08-04 — preparação da VPS de produção
+
+- Commit-base inspecionado: `e14e9cf24966b86f835c2b717e1af4a42b32f568`.
+- Validação da main: Prettier, ESLint, TypeScript, 30 Vitest, build de 18
+  rotas, auditoria pnpm, Gitleaks, OSV-Scanner e actionlint aprovados.
+- Supabase estritamente local: 162 testes pgTAP aprovados; lint e advisors de
+  segurança/performance sem achados. Nenhuma migration remota foi aplicada.
+- A implantação Docker/Nginx foi preparada na branch
+  `ops/production-vps-docker`; o app permanece em loopback e HTTP público não
+  encaminha tráfego antes do TLS.
+- Smoke test da imagem standalone: container sem privilégios, filesystem
+  somente leitura, limite de 2 GiB/1,5 CPU, healthcheck `healthy`, `/api/health`
+  e `/login` respondendo `200` exclusivamente em `127.0.0.1:3000`.
+- Hardening do host: usuário `deploy` com chave, senhas SSH desativadas, root
+  mantido somente por chave, Fail2ban, atualizações automáticas, sysctl e UFW
+  com entrada limitada a 22/80/443. O Nginx retorna `503` em HTTP até o TLS.
+
 ## 2026-08-03 — preparação obrigatória do ambiente
 
 ### Fontes preservadas
