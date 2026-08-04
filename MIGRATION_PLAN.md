@@ -37,10 +37,11 @@ Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende 
 
 ## Gate 3 — interface
 
-1. Migrar layout e componentes reutilizáveis.
-2. Migrar páginas por domínio, preservando responsividade.
-3. Remover dados demo e usuário hard-coded.
-4. Integrar navegação e ações à matriz de permissões.
+- [x] Migrar shell protegido, navegação ativa e temas claro/equilibrado/escuro.
+- [x] Migrar páginas por domínio, preservando responsividade.
+- [x] Remover dados demo e usuário hard-coded.
+- [x] Integrar navegação e ações à matriz de permissões.
+- [ ] Migrar filtros dimensionais após criar o read model normalizado de registros.
 
 ## Gate 4 — entrega
 

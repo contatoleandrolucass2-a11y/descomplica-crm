@@ -26,6 +26,7 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Detalhes server-rendered das cinco etapas com visões, períodos, conversão e comparações históricas.
 - Route Handlers seguros para status, refresh e ingestão Salesforce, com contrato Zod versionado.
 - Histórico de ingestão, RPC transacional, idempotência, rejeição de snapshot antigo e botão de refresh autorizado.
+- Shell protegido com navegação ativa e temas claro, equilibrado e escuro persistidos localmente.
 
 ### Alterado
 

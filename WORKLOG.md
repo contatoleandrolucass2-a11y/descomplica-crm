@@ -277,3 +277,18 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Foi usado apenas um webhook HTTP local descartável. Nenhuma credencial, URL, base ou chamada de produção foi utilizada.
 - Gates finais repetidos em banco limpo: instalação congelada, formatação, ESLint, TypeScript, 28 testes Vitest, build de 23 páginas e 162 testes pgTAP aprovados. Schema lint, Actionlint e advisors de segurança/performance passaram sem achados.
 - Segurança final: auditoria pnpm sem vulnerabilidades, Gitleaks sem achados na árvore e em 178 commits, OSV-Scanner sem achados em 514 pacotes.
+
+### Encerramento do incremento de ingestão
+
+- PR #11 mesclada na `main` em `9eba53b`; GitHub Actions run `30881418246` aprovou a branch e run `30881474209` aprovou a `main` após o merge.
+- Branch `feat/gate3-interface-shell` criada a partir da `main` atualizada.
+
+## 2026-08-04 — Gate 3: shell da interface
+
+- O `SiteMenu` estático foi mantido fora da migração: `AuthorizedNavigation` recebe o catálogo já filtrado e marca a rota atual com `aria-current`.
+- `ThemeSwitch` migrou os modos claro, equilibrado e escuro com catálogo fechado, persistência local não sensível e fallback claro quando storage/valor não é válido.
+- Tokens globais cobrem superfícies, textos, bordas e campos; foco visível e `prefers-reduced-motion` foram adicionados sem dependência nova ou script inline.
+- ESLint, TypeScript, 30 testes Vitest e build de 23 páginas passaram antes da QA.
+- QA autenticada confirmou os três temas, persistência ao navegar para Ranking, item ativo e ausência de overflow em 1280 px.
+- Conta e preferência de QA foram removidas do banco por reset integral; nenhum dado remoto foi alterado.
+- Gates finais repetidos: instalação congelada, formatação, ESLint, TypeScript, 30 testes Vitest e build de 23 páginas aprovados. Auditoria pnpm, Gitleaks na árvore e em 179 commits e OSV-Scanner em 514 pacotes não encontraram problemas.

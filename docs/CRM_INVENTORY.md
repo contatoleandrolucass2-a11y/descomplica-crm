@@ -20,16 +20,16 @@ O parâmetro `stage` aceita cinco slugs: `oportunidades`, `agendamentos`, `visit
 
 | Componente              | Responsabilidade                               | Decisão                                        |
 | ----------------------- | ---------------------------------------------- | ---------------------------------------------- |
-| `DashboardClient`       | KPIs, funil, progresso, atualização Salesforce | migrar após substituir APIs e dados demo       |
+| `DashboardClient`       | KPIs, funil, progresso, atualização Salesforce | migrado para Server Component + refresh seguro |
 | `StageDetailClient`     | Detalhe e comparação por etapa                 | migrado sobre o read model do dashboard        |
 | `RankingClient`         | Pontuação, conversões, filtros e produtividade | migrado para ranking server-rendered           |
 | `GoalsSettingsClient`   | Edição de metas mensais/semanais/diárias       | migrado para Server Component + Server Action  |
 | `PointsSettingsClient`  | Pesos e metas de pontuação                     | migrado para Server Component + Server Action  |
 | `DashboardFilters`      | Filtros locais persistidos no navegador        | reutilizar com revisão de acessibilidade       |
-| `PeriodComparisonTable` | Comparações de período                         | reutilizar                                     |
+| `PeriodComparisonTable` | Comparações de período                         | migrado para tabela server-rendered            |
 | `StageNavigation`       | Navegação das etapas                           | substituir pelo catálogo de páginas autorizado |
-| `SiteMenu`              | Menu principal estático                        | substituir por navegação dinâmica autorizada   |
-| `ThemeSwitch`           | Tema claro/equilibrado/escuro                  | reutilizar depois do shell protegido           |
+| `SiteMenu`              | Menu principal estático                        | substituído por navegação dinâmica autorizada  |
+| `ThemeSwitch`           | Tema claro/equilibrado/escuro                  | migrado com persistência local não sensível    |
 
 ## APIs encontradas
 

@@ -22,13 +22,16 @@ import { enforceAuthorization } from "@/lib/authorization/enforce";
 import { logoutAction } from "@/lib/auth/actions/logout";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
+import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
+import { ThemeSwitch } from "./_components/ThemeSwitch";
+
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   const context = await enforceAuthorization();
   const pages = await getAuthorizedNavigation(context);
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+      <header className="border-b border-slate-200 bg-white shadow-sm">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <div>
             <Link href="/app" className="font-semibold text-slate-900">
@@ -36,29 +39,19 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
             </Link>
             <p className="text-xs tracking-wide text-slate-500 uppercase">{context.roleKey}</p>
           </div>
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-            >
-              Sair
-            </button>
-          </form>
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <ThemeSwitch />
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+              >
+                Sair
+              </button>
+            </form>
+          </div>
         </div>
-        <nav
-          aria-label="Navegação autorizada"
-          className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-4 sm:flex-wrap sm:px-6"
-        >
-          {pages.map((page) => (
-            <Link
-              key={page.key}
-              href={page.path}
-              className="rounded-full border border-slate-200 px-3 py-1.5 text-sm whitespace-nowrap text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-            >
-              {page.name}
-            </Link>
-          ))}
-        </nav>
+        <AuthorizedNavigation pages={pages} />
       </header>
       {children}
     </div>
