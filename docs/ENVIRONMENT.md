@@ -31,7 +31,7 @@ zsh -lic 'node -v; pnpm -v; nvm --version; psql --version'
 ## Reconstrução
 
 1. Instalar ferramentas oficiais listadas no README.
-2. Clonar o repositório privado.
+2. Clonar o repositório público.
 3. Executar `nvm install && nvm use`.
 4. Ativar `pnpm@11.20.0` com Corepack.
 5. Abrir Docker Desktop.

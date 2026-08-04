@@ -123,7 +123,7 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 3. Supabase PostgreSQL/Auth/RLS no lugar de D1 e autenticação manual.
 4. pnpm único e lockfile único.
 5. Build standalone + PM2/Nginx para Hostinger; Docker apenas no desenvolvimento Supabase.
-6. GitHub privado, CI e branch protegida antes da homologação.
+6. GitHub, CI e branch protegida antes da homologação.
 7. Nenhuma publicação em produção sem autorização explícita.
 
 ### Checkpoint remoto e Gate 0
@@ -140,3 +140,11 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Após a atualização da `main`, Dependabot recalculou zero alerta aberto. A PR automática #2, baseada no lockfile antigo e conflitante com Next.js 16.3.0, foi fechada e sua branch removida.
 - Proteção da `main` não foi habilitada: a API exige GitHub Pro para este repositório privado. O projeto permaneceu privado e nenhum plano/cobrança foi alterado. Pull request e CI continuam sendo o fluxo obrigatório documentado.
 - Gate 0 encerrado. A migração funcional pode começar em nova etapa/branch a partir da `main` validada.
+
+## 2026-08-04 — visibilidade pública do repositório
+
+- Por solicitação explícita do proprietário, `contatoleandrolucass2-a11y/descomplica-crm` mudou de privado para público.
+- Antes da exposição, Gitleaks verificou a árvore atual e 169 commits: zero segredo encontrado.
+- GitHub confirmou `visibility: public`; código, histórico, tags, issues, pull requests e Actions passaram a ser acessíveis publicamente.
+- Nenhuma configuração de produção, plano ou cobrança foi alterada.
+- A proteção da `main`, antes indisponível no plano para repositório privado, tornou-se tecnicamente disponível; não foi alterada porque o pedido se limitou à visibilidade.
