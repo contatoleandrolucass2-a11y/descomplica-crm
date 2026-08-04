@@ -4,6 +4,8 @@ import type { DashboardFilterRecord, DashboardPayload } from "./types";
 
 export type RankingWeights = {
   roulette: number;
+  rouletteSaturday: number;
+  rouletteSunday: number;
   schedule: number;
   visit: number;
   approvedFolder: number;
@@ -382,7 +384,9 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
                 <div className="ranking-explainer-title"><span className="ranking-explainer-number">1</span><h3>Primeiro, somamos seus pontos</h3></div>
                 <p>{isBrokerRanking ? "Cada resultado registrado vale uma quantidade de pontos. Quanto mais você produz, mais pontos ganha." : "Somamos os resultados de todos os corretores da equipe. Quanto mais a equipe produz, mais pontos o gerente ganha."}</p>
                 <ul className="ranking-weight-list">
-                  <li><strong>Roleta</strong><span>{number.format(weights.roulette)} ponto{weights.roulette === 1 ? "" : "s"}</span></li>
+                  <li><strong>Roleta de seg. a sex.</strong><span>{number.format(weights.roulette)} ponto{weights.roulette === 1 ? "" : "s"}</span></li>
+                  <li><strong>Roleta de sábado</strong><span>{number.format(weights.rouletteSaturday)} pontos</span></li>
+                  <li><strong>Roleta de domingo</strong><span>{number.format(weights.rouletteSunday)} pontos</span></li>
                   <li><strong>Agendamento</strong><span>{number.format(weights.schedule)} ponto{weights.schedule === 1 ? "" : "s"}</span></li>
                   <li><strong>Visita</strong><span>{number.format(weights.visit)} pontos</span></li>
                   <li><strong>Pasta aprovada</strong><span>{number.format(weights.approvedFolder)} pontos</span></li>

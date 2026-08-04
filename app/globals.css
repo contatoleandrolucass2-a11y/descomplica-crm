@@ -3682,7 +3682,7 @@ a {
 .points-panel-heading > small { margin-left: auto; color: #087c8d; font-size: .64rem; font-weight: 800; white-space: nowrap; }
 .points-panel-note { margin: 6px 0 8px; color: #52667d; font-size: .72rem; line-height: 1.35; }
 
-.points-metric-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.points-metric-list { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; }
 .points-metric-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -4122,6 +4122,7 @@ a {
 }
 .points-metric-card > span { gap:0; }
 .points-value-editor { height:34px; }
+.ranking-weight-list { grid-template-columns:repeat(7,minmax(0,1fr)); }
 
 .ranking-bonus-story li {
   grid-template-columns:minmax(150px,1fr) auto minmax(150px,1fr);

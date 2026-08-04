@@ -5,10 +5,12 @@ import { pointGoals } from "@/db/schema";
 export const dynamic = "force-dynamic";
 
 const settingId = "default";
-const metricKeys = ["roulette", "schedule", "visit", "approvedFolder", "sale"] as const;
+const metricKeys = ["roulette", "rouletteSaturday", "rouletteSunday", "schedule", "visit", "approvedFolder", "sale"] as const;
 
 const defaultWeights = {
   roulette: 1,
+  rouletteSaturday: 2,
+  rouletteSunday: 3,
   schedule: 1,
   visit: 7,
   approvedFolder: 4,
@@ -17,6 +19,8 @@ const defaultWeights = {
 
 const defaultTargets = {
   roulette: 0,
+  rouletteSaturday: 0,
+  rouletteSunday: 0,
   schedule: 0,
   visit: 0,
   approvedFolder: 0,
@@ -46,8 +50,8 @@ export async function GET() {
     }
     return Response.json(
       {
-        weights: JSON.parse(row.weightsJson),
-        targets: JSON.parse(row.targetsJson),
+        weights: { ...defaultWeights, ...JSON.parse(row.weightsJson) },
+        targets: { ...defaultTargets, ...JSON.parse(row.targetsJson) },
         updated_at: row.updatedAt,
       },
       { headers: { "cache-control": "no-store" } },

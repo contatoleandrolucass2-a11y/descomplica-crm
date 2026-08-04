@@ -7,7 +7,9 @@ import { SiteMenu } from "./SiteMenu";
 import type { DashboardPayload } from "./types";
 
 const metrics = [
-  { key: "roulette", label: "Roleta", color: "#2563eb" },
+  { key: "roulette", label: "Roleta de seg. a sex.", color: "#2563eb" },
+  { key: "rouletteSaturday", label: "Roleta de sábado", color: "#4f46e5" },
+  { key: "rouletteSunday", label: "Roleta de domingo", color: "#7c3aed" },
   { key: "schedule", label: "Agenda", color: "#0e7490" },
   { key: "visit", label: "Visita", color: "#eab308" },
   { key: "approvedFolder", label: "Pasta aprovada", color: "#14b8a6" },
@@ -17,8 +19,8 @@ const metrics = [
 type MetricKey = (typeof metrics)[number]["key"];
 type MetricValues = Record<MetricKey, number | "">;
 
-const defaultWeights: MetricValues = { roulette: 1, schedule: 1, visit: 7, approvedFolder: 4, sale: 10 };
-const defaultTargets: MetricValues = { roulette: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0 };
+const defaultWeights: MetricValues = { roulette: 1, rouletteSaturday: 2, rouletteSunday: 3, schedule: 1, visit: 7, approvedFolder: 4, sale: 10 };
+const defaultTargets: MetricValues = { roulette: 0, rouletteSaturday: 0, rouletteSunday: 0, schedule: 0, visit: 0, approvedFolder: 0, sale: 0 };
 
 const navigation = [
   { label: "Direcional Vendas", description: "Equipe interna", href: "/configuracoes/metas" },
@@ -54,7 +56,7 @@ export function PointsSettingsClient({
       })
       .then((row) => {
         if (row?.weights) {
-          setWeights(Object.fromEntries(metrics.map(({ key }) => [key, Number(row.weights[key]) || 0])) as MetricValues);
+          setWeights(Object.fromEntries(metrics.map(({ key }) => [key, Number(row.weights[key] ?? defaultWeights[key]) || 0])) as MetricValues);
         }
         setUpdatedAt(row?.updated_at ?? null);
         setMessage("");
