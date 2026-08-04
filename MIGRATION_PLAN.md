@@ -25,11 +25,12 @@ Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende 
 
 ## Gate 2 — banco e APIs
 
-1. Mapear schema D1/Drizzle para PostgreSQL.
-2. Criar migrations Supabase revisáveis, grants e policies RLS.
-3. Migrar metas, pontos, ranking e status do dashboard.
-4. Substituir APIs manuais por Route Handlers/Server Actions autenticados.
-5. Migrar ingestão e Salesforce com segredos server-side e controles de abuso.
+- [x] Mapear o read model do dashboard D1/JSON para PostgreSQL normalizado.
+- [x] Criar migration, grants, RLS e testes do dashboard somente leitura.
+- [x] Migrar a interface inicial do dashboard sem dados demo ou usuário fixo.
+- [ ] Migrar metas, pontos, ranking e detalhes de etapas.
+- [ ] Substituir APIs manuais por Route Handlers/Server Actions autenticados.
+- [ ] Migrar ingestão e Salesforce com segredos server-side e controles de abuso.
 
 ## Gate 3 — interface
 

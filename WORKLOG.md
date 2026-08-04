@@ -170,3 +170,19 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - O primeiro processo `standalone` foi iniciado sem as variáveis públicas do Supabase e respondeu 500; a repetição com `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` locais passou. Nenhum segredo foi exibido ou persistido.
 - Checkpoint funcional criado em `800ba10` e publicado na branch `feat/gate1-page-catalog`.
 - PR draft #5 aberta contra `main`; GitHub Actions run `30877794127` aprovou o workflow `validate` em 39 segundos.
+
+### Encerramento do Gate 1
+
+- Autorização ampla recebida para promover e mesclar o trabalho validado.
+- PR #5 mesclada na `main` em `33c134a`; GitHub Actions run `30877996373` passou após o merge.
+
+## 2026-08-04 — Gate 2: dashboard somente leitura
+
+- Branch `feat/gate2-dashboard-read-model` criada a partir da `main` atualizada.
+- O contrato D1/JSON foi substituído por quatro tabelas normalizadas: snapshots, resumos por visão, métricas e empreendimentos.
+- Grants explícitos concedem somente `SELECT` a `authenticated`; RLS exige `crm.dashboard.view`; `anon` e escrita direta permanecem bloqueados.
+- `/app` passou a renderizar três visões e três períodos, progresso das cinco etapas, conversões, valor vendido por visão/período e destaques.
+- Sem snapshot `global`, a interface exibe estado de espera. Dados demonstrativos e usuário hard-coded não foram migrados.
+- Testes locais: 52 pgTAP e 7 Vitest aprovados; schema lint, advisors, ESLint, TypeScript e build também aprovados.
+- Teste autenticado no navegador aprovado em 390×844 e 1440×900, sem overflow do corpo ou erros de console. Troca de visão e período atualizou métricas e URL corretamente.
+- A fixture e a conta de QA foram criadas apenas no Supabase local e removidas por reset ao final.
