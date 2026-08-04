@@ -10,7 +10,7 @@
 ## Regras
 
 1. Nunca commitar `.env.local`, dumps, certificados, ZIPs, tokens ou credenciais.
-2. Usar `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` no cliente; nunca secret/service role.
+2. Usar `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` no cliente. A secret key Supabase existe somente no módulo server-only da ingestão M2M, com RPC única e grants mínimos; nunca entra no bundle, logs ou código cliente.
 3. Validar a sessão com API confiável do Supabase no servidor (`getClaims`/`getUser` conforme o contexto), nunca confiar em `getSession` para autorização server-side.
 4. Toda entrada externa passa por validação de schema; Zod é a biblioteca padrão.
 5. Toda API exige autenticação e permissão explícitas, salvo endpoint documentado como público.
@@ -19,6 +19,7 @@
 8. O bootstrap do master usa conexão PostgreSQL privilegiada e não é publicado pela aplicação.
 9. Usuários inativos não recebem contexto de autorização; o helper efetivo de permissões também os bloqueia dentro da RLS.
 10. Alterações de papel, exceção, status e visibilidade passam por RPCs auditadas e respeitam hierarquia estrita.
+11. Refresh autenticado exige `Origin` da aplicação, permissão dedicada, lock transacional e cooldown. Ingestão exige Bearer dedicado, comparação constante, corpo de até 1 MB, schema versionado, idempotência e cota global por minuto.
 
 ## Verificações locais
 

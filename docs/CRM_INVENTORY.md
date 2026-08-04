@@ -33,16 +33,16 @@ O parâmetro `stage` aceita cinco slugs: `oportunidades`, `agendamentos`, `visit
 
 ## APIs encontradas
 
-| Endpoint original         | Método   | Dependência                       | Problema preexistente                          | Destino                                |
-| ------------------------- | -------- | --------------------------------- | ---------------------------------------------- | -------------------------------------- |
-| `/api/auth/login`         | POST     | Supabase Auth manual              | duplica login SSR; cookie manual               | remover                                |
-| `/api/auth/logout`        | POST     | cookie manual                     | duplica Server Action existente                | remover                                |
-| `/api/auth/session`       | GET      | token em cookie                   | duplica cliente SSR                            | remover                                |
-| `/api/dashboard/status`   | GET      | Supabase REST ou D1               | fallback Cloudflare/demo e autorização ausente | reescrever server-side                 |
-| `/api/ingest/salesforce`  | POST     | `INGEST_SECRET`, D1/n8n           | validação rasa, fallback hard-coded            | reescrever com Zod, limite e auditoria |
-| `/api/refresh/salesforce` | POST     | Salesforce/n8n                    | sem sessão ou permissão                        | reescrever com permissão dedicada      |
-| `/api/settings/goals`     | GET/POST | Supabase REST com publishable key | sem autenticação/permissão server-side         | substituída por SDK SSR + RLS/RPC      |
-| `/api/settings/points`    | GET/POST | Cloudflare D1                     | sem autenticação/permissão                     | substituída por PostgreSQL + RLS/RPC   |
+| Endpoint original         | Método   | Dependência                       | Problema preexistente                          | Destino                              |
+| ------------------------- | -------- | --------------------------------- | ---------------------------------------------- | ------------------------------------ |
+| `/api/auth/login`         | POST     | Supabase Auth manual              | duplica login SSR; cookie manual               | remover                              |
+| `/api/auth/logout`        | POST     | cookie manual                     | duplica Server Action existente                | remover                              |
+| `/api/auth/session`       | GET      | token em cookie                   | duplica cliente SSR                            | remover                              |
+| `/api/dashboard/status`   | GET      | Supabase REST ou D1               | fallback Cloudflare/demo e autorização ausente | migrado para sessão + RPC segura     |
+| `/api/ingest/salesforce`  | POST     | `INGEST_SECRET`, D1/n8n           | validação rasa, fallback hard-coded            | migrado para Zod + RPC transacional  |
+| `/api/refresh/salesforce` | POST     | Salesforce/n8n                    | sem sessão ou permissão                        | migrado com permissão e controles    |
+| `/api/settings/goals`     | GET/POST | Supabase REST com publishable key | sem autenticação/permissão server-side         | substituída por SDK SSR + RLS/RPC    |
+| `/api/settings/points`    | GET/POST | Cloudflare D1                     | sem autenticação/permissão                     | substituída por PostgreSQL + RLS/RPC |
 
 Nenhuma API original será copiada diretamente. O sistema de login e seus cookies Supabase SSR continuam como única autenticação.
 

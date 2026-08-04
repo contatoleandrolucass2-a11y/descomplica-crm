@@ -1,6 +1,6 @@
 # Descomplica CRM
 
-Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM são migradas de forma controlada. O Gate 1 inclui catálogo dinâmico de páginas, navegação autorizada e painel administrativo. O Gate 2 inclui dashboard, metas, pontos, ranking e detalhes das etapas em PostgreSQL normalizado.
+Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM são migradas de forma controlada. O Gate 1 inclui catálogo dinâmico de páginas, navegação autorizada e painel administrativo. O Gate 2 inclui dashboard, metas, pontos, ranking, detalhes das etapas e ingestão Salesforce segura em PostgreSQL normalizado.
 
 ## Arquitetura alvo
 
@@ -53,15 +53,20 @@ pnpm install --frozen-lockfile
 cp .env.example .env.local
 ```
 
-Preencha em `.env.local` somente:
+Preencha em `.env.local` as variáveis públicas e, quando testar a integração, as variáveis server-side:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 MASTER_USER_ID=
+APP_ORIGIN=http://127.0.0.1:3000
+SUPABASE_SECRET_KEY=
+SALESFORCE_INGEST_SECRET=
+SALESFORCE_REFRESH_URL=
+SALESFORCE_REFRESH_SECRET=
 ```
 
-Não use `service_role`, secret key ou credenciais PostgreSQL no bundle da aplicação. `.env.local` nunca deve entrar no Git.
+Secret key, Bearers e credenciais PostgreSQL nunca podem entrar no bundle da aplicação. A secret key é aceita somente pelo módulo server-only da ingestão M2M. `.env.local` nunca deve entrar no Git.
 
 ## Banco local e aplicação
 
@@ -126,6 +131,7 @@ O diretório `.next/standalone` é o artefato de runtime. O fluxo completo de Ho
 - [docs/POINT_SETTINGS.md](docs/POINT_SETTINGS.md): pesos/objetivos do ranking e substituição auditada.
 - [docs/RANKING.md](docs/RANKING.md): atividades, cálculo, filtros e consolidação do ranking.
 - [docs/STAGE_DETAILS.md](docs/STAGE_DETAILS.md): indicadores, comparações e navegação das etapas.
+- [docs/INGESTION.md](docs/INGESTION.md): contrato versionado, refresh, idempotência e rotação de segredos.
 - [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md): integrações encontradas e política de migração.
 - [docs/BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md): backup e restauração.
 - [CONTRIBUTING.md](CONTRIBUTING.md): fluxo de branch, commits e qualidade.

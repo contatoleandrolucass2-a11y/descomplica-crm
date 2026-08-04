@@ -32,6 +32,8 @@ flowchart LR
 11. **Pontos normalizados.** Pesos e objetivos do ranking são linhas tipadas, legíveis por `crm.ranking.view`; a substituição integral exige `crm.settings.manage` e gera auditoria.
 12. **Ranking recalculável.** O read model guarda atividades por corretor/período, não pontuações finais. Corretores e gerentes são classificados com os pesos atuais, sem regravar o snapshot.
 13. **Etapas sem duplicação.** As cinco análises detalhadas leem as mesmas métricas autorizadas do dashboard; não existe uma segunda fonte ou tabela derivada para a mesma informação.
+14. **Ingestão transacional.** O produtor Salesforce envia um contrato versionado a um Route Handler M2M limitado. Uma RPC exclusiva do papel de serviço substitui dashboard e ranking atomicamente, impede replay/snapshot antigo e registra execução sanitizada.
+15. **Refresh sob demanda.** O navegador nunca acessa credenciais Salesforce. Sessão, permissão, origem, lock e cooldown são verificados antes de um webhook HTTPS configurado por ambiente.
 
 ## Fronteiras de segredo
 
@@ -39,8 +41,8 @@ Chaves públicas do Supabase podem chegar ao navegador e permanecem limitadas po
 
 ## Próximas decisões da migração
 
-- Contratos autenticados de ingestão e atualização Salesforce.
-- Contratos de ingestão e Salesforce com autenticação, autorização, rate limiting, timeout, retry e auditoria.
 - Estratégia de dados seed/demonstração separada dos dados reais.
+- Observabilidade e alertas da ingestão em homologação.
+- Contrato operacional definitivo com o produtor Salesforce/n8n real.
 
 Essas decisões serão implementadas incrementalmente nas próximas branches.

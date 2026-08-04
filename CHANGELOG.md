@@ -24,6 +24,8 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Ranking server-rendered de corretores e gerentes, com quatro períodos, pódio e placar completo.
 - Read model normalizado de atividades do ranking, recalculado com os pesos atuais.
 - Detalhes server-rendered das cinco etapas com visões, períodos, conversão e comparações históricas.
+- Route Handlers seguros para status, refresh e ingestão Salesforce, com contrato Zod versionado.
+- Histórico de ingestão, RPC transacional, idempotência, rejeição de snapshot antigo e botão de refresh autorizado.
 
 ### Alterado
 
@@ -34,6 +36,7 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Dependências D1/JSON e `sf_relatorio_resumo` removidas do caminho de leitura do dashboard.
 - API pública `/api/settings/goals` substituída pelo SDK SSR e pela RPC auditada.
 - API D1 `/api/settings/points` substituída pelo SDK SSR e pela RPC auditada.
+- Endpoints Cloudflare/n8n de status, refresh e ingestão substituídos por Supabase, segredos server-side e respostas sanitizadas.
 
 ### Segurança
 
@@ -44,3 +47,4 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Escrita direta das metas revogada para o navegador; perfil inativo ou sem permissão falha fechado.
 - Pesos do ranking expostos somente para leitores autorizados; escrita direta permanece revogada.
 - Snapshots e participantes do ranking protegidos por `crm.ranking.view`, sem fallback demonstrativo.
+- Ingestão limitada a 1 MB e 20 snapshots/minuto com secret key server-only; refresh protegido por mesma origem, permissão, lock, cooldown e timeout.

@@ -32,8 +32,8 @@ Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende 
 - [x] Migrar configuração de pontos com escrita auditada.
 - [x] Migrar ranking com read model normalizado e pontuação dinâmica.
 - [x] Migrar detalhes das cinco etapas sobre o read model do dashboard.
-- [ ] Substituir APIs manuais por Route Handlers/Server Actions autenticados.
-- [ ] Migrar ingestão e Salesforce com segredos server-side e controles de abuso.
+- [x] Substituir APIs manuais por Route Handlers/Server Actions autenticados.
+- [x] Migrar ingestão e Salesforce com segredos server-side e controles de abuso.
 
 ## Gate 3 — interface
 
