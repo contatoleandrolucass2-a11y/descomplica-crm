@@ -1,0 +1,282 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+set +x
+umask 027
+
+PATH=/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+
+readonly environment_directory="/etc/descomplica-crm"
+readonly environment_file="${environment_directory}/production.env"
+readonly repository_directory="/srv/descomplica-crm"
+readonly application_origin="https://crm.descomplicapro.com.br"
+
+temporary_environment_file=""
+
+cleanup() {
+  if [[ -n "${temporary_environment_file}" && -e "${temporary_environment_file}" ]]; then
+    rm -f -- "${temporary_environment_file}"
+  fi
+}
+trap cleanup EXIT HUP INT TERM
+
+fail() {
+  printf 'Erro: %s\n' "$1" >&2
+  exit 1
+}
+
+if ((EUID != 0)); then
+  fail "execute este assistente como root (o usuário deploy pode usar sudo /usr/local/sbin/descomplica-configure-env)."
+fi
+if (($# != 0)); then
+  fail "este assistente não aceita argumentos."
+fi
+if [[ ! -t 0 || ! -t 1 ]]; then
+  fail "execute este assistente diretamente em um Terminal interativo."
+fi
+
+for required_command in git install mktemp mv node openssl; do
+  command -v "${required_command}" >/dev/null 2>&1 ||
+    fail "dependência obrigatória ausente: ${required_command}."
+done
+
+declare -A values=()
+readonly -a managed_keys=(
+  IMAGE_TAG
+  NEXT_PUBLIC_SUPABASE_URL
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  APP_ORIGIN
+  SUPABASE_SECRET_KEY
+  SALESFORCE_INGEST_SECRET
+  SALESFORCE_REFRESH_URL
+  SALESFORCE_REFRESH_SECRET
+  MASTER_USER_ID
+)
+
+is_managed_key() {
+  local candidate="$1"
+  local managed_key
+  for managed_key in "${managed_keys[@]}"; do
+    [[ "${candidate}" == "${managed_key}" ]] && return 0
+  done
+  return 1
+}
+
+load_existing_values() {
+  local line key value
+  [[ -f "${environment_file}" ]] || return 0
+
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    line="${line%$'\r'}"
+    [[ -z "${line}" || "${line}" == \#* || "${line}" != *=* ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    if is_managed_key "${key}"; then
+      values["${key}"]="${value}"
+    fi
+  done <"${environment_file}"
+}
+
+confirm() {
+  local prompt="$1"
+  local default_answer="$2"
+  local answer
+
+  while true; do
+    if [[ "${default_answer}" == "yes" ]]; then
+      printf '%s [S/n]: ' "${prompt}"
+    else
+      printf '%s [s/N]: ' "${prompt}"
+    fi
+    IFS= read -r answer
+    case "${answer,,}" in
+      s | sim) return 0 ;;
+      n | nao | não) return 1 ;;
+      '') [[ "${default_answer}" == "yes" ]] && return 0 || return 1 ;;
+      *) printf 'Responda s ou n.\n' >&2 ;;
+    esac
+  done
+}
+
+validate_supabase_url() {
+  node -e '
+    let input = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", chunk => { input += chunk; });
+    process.stdin.on("end", () => {
+      input = input.replace(/\r?\n$/, "");
+      try {
+        const url = new URL(input);
+        const valid = url.protocol === "https:"
+          && !url.username
+          && !url.password
+          && !url.port
+          && !url.search
+          && !url.hash
+          && (url.pathname === "/" || url.pathname === "")
+          && /^[a-z0-9][a-z0-9-]*\.supabase\.co$/.test(url.hostname);
+        process.exit(valid ? 0 : 1);
+      } catch {
+        process.exit(1);
+      }
+    });
+  ' <<<"$1" >/dev/null 2>&1
+}
+
+validate_publishable_key() {
+  [[ "$1" =~ ^sb_publishable_[A-Za-z0-9_-]{20,}$ ]]
+}
+
+validate_secret_key() {
+  [[ "$1" =~ ^sb_secret_[A-Za-z0-9_-]{20,}$ ]]
+}
+
+validate_refresh_url() {
+  node -e '
+    let input = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", chunk => { input += chunk; });
+    process.stdin.on("end", () => {
+      input = input.replace(/\r?\n$/, "");
+      try {
+        const url = new URL(input);
+        const valid = url.protocol === "https:"
+          && !url.username
+          && !url.password
+          && !url.search
+          && !url.hash
+          && !/[\s$\\\x00-\x1f\x7f]/u.test(input);
+        process.exit(valid ? 0 : 1);
+      } catch {
+        process.exit(1);
+      }
+    });
+  ' <<<"$1" >/dev/null 2>&1
+}
+
+validate_master_user_id() {
+  [[ "${1,,}" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$ ]]
+}
+
+prompt_value() {
+  local key="$1"
+  local prompt="$2"
+  local hidden="$3"
+  local validator="$4"
+  local input=""
+
+  if [[ -n "${values[${key}]:-}" ]] && "${validator}" "${values[${key}]}"; then
+    if confirm "${key} já possui um valor válido. Preservar?" yes; then
+      return 0
+    fi
+  elif [[ -n "${values[${key}]:-}" ]]; then
+    printf '%s possui um valor inválido e precisa ser substituído.\n' "${key}" >&2
+  fi
+
+  while true; do
+    printf '%s: ' "${prompt}"
+    if [[ "${hidden}" == "yes" ]]; then
+      IFS= read -r -s input
+      printf '\n'
+    else
+      IFS= read -r input
+    fi
+
+    if [[ -n "${input}" ]] && "${validator}" "${input}"; then
+      values["${key}"]="${input}"
+      input=""
+      return 0
+    fi
+    input=""
+    printf 'Valor inválido para %s.\n' "${key}" >&2
+  done
+}
+
+load_existing_values
+
+if [[ -z "${values[IMAGE_TAG]:-}" || ! "${values[IMAGE_TAG]}" =~ ^[0-9a-f]{7,64}$ ]]; then
+  values[IMAGE_TAG]="$(git -C "${repository_directory}" rev-parse --verify --short=12 HEAD)" ||
+    fail "não foi possível determinar IMAGE_TAG a partir do repositório."
+fi
+values[APP_ORIGIN]="${application_origin}"
+
+printf 'Configuração segura do ambiente de produção do Descomplica CRM.\n'
+printf 'Valores secretos são lidos sem eco e nunca são exibidos no resumo.\n\n'
+
+prompt_value \
+  NEXT_PUBLIC_SUPABASE_URL \
+  'NEXT_PUBLIC_SUPABASE_URL (URL HTTPS do projeto, *.supabase.co)' \
+  no \
+  validate_supabase_url
+prompt_value \
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY \
+  'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (prefixo sb_publishable_)' \
+  yes \
+  validate_publishable_key
+prompt_value \
+  SUPABASE_SECRET_KEY \
+  'SUPABASE_SECRET_KEY (prefixo sb_secret_)' \
+  yes \
+  validate_secret_key
+
+printf '\nSALESFORCE_REFRESH_URL é a URL HTTPS do webhook da automação externa\n'
+printf 'responsável por iniciar a extração no Salesforce (n8n ou substituto implantado).\n'
+printf 'Ela deve ser obtida no serviço de automação; não existe fallback no CRM.\n'
+prompt_value \
+  SALESFORCE_REFRESH_URL \
+  'SALESFORCE_REFRESH_URL' \
+  no \
+  validate_refresh_url
+
+if [[ -z "${values[SALESFORCE_INGEST_SECRET]:-}" ]]; then
+  values[SALESFORCE_INGEST_SECRET]="$(openssl rand -hex 32)"
+  printf 'SALESFORCE_INGEST_SECRET foi gerado com entropia criptográfica.\n'
+fi
+if [[ -z "${values[SALESFORCE_REFRESH_SECRET]:-}" ]]; then
+  values[SALESFORCE_REFRESH_SECRET]="$(openssl rand -hex 32)"
+  printf 'SALESFORCE_REFRESH_SECRET foi gerado com entropia criptográfica.\n'
+fi
+
+if [[ -n "${values[MASTER_USER_ID]:-}" ]]; then
+  if validate_master_user_id "${values[MASTER_USER_ID]}"; then
+    printf 'MASTER_USER_ID existente foi preservado.\n'
+  else
+    unset 'values[MASTER_USER_ID]'
+    printf 'MASTER_USER_ID existente era inválido e não será preservado.\n' >&2
+  fi
+fi
+if [[ -z "${values[MASTER_USER_ID]:-}" ]] &&
+  confirm 'O bootstrap inicial do usuário master ainda precisa ser executado?' no; then
+  prompt_value \
+    MASTER_USER_ID \
+    'MASTER_USER_ID (UUID conferido diretamente no Supabase Auth)' \
+    no \
+    validate_master_user_id
+fi
+
+install -d -o root -g deploy -m 0750 "${environment_directory}"
+temporary_environment_file="$(mktemp --tmpdir="${environment_directory}" .production.env.XXXXXX)"
+
+{
+  printf '# Gerenciado por /usr/local/sbin/descomplica-configure-env. Não versionar.\n'
+  printf 'IMAGE_TAG=%s\n' "${values[IMAGE_TAG]}"
+  printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "${values[NEXT_PUBLIC_SUPABASE_URL]}"
+  printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "${values[NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY]}"
+  printf 'APP_ORIGIN=%s\n' "${values[APP_ORIGIN]}"
+  printf 'SUPABASE_SECRET_KEY=%s\n' "${values[SUPABASE_SECRET_KEY]}"
+  printf 'SALESFORCE_INGEST_SECRET=%s\n' "${values[SALESFORCE_INGEST_SECRET]}"
+  printf 'SALESFORCE_REFRESH_URL=%s\n' "${values[SALESFORCE_REFRESH_URL]}"
+  printf 'SALESFORCE_REFRESH_SECRET=%s\n' "${values[SALESFORCE_REFRESH_SECRET]}"
+  if [[ -n "${values[MASTER_USER_ID]:-}" ]]; then
+    printf 'MASTER_USER_ID=%s\n' "${values[MASTER_USER_ID]}"
+  fi
+} >"${temporary_environment_file}"
+
+chown root:deploy "${temporary_environment_file}"
+chmod 0640 "${temporary_environment_file}"
+mv -fT -- "${temporary_environment_file}" "${environment_file}"
+temporary_environment_file=""
+
+printf '\nAmbiente atualizado atomicamente em %s (root:deploy, 0640).\n' "${environment_file}"
+printf 'O conteúdo final não foi exibido. Nenhum serviço foi reiniciado.\n'

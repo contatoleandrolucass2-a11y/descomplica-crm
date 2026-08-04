@@ -7,6 +7,9 @@
   por tag imutável.
 - Adiciona endpoint de liveness e configurações Nginx separadas para a fase HTTP
   segura e para a ativação posterior de HTTPS.
+- Adiciona assistente interativo para gravar o ambiente de produção
+  atomicamente, sem eco de segredos, com validação das chaves atuais do Supabase
+  e geração criptográfica dos Bearers Salesforce.
 
 Todas as alterações relevantes deste projeto serão registradas aqui.
 

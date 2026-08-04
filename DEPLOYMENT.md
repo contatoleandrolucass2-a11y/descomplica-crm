@@ -71,6 +71,32 @@ exige uma nova imagem. Segredos server-side são fornecidos somente no runtime.
 Use `deploy/production.env.example` como inventário, sem inserir valores no
 arquivo versionado.
 
+Na VPS, instale o assistente versionado e a autorização restrita do usuário de
+deploy:
+
+```bash
+sudo install -o root -g root -m 0755 \
+  deploy/system/descomplica-configure-env \
+  /usr/local/sbin/descomplica-configure-env
+sudo install -o root -g root -m 0440 \
+  deploy/system/descomplica-configure-env.sudoers \
+  /etc/sudoers.d/descomplica-configure-env
+sudo visudo -cf /etc/sudoers.d/descomplica-configure-env
+```
+
+O operador `deploy` pode então executar
+`sudo /usr/local/sbin/descomplica-configure-env`. O assistente lê chaves sem
+eco, valida a URL e os prefixos atuais do Supabase, gera Bearers Salesforce com
+entropia criptográfica, preserva valores válidos em reexecuções e substitui
+`/etc/descomplica-crm/production.env` atomicamente com `root:deploy` e `0640`.
+Ele não inicia containers nem mostra o arquivo final.
+
+`SALESFORCE_REFRESH_URL` não é derivada pelo CRM: é a URL HTTPS publicada pela
+automação externa que inicia a extração Salesforce (n8n ou seu substituto). A
+URL deve ser obtida nesse serviço e não pode conter credenciais embutidas. O
+`MASTER_USER_ID` só é solicitado quando o operador confirma que o bootstrap
+manual documentado em `docs/runbooks/bootstrap-master.md` ainda é necessário.
+
 Para rollback, selecione uma imagem imutável que permaneça no host e não faça
 novo build:
 
