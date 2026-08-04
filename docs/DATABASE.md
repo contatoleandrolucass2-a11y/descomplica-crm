@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema usa PostgreSQL 17 no Supabase local. Existem nove migrations versionadas. A validação local encontrou 17 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 14 páginas. Nenhum dado comercial é seedado.
+O schema usa PostgreSQL 17 no Supabase local. Existem onze migrations versionadas. A validação local encontrou 18 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 14 páginas. Nenhum dado comercial é seedado.
 
 ## Migrations
 
@@ -15,6 +15,8 @@ O schema usa PostgreSQL 17 no Supabase local. Existem nove migrations versionada
 7. `20260804044701_funnel_goals.sql`: metas mensais normalizadas, RLS e upsert auditado dos funis DV/parcerias.
 8. `20260804045945_point_settings.sql`: pesos e objetivos normalizados do ranking, RLS e substituição auditada.
 9. `20260804050720_ranking_read_model.sql`: snapshots e atividades agregadas do ranking por corretor/período.
+10. `20260804052500_secure_salesforce_ingestion.sql`: ingestão transacional e refresh Salesforce auditado.
+11. `20260804191713_normalize_new_project_grants.sql`: matriz explícita de grants compatível com os defaults fail-closed dos novos projetos Supabase.
 
 ## Desenvolvimento local
 
@@ -31,7 +33,7 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` executa 128 testes pgTAP: 26 do catálogo/autorização, 26 do dashboard, 25 das metas, 26 dos pontos e 25 do ranking. A cobertura verifica schema, grants, policies, constraints, provisionamento, usuários inativos, overrides, cálculos e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
+`supabase test db` executa 177 testes pgTAP: 26 do catálogo/autorização, 26 do dashboard, 25 das metas, 26 dos pontos, 25 do ranking, 34 da ingestão e 15 da matriz global de grants. A cobertura verifica schema, grants, policies, constraints, provisionamento, usuários inativos, overrides, cálculos e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
 
 ## RLS e grants
 
@@ -44,7 +46,19 @@ RLS e grants são camadas complementares. Cada nova tabela exposta precisa:
 - teste com usuário autorizado e não autorizado;
 - auditoria para alterações administrativas.
 
-Os advisors locais de segurança e performance não apontam problemas. As três policies permissivas duplicadas da base de login foram consolidadas sem alterar a regra self-or-manager.
+O advisor de segurança mantém apenas o `INFO` intencional de
+`crm_ingestion_runs` com RLS e sem policy, pois a tabela não integra a Data API.
+Os avisos informativos de foreign keys sem índice e índices ainda não usados
+permanecem registrados para avaliação separada; esta correção de grants não
+altera índices. As policies permissivas duplicadas da base de login foram
+consolidadas sem alterar a regra self-or-manager.
+
+Os grants são normalizados explicitamente para que projetos anteriores e novos
+convirjam. `PUBLIC`/`anon` não acessam objetos da aplicação; `authenticated`
+recebe apenas os `SELECT` e RPCs usados pelo SDK SSR; `service_role` recebe
+somente a RPC server-only de ingestão. Default privileges de tabelas,
+sequências e funções futuras também permanecem fechados até um `GRANT`
+versionado. A matriz completa está em `docs/AUTHORIZATION_MATRIX.md`.
 
 ## D1 para PostgreSQL
 

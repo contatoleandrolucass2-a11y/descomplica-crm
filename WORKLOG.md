@@ -348,3 +348,23 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - QA autenticada confirmou os três temas, persistência ao navegar para Ranking, item ativo e ausência de overflow em 1280 px.
 - Conta e preferência de QA foram removidas do banco por reset integral; nenhum dado remoto foi alterado.
 - Gates finais repetidos: instalação congelada, formatação, ESLint, TypeScript, 30 testes Vitest e build de 23 páginas aprovados. Auditoria pnpm, Gitleaks na árvore e em 179 commits e OSV-Scanner em 514 pacotes não encontraram problemas.
+
+## 2026-08-04 — compatibilidade de grants do Supabase
+
+- A mudança de defaults da Data API para projetos novos foi confrontada com
+  todos os acessos `.from()` e `.rpc()` da aplicação, migrations e testes.
+- Migration `20260804191713_normalize_new_project_grants.sql` normaliza ACLs
+  atuais e futuras: navegador somente leitura/RPCs guardadas, ingestão somente
+  pela RPC server-only e bootstrap exclusivamente por `postgres`.
+- A correção não altera policies, RLS, dados, índices ou integração remota. Uma
+  matriz pgTAP dedicada cobre tabelas, sequências, funções, `rls_auto_enable`,
+  `ensure_rls` e o bootstrap administrativo.
+- Reset integral das onze migrations e 177 testes pgTAP passaram. O cenário em
+  que `rls_auto_enable`/`ensure_rls` já existem também foi reproduzido em
+  transação local; a função perdeu execução pública e o trigger continuou ativo.
+- Formatação, ESLint, TypeScript, 40 testes Vitest e build Next.js de 23 páginas
+  passaram. Schema lint não encontrou erro; auditoria pnpm, Gitleaks da árvore e
+  do histórico, OSV-Scanner e Actionlint não encontraram problema.
+- Advisors mantiveram somente o `INFO` de segurança intencional da tabela de
+  ingestão sem policy e os informativos preexistentes de performance, sem
+  adicionar índices a este escopo.

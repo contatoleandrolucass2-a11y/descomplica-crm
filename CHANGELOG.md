@@ -12,6 +12,8 @@
   e geração criptográfica dos Bearers Salesforce.
 - Adiciona flags server-side independentes para ingestão e refresh Salesforce,
   desativadas por padrão, com endpoints e interface em estado fail-closed.
+- Normaliza grants de tabelas, sequências e RPCs para os defaults fail-closed
+  dos novos projetos Supabase, com matriz pgTAP de privilégio mínimo.
 
 Todas as alterações relevantes deste projeto serão registradas aqui.
 

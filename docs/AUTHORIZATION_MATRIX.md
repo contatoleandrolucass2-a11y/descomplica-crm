@@ -42,8 +42,29 @@ As páginas de metas exigem `crm.settings.manage` na rota e na Server Action. A 
 
 As tabelas de pontos aceitam leitura com `crm.ranking.view` ou `crm.settings.manage`. A rota de configuração e a RPC de substituição exigem `crm.settings.manage`; negar `crm.ranking.view` remove a leitura para papéis comerciais sem permissão administrativa.
 
-O read model do ranking exige `crm.ranking.view` na rota e nas duas policies RLS. A tabela não expõe escrita a `authenticated`; o papel `service_role` fica reservado à futura ingestão server-side, sem ser usado no bundle da aplicação.
+O read model do ranking exige `crm.ranking.view` na rota e nas duas policies RLS. A tabela não expõe escrita a `authenticated` nem a `service_role`; a ingestão server-side altera o read model somente pela RPC transacional, sem credencial privilegiada no bundle da aplicação.
 
 Cada detalhe de etapa exige `crm.stages.view` e reutiliza as tabelas do dashboard, cuja RLS exige `crm.dashboard.view`. Os papéis comerciais recebem ambas por padrão; um override `deny` em qualquer camada faz a leitura falhar fechada.
 
 `crm_ingestion_runs` não concede acesso direto a navegador algum. O controle Salesforce só é renderizado com `crm.salesforce.refresh`; quando a capacidade está desativada ou incompleta, ele permanece desabilitado e não chama o endpoint. O status exige `crm.dashboard.view`. A ingestão usa credencial de máquina separada da sessão humana e sua função possui grant exclusivo.
+
+## Matriz de grants da Data API
+
+`PUBLIC` e `anon` não possuem privilégio em tabela, sequência ou função da
+aplicação. `authenticated` recebe somente `SELECT` nas tabelas consultadas pelo
+SDK SSR: catálogo de páginas, auditoria, perfis/papéis/overrides de usuários e
+os read models do CRM. As tabelas `roles`, `permissions`, `role_permissions` e
+`crm_ingestion_runs` não são consultadas diretamente pelo cliente e permanecem
+sem grant.
+
+O papel `authenticated` não recebe escrita, `TRUNCATE`, `REFERENCES`, `TRIGGER`
+ou `MAINTAIN`. As mutações passam exclusivamente pelas RPCs listadas acima.
+`has_permission` também conserva `EXECUTE` porque é chamada pelas policies RLS;
+os helpers `get_role_level`, `can_assign_role` e `can_grant_permission` não são
+RPCs públicas da aplicação.
+
+`service_role` não recebe acesso direto a tabelas ou sequências. O único grant
+comprovado é `EXECUTE` em `ingest_crm_salesforce_snapshot`, chamada pelo Route
+Handler server-only; a função executa as escritas como uma transação
+`SECURITY DEFINER`. `bootstrap_master_user` permanece exclusiva do proprietário
+`postgres`, conforme o runbook operacional.
