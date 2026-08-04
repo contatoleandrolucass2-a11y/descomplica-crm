@@ -20,17 +20,20 @@
 //   - Delegate cookie sync and token rotation to the helper in
 //     lib/auth/supabase/middleware.ts. That helper rebuilds the
 //     NextResponse with rotated cookies and applies the anti-cache
-//     headers required by @supabase/ssr. This file just wires the
-//     helper into Next.js and forwards its response.
+//     headers required by @supabase/ssr.
+//   - Fail closed for disabled or incomplete Salesforce capabilities
+//     before session refresh. This prevents even an unrelated auth
+//     network request from preceding the controlled 503 response.
 //
 // Security headers (M3.4):
 //   - HTTP security headers (CSP, HSTS, X-Frame-Options,
 //     Referrer-Policy, X-Content-Type-Options, Permissions-Policy)
 //     are now applied via applySecurityHeaders from
 //     lib/security/headers.ts. The policy itself lives there so
-//     this file stays focused on session refresh wiring. The call
-//     happens AFTER updateSession so the cookies and anti-cache
-//     headers placed by @supabase/ssr are not overwritten.
+//     this file stays focused on request wiring. For normal responses,
+//     the call happens AFTER updateSession so the cookies and anti-cache
+//     headers placed by @supabase/ssr are not overwritten. Direct 503
+//     responses receive the same policy before being returned.
 //   - The production-mode gate combines NODE_ENV with a runtime
 //     check that the request is actually over HTTPS. Running a
 //     local prod build over plain HTTP must NOT emit HSTS or
@@ -66,15 +69,48 @@
 //     common static asset extensions for the same reason.
 
 import { updateSession } from "@/lib/auth/supabase/middleware";
+import {
+  getSalesforceIngestConfiguration,
+  getSalesforceRefreshConfiguration,
+} from "@/lib/crm/salesforce/config";
 import { applySecurityHeaders } from "@/lib/security/headers";
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+
+function unavailableSalesforceResponse(request: NextRequest): NextResponse | null {
+  if (
+    request.nextUrl.pathname === "/api/ingest/salesforce" &&
+    !getSalesforceIngestConfiguration().available
+  ) {
+    return NextResponse.json(
+      { error: "ingestion_unavailable" },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
+  if (
+    request.nextUrl.pathname === "/api/refresh/salesforce" &&
+    !getSalesforceRefreshConfiguration().available
+  ) {
+    return NextResponse.json(
+      { error: "refresh_unavailable" },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
+  return null;
+}
 
 export async function proxy(request: NextRequest) {
-  const { response } = await updateSession(request);
-
   const isSecureProduction =
     process.env.NODE_ENV === "production" && request.nextUrl.protocol === "https:";
 
+  const unavailableResponse = unavailableSalesforceResponse(request);
+  if (unavailableResponse) {
+    applySecurityHeaders(unavailableResponse.headers, { isProd: isSecureProduction });
+    return unavailableResponse;
+  }
+
+  const { response } = await updateSession(request);
   applySecurityHeaders(response.headers, { isProd: isSecureProduction });
 
   return response;

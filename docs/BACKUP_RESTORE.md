@@ -39,3 +39,8 @@ Nunca restaure dump de produção sobre ambiente errado. Restauração remota é
 Manter imagens Docker imutáveis identificadas pelo SHA. Para rollback, selecione
 a tag anterior e execute o Compose com `--no-build`. Retenha logs e artefatos
 suficientes para diagnóstico, sem credenciais.
+
+Preserve uma cópia restrita do `production.env` anterior a cada mudança. O
+rollback da imagem deve restaurar as flags e variáveis compatíveis com aquela
+versão. Nunca apague a imagem smoke saudável antes de validar o novo
+healthcheck, os endpoints desativados e o proxy em loopback.

@@ -10,6 +10,8 @@
 - Adiciona assistente interativo para gravar o ambiente de produção
   atomicamente, sem eco de segredos, com validação das chaves atuais do Supabase
   e geração criptográfica dos Bearers Salesforce.
+- Adiciona flags server-side independentes para ingestão e refresh Salesforce,
+  desativadas por padrão, com endpoints e interface em estado fail-closed.
 
 Todas as alterações relevantes deste projeto serão registradas aqui.
 

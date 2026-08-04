@@ -32,8 +32,8 @@ flowchart LR
 11. **Pontos normalizados.** Pesos e objetivos do ranking são linhas tipadas, legíveis por `crm.ranking.view`; a substituição integral exige `crm.settings.manage` e gera auditoria.
 12. **Ranking recalculável.** O read model guarda atividades por corretor/período, não pontuações finais. Corretores e gerentes são classificados com os pesos atuais, sem regravar o snapshot.
 13. **Etapas sem duplicação.** As cinco análises detalhadas leem as mesmas métricas autorizadas do dashboard; não existe uma segunda fonte ou tabela derivada para a mesma informação.
-14. **Ingestão transacional.** O produtor Salesforce envia um contrato versionado a um Route Handler M2M limitado. Uma RPC exclusiva do papel de serviço substitui dashboard e ranking atomicamente, impede replay/snapshot antigo e registra execução sanitizada.
-15. **Refresh sob demanda.** O navegador nunca acessa credenciais Salesforce. Sessão, permissão, origem, lock e cooldown são verificados antes de um webhook HTTPS configurado por ambiente.
+14. **Ingestão transacional.** O produtor Salesforce envia um contrato versionado a um Route Handler M2M limitado. Uma RPC exclusiva do papel de serviço substitui dashboard e ranking atomicamente, impede replay/snapshot antigo e registra execução sanitizada. A capacidade possui flag server-side própria e desativada por padrão.
+15. **Refresh sob demanda.** O navegador nunca acessa credenciais Salesforce. Sessão, permissão, origem, lock e cooldown são verificados antes de um webhook HTTPS configurado por ambiente. Uma flag independente permite manter o refresh desativado sem URL ou Bearer.
 16. **Preferência visual local.** Tema é estado de apresentação não sensível em `localStorage`; autorização e catálogo continuam resolvidos no servidor. O shell aplica somente três valores conhecidos e falha para claro.
 
 ## Fronteiras de segredo

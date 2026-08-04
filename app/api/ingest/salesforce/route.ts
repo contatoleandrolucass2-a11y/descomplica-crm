@@ -1,5 +1,6 @@
 import { createPrivilegedClient } from "@/lib/auth/supabase/privileged";
 import { salesforceIngestionSchema } from "@/lib/crm/ingestion/schema";
+import { getSalesforceIngestConfiguration } from "@/lib/crm/salesforce/config";
 import { MAX_INGESTION_BODY_BYTES, noStoreHeaders, secretsMatch } from "@/lib/security/api";
 
 function bearerToken(request: Request): string | null {
@@ -8,7 +9,15 @@ function bearerToken(request: Request): string | null {
 }
 
 export async function POST(request: Request) {
-  if (!secretsMatch(bearerToken(request), process.env.SALESFORCE_INGEST_SECRET)) {
+  const configuration = getSalesforceIngestConfiguration();
+  if (!configuration.available) {
+    return Response.json(
+      { error: "ingestion_unavailable" },
+      { status: 503, headers: noStoreHeaders() },
+    );
+  }
+
+  if (!secretsMatch(bearerToken(request), configuration.ingestSecret)) {
     return Response.json({ error: "unauthorized" }, { status: 401, headers: noStoreHeaders() });
   }
 

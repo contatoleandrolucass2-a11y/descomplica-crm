@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 import { createClient } from "@/lib/auth/supabase/server";
-import { isSameOriginRequest, noStoreHeaders, safeExternalUrl } from "@/lib/security/api";
+import { getSalesforceRefreshConfiguration } from "@/lib/crm/salesforce/config";
+import { isSameOriginRequest, noStoreHeaders } from "@/lib/security/api";
 import { authorizeRoute } from "@/lib/security/route-auth";
 
 const beginResultSchema = z.object({
@@ -28,22 +29,18 @@ async function finishRefresh(
 }
 
 export async function POST(request: Request) {
-  const authorization = await authorizeRoute("crm.salesforce.refresh");
-  if (!authorization.ok) return authorization.response;
-  if (!isSameOriginRequest(request, process.env.APP_ORIGIN)) {
-    return Response.json({ error: "invalid_origin" }, { status: 403, headers: noStoreHeaders() });
-  }
-
-  const refreshUrl = safeExternalUrl(
-    process.env.SALESFORCE_REFRESH_URL,
-    process.env.NODE_ENV === "production",
-  );
-  const refreshSecret = process.env.SALESFORCE_REFRESH_SECRET;
-  if (!refreshUrl || !refreshSecret || refreshSecret.length < 32) {
+  const configuration = getSalesforceRefreshConfiguration();
+  if (!configuration.available) {
     return Response.json(
       { error: "refresh_unavailable" },
       { status: 503, headers: noStoreHeaders() },
     );
+  }
+
+  const authorization = await authorizeRoute("crm.salesforce.refresh");
+  if (!authorization.ok) return authorization.response;
+  if (!isSameOriginRequest(request, process.env.APP_ORIGIN)) {
+    return Response.json({ error: "invalid_origin" }, { status: 403, headers: noStoreHeaders() });
   }
 
   const requestId = crypto.randomUUID();
@@ -72,10 +69,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const response = await fetch(refreshUrl, {
+    const response = await fetch(configuration.refreshUrl, {
       method: "POST",
       headers: {
-        authorization: `Bearer ${refreshSecret}`,
+        authorization: `Bearer ${configuration.refreshSecret}`,
         "content-type": "application/json",
         "x-request-id": requestId,
       },

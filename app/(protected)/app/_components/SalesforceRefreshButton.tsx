@@ -13,8 +13,25 @@ const MESSAGES: Record<State, string> = {
   error: "Não foi possível solicitar a atualização agora.",
 };
 
-export function SalesforceRefreshButton() {
+export function SalesforceRefreshButton({ available }: { available: boolean }) {
   const [state, setState] = useState<State>("idle");
+
+  if (!available) {
+    return (
+      <div className="flex flex-col items-start gap-2 sm:items-end">
+        <button
+          type="button"
+          disabled
+          className="cursor-not-allowed rounded-xl bg-slate-600 px-4 py-2 text-sm font-medium text-slate-200 opacity-80"
+        >
+          Atualização indisponível
+        </button>
+        <span className="max-w-xs text-xs text-slate-300">
+          Recurso indisponível neste ambiente.
+        </span>
+      </div>
+    );
+  }
 
   async function refresh() {
     setState("loading");

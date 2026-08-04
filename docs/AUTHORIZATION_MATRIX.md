@@ -46,4 +46,4 @@ O read model do ranking exige `crm.ranking.view` na rota e nas duas policies RLS
 
 Cada detalhe de etapa exige `crm.stages.view` e reutiliza as tabelas do dashboard, cuja RLS exige `crm.dashboard.view`. Os papéis comerciais recebem ambas por padrão; um override `deny` em qualquer camada faz a leitura falhar fechada.
 
-`crm_ingestion_runs` não concede acesso direto a navegador algum. O botão Salesforce só é renderizado com `crm.salesforce.refresh`; o status exige `crm.dashboard.view`. A ingestão usa credencial de máquina separada da sessão humana e sua função possui grant exclusivo.
+`crm_ingestion_runs` não concede acesso direto a navegador algum. O controle Salesforce só é renderizado com `crm.salesforce.refresh`; quando a capacidade está desativada ou incompleta, ele permanece desabilitado e não chama o endpoint. O status exige `crm.dashboard.view`. A ingestão usa credencial de máquina separada da sessão humana e sua função possui grant exclusivo.

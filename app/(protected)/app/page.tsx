@@ -17,6 +17,10 @@ import {
   calculateProgress,
   clampPercentage,
 } from "@/lib/crm/dashboard/presentation";
+import {
+  getSalesforceIngestConfiguration,
+  getSalesforceRefreshConfiguration,
+} from "@/lib/crm/salesforce/config";
 
 import { SalesforceRefreshButton } from "./_components/SalesforceRefreshButton";
 
@@ -49,6 +53,8 @@ export default async function AppHomePage({
 }) {
   const authorization = await enforcePermission("crm.dashboard.view");
   const canRefresh = authorization.permissions.includes("crm.salesforce.refresh");
+  const ingestConfiguration = getSalesforceIngestConfiguration();
+  const refreshConfiguration = getSalesforceRefreshConfiguration();
   const query = await searchParams;
   const selectedView: DashboardViewKey = isDashboardView(query.view) ? query.view : "all";
   const selectedPeriod: DashboardPeriodKey = isDashboardPeriod(query.period)
@@ -69,12 +75,13 @@ export default async function AppHomePage({
             carregado. Nenhum dado demonstrativo é usado como substituto.
           </p>
           <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
-            A ingestão autenticada está pronta para receber o primeiro snapshot versionado do
-            Salesforce.
+            {ingestConfiguration.available
+              ? "A ingestão autenticada está pronta para receber o primeiro snapshot versionado."
+              : "A integração de dados está indisponível neste ambiente."}
           </div>
           {canRefresh ? (
             <div className="mt-6 rounded-2xl bg-slate-950 p-5 text-white">
-              <SalesforceRefreshButton />
+              <SalesforceRefreshButton available={refreshConfiguration.available} />
             </div>
           ) : null}
         </div>
@@ -115,7 +122,9 @@ export default async function AppHomePage({
               <span className="mt-1 block text-xs break-words text-slate-400">
                 {dashboard.source}
               </span>
-              {canRefresh ? <SalesforceRefreshButton /> : null}
+              {canRefresh ? (
+                <SalesforceRefreshButton available={refreshConfiguration.available} />
+              ) : null}
             </div>
           </div>
 

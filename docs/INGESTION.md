@@ -12,6 +12,11 @@ O Gate 2 substitui os três endpoints legados sem copiar Cloudflare, D1 ou o fal
 
 Os Route Handlers nunca retornam tokens, URLs internas, resposta do provedor ou detalhes SQL. O refresh aceita somente URL configurada por ambiente; em produção ela deve usar HTTPS e não pode conter credenciais embutidas.
 
+Ingestão e refresh são capacidades independentes. Ambas ficam desativadas por
+padrão e exigem o valor literal `true` em sua flag server-side. Desativadas ou
+mal configuradas, retornam `503` antes de criar clientes privilegiados, iniciar
+runs ou fazer chamadas externas.
+
 ## Contrato de ingestão
 
 O produtor envia JSON com `schemaVersion: 1`, `requestId` UUID, `workflow` e um snapshot normalizado de dashboard. Ranking é opcional, mas, quando presente, deve usar a mesma data de referência e instante de geração.
@@ -42,7 +47,11 @@ A secret key Supabase fica confinada a `lib/auth/supabase/privileged.ts` e chama
 
 ## Refresh
 
-O botão aparece apenas para quem possui `crm.salesforce.refresh`. O banco serializa pedidos concorrentes, encerra runs presos após cinco minutos e aplica cooldown por usuário. O webhook recebe somente `requestId` e `requestedAt`, mais o Bearer dedicado.
+O controle aparece apenas para quem possui `crm.salesforce.refresh`. Quando a
+capacidade está desativada ou incompleta, ele fica desabilitado com mensagem
+neutra. Ativado e configurado, o banco serializa pedidos concorrentes, encerra
+runs presos após cinco minutos e aplica cooldown por usuário. O webhook recebe
+somente `requestId` e `requestedAt`, mais o Bearer dedicado.
 
 Status HTTP do provedor não é repassado livremente: sucesso retorna `202`, concorrência/cooldown retorna `409`/`429`, configuração ausente retorna `503` e falha do provedor retorna erro genérico `502`.
 
@@ -50,13 +59,20 @@ Status HTTP do provedor não é repassado livremente: sucesso retorna `202`, con
 
 ```dotenv
 APP_ORIGIN=https://homologacao.exemplo.com
+SALESFORCE_INGEST_ENABLED=false
+SALESFORCE_REFRESH_ENABLED=false
 SUPABASE_SECRET_KEY=
 SALESFORCE_INGEST_SECRET=
-SALESFORCE_REFRESH_URL=https://automacao.exemplo.com/webhook/refresh
+SALESFORCE_REFRESH_URL=
 SALESFORCE_REFRESH_SECRET=
 ```
 
-Cada ambiente deve usar valores diferentes. A rotação é feita no produtor/webhook e no runtime da aplicação, seguida de restart controlado e smoke test. Nenhum valor entra no Git, em logs ou em imagens Docker.
+Com a flag de ingestão em `true`, `SUPABASE_SECRET_KEY` e
+`SALESFORCE_INGEST_SECRET` tornam-se obrigatórias. Com a flag de refresh em
+`true`, a URL HTTPS sem credenciais e `SALESFORCE_REFRESH_SECRET` tornam-se
+obrigatórias. Configuração parcial falha fechada. Cada ambiente usa valores
+distintos; a rotação ocorre no produtor/webhook e no runtime, seguida de restart
+controlado e smoke test. Nenhum valor entra no Git, em logs ou em imagens.
 
 ## Validação local
 

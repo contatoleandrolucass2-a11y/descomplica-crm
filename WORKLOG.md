@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-08-04 — lançamento sem Salesforce
+
+- Branch `feat/salesforce-capability-flags` criada a partir de
+  `c1d6af7b80d9ee33b694bdb8907e0a05183c9691` para separar o lançamento inicial
+  da ativação futura das integrações.
+- Ingestão M2M e refresh humano foram confirmados como capacidades
+  independentes. Flags server-side exigem o valor literal `true`; qualquer
+  ausência, valor diferente ou configuração incompleta falha fechada com
+  `503`, sem cliente privilegiado ou chamada externa.
+- A interface recebe somente o booleano de disponibilidade calculado no
+  servidor. URL e segredos não atravessam a fronteira de Server Components.
+- A configuração Supabase Auth de produção exige somente Site URL
+  `https://crm.descomplicapro.com.br`. O código atual não possui callback OAuth,
+  magic link ou recuperação de senha e, portanto, não requer redirects
+  adicionais de produção.
+- Validação local: 40 Vitest, 162 pgTAP, formatação, ESLint, TypeScript, build
+  Next.js de 19 rotas, pnpm audit, OSV-Scanner, Gitleaks, actionlint,
+  ShellCheck e validadores operacionais aprovados. Nenhuma migration foi criada
+  ou aplicada; o Supabase local foi encerrado após os testes.
+
 ## 2026-08-04 — preparação da VPS de produção
 
 - Commit-base inspecionado: `e14e9cf24966b86f835c2b717e1af4a42b32f568`.
