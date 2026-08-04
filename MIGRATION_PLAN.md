@@ -12,7 +12,7 @@
 - [x] Criar checkpoint Git local da preparação.
 - [x] Criar repositório GitHub privado e enviar a branch de preparação.
 
-Nenhuma etapa abaixo começa antes do fechamento do Gate 0.
+Gate 0 encerrado em 2026-08-04 após CI remota verde na PR draft #1. As próximas etapas devem usar branch própria e manter os gates de qualidade.
 
 ## Gate 1 — estrutura e permissões
 

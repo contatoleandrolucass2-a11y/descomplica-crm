@@ -126,9 +126,11 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 6. GitHub privado, CI e branch protegida antes da homologação.
 7. Nenhuma publicação em produção sem autorização explícita.
 
-### Pendências antes de abrir a migração
+### Checkpoint remoto e Gate 0
 
 - Checkpoint local criado na branch `chore/environment-preparation`: `dcb4257` (toolchain/dependências) e `217da89` (CI).
 - Todos os gates foram repetidos após documentação e formatação; Supabase reiniciou limpo e foi encerrado com backup local preservado.
 - Autenticação `gh` validada em 2026-08-04. Repositório privado criado em `contatoleandrolucass2-a11y/descomplica-crm`, com `main` definida como branch padrão.
-- Branch `chore/environment-preparation`, tags de checkpoint e workflow CI serão enviados neste checkpoint remoto. Migração permanece fechada até a execução verde da CI.
+- Branch `chore/environment-preparation` e três tags de checkpoint enviadas. PR draft #1 aberta contra `main`.
+- GitHub Actions run `30875961593`: aprovado em 54 segundos. Instalação congelada, lint, typecheck, 4 testes, auditoria e build passaram.
+- Gate 0 encerrado. A migração funcional pode começar em nova etapa/branch, mantendo a PR de preparação isolada.
