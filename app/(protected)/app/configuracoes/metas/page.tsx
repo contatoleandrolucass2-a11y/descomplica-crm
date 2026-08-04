@@ -1,13 +1,24 @@
-import { RoutePlaceholder } from "@/app/(protected)/app/_components/RoutePlaceholder";
 import { enforcePermission } from "@/lib/authorization/enforce";
 
-export default async function GoalsPage() {
+import { FunnelGoalsPage } from "./_components/FunnelGoalsPage";
+
+export const metadata = { title: "Metas do funil" };
+
+export default async function GoalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string; error?: string }>;
+}) {
   await enforcePermission("crm.settings.manage");
-  return (
-    <RoutePlaceholder
-      eyebrow="Configurações"
-      title="Metas do funil"
-      description="Definição de metas mensais, semanais e diárias para o funil DV."
-    />
-  );
+  const query = await searchParams;
+  const notification =
+    query.saved === "1"
+      ? "saved"
+      : query.error === "validation"
+        ? "validation"
+        : query.error === "save"
+          ? "save"
+          : undefined;
+
+  return <FunnelGoalsPage profile="dv" {...(notification ? { notification } : {})} />;
 }
