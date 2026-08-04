@@ -148,3 +148,11 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - GitHub confirmou `visibility: public`; código, histórico, tags, issues, pull requests e Actions passaram a ser acessíveis publicamente.
 - Nenhuma configuração de produção, plano ou cobrança foi alterada.
 - A proteção da `main`, antes indisponível no plano para repositório privado, tornou-se tecnicamente disponível; não foi alterada porque o pedido se limitou à visibilidade.
+
+## 2026-08-04 — início do Gate 1
+
+- Branch `feat/gate1-page-catalog` criada a partir da `main` pública e verde.
+- CRM original inventariado: sete superfícies de página, cinco etapas dinâmicas, nove componentes reutilizáveis e oito endpoints.
+- O login Supabase SSR permanece como autenticação única. As três APIs manuais de autenticação do CRM serão descartadas.
+- Menu estático será substituído por catálogo PostgreSQL associado a permissões efetivas. Cloudflare, D1, Vinext, Vite, Wrangler e dados demo continuam proibidos.
+- Inventário detalhado: `docs/CRM_INVENTORY.md`.
