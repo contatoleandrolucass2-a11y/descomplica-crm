@@ -10,11 +10,11 @@ Encontrados no CRM original: plugins Cloudflare/Vite, Wrangler, Vinext, binding 
 
 ## Salesforce
 
-O CRM original possui endpoint de refresh que usa credenciais server-side, mas não exige sessão/permissão. Na migração ele deverá ter autenticação, permissão dedicada, timeout, erros sanitizados, rotação de segredo e auditoria. Nenhuma chamada real foi executada durante a preparação.
+O refresh foi reescrito como Route Handler com sessão, `crm.salesforce.refresh`, validação de origem, lock, cooldown, timeout, erros sanitizados e auditoria. A URL não tem fallback: deve vir do ambiente e usar HTTPS fora do desenvolvimento. Nenhuma chamada real de produção foi executada.
 
 ## Ingestão/n8n
 
-O CRM original possui endpoint com Bearer `INGEST_SECRET`, validação superficial e URL fallback hard-coded. A migração exigirá schema Zod, limite de tamanho, proteção contra replay/rate limit, destino configurado somente por ambiente, timeout e trilha de auditoria.
+O encaminhamento para n8n foi removido. O endpoint recebe contrato normalizado versionado, Bearer dedicado, limite de 1 MB e validação Zod estrita; a RPC Supabase persiste em transação, aplica idempotência e rejeita snapshot antigo. Detalhes em `docs/INGESTION.md`.
 
 ## APIs internas do CRM
 

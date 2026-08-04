@@ -18,6 +18,8 @@ import {
   clampPercentage,
 } from "@/lib/crm/dashboard/presentation";
 
+import { SalesforceRefreshButton } from "./_components/SalesforceRefreshButton";
+
 export const metadata = { title: "Dashboard comercial" };
 
 const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
@@ -45,7 +47,8 @@ export default async function AppHomePage({
 }: {
   searchParams: Promise<{ view?: string | string[]; period?: string | string[] }>;
 }) {
-  await enforcePermission("crm.dashboard.view");
+  const authorization = await enforcePermission("crm.dashboard.view");
+  const canRefresh = authorization.permissions.includes("crm.salesforce.refresh");
   const query = await searchParams;
   const selectedView: DashboardViewKey = isDashboardView(query.view) ? query.view : "all";
   const selectedPeriod: DashboardPeriodKey = isDashboardPeriod(query.period)
@@ -66,8 +69,14 @@ export default async function AppHomePage({
             carregado. Nenhum dado demonstrativo é usado como substituto.
           </p>
           <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
-            O próximo incremento conectará a ingestão autenticada do Salesforce a este read model.
+            A ingestão autenticada está pronta para receber o primeiro snapshot versionado do
+            Salesforce.
           </div>
+          {canRefresh ? (
+            <div className="mt-6 rounded-2xl bg-slate-950 p-5 text-white">
+              <SalesforceRefreshButton />
+            </div>
+          ) : null}
         </div>
       </main>
     );
@@ -94,7 +103,7 @@ export default async function AppHomePage({
                 {DASHBOARD_VIEWS[selectedView].description}
               </p>
             </div>
-            <div className="w-full min-w-0 rounded-2xl bg-white/10 px-5 py-4 text-left ring-1 ring-white/15 sm:w-auto sm:text-right">
+            <div className="flex w-full min-w-0 flex-col gap-4 rounded-2xl bg-white/10 px-5 py-4 text-left ring-1 ring-white/15 sm:w-auto sm:text-right">
               <p className="text-xs tracking-wide text-slate-300 uppercase">Atualizado em</p>
               <strong className="mt-1 block text-sm">
                 {new Intl.DateTimeFormat("pt-BR", {
@@ -106,6 +115,7 @@ export default async function AppHomePage({
               <span className="mt-1 block text-xs break-words text-slate-400">
                 {dashboard.source}
               </span>
+              {canRefresh ? <SalesforceRefreshButton /> : null}
             </div>
           </div>
 

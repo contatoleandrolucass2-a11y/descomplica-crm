@@ -11,6 +11,7 @@ VPS Hostinger KVM 1, Linux suportado, Node.js 24 LTS, aplicação Next.js `stand
 - Node 24.19.x, pnpm 11.20.x e PM2.
 - Nginx, certificado TLS e rotação de logs.
 - Variáveis de ambiente em arquivo com permissão restrita ou gerenciador de segredos.
+- `APP_ORIGIN`, secret key Supabase e Bearers Salesforce distintos por ambiente, nunca presentes no artefato.
 - Backup validado antes de cada alteração de banco.
 
 ## Artefato
@@ -31,6 +32,7 @@ Copiar `.next/standalone`, `.next/static` e `public` para uma release imutável.
 5. Apontar Nginx para o processo e validar HTTPS.
 6. Executar smoke tests de login, autorização, páginas, APIs e integrações.
 7. Monitorar logs, memória, CPU e erros.
+8. Validar o produtor primeiro com um snapshot de homologação e repetir o mesmo `requestId` para confirmar idempotência.
 
 ## Rollback
 

@@ -256,3 +256,24 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Conta e snapshot temporários foram removidos por `supabase db reset`.
 - Gates finais repetidos: instalação congelada, formatação, lint, tipos, 21 testes Vitest, build e 128 testes pgTAP aprovados. O schema lint reportou apenas falsos positivos conhecidos da extensão pgTAP; advisors de segurança e performance não encontraram problemas.
 - Segurança final: auditoria pnpm sem vulnerabilidades, Gitleaks sem achados na árvore e em 177 commits, OSV-Scanner sem achados em 514 pacotes.
+
+### Encerramento do incremento de detalhes
+
+- PR #10 mesclada na `main` em `c4c959a`; GitHub Actions run `30880417097` aprovou a branch e run `30880462632` aprovou a `main` após o merge.
+- Branch `feat/gate2-secure-ingestion` criada a partir da `main` atualizada.
+
+## 2026-08-04 — Gate 2: ingestão e Salesforce
+
+- Os três endpoints originais foram relidos. Cloudflare/D1, fallback n8n fixo, status público e refresh sem sessão não foram copiados.
+- Migration `20260804052500_secure_salesforce_ingestion.sql` criou `crm_ingestion_runs`, quatro RPCs, grants explícitos, RLS, auditoria, idempotência, locks, cotas, cooldown e rejeição de snapshot antigo.
+- `/api/ingest/salesforce` aceita somente contrato Zod v1 normalizado, Bearer M2M de no mínimo 32 caracteres e corpo de até 1 MB. A secret key Supabase está isolada em módulo server-only.
+- `/api/refresh/salesforce` exige sessão, `crm.salesforce.refresh`, origem da aplicação e configuração explícita; usa timeout de 15 segundos e nunca devolve resposta ou segredo do provedor.
+- `/api/dashboard/status` exige `crm.dashboard.view` e lê uma RPC que expõe somente timestamps e estados seguros.
+- O dashboard mostra o botão de refresh somente para usuário autorizado e informa sucesso, concorrência, cooldown ou falha sem detalhes internos.
+- Cópias não versionadas `arquivo 2.*` surgiram durante a validação: 16 eram idênticas e uma continha o placeholder antigo do ranking. Todas foram removidas após comparação, evitando compilação duplicada/obsoleta.
+- Reset integral das dez migrations passou. `supabase test db` aprovou 161 testes; schema lint e advisors de segurança/performance não encontraram problema no schema da aplicação.
+- QA local: status sem sessão `401`, ingestão com segredo inválido `401`, ingestão válida `201`, replay idempotente `200`, refresh autorizado `202` e repetição no cooldown `429`.
+- A ingestão de QA atualizou atomicamente dashboard (3 visões/15 métricas) e ranking; o navegador exibiu os dados e não teve overflow em 1280 px. Runs e auditoria registraram somente metadados sanitizados.
+- Foi usado apenas um webhook HTTP local descartável. Nenhuma credencial, URL, base ou chamada de produção foi utilizada.
+- Gates finais repetidos em banco limpo: instalação congelada, formatação, ESLint, TypeScript, 28 testes Vitest, build de 23 páginas e 162 testes pgTAP aprovados. Schema lint, Actionlint e advisors de segurança/performance passaram sem achados.
+- Segurança final: auditoria pnpm sem vulnerabilidades, Gitleaks sem achados na árvore e em 178 commits, OSV-Scanner sem achados em 514 pacotes.
