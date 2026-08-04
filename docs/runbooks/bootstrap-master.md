@@ -20,10 +20,9 @@ public.bootstrap_master_user(master_user_id uuid)
   `{ ok: true, noop: true }` sem novo registro de auditoria.
 - **Recusa** um master divergente: se já existe um `master` com UUID diferente,
   levanta `conflict` (SQLSTATE `23505`) e não altera nada.
-- Está **revogada** para `anon` e `authenticated`
-  (`revoke execute ... from anon, authenticated`). Só `service_role`/`postgres`
-  conseguem executá-la — por isso o bootstrap roda por conexão privilegiada,
-  nunca pelo app.
+- Está **revogada** para `PUBLIC`, `anon`, `authenticated` e `service_role`.
+  Somente o proprietário `postgres` consegue executá-la — por isso o bootstrap
+  roda por conexão administrativa direta, nunca pelo app ou Data API.
 - Garante um `profiles` mínimo, define `user_roles = master` e grava uma linha
   em `audit_logs` (`authorization.master_bootstrap`).
 

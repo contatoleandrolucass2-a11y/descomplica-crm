@@ -116,9 +116,9 @@ select has_index(
   'period and manager lookup is indexed'
 );
 select ok(
-  has_table_privilege('service_role', 'public.crm_ranking_snapshots', 'insert')
-  and has_table_privilege('service_role', 'public.crm_ranking_participants', 'insert'),
-  'service role is reserved for future server-side ingestion'
+  not has_table_privilege('service_role', 'public.crm_ranking_snapshots', 'insert')
+  and not has_table_privilege('service_role', 'public.crm_ranking_participants', 'insert'),
+  'service role writes ranking only through the audited ingestion RPC'
 );
 
 insert into auth.users (id, email)

@@ -20,9 +20,9 @@ select ok(
   'anon cannot access ingestion runs'
 );
 select ok(
-  has_table_privilege('service_role', 'public.crm_ingestion_runs', 'select')
-  and has_table_privilege('service_role', 'public.crm_ingestion_runs', 'insert'),
-  'service role owns the machine ingestion path'
+  not has_table_privilege('service_role', 'public.crm_ingestion_runs', 'select')
+  and not has_table_privilege('service_role', 'public.crm_ingestion_runs', 'insert'),
+  'service role reaches ingestion only through the machine RPC'
 );
 select ok(
   to_regclass('public.crm_ingestion_runs_kind_created_idx') is not null
@@ -238,6 +238,7 @@ select is(
   'succeeded',
   'service role ingests a valid normalized snapshot'
 );
+reset role;
 select is((select count(*) from public.crm_dashboard_snapshots), 1::bigint, 'ingestion creates dashboard snapshot');
 select is((select count(*) from public.crm_dashboard_views), 3::bigint, 'ingestion stores all dashboard views');
 select is((select count(*) from public.crm_dashboard_metrics), 15::bigint, 'ingestion stores complete metrics');
@@ -248,6 +249,7 @@ select is(
   16,
   'successful run records normalized row count'
 );
+set local role service_role;
 select is(
   (public.ingest_crm_salesforce_snapshot(
     pg_temp.valid_ingestion_payload('60000000-0000-4000-8000-000000000010')
@@ -255,11 +257,13 @@ select is(
   'true',
   'replayed request is idempotent'
 );
+reset role;
 select is(
   (select count(*) from public.crm_ingestion_runs where kind = 'salesforce_ingest'),
   1::bigint,
   'idempotent replay does not create another run'
 );
+set local role service_role;
 select is(
   (public.ingest_crm_salesforce_snapshot(
     pg_temp.valid_ingestion_payload(
@@ -270,6 +274,7 @@ select is(
   'failed',
   'stale snapshot is rejected'
 );
+reset role;
 select is(
   (select generated_at::text from public.crm_dashboard_snapshots where snapshot_key = 'global'),
   '2026-08-04 06:00:00+00',
@@ -291,6 +296,7 @@ select
   'ingestion_rejected',
   now()
 from generate_series(1, 18) series;
+set local role service_role;
 select is(
   (public.ingest_crm_salesforce_snapshot(
     pg_temp.valid_ingestion_payload('60000000-0000-4000-8000-000000000012')
@@ -298,6 +304,7 @@ select is(
   'rate_limited',
   'machine ingestion enforces the global per-minute limit'
 );
+reset role;
 
 select * from finish();
 rollback;
