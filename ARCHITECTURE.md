@@ -29,6 +29,7 @@ flowchart LR
 8. **Provisionamento mínimo.** Novas contas Auth recebem perfil ativo e papel `user`. O painel só modifica alvos abaixo do nível do ator e toda mutação é auditada.
 9. **Dashboard normalizado.** O read model separa snapshot, visão, métricas e ranking de empreendimentos. A UI lê com a sessão SSR e nunca usa fallback demonstrativo.
 10. **Metas mensais auditadas.** Os funis DV e parcerias compartilham uma tabela tipada por perfil/mês. A escrita ocorre por Server Action e RPC, que recalcula as etapas e audita atomicamente.
+11. **Pontos normalizados.** Pesos e objetivos do ranking são linhas tipadas, legíveis por `crm.ranking.view`; a substituição integral exige `crm.settings.manage` e gera auditoria.
 
 ## Fronteiras de segredo
 
@@ -36,7 +37,7 @@ Chaves públicas do Supabase podem chegar ao navegador e permanecem limitadas po
 
 ## Próximas decisões da migração
 
-- Modelo PostgreSQL para pontos e ranking.
+- Read model PostgreSQL para ranking e detalhes das etapas.
 - Contratos de ingestão e Salesforce com autenticação, autorização, rate limiting, timeout, retry e auditoria.
 - Estratégia de dados seed/demonstração separada dos dados reais.
 

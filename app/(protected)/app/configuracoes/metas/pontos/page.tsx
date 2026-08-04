@@ -1,13 +1,24 @@
-import { RoutePlaceholder } from "@/app/(protected)/app/_components/RoutePlaceholder";
 import { enforcePermission } from "@/lib/authorization/enforce";
 
-export default async function PointGoalsPage() {
+import { PointSettingsPage } from "./_components/PointSettingsPage";
+
+export const metadata = { title: "Metas de pontos" };
+
+export default async function PointGoalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string; error?: string }>;
+}) {
   await enforcePermission("crm.settings.manage");
-  return (
-    <RoutePlaceholder
-      eyebrow="Configurações"
-      title="Metas de pontos"
-      description="Definição de pesos, objetivos e regras de pontuação do ranking."
-    />
-  );
+  const query = await searchParams;
+  const notification =
+    query.saved === "1"
+      ? "saved"
+      : query.error === "validation"
+        ? "validation"
+        : query.error === "save"
+          ? "save"
+          : undefined;
+
+  return <PointSettingsPage {...(notification ? { notification } : {})} />;
 }
