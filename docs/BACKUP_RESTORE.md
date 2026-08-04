@@ -2,7 +2,7 @@
 
 ## Código
 
-- Repositório Git privado com tags de checkpoints.
+- Repositório Git público com tags de checkpoints.
 - Bundles offline das duas origens em `../source-checkpoints/` no pacote entregue.
 - ZIPs originais preservados fora do repositório; seus hashes constam no `WORKLOG.md`.
 

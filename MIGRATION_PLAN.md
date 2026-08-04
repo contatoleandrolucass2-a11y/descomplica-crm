@@ -10,7 +10,7 @@
 - [x] Fixar arquitetura e dependências da base final.
 - [x] Fazer lint, typecheck, testes, auditoria e build da base final.
 - [x] Criar checkpoint Git local da preparação.
-- [x] Criar repositório GitHub privado e enviar a branch de preparação.
+- [x] Criar repositório GitHub e enviar a branch de preparação.
 
 Gate 0 encerrado em 2026-08-04 após CI remota verde na PR draft #1. As próximas etapas devem usar branch própria e manter os gates de qualidade.
 
