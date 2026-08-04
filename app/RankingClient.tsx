@@ -210,7 +210,7 @@ function buildRanking(dashboard: DashboardPayload, weights: RankingWeights, peri
   );
 }
 
-export function RankingBoard({ dashboard, dataStatus, weights, conversionData }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights; conversionData?: { rate: number; appointments: number; visits: number; updatedAt: string | null } }) {
+export function RankingBoard({ dashboard, dataStatus, weights, conversionData, showPrizes = false }: { dashboard: DashboardPayload | null; dataStatus: "live" | "demo" | "waiting"; weights: RankingWeights; conversionData?: { rate: number; appointments: number; visits: number; updatedAt: string | null }; showPrizes?: boolean }) {
   const [scope, setScope] = useState<RankingScope>("brokers");
   const [period, setPeriod] = useState<RankingPeriod>("month");
   const [isPresentationActive, setIsPresentationActive] = useState(true);
@@ -430,6 +430,45 @@ export function RankingBoard({ dashboard, dataStatus, weights, conversionData }:
               {productivity.map((metric) => <TeamProductivityGauge {...metric} total={productivityBrokers.length} key={metric.key} />)}
             </div>
           </section>
+
+          {showPrizes ? <section className="ranking-prizes" aria-labelledby="ranking-prizes-title">
+            <header className="ranking-prizes-heading">
+              <div><p className="goal-kicker">Campanha de incentivo</p><h2 id="ranking-prizes-title">Premiações por produtividade</h2></div>
+              <p>Quanto mais metas o time alcançar, mais prêmios serão liberados.</p>
+            </header>
+
+            <div className="ranking-prize-champion">
+              <div className="ranking-prize-emblem" aria-hidden="true"><span>1º</span></div>
+              <div className="ranking-prize-champion-copy">
+                <small>Campeão do mês</small>
+                <h3>Até R$ 1.500 em mídia para Facebook</h3>
+                <p>R$ 500 em boleto + R$ 500 adicionais quando o corretor também investir R$ 500.</p>
+              </div>
+              <div className="ranking-prize-extra"><strong>+ R$ 100</strong><span>vale-jantar</span></div>
+            </div>
+
+            <div className="ranking-weekly-prizes">
+              <div className="ranking-weekly-prizes-title">
+                <div><small>Prêmio semanal · sorteio geral</small><h3>R$ 250 por meta alcançada</h3></div>
+                <p>5 sorteios de R$ 50, de segunda a sexta, entre os corretores presentes na loja.</p>
+              </div>
+              <div className="ranking-weekly-prize-grid">
+                <article style={{ "--prize-color": "#22b8c7" } as React.CSSProperties}>
+                  <span>100%</span><h4>Agendamento</h4><p>Todos os corretores com pelo menos 1 agendamento e a regional com 50 agendamentos na semana.</p><strong>Libera R$ 250</strong>
+                </article>
+                <article style={{ "--prize-color": "#f7c948" } as React.CSSProperties}>
+                  <span>100%</span><h4>Visita</h4><p>Todos os corretores com pelo menos 1 visita na semana.</p><strong>Libera R$ 250</strong>
+                </article>
+                <article style={{ "--prize-color": "#42d79a" } as React.CSSProperties}>
+                  <span>100%</span><h4>Pasta aprovada</h4><p>Todos os corretores com pelo menos 1 pasta aprovada na semana.</p><strong>Libera R$ 250</strong>
+                </article>
+                <article style={{ "--prize-color": "#10b981" } as React.CSSProperties}>
+                  <span>70%</span><h4>Venda</h4><p>Setenta por cento dos corretores com pelo menos 1 venda na semana.</p><strong>Libera R$ 250</strong>
+                </article>
+              </div>
+              <div className="ranking-weekly-champion"><div><small>Campeão da semana em pontos</small><strong>+ 1 vale-jantar de R$ 100</strong></div><p>Prêmios cumulativos: cada indicador alcançado libera sua própria premiação.</p></div>
+            </div>
+          </section> : null}
         </>
       ) : <section className="ranking-empty"><span>R</span><h2>Nenhum resultado neste período</h2><p>Nenhum registro da imobiliária {TARGET_AGENCY} encontrado. Altere o período ou aguarde a próxima sincronização dos dados.</p></section>}
       <footer className="ranking-help-footer"><span>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</span></footer>

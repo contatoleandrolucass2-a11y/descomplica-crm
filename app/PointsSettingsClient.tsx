@@ -149,7 +149,7 @@ export function PointsSettingsClient({
 
       </form>
 
-      <RankingBoard dashboard={dashboard} dataStatus={dataStatus} weights={rankingWeights} conversionData={{ rate: conversionRate, appointments, visits, updatedAt: sourceUpdatedAt }} />
+      <RankingBoard dashboard={dashboard} dataStatus={dataStatus} weights={rankingWeights} conversionData={{ rate: conversionRate, appointments, visits, updatedAt: sourceUpdatedAt }} showPrizes />
     </main>
   );
 }
