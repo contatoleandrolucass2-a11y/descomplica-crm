@@ -22,7 +22,7 @@ O parâmetro `stage` aceita cinco slugs: `oportunidades`, `agendamentos`, `visit
 | ----------------------- | ---------------------------------------------- | ---------------------------------------------- |
 | `DashboardClient`       | KPIs, funil, progresso, atualização Salesforce | migrar após substituir APIs e dados demo       |
 | `StageDetailClient`     | Detalhe e comparação por etapa                 | migrar junto do dashboard                      |
-| `RankingClient`         | Pontuação, conversões, filtros e produtividade | migrar após persistência PostgreSQL            |
+| `RankingClient`         | Pontuação, conversões, filtros e produtividade | migrado para ranking server-rendered           |
 | `GoalsSettingsClient`   | Edição de metas mensais/semanais/diárias       | migrado para Server Component + Server Action  |
 | `PointsSettingsClient`  | Pesos e metas de pontuação                     | migrado para Server Component + Server Action  |
 | `DashboardFilters`      | Filtros locais persistidos no navegador        | reutilizar com revisão de acessibilidade       |
@@ -48,7 +48,7 @@ Nenhuma API original será copiada diretamente. O sistema de login e seus cookie
 
 ## Dados e integrações
 
-- `collaborator_dashboards`: snapshot JSON por e-mail do colaborador.
+- `collaborator_dashboards`: ranking extraído para snapshots e atividades normalizadas.
 - `ingestion_runs`: histórico simples de ingestão.
 - `point_goals`: JSONs D1 substituídos por duas tabelas PostgreSQL normalizadas.
 - `crm_funnel_goals`: dependência ausente do ZIP, agora versionada em PostgreSQL com colunas tipadas, RLS e auditoria.

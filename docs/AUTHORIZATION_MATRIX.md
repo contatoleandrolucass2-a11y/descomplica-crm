@@ -38,3 +38,5 @@ Nenhuma dessas tabelas aceita escrita direta do papel `authenticated`. A RLS de 
 As páginas de metas exigem `crm.settings.manage` na rota e na Server Action. A tabela `crm_funnel_goals` repete a verificação na RLS, e a RPC de escrita revalida sessão, conta ativa, permissão e limites antes de alterar qualquer linha.
 
 As tabelas de pontos aceitam leitura com `crm.ranking.view` ou `crm.settings.manage`. A rota de configuração e a RPC de substituição exigem `crm.settings.manage`; negar `crm.ranking.view` remove a leitura para papéis comerciais sem permissão administrativa.
+
+O read model do ranking exige `crm.ranking.view` na rota e nas duas policies RLS. A tabela não expõe escrita a `authenticated`; o papel `service_role` fica reservado à futura ingestão server-side, sem ser usado no bundle da aplicação.
