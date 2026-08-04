@@ -28,7 +28,8 @@ Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende 
 - [x] Mapear o read model do dashboard D1/JSON para PostgreSQL normalizado.
 - [x] Criar migration, grants, RLS e testes do dashboard somente leitura.
 - [x] Migrar a interface inicial do dashboard sem dados demo ou usuário fixo.
-- [ ] Migrar metas, pontos, ranking e detalhes de etapas.
+- [x] Migrar metas dos funis DV e parcerias com escrita auditada.
+- [ ] Migrar pontos, ranking e detalhes de etapas.
 - [ ] Substituir APIs manuais por Route Handlers/Server Actions autenticados.
 - [ ] Migrar ingestão e Salesforce com segredos server-side e controles de abuso.
 

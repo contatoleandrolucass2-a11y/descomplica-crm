@@ -23,7 +23,7 @@ O parâmetro `stage` aceita cinco slugs: `oportunidades`, `agendamentos`, `visit
 | `DashboardClient`       | KPIs, funil, progresso, atualização Salesforce | migrar após substituir APIs e dados demo       |
 | `StageDetailClient`     | Detalhe e comparação por etapa                 | migrar junto do dashboard                      |
 | `RankingClient`         | Pontuação, conversões, filtros e produtividade | migrar após persistência PostgreSQL            |
-| `GoalsSettingsClient`   | Edição de metas mensais/semanais/diárias       | migrar após API autenticada                    |
+| `GoalsSettingsClient`   | Edição de metas mensais/semanais/diárias       | migrado para Server Component + Server Action  |
 | `PointsSettingsClient`  | Pesos e metas de pontuação                     | migrar após API autenticada                    |
 | `DashboardFilters`      | Filtros locais persistidos no navegador        | reutilizar com revisão de acessibilidade       |
 | `PeriodComparisonTable` | Comparações de período                         | reutilizar                                     |
@@ -41,7 +41,7 @@ O parâmetro `stage` aceita cinco slugs: `oportunidades`, `agendamentos`, `visit
 | `/api/dashboard/status`   | GET      | Supabase REST ou D1               | fallback Cloudflare/demo e autorização ausente | reescrever server-side                 |
 | `/api/ingest/salesforce`  | POST     | `INGEST_SECRET`, D1/n8n           | validação rasa, fallback hard-coded            | reescrever com Zod, limite e auditoria |
 | `/api/refresh/salesforce` | POST     | Salesforce/n8n                    | sem sessão ou permissão                        | reescrever com permissão dedicada      |
-| `/api/settings/goals`     | GET/POST | Supabase REST com publishable key | sem autenticação/permissão server-side         | substituir por SDK SSR + RLS/RPC       |
+| `/api/settings/goals`     | GET/POST | Supabase REST com publishable key | sem autenticação/permissão server-side         | substituída por SDK SSR + RLS/RPC      |
 | `/api/settings/points`    | GET/POST | Cloudflare D1                     | sem autenticação/permissão                     | substituir por PostgreSQL + RLS/RPC    |
 
 Nenhuma API original será copiada diretamente. O sistema de login e seus cookies Supabase SSR continuam como única autenticação.
@@ -51,7 +51,7 @@ Nenhuma API original será copiada diretamente. O sistema de login e seus cookie
 - `collaborator_dashboards`: snapshot JSON por e-mail do colaborador.
 - `ingestion_runs`: histórico simples de ingestão.
 - `point_goals`: pesos e metas em JSON.
-- `crm_funnel_goals`: tabela Supabase referenciada pela API original, ausente no schema versionado do ZIP.
+- `crm_funnel_goals`: dependência ausente do ZIP, agora versionada em PostgreSQL com colunas tipadas, RLS e auditoria.
 - Salesforce/n8n: refresh e persistência por URLs externas configuradas em ambiente.
 - Dados demo: dashboard completo hard-coded e usuário fictício; não podem chegar à produção.
 

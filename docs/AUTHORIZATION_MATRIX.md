@@ -30,5 +30,8 @@ O menu consulta somente páginas ativas, marcadas para navegação e permitidas 
 - `set_user_active`: ativa/desativa conta de nível inferior e audita.
 - `list_app_pages_for_management`: lista o catálogo completo apenas para gestores de páginas.
 - `set_app_page_active`: ativa/desativa página do catálogo e audita.
+- `upsert_crm_funnel_goals`: calcula e grava as metas mensais de um canal e audita.
 
 Nenhuma dessas tabelas aceita escrita direta do papel `authenticated`. A RLS de `app_pages` nunca concede o bypass administrativo usado pela tela de gestão; o catálogo completo sai exclusivamente pela RPC protegida. O navegador chama somente RPCs `security definer` que revalidam sessão, perfil ativo, permissão e hierarquia no banco.
+
+As páginas de metas exigem `crm.settings.manage` na rota e na Server Action. A tabela `crm_funnel_goals` repete a verificação na RLS, e a RPC de escrita revalida sessão, conta ativa, permissão e limites antes de alterar qualquer linha.

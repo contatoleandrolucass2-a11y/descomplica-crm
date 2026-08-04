@@ -186,3 +186,22 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Testes locais: 52 pgTAP e 7 Vitest aprovados; schema lint, advisors, ESLint, TypeScript e build também aprovados.
 - Teste autenticado no navegador aprovado em 390×844 e 1440×900, sem overflow do corpo ou erros de console. Troca de visão e período atualizou métricas e URL corretamente.
 - A fixture e a conta de QA foram criadas apenas no Supabase local e removidas por reset ao final.
+
+### Encerramento do incremento do dashboard
+
+- PR #6 mesclada na `main` no commit `66da130`; GitHub Actions run `30878565908` passou antes do merge e run `30878648010` passou na `main`.
+- Branch `feat/gate2-funnel-goals` criada a partir da `main` atualizada.
+
+## 2026-08-04 — Gate 2: metas dos funis
+
+- O contrato de `GoalsSettingsClient` e `/api/settings/goals` foi analisado no CRM original: dois perfis, seis etapas, cinco taxas e parâmetros operacionais de equipe.
+- Migration `20260804044701_funnel_goals.sql` criada sem seed comercial. A tabela usa chave única por perfil/mês, colunas tipadas, constraints, grants mínimos e RLS.
+- A RPC `upsert_crm_funnel_goals` exige sessão ativa e `crm.settings.manage`, normaliza o mês, calcula os volumes no servidor, força o escopo reduzido de parcerias, faz upsert e registra auditoria na mesma transação.
+- `/app/configuracoes/metas` e `/app/configuracoes/metas/parcerias` substituíram os placeholders. Ambas usam sessão Supabase SSR; a antiga API pública e seus objetos JSON não foram copiados.
+- `supabase db reset` aplicou as sete migrations do zero. Os 77 testes pgTAP passaram; Vitest passou com 3 arquivos e 11 testes.
+- ESLint, TypeScript e build Next.js passaram. A primeira execução paralela de `typecheck` com `build` encontrou arquivos transitórios de `.next` removidos pelo build; a repetição sequencial passou, sem alteração de código necessária.
+- QA autenticada criou metas DV e parcerias no Supabase local. O funil DV foi calculado como `90 → 45 → 30 → 15 → 12 → 10`; parcerias ocultou e zerou as etapas não aplicáveis.
+- Usuário comum foi redirecionado para `/unauthorized`. Em 1280 px, largura do documento e `scrollWidth` permaneceram iguais, sem overflow horizontal.
+- A conta administrativa, a conta comum e as metas de QA foram removidas por `supabase db reset` ao final.
+- Gates finais: instalação congelada, formatação, ESLint, TypeScript, 11 testes Vitest, build de 21 páginas, 77 testes pgTAP, schema lint e advisors aprovados.
+- Segurança final: `pnpm audit` sem vulnerabilidades; Gitleaks sem achados na árvore ou em 174 commits; OSV-Scanner sem achados em 514 pacotes.

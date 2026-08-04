@@ -1,13 +1,24 @@
-import { RoutePlaceholder } from "@/app/(protected)/app/_components/RoutePlaceholder";
 import { enforcePermission } from "@/lib/authorization/enforce";
 
-export default async function PartnershipGoalsPage() {
+import { FunnelGoalsPage } from "../_components/FunnelGoalsPage";
+
+export const metadata = { title: "Metas de parcerias" };
+
+export default async function PartnershipGoalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string; error?: string }>;
+}) {
   await enforcePermission("crm.settings.manage");
-  return (
-    <RoutePlaceholder
-      eyebrow="Configurações"
-      title="Metas de parcerias"
-      description="Definição das metas comerciais do canal de parceiros."
-    />
-  );
+  const query = await searchParams;
+  const notification =
+    query.saved === "1"
+      ? "saved"
+      : query.error === "validation"
+        ? "validation"
+        : query.error === "save"
+          ? "save"
+          : undefined;
+
+  return <FunnelGoalsPage profile="partnerships" {...(notification ? { notification } : {})} />;
 }

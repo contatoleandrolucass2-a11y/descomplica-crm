@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema usa PostgreSQL 17 no Supabase local. Existem seis migrations versionadas. A validação local encontrou 12 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 14 páginas. Nenhum dado comercial é seedado.
+O schema usa PostgreSQL 17 no Supabase local. Existem sete migrations versionadas. A validação local encontrou 13 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 14 páginas. Nenhum dado comercial é seedado.
 
 ## Migrations
 
@@ -12,6 +12,7 @@ O schema usa PostgreSQL 17 no Supabase local. Existem seis migrations versionada
 4. `20260721120000_fix_remove_user_permission_override_ambiguity.sql`: correção de ambiguidade em override.
 5. `20260804041218_page_catalog_and_crm_permissions.sql`: catálogo de páginas, permissões CRM, provisionamento de contas, bloqueio de inativos e RPCs administrativas.
 6. `20260804043416_dashboard_read_model.sql`: snapshots, resumos por visão, métricas e empreendimentos do dashboard.
+7. `20260804044701_funnel_goals.sql`: metas mensais normalizadas, RLS e upsert auditado dos funis DV/parcerias.
 
 ## Desenvolvimento local
 
@@ -28,7 +29,7 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` executa 52 testes pgTAP: 26 do catálogo/autorização e 26 do dashboard. A cobertura verifica schema, grants, policies, constraints, provisionamento, usuários inativos e overrides. Cada novo domínio do CRM deve ampliar esse conjunto.
+`supabase test db` executa 77 testes pgTAP: 26 do catálogo/autorização, 26 do dashboard e 25 das metas. A cobertura verifica schema, grants, policies, constraints, provisionamento, usuários inativos, overrides, cálculo do funil e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
 
 ## RLS e grants
 
@@ -48,3 +49,5 @@ Os advisors locais de segurança e performance não apontam problemas. As três 
 Modelos e queries do CRM original não serão copiados literalmente. Cada tabela D1 será mapeada para tipo PostgreSQL, constraints, índices, grants e policies; o acesso ocorrerá pelo Supabase SDK/server-side. Drizzle/D1, bindings `env.DB` e imports `cloudflare:` não entram na aplicação final.
 
 O antigo `collaborator_dashboards.payload_json` e a dependência não versionada `sf_relatorio_resumo` foram substituídos no dashboard por quatro tabelas normalizadas. A ingestão ainda não está exposta: navegadores recebem somente `SELECT` limitado por `crm.dashboard.view`.
+
+A dependência não versionada `crm_funnel_goals` do CRM original foi substituída por uma tabela mensal tipada. O papel `authenticated` recebe somente `SELECT` com RLS; a Server Action grava exclusivamente pela função `upsert_crm_funnel_goals`, que exige `crm.settings.manage`, recalcula os volumes e audita a alteração.
