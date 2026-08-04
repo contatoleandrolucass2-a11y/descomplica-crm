@@ -1,0 +1,14 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Generated build, dependency, and local-service artifacts"
+paths = [
+  '''(^|/)\.next/''',
+  '''(^|/)node_modules/''',
+  '''(^|/)out/''',
+  '''(^|/)build/''',
+  '''(^|/)dist/''',
+  '''(^|/)\.wrangler/''',
+  '''(^|/)supabase/\.temp/''',
+]

@@ -1,0 +1,3 @@
+-- Dados mínimos de desenvolvimento serão adicionados quando o catálogo de
+-- páginas do CRM estiver definido. Este arquivo existe para manter
+-- `supabase db reset --local` reproduzível sem depender de arquivos externos.

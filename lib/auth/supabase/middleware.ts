@@ -33,7 +33,7 @@
 //
 // Env vars:
 //   - NEXT_PUBLIC_SUPABASE_URL (public)
-//   - NEXT_PUBLIC_SUPABASE_ANON_KEY (public, RLS-bounded)
+//   - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (public, RLS-bounded)
 // SUPABASE_SERVICE_ROLE_KEY is server-only and is NOT referenced here.
 
 import { createServerClient } from "@supabase/ssr";
@@ -44,7 +44,7 @@ export async function updateSession(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
@@ -72,7 +72,7 @@ export async function updateSession(request: NextRequest) {
   // inspected, logged, or rendered: M3 does not branch on user state, and
   // exposing session material outside the cookie boundary is forbidden
   // per AUTH_SECURITY.md > Session Observability Requirements.
-  await supabase.auth.getUser();
+  await supabase.auth.getClaims();
 
   return { supabase, response };
 }
