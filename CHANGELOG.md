@@ -19,6 +19,8 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Read model PostgreSQL normalizado do dashboard com quatro tabelas, constraints, grants e RLS.
 - Metas mensais dos funis DV e parcerias com tabela tipada, cálculo server-side e histórico por mês.
 - Server Action e RPC de metas protegidas por `crm.settings.manage`, RLS e auditoria atômica.
+- Configuração normalizada de pesos e objetivos das sete atividades do ranking.
+- Server Action e RPC de pontos com substituição integral, validação e auditoria atômica.
 
 ### Alterado
 
@@ -28,6 +30,7 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Policies SELECT duplicadas consolidadas sem ampliar acesso.
 - Dependências D1/JSON e `sf_relatorio_resumo` removidas do caminho de leitura do dashboard.
 - API pública `/api/settings/goals` substituída pelo SDK SSR e pela RPC auditada.
+- API D1 `/api/settings/points` substituída pelo SDK SSR e pela RPC auditada.
 
 ### Segurança
 
@@ -36,3 +39,4 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Usuários inativos bloqueados no contexto de autorização e na resolução de permissões usada pela RLS.
 - Mutações administrativas protegidas por guarda server-side, RPC hierárquica e auditoria no banco.
 - Escrita direta das metas revogada para o navegador; perfil inativo ou sem permissão falha fechado.
+- Pesos do ranking expostos somente para leitores autorizados; escrita direta permanece revogada.

@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema usa PostgreSQL 17 no Supabase local. Existem sete migrations versionadas. A validação local encontrou 13 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 14 páginas. Nenhum dado comercial é seedado.
+O schema usa PostgreSQL 17 no Supabase local. Existem oito migrations versionadas. A validação local encontrou 15 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 14 páginas. Nenhum dado comercial é seedado.
 
 ## Migrations
 
@@ -13,6 +13,7 @@ O schema usa PostgreSQL 17 no Supabase local. Existem sete migrations versionada
 5. `20260804041218_page_catalog_and_crm_permissions.sql`: catálogo de páginas, permissões CRM, provisionamento de contas, bloqueio de inativos e RPCs administrativas.
 6. `20260804043416_dashboard_read_model.sql`: snapshots, resumos por visão, métricas e empreendimentos do dashboard.
 7. `20260804044701_funnel_goals.sql`: metas mensais normalizadas, RLS e upsert auditado dos funis DV/parcerias.
+8. `20260804045945_point_settings.sql`: pesos e objetivos normalizados do ranking, RLS e substituição auditada.
 
 ## Desenvolvimento local
 
@@ -29,7 +30,7 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` executa 77 testes pgTAP: 26 do catálogo/autorização, 26 do dashboard e 25 das metas. A cobertura verifica schema, grants, policies, constraints, provisionamento, usuários inativos, overrides, cálculo do funil e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
+`supabase test db` executa 103 testes pgTAP: 26 do catálogo/autorização, 26 do dashboard, 25 das metas e 26 dos pontos. A cobertura verifica schema, grants, policies, constraints, provisionamento, usuários inativos, overrides, cálculos e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
 
 ## RLS e grants
 
@@ -51,3 +52,5 @@ Modelos e queries do CRM original não serão copiados literalmente. Cada tabela
 O antigo `collaborator_dashboards.payload_json` e a dependência não versionada `sf_relatorio_resumo` foram substituídos no dashboard por quatro tabelas normalizadas. A ingestão ainda não está exposta: navegadores recebem somente `SELECT` limitado por `crm.dashboard.view`.
 
 A dependência não versionada `crm_funnel_goals` do CRM original foi substituída por uma tabela mensal tipada. O papel `authenticated` recebe somente `SELECT` com RLS; a Server Action grava exclusivamente pela função `upsert_crm_funnel_goals`, que exige `crm.settings.manage`, recalcula os volumes e audita a alteração.
+
+Os JSONs da tabela D1 `point_goals` foram substituídos por `crm_point_settings` e `crm_point_metrics`. O ranking pode ler as sete métricas via `crm.ranking.view`; a escrita completa ocorre somente pela RPC `replace_crm_point_settings`, protegida por `crm.settings.manage`.

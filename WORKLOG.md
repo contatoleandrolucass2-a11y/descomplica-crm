@@ -205,3 +205,20 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - A conta administrativa, a conta comum e as metas de QA foram removidas por `supabase db reset` ao final.
 - Gates finais: instalação congelada, formatação, ESLint, TypeScript, 11 testes Vitest, build de 21 páginas, 77 testes pgTAP, schema lint e advisors aprovados.
 - Segurança final: `pnpm audit` sem vulnerabilidades; Gitleaks sem achados na árvore ou em 174 commits; OSV-Scanner sem achados em 514 pacotes.
+
+### Encerramento do incremento de metas
+
+- PR #7 mesclada na `main` em `ca279fd`; GitHub Actions run `30879238469` aprovou a branch e run `30879283419` aprovou a `main`.
+- Branch `feat/gate2-points-settings` criada a partir da `main` atualizada.
+
+## 2026-08-04 — Gate 2: configuração de pontos
+
+- O contrato D1 foi extraído de `PointsSettingsClient`, `/api/settings/points` e `point_goals`: sete métricas, pesos e objetivos armazenados em JSON sem autorização.
+- Migration `20260804045945_point_settings.sql` criou o singleton de configuração e sete linhas tipadas, sem seed. `crm.ranking.view` permite leitura; escrita direta permanece revogada.
+- A RPC `replace_crm_point_settings` exige conta ativa e `crm.settings.manage`, rejeita payload incompleto/desconhecido/fracionário, substitui a configuração em uma transação e audita.
+- `/app/configuracoes/metas/pontos` substituiu o placeholder por formulário server-rendered. Os pesos sugeridos originais aparecem apenas como proposta não persistida no estado vazio.
+- Reset integral das oito migrations e 103 testes pgTAP passaram. ESLint, TypeScript, 14 testes Vitest e build de 21 páginas também passaram.
+- QA autenticada salvou peso de venda `12` e objetivo de visitas `25`; a releitura confirmou ambos. Em 1280 px não houve overflow horizontal nem warning no servidor.
+- Conta e configuração temporárias foram removidas por `supabase db reset`.
+- Gates finais repetidos: instalação congelada, formatação, lint, tipos, 14 testes Vitest, build, 103 testes pgTAP, schema lint e advisors aprovados.
+- Segurança final: auditoria pnpm sem vulnerabilidades, Gitleaks sem achados na árvore e em 175 commits, OSV-Scanner sem achados em 514 pacotes.
