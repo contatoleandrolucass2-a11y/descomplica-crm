@@ -133,4 +133,5 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Autenticação `gh` validada em 2026-08-04. Repositório privado criado em `contatoleandrolucass2-a11y/descomplica-crm`, com `main` definida como branch padrão.
 - Branch `chore/environment-preparation` e três tags de checkpoint enviadas. PR draft #1 aberta contra `main`.
 - GitHub Actions run `30875961593`: aprovado em 54 segundos. Instalação congelada, lint, typecheck, 4 testes, auditoria e build passaram.
+- A segunda execução verde apontou runtime Node 20 depreciado nas actions v4. `actions/checkout` foi atualizado para v7.0.1 e `actions/setup-node` para v7.0.0, ambas fixadas por SHA completo para reduzir risco de alteração de tag.
 - Gate 0 encerrado. A migração funcional pode começar em nova etapa/branch, mantendo a PR de preparação isolada.
