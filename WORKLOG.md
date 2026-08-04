@@ -1,5 +1,41 @@
 # Worklog
 
+## 2026-08-04 — preparação da VPS de produção
+
+- Commit-base inspecionado: `e14e9cf24966b86f835c2b717e1af4a42b32f568`.
+- Validação da main: Prettier, ESLint, TypeScript, 30 Vitest, build de 18
+  rotas, auditoria pnpm, Gitleaks, OSV-Scanner e actionlint aprovados.
+- Supabase estritamente local: 162 testes pgTAP aprovados; lint e advisors de
+  segurança/performance sem achados. Nenhuma migration remota foi aplicada.
+- A implantação Docker/Nginx foi preparada na branch
+  `ops/production-vps-docker`; o app permanece em loopback e HTTP público não
+  encaminha tráfego antes do TLS.
+- Smoke test da imagem standalone: container sem privilégios, filesystem
+  somente leitura, limite de 2 GiB/1,5 CPU, healthcheck `healthy`, `/api/health`
+  e `/login` respondendo `200` exclusivamente em `127.0.0.1:3000`.
+- Hardening do host: usuário `deploy` com chave, senhas SSH desativadas, root
+  mantido somente por chave, Fail2ban, atualizações automáticas, sysctl e UFW
+  com entrada limitada a 22/80/443. O Nginx retorna `503` em HTTP até o TLS.
+- DNS confirmado por Cloudflare, Google, Quad9 e pelos autoritativos
+  `pixel.dns-parking.com`/`byte.dns-parking.com`: A `187.127.249.50` e AAAA
+  `2a02:4780:75:cad3::1`, ambos com TTL de 300 segundos.
+- `Generating static pages` reportou 23 unidades internas do build, não rotas.
+  A `main` exibe 18 rotas; esta branch exibe 19 porque acrescenta somente
+  `/api/health`. Os manifests confirmam 20 caminhos de aplicação na `main` e 21
+  nesta branch, sem remoção. A única mudança no `next.config.ts` é o
+  `deploymentId` opcional; não há filtro, rewrite ou alteração de descoberta de
+  rotas.
+- Node 24.19.0 e pnpm 11.20.0 foram confirmados, sem divergência, no host,
+  `package.json`, `.nvmrc`, Dockerfile e GitHub Actions.
+- Assistente seguro de ambiente adicionado para uso no Terminal. Ele preserva
+  valores válidos, valida as novas chaves Supabase, gera os dois Bearers
+  Salesforce e grava o arquivo com troca atômica e permissões restritas.
+- Validação final da branch: formatação, ESLint, TypeScript, 30 Vitest, 162
+  pgTAP, auditorias pnpm/OSV, Gitleaks de árvore/histórico, actionlint e build
+  Next.js com 19 rotas aprovados. O assistente passou por Bash syntax,
+  ShellCheck, `visudo`, teste de entrada sem eco e reexecução com preservação
+  byte a byte. O Supabase local foi encerrado após os testes.
+
 ## 2026-08-03 — preparação obrigatória do ambiente
 
 ### Fontes preservadas

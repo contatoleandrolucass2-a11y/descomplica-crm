@@ -7,8 +7,11 @@
  */
 import type { NextConfig } from "next";
 
+const deploymentId = process.env.DEPLOYMENT_VERSION;
+
 const nextConfig: NextConfig = {
   output: "standalone",
+  ...(deploymentId ? { deploymentId } : {}),
   poweredByHeader: false,
   reactStrictMode: true,
 };

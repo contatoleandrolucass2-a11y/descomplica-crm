@@ -1,0 +1,14 @@
+.git
+.github
+.next
+.env*
+!.env.example
+node_modules
+coverage
+*.log
+*.pem
+*.key
+*.p12
+*.zip
+supabase/.branches
+supabase/.temp

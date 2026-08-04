@@ -36,4 +36,6 @@ Nunca restaure dump de produção sobre ambiente errado. Restauração remota é
 
 ## Aplicação na VPS
 
-Manter releases imutáveis e um symlink `current`. Para rollback, aponte para a release anterior e recarregue PM2. Retenha logs e artefatos suficientes para diagnóstico, sem credenciais.
+Manter imagens Docker imutáveis identificadas pelo SHA. Para rollback, selecione
+a tag anterior e execute o Compose com `--no-build`. Retenha logs e artefatos
+suficientes para diagnóstico, sem credenciais.

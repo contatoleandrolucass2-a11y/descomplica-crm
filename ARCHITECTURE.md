@@ -13,7 +13,7 @@ flowchart LR
     N --> P["PostgreSQL + RLS"]
     N --> I["Integrações server-side"]
     G["GitHub Actions"] --> H["Hostinger VPS - homologação"]
-    H --> M["PM2 + Next standalone"]
+    H --> M["Docker Compose + Next standalone"]
     X["Nginx + HTTPS"] --> M
 ```
 
@@ -23,7 +23,7 @@ flowchart LR
 2. **Supabase em vez de D1.** O banco final é PostgreSQL, com migrations SQL, grants e RLS. Drizzle/D1 não será copiado automaticamente; cada modelo do CRM terá migration revisada.
 3. **Autenticação única.** O fluxo Supabase SSR da base substitui cookies e rotas de autenticação manuais do CRM.
 4. **Autorização em profundidade.** Menus e páginas respeitam permissões, mas APIs, Server Actions e RLS também as impõem.
-5. **Deploy `standalone` em VPS.** PM2 é suficiente para o KVM 1 e reduz a sobrecarga de runtime. Docker continua necessário para o Supabase local, não para executar o app na VPS.
+5. **Deploy `standalone` em VPS.** Docker Compose empacota o runtime de forma reproduzível, publica o Next.js apenas em loopback e deixa o Nginx como única entrada pública. O Supabase local usa um stack separado e nunca é parte do Compose de produção.
 6. **Versões exatas.** `package.json` e lockfile fixam a base homologada; atualizações futuras serão seletivas e testadas.
 7. **Catálogo autorizado.** `app_pages` é a fonte da navegação. RLS filtra páginas pela permissão efetiva; guardas de rota e RPCs continuam sendo as fronteiras de segurança.
 8. **Provisionamento mínimo.** Novas contas Auth recebem perfil ativo e papel `user`. O painel só modifica alvos abaixo do nível do ator e toda mutação é auditada.

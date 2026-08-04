@@ -7,7 +7,7 @@ Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fu
 - Next.js nativo com App Router, React e TypeScript.
 - Supabase Auth e PostgreSQL, com grants, RLS e auditoria.
 - `pnpm` como único gerenciador de pacotes.
-- Build `standalone` do Next.js em VPS Hostinger, gerenciado por PM2 e servido por Nginx/HTTPS.
+- Build `standalone` do Next.js em Docker Compose na VPS Hostinger, servido por Nginx/HTTPS.
 - GitHub público e CI antes da homologação.
 
 As decisões completas estão em [ARCHITECTURE.md](ARCHITECTURE.md), [SECURITY.md](SECURITY.md) e [MIGRATION_PLAN.md](MIGRATION_PLAN.md).
