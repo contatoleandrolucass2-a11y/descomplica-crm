@@ -15,11 +15,24 @@ padrão. O refresh mantém sessão, `crm.salesforce.refresh`, validação de ori
 proteção de URL, lock, cooldown, timeout, erros sanitizados e auditoria. A URL
 não tem fallback: deve vir do ambiente e usar HTTPS fora do desenvolvimento.
 Com a capacidade desativada ou incompleta, nenhuma chamada externa ocorre.
-Nenhuma chamada real de produção foi executada.
+
+O produtor de produção usa a Analytics Reports API `v61.0` por uma sessão do
+Chrome aprovada com MFA. A frequência de 30 minutos não renova nem contorna o
+MFA: quando o cookie `sid` expirar, o exportador falha fechado e exige novo
+login interativo. A candidata versionada em `ops/salesforce` consulta os sete
+relatórios autorizados, preserva os `recordId` existentes somente em memória e
+descarta CPF, CNPJ, banco, telefone, e-mail e endereço antes de criar o snapshot
+agregado.
 
 ## Ingestão/n8n
 
-O encaminhamento para n8n foi removido. O endpoint recebe contrato normalizado versionado, Bearer dedicado, limite de 1 MB e validação Zod estrita; a RPC Supabase persiste em transação, aplica idempotência e rejeita snapshot antigo. Detalhes em `docs/INGESTION.md`.
+O fallback fixo para n8n foi removido da aplicação. O endpoint recebe contrato
+normalizado versionado, Bearer dedicado, limite de 1 MB e validação Zod estrita;
+a RPC Supabase persiste em transação, aplica idempotência e rejeita snapshot
+antigo. O workflow de migração permanece inativo até receber credenciais
+dedicadas e passar pela reconciliação descrita em
+`docs/runbooks/salesforce-n8n-migration.md`. Detalhes do contrato ficam em
+`docs/INGESTION.md`.
 
 ## APIs internas do CRM
 
@@ -28,4 +41,5 @@ O encaminhamento para n8n foi removido. O endpoint recebe contrato normalizado v
 - `dashboard/status`: misturava Supabase e fallback D1/demo.
 - autenticação própria: redundante em relação à base de login e não será mantida.
 
-Nenhuma integração externa, conta, cobrança ou ambiente remoto foi alterado nesta etapa.
+Nenhum usuário Auth, papel, grant, policy ou dado comercial é alterado pela
+coleta candidata.

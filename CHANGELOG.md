@@ -14,6 +14,9 @@
   desativadas por padrão, com endpoints e interface em estado fail-closed.
 - Normaliza grants de tabelas, sequências e RPCs para os defaults fail-closed
   dos novos projetos Supabase, com matriz pgTAP de privilégio mínimo.
+- Adiciona exportador candidato de sete relatórios Salesforce com projeção
+  mínima sem PII, identidades estáveis, transformação para o contrato v1 e
+  workflow n8n inativo/fail-closed para validação antes da primeira ingestão.
 
 Todas as alterações relevantes deste projeto serão registradas aqui.
 

@@ -368,3 +368,25 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Advisors mantiveram somente o `INFO` de segurança intencional da tabela de
   ingestão sem policy e os informativos preexistentes de performance, sem
   adicionar índices a este escopo.
+
+## 2026-08-06 — candidata Salesforce/n8n de produção
+
+- Os quatro workflows n8n relevantes e o exportador da VPS legada foram
+  copiados para backups root-only com SHA-256 antes de qualquer criação.
+- Uma alteração externa de estoque no workflow ativo foi identificada e
+  preservada sem mistura com a migração do CRM novo.
+- A resposta bruta da Analytics Reports API confirmou `recordId` estável para
+  Opportunity, avaliação de crédito, Contact e Account. O XLSX legado descartava
+  essa informação; a candidata agora a usa somente em memória.
+- O exportador candidato coleta os sete reports autorizados, remove PII antes da
+  serialização, agrega dashboard/ranking e grava o arquivo de validação
+  atomicamente com modo `0600`.
+- A primeira coleta real produziu 3 views, 15 métricas e 108 participantes. O
+  schema Zod aceitou o payload; buscas por IDs Salesforce, e-mail, números longos
+  e chaves proibidas no payload final retornaram zero.
+- O workflow `GnSUcxUhyPYq6d1l` foi criado inativo, sem credenciais nem chamadas
+  externas. Nenhum snapshot, usuário, papel, grant ou policy do Supabase novo
+  foi alterado.
+- Metas seguem sem fonte M2M confirmada e roleta não existe nos sete relatórios;
+  a ativação e a primeira persistência permanecem bloqueadas até decisão
+  explícita sobre esses dois campos.
