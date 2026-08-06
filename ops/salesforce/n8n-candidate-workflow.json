@@ -1,0 +1,90 @@
+{
+  "name": "Descomplica CRM - Salesforce Ingest Candidate (inactive)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "descomplica-crm-salesforce-candidate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "2de8c056-9a9e-47d8-8d32-7b0923058e31",
+      "name": "Receber Snapshot Normalizado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-320, 0],
+      "webhookId": "d55be727-701d-4b76-af96-67e910c67a2b"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const envelope = $input.first().json;\nconst payload = envelope.body ?? envelope;\nif (!payload || payload.schemaVersion !== 2 || !payload.dashboard) {\n  throw new Error('invalid snapshot envelope');\n}\nif (typeof payload.dashboard.goalsAvailable !== 'boolean') {\n  throw new Error('invalid goals availability');\n}\nif (!Array.isArray(payload.dashboard.views) || payload.dashboard.views.length !== 3) {\n  throw new Error('invalid dashboard views');\n}\nif (!Array.isArray(payload.dashboard.metrics) || payload.dashboard.metrics.length !== 15) {\n  throw new Error('invalid dashboard metrics');\n}\nif (!payload.dashboard.goalsAvailable && payload.dashboard.metrics.some((metric) => metric.goalMonth !== 0 || metric.goalWeek !== 0 || metric.goalToday !== 0)) {\n  throw new Error('unavailable goals must be zero');\n}\nif (payload.ranking && (typeof payload.ranking.rouletteAvailable !== 'boolean' || !Array.isArray(payload.ranking.participants) || payload.ranking.participants.length > 2000)) {\n  throw new Error('invalid ranking participants');\n}\nif (payload.ranking && !payload.ranking.rouletteAvailable && payload.ranking.participants.some((participant) => participant.roulette !== 0 || participant.rouletteSaturday !== 0 || participant.rouletteSunday !== 0)) {\n  throw new Error('unavailable roulette must be zero');\n}\nconst serialized = JSON.stringify(payload).toLowerCase();\nconst forbidden = ['cpf', 'cnpj', 'password', 'senha', 'bank', 'banco', 'agência bancária', 'conta bancária', 'telefone', 'phone', 'email', 'logradouro', 'cep'];\nif (forbidden.some((field) => serialized.includes(`\\\"${field}\\\"`))) {\n  throw new Error('forbidden source field');\n}\nreturn [{ json: { payload, accepted: true } }];"
+      },
+      "id": "26902f30-51c5-4740-a038-03891740e65b",
+      "name": "Validar Contrato e PII",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-64, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, status: 'candidate_validated' } }}",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "81d96354-7145-40a2-b2f8-748879e93b92",
+      "name": "Responder Validação",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [192, 0]
+    },
+    {
+      "parameters": {
+        "content": "## Candidata segura\n\nInativa por projeto. Recebe somente o snapshot agregado versionado. Não contém destino, credencial ou chamada externa até a validação do payload e a rotação dos segredos dedicados.",
+        "height": 220,
+        "width": 760,
+        "color": 5
+      },
+      "id": "943876c3-c890-4423-a746-f6685079088f",
+      "name": "Notas de Segurança",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-368, -272]
+    }
+  ],
+  "connections": {
+    "Receber Snapshot Normalizado": {
+      "main": [
+        [
+          {
+            "node": "Validar Contrato e PII",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Contrato e PII": {
+      "main": [
+        [
+          {
+            "node": "Responder Validação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false,
+    "executionTimeout": 600
+  }
+}

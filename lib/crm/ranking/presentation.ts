@@ -27,11 +27,12 @@ export type RankingLine = Omit<RankingActivity, "periodKey" | "brokerKey" | "bro
 function score(
   activity: Omit<RankingActivity, "periodKey" | "brokerKey" | "brokerName">,
   weights: PointMetricValues,
+  rouletteAvailable: boolean,
 ) {
   const baseScore =
-    activity.roulette * weights.roulette +
-    activity.rouletteSaturday * weights.roulette_saturday +
-    activity.rouletteSunday * weights.roulette_sunday +
+    (rouletteAvailable ? activity.roulette * weights.roulette : 0) +
+    (rouletteAvailable ? activity.rouletteSaturday * weights.roulette_saturday : 0) +
+    (rouletteAvailable ? activity.rouletteSunday * weights.roulette_sunday : 0) +
     activity.schedule * weights.schedule +
     activity.visit * weights.visit +
     activity.approvedFolder * weights.approved_folder +
@@ -57,6 +58,7 @@ export function buildRanking(
   period: RankingPeriodKey,
   scope: RankingScopeKey,
   weights: PointMetricValues,
+  rouletteAvailable = true,
 ): RankingLine[] {
   const selected = activities.filter((activity) => activity.periodKey === period);
 
@@ -73,7 +75,7 @@ export function buildRanking(
         visit: activity.visit,
         approvedFolder: activity.approvedFolder,
         sale: activity.sale,
-        ...score(activity, weights),
+        ...score(activity, weights, rouletteAvailable),
       }))
       .sort(compareLines);
   }
@@ -108,6 +110,6 @@ export function buildRanking(
   }
 
   return [...managers.values()]
-    .map((manager) => ({ ...manager, ...score(manager, weights) }))
+    .map((manager) => ({ ...manager, ...score(manager, weights, rouletteAvailable) }))
     .sort(compareLines);
 }

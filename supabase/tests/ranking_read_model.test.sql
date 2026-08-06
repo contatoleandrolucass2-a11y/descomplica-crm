@@ -1,9 +1,15 @@
 begin;
 
-select plan(25);
+select plan(27);
 
 select has_table('public', 'crm_ranking_snapshots', 'ranking snapshots table exists');
 select has_table('public', 'crm_ranking_participants', 'ranking participants table exists');
+select has_column(
+  'public',
+  'crm_ranking_snapshots',
+  'roulette_available',
+  'ranking snapshots track roulette source availability'
+);
 select ok(
   (select relrowsecurity from pg_catalog.pg_class where oid = 'public.crm_ranking_snapshots'::regclass),
   'ranking snapshots have RLS enabled'
@@ -65,6 +71,11 @@ from public.crm_ranking_snapshots where snapshot_key = 'global';
 
 select is((select count(*) from public.crm_ranking_snapshots), 1::bigint, 'fixture creates one snapshot');
 select is((select count(*) from public.crm_ranking_participants), 1::bigint, 'fixture creates one participant');
+select is(
+  (select roulette_available from public.crm_ranking_snapshots where snapshot_key = 'global'),
+  false,
+  'roulette availability fails closed when a source is not declared'
+);
 select throws_ok(
   $$insert into public.crm_ranking_snapshots
     (snapshot_key, reference_date, generated_at, source)

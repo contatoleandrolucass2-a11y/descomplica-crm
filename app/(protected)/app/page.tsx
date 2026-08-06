@@ -21,6 +21,11 @@ import {
   getSalesforceIngestConfiguration,
   getSalesforceRefreshConfiguration,
 } from "@/lib/crm/salesforce/config";
+import {
+  DATA_UNAVAILABLE_LABEL,
+  GOALS_UNAVAILABLE_LABEL,
+  availableCommercialValue,
+} from "@/lib/crm/source-availability";
 
 import { SalesforceRefreshButton } from "./_components/SalesforceRefreshButton";
 
@@ -167,10 +172,21 @@ export default async function AppHomePage({
           </div>
         </section>
 
+        {!dashboard.goalsAvailable ? (
+          <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+            <strong className="block">{GOALS_UNAVAILABLE_LABEL}</strong>
+            <span className="mt-1 block">
+              Os resultados do funil são reais, mas metas, atingimento e progresso não são
+              apresentados até existir uma fonte oficial.
+            </span>
+          </section>
+        ) : null}
+
         <section aria-label="Indicadores do funil" className="mt-6 grid gap-4 md:grid-cols-5">
           {stages.map(([stageKey, stage]) => {
             const value = metricValue(metrics[stageKey], selectedPeriod);
-            const progress = calculateProgress(value.current, value.goal);
+            const goal = availableCommercialValue(dashboard.goalsAvailable, value.goal);
+            const progress = goal === null ? null : calculateProgress(value.current, goal);
 
             return (
               <article
@@ -182,17 +198,27 @@ export default async function AppHomePage({
                   {numberFormatter.format(value.current)}
                 </strong>
                 <p className="mt-1 text-xs text-slate-500">
-                  Meta: {numberFormatter.format(value.goal)}
+                  {goal === null
+                    ? GOALS_UNAVAILABLE_LABEL
+                    : `Meta: ${numberFormatter.format(goal)}`}
                 </p>
-                <progress
-                  className="mt-4 h-2 w-full accent-cyan-600"
-                  max={100}
-                  value={clampPercentage(progress)}
-                  aria-label={`Progresso de ${stage.label}`}
-                />
-                <p className="mt-2 text-xs font-medium text-slate-600">
-                  {progress === null ? "Meta não definida" : percentFormatter.format(progress)}
-                </p>
+                {goal === null ? (
+                  <p className="mt-4 rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-600">
+                    {DATA_UNAVAILABLE_LABEL}
+                  </p>
+                ) : (
+                  <>
+                    <progress
+                      className="mt-4 h-2 w-full accent-cyan-600"
+                      max={100}
+                      value={clampPercentage(progress)}
+                      aria-label={`Progresso de ${stage.label}`}
+                    />
+                    <p className="mt-2 text-xs font-medium text-slate-600">
+                      {progress === null ? "Meta não definida" : percentFormatter.format(progress)}
+                    </p>
+                  </>
+                )}
               </article>
             );
           })}

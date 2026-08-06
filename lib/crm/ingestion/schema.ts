@@ -66,6 +66,7 @@ const dashboardSchema = z
     generatedAt: timestamp,
     timezone: label.max(100),
     source: label,
+    goalsAvailable: z.boolean(),
     views: z.array(dashboardViewSchema).length(3),
     metrics: z.array(dashboardMetricSchema).length(15),
     topDevelopments: z.array(topDevelopmentSchema).max(15),
@@ -128,6 +129,7 @@ const rankingSchema = z
     generatedAt: timestamp,
     timezone: label.max(100),
     source: label,
+    rouletteAvailable: z.boolean(),
     participants: z.array(rankingParticipantSchema).max(2_000),
   })
   .strict()
@@ -149,7 +151,7 @@ const rankingSchema = z
 
 export const salesforceIngestionSchema = z
   .object({
-    schemaVersion: z.literal(1),
+    schemaVersion: z.literal(2),
     requestId: z.string().uuid(),
     workflow: key,
     dashboard: dashboardSchema,
@@ -157,6 +159,32 @@ export const salesforceIngestionSchema = z
   })
   .strict()
   .superRefine((payload, context) => {
+    if (
+      !payload.dashboard.goalsAvailable &&
+      payload.dashboard.metrics.some(
+        (metric) => metric.goalMonth !== 0 || metric.goalWeek !== 0 || metric.goalToday !== 0,
+      )
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "unavailable goals must use zero as technical storage only",
+      });
+    }
+    if (
+      payload.ranking &&
+      !payload.ranking.rouletteAvailable &&
+      payload.ranking.participants.some(
+        (participant) =>
+          participant.roulette !== 0 ||
+          participant.rouletteSaturday !== 0 ||
+          participant.rouletteSunday !== 0,
+      )
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "unavailable roulette data must use zero as technical storage only",
+      });
+    }
     if (
       payload.ranking &&
       (payload.ranking.generatedAt !== payload.dashboard.generatedAt ||

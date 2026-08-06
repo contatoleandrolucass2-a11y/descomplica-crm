@@ -1,6 +1,6 @@
 begin;
 
-select plan(26);
+select plan(28);
 
 select has_table('public', 'crm_dashboard_snapshots', 'dashboard snapshots table exists');
 select has_table('public', 'crm_dashboard_metrics', 'dashboard metrics table exists');
@@ -9,6 +9,12 @@ select has_table(
   'public',
   'crm_dashboard_top_developments',
   'dashboard top developments table exists'
+);
+select has_column(
+  'public',
+  'crm_dashboard_snapshots',
+  'goals_available',
+  'dashboard snapshots track goal source availability'
 );
 
 select ok(
@@ -134,6 +140,11 @@ select is(
   (select count(*) from public.crm_dashboard_views),
   3::bigint,
   'fixture stores one summary per dashboard view'
+);
+select is(
+  (select goals_available from public.crm_dashboard_snapshots where snapshot_key = 'global'),
+  false,
+  'goal availability fails closed when a source is not declared'
 );
 
 select is(

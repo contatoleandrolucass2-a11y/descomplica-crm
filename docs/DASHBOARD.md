@@ -6,14 +6,19 @@
 
 Quando não existe o snapshot `global`, a tela exibe “Aguardando dados”. Isso é intencional: ausência de dados reais nunca é mascarada com números fictícios.
 
+`goals_available` distingue metas provenientes de uma fonte autorizada de zeros
+técnicos. Enquanto estiver `false`, o dashboard e os detalhes de etapa exibem
+“Fonte não configurada”/“Dados indisponíveis” e omitem barra de progresso,
+atingimento e gap. O realizado continua visível e não é afetado.
+
 ## Read model
 
-| Tabela                           | Responsabilidade                                         |
-| -------------------------------- | -------------------------------------------------------- |
-| `crm_dashboard_snapshots`        | Cabeçalho do snapshot: referência, geração, fuso e fonte |
-| `crm_dashboard_views`            | Valor vendido por visão e período                        |
-| `crm_dashboard_metrics`          | Indicadores e metas por visão, etapa e período           |
-| `crm_dashboard_top_developments` | Até cinco empreendimentos classificados por visão        |
+| Tabela                           | Responsabilidade                                  |
+| -------------------------------- | ------------------------------------------------- |
+| `crm_dashboard_snapshots`        | Cabeçalho, fonte e disponibilidade das metas      |
+| `crm_dashboard_views`            | Valor vendido por visão e período                 |
+| `crm_dashboard_metrics`          | Indicadores e metas por visão, etapa e período    |
+| `crm_dashboard_top_developments` | Até cinco empreendimentos classificados por visão |
 
 Visões aceitas: `all`, `with_canal_imob` e `without_canal_imob`. Etapas aceitas: `opportunities`, `appointments`, `visits`, `folders` e `sales`.
 

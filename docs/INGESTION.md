@@ -19,7 +19,7 @@ runs ou fazer chamadas externas.
 
 ## Contrato de ingestão
 
-O produtor envia JSON com `schemaVersion: 1`, `requestId` UUID, `workflow` e um snapshot normalizado de dashboard. Ranking é opcional, mas, quando presente, deve usar a mesma data de referência e instante de geração.
+O produtor envia JSON com `schemaVersion: 2`, `requestId` UUID, `workflow` e um snapshot normalizado de dashboard. Ranking é opcional, mas, quando presente, deve usar a mesma data de referência e instante de geração.
 
 O dashboard exige:
 
@@ -28,8 +28,10 @@ O dashboard exige:
 - valores e contagens não negativos;
 - no máximo cinco empreendimentos por visão;
 - snapshot `global` ou outra chave no formato documentado.
+- `goalsAvailable` obrigatório. Quando `false`, as metas numéricas ficam em
+  zero somente para armazenamento e a interface exibe “Fonte não configurada”.
 
-O ranking aceita até 2.000 linhas únicas por período/corretor e os períodos `month`, `last_week`, `week` e `today`. O contrato TypeScript completo está em `lib/crm/ingestion/schema.ts`.
+O ranking aceita até 2.000 linhas únicas por período/corretor e os períodos `month`, `last_week`, `week` e `today`. `rouletteAvailable` também é obrigatório; quando `false`, os três campos de roleta devem ser zero, são excluídos da pontuação e aparecem como “Dados indisponíveis”. O contrato TypeScript completo está em `lib/crm/ingestion/schema.ts`.
 
 ## Persistência
 
@@ -41,7 +43,7 @@ O ranking aceita até 2.000 linhas únicas por período/corretor e os períodos 
 4. substitui os filhos normalizados do dashboard e, se enviado, do ranking;
 5. conclui o run e grava evento de auditoria sem payload comercial.
 
-Repetir o mesmo `requestId` não regrava dados. Falha de constraint desfaz todas as mudanças do read model e preserva somente um run `failed` com código sanitizado.
+Repetir o mesmo `requestId` não regrava dados nem altera os indicadores de disponibilidade. Falha de constraint desfaz todas as mudanças do read model e preserva somente um run `failed` com código sanitizado. A primitiva legada v1 foi movida para schema privado e não possui execução para papéis externos; somente o wrapper v2 público continua concedido a `service_role`.
 
 A secret key Supabase fica confinada a `lib/auth/supabase/privileged.ts` e chama somente a RPC de ingestão. Navegadores não recebem grant na tabela de runs nem execução nessa RPC.
 
@@ -76,7 +78,7 @@ controlado e smoke test. Nenhum valor entra no Git, em logs ou em imagens.
 
 ## Validação local
 
-- 34 testes pgTAP cobrem grants, RLS, RPCs, auditoria, locks/cotas, ingestão, replay e snapshot antigo.
+- 43 testes pgTAP cobrem grants, RLS, RPCs, disponibilidade de fontes, auditoria, locks/cotas, ingestão, replay e snapshot antigo.
 - Vitest cobre schema completo, identidades duplicadas, alinhamento dashboard/ranking, segredo, origem e URL HTTPS.
 - QA local verificou `401` sem sessão/segredo, `201` na ingestão, `200` no replay, `202` no refresh e `429` no segundo pedido.
 

@@ -12,6 +12,11 @@ import {
 } from "@/lib/crm/dashboard/catalog";
 import { loadDashboardReadModel } from "@/lib/crm/dashboard/data";
 import { calculateConversion, calculateProgress } from "@/lib/crm/dashboard/presentation";
+import {
+  DATA_UNAVAILABLE_LABEL,
+  GOALS_UNAVAILABLE_LABEL,
+  availableCommercialValue,
+} from "@/lib/crm/source-availability";
 import { CRM_STAGES, getCrmStage } from "@/lib/crm/stages/catalog";
 import { buildStageComparisons, stageAttainment } from "@/lib/crm/stages/presentation";
 
@@ -80,9 +85,9 @@ export default async function StagePage({
   const metric = dashboard.metrics[view][stage.key];
   const periodConfig = DASHBOARD_PERIODS[period];
   const current = metric[periodConfig.currentField];
-  const goal = metric[periodConfig.goalField];
-  const progress = calculateProgress(current, goal);
-  const gap = goal > 0 ? Math.max(goal - current, 0) : null;
+  const goal = availableCommercialValue(dashboard.goalsAvailable, metric[periodConfig.goalField]);
+  const progress = goal === null ? null : calculateProgress(current, goal);
+  const gap = goal !== null && goal > 0 ? Math.max(goal - current, 0) : null;
   const stageIndex = CRM_STAGES.findIndex((item) => item.slug === stage.slug);
   const previousStage = stageIndex > 0 ? CRM_STAGES[stageIndex - 1] : null;
   const nextStage = stageIndex < CRM_STAGES.length - 1 ? CRM_STAGES[stageIndex + 1] : null;
@@ -90,7 +95,9 @@ export default async function StagePage({
     ? dashboard.metrics[view][previousStage.key][periodConfig.currentField]
     : null;
   const conversion = previousValue === null ? null : calculateConversion(current, previousValue);
-  const attainment = stageAttainment(progress);
+  const attainment = dashboard.goalsAvailable
+    ? stageAttainment(progress)
+    : ({ label: DATA_UNAVAILABLE_LABEL, tone: "slate" } as const);
   const comparisons = buildStageComparisons(metric);
 
   return (
@@ -185,9 +192,11 @@ export default async function StagePage({
                   {numberFormatter.format(current)}
                 </strong>
                 <p className="mt-2 text-sm text-slate-500">
-                  {goal > 0
-                    ? `Meta de ${numberFormatter.format(goal)}`
-                    : "Acompanhamento sem meta definida"}
+                  {goal === null
+                    ? GOALS_UNAVAILABLE_LABEL
+                    : goal > 0
+                      ? `Meta de ${numberFormatter.format(goal)}`
+                      : "Acompanhamento sem meta definida"}
                 </p>
               </div>
               <span
@@ -196,23 +205,37 @@ export default async function StagePage({
                 {attainment.label}
               </span>
             </div>
-            <progress
-              className="mt-8 h-3 w-full accent-cyan-600"
-              max={100}
-              value={progress === null ? 0 : Math.min(Math.max(progress * 100, 0), 100)}
-              aria-label={`Progresso de ${stage.label}`}
-            />
+            {goal === null ? (
+              <p className="mt-8 rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-600">
+                {DATA_UNAVAILABLE_LABEL}
+              </p>
+            ) : (
+              <progress
+                className="mt-8 h-3 w-full accent-cyan-600"
+                max={100}
+                value={progress === null ? 0 : Math.min(Math.max(progress * 100, 0), 100)}
+                aria-label={`Progresso de ${stage.label}`}
+              />
+            )}
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl bg-slate-50 p-4">
                 <small className="text-slate-500">Atingimento</small>
                 <strong className="mt-1 block text-xl text-slate-950">
-                  {progress === null ? "—" : percentFormatter.format(progress)}
+                  {goal === null
+                    ? DATA_UNAVAILABLE_LABEL
+                    : progress === null
+                      ? "—"
+                      : percentFormatter.format(progress)}
                 </strong>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
                 <small className="text-slate-500">Gap</small>
                 <strong className="mt-1 block text-xl text-slate-950">
-                  {gap === null ? "—" : numberFormatter.format(gap)}
+                  {goal === null
+                    ? DATA_UNAVAILABLE_LABEL
+                    : gap === null
+                      ? "—"
+                      : numberFormatter.format(gap)}
                 </strong>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
@@ -294,7 +317,11 @@ export default async function StagePage({
                         {variation === null ? "—" : percentFormatter.format(variation)}
                       </td>
                       <td className="px-5 py-4 text-right">
-                        {row.goal === null ? "—" : numberFormatter.format(row.goal)}
+                        {row.goal === null
+                          ? "—"
+                          : dashboard.goalsAvailable
+                            ? numberFormatter.format(row.goal)
+                            : GOALS_UNAVAILABLE_LABEL}
                       </td>
                     </tr>
                   );
