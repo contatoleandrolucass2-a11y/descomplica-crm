@@ -86,11 +86,14 @@ A execução controlada de 6 de agosto de 2026 retornou:
 
 O contrato final contém três views, quinze métricas e 108 participantes de
 ranking (27 corretores × quatro períodos). A validação encontrou 63 visitas sem
-agendamento, 66 vínculos de pasta fora do recorte de oportunidades, 37 vínculos
-de venda fora do recorte e 122 pastas aprovadas. Nada foi descartado por essas
-divergências. A diferença de vínculo por ID é maior que a comparação antiga por
-nome porque o relatório de oportunidades é recortado pela criação em 2026,
-enquanto pastas e vendas podem referenciar oportunidades anteriores.
+agendamento, 19 vínculos de pasta fora do recorte de oportunidades, 18 vínculos
+de venda fora do recorte e 122 pastas aprovadas. As comparações por ID e por nome
+produziram os mesmos totais. Nada foi descartado por essas divergências. O
+relatório de oportunidades é recortado pela criação em 2026, enquanto pastas e
+vendas podem referenciar oportunidades anteriores. Cinco dos 27 corretores
+ativos ainda não possuem gerente resolvido e 195 nomes históricos/externos das
+atividades não pertencem à base ativa atual; ambos permanecem diagnósticos, sem
+criar identidades sintéticas.
 
 ## Gates antes da primeira escrita
 

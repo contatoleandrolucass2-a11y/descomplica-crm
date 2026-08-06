@@ -388,6 +388,10 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - A primeira coleta real produziu 3 views, 15 métricas e 108 participantes. O
   schema Zod aceitou o payload; buscas por IDs Salesforce, e-mail, números longos
   e chaves proibidas no payload final retornaram zero.
+- A segunda coleta reproduziu exatamente os tamanhos das sete fontes e
+  reconciliou por ID/nome: 63 visitas sem agendamento, 19 pastas e 18 vendas fora
+  do recorte de oportunidades, 122 pastas aprovadas, 27 corretores ativos e
+  cinco ainda sem gerente resolvido.
 - O workflow `GnSUcxUhyPYq6d1l` foi criado inativo, sem credenciais nem chamadas
   externas. Nenhum snapshot, usuário, papel, grant ou policy do Supabase novo
   foi alterado.
