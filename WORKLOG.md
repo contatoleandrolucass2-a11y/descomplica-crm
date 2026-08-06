@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-08-06 — disponibilidade explícita de metas e roleta
+
+- A primeira carga real foi autorizada sem fonte oficial para metas ou roleta,
+  desde que zero não fosse apresentado como resultado comercial.
+- O contrato candidato avançou para `schemaVersion: 2`, com
+  `goalsAvailable` e `rouletteAvailable` obrigatórios. Fonte indisponível exige
+  zeros técnicos e falha se transportar valor comercial diferente de zero.
+- A migration `20260806222732_salesforce_source_availability.sql` adiciona flags
+  fail-closed aos snapshots. A função v1 foi movida para schema privado, sem
+  execução externa, e o wrapper v2 persiste as flags atomicamente sem permitir
+  que replay idempotente as altere.
+- Dashboard e detalhes mostram “Fonte não configurada”/“Dados indisponíveis” e
+  ocultam progresso, atingimento e gap. O ranking exclui roleta da pontuação e
+  não apresenta seus pesos como disponíveis.
+- Validação parcial: TypeScript, 45 Vitest, 8 testes Node e 190 pgTAP locais
+  aprovados. A migration ainda não foi aplicada remotamente e nenhuma carga ou
+  automação foi ativada.
+
 ## 2026-08-04 — lançamento sem Salesforce
 
 - Branch `feat/salesforce-capability-flags` criada a partir de

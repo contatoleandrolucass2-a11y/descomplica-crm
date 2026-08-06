@@ -8,7 +8,7 @@ const stages = ["opportunities", "appointments", "visits", "folders", "sales"] a
 
 function validPayload() {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     requestId: "60000000-0000-4000-8000-000000000001",
     workflow: "salesforce_daily",
     dashboard: {
@@ -17,6 +17,7 @@ function validPayload() {
       generatedAt: "2026-08-04T06:00:00.000Z",
       timezone: "America/Sao_Paulo",
       source: "Salesforce",
+      goalsAvailable: true,
       views: views.map((viewKey) => ({
         viewKey,
         salesValueMonth: 100,
@@ -52,6 +53,7 @@ function validPayload() {
       generatedAt: "2026-08-04T06:00:00.000Z",
       timezone: "America/Sao_Paulo",
       source: "Salesforce",
+      rouletteAvailable: true,
       participants: [
         {
           periodKey: "month",
@@ -95,6 +97,27 @@ describe("Salesforce ingestion contract", () => {
     const payload = validPayload();
     payload.ranking.generatedAt = "2026-08-04T06:01:00.000Z";
     expect(salesforceIngestionSchema.safeParse(payload).success).toBe(false);
+  });
+
+  it("distinguishes unavailable sources from a real zero", () => {
+    const unavailable = validPayload();
+    unavailable.dashboard.goalsAvailable = false;
+    unavailable.ranking.rouletteAvailable = false;
+    for (const metric of unavailable.dashboard.metrics) {
+      metric.goalMonth = 0;
+      metric.goalWeek = 0;
+      metric.goalToday = 0;
+    }
+    for (const participant of unavailable.ranking.participants) {
+      participant.roulette = 0;
+      participant.rouletteSaturday = 0;
+      participant.rouletteSunday = 0;
+    }
+    expect(salesforceIngestionSchema.safeParse(unavailable).success).toBe(true);
+
+    unavailable.dashboard.metrics[0]!.goalMonth = 1;
+    unavailable.ranking.participants[0]!.roulette = 1;
+    expect(salesforceIngestionSchema.safeParse(unavailable).success).toBe(false);
   });
 });
 

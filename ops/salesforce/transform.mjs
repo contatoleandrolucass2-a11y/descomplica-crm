@@ -311,6 +311,7 @@ function buildRanking(reports, referenceDate, generatedAt) {
     generatedAt,
     timezone: "America/Sao_Paulo",
     source: "Salesforce Analytics Reports API v61 via n8n",
+    rouletteAvailable: false,
     participants,
   };
 }
@@ -400,7 +401,7 @@ export function buildSalesforceSnapshot({
     topDevelopments(reports.opportunities, viewKey, imobAccounts),
   );
   const payload = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     requestId,
     workflow: "salesforce_n8n_v1",
     dashboard: {
@@ -409,6 +410,7 @@ export function buildSalesforceSnapshot({
       generatedAt,
       timezone: "America/Sao_Paulo",
       source: "Salesforce Analytics Reports API v61 via n8n",
+      goalsAvailable: Boolean(goals),
       views,
       metrics,
       topDevelopments: top,

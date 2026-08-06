@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema usa PostgreSQL 17 no Supabase local. Existem onze migrations versionadas. A validação local encontrou 18 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 14 páginas. Nenhum dado comercial é seedado.
+O schema usa PostgreSQL 17 no Supabase local. Existem doze migrations versionadas. A validação local encontrou 18 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 14 páginas. Nenhum dado comercial é seedado.
 
 ## Migrations
 
@@ -17,6 +17,7 @@ O schema usa PostgreSQL 17 no Supabase local. Existem onze migrations versionada
 9. `20260804050720_ranking_read_model.sql`: snapshots e atividades agregadas do ranking por corretor/período.
 10. `20260804052500_secure_salesforce_ingestion.sql`: ingestão transacional e refresh Salesforce auditado.
 11. `20260804191713_normalize_new_project_grants.sql`: matriz explícita de grants compatível com os defaults fail-closed dos novos projetos Supabase.
+12. `20260806222732_salesforce_source_availability.sql`: flags fail-closed para metas/roleta e wrapper privado do contrato de ingestão v2.
 
 ## Desenvolvimento local
 
@@ -33,7 +34,7 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` executa 177 testes pgTAP: 26 do catálogo/autorização, 26 do dashboard, 25 das metas, 26 dos pontos, 25 do ranking, 34 da ingestão e 15 da matriz global de grants. A cobertura verifica schema, grants, policies, constraints, provisionamento, usuários inativos, overrides, cálculos e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
+`supabase test db` executa 190 testes pgTAP: 26 do catálogo/autorização, 28 do dashboard, 25 das metas, 26 dos pontos, 27 do ranking, 43 da ingestão e 15 da matriz global de grants. A cobertura verifica schema, grants, policies, constraints, disponibilidade de fontes, provisionamento, usuários inativos, overrides, cálculos e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
 
 ## RLS e grants
 

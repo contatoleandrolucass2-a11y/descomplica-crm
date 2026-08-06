@@ -17,12 +17,17 @@ function runValidator(payload) {
 
 function validPayload() {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     dashboard: {
+      goalsAvailable: false,
       views: [{}, {}, {}],
-      metrics: Array.from({ length: 15 }, () => ({})),
+      metrics: Array.from({ length: 15 }, () => ({
+        goalMonth: 0,
+        goalWeek: 0,
+        goalToday: 0,
+      })),
     },
-    ranking: { participants: [] },
+    ranking: { rouletteAvailable: false, participants: [] },
   };
 }
 
@@ -47,4 +52,18 @@ test("candidate rejects source PII fields", () => {
   const payload = validPayload();
   payload.source = { cpf: "not-a-real-value" };
   assert.throws(() => runValidator(payload), /forbidden source field/);
+});
+
+test("candidate rejects unavailable sources carrying commercial values", () => {
+  const goals = validPayload();
+  goals.dashboard.metrics[0].goalMonth = 1;
+  assert.throws(() => runValidator(goals), /unavailable goals must be zero/);
+
+  const roulette = validPayload();
+  roulette.ranking.participants.push({
+    roulette: 1,
+    rouletteSaturday: 0,
+    rouletteSunday: 0,
+  });
+  assert.throws(() => runValidator(roulette), /unavailable roulette must be zero/);
 });

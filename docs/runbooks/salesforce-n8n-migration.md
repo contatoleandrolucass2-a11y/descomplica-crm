@@ -65,10 +65,12 @@ são projetados, transportados ou persistidos.
   passagem por pasta e venda;
 - corretor ativo usa Contact ID estável; associação com atividades ocorre por
   nome normalizado e falha de gerente fica explícita;
-- roleta não existe nos sete relatórios e permanece marcada como fonte ausente;
-- metas não são calculadas pelo exportador. A candidata usa zero somente como
-  marcador de configuração ausente e não deve ser persistida até a fonte oficial
-  de metas ser confirmada.
+- roleta não existe nos sete relatórios. O contrato v2 envia
+  `rouletteAvailable=false`, mantém zero apenas como armazenamento técnico,
+  exclui roleta da pontuação e mostra “Dados indisponíveis” na interface;
+- metas não são calculadas pelo exportador. O contrato v2 envia
+  `goalsAvailable=false`; o dashboard mostra “Fonte não configurada” e não
+  apresenta progresso, atingimento ou gap como indicador comercial.
 
 ## Primeira coleta candidata
 
@@ -98,14 +100,19 @@ criar identidades sintéticas.
 ## Gates antes da primeira escrita
 
 1. manter a candidata inativa e validar o snapshot pelo schema Zod;
-2. obter metas do CRM novo ou aprovar explicitamente o estado sem meta;
-3. aceitar que roleta fique indisponível ou adicionar uma fonte autorizada;
+2. manter `goalsAvailable=false` até existir fonte oficial de metas;
+3. manter `rouletteAvailable=false` até existir fonte oficial de roleta;
 4. fazer backup protegido do Supabase novo e validar leitura/checksum;
 5. gerar Bearers exclusivos para origem→n8n e n8n→CRM;
 6. habilitar somente `SALESFORCE_INGEST_ENABLED` e manter refresh desativado;
 7. enviar uma única requisição e reconciliar contagens, RLS, Auth e auditoria;
 8. repetir exatamente o mesmo `requestId` e confirmar resposta idempotente;
 9. somente depois ativar uma agenda de 30 minutos com lock não bloqueante.
+
+O estado indisponível de metas e roleta foi autorizado para a primeira carga em
+6 de agosto de 2026. Ele não autoriza inventar metas, percentuais ou eventos de
+roleta. Antes da escrita, o PR deve ter todos os checks do GitHub Actions verdes
+e a migration v2 deve passar por dry-run/auditoria e ser aplicada isoladamente.
 
 ## Rollback
 

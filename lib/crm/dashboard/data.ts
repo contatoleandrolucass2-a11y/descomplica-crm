@@ -21,6 +21,7 @@ const snapshotRowSchema = z.object({
   generated_at: z.string(),
   timezone: z.string(),
   source: z.string(),
+  goals_available: z.boolean(),
 });
 
 const viewRowSchema = z.object({
@@ -82,6 +83,7 @@ export interface DashboardReadModel {
   generatedAt: string;
   timezone: string;
   source: string;
+  goalsAvailable: boolean;
   salesValue: Record<DashboardViewKey, { month: number; week: number; today: number }>;
   metrics: Record<DashboardViewKey, Record<DashboardStageKey, DashboardMetric>>;
   topDevelopments: Record<DashboardViewKey, Array<{ rank: number; name: string; total: number }>>;
@@ -103,7 +105,7 @@ export async function loadDashboardReadModel(): Promise<DashboardLoadResult> {
   const supabase = await createClient();
   const snapshotResult = await supabase
     .from("crm_dashboard_snapshots")
-    .select("id,snapshot_key,reference_date,generated_at,timezone,source")
+    .select("id,snapshot_key,reference_date,generated_at,timezone,source,goals_available")
     .eq("snapshot_key", "global")
     .maybeSingle();
 
@@ -197,6 +199,7 @@ export async function loadDashboardReadModel(): Promise<DashboardLoadResult> {
       generatedAt: snapshot.generated_at,
       timezone: snapshot.timezone,
       source: snapshot.source,
+      goalsAvailable: snapshot.goals_available,
       salesValue,
       metrics,
       topDevelopments,

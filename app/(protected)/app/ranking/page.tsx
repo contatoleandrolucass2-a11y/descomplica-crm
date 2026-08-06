@@ -12,6 +12,7 @@ import {
 } from "@/lib/crm/ranking/catalog";
 import { loadRankingReadModel } from "@/lib/crm/ranking/data";
 import { buildRanking } from "@/lib/crm/ranking/presentation";
+import { DATA_UNAVAILABLE_LABEL } from "@/lib/crm/source-availability";
 
 export const metadata = { title: "Ranking" };
 
@@ -62,7 +63,13 @@ export default async function RankingPage({
     );
   }
 
-  const ranking = buildRanking(result.activities, period, scope, result.weights.weights);
+  const ranking = buildRanking(
+    result.activities,
+    period,
+    scope,
+    result.weights.weights,
+    result.rouletteAvailable,
+  );
   const totalPoints = ranking.reduce((sum, line) => sum + line.total, 0);
   const averagePoints = ranking.length ? totalPoints / ranking.length : 0;
   const averageConversion = ranking.length
@@ -133,6 +140,15 @@ export default async function RankingPage({
             </nav>
           </div>
         </section>
+
+        {!result.rouletteAvailable ? (
+          <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+            <strong className="block">Roleta: {DATA_UNAVAILABLE_LABEL}</strong>
+            <span className="mt-1 block">
+              A roleta não possui fonte oficial e não participa da pontuação deste snapshot.
+            </span>
+          </section>
+        ) : null}
 
         {ranking.length === 0 ? (
           <section className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
@@ -246,7 +262,9 @@ export default async function RankingPage({
                   <div key={metric.key} className="rounded-xl bg-slate-50 p-3">
                     <dt className="text-xs text-slate-500">{metric.label}</dt>
                     <dd className="mt-1 font-semibold text-slate-950">
-                      {result.weights.weights[metric.key]} pts
+                      {!result.rouletteAvailable && metric.key.startsWith("roulette")
+                        ? DATA_UNAVAILABLE_LABEL
+                        : `${result.weights.weights[metric.key]} pts`}
                     </dd>
                   </div>
                 ))}

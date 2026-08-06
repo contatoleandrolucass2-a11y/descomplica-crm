@@ -72,4 +72,17 @@ describe("ranking presentation", () => {
     expect(today?.schedule).toBe(1);
     expect(today?.total).toBe(16);
   });
+
+  it("excludes roulette from scoring when its source is unavailable", () => {
+    const [available] = buildRanking(activities, "month", "brokers", DEFAULT_POINT_WEIGHTS, true);
+    const [unavailable] = buildRanking(
+      activities,
+      "month",
+      "brokers",
+      DEFAULT_POINT_WEIGHTS,
+      false,
+    );
+    expect(unavailable?.baseScore).toBeLessThan(available?.baseScore ?? 0);
+    expect(unavailable?.roulette).toBe(2);
+  });
 });

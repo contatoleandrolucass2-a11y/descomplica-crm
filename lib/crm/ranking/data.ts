@@ -13,6 +13,7 @@ const snapshotSchema = z.object({
   generated_at: z.string(),
   timezone: z.string().min(1),
   source: z.string().min(1),
+  roulette_available: z.boolean(),
 });
 const participantSchema = z.object({
   period_key: z.string(),
@@ -41,6 +42,7 @@ export type RankingLoadResult =
       generatedAt: string;
       timezone: string;
       source: string;
+      rouletteAvailable: boolean;
       activities: RankingActivity[];
       weights: Awaited<ReturnType<typeof loadPointSettings>> & { status: "ready" };
     };
@@ -49,7 +51,7 @@ export async function loadRankingReadModel(): Promise<RankingLoadResult> {
   const supabase = await createClient();
   const snapshotResult = await supabase
     .from("crm_ranking_snapshots")
-    .select("id,reference_date,generated_at,timezone,source")
+    .select("id,reference_date,generated_at,timezone,source,roulette_available")
     .eq("snapshot_key", "global")
     .maybeSingle();
 
@@ -94,6 +96,7 @@ export async function loadRankingReadModel(): Promise<RankingLoadResult> {
     generatedAt: snapshot.generated_at,
     timezone: snapshot.timezone,
     source: snapshot.source,
+    rouletteAvailable: snapshot.roulette_available,
     activities,
     weights: pointSettings,
   };

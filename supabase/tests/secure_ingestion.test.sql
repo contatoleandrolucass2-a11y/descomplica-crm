@@ -1,6 +1,6 @@
 begin;
 
-select plan(34);
+select plan(43);
 
 select has_table('public', 'crm_ingestion_runs', 'ingestion runs table exists');
 select ok(
@@ -59,6 +59,19 @@ select ok(
   and not has_function_privilege('authenticated', 'public.ingest_crm_salesforce_snapshot(jsonb)', 'execute')
   and not has_function_privilege('anon', 'public.ingest_crm_salesforce_snapshot(jsonb)', 'execute'),
   'machine ingestion is service-role only'
+);
+select ok(
+  not has_function_privilege(
+    'service_role',
+    'private.ingest_crm_salesforce_snapshot_v1_internal(jsonb)',
+    'execute'
+  )
+  and not has_function_privilege(
+    'authenticated',
+    'private.ingest_crm_salesforce_snapshot_v1_internal(jsonb)',
+    'execute'
+  ),
+  'legacy ingestion primitive is not externally executable'
 );
 select is((select count(*) from public.crm_ingestion_runs), 0::bigint, 'migration seeds no runs');
 
@@ -160,7 +173,7 @@ returns jsonb
 language sql
 as $$
   select jsonb_build_object(
-    'schemaVersion', 1,
+    'schemaVersion', 2,
     'requestId', p_request_id,
     'workflow', 'salesforce_daily',
     'dashboard', jsonb_build_object(
@@ -169,6 +182,7 @@ as $$
       'generatedAt', p_generated_at,
       'timezone', 'America/Sao_Paulo',
       'source', 'pgTAP Salesforce fixture',
+      'goalsAvailable', true,
       'views', (
         select jsonb_agg(jsonb_build_object(
           'viewKey', view_key,
@@ -213,6 +227,7 @@ as $$
       'generatedAt', p_generated_at,
       'timezone', 'America/Sao_Paulo',
       'source', 'pgTAP Salesforce fixture',
+      'rouletteAvailable', true,
       'participants', jsonb_build_array(jsonb_build_object(
         'periodKey', 'month',
         'brokerKey', 'ana-silva',
@@ -230,6 +245,50 @@ as $$
   );
 $$;
 
+create function pg_temp.unavailable_source_payload(p_request_id text)
+returns jsonb
+language plpgsql
+as $$
+declare
+  v_payload jsonb := pg_temp.valid_ingestion_payload(
+    p_request_id,
+    '2026-08-04T07:00:00Z'
+  );
+begin
+  v_payload := jsonb_set(v_payload, '{dashboard,goalsAvailable}', 'false'::jsonb);
+  v_payload := jsonb_set(
+    v_payload,
+    '{dashboard,metrics}',
+    (
+      select jsonb_agg(
+        metric || jsonb_build_object(
+          'goalMonth', 0,
+          'goalWeek', 0,
+          'goalToday', 0
+        )
+      )
+      from jsonb_array_elements(v_payload#>'{dashboard,metrics}') metric
+    )
+  );
+  v_payload := jsonb_set(v_payload, '{ranking,rouletteAvailable}', 'false'::jsonb);
+  v_payload := jsonb_set(
+    v_payload,
+    '{ranking,participants}',
+    (
+      select jsonb_agg(
+        participant || jsonb_build_object(
+          'roulette', 0,
+          'rouletteSaturday', 0,
+          'rouletteSunday', 0
+        )
+      )
+      from jsonb_array_elements(v_payload#>'{ranking,participants}') participant
+    )
+  );
+  return v_payload;
+end;
+$$;
+
 set local role service_role;
 select is(
   (public.ingest_crm_salesforce_snapshot(
@@ -244,6 +303,16 @@ select is((select count(*) from public.crm_dashboard_views), 3::bigint, 'ingesti
 select is((select count(*) from public.crm_dashboard_metrics), 15::bigint, 'ingestion stores complete metrics');
 select is((select count(*) from public.crm_ranking_snapshots), 1::bigint, 'ingestion creates ranking snapshot');
 select is((select count(*) from public.crm_ranking_participants), 1::bigint, 'ingestion stores ranking participant');
+select is(
+  (select goals_available from public.crm_dashboard_snapshots where snapshot_key = 'global'),
+  true,
+  'ingestion persists that goals came from an authorized source'
+);
+select is(
+  (select roulette_available from public.crm_ranking_snapshots where snapshot_key = 'global'),
+  true,
+  'ingestion persists that roulette came from an authorized source'
+);
 select is(
   (select record_count from public.crm_ingestion_runs where request_key = 'ingest:60000000-0000-4000-8000-000000000010'),
   16,
@@ -264,6 +333,65 @@ select is(
   'idempotent replay does not create another run'
 );
 set local role service_role;
+select throws_ok(
+  $$select public.ingest_crm_salesforce_snapshot(
+    jsonb_set(
+      pg_temp.valid_ingestion_payload('60000000-0000-4000-8000-000000000099'),
+      '{schemaVersion}',
+      '1'::jsonb
+    )
+  )$$,
+  '22023',
+  'invalid ingestion availability',
+  'legacy contract cannot bypass source availability'
+);
+select is(
+  (public.ingest_crm_salesforce_snapshot(
+    pg_temp.unavailable_source_payload('60000000-0000-4000-8000-000000000013')
+  )->>'status'),
+  'succeeded',
+  'snapshot with unavailable sources is accepted explicitly'
+);
+reset role;
+select ok(
+  not (select goals_available from public.crm_dashboard_snapshots where snapshot_key = 'global')
+  and not (select roulette_available from public.crm_ranking_snapshots where snapshot_key = 'global'),
+  'unavailable source flags are persisted fail-closed'
+);
+select ok(
+  not exists (
+    select 1 from public.crm_dashboard_metrics
+    where goal_month <> 0 or goal_week <> 0 or goal_today <> 0
+  )
+  and not exists (
+    select 1 from public.crm_ranking_participants
+    where roulette <> 0 or roulette_saturday <> 0 or roulette_sunday <> 0
+  ),
+  'unavailable source values remain technical zero only'
+);
+set local role service_role;
+select is(
+  (public.ingest_crm_salesforce_snapshot(
+    jsonb_set(
+      jsonb_set(
+        pg_temp.unavailable_source_payload('60000000-0000-4000-8000-000000000013'),
+        '{dashboard,goalsAvailable}',
+        'true'::jsonb
+      ),
+      '{ranking,rouletteAvailable}',
+      'true'::jsonb
+    )
+  )->>'idempotent'),
+  'true',
+  'replay remains idempotent even if availability flags are changed'
+);
+reset role;
+select ok(
+  not (select goals_available from public.crm_dashboard_snapshots where snapshot_key = 'global')
+  and not (select roulette_available from public.crm_ranking_snapshots where snapshot_key = 'global'),
+  'idempotent replay cannot mutate source availability'
+);
+set local role service_role;
 select is(
   (public.ingest_crm_salesforce_snapshot(
     pg_temp.valid_ingestion_payload(
@@ -277,7 +405,7 @@ select is(
 reset role;
 select is(
   (select generated_at::text from public.crm_dashboard_snapshots where snapshot_key = 'global'),
-  '2026-08-04 06:00:00+00',
+  '2026-08-04 07:00:00+00',
   'stale request cannot overwrite the current snapshot'
 );
 select is(

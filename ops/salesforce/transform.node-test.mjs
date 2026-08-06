@@ -132,4 +132,24 @@ test("is deterministic for the same request and accepts goals only from input", 
     { month: 10, week: 3, today: 1 },
   );
   assert.equal(first.diagnostics.goals, "provided");
+  assert.equal(first.payload.dashboard.goalsAvailable, true);
+});
+
+test("marks missing goals and roulette as unavailable instead of commercial zero", () => {
+  const result = buildSalesforceSnapshot(fixture());
+  assert.equal(result.payload.dashboard.goalsAvailable, false);
+  assert.equal(result.payload.ranking.rouletteAvailable, false);
+  assert.ok(
+    result.payload.dashboard.metrics.every(
+      (metric) => metric.goalMonth === 0 && metric.goalWeek === 0 && metric.goalToday === 0,
+    ),
+  );
+  assert.ok(
+    result.payload.ranking.participants.every(
+      (participant) =>
+        participant.roulette === 0 &&
+        participant.rouletteSaturday === 0 &&
+        participant.rouletteSunday === 0,
+    ),
+  );
 });
