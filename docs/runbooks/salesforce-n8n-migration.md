@@ -12,6 +12,14 @@ O workflow ativo `Funil de Vendas` recebeu em 6 de agosto uma alteração extern
 de estoque que grava e remove linhas no Supabase antigo. Essa alteração não faz
 parte desta migração, não foi modificada e não deve ser copiada para a candidata.
 
+O `Atualizar Funil Salesforce` responde em cerca de 200 ms porque apenas aceita
+o disparo assíncrono do exportador. Por isso suas execuções `success` não provam
+o processamento completo. Após a inclusão externa de estoque, o exportador
+passou a expirar aguardando o download de interface e não alcança o envio final;
+o último processamento completo observado no transformador foi às 16:04 UTC de
+6 de agosto. A candidata usa API para todos os sete relatórios e valida o fim da
+coleta antes de produzir o snapshot.
+
 ## Fonte autorizada
 
 | Chave         | Report ID            | Identidade usada na transformação                  |

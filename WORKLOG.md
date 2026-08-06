@@ -375,6 +375,10 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   copiados para backups root-only com SHA-256 antes de qualquer criação.
 - Uma alteração externa de estoque no workflow ativo foi identificada e
   preservada sem mistura com a migração do CRM novo.
+- O `success` do coordenador foi classificado corretamente como aceite
+  assíncrono, não sucesso fim a fim. O ramo externo de estoque passou a expirar
+  antes do agendamento/webhook; o transformador ativo não recebe execução
+  completa desde 16:04 UTC.
 - A resposta bruta da Analytics Reports API confirmou `recordId` estável para
   Opportunity, avaliação de crédito, Contact e Account. O XLSX legado descartava
   essa informação; a candidata agora a usa somente em memória.
