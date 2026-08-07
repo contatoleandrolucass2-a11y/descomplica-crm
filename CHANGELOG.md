@@ -19,6 +19,8 @@
   workflow n8n inativo/fail-closed para validação antes da primeira ingestão.
 - Distingue metas e roleta sem fonte oficial de resultados comerciais iguais a
   zero, persiste flags fail-closed e mostra estados neutros na interface.
+- Versiona o schema remoto do ranking Qlik de imobiliárias sem seed ou perda de
+  dados e remove seus grants diretos não auditados de Data API/service role.
 
 Todas as alterações relevantes deste projeto serão registradas aqui.
 

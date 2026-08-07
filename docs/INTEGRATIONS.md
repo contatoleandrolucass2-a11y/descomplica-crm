@@ -34,6 +34,12 @@ dedicadas e passar pela reconciliação descrita em
 `docs/runbooks/salesforce-n8n-migration.md`. Detalhes do contrato ficam em
 `docs/INGESTION.md`.
 
+## Qlik / ranking de imobiliárias
+
+O projeto remoto recebeu diretamente duas tabelas para histórico de ranking de imobiliárias: `crm_imob_ranking_runs` e `crm_imob_ranking_entries`. Os metadados apontam para duas cargas Qlik concluídas em 6 de agosto de 2026, uma delas identificada como exportação histórica do Qlik Cloud. Não existe caller, função, view, trigger ou rota correspondente no repositório.
+
+A migration de reconciliação versiona o DDL e a página `crm.partnerships`, preserva as linhas existentes e revoga os grants diretos de `anon`, `authenticated` e `service_role`. Nenhuma automação substituta é criada. Qualquer retomada dessa integração precisa de contrato de leitura/escrita próprio, RPC mínima, testes e autorização separada.
+
 ## APIs internas do CRM
 
 - `goals`: usava publishable/anon key sem validar sessão/permissão.

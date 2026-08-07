@@ -1,6 +1,6 @@
 begin;
 
-select plan(26);
+select plan(27);
 
 select has_table('public', 'app_pages', 'app_pages exists');
 
@@ -17,8 +17,28 @@ select is(
 
 select is(
   (select count(*) from public.app_pages),
-  14::bigint,
+  15::bigint,
   'all CRM and initial admin pages are seeded'
+);
+
+select is(
+  (
+    select concat_ws(
+      '|',
+      path,
+      name,
+      description,
+      section,
+      permission_key,
+      sort_order::text,
+      is_navigation::text,
+      is_active::text
+    )
+    from public.app_pages
+    where key = 'crm.partnerships'
+  ),
+  '/app/canal-de-parcerias|Canal de Parcerias|Ranking das imobiliárias parceiras|crm|crm.ranking.view|65|true|true',
+  'the remote partnership catalog identity is versioned explicitly'
 );
 
 select has_function(
@@ -119,7 +139,7 @@ set local role authenticated;
 
 select is(
   (select count(*) from public.app_pages),
-  7::bigint,
+  8::bigint,
   'regular user sees only authorized CRM pages'
 );
 
@@ -177,7 +197,7 @@ select lives_ok(
 
 select is(
   (select count(*) from public.list_app_pages_for_management()),
-  14::bigint,
+  15::bigint,
   'page manager RPC returns active and inactive catalog entries'
 );
 
@@ -187,7 +207,7 @@ set local role authenticated;
 
 select is(
   (select count(*) from public.app_pages),
-  6::bigint,
+  7::bigint,
   'regular user does not see an inactive page'
 );
 

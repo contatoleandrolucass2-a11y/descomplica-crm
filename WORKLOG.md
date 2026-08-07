@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-08-07 — reconciliação do drift Supabase/Qlik
+
+- Auditoria somente leitura comparou o projeto `descomplica-crm-production` com um reset local das doze migrations então versionadas. Histórico de migrations, 18 tabelas comuns, funções, sequências, schemas e default ACLs coincidiram por nome e hash.
+- O drift da aplicação ficou restrito a duas tabelas Qlik com RLS, duas policies, 339 registros associados a dois runs concluídos e a página `crm.partnerships`. `rls_auto_enable`/`ensure_rls` foram classificados como objetos opcionais gerenciados pela plataforma e já permaneciam sem execução por Data API roles.
+- Nenhum caller, view, função, trigger ou rota para o ranking de imobiliárias existe no repositório. Os grants remotos diretos de leitura para `anon`/`authenticated` e escrita/leitura para `service_role` não possuíam contrato versionado.
+- A migration corretiva preserva tabelas, linhas e RLS; versiona o DDL e a identidade do catálogo; remove `anon` das policies; recompõe as allowlists de grants; mantém default privileges do papel de migration fechados.
+- A migration não foi aplicada remotamente. Salesforce, segredos, produção e automações permaneceram inalterados.
+
 ## 2026-08-06 — disponibilidade explícita de metas e roleta
 
 - A primeira carga real foi autorizada sem fonte oficial para metas ou roleta,
