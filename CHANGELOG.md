@@ -21,6 +21,9 @@
   zero, persiste flags fail-closed e mostra estados neutros na interface.
 - Versiona o schema remoto do ranking Qlik de imobiliárias sem seed ou perda de
   dados e remove seus grants diretos não auditados de Data API/service role.
+- Atualiza a baseline Salesforce após reconciliação somente leitura comprovar
+  385 oportunidades criadas depois do snapshot e uma alteração legítima no
+  status da base de corretores, sem escrita no Supabase ou ativação do n8n.
 
 Todas as alterações relevantes deste projeto serão registradas aqui.
 

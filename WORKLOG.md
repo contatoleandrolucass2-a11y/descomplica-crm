@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-08-07 — reconciliação da baseline Salesforce
+
+- A coleta validada de 06/08 foi confrontada com nova execução do mesmo
+  exportador, relatório, filtro e usuário. A comparação ocorreu na VPS da fonte;
+  somente contagens e HMACs saíram do ambiente legado.
+- As 385 oportunidades adicionais foram criadas e modificadas depois de
+  `2026-08-06T21:38:49.821Z`. Não houve oportunidade removida, renomeada ou
+  duplicada. A baseline passou de 11.914 para 12.299 oportunidades.
+- Doze criações registradas em 07/08 UTC pertencem a 06/08 em
+  `America/Sao_Paulo`; o filtro Salesforce usa o fuso do executor e está
+  correto. Escopo organizacional e definição do relatório não mudaram.
+- Um contato ainda existente teve o status alterado na fonte e deixou o
+  relatório de corretores. A base passou de 27 para 26 e o ranking de 108 para
+  104 participantes, removendo os quatro períodos do mesmo corretor.
+- Nenhuma correção de código foi necessária. Supabase, n8n ativo e produção
+  permaneceram sem escrita; as flags Salesforce continuam desativadas.
+
 ## 2026-08-07 — reconciliação do drift Supabase/Qlik
 
 - Auditoria somente leitura comparou o projeto `descomplica-crm-production` com um reset local das doze migrations então versionadas. Histórico de migrations, 18 tabelas comuns, funções, sequências, schemas e default ACLs coincidiram por nome e hash.

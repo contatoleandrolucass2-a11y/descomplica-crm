@@ -97,6 +97,31 @@ ativos ainda não possuem gerente resolvido e 195 nomes históricos/externos das
 atividades não pertencem à base ativa atual; ambos permanecem diagnósticos, sem
 criar identidades sintéticas.
 
+## Baseline vigente após reconciliação
+
+A auditoria somente leitura de 7 de agosto confirmou que 385 oportunidades
+foram criadas na fonte depois do snapshot anterior, sem remoção ou duplicidade.
+O relatório manteve escopo, definição e filtro; os doze registros criados em
+07/08 UTC pertencem a 06/08 no fuso `America/Sao_Paulo`. Um corretor teve o
+status alterado na fonte e deixou legitimamente o relatório, removendo seus
+quatro períodos do ranking.
+
+| Relatório     | Linhas vigentes |
+| ------------- | --------------: |
+| corretores    |              26 |
+| contas Imob   |               4 |
+| oportunidades |          12.299 |
+| agendamentos  |             816 |
+| visitas       |             352 |
+| pastas        |             465 |
+| vendas        |             595 |
+
+O payload reconciliado passa a ter 104 participantes. Permanecem 63 visitas
+sem agendamento, 19 pastas e 18 vendas fora do recorte, 122 pastas aprovadas,
+quatro corretores sem gerente resolvido e 195 nomes de atividade fora da base
+ativa. A evidência detalhada sem PII está em
+[`docs/SALESFORCE_BASELINE.md`](../SALESFORCE_BASELINE.md).
+
 ## Gates antes da primeira escrita
 
 1. aplicar isoladamente a migration de reconciliação do drift Qlik e obter 229/229 ou mais testes pgTAP remotos aprovados;
