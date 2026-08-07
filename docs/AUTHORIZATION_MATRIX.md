@@ -38,6 +38,7 @@ O menu consulta somente páginas ativas, marcadas para navegação e permitidas 
 - `get_crm_sync_status`: retorna somente timestamps/estados seguros para leitores do dashboard.
 - `begin_crm_salesforce_refresh` e `finish_crm_salesforce_refresh`: exigem sessão ativa e `crm.salesforce.refresh`, aplicam lock/cooldown e auditam.
 - `ingest_crm_salesforce_snapshot`: disponível somente ao `service_role` do Route Handler M2M; nunca a `authenticated` ou `anon`.
+- `ingest_crm_imob_ranking_snapshot`: disponível somente ao `service_role` do workflow Qlik; nunca concede acesso direto às tabelas.
 
 Nenhuma dessas tabelas aceita escrita direta do papel `authenticated`. A RLS de `app_pages` nunca concede o bypass administrativo usado pela tela de gestão; o catálogo completo sai exclusivamente pela RPC protegida. O navegador chama somente RPCs `security definer` que revalidam sessão, perfil ativo, permissão e hierarquia no banco.
 
@@ -66,10 +67,11 @@ ou `MAINTAIN`. As mutações passam exclusivamente pelas RPCs listadas acima.
 os helpers `get_role_level`, `can_assign_role` e `can_grant_permission` não são
 RPCs públicas da aplicação.
 
-`service_role` não recebe acesso direto a tabelas ou sequências. O único grant
-comprovado é `EXECUTE` em `ingest_crm_salesforce_snapshot`, chamada pelo Route
-Handler server-only; a função executa as escritas como uma transação
-`SECURITY DEFINER`. `bootstrap_master_user` permanece exclusiva do proprietário
+`service_role` não recebe acesso direto a tabelas ou sequências. Os únicos grants
+comprovados são `EXECUTE` em `ingest_crm_salesforce_snapshot`, chamada pelo Route
+Handler server-only, e `ingest_crm_imob_ranking_snapshot`, chamada pelo workflow
+Qlik protegido; ambas executam as escritas como transações `SECURITY DEFINER`.
+`bootstrap_master_user` permanece exclusiva do proprietário
 `postgres`, conforme o runbook operacional.
 
-As tabelas externas `crm_imob_ranking_runs` e `crm_imob_ranking_entries` não fazem parte da allowlist do navegador nem do `service_role`. A integração Qlik observada remotamente usava grants diretos não versionados; a migration corretiva os revoga e não cria uma RPC substituta sem contrato e caller auditados.
+As tabelas externas `crm_imob_ranking_runs` e `crm_imob_ranking_entries` não fazem parte da allowlist do navegador nem do `service_role`. A integração Qlik usa exclusivamente a RPC mínima versionada; conceder acesso direto para contornar uma falha operacional é proibido.
