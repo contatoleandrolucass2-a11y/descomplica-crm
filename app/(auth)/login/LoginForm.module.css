@@ -1,0 +1,338 @@
+.page {
+  min-height: 100svh;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.shell {
+  display: grid;
+  min-height: 100svh;
+  grid-template-columns: minmax(0, 1.12fr) minmax(26rem, 0.88fr);
+}
+
+.visualPanel {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: clamp(1.5rem, 3vw, 3rem);
+  background:
+    radial-gradient(circle at 16% 14%, rgb(45 212 191 / 0.13), transparent 26rem),
+    radial-gradient(circle at 86% 74%, rgb(59 130 246 / 0.2), transparent 25rem),
+    linear-gradient(145deg, #071423 0%, #0b2038 58%, #102b48 100%);
+}
+
+.visualPanel::before,
+.visualPanel::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+.visualPanel::before {
+  inset: 0;
+  background-image:
+    linear-gradient(rgb(148 163 184 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(148 163 184 / 0.045) 1px, transparent 1px);
+  background-size: 3rem 3rem;
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+}
+
+.visualPanel::after {
+  right: -8rem;
+  bottom: -8rem;
+  width: 24rem;
+  height: 24rem;
+  border: 1px solid rgb(45 212 191 / 0.16);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 4rem rgb(45 212 191 / 0.035),
+    0 0 0 8rem rgb(59 130 246 / 0.025);
+}
+
+.brand,
+.visualCopy {
+  position: relative;
+  z-index: 2;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #f8fafc;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.brandMark {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid rgb(94 234 212 / 0.45);
+  border-radius: 0.75rem;
+  background: linear-gradient(145deg, rgb(45 212 191 / 0.2), rgb(37 99 235 / 0.2));
+  color: #5eead4;
+  box-shadow: 0 0 1.5rem rgb(45 212 191 / 0.14);
+  font-size: 1rem;
+}
+
+.brainWrap {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: min(88%, 46rem);
+  transform: translate(-48%, -51%);
+}
+
+.visualCopy {
+  max-width: 34rem;
+  padding-top: min(65vh, 38rem);
+  color: #e2e8f0;
+}
+
+.eyebrow {
+  margin-bottom: 0.8rem;
+  color: #5eead4;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.visualTitle {
+  max-width: 28rem;
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  font-weight: 650;
+  line-height: 1.06;
+  letter-spacing: -0.045em;
+}
+
+.visualText {
+  max-width: 29rem;
+  margin-top: 0.9rem;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.formPanel {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 5.5rem);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(14 165 233 / 0.07), transparent 22rem), #f8fafc;
+}
+
+.formPanel::before {
+  position: absolute;
+  top: clamp(2rem, 4vw, 3.25rem);
+  right: clamp(2rem, 4vw, 3.25rem);
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #14b8a6;
+  box-shadow: 0 0 0 0.4rem rgb(20 184 166 / 0.1);
+  content: "";
+}
+
+.card {
+  width: 100%;
+  max-width: 25rem;
+}
+
+.mobileBrand {
+  display: none;
+}
+
+.title {
+  margin-bottom: 0.55rem;
+  color: #0f172a;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  font-weight: 680;
+  letter-spacing: -0.045em;
+}
+
+.subtitle {
+  margin-bottom: 2.25rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.input {
+  width: 100%;
+  min-height: 3.1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 0.9);
+  padding: 0.75rem 0.95rem;
+  color: #0f172a;
+  font-size: 0.95rem;
+  outline: none;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
+}
+
+.input::placeholder {
+  color: #64748b;
+}
+
+.input:hover {
+  border-color: #94a3b8;
+}
+
+.input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgb(37 99 235 / 0.12);
+}
+
+.input:disabled,
+.submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.error {
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  background: #fef2f2;
+  padding: 0.7rem 0.85rem;
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+.submit {
+  min-height: 3.15rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, #172554, #1d4ed8);
+  padding: 0.75rem 1rem;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 650;
+  box-shadow: 0 0.75rem 1.8rem rgb(29 78 216 / 0.2);
+}
+
+.submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  transform: translateY(-1px);
+}
+
+.register {
+  margin-top: 2rem;
+  color: #64748b;
+  text-align: center;
+  font-size: 0.88rem;
+}
+
+.registerLink {
+  color: #1e3a8a;
+  font-weight: 650;
+}
+
+.registerLink:hover {
+  text-decoration: underline;
+}
+
+:global(:root[data-theme="dark"]) .input {
+  border-color: #94a3b8;
+  background: rgb(255 255 255 / 0.96);
+  color: #0f172a;
+}
+
+@media (max-width: 880px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .visualPanel {
+    min-height: 19rem;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .brand {
+    font-size: 0.72rem;
+  }
+
+  .brainWrap {
+    top: 52%;
+    left: 53%;
+    width: min(78vw, 27rem);
+    transform: translate(-50%, -51%);
+  }
+
+  .visualCopy {
+    display: none;
+  }
+
+  .formPanel {
+    align-items: flex-start;
+    padding: 2.5rem 1.5rem 3rem;
+  }
+
+  .formPanel::before {
+    top: 1.5rem;
+    right: 1.75rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .visualPanel {
+    min-height: 12.75rem;
+  }
+
+  .brand {
+    position: relative;
+    z-index: 3;
+  }
+
+  .brandMark {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .brainWrap {
+    top: 54%;
+    left: 59%;
+    width: 17rem;
+  }
+
+  .formPanel {
+    padding: 2.25rem 1.25rem 2.5rem;
+  }
+
+  .subtitle {
+    margin-bottom: 1.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit:hover:not(:disabled) {
+    transform: none;
+  }
+}

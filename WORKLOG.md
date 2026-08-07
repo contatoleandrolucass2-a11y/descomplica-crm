@@ -7,6 +7,25 @@
 - Nenhuma outra dependência, arquivo de aplicação, autenticação, Supabase,
   middleware, banco, produção ou deploy foi alterado.
 
+## 2026-08-07 — experiência visual do login
+
+- A tela existente foi mantida como único ponto de autenticação, preservando
+  `loginAction`, nomes dos campos, payload, validações, erros e redirecionamentos.
+- O login ganhou layout responsivo em duas áreas e um componente visual isolado
+  com cabeça mecânica, engrenagens SVG alternadas, parallax limitado e retorno
+  suave controlado por `requestAnimationFrame`.
+- O asset local recebeu recorte transparente real; não há fundo quadriculado,
+  dependência nova, listener global ou captura de eventos do formulário.
+- Ponteiros sem hover recebem imagem estática e `prefers-reduced-motion` desliga
+  parallax, rotação e transições decorativas.
+- A candidata isolada passou por 56 checks em Chromium nos quatro tamanhos
+  pedidos, zoom de 200%, redução de movimento, touch, teclado, autofill, erro,
+  três temas, contraste e imagem atrasada. As capturas sem credenciais e o
+  resultado estruturado estão em `docs/qa/login-visual/`.
+- O QA identificou e corrigiu somente no CSS do login a borda reta inferior do
+  recorte e o contraste do placeholder/input no tema escuro. Nenhuma conexão
+  remota ou alteração de autenticação foi realizada.
+
 ## 2026-08-07 — causa raiz e contrato seguro da integração Qlik
 
 - Logs PostgreSQL registraram às `04:00:30Z` os dois `GRANT SELECT` e os dois
