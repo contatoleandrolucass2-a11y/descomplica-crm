@@ -28,3 +28,7 @@ calculados normalmente.
 As duas tabelas têm grants mínimos, RLS por `crm.ranking.view`, constraints de chaves/nomes/contagens e escrita reservada a `service_role` para a futura ingestão controlada. `ranking_read_model.test.sql` cobre schema, grants, RLS, constraints, índices, deny override e cascade.
 
 A QA autenticada validou corretores, consolidação de gerentes, troca de período e cálculo com pesos persistidos. A fixture e a conta local foram removidas por reset.
+
+## Ranking externo de imobiliárias
+
+O schema remoto também continha `crm_imob_ranking_runs` e `crm_imob_ranking_entries`, criadas fora das migrations para cargas do Qlik. Elas não substituem o read model de corretores acima e não possuem caller no código atual. O DDL foi versionado somente para eliminar drift e preservar dados; nenhum papel da Data API recebe acesso direto até existir uma implementação revisada da rota `/app/canal-de-parcerias`.

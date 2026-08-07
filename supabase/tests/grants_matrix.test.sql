@@ -1,6 +1,6 @@
 begin;
 
-select plan(15);
+select plan(18);
 
 select is(
   (
@@ -11,14 +11,78 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  18::bigint,
+  20::bigint,
   'all public tables retain RLS'
 );
 
 select is(
+  (
+    select array_agg(c.relname order by c.relname)
+    from pg_catalog.pg_class c
+    join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relkind in ('r', 'p')
+      and c.relrowsecurity
+  ),
+  array[
+    'app_pages',
+    'audit_logs',
+    'crm_dashboard_metrics',
+    'crm_dashboard_snapshots',
+    'crm_dashboard_top_developments',
+    'crm_dashboard_views',
+    'crm_funnel_goals',
+    'crm_imob_ranking_entries',
+    'crm_imob_ranking_runs',
+    'crm_ingestion_runs',
+    'crm_point_metrics',
+    'crm_point_settings',
+    'crm_ranking_participants',
+    'crm_ranking_snapshots',
+    'permissions',
+    'profiles',
+    'role_permissions',
+    'roles',
+    'user_permission_overrides',
+    'user_roles'
+  ]::name[],
+  'the complete named public table allowlist retains RLS'
+);
+
+select is(
   (select count(*) from pg_catalog.pg_policies where schemaname = 'public'),
-  17::bigint,
+  19::bigint,
   'the existing policy set is preserved'
+);
+
+select is(
+  (
+    select array_agg(tablename || ':' || policyname order by tablename, policyname)
+    from pg_catalog.pg_policies
+    where schemaname = 'public'
+  ),
+  array[
+    'app_pages:app_pages_select_authorized',
+    'audit_logs:audit_logs_select_with_audit_view',
+    'crm_dashboard_metrics:crm_dashboard_metrics_select_authorized',
+    'crm_dashboard_snapshots:crm_dashboard_snapshots_select_authorized',
+    'crm_dashboard_top_developments:crm_dashboard_top_developments_select_authorized',
+    'crm_dashboard_views:crm_dashboard_views_select_authorized',
+    'crm_funnel_goals:crm_funnel_goals_select_authorized',
+    'crm_imob_ranking_entries:crm_imob_ranking_entries_select_completed',
+    'crm_imob_ranking_runs:crm_imob_ranking_runs_select_completed',
+    'crm_point_metrics:crm_point_metrics_select_authorized',
+    'crm_point_settings:crm_point_settings_select_authorized',
+    'crm_ranking_participants:crm_ranking_participants_select_authorized',
+    'crm_ranking_snapshots:crm_ranking_snapshots_select_authorized',
+    'permissions:permissions_select_authenticated',
+    'profiles:profiles_select_self_or_users_view',
+    'role_permissions:role_permissions_select_authenticated',
+    'roles:roles_select_authenticated',
+    'user_permission_overrides:user_permission_overrides_select_self_or_permissions_view',
+    'user_roles:user_roles_select_self_or_users_view'
+  ]::text[],
+  'the complete named policy allowlist is preserved'
 );
 
 select ok(
@@ -212,6 +276,26 @@ select ok(
   and not has_function_privilege('authenticated', 'public.bootstrap_master_user(uuid)', 'EXECUTE')
   and not has_function_privilege('service_role', 'public.bootstrap_master_user(uuid)', 'EXECUTE'),
   'bootstrap_master_user is restricted to the documented postgres administrator path'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_default_acl d
+    join pg_catalog.pg_namespace n on n.oid = d.defaclnamespace
+    cross join lateral aclexplode(d.defaclacl) acl
+    where pg_catalog.pg_get_userbyid(d.defaclrole) = 'postgres'
+      and n.nspname = 'public'
+      and (
+        acl.grantee = 0
+        or pg_catalog.pg_get_userbyid(acl.grantee) in (
+          'anon',
+          'authenticated',
+          'service_role'
+        )
+      )
+  ),
+  'postgres default privileges keep future public objects fail-closed'
 );
 
 select * from finish();

@@ -14,11 +14,14 @@ As permissões administrativas respeitam hierarquia estrita: o ator somente modi
 
 ## Catálogo
 
-`public.app_pages` contém 14 registros versionados:
+`public.app_pages` contém 15 registros versionados:
 
 - dashboard, cinco etapas e ranking;
+- identidade externa do Canal de Parcerias em `/app/canal-de-parcerias`;
 - configurações, metas do funil, parcerias e pontos;
 - início administrativo, usuários e catálogo de páginas.
+
+O repositório ainda não implementa a rota do Canal de Parcerias. Versionar sua identidade preserva o estado remoto sem conceder acesso às tabelas Qlik; a rota e o contrato de leitura exigem incremento separado antes de qualquer grant.
 
 O menu consulta somente páginas ativas, marcadas para navegação e permitidas pela RLS. Ocultar um item não concede nem revoga acesso: cada rota mantém sua guarda server-side e cada operação de dados mantém grants, RLS ou RPC próprios.
 
@@ -68,3 +71,5 @@ comprovado é `EXECUTE` em `ingest_crm_salesforce_snapshot`, chamada pelo Route
 Handler server-only; a função executa as escritas como uma transação
 `SECURITY DEFINER`. `bootstrap_master_user` permanece exclusiva do proprietário
 `postgres`, conforme o runbook operacional.
+
+As tabelas externas `crm_imob_ranking_runs` e `crm_imob_ranking_entries` não fazem parte da allowlist do navegador nem do `service_role`. A integração Qlik observada remotamente usava grants diretos não versionados; a migration corretiva os revoga e não cria uma RPC substituta sem contrato e caller auditados.

@@ -99,15 +99,17 @@ criar identidades sintéticas.
 
 ## Gates antes da primeira escrita
 
-1. manter a candidata inativa e validar o snapshot pelo schema Zod;
-2. manter `goalsAvailable=false` até existir fonte oficial de metas;
-3. manter `rouletteAvailable=false` até existir fonte oficial de roleta;
-4. fazer backup protegido do Supabase novo e validar leitura/checksum;
-5. gerar Bearers exclusivos para origem→n8n e n8n→CRM;
-6. habilitar somente `SALESFORCE_INGEST_ENABLED` e manter refresh desativado;
-7. enviar uma única requisição e reconciliar contagens, RLS, Auth e auditoria;
-8. repetir exatamente o mesmo `requestId` e confirmar resposta idempotente;
-9. somente depois ativar uma agenda de 30 minutos com lock não bloqueante.
+1. aplicar isoladamente a migration de reconciliação do drift Qlik e obter 229/229 ou mais testes pgTAP remotos aprovados;
+2. confirmar que `anon` não acessa tabelas e `service_role` conserva somente a RPC Salesforce autorizada;
+3. manter a candidata inativa e validar o snapshot pelo schema Zod;
+4. manter `goalsAvailable=false` até existir fonte oficial de metas;
+5. manter `rouletteAvailable=false` até existir fonte oficial de roleta;
+6. fazer backup protegido do Supabase novo e validar leitura/checksum;
+7. gerar Bearers exclusivos para origem→n8n e n8n→CRM;
+8. habilitar somente `SALESFORCE_INGEST_ENABLED` e manter refresh desativado;
+9. enviar uma única requisição e reconciliar contagens, RLS, Auth e auditoria;
+10. repetir exatamente o mesmo `requestId` e confirmar resposta idempotente;
+11. somente depois ativar uma agenda de 30 minutos com lock não bloqueante.
 
 O estado indisponível de metas e roleta foi autorizado para a primeira carga em
 6 de agosto de 2026. Ele não autoriza inventar metas, percentuais ou eventos de
