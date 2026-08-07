@@ -244,8 +244,11 @@ select is(
     where n.nspname = 'public'
       and has_function_privilege('service_role', p.oid, 'EXECUTE')
   ),
-  array['ingest_crm_salesforce_snapshot']::name[],
-  'service_role can execute only the server-side ingestion RPC'
+  array[
+    'ingest_crm_imob_ranking_snapshot',
+    'ingest_crm_salesforce_snapshot'
+  ]::name[],
+  'service_role can execute only the audited server-side ingestion RPCs'
 );
 
 select ok(

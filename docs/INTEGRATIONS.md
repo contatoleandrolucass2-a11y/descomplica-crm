@@ -36,9 +36,11 @@ dedicadas e passar pela reconciliação descrita em
 
 ## Qlik / ranking de imobiliárias
 
-O projeto remoto recebeu diretamente duas tabelas para histórico de ranking de imobiliárias: `crm_imob_ranking_runs` e `crm_imob_ranking_entries`. Os metadados apontam para duas cargas Qlik concluídas em 6 de agosto de 2026, uma delas identificada como exportação histórica do Qlik Cloud. Não existe caller, função, view, trigger ou rota correspondente no repositório.
+O projeto remoto recebeu diretamente duas tabelas para histórico de ranking de imobiliárias: `crm_imob_ranking_runs` e `crm_imob_ranking_entries`. Os metadados apontam para duas cargas Qlik concluídas em 6 de agosto de 2026, uma delas identificada como exportação histórica do Qlik Cloud. A rota de leitura do Canal de Parcerias ainda não existe no repositório.
 
-A migration de reconciliação versiona o DDL e a página `crm.partnerships`, preserva as linhas existentes e revoga os grants diretos de `anon`, `authenticated` e `service_role`. Nenhuma automação substituta é criada. Qualquer retomada dessa integração precisa de contrato de leitura/escrita próprio, RPC mínima, testes e autorização separada.
+A investigação do drift posterior identificou o executor exato: uma sessão interativa do conector Supabase/Codex executou `GRANT SELECT` e `ALTER POLICY` por `POST /mcp`. O exportador Qlik não possui cliente PostgreSQL/Supabase nem DDL; o workflow n8n observado não contém DDL, nunca iniciou uma execução e aponta ao projeto Supabase anterior.
+
+`ingest_crm_imob_ranking_snapshot(jsonb)` passa a ser o único contrato de escrita da integração nova. A RPC valida e grava um snapshot completo em uma transação, aceita replay idêntico e rejeita reutilização conflitante do identificador. Somente `service_role` pode executá-la; nenhum papel da Data API recebe privilégio direto nas tabelas. O procedimento operacional está em `docs/runbooks/qlik-ranking-ingestion.md`.
 
 ## APIs internas do CRM
 

@@ -24,6 +24,8 @@
 - Atualiza a baseline Salesforce após reconciliação somente leitura comprovar
   385 oportunidades criadas depois do snapshot e uma alteração legítima no
   status da base de corretores, sem escrita no Supabase ou ativação do n8n.
+- Corrige o drift Qlik sem acesso direto à Data API e adiciona uma RPC
+  transacional, idempotente e exclusiva do `service_role` para o workflow n8n.
 
 Todas as alterações relevantes deste projeto serão registradas aqui.
 

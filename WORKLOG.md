@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-08-07 — causa raiz e contrato seguro da integração Qlik
+
+- Logs PostgreSQL registraram às `04:00:30Z` os dois `GRANT SELECT` e os dois
+  `ALTER POLICY` por `POST /mcp`, usando a identidade OAuth do conector
+  Supabase/Codex. A alteração ocorreu depois de tentativas anônimas negadas e
+  não veio do proprietário `postgres` de forma autônoma.
+- O exportador `qlik-ranking-api.service` e seu script foram auditados na VPS
+  de origem: eles apenas autenticam no Qlik, produzem JSON e não possuem cliente
+  PostgreSQL/Supabase, DDL, cron ou job de grants.
+- O workflow n8n `ranking imobs` está ativo, porém sem execução registrada. Ele
+  não contém DDL, grava diretamente por nodes Supabase e sua credencial aponta
+  ao projeto antigo, não a `descomplica-crm-production`.
+- A migration `20260807185611_secure_qlik_ingestion_contract.sql` revoga todos
+  os privilégios diretos nas duas tabelas, remove `anon` das policies, mantém
+  RLS/default privileges fechados e cria uma RPC transacional exclusiva do
+  `service_role` para substituir as escritas diretas.
+- Testes regressivos cobrem a matriz completa, roles das policies, preservação
+  por contagem/hash, atomicidade, conflito de replay e idempotência. Nenhuma
+  migration remota, workflow, Salesforce ou produção foi alterado nesta etapa.
+
 ## 2026-08-07 — reconciliação da baseline Salesforce
 
 - A coleta validada de 06/08 foi confrontada com nova execução do mesmo

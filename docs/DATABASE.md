@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema usa PostgreSQL 17 no Supabase local. Existem treze migrations versionadas. A validação local encontrou 20 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 15 páginas. Nenhum dado comercial é seedado.
+O schema usa PostgreSQL 17 no Supabase local. Existem quatorze migrations versionadas. A validação local encontrou 20 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 15 páginas. Nenhum dado comercial é seedado.
 
 ## Migrations
 
@@ -19,6 +19,7 @@ O schema usa PostgreSQL 17 no Supabase local. Existem treze migrations versionad
 11. `20260804191713_normalize_new_project_grants.sql`: matriz explícita de grants compatível com os defaults fail-closed dos novos projetos Supabase.
 12. `20260806222732_salesforce_source_availability.sql`: flags fail-closed para metas/roleta e wrapper privado do contrato de ingestão v2.
 13. `20260807001159_reconcile_remote_imob_schema_and_grants.sql`: versionamento aditivo das tabelas Qlik de ranking de imobiliárias, identidade remota do catálogo e reconstrução fail-closed da matriz de grants.
+14. `20260807185611_secure_qlik_ingestion_contract.sql`: correção idempotente do drift Qlik e RPC transacional exclusiva do `service_role`, sem acesso direto às tabelas.
 
 ## Desenvolvimento local
 
@@ -35,7 +36,7 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` executa 229 testes pgTAP: 27 do catálogo/autorização, 28 do dashboard, 25 das metas, 35 do schema Qlik de imobiliárias, 26 dos pontos, 27 do ranking, 43 da ingestão e 18 da matriz global de grants. A cobertura verifica nomes, schema, grants, policies, constraints, disponibilidade de fontes, provisionamento, usuários inativos, overrides, cálculos e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
+`supabase test db` executa 252 testes pgTAP: 27 do catálogo/autorização, 28 do dashboard, 25 das metas, 35 do schema Qlik de imobiliárias, 23 do contrato de ingestão Qlik, 26 dos pontos, 27 do ranking, 43 da ingestão e 18 da matriz global de grants. A cobertura verifica nomes, schema, grants, policies, constraints, disponibilidade de fontes, preservação de dados, provisionamento, usuários inativos, overrides, cálculos e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
 
 ## RLS e grants
 
@@ -58,7 +59,7 @@ consolidadas sem alterar a regra self-or-manager.
 Os grants são normalizados explicitamente para que projetos anteriores e novos
 convirjam. `PUBLIC`/`anon` não acessam objetos da aplicação; `authenticated`
 recebe apenas os `SELECT` e RPCs usados pelo SDK SSR; `service_role` recebe
-somente a RPC server-only de ingestão. Default privileges de tabelas,
+somente as RPCs server-only de ingestão Salesforce e Qlik. Default privileges de tabelas,
 sequências e funções futuras também permanecem fechados até um `GRANT`
 versionado. A matriz completa está em `docs/AUTHORIZATION_MATRIX.md`.
 
@@ -74,4 +75,4 @@ Os JSONs da tabela D1 `point_goals` foram substituídos por `crm_point_settings`
 
 O ranking usa snapshots e contagens por participante/período, sem payload JSON. Os totais são recalculados na aplicação com os pesos atuais, evitando regravar atividade quando a configuração muda. A escrita permanece reservada à futura ingestão server-side.
 
-As tabelas `crm_imob_ranking_runs` e `crm_imob_ranking_entries` preservam o histórico externo do ranking de imobiliárias originado no Qlik. Nenhum caller dessas tabelas existe no repositório atual; por isso `anon`, `authenticated` e `service_role` permanecem sem grants diretos. As policies nomeadas são mantidas com escopo `authenticated`, mas ficam inoperantes até uma futura leitura receber grant explícito e revisão própria. A auditoria do drift está em `docs/SUPABASE_REMOTE_DRIFT_AUDIT.md`.
+As tabelas `crm_imob_ranking_runs` e `crm_imob_ranking_entries` preservam o histórico externo do ranking de imobiliárias originado no Qlik. `anon`, `authenticated` e `service_role` permanecem sem grants diretos. O n8n grava somente pela RPC transacional `ingest_crm_imob_ranking_snapshot`; as policies nomeadas continuam com escopo `authenticated`, mas ficam inoperantes até uma futura leitura receber grant explícito e revisão própria. A auditoria do drift está em `docs/SUPABASE_REMOTE_DRIFT_AUDIT.md`.

@@ -13,6 +13,10 @@ Este repositório consolida o sistema de login e o Descomplica CRM. O login Next
 - Nunca versione `.env.local`, tokens, chaves secret/service role, senhas, dumps ou artefatos de usuário.
 - Toda tabela exposta deve ter grants mínimos e RLS validada. Autorização de interface nunca substitui autorização no servidor/banco.
 - Não exponha `bootstrap_master_user` por endpoint, Server Action ou cliente público.
+- Nunca conceda acesso direto de `anon`, `authenticated` ou `service_role` às
+  tabelas Qlik `crm_imob_ranking_runs` e `crm_imob_ranking_entries`. A escrita
+  automatizada usa exclusivamente a RPC versionada; qualquer mudança de ACL ou
+  policy exige migration e pgTAP.
 - Atualize `WORKLOG.md`, `CHANGELOG.md` e a documentação afetada no mesmo commit.
 - Produção, DNS, cobranças e dados remotos exigem autorização explícita.
 

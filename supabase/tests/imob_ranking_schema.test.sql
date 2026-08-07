@@ -240,14 +240,27 @@ select is(
   'partner ranking page retains its audited identity and permission'
 );
 select is(
-  (select count(*) from public.crm_imob_ranking_runs),
-  0::bigint,
-  'clean migrations do not seed partner ranking runs'
+  (
+    select coalesce(sum(runs.row_count), 0)
+    from public.crm_imob_ranking_runs runs
+    where runs.status = 'succeeded'
+  ),
+  (
+    select count(*)::bigint
+    from public.crm_imob_ranking_entries entries
+    join public.crm_imob_ranking_runs runs on runs.id = entries.run_id
+    where runs.status = 'succeeded'
+  ),
+  'completed run row counts reconcile with stored ranking entries'
 );
-select is(
-  (select count(*) from public.crm_imob_ranking_entries),
-  0::bigint,
-  'clean migrations do not seed partner ranking entries'
+select ok(
+  not exists (
+    select 1
+    from public.crm_imob_ranking_entries entries
+    left join public.crm_imob_ranking_runs runs on runs.id = entries.run_id
+    where runs.id is null
+  ),
+  'partner ranking entries never become orphaned'
 );
 
 select * from finish();

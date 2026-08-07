@@ -89,3 +89,46 @@ Conclusão provável: objetos foram provisionados por SQL externo para uma integ
 7. deixa qualquer futura integração Qlik bloqueada até existir RPC/caller auditado.
 
 A migration permanece local até PR e CI completos. Sua aplicação remota exige novo dry-run, backup e execução isolada.
+
+## Recorrência após a migration e causa confirmada
+
+A migration acima foi aplicada às `00:34:27Z` de 7 de agosto de 2026. Os logs
+mostram tentativas de leitura anônima bloqueadas entre `01:41Z` e `03:58Z`. Às
+`04:00:30Z`, uma sessão interativa executou exatamente:
+
+- `GRANT SELECT` para `anon` e `authenticated` nas duas tabelas;
+- `ALTER POLICY` para incluir `anon` nas duas policies.
+
+O registro identifica `source: POST /mcp` e a identidade OAuth usada pelo
+conector Supabase/Codex. Uma consulta somente leitura posterior do mesmo
+ambiente usa a mesma identidade. Portanto o executor não foi inferido pelo
+owner `postgres`: foi o conector interativo, provavelmente como contorno às
+leituras anônimas negadas.
+
+A auditoria da origem excluiu recorrência automática:
+
+- `qlik-ranking-api.service` apenas autentica a requisição e executa o
+  exportador local;
+- `qlik-ranking-export.cjs` acessa Qlik via Chrome e produz JSON, sem cliente
+  PostgreSQL/Supabase ou DDL;
+- não existe cron, timer, função, trigger ou job de banco que aplique grants;
+- o workflow n8n `ranking imobs` não contém DDL, não possui execução registrada
+  e sua credencial `supabaseApi` aponta ao projeto antigo;
+- nenhum credential `supabaseApi` do n8n auditado aponta ao projeto novo.
+
+## Correção da recorrência
+
+`20260807185611_secure_qlik_ingestion_contract.sql` torna o caminho esperado
+explícito e idempotente:
+
+1. revoga `PUBLIC`, `anon`, `authenticated` e `service_role` das duas tabelas;
+2. mantém RLS e restringe ambas as policies a `authenticated`, sem grant de
+   tabela que as torne alcançáveis;
+3. mantém default privileges de `postgres` fail-closed;
+4. cria `ingest_crm_imob_ranking_snapshot(jsonb)`, RPC transacional com
+   validação, lock por request, replay idempotente e conflito fail-closed;
+5. concede somente `EXECUTE` dessa RPC a `service_role`.
+
+O workflow novo deve usar essa RPC por credencial dedicada e nunca nodes de
+escrita direta. `AGENTS.md`, pgTAP e o runbook operacional proíbem o contorno
+por grants avulsos.
