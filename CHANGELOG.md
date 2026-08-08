@@ -4,6 +4,9 @@
 
 - Corrige o advisory `GHSA-2v37-7h3g-55p8` fixando `nanoid` transitivo em
   `3.3.17`, sem atualizar outras dependências.
+- Reformula visualmente o login com layout responsivo em duas áreas e cérebro
+  mecânico interativo, validado em desktop, tablet, celular, zoom, touch e
+  redução de movimento, sem alterar o formulário ou o fluxo de autenticação.
 - Adiciona implantação Docker Compose do build Next.js standalone, limitada a
   loopback, com healthcheck, limites de recursos, logs rotacionados e rollback
   por tag imutável.

@@ -1,0 +1,1008 @@
+{
+  "generatedAt": "2026-08-07T21:57:12.476Z",
+  "checks": [
+    {
+      "name": "desktop: cérebro possui área interativa",
+      "passed": true,
+      "bounds": {
+        "x": 62.57501220703125,
+        "y": 107.27999877929688,
+        "width": 672,
+        "height": 672.0000305175781
+      }
+    },
+    {
+      "name": "desktop: inclinação limitada a 4 graus",
+      "passed": true,
+      "stageTransform": "translate(3.20 2.08) rotate(2.46 627 627)",
+      "rotation": 2.46
+    },
+    {
+      "name": "desktop: engrenagens alternam sentidos",
+      "passed": true,
+      "gearRotations": [
+        {
+          "speed": 0.62,
+          "rotation": 8.47
+        },
+        {
+          "speed": -0.46,
+          "rotation": -6.28
+        },
+        {
+          "speed": 0.72,
+          "rotation": 9.84
+        },
+        {
+          "speed": 0.68,
+          "rotation": 9.29
+        },
+        {
+          "speed": -0.8,
+          "rotation": -10.93
+        },
+        {
+          "speed": 1.15,
+          "rotation": 15.71
+        }
+      ]
+    },
+    {
+      "name": "desktop: movimento não cria scroll",
+      "passed": true,
+      "scrollWidthBefore": 1440
+    },
+    {
+      "name": "desktop: retorno suave à origem",
+      "passed": true,
+      "returnedTransform": "translate(0.00 0.00) rotate(0.00 627 627)"
+    },
+    {
+      "name": "desktop: navegação por teclado completa",
+      "passed": true,
+      "focus1": "email",
+      "focus2": "password",
+      "focus3": "BUTTON:submit",
+      "focus4": "/register"
+    },
+    {
+      "name": "desktop: preenchimento programático não é bloqueado",
+      "passed": true
+    },
+    {
+      "name": "desktop: sem erro no navegador",
+      "passed": true,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "desktop tema equilibrado: sem overflow horizontal",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema equilibrado: campos e botão visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema equilibrado: labels visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema equilibrado: contrato de autofill",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema equilibrado: sem layout shift",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema equilibrado: contraste mínimo 4.5:1",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema equilibrado: sem erro no navegador",
+      "passed": true,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "desktop tema escuro: sem overflow horizontal",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema escuro: campos e botão visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema escuro: labels visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema escuro: contrato de autofill",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema escuro: sem layout shift",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema escuro: contraste mínimo 4.5:1",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "desktop tema escuro: sem erro no navegador",
+      "passed": true,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "notebook 1280x720: sem overflow horizontal",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "notebook 1280x720: campos e botão visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "notebook 1280x720: labels visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "notebook 1280x720: contrato de autofill",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "notebook 1280x720: sem layout shift",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "notebook 1280x720: contraste mínimo 4.5:1",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "notebook 1280x720: sem erro no navegador",
+      "passed": true,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "tablet 768x1024: sem overflow horizontal",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "tablet 768x1024: campos e botão visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "tablet 768x1024: labels visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "tablet 768x1024: contrato de autofill",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "tablet 768x1024: sem layout shift",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "tablet 768x1024: contraste mínimo 4.5:1",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "tablet 768x1024: sem erro no navegador",
+      "passed": true,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "touch: sem animação dependente de hover",
+      "passed": true,
+      "stageTransform": null
+    },
+    {
+      "name": "celular touch 390x844: sem overflow horizontal",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "celular touch 390x844: campos e botão visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "celular touch 390x844: labels visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "celular touch 390x844: contrato de autofill",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "celular touch 390x844: sem layout shift",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "celular touch 390x844: contraste mínimo 4.5:1",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "touch: sem erro no navegador",
+      "passed": true,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "zoom 200%: sem overflow horizontal",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "zoom 200%: campos e botão visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "zoom 200%: labels visíveis",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "zoom 200%: contrato de autofill",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "zoom 200%: sem layout shift",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "zoom 200%: contraste mínimo 4.5:1",
+      "passed": true,
+      "horizontalOverflow": 0,
+      "controlsVisible": true,
+      "labelsVisible": true,
+      "buttonText": "Entrar",
+      "emailAutocomplete": "email",
+      "passwordAutocomplete": "current-password",
+      "passwordType": "password",
+      "layoutShift": 0,
+      "contrastRatios": {
+        "title": 17.062933971317335,
+        "subtitle": 4.548363604249587,
+        "label": 9.896764973632585,
+        "inputText": 17.85253496299567,
+        "placeholder": 4.758842787868666,
+        "buttonFirstStop": 14.694794518800467,
+        "buttonSecondStop": 6.701618401398807,
+        "register": 4.548363604249587,
+        "registerLink": 9.899858341578378
+      }
+    },
+    {
+      "name": "zoom 200%: sem erro no navegador",
+      "passed": true,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "reduced motion: cérebro e engrenagens estáticos",
+      "passed": true,
+      "stageTransform": null,
+      "gearTransforms": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "name": "reduced motion: sem erro no navegador",
+      "passed": true,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "erro: mensagem visível sem quebrar largura",
+      "passed": true,
+      "before": {
+        "x": 798.390625,
+        "y": 292.890625,
+        "width": 400,
+        "height": 246.359375
+      },
+      "after": {
+        "x": 798.390625,
+        "y": 250.3125,
+        "width": 400,
+        "height": 331.515625
+      },
+      "horizontalOverflow": 0
+    },
+    {
+      "name": "erro: sem exceção de página",
+      "passed": true,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "name": "imagem: carregamento não desloca formulário",
+      "passed": true,
+      "before": {
+        "x": 923.1875,
+        "y": 365.25,
+        "width": 400,
+        "height": 246.359375
+      },
+      "after": {
+        "x": 923.1875,
+        "y": 365.25,
+        "width": 400,
+        "height": 246.359375
+      },
+      "delta": 0
+    }
+  ],
+  "failures": []
+}
