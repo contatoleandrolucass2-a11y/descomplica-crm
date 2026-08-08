@@ -31,4 +31,4 @@ A QA autenticada validou corretores, consolidação de gerentes, troca de perío
 
 ## Ranking externo de imobiliárias
 
-O schema remoto também continha `crm_imob_ranking_runs` e `crm_imob_ranking_entries`, criadas fora das migrations para cargas do Qlik. Elas não substituem o read model de corretores acima e não possuem caller no código atual. O DDL foi versionado somente para eliminar drift e preservar dados; nenhum papel da Data API recebe acesso direto até existir uma implementação revisada da rota `/app/canal-de-parcerias`.
+O schema remoto também continha `crm_imob_ranking_runs` e `crm_imob_ranking_entries`, criadas fora das migrations para cargas do Qlik. Elas não substituem o read model de corretores acima e não possuem caller no código atual. O DDL foi versionado somente para eliminar drift e preservar dados; `/app/canal-de-parcerias` exibe apenas um placeholder protegido, sem acesso direto das funções da Data API a essas tabelas.

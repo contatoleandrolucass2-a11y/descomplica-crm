@@ -28,6 +28,9 @@
   status da base de corretores, sem escrita no Supabase ou ativação do n8n.
 - Corrige o drift Qlik sem acesso direto à Data API e adiciona uma RPC
   transacional, idempotente e exclusiva do `service_role` para o workflow n8n.
+- Localiza papéis, permissões e estados 403/404/500; compacta a gestão de
+  usuários, exige motivo transacional para alterações sensíveis e adiciona a
+  rota protegida do Canal de Parcerias sem leitura Qlik ou mudança de grants.
 
 Todas as alterações relevantes deste projeto serão registradas aqui.
 

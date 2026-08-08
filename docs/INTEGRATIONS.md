@@ -36,7 +36,7 @@ dedicadas e passar pela reconciliação descrita em
 
 ## Qlik / ranking de imobiliárias
 
-O projeto remoto recebeu diretamente duas tabelas para histórico de ranking de imobiliárias: `crm_imob_ranking_runs` e `crm_imob_ranking_entries`. Os metadados apontam para duas cargas Qlik concluídas em 6 de agosto de 2026, uma delas identificada como exportação histórica do Qlik Cloud. A rota de leitura do Canal de Parcerias ainda não existe no repositório.
+O projeto remoto recebeu diretamente duas tabelas para histórico de ranking de imobiliárias: `crm_imob_ranking_runs` e `crm_imob_ranking_entries`. Os metadados apontam para duas cargas Qlik concluídas em 6 de agosto de 2026, uma delas identificada como exportação histórica do Qlik Cloud. A rota do Canal de Parcerias existe somente como placeholder protegido e não consulta esses dados.
 
 A investigação do drift posterior identificou o executor exato: uma sessão interativa do conector Supabase/Codex executou `GRANT SELECT` e `ALTER POLICY` por `POST /mcp`. O exportador Qlik não possui cliente PostgreSQL/Supabase nem DDL; o workflow n8n observado não contém DDL, nunca iniciou uma execução e aponta ao projeto Supabase anterior.
 

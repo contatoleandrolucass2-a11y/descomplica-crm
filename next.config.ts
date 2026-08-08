@@ -12,6 +12,9 @@ const deploymentId = process.env.DEPLOYMENT_VERSION;
 const nextConfig: NextConfig = {
   output: "standalone",
   ...(deploymentId ? { deploymentId } : {}),
+  experimental: {
+    authInterrupts: true,
+  },
   poweredByHeader: false,
   reactStrictMode: true,
 };

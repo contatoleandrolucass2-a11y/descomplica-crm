@@ -1,30 +1,100 @@
-import "server-only";
-
 // Mirrors the `permissions` seed in M5.1/M5.2 migrations. Not a security boundary —
-// the authoritative values live in the database. Update here when the seed changes.
-// Page-specific keys are added here in the same change as their database seed.
+// the authoritative values live in the database. Labels are presentation-only;
+// the technical keys remain unchanged for RPCs, RLS and audit records.
 export const PERMISSIONS = {
-  "users.view": { description: "View user profiles and roles", minLevel: 10 },
-  "users.manage": { description: "Create and modify users", minLevel: 80 },
-  "permissions.view": { description: "View permission assignments", minLevel: 10 },
-  "permissions.manage": { description: "Grant and revoke permission overrides", minLevel: 80 },
-  "roles.view": { description: "View role definitions and assignments", minLevel: 10 },
-  "roles.manage": { description: "Assign and modify user roles", minLevel: 80 },
-  "audit.view": { description: "Read the audit log", minLevel: 80 },
-  "admin.access": { description: "Access the admin panel", minLevel: 80 },
-  "pages.view": { description: "View the authorized page catalog", minLevel: 10 },
-  "pages.manage": { description: "Manage page catalog visibility", minLevel: 80 },
-  "crm.dashboard.view": { description: "View the CRM dashboard", minLevel: 10 },
-  "crm.stages.view": { description: "View CRM funnel stage details", minLevel: 10 },
-  "crm.ranking.view": { description: "View CRM rankings", minLevel: 10 },
-  "crm.settings.view": { description: "View CRM settings", minLevel: 80 },
-  "crm.settings.manage": { description: "Change CRM goals and point settings", minLevel: 80 },
-  "crm.salesforce.refresh": { description: "Request a Salesforce data refresh", minLevel: 80 },
-  "crm.ingest.manage": { description: "Run and inspect CRM ingestion", minLevel: 80 },
+  "users.view": {
+    label: "Visualizar usuários",
+    description: "Consulta perfis e papéis atribuídos.",
+    minLevel: 10,
+  },
+  "users.manage": {
+    label: "Gerenciar usuários",
+    description: "Ativa ou desativa contas abaixo do próprio nível.",
+    minLevel: 80,
+  },
+  "permissions.view": {
+    label: "Visualizar permissões",
+    description: "Consulta permissões e exceções individuais.",
+    minLevel: 10,
+  },
+  "permissions.manage": {
+    label: "Gerenciar exceções",
+    description: "Concede ou revoga exceções abaixo do próprio nível.",
+    minLevel: 80,
+  },
+  "roles.view": {
+    label: "Visualizar papéis",
+    description: "Consulta os papéis e suas atribuições.",
+    minLevel: 10,
+  },
+  "roles.manage": {
+    label: "Gerenciar papéis",
+    description: "Altera papéis respeitando a hierarquia.",
+    minLevel: 80,
+  },
+  "audit.view": {
+    label: "Visualizar auditoria",
+    description: "Consulta o histórico de alterações administrativas.",
+    minLevel: 80,
+  },
+  "admin.access": {
+    label: "Acessar administração",
+    description: "Abre o painel administrativo.",
+    minLevel: 80,
+  },
+  "pages.view": {
+    label: "Visualizar navegação",
+    description: "Consulta o catálogo de páginas autorizadas.",
+    minLevel: 10,
+  },
+  "pages.manage": {
+    label: "Gerenciar páginas",
+    description: "Ativa ou desativa itens do catálogo de navegação.",
+    minLevel: 80,
+  },
+  "crm.dashboard.view": {
+    label: "Visualizar dashboard",
+    description: "Consulta os indicadores do CRM.",
+    minLevel: 10,
+  },
+  "crm.stages.view": {
+    label: "Visualizar etapas",
+    description: "Consulta oportunidades, agendamentos, visitas, pastas e vendas.",
+    minLevel: 10,
+  },
+  "crm.ranking.view": {
+    label: "Visualizar ranking",
+    description: "Consulta o ranking comercial disponível.",
+    minLevel: 10,
+  },
+  "crm.settings.view": {
+    label: "Visualizar configurações",
+    description: "Consulta metas e parâmetros do CRM.",
+    minLevel: 80,
+  },
+  "crm.settings.manage": {
+    label: "Gerenciar configurações",
+    description: "Altera metas e parâmetros de pontuação.",
+    minLevel: 80,
+  },
+  "crm.salesforce.refresh": {
+    label: "Atualizar dados",
+    description: "Solicita atualização quando a integração estiver disponível.",
+    minLevel: 80,
+  },
+  "crm.ingest.manage": {
+    label: "Gerenciar ingestão",
+    description: "Executa e inspeciona cargas autorizadas do CRM.",
+    minLevel: 80,
+  },
 } as const;
 
 export type PermissionKey = keyof typeof PERMISSIONS;
 
 export function getPermissionMinLevel(permissionKey: PermissionKey): number {
   return PERMISSIONS[permissionKey].minLevel;
+}
+
+export function getPermissionLabel(permissionKey: PermissionKey): string {
+  return PERMISSIONS[permissionKey].label;
 }
