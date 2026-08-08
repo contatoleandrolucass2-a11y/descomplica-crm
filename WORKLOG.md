@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-08-08 — buffer de resposta do Nginx
+
+- Doze falhas de login desde 04/08 foram correlacionadas ao erro Nginx
+  `upstream sent too big header while reading response header from upstream`.
+  Aplicação, container, `/login` e `/api/health` permaneceram saudáveis.
+- Auditor Chromium reproduziu o protocolo hidratado da Server Action da imagem
+  implantada, criou sessão e mediu somente o tamanho total dos headers: 4.260
+  bytes. Nenhum valor de cookie, token, senha ou header foi registrado.
+- O template HTTPS agora define `proxy_buffer_size 8k`, `proxy_buffers 8 8k` e
+  `proxy_busy_buffers_size 16k` somente no `location /` do CRM. Configurações
+  globais, `large_client_header_buffers`, aplicação e Supabase não mudaram.
+- Runbook documenta backup root-only com checksum, `nginx -t`, reload sem
+  restart, gates de login/saúde/logs e rollback imediato.
+
 ## 2026-08-08 — experiência visual do cadastro
 
 - O cadastro reutiliza diretamente o cérebro mecânico e os estilos-base do

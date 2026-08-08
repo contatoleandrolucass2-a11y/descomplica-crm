@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Ajusta somente o proxy HTTPS de `crm.descomplicapro.com.br` para aceitar os
+  headers de resposta da sessão Supabase, com buffers Nginx mínimos medidos e
+  runbook de validação, reload e rollback.
 - Integra visualmente o cadastro à experiência aprovada do login, reutilizando
   o cérebro mecânico, responsividade, temas, touch e redução de movimento sem
   alterar o fluxo de criação de conta ou qualquer contrato de segurança.
