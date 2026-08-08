@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Integra visualmente o cadastro à experiência aprovada do login, reutilizando
+  o cérebro mecânico, responsividade, temas, touch e redução de movimento sem
+  alterar o fluxo de criação de conta ou qualquer contrato de segurança.
 - Corrige o advisory `GHSA-2v37-7h3g-55p8` fixando `nanoid` transitivo em
   `3.3.17`, sem atualizar outras dependências.
 - Reformula visualmente o login com layout responsivo em duas áreas e cérebro
