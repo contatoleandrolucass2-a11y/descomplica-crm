@@ -1,0 +1,161 @@
+.page {
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.shell {
+  align-items: stretch;
+}
+
+.visualPanel {
+  min-height: 100svh;
+}
+
+.brainWrap {
+  position: fixed;
+  left: calc(28% - 1rem);
+  width: min(49vw, 43rem);
+}
+
+.visualCopy {
+  padding-top: min(67vh, 38rem);
+}
+
+.formPanel {
+  align-items: flex-start;
+  min-height: 100svh;
+  padding-top: clamp(2.5rem, 5vh, 4.25rem);
+  padding-bottom: clamp(2.5rem, 5vh, 4.25rem);
+}
+
+.card {
+  max-width: 27rem;
+  margin-block: auto;
+}
+
+.title {
+  font-size: clamp(1.9rem, 3vw, 2.45rem);
+}
+
+.subtitle {
+  margin-bottom: 1.65rem;
+}
+
+.form {
+  gap: 1rem;
+}
+
+.fieldError {
+  color: #dc2626;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.statusError {
+  color: #dc2626;
+}
+
+.success {
+  border: 1px solid #bbf7d0;
+  border-radius: 0.75rem;
+  background: #f0fdf4;
+  padding: 0.7rem 0.85rem;
+  color: #15803d;
+  font-size: 0.85rem;
+}
+
+:global(:root[data-theme="dark"]) .page {
+  background: #071c2a;
+}
+
+:global(:root[data-theme="dark"]) .formPanel {
+  background:
+    radial-gradient(circle at 100% 0%, rgb(45 212 191 / 0.08), transparent 22rem), #071c2a;
+}
+
+:global(:root[data-theme="dark"]) .title {
+  color: #f4fbff;
+}
+
+:global(:root[data-theme="dark"]) .subtitle,
+:global(:root[data-theme="dark"]) .formPanel :global(p) {
+  color: #98afc0;
+}
+
+:global(:root[data-theme="dark"]) .formPanel :global(label) {
+  color: #c0d2df;
+}
+
+:global(:root[data-theme="dark"]) .formPanel :global(input) {
+  border-color: #3b5b73;
+  background: #0b2136;
+  color: #f4fbff;
+}
+
+:global(:root[data-theme="dark"]) .formPanel :global(input::placeholder) {
+  color: #98afc0;
+}
+
+:global(:root[data-theme="dark"]) .formPanel .fieldError {
+  color: #fca5a5;
+}
+
+:global(:root[data-theme="dark"]) .formPanel .statusError {
+  border-color: #7f1d1d;
+  background: #450a0a;
+  color: #fca5a5;
+}
+
+:global(:root[data-theme="dark"]) .formPanel .success {
+  border-color: #166534;
+  background: #052e16;
+  color: #86efac;
+}
+
+:global(:root[data-theme="dark"]) .formPanel :global(a) {
+  color: #5eead4;
+}
+
+@media (max-width: 880px) {
+  .visualPanel {
+    min-height: 17rem;
+  }
+
+  .brainWrap {
+    position: absolute;
+    left: 53%;
+    width: min(72vw, 25rem);
+  }
+
+  .formPanel {
+    min-height: auto;
+    padding-top: 2.25rem;
+  }
+
+  .card {
+    margin-block: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .visualPanel {
+    min-height: 11.5rem;
+  }
+
+  .brainWrap {
+    left: 60%;
+    width: 15rem;
+  }
+
+  .formPanel {
+    padding-top: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .formPanel,
+  .formPanel :global(*) {
+    scroll-behavior: auto;
+  }
+}

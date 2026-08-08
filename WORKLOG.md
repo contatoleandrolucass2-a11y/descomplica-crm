@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-08-08 — experiência visual do cadastro
+
+- O cadastro reutiliza diretamente o cérebro mecânico e os estilos-base do
+  login, com composição responsiva própria para os quatro campos e rolagem
+  vertical confortável em telas ou zoom que não comportem todo o formulário.
+- `signupAction`, schema Zod, payload, nomes, IDs, tipos, autocomplete, estado
+  pendente, mensagens e resultado do cadastro foram preservados. O teste
+  funcional local confirmou o mesmo payload e resposta usando um mock isolado,
+  sem chamada ao Supabase remoto ou criação de usuário real.
+- Chromium aprovou 70/70 checks em 1440×900, 1280×720, 768×1024, 390×844,
+  zoom de 200%, três temas, redução de movimento, touch, teclado, erros,
+  carregamento, contraste, retorno do parallax e imagem atrasada com CLS zero.
+- O login permaneceu byte a byte inalterado e passou pelo teste de regressão.
+  Nenhuma dependência, lockfile, backend, autenticação, middleware, banco,
+  infraestrutura, produção ou deploy foi alterado.
+
 ## 2026-08-08 — correção isolada do nanoid
 
 - O override transitivo fixa `nanoid` em `3.3.17`, versão corrigida para o
