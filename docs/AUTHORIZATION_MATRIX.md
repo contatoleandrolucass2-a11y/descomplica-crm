@@ -12,6 +12,10 @@ A autorização combina o papel do usuário com exceções individuais. Uma exce
 
 As permissões administrativas respeitam hierarquia estrita: o ator somente modifica usuários e papéis abaixo do próprio nível. O próprio usuário não pode alterar seu papel, status ou exceções.
 
+Na interface, as chaves acima continuam técnicas e são enviadas sem tradução às
+RPCs. O usuário vê nomes e descrições em português. O papel `master` nunca
+aparece entre as opções atribuíveis, mesmo para o próprio Master.
+
 ## Catálogo
 
 `public.app_pages` contém 15 registros versionados:
@@ -21,7 +25,12 @@ As permissões administrativas respeitam hierarquia estrita: o ator somente modi
 - configurações, metas do funil, parcerias e pontos;
 - início administrativo, usuários e catálogo de páginas.
 
-O repositório ainda não implementa a rota do Canal de Parcerias. Versionar sua identidade preserva o estado remoto sem conceder acesso às tabelas Qlik; a rota e o contrato de leitura exigem incremento separado antes de qualquer grant.
+O Canal de Parcerias possui uma rota protegida que exibe apenas o estado “página em desenvolvimento”. Ela reutiliza `crm.ranking.view` e não consulta as tabelas Qlik. O contrato de leitura dos dados continua exigindo incremento separado antes de qualquer grant.
+
+Uma tentativa autorizada de abrir esse caminho retorna o placeholder protegido.
+Falta de permissão autenticada usa o interruptor `forbidden()` do Next.js e
+retorna a superfície `AUTH-403`; caminhos realmente inexistentes usam
+`ROUTE-404`, e falhas inesperadas permanecem 500 com mensagem distinta.
 
 O menu consulta somente páginas ativas, marcadas para navegação e permitidas pela RLS. Ocultar um item não concede nem revoga acesso: cada rota mantém sua guarda server-side e cada operação de dados mantém grants, RLS ou RPC próprios.
 
@@ -39,6 +48,13 @@ O menu consulta somente páginas ativas, marcadas para navegação e permitidas 
 - `begin_crm_salesforce_refresh` e `finish_crm_salesforce_refresh`: exigem sessão ativa e `crm.salesforce.refresh`, aplicam lock/cooldown e auditam.
 - `ingest_crm_salesforce_snapshot`: disponível somente ao `service_role` do Route Handler M2M; nunca a `authenticated` ou `anon`.
 - `ingest_crm_imob_ranking_snapshot`: disponível somente ao `service_role` do workflow Qlik; nunca concede acesso direto às tabelas.
+
+Elevação de papel, desativação de conta e criação/remoção de exceções exigem um
+motivo não vazio. A validação roda em trigger `BEFORE INSERT` do log de auditoria
+dentro da mesma transação das RPCs: uma tentativa sem motivo reverte papel,
+status ou exceção integralmente. Rebaixamento de papel e reativação continuam
+aceitando motivo opcional. As regras de sessão ativa, anti-autoelevação,
+hierarquia e `can_grant_permission` não mudaram.
 
 Nenhuma dessas tabelas aceita escrita direta do papel `authenticated`. A RLS de `app_pages` nunca concede o bypass administrativo usado pela tela de gestão; o catálogo completo sai exclusivamente pela RPC protegida. O navegador chama somente RPCs `security definer` que revalidam sessão, perfil ativo, permissão e hierarquia no banco.
 

@@ -1,4 +1,5 @@
 import { enforcePermission } from "@/lib/authorization/enforce";
+import { getPermissionLabel } from "@/lib/authorization/permissions";
 import { getManageablePages } from "@/lib/navigation/pages";
 
 import { setPageVisibilityAction } from "./actions";
@@ -41,8 +42,8 @@ export default async function PagesAdminPage() {
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-slate-600">{page.description}</p>
-                    <p className="mt-2 font-mono text-xs break-all text-slate-500">
-                      {page.path} · {page.permissionKey}
+                    <p className="mt-2 text-xs text-slate-500">
+                      {page.path} · {getPermissionLabel(page.permissionKey)}
                     </p>
                   </div>
                   <form action={action} className="flex flex-col gap-2 sm:flex-row">

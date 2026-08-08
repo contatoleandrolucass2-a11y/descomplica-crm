@@ -20,6 +20,7 @@ import Link from "next/link";
 
 import { enforceAuthorization } from "@/lib/authorization/enforce";
 import { logoutAction } from "@/lib/auth/actions/logout";
+import { getRoleLabel } from "@/lib/authorization/roles";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
 import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
@@ -37,7 +38,9 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
             <Link href="/app" className="font-semibold text-slate-900">
               Descomplica CRM
             </Link>
-            <p className="text-xs tracking-wide text-slate-500 uppercase">{context.roleKey}</p>
+            <p className="text-xs tracking-wide text-slate-500 uppercase">
+              {getRoleLabel(context.roleKey)}
+            </p>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-3">
             <ThemeSwitch />

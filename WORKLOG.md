@@ -468,3 +468,30 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Metas seguem sem fonte M2M confirmada e roleta não existe nos sete relatórios;
   a ativação e a primeira persistência permanecem bloqueadas até decisão
   explícita sobre esses dois campos.
+
+## 2026-08-08 — experiência de usuários e acessos
+
+- Diagnóstico read-only identificou `/app/canal-de-parcerias` como a rota
+  observada: nove respostas 404 e nenhum 403/500 no Nginx. O catálogo ativo
+  publicava o link sem existir um `page.tsx`; a rota agora mostra somente um
+  placeholder protegido por `crm.ranking.view`, sem consultar dados Qlik.
+- A conta operacional já havia sido elevada de `user` para `admin` pela RPC
+  auditada. `get_user_authorization_context` retornou nível 80 e o conjunto
+  administrativo atual; a decisão não depende de claim de papel desatualizada.
+- O texto “This page couldn’t load” veio do fallback global padrão do Next.js,
+  enquanto o container também registrava tentativa de atualizar o HTML estático
+  de `/unauthorized` em filesystem read-only.
+- `forbidden()` e `app/forbidden.tsx` agora produzem 403 localizado. 404 e 500
+  possuem superfícies próprias em português e códigos técnicos discretos.
+- O painel de usuários passou a traduzir papéis/permissões, pesquisar usuários,
+  separar herança de exceções, resumir mudanças e manter controles sensíveis em
+  “Configurações avançadas”. Master não é atribuível e a própria conta não recebe
+  controles de mutação.
+- Migration `20260808174817_require_sensitive_access_change_reasons.sql` adiciona
+  um trigger privado que reverte elevação, desativação e exceção sem motivo. Não
+  altera grants, policies, RLS, assinaturas de RPC ou hierarquia.
+- Validação final: ESLint, TypeScript, 57 Vitest + 8 Node, build e 280/280
+  pgTAP passaram; lint local, advisors, auditoria de dependências, Gitleaks e
+  OSV não encontraram erro novo. Oito checks Chromium confirmaram 403, 404 e
+  500 reais, rota protegida, teclado, celular, zoom de 200% sem overflow, três
+  temas e Master ausente das opções atribuíveis.
