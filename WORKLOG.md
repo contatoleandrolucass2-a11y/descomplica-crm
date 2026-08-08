@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-08-08 — correção isolada do nanoid
+
+- O override transitivo fixa `nanoid` em `3.3.17`, versão corrigida para o
+  advisory `GHSA-2v37-7h3g-55p8` que bloqueou a CI do PR visual do login.
+- Nenhuma outra dependência, arquivo de aplicação, autenticação, Supabase,
+  middleware, banco, produção ou deploy foi alterado.
+
 ## 2026-08-07 — causa raiz e contrato seguro da integração Qlik
 
 - Logs PostgreSQL registraram às `04:00:30Z` os dois `GRANT SELECT` e os dois

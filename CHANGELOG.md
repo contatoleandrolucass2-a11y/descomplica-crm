@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Corrige o advisory `GHSA-2v37-7h3g-55p8` fixando `nanoid` transitivo em
+  `3.3.17`, sem atualizar outras dependências.
 - Adiciona implantação Docker Compose do build Next.js standalone, limitada a
   loopback, com healthcheck, limites de recursos, logs rotacionados e rollback
   por tag imutável.
