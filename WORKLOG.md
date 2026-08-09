@@ -20,7 +20,7 @@
   sem metadados, manifest e hashes SHA-256. A execução final respondeu `200` em
   18/18 rotas, aplicou 2.969 máscaras e não registrou erro de console, erro de
   página, mudança de URL ou mutação durante a captura.
-- A barreira anônima passou antes e depois: seis rotas retornaram `307` para
+- A barreira anônima passou antes e depois: doze rotas CRM retornaram `307` para
   `/login`; os quatro viewports terminaram no formulário vazio com `200`, CSP,
   X-Frame-Options e nosniff, sem marcador comercial ou erro. Os WebP de antes e
   depois têm SHA-256 idêntico por viewport. Os 26 arquivos passaram em dimensão,

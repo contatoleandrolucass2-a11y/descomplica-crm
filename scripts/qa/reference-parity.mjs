@@ -87,6 +87,12 @@ const protectedRoutes = [
   "/app/etapas/visitas",
   "/app/etapas/pastas",
   "/app/etapas/vendas",
+  "/app/ranking",
+  "/app/canal-de-parcerias",
+  "/app/configuracoes",
+  "/app/configuracoes/metas",
+  "/app/configuracoes/metas/parcerias",
+  "/app/configuracoes/metas/pontos",
 ];
 
 const viewports = [

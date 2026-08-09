@@ -131,7 +131,7 @@ describe("versioned reference parity catalog", () => {
     for (const kind of ["target-before", "target-after"]) {
       const result = results[kind]!;
       expect(result.passed).toBe(true);
-      expect(result.routes).toHaveLength(6);
+      expect(result.routes).toHaveLength(12);
       expect(result.routes.every((route) => route.securityHeadersPresent)).toBe(true);
       expect(result.viewports).toHaveLength(4);
       expect(

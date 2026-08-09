@@ -8,7 +8,7 @@ O harness `scripts/qa/reference-parity.mjs` cobre duas fronteiras:
 
 1. captura das 18 páginas públicas da referência viva em `1440×900`, com
    máscara opaca irreversível aplicada antes do screenshot;
-2. verificação sem sessão das seis rotas protegidas deste incremento, seguida
+2. verificação sem sessão das doze rotas CRM protegidas do catálogo, seguida
    de captura do login vazio em `1440×900`, `1280×720`, `768×1024` e
    `390×844`.
 
@@ -63,7 +63,7 @@ Capturas:
 
 ## Limite anônimo antes e depois
 
-As seis rotas abaixo responderam `307` para `/login` tanto na versão anterior
+As doze rotas abaixo responderam `307` para `/login` tanto na versão anterior
 implantada quanto no build local desta branch:
 
 - `/app`;
@@ -71,7 +71,13 @@ implantada quanto no build local desta branch:
 - `/app/etapas/agendamentos`;
 - `/app/etapas/visitas`;
 - `/app/etapas/pastas`;
-- `/app/etapas/vendas`.
+- `/app/etapas/vendas`;
+- `/app/ranking`;
+- `/app/canal-de-parcerias`;
+- `/app/configuracoes`;
+- `/app/configuracoes/metas`;
+- `/app/configuracoes/metas/parcerias`;
+- `/app/configuracoes/metas/pontos`.
 
 Nos quatro viewports, a navegação terminou em `/login`, o campo comercial
 detectado foi zero, CSP/X-Frame-Options/nosniff permaneceram presentes e
