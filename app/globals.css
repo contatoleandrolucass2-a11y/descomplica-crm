@@ -125,6 +125,14 @@ textarea {
   background-color: #173953;
 }
 
+:root[data-theme="dark"] .bg-cyan-50,
+:root[data-theme="dark"] .bg-violet-50,
+:root[data-theme="dark"] .bg-emerald-50,
+:root[data-theme="dark"] .bg-amber-50,
+:root[data-theme="dark"] .bg-red-50 {
+  background-color: #12364f;
+}
+
 :root[data-theme="dark"] .bg-slate-950 {
   background-color: #030f18;
 }
@@ -144,6 +152,30 @@ textarea {
   color: #98afc0;
 }
 
+:root[data-theme="dark"] .text-cyan-900,
+:root[data-theme="dark"] .text-cyan-800,
+:root[data-theme="dark"] .text-cyan-700,
+:root[data-theme="dark"] .text-violet-900,
+:root[data-theme="dark"] .text-violet-800,
+:root[data-theme="dark"] .text-violet-700,
+:root[data-theme="dark"] .text-emerald-900,
+:root[data-theme="dark"] .text-emerald-800,
+:root[data-theme="dark"] .text-amber-900,
+:root[data-theme="dark"] .text-amber-800,
+:root[data-theme="dark"] .text-red-900,
+:root[data-theme="dark"] .text-red-800 {
+  color: #d8f5fa;
+}
+
+:root[data-theme="dark"] .bg-cyan-100.text-cyan-900,
+:root[data-theme="dark"] .bg-lime-100.text-lime-900,
+:root[data-theme="dark"] .bg-emerald-200.text-emerald-900,
+:root[data-theme="dark"] .bg-amber-200.text-amber-950,
+:root[data-theme="dark"] .bg-red-200.text-red-900 {
+  background-color: #23455b;
+  color: #f1fbff;
+}
+
 :root[data-theme="dark"] .border-slate-200,
 :root[data-theme="dark"] .border-slate-300 {
   border-color: #31516c;
@@ -151,6 +183,23 @@ textarea {
 
 :root[data-theme="dark"] .ring-slate-200 {
   --tw-ring-color: #31516c;
+}
+
+:root[data-theme="dark"] .ring-cyan-200,
+:root[data-theme="dark"] .ring-violet-200,
+:root[data-theme="dark"] .ring-emerald-200,
+:root[data-theme="dark"] .ring-amber-200,
+:root[data-theme="dark"] .ring-red-200 {
+  --tw-ring-color: #315f75;
+}
+
+:root[data-theme="dark"] .border-cyan-200,
+:root[data-theme="dark"] .border-violet-200,
+:root[data-theme="dark"] .border-emerald-200,
+:root[data-theme="dark"] .border-amber-200,
+:root[data-theme="dark"] .border-red-200,
+:root[data-theme="dark"] .border-amber-300 {
+  border-color: #315f75;
 }
 
 :root[data-theme="dark"] input,

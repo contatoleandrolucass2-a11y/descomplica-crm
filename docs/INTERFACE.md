@@ -4,7 +4,8 @@ O shell combina autenticação server-side com dois componentes client-side pequ
 
 - `AuthorizedNavigation` recebe somente as páginas já filtradas por catálogo,
   RLS e permissões; monta grupos pai/filho, marca o ancestral ativo e omite
-  filhos órfãos.
+  filhos órfãos. Ícones SVG locais identificam os domínios sem mudar a decisão
+  de acesso.
 - `ThemeSwitch` oferece `light`, `balanced` e `dark`, persiste apenas a preferência não sensível em `localStorage` e continua funcional sem armazenamento.
 
 O tema não altera autorização, dados ou cookies de sessão. A preferência é aplicada em `data-theme` no elemento `html`; tokens globais ajustam superfícies, texto, bordas e campos sem copiar os milhares de estilos legados.
@@ -18,13 +19,14 @@ e somente um grupo permanece aberto por vez.
 ## Validação
 
 - Vitest valida o catálogo fechado dos três temas e rejeita valores persistidos desconhecidos.
-- O harness versionado cobre a referência sanitizada e a barreira anônima nos
-  quatro viewports com reduced-motion.
-- A automação autenticada para três temas, teclado e zoom de 200% ainda precisa
-  ser implementada e executada quando forem disponibilizadas homologação e
-  conta QA segura.
-  Nesta fundação, essa etapa ficou bloqueada; produção não foi usada como
-  substituta.
+- O harness versionado cobre as 18 páginas da referência sanitizada e a
+  barreira anônima das 18 rotas CRM nos quatro viewports com reduced-motion.
+- O QA autenticado complementar usa runner Supabase local, conta QA efêmera e
+  fixtures sintéticas isoladas/validadas por RLS para revisar três temas,
+  teclado e zoom de 200%; conta e fixtures são removidas ao final.
+  A comparação autenticada de homologação permanece bloqueada até existir
+  ambiente e credencial QA dedicados; produção e contas pessoais não são
+  substitutas.
 
 Filtros dimensionais do dashboard não pertencem a este incremento: eles dependem de registros normalizados por canal, gerente, responsável e empresa. Até esse read model existir, a interface não oferece filtros sem efeito ou dados demonstrativos.
 

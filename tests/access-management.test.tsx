@@ -27,7 +27,10 @@ import ErrorPage from "@/app/error";
 import NotFoundPage from "@/app/not-found";
 import PartnershipsChannelPage from "@/app/(protected)/app/canal-de-parcerias/page";
 import { UserAccessManager } from "@/app/(protected)/admin/usuarios/UserAccessManager";
-import { summarizeRoleChange } from "@/lib/authorization/access-presentation";
+import {
+  ROLE_INHERITED_PERMISSIONS,
+  summarizeRoleChange,
+} from "@/lib/authorization/access-presentation";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { PERMISSIONS } from "@/lib/authorization/permissions";
 import { getAssignableRoleKeys, ROLES } from "@/lib/authorization/roles";
@@ -89,7 +92,8 @@ describe("experiência de acesso", () => {
     const markup = renderToStaticMarkup(await PartnershipsChannelPage());
 
     expect(mocks.requirePermission).toHaveBeenCalledWith("crm.ranking.view");
-    expect(markup).toContain("Canal de Parcerias — página em desenvolvimento");
+    expect(markup).toContain("Performance das parcerias");
+    expect(markup).toContain("Dado indisponível — integração pendente");
     expect(markup).not.toContain("crm_imob_ranking");
   });
 
@@ -128,6 +132,30 @@ describe("catálogo localizado de acesso", () => {
   it("nunca oferece Master como papel atribuível", () => {
     expect(getAssignableRoleKeys(100)).not.toContain("master");
     expect(getAssignableRoleKeys(80)).not.toContain("master");
+  });
+
+  it("mantém a matriz visual dos oito perfis alinhada ao catálogo protegido", () => {
+    const coreReaderPermissions = [
+      "pages.view",
+      "crm.dashboard.view",
+      "crm.stages.view",
+      "crm.ranking.view",
+      "crm.simulators.view",
+    ];
+
+    expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(Object.keys(PERMISSIONS));
+    expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual(Object.keys(PERMISSIONS));
+    for (const roleKey of [
+      "coordinator",
+      "supervisor",
+      "real_estate",
+      "broker_lead",
+      "broker",
+      "user",
+    ] as const) {
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(coreReaderPermissions);
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.settings.manage");
+    }
   });
 
   it("resume acessos adicionados e removidos antes da troca de papel", () => {

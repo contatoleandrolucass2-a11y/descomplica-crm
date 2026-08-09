@@ -67,6 +67,11 @@ export const PERMISSIONS = {
     description: "Consulta o ranking comercial disponível.",
     minLevel: 10,
   },
+  "crm.simulators.view": {
+    label: "Visualizar simuladores",
+    description: "Acessa as interfaces autorizadas de simulação comercial.",
+    minLevel: 10,
+  },
   "crm.settings.view": {
     label: "Visualizar configurações",
     description: "Consulta metas e parâmetros do CRM.",

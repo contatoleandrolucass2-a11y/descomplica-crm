@@ -4,17 +4,22 @@ Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
 ## Escopo executável
 
-O harness `scripts/qa/reference-parity.mjs` cobre duas fronteiras:
+Os harnesses de QA visual cobrem três fronteiras:
 
 1. captura das 18 páginas públicas da referência viva em `1440×900`, com
    máscara opaca irreversível aplicada antes do screenshot;
-2. verificação sem sessão das doze rotas CRM protegidas do catálogo, seguida
+2. verificação sem sessão das 18 rotas CRM protegidas do catálogo, seguida
    de captura do login vazio em `1440×900`, `1280×720`, `768×1024` e
-   `390×844`.
+   `390×844`;
+3. QA autenticado complementar das 18 rotas em Supabase local isolado, com
+   conta QA efêmera, fixtures sintéticas e motores de simulação bloqueados.
 
 Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
 cada imagem está em [`manifest.json`](./manifest.json).
+O QA local autenticado está em
+[`authenticated-results.json`](./authenticated-results.json); suas 87 capturas
+ficam em [`target-authenticated`](./target-authenticated/).
 
 ## Política de captura
 
@@ -65,8 +70,8 @@ Capturas:
 
 ## Limite anônimo antes e depois
 
-As doze rotas abaixo responderam `307` para `/login` tanto na versão anterior
-implantada quanto no build local desta branch:
+As doze rotas já existentes responderam `307` para `/login` tanto na versão
+anterior implantada quanto no build local desta branch:
 
 - `/app`;
 - `/app/etapas/oportunidades`;
@@ -81,6 +86,15 @@ implantada quanto no build local desta branch:
 - `/app/configuracoes/metas/parcerias`;
 - `/app/configuracoes/metas/pontos`.
 
+No build local, as seis rotas novas também responderam `307` para `/login`:
+
+- `/app/simulacao`;
+- `/app/simulacao/associativo-fluxo-linear`;
+- `/app/simulacao/calcular-documentacao`;
+- `/app/simulacao/caixa`;
+- `/app/simulacao/tabela-direta`;
+- `/app/simulacao/tabela-investidor`.
+
 Nos quatro viewports, a navegação terminou em `/login`, o campo comercial
 detectado foi zero, CSP/X-Frame-Options/nosniff permaneceram presentes e
 nenhuma credencial foi fornecida. Cada rota usou contexto anônimo isolado; o
@@ -90,25 +104,53 @@ imagens comparáveis estão em
 [`target-before`](./target-before/) e
 [`target-after`](./target-after/).
 
-Esta comparação comprova a barreira anônima, não a paridade interna das páginas
-protegidas.
+Esta comparação comprova a barreira anônima. A paridade interna é coberta pelo
+QA local autenticado abaixo.
 
-## Bloqueio da comparação autenticada
+## QA autenticado local complementar
 
-A comparação autenticada foi interrompida somente nesta etapa. URL e credencial
-QA de homologação não foram disponibilizadas nem localizadas no repositório, nos
-environments/variables/secrets/deployments consultados do GitHub ou no ambiente
-local. O Supabase local possui zero usuários e a documentação de homologação
-contém apenas um placeholder. O Auth remoto não foi interrogado sem credencial
-segura, portanto não se afirma a inexistência de conta remota.
+Um build de produção local foi conectado exclusivamente ao Supabase local. O
+runner descobre as chaves locais somente em memória, reserva uma porta loopback,
+inicia e encerra `pnpm start`, cria uma identidade `qa.*@local.invalid` com senha
+efêmera e não persiste credenciais ou storage state. A conta recebe papel
+`admin` somente durante a execução. Dashboard, metas, pontos e ranking recebem
+fixtures com fonte `QA local synthetic — not production · run <id efêmero>`;
+contagens e marcador são validados novamente pela sessão QA através da RLS antes
+de qualquer captura. Fixtures e conta são apagadas no `finally`, inclusive em
+falha ou sinal.
 
-Produção não foi usada para comparação autenticada; houve somente a leitura
-anônima do limite já implantado para o conjunto “antes”. Contas Master/Admin
-pessoais não foram usadas e nenhum usuário foi criado. Capturas internas, QA por
-perfil, temas, teclado, zoom de 200% e reduced-motion no dashboard protegido
-permanecem pendentes até o proprietário fornecer homologação e contas QA
-dedicadas. O harness autenticado dessas interações ainda deverá ser implementado
-nessa retomada; os comandos atuais não aceitam credenciais nem storage state.
+O setup falha fechado se os slots locais `global`, `default` ou as metas do mês
+já estiverem ocupados; nenhum dado local existente é sobrescrito. O serviço
+local, o banco e a aplicação precisam usar endpoints loopback. Chave privilegiada
+nunca é enviada ao navegador ou ao harness de captura.
+
+Resultados aprovados:
+
+- 72/72 checks responsivos: 18 rotas em quatro viewports;
+- 54/54 checks de tema: 18 rotas em claro, equilibrado e escuro;
+- 18/18 checks em zoom de 200%, representado por viewport CSS de `720×450` e
+  `deviceScaleFactor: 2` sobre canvas físico `1440×900`;
+- disclosure aberto por teclado, fechado com `Escape`, foco devolvido e `Tab`
+  alcançando controle interativo;
+- campo obrigatório de simulador sinalizado após blur com `aria-invalid`,
+  mensagem associada e retorno ao estado válido após preenchimento local;
+- `prefers-reduced-motion: reduce` ativo em todos os contextos;
+- zero overflow raiz, erro de console, erro de página, rota desviada ou motor de
+  simulador habilitado;
+- 72 capturas rota×viewport e 15 amostras dos três temas, sem metadados.
+
+As capturas autenticadas usam somente identidades e valores sintéticos com
+prefixo QA. Elas permitem comparar composição, densidade, reflow e estados com
+o baseline sanitizado da referência; não constituem comparação de métricas
+comerciais.
+
+## Bloqueio da comparação autenticada em homologação
+
+URL e credencial QA de homologação não foram disponibilizadas. Portanto, a
+comparação autenticada nesse ambiente permanece interrompida, conforme o gate
+original. Produção não foi usada como substituta; contas Master/Admin pessoais
+não foram usadas e nenhum usuário remoto foi criado. O QA local acima é
+evidência complementar, não fechamento do gate de homologação.
 
 Cada execução registra o commit base, se a árvore estava alterada e um SHA-256
 determinístico do diff e dos arquivos não rastreados, excluindo os próprios
@@ -120,6 +162,9 @@ atribuída falsamente a uma árvore limpa.
 ```bash
 pnpm qa:browser:install
 pnpm qa:visual:reference
+pnpm db:start
+pnpm build
+pnpm qa:visual:authenticated
 QA_TARGET_ORIGIN=https://crm.descomplicapro.com.br \
   QA_TARGET_LABEL=target-before \
   pnpm qa:security:anonymous
@@ -133,6 +178,7 @@ Em uma imagem mínima de CI, instale também as bibliotecas do sistema com
 deve ser apenas `http(s)://host[:porta]`, sem credenciais, caminho, query ou
 fragmento; o rótulo aceita somente `target-before` ou `target-after`.
 
-O último comando deve apontar para um build local isolado com Supabase local ou
-destino inacessível, sem cookies. Ele não autoriza uso de produção para QA
+O runner autenticado aceita `QA_AUTH_ORIGIN` somente como origem HTTP loopback
+opcional; sem ela, escolhe uma porta local livre. Os comandos de fronteira
+anônima não recebem cookies. Nenhum deles autoriza usar produção para QA
 autenticada.

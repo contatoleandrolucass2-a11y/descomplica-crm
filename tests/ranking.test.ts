@@ -60,6 +60,19 @@ describe("ranking presentation", () => {
     ).toEqual(["Ana", "Bia"]);
   });
 
+  it("keeps source-backed keys when broker names collide", () => {
+    const duplicatedNames: RankingActivity[] = activities.slice(0, 2).map((activity) => ({
+      ...activity,
+      brokerName: "Mesmo nome",
+    }));
+
+    expect(
+      buildRanking(duplicatedNames, "month", "brokers", DEFAULT_POINT_WEIGHTS).map(
+        (line) => line.key,
+      ),
+    ).toEqual(["broker:ana", "broker:bia"]);
+  });
+
   it("aggregates managers without double-counting members", () => {
     const [manager] = buildRanking(activities, "month", "managers", DEFAULT_POINT_WEIGHTS);
     expect(manager?.memberCount).toBe(2);

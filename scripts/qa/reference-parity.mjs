@@ -93,6 +93,12 @@ const protectedRoutes = [
   "/app/configuracoes/metas",
   "/app/configuracoes/metas/parcerias",
   "/app/configuracoes/metas/pontos",
+  "/app/simulacao",
+  "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/calcular-documentacao",
+  "/app/simulacao/caixa",
+  "/app/simulacao/tabela-direta",
+  "/app/simulacao/tabela-investidor",
 ];
 
 const viewports = [

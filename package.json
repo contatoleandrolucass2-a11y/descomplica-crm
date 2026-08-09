@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "qa:browser:install": "playwright install chromium",
     "qa:visual:reference": "node scripts/qa/reference-parity.mjs reference",
+    "qa:visual:authenticated": "node scripts/qa/local-authenticated-visual.mjs",
     "qa:security:anonymous": "node scripts/qa/reference-parity.mjs boundary",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "audit": "pnpm audit --audit-level high",

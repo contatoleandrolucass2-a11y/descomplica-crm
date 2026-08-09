@@ -1,5 +1,35 @@
 # Worklog
 
+## 2026-08-09 — consolidação visual das 18 páginas
+
+- Esta entrada supersede o recorte inicial da fundação registrado logo abaixo:
+  as 18 páginas da referência viva agora têm composição visual no catálogo
+  protegido, sem ampliar o escopo funcional ou copiar autoridade comercial do
+  sistema legado.
+- Dashboard, cinco etapas, ranking, Canal de Parcerias, configurações, metas e
+  cinco jornadas de simulação compartilham topbar hierárquica, ícones e o
+  design system navy/cyan/lime. Estados sem fonte mantêm toda a composição e
+  exibem “indisponível” em vez de converter ausência em zero.
+- O hub e as rotas WF13, WF16, CAIXA, WF14 e WF15 foram adicionados ao catálogo
+  com a permissão `crm.simulators.view`, guard server-side e grants de catálogo
+  mínimos. Os formulários são apenas visuais: não têm submit, persistência,
+  fórmula ou resultado ativo.
+- A migration `20260809024000_simulator_visual_catalog.sql` altera somente o
+  catálogo de páginas, a permissão e sua matriz de papéis. Tabelas Qlik, grants
+  de dados, policies, funções comerciais e contratos dos simuladores não foram
+  alterados.
+- O Canal de Parcerias permanece sem leitura direta das tabelas protegidas e
+  sinaliza a integração pendente. Ranking avançado, roleta, prêmios e motores
+  WF13/WF14/WF15/WF16/CAIXA seguem bloqueados para incrementos com fonte oficial.
+- QA autenticado complementar passou em Supabase local isolado com conta QA
+  efêmera e fixtures sintéticas removidas ao final: 72/72 checks responsivos,
+  54/54 checks de tema, 18/18 rotas em zoom de 200%, teclado, reduced-motion e
+  87 capturas sem overflow ou erro de aplicação. A barreira anônima passou nas
+  18 rotas do build local nos quatro viewports.
+- A comparação autenticada em homologação continua bloqueada por ausência de
+  URL e credencial QA dedicadas. Produção, conta Master/Admin pessoal, deploy,
+  merge e criação de usuário remoto não foram usados.
+
 ## 2026-08-09 — fundação de paridade da referência
 
 - A referência viva foi recatalogada em 18 rotas. O checkpoint antigo permanece

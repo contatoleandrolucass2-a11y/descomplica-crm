@@ -16,6 +16,7 @@ export type RankingActivity = {
 };
 
 export type RankingLine = Omit<RankingActivity, "periodKey" | "brokerKey" | "brokerName"> & {
+  key: string;
   name: string;
   memberCount: number;
   baseScore: number;
@@ -65,6 +66,7 @@ export function buildRanking(
   if (scope === "brokers") {
     return selected
       .map((activity) => ({
+        key: `broker:${activity.brokerKey}`,
         name: activity.brokerName,
         managerName: activity.managerName,
         memberCount: 1,
@@ -87,6 +89,7 @@ export function buildRanking(
 
   for (const activity of selected) {
     const current = managers.get(activity.managerName) ?? {
+      key: `manager:${activity.managerName}`,
       name: activity.managerName,
       managerName: activity.managerName,
       memberCount: 0,

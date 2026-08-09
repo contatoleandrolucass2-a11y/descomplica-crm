@@ -46,6 +46,7 @@ describe("authorized navigation component", () => {
     expect(markup).toContain("<details");
     expect(markup).toContain('name="authorized-navigation"');
     expect(markup).toContain("<summary");
+    expect(markup).toContain("<svg");
     expect(markup).toContain("contém a página atual");
     expect(markup).toContain('aria-current="page" href="/app/etapas/visitas"');
     expect(markup).not.toContain("Não autorizada");

@@ -11,6 +11,7 @@ import {
   type NavigationItem,
 } from "@/lib/navigation/presentation";
 
+import { AppPageIcon } from "./AppPageIcon";
 import styles from "./ProtectedShell.module.css";
 
 function NavigationDisclosure({ group, pathname }: { group: NavigationGroup; pathname: string }) {
@@ -57,6 +58,9 @@ function NavigationDisclosure({ group, pathname }: { group: NavigationGroup; pat
         className={`${styles.navigationSummary} ${active ? styles.activeSummary : ""}`}
         ref={summary}
       >
+        <span className={styles.navigationIcon}>
+          <AppPageIcon pageKey={group.page.key} />
+        </span>
         {group.page.name}
         {active ? <span className={styles.visuallyHidden}> — contém a página atual</span> : null}
         <span className={styles.chevron} aria-hidden="true">
@@ -74,8 +78,13 @@ function NavigationDisclosure({ group, pathname }: { group: NavigationGroup; pat
               key={page.key}
               onClick={closeDisclosure}
             >
-              {page.name}
-              <span className={styles.menuDescription}>{page.description}</span>
+              <span className={styles.menuIcon}>
+                <AppPageIcon pageKey={page.key} />
+              </span>
+              <span className={styles.menuCopy}>
+                <span>{page.name}</span>
+                <span className={styles.menuDescription}>{page.description}</span>
+              </span>
             </Link>
           );
         })}
@@ -101,6 +110,9 @@ export function AuthorizedNavigation({ pages }: { pages: NavigationItem[] }) {
                 aria-current={pathname === group.page.path ? "page" : undefined}
                 className={styles.navigationLink}
               >
+                <span className={styles.navigationIcon}>
+                  <AppPageIcon pageKey={group.page.key} />
+                </span>
                 {group.page.name}
               </Link>
             )}

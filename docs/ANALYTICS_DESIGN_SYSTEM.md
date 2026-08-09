@@ -4,8 +4,9 @@
 
 A fundação aproxima o CRM da linguagem navy/cyan/lime da referência viva sem
 copiar seu bundle. Os componentes são Server Components sempre que não há
-interação de navegador. A única lógica client-side do shell permanece restrita
-à rota ativa, disclosure da navegação e troca de tema.
+interação de navegador. As fronteiras client-side ficam restritas à rota ativa,
+disclosure da navegação, troca de tema e formulário visual dos simuladores; este
+último não envia, calcula ou persiste dados.
 
 ## Tokens
 
@@ -26,20 +27,22 @@ completa. Cor nunca é o único indicador de estado.
 
 ## Componentes e contratos
 
-| Componente          | Entrada principal                             | Saída acessível                       | Restrição                            |
-| ------------------- | --------------------------------------------- | ------------------------------------- | ------------------------------------ |
-| `PageHeader`        | título, descrição, metadados e rodapé         | Um único `h1` por página              | Não consulta dados                   |
-| `AnalyticsCard`     | conteúdo e tom                                | `article`                             | Não calcula métricas                 |
-| `MetricCard`        | realizado formatado, detalhe e razão opcional | Valor textual + rosca descrita        | Razão nula não desenha arco          |
-| `FilterBar`         | grupos de links e dimensões indisponíveis     | `section`, `fieldset`, `legend`       | Não recebe opção sem enforcement     |
-| `DonutChart`        | razão e texto já calculados                   | `figure` com nome textual             | Clamp somente no arco SVG            |
-| `FunnelChart`       | etapas na ordem da fonte                      | Lista ordenada legível                | Larguras iguais; não codifica área   |
-| `Gauge`             | razão e texto já calculados                   | `figure` com leitura textual          | Sem thresholds comerciais            |
-| `AnalyticsTable`    | colunas, linhas e chave estável               | `caption`, `scope`, região focável    | Rolagem só no wrapper                |
-| `RankingList`       | entradas já ordenadas e identificadas         | Lista ordenada                        | Não pontua ou desempata              |
-| `AnalyticsSkeleton` | rótulo de carregamento                        | `aria-busy`                           | Animação desligada em reduced-motion |
-| `DataState`         | `empty`, `unavailable` ou `error`             | Estado textual; erro usa `role=alert` | Não mostra erro bruto do backend     |
-| `UnavailableValue`  | motivo seguro opcional                        | “Indisponível”                        | Nunca substitui ausência por zero    |
+| Componente           | Entrada principal                             | Saída acessível                       | Restrição                            |
+| -------------------- | --------------------------------------------- | ------------------------------------- | ------------------------------------ |
+| `PageHeader`         | título, descrição, metadados e rodapé         | Um único `h1` por página              | Não consulta dados                   |
+| `AnalyticsCard`      | conteúdo e tom                                | `article`                             | Não calcula métricas                 |
+| `MetricCard`         | realizado formatado, detalhe e razão opcional | Valor textual + rosca descrita        | Razão nula não desenha arco          |
+| `FilterBar`          | grupos de links e dimensões indisponíveis     | `section`, `fieldset`, `legend`       | Não recebe opção sem enforcement     |
+| `DonutChart`         | razão e texto já calculados                   | `figure` com nome textual             | Clamp somente no arco SVG            |
+| `FunnelChart`        | etapas na ordem da fonte                      | Lista ordenada legível                | Larguras iguais; não codifica área   |
+| `Gauge`              | razão e texto já calculados                   | `figure` com leitura textual          | Sem thresholds comerciais            |
+| `AnalyticsTable`     | colunas, linhas e chave estável               | `caption`, `scope`, região focável    | Rolagem só no wrapper                |
+| `RankingList`        | entradas já ordenadas e identificadas         | Lista ordenada                        | Não pontua ou desempata              |
+| `AnalyticsSkeleton`  | rótulo de carregamento                        | `aria-busy`                           | Animação desligada em reduced-motion |
+| `DataState`          | `empty`, `unavailable` ou `error`             | Estado textual; erro usa `role=alert` | Não mostra erro bruto do backend     |
+| `UnavailableValue`   | motivo seguro opcional                        | “Indisponível”                        | Nunca substitui ausência por zero    |
+| `AppPageIcon`        | seção semântica do catálogo                   | SVG decorativo consistente            | Não decide permissão ou rota         |
+| `SimulatorWorkspace` | catálogo imutável de campos e resultados      | Formulário e painel completos         | Sem action, fórmula ou persistência  |
 
 ## Regras de métricas
 
@@ -64,7 +67,8 @@ empresa aparecem apenas como dimensões indisponíveis, sem controles simulados.
 
 ## Navegação
 
-`AuthorizedNavigation` monta a árvore depois do filtro de permissão. Pais sem
+`AuthorizedNavigation` monta a árvore depois do filtro de permissão e associa
+ícones SVG locais por domínio. Pais sem
 filhos são links; pais com filhos usam `details`/`summary`, incluem a visão geral
 e os filhos autorizados. Os grupos são mutuamente exclusivos e fecham ao clicar
 fora, ao escolher um link ou com `Escape`; nesse último caso, o foco retorna ao
@@ -85,14 +89,26 @@ disclosure. Filhos cujo pai não veio no conjunto autorizado são omitidos.
   `prefers-reduced-motion: reduce`;
 - três temas baseados nos mesmos tokens semânticos.
 
+## Simuladores
+
+O hub e as cinco jornadas usam o mesmo catálogo tipado. Campos mantêm labels,
+legends, hints, tipos e ordem visual; obrigatórios exibem validação local após
+interação com `aria-invalid` e mensagem associada. O painel lateral mantém
+todos os espaços de resultado como indisponíveis. O CTA é um `button`
+desabilitado, o formulário intercepta submit localmente e não possui `action`.
+A mensagem normativa é
+“Cálculo temporariamente indisponível — regra aguardando validação”.
+
 ## Dependência de QA
 
 `@playwright/test` é dependência de desenvolvimento porque o incremento exige
 capturas repetíveis e verificação do limite anônimo nos quatro viewports com
 reduced-motion. O harness importa o pacote diretamente e os scripts
-`qa:visual:reference` e `qa:security:anonymous` comprovam o uso. Temas, teclado e
-zoom das páginas protegidas integram o plano autenticado bloqueado, não o
-harness atual. Nenhuma dependência de runtime foi adicionada.
+`qa:visual:reference`, `qa:security:anonymous` e `qa:visual:authenticated`
+comprovam o uso. A revisão autenticada usa um runner fail-closed que cria conta
+QA e fixtures somente no Supabase local, valida seus marcadores através da RLS e
+remove tudo no `finally`; nenhum dado de QA entra no runtime de produção.
+Nenhuma dependência de runtime foi adicionada.
 
 ## Localização
 

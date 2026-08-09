@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Consolida a paridade visual das 18 páginas: ranking, Canal de Parcerias,
+  configurações, metas e cinco jornadas de simulação passam a compartilhar a
+  mesma linguagem analítica navy/cyan/lime.
+- Adiciona ao catálogo protegido o hub e as rotas WF13, WF16, CAIXA, WF14 e
+  WF15 com `crm.simulators.view`, guard server-side e matriz de papéis
+  versionada.
+- Entrega formulários e painéis completos dos simuladores com motores
+  fail-closed: validação acessível fica somente no navegador, sem submit,
+  persistência, fórmula ou valor fictício; todo resultado permanece
+  explicitamente indisponível.
+- Restaura diagnóstico, gargalo e plano de ação do dashboard e ícones
+  semânticos na navegação autorizada, sem ampliar acesso ou inferir regra
+  comercial.
+- Adiciona runner autenticado estritamente local que cria conta/fixtures
+  efêmeras, valida marcador e contagens via RLS, captura as 18 rotas e remove
+  tudo no encerramento, sem persistir credenciais.
 - Versiona o inventário das 18 páginas da referência viva, matriz de paridade,
   catálogo de componentes/fontes e baseline visual com máscara opaca antes da
   captura.

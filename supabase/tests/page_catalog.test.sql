@@ -1,6 +1,6 @@
 begin;
 
-select plan(29);
+select plan(30);
 
 select has_table('public', 'app_pages', 'app_pages exists');
 
@@ -11,14 +11,14 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  9::bigint,
-  'nine Gate 1 permissions are seeded'
+  10::bigint,
+  'ten platform and CRM permissions are seeded'
 );
 
 select is(
   (select count(*) from public.app_pages),
-  15::bigint,
-  'all CRM and initial admin pages are seeded'
+  21::bigint,
+  'all reference CRM and initial admin pages are seeded'
 );
 
 select is(
@@ -33,12 +33,13 @@ select is(
           'pages.view',
           'crm.dashboard.view',
           'crm.stages.view',
-          'crm.ranking.view'
+          'crm.ranking.view',
+          'crm.simulators.view'
         )
-    ) = 4
+    ) = 5
   ),
   8::bigint,
-  'all eight profiles receive the exact core CRM read permissions'
+  'all eight profiles receive the exact core CRM read permissions including simulators'
 );
 
 select is(
@@ -69,6 +70,25 @@ select is(
   ),
   '/app/canal-de-parcerias|Canal de Parcerias|Ranking das imobiliárias parceiras|crm|crm.ranking.view|65|true|true',
   'the remote partnership catalog identity is versioned explicitly'
+);
+
+select is(
+  (
+    select string_agg(
+      concat_ws('|', key, path, permission_key, coalesce(parent_key, 'root')),
+      ','
+      order by sort_order
+    )
+    from public.app_pages
+    where section = 'simulation'
+  ),
+  'crm.simulation|/app/simulacao|crm.simulators.view|root,'
+    || 'crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view|crm.simulation,'
+    || 'crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view|crm.simulation,'
+    || 'crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view|crm.simulation,'
+    || 'crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view|crm.simulation,'
+    || 'crm.simulation.wf15|/app/simulacao/tabela-investidor|crm.simulators.view|crm.simulation',
+  'all simulator routes use one explicit authorized hierarchy'
 );
 
 select has_function(
@@ -169,7 +189,7 @@ set local role authenticated;
 
 select is(
   (select count(*) from public.app_pages),
-  8::bigint,
+  14::bigint,
   'regular user sees only authorized CRM pages'
 );
 
@@ -227,7 +247,7 @@ select lives_ok(
 
 select is(
   (select count(*) from public.list_app_pages_for_management()),
-  15::bigint,
+  21::bigint,
   'page manager RPC returns active and inactive catalog entries'
 );
 
@@ -237,7 +257,7 @@ set local role authenticated;
 
 select is(
   (select count(*) from public.app_pages),
-  7::bigint,
+  13::bigint,
   'regular user does not see an inactive page'
 );
 

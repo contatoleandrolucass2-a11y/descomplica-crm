@@ -118,6 +118,22 @@
   color: var(--analytics-cyan);
 }
 
+.navigationIcon,
+.menuIcon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.navigationIcon svg {
+  width: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
 .navigationDetails {
   position: relative;
 }
@@ -157,7 +173,10 @@
 
 .menuLink {
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   min-height: 2.9rem;
+  align-items: center;
+  gap: 0.65rem;
   align-content: center;
   border-radius: 0.7rem;
   padding: 0.55rem 0.7rem;
@@ -165,6 +184,29 @@
   font-size: 0.79rem;
   font-weight: 700;
   text-decoration: none;
+}
+
+.menuIcon {
+  width: 2rem;
+  aspect-ratio: 1;
+  border-radius: 0.6rem;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-cyan-strong);
+}
+
+.menuIcon svg {
+  width: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.menuCopy,
+.menuCopy > span {
+  display: block;
+  min-width: 0;
 }
 
 .menuLink:hover {
@@ -250,7 +292,7 @@
   color: #ffffff;
 }
 
-@media (max-width: 64rem) {
+@media (max-width: 80rem) {
   .topbarInner {
     grid-template-columns: minmax(0, 1fr) auto;
   }

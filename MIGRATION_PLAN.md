@@ -53,10 +53,19 @@ Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende 
       skeletons e estados analíticos reutilizáveis.
 - [x] Restaurar visualmente dashboard e cinco páginas de etapas usando o read
       model existente.
+- [x] Restaurar a composição visual de ranking, Canal de Parcerias,
+      configurações, metas do funil, metas de parcerias e metas de pontos sem
+      alterar seus contratos seguros.
+- [x] Criar hub e cinco jornadas visuais de simulação, protegidos por catálogo,
+      permissão e guard; manter todos os motores bloqueados.
+- [x] Executar QA autenticado complementar com conta dedicada e fixtures
+      sintéticas no Supabase local; produção não foi usada nem alterada.
 - [ ] Executar comparação autenticada em homologação com conta QA dedicada.
-      Bloqueio atual: ambiente e credenciais QA não foram disponibilizados nem
-      localizados pelos canais seguros inspecionados; produção não pode ser usada.
-- [ ] Tratar ranking avançado, Canal de Parcerias, simuladores, roleta e prêmios
+      Bloqueio: ambiente e credenciais QA de homologação continuam ausentes;
+      a evidência local não substitui este gate.
+- [ ] Conectar fontes pendentes do Canal de Parcerias e motores WF13, WF14,
+      WF15, WF16 e CAIXA somente em incrementos próprios com regra oficial.
+- [ ] Tratar ranking avançado, roleta, prêmios e novos cálculos comerciais
       somente nos incrementos separados já aprovados.
 
 ## Gate 4 — entrega

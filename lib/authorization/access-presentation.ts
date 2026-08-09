@@ -6,6 +6,7 @@ const CRM_READER_PERMISSIONS = [
   "crm.dashboard.view",
   "crm.stages.view",
   "crm.ranking.view",
+  "crm.simulators.view",
 ] as const satisfies readonly PermissionKey[];
 
 const ADMIN_PERMISSIONS = Object.keys(PERMISSIONS) as PermissionKey[];

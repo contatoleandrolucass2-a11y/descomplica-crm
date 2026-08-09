@@ -4,11 +4,11 @@
 
 A autorização combina o papel do usuário com exceções individuais. Uma exceção `deny` vence tanto `allow` quanto a permissão herdada do papel. Usuários sem perfil ativo não recebem contexto de autorização e falham fechados nas policies RLS.
 
-| Grupo de papéis                                                             | Páginas padrão                    | Administração                                               |
-| --------------------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------- |
-| `master`                                                                    | todas as páginas CRM              | usuários, papéis, exceções e catálogo                       |
-| `admin`                                                                     | todas as páginas CRM              | usuários, papéis, exceções e catálogo, sujeito à hierarquia |
-| `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | dashboard, cinco etapas e ranking | nenhuma                                                     |
+| Grupo de papéis                                                             | Páginas padrão                                                                                     | Administração                                               |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `master`                                                                    | todas as páginas CRM                                                                               | usuários, papéis, exceções e catálogo                       |
+| `admin`                                                                     | todas as páginas CRM                                                                               | usuários, papéis, exceções e catálogo, sujeito à hierarquia |
+| `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | dashboard, cinco etapas, ranking, Canal de Parcerias e seis páginas visuais de simulação bloqueada | nenhuma                                                     |
 
 As permissões administrativas respeitam hierarquia estrita: o ator somente modifica usuários e papéis abaixo do próprio nível. O próprio usuário não pode alterar seu papel, status ou exceções.
 
@@ -18,16 +18,25 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 
 ## Catálogo
 
-`public.app_pages` contém 15 registros versionados:
+`public.app_pages` contém 21 registros versionados:
 
 - dashboard, cinco etapas e ranking;
 - identidade externa do Canal de Parcerias em `/app/canal-de-parcerias`;
 - configurações, metas do funil, parcerias e pontos;
+- hub de simulação e cinco jornadas visuais WF13, WF16, CAIXA, WF14 e WF15;
 - início administrativo, usuários e catálogo de páginas.
 
-O Canal de Parcerias possui uma rota protegida que exibe apenas o estado “página em desenvolvimento”. Ela reutiliza `crm.ranking.view` e não consulta as tabelas Qlik. O contrato de leitura dos dados continua exigindo incremento separado antes de qualquer grant.
+O Canal de Parcerias possui composição visual protegida com estados explícitos
+de integração pendente. Ela reutiliza `crm.ranking.view` e não consulta as
+tabelas Qlik. O contrato de leitura dos dados continua exigindo incremento
+separado antes de qualquer grant.
 
-Uma tentativa autorizada de abrir esse caminho retorna o placeholder protegido.
+As seis rotas de simulação exigem `crm.simulators.view`. A permissão integra o
+conjunto padrão de leitura CRM dos oito papéis; seus motores continuam sem
+submit, fórmula ou persistência. Um administrador pode remover o acesso de um
+usuário por override `deny` e pode desativar cada página no catálogo, sem
+substituir o guard server-side.
+
 Falta de permissão autenticada usa o interruptor `forbidden()` do Next.js e
 retorna a superfície `AUTH-403`; caminhos realmente inexistentes usam
 `ROUTE-404`, e falhas inesperadas permanecem 500 com mensagem distinta.
