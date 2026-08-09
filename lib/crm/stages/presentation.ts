@@ -5,7 +5,7 @@ export type StageComparison = {
   previousLabel: string;
   previous: number | null;
   currentLabel: string;
-  current: number;
+  current: number | null;
   goal: number | null;
 };
 
@@ -24,7 +24,7 @@ export function buildStageComparisons(metric: DashboardMetric): StageComparison[
       previousLabel: "14 dias anteriores",
       previous: metric.previousFourteenDays,
       currentLabel: "Últimos 14 dias",
-      current: metric.lastFourteenDays ?? 0,
+      current: metric.lastFourteenDays,
       goal: null,
     },
     {
@@ -32,7 +32,7 @@ export function buildStageComparisons(metric: DashboardMetric): StageComparison[
       previousLabel: "7 dias anteriores",
       previous: metric.previousSevenDays,
       currentLabel: "Últimos 7 dias",
-      current: metric.lastSevenDays ?? metric.currentWeek,
+      current: metric.lastSevenDays,
       goal: null,
     },
     {
@@ -52,12 +52,4 @@ export function buildStageComparisons(metric: DashboardMetric): StageComparison[
       goal: metric.goalToday,
     },
   ];
-}
-
-export function stageAttainment(progress: number | null) {
-  if (progress === null) return { label: "Sem meta definida", tone: "slate" } as const;
-  if (progress >= 1) return { label: "Meta atingida", tone: "emerald" } as const;
-  if (progress >= 0.8) return { label: "Próximo da meta", tone: "cyan" } as const;
-  if (progress >= 0.5) return { label: "Atenção ao ritmo", tone: "amber" } as const;
-  return { label: "Gap relevante", tone: "red" } as const;
 }

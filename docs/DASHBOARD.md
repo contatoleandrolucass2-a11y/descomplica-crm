@@ -27,13 +27,31 @@ O contrato usa tipos PostgreSQL próprios, chaves compostas e constraints de dom
 ## Interface
 
 - seleção de visão e período pela URL, sem estado oculto no navegador;
-- metas e progresso das cinco etapas;
-- conversão sequencial do funil;
+- cards e roscas das cinco etapas, desenhadas apenas com meta oficial positiva;
+- funil do período e cinco comparativos mensais sustentados pelo read model;
+- relações sequenciais explicitamente rotuladas como comparação entre volumes
+  agregados, não como conversão de coorte;
 - valor vendido específico de cada visão/período;
-- empreendimentos em destaque;
+- ranking de oportunidades por empreendimento, sem cálculo no componente;
+- tabela com mês, históricos, semana, hoje e metas, mantendo campos nulos como
+  “Indisponível”;
 - data, fonte e horário do snapshot;
-- layout validado em 390×844 e 1440×900 sem overflow no corpo.
+- filtros dimensionais apenas como pendência explícita, sem controles sem efeito;
+- identidade navy/cyan/lime nos temas claro, equilibrado e escuro.
+
+A projeção proporcional observada na referência viva não foi reproduzida porque
+não existe fórmula oficial versionada. Filtros por gerente, responsável, empresa
+e canal detalhado continuam indisponíveis até haver enforcement no servidor e
+no banco.
 
 ## Validação
 
-Os testes pgTAP cobrem tabelas, RLS, grants, constraints, leitura autorizada e override `deny`. Os testes Vitest cobrem seleção de parâmetros, conversão e progresso. Uma fixture temporária foi usada somente no Supabase local para o teste autenticado no navegador e removida por `supabase db reset`.
+Os testes pgTAP cobrem tabelas, RLS, grants, constraints, leitura autorizada e
+override `deny`. Os testes Vitest cobrem seleção de parâmetros, cálculos
+existentes, snapshots visuais e preservação de indisponibilidade.
+
+A comparação autenticada desta fundação está bloqueada porque URL de homologação
+e credencial QA dedicada não foram disponibilizadas nem localizadas pelos canais
+seguros inspecionados. Produção não foi usada para QA autenticada; somente sua
+barreira anônima compõe o baseline “antes”. Contas pessoais não foram usadas. O
+harness versionado valida a referência sanitizada e essa barreira anônima.

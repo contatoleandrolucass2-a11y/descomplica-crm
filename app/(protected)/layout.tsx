@@ -22,39 +22,53 @@ import { enforceAuthorization } from "@/lib/authorization/enforce";
 import { logoutAction } from "@/lib/auth/actions/logout";
 import { getRoleLabel } from "@/lib/authorization/roles";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
+import { getNavigationHome } from "@/lib/navigation/presentation";
 
 import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
+import styles from "./_components/ProtectedShell.module.css";
 import { ThemeSwitch } from "./_components/ThemeSwitch";
 
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   const context = await enforceAuthorization();
   const pages = await getAuthorizedNavigation(context);
+  const navigationHome = getNavigationHome(pages);
+  const brand = (
+    <>
+      <span className={styles.brandMark} aria-hidden="true">
+        D
+      </span>
+      <span>
+        <span className={styles.brandName}>Descomplica CRM</span>
+        <span className={styles.role}>{getRoleLabel(context.roleKey)}</span>
+      </span>
+    </>
+  );
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <div>
-            <Link href="/app" className="font-semibold text-slate-900">
-              Descomplica CRM
+    <div className={styles.shell}>
+      <header className={styles.topbar}>
+        <div className={styles.topbarInner}>
+          {navigationHome ? (
+            <Link
+              href={navigationHome.path}
+              className={styles.brand}
+              aria-label={`Descomplica CRM — ${navigationHome.name}`}
+            >
+              {brand}
             </Link>
-            <p className="text-xs tracking-wide text-slate-500 uppercase">
-              {getRoleLabel(context.roleKey)}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          ) : (
+            <div className={styles.brand}>{brand}</div>
+          )}
+          <AuthorizedNavigation pages={pages} />
+          <div className={styles.actions}>
             <ThemeSwitch />
             <form action={logoutAction}>
-              <button
-                type="submit"
-                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-              >
+              <button type="submit" className={styles.logout}>
                 Sair
               </button>
             </form>
           </div>
         </div>
-        <AuthorizedNavigation pages={pages} />
       </header>
       {children}
     </div>

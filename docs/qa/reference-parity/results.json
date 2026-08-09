@@ -1,0 +1,458 @@
+{
+  "schemaVersion": 1,
+  "reference": {
+    "passed": true,
+    "capturedAt": "2026-08-09T02:00:46.144Z",
+    "provenance": {
+      "captureCommit": "6eb4b0ec2895ce7348333a56b354375d57546312",
+      "worktreeDirtyAtCapture": true,
+      "worktreeFingerprint": "1d2b4a80163d9d299ea246b9a47cc2212466863f89ebf014cd81fb7bbb25b07c",
+      "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1"
+    },
+    "routeCount": 18,
+    "routes": [
+      {
+        "route": "/",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 237,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/etapas/oportunidades",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/etapas/oportunidades",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 204,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/etapas/agendamentos",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/etapas/agendamentos",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 204,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/etapas/visitas",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/etapas/visitas",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 204,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/etapas/pastas",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/etapas/pastas",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 204,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/etapas/vendas",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/etapas/vendas",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 204,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/ranking",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/ranking",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 213,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/canal-de-parcerias",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/canal-de-parcerias",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 132,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/configuracoes",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/configuracoes",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 28,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/configuracoes/metas",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/configuracoes/metas",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 257,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/configuracoes/metas/parcerias",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/configuracoes/metas/parcerias",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 314,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/configuracoes/metas/pontos",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/configuracoes/metas/pontos",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 213,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/simulacao",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/simulacao",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 56,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/simulacao/associativo-fluxo-linear",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/simulacao/associativo-fluxo-linear",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 91,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/simulacao/calcular-documentacao",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/simulacao/calcular-documentacao",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 125,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/simulacao/caixa",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/simulacao/caixa",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 152,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/simulacao/tabela-direta",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/simulacao/tabela-direta",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 74,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      },
+      {
+        "route": "/simulacao/tabela-investidor",
+        "status": 200,
+        "finalOrigin": "https://descomplicapro.com.br",
+        "finalPath": "/simulacao/tabela-investidor",
+        "hasUnexpectedLocationSuffix": false,
+        "redactionCount": 57,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureLocationStable": true
+      }
+    ],
+    "notes": [
+      "All non-whitelisted text and analytical visuals were covered before pixels left browser memory.",
+      "Raw PNG, HTML, network bodies, cookies, HAR, trace and video were not written to disk."
+    ]
+  },
+  "target-before": {
+    "passed": true,
+    "capturedAt": "2026-08-09T01:57:14.641Z",
+    "origin": "https://crm.descomplicapro.com.br",
+    "provenance": {
+      "captureCommit": "6eb4b0ec2895ce7348333a56b354375d57546312",
+      "worktreeDirtyAtCapture": true,
+      "worktreeFingerprint": "12d7b81719db2853298022b105a1c84fd9a09012644fc2b2979e1196d74d2bf7",
+      "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1"
+    },
+    "routes": [
+      {
+        "route": "/app",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/oportunidades",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/agendamentos",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/visitas",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/pastas",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/vendas",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      }
+    ],
+    "viewports": [
+      {
+        "viewport": "desktop-1440x900",
+        "finalOrigin": "https://crm.descomplicapro.com.br",
+        "finalPath": "/login",
+        "hasUnexpectedLocationSuffix": false,
+        "status": 200,
+        "finalSecurityHeadersPresent": true,
+        "commercialContentCount": 0,
+        "loginSurfacePresent": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureValidated": true
+      },
+      {
+        "viewport": "notebook-1280x720",
+        "finalOrigin": "https://crm.descomplicapro.com.br",
+        "finalPath": "/login",
+        "hasUnexpectedLocationSuffix": false,
+        "status": 200,
+        "finalSecurityHeadersPresent": true,
+        "commercialContentCount": 0,
+        "loginSurfacePresent": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureValidated": true
+      },
+      {
+        "viewport": "tablet-768x1024",
+        "finalOrigin": "https://crm.descomplicapro.com.br",
+        "finalPath": "/login",
+        "hasUnexpectedLocationSuffix": false,
+        "status": 200,
+        "finalSecurityHeadersPresent": true,
+        "commercialContentCount": 0,
+        "loginSurfacePresent": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureValidated": true
+      },
+      {
+        "viewport": "mobile-390x844",
+        "finalOrigin": "https://crm.descomplicapro.com.br",
+        "finalPath": "/login",
+        "hasUnexpectedLocationSuffix": false,
+        "status": 200,
+        "finalSecurityHeadersPresent": true,
+        "commercialContentCount": 0,
+        "loginSurfacePresent": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureValidated": true
+      }
+    ],
+    "notes": [
+      "No cookies or storage state were supplied.",
+      "Screenshots contain the empty login surface only."
+    ]
+  },
+  "target-after": {
+    "passed": true,
+    "capturedAt": "2026-08-09T01:57:33.738Z",
+    "origin": "http://127.0.0.1:3100",
+    "provenance": {
+      "captureCommit": "6eb4b0ec2895ce7348333a56b354375d57546312",
+      "worktreeDirtyAtCapture": true,
+      "worktreeFingerprint": "12d7b81719db2853298022b105a1c84fd9a09012644fc2b2979e1196d74d2bf7",
+      "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1"
+    },
+    "routes": [
+      {
+        "route": "/app",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/oportunidades",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/agendamentos",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/visitas",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/pastas",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/etapas/vendas",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      }
+    ],
+    "viewports": [
+      {
+        "viewport": "desktop-1440x900",
+        "finalOrigin": "http://127.0.0.1:3100",
+        "finalPath": "/login",
+        "hasUnexpectedLocationSuffix": false,
+        "status": 200,
+        "finalSecurityHeadersPresent": true,
+        "commercialContentCount": 0,
+        "loginSurfacePresent": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureValidated": true
+      },
+      {
+        "viewport": "notebook-1280x720",
+        "finalOrigin": "http://127.0.0.1:3100",
+        "finalPath": "/login",
+        "hasUnexpectedLocationSuffix": false,
+        "status": 200,
+        "finalSecurityHeadersPresent": true,
+        "commercialContentCount": 0,
+        "loginSurfacePresent": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureValidated": true
+      },
+      {
+        "viewport": "tablet-768x1024",
+        "finalOrigin": "http://127.0.0.1:3100",
+        "finalPath": "/login",
+        "hasUnexpectedLocationSuffix": false,
+        "status": 200,
+        "finalSecurityHeadersPresent": true,
+        "commercialContentCount": 0,
+        "loginSurfacePresent": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureValidated": true
+      },
+      {
+        "viewport": "mobile-390x844",
+        "finalOrigin": "http://127.0.0.1:3100",
+        "finalPath": "/login",
+        "hasUnexpectedLocationSuffix": false,
+        "status": 200,
+        "finalSecurityHeadersPresent": true,
+        "commercialContentCount": 0,
+        "loginSurfacePresent": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "postCaptureMutationCount": 0,
+        "postCaptureValidated": true
+      }
+    ],
+    "notes": [
+      "No cookies or storage state were supplied.",
+      "Screenshots contain the empty login surface only."
+    ]
+  }
+}

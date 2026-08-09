@@ -2,18 +2,29 @@
 
 O shell combina autenticação server-side com dois componentes client-side pequenos:
 
-- `AuthorizedNavigation` recebe somente as páginas já filtradas por catálogo, RLS e permissões; usa a rota atual para `aria-current` e destaque visual.
+- `AuthorizedNavigation` recebe somente as páginas já filtradas por catálogo,
+  RLS e permissões; monta grupos pai/filho, marca o ancestral ativo e omite
+  filhos órfãos.
 - `ThemeSwitch` oferece `light`, `balanced` e `dark`, persiste apenas a preferência não sensível em `localStorage` e continua funcional sem armazenamento.
 
 O tema não altera autorização, dados ou cookies de sessão. A preferência é aplicada em `data-theme` no elemento `html`; tokens globais ajustam superfícies, texto, bordas e campos sem copiar os milhares de estilos legados.
 
-O CSS inclui foco visível e respeita `prefers-reduced-motion`. A navegação mantém rolagem horizontal em telas estreitas e quebra em múltiplas linhas a partir de `sm`.
+O CSS inclui foco visível e respeita `prefers-reduced-motion`. A topbar usa a
+identidade navy/cyan/lime e a navegação quebra em múltiplas linhas no reflow.
+Grupos usam `details`/`summary`, funcionam sem hover, fecham com `Escape` e
+devolvem foco ao disclosure. Também fecham ao clicar fora ou selecionar um link,
+e somente um grupo permanece aberto por vez.
 
 ## Validação
 
 - Vitest valida o catálogo fechado dos três temas e rejeita valores persistidos desconhecidos.
-- QA autenticada confirmou temas claro/equilibrado/escuro, persistência ao navegar para Ranking e item ativo.
-- Em 1280 px, `clientWidth` e `scrollWidth` permaneceram iguais.
+- O harness versionado cobre a referência sanitizada e a barreira anônima nos
+  quatro viewports com reduced-motion.
+- A automação autenticada para três temas, teclado e zoom de 200% ainda precisa
+  ser implementada e executada quando forem disponibilizadas homologação e
+  conta QA segura.
+  Nesta fundação, essa etapa ficou bloqueada; produção não foi usada como
+  substituta.
 
 Filtros dimensionais do dashboard não pertencem a este incremento: eles dependem de registros normalizados por canal, gerente, responsável e empresa. Até esse read model existir, a interface não oferece filtros sem efeito ou dados demonstrativos.
 

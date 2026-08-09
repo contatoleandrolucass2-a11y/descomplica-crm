@@ -13,21 +13,35 @@ import {
 } from "@/lib/crm/dashboard/catalog";
 import { loadDashboardReadModel, type DashboardMetric } from "@/lib/crm/dashboard/data";
 import {
-  calculateConversion,
+  buildMonthlyFunnelSnapshots,
+  buildPeriodFunnelReadings,
   calculateProgress,
-  clampPercentage,
+  metricValueForPeriod,
 } from "@/lib/crm/dashboard/presentation";
 import {
   getSalesforceIngestConfiguration,
   getSalesforceRefreshConfiguration,
 } from "@/lib/crm/salesforce/config";
-import {
-  DATA_UNAVAILABLE_LABEL,
-  GOALS_UNAVAILABLE_LABEL,
-  availableCommercialValue,
-} from "@/lib/crm/source-availability";
+import { GOALS_UNAVAILABLE_LABEL, availableCommercialValue } from "@/lib/crm/source-availability";
+import { CRM_STAGES } from "@/lib/crm/stages/catalog";
 
 import { SalesforceRefreshButton } from "./_components/SalesforceRefreshButton";
+import {
+  AnalyticsCard,
+  AnalyticsTable,
+  DataState,
+  FilterBar,
+  FilterGroup,
+  FilterLink,
+  FunnelChart,
+  MetricCard,
+  PageHeader,
+  RankingList,
+  SectionHeading,
+  UnavailableValue,
+  type AnalyticsColumn,
+  type ChartAccent,
+} from "./_components/analytics";
 
 export const metadata = { title: "Dashboard comercial" };
 
@@ -42,13 +56,26 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 0,
 });
 
-function metricValue(metric: DashboardMetric, period: DashboardPeriodKey) {
-  const config = DASHBOARD_PERIODS[period];
-  return { current: metric[config.currentField], goal: metric[config.goalField] };
-}
+const STAGE_ACCENTS: Record<DashboardStageKey, ChartAccent> = {
+  opportunities: "cyan",
+  appointments: "blue",
+  visits: "violet",
+  folders: "teal",
+  sales: "emerald",
+};
 
 function dashboardHref(view: DashboardViewKey, period: DashboardPeriodKey) {
   return `/app?view=${encodeURIComponent(view)}&period=${encodeURIComponent(period)}`;
+}
+
+function optionalNumber(value: number | null, reason: string) {
+  return value === null ? <UnavailableValue reason={reason} /> : numberFormatter.format(value);
+}
+
+interface RealizedRow {
+  key: DashboardStageKey;
+  label: string;
+  metric: DashboardMetric;
 }
 
 export default async function AppHomePage({
@@ -69,27 +96,22 @@ export default async function AppHomePage({
 
   if (result.status === "empty") {
     return (
-      <main className="px-4 py-12 sm:px-6">
-        <div className="mx-auto max-w-4xl rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200 sm:p-12">
-          <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-800">
-            Aguardando dados
-          </span>
-          <h1 className="mt-5 text-3xl font-semibold text-slate-950">Dashboard comercial</h1>
-          <p className="mt-3 max-w-2xl text-slate-600">
-            A estrutura segura do dashboard está pronta, mas ainda não existe um snapshot real
-            carregado. Nenhum dado demonstrativo é usado como substituto.
-          </p>
-          <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
-            {ingestConfiguration.available
-              ? "A ingestão autenticada está pronta para receber o primeiro snapshot versionado."
-              : "A integração de dados está indisponível neste ambiente."}
-          </div>
-          {canRefresh ? (
-            <div className="mt-6 rounded-2xl bg-slate-950 p-5 text-white">
+      <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+        <DataState
+          variant="empty"
+          title="Dashboard aguardando snapshot real"
+          description={
+            ingestConfiguration.available
+              ? "A ingestão autenticada está pronta. Nenhum dado demonstrativo substitui o snapshot comercial validado."
+              : "A integração de dados está indisponível neste ambiente. Nenhum dado demonstrativo é exibido."
+          }
+          headingLevel="h1"
+          action={
+            canRefresh ? (
               <SalesforceRefreshButton available={refreshConfiguration.available} />
-            </div>
-          ) : null}
-        </div>
+            ) : undefined
+          }
+        />
       </main>
     );
   }
@@ -99,220 +121,299 @@ export default async function AppHomePage({
   const stages = Object.entries(DASHBOARD_STAGES) as Array<
     [DashboardStageKey, (typeof DASHBOARD_STAGES)[DashboardStageKey]]
   >;
+  const selectedFunnel = buildPeriodFunnelReadings(metrics, selectedPeriod);
+  const monthlySnapshots = buildMonthlyFunnelSnapshots(metrics, dashboard.goalsAvailable);
+  const realizedRows: RealizedRow[] = stages.map(([key, stage]) => ({
+    key,
+    label: stage.label,
+    metric: metrics[key],
+  }));
+  const unavailableReason = "A janela não existe no snapshot validado atual.";
+  const goalsReason = "A fonte oficial de metas ainda não está disponível.";
+  const realizedColumns: Array<AnalyticsColumn<RealizedRow>> = [
+    { key: "stage", label: "Etapa", render: (row) => row.label },
+    {
+      key: "month",
+      label: "Mês atual",
+      align: "right",
+      render: (row) => numberFormatter.format(row.metric.currentMonth),
+    },
+    {
+      key: "previous-month",
+      label: "Mês anterior",
+      align: "right",
+      render: (row) => optionalNumber(row.metric.previousMonth, unavailableReason),
+    },
+    {
+      key: "year-average",
+      label: "Média dos meses encerrados no ano",
+      align: "right",
+      render: (row) => optionalNumber(row.metric.yearClosedMonthsAverage, unavailableReason),
+    },
+    {
+      key: "three-month-average",
+      label: "Média 3 meses",
+      align: "right",
+      render: (row) => optionalNumber(row.metric.lastThreeClosedMonthsAverage, unavailableReason),
+    },
+    {
+      key: "last-fourteen",
+      label: "Últimos 14 dias",
+      align: "right",
+      render: (row) => optionalNumber(row.metric.lastFourteenDays, unavailableReason),
+    },
+    {
+      key: "last-seven",
+      label: "Últimos 7 dias",
+      align: "right",
+      render: (row) => optionalNumber(row.metric.lastSevenDays, unavailableReason),
+    },
+    {
+      key: "week",
+      label: "Semana",
+      align: "right",
+      render: (row) => numberFormatter.format(row.metric.currentWeek),
+    },
+    {
+      key: "today",
+      label: "Hoje",
+      align: "right",
+      render: (row) => numberFormatter.format(row.metric.currentToday),
+    },
+    {
+      key: "goal",
+      label: "Meta mensal",
+      align: "right",
+      render: (row) =>
+        dashboard.goalsAvailable && row.metric.goalMonth > 0 ? (
+          numberFormatter.format(row.metric.goalMonth)
+        ) : (
+          <UnavailableValue
+            reason={dashboard.goalsAvailable ? "Meta não definida." : goalsReason}
+          />
+        ),
+    },
+  ];
   const salesValue = dashboard.salesValue[selectedView][selectedPeriod];
 
   return (
-    <main className="px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-7xl">
-        <section className="overflow-hidden rounded-3xl bg-slate-950 px-6 py-8 text-white shadow-xl sm:px-10">
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div>
-              <p className="text-sm font-medium tracking-wide text-cyan-300 uppercase">
-                Visão comercial
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Dashboard do funil</h1>
-              <p className="mt-3 max-w-2xl text-slate-300">
-                {DASHBOARD_VIEWS[selectedView].description}
-              </p>
-            </div>
-            <div className="flex w-full min-w-0 flex-col gap-4 rounded-2xl bg-white/10 px-5 py-4 text-left ring-1 ring-white/15 sm:w-auto sm:text-right">
-              <p className="text-xs tracking-wide text-slate-300 uppercase">Atualizado em</p>
-              <strong className="mt-1 block text-sm">
-                {new Intl.DateTimeFormat("pt-BR", {
-                  dateStyle: "short",
-                  timeStyle: "short",
-                  timeZone: dashboard.timezone,
-                }).format(new Date(dashboard.generatedAt))}
-              </strong>
-              <span className="mt-1 block text-xs break-words text-slate-400">
-                {dashboard.source}
-              </span>
+    <main className="px-4 py-6 sm:px-6 sm:py-10">
+      <div className="mx-auto grid max-w-7xl gap-7">
+        <PageHeader
+          eyebrow="Visão comercial autorizada"
+          title="Dashboard do funil"
+          description={DASHBOARD_VIEWS[selectedView].description}
+          meta={
+            <div className="grid gap-3">
+              <dl className="grid gap-3">
+                <div>
+                  <dt className="text-xs tracking-wide text-slate-300 uppercase">Atualizado em</dt>
+                  <dd className="mt-1 font-semibold text-white">
+                    {new Intl.DateTimeFormat("pt-BR", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                      timeZone: dashboard.timezone,
+                    }).format(new Date(dashboard.generatedAt))}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs tracking-wide text-slate-300 uppercase">
+                    Data de referência
+                  </dt>
+                  <dd className="mt-1 font-semibold text-white">
+                    {new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
+                      new Date(`${dashboard.referenceDate}T00:00:00Z`),
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
+                  <dd className="mt-1 break-words text-slate-100">{dashboard.source}</dd>
+                </div>
+              </dl>
               {canRefresh ? (
-                <SalesforceRefreshButton available={refreshConfiguration.available} />
+                <div>
+                  <SalesforceRefreshButton available={refreshConfiguration.available} />
+                </div>
               ) : null}
             </div>
-          </div>
+          }
+          footer={
+            authorization.permissions.includes("crm.stages.view") ? (
+              <nav aria-label="Etapas do funil" className="flex flex-wrap gap-2">
+                {CRM_STAGES.map((stage) => (
+                  <Link
+                    key={stage.slug}
+                    href={`/app/etapas/${stage.slug}?view=${selectedView}&period=${selectedPeriod}`}
+                    className="inline-flex min-h-11 items-center rounded-xl bg-white/8 px-3 py-2 text-sm font-medium text-white ring-1 ring-white/15 hover:bg-white/15"
+                  >
+                    {stage.label}
+                  </Link>
+                ))}
+              </nav>
+            ) : null
+          }
+        />
 
-          <div className="mt-8 flex flex-col gap-4 border-t border-white/10 pt-6 lg:flex-row lg:items-center lg:justify-between">
-            <nav
-              aria-label="Visão do dashboard"
-              className="grid w-full gap-2 sm:flex sm:w-auto sm:flex-wrap"
-            >
-              {(Object.keys(DASHBOARD_VIEWS) as DashboardViewKey[]).map((viewKey) => (
-                <Link
-                  key={viewKey}
-                  href={dashboardHref(viewKey, selectedPeriod)}
-                  aria-current={selectedView === viewKey ? "page" : undefined}
-                  className={`rounded-full px-4 py-2 text-center text-sm font-medium transition ${
-                    selectedView === viewKey
-                      ? "bg-cyan-300 text-slate-950"
-                      : "bg-white/10 text-white hover:bg-white/20"
-                  }`}
-                >
-                  {DASHBOARD_VIEWS[viewKey].label}
-                </Link>
-              ))}
-            </nav>
-            <nav aria-label="Período do dashboard" className="flex flex-wrap gap-2">
-              {(Object.keys(DASHBOARD_PERIODS) as DashboardPeriodKey[]).map((periodKey) => (
-                <Link
-                  key={periodKey}
-                  href={dashboardHref(selectedView, periodKey)}
-                  aria-current={selectedPeriod === periodKey ? "page" : undefined}
-                  className={`rounded-lg px-3 py-2 text-sm transition ${
-                    selectedPeriod === periodKey
-                      ? "bg-white text-slate-950"
-                      : "text-slate-300 hover:bg-white/10"
-                  }`}
-                >
-                  {DASHBOARD_PERIODS[periodKey].label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </section>
+        <FilterBar
+          label="Filtros autorizados do dashboard"
+          unavailableDimensions={["Canal de vendas", "Gerente", "Responsável", "Empresa"]}
+        >
+          <FilterGroup label="Visão">
+            {(Object.keys(DASHBOARD_VIEWS) as DashboardViewKey[]).map((viewKey) => (
+              <FilterLink
+                key={viewKey}
+                href={dashboardHref(viewKey, selectedPeriod)}
+                active={selectedView === viewKey}
+              >
+                {DASHBOARD_VIEWS[viewKey].label}
+              </FilterLink>
+            ))}
+          </FilterGroup>
+          <FilterGroup label="Período">
+            {(Object.keys(DASHBOARD_PERIODS) as DashboardPeriodKey[]).map((periodKey) => (
+              <FilterLink
+                key={periodKey}
+                href={dashboardHref(selectedView, periodKey)}
+                active={selectedPeriod === periodKey}
+              >
+                {DASHBOARD_PERIODS[periodKey].label}
+              </FilterLink>
+            ))}
+          </FilterGroup>
+        </FilterBar>
 
         {!dashboard.goalsAvailable ? (
-          <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-            <strong className="block">{GOALS_UNAVAILABLE_LABEL}</strong>
-            <span className="mt-1 block">
-              Os resultados do funil são reais, mas metas, atingimento e progresso não são
-              apresentados até existir uma fonte oficial.
-            </span>
-          </section>
+          <DataState
+            variant="unavailable"
+            compact
+            title={GOALS_UNAVAILABLE_LABEL}
+            description="Os realizados vêm do snapshot real. Metas, atingimento e arcos de progresso permanecem indisponíveis até existir fonte oficial segura."
+          />
         ) : null}
 
-        <section aria-label="Indicadores do funil" className="mt-6 grid gap-4 md:grid-cols-5">
-          {stages.map(([stageKey, stage]) => {
-            const value = metricValue(metrics[stageKey], selectedPeriod);
-            const goal = availableCommercialValue(dashboard.goalsAvailable, value.goal);
-            const progress = goal === null ? null : calculateProgress(value.current, goal);
+        <section aria-labelledby="funnel-indicators-title">
+          <SectionHeading
+            id="funnel-indicators-title"
+            kicker={`${DASHBOARD_VIEWS[selectedView].label} · ${DASHBOARD_PERIODS[selectedPeriod].label}`}
+            title="Indicadores do funil"
+            description="Valores realizados do snapshot autorizado; o arco aparece somente quando existe meta oficial maior que zero."
+          />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            {stages.map(([stageKey, stage]) => {
+              const reading = metricValueForPeriod(metrics[stageKey], selectedPeriod);
+              const goal = availableCommercialValue(dashboard.goalsAvailable, reading.goal);
+              const progress =
+                goal !== null && goal > 0 ? calculateProgress(reading.current, goal) : null;
+              const goalDetail =
+                goal === null
+                  ? GOALS_UNAVAILABLE_LABEL
+                  : goal > 0
+                    ? `Meta: ${numberFormatter.format(goal)}`
+                    : "Meta não definida para o período";
 
-            return (
-              <article
-                key={stageKey}
-                className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200"
-              >
-                <p className="text-sm font-medium text-slate-600">{stage.label}</p>
-                <strong className="mt-3 block text-3xl font-semibold text-slate-950">
-                  {numberFormatter.format(value.current)}
-                </strong>
-                <p className="mt-1 text-xs text-slate-500">
-                  {goal === null
-                    ? GOALS_UNAVAILABLE_LABEL
-                    : `Meta: ${numberFormatter.format(goal)}`}
-                </p>
-                {goal === null ? (
-                  <p className="mt-4 rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-600">
-                    {DATA_UNAVAILABLE_LABEL}
-                  </p>
-                ) : (
-                  <>
-                    <progress
-                      className="mt-4 h-2 w-full accent-cyan-600"
-                      max={100}
-                      value={clampPercentage(progress)}
-                      aria-label={`Progresso de ${stage.label}`}
-                    />
-                    <p className="mt-2 text-xs font-medium text-slate-600">
-                      {progress === null ? "Meta não definida" : percentFormatter.format(progress)}
-                    </p>
-                  </>
-                )}
-              </article>
-            );
-          })}
+              return (
+                <MetricCard
+                  key={stageKey}
+                  label={stage.label}
+                  value={numberFormatter.format(reading.current)}
+                  detail={goalDetail}
+                  ratio={progress}
+                  ratioLabel={
+                    progress === null ? "Indisponível" : percentFormatter.format(progress)
+                  }
+                  accent={STAGE_ACCENTS[stageKey]}
+                />
+              );
+            })}
+          </div>
         </section>
 
-        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-          <article className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-cyan-700">Conversão entre etapas</p>
-                <h2 className="mt-1 text-2xl font-semibold text-slate-950">Eficiência do funil</h2>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-slate-500">Valor vendido no período</p>
-                <strong className="text-xl text-slate-950">
-                  {currencyFormatter.format(salesValue)}
-                </strong>
-              </div>
-            </div>
+        <section className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
+          <AnalyticsCard>
+            <SectionHeading
+              kicker="Relação entre volumes"
+              title="Funil do período"
+              description="Razões sequenciais comparam volumes agregados do mesmo snapshot; não representam coortes individuais."
+            />
+            <FunnelChart
+              label={`${DASHBOARD_VIEWS[selectedView].label}, ${DASHBOARD_PERIODS[selectedPeriod].label.toLocaleLowerCase("pt-BR")}`}
+              stages={selectedFunnel}
+            />
+          </AnalyticsCard>
 
-            <ol className="mt-8 grid gap-3">
-              {stages.map(([stageKey, stage], index) => {
-                const current = metricValue(metrics[stageKey], selectedPeriod).current;
-                const previousStage = stages[index - 1];
-                const previous = previousStage
-                  ? metricValue(metrics[previousStage[0]], selectedPeriod).current
-                  : 0;
-                const conversion = previousStage ? calculateConversion(current, previous) : null;
-
-                return (
-                  <li
-                    key={stageKey}
-                    className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl bg-slate-50 px-5 py-4"
-                  >
-                    <div>
-                      <p className="font-medium text-slate-900">{stage.shortLabel}</p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        {previousStage
-                          ? `Conversão desde ${previousStage[1].shortLabel.toLocaleLowerCase("pt-BR")}`
-                          : "Entrada total do funil"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <strong className="block text-lg text-slate-950">
-                        {numberFormatter.format(current)}
-                      </strong>
-                      {conversion !== null ? (
-                        <span className="text-xs font-medium text-cyan-700">
-                          {percentFormatter.format(conversion)}
-                        </span>
-                      ) : null}
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </article>
-
-          <aside className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
-            <p className="text-sm font-medium text-cyan-700">Empreendimentos</p>
-            <h2 className="mt-1 text-2xl font-semibold text-slate-950">Destaques</h2>
-            {dashboard.topDevelopments[selectedView].length > 0 ? (
-              <ol className="mt-6 grid gap-3">
-                {dashboard.topDevelopments[selectedView].map((development) => (
-                  <li
-                    key={development.rank}
-                    className="flex items-center gap-3 rounded-xl border border-slate-200 p-3"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
-                      {development.rank}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-slate-800">
-                      {development.name}
-                    </span>
-                    <strong className="text-sm text-slate-950">{development.total}</strong>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="mt-6 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
-                Nenhum empreendimento classificado neste snapshot.
+          <div className="grid gap-5">
+            <AnalyticsCard tone="navy">
+              <p className="text-xs font-semibold tracking-widest text-cyan-300 uppercase">
+                Valor vendido
               </p>
-            )}
-            <dl className="mt-6 border-t border-slate-200 pt-5 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">Data de referência</dt>
-                <dd className="font-medium text-slate-800">
-                  {new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
-                    new Date(`${dashboard.referenceDate}T00:00:00Z`),
-                  )}
-                </dd>
-              </div>
-            </dl>
-          </aside>
+              <strong className="mt-3 block text-3xl font-semibold text-white">
+                {currencyFormatter.format(salesValue)}
+              </strong>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Total validado para a visão e o período selecionados.
+              </p>
+            </AnalyticsCard>
+            <AnalyticsCard>
+              <SectionHeading
+                kicker="Ranking validado"
+                title="Oportunidades por empreendimento"
+                description="Ordem já calculada na ingestão; este componente não pontua nem reordena."
+              />
+              {dashboard.topDevelopments[selectedView].length > 0 ? (
+                <RankingList
+                  items={dashboard.topDevelopments[selectedView].map((development) => ({
+                    id: `${selectedView}-${development.rank}`,
+                    rank: development.rank,
+                    name: development.name,
+                    value: numberFormatter.format(development.total),
+                  }))}
+                />
+              ) : (
+                <DataState
+                  variant="empty"
+                  compact
+                  title="Sem empreendimentos classificados"
+                  description="O snapshot atual não trouxe entradas para este ranking."
+                />
+              )}
+            </AnalyticsCard>
+          </div>
+        </section>
+
+        <section aria-labelledby="monthly-comparisons-title">
+          <SectionHeading
+            id="monthly-comparisons-title"
+            kicker="Comparação visual"
+            title="Funis mensais disponíveis"
+            description="Somente janelas existentes no read model. A projeção proporcional da referência não é reproduzida porque não há fórmula oficial validada."
+          />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {monthlySnapshots.map((snapshot, index) => (
+              <AnalyticsCard key={snapshot.key}>
+                <FunnelChart
+                  label={snapshot.label}
+                  stages={snapshot.readings}
+                  accent={index === monthlySnapshots.length - 1 ? "lime" : "cyan"}
+                />
+              </AnalyticsCard>
+            ))}
+          </div>
+        </section>
+
+        <section aria-labelledby="realized-table-title">
+          <SectionHeading
+            id="realized-table-title"
+            kicker="Série validada"
+            title="Realizados e referências temporais"
+            description="Ausências do snapshot ficam explícitas e não são convertidas em zero ou substituídas por outra janela."
+          />
+          <AnalyticsTable
+            caption="Indicadores reais por etapa e janela temporal"
+            rows={realizedRows}
+            columns={realizedColumns}
+            rowKey={(row) => row.key}
+          />
         </section>
       </div>
     </main>

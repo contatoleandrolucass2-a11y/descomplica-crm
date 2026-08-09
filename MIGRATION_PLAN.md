@@ -43,6 +43,22 @@ Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende 
 - [x] Integrar navegação e ações à matriz de permissões.
 - [ ] Migrar filtros dimensionais após criar o read model normalizado de registros.
 
+### Fundação de paridade com a referência viva
+
+- [x] Inventariar as 18 páginas da referência viva.
+- [x] Versionar matriz de paridade e catálogo de páginas, componentes e fontes.
+- [x] Criar baseline visual sanitizada sem PII ou dados comerciais legíveis.
+- [x] Implementar topbar e navegação hierárquica autorizada.
+- [x] Implementar cards, filtros, roscas, funis, gauges, tabelas, rankings,
+      skeletons e estados analíticos reutilizáveis.
+- [x] Restaurar visualmente dashboard e cinco páginas de etapas usando o read
+      model existente.
+- [ ] Executar comparação autenticada em homologação com conta QA dedicada.
+      Bloqueio atual: ambiente e credenciais QA não foram disponibilizados nem
+      localizados pelos canais seguros inspecionados; produção não pode ser usada.
+- [ ] Tratar ranking avançado, Canal de Parcerias, simuladores, roleta e prêmios
+      somente nos incrementos separados já aprovados.
+
 ## Gate 4 — entrega
 
 1. Testes unitários, integração, E2E, acessibilidade e responsividade.

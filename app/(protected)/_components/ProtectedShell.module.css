@@ -1,0 +1,309 @@
+.shell {
+  min-height: 100vh;
+  background: var(--analytics-page);
+}
+
+.topbar {
+  position: sticky;
+  z-index: 40;
+  top: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+  background: color-mix(in srgb, var(--analytics-navy) 94%, transparent);
+  color: #f7fdff;
+  box-shadow: 0 8px 30px rgb(3 15 24 / 18%);
+  backdrop-filter: blur(16px);
+}
+
+.topbar :focus-visible {
+  outline-color: #7ceaf5;
+}
+
+.topbarInner {
+  position: relative;
+  display: grid;
+  max-width: 88rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  margin-inline: auto;
+  padding: 0.75rem 1rem;
+}
+
+.brand {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.65rem;
+  color: #f7fdff;
+  text-decoration: none;
+}
+
+.brandMark {
+  display: grid;
+  width: 2.45rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 0.8rem 0.8rem 0.8rem 0.2rem;
+  background: var(--analytics-lime);
+  color: var(--analytics-navy);
+  font-size: 1.35rem;
+  font-weight: 850;
+  line-height: 1;
+  box-shadow: 0 0 0 3px rgb(182 228 58 / 15%);
+}
+
+.brandName {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+}
+
+.role {
+  display: block;
+  margin-top: 0.1rem;
+  color: #9db5c4;
+  font-size: 0.62rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.navigation {
+  min-width: 0;
+}
+
+.navigationList {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navigationItem {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.navigationLink,
+.navigationSummary {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  color: #cadbe4;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.navigationLink:hover,
+.navigationSummary:hover {
+  border-color: rgb(255 255 255 / 12%);
+  background: rgb(255 255 255 / 8%);
+  color: #ffffff;
+}
+
+.navigationLink[aria-current="page"],
+.activeSummary {
+  background: rgb(22 199 223 / 15%);
+  color: var(--analytics-cyan);
+}
+
+.navigationDetails {
+  position: relative;
+}
+
+.navigationSummary {
+  list-style: none;
+}
+
+.navigationSummary::-webkit-details-marker {
+  display: none;
+}
+
+.chevron {
+  font-size: 0.7rem;
+  transition: transform 160ms ease-out;
+}
+
+.navigationDetails[open] .chevron {
+  transform: rotate(180deg);
+}
+
+.navigationMenu {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  display: grid;
+  width: min(20rem, calc(100vw - 2rem));
+  gap: 0.25rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 1rem;
+  background: var(--analytics-surface);
+  padding: 0.5rem;
+  color: var(--analytics-ink);
+  box-shadow: var(--analytics-shadow);
+  z-index: 2;
+}
+
+.menuLink {
+  display: grid;
+  min-height: 2.9rem;
+  align-content: center;
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  color: var(--analytics-ink);
+  font-size: 0.79rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.menuLink:hover {
+  background: var(--analytics-surface-muted);
+}
+
+.menuLink[aria-current="page"] {
+  background: color-mix(in srgb, var(--analytics-cyan) 13%, var(--analytics-surface));
+  color: var(--analytics-cyan-strong);
+}
+
+.menuDescription {
+  margin-top: 0.2rem;
+  color: var(--analytics-muted);
+  font-size: 0.67rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.themeSwitch {
+  display: flex;
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-radius: 0.75rem;
+  background: rgb(255 255 255 / 7%);
+  padding: 0.18rem;
+}
+
+.themeOption {
+  min-height: 2.35rem;
+  border: 0;
+  border-radius: 0.58rem;
+  background: transparent;
+  padding: 0.4rem 0.65rem;
+  color: #a9bfcb;
+  font-size: 0.68rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.themeOption:hover {
+  color: #ffffff;
+}
+
+.themeOption[aria-pressed="true"] {
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 18%);
+}
+
+.logout {
+  min-height: 2.75rem;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 0.75rem;
+  background: transparent;
+  padding: 0.55rem 0.8rem;
+  color: #d7e5ec;
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.logout:hover {
+  background: rgb(255 255 255 / 8%);
+  color: #ffffff;
+}
+
+@media (max-width: 64rem) {
+  .topbarInner {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .navigation {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-bottom: 0.1rem;
+  }
+
+  .navigationList {
+    flex-wrap: wrap;
+  }
+
+  .navigationDetails {
+    position: static;
+  }
+
+  .navigationMenu {
+    top: calc(100% - 0.35rem);
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+    max-height: calc(100vh - 8rem);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 36rem) {
+  .topbarInner {
+    gap: 0.65rem;
+  }
+
+  .brandName,
+  .role {
+    display: none;
+  }
+
+  .actions {
+    min-width: 0;
+  }
+
+  .logout {
+    padding-inline: 0.65rem;
+  }
+
+  .themeOption {
+    padding-inline: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}

@@ -18,6 +18,28 @@
 
 :root {
   color-scheme: light;
+  --analytics-page: #edf5f8;
+  --analytics-surface: #ffffff;
+  --analytics-surface-muted: #f4f8fa;
+  --analytics-surface-strong: #dce9ee;
+  --analytics-ink: #082137;
+  --analytics-muted: #536b7c;
+  --analytics-line: #cbdbe2;
+  --analytics-navy: #071f35;
+  --analytics-navy-raised: #0e3656;
+  --analytics-cyan: #16c7df;
+  --analytics-cyan-strong: #006f85;
+  --analytics-lime: #b6e43a;
+  --analytics-positive: #14865f;
+  --analytics-warning: #a76308;
+  --analytics-danger: #b4233c;
+  --analytics-shadow: 0 18px 42px rgb(8 33 55 / 10%);
+  --focus-ring: #006f85;
+}
+
+body {
+  background: var(--analytics-page);
+  color: var(--analytics-ink);
 }
 
 html,
@@ -39,13 +61,22 @@ textarea {
 }
 
 :focus-visible {
-  outline: 3px solid #06b6d4;
+  outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
 }
 
 :root[data-theme="balanced"] body,
 :root[data-theme="balanced"] .bg-slate-50 {
   background-color: #e8f0f3;
+}
+
+:root[data-theme="balanced"] {
+  --analytics-page: #dfecef;
+  --analytics-surface: #f8fbfc;
+  --analytics-surface-muted: #eaf2f4;
+  --analytics-surface-strong: #ccdde2;
+  --analytics-line: #b8ccd3;
+  --analytics-shadow: 0 18px 42px rgb(8 33 55 / 14%);
 }
 
 :root[data-theme="balanced"] .bg-white {
@@ -63,6 +94,27 @@ textarea {
 :root[data-theme="dark"] body,
 :root[data-theme="dark"] .bg-slate-50 {
   background-color: #071c2a;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --analytics-page: #061723;
+  --analytics-surface: #0d2a40;
+  --analytics-surface-muted: #12364f;
+  --analytics-surface-strong: #1b4660;
+  --analytics-ink: #f3fbff;
+  --analytics-muted: #a9bfcd;
+  --analytics-line: #31556d;
+  --analytics-navy: #030f18;
+  --analytics-navy-raised: #113b59;
+  --analytics-cyan: #3ad8ea;
+  --analytics-cyan-strong: #7ceaf5;
+  --analytics-lime: #c8ee5b;
+  --analytics-positive: #4ed4a7;
+  --analytics-warning: #f2b65f;
+  --analytics-danger: #ff8293;
+  --analytics-shadow: 0 18px 42px rgb(0 0 0 / 28%);
+  --focus-ring: #7ceaf5;
 }
 
 :root[data-theme="dark"] .bg-white {
@@ -115,19 +167,13 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html,
-  body,
-  header,
-  main,
-  section,
-  article,
-  aside,
-  nav,
-  div,
-  input,
-  button,
-  select,
-  textarea {
-    transition-duration: 0.01ms;
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

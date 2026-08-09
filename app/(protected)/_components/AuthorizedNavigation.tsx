@@ -2,38 +2,111 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, type KeyboardEvent } from "react";
 
-interface NavigationPage {
-  key: string;
-  path: string;
-  name: string;
-}
+import {
+  buildNavigationGroups,
+  isNavigationGroupActive,
+  type NavigationGroup,
+  type NavigationItem,
+} from "@/lib/navigation/presentation";
 
-export function AuthorizedNavigation({ pages }: { pages: NavigationPage[] }) {
-  const pathname = usePathname();
+import styles from "./ProtectedShell.module.css";
+
+function NavigationDisclosure({ group, pathname }: { group: NavigationGroup; pathname: string }) {
+  const details = useRef<HTMLDetailsElement>(null);
+  const summary = useRef<HTMLElement>(null);
+  const active = isNavigationGroupActive(pathname, group);
+
+  useEffect(() => {
+    if (details.current) details.current.open = false;
+  }, [pathname]);
+
+  useEffect(() => {
+    function closeOnOutsidePointer(event: PointerEvent) {
+      const disclosure = details.current;
+      if (!disclosure?.open) return;
+      if (event.target instanceof Node && disclosure.contains(event.target)) return;
+      disclosure.open = false;
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePointer);
+  }, []);
+
+  function closeDisclosure() {
+    if (details.current) details.current.open = false;
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDetailsElement>) {
+    if (event.key !== "Escape" || !details.current?.open) return;
+    details.current.open = false;
+    summary.current?.focus();
+  }
+
+  const links = [group.page, ...group.children];
 
   return (
-    <nav
-      aria-label="Navegação autorizada"
-      className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 pb-4 sm:flex-wrap sm:px-6"
+    <details
+      className={styles.navigationDetails}
+      name="authorized-navigation"
+      ref={details}
+      onKeyDown={handleKeyDown}
     >
-      {pages.map((page) => {
-        const active = pathname === page.path;
-        return (
-          <Link
-            key={page.key}
-            href={page.path}
-            aria-current={active ? "page" : undefined}
-            className={`rounded-full border px-3 py-1.5 text-sm whitespace-nowrap transition ${
-              active
-                ? "border-cyan-700 bg-cyan-50 font-medium text-cyan-900"
-                : "border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-50"
-            }`}
-          >
-            {page.name}
-          </Link>
-        );
-      })}
+      <summary
+        className={`${styles.navigationSummary} ${active ? styles.activeSummary : ""}`}
+        ref={summary}
+      >
+        {group.page.name}
+        {active ? <span className={styles.visuallyHidden}> — contém a página atual</span> : null}
+        <span className={styles.chevron} aria-hidden="true">
+          ▾
+        </span>
+      </summary>
+      <div className={styles.navigationMenu}>
+        {links.map((page) => {
+          const current = pathname === page.path;
+          return (
+            <Link
+              className={styles.menuLink}
+              href={page.path}
+              aria-current={current ? "page" : undefined}
+              key={page.key}
+              onClick={closeDisclosure}
+            >
+              {page.name}
+              <span className={styles.menuDescription}>{page.description}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </details>
+  );
+}
+
+export function AuthorizedNavigation({ pages }: { pages: NavigationItem[] }) {
+  const pathname = usePathname();
+  const groups = buildNavigationGroups(pages);
+
+  return (
+    <nav aria-label="Navegação autorizada" className={styles.navigation}>
+      <ul className={styles.navigationList}>
+        {groups.map((group) => (
+          <li className={styles.navigationItem} key={group.page.key}>
+            {group.children.length > 0 ? (
+              <NavigationDisclosure group={group} pathname={pathname} />
+            ) : (
+              <Link
+                href={group.page.path}
+                aria-current={pathname === group.page.path ? "page" : undefined}
+                className={styles.navigationLink}
+              >
+                {group.page.name}
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
     </nav>
   );
 }

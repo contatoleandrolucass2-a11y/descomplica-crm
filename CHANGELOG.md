@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Versiona o inventário das 18 páginas da referência viva, matriz de paridade,
+  catálogo de componentes/fontes e baseline visual com máscara opaca antes da
+  captura.
+- Adiciona design system analítico navy/cyan/lime, topbar hierárquica autorizada
+  e componentes reutilizáveis de cards, filtros, roscas, funis, gauges,
+  tabelas, rankings, skeletons e estados.
+- Restaura dashboard e cinco etapas sobre o read model existente, preservando
+  campos ausentes como “Indisponível” e sem copiar projeções, filtros ou regras
+  comerciais sem fonte oficial.
+- Adiciona Playwright apenas como dependência de desenvolvimento, com harness
+  versionado para baseline sanitizada e verificação de acesso anônimo. O
+  harness exige origem explícita, isola contextos, valida rota/headers/DOM antes
+  e depois da captura e só persiste o conjunto após aprovação integral.
 - Ajusta somente o proxy HTTPS de `crm.descomplicapro.com.br` para aceitar os
   headers de resposta da sessão Supabase, com buffers Nginx mínimos medidos e
   runbook de validação, reload e rollback.

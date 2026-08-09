@@ -1,6 +1,6 @@
 begin;
 
-select plan(27);
+select plan(29);
 
 select has_table('public', 'app_pages', 'app_pages exists');
 
@@ -19,6 +19,36 @@ select is(
   (select count(*) from public.app_pages),
   15::bigint,
   'all CRM and initial admin pages are seeded'
+);
+
+select is(
+  (
+    select count(*)
+    from public.roles r
+    where (
+      select count(*)
+      from public.role_permissions rp
+      where rp.role_key = r.key
+        and rp.permission_key in (
+          'pages.view',
+          'crm.dashboard.view',
+          'crm.stages.view',
+          'crm.ranking.view'
+        )
+    ) = 4
+  ),
+  8::bigint,
+  'all eight profiles receive the exact core CRM read permissions'
+);
+
+select is(
+  (
+    select array_agg(distinct rp.role_key order by rp.role_key)
+    from public.role_permissions rp
+    where rp.permission_key in ('crm.settings.view', 'crm.settings.manage')
+  ),
+  array['admin', 'master']::text[],
+  'only admin and master receive CRM settings permissions'
 );
 
 select is(

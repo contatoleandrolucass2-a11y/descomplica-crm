@@ -6,7 +6,6 @@ export const CRM_STAGES = [
     key: "opportunities",
     label: "Oportunidades",
     description: "Entrada do funil e volume disponível para contato comercial.",
-    action: "Priorize a velocidade do primeiro contato e qualifique a origem das oportunidades.",
     accent: "cyan",
   },
   {
@@ -14,8 +13,6 @@ export const CRM_STAGES = [
     key: "appointments",
     label: "Agendamentos",
     description: "Compromissos comerciais confirmados com os clientes.",
-    action:
-      "Revise cadências, confirme horários e acompanhe a passagem de oportunidade para agenda.",
     accent: "blue",
   },
   {
@@ -23,7 +20,6 @@ export const CRM_STAGES = [
     key: "visits",
     label: "Visitas",
     description: "Clientes que avançaram para conhecer os empreendimentos.",
-    action: "Atue sobre faltas, qualidade dos agendamentos e aderência entre perfil e produto.",
     accent: "violet",
   },
   {
@@ -31,7 +27,6 @@ export const CRM_STAGES = [
     key: "folders",
     label: "Pastas",
     description: "Propostas e documentos encaminhados para análise.",
-    action: "Remova pendências documentais e acompanhe diariamente as propostas em análise.",
     accent: "teal",
   },
   {
@@ -39,7 +34,6 @@ export const CRM_STAGES = [
     key: "sales",
     label: "Vendas",
     description: "Conversões concluídas no fim do funil comercial.",
-    action: "Analise perdas finais, prazo de aprovação e empreendimentos com maior conversão.",
     accent: "emerald",
   },
 ] as const satisfies ReadonlyArray<{
@@ -47,7 +41,6 @@ export const CRM_STAGES = [
   key: DashboardStageKey;
   label: string;
   description: string;
-  action: string;
   accent: string;
 }>;
 
