@@ -158,8 +158,10 @@ export const n8nSalesforceEnvelopeSchema = z.union([
 const qlikKey = z
   .string()
   .regex(/^[a-z0-9]+([._-][a-z0-9]+)*$/)
-  .max(100);
-const qlikAmount = z.number().finite().min(0).max(1_000_000_000_000_000);
+  .max(128);
+const qlikAmount = z
+  .string()
+  .regex(/^(0|[1-9]\d{0,15})(\.\d{1,2})?$/, "Qlik amounts require an exact decimal string");
 const qlikCount = z.number().int().min(0).max(1_000_000_000);
 const qlikRank = z.number().int().min(1).max(1_000_000).nullable().optional();
 
@@ -167,7 +169,20 @@ export const qlikRankingEntrySchema = z
   .object({
     periodMonth: z.string().regex(/^\d{4}-\d{2}-01$/),
     imobKey: qlikKey,
-    imobName: z.string().trim().min(1).max(200),
+    imobName: z.string().trim().min(1).max(256),
+    vgv: qlikAmount,
+    contracts: qlikCount,
+    sourceRankVgv: qlikRank,
+    sourceRankContracts: qlikRank,
+  })
+  .strict();
+
+export const qlikDevelopmentEntrySchema = z
+  .object({
+    periodMonth: z.string().regex(/^\d{4}-\d{2}-01$/),
+    businessUnit: z.string().trim().min(1).max(128),
+    developmentKey: qlikKey,
+    developmentName: z.string().trim().min(1).max(256),
     vgv: qlikAmount,
     contracts: qlikCount,
     sourceRankVgv: qlikRank,
@@ -184,6 +199,7 @@ export function createQlikRankingIngestionSchema(now: () => Date = () => new Dat
       generatedAt: z.string().datetime({ offset: true }),
       sourceUpdatedAt: z.string().datetime({ offset: true }).optional(),
       entries: z.array(qlikRankingEntrySchema).min(1).max(5_000),
+      developments: z.array(qlikDevelopmentEntrySchema).max(5_000).optional(),
     })
     .strict()
     .superRefine((payload, context) => {
@@ -222,6 +238,26 @@ export function createQlikRankingIngestionSchema(now: () => Date = () => new Dat
           });
         }
         identities.add(identity);
+      }
+
+      const developmentIdentities = new Set<string>();
+      for (const [index, development] of (payload.developments ?? []).entries()) {
+        if (Number(development.periodMonth.slice(0, 4)) !== payload.referenceYear) {
+          context.addIssue({
+            code: "custom",
+            message: "development year must match referenceYear",
+            path: ["developments", index, "periodMonth"],
+          });
+        }
+        const identity = `${development.periodMonth}:${development.businessUnit}:${development.developmentKey}`;
+        if (developmentIdentities.has(identity)) {
+          context.addIssue({
+            code: "custom",
+            message: "Qlik developments must be unique by month, unit and key",
+            path: ["developments", index],
+          });
+        }
+        developmentIdentities.add(identity);
       }
     });
 }

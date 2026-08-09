@@ -699,3 +699,63 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   OSV não encontraram erro novo. Oito checks Chromium confirmaram 403, 404 e
   500 reais, rota protegida, teclado, celular, zoom de 200% sem overflow, três
   temas e Master ausente das opções atribuíveis.
+
+## 2026-08-09 — integrações e read model v3 local
+
+- Gate 0 confirmou base `8ae8a42a7182e432657676e28b4ec29ef7eb354b`,
+  worktree limpa, Node `24.19.0`, pnpm `11.20.0`, Supabase CLI `2.111.0` e
+  dependências congeladas sem alteração de lockfile.
+- Baseline antes da edição: lint/typecheck/build aprovados; 103 Vitest + 8 Node
+  aprovados, 1 ignorado; 13 arquivos e 518 testes pgTAP aprovados.
+- Investigação separada caracterizou o caller Qlik ativo como `anon` +
+  verificador no argumento da RPC legada. Processo e owner nominal continuam
+  não identificados; o hardening do PR #28 não pode ser aplicado antes do
+  relay/cutover.
+- Migrations locais `20260809181422` e `20260809181424` adicionam owners,
+  mappings versionados, histórico, fila, lineage, autoridade privada por
+  dataset/fonte/workflow/produtor, dimensões canônicas, runs, fatos,
+  competências fechadas, ponteiro ativo e RPCs v3 com privilégio mínimo.
+- IDs desconhecidos rejeitam o lote inteiro e entram em reconciliação; replay
+  conflitante falha; snapshots antigos não substituem o ativo; nomes nunca são
+  usados para autorização ou matching.
+- Dashboard, cinco etapas, Ranking e Canal de Parcerias v3 usam um loader
+  server-only nas rotas shadow `/app/read-model-v3/*`. A flag é desligada por
+  padrão, essas rotas ficam fora do catálogo e as páginas de produção continuam
+  byte a byte nos leitores v2. Filtros v3 funcionam por período, origem,
+  organização, equipe, carteira, coordenador, gestor, corretor, empreendimento
+  e localização.
+- Quatro permissões v3 por dataset foram catalogadas sem herança automática por
+  papel. Os testes criam grants sintéticos exclusivamente dentro da transação
+  local para provar Master, Admin, gestor e corretor; permissões v2 globais
+  continuam fechadas e o rollout real exige migration posterior.
+- Revisão cruzada corrigiu cross-tenant com dimensões nulas, replay semântico,
+  corrida de idempotência, lifecycle de mappings, reabertura da fila, precisão
+  monetária, gate por dataset, qualidade visual e lineage do leitor Qlik.
+- Validação do banco após reset de 20 migrations: 684/684 pgTAP aprovados em
+  15 arquivos. O contrato v3 passou 143/143, a governança de identidades 20/20
+  e o Qlik 54/54, incluindo ingestão/agregação real de 10.000 fatos dentro do
+  timeout. Lint e typecheck passaram; 125 Vitest + 8 Node passaram, com um
+  Vitest ignorado; o build gerou 37 páginas.
+- Revisão independente adicional exigiu cobertura explícita por escopo/run,
+  contenção temporal de todos os presets, limite de 100 caracteres nas chaves
+  de provenance, timezone comum ao SQL/`Intl`, normalização consistente dos IDs
+  e preservação da opção selecionada fora do cap. O manifesto imutável permite
+  provar escopo vazio sem inferir completude a partir de um único fato.
+- A revisão final também fechou lineage delegado após mudança temporal de
+  topologia: cada aresta pai/filho revalida contenção no instante da consulta;
+  membership expirado invalida imediatamente o grant descendente.
+- Revisão independente encerrada em 0 P0 / 0 P1 depois das remediações.
+- Prettier no diff, auditoria pnpm, Gitleaks da árvore e de 207 commits, OSV em
+  518 pacotes, lint dos schemas `public/private`, sintaxe do configurador e
+  `git diff --check` passaram. O check global de formato continua apontando
+  somente 12 arquivos preexistentes fora do diff.
+- QA autenticado exclusivamente local passou 72 checks responsivos, 54 de tema,
+  18 rotas a 200%, teclado e reduced-motion. QA PostgREST/RLS provou 9 perfis,
+  8 negações comerciais, 8 anônimas e bloqueio de dupla afiliação; todas as
+  contas e fixtures efêmeras foram removidas. Os harnesses agora limpam também
+  o lineage privado criado pelos novos grants.
+- A migration Qlik destrutiva do PR base precede a ponte v3. A pilha atual não
+  pode receber migration remota até ser separada em fase aditiva e hardening
+  pós-relay; o bloqueio está documentado, não contornado.
+- Nenhuma alteração foi feita em produção, Supabase remoto, n8n, Salesforce,
+  Qlik, VPS, DNS ou Nginx. Não houve merge nem deploy.

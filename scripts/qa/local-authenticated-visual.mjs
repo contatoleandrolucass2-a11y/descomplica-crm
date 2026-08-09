@@ -833,6 +833,14 @@ delete from public.audit_logs
 where actor_id = ${userIdSql}
    or target_user_id = ${userIdSql};
 
+delete from private.crm_reporting_scope_grant_lineage
+where owner_user_id = ${userIdSql}
+   or grant_id in (
+     select id
+     from public.crm_user_reporting_scope_grants
+     where user_id = ${userIdSql}
+   );
+
 delete from public.crm_user_reporting_scope_grants
 where user_id = ${userIdSql};
 
@@ -848,6 +856,15 @@ begin
     or exists (
       select 1 from public.crm_user_reporting_scope_grants
       where user_id = ${userIdSql}
+    )
+    or exists (
+      select 1 from private.crm_reporting_scope_grant_lineage
+      where owner_user_id = ${userIdSql}
+         or grant_id in (
+           select id
+           from public.crm_user_reporting_scope_grants
+           where user_id = ${userIdSql}
+         )
     )
     or exists (
       select 1 from public.audit_logs

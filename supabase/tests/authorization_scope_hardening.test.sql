@@ -235,7 +235,7 @@ values
     '22000000-0000-4000-8000-000000000001',
     'a2000000-0000-4000-8000-000000000001',
     'Admin A scope',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -243,7 +243,7 @@ values
     '22000000-0000-4000-8000-000000000002',
     'a2000000-0000-4000-8000-000000000001',
     'Admin B scope',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -251,7 +251,7 @@ values
     '22000000-0000-4000-8000-000000000005',
     'a2000000-0000-4000-8000-000000000001',
     'Broker A scope',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -259,7 +259,7 @@ values
     '22000000-0000-4000-8000-000000000006',
     'a2000000-0000-4000-8000-000000000001',
     'Broker B scope',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -275,7 +275,7 @@ values
     '22000000-0000-4000-8000-000000000001',
     'a2000000-0000-4000-8000-000000000001',
     'Suspended Admin scope',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -283,7 +283,7 @@ values
     '22000000-0000-4000-8000-000000000003',
     'a2000000-0000-4000-8000-000000000001',
     'Current Team A scope',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -299,7 +299,7 @@ values
     '22000000-0000-4000-8000-000000000009',
     'a2000000-0000-4000-8000-000000000001',
     'Binding later malformed',
-    now() - interval '1 hour',
+    now(),
     null
   );
 
@@ -399,7 +399,7 @@ values
     '22000000-0000-4000-8000-000000000002',
     'a2000000-0000-4000-8000-000000000001',
     'Stale scope replaced during approval',
-    now() - interval '1 hour'
+    now()
   );
 
 insert into public.user_permission_overrides (

@@ -1,5 +1,11 @@
 # Contratos de integração: Salesforce, n8n, Qlik e estoque
 
+> Supersessão aditiva: o contrato canônico de publicação e leitura dimensional
+> está em `docs/integration-read-model-v3/READ_MODEL_V3.md` e
+> `lib/crm/read-model-v3/contracts.ts`. Os contratos v1/v2 abaixo permanecem
+> documentados para reconciliação e rollback; não autorizam associação por nome
+> nem abertura de leitura global.
+
 ## Resultado da busca
 
 Foram esgotados código, workflows exportados, migrations, schemas, read models,
@@ -87,8 +93,11 @@ oficial; este gate não o corrige nem o promove a regra.
 - A projeção Salesforce pode receber valor de venda numérico ou texto bruto. A
   transformação atual usa `Number`; o contrato agregado exige número finito,
   não negativo, até `10^15`.
-- O PostgreSQL usa `numeric` para VGV Qlik. Nenhum motor de simulação deve usar
-  `number` binário como autoridade financeira.
+- O PostgreSQL usa `numeric(18,2)` para persistir VGV Qlik. O contrato
+  TypeScript de novos produtores exige decimal textual exato; a RPC legada
+  mantém aceitação SQL compatível de número JSON, sem passar por aritmética
+  binária. A leitura escopada serializa `vgv` como texto. Nenhum navegador ou
+  motor deve usar `number` binário como autoridade financeira.
 
 ### Transformação e contagem
 
@@ -143,15 +152,21 @@ entries[1..5000]: periodMonth, imobKey, imobName, vgv, contracts,
 
 `periodMonth` deve ser o primeiro dia de mês e pertencer a `referenceYear`;
 chave usa `[a-z0-9._-]`; nome não pode ser vazio; VGV/contratos não podem ser
-negativos; ranks, quando presentes, começam em 1. O request UUID é também o run
+negativos; no contrato TypeScript, `vgv` é string decimal exata com até 16
+dígitos inteiros e duas casas; ranks, quando presentes, começam em 1. O request UUID é também o run
 ID. `generatedAt` e `sourceUpdatedAt` não podem exceder o relógio do banco em
 mais de cinco minutos; o schema tipado replica esse limite com relógio injetável
 nos testes. Replay semanticamente equivalente é idempotente; reutilização
 conflitante falha com `23505`.
 
 A RPC fixa fonte, regional e empresa no código local. Esses literais são
-metadados observados, não uma política multiempresa. O contrato ainda não cobre
-developments. O remoto atual possui uma RPC legada diferente, verifier embutido
+metadados observados, não uma política multiempresa. O contrato TypeScript
+local cobre o array opcional `developments` e é um subconjunto deliberadamente
+mais estrito para moeda do RPC SQL compatível. A RPC escopada
+`list_scoped_crm_imob_ranking_entries` devolve `vgv` textual para preservar
+centavos acima de `Number.MAX_SAFE_INTEGER`. Isso ainda não cria o mapping
+canônico de organização exigido pelo v3.
+O remoto atual possui uma RPC legada diferente, verifier embutido
 e grants proibidos; não deve ser chamado nem copiado.
 
 ## Estoque e perdas por SLA

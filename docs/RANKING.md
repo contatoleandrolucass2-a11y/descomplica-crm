@@ -2,6 +2,9 @@
 
 ## Read model
 
+O leitor abaixo é o v2 mantido nas rotas de produção durante a validação shadow
+do v3.
+
 O ranking não copia o `DashboardPayload` JSON do CRM original. O modelo usa:
 
 - `crm_ranking_snapshots`: referência, geração, fuso e origem do lote;
@@ -32,3 +35,12 @@ A QA autenticada validou corretores, consolidação de gerentes, troca de perío
 ## Ranking externo de imobiliárias
 
 O schema remoto também continha `crm_imob_ranking_runs` e `crm_imob_ranking_entries`, criadas fora das migrations para cargas do Qlik. Elas não substituem o read model de corretores acima e não possuem caller no código atual. O DDL foi versionado somente para eliminar drift e preservar dados; `/app/canal-de-parcerias` exibe apenas um placeholder protegido, sem acesso direto das funções da Data API a essas tabelas.
+
+## Shadow v3
+
+`/app/read-model-v3/ranking` exige
+`crm.read_model_v3.ranking.view`. Como não existe autoridade/fonte oficial
+ativada, o contrato específico de ranking permanece indisponível e nenhum motor
+de pesos, bônus, desempate, roleta ou prêmio é executado. O Canal de Parcerias
+shadow usa `crm.read_model_v3.partnerships.view`; a compatibilidade Qlik lê por
+RPC escopada, com lineage efetivo e `vgv` decimal textual, nunca por grant direto.

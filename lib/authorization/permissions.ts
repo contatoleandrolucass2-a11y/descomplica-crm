@@ -72,6 +72,27 @@ export const PERMISSIONS = {
     description: "Consulta somente dados Qlik vinculados a organizações dentro do escopo aprovado.",
     minLevel: 10,
   },
+  "crm.read_model_v3.view": {
+    label: "Visualizar read model v3",
+    description:
+      "Consulta fatos comerciais canônicos somente por RPC e dentro de um escopo explícito.",
+    minLevel: 10,
+  },
+  "crm.read_model_v3.ranking.view": {
+    label: "Visualizar dataset v3 de ranking",
+    description: "Autoriza somente o dataset canônico de ranking escopado.",
+    minLevel: 10,
+  },
+  "crm.read_model_v3.partnerships.view": {
+    label: "Visualizar dataset v3 de parcerias",
+    description: "Autoriza somente o dataset canônico de parcerias escopado.",
+    minLevel: 10,
+  },
+  "crm.read_model_v3.stock.view": {
+    label: "Visualizar dataset v3 de estoque",
+    description: "Autoriza somente o dataset canônico de estoque escopado.",
+    minLevel: 10,
+  },
   "crm.simulators.view": {
     label: "Visualizar simuladores",
     description: "Acessa as interfaces autorizadas de simulação comercial.",

@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   }),
   requireAuthorization: vi.fn(),
   requirePermission: vi.fn(),
+  loadReadModelV3: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -20,6 +21,9 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/lib/authorization/guards", () => ({
   requireAuthorization: mocks.requireAuthorization,
   requirePermission: mocks.requirePermission,
+}));
+vi.mock("@/lib/crm/read-model-v3/data", () => ({
+  loadReadModelV3: mocks.loadReadModelV3,
 }));
 
 import ForbiddenPage from "@/app/forbidden";
@@ -95,6 +99,7 @@ describe("experiência de acesso", () => {
     expect(markup).toContain("Performance das parcerias");
     expect(markup).toContain("Dado indisponível — integração pendente");
     expect(markup).not.toContain("crm_imob_ranking");
+    expect(mocks.loadReadModelV3).not.toHaveBeenCalled();
   });
 
   it("nega Canal de Parcerias com 403 quando a permissão efetiva não autoriza", async () => {

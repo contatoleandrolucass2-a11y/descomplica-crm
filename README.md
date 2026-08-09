@@ -1,6 +1,6 @@
 # Descomplica CRM
 
-Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM são migradas de forma controlada. O Gate 1 inclui catálogo dinâmico de páginas, navegação autorizada e painel administrativo. O Gate 2 inclui dashboard, metas, pontos, ranking, detalhes das etapas e ingestão Salesforce segura em PostgreSQL normalizado.
+Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM são migradas de forma controlada. O Gate 1 inclui catálogo dinâmico de páginas, navegação autorizada e painel administrativo. O Gate 2 inclui dashboard, metas, pontos, ranking, detalhes das etapas e ingestão Salesforce segura em PostgreSQL normalizado. A fundação v3 adiciona identidades canônicas owned, reconciliação, lineage de grants, autoridade de fonte, fatos imutáveis e filtros dimensionais aplicados por RPC escopada. Ela permanece em rotas shadow desativadas por padrão; páginas, navegação e dados remotos não sofreram cutover.
 
 ## Arquitetura alvo
 
@@ -62,13 +62,14 @@ MASTER_USER_ID=
 APP_ORIGIN=http://127.0.0.1:3000
 SALESFORCE_INGEST_ENABLED=false
 SALESFORCE_REFRESH_ENABLED=false
+CRM_READ_MODEL_V3_SHADOW_ENABLED=false
 SUPABASE_SECRET_KEY=
 SALESFORCE_INGEST_SECRET=
 SALESFORCE_REFRESH_URL=
 SALESFORCE_REFRESH_SECRET=
 ```
 
-Secret key, Bearers e credenciais PostgreSQL nunca podem entrar no bundle da aplicação. A secret key é aceita somente pelo módulo server-only da ingestão M2M. `.env.local` nunca deve entrar no Git.
+Secret key, Bearers e credenciais PostgreSQL nunca podem entrar no bundle da aplicação. A secret key é aceita somente pelo módulo server-only da ingestão M2M. `CRM_READ_MODEL_V3_SHADOW_ENABLED` revela apenas as rotas shadow autenticadas e não autoriza cutover ou ingestão. `.env.local` nunca deve entrar no Git.
 
 ## Banco local e aplicação
 
@@ -139,6 +140,9 @@ O diretório `.next/standalone` é o artefato de runtime. O fluxo completo de Ho
 - [docs/BACKUP_RESTORE.md](docs/BACKUP_RESTORE.md): backup e restauração.
 - [docs/reconciliation/README.md](docs/reconciliation/README.md): gate de
   reconciliação local/remoto, contratos, políticas, escopos e plano operacional.
+- [docs/integration-read-model-v3/README.md](docs/integration-read-model-v3/README.md):
+  callers, `service_role`, IDs/owners, lineage, read model v3, filtros,
+  qualidade, cutover, rollback e decisões restantes.
 - [CONTRIBUTING.md](CONTRIBUTING.md): fluxo de branch, commits e qualidade.
 
 ## Checkpoints de origem

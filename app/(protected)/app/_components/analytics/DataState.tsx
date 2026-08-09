@@ -2,10 +2,11 @@ import type { ReactNode } from "react";
 
 import styles from "./analytics.module.css";
 
-export type DataStateVariant = "empty" | "unavailable" | "error";
+export type DataStateVariant = "empty" | "warning" | "unavailable" | "error";
 
 const STATE_LABELS: Record<DataStateVariant, string> = {
   empty: "Sem dados",
+  warning: "Atenção",
   unavailable: "Indisponível",
   error: "Erro",
 };
@@ -31,7 +32,7 @@ export function DataState({
     <div
       className={`${styles.state} ${compact ? styles.stateCompact : ""}`}
       data-variant={variant}
-      role={variant === "error" ? "alert" : undefined}
+      role={variant === "error" ? "alert" : variant === "warning" ? "status" : undefined}
     >
       <p className={styles.stateLabel}>{STATE_LABELS[variant]}</p>
       <Heading className={styles.stateTitle}>{title}</Heading>

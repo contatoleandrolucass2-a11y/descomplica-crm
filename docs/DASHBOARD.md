@@ -13,6 +13,9 @@ atingimento e gap. O realizado continua visível e não é afetado.
 
 ## Read model
 
+Esta seção descreve o leitor v2 que continua ativo em produção. A migration v3
+não altera esta rota nem o catálogo.
+
 | Tabela                           | Responsabilidade                                  |
 | -------------------------------- | ------------------------------------------------- |
 | `crm_dashboard_snapshots`        | Cabeçalho, fonte e disponibilidade das metas      |
@@ -43,6 +46,17 @@ A projeção proporcional observada na referência viva não foi reproduzida por
 não existe fórmula oficial versionada. Filtros por gerente, responsável, empresa
 e canal detalhado continuam indisponíveis até haver enforcement no servidor e
 no banco.
+
+## Shadow v3
+
+`/app/read-model-v3` oferece a composição dimensional nova somente quando a
+flag server-side `CRM_READ_MODEL_V3_SHADOW_ENABLED=true`. A rota não aparece na
+navegação, exige `crm.read_model_v3.view`, um scope explícito e lineage efetivo,
+e consulta apenas `list_crm_read_model_v3_scopes` e
+`get_crm_read_model_v3`. Valores de moeda são decimais textuais exatos; metas,
+planejamento e fórmulas não aprovadas aparecem como indisponíveis. Nenhum dado
+real é seedado pela PR. Zero real exige intervalo certificado e manifesto
+explícito contendo exatamente o escopo consultado.
 
 ## Validação
 

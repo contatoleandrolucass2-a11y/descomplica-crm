@@ -519,7 +519,8 @@
   background: color-mix(in srgb, var(--analytics-danger) 7%, var(--analytics-surface));
 }
 
-.state[data-variant="unavailable"] {
+.state[data-variant="unavailable"],
+.state[data-variant="warning"] {
   border-color: color-mix(in srgb, var(--analytics-warning) 45%, transparent);
 }
 

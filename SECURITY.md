@@ -1,5 +1,30 @@
 # Segurança
 
+## Read model v3
+
+As tabelas `crm_read_model_v3_*`, dimensões canônicas e mappings não recebem
+grants diretos de `anon`, `authenticated` ou `service_role`; todas têm RLS e as
+tabelas de fatos usam FORCE RLS. No estado versionado, porém, a credencial global
+de `service_role` pode executar três capacidades públicas de ingestão:
+`ingest_crm_salesforce_snapshot(jsonb)`,
+`ingest_crm_imob_ranking_snapshot(jsonb)` e
+`ingest_crm_read_model_v3(jsonb)`. O Route Handler implementado chama somente a
+primeira, mas isso não reduz o blast radius da credencial no banco.
+
+A ingestão v3 ainda exige uma autoridade exata, ativa e aprovada em
+`private.crm_read_model_v3_sources`, com owner ativo, para a tupla
+dataset/source/workflow/producer. Essa tabela falha fechado para provenance não
+aprovada, mas não transforma a chave global em identidade exclusiva do
+produtor. Papel de máquina ou wrapper com zero grants de tabela e uma única RPC
+é mitigação futura, ainda não implantada.
+
+O navegador executa somente RPCs de leitura, com permissão específica do
+dataset, scope explícito e lineage efetivo. As permissões v3 estão no catálogo,
+mas nenhum papel as herda automaticamente; até uma migration de rollout
+separada, inclusive Master falha fechado. IDs desconhecidos falham fechados e
+nenhuma associação por nome autoriza leitura. Esta correção documental não
+alterou credencial, grant, environment ou estado remoto.
+
 ## Estado da preparação
 
 - Segredo encontrado no ZIP do login foi removido da árvore de trabalho e colocado em quarentena local, fora do repositório de entrega. O histórico Git original não continha esse arquivo.
@@ -10,7 +35,7 @@
 ## Regras
 
 1. Nunca commitar `.env.local`, dumps, certificados, ZIPs, tokens ou credenciais.
-2. Usar `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` no cliente. A secret key Supabase existe somente no módulo server-only da ingestão M2M, com RPC única e grants mínimos; nunca entra no bundle, logs ou código cliente.
+2. Usar `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` no cliente. A secret key Supabase existe somente no módulo server-only da ingestão M2M e nunca entra no bundle, logs ou código cliente. O caller atual invoca uma RPC Salesforce, mas a credencial global pode executar as três RPCs de ingestão versionadas; restringi-la a uma capacidade exige papel de máquina/wrapper futuro e migration testada.
 3. Validar a sessão com API confiável do Supabase no servidor (`getClaims`/`getUser` conforme o contexto), nunca confiar em `getSession` para autorização server-side.
 4. Toda entrada externa passa por validação de schema; Zod é a biblioteca padrão.
 5. Toda API exige autenticação e permissão explícitas, salvo endpoint documentado como público.

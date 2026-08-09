@@ -11,8 +11,8 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  11::bigint,
-  'eleven platform and CRM permissions are seeded'
+  15::bigint,
+  'fifteen platform and CRM permissions are seeded'
 );
 
 select is(
@@ -79,7 +79,7 @@ select is(
     where key = 'crm.partnerships'
   ),
   '/app/canal-de-parcerias|Canal de Parcerias|Ranking das imobiliárias parceiras|crm|crm.partnerships.view|65|true|true',
-  'the remote partnership catalog identity is versioned explicitly'
+  'the production partnership page keeps its existing dedicated gate during v3 shadow validation'
 );
 
 select is(
