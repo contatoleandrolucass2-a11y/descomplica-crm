@@ -18,8 +18,9 @@
 - O harness Playwright cobre as 18 páginas da referência com máscara opaca
   irreversível aplicada no DOM. PNG bruto fica só em memória; o Git recebe WebP
   sem metadados, manifest e hashes SHA-256. A execução final respondeu `200` em
-  18/18 rotas, aplicou 2.969 máscaras e não registrou erro de console, erro de
-  página, mudança de URL ou mutação durante a captura.
+  18/18 rotas, aplicou 2.969 máscaras e não registrou erro de aplicação no
+  console, erro de página, mudança de URL ou mutação durante a captura. Bloqueios
+  de rede impostos pelo próprio harness são contabilizados separadamente.
 - A barreira anônima passou antes e depois: doze rotas CRM retornaram `307` para
   `/login`; os quatro viewports terminaram no formulário vazio com `200`, CSP,
   X-Frame-Options e nosniff, sem marcador comercial ou erro. Os WebP de antes e

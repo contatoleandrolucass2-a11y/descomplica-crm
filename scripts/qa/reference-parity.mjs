@@ -470,10 +470,16 @@ async function captureReference() {
 
   for (const item of referenceRoutes) {
     const page = await context.newPage();
+    let blockedRequestConsoleErrorCount = 0;
     let consoleErrorCount = 0;
     let pageErrorCount = 0;
     page.on("console", (message) => {
-      if (message.type() === "error") consoleErrorCount += 1;
+      if (message.type() !== "error") return;
+      if (message.text().includes("net::ERR_BLOCKED_BY_CLIENT")) {
+        blockedRequestConsoleErrorCount += 1;
+        return;
+      }
+      consoleErrorCount += 1;
     });
     page.on("pageerror", () => {
       pageErrorCount += 1;
@@ -497,6 +503,7 @@ async function captureReference() {
       finalPath: finalUrl.pathname,
       hasUnexpectedLocationSuffix: finalUrl.search !== "" || finalUrl.hash !== "",
       redactionCount,
+      blockedRequestConsoleErrorCount,
       consoleErrorCount,
       pageErrorCount,
     };
@@ -523,6 +530,7 @@ async function captureReference() {
     const screenshot = await page.screenshot({ type: "png" });
     const postCaptureMutationCount = await endMutationAudit(page);
     const postCaptureUrl = new URL(page.url());
+    routeResult.blockedRequestConsoleErrorCount = blockedRequestConsoleErrorCount;
     routeResult.consoleErrorCount = consoleErrorCount;
     routeResult.pageErrorCount = pageErrorCount;
     routeResult.postCaptureMutationCount = postCaptureMutationCount;
@@ -662,10 +670,16 @@ async function captureAnonymousBoundary() {
     });
     await configureNetwork(context, new URL(origin).origin);
     const page = await context.newPage();
+    let blockedRequestConsoleErrorCount = 0;
     let consoleErrorCount = 0;
     let pageErrorCount = 0;
     page.on("console", (message) => {
-      if (message.type() === "error") consoleErrorCount += 1;
+      if (message.type() !== "error") return;
+      if (message.text().includes("net::ERR_BLOCKED_BY_CLIENT")) {
+        blockedRequestConsoleErrorCount += 1;
+        return;
+      }
+      consoleErrorCount += 1;
     });
     page.on("pageerror", () => {
       pageErrorCount += 1;
@@ -695,6 +709,7 @@ async function captureAnonymousBoundary() {
         finalResponseHeaders["x-frame-options"] === "DENY" &&
         finalResponseHeaders["x-content-type-options"] === "nosniff",
       ...surfaceValidation,
+      blockedRequestConsoleErrorCount,
       consoleErrorCount,
       pageErrorCount,
     };
@@ -718,6 +733,7 @@ async function captureAnonymousBoundary() {
     const postCaptureMutationCount = await endMutationAudit(page);
     const postCaptureSurface = await readAnonymousSurface(page);
     const postCaptureUrl = new URL(page.url());
+    viewportResult.blockedRequestConsoleErrorCount = blockedRequestConsoleErrorCount;
     viewportResult.consoleErrorCount = consoleErrorCount;
     viewportResult.pageErrorCount = pageErrorCount;
     viewportResult.postCaptureMutationCount = postCaptureMutationCount;

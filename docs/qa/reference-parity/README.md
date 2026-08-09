@@ -36,9 +36,11 @@ cada imagem está em [`manifest.json`](./manifest.json).
 
 ## Resultado da referência
 
-As 18 rotas responderam `200`, nenhuma gerou erro de página ou console e 2.969
-regiões foram mascaradas. Os 26 WebP do conjunto completo foram inspecionados
-com o Sharp e não contêm EXIF, ICC, XMP ou IPTC.
+As 18 rotas responderam `200`, sem erro de página ou erro de aplicação no
+console, e 2.969 regiões foram mascaradas. Erros de rede produzidos pelo bloqueio
+intencional do harness são contados separadamente e não ocultam erros da
+aplicação. Os 26 WebP do conjunto completo foram inspecionados com o Sharp e não
+contêm EXIF, ICC, XMP ou IPTC.
 
 Capturas:
 
