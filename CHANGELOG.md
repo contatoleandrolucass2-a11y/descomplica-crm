@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Adiciona gate de reconciliação local/remoto com matriz das 20 versões,
+  evidência sanitizada do schema, plano de baseline/backup/restore/domínio,
+  contratos tipados Salesforce/n8n/Qlik e estoque fail-closed, inventário de
+  políticas e proposta deny-by-default de escopos/RLS; sem mutation remota.
 - Consolida a paridade visual das 18 páginas: ranking, Canal de Parcerias,
   configurações, metas e cinco jornadas de simulação passam a compartilhar a
   mesma linguagem analítica navy/cyan/lime.

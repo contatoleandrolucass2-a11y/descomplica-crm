@@ -2,10 +2,17 @@
 
 ## Estado atual
 
-O schema usa PostgreSQL 17 no Supabase local. Existem dezesseis migrations
-versionadas. A validação local encontrou 20 tabelas públicas e RLS habilitada
-em todas; os seeds estruturais criam oito papéis, 18 permissões e 21 páginas.
-Nenhum dado comercial é seedado.
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem dezesseis
+migrations locais. A validação local encontrou 20 tabelas públicas e RLS
+habilitada em todas; os seeds estruturais criam oito papéis, 18 permissões e 21
+páginas. Nenhum dado comercial é seedado.
+
+Isso não descreve convergência com produção. A captura somente leitura de 9 de
+agosto encontrou quatro migrations somente remotas, três somente locais, 21
+tabelas remotas e exposição Qlik incompatível com a allowlist. A matriz
+completa, hashes e ordem segura estão em
+[`docs/reconciliation/MIGRATION_MATRIX.md`](reconciliation/MIGRATION_MATRIX.md).
+Nenhuma migration de reconciliação foi aplicada remotamente.
 
 ## Migrations
 
@@ -86,4 +93,12 @@ Os JSONs da tabela D1 `point_goals` foram substituídos por `crm_point_settings`
 
 O ranking usa snapshots e contagens por participante/período, sem payload JSON. Os totais são recalculados na aplicação com os pesos atuais, evitando regravar atividade quando a configuração muda. A escrita permanece reservada à futura ingestão server-side.
 
-As tabelas `crm_imob_ranking_runs` e `crm_imob_ranking_entries` preservam o histórico externo do ranking de imobiliárias originado no Qlik. `anon`, `authenticated` e `service_role` permanecem sem grants diretos. O n8n grava somente pela RPC transacional `ingest_crm_imob_ranking_snapshot`; as policies nomeadas continuam com escopo `authenticated`, mas ficam inoperantes até uma futura leitura receber grant explícito e revisão própria. A auditoria do drift está em `docs/SUPABASE_REMOTE_DRIFT_AUDIT.md`.
+No schema local pretendido, `crm_imob_ranking_runs` e
+`crm_imob_ranking_entries` preservam o histórico externo do ranking de
+imobiliárias; `anon`, `authenticated` e `service_role` ficam sem grants diretos
+e o n8n escreve somente pela RPC transacional
+`ingest_crm_imob_ranking_snapshot`. O remoto ainda não possui essa RPC segura,
+contém a tabela adicional `crm_imob_ranking_developments`, uma RPC legada e
+grants/policies abertos. O estado efetivo está no
+[dump sanitizado](reconciliation/REMOTE_SCHEMA_SANITIZED.md), não deve ser
+inferido apenas das migrations locais.

@@ -1,5 +1,13 @@
 # Matriz de autorização e páginas
 
+> Esta matriz descreve o contrato local pretendido. A captura remota de 9 de
+> agosto de 2026 encontrou exposição Qlik a `anon` e read models globais sem
+> escopo de organização/equipe/carteira. Além disso, cadastro público pode criar
+> perfil ativo `user` com leitura comercial global. O estado e a proposta
+> deny-by-default estão em
+> [`docs/reconciliation/RLS_SCOPE_PROPOSAL.md`](reconciliation/RLS_SCOPE_PROPOSAL.md).
+> Nenhuma correção foi aplicada remotamente neste gate.
+
 ## Regras efetivas
 
 A autorização combina o papel do usuário com exceções individuais. Uma exceção `deny` vence tanto `allow` quanto a permissão herdada do papel. Usuários sem perfil ativo não recebem contexto de autorização e falham fechados nas policies RLS.
@@ -79,8 +87,8 @@ Cada detalhe de etapa exige `crm.stages.view` e reutiliza as tabelas do dashboar
 
 ## Matriz de grants da Data API
 
-`PUBLIC` e `anon` não possuem privilégio em tabela, sequência ou função da
-aplicação. `authenticated` recebe somente `SELECT` nas tabelas consultadas pelo
+No schema local pretendido, `PUBLIC` e `anon` não possuem privilégio em tabela,
+sequência ou função da aplicação. `authenticated` recebe somente `SELECT` nas tabelas consultadas pelo
 SDK SSR: catálogo de páginas, auditoria, perfis/papéis/overrides de usuários e
 os read models do CRM. As tabelas `roles`, `permissions`, `role_permissions` e
 `crm_ingestion_runs` não são consultadas diretamente pelo cliente e permanecem
@@ -92,11 +100,15 @@ ou `MAINTAIN`. As mutações passam exclusivamente pelas RPCs listadas acima.
 os helpers `get_role_level`, `can_assign_role` e `can_grant_permission` não são
 RPCs públicas da aplicação.
 
-`service_role` não recebe acesso direto a tabelas ou sequências. Os únicos grants
+Localmente, `service_role` não recebe acesso direto a tabelas ou sequências. Os únicos grants
 comprovados são `EXECUTE` em `ingest_crm_salesforce_snapshot`, chamada pelo Route
 Handler server-only, e `ingest_crm_imob_ranking_snapshot`, chamada pelo workflow
 Qlik protegido; ambas executam as escritas como transações `SECURITY DEFINER`.
 `bootstrap_master_user` permanece exclusiva do proprietário
 `postgres`, conforme o runbook operacional.
 
-As tabelas externas `crm_imob_ranking_runs` e `crm_imob_ranking_entries` não fazem parte da allowlist do navegador nem do `service_role`. A integração Qlik usa exclusivamente a RPC mínima versionada; conceder acesso direto para contornar uma falha operacional é proibido.
+As tabelas externas `crm_imob_ranking_runs` e `crm_imob_ranking_entries` não
+fazem parte da allowlist local do navegador nem do `service_role`. A integração
+Qlik deve usar exclusivamente a RPC mínima versionada; conceder acesso direto
+para contornar uma falha operacional é proibido. O remoto ainda diverge dessa
+regra e não deve receber novo caller antes da reconciliação.
