@@ -404,10 +404,10 @@
   },
   "target-after": {
     "passed": true,
-    "capturedAt": "2026-08-09T02:22:37.274Z",
+    "capturedAt": "2026-08-09T04:17:24.865Z",
     "origin": "http://127.0.0.1:3100",
     "provenance": {
-      "captureCommit": "bbf14fceefd7af107e9778ccad313ff97e051a34",
+      "captureCommit": "1c7c5c651542480af7152fe94f4c141af010a4e2",
       "worktreeDirtyAtCapture": false,
       "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
       "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1"
@@ -481,6 +481,42 @@
       },
       {
         "route": "/app/configuracoes/metas/pontos",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/simulacao",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/simulacao/associativo-fluxo-linear",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/simulacao/calcular-documentacao",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/simulacao/caixa",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/simulacao/tabela-direta",
+        "status": 307,
+        "redirectsToLogin": true,
+        "securityHeadersPresent": true
+      },
+      {
+        "route": "/app/simulacao/tabela-investidor",
         "status": 307,
         "redirectsToLogin": true,
         "securityHeadersPresent": true
