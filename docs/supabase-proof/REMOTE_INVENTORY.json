@@ -1,0 +1,1311 @@
+{
+  "function_grants": [
+    {
+      "function": "assign_user_role",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "target_user_id uuid, target_role_key text, reason text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "begin_crm_salesforce_refresh",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "p_request_key text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "finish_crm_salesforce_refresh",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "p_run_id uuid, p_status text, p_http_status integer, p_error_code text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "get_crm_sync_status",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "get_user_authorization_context",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "user_uuid uuid",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "has_permission",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "user_uuid uuid, permission_key text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "ingest_crm_salesforce_snapshot",
+      "grantable": false,
+      "grantee": "service_role",
+      "identity_arguments": "p_payload jsonb",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "list_app_pages_for_management",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "publish_crm_imob_ranking",
+      "grantable": false,
+      "grantee": "anon",
+      "identity_arguments": "payload jsonb, sync_token text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "publish_crm_imob_ranking",
+      "grantable": false,
+      "grantee": "service_role",
+      "identity_arguments": "payload jsonb, sync_token text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "remove_user_permission_override",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "target_user_id uuid, permission_key text, reason text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "replace_crm_point_settings",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "p_weights jsonb, p_targets jsonb",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "set_app_page_active",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "target_page_key text, target_is_active boolean, reason text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "set_user_active",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "target_user_id uuid, target_is_active boolean, reason text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "set_user_permission_override",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "target_user_id uuid, permission_key text, effect text, reason text",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    },
+    {
+      "function": "upsert_crm_funnel_goals",
+      "grantable": false,
+      "grantee": "authenticated",
+      "identity_arguments": "p_profile_key text, p_effective_month date, p_sales bigint, p_opportunities_rate numeric, p_appointments_rate numeric, p_visits_rate numeric, p_folders_rate numeric, p_approved_folders_rate numeric, p_broker_minimum_month_1 integer, p_broker_minimum_month_2 integer, p_broker_minimum_month_3 integer, p_broker_minimum_month_4_plus integer, p_broker_weekly_appointments integer, p_broker_weekly_visits integer, p_broker_weekly_folders integer, p_productive_team_appointments smallint, p_productive_team_visits smallint, p_productive_team_folders smallint, p_productive_team_sales smallint",
+      "privilege": "EXECUTE",
+      "schema": "public"
+    }
+  ],
+  "functions": [
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "24d26d53fcdf089cc8710a66424fc6112ef666b856ce877453e83300cded2097",
+      "identity_arguments": "p_payload jsonb",
+      "name": "ingest_crm_salesforce_snapshot_v1_internal",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "private",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "f4a4b80165a3455deaccdabfefb8e8d4b85065206722dddbf3064ebacae49f03",
+      "identity_arguments": "actor_uuid uuid",
+      "name": "_internal_assert_actor_active",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "integer",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "7f84222afe115050e330d78b694d79b4ea09593837c026ec15ef64e3de5f06ad",
+      "identity_arguments": "user_uuid uuid",
+      "name": "_internal_get_role_level",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "integer",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "58373ef795c5f690dab7ef70b2aa15038948c9a197baa8e7884426f0fedf62f7",
+      "identity_arguments": "user_uuid uuid, permission_key text",
+      "name": "_internal_has_permission",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "boolean",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "9b4a473bb4e4289c7d61fc2423da4253eab8ea5608a7081ffabe6652b5caaf0b",
+      "identity_arguments": "user_uuid uuid",
+      "name": "_internal_list_permissions",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "text[]",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "9c1ee5d94c32be6e85f83a568c61c31e8116ba181b9f60569ee7d1ab458c35ab",
+      "identity_arguments": "target_user_id uuid, target_role_key text, reason text",
+      "name": "assign_user_role",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "3e8c979d3001813d8d7d9f138039c62321f10af0bf5b59b345de0668dbfffce5",
+      "identity_arguments": "p_request_key text",
+      "name": "begin_crm_salesforce_refresh",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "124703b23b6bf2aa7960cdc1b4b2a5906cffa416de5db95c8a12bd1e7ee1b992",
+      "identity_arguments": "master_user_id uuid",
+      "name": "bootstrap_master_user",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "5bb3015dc606508fa7b0b1cee1f202539cf38fa3f71945f2d8c1f2e05fb18d3d",
+      "identity_arguments": "actor_uuid uuid, target_role_key text",
+      "name": "can_assign_role",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "boolean",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "fd8684361510a5f46ade968a640d1fac11abb90cb452ccf6729f7cfa1db59e12",
+      "identity_arguments": "actor_uuid uuid, permission_key text",
+      "name": "can_grant_permission",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "boolean",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "c8615d7e590975ad65a59770632591432c1e173acfec1add5342329d4121f34e",
+      "identity_arguments": "p_run_id uuid, p_status text, p_http_status integer, p_error_code text",
+      "name": "finish_crm_salesforce_refresh",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "017f76b8a7701585971133e4820af318c374d3e25663741f02050bff7ed8719a",
+      "identity_arguments": "",
+      "name": "get_crm_sync_status",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "TABLE(generated_at timestamp with time zone, last_ingest_at timestamp with time zone, last_ingest_status text, refresh_status text, refresh_requested_at timestamp with time zone)",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "8163bf615c67898a41756e88c4c800ea60600d4e0629ef492afc22fac95dc533",
+      "identity_arguments": "user_uuid uuid",
+      "name": "get_role_level",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "integer",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "de04afa5273d1cc720dc120ee32337663c2787ed705992b9f7ddb049cdb68e0b",
+      "identity_arguments": "user_uuid uuid",
+      "name": "get_user_authorization_context",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "TABLE(user_id uuid, role_key text, level integer, permissions text[])",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "4263c8398162047470064a9e66a69fe241dc05287be244d5e468f37832400114",
+      "identity_arguments": "",
+      "name": "handle_new_auth_user",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "trigger",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "303f280721f81a5bb2ce67fc21b1d5476beeca0604e8d72fde04d333dbceb6ac",
+      "identity_arguments": "user_uuid uuid, permission_key text",
+      "name": "has_permission",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "boolean",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "b6774a50728636a6b7e8a2d50c7d0d562672d9a3a89fa0344d190935b2f502eb",
+      "identity_arguments": "p_payload jsonb",
+      "name": "ingest_crm_salesforce_snapshot",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "a6016923641aea8d7dc9fab3d1dceb211c0ac836bfa18d1f95cfd12c68c9c7b3",
+      "identity_arguments": "",
+      "name": "list_app_pages_for_management",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "SETOF app_pages",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "s"
+    },
+    {
+      "config": ["search_path=pg_catalog, public, extensions"],
+      "definition_sha256": "0d8232d40fad8396cf495c44a65666d23a78062a66ec5a868df6cd4819d09236",
+      "identity_arguments": "payload jsonb, sync_token text",
+      "name": "publish_crm_imob_ranking",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "1d7ef47af0578a1f91cc3add8f17dd6ee587211cf96670d798f764096063c640",
+      "identity_arguments": "target_user_id uuid, permission_key text, reason text",
+      "name": "remove_user_permission_override",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "05fd6a2ac4e242f9c3a047195933b86da0383403390693f9f002bb9483481042",
+      "identity_arguments": "p_weights jsonb, p_targets jsonb",
+      "name": "replace_crm_point_settings",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=pg_catalog"],
+      "definition_sha256": "dd9ce3fd3905d621611cf0ea2e7591bada6d61f827445cfa2afe27e69b03f271",
+      "identity_arguments": "",
+      "name": "rls_auto_enable",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "event_trigger",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "1f227d0892cbd83cd91f8fb5e8cd92c826d71d996e6ec9727c70da1b1b81c656",
+      "identity_arguments": "target_page_key text, target_is_active boolean, reason text",
+      "name": "set_app_page_active",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "app_pages",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "0c57996cea08936cb25da37e276ef4932c788cfb1f2bffca8e5a03e076c47b52",
+      "identity_arguments": "",
+      "name": "set_updated_at",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "trigger",
+      "schema": "public",
+      "security_definer": false,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "c50e425f0f578cbcd2e5b01cdb83da7d4edd71a88224dc7ee574fd1620de26a8",
+      "identity_arguments": "target_user_id uuid, target_is_active boolean, reason text",
+      "name": "set_user_active",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "profiles",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "80e5c6b887ca8f5b397016a2acaca3ee50f6c06711db9ecd5c2efc245fcdfdac",
+      "identity_arguments": "target_user_id uuid, permission_key text, effect text, reason text",
+      "name": "set_user_permission_override",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "jsonb",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    },
+    {
+      "config": ["search_path=\"\""],
+      "definition_sha256": "00e204b784bc4205a01b6484e168175c12bb312dc85bfe84a70d2b0d6055ff60",
+      "identity_arguments": "p_profile_key text, p_effective_month date, p_sales bigint, p_opportunities_rate numeric, p_appointments_rate numeric, p_visits_rate numeric, p_folders_rate numeric, p_approved_folders_rate numeric, p_broker_minimum_month_1 integer, p_broker_minimum_month_2 integer, p_broker_minimum_month_3 integer, p_broker_minimum_month_4_plus integer, p_broker_weekly_appointments integer, p_broker_weekly_visits integer, p_broker_weekly_folders integer, p_productive_team_appointments smallint, p_productive_team_visits smallint, p_productive_team_folders smallint, p_productive_team_sales smallint",
+      "name": "upsert_crm_funnel_goals",
+      "owner": "postgres",
+      "parallel": "u",
+      "result": "crm_funnel_goals",
+      "schema": "public",
+      "security_definer": true,
+      "volatility": "v"
+    }
+  ],
+  "migrations": [
+    {
+      "name": "access_control_foundation",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 50,
+      "statements_sha256": "46b19fa8e0391c4d249cfdcb99de0ecb5e42774e17cff16d18a9174107b0f7e9",
+      "version": "20260519190726"
+    },
+    {
+      "name": "access_control_admin_functions",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 17,
+      "statements_sha256": "5158b37c83bda94ca6cd2104720839a06734f8fbbdffc5b033556a8e5cbbc9be",
+      "version": "20260522010552"
+    },
+    {
+      "name": "authorization_context_rpc",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 7,
+      "statements_sha256": "93bd0cf54014e8eeb61216e1becb98463da6242c2f86b444fd2982e447bcbcf2",
+      "version": "20260527120000"
+    },
+    {
+      "name": "fix_remove_user_permission_override_ambiguity",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 4,
+      "statements_sha256": "7892baf5872d7d70d4666fa4769878937b177315f78c75d8474719f93d0e2f81",
+      "version": "20260721120000"
+    },
+    {
+      "name": "page_catalog_and_crm_permissions",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 40,
+      "statements_sha256": "6b48833d231d73cfef885d8748a846012999d51fa4ccadf299c082fe43afbe7f",
+      "version": "20260804041218"
+    },
+    {
+      "name": "dashboard_read_model",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 18,
+      "statements_sha256": "9b31ca16b2f405f74bba05d1b84a9f509e627a846a78f20fe61f0852833ee24c",
+      "version": "20260804043416"
+    },
+    {
+      "name": "funnel_goals",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 13,
+      "statements_sha256": "86d6ed5d1b24715a4e77f96c27e731b489dccf5ee688fc274323e95ce3b416d1",
+      "version": "20260804044701"
+    },
+    {
+      "name": "point_settings",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 14,
+      "statements_sha256": "c4ade9304fcf1f6a4fba76ce367fde490dbbbc51337672460c018b79b5273dae",
+      "version": "20260804045945"
+    },
+    {
+      "name": "ranking_read_model",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 13,
+      "statements_sha256": "fef7a0e668442ee55e79f8398a62bc57007c4569afb2177eef179ae7f6430d54",
+      "version": "20260804050720"
+    },
+    {
+      "name": "secure_salesforce_ingestion",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 19,
+      "statements_sha256": "ffd4b36c614d3e7379e7ecafe2f05a3f58f8f839854b09af1f302c03e2e643f4",
+      "version": "20260804052500"
+    },
+    {
+      "name": "normalize_new_project_grants",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 22,
+      "statements_sha256": "7248b3e52f5c0e1b30f0998380034ce8e5f5851245656cfe3428d2c14ed777da",
+      "version": "20260804191713"
+    },
+    {
+      "name": "salesforce_source_availability",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 12,
+      "statements_sha256": "29417c09b97d3a838300336c8c6a51e601326611b1d99e072349707951d63d8a",
+      "version": "20260806222732"
+    },
+    {
+      "name": "reconcile_remote_imob_schema_and_grants",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 37,
+      "statements_sha256": "7dec69dd772b68ea94941c64b62c1ff1d0b95697cda12557a6049a548d3adc9a",
+      "version": "20260807001159"
+    },
+    {
+      "name": "grant_imob_ranking_service_role",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 1,
+      "statements_sha256": "11070628523162b3dca78628a26d060ceda092afbcfcf18a3a1b420357673d0b",
+      "version": "20260808235856"
+    },
+    {
+      "name": "add_atomic_imob_ranking_publish_rpc",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 1,
+      "statements_sha256": "dbb139eedb24d2527e92d8dd6e4d326047237f845945bfe81b297ba643042af7",
+      "version": "20260809004414"
+    },
+    {
+      "name": "restrict_imob_ranking_rpc_roles",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 1,
+      "statements_sha256": "27fc899b0f784238ab9812052270c905cdbdbd20e754eeaea9cd569a2e0b23c5",
+      "version": "20260809010942"
+    },
+    {
+      "name": "qlik_ranking_developments",
+      "rollback_count": 0,
+      "rollback_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "statement_count": 1,
+      "statements_sha256": "c01b7dd375839d776fd8d7cf09b24d6e32c603ec7bca78f7636c51222143e4d0",
+      "version": "20260809031936"
+    }
+  ],
+  "policies": [
+    {
+      "command": "SELECT",
+      "name": "app_pages_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "app_pages",
+      "using": "(is_active AND has_permission(( SELECT auth.uid() AS uid), 'pages.view'::text) AND has_permission(( SELECT auth.uid() AS uid), permission_key))",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "audit_logs_select_with_audit_view",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "audit_logs",
+      "using": "has_permission(( SELECT auth.uid() AS uid), 'audit.view'::text)",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_dashboard_metrics_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "crm_dashboard_metrics",
+      "using": "( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.dashboard.view'::text) AS has_permission)",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_dashboard_snapshots_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "crm_dashboard_snapshots",
+      "using": "( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.dashboard.view'::text) AS has_permission)",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_dashboard_top_developments_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "crm_dashboard_top_developments",
+      "using": "( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.dashboard.view'::text) AS has_permission)",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_dashboard_views_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "crm_dashboard_views",
+      "using": "( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.dashboard.view'::text) AS has_permission)",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_funnel_goals_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "crm_funnel_goals",
+      "using": "( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.settings.manage'::text) AS has_permission)",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_imob_ranking_developments_select_completed",
+      "permissive": "PERMISSIVE",
+      "roles": ["anon", "authenticated"],
+      "schema": "public",
+      "table": "crm_imob_ranking_developments",
+      "using": "(EXISTS ( SELECT 1\n   FROM crm_imob_ranking_runs runs\n  WHERE ((runs.id = crm_imob_ranking_developments.run_id) AND (runs.status = 'succeeded'::text))))",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_imob_ranking_entries_select_completed",
+      "permissive": "PERMISSIVE",
+      "roles": ["anon", "authenticated"],
+      "schema": "public",
+      "table": "crm_imob_ranking_entries",
+      "using": "(EXISTS ( SELECT 1\n   FROM crm_imob_ranking_runs runs\n  WHERE ((runs.id = crm_imob_ranking_entries.run_id) AND (runs.status = 'succeeded'::text))))",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_imob_ranking_runs_select_completed",
+      "permissive": "PERMISSIVE",
+      "roles": ["anon", "authenticated"],
+      "schema": "public",
+      "table": "crm_imob_ranking_runs",
+      "using": "(status = 'succeeded'::text)",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_point_metrics_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "crm_point_metrics",
+      "using": "(( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.ranking.view'::text) AS has_permission) OR ( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.settings.manage'::text) AS has_permission))",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_point_settings_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "crm_point_settings",
+      "using": "(( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.ranking.view'::text) AS has_permission) OR ( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.settings.manage'::text) AS has_permission))",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_ranking_participants_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "crm_ranking_participants",
+      "using": "( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.ranking.view'::text) AS has_permission)",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "crm_ranking_snapshots_select_authorized",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "crm_ranking_snapshots",
+      "using": "( SELECT has_permission(( SELECT auth.uid() AS uid), 'crm.ranking.view'::text) AS has_permission)",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "permissions_select_authenticated",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "permissions",
+      "using": "true",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "profiles_select_self_or_users_view",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "profiles",
+      "using": "((user_id = ( SELECT auth.uid() AS uid)) OR has_permission(( SELECT auth.uid() AS uid), 'users.view'::text))",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "role_permissions_select_authenticated",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "role_permissions",
+      "using": "true",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "roles_select_authenticated",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "roles",
+      "using": "true",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "user_permission_overrides_select_self_or_permissions_view",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "user_permission_overrides",
+      "using": "((user_id = ( SELECT auth.uid() AS uid)) OR has_permission(( SELECT auth.uid() AS uid), 'permissions.view'::text))",
+      "with_check": null
+    },
+    {
+      "command": "SELECT",
+      "name": "user_roles_select_self_or_users_view",
+      "permissive": "PERMISSIVE",
+      "roles": ["authenticated"],
+      "schema": "public",
+      "table": "user_roles",
+      "using": "((user_id = ( SELECT auth.uid() AS uid)) OR has_permission(( SELECT auth.uid() AS uid), 'users.view'::text))",
+      "with_check": null
+    }
+  ],
+  "relation_grants": [
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "app_pages",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "audit_logs",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_dashboard_metrics",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_dashboard_snapshots",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_dashboard_top_developments",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_dashboard_views",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_funnel_goals",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "anon",
+      "privilege": "SELECT",
+      "relation": "crm_imob_ranking_developments",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_imob_ranking_developments",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "DELETE",
+      "relation": "crm_imob_ranking_developments",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "INSERT",
+      "relation": "crm_imob_ranking_developments",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "SELECT",
+      "relation": "crm_imob_ranking_developments",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "UPDATE",
+      "relation": "crm_imob_ranking_developments",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "anon",
+      "privilege": "SELECT",
+      "relation": "crm_imob_ranking_entries",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_imob_ranking_entries",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "DELETE",
+      "relation": "crm_imob_ranking_entries",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "INSERT",
+      "relation": "crm_imob_ranking_entries",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "SELECT",
+      "relation": "crm_imob_ranking_entries",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "UPDATE",
+      "relation": "crm_imob_ranking_entries",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "anon",
+      "privilege": "SELECT",
+      "relation": "crm_imob_ranking_runs",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_imob_ranking_runs",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "DELETE",
+      "relation": "crm_imob_ranking_runs",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "INSERT",
+      "relation": "crm_imob_ranking_runs",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "SELECT",
+      "relation": "crm_imob_ranking_runs",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "service_role",
+      "privilege": "UPDATE",
+      "relation": "crm_imob_ranking_runs",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_point_metrics",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_point_settings",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_ranking_participants",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "crm_ranking_snapshots",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "profiles",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "user_permission_overrides",
+      "schema": "public"
+    },
+    {
+      "grantable": false,
+      "grantee": "authenticated",
+      "privilege": "SELECT",
+      "relation": "user_roles",
+      "schema": "public"
+    }
+  ],
+  "relations": [
+    {
+      "kind": "table",
+      "name": "app_pages",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "audit_logs",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "sequence",
+      "name": "audit_logs_id_seq",
+      "owner": "postgres",
+      "rls_enabled": false,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_dashboard_metrics",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_dashboard_snapshots",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "sequence",
+      "name": "crm_dashboard_snapshots_id_seq",
+      "owner": "postgres",
+      "rls_enabled": false,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_dashboard_top_developments",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_dashboard_views",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_funnel_goals",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "sequence",
+      "name": "crm_funnel_goals_id_seq",
+      "owner": "postgres",
+      "rls_enabled": false,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_imob_ranking_developments",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_imob_ranking_entries",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_imob_ranking_runs",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_ingestion_runs",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_point_metrics",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_point_settings",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_ranking_participants",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "crm_ranking_snapshots",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "sequence",
+      "name": "crm_ranking_snapshots_id_seq",
+      "owner": "postgres",
+      "rls_enabled": false,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "permissions",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "profiles",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "role_permissions",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "roles",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "user_permission_overrides",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    },
+    {
+      "kind": "table",
+      "name": "user_roles",
+      "owner": "postgres",
+      "rls_enabled": true,
+      "rls_forced": false,
+      "schema": "public"
+    }
+  ],
+  "schemas": [
+    {
+      "owner": "postgres",
+      "schema": "private"
+    },
+    {
+      "owner": "pg_database_owner",
+      "schema": "public"
+    }
+  ],
+  "triggers": [
+    {
+      "definition_sha256": "6c60b8b1de174c5f87ec04de1386c1df39da9dfa472f307e9b99232ff1e3057a",
+      "enabled": "O",
+      "function": "handle_new_auth_user()",
+      "name": "on_auth_user_created",
+      "schema": "auth",
+      "table": "users"
+    },
+    {
+      "definition_sha256": "b1a3c2c518c2e18ba553c9458a876db3fdbd7ea39ae8378994817481bd5fe1c2",
+      "enabled": "O",
+      "function": "set_updated_at()",
+      "name": "app_pages_set_updated_at",
+      "schema": "public",
+      "table": "app_pages"
+    },
+    {
+      "definition_sha256": "c0dcf4ea2712f022b52429736d76821b475adc681b79fb7fec3a62587b97c94d",
+      "enabled": "O",
+      "function": "set_updated_at()",
+      "name": "crm_dashboard_snapshots_set_updated_at",
+      "schema": "public",
+      "table": "crm_dashboard_snapshots"
+    },
+    {
+      "definition_sha256": "b3243d8bb468e825c0a72b10ebca3111681aaef5c67c9fb178ae5cb88dd414d2",
+      "enabled": "O",
+      "function": "set_updated_at()",
+      "name": "crm_funnel_goals_set_updated_at",
+      "schema": "public",
+      "table": "crm_funnel_goals"
+    },
+    {
+      "definition_sha256": "c5a0c98fae8508b3500650b728157b203ef77a26c7a02320e6fe3a5a01ea5616",
+      "enabled": "O",
+      "function": "set_updated_at()",
+      "name": "crm_ingestion_runs_set_updated_at",
+      "schema": "public",
+      "table": "crm_ingestion_runs"
+    },
+    {
+      "definition_sha256": "e63c16351aa2301a5be3f434cf97a51f53959051c906b253fab5c802804e1de6",
+      "enabled": "O",
+      "function": "set_updated_at()",
+      "name": "crm_point_settings_set_updated_at",
+      "schema": "public",
+      "table": "crm_point_settings"
+    },
+    {
+      "definition_sha256": "7fbe798e2cd818c625c960c087e412dfabba48086d9f04a46b8d2ccc180b5e92",
+      "enabled": "O",
+      "function": "set_updated_at()",
+      "name": "crm_ranking_snapshots_set_updated_at",
+      "schema": "public",
+      "table": "crm_ranking_snapshots"
+    },
+    {
+      "definition_sha256": "9102fec2e184e8791ee9a5747bcc37e003d5be449206007f8cf0fea8edbbc4cb",
+      "enabled": "O",
+      "function": "set_updated_at()",
+      "name": "profiles_set_updated_at",
+      "schema": "public",
+      "table": "profiles"
+    },
+    {
+      "definition_sha256": "2fdfc212ba3c651f412ff045c3eba95b605dba41dd8e834a9610e110843afa58",
+      "enabled": "O",
+      "function": "set_updated_at()",
+      "name": "user_roles_set_updated_at",
+      "schema": "public",
+      "table": "user_roles"
+    }
+  ],
+  "views": []
+}

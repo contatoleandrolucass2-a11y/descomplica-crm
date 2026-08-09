@@ -376,23 +376,63 @@ begin
   ) then
     raise exception 'reserved funnel-goals fixture slot is occupied';
   end if;
+  if exists (
+    select 1
+    from public.user_roles
+    where role_key = 'master'
+  ) then
+    raise exception 'local visual QA requires a fresh database without a Master fixture';
+  end if;
   if not exists (
     select 1
     from public.role_permissions
-    where role_key = 'admin' and permission_key = 'crm.simulators.view'
+    where role_key = 'master' and permission_key = 'crm.simulators.view'
   ) then
     raise exception 'simulator permission migration is not applied';
+  end if;
+  if exists (
+    select 1
+    from public.role_permissions role_permission
+    where role_permission.role_key <> 'master'
+      and role_permission.permission_key = any(array[
+        'crm.dashboard.view',
+        'crm.stages.view',
+        'crm.ranking.view',
+        'crm.partnerships.view',
+        'pages.manage',
+        'crm.settings.view',
+        'crm.settings.manage',
+        'crm.salesforce.refresh',
+        'crm.ingest.manage'
+      ])
+  ) then
+    raise exception 'global commercial v2 permissions are not Master-only';
+  end if;
+  if exists (
+    select 1
+    from public.profiles profile
+    join public.user_roles user_role on user_role.user_id = profile.user_id
+    where profile.is_active
+      and profile.access_status = 'approved'
+      and user_role.role_key = any(array['user', 'supervisor', 'broker_lead'])
+  ) then
+    raise exception 'approved legacy roles violate the local visual QA contract';
   end if;
 end
 $qa_preflight$;
 
+select public.bootstrap_master_user(${userIdSql});
+
 update public.profiles
-set is_active = true, profile_completed = true
+set profile_completed = true
 where user_id = ${userIdSql};
 
-update public.user_roles
-set role_key = 'admin'
-where user_id = ${userIdSql};
+insert into public.crm_organizations (organization_key, name, kind)
+values (
+  'qa-' || replace(${userIdSql}::text, '-', ''),
+  'QA synthetic organization',
+  'internal'
+);
 
 insert into public.crm_dashboard_snapshots (
   snapshot_key,
@@ -660,10 +700,37 @@ begin
     join public.user_roles user_role on user_role.user_id = profile.user_id
     where profile.user_id = ${userIdSql}
       and profile.is_active
+      and profile.access_status = 'approved'
       and profile.profile_completed
-      and user_role.role_key = 'admin'
+      and user_role.role_key = 'master'
   ) then
     raise exception 'QA authorization fixture is incomplete';
+  end if;
+  if (
+    select count(*)
+    from public.crm_user_reporting_scope_grants scope_grant
+    join public.crm_reporting_scopes reporting_scope
+      on reporting_scope.id = scope_grant.reporting_scope_id
+    where scope_grant.user_id = ${userIdSql}
+      and scope_grant.revoked_at is null
+      and scope_grant.valid_from <= now()
+      and (scope_grant.valid_until is null or scope_grant.valid_until > now())
+      and reporting_scope.is_active
+      and reporting_scope.scope_type = 'global'
+      and reporting_scope.scope_key = 'global'
+  ) <> 1 then
+    raise exception 'QA active global reporting scope fixture is incomplete';
+  end if;
+  if exists (
+    select 1
+    from public.profiles profile
+    join public.user_roles user_role on user_role.user_id = profile.user_id
+    where profile.user_id = ${userIdSql}
+      and profile.is_active
+      and profile.access_status = 'approved'
+      and user_role.role_key = any(array['user', 'supervisor', 'broker_lead'])
+  ) then
+    raise exception 'QA fixture approved a legacy role';
   end if;
   if (
     select count(*)
@@ -762,12 +829,41 @@ where updated_by = ${userIdSql};
 delete from public.crm_point_settings
 where setting_key = 'default' and updated_by = ${userIdSql};
 
+delete from public.audit_logs
+where actor_id = ${userIdSql}
+   or target_user_id = ${userIdSql};
+
+delete from public.crm_user_reporting_scope_grants
+where user_id = ${userIdSql};
+
+delete from public.crm_organizations
+where organization_key = 'qa-' || replace(${userIdSql}::text, '-', '');
+
 do $qa_cleanup_verify$
 begin
   if exists (select 1 from public.crm_dashboard_snapshots where source = ${markerSql})
     or exists (select 1 from public.crm_ranking_snapshots where source = ${markerSql})
     or exists (select 1 from public.crm_funnel_goals where updated_by = ${userIdSql})
     or exists (select 1 from public.crm_point_settings where updated_by = ${userIdSql})
+    or exists (
+      select 1 from public.crm_user_reporting_scope_grants
+      where user_id = ${userIdSql}
+    )
+    or exists (
+      select 1 from public.audit_logs
+      where actor_id = ${userIdSql}
+         or target_user_id = ${userIdSql}
+    )
+    or exists (
+      select 1 from public.crm_organizations
+      where organization_key = 'qa-' || replace(${userIdSql}::text, '-', '')
+    )
+    or not exists (
+      select 1 from public.crm_reporting_scopes
+      where scope_key = 'global'
+        and scope_type = 'global'
+        and is_active
+    )
   then
     raise exception 'ephemeral fixture cleanup is incomplete';
   end if;
@@ -809,41 +905,96 @@ async function verifyFixturesThroughRls({ apiUrl, publishableKey, account, marke
   }
 
   try {
-    const [dashboardSnapshot, rankingSnapshot, pointSettings, pointMetrics, funnelGoals] =
-      await Promise.all([
-        client
-          .from("crm_dashboard_snapshots")
-          .select("id,source")
-          .eq("snapshot_key", "global")
-          .eq("source", marker)
-          .single(),
-        client
-          .from("crm_ranking_snapshots")
-          .select("id,source,roulette_available")
-          .eq("snapshot_key", "global")
-          .eq("source", marker)
-          .single(),
-        client
-          .from("crm_point_settings")
-          .select("updated_by")
-          .eq("setting_key", "default")
-          .eq("updated_by", account.id)
-          .single(),
-        client.from("crm_point_metrics").select("metric_key").eq("setting_key", "default"),
-        client
-          .from("crm_funnel_goals")
-          .select("profile_key,updated_by")
-          .eq("updated_by", account.id),
-      ]);
+    const [
+      profile,
+      userRole,
+      scopeGrants,
+      dashboardSnapshot,
+      rankingSnapshot,
+      pointSettings,
+      pointMetrics,
+      funnelGoals,
+    ] = await Promise.all([
+      client
+        .from("profiles")
+        .select("user_id,access_status,is_active")
+        .eq("user_id", account.id)
+        .single(),
+      client.from("user_roles").select("role_key").eq("user_id", account.id).single(),
+      client
+        .from("crm_user_reporting_scope_grants")
+        .select("reporting_scope_id,valid_from,valid_until,revoked_at")
+        .eq("user_id", account.id),
+      client
+        .from("crm_dashboard_snapshots")
+        .select("id,source")
+        .eq("snapshot_key", "global")
+        .eq("source", marker)
+        .single(),
+      client
+        .from("crm_ranking_snapshots")
+        .select("id,source,roulette_available")
+        .eq("snapshot_key", "global")
+        .eq("source", marker)
+        .single(),
+      client
+        .from("crm_point_settings")
+        .select("updated_by")
+        .eq("setting_key", "default")
+        .eq("updated_by", account.id)
+        .single(),
+      client.from("crm_point_metrics").select("metric_key").eq("setting_key", "default"),
+      client.from("crm_funnel_goals").select("profile_key,updated_by").eq("updated_by", account.id),
+    ]);
 
     if (
-      [dashboardSnapshot, rankingSnapshot, pointSettings, pointMetrics, funnelGoals].some(
-        (result) => result.error,
-      ) ||
+      [
+        profile,
+        userRole,
+        scopeGrants,
+        dashboardSnapshot,
+        rankingSnapshot,
+        pointSettings,
+        pointMetrics,
+        funnelGoals,
+      ].some((result) => result.error) ||
       !dashboardSnapshot.data?.id ||
       !rankingSnapshot.data?.id
     ) {
       throw new Error("Synthetic fixtures are not readable through QA RLS.");
+    }
+
+    const currentTime = Date.now();
+    const activeScopeGrant = scopeGrants.data?.[0];
+    const validFrom = Date.parse(activeScopeGrant?.valid_from);
+    const validUntil =
+      activeScopeGrant?.valid_until === null ? null : Date.parse(activeScopeGrant?.valid_until);
+    if (
+      profile.data?.user_id !== account.id ||
+      profile.data.access_status !== "approved" ||
+      profile.data.is_active !== true ||
+      userRole.data?.role_key !== "master" ||
+      scopeGrants.data?.length !== 1 ||
+      activeScopeGrant?.revoked_at !== null ||
+      !Number.isFinite(validFrom) ||
+      validFrom > currentTime ||
+      (validUntil !== null && (!Number.isFinite(validUntil) || validUntil <= currentTime))
+    ) {
+      throw new Error("Master QA authorization or active scope validation failed.");
+    }
+
+    const reportingScope = await client
+      .from("crm_reporting_scopes")
+      .select("scope_key,scope_type,is_active")
+      .eq("id", activeScopeGrant.reporting_scope_id)
+      .single();
+    if (
+      reportingScope.error ||
+      reportingScope.data?.scope_key !== "global" ||
+      reportingScope.data.scope_type !== "global" ||
+      reportingScope.data.is_active !== true
+    ) {
+      throw new Error("Master QA global reporting scope validation failed.");
     }
 
     const [dashboardViews, dashboardMetrics, dashboardDevelopments, rankingParticipants] =

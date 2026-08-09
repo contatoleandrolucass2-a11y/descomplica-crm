@@ -37,12 +37,12 @@ select ok(
 );
 
 insert into auth.users (id, email) values
-  ('30000000-0000-0000-0000-000000000001', 'goals-admin@example.test'),
-  ('30000000-0000-0000-0000-000000000002', 'goals-user@example.test');
+  ('30000000-0000-0000-0000-000000000001', 'goals-master@example.test'),
+  ('30000000-0000-0000-0000-000000000002', 'goals-pending@example.test');
 
-update public.user_roles
-set role_key = 'admin'
-where user_id = '30000000-0000-0000-0000-000000000001';
+select public.bootstrap_master_user(
+  '30000000-0000-0000-0000-000000000001'
+);
 
 select set_config('request.jwt.claim.sub', '30000000-0000-0000-0000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
@@ -51,7 +51,7 @@ set local role authenticated;
 select is(
   (select count(*) from public.crm_funnel_goals),
   0::bigint,
-  'authorized administrator starts with no configured goals'
+  'authorized Master starts with no configured goals'
 );
 
 select lives_ok(
@@ -62,7 +62,7 @@ select lives_ok(
     6, 2, 1,
     100::smallint, 90::smallint, 80::smallint, 60::smallint
   )$$,
-  'authorized administrator creates DV goals through the RPC'
+  'authorized Master creates DV goals through the RPC'
 );
 
 select is(
@@ -159,7 +159,7 @@ set local role authenticated;
 select is(
   (select count(*) from public.crm_funnel_goals),
   0::bigint,
-  'user without settings permission cannot read goal rows'
+  'pending user without settings permission cannot read goal rows'
 );
 select throws_ok(
   $$select public.upsert_crm_funnel_goals(
@@ -171,12 +171,15 @@ select throws_ok(
   )$$,
   '42501',
   null,
-  'user without settings permission cannot call the write RPC'
+  'pending user without settings permission cannot call the write RPC'
 );
 
 reset role;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
 update public.profiles
-set is_active = false
+set is_active = false,
+    access_status = 'suspended'
 where user_id = '30000000-0000-0000-0000-000000000001';
 select set_config('request.jwt.claim.sub', '30000000-0000-0000-0000-000000000001', true);
 set local role authenticated;
@@ -191,7 +194,7 @@ select throws_ok(
   )$$,
   '42501',
   null,
-  'inactive administrator cannot mutate goals'
+  'inactive Master cannot mutate goals'
 );
 
 select throws_ok(

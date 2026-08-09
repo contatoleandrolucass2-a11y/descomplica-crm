@@ -38,13 +38,12 @@ select has_function(
 select is((select count(*) from public.crm_point_settings), 0::bigint, 'migration seeds no settings');
 select is((select count(*) from public.crm_point_metrics), 0::bigint, 'migration seeds no metrics');
 
-insert into auth.users (id, email) values
-  ('40000000-0000-0000-0000-000000000001', 'points-admin@example.test'),
-  ('40000000-0000-0000-0000-000000000002', 'points-user@example.test');
+insert into auth.users (id, email)
+values ('40000000-0000-0000-0000-000000000001', 'points-master@example.test');
 
-update public.user_roles
-set role_key = 'admin'
-where user_id = '40000000-0000-0000-0000-000000000001';
+select public.bootstrap_master_user(
+  '40000000-0000-0000-0000-000000000001'
+);
 
 select set_config('request.jwt.claim.sub', '40000000-0000-0000-0000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
@@ -55,7 +54,7 @@ select lives_ok(
     '{"roulette":1,"roulette_saturday":2,"roulette_sunday":3,"schedule":1,"visit":7,"approved_folder":4,"sale":10}'::jsonb,
     '{"roulette":0,"roulette_saturday":0,"roulette_sunday":0,"schedule":50,"visit":20,"approved_folder":10,"sale":5}'::jsonb
   )$$,
-  'authorized administrator creates point settings through the RPC'
+  'authorized Master creates point settings through the RPC'
 );
 select is((select count(*) from public.crm_point_settings), 1::bigint, 'RPC creates singleton settings');
 select is((select count(*) from public.crm_point_metrics), 7::bigint, 'RPC creates all seven metric rows');
@@ -92,7 +91,7 @@ select lives_ok(
     '{"roulette":2,"roulette_saturday":3,"roulette_sunday":4,"schedule":2,"visit":8,"approved_folder":5,"sale":12}'::jsonb,
     '{"roulette":1,"roulette_saturday":1,"roulette_sunday":1,"schedule":60,"visit":25,"approved_folder":12,"sale":6}'::jsonb
   )$$,
-  'authorized administrator replaces the complete configuration'
+  'authorized Master replaces the complete configuration'
 );
 select is((select count(*) from public.crm_point_metrics), 7::bigint, 'replacement remains complete');
 select is(
@@ -108,24 +107,35 @@ select is(
   'replacement appends a second audit event'
 );
 
-select set_config('request.jwt.claim.sub', '40000000-0000-0000-0000-000000000002', true);
+select set_config('request.jwt.claim.sub', '40000000-0000-0000-0000-000000000001', true);
 set local role authenticated;
-select is((select count(*) from public.crm_point_settings), 1::bigint, 'ranking reader sees settings');
-select is((select count(*) from public.crm_point_metrics), 7::bigint, 'ranking reader sees all weights');
+select is((select count(*) from public.crm_point_settings), 1::bigint, 'Master sees settings');
+select is((select count(*) from public.crm_point_metrics), 7::bigint, 'Master sees all weights');
 
 reset role;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
 insert into public.user_permission_overrides (user_id, permission_key, effect, reason)
-values (
-  '40000000-0000-0000-0000-000000000002',
-  'crm.ranking.view',
-  'deny',
-  'point settings RLS test'
-);
+values
+  (
+    '40000000-0000-0000-0000-000000000001',
+    'crm.ranking.view',
+    'deny',
+    'point settings RLS test'
+  ),
+  (
+    '40000000-0000-0000-0000-000000000001',
+    'crm.settings.manage',
+    'deny',
+    'point settings RPC test'
+  );
+select set_config('request.jwt.claim.sub', '40000000-0000-0000-0000-000000000001', true);
+select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;
 select ok(
   (select count(*) from public.crm_point_settings) = 0
   and (select count(*) from public.crm_point_metrics) = 0,
-  'ranking deny override hides all point settings'
+  'commercial deny overrides hide all point settings'
 );
 select throws_ok(
   $$select public.replace_crm_point_settings(
@@ -134,12 +144,18 @@ select throws_ok(
   )$$,
   '42501',
   null,
-  'ranking reader cannot replace point settings'
+  'settings deny override blocks point settings replacement'
 );
 
 reset role;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
+delete from public.user_permission_overrides
+where user_id = '40000000-0000-0000-0000-000000000001'
+  and permission_key in ('crm.ranking.view', 'crm.settings.manage');
 update public.profiles
-set is_active = false
+set is_active = false,
+    access_status = 'suspended'
 where user_id = '40000000-0000-0000-0000-000000000001';
 select set_config('request.jwt.claim.sub', '40000000-0000-0000-0000-000000000001', true);
 set local role authenticated;
@@ -150,7 +166,7 @@ select throws_ok(
   )$$,
   '42501',
   null,
-  'inactive administrator cannot replace point settings'
+  'inactive Master cannot replace point settings'
 );
 
 reset role;

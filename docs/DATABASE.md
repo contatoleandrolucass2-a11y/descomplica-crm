@@ -2,9 +2,9 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem dezesseis
-migrations locais. A validação local encontrou 20 tabelas públicas e RLS
-habilitada em todas; os seeds estruturais criam oito papéis, 18 permissões e 21
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem dezoito
+migrations locais. A validação local encontrou 31 tabelas públicas e RLS
+habilitada em todas; os seeds estruturais criam 12 papéis, 19 permissões e 21
 páginas. Nenhum dado comercial é seedado.
 
 Isso não descreve convergência com produção. A captura somente leitura de 9 de
@@ -32,6 +32,8 @@ Nenhuma migration de reconciliação foi aplicada remotamente.
 14. `20260807185611_secure_qlik_ingestion_contract.sql`: correção idempotente do drift Qlik e RPC transacional exclusiva do `service_role`, sem acesso direto às tabelas.
 15. `20260808174817_require_sensitive_access_change_reasons.sql`: motivo obrigatório e validação transacional para alterações administrativas sensíveis.
 16. `20260809024000_simulator_visual_catalog.sql`: permissão de leitura e hierarquia protegida do hub e das cinco jornadas visuais de simulação, sem tabela ou motor comercial.
+17. `20260809144137_pending_onboarding_scope_foundation.sql`: onboarding pendente, hierarquia de reporting scopes, grants temporais/revogáveis, delegação direcional, locks de topologia e administração escopada fail-closed.
+18. `20260809144143_qlik_rls_contract_hardening.sql`: convergência Qlik, limites de payload, ACL sem tabela direta, ingestão interna mínima e leitura humana por identidade/organização escopada.
 
 ## Desenvolvimento local
 
@@ -48,13 +50,15 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` executa 283 testes pgTAP: 28 dos motivos de acesso,
-30 do catálogo/autorização, 28 do dashboard, 25 das metas, 35 do schema Qlik de
-imobiliárias, 23 do contrato de ingestão Qlik, 26 dos pontos, 27 do ranking,
-43 da ingestão e 18 da matriz global de grants. A cobertura verifica nomes,
-schema, grants, policies, constraints, disponibilidade de fontes, preservação
-de dados, provisionamento, usuários inativos, overrides, cálculos e auditoria.
-Cada novo domínio do CRM deve ampliar esse conjunto.
+`supabase test db` executa 518 testes pgTAP em 13 arquivos: 28 dos motivos de
+acesso, 51 regressões de hardening escopado, 28 do dashboard, 25 das metas, 20
+da matriz global de grants, 60 do schema Qlik, 33 do catálogo, 28 do signup
+pendente, 26 dos pontos, 51 do contrato Qlik, 27 do ranking, 98 da matriz de
+escopos e 43 da ingestão Salesforce. A cobertura verifica nomes, schema, grants,
+policies, constraints, disponibilidade de fontes, preservação de dados,
+provisionamento, usuários inativos, overrides, limites de payload, delegação
+direcional, cardinalidade de escopo, serialização de topologia, cálculos e
+auditoria. Cada novo domínio deve ampliar esse conjunto.
 
 ## RLS e grants
 
@@ -93,12 +97,13 @@ Os JSONs da tabela D1 `point_goals` foram substituídos por `crm_point_settings`
 
 O ranking usa snapshots e contagens por participante/período, sem payload JSON. Os totais são recalculados na aplicação com os pesos atuais, evitando regravar atividade quando a configuração muda. A escrita permanece reservada à futura ingestão server-side.
 
-No schema local pretendido, `crm_imob_ranking_runs` e
-`crm_imob_ranking_entries` preservam o histórico externo do ranking de
-imobiliárias; `anon`, `authenticated` e `service_role` ficam sem grants diretos
-e o n8n escreve somente pela RPC transacional
-`ingest_crm_imob_ranking_snapshot`. O remoto ainda não possui essa RPC segura,
-contém a tabela adicional `crm_imob_ranking_developments`, uma RPC legada e
-grants/policies abertos. O estado efetivo está no
-[dump sanitizado](reconciliation/REMOTE_SCHEMA_SANITIZED.md), não deve ser
-inferido apenas das migrations locais.
+No schema local proposto, `crm_imob_ranking_runs`,
+`crm_imob_ranking_entries` e `crm_imob_ranking_developments` preservam o
+histórico externo. `anon`, `authenticated` e `service_role` ficam sem grants
+diretos; escrita ocorre somente por `ingest_crm_imob_ranking_snapshot`.
+Leitura humana passa por `list_scoped_crm_imob_ranking_entries`, que exige
+permissão dedicada, identidade Qlik mapeada e organização dentro do reporting
+scope. O remoto ainda mantém RPC legada e grants/policies abertos. O estado
+efetivo e a baseline proposta estão no
+[pacote de prova](supabase-proof/README.md), não devem ser inferidos apenas das
+migrations locais.

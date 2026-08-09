@@ -8,9 +8,119 @@ values
   ('81000000-0000-4000-8000-000000000002', 'access-target@example.test'),
   ('81000000-0000-4000-8000-000000000003', 'access-user@example.test');
 
+select public.bootstrap_master_user(
+  '81000000-0000-4000-8000-000000000001'
+);
+
+insert into public.crm_organizations (
+  id,
+  organization_key,
+  name,
+  kind
+) values (
+  '82000000-0000-4000-8000-000000000001',
+  'access-real-estate',
+  'Access Test Real Estate',
+  'real_estate'
+);
+
+insert into public.crm_people (
+  id,
+  person_key,
+  display_name,
+  auth_user_id
+) values (
+  '83000000-0000-4000-8000-000000000001',
+  'access-broker',
+  'Access Test Broker',
+  '81000000-0000-4000-8000-000000000003'
+);
+
+insert into public.crm_teams (
+  id,
+  organization_id,
+  team_key,
+  name
+) values (
+  '83500000-0000-4000-8000-000000000001',
+  '82000000-0000-4000-8000-000000000001',
+  'access-team',
+  'Access Test Team'
+);
+
+insert into public.crm_team_memberships (
+  id,
+  team_id,
+  person_id,
+  membership_role
+) values (
+  '83600000-0000-4000-8000-000000000001',
+  '83500000-0000-4000-8000-000000000001',
+  '83000000-0000-4000-8000-000000000001',
+  'broker'
+);
+
+insert into public.crm_reporting_scopes (
+  id,
+  scope_key,
+  scope_type,
+  organization_id,
+  person_id
+) values
+  (
+    '84000000-0000-4000-8000-000000000001',
+    'access-organization',
+    'organization',
+    '82000000-0000-4000-8000-000000000001',
+    null
+  ),
+  (
+    '84000000-0000-4000-8000-000000000002',
+    'access-person',
+    'person',
+    null,
+    '83000000-0000-4000-8000-000000000001'
+  );
+
+insert into public.crm_user_reporting_scope_grants (
+  user_id,
+  reporting_scope_id,
+  granted_by,
+  reason
+) values
+  (
+    '81000000-0000-4000-8000-000000000002',
+    '84000000-0000-4000-8000-000000000001',
+    '81000000-0000-4000-8000-000000000001',
+    'Scoped role-change test'
+  ),
+  (
+    '81000000-0000-4000-8000-000000000003',
+    '84000000-0000-4000-8000-000000000002',
+    '81000000-0000-4000-8000-000000000001',
+    'Scoped self-change test'
+  );
+
 update public.user_roles
-set role_key = 'master'
-where user_id = '81000000-0000-4000-8000-000000000001';
+set role_key = case user_id
+      when '81000000-0000-4000-8000-000000000002' then 'real_estate'
+      when '81000000-0000-4000-8000-000000000003' then 'broker'
+    end,
+    assigned_by = '81000000-0000-4000-8000-000000000001'
+where user_id in (
+  '81000000-0000-4000-8000-000000000002',
+  '81000000-0000-4000-8000-000000000003'
+);
+
+update public.profiles
+set is_active = true,
+    access_status = 'approved',
+    approved_at = now(),
+    approved_by = '81000000-0000-4000-8000-000000000001'
+where user_id in (
+  '81000000-0000-4000-8000-000000000002',
+  '81000000-0000-4000-8000-000000000003'
+);
 
 select set_config('request.jwt.claim.sub', '81000000-0000-4000-8000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
@@ -23,7 +133,7 @@ select throws_ok(
     null
   )$$,
   '22023',
-  'invalid_argument: reason is required for privilege elevation',
+  'invalid_argument: target, role and reason are required',
   'privilege elevation requires a reason'
 );
 
@@ -33,7 +143,7 @@ select is(
     from public.user_roles
     where user_id = '81000000-0000-4000-8000-000000000002'
   ),
-  'user',
+  'real_estate',
   'failed elevation leaves the role unchanged'
 );
 
@@ -67,10 +177,10 @@ select ok(
 select lives_ok(
   $$select public.assign_user_role(
     '81000000-0000-4000-8000-000000000002',
-    'user',
-    null
+    'real_estate',
+    'Responsabilidade administrativa encerrada'
   )$$,
-  'role downgrade does not require an elevation reason'
+  'role downgrade remains explicitly audited'
 );
 
 select is(
@@ -79,8 +189,8 @@ select is(
     from public.user_roles
     where user_id = '81000000-0000-4000-8000-000000000002'
   ),
-  'user',
-  'downgrade restores the user role'
+  'real_estate',
+  'downgrade restores the scoped Real Estate role'
 );
 
 select throws_ok(
@@ -135,7 +245,7 @@ select throws_ok(
     '   '
   )$$,
   '22023',
-  'invalid_argument: reason is required for permission exceptions',
+  'invalid_argument: target, permission and reason are required',
   'setting an exception requires a meaningful reason'
 );
 
@@ -178,7 +288,7 @@ select throws_ok(
     null
   )$$,
   '22023',
-  'invalid_argument: reason is required for permission exceptions',
+  'invalid_argument: target, permission and reason are required',
   'removing an exception requires a reason'
 );
 
@@ -218,7 +328,7 @@ select set_config('request.jwt.claim.sub', '81000000-0000-4000-8000-000000000003
 select throws_ok(
   $$select public.assign_user_role(
     '81000000-0000-4000-8000-000000000003',
-    'broker',
+    'coordinator',
     'Tentativa de autoelevação'
   )$$,
   '42501',
@@ -232,7 +342,7 @@ select is(
     from public.user_roles
     where user_id = '81000000-0000-4000-8000-000000000003'
   ),
-  'user',
+  'broker',
   'self-elevation attempt leaves the role unchanged'
 );
 
@@ -244,8 +354,8 @@ select throws_ok(
     'master',
     'Tentativa de atribuição do papel protegido'
   )$$,
-  '42501',
-  'forbidden: actor cannot assign role master (level 100)',
+  '22023',
+  'invalid_argument: role is not available for assignment',
   'Master role cannot be assigned through the authenticated RPC'
 );
 
@@ -255,7 +365,7 @@ select is(
     from public.user_roles
     where user_id = '81000000-0000-4000-8000-000000000002'
   ),
-  'user',
+  'real_estate',
   'protected Master assignment leaves the target role unchanged'
 );
 

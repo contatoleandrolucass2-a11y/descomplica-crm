@@ -41,16 +41,23 @@ O projeto remoto contém três tabelas para histórico de ranking de imobiliári
 `crm_imob_ranking_developments`. A rota do Canal de Parcerias não consulta
 diretamente esses dados.
 
-A investigação do drift posterior identificou o executor exato: uma sessão interativa do conector Supabase/Codex executou `GRANT SELECT` e `ALTER POLICY` por `POST /mcp`. O exportador Qlik não possui cliente PostgreSQL/Supabase nem DDL; o workflow n8n observado não contém DDL, nunca iniciou uma execução e aponta ao projeto Supabase anterior.
+A prova remota confirmou atividade recente da RPC legada como role `anon`, mas
+não identificou com segurança processo, owner ou credencial do caller. O
+exportador Qlik versionado não contém cliente PostgreSQL/Supabase nem DDL; o
+workflow n8n legado observado aponta ao projeto anterior. Portanto, nenhum dos
+dois pode ser declarado caller do projeto atual sem nova evidência.
 
-`ingest_crm_imob_ranking_snapshot(jsonb)` é o contrato local pretendido: valida
-e grava um snapshot completo em transação, aceita replay idêntico e rejeita
-reutilização conflitante. A captura de 9 de agosto confirmou que essa RPC não
-existe remotamente. Em seu lugar, o remoto mantém
+`ingest_crm_imob_ranking_snapshot(jsonb)` é o contrato local proposto: valida e
+grava entries e developments em transação, aceita replay idêntico e rejeita
+reutilização conflitante. `list_scoped_crm_imob_ranking_entries` exige
+`crm.partnerships.view`, mapeamento de identidade e reporting scope. A captura
+de 9 de agosto confirmou que essas RPCs seguras não existem remotamente. Em seu
+lugar, o remoto mantém
 `publish_crm_imob_ranking(jsonb,text)` com verifier embutido, `EXECUTE` para
 `anon` e `service_role`, leitura anônima e CRUD direto de `service_role` nas três
-tabelas. Nenhum desses grants é autoridade segura. O plano está em
-[`docs/reconciliation/MIGRATION_MATRIX.md`](reconciliation/MIGRATION_MATRIX.md)
+tabelas. Nenhum desses grants é autoridade segura. O plano e a prova de
+backup/restore estão em
+[`docs/supabase-proof/`](supabase-proof/README.md)
 e o procedimento futuro continua em
 [`docs/runbooks/qlik-ranking-ingestion.md`](runbooks/qlik-ranking-ingestion.md).
 

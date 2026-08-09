@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Comprova por leitura o projeto Supabase remoto, versiona DDL/inventário
+  sanitizados e valida backup oficial em restore isolado com contagens,
+  checksums, Auth, Storage, grants, policies e pgTAP, sem mutação remota.
+- Prepara onboarding `pending` deny-by-default, papéis técnicos, organizações,
+  equipes, carteiras, pessoas e reporting scopes com aprovação atômica,
+  auditoria e matriz RLS sintética.
+- Endurece a topologia de autorização contra TOCTOU: locks por pessoa/carteira,
+  perfis bloqueados em ordem determinística, revalidação pós-lock, fronteiras
+  imutáveis, manutenção somente com usuário suspenso, aprovação/reativação
+  Master ou Admin e cardinalidade central dos papéis de escopo único.
+- Converge localmente o schema Qlik das três tabelas, remove ACL/policies
+  diretas no estado proposto e limita ingestão/leitura a RPCs específicas;
+  aplicação remota continua bloqueada até o cutover do caller legado.
+- Documenta plano de `service_role`, conta QA, rollback, riscos e pacote
+  completo das decisões comerciais ainda sem autoridade; simuladores, roleta
+  e prêmios permanecem bloqueados.
 - Adiciona gate de reconciliação local/remoto com matriz das 20 versões,
   evidência sanitizada do schema, plano de baseline/backup/restore/domínio,
   contratos tipados Salesforce/n8n/Qlik e estoque fail-closed, inventário de

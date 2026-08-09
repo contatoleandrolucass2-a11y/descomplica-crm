@@ -11,43 +11,66 @@ export const ROLES = {
   admin: {
     level: 80,
     label: "Administrador",
-    description: "Gerencia usuários, acessos, auditoria, páginas e configurações do CRM.",
+    description:
+      "Gerencia usuários, acessos e auditoria dentro do escopo aprovado; fatos comerciais v2 permanecem restritos ao Master.",
   },
   coordinator: {
     level: 60,
     label: "Coordenador",
     description:
-      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
+      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+  },
+  manager: {
+    level: 55,
+    label: "Gerente",
+    description: "Papel técnico de gerente; não recebe permissões comerciais automaticamente.",
   },
   supervisor: {
     level: 50,
     label: "Supervisor",
     description:
-      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
+      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+  },
+  house: {
+    level: 45,
+    label: "House",
+    description: "Papel técnico de house; não recebe permissões comerciais automaticamente.",
   },
   real_estate: {
     level: 40,
     label: "Imobiliária",
     description:
-      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
+      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+  },
+  partnership_channel: {
+    level: 35,
+    label: "Canal de Parcerias",
+    description:
+      "Papel técnico do Canal de Parcerias; não recebe permissões comerciais automaticamente.",
   },
   broker_lead: {
     level: 30,
     label: "Líder de corretores",
     description:
-      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
+      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
   },
   broker: {
     level: 20,
     label: "Corretor",
     description:
-      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
+      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
   },
   user: {
     level: 10,
     label: "Usuário",
     description:
-      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
+      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+  },
+  pending: {
+    level: 1,
+    label: "Pendente",
+    description:
+      "Papel técnico de onboarding pendente; não recebe permissões comerciais automaticamente.",
   },
 } as const;
 
@@ -63,6 +86,6 @@ export function getRoleLabel(roleKey: RoleKey): string {
 
 export function getAssignableRoleKeys(actorLevel: number): RoleKey[] {
   return (Object.keys(ROLES) as RoleKey[]).filter(
-    (roleKey) => roleKey !== "master" && ROLES[roleKey].level < actorLevel,
+    (roleKey) => roleKey !== "master" && roleKey !== "pending" && ROLES[roleKey].level < actorLevel,
   );
 }
