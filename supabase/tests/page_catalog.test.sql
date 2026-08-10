@@ -11,8 +11,8 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  15::bigint,
-  'fifteen platform and CRM permissions are seeded'
+  18::bigint,
+  'eighteen platform and CRM permissions are seeded'
 );
 
 select is(

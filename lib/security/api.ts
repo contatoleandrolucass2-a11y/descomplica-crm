@@ -26,13 +26,6 @@ export function isSameOriginRequest(request: Request, applicationOrigin?: string
   const configured = normalizedOrigin(applicationOrigin);
   if (configured) allowed.add(configured);
 
-  const host =
-    request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() || request.headers.get("host");
-  const protocol = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
-  if (host && (protocol === "http" || protocol === "https")) {
-    allowed.add(`${protocol}://${host}`);
-  }
-
   return allowed.has(origin);
 }
 

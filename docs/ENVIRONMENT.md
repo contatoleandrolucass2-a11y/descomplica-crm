@@ -67,6 +67,34 @@ banco. O token humano de mapping deve vir de sessão Master dedicada, somente
 por ambiente, nunca por argumento. Apply permanece bloqueado sem confirmação
 dos dois hashes e a flag separada.
 
+## Runtime de políticas comerciais
+
+```dotenv
+COMMERCIAL_ENGINE_RUNTIME_MODE=off
+COMMERCIAL_ENGINE_ENABLED_KEYS=
+COMMERCIAL_ENGINE_DATABASE_URL=
+```
+
+Valores aceitos para o modo são `off`, `shadow` e `active`; valor desconhecido
+vira `off`. Shadow/active sem allowlist exata também ficam indisponíveis. A
+allowlist aceita apenas as 14 chaves do catálogo e duplicata/entrada desconhecida
+invalida a configuração inteira. Shadow/active também exigem
+`COMMERCIAL_ENGINE_DATABASE_URL` com TLS `sslmode=verify-full`, senha de pelo
+menos 16 caracteres e usuário exato `crm_commercial_engine` (ou seu sufixo de
+pooler). Host direto e sufixo do usuário no pooler devem corresponder ao mesmo
+project ref de `NEXT_PUBLIC_SUPABASE_URL`; ausência ou divergência falha fechada.
+Usuário administrativo, parâmetros extras, host não Supabase em produção ou
+senha reutilizada de Supabase/Qlik invalidam a configuração. Essas variáveis
+são server-only.
+
+O configurador de produção fixa `off`, lista e URL vazias neste incremento. Ele
+não oferece prompt de ativação. A migration cria `crm_commercial_engine` como
+`NOLOGIN`, sem senha, acesso a tabelas/sequences ou membership utilizável; apenas
+os dois entrypoints no schema `commercial_engine` são concedidos. Uma futura
+habilitação exige provisionamento privado e prova de isolamento do papel,
+mudança versionada e autorizada, policy, casos de ouro, permissão e gate no
+banco; editar o arquivo de ambiente isoladamente não basta.
+
 ## Diagnóstico
 
 - Se `node -v` mostrar Node 26, execute `nvm use` antes de instalar dependências.

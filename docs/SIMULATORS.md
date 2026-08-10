@@ -1,4 +1,4 @@
-# Simuladores — contrato visual seguro
+# Simuladores — visual e runtime comercial bloqueado
 
 ## Escopo
 
@@ -33,10 +33,28 @@ autorização.
   validação”.
 - Nenhum acesso direto a tabela protegida foi criado.
 
-Habilitar qualquer motor exige outro incremento: fonte oficial identificada,
-fórmula versionada, contrato tipado, validação, autorização server-side,
-RLS/grants quando houver persistência, testes de casos oficiais e aprovação
-explícita.
+O runtime comercial versionado existe como fundação server-only, mas não muda
+esse comportamento. Os cinco simuladores estão registrados, a rota de execução
+aceita somente essas chaves e exige `crm.simulators.execute`; nenhum papel recebe
+essa capacidade operacional neste incremento. Além disso:
+
+- `COMMERCIAL_ENGINE_RUNTIME_MODE=off` é o default;
+- `COMMERCIAL_ENGINE_ENABLED_KEYS` nasce vazio;
+- `COMMERCIAL_ENGINE_DATABASE_URL` nasce vazia e o papel dedicado permanece
+  `NOLOGIN`, sem segredo provisionado;
+- não existe policy oficial importada nem gate ativo;
+- cada versão exige owner, backup, evidência, vigência e pelo menos um caso de
+  ouro aprovado;
+- `shadow` audita hashes sem devolver resultado; somente `active`, com todos os
+  gates satisfeitos, pode devolver output;
+- fórmulas nunca são enviadas ao cliente e o ledger não guarda input/output.
+- o loader usa conexão PostgreSQL de menor privilégio, nunca Data API,
+  `service_role` ou acesso direto às tabelas privadas.
+
+Os formulários visuais continuam sem submit. Conectá-los ao endpoint requer um
+incremento posterior, políticas oficiais e autorização explícita. O contrato e
+o runbook estão em
+[`commercial-engines-policy-runtime`](commercial-engines-policy-runtime/README.md).
 
 ## QA local
 

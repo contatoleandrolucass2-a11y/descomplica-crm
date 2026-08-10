@@ -1,6 +1,6 @@
 # Descomplica CRM
 
-Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM são migradas de forma controlada. O Gate 1 inclui catálogo dinâmico de páginas, navegação autorizada e painel administrativo. O Gate 2 inclui dashboard, metas, pontos, ranking, detalhes das etapas e ingestão Salesforce segura em PostgreSQL normalizado. A fundação v3 adiciona identidades canônicas owned, reconciliação, lineage de grants, autoridade de fonte, fatos imutáveis e filtros dimensionais aplicados por RPC escopada. Ela permanece em rotas shadow desativadas por padrão; páginas, navegação e dados remotos não sofreram cutover.
+Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fundação; as páginas, APIs e integrações do CRM são migradas de forma controlada. O Gate 1 inclui catálogo dinâmico de páginas, navegação autorizada e painel administrativo. O Gate 2 inclui dashboard, metas, pontos, ranking, detalhes das etapas e ingestão Salesforce segura em PostgreSQL normalizado. A fundação v3 adiciona identidades canônicas owned, reconciliação, lineage de grants, autoridade de fonte, fatos imutáveis e filtros dimensionais aplicados por RPC escopada. Ela permanece em rotas shadow desativadas por padrão; páginas, navegação e dados remotos não sofreram cutover. A fundação de políticas comerciais cataloga 14 motores e valida versões/casos de ouro, mas contém zero regra oficial e permanece bloqueada por flag, permissão e gate privado.
 
 ## Arquitetura alvo
 
@@ -68,13 +68,16 @@ QLIK_RELAY_WRITE_ENABLED=false
 QLIK_RELAY_KEY_ID=
 QLIK_RELAY_HMAC_SECRET=
 QLIK_RELAY_DATABASE_URL=
+COMMERCIAL_ENGINE_RUNTIME_MODE=off
+COMMERCIAL_ENGINE_ENABLED_KEYS=
+COMMERCIAL_ENGINE_DATABASE_URL=
 SUPABASE_SECRET_KEY=
 SALESFORCE_INGEST_SECRET=
 SALESFORCE_REFRESH_URL=
 SALESFORCE_REFRESH_SECRET=
 ```
 
-Secret key, Bearers e credenciais PostgreSQL nunca podem entrar no bundle da aplicação. A secret key é aceita somente pelo módulo server-only da ingestão M2M. `CRM_READ_MODEL_V3_SHADOW_ENABLED` revela apenas as rotas shadow autenticadas e não autoriza cutover ou ingestão. O relay Qlik exige HMAC e conexão PostgreSQL exclusiva; `off` é o default e nenhuma flag substitui o gate privado no banco. `.env.local` nunca deve entrar no Git.
+Secret key, Bearers e credenciais PostgreSQL nunca podem entrar no bundle da aplicação. A secret key é aceita somente pelo módulo server-only da ingestão M2M. `CRM_READ_MODEL_V3_SHADOW_ENABLED` revela apenas as rotas shadow autenticadas e não autoriza cutover ou ingestão. O relay Qlik exige HMAC e conexão PostgreSQL exclusiva; `off` é o default e nenhuma flag substitui o gate privado no banco. Motores comerciais também exigem modo, allowlist, conexão dedicada vinculada ao mesmo project ref de `NEXT_PUBLIC_SUPABASE_URL`, permissão, policy vigente e gate; neste incremento os três controles de ambiente ficam vazios/off e o papel dedicado permanece `NOLOGIN`. `.env.local` nunca deve entrar no Git.
 
 ## Banco local e aplicação
 
@@ -151,6 +154,9 @@ O diretório `.next/standalone` é o artefato de runtime. O fluxo completo de Ho
 - [docs/qlik-relay-mapping-cutover/README.md](docs/qlik-relay-mapping-cutover/README.md):
   relay HMAC de menor privilégio, caller confirmado, mappings, canário,
   observabilidade e rollback.
+- [docs/commercial-engines-policy-runtime/README.md](docs/commercial-engines-policy-runtime/README.md):
+  catálogo, DSL determinística, policies imutáveis, casos de ouro, gates,
+  canário e decisões comerciais ainda ausentes.
 - [CONTRIBUTING.md](CONTRIBUTING.md): fluxo de branch, commits e qualidade.
 
 ## Checkpoints de origem

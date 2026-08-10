@@ -151,7 +151,12 @@ describe("catálogo localizado de acesso", () => {
   it("mantém a matriz visual dos papéis alinhada ao catálogo protegido", () => {
     const visualFoundationPermissions = ["pages.view", "crm.simulators.view"];
 
-    expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(Object.keys(PERMISSIONS));
+    expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(
+      Object.keys(PERMISSIONS).filter(
+        (permission) =>
+          permission !== "crm.simulators.execute" && permission !== "crm.commercial_engine.execute",
+      ),
+    );
     expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual([
       "users.view",
       "users.manage",

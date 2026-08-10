@@ -1,5 +1,42 @@
 # Worklog
 
+## 2026-08-10 — runtime versionado de políticas comerciais
+
+- Branch criada do SHA exato `1f570d0a7b3ce64571019b121b0b4aff132e1676`.
+  O baseline aprovou instalação congelada, lint, typecheck, 193 Vitest + 8 Node,
+  build de 37 rotas e 770 pgTAP antes das alterações.
+- O inventário confirmou zero policy oficial e zero caso de ouro oficial para
+  WF13/WF14/WF15/WF16/CAIXA, metas, pontos, ranking, SLA, roleta, campanhas ou
+  premiações. Legado, configuração v2 e fixtures não foram promovidos a regra.
+- Foram catalogadas 14 chaves estruturais. A DSL v1 é fechada, determinística e
+  sem rede/SQL/relógio/aleatoriedade; usa decimal `BigInt`, datas civis UTC,
+  limites de complexidade, dispatch versionado e atestação privada após executar
+  todos os casos de ouro.
+- A migration local cria catálogo, versões/imports/executions imutáveis, gate,
+  owners/backup, preview/apply e permissões separadas. Nenhuma policy, caso real,
+  grant de execução, gate ou valor comercial é seedado.
+- Lookup e ledger saíram da Data API: somente o papel PostgreSQL
+  `crm_commercial_engine` recebe os dois entrypoints. Ele nasce `NOLOGIN`, sem
+  senha/tabela/sequence/membership utilizável; flags, allowlist e URL ficam
+  vazias. O baseline `PUBLIC` mantém o checker de isolamento falso até hardening
+  remoto separado e explicitamente autorizado.
+- Revisões adversariais fecharam RPC runtime pública, TOCTOU de ator/owner,
+  downgrade concorrente, SQLSTATE ambíguo, escala intermediária, concat/AST DoS,
+  canonical JSON não finito, objeto verificado forjável, manifesto parcial e
+  confiança em `X-Forwarded-Host`. A revisão final também vinculou a conexão ao
+  project ref da aplicação, limitou outputs a 30 dígitos, preservou replay
+  histórico após owner inativo e passou a expandir ACL default no checker.
+- Reset Supabase estritamente local aplicou a migration limpa; pgTAP aprovou
+  863/863, incluindo 93/93 do runtime. O lint SQL não apontou achado novo; reteve
+  apenas alertas da extensão pgTAP e dois warnings preexistentes do read model v3.
+- Os gates finais aprovaram lint, typecheck, 226 Vitest + 8 Node (um ignorado),
+  build de 37 páginas, schema diff vazio, advisors sem issues, audit/OSV sem
+  vulnerabilidade e Gitleaks sem achado na árvore ou em 210 commits. Actionlint,
+  ShellCheck, `bash -n` e Compose com configuração sintética também passaram.
+- Nenhum Supabase remoto, dado, grant, migration aplicada, workflow n8n,
+  Salesforce, Qlik, VPS, container, DNS ou Nginx foi alterado. Não houve merge,
+  deploy, cutover nem provisionamento de segredo.
+
 ## 2026-08-10 — relay Qlik, mappings e cutover local
 
 - Branch criada do SHA exato `96d48b0e64ad85c5020d4ec69b6f1dd0bf408e08`.

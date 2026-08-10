@@ -144,6 +144,17 @@ describe("integration request boundaries", () => {
         }),
       ),
     ).toBe(false);
+    expect(
+      isSameOriginRequest(
+        new Request("https://crm.example.com/api/refresh/salesforce", {
+          headers: {
+            origin: "https://evil.example",
+            "x-forwarded-host": "evil.example",
+            "x-forwarded-proto": "https",
+          },
+        }),
+      ),
+    ).toBe(false);
   });
 
   it("requires HTTPS for external production webhooks", () => {

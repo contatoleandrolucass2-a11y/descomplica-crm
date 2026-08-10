@@ -164,3 +164,26 @@ comportamento legado não será adotado por silêncio.
 
 Até essas respostas: simuladores, SLA, ranking avançado, roleta, campanhas e
 prêmios continuam fail-closed.
+
+## Fundação versionada de runtime
+
+O incremento `commercial-engines-policy-runtime` adiciona somente a estrutura
+capaz de receber decisões futuras: catálogo de 14 motores, DSL determinística,
+decimal exato, vigência em `America/Sao_Paulo`, owners distintos, importação com
+preview, versões imutáveis, casos de ouro obrigatórios, gates `shadow/active` e
+ledger sanitizado. Ele não promove nenhuma linha deste inventário a autoridade.
+O lookup/audit ficam fora da Data API, atrás do papel dedicado
+`crm_commercial_engine`, criado `NOLOGIN`; não existe segredo ou conexão ativa.
+
+Estado documental em 10 de agosto de 2026:
+
+- políticas oficiais importadas: **0**;
+- casos de ouro oficiais importados: **0**;
+- gates de execução criados/ativos: **0**;
+- valores, percentuais, pesos, limites ou prêmios adicionados: **0**;
+- integrações com os leitores v2/v3: **0**.
+
+Fixtures automatizadas exercitam apenas aritmética, datas, hashing, isolamento e
+falha fechada. Seus valores são sintéticos e não podem ser publicados como
+política. Ver
+[`docs/commercial-engines-policy-runtime/README.md`](../commercial-engines-policy-runtime/README.md).

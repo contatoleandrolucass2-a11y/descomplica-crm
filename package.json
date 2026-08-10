@@ -20,6 +20,7 @@
     "qa:security:anonymous": "node scripts/qa/reference-parity.mjs boundary",
     "qa:security:rls-api": "node scripts/qa/local-rls-api.mjs",
     "mapping:reconcile": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/mappings/import.ts",
+    "commercial-policy:verify": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/commercial-policies/verify.ts",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "audit": "pnpm audit --audit-level high",
     "security:secrets": "gitleaks dir . --redact=100 --no-banner",

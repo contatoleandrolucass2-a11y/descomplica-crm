@@ -55,6 +55,9 @@ readonly -a managed_keys=(
   QLIK_RELAY_KEY_ID
   QLIK_RELAY_HMAC_SECRET
   QLIK_RELAY_DATABASE_URL
+  COMMERCIAL_ENGINE_RUNTIME_MODE
+  COMMERCIAL_ENGINE_ENABLED_KEYS
+  COMMERCIAL_ENGINE_DATABASE_URL
   SUPABASE_SECRET_KEY
   SALESFORCE_INGEST_SECRET
   SALESFORCE_REFRESH_URL
@@ -364,6 +367,12 @@ prompt_capability \
   'Ativar as rotas autenticadas shadow do read model v3?'
 configure_qlik_relay
 
+# Incremento local-only: o assistente de produção não oferece ativação. Uma
+# alteração futura e explicitamente autorizada deverá remover este fail-closed.
+values[COMMERCIAL_ENGINE_RUNTIME_MODE]="off"
+values[COMMERCIAL_ENGINE_ENABLED_KEYS]=""
+values[COMMERCIAL_ENGINE_DATABASE_URL]=""
+
 printf '\n'
 
 prompt_value \
@@ -435,6 +444,12 @@ temporary_environment_file="$(mktemp --tmpdir="${environment_directory}" .produc
     printf 'QLIK_RELAY_HMAC_SECRET=%s\n' "${values[QLIK_RELAY_HMAC_SECRET]}"
     printf 'QLIK_RELAY_DATABASE_URL=%s\n' "${values[QLIK_RELAY_DATABASE_URL]}"
   fi
+  printf 'COMMERCIAL_ENGINE_RUNTIME_MODE=%s\n' \
+    "${values[COMMERCIAL_ENGINE_RUNTIME_MODE]}"
+  printf 'COMMERCIAL_ENGINE_ENABLED_KEYS=%s\n' \
+    "${values[COMMERCIAL_ENGINE_ENABLED_KEYS]}"
+  printf 'COMMERCIAL_ENGINE_DATABASE_URL=%s\n' \
+    "${values[COMMERCIAL_ENGINE_DATABASE_URL]}"
   printf 'SUPABASE_SECRET_KEY=%s\n' "${values[SUPABASE_SECRET_KEY]:-}"
   printf 'SALESFORCE_INGEST_SECRET=%s\n' "${values[SALESFORCE_INGEST_SECRET]:-}"
   printf 'SALESFORCE_REFRESH_URL=%s\n' "${values[SALESFORCE_REFRESH_URL]:-}"

@@ -154,6 +154,16 @@ O menu consulta somente páginas ativas, marcadas para navegação e permitidas 
 - `list_crm_read_model_v3_scopes` e `get_crm_read_model_v3`: descoberta e
   leitura autenticadas, sempre revalidando permissão específica do dataset,
   scope e lineage no banco.
+- `preview_crm_commercial_policy_import` e
+  `apply_crm_commercial_policy_import`: preview/import de versão imutável,
+  Master-only com `crm.commercial_policy.manage`; owner e backup ativos,
+  evidência, hashes e casos de ouro são obrigatórios.
+- `set_crm_commercial_engine_gate`: altera somente o gate privado de uma policy
+  já importada; não substitui a feature flag server-only.
+- `commercial_engine.get_policy` e `commercial_engine.record_execution`:
+  entrypoints fora da Data API, executáveis somente pelo papel PostgreSQL
+  dedicado. Recebem o ator já autenticado, revalidam conta/permissão, gate,
+  vigência e owners e não concedem acesso direto a tabela alguma.
 
 Elevação de papel, desativação de conta e criação/remoção de exceções exigem um
 motivo não vazio. A validação roda em trigger `BEFORE INSERT` do log de auditoria
@@ -182,11 +192,30 @@ As tabelas de pontos aceitam leitura com `crm.ranking.view` ou
 `crm.settings.manage`. Ambas são Master-only enquanto o modelo permanecer v2
 global.
 
+O catálogo novo separa `crm.simulators.view` de
+`crm.simulators.execute` e usa `crm.commercial_engine.execute` exclusivamente
+para futuros consumidores não interativos. Nenhum papel herda qualquer execução
+neste incremento; até Master permanece bloqueado para calcular. `crm.commercial_policy.manage` é
+Master-only e permite preparar versões/gates, não executar motores. O endpoint
+interativo aceita apenas os cinco simuladores e exige a capacidade de execução,
+feature flag, allowlist, policy vigente, casos de ouro válidos e gate do banco.
+Os outros nove motores não possuem endpoint de navegador ou consumidor
+server-side.
+
 A rota de ranking de produção conserva `crm.ranking.view` e o read model v2. A
 rota shadow exige `crm.read_model_v3.ranking.view` e usa somente a RPC v3
 escopada. Pesos, objetivos e configuração permanecem no modelo v2 Master-only;
 ranking avançado, bônus e premiações não foram implementados. As tabelas v3 não
 expõem leitura ou escrita direta a `authenticated` nem a `service_role`.
+
+As tabelas privadas de catálogo comercial, versões, imports, gates e execuções
+usam `FORCE ROW LEVEL SECURITY`. `PUBLIC`, `anon`, `authenticated`,
+`service_role` e o papel dedicado Qlik não recebem acesso direto. O ledger
+guarda somente hashes, versão, ator, modo e duração; não guarda fórmulas,
+entradas ou saídas.
+O papel `crm_commercial_engine` nasce `NOLOGIN`; quando autorizado futuramente,
+recebe somente `USAGE` no schema dedicado e `EXECUTE` nos dois entrypoints. A
+aplicação não usa Supabase SSR/service role para buscar policy ou gravar ledger.
 
 Cada detalhe de etapa e o dashboard de produção conservam `crm.stages.view` ou
 `crm.dashboard.view` e seus leitores v2. As versões shadow exigem
