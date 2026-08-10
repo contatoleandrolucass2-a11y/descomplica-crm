@@ -172,7 +172,7 @@ pnpm db:start
 pnpm build
 pnpm qa:visual:authenticated
 # somente após revisar os candidatos e autorizar a nova baseline local:
-pnpm qa:visual:authenticated -- --update-baseline
+pnpm qa:visual:authenticated --update-baseline
 QA_TARGET_ORIGIN=https://crm.descomplicapro.com.br \
   QA_TARGET_LABEL=target-before \
   pnpm qa:security:anonymous
