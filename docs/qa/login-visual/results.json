@@ -948,14 +948,7 @@
       "name": "reduced motion: cérebro e engrenagens estáticos",
       "passed": true,
       "stageTransform": null,
-      "gearTransforms": [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-      ]
+      "gearTransforms": [null, null, null, null, null, null]
     },
     {
       "name": "reduced motion: sem erro no navegador",
