@@ -188,7 +188,7 @@ export async function FunnelGoalsPage({
               >
                 <span>
                   <strong className="block leading-5">{item.label}</strong>
-                  <span className="block text-xs opacity-70">{item.description}</span>
+                  <span className="block text-xs">{item.description}</span>
                 </span>
                 <span
                   aria-hidden="true"
@@ -381,7 +381,7 @@ export async function FunnelGoalsPage({
                   03
                 </span>
                 <div>
-                  <p className="text-xs font-semibold tracking-widest text-[var(--analytics-positive)] uppercase">
+                  <p className="text-xs font-semibold tracking-widest text-emerald-800 uppercase">
                     Capacidade
                   </p>
                   <h2 id="capacity-title" className="mt-1 text-lg font-semibold text-slate-950">

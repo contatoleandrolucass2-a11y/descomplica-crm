@@ -112,8 +112,9 @@ QA local autenticado abaixo.
 Um build de produção local foi conectado exclusivamente ao Supabase local. O
 runner descobre as chaves locais somente em memória, reserva uma porta loopback,
 inicia e encerra `pnpm start`, cria uma identidade `qa.*@local.invalid` com senha
-efêmera e não persiste credenciais ou storage state. A conta recebe papel
-`admin` somente durante a execução. Dashboard, metas, pontos e ranking recebem
+efêmera e não persiste credenciais ou storage state. A conta recebe o único
+papel `master` local somente durante a execução, pois os read models v2 globais
+permanecem Master-only até o cutover v3. Dashboard, metas, pontos e ranking recebem
 fixtures com fonte `QA local synthetic — not production · run <id efêmero>`;
 contagens e marcador são validados novamente pela sessão QA através da RLS antes
 de qualquer captura. Fixtures e conta são apagadas no `finally`, inclusive em
@@ -128,6 +129,8 @@ Resultados aprovados:
 
 - 72/72 checks responsivos: 18 rotas em quatro viewports;
 - 54/54 checks de tema: 18 rotas em claro, equilibrado e escuro;
+- 87/87 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
+  dos três temas, sem violações;
 - 18/18 checks em zoom de 200%, representado por viewport CSS de `720×450` e
   `deviceScaleFactor: 2` sobre canvas físico `1440×900`;
 - disclosure aberto por teclado, fechado com `Escape`, foco devolvido e `Tab`
@@ -137,12 +140,15 @@ Resultados aprovados:
 - `prefers-reduced-motion: reduce` ativo em todos os contextos;
 - zero overflow raiz, erro de console, erro de página, rota desviada ou motor de
   simulador habilitado;
-- 72 capturas rota×viewport e 15 amostras dos três temas, sem metadados.
+- 72 capturas rota×viewport e 15 amostras dos três temas, sem metadados;
+- 87/87 comparações contra o baseline versionado dentro do limiar máximo de 1%
+  de pixels alterados, com tolerância de 16 níveis por canal.
 
 As capturas autenticadas usam somente identidades e valores sintéticos com
 prefixo QA. Elas permitem comparar composição, densidade, reflow e estados com
-o baseline sanitizado da referência; não constituem comparação de métricas
-comerciais.
+o baseline versionado de regressão do próprio alvo. A comparação com as
+capturas da referência viva continua sendo uma revisão visual humana separada;
+nenhuma dessas evidências constitui comparação de métricas comerciais.
 
 ## Bloqueio da comparação autenticada em homologação
 
@@ -165,6 +171,8 @@ pnpm qa:visual:reference
 pnpm db:start
 pnpm build
 pnpm qa:visual:authenticated
+# somente após revisar os candidatos e autorizar a nova baseline local:
+pnpm qa:visual:authenticated -- --update-baseline
 QA_TARGET_ORIGIN=https://crm.descomplicapro.com.br \
   QA_TARGET_LABEL=target-before \
   pnpm qa:security:anonymous
@@ -182,3 +190,10 @@ O runner autenticado aceita `QA_AUTH_ORIGIN` somente como origem HTTP loopback
 opcional; sem ela, escolhe uma porta local livre. Os comandos de fronteira
 anônima não recebem cookies. Nenhum deles autoriza usar produção para QA
 autenticada.
+
+O modo padrão nunca altera a baseline versionada. Capturas e diagnóstico da
+execução ficam em `test-results/authenticated-visual/`, ignorado pelo Git. O
+modo `--update-baseline` também exige que a baseline inicial corresponda ao
+`HEAD` e só a promove, por troca atômica com rollback, depois de todos os checks
+funcionais e de acessibilidade passarem. Hashes dos 87 arquivos usados ficam
+registrados na evidência; uma falha nunca atualiza a baseline.

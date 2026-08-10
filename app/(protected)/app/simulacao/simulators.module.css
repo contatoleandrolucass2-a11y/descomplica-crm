@@ -345,7 +345,7 @@
 
 .actionBar button:disabled {
   cursor: not-allowed;
-  opacity: 0.58;
+  opacity: 1;
 }
 
 .results {
@@ -428,7 +428,7 @@
   border-radius: 0.85rem;
   background: color-mix(in srgb, var(--analytics-warning) 10%, var(--analytics-surface));
   padding: 0.85rem;
-  color: var(--analytics-warning);
+  color: var(--analytics-ink);
   font-size: 0.72rem;
   line-height: 1.45;
 }

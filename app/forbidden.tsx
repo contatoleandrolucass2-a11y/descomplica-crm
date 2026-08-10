@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { logoutAction } from "@/lib/auth/actions/logout";
+
 export const metadata = {
   title: "Acesso negado",
 };
@@ -23,6 +25,14 @@ export default function ForbiddenPage() {
           >
             Voltar ao início
           </Link>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-800 transition hover:bg-slate-100"
+            >
+              Sair
+            </button>
+          </form>
         </div>
         <p className="mt-6 font-mono text-xs text-slate-500">Código para suporte: AUTH-403</p>
       </section>

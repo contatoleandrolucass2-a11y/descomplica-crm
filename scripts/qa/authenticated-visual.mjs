@@ -1,17 +1,32 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
+import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 import sharp from "sharp";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const outputRoot = path.join(repositoryRoot, "docs/qa/reference-parity");
-const screenshotRoot = path.join(outputRoot, "target-authenticated");
-const resultsPath = path.join(outputRoot, "authenticated-results.json");
+const baselineScreenshotRoot = path.join(outputRoot, "target-authenticated");
+const baselineResultsPath = path.join(outputRoot, "authenticated-results.json");
+const artifactRoot = path.join(repositoryRoot, "test-results/authenticated-visual");
+const candidateScreenshotRoot = path.join(artifactRoot, "candidate");
+const candidateResultsPath = path.join(artifactRoot, "candidate-results.json");
+const visualDifferenceThreshold = 0.01;
+const visualChannelTolerance = 16;
+const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+
+function parseMode(argv) {
+  if (argv.length === 0) return "verify";
+  if (argv.length === 1 && argv[0] === "--update-baseline") return "update-baseline";
+  throw new Error("Authenticated visual QA accepts only the optional --update-baseline flag.");
+}
+
+const mode = parseMode(process.argv.slice(2));
 
 const routes = [
   "/app",
@@ -114,6 +129,79 @@ function routeKey(route) {
   return route === "/app" ? "dashboard" : route.slice(5).replaceAll("/", "-");
 }
 
+function repositoryRelative(filePath) {
+  return path.relative(repositoryRoot, filePath).split(path.sep).join("/");
+}
+
+function relativeTo(root, filePath) {
+  return path.relative(root, filePath).split(path.sep).join("/");
+}
+
+function trackedRepositoryFiles() {
+  return new Set(
+    execFileSync("git", ["ls-files", "-z", "--", "docs/qa/reference-parity"], {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+    })
+      .split("\0")
+      .filter(Boolean),
+  );
+}
+
+function baselineMatchesHead() {
+  const paths = [
+    repositoryRelative(baselineResultsPath),
+    repositoryRelative(baselineScreenshotRoot),
+  ];
+  try {
+    execFileSync("git", ["diff", "--quiet", "HEAD", "--", ...paths], {
+      cwd: repositoryRoot,
+      stdio: "ignore",
+    });
+  } catch (error) {
+    if (error && typeof error === "object" && "status" in error && error.status === 1) {
+      return false;
+    }
+    throw error;
+  }
+
+  const untracked = execFileSync(
+    "git",
+    ["ls-files", "--others", "--exclude-standard", "-z", "--", ...paths],
+    {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+    },
+  );
+  return untracked.length === 0;
+}
+
+async function sha256File(filePath) {
+  try {
+    const contents = await readFile(filePath);
+    return {
+      bytes: contents.byteLength,
+      sha256: createHash("sha256").update(contents).digest("hex"),
+    };
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function writeJsonAtomically(destination, value) {
+  await mkdir(path.dirname(destination), { recursive: true });
+  const temporary = `${destination}.tmp-${process.pid}`;
+  try {
+    await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+    await rename(temporary, destination);
+  } finally {
+    await rm(temporary, { force: true });
+  }
+}
+
 function getCaptureProvenance() {
   const captureCommit = execFileSync("git", ["rev-parse", "HEAD"], {
     cwd: repositoryRoot,
@@ -154,7 +242,7 @@ async function saveLosslessWebp(buffer, destination) {
     const metadata = await sharp(contents).metadata();
     await rename(temporary, destination);
     return {
-      path: path.relative(outputRoot, destination),
+      path: relativeTo(artifactRoot, destination),
       bytes: contents.byteLength,
       sha256: createHash("sha256").update(contents).digest("hex"),
       width: metadata.width,
@@ -163,6 +251,144 @@ async function saveLosslessWebp(buffer, destination) {
   } finally {
     await rm(temporary, { force: true });
   }
+}
+
+async function compareVisualBaseline(buffer, baselinePath, trackedFiles) {
+  const repositoryPath = repositoryRelative(baselinePath);
+  if (!trackedFiles.has(repositoryPath)) {
+    return {
+      passed: false,
+      reason: "baseline_not_tracked",
+      changedPixelRatio: null,
+      baselineUsed: { path: repositoryPath, tracked: false, bytes: null, sha256: null },
+    };
+  }
+
+  let baseline;
+  try {
+    baseline = await readFile(baselinePath);
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return {
+        passed: false,
+        reason: "baseline_missing",
+        changedPixelRatio: null,
+        baselineUsed: {
+          path: repositoryPath,
+          tracked: true,
+          bytes: null,
+          sha256: null,
+        },
+      };
+    }
+    throw error;
+  }
+
+  const baselineUsed = {
+    path: repositoryPath,
+    tracked: true,
+    bytes: baseline.byteLength,
+    sha256: createHash("sha256").update(baseline).digest("hex"),
+  };
+
+  const [actual, expected] = await Promise.all([
+    sharp(buffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
+    sharp(baseline).ensureAlpha().raw().toBuffer({ resolveWithObject: true }),
+  ]);
+  if (
+    actual.info.width !== expected.info.width ||
+    actual.info.height !== expected.info.height ||
+    actual.info.channels !== expected.info.channels
+  ) {
+    return {
+      passed: false,
+      reason: "dimensions_changed",
+      changedPixelRatio: 1,
+      expected: { width: expected.info.width, height: expected.info.height },
+      actual: { width: actual.info.width, height: actual.info.height },
+      baselineUsed,
+    };
+  }
+
+  const channels = actual.info.channels;
+  const pixels = actual.info.width * actual.info.height;
+  let changedPixels = 0;
+  for (let offset = 0; offset < actual.data.length; offset += channels) {
+    let changed = false;
+    for (let channel = 0; channel < channels; channel += 1) {
+      if (
+        Math.abs(actual.data[offset + channel] - expected.data[offset + channel]) >
+        visualChannelTolerance
+      ) {
+        changed = true;
+        break;
+      }
+    }
+    if (changed) changedPixels += 1;
+  }
+  const changedPixelRatio = pixels === 0 ? 1 : changedPixels / pixels;
+  return {
+    passed: changedPixelRatio <= visualDifferenceThreshold,
+    reason: changedPixelRatio <= visualDifferenceThreshold ? "within_threshold" : "pixel_drift",
+    changedPixels,
+    totalPixels: pixels,
+    changedPixelRatio,
+    baselineUsed,
+  };
+}
+
+function summarizeBaselineUsage(screenshots, resultsFile) {
+  const files = screenshots
+    .map((screenshot) => screenshot.visualComparison.baselineUsed)
+    .sort((left, right) => left.path.localeCompare(right.path));
+  const manifest = createHash("sha256");
+  for (const file of files) {
+    manifest
+      .update(file.path)
+      .update("\0")
+      .update(file.sha256 ?? "missing")
+      .update("\0");
+  }
+  return {
+    root: repositoryRelative(baselineScreenshotRoot),
+    result: {
+      path: repositoryRelative(baselineResultsPath),
+      tracked: resultsFile.tracked,
+      bytes: resultsFile.digest?.bytes ?? null,
+      sha256: resultsFile.digest?.sha256 ?? null,
+    },
+    files,
+    fileCount: files.length,
+    manifestSha256: manifest.digest("hex"),
+  };
+}
+
+async function baselineUsageIsUnchanged(baselineUsed) {
+  const resultDigest = await sha256File(path.join(repositoryRoot, baselineUsed.result.path));
+  if (
+    resultDigest?.sha256 !== baselineUsed.result.sha256 ||
+    resultDigest?.bytes !== baselineUsed.result.bytes
+  ) {
+    return false;
+  }
+
+  for (const file of baselineUsed.files) {
+    const digest = await sha256File(path.join(repositoryRoot, file.path));
+    if (digest?.sha256 !== file.sha256 || digest?.bytes !== file.bytes) return false;
+  }
+  return true;
+}
+
+async function inspectAccessibility(page, route, viewport, theme) {
+  const analysis = await new AxeBuilder({ page }).withTags(accessibilityTags).analyze();
+  const violations = analysis.violations.map((violation) => ({
+    id: violation.id,
+    impact: violation.impact,
+    affectedNodes: violation.nodes.length,
+    targets: violation.nodes.map((node) => node.target),
+    helpUrl: violation.helpUrl,
+  }));
+  return { route, viewport, theme, violations, passed: violations.length === 0 };
 }
 
 async function login(page, origin, email, password) {
@@ -335,7 +561,165 @@ async function checkZoom(origin, email, password, browser) {
   }
 }
 
+function functionalChecksPassed({
+  routeChecks,
+  themeChecks,
+  accessibilityChecks,
+  screenshots,
+  keyboard,
+  simulatorValidation,
+  fixtureSourceMarker,
+  zoom,
+}) {
+  return (
+    routeChecks.length === routes.length * viewports.length &&
+    routeChecks.every((check) => check.passed) &&
+    themeChecks.length === routes.length * themes.length &&
+    themeChecks.every((check) => check.passed) &&
+    accessibilityChecks.length ===
+      routes.length * viewports.length + themeCaptureRoutes.size * themes.length &&
+    accessibilityChecks.every((check) => check.passed) &&
+    screenshots.length ===
+      routes.length * viewports.length + themeCaptureRoutes.size * themes.length &&
+    keyboard &&
+    Object.values(keyboard).every(Boolean) &&
+    simulatorValidation &&
+    Object.values(simulatorValidation).every(Boolean) &&
+    fixtureSourceMarker &&
+    Object.values(fixtureSourceMarker).every(Boolean) &&
+    zoom.routes.length === routes.length &&
+    zoom.passed
+  );
+}
+
+function createPromotedResult(candidateResult) {
+  const screenshots = candidateResult.screenshots.map((screenshot) => {
+    const relativeCandidatePath = screenshot.path.replace(/^candidate\//, "");
+    const baselinePath = repositoryRelative(
+      path.join(baselineScreenshotRoot, relativeCandidatePath),
+    );
+    return {
+      ...screenshot,
+      path: relativeTo(outputRoot, path.join(baselineScreenshotRoot, relativeCandidatePath)),
+      previousBaselineComparison: screenshot.visualComparison,
+      visualComparison: {
+        passed: true,
+        reason: "baseline_updated",
+        changedPixels: 0,
+        totalPixels: screenshot.width * screenshot.height,
+        changedPixelRatio: 0,
+        baselineUsed: {
+          path: baselinePath,
+          tracked: true,
+          bytes: screenshot.bytes,
+          sha256: screenshot.sha256,
+        },
+      },
+    };
+  });
+  const promoted = {
+    ...candidateResult,
+    mode: "update-baseline",
+    artifacts: {
+      baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
+      baselineResult: repositoryRelative(baselineResultsPath),
+      candidateDiagnostics: repositoryRelative(artifactRoot),
+    },
+    screenshots,
+    baselineUsed: summarizeBaselineUsage(screenshots, {
+      tracked: true,
+      digest: null,
+    }),
+    baselinePromotion: {
+      requested: true,
+      performed: true,
+      method: "same-filesystem transactional rename with rollback",
+      previousBaselineManifestSha256: candidateResult.baselineUsed.manifestSha256,
+      previousBaselineResultSha256: candidateResult.baselineUsed.result.sha256,
+    },
+    passed: true,
+  };
+  return promoted;
+}
+
+async function promoteBaseline(candidateResult) {
+  const promotionRoot = path.join(outputRoot, `.authenticated-visual-promotion-${process.pid}`);
+  const stagedScreenshots = path.join(promotionRoot, "target-authenticated.next");
+  const stagedResult = path.join(promotionRoot, "authenticated-results.next.json");
+  const backupScreenshots = path.join(promotionRoot, "target-authenticated.previous");
+  const backupResult = path.join(promotionRoot, "authenticated-results.previous.json");
+  const promotedResult = createPromotedResult(candidateResult);
+  let baselineMoved = false;
+  let resultMoved = false;
+  let screenshotsInstalled = false;
+  let resultInstalled = false;
+
+  await rm(promotionRoot, { recursive: true, force: true });
+  await mkdir(promotionRoot, { recursive: true });
+  await cp(candidateScreenshotRoot, stagedScreenshots, { recursive: true });
+  await writeJsonAtomically(stagedResult, promotedResult);
+
+  try {
+    await rename(baselineScreenshotRoot, backupScreenshots);
+    baselineMoved = true;
+    await rename(baselineResultsPath, backupResult);
+    resultMoved = true;
+    await rename(stagedScreenshots, baselineScreenshotRoot);
+    screenshotsInstalled = true;
+    await rename(stagedResult, baselineResultsPath);
+    resultInstalled = true;
+  } catch {
+    if (resultInstalled) await rm(baselineResultsPath, { force: true });
+    if (screenshotsInstalled) await rm(baselineScreenshotRoot, { recursive: true, force: true });
+    if (resultMoved) await rename(backupResult, baselineResultsPath);
+    if (baselineMoved) await rename(backupScreenshots, baselineScreenshotRoot);
+    throw new Error("Baseline promotion failed and was rolled back.");
+  } finally {
+    await rm(promotionRoot, { recursive: true, force: true });
+  }
+
+  return promotedResult;
+}
+
 async function run() {
+  await rm(artifactRoot, { recursive: true, force: true });
+  await mkdir(candidateScreenshotRoot, { recursive: true });
+  const baselineCommittedAtStart = baselineMatchesHead();
+  const trackedFiles = trackedRepositoryFiles();
+  const baselineResultsTracked = trackedFiles.has(repositoryRelative(baselineResultsPath));
+  const baselineResultsDigest = await sha256File(baselineResultsPath);
+  let candidateResultWritten = false;
+  await writeJsonAtomically(candidateResultsPath, {
+    schemaVersion: 2,
+    capturedAt: new Date().toISOString(),
+    ...getCaptureProvenance(),
+    mode,
+    environment: "isolated local Supabase",
+    account: "dedicated ephemeral QA account",
+    data: "synthetic local-only fixtures; never production runtime",
+    credentialsPersisted: false,
+    storageStatePersisted: false,
+    artifacts: {
+      baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
+      baselineResult: repositoryRelative(baselineResultsPath),
+      candidateScreenshots: repositoryRelative(candidateScreenshotRoot),
+      candidateResult: repositoryRelative(candidateResultsPath),
+    },
+    baselinePromotion: {
+      requested: mode === "update-baseline",
+      performed: false,
+      eligible: false,
+    },
+    baselineIntegrity: {
+      committedAtStart: baselineCommittedAtStart,
+      unchangedDuringCapture: null,
+    },
+    failure: { stage: "initializing", kind: "sanitized" },
+    passed: false,
+  });
+  if (!baselineCommittedAtStart) {
+    throw new Error("Authenticated visual baseline must match HEAD before verification.");
+  }
   const fixtureVerification = requiredEnvironment("QA_AUTH_FIXTURE_VERIFICATION");
   if (fixtureVerification !== "rls-marker-v1") {
     throw new Error("Authenticated QA requires fixtures verified by the local isolated runner.");
@@ -360,13 +744,13 @@ async function run() {
   const browser = await chromium.launch({ headless: true });
   const routeChecks = [];
   const themeChecks = [];
+  const accessibilityChecks = [];
   const screenshots = [];
   let keyboard = null;
   let simulatorValidation = null;
   let fixtureSourceMarker = null;
 
   try {
-    await rm(screenshotRoot, { recursive: true, force: true });
     for (const viewport of viewports) {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
@@ -387,10 +771,11 @@ async function run() {
         for (const route of routes) {
           const check = await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors);
           routeChecks.push({ viewport: viewport.key, ...check });
+          accessibilityChecks.push(await inspectAccessibility(page, route, viewport.key, "light"));
 
           const buffer = await page.screenshot({ fullPage: true, animations: "disabled" });
           const destination = path.join(
-            screenshotRoot,
+            candidateScreenshotRoot,
             `${routeKey(route)}-${viewport.width}x${viewport.height}.webp`,
           );
           screenshots.push({
@@ -398,6 +783,14 @@ async function run() {
             route,
             viewport: viewport.key,
             theme: "light",
+            visualComparison: await compareVisualBaseline(
+              buffer,
+              path.join(
+                baselineScreenshotRoot,
+                path.relative(candidateScreenshotRoot, destination),
+              ),
+              trackedFiles,
+            ),
             ...(await saveLosslessWebp(buffer, destination)),
           });
         }
@@ -417,9 +810,12 @@ async function run() {
               );
               themeChecks.push({ theme, ...check });
               if (themeCaptureRoutes.has(route)) {
+                accessibilityChecks.push(
+                  await inspectAccessibility(page, route, viewport.key, theme),
+                );
                 const buffer = await page.screenshot({ fullPage: true, animations: "disabled" });
                 const destination = path.join(
-                  screenshotRoot,
+                  candidateScreenshotRoot,
                   "themes",
                   `${routeKey(route)}-${theme}-1440x900.webp`,
                 );
@@ -428,6 +824,14 @@ async function run() {
                   route,
                   viewport: viewport.key,
                   theme,
+                  visualComparison: await compareVisualBaseline(
+                    buffer,
+                    path.join(
+                      baselineScreenshotRoot,
+                      path.relative(candidateScreenshotRoot, destination),
+                    ),
+                    trackedFiles,
+                  ),
                   ...(await saveLosslessWebp(buffer, destination)),
                 });
               }
@@ -443,10 +847,29 @@ async function run() {
     }
 
     const zoom = await checkZoom(origin, email, password, browser);
+    const functionalPassed = functionalChecksPassed({
+      routeChecks,
+      themeChecks,
+      accessibilityChecks,
+      screenshots,
+      keyboard,
+      simulatorValidation,
+      fixtureSourceMarker,
+      zoom,
+    });
+    const visualComparisonsPassed = screenshots.every(
+      (screenshot) => screenshot.visualComparison.passed,
+    );
+    const baselineUsed = summarizeBaselineUsage(screenshots, {
+      tracked: baselineResultsTracked,
+      digest: baselineResultsDigest,
+    });
+    const baselineUnchangedDuringCapture = await baselineUsageIsUnchanged(baselineUsed);
     const result = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       capturedAt: new Date().toISOString(),
       ...getCaptureProvenance(),
+      mode,
       environment: "isolated local Supabase",
       account: "dedicated ephemeral QA account",
       identityVerification,
@@ -458,42 +881,109 @@ async function run() {
       },
       data: "synthetic local-only fixtures; never production runtime",
       credentialsPersisted: false,
+      storageStatePersisted: false,
+      artifacts: {
+        baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
+        baselineResult: repositoryRelative(baselineResultsPath),
+        candidateScreenshots: repositoryRelative(candidateScreenshotRoot),
+        candidateResult: repositoryRelative(candidateResultsPath),
+      },
       viewports,
       routeChecks,
       themeChecks,
+      accessibilityChecks,
       keyboard,
       simulatorValidation,
       zoom,
       screenshots,
+      baselineUsed,
+      baselineIntegrity: {
+        trackedFilesRequired: true,
+        committedAtStart: baselineCommittedAtStart,
+        unchangedDuringCapture: baselineUnchangedDuringCapture,
+      },
+      baselinePromotion: {
+        requested: mode === "update-baseline",
+        performed: false,
+        eligible: mode === "update-baseline" && functionalPassed,
+      },
       visualInspectionCoverage: {
         responsiveScreenshots: routes.length * viewports.length,
         themeScreenshots: themeCaptureRoutes.size * themes.length,
+        accessibilityAudits: accessibilityChecks.length,
+        baselineComparisons: screenshots.length,
+        changedPixelRatioThreshold: visualDifferenceThreshold,
+        channelTolerance: visualChannelTolerance,
       },
     };
     result.passed =
-      routeChecks.every((check) => check.passed) &&
-      themeChecks.every((check) => check.passed) &&
-      keyboard &&
-      Object.values(keyboard).every(Boolean) &&
-      simulatorValidation &&
-      Object.values(simulatorValidation).every(Boolean) &&
-      fixtureSourceMarker &&
-      Object.values(fixtureSourceMarker).every(Boolean) &&
-      zoom.passed;
+      functionalPassed &&
+      baselineUnchangedDuringCapture &&
+      (mode === "update-baseline" || visualComparisonsPassed);
 
-    await mkdir(outputRoot, { recursive: true });
-    const temporary = `${resultsPath}.tmp-${process.pid}`;
-    try {
-      await writeFile(temporary, `${JSON.stringify(result, null, 2)}\n`, "utf8");
-      await rename(temporary, resultsPath);
-    } finally {
-      await rm(temporary, { force: true });
+    await writeJsonAtomically(candidateResultsPath, result);
+    candidateResultWritten = true;
+
+    if (!result.passed) {
+      throw new Error("Authenticated visual QA failed. Inspect candidate diagnostics.");
     }
-
-    if (!result.passed) throw new Error("Authenticated visual QA failed. Inspect result artifact.");
+    if (mode === "update-baseline") {
+      await promoteBaseline(result);
+      result.baselinePromotion = {
+        requested: true,
+        performed: true,
+        eligible: true,
+        method: "same-filesystem transactional rename with rollback",
+      };
+      await writeJsonAtomically(candidateResultsPath, result);
+    }
     process.stdout.write(
-      `Authenticated QA passed: ${routeChecks.length} responsive, ${themeChecks.length} theme and ${zoom.routes.length} zoom route checks.\n`,
+      `Authenticated QA passed in ${mode} mode: ${routeChecks.length} responsive, ${themeChecks.length} theme, ${accessibilityChecks.length} accessibility, ${screenshots.length} candidate/baseline comparisons and ${zoom.routes.length} zoom route checks.\n`,
     );
+  } catch {
+    if (!candidateResultWritten) {
+      await writeJsonAtomically(candidateResultsPath, {
+        schemaVersion: 2,
+        capturedAt: new Date().toISOString(),
+        ...getCaptureProvenance(),
+        mode,
+        environment: "isolated local Supabase",
+        account: "dedicated ephemeral QA account",
+        data: "synthetic local-only fixtures; never production runtime",
+        credentialsPersisted: false,
+        storageStatePersisted: false,
+        artifacts: {
+          baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
+          baselineResult: repositoryRelative(baselineResultsPath),
+          candidateScreenshots: repositoryRelative(candidateScreenshotRoot),
+          candidateResult: repositoryRelative(candidateResultsPath),
+        },
+        baselineUsed: {
+          root: repositoryRelative(baselineScreenshotRoot),
+          result: {
+            path: repositoryRelative(baselineResultsPath),
+            tracked: baselineResultsTracked,
+            bytes: baselineResultsDigest?.bytes ?? null,
+            sha256: baselineResultsDigest?.sha256 ?? null,
+          },
+          files: [],
+          fileCount: 0,
+          manifestSha256: null,
+        },
+        baselinePromotion: {
+          requested: mode === "update-baseline",
+          performed: false,
+          eligible: false,
+        },
+        baselineIntegrity: {
+          committedAtStart: baselineCommittedAtStart,
+          unchangedDuringCapture: null,
+        },
+        failure: { stage: "capture-or-verification", kind: "sanitized" },
+        passed: false,
+      });
+    }
+    throw new Error("Authenticated visual QA failed. Inspect candidate diagnostics.");
   } finally {
     await browser.close();
   }

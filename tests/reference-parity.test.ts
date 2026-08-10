@@ -47,6 +47,7 @@ const expectedProtectedRoutes = [
 const manifest = JSON.parse(
   readFileSync(new URL("../docs/qa/reference-parity/manifest.json", import.meta.url), "utf8"),
 ) as {
+  schemaVersion: number;
   captures: Array<{
     kind: string;
     route: string;
@@ -96,6 +97,7 @@ const authenticatedResults = JSON.parse(
     "utf8",
   ),
 ) as {
+  schemaVersion: number;
   passed: boolean;
   credentialsPersisted: boolean;
   worktreeDirtyAtCapture: boolean;
@@ -124,6 +126,13 @@ const authenticatedResults = JSON.parse(
     reducedMotion: boolean;
     horizontalOverflow: boolean;
   }>;
+  accessibilityChecks: Array<{
+    route: string;
+    viewport: string;
+    theme: string;
+    violations: Array<{ id: string; affectedNodes: number }>;
+    passed: boolean;
+  }>;
   zoom: {
     passed: boolean;
     routes: Array<{
@@ -139,11 +148,19 @@ const authenticatedResults = JSON.parse(
   visualInspectionCoverage: {
     responsiveScreenshots: number;
     themeScreenshots: number;
+    accessibilityAudits: number;
+    baselineComparisons: number;
+    changedPixelRatioThreshold: number;
+    channelTolerance: number;
   };
   screenshots: Array<{
     path: string;
     bytes: number;
     sha256: string;
+    visualComparison: {
+      passed: boolean;
+      changedPixelRatio: number;
+    };
   }>;
 };
 
@@ -231,6 +248,7 @@ describe("versioned reference parity catalog", () => {
   });
 
   it("records complete authenticated local QA without persisting credentials", () => {
+    expect(authenticatedResults.schemaVersion).toBe(2);
     expect(authenticatedResults.passed).toBe(true);
     expect(authenticatedResults.credentialsPersisted).toBe(false);
     expect(authenticatedResults.identityVerification.endpoint).toMatch(
@@ -270,6 +288,12 @@ describe("versioned reference parity catalog", () => {
         (check) => check.passed && check.reducedMotion && !check.horizontalOverflow,
       ),
     ).toBe(true);
+    expect(authenticatedResults.accessibilityChecks).toHaveLength(87);
+    expect(
+      authenticatedResults.accessibilityChecks.every(
+        (check) => check.passed && check.violations.length === 0,
+      ),
+    ).toBe(true);
 
     expect(authenticatedResults.zoom.passed).toBe(true);
     expect(authenticatedResults.zoom.routes).toHaveLength(18);
@@ -291,6 +315,10 @@ describe("versioned reference parity catalog", () => {
     expect(authenticatedResults.visualInspectionCoverage).toEqual({
       responsiveScreenshots: 72,
       themeScreenshots: 15,
+      accessibilityAudits: 87,
+      baselineComparisons: 87,
+      changedPixelRatioThreshold: 0.01,
+      channelTolerance: 16,
     });
     expect(authenticatedResults.screenshots).toHaveLength(87);
     expect(typeof authenticatedResults.worktreeDirtyAtCapture).toBe("boolean");
@@ -300,6 +328,8 @@ describe("versioned reference parity catalog", () => {
     );
 
     for (const screenshot of authenticatedResults.screenshots) {
+      expect(screenshot.visualComparison.passed).toBe(true);
+      expect(screenshot.visualComparison.changedPixelRatio).toBeLessThanOrEqual(0.01);
       const contents = readFileSync(
         new URL(`../docs/qa/reference-parity/${screenshot.path}`, import.meta.url),
       );

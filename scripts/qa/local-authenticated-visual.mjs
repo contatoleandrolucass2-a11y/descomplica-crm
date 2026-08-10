@@ -1066,6 +1066,13 @@ async function verifyFixturesThroughRls({ apiUrl, publishableKey, account, marke
 }
 
 function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
+  const requestedArguments = process.argv.slice(2);
+  if (
+    requestedArguments.length > 1 ||
+    (requestedArguments.length === 1 && requestedArguments[0] !== "--update-baseline")
+  ) {
+    throw new Error("Authenticated visual QA accepts only the optional --update-baseline flag.");
+  }
   const childEnvironment = {
     ...environmentSubset([
       "PATH",
@@ -1086,7 +1093,7 @@ function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
   };
 
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [visualHarnessPath], {
+    const child = spawn(process.execPath, [visualHarnessPath, ...requestedArguments], {
       cwd: repositoryRoot,
       detached: true,
       env: childEnvironment,

@@ -29,12 +29,15 @@ jobs:
 
       - name: Enable pnpm
         run: |
-          npm install --global corepack@latest
+          npm install --global corepack@0.35.0
           corepack enable
           corepack prepare pnpm@11.20.0 --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Formatting
+        run: pnpm format:check
 
       - name: Lint
         run: pnpm lint
@@ -50,3 +53,113 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  release-gates:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node.js 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pnpm
+        run: |
+          npm install --global corepack@0.35.0
+          corepack enable
+          corepack prepare pnpm@11.20.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Start isolated local Supabase
+        shell: bash
+        run: |
+          start_log="$(mktemp "${RUNNER_TEMP}/supabase-start.XXXXXX")"
+          if pnpm db:start >"${start_log}" 2>&1; then
+            rm -f "${start_log}"
+            echo "Local Supabase started."
+          else
+            start_status=$?
+            rm -f "${start_log}"
+            echo "::error::Local Supabase failed to start; raw CLI output was withheld."
+            exit "${start_status}"
+          fi
+
+      - name: Replay migrations without seed
+        run: pnpm exec supabase db reset --local --no-seed
+
+      - name: Database tests
+        run: pnpm db:test
+
+      - name: Database lint and advisors
+        run: |
+          pnpm exec supabase db lint --local --level warning --fail-on warning
+          pnpm exec supabase db advisors --local --type security --level warn --fail-on warn
+          pnpm exec supabase db advisors --local --type performance --level warn --fail-on warn
+
+      - name: Production build
+        run: pnpm build
+
+      - name: Browser authorization and release E2E
+        run: pnpm qa:e2e:release
+
+      - name: Responsive, theme, zoom and keyboard matrix
+        run: pnpm qa:visual:authenticated
+
+      - name: Upload sanitized visual candidate diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: authenticated-visual-candidate-${{ github.sha }}
+          path: test-results/authenticated-visual
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Stop local Supabase
+        if: always()
+        run: pnpm exec supabase stop --no-backup
+
+  isolated-restore:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node.js 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pnpm
+        run: |
+          npm install --global corepack@0.35.0
+          corepack enable
+          corepack prepare pnpm@11.20.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Rehearse clean migration and logical restore
+        run: >-
+          pnpm db:rehearse --
+          --evidence docs/release-candidate/ci-isolated-restore-results.json
+
+      - name: Upload sanitized restore evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: isolated-restore-${{ github.sha }}
+          path: docs/release-candidate/ci-isolated-restore-results.json
+          if-no-files-found: error
+          retention-days: 14
