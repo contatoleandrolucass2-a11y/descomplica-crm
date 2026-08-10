@@ -2,15 +2,16 @@
 
 ## P0 — impedem cutover
 
-| Decisão/bloqueio                        | Evidência atual                                                                   | Autoridade necessária                     | Próxima ação segura                                                                 |
-| --------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------- |
-| Processo e owner nominal do caller Qlik | atividade remota provada; identidade nominal ausente                              | operação Qlik/VPS/n8n                     | acesso read-only temporário a logs e configuração; observar duas janelas            |
-| IDs oficiais nas atividades Salesforce  | contratos atuais carregam nomes de gestor, corretor, imobiliária e empreendimento | owner Salesforce/Analytics Reports        | adicionar IDs oficiais aos relatórios e contrato; nenhum match por nome             |
-| Vínculo Salesforce ↔ Qlik               | não há chave comum confirmada                                                     | owners Salesforce e Qlik                  | aprovar ID mestre ou tabela de ponte owned e versionada                             |
-| Mappings reais e owners                 | nenhuma correspondência de produção foi inventada                                 | data steward por domínio                  | cadastrar owner, evidência e revisão antes de verificar mapping                     |
-| Aplicação do hardening Qlik             | caller atual usa caminho que seria removido                                       | segurança + operação                      | implementar relay e cutover antes da revogação final                                |
-| Ordem da pilha PR #28 + v3              | `20260809144143` revoga o caller antes da ponte v3                                | owners PR #28, segurança e operação       | separar ponte aditiva e hardening destrutivo; não aplicar a pilha atual remotamente |
-| Autoridade real por dataset             | catálogo privado existe, mas nenhuma tupla de produção foi seedada                | owner da fonte + segurança + data steward | aprovar owner, tupla exata, evidência e cobertura em migration própria              |
+| Decisão/bloqueio                       | Evidência atual                                                                   | Autoridade necessária                     | Próxima ação segura                                                          |
+| -------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------- |
+| Ownership operacional do caller Qlik   | workflow/owner técnico identificados; backup e aceite formal ausentes             | operação Qlik/n8n + segurança             | nomear owner operacional e backup; aprovar rotação, canário e rollback       |
+| Leitores `GET` Qlik residuais          | leituras diretas sem user-agent atribuível                                        | operação/segurança                        | correlacionar origem e janela ou provar descontinuação antes do hardening    |
+| IDs oficiais nas atividades Salesforce | contratos atuais carregam nomes de gestor, corretor, imobiliária e empreendimento | owner Salesforce/Analytics Reports        | adicionar IDs oficiais aos relatórios e contrato; nenhum match por nome      |
+| Vínculo Salesforce ↔ Qlik              | não há chave comum confirmada                                                     | owners Salesforce e Qlik                  | aprovar ID mestre ou tabela de ponte owned e versionada                      |
+| Mappings reais e owners                | nenhuma correspondência de produção foi inventada                                 | data steward por domínio                  | cadastrar owner, evidência e revisão antes de verificar mapping              |
+| Aplicação do hardening Qlik            | caller atual usa caminho que seria removido                                       | segurança + operação                      | implementar relay e cutover antes da revogação final                         |
+| Ordem da pilha PR #28 + v3             | ponte agora preserva a RPC legada; hardening destrutivo foi retirado desta etapa  | owners PR #28, segurança e operação       | ensaiar restore/drift; executar hardening somente após relay/cutover estável |
+| Autoridade real por dataset            | catálogo privado existe, mas nenhuma tupla de produção foi seedada                | owner da fonte + segurança + data steward | aprovar owner, tupla exata, evidência e cobertura em migration própria       |
 
 ## P1 — necessários antes de ampliar usuários
 

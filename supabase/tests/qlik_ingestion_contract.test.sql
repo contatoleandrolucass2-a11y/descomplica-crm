@@ -352,6 +352,8 @@ as $$
     )
   ) else '{}'::jsonb end;
 $$;
+grant execute on function pg_temp.valid_qlik_payload(text, boolean)
+to service_role;
 
 set local role service_role;
 select is(

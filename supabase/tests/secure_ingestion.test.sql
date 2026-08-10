@@ -251,6 +251,8 @@ as $$
     )
   );
 $$;
+grant execute on function pg_temp.valid_ingestion_payload(text, text)
+to service_role;
 
 create function pg_temp.unavailable_source_payload(p_request_id text)
 returns jsonb
@@ -295,6 +297,7 @@ begin
   return v_payload;
 end;
 $$;
+grant execute on function pg_temp.unavailable_source_payload(text) to service_role;
 
 set local role service_role;
 select is(

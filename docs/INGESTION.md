@@ -29,6 +29,34 @@ O Gate 2 substitui os três endpoints legados sem copiar Cloudflare, D1 ou o fal
 
 Os Route Handlers nunca retornam tokens, URLs internas, resposta do provedor ou detalhes SQL. O refresh aceita somente URL configurada por ambiente; em produção ela deve usar HTTPS e não pode conter credenciais embutidas.
 
+## Relay Qlik
+
+`POST /api/ingest/qlik` é uma fronteira server-only independente de
+Salesforce. O endpoint fica desligado por padrão e retorna `503` antes de ler o
+body. Quando autorizado, exige HMAC-SHA256 de seis linhas — método, path, key
+ID, timestamp UTC, nonce UUID v4 e digest dos bytes —, JSON estrito e no máximo
+1 MB. O relay Qlik não aceita Bearer. Replay e rate limit são serializados pela
+linha da credential com `SELECT ... FOR UPDATE` no banco.
+
+A conexão dedicada pode executar somente
+`qlik_relay.ingest_snapshot(jsonb,text,text,timestamptz,text,text)`. Shadow
+compara o body com o run legado de mesmo `requestId` sem gravar fatos. Canary e
+active exigem write flag, credencial válida, dois owners ativos e gate privado
+com duas janelas shadow iguais seguidas de duas janelas canary. Nenhuma linha
+real é seedada.
+
+O papel dedicado permanece `NOLOGIN` e ainda não é ativável. Privilégios
+estruturais herdados de `PUBLIC` no Supabase, inclusive `pg_net` e
+`CONNECT`/`TEMP` de banco, exigem inventário remoto somente leitura e uma
+remediação futura autorizada por `supabase_admin`/owner do banco. O helper
+`private.crm_qlik_relay_role_isolated()` deve retornar `true` antes de qualquer
+`LOGIN`; no estado atual ele retorna `false` e o relay falha fechado.
+
+O publisher técnico confirmado continua usando a RPC anônima legada. A ponte a
+preserva até cutover; o relay, n8n e ambientes remotos não foram ativados ou
+alterados neste incremento. O runbook está em
+[`docs/qlik-relay-mapping-cutover/`](qlik-relay-mapping-cutover/README.md).
+
 Ingestão e refresh são capacidades independentes. Ambas ficam desativadas por
 padrão e exigem o valor literal `true` em sua flag server-side. Desativadas ou
 mal configuradas, retornam `503` antes de criar clientes privilegiados, iniciar
@@ -81,6 +109,11 @@ APP_ORIGIN=https://homologacao.exemplo.com
 SALESFORCE_INGEST_ENABLED=false
 SALESFORCE_REFRESH_ENABLED=false
 CRM_READ_MODEL_V3_SHADOW_ENABLED=false
+QLIK_RELAY_MODE=off
+QLIK_RELAY_WRITE_ENABLED=false
+QLIK_RELAY_KEY_ID=
+QLIK_RELAY_HMAC_SECRET=
+QLIK_RELAY_DATABASE_URL=
 SUPABASE_SECRET_KEY=
 SALESFORCE_INGEST_SECRET=
 SALESFORCE_REFRESH_URL=
@@ -92,7 +125,10 @@ Com a flag de ingestão em `true`, `SUPABASE_SECRET_KEY` e
 `true`, a URL HTTPS sem credenciais e `SALESFORCE_REFRESH_SECRET` tornam-se
 obrigatórias. Configuração parcial falha fechada. Cada ambiente usa valores
 distintos; a rotação ocorre no produtor/webhook e no runtime, seguida de restart
-controlado e smoke test. Nenhum valor entra no Git, em logs ou em imagens.
+controlado e smoke test. Para o relay Qlik, mudar o key ID sempre gera novo HMAC;
+preservá-lo exige o mesmo key ID e confirmação explícita. Com
+`QLIK_RELAY_MODE=off`, o configurador remove key ID, HMAC e URL do banco: nenhum
+segredo do relay fica montado. Nenhum valor entra no Git, em logs ou em imagens.
 
 `CRM_READ_MODEL_V3_SHADOW_ENABLED=true` revela somente as rotas shadow
 autenticadas. A flag não ativa produtor, não publica fonte, não altera o modelo

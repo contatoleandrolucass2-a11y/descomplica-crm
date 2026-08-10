@@ -2,6 +2,11 @@ begin;
 
 select plan(143);
 
+-- The relay/cutover migration closes this primitive to Data API roles. Keep a
+-- transaction-local grant only for the v3 fixture setup exercised below.
+grant execute on function public.review_crm_source_identity_mapping(jsonb)
+to authenticated;
+
 select has_table('public', 'crm_read_model_v3_runs', 'v3 run table exists');
 select has_table('public', 'crm_read_model_v3_events', 'v3 event table exists');
 select has_table(

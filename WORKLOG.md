@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-08-10 — relay Qlik, mappings e cutover local
+
+- Branch criada do SHA exato `96d48b0e64ad85c5020d4ec69b6f1dd0bf408e08`.
+  Baseline aprovou lint, typecheck, 125 Vitest + 8 Node (um ignorado), build de
+  37 rotas e 684 pgTAP antes das alterações.
+- Inspeções remotas somente leitura identificaram o único publisher entre 484
+  workflows: n8n `r4DyPyOTDtoROXq0` (`ranking imobs`), agenda de 30 minutos,
+  papel efetivo `anon` e owner técnico Leandro Lucas (`global:owner`). A amostra
+  correlacionou 27/27 execuções bem-sucedidas; owner operacional/backup e
+  leitores `GET` residuais permanecem gates.
+- O relay server-only exige HMAC do request canônico, digest do body, timestamp,
+  nonce, 1 MB máximo e schema estrito. Flags ficam off; a conexão dedicada
+  rejeita usuários administrativos e recebe somente a RPC `qlik_relay`.
+- A migration local cria papel `NOLOGIN`, registry/gate/ledger vazios, RLS
+  forçada, shadow sem fatos, duas janelas shadow, duas canary e saúde agregada.
+  Nenhuma credential, owner, mapping, target ou dado real foi seedado.
+- A CLI de mappings faz preview por padrão e exige flag, hash do manifesto e
+  hash do plano para apply. O banco revalida autoridade, conflitos e estado em
+  transação atômica; owners/targets nunca são criados pelo importador.
+- Revisões adversariais fecharam TLS sem verificação integral, reutilização de
+  HMAC, drift de atributos/ACL/session user do papel, replay histórico com body
+  não validado, aliases whitespace e bypass da autoridade pela primitiva antiga.
+  O papel continua `NOLOGIN`: grants `PUBLIC` de `pg_net` e banco fazem o helper
+  retornar `false` até remediação futura pelos owners autorizados.
+- Reset integral passou; pgTAP aprovou 770/770, incluindo 86/86 casos do
+  relay/mappings. Lint, typecheck, 193 Vitest + 8 Node, build de 37 páginas,
+  advisors, auditorias de dependência/segredos, Actionlint e ShellCheck passaram.
+  O lint SQL reteve somente duas advertências preexistentes do read model v3.
+- A ponte Qlik anterior foi tornada aditiva: preserva a RPC legada até cutover;
+  o hardening destrutivo permanece em incremento separado.
+- Nenhum Supabase remoto, dado, grant, migration aplicada, workflow n8n,
+  Salesforce, Qlik, VPS, container, DNS ou Nginx foi alterado. Não houve
+  cutover, merge ou deploy.
+
 ## 2026-08-09 — prova remota, restore isolado e hardening RLS local
 
 - Esta entrada conclui o gate que antes estava bloqueado por autenticação da

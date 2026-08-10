@@ -47,11 +47,13 @@ Se qualquer ID obrigatório ou fornecido estiver ausente, pendente, expirado ou 
 
 Se uma ocorrência reaparece depois de resolução ou rejeição, o item volta a
 `pending`, perde vínculos de resolução antigos e exige nova decisão. Um Master
-com `crm.ingest.manage` pode verificar ou rejeitar pela RPC auditada
-`review_crm_source_identity_mapping`. Verificação exige owner ativo, alvo
-canônico, evidência e `effectiveFrom`; a data efetiva permite reconciliar fatos
-históricos sem reescrever uma versão já fechada. Rejeição encerra a versão
-vigente em vez de deixá-la autorizando cargas futuras.
+com `crm.ingest.manage` pode verificar ou rejeitar somente pelo contrato de lote
+preview/apply, que também exige autoridade vigente e hashes revisados. A RPC
+`review_crm_source_identity_mapping` permanece como primitiva owner-only usada
+internamente pelo lote, sem grant para Data API. Verificação exige owner ativo,
+alvo canônico, evidência e `effectiveFrom`; a data efetiva permite reconciliar
+fatos históricos sem reescrever uma versão já fechada. Rejeição encerra a
+versão vigente em vez de deixá-la autorizando cargas futuras.
 
 Não há fallback por aproximação textual, lower-case de nome, hash de nome ou primeira ocorrência.
 

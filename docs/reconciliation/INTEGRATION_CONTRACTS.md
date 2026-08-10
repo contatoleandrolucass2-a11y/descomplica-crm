@@ -25,18 +25,18 @@ integração nem autorizam escrita.
 
 ## Mapa ponta a ponta
 
-| Fluxo               | Fonte/workflow                                                                          | Frequência                                                               | Destino interno                                              | Contrato e estado                                                                                 |
-| ------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| Salesforce bruto    | Analytics Reports API `v61.0`; sete report IDs versionados                              | Legado comprovado a cada 30 min; candidata sem agenda ativa              | Exportador local autorizado                                  | Projeção tipada por relatório; sessão Chrome/MFA; candidata não ativa                             |
-| Salesforce agregado | `salesforce_n8n_v1`                                                                     | Somente após coleta completa                                             | `POST /api/ingest/salesforce`                                | JSON v2, Bearer M2M, 1 MB, Zod estrito, RPC transacional; remoto contém última base válida        |
-| Refresh Salesforce  | Route Handler → webhook configurado                                                     | Manual, com lock/cooldown                                                | `POST /api/refresh/salesforce`                               | Sessão + permissão + mesma origem; capacidade desativada por padrão                               |
-| n8n candidato       | `Descomplica CRM - Salesforce Ingest Candidate (inactive)`                              | Nenhuma agenda                                                           | Webhook candidato local do n8n                               | Aceita envelope direto ou `body`; valida forma/PII e responde 202; sem credencial ou node externo |
-| Qlik imobiliárias   | origem `qlik:23.1-painel-comercial-vendas`; caller atual não identificado com segurança | 9 runs observados em 4h14, média 31,7 min; runbook legado fala em 60 min | Contrato local pretendido `ingest_crm_imob_ranking_snapshot` | v1, máximo 5.000 entries, idempotente; RPC segura ausente no remoto e RPC legada exposta          |
-| Estoque             | Alteração externa no workflow antigo `Funil de Vendas`                                  | Não comprovada                                                           | Projeto Supabase antigo, fora deste CRM                      | Sem export, schema, ID, endpoint ou baseline seguros; bloqueado                                   |
+| Fluxo               | Fonte/workflow                                             | Frequência                                                  | Destino interno                                        | Contrato e estado                                                                                 |
+| ------------------- | ---------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Salesforce bruto    | Analytics Reports API `v61.0`; sete report IDs versionados | Legado comprovado a cada 30 min; candidata sem agenda ativa | Exportador local autorizado                            | Projeção tipada por relatório; sessão Chrome/MFA; candidata não ativa                             |
+| Salesforce agregado | `salesforce_n8n_v1`                                        | Somente após coleta completa                                | `POST /api/ingest/salesforce`                          | JSON v2, Bearer M2M, 1 MB, Zod estrito, RPC transacional; remoto contém última base válida        |
+| Refresh Salesforce  | Route Handler → webhook configurado                        | Manual, com lock/cooldown                                   | `POST /api/refresh/salesforce`                         | Sessão + permissão + mesma origem; capacidade desativada por padrão                               |
+| n8n candidato       | `Descomplica CRM - Salesforce Ingest Candidate (inactive)` | Nenhuma agenda                                              | Webhook candidato local do n8n                         | Aceita envelope direto ou `body`; valida forma/PII e responde 202; sem credencial ou node externo |
+| Qlik imobiliárias   | workflow n8n `r4DyPyOTDtoROXq0`; upstream Qlik separado    | agenda confirmada de 30 min; 47 runs/24h observados         | `POST /api/ingest/qlik` → `qlik_relay.ingest_snapshot` | v1, HMAC/replay/rate/gate; relay local off e RPC legada remota ainda exposta                      |
+| Estoque             | Alteração externa no workflow antigo `Funil de Vendas`     | Não comprovada                                              | Projeto Supabase antigo, fora deste CRM                | Sem export, schema, ID, endpoint ou baseline seguros; bloqueado                                   |
 
-As frequências Qlik de 31,7 e 60 minutos são evidências divergentes, não uma
-política. O workflow/caller que produziu os runs remotos deve ser identificado e
-rotacionado antes de qualquer troca.
+A cadência observada converge com a agenda de 30 minutos do workflow. O owner
+técnico foi identificado, mas owner operacional, backup e leitores `GET`
+residuais ainda precisam ser resolvidos antes de rotação ou troca.
 
 ## Fonte Salesforce
 
@@ -166,8 +166,9 @@ mais estrito para moeda do RPC SQL compatível. A RPC escopada
 `list_scoped_crm_imob_ranking_entries` devolve `vgv` textual para preservar
 centavos acima de `Number.MAX_SAFE_INTEGER`. Isso ainda não cria o mapping
 canônico de organização exigido pelo v3.
-O remoto atual possui uma RPC legada diferente, verifier embutido
-e grants proibidos; não deve ser chamado nem copiado.
+O remoto atual possui uma RPC legada diferente, verifier embutido e grants
+proibidos. Ela continua sendo usada pelo workflow confirmado e não deve ser
+copiada; a ponte a preserva apenas até shadow/canário/cutover autorizados.
 
 ## Estoque e perdas por SLA
 
@@ -205,11 +206,11 @@ valor visto na interface antiga será usado como dado.
 
 ## Última base válida
 
-| Fonte       | Referência/geração                                         | Contagens sanitizadas                                                                                                            | Disponibilidade                        |
-| ----------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| Salesforce  | referência `2026-08-07`; gerada `2026-08-07T18:03:36.329Z` | 26 corretores, 4 contas Imob, 12.299 oportunidades, 816 agendamentos, 352 visitas, 465 pastas, 595 vendas, 104 linhas de ranking | Metas e roleta indisponíveis           |
-| Qlik        | ano 2026; gerada `2026-08-09T05:07:36.463Z`                | 384 entries; 0 developments                                                                                                      | Caller ativo, contrato remoto inseguro |
-| Estoque/SLA | —                                                          | —                                                                                                                                | Sem fonte segura                       |
+| Fonte       | Referência/geração                                         | Contagens sanitizadas                                                                                                            | Disponibilidade                      |
+| ----------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| Salesforce  | referência `2026-08-07`; gerada `2026-08-07T18:03:36.329Z` | 26 corretores, 4 contas Imob, 12.299 oportunidades, 816 agendamentos, 352 visitas, 465 pastas, 595 vendas, 104 linhas de ranking | Metas e roleta indisponíveis         |
+| Qlik        | ano 2026; gerada `2026-08-09T05:07:36.463Z`                | 384 entries; 0 developments                                                                                                      | Caller identificado; relay ainda off |
+| Estoque/SLA | —                                                          | —                                                                                                                                | Sem fonte segura                     |
 
 Diagnósticos Salesforce: 63 visitas sem agendamento; 19 pastas e 18 vendas fora
 do recorte de oportunidades; 122 pastas aprovadas; quatro corretores ativos sem
@@ -222,7 +223,7 @@ não dados fictícios nem regras de exclusão.
 2. obter IDs oficiais de gerente, organização, unidade e empreendimento;
 3. definir atraso, remoção lógica e correção retroativa por fonte;
 4. reconciliar totais/IDs antes de publicar agregados escopados;
-5. identificar o caller Qlik e migrá-lo para credencial/RPC dedicadas;
+5. formalizar owners, resolver leitores residuais e validar relay shadow/canário;
 6. obter contrato oficial de estoque e SLA;
 7. manter workflows remotos inalterados até backup restaurado, migrations
    conciliadas e autorização explícita.

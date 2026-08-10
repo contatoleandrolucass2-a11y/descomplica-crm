@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "batchRequestId": "00000000-0000-4000-8000-000000000101",
+  "generatedAt": "2026-08-10T00:00:00Z",
+  "evidenceReference": "qa-fixture-only:not-for-apply:BATCH-001",
+  "mappings": [
+    {
+      "requestId": "00000000-0000-4000-8000-000000000201",
+      "source": "qa_qlik_fixture",
+      "entityKind": "organization",
+      "externalId": "QA-FIXTURE-ORG-001",
+      "ownerKey": "qa_fixture_owner_not_provisioned",
+      "targetId": "00000000-0000-4000-8000-000000000301",
+      "decision": "verify",
+      "effectiveFrom": "2026-08-01T00:00:00Z",
+      "evidenceReference": "qa-fixture-only:not-for-apply:ITEM-001",
+      "reason": "qa_contract_example_only"
+    },
+    {
+      "requestId": "00000000-0000-4000-8000-000000000202",
+      "source": "qa_qlik_fixture",
+      "entityKind": "organization",
+      "externalId": "QA-FIXTURE-ORG-002",
+      "decision": "reject",
+      "evidenceReference": "qa-fixture-only:not-for-apply:ITEM-002",
+      "reason": "qa_rejection_example_only"
+    }
+  ]
+}

@@ -63,13 +63,18 @@ APP_ORIGIN=http://127.0.0.1:3000
 SALESFORCE_INGEST_ENABLED=false
 SALESFORCE_REFRESH_ENABLED=false
 CRM_READ_MODEL_V3_SHADOW_ENABLED=false
+QLIK_RELAY_MODE=off
+QLIK_RELAY_WRITE_ENABLED=false
+QLIK_RELAY_KEY_ID=
+QLIK_RELAY_HMAC_SECRET=
+QLIK_RELAY_DATABASE_URL=
 SUPABASE_SECRET_KEY=
 SALESFORCE_INGEST_SECRET=
 SALESFORCE_REFRESH_URL=
 SALESFORCE_REFRESH_SECRET=
 ```
 
-Secret key, Bearers e credenciais PostgreSQL nunca podem entrar no bundle da aplicação. A secret key é aceita somente pelo módulo server-only da ingestão M2M. `CRM_READ_MODEL_V3_SHADOW_ENABLED` revela apenas as rotas shadow autenticadas e não autoriza cutover ou ingestão. `.env.local` nunca deve entrar no Git.
+Secret key, Bearers e credenciais PostgreSQL nunca podem entrar no bundle da aplicação. A secret key é aceita somente pelo módulo server-only da ingestão M2M. `CRM_READ_MODEL_V3_SHADOW_ENABLED` revela apenas as rotas shadow autenticadas e não autoriza cutover ou ingestão. O relay Qlik exige HMAC e conexão PostgreSQL exclusiva; `off` é o default e nenhuma flag substitui o gate privado no banco. `.env.local` nunca deve entrar no Git.
 
 ## Banco local e aplicação
 
@@ -143,6 +148,9 @@ O diretório `.next/standalone` é o artefato de runtime. O fluxo completo de Ho
 - [docs/integration-read-model-v3/README.md](docs/integration-read-model-v3/README.md):
   callers, `service_role`, IDs/owners, lineage, read model v3, filtros,
   qualidade, cutover, rollback e decisões restantes.
+- [docs/qlik-relay-mapping-cutover/README.md](docs/qlik-relay-mapping-cutover/README.md):
+  relay HMAC de menor privilégio, caller confirmado, mappings, canário,
+  observabilidade e rollback.
 - [CONTRIBUTING.md](CONTRIBUTING.md): fluxo de branch, commits e qualidade.
 
 ## Checkpoints de origem

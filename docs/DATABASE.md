@@ -2,9 +2,9 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 20 migrations
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 21 migrations
 locais. A validação local encontrou 39 tabelas públicas, com RLS habilitada em
-todas, e seis tabelas privadas. Os seeds estruturais criam 12 papéis, 23
+todas, e 12 tabelas privadas. Os seeds estruturais criam 12 papéis, 23
 permissões e 21 páginas. Nenhum dado comercial é seedado.
 
 Isso não descreve convergência com produção. A captura somente leitura de 9 de
@@ -34,9 +34,10 @@ Qlik ou do read model v3 foi realizado.
 15. `20260808174817_require_sensitive_access_change_reasons.sql`: motivo obrigatório e validação transacional para alterações administrativas sensíveis.
 16. `20260809024000_simulator_visual_catalog.sql`: permissão de leitura e hierarquia protegida do hub e das cinco jornadas visuais de simulação, sem tabela ou motor comercial.
 17. `20260809144137_pending_onboarding_scope_foundation.sql`: onboarding pendente, hierarquia de reporting scopes, grants temporais/revogáveis, delegação direcional, locks de topologia e administração escopada fail-closed.
-18. `20260809144143_qlik_rls_contract_hardening.sql`: convergência Qlik, limites de payload, ACL sem tabela direta, ingestão interna mínima e leitura humana por identidade/organização escopada. Esta migration é destrutiva para o caller anônimo ativo: não pode ser aplicada remotamente antes da identificação do caller e da aprovação/validação do relay substituto.
+18. `20260809144143_qlik_rls_contract_hardening.sql`: ponte Qlik aditiva, limites de payload, ACL sem tabela direta, ingestão interna mínima e leitura humana escopada. Preserva a RPC legada até hardening destrutivo posterior ao cutover.
 19. `20260809181422_integration_identity_governance.sql`: owners, mappings externos versionados, histórico auditável, fila de reconciliação e lineage dos grants de reporting scope.
 20. `20260809181424_crm_read_model_v3.sql`: autoridades privadas de fonte, dimensões canônicas, runs/fatos imutáveis, ingestão v3 e leitura autenticada por dataset, permissão e scope efetivo.
+21. `20260810165927_qlik_relay_mapping_cutover.sql`: papel/RPC exclusivos do relay, credenciais e gates vazios, ledger sanitizado, saúde agregada e importação de mappings com preview/apply atômico.
 
 ## Desenvolvimento local
 
@@ -53,12 +54,12 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 684 testes pgTAP em 15 arquivos: 28 dos motivos de
+`supabase test db` planeja 770 testes pgTAP em 16 arquivos: 28 dos motivos de
 acesso, 51 regressões de hardening escopado, 28 do dashboard, 25 das metas, 20
 da matriz global de grants, 60 do schema Qlik, 33 do catálogo, 28 do signup
 pendente, 26 dos pontos, 54 do contrato Qlik, 20 da governança de identidades,
-27 do ranking, 143 do read model v3, 98 da matriz de escopos e 43 da ingestão
-Salesforce. A cobertura verifica nomes,
+27 do ranking, 143 do read model v3, 98 da matriz de escopos, 43 da ingestão
+Salesforce e 86 do relay/mappings. A cobertura verifica nomes,
 schema, grants, policies, constraints, disponibilidade e autoridade de fontes,
 preservação de dados, mappings, lineage, provisionamento, usuários inativos,
 overrides, limites de payload, delegação direcional, cardinalidade de escopo,
@@ -112,7 +113,6 @@ permissão dedicada, identidade Qlik mapeada e organização dentro do reporting
 scope. O remoto ainda mantém RPC legada e grants/policies abertos. O estado
 efetivo e a baseline proposta estão no
 [pacote de prova](supabase-proof/README.md), não devem ser inferidos apenas das
-migrations locais. Em particular, `20260809144143` remove o caminho legado e
-não integra uma ponte aditiva: mantê-la fora de qualquer aplicação remota é um
-bloqueio obrigatório até o caller ativo ser identificado e o relay aprovado ser
-observado em paralelo.
+migrations locais. `20260809144143` agora preserva o caminho legado como ponte
+aditiva; `20260810165927` cria somente a fundação inerte. Aplicação remota ainda
+exige restore, drift, owners, credenciais privadas e autorizações próprias.

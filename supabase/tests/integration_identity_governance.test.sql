@@ -54,14 +54,20 @@ select ok(
 );
 
 select ok(
-  has_function_privilege(
+  not has_function_privilege(
     'authenticated', 'public.review_crm_source_identity_mapping(jsonb)', 'EXECUTE'
   )
   and not has_function_privilege(
     'anon', 'public.review_crm_source_identity_mapping(jsonb)', 'EXECUTE'
   ),
-  'mapping review is callable only through an authenticated session gate'
+  'direct mapping mutation is closed to Data API sessions'
 );
+
+-- The final migration keeps this function as an owner-only primitive. This
+-- transactional grant exercises its lower-level governance contract in
+-- isolation; production callers use the authority-gated batch wrapper.
+grant execute on function public.review_crm_source_identity_mapping(jsonb)
+to authenticated;
 
 insert into auth.users (id, email)
 values

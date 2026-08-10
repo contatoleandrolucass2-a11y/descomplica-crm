@@ -43,6 +43,30 @@ zsh -lic 'node -v; pnpm -v; nvm --version; psql --version'
 
 Não foi necessária extensão de editor para compilar ou testar. As capacidades locais usadas foram terminal, Git, Docker, scanners e documentação oficial. Supabase e GitHub são tratados por CLIs oficiais; credenciais não são armazenadas pelo projeto.
 
+## Relay Qlik e mappings
+
+O runtime aceita somente variáveis server-side e permanece inerte por padrão:
+
+```dotenv
+QLIK_RELAY_MODE=off
+QLIK_RELAY_WRITE_ENABLED=false
+QLIK_RELAY_KEY_ID=
+QLIK_RELAY_HMAC_SECRET=
+QLIK_RELAY_DATABASE_URL=
+CRM_MAPPING_IMPORT_ACCESS_TOKEN=
+CRM_MAPPING_IMPORT_APPLY_ENABLED=false
+```
+
+`QLIK_RELAY_DATABASE_URL` deve usar exclusivamente o usuário
+`crm_qlik_relay` (ou seu sufixo de pooler), TLS `sslmode=verify-full` e senha
+privada. `postgres`, `service_role` e conexões administrativas são rejeitados.
+O segredo HMAC e a senha PostgreSQL devem ser obrigatoriamente distintos;
+reutilização faz a configuração falhar fechada.
+Shadow exige write `false`; canary/active exigem write `true`, além do gate no
+banco. O token humano de mapping deve vir de sessão Master dedicada, somente
+por ambiente, nunca por argumento. Apply permanece bloqueado sem confirmação
+dos dois hashes e a flag separada.
+
 ## Diagnóstico
 
 - Se `node -v` mostrar Node 26, execute `nvm use` antes de instalar dependências.

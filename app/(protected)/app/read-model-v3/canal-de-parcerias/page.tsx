@@ -25,7 +25,7 @@ export default function ReadModelV3PartnershipsPage({
       dataset="partnerships"
       searchParams={searchParams}
       breakdown="organizations"
-      policyNotice="O caller Qlik ativo ainda não foi identificado nominalmente e o cutover permanece bloqueado. Nenhum grant remoto foi alterado."
+      policyNotice="O caller técnico Qlik foi identificado. O relay permanece desligado e o cutover segue bloqueado até owner operacional, backup e leitores residuais serem formalmente resolvidos. Nenhum grant remoto foi alterado."
     />
   );
 }

@@ -136,11 +136,19 @@ O menu consulta somente páginas ativas, marcadas para navegação e permitidas 
 - `ingest_crm_imob_ranking_snapshot`: contrato interno de ingestão Qlik. n8n
   externo nunca recebe `service_role`; deve usar relay server-side com M2M ou
   papel DB estritamente limitado à RPC, após gate formal.
+- `qlik_relay.ingest_snapshot`: única capacidade do papel dedicado
+  `crm_qlik_relay`; valida registry, replay, rate e gate antes de comparar ou
+  chamar a RPC interna. Nenhum Data API role recebe execução.
+- `get_qlik_relay_health`: agregados sanitizados somente para Master com
+  `crm.ingest.manage`.
+- `preview_crm_source_identity_mapping_import` e
+  `apply_crm_source_identity_mapping_import`: preview/apply Master-only; apply
+  exige plano imutável e autoridade ativa, sem criar targets ou owners.
 - `list_scoped_crm_imob_ranking_entries`: leitura humana autenticada com
   `crm.partnerships.view`, identidade externa estável e escopo organizacional.
-- `review_crm_source_identity_mapping`: revisão idempotente de mapping por
-  Master autenticado com `crm.ingest.manage`; em verificação, owner, evidência e
-  `effectiveFrom` auditado são obrigatórios.
+- `review_crm_source_identity_mapping`: primitiva de mutação owner-only, sem
+  `EXECUTE` para Data API; callers autenticados usam exclusivamente o lote
+  preview/apply, que exige autoridade, hashes e plano vigente.
 - `ingest_crm_read_model_v3`: ingestão atômica exclusiva de `service_role`, sem
   privilégio direto nos fatos.
 - `list_crm_read_model_v3_scopes` e `get_crm_read_model_v3`: descoberta e
@@ -207,9 +215,11 @@ Localmente, `service_role` não recebe acesso direto a tabelas ou sequências. O
 grants técnicos de `EXECUTE` nas RPCs Salesforce, Qlik e v3 são capacidades
 server-only, não autorização para distribuir a chave global. Salesforce fica no
 Route Handler confiável. O produtor v3 ainda não foi ativado. n8n/Qlik externo
-deve usar relay autenticado por M2M; como alternativa formal, papel DB dedicado
-sem `BYPASSRLS`, sem tabela/sequência e com `EXECUTE` apenas na assinatura
-necessária. As escritas passam por transações `SECURITY DEFINER` validadas.
+usa o relay HMAC. O app conecta com o papel dedicado `crm_qlik_relay`, sem
+`BYPASSRLS`, sem tabela/sequência e com `EXECUTE` apenas na assinatura
+`qlik_relay.ingest_snapshot`. O papel nasce `NOLOGIN`; qualquer provisionamento
+de senha/login é operação privada, separada e autorizada. As escritas passam por
+transação `SECURITY DEFINER` validada.
 `bootstrap_master_user` permanece exclusiva do proprietário
 `postgres`, conforme o runbook operacional.
 

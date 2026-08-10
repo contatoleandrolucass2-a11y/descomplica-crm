@@ -50,6 +50,11 @@ readonly -a managed_keys=(
   SALESFORCE_INGEST_ENABLED
   SALESFORCE_REFRESH_ENABLED
   CRM_READ_MODEL_V3_SHADOW_ENABLED
+  QLIK_RELAY_MODE
+  QLIK_RELAY_WRITE_ENABLED
+  QLIK_RELAY_KEY_ID
+  QLIK_RELAY_HMAC_SECRET
+  QLIK_RELAY_DATABASE_URL
   SUPABASE_SECRET_KEY
   SALESFORCE_INGEST_SECRET
   SALESFORCE_REFRESH_URL
@@ -154,6 +159,65 @@ validate_machine_secret() {
   [[ "$1" =~ ^[A-Za-z0-9_-]{32,}$ ]]
 }
 
+validate_relay_key_id() {
+  ((${#1} <= 100)) && [[ "$1" =~ ^[a-z0-9]+([._-][a-z0-9]+)*$ ]]
+}
+
+validate_relay_secret() {
+  [[ "$1" =~ ^[A-Za-z0-9_-]{43,128}$ ]]
+}
+
+validate_relay_database_url() {
+  node -e '
+    let input = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", chunk => { input += chunk; });
+    process.stdin.on("end", () => {
+      input = input.replace(/\r?\n$/, "");
+      try {
+        const url = new URL(input);
+        const username = decodeURIComponent(url.username);
+        const password = decodeURIComponent(url.password);
+        const valid = !/[\s$\\\x00-\x1f\x7f]/u.test(input)
+          && (url.protocol === "postgres:" || url.protocol === "postgresql:")
+          && (username === "crm_qlik_relay" || username.startsWith("crm_qlik_relay."))
+          && password.length >= 16
+          && !/[\x00-\x1f\x7f]/u.test(password)
+          && (url.hostname.endsWith(".supabase.co") || url.hostname.endsWith(".supabase.com"))
+          && url.pathname === "/postgres"
+          && !url.hash
+          && url.searchParams.size === 1
+          && [...url.searchParams].every(([key, value]) => key === "sslmode" && value === "verify-full");
+        process.exit(valid ? 0 : 1);
+      } catch {
+        process.exit(1);
+      }
+    });
+  ' <<<"$1" >/dev/null 2>&1
+}
+
+relay_secrets_are_distinct() {
+  local database_url="$1"
+  local hmac_secret="$2"
+
+  node -e '
+    let input = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", chunk => { input += chunk; });
+    process.stdin.on("end", () => {
+      try {
+        const separator = input.indexOf("\n");
+        const databaseUrl = input.slice(0, separator);
+        const hmacSecret = input.slice(separator + 1).replace(/\n$/, "");
+        const databasePassword = decodeURIComponent(new URL(databaseUrl).password);
+        process.exit(databasePassword !== hmacSecret ? 0 : 1);
+      } catch {
+        process.exit(1);
+      }
+    });
+  ' <<<"${database_url}"$'\n'"${hmac_secret}" >/dev/null 2>&1
+}
+
 validate_refresh_url() {
   node -e '
     let input = "";
@@ -227,6 +291,61 @@ ensure_machine_secret() {
   printf '%s foi gerado com entropia criptográfica.\n' "${key}"
 }
 
+configure_qlik_relay() {
+  local requested_mode="off"
+  local activation_phrase=""
+  local previous_relay_key_id="${values[QLIK_RELAY_KEY_ID]:-}"
+  local preserve_existing_hmac="false"
+
+  printf '\nRelay Qlik: off (padrão), shadow, canary ou active: '
+  IFS= read -r requested_mode
+  requested_mode="${requested_mode,,}"
+  [[ -n "${requested_mode}" ]] || requested_mode="off"
+  [[ "${requested_mode}" =~ ^(off|shadow|canary|active)$ ]] ||
+    fail "modo do relay Qlik inválido."
+
+  if [[ "${requested_mode}" != "off" ]]; then
+    printf 'Digite ATIVAR-RELAY-QLIK para confirmar configuração (não executa cutover): '
+    IFS= read -r activation_phrase
+    [[ "${activation_phrase}" == "ATIVAR-RELAY-QLIK" ]] ||
+      fail "configuração do relay Qlik cancelada."
+    prompt_value QLIK_RELAY_KEY_ID 'QLIK_RELAY_KEY_ID' no validate_relay_key_id
+    prompt_value \
+      QLIK_RELAY_DATABASE_URL \
+      'QLIK_RELAY_DATABASE_URL (papel exclusivo crm_qlik_relay, TLS obrigatório)' \
+      yes \
+      validate_relay_database_url
+    if [[ "${values[QLIK_RELAY_KEY_ID]}" == "${previous_relay_key_id}" ]] &&
+      [[ -n "${values[QLIK_RELAY_HMAC_SECRET]:-}" ]] &&
+      validate_relay_secret "${values[QLIK_RELAY_HMAC_SECRET]}" &&
+      confirm 'Preservar o HMAC existente para o mesmo key ID?' no; then
+      preserve_existing_hmac="true"
+    fi
+    if [[ "${preserve_existing_hmac}" == "true" ]]; then
+      printf 'QLIK_RELAY_HMAC_SECRET existente foi preservado.\n'
+    else
+      values[QLIK_RELAY_HMAC_SECRET]="$(openssl rand -hex 32)"
+      printf 'Novo QLIK_RELAY_HMAC_SECRET foi gerado com entropia criptográfica.\n'
+    fi
+    relay_secrets_are_distinct \
+      "${values[QLIK_RELAY_DATABASE_URL]}" \
+      "${values[QLIK_RELAY_HMAC_SECRET]}" ||
+      fail "QLIK_RELAY_HMAC_SECRET deve ser distinto da senha PostgreSQL do relay."
+  else
+    unset 'values[QLIK_RELAY_KEY_ID]'
+    unset 'values[QLIK_RELAY_HMAC_SECRET]'
+    unset 'values[QLIK_RELAY_DATABASE_URL]'
+    printf 'Credenciais do relay Qlik foram removidas porque o modo está off.\n'
+  fi
+
+  values[QLIK_RELAY_MODE]="${requested_mode}"
+  if [[ "${requested_mode}" == "canary" || "${requested_mode}" == "active" ]]; then
+    values[QLIK_RELAY_WRITE_ENABLED]="true"
+  else
+    values[QLIK_RELAY_WRITE_ENABLED]="false"
+  fi
+}
+
 load_existing_values
 
 if [[ -z "${values[IMAGE_TAG]:-}" || ! "${values[IMAGE_TAG]}" =~ ^[0-9a-f]{7,64}$ ]]; then
@@ -243,6 +362,7 @@ prompt_capability SALESFORCE_REFRESH_ENABLED 'Ativar a atualização Salesforce 
 prompt_capability \
   CRM_READ_MODEL_V3_SHADOW_ENABLED \
   'Ativar as rotas autenticadas shadow do read model v3?'
+configure_qlik_relay
 
 printf '\n'
 
@@ -308,6 +428,13 @@ temporary_environment_file="$(mktemp --tmpdir="${environment_directory}" .produc
   printf 'SALESFORCE_REFRESH_ENABLED=%s\n' "${values[SALESFORCE_REFRESH_ENABLED]}"
   printf 'CRM_READ_MODEL_V3_SHADOW_ENABLED=%s\n' \
     "${values[CRM_READ_MODEL_V3_SHADOW_ENABLED]}"
+  printf 'QLIK_RELAY_MODE=%s\n' "${values[QLIK_RELAY_MODE]}"
+  printf 'QLIK_RELAY_WRITE_ENABLED=%s\n' "${values[QLIK_RELAY_WRITE_ENABLED]}"
+  if [[ "${values[QLIK_RELAY_MODE]}" != "off" ]]; then
+    printf 'QLIK_RELAY_KEY_ID=%s\n' "${values[QLIK_RELAY_KEY_ID]}"
+    printf 'QLIK_RELAY_HMAC_SECRET=%s\n' "${values[QLIK_RELAY_HMAC_SECRET]}"
+    printf 'QLIK_RELAY_DATABASE_URL=%s\n' "${values[QLIK_RELAY_DATABASE_URL]}"
+  fi
   printf 'SUPABASE_SECRET_KEY=%s\n' "${values[SUPABASE_SECRET_KEY]:-}"
   printf 'SALESFORCE_INGEST_SECRET=%s\n' "${values[SALESFORCE_INGEST_SECRET]:-}"
   printf 'SALESFORCE_REFRESH_URL=%s\n' "${values[SALESFORCE_REFRESH_URL]:-}"

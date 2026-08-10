@@ -1,5 +1,12 @@
 # Cutover e rollback
 
+> Atualização de 10 de agosto de 2026: o caller técnico Qlik foi identificado e
+> a migration `20260809144143` agora preserva a RPC legada como ponte aditiva.
+> O runbook operacional atual está em
+> [`../qlik-relay-mapping-cutover/CUTOVER_AND_ROLLBACK.md`](../qlik-relay-mapping-cutover/CUTOVER_AND_ROLLBACK.md).
+> Cutover continua bloqueado por owner operacional/backup, leitores residuais,
+> mappings reais, isolamento do papel de relay e autorizações remotas.
+
 ## Estado atual: somente local e shadow
 
 As duas migrations desta etapa foram aplicadas apenas ao Supabase local. As
@@ -15,19 +22,18 @@ remoto, merge ou deploy.
 ## Bloqueio P0 da pilha base
 
 A pilha cronológica contém
-`20260809144143_qlik_rls_contract_hardening.sql` antes das migrations v3. Essa
-migration do PR base remove o caminho legado usado pelo caller Qlik que continua
-ativo. Como o processo e o owner nominais do caller ainda não foram
-identificados e nenhum relay foi implantado, **a pilha PR #28 + esta PR não é
-aplicável remotamente na ordem atual**.
+`20260809144143_qlik_rls_contract_hardening.sql` antes das migrations v3. Neste
+incremento ela foi convertida em ponte aditiva: remove acesso direto e cria o
+contrato estreito, mas preserva a RPC legada quando ela existe remotamente. O
+publisher foi identificado como o workflow n8n `r4DyPyOTDtoROXq0`; o relay
+continua inerte e **a pilha ainda não é aplicável remotamente sem ensaio de
+drift, backup e autorização separados**.
 
-Não existe uma “Fase A” executável apenas rodando as migrations existentes. Antes
-de qualquer migration remota, o PR base deve ser reestruturado e revalidado para
-separar:
+O hardening foi separado em três fases:
 
-1. ponte aditiva sem revogação do caller atual;
-2. relay server-side de menor privilégio;
-3. hardening destrutivo, somente depois do cutover aprovado e observado.
+1. ponte aditiva sem revogação do caller atual, agora versionada;
+2. relay server-side de menor privilégio, implementado e desligado;
+3. hardening destrutivo ainda ausente, somente depois do cutover aprovado.
 
 Este documento não autoriza editar migration já aplicada, restaurar token em
 argumento nem reabrir grants diretos. A correção da ordem precisa de decisão e
@@ -35,16 +41,19 @@ PR próprios antes do merge da pilha.
 
 ## Pré-requisitos de qualquer publicação v3
 
-1. Identificar processo e owner nominal do caller Qlik ativo.
-2. Confirmar por leitura de logs endpoint, principal, origem, frequência e duas
-   janelas reais.
+1. Formalizar owner operacional e backup do caller técnico já identificado.
+2. Atribuir ou excluir os leitores `GET` residuais e confirmar duas janelas
+   reais pelo relay shadow e duas pelo canário.
 3. Obter IDs oficiais das dimensões Salesforce; nomes não atendem o contrato.
 4. Provisionar owners formais de mapping e de cada dataset.
 5. Reconciliar mappings, vigências e evidências; nenhuma associação por nome.
    Aprovar também o manifesto de escopos que cada snapshot certifica, inclusive
    escopos vazios.
-6. Criar relay server-side com credencial própria; nunca entregar
-   `service_role` ao navegador ou ao caller externo.
+6. Manter o relay server-side desligado e o papel dedicado `NOLOGIN` até um
+   inventário remoto somente leitura e a remediação autorizada por
+   `supabase_admin`/owner do banco retirarem do papel os privilégios `PUBLIC` de
+   `pg_net` e `CONNECT`/`TEMP`; o helper de isolamento deve retornar `true`.
+   Nunca entregar `service_role` ao navegador ou ao caller externo.
 7. Reconciliar contagens, valores decimais, watermarks, duplicidade e escopos.
 8. Validar Master, Admin, gestor e corretor com contas QA dedicadas.
 9. Obter autorizações separadas para migration remota, alteração de workflow,
@@ -73,11 +82,11 @@ tabelas nem apaga runs.
 
 ## Sequência futura proposta
 
-### Fase 0 — corrigir a pilha Qlik
+### Fase 0 — ponte Qlik concluída localmente
 
-- separar a ponte aditiva do hardening destrutivo do PR base;
-- provar que o caller legado segue funcionando após a parte aditiva;
-- manter toda a pilha bloqueada para migration remota até essa prova.
+- preservar a RPC legada e manter o hardening destrutivo fora desta branch;
+- provar em restore autorizado que o caller legado segue após a ponte;
+- manter a pilha bloqueada para migration remota até backup/drift/owners.
 
 ### Fase 1 — shadow local/homologação autorizada
 
@@ -115,8 +124,10 @@ A flag shadow, isoladamente, **não é cutover de produção**.
 
 ### Fase 4 — Qlik
 
-- implantar e observar relay seguro;
-- trocar o caller com autorização explícita;
+- confirmar helper de isolamento `true` antes de provisionar `LOGIN`;
+- implantar o relay seguro e observar duas janelas shadow consecutivas;
+- observar duas janelas canary consecutivas;
+- trocar o caller para active somente com autorização explícita e gates 2+2;
 - somente então aplicar revogações finais;
 - nunca restaurar grants diretos como rollback.
 
