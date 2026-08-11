@@ -126,10 +126,9 @@ já estiverem ocupados; nenhum dado local existente é sobrescrito. O serviço
 local, o banco e a aplicação precisam usar endpoints loopback. Chave privilegiada
 nunca é enviada ao navegador ou ao harness de captura.
 
-### Matriz preparada para a próxima baseline
+### Matriz autenticada aprovada no SHA de fechamento
 
-O harness está configurado para a próxima execução autenticada, ainda não
-realizada, com:
+O harness executou a captura autenticada local, limpa e transacional com:
 
 - sete viewports: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `390×844`,
   `375×812` e `320×568`;
@@ -142,20 +141,19 @@ realizada, com:
 - reduced motion e Axe nas 147 combinações responsivas, nas 24 amostras desktop
   de tema e nas 21 combinações mobile dark.
 
-A matriz produzirá 147 capturas responsivas, 45 capturas de tema, 192 auditorias
-de acessibilidade, 192 comparações de baseline e 105 checks de zoom. Esses
-números são expectativas do contrato do harness, não evidência executada. A
-baseline aprovada abaixo continua sendo a última evidência versionada até uma
-execução explícita de `--update-baseline` passar integralmente.
+A matriz aprovou 147 capturas responsivas, 45 capturas de tema, 192 auditorias
+de acessibilidade, 192 comparações e 105 checks de zoom. A promoção ocorreu por
+rename transacional com rollback, a partir de worktree limpa e sem alteração do
+fingerprint durante a captura.
 
 Resultados aprovados:
 
-- 84/84 checks responsivos: 21 rotas em quatro viewports;
-- 63/63 checks de tema: 21 rotas em claro, equilibrado e escuro;
-- 99/99 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
-  dos três temas, sem violações;
-- 21/21 checks em zoom de 200%, representado por viewport CSS de `720×450` e
-  `deviceScaleFactor: 2` sobre canvas físico `1440×900`;
+- 147/147 checks responsivos: 21 rotas em sete viewports;
+- 84/84 checks de tema: 21 rotas em mobile dark e oito amostras desktop nos
+  temas claro, equilibrado e escuro;
+- 192/192 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
+  de tema, sem violações;
+- 105/105 checks de zoom: 21 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
 - disclosure aberto por teclado, fechado com `Escape`, foco devolvido e `Tab`
   alcançando controle interativo;
 - campo obrigatório de simulador sinalizado após blur com `aria-invalid`,
@@ -163,8 +161,8 @@ Resultados aprovados:
 - `prefers-reduced-motion: reduce` ativo em todos os contextos;
 - zero overflow raiz, erro de console, erro de página, rota desviada ou motor de
   simulador habilitado;
-- 84 capturas rota×viewport e 15 amostras dos três temas, sem metadados;
-- 99/99 comparações contra o baseline versionado dentro do limiar máximo de 1%
+- 147 capturas rota×viewport e 45 amostras de tema, sem metadados;
+- 192/192 comparações contra o baseline versionado dentro do limiar máximo de 1%
   de pixels alterados, com tolerância de 16 níveis por canal.
 
 As capturas autenticadas usam somente identidades e valores sintéticos com

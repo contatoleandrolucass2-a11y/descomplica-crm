@@ -985,3 +985,6 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   execução comercial. As cores foram corrigidas e o gate passou a exigir o
   botão de cálculo explicitamente desabilitado, mantendo controles locais
   estruturais disponíveis.
+- A recaptura limpa aprovou 147 combinações responsivas, 84 checks de tema, 192
+  auditorias Axe/comparações e 105 checks de zoom. A baseline foi promovida por
+  rename transacional, sem persistir conta, senha ou storage state.
