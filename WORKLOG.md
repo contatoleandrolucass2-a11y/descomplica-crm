@@ -1002,3 +1002,6 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   “Performance das parcerias”. A matriz foi alinhada aos H1 restaurados
   “Relatório completo da equipe” e “Ranking das Imob’s”; permissões, navegação e
   conteúdo permitido continuam sendo verificados sem relaxamento.
+- A travessia Master avançou e encontrou o nome acessível legado do filtro do
+  Canal. O seletor foi alinhado ao grupo ampliado “Visões e filtros do Canal de
+  Parcerias”, preservando a exigência de visibilidade do controle seguro.

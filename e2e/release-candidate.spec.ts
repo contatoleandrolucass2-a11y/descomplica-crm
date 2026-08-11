@@ -362,7 +362,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
 
     await expect(page.getByText("Dado indisponível — integração pendente").first()).toBeVisible();
     await expect(
-      page.locator('[aria-label="Filtros do Canal de Parcerias indisponíveis"]'),
+      page.getByLabel("Visões e filtros do Canal de Parcerias", { exact: true }),
     ).toBeVisible();
   });
 });
