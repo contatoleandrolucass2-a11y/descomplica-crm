@@ -19,7 +19,7 @@ Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
 cada imagem está em [`manifest.json`](./manifest.json).
 O QA local autenticado está em
-[`authenticated-results.json`](./authenticated-results.json); suas 99 capturas
+[`authenticated-results.json`](./authenticated-results.json); suas 192 capturas
 ficam em [`target-authenticated`](./target-authenticated/).
 
 ## Política de captura
@@ -216,5 +216,5 @@ O modo padrão nunca altera a baseline versionada. Capturas e diagnóstico da
 execução ficam em `test-results/authenticated-visual/`, ignorado pelo Git. O
 modo `--update-baseline` também exige que a baseline inicial corresponda ao
 `HEAD` e só a promove, por troca atômica com rollback, depois de todos os checks
-funcionais e de acessibilidade passarem. Hashes dos 99 arquivos usados ficam
+funcionais e de acessibilidade passarem. Hashes dos 192 arquivos usados ficam
 registrados na evidência; uma falha nunca atualiza a baseline.

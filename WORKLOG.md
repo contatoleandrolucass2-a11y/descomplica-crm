@@ -994,3 +994,7 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Duas execuções independentes do ensaio passaram. A evidência versionada prova
   57 tabelas, 62 relações, 88 funções, owners/ACL preservados, fingerprint
   canônico idêntico e todos os gates/credenciais/policies/mappings vazios.
+- A suíte integral revelou duas asserções que ainda descreviam a baseline antiga:
+  estado “preparado” e obrigatoriedade de igualdade com a imagem anterior. O
+  teste agora exige a baseline promovida íntegra e mantém o diagnóstico anterior
+  auditável, permitindo somente os motivos fechados produzidos pelo harness.

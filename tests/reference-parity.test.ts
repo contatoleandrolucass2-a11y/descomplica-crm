@@ -218,10 +218,15 @@ const authenticatedResults = JSON.parse(
     visualComparison: {
       passed: boolean;
       reason: string;
+      changedPixelRatio: number | null;
+      baselineUsed: { path: string; tracked: boolean; bytes: number | null; sha256: string | null };
+    };
+    previousBaselineComparison: {
+      passed: boolean;
+      reason: string;
       changedPixelRatio: number;
       baselineUsed: { path: string; tracked: boolean; bytes: number; sha256: string };
     };
-    previousBaselineComparison: { passed: boolean; changedPixelRatio: number };
   }>;
 };
 
@@ -253,9 +258,9 @@ describe("versioned reference parity catalog", () => {
     );
     expect(visualHarness).toContain('if (remoteHomologation && mode !== "verify")');
     expect(visualHarness).toContain('method: "same-filesystem transactional rename with rollback"');
-    expect(referenceQaReadme).toContain("Matriz preparada para a próxima baseline");
+    expect(referenceQaReadme).toContain("Matriz autenticada aprovada no SHA de fechamento");
     expect(referenceQaReadme).toContain(
-      "números são expectativas do contrato do harness, não evidência executada.",
+      "A matriz aprovou 147 capturas responsivas, 45 capturas de tema, 192 auditorias",
     );
   });
 
@@ -478,8 +483,20 @@ describe("versioned reference parity catalog", () => {
         bytes: screenshot.bytes,
         sha256: screenshot.sha256,
       });
-      expect(screenshot.previousBaselineComparison.passed).toBe(true);
-      expect(screenshot.previousBaselineComparison.changedPixelRatio).toBeLessThanOrEqual(0.01);
+      expect(screenshot.previousBaselineComparison.reason).toMatch(
+        /^(within_threshold|pixel_drift|dimensions_changed|baseline_not_tracked)$/,
+      );
+      if (screenshot.previousBaselineComparison.reason === "baseline_not_tracked") {
+        expect(screenshot.previousBaselineComparison.changedPixelRatio).toBeNull();
+        expect(screenshot.previousBaselineComparison.baselineUsed.tracked).toBe(false);
+      } else {
+        expect(screenshot.previousBaselineComparison.changedPixelRatio).toBeGreaterThanOrEqual(0);
+        expect(screenshot.previousBaselineComparison.changedPixelRatio).toBeLessThanOrEqual(1);
+        expect(screenshot.previousBaselineComparison.baselineUsed.tracked).toBe(true);
+      }
+      expect(screenshot.previousBaselineComparison.baselineUsed.path).toBe(
+        `docs/qa/reference-parity/${screenshot.path}`,
+      );
       const contents = readFileSync(
         new URL(`../docs/qa/reference-parity/${screenshot.path}`, import.meta.url),
       );
