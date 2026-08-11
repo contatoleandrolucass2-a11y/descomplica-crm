@@ -69,10 +69,13 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
           <div className={styles.actions}>
             <div
               className={styles.identity}
+              data-session-identity
               aria-label={`Usuário autenticado: ${user?.email ?? "identidade protegida"}. Sessão ativa.`}
               title={user?.email ?? undefined}
             >
-              <span className={styles.identityLabel}>{user?.email ?? "Usuário autenticado"}</span>
+              <span className={styles.identityLabel} data-session-identity-label>
+                {user?.email ?? "Usuário autenticado"}
+              </span>
               <span className={styles.identityStatus}>
                 <span aria-hidden="true" />
                 Sessão ativa

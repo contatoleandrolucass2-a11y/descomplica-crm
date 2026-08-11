@@ -31,6 +31,7 @@ import { SalesforceRefreshButton } from "./_components/SalesforceRefreshButton";
 import {
   AnalyticsCard,
   AnalyticsTable,
+  CommercialSourceLabel,
   DataState,
   FilterBar,
   FilterGroup,
@@ -523,7 +524,7 @@ export default async function AppHomePage({
               id="empty-monthly-comparisons-title"
               kicker="Comparativo mensal"
               title="Realizado e meta lado a lado"
-              description="Histórico × planejamento × realizado. Médias fechadas e meta esperada aguardam intervalos confirmados pelo backend."
+              description="Histórico × planejamento × realizado. Médias fechadas e meta esperada aguardam intervalos confirmados pelo sistema."
             />
             <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {[
@@ -679,7 +680,9 @@ export default async function AppHomePage({
                 </div>
                 <div>
                   <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
-                  <dd className="mt-1 break-words text-slate-100">{dashboard.source}</dd>
+                  <dd className="mt-1 break-words text-slate-100">
+                    <CommercialSourceLabel value={dashboard.source} />
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-xs tracking-wide text-slate-300 uppercase">Periodicidade</dt>
@@ -808,7 +811,7 @@ export default async function AppHomePage({
             <SectionHeading
               kicker="Relação entre volumes"
               title="Funil do período"
-              description="Razões sequenciais comparam volumes agregados do mesmo snapshot; não representam coortes individuais."
+              description="Razões sequenciais comparam volumes agregados da mesma base; não representam grupos individuais acompanhados no tempo."
             />
             <FunnelChart
               label={`${DASHBOARD_VIEWS[selectedView].label}, ${DASHBOARD_PERIODS[selectedPeriod].label.toLocaleLowerCase("pt-BR")}`}
@@ -947,7 +950,7 @@ export default async function AppHomePage({
                     compact
                     headingLevel="h3"
                     title={DATA_UNAVAILABLE_LABEL}
-                    description="O snapshot ainda não fornece o intervalo confirmado pelo backend."
+                    description="A base ainda não fornece o intervalo confirmado pelo sistema."
                   />
                 </div>
               </AnalyticsCard>

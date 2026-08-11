@@ -96,7 +96,7 @@ describe("experiência de acesso", () => {
     const markup = renderToStaticMarkup(await PartnershipsChannelPage());
 
     expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
-    expect(markup).toContain("Ranking das Imob’s");
+    expect(markup).toContain("Ranking das imobiliárias");
     expect(markup).toContain("Aguardando conciliação das fontes");
     expect(markup).toContain("Dado indisponível — integração pendente");
     expect(markup).not.toContain("crm_imob_ranking");

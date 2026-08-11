@@ -116,10 +116,11 @@ inicia e encerra `pnpm start`, cria uma identidade `qa.*@local.invalid` com senh
 efêmera e não persiste credenciais ou storage state. A conta recebe o único
 papel `master` local somente durante a execução, pois os read models v2 globais
 permanecem Master-only até o cutover v3. Dashboard, metas, pontos e ranking recebem
-fixtures com fonte `QA local synthetic — not production · run <id efêmero>`;
-contagens e marcador são validados novamente pela sessão QA através da RLS antes
-de qualquer captura. Fixtures e conta são apagadas no `finally`, inclusive em
-falha ou sinal.
+fixtures marcadas internamente por execução; a visão comercial exibe somente
+`Dados sintéticos de homologação` e mantém o identificador sob `Detalhes
+técnicos`. Contagens e marcador são validados novamente pela sessão QA através
+da RLS antes de qualquer captura. Fixtures e conta são apagadas no `finally`,
+inclusive em falha ou sinal.
 
 O setup falha fechado se os slots locais `global`, `default` ou as metas do mês
 já estiverem ocupados; nenhum dado local existente é sobrescrito. O serviço
@@ -161,6 +162,9 @@ Resultados aprovados:
 - `prefers-reduced-motion: reduce` ativo em todos os contextos;
 - zero overflow raiz, erro de console, erro de página, rota desviada ou motor de
   simulador habilitado;
+- zero colisão entre navegação e identidade de sessão, com truncamento pronto
+  para nomes longos;
+- CTAs habilitado, bloqueado e indisponível com estilos computados distintos;
 - 147 capturas rota×viewport e 45 amostras de tema, sem metadados;
 - 192/192 comparações contra o baseline versionado dentro do limiar máximo de 1%
   de pixels alterados, com tolerância de 16 níveis por canal.
@@ -218,3 +222,10 @@ modo `--update-baseline` também exige que a baseline inicial corresponda ao
 `HEAD` e só a promove, por troca atômica com rollback, depois de todos os checks
 funcionais e de acessibilidade passarem. Hashes dos 192 arquivos usados ficam
 registrados na evidência; uma falha nunca atualiza a baseline.
+
+## Estados do gate final
+
+As superfícies atuais de login, logout, 403, 404, 500, loading, empty, stale e
+error ficam em [`../final-states`](../final-states/). O E2E usa contas QA
+sintéticas e diferencia capturas do fluxo real das composições dos componentes
+de estado. Identificadores técnicos permanecem fechados em disclosure.

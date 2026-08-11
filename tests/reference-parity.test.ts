@@ -142,6 +142,10 @@ const authenticatedResults = JSON.parse(
     passed: boolean;
     reducedMotion: boolean;
     horizontalOverflow: boolean;
+    topbarCollision: boolean;
+    identityTruncationReady: boolean;
+    blockedActionDistinct: boolean;
+    unavailableActionDistinct: boolean;
     consoleErrorCount: number;
     pageErrorCount: number;
   }>;
@@ -366,13 +370,7 @@ describe("versioned reference parity catalog", () => {
       sourceMarkerVisible: { dashboard: true, stageOpportunities: true },
     });
     const viewportKeys = authenticatedResults.viewports.map(({ key }) => key);
-    const previousViewportKeys = expectedExpandedViewports
-      .filter(({ width }) => ![320, 375, 1024].includes(width))
-      .map(({ key }) => key);
-    const expandedEvidence = viewportKeys.length === expectedExpandedViewports.length;
-    expect(viewportKeys).toEqual(
-      expandedEvidence ? expectedExpandedViewports.map(({ key }) => key) : previousViewportKeys,
-    );
+    expect(viewportKeys).toEqual(expectedExpandedViewports.map(({ key }) => key));
 
     const responsiveScreenshotCount = expectedProtectedRoutes.length * viewportKeys.length;
     expect(authenticatedResults.routeChecks).toHaveLength(responsiveScreenshotCount);
@@ -386,12 +384,16 @@ describe("versioned reference parity catalog", () => {
           check.pathname === check.route &&
           check.reducedMotion &&
           !check.horizontalOverflow &&
+          !check.topbarCollision &&
+          check.identityTruncationReady &&
+          check.blockedActionDistinct &&
+          check.unavailableActionDistinct &&
           check.consoleErrorCount === 0 &&
           check.pageErrorCount === 0,
       ),
     ).toBe(true);
 
-    const themeCheckCount = expectedProtectedRoutes.length * (expandedEvidence ? 4 : 3);
+    const themeCheckCount = expectedProtectedRoutes.length * 4;
     expect(authenticatedResults.themeChecks).toHaveLength(themeCheckCount);
     expect([...new Set(authenticatedResults.themeChecks.map(({ theme }) => theme))]).toEqual([
       "light",
@@ -403,7 +405,7 @@ describe("versioned reference parity catalog", () => {
         (check) => check.passed && check.reducedMotion && !check.horizontalOverflow,
       ),
     ).toBe(true);
-    const themeScreenshotCount = expandedEvidence ? 45 : 15;
+    const themeScreenshotCount = 45;
     const visualEvidenceCount = responsiveScreenshotCount + themeScreenshotCount;
     expect(authenticatedResults.accessibilityChecks).toHaveLength(visualEvidenceCount);
     expect(
@@ -413,14 +415,12 @@ describe("versioned reference parity catalog", () => {
     ).toBe(true);
 
     expect(authenticatedResults.zoom.passed).toBe(true);
-    const capturedZoomLevels = authenticatedResults.zoom.levels?.map(({ percent }) => percent) ?? [
-      200,
-    ];
-    expect(capturedZoomLevels).toEqual(expandedEvidence ? expectedZoomLevels : [200]);
+    const capturedZoomLevels = authenticatedResults.zoom.levels?.map(({ percent }) => percent);
+    expect(capturedZoomLevels).toEqual(expectedZoomLevels);
     expect(authenticatedResults.zoom.routes).toHaveLength(
-      expectedProtectedRoutes.length * capturedZoomLevels.length,
+      expectedProtectedRoutes.length * expectedZoomLevels.length,
     );
-    for (const zoomPercent of capturedZoomLevels) {
+    for (const zoomPercent of expectedZoomLevels) {
       expect(
         authenticatedResults.zoom.routes
           .filter((check) => (check.zoomPercent ?? 200) === zoomPercent)

@@ -162,7 +162,7 @@ export default async function PartnershipsChannelPage() {
       <div className="mx-auto grid max-w-7xl min-w-0 grid-cols-1 gap-7">
         <PageHeader
           eyebrow="Canal de Parcerias"
-          title="Ranking das Imob’s"
+          title="Ranking das imobiliárias"
           description="Evolução comercial das parceiras e empreendimentos. Ranking, totais e mensagens aguardam a mesma base conciliada."
           meta={
             <dl className="grid gap-3">
@@ -258,7 +258,7 @@ export default async function PartnershipsChannelPage() {
         <section aria-labelledby="partnership-podium-title">
           <SectionHeading
             id="partnership-podium-title"
-            kicker="Ranking de IMOBs"
+            kicker="Ranking de imobiliárias"
             title="Pódio das parcerias"
             description="A composição visual está pronta para receber o ranking oficial, sem antecipar nomes, posições ou resultados."
           />
@@ -307,8 +307,8 @@ export default async function PartnershipsChannelPage() {
               <SectionHeading
                 id="imob-ranking-title"
                 kicker="Elite Partners — Top 10"
-                title="Ranking das IMOBs"
-                description="Período, unidade e ordem serão devolvidos pelo backend."
+                title="Ranking das imobiliárias"
+                description="Período, unidade e ordem serão apresentados pelo sistema."
               />
               <label className="mb-4 grid gap-1 text-sm font-semibold text-slate-700">
                 Pesquisar por imobiliária
@@ -320,7 +320,7 @@ export default async function PartnershipsChannelPage() {
                 />
               </label>
               <AnalyticsTable
-                caption="Ranking de IMOBs parceiras"
+                caption="Ranking de imobiliárias parceiras"
                 rows={imobRows}
                 columns={imobColumns}
                 rowKey={(row) => row.id}
@@ -343,7 +343,7 @@ export default async function PartnershipsChannelPage() {
                 id="development-ranking-title"
                 kicker="Performance por produto — Top 10"
                 title="Ranking dos Empreendimentos"
-                description="Mesmo período, unidade, população e snapshot do ranking das IMOBs."
+                description="Mesmo período, unidade, população e base do ranking das imobiliárias."
               />
               <AnalyticsTable
                 caption="Ranking de empreendimentos do canal"
@@ -368,9 +368,9 @@ export default async function PartnershipsChannelPage() {
           <AnalyticsCard tone="navy">
             <SectionHeading
               id="reconciliation-gate-title"
-              kicker="Gate de conciliação"
+              kicker="Validação da conciliação"
               title="Aguardando conciliação das fontes"
-              description="Sync run, período, unidade, população, totais e carga completa ainda não possuem evidência comum."
+              description="Período, unidade, população, totais e carga completa ainda não possuem evidência comum."
             />
             <dl className="mt-4 grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
               <div>

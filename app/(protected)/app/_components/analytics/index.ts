@@ -2,6 +2,7 @@ export { FunnelChart, Gauge, type FunnelStage, type ChartAccent } from "./Charts
 export {
   AnalyticsCard,
   AnalyticsTable,
+  CommercialSourceLabel,
   FilterBar,
   FilterGroup,
   FilterLink,

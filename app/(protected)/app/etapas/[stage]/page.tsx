@@ -24,6 +24,7 @@ import { buildStageComparisons, type StageComparison } from "@/lib/crm/stages/pr
 import {
   AnalyticsCard,
   AnalyticsTable,
+  CommercialSourceLabel,
   DataState,
   FilterBar,
   FilterGroup,
@@ -476,7 +477,9 @@ export default async function StagePage({
               </div>
               <div>
                 <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
-                <dd className="mt-1 break-words text-slate-100">{dashboard.source}</dd>
+                <dd className="mt-1 break-words text-slate-100">
+                  <CommercialSourceLabel value={dashboard.source} />
+                </dd>
               </div>
             </dl>
           }
@@ -605,7 +608,7 @@ export default async function StagePage({
           <SectionHeading
             kicker="Contexto do período"
             title="Funil completo"
-            description="As relações comparam volumes agregados; não são conversões de coorte."
+            description="As relações comparam volumes agregados; não acompanham o mesmo grupo ao longo do tempo."
           />
           <AnalyticsCard>
             <FunnelChart

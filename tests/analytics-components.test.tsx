@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   AnalyticsSkeleton,
   AnalyticsTable,
+  CommercialSourceLabel,
   DataState,
   FilterBar,
   FilterGroup,
@@ -157,6 +158,18 @@ describe("analytical design system", () => {
     expect(stale).toContain('role="status"');
     expect(error).toContain('role="alert"');
     expect(loading).toContain('aria-busy="true"');
+  });
+
+  it("localizes synthetic sources and keeps execution identifiers in technical details", () => {
+    const markup = renderToStaticMarkup(
+      <CommercialSourceLabel value="QA local synthetic — not production · run 1780000000000-a1b2c3d4e5f6" />,
+    );
+
+    expect(markup).toContain("Dados sintéticos de homologação");
+    expect(markup).toContain("Detalhes técnicos");
+    expect(markup).toContain("Execução: 1780000000000-a1b2c3d4e5f6");
+    expect(markup).not.toContain("QA local synthetic");
+    expect(markup).not.toContain("not production");
   });
 
   it("disables skeleton motion when reduced motion is requested", () => {

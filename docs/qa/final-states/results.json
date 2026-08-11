@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "captureCommit": "420af55093da7622cea194aab5b27f13d42c1eab",
+  "capturedAt": "2026-08-11T19:42:31.155Z",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "states": ["login", "logout", "403", "404", "500", "loading", "empty", "stale", "error"],
+  "method": {
+    "runtime": ["login", "logout", "403", "404"],
+    "componentSurface": ["500", "loading", "empty", "stale", "error"]
+  },
+  "syntheticQaOnly": true,
+  "credentialsPersisted": false
+}

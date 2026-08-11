@@ -509,6 +509,24 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
     const text = document.body.innerText;
     const root = document.documentElement;
     const simulatorForm = simulatorWorkspace ? document.querySelector("main form") : null;
+    const navigation = document.querySelector('header nav[aria-label="Navegação autorizada"]');
+    const identity = document.querySelector("[data-session-identity]");
+    const identityLabel = document.querySelector("[data-session-identity-label]");
+    const navigationBox = navigation?.getBoundingClientRect();
+    const identityBox = identity?.getBoundingClientRect();
+    const overlaps =
+      navigationBox && identityBox
+        ? navigationBox.left < identityBox.right &&
+          navigationBox.right > identityBox.left &&
+          navigationBox.top < identityBox.bottom &&
+          navigationBox.bottom > identityBox.top
+        : false;
+    const blockedAction = simulatorForm?.querySelector('[data-cta-state="blocked"]');
+    const enabledAction = simulatorForm?.querySelector('[data-cta-state="enabled"]');
+    const unavailableAction = simulatorForm?.querySelector('[data-cta-state="unavailable"]');
+    const blockedStyle = blockedAction ? getComputedStyle(blockedAction) : null;
+    const enabledStyle = enabledAction ? getComputedStyle(enabledAction) : null;
+    const unavailableStyle = unavailableAction ? getComputedStyle(unavailableAction) : null;
     return {
       pathname: window.location.pathname,
       h1Count: document.querySelectorAll("h1").length,
@@ -519,6 +537,12 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
       protectedShellPresent: Boolean(document.querySelector("header nav")),
       loginPresent: Boolean(document.querySelector('input[name="password"]')),
       reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+      topbarCollision: overlaps,
+      identityTruncationReady:
+        !identityLabel ||
+        getComputedStyle(identityLabel).display === "none" ||
+        (getComputedStyle(identityLabel).overflow === "hidden" &&
+          getComputedStyle(identityLabel).textOverflow === "ellipsis"),
       simulatorActionEnabled: simulatorForm
         ? !simulatorForm.querySelector(
             'button[disabled][aria-describedby="calculation-blocked-reason"]',
@@ -528,6 +552,17 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
       blockedCalculationMessagePresent:
         !simulatorWorkspace ||
         text.includes("Cálculo temporariamente indisponível — regra aguardando validação"),
+      blockedActionDistinct:
+        !simulatorWorkspace ||
+        (Boolean(blockedAction?.querySelector("svg")) &&
+          Boolean(document.querySelector("#calculation-blocked-reason")) &&
+          blockedStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
+          blockedStyle?.cursor === "not-allowed"),
+      unavailableActionDistinct:
+        !unavailableAction ||
+        (unavailableStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
+          unavailableStyle?.borderStyle === "dashed" &&
+          unavailableStyle?.cursor === "not-allowed"),
     };
   }, isSimulatorWorkspace);
 
@@ -542,9 +577,13 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
     snapshot.protectedShellPresent &&
     !snapshot.loginPresent &&
     snapshot.reducedMotion &&
+    !snapshot.topbarCollision &&
+    snapshot.identityTruncationReady &&
     !snapshot.simulatorActionEnabled &&
     !snapshot.simulatorFormActionPresent &&
     snapshot.blockedCalculationMessagePresent &&
+    snapshot.blockedActionDistinct &&
+    snapshot.unavailableActionDistinct &&
     consoleErrors.length === consoleStart &&
     pageErrors.length === pageErrorStart;
 
@@ -626,8 +665,13 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
       .first();
     const sourceValue = sourceLabel.locator("xpath=following-sibling::dd[1]");
     await sourceValue.waitFor({ state: "visible", timeout: 20_000 });
-    const visibleSource = ((await sourceValue.textContent()) ?? "").replace(/\s+/g, " ").trim();
-    checks[key] = (await sourceValue.isVisible()) && visibleSource === expectedMarker;
+    const visibleLabel = sourceValue.locator("[data-commercial-source-label]");
+    const technicalDetails = sourceValue.locator("details code");
+    const markerRunId = expectedMarker.replace(/^QA local synthetic — not production · run /, "");
+    checks[key] =
+      (await sourceValue.isVisible()) &&
+      (await visibleLabel.textContent())?.trim() === "Dados sintéticos de homologação" &&
+      (await technicalDetails.textContent())?.trim() === `Execução: ${markerRunId}`;
   }
   return checks;
 }

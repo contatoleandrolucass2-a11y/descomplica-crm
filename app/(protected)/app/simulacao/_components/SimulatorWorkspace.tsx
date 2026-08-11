@@ -28,6 +28,15 @@ function CalculatorIcon() {
   );
 }
 
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="5" y="10" width="14" height="10" rx="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2" />
+    </svg>
+  );
+}
+
 function inputId(sectionKey: string, fieldKey: string, itemNumber?: number) {
   const itemSegment = itemNumber === undefined ? "" : `-${itemNumber}`;
   return `simulator-${sectionKey}${itemSegment}-${fieldKey}`;
@@ -227,16 +236,36 @@ function SectionPreview({ section }: { section: SimulatorSection }) {
             <div className={styles.actionBar}>
               <p>
                 <strong>Paginação preparada.</strong>
-                <span>Nenhuma unidade foi carregada.</span>
+                <span id={`inventory-unavailable-reason-${section.key}`}>
+                  Nenhuma unidade foi carregada porque a fonte oficial está indisponível.
+                </span>
               </p>
               <div className={styles.simulatorNav}>
-                <button type="button" disabled>
+                <button
+                  type="button"
+                  disabled
+                  className={styles.unavailableAction}
+                  data-cta-state="unavailable"
+                  aria-describedby={`inventory-unavailable-reason-${section.key}`}
+                >
                   Atualizar estoque
                 </button>
-                <button type="button" disabled>
+                <button
+                  type="button"
+                  disabled
+                  className={styles.unavailableAction}
+                  data-cta-state="unavailable"
+                  aria-describedby={`inventory-unavailable-reason-${section.key}`}
+                >
                   Anterior
                 </button>
-                <button type="button" disabled>
+                <button
+                  type="button"
+                  disabled
+                  className={styles.unavailableAction}
+                  data-cta-state="unavailable"
+                  aria-describedby={`inventory-unavailable-reason-${section.key}`}
+                >
                   Próxima
                 </button>
               </div>
@@ -403,6 +432,8 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
                       </p>
                       <button
                         type="button"
+                        className={styles.enabledAction}
+                        data-cta-state="enabled"
                         onClick={() => removeLastRepeatedItem(section, repeatCount)}
                       >
                         Remover {section.repeatable?.itemLabel.toLocaleLowerCase("pt-BR")}
@@ -417,7 +448,12 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
                 <strong>Estrutura repetível.</strong>
                 <span>Sem limite presumido; a política oficial permanece pendente.</span>
               </p>
-              <button type="button" onClick={() => setRepeatCount(section.key, repeatCount + 1)}>
+              <button
+                type="button"
+                className={styles.enabledAction}
+                data-cta-state="enabled"
+                onClick={() => setRepeatCount(section.key, repeatCount + 1)}
+              >
                 {section.repeatable.addLabel}
               </button>
             </div>
@@ -536,19 +572,38 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
                 <span>Nenhum cálculo ou envio ao servidor será executado.</span>
               </p>
               <div className={styles.simulatorNav}>
-                <button type="button" onClick={clearFields}>
+                <button
+                  type="button"
+                  className={styles.enabledAction}
+                  data-cta-state="enabled"
+                  onClick={clearFields}
+                >
                   Limpar
                 </button>
-                <button type="button" onClick={() => window.print()}>
+                <button
+                  type="button"
+                  className={styles.enabledAction}
+                  data-cta-state="enabled"
+                  onClick={() => window.print()}
+                >
                   Imprimir estrutura
                 </button>
-                <button type="button" disabled aria-describedby="calculation-blocked-reason">
-                  {definition.actionLabel}
-                </button>
+                <span className={styles.blockedControl}>
+                  <button
+                    type="button"
+                    disabled
+                    className={styles.blockedAction}
+                    data-cta-state="blocked"
+                    aria-describedby="calculation-blocked-reason"
+                  >
+                    <LockIcon />
+                    {definition.actionLabel}
+                  </button>
+                  <span id="calculation-blocked-reason" className={styles.blockedReason}>
+                    Motor bloqueado. {UNAVAILABLE_MESSAGE}.
+                  </span>
+                </span>
               </div>
-              <span id="calculation-blocked-reason" className={styles.visuallyHidden}>
-                {UNAVAILABLE_MESSAGE}
-              </span>
             </div>
           </form>
 

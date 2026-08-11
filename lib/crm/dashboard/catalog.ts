@@ -4,12 +4,12 @@ export const DASHBOARD_VIEWS = {
     description: "Visão consolidada com todas as informações disponíveis.",
   },
   with_canal_imob: {
-    label: "Com Canal Imob",
+    label: "Com canal de imobiliárias",
     description: "Negócios associados ao canal de imobiliárias.",
   },
   without_canal_imob: {
-    label: "Sem Canal Imob",
-    description: "Resultado próprio, sem negócios do Canal Imob.",
+    label: "Sem canal de imobiliárias",
+    description: "Resultado próprio, sem negócios do canal de imobiliárias.",
   },
 } as const;
 

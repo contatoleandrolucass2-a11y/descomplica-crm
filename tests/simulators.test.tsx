@@ -36,7 +36,13 @@ describe("simulator visual catalog", () => {
     expect(markup).toContain("Cálculo temporariamente indisponível — regra aguardando validação");
     expect(markup).toContain("Nenhuma fórmula da referência foi copiada");
     expect(markup).toContain('aria-label="Ferramentas de simulação"');
-    expect(markup).toContain("disabled");
+    expect(markup).toContain('data-cta-state="enabled"');
+    expect(markup).toContain('data-cta-state="blocked"');
+    expect(markup).toContain('id="calculation-blocked-reason"');
+    expect(markup).toContain("Motor bloqueado");
+    expect(markup).toMatch(
+      /data-cta-state="blocked"[^>]*disabled|disabled[^>]*data-cta-state="blocked"/,
+    );
     expect(markup).not.toContain("<output");
     expect(markup).not.toContain("action=");
   });
@@ -53,6 +59,7 @@ describe("simulator visual catalog", () => {
     });
     expect(markup).toContain("Simulação · WF15");
     expect(markup).toContain("Tabela Investidor");
+    expect(markup).toContain('data-cta-state="unavailable"');
     expect(markup).not.toContain("Calcular documentação");
   });
 

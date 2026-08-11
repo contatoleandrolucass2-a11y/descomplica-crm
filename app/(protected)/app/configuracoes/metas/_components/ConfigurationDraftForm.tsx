@@ -8,14 +8,14 @@ import {
 } from "@/lib/crm/commercial-engine/drafts";
 
 const BLOCKER_LABELS: Record<string, string> = {
-  official_policy: "política oficial",
-  owner: "owner",
-  backup_owner: "owner substituto",
+  official_policy: "política ativa",
+  owner: "responsável",
+  backup_owner: "responsável substituto",
   golden_cases: "casos de ouro",
   approval: "aprovação",
-  cohort_and_grant: "coorte e grant",
+  cohort_and_grant: "público e permissões",
   effective_date: "vigência",
-  rollback: "rollback",
+  rollback: "plano de reversão",
 };
 
 export function ConfigurationDraftForm({
@@ -36,14 +36,14 @@ export function ConfigurationDraftForm({
     <form action={formAction} className="mt-5 grid gap-5">
       {children}
       <section
-        aria-label="Gate do rascunho"
+        aria-label="Validação do rascunho"
         className="grid gap-4 rounded-2xl border border-cyan-300/30 bg-[var(--analytics-navy)] p-4 text-white shadow-xl sm:p-5"
       >
         <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(16rem,0.6fr)] sm:items-end">
           <div>
             <p className="text-sm leading-6 text-slate-200">
               Esta operação valida ou salva somente um rascunho inativo. Ela não altera metas,
-              ranking, policy, gate, grant ou dados realizados.
+              ranking, política ativa, ativação, permissões ou dados realizados.
             </p>
             {state.status !== "idle" ? (
               <div
@@ -57,9 +57,12 @@ export function ConfigurationDraftForm({
               >
                 <strong>{state.message}</strong>
                 {state.planFingerprint ? (
-                  <span className="mt-1 block font-mono text-xs">
-                    Plano: {state.planFingerprint}
-                  </span>
+                  <details className="mt-1 text-xs">
+                    <summary className="cursor-pointer underline underline-offset-2">
+                      Detalhes técnicos
+                    </summary>
+                    <code className="mt-1 block break-all">Plano: {state.planFingerprint}</code>
+                  </details>
                 ) : null}
                 {state.blockers?.length ? (
                   <span className="mt-1 block text-xs">
@@ -90,7 +93,7 @@ export function ConfigurationDraftForm({
             disabled={pending}
             className="min-h-12 rounded-xl border border-cyan-200/40 px-5 py-3 text-sm font-semibold text-cyan-100 hover:bg-white/10 disabled:opacity-60"
           >
-            {pending ? "Validando…" : "Validar e gerar dry-run"}
+            {pending ? "Validando…" : "Validar sem aplicar"}
           </button>
           <button
             type="submit"

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Corrige o gate visual final: topbar sem colisão com identidade longa em
+  `1440×900`, CTAs habilitado/bloqueado/indisponível visualmente distintos,
+  contraste navy consistente, linguagem comercial localizada e nomenclatura
+  única para imobiliárias e Metas de pontos.
+- Mantém motores e políticas fail-closed enquanto apresenta o bloqueio junto ao
+  CTA, com cadeado e motivo visível; nenhuma fórmula ou pontuação oficial foi
+  adicionada.
+- Adiciona regressão browser para identidade longa e três estados de CTA, além
+  de evidências reproduzíveis de login, logout, 403, 404, 500, loading, empty,
+  stale e error sem persistir credenciais.
 - Fecha lacunas determinísticas da especificação com rastreabilidade das 21
   rotas, breadcrumbs autorizados, aprovação Master-only por escopos oficiais,
   drafts privados de metas/pontos, ranking fail-closed, estados v3 estritos e

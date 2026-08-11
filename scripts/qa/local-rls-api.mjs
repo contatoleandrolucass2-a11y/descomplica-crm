@@ -434,6 +434,9 @@ function runBrowserE2e(origin, accounts) {
           ]),
           QA_E2E_LOCAL_ONLY: "true",
           QA_E2E_ORIGIN: origin,
+          ...(process.env.QA_CAPTURE_STATE_EVIDENCE === "true"
+            ? { QA_CAPTURE_STATE_EVIDENCE: "true" }
+            : {}),
           QA_E2E_ACCOUNTS: JSON.stringify(
             accounts.map(({ email, password, role }) => ({ email, password, role })),
           ),

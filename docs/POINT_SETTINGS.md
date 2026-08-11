@@ -4,7 +4,10 @@
 
 A rota `/app/configuracoes/metas/pontos` preserva as sete métricas do CRM original: roleta em dias úteis, sábado e domingo, agendamento, visita, pasta aprovada e venda. Cada métrica possui peso e objetivo inteiro entre 0 e 100.000.
 
-Quando ainda não existe configuração, a interface apresenta os pesos sugeridos do contrato original, mas informa que eles somente passam a valer após o primeiro salvamento. A migration não cria dados comerciais nem configuração implícita.
+Quando ainda não existe configuração, a interface mantém pesos e objetivos
+vazios para não sugerir regra comercial. Salvar cria somente um rascunho
+inativo; não existe ativação implícita. A migration não cria dado comercial,
+política ativa, permissão de execução ou configuração presumida.
 
 ## Persistência
 

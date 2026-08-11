@@ -53,16 +53,12 @@ export async function PointSettingsPage({
                       result.status === "ready" ? "bg-[var(--analytics-lime)]" : "bg-amber-300"
                     }`}
                   />
-                  {draft
-                    ? `Rascunho · revisão ${draft.revision}`
-                    : result.status === "ready"
-                      ? "Legado somente leitura"
-                      : "Primeiro rascunho pendente"}
+                  Base legada: somente leitura · Rascunho atual: editável
                 </span>
               </div>
 
               <h1 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-balance sm:text-4xl lg:text-5xl">
-                Meta por pontos
+                Metas de pontos
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
                 Prepare pesos e objetivos como rascunho inativo, sem alterar o ranking.
@@ -154,7 +150,7 @@ export async function PointSettingsPage({
               className="rounded-2xl bg-[var(--analytics-cyan)] px-4 py-3 text-sm text-[var(--analytics-navy)] shadow-lg ring-1 shadow-cyan-950/20 ring-cyan-100/50"
             >
               <span className="flex items-center justify-between gap-3">
-                <strong>Meta por pontos</strong>
+                <strong>Metas de pontos</strong>
                 <span
                   aria-hidden="true"
                   className="size-2 rounded-full bg-[var(--analytics-lime)]"
@@ -202,7 +198,7 @@ export async function PointSettingsPage({
               Estado da configuração
             </p>
             <strong className="mt-2 block text-xl text-[var(--analytics-ink)]">
-              {result.status === "ready" ? "Persistida" : "Ainda não persistida"}
+              {result.status === "ready" ? "Base legada disponível" : "Sem base legada"}
             </strong>
           </article>
           <article className="relative overflow-hidden rounded-2xl bg-[var(--analytics-surface)] p-5 shadow-sm ring-1 ring-[var(--analytics-line)]">
@@ -238,7 +234,7 @@ export async function PointSettingsPage({
             </span>
             <p>
               {notification === "saved"
-                ? "Configuração salva e registrada na auditoria."
+                ? "Rascunho salvo e registrado na auditoria; nenhuma ativação foi realizada."
                 : notification === "validation"
                   ? "Revise os valores: use somente inteiros entre 0 e 100.000."
                   : "Não foi possível salvar a configuração. Tente novamente."}
@@ -255,8 +251,8 @@ export async function PointSettingsPage({
               i
             </span>
             <p>
-              Ainda não existe configuração persistida. Os campos permanecem vazios para evitar
-              sugerir uma regra comercial e somente passam a valer após o primeiro salvamento.
+              Ainda não existe base legada. Os campos permanecem vazios para evitar sugerir uma
+              regra comercial. Salvar cria apenas um rascunho inativo.
             </p>
           </div>
         ) : null}

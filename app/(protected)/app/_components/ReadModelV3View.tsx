@@ -13,6 +13,7 @@ import type { ReadModelV3LoadResult } from "@/lib/crm/read-model-v3/data";
 import {
   AnalyticsCard,
   AnalyticsTable,
+  CommercialSourceLabel,
   DataState,
   FunnelChart,
   MetricCard,
@@ -149,7 +150,7 @@ export function ReadModelV3View({
           <DataState
             variant="unavailable"
             title="Selecione um escopo autorizado"
-            description="A leitura exige exatamente um escopo. Nenhuma união implícita de grants é realizada."
+            description="A leitura exige exatamente um escopo. Nenhuma combinação implícita de permissões é realizada."
           />
         </div>
       </main>
@@ -229,7 +230,7 @@ export function ReadModelV3View({
               <div>
                 <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
                 <dd className="mt-1 font-semibold text-white">
-                  {source?.sourceKey ?? "Indisponível"}
+                  <CommercialSourceLabel value={source?.sourceKey} />
                 </dd>
               </div>
               <div>

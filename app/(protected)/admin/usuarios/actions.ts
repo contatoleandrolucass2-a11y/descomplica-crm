@@ -248,7 +248,7 @@ export async function approveUserAccessAction(
       reporting_scope_ids: reportingScopeIds,
       reason,
     });
-    if (error) return failure("A aprovação foi rejeitada pelo gate de papel e escopo.");
+    if (error) return failure("A aprovação foi rejeitada pela validação de papel e escopo.");
 
     refreshUsersAdmin();
     return {

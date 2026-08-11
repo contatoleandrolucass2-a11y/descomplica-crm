@@ -1017,3 +1017,31 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - A baseline local estabilizada foi recapturada em worktree limpa e aprovou
   novamente 147 responsivos, 84 temas, 192 Axe/comparações e 105 checks de zoom;
   conta e fixtures efêmeras foram removidas ao final.
+
+## 2026-08-11 — correções do gate visual final
+
+- Auditoria independente recebida no SHA `420af55093da7622cea194aab5b27f13d42c1eab`:
+  zero P0, dois P1, quatro P2 e quatro P3. As 21 rotas estavam estruturalmente
+  íntegras; responsividade, temas, teclado, zoom, reduced-motion e Axe já
+  passavam.
+- O shell passou a reservar e truncar toda a cadeia da identidade, além de
+  empilhar a navegação a partir de `90rem`. O E2E injeta uma identidade longa em
+  `1440×900` e prova ellipsis, ausência de sobreposição e zero overflow raiz.
+- O workspace compartilhado dos cinco simuladores agora diferencia controles
+  locais habilitados, motor bloqueado e estoque indisponível. O motor continua
+  desabilitado, sem submit/action, com cadeado e explicação visível junto ao
+  CTA; nenhuma regra comercial foi acrescentada.
+- Canal, Ranking e Configurações receberam contraste e copy finais. O termo
+  oficial é “imobiliárias”; “Metas de pontos” ficou uniforme; o funil de
+  parcerias ganhou H1 contextual; política, ativação e permissões substituem
+  jargões técnicos na visão comercial.
+- Fontes sintéticas são apresentadas como “Dados sintéticos de homologação”.
+  Identificadores de execução, plano e códigos de suporte permanecem fechados
+  em `Detalhes técnicos`.
+- O E2E local isolado ampliado passou com 8 cenários e um skip remoto, nove
+  perfis, 21 rotas, RLS e remoção das nove contas efêmeras. Capturas atuais de
+  login, logout, 403, 404, 500, loading, empty, stale e error foram geradas em
+  `docs/qa/final-states/`; nenhuma credencial foi persistida.
+- Nenhum ambiente remoto, Supabase, n8n, Qlik, Salesforce, DNS ou Nginx foi
+  alterado nesta correção. Flags comerciais, allowlists e motores continuam
+  desligados.

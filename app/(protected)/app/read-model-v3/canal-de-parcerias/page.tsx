@@ -25,7 +25,7 @@ export default function ReadModelV3PartnershipsPage({
       dataset="partnerships"
       searchParams={searchParams}
       breakdown="organizations"
-      policyNotice="O caller técnico Qlik foi identificado. O relay permanece desligado e o cutover segue bloqueado até owner operacional, backup e leitores residuais serem formalmente resolvidos. Nenhum grant remoto foi alterado."
+      policyNotice="A integração técnica do Qlik foi identificada, mas permanece desligada. A ativação aguarda responsável operacional, substituto e revisão dos acessos de leitura. Nenhuma permissão remota foi alterada."
     />
   );
 }

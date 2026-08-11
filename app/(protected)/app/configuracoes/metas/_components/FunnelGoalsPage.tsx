@@ -99,6 +99,7 @@ export async function FunnelGoalsPage({
   const visibleStages = GOAL_STAGES.slice(stageOffset);
   const visibleRates = GOAL_RATE_FIELDS.slice(stageOffset);
   const isPartnerships = profile === "partnerships";
+  const pageTitle = isPartnerships ? "Metas do funil de parcerias" : "Metas do funil";
   const monthLabel = new Intl.DateTimeFormat("pt-BR", {
     month: "long",
     year: "numeric",
@@ -142,15 +143,11 @@ export async function FunnelGoalsPage({
                       result.status === "ready" ? "bg-lime-300" : "bg-cyan-300"
                     }`}
                   />
-                  {draft
-                    ? `Rascunho · revisão ${draft.revision}`
-                    : result.status === "ready"
-                      ? "Legado somente leitura"
-                      : "Primeiro rascunho"}
+                  Base legada: somente leitura · Rascunho atual: editável
                 </span>
               </div>
               <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-                Metas do funil
+                {pageTitle}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
                 Prepare e valide um rascunho inativo para {monthLabel}. Nada é aplicado ao funil.
@@ -238,7 +235,7 @@ export async function FunnelGoalsPage({
             />
             <span>
               {notification === "saved"
-                ? "Metas salvas e registradas na auditoria."
+                ? "Rascunho de metas salvo e registrado na auditoria; nenhuma ativação foi realizada."
                 : notification === "validation"
                   ? "Revise os campos: existem valores ausentes ou fora dos limites permitidos."
                   : "Não foi possível salvar as metas. Tente novamente."}
@@ -276,11 +273,12 @@ export async function FunnelGoalsPage({
                     </p>
                     <h2 id="funnel-result-title" className="mt-1 text-xl font-semibold">
                       {result.status === "ready"
-                        ? "Último funil salvo"
+                        ? "Última base legada"
                         : "Prévia da primeira configuração"}
                     </h2>
                     <p className="mt-1.5 max-w-md text-xs leading-5 text-slate-300">
-                      A RPC recalcula todas as etapas ao salvar vendas e taxas informadas.
+                      A prévia recalcula as etapas localmente a partir das vendas e taxas
+                      informadas.
                     </p>
                   </div>
                   <label className="grid shrink-0 gap-1.5 rounded-2xl border border-cyan-200/30 bg-cyan-300/10 p-3">
