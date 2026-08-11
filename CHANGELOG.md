@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Torna os dois gates locais que consomem `supabase status --output json`
+  tolerantes às mensagens informativas do CLI ao redor do único objeto JSON,
+  mantendo rejeição fail-closed para saída ausente, truncada ou ambígua.
 - Adiciona E2E Playwright local com nove perfis, autenticação e matriz exata das
   21 rotas/permissões,
   superfícies comerciais, filtros, flags off, endpoints e simuladores

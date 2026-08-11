@@ -2,6 +2,11 @@
 
 ## 2026-08-10 — release candidate, E2E e gates
 
+- A primeira execução do CI remoto revelou que o Supabase CLI pode escrever
+  mensagens informativas junto do JSON de status. Os gates E2E e visual agora
+  extraem exatamente um objeto JSON balanceado e rejeitam saída ausente,
+  truncada ou múltipla; casos sintéticos, E2E/RLS e a matriz visual autenticada
+  passaram localmente após a correção.
 - Branch criada do SHA exato
   `d00118fe62296fa3e23e266585899e3ee3a78478`; feature flags permaneceram off.
 - Playwright passou a executar login inválido/anônimo, logout, nove perfis,
