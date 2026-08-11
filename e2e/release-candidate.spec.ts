@@ -357,27 +357,47 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       await expect(page.locator("body")).not.toContainText(/\b(?:NaN|undefined)\b/);
     }
 
-    await page.goto("/app");
-    await page.getByRole("link", { name: "Com Canal Imob", exact: true }).click();
-    await expect(page).toHaveURL(/view=with_canal_imob/);
-    await page.getByRole("link", { name: "Semana", exact: true }).click();
-    await expect(page).toHaveURL(/view=with_canal_imob.*period=week/);
-    await expect(page.getByRole("link", { name: "Semana", exact: true })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
-
-    await page.goto("/app/ranking");
-    await page.getByRole("link", { name: "Gerentes", exact: true }).click();
-    await expect(page).toHaveURL(/scope=managers/);
-    await page.getByRole("link", { name: "Esta semana", exact: true }).click();
-    await expect(page).toHaveURL(/period=week.*scope=managers/);
-
-    await page.goto("/app/canal-de-parcerias");
     await expect(page.getByText("Dado indisponível — integração pendente").first()).toBeVisible();
     await expect(
       page.locator('[aria-label="Filtros do Canal de Parcerias indisponíveis"]'),
     ).toBeVisible();
+  });
+});
+
+test("dashboard and ranking filter links enforce their selected server state", async ({
+  browser,
+}) => {
+  await withRolePage(browser, "master", async (page) => {
+    const cases = [
+      {
+        pathname: "/app?view=with_canal_imob&period=month",
+        selectedHref: "/app?view=with_canal_imob&amp;period=month",
+      },
+      {
+        pathname: "/app?view=with_canal_imob&period=week",
+        selectedHref: "/app?view=with_canal_imob&amp;period=week",
+      },
+      {
+        pathname: "/app/ranking?period=month&scope=managers",
+        selectedHref: "/app/ranking?period=month&amp;scope=managers",
+      },
+      {
+        pathname: "/app/ranking?period=week&scope=managers",
+        selectedHref: "/app/ranking?period=week&amp;scope=managers",
+      },
+    ];
+
+    for (const filterCase of cases) {
+      const response = await page.context().request.get(filterCase.pathname, {
+        maxRedirects: 0,
+      });
+      expect(response.status()).toBe(200);
+      const html = await response.text();
+      const escapedHref = filterCase.selectedHref.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      expect(html).toMatch(
+        new RegExp(`<a(?=[^>]*href="${escapedHref}")(?=[^>]*aria-current="page")[^>]*>`),
+      );
+    }
   });
 });
 

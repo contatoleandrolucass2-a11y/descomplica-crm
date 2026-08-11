@@ -69,8 +69,8 @@ email_sent = 1
 sms_sent = 1
 anonymous_users = 1
 token_refresh = 60
-sign_in_sign_ups = 30
-token_verifications = 10
+sign_in_sign_ups = 120
+token_verifications = 300
 web3 = 1
 
 [auth.email]

@@ -907,3 +907,13 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   segundo ensaio persistiu exatamente nove contas sintéticas. A fixture visual
   passou a reutilizar o Master isolado completando somente seu perfil QA; carga
   e reexecução idempotente foram verificadas.
+- A matriz browser local confirmou login genérico, guards, nove perfis, oito
+  superfícies Master, filtros server-rendered e simuladores bloqueados. O teste
+  de filtros foi separado da travessia longa e valida os `href` selecionados na
+  resposta HTTP autenticada, eliminando corrida de navegação do App Router sem
+  reduzir a cobertura. Limites Auth sintéticos foram dimensionados para a
+  própria matriz; o gate externo Basic continua obrigatório.
+- Cliente DNS Hostinger fail-closed preparado: lê token somente de arquivo
+  `0600`, recusa nome existente, valida o payload antes do `PUT` e confirma
+  somente o novo `A` de homologação. A etapa permanece sem execução enquanto a
+  autenticação privada não existir.

@@ -201,8 +201,15 @@ ausência de chamadas externas antes de publicar DNS.
 1. Repetir o healthcheck de produção.
 2. Consultar DNS autoritativo e painel privado. Se o nome existir, parar; nunca
    editar registro existente.
-3. Criar somente o novo `A`/`AAAA` necessário para
-   `homolog.descomplicapro.com.br`, apontando ao host aprovado.
+3. Criar somente o novo `A` necessário para
+   `homolog.descomplicapro.com.br`, apontando ao host aprovado. O token é lido
+   do arquivo root-only e nunca é impresso; o script recusa nome preexistente,
+   valida antes do `PUT` e confirma o registro depois:
+
+```bash
+sudo pnpm homologation:dns
+```
+
 4. Instalar primeiro o vhost HTTP fechado:
 
 ```bash
