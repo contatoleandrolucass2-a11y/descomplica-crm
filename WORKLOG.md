@@ -1014,3 +1014,6 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   o baseline efêmero possui uma. A região dinâmica ganhou marcador explícito e
   é omitida somente do screenshot comparável, depois de passar funcional e Axe.
   Um erro de console isolado não foi reproduzido em duas travessias diagnósticas.
+- A baseline local estabilizada foi recapturada em worktree limpa e aprovou
+  novamente 147 responsivos, 84 temas, 192 Axe/comparações e 105 checks de zoom;
+  conta e fixtures efêmeras foram removidas ao final.
