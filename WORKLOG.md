@@ -988,3 +988,6 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - A recaptura limpa aprovou 147 combinações responsivas, 84 checks de tema, 192
   auditorias Axe/comparações e 105 checks de zoom. A baseline foi promovida por
   rename transacional, sem persistir conta, senha ou storage state.
+- O primeiro disparo do restore rehearsal fechou antes de criar containers ao
+  detectar que seu sentinela ainda esperava 863 testes. O contrato foi alinhado
+  ao inventário versionado atual: 27 migrations, 18 arquivos e 885 pgTAP.

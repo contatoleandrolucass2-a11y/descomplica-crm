@@ -25,6 +25,8 @@
 - Consolida os riscos P0 das migrations, o merge train #26–#33, os bloqueios de
   caller/mappings/políticas e o pacote de decisões necessário para canário,
   cutover e produção.
+- Atualiza o ensaio isolado para o manifesto atual de 27 migrations e 885 casos
+  pgTAP distribuídos em 18 arquivos.
 - Publica a homologação visual isolada em HTTPS com DNS/TLS exclusivos, Basic
   Auth antes do login, `noindex`, nove perfis e fixtures somente sintéticas;
   E2E remoto, 21 rotas, 87 checks visuais/Axe, quatro viewports, três temas,
