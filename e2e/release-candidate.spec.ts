@@ -145,7 +145,7 @@ const protectedSurfaces = [
   { path: "/app/ranking", heading: "Ranking por pontos", allowed: masterOnlyRoles },
   {
     path: "/app/canal-de-parcerias",
-    heading: "Performance das parcerias",
+    heading: "Ranking das Imob’s",
     allowed: masterOnlyRoles,
   },
   {
@@ -349,7 +349,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       ["/app/etapas/pastas", "Pastas"],
       ["/app/etapas/vendas", "Vendas"],
       ["/app/ranking", "Ranking por pontos"],
-      ["/app/canal-de-parcerias", "Performance das parcerias"],
+      ["/app/canal-de-parcerias", "Ranking das Imob’s"],
     ] as const;
 
     for (const [pathname, heading] of surfaces) {
