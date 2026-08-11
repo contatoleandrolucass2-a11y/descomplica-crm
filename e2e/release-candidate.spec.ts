@@ -290,10 +290,13 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
         if (surface.allowed.has(role)) {
           expect(response?.status()).toBe(200);
           await expect(page).toHaveURL((url) => url.pathname === surface.path);
-          await expect(page.locator("main")).toBeVisible();
-          await expect(
-            page.getByRole("heading", { level: 1, name: surface.heading, exact: true }),
-          ).toBeVisible();
+          const surfaceHeading = page.getByRole("heading", {
+            level: 1,
+            name: surface.heading,
+            exact: true,
+          });
+          await expect(surfaceHeading).toBeVisible();
+          await expect(page.locator("main").filter({ has: surfaceHeading })).toBeVisible();
           await expect(page.getByRole("heading", { level: 1, name: forbiddenHeading })).toHaveCount(
             0,
           );

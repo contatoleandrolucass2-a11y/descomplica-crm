@@ -125,9 +125,16 @@ function homologationHttpCredentials(origin) {
 async function hideHomologationBannerForBaseline(context) {
   if (!remoteHomologation) return;
   await context.addInitScript(() => {
-    const style = document.createElement("style");
-    style.textContent = ".homologation-banner{display:none!important}";
-    document.documentElement.append(style);
+    const hideBanner = () => {
+      const style = document.createElement("style");
+      style.textContent = ".homologation-banner{display:none!important}";
+      document.head.append(style);
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", hideBanner, { once: true });
+    } else {
+      hideBanner();
+    }
   });
 }
 
@@ -539,15 +546,26 @@ async function checkSimulatorValidation(page, origin) {
   await page.goto(`${origin}/app/simulacao/associativo-fluxo-linear`, {
     waitUntil: "domcontentloaded",
   });
+  await page.waitForLoadState("networkidle");
   const field = page.locator("main form input[required]").first();
+  await field.waitFor({ state: "visible" });
   await field.focus();
   await page.keyboard.press("Tab");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("main form input[required]")?.getAttribute("aria-invalid") === "true",
+  );
   const invalidAfterBlur = (await field.getAttribute("aria-invalid")) === "true";
   const errorId = (await field.getAttribute("aria-describedby"))
     ?.split(/\s+/)
     .find((id) => id.endsWith("-error"));
+  if (errorId) await page.locator(`#${errorId}`).waitFor({ state: "visible" });
   const messageAssociated = Boolean(errorId) && (await page.locator(`#${errorId}`).isVisible());
   await field.fill("QA visual local");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("main form input[required]")?.getAttribute("aria-invalid") !== "true",
+  );
   const validAfterInput = (await field.getAttribute("aria-invalid")) !== "true";
 
   return { invalidAfterBlur, messageAssociated, validAfterInput };

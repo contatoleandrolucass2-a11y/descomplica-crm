@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Publica a homologação visual isolada em HTTPS com DNS/TLS exclusivos, Basic
+  Auth antes do login, `noindex`, nove perfis e fixtures somente sintéticas;
+  E2E remoto, 21 rotas, 87 checks visuais/Axe, quatro viewports, três temas,
+  zoom, teclado, RLS e isolamento passam sem ativar relay ou motores.
+- Estabiliza os harnesses Playwright contra a coexistência transitória do
+  loading boundary e contra execução do init script antes do DOM, sem reduzir
+  testes nem alterar comportamento da aplicação.
 - Torna os dois gates locais que consomem `supabase status --output json`
   tolerantes às mensagens informativas do CLI ao redor do único objeto JSON,
   mantendo rejeição fail-closed para saída ausente, truncada ou ambígua.

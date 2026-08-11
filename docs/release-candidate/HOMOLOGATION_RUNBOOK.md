@@ -293,6 +293,12 @@ Registrar sem segredo ou PII:
 - zero chamadas/escritas em Supabase de produção, n8n, Qlik e Salesforce;
 - logs sanitizados e resultado do ensaio de rollback.
 
+O fechamento executado em 11/08/2026 está registrado em
+[`docs/qa/homologation/RESULTS.md`](../qa/homologation/RESULTS.md), acompanhado
+de manifesto de hashes e screenshots sintéticos. O gate aprovou nove perfis e
+21 rotas no E2E HTTPS; a matriz visual complementar cobriu as 18 páginas CRM em
+quatro viewports, três temas, zoom 200%, Axe e 87 comparações de baseline.
+
 ## Rollback sem cutover
 
 A homologação não substitui tráfego de produção. Diante de qualquer degradação,

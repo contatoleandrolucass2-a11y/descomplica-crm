@@ -917,3 +917,26 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   `0600`, recusa nome existente, valida o payload antes do `PUT` e confirma
   somente o novo `A` de homologação. A etapa permanece sem execução enquanto a
   autenticação privada não existir.
+- Após provisionamento privado autorizado, o script criou exclusivamente
+  `homolog.descomplicapro.com.br A 187.127.249.50`; DNS autoritativo e recursivo
+  confirmaram o registro. Certbot emitiu certificado exclusivo válido até
+  09/11/2026. `nginx -t`, reload seguro, Basic Auth, `401` pré-gate,
+  `robots.txt`, `noindex`, cadastro `404` e HTTPS autenticado passaram.
+- Produção respondeu `{"status":"ok"}` antes, durante e depois. O app isolado
+  permaneceu em `127.0.0.1:3100`; banco/Auth/rede/cache têm nomes exclusivos e
+  as portas Docker `55321`/`55322` continuam bloqueadas externamente pela chain
+  dedicada. Backup Nginx root-only manteve checksum válido.
+- QA HTTPS final aprovou 7/7 cenários E2E, nove perfis e a matriz de 21 rotas.
+  A matriz visual aprovou 72/72 checks responsivos, 54/54 temas, 87/87 Axe,
+  87/87 comparações de baseline e 18/18 rotas a 200%, além de teclado,
+  reduced-motion, filtros, cookies e CSP. Maior diferença visual: `0,0885%`
+  sob limite de `1%`.
+- A primeira execução remota revelou dois races exclusivos do harness: dois
+  `<main>` coexistiam durante streaming e o init script tocava o DOM antes de
+  `documentElement`. Locators foram ancorados no heading terminal e os scripts
+  aguardam DOM/hidratação; cobertura foi preservada e as reexecuções passaram.
+- Evidências selecionadas e seus hashes foram versionados em
+  `docs/qa/homologation/`. Relay, Salesforce e motores ficaram desligados;
+  simuladores estão visualmente completos, mas cálculo e persistência seguem
+  bloqueados. Supabase de produção, n8n, Qlik, Salesforce, dados, grants, flags
+  e container de produção não foram alterados; não houve merge ou cutover.
