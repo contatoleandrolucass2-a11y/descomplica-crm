@@ -991,3 +991,6 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - O primeiro disparo do restore rehearsal fechou antes de criar containers ao
   detectar que seu sentinela ainda esperava 863 testes. O contrato foi alinhado
   ao inventário versionado atual: 27 migrations, 18 arquivos e 885 pgTAP.
+- Duas execuções independentes do ensaio passaram. A evidência versionada prova
+  57 tabelas, 62 relações, 88 funções, owners/ACL preservados, fingerprint
+  canônico idêntico e todos os gates/credenciais/policies/mappings vazios.

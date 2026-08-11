@@ -165,11 +165,11 @@ describe("isolated restore evidence", () => {
       postValidationNonSequenceFingerprintMatch: true,
       objectCounts: {
         roles: 2,
-        tables: 56,
+        tables: 57,
         schemas: 4,
         policies: 25,
-        functions: 84,
-        relations: 61,
+        functions: 88,
+        relations: 62,
         sequences: 5,
       },
       failClosed: {
