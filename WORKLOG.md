@@ -901,3 +901,9 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   DNS de homologação ainda livre. Nenhum ambiente remoto, DNS ou Nginx havia
   sido alterado neste checkpoint; publicação e QA HTTPS seguem para o próximo
   gate da mesma branch.
+- Primeiro ensaio isolado falhou fechado: o Auth havia desligado também o login
+  por e-mail ao bloquear signup. As nove contas foram removidas automaticamente.
+  O ajuste mantém o provider de login ativo sob `auth.enable_signup=false` e o
+  segundo ensaio persistiu exatamente nove contas sintéticas. A fixture visual
+  passou a reutilizar o Master isolado completando somente seu perfil QA; carga
+  e reexecução idempotente foram verificadas.

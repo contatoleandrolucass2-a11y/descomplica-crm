@@ -74,7 +74,9 @@ token_verifications = 10
 web3 = 1
 
 [auth.email]
-enable_signup = false
+# Mantém login por e-mail ativo; [auth].enable_signup=false continua bloqueando
+# criação pública de contas no Auth isolado.
+enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
 secure_password_change = true

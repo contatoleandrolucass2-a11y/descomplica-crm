@@ -21,6 +21,7 @@ const requiredRoles = new Set([
   "partnership_channel",
   "pending",
 ]);
+let failureStage = "initializing";
 
 function fail(message) {
   throw new Error(message);
@@ -107,15 +108,18 @@ async function persistMarker(payload, marker) {
 }
 
 async function main() {
+  failureStage = "reading-private-account-matrix";
   const payload = await readSyntheticAccounts();
   const master = payload.accounts.find((account) => account.role === "master");
   const marker = `QA local synthetic — not production · run ${payload.visualRunId}`;
+  failureStage = "discovering-isolated-supabase";
   const local = await discoverLocalSupabase();
 
   if (payload.visualSourceMarker && payload.visualSourceMarker !== marker) {
     fail("Homologation visual marker does not match its synthetic account run.");
   }
   if (!payload.visualSourceMarker) {
+    failureStage = "checking-existing-fixtures";
     try {
       await verifyFixturesThroughRls({
         apiUrl: local.apiUrl,
@@ -124,6 +128,7 @@ async function main() {
         marker,
       });
     } catch {
+      failureStage = "applying-atomic-fixtures";
       runLocalSql(
         local.database,
         atomicProvisioningSql({ marker, userId: master.id }),
@@ -131,19 +136,24 @@ async function main() {
       );
     }
   }
+  failureStage = "verifying-fixtures-through-rls";
   await verifyFixturesThroughRls({
     apiUrl: local.apiUrl,
     publishableKey: local.publishableKey,
     account: master,
     marker,
   });
+  failureStage = "persisting-synthetic-marker";
   if (!payload.visualSourceMarker) await persistMarker(payload, marker);
   process.stdout.write("Homologation visual fixtures: synthetic=1 profiles=9 v3_grants=4\n");
 }
 
 try {
   await main();
-} catch {
-  process.stderr.write("Homologation visual fixture provisioning failed.\n");
+} catch (error) {
+  const sqlstate = error instanceof Error ? error.message.match(/SQLSTATE [0-9A-Z]{5}/)?.[0] : null;
+  process.stderr.write(
+    `Homologation visual fixture provisioning failed: stage=${failureStage}${sqlstate ? ` ${sqlstate}` : ""}.\n`,
+  );
   process.exitCode = 1;
 }

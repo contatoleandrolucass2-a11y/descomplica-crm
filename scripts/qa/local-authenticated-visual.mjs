@@ -386,6 +386,8 @@ export function runLocalSql(database, sql, purpose) {
       "--no-psqlrc",
       "--set",
       "ON_ERROR_STOP=1",
+      "--set",
+      "VERBOSITY=sqlstate",
       "--quiet",
       "--host",
       database.host,
@@ -411,7 +413,10 @@ export function runLocalSql(database, sql, purpose) {
   );
 
   if (result.error || result.status !== 0) {
-    throw new Error(`Local QA database ${purpose} failed.`);
+    const sqlstate = result.stderr?.match(/ERROR:\s+([0-9A-Z]{5})/)?.[1];
+    throw new Error(
+      `Local QA database ${purpose} failed${sqlstate ? ` (SQLSTATE ${sqlstate})` : ""}.`,
+    );
   }
 }
 
@@ -443,7 +448,11 @@ export function fixtureSetupSql({ marker, userId, reuseExistingMaster = false })
     raise exception 'local visual QA requires a fresh database without a Master fixture';
   end if;`;
   const masterBootstrap = reuseExistingMaster
-    ? ""
+    ? `
+update public.profiles
+set profile_completed = true
+where user_id = ${userIdSql};
+`
     : `
 select public.bootstrap_master_user(${userIdSql});
 
