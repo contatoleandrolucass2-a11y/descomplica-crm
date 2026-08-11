@@ -29,5 +29,17 @@ fórmula, pontuação ou valor oficial foi criada.
 
 ## Resultado
 
-O resultado final será registrado após promoção e verificação limpa da baseline,
-execução integral das validações e nova revisão independente.
+Gate automatizado local aprovado no SHA de captura
+`a33ec1b0f2f1ff1222288d032d84db1a6a12c6d9`:
+
+- 147/147 combinações responsivas das 21 rotas;
+- 84/84 checks de tema;
+- 192/192 auditorias Axe e capturas promovidas;
+- 105/105 checks de zoom;
+- zero colisão de topbar;
+- 100% dos contratos de truncamento e distinção de CTA aprovados;
+- conta e fixtures QA efêmeras removidas.
+
+A baseline foi promovida a partir de worktree limpa. A revisão visual
+independente será registrada depois da inspeção das evidências promovidas; ela
+não autoriza política comercial, merge, migration ou deploy de produção.

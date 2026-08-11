@@ -1042,6 +1042,10 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   perfis, 21 rotas, RLS e remoção das nove contas efêmeras. Capturas atuais de
   login, logout, 403, 404, 500, loading, empty, stale e error foram geradas em
   `docs/qa/final-states/`; nenhuma credencial foi persistida.
+- A baseline final foi promovida a partir de worktree limpa no SHA
+  `a33ec1b0f2f1ff1222288d032d84db1a6a12c6d9`: 147 responsivos, 84 checks de
+  tema, 192 Axe/comparações e 105 checks de zoom. Colisão do topbar e contratos
+  dos três estados de CTA tiveram zero falhas; conta e fixtures foram removidas.
 - Nenhum ambiente remoto, Supabase, n8n, Qlik, Salesforce, DNS ou Nginx foi
   alterado nesta correção. Flags comerciais, allowlists e motores continuam
   desligados.
