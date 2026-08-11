@@ -500,7 +500,9 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
       loginPresent: Boolean(document.querySelector('input[name="password"]')),
       reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
       simulatorActionEnabled: simulatorForm
-        ? [...simulatorForm.querySelectorAll("button")].some((button) => !button.disabled)
+        ? !simulatorForm.querySelector(
+            'button[disabled][aria-describedby="calculation-blocked-reason"]',
+          )
         : false,
       simulatorFormActionPresent: simulatorForm?.hasAttribute("action") ?? false,
       blockedCalculationMessagePresent:

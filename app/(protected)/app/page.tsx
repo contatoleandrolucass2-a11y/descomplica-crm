@@ -350,7 +350,7 @@ export default async function AppHomePage({
                   <Link
                     href={dashboardHref(selectedView, selectedPeriod)}
                     aria-current="page"
-                    className="inline-flex min-h-11 items-center rounded-xl bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950"
+                    className="inline-flex min-h-11 items-center rounded-xl bg-cyan-300 px-3 py-2 text-sm font-semibold text-[#082137]"
                   >
                     Visão Geral
                   </Link>
@@ -701,7 +701,7 @@ export default async function AppHomePage({
                 <Link
                   href={dashboardHref(selectedView, selectedPeriod)}
                   aria-current="page"
-                  className="inline-flex min-h-11 items-center rounded-xl bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950"
+                  className="inline-flex min-h-11 items-center rounded-xl bg-cyan-300 px-3 py-2 text-sm font-semibold text-[#082137]"
                 >
                   Visão Geral
                 </Link>

@@ -980,3 +980,8 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Três migrations com efeitos P0 foram marcadas para decomposição forward antes
   de qualquer execução remota. Não houve migration remota, importação real,
   alteração de n8n/Qlik/Salesforce, merge, cutover ou deploy de produção.
+- A primeira captura ampliada encontrou contraste insuficiente em três estados
+  ativos no tema escuro e um falso positivo que confundia limpar/imprimir com
+  execução comercial. As cores foram corrigidas e o gate passou a exigir o
+  botão de cálculo explicitamente desabilitado, mantendo controles locais
+  estruturais disponíveis.

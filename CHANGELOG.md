@@ -17,6 +17,8 @@
   dark e três temas nas páginas administrativas; a nova baseline só pode ser
   promovida por execução limpa e transacional, sem reutilizar dados, contas ou
   credenciais de produção.
+- Distingue controles estruturais locais dos botões de cálculo bloqueados no
+  gate dos simuladores e corrige contraste dos estados ativos no tema escuro.
 - Comprova backup produtivo criptografado e root-only por leitura, restore
   representativo sem rede, aplicação isolada das dez migrations futuras e
   rollback limpo; nenhuma migration, flag, grant ou dado remoto foi alterado.

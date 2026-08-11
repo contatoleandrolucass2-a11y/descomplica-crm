@@ -480,7 +480,7 @@ function UserRow({
           <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
             <span
               className={`rounded-full px-2.5 py-1 ${
-                user.isActive ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+                user.isActive ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"
               }`}
             >
               {user.isActive ? "Ativo" : "Inativo"}
