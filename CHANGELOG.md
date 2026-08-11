@@ -32,6 +32,8 @@
   do baseline novo.
 - Alinha o E2E de permissões aos títulos oficiais restaurados do dashboard e do
   Canal de Parcerias e ao nome acessível do conjunto ampliado de filtros.
+- Distingue no E2E dos simuladores os controles estruturais locais do único
+  botão comercial, que continua sem submit, action ou estado habilitado.
 - Publica a homologação visual isolada em HTTPS com DNS/TLS exclusivos, Basic
   Auth antes do login, `noindex`, nove perfis e fixtures somente sintéticas;
   E2E remoto, 21 rotas, 87 checks visuais/Axe, quatro viewports, três temas,

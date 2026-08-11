@@ -497,8 +497,12 @@ test("simulators stay visual-only and keyboard/theme controls remain operable", 
         }),
       ).toBeVisible();
       await expect(page.locator("main form")).not.toHaveAttribute("action");
-      const enabledActionCount = await page.locator("main form button:enabled").count();
-      expect(enabledActionCount).toBe(0);
+      await expect(page.locator('main form button[type="submit"]')).toHaveCount(0);
+      const calculationAction = page.locator(
+        'main form button[aria-describedby="calculation-blocked-reason"]',
+      );
+      await expect(calculationAction).toHaveCount(1);
+      await expect(calculationAction).toBeDisabled();
     }
 
     await page.goto("/app");

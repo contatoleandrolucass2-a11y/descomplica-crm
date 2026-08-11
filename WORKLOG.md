@@ -1005,3 +1005,7 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - A travessia Master avançou e encontrou o nome acessível legado do filtro do
   Canal. O seletor foi alinhado ao grupo ampliado “Visões e filtros do Canal de
   Parcerias”, preservando a exigência de visibilidade do controle seguro.
+- O E2E chegou aos simuladores e repetiu o falso positivo já encontrado no gate
+  visual: três controles locais estavam sendo contados como motor. A asserção
+  agora prova ausência de submit/action e exige exatamente um botão comercial,
+  identificado pelo motivo de bloqueio e desabilitado.
