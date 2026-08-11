@@ -617,21 +617,23 @@ export function UserAccessManager(props: UserAccessManagerProps) {
         placeholder="E-mail, papel ou status"
         className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 sm:max-w-xl"
       />
-      <p className="mt-2 text-sm text-slate-600" aria-live="polite">
-        {users.length} {users.length === 1 ? "usuário encontrado" : "usuários encontrados"}
-      </p>
-
-      {users.length > 0 ? (
-        <div className="mt-5 grid gap-3">
-          {users.map((user) => (
-            <UserRow key={user.userId} user={user} {...props} />
-          ))}
-        </div>
-      ) : (
-        <p className="mt-6 rounded-xl bg-white p-5 text-slate-600 ring-1 ring-slate-200">
-          Nenhum usuário corresponde à busca.
+      <div data-qa-visual-volatile="user-results">
+        <p className="mt-2 text-sm text-slate-600" aria-live="polite">
+          {users.length} {users.length === 1 ? "usuário encontrado" : "usuários encontrados"}
         </p>
-      )}
+
+        {users.length > 0 ? (
+          <div className="mt-5 grid gap-3">
+            {users.map((user) => (
+              <UserRow key={user.userId} user={user} {...props} />
+            ))}
+          </div>
+        ) : (
+          <p className="mt-6 rounded-xl bg-white p-5 text-slate-600 ring-1 ring-slate-200">
+            Nenhum usuário corresponde à busca.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

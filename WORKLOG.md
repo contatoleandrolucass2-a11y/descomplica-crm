@@ -1009,3 +1009,8 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   visual: três controles locais estavam sendo contados como motor. A asserção
   agora prova ausência de submit/action e exige exatamente um botão comercial,
   identificado pelo motivo de bloqueio e desabilitado.
+- O primeiro QA visual HTTPS aprovou E2E 7/7 e todos os gates funcionais/Axe,
+  mas rejeitou 11 screenshots de Usuários: homologação possui nove contas QA e
+  o baseline efêmero possui uma. A região dinâmica ganhou marcador explícito e
+  é omitida somente do screenshot comparável, depois de passar funcional e Axe.
+  Um erro de console isolado não foi reproduzido em duas travessias diagnósticas.

@@ -321,6 +321,26 @@ async function saveLosslessWebp(buffer, destination) {
   }
 }
 
+async function captureComparableScreenshot(page) {
+  const volatileRegions = page.locator("[data-qa-visual-volatile]:not([hidden])");
+  await volatileRegions.evaluateAll((elements) => {
+    for (const element of elements) {
+      element.setAttribute("data-qa-visual-hidden", "true");
+      element.setAttribute("hidden", "");
+    }
+  });
+  try {
+    return await page.screenshot({ fullPage: true, animations: "disabled" });
+  } finally {
+    await page.locator('[data-qa-visual-hidden="true"]').evaluateAll((elements) => {
+      for (const element of elements) {
+        element.removeAttribute("hidden");
+        element.removeAttribute("data-qa-visual-hidden");
+      }
+    });
+  }
+}
+
 async function compareVisualBaseline(buffer, baselinePath, trackedFiles) {
   const repositoryPath = repositoryRelative(baselinePath);
   if (!trackedFiles.has(repositoryPath)) {
@@ -919,7 +939,7 @@ async function run() {
           routeChecks.push({ viewport: viewport.key, ...check });
           accessibilityChecks.push(await inspectAccessibility(page, route, viewport.key, "light"));
 
-          const buffer = await page.screenshot({ fullPage: true, animations: "disabled" });
+          const buffer = await captureComparableScreenshot(page);
           const destination = path.join(
             candidateScreenshotRoot,
             `${routeKey(route)}-${viewport.width}x${viewport.height}.webp`,
@@ -966,7 +986,7 @@ async function run() {
                 accessibilityChecks.push(
                   await inspectAccessibility(page, route, viewport.key, theme),
                 );
-                const buffer = await page.screenshot({ fullPage: true, animations: "disabled" });
+                const buffer = await captureComparableScreenshot(page);
                 const destination = path.join(
                   candidateScreenshotRoot,
                   "themes",
@@ -1019,7 +1039,7 @@ async function run() {
               ...check,
             });
             accessibilityChecks.push(await inspectAccessibility(page, route, viewport.key, "dark"));
-            const buffer = await page.screenshot({ fullPage: true, animations: "disabled" });
+            const buffer = await captureComparableScreenshot(page);
             const destination = path.join(
               candidateScreenshotRoot,
               "themes",
