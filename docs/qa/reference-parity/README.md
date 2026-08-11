@@ -11,14 +11,15 @@ Os harnesses de QA visual cobrem três fronteiras:
 2. verificação sem sessão das 18 rotas CRM protegidas do catálogo, seguida
    de captura do login vazio em `1440×900`, `1280×720`, `768×1024` e
    `390×844`;
-3. QA autenticado complementar das 18 rotas em Supabase local isolado, com
+3. QA autenticado complementar das 21 rotas protegidas em Supabase local
+   isolado, incluindo as três páginas administrativas, com
    conta QA efêmera, fixtures sintéticas e motores de simulação bloqueados.
 
 Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
 cada imagem está em [`manifest.json`](./manifest.json).
 O QA local autenticado está em
-[`authenticated-results.json`](./authenticated-results.json); suas 87 capturas
+[`authenticated-results.json`](./authenticated-results.json); suas 99 capturas
 ficam em [`target-authenticated`](./target-authenticated/).
 
 ## Política de captura
@@ -125,13 +126,35 @@ já estiverem ocupados; nenhum dado local existente é sobrescrito. O serviço
 local, o banco e a aplicação precisam usar endpoints loopback. Chave privilegiada
 nunca é enviada ao navegador ou ao harness de captura.
 
+### Matriz preparada para a próxima baseline
+
+O harness está configurado para a próxima execução autenticada, ainda não
+realizada, com:
+
+- sete viewports: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `390×844`,
+  `375×812` e `320×568`;
+- 21 rotas em tema claro nos sete viewports;
+- as 21 rotas em tema escuro móvel no viewport `390×844`;
+- capturas desktop dos temas claro, equilibrado e escuro para as três páginas
+  administrativas, além das amostras visuais já existentes;
+- reflow equivalente a zoom de `80%`, `100%`, `125%`, `150%` e `200%`, sempre
+  sobre canvas físico de `1440×900`;
+- reduced motion e Axe nas 147 combinações responsivas, nas 24 amostras desktop
+  de tema e nas 21 combinações mobile dark.
+
+A matriz produzirá 147 capturas responsivas, 45 capturas de tema, 192 auditorias
+de acessibilidade, 192 comparações de baseline e 105 checks de zoom. Esses
+números são expectativas do contrato do harness, não evidência executada. A
+baseline aprovada abaixo continua sendo a última evidência versionada até uma
+execução explícita de `--update-baseline` passar integralmente.
+
 Resultados aprovados:
 
-- 72/72 checks responsivos: 18 rotas em quatro viewports;
-- 54/54 checks de tema: 18 rotas em claro, equilibrado e escuro;
-- 87/87 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
+- 84/84 checks responsivos: 21 rotas em quatro viewports;
+- 63/63 checks de tema: 21 rotas em claro, equilibrado e escuro;
+- 99/99 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
   dos três temas, sem violações;
-- 18/18 checks em zoom de 200%, representado por viewport CSS de `720×450` e
+- 21/21 checks em zoom de 200%, representado por viewport CSS de `720×450` e
   `deviceScaleFactor: 2` sobre canvas físico `1440×900`;
 - disclosure aberto por teclado, fechado com `Escape`, foco devolvido e `Tab`
   alcançando controle interativo;
@@ -140,8 +163,8 @@ Resultados aprovados:
 - `prefers-reduced-motion: reduce` ativo em todos os contextos;
 - zero overflow raiz, erro de console, erro de página, rota desviada ou motor de
   simulador habilitado;
-- 72 capturas rota×viewport e 15 amostras dos três temas, sem metadados;
-- 87/87 comparações contra o baseline versionado dentro do limiar máximo de 1%
+- 84 capturas rota×viewport e 15 amostras dos três temas, sem metadados;
+- 99/99 comparações contra o baseline versionado dentro do limiar máximo de 1%
   de pixels alterados, com tolerância de 16 níveis por canal.
 
 As capturas autenticadas usam somente identidades e valores sintéticos com
@@ -150,13 +173,13 @@ o baseline versionado de regressão do próprio alvo. A comparação com as
 capturas da referência viva continua sendo uma revisão visual humana separada;
 nenhuma dessas evidências constitui comparação de métricas comerciais.
 
-## Bloqueio da comparação autenticada em homologação
+## Comparação autenticada em homologação
 
-URL e credencial QA de homologação não foram disponibilizadas. Portanto, a
-comparação autenticada nesse ambiente permanece interrompida, conforme o gate
-original. Produção não foi usada como substituta; contas Master/Admin pessoais
-não foram usadas e nenhum usuário remoto foi criado. O QA local acima é
-evidência complementar, não fechamento do gate de homologação.
+A homologação isolada existe em `https://homolog.descomplicapro.com.br/`, com
+Basic Auth, contas QA sintéticas e banco próprio. A evidência remota versionada
+ainda corresponde ao SHA-base; deve ser regenerada depois do SHA final deste
+incremento. Produção não é substituta e contas Master/Admin pessoais continuam
+proibidas.
 
 Cada execução registra o commit base, se a árvore estava alterada e um SHA-256
 determinístico do diff e dos arquivos não rastreados, excluindo os próprios
@@ -195,5 +218,5 @@ O modo padrão nunca altera a baseline versionada. Capturas e diagnóstico da
 execução ficam em `test-results/authenticated-visual/`, ignorado pelo Git. O
 modo `--update-baseline` também exige que a baseline inicial corresponda ao
 `HEAD` e só a promove, por troca atômica com rollback, depois de todos os checks
-funcionais e de acessibilidade passarem. Hashes dos 87 arquivos usados ficam
+funcionais e de acessibilidade passarem. Hashes dos 99 arquivos usados ficam
 registrados na evidência; uma falha nunca atualiza a baseline.

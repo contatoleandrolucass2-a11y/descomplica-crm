@@ -59,6 +59,33 @@ describe("complete visual composition on the scoped v3 read model", () => {
     expect(page).toContain("defaultValue={weights?.[metric.key]}");
     expect(page).toContain("campos permanecem vazios");
   });
+
+  it("keeps deterministic dashboard and partnership structures visible without invented data", () => {
+    const dashboard = source("app/(protected)/app/page.tsx");
+    const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
+
+    for (const label of [
+      "Ritmo de vendas",
+      "Realizado Funil",
+      "Corretores por gerente",
+      "Canal de contato: configuração institucional indisponível",
+    ]) {
+      expect(dashboard).toContain(label);
+    }
+    for (const label of [
+      "Mês atual",
+      "Mês anterior",
+      "Ano",
+      "Personalizado",
+      "Período personalizado",
+      "Ranking das IMOBs",
+      "Ranking dos Empreendimentos",
+      "Aguardando conciliação das fontes",
+    ]) {
+      expect(partnerships).toContain(label);
+    }
+    expect(partnerships).not.toMatch(/VGV[^\n]*[1-9][0-9.,]/);
+  });
 });
 
 describe("isolated authenticated visual QA contract", () => {
@@ -72,7 +99,9 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("@local\\.invalid");
     expect(script).toContain('kind: "responsive"');
     expect(script).toContain("responsiveScreenshots: routes.length * viewports.length");
-    expect(script).toContain("themeScreenshots: themeCaptureRoutes.size * themes.length");
+    expect(script).toContain(
+      "themeScreenshots: desktopThemeCaptureRoutes.size * themes.length + routes.length",
+    );
     expect(script).toContain('locale: "pt-BR"');
     expect(script).toContain('timezoneId: "America/Sao_Paulo"');
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');

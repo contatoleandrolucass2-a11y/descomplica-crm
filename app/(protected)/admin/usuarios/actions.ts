@@ -217,3 +217,47 @@ export async function setUserActiveAction(
     return failure("Operação não autorizada ou inválida.");
   }
 }
+
+export async function approveUserAccessAction(
+  targetUserId: string,
+  _previousState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  try {
+    const actor = await requirePermission("users.manage");
+    await requirePermission("roles.manage");
+    if (actor.roleKey !== "master") return failure("A aprovação é exclusiva do perfil Master.");
+
+    const userId = userIdSchema.parse(targetUserId);
+    const roleKeyInput = z.string().parse(formData.get("roleKey"));
+    const reportingScopeIds = z
+      .array(z.string().uuid())
+      .min(1)
+      .max(20)
+      .parse(formData.getAll("reportingScopeIds"));
+    const reason = readRequiredReason(formData);
+    if (!isRoleKey(roleKeyInput) || ["master", "pending", "user"].includes(roleKeyInput)) {
+      return failure("Esse papel não pode ser aprovado pela interface.");
+    }
+    if (userId === actor.userId) return failure("Você não pode aprovar a própria conta.");
+
+    const supabase = await createClient();
+    const { error } = await supabase.rpc("approve_user_access", {
+      target_user_id: userId,
+      target_role_key: roleKeyInput,
+      reporting_scope_ids: reportingScopeIds,
+      reason,
+    });
+    if (error) return failure("A aprovação foi rejeitada pelo gate de papel e escopo.");
+
+    refreshUsersAdmin();
+    return {
+      status: "success",
+      message: "Acesso aprovado com papel e escopo auditados.",
+      sessionRefreshRecommended: true,
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) return failure(error.issues[0]?.message);
+    return failure("Operação não autorizada ou inválida.");
+  }
+}

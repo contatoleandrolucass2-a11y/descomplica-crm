@@ -1,5 +1,28 @@
 # Importação e reconciliação de mappings
 
+## Estado do fechamento de 11 de agosto de 2026
+
+O processo, contratos, preview e conflitos foram revalidados localmente com
+fixtures sintéticas. Nenhum manifesto real assinado foi disponibilizado; por
+isso não existe resultado honesto de conflito para organizações, equipes,
+carteiras ou responsáveis reais. O estado não é “zero conflitos”, mas
+**conflitos reais ainda não computáveis**.
+
+Inventário somente leitura relacionado:
+
+- caller de publicação confirmado: workflow n8n `r4DyPyOTDtoROXq0`;
+- owner operacional formal e backup: ausentes;
+- 40 leituras `GET` residuais recentes: consumidor não atribuído;
+- IDs Salesforce/Qlik canônicos e autoridade de mapping: ausentes;
+- fonte oficial de estoque: ausente;
+- apply real: não executado e não autorizado.
+
+Para eliminar o bloqueio, os data stewards dos dois lados devem fornecer um
+manifesto v1 fora do Git com IDs oficiais, evidência por item, vigência, owner e
+assinatura. O reviewer autorizado executa o preview, atribui cada conflito a um
+owner e devolve hash do manifesto, hash do plano, contagens por disposição e
+decisão por conflito. Matching aproximado por nome permanece proibido.
+
 ## Estado seguro deste incremento
 
 O importador recebe decisões humanas já revisadas; ele não descobre relações,

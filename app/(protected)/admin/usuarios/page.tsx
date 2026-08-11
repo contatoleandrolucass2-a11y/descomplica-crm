@@ -15,6 +15,7 @@ const profileSchema = z.object({
   email: z.string().nullable(),
   is_active: z.boolean(),
   created_at: z.string(),
+  access_status: z.enum(["pending", "approved", "suspended", "legacy_review"]),
 });
 const roleAssignmentSchema = z.object({ user_id: z.string().uuid(), role_key: z.string() });
 const overrideSchema = z.object({
@@ -22,6 +23,12 @@ const overrideSchema = z.object({
   permission_key: z.string(),
   effect: z.enum(["allow", "deny"]),
   reason: z.string().nullable(),
+});
+const reportingScopeSchema = z.object({
+  id: z.string().uuid(),
+  scope_key: z.string(),
+  scope_type: z.enum(["global", "organization", "team", "portfolio", "person"]),
+  is_active: z.boolean(),
 });
 
 function isRoleKey(value: string | undefined): value is RoleKey {
@@ -32,25 +39,62 @@ function isPermissionKey(value: string): value is PermissionKey {
   return Object.prototype.hasOwnProperty.call(PERMISSIONS, value);
 }
 
+function isMissingOnboardingFoundation(code: string | undefined) {
+  return code === "PGRST204" || code === "PGRST205" || code === "42703" || code === "42P01";
+}
+
 export default async function UsersAdminPage() {
   const context = await enforcePermission("users.view");
   const supabase = await createClient();
   const [profilesResult, rolesResult, overridesResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("user_id,email,is_active,created_at")
+      .select("user_id,email,is_active,created_at,access_status")
       .order("created_at", { ascending: false }),
     supabase.from("user_roles").select("user_id,role_key"),
     supabase.from("user_permission_overrides").select("user_id,permission_key,effect,reason"),
   ]);
 
-  if (profilesResult.error || rolesResult.error || overridesResult.error) {
+  // The approved app-first train must remain readable before the additive
+  // onboarding foundation reaches production. Fall back only for the exact
+  // missing-column/table states; all authorization and transport errors fail.
+  let profileRows: unknown = profilesResult.data ?? [];
+  let profileError = profilesResult.error;
+  if (isMissingOnboardingFoundation(profilesResult.error?.code)) {
+    const legacyProfilesResult = await supabase
+      .from("profiles")
+      .select("user_id,email,is_active,created_at")
+      .order("created_at", { ascending: false });
+    profileError = legacyProfilesResult.error;
+    profileRows = (legacyProfilesResult.data ?? []).map((profile) => ({
+      ...profile,
+      access_status: "legacy_review",
+    }));
+  }
+
+  if (profileError || rolesResult.error || overridesResult.error) {
     throw new Error("Não foi possível carregar a administração de usuários.");
   }
 
-  const profiles = z.array(profileSchema).parse(profilesResult.data ?? []);
+  const scopesResult =
+    context.roleKey === "master"
+      ? await supabase
+          .from("crm_reporting_scopes")
+          .select("id,scope_key,scope_type,is_active")
+          .eq("is_active", true)
+          .order("scope_type")
+          .order("scope_key")
+      : { data: [], error: null };
+  if (scopesResult.error && !isMissingOnboardingFoundation(scopesResult.error.code)) {
+    throw new Error("Não foi possível carregar os escopos oficiais para aprovação.");
+  }
+
+  const profiles = z.array(profileSchema).parse(profileRows);
   const assignments = z.array(roleAssignmentSchema).parse(rolesResult.data ?? []);
   const overrides = z.array(overrideSchema).parse(overridesResult.data ?? []);
+  const reportingScopes = z
+    .array(reportingScopeSchema)
+    .parse(scopesResult.error ? [] : (scopesResult.data ?? []));
   const rolesByUser = new Map(assignments.map((row) => [row.user_id, row.role_key]));
   const assignableRoles = getAssignableRoleKeys(context.level);
   const manageablePermissions = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
@@ -87,6 +131,7 @@ export default async function UsersAdminPage() {
       userId: profile.user_id,
       email: profile.email,
       isActive: profile.is_active,
+      accessStatus: profile.access_status,
       roleKey,
       isSelf: profile.user_id === context.userId,
       isManageable: profile.user_id !== context.userId && targetLevel < context.level,
@@ -110,6 +155,12 @@ export default async function UsersAdminPage() {
           canManageRoles={canManageRoles}
           canManagePermissions={canManagePermissions}
           canManageUsers={canManageUsers}
+          canApproveUsers={context.roleKey === "master" && canManageRoles && canManageUsers}
+          reportingScopes={reportingScopes.map((scope) => ({
+            id: scope.id,
+            key: scope.scope_key,
+            type: scope.scope_type,
+          }))}
         />
       </div>
     </main>

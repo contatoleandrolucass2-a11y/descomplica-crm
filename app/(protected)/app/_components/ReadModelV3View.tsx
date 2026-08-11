@@ -75,7 +75,7 @@ const OPTION_LABELS: Record<ReadModelV3Response["truncatedOptions"][number], str
 
 type MonthlyRow = {
   monthStart: string;
-  stages: Record<string, number>;
+  stages: Record<DashboardStageKey, number>;
 };
 
 function fallbackSelection(result: ReadModelV3LoadResult): ReadModelV3FilterSelection {
@@ -213,7 +213,7 @@ export function ReadModelV3View({
       key: stageKey,
       label: DASHBOARD_STAGES[stageKey].label,
       align: "right" as const,
-      render: (row: MonthlyRow) => numberFormatter.format(row.stages[stageKey] ?? 0),
+      render: (row: MonthlyRow) => numberFormatter.format(row.stages[stageKey]),
     })),
   ];
 
@@ -291,7 +291,7 @@ export function ReadModelV3View({
               model.dataStatus === "error"
                 ? "error"
                 : model.dataStatus === "stale"
-                  ? "warning"
+                  ? "stale"
                   : "unavailable"
             }
             title={statusCopy!.title}

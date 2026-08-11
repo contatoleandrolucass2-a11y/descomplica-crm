@@ -103,3 +103,75 @@ export function buildMonthlyFunnelSnapshots(metrics: DashboardMetricMap, goalsAv
     }),
   }));
 }
+
+export interface OperationalComparison {
+  key: "month" | "fourteen-days" | "seven-days" | "week" | "day";
+  label: string;
+  comparison: string;
+  previous: number | null;
+  current: number | null;
+  variation: number | null;
+  goal: number | null;
+  goalProgress: number | null;
+}
+
+function calculateVariation(current: number | null, previous: number | null) {
+  return current === null || previous === null || previous <= 0
+    ? null
+    : (current - previous) / previous;
+}
+
+export function buildOperationalComparisons(
+  metric: DashboardMetric,
+  goalsAvailable: boolean,
+): OperationalComparison[] {
+  const rows = [
+    {
+      key: "month",
+      label: "Mês",
+      comparison: "Mês anterior × mês atual",
+      previous: metric.previousMonth,
+      current: metric.currentMonth,
+      goal: goalsAvailable && metric.goalMonth > 0 ? metric.goalMonth : null,
+    },
+    {
+      key: "fourteen-days",
+      label: "Últimos 14 dias",
+      comparison: "14 dias anteriores × 14 dias atuais",
+      previous: metric.previousFourteenDays,
+      current: metric.lastFourteenDays,
+      goal: null,
+    },
+    {
+      key: "seven-days",
+      label: "Últimos 7 dias",
+      comparison: "7 dias anteriores × 7 dias atuais",
+      previous: metric.previousSevenDays,
+      current: metric.lastSevenDays,
+      goal: null,
+    },
+    {
+      key: "week",
+      label: "Semana",
+      comparison: "Semana passada × semana atual",
+      previous: metric.previousWeek,
+      current: metric.currentWeek,
+      goal: goalsAvailable && metric.goalWeek > 0 ? metric.goalWeek : null,
+    },
+    {
+      key: "day",
+      label: "Dia",
+      comparison: "Ontem × hoje",
+      previous: metric.yesterday,
+      current: metric.currentToday,
+      goal: goalsAvailable && metric.goalToday > 0 ? metric.goalToday : null,
+    },
+  ] as const;
+
+  return rows.map((row) => ({
+    ...row,
+    variation: calculateVariation(row.current, row.previous),
+    goalProgress:
+      row.goal === null || row.current === null ? null : calculateProgress(row.current, row.goal),
+  }));
+}

@@ -520,6 +520,7 @@
 }
 
 .state[data-variant="unavailable"],
+.state[data-variant="stale"],
 .state[data-variant="warning"] {
   border-color: color-mix(in srgb, var(--analytics-warning) 45%, transparent);
 }

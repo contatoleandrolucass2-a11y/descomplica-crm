@@ -940,3 +940,43 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   simuladores estão visualmente completos, mas cálculo e persistência seguem
   bloqueados. Supabase de produção, n8n, Qlik, Salesforce, dados, grants, flags
   e container de produção não foram alterados; não houve merge ou cutover.
+
+## 2026-08-11 — fechamento funcional e preparação fail-closed
+
+- Branch criada sobre o head exato do PR #33. A especificação completa e a
+  pilha #26–#33 foram convertidas em matriz rastreável por página, componente,
+  fonte, permissão, teste, evidência, estado e bloqueio.
+- Breadcrumbs passam a usar somente o catálogo autorizado. As 21 rotas entram
+  na matriz autenticada, incluindo Admin, Usuários e Páginas; reduced-motion,
+  teclado, três temas, sete viewports, mobile dark, Axe e zoom de 80%, 100%,
+  125%, 150% e 200% permanecem gates.
+- Aprovação de onboarding exige Master, permissões server-side, papel
+  aprovável, escopos oficiais explícitos, motivo e confirmação. Nenhum owner,
+  vínculo ou escopo é presumido.
+- Metas de funil e pontos foram movidos para draft privado, versionado e
+  Master-only, com preview/hashes e sem apply. Ranking rejeita configuração
+  legada como política oficial. Os cinco simuladores ganharam a estrutura da
+  especificação e seguem sem motor, exportação, persistência ou resultado.
+- Dashboard ganhou ritmo, comparativos operacionais, estrutura de corretores
+  por gerente e rodapé; Canal ganhou quatro visões, período personalizado,
+  resumo, pesquisa, dois rankings e gate de conciliação. Tudo que depende de
+  fonte/semântica ausente permanece explicitamente indisponível.
+- Simuladores ganharam abas acessíveis, repeaters locais, múltiplos proponentes,
+  cenários, inventário/paginação neutros, limpar e impressão estrutural. Nenhum
+  controle chama motor, persiste ou exporta cálculo comercial.
+- A imagem mantém leitura compatível com o schema produtivo anterior: ausência
+  exata das novas RPC/colunas/tabelas cai para legado em revisão e desabilita o
+  fluxo novo; outros erros continuam fail-closed.
+- O read model v3 valida dataset e escopo da resposta, exige as cinco etapas
+  mensais exatas e diferencia stale, indisponibilidade e erro.
+- Inspeção de produção foi somente leitura. Backup lógico criptografado,
+  root-only e com checksums verificados foi restaurado em container descartável
+  sem rede; as dez migrations futuras executaram e o rollback por restore limpo
+  passou. Plaintext temporário e container foram removidos.
+- O caller técnico Qlik permanece `r4DyPyOTDtoROXq0`; owner operacional,
+  substituto, 40 leitores GET, manifesto real de mappings, credenciais privadas,
+  políticas e casos de ouro continuam bloqueios externos. Nenhum conflito real
+  foi inventado como “zero”.
+- Três migrations com efeitos P0 foram marcadas para decomposição forward antes
+  de qualquer execução remota. Não houve migration remota, importação real,
+  alteração de n8n/Qlik/Salesforce, merge, cutover ou deploy de produção.

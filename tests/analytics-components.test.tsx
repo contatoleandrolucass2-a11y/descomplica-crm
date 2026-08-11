@@ -132,7 +132,7 @@ describe("analytical design system", () => {
     expect(markup.indexOf("Segundo")).toBeLessThan(markup.indexOf("Primeiro"));
   });
 
-  it("provides empty, unavailable, error and loading semantics", () => {
+  it("provides empty, stale, unavailable, error and loading semantics", () => {
     const empty = renderToStaticMarkup(
       <DataState variant="empty" title="Sem registros" description="Nada encontrado." />,
     );
@@ -143,6 +143,9 @@ describe("analytical design system", () => {
         description="Aguardando fonte oficial."
       />,
     );
+    const stale = renderToStaticMarkup(
+      <DataState variant="stale" title="Fonte atrasada" description="Watermark preservado." />,
+    );
     const error = renderToStaticMarkup(
       <DataState variant="error" title="Falha segura" description="Tente novamente." />,
     );
@@ -150,6 +153,8 @@ describe("analytical design system", () => {
 
     expect(empty).toContain("Sem dados");
     expect(unavailable).toContain("Indisponível");
+    expect(stale).toContain('data-variant="stale"');
+    expect(stale).toContain('role="status"');
     expect(error).toContain('role="alert"');
     expect(loading).toContain('aria-busy="true"');
   });

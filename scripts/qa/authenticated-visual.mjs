@@ -55,24 +55,40 @@ const routes = [
   "/app/simulacao/caixa",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
+  "/admin",
+  "/admin/usuarios",
+  "/admin/paginas",
 ];
 
 const viewports = [
   { key: "desktop-1440x900", width: 1440, height: 900 },
   { key: "notebook-1280x720", width: 1280, height: 720 },
+  { key: "tablet-1024x768", width: 1024, height: 768 },
   { key: "tablet-768x1024", width: 768, height: 1024 },
   { key: "mobile-390x844", width: 390, height: 844 },
+  { key: "mobile-375x812", width: 375, height: 812 },
+  { key: "mobile-320x568", width: 320, height: 568 },
 ];
 
 const themes = ["light", "balanced", "dark"];
 const themeLabels = { light: "Claro", balanced: "Equilibrado", dark: "Escuro" };
-const themeCaptureRoutes = new Set([
+const adminRoutes = ["/admin", "/admin/usuarios", "/admin/paginas"];
+const desktopThemeCaptureRoutes = new Set([
   "/app",
   "/app/ranking",
   "/app/configuracoes/metas",
   "/app/configuracoes/metas/pontos",
   "/app/simulacao/associativo-fluxo-linear",
+  ...adminRoutes,
 ]);
+const mobileDarkViewportKey = "mobile-390x844";
+const zoomLevels = [
+  { percent: 80, width: 1800, height: 1125, deviceScaleFactor: 0.8 },
+  { percent: 100, width: 1440, height: 900, deviceScaleFactor: 1 },
+  { percent: 125, width: 1152, height: 720, deviceScaleFactor: 1.25 },
+  { percent: 150, width: 960, height: 600, deviceScaleFactor: 1.5 },
+  { percent: 200, width: 720, height: 450, deviceScaleFactor: 2 },
+];
 
 function requiredEnvironment(name) {
   const value = process.env[name];
@@ -176,7 +192,9 @@ async function verifyDedicatedLocalQaIdentity(supabaseUrl, publishableKey, email
 }
 
 function routeKey(route) {
-  return route === "/app" ? "dashboard" : route.slice(5).replaceAll("/", "-");
+  if (route === "/app") return "dashboard";
+  const pathWithoutRoot = route.startsWith("/app/") ? route.slice(5) : route.slice(1);
+  return pathWithoutRoot.replaceAll("/", "-");
 }
 
 function repositoryRelative(filePath) {
@@ -424,7 +442,9 @@ async function baselineUsageIsUnchanged(baselineUsed) {
 
   for (const file of baselineUsed.files) {
     const digest = await sha256File(path.join(repositoryRoot, file.path));
-    if (digest?.sha256 !== file.sha256 || digest?.bytes !== file.bytes) return false;
+    if ((digest?.sha256 ?? null) !== file.sha256 || (digest?.bytes ?? null) !== file.bytes) {
+      return false;
+    }
   }
   return true;
 }
@@ -575,7 +595,7 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
   const checks = {};
   for (const [key, route] of [
     ["dashboard", "/app"],
-    ["ranking", "/app/ranking"],
+    ["stageOpportunities", "/app/etapas/oportunidades"],
   ]) {
     await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
     const sourceLabel = page
@@ -591,37 +611,44 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
 }
 
 async function checkZoom(origin, email, password, browser, httpCredentials) {
-  const context = await browser.newContext({
-    viewport: { width: 720, height: 450 },
-    deviceScaleFactor: 2,
-    reducedMotion: "reduce",
-    locale: "pt-BR",
-    timezoneId: "America/Sao_Paulo",
-    httpCredentials,
-  });
-  await hideHomologationBannerForBaseline(context);
-  const page = await context.newPage();
-  const consoleErrors = [];
-  const pageErrors = [];
-  page.on("console", (message) => {
-    if (message.type() === "error") consoleErrors.push(message.text());
-  });
-  page.on("pageerror", (error) => pageErrors.push(error.message));
+  const checks = [];
+  for (const level of zoomLevels) {
+    const context = await browser.newContext({
+      viewport: { width: level.width, height: level.height },
+      deviceScaleFactor: level.deviceScaleFactor,
+      reducedMotion: "reduce",
+      locale: "pt-BR",
+      timezoneId: "America/Sao_Paulo",
+      httpCredentials,
+    });
+    await hideHomologationBannerForBaseline(context);
+    const page = await context.newPage();
+    const consoleErrors = [];
+    const pageErrors = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+    page.on("pageerror", (error) => pageErrors.push(error.message));
 
-  try {
-    await login(page, origin, email, password);
-    const checks = [];
-    for (const route of routes) {
-      checks.push(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors));
+    try {
+      await login(page, origin, email, password);
+      for (const route of routes) {
+        checks.push({
+          zoomPercent: level.percent,
+          viewport: `zoom-${level.percent}`,
+          ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors)),
+        });
+      }
+    } finally {
+      await context.close();
     }
-    return {
-      method: "720×450 CSS viewport with deviceScaleFactor 2 (1440×900 physical canvas)",
-      routes: checks,
-      passed: checks.every((check) => check.passed),
-    };
-  } finally {
-    await context.close();
   }
+  return {
+    method: "CSS viewport equivalents with deviceScaleFactor on a 1440×900 physical canvas",
+    levels: zoomLevels,
+    routes: checks,
+    passed: checks.every((check) => check.passed),
+  };
 }
 
 async function captureHomologationCheckpoints(browser, origin, email, password, httpCredentials) {
@@ -670,20 +697,24 @@ function functionalChecksPassed({
   return (
     routeChecks.length === routes.length * viewports.length &&
     routeChecks.every((check) => check.passed) &&
-    themeChecks.length === routes.length * themes.length &&
+    themeChecks.length === routes.length * (themes.length + 1) &&
     themeChecks.every((check) => check.passed) &&
     accessibilityChecks.length ===
-      routes.length * viewports.length + themeCaptureRoutes.size * themes.length &&
+      routes.length * viewports.length +
+        desktopThemeCaptureRoutes.size * themes.length +
+        routes.length &&
     accessibilityChecks.every((check) => check.passed) &&
     screenshots.length ===
-      routes.length * viewports.length + themeCaptureRoutes.size * themes.length &&
+      routes.length * viewports.length +
+        desktopThemeCaptureRoutes.size * themes.length +
+        routes.length &&
     keyboard &&
     Object.values(keyboard).every(Boolean) &&
     simulatorValidation &&
     Object.values(simulatorValidation).every(Boolean) &&
     fixtureSourceMarker &&
     Object.values(fixtureSourceMarker).every(Boolean) &&
-    zoom.routes.length === routes.length &&
+    zoom.routes.length === routes.length * zoomLevels.length &&
     zoom.passed
   );
 }
@@ -850,6 +881,7 @@ async function run() {
   let simulatorValidation = null;
   let fixtureSourceMarker = null;
   let homologationCheckpoints = [];
+  let currentStage = "homologation-checkpoints";
 
   try {
     homologationCheckpoints = await captureHomologationCheckpoints(
@@ -860,6 +892,7 @@ async function run() {
       httpCredentials,
     );
     for (const viewport of viewports) {
+      currentStage = `responsive:${viewport.key}`;
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
         reducedMotion: "reduce",
@@ -879,6 +912,7 @@ async function run() {
       try {
         await login(page, origin, email, password);
         for (const route of routes) {
+          currentStage = `responsive:${viewport.key}:${route}`;
           const check = await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors);
           routeChecks.push({ viewport: viewport.key, ...check });
           accessibilityChecks.push(await inspectAccessibility(page, route, viewport.key, "light"));
@@ -907,9 +941,11 @@ async function run() {
 
         if (viewport.key === "desktop-1440x900") {
           for (const theme of themes) {
+            currentStage = `theme:${theme}`;
             await page.goto(`${origin}/app`, { waitUntil: "domcontentloaded" });
             await setTheme(page, theme);
             for (const route of routes) {
+              currentStage = `theme:${theme}:${route}`;
               const check = await inspectRoute(
                 page,
                 origin,
@@ -918,8 +954,13 @@ async function run() {
                 consoleErrors,
                 pageErrors,
               );
-              themeChecks.push({ theme, ...check });
-              if (themeCaptureRoutes.has(route)) {
+              themeChecks.push({
+                matrix: "desktop-themes",
+                viewport: viewport.key,
+                theme,
+                ...check,
+              });
+              if (desktopThemeCaptureRoutes.has(route)) {
                 accessibilityChecks.push(
                   await inspectAccessibility(page, route, viewport.key, theme),
                 );
@@ -927,7 +968,7 @@ async function run() {
                 const destination = path.join(
                   candidateScreenshotRoot,
                   "themes",
-                  `${routeKey(route)}-${theme}-1440x900.webp`,
+                  `${routeKey(route)}-${theme}-${viewport.width}x${viewport.height}.webp`,
                 );
                 screenshots.push({
                   kind: "theme",
@@ -947,15 +988,65 @@ async function run() {
               }
             }
           }
+          currentStage = "keyboard";
           keyboard = await checkKeyboard(page, origin);
+          currentStage = "simulator-validation";
           simulatorValidation = await checkSimulatorValidation(page, origin);
+          currentStage = "fixture-source-marker";
           fixtureSourceMarker = await checkFixtureSourceMarker(page, origin, expectedSourceMarker);
+        }
+
+        if (viewport.key === mobileDarkViewportKey) {
+          currentStage = `mobile-dark:${viewport.key}`;
+          await page.goto(`${origin}/app`, { waitUntil: "domcontentloaded" });
+          await setTheme(page, "dark");
+          for (const route of routes) {
+            currentStage = `mobile-dark:${viewport.key}:${route}`;
+            const check = await inspectRoute(
+              page,
+              origin,
+              route,
+              "dark",
+              consoleErrors,
+              pageErrors,
+            );
+            themeChecks.push({
+              matrix: "mobile-dark",
+              viewport: viewport.key,
+              theme: "dark",
+              ...check,
+            });
+            accessibilityChecks.push(await inspectAccessibility(page, route, viewport.key, "dark"));
+            const buffer = await page.screenshot({ fullPage: true, animations: "disabled" });
+            const destination = path.join(
+              candidateScreenshotRoot,
+              "themes",
+              "mobile-dark",
+              `${routeKey(route)}-dark-${viewport.width}x${viewport.height}.webp`,
+            );
+            screenshots.push({
+              kind: "mobile-dark",
+              route,
+              viewport: viewport.key,
+              theme: "dark",
+              visualComparison: await compareVisualBaseline(
+                buffer,
+                path.join(
+                  baselineScreenshotRoot,
+                  path.relative(candidateScreenshotRoot, destination),
+                ),
+                trackedFiles,
+              ),
+              ...(await saveLosslessWebp(buffer, destination)),
+            });
+          }
         }
       } finally {
         await context.close();
       }
     }
 
+    currentStage = "zoom";
     const zoom = await checkZoom(origin, email, password, browser, httpCredentials);
     const functionalPassed = functionalChecksPassed({
       routeChecks,
@@ -1020,7 +1111,7 @@ async function run() {
       },
       visualInspectionCoverage: {
         responsiveScreenshots: routes.length * viewports.length,
-        themeScreenshots: themeCaptureRoutes.size * themes.length,
+        themeScreenshots: desktopThemeCaptureRoutes.size * themes.length + routes.length,
         accessibilityAudits: accessibilityChecks.length,
         baselineComparisons: screenshots.length,
         changedPixelRatioThreshold: visualDifferenceThreshold,
@@ -1090,7 +1181,7 @@ async function run() {
           committedAtStart: baselineCommittedAtStart,
           unchangedDuringCapture: null,
         },
-        failure: { stage: "capture-or-verification", kind: "sanitized" },
+        failure: { stage: currentStage, kind: "sanitized" },
         passed: false,
       });
     }

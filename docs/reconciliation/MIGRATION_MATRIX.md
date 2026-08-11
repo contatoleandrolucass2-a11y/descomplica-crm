@@ -47,6 +47,7 @@ Captura remota: `2026-08-09T05:31:42Z`, projeto
 |    24 | `20260809181424_crm_read_model_v3`                             |  Sim  |  Não   | `bdf0e05263b2d744b639d5879ed45874c3d79f533c6986d451c51013ab6534ef` | —                                                                  | Autoridades de fonte, dimensões canônicas, runs/fatos/manifesto de escopo imutáveis e RPCs v3 escopadas.      | Somente local; fundação shadow, sem produtor/cutover remoto | Exige tuple de fonte aprovada, mappings reconciliados, dual-write e validação antes de qualquer promoção.        |
 |    25 | `20260810165927_qlik_relay_mapping_cutover`                    |  Sim  |  Não   | `d8b7788f4f5809cc5297919818bcd265a2d1259b952b7583bb239c0406e661d5` | —                                                                  | Papel/RPC relay mínimos, gate, ledger sanitizado, autoridades e importação de mappings.                       | Somente local; inerte e sem credenciais reais               | Manter flags off; exige owners, restore, provisioning privado, shadow/canário e autorizações separadas.          |
 |    26 | `20260810201703_commercial_engines_policy_runtime`             |  Sim  |  Não   | `9a6e31d75acde57ea75f158fee7b4020eb8f589b5eff1c48ca22826d398a1531` | —                                                                  | Políticas/motores versionados, gates, grants e ledger privados; zero regra real seedada.                      | Somente local; runtime inerte e sem políticas               | Manter flags off; ativação exige políticas, owners, grants e casos de ouro oficialmente aprovados.               |
+|    27 | `20260811120000_commercial_configuration_drafts`               |  Sim  |  Não   | `0c6014602ee64f2d6c638a4e7b67eb0a501b6e85657925e50946e04ab296ad3a` | —                                                                  | Rascunhos privados de metas/pontos, preview, revisão otimista e auditoria hashes-only; sem ativação.          | Somente local; intake inerte e Master-only                  | Aplicar apenas na sequência remota aprovada; não cria política, gate, grant ou valor oficial.                    |
 
 As quatro versões antes somente remotas agora têm markers locais no-op. A
 diferença de hashes é intencional: o SQL remoto sensível/inseguro não foi
@@ -81,7 +82,7 @@ remota automática nem autorizada. As migrations locais `20260807185611`,
 `20260808174817` e `20260809024000` têm versões anteriores ao último registro
 remoto (`20260809031936`); portanto um push normal as ignora, enquanto
 `--include-all` ampliaria o risco e continua proibido sem restore exato e
-aprovação. Aplicar as nove migrations somente locais não constitui hoje uma
+aprovação. Aplicar as dez migrations somente locais não constitui hoje uma
 sequência remota segura:
 
 - `20260807185611` fecha somente `crm_imob_ranking_runs` e
@@ -112,7 +113,7 @@ O plano seguro para o próximo gate é:
 4. validar que a ponte aditiva preserva a RPC legada em restore representativo;
 5. executar reset completo, pgTAP de ACL/RLS e comparação do schema local;
 6. obter backup remoto e restauração isolada comprovados;
-7. revisar o dry-run completo, incluindo as nove versões somente locais, os
+7. revisar o dry-run completo, incluindo as dez versões somente locais, os
    markers e a convergência;
 8. validar relay shadow por duas janelas e canário controlado antes de agendar a revogação;
 9. somente em autorização posterior, aplicar pelo mecanismo oficial e validar

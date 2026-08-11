@@ -172,6 +172,7 @@ export default async function RankingPage({
 
   if (result.status !== "ready") {
     const isEmpty = result.status === "empty";
+    const policyPending = result.status === "policy_pending";
 
     return (
       <main className="px-4 py-6 sm:px-6 sm:py-10">
@@ -186,18 +187,30 @@ export default async function RankingPage({
                   aria-hidden="true"
                   className={`size-2.5 rounded-full ${isEmpty ? "bg-amber-300" : "bg-cyan-300"}`}
                 />
-                {isEmpty ? "Aguardando o primeiro snapshot" : "Pontuação ainda não configurada"}
+                {isEmpty
+                  ? "Aguardando o primeiro snapshot"
+                  : policyPending
+                    ? "Política oficial pendente"
+                    : "Pontuação ainda não configurada"}
               </p>
             }
           />
 
           <DataState
             variant={isEmpty ? "empty" : "unavailable"}
-            title={isEmpty ? "Aguardando dados" : "Configuração necessária"}
+            title={
+              isEmpty
+                ? "Aguardando dados"
+                : policyPending
+                  ? "Ranking bloqueado por política"
+                  : "Configuração necessária"
+            }
             description={
               isEmpty
                 ? "O read model está pronto, mas ainda não existe um snapshot real de atividades. Nenhum participante demonstrativo será exibido."
-                : "Existe atividade para o ranking, mas os pesos ainda não foram confirmados por um administrador."
+                : policyPending
+                  ? "Existe configuração legada, mas ela não possui política versionada, owners, casos de ouro, aprovação, gate, coorte, grant, vigência e rollback. Nenhuma pontuação foi calculada."
+                  : "Existe atividade para o ranking, mas ainda não há rascunho validado de pesos."
             }
             action={
               !isEmpty && canManagePoints ? (
@@ -205,7 +218,7 @@ export default async function RankingPage({
                   href="/app/configuracoes/metas/pontos"
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-[#082137] hover:bg-cyan-200"
                 >
-                  Configurar pontuação
+                  Preparar rascunho de pontuação
                 </Link>
               ) : undefined
             }

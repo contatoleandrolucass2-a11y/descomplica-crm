@@ -36,6 +36,7 @@ function isPeriod(value: string): value is RankingPeriodKey {
 export type RankingLoadResult =
   | { status: "empty" }
   | { status: "unconfigured" }
+  | { status: "policy_pending"; legacyConfigurationDetected: boolean }
   | {
       status: "ready";
       referenceDate: string;
@@ -59,18 +60,23 @@ export async function loadRankingReadModel(): Promise<RankingLoadResult> {
   if (!snapshotResult.data) return { status: "empty" };
 
   const snapshot = snapshotSchema.parse(snapshotResult.data);
-  const [participantsResult, pointSettings] = await Promise.all([
-    supabase
-      .from("crm_ranking_participants")
-      .select(
-        "period_key,broker_key,broker_name,manager_name,roulette,roulette_saturday,roulette_sunday,schedule,visit,approved_folder,sale",
-      )
-      .eq("snapshot_id", snapshot.id),
-    loadPointSettings(),
-  ]);
-
-  if (participantsResult.error) throw new Error("Não foi possível carregar os participantes.");
+  const pointSettings = await loadPointSettings();
   if (pointSettings.status === "empty") return { status: "unconfigured" };
+
+  // The v2 table is legacy configuration, not commercial authority. Keep the
+  // ranking fail-closed until the versioned runtime can prove policy, golden
+  // cases, owners, gate, cohort and grant. No environment flag bypass exists.
+  if (!rankingPolicyAuthorityAvailable()) {
+    return { status: "policy_pending", legacyConfigurationDetected: true };
+  }
+
+  const participantsResult = await supabase
+    .from("crm_ranking_participants")
+    .select(
+      "period_key,broker_key,broker_name,manager_name,roulette,roulette_saturday,roulette_sunday,schedule,visit,approved_folder,sale",
+    )
+    .eq("snapshot_id", snapshot.id);
+  if (participantsResult.error) throw new Error("Não foi possível carregar os participantes.");
 
   const rows = z.array(participantSchema).parse(participantsResult.data ?? []);
   const activities = rows.map((row) => {
@@ -100,4 +106,8 @@ export async function loadRankingReadModel(): Promise<RankingLoadResult> {
     activities,
     weights: pointSettings,
   };
+}
+
+function rankingPolicyAuthorityAvailable(): boolean {
+  return false;
 }

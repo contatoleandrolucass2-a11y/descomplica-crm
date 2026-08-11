@@ -24,6 +24,22 @@ export type ReadModelV3LoadResult =
     }
   | { status: "error" };
 
+export function validateReadModelV3Response(
+  value: unknown,
+  expectedDataset: ReadModelV3Dataset,
+  expectedScopeId: string,
+): ReadModelV3Response | null {
+  const parsed = readModelV3ResponseSchema.safeParse(value);
+  if (
+    !parsed.success ||
+    parsed.data.datasetKey !== expectedDataset ||
+    parsed.data.scopeId !== expectedScopeId
+  ) {
+    return null;
+  }
+  return parsed.data;
+}
+
 export async function loadReadModelV3(
   dataset: ReadModelV3Dataset,
   selection: ReadModelV3FilterSelection,
@@ -56,12 +72,12 @@ export async function loadReadModelV3(
       : { status: "error" };
   }
 
-  const model = readModelV3ResponseSchema.safeParse(modelResult.data);
-  if (!model.success) return { status: "error" };
+  const model = validateReadModelV3Response(modelResult.data, dataset, scopeId);
+  if (!model) return { status: "error" };
   return {
     status: "loaded",
     scopes: scopes.data,
     selection: resolvedSelection,
-    model: model.data,
+    model,
   };
 }

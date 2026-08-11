@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildBreadcrumbs,
   buildNavigationGroups,
   getNavigationHome,
   isNavigationGroupActive,
@@ -83,5 +84,13 @@ describe("authorized hierarchical navigation", () => {
         },
       ])?.path,
     ).toBe("/app/ranking");
+  });
+
+  it("builds a cycle-safe breadcrumb only from authorized catalog entries", () => {
+    expect(buildBreadcrumbs("/app/etapas/visitas", pages).map((page) => page.name)).toEqual([
+      "Dashboard",
+      "Visitas",
+    ]);
+    expect(buildBreadcrumbs("/app/admin/secret", pages)).toEqual([]);
   });
 });
