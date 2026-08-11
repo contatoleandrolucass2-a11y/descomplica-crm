@@ -1049,3 +1049,11 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Nenhum ambiente remoto, Supabase, n8n, Qlik, Salesforce, DNS ou Nginx foi
   alterado nesta correção. Flags comerciais, allowlists e motores continuam
   desligados.
+- O gate visual independente read-only no HEAD `5271b2b` aprovou a entrega com
+  P0/P1/P2/P3 iguais a zero. Foram conferidos 192/192 hashes e as superfícies de
+  topbar, simuladores, Canal, Ranking, nomenclaturas, cópias e estados finais;
+  homologação viva não foi acessada.
+- O fechamento técnico aprovou formato, lint, tipos, 263 testes, build, E2E
+  isolado, 885 pgTAP, RLS API, lint local do schema, auditorias pnpm/OSV/gitleaks,
+  actionlint, shellcheck e validação dos manifests Compose. Nenhum segredo ou
+  ambiente remoto foi alterado.

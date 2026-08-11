@@ -12,6 +12,8 @@
 - Adiciona regressão browser para identidade longa e três estados de CTA, além
   de evidências reproduzíveis de login, logout, 403, 404, 500, loading, empty,
   stale e error sem persistir credenciais.
+- Promove 192 capturas finais e recebe aprovação do gate visual independente,
+  com P0/P1/P2/P3 iguais a zero nas 21 rotas e sem acessar a homologação viva.
 - Fecha lacunas determinísticas da especificação com rastreabilidade das 21
   rotas, breadcrumbs autorizados, aprovação Master-only por escopos oficiais,
   drafts privados de metas/pontos, ranking fail-closed, estados v3 estritos e

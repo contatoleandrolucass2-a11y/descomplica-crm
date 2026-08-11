@@ -40,6 +40,37 @@ Gate automatizado local aprovado no SHA de captura
 - 100% dos contratos de truncamento e distinção de CTA aprovados;
 - conta e fixtures QA efêmeras removidas.
 
-A baseline foi promovida a partir de worktree limpa. A revisão visual
-independente será registrada depois da inspeção das evidências promovidas; ela
-não autoriza política comercial, merge, migration ou deploy de produção.
+A baseline foi promovida a partir de worktree limpa.
+
+## Gate visual independente
+
+Revisão read-only concluída no HEAD
+`5271b2bb682ebe11fd5e6d7ea0f341c7360c7100`:
+
+- **GATE VISUAL APROVADO**;
+- P0: 0; P1: 0; P2: 0; P3: 0;
+- 192/192 hashes de captura conferidos, sem divergência;
+- topbar, cinco simuladores, Canal, Ranking, nomenclaturas, cópias e estados
+  finais inspecionados;
+- nenhum bloqueio visual residual.
+
+Login, logout, 403 e 404 foram exercitados no fluxo real. As evidências de 500,
+loading, empty, stale e error usam as superfícies compiladas no runtime local
+isolado. A revisão não acessou a homologação viva e não autoriza política
+comercial, merge, migration ou deploy.
+
+## Validações finais
+
+- `pnpm format` e `pnpm format:check`: aprovados;
+- `pnpm lint`: aprovado;
+- `pnpm typecheck`: aprovado;
+- `pnpm test`: 263 aprovados e 1 skip remoto previsto;
+- `pnpm build`: aprovado, 37 páginas/rotas geradas;
+- `pnpm db:test`: 18 arquivos, 885 testes, aprovado;
+- E2E local isolado: 8 aprovados e 1 skip remoto previsto; nove perfis e
+  fixtures removidos;
+- RLS via API local: nove perfis isolados, oito negações anônimas e zero linha
+  anônima; nenhuma credencial persistida;
+- `supabase db lint --local`: zero erro de schema;
+- auditorias pnpm, OSV e gitleaks do diretório/histórico: zero achado;
+- actionlint, shellcheck e os dois manifests Compose: aprovados.
