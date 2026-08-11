@@ -32,4 +32,15 @@ describe("security headers regression", () => {
     expect(headers.has("Strict-Transport-Security")).toBe(false);
     expect(headers.get("Cache-Control")).toBe("private, no-store");
   });
+
+  it("adds a crawler deny header only for isolated homologation", () => {
+    const homologationHeaders = new Headers();
+    const regularHeaders = new Headers();
+
+    applySecurityHeaders(homologationHeaders, { isProd: true, noIndex: true });
+    applySecurityHeaders(regularHeaders, { isProd: true });
+
+    expect(homologationHeaders.get("X-Robots-Tag")).toBe("noindex, nofollow, noarchive");
+    expect(regularHeaders.has("X-Robots-Tag")).toBe(false);
+  });
 });

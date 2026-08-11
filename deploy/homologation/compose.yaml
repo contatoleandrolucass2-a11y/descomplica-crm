@@ -1,0 +1,78 @@
+name: descomplica-homologation
+
+services:
+  app:
+    container_name: descomplica-homologation-app
+    image: descomplica-homologation:${IMAGE_TAG:?IMAGE_TAG is required}
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?NEXT_PUBLIC_SUPABASE_URL is required}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is required}
+        DEPLOYMENT_VERSION: ${IMAGE_TAG:?IMAGE_TAG is required}
+        HOMOLOGATION_MODE: "true"
+        PUBLIC_SIGNUP_ENABLED: "false"
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    ports:
+      - "127.0.0.1:3100:3000"
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: "3000"
+      NEXT_TELEMETRY_DISABLED: "1"
+      DEPLOYMENT_VERSION: ${IMAGE_TAG:?IMAGE_TAG is required}
+      HOMOLOGATION_MODE: "true"
+      PUBLIC_SIGNUP_ENABLED: "false"
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?NEXT_PUBLIC_SUPABASE_URL is required}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is required}
+      APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN is required}
+      SALESFORCE_INGEST_ENABLED: "false"
+      SALESFORCE_REFRESH_ENABLED: "false"
+      CRM_READ_MODEL_V3_SHADOW_ENABLED: "true"
+      QLIK_RELAY_MODE: "off"
+      QLIK_RELAY_WRITE_ENABLED: "false"
+      COMMERCIAL_ENGINE_RUNTIME_MODE: "off"
+      COMMERCIAL_ENGINE_ENABLED_KEYS: ""
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    volumes:
+      - homologation-next-cache:/app/.next/cache
+    networks:
+      - homologation-supabase
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 256
+    cpus: 1.00
+    mem_limit: 1g
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+networks:
+  homologation-supabase:
+    name: supabase_network_descomplica-homologation
+    external: true
+
+volumes:
+  homologation-next-cache:
+    name: descomplica-homologation-next-cache

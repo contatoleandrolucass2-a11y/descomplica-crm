@@ -874,3 +874,30 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   pós-relay; o bloqueio está documentado, não contornado.
 - Nenhuma alteração foi feita em produção, Supabase remoto, n8n, Salesforce,
   Qlik, VPS, DNS ou Nginx. Não houve merge nem deploy.
+
+## 2026-08-11 — fundação da homologação visual isolada
+
+- Branch `codex/homologation-visual-release-gate` criada no SHA base exato
+  `9f1ca6fca7c7ccd179568dc9f92cc19a0e7bce25`, sem reaproveitar banco, Auth,
+  volume, rede, porta, cookie ou conta de produção.
+- Compose dedicado limita o app a `127.0.0.1:3100`; o Supabase local usa o
+  projeto `descomplica-homologation`, somente fixtures sintéticas e nove contas
+  `@local.invalid`. Firewall exclusivo bloqueia externamente as portas do CLI.
+- `HOMOLOGATION_MODE` adiciona banner visível, metadados e header `noindex`.
+  Cadastro público fica ausente na UI, rota e Server Action. Produção preserva
+  o comportamento anterior quando as flags não são definidas.
+- Read model v3 fica habilitável somente no Compose isolado. Relay Qlik,
+  Salesforce e os 14 motores comerciais continuam desligados; simuladores
+  permanecem visuais e bloqueados, sem política ou valor comercial inventado.
+- Harnesses RLS/Playwright/visual aceitam a URL remota somente quando o modo
+  explícito aponta exatamente para `https://homolog.descomplicapro.com.br`.
+  Basic Auth e nove credenciais QA ficam em arquivos root-only e nunca entram
+  em argumentos, storage state, Git ou evidências.
+- Gate local inicial: instalação congelada, lint, typecheck, 239 Vitest (um
+  ignorado), 8 testes Node, build de 37 páginas e 863/863 pgTAP passaram.
+  Prettier global, pnpm audit, Gitleaks da árvore/217 commits e OSV em 521
+  pacotes também passaram.
+- Inspeção somente leitura confirmou produção saudável, recursos suficientes e
+  DNS de homologação ainda livre. Nenhum ambiente remoto, DNS ou Nginx havia
+  sido alterado neste checkpoint; publicação e QA HTTPS seguem para o próximo
+  gate da mesma branch.

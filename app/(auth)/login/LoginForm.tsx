@@ -17,7 +17,7 @@ import { initialLoginActionState } from "@/lib/auth/actions/login-state";
 import { AnimatedBrainVisual } from "./AnimatedBrainVisual";
 import styles from "./LoginForm.module.css";
 
-export function LoginForm() {
+export function LoginForm({ publicSignupEnabled = true }: { publicSignupEnabled?: boolean }) {
   const [state, formAction, isPending] = useActionState(loginAction, initialLoginActionState);
 
   return (
@@ -90,12 +90,14 @@ export function LoginForm() {
               </button>
             </form>
 
-            <p className={styles.register}>
-              Ainda não tem conta?{" "}
-              <Link href="/register" className={styles.registerLink}>
-                Criar conta
-              </Link>
-            </p>
+            {publicSignupEnabled ? (
+              <p className={styles.register}>
+                Ainda não tem conta?{" "}
+                <Link href="/register" className={styles.registerLink}>
+                  Criar conta
+                </Link>
+              </p>
+            ) : null}
           </div>
         </section>
       </div>

@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+
+import { isPublicSignupEnabled } from "@/lib/homologation/config";
 
 import { RegisterForm } from "./RegisterForm";
 
@@ -7,5 +10,6 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
+  if (!isPublicSignupEnabled()) notFound();
   return <RegisterForm />;
 }

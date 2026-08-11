@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/auth/supabase/server";
+import { isPublicSignupEnabled } from "@/lib/homologation/config";
 
 import { LoginForm } from "./LoginForm";
 
@@ -25,5 +26,5 @@ export default async function LoginPage() {
     redirect("/app");
   }
 
-  return <LoginForm />;
+  return <LoginForm publicSignupEnabled={isPublicSignupEnabled()} />;
 }

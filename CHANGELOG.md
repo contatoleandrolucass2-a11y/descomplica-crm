@@ -187,6 +187,10 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Adicionado
 
+- Homologação visual isolada com Compose/volumes/rede/portas próprios, Supabase
+  local sintético, nove perfis QA, Basic Auth, noindex, banner persistente,
+  cadastro público bloqueado, firewall dedicado, E2E remoto e rollback sem
+  cutover.
 - Vitest e testes iniciais dos schemas de autenticação.
 - Scripts de verificação, auditoria, scanners e Supabase local.
 - Build Next.js `standalone` para a VPS.
@@ -222,6 +226,9 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Segurança
 
+- Flags da homologação falham fechadas; read model v3 pode ser visualizado
+  apenas no ambiente sintético, enquanto relay Qlik, integrações externas e
+  motores comerciais permanecem desligados.
 - Removidas vulnerabilidades críticas/altas/moderadas conhecidas da árvore final.
 - Arquivo de ambiente presente no ZIP de origem removido da árvore de entrega e colocado em quarentena local.
 - Usuários inativos bloqueados no contexto de autorização e na resolução de permissões usada pela RLS.
