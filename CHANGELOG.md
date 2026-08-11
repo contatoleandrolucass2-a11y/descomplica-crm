@@ -30,6 +30,7 @@
 - Atualiza o contrato unitário da baseline promovida para preservar e validar o
   diagnóstico do baseline anterior sem tratar mudanças intencionais como drift
   do baseline novo.
+- Alinha o E2E de permissões ao título oficial restaurado do dashboard.
 - Publica a homologação visual isolada em HTTPS com DNS/TLS exclusivos, Basic
   Auth antes do login, `noindex`, nove perfis e fixtures somente sintéticas;
   E2E remoto, 21 rotas, 87 checks visuais/Axe, quatro viewports, três temas,

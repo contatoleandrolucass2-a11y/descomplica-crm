@@ -128,7 +128,7 @@ const simulatorRoles = new Set<Role>(["master", "admin", "broker", "coordinator"
 const adminRoles = new Set<Role>(["master", "admin"]);
 const masterOnlyRoles = new Set<Role>(["master"]);
 const protectedSurfaces = [
-  { path: "/app", heading: "Dashboard do funil", allowed: masterOnlyRoles },
+  { path: "/app", heading: "Relatório completo da equipe", allowed: masterOnlyRoles },
   {
     path: "/app/etapas/oportunidades",
     heading: "Oportunidades",
@@ -342,7 +342,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
 }) => {
   await withRolePage(browser, "master", async (page) => {
     const surfaces = [
-      ["/app", "Dashboard do funil"],
+      ["/app", "Relatório completo da equipe"],
       ["/app/etapas/oportunidades", "Oportunidades"],
       ["/app/etapas/agendamentos", "Agendamentos"],
       ["/app/etapas/visitas", "Visitas"],

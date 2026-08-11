@@ -998,3 +998,6 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   estado “preparado” e obrigatoriedade de igualdade com a imagem anterior. O
   teste agora exige a baseline promovida íntegra e mantém o diagnóstico anterior
   auditável, permitindo somente os motivos fechados produzidos pelo harness.
+- O primeiro E2E integral parou no título legado “Dashboard do funil”. A matriz
+  foi alinhada ao H1 restaurado “Relatório completo da equipe”; permissões,
+  navegação e conteúdo permitido continuam sendo verificados sem relaxamento.
