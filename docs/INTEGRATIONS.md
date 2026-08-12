@@ -36,11 +36,27 @@ dedicadas e passar pela reconciliação descrita em
 
 ## Qlik / ranking de imobiliárias
 
-O projeto remoto recebeu diretamente duas tabelas para histórico de ranking de imobiliárias: `crm_imob_ranking_runs` e `crm_imob_ranking_entries`. Os metadados apontam para duas cargas Qlik concluídas em 6 de agosto de 2026, uma delas identificada como exportação histórica do Qlik Cloud. A rota do Canal de Parcerias existe somente como placeholder protegido e não consulta esses dados.
+O projeto remoto contém três tabelas para histórico de ranking de imobiliárias:
+`crm_imob_ranking_runs`, `crm_imob_ranking_entries` e
+`crm_imob_ranking_developments`. A rota do Canal de Parcerias não consulta
+diretamente esses dados.
 
 A investigação do drift posterior identificou o executor exato: uma sessão interativa do conector Supabase/Codex executou `GRANT SELECT` e `ALTER POLICY` por `POST /mcp`. O exportador Qlik não possui cliente PostgreSQL/Supabase nem DDL; o workflow n8n observado não contém DDL, nunca iniciou uma execução e aponta ao projeto Supabase anterior.
 
-`ingest_crm_imob_ranking_snapshot(jsonb)` passa a ser o único contrato de escrita da integração nova. A RPC valida e grava um snapshot completo em uma transação, aceita replay idêntico e rejeita reutilização conflitante do identificador. Somente `service_role` pode executá-la; nenhum papel da Data API recebe privilégio direto nas tabelas. O procedimento operacional está em `docs/runbooks/qlik-ranking-ingestion.md`.
+`ingest_crm_imob_ranking_snapshot(jsonb)` é o contrato local pretendido: valida
+e grava um snapshot completo em transação, aceita replay idêntico e rejeita
+reutilização conflitante. A captura de 9 de agosto confirmou que essa RPC não
+existe remotamente. Em seu lugar, o remoto mantém
+`publish_crm_imob_ranking(jsonb,text)` com verifier embutido, `EXECUTE` para
+`anon` e `service_role`, leitura anônima e CRUD direto de `service_role` nas três
+tabelas. Nenhum desses grants é autoridade segura. O plano está em
+[`docs/reconciliation/MIGRATION_MATRIX.md`](reconciliation/MIGRATION_MATRIX.md)
+e o procedimento futuro continua em
+[`docs/runbooks/qlik-ranking-ingestion.md`](runbooks/qlik-ranking-ingestion.md).
+
+O mapa exaustivo de Salesforce, n8n, Qlik, dois escritores legados de estoque e
+SLA está em
+[`docs/reconciliation/INTEGRATION_CONTRACTS.md`](reconciliation/INTEGRATION_CONTRACTS.md).
 
 ## APIs internas do CRM
 

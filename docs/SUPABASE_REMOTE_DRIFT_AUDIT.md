@@ -132,3 +132,25 @@ explícito e idempotente:
 O workflow novo deve usar essa RPC por credencial dedicada e nunca nodes de
 escrita direta. `AGENTS.md`, pgTAP e o runbook operacional proíbem o contorno
 por grants avulsos.
+
+## Atualização de 9 de agosto de 2026
+
+Uma nova captura somente leitura supersede o estado operacional descrito acima,
+sem apagar a cronologia:
+
+- o histórico remoto ganhou quatro versões ausentes do Git;
+- o Git ganhou três versões ainda ausentes do remoto;
+- o remoto criou `crm_imob_ranking_developments`, reabriu leitura para `anon`,
+  concedeu CRUD direto a `service_role` e mantém uma RPC `SECURITY DEFINER`
+  legada executável por `anon`;
+- `ingest_crm_imob_ranking_snapshot` e o trigger local de motivo sensível
+  continuam ausentes no remoto;
+- nove runs Qlik atuais provaram caller ativo, sem tornar sua identidade,
+  verifier ou frequência uma autoridade segura.
+
+O SQL histórico exato das quatro versões foi localizado em
+`supabase_migrations.schema_migrations.statements`. Ele não foi copiado porque
+contém verifier e grants incompatíveis com a política atual. A reconciliação
+completa, hashes e dump sem secrets estão em
+[`docs/reconciliation/README.md`](reconciliation/README.md). Nenhuma escrita,
+migration ou correção remota foi feita nessa atualização.

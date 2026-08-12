@@ -1,5 +1,48 @@
 # Worklog
 
+## 2026-08-09 — gate de reconciliação de fontes e migrations
+
+- A branch `codex/source-migration-reconciliation` foi criada exatamente de
+  `81968eb72371d5a1a794d48703de41a7feb58f70`, HEAD do PR #26. O PR original,
+  produção, Supabase remoto, n8n, VPS, DNS e Nginx não sofreram mutação.
+- A união do histórico contém 20 versões: 13 conciliadas, quatro somente
+  remotas e três somente locais. O SQL exato das quatro remotas foi localizado
+  no histórico interno do banco; verifier e grants inseguros não foram copiados
+  ao Git. A matriz registra hashes, dependências, objetos e plano de markers +
+  hardening posterior.
+- O inventário remoto somente leitura confirmou 21 tabelas, 20 policies e 26
+  funções públicas. As três tabelas Qlik aceitam leitura `anon`, escrita direta
+  de `service_role` e a RPC legada `SECURITY DEFINER` aceita `anon`. Cadastro
+  público + provisionamento ativo `user` também pode expor snapshots globais
+  quando signup estiver habilitado. Nenhuma correção remota foi executada.
+- Salesforce/n8n, Qlik, dois escritores legados de estoque e SLA foram
+  mapeados. Contratos Zod cobrem as sete projeções Salesforce, envelope v2,
+  Qlik v1 e estoque fail-closed; testes rejeitam PII/campos extras, identidades,
+  datas e relógio inválidos, duplicidade e disponibilidade inventada.
+- A auditoria dos workflows históricos classificou WF13, WF14, WF15 e WF16
+  como implementados sem autoridade e divergentes; CAIXA está ausente. Metas,
+  scoring, bônus, arredondamento, desempate, SLA, produtividade, campanhas,
+  roleta e prêmios não possuem política oficial ratificada. Todos continuam
+  bloqueados.
+- A proposta de escopos usa IDs oficiais, organizações, equipes, carteiras,
+  pessoas e read models v3 deny-by-default. Nenhuma migration foi criada porque
+  mapeamentos de Gerente/House/Canal/Admin, onboarding e identidades ainda
+  exigem decisão.
+- A CLI Supabase `2.111.0` restaurou schema/dados `public` do PostgreSQL local
+  `17.6` em banco isolado: 20 tabelas, 27 funções public/private, 19 policies,
+  checksums e contagens iguais. O alvo e os dumps foram removidos. O teste
+  também provou que Auth/Storage integral exige alvo Supabase provisionado; não
+  substitui backup remoto.
+- O acesso read-only do conector funciona, mas a CLI vinculada não tem sessão de
+  plataforma. `supabase migration list --linked` falhou com
+  `LegacyPlatformAuthRequiredError`; dump DDL remoto e restore integral ficam
+  bloqueados até login privado e alvo/custo aprovados.
+- Gates finais: instalação congelada, formatação dos arquivos alterados, ESLint,
+  TypeScript, Vitest/Node, build, 283 pgTAP, lint/advisors locais, auditoria pnpm,
+  Gitleaks árvore/histórico e OSV aprovados. O `format:check` global continua
+  falhando somente em 12 arquivos preexistentes fora do diff; nenhum foi
+  reformatado neste gate.
+
 ## 2026-08-09 — consolidação visual das 18 páginas
 
 - Esta entrada supersede o recorte inicial da fundação registrado logo abaixo:

@@ -24,6 +24,12 @@ pnpm exec supabase db reset
 
 ## Banco remoto
 
+Não existe neste repositório prova atual de backup remoto restaurado. Dump de
+schema, arquivo antigo ou status do backup gerenciado não substituem restore e
+relatório de integridade. O procedimento exato, checksums, alvo isolado,
+bloqueios de autenticação/custo e gates estão em
+[`docs/reconciliation/OPERATIONS_GATE_PLAN.md`](reconciliation/OPERATIONS_GATE_PLAN.md).
+
 Antes de migration em homologação/produção:
 
 1. Registrar versão da aplicação e lista de migrations.
