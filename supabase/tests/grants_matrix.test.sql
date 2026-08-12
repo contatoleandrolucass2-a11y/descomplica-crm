@@ -287,6 +287,7 @@ select is(
       and has_function_privilege('authenticated', p.oid, 'EXECUTE')
   ),
   array[
+    'apply_crm_commercial_policy_import',
     'apply_crm_source_identity_mapping_import',
     'approve_user_access',
     'assign_user_role',
@@ -300,10 +301,12 @@ select is(
     'list_app_pages_for_management',
     'list_crm_read_model_v3_scopes',
     'list_scoped_crm_imob_ranking_entries',
+    'preview_crm_commercial_policy_import',
     'preview_crm_source_identity_mapping_import',
     'remove_user_permission_override',
     'replace_crm_point_settings',
     'set_app_page_active',
+    'set_crm_commercial_engine_gate',
     'set_user_active',
     'set_user_permission_override',
     'upsert_crm_funnel_goals'

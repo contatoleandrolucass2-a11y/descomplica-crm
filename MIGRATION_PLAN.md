@@ -68,6 +68,25 @@ Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende 
 - [ ] Tratar ranking avançado, roleta, prêmios e novos cálculos comerciais
       somente nos incrementos separados já aprovados.
 
+### Runtime de políticas comerciais
+
+- [x] Catalogar 14 motores sem semear regra ou valor comercial.
+- [x] Implementar DSL determinística, decimal exato, datas, versões imutáveis e
+      casos de ouro obrigatórios.
+- [x] Criar preview/apply, owners/backup, gates e ledger hashes-only com
+      `FORCE RLS` e grants mínimos.
+- [x] Isolar lookup/auditoria em schema e papel PostgreSQL dedicados, `NOLOGIN`
+      e fora da Data API, com provisionamento privado ainda bloqueado.
+- [x] Criar endpoint autenticado somente para os cinco simuladores, ainda sem
+      conectar os formulários visuais.
+- [x] Manter modo `off`, allowlist vazia, zero grant de execução e zero policy/
+      gate seedado.
+- [ ] Receber e aprovar políticas/casos de ouro oficiais por domínio.
+- [ ] Integrar cada consumidor e fonte com autorização/RLS próprias.
+- [ ] Executar shadow, canário e cutover somente após autorização explícita.
+- [ ] Provisionar credencial privada do papel dedicado e corrigir ACLs herdadas
+      somente no incremento remoto autorizado, comprovando o helper de isolamento.
+
 ## Gate 4 — entrega
 
 1. Testes unitários, integração, E2E, acessibilidade e responsividade.

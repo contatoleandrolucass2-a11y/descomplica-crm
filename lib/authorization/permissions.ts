@@ -1,4 +1,4 @@
-// Mirrors the `permissions` seed in M5.1/M5.2 migrations. Not a security boundary —
+// Mirrors the `permissions` catalog in versioned migrations. Not a security boundary —
 // the authoritative values live in the database. Labels are presentation-only;
 // the technical keys remain unchanged for RPCs, RLS and audit records.
 export const PERMISSIONS = {
@@ -97,6 +97,21 @@ export const PERMISSIONS = {
     label: "Visualizar simuladores",
     description: "Acessa as interfaces autorizadas de simulação comercial.",
     minLevel: 10,
+  },
+  "crm.simulators.execute": {
+    label: "Executar simuladores",
+    description: "Executa somente motores comerciais aprovados e vigentes.",
+    minLevel: 10,
+  },
+  "crm.commercial_engine.execute": {
+    label: "Executar motores comerciais",
+    description: "Executa somente motores comerciais não interativos aprovados e vigentes.",
+    minLevel: 100,
+  },
+  "crm.commercial_policy.manage": {
+    label: "Gerenciar políticas comerciais",
+    description: "Versiona e controla políticas comerciais aprovadas.",
+    minLevel: 100,
   },
   "crm.settings.view": {
     label: "Visualizar configurações",

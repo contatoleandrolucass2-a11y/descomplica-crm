@@ -74,3 +74,19 @@ SLA está em
 
 Nenhum usuário Auth, papel, grant, policy ou dado comercial é alterado pela
 coleta candidata.
+
+## Runtime comercial
+
+O runtime comercial novo não consulta n8n, Qlik, Salesforce, referência viva ou
+tabelas protegidas. Ele recebe somente um input já autorizado, revalida uma
+policy versionada e produz output determinístico. Neste incremento nenhum
+produtor/consumidor foi conectado: simuladores continuam visuais; metas,
+pontos, ranking, SLA, roleta, campanhas e premiações conservam seus estados
+atuais. Conectar uma fonte exige contrato e enforcement server/database próprios;
+a policy não concede acesso a dados.
+
+Lookup e ledger usam exclusivamente conexão PostgreSQL server-only com o papel
+`crm_commercial_engine`. O papel nasce `NOLOGIN`, sem senha e sem ACL de tabela;
+`anon`, `authenticated`, `service_role` e o relay Qlik não executam os
+entrypoints. Flags, URL e allowlist permanecem desligados/vazios, e nenhuma
+integração remota foi criada ou alterada.

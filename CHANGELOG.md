@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Adiciona runtime determinístico e versionado para 14 motores comerciais, com
+  DSL fechada, decimal exato, datas civis, casos de ouro obrigatórios e hashes
+  canônicos, sem incorporar fórmula, meta, ponto, prêmio ou valor real.
+- Cria catálogo/ledgers privados com `FORCE RLS`, versões estritamente
+  monotônicas e imutáveis, preview/apply Master-only, owners/backup oficiais,
+  gates shadow/active e evidência de execução somente por hashes.
+- Isola lookup/auditoria em conexão PostgreSQL server-only e papel dedicado
+  `NOLOGIN`, vinculada ao project ref da aplicação, sem acesso de Data
+  API/tabela e com flags, allowlist e URL vazias; nenhuma policy, grant de
+  execução ou gate é seedado.
+- Adiciona endpoint autenticado e same-origin para os cinco simuladores, ainda
+  desconectado dos formulários, com 256 KB, output somente após ledger, shadow
+  sem resultado e indisponibilidade fail-closed.
+- Adiciona verifier local sem rede, manifesto atômico `0600`, fixture de hash
+  compartilhada TS/pgTAP e cobertura de RLS, ACL, replay, monotonicidade,
+  rollback, concorrência de ator/owner e isolamento do papel.
 - Adiciona relay Qlik autenticado por HMAC, desligado por padrão, com conexão
   PostgreSQL dedicada, papel/RPC de menor privilégio, replay distribuído, rate
   limit, duas janelas shadow, duas canary, saúde agregada e rollback lógico.
