@@ -40,9 +40,11 @@ Responsabilidades mínimas:
 | Operador do relay   | Entregar payload validado e observar resultados                                | Possuir a identidade de negócio por ser n8n/relay                  |
 | Segurança/DB owner  | Manter ACL, RLS, funções e resposta a incidente                                | Distribuir `service_role` ao workflow n8n                          |
 
-No gate atual, `review_crm_source_identity_mapping(jsonb)` exige usuário Master
-com `crm.ingest.manage`. Delegação futura dessa revisão requer nova decisão de
-papel, migration, testes e auditoria; não deve ser inferida por nível numérico.
+No gate atual, `review_crm_source_identity_mapping(jsonb)` é uma primitiva
+owner-only sem grant de Data API. O Master com `crm.ingest.manage` opera somente
+o contrato de lote preview/apply, sujeito a autoridade vigente e hashes
+revisados. Delegação futura requer nova decisão de papel, migration, testes e
+auditoria; não deve ser inferida por nível numérico.
 
 ## Estados e ciclo de vida
 
@@ -206,13 +208,14 @@ direto a eles.
 `crm_source_identities`, catálogos canônicos e tabelas v3 também não são uma API
 de escrita para o navegador. As fronteiras permitidas são:
 
-| Operação            | Fronteira                                   | Papel permitido                                                           |
-| ------------------- | ------------------------------------------- | ------------------------------------------------------------------------- |
-| Revisar mapping     | `review_crm_source_identity_mapping(jsonb)` | `authenticated`, com Master + `crm.ingest.manage` verificados no servidor |
-| Ingerir v3          | `ingest_crm_read_model_v3(jsonb)`           | somente `service_role` via relay controlado                               |
-| Listar escopos      | `list_crm_read_model_v3_scopes()`           | `authenticated`, filtrado por grant efetivo                               |
-| Ler métricas        | `get_crm_read_model_v3(...)`                | `authenticated`, permissão do dataset + escopo e lineage efetivos         |
-| Ler Qlik compatível | `list_scoped_crm_imob_ranking_entries(...)` | `authenticated`, permissão e organização verificadas                      |
+| Operação            | Fronteira                                   | Papel permitido                                                    |
+| ------------------- | ------------------------------------------- | ------------------------------------------------------------------ |
+| Revisar mapping     | lote preview/apply                          | `authenticated`, Master + `crm.ingest.manage`, autoridade e hashes |
+| Mutação elementar   | `review_crm_source_identity_mapping(jsonb)` | somente owner SQL, chamada internamente pelo lote                  |
+| Ingerir v3          | `ingest_crm_read_model_v3(jsonb)`           | somente `service_role` via relay controlado                        |
+| Listar escopos      | `list_crm_read_model_v3_scopes()`           | `authenticated`, filtrado por grant efetivo                        |
+| Ler métricas        | `get_crm_read_model_v3(...)`                | `authenticated`, permissão do dataset + escopo e lineage efetivos  |
+| Ler Qlik compatível | `list_scoped_crm_imob_ranking_entries(...)` | `authenticated`, permissão e organização verificadas               |
 
 Todas as funções de fronteira são `SECURITY DEFINER`, têm `search_path = ''`,
 timeout e grants exatos. A presença de `service_role` na ingestão não autoriza

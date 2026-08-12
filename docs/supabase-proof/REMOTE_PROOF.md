@@ -102,15 +102,15 @@ desabilitada.
 
 ## Consumidores
 
-| Origem             | Consumidor no repositório                 | Acesso observado/proposto                                 |
-| ------------------ | ----------------------------------------- | --------------------------------------------------------- |
-| Salesforce         | `app/api/ingest/salesforce/route.ts`      | Escrita por RPC específica; sem CRUD direto               |
-| Dashboard          | `lib/crm/dashboard/data.ts`               | Quatro read models v2 globais, RLS por permissão          |
-| Ranking CRM        | `lib/crm/ranking/data.ts`                 | Snapshots/participantes/pontos globais, RLS por permissão |
-| Metas              | `lib/crm/goals/data.ts`                   | RPC auditada e leitura protegida                          |
-| Qlik               | Nenhum caller frontend/backend encontrado | Caller externo remoto ativo ainda não identificado        |
-| Canal de Parcerias | Página protegida, sem consulta Qlik       | Mantém estado indisponível                                |
-| QA privilegiado    | Scripts de stack local                    | Usuário efêmero local, nunca conta pessoal                |
+| Origem             | Consumidor no repositório            | Acesso observado/proposto                                 |
+| ------------------ | ------------------------------------ | --------------------------------------------------------- |
+| Salesforce         | `app/api/ingest/salesforce/route.ts` | Escrita por RPC específica; sem CRUD direto               |
+| Dashboard          | `lib/crm/dashboard/data.ts`          | Quatro read models v2 globais, RLS por permissão          |
+| Ranking CRM        | `lib/crm/ranking/data.ts`            | Snapshots/participantes/pontos globais, RLS por permissão |
+| Metas              | `lib/crm/goals/data.ts`              | RPC auditada e leitura protegida                          |
+| Qlik               | Publisher n8n externo confirmado     | Relay local off; owner formal/backup e leitores pendentes |
+| Canal de Parcerias | Página protegida, sem consulta Qlik  | Mantém estado indisponível                                |
+| QA privilegiado    | Scripts de stack local               | Usuário efêmero local, nunca conta pessoal                |
 
 ## DDL sanitizado
 

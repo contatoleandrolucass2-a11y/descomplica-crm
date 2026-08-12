@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Adiciona relay Qlik autenticado por HMAC, desligado por padrão, com conexão
+  PostgreSQL dedicada, papel/RPC de menor privilégio, replay distribuído, rate
+  limit, duas janelas shadow, duas canary, saúde agregada e rollback lógico.
+- Identifica por evidência somente leitura o publisher n8n ativo e seu owner
+  técnico; owner operacional/backup e leitores residuais continuam bloqueando
+  ativação. Nenhum valor de credencial foi copiado ou versionado.
+- Adiciona importação de mappings com manifesto canônico, preview, conflitos,
+  hash de plano, confirmação dupla e apply atômico Master-only, sem criar
+  owners, targets ou associações presumidas.
+- Fecha a primitiva elementar de mapping para Data API; mutações autenticadas
+  passam pelo lote com autoridade e hashes, inclusive em replay histórico.
+- Converte a migration Qlik anterior em ponte aditiva que preserva o caller
+  legado; revogação/removal destrutiva permanece fora desta branch.
 - Adiciona read model v3 local com runs/fatos imutáveis, hash semântico,
   publicação atômica, competências fechadas explícitas e estados separados de
   fonte, qualidade e publicação; nenhum número fictício é persistido.
@@ -31,10 +44,10 @@
   Qlik escopada, inclusive acima da precisão segura do JavaScript.
 - Atualiza os teardowns de QA local para remover o lineage privado antes dos
   grants efêmeros, mantendo contas e fixtures sintéticas autocontidas.
-- Inventaria caller Qlik e consumidores de `service_role`; o processo nominal
-  do caller continua não identificado e, portanto, não houve cutover, migration
-  remota, alteração n8n/Salesforce/Qlik, deploy ou merge. A ordem destrutiva da
-  migration Qlik no PR base permanece bloqueio explícito da pilha remota.
+- Inventaria caller Qlik e consumidores de `service_role`; o publisher e owner
+  técnico foram identificados, sem promover owner formal ou leitor residual por
+  inferência. Não houve cutover, migration remota, alteração n8n/Salesforce/Qlik,
+  deploy ou merge.
 - Comprova por leitura o projeto Supabase remoto, versiona DDL/inventário
   sanitizados e valida backup oficial em restore isolado com contagens,
   checksums, Auth, Storage, grants, policies e pgTAP, sem mutação remota.

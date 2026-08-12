@@ -154,3 +154,18 @@ contém verifier e grants incompatíveis com a política atual. A reconciliaçã
 completa, hashes e dump sem secrets estão em
 [`docs/reconciliation/README.md`](reconciliation/README.md). Nenhuma escrita,
 migration ou correção remota foi feita nessa atualização.
+
+## Atualização de 10 de agosto de 2026
+
+Inspeções adicionais exclusivamente de leitura identificaram o publisher como
+o workflow n8n `r4DyPyOTDtoROXq0` (`ranking imobs`), ativo em agenda de 30
+minutos. Vinte e sete execuções bem-sucedidas correlacionaram 1:1 com runs
+`succeeded`; a execução retida com erro não criou run. O owner técnico observado
+é Leandro Lucas (`global:owner`), sem backup encontrado. Leituras `GET` diretas
+continuam sem atribuição.
+
+A migration local `20260809144143` foi ajustada antes de qualquer aplicação
+remota para preservar a RPC legada. A nova fundação
+`20260810165927_qlik_relay_mapping_cutover` adiciona relay/gates/mappings vazios
+e desligados por padrão. Nenhuma das duas foi aplicada remotamente; n8n,
+Supabase, Qlik, VPS, DNS e Nginx permaneceram inalterados.

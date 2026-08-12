@@ -107,8 +107,12 @@ Nenhuma validação remota mutável será executada.
 
 ## Bloqueio operacional comprovado
 
-A migration `20260809144143_qlik_rls_contract_hardening.sql` do PR base precede
-as migrations v3 e removeria o caminho do caller Qlik ainda não identificado.
-Por isso, a pilha não é candidata a migration remota até separação e revalidação
-da fase aditiva. Nenhum teste local transforma esse bloqueio em autorização de
-cutover.
+Esta conclusão histórica foi supersedida em 10 de agosto de 2026: o publisher
+técnico foi identificado e `20260809144143_qlik_rls_contract_hardening.sql` foi
+convertida em ponte aditiva que preserva o caminho legado. O relay/mapping
+cutover está documentado em [`../qlik-relay-mapping-cutover/`](../qlik-relay-mapping-cutover/README.md).
+
+A pilha ainda não é candidata a aplicação remota: owner operacional/backup,
+leitores residuais, restore/drift, credenciais privadas, duas janelas shadow,
+canário e autorizações continuam pendentes. Nenhum teste local transforma isso
+em autorização de cutover.

@@ -1,15 +1,14 @@
--- Stage the local Qlik contract convergence without exposing ranking data.
+-- Additive Qlik bridge: stage the narrow contract without cutting over callers.
 --
--- IMPORTANT: this migration must not be applied remotely until the active
--- anonymous caller of publish_crm_imob_ranking(jsonb, text) has been migrated
--- to a CRM-owned server-side relay. External n8n may hold only a dedicated,
--- limited M2M credential for that relay; service_role/secret credentials must
--- never enter n8n, its nodes, exports, logs, or process arguments. Only the
--- internal relay may hold service_role server-side and invoke the single RPC.
--- The relay/gateway must reject raw HTTP bodies above 8 MiB before JSON
--- parsing; pg_column_size below is database defense in depth after parsing.
--- Applying this migration earlier intentionally fails the legacy integration
--- closed.
+-- The remote caller was subsequently proven to be an active n8n workflow that
+-- invokes publish_crm_imob_ranking(jsonb, text) as anon. That legacy function
+-- must remain untouched until the authenticated relay has passed shadow and
+-- canary gates and its owner/backup have approved cutover. This migration still
+-- removes direct table grants and creates the narrow replacement RPC, but it
+-- deliberately does not revoke or drop the legacy function when that function
+-- exists remotely. The destructive removal belongs to a later, separately
+-- authorized migration after cutover. The relay rejects raw bodies above
+-- 1,000,000 bytes; pg_column_size below remains database defense in depth.
 
 alter table public.crm_imob_ranking_runs
   add column if not exists development_row_count integer not null default 0;
@@ -170,18 +169,9 @@ update public.app_pages
 set permission_key = 'crm.partnerships.view'
 where key = 'crm.partnerships';
 
--- Remove the legacy token-in-argument SECURITY DEFINER endpoint. DROP without
--- CASCADE intentionally blocks if an undeclared database dependency exists.
-do $$
-begin
-  if pg_catalog.to_regprocedure(
-    'public.publish_crm_imob_ranking(jsonb,text)'
-  ) is not null then
-    execute 'revoke all privileges on function public.publish_crm_imob_ranking(jsonb, text) from public, anon, authenticated, service_role';
-    execute 'drop function public.publish_crm_imob_ranking(jsonb, text)';
-  end if;
-end;
-$$;
+-- Compatibility bridge only: do not touch publish_crm_imob_ranking(jsonb,text)
+-- here. The caller remains active. Its revocation/drop is intentionally absent
+-- until a future post-cutover hardening migration receives explicit approval.
 
 -- Preserve schemaVersion 1 for existing safe callers. `developments` is an
 -- optional, backward-compatible array; omitted means zero development rows.
