@@ -1,6 +1,6 @@
 begin;
 
-select plan(18);
+select plan(20);
 
 select is(
   (
@@ -11,7 +11,7 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  20::bigint,
+  31::bigint,
   'all public tables retain RLS'
 );
 
@@ -32,13 +32,24 @@ select is(
     'crm_dashboard_top_developments',
     'crm_dashboard_views',
     'crm_funnel_goals',
+    'crm_imob_ranking_developments',
     'crm_imob_ranking_entries',
     'crm_imob_ranking_runs',
     'crm_ingestion_runs',
+    'crm_organizations',
+    'crm_people',
     'crm_point_metrics',
     'crm_point_settings',
+    'crm_portfolio_organizations',
+    'crm_portfolios',
     'crm_ranking_participants',
     'crm_ranking_snapshots',
+    'crm_reporting_scopes',
+    'crm_role_scope_types',
+    'crm_source_identities',
+    'crm_team_memberships',
+    'crm_teams',
+    'crm_user_reporting_scope_grants',
     'permissions',
     'profiles',
     'role_permissions',
@@ -50,8 +61,35 @@ select is(
 );
 
 select is(
+  (
+    select array_agg(c.relname order by c.relname)
+    from pg_catalog.pg_class c
+    join pg_catalog.pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relkind in ('r', 'p')
+      and c.relforcerowsecurity
+  ),
+  array[
+    'crm_imob_ranking_developments',
+    'crm_imob_ranking_entries',
+    'crm_imob_ranking_runs',
+    'crm_organizations',
+    'crm_people',
+    'crm_portfolio_organizations',
+    'crm_portfolios',
+    'crm_reporting_scopes',
+    'crm_role_scope_types',
+    'crm_source_identities',
+    'crm_team_memberships',
+    'crm_teams',
+    'crm_user_reporting_scope_grants'
+  ]::name[],
+  'new scoped and Qlik tables force RLS even for their owner'
+);
+
+select is(
   (select count(*) from pg_catalog.pg_policies where schemaname = 'public'),
-  19::bigint,
+  25::bigint,
   'the existing policy set is preserved'
 );
 
@@ -63,24 +101,30 @@ select is(
   ),
   array[
     'app_pages:app_pages_select_authorized',
-    'audit_logs:audit_logs_select_with_audit_view',
+    'audit_logs:audit_logs_select_scoped',
     'crm_dashboard_metrics:crm_dashboard_metrics_select_authorized',
     'crm_dashboard_snapshots:crm_dashboard_snapshots_select_authorized',
     'crm_dashboard_top_developments:crm_dashboard_top_developments_select_authorized',
     'crm_dashboard_views:crm_dashboard_views_select_authorized',
     'crm_funnel_goals:crm_funnel_goals_select_authorized',
-    'crm_imob_ranking_entries:crm_imob_ranking_entries_select_completed',
-    'crm_imob_ranking_runs:crm_imob_ranking_runs_select_completed',
+    'crm_organizations:crm_organizations_select_scoped',
+    'crm_people:crm_people_select_scoped',
     'crm_point_metrics:crm_point_metrics_select_authorized',
     'crm_point_settings:crm_point_settings_select_authorized',
+    'crm_portfolio_organizations:crm_portfolio_organizations_select_scoped',
+    'crm_portfolios:crm_portfolios_select_scoped',
     'crm_ranking_participants:crm_ranking_participants_select_authorized',
     'crm_ranking_snapshots:crm_ranking_snapshots_select_authorized',
+    'crm_reporting_scopes:crm_reporting_scopes_select_scoped',
+    'crm_team_memberships:crm_team_memberships_select_scoped',
+    'crm_teams:crm_teams_select_scoped',
+    'crm_user_reporting_scope_grants:crm_user_reporting_scope_grants_select_self_or_scoped_manager',
     'permissions:permissions_select_authenticated',
-    'profiles:profiles_select_self_or_users_view',
+    'profiles:profiles_select_self_or_scoped_manager',
     'role_permissions:role_permissions_select_authenticated',
     'roles:roles_select_authenticated',
-    'user_permission_overrides:user_permission_overrides_select_self_or_permissions_view',
-    'user_roles:user_roles_select_self_or_users_view'
+    'user_permission_overrides:user_permission_overrides_select_self_or_scoped_manager',
+    'user_roles:user_roles_select_self_or_scoped_manager'
   ]::text[],
   'the complete named policy allowlist is preserved'
 );
@@ -132,10 +176,18 @@ select is(
     'crm_dashboard_top_developments:SELECT',
     'crm_dashboard_views:SELECT',
     'crm_funnel_goals:SELECT',
+    'crm_organizations:SELECT',
+    'crm_people:SELECT',
     'crm_point_metrics:SELECT',
     'crm_point_settings:SELECT',
+    'crm_portfolio_organizations:SELECT',
+    'crm_portfolios:SELECT',
     'crm_ranking_participants:SELECT',
     'crm_ranking_snapshots:SELECT',
+    'crm_reporting_scopes:SELECT',
+    'crm_team_memberships:SELECT',
+    'crm_teams:SELECT',
+    'crm_user_reporting_scope_grants:SELECT',
     'profiles:SELECT',
     'user_permission_overrides:SELECT',
     'user_roles:SELECT'
@@ -219,6 +271,7 @@ select is(
       and has_function_privilege('authenticated', p.oid, 'EXECUTE')
   ),
   array[
+    'approve_user_access',
     'assign_user_role',
     'begin_crm_salesforce_refresh',
     'finish_crm_salesforce_refresh',
@@ -226,6 +279,7 @@ select is(
     'get_user_authorization_context',
     'has_permission',
     'list_app_pages_for_management',
+    'list_scoped_crm_imob_ranking_entries',
     'remove_user_permission_override',
     'replace_crm_point_settings',
     'set_app_page_active',
@@ -234,6 +288,42 @@ select is(
     'upsert_crm_funnel_goals'
   ]::name[],
   'authenticated can execute only the audited browser and RLS functions'
+);
+
+select ok(
+  has_schema_privilege('authenticated', 'private', 'USAGE')
+  and not has_schema_privilege('anon', 'private', 'USAGE')
+  and not has_schema_privilege('service_role', 'private', 'USAGE')
+  and (
+    select array_agg(
+      p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')'
+      order by p.proname, pg_get_function_identity_arguments(p.oid)
+    )
+    from pg_catalog.pg_proc p
+    join pg_catalog.pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'private'
+      and has_function_privilege('authenticated', p.oid, 'EXECUTE')
+  ) = array[
+    'can_delegate_reporting_scope(p_scope_id uuid)',
+    'can_manage_user(p_target_user_id uuid)',
+    'can_read_organization(p_organization_id uuid)',
+    'can_read_person(p_person_id uuid)',
+    'can_read_portfolio(p_portfolio_id uuid)',
+    'can_read_reporting_scope(p_scope_id uuid)',
+    'can_read_team(p_team_id uuid)',
+    'current_user_is_master()'
+  ]::text[]
+  and not exists (
+    select 1
+    from pg_catalog.pg_proc p
+    join pg_catalog.pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'private'
+      and (
+        has_function_privilege('anon', p.oid, 'EXECUTE')
+        or has_function_privilege('service_role', p.oid, 'EXECUTE')
+      )
+  ),
+  'private RLS helpers expose only the exact authenticated boolean surface'
 );
 
 select is(

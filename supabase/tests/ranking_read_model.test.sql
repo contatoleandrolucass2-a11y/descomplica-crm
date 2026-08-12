@@ -133,15 +133,24 @@ select ok(
 );
 
 insert into auth.users (id, email)
-values ('50000000-0000-0000-0000-000000000001', 'ranking-user@example.test');
+values ('50000000-0000-0000-0000-000000000001', 'ranking-master@example.test');
+
+select public.bootstrap_master_user(
+  '50000000-0000-0000-0000-000000000001'
+);
+
 select set_config('request.jwt.claim.sub', '50000000-0000-0000-0000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;
 
-select is((select count(*) from public.crm_ranking_snapshots), 1::bigint, 'ranking reader sees snapshot');
-select is((select count(*) from public.crm_ranking_participants), 1::bigint, 'ranking reader sees participant');
+select is((select count(*) from public.crm_ranking_snapshots), 1::bigint, 'Master sees ranking snapshot');
+select is((select count(*) from public.crm_ranking_participants), 1::bigint, 'Master sees ranking participant');
 
 reset role;
+
+select set_config('request.jwt.claim.sub', '', true);
+select set_config('request.jwt.claim.role', '', true);
+
 insert into public.user_permission_overrides (user_id, permission_key, effect, reason)
 values (
   '50000000-0000-0000-0000-000000000001',
@@ -149,12 +158,19 @@ values (
   'deny',
   'ranking RLS test'
 );
+
+select set_config('request.jwt.claim.sub', '50000000-0000-0000-0000-000000000001', true);
+select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;
 
 select is((select count(*) from public.crm_ranking_snapshots), 0::bigint, 'deny override hides snapshot');
 select is((select count(*) from public.crm_ranking_participants), 0::bigint, 'deny override hides participants');
 
 reset role;
+
+select set_config('request.jwt.claim.sub', '', true);
+select set_config('request.jwt.claim.role', '', true);
+
 insert into public.crm_ranking_snapshots (snapshot_key, reference_date, generated_at, source)
 values ('temporary', '2026-08-04', now(), 'cascade fixture');
 insert into public.crm_ranking_participants (

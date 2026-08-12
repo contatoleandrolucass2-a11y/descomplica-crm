@@ -76,10 +76,11 @@ select ok(
 select is((select count(*) from public.crm_ingestion_runs), 0::bigint, 'migration seeds no runs');
 
 insert into auth.users (id, email)
-values ('60000000-0000-4000-8000-000000000001', 'ingestion-admin@example.test');
-update public.user_roles
-set role_key = 'admin'
-where user_id = '60000000-0000-4000-8000-000000000001';
+values ('60000000-0000-4000-8000-000000000001', 'ingestion-master@example.test');
+
+select public.bootstrap_master_user(
+  '60000000-0000-4000-8000-000000000001'
+);
 
 select set_config('request.jwt.claim.sub', '60000000-0000-4000-8000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
@@ -90,7 +91,7 @@ select is(
     'refresh:60000000-0000-4000-8000-000000000002'
   )->>'status'),
   'started',
-  'authorized administrator starts a refresh'
+  'authorized Master starts a refresh'
 );
 
 reset role;
@@ -143,6 +144,8 @@ select is(
 );
 
 reset role;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
 insert into public.user_permission_overrides (user_id, permission_key, effect, reason)
 values (
   '60000000-0000-4000-8000-000000000001',
@@ -150,6 +153,8 @@ values (
   'deny',
   'ingestion permission test'
 );
+select set_config('request.jwt.claim.sub', '60000000-0000-4000-8000-000000000001', true);
+select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;
 select throws_ok(
   $$select public.begin_crm_salesforce_refresh(
@@ -161,6 +166,8 @@ select throws_ok(
 );
 
 reset role;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
 delete from public.user_permission_overrides
 where user_id = '60000000-0000-4000-8000-000000000001'
   and permission_key = 'crm.salesforce.refresh';

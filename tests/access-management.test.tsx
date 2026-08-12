@@ -81,17 +81,17 @@ describe("experiência de acesso", () => {
     expect(markup).not.toContain("unexpected");
   });
 
-  it("permite abrir Canal de Parcerias quando a permissão existente autoriza", async () => {
+  it("permite abrir Canal de Parcerias quando a permissão dedicada autoriza", async () => {
     mocks.requirePermission.mockResolvedValueOnce({
       userId: "81000000-0000-4000-8000-000000000002",
       roleKey: "admin",
       level: 80,
-      permissions: ["pages.view", "crm.ranking.view"],
+      permissions: ["pages.view", "crm.partnerships.view"],
     });
 
     const markup = renderToStaticMarkup(await PartnershipsChannelPage());
 
-    expect(mocks.requirePermission).toHaveBeenCalledWith("crm.ranking.view");
+    expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
     expect(markup).toContain("Performance das parcerias");
     expect(markup).toContain("Dado indisponível — integração pendente");
     expect(markup).not.toContain("crm_imob_ranking");
@@ -111,40 +111,53 @@ describe("catálogo localizado de acesso", () => {
       "master",
       "admin",
       "coordinator",
+      "manager",
       "supervisor",
+      "house",
       "real_estate",
+      "partnership_channel",
       "broker_lead",
       "broker",
       "user",
+      "pending",
     ]);
     expect(Object.values(ROLES).map((role) => role.label)).toEqual([
       "Master",
       "Administrador",
       "Coordenador",
+      "Gerente",
       "Supervisor",
+      "House",
       "Imobiliária",
+      "Canal de Parcerias",
       "Líder de corretores",
       "Corretor",
       "Usuário",
+      "Pendente",
     ]);
   });
 
   it("nunca oferece Master como papel atribuível", () => {
     expect(getAssignableRoleKeys(100)).not.toContain("master");
     expect(getAssignableRoleKeys(80)).not.toContain("master");
+    expect(getAssignableRoleKeys(100)).not.toContain("pending");
   });
 
-  it("mantém a matriz visual dos oito perfis alinhada ao catálogo protegido", () => {
-    const coreReaderPermissions = [
-      "pages.view",
-      "crm.dashboard.view",
-      "crm.stages.view",
-      "crm.ranking.view",
-      "crm.simulators.view",
-    ];
+  it("mantém a matriz visual dos papéis alinhada ao catálogo protegido", () => {
+    const visualFoundationPermissions = ["pages.view", "crm.simulators.view"];
 
     expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(Object.keys(PERMISSIONS));
-    expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual(Object.keys(PERMISSIONS));
+    expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual([
+      "users.view",
+      "users.manage",
+      "permissions.view",
+      "permissions.manage",
+      "roles.view",
+      "roles.manage",
+      "audit.view",
+      "admin.access",
+      ...visualFoundationPermissions,
+    ]);
     for (const roleKey of [
       "coordinator",
       "supervisor",
@@ -153,8 +166,12 @@ describe("catálogo localizado de acesso", () => {
       "broker",
       "user",
     ] as const) {
-      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(coreReaderPermissions);
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(visualFoundationPermissions);
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.settings.manage");
+    }
+
+    for (const roleKey of ["manager", "house", "partnership_channel", "pending"] as const) {
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual([]);
     }
   });
 

@@ -189,7 +189,11 @@ select throws_ok(
 );
 
 insert into auth.users (id, email)
-values ('20000000-0000-0000-0000-000000000001', 'dashboard-user@example.test');
+values ('20000000-0000-0000-0000-000000000001', 'dashboard-master@example.test');
+
+select public.bootstrap_master_user(
+  '20000000-0000-0000-0000-000000000001'
+);
 
 select set_config('request.jwt.claim.sub', '20000000-0000-0000-0000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
@@ -198,25 +202,28 @@ set local role authenticated;
 select is(
   (select count(*) from public.crm_dashboard_snapshots),
   1::bigint,
-  'authorized user reads the current dashboard snapshot'
+  'authorized Master reads the current dashboard snapshot'
 );
 select is(
   (select count(*) from public.crm_dashboard_metrics),
   15::bigint,
-  'authorized user reads dashboard metrics'
+  'authorized Master reads dashboard metrics'
 );
 select is(
   (select count(*) from public.crm_dashboard_views),
   3::bigint,
-  'authorized user reads dashboard view summaries'
+  'authorized Master reads dashboard view summaries'
 );
 select is(
   (select count(*) from public.crm_dashboard_top_developments),
   2::bigint,
-  'authorized user reads ranked developments'
+  'authorized Master reads ranked developments'
 );
 
 reset role;
+
+select set_config('request.jwt.claim.sub', '', true);
+select set_config('request.jwt.claim.role', '', true);
 
 insert into public.user_permission_overrides
   (user_id, permission_key, effect, reason)
@@ -227,6 +234,8 @@ values (
   'dashboard RLS test'
 );
 
+select set_config('request.jwt.claim.sub', '20000000-0000-0000-0000-000000000001', true);
+select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;
 
 select is(

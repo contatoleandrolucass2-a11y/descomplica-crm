@@ -1,6 +1,6 @@
 begin;
 
-select plan(30);
+select plan(33);
 
 select has_table('public', 'app_pages', 'app_pages exists');
 
@@ -11,8 +11,8 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  10::bigint,
-  'ten platform and CRM permissions are seeded'
+  11::bigint,
+  'eleven platform and CRM permissions are seeded'
 );
 
 select is(
@@ -23,7 +23,7 @@ select is(
 
 select is(
   (
-    select count(*)
+    select array_agg(r.key order by r.key)
     from public.roles r
     where (
       select count(*)
@@ -38,8 +38,8 @@ select is(
         )
     ) = 5
   ),
-  8::bigint,
-  'all eight profiles receive the exact core CRM read permissions including simulators'
+  array['master']::text[],
+  'only Master inherits all global v2 CRM read permissions'
 );
 
 select is(
@@ -48,8 +48,18 @@ select is(
     from public.role_permissions rp
     where rp.permission_key in ('crm.settings.view', 'crm.settings.manage')
   ),
-  array['admin', 'master']::text[],
-  'only admin and master receive CRM settings permissions'
+  array['master']::text[],
+  'only Master inherits global v2 CRM settings permissions'
+);
+
+select is(
+  (
+    select array_agg(rp.role_key order by rp.role_key)
+    from public.role_permissions rp
+    where rp.permission_key = 'crm.partnerships.view'
+  ),
+  array['master']::text[],
+  'only master inherits the dedicated partnership permission automatically'
 );
 
 select is(
@@ -68,7 +78,7 @@ select is(
     from public.app_pages
     where key = 'crm.partnerships'
   ),
-  '/app/canal-de-parcerias|Canal de Parcerias|Ranking das imobiliárias parceiras|crm|crm.ranking.view|65|true|true',
+  '/app/canal-de-parcerias|Canal de Parcerias|Ranking das imobiliárias parceiras|crm|crm.partnerships.view|65|true|true',
   'the remote partnership catalog identity is versioned explicitly'
 );
 
@@ -160,9 +170,9 @@ values
   ('10000000-0000-0000-0000-000000000001', 'gate1-user@example.test'),
   ('10000000-0000-0000-0000-000000000002', 'gate1-master@example.test');
 
-update public.user_roles
-set role_key = 'master'
-where user_id = '10000000-0000-0000-0000-000000000002';
+select public.bootstrap_master_user(
+  '10000000-0000-0000-0000-000000000002'
+);
 
 select is(
   (
@@ -170,18 +180,87 @@ select is(
     from public.user_roles
     where user_id = '10000000-0000-0000-0000-000000000001'
   ),
-  'user',
-  'new Auth users receive the least-privileged role'
+  'pending',
+  'new Auth users receive the pending role'
+);
+
+select is(
+  (
+    select access_status
+    from public.profiles
+    where user_id = '10000000-0000-0000-0000-000000000001'
+  ),
+  'pending',
+  'new Auth users remain pending until scoped approval'
 );
 
 select ok(
-  (
+  not (
     select is_active
     from public.profiles
     where user_id = '10000000-0000-0000-0000-000000000001'
   ),
-  'new Auth users receive an active profile'
+  'new Auth users receive an inactive profile'
 );
+
+select is(
+  (
+    select count(*)
+    from public.permissions permission
+    where public.has_permission(
+      '10000000-0000-0000-0000-000000000001',
+      permission.key
+    )
+  ),
+  0::bigint,
+  'new Auth users receive no effective permissions before approval'
+);
+
+insert into public.crm_organizations (id, organization_key, name, kind)
+values (
+  '12000000-0000-4000-8000-000000000001',
+  'page-catalog-real-estate',
+  'Page Catalog Real Estate',
+  'real_estate'
+);
+
+insert into public.crm_reporting_scopes (
+  id,
+  scope_key,
+  scope_type,
+  organization_id
+)
+values (
+  '13000000-0000-4000-8000-000000000001',
+  'page-catalog-real-estate',
+  'organization',
+  '12000000-0000-4000-8000-000000000001'
+);
+
+update public.user_roles
+set role_key = 'real_estate',
+    assigned_by = '10000000-0000-0000-0000-000000000002'
+where user_id = '10000000-0000-0000-0000-000000000001';
+
+insert into public.crm_user_reporting_scope_grants (
+  user_id,
+  reporting_scope_id,
+  granted_by,
+  reason
+)
+values (
+  '10000000-0000-0000-0000-000000000001',
+  '13000000-0000-4000-8000-000000000001',
+  '10000000-0000-0000-0000-000000000002',
+  'Page catalog synthetic active scope'
+);
+
+update public.profiles
+set is_active = true,
+    access_status = 'approved',
+    approved_at = now(),
+    approved_by = '10000000-0000-0000-0000-000000000002'
+where user_id = '10000000-0000-0000-0000-000000000001';
 
 select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
@@ -189,8 +268,8 @@ set local role authenticated;
 
 select is(
   (select count(*) from public.app_pages),
-  14::bigint,
-  'regular user sees only authorized CRM pages'
+  6::bigint,
+  'scoped non-Master sees only visual simulator pages'
 );
 
 select throws_ok(
@@ -213,6 +292,8 @@ select throws_ok(
 
 reset role;
 
+select set_config('request.jwt.claim.sub', '', true);
+
 insert into public.user_permission_overrides
   (user_id, permission_key, effect, reason)
 values
@@ -223,6 +304,7 @@ values
     'RLS test'
   );
 
+select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000001', true);
 set local role authenticated;
 
 select is(
@@ -233,6 +315,8 @@ select is(
 
 reset role;
 
+select set_config('request.jwt.claim.sub', '', true);
+
 delete from public.user_permission_overrides
 where user_id = '10000000-0000-0000-0000-000000000001'
   and permission_key = 'pages.view';
@@ -241,7 +325,7 @@ select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000002
 set local role authenticated;
 
 select lives_ok(
-  $$select public.set_app_page_active('crm.ranking', false, 'pgTAP visibility test')$$,
+  $$select public.set_app_page_active('crm.simulation.wf15', false, 'pgTAP visibility test')$$,
   'master can change page visibility through the guarded RPC'
 );
 
@@ -257,8 +341,8 @@ set local role authenticated;
 
 select is(
   (select count(*) from public.app_pages),
-  13::bigint,
-  'regular user does not see an inactive page'
+  5::bigint,
+  'scoped non-Master does not see an inactive simulator page'
 );
 
 reset role;

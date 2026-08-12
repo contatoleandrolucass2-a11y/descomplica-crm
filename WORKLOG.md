@@ -1,5 +1,47 @@
 # Worklog
 
+## 2026-08-09 — prova remota, restore isolado e hardening RLS local
+
+- Esta entrada conclui o gate que antes estava bloqueado por autenticação da
+  CLI. O projeto remoto foi observado somente por leitura: PostgreSQL 17.6,
+  21 tabelas públicas, 26 funções públicas, 20 policies, 8 triggers públicos,
+  3 usuários Auth e zero objetos Storage/Vault. Nenhum dado, grant, policy,
+  migration, Auth, n8n ou deploy remoto foi alterado.
+- A união contém 20 migrations no SHA-base: 13 comuns, quatro somente remotas
+  e três somente locais. Statements e hashes das quatro remotas foram
+  recuperados do histórico, mas não são apresentados como arquivos históricos
+  originais. DDL e inventário canônico sanitizados foram versionados.
+- O backup oficial root-only foi restaurado em stack isolada PostgreSQL 17.6:
+  48/48 contagens e checksums de multiconjunto coincidiram; inventário de
+  aplicação não teve diff; Auth/Storage/PostgREST responderam 200; pgTAP de
+  restore passou 28/28. Limites de configuração Auth e binários Storage estão
+  documentados. Stack e dumps brutos sensíveis foram removidos ao final.
+- `20260809144137` prepara cadastro `pending` inativo, quatro papéis técnicos,
+  organizações, pessoas, equipes, carteiras, identidades externas, reporting
+  scopes, grants temporais e aprovação atômica. Contas antigas não-Master ficam
+  `legacy_review`; read models v2 continuam globais e não recebem filtros
+  dimensionais fictícios.
+- A fundação escopada bloqueia mudanças silenciosas de fronteira: identidade de
+  scope e organização da equipe são imutáveis; pessoa/Auth, memberships e
+  carteira/organização exigem suspender todos os usuários afetados antes da
+  manutenção. Locks transacionais por entidade e `FOR UPDATE` determinístico
+  serializam aprovação, reativação e topologia; a decisão é revalidada depois
+  do lock. Somente Master/Admin aprova ou reativa, papéis de escopo unitário
+  exigem exatamente um grant e afiliações não expiradas, inclusive futuras ou
+  inativas, entram na contenção direcional.
+- `20260809144143` preserva runs/entries/developments Qlik, força RLS, fecha
+  grants/policies diretos, mantém ingestão service-role-only e cria leitura
+  autenticada somente com `crm.partnerships.view`, identidade Qlik mapeada e
+  organização no escopo. O caller `anon` remoto segue ativo e desconhecido;
+  por isso a migration não pode ser aplicada antes do cutover comprovado.
+- A matriz local passou 518 pgTAP, cobrindo signup, grants, FORCE RLS,
+  isolamento horizontal/vertical, papéis, Qlik, ingestão, metas e read models.
+  A prova PostgREST sintética passou com nove perfis removidos ao final, oito
+  negativas anônimas sem linhas e bloqueio uniforme do exploit de dupla
+  afiliação. Nenhuma conta ou fixture remota foi criada.
+  O pacote comercial registra conflitos e decisões faltantes sem promover
+  legado, workflow ou fórmula a autoridade.
+
 ## 2026-08-09 — gate de reconciliação de fontes e migrations
 
 - A branch `codex/source-migration-reconciliation` foi criada exatamente de

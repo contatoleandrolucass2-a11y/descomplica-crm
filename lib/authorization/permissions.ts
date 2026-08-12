@@ -67,6 +67,11 @@ export const PERMISSIONS = {
     description: "Consulta o ranking comercial disponível.",
     minLevel: 10,
   },
+  "crm.partnerships.view": {
+    label: "Visualizar dados de parcerias",
+    description: "Consulta somente dados Qlik vinculados a organizações dentro do escopo aprovado.",
+    minLevel: 10,
+  },
   "crm.simulators.view": {
     label: "Visualizar simuladores",
     description: "Acessa as interfaces autorizadas de simulação comercial.",

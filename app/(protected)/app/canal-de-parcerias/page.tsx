@@ -115,7 +115,7 @@ function PodiumPlaceholder({ featured = false }: { featured?: boolean }) {
 }
 
 export default async function PartnershipsChannelPage() {
-  await enforcePermission("crm.ranking.view");
+  await enforcePermission("crm.partnerships.view");
 
   const imobRows: ImobRankingRow[] = [];
   const developmentRows: DevelopmentRankingRow[] = [];

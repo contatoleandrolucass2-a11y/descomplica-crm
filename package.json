@@ -18,6 +18,7 @@
     "qa:visual:reference": "node scripts/qa/reference-parity.mjs reference",
     "qa:visual:authenticated": "node scripts/qa/local-authenticated-visual.mjs",
     "qa:security:anonymous": "node scripts/qa/reference-parity.mjs boundary",
+    "qa:security:rls-api": "node scripts/qa/local-rls-api.mjs",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "audit": "pnpm audit --audit-level high",
     "security:secrets": "gitleaks dir . --redact=100 --no-banner",
