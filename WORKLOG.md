@@ -874,3 +874,69 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   pós-relay; o bloqueio está documentado, não contornado.
 - Nenhuma alteração foi feita em produção, Supabase remoto, n8n, Salesforce,
   Qlik, VPS, DNS ou Nginx. Não houve merge nem deploy.
+
+## 2026-08-11 — fundação da homologação visual isolada
+
+- Branch `codex/homologation-visual-release-gate` criada no SHA base exato
+  `9f1ca6fca7c7ccd179568dc9f92cc19a0e7bce25`, sem reaproveitar banco, Auth,
+  volume, rede, porta, cookie ou conta de produção.
+- Compose dedicado limita o app a `127.0.0.1:3100`; o Supabase local usa o
+  projeto `descomplica-homologation`, somente fixtures sintéticas e nove contas
+  `@local.invalid`. Firewall exclusivo bloqueia externamente as portas do CLI.
+- `HOMOLOGATION_MODE` adiciona banner visível, metadados e header `noindex`.
+  Cadastro público fica ausente na UI, rota e Server Action. Produção preserva
+  o comportamento anterior quando as flags não são definidas.
+- Read model v3 fica habilitável somente no Compose isolado. Relay Qlik,
+  Salesforce e os 14 motores comerciais continuam desligados; simuladores
+  permanecem visuais e bloqueados, sem política ou valor comercial inventado.
+- Harnesses RLS/Playwright/visual aceitam a URL remota somente quando o modo
+  explícito aponta exatamente para `https://homolog.descomplicapro.com.br`.
+  Basic Auth e nove credenciais QA ficam em arquivos root-only e nunca entram
+  em argumentos, storage state, Git ou evidências.
+- Gate local inicial: instalação congelada, lint, typecheck, 239 Vitest (um
+  ignorado), 8 testes Node, build de 37 páginas e 863/863 pgTAP passaram.
+  Prettier global, pnpm audit, Gitleaks da árvore/217 commits e OSV em 521
+  pacotes também passaram.
+- Inspeção somente leitura confirmou produção saudável, recursos suficientes e
+  DNS de homologação ainda livre. Nenhum ambiente remoto, DNS ou Nginx havia
+  sido alterado neste checkpoint; publicação e QA HTTPS seguem para o próximo
+  gate da mesma branch.
+- Primeiro ensaio isolado falhou fechado: o Auth havia desligado também o login
+  por e-mail ao bloquear signup. As nove contas foram removidas automaticamente.
+  O ajuste mantém o provider de login ativo sob `auth.enable_signup=false` e o
+  segundo ensaio persistiu exatamente nove contas sintéticas. A fixture visual
+  passou a reutilizar o Master isolado completando somente seu perfil QA; carga
+  e reexecução idempotente foram verificadas.
+- A matriz browser local confirmou login genérico, guards, nove perfis, oito
+  superfícies Master, filtros server-rendered e simuladores bloqueados. O teste
+  de filtros foi separado da travessia longa e valida os `href` selecionados na
+  resposta HTTP autenticada, eliminando corrida de navegação do App Router sem
+  reduzir a cobertura. Limites Auth sintéticos foram dimensionados para a
+  própria matriz; o gate externo Basic continua obrigatório.
+- Cliente DNS Hostinger fail-closed preparado: lê token somente de arquivo
+  `0600`, recusa nome existente, valida o payload antes do `PUT` e confirma
+  somente o novo `A` de homologação. A etapa permanece sem execução enquanto a
+  autenticação privada não existir.
+- Após provisionamento privado autorizado, o script criou exclusivamente
+  `homolog.descomplicapro.com.br A 187.127.249.50`; DNS autoritativo e recursivo
+  confirmaram o registro. Certbot emitiu certificado exclusivo válido até
+  09/11/2026. `nginx -t`, reload seguro, Basic Auth, `401` pré-gate,
+  `robots.txt`, `noindex`, cadastro `404` e HTTPS autenticado passaram.
+- Produção respondeu `{"status":"ok"}` antes, durante e depois. O app isolado
+  permaneceu em `127.0.0.1:3100`; banco/Auth/rede/cache têm nomes exclusivos e
+  as portas Docker `55321`/`55322` continuam bloqueadas externamente pela chain
+  dedicada. Backup Nginx root-only manteve checksum válido.
+- QA HTTPS final aprovou 7/7 cenários E2E, nove perfis e a matriz de 21 rotas.
+  A matriz visual aprovou 72/72 checks responsivos, 54/54 temas, 87/87 Axe,
+  87/87 comparações de baseline e 18/18 rotas a 200%, além de teclado,
+  reduced-motion, filtros, cookies e CSP. Maior diferença visual: `0,0885%`
+  sob limite de `1%`.
+- A primeira execução remota revelou dois races exclusivos do harness: dois
+  `<main>` coexistiam durante streaming e o init script tocava o DOM antes de
+  `documentElement`. Locators foram ancorados no heading terminal e os scripts
+  aguardam DOM/hidratação; cobertura foi preservada e as reexecuções passaram.
+- Evidências selecionadas e seus hashes foram versionados em
+  `docs/qa/homologation/`. Relay, Salesforce e motores ficaram desligados;
+  simuladores estão visualmente completos, mas cálculo e persistência seguem
+  bloqueados. Supabase de produção, n8n, Qlik, Salesforce, dados, grants, flags
+  e container de produção não foram alterados; não houve merge ou cutover.

@@ -21,6 +21,7 @@
 import type { SignupActionState, SignupFieldErrors } from "@/lib/auth/actions/signup-state";
 import { signupSchema } from "@/lib/auth/schemas/signup";
 import { createClient } from "@/lib/auth/supabase/server";
+import { isPublicSignupEnabled } from "@/lib/homologation/config";
 
 const GENERIC_FAILURE_MESSAGE =
   "Não foi possível concluir o cadastro. Tente novamente em instantes.";
@@ -32,6 +33,10 @@ export async function signupAction(
   _prevState: SignupActionState,
   formData: FormData,
 ): Promise<SignupActionState> {
+  if (!isPublicSignupEnabled()) {
+    return { success: false, message: GENERIC_FAILURE_MESSAGE };
+  }
+
   const parsed = signupSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),

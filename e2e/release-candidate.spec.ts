@@ -1,4 +1,11 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
+import {
+  expect,
+  test,
+  type Browser,
+  type BrowserContext,
+  type BrowserContextOptions,
+  type Page,
+} from "@playwright/test";
 
 const expectedRoles = [
   "master",
@@ -14,6 +21,14 @@ const expectedRoles = [
 
 type Role = (typeof expectedRoles)[number];
 type QaAccount = { email: string; password: string; role: Role };
+type QaTarget = {
+  origin: string;
+  remoteHomologation: boolean;
+  contextOptions: BrowserContextOptions;
+};
+
+const homologationOrigin = "https://homolog.descomplicapro.com.br";
+const unexpectedRemoteOrigins = new Set<string>();
 
 function requiredEnvironment(name: string): string {
   const value = process.env[name];
@@ -21,24 +36,56 @@ function requiredEnvironment(name: string): string {
   return value;
 }
 
-function readAccounts(): Record<Role, QaAccount> {
-  if (requiredEnvironment("QA_E2E_LOCAL_ONLY") !== "true") {
-    throw new Error("Release-candidate E2E is restricted to the local-only orchestrator.");
+function readTarget(): QaTarget {
+  const remoteHomologation = process.env.QA_E2E_REMOTE_HOMOLOGATION === "true";
+  if (
+    process.env.QA_E2E_REMOTE_HOMOLOGATION !== undefined &&
+    !["true", "false"].includes(process.env.QA_E2E_REMOTE_HOMOLOGATION)
+  ) {
+    throw new Error("QA_E2E_REMOTE_HOMOLOGATION accepts only true or false.");
   }
 
   const origin = new URL(requiredEnvironment("QA_E2E_ORIGIN"));
+  const isCredentialFreeOrigin =
+    !origin.username &&
+    !origin.password &&
+    origin.pathname === "/" &&
+    !origin.search &&
+    !origin.hash;
+
+  if (remoteHomologation) {
+    if (
+      !isCredentialFreeOrigin ||
+      origin.origin !== homologationOrigin ||
+      origin.href !== `${homologationOrigin}/`
+    ) {
+      throw new Error("Remote E2E is restricted to the isolated homologation origin.");
+    }
+    const username = requiredEnvironment("QA_E2E_BASIC_AUTH_USERNAME");
+    const password = requiredEnvironment("QA_E2E_BASIC_AUTH_PASSWORD");
+    return {
+      origin: origin.origin,
+      remoteHomologation: true,
+      contextOptions: { httpCredentials: { username, password } },
+    };
+  }
+
+  if (requiredEnvironment("QA_E2E_LOCAL_ONLY") !== "true") {
+    throw new Error("Release-candidate E2E requires the local-only orchestrator by default.");
+  }
   if (
+    !isCredentialFreeOrigin ||
     origin.protocol !== "http:" ||
-    !["127.0.0.1", "localhost", "[::1]"].includes(origin.hostname) ||
-    origin.username ||
-    origin.password ||
-    origin.pathname !== "/" ||
-    origin.search ||
-    origin.hash
+    !["127.0.0.1", "localhost", "[::1]"].includes(origin.hostname)
   ) {
     throw new Error("QA_E2E_ORIGIN must be a credential-free HTTP loopback origin.");
   }
+  return { origin: origin.origin, remoteHomologation: false, contextOptions: {} };
+}
 
+const qaTarget = readTarget();
+
+function readAccounts(): Record<Role, QaAccount> {
   let parsed: unknown;
   try {
     parsed = JSON.parse(requiredEnvironment("QA_E2E_ACCOUNTS"));
@@ -63,7 +110,7 @@ function readAccounts(): Record<Role, QaAccount> {
       typeof candidate.password !== "string" ||
       candidate.password.length < 20
     ) {
-      throw new Error("QA_E2E_ACCOUNTS contains an invalid local QA identity.");
+      throw new Error("QA_E2E_ACCOUNTS contains an invalid synthetic QA identity.");
     }
     accounts[candidate.role as Role] = candidate as QaAccount;
   }
@@ -167,8 +214,12 @@ async function login(page: Page, account: QaAccount) {
 }
 
 async function withRolePage(browser: Browser, role: Role, run: (page: Page) => Promise<void>) {
-  const context = await browser.newContext({ reducedMotion: "reduce" });
+  const context = await browser.newContext({
+    reducedMotion: "reduce",
+    ...qaTarget.contextOptions,
+  });
   try {
+    await constrainRemoteRequests(context);
     const page = await context.newPage();
     await login(page, accounts[role]);
     await run(page);
@@ -177,7 +228,36 @@ async function withRolePage(browser: Browser, role: Role, run: (page: Page) => P
   }
 }
 
+async function constrainRemoteRequests(context: BrowserContext) {
+  if (!qaTarget.remoteHomologation) return;
+  await context.route("**/*", async (route) => {
+    let origin: string;
+    try {
+      origin = new URL(route.request().url()).origin;
+    } catch {
+      unexpectedRemoteOrigins.add("invalid-url");
+      await route.abort("blockedbyclient");
+      return;
+    }
+    if (origin !== qaTarget.origin) {
+      unexpectedRemoteOrigins.add(origin);
+      await route.abort("blockedbyclient");
+      return;
+    }
+    await route.continue();
+  });
+}
+
 test.describe.configure({ mode: "serial" });
+
+test.beforeEach(async ({ context }) => {
+  unexpectedRemoteOrigins.clear();
+  await constrainRemoteRequests(context);
+});
+
+test.afterEach(() => {
+  expect([...unexpectedRemoteOrigins]).toEqual([]);
+});
 
 test("anonymous boundaries and generic login failure stay closed", async ({ page }) => {
   const response = await page.goto("/app/ranking");
@@ -210,10 +290,13 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
         if (surface.allowed.has(role)) {
           expect(response?.status()).toBe(200);
           await expect(page).toHaveURL((url) => url.pathname === surface.path);
-          await expect(page.locator("main")).toBeVisible();
-          await expect(
-            page.getByRole("heading", { level: 1, name: surface.heading, exact: true }),
-          ).toBeVisible();
+          const surfaceHeading = page.getByRole("heading", {
+            level: 1,
+            name: surface.heading,
+            exact: true,
+          });
+          await expect(surfaceHeading).toBeVisible();
+          await expect(page.locator("main").filter({ has: surfaceHeading })).toBeVisible();
           await expect(page.getByRole("heading", { level: 1, name: forbiddenHeading })).toHaveCount(
             0,
           );
@@ -277,23 +360,6 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       await expect(page.locator("body")).not.toContainText(/\b(?:NaN|undefined)\b/);
     }
 
-    await page.goto("/app");
-    await page.getByRole("link", { name: "Com Canal Imob", exact: true }).click();
-    await expect(page).toHaveURL(/view=with_canal_imob/);
-    await page.getByRole("link", { name: "Semana", exact: true }).click();
-    await expect(page).toHaveURL(/view=with_canal_imob.*period=week/);
-    await expect(page.getByRole("link", { name: "Semana", exact: true })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
-
-    await page.goto("/app/ranking");
-    await page.getByRole("link", { name: "Gerentes", exact: true }).click();
-    await expect(page).toHaveURL(/scope=managers/);
-    await page.getByRole("link", { name: "Esta semana", exact: true }).click();
-    await expect(page).toHaveURL(/period=week.*scope=managers/);
-
-    await page.goto("/app/canal-de-parcerias");
     await expect(page.getByText("Dado indisponível — integração pendente").first()).toBeVisible();
     await expect(
       page.locator('[aria-label="Filtros do Canal de Parcerias indisponíveis"]'),
@@ -301,40 +367,115 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
   });
 });
 
-test("v3, Qlik relay and commercial engines remain off at the real HTTP boundary", async ({
+test("dashboard and ranking filter links enforce their selected server state", async ({
+  browser,
+}) => {
+  await withRolePage(browser, "master", async (page) => {
+    const cases = [
+      {
+        pathname: "/app?view=with_canal_imob&period=month",
+        selectedHref: "/app?view=with_canal_imob&amp;period=month",
+      },
+      {
+        pathname: "/app?view=with_canal_imob&period=week",
+        selectedHref: "/app?view=with_canal_imob&amp;period=week",
+      },
+      {
+        pathname: "/app/ranking?period=month&scope=managers",
+        selectedHref: "/app/ranking?period=month&amp;scope=managers",
+      },
+      {
+        pathname: "/app/ranking?period=week&scope=managers",
+        selectedHref: "/app/ranking?period=week&amp;scope=managers",
+      },
+    ];
+
+    for (const filterCase of cases) {
+      const response = await page.context().request.get(filterCase.pathname, {
+        maxRedirects: 0,
+      });
+      expect(response.status()).toBe(200);
+      const html = await response.text();
+      const escapedHref = filterCase.selectedHref.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      expect(html).toMatch(
+        new RegExp(`<a(?=[^>]*href="${escapedHref}")(?=[^>]*aria-current="page")[^>]*>`),
+      );
+    }
+  });
+});
+
+test("v3 follows the isolated gate while Qlik relay and commercial engines remain off", async ({
   browser,
   request,
 }) => {
   await withRolePage(browser, "master", async (page) => {
-    for (const pathname of [
-      "/app/read-model-v3",
-      "/app/read-model-v3/ranking",
-      "/app/read-model-v3/canal-de-parcerias",
-      "/app/read-model-v3/etapas/oportunidades",
-    ]) {
-      const response = await page.goto(pathname);
-      expect([200, 404]).toContain(response?.status());
+    if (qaTarget.remoteHomologation) {
+      const response = await page.goto("/app/read-model-v3");
+      expect(response?.status()).toBe(200);
       await expect(
-        page.getByRole("heading", {
-          level: 1,
-          name: "Este endereço ainda não está disponível",
-        }),
+        page.getByRole("heading", { level: 1, name: "Dashboard do funil v3", exact: true }),
       ).toBeVisible();
-      await expect(page.getByText("Código para suporte: ROUTE-404", { exact: true })).toBeVisible();
+    } else {
+      for (const pathname of [
+        "/app/read-model-v3",
+        "/app/read-model-v3/ranking",
+        "/app/read-model-v3/canal-de-parcerias",
+        "/app/read-model-v3/etapas/oportunidades",
+      ]) {
+        const response = await page.goto(pathname);
+        expect([200, 404]).toContain(response?.status());
+        await expect(
+          page.getByRole("heading", {
+            level: 1,
+            name: "Este endereço ainda não está disponível",
+          }),
+        ).toBeVisible();
+        await expect(
+          page.getByText("Código para suporte: ROUTE-404", { exact: true }),
+        ).toBeVisible();
+      }
     }
   });
 
   const relay = await request.post("/api/ingest/qlik", {
     data: { requestId: "00000000-0000-4000-8000-000000000001" },
+    maxRedirects: 0,
   });
   expect(relay.status()).toBe(503);
   await expect(relay.json()).resolves.toEqual({ error: "ingestion_unavailable" });
 
   const engine = await request.post("/api/commercial-engine/simulator.wf13", {
     data: { requestId: "00000000-0000-4000-8000-000000000002", input: {} },
+    maxRedirects: 0,
   });
   expect(engine.status()).toBe(503);
   await expect(engine.json()).resolves.toEqual({ error: "engine_unavailable" });
+});
+
+test("isolated homologation exposes its safety controls without sharing production cookies", async ({
+  browser,
+}) => {
+  test.skip(!qaTarget.remoteHomologation, "Remote homologation safety controls are remote-only.");
+
+  await withRolePage(browser, "master", async (page) => {
+    const response = await page.goto("/app");
+    expect(response?.status()).toBe(200);
+    await expect(page.getByText("HOMOLOGAÇÃO — DADOS SINTÉTICOS", { exact: true })).toBeVisible();
+    expect(response?.headers()["x-robots-tag"]?.toLowerCase()).toContain("noindex");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/i);
+
+    const cookies = await page.context().cookies();
+    expect(cookies.length).toBeGreaterThan(0);
+    for (const cookie of cookies) {
+      expect(cookie.domain).not.toBe("descomplicapro.com.br");
+      expect(cookie.domain).not.toBe(".descomplicapro.com.br");
+      expect(cookie.domain.replace(/^\./, "")).toBe("homolog.descomplicapro.com.br");
+    }
+
+    const register = await page.goto("/register");
+    expect(register?.status()).toBe(404);
+    await expect(page.getByRole("heading", { level: 1, name: "Criar sua conta" })).toHaveCount(0);
+  });
 });
 
 test("simulators stay visual-only and keyboard/theme controls remain operable", async ({

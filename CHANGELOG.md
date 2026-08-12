@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Publica a homologação visual isolada em HTTPS com DNS/TLS exclusivos, Basic
+  Auth antes do login, `noindex`, nove perfis e fixtures somente sintéticas;
+  E2E remoto, 21 rotas, 87 checks visuais/Axe, quatro viewports, três temas,
+  zoom, teclado, RLS e isolamento passam sem ativar relay ou motores.
+- Estabiliza os harnesses Playwright contra a coexistência transitória do
+  loading boundary e contra execução do init script antes do DOM, sem reduzir
+  testes nem alterar comportamento da aplicação.
 - Torna os dois gates locais que consomem `supabase status --output json`
   tolerantes às mensagens informativas do CLI ao redor do único objeto JSON,
   mantendo rejeição fail-closed para saída ausente, truncada ou ambígua.
@@ -187,6 +194,10 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Adicionado
 
+- Homologação visual isolada com Compose/volumes/rede/portas próprios, Supabase
+  local sintético, nove perfis QA, Basic Auth, noindex, banner persistente,
+  cadastro público bloqueado, firewall dedicado, E2E remoto e rollback sem
+  cutover.
 - Vitest e testes iniciais dos schemas de autenticação.
 - Scripts de verificação, auditoria, scanners e Supabase local.
 - Build Next.js `standalone` para a VPS.
@@ -222,6 +233,9 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Segurança
 
+- Flags da homologação falham fechadas; read model v3 pode ser visualizado
+  apenas no ambiente sintético, enquanto relay Qlik, integrações externas e
+  motores comerciais permanecem desligados.
 - Removidas vulnerabilidades críticas/altas/moderadas conhecidas da árvore final.
 - Arquivo de ambiente presente no ZIP de origem removido da árvore de entrega e colocado em quarentena local.
 - Usuários inativos bloqueados no contexto de autorização e na resolução de permissões usada pela RLS.

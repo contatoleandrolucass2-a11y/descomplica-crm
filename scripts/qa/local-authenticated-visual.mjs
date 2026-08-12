@@ -10,6 +10,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
+const homologationRuntimeRoot = "/var/lib/descomplica-crm-homologation";
 const visualHarnessPath = path.join(import.meta.dirname, "authenticated-visual.mjs");
 const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const requiredFixtureCounts = {
@@ -196,12 +197,21 @@ function parseLocalStatus(stdout) {
   return { apiUrl, database, publishableKey, secretKey };
 }
 
-async function discoverLocalSupabase() {
+export async function discoverLocalSupabase() {
+  const configuredWorkdir = process.env.QA_SUPABASE_WORKDIR;
+  const workdir = configuredWorkdir ? path.resolve(configuredWorkdir) : repositoryRoot;
+  if (
+    workdir !== repositoryRoot &&
+    (process.env.HOMOLOGATION_MODE !== "true" || workdir !== homologationRuntimeRoot)
+  ) {
+    throw new Error("Alternate Supabase workdir is restricted to explicit isolated homologation.");
+  }
+
   let stdout;
   try {
     ({ stdout } = await execFileAsync(
       "pnpm",
-      ["exec", "supabase", "status", "--output", "json", "--workdir", repositoryRoot],
+      ["exec", "supabase", "status", "--output", "json", "--workdir", workdir],
       {
         cwd: repositoryRoot,
         encoding: "utf8",
@@ -368,7 +378,7 @@ function sqlLiteral(value) {
   return `'${String(value).replaceAll("'", "''")}'`;
 }
 
-function runLocalSql(database, sql, purpose) {
+export function runLocalSql(database, sql, purpose) {
   const result = spawnSync(
     "psql",
     [
@@ -376,6 +386,8 @@ function runLocalSql(database, sql, purpose) {
       "--no-psqlrc",
       "--set",
       "ON_ERROR_STOP=1",
+      "--set",
+      "VERBOSITY=sqlstate",
       "--quiet",
       "--host",
       database.host,
@@ -401,13 +413,53 @@ function runLocalSql(database, sql, purpose) {
   );
 
   if (result.error || result.status !== 0) {
-    throw new Error(`Local QA database ${purpose} failed.`);
+    const sqlstate = result.stderr?.match(/ERROR:\s+([0-9A-Z]{5})/)?.[1];
+    throw new Error(
+      `Local QA database ${purpose} failed${sqlstate ? ` (SQLSTATE ${sqlstate})` : ""}.`,
+    );
   }
 }
 
-function fixtureSetupSql({ marker, userId }) {
+export function fixtureSetupSql({ marker, userId, reuseExistingMaster = false }) {
   const markerSql = sqlLiteral(marker);
   const userIdSql = `${sqlLiteral(userId)}::uuid`;
+  const masterPreflight = reuseExistingMaster
+    ? `
+  if not exists (
+    select 1
+    from public.user_roles user_role
+    join public.profiles profile on profile.user_id = user_role.user_id
+    where user_role.user_id = ${userIdSql}
+      and user_role.role_key = 'master'
+      and profile.is_active
+      and profile.access_status = 'approved'
+  ) or exists (
+    select 1 from public.user_roles
+    where role_key = 'master' and user_id <> ${userIdSql}
+  ) then
+    raise exception 'homologation visual fixture requires the isolated approved Master';
+  end if;`
+    : `
+  if exists (
+    select 1
+    from public.user_roles
+    where role_key = 'master'
+  ) then
+    raise exception 'local visual QA requires a fresh database without a Master fixture';
+  end if;`;
+  const masterBootstrap = reuseExistingMaster
+    ? `
+update public.profiles
+set profile_completed = true
+where user_id = ${userIdSql};
+`
+    : `
+select public.bootstrap_master_user(${userIdSql});
+
+update public.profiles
+set profile_completed = true
+where user_id = ${userIdSql};
+`;
 
   return `
 begin;
@@ -431,13 +483,7 @@ begin
   ) then
     raise exception 'reserved funnel-goals fixture slot is occupied';
   end if;
-  if exists (
-    select 1
-    from public.user_roles
-    where role_key = 'master'
-  ) then
-    raise exception 'local visual QA requires a fresh database without a Master fixture';
-  end if;
+${masterPreflight}
   if not exists (
     select 1
     from public.role_permissions
@@ -476,11 +522,7 @@ begin
 end
 $qa_preflight$;
 
-select public.bootstrap_master_user(${userIdSql});
-
-update public.profiles
-set profile_completed = true
-where user_id = ${userIdSql};
+${masterBootstrap}
 
 insert into public.crm_organizations (organization_key, name, kind)
 values (
@@ -960,7 +1002,7 @@ async function createEphemeralQaUser(adminClient, runId) {
   return { id: assertUuid(data.user.id), email, password };
 }
 
-async function verifyFixturesThroughRls({ apiUrl, publishableKey, account, marker }) {
+export async function verifyFixturesThroughRls({ apiUrl, publishableKey, account, marker }) {
   const client = createClient(apiUrl, publishableKey, {
     auth: {
       autoRefreshToken: false,
@@ -1262,27 +1304,33 @@ async function main() {
   }
 }
 
-for (const signal of ["SIGINT", "SIGTERM"]) {
-  process.on(signal, () => {
-    if (requestedSignal) return;
-    requestedSignal = signal;
-    for (const child of activeChildren) {
-      signalChildGroup(child, signal);
-    }
-  });
-}
+const directExecution = process.argv[1]
+  ? path.resolve(process.argv[1]) === path.resolve(import.meta.filename)
+  : false;
 
-try {
-  await main();
-  if (requestedSignal) {
-    process.exitCode = requestedSignal === "SIGINT" ? 130 : 143;
-  } else {
-    process.stdout.write(
-      "Local authenticated QA passed; ephemeral account and fixtures removed.\n",
-    );
+if (directExecution) {
+  for (const signal of ["SIGINT", "SIGTERM"]) {
+    process.on(signal, () => {
+      if (requestedSignal) return;
+      requestedSignal = signal;
+      for (const child of activeChildren) {
+        signalChildGroup(child, signal);
+      }
+    });
   }
-} catch (error) {
-  const message = error instanceof Error ? error.message : "Unknown local QA failure.";
-  process.stderr.write(`Local authenticated QA failed: ${message}\n`);
-  process.exitCode = requestedSignal === "SIGINT" ? 130 : requestedSignal === "SIGTERM" ? 143 : 1;
+
+  try {
+    await main();
+    if (requestedSignal) {
+      process.exitCode = requestedSignal === "SIGINT" ? 130 : 143;
+    } else {
+      process.stdout.write(
+        "Local authenticated QA passed; ephemeral account and fixtures removed.\n",
+      );
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown local QA failure.";
+    process.stderr.write(`Local authenticated QA failed: ${message}\n`);
+    process.exitCode = requestedSignal === "SIGINT" ? 130 : requestedSignal === "SIGTERM" ? 143 : 1;
+  }
 }

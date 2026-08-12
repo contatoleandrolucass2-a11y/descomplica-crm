@@ -92,12 +92,19 @@ function buildCsp(isProd: boolean): string {
   return directives.join("; ");
 }
 
-export function applySecurityHeaders(headers: Headers, options: { isProd: boolean }): void {
+export function applySecurityHeaders(
+  headers: Headers,
+  options: { isProd: boolean; noIndex?: boolean },
+): void {
   headers.set("X-Frame-Options", "DENY");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("Permissions-Policy", PERMISSIONS_POLICY);
   headers.set("Content-Security-Policy", buildCsp(options.isProd));
+
+  if (options.noIndex) {
+    headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  }
 
   if (options.isProd) {
     headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");

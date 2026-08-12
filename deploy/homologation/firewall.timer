@@ -1,0 +1,11 @@
+[Unit]
+Description=Reassert isolated homologation firewall
+
+[Timer]
+OnBootSec=15s
+OnUnitActiveSec=30s
+AccuracySec=5s
+Unit=descomplica-homologation-firewall.service
+
+[Install]
+WantedBy=timers.target

@@ -19,6 +19,14 @@ const candidateResultsPath = path.join(artifactRoot, "candidate-results.json");
 const visualDifferenceThreshold = 0.01;
 const visualChannelTolerance = 16;
 const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+const homologationOrigin = "https://homolog.descomplicapro.com.br";
+const remoteHomologation = process.env.QA_AUTH_REMOTE_HOMOLOGATION === "true";
+const environmentLabel = remoteHomologation
+  ? "isolated remote homologation with local-only Supabase"
+  : "isolated local Supabase";
+const accountLabel = remoteHomologation
+  ? "dedicated persistent synthetic QA account"
+  : "dedicated ephemeral QA account";
 
 function parseMode(argv) {
   if (argv.length === 0) return "verify";
@@ -72,8 +80,19 @@ function requiredEnvironment(name) {
   return value;
 }
 
-function parseLocalOrigin(rawOrigin) {
+function parseQaOrigin(rawOrigin) {
   const candidate = new URL(rawOrigin);
+  if (
+    remoteHomologation &&
+    !candidate.username &&
+    !candidate.password &&
+    candidate.origin === homologationOrigin &&
+    candidate.pathname === "/" &&
+    !candidate.search &&
+    !candidate.hash
+  ) {
+    return candidate.origin;
+  }
   if (
     candidate.username ||
     candidate.password ||
@@ -83,9 +102,40 @@ function parseLocalOrigin(rawOrigin) {
     candidate.protocol !== "http:" ||
     !["127.0.0.1", "localhost", "[::1]"].includes(candidate.hostname)
   ) {
-    throw new Error("QA_AUTH_ORIGIN must be an HTTP loopback origin without credentials or path.");
+    throw new Error(
+      "QA_AUTH_ORIGIN must be HTTP loopback, or the explicitly enabled homologation origin.",
+    );
   }
   return candidate.origin;
+}
+
+function homologationHttpCredentials(origin) {
+  if (!remoteHomologation) return undefined;
+  if (origin !== homologationOrigin) {
+    throw new Error("Remote homologation mode requires the approved homologation origin.");
+  }
+  return {
+    username: requiredEnvironment("QA_AUTH_BASIC_USERNAME"),
+    password: requiredEnvironment("QA_AUTH_BASIC_PASSWORD"),
+    origin,
+    send: "always",
+  };
+}
+
+async function hideHomologationBannerForBaseline(context) {
+  if (!remoteHomologation) return;
+  await context.addInitScript(() => {
+    const hideBanner = () => {
+      const style = document.createElement("style");
+      style.textContent = ".homologation-banner{display:none!important}";
+      document.head.append(style);
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", hideBanner, { once: true });
+    } else {
+      hideBanner();
+    }
+  });
 }
 
 function parseLocalSupabaseUrl(rawUrl) {
@@ -496,15 +546,26 @@ async function checkSimulatorValidation(page, origin) {
   await page.goto(`${origin}/app/simulacao/associativo-fluxo-linear`, {
     waitUntil: "domcontentloaded",
   });
+  await page.waitForLoadState("networkidle");
   const field = page.locator("main form input[required]").first();
+  await field.waitFor({ state: "visible" });
   await field.focus();
   await page.keyboard.press("Tab");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("main form input[required]")?.getAttribute("aria-invalid") === "true",
+  );
   const invalidAfterBlur = (await field.getAttribute("aria-invalid")) === "true";
   const errorId = (await field.getAttribute("aria-describedby"))
     ?.split(/\s+/)
     .find((id) => id.endsWith("-error"));
+  if (errorId) await page.locator(`#${errorId}`).waitFor({ state: "visible" });
   const messageAssociated = Boolean(errorId) && (await page.locator(`#${errorId}`).isVisible());
   await field.fill("QA visual local");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("main form input[required]")?.getAttribute("aria-invalid") !== "true",
+  );
   const validAfterInput = (await field.getAttribute("aria-invalid")) !== "true";
 
   return { invalidAfterBlur, messageAssociated, validAfterInput };
@@ -529,14 +590,16 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
   return checks;
 }
 
-async function checkZoom(origin, email, password, browser) {
+async function checkZoom(origin, email, password, browser, httpCredentials) {
   const context = await browser.newContext({
     viewport: { width: 720, height: 450 },
     deviceScaleFactor: 2,
     reducedMotion: "reduce",
     locale: "pt-BR",
     timezoneId: "America/Sao_Paulo",
+    httpCredentials,
   });
+  await hideHomologationBannerForBaseline(context);
   const page = await context.newPage();
   const consoleErrors = [];
   const pageErrors = [];
@@ -559,6 +622,39 @@ async function checkZoom(origin, email, password, browser) {
   } finally {
     await context.close();
   }
+}
+
+async function captureHomologationCheckpoints(browser, origin, email, password, httpCredentials) {
+  if (!remoteHomologation) return [];
+  const checkpoints = [];
+  for (const viewport of [viewports[0], viewports.at(-1)]) {
+    const context = await browser.newContext({
+      viewport: { width: viewport.width, height: viewport.height },
+      reducedMotion: "reduce",
+      locale: "pt-BR",
+      timezoneId: "America/Sao_Paulo",
+      httpCredentials,
+    });
+    try {
+      const page = await context.newPage();
+      await login(page, origin, email, password);
+      const banner = page.getByText("HOMOLOGAÇÃO — DADOS SINTÉTICOS", { exact: true });
+      await banner.waitFor({ state: "visible", timeout: 20_000 });
+      const destination = path.join(
+        artifactRoot,
+        `homologation-dashboard-${viewport.width}x${viewport.height}.webp`,
+      );
+      const buffer = await page.screenshot({ fullPage: true, animations: "disabled" });
+      checkpoints.push({
+        viewport: viewport.key,
+        bannerVisible: await banner.isVisible(),
+        ...(await saveLosslessWebp(buffer, destination)),
+      });
+    } finally {
+      await context.close();
+    }
+  }
+  return checkpoints;
 }
 
 function functionalChecksPassed({
@@ -694,8 +790,8 @@ async function run() {
     capturedAt: new Date().toISOString(),
     ...getCaptureProvenance(),
     mode,
-    environment: "isolated local Supabase",
-    account: "dedicated ephemeral QA account",
+    environment: environmentLabel,
+    account: accountLabel,
     data: "synthetic local-only fixtures; never production runtime",
     credentialsPersisted: false,
     storageStatePersisted: false,
@@ -730,7 +826,11 @@ async function run() {
   ) {
     throw new Error("Authenticated QA received an invalid synthetic source marker.");
   }
-  const origin = parseLocalOrigin(requiredEnvironment("QA_AUTH_ORIGIN"));
+  const origin = parseQaOrigin(requiredEnvironment("QA_AUTH_ORIGIN"));
+  if (remoteHomologation && mode !== "verify") {
+    throw new Error("Remote homologation may verify baselines but cannot update them.");
+  }
+  const httpCredentials = homologationHttpCredentials(origin);
   const email = requiredEnvironment("QA_AUTH_EMAIL");
   const password = requiredEnvironment("QA_AUTH_PASSWORD");
   const supabaseUrl = parseLocalSupabaseUrl(requiredEnvironment("QA_AUTH_SUPABASE_URL"));
@@ -749,15 +849,25 @@ async function run() {
   let keyboard = null;
   let simulatorValidation = null;
   let fixtureSourceMarker = null;
+  let homologationCheckpoints = [];
 
   try {
+    homologationCheckpoints = await captureHomologationCheckpoints(
+      browser,
+      origin,
+      email,
+      password,
+      httpCredentials,
+    );
     for (const viewport of viewports) {
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
         reducedMotion: "reduce",
         locale: "pt-BR",
         timezoneId: "America/Sao_Paulo",
+        httpCredentials,
       });
+      await hideHomologationBannerForBaseline(context);
       const page = await context.newPage();
       const consoleErrors = [];
       const pageErrors = [];
@@ -846,7 +956,7 @@ async function run() {
       }
     }
 
-    const zoom = await checkZoom(origin, email, password, browser);
+    const zoom = await checkZoom(origin, email, password, browser, httpCredentials);
     const functionalPassed = functionalChecksPassed({
       routeChecks,
       themeChecks,
@@ -870,8 +980,8 @@ async function run() {
       capturedAt: new Date().toISOString(),
       ...getCaptureProvenance(),
       mode,
-      environment: "isolated local Supabase",
-      account: "dedicated ephemeral QA account",
+      environment: environmentLabel,
+      account: accountLabel,
       identityVerification,
       fixtureVerification: {
         contract: fixtureVerification,
@@ -894,6 +1004,7 @@ async function run() {
       accessibilityChecks,
       keyboard,
       simulatorValidation,
+      homologationCheckpoints,
       zoom,
       screenshots,
       baselineUsed,
@@ -947,8 +1058,8 @@ async function run() {
         capturedAt: new Date().toISOString(),
         ...getCaptureProvenance(),
         mode,
-        environment: "isolated local Supabase",
-        account: "dedicated ephemeral QA account",
+        environment: environmentLabel,
+        account: accountLabel,
         data: "synthetic local-only fixtures; never production runtime",
         credentialsPersisted: false,
         storageStatePersisted: false,

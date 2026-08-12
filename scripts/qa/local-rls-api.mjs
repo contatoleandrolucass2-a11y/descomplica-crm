@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { execFile, spawn, spawnSync } from "node:child_process";
-import { stat } from "node:fs/promises";
+import { chmod, link, open, rm, stat } from "node:fs/promises";
 import { createServer } from "node:net";
 import path from "node:path";
 import process from "node:process";
@@ -10,6 +10,8 @@ import { createClient } from "@supabase/supabase-js";
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
+const homologationRuntimeRoot = "/var/lib/descomplica-crm-homologation";
+const homologationAccountsPath = "/etc/descomplica-crm/homologation-accounts.json";
 const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const requiredRoles = [
   "master",
@@ -214,11 +216,20 @@ function parseLocalStatus(stdout) {
 }
 
 async function discoverLocalSupabase() {
+  const configuredWorkdir = process.env.QA_SUPABASE_WORKDIR;
+  const workdir = configuredWorkdir ? path.resolve(configuredWorkdir) : repositoryRoot;
+  if (
+    workdir !== repositoryRoot &&
+    (process.env.HOMOLOGATION_MODE !== "true" || workdir !== homologationRuntimeRoot)
+  ) {
+    fail("Alternate Supabase workdir is restricted to explicit isolated homologation.");
+  }
+
   let stdout;
   try {
     ({ stdout } = await execFileAsync(
       "pnpm",
-      ["exec", "supabase", "status", "--output", "json", "--workdir", repositoryRoot],
+      ["exec", "supabase", "status", "--output", "json", "--workdir", workdir],
       {
         cwd: repositoryRoot,
         encoding: "utf8",
@@ -237,6 +248,44 @@ async function discoverLocalSupabase() {
   }
 
   return parseLocalStatus(stdout);
+}
+
+function persistentAccountsPath() {
+  const candidate = process.env.QA_RELEASE_PERSIST_ACCOUNTS_FILE;
+  if (!candidate) return null;
+  if (
+    process.env.HOMOLOGATION_MODE !== "true" ||
+    path.resolve(process.env.QA_SUPABASE_WORKDIR ?? "") !== homologationRuntimeRoot ||
+    path.resolve(candidate) !== homologationAccountsPath
+  ) {
+    fail("Persistent QA accounts are restricted to isolated homologation storage.");
+  }
+  return homologationAccountsPath;
+}
+
+async function persistSyntheticAccounts(destination, runId, accounts) {
+  const payload = {
+    schemaVersion: 1,
+    environment: "isolated-homologation",
+    dataClassification: "synthetic-only",
+    runId,
+    visualRunId: `${Date.now()}-${randomBytes(6).toString("hex")}`,
+    accounts: accounts.map(({ id, role, email, password }) => ({ id, role, email, password })),
+  };
+  const temporary = `${destination}.tmp-${process.pid}`;
+  let handle;
+  try {
+    handle = await open(temporary, "wx", 0o600);
+    await handle.writeFile(`${JSON.stringify(payload, null, 2)}\n`, "utf8");
+    await handle.sync();
+    await handle.close();
+    handle = undefined;
+    await chmod(temporary, 0o600);
+    await link(temporary, destination);
+  } finally {
+    await handle?.close();
+    await rm(temporary, { force: true });
+  }
 }
 
 async function reserveLoopbackPort() {
@@ -1417,6 +1466,8 @@ async function main() {
   const fixtures = createFixtures(runKey);
   const adminClient = createLocalClient(local.apiUrl, local.secretKey);
   const accounts = [];
+  const accountsDestination = persistentAccountsPath();
+  let persisted = false;
   let anonymousDenied = 0;
   let anonymousRows = 0;
   let dualAffiliationDenied = 0;
@@ -1455,9 +1506,16 @@ async function main() {
       browserE2e = 1;
       throwIfInterrupted();
     }
+
+    if (accountsDestination) {
+      await persistSyntheticAccounts(accountsDestination, runId, accounts);
+      persisted = true;
+    }
   } finally {
     try {
-      await removeEphemeralState(local, adminClient, accounts, fixtures);
+      if (!persisted) {
+        await removeEphemeralState(local, adminClient, accounts, fixtures);
+      }
     } finally {
       await stopChild(nextServer?.child);
     }
@@ -1474,7 +1532,8 @@ async function main() {
     commercialDenied: requiredRoles.length - 1,
     legacyApproved: 0,
     rpcDenials: 1,
-    removed: accounts.length,
+    persisted: persisted ? accounts.length : 0,
+    removed: persisted ? 0 : accounts.length,
     anonymousDenied,
     anonymousRows,
     dualAffiliationDenied,
@@ -1495,7 +1554,7 @@ try {
     process.exitCode = requestedSignal === "SIGINT" ? 130 : 143;
   } else {
     process.stdout.write(
-      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_master=${counts.commercialMaster} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} browser_e2e=${counts.browserE2e} removed=${counts.removed}\n`,
+      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_master=${counts.commercialMaster} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} browser_e2e=${counts.browserE2e} persisted=${counts.persisted} removed=${counts.removed}\n`,
     );
   }
 } catch (error) {

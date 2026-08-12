@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-11T14:23:50.683Z",
+  "environment": "isolated-homologation",
+  "origin": "https://homolog.descomplicapro.com.br",
+  "dataClassification": "synthetic-only",
+  "checks": {
+    "e2e": { "passed": 7, "total": 7 },
+    "protectedRoutes": { "passed": 21, "total": 21 },
+    "profiles": { "passed": 9, "total": 9 },
+    "responsive": { "passed": 72, "total": 72 },
+    "themes": { "passed": 54, "total": 54 },
+    "accessibility": { "passed": 87, "total": 87 },
+    "visualComparisons": {
+      "passed": 87,
+      "total": 87,
+      "threshold": 0.01,
+      "maxChangedPixelRatio": 0.000884273601233329
+    },
+    "zoom200": { "passed": 18, "total": 18 }
+  },
+  "evidence": [
+    {
+      "path": "evidence/dashboard-desktop.webp",
+      "sha256": "743271e6131a9fda3f5ac3b2d5a52fd52dea6bc6c57e9e25eaa30470eb9cca58"
+    },
+    {
+      "path": "evidence/dashboard-mobile.webp",
+      "sha256": "42f77f0100cce858e9a283c8d53ec55e2d1ccc5f511b11d9e01e4fffdda147a8"
+    },
+    {
+      "path": "evidence/ranking.webp",
+      "sha256": "30a5808afa5e3648ac8058e2fb235bb5de86b2c0ed8c36d6f81fd46df9325e9f"
+    },
+    {
+      "path": "evidence/canal-de-parcerias.webp",
+      "sha256": "47ded1a207051234c56ffeac60bd93374bbc80dcd640a2f40c9bb502d3f81e11"
+    },
+    {
+      "path": "evidence/etapa-oportunidades.webp",
+      "sha256": "e5dbc501cb514e4e5bc6449f393c26cb1f301e3c3b67ebc3922233ad3d9e50ee"
+    },
+    {
+      "path": "evidence/simulacao-hub.webp",
+      "sha256": "16a6e07a9e6147e6a23f1ca357b38fc018d257531a17d32f8433306fc5e476a2"
+    },
+    {
+      "path": "evidence/wf13.webp",
+      "sha256": "c70c504a3f13dd571e998b8b774cc97e595012066658bd97631c6db4d23c9751"
+    },
+    {
+      "path": "evidence/caixa.webp",
+      "sha256": "819d0e4c420392d6801cdfebdb5298003dd7fd96230c9075e82f17fd6a7adf2a"
+    },
+    {
+      "path": "evidence/theme-light.webp",
+      "sha256": "f0a169d7995c223e09706fcb394e1aa2f3a79ef2abeda1538f50ee7d1d56c628"
+    },
+    {
+      "path": "evidence/theme-balanced.webp",
+      "sha256": "97abd2a50af8a41ae5ebc692de753b3ffccf32f90d1dcd57bdc79592cbf8503a"
+    },
+    {
+      "path": "evidence/theme-dark.webp",
+      "sha256": "3d41d09f5be17855237803fac4893e420d9fb611c1a0ba2c090fa97482e752d0"
+    }
+  ],
+  "credentialsPersisted": false,
+  "productionDataUsed": false,
+  "productionChanged": false
+}

@@ -42,6 +42,24 @@ body {
   color: var(--analytics-ink);
 }
 
+.homologation-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #678300;
+  background: #d9ff65;
+  padding: 0.35rem 1rem;
+  color: #172100;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
 html,
 body,
 header,

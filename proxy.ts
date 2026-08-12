@@ -74,6 +74,7 @@ import {
   getSalesforceRefreshConfiguration,
 } from "@/lib/crm/salesforce/config";
 import { applySecurityHeaders } from "@/lib/security/headers";
+import { isHomologationMode } from "@/lib/homologation/config";
 import { NextResponse, type NextRequest } from "next/server";
 
 function unavailableSalesforceResponse(request: NextRequest): NextResponse | null {
@@ -106,12 +107,18 @@ export async function proxy(request: NextRequest) {
 
   const unavailableResponse = unavailableSalesforceResponse(request);
   if (unavailableResponse) {
-    applySecurityHeaders(unavailableResponse.headers, { isProd: isSecureProduction });
+    applySecurityHeaders(unavailableResponse.headers, {
+      isProd: isSecureProduction,
+      noIndex: isHomologationMode(),
+    });
     return unavailableResponse;
   }
 
   const { response } = await updateSession(request);
-  applySecurityHeaders(response.headers, { isProd: isSecureProduction });
+  applySecurityHeaders(response.headers, {
+    isProd: isSecureProduction,
+    noIndex: isHomologationMode(),
+  });
 
   return response;
 }
