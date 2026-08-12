@@ -1,27 +1,31 @@
 import Link from "next/link";
 
 import { GOAL_PROFILES } from "@/lib/crm/goals/catalog";
+import { loadPointSettingsDraft } from "@/lib/crm/commercial-engine/draft-data";
+import { pointDraftValues } from "@/lib/crm/commercial-engine/drafts";
 import { POINT_METRICS } from "@/lib/crm/points/catalog";
 import { loadPointSettings } from "@/lib/crm/points/data";
 
-import { savePointSettingsAction } from "../actions";
+import { preparePointSettingsDraftAction } from "../actions";
+import { ConfigurationDraftForm } from "../../_components/ConfigurationDraftForm";
 
 export async function PointSettingsPage({
   notification,
 }: {
   notification?: "saved" | "validation" | "save";
 }) {
-  const result = await loadPointSettings();
-  const weights = result.status === "ready" ? result.weights : null;
-  const targets = result.status === "ready" ? result.targets : null;
-  const updatedAt =
-    result.status === "ready"
-      ? new Intl.DateTimeFormat("pt-BR", {
-          dateStyle: "short",
-          timeStyle: "short",
-          timeZone: "America/Sao_Paulo",
-        }).format(new Date(result.updatedAt))
-      : null;
+  const [result, draft] = await Promise.all([loadPointSettings(), loadPointSettingsDraft()]);
+  const draftValues = draft ? pointDraftValues(draft.payload) : null;
+  const weights = draftValues?.weights ?? (result.status === "ready" ? result.weights : null);
+  const targets = draftValues?.targets ?? (result.status === "ready" ? result.targets : null);
+  const sourceUpdatedAt = draft?.updatedAt ?? (result.status === "ready" ? result.updatedAt : null);
+  const updatedAt = sourceUpdatedAt
+    ? new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short",
+        timeZone: "America/Sao_Paulo",
+      }).format(new Date(sourceUpdatedAt))
+    : null;
 
   return (
     <main className="px-4 py-6 sm:px-6 sm:py-10">
@@ -49,17 +53,15 @@ export async function PointSettingsPage({
                       result.status === "ready" ? "bg-[var(--analytics-lime)]" : "bg-amber-300"
                     }`}
                   />
-                  {result.status === "ready"
-                    ? "Configuração ativa"
-                    : "Primeiro salvamento pendente"}
+                  Base legada: somente leitura · Rascunho atual: editável
                 </span>
               </div>
 
               <h1 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-balance sm:text-4xl lg:text-5xl">
-                Meta por pontos
+                Metas de pontos
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
-                Defina quanto vale cada atividade e o objetivo usado nas comparações comerciais.
+                Prepare pesos e objetivos como rascunho inativo, sem alterar o ranking.
               </p>
 
               {updatedAt ? (
@@ -148,7 +150,7 @@ export async function PointSettingsPage({
               className="rounded-2xl bg-[var(--analytics-cyan)] px-4 py-3 text-sm text-[var(--analytics-navy)] shadow-lg ring-1 shadow-cyan-950/20 ring-cyan-100/50"
             >
               <span className="flex items-center justify-between gap-3">
-                <strong>Meta por pontos</strong>
+                <strong>Metas de pontos</strong>
                 <span
                   aria-hidden="true"
                   className="size-2 rounded-full bg-[var(--analytics-lime)]"
@@ -196,7 +198,7 @@ export async function PointSettingsPage({
               Estado da configuração
             </p>
             <strong className="mt-2 block text-xl text-[var(--analytics-ink)]">
-              {result.status === "ready" ? "Persistida" : "Ainda não persistida"}
+              {result.status === "ready" ? "Base legada disponível" : "Sem base legada"}
             </strong>
           </article>
           <article className="relative overflow-hidden rounded-2xl bg-[var(--analytics-surface)] p-5 shadow-sm ring-1 ring-[var(--analytics-line)]">
@@ -232,7 +234,7 @@ export async function PointSettingsPage({
             </span>
             <p>
               {notification === "saved"
-                ? "Configuração salva e registrada na auditoria."
+                ? "Rascunho salvo e registrado na auditoria; nenhuma ativação foi realizada."
                 : notification === "validation"
                   ? "Revise os valores: use somente inteiros entre 0 e 100.000."
                   : "Não foi possível salvar a configuração. Tente novamente."}
@@ -249,13 +251,17 @@ export async function PointSettingsPage({
               i
             </span>
             <p>
-              Ainda não existe configuração persistida. Os campos permanecem vazios para evitar
-              sugerir uma regra comercial e somente passam a valer após o primeiro salvamento.
+              Ainda não existe base legada. Os campos permanecem vazios para evitar sugerir uma
+              regra comercial. Salvar cria apenas um rascunho inativo.
             </p>
           </div>
         ) : null}
 
-        <form action={savePointSettingsAction} className="mt-6 grid gap-5">
+        <ConfigurationDraftForm
+          action={preparePointSettingsDraftAction}
+          saveLabel="Salvar rascunho de pontuação"
+        >
+          <input type="hidden" name="draftRevision" value={draft?.revision ?? 0} />
           <section className="overflow-hidden rounded-[2rem] bg-[var(--analytics-surface)] shadow-[var(--analytics-shadow)] ring-1 ring-[var(--analytics-line)]">
             <div className="grid gap-5 border-b border-[var(--analytics-line)] p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div>
@@ -371,26 +377,7 @@ export async function PointSettingsPage({
               </div>
             </div>
           </section>
-
-          <div className="grid gap-4 rounded-2xl border border-white/10 bg-[var(--analytics-navy)] p-4 text-white shadow-2xl shadow-slate-950/20 sm:flex sm:items-center sm:justify-between sm:p-5">
-            <div className="flex items-start gap-3">
-              <span
-                aria-hidden="true"
-                className="mt-0.5 size-2.5 shrink-0 rounded-full bg-[var(--analytics-lime)]"
-              />
-              <p className="text-sm leading-6 text-slate-300">
-                O ranking usará estes pesos somente após a confirmação abaixo.
-              </p>
-            </div>
-            <button
-              type="submit"
-              className="inline-flex min-h-12 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--analytics-lime)] px-6 py-3 font-semibold text-[var(--analytics-navy)] shadow-lg shadow-lime-950/20 transition hover:brightness-105 focus:ring-2 focus:ring-lime-200 focus:ring-offset-2 focus:ring-offset-slate-950 focus:outline-none sm:w-auto"
-            >
-              Salvar configuração
-              <span aria-hidden="true">→</span>
-            </button>
-          </div>
-        </form>
+        </ConfigurationDraftForm>
       </div>
     </main>
   );

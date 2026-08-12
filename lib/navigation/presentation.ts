@@ -38,3 +38,19 @@ export function getNavigationHome(pages: NavigationItem[]) {
 export function isNavigationGroupActive(pathname: string, group: NavigationGroup) {
   return pathname === group.page.path || group.children.some((child) => pathname === child.path);
 }
+
+export function buildBreadcrumbs(pathname: string, pages: NavigationItem[]): NavigationItem[] {
+  const byKey = new Map(pages.map((page) => [page.key, page]));
+  const current = pages.find((page) => page.path === pathname);
+  if (!current) return [];
+
+  const chain: NavigationItem[] = [];
+  const visited = new Set<string>();
+  let cursor: NavigationItem | undefined = current;
+  while (cursor && !visited.has(cursor.key)) {
+    visited.add(cursor.key);
+    chain.unshift(cursor);
+    cursor = cursor.parentKey ? byKey.get(cursor.parentKey) : undefined;
+  }
+  return chain;
+}

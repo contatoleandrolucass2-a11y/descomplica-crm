@@ -18,6 +18,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import { createClient } from "@/lib/auth/supabase/server";
 import { enforceAuthorization } from "@/lib/authorization/enforce";
 import { logoutAction } from "@/lib/auth/actions/logout";
 import { getRoleLabel } from "@/lib/authorization/roles";
@@ -25,11 +26,16 @@ import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 import { getNavigationHome } from "@/lib/navigation/presentation";
 
 import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
+import { AuthorizedBreadcrumbs } from "./_components/AuthorizedBreadcrumbs";
 import styles from "./_components/ProtectedShell.module.css";
 import { ThemeSwitch } from "./_components/ThemeSwitch";
 
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   const context = await enforceAuthorization();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const pages = await getAuthorizedNavigation(context);
   const navigationHome = getNavigationHome(pages);
   const brand = (
@@ -61,6 +67,20 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
           )}
           <AuthorizedNavigation pages={pages} />
           <div className={styles.actions}>
+            <div
+              className={styles.identity}
+              data-session-identity
+              aria-label={`Usuário autenticado: ${user?.email ?? "identidade protegida"}. Sessão ativa.`}
+              title={user?.email ?? undefined}
+            >
+              <span className={styles.identityLabel} data-session-identity-label>
+                {user?.email ?? "Usuário autenticado"}
+              </span>
+              <span className={styles.identityStatus}>
+                <span aria-hidden="true" />
+                Sessão ativa
+              </span>
+            </div>
             <ThemeSwitch />
             <form action={logoutAction}>
               <button type="submit" className={styles.logout}>
@@ -70,6 +90,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
           </div>
         </div>
       </header>
+      <AuthorizedBreadcrumbs pages={pages} />
       {children}
     </div>
   );

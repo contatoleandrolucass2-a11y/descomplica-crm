@@ -38,6 +38,10 @@ describe("protected interface shell", () => {
     expect(stylesheet).toContain("--focus-ring: #7ceaf5");
     expect(stylesheet).toContain("outline: 3px solid var(--focus-ring)");
     expect(shellStylesheet).toMatch(/\.topbar :focus-visible \{\s*outline-color: #7ceaf5/);
+    expect(shellStylesheet).toMatch(/\.actions \{[\s\S]*min-width: 0/);
+    expect(shellStylesheet).toMatch(/\.identity \{[\s\S]*min-width: 0/);
+    expect(shellStylesheet).toMatch(/\.identityLabel \{[\s\S]*text-overflow: ellipsis/);
+    expect(shellStylesheet).toContain("@media (max-width: 90rem)");
     expect(analyticsStylesheet).toMatch(
       /\.pageHeader :focus-visible,[\s\S]*outline-color: #7ceaf5/,
     );

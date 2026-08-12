@@ -2,6 +2,53 @@
 
 ## Unreleased
 
+- Corrige o gate visual final: topbar sem colisão com identidade longa em
+  `1440×900`, CTAs habilitado/bloqueado/indisponível visualmente distintos,
+  contraste navy consistente, linguagem comercial localizada e nomenclatura
+  única para imobiliárias e Metas de pontos.
+- Mantém motores e políticas fail-closed enquanto apresenta o bloqueio junto ao
+  CTA, com cadeado e motivo visível; nenhuma fórmula ou pontuação oficial foi
+  adicionada.
+- Adiciona regressão browser para identidade longa e três estados de CTA, além
+  de evidências reproduzíveis de login, logout, 403, 404, 500, loading, empty,
+  stale e error sem persistir credenciais.
+- Promove 192 capturas finais e recebe aprovação do gate visual independente,
+  com P0/P1/P2/P3 iguais a zero nas 21 rotas e sem acessar a homologação viva.
+- Fecha lacunas determinísticas da especificação com rastreabilidade das 21
+  rotas, breadcrumbs autorizados, aprovação Master-only por escopos oficiais,
+  drafts privados de metas/pontos, ranking fail-closed, estados v3 estritos e
+  estrutura completa dos cinco simuladores sem incorporar regra comercial.
+- Completa estruturas seguras de Dashboard e Canal de Parcerias — ritmo,
+  comparativos, roster indisponível, quatro visões, período, resumos, rankings e
+  conciliação — e adiciona abas, repeaters, cenários, inventário e controles
+  locais aos simuladores sem motor, persistência ou exportação comercial.
+- Mantém compatibilidade app-first com o schema produtivo anterior: somente a
+  ausência exata das foundations novas cai para leitura legada fail-closed;
+  falhas de permissão, rede e validação continuam interrompendo a operação.
+- Amplia o contrato de QA visual para sete viewports, zoom de 80% a 200%, mobile
+  dark e três temas nas páginas administrativas; a nova baseline só pode ser
+  promovida por execução limpa e transacional, sem reutilizar dados, contas ou
+  credenciais de produção.
+- Distingue controles estruturais locais dos botões de cálculo bloqueados no
+  gate dos simuladores e corrige contraste dos estados ativos no tema escuro.
+- Comprova backup produtivo criptografado e root-only por leitura, restore
+  representativo sem rede, aplicação isolada das dez migrations futuras e
+  rollback limpo; nenhuma migration, flag, grant ou dado remoto foi alterado.
+- Consolida os riscos P0 das migrations, o merge train #26–#33, os bloqueios de
+  caller/mappings/políticas e o pacote de decisões necessário para canário,
+  cutover e produção.
+- Atualiza o ensaio isolado para o manifesto atual de 27 migrations e 885 casos
+  pgTAP distribuídos em 18 arquivos.
+- Atualiza o contrato unitário da baseline promovida para preservar e validar o
+  diagnóstico do baseline anterior sem tratar mudanças intencionais como drift
+  do baseline novo.
+- Alinha o E2E de permissões aos títulos oficiais restaurados do dashboard e do
+  Canal de Parcerias e ao nome acessível do conjunto ampliado de filtros.
+- Distingue no E2E dos simuladores os controles estruturais locais do único
+  botão comercial, que continua sem submit, action ou estado habilitado.
+- Estabiliza a comparação visual da administração sem ocultar a região dinâmica
+  dos checks funcionais ou Axe: somente o screenshot omite a lista volátil de
+  identidades QA, preservando o restante da página.
 - Publica a homologação visual isolada em HTTPS com DNS/TLS exclusivos, Basic
   Auth antes do login, `noindex`, nove perfis e fixtures somente sintéticas;
   E2E remoto, 21 rotas, 87 checks visuais/Axe, quatro viewports, três temas,
@@ -22,7 +69,7 @@
   verifier, grants, fórmula ou DDL inseguro e atualiza a matriz com relay e
   runtime comercial.
 - Adiciona ensaio reproduzível em dois projetos PostgreSQL 17 locais e
-  independentes, com reset de 26 migrations, 863 pgTAP/lint/advisors em ambos,
+  independentes, com reset de 27 migrations, 885 pgTAP/lint/advisors em ambos,
   backup/restore lógico e fingerprint fail-closed de owners, privilégios, RLS,
   DDL, ledger e dados, sem mutar ACL no alvo.
 - Remove dois warnings do lint SQL com inicialização tipada explícita dos arrays

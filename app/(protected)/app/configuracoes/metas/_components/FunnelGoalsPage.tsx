@@ -7,9 +7,12 @@ import {
   getVisibleStageOffset,
   type GoalProfileKey,
 } from "@/lib/crm/goals/catalog";
+import { loadFunnelGoalsDraft } from "@/lib/crm/commercial-engine/draft-data";
+import { funnelDraftValuesToGoals } from "@/lib/crm/commercial-engine/drafts";
 import { loadFunnelGoals, type FunnelGoals } from "@/lib/crm/goals/data";
 
-import { saveFunnelGoalsAction } from "../actions";
+import { prepareFunnelGoalsDraftAction } from "../actions";
+import { ConfigurationDraftForm } from "./ConfigurationDraftForm";
 
 const EMPTY_GOALS = {
   opportunities: 0,
@@ -81,20 +84,28 @@ export async function FunnelGoalsPage({
   profile: GoalProfileKey;
   notification?: "saved" | "validation" | "save";
 }) {
-  const result = await loadFunnelGoals(profile);
-  const values = result.status === "ready" ? result.goals : EMPTY_GOALS;
-  const effectiveMonth =
-    result.status === "ready" ? result.goals.effectiveMonth : result.effectiveMonth;
+  const [result, draft] = await Promise.all([
+    loadFunnelGoals(profile),
+    loadFunnelGoalsDraft(profile),
+  ]);
+  const legacyValues = result.status === "ready" ? result.goals : EMPTY_GOALS;
+  const values = draft ? funnelDraftValuesToGoals(draft.payload, draft.updatedAt) : legacyValues;
+  const effectiveMonth = draft
+    ? draft.payload.effectiveMonth
+    : result.status === "ready"
+      ? result.goals.effectiveMonth
+      : result.effectiveMonth;
   const stageOffset = getVisibleStageOffset(profile);
   const visibleStages = GOAL_STAGES.slice(stageOffset);
   const visibleRates = GOAL_RATE_FIELDS.slice(stageOffset);
   const isPartnerships = profile === "partnerships";
+  const pageTitle = isPartnerships ? "Metas do funil de parcerias" : "Metas do funil";
   const monthLabel = new Intl.DateTimeFormat("pt-BR", {
     month: "long",
     year: "numeric",
     timeZone: "America/Sao_Paulo",
   }).format(new Date(`${effectiveMonth}T12:00:00Z`));
-  const saveAction = saveFunnelGoalsAction.bind(null, profile);
+  const draftAction = prepareFunnelGoalsDraftAction.bind(null, profile);
   const funnelWidthClasses =
     visibleStages.length > 4
       ? ["w-full", "w-[94%]", "w-[88%]", "w-[82%]", "w-[76%]", "w-[70%]"]
@@ -132,14 +143,14 @@ export async function FunnelGoalsPage({
                       result.status === "ready" ? "bg-lime-300" : "bg-cyan-300"
                     }`}
                   />
-                  {result.status === "ready" ? "Metas carregadas" : "Primeira configuração"}
+                  Base legada: somente leitura · Rascunho atual: editável
                 </span>
               </div>
               <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-                Metas do funil
+                {pageTitle}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-                Configure o volume mensal e os parâmetros operacionais de {monthLabel}.
+                Prepare e valide um rascunho inativo para {monthLabel}. Nada é aplicado ao funil.
               </p>
             </div>
 
@@ -155,13 +166,19 @@ export async function FunnelGoalsPage({
                   Atualização
                 </dt>
                 <dd className="mt-1 text-sm font-semibold">
-                  {result.status === "ready"
+                  {draft
                     ? new Intl.DateTimeFormat("pt-BR", {
                         dateStyle: "short",
                         timeStyle: "short",
                         timeZone: "America/Sao_Paulo",
-                      }).format(new Date(result.goals.updatedAt))
-                    : "Ainda não salvo"}
+                      }).format(new Date(draft.updatedAt))
+                    : result.status === "ready"
+                      ? new Intl.DateTimeFormat("pt-BR", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                          timeZone: "America/Sao_Paulo",
+                        }).format(new Date(result.goals.updatedAt))
+                      : "Ainda não salvo"}
                 </dd>
               </div>
             </dl>
@@ -218,7 +235,7 @@ export async function FunnelGoalsPage({
             />
             <span>
               {notification === "saved"
-                ? "Metas salvas e registradas na auditoria."
+                ? "Rascunho de metas salvo e registrado na auditoria; nenhuma ativação foi realizada."
                 : notification === "validation"
                   ? "Revise os campos: existem valores ausentes ou fora dos limites permitidos."
                   : "Não foi possível salvar as metas. Tente novamente."}
@@ -241,7 +258,8 @@ export async function FunnelGoalsPage({
           </div>
         ) : null}
 
-        <form action={saveAction} className="mt-5 grid gap-5">
+        <ConfigurationDraftForm action={draftAction} saveLabel={`Salvar rascunho de ${monthLabel}`}>
+          <input type="hidden" name="draftRevision" value={draft?.revision ?? 0} />
           <div className="grid items-start gap-5 xl:grid-cols-[minmax(15rem,0.82fr)_minmax(25rem,1.5fr)_minmax(15rem,0.86fr)]">
             <section
               aria-labelledby="funnel-result-title"
@@ -255,11 +273,12 @@ export async function FunnelGoalsPage({
                     </p>
                     <h2 id="funnel-result-title" className="mt-1 text-xl font-semibold">
                       {result.status === "ready"
-                        ? "Último funil salvo"
+                        ? "Última base legada"
                         : "Prévia da primeira configuração"}
                     </h2>
                     <p className="mt-1.5 max-w-md text-xs leading-5 text-slate-300">
-                      A RPC recalcula todas as etapas ao salvar vendas e taxas informadas.
+                      A prévia recalcula as etapas localmente a partir das vendas e taxas
+                      informadas.
                     </p>
                   </div>
                   <label className="grid shrink-0 gap-1.5 rounded-2xl border border-cyan-200/30 bg-cyan-300/10 p-3">
@@ -320,7 +339,7 @@ export async function FunnelGoalsPage({
                             {stage.label}
                           </span>
                           <strong className="text-base font-semibold tabular-nums sm:text-lg">
-                            {integerFormatter.format(values[stage.key])}
+                            {integerFormatter.format(legacyValues[stage.key])}
                           </strong>
                         </div>
                       </li>
@@ -485,19 +504,7 @@ export async function FunnelGoalsPage({
               </div>
             </article>
           </section>
-
-          <div className="flex flex-col gap-3 rounded-2xl border border-[var(--analytics-line)] bg-[var(--analytics-surface)] p-3 shadow-xl sm:flex-row sm:items-center sm:justify-between sm:pl-5">
-            <p className="text-xs leading-5 text-slate-600 sm:max-w-xl">
-              Ao salvar, a meta e os parâmetros informados seguem para o cálculo oficial da RPC.
-            </p>
-            <button
-              type="submit"
-              className="min-h-12 rounded-xl bg-lime-300 px-6 py-3 text-sm font-semibold text-[#082137] shadow-lg shadow-lime-900/10 hover:bg-lime-200 focus:ring-2 focus:ring-lime-400 focus:ring-offset-2 focus:outline-none"
-            >
-              Salvar metas de {monthLabel}
-            </button>
-          </div>
-        </form>
+        </ConfigurationDraftForm>
       </div>
     </main>
   );

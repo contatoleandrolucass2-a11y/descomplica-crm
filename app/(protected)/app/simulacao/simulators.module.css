@@ -334,11 +334,9 @@
 .actionBar button {
   min-height: 2.8rem;
   flex: 0 0 auto;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 0.75rem;
-  background: var(--analytics-lime);
   padding: 0.65rem 1rem;
-  color: var(--analytics-navy);
   font-size: 0.78rem;
   font-weight: 850;
 }
@@ -346,6 +344,56 @@
 .actionBar button:disabled {
   cursor: not-allowed;
   opacity: 1;
+}
+
+.actionBar .enabledAction {
+  background: var(--analytics-lime);
+  color: var(--analytics-navy);
+  cursor: pointer;
+}
+
+.actionBar .enabledAction:hover {
+  background: color-mix(in srgb, var(--analytics-lime) 82%, white);
+}
+
+.actionBar .blockedAction {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-color: color-mix(in srgb, var(--analytics-warning) 62%, white);
+  background: color-mix(in srgb, var(--analytics-warning) 16%, var(--analytics-navy));
+  color: #fff4d6;
+}
+
+.actionBar .blockedAction svg {
+  width: 1rem;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.actionBar .unavailableAction {
+  border-color: rgb(255 255 255 / 28%);
+  border-style: dashed;
+  background: rgb(255 255 255 / 7%);
+  color: #c7d5dd;
+}
+
+.blockedControl {
+  display: grid;
+  max-width: 18rem;
+  gap: 0.4rem;
+}
+
+.blockedReason {
+  color: #ffe3a3;
+  font-size: 0.68rem;
+  line-height: 1.4;
 }
 
 .results {

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-11T16:45:00Z",
+  "source": "encrypted production logical backup captured read-only",
+  "remoteMutation": false,
+  "representativeRemoteRestore": true,
+  "backup": {
+    "encrypted": true,
+    "cipher": "GPG symmetric AES256",
+    "owner": "root:root",
+    "directoryMode": "0700",
+    "fileMode": "0600",
+    "artifactCount": 3,
+    "checksumsVerified": true,
+    "storedOutsideGit": true
+  },
+  "isolation": {
+    "container": "disposable and removed",
+    "network": "none",
+    "publishedPorts": 0,
+    "homologationDataReuse": false,
+    "plaintextShredded": true
+  },
+  "remoteCurrent": {
+    "restore": "passed",
+    "migrationHistoryEntries": 17,
+    "lastMigration": "20260809031936",
+    "schemaLoaded": true,
+    "dataLoaded": true,
+    "rolesLoaded": true
+  },
+  "futureSequence": [
+    "20260807185611_secure_qlik_ingestion_contract.sql",
+    "20260808174817_require_sensitive_access_change_reasons.sql",
+    "20260809024000_simulator_visual_catalog.sql",
+    "20260809144137_pending_onboarding_scope_foundation.sql",
+    "20260809144143_qlik_rls_contract_hardening.sql",
+    "20260809181422_integration_identity_governance.sql",
+    "20260809181424_crm_read_model_v3.sql",
+    "20260810165927_qlik_relay_mapping_cutover.sql",
+    "20260810201703_commercial_engines_policy_runtime.sql",
+    "20260811120000_commercial_configuration_drafts.sql"
+  ],
+  "futureSequenceResult": "passed",
+  "futureValidation": {
+    "objectsPresent": true,
+    "commercialDraftsEmpty": true,
+    "commercialGatesEmpty": true,
+    "commercialPoliciesEmpty": true,
+    "relayGatesEmpty": true,
+    "qlikDirectBrowserAccessClosed": true,
+    "draftDirectAccessClosed": true
+  },
+  "rollback": {
+    "method": "fresh restore from the same encrypted production backup",
+    "result": "passed",
+    "remoteSchemaPresent": true,
+    "remoteDataLoaded": true,
+    "futureObjectsAbsent": true
+  },
+  "cleanup": {
+    "containerRemoved": true,
+    "plaintextShredded": true,
+    "encryptedBackupPreserved": true
+  },
+  "authorization": {
+    "remoteMigration": false,
+    "cutover": false,
+    "productionDeploy": false
+  }
+}

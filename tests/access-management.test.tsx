@@ -96,7 +96,8 @@ describe("experiência de acesso", () => {
     const markup = renderToStaticMarkup(await PartnershipsChannelPage());
 
     expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
-    expect(markup).toContain("Performance das parcerias");
+    expect(markup).toContain("Ranking das imobiliárias");
+    expect(markup).toContain("Aguardando conciliação das fontes");
     expect(markup).toContain("Dado indisponível — integração pendente");
     expect(markup).not.toContain("crm_imob_ranking");
     expect(mocks.loadReadModelV3).not.toHaveBeenCalled();
@@ -211,6 +212,7 @@ describe("catálogo localizado de acesso", () => {
             userId: "81000000-0000-4000-8000-000000000001",
             email: "usuario@example.test",
             isActive: true,
+            accessStatus: "approved",
             roleKey: "user",
             isSelf: true,
             isManageable: false,
@@ -222,6 +224,8 @@ describe("catálogo localizado de acesso", () => {
         canManageRoles: true,
         canManagePermissions: true,
         canManageUsers: true,
+        canApproveUsers: false,
+        reportingScopes: [],
       }),
     );
 
@@ -231,5 +235,43 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toContain("Configurações avançadas");
     expect(markup).toContain("proteção contra autoelevação");
     expect(markup).not.toContain("Salvar papel");
+  });
+
+  it("expõe aprovação pendente somente com papel, escopo oficial e motivo explícitos", () => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        users: [
+          {
+            userId: "81000000-0000-4000-8000-000000000002",
+            email: "pendente@example.test",
+            isActive: false,
+            accessStatus: "pending",
+            roleKey: "pending",
+            isSelf: false,
+            isManageable: true,
+            overrides: [],
+          },
+        ],
+        assignableRoles: ["coordinator", "broker"],
+        manageablePermissions: [],
+        canManageRoles: true,
+        canManagePermissions: true,
+        canManageUsers: true,
+        canApproveUsers: true,
+        reportingScopes: [
+          {
+            id: "82000000-0000-4000-8000-000000000001",
+            key: "team:qa-official",
+            type: "team",
+          },
+        ],
+      }),
+    );
+
+    expect(markup).toContain("Aprovação de acesso escopado");
+    expect(markup).toContain('name="reportingScopeIds"');
+    expect(markup).toContain("team:qa-official");
+    expect(markup).toContain('name="reason"');
+    expect(markup).toContain("Nenhuma associação é inferida pelo nome");
   });
 });

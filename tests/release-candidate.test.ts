@@ -12,12 +12,12 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 26-version manifest", async () => {
+  it("keeps a unique, ordered 27-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(26);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(26);
+    expect(migrations).toHaveLength(27);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(27);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
   });
@@ -65,9 +65,9 @@ describe("release-candidate activation defaults", () => {
     expect(workflow).toContain("pnpm db:rehearse");
     expect(workflow).toContain("if: always()");
     expect(workflow).toContain("raw CLI output was withheld");
-    expect(runbook).toContain("#26 → #27 → #28 → #29 → #30 → #31 → release candidate");
+    expect(runbook).toContain("#26 → #27 → #28 → #29 → #30 → #31 → #32 → #33 → novo incremento");
     expect(runbook).toContain("Nunca usar `migration repair`");
-    expect(approvals).toContain("Ausência de qualquer autorização significa **não executar**");
+    expect(approvals).toContain("Ausência de qualquer resposta ou autorização mantém o gate");
     const runtimeEnvironment = compose.match(/\n    environment:\n((?:      .*\n)+)/)?.[1];
     expect(runtimeEnvironment).toBeDefined();
     expect(runtimeEnvironment).toContain("DEPLOYMENT_VERSION: ${IMAGE_TAG:?IMAGE_TAG is required}");
@@ -76,6 +76,45 @@ describe("release-candidate activation defaults", () => {
     );
     expect(visualHarness).toContain("function baselineMatchesHead()");
     expect(visualHarness).toContain('argv[0] === "--update-baseline"');
+  });
+});
+
+describe("representative production restore evidence", () => {
+  it("records the read-only restore, future train and clean rollback", async () => {
+    const evidence = JSON.parse(
+      await readFile(
+        path.join(repositoryRoot, "docs/release-candidate/production-restore-results.json"),
+        "utf8",
+      ),
+    ) as Record<string, unknown>;
+
+    expect(evidence).toMatchObject({
+      remoteMutation: false,
+      representativeRemoteRestore: true,
+      remoteCurrent: {
+        restore: "passed",
+        migrationHistoryEntries: 17,
+        lastMigration: "20260809031936",
+      },
+      futureSequenceResult: "passed",
+      rollback: {
+        result: "passed",
+        remoteSchemaPresent: true,
+        remoteDataLoaded: true,
+        futureObjectsAbsent: true,
+      },
+      cleanup: {
+        containerRemoved: true,
+        plaintextShredded: true,
+        encryptedBackupPreserved: true,
+      },
+      authorization: {
+        remoteMigration: false,
+        cutover: false,
+        productionDeploy: false,
+      },
+    });
+    expect(evidence.futureSequence).toHaveLength(10);
   });
 });
 
@@ -98,17 +137,17 @@ describe("isolated restore evidence", () => {
       independentSourceAndTargetProjects: true,
       independentSourceAndTargetContainers: true,
       worktreeDirtyAtRehearsal: false,
-      migrationCount: 26,
-      pgTapFiles: 17,
-      pgTapTests: 863,
+      migrationCount: 27,
+      pgTapFiles: 18,
+      pgTapTests: 885,
       sourceValidation: {
-        pgTapTests: 863,
+        pgTapTests: 885,
         databaseLint: "passed",
         securityAdvisors: "passed",
         performanceAdvisors: "passed",
       },
       restoredValidation: {
-        pgTapTests: 863,
+        pgTapTests: 885,
         databaseLint: "passed",
         securityAdvisors: "passed",
         performanceAdvisors: "passed",
@@ -126,11 +165,11 @@ describe("isolated restore evidence", () => {
       postValidationNonSequenceFingerprintMatch: true,
       objectCounts: {
         roles: 2,
-        tables: 56,
+        tables: 57,
         schemas: 4,
         policies: 25,
-        functions: 84,
-        relations: 61,
+        functions: 88,
+        relations: 62,
         sequences: 5,
       },
       failClosed: {

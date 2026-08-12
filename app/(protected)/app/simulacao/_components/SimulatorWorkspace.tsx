@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FocusEvent } from "react";
+import { useRef, useState, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 
 import {
   DataState,
@@ -12,6 +12,7 @@ import {
   SIMULATOR_LIST,
   type SimulatorDefinition,
   type SimulatorField,
+  type SimulatorSection,
 } from "@/lib/crm/simulators/catalog";
 
 import styles from "../simulators.module.css";
@@ -27,8 +28,18 @@ function CalculatorIcon() {
   );
 }
 
-function inputId(sectionKey: string, field: SimulatorField) {
-  return `simulator-${sectionKey}-${field.key}`;
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="5" y="10" width="14" height="10" rx="2" />
+      <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2" />
+    </svg>
+  );
+}
+
+function inputId(sectionKey: string, fieldKey: string, itemNumber?: number) {
+  const itemSegment = itemNumber === undefined ? "" : `-${itemNumber}`;
+  return `simulator-${sectionKey}${itemSegment}-${fieldKey}`;
 }
 
 function describedBy(id: string, hasHint: boolean, isInvalid: boolean) {
@@ -49,6 +60,7 @@ function ValidationMessage({ id }: { id: string }) {
 function StandardField({
   sectionKey,
   field,
+  itemNumber,
   value,
   touched,
   onValueChange,
@@ -56,12 +68,13 @@ function StandardField({
 }: {
   sectionKey: string;
   field: SimulatorField;
+  itemNumber?: number | undefined;
   value: string | boolean | undefined;
   touched: boolean;
   onValueChange: (id: string, value: string | boolean) => void;
   onTouched: (id: string) => void;
 }) {
-  const id = inputId(sectionKey, field);
+  const id = inputId(sectionKey, field.key, itemNumber);
   const textValue = typeof value === "string" ? value : "";
   const isEmpty = field.type === "checkbox" ? value !== true : textValue.trim() === "";
   const isInvalid = field.required === true && touched && isEmpty;
@@ -92,7 +105,7 @@ function StandardField({
               <label className={styles.choice} htmlFor={optionId} key={option}>
                 <input
                   id={optionId}
-                  name={field.key}
+                  name={id}
                   type="radio"
                   value={option}
                   required={field.required}
@@ -120,7 +133,7 @@ function StandardField({
       >
         <input
           id={id}
-          name={field.key}
+          name={id}
           type="checkbox"
           required={field.required}
           checked={value === true}
@@ -150,7 +163,7 @@ function StandardField({
       {field.type === "select" ? (
         <select
           id={id}
-          name={field.key}
+          name={id}
           required={field.required}
           value={textValue}
           aria-describedby={fieldDescription}
@@ -172,7 +185,7 @@ function StandardField({
           {field.type === "currency" ? <span aria-hidden="true">R$</span> : null}
           <input
             id={id}
-            name={field.key}
+            name={id}
             type={field.type === "currency" ? "text" : field.type}
             required={field.required}
             value={textValue}
@@ -193,9 +206,103 @@ function StandardField({
   );
 }
 
+function SectionPreview({ section }: { section: SimulatorSection }) {
+  if (!section.preview) return null;
+
+  const preview = section.preview;
+
+  return (
+    <div className={styles.fieldGrid}>
+      <div className={styles.fieldWide}>
+        <DataState
+          variant="unavailable"
+          compact
+          title={preview.title}
+          description={preview.description}
+        />
+
+        {preview.kind === "inventory" ? (
+          <>
+            <dl className={styles.resultList} aria-label="Colunas do estoque conciliado">
+              {preview.items.map((item) => (
+                <div key={item}>
+                  <dt>{item}</dt>
+                  <dd>
+                    <UnavailableValue reason="Fonte oficial não conciliada" />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div className={styles.actionBar}>
+              <p>
+                <strong>Paginação preparada.</strong>
+                <span id={`inventory-unavailable-reason-${section.key}`}>
+                  Nenhuma unidade foi carregada porque a fonte oficial está indisponível.
+                </span>
+              </p>
+              <div className={styles.simulatorNav}>
+                <button
+                  type="button"
+                  disabled
+                  className={styles.unavailableAction}
+                  data-cta-state="unavailable"
+                  aria-describedby={`inventory-unavailable-reason-${section.key}`}
+                >
+                  Atualizar estoque
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className={styles.unavailableAction}
+                  data-cta-state="unavailable"
+                  aria-describedby={`inventory-unavailable-reason-${section.key}`}
+                >
+                  Anterior
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className={styles.unavailableAction}
+                  data-cta-state="unavailable"
+                  aria-describedby={`inventory-unavailable-reason-${section.key}`}
+                >
+                  Próxima
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className={styles.processGrid} aria-label={preview.title}>
+            {preview.items.map((item) => (
+              <article className={styles.processCard} key={item}>
+                <span>{item}</span>
+                <strong>Indisponível</strong>
+                <small>{UNAVAILABLE_MESSAGE}</small>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function SimulatorWorkspace({ definition }: { definition: SimulatorDefinition }) {
   const [values, setValues] = useState<Record<string, string | boolean>>({});
   const [touchedFields, setTouchedFields] = useState<ReadonlySet<string>>(() => new Set());
+  const [repeatCounts, setRepeatCounts] = useState<Record<string, number>>({});
+  const navigationGroups = Array.from(
+    new Set(
+      definition.sections
+        .map((section) => section.group)
+        .filter((group): group is string => group !== undefined),
+    ),
+  );
+  const [requestedGroup, setRequestedGroup] = useState<string | undefined>(navigationGroups[0]);
+  const activeGroup = navigationGroups.includes(requestedGroup ?? "")
+    ? requestedGroup
+    : navigationGroups[0];
+  const tabRefs = useRef<Array<HTMLAnchorElement | null>>([]);
 
   function updateValue(id: string, value: string | boolean) {
     setValues((currentValues) => ({ ...currentValues, [id]: value }));
@@ -209,6 +316,155 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
       nextFields.add(id);
       return nextFields;
     });
+  }
+
+  function setRepeatCount(sectionKey: string, nextCount: number) {
+    setRepeatCounts((currentCounts) => ({ ...currentCounts, [sectionKey]: nextCount }));
+  }
+
+  function removeLastRepeatedItem(section: SimulatorSection, currentCount: number) {
+    if (currentCount <= 1) return;
+
+    const removedPrefix = `simulator-${section.key}-${currentCount}-`;
+    setValues((currentValues) =>
+      Object.fromEntries(
+        Object.entries(currentValues).filter(([key]) => !key.startsWith(removedPrefix)),
+      ),
+    );
+    setTouchedFields(
+      (currentFields) =>
+        new Set([...currentFields].filter((key) => !key.startsWith(removedPrefix))),
+    );
+    setRepeatCount(section.key, currentCount - 1);
+  }
+
+  function clearFields() {
+    if (
+      Object.keys(values).length > 0 &&
+      !window.confirm("Limpar os campos preenchidos nesta simulação?")
+    ) {
+      return;
+    }
+
+    setValues({});
+    setTouchedFields(new Set());
+    setRepeatCounts({});
+  }
+
+  function selectAdjacentTab(event: ReactKeyboardEvent<HTMLAnchorElement>, currentIndex: number) {
+    let nextIndex: number | undefined;
+
+    if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % navigationGroups.length;
+    if (event.key === "ArrowLeft") {
+      nextIndex = (currentIndex - 1 + navigationGroups.length) % navigationGroups.length;
+    }
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = navigationGroups.length - 1;
+    if (nextIndex === undefined) return;
+
+    event.preventDefault();
+    setRequestedGroup(navigationGroups[nextIndex]);
+    tabRefs.current[nextIndex]?.focus();
+  }
+
+  function isFieldVisible(section: SimulatorSection, field: SimulatorField, itemNumber?: number) {
+    if (!field.visibleWhen) return true;
+
+    const dependencyValue = values[inputId(section.key, field.visibleWhen.fieldKey, itemNumber)];
+    return (
+      typeof dependencyValue === "string" && field.visibleWhen.values.includes(dependencyValue)
+    );
+  }
+
+  function renderFields(section: SimulatorSection, itemNumber?: number) {
+    return section.fields
+      .filter((field) => isFieldVisible(section, field, itemNumber))
+      .map((field) => {
+        const id = inputId(section.key, field.key, itemNumber);
+
+        return (
+          <StandardField
+            field={field}
+            itemNumber={itemNumber}
+            key={field.key}
+            sectionKey={section.key}
+            value={values[id]}
+            touched={touchedFields.has(id)}
+            onValueChange={updateValue}
+            onTouched={markTouched}
+          />
+        );
+      });
+  }
+
+  function renderSection(section: SimulatorSection) {
+    const sectionIndex = definition.sections.findIndex(({ key }) => key === section.key);
+    const repeatCount = section.repeatable ? (repeatCounts[section.key] ?? 1) : 1;
+
+    return (
+      <section className={styles.formSection} key={section.key}>
+        <div className={styles.sectionHeading}>
+          <span>{String(sectionIndex + 1).padStart(2, "0")}</span>
+          <div>
+            <h2>{section.title}</h2>
+            {section.description ? <p>{section.description}</p> : null}
+          </div>
+        </div>
+
+        {section.repeatable ? (
+          <div className={styles.fieldGrid}>
+            {Array.from({ length: repeatCount }, (_, index) => {
+              const itemNumber = index + 1;
+
+              return (
+                <fieldset className={`${styles.processCard} ${styles.fieldWide}`} key={itemNumber}>
+                  <legend>
+                    <strong>
+                      {section.repeatable?.itemLabel} {itemNumber}
+                    </strong>
+                  </legend>
+                  <div className={styles.fieldGrid}>{renderFields(section, itemNumber)}</div>
+                  {repeatCount > 1 && itemNumber === repeatCount ? (
+                    <div className={styles.actionBar}>
+                      <p>
+                        <strong>Item local.</strong>
+                        <span>Nenhum dado será persistido.</span>
+                      </p>
+                      <button
+                        type="button"
+                        className={styles.enabledAction}
+                        data-cta-state="enabled"
+                        onClick={() => removeLastRepeatedItem(section, repeatCount)}
+                      >
+                        Remover {section.repeatable?.itemLabel.toLocaleLowerCase("pt-BR")}
+                      </button>
+                    </div>
+                  ) : null}
+                </fieldset>
+              );
+            })}
+            <div className={`${styles.actionBar} ${styles.fieldWide}`}>
+              <p>
+                <strong>Estrutura repetível.</strong>
+                <span>Sem limite presumido; a política oficial permanece pendente.</span>
+              </p>
+              <button
+                type="button"
+                className={styles.enabledAction}
+                data-cta-state="enabled"
+                onClick={() => setRepeatCount(section.key, repeatCount + 1)}
+              >
+                {section.repeatable.addLabel}
+              </button>
+            </div>
+          </div>
+        ) : section.fields.length > 0 ? (
+          <div className={styles.fieldGrid}>{renderFields(section)}</div>
+        ) : null}
+
+        <SectionPreview section={section} />
+      </section>
+    );
   }
 
   return (
@@ -256,42 +512,98 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
             aria-label={`Entradas de ${definition.title}`}
             onSubmit={(event) => event.preventDefault()}
           >
-            {definition.sections.map((section, index) => (
-              <section className={styles.formSection} key={section.key}>
-                <div className={styles.sectionHeading}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <div>
-                    <h2>{section.title}</h2>
-                    {section.description ? <p>{section.description}</p> : null}
-                  </div>
-                </div>
-                <div className={styles.fieldGrid}>
-                  {section.fields.map((field) => (
-                    <StandardField
-                      field={field}
-                      key={field.key}
-                      sectionKey={section.key}
-                      value={values[inputId(section.key, field)]}
-                      touched={touchedFields.has(inputId(section.key, field))}
-                      onValueChange={updateValue}
-                      onTouched={markTouched}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))}
+            {navigationGroups.length > 1 ? (
+              <nav aria-label="Áreas da simulação" className={styles.simulatorNav} role="tablist">
+                {navigationGroups.map((group, index) => {
+                  const tabId = `simulator-tab-${definition.slug}-${index}`;
+                  const panelId = `simulator-panel-${definition.slug}-${index}`;
+                  const isActive = group === activeGroup;
+
+                  return (
+                    <a
+                      aria-controls={panelId}
+                      aria-selected={isActive}
+                      href={`#${panelId}`}
+                      id={tabId}
+                      key={group}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        setRequestedGroup(group);
+                      }}
+                      onKeyDown={(event) => selectAdjacentTab(event, index)}
+                      ref={(element) => {
+                        tabRefs.current[index] = element;
+                      }}
+                      role="tab"
+                      tabIndex={isActive ? 0 : -1}
+                    >
+                      {group}
+                    </a>
+                  );
+                })}
+              </nav>
+            ) : null}
+
+            {navigationGroups.length > 1
+              ? navigationGroups.map((group, index) => {
+                  const isActive = group === activeGroup;
+
+                  return (
+                    <div
+                      aria-labelledby={`simulator-tab-${definition.slug}-${index}`}
+                      className={styles.form}
+                      hidden={!isActive}
+                      id={`simulator-panel-${definition.slug}-${index}`}
+                      key={group}
+                      role="tabpanel"
+                      tabIndex={0}
+                    >
+                      {definition.sections
+                        .filter((section) => section.group === group)
+                        .map(renderSection)}
+                    </div>
+                  );
+                })
+              : definition.sections.map(renderSection)}
 
             <div className={styles.actionBar}>
               <p>
                 <strong>Preenchimento disponível.</strong>
                 <span>Nenhum cálculo ou envio ao servidor será executado.</span>
               </p>
-              <button type="button" disabled aria-describedby="calculation-blocked-reason">
-                {definition.actionLabel}
-              </button>
-              <span id="calculation-blocked-reason" className={styles.visuallyHidden}>
-                {UNAVAILABLE_MESSAGE}
-              </span>
+              <div className={styles.simulatorNav}>
+                <button
+                  type="button"
+                  className={styles.enabledAction}
+                  data-cta-state="enabled"
+                  onClick={clearFields}
+                >
+                  Limpar
+                </button>
+                <button
+                  type="button"
+                  className={styles.enabledAction}
+                  data-cta-state="enabled"
+                  onClick={() => window.print()}
+                >
+                  Imprimir estrutura
+                </button>
+                <span className={styles.blockedControl}>
+                  <button
+                    type="button"
+                    disabled
+                    className={styles.blockedAction}
+                    data-cta-state="blocked"
+                    aria-describedby="calculation-blocked-reason"
+                  >
+                    <LockIcon />
+                    {definition.actionLabel}
+                  </button>
+                  <span id="calculation-blocked-reason" className={styles.blockedReason}>
+                    Motor bloqueado. {UNAVAILABLE_MESSAGE}.
+                  </span>
+                </span>
+              </div>
             </div>
           </form>
 

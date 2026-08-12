@@ -240,9 +240,87 @@
 
 .actions {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: flex-end;
   gap: 0.5rem;
+}
+
+.identity {
+  display: grid;
+  width: clamp(6rem, 15vw, 12rem);
+  min-width: 0;
+  max-width: 12rem;
+  flex: 0 1 12rem;
+  gap: 0.12rem;
+  border-right: 1px solid rgb(255 255 255 / 12%);
+  padding-right: 0.7rem;
+  line-height: 1.15;
+}
+
+.identityLabel {
+  overflow: hidden;
+  color: #f7fdff;
+  font-size: 0.7rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identityStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #9db5c4;
+  font-size: 0.62rem;
+}
+
+.identityStatus > span {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: var(--analytics-lime);
+}
+
+.breadcrumbs {
+  max-width: 88rem;
+  margin-inline: auto;
+  padding: 0.7rem 1rem 0;
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+}
+
+.breadcrumbs ol {
+  display: flex;
+  min-height: 2.25rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumbs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.breadcrumbs a {
+  color: var(--analytics-cyan-strong);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.breadcrumbs [aria-current="page"] {
+  color: var(--analytics-ink);
+  font-weight: 700;
 }
 
 .themeSwitch {
@@ -292,7 +370,7 @@
   color: #ffffff;
 }
 
-@media (max-width: 80rem) {
+@media (max-width: 90rem) {
   .topbarInner {
     grid-template-columns: minmax(0, 1fr) auto;
   }
@@ -333,6 +411,24 @@
 
   .actions {
     min-width: 0;
+  }
+
+  .identity {
+    max-width: 4.2rem;
+    padding-right: 0.5rem;
+  }
+
+  .identityLabel {
+    display: none;
+  }
+
+  .identityStatus {
+    font-size: 0;
+  }
+
+  .identityStatus::after {
+    content: "Ativo";
+    font-size: 0.62rem;
   }
 
   .logout {

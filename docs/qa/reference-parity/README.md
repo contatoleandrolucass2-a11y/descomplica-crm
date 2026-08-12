@@ -11,14 +11,15 @@ Os harnesses de QA visual cobrem três fronteiras:
 2. verificação sem sessão das 18 rotas CRM protegidas do catálogo, seguida
    de captura do login vazio em `1440×900`, `1280×720`, `768×1024` e
    `390×844`;
-3. QA autenticado complementar das 18 rotas em Supabase local isolado, com
+3. QA autenticado complementar das 21 rotas protegidas em Supabase local
+   isolado, incluindo as três páginas administrativas, com
    conta QA efêmera, fixtures sintéticas e motores de simulação bloqueados.
 
 Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
 cada imagem está em [`manifest.json`](./manifest.json).
 O QA local autenticado está em
-[`authenticated-results.json`](./authenticated-results.json); suas 87 capturas
+[`authenticated-results.json`](./authenticated-results.json); suas 192 capturas
 ficam em [`target-authenticated`](./target-authenticated/).
 
 ## Política de captura
@@ -115,24 +116,45 @@ inicia e encerra `pnpm start`, cria uma identidade `qa.*@local.invalid` com senh
 efêmera e não persiste credenciais ou storage state. A conta recebe o único
 papel `master` local somente durante a execução, pois os read models v2 globais
 permanecem Master-only até o cutover v3. Dashboard, metas, pontos e ranking recebem
-fixtures com fonte `QA local synthetic — not production · run <id efêmero>`;
-contagens e marcador são validados novamente pela sessão QA através da RLS antes
-de qualquer captura. Fixtures e conta são apagadas no `finally`, inclusive em
-falha ou sinal.
+fixtures marcadas internamente por execução; a visão comercial exibe somente
+`Dados sintéticos de homologação` e mantém o identificador sob `Detalhes
+técnicos`. Contagens e marcador são validados novamente pela sessão QA através
+da RLS antes de qualquer captura. Fixtures e conta são apagadas no `finally`,
+inclusive em falha ou sinal.
 
 O setup falha fechado se os slots locais `global`, `default` ou as metas do mês
 já estiverem ocupados; nenhum dado local existente é sobrescrito. O serviço
 local, o banco e a aplicação precisam usar endpoints loopback. Chave privilegiada
 nunca é enviada ao navegador ou ao harness de captura.
 
+### Matriz autenticada aprovada no SHA de fechamento
+
+O harness executou a captura autenticada local, limpa e transacional com:
+
+- sete viewports: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `390×844`,
+  `375×812` e `320×568`;
+- 21 rotas em tema claro nos sete viewports;
+- as 21 rotas em tema escuro móvel no viewport `390×844`;
+- capturas desktop dos temas claro, equilibrado e escuro para as três páginas
+  administrativas, além das amostras visuais já existentes;
+- reflow equivalente a zoom de `80%`, `100%`, `125%`, `150%` e `200%`, sempre
+  sobre canvas físico de `1440×900`;
+- reduced motion e Axe nas 147 combinações responsivas, nas 24 amostras desktop
+  de tema e nas 21 combinações mobile dark.
+
+A matriz aprovou 147 capturas responsivas, 45 capturas de tema, 192 auditorias
+de acessibilidade, 192 comparações e 105 checks de zoom. A promoção ocorreu por
+rename transacional com rollback, a partir de worktree limpa e sem alteração do
+fingerprint durante a captura.
+
 Resultados aprovados:
 
-- 72/72 checks responsivos: 18 rotas em quatro viewports;
-- 54/54 checks de tema: 18 rotas em claro, equilibrado e escuro;
-- 87/87 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
-  dos três temas, sem violações;
-- 18/18 checks em zoom de 200%, representado por viewport CSS de `720×450` e
-  `deviceScaleFactor: 2` sobre canvas físico `1440×900`;
+- 147/147 checks responsivos: 21 rotas em sete viewports;
+- 84/84 checks de tema: 21 rotas em mobile dark e oito amostras desktop nos
+  temas claro, equilibrado e escuro;
+- 192/192 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
+  de tema, sem violações;
+- 105/105 checks de zoom: 21 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
 - disclosure aberto por teclado, fechado com `Escape`, foco devolvido e `Tab`
   alcançando controle interativo;
 - campo obrigatório de simulador sinalizado após blur com `aria-invalid`,
@@ -140,8 +162,11 @@ Resultados aprovados:
 - `prefers-reduced-motion: reduce` ativo em todos os contextos;
 - zero overflow raiz, erro de console, erro de página, rota desviada ou motor de
   simulador habilitado;
-- 72 capturas rota×viewport e 15 amostras dos três temas, sem metadados;
-- 87/87 comparações contra o baseline versionado dentro do limiar máximo de 1%
+- zero colisão entre navegação e identidade de sessão, com truncamento pronto
+  para nomes longos;
+- CTAs habilitado, bloqueado e indisponível com estilos computados distintos;
+- 147 capturas rota×viewport e 45 amostras de tema, sem metadados;
+- 192/192 comparações contra o baseline versionado dentro do limiar máximo de 1%
   de pixels alterados, com tolerância de 16 níveis por canal.
 
 As capturas autenticadas usam somente identidades e valores sintéticos com
@@ -150,13 +175,13 @@ o baseline versionado de regressão do próprio alvo. A comparação com as
 capturas da referência viva continua sendo uma revisão visual humana separada;
 nenhuma dessas evidências constitui comparação de métricas comerciais.
 
-## Bloqueio da comparação autenticada em homologação
+## Comparação autenticada em homologação
 
-URL e credencial QA de homologação não foram disponibilizadas. Portanto, a
-comparação autenticada nesse ambiente permanece interrompida, conforme o gate
-original. Produção não foi usada como substituta; contas Master/Admin pessoais
-não foram usadas e nenhum usuário remoto foi criado. O QA local acima é
-evidência complementar, não fechamento do gate de homologação.
+A homologação isolada existe em `https://homolog.descomplicapro.com.br/`, com
+Basic Auth, contas QA sintéticas e banco próprio. A evidência remota versionada
+ainda corresponde ao SHA-base; deve ser regenerada depois do SHA final deste
+incremento. Produção não é substituta e contas Master/Admin pessoais continuam
+proibidas.
 
 Cada execução registra o commit base, se a árvore estava alterada e um SHA-256
 determinístico do diff e dos arquivos não rastreados, excluindo os próprios
@@ -195,5 +220,12 @@ O modo padrão nunca altera a baseline versionada. Capturas e diagnóstico da
 execução ficam em `test-results/authenticated-visual/`, ignorado pelo Git. O
 modo `--update-baseline` também exige que a baseline inicial corresponda ao
 `HEAD` e só a promove, por troca atômica com rollback, depois de todos os checks
-funcionais e de acessibilidade passarem. Hashes dos 87 arquivos usados ficam
+funcionais e de acessibilidade passarem. Hashes dos 192 arquivos usados ficam
 registrados na evidência; uma falha nunca atualiza a baseline.
+
+## Estados do gate final
+
+As superfícies atuais de login, logout, 403, 404, 500, loading, empty, stale e
+error ficam em [`../final-states`](../final-states/). O E2E usa contas QA
+sintéticas e diferencia capturas do fluxo real das composições dos componentes
+de estado. Identificadores técnicos permanecem fechados em disclosure.

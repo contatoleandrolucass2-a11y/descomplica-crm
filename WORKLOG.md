@@ -940,3 +940,120 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   simuladores estão visualmente completos, mas cálculo e persistência seguem
   bloqueados. Supabase de produção, n8n, Qlik, Salesforce, dados, grants, flags
   e container de produção não foram alterados; não houve merge ou cutover.
+
+## 2026-08-11 — fechamento funcional e preparação fail-closed
+
+- Branch criada sobre o head exato do PR #33. A especificação completa e a
+  pilha #26–#33 foram convertidas em matriz rastreável por página, componente,
+  fonte, permissão, teste, evidência, estado e bloqueio.
+- Breadcrumbs passam a usar somente o catálogo autorizado. As 21 rotas entram
+  na matriz autenticada, incluindo Admin, Usuários e Páginas; reduced-motion,
+  teclado, três temas, sete viewports, mobile dark, Axe e zoom de 80%, 100%,
+  125%, 150% e 200% permanecem gates.
+- Aprovação de onboarding exige Master, permissões server-side, papel
+  aprovável, escopos oficiais explícitos, motivo e confirmação. Nenhum owner,
+  vínculo ou escopo é presumido.
+- Metas de funil e pontos foram movidos para draft privado, versionado e
+  Master-only, com preview/hashes e sem apply. Ranking rejeita configuração
+  legada como política oficial. Os cinco simuladores ganharam a estrutura da
+  especificação e seguem sem motor, exportação, persistência ou resultado.
+- Dashboard ganhou ritmo, comparativos operacionais, estrutura de corretores
+  por gerente e rodapé; Canal ganhou quatro visões, período personalizado,
+  resumo, pesquisa, dois rankings e gate de conciliação. Tudo que depende de
+  fonte/semântica ausente permanece explicitamente indisponível.
+- Simuladores ganharam abas acessíveis, repeaters locais, múltiplos proponentes,
+  cenários, inventário/paginação neutros, limpar e impressão estrutural. Nenhum
+  controle chama motor, persiste ou exporta cálculo comercial.
+- A imagem mantém leitura compatível com o schema produtivo anterior: ausência
+  exata das novas RPC/colunas/tabelas cai para legado em revisão e desabilita o
+  fluxo novo; outros erros continuam fail-closed.
+- O read model v3 valida dataset e escopo da resposta, exige as cinco etapas
+  mensais exatas e diferencia stale, indisponibilidade e erro.
+- Inspeção de produção foi somente leitura. Backup lógico criptografado,
+  root-only e com checksums verificados foi restaurado em container descartável
+  sem rede; as dez migrations futuras executaram e o rollback por restore limpo
+  passou. Plaintext temporário e container foram removidos.
+- O caller técnico Qlik permanece `r4DyPyOTDtoROXq0`; owner operacional,
+  substituto, 40 leitores GET, manifesto real de mappings, credenciais privadas,
+  políticas e casos de ouro continuam bloqueios externos. Nenhum conflito real
+  foi inventado como “zero”.
+- Três migrations com efeitos P0 foram marcadas para decomposição forward antes
+  de qualquer execução remota. Não houve migration remota, importação real,
+  alteração de n8n/Qlik/Salesforce, merge, cutover ou deploy de produção.
+- A primeira captura ampliada encontrou contraste insuficiente em três estados
+  ativos no tema escuro e um falso positivo que confundia limpar/imprimir com
+  execução comercial. As cores foram corrigidas e o gate passou a exigir o
+  botão de cálculo explicitamente desabilitado, mantendo controles locais
+  estruturais disponíveis.
+- A recaptura limpa aprovou 147 combinações responsivas, 84 checks de tema, 192
+  auditorias Axe/comparações e 105 checks de zoom. A baseline foi promovida por
+  rename transacional, sem persistir conta, senha ou storage state.
+- O primeiro disparo do restore rehearsal fechou antes de criar containers ao
+  detectar que seu sentinela ainda esperava 863 testes. O contrato foi alinhado
+  ao inventário versionado atual: 27 migrations, 18 arquivos e 885 pgTAP.
+- Duas execuções independentes do ensaio passaram. A evidência versionada prova
+  57 tabelas, 62 relações, 88 funções, owners/ACL preservados, fingerprint
+  canônico idêntico e todos os gates/credenciais/policies/mappings vazios.
+- A suíte integral revelou duas asserções que ainda descreviam a baseline antiga:
+  estado “preparado” e obrigatoriedade de igualdade com a imagem anterior. O
+  teste agora exige a baseline promovida íntegra e mantém o diagnóstico anterior
+  auditável, permitindo somente os motivos fechados produzidos pelo harness.
+- Os primeiros E2E integrais pararam nos títulos legados “Dashboard do funil” e
+  “Performance das parcerias”. A matriz foi alinhada aos H1 restaurados
+  “Relatório completo da equipe” e “Ranking das Imob’s”; permissões, navegação e
+  conteúdo permitido continuam sendo verificados sem relaxamento.
+- A travessia Master avançou e encontrou o nome acessível legado do filtro do
+  Canal. O seletor foi alinhado ao grupo ampliado “Visões e filtros do Canal de
+  Parcerias”, preservando a exigência de visibilidade do controle seguro.
+- O E2E chegou aos simuladores e repetiu o falso positivo já encontrado no gate
+  visual: três controles locais estavam sendo contados como motor. A asserção
+  agora prova ausência de submit/action e exige exatamente um botão comercial,
+  identificado pelo motivo de bloqueio e desabilitado.
+- O primeiro QA visual HTTPS aprovou E2E 7/7 e todos os gates funcionais/Axe,
+  mas rejeitou 11 screenshots de Usuários: homologação possui nove contas QA e
+  o baseline efêmero possui uma. A região dinâmica ganhou marcador explícito e
+  é omitida somente do screenshot comparável, depois de passar funcional e Axe.
+  Um erro de console isolado não foi reproduzido em duas travessias diagnósticas.
+- A baseline local estabilizada foi recapturada em worktree limpa e aprovou
+  novamente 147 responsivos, 84 temas, 192 Axe/comparações e 105 checks de zoom;
+  conta e fixtures efêmeras foram removidas ao final.
+
+## 2026-08-11 — correções do gate visual final
+
+- Auditoria independente recebida no SHA `420af55093da7622cea194aab5b27f13d42c1eab`:
+  zero P0, dois P1, quatro P2 e quatro P3. As 21 rotas estavam estruturalmente
+  íntegras; responsividade, temas, teclado, zoom, reduced-motion e Axe já
+  passavam.
+- O shell passou a reservar e truncar toda a cadeia da identidade, além de
+  empilhar a navegação a partir de `90rem`. O E2E injeta uma identidade longa em
+  `1440×900` e prova ellipsis, ausência de sobreposição e zero overflow raiz.
+- O workspace compartilhado dos cinco simuladores agora diferencia controles
+  locais habilitados, motor bloqueado e estoque indisponível. O motor continua
+  desabilitado, sem submit/action, com cadeado e explicação visível junto ao
+  CTA; nenhuma regra comercial foi acrescentada.
+- Canal, Ranking e Configurações receberam contraste e copy finais. O termo
+  oficial é “imobiliárias”; “Metas de pontos” ficou uniforme; o funil de
+  parcerias ganhou H1 contextual; política, ativação e permissões substituem
+  jargões técnicos na visão comercial.
+- Fontes sintéticas são apresentadas como “Dados sintéticos de homologação”.
+  Identificadores de execução, plano e códigos de suporte permanecem fechados
+  em `Detalhes técnicos`.
+- O E2E local isolado ampliado passou com 8 cenários e um skip remoto, nove
+  perfis, 21 rotas, RLS e remoção das nove contas efêmeras. Capturas atuais de
+  login, logout, 403, 404, 500, loading, empty, stale e error foram geradas em
+  `docs/qa/final-states/`; nenhuma credencial foi persistida.
+- A baseline final foi promovida a partir de worktree limpa no SHA
+  `a33ec1b0f2f1ff1222288d032d84db1a6a12c6d9`: 147 responsivos, 84 checks de
+  tema, 192 Axe/comparações e 105 checks de zoom. Colisão do topbar e contratos
+  dos três estados de CTA tiveram zero falhas; conta e fixtures foram removidas.
+- Nenhum ambiente remoto, Supabase, n8n, Qlik, Salesforce, DNS ou Nginx foi
+  alterado nesta correção. Flags comerciais, allowlists e motores continuam
+  desligados.
+- O gate visual independente read-only no HEAD `5271b2b` aprovou a entrega com
+  P0/P1/P2/P3 iguais a zero. Foram conferidos 192/192 hashes e as superfícies de
+  topbar, simuladores, Canal, Ranking, nomenclaturas, cópias e estados finais;
+  homologação viva não foi acessada.
+- O fechamento técnico aprovou formato, lint, tipos, 263 testes, build, E2E
+  isolado, 885 pgTAP, RLS API, lint local do schema, auditorias pnpm/OSV/gitleaks,
+  actionlint, shellcheck e validação dos manifests Compose. Nenhum segredo ou
+  ambiente remoto foi alterado.

@@ -296,8 +296,9 @@ Registrar sem segredo ou PII:
 O fechamento executado em 11/08/2026 está registrado em
 [`docs/qa/homologation/RESULTS.md`](../qa/homologation/RESULTS.md), acompanhado
 de manifesto de hashes e screenshots sintéticos. O gate aprovou nove perfis e
-21 rotas no E2E HTTPS; a matriz visual complementar cobriu as 18 páginas CRM em
-quatro viewports, três temas, zoom 200%, Axe e 87 comparações de baseline.
+21 rotas no E2E HTTPS. No novo SHA, a matriz visual complementar cobre as 21
+páginas protegidas em quatro viewports, três temas, zoom 200%, Axe e 99
+comparações de baseline.
 
 ## Rollback sem cutover
 

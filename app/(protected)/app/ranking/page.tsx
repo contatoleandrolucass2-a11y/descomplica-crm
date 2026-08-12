@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   AnalyticsCard,
   AnalyticsTable,
+  CommercialSourceLabel,
   DataState,
   FilterBar,
   FilterGroup,
@@ -172,6 +173,7 @@ export default async function RankingPage({
 
   if (result.status !== "ready") {
     const isEmpty = result.status === "empty";
+    const policyPending = result.status === "policy_pending";
 
     return (
       <main className="px-4 py-6 sm:px-6 sm:py-10">
@@ -179,25 +181,37 @@ export default async function RankingPage({
           <PageHeader
             eyebrow="Desempenho comercial"
             title="Ranking por pontos"
-            description="A classificação comercial combina somente atividades reais do snapshot autorizado com a pontuação confirmada."
+            description="A classificação comercial usará somente atividades reais e uma política oficial aprovada."
             footer={
               <p className="flex items-center gap-3 text-sm text-slate-200">
                 <span
                   aria-hidden="true"
                   className={`size-2.5 rounded-full ${isEmpty ? "bg-amber-300" : "bg-cyan-300"}`}
                 />
-                {isEmpty ? "Aguardando o primeiro snapshot" : "Pontuação ainda não configurada"}
+                {isEmpty
+                  ? "Aguardando o primeiro snapshot"
+                  : policyPending
+                    ? "Política oficial pendente"
+                    : "Pontuação ainda não configurada"}
               </p>
             }
           />
 
           <DataState
             variant={isEmpty ? "empty" : "unavailable"}
-            title={isEmpty ? "Aguardando dados" : "Configuração necessária"}
+            title={
+              isEmpty
+                ? "Aguardando dados"
+                : policyPending
+                  ? "Ranking bloqueado por política"
+                  : "Configuração necessária"
+            }
             description={
               isEmpty
                 ? "O read model está pronto, mas ainda não existe um snapshot real de atividades. Nenhum participante demonstrativo será exibido."
-                : "Existe atividade para o ranking, mas os pesos ainda não foram confirmados por um administrador."
+                : policyPending
+                  ? "A política oficial ainda não foi aprovada. Nenhuma pontuação oficial foi calculada."
+                  : "Existe atividade para o ranking, mas ainda não há rascunho validado de pesos."
             }
             action={
               !isEmpty && canManagePoints ? (
@@ -205,7 +219,7 @@ export default async function RankingPage({
                   href="/app/configuracoes/metas/pontos"
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-[#082137] hover:bg-cyan-200"
                 >
-                  Configurar pontuação
+                  Preparar rascunho de pontuação
                 </Link>
               ) : undefined
             }
@@ -215,7 +229,7 @@ export default async function RankingPage({
             <AnalyticsCard tone="navy">
               <div className="border-b border-white/10 pb-4">
                 <p className="text-xs font-semibold tracking-[0.14em] text-cyan-300 uppercase">
-                  Regra vigente
+                  Sem pontuação oficial
                 </p>
                 <h2 id="ranking-points-title" className="mt-1 text-xl font-semibold text-white">
                   Pontos por ação
@@ -394,7 +408,9 @@ export default async function RankingPage({
               </div>
               <div>
                 <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
-                <dd className="mt-1 break-words text-slate-100">{result.source}</dd>
+                <dd className="mt-1 break-words text-slate-100">
+                  <CommercialSourceLabel value={result.source} />
+                </dd>
               </div>
             </dl>
           }

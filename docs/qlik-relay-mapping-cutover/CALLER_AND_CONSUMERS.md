@@ -79,11 +79,13 @@ payload, rótulos Qlik ou ownership SQL.
 
 ### Não atribuído
 
-Os logs da Data API também registraram leituras `GET` das três tabelas Qlik sem
-user-agent atribuível. Nenhum workflow ativo ou caller no repositório
+Uma nova captura somente leitura em 11 de agosto de 2026 registrou 40 leituras
+`GET` recentes nas três tabelas Qlik, associadas ao mesmo identificador opaco e
+sem user-agent atribuível. Nenhum workflow ativo ou caller no repositório
 correspondeu a essas leituras. Elas não devem ser classificadas como consumidor
 de negócio, auditoria ou integração até existir correlação por request ID,
-origem sanitizada e janela de execução.
+origem sanitizada e janela de execução. Nenhum grant foi revogado durante a
+inspeção.
 
 ## Exposição residual e tratamento
 

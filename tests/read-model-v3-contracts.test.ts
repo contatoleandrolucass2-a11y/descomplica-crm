@@ -6,6 +6,7 @@ import {
   type ReadModelV3Ingestion,
   type ReadModelV3Response,
 } from "@/lib/crm/read-model-v3/contracts";
+import { validateReadModelV3Response } from "@/lib/crm/read-model-v3/data";
 
 const readModelV3IngestionSchema = createReadModelV3IngestionSchema(
   () => new Date("2026-08-09T18:00:00.000Z"),
@@ -320,5 +321,37 @@ describe("read model v3 response contract", () => {
     const incompatible = response("0.00");
     incompatible.source!.timezone = "Factory";
     expect(readModelV3ResponseSchema.safeParse(incompatible).success).toBe(false);
+  });
+
+  it("binds a valid response to the requested dataset and reporting scope", () => {
+    const model = response("0.00");
+
+    expect(validateReadModelV3Response(model, "funnel", model.scopeId)).toEqual(model);
+    expect(validateReadModelV3Response(model, "ranking", model.scopeId)).toBeNull();
+    expect(
+      validateReadModelV3Response(model, "funnel", "00000000-0000-4000-8000-000000000099"),
+    ).toBeNull();
+  });
+
+  it("requires every funnel stage in each monthly series row", () => {
+    const complete = response("0.00");
+    complete.metrics!.monthlySeries = [
+      {
+        monthStart: "2026-07-01",
+        stages: {
+          opportunities: 10,
+          appointments: 8,
+          visits: 6,
+          folders: 4,
+          sales: 2,
+        },
+      },
+    ];
+    expect(readModelV3ResponseSchema.safeParse(complete).success).toBe(true);
+
+    const partial = structuredClone(complete) as unknown as Record<string, unknown>;
+    delete (partial.metrics as { monthlySeries: Array<{ stages: Record<string, number> }> })
+      .monthlySeries[0]!.stages.sales;
+    expect(readModelV3ResponseSchema.safeParse(partial).success).toBe(false);
   });
 });

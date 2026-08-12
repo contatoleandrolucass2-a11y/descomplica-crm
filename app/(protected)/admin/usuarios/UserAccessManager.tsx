@@ -15,6 +15,7 @@ import { ROLES, getRoleLabel, type RoleKey } from "@/lib/authorization/roles";
 
 import {
   assignRoleAction,
+  approveUserAccessAction,
   removePermissionOverrideAction,
   setPermissionOverrideAction,
   setUserActiveAction,
@@ -33,6 +34,7 @@ export interface ManagedUser {
   userId: string;
   email: string | null;
   isActive: boolean;
+  accessStatus: "pending" | "approved" | "suspended" | "legacy_review";
   roleKey: RoleKey | null;
   isSelf: boolean;
   isManageable: boolean;
@@ -46,6 +48,112 @@ interface UserAccessManagerProps {
   canManageRoles: boolean;
   canManagePermissions: boolean;
   canManageUsers: boolean;
+  canApproveUsers: boolean;
+  reportingScopes: Array<{
+    id: string;
+    key: string;
+    type: "global" | "organization" | "team" | "portfolio" | "person";
+  }>;
+}
+
+const APPROVABLE_ROLES = [
+  "admin",
+  "coordinator",
+  "manager",
+  "broker",
+  "real_estate",
+  "house",
+  "partnership_channel",
+] as const satisfies readonly RoleKey[];
+
+function ApprovalForm({
+  user,
+  roles,
+  reportingScopes,
+}: {
+  user: ManagedUser;
+  roles: RoleKey[];
+  reportingScopes: UserAccessManagerProps["reportingScopes"];
+}) {
+  const availableRoles = roles.filter((role) =>
+    APPROVABLE_ROLES.some((approvableRole) => approvableRole === role),
+  );
+  const [state, action, pending] = useActionState(
+    approveUserAccessAction.bind(null, user.userId),
+    INITIAL_STATE,
+  );
+  if (availableRoles.length === 0 || reportingScopes.length === 0) {
+    return (
+      <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+        Aprovação indisponível: falta papel atribuível ou escopo oficial ativo.
+      </p>
+    );
+  }
+
+  return (
+    <form
+      action={action}
+      onSubmit={(event) =>
+        confirmChange(event, "A conta será aprovada somente com o papel e os escopos selecionados.")
+      }
+      className="grid gap-3 rounded-xl border border-cyan-200 bg-cyan-50/60 p-4"
+    >
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="grid gap-1 text-sm font-medium text-slate-800">
+          Papel aprovado
+          <select
+            name="roleKey"
+            required
+            className="min-h-11 rounded-lg border border-slate-300 px-3"
+          >
+            {availableRoles.map((role) => (
+              <option key={role} value={role}>
+                {getRoleLabel(role)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-1 text-sm font-medium text-slate-800">
+          Escopo oficial
+          <select
+            name="reportingScopeIds"
+            required
+            multiple
+            size={Math.min(5, reportingScopes.length)}
+            className="min-h-28 rounded-lg border border-slate-300 px-3 py-2"
+          >
+            {reportingScopes.map((scope) => (
+              <option key={scope.id} value={scope.id}>
+                {scope.key} · {scope.type}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <label className="grid gap-1 text-sm font-medium text-slate-800">
+        Motivo da aprovação
+        <input
+          name="reason"
+          required
+          minLength={3}
+          maxLength={240}
+          className="min-h-11 rounded-lg border border-slate-300 px-3"
+        />
+      </label>
+      <p className="text-xs leading-5 text-slate-600">
+        O banco revalida identidade, hierarquia, compatibilidade e unicidade do escopo. Nenhuma
+        associação é inferida pelo nome.
+      </p>
+      <button
+        type="submit"
+        disabled={pending}
+        className="min-h-11 rounded-lg bg-cyan-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+      >
+        {pending ? "Validando…" : "Aprovar acesso escopado"}
+      </button>
+      <ActionFeedback state={state} />
+    </form>
+  );
 }
 
 function confirmChange(event: FormEvent<HTMLFormElement>, summary: string) {
@@ -349,6 +457,8 @@ function UserRow({
   canManageRoles,
   canManagePermissions,
   canManageUsers,
+  canApproveUsers,
+  reportingScopes,
 }: UserAccessManagerProps & { user: ManagedUser }) {
   const inherited = user.roleKey ? ROLE_INHERITED_PERMISSIONS[user.roleKey] : [];
   const hasControls =
@@ -370,10 +480,19 @@ function UserRow({
           <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
             <span
               className={`rounded-full px-2.5 py-1 ${
-                user.isActive ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+                user.isActive ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"
               }`}
             >
               {user.isActive ? "Ativo" : "Inativo"}
+            </span>
+            <span className="rounded-full bg-cyan-50 px-2.5 py-1 text-cyan-800">
+              {user.accessStatus === "pending"
+                ? "Aguardando aprovação"
+                : user.accessStatus === "approved"
+                  ? "Acesso aprovado"
+                  : user.accessStatus === "suspended"
+                    ? "Acesso suspenso"
+                    : "Legado em revisão"}
             </span>
             <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">
               {user.overrides.length} {user.overrides.length === 1 ? "exceção" : "exceções"}
@@ -385,6 +504,12 @@ function UserRow({
         </summary>
 
         <div className="border-t border-slate-200 px-4 py-5 sm:px-5">
+          {user.accessStatus === "pending" && canApproveUsers && user.isManageable ? (
+            <section className="mb-5" aria-label="Aprovação Master-only">
+              <h3 className="mb-2 font-semibold text-slate-900">Aprovação de acesso escopado</h3>
+              <ApprovalForm user={user} roles={assignableRoles} reportingScopes={reportingScopes} />
+            </section>
+          ) : null}
           <section aria-labelledby={`role-title-${user.userId}`}>
             <h3 id={`role-title-${user.userId}`} className="font-semibold text-slate-900">
               {user.roleKey ? getRoleLabel(user.roleKey) : "Sem papel"}
@@ -492,21 +617,23 @@ export function UserAccessManager(props: UserAccessManagerProps) {
         placeholder="E-mail, papel ou status"
         className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 sm:max-w-xl"
       />
-      <p className="mt-2 text-sm text-slate-500" aria-live="polite">
-        {users.length} {users.length === 1 ? "usuário encontrado" : "usuários encontrados"}
-      </p>
-
-      {users.length > 0 ? (
-        <div className="mt-5 grid gap-3">
-          {users.map((user) => (
-            <UserRow key={user.userId} user={user} {...props} />
-          ))}
-        </div>
-      ) : (
-        <p className="mt-6 rounded-xl bg-white p-5 text-slate-600 ring-1 ring-slate-200">
-          Nenhum usuário corresponde à busca.
+      <div data-qa-visual-volatile="user-results">
+        <p className="mt-2 text-sm text-slate-600" aria-live="polite">
+          {users.length} {users.length === 1 ? "usuário encontrado" : "usuários encontrados"}
         </p>
-      )}
+
+        {users.length > 0 ? (
+          <div className="mt-5 grid gap-3">
+            {users.map((user) => (
+              <UserRow key={user.userId} user={user} {...props} />
+            ))}
+          </div>
+        ) : (
+          <p className="mt-6 rounded-xl bg-white p-5 text-slate-600 ring-1 ring-slate-200">
+            Nenhum usuário corresponde à busca.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

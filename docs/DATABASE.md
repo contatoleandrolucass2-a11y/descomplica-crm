@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 26 migrations
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 27 migrations
 locais, incluindo quatro markers históricos sanitizados e no-op. Nenhuma regra,
 política ou valor comercial é seedado. O rebuild contém 39 tabelas públicas,
 17 privadas, 12 papéis, 26 permissões e 21 páginas.
@@ -44,6 +44,7 @@ Qlik ou do read model v3 foi realizado.
 24. `20260809181424_crm_read_model_v3.sql`: autoridades privadas de fonte, dimensões canônicas, runs/fatos imutáveis, ingestão v3 e leitura autenticada por dataset, permissão e scope efetivo.
 25. `20260810165927_qlik_relay_mapping_cutover.sql`: papel/RPC exclusivos do relay, credenciais e gates vazios, ledger sanitizado, saúde agregada e importação de mappings com preview/apply atômico.
 26. `20260810201703_commercial_engines_policy_runtime.sql`: runtime privado/versionado para motores comerciais, com zero política, gate ou grant real seedado.
+27. `20260811120000_commercial_configuration_drafts.sql`: rascunhos privados e versionados de metas/pontos, preview determinístico, optimistic locking e auditoria hashes-only; não existe RPC de ativação.
 
 ## Desenvolvimento local
 
@@ -60,12 +61,13 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 863 testes pgTAP em 17 arquivos: 28 dos motivos de
+`supabase test db` planeja 885 testes pgTAP em 18 arquivos: 28 dos motivos de
 acesso, 51 regressões de hardening escopado, 28 do dashboard, 25 das metas, 20
 da matriz global de grants, 60 do schema Qlik, 33 do catálogo, 28 do signup
 pendente, 26 dos pontos, 54 do contrato Qlik, 20 da governança de identidades,
 27 do ranking, 143 do read model v3, 98 da matriz de escopos, 43 da ingestão
-Salesforce, 86 do relay/mappings e 93 do runtime comercial. A cobertura verifica nomes,
+Salesforce, 86 do relay/mappings, 93 do runtime comercial e 22 dos rascunhos
+comerciais. A cobertura verifica nomes,
 schema, grants, policies, constraints, disponibilidade e autoridade de fontes,
 preservação de dados, mappings, lineage, provisionamento, usuários inativos,
 overrides, limites de payload, delegação direcional, cardinalidade de escopo,
@@ -104,11 +106,11 @@ Modelos e queries do CRM original não serão copiados literalmente. Cada tabela
 
 O antigo `collaborator_dashboards.payload_json` e a dependência não versionada `sf_relatorio_resumo` foram substituídos no dashboard por quatro tabelas normalizadas. A ingestão ainda não está exposta: navegadores recebem somente `SELECT` limitado por `crm.dashboard.view`.
 
-A dependência não versionada `crm_funnel_goals` do CRM original foi substituída por uma tabela mensal tipada. O papel `authenticated` recebe somente `SELECT` com RLS; a Server Action grava exclusivamente pela função `upsert_crm_funnel_goals`, que exige `crm.settings.manage`, recalcula os volumes e audita a alteração.
+A dependência não versionada `crm_funnel_goals` do CRM original foi substituída por uma tabela mensal tipada. O legado continua somente leitura na interface. Novas edições passam por preview e rascunho privado; não atualizam a tabela ativa e não podem ser ativadas sem política, owner, caso de ouro, aprovação, gate, coorte, grant, vigência e rollback.
 
-Os JSONs da tabela D1 `point_goals` foram substituídos por `crm_point_settings` e `crm_point_metrics`. O ranking pode ler as sete métricas via `crm.ranking.view`; a escrita completa ocorre somente pela RPC `replace_crm_point_settings`, protegida por `crm.settings.manage`.
+Os JSONs da tabela D1 `point_goals` foram substituídos por `crm_point_settings` e `crm_point_metrics`. O legado continua somente leitura. Novas edições usam o mesmo contrato de rascunho privado; a interface não chama `replace_crm_point_settings` e o ranking comercial permanece fail-closed sem política oficial aprovada.
 
-O ranking usa snapshots e contagens por participante/período, sem payload JSON. Os totais são recalculados na aplicação com os pesos atuais, evitando regravar atividade quando a configuração muda. A escrita permanece reservada à futura ingestão server-side.
+O ranking legado preserva snapshots e contagens por participante/período para reconciliação, mas seus pesos e fórmula não são autoridade comercial. A rota não calcula nem exibe pontos enquanto o runtime oficial, seus gates e casos de ouro estiverem ausentes.
 
 No schema local proposto, `crm_imob_ranking_runs`,
 `crm_imob_ranking_entries` e `crm_imob_ranking_developments` preservam o

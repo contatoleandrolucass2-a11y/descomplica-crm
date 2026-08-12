@@ -19,14 +19,15 @@ e somente um grupo permanece aberto por vez.
 ## Validação
 
 - Vitest valida o catálogo fechado dos três temas e rejeita valores persistidos desconhecidos.
-- O harness versionado cobre as 18 páginas da referência sanitizada e a
-  barreira anônima das 18 rotas CRM nos quatro viewports com reduced-motion.
+- O harness versionado cobre as 18 páginas da referência sanitizada. A matriz
+  autenticada e a barreira anônima cobrem as 21 rotas protegidas atuais — as 18
+  superfícies de referência e as três rotas administrativas — nos quatro
+  viewports com reduced-motion.
 - O QA autenticado complementar usa runner Supabase local, conta QA efêmera e
   fixtures sintéticas isoladas/validadas por RLS para revisar três temas,
   teclado e zoom de 200%; conta e fixtures são removidas ao final.
-  A comparação autenticada de homologação permanece bloqueada até existir
-  ambiente e credencial QA dedicados; produção e contas pessoais não são
-  substitutas.
+  A homologação isolada usa somente credenciais QA dedicadas e dados sintéticos;
+  produção e contas pessoais não são substitutas.
 
 Filtros dimensionais do dashboard não pertencem a este incremento: eles dependem de registros normalizados por canal, gerente, responsável e empresa. Até esse read model existir, a interface não oferece filtros sem efeito ou dados demonstrativos.
 

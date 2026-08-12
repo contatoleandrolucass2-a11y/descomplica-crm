@@ -42,7 +42,29 @@ const expectedProtectedRoutes = [
   "/app/simulacao/caixa",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
+  "/admin",
+  "/admin/usuarios",
+  "/admin/paginas",
 ];
+
+const expectedExpandedViewports = [
+  { key: "desktop-1440x900", width: 1440, height: 900 },
+  { key: "notebook-1280x720", width: 1280, height: 720 },
+  { key: "tablet-1024x768", width: 1024, height: 768 },
+  { key: "tablet-768x1024", width: 768, height: 1024 },
+  { key: "mobile-390x844", width: 390, height: 844 },
+  { key: "mobile-375x812", width: 375, height: 812 },
+  { key: "mobile-320x568", width: 320, height: 568 },
+];
+const expectedZoomLevels = [80, 100, 125, 150, 200];
+const visualHarness = readFileSync(
+  new URL("../scripts/qa/authenticated-visual.mjs", import.meta.url),
+  "utf8",
+);
+const referenceQaReadme = readFileSync(
+  new URL("../docs/qa/reference-parity/README.md", import.meta.url),
+  "utf8",
+);
 
 const manifest = JSON.parse(
   readFileSync(new URL("../docs/qa/reference-parity/manifest.json", import.meta.url), "utf8"),
@@ -107,6 +129,7 @@ const authenticatedResults = JSON.parse(
   worktreeFingerprint: string;
   worktreeFingerprintAlgorithm: string;
   identityVerification: { endpoint: string; accountPolicy: string };
+  viewports: Array<{ key: string; width: number; height: number }>;
   fixtureVerification: {
     contract: string;
     assertion: string;
@@ -119,11 +142,16 @@ const authenticatedResults = JSON.parse(
     passed: boolean;
     reducedMotion: boolean;
     horizontalOverflow: boolean;
+    topbarCollision: boolean;
+    identityTruncationReady: boolean;
+    blockedActionDistinct: boolean;
+    unavailableActionDistinct: boolean;
     consoleErrorCount: number;
     pageErrorCount: number;
   }>;
   themeChecks: Array<{
     route: string;
+    viewport?: string;
     theme: string;
     passed: boolean;
     reducedMotion: boolean;
@@ -137,9 +165,18 @@ const authenticatedResults = JSON.parse(
     passed: boolean;
   }>;
   zoom: {
+    method?: string;
+    levels?: Array<{
+      percent: number;
+      width: number;
+      height: number;
+      deviceScaleFactor: number;
+    }>;
     passed: boolean;
     routes: Array<{
       route: string;
+      viewport?: string;
+      zoomPercent?: number;
       pathname: string;
       passed: boolean;
       reducedMotion: boolean;
@@ -185,14 +222,52 @@ const authenticatedResults = JSON.parse(
     visualComparison: {
       passed: boolean;
       reason: string;
+      changedPixelRatio: number | null;
+      baselineUsed: { path: string; tracked: boolean; bytes: number | null; sha256: string | null };
+    };
+    previousBaselineComparison: {
+      passed: boolean;
+      reason: string;
       changedPixelRatio: number;
       baselineUsed: { path: string; tracked: boolean; bytes: number; sha256: string };
     };
-    previousBaselineComparison: { passed: boolean; changedPixelRatio: number };
   }>;
 };
 
 describe("versioned reference parity catalog", () => {
+  it("prepares the expanded authenticated visual matrix without weakening baseline safety", () => {
+    const viewportSource = visualHarness.match(/const viewports = \[(.*?)\n\];/s)?.[1] ?? "";
+    const configuredViewports = [
+      ...viewportSource.matchAll(/\{ key: "([^"]+)", width: (\d+), height: (\d+) \}/g),
+    ].map((match) => ({ key: match[1], width: Number(match[2]), height: Number(match[3]) }));
+    expect(configuredViewports).toEqual(expectedExpandedViewports);
+
+    const zoomSource = visualHarness.match(/const zoomLevels = \[(.*?)\n\];/s)?.[1] ?? "";
+    const configuredZoomLevels = [...zoomSource.matchAll(/percent: (\d+)/g)].map((match) =>
+      Number(match[1]),
+    );
+    expect(configuredZoomLevels).toEqual(expectedZoomLevels);
+
+    expect(visualHarness).toContain('const mobileDarkViewportKey = "mobile-390x844"');
+    expect(visualHarness).toContain('matrix: "mobile-dark"');
+    expect(visualHarness).toContain('kind: "mobile-dark"');
+    expect(visualHarness).toContain("...adminRoutes");
+    for (const route of ["/admin", "/admin/usuarios", "/admin/paginas"]) {
+      expect(visualHarness).toContain(`"${route}"`);
+    }
+
+    expect(visualHarness).toContain('if (argv.length === 0) return "verify"');
+    expect(visualHarness).toContain(
+      'if (argv.length === 1 && argv[0] === "--update-baseline") return "update-baseline"',
+    );
+    expect(visualHarness).toContain('if (remoteHomologation && mode !== "verify")');
+    expect(visualHarness).toContain('method: "same-filesystem transactional rename with rollback"');
+    expect(referenceQaReadme).toContain("Matriz autenticada aprovada no SHA de fechamento");
+    expect(referenceQaReadme).toContain(
+      "A matriz aprovou 147 capturas responsivas, 45 capturas de tema, 192 auditorias",
+    );
+  });
+
   it("catalogs exactly the eighteen live reference pages in both documents", () => {
     const inventory = readFileSync(new URL("../docs/CRM_INVENTORY.md", import.meta.url), "utf8");
     const matrix = readFileSync(
@@ -255,7 +330,9 @@ describe("versioned reference parity catalog", () => {
       const result = results[kind]!;
       expect(result.passed).toBe(true);
       const expectedRoutes =
-        kind === "target-before" ? expectedProtectedRoutes.slice(0, 12) : expectedProtectedRoutes;
+        kind === "target-before"
+          ? expectedProtectedRoutes.slice(0, 12)
+          : expectedReferenceRoutes.map((route) => (route === "/" ? "/app" : `/app${route}`));
       expect(result.routes.map((route) => route.route)).toEqual(expectedRoutes);
       expect(result.routes.every((route) => route.securityHeadersPresent)).toBe(true);
       expect(result.viewports).toHaveLength(4);
@@ -290,9 +367,13 @@ describe("versioned reference parity catalog", () => {
       contract: "rls-marker-v1",
       assertion: "synthetic marker and exact fixture counts verified through authenticated RLS",
       sourceMarkerPolicy: "QA local synthetic — not production · run <ephemeral-id>",
-      sourceMarkerVisible: { dashboard: true, ranking: true },
+      sourceMarkerVisible: { dashboard: true, stageOpportunities: true },
     });
-    expect(authenticatedResults.routeChecks).toHaveLength(72);
+    const viewportKeys = authenticatedResults.viewports.map(({ key }) => key);
+    expect(viewportKeys).toEqual(expectedExpandedViewports.map(({ key }) => key));
+
+    const responsiveScreenshotCount = expectedProtectedRoutes.length * viewportKeys.length;
+    expect(authenticatedResults.routeChecks).toHaveLength(responsiveScreenshotCount);
     expect([...new Set(authenticatedResults.routeChecks.map(({ route }) => route))]).toEqual(
       expectedProtectedRoutes,
     );
@@ -303,12 +384,17 @@ describe("versioned reference parity catalog", () => {
           check.pathname === check.route &&
           check.reducedMotion &&
           !check.horizontalOverflow &&
+          !check.topbarCollision &&
+          check.identityTruncationReady &&
+          check.blockedActionDistinct &&
+          check.unavailableActionDistinct &&
           check.consoleErrorCount === 0 &&
           check.pageErrorCount === 0,
       ),
     ).toBe(true);
 
-    expect(authenticatedResults.themeChecks).toHaveLength(54);
+    const themeCheckCount = expectedProtectedRoutes.length * 4;
+    expect(authenticatedResults.themeChecks).toHaveLength(themeCheckCount);
     expect([...new Set(authenticatedResults.themeChecks.map(({ theme }) => theme))]).toEqual([
       "light",
       "balanced",
@@ -319,7 +405,9 @@ describe("versioned reference parity catalog", () => {
         (check) => check.passed && check.reducedMotion && !check.horizontalOverflow,
       ),
     ).toBe(true);
-    expect(authenticatedResults.accessibilityChecks).toHaveLength(87);
+    const themeScreenshotCount = 45;
+    const visualEvidenceCount = responsiveScreenshotCount + themeScreenshotCount;
+    expect(authenticatedResults.accessibilityChecks).toHaveLength(visualEvidenceCount);
     expect(
       authenticatedResults.accessibilityChecks.every(
         (check) => check.passed && check.violations.length === 0,
@@ -327,10 +415,18 @@ describe("versioned reference parity catalog", () => {
     ).toBe(true);
 
     expect(authenticatedResults.zoom.passed).toBe(true);
-    expect(authenticatedResults.zoom.routes).toHaveLength(18);
-    expect(authenticatedResults.zoom.routes.map(({ route }) => route)).toEqual(
-      expectedProtectedRoutes,
+    const capturedZoomLevels = authenticatedResults.zoom.levels?.map(({ percent }) => percent);
+    expect(capturedZoomLevels).toEqual(expectedZoomLevels);
+    expect(authenticatedResults.zoom.routes).toHaveLength(
+      expectedProtectedRoutes.length * expectedZoomLevels.length,
     );
+    for (const zoomPercent of expectedZoomLevels) {
+      expect(
+        authenticatedResults.zoom.routes
+          .filter((check) => (check.zoomPercent ?? 200) === zoomPercent)
+          .map(({ route }) => route),
+      ).toEqual(expectedProtectedRoutes);
+    }
     expect(
       authenticatedResults.zoom.routes.every(
         (check) =>
@@ -344,14 +440,14 @@ describe("versioned reference parity catalog", () => {
     expect(Object.values(authenticatedResults.simulatorValidation).every(Boolean)).toBe(true);
 
     expect(authenticatedResults.visualInspectionCoverage).toEqual({
-      responsiveScreenshots: 72,
-      themeScreenshots: 15,
-      accessibilityAudits: 87,
-      baselineComparisons: 87,
+      responsiveScreenshots: responsiveScreenshotCount,
+      themeScreenshots: themeScreenshotCount,
+      accessibilityAudits: visualEvidenceCount,
+      baselineComparisons: visualEvidenceCount,
       changedPixelRatioThreshold: 0.01,
       channelTolerance: 16,
     });
-    expect(authenticatedResults.screenshots).toHaveLength(87);
+    expect(authenticatedResults.screenshots).toHaveLength(visualEvidenceCount);
     expect(authenticatedResults.worktreeDirtyAtCapture).toBe(false);
     expect(authenticatedResults.worktreeFingerprint).toMatch(/^[a-f0-9]{64}$/);
     expect(authenticatedResults.worktreeFingerprintAlgorithm).toBe(
@@ -373,8 +469,8 @@ describe("versioned reference parity catalog", () => {
     expect(authenticatedResults.baselinePromotion.previousBaselineResultSha256).toMatch(
       /^[a-f0-9]{64}$/,
     );
-    expect(authenticatedResults.baselineUsed.fileCount).toBe(87);
-    expect(authenticatedResults.baselineUsed.files).toHaveLength(87);
+    expect(authenticatedResults.baselineUsed.fileCount).toBe(visualEvidenceCount);
+    expect(authenticatedResults.baselineUsed.files).toHaveLength(visualEvidenceCount);
     expect(authenticatedResults.baselineUsed.manifestSha256).toMatch(/^[a-f0-9]{64}$/);
 
     for (const screenshot of authenticatedResults.screenshots) {
@@ -387,8 +483,20 @@ describe("versioned reference parity catalog", () => {
         bytes: screenshot.bytes,
         sha256: screenshot.sha256,
       });
-      expect(screenshot.previousBaselineComparison.passed).toBe(true);
-      expect(screenshot.previousBaselineComparison.changedPixelRatio).toBeLessThanOrEqual(0.01);
+      expect(screenshot.previousBaselineComparison.reason).toMatch(
+        /^(within_threshold|pixel_drift|dimensions_changed|baseline_not_tracked)$/,
+      );
+      if (screenshot.previousBaselineComparison.reason === "baseline_not_tracked") {
+        expect(screenshot.previousBaselineComparison.changedPixelRatio).toBeNull();
+        expect(screenshot.previousBaselineComparison.baselineUsed.tracked).toBe(false);
+      } else {
+        expect(screenshot.previousBaselineComparison.changedPixelRatio).toBeGreaterThanOrEqual(0);
+        expect(screenshot.previousBaselineComparison.changedPixelRatio).toBeLessThanOrEqual(1);
+        expect(screenshot.previousBaselineComparison.baselineUsed.tracked).toBe(true);
+      }
+      expect(screenshot.previousBaselineComparison.baselineUsed.path).toBe(
+        `docs/qa/reference-parity/${screenshot.path}`,
+      );
       const contents = readFileSync(
         new URL(`../docs/qa/reference-parity/${screenshot.path}`, import.meta.url),
       );

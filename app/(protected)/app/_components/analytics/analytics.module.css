@@ -96,6 +96,18 @@
   color: #f7fdff;
 }
 
+.card[data-tone="navy"] .sectionKicker {
+  color: var(--analytics-cyan);
+}
+
+.card[data-tone="navy"] .sectionTitle {
+  color: #ffffff;
+}
+
+.card[data-tone="navy"] .sectionDescription {
+  color: #c7d5dd;
+}
+
 .card[data-tone="subtle"] {
   background: var(--analytics-surface-muted);
   box-shadow: none;
@@ -138,6 +150,27 @@
   color: var(--analytics-muted);
   font-size: 0.9rem;
   line-height: 1.55;
+}
+
+.technicalDetails {
+  margin-top: 0.35rem;
+  color: inherit;
+  font-size: 0.68rem;
+}
+
+.technicalDetails summary {
+  width: fit-content;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.technicalDetails code {
+  display: block;
+  max-width: 100%;
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+  font-size: 0.65rem;
 }
 
 .metricCard {
@@ -520,6 +553,7 @@
 }
 
 .state[data-variant="unavailable"],
+.state[data-variant="stale"],
 .state[data-variant="warning"] {
   border-color: color-mix(in srgb, var(--analytics-warning) 45%, transparent);
 }

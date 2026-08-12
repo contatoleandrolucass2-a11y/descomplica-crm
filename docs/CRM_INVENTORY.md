@@ -40,9 +40,9 @@ existe.
 | REF-07 | `/ranking`                            | Ranking comercial       | `/app/ranking`                            | `crm.ranking.view`      | Composição visual completa sobre read model seguro      |
 | REF-08 | `/canal-de-parcerias`                 | Canal de Parcerias      | `/app/canal-de-parcerias`                 | `crm.partnerships.view` | Composição completa; integração sinalizada indisponível |
 | REF-09 | `/configuracoes`                      | Índice de configurações | `/app/configuracoes`                      | `crm.settings.view`     | Índice visual restaurado                                |
-| REF-10 | `/configuracoes/metas`                | Metas do funil          | `/app/configuracoes/metas`                | `crm.settings.manage`   | Composição visual sobre Server Action/RPC existente     |
-| REF-11 | `/configuracoes/metas/parcerias`      | Metas de parcerias      | `/app/configuracoes/metas/parcerias`      | `crm.settings.manage`   | Composição visual sobre Server Action/RPC existente     |
-| REF-12 | `/configuracoes/metas/pontos`         | Pesos e metas de pontos | `/app/configuracoes/metas/pontos`         | `crm.settings.manage`   | Composição visual sobre configuração existente          |
+| REF-10 | `/configuracoes/metas`                | Metas do funil          | `/app/configuracoes/metas`                | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
+| REF-11 | `/configuracoes/metas/parcerias`      | Metas de parcerias      | `/app/configuracoes/metas/parcerias`      | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
+| REF-12 | `/configuracoes/metas/pontos`         | Pesos e metas de pontos | `/app/configuracoes/metas/pontos`         | `crm.settings.manage`   | Preview e rascunho versionado; ranking segue bloqueado  |
 | REF-13 | `/simulacao`                          | Índice de simuladores   | `/app/simulacao`                          | `crm.simulators.view`   | Hub visual concluído; motores bloqueados                |
 | REF-14 | `/simulacao/associativo-fluxo-linear` | Associativo WF13        | `/app/simulacao/associativo-fluxo-linear` | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
 | REF-15 | `/simulacao/calcular-documentacao`    | Documentação WF16       | `/app/simulacao/calcular-documentacao`    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
@@ -131,17 +131,18 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 | `AnalyticsTable`                         | Tabela semântica e rolável              | Ausência usa estado explícito, nunca zero substituto                     |
 | `RankingList`                            | Lista já ordenada pela fonte            | Não pontua, desempata ou reordena                                        |
 | `AnalyticsSkeleton`                      | Carregamento estável                    | `aria-busy` e animação desligada em reduced-motion                       |
-| `DataState`                              | Estados vazio, indisponível e erro      | Mensagem segura sem detalhes do Supabase                                 |
+| `DataState`                              | Vazio, atraso, indisponível e erro      | Mensagem segura sem detalhes do Supabase                                 |
 | `UnavailableValue`                       | Ausência em célula ou indicador         | Diferencia ausência de zero real                                         |
 | `RoutePlaceholder`                       | Página protegida ainda sem fonte        | Não consulta tabelas adiadas                                             |
 | `SalesforceRefreshButton`                | Aciona refresh já existente             | Só renderiza autorizado e respeita flag fail-closed                      |
 | `ReadModelV3Page`                        | Bridge server-only das páginas shadow   | Seleciona permissão por dataset e chama somente RPCs v3                  |
 | `ReadModelV3Filters`                     | Filtros dimensionais shadow             | Opções vêm do mesmo scope/run; URL inválida falha fechada                |
 | `ReadModelV3View`                        | Estados e apresentação analítica v3     | Só o funil possui presenter oficial; outros datasets ficam indisponíveis |
-| `FunnelGoalsPage`                        | Edição segura de metas                  | Server Action/RPC e `crm.settings.manage`                                |
-| `PointSettingsPage`                      | Edição segura de pesos e objetivos      | Server Action/RPC e `crm.settings.manage`                                |
+| `ConfigurationDraftForm`                 | Preview, dry-run e rascunho             | Master-only; blockers explícitos; sem apply ou ativação                  |
+| `FunnelGoalsPage`                        | Rascunho seguro de metas                | Legado somente leitura; payload fechado e revisão otimista               |
+| `PointSettingsPage`                      | Rascunho seguro de pesos e objetivos    | Não grava configuração ativa nem libera ranking                          |
 | `SimulatorWorkspace`                     | Formulários e painéis dos simuladores   | Sem submit, persistência, fórmula ou resultado ativo                     |
-| `UserAccessManager`                      | Papéis, status e overrides              | RPCs auditadas e permissões administrativas                              |
+| `UserAccessManager`                      | Papéis, status, aprovação e overrides   | Aprovação Master-only exige papel, reporting scope oficial e motivo      |
 | `LoginForm`, `RegisterForm`              | Autenticação e cadastro                 | Contratos existentes preservados                                         |
 | `AnimatedBrainVisual`                    | Arte visual do fluxo de autenticação    | Sem acesso a sessão, credenciais ou dados comerciais                     |
 
@@ -163,9 +164,9 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 | Ordem das etapas                 | `DASHBOARD_STAGES` e `CRM_STAGES`                                                                 | Catálogo versionado                                  | Cinco etapas                                                        |
 | Filtros dimensionais v3          | `get_crm_read_model_v3` + IDs canônicos do run ativo                                              | permissão do dataset, scope, lineage e validação SQL | Disponíveis somente nas rotas shadow                                |
 | Projeção proporcional            | Nenhuma fórmula oficial versionada                                                                | Não implementado                                     | Indisponível                                                        |
-| Metas do funil                   | `crm_funnel_goals`                                                                                | Guard, RLS e RPC de escrita auditada                 | Disponível conforme flag de fonte                                   |
-| Pesos e objetivos de pontos      | `crm_point_settings`, `crm_point_metrics`                                                         | Guard, RLS e RPC de escrita auditada                 | Disponível                                                          |
-| Ranking de corretores            | `crm_ranking_snapshots`, `crm_ranking_participants`                                               | `crm.ranking.view` + RLS                             | Disponível na rota de ranking                                       |
+| Metas do funil                   | Legado `crm_funnel_goals` + rascunho privado                                                      | Master-only por RPC; preview/dry-run; zero ativação  | Legado visível; novas propostas permanecem rascunho                 |
+| Pesos e objetivos de pontos      | Legado `crm_point_settings`/`crm_point_metrics` + rascunho privado                                | Master-only por RPC; preview/dry-run; zero ativação  | Propostas não alteram configuração ativa                            |
+| Ranking de corretores            | Snapshots legados preservados para reconciliação                                                  | Fail-closed sem policy runtime oficial               | Bloqueado por política, gates, grants e casos de ouro               |
 | Histórico de ingestão            | `crm_ingestion_runs`                                                                              | Sem acesso direto do navegador                       | Disponível pelos endpoints autorizados                              |
 | Salesforce                       | Exportador/contrato v2 e RPC de ingestão existentes                                               | Bearer de máquina, validação Zod e transação         | Disponível somente quando flags/configuração estão completas        |
 | Catálogo visual dos simuladores  | `SIMULATORS`                                                                                      | `crm.simulators.view` + guard server-side            | Cinco jornadas aprovadas para composição visual                     |

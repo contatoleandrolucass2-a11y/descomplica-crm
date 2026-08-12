@@ -27,9 +27,14 @@ export default function GlobalError({
             >
               Tentar novamente
             </button>
-            <p className="mt-6 font-mono text-xs text-slate-500">
-              Código para suporte: {error.digest ?? "APP-500"}
-            </p>
+            <details className="mt-6 text-xs text-slate-500">
+              <summary className="mx-auto w-fit cursor-pointer underline underline-offset-2">
+                Detalhes técnicos
+              </summary>
+              <code className="mt-2 block font-mono">
+                Código para suporte: {error.digest ?? "APP-500"}
+              </code>
+            </details>
           </section>
         </main>
       </body>

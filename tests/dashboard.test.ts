@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { isDashboardPeriod, isDashboardView } from "../lib/crm/dashboard/catalog";
 import {
   buildMonthlyFunnelSnapshots,
+  buildOperationalComparisons,
   buildPeriodFunnelReadings,
   calculateConversion,
   calculateProgress,
@@ -78,6 +79,20 @@ describe("dashboard indicators", () => {
     )!;
 
     expect(goal.readings.every((reading) => reading.value === null)).toBe(true);
+  });
+
+  it("builds operational windows without inventing unavailable goals", () => {
+    const rows = buildOperationalComparisons(metric, false);
+
+    expect(rows.map((row) => row.label)).toEqual([
+      "Mês",
+      "Últimos 14 dias",
+      "Últimos 7 dias",
+      "Semana",
+      "Dia",
+    ]);
+    expect(rows.every((row) => row.goal === null && row.goalProgress === null)).toBe(true);
+    expect(rows[0]?.variation).toBeNull();
   });
 
   it("limita o valor visual de progresso entre zero e cem", () => {

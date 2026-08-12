@@ -59,6 +59,61 @@ describe("complete visual composition on the scoped v3 read model", () => {
     expect(page).toContain("defaultValue={weights?.[metric.key]}");
     expect(page).toContain("campos permanecem vazios");
   });
+
+  it("keeps deterministic dashboard and partnership structures visible without invented data", () => {
+    const dashboard = source("app/(protected)/app/page.tsx");
+    const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
+
+    for (const label of [
+      "Ritmo de vendas",
+      "Realizado Funil",
+      "Corretores por gerente",
+      "Canal de contato: configuração institucional indisponível",
+    ]) {
+      expect(dashboard).toContain(label);
+    }
+    for (const label of [
+      "Mês atual",
+      "Mês anterior",
+      "Ano",
+      "Personalizado",
+      "Período personalizado",
+      "Ranking das imobiliárias",
+      "Ranking dos Empreendimentos",
+      "Aguardando conciliação das fontes",
+    ]) {
+      expect(partnerships).toContain(label);
+    }
+    expect(partnerships).not.toMatch(/VGV[^\n]*[1-9][0-9.,]/);
+  });
+
+  it("keeps final commercial copy localized and technical identifiers disclosed on demand", () => {
+    const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
+    const ranking = source("app/(protected)/app/ranking/page.tsx");
+    const funnel = source(
+      "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
+    );
+    const points = source(
+      "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
+    );
+    const draft = source(
+      "app/(protected)/app/configuracoes/metas/_components/ConfigurationDraftForm.tsx",
+    );
+    const sourceLabel = source("app/(protected)/app/_components/analytics/DataDisplay.tsx");
+
+    expect(partnerships).toContain('title="Ranking das imobiliárias"');
+    expect(partnerships).not.toMatch(/Imob’s|IMOBs/);
+    expect(ranking).toContain("Nenhuma pontuação oficial foi calculada");
+    expect(ranking).toContain("Sem pontuação oficial");
+    expect(funnel).toContain("Metas do funil de parcerias");
+    expect(funnel).toContain("Base legada: somente leitura · Rascunho atual: editável");
+    expect(points).toContain("Metas de pontos");
+    expect(points).toContain("Base legada: somente leitura · Rascunho atual: editável");
+    expect(draft).toContain("política ativa, ativação, permissões");
+    expect(draft).toContain("Validar sem aplicar");
+    expect(sourceLabel).toContain("Dados sintéticos de homologação");
+    expect(sourceLabel).toContain("Detalhes técnicos");
+  });
 });
 
 describe("isolated authenticated visual QA contract", () => {
@@ -72,7 +127,9 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("@local\\.invalid");
     expect(script).toContain('kind: "responsive"');
     expect(script).toContain("responsiveScreenshots: routes.length * viewports.length");
-    expect(script).toContain("themeScreenshots: themeCaptureRoutes.size * themes.length");
+    expect(script).toContain(
+      "themeScreenshots: desktopThemeCaptureRoutes.size * themes.length + routes.length",
+    );
     expect(script).toContain('locale: "pt-BR"');
     expect(script).toContain('timezoneId: "America/Sao_Paulo"');
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');

@@ -412,7 +412,15 @@ export const readModelV3ResponseSchema = z
           z
             .object({
               monthStart: calendarDate,
-              stages: z.record(z.string(), z.number().int().nonnegative()),
+              stages: z
+                .object({
+                  opportunities: z.number().int().nonnegative(),
+                  appointments: z.number().int().nonnegative(),
+                  visits: z.number().int().nonnegative(),
+                  folders: z.number().int().nonnegative(),
+                  sales: z.number().int().nonnegative(),
+                })
+                .strict(),
             })
             .strict(),
         ),

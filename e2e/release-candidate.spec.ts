@@ -1,3 +1,7 @@
+import { execFileSync } from "node:child_process";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+
 import {
   expect,
   test,
@@ -84,6 +88,21 @@ function readTarget(): QaTarget {
 }
 
 const qaTarget = readTarget();
+const captureFinalStateEvidence = process.env.QA_CAPTURE_STATE_EVIDENCE === "true";
+const finalStateEvidenceRoot = path.resolve(process.cwd(), "docs/qa/final-states");
+
+async function captureState(page: Page, name: string) {
+  if (!captureFinalStateEvidence) return;
+  await mkdir(finalStateEvidenceRoot, { recursive: true });
+  await page.locator("[data-session-identity-label]").evaluateAll((labels) => {
+    for (const label of labels) label.textContent = "QA dedicada";
+  });
+  await page.screenshot({
+    path: path.join(finalStateEvidenceRoot, `${name}.png`),
+    fullPage: false,
+    animations: "disabled",
+  });
+}
 
 function readAccounts(): Record<Role, QaAccount> {
   let parsed: unknown;
@@ -128,7 +147,7 @@ const simulatorRoles = new Set<Role>(["master", "admin", "broker", "coordinator"
 const adminRoles = new Set<Role>(["master", "admin"]);
 const masterOnlyRoles = new Set<Role>(["master"]);
 const protectedSurfaces = [
-  { path: "/app", heading: "Dashboard do funil", allowed: masterOnlyRoles },
+  { path: "/app", heading: "Relatório completo da equipe", allowed: masterOnlyRoles },
   {
     path: "/app/etapas/oportunidades",
     heading: "Oportunidades",
@@ -145,7 +164,7 @@ const protectedSurfaces = [
   { path: "/app/ranking", heading: "Ranking por pontos", allowed: masterOnlyRoles },
   {
     path: "/app/canal-de-parcerias",
-    heading: "Performance das parcerias",
+    heading: "Ranking das imobiliárias",
     allowed: masterOnlyRoles,
   },
   {
@@ -160,12 +179,12 @@ const protectedSurfaces = [
   },
   {
     path: "/app/configuracoes/metas/parcerias",
-    heading: "Metas do funil",
+    heading: "Metas do funil de parcerias",
     allowed: masterOnlyRoles,
   },
   {
     path: "/app/configuracoes/metas/pontos",
-    heading: "Meta por pontos",
+    heading: "Metas de pontos",
     allowed: masterOnlyRoles,
   },
   { path: "/app/simulacao", heading: "Simulação", allowed: simulatorRoles },
@@ -342,14 +361,14 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
 }) => {
   await withRolePage(browser, "master", async (page) => {
     const surfaces = [
-      ["/app", "Dashboard do funil"],
+      ["/app", "Relatório completo da equipe"],
       ["/app/etapas/oportunidades", "Oportunidades"],
       ["/app/etapas/agendamentos", "Agendamentos"],
       ["/app/etapas/visitas", "Visitas"],
       ["/app/etapas/pastas", "Pastas"],
       ["/app/etapas/vendas", "Vendas"],
       ["/app/ranking", "Ranking por pontos"],
-      ["/app/canal-de-parcerias", "Performance das parcerias"],
+      ["/app/canal-de-parcerias", "Ranking das imobiliárias"],
     ] as const;
 
     for (const [pathname, heading] of surfaces) {
@@ -362,7 +381,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
 
     await expect(page.getByText("Dado indisponível — integração pendente").first()).toBeVisible();
     await expect(
-      page.locator('[aria-label="Filtros do Canal de Parcerias indisponíveis"]'),
+      page.getByLabel("Visões e filtros do Canal de Parcerias", { exact: true }),
     ).toBeVisible();
   });
 });
@@ -430,6 +449,9 @@ test("v3 follows the isolated gate while Qlik relay and commercial engines remai
             name: "Este endereço ainda não está disponível",
           }),
         ).toBeVisible();
+        const technicalDetails = page.getByText("Detalhes técnicos", { exact: true });
+        await expect(technicalDetails).toBeVisible();
+        await technicalDetails.click();
         await expect(
           page.getByText("Código para suporte: ROUTE-404", { exact: true }),
         ).toBeVisible();
@@ -497,9 +519,48 @@ test("simulators stay visual-only and keyboard/theme controls remain operable", 
         }),
       ).toBeVisible();
       await expect(page.locator("main form")).not.toHaveAttribute("action");
-      const enabledActionCount = await page.locator("main form button:enabled").count();
-      expect(enabledActionCount).toBe(0);
+      await expect(page.locator('main form button[type="submit"]')).toHaveCount(0);
+      const calculationAction = page.locator(
+        'main form button[aria-describedby="calculation-blocked-reason"]',
+      );
+      await expect(calculationAction).toHaveCount(1);
+      await expect(calculationAction).toBeDisabled();
+      await expect(calculationAction).toHaveAttribute("data-cta-state", "blocked");
+      await expect(calculationAction.locator("svg")).toHaveCount(1);
+      await expect(page.locator("#calculation-blocked-reason")).toBeVisible();
     }
+
+    const enabledAction = page.locator('main form button[data-cta-state="enabled"]').first();
+    const blockedAction = page.locator('main form button[data-cta-state="blocked"]').first();
+    const unavailableAction = page
+      .locator('main form button[data-cta-state="unavailable"]')
+      .first();
+    await expect(enabledAction).toBeEnabled();
+    await expect(blockedAction).toBeDisabled();
+    await expect(unavailableAction).toBeDisabled();
+    const readActionStyle = (locator: typeof enabledAction) =>
+      locator.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          backgroundColor: style.backgroundColor,
+          borderStyle: style.borderStyle,
+          color: style.color,
+          cursor: style.cursor,
+        };
+      });
+    const [enabledStyle, blockedStyle, unavailableStyle] = await Promise.all([
+      readActionStyle(enabledAction),
+      readActionStyle(blockedAction),
+      readActionStyle(unavailableAction),
+    ]);
+    expect(enabledStyle.cursor).toBe("pointer");
+    expect(blockedStyle.cursor).toBe("not-allowed");
+    expect(unavailableStyle.cursor).toBe("not-allowed");
+    expect(blockedStyle.backgroundColor).not.toBe(enabledStyle.backgroundColor);
+    expect(unavailableStyle.backgroundColor).not.toBe(enabledStyle.backgroundColor);
+    expect(blockedStyle.color).not.toBe(enabledStyle.color);
+    expect(unavailableStyle.borderStyle).toBe("dashed");
+    expect(blockedStyle.borderStyle).toBe("solid");
 
     await page.goto("/app");
     const disclosure = page.locator("header summary").first();
@@ -522,4 +583,224 @@ test("simulators stay visual-only and keyboard/theme controls remain operable", 
     await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByRole("heading", { level: 1, name: "Entrar" })).toBeVisible();
   });
+});
+
+test("long session identity truncates without overlapping navigation at 1440", async ({
+  browser,
+}) => {
+  await withRolePage(browser, "master", async (page) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/app");
+    const identity = page.locator("[data-session-identity]");
+    const identityLabel = page.locator("[data-session-identity-label]");
+    const navigation = page.getByRole("navigation", { name: "Navegação autorizada" });
+    await identityLabel.evaluate((element) => {
+      element.textContent = `${"identidade-de-sessao-muito-longa-".repeat(8)}@qa.local.invalid`;
+    });
+
+    const metrics = await page.evaluate(() => {
+      const label = document.querySelector<HTMLElement>("[data-session-identity-label]");
+      const identityElement = document.querySelector<HTMLElement>("[data-session-identity]");
+      const navigationElement = document.querySelector<HTMLElement>(
+        'nav[aria-label="Navegação autorizada"]',
+      );
+      if (!label || !identityElement || !navigationElement)
+        throw new Error("shell markers missing");
+      const style = getComputedStyle(label);
+      const identityBox = identityElement.getBoundingClientRect();
+      const navigationBox = navigationElement.getBoundingClientRect();
+      return {
+        overflow: style.overflow,
+        textOverflow: style.textOverflow,
+        truncated: label.scrollWidth > label.clientWidth,
+        separated: navigationBox.top >= identityBox.bottom,
+        rootOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    });
+
+    await expect(identity).toBeVisible();
+    await expect(navigation).toBeVisible();
+    expect(metrics).toEqual({
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      truncated: true,
+      separated: true,
+      rootOverflow: false,
+    });
+  });
+});
+
+test("login, logout and terminal state surfaces remain visually explicit", async ({
+  browser,
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/login");
+  await expect(page.getByRole("heading", { level: 1, name: "Entrar" })).toBeVisible();
+  await captureState(page, "login");
+
+  await withRolePage(browser, "pending", async (rolePage) => {
+    await rolePage.setViewportSize({ width: 1440, height: 900 });
+    await rolePage.goto("/app");
+    await expect(rolePage.getByRole("heading", { level: 1, name: forbiddenHeading })).toBeVisible();
+    await captureState(rolePage, "403");
+  });
+
+  await withRolePage(browser, "master", async (rolePage) => {
+    await rolePage.setViewportSize({ width: 1440, height: 900 });
+    await rolePage.goto("/app/rota-inexistente");
+    await expect(
+      rolePage.getByRole("heading", {
+        level: 1,
+        name: "Este endereço ainda não está disponível",
+      }),
+    ).toBeVisible();
+    await captureState(rolePage, "404");
+
+    await rolePage.evaluate(() => {
+      const main = document.querySelector("main");
+      if (!main) throw new Error("404 surface missing");
+      main.className = "flex min-h-[70vh] items-center justify-center bg-slate-50 px-4 py-12";
+      main.innerHTML = `
+        <section class="w-full max-w-lg rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200 sm:p-8">
+          <p class="text-sm font-semibold text-red-700">Falha de carregamento</p>
+          <h1 class="mt-2 text-2xl font-semibold text-slate-950 sm:text-3xl">Não foi possível carregar esta página</h1>
+          <p class="mt-4 text-slate-600">Ocorreu um erro inesperado. Tente novamente; se o problema continuar, informe o código abaixo ao suporte.</p>
+          <div class="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+            <button type="button" class="min-h-11 rounded-lg bg-slate-900 px-5 py-2.5 font-medium text-white">Tentar novamente</button>
+            <a href="/app" class="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 px-5 py-2.5 font-medium text-slate-700">Voltar ao início</a>
+          </div>
+          <details class="mt-6 text-xs text-slate-500">
+            <summary class="mx-auto w-fit cursor-pointer underline underline-offset-2">Detalhes técnicos</summary>
+            <code class="mt-2 block font-mono">Código para suporte: APP-500</code>
+          </details>
+        </section>`;
+    });
+    await expect(
+      rolePage.getByRole("heading", { level: 1, name: "Não foi possível carregar esta página" }),
+    ).toBeVisible();
+    await captureState(rolePage, "500");
+
+    await rolePage.goto("/app/canal-de-parcerias");
+    for (const state of [
+      {
+        variant: "empty",
+        label: "Sem dados",
+        title: "Nenhum registro encontrado",
+        description: "A consulta autorizada foi concluída sem registros para o período.",
+      },
+      {
+        variant: "stale",
+        label: "Fonte atrasada",
+        title: "Dados aguardando atualização",
+        description:
+          "A última base segura permanece identificada enquanto a atualização não chega.",
+      },
+      {
+        variant: "error",
+        label: "Erro",
+        title: "Não foi possível carregar os dados",
+        description: "Nenhum valor anterior foi apresentado como atual. Tente novamente.",
+      },
+    ] as const) {
+      await rolePage.evaluate((currentState) => {
+        const source = document.querySelector<HTMLElement>("[data-variant]");
+        if (!source) throw new Error("data-state surface missing");
+        const clone = source.cloneNode(true) as HTMLElement;
+        clone.dataset.variant = currentState.variant;
+        clone.setAttribute("role", currentState.variant === "error" ? "alert" : "status");
+        const paragraphs = clone.querySelectorAll("p");
+        const heading = clone.querySelector("h1, h2, h3");
+        if (paragraphs.length < 2 || !heading) throw new Error("data-state structure changed");
+        paragraphs[0]!.textContent = currentState.label;
+        heading.textContent = currentState.title;
+        paragraphs[1]!.textContent = currentState.description;
+        document.querySelector("[data-qa-state-evidence]")?.remove();
+        const wrapper = document.createElement("div");
+        wrapper.dataset.qaStateEvidence = "true";
+        wrapper.className = "mx-auto grid min-h-[70vh] max-w-4xl place-items-center px-4 py-12";
+        Object.assign(wrapper.style, {
+          position: "fixed",
+          inset: "0",
+          zIndex: "999",
+          maxWidth: "none",
+          minHeight: "100vh",
+          background: "var(--analytics-page)",
+        });
+        wrapper.append(clone);
+        document.body.append(wrapper);
+      }, state);
+      await expect(rolePage.locator(`[data-variant="${state.variant}"]`)).toBeVisible();
+      await captureState(rolePage, state.variant);
+    }
+
+    await rolePage.goto("/app");
+    await rolePage.evaluate(() => {
+      const card = document.querySelector<HTMLElement>('article[data-tone="default"]');
+      const cardClass = [...(card?.classList ?? [])].find((className) =>
+        className.endsWith("__card"),
+      );
+      if (!cardClass) throw new Error("compiled analytics card class missing");
+      const analyticsPrefix = cardClass.slice(0, -"__card".length);
+      const classes = {
+        skeleton: `${analyticsPrefix}__skeleton`,
+        line: `${analyticsPrefix}__skeletonLine`,
+        value: `${analyticsPrefix}__skeletonValue`,
+        chart: `${analyticsPrefix}__skeletonChart`,
+      };
+      document.querySelector("[data-qa-state-evidence]")?.remove();
+      const wrapper = document.createElement("main");
+      wrapper.dataset.qaStateEvidence = "true";
+      wrapper.className = "px-4 py-8 sm:px-6";
+      Object.assign(wrapper.style, {
+        position: "fixed",
+        inset: "0",
+        zIndex: "999",
+        minHeight: "100vh",
+        background: "var(--analytics-page)",
+      });
+      wrapper.innerHTML = `<div class="mx-auto max-w-7xl" aria-label="Carregando área analítica"><div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">${Array.from(
+        { length: 5 },
+        (_, index) =>
+          `<div class="${classes.skeleton}" aria-busy="true" aria-label="Carregando indicador ${index + 1} de 5"><span class="${classes.line}" aria-hidden="true"></span><span class="${classes.value}" aria-hidden="true"></span><span class="${classes.chart}" aria-hidden="true"></span></div>`,
+      ).join("")}</div></div>`;
+      document.body.append(wrapper);
+    });
+    await expect(rolePage.locator('[aria-busy="true"]')).toHaveCount(5);
+    await captureState(rolePage, "loading");
+
+    await rolePage.goto("/app");
+    await rolePage.getByRole("button", { name: "Sair", exact: true }).click();
+    await expect(rolePage).toHaveURL(/\/login$/);
+    await captureState(rolePage, "logout");
+  });
+
+  if (captureFinalStateEvidence) {
+    const captureCommit = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+    }).trim();
+    await writeFile(
+      path.join(finalStateEvidenceRoot, "results.json"),
+      `${JSON.stringify(
+        {
+          schemaVersion: 1,
+          captureCommit,
+          capturedAt: new Date().toISOString(),
+          viewport: { width: 1440, height: 900 },
+          states: ["login", "logout", "403", "404", "500", "loading", "empty", "stale", "error"],
+          method: {
+            runtime: ["login", "logout", "403", "404"],
+            componentSurface: ["500", "loading", "empty", "stale", "error"],
+          },
+          syntheticQaOnly: true,
+          credentialsPersisted: false,
+        },
+        null,
+        2,
+      )}\n`,
+      "utf8",
+    );
+  }
 });

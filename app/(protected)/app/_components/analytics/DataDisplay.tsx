@@ -80,6 +80,32 @@ export function SectionHeading({
   );
 }
 
+const SOURCE_LABELS: Record<string, string> = {
+  salesforce: "Salesforce",
+  qlik: "Qlik",
+};
+
+export function CommercialSourceLabel({ value }: { value: string | null | undefined }) {
+  if (!value) return <span data-commercial-source-label>Indisponível</span>;
+
+  const syntheticMatch = /^QA local synthetic — not production · run (.+)$/.exec(value);
+  const label = syntheticMatch
+    ? "Dados sintéticos de homologação"
+    : (SOURCE_LABELS[value] ?? value);
+
+  return (
+    <>
+      <span data-commercial-source-label>{label}</span>
+      {syntheticMatch ? (
+        <details className={styles.technicalDetails}>
+          <summary>Detalhes técnicos</summary>
+          <code>Execução: {syntheticMatch[1]}</code>
+        </details>
+      ) : null}
+    </>
+  );
+}
+
 export function MetricCard({
   label,
   value,
