@@ -8,17 +8,34 @@ import {
   isDashboardPeriod,
   isDashboardView,
   type DashboardPeriodKey,
+  type DashboardStageKey,
   type DashboardViewKey,
 } from "@/lib/crm/dashboard/catalog";
 import { loadDashboardReadModel } from "@/lib/crm/dashboard/data";
-import { calculateConversion, calculateProgress } from "@/lib/crm/dashboard/presentation";
 import {
-  DATA_UNAVAILABLE_LABEL,
-  GOALS_UNAVAILABLE_LABEL,
-  availableCommercialValue,
-} from "@/lib/crm/source-availability";
-import { CRM_STAGES, getCrmStage } from "@/lib/crm/stages/catalog";
-import { buildStageComparisons, stageAttainment } from "@/lib/crm/stages/presentation";
+  buildPeriodFunnelReadings,
+  calculateConversion,
+  calculateProgress,
+} from "@/lib/crm/dashboard/presentation";
+import { GOALS_UNAVAILABLE_LABEL, availableCommercialValue } from "@/lib/crm/source-availability";
+import { CRM_STAGES, getCrmStage, type CrmStage } from "@/lib/crm/stages/catalog";
+import { buildStageComparisons, type StageComparison } from "@/lib/crm/stages/presentation";
+
+import {
+  AnalyticsCard,
+  AnalyticsTable,
+  DataState,
+  FilterBar,
+  FilterGroup,
+  FilterLink,
+  FunnelChart,
+  Gauge,
+  PageHeader,
+  SectionHeading,
+  UnavailableValue,
+  type AnalyticsColumn,
+  type ChartAccent,
+} from "../../_components/analytics";
 
 const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
 const percentFormatter = new Intl.NumberFormat("pt-BR", {
@@ -26,16 +43,315 @@ const percentFormatter = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 1,
 });
 
-const STATUS_CLASSES = {
-  slate: "bg-slate-100 text-slate-700 ring-slate-200",
-  emerald: "bg-emerald-50 text-emerald-800 ring-emerald-200",
-  cyan: "bg-cyan-50 text-cyan-800 ring-cyan-200",
-  amber: "bg-amber-50 text-amber-800 ring-amber-200",
-  red: "bg-red-50 text-red-800 ring-red-200",
-} as const;
+const STAGE_ACCENTS: Record<DashboardStageKey, ChartAccent> = {
+  opportunities: "cyan",
+  appointments: "blue",
+  visits: "violet",
+  folders: "teal",
+  sales: "emerald",
+};
+
+const INTEGRATION_PENDING_LABEL = "Dado indisponível — integração pendente";
+
+const EMPTY_COMPARISONS: StageComparison[] = (
+  [
+    ["Mês", "Mês anterior", "Mês atual"],
+    ["14 dias", "14 dias anteriores", "Últimos 14 dias"],
+    ["7 dias", "7 dias anteriores", "Últimos 7 dias"],
+    ["Semana", "Semana passada", "Esta semana"],
+    ["Dia", "Ontem", "Hoje"],
+  ] as const
+).map(([label, previousLabel, currentLabel]) => ({
+  label,
+  previousLabel,
+  previous: null,
+  currentLabel,
+  current: null,
+  goal: null,
+}));
 
 function stageHref(slug: string, view: DashboardViewKey, period: DashboardPeriodKey) {
-  return `/app/etapas/${slug}?view=${view}&period=${period}`;
+  return `/app/etapas/${slug}?view=${encodeURIComponent(view)}&period=${encodeURIComponent(period)}`;
+}
+
+function variationFor(row: StageComparison) {
+  if (row.previous === null || row.previous <= 0 || row.current === null) return null;
+  return (row.current - row.previous) / row.previous;
+}
+
+function StageNavigation({
+  stage,
+  view,
+  period,
+}: {
+  stage: CrmStage;
+  view: DashboardViewKey;
+  period: DashboardPeriodKey;
+}) {
+  return (
+    <nav aria-label="Etapas do funil" className="grid gap-2 sm:grid-cols-5">
+      {CRM_STAGES.map((item) => (
+        <Link
+          key={item.slug}
+          href={stageHref(item.slug, view, period)}
+          aria-current={item.slug === stage.slug ? "page" : undefined}
+          className={`inline-flex min-h-11 items-center justify-center rounded-xl px-3 py-2 text-center text-sm font-medium ring-1 ring-white/15 ${
+            item.slug === stage.slug
+              ? "bg-cyan-300 text-[#082137]"
+              : "bg-white/8 text-white hover:bg-white/15"
+          }`}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+function StageFilters({
+  stage,
+  view,
+  period,
+}: {
+  stage: CrmStage;
+  view: DashboardViewKey;
+  period: DashboardPeriodKey;
+}) {
+  return (
+    <FilterBar
+      label={`Filtros autorizados de ${stage.label}`}
+      unavailableDimensions={["Canal de vendas", "Gerente", "Responsável", "Empresa"]}
+    >
+      <FilterGroup label="Visão">
+        {(Object.keys(DASHBOARD_VIEWS) as DashboardViewKey[]).map((viewKey) => (
+          <FilterLink
+            key={viewKey}
+            href={stageHref(stage.slug, viewKey, period)}
+            active={view === viewKey}
+          >
+            {DASHBOARD_VIEWS[viewKey].label}
+          </FilterLink>
+        ))}
+      </FilterGroup>
+      <FilterGroup label="Período">
+        {(Object.keys(DASHBOARD_PERIODS) as DashboardPeriodKey[]).map((periodKey) => (
+          <FilterLink
+            key={periodKey}
+            href={stageHref(stage.slug, view, periodKey)}
+            active={period === periodKey}
+          >
+            {DASHBOARD_PERIODS[periodKey].label}
+          </FilterLink>
+        ))}
+      </FilterGroup>
+    </FilterBar>
+  );
+}
+
+function EmptyStagePage({
+  stage,
+  view,
+  period,
+}: {
+  stage: CrmStage;
+  view: DashboardViewKey;
+  period: DashboardPeriodKey;
+}) {
+  const periodConfig = DASHBOARD_PERIODS[period];
+  const stageIndex = CRM_STAGES.findIndex((item) => item.slug === stage.slug);
+  const previousStage = stageIndex > 0 ? CRM_STAGES[stageIndex - 1] : null;
+  const nextStage = stageIndex < CRM_STAGES.length - 1 ? CRM_STAGES[stageIndex + 1] : null;
+  const emptyFunnel = CRM_STAGES.map((item) => ({
+    key: item.key,
+    label: item.label,
+    value: null,
+    conversion: null,
+  }));
+  const unavailableColumns: Array<AnalyticsColumn<StageComparison>> = [
+    { key: "window", label: "Janela", render: (row) => row.label },
+    { key: "previous-label", label: "Referência anterior", render: (row) => row.previousLabel },
+    {
+      key: "previous",
+      label: "Valor anterior",
+      align: "right",
+      render: () => <UnavailableValue reason={INTEGRATION_PENDING_LABEL} />,
+    },
+    { key: "current-label", label: "Referência atual", render: (row) => row.currentLabel },
+    {
+      key: "current",
+      label: "Valor atual",
+      align: "right",
+      render: () => <UnavailableValue reason={INTEGRATION_PENDING_LABEL} />,
+    },
+    {
+      key: "variation",
+      label: "Variação",
+      align: "right",
+      render: () => <UnavailableValue reason={INTEGRATION_PENDING_LABEL} />,
+    },
+    {
+      key: "goal",
+      label: "Meta",
+      align: "right",
+      render: () => <UnavailableValue reason={INTEGRATION_PENDING_LABEL} />,
+    },
+  ];
+
+  return (
+    <main className="min-w-0 px-4 py-6 sm:px-6 sm:py-10">
+      <div className="mx-auto grid max-w-7xl min-w-0 grid-cols-[minmax(0,1fr)] gap-7">
+        <PageHeader
+          eyebrow={`Etapa ${String(stageIndex + 1).padStart(2, "0")} do funil`}
+          title={stage.label}
+          description={stage.description}
+          meta={
+            <dl className="grid gap-3">
+              <div>
+                <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
+                <dd className="mt-1 font-semibold text-white">Nenhum snapshot validado</dd>
+              </div>
+              <div>
+                <dt className="text-xs tracking-wide text-slate-300 uppercase">Situação</dt>
+                <dd className="mt-1 text-slate-100">{INTEGRATION_PENDING_LABEL}</dd>
+              </div>
+            </dl>
+          }
+          footer={<StageNavigation stage={stage} view={view} period={period} />}
+        />
+
+        <StageFilters stage={stage} view={view} period={period} />
+
+        <DataState
+          variant="unavailable"
+          compact
+          title={INTEGRATION_PENDING_LABEL}
+          description="A composição analítica permanece visível, mas nenhum valor é inferido enquanto o snapshot real e validado não estiver disponível."
+        />
+
+        <section className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
+          <AnalyticsCard>
+            <SectionHeading
+              kicker={`${DASHBOARD_VIEWS[view].label} · ${periodConfig.label}`}
+              title={`Realizado de ${stage.label.toLocaleLowerCase("pt-BR")}`}
+              description="Realizado, meta e gap dependem do snapshot validado."
+            />
+            <div className="grid min-w-0 items-center gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(14rem,0.9fr)]">
+              <div className="min-w-0">
+                <strong className="block text-xl font-semibold text-slate-950">
+                  {INTEGRATION_PENDING_LABEL}
+                </strong>
+                <p className="mt-2 text-sm text-slate-600">
+                  Nenhum realizado ou alvo é preenchido com valor demonstrativo.
+                </p>
+                <dl className="mt-6 grid min-w-0 gap-3 sm:grid-cols-2">
+                  <div className="min-w-0 rounded-xl bg-slate-50 p-4">
+                    <dt className="text-xs text-slate-500">Gap matemático</dt>
+                    <dd className="mt-1 font-semibold text-slate-950">
+                      <UnavailableValue reason={INTEGRATION_PENDING_LABEL} />
+                    </dd>
+                  </div>
+                  <div className="min-w-0 rounded-xl bg-slate-50 p-4">
+                    <dt className="text-xs text-slate-500">Relação com etapa anterior</dt>
+                    <dd className="mt-1 font-semibold text-slate-950">
+                      <UnavailableValue reason={INTEGRATION_PENDING_LABEL} />
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+              <div className="min-w-0">
+                <Gauge
+                  label="Atingimento da meta"
+                  value="Indisponível"
+                  ratio={null}
+                  accent={STAGE_ACCENTS[stage.key]}
+                />
+                <p className="mt-2 text-center text-xs text-slate-500">
+                  {INTEGRATION_PENDING_LABEL}
+                </p>
+              </div>
+            </div>
+          </AnalyticsCard>
+
+          <AnalyticsCard tone="navy">
+            <p className="text-xs font-semibold tracking-widest text-cyan-300 uppercase">
+              Leitura factual
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">Posição no funil</h2>
+            <dl className="mt-6 grid gap-4 text-sm">
+              <div className="border-b border-white/10 pb-4">
+                <dt className="text-slate-400">Etapa</dt>
+                <dd className="mt-1 font-semibold text-white">
+                  {stageIndex + 1} de {CRM_STAGES.length}
+                </dd>
+              </div>
+              <div className="border-b border-white/10 pb-4">
+                <dt className="text-slate-400">Visão selecionada</dt>
+                <dd className="mt-1 font-semibold text-white">{DASHBOARD_VIEWS[view].label}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-400">Período selecionado</dt>
+                <dd className="mt-1 font-semibold text-white">{periodConfig.label}</dd>
+              </div>
+            </dl>
+            <nav
+              aria-label="Etapas adjacentes"
+              className="mt-7 grid gap-2 border-t border-white/10 pt-5"
+            >
+              {previousStage ? (
+                <Link
+                  href={stageHref(previousStage.slug, view, period)}
+                  className="inline-flex min-h-11 items-center rounded-lg bg-white/8 px-3 py-2 text-sm text-white hover:bg-white/15"
+                >
+                  ← {previousStage.label}
+                </Link>
+              ) : (
+                <span className="text-sm text-slate-400">Início do funil</span>
+              )}
+              {nextStage ? (
+                <Link
+                  href={stageHref(nextStage.slug, view, period)}
+                  className="inline-flex min-h-11 items-center justify-end rounded-lg bg-white/8 px-3 py-2 text-sm text-white hover:bg-white/15"
+                >
+                  {nextStage.label} →
+                </Link>
+              ) : (
+                <span className="text-right text-sm text-slate-400">Fim do funil</span>
+              )}
+            </nav>
+          </AnalyticsCard>
+        </section>
+
+        <section className="min-w-0">
+          <SectionHeading
+            kicker="Contexto do período"
+            title="Funil completo"
+            description="Todas as etapas permanecem explícitas; volumes e conversões aguardam integração segura."
+          />
+          <AnalyticsCard>
+            <FunnelChart
+              label={`${DASHBOARD_VIEWS[view].label}, ${periodConfig.label.toLocaleLowerCase("pt-BR")}`}
+              stages={emptyFunnel}
+              accent={STAGE_ACCENTS[stage.key]}
+            />
+          </AnalyticsCard>
+        </section>
+
+        <section className="min-w-0">
+          <SectionHeading
+            kicker="Evolução validada"
+            title="Comparativo entre períodos"
+            description="As janelas são exibidas sem preencher ausências com zero ou reaproveitar outro período."
+          />
+          <AnalyticsTable
+            caption={`Comparações temporais de ${stage.label} — ${INTEGRATION_PENDING_LABEL}`}
+            rows={EMPTY_COMPARISONS}
+            columns={unavailableColumns}
+            rowKey={(row) => row.label}
+          />
+        </section>
+      </div>
+    </main>
+  );
 }
 
 export function generateStaticParams() {
@@ -59,276 +375,259 @@ export default async function StagePage({
   const result = await loadDashboardReadModel();
 
   if (result.status === "empty") {
-    return (
-      <main className="px-4 py-12 sm:px-6">
-        <div className="mx-auto max-w-4xl rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-200 sm:p-12">
-          <span className="inline-flex rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-800">
-            Aguardando dados
-          </span>
-          <h1 className="mt-5 text-3xl font-semibold text-slate-950">{stage.label}</h1>
-          <p className="mt-3 max-w-2xl text-slate-600">
-            O read model está pronto, mas o Salesforce ainda não enviou um snapshot real. Nenhum
-            indicador demonstrativo será exibido.
-          </p>
-          <Link
-            href="/app"
-            className="mt-7 inline-flex rounded-xl bg-blue-700 px-5 py-3 text-sm font-medium text-white hover:bg-blue-800"
-          >
-            Voltar ao dashboard
-          </Link>
-        </div>
-      </main>
-    );
+    return <EmptyStagePage stage={stage} view={view} period={period} />;
   }
 
-  const dashboard = result.dashboard;
+  const { dashboard } = result;
   const metric = dashboard.metrics[view][stage.key];
   const periodConfig = DASHBOARD_PERIODS[period];
   const current = metric[periodConfig.currentField];
-  const goal = availableCommercialValue(dashboard.goalsAvailable, metric[periodConfig.goalField]);
+  const sourceGoal = availableCommercialValue(
+    dashboard.goalsAvailable,
+    metric[periodConfig.goalField],
+  );
+  const goal = sourceGoal !== null && sourceGoal > 0 ? sourceGoal : null;
   const progress = goal === null ? null : calculateProgress(current, goal);
-  const gap = goal !== null && goal > 0 ? Math.max(goal - current, 0) : null;
+  const gap = goal === null ? null : Math.max(goal - current, 0);
   const stageIndex = CRM_STAGES.findIndex((item) => item.slug === stage.slug);
   const previousStage = stageIndex > 0 ? CRM_STAGES[stageIndex - 1] : null;
   const nextStage = stageIndex < CRM_STAGES.length - 1 ? CRM_STAGES[stageIndex + 1] : null;
   const previousValue = previousStage
     ? dashboard.metrics[view][previousStage.key][periodConfig.currentField]
     : null;
-  const conversion = previousValue === null ? null : calculateConversion(current, previousValue);
-  const attainment = dashboard.goalsAvailable
-    ? stageAttainment(progress)
-    : ({ label: DATA_UNAVAILABLE_LABEL, tone: "slate" } as const);
+  const volumeRatio = previousValue === null ? null : calculateConversion(current, previousValue);
   const comparisons = buildStageComparisons(metric);
+  const selectedFunnel = buildPeriodFunnelReadings(dashboard.metrics[view], period);
+  const unavailableReason = "A janela não existe no snapshot validado atual.";
+  const comparisonColumns: Array<AnalyticsColumn<StageComparison>> = [
+    { key: "window", label: "Janela", render: (row) => row.label },
+    { key: "previous-label", label: "Referência anterior", render: (row) => row.previousLabel },
+    {
+      key: "previous",
+      label: "Valor anterior",
+      align: "right",
+      render: (row) =>
+        row.previous === null ? (
+          <UnavailableValue reason={unavailableReason} />
+        ) : (
+          numberFormatter.format(row.previous)
+        ),
+    },
+    { key: "current-label", label: "Referência atual", render: (row) => row.currentLabel },
+    {
+      key: "current",
+      label: "Valor atual",
+      align: "right",
+      render: (row) =>
+        row.current === null ? (
+          <UnavailableValue reason={unavailableReason} />
+        ) : (
+          numberFormatter.format(row.current)
+        ),
+    },
+    {
+      key: "variation",
+      label: "Variação",
+      align: "right",
+      render: (row) => {
+        const variation = variationFor(row);
+        return variation === null ? (
+          <UnavailableValue reason="A variação exige dois valores comparáveis e base maior que zero." />
+        ) : (
+          percentFormatter.format(variation)
+        );
+      },
+    },
+    {
+      key: "goal",
+      label: "Meta",
+      align: "right",
+      render: (row) => {
+        if (!dashboard.goalsAvailable) {
+          return <UnavailableValue reason="A fonte oficial de metas não está disponível." />;
+        }
+        return row.goal !== null && row.goal > 0 ? (
+          numberFormatter.format(row.goal)
+        ) : (
+          <UnavailableValue reason="Não existe meta definida para esta janela." />
+        );
+      },
+    },
+  ];
 
   return (
-    <main className="px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-7xl">
-        <section className="overflow-hidden rounded-3xl bg-slate-950 px-6 py-8 text-white shadow-xl sm:px-10">
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div>
-              <p className="text-sm font-medium tracking-wide text-cyan-300 uppercase">
-                Etapa {String(stageIndex + 1).padStart(2, "0")} do funil
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">{stage.label}</h1>
-              <p className="mt-3 max-w-2xl text-slate-300">{stage.description}</p>
-            </div>
-            <div className="w-full rounded-2xl bg-white/10 px-5 py-4 text-sm ring-1 ring-white/15 sm:w-auto sm:text-right">
-              <small className="block text-slate-400">Atualizado em</small>
-              <strong>
-                {new Intl.DateTimeFormat("pt-BR", {
-                  dateStyle: "short",
-                  timeStyle: "short",
-                  timeZone: dashboard.timezone,
-                }).format(new Date(dashboard.generatedAt))}
-              </strong>
-              <span className="mt-1 block text-xs text-slate-400">{dashboard.source}</span>
-            </div>
-          </div>
-
-          <nav
-            aria-label="Etapas do funil"
-            className="mt-8 grid gap-2 border-t border-white/10 pt-6 sm:grid-cols-5"
-          >
-            {CRM_STAGES.map((item) => (
-              <Link
-                key={item.slug}
-                href={stageHref(item.slug, view, period)}
-                aria-current={item.slug === stage.slug ? "page" : undefined}
-                className={`rounded-xl px-3 py-2 text-center text-sm transition ${
-                  item.slug === stage.slug
-                    ? "bg-cyan-300 font-medium text-slate-950"
-                    : "bg-white/10 text-white hover:bg-white/20"
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </section>
-
-        <section className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <nav aria-label="Visão da etapa" className="grid gap-2 sm:flex sm:flex-wrap">
-            {(Object.keys(DASHBOARD_VIEWS) as DashboardViewKey[]).map((viewKey) => (
-              <Link
-                key={viewKey}
-                href={stageHref(stage.slug, viewKey, period)}
-                aria-current={view === viewKey ? "page" : undefined}
-                className={`rounded-xl px-4 py-3 text-sm ring-1 transition ${
-                  view === viewKey
-                    ? "bg-blue-700 text-white ring-blue-700"
-                    : "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                {DASHBOARD_VIEWS[viewKey].label}
-              </Link>
-            ))}
-          </nav>
-          <nav aria-label="Período da etapa" className="flex flex-wrap gap-2">
-            {(Object.keys(DASHBOARD_PERIODS) as DashboardPeriodKey[]).map((periodKey) => (
-              <Link
-                key={periodKey}
-                href={stageHref(stage.slug, view, periodKey)}
-                aria-current={period === periodKey ? "page" : undefined}
-                className={`rounded-lg px-4 py-3 text-sm ring-1 transition ${
-                  period === periodKey
-                    ? "bg-slate-950 text-white ring-slate-950"
-                    : "bg-white text-slate-700 ring-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                {DASHBOARD_PERIODS[periodKey].label}
-              </Link>
-            ))}
-          </nav>
-        </section>
-
-        <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-          <article className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
-            <div className="flex flex-wrap items-start justify-between gap-5">
+    <main className="min-w-0 px-4 py-6 sm:px-6 sm:py-10">
+      <div className="mx-auto grid max-w-7xl min-w-0 grid-cols-[minmax(0,1fr)] gap-7">
+        <PageHeader
+          eyebrow={`Etapa ${String(stageIndex + 1).padStart(2, "0")} do funil`}
+          title={stage.label}
+          description={stage.description}
+          meta={
+            <dl className="grid gap-3">
               <div>
-                <p className="text-sm font-medium text-cyan-700">
-                  {DASHBOARD_VIEWS[view].label} · {periodConfig.label}
-                </p>
-                <strong className="mt-2 block text-5xl font-semibold text-slate-950">
+                <dt className="text-xs tracking-wide text-slate-300 uppercase">Atualizado em</dt>
+                <dd className="mt-1 font-semibold text-white">
+                  {new Intl.DateTimeFormat("pt-BR", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                    timeZone: dashboard.timezone,
+                  }).format(new Date(dashboard.generatedAt))}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
+                <dd className="mt-1 break-words text-slate-100">{dashboard.source}</dd>
+              </div>
+            </dl>
+          }
+          footer={<StageNavigation stage={stage} view={view} period={period} />}
+        />
+
+        <StageFilters stage={stage} view={view} period={period} />
+
+        {!dashboard.goalsAvailable ? (
+          <DataState
+            variant="unavailable"
+            compact
+            title={GOALS_UNAVAILABLE_LABEL}
+            description="Realizados continuam visíveis. Gauge, meta e gap ficam indisponíveis até existir uma fonte oficial segura."
+          />
+        ) : sourceGoal !== null && sourceGoal <= 0 ? (
+          <DataState
+            variant="unavailable"
+            compact
+            title="Meta não definida para o período"
+            description="O snapshot trouxe valor de meta igual a zero; ele não é tratado como progresso zero nem como alvo válido."
+          />
+        ) : null}
+
+        <section className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
+          <AnalyticsCard>
+            <SectionHeading
+              kicker={`${DASHBOARD_VIEWS[view].label} · ${periodConfig.label}`}
+              title={`Realizado de ${stage.label.toLocaleLowerCase("pt-BR")}`}
+              description="A leitura usa somente o snapshot e o filtro suportado no servidor."
+            />
+            <div className="grid items-center gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(14rem,0.9fr)]">
+              <div>
+                <strong className="block text-5xl font-semibold tracking-tight text-slate-950">
                   {numberFormatter.format(current)}
                 </strong>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-slate-600">
                   {goal === null
-                    ? GOALS_UNAVAILABLE_LABEL
-                    : goal > 0
-                      ? `Meta de ${numberFormatter.format(goal)}`
-                      : "Acompanhamento sem meta definida"}
+                    ? "Meta indisponível ou não definida"
+                    : `Meta oficial: ${numberFormatter.format(goal)}`}
                 </p>
+                <dl className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl bg-slate-50 p-4">
+                    <dt className="text-xs text-slate-500">Gap matemático</dt>
+                    <dd className="mt-1 font-semibold text-slate-950">
+                      {gap === null ? (
+                        <UnavailableValue reason="O gap exige meta oficial maior que zero." />
+                      ) : (
+                        numberFormatter.format(gap)
+                      )}
+                    </dd>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 p-4">
+                    <dt className="text-xs text-slate-500">Relação com etapa anterior</dt>
+                    <dd className="mt-1 font-semibold text-slate-950">
+                      {previousStage === null ? (
+                        "Etapa de entrada"
+                      ) : volumeRatio === null ? (
+                        <UnavailableValue reason="A base anterior é nula ou igual a zero." />
+                      ) : (
+                        percentFormatter.format(volumeRatio)
+                      )}
+                    </dd>
+                  </div>
+                </dl>
               </div>
-              <span
-                className={`rounded-full px-4 py-2 text-sm font-medium ring-1 ${STATUS_CLASSES[attainment.tone]}`}
-              >
-                {attainment.label}
-              </span>
-            </div>
-            {goal === null ? (
-              <p className="mt-8 rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-600">
-                {DATA_UNAVAILABLE_LABEL}
-              </p>
-            ) : (
-              <progress
-                className="mt-8 h-3 w-full accent-cyan-600"
-                max={100}
-                value={progress === null ? 0 : Math.min(Math.max(progress * 100, 0), 100)}
-                aria-label={`Progresso de ${stage.label}`}
+              <Gauge
+                label="Atingimento da meta"
+                value={progress === null ? "Indisponível" : percentFormatter.format(progress)}
+                ratio={progress}
+                accent={STAGE_ACCENTS[stage.key]}
               />
-            )}
-            <div className="mt-7 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <small className="text-slate-500">Atingimento</small>
-                <strong className="mt-1 block text-xl text-slate-950">
-                  {goal === null
-                    ? DATA_UNAVAILABLE_LABEL
-                    : progress === null
-                      ? "—"
-                      : percentFormatter.format(progress)}
-                </strong>
-              </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <small className="text-slate-500">Gap</small>
-                <strong className="mt-1 block text-xl text-slate-950">
-                  {goal === null
-                    ? DATA_UNAVAILABLE_LABEL
-                    : gap === null
-                      ? "—"
-                      : numberFormatter.format(gap)}
-                </strong>
-              </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <small className="text-slate-500">Conversão da etapa</small>
-                <strong className="mt-1 block text-xl text-slate-950">
-                  {conversion === null ? "Base" : percentFormatter.format(conversion)}
-                </strong>
-              </div>
             </div>
-          </article>
+          </AnalyticsCard>
 
-          <aside className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm sm:p-8">
-            <p className="text-sm font-medium text-cyan-300">Plano de ação</p>
-            <h2 className="mt-2 text-2xl font-semibold">{attainment.label}</h2>
-            <p className="mt-4 text-sm leading-6 text-slate-300">{stage.action}</p>
-            <div className="mt-8 grid gap-2 border-t border-white/10 pt-5 text-sm">
+          <AnalyticsCard tone="navy">
+            <p className="text-xs font-semibold tracking-widest text-cyan-300 uppercase">
+              Leitura factual
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">Posição no funil</h2>
+            <dl className="mt-6 grid gap-4 text-sm">
+              <div className="border-b border-white/10 pb-4">
+                <dt className="text-slate-400">Etapa</dt>
+                <dd className="mt-1 font-semibold text-white">
+                  {stageIndex + 1} de {CRM_STAGES.length}
+                </dd>
+              </div>
+              <div className="border-b border-white/10 pb-4">
+                <dt className="text-slate-400">Visão aplicada</dt>
+                <dd className="mt-1 font-semibold text-white">{DASHBOARD_VIEWS[view].label}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-400">Período aplicado</dt>
+                <dd className="mt-1 font-semibold text-white">{periodConfig.label}</dd>
+              </div>
+            </dl>
+            <nav
+              aria-label="Etapas adjacentes"
+              className="mt-7 grid gap-2 border-t border-white/10 pt-5"
+            >
               {previousStage ? (
                 <Link
                   href={stageHref(previousStage.slug, view, period)}
-                  className="rounded-lg bg-white/10 px-3 py-2 hover:bg-white/20"
+                  className="inline-flex min-h-11 items-center rounded-lg bg-white/8 px-3 py-2 text-sm text-white hover:bg-white/15"
                 >
                   ← {previousStage.label}
                 </Link>
               ) : (
-                <span className="text-slate-500">Início do funil</span>
+                <span className="text-sm text-slate-400">Início do funil</span>
               )}
               {nextStage ? (
                 <Link
                   href={stageHref(nextStage.slug, view, period)}
-                  className="rounded-lg bg-white/10 px-3 py-2 text-right hover:bg-white/20"
+                  className="inline-flex min-h-11 items-center justify-end rounded-lg bg-white/8 px-3 py-2 text-sm text-white hover:bg-white/15"
                 >
                   {nextStage.label} →
                 </Link>
               ) : (
-                <span className="text-right text-slate-500">Fim do funil</span>
+                <span className="text-right text-sm text-slate-400">Fim do funil</span>
               )}
-            </div>
-          </aside>
+            </nav>
+          </AnalyticsCard>
         </section>
 
-        <section className="mt-6 overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
-          <div className="border-b border-slate-200 p-6 sm:p-8">
-            <p className="text-sm font-medium text-cyan-700">Evolução</p>
-            <h2 className="mt-1 text-2xl font-semibold text-slate-950">
-              Comparativo entre períodos
-            </h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-3xl text-left text-sm">
-              <thead className="bg-slate-50 text-xs tracking-wide text-slate-500 uppercase">
-                <tr>
-                  <th className="px-5 py-3">Janela</th>
-                  <th className="px-5 py-3">Anterior</th>
-                  <th className="px-5 py-3 text-right">Valor anterior</th>
-                  <th className="px-5 py-3">Atual</th>
-                  <th className="px-5 py-3 text-right">Valor atual</th>
-                  <th className="px-5 py-3 text-right">Variação</th>
-                  <th className="px-5 py-3 text-right">Meta</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {comparisons.map((row) => {
-                  const variation =
-                    row.previous !== null && row.previous > 0
-                      ? (row.current - row.previous) / row.previous
-                      : null;
-                  return (
-                    <tr key={row.label}>
-                      <th className="px-5 py-4 font-medium text-slate-950">{row.label}</th>
-                      <td className="px-5 py-4 text-slate-500">{row.previousLabel}</td>
-                      <td className="px-5 py-4 text-right">
-                        {row.previous === null ? "—" : numberFormatter.format(row.previous)}
-                      </td>
-                      <td className="px-5 py-4 text-slate-500">{row.currentLabel}</td>
-                      <td className="px-5 py-4 text-right font-medium text-slate-950">
-                        {numberFormatter.format(row.current)}
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        {variation === null ? "—" : percentFormatter.format(variation)}
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        {row.goal === null
-                          ? "—"
-                          : dashboard.goalsAvailable
-                            ? numberFormatter.format(row.goal)
-                            : GOALS_UNAVAILABLE_LABEL}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+        <section className="min-w-0">
+          <SectionHeading
+            kicker="Contexto do período"
+            title="Funil completo"
+            description="As relações comparam volumes agregados; não são conversões de coorte."
+          />
+          <AnalyticsCard>
+            <FunnelChart
+              label={`${DASHBOARD_VIEWS[view].label}, ${periodConfig.label.toLocaleLowerCase("pt-BR")}`}
+              stages={selectedFunnel}
+              accent={STAGE_ACCENTS[stage.key]}
+            />
+          </AnalyticsCard>
+        </section>
+
+        <section className="min-w-0">
+          <SectionHeading
+            kicker="Evolução validada"
+            title="Comparativo entre períodos"
+            description="Ausência permanece ausência: nenhum valor é preenchido com zero ou reaproveitado de outra janela."
+          />
+          <AnalyticsTable
+            caption={`Comparações temporais de ${stage.label}`}
+            rows={comparisons}
+            columns={comparisonColumns}
+            rowKey={(row) => row.label}
+          />
         </section>
       </div>
     </main>

@@ -2,7 +2,10 @@
 
 ## Estado atual
 
-O schema usa PostgreSQL 17 no Supabase local. Existem quatorze migrations versionadas. A validação local encontrou 20 tabelas públicas e RLS habilitada em todas; os seeds estruturais criam oito papéis, 17 permissões e 15 páginas. Nenhum dado comercial é seedado.
+O schema usa PostgreSQL 17 no Supabase local. Existem dezesseis migrations
+versionadas. A validação local encontrou 20 tabelas públicas e RLS habilitada
+em todas; os seeds estruturais criam oito papéis, 18 permissões e 21 páginas.
+Nenhum dado comercial é seedado.
 
 ## Migrations
 
@@ -20,6 +23,8 @@ O schema usa PostgreSQL 17 no Supabase local. Existem quatorze migrations versio
 12. `20260806222732_salesforce_source_availability.sql`: flags fail-closed para metas/roleta e wrapper privado do contrato de ingestão v2.
 13. `20260807001159_reconcile_remote_imob_schema_and_grants.sql`: versionamento aditivo das tabelas Qlik de ranking de imobiliárias, identidade remota do catálogo e reconstrução fail-closed da matriz de grants.
 14. `20260807185611_secure_qlik_ingestion_contract.sql`: correção idempotente do drift Qlik e RPC transacional exclusiva do `service_role`, sem acesso direto às tabelas.
+15. `20260808174817_require_sensitive_access_change_reasons.sql`: motivo obrigatório e validação transacional para alterações administrativas sensíveis.
+16. `20260809024000_simulator_visual_catalog.sql`: permissão de leitura e hierarquia protegida do hub e das cinco jornadas visuais de simulação, sem tabela ou motor comercial.
 
 ## Desenvolvimento local
 
@@ -36,7 +41,13 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` executa 252 testes pgTAP: 27 do catálogo/autorização, 28 do dashboard, 25 das metas, 35 do schema Qlik de imobiliárias, 23 do contrato de ingestão Qlik, 26 dos pontos, 27 do ranking, 43 da ingestão e 18 da matriz global de grants. A cobertura verifica nomes, schema, grants, policies, constraints, disponibilidade de fontes, preservação de dados, provisionamento, usuários inativos, overrides, cálculos e auditoria. Cada novo domínio do CRM deve ampliar esse conjunto.
+`supabase test db` executa 283 testes pgTAP: 28 dos motivos de acesso,
+30 do catálogo/autorização, 28 do dashboard, 25 das metas, 35 do schema Qlik de
+imobiliárias, 23 do contrato de ingestão Qlik, 26 dos pontos, 27 do ranking,
+43 da ingestão e 18 da matriz global de grants. A cobertura verifica nomes,
+schema, grants, policies, constraints, disponibilidade de fontes, preservação
+de dados, provisionamento, usuários inativos, overrides, cálculos e auditoria.
+Cada novo domínio do CRM deve ampliar esse conjunto.
 
 ## RLS e grants
 

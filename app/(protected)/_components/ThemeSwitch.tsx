@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import { isThemeMode, THEME_MODES, type ThemeMode } from "@/lib/interface/theme";
 
+import styles from "./ProtectedShell.module.css";
+
 const STORAGE_KEY = "descomplica-theme";
 
 function applyTheme(theme: ThemeMode) {
@@ -39,11 +41,7 @@ export function ThemeSwitch() {
   }
 
   return (
-    <div
-      role="group"
-      aria-label="Aparência da página"
-      className="flex rounded-xl bg-slate-100 p-1 ring-1 ring-slate-200"
-    >
+    <div role="group" aria-label="Aparência da página" className={styles.themeSwitch}>
       {THEME_MODES.map((mode) => (
         <button
           key={mode.key}
@@ -51,11 +49,7 @@ export function ThemeSwitch() {
           aria-pressed={theme === mode.key}
           title={`Tema ${mode.label.toLocaleLowerCase("pt-BR")}`}
           onClick={() => selectTheme(mode.key)}
-          className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition sm:px-3 ${
-            theme === mode.key
-              ? "bg-white text-slate-950 shadow-sm"
-              : "text-slate-600 hover:text-slate-950"
-          }`}
+          className={styles.themeOption}
         >
           {mode.label}
         </button>

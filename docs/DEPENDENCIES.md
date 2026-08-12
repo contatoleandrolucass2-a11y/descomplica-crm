@@ -1,6 +1,6 @@
 # Inventário de dependências
 
-Data do inventário: 2026-08-03. O `pnpm-lock.yaml` é o inventário transitivo completo e reproduzível da base final.
+Data do inventário: 2026-08-09. O `pnpm-lock.yaml` é o inventário transitivo completo e reproduzível da base final.
 
 ## Sistema de login original
 
@@ -68,20 +68,26 @@ O CRM usava npm e `package-lock.json`; o artefato final não os contém. O pacot
 
 ### Desenvolvimento
 
-| Pacote                        |  Versão | Uso comprovado           |
-| ----------------------------- | ------: | ------------------------ |
-| `@tailwindcss/postcss`        |   4.3.0 | pipeline CSS             |
-| `@types/node`                 | 24.12.4 | tipos do runtime         |
-| `@types/react`                | 19.2.14 | tipos React              |
-| `@types/react-dom`            |  19.2.3 | tipos React DOM          |
-| `eslint`                      |  9.39.5 | lint                     |
-| `eslint-config-next`          |  16.3.0 | regras Next              |
-| `prettier`                    |   3.8.3 | formatação               |
-| `prettier-plugin-tailwindcss` |  0.6.14 | ordenação de classes     |
-| `supabase`                    | 2.111.0 | banco local e migrations |
-| `tailwindcss`                 |   4.3.0 | estilos                  |
-| `typescript`                  |   5.9.3 | typecheck                |
-| `vitest`                      |  4.1.10 | testes unitários         |
+| Pacote                        |  Versão | Uso comprovado             |
+| ----------------------------- | ------: | -------------------------- |
+| `@playwright/test`            |  1.62.1 | QA visual e limite anônimo |
+| `@tailwindcss/postcss`        |   4.3.0 | pipeline CSS               |
+| `@types/node`                 | 24.12.4 | tipos do runtime           |
+| `@types/react`                | 19.2.14 | tipos React                |
+| `@types/react-dom`            |  19.2.3 | tipos React DOM            |
+| `eslint`                      |  9.39.5 | lint                       |
+| `eslint-config-next`          |  16.3.0 | regras Next                |
+| `prettier`                    |   3.8.3 | formatação                 |
+| `prettier-plugin-tailwindcss` |  0.6.14 | ordenação de classes       |
+| `supabase`                    | 2.111.0 | banco local e migrations   |
+| `tailwindcss`                 |   4.3.0 | estilos                    |
+| `typescript`                  |   5.9.3 | typecheck                  |
+| `vitest`                      |  4.1.10 | testes unitários           |
+
+O binário Chromium usado pelo harness é provisionado por
+`pnpm qa:browser:install`; em runners mínimos, a variante
+`pnpm exec playwright install --with-deps chromium` instala também as
+bibliotecas do sistema operacional.
 
 ## Ausentes, incompatíveis, duplicadas, obsoletas e desnecessárias
 
@@ -90,8 +96,14 @@ O CRM usava npm e `package-lock.json`; o artefato final não os contém. O pacot
 - **Duplicadas:** duas versões/origens de Next, React, Tailwind, TypeScript e ESLint foram consolidadas.
 - **Obsoletas para o alvo:** `vinext`, Wrangler, plugins Vite/RSC, Drizzle D1 e `package-lock.json`.
 - **Exclusivas Cloudflare:** `@cloudflare/vite-plugin`, Wrangler e todos os bindings/imports `cloudflare:`.
-- **Não instaladas:** bibliotecas de UI, E2E, ORM alternativo, SDK Salesforce e PM2 local. Serão adicionadas apenas quando uma funcionalidade ou alvo operacional comprovar a necessidade.
+- **Não instaladas:** bibliotecas de UI, ORM alternativo, SDK Salesforce e PM2
+  local. O Playwright entrou somente após existir harness versionado de QA
+  visual e segurança anônima.
 
 ## Política transitiva
 
-O pnpm resolveu 514 pacotes após deduplicação. Overrides mínimos corrigem faixas vulneráveis de `@babel/core`, `brace-expansion` e `postcss`; nenhum `--force` ou `--legacy-peer-deps` foi usado. Scripts de instalação são permitidos apenas para quatro pacotes explicitamente necessários. Atualizações de maior versão, TypeScript experimental e ESLint incompatível não foram adotadas.
+O pnpm resolveu 518 pacotes após deduplicação. Overrides mínimos corrigem faixas
+vulneráveis de `@babel/core`, `brace-expansion` e `postcss`; nenhum `--force` ou
+`--legacy-peer-deps` foi usado. Scripts de instalação permanecem limitados aos
+pacotes explicitamente necessários. Atualizações de maior versão, TypeScript
+experimental e ESLint incompatível não foram adotadas.

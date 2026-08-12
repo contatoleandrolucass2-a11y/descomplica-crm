@@ -1,5 +1,75 @@
 # Worklog
 
+## 2026-08-09 — consolidação visual das 18 páginas
+
+- Esta entrada supersede o recorte inicial da fundação registrado logo abaixo:
+  as 18 páginas da referência viva agora têm composição visual no catálogo
+  protegido, sem ampliar o escopo funcional ou copiar autoridade comercial do
+  sistema legado.
+- Dashboard, cinco etapas, ranking, Canal de Parcerias, configurações, metas e
+  cinco jornadas de simulação compartilham topbar hierárquica, ícones e o
+  design system navy/cyan/lime. Estados sem fonte mantêm toda a composição e
+  exibem “indisponível” em vez de converter ausência em zero.
+- O hub e as rotas WF13, WF16, CAIXA, WF14 e WF15 foram adicionados ao catálogo
+  com a permissão `crm.simulators.view`, guard server-side e grants de catálogo
+  mínimos. Os formulários são apenas visuais: não têm submit, persistência,
+  fórmula ou resultado ativo.
+- A migration `20260809024000_simulator_visual_catalog.sql` altera somente o
+  catálogo de páginas, a permissão e sua matriz de papéis. Tabelas Qlik, grants
+  de dados, policies, funções comerciais e contratos dos simuladores não foram
+  alterados.
+- O Canal de Parcerias permanece sem leitura direta das tabelas protegidas e
+  sinaliza a integração pendente. Ranking avançado, roleta, prêmios e motores
+  WF13/WF14/WF15/WF16/CAIXA seguem bloqueados para incrementos com fonte oficial.
+- QA autenticado complementar passou em Supabase local isolado com conta QA
+  efêmera e fixtures sintéticas removidas ao final: 72/72 checks responsivos,
+  54/54 checks de tema, 18/18 rotas em zoom de 200%, teclado, reduced-motion e
+  87 capturas sem overflow ou erro de aplicação. A barreira anônima passou nas
+  18 rotas do build local nos quatro viewports.
+- A comparação autenticada em homologação continua bloqueada por ausência de
+  URL e credencial QA dedicadas. Produção, conta Master/Admin pessoal, deploy,
+  merge e criação de usuário remoto não foram usados.
+
+## 2026-08-09 — fundação de paridade da referência
+
+- A referência viva foi recatalogada em 18 rotas. O checkpoint antigo permanece
+  apenas como proveniência; não autoriza dados, fórmulas ou regras comerciais.
+- A matriz de paridade separa seis páginas desta fundação, rotas seguras já
+  existentes e simuladores/ranking avançado/Canal de Parcerias adiados.
+- O shell protegido ganhou topbar navy/cyan/lime e navegação pai/filho montada
+  somente depois do filtro efetivo de permissões. Supabase SSR, guards, RLS,
+  grants, CSP e logout não mudaram.
+- Dashboard e cinco etapas passaram a reutilizar cards, filtros, roscas, funis,
+  gauge, tabela, ranking, skeleton e estados. Nenhum campo nulo vira zero;
+  últimos 7/14 dias não recebem fallback; meta ausente ou zero não desenha arco.
+- A projeção proporcional, filtros dimensionais, thresholds editoriais,
+  simuladores, roleta, prêmios e cálculos comerciais ficaram fora do código por
+  ausência de fonte oficial aprovada.
+- O harness Playwright cobre as 18 páginas da referência com máscara opaca
+  irreversível aplicada no DOM. PNG bruto fica só em memória; o Git recebe WebP
+  sem metadados, manifest e hashes SHA-256. A execução final respondeu `200` em
+  18/18 rotas, aplicou 2.969 máscaras e não registrou erro de aplicação no
+  console, erro de página, mudança de URL ou mutação durante a captura. Bloqueios
+  de rede impostos pelo próprio harness são contabilizados separadamente.
+- A barreira anônima passou antes e depois: doze rotas CRM retornaram `307` para
+  `/login`; os quatro viewports terminaram no formulário vazio com `200`, CSP,
+  X-Frame-Options e nosniff, sem marcador comercial ou erro. Os WebP de antes e
+  depois têm SHA-256 idêntico por viewport. Os 26 arquivos passaram em dimensão,
+  checksum e ausência de EXIF, ICC, IPTC e XMP.
+- A comparação autenticada foi interrompida apenas nessa etapa: URL de
+  homologação e credencial QA dedicada não foram disponibilizadas nem
+  localizadas nos canais seguros inspecionados. Produção foi consultada somente
+  de forma anônima para o limite “antes”; contas pessoais e criação de usuário
+  foram descartadas. Temas, teclado, zoom de 200% e perfis no conteúdo protegido
+  permanecem pendentes.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build` passaram. Foram 81
+  testes Vitest aprovados, um teste condicional omitido por ausência do artefato
+  opcional Salesforce, oito testes Node aprovados e 282 asserções pgTAP.
+  Playwright/Chromium foi provisionado; `pnpm audit` não encontrou
+  vulnerabilidade e o Gitleaks não encontrou segredo.
+- Nenhuma migration, banco remoto, DNS, deploy, workflow ou regra de simulador
+  foi alterado.
+
 ## 2026-08-08 — buffer de resposta do Nginx
 
 - Doze falhas de login desde 04/08 foram correlacionadas ao erro Nginx

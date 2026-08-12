@@ -43,6 +43,31 @@ Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende 
 - [x] Integrar navegação e ações à matriz de permissões.
 - [ ] Migrar filtros dimensionais após criar o read model normalizado de registros.
 
+### Fundação de paridade com a referência viva
+
+- [x] Inventariar as 18 páginas da referência viva.
+- [x] Versionar matriz de paridade e catálogo de páginas, componentes e fontes.
+- [x] Criar baseline visual sanitizada sem PII ou dados comerciais legíveis.
+- [x] Implementar topbar e navegação hierárquica autorizada.
+- [x] Implementar cards, filtros, roscas, funis, gauges, tabelas, rankings,
+      skeletons e estados analíticos reutilizáveis.
+- [x] Restaurar visualmente dashboard e cinco páginas de etapas usando o read
+      model existente.
+- [x] Restaurar a composição visual de ranking, Canal de Parcerias,
+      configurações, metas do funil, metas de parcerias e metas de pontos sem
+      alterar seus contratos seguros.
+- [x] Criar hub e cinco jornadas visuais de simulação, protegidos por catálogo,
+      permissão e guard; manter todos os motores bloqueados.
+- [x] Executar QA autenticado complementar com conta dedicada e fixtures
+      sintéticas no Supabase local; produção não foi usada nem alterada.
+- [ ] Executar comparação autenticada em homologação com conta QA dedicada.
+      Bloqueio: ambiente e credenciais QA de homologação continuam ausentes;
+      a evidência local não substitui este gate.
+- [ ] Conectar fontes pendentes do Canal de Parcerias e motores WF13, WF14,
+      WF15, WF16 e CAIXA somente em incrementos próprios com regra oficial.
+- [ ] Tratar ranking avançado, roleta, prêmios e novos cálculos comerciais
+      somente nos incrementos separados já aprovados.
+
 ## Gate 4 — entrega
 
 1. Testes unitários, integração, E2E, acessibilidade e responsividade.

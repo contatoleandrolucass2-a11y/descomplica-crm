@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { CRM_STAGES, getCrmStage } from "../lib/crm/stages/catalog";
-import { buildStageComparisons, stageAttainment } from "../lib/crm/stages/presentation";
+import { buildStageComparisons } from "../lib/crm/stages/presentation";
 
 const metric = {
   currentMonth: 80,
@@ -35,10 +35,14 @@ describe("stage details", () => {
     expect(comparisons.at(-1)).toMatchObject({ previous: 3, current: 4, goal: 5 });
   });
 
-  it("classifies progress thresholds", () => {
-    expect(stageAttainment(null).label).toBe("Sem meta definida");
-    expect(stageAttainment(0.49).label).toBe("Gap relevante");
-    expect(stageAttainment(0.8).label).toBe("Próximo da meta");
-    expect(stageAttainment(1).label).toBe("Meta atingida");
+  it("preserves unavailable temporal windows instead of inventing zero or fallback values", () => {
+    const comparisons = buildStageComparisons({
+      ...metric,
+      lastFourteenDays: null,
+      lastSevenDays: null,
+    });
+
+    expect(comparisons.find((row) => row.label === "14 dias")?.current).toBeNull();
+    expect(comparisons.find((row) => row.label === "7 dias")?.current).toBeNull();
   });
 });

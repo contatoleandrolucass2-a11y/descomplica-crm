@@ -1,0 +1,107 @@
+import Link from "next/link";
+
+import { DataState, PageHeader, SectionHeading } from "@/app/(protected)/app/_components/analytics";
+import { enforcePermission } from "@/lib/authorization/enforce";
+import { SIMULATOR_LIST } from "@/lib/crm/simulators/catalog";
+
+import styles from "./simulators.module.css";
+
+export const metadata = { title: "Simulação" };
+
+function CalculatorIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="4" y="2.75" width="16" height="18.5" rx="3" />
+      <path d="M7.5 6.5h9v3h-9zM8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01M16 17h.01" />
+    </svg>
+  );
+}
+
+export default async function SimulationHubPage() {
+  await enforcePermission("crm.simulators.view");
+
+  return (
+    <main className={styles.page}>
+      <div className={styles.container}>
+        <PageHeader
+          eyebrow="Ferramentas comerciais"
+          title="Simulação"
+          description="Interfaces completas para preparar propostas. Motores permanecem bloqueados até validação oficial de cada regra."
+          meta={
+            <div className={styles.headerStatus}>
+              <CalculatorIcon />
+              <span>
+                <small>Ferramentas disponíveis</small>
+                <strong>{SIMULATOR_LIST.length} jornadas visuais</strong>
+              </span>
+            </div>
+          }
+        />
+
+        <DataState
+          variant="unavailable"
+          compact
+          title="Cálculos temporariamente indisponíveis"
+          description="As jornadas podem ser consultadas. Nenhuma fórmula, resultado ou regra não validada atua no runtime."
+        />
+
+        <section aria-labelledby="simulation-tools-title">
+          <SectionHeading
+            id="simulation-tools-title"
+            kicker="Escolha uma jornada"
+            title="Ferramentas comerciais em um só lugar"
+            description="Cada tela preserva campos, seções, alertas e painel de resultado sem publicar cálculo não validado."
+          />
+          <div className={styles.hubGrid}>
+            {SIMULATOR_LIST.map((simulator) => (
+              <Link
+                className={styles.hubCard}
+                href={`/app/simulacao/${simulator.slug}`}
+                key={simulator.slug}
+              >
+                <span className={styles.hubIcon}>
+                  <CalculatorIcon />
+                </span>
+                <span>
+                  <h2>{simulator.title}</h2>
+                  <p>{simulator.description}</p>
+                  <span className={styles.hubCode}>{simulator.code}</span>
+                </span>
+                <span className={styles.hubArrow} aria-hidden="true">
+                  ↗
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section aria-labelledby="simulation-process-title">
+          <SectionHeading
+            id="simulation-process-title"
+            kicker="Fluxo seguro"
+            title="Da entrada ao resultado validado"
+          />
+          <div className={styles.processGrid}>
+            <article className={styles.processCard}>
+              <span>01</span>
+              <strong>Preencha a proposta</strong>
+              <small>Campos organizados para conferir as informações da proposta.</small>
+            </article>
+            <article className={styles.processCard}>
+              <span>02</span>
+              <strong>Aguarde regra oficial</strong>
+              <small>Motores não executam fórmulas importadas ou valores demonstrativos.</small>
+            </article>
+            <article className={styles.processCard}>
+              <span>03</span>
+              <strong>Conecte fonte validada</strong>
+              <small>
+                Resultados só serão liberados em incremento próprio, com contrato e testes.
+              </small>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}

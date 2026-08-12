@@ -61,7 +61,7 @@ export function SalesforceRefreshButton({ available }: { available: boolean }) {
         type="button"
         onClick={refresh}
         disabled={state === "loading"}
-        className="rounded-xl bg-cyan-300 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-wait disabled:opacity-70"
+        className="rounded-xl bg-cyan-300 px-4 py-2 text-sm font-medium text-[#082137] transition hover:bg-cyan-200 disabled:cursor-wait disabled:opacity-70"
       >
         Atualizar Salesforce
       </button>

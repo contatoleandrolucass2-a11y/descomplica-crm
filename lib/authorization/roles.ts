@@ -16,32 +16,38 @@ export const ROLES = {
   coordinator: {
     level: 60,
     label: "Coordenador",
-    description: "Consulta dashboard, etapas e ranking do CRM, sem administrar acessos.",
+    description:
+      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
   },
   supervisor: {
     level: 50,
     label: "Supervisor",
-    description: "Consulta dashboard, etapas e ranking do CRM, sem administrar acessos.",
+    description:
+      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
   },
   real_estate: {
     level: 40,
     label: "Imobiliária",
-    description: "Consulta dashboard, etapas e ranking do CRM, sem administrar acessos.",
+    description:
+      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
   },
   broker_lead: {
     level: 30,
     label: "Líder de corretores",
-    description: "Consulta dashboard, etapas e ranking do CRM, sem administrar acessos.",
+    description:
+      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
   },
   broker: {
     level: 20,
     label: "Corretor",
-    description: "Consulta dashboard, etapas e ranking do CRM, sem administrar acessos.",
+    description:
+      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
   },
   user: {
     level: 10,
     label: "Usuário",
-    description: "Acesso básico de consulta ao dashboard, às etapas e ao ranking do CRM.",
+    description:
+      "Consulta dashboard, etapas, Canal de Parcerias, ranking e simuladores visuais, sem administrar acessos.",
   },
 } as const;
 
