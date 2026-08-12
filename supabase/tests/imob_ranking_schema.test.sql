@@ -413,7 +413,7 @@ select is(
    from public.app_pages
    where key = 'crm.partnerships' and path = '/app/canal-de-parcerias'),
   'crm.partnerships.view',
-  'partner ranking page retains its audited navigation permission'
+  'partner ranking page keeps its production permission during v3 shadow validation'
 );
 select is(
   (select coalesce(sum(runs.row_count), 0)

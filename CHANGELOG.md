@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+- Adiciona read model v3 local com runs/fatos imutáveis, hash semântico,
+  publicação atômica, competências fechadas explícitas e estados separados de
+  fonte, qualidade e publicação; nenhum número fictício é persistido.
+- Exige manifesto imutável de cobertura por run/escopo, inclusive para escopos
+  vazios; período ou escopo não certificado fica indisponível em vez de produzir
+  totais parciais ou falso zero.
+- Versiona IDs externos com vigência, owner, evidência, histórico e fila
+  privada de reconciliação; IDs pendentes ou desconhecidos rejeitam o lote
+  inteiro e nunca usam nome como associação.
+- Registra lineage pai/raiz dos grants de reporting scope e exige cadeia
+  efetiva nas leituras v3; grants históricos sem ancestry comprovável ficam
+  marcados para reconciliação.
+- Adiciona autoridade privada e única por dataset/fonte/workflow/produtor;
+  owner, aprovação, evidência e cobertura são obrigatórios antes da ingestão.
+- Disponibiliza Dashboard, cinco etapas, Canal de Parcerias e Ranking em rotas
+  shadow `/app/read-model-v3/*`, ocultas por flag server-side e fora do catálogo,
+  com filtros de período, origem, organização/House, equipe, carteira,
+  coordenador, gestor, corretor, empreendimento e região/stand. As rotas de
+  produção e seus leitores v2 permanecem inalterados.
+- Limita cada catálogo dimensional a 100 opções com truncamento explícito e
+  preserva toda seleção autorizada dentro do cap.
+- Cataloga permissões v3 separadas para funil, ranking, parcerias e estoque sem
+  concedê-las automaticamente a papel algum. Os testes ativam grants sintéticos
+  locais para provar Master, Admin, gestor e corretor sem reabrir os read models
+  v2 globais; o rollout real exige migration posterior e compatível com rollback.
+- Preserva moeda em strings decimais exatas na ingestão/leitura v3 e na leitura
+  Qlik escopada, inclusive acima da precisão segura do JavaScript.
+- Atualiza os teardowns de QA local para remover o lineage privado antes dos
+  grants efêmeros, mantendo contas e fixtures sintéticas autocontidas.
+- Inventaria caller Qlik e consumidores de `service_role`; o processo nominal
+  do caller continua não identificado e, portanto, não houve cutover, migration
+  remota, alteração n8n/Salesforce/Qlik, deploy ou merge. A ordem destrutiva da
+  migration Qlik no PR base permanece bloqueio explícito da pilha remota.
 - Comprova por leitura o projeto Supabase remoto, versiona DDL/inventário
   sanitizados e valida backup oficial em restore isolado com contagens,
   checksums, Auth, Storage, grants, policies e pgTAP, sem mutação remota.

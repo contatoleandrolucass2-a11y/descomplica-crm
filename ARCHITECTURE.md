@@ -35,6 +35,9 @@ flowchart LR
 14. **Ingestão transacional.** O produtor Salesforce envia um contrato versionado a um Route Handler M2M limitado. Uma RPC exclusiva do papel de serviço substitui dashboard e ranking atomicamente, impede replay/snapshot antigo e registra execução sanitizada. A capacidade possui flag server-side própria e desativada por padrão.
 15. **Refresh sob demanda.** O navegador nunca acessa credenciais Salesforce. Sessão, permissão, origem, lock e cooldown são verificados antes de um webhook HTTPS configurado por ambiente. Uma flag independente permite manter o refresh desativado sem URL ou Bearer.
 16. **Preferência visual local.** Tema é estado de apresentação não sensível em `localStorage`; autorização e catálogo continuam resolvidos no servidor. O shell aplica somente três valores conhecidos e falha para claro.
+17. **Identidade externa governada.** IDs Salesforce/Qlik/n8n são resolvidos por fonte, tipo, versão temporal, owner e evidência. Nomes são apenas rótulos; mappings ausentes rejeitam a publicação e entram em reconciliação.
+18. **Read model v3 escopado.** Runs, fatos e manifestos de cobertura por escopo são imutáveis e publicados por RPC transacional exclusiva de máquina, depois de validar a autoridade privada da tupla dataset/fonte/workflow/produtor. O navegador usa somente RPC autenticada com permissão do dataset, scope explícito, lineage efetivo e filtros canônicos validados no banco. Zero real exige período integralmente certificado e o escopo exato no manifesto.
+19. **Rollout shadow deny-by-default.** As rotas e o catálogo de produção permanecem v2. O v3 fica fora da navegação, retorna 404 salvo flag server-side explícita e suas permissões são catalogadas sem herança automática para papel algum. Qualquer grant real exige migration posterior, depois de IDs, owners, produtores e políticas serem reconciliados. Fonte indisponível, fórmula não aprovada e zero real permanecem estados distintos.
 
 ## Fronteiras de segredo
 
@@ -45,5 +48,8 @@ Chaves públicas do Supabase podem chegar ao navegador e permanecem limitadas po
 - Estratégia de dados seed/demonstração separada dos dados reais.
 - Observabilidade e alertas da ingestão em homologação.
 - Contrato operacional definitivo com o produtor Salesforce/n8n real.
+- Identificação nominal e relay M2M do caller Qlik antes do hardening remoto.
+- Rollout por papel do read model v3 após reconciliação dos scopes oficiais.
+- Contratos oficiais de metas, planejamento, estoque, ranking e parcerias.
 
 Essas decisões serão implementadas incrementalmente nas próximas branches.

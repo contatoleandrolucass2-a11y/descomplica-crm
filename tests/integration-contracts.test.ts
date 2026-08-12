@@ -144,7 +144,7 @@ describe("integration source contracts", () => {
           periodMonth: "2026-08-01",
           imobKey: "imob.qa",
           imobName: "Imobiliária QA",
-          vgv: 0,
+          vgv: "0.00",
           contracts: 0,
           sourceRankVgv: null,
           sourceRankContracts: null,
@@ -165,6 +165,24 @@ describe("integration source contracts", () => {
         entries: [{ ...payload.entries[0], periodMonth: "2025-08-01" }],
       }).success,
     ).toBe(false);
+    expect(
+      qlikRankingIngestionSchema.safeParse({
+        ...payload,
+        entries: [{ ...payload.entries[0], vgv: "0.29" }],
+      }).success,
+    ).toBe(true);
+    expect(
+      qlikRankingIngestionSchema.safeParse({
+        ...payload,
+        entries: [{ ...payload.entries[0], vgv: "0.001" }],
+      }).success,
+    ).toBe(false);
+    expect(
+      qlikRankingIngestionSchema.safeParse({
+        ...payload,
+        entries: [{ ...payload.entries[0], vgv: "10000000000000000.00" }],
+      }).success,
+    ).toBe(false);
   });
 
   it("matches the Qlik RPC five-minute future tolerance", () => {
@@ -180,7 +198,7 @@ describe("integration source contracts", () => {
           periodMonth: "2026-08-01",
           imobKey: "imob.qa",
           imobName: "Imobiliária QA",
-          vgv: 0,
+          vgv: "0.00",
           contracts: 0,
         },
       ],

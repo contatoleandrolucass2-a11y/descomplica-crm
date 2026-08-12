@@ -308,7 +308,7 @@ values
     '21000000-0000-4000-8000-000000000001',
     'a1000000-0000-4000-8000-000000000001',
     'Synthetic organization A grant',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -316,7 +316,7 @@ values
     '21000000-0000-4000-8000-000000000007',
     'a1000000-0000-4000-8000-000000000001',
     'Synthetic portfolio A grant',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -324,7 +324,7 @@ values
     '21000000-0000-4000-8000-000000000003',
     'a1000000-0000-4000-8000-000000000001',
     'Synthetic team A grant',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -332,7 +332,7 @@ values
     '21000000-0000-4000-8000-000000000005',
     'a1000000-0000-4000-8000-000000000001',
     'Synthetic person A grant',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -340,7 +340,7 @@ values
     '21000000-0000-4000-8000-000000000002',
     'a1000000-0000-4000-8000-000000000001',
     'Synthetic organization B grant',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -348,7 +348,7 @@ values
     '21000000-0000-4000-8000-000000000001',
     'a1000000-0000-4000-8000-000000000001',
     'Synthetic House A grant',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (
@@ -356,7 +356,7 @@ values
     '21000000-0000-4000-8000-000000000007',
     'a1000000-0000-4000-8000-000000000001',
     'Synthetic partnership portfolio A grant',
-    now() - interval '1 hour',
+    now(),
     null
   ),
   (

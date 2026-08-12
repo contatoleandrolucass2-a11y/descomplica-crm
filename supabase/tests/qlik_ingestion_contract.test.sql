@@ -1,6 +1,6 @@
 begin;
 
-select plan(51);
+select plan(54);
 
 select has_function(
   'public',
@@ -629,7 +629,10 @@ insert into auth.users (id, email)
 values
   ('71000000-0000-4000-8000-000000000001', 'qlik-scoped@example.test'),
   ('71000000-0000-4000-8000-000000000002', 'qlik-no-permission@example.test'),
-  ('71000000-0000-4000-8000-000000000003', 'qlik-no-scope@example.test');
+  ('71000000-0000-4000-8000-000000000003', 'qlik-no-scope@example.test'),
+  ('71000000-0000-4000-8000-000000000004', 'qlik-master@example.test');
+
+select public.bootstrap_master_user('71000000-0000-4000-8000-000000000004');
 
 insert into public.crm_organizations (id, organization_key, name, kind)
 values
@@ -683,19 +686,19 @@ values
   (
     '71000000-0000-4000-8000-000000000001',
     '73000000-0000-4000-8000-000000000001',
-    '71000000-0000-4000-8000-000000000001',
+    '71000000-0000-4000-8000-000000000004',
     'Synthetic organization A Qlik scope'
   ),
   (
     '71000000-0000-4000-8000-000000000002',
     '73000000-0000-4000-8000-000000000001',
-    '71000000-0000-4000-8000-000000000001',
+    '71000000-0000-4000-8000-000000000004',
     'Synthetic scope without Qlik permission'
   ),
   (
     '71000000-0000-4000-8000-000000000003',
     '73000000-0000-4000-8000-000000000002',
-    '71000000-0000-4000-8000-000000000001',
+    '71000000-0000-4000-8000-000000000004',
     'Synthetic scope revoked before Qlik read'
   );
 
@@ -735,24 +738,55 @@ values
     'Synthetic Qlik reader without active scope'
   );
 
+insert into private.crm_integration_owners (
+  id,
+  owner_key,
+  display_name,
+  owner_kind
+)
+values (
+  '74000000-0000-4000-8000-000000000001',
+  'qlik-contract-qa-owner',
+  'Qlik contract QA owner',
+  'team'
+);
+
 insert into public.crm_source_identities (
   source,
   entity_kind,
   external_id,
-  organization_id
+  organization_id,
+  mapping_status,
+  mapping_owner_id,
+  valid_from,
+  verified_at,
+  verified_by,
+  evidence_reference
 )
 values
   (
     'qlik',
     'organization',
     'imobiliaria-a-11111111',
-    '72000000-0000-4000-8000-000000000001'
+    '72000000-0000-4000-8000-000000000001',
+    'verified',
+    '74000000-0000-4000-8000-000000000001',
+    '2026-01-01T00:00:00Z',
+    now(),
+    '71000000-0000-4000-8000-000000000001',
+    'qa://qlik-contract/mapping-a'
   ),
   (
     'qlik',
     'organization',
     'imobiliaria-b-22222222',
-    '72000000-0000-4000-8000-000000000002'
+    '72000000-0000-4000-8000-000000000002',
+    'verified',
+    '74000000-0000-4000-8000-000000000001',
+    '2026-01-01T00:00:00Z',
+    now(),
+    '71000000-0000-4000-8000-000000000001',
+    'qa://qlik-contract/mapping-b'
   );
 
 select set_config(
@@ -780,7 +814,47 @@ select is(
   array['imobiliaria-a-11111111']::text[],
   'out-of-scope mappings and unmapped Qlik identities remain unavailable'
 );
+select is(
+  (select vgv from public.list_scoped_crm_imob_ranking_entries() limit 1),
+  '123456.78',
+  'scoped Qlik RPC returns VGV as an exact decimal string'
+);
+select is(
+  (select pg_typeof(vgv)::text
+   from public.list_scoped_crm_imob_ranking_entries() limit 1),
+  'text',
+  'Qlik browser contract never serializes unsafe money as a JSON number'
+);
 reset role;
+
+update private.crm_reporting_scope_grant_lineage lineage
+set requires_reconciliation = true
+where lineage.grant_id = (
+  select grant_row.id
+  from public.crm_user_reporting_scope_grants grant_row
+  where grant_row.user_id = '71000000-0000-4000-8000-000000000001'
+    and grant_row.reporting_scope_id = '73000000-0000-4000-8000-000000000001'
+);
+select set_config(
+  'request.jwt.claim.sub',
+  '71000000-0000-4000-8000-000000000001',
+  true
+);
+set local role authenticated;
+select is(
+  (select count(*) from public.list_scoped_crm_imob_ranking_entries()),
+  0::bigint,
+  'Qlik scoped read fails closed when the effective grant lineage needs reconciliation'
+);
+reset role;
+update private.crm_reporting_scope_grant_lineage lineage
+set requires_reconciliation = false
+where lineage.grant_id = (
+  select grant_row.id
+  from public.crm_user_reporting_scope_grants grant_row
+  where grant_row.user_id = '71000000-0000-4000-8000-000000000001'
+    and grant_row.reporting_scope_id = '73000000-0000-4000-8000-000000000001'
+);
 
 select set_config(
   'request.jwt.claim.sub',

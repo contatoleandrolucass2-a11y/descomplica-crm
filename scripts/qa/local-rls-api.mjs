@@ -645,6 +645,15 @@ delete from public.audit_logs
 where actor_id = any(${userIds})
    or target_user_id = any(${userIds});
 
+delete from private.crm_reporting_scope_grant_lineage
+where owner_user_id = any(${userIds})
+   or grant_id in (
+     select id
+     from public.crm_user_reporting_scope_grants
+     where user_id = any(${userIds})
+        or granted_by = any(${userIds})
+   );
+
 delete from public.crm_user_reporting_scope_grants
 where user_id = any(${userIds})
    or granted_by = any(${userIds});
@@ -682,6 +691,15 @@ begin
   ) or exists (
     select 1 from public.crm_user_reporting_scope_grants
     where user_id = any(${userIds}) or granted_by = any(${userIds})
+  ) or exists (
+    select 1 from private.crm_reporting_scope_grant_lineage
+    where owner_user_id = any(${userIds})
+       or grant_id in (
+         select id
+         from public.crm_user_reporting_scope_grants
+         where user_id = any(${userIds})
+            or granted_by = any(${userIds})
+       )
   ) or exists (
     select 1 from public.crm_reporting_scopes
     where id = any(${sqlUuidArray(ids.reportingScopes)})

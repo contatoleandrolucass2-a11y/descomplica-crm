@@ -36,10 +36,46 @@ trocas de papel posteriores. Toda afiliação de pessoa não expirada — atual,
 futura ou ligada a equipe/organização inativa — participa da contenção para
 impedir expansão latente.
 
-Dashboard, cinco etapas, ranking, configurações, metas e pontos usam read models
-v2 globais. Enquanto esses modelos não carregarem `reporting_scope_id`, somente
-Master herda suas permissões. Override `allow` comercial para não-Master é
-rejeitado; papel ou UI não substituem o gate v3.
+As rotas de produção do Dashboard, cinco etapas, ranking e Canal de Parcerias
+continuam nos modelos v2 e nos gates existentes nesta PR. O v3 é uma superfície
+shadow fora de `app_pages`, habilitada somente por flag server-side. Sua RPC
+seleciona uma permissão por dataset; a chave genérica de funil não abre ranking,
+parcerias ou estoque:
+
+| `dataset_key`  | Permissão exigida                     | Consumidor atual                                              |
+| -------------- | ------------------------------------- | ------------------------------------------------------------- |
+| `funnel`       | `crm.read_model_v3.view`              | `/app/read-model-v3` e cinco páginas shadow de etapa          |
+| `ranking`      | `crm.read_model_v3.ranking.view`      | `/app/read-model-v3/ranking`                                  |
+| `partnerships` | `crm.read_model_v3.partnerships.view` | `/app/read-model-v3/canal-de-parcerias`                       |
+| `stock`        | `crm.read_model_v3.stock.view`        | contrato reservado; sem página ou produtor oficial habilitado |
+
+As rotas shadow retornam 404 salvo quando
+`CRM_READ_MODEL_V3_SHADOW_ENABLED=true`; não aparecem na navegação e possuem
+`noindex`. A flag apenas revela a superfície: sessão, perfil, permissão, scope,
+lineage e filtros continuam validados no servidor e no banco.
+
+Nenhum papel herda automaticamente as quatro permissões shadow nesta migration,
+inclusive Master. Os testes criam grants sintéticos locais e transitórios para
+provar a matriz, mas qualquer autorização real futura precisa ser explícita,
+auditada e aplicada em migration posterior compatível com a imagem anterior. Os
+modelos v2 comerciais, configurações, metas e pontos permanecem Master-only.
+Papel, flag ou UI nunca substituem o gate no banco.
+
+`get_crm_read_model_v3` falha fechado (`42501`) quando o dataset é desconhecido,
+a permissão correspondente falta, o escopo é nulo ou o grant exato não está
+vigente. O grant precisa ter lineage completo e efetivo: raiz válida, cadeia de
+até oito ancestrais, escopos ativos e compatíveis com os papéis, nenhum
+ancestral revogado/expirado, perfil delegante aprovado e nenhum elo marcado
+`requires_reconciliation`. O perfil solicitante também precisa estar aprovado,
+ativo e compatível com o próprio grant. Filtros dimensionais apenas restringem
+o resultado dentro desse escopo; não substituem nem ampliam o grant. Além da
+autorização, valores e zeros exigem que o run manifeste exatamente o escopo
+consultado e que todo o período caiba na cobertura certificada.
+
+`list_crm_read_model_v3_scopes` só lista grants efetivos quando o usuário possui
+ao menos uma das quatro permissões. Essa descoberta não concede acesso cruzado:
+cada chamada de leitura revalida a permissão do dataset, o grant exato e toda a
+lineage.
 
 Na interface, as chaves acima continuam técnicas e são enviadas sem tradução às
 RPCs. O usuário vê nomes e descrições em português. O papel `master` nunca
@@ -50,22 +86,21 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 `public.app_pages` contém 21 registros versionados:
 
 - dashboard, cinco etapas e ranking;
-- identidade externa do Canal de Parcerias em `/app/canal-de-parcerias`;
+- Canal de Parcerias protegido em `/app/canal-de-parcerias`;
 - configurações, metas do funil, parcerias e pontos;
 - hub de simulação e cinco jornadas visuais WF13, WF16, CAIXA, WF14 e WF15;
 - início administrativo, usuários e catálogo de páginas.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
-de integração pendente. A rota exige a permissão dedicada
-`crm.partnerships.view` e ainda não consulta as tabelas Qlik. O contrato local
-de leitura é deliberadamente mais
-estrito: a RPC só retorna entries mapeadas por ID Qlik a uma organização dentro
-do escopo aprovado. Runs globais, developments e linhas sem mapeamento
-permanecem indisponíveis. Neste gate, a permissão é herdada automaticamente
-somente por Master. Um não-Master só pode
-recebê-la por override `allow` auditado e, mesmo assim, a RPC exige grant ativo,
-escopo organizacional e identidade Qlik oficial mapeada; sem qualquer desses
-vínculos, retorna zero linhas.
+de integração pendente. A rota de produção continua exigindo
+`crm.partnerships.view` e não lê fatos Qlik. A rota shadow exige
+`crm.read_model_v3.partnerships.view` e consulta apenas
+`get_crm_read_model_v3('partnerships', scope, filters)`. Como não existe produtor
+v3 oficial publicado para esse dataset, a página mostra indisponibilidade, sem
+reaproveitar Qlik legado nem inventar valores. A RPC Qlik de compatibilidade
+continua separada e só retorna entries com ID Qlik mapeado, owner ativo,
+vigência e organização dentro do escopo aprovado; ela não é a fonte da página
+v3.
 
 As seis rotas de simulação exigem `crm.simulators.view`. A permissão permanece
 nos oito papéis legados porque essas superfícies são somente visuais; ela não
@@ -103,6 +138,14 @@ O menu consulta somente páginas ativas, marcadas para navegação e permitidas 
   papel DB estritamente limitado à RPC, após gate formal.
 - `list_scoped_crm_imob_ranking_entries`: leitura humana autenticada com
   `crm.partnerships.view`, identidade externa estável e escopo organizacional.
+- `review_crm_source_identity_mapping`: revisão idempotente de mapping por
+  Master autenticado com `crm.ingest.manage`; em verificação, owner, evidência e
+  `effectiveFrom` auditado são obrigatórios.
+- `ingest_crm_read_model_v3`: ingestão atômica exclusiva de `service_role`, sem
+  privilégio direto nos fatos.
+- `list_crm_read_model_v3_scopes` e `get_crm_read_model_v3`: descoberta e
+  leitura autenticadas, sempre revalidando permissão específica do dataset,
+  scope e lineage no banco.
 
 Elevação de papel, desativação de conta e criação/remoção de exceções exigem um
 motivo não vazio. A validação roda em trigger `BEFORE INSERT` do log de auditoria
@@ -131,25 +174,28 @@ As tabelas de pontos aceitam leitura com `crm.ranking.view` ou
 `crm.settings.manage`. Ambas são Master-only enquanto o modelo permanecer v2
 global.
 
-O read model do ranking exige `crm.ranking.view` na rota e nas duas policies RLS.
-A permissão é Master-only neste gate. A tabela não expõe escrita a
-`authenticated` nem a `service_role`; a ingestão server-side altera o read model
-somente pela RPC transacional, sem credencial privilegiada no bundle.
+A rota de ranking de produção conserva `crm.ranking.view` e o read model v2. A
+rota shadow exige `crm.read_model_v3.ranking.view` e usa somente a RPC v3
+escopada. Pesos, objetivos e configuração permanecem no modelo v2 Master-only;
+ranking avançado, bônus e premiações não foram implementados. As tabelas v3 não
+expõem leitura ou escrita direta a `authenticated` nem a `service_role`.
 
-Cada detalhe de etapa exige `crm.stages.view` e reutiliza as tabelas do dashboard,
-cuja RLS exige `crm.dashboard.view`. Somente Master recebe ambas enquanto os
-snapshots forem globais. Um override `deny` continua prevalecendo; `allow` para
-não-Master não pode contornar a ausência de escopo v3.
+Cada detalhe de etapa e o dashboard de produção conservam `crm.stages.view` ou
+`crm.dashboard.view` e seus leitores v2. As versões shadow exigem
+`crm.read_model_v3.view` e reutilizam a mesma RPC, o mesmo run ativo e os mesmos
+filtros dimensionais. Um override `deny` continua prevalecendo; um `allow` v3
+sem grant de escopo e lineage efetivo não retorna dados.
 
 `crm_ingestion_runs` não concede acesso direto a navegador algum. O controle Salesforce só é renderizado com `crm.salesforce.refresh`; quando a capacidade está desativada ou incompleta, ele permanece desabilitado e não chama o endpoint. O status exige `crm.dashboard.view`. A ingestão usa credencial de máquina separada da sessão humana e sua função possui grant exclusivo.
 
 ## Matriz de grants da Data API
 
 No schema local pretendido, `PUBLIC` e `anon` não possuem privilégio em tabela,
-sequência ou função da aplicação. `authenticated` recebe somente `SELECT` nas tabelas consultadas pelo
-SDK SSR: catálogo de páginas, auditoria, perfis/papéis/overrides, metadados de
-organização/equipe/carteira/pessoa e read models do CRM. Identidades externas,
-matriz papel-escopo e `crm_ingestion_runs` permanecem sem grant direto.
+sequência ou função da aplicação. `authenticated` recebe somente `SELECT` nas
+tabelas legadas ainda consultadas pelo SDK SSR: catálogo de páginas, auditoria,
+perfis/papéis/overrides, metadados de organização/equipe/carteira/pessoa e read
+models v2 autorizados. Identidades externas, matriz papel-escopo,
+`crm_ingestion_runs` e todas as tabelas v3 permanecem sem grant direto.
 
 O papel `authenticated` não recebe escrita, `TRUNCATE`, `REFERENCES`, `TRIGGER`
 ou `MAINTAIN`. As mutações passam exclusivamente pelas RPCs listadas acima.
@@ -158,12 +204,12 @@ os helpers `get_role_level`, `can_assign_role` e `can_grant_permission` não sã
 RPCs públicas da aplicação.
 
 Localmente, `service_role` não recebe acesso direto a tabelas ou sequências. Os
-grants técnicos de `EXECUTE` nas RPCs Salesforce/Qlik são estado intermediário
+grants técnicos de `EXECUTE` nas RPCs Salesforce, Qlik e v3 são capacidades
 server-only, não autorização para distribuir a chave global. Salesforce fica no
-Route Handler confiável. n8n/Qlik externo usa relay autenticado por M2M; como
-alternativa formal, papel DB dedicado sem `BYPASSRLS`, sem tabela/sequência e
-com `EXECUTE` apenas na assinatura necessária. Ambas executam as escritas como
-transações `SECURITY DEFINER` validadas.
+Route Handler confiável. O produtor v3 ainda não foi ativado. n8n/Qlik externo
+deve usar relay autenticado por M2M; como alternativa formal, papel DB dedicado
+sem `BYPASSRLS`, sem tabela/sequência e com `EXECUTE` apenas na assinatura
+necessária. As escritas passam por transações `SECURITY DEFINER` validadas.
 `bootstrap_master_user` permanece exclusiva do proprietário
 `postgres`, conforme o runbook operacional.
 

@@ -86,6 +86,7 @@ export function MetricCard({
   detail,
   ratio,
   ratioLabel,
+  ratioAriaLabel,
   accent = "cyan",
 }: {
   label: string;
@@ -93,6 +94,7 @@ export function MetricCard({
   detail: string;
   ratio: number | null;
   ratioLabel: string;
+  ratioAriaLabel?: string;
   accent?: ChartAccent;
 }) {
   const ratioValue = ratio === null ? "Indisponível" : ratioLabel;
@@ -105,7 +107,7 @@ export function MetricCard({
         <p className={styles.metricDetail}>{detail}</p>
       </div>
       <DonutChart
-        label={`Atingimento de ${label}`}
+        label={ratioAriaLabel ?? `Atingimento de ${label}`}
         value={ratioValue}
         ratio={ratio}
         accent={accent}

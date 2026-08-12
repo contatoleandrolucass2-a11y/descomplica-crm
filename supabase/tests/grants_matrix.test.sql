@@ -11,7 +11,7 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  31::bigint,
+  39::bigint,
   'all public tables retain RLS'
 );
 
@@ -31,12 +31,15 @@ select is(
     'crm_dashboard_snapshots',
     'crm_dashboard_top_developments',
     'crm_dashboard_views',
+    'crm_developments',
     'crm_funnel_goals',
     'crm_imob_ranking_developments',
     'crm_imob_ranking_entries',
     'crm_imob_ranking_runs',
     'crm_ingestion_runs',
+    'crm_locations',
     'crm_organizations',
+    'crm_origins',
     'crm_people',
     'crm_point_metrics',
     'crm_point_settings',
@@ -44,6 +47,11 @@ select is(
     'crm_portfolios',
     'crm_ranking_participants',
     'crm_ranking_snapshots',
+    'crm_read_model_v3_active_runs',
+    'crm_read_model_v3_closed_months',
+    'crm_read_model_v3_events',
+    'crm_read_model_v3_runs',
+    'crm_read_model_v3_scope_coverage',
     'crm_reporting_scopes',
     'crm_role_scope_types',
     'crm_source_identities',
@@ -70,13 +78,21 @@ select is(
       and c.relforcerowsecurity
   ),
   array[
+    'crm_developments',
     'crm_imob_ranking_developments',
     'crm_imob_ranking_entries',
     'crm_imob_ranking_runs',
+    'crm_locations',
     'crm_organizations',
+    'crm_origins',
     'crm_people',
     'crm_portfolio_organizations',
     'crm_portfolios',
+    'crm_read_model_v3_active_runs',
+    'crm_read_model_v3_closed_months',
+    'crm_read_model_v3_events',
+    'crm_read_model_v3_runs',
+    'crm_read_model_v3_scope_coverage',
     'crm_reporting_scopes',
     'crm_role_scope_types',
     'crm_source_identities',
@@ -275,13 +291,16 @@ select is(
     'assign_user_role',
     'begin_crm_salesforce_refresh',
     'finish_crm_salesforce_refresh',
+    'get_crm_read_model_v3',
     'get_crm_sync_status',
     'get_user_authorization_context',
     'has_permission',
     'list_app_pages_for_management',
+    'list_crm_read_model_v3_scopes',
     'list_scoped_crm_imob_ranking_entries',
     'remove_user_permission_override',
     'replace_crm_point_settings',
+    'review_crm_source_identity_mapping',
     'set_app_page_active',
     'set_user_active',
     'set_user_permission_override',
@@ -336,6 +355,7 @@ select is(
   ),
   array[
     'ingest_crm_imob_ranking_snapshot',
+    'ingest_crm_read_model_v3',
     'ingest_crm_salesforce_snapshot'
   ]::name[],
   'service_role can execute only the audited server-side ingestion RPCs'

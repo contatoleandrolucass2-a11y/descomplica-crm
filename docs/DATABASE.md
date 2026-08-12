@@ -2,17 +2,18 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem dezoito
-migrations locais. A validação local encontrou 31 tabelas públicas e RLS
-habilitada em todas; os seeds estruturais criam 12 papéis, 19 permissões e 21
-páginas. Nenhum dado comercial é seedado.
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 20 migrations
+locais. A validação local encontrou 39 tabelas públicas, com RLS habilitada em
+todas, e seis tabelas privadas. Os seeds estruturais criam 12 papéis, 23
+permissões e 21 páginas. Nenhum dado comercial é seedado.
 
 Isso não descreve convergência com produção. A captura somente leitura de 9 de
-agosto encontrou quatro migrations somente remotas, três somente locais, 21
+agosto encontrou quatro migrations somente remotas, sete somente locais, 21
 tabelas remotas e exposição Qlik incompatível com a allowlist. A matriz
 completa, hashes e ordem segura estão em
 [`docs/reconciliation/MIGRATION_MATRIX.md`](reconciliation/MIGRATION_MATRIX.md).
-Nenhuma migration de reconciliação foi aplicada remotamente.
+Nenhuma migration de reconciliação foi aplicada remotamente e nenhum cutover
+Qlik ou do read model v3 foi realizado.
 
 ## Migrations
 
@@ -33,7 +34,9 @@ Nenhuma migration de reconciliação foi aplicada remotamente.
 15. `20260808174817_require_sensitive_access_change_reasons.sql`: motivo obrigatório e validação transacional para alterações administrativas sensíveis.
 16. `20260809024000_simulator_visual_catalog.sql`: permissão de leitura e hierarquia protegida do hub e das cinco jornadas visuais de simulação, sem tabela ou motor comercial.
 17. `20260809144137_pending_onboarding_scope_foundation.sql`: onboarding pendente, hierarquia de reporting scopes, grants temporais/revogáveis, delegação direcional, locks de topologia e administração escopada fail-closed.
-18. `20260809144143_qlik_rls_contract_hardening.sql`: convergência Qlik, limites de payload, ACL sem tabela direta, ingestão interna mínima e leitura humana por identidade/organização escopada.
+18. `20260809144143_qlik_rls_contract_hardening.sql`: convergência Qlik, limites de payload, ACL sem tabela direta, ingestão interna mínima e leitura humana por identidade/organização escopada. Esta migration é destrutiva para o caller anônimo ativo: não pode ser aplicada remotamente antes da identificação do caller e da aprovação/validação do relay substituto.
+19. `20260809181422_integration_identity_governance.sql`: owners, mappings externos versionados, histórico auditável, fila de reconciliação e lineage dos grants de reporting scope.
+20. `20260809181424_crm_read_model_v3.sql`: autoridades privadas de fonte, dimensões canônicas, runs/fatos imutáveis, ingestão v3 e leitura autenticada por dataset, permissão e scope efetivo.
 
 ## Desenvolvimento local
 
@@ -50,15 +53,17 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` executa 518 testes pgTAP em 13 arquivos: 28 dos motivos de
+`supabase test db` planeja 684 testes pgTAP em 15 arquivos: 28 dos motivos de
 acesso, 51 regressões de hardening escopado, 28 do dashboard, 25 das metas, 20
 da matriz global de grants, 60 do schema Qlik, 33 do catálogo, 28 do signup
-pendente, 26 dos pontos, 51 do contrato Qlik, 27 do ranking, 98 da matriz de
-escopos e 43 da ingestão Salesforce. A cobertura verifica nomes, schema, grants,
-policies, constraints, disponibilidade de fontes, preservação de dados,
-provisionamento, usuários inativos, overrides, limites de payload, delegação
-direcional, cardinalidade de escopo, serialização de topologia, cálculos e
-auditoria. Cada novo domínio deve ampliar esse conjunto.
+pendente, 26 dos pontos, 54 do contrato Qlik, 20 da governança de identidades,
+27 do ranking, 143 do read model v3, 98 da matriz de escopos e 43 da ingestão
+Salesforce. A cobertura verifica nomes,
+schema, grants, policies, constraints, disponibilidade e autoridade de fontes,
+preservação de dados, mappings, lineage, provisionamento, usuários inativos,
+overrides, limites de payload, delegação direcional, cardinalidade de escopo,
+serialização de topologia, cálculos e auditoria. Cada novo domínio deve ampliar
+esse conjunto.
 
 ## RLS e grants
 
@@ -81,9 +86,10 @@ consolidadas sem alterar a regra self-or-manager.
 Os grants são normalizados explicitamente para que projetos anteriores e novos
 convirjam. `PUBLIC`/`anon` não acessam objetos da aplicação; `authenticated`
 recebe apenas os `SELECT` e RPCs usados pelo SDK SSR; `service_role` recebe
-somente as RPCs server-only de ingestão Salesforce e Qlik. Default privileges de tabelas,
-sequências e funções futuras também permanecem fechados até um `GRANT`
-versionado. A matriz completa está em `docs/AUTHORIZATION_MATRIX.md`.
+somente as RPCs server-only versionadas de ingestão Salesforce, Qlik e v3.
+Default privileges de tabelas, sequências e funções futuras também permanecem
+fechados até um `GRANT` versionado. A matriz completa está em
+`docs/AUTHORIZATION_MATRIX.md`.
 
 ## D1 para PostgreSQL
 
@@ -106,4 +112,7 @@ permissão dedicada, identidade Qlik mapeada e organização dentro do reporting
 scope. O remoto ainda mantém RPC legada e grants/policies abertos. O estado
 efetivo e a baseline proposta estão no
 [pacote de prova](supabase-proof/README.md), não devem ser inferidos apenas das
-migrations locais.
+migrations locais. Em particular, `20260809144143` remove o caminho legado e
+não integra uma ponte aditiva: mantê-la fora de qualquer aplicação remota é um
+bloqueio obrigatório até o caller ativo ser identificado e o relay aprovado ser
+observado em paralelo.

@@ -6,6 +6,8 @@
 
 ## Dados e apresentação
 
+As rotas oficiais abaixo continuam no leitor v2 durante esta PR.
+
 Os detalhes reutilizam o read model normalizado do dashboard, sem tabela paralela ou payload JSON. Cada etapa oferece:
 
 - visões geral, com Canal Imob e sem Canal Imob;
@@ -24,6 +26,14 @@ como progresso zero.
 Classificações de ritmo e recomendações editoriais foram removidas da
 apresentação desta fundação porque não existe fonte oficial versionada para seus
 thresholds. A atualização Salesforce permanece separada e autenticada.
+
+## Shadow v3
+
+As cinco rotas equivalentes em `/app/read-model-v3/etapas/[stage]` reutilizam a
+RPC v3, preservam filtros escopados na URL e apresentam somente a etapa em foco;
+o restante do funil serve como contexto. Elas ficam fora da navegação e retornam
+404 enquanto a flag shadow estiver desligada. Detalhes sem contrato oficial não
+são derivados nem preenchidos com números fictícios.
 
 ## Validação
 

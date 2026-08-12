@@ -5,55 +5,49 @@ function source(relativePath: string) {
   return readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
 }
 
-describe("complete visual composition without commercial fixtures", () => {
-  it("keeps the dashboard analytical composition when the snapshot is absent", () => {
-    const page = source("app/(protected)/app/page.tsx");
-    const emptyBranch = page.slice(
-      page.indexOf('if (result.status === "empty")'),
-      page.indexOf("const { dashboard } = result"),
-    );
+describe("complete visual composition on the scoped v3 read model", () => {
+  it("connects the shadow dashboard to the shared secure analytical composition", () => {
+    const productionPage = source("app/(protected)/app/page.tsx");
+    const page = source("app/(protected)/app/read-model-v3/page.tsx");
+    const bridge = source("app/(protected)/app/_components/ReadModelV3Page.tsx");
+    const shared = source("app/(protected)/app/_components/ReadModelV3View.tsx");
 
-    expect(page).toContain(
-      'const DATA_UNAVAILABLE_LABEL = "Dado indisponível — integração pendente"',
-    );
-    expect(emptyBranch).toContain("DATA_UNAVAILABLE_LABEL");
-    expect(emptyBranch).toContain("<PageHeader");
-    expect(emptyBranch).toContain("<FilterBar");
-    expect(emptyBranch).toContain("<MetricCard");
-    expect(emptyBranch).toContain("<FunnelChart");
-    expect(emptyBranch).toContain("<AnalyticsTable");
-    expect(emptyBranch).toContain("Diagnóstico, gargalo e plano de ação");
+    expect(productionPage).toContain("loadDashboardReadModel");
+    expect(page).toContain("isReadModelV3ShadowEnabled");
+    expect(page).toContain('dataset="funnel"');
+    expect(bridge).toContain("DATASET_PERMISSIONS");
+    expect(bridge).toContain("loadReadModelV3(dataset");
+    expect(bridge).toContain("<ReadModelV3View");
+    expect(shared).toContain("<PageHeader");
+    expect(shared).toContain("<ReadModelV3Filters");
+    expect(shared).toContain("<MetricCard");
+    expect(shared).toContain("<FunnelChart");
+    expect(shared).toContain("<AnalyticsTable");
+    expect(shared).toContain("Opções de filtro limitadas");
+    expect(shared).toContain("Cobertura do escopo não comprovada");
+    expect(shared).toContain("Cobertura do período não comprovada");
+    expect(shared).toContain("Fórmula ou política oficial ainda não aprovada");
   });
 
-  it("keeps every stage composition when the shared snapshot is absent", () => {
-    const page = source("app/(protected)/app/etapas/[stage]/page.tsx");
-    const emptyPage = page.slice(
-      page.indexOf("function EmptyStagePage"),
-      page.indexOf("export function generateStaticParams"),
-    );
+  it("keeps every shadow stage on the same v3 loader and dimensional filter surface", () => {
+    const page = source("app/(protected)/app/read-model-v3/etapas/[stage]/page.tsx");
 
-    expect(page).toContain(
-      'const INTEGRATION_PENDING_LABEL = "Dado indisponível — integração pendente"',
-    );
-    expect(emptyPage).toContain("INTEGRATION_PENDING_LABEL");
-    expect(emptyPage).toContain("Nenhum snapshot validado");
-    expect(emptyPage).toContain("<PageHeader");
-    expect(emptyPage).toContain("<StageFilters");
-    expect(emptyPage).toContain("<Gauge");
-    expect(emptyPage).toContain("<FunnelChart");
-    expect(emptyPage).toContain("<AnalyticsTable");
+    expect(page).toContain("generateStaticParams");
+    expect(page).toContain("<ReadModelV3Page");
+    expect(page).toContain('dataset="funnel"');
+    expect(page).toContain("focusStage={stage.key}");
+    expect(page).toContain('breakdown="brokers"');
   });
 
-  it("keeps ranking structure empty and hides its admin action from readers", () => {
-    const page = source("app/(protected)/app/ranking/page.tsx");
+  it("keeps shadow ranking facts separate while its commercial motor stays blocked", () => {
+    const productionPage = source("app/(protected)/app/ranking/page.tsx");
+    const page = source("app/(protected)/app/read-model-v3/ranking/page.tsx");
 
-    expect(page).toContain("function UnavailableRankingComposition");
-    expect(page).toContain("<AnalyticsTable");
-    expect(page).toContain("<UnavailableRankingComposition period={period} scope={scope} />");
+    expect(page).toContain('dataset="ranking"');
     expect(page).toContain(
-      'const canManagePoints = authorization.permissions.includes("crm.settings.manage")',
+      "Ranking avançado, pesos, bônus, roleta e prêmios permanecem bloqueados",
     );
-    expect(page).toContain("!isEmpty && canManagePoints");
+    expect(productionPage).toContain("loadRankingReadModel");
   });
 
   it("does not prefill an unconfigured point policy with legacy defaults", () => {

@@ -1,5 +1,22 @@
 # Ingestão e atualização Salesforce
 
+## Contrato v3 aditivo
+
+As rotas Salesforce atuais continuam em `schemaVersion: 2` e permanecem
+desativadas por padrão. Esta etapa adiciona somente no banco local a RPC
+`ingest_crm_read_model_v3(jsonb)`, concedida exclusivamente a `service_role`.
+Nenhum Route Handler, workflow ou caller remoto foi trocado para ela.
+
+O v3 exige IDs externos oficiais, owner/evidência verificados, hash semântico,
+timezone IANA, watermark, cobertura temporal, manifesto explícito por escopo,
+medidas disponíveis e estados explícitos.
+Antes de validar mappings, a RPC exige uma tupla ativa e aprovada em
+`private.crm_read_model_v3_sources`, com owner ativo e política de cobertura;
+nenhuma tupla real é seedada por esta PR.
+ID desconhecido envia o item à fila privada e rejeita o lote inteiro sem mover
+o ponteiro ativo. O contrato completo e o plano de cutover estão em
+`docs/integration-read-model-v3/`.
+
 ## Fronteiras
 
 O Gate 2 substitui os três endpoints legados sem copiar Cloudflare, D1 ou o fallback n8n fixo:
@@ -63,6 +80,7 @@ Status HTTP do provedor não é repassado livremente: sucesso retorna `202`, con
 APP_ORIGIN=https://homologacao.exemplo.com
 SALESFORCE_INGEST_ENABLED=false
 SALESFORCE_REFRESH_ENABLED=false
+CRM_READ_MODEL_V3_SHADOW_ENABLED=false
 SUPABASE_SECRET_KEY=
 SALESFORCE_INGEST_SECRET=
 SALESFORCE_REFRESH_URL=
@@ -75,6 +93,10 @@ Com a flag de ingestão em `true`, `SUPABASE_SECRET_KEY` e
 obrigatórias. Configuração parcial falha fechada. Cada ambiente usa valores
 distintos; a rotação ocorre no produtor/webhook e no runtime, seguida de restart
 controlado e smoke test. Nenhum valor entra no Git, em logs ou em imagens.
+
+`CRM_READ_MODEL_V3_SHADOW_ENABLED=true` revela somente as rotas shadow
+autenticadas. A flag não ativa produtor, não publica fonte, não altera o modelo
+v2 e não substitui os gates de permissão, scope e lineage no servidor/banco.
 
 ## Validação local
 
