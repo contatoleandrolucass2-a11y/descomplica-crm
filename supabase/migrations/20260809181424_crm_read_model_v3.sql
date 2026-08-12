@@ -516,8 +516,8 @@ declare
   v_quality_issues text[];
   v_available_measures text[];
   v_covered_scope_external_ids text[];
-  v_covered_scope_ids uuid[] := '{}';
-  v_covered_scope_identity_ids uuid[] := '{}';
+  v_covered_scope_ids uuid[] := array[]::uuid[];
+  v_covered_scope_identity_ids uuid[] := array[]::uuid[];
   v_record_count integer;
   v_record jsonb;
   v_dimensions jsonb;

@@ -2,14 +2,15 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 21 migrations
-locais. A validação local encontrou 39 tabelas públicas, com RLS habilitada em
-todas, e 12 tabelas privadas. Os seeds estruturais criam 12 papéis, 23
-permissões e 21 páginas. Nenhum dado comercial é seedado.
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 26 migrations
+locais, incluindo quatro markers históricos sanitizados e no-op. Nenhuma regra,
+política ou valor comercial é seedado. O rebuild contém 39 tabelas públicas,
+17 privadas, 12 papéis, 26 permissões e 21 páginas.
 
 Isso não descreve convergência com produção. A captura somente leitura de 9 de
-agosto encontrou quatro migrations somente remotas, sete somente locais, 21
-tabelas remotas e exposição Qlik incompatível com a allowlist. A matriz
+agosto encontrou quatro versões então somente remotas, hoje representadas por
+markers locais sem o SQL inseguro, além de migrations locais ainda não
+aplicadas. A exposição Qlik remota segue incompatível com a allowlist. A matriz
 completa, hashes e ordem segura estão em
 [`docs/reconciliation/MIGRATION_MATRIX.md`](reconciliation/MIGRATION_MATRIX.md).
 Nenhuma migration de reconciliação foi aplicada remotamente e nenhum cutover
@@ -32,12 +33,17 @@ Qlik ou do read model v3 foi realizado.
 13. `20260807001159_reconcile_remote_imob_schema_and_grants.sql`: versionamento aditivo das tabelas Qlik de ranking de imobiliárias, identidade remota do catálogo e reconstrução fail-closed da matriz de grants.
 14. `20260807185611_secure_qlik_ingestion_contract.sql`: correção idempotente do drift Qlik e RPC transacional exclusiva do `service_role`, sem acesso direto às tabelas.
 15. `20260808174817_require_sensitive_access_change_reasons.sql`: motivo obrigatório e validação transacional para alterações administrativas sensíveis.
-16. `20260809024000_simulator_visual_catalog.sql`: permissão de leitura e hierarquia protegida do hub e das cinco jornadas visuais de simulação, sem tabela ou motor comercial.
-17. `20260809144137_pending_onboarding_scope_foundation.sql`: onboarding pendente, hierarquia de reporting scopes, grants temporais/revogáveis, delegação direcional, locks de topologia e administração escopada fail-closed.
-18. `20260809144143_qlik_rls_contract_hardening.sql`: ponte Qlik aditiva, limites de payload, ACL sem tabela direta, ingestão interna mínima e leitura humana escopada. Preserva a RPC legada até hardening destrutivo posterior ao cutover.
-19. `20260809181422_integration_identity_governance.sql`: owners, mappings externos versionados, histórico auditável, fila de reconciliação e lineage dos grants de reporting scope.
-20. `20260809181424_crm_read_model_v3.sql`: autoridades privadas de fonte, dimensões canônicas, runs/fatos imutáveis, ingestão v3 e leitura autenticada por dataset, permissão e scope efetivo.
-21. `20260810165927_qlik_relay_mapping_cutover.sql`: papel/RPC exclusivos do relay, credenciais e gates vazios, ledger sanitizado, saúde agregada e importação de mappings com preview/apply atômico.
+16. `20260808235856_grant_imob_ranking_service_role.sql`: marker histórico no-op; não reproduz o grant direto remoto proibido.
+17. `20260809004414_add_atomic_imob_ranking_publish_rpc.sql`: marker histórico no-op; não copia verificador, RPC ou grants remotos.
+18. `20260809010942_restrict_imob_ranking_rpc_roles.sql`: marker histórico no-op; não reproduz a execução anônima remota.
+19. `20260809024000_simulator_visual_catalog.sql`: permissão de leitura e hierarquia protegida do hub e das cinco jornadas visuais de simulação, sem tabela ou motor comercial.
+20. `20260809031936_qlik_ranking_developments.sql`: marker histórico no-op; a forma segura é convergida posteriormente.
+21. `20260809144137_pending_onboarding_scope_foundation.sql`: onboarding pendente, hierarquia de reporting scopes, grants temporais/revogáveis, delegação direcional, locks de topologia e administração escopada fail-closed.
+22. `20260809144143_qlik_rls_contract_hardening.sql`: ponte Qlik aditiva, limites de payload, ACL sem tabela direta, ingestão interna mínima e leitura humana escopada. Preserva a RPC legada até hardening destrutivo posterior ao cutover.
+23. `20260809181422_integration_identity_governance.sql`: owners, mappings externos versionados, histórico auditável, fila de reconciliação e lineage dos grants de reporting scope.
+24. `20260809181424_crm_read_model_v3.sql`: autoridades privadas de fonte, dimensões canônicas, runs/fatos imutáveis, ingestão v3 e leitura autenticada por dataset, permissão e scope efetivo.
+25. `20260810165927_qlik_relay_mapping_cutover.sql`: papel/RPC exclusivos do relay, credenciais e gates vazios, ledger sanitizado, saúde agregada e importação de mappings com preview/apply atômico.
+26. `20260810201703_commercial_engines_policy_runtime.sql`: runtime privado/versionado para motores comerciais, com zero política, gate ou grant real seedado.
 
 ## Desenvolvimento local
 
@@ -48,18 +54,18 @@ pnpm exec supabase db lint --local
 pnpm db:test
 pnpm exec supabase db advisors --local --type security
 pnpm exec supabase db advisors --local --type performance
-pnpm exec supabase db reset
+pnpm exec supabase db reset --local --no-seed
 pnpm db:stop
 ```
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 770 testes pgTAP em 16 arquivos: 28 dos motivos de
+`supabase test db` planeja 863 testes pgTAP em 17 arquivos: 28 dos motivos de
 acesso, 51 regressões de hardening escopado, 28 do dashboard, 25 das metas, 20
 da matriz global de grants, 60 do schema Qlik, 33 do catálogo, 28 do signup
 pendente, 26 dos pontos, 54 do contrato Qlik, 20 da governança de identidades,
 27 do ranking, 143 do read model v3, 98 da matriz de escopos, 43 da ingestão
-Salesforce e 86 do relay/mappings. A cobertura verifica nomes,
+Salesforce, 86 do relay/mappings e 93 do runtime comercial. A cobertura verifica nomes,
 schema, grants, policies, constraints, disponibilidade e autoridade de fontes,
 preservação de dados, mappings, lineage, provisionamento, usuários inativos,
 overrides, limites de payload, delegação direcional, cardinalidade de escopo,

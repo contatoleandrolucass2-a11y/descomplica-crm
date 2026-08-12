@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- Torna os dois gates locais que consomem `supabase status --output json`
+  tolerantes às mensagens informativas do CLI ao redor do único objeto JSON,
+  mantendo rejeição fail-closed para saída ausente, truncada ou ambígua.
+- Adiciona E2E Playwright local com nove perfis, autenticação e matriz exata das
+  21 rotas/permissões,
+  superfícies comerciais, filtros, flags off, endpoints e simuladores
+  bloqueados, usando apenas contas/fixtures efêmeras removidas no encerramento.
+- Corrige o ciclo de redirect de identidades autenticadas sem contexto aprovado,
+  retornando 403 genérico com logout seguro sem expor o estado do onboarding.
+- Versiona quatro markers históricos no-op para migrations remotas sem copiar
+  verifier, grants, fórmula ou DDL inseguro e atualiza a matriz com relay e
+  runtime comercial.
+- Adiciona ensaio reproduzível em dois projetos PostgreSQL 17 locais e
+  independentes, com reset de 26 migrations, 863 pgTAP/lint/advisors em ambos,
+  backup/restore lógico e fingerprint fail-closed de owners, privilégios, RLS,
+  DDL, ledger e dados, sem mutar ACL no alvo.
+- Remove dois warnings do lint SQL com inicialização tipada explícita dos arrays
+  UUID internos do read model v3, sem alterar a regra de negócio.
+- Consolida pacote de aprovações, auditoria #26–#31 e runbook de merge train,
+  canário, rollback floor e deploy; toda mudança remota continua bloqueada.
+- Identifica o SHA de release sanitizado no healthcheck e amplia CI com formato,
+  banco, E2E, matriz visual e restore isolado.
+- Propaga `IMAGE_TAG` como identidade de runtime do container para tornar a
+  conferência de canário e rollback verificável pelo healthcheck.
+- Torna a QA visual objetiva com 87 comparações de baseline e auditorias WCAG
+  A/AA, mantendo candidatos separados, baseline imutável no modo de verificação
+  e screenshots sanitizados sem credenciais.
+- Corrige contraste do aviso de indisponibilidade dos simuladores e do rótulo
+  de capacidade das metas nos três temas.
 - Adiciona runtime determinístico e versionado para 14 motores comerciais, com
   DSL fechada, decimal exato, datas civis, casos de ouro obrigatórios e hashes
   canônicos, sem incorporar fórmula, meta, ponto, prêmio ou valor real.

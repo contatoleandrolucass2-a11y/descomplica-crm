@@ -47,6 +47,7 @@ const expectedProtectedRoutes = [
 const manifest = JSON.parse(
   readFileSync(new URL("../docs/qa/reference-parity/manifest.json", import.meta.url), "utf8"),
 ) as {
+  schemaVersion: number;
   captures: Array<{
     kind: string;
     route: string;
@@ -96,8 +97,12 @@ const authenticatedResults = JSON.parse(
     "utf8",
   ),
 ) as {
+  schemaVersion: number;
   passed: boolean;
+  mode: string;
+  captureCommit: string;
   credentialsPersisted: boolean;
+  storageStatePersisted: boolean;
   worktreeDirtyAtCapture: boolean;
   worktreeFingerprint: string;
   worktreeFingerprintAlgorithm: string;
@@ -124,6 +129,13 @@ const authenticatedResults = JSON.parse(
     reducedMotion: boolean;
     horizontalOverflow: boolean;
   }>;
+  accessibilityChecks: Array<{
+    route: string;
+    viewport: string;
+    theme: string;
+    violations: Array<{ id: string; affectedNodes: number }>;
+    passed: boolean;
+  }>;
   zoom: {
     passed: boolean;
     routes: Array<{
@@ -136,14 +148,47 @@ const authenticatedResults = JSON.parse(
   };
   keyboard: Record<string, boolean>;
   simulatorValidation: Record<string, boolean>;
+  baselineIntegrity: {
+    trackedFilesRequired: boolean;
+    committedAtStart: boolean;
+    unchangedDuringCapture: boolean;
+  };
+  baselinePromotion: {
+    requested: boolean;
+    performed: boolean;
+    method: string;
+    previousBaselineManifestSha256: string;
+    previousBaselineResultSha256: string;
+  };
+  baselineUsed: {
+    fileCount: number;
+    manifestSha256: string;
+    files: Array<{
+      path: string;
+      tracked: boolean;
+      bytes: number;
+      sha256: string;
+    }>;
+  };
   visualInspectionCoverage: {
     responsiveScreenshots: number;
     themeScreenshots: number;
+    accessibilityAudits: number;
+    baselineComparisons: number;
+    changedPixelRatioThreshold: number;
+    channelTolerance: number;
   };
   screenshots: Array<{
     path: string;
     bytes: number;
     sha256: string;
+    visualComparison: {
+      passed: boolean;
+      reason: string;
+      changedPixelRatio: number;
+      baselineUsed: { path: string; tracked: boolean; bytes: number; sha256: string };
+    };
+    previousBaselineComparison: { passed: boolean; changedPixelRatio: number };
   }>;
 };
 
@@ -231,8 +276,12 @@ describe("versioned reference parity catalog", () => {
   });
 
   it("records complete authenticated local QA without persisting credentials", () => {
+    expect(authenticatedResults.schemaVersion).toBe(2);
     expect(authenticatedResults.passed).toBe(true);
+    expect(authenticatedResults.mode).toBe("update-baseline");
+    expect(authenticatedResults.captureCommit).toMatch(/^[a-f0-9]{40}$/);
     expect(authenticatedResults.credentialsPersisted).toBe(false);
+    expect(authenticatedResults.storageStatePersisted).toBe(false);
     expect(authenticatedResults.identityVerification.endpoint).toMatch(
       /^http:\/\/(127\.0\.0\.1|localhost):\d+$/,
     );
@@ -270,6 +319,12 @@ describe("versioned reference parity catalog", () => {
         (check) => check.passed && check.reducedMotion && !check.horizontalOverflow,
       ),
     ).toBe(true);
+    expect(authenticatedResults.accessibilityChecks).toHaveLength(87);
+    expect(
+      authenticatedResults.accessibilityChecks.every(
+        (check) => check.passed && check.violations.length === 0,
+      ),
+    ).toBe(true);
 
     expect(authenticatedResults.zoom.passed).toBe(true);
     expect(authenticatedResults.zoom.routes).toHaveLength(18);
@@ -291,15 +346,49 @@ describe("versioned reference parity catalog", () => {
     expect(authenticatedResults.visualInspectionCoverage).toEqual({
       responsiveScreenshots: 72,
       themeScreenshots: 15,
+      accessibilityAudits: 87,
+      baselineComparisons: 87,
+      changedPixelRatioThreshold: 0.01,
+      channelTolerance: 16,
     });
     expect(authenticatedResults.screenshots).toHaveLength(87);
-    expect(typeof authenticatedResults.worktreeDirtyAtCapture).toBe("boolean");
+    expect(authenticatedResults.worktreeDirtyAtCapture).toBe(false);
     expect(authenticatedResults.worktreeFingerprint).toMatch(/^[a-f0-9]{64}$/);
     expect(authenticatedResults.worktreeFingerprintAlgorithm).toBe(
       "sha256-git-diff-head-and-untracked-v1",
     );
+    expect(authenticatedResults.baselineIntegrity).toEqual({
+      trackedFilesRequired: true,
+      committedAtStart: true,
+      unchangedDuringCapture: true,
+    });
+    expect(authenticatedResults.baselinePromotion).toMatchObject({
+      requested: true,
+      performed: true,
+      method: "same-filesystem transactional rename with rollback",
+    });
+    expect(authenticatedResults.baselinePromotion.previousBaselineManifestSha256).toMatch(
+      /^[a-f0-9]{64}$/,
+    );
+    expect(authenticatedResults.baselinePromotion.previousBaselineResultSha256).toMatch(
+      /^[a-f0-9]{64}$/,
+    );
+    expect(authenticatedResults.baselineUsed.fileCount).toBe(87);
+    expect(authenticatedResults.baselineUsed.files).toHaveLength(87);
+    expect(authenticatedResults.baselineUsed.manifestSha256).toMatch(/^[a-f0-9]{64}$/);
 
     for (const screenshot of authenticatedResults.screenshots) {
+      expect(screenshot.visualComparison.passed).toBe(true);
+      expect(screenshot.visualComparison.reason).toBe("baseline_updated");
+      expect(screenshot.visualComparison.changedPixelRatio).toBeLessThanOrEqual(0.01);
+      expect(screenshot.visualComparison.baselineUsed).toMatchObject({
+        path: `docs/qa/reference-parity/${screenshot.path}`,
+        tracked: true,
+        bytes: screenshot.bytes,
+        sha256: screenshot.sha256,
+      });
+      expect(screenshot.previousBaselineComparison.passed).toBe(true);
+      expect(screenshot.previousBaselineComparison.changedPixelRatio).toBeLessThanOrEqual(0.01);
       const contents = readFileSync(
         new URL(`../docs/qa/reference-parity/${screenshot.path}`, import.meta.url),
       );

@@ -118,10 +118,65 @@ function parseLoopbackDatabaseUrl(rawValue) {
   };
 }
 
+function extractSingleTopLevelJsonObject(stdout) {
+  let candidate = null;
+  let start = -1;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = 0; index < stdout.length; index += 1) {
+    const character = stdout[index];
+
+    if (depth === 0) {
+      if (character === "}") {
+        throw new Error("Supabase CLI did not return valid local status JSON.");
+      }
+      if (character !== "{") continue;
+      if (candidate !== null) {
+        throw new Error("Supabase CLI did not return valid local status JSON.");
+      }
+
+      start = index;
+      depth = 1;
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (character === "\\") {
+        escaped = true;
+      } else if (character === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (character === '"') {
+      inString = true;
+    } else if (character === "{") {
+      depth += 1;
+    } else if (character === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        candidate = stdout.slice(start, index + 1);
+        start = -1;
+      }
+    }
+  }
+
+  if (candidate === null || depth !== 0) {
+    throw new Error("Supabase CLI did not return valid local status JSON.");
+  }
+
+  return candidate;
+}
+
 function parseLocalStatus(stdout) {
   let status;
   try {
-    status = JSON.parse(stdout);
+    status = JSON.parse(extractSingleTopLevelJsonObject(stdout));
   } catch {
     throw new Error("Supabase CLI did not return valid local status JSON.");
   }
@@ -1066,6 +1121,13 @@ async function verifyFixturesThroughRls({ apiUrl, publishableKey, account, marke
 }
 
 function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
+  const requestedArguments = process.argv.slice(2);
+  if (
+    requestedArguments.length > 1 ||
+    (requestedArguments.length === 1 && requestedArguments[0] !== "--update-baseline")
+  ) {
+    throw new Error("Authenticated visual QA accepts only the optional --update-baseline flag.");
+  }
   const childEnvironment = {
     ...environmentSubset([
       "PATH",
@@ -1086,7 +1148,7 @@ function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
   };
 
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [visualHarnessPath], {
+    const child = spawn(process.execPath, [visualHarnessPath, ...requestedArguments], {
       cwd: repositoryRoot,
       detached: true,
       env: childEnvironment,

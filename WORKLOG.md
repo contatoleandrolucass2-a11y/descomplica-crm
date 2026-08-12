@@ -1,5 +1,49 @@
 # Worklog
 
+## 2026-08-10 — release candidate, E2E e gates
+
+- A primeira execução do CI remoto revelou que o Supabase CLI pode escrever
+  mensagens informativas junto do JSON de status. Os gates E2E e visual agora
+  extraem exatamente um objeto JSON balanceado e rejeitam saída ausente,
+  truncada ou múltipla; casos sintéticos, E2E/RLS e a matriz visual autenticada
+  passaram localmente após a correção.
+- Branch criada do SHA exato
+  `d00118fe62296fa3e23e266585899e3ee3a78478`; feature flags permaneceram off.
+- Playwright passou a executar login inválido/anônimo, logout, nove perfis,
+  catálogo e permissões exatas nas 21 rotas, Dashboard, cinco etapas, Ranking,
+  Canal, filtros, v3 desligado, relay/motores indisponíveis e simuladores visuais
+  bloqueados.
+- A execução inicial revelou ciclo de redirect para conta autenticada ainda não
+  aprovada. A distinção sessão válida/sem autorização agora termina em 403
+  uniforme sem revelar estado do perfil; o próprio 403 permite logout e troca
+  de conta, cobertos no navegador com o perfil pending.
+- Quatro versions remotas ganharam markers locais no-op. Nenhum verifier, grant,
+  fórmula ou DDL inseguro foi copiado. A matriz registra o bloqueio de ordem das
+  três migrations locais antigas; nenhum push remoto é hoje autorizado.
+- Dois projetos/containers PostgreSQL 17 efêmeros e independentes refizeram 26
+  migrations; origem e alvo restaurado passaram 863 pgTAP, lint e advisors. O
+  backup/restore preservou owners e privilégios efetivos e obteve fingerprint
+  canônico idêntico sem mutar ACL no alvo. Roles relay/engine ficaram `NOLOGIN`;
+  credenciais, gates, mappings, políticas e execuções permaneceram zerados.
+- Os dois casts implícitos de arrays UUID no read model v3 foram tornados
+  explícitos; o lint SQL local passou sem warnings depois de reset completo.
+- O Compose agora injeta a tag imutável também no runtime do container, para o
+  healthcheck identificar o SHA em vez de depender apenas do build ARG.
+- As 12 divergências do `format:check` foram corrigidas mecanicamente. CI ganhou
+  jobs de formato, Supabase/pgTAP, Playwright/matriz visual e restore isolado.
+- A matriz visual passou a falhar por baseline ausente/drift acima de 1%, roda
+  Axe WCAG A/AA em 87 combinações e publica somente candidatos sanitizados no
+  CI, inclusive em falha. O modo normal mantém o baseline igual ao `HEAD`; uma
+  atualização exige flag explícita e promoção transacional após todos os checks.
+- A primeira execução objetiva encontrou contraste insuficiente no aviso de
+  indisponibilidade dos simuladores e no rótulo de capacidade das metas; ambos
+  passaram a preservar contraste integral sem mudar comportamento.
+- Pacote único documenta aprovações, merge train empilhado, bloqueio de ordem de
+  migrations, app-first, canário, rollback floor e deploy futuro.
+- Nenhum Supabase remoto, dado, grant aplicado, n8n, Salesforce, Qlik, VPS,
+  container externo, DNS ou Nginx foi alterado. Não houve merge, cutover ou
+  deploy.
+
 ## 2026-08-10 — runtime versionado de políticas comerciais
 
 - Branch criada do SHA exato `1f570d0a7b3ce64571019b121b0b4aff132e1676`.

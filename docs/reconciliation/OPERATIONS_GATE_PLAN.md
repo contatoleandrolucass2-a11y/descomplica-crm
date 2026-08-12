@@ -148,12 +148,12 @@ sessão ausente da CLI e pela falta de um alvo isolado/custo aprovado.
 
 Depois do restore, nunca antes:
 
-1. aplicar em cópia os markers históricos seguros das quatro versões somente
-   remotas, sem verifier ou grants legados;
-2. aplicar as três migrations somente locais e uma nova migration de hardening
-   posterior a `20260809031936`;
-3. comparar DDL, histórico, ACL, RLS e contagens com a
-   [matriz](MIGRATION_MATRIX.md);
+1. reproduzir em cópia os quatro markers históricos no-op, sem verifier, fórmula
+   ou grants legados;
+2. aplicar, na ordem e estratégia aprovadas, as nove versões hoje somente
+   locais inventariadas na [matriz](MIGRATION_MATRIX.md); três delas são mais
+   antigas que `20260809031936` e bloqueiam `db push` normal;
+3. comparar DDL, histórico, ACL, RLS e contagens com a matriz;
 4. provar que a RPC Qlik legada e todo acesso `anon`/direto de `service_role`
    foram removidos na cópia;
 5. provar que o caller Qlik tem contrato M2M novo e rotacionável;

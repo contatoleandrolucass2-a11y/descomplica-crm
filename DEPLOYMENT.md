@@ -131,8 +131,12 @@ Não autorize wildcard de produção nem caminhos hipotéticos. Quando callback,
 OAuth, magic link ou recuperação forem implementados, o respectivo caminho
 exato deverá entrar na allowlist no mesmo incremento.
 
-Para rollback, selecione uma imagem imutável que permaneça no host e não faça
-novo build:
+Para rollback antes da nova pilha de migrations, selecione uma imagem imutável
+que permaneça no host e não faça novo build. Depois que as novas permission
+keys/migrations entrarem no banco, uma imagem antiga pode falhar fechada por
+drift de catálogo. Nesse caso, o rollback floor é a imagem da release candidate
+compatível (ou outra comprovadamente equivalente e posterior a `d00118f`) com
+todas as flags desligadas; não volte para imagem pré-pilha.
 
 ```bash
 export IMAGE_TAG=<sha-anterior>
@@ -140,10 +144,12 @@ docker compose --env-file /etc/descomplica-crm/production.env up -d --no-build
 curl --fail --silent http://127.0.0.1:3000/api/health
 ```
 
-O rollback deve restaurar também a cópia anterior de `production.env`. Se a
-imagem anterior não reconhecer as flags, preserve a imagem smoke atual e não a
-substitua até que o healthcheck e o comportamento dos endpoints estejam
-validados.
+O rollback deve restaurar também uma configuração compatível com o schema,
+mantendo v3/relay/motores off e gates revogados. Se a imagem anterior não
+reconhecer todas as permission keys e flags, preserve a RC compatível. Valide o
+`version` de `/api/health` e os endpoints antes de trocar qualquer container.
+Detalhes no
+[runbook da release candidate](docs/release-candidate/RELEASE_RUNBOOK.md).
 
 Enquanto DNS e certificado não estiverem prontos, habilite somente
 `deploy/nginx/crm.descomplicapro.com.br.http.conf`, que atende o desafio ACME e

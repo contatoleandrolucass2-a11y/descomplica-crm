@@ -34,9 +34,11 @@ function isPermissionKey(value: string): value is PermissionKey {
   return Object.prototype.hasOwnProperty.call(PERMISSIONS, value);
 }
 
-// Resolve the caller's authorization context, or null when unauthenticated /
-// no role assigned. Throws AuthorizationError FORBIDDEN on any RPC failure,
-// with a generic message (never leaks whether a user/role/permission exists).
+// Resolve the caller's authorization context, or null when unauthenticated.
+// An authenticated identity without an approved, scoped context is forbidden;
+// treating it as anonymous would bounce between /login and /app forever because
+// the login page correctly recognizes the still-valid Supabase session.
+// Throws a generic FORBIDDEN error without leaking onboarding/profile details.
 export async function getCurrentAuthorizationContext(): Promise<AuthorizationContext | null> {
   const supabase = await createClient();
 
@@ -59,9 +61,10 @@ export async function getCurrentAuthorizationContext(): Promise<AuthorizationCon
   const rows = (data ?? []) as AuthorizationContextRow[];
   const row = rows[0];
 
-  // No row → no role assigned / access rule blocked. Treat as no context.
+  // The session is valid, so an empty result means authorization denied rather
+  // than unauthenticated. Keep that distinction all the way to forbidden().
   if (!row) {
-    return null;
+    throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
   }
 
   // Defensive: validate the RPC payload against the local catalog before

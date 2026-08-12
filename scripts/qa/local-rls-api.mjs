@@ -1,5 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
-import { execFile, spawnSync } from "node:child_process";
+import { execFile, spawn, spawnSync } from "node:child_process";
+import { stat } from "node:fs/promises";
+import { createServer } from "node:net";
 import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
@@ -21,7 +23,51 @@ const requiredRoles = [
   "pending",
 ];
 const legacyRoles = new Set(["user", "supervisor", "broker_lead"]);
-const positivePageRoles = new Set(["master", "admin", "broker", "coordinator", "real_estate"]);
+const simulatorPageKeys = [
+  "crm.simulation",
+  "crm.simulation.caixa",
+  "crm.simulation.wf13",
+  "crm.simulation.wf14",
+  "crm.simulation.wf15",
+  "crm.simulation.wf16",
+];
+const masterCommercialPageKeys = [
+  "crm.dashboard",
+  "crm.partnerships",
+  "crm.ranking",
+  "crm.settings",
+  "crm.settings.goals",
+  "crm.settings.partnerships",
+  "crm.settings.points",
+  "crm.stage.appointments",
+  "crm.stage.folders",
+  "crm.stage.opportunities",
+  "crm.stage.sales",
+  "crm.stage.visits",
+];
+const masterAdministrativePageKeys = ["admin.home", "admin.pages", "admin.users"];
+const adminPageKeys = ["admin.home", "admin.users"];
+const expectedPageKeysByRole = {
+  master: [
+    ...masterAdministrativePageKeys,
+    ...masterCommercialPageKeys,
+    ...simulatorPageKeys,
+  ].sort(),
+  admin: [...adminPageKeys, ...simulatorPageKeys].sort(),
+  manager: [],
+  broker: [...simulatorPageKeys],
+  coordinator: [...simulatorPageKeys],
+  real_estate: [...simulatorPageKeys],
+  house: [],
+  partnership_channel: [],
+  pending: [],
+};
+const positivePageRoles = new Set(
+  Object.entries(expectedPageKeysByRole)
+    .filter(([, pageKeys]) => pageKeys.length > 0)
+    .map(([role]) => role),
+);
+const activeChildren = new Set();
 
 class LocalQaError extends Error {}
 
@@ -93,10 +139,61 @@ function parseLoopbackDatabaseUrl(rawValue) {
   };
 }
 
+function extractSingleTopLevelJsonObject(stdout) {
+  let candidate = null;
+  let start = -1;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = 0; index < stdout.length; index += 1) {
+    const character = stdout[index];
+
+    if (depth === 0) {
+      if (character === "}") fail("Supabase CLI did not return valid local status JSON.");
+      if (character !== "{") continue;
+      if (candidate !== null) fail("Supabase CLI did not return valid local status JSON.");
+
+      start = index;
+      depth = 1;
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (character === "\\") {
+        escaped = true;
+      } else if (character === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (character === '"') {
+      inString = true;
+    } else if (character === "{") {
+      depth += 1;
+    } else if (character === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        candidate = stdout.slice(start, index + 1);
+        start = -1;
+      }
+    }
+  }
+
+  if (candidate === null || depth !== 0) {
+    fail("Supabase CLI did not return valid local status JSON.");
+  }
+
+  return candidate;
+}
+
 function parseLocalStatus(stdout) {
   let status;
   try {
-    status = JSON.parse(stdout);
+    status = JSON.parse(extractSingleTopLevelJsonObject(stdout));
   } catch {
     fail("Supabase CLI did not return valid local status JSON.");
   }
@@ -140,6 +237,177 @@ async function discoverLocalSupabase() {
   }
 
   return parseLocalStatus(stdout);
+}
+
+async function reserveLoopbackPort() {
+  return await new Promise((resolve, reject) => {
+    const server = createServer();
+    server.unref();
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      if (!address || typeof address === "string") {
+        server.close(() => reject(new Error("Could not reserve a loopback E2E port.")));
+        return;
+      }
+      server.close((error) => (error ? reject(error) : resolve(address.port)));
+    });
+  });
+}
+
+async function assertFreshProductionBuild() {
+  let buildStat;
+  try {
+    buildStat = await stat(path.join(repositoryRoot, ".next", "BUILD_ID"));
+  } catch {
+    fail("Production build is missing; run pnpm build before browser E2E.");
+  }
+
+  let stdout;
+  try {
+    ({ stdout } = await execFileAsync(
+      "git",
+      [
+        "ls-files",
+        "-co",
+        "--exclude-standard",
+        "-z",
+        "--",
+        "app",
+        "lib",
+        "public",
+        "next.config.ts",
+        "package.json",
+        "pnpm-lock.yaml",
+        "postcss.config.mjs",
+        "proxy.ts",
+        "tsconfig.json",
+      ],
+      { cwd: repositoryRoot, encoding: "utf8", maxBuffer: 4 * 1024 * 1024 },
+    ));
+  } catch {
+    fail("Could not verify production build freshness for browser E2E.");
+  }
+
+  const inputs = [...new Set(stdout.split("\0").filter(Boolean))];
+  const inputStats = await Promise.all(inputs.map((file) => stat(path.join(repositoryRoot, file))));
+  if (inputStats.some((input) => input.mtimeMs > buildStat.mtimeMs)) {
+    fail("Production build is stale; run pnpm build before browser E2E.");
+  }
+}
+
+async function assertLoopbackServerReady(origin) {
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    throwIfInterrupted();
+    try {
+      const response = await fetch(`${origin}/login`, {
+        redirect: "manual",
+        signal: AbortSignal.timeout(2_000),
+      });
+      if (response.status < 500) return;
+    } catch {
+      // The production server is still starting.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  fail("Local Next.js production server did not become ready for browser E2E.");
+}
+
+async function startLocalNextServer(local) {
+  await assertFreshProductionBuild();
+  const port = await reserveLoopbackPort();
+  const origin = `http://127.0.0.1:${port}`;
+  const child = spawn("pnpm", ["start", "--hostname", "127.0.0.1", "--port", String(port)], {
+    cwd: repositoryRoot,
+    detached: true,
+    env: {
+      ...environmentSubset(["PATH", "HOME", "TZ", "NODE_OPTIONS", "LD_LIBRARY_PATH"]),
+      NODE_ENV: "production",
+      APP_ORIGIN: origin,
+      NEXT_PUBLIC_SUPABASE_URL: local.apiUrl,
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
+    },
+    stdio: ["ignore", "ignore", "inherit"],
+  });
+  activeChildren.add(child);
+  child.once("exit", () => activeChildren.delete(child));
+  child.once("error", () => activeChildren.delete(child));
+
+  try {
+    await assertLoopbackServerReady(origin);
+    return { child, origin };
+  } catch (error) {
+    await stopChild(child);
+    throw error;
+  }
+}
+
+function signalChildGroup(child, signal) {
+  if (!child?.pid || child.exitCode !== null || child.signalCode !== null) return;
+  try {
+    process.kill(-child.pid, signal);
+  } catch {
+    child.kill(signal);
+  }
+}
+
+async function stopChild(child) {
+  if (!child || child.exitCode !== null || child.signalCode !== null) return;
+  signalChildGroup(child, "SIGTERM");
+  await Promise.race([
+    new Promise((resolve) => child.once("exit", resolve)),
+    new Promise((resolve) => setTimeout(resolve, 5_000)),
+  ]);
+  if (child.exitCode === null && child.signalCode === null) {
+    signalChildGroup(child, "SIGKILL");
+    await new Promise((resolve) => child.once("exit", resolve));
+  }
+}
+
+function runBrowserE2e(origin, accounts) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(
+      "pnpm",
+      ["exec", "playwright", "test", "--config", "playwright.config.ts"],
+      {
+        cwd: repositoryRoot,
+        detached: true,
+        env: {
+          ...environmentSubset([
+            "PATH",
+            "HOME",
+            "CI",
+            "TZ",
+            "NODE_OPTIONS",
+            "PLAYWRIGHT_BROWSERS_PATH",
+            "LD_LIBRARY_PATH",
+          ]),
+          QA_E2E_LOCAL_ONLY: "true",
+          QA_E2E_ORIGIN: origin,
+          QA_E2E_ACCOUNTS: JSON.stringify(
+            accounts.map(({ email, password, role }) => ({ email, password, role })),
+          ),
+        },
+        stdio: ["ignore", "inherit", "inherit"],
+      },
+    );
+    activeChildren.add(child);
+    let settled = false;
+    child.once("error", () => {
+      if (settled) return;
+      settled = true;
+      activeChildren.delete(child);
+      reject(new Error("Playwright release-candidate process could not start."));
+    });
+    child.once("exit", (code, signal) => {
+      if (settled) return;
+      settled = true;
+      activeChildren.delete(child);
+      if (code === 0) resolve();
+      else reject(new Error(`Playwright release-candidate process failed (${signal || code}).`));
+    });
+  });
 }
 
 function localOnlyFetch(expectedOrigin) {
@@ -1041,10 +1309,8 @@ async function verifyAccountThroughRest(local, account, fixtures) {
     }
 
     const pages = assertSuccessfulRows(pagesResult, "Application-page RLS assertion");
-    if (
-      (positivePageRoles.has(account.role) && pages.length === 0) ||
-      (!positivePageRoles.has(account.role) && pages.length !== 0)
-    ) {
+    const actualPageKeys = pages.map((page) => page.key).sort();
+    if (JSON.stringify(actualPageKeys) !== JSON.stringify(expectedPageKeysByRole[account.role])) {
       fail("Application-page visibility does not match role permissions.");
     }
 
@@ -1140,6 +1406,12 @@ async function main() {
   runLocalSql(local.database, preflightSql(), "preflight");
   throwIfInterrupted();
 
+  const browserE2eEnabled = process.env.QA_RELEASE_BROWSER === "true";
+  if (process.env.QA_RELEASE_BROWSER && !browserE2eEnabled) {
+    fail("QA_RELEASE_BROWSER accepts only the literal true when browser E2E is requested.");
+  }
+  const nextServer = browserE2eEnabled ? await startLocalNextServer(local) : null;
+
   const runId = randomBytes(8).toString("hex");
   const runKey = `qa-rls-${runId}`;
   const fixtures = createFixtures(runKey);
@@ -1148,6 +1420,7 @@ async function main() {
   let anonymousDenied = 0;
   let anonymousRows = 0;
   let dualAffiliationDenied = 0;
+  let browserE2e = 0;
 
   try {
     for (const role of requiredRoles) {
@@ -1176,8 +1449,18 @@ async function main() {
       await verifyAccountThroughRest(local, account, fixtures);
       throwIfInterrupted();
     }
+
+    if (nextServer) {
+      await runBrowserE2e(nextServer.origin, accounts);
+      browserE2e = 1;
+      throwIfInterrupted();
+    }
   } finally {
-    await removeEphemeralState(local, adminClient, accounts, fixtures);
+    try {
+      await removeEphemeralState(local, adminClient, accounts, fixtures);
+    } finally {
+      await stopChild(nextServer?.child);
+    }
   }
 
   return {
@@ -1195,12 +1478,14 @@ async function main() {
     anonymousDenied,
     anonymousRows,
     dualAffiliationDenied,
+    browserE2e,
   };
 }
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.on(signal, () => {
     requestedSignal ??= signal;
+    for (const child of activeChildren) signalChildGroup(child, signal);
   });
 }
 
@@ -1210,7 +1495,7 @@ try {
     process.exitCode = requestedSignal === "SIGINT" ? 130 : 143;
   } else {
     process.stdout.write(
-      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_master=${counts.commercialMaster} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} removed=${counts.removed}\n`,
+      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_master=${counts.commercialMaster} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} browser_e2e=${counts.browserE2e} removed=${counts.removed}\n`,
     );
   }
 } catch (error) {
