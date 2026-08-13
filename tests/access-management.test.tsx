@@ -154,8 +154,7 @@ describe("catálogo localizado de acesso", () => {
 
     expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(
       Object.keys(PERMISSIONS).filter(
-        (permission) =>
-          permission !== "crm.simulators.execute" && permission !== "crm.commercial_engine.execute",
+        (permission) => permission !== "crm.commercial_engine.execute",
       ),
     );
     expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual([

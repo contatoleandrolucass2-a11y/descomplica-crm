@@ -14,6 +14,13 @@ import {
   type SimulatorField,
   type SimulatorSection,
 } from "@/lib/crm/simulators/catalog";
+import { isOfficialSimulatorSlug } from "@/lib/crm/simulators/official/catalog";
+import {
+  buildOfficialSimulatorInput,
+  officialSimulatorInitialValues,
+  officialSimulatorResultRows,
+  type OfficialSimulatorResultRow,
+} from "@/lib/crm/simulators/official/client";
 
 import styles from "../simulators.module.css";
 
@@ -287,10 +294,35 @@ function SectionPreview({ section }: { section: SimulatorSection }) {
   );
 }
 
-export function SimulatorWorkspace({ definition }: { definition: SimulatorDefinition }) {
-  const [values, setValues] = useState<Record<string, string | boolean>>({});
+type OfficialExecutionResult = {
+  formulaVersion: string;
+  rows: OfficialSimulatorResultRow[];
+  ok: boolean;
+  errors: string[];
+  warnings: string[];
+};
+
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string") ? value : [];
+}
+
+export function SimulatorWorkspace({
+  definition,
+  executionEnabled = false,
+  executionReason = UNAVAILABLE_MESSAGE,
+}: {
+  definition: SimulatorDefinition;
+  executionEnabled?: boolean;
+  executionReason?: string;
+}) {
+  const [values, setValues] = useState<Record<string, string | boolean>>(() =>
+    officialSimulatorInitialValues(definition.slug),
+  );
   const [touchedFields, setTouchedFields] = useState<ReadonlySet<string>>(() => new Set());
   const [repeatCounts, setRepeatCounts] = useState<Record<string, number>>({});
+  const [executionStatus, setExecutionStatus] = useState<"idle" | "pending" | "error">("idle");
+  const [executionError, setExecutionError] = useState("");
+  const [officialResult, setOfficialResult] = useState<OfficialExecutionResult | null>(null);
   const navigationGroups = Array.from(
     new Set(
       definition.sections
@@ -346,9 +378,58 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
       return;
     }
 
-    setValues({});
+    setValues(officialSimulatorInitialValues(definition.slug));
     setTouchedFields(new Set());
     setRepeatCounts({});
+    setExecutionStatus("idle");
+    setExecutionError("");
+    setOfficialResult(null);
+  }
+
+  async function executeOfficialSimulator() {
+    if (!executionEnabled || !isOfficialSimulatorSlug(definition.slug)) return;
+    const input = buildOfficialSimulatorInput(definition.slug, values);
+    if (!input) return;
+
+    setExecutionStatus("pending");
+    setExecutionError("");
+    setOfficialResult(null);
+    try {
+      const response = await fetch(`/api/official-simulator/${definition.slug}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ schemaVersion: 1, input }),
+      });
+      const payload: unknown = await response.json();
+      if (!response.ok || !payload || typeof payload !== "object") {
+        throw new Error("request_failed");
+      }
+      const envelope = payload as Record<string, unknown>;
+      const result = envelope.result;
+      const rows = officialSimulatorResultRows(definition.slug, result);
+      if (
+        !rows ||
+        typeof envelope.formulaVersion !== "string" ||
+        !result ||
+        typeof result !== "object"
+      ) {
+        throw new Error("invalid_response");
+      }
+      const resultRecord = result as Record<string, unknown>;
+      setOfficialResult({
+        formulaVersion: envelope.formulaVersion,
+        rows,
+        ok: resultRecord.ok === true,
+        errors: stringList(resultRecord.errors),
+        warnings: stringList(resultRecord.warnings),
+      });
+      setExecutionStatus("idle");
+    } catch {
+      setExecutionStatus("error");
+      setExecutionError(
+        "Não foi possível concluir o cálculo. Nenhum resultado parcial foi considerado válido.",
+      );
+    }
   }
 
   function selectAdjacentTab(event: ReactKeyboardEvent<HTMLAnchorElement>, currentIndex: number) {
@@ -400,6 +481,8 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
   function renderSection(section: SimulatorSection) {
     const sectionIndex = definition.sections.findIndex(({ key }) => key === section.key);
     const repeatCount = section.repeatable ? (repeatCounts[section.key] ?? 1) : 1;
+    const repeatLimitReached =
+      section.repeatable?.maxItems !== undefined && repeatCount >= section.repeatable.maxItems;
 
     return (
       <section className={styles.formSection} key={section.key}>
@@ -446,15 +529,20 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
             <div className={`${styles.actionBar} ${styles.fieldWide}`}>
               <p>
                 <strong>Estrutura repetível.</strong>
-                <span>Sem limite presumido; a política oficial permanece pendente.</span>
+                <span>
+                  {section.repeatable.maxItems
+                    ? `Limite oficial: ${section.repeatable.maxItems} itens.`
+                    : "Sem limite presumido; a política oficial permanece pendente."}
+                </span>
               </p>
               <button
                 type="button"
-                className={styles.enabledAction}
-                data-cta-state="enabled"
+                disabled={repeatLimitReached}
+                className={repeatLimitReached ? styles.unavailableAction : styles.enabledAction}
+                data-cta-state={repeatLimitReached ? "unavailable" : "enabled"}
                 onClick={() => setRepeatCount(section.key, repeatCount + 1)}
               >
-                {section.repeatable.addLabel}
+                {repeatLimitReached ? "Limite atingido" : section.repeatable.addLabel}
               </button>
             </div>
           </div>
@@ -479,7 +567,7 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
               <CalculatorIcon />
               <span>
                 <small>Motor de cálculo</small>
-                <strong>Aguardando validação</strong>
+                <strong>{executionEnabled ? "Validação Master" : "Aguardando validação"}</strong>
               </span>
             </div>
           }
@@ -499,18 +587,30 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
           }
         />
 
-        <DataState
-          variant="unavailable"
-          compact
-          title={UNAVAILABLE_MESSAGE}
-          description="Os campos permanecem disponíveis para conferência. Nenhum valor é calculado, persistido ou tratado como proposta comercial."
-        />
+        {executionEnabled ? (
+          <DataState
+            variant="warning"
+            compact
+            title="Motor oficial em validação Master"
+            description="O cálculo usa a versão oficial identificada na referência viva. O resultado não é persistido nem constitui proposta comercial."
+          />
+        ) : (
+          <DataState
+            variant="unavailable"
+            compact
+            title={UNAVAILABLE_MESSAGE}
+            description="Os campos permanecem disponíveis para conferência. Nenhum valor é calculado, persistido ou tratado como proposta comercial."
+          />
+        )}
 
         <div className={styles.workspace}>
           <form
             className={styles.form}
             aria-label={`Entradas de ${definition.title}`}
-            onSubmit={(event) => event.preventDefault()}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void executeOfficialSimulator();
+            }}
           >
             {navigationGroups.length > 1 ? (
               <nav aria-label="Áreas da simulação" className={styles.simulatorNav} role="tablist">
@@ -588,23 +688,42 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
                 >
                   Imprimir estrutura
                 </button>
-                <span className={styles.blockedControl}>
+                {executionEnabled ? (
                   <button
-                    type="button"
-                    disabled
-                    className={styles.blockedAction}
-                    data-cta-state="blocked"
-                    aria-describedby="calculation-blocked-reason"
+                    type="submit"
+                    disabled={executionStatus === "pending"}
+                    className={styles.enabledAction}
+                    data-cta-state="enabled"
                   >
-                    <LockIcon />
-                    {definition.actionLabel}
+                    {executionStatus === "pending" ? "Calculando…" : definition.actionLabel}
                   </button>
-                  <span id="calculation-blocked-reason" className={styles.blockedReason}>
-                    Motor bloqueado. {UNAVAILABLE_MESSAGE}.
+                ) : (
+                  <span className={styles.blockedControl}>
+                    <button
+                      type="button"
+                      disabled
+                      className={styles.blockedAction}
+                      data-cta-state="blocked"
+                      aria-describedby="calculation-blocked-reason"
+                    >
+                      <LockIcon />
+                      {definition.actionLabel}
+                    </button>
+                    <span id="calculation-blocked-reason" className={styles.blockedReason}>
+                      Motor bloqueado. {executionReason}.
+                    </span>
                   </span>
-                </span>
+                )}
               </div>
             </div>
+            {executionStatus === "error" ? (
+              <DataState
+                variant="error"
+                compact
+                title="Cálculo não concluído"
+                description={executionError}
+              />
+            ) : null}
           </form>
 
           <aside className={styles.results} aria-labelledby="simulator-results-title">
@@ -618,21 +737,55 @@ export function SimulatorWorkspace({ definition }: { definition: SimulatorDefini
               </div>
             </div>
             <p className={styles.resultsDescription}>
-              Estrutura pronta para receber somente cálculo oficialmente validado.
+              {officialResult
+                ? "Resultado determinístico da fórmula oficial versionada."
+                : "Estrutura pronta para receber somente cálculo oficialmente validado."}
             </p>
             <dl className={styles.resultList}>
-              {definition.resultItems.map((item) => (
-                <div key={item}>
-                  <dt>{item}</dt>
-                  <dd>
-                    <UnavailableValue reason={UNAVAILABLE_MESSAGE} />
-                  </dd>
-                </div>
-              ))}
+              {officialResult
+                ? officialResult.rows.map((item) => (
+                    <div key={item.label}>
+                      <dt>{item.label}</dt>
+                      <dd>
+                        <strong>{item.value}</strong>
+                      </dd>
+                    </div>
+                  ))
+                : definition.resultItems.map((item) => (
+                    <div key={item}>
+                      <dt>{item}</dt>
+                      <dd>
+                        <UnavailableValue reason={UNAVAILABLE_MESSAGE} />
+                      </dd>
+                    </div>
+                  ))}
             </dl>
             <div className={styles.resultNotice}>
-              <strong>{UNAVAILABLE_MESSAGE}</strong>
-              <span>Nenhuma fórmula da referência foi copiada.</span>
+              {officialResult ? (
+                <>
+                  <strong>
+                    {officialResult.ok
+                      ? "Cálculo concluído para conferência."
+                      : "Entradas rejeitadas pelas regras oficiais."}
+                  </strong>
+                  <span>Versão da fórmula: {officialResult.formulaVersion}</span>
+                  {officialResult.errors.map((error) => (
+                    <span key={error}>{error}</span>
+                  ))}
+                  {officialResult.warnings.map((warning) => (
+                    <span key={warning}>{warning}</span>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <strong>{executionEnabled ? "Preencha e calcule." : UNAVAILABLE_MESSAGE}</strong>
+                  <span>
+                    {executionEnabled
+                      ? "O cálculo será executado sem persistir os dados informados."
+                      : "Nenhuma fórmula é executada enquanto o gate permanece desligado."}
+                  </span>
+                </>
+              )}
             </div>
           </aside>
         </div>

@@ -99,9 +99,9 @@ export const PERMISSIONS = {
     minLevel: 10,
   },
   "crm.simulators.execute": {
-    label: "Executar simuladores",
-    description: "Executa somente motores comerciais aprovados e vigentes.",
-    minLevel: 10,
+    label: "Executar simuladores oficiais",
+    description: "Executa motores oficiais somente na validação controlada do perfil Master.",
+    minLevel: 100,
   },
   "crm.commercial_engine.execute": {
     label: "Executar motores comerciais",

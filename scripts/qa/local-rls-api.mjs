@@ -376,6 +376,8 @@ async function startLocalNextServer(local) {
       APP_ORIGIN: origin,
       NEXT_PUBLIC_SUPABASE_URL: local.apiUrl,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
+      OFFICIAL_SIMULATOR_RUNTIME_MODE: "active",
+      OFFICIAL_SIMULATOR_ENABLED_KEYS: "simulator.wf13",
     },
     stdio: ["ignore", "ignore", "inherit"],
   });

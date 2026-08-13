@@ -7,8 +7,7 @@ const VISUAL_FOUNDATION_PERMISSIONS = [
 ] as const satisfies readonly PermissionKey[];
 
 const MASTER_PERMISSIONS = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
-  (permission) =>
-    permission !== "crm.simulators.execute" && permission !== "crm.commercial_engine.execute",
+  (permission) => permission !== "crm.commercial_engine.execute",
 );
 const ADMIN_PERMISSIONS = [
   "users.view",

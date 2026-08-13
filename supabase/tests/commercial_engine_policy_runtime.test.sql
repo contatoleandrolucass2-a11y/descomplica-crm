@@ -152,7 +152,7 @@ select is(
   '[
     {"key":"crm.commercial_engine.execute","minLevel":100},
     {"key":"crm.commercial_policy.manage","minLevel":100},
-    {"key":"crm.simulators.execute","minLevel":10}
+    {"key":"crm.simulators.execute","minLevel":100}
   ]'::jsonb,
   'commercial management and execution permissions have bounded hierarchy levels'
 );
@@ -170,8 +170,11 @@ select is(
       'crm.simulators.execute'
     )
   ),
-  array['master:crm.commercial_policy.manage']::text[],
-  'management is Master-only and no role receives either execution permission'
+  array[
+    'master:crm.commercial_policy.manage',
+    'master:crm.simulators.execute'
+  ]::text[],
+  'commercial management and simulator execution are Master-only'
 );
 
 select ok(
@@ -1134,21 +1137,22 @@ select is(
 
 reset role;
 
-select is(
+select isnt(
   commercial_engine.get_policy('c1000000-0000-4000-8000-000000000001', 'simulator.wf13', 'shadow'),
   null::jsonb,
-  'Master still receives no simulator policy without execution permission'
+  'Master receives the shadow simulator policy after the explicit execution grant'
 );
 
-select throws_ok(
-  $$select commercial_engine.record_execution('c1000000-0000-4000-8000-000000000001',
+select is(
+  (
+    commercial_engine.record_execution('c1000000-0000-4000-8000-000000000001',
       'simulator.wf13', 'shadow', '79c9cd65725a73aeb7a7763750bd820241d62e9474e48adf6da609be38ca1774',
       'c3000000-0000-4000-8000-000000000030',
       repeat('c', 64), repeat('d', 64), 1
-    )$$,
-  '42501',
-  'forbidden: commercial execution is not permitted',
-  'actor without simulator permission cannot record execution evidence'
+    ) ->> 'replay'
+  ),
+  'false'::text,
+  'Master can record simulator execution evidence after the explicit grant'
 );
 
 reset role;

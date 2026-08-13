@@ -1,5 +1,17 @@
 # Ambiente de desenvolvimento
 
+## Simuladores oficiais
+
+- `OFFICIAL_SIMULATOR_RUNTIME_MODE`: `off` por padrão; único valor habilitador:
+  `active`.
+- `OFFICIAL_SIMULATOR_ENABLED_KEYS`: allowlist separada por vírgulas. Valores
+  conhecidos: `simulator.wf13`, `simulator.wf16`, `simulator.caixa`,
+  `simulator.wf14` e `simulator.wf15`.
+
+Modo inválido, allowlist vazia, duplicada ou com chave desconhecida falha
+fechado. Essas variáveis não carregam segredo e não substituem autorização no
+banco/servidor.
+
 ## Matriz validada
 
 | Ferramenta        |  Versão | Origem/decisão                               |

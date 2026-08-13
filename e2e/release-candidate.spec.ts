@@ -472,6 +472,14 @@ test("v3 follows the isolated gate while Qlik relay and commercial engines remai
   });
   expect(engine.status()).toBe(503);
   await expect(engine.json()).resolves.toEqual({ error: "engine_unavailable" });
+
+  const officialSimulator = await request.post("/api/official-simulator/associativo-fluxo-linear", {
+    data: { schemaVersion: 1, input: {} },
+    headers: { origin: qaTarget.origin },
+    maxRedirects: 0,
+  });
+  expect(officialSimulator.status()).toBe(401);
+  await expect(officialSimulator.json()).resolves.toEqual({ error: "unauthenticated" });
 });
 
 test("isolated homologation exposes its safety controls without sharing production cookies", async ({
@@ -500,12 +508,27 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("simulators stay visual-only and keyboard/theme controls remain operable", async ({
-  browser,
-}) => {
+test("WF13 runs only for Master while other simulators stay blocked", async ({ browser }) => {
   await withRolePage(browser, "master", async (page) => {
+    await page.goto("/app/simulacao/associativo-fluxo-linear");
+    await expect(
+      page.getByRole("heading", { name: "Motor oficial em validação Master", exact: true }),
+    ).toBeVisible();
+    await page.getByLabel("Empreendimento *").fill("Residencial QA");
+    await page.getByLabel("Produto / unidade *").fill("Torre QA 101");
+    await page.getByLabel("Match 100% confirmado").check();
+    await page.getByLabel("Término da obra *").fill("2029-12-31");
+    await page.getByLabel("Renda *").fill("10.000,00");
+    await page.getByLabel("Valor do imóvel *").fill("300.000,00");
+    await page.getByLabel("Financiamento").fill("240.000,00");
+    await page.getByLabel("Entrada / ato").fill("15.000,00");
+    await page.getByLabel("Política comercial conferida").check();
+    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
+    await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
+    await expect(page.getByText("R$ 730,86", { exact: true })).toBeVisible();
+    await expect(page.getByText(/wf13-1\.0\.0/)).toBeVisible();
+
     for (const simulator of [
-      "associativo-fluxo-linear",
       "calcular-documentacao",
       "caixa",
       "tabela-direta",
@@ -582,6 +605,12 @@ test("simulators stay visual-only and keyboard/theme controls remain operable", 
     await page.getByRole("button", { name: "Sair", exact: true }).click();
     await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByRole("heading", { level: 1, name: "Entrar" })).toBeVisible();
+  });
+
+  await withRolePage(browser, "admin", async (page) => {
+    await page.goto("/app/simulacao/associativo-fluxo-linear");
+    await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toBeDisabled();
+    await expect(page.getByText(/Disponível somente para o perfil Master/)).toBeVisible();
   });
 });
 

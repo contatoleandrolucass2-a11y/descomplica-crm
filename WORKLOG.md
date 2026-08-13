@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-08-13 — motor oficial WF13
+
+- A função real do Associativo · Fluxo Linear foi inspecionada somente em
+  leitura na referência viva. O asset e seu SHA-256 foram registrados sem
+  versionar o bundle.
+- A implementação tipada reproduz as operações, datas, limites, mensagens,
+  arredondamentos e memória. Doze casos representativos comparam as saídas da
+  referência e do CRM sem tolerância; todas as diferenças são zero.
+- Runtime e endpoint nascem desligados, sem banco ou integração. Quando
+  habilitados para `simulator.wf13`, ainda exigem sessão, permissão de execução,
+  papel Master e same-origin. Inputs/resultados não são persistidos ou logados.
+- Migration própria concede a execução somente ao Master e remove qualquer
+  vínculo/override residual; a flag permanece off após migration e deploy.
+
 ## 2026-08-13 — sincronização do catálogo RBAC de parcerias
 
 - A revisão pré-aplicação detectou que a migration Master-only usava nível 100,
