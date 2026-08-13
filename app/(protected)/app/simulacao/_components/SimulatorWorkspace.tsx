@@ -479,6 +479,9 @@ export function SimulatorWorkspace({
   }
 
   function renderSection(section: SimulatorSection) {
+    if (executionEnabled && section.fields.length === 0 && section.preview?.kind === "status") {
+      return null;
+    }
     const sectionIndex = definition.sections.findIndex(({ key }) => key === section.key);
     const repeatCount = section.repeatable ? (repeatCounts[section.key] ?? 1) : 1;
     const repeatLimitReached =
@@ -669,7 +672,11 @@ export function SimulatorWorkspace({
             <div className={styles.actionBar}>
               <p>
                 <strong>Preenchimento disponível.</strong>
-                <span>Nenhum cálculo ou envio ao servidor será executado.</span>
+                <span>
+                  {executionEnabled
+                    ? "Cálculo não persistente disponível somente para conferência Master."
+                    : "Nenhum cálculo ou envio ao servidor será executado."}
+                </span>
               </p>
               <div className={styles.simulatorNav}>
                 <button

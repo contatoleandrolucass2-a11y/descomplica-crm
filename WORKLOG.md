@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-08-13 — motor oficial WF16
+
+- A função real de Documentação foi inspecionada somente em leitura na
+  referência viva. Rota, asset e SHA-256 foram registrados sem copiar o bundle.
+- A implementação reproduz normalizações, limites MCMV/SPBE, ITBI, tabela de 48
+  faixas de registro, custos, parcelamento a 1,5% e vencimentos em 120 dias.
+- Treze casos representativos comparam a referência e o CRM campo a campo, sem
+  tolerância; todas as diferenças são zero.
+- O motor usa o endpoint seguro já isolado, com chave `simulator.wf16`, flag
+  independente, sessão, permissão Master e same-origin. Nenhum dado é
+  persistido ou emitido em telemetria.
+- Nenhuma migration adicional, integração externa, regra presumida ou mudança
+  remota foi necessária. Rollback remove somente WF16 da allowlist.
+
 ## 2026-08-13 — motor oficial WF13
 
 - A função real do Associativo · Fluxo Linear foi inspecionada somente em

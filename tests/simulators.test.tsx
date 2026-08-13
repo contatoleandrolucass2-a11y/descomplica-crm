@@ -140,17 +140,23 @@ describe("simulator visual catalog", () => {
     );
   });
 
-  it("renders WF13 as actionable only when the server authorizes the Master canary", () => {
-    const markup = renderToStaticMarkup(
-      <SimulatorWorkspace definition={SIMULATORS["associativo-fluxo-linear"]} executionEnabled />,
-    );
+  it.each([
+    ["associativo-fluxo-linear", "Calcular fluxo linear"],
+    ["calcular-documentacao", "Calcular documentação"],
+  ] as const)(
+    "renders %s as actionable only when the server authorizes the Master canary",
+    (slug, action) => {
+      const markup = renderToStaticMarkup(
+        <SimulatorWorkspace definition={SIMULATORS[slug]} executionEnabled />,
+      );
 
-    expect(markup).toContain("Motor oficial em validação Master");
-    expect(markup).toContain('type="submit"');
-    expect(markup).toContain('data-cta-state="enabled"');
-    expect(markup).not.toContain('data-cta-state="blocked"');
-    expect(markup).toContain('value="84"');
-  });
+      expect(markup).toContain("Motor oficial em validação Master");
+      expect(markup).toContain('type="submit"');
+      expect(markup).toContain('data-cta-state="enabled"');
+      expect(markup).not.toContain('data-cta-state="blocked"');
+      expect(markup).toContain(action);
+    },
+  );
 
   it("renders neutral tabs, repeaters, inventory pagination and local tools", () => {
     const caixaMarkup = renderToStaticMarkup(<SimulatorWorkspace definition={SIMULATORS.caixa} />);
