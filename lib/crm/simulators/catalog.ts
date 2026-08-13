@@ -38,6 +38,7 @@ export interface SimulatorSection {
   repeatable?: {
     itemLabel: string;
     addLabel: string;
+    maxItems?: number;
   };
   preview?: SimulatorSectionPreview;
 }
@@ -112,12 +113,6 @@ export const SIMULATORS = {
             required: true,
             placeholder: "Produto exato do estoque",
           },
-          {
-            key: "official-code",
-            label: "Código oficial",
-            type: "text",
-            placeholder: "Código conforme fonte oficial",
-          },
           { key: "effective-date", label: "Data vigente", type: "date", required: true },
           { key: "construction-end", label: "Término da obra", type: "date", required: true },
           { key: "income", label: "Renda", type: "currency", required: true },
@@ -126,13 +121,6 @@ export const SIMULATORS = {
             label: "Match 100% confirmado",
             type: "checkbox",
             hint: "Empreendimento e produto precisam ser conferidos na base oficial.",
-            wide: true,
-          },
-          {
-            key: "income-validates-annuals",
-            label: "Usar renda para validar anuais",
-            type: "checkbox",
-            hint: "A aplicação depende da política oficial vigente.",
             wide: true,
           },
         ],
@@ -155,13 +143,9 @@ export const SIMULATORS = {
         title: "Ato e sinais",
         fields: [
           { key: "entry", label: "Entrada / ato", type: "currency" },
-          { key: "entry-date", label: "Data do ato", type: "date" },
           { key: "signal-1", label: "Sinal 1", type: "currency" },
-          { key: "signal-1-date", label: "Data do sinal 1", type: "date" },
           { key: "signal-2", label: "Sinal 2", type: "currency" },
-          { key: "signal-2-date", label: "Data do sinal 2", type: "date" },
           { key: "signal-3", label: "Sinal 3", type: "currency" },
-          { key: "signal-3-date", label: "Data do sinal 3", type: "date" },
         ],
       },
       {
@@ -172,11 +156,9 @@ export const SIMULATORS = {
         repeatable: {
           itemLabel: "Anual",
           addLabel: "Adicionar anual",
+          maxItems: 5,
         },
-        fields: [
-          { key: "annual-value", label: "Valor da anual", type: "currency" },
-          { key: "annual-date", label: "Data da anual", type: "date" },
-        ],
+        fields: [{ key: "annual-value", label: "Valor da anual", type: "currency" }],
       },
       {
         key: "commercial-policy",
@@ -194,18 +176,6 @@ export const SIMULATORS = {
             type: "checkbox",
             hint: "O limite deve respeitar a política oficial do empreendimento.",
             wide: true,
-          },
-          {
-            key: "additional-installment-treatment",
-            label: "Tratamento de parcela adicional",
-            type: "text",
-            hint: "Preenchido somente quando previsto pela política oficial.",
-          },
-          {
-            key: "term-extension-treatment",
-            label: "Tratamento de extensão de prazo",
-            type: "text",
-            hint: "Preenchido somente quando previsto pela política oficial.",
           },
         ],
       },

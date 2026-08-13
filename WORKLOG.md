@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-08-13 — motor oficial WF13
+
+- A função real do Associativo · Fluxo Linear foi inspecionada somente em
+  leitura na referência viva. O asset e seu SHA-256 foram registrados sem
+  versionar o bundle.
+- A implementação tipada reproduz as operações, datas, limites, mensagens,
+  arredondamentos e memória. Doze casos representativos comparam as saídas da
+  referência e do CRM sem tolerância; todas as diferenças são zero.
+- Runtime e endpoint nascem desligados, sem banco ou integração. Quando
+  habilitados para `simulator.wf13`, ainda exigem sessão, permissão de execução,
+  papel Master e same-origin. Inputs/resultados não são persistidos ou logados.
+- Migration própria concede a execução somente ao Master e remove qualquer
+  vínculo/override residual; a flag permanece off após migration e deploy.
+
 ## 2026-08-13 — sincronização do catálogo RBAC de parcerias
 
 - A revisão pré-aplicação detectou que a migration Master-only usava nível 100,
@@ -1145,3 +1159,15 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Produção da aplicação permaneceu saudável e no SHA
   `b8483c5ddb335530ba8b84fa0f2e1a299c1036f7`. Nenhum workflow, dado,
   credencial, DNS, Nginx, Salesforce ou n8n foi alterado.
+
+## 2026-08-13 — convergência RBAC do Canal de Parcerias
+
+- Após o CI pós-merge da recontenção ficar 3/3 verde, o preflight confirmou
+  Qlik fechado e o Canal ainda no estado divergente documentado.
+- Aplicada somente a migration `partnerships_rbac_convergence`, registrada
+  remotamente como `20260813160418`; nenhuma outra migration pendente entrou.
+- Verificação agregada confirmou permissão/catalogo/vínculo Master 1/1/1,
+  não-Master 0, overrides 0 e um Master ativo autorizado. Anônimo recebe
+  redirecionamento ao login e `/api/health` permanece 200.
+- As três tabelas Qlik continuaram com zero grant direto e zero policy de
+  leitura. Integrações, motores, allowlists e flags não foram ativados.

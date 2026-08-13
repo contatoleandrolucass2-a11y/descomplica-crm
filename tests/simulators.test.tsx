@@ -34,7 +34,7 @@ describe("simulator visual catalog", () => {
     expect(definition.resultItems.length).toBeGreaterThan(3);
     expect(markup).toContain(definition.title);
     expect(markup).toContain("Cálculo temporariamente indisponível — regra aguardando validação");
-    expect(markup).toContain("Nenhuma fórmula da referência foi copiada");
+    expect(markup).toContain("Nenhuma fórmula é executada enquanto o gate permanece desligado");
     expect(markup).toContain('aria-label="Ferramentas de simulação"');
     expect(markup).toContain('data-cta-state="enabled"');
     expect(markup).toContain('data-cta-state="blocked"');
@@ -106,7 +106,7 @@ describe("simulator visual catalog", () => {
     ]);
   });
 
-  it("keeps commercial dates explicit without prefilled values", () => {
+  it("keeps commercial dates explicit and derives WF13 signal dates in the official engine", () => {
     const dateFields = SIMULATOR_LIST.flatMap((definition) =>
       definition.sections.flatMap((section) =>
         section.fields
@@ -119,8 +119,6 @@ describe("simulator visual catalog", () => {
       expect.arrayContaining([
         "WF13:Data vigente",
         "WF13:Término da obra",
-        "WF13:Data do ato",
-        "WF13:Data da anual",
         "CAIXA:Data de nascimento",
         "CAIXA:Data inicial",
         "CAIXA:Data final",
@@ -140,6 +138,18 @@ describe("simulator visual catalog", () => {
     expect(SIMULATORS["calcular-documentacao"].resultItems).toEqual(
       expect.arrayContaining(["Data da simulação", "Primeira data de vencimento"]),
     );
+  });
+
+  it("renders WF13 as actionable only when the server authorizes the Master canary", () => {
+    const markup = renderToStaticMarkup(
+      <SimulatorWorkspace definition={SIMULATORS["associativo-fluxo-linear"]} executionEnabled />,
+    );
+
+    expect(markup).toContain("Motor oficial em validação Master");
+    expect(markup).toContain('type="submit"');
+    expect(markup).toContain('data-cta-state="enabled"');
+    expect(markup).not.toContain('data-cta-state="blocked"');
+    expect(markup).toContain('value="84"');
   });
 
   it("renders neutral tabs, repeaters, inventory pagination and local tools", () => {

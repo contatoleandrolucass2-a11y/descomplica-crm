@@ -2,6 +2,14 @@ import { notFound } from "next/navigation";
 
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { SIMULATORS, SIMULATOR_LIST, isSimulatorSlug } from "@/lib/crm/simulators/catalog";
+import {
+  OFFICIAL_SIMULATOR_SLUGS,
+  officialSimulatorIsImplemented,
+} from "@/lib/crm/simulators/official/catalog";
+import {
+  getOfficialSimulatorRuntimeConfiguration,
+  officialSimulatorIsEnabled,
+} from "@/lib/crm/simulators/official/config";
 
 import { SimulatorWorkspace } from "../_components/SimulatorWorkspace";
 
@@ -16,9 +24,28 @@ export default async function SimulatorPage({
 }: {
   params: Promise<{ simulator: string }>;
 }) {
-  await enforcePermission("crm.simulators.view");
+  const authorization = await enforcePermission("crm.simulators.view");
   const { simulator } = await params;
   if (!isSimulatorSlug(simulator)) notFound();
 
-  return <SimulatorWorkspace definition={SIMULATORS[simulator]} />;
+  const configuration = getOfficialSimulatorRuntimeConfiguration();
+  const engineKey = OFFICIAL_SIMULATOR_SLUGS[simulator];
+  const runtimeEnabled =
+    officialSimulatorIsImplemented(simulator) &&
+    officialSimulatorIsEnabled(configuration, engineKey);
+  const executionEnabled =
+    runtimeEnabled &&
+    authorization.roleKey === "master" &&
+    authorization.permissions.includes("crm.simulators.execute");
+  const executionReason = runtimeEnabled
+    ? "Disponível somente para o perfil Master nesta etapa de validação."
+    : "Cálculo temporariamente indisponível — regra aguardando validação";
+
+  return (
+    <SimulatorWorkspace
+      definition={SIMULATORS[simulator]}
+      executionEnabled={executionEnabled}
+      executionReason={executionReason}
+    />
+  );
 }

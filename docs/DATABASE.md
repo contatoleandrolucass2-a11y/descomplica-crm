@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 30 migrations
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 31 migrations
 locais, incluindo quatro markers históricos sanitizados e no-op. Nenhuma regra,
 política ou valor comercial é seedado. O rebuild contém 39 tabelas públicas,
 17 privadas, 12 papéis, 26 permissões e 21 páginas.
@@ -13,8 +13,8 @@ markers locais sem o SQL inseguro, além de migrations locais ainda não
 aplicadas. A exposição Qlik remota segue incompatível com a allowlist. A matriz
 completa, hashes e ordem segura estão em
 [`docs/reconciliation/MIGRATION_MATRIX.md`](reconciliation/MIGRATION_MATRIX.md).
-Nenhuma migration de reconciliação foi aplicada remotamente e nenhum cutover
-Qlik ou do read model v3 foi realizado.
+Somente os gates isolados P0 Qlik e RBAC do Canal foram aplicados remotamente;
+nenhum cutover Qlik ou do read model v3 foi realizado.
 
 ## Migrations
 
@@ -48,6 +48,7 @@ Qlik ou do read model v3 foi realizado.
 28. `20260813115335_emergency_qlik_public_read_hardening.sql`: contenção P0 isolada que força RLS, remove policies de leitura, revoga todo acesso direto às três tabelas Qlik e restringe a RPC legada ao caller `anon` temporário com `search_path` seguro; dados e RBAC do Canal permanecem inalterados.
 29. `20260813140000_partnerships_rbac_convergence.sql`: convergência RBAC isolada que cria a permissão Master-only do Canal, remove vínculos/overrides residuais apenas dessa chave e alinha `app_pages` ao guard da rota.
 30. `20260813151446_emergency_qlik_public_read_recontainment.sql`: roll-forward P0 idempotente que restabelece RLS forçada, remove novamente toda policy de leitura e revoga ACL direta após regressão remota; não reproduz as migrations inseguras nem autoriza rollback público.
+31. `20260813143000_master_simulator_execution_gate.sql`: gate aditivo que concede `crm.simulators.execute` somente ao Master, sem ativar fórmula, flag ou integração.
 
 ## Desenvolvimento local
 

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Implementa o motor oficial WF13 com contrato estrito, fórmula versionada,
+  memória de cálculo e 12 casos de ouro extraídos da referência viva com
+  diferença zero; nenhuma dependência de Salesforce, n8n ou Qlik.
+- Adiciona endpoint same-origin Master-only, body limitado, telemetria sem
+  payload, flags `off` por padrão, allowlist independente e UI acionável apenas
+  no canário autorizado.
+- Adiciona migration isolada para `crm.simulators.execute` somente no papel
+  `master`, zero override, mais 7 casos pgTAP e rollback fail-closed por flag.
 - Alinha o catálogo TypeScript de `crm.partnerships.view` ao gate remoto
   Master-only: nível 100, rótulo comercial em português e regressão unitária
   explícita, sem nova migration ou alteração de permissões.
@@ -296,6 +304,8 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Segurança
 
+- Converge o Canal de Parcerias para `crm.partnerships.view` exclusivamente
+  Master, sem overrides ou autorização para outros papéis.
 - Reaplica em migration exclusiva o hardening fail-closed das três tabelas
   Qlik após regressão remota: RLS forçada, zero policy de leitura e zero ACL
   direta para papéis da Data API, sem versionar as migrations inseguras.

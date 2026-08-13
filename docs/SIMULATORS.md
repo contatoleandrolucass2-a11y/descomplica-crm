@@ -1,10 +1,19 @@
-# Simuladores — visual e runtime comercial bloqueado
+# Simuladores — visual e motores oficiais isolados
+
+## Motor oficial WF13
+
+O WF13 possui implementação determinística versionada, mas continua desligado
+por padrão e isolado dos demais motores. Contrato, fonte, 12 casos de ouro,
+memória, segurança, canário Master e rollback estão em
+[`docs/simulators-official/WF13.md`](simulators-official/WF13.md).
+
+Os outros quatro motores permanecem visualmente completos e bloqueados até seus
+incrementos independentes. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 
 ## Escopo
 
-Este incremento entrega somente a composição visual das cinco jornadas
-aprovadas. Ele não importa bundles, fórmulas, parâmetros comerciais ou regras da
-referência viva.
+As cinco jornadas preservam a composição visual aprovada. Somente o WF13 possui
+fórmula oficial neste incremento; o bundle da referência não é versionado.
 
 | Código | Rota protegida                            | Jornada visual             |
 | ------ | ----------------------------------------- | -------------------------- |
@@ -22,42 +31,32 @@ autorização.
 ## Comportamento fail-closed
 
 - O catálogo tipado define títulos, seções, campos e espaços de resultado.
-- Campos servem apenas à inspeção visual local; não possuem valores padrão
-  comerciais. Campos obrigatórios ganham estado local de validação após
-  interação, com `aria-invalid` e mensagem associada.
-- A validação não envia o formulário. Ele não possui Server Action, Route
-  Handler, consulta ou escrita.
-- O botão de cálculo permanece desabilitado.
-- Todo resultado usa `UnavailableValue`.
+- Campos obrigatórios ganham validação associada e `aria-invalid`.
+- As flags oficiais nascem `off` e a allowlist nasce vazia.
+- WF16, CAIXA, WF14 e WF15 mantêm botão bloqueado e `UnavailableValue`.
+- WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
+  papel Master coincidem.
+- O endpoint limita o corpo, valida o contrato exato, não persiste input/output
+  e não registra payload na telemetria.
 - A interface informa: “Cálculo temporariamente indisponível — regra aguardando
-  validação”.
+  validação” sempre que o gate não fecha.
 - Nenhum acesso direto a tabela protegida foi criado.
 
-O runtime comercial versionado existe como fundação server-only, mas não muda
-esse comportamento. Os cinco simuladores estão registrados, a rota de execução
-aceita somente essas chaves e exige `crm.simulators.execute`; nenhum papel recebe
-essa capacidade operacional neste incremento. Além disso:
+O runtime de políticas comerciais anterior continua desligado e independente:
 
 - `COMMERCIAL_ENGINE_RUNTIME_MODE=off` é o default;
 - `COMMERCIAL_ENGINE_ENABLED_KEYS` nasce vazio;
 - `COMMERCIAL_ENGINE_DATABASE_URL` nasce vazia e o papel dedicado permanece
   `NOLOGIN`, sem segredo provisionado;
-- não existe policy oficial importada nem gate ativo;
-- cada versão exige owner, backup, evidência, vigência e pelo menos um caso de
-  ouro aprovado;
-- `shadow` audita hashes sem devolver resultado; somente `active`, com todos os
-  gates satisfeitos, pode devolver output;
-- fórmulas nunca são enviadas ao cliente e o ledger não guarda input/output.
+- não existe policy importada nem gate ativo naquele runtime;
 - o loader usa conexão PostgreSQL de menor privilégio, nunca Data API,
   `service_role` ou acesso direto às tabelas privadas.
 
-Os formulários visuais continuam sem submit. Conectá-los ao endpoint requer um
-incremento posterior, políticas oficiais e autorização explícita. O contrato e
-o runbook estão em
+O contrato e o runbook do runtime genérico permanecem em
 [`commercial-engines-policy-runtime`](commercial-engines-policy-runtime/README.md).
 
 ## QA local
 
-Fixtures sintéticas podem preencher os campos somente durante QA isolado. Elas
-não são importadas pelo código, não são seed de produção e não geram resultado.
-Credenciais QA, storage state, HTML, HAR e payloads não são versionados.
+Fixtures sintéticas podem preencher os campos somente durante QA isolado. Os
+casos de ouro do WF13 são testes versionados, não seeds de produção. Credenciais
+QA, storage state, HTML, HAR e payloads de usuário não são versionados.
