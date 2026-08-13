@@ -204,6 +204,14 @@ describe("catálogo localizado de acesso", () => {
     expect(visibleText).not.toMatch(/\b(View|Manage|Grant|Request|Access|Create)\b/);
   });
 
+  it("mantém o Canal de Parcerias como gate exclusivo do Master", () => {
+    expect(PERMISSIONS["crm.partnerships.view"]).toEqual({
+      label: "Visualizar Canal de Parcerias",
+      description: "Acessa o Canal de Parcerias exclusivamente no perfil Master.",
+      minLevel: 100,
+    });
+  });
+
   it("mostra busca, herança e exceções sem oferecer autoelevação", () => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {
