@@ -296,6 +296,9 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Segurança
 
+- Reaplica em migration exclusiva o hardening fail-closed das três tabelas
+  Qlik após regressão remota: RLS forçada, zero policy de leitura e zero ACL
+  direta para papéis da Data API, sem versionar as migrations inseguras.
 - Flags da homologação falham fechadas; read model v3 pode ser visualizado
   apenas no ambiente sintético, enquanto relay Qlik, integrações externas e
   motores comerciais permanecem desligados.
