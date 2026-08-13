@@ -617,7 +617,8 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
 
   await withRolePage(browser, "admin", async (page) => {
     const status = await page.request.get("/api/official-simulator/associativo-fluxo-linear");
-    expect(status.status()).toBe(403);
+    expect(status.status()).toBe(200);
+    expect(await status.json()).toMatchObject({ executionEnabled: false });
     await page.goto("/app/simulacao/associativo-fluxo-linear");
     await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toBeDisabled();
     await expect(page.getByText(/Disponível somente para o perfil Master/)).toBeVisible();

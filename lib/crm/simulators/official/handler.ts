@@ -16,6 +16,7 @@ import {
 } from "./catalog";
 import {
   getOfficialSimulatorRuntimeConfiguration,
+  officialSimulatorExecutionIsEnabled,
   officialSimulatorIsEnabled,
   type OfficialSimulatorRuntimeConfiguration,
 } from "./config";
@@ -259,19 +260,11 @@ export async function handleOfficialSimulatorStatus(
   const engineKey = OFFICIAL_SIMULATOR_SLUGS[suppliedSlug];
   const calculator = dependencies.calculators[suppliedSlug];
   const configuration = dependencies.configuration();
-  if (
-    !calculator ||
-    calculator.engineKey !== engineKey ||
-    !officialSimulatorIsEnabled(configuration, engineKey)
-  ) {
-    return json(request, { error: "simulator_unavailable" }, 503);
-  }
-
-  const authorization = await dependencies.authorize("crm.simulators.execute");
+  const authorization = await dependencies.authorize("crm.simulators.view");
   if (!authorization.ok) return authorization.response;
-  if (authorization.context.roleKey !== "master") {
-    return json(request, { error: "forbidden" }, 403);
-  }
+  const executionEnabled =
+    calculator?.engineKey === engineKey &&
+    officialSimulatorExecutionIsEnabled(configuration, suppliedSlug, authorization.context);
 
-  return json(request, { schemaVersion: 1, engineKey, executionEnabled: true }, 200);
+  return json(request, { schemaVersion: 1, engineKey, executionEnabled }, 200);
 }

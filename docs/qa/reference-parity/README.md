@@ -23,8 +23,8 @@ O QA local autenticado está em
 ficam em [`target-authenticated`](./target-authenticated/).
 
 A baseline canônica continua comprovando todos os simuladores bloqueados. Quando
-uma chave oficial é liberada para canário, somente a rota correspondente é
-comparada com sua baseline de estado habilitado em
+uma única chave oficial é liberada para canário, a rota correspondente e o hub
+de simulação são comparados com suas baselines de estado habilitado em
 [`target-authenticated-canary`](./target-authenticated-canary/). O primeiro
 conjunto versionado é `simulator.wf13`; chave desconhecida ou rota sem conjunto
 versionado falha fechada, sem aceitar diferença visual genérica.

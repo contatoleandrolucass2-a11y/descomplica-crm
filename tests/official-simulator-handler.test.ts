@@ -158,8 +158,25 @@ describe("endpoint oficial dos simuladores", () => {
         })),
       }),
     );
-    expect(blocked.status).toBe(503);
-    expect(nonMaster.status).toBe(403);
+    expect(blocked.status).toBe(200);
+    await expect(blocked.json()).resolves.toMatchObject({ executionEnabled: false });
+    expect(nonMaster.status).toBe(200);
+    await expect(nonMaster.json()).resolves.toMatchObject({ executionEnabled: false });
+  });
+
+  it("mantém o status autenticado e não revela execução a quem não pode ver simuladores", async () => {
+    const authorize = vi.fn(async () => ({
+      ok: false as const,
+      response: Response.json({ error: "forbidden" }, { status: 403 }),
+    }));
+    const response = await handleOfficialSimulatorStatus(
+      new Request(ENDPOINT),
+      "associativo-fluxo-linear",
+      dependencies({ authorize }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(authorize).toHaveBeenCalledWith("crm.simulators.view");
   });
 
   it("rejeita origem, media type e payload fora do contrato", async () => {

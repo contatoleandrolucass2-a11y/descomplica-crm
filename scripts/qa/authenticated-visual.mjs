@@ -88,12 +88,19 @@ function expectedEnabledSimulatorRoutes() {
 }
 
 const enabledSimulatorRoutes = expectedEnabledSimulatorRoutes();
+const simulatorHubCanaryKey =
+  enabledSimulatorRoutes.size === 1
+    ? simulatorRuntimeKeysByRoute.get([...enabledSimulatorRoutes][0])
+    : undefined;
 
 function visualBaselinePath(route, candidatePath) {
   const relativeCandidatePath = path.relative(candidateScreenshotRoot, candidatePath);
   const runtimeKey = simulatorRuntimeKeysByRoute.get(route);
   if (runtimeKey && enabledSimulatorRoutes.has(route)) {
     return path.join(simulatorCanaryBaselineRoot, runtimeKey, relativeCandidatePath);
+  }
+  if (route === "/app/simulacao" && simulatorHubCanaryKey) {
+    return path.join(simulatorCanaryBaselineRoot, simulatorHubCanaryKey, relativeCandidatePath);
   }
   return path.join(baselineScreenshotRoot, relativeCandidatePath);
 }
@@ -679,7 +686,6 @@ async function checkSimulatorValidation(page, origin) {
   await page.goto(`${origin}/app/simulacao/associativo-fluxo-linear`, {
     waitUntil: "domcontentloaded",
   });
-  await page.waitForLoadState("networkidle");
   const field = page.locator("main form input[required]").first();
   await field.waitFor({ state: "visible" });
   await field.focus();

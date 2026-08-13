@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-08-13 — Hotfix WF13: gate visual do canário
+
+- Reproduzida localmente a falha do CI em `simulator-validation`: a página já
+  estava carregada, mas `waitForLoadState("networkidle")` expirava por atividade
+  assíncrona do runtime. A validação agora aguarda diretamente o campo obrigatório.
+- O runner visual isolado passou a propagar apenas as duas variáveis oficiais de
+  feature flag ao app e ao harness. Isso permite validar o baseline WF13 ativo de
+  forma explícita, mantendo o modo desligado como padrão e os demais motores fora
+  da allowlist.
+- A execução completa também mostrou que o GET de status devolvia `503` para cada
+  motor bloqueado, gerando erro de console apesar do estado visual correto. O GET
+  agora exige `crm.simulators.view` e responde `executionEnabled: false`; somente
+  o POST preserva `503` para runtime desligado e continua exigindo
+  `crm.simulators.execute` + papel Master.
+- A matriz ativa detectou corretamente o novo estado do hub. As oito capturas do
+  hub com apenas `simulator.wf13` foram separadas no conjunto canário; a baseline
+  padrão bloqueada não foi alterada. Múltiplas chaves não recebem fallback de
+  baseline e continuam falhando fechadas.
+
 ## 2026-08-13 — hotfix do canário Master WF13
 
 - A reprovação humana encontrou o CTA ainda bloqueado após ativação das flags.
