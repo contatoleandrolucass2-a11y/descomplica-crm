@@ -45,7 +45,7 @@ Qlik ou do read model v3 foi realizado.
 25. `20260810165927_qlik_relay_mapping_cutover.sql`: papel/RPC exclusivos do relay, credenciais e gates vazios, ledger sanitizado, saúde agregada e importação de mappings com preview/apply atômico.
 26. `20260810201703_commercial_engines_policy_runtime.sql`: runtime privado/versionado para motores comerciais, com zero política, gate ou grant real seedado.
 27. `20260811120000_commercial_configuration_drafts.sql`: rascunhos privados e versionados de metas/pontos, preview determinístico, optimistic locking e auditoria hashes-only; não existe RPC de ativação.
-28. `20260813115335_emergency_qlik_public_read_hardening.sql`: contenção P0 isolada que força RLS, remove policies de leitura e revoga todo acesso direto às três tabelas Qlik; dados, RPC legada e RBAC do Canal permanecem inalterados.
+28. `20260813115335_emergency_qlik_public_read_hardening.sql`: contenção P0 isolada que força RLS, remove policies de leitura, revoga todo acesso direto às três tabelas Qlik e restringe a RPC legada ao caller `anon` temporário com `search_path` seguro; dados e RBAC do Canal permanecem inalterados.
 
 ## Desenvolvimento local
 
@@ -62,13 +62,13 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 900 testes pgTAP em 19 arquivos: 28 dos motivos de
+`supabase test db` planeja 913 testes pgTAP em 19 arquivos: 28 dos motivos de
 acesso, 51 regressões de hardening escopado, 28 do dashboard, 25 das metas, 20
 da matriz global de grants, 60 do schema Qlik, 33 do catálogo, 28 do signup
 pendente, 26 dos pontos, 54 do contrato Qlik, 20 da governança de identidades,
 27 do ranking, 143 do read model v3, 98 da matriz de escopos, 43 da ingestão
 Salesforce, 86 do relay/mappings, 93 do runtime comercial, 22 dos rascunhos
-comerciais e 15 da contenção Qlik. A cobertura verifica nomes,
+comerciais e 28 da contenção Qlik. A cobertura verifica nomes,
 schema, grants, policies, constraints, disponibilidade e autoridade de fontes,
 preservação de dados, mappings, lineage, provisionamento, usuários inativos,
 overrides, limites de payload, delegação direcional, cardinalidade de escopo,

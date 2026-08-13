@@ -17,7 +17,7 @@ import process from "node:process";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const sourceSupabaseRoot = path.join(repositoryRoot, "supabase");
-const expectedPgTapTests = 900;
+const expectedPgTapTests = 913;
 const applicationSchemas = ["commercial_engine", "private", "public", "qlik_relay"];
 const applicationRoles = ["crm_commercial_engine", "crm_qlik_relay"];
 const excludedServices = [

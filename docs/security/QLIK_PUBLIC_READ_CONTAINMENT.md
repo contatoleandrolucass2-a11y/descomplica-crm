@@ -66,8 +66,11 @@ workflow, credencial ou ativar o relay permaneceu fora deste gate.
 2. remove todas as policies `SELECT`/`ALL` dessas tabelas;
 3. revoga todos os privilégios diretos de `PUBLIC`, `anon`, `authenticated` e
    `service_role`;
-4. não altera dados, RPCs, usuários, credenciais, integrações ou RBAC do Canal
-   de Parcerias.
+4. restringe a RPC legada ao caller temporário `anon`, revoga sua execução de
+   `PUBLIC`, `authenticated` e `service_role` e fixa `search_path` em
+   `pg_catalog, extensions, pg_temp`;
+5. não altera dados, corpo da RPC, usuários, credenciais, integrações ou RBAC
+   do Canal de Parcerias.
 
 Leituras permanecem fechadas até existir RPC explicitamente permissionada e
 escopada. Leitura pública nunca faz parte do rollback.
@@ -79,20 +82,19 @@ Backup lógico completo e histórico de migrations foram gravados em diretório
 isolado usa PostgreSQL 17.6, sem conexão com redes externas.
 
 Contagens e hashes canônicos das três tabelas coincidiram antes da migration e
-permaneceram idênticos depois dela. O pgTAP emergencial aprovou 15 de 15 casos:
+permaneceram idênticos depois dela. O pgTAP emergencial aprovou 28 de 28 casos:
 zero leitura direta por `anon`, `authenticated` e `service_role`, zero policy
-de leitura, RLS e `FORCE RLS` nas três tabelas e preservação do contrato legado
-quando ele existe no restore remoto.
+de leitura, RLS e `FORCE RLS` nas três tabelas, ACL mínima da RPC, verificador
+fail-closed, ausência de SQL dinâmico/log sensível, referências qualificadas e
+`search_path` seguro quando o contrato legado existe no restore remoto.
 
-## Bloqueio de aplicação remota
+## Exceção transitória autorizada
 
-O restore comprova que a contenção preserva tecnicamente a RPC legada. Contudo,
-o caller real continua usando `anon` e não atende ao requisito de identidade
-dedicada e menor privilégio. As restrições deste gate também proíbem alterar
-n8n, credenciais ou ativar o relay. Portanto a aplicação remota exige decisão
-explícita entre uma exceção transitória para manter a escrita legada ou o
-bloqueio da escrita até o provisionamento dedicado. O requisito não deve ser
-declarado atendido sem essa decisão.
+O restore comprova que a contenção preserva tecnicamente a RPC legada. A missão
+de ativação autorizou explicitamente esse caller `anon` somente como ponte P0,
+com execução restrita e posterior substituição por identidade dedicada. Essa
+exceção não atende ao estado final do Qlik e não autoriza leitura pública,
+cutover, remoção do verificador ou ativação do relay antes de shadow e canário.
 
 ## Roll-forward
 

@@ -1077,3 +1077,23 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   isolado, 885 pgTAP, RLS API, lint local do schema, auditorias pnpm/OSV/gitleaks,
   actionlint, shellcheck e validação dos manifests Compose. Nenhum segredo ou
   ambiente remoto foi alterado.
+
+## 2026-08-13 — gate final da contenção P0 Qlik
+
+- A RPC remota `publish_crm_imob_ranking(jsonb,text)` foi auditada sem expor
+  corpo sensível: `SECURITY DEFINER`, owner `postgres`, verificador por digest,
+  referências de tabela qualificadas, sem SQL dinâmico, sem logs do payload e
+  sem retorno de linhas armazenadas.
+- O gate encontrou dois excessos: `service_role` ainda executava a RPC e o
+  `search_path` não fixava `pg_temp` por último. A migration emergencial agora
+  revoga `PUBLIC`, `authenticated` e `service_role`, mantém temporariamente
+  apenas `anon` e fixa `pg_catalog, extensions, pg_temp`.
+- Verificador ausente e inválido falham fechados com SQLSTATE `42501`, antes de
+  qualquer escrita. Testes específicos cresceram de 15 para 28 e passaram no
+  restore exato; suíte completa aprovou 913 pgTAP em 19 arquivos.
+- Ensaio em dois projetos PostgreSQL 17 independentes aprovou reset das 28
+  migrations, backup/restore lógico, 913 pgTAP em origem e destino, lint,
+  advisors, owners, ACL e fingerprint canônico idêntico. Formato, lint,
+  typecheck, 263 testes e build também passaram.
+- Nenhum dado, credencial, workflow, integração ou ambiente remoto foi alterado
+  durante este ajuste pré-merge.

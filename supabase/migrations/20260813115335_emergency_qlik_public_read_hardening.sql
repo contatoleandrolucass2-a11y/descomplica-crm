@@ -1,10 +1,11 @@
 -- Emergency P0 containment for the legacy Qlik ranking tables.
 --
--- This migration changes table access only. It deliberately leaves the
--- existing publish_crm_imob_ranking(jsonb, text) write contract untouched so
--- the identified legacy caller keeps using the pre-existing SECURITY DEFINER
--- RPC. Its anonymous transport is a temporary exception, not a dedicated
--- identity or approved least-privilege end state.
+-- This migration closes direct table access and narrows the existing
+-- publish_crm_imob_ranking(jsonb, text) compatibility RPC when that remote-only
+-- function is present. The identified legacy caller temporarily keeps EXECUTE
+-- through anon; PUBLIC, authenticated and service_role cannot invoke it. Its
+-- anonymous transport remains a temporary exception, not a dedicated identity
+-- or approved least-privilege end state.
 -- Authenticated reads remain fail-closed until a separately approved,
 -- permissioned and organization-scoped read contract is available.
 
@@ -48,3 +49,24 @@ revoke all privileges on table
   public.crm_imob_ranking_entries,
   public.crm_imob_ranking_developments
 from public, anon, authenticated, service_role;
+
+-- The compatibility RPC exists only in the live environment and exact
+-- production restores. Keep clean local migration replays deterministic while
+-- applying the same narrow ACL and safe search_path whenever it is present.
+-- Dynamic statements are constant DDL; no identifier or value comes from data.
+do $$
+begin
+  if to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is not null then
+    execute
+      'alter function public.publish_crm_imob_ranking(jsonb, text) '
+      'set search_path = pg_catalog, extensions, pg_temp';
+    execute
+      'revoke all privileges on function '
+      'public.publish_crm_imob_ranking(jsonb, text) '
+      'from public, authenticated, service_role';
+    execute
+      'grant execute on function '
+      'public.publish_crm_imob_ranking(jsonb, text) to anon';
+  end if;
+end;
+$$;

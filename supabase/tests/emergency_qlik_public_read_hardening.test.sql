@@ -1,6 +1,6 @@
 begin;
 
-select plan(15);
+select plan(28);
 
 select ok(
   not has_table_privilege('anon', 'public.crm_imob_ranking_runs', 'SELECT'),
@@ -147,6 +147,187 @@ select ok(
       where procedure.oid = to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)')
     ),
   'when present, legacy publisher keeps SECURITY DEFINER owner bypass required after FORCE RLS'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or not exists (
+      select 1
+      from pg_catalog.pg_proc procedure
+      cross join lateral pg_catalog.aclexplode(
+        coalesce(
+          procedure.proacl,
+          pg_catalog.acldefault('f', procedure.proowner)
+        )
+      ) acl
+      where procedure.oid = to_regprocedure(
+        'public.publish_crm_imob_ranking(jsonb,text)'
+      )
+        and acl.grantee = 0
+        and acl.privilege_type = 'EXECUTE'
+    ),
+  'PUBLIC cannot execute the legacy publisher'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or not has_function_privilege(
+      'authenticated',
+      to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)'),
+      'EXECUTE'
+    ),
+  'authenticated cannot execute the legacy publisher'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or not has_function_privilege(
+      'service_role',
+      to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)'),
+      'EXECUTE'
+    ),
+  'service_role cannot execute the legacy publisher'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or (
+      select procedure.proconfig = array[
+        'search_path=pg_catalog, extensions, pg_temp'
+      ]::text[]
+      from pg_catalog.pg_proc procedure
+      where procedure.oid = to_regprocedure(
+        'public.publish_crm_imob_ranking(jsonb,text)'
+      )
+    ),
+  'legacy publisher uses an explicit safe search_path with pg_temp last'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or (
+      select lower(procedure.prosrc) not like '%execute %'
+        and lower(procedure.prosrc) not like '%format(%'
+      from pg_catalog.pg_proc procedure
+      where procedure.oid = to_regprocedure(
+        'public.publish_crm_imob_ranking(jsonb,text)'
+      )
+    ),
+  'legacy publisher contains no dynamic SQL'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or (
+      select lower(procedure.prosrc) not like '%raise log%'
+        and lower(procedure.prosrc) not like '%raise notice%'
+        and lower(procedure.prosrc) not like '%raise info%'
+        and lower(procedure.prosrc) not like '%raise debug%'
+      from pg_catalog.pg_proc procedure
+      where procedure.oid = to_regprocedure(
+        'public.publish_crm_imob_ranking(jsonb,text)'
+      )
+    ),
+  'legacy publisher does not log verifier or payload values'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or (
+      select lower(procedure.prosrc) like '%extensions.digest(coalesce(sync_token%'
+        and lower(procedure.prosrc) like '%raise exception%'
+      from pg_catalog.pg_proc procedure
+      where procedure.oid = to_regprocedure(
+        'public.publish_crm_imob_ranking(jsonb,text)'
+      )
+    ),
+  'legacy publisher validates the shared verifier and fails closed'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or (
+      select lower(procedure.prosrc) not like '%return query%'
+        and lower(procedure.prosrc) not like '%return next%'
+        and pg_catalog.pg_get_function_result(procedure.oid) = 'jsonb'
+      from pg_catalog.pg_proc procedure
+      where procedure.oid = to_regprocedure(
+        'public.publish_crm_imob_ranking(jsonb,text)'
+      )
+    ),
+  'legacy publisher cannot return stored table rows'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or (
+      select lower(procedure.prosrc) like '%public.crm_imob_ranking_runs%'
+        and lower(procedure.prosrc) like '%public.crm_imob_ranking_entries%'
+        and lower(procedure.prosrc) like '%public.crm_imob_ranking_developments%'
+        and lower(procedure.prosrc) like '%extensions.digest%'
+      from pg_catalog.pg_proc procedure
+      where procedure.oid = to_regprocedure(
+        'public.publish_crm_imob_ranking(jsonb,text)'
+      )
+    ),
+  'legacy publisher schema-qualifies protected relations and digest'
+);
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or (
+      select lower(procedure.prosrc) like '%insert into public.crm_imob_ranking_runs%'
+        and lower(procedure.prosrc) like '%insert into public.crm_imob_ranking_entries%'
+        and lower(procedure.prosrc) like '%insert into public.crm_imob_ranking_developments%'
+        and lower(procedure.prosrc) like '%update public.crm_imob_ranking_runs%'
+        and lower(procedure.prosrc) not like '%delete from%'
+        and lower(procedure.prosrc) not like '%truncate%'
+        and lower(procedure.prosrc) not like '%alter table%'
+        and lower(procedure.prosrc) not like '%drop table%'
+      from pg_catalog.pg_proc procedure
+      where procedure.oid = to_regprocedure(
+        'public.publish_crm_imob_ranking(jsonb,text)'
+      )
+    ),
+  'legacy publisher writes only the expected ranking snapshot relations'
+);
+
+select case
+  when to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    then pass('legacy publisher absent on clean local replay')
+  else throws_ok(
+    $$select public.publish_crm_imob_ranking('{}'::jsonb, null)$$,
+    '42501',
+    'invalid_sync_token',
+    'legacy publisher rejects a missing verifier'
+  )
+end;
+
+select case
+  when to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    then pass('legacy publisher absent on clean local replay')
+  else throws_ok(
+    $$select public.publish_crm_imob_ranking(
+      '{}'::jsonb,
+      'known-invalid-value'
+    )$$,
+    '42501',
+    'invalid_sync_token',
+    'legacy publisher rejects an invalid verifier'
+  )
+end;
+
+select ok(
+  to_regprocedure('public.publish_crm_imob_ranking(jsonb,text)') is null
+    or (
+      select procedure.prosecdef
+        and pg_catalog.pg_get_userbyid(procedure.proowner) = 'postgres'
+      from pg_catalog.pg_proc procedure
+      where procedure.oid = to_regprocedure(
+        'public.publish_crm_imob_ranking(jsonb,text)'
+      )
+    ),
+  'legacy publisher retains only its required definer execution model'
 );
 
 select * from finish();
