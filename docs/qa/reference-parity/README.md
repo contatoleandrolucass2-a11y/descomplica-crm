@@ -22,6 +22,13 @@ O QA local autenticado está em
 [`authenticated-results.json`](./authenticated-results.json); suas 192 capturas
 ficam em [`target-authenticated`](./target-authenticated/).
 
+A baseline canônica continua comprovando todos os simuladores bloqueados. Quando
+uma chave oficial é liberada para canário, somente a rota correspondente é
+comparada com sua baseline de estado habilitado em
+[`target-authenticated-canary`](./target-authenticated-canary/). O primeiro
+conjunto versionado é `simulator.wf13`; chave desconhecida ou rota sem conjunto
+versionado falha fechada, sem aceitar diferença visual genérica.
+
 ## Política de captura
 
 - HTML, HAR, trace, vídeo, bodies, cookies e storage state não são gravados.

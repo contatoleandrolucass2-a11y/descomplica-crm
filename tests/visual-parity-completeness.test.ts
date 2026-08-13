@@ -137,6 +137,9 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("unknown simulator runtime key");
     expect(script).toContain("expectedSimulatorState: isSimulatorWorkspace");
     expect(script).toContain("simulatorStatePassed");
+    expect(script).toContain("const simulatorCanaryBaselineRoot = path.join(");
+    expect(script).toContain("visualBaselinePath(route, destination)");
+    expect(script).toContain("enabledSimulatorRoutes.has(route)");
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');
     expect(runner).toContain("verifyFixturesThroughRls");
     expect(runner).toContain("auth.admin.deleteUser");

@@ -12,6 +12,7 @@ import sharp from "sharp";
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const outputRoot = path.join(repositoryRoot, "docs/qa/reference-parity");
 const baselineScreenshotRoot = path.join(outputRoot, "target-authenticated");
+const simulatorCanaryBaselineRoot = path.join(outputRoot, "target-authenticated-canary");
 const baselineResultsPath = path.join(outputRoot, "authenticated-results.json");
 const artifactRoot = path.join(repositoryRoot, "test-results/authenticated-visual");
 const candidateScreenshotRoot = path.join(artifactRoot, "candidate");
@@ -67,6 +68,9 @@ const simulatorRoutesByRuntimeKey = new Map([
   ["simulator.wf14", "/app/simulacao/tabela-direta"],
   ["simulator.wf15", "/app/simulacao/tabela-investidor"],
 ]);
+const simulatorRuntimeKeysByRoute = new Map(
+  [...simulatorRoutesByRuntimeKey].map(([runtimeKey, route]) => [route, runtimeKey]),
+);
 
 function expectedEnabledSimulatorRoutes() {
   if (process.env.OFFICIAL_SIMULATOR_RUNTIME_MODE !== "active") return new Set();
@@ -84,6 +88,15 @@ function expectedEnabledSimulatorRoutes() {
 }
 
 const enabledSimulatorRoutes = expectedEnabledSimulatorRoutes();
+
+function visualBaselinePath(route, candidatePath) {
+  const relativeCandidatePath = path.relative(candidateScreenshotRoot, candidatePath);
+  const runtimeKey = simulatorRuntimeKeysByRoute.get(route);
+  if (runtimeKey && enabledSimulatorRoutes.has(route)) {
+    return path.join(simulatorCanaryBaselineRoot, runtimeKey, relativeCandidatePath);
+  }
+  return path.join(baselineScreenshotRoot, relativeCandidatePath);
+}
 
 const viewports = [
   { key: "desktop-1440x900", width: 1440, height: 900 },
@@ -245,6 +258,7 @@ function baselineMatchesHead() {
   const paths = [
     repositoryRelative(baselineResultsPath),
     repositoryRelative(baselineScreenshotRoot),
+    repositoryRelative(simulatorCanaryBaselineRoot),
   ];
   try {
     execFileSync("git", ["diff", "--quiet", "HEAD", "--", ...paths], {
@@ -1033,10 +1047,7 @@ async function run() {
             theme: "light",
             visualComparison: await compareVisualBaseline(
               buffer,
-              path.join(
-                baselineScreenshotRoot,
-                path.relative(candidateScreenshotRoot, destination),
-              ),
+              visualBaselinePath(route, destination),
               trackedFiles,
             ),
             ...(await saveLosslessWebp(buffer, destination)),
@@ -1081,10 +1092,7 @@ async function run() {
                   theme,
                   visualComparison: await compareVisualBaseline(
                     buffer,
-                    path.join(
-                      baselineScreenshotRoot,
-                      path.relative(candidateScreenshotRoot, destination),
-                    ),
+                    visualBaselinePath(route, destination),
                     trackedFiles,
                   ),
                   ...(await saveLosslessWebp(buffer, destination)),
@@ -1135,10 +1143,7 @@ async function run() {
               theme: "dark",
               visualComparison: await compareVisualBaseline(
                 buffer,
-                path.join(
-                  baselineScreenshotRoot,
-                  path.relative(candidateScreenshotRoot, destination),
-                ),
+                visualBaselinePath(route, destination),
                 trackedFiles,
               ),
               ...(await saveLosslessWebp(buffer, destination)),
