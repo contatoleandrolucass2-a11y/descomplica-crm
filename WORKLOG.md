@@ -13,6 +13,9 @@
   persistido ou emitido em telemetria.
 - Nenhuma migration adicional, integração externa, regra presumida ou mudança
   remota foi necessária. Rollback remove somente WF16 da allowlist.
+- Baseline promovida transacionalmente a partir da árvore limpa: 147 capturas
+  responsivas, 84 checks de tema, 192 auditorias Axe/comparações e 105 checks
+  de zoom aprovados; conta e fixtures efêmeras foram removidas.
 
 ## 2026-08-13 — motor oficial WF13
 
