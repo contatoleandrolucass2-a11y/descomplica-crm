@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Adiciona migration emergencial isolada que força RLS, remove policies de
+  leitura e revoga privilégios diretos de `PUBLIC`, `anon`, `authenticated` e
+  `service_role` nas três tabelas Qlik, sem alterar dados ou RBAC do Canal.
+- Registra backup/restore exato, 28 casos pgTAP e auditoria sanitizada da janela
+  de exposição; leitura permanece fail-closed e nunca será reaberta como
+  rollback. O publisher legado continua exceção transitória `anon`, com
+  `search_path` seguro e sem execução por `PUBLIC`, `authenticated` ou
+  `service_role`, até gate separado da identidade dedicada.
 - Corrige o gate visual final: topbar sem colisão com identidade longa em
   `1440×900`, CTAs habilitado/bloqueado/indisponível visualmente distintos,
   contraste navy consistente, linguagem comercial localizada e nomenclatura

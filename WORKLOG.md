@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-08-13 — contenção emergencial da leitura pública Qlik
+
+- Diagnóstico somente leitura comprovou `SELECT` de `anon`, `authenticated` e
+  `service_role` e policies públicas nas três tabelas `crm_imob_ranking_*`.
+  Logs sanitizados preservam ao menos 51 GETs bem-sucedidos não atribuídos;
+  origem externa e exfiltração não foram comprovadas.
+- Backup lógico root-only incluiu roles, schema, dados e histórico. Restore
+  isolado PostgreSQL 17.6 reproduziu exatamente 97 runs, 29.779 entries e 4.031
+  developments, com hashes canônicos idênticos e sem rede externa.
+- Migration emergencial exclusiva força RLS, remove todas as policies de
+  leitura e revoga privilégios diretos dos papéis da Data API e
+  `service_role`. Não altera dados, RBAC, app, usuários ou integrações.
+- Comparação canônica externa confirmou hashes de dados inalterados. pgTAP do
+  restore aprovou 15/15 casos de ACL, policies, RLS e preservação estrutural do
+  writer. Leitores diretos ficam indisponíveis; leitura pública não é rollback.
+- Publisher confirmado continua no workflow `r4DyPyOTDtoROXq0`, usando RPC
+  `SECURITY DEFINER` por transporte `anon`. Revogar leitura não quebra a RPC,
+  mas identidade dedicada e menor privilégio ainda exigem gate separado; relay
+  e workflow não foram alterados.
+
 ## 2026-08-10 — release candidate, E2E e gates
 
 - A primeira execução do CI remoto revelou que o Supabase CLI pode escrever
@@ -1057,3 +1077,23 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   isolado, 885 pgTAP, RLS API, lint local do schema, auditorias pnpm/OSV/gitleaks,
   actionlint, shellcheck e validação dos manifests Compose. Nenhum segredo ou
   ambiente remoto foi alterado.
+
+## 2026-08-13 — gate final da contenção P0 Qlik
+
+- A RPC remota `publish_crm_imob_ranking(jsonb,text)` foi auditada sem expor
+  corpo sensível: `SECURITY DEFINER`, owner `postgres`, verificador por digest,
+  referências de tabela qualificadas, sem SQL dinâmico, sem logs do payload e
+  sem retorno de linhas armazenadas.
+- O gate encontrou dois excessos: `service_role` ainda executava a RPC e o
+  `search_path` não fixava `pg_temp` por último. A migration emergencial agora
+  revoga `PUBLIC`, `authenticated` e `service_role`, mantém temporariamente
+  apenas `anon` e fixa `pg_catalog, extensions, pg_temp`.
+- Verificador ausente e inválido falham fechados com SQLSTATE `42501`, antes de
+  qualquer escrita. Testes específicos cresceram de 15 para 28 e passaram no
+  restore exato; suíte completa aprovou 913 pgTAP em 19 arquivos.
+- Ensaio em dois projetos PostgreSQL 17 independentes aprovou reset das 28
+  migrations, backup/restore lógico, 913 pgTAP em origem e destino, lint,
+  advisors, owners, ACL e fingerprint canônico idêntico. Formato, lint,
+  typecheck, 263 testes e build também passaram.
+- Nenhum dado, credencial, workflow, integração ou ambiente remoto foi alterado
+  durante este ajuste pré-merge.
