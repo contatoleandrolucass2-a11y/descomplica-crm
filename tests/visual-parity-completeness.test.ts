@@ -132,6 +132,11 @@ describe("isolated authenticated visual QA contract", () => {
     );
     expect(script).toContain('locale: "pt-BR"');
     expect(script).toContain('timezoneId: "America/Sao_Paulo"');
+    expect(script).toContain('process.env.OFFICIAL_SIMULATOR_RUNTIME_MODE !== "active"');
+    expect(script).toContain("process.env.OFFICIAL_SIMULATOR_ENABLED_KEYS");
+    expect(script).toContain("unknown simulator runtime key");
+    expect(script).toContain("expectedSimulatorState: isSimulatorWorkspace");
+    expect(script).toContain("simulatorStatePassed");
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');
     expect(runner).toContain("verifyFixturesThroughRls");
     expect(runner).toContain("auth.admin.deleteUser");

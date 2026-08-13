@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-08-13 — gate visual do canário WF13
+
+- O primeiro ensaio remoto passou nos nove fluxos E2E, mas o verificador visual
+  rejeitou a rota WF13 por exigir CTA bloqueado em todos os simuladores,
+  inclusive no único canário explicitamente habilitado.
+- Homologação foi revertida imediatamente para o SHA, configuração e estado de
+  banco anteriores; produção permaneceu inalterada e saudável.
+- O gate agora deriva a expectativa das flags oficiais, aceita CTA habilitado
+  apenas na rota conhecida correspondente e mantém chaves desconhecidas e todas
+  as rotas não liberadas em falha fechada.
+
 ## 2026-08-13 — atualização transitiva de segurança
 
 - O CI pós-merge do WF13 bloqueou no audit por advisory novo contra
