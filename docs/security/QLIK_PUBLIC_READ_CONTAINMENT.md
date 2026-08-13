@@ -102,3 +102,31 @@ Rollback por reabertura pública é proibido. Se um leitor legítimo falhar, ele
 permanece indisponível até receber uma RPC autenticada, permissionada e
 escopada. A escrita deve migrar para identidade dedicada por gate separado,
 com owner, backup, credencial privada, canário e rotação do verificador legado.
+
+## Recontenção de 13 de agosto de 2026
+
+Após o primeiro hardening, duas migrations remotas fora da sequência aprovada
+foram registradas às `14:27:23Z` e `14:28:35Z`. Elas restauraram seis grants de
+`SELECT` e três policies para `anon,authenticated`. O estado foi detectado no
+preflight do gate RBAC; esse gate foi suspenso sem aplicar sua migration.
+Os logs PostgreSQL atribuem ambas as aplicações ao endpoint MCP com principal
+OAuth autenticado; identidade, token e chaves de idempotência permanecem
+redigidos. Não há evidência de que CI, aplicação ou workflow Qlik as aplicou.
+
+O backup contemporâneo root-only foi validado por SHA-256 e restaurado em
+PostgreSQL 17.6 isolado. O restore reproduziu 98 runs, 30.091 entries, 4.087
+developments e 20 versões remotas. O roll-forward preservou essas contagens e
+aprovou os 28 testes pgTAP do contrato P0.
+
+A migration `20260813151446_emergency_qlik_public_read_recontainment.sql` foi
+então aplicada isoladamente. O estado final tem RLS e `FORCE RLS` nas três
+tabelas, zero policy de leitura, zero privilégio direto para os papéis da Data
+API e respostas 401 aos três probes anônimos GET. A aplicação permaneceu
+saudável no mesmo SHA.
+
+Na janela observável entre a regressão e a contenção, os 100 eventos mais
+recentes da Data API incluem 80 GETs com HTTP 200 para as três tabelas. Eles
+ocorreram em grupos repetitivos entre `14:44:16Z` e `15:14:31Z`; o log
+disponível não fornece origem confiável, bytes ou linhas retornadas. Portanto,
+não é possível atribuí-los nem excluir acesso externo. A classificação dos
+dados e o critério de escalonamento LGPD permanecem os descritos acima.
