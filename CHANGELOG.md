@@ -304,6 +304,8 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Segurança
 
+- Converge o Canal de Parcerias para `crm.partnerships.view` exclusivamente
+  Master, sem overrides ou autorização para outros papéis.
 - Reaplica em migration exclusiva o hardening fail-closed das três tabelas
   Qlik após regressão remota: RLS forçada, zero policy de leitura e zero ACL
   direta para papéis da Data API, sem versionar as migrations inseguras.

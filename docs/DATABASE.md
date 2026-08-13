@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 30 migrations
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 31 migrations
 locais, incluindo quatro markers históricos sanitizados e no-op. Nenhuma regra,
 política ou valor comercial é seedado. O rebuild contém 39 tabelas públicas,
 17 privadas, 12 papéis, 26 permissões e 21 páginas.
@@ -13,8 +13,8 @@ markers locais sem o SQL inseguro, além de migrations locais ainda não
 aplicadas. A exposição Qlik remota segue incompatível com a allowlist. A matriz
 completa, hashes e ordem segura estão em
 [`docs/reconciliation/MIGRATION_MATRIX.md`](reconciliation/MIGRATION_MATRIX.md).
-Nenhuma migration de reconciliação foi aplicada remotamente e nenhum cutover
-Qlik ou do read model v3 foi realizado.
+Somente os gates isolados P0 Qlik e RBAC do Canal foram aplicados remotamente;
+nenhum cutover Qlik ou do read model v3 foi realizado.
 
 ## Migrations
 
