@@ -60,6 +60,31 @@ const routes = [
   "/admin/paginas",
 ];
 
+const simulatorRoutesByRuntimeKey = new Map([
+  ["simulator.wf13", "/app/simulacao/associativo-fluxo-linear"],
+  ["simulator.wf16", "/app/simulacao/calcular-documentacao"],
+  ["simulator.caixa", "/app/simulacao/caixa"],
+  ["simulator.wf14", "/app/simulacao/tabela-direta"],
+  ["simulator.wf15", "/app/simulacao/tabela-investidor"],
+]);
+
+function expectedEnabledSimulatorRoutes() {
+  if (process.env.OFFICIAL_SIMULATOR_RUNTIME_MODE !== "active") return new Set();
+
+  const enabledKeys = (process.env.OFFICIAL_SIMULATOR_ENABLED_KEYS ?? "")
+    .split(",")
+    .map((key) => key.trim())
+    .filter(Boolean);
+  const unknownKeys = enabledKeys.filter((key) => !simulatorRoutesByRuntimeKey.has(key));
+  if (unknownKeys.length > 0) {
+    throw new Error("Authenticated visual QA received an unknown simulator runtime key.");
+  }
+
+  return new Set(enabledKeys.map((key) => simulatorRoutesByRuntimeKey.get(key)));
+}
+
+const enabledSimulatorRoutes = expectedEnabledSimulatorRoutes();
+
 const viewports = [
   { key: "desktop-1440x900", width: 1440, height: 900 },
   { key: "notebook-1280x720", width: 1280, height: 720 },
@@ -505,6 +530,7 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
   await page.evaluate(() => document.fonts.ready);
 
   const isSimulatorWorkspace = route.startsWith("/app/simulacao/");
+  const expectsEnabledSimulatorAction = enabledSimulatorRoutes.has(route);
   const snapshot = await page.evaluate((simulatorWorkspace) => {
     const text = document.body.innerText;
     const root = document.documentElement;
@@ -522,7 +548,9 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
           navigationBox.bottom > identityBox.top
         : false;
     const blockedAction = simulatorForm?.querySelector('[data-cta-state="blocked"]');
-    const enabledAction = simulatorForm?.querySelector('[data-cta-state="enabled"]');
+    const enabledAction = simulatorForm?.querySelector(
+      'button[type="submit"][data-cta-state="enabled"]',
+    );
     const unavailableAction = simulatorForm?.querySelector('[data-cta-state="unavailable"]');
     const blockedStyle = blockedAction ? getComputedStyle(blockedAction) : null;
     const enabledStyle = enabledAction ? getComputedStyle(enabledAction) : null;
@@ -543,11 +571,7 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
         getComputedStyle(identityLabel).display === "none" ||
         (getComputedStyle(identityLabel).overflow === "hidden" &&
           getComputedStyle(identityLabel).textOverflow === "ellipsis"),
-      simulatorActionEnabled: simulatorForm
-        ? !simulatorForm.querySelector(
-            'button[disabled][aria-describedby="calculation-blocked-reason"]',
-          )
-        : false,
+      simulatorActionEnabled: Boolean(enabledAction) && !enabledAction?.disabled,
       simulatorFormActionPresent: simulatorForm?.hasAttribute("action") ?? false,
       blockedCalculationMessagePresent:
         !simulatorWorkspace ||
@@ -566,6 +590,17 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
     };
   }, isSimulatorWorkspace);
 
+  const simulatorStatePassed = !isSimulatorWorkspace
+    ? !snapshot.simulatorActionEnabled && !snapshot.simulatorFormActionPresent
+    : expectsEnabledSimulatorAction
+      ? snapshot.simulatorActionEnabled &&
+        !snapshot.simulatorFormActionPresent &&
+        !snapshot.blockedCalculationMessagePresent
+      : !snapshot.simulatorActionEnabled &&
+        !snapshot.simulatorFormActionPresent &&
+        snapshot.blockedCalculationMessagePresent &&
+        snapshot.blockedActionDistinct;
+
   const passed =
     response?.status() === 200 &&
     snapshot.pathname === route &&
@@ -579,10 +614,7 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
     snapshot.reducedMotion &&
     !snapshot.topbarCollision &&
     snapshot.identityTruncationReady &&
-    !snapshot.simulatorActionEnabled &&
-    !snapshot.simulatorFormActionPresent &&
-    snapshot.blockedCalculationMessagePresent &&
-    snapshot.blockedActionDistinct &&
+    simulatorStatePassed &&
     snapshot.unavailableActionDistinct &&
     consoleErrors.length === consoleStart &&
     pageErrors.length === pageErrorStart;
@@ -590,6 +622,12 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
   return {
     route,
     status: response?.status() ?? null,
+    expectedSimulatorState: isSimulatorWorkspace
+      ? expectsEnabledSimulatorAction
+        ? "enabled"
+        : "blocked"
+      : "not-applicable",
+    simulatorStatePassed,
     ...snapshot,
     consoleErrorCount: consoleErrors.length - consoleStart,
     pageErrorCount: pageErrors.length - pageErrorStart,

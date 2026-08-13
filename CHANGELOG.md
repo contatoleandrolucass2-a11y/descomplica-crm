@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Corrige o gate visual autenticado para validar o estado habilitado somente nas
+  rotas de simuladores explicitamente liberadas pelas mesmas flags do runtime;
+  chaves desconhecidas falham fechadas e os demais simuladores continuam
+  obrigatoriamente bloqueados.
 - Atualiza o override transitivo de `nanoid` para 3.3.18 após novo advisory de
   alta severidade, sem alterar dependências diretas ou runtime da aplicação.
 - Implementa o motor oficial WF13 com contrato estrito, fórmula versionada,
