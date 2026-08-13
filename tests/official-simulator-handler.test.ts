@@ -10,8 +10,10 @@ import {
   type OfficialSimulatorHandlerDependencies,
 } from "@/lib/crm/simulators/official/handler";
 import { calculateWf13, WF13_FORMULA, wf13InputSchema } from "@/lib/crm/simulators/official/wf13";
+import { calculateWf16, WF16_FORMULA, wf16InputSchema } from "@/lib/crm/simulators/official/wf16";
 
 import goldenFixture from "./fixtures/wf13-reference-golden.json";
+import wf16GoldenFixture from "./fixtures/wf16-reference-golden.json";
 
 const ENDPOINT = "https://crm.example.com/api/official-simulator/associativo-fluxo-linear";
 const standardInput = goldenFixture[0]!.input;
@@ -174,5 +176,41 @@ describe("endpoint oficial dos simuladores", () => {
     );
 
     expect(response.status).toBe(503);
+  });
+
+  it("executa WF16 somente com sua flag independente", async () => {
+    const response = await handleOfficialSimulatorPost(
+      new Request("https://crm.example.com/api/official-simulator/calcular-documentacao", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "https://crm.example.com",
+        },
+        body: JSON.stringify({ schemaVersion: 1, input: wf16GoldenFixture[0]!.input }),
+      }),
+      "calcular-documentacao",
+      dependencies({
+        configuration: () => ({ mode: "active", enabledKeys: ["simulator.wf16"] }),
+        calculators: {
+          "calcular-documentacao": {
+            engineKey: "simulator.wf16",
+            formulaVersion: WF16_FORMULA.version,
+            sourceSha256: WF16_FORMULA.sourceSha256,
+            execute(input) {
+              return calculateWf16(wf16InputSchema.parse(input));
+            },
+          },
+        },
+      }),
+    );
+    const body = (await response.json()) as Record<string, unknown>;
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({
+      engineKey: "simulator.wf16",
+      formulaVersion: "wf16-1.0.0",
+      sourceSha256: WF16_FORMULA.sourceSha256,
+      result: wf16GoldenFixture[0]!.expected,
+    });
   });
 });

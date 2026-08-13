@@ -1,19 +1,23 @@
 # Simuladores — visual e motores oficiais isolados
 
-## Motor oficial WF13
+## Motores oficiais WF13 e WF16
 
 O WF13 possui implementação determinística versionada, mas continua desligado
 por padrão e isolado dos demais motores. Contrato, fonte, 12 casos de ouro,
 memória, segurança, canário Master e rollback estão em
 [`docs/simulators-official/WF13.md`](simulators-official/WF13.md).
 
-Os outros quatro motores permanecem visualmente completos e bloqueados até seus
+O WF16 possui implementação independente da fórmula de Documentação, com 13
+casos de ouro e diferença zero. Contrato e evidências estão em
+[`docs/simulators-official/WF16.md`](simulators-official/WF16.md).
+
+CAIXA, WF14 e WF15 permanecem visualmente completos e bloqueados até seus
 incrementos independentes. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 
 ## Escopo
 
-As cinco jornadas preservam a composição visual aprovada. Somente o WF13 possui
-fórmula oficial neste incremento; o bundle da referência não é versionado.
+As cinco jornadas preservam a composição visual aprovada. WF13 e WF16 possuem
+fórmulas oficiais em incrementos separados; os bundles não são versionados.
 
 | Código | Rota protegida                            | Jornada visual             |
 | ------ | ----------------------------------------- | -------------------------- |
@@ -33,9 +37,9 @@ autorização.
 - O catálogo tipado define títulos, seções, campos e espaços de resultado.
 - Campos obrigatórios ganham validação associada e `aria-invalid`.
 - As flags oficiais nascem `off` e a allowlist nasce vazia.
-- WF16, CAIXA, WF14 e WF15 mantêm botão bloqueado e `UnavailableValue`.
-- WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
-  papel Master coincidem.
+- CAIXA, WF14 e WF15 mantêm botão bloqueado e `UnavailableValue`.
+- WF13 e WF16 só enviam ao Route Handler same-origin quando suas flags, chaves,
+  permissão e papel Master coincidem.
 - O endpoint limita o corpo, valida o contrato exato, não persiste input/output
   e não registra payload na telemetria.
 - A interface informa: “Cálculo temporariamente indisponível — regra aguardando
@@ -58,5 +62,5 @@ O contrato e o runbook do runtime genérico permanecem em
 ## QA local
 
 Fixtures sintéticas podem preencher os campos somente durante QA isolado. Os
-casos de ouro do WF13 são testes versionados, não seeds de produção. Credenciais
+casos de ouro de WF13/WF16 são testes versionados, não seeds de produção. Credenciais
 QA, storage state, HTML, HAR e payloads de usuário não são versionados.

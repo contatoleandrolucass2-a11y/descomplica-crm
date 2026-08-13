@@ -21,6 +21,7 @@ import {
 } from "./config";
 import { emitOfficialSimulatorTelemetry, type OfficialSimulatorTelemetryEvent } from "./telemetry";
 import { calculateWf13, WF13_FORMULA, wf13InputSchema } from "./wf13";
+import { calculateWf16, WF16_FORMULA, wf16InputSchema } from "./wf16";
 
 export const OFFICIAL_SIMULATOR_MAX_BODY_BYTES = 64_000;
 
@@ -45,6 +46,14 @@ const calculators: Partial<Record<OfficialSimulatorSlug, Calculator>> = {
     sourceSha256: WF13_FORMULA.sourceSha256,
     execute(input, today) {
       return calculateWf13(wf13InputSchema.parse(input), { today });
+    },
+  },
+  "calcular-documentacao": {
+    engineKey: "simulator.wf16",
+    formulaVersion: WF16_FORMULA.version,
+    sourceSha256: WF16_FORMULA.sourceSha256,
+    execute(input) {
+      return calculateWf16(wf16InputSchema.parse(input));
     },
   },
 };

@@ -508,7 +508,9 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("WF13 runs only for Master while other simulators stay blocked", async ({ browser }) => {
+test("WF13 and WF16 run only for Master while other simulators stay blocked", async ({
+  browser,
+}) => {
   await withRolePage(browser, "master", async (page) => {
     await page.goto("/app/simulacao/associativo-fluxo-linear");
     await expect(
@@ -528,12 +530,24 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     await expect(page.getByText("R$ 730,86", { exact: true })).toBeVisible();
     await expect(page.getByText(/wf13-1\.0\.0/)).toBeVisible();
 
-    for (const simulator of [
-      "calcular-documentacao",
-      "caixa",
-      "tabela-direta",
-      "tabela-investidor",
-    ]) {
+    await page.goto("/app/simulacao/calcular-documentacao");
+    await expect(
+      page.getByRole("heading", { name: "Motor oficial em validação Master", exact: true }),
+    ).toBeVisible();
+    await page.getByLabel("Construtora *").selectOption("Direcional");
+    await page.getByLabel("Modalidade de financiamento *").selectOption("MCMV");
+    await page.getByLabel("Sim", { exact: true }).check();
+    await page.getByLabel("Valor da venda *").fill("240.000,00");
+    await page.getByLabel("Avaliação bancária *").fill("250.000,00");
+    await page.locator("#simulator-values-financing").fill("190.000,00");
+    await page.getByLabel("Renda familiar *").fill("6.000,00");
+    await page.getByLabel("Data-base *").fill("2026-08-13");
+    await page.getByRole("button", { name: "Calcular documentação" }).click();
+    await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
+    await expect(page.getByText("R$ 3.951,99", { exact: true })).toBeVisible();
+    await expect(page.getByText(/wf16-1\.0\.0/)).toBeVisible();
+
+    for (const simulator of ["caixa", "tabela-direta", "tabela-investidor"]) {
       await page.goto(`/app/simulacao/${simulator}`);
       await expect(
         page.getByRole("heading", {
@@ -608,9 +622,14 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
   });
 
   await withRolePage(browser, "admin", async (page) => {
-    await page.goto("/app/simulacao/associativo-fluxo-linear");
-    await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toBeDisabled();
-    await expect(page.getByText(/Disponível somente para o perfil Master/)).toBeVisible();
+    for (const [simulator, action] of [
+      ["associativo-fluxo-linear", "Calcular fluxo linear"],
+      ["calcular-documentacao", "Calcular documentação"],
+    ] as const) {
+      await page.goto(`/app/simulacao/${simulator}`);
+      await expect(page.getByRole("button", { name: action })).toBeDisabled();
+      await expect(page.getByText(/Disponível somente para o perfil Master/)).toBeVisible();
+    }
   });
 });
 

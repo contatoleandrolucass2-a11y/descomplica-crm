@@ -38,6 +38,11 @@ function decimal(value: string): string {
 }
 
 export function officialSimulatorInitialValues(slug: string): SimulatorFormValues {
+  if (slug === "calcular-documentacao") {
+    return {
+      "simulator-values-base-date": localToday(),
+    };
+  }
   if (slug !== "associativo-fluxo-linear") return {};
   return {
     "simulator-official-context-effective-date": localToday(),
@@ -59,6 +64,20 @@ export function buildOfficialSimulatorInput(
   slug: OfficialSimulatorSlug,
   values: SimulatorFormValues,
 ): Record<string, string | boolean> | null {
+  if (slug === "calcular-documentacao") {
+    const firstProperty = field(values, "simulator-purchase-type-first-property");
+    return {
+      businessUnit: field(values, "simulator-profile-builder"),
+      modality: field(values, "simulator-purchase-type-modality"),
+      firstProperty: firstProperty === "Sim" ? "SIM" : firstProperty === "Não" ? "NAO" : "",
+      salePrice: decimal(field(values, "simulator-values-property-value")),
+      appraisalValue: decimal(field(values, "simulator-values-bank-appraisal")),
+      financing: decimal(field(values, "simulator-values-financing")),
+      income: decimal(field(values, "simulator-values-family-income")),
+      baseDate: field(values, "simulator-values-base-date"),
+      requestedFirstInstallment: field(values, "simulator-values-requested-first-installment"),
+    };
+  }
   if (slug !== "associativo-fluxo-linear") return null;
   return {
     development: field(values, "simulator-official-context-development"),
@@ -111,10 +130,52 @@ export function officialSimulatorResultRows(
   slug: OfficialSimulatorSlug,
   rawResult: unknown,
 ): OfficialSimulatorResultRow[] | null {
-  if (slug !== "associativo-fluxo-linear" || !rawResult || typeof rawResult !== "object") {
+  if (!rawResult || typeof rawResult !== "object") {
     return null;
   }
   const result = rawResult as Record<string, unknown>;
+  if (slug === "calcular-documentacao") {
+    const effectiveModality = text(result, "effectiveModality");
+    const maximumFinancing = finiteNumber(result, "maximumFinancing");
+    if (effectiveModality === null || maximumFinancing === null) return null;
+    if (result.ok !== true) {
+      return [
+        { label: "Modalidade efetiva", value: effectiveModality || "—" },
+        { label: "Teto do financiamento", value: currency.format(maximumFinancing) },
+        { label: "Resultado", value: "Entradas rejeitadas" },
+      ];
+    }
+    const values = {
+      financingUsage: finiteNumber(result, "financingUsage"),
+      financingHeadroom: finiteNumber(result, "financingHeadroom"),
+      itbi: finiteNumber(result, "itbi"),
+      totalRegistration: finiteNumber(result, "totalRegistration"),
+      dispatchFee: finiteNumber(result, "dispatchFee"),
+      caixaInsurance: finiteNumber(result, "caixaInsurance"),
+      totalCash: finiteNumber(result, "totalCash"),
+      installments: finiteNumber(result, "installments"),
+      installmentValue: finiteNumber(result, "installmentValue"),
+      firstInstallmentDate: text(result, "firstInstallmentDate"),
+      itbiRule: text(result, "itbiRule"),
+    };
+    if (Object.values(values).some((value) => value === null)) return null;
+    return [
+      { label: "Modalidade efetiva", value: effectiveModality },
+      { label: "Teto do financiamento", value: currency.format(maximumFinancing) },
+      { label: "Percentual financiado", value: percent.format(values.financingUsage!) },
+      { label: "Margem do financiamento", value: currency.format(values.financingHeadroom!) },
+      { label: "ITBI", value: currency.format(values.itbi!) },
+      { label: "Registro total", value: currency.format(values.totalRegistration!) },
+      { label: "Despachante", value: currency.format(values.dispatchFee!) },
+      { label: "Seguro CAIXA", value: currency.format(values.caixaInsurance!) },
+      { label: "Total da documentação", value: currency.format(values.totalCash!) },
+      { label: "Parcelas", value: number.format(values.installments!) },
+      { label: "Valor da parcela", value: currency.format(values.installmentValue!) },
+      { label: "Primeiro vencimento", value: values.firstInstallmentDate! || "—" },
+      { label: "Regra do ITBI", value: values.itbiRule! },
+    ];
+  }
+  if (slug !== "associativo-fluxo-linear") return null;
   const values = {
     realSaleValue: finiteNumber(result, "realSaleValue"),
     proSoluto: finiteNumber(result, "proSoluto"),

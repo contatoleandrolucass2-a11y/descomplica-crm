@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Implementa o motor oficial WF16 de Documentação com contrato estrito,
+  fórmula versionada, tabela de 48 faixas e 13 casos de ouro da referência viva
+  com diferença zero; runtime e flag independente permanecem desligados.
+- Reproduz enquadramento MCMV/SPBE, tetos de financiamento, ITBI, registros,
+  custos, parcelamento e vencimentos sem depender de Salesforce, n8n ou Qlik.
 - Implementa o motor oficial WF13 com contrato estrito, fórmula versionada,
   memória de cálculo e 12 casos de ouro extraídos da referência viva com
   diferença zero; nenhuma dependência de Salesforce, n8n ou Qlik.
