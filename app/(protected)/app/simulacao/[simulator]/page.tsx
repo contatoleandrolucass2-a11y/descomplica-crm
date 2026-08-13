@@ -1,23 +1,18 @@
 import { notFound } from "next/navigation";
 
 import { enforcePermission } from "@/lib/authorization/enforce";
-import { SIMULATORS, SIMULATOR_LIST, isSimulatorSlug } from "@/lib/crm/simulators/catalog";
-import {
-  OFFICIAL_SIMULATOR_SLUGS,
-  officialSimulatorIsImplemented,
-} from "@/lib/crm/simulators/official/catalog";
+import { SIMULATORS, isSimulatorSlug } from "@/lib/crm/simulators/catalog";
+import { isOfficialSimulatorSlug } from "@/lib/crm/simulators/official/catalog";
 import {
   getOfficialSimulatorRuntimeConfiguration,
-  officialSimulatorIsEnabled,
+  officialSimulatorExecutionIsEnabled,
+  officialSimulatorRuntimeIsEnabled,
 } from "@/lib/crm/simulators/official/config";
 
 import { SimulatorWorkspace } from "../_components/SimulatorWorkspace";
 
 export const metadata = { title: "Simulação comercial" };
-
-export function generateStaticParams() {
-  return SIMULATOR_LIST.map((simulator) => ({ simulator: simulator.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function SimulatorPage({
   params,
@@ -29,14 +24,12 @@ export default async function SimulatorPage({
   if (!isSimulatorSlug(simulator)) notFound();
 
   const configuration = getOfficialSimulatorRuntimeConfiguration();
-  const engineKey = OFFICIAL_SIMULATOR_SLUGS[simulator];
+  const officialSlug = isOfficialSimulatorSlug(simulator) ? simulator : null;
   const runtimeEnabled =
-    officialSimulatorIsImplemented(simulator) &&
-    officialSimulatorIsEnabled(configuration, engineKey);
+    officialSlug !== null && officialSimulatorRuntimeIsEnabled(configuration, officialSlug);
   const executionEnabled =
-    runtimeEnabled &&
-    authorization.roleKey === "master" &&
-    authorization.permissions.includes("crm.simulators.execute");
+    officialSlug !== null &&
+    officialSimulatorExecutionIsEnabled(configuration, officialSlug, authorization);
   const executionReason = runtimeEnabled
     ? "Disponível somente para o perfil Master nesta etapa de validação."
     : "Cálculo temporariamente indisponível — regra aguardando validação";

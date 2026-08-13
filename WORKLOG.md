@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-08-13 — hotfix do canário Master WF13
+
+- A reprovação humana encontrou o CTA ainda bloqueado após ativação das flags.
+  O diagnóstico comprovou no runtime `active/simulator.wf13`, vínculo Master,
+  permissão efetiva e sessão produtiva atualizada. O Route Handler oficial não
+  depende do runtime genérico de políticas comerciais.
+- A interface recebia a decisão somente pelo payload renderizado da página; uma
+  página aberta antes da troca de flags podia manter o estado bloqueado. Hub e
+  rota agora forçam renderização por requisição e o workspace reconcilia o gate
+  por um status autenticado e `no-store` antes de habilitar o CTA.
+- O status não executa fórmula nem retorna dados comerciais. O POST continua
+  revalidando flag, implementação, permissão, papel Master, origem e payload;
+  decisão de interface não substitui autorização server-side.
+
 ## 2026-08-13 — baseline visual do canário WF13
 
 - O segundo ensaio passou 147/147 checks responsivos, 84/84 checks de tema,

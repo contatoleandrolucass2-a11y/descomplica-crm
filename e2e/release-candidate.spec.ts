@@ -510,6 +510,14 @@ test("isolated homologation exposes its safety controls without sharing producti
 
 test("WF13 runs only for Master while other simulators stay blocked", async ({ browser }) => {
   await withRolePage(browser, "master", async (page) => {
+    const status = await page.request.get("/api/official-simulator/associativo-fluxo-linear");
+    expect(status.status()).toBe(200);
+    expect(status.headers()["cache-control"]).toContain("no-store");
+    expect(await status.json()).toMatchObject({
+      engineKey: "simulator.wf13",
+      executionEnabled: true,
+    });
+
     await page.goto("/app/simulacao/associativo-fluxo-linear");
     await expect(
       page.getByRole("heading", { name: "Motor oficial em validação Master", exact: true }),
@@ -608,6 +616,8 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
   });
 
   await withRolePage(browser, "admin", async (page) => {
+    const status = await page.request.get("/api/official-simulator/associativo-fluxo-linear");
+    expect(status.status()).toBe(403);
     await page.goto("/app/simulacao/associativo-fluxo-linear");
     await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toBeDisabled();
     await expect(page.getByText(/Disponível somente para o perfil Master/)).toBeVisible();

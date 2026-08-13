@@ -36,6 +36,9 @@ autorização.
 - WF16, CAIXA, WF14 e WF15 mantêm botão bloqueado e `UnavailableValue`.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
+- Hub e rota do simulador são renderizados por requisição. O cliente consulta
+  um status autenticado e `no-store` para substituir com segurança qualquer
+  estado visual aberto antes da ativação; esse status não executa cálculo.
 - O endpoint limita o corpo, valida o contrato exato, não persiste input/output
   e não registra payload na telemetria.
 - A interface informa: “Cálculo temporariamente indisponível — regra aguardando

@@ -246,3 +246,32 @@ export async function handleOfficialSimulatorPost(
     200,
   );
 }
+
+export async function handleOfficialSimulatorStatus(
+  request: Request,
+  suppliedSlug: string,
+  dependencies: OfficialSimulatorHandlerDependencies = defaultDependencies,
+): Promise<Response> {
+  if (!isOfficialSimulatorSlug(suppliedSlug)) {
+    return json(request, { error: "simulator_not_found" }, 404);
+  }
+
+  const engineKey = OFFICIAL_SIMULATOR_SLUGS[suppliedSlug];
+  const calculator = dependencies.calculators[suppliedSlug];
+  const configuration = dependencies.configuration();
+  if (
+    !calculator ||
+    calculator.engineKey !== engineKey ||
+    !officialSimulatorIsEnabled(configuration, engineKey)
+  ) {
+    return json(request, { error: "simulator_unavailable" }, 503);
+  }
+
+  const authorization = await dependencies.authorize("crm.simulators.execute");
+  if (!authorization.ok) return authorization.response;
+  if (authorization.context.roleKey !== "master") {
+    return json(request, { error: "forbidden" }, 403);
+  }
+
+  return json(request, { schemaVersion: 1, engineKey, executionEnabled: true }, 200);
+}

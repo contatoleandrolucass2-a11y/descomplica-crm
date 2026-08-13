@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Corrige o canário Master do WF13 para revalidar no servidor o estado efetivo
+  de flag, implementação, papel e permissão, sem depender de payload RSC aberto
+  antes da ativação. O hub e a rota passam a ser dinâmicos e o endpoint de
+  status é autenticado, fail-closed e `no-store`; os outros motores continuam
+  bloqueados.
 - Versiona a baseline visual específica do canário WF13 e mantém a baseline
   canônica bloqueada intacta; o gate escolhe o conjunto somente pela chave
   oficial conhecida e continua reprovando drift ou baseline ausente.

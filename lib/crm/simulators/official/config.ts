@@ -1,6 +1,14 @@
 import "server-only";
 
-import { isOfficialSimulatorKey, type OfficialSimulatorKey } from "./catalog";
+import type { AuthorizationContext } from "@/lib/authorization/types";
+
+import {
+  OFFICIAL_SIMULATOR_SLUGS,
+  isOfficialSimulatorKey,
+  officialSimulatorIsImplemented,
+  type OfficialSimulatorKey,
+  type OfficialSimulatorSlug,
+} from "./catalog";
 
 export type OfficialSimulatorRuntimeConfiguration =
   | { mode: "off"; enabledKeys: readonly [] }
@@ -38,4 +46,26 @@ export function officialSimulatorIsEnabled(
   engineKey: OfficialSimulatorKey,
 ): boolean {
   return configuration.mode === "active" && configuration.enabledKeys.includes(engineKey);
+}
+
+export function officialSimulatorRuntimeIsEnabled(
+  configuration: OfficialSimulatorRuntimeConfiguration,
+  slug: OfficialSimulatorSlug,
+): boolean {
+  return (
+    officialSimulatorIsImplemented(slug) &&
+    officialSimulatorIsEnabled(configuration, OFFICIAL_SIMULATOR_SLUGS[slug])
+  );
+}
+
+export function officialSimulatorExecutionIsEnabled(
+  configuration: OfficialSimulatorRuntimeConfiguration,
+  slug: OfficialSimulatorSlug,
+  authorization: AuthorizationContext,
+): boolean {
+  return (
+    officialSimulatorRuntimeIsEnabled(configuration, slug) &&
+    authorization.roleKey === "master" &&
+    authorization.permissions.includes("crm.simulators.execute")
+  );
 }
