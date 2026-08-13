@@ -68,9 +68,9 @@ export const PERMISSIONS = {
     minLevel: 10,
   },
   "crm.partnerships.view": {
-    label: "Visualizar dados de parcerias",
-    description: "Consulta somente dados Qlik vinculados a organizações dentro do escopo aprovado.",
-    minLevel: 10,
+    label: "Visualizar Canal de Parcerias",
+    description: "Acessa o Canal de Parcerias exclusivamente no perfil Master.",
+    minLevel: 100,
   },
   "crm.read_model_v3.view": {
     label: "Visualizar read model v3",

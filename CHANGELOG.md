@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Alinha o catálogo TypeScript de `crm.partnerships.view` ao gate remoto
+  Master-only: nível 100, rótulo comercial em português e regressão unitária
+  explícita, sem nova migration ou alteração de permissões.
 - Adiciona uma migration RBAC isolada para criar `crm.partnerships.view`,
   vinculá-la somente ao papel `master` e convergir o catálogo do Canal de
   Parcerias sem aplicar a pilha pendente nem alterar outras permissões.

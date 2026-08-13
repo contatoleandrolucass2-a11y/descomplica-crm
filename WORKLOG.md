@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-08-13 — sincronização do catálogo RBAC de parcerias
+
+- A revisão pré-aplicação detectou que a migration Master-only usava nível 100,
+  mas o espelho TypeScript ainda declarava nível 10. O catálogo local agora
+  reflete o mesmo gate, com teste explícito; banco, usuários e produção não
+  foram alterados por esta correção.
+
 ## 2026-08-13 — convergência RBAC do Canal de Parcerias
 
 - O diagnóstico remoto somente leitura comprovou a divergência: a permissão
