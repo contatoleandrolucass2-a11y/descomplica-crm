@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 30 migrations
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 31 migrations
 locais, incluindo quatro markers históricos sanitizados e no-op. Nenhuma regra,
 política ou valor comercial é seedado. O rebuild contém 39 tabelas públicas,
 17 privadas, 12 papéis, 26 permissões e 21 páginas.
@@ -13,8 +13,8 @@ markers locais sem o SQL inseguro, além de migrations locais ainda não
 aplicadas. A exposição Qlik remota segue incompatível com a allowlist. A matriz
 completa, hashes e ordem segura estão em
 [`docs/reconciliation/MIGRATION_MATRIX.md`](reconciliation/MIGRATION_MATRIX.md).
-Nenhuma migration de reconciliação foi aplicada remotamente e nenhum cutover
-Qlik ou do read model v3 foi realizado.
+Somente os gates isolados P0 Qlik e RBAC do Canal foram aplicados remotamente;
+nenhum cutover Qlik ou do read model v3 foi realizado.
 
 ## Migrations
 
@@ -47,7 +47,8 @@ Qlik ou do read model v3 foi realizado.
 27. `20260811120000_commercial_configuration_drafts.sql`: rascunhos privados e versionados de metas/pontos, preview determinístico, optimistic locking e auditoria hashes-only; não existe RPC de ativação.
 28. `20260813115335_emergency_qlik_public_read_hardening.sql`: contenção P0 isolada que força RLS, remove policies de leitura, revoga todo acesso direto às três tabelas Qlik e restringe a RPC legada ao caller `anon` temporário com `search_path` seguro; dados e RBAC do Canal permanecem inalterados.
 29. `20260813140000_partnerships_rbac_convergence.sql`: convergência RBAC isolada que cria a permissão Master-only do Canal, remove vínculos/overrides residuais apenas dessa chave e alinha `app_pages` ao guard da rota.
-30. `20260813143000_master_simulator_execution_gate.sql`: gate aditivo que concede `crm.simulators.execute` somente ao Master, sem ativar fórmula, flag ou integração.
+30. `20260813151446_emergency_qlik_public_read_recontainment.sql`: roll-forward P0 idempotente que restabelece RLS forçada, remove novamente toda policy de leitura e revoga ACL direta após regressão remota; não reproduz as migrations inseguras nem autoriza rollback público.
+31. `20260813143000_master_simulator_execution_gate.sql`: gate aditivo que concede `crm.simulators.execute` somente ao Master, sem ativar fórmula, flag ou integração.
 
 ## Desenvolvimento local
 
@@ -64,14 +65,13 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 929 testes pgTAP em 21 arquivos: 28 dos motivos de
+`supabase test db` planeja 922 testes pgTAP em 20 arquivos: 28 dos motivos de
 acesso, 51 regressões de hardening escopado, 28 do dashboard, 25 das metas, 20
 da matriz global de grants, 60 do schema Qlik, 33 do catálogo, 28 do signup
 pendente, 26 dos pontos, 54 do contrato Qlik, 20 da governança de identidades,
 27 do ranking, 143 do read model v3, 98 da matriz de escopos, 43 da ingestão
 Salesforce, 86 do relay/mappings, 93 do runtime comercial, 22 dos rascunhos
-comerciais, 28 da contenção Qlik, 9 da convergência RBAC do Canal e 7 do gate
-Master dos simuladores. A cobertura verifica nomes,
+comerciais, 28 da contenção Qlik e 9 da convergência RBAC do Canal. A cobertura verifica nomes,
 schema, grants, policies, constraints, disponibilidade e autoridade de fontes,
 preservação de dados, mappings, lineage, provisionamento, usuários inativos,
 overrides, limites de payload, delegação direcional, cardinalidade de escopo,

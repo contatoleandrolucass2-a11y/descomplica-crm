@@ -1146,3 +1146,42 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   typecheck, 263 testes e build também passaram.
 - Nenhum dado, credencial, workflow, integração ou ambiente remoto foi alterado
   durante este ajuste pré-merge.
+
+## 2026-08-13 — recontenção emergencial P0 Qlik
+
+- O preflight do RBAC detectou duas migrations remotas não pertencentes ao
+  fluxo aprovado, registradas às `14:27:23Z` e `14:28:35Z`. O gate do Canal foi
+  suspenso antes de qualquer alteração.
+- O estado regressivo tinha seis grants diretos de `SELECT` e três policies de
+  leitura para `anon,authenticated`. Evidências e logs foram preservados sem
+  linhas, identificadores pessoais, tokens ou segredos.
+- O log PostgreSQL comprova aplicação via endpoint MCP por principal OAuth
+  autenticado. A identidade foi redigida; nenhum CI, deploy da aplicação ou
+  workflow Qlik aparece como autor dessas duas migrations.
+- Backup contemporâneo root-only passou SHA-256 e restore isolado PostgreSQL
+  17.6. As contagens 98/30.091/4.087 e as 20 versões remotas foram reproduzidas;
+  o ensaio do roll-forward passou 28/28 pgTAP sem mudar dados.
+- A migration exclusiva
+  `20260813151446_emergency_qlik_public_read_recontainment.sql` foi aplicada
+  isoladamente. Probes GET anônimos retornam 401; RLS/FORCE RLS estão ativos;
+  policies de leitura e ACLs diretas estão zeradas. A RPC temporária continua
+  somente para `anon`, como exceção já aprovada até identidade dedicada.
+- A amostra limitada aos 100 eventos mais recentes registra 80 GETs HTTP 200
+  entre `14:44:16Z` e `15:14:31Z`. A origem e o volume retornado não são
+  confiáveis no log disponível; não há prova de exfiltração nem base para
+  excluir acesso externo.
+- Produção da aplicação permaneceu saudável e no SHA
+  `b8483c5ddb335530ba8b84fa0f2e1a299c1036f7`. Nenhum workflow, dado,
+  credencial, DNS, Nginx, Salesforce ou n8n foi alterado.
+
+## 2026-08-13 — convergência RBAC do Canal de Parcerias
+
+- Após o CI pós-merge da recontenção ficar 3/3 verde, o preflight confirmou
+  Qlik fechado e o Canal ainda no estado divergente documentado.
+- Aplicada somente a migration `partnerships_rbac_convergence`, registrada
+  remotamente como `20260813160418`; nenhuma outra migration pendente entrou.
+- Verificação agregada confirmou permissão/catalogo/vínculo Master 1/1/1,
+  não-Master 0, overrides 0 e um Master ativo autorizado. Anônimo recebe
+  redirecionamento ao login e `/api/health` permanece 200.
+- As três tabelas Qlik continuaram com zero grant direto e zero policy de
+  leitura. Integrações, motores, allowlists e flags não foram ativados.

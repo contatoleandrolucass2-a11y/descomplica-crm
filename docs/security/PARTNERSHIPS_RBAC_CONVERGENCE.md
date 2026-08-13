@@ -23,10 +23,14 @@ alterado. A migration usa transação curta, `lock_timeout` e
 `statement_timeout` e pode ser aplicada isoladamente sem executar a pilha
 pendente.
 
-## Resultado esperado
+## Resultado aplicado em 13 de agosto de 2026
 
-- Master: link visível e rota autorizada;
-- qualquer outro papel: link oculto e acesso direto 403;
+- migration remota isolada `20260813160418_partnerships_rbac_convergence`;
+- um Master ativo autorizado por `crm.partnerships.view`;
+- zero não-Master autorizado e zero override direto;
+- catálogo e guard convergidos na mesma chave;
+- anônimo redirecionado ao login e produção saudável;
+- hardening Qlik preservado com zero ACL/policy de leitura;
 - login/logout, Dashboard, Ranking e Configurações inalterados;
 - rollback: nova migration explícita que retira o gate e volta a página ao
   estado indisponível; nunca executar SQL manual nem aplicar migrations em
