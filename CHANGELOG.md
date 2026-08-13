@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Atualiza o override transitivo de `nanoid` para 3.3.18 após novo advisory de
+  alta severidade, sem alterar dependências diretas ou runtime da aplicação.
 - Implementa o motor oficial WF13 com contrato estrito, fórmula versionada,
   memória de cálculo e 12 casos de ouro extraídos da referência viva com
   diferença zero; nenhuma dependência de Salesforce, n8n ou Qlik.
