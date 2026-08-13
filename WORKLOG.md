@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-08-13 — atualização transitiva de segurança
+
+- O CI pós-merge do WF13 bloqueou no audit por advisory novo contra
+  `nanoid <3.3.18`, dependência transitiva do PostCSS.
+- O override anterior 3.3.17 foi elevado para a versão corrigida 3.3.18; não
+  houve mudança de dependência direta, regra comercial, migration ou flag.
+- `pnpm why` confirmou uma única versão 3.3.18 e o audit voltou a zero
+  vulnerabilidades conhecidas.
+
 ## 2026-08-13 — motor oficial WF13
 
 - A função real do Associativo · Fluxo Linear foi inspecionada somente em
