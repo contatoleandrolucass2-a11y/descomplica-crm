@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-08-13 — contenção emergencial da leitura pública Qlik
+
+- Diagnóstico somente leitura comprovou `SELECT` de `anon`, `authenticated` e
+  `service_role` e policies públicas nas três tabelas `crm_imob_ranking_*`.
+  Logs sanitizados preservam ao menos 51 GETs bem-sucedidos não atribuídos;
+  origem externa e exfiltração não foram comprovadas.
+- Backup lógico root-only incluiu roles, schema, dados e histórico. Restore
+  isolado PostgreSQL 17.6 reproduziu exatamente 97 runs, 29.779 entries e 4.031
+  developments, com hashes canônicos idênticos e sem rede externa.
+- Migration emergencial exclusiva força RLS, remove todas as policies de
+  leitura e revoga privilégios diretos dos papéis da Data API e
+  `service_role`. Não altera dados, RBAC, app, usuários ou integrações.
+- Comparação canônica externa confirmou hashes de dados inalterados. pgTAP do
+  restore aprovou 15/15 casos de ACL, policies, RLS e preservação estrutural do
+  writer. Leitores diretos ficam indisponíveis; leitura pública não é rollback.
+- Publisher confirmado continua no workflow `r4DyPyOTDtoROXq0`, usando RPC
+  `SECURITY DEFINER` por transporte `anon`. Revogar leitura não quebra a RPC,
+  mas identidade dedicada e menor privilégio ainda exigem gate separado; relay
+  e workflow não foram alterados.
+
 ## 2026-08-10 — release candidate, E2E e gates
 
 - A primeira execução do CI remoto revelou que o Supabase CLI pode escrever
