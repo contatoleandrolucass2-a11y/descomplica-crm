@@ -49,11 +49,12 @@ Captura remota: `2026-08-09T05:31:42Z`, projeto
 |    26 | `20260810201703_commercial_engines_policy_runtime`             |  Sim  |  Não   | `9a6e31d75acde57ea75f158fee7b4020eb8f589b5eff1c48ca22826d398a1531` | —                                                                  | Políticas/motores versionados, gates, grants e ledger privados; zero regra real seedada.                      | Somente local; runtime inerte e sem políticas               | Manter flags off; ativação exige políticas, owners, grants e casos de ouro oficialmente aprovados.                |
 |    27 | `20260811120000_commercial_configuration_drafts`               |  Sim  |  Não   | `0c6014602ee64f2d6c638a4e7b67eb0a501b6e85657925e50946e04ab296ad3a` | —                                                                  | Rascunhos privados de metas/pontos, preview, revisão otimista e auditoria hashes-only; sem ativação.          | Somente local; intake inerte e Master-only                  | Aplicar apenas na sequência remota aprovada; não cria política, gate, grant ou valor oficial.                     |
 |    28 | `20260813115335_emergency_qlik_public_read_hardening`          |  Sim  |  Não   | `111a5d20d09af97b77424d045a763983e86ae2decf9db4461c55ecf8de1c0de7` | —                                                                  | Força RLS, fecha ACL/policies das três tabelas e restringe a RPC legada ao caller `anon` temporário.          | P0 isolada; restore e gate aprovados                        | Aplicar isoladamente; preserva dados/corpo da RPC, não corrige RBAC e nunca reabre leitura pública como rollback. |
+|    29 | `20260813140000_partnerships_rbac_convergence`                 |  Sim  |  Não   | `e58f0b0eec61c94958d566c2bc61945e5729172363f6dd6d8400bbfe2944ab9e` | —                                                                  | Cria gate Master-only e alinha catálogo/guard do Canal sem tocar em outras permissões.                        | RBAC isolado; requer restore e gate próprios                | Aplicar isoladamente; não executar migrations pendentes nem misturar com Qlik.                                    |
 
 As quatro versões antes somente remotas agora têm markers locais no-op. A
 diferença de hashes é intencional: o SQL remoto sensível/inseguro não foi
 copiado; forma e ACL seguras convergem por migrations posteriores. Não há versão
-“não identificada”. As versões 14, 15, 19, 21–28 continuam somente locais;
+“não identificada”. As versões 14, 15, 19, 21–29 continuam somente locais;
 nenhuma foi aplicada ao projeto remoto.
 
 ## Recuperação das quatro versões somente remotas

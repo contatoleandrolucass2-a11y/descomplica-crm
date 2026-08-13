@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Adiciona uma migration RBAC isolada para criar `crm.partnerships.view`,
+  vinculá-la somente ao papel `master` e convergir o catálogo do Canal de
+  Parcerias sem aplicar a pilha pendente nem alterar outras permissões.
+- Remove vínculos e overrides residuais exclusivos desse gate, eleva o nível de
+  gestão para Master e adiciona pgTAP que prova menu/guard na mesma chave.
 - Adiciona migration emergencial isolada que força RLS, remove policies de
   leitura e revoga privilégios diretos de `PUBLIC`, `anon`, `authenticated` e
   `service_role` nas três tabelas Qlik, sem alterar dados ou RBAC do Canal.

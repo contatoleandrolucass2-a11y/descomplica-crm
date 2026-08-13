@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-08-13 — convergência RBAC do Canal de Parcerias
+
+- O diagnóstico remoto somente leitura comprovou a divergência: a permissão
+  `crm.partnerships.view` não existia, enquanto `crm.partnerships` ainda usava
+  `crm.ranking.view`. O menu herdava a chave antiga e a rota exigia a nova,
+  explicando o `AUTH-403` para Master.
+- A migration exclusiva cria/atualiza somente essa permissão com nível 100,
+  remove vínculos não Master e overrides diretos dessa chave, vincula Master e
+  atualiza exatamente uma linha do catálogo. Ausência/duplicidade falha a
+  transação fechada.
+- O teste pgTAP prova catálogo, nível, vínculo Master-only, zero override e
+  convergência entre menu e guard. Código da rota, demais permissões, Qlik,
+  integrações, dados comerciais e aplicação permanecem inalterados.
+
 ## 2026-08-13 — contenção emergencial da leitura pública Qlik
 
 - Diagnóstico somente leitura comprovou `SELECT` de `anon`, `authenticated` e
