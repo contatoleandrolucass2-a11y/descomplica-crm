@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-08-13 — baseline visual do canário WF13
+
+- O segundo ensaio passou 147/147 checks responsivos, 84/84 checks de tema,
+  192/192 auditorias Axe, 105/105 checks de zoom e E2E 9/9. A única reprovação
+  foram 11 comparações da rota WF13 habilitada contra sua baseline canônica
+  bloqueada, todas por mudança esperada de altura.
+- Homologação foi novamente revertida e comprovada no SHA, configuração e banco
+  anteriores; produção permaneceu saudável e inalterada.
+- As 11 capturas sanitizadas do canário passaram a formar um conjunto separado
+  e rastreado. A seleção depende da mesma chave oficial do runtime; baseline
+  ausente, chave desconhecida e qualquer drift continuam reprovando o gate.
+
 ## 2026-08-13 — gate visual do canário WF13
 
 - O primeiro ensaio remoto passou nos nove fluxos E2E, mas o verificador visual

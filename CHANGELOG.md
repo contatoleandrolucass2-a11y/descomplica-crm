@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Versiona a baseline visual específica do canário WF13 e mantém a baseline
+  canônica bloqueada intacta; o gate escolhe o conjunto somente pela chave
+  oficial conhecida e continua reprovando drift ou baseline ausente.
 - Corrige o gate visual autenticado para validar o estado habilitado somente nas
   rotas de simuladores explicitamente liberadas pelas mesmas flags do runtime;
   chaves desconhecidas falham fechadas e os demais simuladores continuam
