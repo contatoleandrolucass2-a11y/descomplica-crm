@@ -297,6 +297,7 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
     detached: true,
     env: {
       ...environmentSubset(["PATH", "HOME", "TZ", "NODE_OPTIONS", "LD_LIBRARY_PATH"]),
+      ...environmentSubset(["OFFICIAL_SIMULATOR_RUNTIME_MODE", "OFFICIAL_SIMULATOR_ENABLED_KEYS"]),
       NODE_ENV: "production",
       APP_ORIGIN: origin,
       NEXT_PUBLIC_SUPABASE_URL: apiUrl,
@@ -1179,6 +1180,8 @@ function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
       "NODE_OPTIONS",
       "PLAYWRIGHT_BROWSERS_PATH",
       "LD_LIBRARY_PATH",
+      "OFFICIAL_SIMULATOR_RUNTIME_MODE",
+      "OFFICIAL_SIMULATOR_ENABLED_KEYS",
     ]),
     QA_AUTH_ORIGIN: origin,
     QA_AUTH_EMAIL: account.email,

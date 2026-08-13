@@ -16,6 +16,7 @@ import {
 } from "./catalog";
 import {
   getOfficialSimulatorRuntimeConfiguration,
+  officialSimulatorExecutionIsEnabled,
   officialSimulatorIsEnabled,
   type OfficialSimulatorRuntimeConfiguration,
 } from "./config";
@@ -245,4 +246,25 @@ export async function handleOfficialSimulatorPost(
     },
     200,
   );
+}
+
+export async function handleOfficialSimulatorStatus(
+  request: Request,
+  suppliedSlug: string,
+  dependencies: OfficialSimulatorHandlerDependencies = defaultDependencies,
+): Promise<Response> {
+  if (!isOfficialSimulatorSlug(suppliedSlug)) {
+    return json(request, { error: "simulator_not_found" }, 404);
+  }
+
+  const engineKey = OFFICIAL_SIMULATOR_SLUGS[suppliedSlug];
+  const calculator = dependencies.calculators[suppliedSlug];
+  const configuration = dependencies.configuration();
+  const authorization = await dependencies.authorize("crm.simulators.view");
+  if (!authorization.ok) return authorization.response;
+  const executionEnabled =
+    calculator?.engineKey === engineKey &&
+    officialSimulatorExecutionIsEnabled(configuration, suppliedSlug, authorization.context);
+
+  return json(request, { schemaVersion: 1, engineKey, executionEnabled }, 200);
 }

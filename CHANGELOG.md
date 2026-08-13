@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Estabiliza o gate visual do canário WF13: a validação de formulário não depende
+  de `networkidle`, e o runner local propaga explicitamente as flags do simulador
+  para o runtime Next.js e para a matriz visual.
+- O GET autenticado de status dos simuladores passa a representar bloqueio com
+  `200` e `executionEnabled: false`, evitando erro de console esperado; o POST
+  continua fail-closed e sem mudança de autorização.
+- Versiona o estado visual do hub quando somente WF13 está no canário, sem
+  substituir a baseline canônica em que todos os motores permanecem bloqueados.
+
+- Corrige o canário Master do WF13 para revalidar no servidor o estado efetivo
+  de flag, implementação, papel e permissão, sem depender de payload RSC aberto
+  antes da ativação. O hub e a rota passam a ser dinâmicos e o endpoint de
+  status é autenticado, fail-closed e `no-store`; os outros motores continuam
+  bloqueados.
 - Versiona a baseline visual específica do canário WF13 e mantém a baseline
   canônica bloqueada intacta; o gate escolhe o conjunto somente pela chave
   oficial conhecida e continua reprovando drift ou baseline ausente.

@@ -3,10 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 import type { AuthorizationContext } from "@/lib/authorization/types";
 import {
   getOfficialSimulatorRuntimeConfiguration,
+  officialSimulatorExecutionIsEnabled,
   type OfficialSimulatorRuntimeConfiguration,
 } from "@/lib/crm/simulators/official/config";
 import {
   handleOfficialSimulatorPost,
+  handleOfficialSimulatorStatus,
   type OfficialSimulatorHandlerDependencies,
 } from "@/lib/crm/simulators/official/handler";
 import { calculateWf13, WF13_FORMULA, wf13InputSchema } from "@/lib/crm/simulators/official/wf13";
@@ -109,6 +111,72 @@ describe("endpoint oficial dos simuladores", () => {
 
     expect(unauthenticated.status).toBe(401);
     expect(nonMaster.status).toBe(403);
+  });
+
+  it("expõe status no-store para recuperar UI de canário sem relaxar autorização", async () => {
+    expect(
+      officialSimulatorExecutionIsEnabled(
+        { mode: "active", enabledKeys: ["simulator.wf13"] },
+        "associativo-fluxo-linear",
+        masterContext,
+      ),
+    ).toBe(true);
+    expect(
+      officialSimulatorExecutionIsEnabled(
+        { mode: "active", enabledKeys: ["simulator.wf13"] },
+        "associativo-fluxo-linear",
+        { ...masterContext, roleKey: "admin", level: 80 },
+      ),
+    ).toBe(false);
+
+    const enabled = await handleOfficialSimulatorStatus(
+      new Request(ENDPOINT),
+      "associativo-fluxo-linear",
+      dependencies(),
+    );
+    const body = (await enabled.json()) as Record<string, unknown>;
+    expect(enabled.status).toBe(200);
+    expect(enabled.headers.get("cache-control")).toContain("no-store");
+    expect(body).toMatchObject({
+      schemaVersion: 1,
+      engineKey: "simulator.wf13",
+      executionEnabled: true,
+    });
+
+    const blocked = await handleOfficialSimulatorStatus(
+      new Request(ENDPOINT),
+      "associativo-fluxo-linear",
+      dependencies({ configuration: () => ({ mode: "off", enabledKeys: [] }) }),
+    );
+    const nonMaster = await handleOfficialSimulatorStatus(
+      new Request(ENDPOINT),
+      "associativo-fluxo-linear",
+      dependencies({
+        authorize: vi.fn(async () => ({
+          ok: true as const,
+          context: { ...masterContext, roleKey: "admin" as const, level: 80 },
+        })),
+      }),
+    );
+    expect(blocked.status).toBe(200);
+    await expect(blocked.json()).resolves.toMatchObject({ executionEnabled: false });
+    expect(nonMaster.status).toBe(200);
+    await expect(nonMaster.json()).resolves.toMatchObject({ executionEnabled: false });
+  });
+
+  it("mantém o status autenticado e não revela execução a quem não pode ver simuladores", async () => {
+    const authorize = vi.fn(async () => ({
+      ok: false as const,
+      response: Response.json({ error: "forbidden" }, { status: 403 }),
+    }));
+    const response = await handleOfficialSimulatorStatus(
+      new Request(ENDPOINT),
+      "associativo-fluxo-linear",
+      dependencies({ authorize }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(authorize).toHaveBeenCalledWith("crm.simulators.view");
   });
 
   it("rejeita origem, media type e payload fora do contrato", async () => {

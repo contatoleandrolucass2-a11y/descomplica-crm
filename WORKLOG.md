@@ -1,5 +1,38 @@
 # Worklog
 
+## 2026-08-13 — Hotfix WF13: gate visual do canário
+
+- Reproduzida localmente a falha do CI em `simulator-validation`: a página já
+  estava carregada, mas `waitForLoadState("networkidle")` expirava por atividade
+  assíncrona do runtime. A validação agora aguarda diretamente o campo obrigatório.
+- O runner visual isolado passou a propagar apenas as duas variáveis oficiais de
+  feature flag ao app e ao harness. Isso permite validar o baseline WF13 ativo de
+  forma explícita, mantendo o modo desligado como padrão e os demais motores fora
+  da allowlist.
+- A execução completa também mostrou que o GET de status devolvia `503` para cada
+  motor bloqueado, gerando erro de console apesar do estado visual correto. O GET
+  agora exige `crm.simulators.view` e responde `executionEnabled: false`; somente
+  o POST preserva `503` para runtime desligado e continua exigindo
+  `crm.simulators.execute` + papel Master.
+- A matriz ativa detectou corretamente o novo estado do hub. As oito capturas do
+  hub com apenas `simulator.wf13` foram separadas no conjunto canário; a baseline
+  padrão bloqueada não foi alterada. Múltiplas chaves não recebem fallback de
+  baseline e continuam falhando fechadas.
+
+## 2026-08-13 — hotfix do canário Master WF13
+
+- A reprovação humana encontrou o CTA ainda bloqueado após ativação das flags.
+  O diagnóstico comprovou no runtime `active/simulator.wf13`, vínculo Master,
+  permissão efetiva e sessão produtiva atualizada. O Route Handler oficial não
+  depende do runtime genérico de políticas comerciais.
+- A interface recebia a decisão somente pelo payload renderizado da página; uma
+  página aberta antes da troca de flags podia manter o estado bloqueado. Hub e
+  rota agora forçam renderização por requisição e o workspace reconcilia o gate
+  por um status autenticado e `no-store` antes de habilitar o CTA.
+- O status não executa fórmula nem retorna dados comerciais. O POST continua
+  revalidando flag, implementação, permissão, papel Master, origem e payload;
+  decisão de interface não substitui autorização server-side.
+
 ## 2026-08-13 — baseline visual do canário WF13
 
 - O segundo ensaio passou 147/147 checks responsivos, 84/84 checks de tema,

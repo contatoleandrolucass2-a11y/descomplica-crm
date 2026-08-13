@@ -3,10 +3,15 @@ import Link from "next/link";
 import { DataState, PageHeader, SectionHeading } from "@/app/(protected)/app/_components/analytics";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { SIMULATOR_LIST } from "@/lib/crm/simulators/catalog";
+import {
+  getOfficialSimulatorRuntimeConfiguration,
+  officialSimulatorExecutionIsEnabled,
+} from "@/lib/crm/simulators/official/config";
 
 import styles from "./simulators.module.css";
 
 export const metadata = { title: "Simulação" };
+export const dynamic = "force-dynamic";
 
 function CalculatorIcon() {
   return (
@@ -18,7 +23,12 @@ function CalculatorIcon() {
 }
 
 export default async function SimulationHubPage() {
-  await enforcePermission("crm.simulators.view");
+  const authorization = await enforcePermission("crm.simulators.view");
+  const wf13Enabled = officialSimulatorExecutionIsEnabled(
+    getOfficialSimulatorRuntimeConfiguration(),
+    "associativo-fluxo-linear",
+    authorization,
+  );
 
   return (
     <main className={styles.page}>
@@ -26,7 +36,11 @@ export default async function SimulationHubPage() {
         <PageHeader
           eyebrow="Ferramentas comerciais"
           title="Simulação"
-          description="Interfaces completas para preparar propostas. Motores permanecem bloqueados até validação oficial de cada regra."
+          description={
+            wf13Enabled
+              ? "WF13 disponível em validação Master. Demais motores permanecem bloqueados."
+              : "Interfaces completas para preparar propostas. Motores permanecem bloqueados até validação oficial de cada regra."
+          }
           meta={
             <div className={styles.headerStatus}>
               <CalculatorIcon />
@@ -38,12 +52,21 @@ export default async function SimulationHubPage() {
           }
         />
 
-        <DataState
-          variant="unavailable"
-          compact
-          title="Cálculos temporariamente indisponíveis"
-          description="As jornadas podem ser consultadas. Nenhuma fórmula, resultado ou regra não validada atua no runtime."
-        />
+        {wf13Enabled ? (
+          <DataState
+            variant="warning"
+            compact
+            title="WF13 disponível em canário Master"
+            description="Associativo — Fluxo Linear pode ser calculado sem persistência. Demais motores continuam indisponíveis."
+          />
+        ) : (
+          <DataState
+            variant="unavailable"
+            compact
+            title="Cálculos temporariamente indisponíveis"
+            description="As jornadas podem ser consultadas. Nenhuma fórmula, resultado ou regra não validada atua no runtime."
+          />
+        )}
 
         <section aria-labelledby="simulation-tools-title">
           <SectionHeading

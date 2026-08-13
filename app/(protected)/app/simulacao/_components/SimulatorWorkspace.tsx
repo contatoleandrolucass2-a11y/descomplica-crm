@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type FocusEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FocusEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 
 import {
   DataState,
@@ -302,6 +308,12 @@ type OfficialExecutionResult = {
   warnings: string[];
 };
 
+type ExecutionGateResolution = {
+  slug: string;
+  serverEnabled: boolean;
+  enabled: boolean;
+};
+
 function stringList(value: unknown): string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string") ? value : [];
 }
@@ -323,6 +335,7 @@ export function SimulatorWorkspace({
   const [executionStatus, setExecutionStatus] = useState<"idle" | "pending" | "error">("idle");
   const [executionError, setExecutionError] = useState("");
   const [officialResult, setOfficialResult] = useState<OfficialExecutionResult | null>(null);
+  const [gateResolution, setGateResolution] = useState<ExecutionGateResolution | null>(null);
   const navigationGroups = Array.from(
     new Set(
       definition.sections
@@ -335,6 +348,50 @@ export function SimulatorWorkspace({
     ? requestedGroup
     : navigationGroups[0];
   const tabRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const executionAllowed =
+    gateResolution?.slug === definition.slug && gateResolution.serverEnabled === executionEnabled
+      ? gateResolution.enabled
+      : executionEnabled;
+
+  useEffect(() => {
+    if (!isOfficialSimulatorSlug(definition.slug)) return;
+
+    const controller = new AbortController();
+    void fetch(`/api/official-simulator/${definition.slug}`, {
+      cache: "no-store",
+      credentials: "same-origin",
+      headers: { accept: "application/json" },
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          const payload: unknown = await response.json();
+          const enabled =
+            typeof payload === "object" &&
+            payload !== null &&
+            "executionEnabled" in payload &&
+            payload.executionEnabled === true;
+          setGateResolution({
+            slug: definition.slug,
+            serverEnabled: executionEnabled,
+            enabled,
+          });
+          return;
+        }
+        if ([401, 403, 404, 503].includes(response.status)) {
+          setGateResolution({
+            slug: definition.slug,
+            serverEnabled: executionEnabled,
+            enabled: false,
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      });
+
+    return () => controller.abort();
+  }, [definition.slug, executionEnabled]);
 
   function updateValue(id: string, value: string | boolean) {
     setValues((currentValues) => ({ ...currentValues, [id]: value }));
@@ -387,7 +444,7 @@ export function SimulatorWorkspace({
   }
 
   async function executeOfficialSimulator() {
-    if (!executionEnabled || !isOfficialSimulatorSlug(definition.slug)) return;
+    if (!executionAllowed || !isOfficialSimulatorSlug(definition.slug)) return;
     const input = buildOfficialSimulatorInput(definition.slug, values);
     if (!input) return;
 
@@ -567,7 +624,7 @@ export function SimulatorWorkspace({
               <CalculatorIcon />
               <span>
                 <small>Motor de cálculo</small>
-                <strong>{executionEnabled ? "Validação Master" : "Aguardando validação"}</strong>
+                <strong>{executionAllowed ? "Validação Master" : "Aguardando validação"}</strong>
               </span>
             </div>
           }
@@ -587,7 +644,7 @@ export function SimulatorWorkspace({
           }
         />
 
-        {executionEnabled ? (
+        {executionAllowed ? (
           <DataState
             variant="warning"
             compact
@@ -688,7 +745,7 @@ export function SimulatorWorkspace({
                 >
                   Imprimir estrutura
                 </button>
-                {executionEnabled ? (
+                {executionAllowed ? (
                   <button
                     type="submit"
                     disabled={executionStatus === "pending"}
@@ -778,9 +835,9 @@ export function SimulatorWorkspace({
                 </>
               ) : (
                 <>
-                  <strong>{executionEnabled ? "Preencha e calcule." : UNAVAILABLE_MESSAGE}</strong>
+                  <strong>{executionAllowed ? "Preencha e calcule." : UNAVAILABLE_MESSAGE}</strong>
                   <span>
-                    {executionEnabled
+                    {executionAllowed
                       ? "O cálculo será executado sem persistir os dados informados."
                       : "Nenhuma fórmula é executada enquanto o gate permanece desligado."}
                   </span>
