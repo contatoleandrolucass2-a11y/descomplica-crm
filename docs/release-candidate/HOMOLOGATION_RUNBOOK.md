@@ -268,6 +268,11 @@ contas e chaves fora de argumentos e artefatos:
 sudo pnpm homologation:qa
 ```
 
+O runner lê do arquivo privado apenas
+`OFFICIAL_SIMULATOR_RUNTIME_MODE` e `OFFICIAL_SIMULATOR_ENABLED_KEYS`, valida
+owner/permissões e repassa esses dois valores ao gate visual. Nenhum outro valor
+do ambiente privado é exposto ou persistido em artefatos.
+
 Esses comandos locais não substituem o smoke HTTPS. Na URL real, validar nove
 perfis, 21 rotas, isolamento vertical/horizontal, guards, filtros, estados
 `ready`, `empty`, `stale`, `unavailable`, `error` e bloqueado, desktop/celular,

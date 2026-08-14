@@ -7,6 +7,7 @@ const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const runtimeRoot = "/var/lib/descomplica-crm-homologation";
 const accountsPath = "/etc/descomplica-crm/homologation-accounts.json";
 const accessPath = "/etc/descomplica-crm/homologation-access.json";
+const appEnvironmentPath = "/etc/descomplica-crm/homologation.env";
 const origin = "https://homolog.descomplicapro.com.br";
 const roles = new Set([
   "master",
@@ -34,6 +35,34 @@ async function readPrivateJson(file) {
   }
 }
 
+async function readOfficialSimulatorEnvironment() {
+  const fileStat = await stat(appEnvironmentPath);
+  if (fileStat.uid !== 0 || fileStat.gid !== 0 || (fileStat.mode & 0o077) !== 0) {
+    fail("Homologation app environment has unsafe ownership or permissions.");
+  }
+
+  const contents = await readFile(appEnvironmentPath, "utf8");
+  const values = new Map();
+  for (const line of contents.split(/\r?\n/u)) {
+    const match = line.match(
+      /^(OFFICIAL_SIMULATOR_RUNTIME_MODE|OFFICIAL_SIMULATOR_ENABLED_KEYS)=(.*)$/u,
+    );
+    if (!match) continue;
+    if (values.has(match[1])) fail("Homologation simulator runtime configuration is duplicated.");
+    values.set(match[1], match[2]);
+  }
+
+  const mode = values.get("OFFICIAL_SIMULATOR_RUNTIME_MODE");
+  const enabledKeys = values.get("OFFICIAL_SIMULATOR_ENABLED_KEYS");
+  if (!new Set(["off", "active"]).has(mode) || enabledKeys === undefined) {
+    fail("Homologation simulator runtime configuration is invalid.");
+  }
+  return {
+    OFFICIAL_SIMULATOR_RUNTIME_MODE: mode,
+    OFFICIAL_SIMULATOR_ENABLED_KEYS: enabledKeys,
+  };
+}
+
 async function run(command, arguments_, environment) {
   await new Promise((resolve, reject) => {
     const child = spawn(command, arguments_, {
@@ -54,9 +83,10 @@ async function main() {
   process.env.HOMOLOGATION_MODE = "true";
   process.env.QA_SUPABASE_WORKDIR = runtimeRoot;
 
-  const [accountsPayload, access, localModule] = await Promise.all([
+  const [accountsPayload, access, officialSimulatorEnvironment, localModule] = await Promise.all([
     readPrivateJson(accountsPath),
     readPrivateJson(accessPath),
+    readOfficialSimulatorEnvironment(),
     import("../qa/local-authenticated-visual.mjs"),
   ]);
   if (
@@ -94,6 +124,7 @@ async function main() {
     ...process.env,
     HOMOLOGATION_MODE: "true",
     QA_SUPABASE_WORKDIR: runtimeRoot,
+    ...officialSimulatorEnvironment,
   };
 
   await run("pnpm", ["exec", "playwright", "test", "e2e/release-candidate.spec.ts"], {

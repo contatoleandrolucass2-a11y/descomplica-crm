@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-08-14 — Hotfix WF13: alinhamento do gate visual remoto
+
+- O smoke funcional HTTPS aprovou 9/9 cenários, inclusive cálculo WF13 por
+  Master e bloqueio para os demais papéis/motores.
+- O primeiro gate visual remoto falhou fechado porque o runner não recebia as
+  duas flags oficiais do runtime, embora a aplicação estivesse correta.
+- Correção mínima: leitura seletiva do arquivo privado root-only, sem persistir
+  ou imprimir segredos; produção permaneceu intocada.
+
 ## 2026-08-14 — hotfix do acesso Master à página WF13
 
 - O smoke produtivo mostrou `AUTH-403` antes da renderização. A inspeção

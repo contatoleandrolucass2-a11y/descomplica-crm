@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-14 — QA remoto acompanha canário oficial
+
+- O runner visual da homologação passa a ler, sem imprimir, somente as duas
+  configurações do simulador oficial no arquivo privado root-only. Assim o gate
+  reconhece WF13 ativo no canário e continua exigindo os demais motores bloqueados.
+
 ## Unreleased
 
 - Converge o gate de página do WF13 com o gate de execução já aplicado: cria
