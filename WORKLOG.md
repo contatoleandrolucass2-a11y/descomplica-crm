@@ -13,6 +13,9 @@
 - A correção forward cria somente o pré-requisito de página do WF13, remove
   herança/overrides não Master dessa chave e mantém o gate de execução
   independente. Outros motores, integrações e runtime comercial não mudam.
+- O primeiro CI rejeitou expectativas antigas que ainda davam páginas de
+  simulador a cinco papéis. A matriz REST/browser agora exige `403` e ausência
+  de CTA para todo não Master; o fluxo Master continua validando cálculo WF13.
 
 ## 2026-08-13 — Hotfix WF13: gate visual do canário
 

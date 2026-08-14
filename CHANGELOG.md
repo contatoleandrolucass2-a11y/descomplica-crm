@@ -8,6 +8,8 @@
 - Remove a herança visual de simuladores dos demais papéis e bloqueia overrides
   diretos dessa permissão; `simulator.wf13` continua sendo o único motor na
   allowlist, sem ativar WF16, CAIXA, WF14, WF15 ou integrações.
+- Alinha as matrizes REST e Playwright ao gate Master-only: não Master recebe
+  `403` antes da renderização e não encontra CTA de cálculo.
 - Estabiliza o gate visual do canário WF13: a validação de formulário não depende
   de `networkidle`, e o runner local propaga explicitamente as flags do simulador
   para o runtime Next.js e para a matriz visual.

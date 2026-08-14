@@ -501,6 +501,7 @@ ${masterPreflight}
         'crm.stages.view',
         'crm.ranking.view',
         'crm.partnerships.view',
+        'crm.simulators.view',
         'pages.manage',
         'crm.settings.view',
         'crm.settings.manage',
