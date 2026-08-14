@@ -17,8 +17,7 @@ export const ROLES = {
   coordinator: {
     level: 60,
     label: "Coordenador",
-    description:
-      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
   },
   manager: {
     level: 55,
@@ -28,8 +27,7 @@ export const ROLES = {
   supervisor: {
     level: 50,
     label: "Supervisor",
-    description:
-      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
   },
   house: {
     level: 45,
@@ -39,8 +37,7 @@ export const ROLES = {
   real_estate: {
     level: 40,
     label: "Imobiliária",
-    description:
-      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
   },
   partnership_channel: {
     level: 35,
@@ -51,20 +48,17 @@ export const ROLES = {
   broker_lead: {
     level: 30,
     label: "Líder de corretores",
-    description:
-      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
   },
   broker: {
     level: 20,
     label: "Corretor",
-    description:
-      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
   },
   user: {
     level: 10,
     label: "Usuário",
-    description:
-      "Acessa navegação básica e simuladores visuais; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
   },
   pending: {
     level: 1,

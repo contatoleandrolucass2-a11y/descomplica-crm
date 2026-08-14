@@ -1,10 +1,7 @@
 import { PERMISSIONS, type PermissionKey } from "./permissions";
 import type { RoleKey } from "./roles";
 
-const VISUAL_FOUNDATION_PERMISSIONS = [
-  "pages.view",
-  "crm.simulators.view",
-] as const satisfies readonly PermissionKey[];
+const BASE_NAVIGATION_PERMISSIONS = ["pages.view"] as const satisfies readonly PermissionKey[];
 
 const MASTER_PERMISSIONS = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
   (permission) => permission !== "crm.commercial_engine.execute",
@@ -18,7 +15,7 @@ const ADMIN_PERMISSIONS = [
   "roles.manage",
   "audit.view",
   "admin.access",
-  ...VISUAL_FOUNDATION_PERMISSIONS,
+  ...BASE_NAVIGATION_PERMISSIONS,
 ] as const satisfies readonly PermissionKey[];
 const NO_INHERITED_PERMISSIONS = [] as const satisfies readonly PermissionKey[];
 
@@ -27,15 +24,15 @@ const NO_INHERITED_PERMISSIONS = [] as const satisfies readonly PermissionKey[];
 export const ROLE_INHERITED_PERMISSIONS: Record<RoleKey, readonly PermissionKey[]> = {
   master: MASTER_PERMISSIONS,
   admin: ADMIN_PERMISSIONS,
-  coordinator: VISUAL_FOUNDATION_PERMISSIONS,
+  coordinator: BASE_NAVIGATION_PERMISSIONS,
   manager: NO_INHERITED_PERMISSIONS,
-  supervisor: VISUAL_FOUNDATION_PERMISSIONS,
+  supervisor: BASE_NAVIGATION_PERMISSIONS,
   house: NO_INHERITED_PERMISSIONS,
-  real_estate: VISUAL_FOUNDATION_PERMISSIONS,
+  real_estate: BASE_NAVIGATION_PERMISSIONS,
   partnership_channel: NO_INHERITED_PERMISSIONS,
-  broker_lead: VISUAL_FOUNDATION_PERMISSIONS,
-  broker: VISUAL_FOUNDATION_PERMISSIONS,
-  user: VISUAL_FOUNDATION_PERMISSIONS,
+  broker_lead: BASE_NAVIGATION_PERMISSIONS,
+  broker: BASE_NAVIGATION_PERMISSIONS,
+  user: BASE_NAVIGATION_PERMISSIONS,
   pending: NO_INHERITED_PERMISSIONS,
 };
 

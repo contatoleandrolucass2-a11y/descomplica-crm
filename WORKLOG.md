@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-08-14 — hotfix do acesso Master à página WF13
+
+- O smoke produtivo mostrou `AUTH-403` antes da renderização. A inspeção
+  somente leitura comprovou flag `active/simulator.wf13`, papel Master ativo e
+  `crm.simulators.execute` efetiva, mas ausência de `crm.simulators.view`, do
+  vínculo Master e das entradas de simulação em `app_pages`.
+- A migration remota `20260813192928` foi confirmada no histórico e contém
+  somente o gate de execução; não contém a permissão de página nem o catálogo.
+  A migration visual antiga permanece fora do histórico remoto e não será
+  aplicada em lote.
+- A correção forward cria somente o pré-requisito de página do WF13, remove
+  herança/overrides não Master dessa chave e mantém o gate de execução
+  independente. Outros motores, integrações e runtime comercial não mudam.
+
 ## 2026-08-13 — Hotfix WF13: gate visual do canário
 
 - Reproduzida localmente a falha do CI em `simulator-validation`: a página já

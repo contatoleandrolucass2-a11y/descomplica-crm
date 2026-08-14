@@ -12,12 +12,12 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 31-version manifest", async () => {
+  it("keeps a unique, ordered 32-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(31);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(31);
+    expect(migrations).toHaveLength(32);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(32);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
   });

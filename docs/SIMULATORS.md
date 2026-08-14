@@ -26,7 +26,10 @@ fórmula oficial neste incremento; o bundle da referência não é versionado.
 O hub está em `/app/simulacao`. Todas as seis rotas exigem
 `crm.simulators.view` no guard server-side e no catálogo `app_pages`. A
 navegação continua recebendo somente as páginas filtradas pelo contexto de
-autorização.
+autorização. No canário atual, essa permissão é exclusiva do Master e não possui
+override direto. O acesso à página e a execução são gates independentes: WF13
+também exige `crm.simulators.execute`, flag e chave oficiais; os demais papéis
+falham antes da renderização e os demais motores permanecem desligados.
 
 ## Comportamento fail-closed
 

@@ -150,7 +150,7 @@ describe("catálogo localizado de acesso", () => {
   });
 
   it("mantém a matriz visual dos papéis alinhada ao catálogo protegido", () => {
-    const visualFoundationPermissions = ["pages.view", "crm.simulators.view"];
+    const baseNavigationPermissions = ["pages.view"];
 
     expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(
       Object.keys(PERMISSIONS).filter(
@@ -166,7 +166,7 @@ describe("catálogo localizado de acesso", () => {
       "roles.manage",
       "audit.view",
       "admin.access",
-      ...visualFoundationPermissions,
+      ...baseNavigationPermissions,
     ]);
     for (const roleKey of [
       "coordinator",
@@ -176,7 +176,8 @@ describe("catálogo localizado de acesso", () => {
       "broker",
       "user",
     ] as const) {
-      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(visualFoundationPermissions);
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(baseNavigationPermissions);
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.simulators.view");
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.settings.manage");
     }
 
@@ -209,6 +210,21 @@ describe("catálogo localizado de acesso", () => {
       description: "Acessa o Canal de Parcerias exclusivamente no perfil Master.",
       minLevel: 100,
     });
+  });
+
+  it("mantém as páginas de simuladores exclusivas do Master durante o canário WF13", () => {
+    expect(PERMISSIONS["crm.simulators.view"]).toEqual({
+      label: "Visualizar simuladores",
+      description: "Acessa as interfaces de simulação autorizadas para o perfil Master.",
+      minLevel: 100,
+    });
+    expect(ROLE_INHERITED_PERMISSIONS.master).toContain("crm.simulators.view");
+
+    for (const roleKey of Object.keys(ROLE_INHERITED_PERMISSIONS).filter(
+      (roleKey) => roleKey !== "master",
+    ) as Array<Exclude<keyof typeof ROLE_INHERITED_PERMISSIONS, "master">>) {
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.simulators.view");
+    }
   });
 
   it("mostra busca, herança e exceções sem oferecer autoelevação", () => {

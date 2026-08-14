@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Converge o gate de página do WF13 com o gate de execução já aplicado: cria
+  `crm.simulators.view` em nível 100, vincula somente Master e registra apenas o
+  hub e a rota WF13 no catálogo remoto ausente.
+- Remove a herança visual de simuladores dos demais papéis e bloqueia overrides
+  diretos dessa permissão; `simulator.wf13` continua sendo o único motor na
+  allowlist, sem ativar WF16, CAIXA, WF14, WF15 ou integrações.
 - Estabiliza o gate visual do canário WF13: a validação de formulário não depende
   de `networkidle`, e o runner local propaga explicitamente as flags do simulador
   para o runtime Next.js e para a matriz visual.
