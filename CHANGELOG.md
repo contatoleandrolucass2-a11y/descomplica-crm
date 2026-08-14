@@ -1,7 +1,21 @@
 # Changelog
 
+## 2026-08-14 — QA remoto acompanha canário oficial
+
+- O runner visual da homologação passa a ler, sem imprimir, somente as duas
+  configurações do simulador oficial no arquivo privado root-only. Assim o gate
+  reconhece WF13 ativo no canário e continua exigindo os demais motores bloqueados.
+
 ## Unreleased
 
+- Converge o gate de página do WF13 com o gate de execução já aplicado: cria
+  `crm.simulators.view` em nível 100, vincula somente Master e registra apenas o
+  hub e a rota WF13 no catálogo remoto ausente.
+- Remove a herança visual de simuladores dos demais papéis e bloqueia overrides
+  diretos dessa permissão; `simulator.wf13` continua sendo o único motor na
+  allowlist, sem ativar WF16, CAIXA, WF14, WF15 ou integrações.
+- Alinha as matrizes REST e Playwright ao gate Master-only: não Master recebe
+  `403` antes da renderização e não encontra CTA de cálculo.
 - Estabiliza o gate visual do canário WF13: a validação de formulário não depende
   de `networkidle`, e o runner local propaga explicitamente as flags do simulador
   para o runtime Next.js e para a matriz visual.

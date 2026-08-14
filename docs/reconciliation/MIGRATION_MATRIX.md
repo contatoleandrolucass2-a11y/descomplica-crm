@@ -51,16 +51,18 @@ Captura remota: `2026-08-09T05:31:42Z`, projeto
 |    28 | `20260813115335_emergency_qlik_public_read_hardening`          |  Sim  |  Sim   | `111a5d20d09af97b77424d045a763983e86ae2decf9db4461c55ecf8de1c0de7` | `20260813133534`                                                   | Força RLS, fecha ACL/policies das três tabelas e restringe a RPC legada ao caller `anon` temporário.          | P0 aplicado isoladamente; depois recontido pela versão 30   | Preserva dados/corpo da RPC; leitura pública nunca integra rollback.                                             |
 |    29 | `20260813140000_partnerships_rbac_convergence`                 |  Sim  |  Sim   | `e58f0b0eec61c94958d566c2bc61945e5729172363f6dd6d8400bbfe2944ab9e` | `20260813160418`                                                   | Cria gate Master-only e alinha catálogo/guard do Canal sem tocar em outras permissões.                        | RBAC aplicado isoladamente após restore e preflight         | Master efetivo permitido; não-Master e overrides permanecem zero.                                                |
 |    30 | `20260813151446_emergency_qlik_public_read_recontainment`      |  Sim  |  Sim   | `3e0c94d350a05f99989f358afa9f01615dfa33d5ccbcc59a173a875c0584b2ff` | `20260813151446`                                                   | Reaplica invariantes fail-closed após duas migrations remotas inseguras reabrirem leitura direta.             | P0 aplicado isoladamente após restore exato                 | Nunca versionar/reexecutar as migrations inseguras; leitura pública não é rollback.                              |
-|    31 | `20260813143000_master_simulator_execution_gate`               |  Sim  |  Não   | `d4c38611f7baa8483187f1efe30aaafe6be28049d5636d9ef2372129d1da5424` | —                                                                  | Concede execução dos simuladores oficiais somente ao Master; flags continuam desligadas.                      | Gate aditivo; requer restore e aplicação isolada            | Aplicar isoladamente; ativar cada motor somente após deploy off, casos de ouro e canário Master.                 |
+|    31 | `20260813143000_master_simulator_execution_gate`               |  Sim  |  Sim   | `d4c38611f7baa8483187f1efe30aaafe6be28049d5636d9ef2372129d1da5424` | `9c12666eb2dc4ae53d1ef0345483ce34dc4eb8cfabd340b42f76bde3bb528d42` | Concede execução dos simuladores oficiais somente ao Master; flags continuam desligadas.                      | Aplicada remotamente como `20260813192928`                  | Gate de execução ativo somente para WF13 por flag; não concede acesso à página.                                  |
+|    32 | `20260814045436_wf13_master_page_access_convergence`           |  Sim  |  Não   | `aced7dc4e1b3cd5aa828ae1c5846715600c8b46844c45eef9db6dd9946dee787` | —                                                                  | Cria `crm.simulators.view` Master-only e converge hub/rota WF13 com o guard; depende da migration 31.         | Hotfix forward isolado; candidato                           | Aplicar somente esta versão após restore/CI; não usar `--include-all` nem liberar outro motor.                   |
 
 As quatro versões antes somente remotas agora têm markers locais no-op. A
 diferença de hashes é intencional: o SQL remoto sensível/inseguro não foi
 copiado; forma e ACL seguras convergem por migrations posteriores. Não há versão
-“não identificada”. As versões 14, 15, 19, 21–27 e 31 continuam somente locais;
+“não identificada”. As versões 14, 15, 19, 21–27 e 32 continuam somente locais;
 nenhuma foi aplicada ao projeto remoto. As versões 28–30 foram aplicadas
-isoladamente nos gates P0 e RBAC; as versões remotas inseguras `20260813142723` e
-`20260813142835` permanecem apenas na trilha remota e não são autoridade para o
-schema nem devem ser copiadas.
+isoladamente nos gates P0 e RBAC. O gate de execução 31 foi aplicado como versão
+remota `20260813192928`; a versão 32 permanece candidata até este hotfix. As
+versões remotas inseguras `20260813142723` e `20260813142835` permanecem apenas
+na trilha remota e não são autoridade para o schema nem devem ser copiadas.
 
 ## Recuperação das quatro versões somente remotas
 

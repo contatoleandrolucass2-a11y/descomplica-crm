@@ -268,8 +268,8 @@ set local role authenticated;
 
 select is(
   (select count(*) from public.app_pages),
-  6::bigint,
-  'scoped non-Master sees only visual simulator pages'
+  0::bigint,
+  'scoped non-Master cannot read Master-only simulator pages'
 );
 
 select throws_ok(
@@ -341,8 +341,8 @@ set local role authenticated;
 
 select is(
   (select count(*) from public.app_pages),
-  5::bigint,
-  'scoped non-Master does not see an inactive simulator page'
+  0::bigint,
+  'scoped non-Master remains blocked after simulator visibility changes'
 );
 
 reset role;

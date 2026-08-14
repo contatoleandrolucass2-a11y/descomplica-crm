@@ -15,12 +15,12 @@ exceções individuais. Uma exceção `deny` vence `allow` e a permissão herdad
 Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 `legacy_review` falham fechados nas policies RLS.
 
-| Grupo de papéis                                                             | Páginas padrão                                                        | Administração                                       |
-| --------------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------- |
-| `master`                                                                    | todas as páginas; único papel com fatos comerciais v2                 | usuários, papéis, exceções e catálogo               |
-| `admin`                                                                     | seis páginas visuais de simulação bloqueada; nenhum fato comercial v2 | escopada; intake somente com `crm_people` confiável |
-| `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | seis páginas visuais de simulação bloqueada; nenhum fato comercial v2 | nenhuma                                             |
-| `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                                | nenhuma                                             |
+| Grupo de papéis                                                             | Páginas padrão                                                      | Administração                                       |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
+| `master`                                                                    | todas as páginas; único papel com fatos comerciais v2 e simuladores | usuários, papéis, exceções e catálogo               |
+| `admin`                                                                     | navegação básica; nenhum simulador ou fato comercial v2             | escopada; intake somente com `crm_people` confiável |
+| `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | navegação básica; nenhum simulador ou fato comercial v2             | nenhuma                                             |
+| `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                              | nenhuma                                             |
 
 As permissões administrativas respeitam hierarquia estrita: o ator somente
 modifica usuários e papéis abaixo do próprio nível. O próprio usuário não pode
@@ -102,12 +102,11 @@ continua separada e só retorna entries com ID Qlik mapeado, owner ativo,
 vigência e organização dentro do escopo aprovado; ela não é a fonte da página
 v3.
 
-As seis rotas de simulação exigem `crm.simulators.view`. A permissão permanece
-nos oito papéis legados porque essas superfícies são somente visuais; ela não
-abre dashboard, ranking, metas, pontos ou qualquer motor comercial. Os motores
-continuam sem submit, fórmula ou persistência. Um administrador pode remover o
-acesso por override `deny` e desativar cada página no catálogo, sem substituir o
-guard server-side.
+As seis rotas de simulação exigem `crm.simulators.view`. Durante o canário WF13,
+essa permissão é nível 100 e pertence somente ao Master, sem overrides diretos.
+O gate de página permanece separado de `crm.simulators.execute`; possuir um não
+substitui o outro. Somente WF13 pode executar quando sua flag explícita também
+está ativa. WF16, CAIXA, WF14 e WF15 continuam bloqueados.
 
 Falta de permissão autenticada usa o interruptor `forbidden()` do Next.js e
 retorna a superfície `AUTH-403`; caminhos realmente inexistentes usam

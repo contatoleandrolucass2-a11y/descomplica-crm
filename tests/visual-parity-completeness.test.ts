@@ -120,6 +120,7 @@ describe("isolated authenticated visual QA contract", () => {
   it("requires a local Supabase QA identity and captures every responsive route", () => {
     const script = source("scripts/qa/authenticated-visual.mjs");
     const runner = source("scripts/qa/local-authenticated-visual.mjs");
+    const remoteRunner = source("scripts/homologation/run-remote-qa.mjs");
 
     expect(script).toContain('requiredEnvironment("QA_AUTH_FIXTURE_VERIFICATION")');
     expect(script).toContain('requiredEnvironment("QA_AUTH_SUPABASE_URL")');
@@ -147,5 +148,11 @@ describe("isolated authenticated visual QA contract", () => {
     expect(runner).toContain("verifyFixturesThroughRls");
     expect(runner).toContain("auth.admin.deleteUser");
     expect(runner).toContain("reserved dashboard fixture slot is occupied");
+    expect(remoteRunner).toContain(
+      'const appEnvironmentPath = "/etc/descomplica-crm/homologation.env"',
+    );
+    expect(remoteRunner).toContain("readOfficialSimulatorEnvironment()");
+    expect(remoteRunner).toContain("...officialSimulatorEnvironment");
+    expect(remoteRunner).toContain("unsafe ownership or permissions");
   });
 });

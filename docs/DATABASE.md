@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 31 migrations
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 32 migrations
 locais, incluindo quatro markers históricos sanitizados e no-op. Nenhuma regra,
 política ou valor comercial é seedado. O rebuild contém 39 tabelas públicas,
 17 privadas, 12 papéis, 26 permissões e 21 páginas.
@@ -49,6 +49,7 @@ nenhum cutover Qlik ou do read model v3 foi realizado.
 29. `20260813140000_partnerships_rbac_convergence.sql`: convergência RBAC isolada que cria a permissão Master-only do Canal, remove vínculos/overrides residuais apenas dessa chave e alinha `app_pages` ao guard da rota.
 30. `20260813151446_emergency_qlik_public_read_recontainment.sql`: roll-forward P0 idempotente que restabelece RLS forçada, remove novamente toda policy de leitura e revoga ACL direta após regressão remota; não reproduz as migrations inseguras nem autoriza rollback público.
 31. `20260813143000_master_simulator_execution_gate.sql`: gate aditivo que concede `crm.simulators.execute` somente ao Master, sem ativar fórmula, flag ou integração.
+32. `20260814045436_wf13_master_page_access_convergence.sql`: correção forward isolada que cria `crm.simulators.view` Master-only e converge o hub/rota WF13 com o guard, sem ativar outro motor.
 
 ## Desenvolvimento local
 
@@ -65,13 +66,14 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 922 testes pgTAP em 20 arquivos: 28 dos motivos de
+`supabase test db` planeja 939 testes pgTAP em 22 arquivos: 28 dos motivos de
 acesso, 51 regressões de hardening escopado, 28 do dashboard, 25 das metas, 20
 da matriz global de grants, 60 do schema Qlik, 33 do catálogo, 28 do signup
 pendente, 26 dos pontos, 54 do contrato Qlik, 20 da governança de identidades,
 27 do ranking, 143 do read model v3, 98 da matriz de escopos, 43 da ingestão
 Salesforce, 86 do relay/mappings, 93 do runtime comercial, 22 dos rascunhos
-comerciais, 28 da contenção Qlik e 9 da convergência RBAC do Canal. A cobertura verifica nomes,
+comerciais, 28 da contenção Qlik, 9 da convergência RBAC do Canal e 10 da
+convergência de página do WF13. A cobertura verifica nomes,
 schema, grants, policies, constraints, disponibilidade e autoridade de fontes,
 preservação de dados, mappings, lineage, provisionamento, usuários inativos,
 overrides, limites de payload, delegação direcional, cardinalidade de escopo,

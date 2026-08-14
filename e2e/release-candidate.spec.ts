@@ -143,7 +143,6 @@ const accounts = readAccounts();
 const genericLoginFailure =
   "Não foi possível autenticar. Verifique suas credenciais e tente novamente.";
 const forbiddenHeading = "Você não possui acesso a esta página";
-const simulatorRoles = new Set<Role>(["master", "admin", "broker", "coordinator", "real_estate"]);
 const adminRoles = new Set<Role>(["master", "admin"]);
 const masterOnlyRoles = new Set<Role>(["master"]);
 const protectedSurfaces = [
@@ -187,27 +186,27 @@ const protectedSurfaces = [
     heading: "Metas de pontos",
     allowed: masterOnlyRoles,
   },
-  { path: "/app/simulacao", heading: "Simulação", allowed: simulatorRoles },
+  { path: "/app/simulacao", heading: "Simulação", allowed: masterOnlyRoles },
   {
     path: "/app/simulacao/associativo-fluxo-linear",
     heading: "Associativo · Fluxo Linear",
-    allowed: simulatorRoles,
+    allowed: masterOnlyRoles,
   },
   {
     path: "/app/simulacao/calcular-documentacao",
     heading: "Calcular documentação",
-    allowed: simulatorRoles,
+    allowed: masterOnlyRoles,
   },
-  { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: simulatorRoles },
+  { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: masterOnlyRoles },
   {
     path: "/app/simulacao/tabela-direta",
     heading: "Tabela Direta",
-    allowed: simulatorRoles,
+    allowed: masterOnlyRoles,
   },
   {
     path: "/app/simulacao/tabela-investidor",
     heading: "Tabela Investidor",
-    allowed: simulatorRoles,
+    allowed: masterOnlyRoles,
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
   { path: "/admin/usuarios", heading: "Usuários e acessos", allowed: adminRoles },
@@ -617,11 +616,11 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
 
   await withRolePage(browser, "admin", async (page) => {
     const status = await page.request.get("/api/official-simulator/associativo-fluxo-linear");
-    expect(status.status()).toBe(200);
-    expect(await status.json()).toMatchObject({ executionEnabled: false });
+    expect(status.status()).toBe(403);
+    expect(await status.json()).toEqual({ error: "forbidden" });
     await page.goto("/app/simulacao/associativo-fluxo-linear");
-    await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toBeDisabled();
-    await expect(page.getByText(/Disponível somente para o perfil Master/)).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: forbiddenHeading })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toHaveCount(0);
   });
 });
 
