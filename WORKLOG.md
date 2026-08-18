@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-08-18 — Hotfix WF13: paridade do PDF 2
+
+- A reprodução no SHA-base `2bcf6630689989fe542129087acd7be4ee17ec89`
+  confirmou `R$ 16.493,81`, `R$ 281,63` e `15/10/2026`.
+- A diferença de `R$ 506,19` era a correção das anuais abatida do saldo nominal;
+  a data-base 15/09 era avançada novamente para formar a primeira mensal.
+- O asset oficial confirmou taxas e anuidade. Com saldo nominal de R$ 17.000,00,
+  correção inicial para R$ 17.085,00 e divisão 29/55, a fórmula resulta em
+  R$ 288,67, como no PDF 2.
+- O motor agora usa centavos e frações inteiras, exige vencimento 05/10/15,
+  datas explícitas para sinais e intervalo máximo de 30 dias. A memória fica
+  visível e o ledger nominal reconcilia exatamente o saldo.
+- Nenhuma migration, permissão, flag, integração ou outro motor foi alterado.
+
 ## 2026-08-14 — Hotfix WF13: alinhamento do gate visual remoto
 
 - O smoke funcional HTTPS aprovou 9/9 cenários, inclusive cálculo WF13 por

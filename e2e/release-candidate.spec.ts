@@ -524,16 +524,29 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     await page.getByLabel("Empreendimento *").fill("Residencial QA");
     await page.getByLabel("Produto / unidade *").fill("Torre QA 101");
     await page.getByLabel("Match 100% confirmado").check();
-    await page.getByLabel("Término da obra *").fill("2029-12-31");
-    await page.getByLabel("Renda *").fill("10.000,00");
-    await page.getByLabel("Valor do imóvel *").fill("300.000,00");
-    await page.getByLabel("Financiamento").fill("240.000,00");
-    await page.getByLabel("Entrada / ato").fill("15.000,00");
+    await page.getByLabel("Data vigente *").fill("2026-08-17");
+    await page.getByLabel("Término da obra *").fill("2029-02-28");
+    await page.getByLabel("Dia de vencimento das mensais *").selectOption("15");
+    await page.getByLabel("Renda *").fill("4.000,00");
+    await page.getByLabel("Valor do imóvel *").fill("262.500,00");
+    await page.getByLabel("Bônus adimplência").fill("28.500,00");
+    await page.getByLabel("Financiamento").fill("210.000,00");
+    await page.getByLabel("Entrada / ato").fill("1.000,00");
+    await page.getByLabel("Valor da anual").fill("2.000,00");
+    await page.getByRole("button", { name: "Adicionar anual" }).click();
+    await page.getByLabel("Valor da anual").nth(1).fill("2.000,00");
+    await page.getByRole("button", { name: "Adicionar anual" }).click();
+    await page.getByLabel("Valor da anual").nth(2).fill("2.000,00");
     await page.getByLabel("Política comercial conferida").check();
     await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
     await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
-    await expect(page.getByText("R$ 730,86", { exact: true })).toBeVisible();
-    await expect(page.getByText(/wf13-1\.0\.0/)).toBeVisible();
+    await expect(page.getByText("R$ 17.000,00", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("R$ 202,38", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("R$ 288,67", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("15/09/2026", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText(/wf13-1\.1\.0/)).toBeVisible();
+    await page.getByText("Memória de cálculo auditável", { exact: true }).click();
+    await expect(page.getByText("R$ 6.000,00", { exact: true })).toBeVisible();
 
     for (const simulator of [
       "calcular-documentacao",

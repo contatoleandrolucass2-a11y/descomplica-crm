@@ -8,6 +8,16 @@
 
 ## Unreleased
 
+- Corrige a paridade do WF13 com o PDF 2: anuais corrigidas deixam de reduzir o
+  saldo nominal, a primeira mensal não avança um mês duas vezes e o caso oficial
+  fecha em R$ 17.000,00, R$ 202,38, R$ 288,67 e 15/09/2026.
+- Substitui aritmética monetária por centavos/frações inteiras, reconcilia os
+  oito centavos residuais, restringe vencimentos a 05/10/15 e exige datas
+  explícitas para sinais sem criar cobranças silenciosas.
+- Adiciona memória de cálculo visível, 14 casos de calendário, regressão dos 12
+  cenários anteriores e E2E do caso PDF 2; RBAC, flags, integrações e demais
+  motores permanecem inalterados.
+
 - Converge o gate de página do WF13 com o gate de execução já aplicado: cria
   `crm.simulators.view` em nível 100, vincula somente Master e registra apenas o
   hub e a rota WF13 no catálogo remoto ausente.

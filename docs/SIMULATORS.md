@@ -3,8 +3,9 @@
 ## Motor oficial WF13
 
 O WF13 possui implementação determinística versionada, mas continua desligado
-por padrão e isolado dos demais motores. Contrato, fonte, 12 casos de ouro,
-memória, segurança, canário Master e rollback estão em
+por padrão e isolado dos demais motores. Contrato, fontes, caso de ouro do PDF
+2, 14 transições de calendário, 12 regressões, memória, segurança, canário
+Master e rollback estão em
 [`docs/simulators-official/WF13.md`](simulators-official/WF13.md).
 
 Os outros quatro motores permanecem visualmente completos e bloqueados até seus
@@ -46,6 +47,8 @@ falham antes da renderização e os demais motores permanecem desligados.
   cálculo.
 - O endpoint limita o corpo, valida o contrato exato, não persiste input/output
   e não registra payload na telemetria.
+- Valores nominais usam centavos inteiros; vencimentos mensais são restritos a
+  05/10/15 e sinais nunca são criados ou datados implicitamente.
 - A interface informa: “Cálculo temporariamente indisponível — regra aguardando
   validação” sempre que o gate não fecha.
 - Nenhum acesso direto a tabela protegida foi criado.

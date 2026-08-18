@@ -23,6 +23,7 @@ import {
 import { isOfficialSimulatorSlug } from "@/lib/crm/simulators/official/catalog";
 import {
   buildOfficialSimulatorInput,
+  officialSimulatorMemoryRows,
   officialSimulatorInitialValues,
   officialSimulatorResultRows,
   type OfficialSimulatorResultRow,
@@ -306,6 +307,7 @@ type OfficialExecutionResult = {
   ok: boolean;
   errors: string[];
   warnings: string[];
+  memory: OfficialSimulatorResultRow[];
 };
 
 type ExecutionGateResolution = {
@@ -464,8 +466,10 @@ export function SimulatorWorkspace({
       const envelope = payload as Record<string, unknown>;
       const result = envelope.result;
       const rows = officialSimulatorResultRows(definition.slug, result);
+      const memory = officialSimulatorMemoryRows(definition.slug, result);
       if (
         !rows ||
+        !memory ||
         typeof envelope.formulaVersion !== "string" ||
         !result ||
         typeof result !== "object"
@@ -476,6 +480,7 @@ export function SimulatorWorkspace({
       setOfficialResult({
         formulaVersion: envelope.formulaVersion,
         rows,
+        memory,
         ok: resultRecord.ok === true,
         errors: stringList(resultRecord.errors),
         warnings: stringList(resultRecord.warnings),
@@ -817,6 +822,21 @@ export function SimulatorWorkspace({
                     </div>
                   ))}
             </dl>
+            {officialResult ? (
+              <details className={styles.resultNotice}>
+                <summary>Memória de cálculo auditável</summary>
+                <dl className={styles.resultList}>
+                  {officialResult.memory.map((item) => (
+                    <div key={item.label}>
+                      <dt>{item.label}</dt>
+                      <dd>
+                        <strong>{item.value}</strong>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </details>
+            ) : null}
             <div className={styles.resultNotice}>
               {officialResult ? (
                 <>
