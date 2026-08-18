@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-08-18 — WF13: ranking, anuais fixas e paridade Looker
+
+- O relatório Looker foi auditado anonimamente e somente em leitura. Campos
+  calculados e 30 cenários sintéticos comprovaram pró-soluto corrigido, maior
+  parcela pré/pós dividida pela renda, limites e regra individual das anuais.
+- A política `wf13-ranking-2026-08-18` centraliza os cinco rankings em basis
+  points, compara frações exatas no servidor e devolve todas as violações.
+  `NÃO ELEGÍVEL` falha com motivo próprio.
+- O Looker antigo usa limite estrito (`<`). A regra explícita aprovada usa
+  inclusivo (`<=`); os dez casos exatos estão identificados na matriz, sem
+  mascarar a divergência.
+- Anuais agora surgem automaticamente em cada 15/12 dentro das obras, com data
+  somente leitura e valor editável. Cada valor é limitado a 50% da renda. A
+  correção continua separada do saldo nominal.
+- Ato, sinais e anuais ganharam seções próprias; o quadro final apresenta os
+  dois limites, apurados, excedentes, resultados individuais, status geral e
+  motivos. Violações apontam e focam apenas os campos causadores.
+- O caso PDF 2 permanece em R$ 17.000,00, R$ 202,38, R$ 288,67 e 15/09/2026.
+  Nenhuma migration, integração, outro motor ou default de feature flag mudou.
+- O gate isolado aprovou E2E com nove perfis, 147 checks responsivos, 84 de
+  tema, 192 de acessibilidade/comparação e 105 de zoom. A conta QA efêmera e as
+  fixtures foram removidas; nenhum ambiente remoto foi alterado nesta etapa.
+
 ## 2026-08-18 — Hotfix WF13: paridade do PDF 2
 
 - A reprodução no SHA-base `2bcf6630689989fe542129087acd7be4ee17ec89`

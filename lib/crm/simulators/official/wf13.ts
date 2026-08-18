@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+import {
+  evaluateWf13RankingPolicy,
+  generateWf13AnnualDates,
+  WF13_RANKINGS,
+  type Wf13PolicyEvaluation,
+  type Wf13Violation,
+} from "./wf13-policy";
+
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f]/u;
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const NON_NEGATIVE_DECIMAL_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/;
@@ -47,6 +55,7 @@ export const wf13InputSchema = z
     product: boundedText,
     stockMatch: z.boolean(),
     policyConfirmed: z.boolean(),
+    ranking: z.union([z.literal(""), z.enum(WF13_RANKINGS)]),
     policyLimit: integerInput,
     installments: integerInput,
     entryDate: dateInput,
@@ -56,6 +65,8 @@ export const wf13InputSchema = z
     salePrice: moneyInput,
     bonus: moneyInput,
     discount: moneyInput,
+    cashback: moneyInput,
+    cashbackDiscount: moneyInput,
     financing: moneyInput,
     subsidy: moneyInput,
     fgts: moneyInput,
@@ -67,11 +78,7 @@ export const wf13InputSchema = z
     signal2Date: dateInput,
     signal3: moneyInput,
     signal3Date: dateInput,
-    annual1: moneyInput,
-    annual2: moneyInput,
-    annual3: moneyInput,
-    annual4: moneyInput,
-    annual5: moneyInput,
+    annuals: z.array(moneyInput),
   })
   .strict();
 
@@ -81,10 +88,14 @@ export const WF13_FORMULA = Object.freeze({
   engineKey: "simulator.wf13" as const,
   workflow: "WF-13",
   scope: "Associativo | Fluxo Linear",
-  version: "wf13-1.1.0",
+  version: "wf13-1.2.0",
   sourceRoute: "https://descomplicapro.com.br/simulacao/associativo-fluxo-linear",
   sourceAsset: "https://descomplicapro.com.br/assets/AssociativeLinearCalculator-D0Gvra4K.js",
   sourceSha256: "e9f4d1577cba434582aeb054f0f2a2eb8018a21d66fbf6ec7a72012e35641b71",
+  lookerReportId: "2fc80aba-ceca-4e2c-8f94-3c2f4bf7b223",
+  lookerPageId: "p_3ll8k3zrrd",
+  lookerCaptureSha256: "daf02309339c65c6af09cb8fc9183416fa07fca4cd4da8da48a5b57bcd1e44bc",
+  lookerAuditedAt: "2026-08-18T00:00:00.000Z",
   referencePdfSha256: "dd54578f8762ea37f0a8eb6496cda945ee555a56d85dcdff317d20ccbbd834dc",
   observedAt: "2026-08-18T00:00:00.000Z",
   timeZone: "America/Sao_Paulo",
@@ -111,6 +122,7 @@ type AnnualScheduleItem = {
 type AnnualScheduleCalculation = AnnualScheduleItem & {
   amountCents: bigint;
   correctedCents: bigint;
+  correctedFraction: Fraction;
 };
 
 type NominalSchedule = {
@@ -127,6 +139,8 @@ export type Wf13Result = {
   ok: boolean;
   errors: string[];
   warnings: string[];
+  violations: Wf13Violation[];
+  approval: Wf13PolicyEvaluation;
   workflow: string;
   scope: string;
   formulaVersion: string;
@@ -138,12 +152,17 @@ export type Wf13Result = {
   initialToFirstInstallmentDays: number;
   monthlyDueDay: number;
   graceMonths: number;
+  entryAmount: number;
+  signalsTotal: number;
   validInitialTotal: number;
   annualSchedule: AnnualScheduleItem[];
   annualNominalTotal: number;
   annualCorrectedTotal: number;
   realSaleValue: number;
   deductions: number;
+  financing: number;
+  subsidy: number;
+  fgts: number;
   proSoluto: number;
   nominalInstallment: number;
   nominalSchedule: NominalSchedule;
@@ -166,13 +185,14 @@ export type Wf13Result = {
   prePayment: number;
   postPayment: number;
   correctedInstallment: number;
+  incomeCommitment: number;
   installmentOverSale: number;
   proSolutoOverSale: number;
   audit: Array<{ label: string; ok: boolean }>;
   calculationMemory: Array<{
     step: string;
     value: number | string;
-    format: "currency" | "date" | "integer";
+    format: "currency" | "date" | "integer" | "percent" | "text";
   }>;
 };
 
@@ -194,6 +214,11 @@ function multiplyFractions(left: Fraction, right: Fraction): Fraction {
 function divideFractions(left: Fraction, right: Fraction): Fraction {
   if (right.numerator === 0n) return fraction(0n);
   return fraction(left.numerator * right.denominator, left.denominator * right.numerator);
+}
+
+function compareFractions(left: Fraction, right: Fraction): number {
+  const difference = left.numerator * right.denominator - right.numerator * left.denominator;
+  return difference === 0n ? 0 : difference > 0n ? 1 : -1;
 }
 
 function ratePower(rateNumerator: bigint, rateDenominator: bigint, periods: number): Fraction {
@@ -324,6 +349,11 @@ function buildNominalSchedule(proSolutoCents: bigint, installments: number): Nom
 export function calculateWf13(input: Wf13Input, options: { today?: string } = {}): Wf13Result {
   const errors: string[] = [];
   const warnings: string[] = [];
+  const violations: Wf13Violation[] = [];
+  const addViolation = (code: string, message: string, fieldPaths: string[]) => {
+    errors.push(message);
+    violations.push({ code, message, fieldPaths });
+  };
   const entryDate = parseDate(input.entryDate);
   const constructionEnd = parseDate(input.constructionEnd);
   const calculationDate = parseDate(options.today ?? utcToday());
@@ -332,6 +362,8 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
   const incomeCents = parseMoneyCents(input.income);
   const bonusCents = parseMoneyCents(input.bonus);
   const discountCents = parseMoneyCents(input.discount);
+  const cashbackCents = parseMoneyCents(input.cashback);
+  const cashbackDiscountCents = parseMoneyCents(input.cashbackDiscount);
   const financingCents = parseMoneyCents(input.financing);
   const subsidyCents = parseMoneyCents(input.subsidy);
   const fgtsCents = parseMoneyCents(input.fgts);
@@ -345,26 +377,79 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
   const policyLimit = Number(input.policyLimit || 0);
   const minimumCents = BigInt(WF13_FORMULA.minimumEntryOrSignal) * CENTS_PER_REAL;
 
-  if (!input.development.trim()) errors.push("Informe o nome completo do empreendimento.");
-  if (!input.product.trim()) errors.push("Informe o produto ou a unidade exata do estoque.");
+  if (!input.development.trim())
+    addViolation("context.development_required", "Informe o nome completo do empreendimento.", [
+      "officialContext.development",
+    ]);
+  if (!input.product.trim())
+    addViolation("context.product_required", "Informe o produto ou a unidade exata do estoque.", [
+      "officialContext.product",
+    ]);
   if (!input.stockMatch)
-    errors.push("Confirme o match de empreendimento e produto na fonte oficial.");
-  if (!entryDate) errors.push("Informe uma data vigente válida.");
-  if (!constructionEnd) errors.push("Informe a data oficial de término da obra.");
-  if (entryDate && constructionEnd && constructionEnd <= entryDate) {
-    errors.push("A data de término da obra deve ser posterior à data vigente.");
+    addViolation(
+      "context.stock_match_required",
+      "Confirme o match de empreendimento e produto na fonte oficial.",
+      ["officialContext.stockMatch"],
+    );
+  if (!entryDate)
+    addViolation("date.base_invalid", "Informe uma data vigente válida.", [
+      "officialContext.entryDate",
+    ]);
+  if (!constructionEnd)
+    addViolation("date.construction_end_invalid", "Informe a data oficial de término da obra.", [
+      "officialContext.constructionEnd",
+    ]);
+  if (entryDate && constructionEnd && constructionEnd < entryDate) {
+    addViolation(
+      "date.construction_end_before_base",
+      "A data de término da obra não pode ser anterior à data vigente.",
+      ["officialContext.entryDate", "officialContext.constructionEnd"],
+    );
   }
-  if (salePriceCents <= 0n) errors.push("Informe um valor de imóvel maior que zero.");
-  if (bonusCents + discountCents > salePriceCents) {
-    errors.push("Bônus e desconto não podem superar o valor do imóvel.");
+  if (incomeCents <= 0n)
+    addViolation("income.required", "Informe uma renda maior que zero.", [
+      "officialContext.income",
+    ]);
+  if (salePriceCents <= 0n)
+    addViolation("sale_price.required", "Informe um valor de imóvel maior que zero.", [
+      "proSoluto.salePrice",
+    ]);
+  if (bonusCents + discountCents + cashbackDiscountCents > salePriceCents) {
+    addViolation(
+      "sale_price.discounts_exceeded",
+      "Bônus e descontos não podem superar o valor do imóvel.",
+      [
+        "proSoluto.salePrice",
+        "proSoluto.bonus",
+        "proSoluto.discount",
+        "proSoluto.cashbackDiscount",
+      ],
+    );
   }
-  if (entryCents < minimumCents) errors.push("A entrada deve ser de pelo menos R$ 150,00.");
+  if (entryCents < minimumCents)
+    addViolation("entry.minimum", "A entrada deve ser de pelo menos R$ 150,00.", ["entry.amount"]);
   if (!input.policyConfirmed)
-    errors.push("Confirme a consulta à política comercial do empreendimento.");
-  if (policyLimit <= 0) errors.push("Informe o limite de parcelas aprovado na política comercial.");
-  if (installments <= 0) errors.push("Informe a quantidade de parcelas mensais.");
+    addViolation(
+      "commercial_policy.confirmation_required",
+      "Confirme a consulta à política comercial do empreendimento.",
+      ["commercialPolicy.confirmed"],
+    );
+  if (policyLimit <= 0)
+    addViolation(
+      "commercial_policy.limit_required",
+      "Informe o limite de parcelas aprovado na política comercial.",
+      ["commercialPolicy.limit"],
+    );
+  if (installments <= 0)
+    addViolation("installments.required", "Informe a quantidade de parcelas mensais.", [
+      "commercialPolicy.installments",
+    ]);
   if (policyLimit > 0 && installments > policyLimit) {
-    errors.push(`A quantidade solicitada supera o limite comercial de ${policyLimit} parcelas.`);
+    addViolation(
+      "installments.policy_limit_exceeded",
+      `A quantidade solicitada supera o limite comercial de ${policyLimit} parcelas.`,
+      ["commercialPolicy.limit", "commercialPolicy.installments"],
+    );
   }
 
   const signal1Valid = signalCents[0] === 0n || signalCents[0]! >= minimumCents;
@@ -379,15 +464,22 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
       signalCents[2]! >= minimumCents &&
       signalCents[2]! <= signalCents[1]!);
   const signalAmountValidity = [signal1Valid, signal2Valid, signal3Valid];
-  if (!signal1Valid) errors.push("Sinal 1 deve ser zero ou ter valor mínimo de R$ 150,00.");
+  if (!signal1Valid)
+    addViolation("signal.1.minimum", "Sinal 1 deve ser zero ou ter valor mínimo de R$ 150,00.", [
+      "signals.1.amount",
+    ]);
   if (!signal2Valid) {
-    errors.push(
+    addViolation(
+      "signal.2.sequence",
       "Sinal 2 exige Sinal 1 válido, mínimo de R$ 150,00 e valor menor ou igual ao Sinal 1.",
+      ["signals.1.amount", "signals.2.amount"],
     );
   }
   if (!signal3Valid) {
-    errors.push(
+    addViolation(
+      "signal.3.sequence",
       "Sinal 3 exige Sinal 2 válido, mínimo de R$ 150,00 e valor menor ou igual ao Sinal 2.",
+      ["signals.2.amount", "signals.3.amount"],
     );
   }
 
@@ -400,20 +492,36 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
     const signalNumber = index + 1;
     const signalDate = enteredSignalDates[index];
     if (amountCents === 0n && signalDate) {
-      errors.push(`Sinal ${signalNumber}: informe um valor para a data preenchida.`);
+      addViolation(
+        `signal.${signalNumber}.amount_required`,
+        `Sinal ${signalNumber}: informe um valor para a data preenchida.`,
+        [`signals.${signalNumber}.amount`, `signals.${signalNumber}.date`],
+      );
       return;
     }
     if (amountCents > 0n && !signalDate) {
-      errors.push(`Sinal ${signalNumber}: informe uma data válida.`);
+      addViolation(
+        `signal.${signalNumber}.date_required`,
+        `Sinal ${signalNumber}: informe uma data válida.`,
+        [`signals.${signalNumber}.date`],
+      );
       return;
     }
     if (amountCents === 0n || !signalDate) return;
     if (!PAYMENT_DAYS.includes(signalDate.getUTCDate() as (typeof PAYMENT_DAYS)[number])) {
-      errors.push(`Sinal ${signalNumber}: o vencimento deve ocorrer no dia 05, 10 ou 15.`);
+      addViolation(
+        `signal.${signalNumber}.date_day_invalid`,
+        `Sinal ${signalNumber}: o vencimento deve ocorrer no dia 05, 10 ou 15.`,
+        [`signals.${signalNumber}.date`],
+      );
       return;
     }
     if (!previousPaymentDate || signalDate <= previousPaymentDate) {
-      errors.push(`Sinal ${signalNumber}: a data deve ser posterior ao pagamento anterior.`);
+      addViolation(
+        `signal.${signalNumber}.date_order`,
+        `Sinal ${signalNumber}: a data deve ser posterior ao pagamento anterior.`,
+        [`signals.${signalNumber}.date`],
+      );
       return;
     }
     if (!signalAmountValidity[index]) return;
@@ -436,8 +544,10 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
     firstValidSignalDate &&
     !sameCalendarMonth(entryDate, firstValidSignalDate)
   ) {
-    errors.push(
+    addViolation(
+      "signal.first_same_month_required",
       "Quando a primeira mensal excede 30 dias, o primeiro sinal deve estar no mesmo mês do pagamento inicial.",
+      ["signals.1.amount", "signals.1.date"],
     );
   }
   const initialToFirstInstallmentDays =
@@ -449,16 +559,22 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
       ? PAYMENT_DAYS.some((day) => day > entryDate.getUTCDate())
       : false;
     if (validSignalDates.every((date) => date === null) && !hasFutureAllowedDate) {
-      errors.push(
+      addViolation(
+        "signal.no_allowed_date",
         "A primeira mensal excede 30 dias e não há dia 05, 10 ou 15 futuro no mês para um sinal.",
+        ["officialContext.entryDate", "signals.1.date"],
       );
     } else if (validSignalDates.every((date) => date === null)) {
-      errors.push(
+      addViolation(
+        "signal.required_for_first_monthly",
         "A primeira mensal excede 30 dias. Informe valor e data de um sinal no mesmo mês.",
+        ["signals.1.amount", "signals.1.date"],
       );
     } else {
-      errors.push(
+      addViolation(
+        "signal.first_monthly_interval_exceeded",
         `O intervalo entre o último pagamento inicial e a primeira mensal é de ${initialToFirstInstallmentDays} dias; o limite é 30.`,
+        ["signals.1.date", "signals.2.date", "signals.3.date"],
       );
     }
   }
@@ -474,64 +590,68 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
   const validInitialTotalCents = entryCents + validSignalCents;
   const graceMonths = validSignalDates.filter(Boolean).length;
 
-  const annualCalculations = [
-    input.annual1,
-    input.annual2,
-    input.annual3,
-    input.annual4,
-    input.annual5,
-  ]
-    .map(parseMoneyCents)
-    .map((amountCents, index): AnnualScheduleCalculation => {
-      const dueDate = calculationDate
-        ? new Date(Date.UTC(calculationDate.getUTCFullYear() + index, 11, 15))
-        : null;
-      let valid = amountCents <= 0n;
-      let reason = amountCents <= 0n ? "Não informado" : "";
-      if (amountCents > 0n) {
-        if (incomeCents <= 0n) reason = "Informe a renda para validar a anual.";
-        else if (amountCents * 2n > incomeCents) reason = "A anual supera 50% da renda.";
-        else if (!dueDate || !constructionEnd || dueDate > constructionEnd)
-          reason = "A anual ultrapassa o término da obra.";
-        else if (!calculationDate || dueDate < calculationDate)
-          reason = "A data da anual já passou.";
-        else {
-          valid = true;
-          reason = "Válida";
-        }
+  const eligibleAnnualDates = generateWf13AnnualDates(input.entryDate, input.constructionEnd);
+  if (input.annuals.length > eligibleAnnualDates.length) {
+    addViolation(
+      "annual.count_exceeded",
+      `Existem ${eligibleAnnualDates.length} vencimentos anuais disponíveis durante as obras.`,
+      input.annuals
+        .slice(eligibleAnnualDates.length)
+        .map((_, index) => `annuals.${eligibleAnnualDates.length + index + 1}.date`),
+    );
+  }
+  const annualCalculations = Array.from(
+    { length: Math.max(eligibleAnnualDates.length, input.annuals.length) },
+    (_, index) => parseMoneyCents(input.annuals[index] ?? ""),
+  ).map((amountCents, index): AnnualScheduleCalculation => {
+    const dueDate = parseDate(eligibleAnnualDates[index]);
+    let valid = amountCents <= 0n && dueDate !== null;
+    let reason = dueDate ? (amountCents <= 0n ? "Não informado" : "") : "Fora das obras";
+    if (amountCents > 0n) {
+      if (incomeCents <= 0n) reason = "Informe a renda para validar a anual.";
+      else if (amountCents * 2n > incomeCents) reason = "A anual supera 50% da renda.";
+      else if (!dueDate) reason = "A anual está fora do período de obras.";
+      else {
+        valid = true;
+        reason = "Válida";
       }
-      const months =
-        valid && amountCents > 0n && calculationDate && dueDate
-          ? completedMonths(calculationDate, dueDate)
-          : 0;
-      const correctedCents =
-        valid && amountCents > 0n
-          ? fractionToCents(
-              multiplyFractions(fraction(amountCents), ratePower(5n, 1_000n, months + 1)),
-            )
-          : 0n;
-      if (amountCents > 0n && !valid) errors.push(`Anual ${index + 1}: ${reason}`);
-      return {
-        index: index + 1,
-        amount: centsToMoney(amountCents),
-        dueDate: dateText(dueDate),
-        months,
-        corrected: centsToMoney(correctedCents),
-        amountCents,
-        correctedCents,
-        valid,
-        reason,
-      };
-    });
+    }
+    const months =
+      valid && amountCents > 0n && entryDate && dueDate ? completedMonths(entryDate, dueDate) : 0;
+    const correctedFraction =
+      valid && amountCents > 0n
+        ? multiplyFractions(fraction(amountCents), ratePower(5n, 1_000n, months + 1))
+        : fraction(0n);
+    const correctedCents = fractionToCents(correctedFraction);
+    if (amountCents > 0n && !valid) {
+      addViolation(`annual.${index + 1}.invalid`, `Anual ${index + 1}: ${reason}`, [
+        `annuals.${index + 1}.amount`,
+        `annuals.${index + 1}.date`,
+      ]);
+    }
+    return {
+      index: index + 1,
+      amount: centsToMoney(amountCents),
+      dueDate: dateText(dueDate),
+      months,
+      corrected: centsToMoney(correctedCents),
+      amountCents,
+      correctedCents,
+      correctedFraction,
+      valid,
+      reason,
+    };
+  });
 
   const annualNominalTotalCents = annualCalculations.reduce(
     (total, item) => total + (item.valid ? item.amountCents : 0n),
     0n,
   );
-  const annualCorrectedTotalCents = annualCalculations.reduce(
-    (total, item) => total + item.correctedCents,
-    0n,
+  const annualCorrectedTotalFraction = annualCalculations.reduce(
+    (total, item) => addFractions(total, item.correctedFraction),
+    fraction(0n),
   );
+  const annualCorrectedTotalCents = fractionToCents(annualCorrectedTotalFraction);
   const annualSchedule: AnnualScheduleItem[] = annualCalculations.map((item) => ({
     index: item.index,
     amount: item.amount,
@@ -541,7 +661,7 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
     valid: item.valid,
     reason: item.reason,
   }));
-  const realSaleValueCents = salePriceCents - bonusCents - discountCents;
+  const realSaleValueCents = salePriceCents - bonusCents - discountCents - cashbackDiscountCents;
   const deductionsCents =
     financingCents +
     subsidyCents +
@@ -605,12 +725,38 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
   );
   const prePaymentFraction = annuityPayment(5n, 1_000n, preInstallments, prePeriodTotalFraction);
   const postPaymentFraction = annuityPayment(15n, 1_000n, postInstallments, adjustedPostFraction);
-  const correctedInstallmentCents =
-    fractionToCents(prePaymentFraction) > fractionToCents(postPaymentFraction)
-      ? fractionToCents(prePaymentFraction)
-      : fractionToCents(postPaymentFraction);
+  const correctedInstallmentFraction =
+    compareFractions(prePaymentFraction, postPaymentFraction) >= 0
+      ? prePaymentFraction
+      : postPaymentFraction;
+  const correctedInstallmentCents = fractionToCents(correctedInstallmentFraction);
   const correctedProSolutoCents = fractionToCents(correctedProSolutoFraction);
-  const correctedWithAnnualsCents = correctedProSolutoCents + annualCorrectedTotalCents;
+  const correctedWithAnnualsFraction = addFractions(
+    correctedProSolutoFraction,
+    annualCorrectedTotalFraction,
+  );
+  const correctedWithAnnualsCents = fractionToCents(correctedWithAnnualsFraction);
+  const proSolutoRatio =
+    realSaleValueCents > 0n
+      ? divideFractions(correctedWithAnnualsFraction, fraction(realSaleValueCents))
+      : fraction(0n, 0n);
+  const incomeCommitmentRatio =
+    incomeCents > 0n
+      ? divideFractions(correctedInstallmentFraction, fraction(incomeCents))
+      : fraction(0n, 0n);
+  const rankingApproval = evaluateWf13RankingPolicy({
+    ranking: input.ranking,
+    proSoluto: proSolutoRatio,
+    incomeCommitment: incomeCommitmentRatio,
+  });
+  violations.push(...rankingApproval.violations);
+  errors.push(...rankingApproval.violations.map(({ message }) => message));
+  const approval: Wf13PolicyEvaluation = {
+    ...rankingApproval,
+    status:
+      violations.length === 0 && rankingApproval.status === "APROVADO" ? "APROVADO" : "REPROVADO",
+    violations: [...violations],
+  };
 
   if (proSolutoCents === 0n)
     warnings.push("O pró-soluto ficou zerado após as deduções informadas.");
@@ -632,6 +778,10 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
       ok: input.policyConfirmed && policyLimit > 0 && installments <= policyLimit,
     },
     {
+      label: "Ranking e dois limites comerciais avaliados sem compensação",
+      ok: approval.status === "APROVADO",
+    },
+    {
       label: "Entrada e sinais respeitam valor, sequência e datas",
       ok:
         entryCents >= minimumCents &&
@@ -648,6 +798,10 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
           housingCheckCents +
           validInitialTotalCents +
           annualNominalTotalCents,
+    },
+    {
+      label: "Volta ao Caixa não altera o pró-soluto nem os dois indicadores",
+      ok: cashbackCents >= 0n,
     },
     {
       label: "Cronograma nominal reconcilia o pró-soluto",
@@ -678,6 +832,8 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
     ok: errors.length === 0,
     errors,
     warnings,
+    violations,
+    approval,
     workflow: WF13_FORMULA.workflow,
     scope: WF13_FORMULA.scope,
     formulaVersion: WF13_FORMULA.version,
@@ -689,12 +845,17 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
     initialToFirstInstallmentDays,
     monthlyDueDay,
     graceMonths,
+    entryAmount: centsToMoney(entryCents),
+    signalsTotal: centsToMoney(validSignalCents),
     validInitialTotal: centsToMoney(validInitialTotalCents),
     annualSchedule,
     annualNominalTotal: centsToMoney(annualNominalTotalCents),
     annualCorrectedTotal: centsToMoney(annualCorrectedTotalCents),
     realSaleValue: centsToMoney(realSaleValueCents),
     deductions: centsToMoney(deductionsCents),
+    financing: centsToMoney(financingCents),
+    subsidy: centsToMoney(subsidyCents),
+    fgts: centsToMoney(fgtsCents),
     proSoluto: centsToMoney(proSolutoCents),
     nominalInstallment: nominalSchedule.baseAmount,
     nominalSchedule,
@@ -717,34 +878,52 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
     prePayment: fractionCentsToMoney(prePaymentFraction),
     postPayment: fractionCentsToMoney(postPaymentFraction),
     correctedInstallment: centsToMoney(correctedInstallmentCents),
+    incomeCommitment: approval.incomeCommitment.value,
     installmentOverSale:
       realSaleValueCents > 0n
         ? fractionToNumber(fraction(correctedInstallmentCents, realSaleValueCents))
         : 0,
-    proSolutoOverSale:
-      realSaleValueCents > 0n
-        ? fractionToNumber(fraction(correctedWithAnnualsCents, realSaleValueCents))
-        : 0,
+    proSolutoOverSale: approval.proSoluto.value,
     audit,
     calculationMemory: [
       { step: "Valor nominal da unidade", value: centsToMoney(salePriceCents), format: "currency" },
       {
         step: "Bônus e descontos nominais",
-        value: centsToMoney(bonusCents + discountCents),
+        value: centsToMoney(bonusCents + discountCents + cashbackDiscountCents),
+        format: "currency",
+      },
+      {
+        step: "Volta ao Caixa (sem efeito nos indicadores)",
+        value: centsToMoney(cashbackCents),
         format: "currency",
       },
       { step: "Valor real da venda", value: centsToMoney(realSaleValueCents), format: "currency" },
+      { step: "Financiamento", value: centsToMoney(financingCents), format: "currency" },
+      { step: "Subsídio", value: centsToMoney(subsidyCents), format: "currency" },
+      { step: "FGTS", value: centsToMoney(fgtsCents), format: "currency" },
+      { step: "Cheque moradia", value: centsToMoney(housingCheckCents), format: "currency" },
       {
         step: "Financiamento e recursos externos",
         value: centsToMoney(financingCents + subsidyCents + fgtsCents + housingCheckCents),
         format: "currency",
       },
       {
-        step: "Ato e sinais válidos",
-        value: centsToMoney(validInitialTotalCents),
+        step: "Ato",
+        value: centsToMoney(entryCents),
         format: "currency",
       },
+      { step: "Sinais válidos", value: centsToMoney(validSignalCents), format: "currency" },
       { step: "Anuais nominais", value: centsToMoney(annualNominalTotalCents), format: "currency" },
+      ...annualSchedule.map((item) => ({
+        step: `Anual ${item.index} · vencimento fixo`,
+        value: item.dueDate,
+        format: "date" as const,
+      })),
+      {
+        step: "Correção das anuais (separada)",
+        value: centsToMoney(annualCorrectedTotalCents),
+        format: "currency",
+      },
       {
         step: "Saldo nominal do pró-soluto",
         value: centsToMoney(proSolutoCents),
@@ -772,6 +951,18 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
         step: "Parcela corrigida",
         value: centsToMoney(correctedInstallmentCents),
         format: "currency",
+      },
+      { step: "Ranking", value: input.ranking || "Não selecionado", format: "text" },
+      { step: "Versão da política", value: approval.policyVersion, format: "text" },
+      {
+        step: "Percentual do pró-soluto",
+        value: approval.proSoluto.value,
+        format: "percent",
+      },
+      {
+        step: "Comprometimento de renda",
+        value: approval.incomeCommitment.value,
+        format: "percent",
       },
       { step: "Último pagamento inicial", value: dateText(initialPaymentDate), format: "date" },
       { step: "Primeira mensal", value: dateText(firstInstallmentDate), format: "date" },

@@ -112,6 +112,11 @@
   overflow: clip;
 }
 
+.sectionInvalid {
+  border-color: var(--analytics-danger);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--analytics-danger) 22%, transparent);
+}
+
 .sectionHeading {
   display: flex;
   align-items: flex-start;
@@ -239,6 +244,67 @@
 .checkField .validationMessage {
   color: var(--analytics-danger);
   font-weight: 750;
+}
+
+.validationMessage > span {
+  margin-right: 0.2rem;
+}
+
+.annualGrid {
+  display: grid;
+  grid-template-columns: minmax(11rem, 0.85fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.readOnlyDate {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.8rem;
+  background: var(--analytics-surface-muted);
+  padding: 0.75rem 0.85rem;
+  color: var(--analytics-ink);
+}
+
+.readOnlyDate[aria-invalid="true"],
+.processCardInvalid {
+  border-color: var(--analytics-danger);
+  background: color-mix(in srgb, var(--analytics-danger) 7%, var(--analytics-surface));
+}
+
+.readOnlyDate span {
+  color: var(--analytics-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.readOnlyDate strong {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.readOnlyDate small {
+  margin: 0;
+}
+
+.annualAvailability {
+  display: grid;
+  gap: 0.2rem;
+  border: 1px dashed var(--analytics-line);
+  border-radius: 0.85rem;
+  background: var(--analytics-surface-muted);
+  padding: 0.85rem;
+  color: var(--analytics-ink);
+  font-size: 0.75rem;
+}
+
+.annualAvailability span {
+  color: var(--analytics-muted);
 }
 
 .choiceGrid {
@@ -442,6 +508,119 @@
   line-height: 1.55;
 }
 
+.approvalPanel {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1rem 1.15rem 0;
+  border: 1px solid var(--analytics-line);
+  border-radius: 1rem;
+  background: var(--analytics-surface-muted);
+  padding: 0.9rem;
+}
+
+.approvalHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.approvalHeading p {
+  color: var(--analytics-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.approvalHeading h2 {
+  margin-top: 0.15rem;
+  color: var(--analytics-ink);
+  font-size: 1rem;
+}
+
+.approvalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.approvalMetric {
+  display: grid;
+  gap: 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--analytics-lime) 52%, var(--analytics-line));
+  border-radius: 0.85rem;
+  background: var(--analytics-surface);
+  padding: 0.75rem;
+}
+
+.approvalMetricInvalid {
+  border-color: var(--analytics-danger);
+  background: color-mix(in srgb, var(--analytics-danger) 7%, var(--analytics-surface));
+}
+
+.approvalMetric h3 {
+  color: var(--analytics-ink);
+  font-size: 0.78rem;
+}
+
+.approvalMetric dl {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.approvalMetric dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--analytics-muted);
+  font-size: 0.7rem;
+}
+
+.approvalMetric dd {
+  color: var(--analytics-ink);
+  font-weight: 800;
+}
+
+.approvedStatus,
+.rejectedStatus {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.approvedStatus {
+  background: color-mix(in srgb, var(--analytics-lime) 22%, var(--analytics-surface));
+  color: color-mix(in srgb, var(--analytics-lime) 45%, var(--analytics-ink));
+}
+
+.rejectedStatus {
+  background: color-mix(in srgb, var(--analytics-danger) 14%, var(--analytics-surface));
+  color: var(--analytics-danger);
+}
+
+.violationSummary {
+  border-left: 3px solid var(--analytics-danger);
+  padding: 0.6rem 0.7rem;
+  color: var(--analytics-ink);
+  font-size: 0.72rem;
+}
+
+.violationSummary ul {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.4rem 0 0 1rem;
+}
+
+.approvalPanel > small {
+  color: var(--analytics-muted);
+  font-size: 0.66rem;
+}
+
 .resultList {
   display: grid;
   gap: 0;
@@ -553,24 +732,24 @@
   padding: 1.15rem;
 }
 
-.processCard span {
+.processCard > span {
   color: var(--analytics-cyan-strong);
   font-size: 0.7rem;
   font-weight: 850;
   letter-spacing: 0.1em;
 }
 
-.processCard strong,
-.processCard small {
+.processCard > strong,
+.processCard > small {
   display: block;
 }
 
-.processCard strong {
+.processCard > strong {
   margin-top: 0.45rem;
   color: var(--analytics-ink);
 }
 
-.processCard small {
+.processCard > small {
   margin-top: 0.3rem;
   color: var(--analytics-muted);
   line-height: 1.5;
@@ -606,8 +785,15 @@
 
   .fieldGrid,
   .hubGrid,
-  .processGrid {
+  .processGrid,
+  .annualGrid,
+  .approvalGrid {
     grid-template-columns: 1fr;
+  }
+
+  .approvalHeading {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .hubCard {
