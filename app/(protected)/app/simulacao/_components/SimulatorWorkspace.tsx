@@ -23,11 +23,16 @@ import {
 import { isOfficialSimulatorSlug } from "@/lib/crm/simulators/official/catalog";
 import {
   buildOfficialSimulatorInput,
+  officialSimulatorApproval,
   officialSimulatorMemoryRows,
   officialSimulatorInitialValues,
   officialSimulatorResultRows,
+  officialSimulatorViolations,
+  type OfficialSimulatorApproval,
   type OfficialSimulatorResultRow,
+  type OfficialSimulatorViolation,
 } from "@/lib/crm/simulators/official/client";
+import { generateWf13AnnualDates } from "@/lib/crm/simulators/official/wf13-policy";
 
 import styles from "../simulators.module.css";
 
@@ -63,10 +68,10 @@ function describedBy(id: string, hasHint: boolean, isInvalid: boolean) {
   );
 }
 
-function ValidationMessage({ id }: { id: string }) {
+function ValidationMessage({ id, message }: { id: string; message: string }) {
   return (
     <small id={`${id}-error`} className={styles.validationMessage} role="alert">
-      Preencha este campo obrigatório.
+      <span aria-hidden="true">⚠</span> {message}
     </small>
   );
 }
@@ -77,6 +82,7 @@ function StandardField({
   itemNumber,
   value,
   touched,
+  errors,
   onValueChange,
   onTouched,
 }: {
@@ -85,13 +91,16 @@ function StandardField({
   itemNumber?: number | undefined;
   value: string | boolean | undefined;
   touched: boolean;
+  errors: string[];
   onValueChange: (id: string, value: string | boolean) => void;
   onTouched: (id: string) => void;
 }) {
   const id = inputId(sectionKey, field.key, itemNumber);
   const textValue = typeof value === "string" ? value : "";
   const isEmpty = field.type === "checkbox" ? value !== true : textValue.trim() === "";
-  const isInvalid = field.required === true && touched && isEmpty;
+  const requiredInvalid = field.required === true && touched && isEmpty;
+  const isInvalid = requiredInvalid || errors.length > 0;
+  const validationMessage = errors[0] ?? "Preencha este campo obrigatório.";
   const fieldDescription = describedBy(id, Boolean(field.hint), isInvalid);
 
   if (field.type === "radio") {
@@ -132,7 +141,7 @@ function StandardField({
           })}
         </div>
         {field.hint ? <small id={`${id}-hint`}>{field.hint}</small> : null}
-        {isInvalid ? <ValidationMessage id={id} /> : null}
+        {isInvalid ? <ValidationMessage id={id} message={validationMessage} /> : null}
       </fieldset>
     );
   }
@@ -162,7 +171,7 @@ function StandardField({
             {field.required ? <span aria-hidden="true"> *</span> : null}
           </strong>
           {field.hint ? <small id={`${id}-hint`}>{field.hint}</small> : null}
-          {isInvalid ? <ValidationMessage id={id} /> : null}
+          {isInvalid ? <ValidationMessage id={id} message={validationMessage} /> : null}
         </span>
       </label>
     );
@@ -215,7 +224,7 @@ function StandardField({
         </span>
       )}
       {field.hint ? <small id={`${id}-hint`}>{field.hint}</small> : null}
-      {isInvalid ? <ValidationMessage id={id} /> : null}
+      {isInvalid ? <ValidationMessage id={id} message={validationMessage} /> : null}
     </label>
   );
 }
@@ -308,6 +317,8 @@ type OfficialExecutionResult = {
   errors: string[];
   warnings: string[];
   memory: OfficialSimulatorResultRow[];
+  approval: OfficialSimulatorApproval;
+  violations: OfficialSimulatorViolation[];
 };
 
 type ExecutionGateResolution = {
@@ -318,6 +329,146 @@ type ExecutionGateResolution = {
 
 function stringList(value: unknown): string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string") ? value : [];
+}
+
+const violationFieldIds: Record<string, string[]> = {
+  "officialContext.development": ["simulator-official-context-development"],
+  "officialContext.product": ["simulator-official-context-product"],
+  "officialContext.stockMatch": ["simulator-official-context-official-match"],
+  "officialContext.entryDate": ["simulator-official-context-effective-date"],
+  "officialContext.constructionEnd": ["simulator-official-context-construction-end"],
+  "officialContext.income": ["simulator-official-context-income"],
+  "proSoluto.salePrice": ["simulator-pro-soluto-property-value"],
+  "proSoluto.bonus": ["simulator-pro-soluto-bonus"],
+  "proSoluto.discount": ["simulator-pro-soluto-discount"],
+  "proSoluto.cashbackDiscount": ["simulator-pro-soluto-cashback-discount"],
+  "entry.amount": ["simulator-entry-entry"],
+  "commercialPolicy.ranking": ["simulator-commercial-policy-ranking"],
+  "commercialPolicy.confirmed": ["simulator-commercial-policy-policy-confirmed"],
+  "commercialPolicy.limit": ["simulator-commercial-policy-approved-limit"],
+  "commercialPolicy.installments": ["simulator-commercial-policy-requested-installments"],
+  "result.proSolutoPercentage": ["wf13-pro-soluto-result"],
+  "result.incomeCommitment": ["wf13-income-result"],
+  "result.correctedInstallment": ["wf13-income-result"],
+};
+
+function idsForViolationPath(path: string): string[] {
+  const annual = /^annuals\.(\d+)\.(amount|date)$/.exec(path);
+  if (annual) {
+    const suffix = annual[2] === "amount" ? "annual-value" : "annual-date";
+    return [`simulator-annuals-${annual[1]}-${suffix}`];
+  }
+  const signal = /^signals\.(\d+)\.(amount|date)$/.exec(path);
+  if (signal) {
+    const suffix = signal[2] === "amount" ? `signal-${signal[1]}` : `signal-${signal[1]}-date`;
+    return [`simulator-signals-${suffix}`];
+  }
+  return violationFieldIds[path] ?? [];
+}
+
+function formatIsoDate(value: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "—";
+  return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
+    new Date(`${value}T00:00:00.000Z`),
+  );
+}
+
+const approvalPercent = new Intl.NumberFormat("pt-BR", {
+  style: "percent",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const percentagePoints = new Intl.NumberFormat("pt-BR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+function ApprovalMetric({
+  id,
+  label,
+  metric,
+}: {
+  id: string;
+  label: string;
+  metric: OfficialSimulatorApproval["proSoluto"];
+}) {
+  return (
+    <section
+      aria-invalid={!metric.approved || undefined}
+      className={`${styles.approvalMetric} ${!metric.approved ? styles.approvalMetricInvalid : ""}`}
+      id={id}
+      tabIndex={-1}
+    >
+      <h3>{label}</h3>
+      <dl>
+        <div>
+          <dt>Resultado</dt>
+          <dd>{approvalPercent.format(metric.value)}</dd>
+        </div>
+        <div>
+          <dt>Limite</dt>
+          <dd>{approvalPercent.format(metric.limit)}</dd>
+        </div>
+        {metric.excessPercentagePoints > 0 ? (
+          <div>
+            <dt>Excedente</dt>
+            <dd>{percentagePoints.format(metric.excessPercentagePoints)} p.p.</dd>
+          </div>
+        ) : null}
+      </dl>
+      <strong className={metric.approved ? styles.approvedStatus : styles.rejectedStatus}>
+        {metric.approved ? "APROVADO" : "⚠ REPROVADO"}
+      </strong>
+    </section>
+  );
+}
+
+function ApprovalPanel({
+  approval,
+  violations,
+}: {
+  approval: OfficialSimulatorApproval;
+  violations: OfficialSimulatorViolation[];
+}) {
+  return (
+    <section className={styles.approvalPanel} aria-labelledby="wf13-approval-title">
+      <div className={styles.approvalHeading}>
+        <div>
+          <p>Ranking selecionado</p>
+          <h2 id="wf13-approval-title">{approval.ranking || "Não selecionado"}</h2>
+        </div>
+        <strong
+          className={approval.status === "APROVADO" ? styles.approvedStatus : styles.rejectedStatus}
+        >
+          STATUS GERAL: {approval.status}
+        </strong>
+      </div>
+      <div className={styles.approvalGrid}>
+        <ApprovalMetric
+          id="wf13-pro-soluto-result"
+          label="Pró-soluto"
+          metric={approval.proSoluto}
+        />
+        <ApprovalMetric
+          id="wf13-income-result"
+          label="Comprometimento de renda"
+          metric={approval.incomeCommitment}
+        />
+      </div>
+      {violations.length > 0 ? (
+        <div className={styles.violationSummary} role="alert" aria-live="polite">
+          <strong>Pendências encontradas</strong>
+          <ul>
+            {violations.map((violation) => (
+              <li key={violation.code}>{violation.message}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      <small>Política {approval.policyVersion}</small>
+    </section>
+  );
 }
 
 export function SimulatorWorkspace({
@@ -354,6 +505,24 @@ export function SimulatorWorkspace({
     gateResolution?.slug === definition.slug && gateResolution.serverEnabled === executionEnabled
       ? gateResolution.enabled
       : executionEnabled;
+  const annualDates =
+    definition.slug === "associativo-fluxo-linear"
+      ? generateWf13AnnualDates(
+          String(values["simulator-official-context-effective-date"] ?? ""),
+          String(values["simulator-official-context-construction-end"] ?? ""),
+        )
+      : [];
+  const fieldErrors = new Map<string, string[]>();
+  for (const violation of officialResult?.violations ?? []) {
+    for (const path of violation.fieldPaths) {
+      for (const id of idsForViolationPath(path)) {
+        fieldErrors.set(id, [...(fieldErrors.get(id) ?? []), violation.message]);
+      }
+    }
+  }
+  const proSolutoSectionInvalid = (officialResult?.violations ?? []).some((violation) =>
+    violation.fieldPaths.includes("section.proSoluto"),
+  );
 
   useEffect(() => {
     if (!isOfficialSimulatorSlug(definition.slug)) return;
@@ -467,9 +636,13 @@ export function SimulatorWorkspace({
       const result = envelope.result;
       const rows = officialSimulatorResultRows(definition.slug, result);
       const memory = officialSimulatorMemoryRows(definition.slug, result);
+      const approval = officialSimulatorApproval(definition.slug, result);
+      const violations = officialSimulatorViolations(definition.slug, result);
       if (
         !rows ||
         !memory ||
+        !approval ||
+        !violations ||
         typeof envelope.formulaVersion !== "string" ||
         !result ||
         typeof result !== "object"
@@ -484,7 +657,22 @@ export function SimulatorWorkspace({
         ok: resultRecord.ok === true,
         errors: stringList(resultRecord.errors),
         warnings: stringList(resultRecord.warnings),
+        approval,
+        violations,
       });
+      const invalidIds = violations.flatMap((violation) =>
+        violation.fieldPaths.flatMap(idsForViolationPath),
+      );
+      setTouchedFields((currentFields) => new Set([...currentFields, ...invalidIds]));
+      const firstFocusableId = invalidIds[0];
+      if (firstFocusableId) {
+        requestAnimationFrame(() => {
+          const element = document.getElementById(firstFocusableId);
+          const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          element?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+          element?.focus({ preventScroll: true });
+        });
+      }
       setExecutionStatus("idle");
     } catch {
       setExecutionStatus("error");
@@ -533,6 +721,7 @@ export function SimulatorWorkspace({
             sectionKey={section.key}
             value={values[id]}
             touched={touchedFields.has(id)}
+            errors={fieldErrors.get(id) ?? []}
             onValueChange={updateValue}
             onTouched={markTouched}
           />
@@ -542,12 +731,19 @@ export function SimulatorWorkspace({
 
   function renderSection(section: SimulatorSection) {
     const sectionIndex = definition.sections.findIndex(({ key }) => key === section.key);
+    const isFixedAnnualSection =
+      definition.slug === "associativo-fluxo-linear" && section.key === "annuals";
     const repeatCount = section.repeatable ? (repeatCounts[section.key] ?? 1) : 1;
     const repeatLimitReached =
       section.repeatable?.maxItems !== undefined && repeatCount >= section.repeatable.maxItems;
 
     return (
-      <section className={styles.formSection} key={section.key}>
+      <section
+        className={`${styles.formSection} ${
+          section.key === "pro-soluto" && proSolutoSectionInvalid ? styles.sectionInvalid : ""
+        }`}
+        key={section.key}
+      >
         <div className={styles.sectionHeading}>
           <span>{String(sectionIndex + 1).padStart(2, "0")}</span>
           <div>
@@ -556,7 +752,64 @@ export function SimulatorWorkspace({
           </div>
         </div>
 
-        {section.repeatable ? (
+        {isFixedAnnualSection ? (
+          <div className={styles.fieldGrid}>
+            {annualDates.length === 0 ? (
+              <div className={styles.fieldWide}>
+                <DataState
+                  variant="unavailable"
+                  compact
+                  title="Nenhuma data anual disponível"
+                  description="Não existe 15 de dezembro compreendido entre a data-base e o término da obra informados."
+                />
+              </div>
+            ) : (
+              annualDates.map((annualDate, index) => {
+                const itemNumber = index + 1;
+                const amountId = inputId(section.key, "annual-value", itemNumber);
+                const dateId = inputId(section.key, "annual-date", itemNumber);
+                const annualErrors = [
+                  ...(fieldErrors.get(amountId) ?? []),
+                  ...(fieldErrors.get(dateId) ?? []),
+                ];
+
+                return (
+                  <fieldset
+                    aria-invalid={annualErrors.length > 0 || undefined}
+                    className={`${styles.processCard} ${styles.fieldWide} ${
+                      annualErrors.length > 0 ? styles.processCardInvalid : ""
+                    }`}
+                    key={annualDate}
+                  >
+                    <legend>
+                      <strong>ANUAL {itemNumber}</strong>
+                    </legend>
+                    <div className={styles.annualGrid}>
+                      <output
+                        aria-describedby={annualErrors.length > 0 ? `${dateId}-error` : undefined}
+                        aria-invalid={annualErrors.length > 0 || undefined}
+                        className={styles.readOnlyDate}
+                        id={dateId}
+                      >
+                        <span>Vencimento fixo</span>
+                        <strong>{formatIsoDate(annualDate)}</strong>
+                        <small>Durante o período de obras · somente leitura</small>
+                      </output>
+                      {renderFields(section, itemNumber)}
+                    </div>
+                    {annualErrors[0] ? (
+                      <ValidationMessage id={dateId} message={annualErrors[0]} />
+                    ) : null}
+                  </fieldset>
+                );
+              })
+            )}
+            <div className={`${styles.annualAvailability} ${styles.fieldWide}`}>
+              <strong>{annualDates.length} data(s) anual(is) disponível(is).</strong>
+              <span>Não é possível adicionar vencimentos fora deste calendário.</span>
+            </div>
+          </div>
+        ) : section.repeatable ? (
           <div className={styles.fieldGrid}>
             {Array.from({ length: repeatCount }, (_, index) => {
               const itemNumber = index + 1;
@@ -609,7 +862,18 @@ export function SimulatorWorkspace({
             </div>
           </div>
         ) : section.fields.length > 0 ? (
-          <div className={styles.fieldGrid}>{renderFields(section)}</div>
+          <div className={styles.fieldGrid}>
+            {renderFields(section)}
+            {definition.slug === "associativo-fluxo-linear" && section.key === "entry" ? (
+              <output className={`${styles.readOnlyDate} ${styles.fieldWide}`}>
+                <span>Data do ato</span>
+                <strong>
+                  {formatIsoDate(String(values["simulator-official-context-effective-date"] ?? ""))}
+                </strong>
+                <small>Pagamento previsto para a assinatura · somente leitura</small>
+              </output>
+            ) : null}
+          </div>
         ) : null}
 
         <SectionPreview section={section} />
@@ -669,6 +933,7 @@ export function SimulatorWorkspace({
           <form
             className={styles.form}
             aria-label={`Entradas de ${definition.title}`}
+            noValidate
             onSubmit={(event) => {
               event.preventDefault();
               void executeOfficialSimulator();
@@ -730,8 +995,14 @@ export function SimulatorWorkspace({
 
             <div className={styles.actionBar}>
               <p>
-                <strong>Preenchimento disponível.</strong>
-                <span>Nenhum cálculo ou envio ao servidor será executado.</span>
+                <strong>
+                  {executionAllowed ? "Cálculo disponível." : "Preenchimento disponível."}
+                </strong>
+                <span>
+                  {executionAllowed
+                    ? "Execução no servidor sem persistir os dados informados."
+                    : "Nenhum cálculo ou envio ao servidor será executado."}
+                </span>
               </p>
               <div className={styles.simulatorNav}>
                 <button
@@ -803,6 +1074,12 @@ export function SimulatorWorkspace({
                 ? "Resultado determinístico da fórmula oficial versionada."
                 : "Estrutura pronta para receber somente cálculo oficialmente validado."}
             </p>
+            {officialResult ? (
+              <ApprovalPanel
+                approval={officialResult.approval}
+                violations={officialResult.violations}
+              />
+            ) : null}
             <dl className={styles.resultList}>
               {officialResult
                 ? officialResult.rows.map((item) => (

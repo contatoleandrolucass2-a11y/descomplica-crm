@@ -1,0 +1,10 @@
+scenario,base_date,delivery_date,income,annual_values,eligible_dates,looker_result,site_result,difference,authority
+no-date,2026-12-16,2027-12-14,10000,,"",not-representable-with-report-controls,no-annual-available,explicit-rule
+one-annual,2026-08-18,2026-12-15,10000,1000,2026-12-15,valid,valid,none,looker-rendered
+three-annuals,2026-08-18,2028-12-15,10000,1000|1000|1000,2026-12-15|2027-12-15|2028-12-15,valid,valid,none,looker-rendered
+delivery-before-december-15,2026-08-18,2028-12-14,10000,1000|1000,2026-12-15|2027-12-15,not-representable-with-report-controls,valid,explicit-calendar-boundary,explicit-rule
+delivery-on-december-15,2026-08-18,2028-12-15,10000,1000|1000|1000,2026-12-15|2027-12-15|2028-12-15,not-representable-with-report-controls,valid,explicit-inclusive-boundary,explicit-rule
+base-after-december-15,2026-12-16,2028-12-15,10000,1000|1000,2027-12-15|2028-12-15,not-representable-with-report-controls,valid,explicit-calendar-boundary,explicit-rule
+annual-exactly-50-percent,2026-08-18,2026-12-15,10000,5000,2026-12-15,valid,valid,none,looker-rendered
+annual-above-50-percent,2026-08-18,2026-12-15,10000,5000.01,2026-12-15,rejected-and-excluded,rejected,none,looker-rendered
+annual-outside-works,2026-08-18,2026-12-15,10000,1000|1000,2026-12-15,not-representable-with-report-controls,rejected,site-blocks-extra-value,explicit-rule

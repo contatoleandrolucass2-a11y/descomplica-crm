@@ -43,7 +43,12 @@ describe("simulator visual catalog", () => {
     expect(markup).toMatch(
       /data-cta-state="blocked"[^>]*disabled|disabled[^>]*data-cta-state="blocked"/,
     );
-    expect(markup).not.toContain("<output");
+    if (definition.slug === "associativo-fluxo-linear") {
+      expect(markup).toContain("Data do ato");
+      expect(markup).toContain("somente leitura");
+    } else {
+      expect(markup).not.toContain("<output");
+    }
     expect(markup).not.toContain("action=");
   });
 
@@ -67,8 +72,9 @@ describe("simulator visual catalog", () => {
     expect(SIMULATORS["associativo-fluxo-linear"].sections.map(({ title }) => title)).toEqual([
       "Contexto oficial",
       "Formação do pró-soluto",
-      "Ato e sinais",
-      "Anuais",
+      "ATO — pagamento na assinatura",
+      "SINAIS — pagamentos intermediários",
+      "ANUAIS — vencimentos fixos em 15/12",
       "Política comercial",
     ]);
     expect(SIMULATORS["calcular-documentacao"].sections.map(({ title }) => title)).toEqual([
@@ -150,6 +156,9 @@ describe("simulator visual catalog", () => {
     expect(markup).toContain('data-cta-state="enabled"');
     expect(markup).not.toContain('data-cta-state="blocked"');
     expect(markup).toContain('value="84"');
+    expect(markup).toContain("Ranking no Bora Vender");
+    expect(markup).toContain('<option value="NÃO ELEGÍVEL">NÃO ELEGÍVEL</option>');
+    expect(markup).toContain("Nenhuma data anual disponível");
   });
 
   it("renders neutral tabs, repeaters, inventory pagination and local tools", () => {

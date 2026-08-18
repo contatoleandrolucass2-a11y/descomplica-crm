@@ -8,6 +8,21 @@
 
 ## Unreleased
 
+- Evolui somente o WF13 para `wf13-1.2.0`: ranking obrigatório e versionado,
+  comparação exata por dois limites independentes e reprovação explícita de
+  `NÃO ELEGÍVEL`, sempre revalidada no servidor.
+- Gera anuais automaticamente nos dias 15/12 compreendidos entre data-base e
+  entrega, mantém datas somente leitura e valida cada parcela contra 50% da
+  renda sem misturar correção e saldo nominal.
+- Separa visualmente ato, sinais e anuais; adiciona quadro intuitivo de
+  aprovação, múltiplos motivos e erros acessíveis ligados aos campos causadores.
+- Versiona 30 cenários Looker × site e nove fronteiras anuais. Documenta a única
+  diferença deliberada: o Looker antigo usa `<`, enquanto a regra aprovada usa
+  `<=` no limite exato. PDF 2 e demais motores permanecem inalterados.
+- Atualiza somente as 11 capturas sanitizadas do canário WF13 ativo para o novo
+  formulário de ranking e anuais; a baseline canônica com motores desligados
+  permanece separada e intacta.
+
 - Corrige a paridade do WF13 com o PDF 2: anuais corrigidas deixam de reduzir o
   saldo nominal, a primeira mensal não avança um mês duas vezes e o caso oficial
   fecha em R$ 17.000,00, R$ 202,38, R$ 288,67 e 15/09/2026.

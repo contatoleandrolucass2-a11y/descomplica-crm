@@ -1,3 +1,5 @@
+import { WF13_RANKINGS } from "./official/wf13-policy";
+
 export type SimulatorFieldType =
   | "text"
   | "currency"
@@ -138,8 +140,15 @@ export const SIMULATORS = {
         title: "Formação do pró-soluto",
         fields: [
           { key: "property-value", label: "Valor do imóvel", type: "currency", required: true },
-          { key: "bonus", label: "Bônus adimplência", type: "currency" },
-          { key: "discount", label: "Desconto", type: "currency" },
+          { key: "bonus", label: "Bônus de adimplência", type: "currency" },
+          { key: "discount", label: "Desconto MÊS", type: "currency" },
+          {
+            key: "cashback",
+            label: "Volta ao Caixa",
+            type: "currency",
+            hint: "Registrado separadamente; não altera os indicadores do ranking.",
+          },
+          { key: "cashback-discount", label: "Desconto V.C.", type: "currency" },
           { key: "financing", label: "Financiamento", type: "currency" },
           { key: "subsidy", label: "Subsídio", type: "currency" },
           { key: "fgts", label: "FGTS", type: "currency" },
@@ -147,10 +156,15 @@ export const SIMULATORS = {
         ],
       },
       {
+        key: "entry",
+        title: "ATO — pagamento na assinatura",
+        description: "Pagamento previsto para a assinatura. A data é a data-base da proposta.",
+        fields: [{ key: "entry", label: "Valor do ato", type: "currency", required: true }],
+      },
+      {
         key: "signals",
-        title: "Ato e sinais",
+        title: "SINAIS — pagamentos intermediários",
         fields: [
-          { key: "entry", label: "Entrada / ato", type: "currency" },
           { key: "signal-1", label: "Sinal 1", type: "currency" },
           {
             key: "signal-1-date",
@@ -176,13 +190,12 @@ export const SIMULATORS = {
       },
       {
         key: "annuals",
-        title: "Anuais",
+        title: "ANUAIS — vencimentos fixos em 15/12",
         description:
-          "Quantidade, valores e datas dependem da política oficial; este item representa a estrutura repetível.",
+          "As datas são geradas automaticamente entre a data-base e o término da obra. Cada anual pode atingir no máximo 50% da renda.",
         repeatable: {
           itemLabel: "Anual",
-          addLabel: "Adicionar anual",
-          maxItems: 5,
+          addLabel: "Data anual disponível",
         },
         fields: [{ key: "annual-value", label: "Valor da anual", type: "currency" }],
       },
@@ -190,6 +203,13 @@ export const SIMULATORS = {
         key: "commercial-policy",
         title: "Política comercial",
         fields: [
+          {
+            key: "ranking",
+            label: "Ranking no Bora Vender",
+            type: "select",
+            required: true,
+            options: WF13_RANKINGS,
+          },
           { key: "approved-limit", label: "Limite aprovado", type: "number" },
           {
             key: "requested-installments",
@@ -214,6 +234,13 @@ export const SIMULATORS = {
       "Total de recursos externos",
       "Total de descontos",
       "Saldo do pró-soluto",
+      "Ranking selecionado",
+      "Limite de pró-soluto",
+      "Pró-soluto apurado",
+      "Limite de comprometimento de renda",
+      "Comprometimento apurado",
+      "Resultado individual de cada regra",
+      "Status geral da proposta",
       "Divergências",
       "Limites violados",
       "Ato",

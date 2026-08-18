@@ -529,14 +529,18 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     await page.getByLabel("Dia de vencimento das mensais *").selectOption("15");
     await page.getByLabel("Renda *").fill("4.000,00");
     await page.getByLabel("Valor do imóvel *").fill("262.500,00");
-    await page.getByLabel("Bônus adimplência").fill("28.500,00");
+    await page.getByLabel("Bônus de adimplência").fill("28.500,00");
     await page.getByLabel("Financiamento").fill("210.000,00");
-    await page.getByLabel("Entrada / ato").fill("1.000,00");
-    await page.getByLabel("Valor da anual").fill("2.000,00");
-    await page.getByRole("button", { name: "Adicionar anual" }).click();
+    await page.getByLabel("Valor do ato").fill("1.000,00");
+    await expect(page.getByText("Data do ato", { exact: true })).toBeVisible();
+    await expect(page.getByText("17/08/2026", { exact: true }).first()).toBeVisible();
+    await page.getByLabel("Valor da anual").first().fill("2.000,00");
     await page.getByLabel("Valor da anual").nth(1).fill("2.000,00");
-    await page.getByRole("button", { name: "Adicionar anual" }).click();
     await page.getByLabel("Valor da anual").nth(2).fill("2.000,00");
+    await expect(page.getByText("15/12/2026", { exact: true })).toBeVisible();
+    await expect(page.getByText("15/12/2027", { exact: true })).toBeVisible();
+    await expect(page.getByText("15/12/2028", { exact: true })).toBeVisible();
+    await page.getByLabel("Ranking no Bora Vender *").selectOption("BRONZE");
     await page.getByLabel("Política comercial conferida").check();
     await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
     await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
@@ -544,9 +548,21 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     await expect(page.getByText("R$ 202,38", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("R$ 288,67", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("15/09/2026", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText(/wf13-1\.1\.0/)).toBeVisible();
+    await expect(page.getByText(/wf13-1\.2\.0/)).toBeVisible();
     await page.getByText("Memória de cálculo auditável", { exact: true }).click();
-    await expect(page.getByText("R$ 6.000,00", { exact: true })).toBeVisible();
+    await expect(page.getByText("R$ 6.000,00", { exact: true }).first()).toBeVisible();
+
+    const firstAnnual = page.getByLabel("Valor da anual").first();
+    await firstAnnual.fill("2.000,01");
+    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
+    await expect(firstAnnual).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator("#simulator-annuals-1-annual-value-error")).toContainText(
+      "Anual 1: A anual supera 50% da renda",
+    );
+    await firstAnnual.fill("2.000,00");
+    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
+    await expect(firstAnnual).not.toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
 
     for (const simulator of [
       "calcular-documentacao",
