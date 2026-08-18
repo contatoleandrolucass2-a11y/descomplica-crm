@@ -100,9 +100,7 @@ export function buildOfficialSimulatorInput(
     development: field(values, "simulator-official-context-development"),
     product: field(values, "simulator-official-context-product"),
     stockMatch: checked(values, "simulator-official-context-official-match"),
-    policyConfirmed: checked(values, "simulator-commercial-policy-policy-confirmed"),
     ranking: field(values, "simulator-commercial-policy-ranking"),
-    policyLimit: field(values, "simulator-commercial-policy-approved-limit"),
     installments: field(values, "simulator-commercial-policy-requested-installments"),
     entryDate,
     constructionEnd,
@@ -175,6 +173,8 @@ export function officialSimulatorResultRows(
     entryAmount: finiteNumber(result, "entryAmount"),
     signalsTotal: finiteNumber(result, "signalsTotal"),
     annualNominalTotal: finiteNumber(result, "annualNominalTotal"),
+    installments: finiteNumber(result, "installments"),
+    policyLimit: finiteNumber(result, "policyLimit"),
     financing: finiteNumber(result, "financing"),
     subsidy: finiteNumber(result, "subsidy"),
     fgts: finiteNumber(result, "fgts"),
@@ -202,6 +202,8 @@ export function officialSimulatorResultRows(
     { label: "Ato", value: currency.format(values.entryAmount!) },
     { label: "Sinais", value: currency.format(values.signalsTotal!) },
     { label: "Anuais", value: currency.format(values.annualNominalTotal!) },
+    { label: "Parcelas mensais solicitadas", value: number.format(values.installments!) },
+    { label: "Limite máximo de parcelas", value: number.format(values.policyLimit!) },
     { label: "Mensal corrigida", value: currency.format(values.correctedInstallment!) },
     { label: "Financiamento", value: currency.format(values.financing!) },
     { label: "Subsídio", value: currency.format(values.subsidy!) },
@@ -215,7 +217,10 @@ export function officialSimulatorResultRows(
         : "—",
     },
     { label: "Comprometimento de renda", value: percent.format(values.incomeCommitment!) },
-    { label: "Pró-soluto apurado", value: percent.format(values.proSolutoOverSale!) },
+    {
+      label: "Comprometimento do pró-soluto",
+      value: percent.format(values.proSolutoOverSale!),
+    },
   ];
 }
 

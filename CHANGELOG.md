@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-18 — Hotfix WF13: limite 84 e pró-soluto
+
+- Fixa o limite comercial em 84 no servidor e na interface somente leitura;
+  remove limite e confirmação manual do payload estrito.
+- Valida parcelas solicitadas como inteiro de 1 a 84, sem arredondar ou reduzir
+  entradas inválidas, com erro acessível, foco e bloqueio do cálculo.
+- Corrige o numerador do comprometimento do pró-soluto: anuais usam somente a
+  correção inicial de 0,5%, eliminando a divergência de 10,08% para 9,88% sem
+  alterar saldo, parcela, calendário ou comprometimento de renda.
+- Versiona fórmula `wf13-1.3.0`, memória com numerador/denominador e regressões
+  do PDF; demais motores, integrações, RBAC e flags permanecem inalterados.
+
 ## 2026-08-14 — QA remoto acompanha canário oficial
 
 - O runner visual da homologação passa a ler, sem imprimir, somente as duas

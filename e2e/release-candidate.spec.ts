@@ -541,16 +541,69 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     await expect(page.getByText("15/12/2027", { exact: true })).toBeVisible();
     await expect(page.getByText("15/12/2028", { exact: true })).toBeVisible();
     await page.getByLabel("Ranking no Bora Vender *").selectOption("BRONZE");
-    await page.getByLabel("Política comercial conferida").check();
+    const policyLimit = page.getByLabel("Limite aprovado");
+    const requestedInstallments = page.getByLabel("Parcelas mensais solicitadas *");
+    await expect(policyLimit).toHaveValue("84");
+    await expect(policyLimit).toHaveAttribute("readonly", "");
+    await expect(policyLimit).toHaveAttribute("aria-readonly", "true");
+    await expect(requestedInstallments).toHaveAttribute("min", "1");
+    await expect(requestedInstallments).toHaveAttribute("max", "84");
+    await expect(requestedInstallments).toHaveAttribute("step", "1");
+    await expect(page.locator("#simulator-commercial-policy-policy-confirmed")).toHaveCount(0);
+
+    await requestedInstallments.fill("85");
+    await requestedInstallments.press("Tab");
+    await expect(requestedInstallments).toHaveAttribute("aria-invalid", "true");
+    await expect(
+      page.locator("#simulator-commercial-policy-requested-installments-error"),
+    ).toHaveText(/O limite máximo permitido é de 84 parcelas mensais/);
+    await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toBeDisabled();
+    await page.locator("main form").evaluate((form) => (form as HTMLFormElement).requestSubmit());
+    await expect(requestedInstallments).toBeFocused();
+
+    await requestedInstallments.fill("84.5");
+    await requestedInstallments.press("Tab");
+    await expect(
+      page.locator("#simulator-commercial-policy-requested-installments-error"),
+    ).toHaveText(/Informe uma quantidade inteira de parcelas/);
+
+    await requestedInstallments.fill("84");
+    await expect(requestedInstallments).not.toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toBeEnabled();
     await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
     await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
+    await expect(
+      page.getByText("Política comercial conferida", { exact: true }).first(),
+    ).toBeVisible();
     await expect(page.getByText("R$ 17.000,00", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("R$ 202,38", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("R$ 288,67", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("9,88%", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("15/09/2026", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText(/wf13-1\.2\.0/)).toBeVisible();
+    await expect(page.getByText(/wf13-1\.3\.0/)).toBeVisible();
     await page.getByText("Memória de cálculo auditável", { exact: true }).click();
     await expect(page.getByText("R$ 6.000,00", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("R$ 23.115,00", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("R$ 234.000,00", { exact: true }).first()).toBeVisible();
+
+    await requestedInstallments.fill("36");
+    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
+    const requestedInstallmentsResult = page
+      .locator("aside dt")
+      .filter({ hasText: /^Parcelas mensais solicitadas$/ })
+      .first()
+      .locator("xpath=following-sibling::dd[1]");
+    const policyLimitResult = page
+      .locator("aside dt")
+      .filter({ hasText: /^Limite máximo de parcelas$/ })
+      .first()
+      .locator("xpath=following-sibling::dd[1]");
+    await expect(requestedInstallmentsResult).toHaveText("36");
+    await expect(policyLimitResult).toHaveText("84");
+
+    await requestedInstallments.fill("84");
+    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
+    await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
 
     const firstAnnual = page.getByLabel("Valor da anual").first();
     await firstAnnual.fill("2.000,01");

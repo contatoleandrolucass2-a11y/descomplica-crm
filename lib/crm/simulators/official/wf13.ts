@@ -7,11 +7,11 @@ import {
   type Wf13PolicyEvaluation,
   type Wf13Violation,
 } from "./wf13-policy";
+import { WF13_MAX_INSTALLMENTS, validateWf13Installments } from "./wf13-contract";
 
 const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f]/u;
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const NON_NEGATIVE_DECIMAL_PATTERN = /^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/;
-const NON_NEGATIVE_INTEGER_PATTERN = /^(?:0|[1-9]\d*)$/;
 const MAX_MONEY_CENTS = 100_000_000_000_000n;
 const CENTS_PER_REAL = 100n;
 const PAYMENT_DAYS = [5, 10, 15] as const;
@@ -32,9 +32,10 @@ function parseMoneyCents(value: string): bigint {
 const moneyInput = z
   .union([z.literal(""), z.string().regex(NON_NEGATIVE_DECIMAL_PATTERN)])
   .refine((value) => value === "" || parseMoneyCents(value) <= MAX_MONEY_CENTS);
-const integerInput = z
-  .union([z.literal(""), z.string().regex(NON_NEGATIVE_INTEGER_PATTERN)])
-  .refine((value) => value === "" || Number(value) <= 1_000);
+const installmentsInput = z
+  .string()
+  .max(32)
+  .refine((value) => !CONTROL_CHARACTER_PATTERN.test(value));
 
 function parseDate(value: string | undefined): Date | null {
   if (!value) return null;
@@ -54,10 +55,8 @@ export const wf13InputSchema = z
     development: boundedText,
     product: boundedText,
     stockMatch: z.boolean(),
-    policyConfirmed: z.boolean(),
     ranking: z.union([z.literal(""), z.enum(WF13_RANKINGS)]),
-    policyLimit: integerInput,
-    installments: integerInput,
+    installments: installmentsInput,
     entryDate: dateInput,
     constructionEnd: dateInput,
     monthlyDueDay: z.enum(["5", "10", "15"]),
@@ -88,7 +87,7 @@ export const WF13_FORMULA = Object.freeze({
   engineKey: "simulator.wf13" as const,
   workflow: "WF-13",
   scope: "Associativo | Fluxo Linear",
-  version: "wf13-1.2.0",
+  version: "wf13-1.3.0",
   sourceRoute: "https://descomplicapro.com.br/simulacao/associativo-fluxo-linear",
   sourceAsset: "https://descomplicapro.com.br/assets/AssociativeLinearCalculator-D0Gvra4K.js",
   sourceSha256: "e9f4d1577cba434582aeb054f0f2a2eb8018a21d66fbf6ec7a72012e35641b71",
@@ -373,8 +372,9 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
   const enteredSignalDates = [input.signal1Date, input.signal2Date, input.signal3Date].map(
     parseDate,
   );
-  const installments = Number(input.installments || 0);
-  const policyLimit = Number(input.policyLimit || 0);
+  const installmentsValidation = validateWf13Installments(input.installments);
+  const installments = installmentsValidation.valid ? installmentsValidation.value : 0;
+  const policyLimit = WF13_MAX_INSTALLMENTS;
   const minimumCents = BigInt(WF13_FORMULA.minimumEntryOrSignal) * CENTS_PER_REAL;
 
   if (!input.development.trim())
@@ -428,28 +428,10 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
   }
   if (entryCents < minimumCents)
     addViolation("entry.minimum", "A entrada deve ser de pelo menos R$ 150,00.", ["entry.amount"]);
-  if (!input.policyConfirmed)
-    addViolation(
-      "commercial_policy.confirmation_required",
-      "Confirme a consulta à política comercial do empreendimento.",
-      ["commercialPolicy.confirmed"],
-    );
-  if (policyLimit <= 0)
-    addViolation(
-      "commercial_policy.limit_required",
-      "Informe o limite de parcelas aprovado na política comercial.",
-      ["commercialPolicy.limit"],
-    );
-  if (installments <= 0)
-    addViolation("installments.required", "Informe a quantidade de parcelas mensais.", [
+  if (!installmentsValidation.valid) {
+    addViolation(installmentsValidation.code, installmentsValidation.message, [
       "commercialPolicy.installments",
     ]);
-  if (policyLimit > 0 && installments > policyLimit) {
-    addViolation(
-      "installments.policy_limit_exceeded",
-      `A quantidade solicitada supera o limite comercial de ${policyLimit} parcelas.`,
-      ["commercialPolicy.limit", "commercialPolicy.installments"],
-    );
   }
 
   const signal1Valid = signalCents[0] === 0n || signalCents[0]! >= minimumCents;
@@ -731,9 +713,13 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
       : postPaymentFraction;
   const correctedInstallmentCents = fractionToCents(correctedInstallmentFraction);
   const correctedProSolutoCents = fractionToCents(correctedProSolutoFraction);
+  const annualsForProSolutoRatioFraction = multiplyFractions(
+    fraction(annualNominalTotalCents),
+    initialCorrection,
+  );
   const correctedWithAnnualsFraction = addFractions(
     correctedProSolutoFraction,
-    annualCorrectedTotalFraction,
+    annualsForProSolutoRatioFraction,
   );
   const correctedWithAnnualsCents = fractionToCents(correctedWithAnnualsFraction);
   const proSolutoRatio =
@@ -775,7 +761,7 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
     },
     {
       label: "Política comercial conferida",
-      ok: input.policyConfirmed && policyLimit > 0 && installments <= policyLimit,
+      ok: violations.length === 0 && approval.status === "APROVADO",
     },
     {
       label: "Ranking e dois limites comerciais avaliados sem compensação",
@@ -925,6 +911,11 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
         format: "currency",
       },
       {
+        step: "Anuais consideradas no comprometimento do pró-soluto",
+        value: fractionCentsToMoney(annualsForProSolutoRatioFraction),
+        format: "currency",
+      },
+      {
         step: "Saldo nominal do pró-soluto",
         value: centsToMoney(proSolutoCents),
         format: "currency",
@@ -953,11 +944,35 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
         format: "currency",
       },
       { step: "Ranking", value: input.ranking || "Não selecionado", format: "text" },
+      { step: "Parcelas mensais solicitadas", value: installments, format: "integer" },
+      { step: "Limite máximo de parcelas", value: policyLimit, format: "integer" },
       { step: "Versão da política", value: approval.policyVersion, format: "text" },
       {
         step: "Percentual do pró-soluto",
         value: approval.proSoluto.value,
         format: "percent",
+      },
+      {
+        step: "Numerador do comprometimento do pró-soluto",
+        value: fractionCentsToMoney(correctedWithAnnualsFraction),
+        format: "currency",
+      },
+      {
+        step: "Denominador do comprometimento do pró-soluto",
+        value: centsToMoney(realSaleValueCents),
+        format: "currency",
+      },
+      {
+        step: "Percentual bruto do pró-soluto",
+        value: `${(fractionToNumber(proSolutoRatio) * 100).toFixed(6).replace(".", ",")}%`,
+        format: "text",
+      },
+      {
+        step: "Percentual arredondado do pró-soluto",
+        value: `${(Math.round(fractionToNumber(proSolutoRatio) * 10_000) / 100)
+          .toFixed(2)
+          .replace(".", ",")}%`,
+        format: "text",
       },
       {
         step: "Comprometimento de renda",

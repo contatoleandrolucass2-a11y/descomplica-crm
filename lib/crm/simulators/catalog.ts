@@ -18,6 +18,10 @@ export interface SimulatorField {
   hint?: string;
   options?: readonly string[];
   wide?: boolean;
+  readOnly?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
   visibleWhen?: {
     fieldKey: string;
     values: readonly string[];
@@ -210,18 +214,22 @@ export const SIMULATORS = {
             required: true,
             options: WF13_RANKINGS,
           },
-          { key: "approved-limit", label: "Limite aprovado", type: "number" },
+          {
+            key: "approved-limit",
+            label: "Limite aprovado",
+            type: "number",
+            readOnly: true,
+            hint: "Limite máximo: 84 parcelas mensais",
+          },
           {
             key: "requested-installments",
             label: "Parcelas mensais solicitadas",
             type: "number",
-          },
-          {
-            key: "policy-confirmed",
-            label: "Política comercial conferida",
-            type: "checkbox",
-            hint: "O limite deve respeitar a política oficial do empreendimento.",
-            wide: true,
+            required: true,
+            min: 1,
+            max: 84,
+            step: 1,
+            hint: "Informe uma quantidade inteira entre 1 e 84.",
           },
         ],
       },

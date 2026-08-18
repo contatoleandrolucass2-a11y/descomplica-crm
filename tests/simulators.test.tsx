@@ -156,6 +156,15 @@ describe("simulator visual catalog", () => {
     expect(markup).toContain('data-cta-state="enabled"');
     expect(markup).not.toContain('data-cta-state="blocked"');
     expect(markup).toContain('value="84"');
+    expect(markup).toMatch(/value="84"[^>]*readonly|readonly[^>]*value="84"/);
+    expect(markup).toContain('aria-readonly="true"');
+    expect(markup).toContain('min="1"');
+    expect(markup).toContain('max="84"');
+    expect(markup).toContain('step="1"');
+    expect(markup).toContain("Limite máximo: 84 parcelas mensais");
+    expect(markup).toContain("Política comercial pendente");
+    expect(markup).toContain("Nenhuma confirmação manual é aceita");
+    expect(markup).not.toContain('id="simulator-commercial-policy-policy-confirmed"');
     expect(markup).toContain("Ranking no Bora Vender");
     expect(markup).toContain('<option value="NÃO ELEGÍVEL">NÃO ELEGÍVEL</option>');
     expect(markup).toContain("Nenhuma data anual disponível");

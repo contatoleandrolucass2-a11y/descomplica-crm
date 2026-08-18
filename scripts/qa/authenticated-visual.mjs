@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { cp, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
@@ -707,7 +707,51 @@ async function checkSimulatorValidation(page, origin) {
   );
   const validAfterInput = (await field.getAttribute("aria-invalid")) !== "true";
 
-  return { invalidAfterBlur, messageAssociated, validAfterInput };
+  const policyLimit = page.getByLabel("Limite aprovado");
+  const requestedInstallments = page.getByLabel("Parcelas mensais solicitadas *");
+  const calculationAction = page.getByRole("button", { name: "Calcular fluxo linear" });
+  const fixedLimit =
+    (await policyLimit.inputValue()) === "84" &&
+    (await policyLimit.getAttribute("readonly")) !== null &&
+    (await policyLimit.getAttribute("aria-readonly")) === "true";
+  const policyConfirmationIsAutomatic =
+    (await page.locator("#simulator-commercial-policy-policy-confirmed").count()) === 0;
+
+  await requestedInstallments.fill("85");
+  await requestedInstallments.press("Tab");
+  const maximumRejected =
+    (await requestedInstallments.getAttribute("aria-invalid")) === "true" &&
+    (
+      await page.locator("#simulator-commercial-policy-requested-installments-error").textContent()
+    )?.includes("O limite máximo permitido é de 84 parcelas mensais.") === true &&
+    (await calculationAction.isDisabled());
+
+  await requestedInstallments.fill("84.5");
+  await requestedInstallments.press("Tab");
+  const decimalRejected =
+    (
+      await page.locator("#simulator-commercial-policy-requested-installments-error").textContent()
+    )?.includes("Informe uma quantidade inteira de parcelas.") === true;
+
+  await requestedInstallments.fill("84");
+  const expectsEnabledAction = enabledSimulatorRoutes.has(
+    "/app/simulacao/associativo-fluxo-linear",
+  );
+  const correctionClearsError =
+    (await requestedInstallments.getAttribute("aria-invalid")) !== "true" &&
+    ((expectsEnabledAction && !(await calculationAction.isDisabled())) ||
+      (!expectsEnabledAction && (await calculationAction.isDisabled())));
+
+  return {
+    invalidAfterBlur,
+    messageAssociated,
+    validAfterInput,
+    fixedLimit,
+    policyConfirmationIsAutomatic,
+    maximumRejected,
+    decimalRejected,
+    correctionClearsError,
+  };
 }
 
 async function checkFixtureSourceMarker(page, origin, expectedMarker) {
@@ -849,21 +893,30 @@ function createPromotedResult(candidateResult) {
     const baselinePath = repositoryRelative(
       path.join(baselineScreenshotRoot, relativeCandidatePath),
     );
+    const baselineChanged = !screenshot.visualComparison.passed;
+    const promotedBytes = baselineChanged
+      ? screenshot.bytes
+      : screenshot.visualComparison.baselineUsed.bytes;
+    const promotedSha256 = baselineChanged
+      ? screenshot.sha256
+      : screenshot.visualComparison.baselineUsed.sha256;
     return {
       ...screenshot,
       path: relativeTo(outputRoot, path.join(baselineScreenshotRoot, relativeCandidatePath)),
+      bytes: promotedBytes,
+      sha256: promotedSha256,
       previousBaselineComparison: screenshot.visualComparison,
       visualComparison: {
         passed: true,
-        reason: "baseline_updated",
+        reason: baselineChanged ? "baseline_updated" : "baseline_preserved",
         changedPixels: 0,
         totalPixels: screenshot.width * screenshot.height,
         changedPixelRatio: 0,
         baselineUsed: {
           path: baselinePath,
           tracked: true,
-          bytes: screenshot.bytes,
-          sha256: screenshot.sha256,
+          bytes: promotedBytes,
+          sha256: promotedSha256,
         },
       },
     };
@@ -907,7 +960,14 @@ async function promoteBaseline(candidateResult) {
 
   await rm(promotionRoot, { recursive: true, force: true });
   await mkdir(promotionRoot, { recursive: true });
-  await cp(candidateScreenshotRoot, stagedScreenshots, { recursive: true });
+  await cp(baselineScreenshotRoot, stagedScreenshots, { recursive: true });
+  for (const screenshot of candidateResult.screenshots) {
+    if (screenshot.visualComparison.passed) continue;
+    const relativeCandidatePath = screenshot.path.replace(/^candidate\//, "");
+    const destination = path.join(stagedScreenshots, relativeCandidatePath);
+    await mkdir(path.dirname(destination), { recursive: true });
+    await copyFile(path.join(candidateScreenshotRoot, relativeCandidatePath), destination);
+  }
   await writeJsonAtomically(stagedResult, promotedResult);
 
   try {

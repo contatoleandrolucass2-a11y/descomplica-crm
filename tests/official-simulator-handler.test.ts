@@ -16,8 +16,18 @@ import { calculateWf13, WF13_FORMULA, wf13InputSchema } from "@/lib/crm/simulato
 import goldenFixture from "./fixtures/wf13-reference-golden.json";
 
 const ENDPOINT = "https://crm.example.com/api/official-simulator/associativo-fluxo-linear";
-const { annual1, annual2, annual3, annual4, annual5, ...legacyStandardInput } =
-  goldenFixture[0]!.input;
+const {
+  annual1,
+  annual2,
+  annual3,
+  annual4,
+  annual5,
+  policyConfirmed: _policyConfirmed,
+  policyLimit: _policyLimit,
+  ...legacyStandardInput
+} = goldenFixture[0]!.input;
+void _policyConfirmed;
+void _policyLimit;
 const standardAnnuals = [annual1, annual2, annual3, annual4, annual5];
 while (standardAnnuals.at(-1) === "0") standardAnnuals.pop();
 const standardInput = {
@@ -217,11 +227,17 @@ describe("endpoint oficial dos simuladores", () => {
       "associativo-fluxo-linear",
       dependencies(),
     );
+    const forgedPolicyLimit = await handleOfficialSimulatorPost(
+      request({ schemaVersion: 1, input: { ...standardInput, policyLimit: "1" } }),
+      "associativo-fluxo-linear",
+      dependencies(),
+    );
 
     expect(invalidOrigin.status).toBe(403);
     expect(invalidMedia.status).toBe(415);
     expect(invalidInput.status).toBe(422);
     expect(forgedApproval.status).toBe(422);
+    expect(forgedPolicyLimit.status).toBe(422);
   });
 
   it("retorna cálculo exato e telemetria sem payload", async () => {
@@ -238,7 +254,7 @@ describe("endpoint oficial dos simuladores", () => {
     expect(body).toMatchObject({
       schemaVersion: 1,
       engineKey: "simulator.wf13",
-      formulaVersion: "wf13-1.2.0",
+      formulaVersion: "wf13-1.3.0",
       sourceSha256: WF13_FORMULA.sourceSha256,
       result: {
         ok: true,
