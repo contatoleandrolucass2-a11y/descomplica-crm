@@ -889,10 +889,8 @@ function functionalChecksPassed({
 
 function createPromotedResult(candidateResult) {
   const screenshots = candidateResult.screenshots.map((screenshot) => {
-    const relativeCandidatePath = screenshot.path.replace(/^candidate\//, "");
-    const baselinePath = repositoryRelative(
-      path.join(baselineScreenshotRoot, relativeCandidatePath),
-    );
+    const baselinePath = screenshot.visualComparison.baselineUsed.path;
+    const absoluteBaselinePath = path.join(repositoryRoot, baselinePath);
     const baselineChanged = !screenshot.visualComparison.passed;
     const promotedBytes = baselineChanged
       ? screenshot.bytes
@@ -902,7 +900,7 @@ function createPromotedResult(candidateResult) {
       : screenshot.visualComparison.baselineUsed.sha256;
     return {
       ...screenshot,
-      path: relativeTo(outputRoot, path.join(baselineScreenshotRoot, relativeCandidatePath)),
+      path: relativeTo(outputRoot, absoluteBaselinePath),
       bytes: promotedBytes,
       sha256: promotedSha256,
       previousBaselineComparison: screenshot.visualComparison,
@@ -949,22 +947,42 @@ function createPromotedResult(candidateResult) {
 async function promoteBaseline(candidateResult) {
   const promotionRoot = path.join(outputRoot, `.authenticated-visual-promotion-${process.pid}`);
   const stagedScreenshots = path.join(promotionRoot, "target-authenticated.next");
+  const stagedCanaryScreenshots = path.join(promotionRoot, "target-authenticated-canary.next");
   const stagedResult = path.join(promotionRoot, "authenticated-results.next.json");
   const backupScreenshots = path.join(promotionRoot, "target-authenticated.previous");
+  const backupCanaryScreenshots = path.join(promotionRoot, "target-authenticated-canary.previous");
   const backupResult = path.join(promotionRoot, "authenticated-results.previous.json");
   const promotedResult = createPromotedResult(candidateResult);
   let baselineMoved = false;
+  let canaryBaselineMoved = false;
   let resultMoved = false;
   let screenshotsInstalled = false;
+  let canaryScreenshotsInstalled = false;
   let resultInstalled = false;
 
   await rm(promotionRoot, { recursive: true, force: true });
   await mkdir(promotionRoot, { recursive: true });
   await cp(baselineScreenshotRoot, stagedScreenshots, { recursive: true });
+  await cp(simulatorCanaryBaselineRoot, stagedCanaryScreenshots, { recursive: true });
   for (const screenshot of candidateResult.screenshots) {
     if (screenshot.visualComparison.passed) continue;
     const relativeCandidatePath = screenshot.path.replace(/^candidate\//, "");
-    const destination = path.join(stagedScreenshots, relativeCandidatePath);
+    const baselinePath = path.join(repositoryRoot, screenshot.visualComparison.baselineUsed.path);
+    const canonicalRelativePath = path.relative(baselineScreenshotRoot, baselinePath);
+    const canaryRelativePath = path.relative(simulatorCanaryBaselineRoot, baselinePath);
+    const isInside = (relativePath) =>
+      relativePath !== "" &&
+      !relativePath.startsWith(`..${path.sep}`) &&
+      relativePath !== ".." &&
+      !path.isAbsolute(relativePath);
+    const destination = isInside(canonicalRelativePath)
+      ? path.join(stagedScreenshots, canonicalRelativePath)
+      : isInside(canaryRelativePath)
+        ? path.join(stagedCanaryScreenshots, canaryRelativePath)
+        : null;
+    if (!destination) {
+      throw new Error("Baseline promotion target is outside approved visual roots.");
+    }
     await mkdir(path.dirname(destination), { recursive: true });
     await copyFile(path.join(candidateScreenshotRoot, relativeCandidatePath), destination);
   }
@@ -973,16 +991,23 @@ async function promoteBaseline(candidateResult) {
   try {
     await rename(baselineScreenshotRoot, backupScreenshots);
     baselineMoved = true;
+    await rename(simulatorCanaryBaselineRoot, backupCanaryScreenshots);
+    canaryBaselineMoved = true;
     await rename(baselineResultsPath, backupResult);
     resultMoved = true;
     await rename(stagedScreenshots, baselineScreenshotRoot);
     screenshotsInstalled = true;
+    await rename(stagedCanaryScreenshots, simulatorCanaryBaselineRoot);
+    canaryScreenshotsInstalled = true;
     await rename(stagedResult, baselineResultsPath);
     resultInstalled = true;
   } catch {
     if (resultInstalled) await rm(baselineResultsPath, { force: true });
+    if (canaryScreenshotsInstalled)
+      await rm(simulatorCanaryBaselineRoot, { recursive: true, force: true });
     if (screenshotsInstalled) await rm(baselineScreenshotRoot, { recursive: true, force: true });
     if (resultMoved) await rename(backupResult, baselineResultsPath);
+    if (canaryBaselineMoved) await rename(backupCanaryScreenshots, simulatorCanaryBaselineRoot);
     if (baselineMoved) await rename(backupScreenshots, baselineScreenshotRoot);
     throw new Error("Baseline promotion failed and was rolled back.");
   } finally {
