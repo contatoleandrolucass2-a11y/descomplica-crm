@@ -35,6 +35,8 @@ escuro.
 - matriz de ranking: `looker-site-ranking-matrix.csv`;
 - matriz anual: `annual-boundary-matrix.csv`;
 - auditoria das fórmulas: `docs/simulators-official/WF13_LOOKER_AUDIT.md`.
+- hotfix do comprometimento e limite 84:
+  `docs/simulators-official/WF13_PRO_SOLUTO_HOTFIX.md`.
 
 As capturas representam dados sintéticos e não contêm credenciais. O gate
 funcional ativo foi exercitado pelo E2E Master; a baseline canônica preserva o

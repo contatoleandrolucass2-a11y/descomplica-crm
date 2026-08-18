@@ -30,8 +30,10 @@ saldo_nominal = valor_final
   - financiamento - subsídio - FGTS - cheque_moradia
   - ato - sinais_válidos - anuais_nominais_válidas
 
+anuais_no_indicador = anuais_nominais_válidas × (1 + 0,5%)
+
 percentual_pró_soluto =
-  (pró_soluto_corrigido + soma_das_anuais_corrigidas) / valor_final
+  (pró_soluto_corrigido + anuais_no_indicador) / valor_final
 ```
 
 - bônus, `Desconto MÊS` e `Desconto V.C.` reduzem valor final e saldo;
@@ -39,8 +41,10 @@ percentual_pró_soluto =
   o saldo nominal;
 - `Volta ao Caixa` é informativa e não altera valor final, saldo nem os dois
   indicadores;
-- anuais corrigidas entram somente no numerador corrigido. Não são abatidas
-  novamente do saldo nominal;
+- a correção futura de cada anual continua separada na memória, mas não substitui
+  `anuais_no_indicador`. Usá-la no numerador elevava indevidamente o cenário de
+  ouro de `9,88%` para `10,08%`;
+- anuais nominais não são abatidas novamente do saldo nominal;
 - o cálculo compara a fração integral. Arredondamento para duas casas ocorre
   apenas na apresentação.
 
@@ -105,3 +109,18 @@ coluna `status_looker_evidence` distingue `rendered` de `calculated-field`.
 
 Resultado: nenhuma diferença nas regras preservadas. A única diferença é a
 inclusão deliberada do limite exato no site.
+
+## Retificação do cenário com anuais
+
+A matriz inicial de ranking não tinha anuais preenchidas e a matriz anual
+validava elegibilidade, não o percentual financeiro. A reprodução integral do
+PDF oficial com três anuais demonstrou que a interpretação anterior — somar as
+correções futuras de cada anual ao numerador — era incompleta.
+
+No cenário oficial, o numerador é `R$ 23.115,00`: `R$ 17.085,00` do saldo
+mensal corrigido mais `R$ 6.030,00` das anuais nominais submetidas uma vez à
+correção inicial de `0,5%`. Dividido por `R$ 234.000,00`, resulta em
+`9,878205%`, exibido como `9,88%`. A correção futura das anuais soma
+`R$ 6.506,19`, mas permanece memória do fluxo e não entra nesse indicador.
+
+Comparação e rastreio completos: `WF13_PRO_SOLUTO_HOTFIX.md`.

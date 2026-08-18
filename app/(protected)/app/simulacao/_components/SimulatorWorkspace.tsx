@@ -32,6 +32,7 @@ import {
   type OfficialSimulatorResultRow,
   type OfficialSimulatorViolation,
 } from "@/lib/crm/simulators/official/client";
+import { validateWf13Installments } from "@/lib/crm/simulators/official/wf13-contract";
 import { generateWf13AnnualDates } from "@/lib/crm/simulators/official/wf13-policy";
 
 import styles from "../simulators.module.css";
@@ -215,12 +216,25 @@ function StandardField({
             inputMode={field.type === "currency" ? "decimal" : undefined}
             placeholder={field.placeholder ?? (field.type === "currency" ? "0,00" : undefined)}
             autoComplete="off"
-            min={field.type === "number" ? 0 : undefined}
+            min={field.type === "number" ? field.min : undefined}
+            max={field.type === "number" ? field.max : undefined}
+            step={field.type === "number" ? field.step : undefined}
+            readOnly={field.readOnly}
+            aria-readonly={field.readOnly || undefined}
             aria-describedby={fieldDescription}
             aria-invalid={isInvalid || undefined}
-            onBlur={() => onTouched(id)}
-            onChange={(event) => onValueChange(id, event.currentTarget.value)}
+            onBlur={() => {
+              if (!field.readOnly) onTouched(id);
+            }}
+            onChange={
+              field.readOnly ? undefined : (event) => onValueChange(id, event.currentTarget.value)
+            }
           />
+          {field.readOnly ? (
+            <span className={styles.readOnlyLock} aria-hidden="true">
+              <LockIcon />
+            </span>
+          ) : null}
         </span>
       )}
       {field.hint ? <small id={`${id}-hint`}>{field.hint}</small> : null}
@@ -344,8 +358,6 @@ const violationFieldIds: Record<string, string[]> = {
   "proSoluto.cashbackDiscount": ["simulator-pro-soluto-cashback-discount"],
   "entry.amount": ["simulator-entry-entry"],
   "commercialPolicy.ranking": ["simulator-commercial-policy-ranking"],
-  "commercialPolicy.confirmed": ["simulator-commercial-policy-policy-confirmed"],
-  "commercialPolicy.limit": ["simulator-commercial-policy-approved-limit"],
   "commercialPolicy.installments": ["simulator-commercial-policy-requested-installments"],
   "result.proSolutoPercentage": ["wf13-pro-soluto-result"],
   "result.incomeCommitment": ["wf13-income-result"],
@@ -512,15 +524,29 @@ export function SimulatorWorkspace({
           String(values["simulator-official-context-construction-end"] ?? ""),
         )
       : [];
+  const requestedInstallmentsId = "simulator-commercial-policy-requested-installments";
+  const installmentsValidation = validateWf13Installments(
+    String(values[requestedInstallmentsId] ?? ""),
+  );
+  const clientInstallmentViolation: OfficialSimulatorViolation | null =
+    !installmentsValidation.valid && touchedFields.has(requestedInstallmentsId)
+      ? {
+          code: installmentsValidation.code,
+          message: installmentsValidation.message,
+          fieldPaths: ["commercialPolicy.installments"],
+        }
+      : null;
+  const activeViolations =
+    officialResult?.violations ?? (clientInstallmentViolation ? [clientInstallmentViolation] : []);
   const fieldErrors = new Map<string, string[]>();
-  for (const violation of officialResult?.violations ?? []) {
+  for (const violation of activeViolations) {
     for (const path of violation.fieldPaths) {
       for (const id of idsForViolationPath(path)) {
         fieldErrors.set(id, [...(fieldErrors.get(id) ?? []), violation.message]);
       }
     }
   }
-  const proSolutoSectionInvalid = (officialResult?.violations ?? []).some((violation) =>
+  const proSolutoSectionInvalid = activeViolations.some((violation) =>
     violation.fieldPaths.includes("section.proSoluto"),
   );
 
@@ -566,6 +592,9 @@ export function SimulatorWorkspace({
 
   function updateValue(id: string, value: string | boolean) {
     setValues((currentValues) => ({ ...currentValues, [id]: value }));
+    setOfficialResult(null);
+    setExecutionError("");
+    setExecutionStatus("idle");
   }
 
   function markTouched(id: string) {
@@ -616,6 +645,13 @@ export function SimulatorWorkspace({
 
   async function executeOfficialSimulator() {
     if (!executionAllowed || !isOfficialSimulatorSlug(definition.slug)) return;
+    if (!installmentsValidation.valid) {
+      markTouched(requestedInstallmentsId);
+      requestAnimationFrame(() => {
+        document.getElementById(requestedInstallmentsId)?.focus();
+      });
+      return;
+    }
     const input = buildOfficialSimulatorInput(definition.slug, values);
     if (!input) return;
 
@@ -733,6 +769,8 @@ export function SimulatorWorkspace({
     const sectionIndex = definition.sections.findIndex(({ key }) => key === section.key);
     const isFixedAnnualSection =
       definition.slug === "associativo-fluxo-linear" && section.key === "annuals";
+    const isWf13PolicySection =
+      definition.slug === "associativo-fluxo-linear" && section.key === "commercial-policy";
     const repeatCount = section.repeatable ? (repeatCounts[section.key] ?? 1) : 1;
     const repeatLimitReached =
       section.repeatable?.maxItems !== undefined && repeatCount >= section.repeatable.maxItems;
@@ -872,6 +910,40 @@ export function SimulatorWorkspace({
                 </strong>
                 <small>Pagamento previsto para a assinatura · somente leitura</small>
               </output>
+            ) : null}
+          </div>
+        ) : null}
+
+        {isWf13PolicySection ? (
+          <div className={styles.policyStatusArea}>
+            <output
+              aria-live="polite"
+              className={`${styles.policyStatus} ${
+                officialResult?.ok ? styles.policyStatusApproved : styles.policyStatusPending
+              }`}
+            >
+              <strong>
+                {officialResult?.ok
+                  ? "Política comercial conferida"
+                  : executionStatus === "pending"
+                    ? "Validando política comercial"
+                    : "Política comercial pendente"}
+              </strong>
+              <span>
+                {officialResult?.ok
+                  ? "Ranking, parcelas, pró-soluto, renda e campos obrigatórios validados automaticamente."
+                  : "Status automático. Nenhuma confirmação manual é aceita."}
+              </span>
+            </output>
+            {activeViolations.length > 0 ? (
+              <div className={styles.violationSummary} role="alert" aria-live="polite">
+                <strong>Pendências encontradas</strong>
+                <ul>
+                  {activeViolations.map((violation) => (
+                    <li key={violation.code}>{violation.message}</li>
+                  ))}
+                </ul>
+              </div>
             ) : null}
           </div>
         ) : null}
@@ -1021,7 +1093,7 @@ export function SimulatorWorkspace({
                 >
                   Imprimir estrutura
                 </button>
-                {executionAllowed ? (
+                {executionAllowed && installmentsValidation.valid ? (
                   <button
                     type="submit"
                     disabled={executionStatus === "pending"}
@@ -1030,6 +1102,26 @@ export function SimulatorWorkspace({
                   >
                     {executionStatus === "pending" ? "Calculando…" : definition.actionLabel}
                   </button>
+                ) : executionAllowed ? (
+                  <span className={styles.blockedControl}>
+                    <button
+                      type="button"
+                      disabled
+                      className={styles.blockedAction}
+                      data-cta-state="blocked"
+                      aria-describedby={
+                        touchedFields.has(requestedInstallmentsId)
+                          ? `${requestedInstallmentsId}-error`
+                          : undefined
+                      }
+                    >
+                      <LockIcon />
+                      {definition.actionLabel}
+                    </button>
+                    <span className={styles.blockedReason}>
+                      Revise a quantidade de parcelas solicitadas.
+                    </span>
+                  </span>
                 ) : (
                   <span className={styles.blockedControl}>
                     <button

@@ -44,7 +44,7 @@ existe.
 | REF-11 | `/configuracoes/metas/parcerias`      | Metas de parcerias      | `/app/configuracoes/metas/parcerias`      | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
 | REF-12 | `/configuracoes/metas/pontos`         | Pesos e metas de pontos | `/app/configuracoes/metas/pontos`         | `crm.settings.manage`   | Preview e rascunho versionado; ranking segue bloqueado  |
 | REF-13 | `/simulacao`                          | Índice de simuladores   | `/app/simulacao`                          | `crm.simulators.view`   | Hub visual concluído; motores bloqueados                |
-| REF-14 | `/simulacao/associativo-fluxo-linear` | Associativo WF13        | `/app/simulacao/associativo-fluxo-linear` | `crm.simulators.view`   | Fórmula `wf13-1.2.0`; execução isolada Master-only      |
+| REF-14 | `/simulacao/associativo-fluxo-linear` | Associativo WF13        | `/app/simulacao/associativo-fluxo-linear` | `crm.simulators.view`   | Fórmula `wf13-1.3.0`; execução isolada Master-only      |
 | REF-15 | `/simulacao/calcular-documentacao`    | Documentação WF16       | `/app/simulacao/calcular-documentacao`    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
 | REF-16 | `/simulacao/caixa`                    | Simulador CAIXA         | `/app/simulacao/caixa`                    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
 | REF-17 | `/simulacao/tabela-direta`            | Tabela Direta WF14      | `/app/simulacao/tabela-direta`            | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |

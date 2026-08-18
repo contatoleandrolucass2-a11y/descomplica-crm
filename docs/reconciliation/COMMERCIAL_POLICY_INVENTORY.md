@@ -35,7 +35,7 @@ sem submit, fórmula ou persistência.
 | Premiações/roleta            | Presença manual e valores hardcoded no legado                                              | Implementada sem fonte; incompleta             | Fonte marcada indisponível                |
 
 As regras de fluxo do WF13 cobertas pelo PDF 2 de 18/08/2026 e pelo asset
-observado estão versionadas em `wf13-1.2.0`. Nenhuma regra dos demais motores
+observado estão versionadas em `wf13-1.3.0`. Nenhuma regra dos demais motores
 foi classificada como “confirmada por fonte oficial”.
 
 ## Motores históricos observados
@@ -47,7 +47,7 @@ subsídio, FGTS, cheque, entrada, sinais e anuais. Usava JavaScript `Number`,
 timezone do runtime e fallbacks comerciais hardcoded. Entre os comportamentos
 observados:
 
-A correção `wf13-1.2.0` não porta fallbacks ou decisões de aprovação desse
+A correção `wf13-1.3.0` não porta fallbacks ou decisões de aprovação desse
 histórico. Ela usa somente a fórmula de fluxo comprovada, o caso de ouro do PDF
 2 e os gates Master já existentes; política, estoque e integrações continuam
 independentes e fail-closed.

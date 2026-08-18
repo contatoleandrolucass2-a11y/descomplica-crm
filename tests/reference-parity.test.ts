@@ -475,7 +475,9 @@ describe("versioned reference parity catalog", () => {
 
     for (const screenshot of authenticatedResults.screenshots) {
       expect(screenshot.visualComparison.passed).toBe(true);
-      expect(screenshot.visualComparison.reason).toBe("baseline_updated");
+      expect(["baseline_updated", "baseline_preserved"]).toContain(
+        screenshot.visualComparison.reason,
+      );
       expect(screenshot.visualComparison.changedPixelRatio).toBeLessThanOrEqual(0.01);
       expect(screenshot.visualComparison.baselineUsed).toMatchObject({
         path: `docs/qa/reference-parity/${screenshot.path}`,

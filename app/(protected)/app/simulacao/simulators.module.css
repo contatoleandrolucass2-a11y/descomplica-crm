@@ -228,6 +228,34 @@
   outline: 0;
 }
 
+.readOnlyLock {
+  display: grid;
+  width: 1.35rem;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--analytics-navy);
+  color: var(--analytics-lime) !important;
+}
+
+.readOnlyLock svg {
+  width: 0.8rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.inputShell:has(input[readonly]) {
+  background: var(--analytics-surface-muted);
+}
+
+.inputShell input[readonly] {
+  cursor: not-allowed;
+}
+
 .inputShell:focus-within {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
@@ -305,6 +333,42 @@
 
 .annualAvailability span {
   color: var(--analytics-muted);
+}
+
+.policyStatusArea {
+  display: grid;
+  gap: 0.75rem;
+  border-top: 1px solid var(--analytics-line);
+  padding: 0 1.15rem 1.15rem;
+}
+
+.policyStatus {
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.85rem;
+  padding: 0.85rem;
+  color: var(--analytics-ink);
+}
+
+.policyStatus strong {
+  font-size: 0.78rem;
+}
+
+.policyStatus span {
+  color: var(--analytics-muted);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.policyStatusApproved {
+  border-color: color-mix(in srgb, var(--analytics-lime) 55%, var(--analytics-line));
+  background: color-mix(in srgb, var(--analytics-lime) 10%, var(--analytics-surface));
+}
+
+.policyStatusPending {
+  border-color: color-mix(in srgb, var(--analytics-warning) 55%, var(--analytics-line));
+  background: color-mix(in srgb, var(--analytics-warning) 8%, var(--analytics-surface));
 }
 
 .choiceGrid {

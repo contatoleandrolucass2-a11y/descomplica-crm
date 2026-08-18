@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { cp, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
@@ -707,7 +707,51 @@ async function checkSimulatorValidation(page, origin) {
   );
   const validAfterInput = (await field.getAttribute("aria-invalid")) !== "true";
 
-  return { invalidAfterBlur, messageAssociated, validAfterInput };
+  const policyLimit = page.getByLabel("Limite aprovado");
+  const requestedInstallments = page.getByLabel("Parcelas mensais solicitadas *");
+  const calculationAction = page.getByRole("button", { name: "Calcular fluxo linear" });
+  const fixedLimit =
+    (await policyLimit.inputValue()) === "84" &&
+    (await policyLimit.getAttribute("readonly")) !== null &&
+    (await policyLimit.getAttribute("aria-readonly")) === "true";
+  const policyConfirmationIsAutomatic =
+    (await page.locator("#simulator-commercial-policy-policy-confirmed").count()) === 0;
+
+  await requestedInstallments.fill("85");
+  await requestedInstallments.press("Tab");
+  const maximumRejected =
+    (await requestedInstallments.getAttribute("aria-invalid")) === "true" &&
+    (
+      await page.locator("#simulator-commercial-policy-requested-installments-error").textContent()
+    )?.includes("O limite máximo permitido é de 84 parcelas mensais.") === true &&
+    (await calculationAction.isDisabled());
+
+  await requestedInstallments.fill("84.5");
+  await requestedInstallments.press("Tab");
+  const decimalRejected =
+    (
+      await page.locator("#simulator-commercial-policy-requested-installments-error").textContent()
+    )?.includes("Informe uma quantidade inteira de parcelas.") === true;
+
+  await requestedInstallments.fill("84");
+  const expectsEnabledAction = enabledSimulatorRoutes.has(
+    "/app/simulacao/associativo-fluxo-linear",
+  );
+  const correctionClearsError =
+    (await requestedInstallments.getAttribute("aria-invalid")) !== "true" &&
+    ((expectsEnabledAction && !(await calculationAction.isDisabled())) ||
+      (!expectsEnabledAction && (await calculationAction.isDisabled())));
+
+  return {
+    invalidAfterBlur,
+    messageAssociated,
+    validAfterInput,
+    fixedLimit,
+    policyConfirmationIsAutomatic,
+    maximumRejected,
+    decimalRejected,
+    correctionClearsError,
+  };
 }
 
 async function checkFixtureSourceMarker(page, origin, expectedMarker) {
@@ -845,25 +889,32 @@ function functionalChecksPassed({
 
 function createPromotedResult(candidateResult) {
   const screenshots = candidateResult.screenshots.map((screenshot) => {
-    const relativeCandidatePath = screenshot.path.replace(/^candidate\//, "");
-    const baselinePath = repositoryRelative(
-      path.join(baselineScreenshotRoot, relativeCandidatePath),
-    );
+    const baselinePath = screenshot.visualComparison.baselineUsed.path;
+    const absoluteBaselinePath = path.join(repositoryRoot, baselinePath);
+    const baselineChanged = !screenshot.visualComparison.passed;
+    const promotedBytes = baselineChanged
+      ? screenshot.bytes
+      : screenshot.visualComparison.baselineUsed.bytes;
+    const promotedSha256 = baselineChanged
+      ? screenshot.sha256
+      : screenshot.visualComparison.baselineUsed.sha256;
     return {
       ...screenshot,
-      path: relativeTo(outputRoot, path.join(baselineScreenshotRoot, relativeCandidatePath)),
+      path: relativeTo(outputRoot, absoluteBaselinePath),
+      bytes: promotedBytes,
+      sha256: promotedSha256,
       previousBaselineComparison: screenshot.visualComparison,
       visualComparison: {
         passed: true,
-        reason: "baseline_updated",
+        reason: baselineChanged ? "baseline_updated" : "baseline_preserved",
         changedPixels: 0,
         totalPixels: screenshot.width * screenshot.height,
         changedPixelRatio: 0,
         baselineUsed: {
           path: baselinePath,
           tracked: true,
-          bytes: screenshot.bytes,
-          sha256: screenshot.sha256,
+          bytes: promotedBytes,
+          sha256: promotedSha256,
         },
       },
     };
@@ -896,33 +947,72 @@ function createPromotedResult(candidateResult) {
 async function promoteBaseline(candidateResult) {
   const promotionRoot = path.join(outputRoot, `.authenticated-visual-promotion-${process.pid}`);
   const stagedScreenshots = path.join(promotionRoot, "target-authenticated.next");
+  const stagedCanaryScreenshots = path.join(promotionRoot, "target-authenticated-canary.next");
   const stagedResult = path.join(promotionRoot, "authenticated-results.next.json");
   const backupScreenshots = path.join(promotionRoot, "target-authenticated.previous");
+  const backupCanaryScreenshots = path.join(promotionRoot, "target-authenticated-canary.previous");
   const backupResult = path.join(promotionRoot, "authenticated-results.previous.json");
   const promotedResult = createPromotedResult(candidateResult);
+  const promoteCanonicalResult = simulatorHubCanaryKey === undefined;
   let baselineMoved = false;
+  let canaryBaselineMoved = false;
   let resultMoved = false;
   let screenshotsInstalled = false;
+  let canaryScreenshotsInstalled = false;
   let resultInstalled = false;
 
   await rm(promotionRoot, { recursive: true, force: true });
   await mkdir(promotionRoot, { recursive: true });
-  await cp(candidateScreenshotRoot, stagedScreenshots, { recursive: true });
-  await writeJsonAtomically(stagedResult, promotedResult);
+  await cp(baselineScreenshotRoot, stagedScreenshots, { recursive: true });
+  await cp(simulatorCanaryBaselineRoot, stagedCanaryScreenshots, { recursive: true });
+  for (const screenshot of candidateResult.screenshots) {
+    if (screenshot.visualComparison.passed) continue;
+    const relativeCandidatePath = screenshot.path.replace(/^candidate\//, "");
+    const baselinePath = path.join(repositoryRoot, screenshot.visualComparison.baselineUsed.path);
+    const canonicalRelativePath = path.relative(baselineScreenshotRoot, baselinePath);
+    const canaryRelativePath = path.relative(simulatorCanaryBaselineRoot, baselinePath);
+    const isInside = (relativePath) =>
+      relativePath !== "" &&
+      !relativePath.startsWith(`..${path.sep}`) &&
+      relativePath !== ".." &&
+      !path.isAbsolute(relativePath);
+    const destination = isInside(canonicalRelativePath)
+      ? path.join(stagedScreenshots, canonicalRelativePath)
+      : isInside(canaryRelativePath)
+        ? path.join(stagedCanaryScreenshots, canaryRelativePath)
+        : null;
+    if (!destination) {
+      throw new Error("Baseline promotion target is outside approved visual roots.");
+    }
+    await mkdir(path.dirname(destination), { recursive: true });
+    await copyFile(path.join(candidateScreenshotRoot, relativeCandidatePath), destination);
+  }
+  if (promoteCanonicalResult) await writeJsonAtomically(stagedResult, promotedResult);
 
   try {
     await rename(baselineScreenshotRoot, backupScreenshots);
     baselineMoved = true;
-    await rename(baselineResultsPath, backupResult);
-    resultMoved = true;
+    await rename(simulatorCanaryBaselineRoot, backupCanaryScreenshots);
+    canaryBaselineMoved = true;
+    if (promoteCanonicalResult) {
+      await rename(baselineResultsPath, backupResult);
+      resultMoved = true;
+    }
     await rename(stagedScreenshots, baselineScreenshotRoot);
     screenshotsInstalled = true;
-    await rename(stagedResult, baselineResultsPath);
-    resultInstalled = true;
+    await rename(stagedCanaryScreenshots, simulatorCanaryBaselineRoot);
+    canaryScreenshotsInstalled = true;
+    if (promoteCanonicalResult) {
+      await rename(stagedResult, baselineResultsPath);
+      resultInstalled = true;
+    }
   } catch {
     if (resultInstalled) await rm(baselineResultsPath, { force: true });
+    if (canaryScreenshotsInstalled)
+      await rm(simulatorCanaryBaselineRoot, { recursive: true, force: true });
     if (screenshotsInstalled) await rm(baselineScreenshotRoot, { recursive: true, force: true });
     if (resultMoved) await rename(backupResult, baselineResultsPath);
+    if (canaryBaselineMoved) await rename(backupCanaryScreenshots, simulatorCanaryBaselineRoot);
     if (baselineMoved) await rename(backupScreenshots, baselineScreenshotRoot);
     throw new Error("Baseline promotion failed and was rolled back.");
   } finally {

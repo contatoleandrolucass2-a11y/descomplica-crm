@@ -7,6 +7,10 @@ import {
   type Wf13Input,
 } from "@/lib/crm/simulators/official/wf13";
 import {
+  WF13_MAX_INSTALLMENTS,
+  validateWf13Installments,
+} from "@/lib/crm/simulators/official/wf13-contract";
+import {
   buildOfficialSimulatorInput,
   officialSimulatorInitialValues,
   officialSimulatorMemoryRows,
@@ -20,9 +24,7 @@ function validInput(overrides: Partial<Wf13Input> = {}): Wf13Input {
     development: "Residencial Teste",
     product: "Torre A 101",
     stockMatch: true,
-    policyConfirmed: true,
     ranking: "BRONZE",
-    policyLimit: "84",
     installments: "84",
     entryDate: "2026-08-17",
     constructionEnd: "2029-02-28",
@@ -57,7 +59,7 @@ describe("motor oficial WF13", () => {
   it("mantém fontes e versão imutáveis da correção de paridade", () => {
     expect(WF13_FORMULA).toMatchObject({
       workflow: "WF-13",
-      version: "wf13-1.2.0",
+      version: "wf13-1.3.0",
       sourceSha256: "e9f4d1577cba434582aeb054f0f2a2eb8018a21d66fbf6ec7a72012e35641b71",
       lookerCaptureSha256: "daf02309339c65c6af09cb8fc9183416fa07fca4cd4da8da48a5b57bcd1e44bc",
       referencePdfSha256: "dd54578f8762ea37f0a8eb6496cda945ee555a56d85dcdff317d20ccbbd834dc",
@@ -75,6 +77,7 @@ describe("motor oficial WF13", () => {
       realSaleValue: 234000,
       annualNominalTotal: 6000,
       annualCorrectedTotal: 6506.19,
+      correctedWithAnnuals: 23115,
       deductions: 217000,
       proSoluto: 17000,
       nominalInstallment: 202.38,
@@ -93,9 +96,76 @@ describe("motor oficial WF13", () => {
       initialToFirstInstallmentDays: 29,
       preInstallments: 29,
       postInstallments: 55,
+      proSolutoOverSale: 0.098782051282,
     });
     expect(result.nominalSchedule.total).toBe(result.proSoluto);
     expect(result.nominalSchedule.baseAmount * 84).not.toBe(result.proSoluto);
+  });
+
+  it("corrige a causa dos 0,20 p.p. sem alterar o comprometimento de renda", () => {
+    const result = calculate(validInput());
+    const previousNumerator = result.correctedProSoluto + result.annualCorrectedTotal;
+    const previousPercentage = previousNumerator / result.realSaleValue;
+
+    expect(previousNumerator).toBe(23591.19);
+    expect(previousPercentage * 100).toBeCloseTo(10.08, 2);
+    expect(result.correctedWithAnnuals).toBe(23115);
+    expect(result.proSolutoOverSale * 100).toBeCloseTo(9.88, 2);
+    expect(result.correctedInstallment).toBe(288.67);
+    expect(result.incomeCommitment * 100).toBeCloseTo(7.22, 2);
+    expect(result.calculationMemory).toEqual(
+      expect.arrayContaining([
+        {
+          step: "Anuais consideradas no comprometimento do pró-soluto",
+          value: 6030,
+          format: "currency",
+        },
+        {
+          step: "Numerador do comprometimento do pró-soluto",
+          value: 23115,
+          format: "currency",
+        },
+        {
+          step: "Denominador do comprometimento do pró-soluto",
+          value: 234000,
+          format: "currency",
+        },
+        { step: "Percentual bruto do pró-soluto", value: "9,878205%", format: "text" },
+        { step: "Percentual arredondado do pró-soluto", value: "9,88%", format: "text" },
+      ]),
+    );
+  });
+
+  it.each([
+    ["", false, "installments.range_invalid"],
+    ["-1", false, "installments.range_invalid"],
+    ["0", false, "installments.range_invalid"],
+    ["1", true, ""],
+    ["36", true, ""],
+    ["37", true, ""],
+    ["83", true, ""],
+    ["84", true, ""],
+    ["84.5", false, "installments.integer_required"],
+    ["85", false, "installments.maximum_exceeded"],
+    ["100", false, "installments.maximum_exceeded"],
+    ["texto", false, "installments.integer_required"],
+  ] as const)("valida parcelas solicitadas %s", (value, valid, code) => {
+    const validation = validateWf13Installments(value);
+    const result = calculate(validInput({ installments: value }));
+
+    expect(validation.valid).toBe(valid);
+    expect(result.policyLimit).toBe(WF13_MAX_INSTALLMENTS);
+    expect(result.installments).toBe(valid ? Number(value) : 0);
+    if (valid) {
+      expect(
+        result.violations.some(({ code: resultCode }) => resultCode.startsWith("installments.")),
+      ).toBe(false);
+    } else {
+      expect(result.ok).toBe(false);
+      expect(result.violations).toEqual(
+        expect.arrayContaining([expect.objectContaining({ code })]),
+      );
+    }
   });
 
   it("separa saldo nominal, correção e memória auditável", () => {
@@ -404,13 +474,24 @@ describe("motor oficial WF13", () => {
       "bonus-discount": [true, "2026-09-10", 30000, 357.14, 485.11, 39, 45],
       "invalid-entry": [false, "2026-09-10", 59850.01, 712.5, 967.79, 39, 45],
       "invalid-annual-income": [false, "2026-09-10", 45000, 535.71, 727.66, 39, 45],
-      "invalid-policy-limit": [false, "2026-09-10", 45000, 529.41, 722.83, 39, 46],
+      "invalid-policy-limit": [false, "2026-09-10", 45000, 0, 0, 0, 0],
       "zero-pro-soluto": [true, "2026-09-10", 0, 0, 0, 39, 45],
       "invalid-signal-order": [false, "2026-10-10", 44500, 529.76, 726.35, 38, 46],
     } as const;
 
     for (const priorCase of priorGoldenFixture) {
-      const { annual1, annual2, annual3, annual4, annual5, ...legacyInput } = priorCase.input;
+      const {
+        annual1,
+        annual2,
+        annual3,
+        annual4,
+        annual5,
+        policyConfirmed: _policyConfirmed,
+        policyLimit: _policyLimit,
+        ...legacyInput
+      } = priorCase.input;
+      void _policyConfirmed;
+      void _policyLimit;
       const annuals = [annual1, annual2, annual3, annual4, annual5];
       while (annuals.at(-1) === "0") annuals.pop();
       const input = {
@@ -458,6 +539,10 @@ describe("motor oficial WF13", () => {
       false,
     );
     expect(wf13InputSchema.safeParse({ ...validInput(), unexpected: "field" }).success).toBe(false);
+    expect(wf13InputSchema.safeParse({ ...validInput(), policyLimit: "1" }).success).toBe(false);
+    expect(wf13InputSchema.safeParse({ ...validInput(), policyConfirmed: true }).success).toBe(
+      false,
+    );
   });
 
   it("normaliza a interface e apresenta resultado e memória do PDF 2", () => {
@@ -476,7 +561,6 @@ describe("motor oficial WF13", () => {
       "simulator-annuals-1-annual-value": "2.000,00",
       "simulator-annuals-2-annual-value": "2.000,00",
       "simulator-annuals-3-annual-value": "2.000,00",
-      "simulator-commercial-policy-policy-confirmed": true,
       "simulator-commercial-policy-ranking": "BRONZE",
     };
     const input = buildOfficialSimulatorInput("associativo-fluxo-linear", values);
@@ -488,11 +572,12 @@ describe("motor oficial WF13", () => {
       salePrice: "262500.00",
       financing: "210000.00",
       entry: "1000.00",
-      policyLimit: "84",
       installments: "84",
       ranking: "BRONZE",
       annuals: ["2000.00", "2000.00", "2000.00"],
     });
+    expect(input).not.toHaveProperty("policyLimit");
+    expect(input).not.toHaveProperty("policyConfirmed");
     const result = calculate(wf13InputSchema.parse(input), "2026-08-17");
     expect(officialSimulatorResultRows("associativo-fluxo-linear", result)).toEqual(
       expect.arrayContaining([
@@ -500,6 +585,7 @@ describe("motor oficial WF13", () => {
         { label: "Saldo do pró-soluto", value: "R$ 17.000,00" },
         { label: "Mensal nominal", value: "R$ 202,38" },
         { label: "Mensal corrigida", value: "R$ 288,67" },
+        { label: "Comprometimento do pró-soluto", value: "9,88%" },
         { label: "Início das mensais", value: "15/09/2026" },
       ]),
     );
@@ -507,6 +593,8 @@ describe("motor oficial WF13", () => {
       expect.arrayContaining([
         { label: "Anuais nominais", value: "R$ 6.000,00" },
         { label: "Total nominal reconciliado", value: "R$ 17.000,00" },
+        { label: "Numerador do comprometimento do pró-soluto", value: "R$ 23.115,00" },
+        { label: "Denominador do comprometimento do pró-soluto", value: "R$ 234.000,00" },
       ]),
     );
     expect(

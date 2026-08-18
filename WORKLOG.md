@@ -1,5 +1,32 @@
 # Worklog
 
+## 2026-08-18 — Hotfix WF13: limite 84 e comprometimento
+
+- Base e produção confirmadas em `3ddbf30362788ecaf1450377742ee162b3984a6c`.
+  Trabalho isolado em `codex/wf13-84-pro-soluto-hotfix`.
+- PDF oficial reproduzido: saldo R$ 17.000,00, mensal R$ 202,38, corrigida
+  R$ 288,67, primeira mensal 15/09/2026, três anuais de R$ 2.000,00 e
+  comprometimento do pró-soluto de 9,88%.
+- Causa dos 0,20 p.p.: o numerador anterior somava R$ 6.506,19 das anuais
+  corrigidas até cada vencimento. A referência usa R$ 6.030,00, anuais nominais
+  submetidas uma vez à correção inicial de 0,5%. Numerador caiu de R$ 23.591,19
+  para R$ 23.115,00; denominador permanece R$ 234.000,00.
+- `WF13_MAX_INSTALLMENTS` centraliza 84. O payload envia somente quantidade
+  solicitada; schema estrito rejeita limite livre e confirmação forjada.
+  Validação compartilhada cobre vazio, negativo, zero, decimal, texto, excesso
+  e todas as fronteiras permitidas sem arredondamento silencioso.
+- Política conferida virou saída automática do cálculo integral. Campo 84 usa
+  `readOnly`, `aria-readonly`, cadeado; erros de quantidade bloqueiam CTA,
+  marcam campo, aparecem no resumo e recebem foco.
+- Nenhuma migration, dependência, permissão, integração, motor adicional ou
+  default de feature flag foi alterado.
+- Gate local aprovou 385 testes unitários, 8 E2E executados, 147 checks
+  responsivos, 84 de tema, 192 Axe/comparações e 105 de zoom. Onze capturas
+  canônicas e onze do canário Master foram revisadas em desktop e celular.
+- Promoção visual foi endurecida para preservar arquivos aprovados e escrever
+  diferenças somente no root de baseline realmente usado, inclusive o canário.
+  Isso evitou refresh binário de páginas e motores fora do WF13.
+
 ## 2026-08-18 — WF13: ranking, anuais fixas e paridade Looker
 
 - O relatório Looker foi auditado anonimamente e somente em leitura. Campos
