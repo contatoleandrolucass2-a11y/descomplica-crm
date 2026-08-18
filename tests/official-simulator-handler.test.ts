@@ -16,7 +16,13 @@ import { calculateWf13, WF13_FORMULA, wf13InputSchema } from "@/lib/crm/simulato
 import goldenFixture from "./fixtures/wf13-reference-golden.json";
 
 const ENDPOINT = "https://crm.example.com/api/official-simulator/associativo-fluxo-linear";
-const standardInput = goldenFixture[0]!.input;
+const standardInput = {
+  ...goldenFixture[0]!.input,
+  monthlyDueDay: "10",
+  signal1Date: "",
+  signal2Date: "",
+  signal3Date: "",
+};
 
 const masterContext: AuthorizationContext = {
   userId: "10000000-0000-4000-8000-000000000001",
@@ -215,9 +221,15 @@ describe("endpoint oficial dos simuladores", () => {
     expect(body).toMatchObject({
       schemaVersion: 1,
       engineKey: "simulator.wf13",
-      formulaVersion: "wf13-1.0.0",
+      formulaVersion: "wf13-1.1.0",
       sourceSha256: WF13_FORMULA.sourceSha256,
-      result: goldenFixture[0]!.expected,
+      result: {
+        ok: true,
+        firstInstallmentDate: "2026-09-10",
+        proSoluto: 45000,
+        nominalInstallment: 535.71,
+        correctedInstallment: 727.66,
+      },
     });
     expect(emit).toHaveBeenCalledWith(
       expect.objectContaining({

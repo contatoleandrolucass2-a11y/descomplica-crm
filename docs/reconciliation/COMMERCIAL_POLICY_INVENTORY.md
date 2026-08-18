@@ -34,8 +34,9 @@ sem submit, fórmula ou persistência.
 | Campanhas                    | Nomes/valores somente no legado                                                            | Ausente como política versionada               | Bloqueada                                 |
 | Premiações/roleta            | Presença manual e valores hardcoded no legado                                              | Implementada sem fonte; incompleta             | Fonte marcada indisponível                |
 
-Nenhuma regra desta tabela foi classificada como “confirmada por fonte
-oficial”.
+As regras de fluxo do WF13 cobertas pelo PDF 2 de 18/08/2026 e pelo asset
+observado estão versionadas em `wf13-1.1.0`. Nenhuma regra dos demais motores
+foi classificada como “confirmada por fonte oficial”.
 
 ## Motores históricos observados
 
@@ -45,6 +46,11 @@ O motor histórico recebia contexto, renda, preço, bônus/desconto, financiamen
 subsídio, FGTS, cheque, entrada, sinais e anuais. Usava JavaScript `Number`,
 timezone do runtime e fallbacks comerciais hardcoded. Entre os comportamentos
 observados:
+
+A correção `wf13-1.1.0` não porta fallbacks ou decisões de aprovação desse
+histórico. Ela usa somente a fórmula de fluxo comprovada, o caso de ouro do PDF
+2 e os gates Master já existentes; política, estoque e integrações continuam
+independentes e fail-closed.
 
 - venda real = preço com kit menos bônus, folga e desconto;
 - anuais manuais ou automáticas, correção mensal embutida e vencimento em

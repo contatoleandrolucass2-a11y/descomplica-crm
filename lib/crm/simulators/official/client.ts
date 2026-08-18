@@ -7,6 +7,12 @@ export type OfficialSimulatorResultRow = {
   value: string;
 };
 
+type OfficialSimulatorMemoryItem = {
+  step: string;
+  value: number | string;
+  format: "currency" | "date" | "integer";
+};
+
 function localToday(): string {
   const parts = new Intl.DateTimeFormat("en", {
     timeZone: "America/Sao_Paulo",
@@ -41,6 +47,7 @@ export function officialSimulatorInitialValues(slug: string): SimulatorFormValue
   if (slug !== "associativo-fluxo-linear") return {};
   return {
     "simulator-official-context-effective-date": localToday(),
+    "simulator-official-context-monthly-due-day": "15",
     "simulator-pro-soluto-bonus": "0",
     "simulator-pro-soluto-discount": "0",
     "simulator-pro-soluto-subsidy": "0",
@@ -69,6 +76,7 @@ export function buildOfficialSimulatorInput(
     installments: field(values, "simulator-commercial-policy-requested-installments"),
     entryDate: field(values, "simulator-official-context-effective-date"),
     constructionEnd: field(values, "simulator-official-context-construction-end"),
+    monthlyDueDay: field(values, "simulator-official-context-monthly-due-day").replace(/^0/, ""),
     income: decimal(field(values, "simulator-official-context-income")),
     salePrice: decimal(field(values, "simulator-pro-soluto-property-value")),
     bonus: decimal(field(values, "simulator-pro-soluto-bonus")),
@@ -79,8 +87,11 @@ export function buildOfficialSimulatorInput(
     housingCheck: decimal(field(values, "simulator-pro-soluto-housing-check")),
     entry: decimal(field(values, "simulator-signals-entry")),
     signal1: decimal(field(values, "simulator-signals-signal-1")),
+    signal1Date: field(values, "simulator-signals-signal-1-date"),
     signal2: decimal(field(values, "simulator-signals-signal-2")),
+    signal2Date: field(values, "simulator-signals-signal-2-date"),
     signal3: decimal(field(values, "simulator-signals-signal-3")),
+    signal3Date: field(values, "simulator-signals-signal-3-date"),
     annual1: decimal(field(values, "simulator-annuals-1-annual-value")) || "0",
     annual2: decimal(field(values, "simulator-annuals-2-annual-value")) || "0",
     annual3: decimal(field(values, "simulator-annuals-3-annual-value")) || "0",
@@ -106,6 +117,7 @@ const percent = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 2,
 });
 const number = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 6 });
+const date = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 
 export function officialSimulatorResultRows(
   slug: OfficialSimulatorSlug,
@@ -118,6 +130,15 @@ export function officialSimulatorResultRows(
   const values = {
     realSaleValue: finiteNumber(result, "realSaleValue"),
     proSoluto: finiteNumber(result, "proSoluto"),
+    nominalInstallment: finiteNumber(result, "nominalInstallment"),
+    nominalScheduleTotal:
+      result.nominalSchedule && typeof result.nominalSchedule === "object"
+        ? finiteNumber(result.nominalSchedule as Record<string, unknown>, "total")
+        : null,
+    nominalScheduleRemainder:
+      result.nominalSchedule && typeof result.nominalSchedule === "object"
+        ? finiteNumber(result.nominalSchedule as Record<string, unknown>, "remainder")
+        : null,
     correctedProSoluto: finiteNumber(result, "correctedProSoluto"),
     correctedInstallment: finiteNumber(result, "correctedInstallment"),
     preInstallments: finiteNumber(result, "preInstallments"),
@@ -131,12 +152,67 @@ export function officialSimulatorResultRows(
   return [
     { label: "Valor real da venda", value: currency.format(values.realSaleValue!) },
     { label: "Saldo do pró-soluto", value: currency.format(values.proSoluto!) },
+    { label: "Mensal nominal", value: currency.format(values.nominalInstallment!) },
+    {
+      label: "Ajuste de centavos no cronograma",
+      value: currency.format(values.nominalScheduleRemainder!),
+    },
+    {
+      label: "Total nominal reconciliado",
+      value: currency.format(values.nominalScheduleTotal!),
+    },
     { label: "Pró-soluto corrigido", value: currency.format(values.correctedProSoluto!) },
     { label: "Parcela corrigida", value: currency.format(values.correctedInstallment!) },
     { label: "Parcelas antes da obra", value: number.format(values.preInstallments!) },
     { label: "Parcelas após a obra", value: number.format(values.postInstallments!) },
-    { label: "Primeira parcela", value: values.firstInstallmentDate! || "—" },
+    {
+      label: "Início das mensais",
+      value: values.firstInstallmentDate
+        ? date.format(new Date(`${values.firstInstallmentDate}T00:00:00.000Z`))
+        : "—",
+    },
     { label: "Parcela sobre a venda", value: percent.format(values.installmentOverSale!) },
     { label: "Pró-soluto sobre a venda", value: percent.format(values.proSolutoOverSale!) },
   ];
+}
+
+export function officialSimulatorMemoryRows(
+  slug: OfficialSimulatorSlug,
+  rawResult: unknown,
+): OfficialSimulatorResultRow[] | null {
+  if (slug !== "associativo-fluxo-linear" || !rawResult || typeof rawResult !== "object") {
+    return null;
+  }
+  const rawMemory = (rawResult as Record<string, unknown>).calculationMemory;
+  if (!Array.isArray(rawMemory)) return null;
+
+  const memory: OfficialSimulatorMemoryItem[] = [];
+  for (const rawItem of rawMemory) {
+    if (!rawItem || typeof rawItem !== "object") return null;
+    const item = rawItem as Record<string, unknown>;
+    if (
+      typeof item.step !== "string" ||
+      !["currency", "date", "integer"].includes(String(item.format)) ||
+      (typeof item.value !== "number" && typeof item.value !== "string")
+    ) {
+      return null;
+    }
+    memory.push(item as OfficialSimulatorMemoryItem);
+  }
+
+  return memory.map((item) => {
+    if (item.format === "currency" && typeof item.value === "number") {
+      return { label: item.step, value: currency.format(item.value) };
+    }
+    if (item.format === "integer" && typeof item.value === "number") {
+      return { label: item.step, value: number.format(item.value) };
+    }
+    if (item.format === "date" && typeof item.value === "string" && item.value) {
+      return {
+        label: item.step,
+        value: date.format(new Date(`${item.value}T00:00:00.000Z`)),
+      };
+    }
+    return { label: item.step, value: "—" };
+  });
 }

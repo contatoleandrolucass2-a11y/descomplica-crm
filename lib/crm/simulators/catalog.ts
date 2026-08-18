@@ -115,6 +115,14 @@ export const SIMULATORS = {
           },
           { key: "effective-date", label: "Data vigente", type: "date", required: true },
           { key: "construction-end", label: "Término da obra", type: "date", required: true },
+          {
+            key: "monthly-due-day",
+            label: "Dia de vencimento das mensais",
+            type: "select",
+            required: true,
+            options: ["05", "10", "15"],
+            hint: "O WF13 aceita exclusivamente os dias 05, 10 ou 15.",
+          },
           { key: "income", label: "Renda", type: "currency", required: true },
           {
             key: "official-match",
@@ -144,8 +152,26 @@ export const SIMULATORS = {
         fields: [
           { key: "entry", label: "Entrada / ato", type: "currency" },
           { key: "signal-1", label: "Sinal 1", type: "currency" },
+          {
+            key: "signal-1-date",
+            label: "Data do sinal 1",
+            type: "date",
+            hint: "Obrigatória quando houver sinal; use dia 05, 10 ou 15 no mês do ato.",
+          },
           { key: "signal-2", label: "Sinal 2", type: "currency" },
+          {
+            key: "signal-2-date",
+            label: "Data do sinal 2",
+            type: "date",
+            hint: "Obrigatória quando houver sinal; use dia 05, 10 ou 15 no mês do ato.",
+          },
           { key: "signal-3", label: "Sinal 3", type: "currency" },
+          {
+            key: "signal-3-date",
+            label: "Data do sinal 3",
+            type: "date",
+            hint: "Obrigatória quando houver sinal; use dia 05, 10 ou 15 no mês do ato.",
+          },
         ],
       },
       {
@@ -164,7 +190,7 @@ export const SIMULATORS = {
         key: "commercial-policy",
         title: "Política comercial",
         fields: [
-          { key: "approved-limit", label: "Limite aprovado", type: "currency" },
+          { key: "approved-limit", label: "Limite aprovado", type: "number" },
           {
             key: "requested-installments",
             label: "Parcelas mensais solicitadas",
