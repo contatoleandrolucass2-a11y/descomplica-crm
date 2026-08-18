@@ -20,6 +20,12 @@
   marcam campo, aparecem no resumo e recebem foco.
 - Nenhuma migration, dependência, permissão, integração, motor adicional ou
   default de feature flag foi alterado.
+- Gate local aprovou 385 testes unitários, 8 E2E executados, 147 checks
+  responsivos, 84 de tema, 192 Axe/comparações e 105 de zoom. Onze capturas
+  canônicas e onze do canário Master foram revisadas em desktop e celular.
+- Promoção visual foi endurecida para preservar arquivos aprovados e escrever
+  diferenças somente no root de baseline realmente usado, inclusive o canário.
+  Isso evitou refresh binário de páginas e motores fora do WF13.
 
 ## 2026-08-18 — WF13: ranking, anuais fixas e paridade Looker
 

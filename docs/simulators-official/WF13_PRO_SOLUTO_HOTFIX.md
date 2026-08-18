@@ -76,3 +76,17 @@ substituída pelo limite.
 Entradas vazia, `-1`, `0`, `84,5`, `85`, `100` e texto falham fechadas. Entradas
 `1`, `36`, `37`, `83` e `84` passam a validação de quantidade. A política só é
 marcada como conferida após cálculo integral aprovado.
+
+## Gate local
+
+- format, lint, typecheck e build: aprovados;
+- testes: 385 aprovados e um ignorado; oito testes Node adicionais aprovados;
+- Playwright: oito aprovados e um remoto ignorado no isolamento local;
+- sete viewports: 147 verificações responsivas;
+- três temas: 84 verificações;
+- Axe e comparação: 192 verificações;
+- zoom de 80%, 100%, 125%, 150% e 200%: 105 verificações;
+- teclado, foco, reduced-motion, correção do erro e cadeado somente leitura:
+  aprovados;
+- onze evidências canônicas e onze do canário Master atualizadas; demais rotas
+  e motores preservados byte a byte.
