@@ -17,6 +17,9 @@
 - Adiciona memória de cálculo visível, 14 casos de calendário, regressão dos 12
   cenários anteriores e E2E do caso PDF 2; RBAC, flags, integrações e demais
   motores permanecem inalterados.
+- Atualiza transacionalmente a baseline autenticada após revisar a mudança de
+  altura exclusiva dos novos campos do WF13; matriz responsiva, temas, zoom,
+  teclado e 192 auditorias Axe permanecem verdes.
 
 - Converge o gate de página do WF13 com o gate de execução já aplicado: cria
   `crm.simulators.view` em nível 100, vincula somente Master e registra apenas o

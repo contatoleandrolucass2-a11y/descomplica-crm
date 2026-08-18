@@ -12,6 +12,10 @@
 - O motor agora usa centavos e frações inteiras, exige vencimento 05/10/15,
   datas explícitas para sinais e intervalo máximo de 30 dias. A memória fica
   visível e o ledger nominal reconcilia exatamente o saldo.
+- O primeiro CI aprovou código, restore, pgTAP e E2E, mas rejeitou somente as 11
+  dimensões visuais alteradas do WF13. A promoção transacional regenerou 147
+  capturas responsivas, 84 checks de tema, 192 auditorias Axe/comparações e 105
+  checks de zoom, todos aprovados sem persistir conta ou fixture QA.
 - Nenhuma migration, permissão, flag, integração ou outro motor foi alterado.
 
 ## 2026-08-14 — Hotfix WF13: alinhamento do gate visual remoto
