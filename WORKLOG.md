@@ -16,6 +16,11 @@
   dimensões visuais alteradas do WF13. A promoção transacional regenerou 147
   capturas responsivas, 84 checks de tema, 192 auditorias Axe/comparações e 105
   checks de zoom, todos aprovados sem persistir conta ou fixture QA.
+- Na homologação isolada, o smoke HTTPS aprovou 9/9 cenários, incluindo o caso
+  PDF 2 por Master e o bloqueio dos outros oito perfis e quatro motores. O gate
+  visual repetido aprovou 147/147 rotas, 84/84 temas, 192/192 auditorias Axe e
+  105/105 checks de zoom; as 11 diferenças eram exclusivamente a altura esperada
+  dos novos campos do WF13 ativo e foram promovidas só ao conjunto canário.
 - Nenhuma migration, permissão, flag, integração ou outro motor foi alterado.
 
 ## 2026-08-14 — Hotfix WF13: alinhamento do gate visual remoto
