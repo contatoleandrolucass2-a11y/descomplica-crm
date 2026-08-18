@@ -28,9 +28,9 @@ de simulação são comparados com suas baselines de estado habilitado em
 [`target-authenticated-canary`](./target-authenticated-canary/). O primeiro
 conjunto versionado é `simulator.wf13`; chave desconhecida ou rota sem conjunto
 versionado falha fechada, sem aceitar diferença visual genérica.
-As 11 capturas desse conjunto refletem também os campos de calendário e a
-memória auditável exigidos pela paridade do PDF 2, sem alterar a baseline
-canônica de motores bloqueados.
+As 11 capturas desse conjunto refletem também os campos de calendário, ranking,
+anuais e memória auditável exigidos pela política WF13 `wf13-1.2.0`, sem alterar
+a baseline canônica de motores bloqueados.
 
 ## Política de captura
 

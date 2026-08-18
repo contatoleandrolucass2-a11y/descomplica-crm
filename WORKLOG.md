@@ -22,6 +22,10 @@
 - O gate isolado aprovou E2E com nove perfis, 147 checks responsivos, 84 de
   tema, 192 de acessibilidade/comparação e 105 de zoom. A conta QA efêmera e as
   fixtures foram removidas; nenhum ambiente remoto foi alterado nesta etapa.
+- O primeiro gate HTTPS no SHA `a74215c` aprovou 9/9 fluxos funcionais e toda a
+  acessibilidade; reprovou somente as 11 dimensões esperadas da rota WF13 ativa.
+  A homologação foi revertida para `c299484` antes de promover exclusivamente
+  essas 11 capturas sanitizadas ao conjunto canário versionado.
 
 ## 2026-08-18 — Hotfix WF13: paridade do PDF 2
 

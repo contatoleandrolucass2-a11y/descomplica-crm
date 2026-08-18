@@ -19,6 +19,9 @@
 - Versiona 30 cenários Looker × site e nove fronteiras anuais. Documenta a única
   diferença deliberada: o Looker antigo usa `<`, enquanto a regra aprovada usa
   `<=` no limite exato. PDF 2 e demais motores permanecem inalterados.
+- Atualiza somente as 11 capturas sanitizadas do canário WF13 ativo para o novo
+  formulário de ranking e anuais; a baseline canônica com motores desligados
+  permanece separada e intacta.
 
 - Corrige a paridade do WF13 com o PDF 2: anuais corrigidas deixam de reduzir o
   saldo nominal, a primeira mensal não avança um mês duas vezes e o caso oficial
