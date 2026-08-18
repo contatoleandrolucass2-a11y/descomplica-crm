@@ -953,6 +953,7 @@ async function promoteBaseline(candidateResult) {
   const backupCanaryScreenshots = path.join(promotionRoot, "target-authenticated-canary.previous");
   const backupResult = path.join(promotionRoot, "authenticated-results.previous.json");
   const promotedResult = createPromotedResult(candidateResult);
+  const promoteCanonicalResult = simulatorHubCanaryKey === undefined;
   let baselineMoved = false;
   let canaryBaselineMoved = false;
   let resultMoved = false;
@@ -986,21 +987,25 @@ async function promoteBaseline(candidateResult) {
     await mkdir(path.dirname(destination), { recursive: true });
     await copyFile(path.join(candidateScreenshotRoot, relativeCandidatePath), destination);
   }
-  await writeJsonAtomically(stagedResult, promotedResult);
+  if (promoteCanonicalResult) await writeJsonAtomically(stagedResult, promotedResult);
 
   try {
     await rename(baselineScreenshotRoot, backupScreenshots);
     baselineMoved = true;
     await rename(simulatorCanaryBaselineRoot, backupCanaryScreenshots);
     canaryBaselineMoved = true;
-    await rename(baselineResultsPath, backupResult);
-    resultMoved = true;
+    if (promoteCanonicalResult) {
+      await rename(baselineResultsPath, backupResult);
+      resultMoved = true;
+    }
     await rename(stagedScreenshots, baselineScreenshotRoot);
     screenshotsInstalled = true;
     await rename(stagedCanaryScreenshots, simulatorCanaryBaselineRoot);
     canaryScreenshotsInstalled = true;
-    await rename(stagedResult, baselineResultsPath);
-    resultInstalled = true;
+    if (promoteCanonicalResult) {
+      await rename(stagedResult, baselineResultsPath);
+      resultInstalled = true;
+    }
   } catch {
     if (resultInstalled) await rm(baselineResultsPath, { force: true });
     if (canaryScreenshotsInstalled)
