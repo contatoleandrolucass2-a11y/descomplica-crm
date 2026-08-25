@@ -1,11 +1,78 @@
 begin;
 
-select plan(10);
+select plan(12);
 
 select is(
   pg_catalog.to_regprocedure('private.role_isolation_net_fail_closed()'),
   null::regprocedure,
-  'compatibility marker creates no helper function'
+  'portability repair creates no helper function'
+);
+
+select is(
+  (
+    select pg_catalog.jsonb_object_agg(function_row.proname, pg_catalog.md5(function_row.prosrc))
+    from pg_catalog.pg_proc function_row
+    join pg_catalog.pg_namespace namespace
+      on namespace.oid = function_row.pronamespace
+    where namespace.nspname = 'private'
+      and function_row.proname in (
+        'crm_qlik_relay_role_isolated',
+        'crm_commercial_engine_role_isolated'
+      )
+  ),
+  '{
+    "crm_qlik_relay_role_isolated": "beb9f8cc531128627ddb8f9a32cb8ec0",
+    "crm_commercial_engine_role_isolated": "dc483726acb9310a57abb963a0b41502"
+  }'::jsonb,
+  'present optional isolation contracts match approved OID-safe fingerprints'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_proc function_row
+    join pg_catalog.pg_namespace namespace
+      on namespace.oid = function_row.pronamespace
+    join pg_catalog.pg_language language_row
+      on language_row.oid = function_row.prolang
+    where namespace.nspname = 'private'
+      and function_row.proname in (
+        'crm_qlik_relay_role_isolated',
+        'crm_commercial_engine_role_isolated'
+      )
+      and (
+        function_row.prorettype <> 'boolean'::pg_catalog.regtype
+        or language_row.lanname <> 'sql'
+        or function_row.prokind <> 'f'
+        or function_row.proretset
+        or function_row.proisstrict
+        or function_row.provolatile <> 's'
+        or not function_row.prosecdef
+        or function_row.proleakproof
+        or function_row.proparallel <> 'u'
+        or coalesce(function_row.proconfig, array[]::text[]) <>
+          array['search_path=""']::text[]
+        or pg_catalog.pg_get_userbyid(function_row.proowner) <> 'postgres'
+        or (
+          select count(*)
+          from pg_catalog.aclexplode(coalesce(
+            function_row.proacl,
+            pg_catalog.acldefault('f', function_row.proowner)
+          )) privilege
+        ) <> 1
+        or exists (
+          select 1
+          from pg_catalog.aclexplode(coalesce(
+            function_row.proacl,
+            pg_catalog.acldefault('f', function_row.proowner)
+          )) privilege
+          where privilege.grantee <> function_row.proowner
+             or privilege.privilege_type <> 'EXECUTE'
+             or privilege.is_grantable
+        )
+      )
+  ),
+  'present optional isolation contracts retain exact safe attributes and owner-only ACLs'
 );
 
 select ok(
@@ -193,7 +260,7 @@ select ok(
         'has_permission'
       )
   ),
-  'compatibility marker creates no Auth/MFA object in integration schemas'
+  'portability repair creates no Auth/MFA object in integration schemas'
 );
 
 select * from finish();

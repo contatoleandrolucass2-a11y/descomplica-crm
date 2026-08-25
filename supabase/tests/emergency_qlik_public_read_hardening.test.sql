@@ -86,9 +86,10 @@ select is(
         'crm_imob_ranking_developments'
       )
       and cmd in ('SELECT', 'ALL')
+      and policyname <> 'authenticated_session_mfa_gate'
   ),
   0::bigint,
-  'Qlik tables expose no direct read policies'
+  'Qlik tables expose no direct read policy beyond the restrictive MFA gate'
 );
 
 select is(

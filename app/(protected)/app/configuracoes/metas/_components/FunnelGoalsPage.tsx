@@ -78,15 +78,17 @@ function numberInput(
 }
 
 export async function FunnelGoalsPage({
+  canManageDraft,
   profile,
   notification,
 }: {
+  canManageDraft: boolean;
   profile: GoalProfileKey;
   notification?: "saved" | "validation" | "save";
 }) {
   const [result, draft] = await Promise.all([
     loadFunnelGoals(profile),
-    loadFunnelGoalsDraft(profile),
+    canManageDraft ? loadFunnelGoalsDraft(profile) : Promise.resolve(null),
   ]);
   const legacyValues = result.status === "ready" ? result.goals : EMPTY_GOALS;
   const values = draft ? funnelDraftValuesToGoals(draft.payload, draft.updatedAt) : legacyValues;
@@ -143,14 +145,18 @@ export async function FunnelGoalsPage({
                       result.status === "ready" ? "bg-lime-300" : "bg-cyan-300"
                     }`}
                   />
-                  Base legada: somente leitura · Rascunho atual: editável
+                  {canManageDraft
+                    ? "Base legada: somente leitura · Rascunho atual: editável"
+                    : "Base legada: somente leitura · Rascunho atual: indisponível"}
                 </span>
               </div>
               <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
                 {pageTitle}
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-                Prepare e valide um rascunho inativo para {monthLabel}. Nada é aplicado ao funil.
+                {canManageDraft
+                  ? `Prepare e valide um rascunho inativo para ${monthLabel}. Nada é aplicado ao funil.`
+                  : `Consulte a base legada de ${monthLabel}. O rascunho permanece indisponível para este perfil.`}
               </p>
             </div>
 
@@ -258,7 +264,11 @@ export async function FunnelGoalsPage({
           </div>
         ) : null}
 
-        <ConfigurationDraftForm action={draftAction} saveLabel={`Salvar rascunho de ${monthLabel}`}>
+        <ConfigurationDraftForm
+          action={draftAction}
+          enabled={canManageDraft}
+          saveLabel={`Salvar rascunho de ${monthLabel}`}
+        >
           <input type="hidden" name="draftRevision" value={draft?.revision ?? 0} />
           <div className="grid items-start gap-5 xl:grid-cols-[minmax(15rem,0.82fr)_minmax(25rem,1.5fr)_minmax(15rem,0.86fr)]">
             <section

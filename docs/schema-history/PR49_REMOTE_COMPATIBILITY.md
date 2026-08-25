@@ -164,6 +164,11 @@ aceita somente um diretório absoluto root-only com manifesto válido. O process
    policy MFA restritiva em cada tabela Qlik, além dos objetos Auth/MFA;
 7. remove os dois projetos e todos os temporários mesmo após falha.
 
+A segunda candidata não encontra contratos de relay/motor no estado produtivo e,
+portanto, não altera esse restore. No clean install, onde os contratos opcionais
+existem, ela aceita somente a definição conhecida e troca o lookup frágil do schema
+`net` por lookup de OID; não cria papel, schema, função ou grant.
+
 Antes do restore, o rehearsal neutraliza somente as ACLs padrão permissivas da
 imagem local. Os grants explícitos do dump recompõem então o estado observado
 em produção. Isso evita que diferenças de bootstrap local falseiem a prova sem

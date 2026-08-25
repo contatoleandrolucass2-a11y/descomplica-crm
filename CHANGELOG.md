@@ -35,6 +35,14 @@
   supersedidas e dois contratos legados confidenciais permanecem fora do Git.
 - Substitui o preflight Master-only obsoleto por comparação exata da matriz
   herdada, bloqueando perda ou ampliação de acesso antes do smoke E2E.
+- Alinha também a matriz exibida na administração aos 17 grants de Admin e aos
+  quatro grants dos seis papéis operacionais; Admin conserva as 14 páginas e
+  consulta metas legadas sem receber gestão de política comercial.
+- Antecipada no Proxy a mesma permissão das 21 rotas versionadas, preservando
+  os guards SSR/API/RLS e retornando `403` real antes de qualquer shell streamed.
+- Mantém a migration Auth portável entre produção e clean install: contratos
+  opcionais ausentes não são criados; quando presentes, atributos e fingerprint
+  devem corresponder ao contrato aprovado antes da correção de `pg_net`.
 - Adiciona inventário produtivo somente leitura e rehearsal sobre restore
   sanitizado PostgreSQL 17. O gate aplica apenas as duas migrations Auth/MFA,
   preserva os fingerprints RBAC 8/20/61/17 e mantém tabelas Qlik fail-closed.
@@ -70,8 +78,8 @@
 - Torna os probes de isolamento do relay Qlik e do motor comercial herméticos
   quando o schema opcional `net` estiver ausente, sem instalar `pg_net` nem
   liberar qualquer papel dedicado.
-- Atualiza o rehearsal de restore para copiar templates Auth e validar o novo
-  total de 1.002 pgTAP; fonte e alvo efêmeros continuam independentes.
+- Atualiza o rehearsal de restore para copiar templates Auth e validar o total
+  atual de 1.004 pgTAP; fonte e alvo efêmeros continuam independentes.
 - Faz a conta QA visual consentir explicitamente com cookies opcionais antes da
   matriz de temas; o produto continua opt-out e sem persistência por padrão.
 - Registra a matriz local dos nove perfis e 21 rotas. A reconciliação preserva

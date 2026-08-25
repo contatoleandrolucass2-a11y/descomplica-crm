@@ -79,6 +79,11 @@ const positivePageRoles = new Set(
     .filter(([, pageKeys]) => pageKeys.length > 0)
     .map(([role]) => role),
 );
+const commercialRankingRoles = new Set(
+  Object.entries(expectedPageKeysByRole)
+    .filter(([, pageKeys]) => pageKeys.includes("crm.ranking"))
+    .map(([role]) => role),
+);
 const activeChildren = new Set();
 
 class LocalQaError extends Error {}
@@ -1472,11 +1477,9 @@ async function verifyAccountThroughRest(local, account, fixtures) {
     }
 
     const commercialRows = assertSuccessfulRows(commercialResult, "Commercial v2 RLS assertion");
-    if (
-      (account.role === "master" && commercialRows.length !== 1) ||
-      (account.role !== "master" && commercialRows.length !== 0)
-    ) {
-      fail("Commercial v2 visibility is not Master-only.");
+    const expectedCommercialRows = commercialRankingRoles.has(account.role) ? 1 : 0;
+    if (commercialRows.length !== expectedCommercialRows) {
+      fail("Commercial v2 visibility diverges from the inherited ranking permission.");
     }
 
     if (account.role === "pending") {
@@ -1622,8 +1625,8 @@ async function main() {
     positivePages: positivePageRoles.size,
     zeroPages: requiredRoles.length - positivePageRoles.size,
     activeScopes: requiredRoles.length - 1,
-    commercialMaster: 1,
-    commercialDenied: requiredRoles.length - 1,
+    commercialAllowed: commercialRankingRoles.size,
+    commercialDenied: requiredRoles.length - commercialRankingRoles.size,
     legacyApproved: 0,
     rpcDenials: 1,
     persisted: persisted ? accounts.length : 0,
@@ -1648,7 +1651,7 @@ try {
     process.exitCode = requestedSignal === "SIGINT" ? 130 : 143;
   } else {
     process.stdout.write(
-      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_master=${counts.commercialMaster} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} browser_e2e=${counts.browserE2e} persisted=${counts.persisted} removed=${counts.removed}\n`,
+      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_allowed=${counts.commercialAllowed} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} browser_e2e=${counts.browserE2e} persisted=${counts.persisted} removed=${counts.removed}\n`,
     );
   }
 } catch (error) {

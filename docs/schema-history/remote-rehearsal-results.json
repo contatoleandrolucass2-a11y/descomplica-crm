@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-25T20:40:06.909Z",
+  "generatedAt": "2026-08-25T22:25:22.434Z",
   "environment": "two isolated local Supabase/PostgreSQL 17 projects",
   "source": "root-only production backup",
   "remoteMutation": false,
@@ -32,7 +32,7 @@
     {
       "version": "20260824230100",
       "name": "role_isolation_net_fail_closed",
-      "sha256": "9868a2de931b665434f5ad9dd0a7c79f91f3e6c13ac00029299c428ef8d6713f"
+      "sha256": "dfbe850624b5b9448970812cc5bf28d8a2a2f971442154f41a10544ccd43af1b"
     }
   ],
   "structuralCounts": {

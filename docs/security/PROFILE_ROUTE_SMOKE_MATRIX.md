@@ -66,16 +66,16 @@ incremento.
 
 ## Matriz de APIs somente leitura/fail-closed
 
-| Contrato                                                | `master`              | outros oito perfis | visitante |
-| ------------------------------------------------------- | --------------------- | ------------------ | --------- |
+| Contrato                                                | `master`              | outros oito perfis            | visitante |
+| ------------------------------------------------------- | --------------------- | ----------------------------- | --------- |
 | `GET /api/dashboard/status`                             | 200                   | conforme `crm.dashboard.view` | 401       |
-| `GET /api/official-simulator/associativo-fluxo-linear`  | 200                   | 403                | 401       |
-| `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro  | 403                | 401       |
-| `POST /api/ingest/qlik`                                 | 503, flag desligada   | 503                | 503       |
-| `POST /api/ingest/salesforce`                           | 503, flag desligada   | 503                | 503       |
-| `POST /api/refresh/salesforce`                          | 503, flag desligada   | 503                | 503       |
-| `POST /api/commercial-engine/simulator.wf14`            | 503, motor desligado  | 503                | 503       |
-| `GET /api/health`                                       | 200, sem dado privado | 200                | 200       |
+| `GET /api/official-simulator/associativo-fluxo-linear`  | 200                   | 403                           | 401       |
+| `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro  | 403                           | 401       |
+| `POST /api/ingest/qlik`                                 | 503, flag desligada   | 503                           | 503       |
+| `POST /api/ingest/salesforce`                           | 503, flag desligada   | 503                           | 503       |
+| `POST /api/refresh/salesforce`                          | 503, flag desligada   | 503                           | 503       |
+| `POST /api/commercial-engine/simulator.wf14`            | 503, motor desligado  | 503                           | 503       |
+| `GET /api/health`                                       | 200, sem dado privado | 200                           | 200       |
 
 Os quatro `POST` em `503` retornam antes de qualquer escrita ou chamada externa. O smoke
 os repete nos nove perfis para provar o default-off; WF13 é o único motor executado, com
@@ -104,18 +104,20 @@ JWT local ainda não expirou.
 Para cada perfil, o E2E deve:
 
 1. autenticar e confirmar a identidade/papel esperados;
-2. verificar a página inicial autorizada (`/admin` para `admin`; `/app` para `master`,
-   `broker`, `coordinator` e `real_estate`; superfície auth-only para os quatro perfis
-   sem página);
+2. verificar a página inicial autorizada (`/app` para `master`, `admin`, `broker`,
+   `coordinator` e `real_estate`; superfície auth-only para os quatro perfis sem página);
 3. comparar o menu com o catálogo permitido;
 4. abrir diretamente cada uma das 21 URLs e comparar o resultado com a tabela;
 5. testar os Route Handlers vinculados às permissões sem gravar dados;
 6. abrir `/conta/seguranca` e provar o estado MFA aplicável;
 7. executar logout e confirmar bloqueio ao voltar, recarregar e reabrir URL protegida.
 
-O `403` é verificado no response HTTP direto e na navegação do navegador, antes que uma
-loading boundary possa mascará-lo com `200` streamed. Conteúdo e título da página
-negada também devem permanecer ausentes.
+O `403` é verificado no response HTTP direto e na navegação do navegador. O Proxy
+antecipa a permissão exata das 21 rotas versionadas antes que uma loading boundary
+possa mascará-la com `200` streamed; layout, página, APIs e RLS repetem o gate. Conteúdo
+e título da página negada também devem permanecer ausentes. Para Admin, as três páginas
+de metas carregam a base legada somente leitura e exibem explicitamente o rascunho como
+indisponível, pois política comercial continua Master-only.
 
 Além dos nove perfis, o gate deve cobrir recuperação de senha com resposta genérica,
 link válido/expirado, senha forte, revogação de sessões, enrollment/challenge/removal

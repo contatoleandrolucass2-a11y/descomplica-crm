@@ -52,21 +52,27 @@ select ok(
 
 select is(
   (select count(*) from pg_catalog.pg_policies
-   where schemaname = 'public' and tablename = 'crm_imob_ranking_runs'),
+   where schemaname = 'public'
+     and tablename = 'crm_imob_ranking_runs'
+     and policyname <> 'authenticated_session_mfa_gate'),
   0::bigint,
-  'runs expose no direct-table policy'
+  'runs expose no direct-table policy beyond the restrictive MFA gate'
 );
 select is(
   (select count(*) from pg_catalog.pg_policies
-   where schemaname = 'public' and tablename = 'crm_imob_ranking_entries'),
+   where schemaname = 'public'
+     and tablename = 'crm_imob_ranking_entries'
+     and policyname <> 'authenticated_session_mfa_gate'),
   0::bigint,
-  'entries expose no direct-table policy'
+  'entries expose no direct-table policy beyond the restrictive MFA gate'
 );
 select is(
   (select count(*) from pg_catalog.pg_policies
-   where schemaname = 'public' and tablename = 'crm_imob_ranking_developments'),
+   where schemaname = 'public'
+     and tablename = 'crm_imob_ranking_developments'
+     and policyname <> 'authenticated_session_mfa_gate'),
   0::bigint,
-  'developments expose no direct-table policy'
+  'developments expose no direct-table policy beyond the restrictive MFA gate'
 );
 
 select ok(

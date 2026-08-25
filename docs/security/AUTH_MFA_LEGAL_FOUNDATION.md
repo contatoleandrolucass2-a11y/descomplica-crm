@@ -102,8 +102,14 @@ O checkbox “Lembrar neste navegador por até 30 dias” começa desmarcado.
   opcional existente é a preferência visual de tema, condicionada ao consentimento
   funcional.
 
-`AUTH_SESSION_COOKIE_SECRET` deve ser provisionado por canal privado e não pode ser
-versionado, impresso ou reutilizado como outra credencial.
+O valor lógico de `AUTH_SESSION_COOKIE_SECRET` deve ser provisionado por canal privado
+e não pode ser versionado, impresso ou reutilizado como outra credencial. Nos ambientes
+hospedados ele nunca entra diretamente no env: o configurador grava o valor em arquivo
+root-only `0640`, o arquivo de ambiente declara apenas
+`AUTH_SESSION_COOKIE_SECRET_SOURCE`, o Compose monta essa origem read-only e a aplicação
+recebe somente `AUTH_SESSION_COOKIE_SECRET_FILE=/run/secrets/auth_session_cookie_secret`.
+Injeção direta por `AUTH_SESSION_COOKIE_SECRET` é fallback exclusivo de teste local e é
+rejeitada pelo validador dos containers hospedados.
 
 ## Cookies e documentos legais
 
@@ -141,7 +147,9 @@ técnicos e não devem ser promovidas como texto jurídico aprovado.
 Antes de qualquer ativação remota:
 
 1. obter aprovação jurídica e versionar novos textos quando necessário;
-2. provisionar `APP_ORIGIN` e `AUTH_SESSION_COOKIE_SECRET` por canal privado;
+2. provisionar `APP_ORIGIN` e o valor lógico do segredo HMAC por canal privado,
+   materializando-o no secret store root-only e declarando somente
+   `AUTH_SESSION_COOKIE_SECRET_SOURCE` no arquivo de ambiente;
 3. configurar redirects exatos, SMTP, TOTP e o template recovery com `TokenHash` no
    projeto Supabase de destino;
 4. comprovar backup e restore isolado;
@@ -159,8 +167,8 @@ Antes de qualquer ativação remota:
   grants amplos ou aceitando sessão revogada. Correção deve ser roll-forward por nova
   migration testada. Rollback do aplicativo precisa manter compatibilidade com os
   helpers de sessão/AAL ou falhar fechado.
-- Rotacionar `AUTH_SESSION_COOKIE_SECRET` invalida markers de duração lembrada, mas não
-  substitui revogação de sessão no Supabase.
+- Rotacionar o arquivo-fonte do segredo HMAC invalida markers de duração lembrada, mas
+  não substitui revogação de sessão no Supabase.
 - Entrega de e-mail depende de SMTP e redirects configurados; indisponibilidade deve ser
   registrada como bloqueio, nunca testada em produção como substituto.
 - O gate local fixa Supabase CLI 2.115.0, que contém a correção de resolução/reload
@@ -170,9 +178,9 @@ Antes de qualquer ativação remota:
   é exercitado quando cadastro público é autorizado.
 - QR Code e chave manual são dados sensíveis exibidos somente durante enrollment; não
   existem recovery codes neste incremento.
-- Gates locais finais aprovados: formato, lint, typecheck, 427 testes Vitest, oito
-  testes Node, build de 39 rotas, reset do Supabase local, 1.002 pgTAP em 24 arquivos e
-  Playwright com 11 cenários aprovados. O único skip é o cenário remoto de homologação,
+- Gates locais finais aprovados: formato, lint, typecheck, 468 testes Vitest, oito
+  testes Node, build de 39 rotas, reset do Supabase local, 1.004 pgTAP em 24 arquivos e
+  Playwright com 19 cenários aprovados. O único skip é o cenário remoto de homologação,
   deliberadamente fora deste incremento local; SMTP e configurações hospedadas não
   foram usados como substituto.
 - A matriz E2E criou nove identidades sintéticas locais e removeu as nove ao concluir.
@@ -181,6 +189,6 @@ Antes de qualquer ativação remota:
 - Auditorias finais sem achados: dependências (`pnpm audit` e OSV sobre 521 pacotes),
   segredos (Gitleaks na árvore e em 266 commits), schema lint e advisors locais de
   segurança e performance.
-- Restore isolado aprovado em dois projetos PostgreSQL 17 efêmeros: 34 migrations,
-  backup lógico, owners, privilégios, fingerprint e os 1.002 pgTAP coincidiram entre
+- Restore isolado aprovado em dois projetos PostgreSQL 17 efêmeros: 41 migrations,
+  backup lógico, owners, privilégios, fingerprint e os 1.004 pgTAP coincidiram entre
   fonte e alvo. O rehearsal copia o template Auth sem incluir configuração remota.

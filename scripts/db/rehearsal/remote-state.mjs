@@ -1,16 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import {
-  cp,
-  mkdir,
-  mkdtemp,
-  readFile,
-  readdir,
-  rename,
-  rm,
-  stat,
-  writeFile,
-} from "node:fs/promises";
+import { cp, lstat, mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -40,13 +30,14 @@ const excludedServices = [
   "vector",
   "supavisor",
 ].join(",");
-const safeEnvironmentNames = ["PATH", "HOME", "XDG_CONFIG_HOME", "XDG_RUNTIME_DIR", "TMPDIR"];
-
-let commandEnvironment = {
-  ...Object.fromEntries(
-    safeEnvironmentNames.flatMap((name) => (process.env[name] ? [[name, process.env[name]]] : [])),
-  ),
+const dockerExecutable = "/usr/bin/docker";
+const dockerSocketPath = "/var/run/docker.sock";
+const dockerEndpoint = `unix://${dockerSocketPath}`;
+const commandEnvironment = {
+  DOCKER_HOST: dockerEndpoint,
   NO_COLOR: "1",
+  PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+  TMPDIR: "/tmp",
   TZ: "UTC",
 };
 
@@ -90,6 +81,14 @@ function runUnchecked(command, args, options = {}) {
     encoding: "utf8",
     maxBuffer: 32 * 1024 * 1024,
   });
+}
+
+function runDocker(args, options = {}) {
+  return run(dockerExecutable, ["--host", dockerEndpoint, ...args], options);
+}
+
+function runDockerUnchecked(args, options = {}) {
+  return runUnchecked(dockerExecutable, ["--host", dockerEndpoint, ...args], options);
 }
 
 function runSupabase(projectRoot, args, label) {
@@ -188,39 +187,12 @@ async function loadBackup(directory) {
   return { files, contents, checksums };
 }
 
-function unixSocketPath(endpoint) {
-  let parsed;
-  try {
-    parsed = new URL(endpoint);
-  } catch {
-    throw new Error("Effective Docker endpoint must be a local Unix socket.");
-  }
-  if (parsed.protocol !== "unix:" || parsed.hostname || parsed.username || parsed.password) {
-    throw new Error("Effective Docker endpoint must be a local Unix socket.");
-  }
-  return decodeURIComponent(parsed.pathname);
-}
-
 async function pinLocalDockerEndpoint() {
-  const configured = process.env.DOCKER_HOST?.trim();
-  const endpoint =
-    configured ||
-    run(
-      "docker",
-      [
-        "context",
-        "inspect",
-        run("docker", ["context", "show"], { label: "Docker context" }).trim(),
-        "--format",
-        '{{(index .Endpoints "docker").Host}}',
-      ],
-      { label: "Docker endpoint" },
-    ).trim();
-  const socketPath = unixSocketPath(endpoint);
-  const socketStatus = await stat(socketPath);
-  if (!socketStatus.isSocket()) throw new Error("Effective Docker endpoint is not a Unix socket.");
-  commandEnvironment = { ...commandEnvironment, DOCKER_HOST: endpoint };
-  run("docker", ["version", "--format", "{{.Server.Version}}"], { label: "Docker daemon" });
+  const socketStatus = await lstat(dockerSocketPath);
+  if (!socketStatus.isSocket() || socketStatus.uid !== 0 || (socketStatus.mode & 0o007) !== 0) {
+    throw new Error("Approved Docker socket ownership or mode is invalid.");
+  }
+  runDocker(["version", "--format", "{{.Server.Version}}"], { label: "Docker daemon" });
 }
 
 function portBlocks() {
@@ -270,8 +242,7 @@ async function prepareProject(projectRoot, projectId, ports) {
 }
 
 function databaseContainer(projectId) {
-  const names = run(
-    "docker",
+  const names = runDocker(
     ["ps", "--filter", `label=com.supabase.cli.project=${projectId}`, "--format", "{{.Names}}"],
     { label: "database container discovery" },
   )
@@ -286,17 +257,17 @@ function databaseContainer(projectId) {
 
 function isolateContainerNetwork(container) {
   const networks = JSON.parse(
-    run("docker", ["inspect", container, "--format", "{{json .NetworkSettings.Networks}}"], {
+    runDocker(["inspect", container, "--format", "{{json .NetworkSettings.Networks}}"], {
       label: "container network inspection",
     }),
   );
   for (const network of Object.keys(networks)) {
-    run("docker", ["network", "disconnect", "--force", network, container], {
+    runDocker(["network", "disconnect", "--force", network, container], {
       label: "container network isolation",
     });
   }
   const remaining = JSON.parse(
-    run("docker", ["inspect", container, "--format", "{{json .NetworkSettings.Networks}}"], {
+    runDocker(["inspect", container, "--format", "{{json .NetworkSettings.Networks}}"], {
       label: "isolated network verification",
     }),
   );
@@ -305,8 +276,7 @@ function isolateContainerNetwork(container) {
 }
 
 function psql(container, input, label, options = {}) {
-  return run(
-    "docker",
+  return runDocker(
     [
       "exec",
       "-i",
@@ -375,8 +345,7 @@ function restoreRemoteSource(container, backup) {
 }
 
 function structuralDump(container) {
-  const output = run(
-    "docker",
+  const output = runDocker(
     [
       "exec",
       container,
@@ -563,10 +532,10 @@ function cleanupProject(_projectRoot, projectId, attempted) {
     ["volume", ["volume", "ls", "--format", "{{.Name}}\t{{.Name}}"], ["volume", "rm"]],
   ];
   for (const [, discovery, removal] of commands) {
-    const result = runUnchecked("docker", discovery);
+    const result = runDockerUnchecked(discovery);
     if (result.status !== 0) continue;
     const ids = parseNamedResources(result.stdout, projectId).map(([id]) => id);
-    if (ids.length > 0) runUnchecked("docker", [...removal, ...ids]);
+    if (ids.length > 0) runDockerUnchecked([...removal, ...ids]);
   }
 }
 

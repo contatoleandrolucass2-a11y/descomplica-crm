@@ -42,17 +42,12 @@
 //     local services. The combined gate is the only safe signal
 //     for "we are serving real production traffic".
 //
-// Out of scope (M4+):
-//   - No redirects. Real route protection enforcement (per
-//     ROUTE_PROTECTION.md and the B10 verification gate) is
-//     deferred to M4+ once login and verification-pending
-//     surfaces exist. Redirecting before those surfaces exist
-//     would produce loops.
-//   - No branching on user/session state. M3 does not read or
-//     render session material outside the cookie boundary
-//     (AUTH_SECURITY.md > Session Observability Requirements).
-//     Nothing about the user, session, token, cookie, or env is
-//     logged from this file.
+// Authorization boundary:
+//   - Versioned protected pages receive an early permission check so Cache
+//     Components cannot stream an HTTP 200 before a page-level forbidden()
+//     interrupt. Layout/page guards, APIs, RPCs and RLS repeat the check.
+//   - The proxy reads only the authenticated user id and effective permission
+//     keys. It never logs or renders user, session, token, cookie or env data.
 //
 // Route groups note:
 //   - The app/(auth)/ and app/(protected)/ segments are Next.js
@@ -76,6 +71,66 @@ import {
 import { applySecurityHeaders } from "@/lib/security/headers";
 import { isHomologationMode } from "@/lib/homologation/config";
 import { NextResponse, type NextRequest } from "next/server";
+import type { PermissionKey } from "@/lib/authorization/permissions";
+
+interface AuthorizationContextRow {
+  permissions?: unknown;
+}
+
+// Cache Components can stream a shared protected shell before a page-level
+// forbidden() interrupt changes the status. Enforce the exact page permission
+// for the versioned route inventory in Proxy as well. Page guards, APIs and RLS
+// remain authoritative and still re-check the same key.
+function permissionRequiredBeforeStreaming(pathname: string): PermissionKey | null {
+  if (pathname === "/app") return "crm.dashboard.view";
+  if (pathname.startsWith("/app/etapas/")) return "crm.stages.view";
+  if (pathname === "/app/ranking") return "crm.ranking.view";
+  if (pathname === "/app/canal-de-parcerias") return "crm.partnerships.view";
+  if (pathname === "/app/configuracoes") return "crm.settings.view";
+  if (pathname.startsWith("/app/configuracoes/metas")) return "crm.settings.manage";
+  if (pathname === "/app/simulacao" || pathname.startsWith("/app/simulacao/")) {
+    return "crm.simulators.view";
+  }
+  if (pathname === "/admin") return "admin.access";
+  if (pathname === "/admin/usuarios") return "users.view";
+  if (pathname === "/admin/paginas") return "pages.manage";
+  return null;
+}
+
+function copySessionResponse(source: NextResponse, target: NextResponse) {
+  for (const [name, value] of source.headers) {
+    if (name === "set-cookie" || name.startsWith("x-middleware-")) continue;
+    target.headers.set(name, value);
+  }
+  for (const cookie of source.cookies.getAll()) target.cookies.set(cookie);
+}
+
+function forbiddenBeforeStreaming(request: NextRequest, sessionResponse: NextResponse) {
+  const response = NextResponse.rewrite(new URL("/unauthorized", request.url), { status: 403 });
+  copySessionResponse(sessionResponse, response);
+  return response;
+}
+
+async function lacksEarlyPermission(
+  supabase: Awaited<ReturnType<typeof updateSession>>["supabase"],
+  permission: PermissionKey,
+) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || !user) return false;
+
+  const { data, error } = await supabase.rpc("get_user_authorization_context", {
+    user_uuid: user.id,
+  });
+  if (error) return true;
+  if (!Array.isArray(data) || data.length === 0) return false;
+  if (data.length !== 1) return true;
+
+  const permissions = (data[0] as AuthorizationContextRow).permissions;
+  return !Array.isArray(permissions) || !permissions.includes(permission);
+}
 
 function unavailableSalesforceResponse(request: NextRequest): NextResponse | null {
   if (
@@ -114,7 +169,16 @@ export async function proxy(request: NextRequest) {
     return unavailableResponse;
   }
 
-  const { response } = await updateSession(request);
+  const { supabase, response: sessionResponse } = await updateSession(request);
+  let response = sessionResponse;
+  const earlyPermission =
+    request.method === "GET" || request.method === "HEAD"
+      ? permissionRequiredBeforeStreaming(request.nextUrl.pathname)
+      : null;
+  if (earlyPermission && (await lacksEarlyPermission(supabase, earlyPermission))) {
+    response = forbiddenBeforeStreaming(request, sessionResponse);
+  }
+
   applySecurityHeaders(response.headers, {
     isProd: isSecureProduction,
     noIndex: isHomologationMode(),

@@ -198,9 +198,10 @@ select is(
        'crm_imob_ranking_runs',
        'crm_imob_ranking_entries',
        'crm_imob_ranking_developments'
-     )),
+     )
+     and policyname <> 'authenticated_session_mfa_gate'),
   0::bigint,
-  'Qlik tables expose zero direct-table policies'
+  'Qlik tables expose no direct policy beyond the restrictive MFA gate'
 );
 select ok(
   (select bool_and(relrowsecurity and relforcerowsecurity)

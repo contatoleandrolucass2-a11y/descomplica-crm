@@ -410,7 +410,6 @@ function expectedRoutesForRole(role: Role) {
 }
 
 function expectedHomeForRole(role: Role) {
-  if (role === "admin") return "/admin";
   if (inheritedAnalyticalRoles.has(role)) return "/app";
   return "/conta/seguranca";
 }
@@ -432,10 +431,21 @@ async function login(page: Page, account: QaAccount, rememberBrowser = false) {
     await page.getByLabel("Lembrar neste navegador por até 30 dias").check();
   }
   const expectedHome = expectedHomeForRole(account.role);
-  await Promise.all([
-    page.waitForURL((url) => url.pathname === expectedHome),
-    page.getByRole("button", { name: "Entrar", exact: true }).click(),
-  ]);
+  await page.getByRole("button", { name: "Entrar", exact: true }).click();
+  try {
+    await page.waitForURL((url) => url.pathname === expectedHome, { timeout: 15_000 });
+  } catch {
+    const actualPath = new URL(page.url()).pathname;
+    throw new Error(
+      `Authenticated ${account.role} reached ${actualPath}; expected ${expectedHome}.`,
+    );
+  }
+  const actualPath = new URL(page.url()).pathname;
+  if (actualPath !== expectedHome) {
+    throw new Error(
+      `Authenticated ${account.role} reached ${actualPath}; expected ${expectedHome}.`,
+    );
+  }
   await page.locator("h1").first().waitFor({ state: "visible" });
 }
 
@@ -745,12 +755,16 @@ test("cookie choices, legal documents and browser-session lifetimes are explicit
   }
 });
 
-test("all nine profiles enforce browser navigation and direct-route permissions", async ({
-  browser,
-}) => {
-  test.setTimeout(300_000);
-  for (const role of expectedRoles) {
+for (const role of expectedRoles) {
+  test(`profile ${role} enforces browser navigation and every direct route`, async ({
+    browser,
+  }) => {
+    test.setTimeout(180_000);
     await withRolePage(browser, role, async (page) => {
+      const reportProgress = (phase: string) =>
+        process.stdout.write(`[route-matrix] role=${role} phase=${phase}\n`);
+
+      reportProgress("identity");
       await expect(page).toHaveURL((url) => url.pathname === expectedHomeForRole(role));
       const identity = page.locator(
         expectedHomeForRole(role) === "/conta/seguranca"
@@ -765,6 +779,7 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
         page.getByRole("heading", { level: 1, name: "Segurança da conta", exact: true }),
       ).toBeVisible();
       await expect(page.locator("[data-account-identity]")).toContainText(accounts[role].email);
+      reportProgress("account-security");
 
       const dashboardApi = await page.request.get("/api/dashboard/status");
       if (inheritedAnalyticalRoles.has(role)) {
@@ -826,16 +841,34 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
         expect(response.headers()["cache-control"]).toContain("no-store");
         expect(await response.json()).toEqual({ error: expectedDisabledErrors[index] });
       }
+      reportProgress("api-gates");
 
-      let navigationChecked = false;
       const expectedNavigationRoutes = expectedRoutesForRole(role);
-      for (const surface of protectedSurfaces) {
-        const directResponse = await page.context().request.get(surface.path, { maxRedirects: 0 });
-        if (surface.allowed.has(role)) {
-          expect(directResponse.status()).toBe(200);
-        } else {
-          expect(directResponse.status()).toBe(403);
+      // Exercise the complete profile × route matrix as direct authenticated
+      // requests. Small batches keep the app under realistic concurrency while
+      // avoiding a serial browser render for every response-code assertion.
+      for (let offset = 0; offset < protectedSurfaces.length; offset += 4) {
+        const batch = protectedSurfaces.slice(offset, offset + 4);
+        const directResponses = await Promise.all(
+          batch.map(async (surface) => ({
+            surface,
+            response: await page.context().request.get(surface.path, { maxRedirects: 0 }),
+          })),
+        );
+        for (const { surface, response } of directResponses) {
+          expect(response.status(), `${role} ${surface.path}`).toBe(
+            surface.allowed.has(role) ? 200 : 403,
+          );
         }
+        reportProgress(`direct-routes-${offset + 1}-${offset + batch.length}`);
+      }
+
+      const allowedSurface = protectedSurfaces.find((surface) => surface.allowed.has(role));
+      const deniedSurface = protectedSurfaces.find((surface) => !surface.allowed.has(role));
+      const navigationSurface = allowedSurface ?? deniedSurface;
+      expect(navigationSurface).toBeDefined();
+
+      const assertRenderedSurface = async (surface: (typeof protectedSurfaces)[number]) => {
         const response = await page.goto(surface.path);
         if (surface.allowed.has(role)) {
           expect(response?.status()).toBe(200);
@@ -859,22 +892,33 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
             page.getByRole("heading", { level: 1, name: surface.heading, exact: true }),
           ).toHaveCount(0);
         }
+      };
 
-        const navigation = page.locator('header nav[aria-label="Navegação autorizada"]');
-        const navigationRoutes = await navigation
-          .locator('a[href^="/"]')
-          .evaluateAll((links) =>
-            [
-              ...new Set(
-                links.map((link) => new URL(link.getAttribute("href")!, location.origin).pathname),
-              ),
-            ].sort(),
-          );
-        expect(navigationRoutes).toEqual(expectedNavigationRoutes);
-        if (expectedNavigationRoutes.length > 0) navigationChecked = true;
+      await assertRenderedSurface(navigationSurface!);
+
+      const navigation = page.locator('header nav[aria-label="Navegação autorizada"]');
+      const navigationRoutes = await navigation
+        .locator('a[href^="/"]')
+        .evaluateAll((links) =>
+          [
+            ...new Set(
+              links.map((link) => new URL(link.getAttribute("href")!, location.origin).pathname),
+            ),
+          ].sort(),
+        );
+      expect(navigationRoutes).toEqual(expectedNavigationRoutes);
+      reportProgress("navigation");
+
+      if (role === "admin") {
+        const settingsResponse = await page.goto("/app/configuracoes/metas");
+        expect(settingsResponse?.status()).toBe(200);
+        await expect(page.getByText("Rascunho indisponível para este perfil")).toBeVisible();
+        await expect(page.getByRole("button", { name: "Validar sem aplicar" })).toHaveCount(0);
+        await expect(page.getByRole("button", { name: /Salvar rascunho/ })).toHaveCount(0);
+        reportProgress("settings-read-only");
       }
 
-      expect(navigationChecked).toBe(expectedNavigationRoutes.length > 0);
+      if (allowedSurface && deniedSurface) await assertRenderedSurface(deniedSurface);
 
       // These three sessions are reused by the subsequent, role-specific
       // scenarios and logged out there. This keeps the complete release smoke
@@ -883,9 +927,10 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
       if (!qaTarget.remoteHomologation && ["master", "admin", "pending"].includes(role)) return;
 
       await logoutAndAssertBoundary(page, role);
+      reportProgress("logout");
     });
-  }
-});
+  });
+}
 
 test("Master traverses dashboard, five stages, ranking, partnerships and safe filters", async ({
   browser,

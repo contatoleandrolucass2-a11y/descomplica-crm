@@ -9,7 +9,8 @@ export default async function GoalsPage({
 }: {
   searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
-  await enforcePermission("crm.settings.manage");
+  const authorization = await enforcePermission("crm.settings.manage");
+  const canManageDraft = authorization.permissions.includes("crm.commercial_policy.manage");
   const query = await searchParams;
   const notification =
     query.saved === "1"
@@ -20,5 +21,11 @@ export default async function GoalsPage({
           ? "save"
           : undefined;
 
-  return <FunnelGoalsPage profile="dv" {...(notification ? { notification } : {})} />;
+  return (
+    <FunnelGoalsPage
+      canManageDraft={canManageDraft}
+      profile="dv"
+      {...(canManageDraft && notification ? { notification } : {})}
+    />
+  );
 }

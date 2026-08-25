@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-08-25 — gate de compatibilidade produtiva do PR #49
+
+- A réplica sanitizada PostgreSQL 17 recebeu somente as migrations candidatas
+  `20260824230058` e `20260824230100`: oito papéis, 20 permissões, 61 vínculos,
+  17 páginas e as 14 páginas de Admin permaneceram idênticos.
+- Clean install e restore lógico independente aprovaram 41 migrations e 1.004
+  pgTAP em 24 arquivos, lint e advisors na fonte e no alvo, owners, privilégios
+  efetivos e fingerprints. O backup de origem permaneceu sem rede.
+- O E2E local aprovou 19 cenários e manteve um único skip reservado ao smoke
+  hospedado: nove perfis, 21 rotas, APIs, recovery, MFA/AAL2, cookies, sessões e
+  logout foram exercitados; nove identidades sintéticas foram removidas.
+- A matriz visual local aprovou 147 checks responsivos, 84 de temas, 192 Axe,
+  192 comparações candidato/baseline e 105 checks de zoom; conta e fixtures
+  efêmeras foram removidas ao final.
+- A apresentação de acesso agora espelha a baseline produtiva: Master 20 grants,
+  Admin 17 e seis papéis legados quatro. As 21 rotas têm `403` pre-stream no
+  Proxy e repetem o mesmo gate em SSR, API/RPC e RLS.
+- Auditorias encerraram com zero vulnerabilidade de dependência, zero achado OSV
+  em 521 pacotes e zero segredo na árvore ou em 278 commits.
+- Produção e homologação permaneceram inalteradas; o smoke hospedado continua
+  pendente por depender de uma promoção futura expressamente autorizada.
+
 ## 2026-08-25 — smoke fixa o daemon Docker local
 
 - O runner hospedado deixou de herdar `HOME`, `DOCKER_HOST`, `DOCKER_CONTEXT` e
@@ -51,6 +73,18 @@ unix:///var/run/docker.sock` explicitamente. O gate valida antes que esse alvo
 - A revisão independente encontrou um preflight local ainda preso ao baseline
   Master-only anterior. O gate agora compara simetricamente a matriz comercial
   herdada exata e reprova tanto perda quanto ampliação de permissão.
+- A mesma revisão encontrou a apresentação de herança ainda defasada. O mapa da
+  UI agora espelha os 17 grants de Admin e os quatro grants de cada papel legado;
+  os testes de troca de papel cobrem esse contrato sem tornar a UI autoridade.
+- O E2E comprovou que Cache Components podia emitir `200` antes do interrupt de
+  página. O Proxy agora antecipa a chave exata das 21 rotas, enquanto layouts,
+  páginas, APIs, RPCs e RLS continuam repetindo o gate. Admin mantém as páginas
+  de metas em modo legado somente leitura, sem RPC ou ação de política Master.
+- O primeiro pgTAP integral revelou duas suposições antigas: contagem de policy
+  que incluía o novo gate MFA restritivo e lookup nominal do schema opcional
+  `net`. Os testes agora distinguem policy de leitura do gate MFA; a migration
+  de portabilidade exige atributos e fingerprints exatos antes de corrigir o
+  contrato conhecido; permanece sem efeito onde esses objetos não existem.
 
 ## 2026-08-25 — imagem promovível e segredos de runtime
 

@@ -16,16 +16,16 @@ legado. Em instalação limpa, conserva aprovação, escopos e fail-closed já e
 
 Produção contém 17 páginas ativas e zero overrides individuais.
 
-| Papel produtivo | Usuários atribuídos | Páginas ativas | Contrato preservado |
-| --------------- | ------------------: | -------------: | ------------------- |
-| `master`        |                   1 |             17 | catálogo produtivo completo |
+| Papel produtivo | Usuários atribuídos | Páginas ativas | Contrato preservado                                                                      |
+| --------------- | ------------------: | -------------: | ---------------------------------------------------------------------------------------- |
+| `master`        |                   1 |             17 | catálogo produtivo completo                                                              |
 | `admin`         |                   2 |             14 | Dashboard, etapas, Ranking, Configurações, `/admin`, `/admin/usuarios`, `/admin/paginas` |
-| `coordinator`   |                   0 |              7 | Dashboard, cinco etapas e Ranking |
-| `supervisor`    |                   0 |              7 | Dashboard, cinco etapas e Ranking |
-| `real_estate`   |                   0 |              7 | Dashboard, cinco etapas e Ranking |
-| `broker_lead`   |                   0 |              7 | Dashboard, cinco etapas e Ranking |
-| `broker`        |                   0 |              7 | Dashboard, cinco etapas e Ranking |
-| `user`          |                   0 |              7 | Dashboard, cinco etapas e Ranking |
+| `coordinator`   |                   0 |              7 | Dashboard, cinco etapas e Ranking                                                        |
+| `supervisor`    |                   0 |              7 | Dashboard, cinco etapas e Ranking                                                        |
+| `real_estate`   |                   0 |              7 | Dashboard, cinco etapas e Ranking                                                        |
+| `broker_lead`   |                   0 |              7 | Dashboard, cinco etapas e Ranking                                                        |
+| `broker`        |                   0 |              7 | Dashboard, cinco etapas e Ranking                                                        |
+| `user`          |                   0 |              7 | Dashboard, cinco etapas e Ranking                                                        |
 
 Os papéis novos `manager`, `house`, `partnership_channel` e `pending` não existem no
 schema produtivo atual. Continuam sem acesso herdado na instalação limpa. O PR não cria
@@ -78,10 +78,11 @@ PR não amplia esse grant.
 O trigger de cadastro exige os Termos e a Política de Privacidade versionados durante a
 criação do usuário. Não depende de um fluxo de aprovação ausente em produção.
 
-`20260824230100_role_isolation_net_fail_closed.sql` é marcador de compatibilidade
-explícito e sem alteração de estado. A versão anterior tocava objetos opcionais de Qlik
-e motores ausentes em produção; essa responsabilidade permanece nas migrations próprias
-desses domínios.
+`20260824230100_role_isolation_net_fail_closed.sql` não cria fundação de relay ou
+motor. Na produção, onde os dois contratos opcionais não existem, ela não altera
+estado. Numa instalação limpa, corrige somente o predicado conhecido que consultava o
+schema opcional `net` por nome. Função presente com definição desconhecida reprova a
+migration; função, papel ou schema ausente nunca é criado.
 
 ## Pós-condições obrigatórias do rehearsal
 
@@ -97,6 +98,8 @@ desses domínios.
 - uma policy `authenticated_session_mfa_gate` por tabela `public` com RLS;
 - ledger legal com RLS forçada, sem grant para Data API ou `PUBLIC`;
 - nenhuma função, role, schema ou grant de relay/motor introduzido.
+- contratos opcionais já presentes usam lookup por OID e não falham quando `pg_net`
+  está ausente.
 
 Rollback após aplicação é somente roll-forward. A imagem anterior pode ser restaurada,
 mas as migrations de segurança e o ledger legal não devem ser revertidos destrutivamente.
