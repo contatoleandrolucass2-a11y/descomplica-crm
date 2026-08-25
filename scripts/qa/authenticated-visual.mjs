@@ -529,6 +529,16 @@ async function inspectAccessibility(page, route, viewport, theme) {
 
 async function login(page, origin, email, password) {
   await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded" });
+  const acceptAllCookies = page.getByRole("button", {
+    name: "Aceitar todos",
+    exact: true,
+  });
+  if (await acceptAllCookies.isVisible()) {
+    await acceptAllCookies.click();
+    await page
+      .getByRole("button", { name: "Preferências de cookies", exact: true })
+      .waitFor({ state: "visible" });
+  }
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Senha").fill(password);
   await Promise.all([

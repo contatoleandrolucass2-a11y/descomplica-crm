@@ -40,6 +40,8 @@
   liberar qualquer papel dedicado.
 - Atualiza o rehearsal de restore para copiar templates Auth e validar o novo
   total de 1.002 pgTAP; fonte e alvo efêmeros continuam independentes.
+- Faz a conta QA visual consentir explicitamente com cookies opcionais antes da
+  matriz de temas; o produto continua opt-out e sem persistência por padrão.
 - Registra a matriz local dos nove perfis e 21 rotas. Alterações permanecem
   locais; nenhum ambiente remoto, migration, usuário ou configuração foi
   modificado. Gates finais aprovaram formato, lint, tipos, 427 testes Vitest,

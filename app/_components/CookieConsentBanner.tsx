@@ -13,7 +13,12 @@ export function CookieConsentBanner({ consent }: { consent: CookieConsent | null
 
   if (!open) {
     return (
-      <button type="button" className={styles.preferencesButton} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        className={styles.preferencesButton}
+        onClick={() => setOpen(true)}
+        data-qa-visual-volatile
+      >
         Preferências de cookies
       </button>
     );

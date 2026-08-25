@@ -57,6 +57,14 @@
   mantém o ensaio genérico; a repetição local aprovou 34 migrations, 1.002 pgTAP
   na fonte e no restore, backup lógico, owners, privilégios e fingerprint entre
   dois projetos PostgreSQL 17 independentes.
+- A matriz visual revelou a suposição antiga de que tema sempre persistia. O
+  harness agora registra consentimento opcional explícito na conta QA antes de
+  alternar temas entre rotas; usuários reais continuam com opcionais desligados.
+  O botão flutuante de preferências é ocultado somente durante screenshots da
+  superfície comercial e permanece exercitado por teclado, Axe e E2E funcional.
+- A repetição visual local aprovou 147 checks responsivos, 84 de tema, 192 Axe,
+  192 comparações de baseline e 105 checks de zoom; conta e fixtures efêmeras
+  foram removidas ao terminar.
 
 ## 2026-08-18 — Hotfix WF13: limite 84 e comprometimento
 
