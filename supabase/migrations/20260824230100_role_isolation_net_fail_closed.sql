@@ -1,62 +1,17 @@
--- Make the dedicated-role isolation probes independent of optional pg_net.
+-- Compatibility marker for the Auth/MFA/legal release.
 --
--- The original predicates address the `net` schema by name. PostgreSQL raises
--- `invalid_schema_name` when the optional extension is absent, instead of
--- reporting that the role lacks USAGE. Patch only that lookup while retaining
--- every previously audited role, database, schema, relation and function check.
+-- An earlier local candidate attempted to patch optional Qlik relay and
+-- commercial-engine isolation functions here. Those objects do not exist in
+-- the production migration lineage and are outside this release. Keeping this
+-- version as an explicit no-op preserves the published migration identifier
+-- without creating roles, schemas, grants, functions or cross-domain
+-- dependencies. Role-isolation hardening remains owned by its original,
+-- separately gated migrations.
 
 do $migration$
-declare
-  v_definition text;
-  v_patched_definition text;
 begin
-  select pg_catalog.pg_get_functiondef(
-    'private.crm_qlik_relay_role_isolated()'::regprocedure
-  )
-  into v_definition;
-
-  v_patched_definition := pg_catalog.replace(
-    v_definition,
-    'not has_schema_privilege(''crm_qlik_relay'', ''net'', ''USAGE'')',
-    'not coalesce(pg_catalog.has_schema_privilege(''crm_qlik_relay'', pg_catalog.to_regnamespace(''net''), ''USAGE''), false)'
-  );
-
-  if v_patched_definition = v_definition then
-    raise exception 'expected Qlik relay net privilege predicate was not found';
-  end if;
-
-  execute v_patched_definition;
+  -- Deliberately no state change. This block makes execution explicit while
+  -- remaining valid on both the production baseline and a clean installation.
+  null;
 end;
 $migration$;
-
-alter function private.crm_qlik_relay_role_isolated() owner to postgres;
-revoke all privileges on function private.crm_qlik_relay_role_isolated()
-from public, anon, authenticated, service_role, crm_qlik_relay;
-
-do $migration$
-declare
-  v_definition text;
-  v_patched_definition text;
-begin
-  select pg_catalog.pg_get_functiondef(
-    'private.crm_commercial_engine_role_isolated()'::regprocedure
-  )
-  into v_definition;
-
-  v_patched_definition := pg_catalog.replace(
-    v_definition,
-    'not has_schema_privilege(''crm_commercial_engine'', ''net'', ''USAGE'')',
-    'not coalesce(pg_catalog.has_schema_privilege(''crm_commercial_engine'', pg_catalog.to_regnamespace(''net''), ''USAGE''), false)'
-  );
-
-  if v_patched_definition = v_definition then
-    raise exception 'expected commercial engine net privilege predicate was not found';
-  end if;
-
-  execute v_patched_definition;
-end;
-$migration$;
-
-alter function private.crm_commercial_engine_role_isolated() owner to postgres;
-revoke all privileges on function private.crm_commercial_engine_role_isolated()
-from public, anon, authenticated, service_role, crm_commercial_engine;

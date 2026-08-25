@@ -105,8 +105,20 @@ select is(
 
 select is(
   (select count(*) from pg_catalog.pg_policies where schemaname = 'public'),
-  50::bigint,
-  'the existing policies and session/MFA gates are preserved'
+  (
+    select count(*)
+    from pg_catalog.pg_policies
+    where schemaname = 'public'
+      and policyname <> 'authenticated_session_mfa_gate'
+  ) + (
+    select count(*)
+    from pg_catalog.pg_class relation
+    join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relkind in ('r', 'p')
+      and relation.relrowsecurity
+  ),
+  'existing policies plus one session/MFA gate per RLS table are preserved'
 );
 
 select is(
@@ -156,34 +168,15 @@ select is(
       and roles = array['authenticated']::name[]
       and cmd = 'ALL'
   ),
-  array[
-    'app_pages',
-    'audit_logs',
-    'crm_dashboard_metrics',
-    'crm_dashboard_snapshots',
-    'crm_dashboard_top_developments',
-    'crm_dashboard_views',
-    'crm_funnel_goals',
-    'crm_organizations',
-    'crm_people',
-    'crm_point_metrics',
-    'crm_point_settings',
-    'crm_portfolio_organizations',
-    'crm_portfolios',
-    'crm_ranking_participants',
-    'crm_ranking_snapshots',
-    'crm_reporting_scopes',
-    'crm_team_memberships',
-    'crm_teams',
-    'crm_user_reporting_scope_grants',
-    'permissions',
-    'profiles',
-    'role_permissions',
-    'roles',
-    'user_permission_overrides',
-    'user_roles'
-  ]::name[],
-  'the 25 authenticated tables require the restrictive session/MFA gate'
+  (
+    select array_agg(relation.relname order by relation.relname)
+    from pg_catalog.pg_class relation
+    join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relkind in ('r', 'p')
+      and relation.relrowsecurity
+  ),
+  'every public RLS table requires the restrictive session/MFA gate'
 );
 
 select ok(
@@ -333,8 +326,6 @@ select is(
     'approve_user_access',
     'assign_user_role',
     'begin_crm_salesforce_refresh',
-    'can_assign_role',
-    'can_grant_permission',
     'current_session_is_live',
     'finish_crm_salesforce_refresh',
     'get_crm_commercial_configuration_draft',

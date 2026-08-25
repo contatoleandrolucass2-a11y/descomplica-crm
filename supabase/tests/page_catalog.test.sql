@@ -48,8 +48,8 @@ select is(
     from public.role_permissions rp
     where rp.permission_key in ('crm.settings.view', 'crm.settings.manage')
   ),
-  array['master']::text[],
-  'only Master inherits global v2 CRM settings permissions'
+  array['admin', 'master']::text[],
+  'Master and Admin retain the production CRM settings permissions'
 );
 
 select is(
@@ -267,9 +267,17 @@ select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;
 
 select is(
-  (select count(*) from public.app_pages),
-  0::bigint,
-  'scoped non-Master cannot read Master-only simulator pages'
+  (select array_agg(key order by sort_order, key) from public.app_pages),
+  array[
+    'crm.dashboard',
+    'crm.stage.opportunities',
+    'crm.stage.appointments',
+    'crm.stage.visits',
+    'crm.stage.folders',
+    'crm.stage.sales',
+    'crm.ranking'
+  ]::text[],
+  'scoped real-estate role sees only its seven inherited production pages'
 );
 
 select throws_ok(
@@ -340,9 +348,17 @@ select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000001
 set local role authenticated;
 
 select is(
-  (select count(*) from public.app_pages),
-  0::bigint,
-  'scoped non-Master remains blocked after simulator visibility changes'
+  (select array_agg(key order by sort_order, key) from public.app_pages),
+  array[
+    'crm.dashboard',
+    'crm.stage.opportunities',
+    'crm.stage.appointments',
+    'crm.stage.visits',
+    'crm.stage.folders',
+    'crm.stage.sales',
+    'crm.ranking'
+  ]::text[],
+  'scoped real-estate role remains isolated from simulator visibility changes'
 );
 
 reset role;

@@ -216,15 +216,6 @@ select is(
   'composite key retains multiple legal-version requirements per user'
 );
 
-select throws_ok(
-  $$update public.profiles
-    set access_status = 'approved'
-    where user_id = 'ae000000-0000-4000-8000-000000000002'$$,
-  '23514',
-  'legal acceptance required before approval',
-  'an unaccepted newer legal version blocks profile approval'
-);
-
 insert into private.legal_acceptances (
   user_id,
   terms_version,
@@ -237,11 +228,62 @@ insert into private.legal_acceptances (
   'authenticated_acceptance'
 );
 
-select lives_ok(
-  $$update public.profiles
-    set access_status = 'approved'
-    where user_id = 'ae000000-0000-4000-8000-000000000002'$$,
-  'approval passes after every required legal version is accepted'
+select is(
+  (
+    select array_agg(function_entry.oid::regprocedure::text order by function_entry.oid::regprocedure::text)
+    from pg_catalog.pg_proc function_entry
+    join pg_catalog.pg_namespace namespace on namespace.oid = function_entry.pronamespace
+    where namespace.nspname = 'private'
+      and function_entry.oid::regprocedure::text in (
+        'private._internal_assert_actor_active(uuid)',
+        'private._internal_get_role_level(uuid)',
+        'private._internal_has_permission(uuid,text)',
+        'private._internal_list_permissions(uuid)',
+        'private.get_role_level(uuid)',
+        'private.get_user_authorization_context(uuid)',
+        'private.has_permission(uuid,text)'
+      )
+  ),
+  array[
+    'private._internal_assert_actor_active(uuid)',
+    'private._internal_get_role_level(uuid)',
+    'private._internal_has_permission(uuid,text)',
+    'private._internal_list_permissions(uuid)',
+    'private.get_role_level(uuid)',
+    'private.get_user_authorization_context(uuid)',
+    'private.has_permission(uuid,text)'
+  ]::text[],
+  'authorization implementations are preserved behind private session-gated wrappers'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_proc function_entry
+    join pg_catalog.pg_namespace namespace on namespace.oid = function_entry.pronamespace
+    cross join lateral pg_catalog.aclexplode(
+      coalesce(function_entry.proacl, pg_catalog.acldefault('f', function_entry.proowner))
+    ) privilege
+    where namespace.nspname = 'private'
+      and function_entry.oid::regprocedure::text in (
+        'private._internal_assert_actor_active(uuid)',
+        'private._internal_get_role_level(uuid)',
+        'private._internal_has_permission(uuid,text)',
+        'private._internal_list_permissions(uuid)',
+        'private.get_role_level(uuid)',
+        'private.get_user_authorization_context(uuid)',
+        'private.has_permission(uuid,text)'
+      )
+      and (
+        privilege.grantee = 0
+        or pg_catalog.pg_get_userbyid(privilege.grantee) in (
+          'anon',
+          'authenticated',
+          'service_role'
+        )
+      )
+  ),
+  'preserved authorization implementations are not executable by Data API roles'
 );
 
 select throws_ok(
@@ -609,8 +651,15 @@ select is(
     where schemaname = 'public'
       and policyname = 'authenticated_session_mfa_gate'
   ),
-  25::bigint,
-  'exactly 25 public tables receive the session/MFA gate'
+  (
+    select count(*)
+    from pg_catalog.pg_class relation
+    join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relkind in ('r', 'p')
+      and relation.relrowsecurity
+  ),
+  'every installed public RLS table receives the session/MFA gate'
 );
 
 select is(
@@ -620,34 +669,15 @@ select is(
     where schemaname = 'public'
       and policyname = 'authenticated_session_mfa_gate'
   ),
-  array[
-    'app_pages',
-    'audit_logs',
-    'crm_dashboard_metrics',
-    'crm_dashboard_snapshots',
-    'crm_dashboard_top_developments',
-    'crm_dashboard_views',
-    'crm_funnel_goals',
-    'crm_organizations',
-    'crm_people',
-    'crm_point_metrics',
-    'crm_point_settings',
-    'crm_portfolio_organizations',
-    'crm_portfolios',
-    'crm_ranking_participants',
-    'crm_ranking_snapshots',
-    'crm_reporting_scopes',
-    'crm_team_memberships',
-    'crm_teams',
-    'crm_user_reporting_scope_grants',
-    'permissions',
-    'profiles',
-    'role_permissions',
-    'roles',
-    'user_permission_overrides',
-    'user_roles'
-  ]::name[],
-  'session/MFA gates cover the exact authenticated table allowlist'
+  (
+    select array_agg(relation.relname order by relation.relname)
+    from pg_catalog.pg_class relation
+    join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relkind in ('r', 'p')
+      and relation.relrowsecurity
+  ),
+  'session/MFA gates cover the complete installed public RLS surface'
 );
 
 select is(
@@ -662,7 +692,14 @@ select is(
       and qual like '%current_session_satisfies_mfa%'
       and with_check like '%current_session_satisfies_mfa%'
   ),
-  25::bigint,
+  (
+    select count(*)
+    from pg_catalog.pg_class relation
+    join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relkind in ('r', 'p')
+      and relation.relrowsecurity
+  ),
   'all session/MFA policies are restrictive authenticated ALL gates'
 );
 

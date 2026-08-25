@@ -24,32 +24,40 @@ Legenda:
 - `redirect`: sem sessão vai para `/login`; fator verificado ainda em AAL1 vai para
   `/mfa`; sessão de recovery vai para `/redefinir-senha`.
 
-As colunas “demais perfis” abrangem os sete perfis diferentes de `master` e `admin`.
-Overrides e flags não podem ampliar esta expectativa no smoke da fundação.
+Produção possui 17 entradas ativas no catálogo. A instalação limpa possui 21; as quatro
+entradas adicionais são simuladores ainda bloqueados por seus gates de execução. A
+migration Auth/MFA preserva o catálogo, `user_roles` e overrides; em instalação limpa,
+recompõe somente os vínculos herdados que já existem em produção.
 
-| Rota protegida                            | `master` | `admin` | demais perfis | visitante |
-| ----------------------------------------- | -------: | ------: | ------------: | --------: |
-| `/app`                                    |      200 |     403 |           403 |  redirect |
-| `/app/etapas/oportunidades`               |      200 |     403 |           403 |  redirect |
-| `/app/etapas/agendamentos`                |      200 |     403 |           403 |  redirect |
-| `/app/etapas/visitas`                     |      200 |     403 |           403 |  redirect |
-| `/app/etapas/pastas`                      |      200 |     403 |           403 |  redirect |
-| `/app/etapas/vendas`                      |      200 |     403 |           403 |  redirect |
-| `/app/ranking`                            |      200 |     403 |           403 |  redirect |
-| `/app/canal-de-parcerias`                 |      200 |     403 |           403 |  redirect |
-| `/app/configuracoes`                      |      200 |     403 |           403 |  redirect |
-| `/app/configuracoes/metas`                |      200 |     403 |           403 |  redirect |
-| `/app/configuracoes/metas/parcerias`      |      200 |     403 |           403 |  redirect |
-| `/app/configuracoes/metas/pontos`         |      200 |     403 |           403 |  redirect |
-| `/app/simulacao`                          |      200 |     403 |           403 |  redirect |
-| `/app/simulacao/associativo-fluxo-linear` |      200 |     403 |           403 |  redirect |
-| `/app/simulacao/calcular-documentacao`    |      200 |     403 |           403 |  redirect |
-| `/app/simulacao/caixa`                    |      200 |     403 |           403 |  redirect |
-| `/app/simulacao/tabela-direta`            |      200 |     403 |           403 |  redirect |
-| `/app/simulacao/tabela-investidor`        |      200 |     403 |           403 |  redirect |
-| `/admin`                                  |      200 |     200 |           403 |  redirect |
-| `/admin/usuarios`                         |      200 |     200 |           403 |  redirect |
-| `/admin/paginas`                          |      200 |     403 |           403 |  redirect |
+| Rota protegida                            | `master` | `admin` | `broker`, `coordinator`, `real_estate` | `manager`, `house`, `partnership_channel`, `pending` | visitante |
+| ----------------------------------------- | -------: | ------: | -------------------------------------: | ---------------------------------------------------: | --------: |
+| `/app`                                    |      200 |     200 |                                    200 |                                                  403 |  redirect |
+| `/app/etapas/oportunidades`               |      200 |     200 |                                    200 |                                                  403 |  redirect |
+| `/app/etapas/agendamentos`                |      200 |     200 |                                    200 |                                                  403 |  redirect |
+| `/app/etapas/visitas`                     |      200 |     200 |                                    200 |                                                  403 |  redirect |
+| `/app/etapas/pastas`                      |      200 |     200 |                                    200 |                                                  403 |  redirect |
+| `/app/etapas/vendas`                      |      200 |     200 |                                    200 |                                                  403 |  redirect |
+| `/app/ranking`                            |      200 |     200 |                                    200 |                                                  403 |  redirect |
+| `/app/canal-de-parcerias`                 |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/configuracoes`                      |      200 |     200 |                                    403 |                                                  403 |  redirect |
+| `/app/configuracoes/metas`                |      200 |     200 |                                    403 |                                                  403 |  redirect |
+| `/app/configuracoes/metas/parcerias`      |      200 |     200 |                                    403 |                                                  403 |  redirect |
+| `/app/configuracoes/metas/pontos`         |      200 |     200 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao`                          |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/associativo-fluxo-linear` |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/calcular-documentacao`    |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/caixa`                    |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/tabela-direta`            |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/tabela-investidor`        |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/admin`                                  |      200 |     200 |                                    403 |                                                  403 |  redirect |
+| `/admin/usuarios`                         |      200 |     200 |                                    403 |                                                  403 |  redirect |
+| `/admin/paginas`                          |      200 |     200 |                                    403 |                                                  403 |  redirect |
+
+Os papéis produtivos legados `supervisor`, `broker_lead` e `user` conservam as mesmas
+sete páginas de `broker`, `coordinator` e `real_estate`. Eles não são criados nem usados
+como fixtures pelos nove perfis do smoke novo, mas entram no fingerprint do rehearsal.
+Produção não possui overrides individuais; o processo continua preservando a tabela
+integralmente caso overrides sejam adicionados antes do cutover.
 
 Autorização de página e execução de motor são gates distintos. Um `200` numa rota de
 simulador não declara CTA ou cálculo autorizado; flags, allowlist, permissão de execução
@@ -60,7 +68,7 @@ incremento.
 
 | Contrato                                                | `master`              | outros oito perfis | visitante |
 | ------------------------------------------------------- | --------------------- | ------------------ | --------- |
-| `GET /api/dashboard/status`                             | 200                   | 403                | 401       |
+| `GET /api/dashboard/status`                             | 200                   | conforme `crm.dashboard.view` | 401       |
 | `GET /api/official-simulator/associativo-fluxo-linear`  | 200                   | 403                | 401       |
 | `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro  | 403                | 401       |
 | `POST /api/ingest/qlik`                                 | 503, flag desligada   | 503                | 503       |
@@ -96,8 +104,9 @@ JWT local ainda não expirou.
 Para cada perfil, o E2E deve:
 
 1. autenticar e confirmar a identidade/papel esperados;
-2. verificar a página inicial autorizada (`/app` para `master`, `/admin` para `admin` e
-   uma superfície auth-only para perfis sem página comercial);
+2. verificar a página inicial autorizada (`/admin` para `admin`; `/app` para `master`,
+   `broker`, `coordinator` e `real_estate`; superfície auth-only para os quatro perfis
+   sem página);
 3. comparar o menu com o catálogo permitido;
 4. abrir diretamente cada uma das 21 URLs e comparar o resultado com a tabela;
 5. testar os Route Handlers vinculados às permissões sem gravar dados;
@@ -121,7 +130,7 @@ TOTP, QR Code ou chave manual. Se Docker, Supabase, SMTP ou navegador estiver
 indisponível, marcar o cenário como bloqueado; não converter em aprovado nem usar
 produção como substituto.
 
-## Resultado local de 2026-08-24
+## Baseline local anterior à reconciliação (2026-08-24)
 
 - Playwright: 11 cenários aprovados, um cenário remoto ignorado explicitamente e zero
   falhas.

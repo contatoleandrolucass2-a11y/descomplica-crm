@@ -1902,14 +1902,23 @@ select is(
   'test-local activation grants each dataset-specific v3 capability only to Master'
 );
 select is(
-  (select count(*) from public.role_permissions
+  (select string_agg(role_key || ':' || permission_key, ',' order by role_key, permission_key)
+   from public.role_permissions
    where role_key <> 'master'
      and permission_key in (
        'crm.dashboard.view', 'crm.stages.view', 'crm.ranking.view',
        'crm.partnerships.view'
      )),
-  0::bigint,
-  'v3 work does not reopen any global v2 commercial permission'
+  'admin:crm.dashboard.view,admin:crm.ranking.view,admin:crm.stages.view,'
+    || 'broker:crm.dashboard.view,broker:crm.ranking.view,broker:crm.stages.view,'
+    || 'broker_lead:crm.dashboard.view,broker_lead:crm.ranking.view,'
+    || 'broker_lead:crm.stages.view,coordinator:crm.dashboard.view,'
+    || 'coordinator:crm.ranking.view,coordinator:crm.stages.view,'
+    || 'real_estate:crm.dashboard.view,real_estate:crm.ranking.view,'
+    || 'real_estate:crm.stages.view,supervisor:crm.dashboard.view,'
+    || 'supervisor:crm.ranking.view,supervisor:crm.stages.view,'
+    || 'user:crm.dashboard.view,user:crm.ranking.view,user:crm.stages.view',
+  'v3 work preserves the exact production v2 read baseline without partnerships'
 );
 select is(
   (select string_agg(key || ':' || permission_key, ',' order by key)

@@ -178,10 +178,164 @@ revoke all privileges on function public.revoke_current_user_sessions_after_pass
 grant execute on function public.revoke_current_user_sessions_after_password_recovery()
   to authenticated;
 
--- Permission resolution is the common authorization seam for page guards,
--- API handlers, RLS policies and privileged RPCs. A revoked or under-assured
--- caller must receive no permission even while its signed access JWT has not
--- reached exp.
+-- Reconcile only the role-permission baseline already observed in production.
+-- An earlier clean-install migration intentionally narrows these grants to
+-- Master, but that must not turn this Auth/MFA release into an authorization
+-- migration. The inserts are idempotent in production and restore a clean
+-- installation to the same inherited-access baseline. Missing prerequisite
+-- roles or permissions fail through the foreign keys instead of being skipped.
+insert into public.role_permissions (role_key, permission_key)
+values
+  ('admin', 'admin.access'),
+  ('admin', 'audit.view'),
+  ('admin', 'crm.dashboard.view'),
+  ('admin', 'crm.ingest.manage'),
+  ('admin', 'crm.ranking.view'),
+  ('admin', 'crm.salesforce.refresh'),
+  ('admin', 'crm.settings.manage'),
+  ('admin', 'crm.settings.view'),
+  ('admin', 'crm.stages.view'),
+  ('admin', 'pages.manage'),
+  ('admin', 'pages.view'),
+  ('admin', 'permissions.manage'),
+  ('admin', 'permissions.view'),
+  ('admin', 'roles.manage'),
+  ('admin', 'roles.view'),
+  ('admin', 'users.manage'),
+  ('admin', 'users.view'),
+  ('coordinator', 'crm.dashboard.view'),
+  ('coordinator', 'crm.ranking.view'),
+  ('coordinator', 'crm.stages.view'),
+  ('coordinator', 'pages.view'),
+  ('supervisor', 'crm.dashboard.view'),
+  ('supervisor', 'crm.ranking.view'),
+  ('supervisor', 'crm.stages.view'),
+  ('supervisor', 'pages.view'),
+  ('real_estate', 'crm.dashboard.view'),
+  ('real_estate', 'crm.ranking.view'),
+  ('real_estate', 'crm.stages.view'),
+  ('real_estate', 'pages.view'),
+  ('broker_lead', 'crm.dashboard.view'),
+  ('broker_lead', 'crm.ranking.view'),
+  ('broker_lead', 'crm.stages.view'),
+  ('broker_lead', 'pages.view'),
+  ('broker', 'crm.dashboard.view'),
+  ('broker', 'crm.ranking.view'),
+  ('broker', 'crm.stages.view'),
+  ('broker', 'pages.view'),
+  ('user', 'crm.dashboard.view'),
+  ('user', 'crm.ranking.view'),
+  ('user', 'crm.stages.view'),
+  ('user', 'pages.view')
+on conflict (role_key, permission_key) do nothing;
+
+do $migration$
+declare
+  v_expected_pairs constant jsonb := $$[
+    {"role":"admin","permissions":["admin.access","audit.view","crm.dashboard.view","crm.ingest.manage","crm.ranking.view","crm.salesforce.refresh","crm.settings.manage","crm.settings.view","crm.stages.view","pages.manage","pages.view","permissions.manage","permissions.view","roles.manage","roles.view","users.manage","users.view"]},
+    {"role":"coordinator","permissions":["crm.dashboard.view","crm.ranking.view","crm.stages.view","pages.view"]},
+    {"role":"supervisor","permissions":["crm.dashboard.view","crm.ranking.view","crm.stages.view","pages.view"]},
+    {"role":"real_estate","permissions":["crm.dashboard.view","crm.ranking.view","crm.stages.view","pages.view"]},
+    {"role":"broker_lead","permissions":["crm.dashboard.view","crm.ranking.view","crm.stages.view","pages.view"]},
+    {"role":"broker","permissions":["crm.dashboard.view","crm.ranking.view","crm.stages.view","pages.view"]},
+    {"role":"user","permissions":["crm.dashboard.view","crm.ranking.view","crm.stages.view","pages.view"]}
+  ]$$::jsonb;
+begin
+  if exists (
+    select 1
+    from jsonb_array_elements(v_expected_pairs) role_contract
+    cross join lateral jsonb_array_elements_text(
+      role_contract -> 'permissions'
+    ) permission_contract(permission_key)
+    where not exists (
+      select 1
+      from public.role_permissions role_permission
+      where role_permission.role_key = role_contract ->> 'role'
+        and role_permission.permission_key = permission_contract.permission_key
+    )
+  ) then
+    raise exception 'production RBAC compatibility baseline is incomplete'
+      using errcode = '23514';
+  end if;
+end;
+$migration$;
+
+-- Preserve the authorization implementation already installed in each
+-- environment. Production currently uses the legacy role/permission model;
+-- clean installs include the later approval and reporting-scope model. The
+-- migration decorates either implementation with one session/MFA gate instead
+-- of replacing its commercial semantics or importing future foundations.
+do $migration$
+declare
+  v_signature text;
+  v_function regprocedure;
+  v_definition text;
+  v_private_definition text;
+begin
+  foreach v_signature in array array[
+    'public._internal_get_role_level(uuid)',
+    'public._internal_has_permission(uuid,text)',
+    'public._internal_list_permissions(uuid)',
+    'public._internal_assert_actor_active(uuid)',
+    'public.has_permission(uuid,text)',
+    'public.get_role_level(uuid)',
+    'public.get_user_authorization_context(uuid)'
+  ] loop
+    v_function := pg_catalog.to_regprocedure(v_signature);
+    if v_function is null then
+      raise exception 'required authorization contract is absent: %', v_signature
+        using errcode = '42P01';
+    end if;
+
+    v_definition := pg_catalog.pg_get_functiondef(v_function);
+    v_private_definition := pg_catalog.replace(
+      v_definition,
+      'CREATE OR REPLACE FUNCTION public.',
+      'CREATE OR REPLACE FUNCTION private.'
+    );
+
+    if v_private_definition = v_definition then
+      raise exception 'cannot preserve authorization contract: %', v_signature
+        using errcode = '55000';
+    end if;
+
+    execute v_private_definition;
+  end loop;
+end;
+$migration$;
+
+alter function private._internal_get_role_level(uuid) owner to postgres;
+alter function private._internal_has_permission(uuid, text) owner to postgres;
+alter function private._internal_list_permissions(uuid) owner to postgres;
+alter function private._internal_assert_actor_active(uuid) owner to postgres;
+alter function private.has_permission(uuid, text) owner to postgres;
+alter function private.get_role_level(uuid) owner to postgres;
+alter function private.get_user_authorization_context(uuid) owner to postgres;
+
+revoke all privileges on function
+  private._internal_get_role_level(uuid),
+  private._internal_has_permission(uuid, text),
+  private._internal_list_permissions(uuid),
+  private._internal_assert_actor_active(uuid),
+  private.has_permission(uuid, text),
+  private.get_role_level(uuid),
+  private.get_user_authorization_context(uuid)
+from public, anon, authenticated, service_role;
+
+create or replace function public._internal_get_role_level(user_uuid uuid)
+returns integer
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select case
+    when (select auth.uid()) is not null
+      and not (select private.current_session_satisfies_mfa()) then null
+    else private._internal_get_role_level(user_uuid)
+  end;
+$$;
+
 create or replace function public._internal_has_permission(
   user_uuid uuid,
   permission_key text
@@ -193,43 +347,46 @@ security definer
 set search_path = ''
 as $$
   select case
-    when user_uuid = (select auth.uid())
+    when (select auth.uid()) is not null
       and not (select private.current_session_satisfies_mfa()) then false
-    when not private.is_approved_user(user_uuid) then false
-    when not exists (
-      select 1
-      from public.user_roles user_role
-      where user_role.user_id = user_uuid
-        and private.user_role_scope_is_valid(user_uuid, user_role.role_key)
-    ) then false
-    when exists (
-      select 1
-      from public.user_permission_overrides permission_override
-      where permission_override.user_id = user_uuid
-        and permission_override.permission_key = _internal_has_permission.permission_key
-        and permission_override.effect = 'deny'
-    ) then false
-    when exists (
-      select 1
-      from public.user_permission_overrides permission_override
-      where permission_override.user_id = user_uuid
-        and permission_override.permission_key = _internal_has_permission.permission_key
-        and permission_override.effect = 'allow'
-    ) then true
-    when exists (
-      select 1
-      from public.user_roles user_role
-      join public.role_permissions role_permission
-        on role_permission.role_key = user_role.role_key
-      where user_role.user_id = user_uuid
-        and role_permission.permission_key = _internal_has_permission.permission_key
-    ) then true
-    else false
+    else private._internal_has_permission(
+      user_uuid,
+      _internal_has_permission.permission_key
+    )
   end;
 $$;
 
-revoke all privileges on function public._internal_has_permission(uuid, text)
-  from public, anon, authenticated, service_role;
+create or replace function public._internal_list_permissions(user_uuid uuid)
+returns text[]
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select case
+    when (select auth.uid()) is not null
+      and not (select private.current_session_satisfies_mfa()) then array[]::text[]
+    else private._internal_list_permissions(user_uuid)
+  end;
+$$;
+
+create or replace function public._internal_assert_actor_active(actor_uuid uuid)
+returns integer
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  if (select auth.uid()) is not null
+     and not (select private.current_session_satisfies_mfa()) then
+    raise exception 'unauthorized: session assurance required'
+      using errcode = '28000';
+  end if;
+
+  return private._internal_assert_actor_active(actor_uuid);
+end;
+$$;
 
 create or replace function public.has_permission(
   user_uuid uuid,
@@ -244,19 +401,9 @@ as $$
   select case
     when (select auth.uid()) is null then false
     when not (select private.current_session_satisfies_mfa()) then false
-    when user_uuid = (select auth.uid())
-      then public._internal_has_permission(user_uuid, has_permission.permission_key)
-    when public._internal_has_permission((select auth.uid()), 'users.view')
-      and private.can_manage_user(user_uuid)
-      then public._internal_has_permission(user_uuid, has_permission.permission_key)
-    else false
+    else private.has_permission(user_uuid, has_permission.permission_key)
   end;
 $$;
-
-revoke all privileges on function public.has_permission(uuid, text)
-  from public, anon, authenticated, service_role;
-grant execute on function public.has_permission(uuid, text)
-  to authenticated;
 
 create or replace function public.get_role_level(user_uuid uuid)
 returns integer
@@ -268,126 +415,9 @@ as $$
   select case
     when (select auth.uid()) is null then null
     when not (select private.current_session_satisfies_mfa()) then null
-    when user_uuid = (select auth.uid())
-      then public._internal_get_role_level(user_uuid)
-    when public._internal_has_permission((select auth.uid()), 'users.view')
-      and private.can_manage_user(user_uuid)
-      then public._internal_get_role_level(user_uuid)
-    else null
+    else private.get_role_level(user_uuid)
   end;
 $$;
-
-revoke all privileges on function public.get_role_level(uuid)
-  from public, anon, authenticated, service_role;
-grant execute on function public.get_role_level(uuid)
-  to authenticated;
-
-create or replace function public.can_assign_role(actor_uuid uuid, target_role_key text)
-returns boolean
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select case
-    when (select auth.uid()) is null
-      or actor_uuid is distinct from (select auth.uid())
-      or not (select private.current_session_satisfies_mfa()) then false
-    else
-      coalesce(public._internal_has_permission(actor_uuid, 'roles.manage'), false)
-      and coalesce(
-        (select role.level from public.roles role where role.key = target_role_key),
-        2147483647
-      ) < coalesce(public._internal_get_role_level(actor_uuid), 0)
-  end;
-$$;
-
-revoke all privileges on function public.can_assign_role(uuid, text)
-  from public, anon, authenticated, service_role;
-grant execute on function public.can_assign_role(uuid, text)
-  to authenticated;
-
-create or replace function public.can_grant_permission(actor_uuid uuid, permission_key text)
-returns boolean
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select case
-    when (select auth.uid()) is null
-      or actor_uuid is distinct from (select auth.uid())
-      or not (select private.current_session_satisfies_mfa()) then false
-    else
-      coalesce(public._internal_has_permission(actor_uuid, 'permissions.manage'), false)
-      and coalesce(
-        public._internal_has_permission(actor_uuid, can_grant_permission.permission_key),
-        false
-      )
-      and coalesce(
-        (
-          select permission.min_level
-          from public.permissions permission
-          where permission.key = can_grant_permission.permission_key
-        ),
-        2147483647
-      ) < coalesce(public._internal_get_role_level(actor_uuid), 0)
-  end;
-$$;
-
-revoke all privileges on function public.can_grant_permission(uuid, text)
-  from public, anon, authenticated, service_role;
-grant execute on function public.can_grant_permission(uuid, text)
-  to authenticated;
-
-create or replace function public._internal_assert_actor_active(actor_uuid uuid)
-returns integer
-language plpgsql
-stable
-security definer
-set search_path = ''
-as $$
-declare
-  v_level integer;
-begin
-  if actor_uuid is null then
-    raise exception 'unauthorized: no actor in session'
-      using errcode = '28000';
-  end if;
-
-  if actor_uuid = (select auth.uid())
-     and not (select private.current_session_satisfies_mfa()) then
-    raise exception 'unauthorized: session assurance required'
-      using errcode = '28000';
-  end if;
-
-  if not private.is_approved_user(actor_uuid) then
-    raise exception 'forbidden: actor is not approved'
-      using errcode = '42501';
-  end if;
-
-  v_level := public._internal_get_role_level(actor_uuid);
-  if v_level is null then
-    raise exception 'unauthorized: actor has no role'
-      using errcode = '28000';
-  end if;
-
-  if not exists (
-    select 1
-    from public.user_roles user_role
-    where user_role.user_id = actor_uuid
-      and private.user_role_scope_is_valid(actor_uuid, user_role.role_key)
-  ) then
-    raise exception 'forbidden: actor has no active compatible reporting scope'
-      using errcode = '42501';
-  end if;
-
-  return v_level;
-end;
-$$;
-
-revoke all privileges on function public._internal_assert_actor_active(uuid)
-  from public, anon, authenticated, service_role;
 
 create or replace function public.get_user_authorization_context(user_uuid uuid)
 returns table (
@@ -401,90 +431,112 @@ stable
 security definer
 set search_path = ''
 as $$
-declare
-  v_caller uuid := (select auth.uid());
 begin
-  if v_caller is null or user_uuid is null then
-    return;
-  end if;
-
-  if not (select private.current_session_satisfies_mfa()) then
-    return;
-  end if;
-
-  if user_uuid <> v_caller
-     and (
-       not coalesce(public._internal_has_permission(v_caller, 'users.view'), false)
-       or not coalesce(private.can_manage_user(user_uuid), false)
-     ) then
+  if (select auth.uid()) is null
+     or not (select private.current_session_satisfies_mfa()) then
     return;
   end if;
 
   return query
-    select
-      user_role.user_id,
-      user_role.role_key,
-      role.level,
-      public._internal_list_permissions(user_role.user_id)
-    from public.user_roles user_role
-    join public.roles role on role.key = user_role.role_key
-    join public.profiles profile
-      on profile.user_id = user_role.user_id
-     and profile.is_active
-     and profile.access_status = 'approved'
-    where user_role.user_id = user_uuid;
+    select authorization_context.*
+    from private.get_user_authorization_context(user_uuid) authorization_context;
 end;
 $$;
 
-revoke all privileges on function public.get_user_authorization_context(uuid)
-  from public, anon, authenticated, service_role;
-grant execute on function public.get_user_authorization_context(uuid)
-  to authenticated;
+revoke all privileges on function
+  public._internal_get_role_level(uuid),
+  public._internal_has_permission(uuid, text),
+  public._internal_list_permissions(uuid),
+  public._internal_assert_actor_active(uuid),
+  public.has_permission(uuid, text),
+  public.get_role_level(uuid),
+  public.get_user_authorization_context(uuid)
+from public, anon, authenticated, service_role;
 
--- A restrictive policy is ANDed with every existing permissive policy. This
--- closes direct self/catalog/scoped reads that do not call has_permission().
-do $$
+grant execute on function
+  public.has_permission(uuid, text),
+  public.get_role_level(uuid),
+  public.get_user_authorization_context(uuid)
+to authenticated;
+
+-- A restrictive policy is ANDed with every existing permissive policy. Cover
+-- the complete installed public RLS surface rather than a future-schema list.
+-- Environments with an authenticated table grant but no RLS fail explicitly.
+do $migration$
 declare
-  v_table text;
+  v_table name;
+  v_expected bigint;
+  v_actual bigint;
 begin
-  foreach v_table in array array[
-    'app_pages',
-    'audit_logs',
-    'crm_dashboard_metrics',
-    'crm_dashboard_snapshots',
-    'crm_dashboard_top_developments',
-    'crm_dashboard_views',
-    'crm_funnel_goals',
-    'crm_organizations',
-    'crm_people',
-    'crm_point_metrics',
-    'crm_point_settings',
-    'crm_portfolio_organizations',
-    'crm_portfolios',
-    'crm_ranking_participants',
-    'crm_ranking_snapshots',
-    'crm_reporting_scopes',
-    'crm_team_memberships',
-    'crm_teams',
-    'crm_user_reporting_scope_grants',
-    'permissions',
-    'profiles',
-    'role_permissions',
-    'roles',
-    'user_permission_overrides',
-    'user_roles'
-  ] loop
-    execute format(
+  if exists (
+    select 1
+    from pg_catalog.pg_class relation
+    join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relkind in ('r', 'p')
+      and not relation.relrowsecurity
+      and (
+        pg_catalog.has_table_privilege('authenticated', relation.oid, 'SELECT')
+        or pg_catalog.has_table_privilege('authenticated', relation.oid, 'INSERT')
+        or pg_catalog.has_table_privilege('authenticated', relation.oid, 'UPDATE')
+        or pg_catalog.has_table_privilege('authenticated', relation.oid, 'DELETE')
+      )
+  ) then
+    raise exception 'authenticated table privilege without RLS'
+      using errcode = '42501';
+  end if;
+
+  select count(*)
+    into v_expected
+  from pg_catalog.pg_class relation
+  join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+  where namespace.nspname = 'public'
+    and relation.relkind in ('r', 'p')
+    and relation.relrowsecurity;
+
+  if v_expected = 0 then
+    raise exception 'public RLS contract is absent'
+      using errcode = '42P01';
+  end if;
+
+  for v_table in
+    select relation.relname
+    from pg_catalog.pg_class relation
+    join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relkind in ('r', 'p')
+      and relation.relrowsecurity
+    order by relation.relname
+  loop
+    execute pg_catalog.format(
       'drop policy if exists authenticated_session_mfa_gate on public.%I',
       v_table
     );
-    execute format(
+    execute pg_catalog.format(
       'create policy authenticated_session_mfa_gate on public.%I as restrictive for all to authenticated using ((select private.current_session_satisfies_mfa())) with check ((select private.current_session_satisfies_mfa()))',
       v_table
     );
   end loop;
+
+  select count(*)
+    into v_actual
+  from pg_catalog.pg_policies policy
+  where policy.schemaname = 'public'
+    and policy.policyname = 'authenticated_session_mfa_gate'
+    and policy.permissive = 'RESTRICTIVE'
+    and policy.roles = array['authenticated']::name[]
+    and policy.cmd = 'ALL'
+    and policy.qual like '%current_session_satisfies_mfa%'
+    and policy.with_check like '%current_session_satisfies_mfa%';
+
+  if v_actual <> v_expected then
+    raise exception 'session/MFA RLS coverage mismatch: expected %, got %',
+      v_expected,
+      v_actual
+      using errcode = '42501';
+  end if;
 end;
-$$;
+$migration$;
 
 create table private.legal_acceptance_requirements (
   user_id uuid not null,
@@ -606,43 +658,6 @@ drop trigger if exists on_auth_user_legal_acceptance on auth.users;
 create trigger on_auth_user_legal_acceptance
   after insert on auth.users
   for each row execute function private.capture_registration_legal_acceptance();
-
-create or replace function private.require_legal_acceptance_before_approval()
-returns trigger
-language plpgsql
-security definer
-set search_path = ''
-as $$
-begin
-  if new.access_status = 'approved'
-     and old.access_status is distinct from 'approved'
-     and exists (
-       select 1
-       from private.legal_acceptance_requirements requirement
-       where requirement.user_id = new.user_id
-         and not exists (
-           select 1
-           from private.legal_acceptances acceptance
-           where acceptance.user_id = requirement.user_id
-             and acceptance.terms_version = requirement.terms_version
-             and acceptance.privacy_version = requirement.privacy_version
-         )
-     ) then
-    raise exception 'legal acceptance required before approval'
-      using errcode = '23514';
-  end if;
-
-  return new;
-end;
-$$;
-
-revoke all privileges on function private.require_legal_acceptance_before_approval()
-  from public, anon, authenticated, service_role;
-
-drop trigger if exists profiles_require_legal_acceptance on public.profiles;
-create trigger profiles_require_legal_acceptance
-  before update of access_status on public.profiles
-  for each row execute function private.require_legal_acceptance_before_approval();
 
 comment on function private.current_session_satisfies_mfa() is
   'Fail-closed session/AAL gate. Reads only factor existence/status; never factor secrets.';

@@ -2,104 +2,198 @@ begin;
 
 select plan(10);
 
-select has_function(
-  'private',
-  'crm_qlik_relay_role_isolated',
-  array[]::text[],
-  'Qlik relay isolation probe exists'
+select is(
+  pg_catalog.to_regprocedure('private.role_isolation_net_fail_closed()'),
+  null::regprocedure,
+  'compatibility marker creates no helper function'
 );
 
-select has_function(
-  'private',
-  'crm_commercial_engine_role_isolated',
-  array[]::text[],
-  'commercial engine isolation probe exists'
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_proc function_entry
+    join pg_catalog.pg_namespace namespace on namespace.oid = function_entry.pronamespace
+    where namespace.nspname in ('public', 'private')
+      and function_entry.proname in (
+        '_internal_assert_actor_active',
+        '_internal_get_role_level',
+        '_internal_has_permission',
+        '_internal_list_permissions',
+        'current_session_is_live',
+        'current_session_satisfies_mfa',
+        'get_role_level',
+        'get_user_authorization_context',
+        'has_permission'
+      )
+      and pg_catalog.pg_get_functiondef(function_entry.oid) ~
+        '(crm_qlik_relay|qlik_relay)'
+  ),
+  'Auth/MFA authorization functions have no Qlik relay dependency'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_proc function_entry
+    join pg_catalog.pg_namespace namespace on namespace.oid = function_entry.pronamespace
+    where namespace.nspname in ('public', 'private')
+      and function_entry.proname in (
+        '_internal_assert_actor_active',
+        '_internal_get_role_level',
+        '_internal_has_permission',
+        '_internal_list_permissions',
+        'current_session_is_live',
+        'current_session_satisfies_mfa',
+        'get_role_level',
+        'get_user_authorization_context',
+        'has_permission'
+      )
+      and pg_catalog.pg_get_functiondef(function_entry.oid) ~
+        '(crm_commercial_engine|commercial_engine)'
+  ),
+  'Auth/MFA authorization functions have no commercial-engine dependency'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_proc function_entry
+    join pg_catalog.pg_namespace namespace on namespace.oid = function_entry.pronamespace
+    where namespace.nspname in ('public', 'private')
+      and function_entry.proname in (
+        '_internal_assert_actor_active',
+        '_internal_get_role_level',
+        '_internal_has_permission',
+        '_internal_list_permissions',
+        'current_session_is_live',
+        'current_session_satisfies_mfa',
+        'get_role_level',
+        'get_user_authorization_context',
+        'has_permission'
+      )
+      and pg_catalog.pg_get_functiondef(function_entry.oid) ~
+        '(has_schema_privilege|to_regnamespace|pg_net)'
+  ),
+  'Auth/MFA authorization functions have no optional network-schema dependency'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_proc function_entry
+    join pg_catalog.pg_namespace namespace on namespace.oid = function_entry.pronamespace
+    join pg_catalog.pg_roles role
+      on role.rolname in ('crm_qlik_relay', 'crm_commercial_engine')
+    cross join lateral pg_catalog.aclexplode(
+      coalesce(function_entry.proacl, pg_catalog.acldefault('f', function_entry.proowner))
+    ) privilege
+    where namespace.nspname in ('public', 'private')
+      and function_entry.proname in (
+        '_internal_assert_actor_active',
+        '_internal_get_role_level',
+        '_internal_has_permission',
+        '_internal_list_permissions',
+        'current_session_is_live',
+        'current_session_satisfies_mfa',
+        'get_role_level',
+        'get_user_authorization_context',
+        'has_permission'
+      )
+      and privilege.grantee = role.oid
+      and privilege.privilege_type = 'EXECUTE'
+  ),
+  'dedicated integration roles receive no Auth/MFA function capability'
 );
 
 select ok(
   (
-    select function_row.prosecdef
-      and pg_catalog.pg_get_userbyid(function_row.proowner) = 'postgres'
-      and 'search_path=""' = any(function_row.proconfig)
-    from pg_catalog.pg_proc function_row
-    where function_row.oid =
-      'private.crm_qlik_relay_role_isolated()'::regprocedure
+    select bool_and(
+      function_entry.prosecdef
+      and pg_catalog.pg_get_userbyid(function_entry.proowner) = 'postgres'
+      and 'search_path=""' = any(function_entry.proconfig)
+    )
+    from pg_catalog.pg_proc function_entry
+    join pg_catalog.pg_namespace namespace on namespace.oid = function_entry.pronamespace
+    where namespace.nspname in ('public', 'private')
+      and function_entry.proname in (
+        '_internal_assert_actor_active',
+        '_internal_get_role_level',
+        '_internal_has_permission',
+        '_internal_list_permissions',
+        'current_session_is_live',
+        'current_session_satisfies_mfa',
+        'get_role_level',
+        'get_user_authorization_context',
+        'has_permission'
+      )
   ),
-  'Qlik relay probe is a postgres-owned empty-path security definer'
+  'Auth/MFA authorization functions stay postgres-owned empty-path security definers'
 );
 
 select ok(
-  (
-    select function_row.prosecdef
-      and pg_catalog.pg_get_userbyid(function_row.proowner) = 'postgres'
-      and 'search_path=""' = any(function_row.proconfig)
-    from pg_catalog.pg_proc function_row
-    where function_row.oid =
-      'private.crm_commercial_engine_role_isolated()'::regprocedure
-  ),
-  'commercial probe is a postgres-owned empty-path security definer'
-);
-
-select ok(
-  pg_catalog.pg_get_functiondef(
-    'private.crm_qlik_relay_role_isolated()'::regprocedure
-  ) like '%not coalesce(pg_catalog.has_schema_privilege(''crm_qlik_relay'', pg_catalog.to_regnamespace(''net''), ''USAGE''), false)%'
+  has_function_privilege(
+    'authenticated',
+    'public.current_session_is_live()',
+    'EXECUTE'
+  )
   and not has_function_privilege(
-    'crm_qlik_relay',
-    'private.crm_qlik_relay_role_isolated()',
+    'anon',
+    'public.current_session_is_live()',
+    'EXECUTE'
+  )
+  and not has_function_privilege(
+    'service_role',
+    'public.current_session_is_live()',
     'EXECUTE'
   ),
-  'Qlik relay probe uses a safe net schema lookup without exposing itself'
+  'live-session probe remains authenticated-only'
 );
 
 select ok(
-  pg_catalog.pg_get_functiondef(
-    'private.crm_commercial_engine_role_isolated()'::regprocedure
-  ) like '%not coalesce(pg_catalog.has_schema_privilege(''crm_commercial_engine'', pg_catalog.to_regnamespace(''net''), ''USAGE''), false)%'
+  has_function_privilege(
+    'authenticated',
+    'private.current_session_satisfies_mfa()',
+    'EXECUTE'
+  )
   and not has_function_privilege(
-    'crm_commercial_engine',
-    'private.crm_commercial_engine_role_isolated()',
+    'anon',
+    'private.current_session_satisfies_mfa()',
+    'EXECUTE'
+  )
+  and not has_function_privilege(
+    'service_role',
+    'private.current_session_satisfies_mfa()',
     'EXECUTE'
   ),
-  'commercial probe uses a safe net schema lookup without exposing itself'
+  'MFA session gate remains authenticated-only'
 );
 
-select is(
-  private.crm_qlik_relay_role_isolated(),
-  false,
-  'Qlik relay isolation remains fail-closed under inherited capabilities'
-);
-
-select is(
-  private.crm_commercial_engine_role_isolated(),
-  false,
-  'commercial isolation remains fail-closed under inherited capabilities'
-);
-
-select is(
-  not coalesce(
-    pg_catalog.has_schema_privilege(
-      'crm_qlik_relay',
-      pg_catalog.to_regnamespace('qa_schema_that_does_not_exist'),
-      'USAGE'
-    ),
-    false
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_policies policy
+    where policy.schemaname in ('public', 'private')
+      and policy.policyname = 'authenticated_session_mfa_gate'
+      and policy.roles && array['crm_qlik_relay', 'crm_commercial_engine']::name[]
   ),
-  true,
-  'Qlik relay net predicate treats an absent schema as no inherited usage'
+  'session/MFA RLS policies grant no dedicated integration role'
 );
 
-select is(
-  not coalesce(
-    pg_catalog.has_schema_privilege(
-      'crm_commercial_engine',
-      pg_catalog.to_regnamespace('qa_schema_that_does_not_exist'),
-      'USAGE'
-    ),
-    false
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_proc function_entry
+    join pg_catalog.pg_namespace namespace on namespace.oid = function_entry.pronamespace
+    where namespace.nspname in ('qlik_relay', 'commercial_engine')
+      and function_entry.proname in (
+        'current_session_is_live',
+        'current_session_satisfies_mfa',
+        'get_role_level',
+        'get_user_authorization_context',
+        'has_permission'
+      )
   ),
-  true,
-  'commercial net predicate treats an absent schema as no inherited usage'
+  'compatibility marker creates no Auth/MFA object in integration schemas'
 );
 
 select * from finish();
