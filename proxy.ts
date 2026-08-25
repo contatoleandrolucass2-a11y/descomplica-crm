@@ -118,6 +118,7 @@ export async function proxy(request: NextRequest) {
   applySecurityHeaders(response.headers, {
     isProd: isSecureProduction,
     noIndex: isHomologationMode(),
+    suppressReferrer: request.nextUrl.pathname === "/auth/callback",
   });
 
   return response;

@@ -39,8 +39,29 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  applyAuthCookiePolicy,
+  buildSessionPersistenceCookie,
+  issueSessionPersistence,
+  isSupabaseAuthCookieName,
+  isSupabaseSessionCookieName,
+  resolveSessionPersistence,
+  SESSION_PERSISTENCE_COOKIE_NAME,
+} from "@/lib/auth/session-persistence";
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const markerValue = request.cookies.get(SESSION_PERSISTENCE_COOKIE_NAME)?.value;
+  const persistence = resolveSessionPersistence(markerValue);
+  const temporaryAuthCookies =
+    persistence.kind === "temporary"
+      ? request.cookies
+          .getAll()
+          .filter(({ name }) =>
+            isSupabaseAuthCookieName(name, process.env.NEXT_PUBLIC_SUPABASE_URL),
+          )
+      : [];
+  const rotatedAuthCookies = new Set<string>();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -51,6 +72,11 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet, headers) {
+          cookiesToSet.forEach(({ name }) => {
+            if (isSupabaseAuthCookieName(name, process.env.NEXT_PUBLIC_SUPABASE_URL)) {
+              rotatedAuthCookies.add(name);
+            }
+          });
           // Mirror rotated cookies to the request so downstream handlers in
           // the same request observe the refreshed session.
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
@@ -58,7 +84,16 @@ export async function updateSession(request: NextRequest) {
           response = NextResponse.next({ request });
           // Persist rotated cookies on the response for the browser.
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
+            response.cookies.set(
+              name,
+              value,
+              applyAuthCookiePolicy(
+                options,
+                isSupabaseSessionCookieName(name, process.env.NEXT_PUBLIC_SUPABASE_URL)
+                  ? persistence
+                  : { kind: "temporary" },
+              ),
+            ),
           );
           // Apply anti-cache headers per @supabase/ssr contract. See
           // file-level comment for rationale.
@@ -73,6 +108,24 @@ export async function updateSession(request: NextRequest) {
   // exposing session material outside the cookie boundary is forbidden
   // per AUTH_SECURITY.md > Session Observability Requirements.
   await supabase.auth.getClaims();
+
+  // An absent, invalid or expired marker means a session-only browser
+  // lifetime. Existing remembered Supabase cookies must be rewritten even
+  // when no token refresh happened during this request.
+  if (temporaryAuthCookies.length > 0) {
+    temporaryAuthCookies
+      .filter(({ name }) => !rotatedAuthCookies.has(name))
+      .forEach(({ name, value }) =>
+        response.cookies.set(name, value, applyAuthCookiePolicy({}, persistence)),
+      );
+  }
+
+  // Invalid, expired and unverifiable markers fail back to a temporary
+  // session. Clear the stale marker without exposing its value.
+  if (markerValue && persistence.kind === "temporary") {
+    const marker = buildSessionPersistenceCookie(issueSessionPersistence(undefined));
+    response.cookies.set(marker.name, marker.value, marker.options);
+  }
 
   return { supabase, response };
 }

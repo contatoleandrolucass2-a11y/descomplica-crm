@@ -8,8 +8,11 @@
  * Referência: PROJECT_STRUCTURE_PLAN.md > Layout strategy
  */
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 
+import { CookieConsentBanner } from "@/app/_components/CookieConsentBanner";
 import { isHomologationMode } from "@/lib/homologation/config";
+import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
 
 import "./globals.css";
 
@@ -30,11 +33,15 @@ export const metadata: Metadata = {
     : {}),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const consentCookie = cookieStore.get(COOKIE_CONSENT_COOKIE_NAME)?.value;
+  const consent = parseCookieConsent(consentCookie);
+
   return (
     <html lang="pt-BR" className="h-full">
       <body className="min-h-full">
@@ -44,6 +51,7 @@ export default function RootLayout({
           </aside>
         ) : null}
         {children}
+        <CookieConsentBanner key={consentCookie ?? "unset"} consent={consent} />
       </body>
     </html>
   );

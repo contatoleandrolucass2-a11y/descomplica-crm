@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { createHmac } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -10,6 +11,8 @@ import {
   type BrowserContextOptions,
   type Page,
 } from "@playwright/test";
+
+import { isRecoveryTokenHash } from "../lib/auth/recovery-token";
 
 const expectedRoles = [
   "master",
@@ -31,8 +34,51 @@ type QaTarget = {
   contextOptions: BrowserContextOptions;
 };
 
+type BrowserStorageState = Awaited<ReturnType<BrowserContext["storageState"]>>;
+
 const homologationOrigin = "https://homolog.descomplicapro.com.br";
 const unexpectedRemoteOrigins = new Set<string>();
+const roleStorageStates = new Map<Role, BrowserStorageState>();
+
+function decodeBase32(value: string): Buffer {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = "";
+  for (const character of value.replaceAll(/\s+/g, "").toUpperCase()) {
+    const index = alphabet.indexOf(character);
+    if (index < 0) throw new Error("TOTP enrollment returned an invalid Base32 secret.");
+    bits += index.toString(2).padStart(5, "0");
+  }
+  const bytes: number[] = [];
+  for (let offset = 0; offset + 8 <= bits.length; offset += 8) {
+    bytes.push(Number.parseInt(bits.slice(offset, offset + 8), 2));
+  }
+  return Buffer.from(bytes);
+}
+
+function currentTotp(secret: string, at = Date.now()): string {
+  const counter = BigInt(Math.floor(at / 30_000));
+  const message = Buffer.alloc(8);
+  message.writeBigUInt64BE(counter);
+  const digest = createHmac("sha1", decodeBase32(secret)).update(message).digest();
+  const offset = digest[digest.length - 1]! & 0x0f;
+  const value =
+    (((digest[offset]! & 0x7f) << 24) |
+      (digest[offset + 1]! << 16) |
+      (digest[offset + 2]! << 8) |
+      digest[offset + 3]!) %
+    1_000_000;
+  return value.toString().padStart(6, "0");
+}
+
+async function waitForNextTotp(secret: string, previousCode: string): Promise<string> {
+  const deadline = Date.now() + 35_000;
+  while (Date.now() < deadline) {
+    const candidate = currentTotp(secret);
+    if (candidate !== previousCode) return candidate;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error("TOTP window did not advance before timeout.");
+}
 
 function requiredEnvironment(name: string): string {
   const value = process.env[name];
@@ -88,6 +134,24 @@ function readTarget(): QaTarget {
 }
 
 const qaTarget = readTarget();
+function readMailpitOrigin(): string | null {
+  if (qaTarget.remoteHomologation) return null;
+  const origin = new URL(requiredEnvironment("QA_E2E_MAILPIT_ORIGIN"));
+  if (
+    origin.protocol !== "http:" ||
+    !["127.0.0.1", "localhost", "[::1]"].includes(origin.hostname) ||
+    origin.username ||
+    origin.password ||
+    origin.pathname !== "/" ||
+    origin.search ||
+    origin.hash
+  ) {
+    throw new Error("QA_E2E_MAILPIT_ORIGIN must be a credential-free HTTP loopback origin.");
+  }
+  return origin.origin;
+}
+
+const mailpitOrigin = readMailpitOrigin();
 const captureFinalStateEvidence = process.env.QA_CAPTURE_STATE_EVIDENCE === "true";
 const finalStateEvidenceRoot = path.resolve(process.cwd(), "docs/qa/final-states");
 
@@ -102,6 +166,106 @@ async function captureState(page: Page, name: string) {
     fullPage: false,
     animations: "disabled",
   });
+}
+
+async function waitForRecoveryLink(recipient: string, requestedAfter: number): Promise<string> {
+  if (!mailpitOrigin) throw new Error("Local SMTP capture is unavailable.");
+  const deadline = Date.now() + 15_000;
+  const diagnostics = {
+    callbacks: 0,
+    exactKeys: 0,
+    tokenContract: 0,
+    links: 0,
+    messages: 0,
+    recoveryType: 0,
+    sameOrigin: 0,
+  };
+  while (Date.now() < deadline) {
+    try {
+      const listResponse = await fetch(`${mailpitOrigin}/api/v1/messages`, {
+        signal: AbortSignal.timeout(2_000),
+      });
+      const list = (await listResponse.json()) as { messages?: unknown };
+      const messages = Array.isArray(list.messages) ? list.messages : [];
+      for (const candidate of messages) {
+        if (!candidate || typeof candidate !== "object") continue;
+        const message = candidate as {
+          ID?: unknown;
+          Created?: unknown;
+          To?: unknown;
+        };
+        const recipients = Array.isArray(message.To) ? message.To : [];
+        const matchesRecipient = recipients.some(
+          (entry) =>
+            entry !== null &&
+            typeof entry === "object" &&
+            (entry as { Address?: unknown }).Address === recipient,
+        );
+        const createdAt = typeof message.Created === "string" ? Date.parse(message.Created) : 0;
+        if (
+          !matchesRecipient ||
+          createdAt < requestedAfter - 1_000 ||
+          typeof message.ID !== "string"
+        ) {
+          continue;
+        }
+        diagnostics.messages += 1;
+
+        let recoveryLink: string | null = null;
+        try {
+          const detailResponse = await fetch(
+            `${mailpitOrigin}/api/v1/message/${encodeURIComponent(message.ID)}`,
+            { signal: AbortSignal.timeout(2_000) },
+          );
+          const detail = (await detailResponse.json()) as { HTML?: unknown; Text?: unknown };
+          const content = [detail.HTML, detail.Text]
+            .filter((value): value is string => typeof value === "string")
+            .join("\n")
+            .replaceAll("&amp;", "&");
+          const links = content.match(/https?:\/\/[^\s"'<>]+/g) ?? [];
+          diagnostics.links += links.length;
+          for (const link of links) {
+            const url = new URL(link);
+            const tokenHash = url.searchParams.get("token_hash");
+            if (url.origin === qaTarget.origin) diagnostics.sameOrigin += 1;
+            if (url.pathname === "/auth/callback") diagnostics.callbacks += 1;
+            if (url.searchParams.get("type") === "recovery") diagnostics.recoveryType += 1;
+            if (isRecoveryTokenHash(tokenHash)) {
+              diagnostics.tokenContract += 1;
+            }
+            if ([...url.searchParams.keys()].sort().join(",") === "token_hash,type") {
+              diagnostics.exactKeys += 1;
+            }
+            if (
+              url.origin === qaTarget.origin &&
+              url.pathname === "/auth/callback" &&
+              url.searchParams.get("type") === "recovery" &&
+              isRecoveryTokenHash(tokenHash) &&
+              [...url.searchParams.keys()].sort().join(",") === "token_hash,type"
+            ) {
+              recoveryLink = url.toString();
+              break;
+            }
+          }
+        } finally {
+          const deleteResponse = await fetch(`${mailpitOrigin}/api/v1/messages`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ IDs: [message.ID] }),
+            signal: AbortSignal.timeout(2_000),
+          });
+          if (!deleteResponse.ok) throw new Error("Local SMTP message cleanup failed.");
+        }
+        if (recoveryLink) return recoveryLink;
+      }
+    } catch {
+      // Retry without exposing message bodies, links, tokens or request codes.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  throw new Error(
+    `Local SMTP recovery contract failed (messages=${diagnostics.messages}, links=${diagnostics.links}, same_origin=${diagnostics.sameOrigin}, callbacks=${diagnostics.callbacks}, recovery_type=${diagnostics.recoveryType}, token_contract=${diagnostics.tokenContract}, exact_keys=${diagnostics.exactKeys}).`,
+  );
 }
 
 function readAccounts(): Record<Role, QaAccount> {
@@ -220,30 +384,96 @@ function expectedRoutesForRole(role: Role) {
     .sort();
 }
 
-async function login(page: Page, account: QaAccount) {
+function expectedHomeForRole(role: Role) {
+  if (role === "master") return "/app";
+  if (role === "admin") return "/admin";
+  return "/conta/seguranca";
+}
+
+async function acceptEssentialCookies(page: Page) {
+  const essential = page.getByRole("button", { name: "Somente essenciais", exact: true });
+  if (await essential.isVisible().catch(() => false)) {
+    await essential.click();
+    await expect(essential).toHaveCount(0);
+  }
+}
+
+async function login(page: Page, account: QaAccount, rememberBrowser = false) {
   await page.goto("/login");
+  await acceptEssentialCookies(page);
   await page.getByLabel("E-mail").fill(account.email);
   await page.getByLabel("Senha").fill(account.password);
+  if (rememberBrowser) {
+    await page.getByLabel("Lembrar neste navegador por até 30 dias").check();
+  }
+  const expectedHome = expectedHomeForRole(account.role);
   await Promise.all([
-    page.waitForURL((url) => url.pathname === "/app"),
+    page.waitForURL((url) => url.pathname === expectedHome),
     page.getByRole("button", { name: "Entrar", exact: true }).click(),
   ]);
   await page.locator("h1").first().waitFor({ state: "visible" });
 }
 
 async function withRolePage(browser: Browser, role: Role, run: (page: Page) => Promise<void>) {
+  const storageState = roleStorageStates.get(role);
   const context = await browser.newContext({
     reducedMotion: "reduce",
     ...qaTarget.contextOptions,
+    ...(storageState ? { storageState } : {}),
   });
   try {
     await constrainRemoteRequests(context);
     const page = await context.newPage();
-    await login(page, accounts[role]);
+    if (storageState) {
+      await page.goto(expectedHomeForRole(role));
+      await expect(page).toHaveURL((url) => url.pathname === expectedHomeForRole(role));
+      await page.locator("h1").first().waitFor({ state: "visible" });
+    } else {
+      await login(page, accounts[role]);
+      roleStorageStates.set(role, await context.storageState());
+    }
     await run(page);
   } finally {
     await context.close();
   }
+}
+
+async function logoutAndAssertBoundary(page: Page, role: Role) {
+  await page.goto("/conta/seguranca");
+  await page.getByRole("button", { name: "Sair", exact: true }).click();
+  roleStorageStates.delete(role);
+  await expect(page).toHaveURL(/\/login$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/login$/);
+  await page.goto("/app");
+  await expect(page).toHaveURL(/\/login$/);
+  await page.reload();
+  await expect(page).toHaveURL(/\/login$/);
+}
+
+async function assertRecoveryRedirect(
+  page: Page,
+  expectedPathname: "/redefinir-senha" | "/esqueci-senha",
+  expectedSearch = "",
+) {
+  const current = new URL(page.url());
+  if (
+    current.origin === qaTarget.origin &&
+    current.pathname === expectedPathname &&
+    current.search === expectedSearch
+  ) {
+    return;
+  }
+
+  // A failed callback can leave its one-time token hash in the browser URL.
+  // Replace it before throwing so Playwright reporters never receive the
+  // token-bearing URL through an assertion message or automatic attachment.
+  try {
+    await page.goto("/esqueci-senha?status=invalid", { waitUntil: "domcontentloaded" });
+  } catch {
+    // The context is closed by the caller. Never surface the previous URL.
+  }
+  throw new Error("Password recovery did not reach the expected safe destination.");
 }
 
 async function constrainRemoteRequests(context: BrowserContext) {
@@ -277,12 +507,25 @@ test.afterEach(() => {
   expect([...unexpectedRemoteOrigins]).toEqual([]);
 });
 
+test.afterAll(() => {
+  roleStorageStates.clear();
+});
+
 test("anonymous boundaries and generic login failure stay closed", async ({ page }) => {
+  const callbackBoundary = await page.context().request.get("/auth/callback?code=invalid", {
+    maxRedirects: 0,
+  });
+  expect(callbackBoundary.status()).toBe(307);
+  expect(callbackBoundary.headers()["referrer-policy"]).toBe("no-referrer");
+  const directBoundary = await page.context().request.get("/app/ranking", { maxRedirects: 0 });
+  expect([303, 307]).toContain(directBoundary.status());
+  expect(directBoundary.headers().location).toBe("/login");
   const response = await page.goto("/app/ranking");
   expect(response?.status()).toBe(200);
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("heading", { level: 1, name: "Entrar" })).toBeVisible();
   await expect(page.locator("body")).not.toContainText("QA synthetic");
+  await acceptEssentialCookies(page);
 
   await page.getByLabel("E-mail").fill("qa.unknown@local.invalid");
   await page.getByLabel("Senha").fill("invalid-credential-Aa1!");
@@ -295,15 +538,279 @@ test("anonymous boundaries and generic login failure stay closed", async ({ page
   expect(response?.headers()["content-security-policy"]).toContain("default-src 'self'");
 });
 
+test("cookie choices, legal documents and browser-session lifetimes are explicit", async ({
+  browser,
+}) => {
+  test.setTimeout(120_000);
+  const consentContext = await browser.newContext(qaTarget.contextOptions);
+  try {
+    await constrainRemoteRequests(consentContext);
+    const page = await consentContext.newPage();
+    await page.goto("/login");
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Preferências de cookies" }),
+    ).toBeVisible();
+    for (const optionalCategory of ["Funcionais", "Desempenho", "Análise"]) {
+      await expect(page.getByLabel(new RegExp(`^${optionalCategory}`))).not.toBeChecked();
+    }
+
+    const preferencesButton = page.getByRole("button", {
+      name: "Preferências de cookies",
+      exact: true,
+    });
+    await page.getByRole("button", { name: "Somente essenciais", exact: true }).click();
+    await expect(preferencesButton).toBeVisible();
+    let consentCookie = (await consentContext.cookies()).find(
+      (cookie) => cookie.name === "descomplica-cookie-consent",
+    );
+    expect(consentCookie).toBeDefined();
+    expect(consentCookie?.httpOnly).toBe(true);
+    expect(consentCookie?.sameSite).toBe("Lax");
+    expect(consentCookie?.path).toBe("/");
+    let consentValue = JSON.parse(decodeURIComponent(consentCookie!.value));
+    expect(consentValue.categories).toEqual({
+      essential: true,
+      security: true,
+      functional: false,
+      performance: false,
+      analytics: false,
+    });
+
+    await preferencesButton.click();
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Preferências de cookies" }),
+    ).toBeVisible();
+    await page.getByLabel(/^Funcionais/).check();
+    await page.getByRole("button", { name: "Salvar preferências", exact: true }).click();
+    await expect(preferencesButton).toBeVisible();
+    consentCookie = (await consentContext.cookies()).find(
+      (cookie) => cookie.name === "descomplica-cookie-consent",
+    );
+    consentValue = JSON.parse(decodeURIComponent(consentCookie!.value));
+    expect(consentValue.categories).toMatchObject({
+      functional: true,
+      performance: false,
+      analytics: false,
+    });
+
+    await preferencesButton.click();
+    await expect(
+      page.getByRole("heading", { level: 2, name: "Preferências de cookies" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Aceitar todos", exact: true }).click();
+    await expect(preferencesButton).toBeVisible();
+    consentCookie = (await consentContext.cookies()).find(
+      (cookie) => cookie.name === "descomplica-cookie-consent",
+    );
+    consentValue = JSON.parse(decodeURIComponent(consentCookie!.value));
+    expect(consentValue.categories).toMatchObject({
+      functional: true,
+      performance: true,
+      analytics: true,
+    });
+
+    for (const document of [
+      ["/termos-de-uso", "Termos de Uso"],
+      ["/politica-de-privacidade", "Política de Privacidade"],
+      ["/politica-de-cookies", "Política de Cookies"],
+    ] as const) {
+      const response = await page.goto(document[0]);
+      expect(response?.status()).toBe(200);
+      await expect(page.getByRole("heading", { level: 1, name: document[1] })).toBeVisible();
+      await expect(page.getByText("Pendente de revisão jurídica", { exact: true })).toBeVisible();
+    }
+
+    if (!qaTarget.remoteHomologation) {
+      await page.goto("/register");
+      const terms = page.getByLabel(/Li e aceito os Termos de Uso/);
+      const privacy = page.getByLabel(/Li e aceito a Política de Privacidade/);
+      await expect(terms).not.toBeChecked();
+      await expect(privacy).not.toBeChecked();
+      await expect(terms).toHaveAttribute("required", "");
+      await expect(privacy).toHaveAttribute("required", "");
+      await expect(page.getByText(/separado das preferências de cookies opcionais/i)).toBeVisible();
+    }
+  } finally {
+    await consentContext.close();
+  }
+
+  const temporaryContext = await browser.newContext(qaTarget.contextOptions);
+  try {
+    await constrainRemoteRequests(temporaryContext);
+    const page = await temporaryContext.newPage();
+    await login(page, accounts.master);
+    const authCookies = (await temporaryContext.cookies()).filter((cookie) =>
+      cookie.name.includes("-auth-token"),
+    );
+    expect(authCookies.length).toBeGreaterThan(0);
+    for (const cookie of authCookies) {
+      expect(cookie.expires).toBe(-1);
+      expect(cookie.httpOnly).toBe(true);
+      expect(cookie.sameSite).toBe("Lax");
+    }
+    const authStorageKeys = await page.evaluate(() =>
+      Object.keys(localStorage).filter((key) =>
+        /(?:supabase|auth-token|access|refresh)/i.test(key),
+      ),
+    );
+    expect(authStorageKeys).toEqual([]);
+    await logoutAndAssertBoundary(page, "master");
+  } finally {
+    await temporaryContext.close();
+  }
+
+  const rememberedContext = await browser.newContext(qaTarget.contextOptions);
+  try {
+    await constrainRemoteRequests(rememberedContext);
+    const page = await rememberedContext.newPage();
+    await login(page, accounts.master, true);
+    const now = Date.now() / 1000;
+    const rememberedCookies = await rememberedContext.cookies();
+    const marker = rememberedCookies.find(
+      (cookie) => cookie.name === "descomplica-session-persistence",
+    );
+    const authCookies = rememberedCookies.filter((cookie) => cookie.name.includes("-auth-token"));
+    expect(marker).toBeDefined();
+    expect(marker?.httpOnly).toBe(true);
+    expect(marker?.expires).toBeGreaterThan(now + 29 * 24 * 60 * 60);
+    expect(marker?.expires).toBeLessThanOrEqual(now + 30 * 24 * 60 * 60 + 60);
+    expect(authCookies.length).toBeGreaterThan(0);
+    for (const cookie of authCookies) {
+      expect(cookie.expires).toBeGreaterThan(now + 29 * 24 * 60 * 60);
+      expect(cookie.expires).toBeLessThanOrEqual(marker!.expires);
+      expect(cookie.httpOnly).toBe(true);
+    }
+
+    const invalidRecovery = await page.request.get(
+      `/auth/callback?token_hash=${"0".repeat(56)}&type=recovery`,
+      { maxRedirects: 0 },
+    );
+    expect(invalidRecovery.status()).toBe(307);
+    const invalidRecoveryLocation = new URL(
+      invalidRecovery.headers().location ?? "/",
+      qaTarget.origin,
+    );
+    expect({
+      origin: invalidRecoveryLocation.origin,
+      pathname: invalidRecoveryLocation.pathname,
+      search: invalidRecoveryLocation.search,
+    }).toEqual({
+      origin: qaTarget.origin,
+      pathname: "/esqueci-senha",
+      search: "?status=invalid",
+    });
+    const cookiesAfterFalseCallback = await rememberedContext.cookies();
+    const markerAfterFalseCallback = cookiesAfterFalseCallback.find(
+      (cookie) => cookie.name === "descomplica-session-persistence",
+    );
+    expect(markerAfterFalseCallback?.value === marker?.value).toBe(true);
+    const sessionAfterFalseCallback = await page.request.get("/api/dashboard/status");
+    expect(sessionAfterFalseCallback.status()).toBe(200);
+
+    await rememberedContext.clearCookies({ name: "descomplica-session-persistence" });
+    await page.reload();
+    const downgradedCookies = (await rememberedContext.cookies()).filter((cookie) =>
+      cookie.name.includes("-auth-token"),
+    );
+    expect(downgradedCookies.length).toBeGreaterThan(0);
+    for (const cookie of downgradedCookies) expect(cookie.expires).toBe(-1);
+    await logoutAndAssertBoundary(page, "master");
+  } finally {
+    await rememberedContext.close();
+  }
+});
+
 test("all nine profiles enforce browser navigation and direct-route permissions", async ({
   browser,
 }) => {
   test.setTimeout(300_000);
   for (const role of expectedRoles) {
     await withRolePage(browser, role, async (page) => {
+      await expect(page).toHaveURL((url) => url.pathname === expectedHomeForRole(role));
+      const identity = page.locator(
+        role === "master" || role === "admin"
+          ? "[data-session-identity-label]"
+          : "[data-account-identity]",
+      );
+      await expect(identity).toContainText(accounts[role].email);
+
+      const securityPage = await page.goto("/conta/seguranca");
+      expect(securityPage?.status()).toBe(200);
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Segurança da conta", exact: true }),
+      ).toBeVisible();
+      await expect(page.locator("[data-account-identity]")).toContainText(accounts[role].email);
+
+      const dashboardApi = await page.request.get("/api/dashboard/status");
+      if (role === "master") {
+        expect(dashboardApi.status()).toBe(200);
+        expect(dashboardApi.headers()["cache-control"]).toContain("no-store");
+      } else {
+        expect(dashboardApi.status()).toBe(403);
+        expect(await dashboardApi.json()).toEqual({ error: "forbidden" });
+      }
+
+      const simulatorStatus = await page.request.get(
+        "/api/official-simulator/associativo-fluxo-linear",
+      );
+      if (role === "master") {
+        expect(simulatorStatus.status()).toBe(200);
+        expect(await simulatorStatus.json()).toMatchObject({
+          engineKey: "simulator.wf13",
+          executionEnabled: true,
+        });
+      } else {
+        expect(simulatorStatus.status()).toBe(403);
+        expect(await simulatorStatus.json()).toEqual({ error: "forbidden" });
+        const simulatorExecution = await page.request.post(
+          "/api/official-simulator/associativo-fluxo-linear",
+          {
+            data: { schemaVersion: 1, input: {} },
+            headers: { origin: qaTarget.origin },
+          },
+        );
+        expect(simulatorExecution.status()).toBe(403);
+        expect(await simulatorExecution.json()).toEqual({ error: "forbidden" });
+      }
+
+      const disabledApiProbes = [
+        page.request.post("/api/ingest/qlik", {
+          data: { requestId: "00000000-0000-4000-8000-000000000011" },
+        }),
+        page.request.post("/api/ingest/salesforce", {
+          data: { requestId: "00000000-0000-4000-8000-000000000012" },
+        }),
+        page.request.post("/api/refresh/salesforce", {
+          data: {},
+          headers: { origin: qaTarget.origin },
+        }),
+        page.request.post("/api/commercial-engine/simulator.wf14", {
+          data: { requestId: "00000000-0000-4000-8000-000000000013", input: {} },
+          headers: { origin: qaTarget.origin },
+        }),
+      ];
+      const disabledApiResponses = await Promise.all(disabledApiProbes);
+      const expectedDisabledErrors = [
+        "ingestion_unavailable",
+        "ingestion_unavailable",
+        "refresh_unavailable",
+        "engine_unavailable",
+      ];
+      for (const [index, response] of disabledApiResponses.entries()) {
+        expect(response.status()).toBe(503);
+        expect(response.headers()["cache-control"]).toContain("no-store");
+        expect(await response.json()).toEqual({ error: expectedDisabledErrors[index] });
+      }
+
       let navigationChecked = false;
       const expectedNavigationRoutes = expectedRoutesForRole(role);
       for (const surface of protectedSurfaces) {
+        const directResponse = await page.context().request.get(surface.path, { maxRedirects: 0 });
+        if (surface.allowed.has(role)) {
+          expect(directResponse.status()).toBe(200);
+        } else {
+          expect(directResponse.status()).toBe(403);
+        }
         const response = await page.goto(surface.path);
         if (surface.allowed.has(role)) {
           expect(response?.status()).toBe(200);
@@ -319,9 +826,7 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
             0,
           );
         } else {
-          // A loading boundary may commit a 200 shell before forbidden() runs;
-          // terminal UI and the independent RLS matrix remain authoritative.
-          expect([200, 403]).toContain(response?.status());
+          expect(response?.status()).toBe(403);
           await expect(
             page.getByRole("heading", { level: 1, name: forbiddenHeading }),
           ).toBeVisible();
@@ -346,11 +851,13 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
 
       expect(navigationChecked).toBe(expectedNavigationRoutes.length > 0);
 
-      if (role === "pending") {
-        await page.getByRole("button", { name: "Sair", exact: true }).click();
-        await expect(page).toHaveURL(/\/login$/);
-        await expect(page.getByRole("heading", { level: 1, name: "Entrar" })).toBeVisible();
-      }
+      // These three sessions are reused by the subsequent, role-specific
+      // scenarios and logged out there. This keeps the complete release smoke
+      // below the local Supabase anti-brute-force threshold without weakening
+      // that threshold or skipping a profile logout.
+      if (!qaTarget.remoteHomologation && ["master", "admin", "pending"].includes(role)) return;
+
+      await logoutAndAssertBoundary(page, role);
     });
   }
 });
@@ -690,10 +1197,6 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
       await page.getByRole("button", { name: label, exact: true }).click();
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     }
-
-    await page.getByRole("button", { name: "Sair", exact: true }).click();
-    await expect(page).toHaveURL(/\/login$/);
-    await expect(page.getByRole("heading", { level: 1, name: "Entrar" })).toBeVisible();
   });
 
   await withRolePage(browser, "admin", async (page) => {
@@ -703,6 +1206,7 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     await page.goto("/app/simulacao/associativo-fluxo-linear");
     await expect(page.getByRole("heading", { level: 1, name: forbiddenHeading })).toBeVisible();
     await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toHaveCount(0);
+    await logoutAndAssertBoundary(page, "admin");
   });
 });
 
@@ -766,6 +1270,8 @@ test("login, logout and terminal state surfaces remain visually explicit", async
     await rolePage.goto("/app");
     await expect(rolePage.getByRole("heading", { level: 1, name: forbiddenHeading })).toBeVisible();
     await captureState(rolePage, "403");
+    await logoutAndAssertBoundary(rolePage, "pending");
+    await captureState(rolePage, "logout");
   });
 
   await withRolePage(browser, "master", async (rolePage) => {
@@ -890,11 +1396,9 @@ test("login, logout and terminal state surfaces remain visually explicit", async
     });
     await expect(rolePage.locator('[aria-busy="true"]')).toHaveCount(5);
     await captureState(rolePage, "loading");
-
-    await rolePage.goto("/app");
-    await rolePage.getByRole("button", { name: "Sair", exact: true }).click();
-    await expect(rolePage).toHaveURL(/\/login$/);
-    await captureState(rolePage, "logout");
+    if (qaTarget.remoteHomologation) {
+      await logoutAndAssertBoundary(rolePage, "master");
+    }
   });
 
   if (captureFinalStateEvidence) {
@@ -923,5 +1427,251 @@ test("login, logout and terminal state surfaces remain visually explicit", async
       )}\n`,
       "utf8",
     );
+  }
+});
+
+test("password recovery is generic, quarantined, one-time and revokes every session", async ({
+  browser,
+}) => {
+  test.skip(
+    qaTarget.remoteHomologation,
+    "Password recovery mutates only ephemeral local QA users.",
+  );
+  test.setTimeout(120_000);
+  const genericRecoveryMessage =
+    "Se houver uma conta elegível para esse e-mail, enviaremos as instruções de redefinição.";
+
+  const masterStorageState = roleStorageStates.get("master");
+  if (!masterStorageState)
+    throw new Error("Master smoke session is unavailable for revocation QA.");
+  const existingSessionContext = await browser.newContext({
+    ...qaTarget.contextOptions,
+    storageState: masterStorageState,
+  });
+  const recoveryContext = await browser.newContext(qaTarget.contextOptions);
+  try {
+    await constrainRemoteRequests(existingSessionContext);
+    await constrainRemoteRequests(recoveryContext);
+    const existingSessionPage = await existingSessionContext.newPage();
+    await existingSessionPage.goto("/app");
+    await expect(existingSessionPage).toHaveURL((url) => url.pathname === "/app");
+
+    const recoveryPage = await recoveryContext.newPage();
+    await recoveryPage.goto("/esqueci-senha");
+    await acceptEssentialCookies(recoveryPage);
+    await recoveryPage.getByLabel("E-mail").fill("qa.recovery-unknown@local.invalid");
+    await recoveryPage.getByRole("button", { name: "Enviar instruções", exact: true }).click();
+    await expect(recoveryPage.getByText(genericRecoveryMessage, { exact: true })).toBeVisible();
+
+    await recoveryPage.goto("/esqueci-senha");
+    const requestedAfter = Date.now();
+    await recoveryPage.getByLabel("E-mail").fill(accounts.master.email);
+    await recoveryPage.getByRole("button", { name: "Enviar instruções", exact: true }).click();
+    await expect(recoveryPage.getByText(genericRecoveryMessage, { exact: true })).toBeVisible();
+    const recoveryLink = await waitForRecoveryLink(accounts.master.email, requestedAfter);
+
+    try {
+      await recoveryPage.goto(recoveryLink, { waitUntil: "domcontentloaded" });
+    } catch {
+      throw new Error("The local one-time recovery link could not be opened.");
+    }
+    await assertRecoveryRedirect(recoveryPage, "/redefinir-senha");
+
+    const quarantinedApi = await recoveryPage.request.get("/api/dashboard/status");
+    expect(quarantinedApi.status()).toBe(403);
+    expect(await quarantinedApi.json()).toEqual({ error: "password_recovery_required" });
+    for (const pathname of ["/app", "/conta/seguranca", "/mfa"]) {
+      await recoveryPage.goto(pathname);
+      await expect(recoveryPage).toHaveURL((url) => url.pathname === "/redefinir-senha");
+    }
+
+    await recoveryPage.getByLabel("Nova senha", { exact: true }).fill("lowercase123!");
+    await recoveryPage.getByLabel("Confirmar nova senha", { exact: true }).fill("lowercase123!");
+    await recoveryPage
+      .getByRole("button", { name: "Redefinir e encerrar sessões", exact: true })
+      .click();
+    await expect(recoveryPage.getByText("Inclua ao menos uma letra maiúscula.")).toBeVisible();
+
+    const replacementPassword = `Aa1!Reset-${accounts.master.password}`;
+    await recoveryPage.getByLabel("Nova senha", { exact: true }).fill(replacementPassword);
+    await recoveryPage
+      .getByLabel("Confirmar nova senha", { exact: true })
+      .fill(replacementPassword);
+    await Promise.all([
+      recoveryPage.waitForURL(
+        (url) => url.pathname === "/login" && url.search === "?password=updated",
+      ),
+      recoveryPage
+        .getByRole("button", { name: "Redefinir e encerrar sessões", exact: true })
+        .click(),
+    ]);
+    accounts.master.password = replacementPassword;
+    roleStorageStates.delete("master");
+    await expect(
+      recoveryPage.getByText(
+        "Senha redefinida. Todas as sessões foram encerradas; entre novamente.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+
+    const oldSessionApi = await existingSessionPage.request.get("/api/dashboard/status");
+    expect([401, 403]).toContain(oldSessionApi.status());
+    expect(await oldSessionApi.json()).toEqual({
+      error: oldSessionApi.status() === 401 ? "unauthenticated" : "forbidden",
+    });
+    await existingSessionPage.goto("/conta/seguranca");
+    await expect(existingSessionPage).toHaveURL((url) => url.pathname === "/login");
+
+    try {
+      await recoveryPage.goto(recoveryLink, { waitUntil: "domcontentloaded" });
+    } catch {
+      throw new Error("The consumed local recovery link could not be rechecked.");
+    }
+    await assertRecoveryRedirect(recoveryPage, "/esqueci-senha", "?status=invalid");
+    await expect(
+      recoveryPage.getByText(/O link é inválido, expirou ou já foi utilizado/),
+    ).toBeVisible();
+
+    await recoveryPage.goto("/login");
+    await recoveryPage.getByLabel("E-mail").fill(accounts.master.email);
+    await recoveryPage.getByLabel("Senha").fill(replacementPassword.slice(0, -1));
+    await recoveryPage.getByRole("button", { name: "Entrar", exact: true }).click();
+    await expect(recoveryPage.getByText(genericLoginFailure, { exact: true })).toBeVisible();
+    // React resets uncontrolled Server Action fields after the failed submit.
+    // Re-enter both required credentials so native form validation does not
+    // suppress the success-path request.
+    await recoveryPage.getByLabel("E-mail").fill(accounts.master.email);
+    await recoveryPage.getByLabel("Senha").fill(replacementPassword);
+    await Promise.all([
+      recoveryPage.waitForURL((url) => url.pathname === "/app"),
+      recoveryPage.getByRole("button", { name: "Entrar", exact: true }).click(),
+    ]);
+    await logoutAndAssertBoundary(recoveryPage, "master");
+  } finally {
+    await existingSessionContext.close();
+    await recoveryContext.close();
+  }
+});
+
+test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", async ({
+  browser,
+}) => {
+  test.skip(qaTarget.remoteHomologation, "MFA enrollment mutates only ephemeral local QA users.");
+  test.setTimeout(120_000);
+
+  let secret = "";
+  let enrollmentCode = "";
+  await withRolePage(browser, "master", async (page) => {
+    await page.goto("/conta/seguranca");
+    await page
+      .getByRole("button", { name: "Ativar verificação em duas etapas", exact: true })
+      .click();
+    await expect(
+      page.getByAltText("Código QR para configurar o aplicativo autenticador"),
+    ).toBeVisible();
+    secret =
+      (
+        await page
+          .locator("code")
+          .filter({ hasText: /^[A-Z2-7]+$/ })
+          .textContent()
+      )?.trim() ?? "";
+    if (!/^[A-Z2-7]{16,128}$/.test(secret)) {
+      throw new Error("MFA enrollment did not expose a valid synthetic manual key.");
+    }
+    enrollmentCode = currentTotp(secret);
+    await page.getByLabel("Código de 6 dígitos").fill(enrollmentCode);
+    await Promise.all([
+      page.waitForURL(
+        (url) => url.pathname === "/conta/seguranca" && url.search === "?mfa=enabled",
+      ),
+      page.getByRole("button", { name: "Confirmar e ativar", exact: true }).click(),
+    ]);
+    await expect(
+      page.getByText("Verificação em duas etapas ativada.", { exact: true }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Sair", exact: true }).click();
+    roleStorageStates.delete("master");
+    await expect(page).toHaveURL(/\/login$/);
+  });
+
+  const staleAal1Context = await browser.newContext(qaTarget.contextOptions);
+  const challengeContext = await browser.newContext(qaTarget.contextOptions);
+  try {
+    await constrainRemoteRequests(staleAal1Context);
+    await constrainRemoteRequests(challengeContext);
+    const staleAal1Page = await staleAal1Context.newPage();
+    await staleAal1Page.goto("/login");
+    await acceptEssentialCookies(staleAal1Page);
+    await staleAal1Page.getByLabel("E-mail").fill(accounts.master.email);
+    await staleAal1Page.getByLabel("Senha").fill(accounts.master.password);
+    await Promise.all([
+      staleAal1Page.waitForURL((url) => url.pathname === "/mfa"),
+      staleAal1Page.getByRole("button", { name: "Entrar", exact: true }).click(),
+    ]);
+    const staleBeforeRemoval = await staleAal1Page.request.get("/api/dashboard/status");
+    expect(staleBeforeRemoval.status()).toBe(403);
+    expect(await staleBeforeRemoval.json()).toEqual({ error: "mfa_required" });
+
+    const page = await challengeContext.newPage();
+    await page.goto("/login");
+    await acceptEssentialCookies(page);
+    await page.getByLabel("E-mail").fill(accounts.master.email);
+    await page.getByLabel("Senha").fill(accounts.master.password);
+    await page.getByLabel("Lembrar neste navegador por até 30 dias").check();
+    await Promise.all([
+      page.waitForURL((url) => url.pathname === "/mfa"),
+      page.getByRole("button", { name: "Entrar", exact: true }).click(),
+    ]);
+
+    const blockedApi = await page.request.get("/api/dashboard/status");
+    expect(blockedApi.status()).toBe(403);
+    expect(await blockedApi.json()).toEqual({ error: "mfa_required" });
+    await page.goto("/app");
+    await expect(page).toHaveURL((url) => url.pathname === "/mfa");
+
+    const challengeCode = await waitForNextTotp(secret, enrollmentCode);
+    await page.getByLabel("Código de 6 dígitos").fill(challengeCode);
+    await Promise.all([
+      page.waitForURL((url) => url.pathname === "/app"),
+      page.getByRole("button", { name: "Verificar e continuar", exact: true }).click(),
+    ]);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Relatório completo da equipe" }),
+    ).toBeVisible();
+
+    await page.goto("/conta/seguranca");
+    await Promise.all([
+      page.waitForURL(
+        (url) => url.pathname === "/conta/seguranca" && url.search === "?mfa=removed",
+      ),
+      page.getByRole("button", { name: "Remover fator", exact: true }).click(),
+    ]);
+    await expect(
+      page.getByText("Fator removido. A sessão foi atualizada.", { exact: true }),
+    ).toBeVisible();
+
+    const staleAfterRemoval = await staleAal1Page.request.get("/api/dashboard/status");
+    expect(staleAfterRemoval.status()).toBe(401);
+    expect(await staleAfterRemoval.json()).toEqual({ error: "unauthenticated" });
+    const stalePageResponse = await staleAal1Page.goto("/app");
+    expect(stalePageResponse?.status()).toBe(200);
+    await expect(staleAal1Page).toHaveURL((url) => url.pathname === "/login");
+
+    await page.getByRole("button", { name: "Sair", exact: true }).click();
+  } finally {
+    await staleAal1Context.close();
+    await challengeContext.close();
+  }
+
+  const noMfaContext = await browser.newContext(qaTarget.contextOptions);
+  try {
+    await constrainRemoteRequests(noMfaContext);
+    const page = await noMfaContext.newPage();
+    await login(page, accounts.master);
+    await expect(page).toHaveURL((url) => url.pathname === "/app");
+    await logoutAndAssertBoundary(page, "master");
+  } finally {
+    await noMfaContext.close();
   }
 });

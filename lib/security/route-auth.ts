@@ -19,7 +19,16 @@ export async function authorizeRoute(permission: PermissionKey): Promise<RouteAu
     return {
       ok: false,
       response: Response.json(
-        { error: error.code === "UNAUTHENTICATED" ? "unauthenticated" : "forbidden" },
+        {
+          error:
+            error.code === "UNAUTHENTICATED"
+              ? "unauthenticated"
+              : error.code === "MFA_REQUIRED"
+                ? "mfa_required"
+                : error.code === "PASSWORD_RECOVERY_REQUIRED"
+                  ? "password_recovery_required"
+                  : "forbidden",
+        },
         {
           status: error.code === "UNAUTHENTICATED" ? 401 : 403,
           headers: noStoreHeaders(),

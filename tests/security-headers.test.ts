@@ -1,6 +1,10 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { applySecurityHeaders } from "../lib/security/headers";
+import nextConfig from "../next.config";
 
 describe("security headers regression", () => {
   it("keeps the production CSP and transport protections", () => {
@@ -42,5 +46,78 @@ describe("security headers regression", () => {
 
     expect(homologationHeaders.get("X-Robots-Tag")).toBe("noindex, nofollow, noarchive");
     expect(regularHeaders.has("X-Robots-Tag")).toBe(false);
+  });
+
+  it("suppresses the referrer for recovery callback responses", () => {
+    const headers = new Headers({ "Referrer-Policy": "strict-origin-when-cross-origin" });
+
+    applySecurityHeaders(headers, { isProd: true, suppressReferrer: true });
+
+    expect(headers.get("Referrer-Policy")).toBe("no-referrer");
+  });
+
+  it("keeps recovery callback query strings out of Nginx access and error logs", async () => {
+    const templates = [
+      ["deploy/nginx/crm.descomplicapro.com.br.http.conf", 1],
+      ["deploy/nginx/crm.descomplicapro.com.br.https.conf.example", 2],
+      ["deploy/nginx/homolog.descomplicapro.com.br.http.conf", 1],
+      ["deploy/nginx/homolog.descomplicapro.com.br.https.conf.example", 2],
+    ] as const;
+
+    for (const [filename, callbackLocations] of templates) {
+      const source = await readFile(path.join(process.cwd(), filename), "utf8");
+      expect(source.match(/location = \/auth\/callback/g)).toHaveLength(callbackLocations);
+      expect(source.match(/access_log off;/g)).toHaveLength(callbackLocations);
+      expect(source.match(/error_log \/dev\/null crit;/g)).toHaveLength(callbackLocations);
+    }
+  });
+
+  it("verifies recovery token hashes by POST and never routes them through gateway queries", async () => {
+    const [callback, template, localConfig, homologationConfig, qaLauncher] = await Promise.all([
+      readFile(path.join(process.cwd(), "app/auth/callback/route.ts"), "utf8"),
+      readFile(path.join(process.cwd(), "supabase/templates/recovery.html"), "utf8"),
+      readFile(path.join(process.cwd(), "supabase/config.toml"), "utf8"),
+      readFile(path.join(process.cwd(), "deploy/homologation/supabase.config.toml"), "utf8"),
+      readFile(path.join(process.cwd(), "scripts/qa/local-rls-api.mjs"), "utf8"),
+    ]);
+
+    expect(callback).toContain("supabase.auth.verifyOtp({");
+    expect(callback).toContain('type: "recovery"');
+    expect(callback).toContain("isRecoveryTokenHash(tokenHash)");
+    expect(callback).not.toContain("exchangeCodeForSession");
+    expect(template).toContain("{{ .RedirectTo }}?token_hash={{ .TokenHash }}");
+    expect(template).not.toContain("{{ .ConfirmationURL }}");
+    expect(template).not.toContain("/auth/v1/verify");
+    expect(localConfig).toContain('content_path = "./supabase/templates/recovery.html"');
+    expect(homologationConfig).toContain('content_path = "./supabase/templates/recovery.html"');
+    expect(qaLauncher).toContain('PLAYWRIGHT_NO_COPY_PROMPT: "1"');
+    expect(qaLauncher).toContain(
+      "await rm(playwrightOutputRoot, { recursive: true, force: true })",
+    );
+  });
+
+  it("disables sensitive Server Function arguments and callback URLs in Next dev logs", () => {
+    const logging = nextConfig.logging;
+    expect(logging).toBeTruthy();
+    expect(logging).not.toBe(false);
+    if (!logging) throw new Error("Next logging protections are missing.");
+
+    expect(logging.serverFunctions).toBe(false);
+    expect(logging.incomingRequests).not.toBe(false);
+    expect(logging.incomingRequests).toBeTruthy();
+    if (!logging.incomingRequests || logging.incomingRequests === true) {
+      throw new Error("Incoming request filtering is missing.");
+    }
+
+    expect(
+      logging.incomingRequests.ignore?.some((pattern: RegExp) =>
+        pattern.test(`/auth/callback?token_hash=${"a".repeat(56)}&type=recovery`),
+      ),
+    ).toBe(true);
+    expect(
+      logging.incomingRequests.ignore?.some((pattern: RegExp) =>
+        pattern.test("/auth/callback-unsafe"),
+      ),
+    ).toBe(false);
   });
 });

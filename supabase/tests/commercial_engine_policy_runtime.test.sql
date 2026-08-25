@@ -403,7 +403,7 @@ select ok(
   )
   and pg_catalog.pg_get_functiondef(
     'private.crm_commercial_engine_role_isolated()'::regprocedure
-  ) like '%not has_schema_privilege(''crm_commercial_engine'', ''net'', ''USAGE'')%'
+  ) like '%not coalesce(pg_catalog.has_schema_privilege(''crm_commercial_engine'', pg_catalog.to_regnamespace(''net''), ''USAGE''), false)%'
   and pg_catalog.pg_get_functiondef(
     'private.crm_commercial_engine_role_isolated()'::regprocedure
   ) like '%has_database_privilege(%'

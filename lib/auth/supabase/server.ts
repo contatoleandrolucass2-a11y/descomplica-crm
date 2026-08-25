@@ -27,8 +27,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function createClient() {
+import {
+  applyAuthCookiePolicy,
+  isSupabaseSessionCookieName,
+  resolveSessionPersistence,
+  SESSION_PERSISTENCE_COOKIE_NAME,
+  type SessionPersistence,
+} from "@/lib/auth/session-persistence";
+
+export async function createClient(options: { persistence?: SessionPersistence } = {}) {
   const cookieStore = await cookies();
+  const persistence =
+    options.persistence ??
+    resolveSessionPersistence(cookieStore.get(SESSION_PERSISTENCE_COOKIE_NAME)?.value);
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,7 +52,16 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
+              cookieStore.set(
+                name,
+                value,
+                applyAuthCookiePolicy(
+                  options,
+                  isSupabaseSessionCookieName(name, process.env.NEXT_PUBLIC_SUPABASE_URL)
+                    ? persistence
+                    : { kind: "temporary" },
+                ),
+              ),
             );
           } catch {
             // Called from a Server Component — cookie writes are not

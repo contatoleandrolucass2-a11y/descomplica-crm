@@ -17,7 +17,13 @@ import { initialLoginActionState } from "@/lib/auth/actions/login-state";
 import { AnimatedBrainVisual } from "./AnimatedBrainVisual";
 import styles from "./LoginForm.module.css";
 
-export function LoginForm({ publicSignupEnabled = true }: { publicSignupEnabled?: boolean }) {
+export function LoginForm({
+  publicSignupEnabled = true,
+  notice,
+}: {
+  publicSignupEnabled?: boolean;
+  notice?: string;
+}) {
   const [state, formAction, isPending] = useActionState(loginAction, initialLoginActionState);
 
   return (
@@ -49,6 +55,12 @@ export function LoginForm({ publicSignupEnabled = true }: { publicSignupEnabled?
             </h1>
             <p className={styles.subtitle}>Acesse sua conta para continuar.</p>
 
+            {notice ? (
+              <p className={styles.success} role="status">
+                {notice}
+              </p>
+            ) : null}
+
             <form action={formAction} className={styles.form}>
               <div className={styles.field}>
                 <label htmlFor="email" className={styles.label}>
@@ -67,9 +79,14 @@ export function LoginForm({ publicSignupEnabled = true }: { publicSignupEnabled?
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="password" className={styles.label}>
-                  Senha
-                </label>
+                <div className={styles.labelRow}>
+                  <label htmlFor="password" className={styles.label}>
+                    Senha
+                  </label>
+                  <Link href="/esqueci-senha" className={styles.inlineLink}>
+                    Esqueci minha senha
+                  </Link>
+                </div>
                 <input
                   id="password"
                   name="password"
@@ -80,6 +97,16 @@ export function LoginForm({ publicSignupEnabled = true }: { publicSignupEnabled?
                   className={styles.input}
                 />
               </div>
+
+              <label className={styles.checkboxRow}>
+                <input
+                  name="rememberBrowser"
+                  type="checkbox"
+                  disabled={isPending}
+                  className={styles.checkbox}
+                />
+                <span>Lembrar neste navegador por até 30 dias</span>
+              </label>
 
               {state.status === "error" && state.message ? (
                 <p className={styles.error}>{state.message}</p>
@@ -98,6 +125,12 @@ export function LoginForm({ publicSignupEnabled = true }: { publicSignupEnabled?
                 </Link>
               </p>
             ) : null}
+
+            <nav aria-label="Documentos legais" className={styles.legalLinks}>
+              <Link href="/termos-de-uso">Termos de Uso</Link>
+              <Link href="/politica-de-privacidade">Privacidade</Link>
+              <Link href="/politica-de-cookies">Cookies</Link>
+            </nav>
           </div>
         </section>
       </div>

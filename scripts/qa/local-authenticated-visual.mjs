@@ -8,6 +8,8 @@ import { promisify } from "node:util";
 
 import { createClient } from "@supabase/supabase-js";
 
+import legalDocumentVersions from "../../lib/legal/versions.json" with { type: "json" };
+
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const homologationRuntimeRoot = "/var/lib/descomplica-crm-homologation";
@@ -300,6 +302,8 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
       ...environmentSubset(["OFFICIAL_SIMULATOR_RUNTIME_MODE", "OFFICIAL_SIMULATOR_ENABLED_KEYS"]),
       NODE_ENV: "production",
       APP_ORIGIN: origin,
+      AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
+      AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
       NEXT_PUBLIC_SUPABASE_URL: apiUrl,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishableKey,
     },
@@ -946,6 +950,22 @@ where user_id = ${userIdSql};
 delete from public.crm_organizations
 where organization_key = 'qa-' || replace(${userIdSql}::text, '-', '');
 
+-- Remove only the synthetic loopback QA ledger rows. Trigger changes and
+-- deletion are transactional; runtime append-only enforcement stays enabled.
+alter table private.legal_acceptances
+  disable trigger legal_acceptances_append_only;
+delete from private.legal_acceptances
+where user_id = ${userIdSql};
+alter table private.legal_acceptances
+  enable trigger legal_acceptances_append_only;
+
+alter table private.legal_acceptance_requirements
+  disable trigger legal_acceptance_requirements_append_only;
+delete from private.legal_acceptance_requirements
+where user_id = ${userIdSql};
+alter table private.legal_acceptance_requirements
+  enable trigger legal_acceptance_requirements_append_only;
+
 do $qa_cleanup_verify$
 begin
   if exists (select 1 from public.crm_dashboard_snapshots where source = ${markerSql})
@@ -974,6 +994,14 @@ begin
       select 1 from public.crm_organizations
       where organization_key = 'qa-' || replace(${userIdSql}::text, '-', '')
     )
+    or exists (
+      select 1 from private.legal_acceptances
+      where user_id = ${userIdSql}
+    )
+    or exists (
+      select 1 from private.legal_acceptance_requirements
+      where user_id = ${userIdSql}
+    )
     or not exists (
       select 1 from public.crm_reporting_scopes
       where scope_key = 'global'
@@ -998,6 +1026,14 @@ async function createEphemeralQaUser(adminClient, runId) {
     password,
     email_confirm: true,
     app_metadata: { qa_ephemeral: true, qa_run_id: runId },
+    user_metadata: {
+      legal_acceptance: {
+        termsAccepted: true,
+        termsVersion: legalDocumentVersions.terms,
+        privacyAccepted: true,
+        privacyVersion: legalDocumentVersions.privacy,
+      },
+    },
   });
 
   if (error || !data.user) throw new Error("Could not create the ephemeral local QA account.");

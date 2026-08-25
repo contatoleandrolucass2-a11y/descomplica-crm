@@ -9,6 +9,13 @@ server {
         try_files $uri =404;
     }
 
+    # Password-recovery codes must never enter access logs.
+    location = /auth/callback {
+        access_log off;
+        error_log /dev/null crit;
+        return 301 https://$host$request_uri;
+    }
+
     location / {
         return 301 https://$host$request_uri;
     }
@@ -28,6 +35,26 @@ server {
 
     client_max_body_size 1m;
     server_tokens off;
+
+    # Keep one-time recovery token hashes out of Nginx logs while preserving
+    # the application callback. Verification reaches Auth only by POST/body.
+    location = /auth/callback {
+        access_log off;
+        error_log /dev/null crit;
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Connection "";
+        proxy_buffer_size 8k;
+        proxy_buffers 8 8k;
+        proxy_busy_buffers_size 16k;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:3000;

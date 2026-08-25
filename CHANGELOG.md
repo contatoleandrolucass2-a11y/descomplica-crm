@@ -20,6 +20,30 @@
 
 ## Unreleased
 
+- Adiciona recuperação de senha com resposta anti-enumeração, callback fixo por
+  `APP_ORIGIN`, template `TokenHash` verificado por POST/body, política forte de
+  12–128 caracteres e revogação de todas as sessões após alteração. Callback falso
+  preserva sessão e marker existentes; AMR `otp`/`recovery` fica em quarentena.
+- Adiciona MFA TOTP com QR Code/chave manual, páginas `/mfa` e
+  `/conta/seguranca` e enforcement AAL2 em SSR, APIs, RPCs e RLS quando houver
+  fator verificado. Remoção AAL2 revoga primeiro as demais sessões e falha fechado.
+- Torna “Lembrar neste navegador” opt-in, com marker HMAC e limite absoluto de
+  30 dias; valor ausente, inválido ou adulterado mantém cookie de sessão.
+- Adiciona consentimento granular de cookies, documentos legais versionados e
+  ledger privado append-only de aceites de Termos e Privacidade, separado das
+  preferências de cookies.
+- Atualiza somente o Supabase CLI de desenvolvimento para 2.115.0, que corrige
+  a resolução/reload do `content_path` de templates Auth. O callback aceita os
+  formatos oficiais SHA-224 puro e `pkce_` + SHA-224, rejeitando outros prefixos.
+- Torna os probes de isolamento do relay Qlik e do motor comercial herméticos
+  quando o schema opcional `net` estiver ausente, sem instalar `pg_net` nem
+  liberar qualquer papel dedicado.
+- Registra a matriz local dos nove perfis e 21 rotas. Alterações permanecem
+  locais; nenhum ambiente remoto, migration, usuário ou configuração foi
+  modificado. Gates finais aprovaram formato, lint, tipos, 427 testes Vitest,
+  oito testes Node, build de 39 rotas, 1.002 pgTAP em 24 arquivos e Playwright
+  com 11 cenários aprovados e um skip remoto explícito.
+
 - Evolui somente o WF13 para `wf13-1.2.0`: ranking obrigatório e versionado,
   comparação exata por dois limites independentes e reprovação explícita de
   `NÃO ELEGÍVEL`, sempre revalidada no servidor.

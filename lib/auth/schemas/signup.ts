@@ -1,9 +1,8 @@
 /**
  * Signup form schema.
  *
- * Validates the shape of a public registration submission only. Password
- * policy here is deliberately minimal (length bounds); stronger complexity
- * rules are a later decision and are not introduced in M8.
+ * Validates public registration, strong password policy and distinct legal
+ * acceptances before any request reaches Supabase Auth.
  *
  * Field-level messages are intentionally generic — they describe what the
  * field needs, never anything about existing accounts. The Server Action
@@ -19,6 +18,8 @@
 
 import { z } from "zod";
 
+import { passwordSchema } from "./password";
+
 export const signupSchema = z
   .object({
     name: z
@@ -31,11 +32,14 @@ export const signupSchema = z
       .trim()
       .toLowerCase()
       .pipe(z.email({ message: "Informe um e-mail válido." })),
-    password: z
-      .string()
-      .min(8, { message: "A senha deve ter no mínimo 8 caracteres." })
-      .max(128, { message: "A senha deve ter no máximo 128 caracteres." }),
+    password: passwordSchema,
     confirmPassword: z.string().min(1, { message: "Confirme sua senha." }),
+    termsAccepted: z.literal("on", {
+      error: "Aceite os Termos de Uso para continuar.",
+    }),
+    privacyAccepted: z.literal("on", {
+      error: "Aceite a Política de Privacidade para continuar.",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "As senhas não coincidem.",

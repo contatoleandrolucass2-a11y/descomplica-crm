@@ -64,6 +64,17 @@ async function main() {
       errorOnExist: true,
     },
   );
+  await cp(
+    path.join(repositoryRoot, "supabase/templates"),
+    path.join(runtimeSupabase, "templates"),
+    {
+      recursive: true,
+      errorOnExist: true,
+    },
+  );
+  // Auth fetches this non-secret template through Kong as an unprivileged
+  // process. Restrictive checkout umasks must not turn that fetch into 403.
+  await chmod(path.join(runtimeSupabase, "templates/recovery.html"), 0o644);
 
   const sourceSha = execFileSync("git", ["rev-parse", "HEAD"], {
     cwd: repositoryRoot,

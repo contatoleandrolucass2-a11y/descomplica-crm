@@ -8,10 +8,13 @@ import { promisify } from "node:util";
 
 import { createClient } from "@supabase/supabase-js";
 
+import legalDocumentVersions from "../../lib/legal/versions.json" with { type: "json" };
+
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const homologationRuntimeRoot = "/var/lib/descomplica-crm-homologation";
 const homologationAccountsPath = "/etc/descomplica-crm/homologation-accounts.json";
+const playwrightOutputRoot = "/tmp/descomplica-playwright-results";
 const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const requiredRoles = [
   "master",
@@ -202,6 +205,7 @@ function parseLocalStatus(stdout) {
 
   const apiUrl = parseLoopbackHttpOrigin(status.API_URL);
   const database = parseLoopbackDatabaseUrl(status.DB_URL);
+  const mailpitUrl = parseLoopbackHttpOrigin(status.INBUCKET_URL || status.MAILPIT_URL);
   const publishableKey = status.PUBLISHABLE_KEY || status.ANON_KEY;
   const secretKey = status.SECRET_KEY || status.SERVICE_ROLE_KEY;
 
@@ -212,7 +216,7 @@ function parseLocalStatus(stdout) {
     fail("Local Supabase admin key is unavailable.");
   }
 
-  return { apiUrl, database, publishableKey, secretKey };
+  return { apiUrl, database, mailpitUrl, publishableKey, secretKey };
 }
 
 async function discoverLocalSupabase() {
@@ -374,6 +378,8 @@ async function startLocalNextServer(local) {
       ...environmentSubset(["PATH", "HOME", "TZ", "NODE_OPTIONS", "LD_LIBRARY_PATH"]),
       NODE_ENV: "production",
       APP_ORIGIN: origin,
+      AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
+      AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
       NEXT_PUBLIC_SUPABASE_URL: local.apiUrl,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
       OFFICIAL_SIMULATOR_RUNTIME_MODE: "active",
@@ -416,7 +422,7 @@ async function stopChild(child) {
   }
 }
 
-function runBrowserE2e(origin, accounts) {
+function runBrowserE2e(origin, mailpitUrl, accounts) {
   return new Promise((resolve, reject) => {
     const child = spawn(
       "pnpm",
@@ -436,6 +442,8 @@ function runBrowserE2e(origin, accounts) {
           ]),
           QA_E2E_LOCAL_ONLY: "true",
           QA_E2E_ORIGIN: origin,
+          QA_E2E_MAILPIT_ORIGIN: mailpitUrl,
+          PLAYWRIGHT_NO_COPY_PROMPT: "1",
           ...(process.env.QA_CAPTURE_STATE_EVIDENCE === "true"
             ? { QA_CAPTURE_STATE_EVIDENCE: "true" }
             : {}),
@@ -1001,6 +1009,23 @@ where id = any(${sqlUuidArray(ids.portfolios)});
 delete from public.crm_organizations
 where id = any(${sqlUuidArray(ids.organizations)});
 
+-- These are synthetic loopback-only acceptances, not legal records. The
+-- append-only triggers remain enabled in every runtime and are disabled only
+-- transactionally around deletion of the exact ephemeral account IDs.
+alter table private.legal_acceptances
+  disable trigger legal_acceptances_append_only;
+delete from private.legal_acceptances
+where user_id = any(${userIds});
+alter table private.legal_acceptances
+  enable trigger legal_acceptances_append_only;
+
+alter table private.legal_acceptance_requirements
+  disable trigger legal_acceptance_requirements_append_only;
+delete from private.legal_acceptance_requirements
+where user_id = any(${userIds});
+alter table private.legal_acceptance_requirements
+  enable trigger legal_acceptance_requirements_append_only;
+
 do $qa_cleanup_verify$
 begin
   if exists (
@@ -1028,6 +1053,12 @@ begin
   ) or exists (
     select 1 from public.crm_organizations
     where id = any(${sqlUuidArray(ids.organizations)})
+  ) or exists (
+    select 1 from private.legal_acceptances
+    where user_id = any(${userIds})
+  ) or exists (
+    select 1 from private.legal_acceptance_requirements
+    where user_id = any(${userIds})
   ) or exists (
     select 1 from public.crm_teams
     where id = any(${sqlUuidArray(ids.teams)})
@@ -1082,6 +1113,14 @@ async function createEphemeralAccount(adminClient, role, runId) {
     password,
     email_confirm: true,
     app_metadata: { qa_ephemeral: true, qa_run_id: runId },
+    user_metadata: {
+      legal_acceptance: {
+        termsAccepted: true,
+        termsVersion: legalDocumentVersions.terms,
+        privacyAccepted: true,
+        privacyVersion: legalDocumentVersions.privacy,
+      },
+    },
   });
 
   if (error || !data.user) fail("Could not create an ephemeral local QA account.");
@@ -1507,7 +1546,7 @@ async function main() {
     }
 
     if (nextServer) {
-      await runBrowserE2e(nextServer.origin, accounts);
+      await runBrowserE2e(nextServer.origin, local.mailpitUrl, accounts);
       browserE2e = 1;
       throwIfInterrupted();
     }
@@ -1522,7 +1561,13 @@ async function main() {
         await removeEphemeralState(local, adminClient, accounts, fixtures);
       }
     } finally {
-      await stopChild(nextServer?.child);
+      try {
+        await stopChild(nextServer?.child);
+      } finally {
+        if (browserE2eEnabled) {
+          await rm(playwrightOutputRoot, { recursive: true, force: true });
+        }
+      }
     }
   }
 

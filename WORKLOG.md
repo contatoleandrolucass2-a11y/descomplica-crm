@@ -1,5 +1,58 @@
 # Worklog
 
+## 2026-08-24 — fundação de recuperação, MFA e consentimentos
+
+- Base, arquitetura Next.js/Supabase SSR e implementação anterior foram
+  auditadas antes das mudanças. Trabalho isolado na branch
+  `codex/auth-mfa-legal-foundation`, sem sobrescrever alterações existentes.
+- Baseline local anterior ao incremento aprovou formato, lint, typecheck, 385
+  testes Vitest, oito testes Node, build, Supabase local, 939 pgTAP em 22
+  arquivos e release E2E com oito cenários executados e um skip remoto.
+- Implementados recuperação de senha anti-enumeração, callback fixo por
+  `APP_ORIGIN`, template `TokenHash` SHA-224 verificado via POST/body, senha de
+  12–128 caracteres e revogação server-side de todas as sessões após uma
+  autenticação Auth `otp`/`recovery` recente. Esses AMRs ficam em quarentena também
+  no RLS; callback falso preserva sessão e marker existentes.
+- Implementados enrollment, challenge e remoção TOTP, com QR Code/chave manual,
+  transição AAL1/AAL2 e bloqueio fail-closed compartilhado por guards, Route
+  Handlers, permissionamento, RPCs e policies RLS restritivas. A remoção revoga
+  primeiro as demais sessões do mesmo usuário para impedir ressurgimento AAL1.
+- “Lembrar neste navegador” permanece desmarcado por padrão. Marker HMAC limita
+  a sessão persistente a 30 dias; entrada inválida regride para sessão
+  temporária. Cookies de autenticação não dependem de `localStorage`.
+- Banner de cookies, cinco categorias, personalização e três documentos legais
+  foram adicionados. Termos e Privacidade exigem aceite versionado separado,
+  registrado em tabelas privadas append-only e sem grants para papéis de API.
+- Razão social, contatos, controlador, DPO, bases legais e retenção continuam
+  pendentes de revisão jurídica; nenhum dado legal foi inventado.
+- A matriz de smoke documenta nove perfis e 21 rotas: Master acessa as 21,
+  Admin somente a raiz administrativa e usuários, demais perfis apenas a superfície
+  auth-only de segurança. MFA e recuperação sobrepõem redirects antes do RBAC.
+- Supabase CLI local foi atualizado de 2.111.0 para 2.115.0 para incorporar a
+  correção oficial de resolução/reload do `content_path` de templates Auth.
+  Auditoria do Auth 2.195.0 confirmou SHA-224 puro no fluxo implícito e prefixo
+  oficial `pkce_` no PKCE; callback e E2E aceitam somente esses dois formatos.
+- Um stack descartável sem a extensão opcional `pg_net` revelou lookup frágil
+  em dois probes preexistentes. Migration separada preserva os predicados e usa
+  OID nulo de forma segura; relay e motor continuam fail-closed e desligados.
+- Todo trabalho permanece local. Nenhum Supabase remoto, produção, homologação,
+  VPS, usuário, sessão, integração, motor, grant ou configuração externa foi
+  alterado.
+- Gate final aprovou `format:check`, lint, typecheck, 427 testes Vitest e oito
+  testes Node, build de 39 rotas, reset do Supabase local e 1.002 pgTAP em 24
+  arquivos. O release E2E aprovou 11 cenários e manteve um skip exclusivo da
+  homologação remota: nove perfis, 21 URLs diretas, APIs, recuperação, MFA,
+  sessões, cookies e aceite legal foram exercitados sem persistir usuários.
+- A revisão independente de rotas confirmou a matriz 9×21, catálogo/menu, guards
+  SSR, Route Handlers e RLS. O P3 de cobertura foi fechado repetindo, para cada
+  perfil, dashboard, status/execução WF13 e os quatro handlers default-off; esses
+  probes terminam antes de qualquer escrita ou chamada externa.
+- Revisão de segurança independente encerrou sem achados P0, P1 ou P2. Evidência
+  sanitizada registrou zero artefatos Playwright, mensagens residuais, parâmetros
+  de token/código em URL, HTTP 5xx, panic ou fatal.
+- `pnpm audit`, OSV sobre 521 pacotes, Gitleaks na árvore e em 266 commits, schema
+  lint e advisors locais de segurança/performance terminaram sem achados.
+
 ## 2026-08-18 — Hotfix WF13: limite 84 e comprometimento
 
 - Base e produção confirmadas em `3ddbf30362788ecaf1450377742ee162b3984a6c`.

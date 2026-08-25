@@ -22,6 +22,7 @@ import type { SignupActionState, SignupFieldErrors } from "@/lib/auth/actions/si
 import { signupSchema } from "@/lib/auth/schemas/signup";
 import { createClient } from "@/lib/auth/supabase/server";
 import { isPublicSignupEnabled } from "@/lib/homologation/config";
+import { LEGAL_DOCUMENT_VERSIONS } from "@/lib/legal/documents";
 
 const GENERIC_FAILURE_MESSAGE =
   "Não foi possível concluir o cadastro. Tente novamente em instantes.";
@@ -42,6 +43,8 @@ export async function signupAction(
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
+    termsAccepted: formData.get("termsAccepted"),
+    privacyAccepted: formData.get("privacyAccepted"),
   });
 
   if (!parsed.success) {
@@ -58,7 +61,17 @@ export async function signupAction(
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { name } },
+    options: {
+      data: {
+        name,
+        legal_acceptance: {
+          termsAccepted: true,
+          termsVersion: LEGAL_DOCUMENT_VERSIONS.terms,
+          privacyAccepted: true,
+          privacyVersion: LEGAL_DOCUMENT_VERSIONS.privacy,
+        },
+      },
+    },
   });
 
   if (error) {

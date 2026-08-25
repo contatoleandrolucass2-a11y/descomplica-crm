@@ -17,6 +17,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { cookies } from "next/headers";
 
 import { createClient } from "@/lib/auth/supabase/server";
 import { enforceAuthorization } from "@/lib/authorization/enforce";
@@ -24,6 +25,7 @@ import { logoutAction } from "@/lib/auth/actions/logout";
 import { getRoleLabel } from "@/lib/authorization/roles";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 import { getNavigationHome } from "@/lib/navigation/presentation";
+import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
 
 import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
 import { AuthorizedBreadcrumbs } from "./_components/AuthorizedBreadcrumbs";
@@ -37,6 +39,8 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
     data: { user },
   } = await supabase.auth.getUser();
   const pages = await getAuthorizedNavigation(context);
+  const cookieStore = await cookies();
+  const cookieConsent = parseCookieConsent(cookieStore.get(COOKIE_CONSENT_COOKIE_NAME)?.value);
   const navigationHome = getNavigationHome(pages);
   const brand = (
     <>
@@ -81,7 +85,10 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
                 Sessão ativa
               </span>
             </div>
-            <ThemeSwitch />
+            <Link href="/conta/seguranca" className={styles.accountLink}>
+              Segurança
+            </Link>
+            <ThemeSwitch canPersist={cookieConsent?.categories.functional === true} />
             <form action={logoutAction}>
               <button type="submit" className={styles.logout}>
                 Sair

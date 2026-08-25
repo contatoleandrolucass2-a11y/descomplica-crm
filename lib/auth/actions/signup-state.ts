@@ -11,7 +11,10 @@
  */
 
 export type SignupFieldErrors = Partial<
-  Record<"name" | "email" | "password" | "confirmPassword", string[]>
+  Record<
+    "name" | "email" | "password" | "confirmPassword" | "termsAccepted" | "privacyAccepted",
+    string[]
+  >
 >;
 
 export type SignupActionState = {
