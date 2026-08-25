@@ -6,7 +6,7 @@ const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 
 function explicitLocalQaMode(configured: URL): boolean {
   if (process.env.AUTH_LOCAL_INSECURE_LOOPBACK_QA !== "true") return false;
-  const supabase = safeExternalUrl(process.env.NEXT_PUBLIC_SUPABASE_URL, false);
+  const supabase = safeExternalUrl(process.env.SUPABASE_URL, false);
   return (
     configured.protocol === "http:" &&
     LOOPBACK_HOSTS.has(configured.hostname) &&

@@ -339,7 +339,7 @@ describe("commercial engine catalog and flags", () => {
       getCommercialEngineRuntimeConfiguration({
         ...base,
         NODE_ENV: "production",
-        NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL,
+        SUPABASE_URL,
         COMMERCIAL_ENGINE_DATABASE_URL: matchingDatabaseUrl,
       }).available,
     ).toBe(true);
@@ -347,7 +347,7 @@ describe("commercial engine catalog and flags", () => {
       getCommercialEngineRuntimeConfiguration({
         ...base,
         NODE_ENV: "production",
-        NEXT_PUBLIC_SUPABASE_URL: "https://differentproject.supabase.co",
+        SUPABASE_URL: "https://differentproject.supabase.co",
         COMMERCIAL_ENGINE_DATABASE_URL: matchingDatabaseUrl,
       }).available,
     ).toBe(false);
@@ -355,7 +355,7 @@ describe("commercial engine catalog and flags", () => {
       getCommercialEngineRuntimeConfiguration({
         ...base,
         NODE_ENV: "production",
-        NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL,
+        SUPABASE_URL,
         COMMERCIAL_ENGINE_DATABASE_URL: `postgresql://crm_commercial_engine.${SUPABASE_PROJECT_REF}:production-test-password@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?sslmode=verify-full`,
       }).available,
     ).toBe(true);

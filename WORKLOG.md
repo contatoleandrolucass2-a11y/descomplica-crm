@@ -1,5 +1,52 @@
 # Worklog
 
+## 2026-08-25 — schema remoto e histórico reconciliado
+
+- A inspeção produtiva ocorreu somente em transações de leitura: PostgreSQL
+  17.6, 22 tabelas de aplicação, 28 funções, 17 policies, oito triggers e 26
+  versões remotas. Nenhuma configuração, migration, grant, linha ou usuário foi
+  alterado.
+- As sete versões remotas ausentes foram localizadas no ledger e em backups
+  root-only, classificadas por hash e reconciliadas com markers no-op. SQL
+  inseguro ou contendo verificadores legados não foi copiado para o Git.
+- Um backup corrente verificável alimentou dois projetos PostgreSQL 17 locais,
+  efêmeros e sem rede. O alvo recebeu somente RBAC/catalogação sanitizados e as
+  migrations `20260824230058` e `20260824230100`.
+- O rehearsal preservou fingerprints de oito papéis, 20 permissões, 61 vínculos
+  e 17 páginas; confirmou as 14 páginas de Admin, Qlik sem grant/policy de
+  leitura permissiva e os objetos Auth/MFA/aceites completos. Recursos
+  temporários foram removidos e nenhum ambiente remoto foi alterado.
+
+## 2026-08-25 — imagem promovível e segredos de runtime
+
+- Eliminada a configuração de ambiente do estágio de build: Supabase público,
+  `APP_ORIGIN`, modo de homologação e flags são validados e consumidos somente
+  no runtime do servidor. O cliente browser não lê `process.env`.
+- Os dois Compose apontam para `descomplica-crm:<SHA completo>`, sem `build:`.
+  `image:build` exige HEAD limpo, grava label OCI da revisão e `image:prove`
+  confirma mesma referência, image ID e revisão nos dois ambientes.
+- `AUTH_SESSION_COOKIE_SECRET` foi ligado aos configuradores privados por
+  arquivo separado. Diretório `root:root 0710`, segredo `root:root 0640` e
+  arquivos de ambiente `root:root 0600` são validados sem imprimir conteúdo;
+  symlinks e argumentos Compose fora da allowlist falham fechados.
+- Docker Compose com fonte de arquivo não aplica `uid/gid/mode`, e o runtime
+  disponível não materializa `secrets.environment`. O fallback comprovado usa
+  bind read-only, `create_host_path: false`, processo `node` com grupo
+  suplementar `0`, zero capabilities e `no-new-privileges`.
+- O configurador de homologação lê sem eco e preserva
+  `OFFICIAL_SIMULATOR_RUNTIME_MODE`/`OFFICIAL_SIMULATOR_ENABLED_KEYS`. Somente
+  `off` com allowlist vazia ou `active` com chaves oficiais únicas são aceitos;
+  ausência usa `off`/vazio e qualquer estado incoerente falha antes do replace.
+- Prova Docker local executou a mesma imagem com os perfis de homologação e
+  produção, mount real `0640` e processo não-root: `sameImage=true`, dois perfis
+  válidos e `secretValuesPrinted=false`. A imagem WIP de prova teve ID
+  `sha256:27124e3a44ef730d6aba381531b5e2e9736bc911b958855cbff058375ba26c5a`;
+  o gate final deve reconstruir uma única vez no SHA limpo integrado.
+- Gate isolado aprovou 80 testes direcionados, ESLint direcionado, typecheck,
+  build sem variáveis de ambiente com 39 rotas, sintaxe Bash/Node, manifests
+  Compose, `git diff --check` e a prova real do container. Nenhum ambiente
+  remoto, serviço, credencial ou dado foi alterado.
+
 ## 2026-08-24 — fundação de recuperação, MFA e consentimentos
 
 - Base, arquitetura Next.js/Supabase SSR e implementação anterior foram

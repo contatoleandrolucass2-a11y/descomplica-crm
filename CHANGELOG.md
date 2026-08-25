@@ -20,6 +20,23 @@
 
 ## Unreleased
 
+- Reconcilia as sete versões existentes somente no histórico remoto com markers
+  sanitizados: três equivalentes canônicos, duas alterações inseguras já
+  supersedidas e dois contratos legados confidenciais permanecem fora do Git.
+- Adiciona inventário produtivo somente leitura e rehearsal sobre restore
+  sanitizado PostgreSQL 17. O gate aplica apenas as duas migrations Auth/MFA,
+  preserva os fingerprints RBAC 8/20/61/17 e mantém tabelas Qlik fail-closed.
+- Torna o artefato Docker promovível: homologação e produção usam a mesma
+  imagem imutável por SHA, sem configuração Supabase, origem ou flags congeladas
+  no build. O contrato runtime valida ambiente antes de iniciar o Next.js.
+- Move o HMAC de persistência para arquivo root-only montado read-only, com
+  configuradores atômicos, wrapper Compose de argumentos estritamente
+  allowlisted e falha fechada para symlink, owner, modo ou conteúdo inválido.
+- Adiciona prova automatizada do mesmo image ID nos dois Compose e execução real
+  dos perfis de homologação e produção sobre o mesmo digest, sem eco de segredo.
+- O configurador de homologação preserva somente o gate oficial de simuladores
+  já válido; combinações incoerentes, chaves desconhecidas ou duplicadas
+  interrompem a escrita, sem apagar uma ativação existente.
 - Adiciona recuperação de senha com resposta anti-enumeração, callback fixo por
   `APP_ORIGIN`, template `TokenHash` verificado por POST/body, política forte de
   12–128 caracteres e revogação de todas as sessões após alteração. Callback falso

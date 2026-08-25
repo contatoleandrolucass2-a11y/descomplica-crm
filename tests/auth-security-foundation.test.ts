@@ -168,7 +168,7 @@ describe("application origin", () => {
   it("allows HTTP only for an exact loopback origin in a local production-mode gate", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("APP_ORIGIN", "http://127.0.0.1:4173");
-    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "http://127.0.0.1:54321");
+    vi.stubEnv("SUPABASE_URL", "http://127.0.0.1:54321");
     expect(getApplicationOrigin()).toBeNull();
 
     vi.stubEnv("AUTH_LOCAL_INSECURE_LOOPBACK_QA", "true");
@@ -181,7 +181,7 @@ describe("application origin", () => {
     expect(getApplicationOrigin()).toBeNull();
 
     vi.stubEnv("APP_ORIGIN", "http://127.0.0.1:4173");
-    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://project.supabase.co");
+    vi.stubEnv("SUPABASE_URL", "https://project.supabase.co");
     expect(getApplicationOrigin()).toBeNull();
   });
 });

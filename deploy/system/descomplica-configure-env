@@ -9,14 +9,20 @@ export PATH
 
 readonly environment_directory="/etc/descomplica-crm"
 readonly environment_file="${environment_directory}/production.env"
+readonly secrets_directory="${environment_directory}/secrets"
+readonly session_cookie_secret_source="${secrets_directory}/production-auth-session-cookie-secret"
 readonly repository_directory="/srv/descomplica-crm"
 readonly application_origin="https://crm.descomplicapro.com.br"
 
 temporary_environment_file=""
+temporary_secret_file=""
 
 cleanup() {
   if [[ -n "${temporary_environment_file}" && -e "${temporary_environment_file}" ]]; then
     rm -f -- "${temporary_environment_file}"
+  fi
+  if [[ -n "${temporary_secret_file}" && -e "${temporary_secret_file}" ]]; then
+    rm -f -- "${temporary_secret_file}"
   fi
 }
 trap cleanup EXIT HUP INT TERM
@@ -44,9 +50,14 @@ done
 declare -A values=()
 readonly -a managed_keys=(
   IMAGE_TAG
+  SUPABASE_URL
+  SUPABASE_PUBLISHABLE_KEY
+  # Legacy names are read once and rewritten to the runtime-only contract.
   NEXT_PUBLIC_SUPABASE_URL
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   APP_ORIGIN
+  AUTH_SESSION_COOKIE_SECRET_SOURCE
+  PUBLIC_SIGNUP_ENABLED
   SALESFORCE_INGEST_ENABLED
   SALESFORCE_REFRESH_ENABLED
   CRM_READ_MODEL_V3_SHADOW_ENABLED
@@ -76,6 +87,7 @@ is_managed_key() {
 
 load_existing_values() {
   local line key value
+  [[ ! -L "${environment_file}" ]] || fail "o arquivo de ambiente não pode ser link simbólico."
   [[ -f "${environment_file}" ]] || return 0
 
   while IFS= read -r line || [[ -n "${line}" ]]; do
@@ -294,6 +306,34 @@ ensure_machine_secret() {
   printf '%s foi gerado com entropia criptográfica.\n' "${key}"
 }
 
+ensure_session_cookie_secret() {
+  local existing_secret=""
+
+  [[ ! -L "${secrets_directory}" ]] || fail "o diretório de segredos não pode ser link simbólico."
+  install -d -o root -g root -m 0710 "${secrets_directory}"
+  [[ ! -L "${session_cookie_secret_source}" ]] ||
+    fail "o segredo de sessão não pode ser link simbólico."
+  if [[ -f "${session_cookie_secret_source}" ]]; then
+    IFS= read -r existing_secret <"${session_cookie_secret_source}" || true
+    if validate_machine_secret "${existing_secret}"; then
+      chown root:root "${session_cookie_secret_source}"
+      chmod 0640 "${session_cookie_secret_source}"
+      existing_secret=""
+      printf 'AUTH_SESSION_COOKIE_SECRET existente foi preservado no secret store.\n'
+      return 0
+    fi
+    existing_secret=""
+  fi
+
+  temporary_secret_file="$(mktemp --tmpdir="${secrets_directory}" .auth-session.XXXXXX)"
+  openssl rand -hex 32 >"${temporary_secret_file}"
+  chown root:root "${temporary_secret_file}"
+  chmod 0640 "${temporary_secret_file}"
+  mv -fT -- "${temporary_secret_file}" "${session_cookie_secret_source}"
+  temporary_secret_file=""
+  printf 'AUTH_SESSION_COOKIE_SECRET foi gerado no secret store.\n'
+}
+
 configure_qlik_relay() {
   local requested_mode="off"
   local activation_phrase=""
@@ -349,13 +389,27 @@ configure_qlik_relay() {
   fi
 }
 
+[[ ! -L "${environment_directory}" ]] ||
+  fail "o diretório de configuração não pode ser link simbólico."
+install -d -o root -g root -m 0750 "${environment_directory}"
 load_existing_values
 
-if [[ -z "${values[IMAGE_TAG]:-}" || ! "${values[IMAGE_TAG]}" =~ ^[0-9a-f]{7,64}$ ]]; then
-  values[IMAGE_TAG]="$(git -C "${repository_directory}" rev-parse --verify --short=12 HEAD)" ||
+if [[ -z "${values[SUPABASE_URL]:-}" && -n "${values[NEXT_PUBLIC_SUPABASE_URL]:-}" ]]; then
+  values[SUPABASE_URL]="${values[NEXT_PUBLIC_SUPABASE_URL]}"
+fi
+if [[ -z "${values[SUPABASE_PUBLISHABLE_KEY]:-}" && -n "${values[NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY]:-}" ]]; then
+  values[SUPABASE_PUBLISHABLE_KEY]="${values[NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY]}"
+fi
+unset 'values[NEXT_PUBLIC_SUPABASE_URL]'
+unset 'values[NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY]'
+
+if [[ -z "${values[IMAGE_TAG]:-}" || ! "${values[IMAGE_TAG]}" =~ ^[0-9a-f]{40}$ ]]; then
+  values[IMAGE_TAG]="$(git -C "${repository_directory}" rev-parse --verify HEAD)" ||
     fail "não foi possível determinar IMAGE_TAG a partir do repositório."
 fi
 values[APP_ORIGIN]="${application_origin}"
+values[AUTH_SESSION_COOKIE_SECRET_SOURCE]="${session_cookie_secret_source}"
+values[PUBLIC_SIGNUP_ENABLED]="true"
 
 printf 'Configuração segura do ambiente de produção do Descomplica CRM.\n'
 printf 'Valores secretos são lidos sem eco e nunca são exibidos no resumo.\n\n'
@@ -376,15 +430,17 @@ values[COMMERCIAL_ENGINE_DATABASE_URL]=""
 printf '\n'
 
 prompt_value \
-  NEXT_PUBLIC_SUPABASE_URL \
-  'NEXT_PUBLIC_SUPABASE_URL (URL HTTPS do projeto, *.supabase.co)' \
+  SUPABASE_URL \
+  'SUPABASE_URL (URL HTTPS do projeto, *.supabase.co)' \
   no \
   validate_supabase_url
 prompt_value \
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY \
-  'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (prefixo sb_publishable_)' \
+  SUPABASE_PUBLISHABLE_KEY \
+  'SUPABASE_PUBLISHABLE_KEY (prefixo sb_publishable_)' \
   yes \
   validate_publishable_key
+
+ensure_session_cookie_secret
 
 if [[ "${values[SALESFORCE_INGEST_ENABLED]}" == "true" ]]; then
   prompt_value \
@@ -424,15 +480,18 @@ if [[ -z "${values[MASTER_USER_ID]:-}" ]] &&
     validate_master_user_id
 fi
 
-install -d -o root -g deploy -m 0750 "${environment_directory}"
+install -d -o root -g root -m 0750 "${environment_directory}"
 temporary_environment_file="$(mktemp --tmpdir="${environment_directory}" .production.env.XXXXXX)"
 
 {
   printf '# Gerenciado por /usr/local/sbin/descomplica-configure-env. Não versionar.\n'
   printf 'IMAGE_TAG=%s\n' "${values[IMAGE_TAG]}"
-  printf 'NEXT_PUBLIC_SUPABASE_URL=%s\n' "${values[NEXT_PUBLIC_SUPABASE_URL]}"
-  printf 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "${values[NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY]}"
+  printf 'SUPABASE_URL=%s\n' "${values[SUPABASE_URL]}"
+  printf 'SUPABASE_PUBLISHABLE_KEY=%s\n' "${values[SUPABASE_PUBLISHABLE_KEY]}"
   printf 'APP_ORIGIN=%s\n' "${values[APP_ORIGIN]}"
+  printf 'AUTH_SESSION_COOKIE_SECRET_SOURCE=%s\n' \
+    "${values[AUTH_SESSION_COOKIE_SECRET_SOURCE]}"
+  printf 'PUBLIC_SIGNUP_ENABLED=%s\n' "${values[PUBLIC_SIGNUP_ENABLED]}"
   printf 'SALESFORCE_INGEST_ENABLED=%s\n' "${values[SALESFORCE_INGEST_ENABLED]}"
   printf 'SALESFORCE_REFRESH_ENABLED=%s\n' "${values[SALESFORCE_REFRESH_ENABLED]}"
   printf 'CRM_READ_MODEL_V3_SHADOW_ENABLED=%s\n' \
@@ -459,10 +518,10 @@ temporary_environment_file="$(mktemp --tmpdir="${environment_directory}" .produc
   fi
 } >"${temporary_environment_file}"
 
-chown root:deploy "${temporary_environment_file}"
-chmod 0640 "${temporary_environment_file}"
+chown root:root "${temporary_environment_file}"
+chmod 0600 "${temporary_environment_file}"
 mv -fT -- "${temporary_environment_file}" "${environment_file}"
 temporary_environment_file=""
 
-printf '\nAmbiente atualizado atomicamente em %s (root:deploy, 0640).\n' "${environment_file}"
+printf '\nAmbiente atualizado atomicamente em %s (root:root, 0600).\n' "${environment_file}"
 printf 'O conteúdo final não foi exibido. Nenhum serviço foi reiniciado.\n'

@@ -304,8 +304,8 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
       APP_ORIGIN: origin,
       AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
       AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
-      NEXT_PUBLIC_SUPABASE_URL: apiUrl,
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishableKey,
+      SUPABASE_URL: apiUrl,
+      SUPABASE_PUBLISHABLE_KEY: publishableKey,
     },
     stdio: ["ignore", "ignore", "ignore"],
   });

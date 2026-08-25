@@ -94,7 +94,7 @@ invalida a configuração inteira. Shadow/active também exigem
 `COMMERCIAL_ENGINE_DATABASE_URL` com TLS `sslmode=verify-full`, senha de pelo
 menos 16 caracteres e usuário exato `crm_commercial_engine` (ou seu sufixo de
 pooler). Host direto e sufixo do usuário no pooler devem corresponder ao mesmo
-project ref de `NEXT_PUBLIC_SUPABASE_URL`; ausência ou divergência falha fechada.
+project ref de `SUPABASE_URL`; ausência ou divergência falha fechada.
 Usuário administrativo, parâmetros extras, host não Supabase em produção ou
 senha reutilizada de Supabase/Qlik invalidam a configuração. Essas variáveis
 são server-only.

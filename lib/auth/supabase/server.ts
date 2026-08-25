@@ -18,9 +18,9 @@
 //     responsibility of the middleware (M3), which has NextResponse.headers
 //     available.
 //
-// Env vars used:
-//   - NEXT_PUBLIC_SUPABASE_URL (public)
-//   - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (public, RLS-bounded)
+// Runtime vars used:
+//   - SUPABASE_URL (public API URL, server runtime only)
+//   - SUPABASE_PUBLISHABLE_KEY (public, RLS-bounded, server runtime only)
 // SUPABASE_SERVICE_ROLE_KEY is NOT used here and must never be referenced
 // from this file.
 
@@ -34,42 +34,40 @@ import {
   SESSION_PERSISTENCE_COOKIE_NAME,
   type SessionPersistence,
 } from "@/lib/auth/session-persistence";
+import { getSupabaseRuntimeConfiguration } from "@/lib/auth/supabase/runtime";
 
 export async function createClient(options: { persistence?: SessionPersistence } = {}) {
+  const configuration = getSupabaseRuntimeConfiguration();
   const cookieStore = await cookies();
   const persistence =
     options.persistence ??
     resolveSessionPersistence(cookieStore.get(SESSION_PERSISTENCE_COOKIE_NAME)?.value);
 
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(
-                name,
-                value,
-                applyAuthCookiePolicy(
-                  options,
-                  isSupabaseSessionCookieName(name, process.env.NEXT_PUBLIC_SUPABASE_URL)
-                    ? persistence
-                    : { kind: "temporary" },
-                ),
+  return createServerClient(configuration.url, configuration.publishableKey, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(
+              name,
+              value,
+              applyAuthCookiePolicy(
+                options,
+                isSupabaseSessionCookieName(name, configuration.url)
+                  ? persistence
+                  : { kind: "temporary" },
               ),
-            );
-          } catch {
-            // Called from a Server Component — cookie writes are not
-            // permitted in that context. Session refresh must be handled
-            // by middleware (M3). See file-level comment above.
-          }
-        },
+            ),
+          );
+        } catch {
+          // Called from a Server Component — cookie writes are not
+          // permitted in that context. Session refresh must be handled
+          // by middleware (M3). See file-level comment above.
+        }
       },
     },
-  );
+  });
 }

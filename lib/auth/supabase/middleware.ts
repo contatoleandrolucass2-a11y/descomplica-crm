@@ -32,8 +32,8 @@
 //     until login and verification-pending surfaces exist in M4+.
 //
 // Env vars:
-//   - NEXT_PUBLIC_SUPABASE_URL (public)
-//   - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (public, RLS-bounded)
+//   - SUPABASE_URL (public API URL, server runtime only)
+//   - SUPABASE_PUBLISHABLE_KEY (public, RLS-bounded, server runtime only)
 // SUPABASE_SERVICE_ROLE_KEY is server-only and is NOT referenced here.
 
 import { createServerClient } from "@supabase/ssr";
@@ -48,8 +48,10 @@ import {
   resolveSessionPersistence,
   SESSION_PERSISTENCE_COOKIE_NAME,
 } from "@/lib/auth/session-persistence";
+import { getSupabaseRuntimeConfiguration } from "@/lib/auth/supabase/runtime";
 
 export async function updateSession(request: NextRequest) {
+  const configuration = getSupabaseRuntimeConfiguration();
   let response = NextResponse.next({ request });
   const markerValue = request.cookies.get(SESSION_PERSISTENCE_COOKIE_NAME)?.value;
   const persistence = resolveSessionPersistence(markerValue);
@@ -57,51 +59,45 @@ export async function updateSession(request: NextRequest) {
     persistence.kind === "temporary"
       ? request.cookies
           .getAll()
-          .filter(({ name }) =>
-            isSupabaseAuthCookieName(name, process.env.NEXT_PUBLIC_SUPABASE_URL),
-          )
+          .filter(({ name }) => isSupabaseAuthCookieName(name, configuration.url))
       : [];
   const rotatedAuthCookies = new Set<string>();
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name }) => {
-            if (isSupabaseAuthCookieName(name, process.env.NEXT_PUBLIC_SUPABASE_URL)) {
-              rotatedAuthCookies.add(name);
-            }
-          });
-          // Mirror rotated cookies to the request so downstream handlers in
-          // the same request observe the refreshed session.
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          // Rebuild the response so it carries the request mutation forward.
-          response = NextResponse.next({ request });
-          // Persist rotated cookies on the response for the browser.
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(
-              name,
-              value,
-              applyAuthCookiePolicy(
-                options,
-                isSupabaseSessionCookieName(name, process.env.NEXT_PUBLIC_SUPABASE_URL)
-                  ? persistence
-                  : { kind: "temporary" },
-              ),
+  const supabase = createServerClient(configuration.url, configuration.publishableKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet, headers) {
+        cookiesToSet.forEach(({ name }) => {
+          if (isSupabaseAuthCookieName(name, configuration.url)) {
+            rotatedAuthCookies.add(name);
+          }
+        });
+        // Mirror rotated cookies to the request so downstream handlers in
+        // the same request observe the refreshed session.
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        // Rebuild the response so it carries the request mutation forward.
+        response = NextResponse.next({ request });
+        // Persist rotated cookies on the response for the browser.
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(
+            name,
+            value,
+            applyAuthCookiePolicy(
+              options,
+              isSupabaseSessionCookieName(name, configuration.url)
+                ? persistence
+                : { kind: "temporary" },
             ),
-          );
-          // Apply anti-cache headers per @supabase/ssr contract. See
-          // file-level comment for rationale.
-          Object.entries(headers).forEach(([key, value]) => response.headers.set(key, value));
-        },
+          ),
+        );
+        // Apply anti-cache headers per @supabase/ssr contract. See
+        // file-level comment for rationale.
+        Object.entries(headers).forEach(([key, value]) => response.headers.set(key, value));
       },
     },
-  );
+  });
 
   // Trigger the session refresh. The return value is intentionally not
   // inspected, logged, or rendered: M3 does not branch on user state, and

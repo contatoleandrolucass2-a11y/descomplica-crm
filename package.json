@@ -36,6 +36,8 @@
     "db:status": "supabase status",
     "db:rehearse": "node scripts/release/isolated-restore-rehearsal.mjs",
     "db:test": "supabase test db",
+    "image:build": "node scripts/release/build-promotable-image.mjs",
+    "image:prove": "node scripts/release/prove-promotable-image.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

@@ -1,6 +1,8 @@
 import "server-only";
 
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 import type { CookieOptions } from "@supabase/ssr";
 
@@ -33,6 +35,12 @@ type PersistenceOptions = {
   secret?: string | undefined;
 };
 
+type SecretEnvironment = Readonly<{
+  [name: string]: string | undefined;
+  AUTH_SESSION_COOKIE_SECRET?: string;
+  AUTH_SESSION_COOKIE_SECRET_FILE?: string;
+}>;
+
 type CookiePolicyOptions = {
   allowInsecureLoopback?: boolean;
   applicationOrigin?: string;
@@ -46,6 +54,36 @@ function currentEpochSeconds(now: Date): number {
 
 function validSecret(secret: string | undefined): secret is string {
   return typeof secret === "string" && Buffer.byteLength(secret, "utf8") >= MINIMUM_SECRET_BYTES;
+}
+
+function normalizeSecretFile(contents: string): string | undefined {
+  const normalized = contents.replace(/\r?\n$/, "");
+  if (normalized.includes("\n") || normalized.includes("\r") || normalized.includes("\0")) {
+    return undefined;
+  }
+  return validSecret(normalized) ? normalized : undefined;
+}
+
+/**
+ * Reads the HMAC key from a runtime-mounted secret file. Direct environment
+ * injection remains a local-test fallback; deployment Compose files mount a
+ * root-owned secret and provide only its in-container path.
+ */
+export function readSessionPersistenceSecret(
+  environment: SecretEnvironment = process.env,
+): string | undefined {
+  const configuredPath = environment.AUTH_SESSION_COOKIE_SECRET_FILE?.trim();
+  if (configuredPath) {
+    if (!path.isAbsolute(configuredPath)) return undefined;
+    try {
+      return normalizeSecretFile(readFileSync(configuredPath, { encoding: "utf8" }));
+    } catch {
+      return undefined;
+    }
+  }
+  return validSecret(environment.AUTH_SESSION_COOKIE_SECRET)
+    ? environment.AUTH_SESSION_COOKIE_SECRET
+    : undefined;
 }
 
 function markerPayload(deadlineEpochSeconds: number): string {
@@ -94,7 +132,7 @@ function isHttpsOrigin(
 function hasExplicitLocalQaCookieOverride(): boolean {
   if (process.env.AUTH_LOCAL_INSECURE_LOOPBACK_QA !== "true") return false;
   try {
-    const supabase = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+    const supabase = new URL(process.env.SUPABASE_URL ?? "");
     return ["127.0.0.1", "localhost", "[::1]"].includes(supabase.hostname);
   } catch {
     return false;
@@ -147,7 +185,7 @@ export function issueSessionPersistence(
   options: PersistenceOptions = {},
 ): IssuedSessionPersistence {
   const now = options.now ?? new Date();
-  const secret = options.secret ?? process.env.AUTH_SESSION_COOKIE_SECRET;
+  const secret = options.secret ?? readSessionPersistenceSecret();
 
   if (!isRememberBrowserRequested(checkboxValue) || !validSecret(secret)) {
     return { persistence: TEMPORARY_SESSION, markerValue: null };
@@ -166,7 +204,7 @@ export function resolveSessionPersistence(
   options: PersistenceOptions = {},
 ): SessionPersistence {
   const now = options.now ?? new Date();
-  const secret = options.secret ?? process.env.AUTH_SESSION_COOKIE_SECRET;
+  const secret = options.secret ?? readSessionPersistenceSecret();
   if (!markerValue || !validSecret(secret)) return TEMPORARY_SESSION;
 
   const match = markerValue.match(/^v1\.(\d{1,12})\.([A-Za-z0-9_-]{43})$/);
