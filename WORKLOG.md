@@ -104,9 +104,11 @@ unix:///var/run/docker.sock` explicitamente. O gate valida antes que esse alvo
   registrado em tabelas privadas append-only e sem grants para papéis de API.
 - Razão social, contatos, controlador, DPO, bases legais e retenção continuam
   pendentes de revisão jurídica; nenhum dado legal foi inventado.
-- A matriz de smoke documenta nove perfis e 21 rotas: Master acessa as 21,
-  Admin somente a raiz administrativa e usuários, demais perfis apenas a superfície
-  auth-only de segurança. MFA e recuperação sobrepõem redirects antes do RBAC.
+- A matriz de smoke documenta nove perfis e 21 rotas. Após a reconciliação
+  produtiva, Master acessa as 21; Admin preserva 14; `broker`, `coordinator` e
+  `real_estate` preservam Dashboard, cinco etapas e Ranking; os quatro perfis
+  sem herança comercial permanecem apenas na superfície auth-only. MFA e
+  recuperação sobrepõem redirects antes do RBAC.
 - Supabase CLI local foi atualizado de 2.111.0 para 2.115.0 para incorporar a
   correção oficial de resolução/reload do `content_path` de templates Auth.
   Auditoria do Auth 2.195.0 confirmou SHA-224 puro no fluxo implícito e prefixo

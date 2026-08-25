@@ -36,33 +36,40 @@ const simulatorPageKeys = [
   "crm.simulation.wf15",
   "crm.simulation.wf16",
 ];
-const masterCommercialPageKeys = [
+const inheritedAnalyticalPageKeys = [
   "crm.dashboard",
-  "crm.partnerships",
   "crm.ranking",
-  "crm.settings",
-  "crm.settings.goals",
-  "crm.settings.partnerships",
-  "crm.settings.points",
   "crm.stage.appointments",
   "crm.stage.folders",
   "crm.stage.opportunities",
   "crm.stage.sales",
   "crm.stage.visits",
 ];
+const administrativeCommercialPageKeys = [
+  "crm.settings",
+  "crm.settings.goals",
+  "crm.settings.partnerships",
+  "crm.settings.points",
+];
+const masterOnlyCommercialPageKeys = ["crm.partnerships"];
 const masterAdministrativePageKeys = ["admin.home", "admin.pages", "admin.users"];
-const adminPageKeys = ["admin.home", "admin.users"];
 const expectedPageKeysByRole = {
   master: [
     ...masterAdministrativePageKeys,
-    ...masterCommercialPageKeys,
+    ...inheritedAnalyticalPageKeys,
+    ...administrativeCommercialPageKeys,
+    ...masterOnlyCommercialPageKeys,
     ...simulatorPageKeys,
   ].sort(),
-  admin: [...adminPageKeys].sort(),
+  admin: [
+    ...masterAdministrativePageKeys,
+    ...inheritedAnalyticalPageKeys,
+    ...administrativeCommercialPageKeys,
+  ].sort(),
   manager: [],
-  broker: [],
-  coordinator: [],
-  real_estate: [],
+  broker: [...inheritedAnalyticalPageKeys].sort(),
+  coordinator: [...inheritedAnalyticalPageKeys].sort(),
+  real_estate: [...inheritedAnalyticalPageKeys].sort(),
   house: [],
   partnership_channel: [],
   pending: [],
@@ -380,8 +387,8 @@ async function startLocalNextServer(local) {
       APP_ORIGIN: origin,
       AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
       AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
-      NEXT_PUBLIC_SUPABASE_URL: local.apiUrl,
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
+      SUPABASE_URL: local.apiUrl,
+      SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
       OFFICIAL_SIMULATOR_RUNTIME_MODE: "active",
       OFFICIAL_SIMULATOR_ENABLED_KEYS: "simulator.wf13",
     },

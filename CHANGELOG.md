@@ -72,11 +72,12 @@
   total de 1.002 pgTAP; fonte e alvo efêmeros continuam independentes.
 - Faz a conta QA visual consentir explicitamente com cookies opcionais antes da
   matriz de temas; o produto continua opt-out e sem persistência por padrão.
-- Registra a matriz local dos nove perfis e 21 rotas. Alterações permanecem
-  locais; nenhum ambiente remoto, migration, usuário ou configuração foi
-  modificado. Gates finais aprovaram formato, lint, tipos, 427 testes Vitest,
-  oito testes Node, build de 39 rotas, 1.002 pgTAP em 24 arquivos e Playwright
-  com 11 cenários aprovados e um skip remoto explícito.
+- Registra a matriz local dos nove perfis e 21 rotas. A reconciliação preserva
+  21 páginas para Master, 14 para Admin, sete para os perfis analíticos
+  herdados e nenhuma herança comercial para os quatro perfis restantes.
+  Alterações permanecem locais; nenhum ambiente remoto, migration, usuário ou
+  configuração foi modificado. Os resultados finais deste novo SHA serão
+  registrados após a repetição integral dos gates.
 
 - Evolui somente o WF13 para `wf13-1.2.0`: ranking obrigatório e versionado,
   comparação exata por dois limites independentes e reprovação explícita de
