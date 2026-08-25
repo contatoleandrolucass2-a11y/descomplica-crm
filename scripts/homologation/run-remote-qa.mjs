@@ -1,5 +1,5 @@
 import { execFile, spawn } from "node:child_process";
-import { open, readFile, stat } from "node:fs/promises";
+import { lstat, open, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
@@ -13,6 +13,9 @@ const accessPath = "/etc/descomplica-crm/homologation-access.json";
 const appEnvironmentPath = "/etc/descomplica-crm/homologation.env";
 const activeProxyPath = "/etc/nginx/sites-enabled/homolog.descomplicapro.com.br";
 const accessLogPath = "/var/log/nginx/homolog.descomplicapro.com.br.access.log";
+const dockerSocketPath = "/var/run/docker.sock";
+const dockerSocketUri = `unix://${dockerSocketPath}`;
+const dockerCommand = "/usr/bin/docker";
 const firewallCommand = "/usr/local/sbin/descomplica-homologation-firewall";
 const runtimeSupabaseConfigPath = path.join(runtimeRoot, "supabase/config.toml");
 const versionedSupabaseConfigPath = path.join(
@@ -24,6 +27,9 @@ const mailpitOrigin = "http://127.0.0.1:55324";
 const appContainer = "descomplica-homologation-app";
 const sessionSecretSource = "/etc/descomplica-crm/secrets/homologation-auth-session-cookie-secret";
 const execFileAsync = promisify(execFile);
+const commandEnvironment = Object.freeze({
+  PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+});
 const officialSimulatorKeys = new Set([
   "simulator.wf13",
   "simulator.wf16",
@@ -103,15 +109,27 @@ async function captured(command, arguments_, label) {
       cwd: repositoryRoot,
       encoding: "utf8",
       maxBuffer: 16 * 1024 * 1024,
-      env: Object.fromEntries(
-        ["PATH", "HOME", "DOCKER_HOST"].flatMap((name) =>
-          process.env[name] ? [[name, process.env[name]]] : [],
-        ),
-      ),
+      env: commandEnvironment,
     });
   } catch {
     fail(label);
   }
+}
+
+async function verifyLocalDockerSocket() {
+  let metadata;
+  try {
+    metadata = await lstat(dockerSocketPath);
+  } catch {
+    fail("Homologation QA local Docker socket is unavailable.");
+  }
+  if (metadata.uid !== 0 || (metadata.mode & 0o007) !== 0 || !metadata.isSocket()) {
+    fail("Homologation QA local Docker socket is unsafe.");
+  }
+}
+
+async function capturedDocker(arguments_, label) {
+  return captured(dockerCommand, ["--host", dockerSocketUri, ...arguments_], label);
 }
 
 async function verifyRepositoryState() {
@@ -194,23 +212,19 @@ async function inspectHostedRuntime(expectedHead) {
     { stdout: imageOutput },
     { stdout: mountsJson },
   ] = await Promise.all([
-    captured(
-      "docker",
+    capturedDocker(
       ["inspect", "--format", "{{json .Config.Env}}", appContainer],
       "Homologation container environment preflight failed.",
     ),
-    captured(
-      "docker",
+    capturedDocker(
       ["inspect", "--format", "{{json .State}}", appContainer],
       "Homologation container state preflight failed.",
     ),
-    captured(
-      "docker",
+    capturedDocker(
       ["inspect", "--format", "{{.Image}}\n{{.Config.Image}}\n{{.RestartCount}}", appContainer],
       "Homologation container image preflight failed.",
     ),
-    captured(
-      "docker",
+    capturedDocker(
       ["inspect", "--format", "{{json .Mounts}}", appContainer],
       "Homologation container mount preflight failed.",
     ),
@@ -564,8 +578,7 @@ async function assertHostedRuntimeStayedHealthy(expectedHead, before, access) {
 }
 
 async function assertHostedApplicationLogSafety(since) {
-  const { stdout, stderr } = await captured(
-    "docker",
+  const { stdout, stderr } = await capturedDocker(
     ["logs", "--since", since, "--tail", "10000", appContainer],
     "Homologation application log postflight failed.",
   );
@@ -583,6 +596,7 @@ async function main() {
   process.env.HOMOLOGATION_MODE = "true";
   process.env.QA_SUPABASE_WORKDIR = runtimeRoot;
 
+  await verifyLocalDockerSocket();
   const head = await verifyRepositoryState();
   const [accountsPayload, access, runtimeEnvironment, localModule] = await Promise.all([
     readPrivateJson(accountsPath),

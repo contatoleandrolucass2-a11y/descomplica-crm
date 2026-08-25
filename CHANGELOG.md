@@ -20,6 +20,9 @@
 
 ## Unreleased
 
+- Fixa todas as inspeções Docker do smoke hospedado no socket local root-owned
+  `/var/run/docker.sock`; comandos capturados usam ambiente mínimo e não herdam
+  `HOME`, `DOCKER_HOST` ou `DOCKER_CONTEXT` do chamador.
 - Habilita SMTP Mailpit estritamente isolado na configuração de homologação e
   amplia o gate HTTPS para recuperação de senha, MFA/AAL2 e restauração
   comprovada da conta Master/QA sintética.

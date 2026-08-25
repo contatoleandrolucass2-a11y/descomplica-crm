@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-08-25 — smoke fixa o daemon Docker local
+
+- O runner hospedado deixou de herdar `HOME`, `DOCKER_HOST`, `DOCKER_CONTEXT` e
+  `PATH` do chamador em comandos capturados; usa somente um `PATH` constante.
+- Inspeções de imagem, mount, estado e logs passam `--host
+unix:///var/run/docker.sock` explicitamente. O gate valida antes que esse alvo
+  seja socket root-owned e sem permissões para outros usuários.
+- Prettier, ESLint, sintaxe Node, testes direcionados e typecheck foram
+  reexecutados localmente. Nenhum daemon, container ou ambiente remoto foi
+  consultado ou alterado.
+
 ## 2026-08-25 — contrato de smoke Auth hospedado endurecido
 
 - A configuração isolada de homologação habilita Mailpit, redirect único por

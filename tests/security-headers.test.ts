@@ -106,6 +106,14 @@ describe("security headers regression", () => {
     expect(hostedQaLauncher).toContain("callbackBlocks.length !== 2");
     expect(hostedQaLauncher).toContain("verifyRepositoryState()");
     expect(hostedQaLauncher).toContain("verifyHomologationNetworkIsolation()");
+    expect(hostedQaLauncher).toContain('const dockerSocketPath = "/var/run/docker.sock"');
+    expect(hostedQaLauncher).toContain('const dockerCommand = "/usr/bin/docker"');
+    expect(hostedQaLauncher).toContain("await verifyLocalDockerSocket()");
+    expect(hostedQaLauncher).toContain("metadata.isSocket()");
+    expect(hostedQaLauncher).toContain('["--host", dockerSocketUri, ...arguments_]');
+    expect(hostedQaLauncher).not.toContain('"DOCKER_HOST"');
+    expect(hostedQaLauncher).not.toContain('"DOCKER_CONTEXT"');
+    expect(hostedQaLauncher).not.toContain('"HOME"');
     expect(hostedQaLauncher).toContain("verifyHostedHealth(head, access)");
     expect(hostedQaLauncher).toContain('"{{json .Mounts}}"');
     expect(hostedQaLauncher).toContain('environment.has("AUTH_SESSION_COOKIE_SECRET")');

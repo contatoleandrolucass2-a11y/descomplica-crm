@@ -280,6 +280,10 @@ completo ao `IMAGE_TAG` privado, à imagem imutável do container e ao
 montado. O `check` fail-closed do firewall deve provar que Mailpit e todas as
 portas `55320`–`55329` continuam restritas ao loopback. Nenhum valor do ambiente
 privado ou do `docker inspect` é emitido.
+Comandos capturados usam um `PATH` constante, sem herdar `HOME`, `DOCKER_HOST`
+ou `DOCKER_CONTEXT`. Toda inspeção Docker fixa explicitamente
+`unix:///var/run/docker.sock`, depois de comprovar por `lstat` que o alvo é um
+socket local pertencente a root e sem permissões para outros usuários.
 Os gates `OFFICIAL_SIMULATOR_RUNTIME_MODE` e
 `OFFICIAL_SIMULATOR_ENABLED_KEYS` são lidos do container efetivo e repassados
 ao E2E/visual; o configurador preserva somente valores válidos já existentes e
