@@ -615,22 +615,59 @@ begin
   end if;
 
   if exists (
+    with expected(role_key, permission_key) as (
+      values
+        ('admin', 'crm.dashboard.view'),
+        ('admin', 'crm.stages.view'),
+        ('admin', 'crm.ranking.view'),
+        ('admin', 'pages.manage'),
+        ('admin', 'crm.settings.view'),
+        ('admin', 'crm.settings.manage'),
+        ('admin', 'crm.salesforce.refresh'),
+        ('admin', 'crm.ingest.manage'),
+        ('coordinator', 'crm.dashboard.view'),
+        ('coordinator', 'crm.stages.view'),
+        ('coordinator', 'crm.ranking.view'),
+        ('supervisor', 'crm.dashboard.view'),
+        ('supervisor', 'crm.stages.view'),
+        ('supervisor', 'crm.ranking.view'),
+        ('real_estate', 'crm.dashboard.view'),
+        ('real_estate', 'crm.stages.view'),
+        ('real_estate', 'crm.ranking.view'),
+        ('broker_lead', 'crm.dashboard.view'),
+        ('broker_lead', 'crm.stages.view'),
+        ('broker_lead', 'crm.ranking.view'),
+        ('broker', 'crm.dashboard.view'),
+        ('broker', 'crm.stages.view'),
+        ('broker', 'crm.ranking.view'),
+        ('user', 'crm.dashboard.view'),
+        ('user', 'crm.stages.view'),
+        ('user', 'crm.ranking.view')
+    ),
+    actual as (
+      select role_permission.role_key, role_permission.permission_key
+      from public.role_permissions role_permission
+      where role_permission.role_key <> 'master'
+        and role_permission.permission_key = any(array[
+          'crm.dashboard.view',
+          'crm.stages.view',
+          'crm.ranking.view',
+          'crm.partnerships.view',
+          'pages.manage',
+          'crm.settings.view',
+          'crm.settings.manage',
+          'crm.salesforce.refresh',
+          'crm.ingest.manage'
+        ])
+    )
     select 1
-    from public.role_permissions role_permission
-    where role_permission.role_key <> 'master'
-      and role_permission.permission_key = any(array[
-        'crm.dashboard.view',
-        'crm.stages.view',
-        'crm.ranking.view',
-        'crm.partnerships.view',
-        'pages.manage',
-        'crm.settings.view',
-        'crm.settings.manage',
-        'crm.salesforce.refresh',
-        'crm.ingest.manage'
-      ])
+    from (
+      (select * from expected except select * from actual)
+      union all
+      (select * from actual except select * from expected)
+    ) difference
   ) then
-    raise exception 'global commercial v2 permissions are not Master-only';
+    raise exception 'inherited commercial permission baseline diverged';
   end if;
 end
 $qa_preflight$;

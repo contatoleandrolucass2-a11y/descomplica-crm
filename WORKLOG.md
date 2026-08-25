@@ -48,6 +48,9 @@ unix:///var/run/docker.sock` explicitamente. O gate valida antes que esse alvo
   e 17 páginas; confirmou as 14 páginas de Admin, Qlik sem grant/policy de
   leitura permissiva e os objetos Auth/MFA/aceites completos. Recursos
   temporários foram removidos e nenhum ambiente remoto foi alterado.
+- A revisão independente encontrou um preflight local ainda preso ao baseline
+  Master-only anterior. O gate agora compara simetricamente a matriz comercial
+  herdada exata e reprova tanto perda quanto ampliação de permissão.
 
 ## 2026-08-25 — imagem promovível e segredos de runtime
 

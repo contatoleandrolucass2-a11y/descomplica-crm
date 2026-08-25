@@ -33,6 +33,8 @@
 - Reconcilia as sete versões existentes somente no histórico remoto com markers
   sanitizados: três equivalentes canônicos, duas alterações inseguras já
   supersedidas e dois contratos legados confidenciais permanecem fora do Git.
+- Substitui o preflight Master-only obsoleto por comparação exata da matriz
+  herdada, bloqueando perda ou ampliação de acesso antes do smoke E2E.
 - Adiciona inventário produtivo somente leitura e rehearsal sobre restore
   sanitizado PostgreSQL 17. O gate aplica apenas as duas migrations Auth/MFA,
   preserva os fingerprints RBAC 8/20/61/17 e mantém tabelas Qlik fail-closed.
