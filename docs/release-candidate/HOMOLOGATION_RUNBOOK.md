@@ -24,7 +24,7 @@ arquivos `.env`, hashes de senha, chaves Supabase ou cookies para evidências.
 | Cache                | `descomplica-homologation-next-cache`              | Não monta volume de produção                                             |
 | Supabase             | projeto local `descomplica-homologation`           | PostgreSQL/Auth próprios; nenhum link com Supabase remoto                |
 | Rede                 | `supabase_network_descomplica-homologation`        | Exclusiva do Supabase e app de homologação                               |
-| Portas Supabase      | `55320`–`55329`, conforme configuração             | Firewall `DOCKER-USER`; externas bloqueadas, Studio/SMTP/etc. desligados |
+| Portas Supabase      | `55320`–`55329`, conforme configuração             | Firewall `DOCKER-USER`; externas bloqueadas; Mailpit só em loopback      |
 | Runtime              | `/var/lib/descomplica-crm-homologation`            | `root`, sem montagem de dados de produção                                |
 | Configuração privada | `/etc/descomplica-crm/homologation.env`            | `0600`; gerada sem imprimir valores                                      |
 | Contas QA            | `/etc/descomplica-crm/homologation-accounts.json`  | Nove identidades sintéticas, `0600`                                      |
@@ -60,6 +60,12 @@ oficial é executada. A aplicação exibe o banner
 `HOMOLOGAÇÃO — DADOS SINTÉTICOS`, desliga cadastro público e aplica `noindex`.
 O Nginx acrescenta `X-Robots-Tag: noindex, nofollow, noarchive`, protege também
 `/robots.txt` e não encaminha a credencial Basic ao Next.js.
+
+O contrato Auth usa `APP_ORIGIN=https://homolog.descomplicapro.com.br` e aceita
+somente o redirect exato `/auth/callback`. O Mailpit isolado escuta apenas em
+`127.0.0.1:55324`, captura a entrega para contas `@local.invalid` e nunca
+encaminha e-mail externo. O bloco Nginx exato de `/auth/callback` desliga access
+e error log para que hashes de recuperação não entrem nos logs do proxy.
 
 ## Gate 0 — SHA, produção e capacidade
 
@@ -139,7 +145,7 @@ Iniciar somente PostgreSQL, Auth, Kong e PostgREST do projeto preparado:
 ```bash
 sudo pnpm exec supabase start \
   --workdir /var/lib/descomplica-crm-homologation \
-  --exclude realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor \
+  --exclude realtime,storage-api,imgproxy,postgres-meta,studio,edge-runtime,logflare,vector,supavisor \
   --yes
 sudo /usr/local/sbin/descomplica-homologation-firewall check
 sudo env \
@@ -172,29 +178,27 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
-sudo env IMAGE_TAG="$(git rev-parse HEAD)" node scripts/homologation/configure-app-env.mjs
-sudo docker compose \
-  --env-file /etc/descomplica-crm/homologation.env \
-  -f deploy/homologation/compose.yaml \
-  config --quiet
-sudo docker compose \
-  --env-file /etc/descomplica-crm/homologation.env \
-  -f deploy/homologation/compose.yaml \
-  build --pull
-sudo docker compose \
-  --env-file /etc/descomplica-crm/homologation.env \
-  -f deploy/homologation/compose.yaml \
-  up -d --remove-orphans
-sudo docker compose \
-  --env-file /etc/descomplica-crm/homologation.env \
-  -f deploy/homologation/compose.yaml \
-  ps
+release_sha="$(git rev-parse HEAD)"
+IMAGE_TAG="${release_sha}" pnpm image:build
+IMAGE_TAG="${release_sha}" pnpm image:prove
+sudo env IMAGE_TAG="${release_sha}" node scripts/homologation/configure-app-env.mjs
+sudo node scripts/release/compose-with-runtime-secret.mjs \
+  homologation config --quiet
+sudo node scripts/release/compose-with-runtime-secret.mjs \
+  homologation up -d --no-build --remove-orphans
+sudo node scripts/release/compose-with-runtime-secret.mjs \
+  homologation ps
+sudo docker image inspect "descomplica-crm:${release_sha}" --format '{{.Id}}'
 curl --fail --silent --show-error http://127.0.0.1:3100/api/health
 ```
 
-O healthcheck deve retornar o SHA esperado. Confirmar `HOMOLOGATION_MODE=true`,
-banner visível, cadastro bloqueado, endpoints de integração indisponíveis e
-ausência de chamadas externas antes de publicar DNS.
+O `image:prove` exige que ambos os Compose resolvam a mesma referência e o mesmo
+ID imutável, valida os dois perfis de runtime sem rede e não imprime o segredo.
+Registrar esse ID após homologação e compará-lo, sem rebuild ou nova tag, ao ID
+usado na promoção futura de produção. O healthcheck deve retornar o SHA
+esperado. Confirmar `HOMOLOGATION_MODE=true`, banner visível, cadastro bloqueado,
+endpoints de integração indisponíveis e ausência de chamadas externas antes de
+publicar DNS.
 
 ## Gate 4 — DNS, Nginx e TLS
 
@@ -268,10 +272,31 @@ contas e chaves fora de argumentos e artefatos:
 sudo pnpm homologation:qa
 ```
 
-O runner lê do arquivo privado apenas
-`OFFICIAL_SIMULATOR_RUNTIME_MODE` e `OFFICIAL_SIMULATOR_ENABLED_KEYS`, valida
-owner/permissões e repassa esses dois valores ao gate visual. Nenhum outro valor
-do ambiente privado é exposto ou persistido em artefatos.
+Antes de abrir o navegador, o runner exige worktree limpa, vincula o HEAD
+completo ao `IMAGE_TAG` privado, à imagem imutável do container e ao
+`version` Basic-auth de `/api/health`. Também compara em memória o
+`supabase/config.toml` efetivo com o arquivo versionado e confirma
+`APP_ORIGIN`, URL interna do Supabase, flags de homologação e origem do segredo
+montado. O `check` fail-closed do firewall deve provar que Mailpit e todas as
+portas `55320`–`55329` continuam restritas ao loopback. Nenhum valor do ambiente
+privado ou do `docker inspect` é emitido.
+Os gates `OFFICIAL_SIMULATOR_RUNTIME_MODE` e
+`OFFICIAL_SIMULATOR_ENABLED_KEYS` são lidos do container efetivo e repassados
+ao E2E/visual; o configurador preserva somente valores válidos já existentes e
+usa `off`/vazio quando ainda não houver configuração.
+
+O mesmo runner usa o Mailpit apenas por loopback para provar entrega, origem e
+uso único do link de recuperação. O teste altera temporariamente a senha e o
+fator TOTP da identidade Master/QA sintética; um `finally` administrativo
+restaura primeiro a senha original, remove somente fatores criados pelo gate,
+revoga explicitamente todas as sessões QA no Supabase isolado e comprova a
+credencial final mesmo quando o Playwright falha. Mensagens de recuperação da
+identidade dedicada são eliminadas antes e em `finally`. O runner recusa uma
+identidade que já tenha fator MFA e nunca imprime senha, chave manual, link,
+token ou ID. Antes e depois do callback, valida exatamente os dois blocos Nginx
+ativos e examina somente os bytes novos do access log e os logs do container
+em memória: query de callback, HTTP 5xx, erro fatal, reinício, troca de imagem
+ou mudança de SHA reprovam o gate sem ecoar conteúdo.
 
 Esses comandos locais não substituem o smoke HTTPS. Na URL real, validar nove
 perfis, 21 rotas, isolamento vertical/horizontal, guards, filtros, estados
@@ -315,10 +340,8 @@ sudo rm /etc/nginx/sites-enabled/homolog.descomplicapro.com.br
 sudo nginx -t
 sudo systemctl reload nginx
 sudo systemctl is-active nginx
-sudo docker compose \
-  --env-file /etc/descomplica-crm/homologation.env \
-  -f deploy/homologation/compose.yaml \
-  down --remove-orphans
+sudo node scripts/release/compose-with-runtime-secret.mjs \
+  homologation down --remove-orphans
 sudo pnpm exec supabase stop --workdir /var/lib/descomplica-crm-homologation
 sudo systemctl disable --now descomplica-homologation-firewall.timer
 sudo /usr/local/sbin/descomplica-homologation-firewall remove

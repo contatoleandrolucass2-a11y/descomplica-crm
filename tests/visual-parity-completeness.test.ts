@@ -151,8 +151,16 @@ describe("isolated authenticated visual QA contract", () => {
     expect(remoteRunner).toContain(
       'const appEnvironmentPath = "/etc/descomplica-crm/homologation.env"',
     );
-    expect(remoteRunner).toContain("readOfficialSimulatorEnvironment()");
+    expect(remoteRunner).toContain("readRuntimeEnvironmentContract()");
+    expect(remoteRunner).toContain("hostedRuntime.officialSimulatorEnvironment");
     expect(remoteRunner).toContain("...officialSimulatorEnvironment");
     expect(remoteRunner).toContain("unsafe ownership or permissions");
+    expect(remoteRunner).toContain("QA_E2E_MAILPIT_ORIGIN: mailpitOrigin");
+    expect(remoteRunner).toContain("restoreQaIdentity(");
+    expect(remoteRunner).toContain("auth.admin.mfa.deleteFactor");
+    expect(remoteRunner).toContain("auth.admin.updateUserById");
+    expect(remoteRunner).toContain("delete from auth.sessions where user_id =");
+    expect(remoteRunner).toContain("purgeQaMail(master.email)");
+    expect(remoteRunner).toContain("assertHostedAccessLogSafety(callbackLogSnapshot)");
   });
 });

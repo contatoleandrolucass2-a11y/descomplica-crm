@@ -73,13 +73,15 @@ describe("security headers regression", () => {
   });
 
   it("verifies recovery token hashes by POST and never routes them through gateway queries", async () => {
-    const [callback, template, localConfig, homologationConfig, qaLauncher] = await Promise.all([
-      readFile(path.join(process.cwd(), "app/auth/callback/route.ts"), "utf8"),
-      readFile(path.join(process.cwd(), "supabase/templates/recovery.html"), "utf8"),
-      readFile(path.join(process.cwd(), "supabase/config.toml"), "utf8"),
-      readFile(path.join(process.cwd(), "deploy/homologation/supabase.config.toml"), "utf8"),
-      readFile(path.join(process.cwd(), "scripts/qa/local-rls-api.mjs"), "utf8"),
-    ]);
+    const [callback, template, localConfig, homologationConfig, qaLauncher, hostedQaLauncher] =
+      await Promise.all([
+        readFile(path.join(process.cwd(), "app/auth/callback/route.ts"), "utf8"),
+        readFile(path.join(process.cwd(), "supabase/templates/recovery.html"), "utf8"),
+        readFile(path.join(process.cwd(), "supabase/config.toml"), "utf8"),
+        readFile(path.join(process.cwd(), "deploy/homologation/supabase.config.toml"), "utf8"),
+        readFile(path.join(process.cwd(), "scripts/qa/local-rls-api.mjs"), "utf8"),
+        readFile(path.join(process.cwd(), "scripts/homologation/run-remote-qa.mjs"), "utf8"),
+      ]);
 
     expect(callback).toContain("supabase.auth.verifyOtp({");
     expect(callback).toContain('type: "recovery"');
@@ -90,9 +92,37 @@ describe("security headers regression", () => {
     expect(template).not.toContain("/auth/v1/verify");
     expect(localConfig).toContain('content_path = "./supabase/templates/recovery.html"');
     expect(homologationConfig).toContain('content_path = "./supabase/templates/recovery.html"');
+    expect(homologationConfig).toMatch(/\[local_smtp\]\s+enabled = true\s+port = 55324/u);
+    expect(homologationConfig).toContain('site_url = "https://homolog.descomplicapro.com.br"');
+    expect(homologationConfig).toContain(
+      'additional_redirect_urls = ["https://homolog.descomplicapro.com.br/auth/callback"]',
+    );
     expect(qaLauncher).toContain('PLAYWRIGHT_NO_COPY_PROMPT: "1"');
     expect(qaLauncher).toContain(
       "await rm(playwrightOutputRoot, { recursive: true, force: true })",
+    );
+    expect(hostedQaLauncher).toContain('const mailpitOrigin = "http://127.0.0.1:55324"');
+    expect(hostedQaLauncher).toContain("verifyProxyPrivacyContract()");
+    expect(hostedQaLauncher).toContain("callbackBlocks.length !== 2");
+    expect(hostedQaLauncher).toContain("verifyRepositoryState()");
+    expect(hostedQaLauncher).toContain("verifyHomologationNetworkIsolation()");
+    expect(hostedQaLauncher).toContain("verifyHostedHealth(head, access)");
+    expect(hostedQaLauncher).toContain('"{{json .Mounts}}"');
+    expect(hostedQaLauncher).toContain('environment.has("AUTH_SESSION_COOKIE_SECRET")');
+    expect(hostedQaLauncher).toContain("assertHostedAccessLogSafety(callbackLogSnapshot)");
+    expect(hostedQaLauncher).toContain("assertHostedApplicationLogSafety(applicationLogSince)");
+    expect(hostedQaLauncher).toContain("delete from auth.sessions where user_id =");
+
+    const restoration = hostedQaLauncher.slice(
+      hostedQaLauncher.indexOf("async function restoreQaIdentity("),
+      hostedQaLauncher.indexOf("function mailMatchesRecipient("),
+    );
+    expect(restoration.indexOf("auth.admin.updateUserById")).toBeGreaterThan(-1);
+    expect(restoration.indexOf("auth.admin.mfa.deleteFactor")).toBeGreaterThan(
+      restoration.indexOf("auth.admin.updateUserById"),
+    );
+    expect(restoration.indexOf("delete from auth.sessions")).toBeGreaterThan(
+      restoration.indexOf("auth.admin.mfa.deleteFactor"),
     );
   });
 

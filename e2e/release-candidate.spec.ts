@@ -134,8 +134,7 @@ function readTarget(): QaTarget {
 }
 
 const qaTarget = readTarget();
-function readMailpitOrigin(): string | null {
-  if (qaTarget.remoteHomologation) return null;
+function readMailpitOrigin(): string {
   const origin = new URL(requiredEnvironment("QA_E2E_MAILPIT_ORIGIN"));
   if (
     origin.protocol !== "http:" ||
@@ -169,7 +168,6 @@ async function captureState(page: Page, name: string) {
 }
 
 async function waitForRecoveryLink(recipient: string, requestedAfter: number): Promise<string> {
-  if (!mailpitOrigin) throw new Error("Local SMTP capture is unavailable.");
   const deadline = Date.now() + 15_000;
   const diagnostics = {
     callbacks: 0,
@@ -264,7 +262,7 @@ async function waitForRecoveryLink(recipient: string, requestedAfter: number): P
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   throw new Error(
-    `Local SMTP recovery contract failed (messages=${diagnostics.messages}, links=${diagnostics.links}, same_origin=${diagnostics.sameOrigin}, callbacks=${diagnostics.callbacks}, recovery_type=${diagnostics.recoveryType}, token_contract=${diagnostics.tokenContract}, exact_keys=${diagnostics.exactKeys}).`,
+    `Isolated SMTP recovery contract failed (messages=${diagnostics.messages}, links=${diagnostics.links}, same_origin=${diagnostics.sameOrigin}, callbacks=${diagnostics.callbacks}, recovery_type=${diagnostics.recoveryType}, token_contract=${diagnostics.tokenContract}, exact_keys=${diagnostics.exactKeys}).`,
   );
 }
 
@@ -308,23 +306,50 @@ const genericLoginFailure =
   "Não foi possível autenticar. Verifique suas credenciais e tente novamente.";
 const forbiddenHeading = "Você não possui acesso a esta página";
 const adminRoles = new Set<Role>(["master", "admin"]);
+const inheritedAnalyticalRoles = new Set<Role>([
+  "master",
+  "admin",
+  "broker",
+  "coordinator",
+  "real_estate",
+]);
 const masterOnlyRoles = new Set<Role>(["master"]);
 const protectedSurfaces = [
-  { path: "/app", heading: "Relatório completo da equipe", allowed: masterOnlyRoles },
+  {
+    path: "/app",
+    heading: "Relatório completo da equipe",
+    allowed: inheritedAnalyticalRoles,
+  },
   {
     path: "/app/etapas/oportunidades",
     heading: "Oportunidades",
-    allowed: masterOnlyRoles,
+    allowed: inheritedAnalyticalRoles,
   },
   {
     path: "/app/etapas/agendamentos",
     heading: "Agendamentos",
-    allowed: masterOnlyRoles,
+    allowed: inheritedAnalyticalRoles,
   },
-  { path: "/app/etapas/visitas", heading: "Visitas", allowed: masterOnlyRoles },
-  { path: "/app/etapas/pastas", heading: "Pastas", allowed: masterOnlyRoles },
-  { path: "/app/etapas/vendas", heading: "Vendas", allowed: masterOnlyRoles },
-  { path: "/app/ranking", heading: "Ranking por pontos", allowed: masterOnlyRoles },
+  {
+    path: "/app/etapas/visitas",
+    heading: "Visitas",
+    allowed: inheritedAnalyticalRoles,
+  },
+  {
+    path: "/app/etapas/pastas",
+    heading: "Pastas",
+    allowed: inheritedAnalyticalRoles,
+  },
+  {
+    path: "/app/etapas/vendas",
+    heading: "Vendas",
+    allowed: inheritedAnalyticalRoles,
+  },
+  {
+    path: "/app/ranking",
+    heading: "Ranking por pontos",
+    allowed: inheritedAnalyticalRoles,
+  },
   {
     path: "/app/canal-de-parcerias",
     heading: "Ranking das imobiliárias",
@@ -333,22 +358,22 @@ const protectedSurfaces = [
   {
     path: "/app/configuracoes",
     heading: "Configurações do CRM",
-    allowed: masterOnlyRoles,
+    allowed: adminRoles,
   },
   {
     path: "/app/configuracoes/metas",
     heading: "Metas do funil",
-    allowed: masterOnlyRoles,
+    allowed: adminRoles,
   },
   {
     path: "/app/configuracoes/metas/parcerias",
     heading: "Metas do funil de parcerias",
-    allowed: masterOnlyRoles,
+    allowed: adminRoles,
   },
   {
     path: "/app/configuracoes/metas/pontos",
     heading: "Metas de pontos",
-    allowed: masterOnlyRoles,
+    allowed: adminRoles,
   },
   { path: "/app/simulacao", heading: "Simulação", allowed: masterOnlyRoles },
   {
@@ -374,7 +399,7 @@ const protectedSurfaces = [
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
   { path: "/admin/usuarios", heading: "Usuários e acessos", allowed: adminRoles },
-  { path: "/admin/paginas", heading: "Catálogo de páginas", allowed: masterOnlyRoles },
+  { path: "/admin/paginas", heading: "Catálogo de páginas", allowed: adminRoles },
 ] as const;
 
 function expectedRoutesForRole(role: Role) {
@@ -385,8 +410,8 @@ function expectedRoutesForRole(role: Role) {
 }
 
 function expectedHomeForRole(role: Role) {
-  if (role === "master") return "/app";
   if (role === "admin") return "/admin";
+  if (inheritedAnalyticalRoles.has(role)) return "/app";
   return "/conta/seguranca";
 }
 
@@ -728,9 +753,9 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
     await withRolePage(browser, role, async (page) => {
       await expect(page).toHaveURL((url) => url.pathname === expectedHomeForRole(role));
       const identity = page.locator(
-        role === "master" || role === "admin"
-          ? "[data-session-identity-label]"
-          : "[data-account-identity]",
+        expectedHomeForRole(role) === "/conta/seguranca"
+          ? "[data-account-identity]"
+          : "[data-session-identity-label]",
       );
       await expect(identity).toContainText(accounts[role].email);
 
@@ -742,7 +767,7 @@ test("all nine profiles enforce browser navigation and direct-route permissions"
       await expect(page.locator("[data-account-identity]")).toContainText(accounts[role].email);
 
       const dashboardApi = await page.request.get("/api/dashboard/status");
-      if (role === "master") {
+      if (inheritedAnalyticalRoles.has(role)) {
         expect(dashboardApi.status()).toBe(200);
         expect(dashboardApi.headers()["cache-control"]).toContain("no-store");
       } else {
@@ -1433,10 +1458,6 @@ test("login, logout and terminal state surfaces remain visually explicit", async
 test("password recovery is generic, quarantined, one-time and revokes every session", async ({
   browser,
 }) => {
-  test.skip(
-    qaTarget.remoteHomologation,
-    "Password recovery mutates only ephemeral local QA users.",
-  );
   test.setTimeout(120_000);
   const genericRecoveryMessage =
     "Se houver uma conta elegível para esse e-mail, enviaremos as instruções de redefinição.";
@@ -1473,7 +1494,7 @@ test("password recovery is generic, quarantined, one-time and revokes every sess
     try {
       await recoveryPage.goto(recoveryLink, { waitUntil: "domcontentloaded" });
     } catch {
-      throw new Error("The local one-time recovery link could not be opened.");
+      throw new Error("The isolated one-time recovery link could not be opened.");
     }
     await assertRecoveryRedirect(recoveryPage, "/redefinir-senha");
 
@@ -1492,7 +1513,9 @@ test("password recovery is generic, quarantined, one-time and revokes every sess
       .click();
     await expect(recoveryPage.getByText("Inclua ao menos uma letra maiúscula.")).toBeVisible();
 
-    const replacementPassword = `Aa1!Reset-${accounts.master.password}`;
+    const replacementPassword = `Aa1!Reset-${createHmac("sha256", accounts.master.password)
+      .update("isolated-recovery-smoke")
+      .digest("base64url")}`;
     await recoveryPage.getByLabel("Nova senha", { exact: true }).fill(replacementPassword);
     await recoveryPage
       .getByLabel("Confirmar nova senha", { exact: true })
@@ -1525,7 +1548,7 @@ test("password recovery is generic, quarantined, one-time and revokes every sess
     try {
       await recoveryPage.goto(recoveryLink, { waitUntil: "domcontentloaded" });
     } catch {
-      throw new Error("The consumed local recovery link could not be rechecked.");
+      throw new Error("The consumed isolated recovery link could not be rechecked.");
     }
     await assertRecoveryRedirect(recoveryPage, "/esqueci-senha", "?status=invalid");
     await expect(
@@ -1556,7 +1579,6 @@ test("password recovery is generic, quarantined, one-time and revokes every sess
 test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", async ({
   browser,
 }) => {
-  test.skip(qaTarget.remoteHomologation, "MFA enrollment mutates only ephemeral local QA users.");
   test.setTimeout(120_000);
 
   let secret = "";

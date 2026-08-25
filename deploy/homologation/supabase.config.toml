@@ -41,7 +41,7 @@ port = 55323
 api_url = "http://127.0.0.1"
 
 [local_smtp]
-enabled = false
+enabled = true
 port = 55324
 
 [storage]
@@ -65,7 +65,10 @@ minimum_password_length = 12
 password_requirements = "lower_upper_letters_digits_symbols"
 
 [auth.rate_limit]
-email_sent = 1
+# A matriz hospedada compara conta inexistente e conta QA dedicada. O Mailpit
+# isolado não entrega mensagens para fora da VPS; a folga permite repetir o
+# gate controlado sem desabilitar o limite.
+email_sent = 10
 sms_sent = 1
 anonymous_users = 1
 token_refresh = 60
@@ -80,7 +83,9 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = false
 secure_password_change = true
-max_frequency = "1m"
+# Ambiente sintético protegido por Basic Auth: permite repetir o smoke sem
+# esperar um minuto, mantendo o limite global de dez mensagens por hora.
+max_frequency = "1s"
 otp_length = 6
 otp_expiry = 3600
 

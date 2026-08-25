@@ -20,6 +20,13 @@
 
 ## Unreleased
 
+- Habilita SMTP Mailpit estritamente isolado na configuração de homologação e
+  amplia o gate HTTPS para recuperação de senha, MFA/AAL2 e restauração
+  comprovada da conta Master/QA sintética.
+- Vincula o smoke hospedado ao mesmo SHA de checkout, env privado, imagem,
+  container e `/api/health`; valida mount root-only do segredo, APP_ORIGIN,
+  redirects, Nginx sem query logs, ausência de 5xx/restarts e limpeza de
+  sessões, fatores e mensagens sem emitir material sensível.
 - Reconcilia as sete versões existentes somente no histórico remoto com markers
   sanitizados: três equivalentes canônicos, duas alterações inseguras já
   supersedidas e dois contratos legados confidenciais permanecem fora do Git.
@@ -37,6 +44,8 @@
 - O configurador de homologação preserva somente o gate oficial de simuladores
   já válido; combinações incoerentes, chaves desconhecidas ou duplicadas
   interrompem a escrita, sem apagar uma ativação existente.
+- O wrapper root-only fixa o manifest Compose no repositório versionado e não
+  aceita resolução pelo diretório corrente do chamador.
 - Adiciona recuperação de senha com resposta anti-enumeração, callback fixo por
   `APP_ORIGIN`, template `TokenHash` verificado por POST/body, política forte de
   12–128 caracteres e revogação de todas as sessões após alteração. Callback falso

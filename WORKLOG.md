@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-08-25 — contrato de smoke Auth hospedado endurecido
+
+- A configuração isolada de homologação habilita Mailpit, redirect único por
+  `APP_ORIGIN` e frequência compatível com repetição controlada do gate; nenhuma
+  mensagem é encaminhada para fora da VPS.
+- O runner agora exige checkout limpo e vincula HEAD, env privado, imagem,
+  container e `/api/health`. A inspeção de env, mount, logs e configuração
+  Supabase ocorre somente em memória, sem imprimir credenciais ou tokens.
+- Recuperação e MFA usam exclusivamente a identidade Master/QA sintética. O
+  `finally` restaura primeiro a senha, remove somente fatores novos, revoga
+  sessões no banco local isolado, comprova a credencial original e elimina
+  mensagens Mailpit mesmo quando o Playwright falha.
+- Nginx exige exatamente dois blocos sem log para `/auth/callback`; bytes novos
+  do access log e logs do app reprovam query de callback, HTTP 5xx ou erro
+  crítico. Image ID, horário de início, restart count e health devem permanecer
+  estáveis até o pós-gate.
+- Gates locais direcionados aprovaram Prettier, ESLint, sintaxe Node, 30 testes
+  Vitest e descoberta dos 12 cenários Playwright. O smoke HTTPS não foi
+  executado porque este incremento proíbe modificar ou substituir a
+  homologação viva.
+
 ## 2026-08-25 — schema remoto e histórico reconciliado
 
 - A inspeção produtiva ocorreu somente em transações de leitura: PostgreSQL
