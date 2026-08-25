@@ -38,6 +38,16 @@ manifesto de versões e hashes está em
 - Não existem as tabelas futuras de organizações, pessoas, equipes, carteiras
   ou reporting scopes.
 
+As dependências Auth usadas pela candidata também foram confirmadas diretamente
+no schema remoto, sem consultar linhas: `auth.sessions.id/user_id` são UUID
+obrigatórios, `not_after` é `timestamptz` anulável e `aal` é
+`auth.aal_level` anulável; `auth.mfa_factors.user_id` e `status` são obrigatórios,
+com `status` em `auth.factor_status`. Os enums possuem os labels `aal1`, `aal2`,
+`aal3`, `unverified` e `verified`. `auth.uid()` retorna UUID e `auth.jwt()`
+retorna JSONB; ambas são SQL `STABLE`, pertencentes a `supabase_auth_admin`.
+O inventário registra somente esses metadados e o hash do dump root-only, nunca
+sessões, fatores, secrets ou corpos de função.
+
 Essas ausências comprovam por que as duas migrations originais do PR #49 não
 podiam ser aplicadas isoladamente: a primeira referenciava a fundação futura de
 escopos; a segunda tentava substituir funções e alterar papéis que não existem

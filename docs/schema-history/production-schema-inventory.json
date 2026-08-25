@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "capturedAt": "2026-08-25T20:15:27Z",
   "environment": "production-read-only",
   "transactionReadOnly": true,
@@ -10,6 +10,57 @@
     "policies": 17,
     "triggers": 8,
     "migrations": 26
+  },
+  "authCandidateDependencies": {
+    "capturedAt": "2026-08-25T20:45:00Z",
+    "source": "production-read-only-auth-schema-dump",
+    "sourceSha256": "0a06642806ee7f4d4f4704dd4403b3c7f6d9c5df2f88015894b3629244c78b08",
+    "dataCaptured": false,
+    "tables": [
+      {
+        "name": "auth.sessions",
+        "owner": "supabase_auth_admin",
+        "columns": [
+          "id:uuid:not-null",
+          "user_id:uuid:not-null",
+          "not_after:timestamp with time zone:nullable",
+          "aal:auth.aal_level:nullable"
+        ]
+      },
+      {
+        "name": "auth.mfa_factors",
+        "owner": "supabase_auth_admin",
+        "columns": ["user_id:uuid:not-null", "status:auth.factor_status:not-null"]
+      }
+    ],
+    "types": [
+      {
+        "name": "auth.aal_level",
+        "owner": "supabase_auth_admin",
+        "labels": ["aal1", "aal2", "aal3"]
+      },
+      {
+        "name": "auth.factor_status",
+        "owner": "supabase_auth_admin",
+        "labels": ["unverified", "verified"]
+      }
+    ],
+    "functions": [
+      {
+        "signature": "auth.uid()",
+        "returns": "uuid",
+        "language": "sql",
+        "volatility": "stable",
+        "owner": "supabase_auth_admin"
+      },
+      {
+        "signature": "auth.jwt()",
+        "returns": "jsonb",
+        "language": "sql",
+        "volatility": "stable",
+        "owner": "supabase_auth_admin"
+      }
+    ]
   },
   "tables": [
     {
