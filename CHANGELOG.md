@@ -45,7 +45,8 @@
   já válido; combinações incoerentes, chaves desconhecidas ou duplicadas
   interrompem a escrita, sem apagar uma ativação existente.
 - O wrapper root-only fixa o manifest Compose no repositório versionado e não
-  aceita resolução pelo diretório corrente do chamador.
+  aceita resolução pelo diretório corrente do chamador. Ambiente herdado é
+  removido e o Docker fica restrito ao socket Unix local.
 - Adiciona recuperação de senha com resposta anti-enumeração, callback fixo por
   `APP_ORIGIN`, template `TokenHash` verificado por POST/body, política forte de
   12–128 caracteres e revogação de todas as sessões após alteração. Callback falso

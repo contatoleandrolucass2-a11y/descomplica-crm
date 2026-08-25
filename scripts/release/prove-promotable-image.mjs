@@ -4,10 +4,15 @@ import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
-const repositoryRoot = process.cwd();
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const dockerEnvironment = {
+  DOCKER_HOST: "unix:///var/run/docker.sock",
+  PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+};
 const imageTag = process.env.IMAGE_TAG?.trim();
 const publishableFixture = `sb_publishable_${"A".repeat(32)}`;
 
@@ -15,13 +20,14 @@ async function run(command, arguments_, options = {}) {
   return execFileAsync(command, arguments_, {
     cwd: repositoryRoot,
     encoding: "utf8",
+    env: dockerEnvironment,
     maxBuffer: 16 * 1024 * 1024,
     ...options,
   });
 }
 
 async function renderedImage(composePath, environmentPath) {
-  const { stdout } = await run("docker", [
+  const { stdout } = await run("/usr/bin/docker", [
     "compose",
     "--env-file",
     environmentPath,
@@ -64,7 +70,7 @@ async function validateProfile(image, proofComposePath, secretSource, environmen
     "",
   ].join("\n");
   await writeFile(proofComposePath, proofCompose, { mode: 0o600 });
-  const { stdout } = await run("docker", [
+  const { stdout } = await run("/usr/bin/docker", [
     "compose",
     "-f",
     proofComposePath,
@@ -131,7 +137,7 @@ async function main() {
       throw new Error("Homologation and production do not resolve the same image reference.");
     }
 
-    const { stdout } = await run("docker", [
+    const { stdout } = await run("/usr/bin/docker", [
       "image",
       "inspect",
       "--format",

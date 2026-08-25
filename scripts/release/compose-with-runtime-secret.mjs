@@ -1,17 +1,25 @@
 import { spawn } from "node:child_process";
 import { readFile, realpath, stat } from "node:fs/promises";
+import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
+
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const dockerEnvironment = {
+  DOCKER_HOST: "unix:///var/run/docker.sock",
+  PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+};
 
 const environments = {
   homologation: {
-    compose: "deploy/homologation/compose.yaml",
+    compose: path.join(repositoryRoot, "deploy/homologation/compose.yaml"),
     environment: "/etc/descomplica-crm/homologation.env",
     environmentGroup: "root",
     environmentMode: 0o600,
     secret: "/etc/descomplica-crm/secrets/homologation-auth-session-cookie-secret",
   },
   production: {
-    compose: "compose.yaml",
+    compose: path.join(repositoryRoot, "compose.yaml"),
     environment: "/etc/descomplica-crm/production.env",
     environmentGroup: "root",
     environmentMode: 0o600,
@@ -117,11 +125,8 @@ async function main() {
   }
   secretBytes.fill(0);
 
-  const childEnvironment = { ...process.env };
-  delete childEnvironment.AUTH_SESSION_COOKIE_SECRET;
-
   const child = spawn(
-    "docker",
+    "/usr/bin/docker",
     [
       "compose",
       "--env-file",
@@ -132,8 +137,8 @@ async function main() {
       ...arguments_,
     ],
     {
-      cwd: process.cwd(),
-      env: childEnvironment,
+      cwd: repositoryRoot,
+      env: dockerEnvironment,
       stdio: "inherit",
     },
   );

@@ -41,8 +41,11 @@ ou linha de comando.
 Os arquivos `/etc/descomplica-crm/production.env` e
 `/etc/descomplica-crm/homologation.env` são `root:root 0600`. Caminhos
 simbólicos, owners ou modos divergentes falham antes de invocar Compose. O
-wrapper remove ainda qualquer `AUTH_SESSION_COOKIE_SECRET` herdado do próprio
-processo antes de iniciar o subprocesso.
+wrapper não herda o ambiente do chamador: o subprocesso recebe somente `PATH`
+fixo e `DOCKER_HOST=unix:///var/run/docker.sock`. Assim variáveis do shell não
+podem sobrepor o arquivo já validado pelo mecanismo de precedência do Compose.
+Manifest e diretório de trabalho são resolvidos a partir da localização
+versionada do wrapper, nunca do diretório corrente do chamador.
 
 Os configuradores preservam segredo válido e criam substituto aleatório de
 forma atômica apenas quando ausente ou inválido. Não imprimem conteúdo. O

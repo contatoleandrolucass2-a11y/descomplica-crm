@@ -22,12 +22,15 @@ afterEach(async () => {
 
 describe("promotable image contract", () => {
   it("keeps environment-specific values out of the Docker build", async () => {
-    const [dockerfile, productionCompose, homologationCompose, browserClient] = await Promise.all([
-      readFile(path.join(repositoryRoot, "Dockerfile"), "utf8"),
-      readFile(path.join(repositoryRoot, "compose.yaml"), "utf8"),
-      readFile(path.join(repositoryRoot, "deploy/homologation/compose.yaml"), "utf8"),
-      readFile(path.join(repositoryRoot, "lib/auth/supabase/client.ts"), "utf8"),
-    ]);
+    const [dockerfile, productionCompose, homologationCompose, browserClient, builder, proof] =
+      await Promise.all([
+        readFile(path.join(repositoryRoot, "Dockerfile"), "utf8"),
+        readFile(path.join(repositoryRoot, "compose.yaml"), "utf8"),
+        readFile(path.join(repositoryRoot, "deploy/homologation/compose.yaml"), "utf8"),
+        readFile(path.join(repositoryRoot, "lib/auth/supabase/client.ts"), "utf8"),
+        readFile(path.join(repositoryRoot, "scripts/release/build-promotable-image.mjs"), "utf8"),
+        readFile(path.join(repositoryRoot, "scripts/release/prove-promotable-image.mjs"), "utf8"),
+      ]);
 
     expect(dockerfile).toContain("ARG DEPLOYMENT_VERSION");
     expect(dockerfile).not.toMatch(
@@ -43,6 +46,12 @@ describe("promotable image contract", () => {
     );
     expect(browserClient).not.toContain("process.env");
     expect(browserClient).toContain("createClient(configuration: SupabaseBrowserConfiguration)");
+    for (const releaseScript of [builder, proof]) {
+      expect(releaseScript).toContain('fileURLToPath(import.meta.url)), "../..")');
+      expect(releaseScript).not.toContain("process.cwd()");
+      expect(releaseScript).toContain('DOCKER_HOST: "unix:///var/run/docker.sock"');
+      expect(releaseScript).toContain('"/usr/bin/docker"');
+    }
   });
 
   it("mounts the session HMAC through a runtime secret in both environments", async () => {
@@ -81,11 +90,15 @@ describe("promotable image contract", () => {
     expect(wrapper.match(/environmentMode: 0o600/gu)).toHaveLength(2);
     expect(wrapper.match(/environmentGroup: "root"/gu)).toHaveLength(2);
     expect(wrapper).toContain("path must not be a symlink.");
+    expect(wrapper).toContain('fileURLToPath(import.meta.url)), "../..")');
+    expect(wrapper).toContain("cwd: repositoryRoot");
     expect(wrapper).toContain(
       'validateOwnedFile(configuration.secret, 0o640, 0, "Runtime secret file")',
     );
     expect(wrapper).toContain("secretBytes.fill(0)");
-    expect(wrapper).toContain("delete childEnvironment.AUTH_SESSION_COOKIE_SECRET");
+    expect(wrapper).not.toContain("...process.env");
+    expect(wrapper).toContain('DOCKER_HOST: "unix:///var/run/docker.sock"');
+    expect(wrapper).toContain('const child = spawn(\n    "/usr/bin/docker"');
     expect(wrapper).toContain('["up", ["-d", "--no-build", "--remove-orphans"]]');
     expect(wrapper).toContain('["config", ["--quiet"]]');
     expect(wrapper).toContain('["down", ["--remove-orphans"]]');

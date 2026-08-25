@@ -1,16 +1,23 @@
 import { spawn } from "node:child_process";
 import { execFile } from "node:child_process";
+import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
-const repositoryRoot = process.cwd();
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const repository = "descomplica-crm";
+const dockerEnvironment = {
+  DOCKER_HOST: "unix:///var/run/docker.sock",
+  PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+};
 
 async function git(...arguments_) {
-  const { stdout } = await execFileAsync("git", arguments_, {
+  const { stdout } = await execFileAsync("/usr/bin/git", arguments_, {
     cwd: repositoryRoot,
     encoding: "utf8",
+    env: dockerEnvironment,
   });
   return stdout.trim();
 }
@@ -19,6 +26,7 @@ function run(command, arguments_) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, arguments_, {
       cwd: repositoryRoot,
+      env: dockerEnvironment,
       stdio: "inherit",
     });
     child.once("error", reject);
@@ -40,7 +48,7 @@ async function main() {
   }
 
   const image = `${repository}:${imageTag}`;
-  await run("docker", [
+  await run("/usr/bin/docker", [
     "build",
     "--pull",
     "--build-arg",
@@ -53,9 +61,9 @@ async function main() {
   ]);
 
   const { stdout } = await execFileAsync(
-    "docker",
+    "/usr/bin/docker",
     ["image", "inspect", "--format", "{{.Id}}", image],
-    { cwd: repositoryRoot, encoding: "utf8" },
+    { cwd: repositoryRoot, encoding: "utf8", env: dockerEnvironment },
   );
   const imageId = stdout.trim();
   if (!/^sha256:[a-f0-9]{64}$/.test(imageId)) {
