@@ -181,3 +181,6 @@ Antes de qualquer ativação remota:
 - Auditorias finais sem achados: dependências (`pnpm audit` e OSV sobre 521 pacotes),
   segredos (Gitleaks na árvore e em 266 commits), schema lint e advisors locais de
   segurança e performance.
+- Restore isolado aprovado em dois projetos PostgreSQL 17 efêmeros: 34 migrations,
+  backup lógico, owners, privilégios, fingerprint e os 1.002 pgTAP coincidiram entre
+  fonte e alvo. O rehearsal copia o template Auth sem incluir configuração remota.

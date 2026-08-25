@@ -52,6 +52,11 @@
   de token/código em URL, HTTP 5xx, panic ou fatal.
 - `pnpm audit`, OSV sobre 521 pacotes, Gitleaks na árvore e em 266 commits, schema
   lint e advisors locais de segurança/performance terminaram sem achados.
+- O CI revelou dois contratos desatualizados no rehearsal isolado: total antigo
+  de 939 pgTAP e ausência da nova pasta de templates na cópia efêmera. A correção
+  mantém o ensaio genérico; a repetição local aprovou 34 migrations, 1.002 pgTAP
+  na fonte e no restore, backup lógico, owners, privilégios e fingerprint entre
+  dois projetos PostgreSQL 17 independentes.
 
 ## 2026-08-18 — Hotfix WF13: limite 84 e comprometimento
 
