@@ -9,15 +9,22 @@ const markerNames = [
   "20260809004414_add_atomic_imob_ranking_publish_rpc.sql",
   "20260809010942_restrict_imob_ranking_rpc_roles.sql",
   "20260809031936_qlik_ranking_developments.sql",
+  "20260813133534_emergency_qlik_public_read_hardening.sql",
+  "20260813142723_restore_ranking_read_permissions.sql",
+  "20260813142835_add_ranking_public_read_policies.sql",
+  "20260813160418_partnerships_rbac_convergence.sql",
+  "20260813161959_secure_ranking_snapshot_read_rpc.sql",
+  "20260813172800_restrict_ranking_snapshot_rpc_contract.sql",
+  "20260813192928_master_simulator_execution_gate.sql",
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 34-version manifest", async () => {
+  it("keeps a unique, ordered 41-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(34);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(34);
+    expect(migrations).toHaveLength(41);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(41);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
   });

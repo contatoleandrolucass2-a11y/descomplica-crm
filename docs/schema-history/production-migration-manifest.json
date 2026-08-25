@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-25T20:15:27Z",
+  "environment": "production-read-only",
+  "transactionReadOnly": true,
+  "remoteMigrationCount": 26,
+  "latestRemoteVersion": "20260814045436",
+  "batchApplyAuthorized": false,
+  "localOnlyPredecessorVersions": [
+    "20260807185611",
+    "20260808174817",
+    "20260809024000",
+    "20260809144137",
+    "20260809144143",
+    "20260809181422",
+    "20260809181424",
+    "20260810165927",
+    "20260810201703",
+    "20260811120000",
+    "20260813115335",
+    "20260813140000",
+    "20260813143000"
+  ],
+  "candidateVersions": ["20260824230058", "20260824230100"],
+  "remoteOnlyReconciliations": [
+    {
+      "version": "20260813133534",
+      "name": "emergency_qlik_public_read_hardening",
+      "statementCount": 1,
+      "statementBytes": 2857,
+      "statementSha256": "111a5d20d09af97b77424d045a763983e86ae2decf9db4461c55ecf8de1c0de7",
+      "classification": "canonical-safe-equivalent",
+      "canonicalLocalVersion": "20260813115335"
+    },
+    {
+      "version": "20260813142723",
+      "name": "restore_ranking_read_permissions",
+      "statementCount": 1,
+      "statementBytes": 674,
+      "statementSha256": "65b8e10ff5135c078fc17bc7f4f8f18393942a7cb516c849aadb9acf7facff4d",
+      "classification": "superseded-unsafe-public-read",
+      "supersededByLocalVersion": "20260813151446"
+    },
+    {
+      "version": "20260813142835",
+      "name": "add_ranking_public_read_policies",
+      "statementCount": 1,
+      "statementBytes": 405,
+      "statementSha256": "f93600c0e1c68bbe4765afad981b98f42ca0768bb7263484f1adb9140b0db36a",
+      "classification": "superseded-unsafe-public-read",
+      "supersededByLocalVersion": "20260813151446"
+    },
+    {
+      "version": "20260813160418",
+      "name": "partnerships_rbac_convergence",
+      "statementCount": 1,
+      "statementBytes": 1680,
+      "statementSha256": "b21547e851f3b792436e8c9335624bc59af7a9c9e50cafb7829fee67f8b3cc89",
+      "classification": "canonical-safe-equivalent",
+      "canonicalLocalVersion": "20260813140000"
+    },
+    {
+      "version": "20260813161959",
+      "name": "secure_ranking_snapshot_read_rpc",
+      "statementCount": 1,
+      "statementBytes": 4481,
+      "statementSha256": "a85559b3a0caa339cca0a50d4c2550e36074266339e368ff552f61611e8e7241",
+      "classification": "confidential-legacy-contract",
+      "contentVersioned": false
+    },
+    {
+      "version": "20260813172800",
+      "name": "restrict_ranking_snapshot_rpc_contract",
+      "statementCount": 1,
+      "statementBytes": 5596,
+      "statementSha256": "0a9454d08efb3bac62fafa6bbfd4e44b8bb5966eccbb2215082f02ef28b3c131",
+      "classification": "confidential-legacy-contract",
+      "contentVersioned": false
+    },
+    {
+      "version": "20260813192928",
+      "name": "master_simulator_execution_gate",
+      "statementCount": 1,
+      "statementBytes": 1477,
+      "statementSha256": "9c12666eb2dc4ae53d1ef0345483ce34dc4eb8cfabd340b42f76bde3bb528d42",
+      "classification": "canonical-safe-equivalent",
+      "canonicalLocalVersion": "20260813143000"
+    }
+  ]
+}
