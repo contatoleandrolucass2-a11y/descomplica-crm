@@ -5,6 +5,7 @@
 - Impede o prefetch das quatro rotas de simuladores ainda bloqueadas no canário WF13, mantendo-as identificadas como indisponíveis e sem ampliar a matriz RBAC aprovada.
 - Atualiza as 12 evidências visuais específicas do canário WF13 após validar 119 rotas responsivas, 68 temas, 160 auditorias Axe e 85 checks de zoom.
 - Mantém o motivo dos itens bloqueados no nome acessível sem introduzir largura mínima ou overflow em tablet e celular.
+- Restringe o estilo de aba aos itens de navegação bloqueados, sem atingir a explicação próxima do CTA indisponível.
 
 ## 2026-08-18 — Hotfix WF13: limite 84 e pró-soluto
 

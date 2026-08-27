@@ -67,7 +67,7 @@
 }
 
 .simulatorNav a,
-.simulatorNav > span {
+.simulatorNav > .simulatorNavBlocked {
   display: inline-flex;
   min-height: 2.6rem;
   align-items: center;
