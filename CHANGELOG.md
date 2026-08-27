@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-08-27
+
+- Impede o prefetch das quatro rotas de simuladores ainda bloqueadas no canário WF13, mantendo-as identificadas como indisponíveis e sem ampliar a matriz RBAC aprovada.
+
 ## 2026-08-18 — Hotfix WF13: limite 84 e pró-soluto
 
 - Fixa o limite comercial em 84 no servidor e na interface somente leitura;

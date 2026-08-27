@@ -1,5 +1,11 @@
 # Worklog
 
+## 2026-08-27 — PR #49: navegação do canário WF13
+
+- O smoke HTTPS mostrou que a navegação interna do WF13 ainda criava links para quatro páginas `releaseEnabled=false`; o prefetch recebia `403` e gerava ruído de console tardio.
+- A navegação agora cria links apenas para jornadas liberadas pelo catálogo server-side e representa as demais como itens bloqueados, sem mudar grants, migrations, flags ou motores.
+- Cobertura adicionada para provar um link autorizado, quatro itens bloqueados e ausência de `href` para as rotas futuras.
+
 ## 2026-08-27 — zero 5xx com capacidades desligadas
 
 - O smoke HTTPS aprovou os 21 cenários, mas o pós-gate detectou 38 respostas

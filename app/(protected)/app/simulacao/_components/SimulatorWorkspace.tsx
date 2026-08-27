@@ -487,10 +487,12 @@ export function SimulatorWorkspace({
   definition,
   executionEnabled = false,
   executionReason = UNAVAILABLE_MESSAGE,
+  releasedSimulatorSlugs = [],
 }: {
   definition: SimulatorDefinition;
   executionEnabled?: boolean;
   executionReason?: string;
+  releasedSimulatorSlugs?: readonly string[];
 }) {
   const [values, setValues] = useState<Record<string, string | boolean>>(() =>
     officialSimulatorInitialValues(definition.slug),
@@ -972,15 +974,27 @@ export function SimulatorWorkspace({
           footer={
             <nav aria-label="Ferramentas de simulação" className={styles.simulatorNav}>
               <Link href="/app/simulacao">Todas</Link>
-              {SIMULATOR_LIST.map((simulator) => (
-                <Link
-                  key={simulator.slug}
-                  href={`/app/simulacao/${simulator.slug}`}
-                  aria-current={simulator.slug === definition.slug ? "page" : undefined}
-                >
-                  {simulator.code}
-                </Link>
-              ))}
+              {SIMULATOR_LIST.map((simulator) =>
+                releasedSimulatorSlugs.includes(simulator.slug) ? (
+                  <Link
+                    key={simulator.slug}
+                    href={`/app/simulacao/${simulator.slug}`}
+                    aria-current={simulator.slug === definition.slug ? "page" : undefined}
+                  >
+                    {simulator.code}
+                  </Link>
+                ) : (
+                  <span
+                    aria-disabled="true"
+                    className={styles.simulatorNavBlocked}
+                    data-release-state="blocked"
+                    key={simulator.slug}
+                  >
+                    {simulator.code}
+                    <span className={styles.visuallyHidden}> · Aguardando autorização</span>
+                  </span>
+                ),
+              )}
             </nav>
           }
         />
