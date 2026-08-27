@@ -6,8 +6,9 @@
   páginas na contagem de evidências autenticadas. O teste agora diferencia as
   21 URLs funcionais das 17 superfícies release-enabled, preservando os `403`
   dos quatro simuladores futuros.
-- A baseline será recapturada a partir de checkout limpo para registrar
-  proveniência reproduzível antes da nova publicação do SHA.
+- A baseline foi recapturada a partir do commit limpo `0449bab`: 119 capturas
+  responsivas, 68 checks de tema, 160 auditorias/comparações e 85 checks de
+  zoom, com promoção transacional e remoção das fixtures efêmeras.
 
 ## 2026-08-27 — gate visual RBAC e cabeçalho móvel
 
