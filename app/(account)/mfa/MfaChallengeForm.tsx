@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { verifyMfaChallengeAction } from "@/lib/auth/actions/mfa";
+import { verifyMfaViaRoute } from "@/lib/auth/mfa/browser";
 import { initialMfaActionState } from "@/lib/auth/mfa/state";
 
 import styles from "../_components/AccountSecurity.module.css";
@@ -10,13 +10,11 @@ import styles from "../_components/AccountSecurity.module.css";
 type FactorOption = { id: string; name: string };
 
 export function MfaChallengeForm({ factors }: { factors: FactorOption[] }) {
-  const [state, formAction, isPending] = useActionState(
-    verifyMfaChallengeAction,
-    initialMfaActionState,
-  );
+  const [state, formAction, isPending] = useActionState(verifyMfaViaRoute, initialMfaActionState);
 
   return (
     <form action={formAction} className={styles.form}>
+      <input type="hidden" name="flow" value="challenge" />
       <fieldset className={styles.factorOptions}>
         <legend className={styles.legend}>Aplicativo autenticador</legend>
         {factors.map((factor, index) => (

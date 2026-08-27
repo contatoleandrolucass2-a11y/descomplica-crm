@@ -111,6 +111,20 @@ describe("pre-stream page permission gates", () => {
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
+  it("defers response auth cookies for the MFA verification POST", async () => {
+    configureSession([]);
+    const request = new NextRequest(`${origin}/auth/mfa/verify`, {
+      method: "POST",
+      headers: { origin },
+    });
+
+    await proxy(request);
+
+    expect(mocks.updateSession).toHaveBeenCalledWith(request, {
+      deferResponseAuthCookies: true,
+    });
+  });
+
   it("fails closed when the effective permission RPC errors", async () => {
     configureSession(["crm.partnerships.view"]);
     mocks.rpc.mockResolvedValueOnce({ data: null, error: { message: "sanitized" } });

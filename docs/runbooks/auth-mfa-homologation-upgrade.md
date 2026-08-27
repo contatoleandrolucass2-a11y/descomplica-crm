@@ -151,4 +151,17 @@ mensagens, mascarar identidades nas evidências e revisar logs sanitizados.
 Enrollment e challenge TOTP aguardam uma janela com pelo menos 12 segundos
 úteis; os únicos checkpoints emitidos são nomes de fases sanitizados. Chaves e
 códigos nunca podem entrar em logs ou evidências.
+
+As duas confirmações TOTP passam por `POST /auth/mfa/verify`, nunca por Server
+Action. O handler aceita somente a origem canônica de `APP_ORIGIN`, corpo
+`application/x-www-form-urlencoded` de até 512 bytes e os campos exatos
+`flow`, `factorId` e `code`. Cookies produzidos pelo Supabase SSR ficam
+bufferizados até a verificação do usuário, AAL, ownership/status do fator e
+claims AAL2 do token retornado; somente uma resposta `204` aplica o conjunto
+final com a política de sessão vigente. O Proxy posterga seu próprio
+`Set-Cookie` somente nesse POST, mas encaminha a rotação na requisição; o
+handler preserva deleções e emite cada chunk uma única vez. O smoke deve
+reprovar resposta RSC, timeout, `Location`, cookie duplicado/corrompido ou
+qualquer ocorrência desses campos sensíveis em URL ou logs.
+
 Produção, integrações e motores permanecem inalterados.

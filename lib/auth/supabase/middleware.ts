@@ -50,7 +50,10 @@ import {
 } from "@/lib/auth/session-persistence";
 import { getSupabaseRuntimeConfiguration } from "@/lib/auth/supabase/runtime";
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(
+  request: NextRequest,
+  options: { deferResponseAuthCookies?: boolean } = {},
+) {
   const configuration = getSupabaseRuntimeConfiguration();
   let response = NextResponse.next({ request });
   const markerValue = request.cookies.get(SESSION_PERSISTENCE_COOKIE_NAME)?.value;
@@ -80,18 +83,20 @@ export async function updateSession(request: NextRequest) {
         // Rebuild the response so it carries the request mutation forward.
         response = NextResponse.next({ request });
         // Persist rotated cookies on the response for the browser.
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(
-            name,
-            value,
-            applyAuthCookiePolicy(
-              options,
-              isSupabaseSessionCookieName(name, configuration.url)
-                ? persistence
-                : { kind: "temporary" },
+        if (!options.deferResponseAuthCookies) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(
+              name,
+              value,
+              applyAuthCookiePolicy(
+                options,
+                isSupabaseSessionCookieName(name, configuration.url)
+                  ? persistence
+                  : { kind: "temporary" },
+              ),
             ),
-          ),
-        );
+          );
+        }
         // Apply anti-cache headers per @supabase/ssr contract. See
         // file-level comment for rationale.
         Object.entries(headers).forEach(([key, value]) => response.headers.set(key, value));
@@ -108,7 +113,7 @@ export async function updateSession(request: NextRequest) {
   // An absent, invalid or expired marker means a session-only browser
   // lifetime. Existing remembered Supabase cookies must be rewritten even
   // when no token refresh happened during this request.
-  if (temporaryAuthCookies.length > 0) {
+  if (!options.deferResponseAuthCookies && temporaryAuthCookies.length > 0) {
     temporaryAuthCookies
       .filter(({ name }) => !rotatedAuthCookies.has(name))
       .forEach(({ name, value }) =>

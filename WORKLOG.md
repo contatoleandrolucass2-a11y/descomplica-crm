@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-08-27 — verificação MFA com resposta atômica
+
+- A repetição hospedada no SHA `a23c671` manteve 20 de 21 cenários verdes e
+  isolou a falha real: o Supabase validava o TOTP e ativava o fator, mas o POST
+  da Server Action permanecia aberto até o proxy devolver `502`.
+- Enrollment e challenge agora usam um Route Handler dedicado. O cliente SSR
+  mantém rotações de cookies em memória, valida usuário, sessão, AAL, fluxo,
+  ownership do fator e claims AAL2 antes de gravá-las atomicamente na resposta
+  `204`; qualquer pós-condição divergente descarta a nova sessão e falha fechado.
+- Para esse POST exato, o Proxy espelha eventual refresh somente na requisição e
+  posterga seus `Set-Cookie`; o handler consolida um único valor final por chunk,
+  inclusive deleções `maxAge=0`, evitando pares AAL1/AAL2 duplicados.
+- O POST aceita somente origem canônica, corpo URL-encoded de até 512 bytes e
+  três campos exatos; a leitura do stream interrompe antes de alocar bytes
+  excedentes. A interface preserva QR/chave e erro inline, faz navegação fixa
+  somente após sucesso e nunca envia TOTP, fator ou token pela URL/log.
+- Testes novos cobrem cross-origin, payload inválido, AAL incorreto, fator por
+  status, claims divergentes, cookie chunks obsoletos e política HttpOnly.
+
 ## 2026-08-27 — janela TOTP estável no smoke hospedado
 
 - O primeiro smoke do SHA `46c33e7` aprovou 20 de 21 cenários; o caso MFA

@@ -3,11 +3,8 @@
 import Image from "next/image";
 import { useActionState } from "react";
 
-import {
-  beginTotpEnrollmentAction,
-  cancelTotpEnrollmentAction,
-  verifyTotpEnrollmentAction,
-} from "@/lib/auth/actions/mfa";
+import { beginTotpEnrollmentAction, cancelTotpEnrollmentAction } from "@/lib/auth/actions/mfa";
+import { verifyMfaViaRoute } from "@/lib/auth/mfa/browser";
 import { initialMfaActionState } from "@/lib/auth/mfa/state";
 
 import styles from "../../_components/AccountSecurity.module.css";
@@ -18,7 +15,7 @@ export function MfaEnrollment() {
     initialMfaActionState,
   );
   const [verifyState, verifyAction, verifyPending] = useActionState(
-    verifyTotpEnrollmentAction,
+    verifyMfaViaRoute,
     initialMfaActionState,
   );
 
@@ -60,6 +57,7 @@ export function MfaEnrollment() {
       </div>
 
       <form action={verifyAction} className={styles.form}>
+        <input type="hidden" name="flow" value="enrollment" />
         <input type="hidden" name="factorId" value={enrollment.factorId} />
         <div className={styles.field}>
           <label htmlFor="enrollment-code">Código de 6 dígitos</label>

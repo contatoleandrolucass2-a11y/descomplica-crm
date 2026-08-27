@@ -20,6 +20,13 @@
 
 ## Unreleased
 
+- Substitui somente as duas verificações TOTP mutáveis por um Route Handler com
+  resposta vazia e cookies SSR bufferizados. Enrollment e challenge preservam
+  erro inline, exigem origem canônica, payload mínimo, fator pertencente à
+  sessão e token AAL2 verificado antes do commit dos cookies; elimina o POST
+  Server Action que podia ativar o fator e travar durante o stream RSC. O Proxy
+  posterga cookies somente nessa rota para o handler consolidar refresh,
+  deleções de chunks e sessão AAL2 sem duplicação.
 - Torna o smoke de revogação de senha independente da ordem dos cenários: ele
   abre uma segunda sessão Master real antes do recovery, em vez de reutilizar
   um storage state já encerrado pelo logout da matriz hospedada.

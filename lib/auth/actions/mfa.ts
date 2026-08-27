@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { clearLocalAuthenticationCookies } from "@/lib/auth/clear-session";
 import { getMfaAssurance } from "@/lib/auth/mfa/assurance";
-import { factorIdSchema, totpCodeSchema } from "@/lib/auth/mfa/schemas";
+import { factorIdSchema } from "@/lib/auth/mfa/schemas";
 import type { MfaActionState } from "@/lib/auth/mfa/state";
 import { createClient } from "@/lib/auth/supabase/server";
 
@@ -66,73 +66,6 @@ export async function beginTotpEnrollmentAction(
       secret: data.totp.secret,
     },
   };
-}
-
-export async function verifyTotpEnrollmentAction(
-  _previousState: MfaActionState,
-  formData: FormData,
-): Promise<MfaActionState> {
-  const factorId = factorIdSchema.safeParse(formData.get("factorId"));
-  const code = totpCodeSchema.safeParse(formData.get("code"));
-  if (!factorId.success || !code.success) {
-    return { status: "error", message: GENERIC_MFA_ERROR };
-  }
-
-  const authentication = await getAuthenticatedMfaClient();
-  if (!authentication || authentication.assurance.status === "required") {
-    return { status: "error", message: GENERIC_MFA_ERROR };
-  }
-  const { supabase } = authentication;
-
-  const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
-  const factor = factors?.all.find(
-    (candidate) =>
-      candidate.id === factorId.data &&
-      candidate.factor_type === "totp" &&
-      candidate.status === "unverified",
-  );
-  if (factorsError || !factor) return { status: "error", message: GENERIC_MFA_ERROR };
-
-  const { error } = await supabase.auth.mfa.challengeAndVerify({
-    factorId: factor.id,
-    code: code.data,
-  });
-  if (error || (await getMfaAssurance(supabase)).status !== "verified") {
-    return { status: "error", message: GENERIC_MFA_ERROR };
-  }
-
-  redirect("/conta/seguranca?mfa=enabled");
-}
-
-export async function verifyMfaChallengeAction(
-  _previousState: MfaActionState,
-  formData: FormData,
-): Promise<MfaActionState> {
-  const factorId = factorIdSchema.safeParse(formData.get("factorId"));
-  const code = totpCodeSchema.safeParse(formData.get("code"));
-  if (!factorId.success || !code.success) {
-    return { status: "error", message: GENERIC_MFA_ERROR };
-  }
-
-  const authentication = await getAuthenticatedMfaClient();
-  if (!authentication || authentication.assurance.status !== "required") {
-    return { status: "error", message: GENERIC_MFA_ERROR };
-  }
-  const { supabase } = authentication;
-
-  const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
-  const factor = factors?.totp.find((candidate) => candidate.id === factorId.data);
-  if (factorsError || !factor) return { status: "error", message: GENERIC_MFA_ERROR };
-
-  const { error } = await supabase.auth.mfa.challengeAndVerify({
-    factorId: factor.id,
-    code: code.data,
-  });
-  if (error || (await getMfaAssurance(supabase)).status !== "verified") {
-    return { status: "error", message: GENERIC_MFA_ERROR };
-  }
-
-  redirect("/");
 }
 
 export async function cancelTotpEnrollmentAction(formData: FormData): Promise<void> {

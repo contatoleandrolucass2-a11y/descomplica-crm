@@ -174,7 +174,11 @@ export async function proxy(request: NextRequest) {
     return unavailableResponse;
   }
 
-  const { supabase, response: sessionResponse } = await updateSession(request);
+  const deferResponseAuthCookies =
+    request.method === "POST" && request.nextUrl.pathname === "/auth/mfa/verify";
+  const { supabase, response: sessionResponse } = await updateSession(request, {
+    deferResponseAuthCookies,
+  });
   let response = sessionResponse;
   const earlyPermission =
     request.method === "GET" || request.method === "HEAD"
