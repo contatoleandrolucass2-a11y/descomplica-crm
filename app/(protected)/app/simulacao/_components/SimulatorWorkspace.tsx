@@ -985,13 +985,13 @@ export function SimulatorWorkspace({
                   </Link>
                 ) : (
                   <span
+                    aria-label={`${simulator.code} · Aguardando autorização`}
                     aria-disabled="true"
                     className={styles.simulatorNavBlocked}
                     data-release-state="blocked"
                     key={simulator.slug}
                   >
                     {simulator.code}
-                    <span className={styles.visuallyHidden}> · Aguardando autorização</span>
                   </span>
                 ),
               )}

@@ -182,7 +182,7 @@ describe("simulator visual catalog", () => {
       expect(markup).not.toContain(`href="/app/simulacao/${blockedSlug}"`);
     }
     expect(markup.match(/data-release-state="blocked"/g)).toHaveLength(4);
-    expect(markup.match(/Aguardando autorização/g)).toHaveLength(4);
+    expect(markup.match(/aria-label="[^\"]+ · Aguardando autorização"/g)).toHaveLength(4);
   });
 
   it("renders neutral tabs, repeaters, inventory pagination and local tools", () => {
