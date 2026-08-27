@@ -47,6 +47,16 @@ const expectedProtectedRoutes = [
   "/admin/paginas",
 ];
 
+const futureSimulatorRoutes = new Set([
+  "/app/simulacao/calcular-documentacao",
+  "/app/simulacao/caixa",
+  "/app/simulacao/tabela-direta",
+  "/app/simulacao/tabela-investidor",
+]);
+const expectedReleasedProtectedRoutes = expectedProtectedRoutes.filter(
+  (route) => !futureSimulatorRoutes.has(route),
+);
+
 const expectedExpandedViewports = [
   { key: "desktop-1440x900", width: 1440, height: 900 },
   { key: "notebook-1280x720", width: 1280, height: 720 },
@@ -372,10 +382,10 @@ describe("versioned reference parity catalog", () => {
     const viewportKeys = authenticatedResults.viewports.map(({ key }) => key);
     expect(viewportKeys).toEqual(expectedExpandedViewports.map(({ key }) => key));
 
-    const responsiveScreenshotCount = expectedProtectedRoutes.length * viewportKeys.length;
+    const responsiveScreenshotCount = expectedReleasedProtectedRoutes.length * viewportKeys.length;
     expect(authenticatedResults.routeChecks).toHaveLength(responsiveScreenshotCount);
     expect([...new Set(authenticatedResults.routeChecks.map(({ route }) => route))]).toEqual(
-      expectedProtectedRoutes,
+      expectedReleasedProtectedRoutes,
     );
     expect(
       authenticatedResults.routeChecks.every(
@@ -393,7 +403,7 @@ describe("versioned reference parity catalog", () => {
       ),
     ).toBe(true);
 
-    const themeCheckCount = expectedProtectedRoutes.length * 4;
+    const themeCheckCount = expectedReleasedProtectedRoutes.length * 4;
     expect(authenticatedResults.themeChecks).toHaveLength(themeCheckCount);
     expect([...new Set(authenticatedResults.themeChecks.map(({ theme }) => theme))]).toEqual([
       "light",
@@ -405,7 +415,9 @@ describe("versioned reference parity catalog", () => {
         (check) => check.passed && check.reducedMotion && !check.horizontalOverflow,
       ),
     ).toBe(true);
-    const themeScreenshotCount = 45;
+    const desktopThemeScreenshotCount = 8 * 3;
+    const mobileDarkScreenshotCount = expectedReleasedProtectedRoutes.length;
+    const themeScreenshotCount = desktopThemeScreenshotCount + mobileDarkScreenshotCount;
     const visualEvidenceCount = responsiveScreenshotCount + themeScreenshotCount;
     expect(authenticatedResults.accessibilityChecks).toHaveLength(visualEvidenceCount);
     expect(
@@ -418,14 +430,14 @@ describe("versioned reference parity catalog", () => {
     const capturedZoomLevels = authenticatedResults.zoom.levels?.map(({ percent }) => percent);
     expect(capturedZoomLevels).toEqual(expectedZoomLevels);
     expect(authenticatedResults.zoom.routes).toHaveLength(
-      expectedProtectedRoutes.length * expectedZoomLevels.length,
+      expectedReleasedProtectedRoutes.length * expectedZoomLevels.length,
     );
     for (const zoomPercent of expectedZoomLevels) {
       expect(
         authenticatedResults.zoom.routes
           .filter((check) => (check.zoomPercent ?? 200) === zoomPercent)
           .map(({ route }) => route),
-      ).toEqual(expectedProtectedRoutes);
+      ).toEqual(expectedReleasedProtectedRoutes);
     }
     expect(
       authenticatedResults.zoom.routes.every(

@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-08-27 — convergência do contrato visual no CI
+
+- O primeiro CI do catálogo 17/21 encontrou uma expectativa residual de 21
+  páginas na contagem de evidências autenticadas. O teste agora diferencia as
+  21 URLs funcionais das 17 superfícies release-enabled, preservando os `403`
+  dos quatro simuladores futuros.
+- A baseline será recapturada a partir de checkout limpo para registrar
+  proveniência reproduzível antes da nova publicação do SHA.
+
 ## 2026-08-27 — gate visual RBAC e cabeçalho móvel
 
 - A comparação detectou 19 divergências esperadas restritas ao hub de Simulação

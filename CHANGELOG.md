@@ -20,6 +20,9 @@
 
 ## Unreleased
 
+- Alinha o contrato da evidência visual ao conjunto release-enabled de 17
+  páginas; as quatro URLs futuras continuam cobertas pela matriz funcional de
+  21 rotas e falham fechadas, sem produzir capturas de conteúdo indisponível.
 - Reorganiza o cabeçalho em três linhas nos breakpoints móveis para impedir
   colisão entre marca, ações, Segurança e navegação; a auditoria visual agora
   detecta também `brand×actions` e colisões entre ações.
