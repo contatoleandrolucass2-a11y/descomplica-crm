@@ -72,13 +72,13 @@ continuam validadas separadamente.
 | `GET /api/dashboard/status`                             | 200                   | conforme `crm.dashboard.view` | 401       |
 | `GET /api/official-simulator/associativo-fluxo-linear`  | 200                   | 403                           | 401       |
 | `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro  | 403                           | 401       |
-| `POST /api/ingest/qlik`                                 | 503, flag desligada   | 503                           | 503       |
-| `POST /api/ingest/salesforce`                           | 503, flag desligada   | 503                           | 503       |
-| `POST /api/refresh/salesforce`                          | 503, flag desligada   | 503                           | 503       |
-| `POST /api/commercial-engine/simulator.wf14`            | 503, motor desligado  | 503                           | 503       |
+| `POST /api/ingest/qlik`                                 | 404, flag desligada   | 404                           | 404       |
+| `POST /api/ingest/salesforce`                           | 404, flag desligada   | 404                           | 404       |
+| `POST /api/refresh/salesforce`                          | 404, flag desligada   | 404                           | 404       |
+| `POST /api/commercial-engine/simulator.wf14`            | 404, motor desligado  | 404                           | 404       |
 | `GET /api/health`                                       | 200, sem dado privado | 200                           | 200       |
 
-Os quatro `POST` em `503` retornam antes de qualquer escrita ou chamada externa. O smoke
+Os quatro `POST` em `404` retornam antes de qualquer escrita ou chamada externa. O smoke
 os repete nos nove perfis para provar o default-off; WF13 é o único motor executado, com
 fixture sintética já versionada e apenas na sessão `master`.
 

@@ -152,6 +152,12 @@ Enrollment e challenge TOTP aguardam uma janela com pelo menos 12 segundos
 úteis; os únicos checkpoints emitidos são nomes de fases sanitizados. Chaves e
 códigos nunca podem entrar em logs ou evidências.
 
+Com integrações e motores explicitamente desligados, os endpoints não
+publicados respondem `404` com `no-store` antes de autenticação, payload ou
+banco. `503` fica reservado a uma capacidade ativada cuja configuração,
+dependência, política, auditoria ou upstream esteja realmente indisponível; o
+smoke default-off exige zero resposta 5xx.
+
 As duas confirmações TOTP passam por `POST /auth/mfa/verify`, nunca por Server
 Action. O handler aceita somente a origem canônica de `APP_ORIGIN`, corpo
 `application/x-www-form-urlencoded` de até 512 bytes e os campos exatos

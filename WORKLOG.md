@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-08-27 — zero 5xx com capacidades desligadas
+
+- O smoke HTTPS aprovou os 21 cenários, mas o pós-gate detectou 38 respostas
+  `503` deliberadas de Salesforce, Qlik e motores com flags desligadas.
+- O contrato fail-closed agora responde `404` somente quando a capacidade está
+  explicitamente off ou não publicada; configuração ativa inválida, banco,
+  política, auditoria e upstream indisponíveis continuam `503`.
+- A mudança preserva corpo sanitizado, `no-store`, short-circuit antes de auth,
+  payload e banco, e mantém todas as integrações e motores desligados.
+
 ## 2026-08-27 — verificação MFA com resposta atômica
 
 - A repetição hospedada no SHA `a23c671` manteve 20 de 21 cenários verdes e

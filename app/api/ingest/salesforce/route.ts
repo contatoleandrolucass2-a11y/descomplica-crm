@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   if (!configuration.available) {
     return Response.json(
       { error: "ingestion_unavailable" },
-      { status: 503, headers: noStoreHeaders() },
+      { status: configuration.enabled ? 503 : 404, headers: noStoreHeaders() },
     );
   }
 

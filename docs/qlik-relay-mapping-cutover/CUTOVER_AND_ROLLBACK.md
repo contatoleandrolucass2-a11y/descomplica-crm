@@ -36,7 +36,7 @@ O executor deve abortar antes da primeira mutação se qualquer item faltar:
    registros nos catálogos novos, RLS forçada e nenhuma flag de runtime ativa.
 3. Publicar a imagem ainda com `QLIK_RELAY_MODE=off` e
    `QLIK_RELAY_WRITE_ENABLED=false`.
-4. Confirmar que o endpoint retorna `503 ingestion_unavailable` sem ler o body
+4. Confirmar que o endpoint retorna `404 ingestion_unavailable` sem ler o body
    e que a carga legada mantém sua cadência e contagens.
 
 Falha em qualquer passo: parar. O legado continua sendo o único publisher.

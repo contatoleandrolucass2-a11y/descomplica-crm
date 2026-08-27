@@ -122,9 +122,17 @@ export async function handleCommercialEnginePost(
   }
   const engineKey: CommercialEngineKey = suppliedEngineKey;
   const descriptor = COMMERCIAL_ENGINE_CATALOG[engineKey];
-  if (!descriptor.interactive || !commercialEngineIsEnabled(configuration, engineKey)) {
+  if (!descriptor.interactive || configuration.mode === "off") {
+    emit({ outcome: "unavailable", httpStatus: 404, engineKey });
+    return json(request, { error: "engine_unavailable" }, 404);
+  }
+  if (!configuration.available) {
     emit({ outcome: "unavailable", httpStatus: 503, engineKey });
     return json(request, { error: "engine_unavailable" }, 503);
+  }
+  if (!commercialEngineIsEnabled(configuration, engineKey)) {
+    emit({ outcome: "unavailable", httpStatus: 404, engineKey });
+    return json(request, { error: "engine_unavailable" }, 404);
   }
 
   const authorization = await dependencies.authorize(descriptor.requiredPermission);

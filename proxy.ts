@@ -138,24 +138,30 @@ async function lacksEarlyPermission(
 }
 
 function unavailableSalesforceResponse(request: NextRequest): NextResponse | null {
-  if (
-    request.nextUrl.pathname === "/api/ingest/salesforce" &&
-    !getSalesforceIngestConfiguration().available
-  ) {
-    return NextResponse.json(
-      { error: "ingestion_unavailable" },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
-    );
+  if (request.nextUrl.pathname === "/api/ingest/salesforce") {
+    const configuration = getSalesforceIngestConfiguration();
+    if (!configuration.available) {
+      return NextResponse.json(
+        { error: "ingestion_unavailable" },
+        {
+          status: configuration.enabled ? 503 : 404,
+          headers: { "Cache-Control": "no-store" },
+        },
+      );
+    }
   }
 
-  if (
-    request.nextUrl.pathname === "/api/refresh/salesforce" &&
-    !getSalesforceRefreshConfiguration().available
-  ) {
-    return NextResponse.json(
-      { error: "refresh_unavailable" },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
-    );
+  if (request.nextUrl.pathname === "/api/refresh/salesforce") {
+    const configuration = getSalesforceRefreshConfiguration();
+    if (!configuration.available) {
+      return NextResponse.json(
+        { error: "refresh_unavailable" },
+        {
+          status: configuration.enabled ? 503 : 404,
+          headers: { "Cache-Control": "no-store" },
+        },
+      );
+    }
   }
 
   return null;

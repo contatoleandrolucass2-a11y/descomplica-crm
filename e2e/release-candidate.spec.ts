@@ -883,7 +883,7 @@ for (const role of expectedRoles) {
         "engine_unavailable",
       ];
       for (const [index, response] of disabledApiResponses.entries()) {
-        expect(response.status()).toBe(503);
+        expect(response.status()).toBe(404);
         expect(response.headers()["cache-control"]).toContain("no-store");
         expect(await response.json()).toEqual({ error: expectedDisabledErrors[index] });
       }
@@ -1104,14 +1104,14 @@ test("v3 follows the isolated gate while Qlik relay and commercial engines remai
     data: { requestId: "00000000-0000-4000-8000-000000000001" },
     maxRedirects: 0,
   });
-  expect(relay.status()).toBe(503);
+  expect(relay.status()).toBe(404);
   await expect(relay.json()).resolves.toEqual({ error: "ingestion_unavailable" });
 
   const engine = await request.post("/api/commercial-engine/simulator.wf13", {
     data: { requestId: "00000000-0000-4000-8000-000000000002", input: {} },
     maxRedirects: 0,
   });
-  expect(engine.status()).toBe(503);
+  expect(engine.status()).toBe(404);
   await expect(engine.json()).resolves.toEqual({ error: "engine_unavailable" });
 
   const officialSimulator = await request.post("/api/official-simulator/associativo-fluxo-linear", {

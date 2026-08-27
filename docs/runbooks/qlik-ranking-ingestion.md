@@ -53,7 +53,7 @@ separadamente autorizado.
 
 | Runtime  | Write flag | Gate privado | Efeito                                              |
 | -------- | ---------- | ------------ | --------------------------------------------------- |
-| `off`    | `false`    | qualquer     | `503` antes de ler body ou abrir banco              |
+| `off`    | `false`    | qualquer     | `404` antes de ler body ou abrir banco              |
 | `shadow` | `false`    | `shadow`     | compara hashes/contagens; não grava fatos           |
 | `canary` | `true`     | `canary`     | escreve pela RPC existente após duas janelas iguais |
 | `active` | `true`     | `cutover`    | publisher principal após aprovação                  |

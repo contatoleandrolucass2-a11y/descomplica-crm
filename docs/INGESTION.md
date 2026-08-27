@@ -32,7 +32,7 @@ Os Route Handlers nunca retornam tokens, URLs internas, resposta do provedor ou 
 ## Relay Qlik
 
 `POST /api/ingest/qlik` é uma fronteira server-only independente de
-Salesforce. O endpoint fica desligado por padrão e retorna `503` antes de ler o
+Salesforce. O endpoint fica desligado por padrão e retorna `404` antes de ler o
 body. Quando autorizado, exige HMAC-SHA256 de seis linhas — método, path, key
 ID, timestamp UTC, nonce UUID v4 e digest dos bytes —, JSON estrito e no máximo
 1 MB. O relay Qlik não aceita Bearer. Replay e rate limit são serializados pela
@@ -58,9 +58,10 @@ alterados neste incremento. O runbook está em
 [`docs/qlik-relay-mapping-cutover/`](qlik-relay-mapping-cutover/README.md).
 
 Ingestão e refresh são capacidades independentes. Ambas ficam desativadas por
-padrão e exigem o valor literal `true` em sua flag server-side. Desativadas ou
-mal configuradas, retornam `503` antes de criar clientes privilegiados, iniciar
-runs ou fazer chamadas externas.
+padrão e exigem o valor literal `true` em sua flag server-side. Desativadas,
+retornam `404`; habilitadas mas mal configuradas, retornam `503`. Nos dois casos,
+falham antes de criar clientes privilegiados, iniciar runs ou fazer chamadas
+externas.
 
 ## Contrato de ingestão
 
@@ -100,7 +101,7 @@ neutra. Ativado e configurado, o banco serializa pedidos concorrentes, encerra
 runs presos após cinco minutos e aplica cooldown por usuário. O webhook recebe
 somente `requestId` e `requestedAt`, mais o Bearer dedicado.
 
-Status HTTP do provedor não é repassado livremente: sucesso retorna `202`, concorrência/cooldown retorna `409`/`429`, configuração ausente retorna `503` e falha do provedor retorna erro genérico `502`.
+Status HTTP do provedor não é repassado livremente: sucesso retorna `202`, concorrência/cooldown retorna `409`/`429`, capacidade desligada retorna `404`, configuração incompleta com a capacidade ligada retorna `503` e falha do provedor retorna erro genérico `502`.
 
 ## Variáveis e rotação
 

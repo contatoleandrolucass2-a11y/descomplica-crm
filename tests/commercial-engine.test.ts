@@ -646,11 +646,31 @@ describe("commercial engine HTTP boundary", () => {
       harness.dependencies,
     );
 
-    expect(response.status).toBe(503);
+    expect(response.status).toBe(404);
     expect(bodyTouched).toBe(false);
     expect(harness.authorize).not.toHaveBeenCalled();
     expect(harness.loadPolicy).not.toHaveBeenCalled();
     expect(harness.recordExecution).not.toHaveBeenCalled();
+  });
+
+  it("reports non-off runtime misconfiguration as unavailable", async () => {
+    const harness = handlerHarness();
+    harness.dependencies.configuration = () => ({
+      mode: "active",
+      available: false,
+      enabledKeys: [],
+    });
+
+    const response = await handleCommercialEnginePost(
+      request(),
+      "simulator.wf13",
+      harness.dependencies,
+    );
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: "engine_unavailable" });
+    expect(harness.authorize).not.toHaveBeenCalled();
+    expect(harness.loadPolicy).not.toHaveBeenCalled();
   });
 
   it("requires the dedicated execution permission before parsing", async () => {
@@ -831,7 +851,7 @@ describe("commercial engine HTTP boundary", () => {
       "awards.calculation",
       harness.dependencies,
     );
-    expect(response.status).toBe(503);
+    expect(response.status).toBe(404);
     expect(harness.authorize).not.toHaveBeenCalled();
   });
 });

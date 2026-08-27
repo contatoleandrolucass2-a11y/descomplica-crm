@@ -20,6 +20,10 @@
 
 ## Unreleased
 
+- Endpoints de integrações, relay e motores explicitamente desligados passam a
+  ocultar a capacidade com `404` e `no-store`, sem autenticar, ler payload ou
+  acessar banco. Configuração ativa inválida e falhas reais continuam `503`,
+  preservando observabilidade sem produzir 5xx no smoke default-off.
 - Substitui somente as duas verificações TOTP mutáveis por um Route Handler com
   resposta vazia e cookies SSR bufferizados. Enrollment e challenge preservam
   erro inline, exigem origem canônica, payload mínimo, fator pertencente à
