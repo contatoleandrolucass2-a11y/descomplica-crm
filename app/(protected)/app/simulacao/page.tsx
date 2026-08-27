@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { DataState, PageHeader, SectionHeading } from "@/app/(protected)/app/_components/analytics";
 import { enforcePermission } from "@/lib/authorization/enforce";
+import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 import { SIMULATOR_LIST } from "@/lib/crm/simulators/catalog";
 import {
   getOfficialSimulatorRuntimeConfiguration,
@@ -22,6 +23,31 @@ function CalculatorIcon() {
   );
 }
 
+function SimulatorCardContent({
+  simulator,
+  releaseEnabled,
+}: {
+  simulator: (typeof SIMULATOR_LIST)[number];
+  releaseEnabled: boolean;
+}) {
+  return (
+    <>
+      <span className={styles.hubIcon}>
+        <CalculatorIcon />
+      </span>
+      <span>
+        <h2>{simulator.title}</h2>
+        <p>{simulator.description}</p>
+        <span className={styles.hubCode}>{simulator.code}</span>
+        {!releaseEnabled ? <span className={styles.hubBlocked}>Aguardando autorização</span> : null}
+      </span>
+      <span className={styles.hubArrow} aria-hidden="true">
+        {releaseEnabled ? "↗" : "🔒"}
+      </span>
+    </>
+  );
+}
+
 export default async function SimulationHubPage() {
   const authorization = await enforcePermission("crm.simulators.view");
   const wf13Enabled = officialSimulatorExecutionIsEnabled(
@@ -29,6 +55,10 @@ export default async function SimulationHubPage() {
     "associativo-fluxo-linear",
     authorization,
   );
+  const authorizedJourneyCount = SIMULATOR_LIST.filter(
+    (simulator) =>
+      getProtectedPageGate(`/app/simulacao/${simulator.slug}`)?.releaseEnabled === true,
+  ).length;
 
   return (
     <main className={styles.page}>
@@ -46,7 +76,7 @@ export default async function SimulationHubPage() {
               <CalculatorIcon />
               <span>
                 <small>Ferramentas disponíveis</small>
-                <strong>{SIMULATOR_LIST.length} jornadas visuais</strong>
+                <strong>{authorizedJourneyCount} jornada autorizada</strong>
               </span>
             </div>
           }
@@ -76,25 +106,27 @@ export default async function SimulationHubPage() {
             description="Cada tela preserva campos, seções, alertas e painel de resultado sem publicar cálculo não validado."
           />
           <div className={styles.hubGrid}>
-            {SIMULATOR_LIST.map((simulator) => (
-              <Link
-                className={styles.hubCard}
-                href={`/app/simulacao/${simulator.slug}`}
-                key={simulator.slug}
-              >
-                <span className={styles.hubIcon}>
-                  <CalculatorIcon />
-                </span>
-                <span>
-                  <h2>{simulator.title}</h2>
-                  <p>{simulator.description}</p>
-                  <span className={styles.hubCode}>{simulator.code}</span>
-                </span>
-                <span className={styles.hubArrow} aria-hidden="true">
-                  ↗
-                </span>
-              </Link>
-            ))}
+            {SIMULATOR_LIST.map((simulator) => {
+              const releaseEnabled =
+                getProtectedPageGate(`/app/simulacao/${simulator.slug}`)?.releaseEnabled === true;
+              return releaseEnabled ? (
+                <Link
+                  className={styles.hubCard}
+                  href={`/app/simulacao/${simulator.slug}`}
+                  key={simulator.slug}
+                >
+                  <SimulatorCardContent simulator={simulator} releaseEnabled />
+                </Link>
+              ) : (
+                <article
+                  className={`${styles.hubCard} ${styles.hubCardBlocked}`}
+                  data-release-state="blocked"
+                  key={simulator.slug}
+                >
+                  <SimulatorCardContent simulator={simulator} releaseEnabled={false} />
+                </article>
+              );
+            })}
           </div>
         </section>
 

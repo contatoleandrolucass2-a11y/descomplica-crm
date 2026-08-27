@@ -28,14 +28,7 @@ const requiredRoles = [
   "pending",
 ];
 const legacyRoles = new Set(["user", "supervisor", "broker_lead"]);
-const simulatorPageKeys = [
-  "crm.simulation",
-  "crm.simulation.caixa",
-  "crm.simulation.wf13",
-  "crm.simulation.wf14",
-  "crm.simulation.wf15",
-  "crm.simulation.wf16",
-];
+const simulatorPageKeys = ["crm.simulation", "crm.simulation.wf13"];
 const inheritedAnalyticalPageKeys = [
   "crm.dashboard",
   "crm.ranking",

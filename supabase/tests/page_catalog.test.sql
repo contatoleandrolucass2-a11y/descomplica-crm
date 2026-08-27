@@ -1,6 +1,6 @@
 begin;
 
-select plan(33);
+select plan(35);
 
 select has_table('public', 'app_pages', 'app_pages exists');
 
@@ -17,8 +17,24 @@ select is(
 
 select is(
   (select count(*) from public.app_pages),
-  21::bigint,
-  'all reference CRM and initial admin pages are seeded'
+  17::bigint,
+  'the catalog contains exactly the approved production pages'
+);
+
+select is(
+  (select count(*) from public.app_pages where is_active and is_navigation),
+  17::bigint,
+  'exactly the approved seventeen production pages are active navigation entries'
+);
+
+select is(
+  (
+    select count(*)
+    from public.app_pages
+    where not is_active
+  ),
+  0::bigint,
+  'the approved production catalog contains no inactive placeholder rows'
 );
 
 select is(
@@ -93,12 +109,8 @@ select is(
     where section = 'simulation'
   ),
   'crm.simulation|/app/simulacao|crm.simulators.view|root,'
-    || 'crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view|crm.simulation,'
-    || 'crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view|crm.simulation,'
-    || 'crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view|crm.simulation,'
-    || 'crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view|crm.simulation,'
-    || 'crm.simulation.wf15|/app/simulacao/tabela-investidor|crm.simulators.view|crm.simulation',
-  'all simulator routes use one explicit authorized hierarchy'
+    || 'crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view|crm.simulation',
+  'only the simulator hub and WF13 belong to the authorized page hierarchy'
 );
 
 select has_function(
@@ -333,13 +345,13 @@ select set_config('request.jwt.claim.sub', '10000000-0000-0000-0000-000000000002
 set local role authenticated;
 
 select lives_ok(
-  $$select public.set_app_page_active('crm.simulation.wf15', false, 'pgTAP visibility test')$$,
+  $$select public.set_app_page_active('crm.partnerships', false, 'pgTAP visibility test')$$,
   'master can change page visibility through the guarded RPC'
 );
 
 select is(
   (select count(*) from public.list_app_pages_for_management()),
-  21::bigint,
+  17::bigint,
   'page manager RPC returns active and inactive catalog entries'
 );
 

@@ -6,7 +6,9 @@
 --     versioned Terms and Privacy acceptance required at registration.
 --
 -- This migration does not enable MFA remotely and does not change any
--- commercial/integration feature flag.
+-- commercial/integration feature flag. It also removes four simulator preview
+-- catalog rows that are absent from the approved production set; their route
+-- code and engines remain versioned but unavailable.
 
 create or replace function private.current_session_is_live()
 returns boolean
@@ -255,6 +257,128 @@ begin
     )
   ) then
     raise exception 'production RBAC compatibility baseline is incomplete'
+      using errcode = '23514';
+  end if;
+end;
+$migration$;
+
+-- Production has exactly 17 commercial/admin catalog pages. Older clean
+-- replays may contain four future simulator previews from the visual-catalog
+-- increment. Remove only those exact identities; route code stays versioned
+-- and the application returns 403 until a future, explicit product gate.
+do $migration$
+begin
+  if exists (
+    select 1
+    from public.app_pages page
+    join (
+      values
+        ('crm.simulation.wf16', '/app/simulacao/calcular-documentacao'),
+        ('crm.simulation.caixa', '/app/simulacao/caixa'),
+        ('crm.simulation.wf14', '/app/simulacao/tabela-direta'),
+        ('crm.simulation.wf15', '/app/simulacao/tabela-investidor')
+    ) expected(page_key, page_path)
+      on page.key = expected.page_key or page.path = expected.page_path
+    where page.key <> expected.page_key or page.path <> expected.page_path
+  ) then
+    raise exception 'future simulator page identity conflicts with the approved catalog'
+      using errcode = '55000';
+  end if;
+end;
+$migration$;
+
+delete from public.app_pages
+where (key, path) in (
+  ('crm.simulation.wf16', '/app/simulacao/calcular-documentacao'),
+  ('crm.simulation.caixa', '/app/simulacao/caixa'),
+  ('crm.simulation.wf14', '/app/simulacao/tabela-direta'),
+  ('crm.simulation.wf15', '/app/simulacao/tabela-investidor')
+);
+
+do $migration$
+begin
+  if exists (
+    with expected(page_key, page_path, permission_key, is_navigation) as (
+      values
+        ('admin.home', '/admin', 'admin.access', true),
+        ('admin.pages', '/admin/paginas', 'pages.manage', true),
+        ('admin.users', '/admin/usuarios', 'users.view', true),
+        ('crm.dashboard', '/app', 'crm.dashboard.view', true),
+        ('crm.partnerships', '/app/canal-de-parcerias', 'crm.partnerships.view', true),
+        ('crm.ranking', '/app/ranking', 'crm.ranking.view', true),
+        ('crm.settings', '/app/configuracoes', 'crm.settings.view', true),
+        ('crm.settings.goals', '/app/configuracoes/metas', 'crm.settings.manage', true),
+        (
+          'crm.settings.partnerships',
+          '/app/configuracoes/metas/parcerias',
+          'crm.settings.manage',
+          true
+        ),
+        (
+          'crm.settings.points',
+          '/app/configuracoes/metas/pontos',
+          'crm.settings.manage',
+          true
+        ),
+        ('crm.simulation', '/app/simulacao', 'crm.simulators.view', true),
+        (
+          'crm.simulation.wf13',
+          '/app/simulacao/associativo-fluxo-linear',
+          'crm.simulators.view',
+          true
+        ),
+        (
+          'crm.stage.appointments',
+          '/app/etapas/agendamentos',
+          'crm.stages.view',
+          true
+        ),
+        ('crm.stage.folders', '/app/etapas/pastas', 'crm.stages.view', true),
+        ('crm.stage.opportunities', '/app/etapas/oportunidades', 'crm.stages.view', true),
+        ('crm.stage.sales', '/app/etapas/vendas', 'crm.stages.view', true),
+        ('crm.stage.visits', '/app/etapas/visitas', 'crm.stages.view', true)
+    ),
+    actual as (
+      select page.key, page.path, page.permission_key, page.is_navigation
+      from public.app_pages page
+      where page.is_active
+    ),
+    difference as (
+      (select * from expected except select * from actual)
+      union all
+      (select * from actual except select * from expected)
+    )
+    select 1 from difference
+  ) then
+    raise exception 'active page catalog differs from the approved 17-page production set'
+      using errcode = '23514';
+  end if;
+
+  if (select count(*) from public.app_pages) <> 17 then
+    raise exception 'page catalog contains entries outside the approved production set'
+      using errcode = '23514';
+  end if;
+
+  if exists (
+    select 1
+    from public.app_pages page
+    join public.role_permissions role_permission
+      on role_permission.permission_key = page.permission_key
+    where page.is_active
+      and role_permission.role_key in (
+        'manager',
+        'house',
+        'partnership_channel',
+        'pending'
+      )
+      and exists (
+        select 1
+        from public.role_permissions page_permission
+        where page_permission.role_key = role_permission.role_key
+          and page_permission.permission_key = 'pages.view'
+      )
+  ) then
+    raise exception 'future or pending role inherited an active commercial page'
       using errcode = '23514';
   end if;
 end;

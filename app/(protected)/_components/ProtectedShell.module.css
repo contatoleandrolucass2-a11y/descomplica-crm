@@ -418,16 +418,30 @@
 
 @media (max-width: 36rem) {
   .topbarInner {
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.65rem;
+  }
+
+  .brand {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .actions {
+    grid-column: 1;
+    grid-row: 2;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .navigation {
+    grid-column: 1;
+    grid-row: 3;
   }
 
   .brandName,
   .role {
     display: none;
-  }
-
-  .actions {
-    min-width: 0;
   }
 
   .identity {

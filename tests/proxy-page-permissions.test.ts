@@ -82,6 +82,25 @@ describe("pre-stream page permission gates", () => {
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
+  it.each([
+    "/app/simulacao/calcular-documentacao",
+    "/app/simulacao/caixa",
+    "/app/simulacao/tabela-direta",
+    "/app/simulacao/tabela-investidor",
+  ])(
+    "returns 403 for inactive catalog route %s even when Master has the shared permission",
+    async (pathname) => {
+      configureSession(["crm.simulators.view"]);
+
+      const response = await proxy(new NextRequest(`${origin}${pathname}`));
+
+      expect(response.status).toBe(403);
+      expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);
+      expect(mocks.getUser).toHaveBeenCalledOnce();
+      expect(mocks.rpc).not.toHaveBeenCalled();
+    },
+  );
+
   it("leaves non-catalog routes on the existing session path", async () => {
     configureSession([]);
 

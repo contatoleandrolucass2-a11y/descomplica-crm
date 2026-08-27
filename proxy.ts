@@ -70,6 +70,7 @@ import {
 } from "@/lib/crm/salesforce/config";
 import { applySecurityHeaders } from "@/lib/security/headers";
 import { isHomologationMode } from "@/lib/homologation/config";
+import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 import { NextResponse, type NextRequest } from "next/server";
 import type { PermissionKey } from "@/lib/authorization/permissions";
 
@@ -81,19 +82,22 @@ interface AuthorizationContextRow {
 // forbidden() interrupt changes the status. Enforce the exact page permission
 // for the versioned route inventory in Proxy as well. Page guards, APIs and RLS
 // remain authoritative and still re-check the same key.
-function permissionRequiredBeforeStreaming(pathname: string): PermissionKey | null {
-  if (pathname === "/app") return "crm.dashboard.view";
-  if (pathname.startsWith("/app/etapas/")) return "crm.stages.view";
-  if (pathname === "/app/ranking") return "crm.ranking.view";
-  if (pathname === "/app/canal-de-parcerias") return "crm.partnerships.view";
-  if (pathname === "/app/configuracoes") return "crm.settings.view";
-  if (pathname.startsWith("/app/configuracoes/metas")) return "crm.settings.manage";
-  if (pathname === "/app/simulacao" || pathname.startsWith("/app/simulacao/")) {
-    return "crm.simulators.view";
+function permissionRequiredBeforeStreaming(pathname: string): {
+  permission: PermissionKey;
+  releaseEnabled: boolean;
+} | null {
+  const pageGate = getProtectedPageGate(pathname);
+  if (pageGate) return pageGate;
+
+  if (pathname.startsWith("/app/etapas/")) {
+    return { permission: "crm.stages.view", releaseEnabled: true };
   }
-  if (pathname === "/admin") return "admin.access";
-  if (pathname === "/admin/usuarios") return "users.view";
-  if (pathname === "/admin/paginas") return "pages.manage";
+  if (pathname.startsWith("/app/configuracoes/metas")) {
+    return { permission: "crm.settings.manage", releaseEnabled: true };
+  }
+  if (pathname === "/app/simulacao" || pathname.startsWith("/app/simulacao/")) {
+    return { permission: "crm.simulators.view", releaseEnabled: true };
+  }
   return null;
 }
 
@@ -113,13 +117,14 @@ function forbiddenBeforeStreaming(request: NextRequest, sessionResponse: NextRes
 
 async function lacksEarlyPermission(
   supabase: Awaited<ReturnType<typeof updateSession>>["supabase"],
-  permission: PermissionKey,
+  pageGate: { permission: PermissionKey; releaseEnabled: boolean },
 ) {
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
   if (userError || !user) return false;
+  if (!pageGate.releaseEnabled) return true;
 
   const { data, error } = await supabase.rpc("get_user_authorization_context", {
     user_uuid: user.id,
@@ -129,7 +134,7 @@ async function lacksEarlyPermission(
   if (data.length !== 1) return true;
 
   const permissions = (data[0] as AuthorizationContextRow).permissions;
-  return !Array.isArray(permissions) || !permissions.includes(permission);
+  return !Array.isArray(permissions) || !permissions.includes(pageGate.permission);
 }
 
 function unavailableSalesforceResponse(request: NextRequest): NextResponse | null {

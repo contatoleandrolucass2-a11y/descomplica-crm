@@ -72,8 +72,10 @@ PR não amplia esse grant.
 7. falha se existir grant `authenticated` em tabela sem RLS ou se a cobertura não for
    exata;
 8. cria somente ledger legal privado, funções de sessão/recovery e triggers legais;
-9. não cria papéis ou permissões, não remove vínculos e não altera `app_pages`,
-   `user_roles`, `user_permission_overrides` ou `profiles`.
+9. não cria papéis ou permissões nem remove vínculos; no restore/clean install,
+   remove somente as quatro linhas de simuladores ausentes do conjunto produtivo
+   (`WF16`, `CAIXA`, `WF14`, `WF15`), sem alterar `user_roles`,
+   `user_permission_overrides` ou `profiles`.
 
 O trigger de cadastro exige os Termos e a Política de Privacidade versionados durante a
 criação do usuário. Não depende de um fluxo de aprovação ausente em produção.
@@ -86,11 +88,11 @@ migration; função, papel ou schema ausente nunca é criado.
 
 ## Pós-condições obrigatórias do rehearsal
 
-- no rehearsal fiel de produção, fingerprints de papéis, permissões, vínculos, páginas,
-  usuários atribuídos e overrides idênticos antes/depois;
+- no rehearsal fiel de produção, fingerprints de papéis, permissões, vínculos,
+  17 páginas, usuários atribuídos e overrides idênticos antes/depois;
 - na instalação limpa, os 41 vínculos de compatibilidade convergem para a matriz
-  produtiva; `manager`, `house`, `partnership_channel` e `pending` continuam sem
-  permissão herdada;
+  produtiva e as quatro páginas exclusivas do restore são removidas;
+  `manager`, `house`, `partnership_channel` e `pending` continuam sem permissão herdada;
 - `admin` continua com 14 páginas; papéis operacionais legados continuam com sete;
 - sessão sem fator mantém exatamente o acesso anterior;
 - usuário com fator verificado em AAL1 falha fechado em guards, RPCs e RLS;

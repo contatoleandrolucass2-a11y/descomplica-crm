@@ -2,10 +2,13 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 32 migrations
-locais, incluindo quatro markers históricos sanitizados e no-op. Nenhuma regra,
-política ou valor comercial é seedado. O rebuild contém 39 tabelas públicas,
-17 privadas, 12 papéis, 26 permissões e 21 páginas.
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 41 arquivos de
+migration: 34 etapas canônicas e sete versões remotas reconciliadas por markers
+ou convergências seguras. Nenhuma regra, política ou valor comercial é seedado.
+O rebuild contém 39 tabelas públicas,
+17 privadas, 12 papéis, 26 permissões e 17 páginas autorizadas. Quatro rotas
+futuras de simuladores continuam no código, mas fora do catálogo e respondem
+`403` para todo perfil até autorização explícita.
 
 Isso não descreve convergência com produção. A captura somente leitura de 9 de
 agosto encontrou quatro versões então somente remotas, hoje representadas por
@@ -50,6 +53,8 @@ nenhum cutover Qlik ou do read model v3 foi realizado.
 30. `20260813151446_emergency_qlik_public_read_recontainment.sql`: roll-forward P0 idempotente que restabelece RLS forçada, remove novamente toda policy de leitura e revoga ACL direta após regressão remota; não reproduz as migrations inseguras nem autoriza rollback público.
 31. `20260813143000_master_simulator_execution_gate.sql`: gate aditivo que concede `crm.simulators.execute` somente ao Master, sem ativar fórmula, flag ou integração.
 32. `20260814045436_wf13_master_page_access_convergence.sql`: correção forward isolada que cria `crm.simulators.view` Master-only e converge o hub/rota WF13 com o guard, sem ativar outro motor.
+33. `20260824230058_auth_mfa_legal_foundation.sql`: recuperação de senha, MFA, sessão lembrada, consentimentos legais privados e convergência exata do catálogo produtivo de 17 páginas.
+34. `20260824230100_role_isolation_net_fail_closed.sql`: isolamento fail-closed das funções Auth/MFA por identidade, AAL e grants mínimos, sem alterar integrações ou motores.
 
 ## Desenvolvimento local
 
@@ -66,14 +71,10 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 939 testes pgTAP em 22 arquivos: 28 dos motivos de
-acesso, 51 regressões de hardening escopado, 28 do dashboard, 25 das metas, 20
-da matriz global de grants, 60 do schema Qlik, 33 do catálogo, 28 do signup
-pendente, 26 dos pontos, 54 do contrato Qlik, 20 da governança de identidades,
-27 do ranking, 143 do read model v3, 98 da matriz de escopos, 43 da ingestão
-Salesforce, 86 do relay/mappings, 93 do runtime comercial, 22 dos rascunhos
-comerciais, 28 da contenção Qlik, 9 da convergência RBAC do Canal e 10 da
-convergência de página do WF13. A cobertura verifica nomes,
+`supabase test db` planeja 1.018 testes pgTAP em 25 arquivos. A cobertura inclui
+52 casos da fundação Auth/MFA/legal, 12 do isolamento fail-closed e 12 da
+convergência exata de páginas, além das suítes existentes de autorização,
+dashboard, Qlik, Salesforce, read models e runtime comercial. Ela verifica nomes,
 schema, grants, policies, constraints, disponibilidade e autoridade de fontes,
 preservação de dados, mappings, lineage, provisionamento, usuários inativos,
 overrides, limites de payload, delegação direcional, cardinalidade de escopo,

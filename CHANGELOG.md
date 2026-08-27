@@ -20,6 +20,26 @@
 
 ## Unreleased
 
+- Reorganiza o cabeçalho em três linhas nos breakpoints móveis para impedir
+  colisão entre marca, ações, Segurança e navegação; a auditoria visual agora
+  detecta também `brand×actions` e colisões entre ações.
+- Atualiza a baseline autenticada somente para o catálogo produtivo de 17
+  páginas, os quatro cards de simuladores release-disabled e o cabeçalho móvel.
+- Torna a matriz Playwright hospedada integralmente efêmera: nove contas são
+  criadas via Auth Admin apenas em memória, recebem papéis/perfis/scopes exatos
+  e são removidas em `finally` com prova de ausência de sessões, fatores,
+  autorização e ledger legal. Somente o Master persistente segue como fixture
+  visual, restaurado antes das capturas; credenciais e identidades são omitidas.
+- Converge o catálogo RBAC pelo conjunto produtivo comprovado: Master 17 páginas,
+  Admin 14, seis papéis legados sete e papéis futuros/pendente zero. As quatro
+  rotas excedentes WF16, CAIXA, WF14 e WF15 permanecem no inventário HTTP, mas
+  saem de `app_pages` e retornam `403` antes de renderizar.
+- Adiciona contrato compartilhado dos 21 paths, pgTAP por conjunto exato e E2E
+  9×21; grants de permissões permanecem 20/17/4/0 e nenhuma flag ou motor muda.
+- Adiciona executor root-only para a homologação com baseline exato de 29
+  versões, allowlist/hashes das duas migrations Auth/MFA, dry-run fail-closed,
+  backup distinto com restore isolado comprovado, lock advisory, histórico
+  atômico e pós-condições RBAC/RLS/Qlik; as 17 páginas exigem navegação ativa.
 - Fixa todas as inspeções Docker do smoke hospedado no socket local root-owned
   `/var/run/docker.sock`; comandos capturados usam ambiente mínimo e não herdam
   `HOME`, `DOCKER_HOST` ou `DOCKER_CONTEXT` do chamador.
@@ -79,11 +99,11 @@
   quando o schema opcional `net` estiver ausente, sem instalar `pg_net` nem
   liberar qualquer papel dedicado.
 - Atualiza o rehearsal de restore para copiar templates Auth e validar o total
-  atual de 1.004 pgTAP; fonte e alvo efêmeros continuam independentes.
+  atual de 1.018 pgTAP; fonte e alvo efêmeros continuam independentes.
 - Faz a conta QA visual consentir explicitamente com cookies opcionais antes da
   matriz de temas; o produto continua opt-out e sem persistência por padrão.
 - Registra a matriz local dos nove perfis e 21 rotas. A reconciliação preserva
-  21 páginas para Master, 14 para Admin, sete para os perfis analíticos
+  17 páginas para Master, 14 para Admin, sete para os perfis analíticos
   herdados e nenhuma herança comercial para os quatro perfis restantes.
   Alterações permanecem locais; nenhum ambiente remoto, migration, usuário ou
   configuração foi modificado. Os resultados finais deste novo SHA serão

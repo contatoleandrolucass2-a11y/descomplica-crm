@@ -142,6 +142,13 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("visualBaselinePath(route, destination)");
     expect(script).toContain("enabledSimulatorRoutes.has(route)");
     expect(script).toContain('route === "/app/simulacao" && simulatorHubCanaryKey');
+    expect(script).toContain('topbarCollisionPairs.push("brand×actions")');
+    expect(script).toContain("actionChildren[firstIndex]");
+    expect(script).toContain("topbarCollisionPairs.length > 0");
+    expect(script).toContain("async function capturePersistedScreenshot(page, comparableBuffer)");
+    expect(script).toContain('data-qa-evidence-identity="remote-homologation"');
+    expect(script).toContain("mask visible identity and email regions before persistence");
+    expect(script).toContain("saveLosslessWebp(persistedBuffer, destination)");
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_RUNTIME_MODE"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_ENABLED_KEYS"');
@@ -156,11 +163,39 @@ describe("isolated authenticated visual QA contract", () => {
     expect(remoteRunner).toContain("...officialSimulatorEnvironment");
     expect(remoteRunner).toContain("unsafe ownership or permissions");
     expect(remoteRunner).toContain("QA_E2E_MAILPIT_ORIGIN: mailpitOrigin");
-    expect(remoteRunner).toContain("restoreQaIdentity(");
+    expect(remoteRunner.match(/QA_E2E_MAILPIT_ORIGIN: mailpitOrigin/g)).toHaveLength(1);
+    expect(remoteRunner).toContain("restorePersistentVisualIdentity(");
+    expect(remoteRunner).toContain("resolveQaUser(adminClient, master.email)");
+    expect(remoteRunner).toContain("originalFactorIds");
     expect(remoteRunner).toContain("auth.admin.mfa.deleteFactor");
-    expect(remoteRunner).toContain("auth.admin.updateUserById");
     expect(remoteRunner).toContain("delete from auth.sessions where user_id =");
-    expect(remoteRunner).toContain("purgeQaMail(master.email)");
+    expect(remoteRunner).toContain("purgeQaMail(recipients)");
+    expect(remoteRunner).toContain("async function createEphemeralAccount(");
+    expect(remoteRunner).toContain("app_metadata: { qa_ephemeral: true, qa_run_id: runId }");
+    expect(remoteRunner).toContain("ephemeralMatrixSetupSql(ephemeralAccounts, masterUser, runId)");
+    expect(remoteRunner).toContain("QA_E2E_ACCOUNTS: JSON.stringify(ephemeralAccounts)");
+    expect(remoteRunner).toContain("clearEphemeralPasswords(ephemeralAccounts)");
+    expect(remoteRunner).toContain("await removeEphemeralQaState({");
+    expect(remoteRunner).toContain("adminClient.auth.admin.deleteUser");
+    expect(remoteRunner).toContain("proveEphemeralAbsenceSql(accounts, persistentMaster, runId)");
+    expect(remoteRunner).toContain("select 1 from auth.mfa_factors where user_id = any");
+    expect(remoteRunner).toContain("select 1 from private.legal_acceptances where user_id = any");
+    expect(remoteRunner).toContain(
+      "select 1 from private.legal_acceptance_requirements where user_id = any",
+    );
+    expect(remoteRunner.indexOf("clearEphemeralPasswords(ephemeralAccounts)")).toBeLessThan(
+      remoteRunner.indexOf("await removeEphemeralQaState({"),
+    );
+    const cleanupCallIndexes = [
+      ...remoteRunner.matchAll(/await cleanupPersistentVisualState\(\{/g),
+    ].map((match) => match.index ?? -1);
+    expect(cleanupCallIndexes).toHaveLength(2);
+    expect(cleanupCallIndexes[1]).toBeGreaterThan(
+      remoteRunner.indexOf('await run("node", ["scripts/qa/authenticated-visual.mjs"]'),
+    );
     expect(remoteRunner).toContain("assertHostedAccessLogSafety(callbackLogSnapshot)");
+    expect(remoteRunner).toContain("errorLogPath");
+    expect(remoteRunner).toContain("verifyAuthMfaMigrationContract(head)");
+    expect(remoteRunner).toContain("runtimeRecoveryTemplate !== versionedRecoveryTemplate");
   });
 });

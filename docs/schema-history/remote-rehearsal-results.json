@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-25T22:25:22.434Z",
+  "generatedAt": "2026-08-27T00:10:14.039Z",
   "environment": "two isolated local Supabase/PostgreSQL 17 projects",
   "source": "root-only production backup",
   "remoteMutation": false,
@@ -27,7 +27,7 @@
     {
       "version": "20260824230058",
       "name": "auth_mfa_legal_foundation",
-      "sha256": "749456153fef4bec2638da953aa41dbe6706330e351a4d2b1954eeee29eb06dd"
+      "sha256": "8afc580224789b59e111b52256459d66a5386d48468f2ba293819bfd33b5bda9"
     },
     {
       "version": "20260824230100",

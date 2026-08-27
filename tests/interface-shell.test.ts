@@ -42,6 +42,9 @@ describe("protected interface shell", () => {
     expect(shellStylesheet).toMatch(/\.identity \{[\s\S]*min-width: 0/);
     expect(shellStylesheet).toMatch(/\.identityLabel \{[\s\S]*text-overflow: ellipsis/);
     expect(shellStylesheet).toContain("@media (max-width: 90rem)");
+    expect(shellStylesheet).toMatch(
+      /@media \(max-width: 36rem\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\)[\s\S]*\.brand \{[\s\S]*grid-row: 1[\s\S]*\.actions \{[\s\S]*grid-row: 2[\s\S]*flex-wrap: wrap[\s\S]*\.navigation \{[\s\S]*grid-row: 3/,
+    );
     expect(analyticsStylesheet).toMatch(
       /\.pageHeader :focus-visible,[\s\S]*outline-color: #7ceaf5/,
     );

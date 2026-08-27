@@ -179,7 +179,7 @@ Antes de qualquer ativação remota:
 - QR Code e chave manual são dados sensíveis exibidos somente durante enrollment; não
   existem recovery codes neste incremento.
 - Gates locais finais aprovados: formato, lint, typecheck, 468 testes Vitest, oito
-  testes Node, build de 39 rotas, reset do Supabase local, 1.004 pgTAP em 24 arquivos e
+  testes Node, build de 39 rotas, reset do Supabase local, 1.018 pgTAP em 25 arquivos e
   Playwright com 19 cenários aprovados. O único skip é o cenário remoto de homologação,
   deliberadamente fora deste incremento local; SMTP e configurações hospedadas não
   foram usados como substituto.

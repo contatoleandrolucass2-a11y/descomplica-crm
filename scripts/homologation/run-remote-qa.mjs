@@ -1,10 +1,13 @@
 import { execFile, spawn } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { lstat, open, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
 
 import { createClient } from "@supabase/supabase-js";
+
+import legalDocumentVersions from "../../lib/legal/versions.json" with { type: "json" };
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const runtimeRoot = "/var/lib/descomplica-crm-homologation";
@@ -13,15 +16,19 @@ const accessPath = "/etc/descomplica-crm/homologation-access.json";
 const appEnvironmentPath = "/etc/descomplica-crm/homologation.env";
 const activeProxyPath = "/etc/nginx/sites-enabled/homolog.descomplicapro.com.br";
 const accessLogPath = "/var/log/nginx/homolog.descomplicapro.com.br.access.log";
+const errorLogPath = "/var/log/nginx/homolog.descomplicapro.com.br.error.log";
 const dockerSocketPath = "/var/run/docker.sock";
 const dockerSocketUri = `unix://${dockerSocketPath}`;
 const dockerCommand = "/usr/bin/docker";
 const firewallCommand = "/usr/local/sbin/descomplica-homologation-firewall";
 const runtimeSupabaseConfigPath = path.join(runtimeRoot, "supabase/config.toml");
+const runtimeRecoveryTemplatePath = path.join(runtimeRoot, "supabase/templates/recovery.html");
+const runtimeManifestPath = path.join(runtimeRoot, "manifest.json");
 const versionedSupabaseConfigPath = path.join(
   repositoryRoot,
   "deploy/homologation/supabase.config.toml",
 );
+const versionedRecoveryTemplatePath = path.join(repositoryRoot, "supabase/templates/recovery.html");
 const origin = "https://homolog.descomplicapro.com.br";
 const mailpitOrigin = "http://127.0.0.1:55324";
 const appContainer = "descomplica-homologation-app";
@@ -37,7 +44,7 @@ const officialSimulatorKeys = new Set([
   "simulator.wf14",
   "simulator.wf15",
 ]);
-const roles = new Set([
+const requiredRoles = Object.freeze([
   "master",
   "admin",
   "manager",
@@ -48,9 +55,15 @@ const roles = new Set([
   "partnership_channel",
   "pending",
 ]);
+const activeChildren = new Set();
+let requestedSignal = null;
 
 function fail(message) {
   throw new Error(message);
+}
+
+function throwIfInterrupted() {
+  if (requestedSignal) fail(`Homologation QA interrupted by ${requestedSignal}.`);
 }
 
 async function readPrivateJson(file) {
@@ -151,27 +164,42 @@ async function verifyRepositoryState() {
 async function verifySupabaseRuntimeContract() {
   let runtimeConfiguration;
   let versionedConfiguration;
+  let runtimeRecoveryTemplate;
+  let versionedRecoveryTemplate;
   try {
-    const [runtimeStat, configurations] = await Promise.all([
-      stat(runtimeSupabaseConfigPath),
+    const [runtimeStats, configurations] = await Promise.all([
+      Promise.all([stat(runtimeSupabaseConfigPath), stat(runtimeRecoveryTemplatePath)]),
       Promise.all([
         readFile(runtimeSupabaseConfigPath, "utf8"),
         readFile(versionedSupabaseConfigPath, "utf8"),
+        readFile(runtimeRecoveryTemplatePath, "utf8"),
+        readFile(versionedRecoveryTemplatePath, "utf8"),
       ]),
     ]);
     if (
-      runtimeStat.uid !== 0 ||
-      runtimeStat.gid !== 0 ||
-      (runtimeStat.mode & 0o022) !== 0 ||
-      !runtimeStat.isFile()
+      runtimeStats.some(
+        (runtimeStat) =>
+          runtimeStat.uid !== 0 ||
+          runtimeStat.gid !== 0 ||
+          (runtimeStat.mode & 0o022) !== 0 ||
+          !runtimeStat.isFile(),
+      )
     ) {
       fail("Homologation Supabase runtime configuration is unsafe.");
     }
-    [runtimeConfiguration, versionedConfiguration] = configurations;
+    [
+      runtimeConfiguration,
+      versionedConfiguration,
+      runtimeRecoveryTemplate,
+      versionedRecoveryTemplate,
+    ] = configurations;
   } catch {
     fail("Homologation Supabase runtime contract is unavailable.");
   }
-  if (runtimeConfiguration !== versionedConfiguration) {
+  if (
+    runtimeConfiguration !== versionedConfiguration ||
+    runtimeRecoveryTemplate !== versionedRecoveryTemplate
+  ) {
     fail("Homologation Supabase runtime differs from the checked-out release.");
   }
 }
@@ -340,12 +368,25 @@ async function run(command, arguments_, environment) {
       env: environment,
       stdio: "inherit",
     });
-    child.once("error", reject);
+    activeChildren.add(child);
+    child.once("error", (error) => {
+      activeChildren.delete(child);
+      reject(error);
+    });
     child.once("exit", (code, signal) => {
+      activeChildren.delete(child);
       if (code === 0 && signal === null) resolve();
       else reject(new Error("Homologation QA child process failed."));
     });
   });
+}
+
+async function verifyAuthMfaMigrationContract(expectedHead) {
+  await run(
+    "pnpm",
+    ["homologation:migrate:auth-mfa", "verify", "--expected-sha", expectedHead],
+    process.env,
+  );
 }
 
 function createAdminClient(apiUrl, secretKey) {
@@ -373,12 +414,18 @@ async function verifyQaCredential(apiUrl, publishableKey, email, password) {
 }
 
 async function resolveQaUser(adminClient, email) {
-  const { data, error } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 100 });
-  if (error) fail("Homologation QA identity preflight failed.");
-  const matches = data.users.filter((user) => user.email === email);
-  if (matches.length !== 1 || data.nextPage !== null) {
-    fail("Homologation Master QA identity is ambiguous.");
+  const matches = [];
+  const perPage = 100;
+  for (let page = 1; page <= 100; page += 1) {
+    const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage });
+    if (error || !Array.isArray(data?.users)) {
+      fail("Homologation QA identity preflight failed.");
+    }
+    matches.push(...data.users.filter((user) => user.email === email));
+    if (data.users.length < perPage || data.nextPage === null) break;
+    if (page === 100) fail("Homologation QA identity preflight was incomplete.");
   }
+  if (matches.length !== 1) fail("Homologation Master QA identity is ambiguous.");
   return matches[0];
 }
 
@@ -395,73 +442,723 @@ function assertUuid(value) {
   return value;
 }
 
-async function restoreQaIdentity(
+function sqlLiteral(value) {
+  return `'${String(value).replaceAll("'", "''")}'`;
+}
+
+function sqlUuid(value) {
+  return `${sqlLiteral(assertUuid(value))}::uuid`;
+}
+
+function sqlUuidArray(values) {
+  return `array[${values.map(sqlUuid).join(", ")}]::uuid[]`;
+}
+
+function assertCompleteEphemeralMatrix(accounts) {
+  if (
+    accounts.length !== requiredRoles.length ||
+    new Set(accounts.map((account) => account.id)).size !== requiredRoles.length ||
+    new Set(accounts.map((account) => account.email)).size !== requiredRoles.length ||
+    new Set(accounts.map((account) => account.role)).size !== requiredRoles.length ||
+    requiredRoles.some((role) => !accounts.some((account) => account.role === role))
+  ) {
+    fail("Homologation ephemeral QA identity matrix is incomplete.");
+  }
+}
+
+async function createEphemeralAccount(adminClient, role, runId) {
+  const email = `qa.rls-${role}-${runId}@local.invalid`;
+  const password = `${randomBytes(36).toString("base64url")}aA1!`;
+  const { data, error } = await adminClient.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    app_metadata: { qa_ephemeral: true, qa_run_id: runId },
+    user_metadata: {
+      legal_acceptance: {
+        termsAccepted: true,
+        termsVersion: legalDocumentVersions.terms,
+        privacyAccepted: true,
+        privacyVersion: legalDocumentVersions.privacy,
+      },
+    },
+  });
+  if (error || !data.user) fail("Homologation ephemeral QA identity creation failed.");
+  return { id: assertUuid(data.user.id), role, email, password };
+}
+
+function ephemeralMatrixSetupSql(accounts, persistentMaster, runId) {
+  assertCompleteEphemeralMatrix(accounts);
+  const persistentMasterId = sqlUuid(persistentMaster.id);
+  const expectedValues = accounts
+    .map((account) => `(${sqlUuid(account.id)}, ${sqlLiteral(account.role)})`)
+    .join(",\n  ");
+  const brokerPersonKey = `qa-hosted-${runId}-broker`;
+  const brokerScopeKey = `qa-hosted-${runId}-broker-scope`;
+
+  return `
+begin;
+
+select pg_advisory_xact_lock(hashtextextended('descomplica-hosted-ephemeral-qa', 0));
+
+create temporary table qa_ephemeral_expected (
+  user_id uuid primary key,
+  role_key text not null unique
+) on commit drop;
+
+insert into qa_ephemeral_expected (user_id, role_key) values
+  ${expectedValues};
+
+do $qa_preflight$
+begin
+  if (
+    select count(*)
+    from public.user_roles user_role
+    join public.profiles profile on profile.user_id = user_role.user_id
+    where user_role.user_id = ${persistentMasterId}
+      and user_role.role_key = 'master'
+      and profile.is_active
+      and profile.profile_completed
+      and profile.access_status = 'approved'
+      and private.user_role_scope_is_valid(user_role.user_id, user_role.role_key)
+  ) <> 1 or (select count(*) from public.user_roles where role_key = 'master') <> 1 then
+    raise exception 'persistent visual Master preflight failed';
+  end if;
+
+  if (select count(*) from qa_ephemeral_expected) <> 9
+     or exists (
+       select 1
+       from qa_ephemeral_expected expected
+       left join auth.users auth_user on auth_user.id = expected.user_id
+       left join public.profiles profile on profile.user_id = expected.user_id
+       left join public.user_roles user_role on user_role.user_id = expected.user_id
+       where auth_user.id is null
+          or auth_user.raw_app_meta_data ->> 'qa_ephemeral' is distinct from 'true'
+          or auth_user.raw_app_meta_data ->> 'qa_run_id' is distinct from ${sqlLiteral(runId)}
+          or profile.user_id is null
+          or profile.is_active
+          or profile.profile_completed
+          or profile.access_status <> 'pending'
+          or user_role.role_key <> 'pending'
+     )
+     or exists (
+       select 1 from public.crm_user_reporting_scope_grants
+       where user_id = any(array(select user_id from qa_ephemeral_expected))
+     )
+     or exists (
+       select 1 from public.user_permission_overrides
+       where user_id = any(array(select user_id from qa_ephemeral_expected))
+     ) then
+    raise exception 'ephemeral identity preflight failed';
+  end if;
+
+  if not exists (
+       select 1 from public.crm_reporting_scopes
+       where scope_type = 'global' and is_active
+     ) or not exists (
+       select 1
+       from public.crm_reporting_scopes reporting_scope
+       join public.crm_organizations organization
+         on organization.id = reporting_scope.organization_id
+        and organization.is_active
+       where reporting_scope.scope_type = 'organization'
+         and reporting_scope.is_active
+     ) or not exists (
+       select 1
+       from public.crm_reporting_scopes reporting_scope
+       join public.crm_organizations organization
+         on organization.id = reporting_scope.organization_id
+        and organization.is_active
+       where reporting_scope.scope_type = 'organization'
+         and reporting_scope.is_active
+         and organization.kind = 'real_estate'
+     ) or not exists (
+       select 1
+       from public.crm_reporting_scopes reporting_scope
+       join public.crm_organizations organization
+         on organization.id = reporting_scope.organization_id
+        and organization.is_active
+       where reporting_scope.scope_type = 'organization'
+         and reporting_scope.is_active
+         and organization.kind = 'house'
+     ) or not exists (
+       select 1
+       from public.crm_reporting_scopes reporting_scope
+       join public.crm_teams team on team.id = reporting_scope.team_id and team.is_active
+       join public.crm_organizations organization
+         on organization.id = team.organization_id
+        and organization.is_active
+       where reporting_scope.scope_type = 'team' and reporting_scope.is_active
+     ) or not exists (
+       select 1
+       from public.crm_reporting_scopes reporting_scope
+       join public.crm_portfolios portfolio
+         on portfolio.id = reporting_scope.portfolio_id
+        and portfolio.is_active
+       where reporting_scope.scope_type = 'portfolio'
+         and reporting_scope.is_active
+         and portfolio.kind = 'partnership'
+     ) then
+    raise exception 'compatible hosted reporting scopes are unavailable';
+  end if;
+end
+$qa_preflight$;
+
+update public.profiles
+set is_active = false,
+    access_status = 'pending'
+where user_id = ${persistentMasterId};
+
+update public.user_roles
+set role_key = 'pending'
+where user_id = ${persistentMasterId};
+
+update public.user_roles user_role
+set role_key = expected.role_key,
+    assigned_by = ${persistentMasterId}
+from qa_ephemeral_expected expected
+where user_role.user_id = expected.user_id;
+
+insert into public.crm_people (person_key, display_name, auth_user_id)
+select
+  ${sqlLiteral(brokerPersonKey)},
+  'Synthetic hosted QA broker',
+  expected.user_id
+from qa_ephemeral_expected expected
+where expected.role_key = 'broker';
+
+insert into public.crm_team_memberships (team_id, person_id, membership_role, valid_from)
+select team.id, person.id, 'broker', now() - interval '1 minute'
+from public.crm_people person
+cross join lateral (
+  select candidate.id
+  from public.crm_teams candidate
+  join public.crm_organizations organization
+    on organization.id = candidate.organization_id
+   and organization.is_active
+  where candidate.is_active
+  order by candidate.id
+  limit 1
+) team
+where person.person_key = ${sqlLiteral(brokerPersonKey)};
+
+insert into public.crm_reporting_scopes (scope_key, scope_type, person_id)
+select ${sqlLiteral(brokerScopeKey)}, 'person', person.id
+from public.crm_people person
+where person.person_key = ${sqlLiteral(brokerPersonKey)};
+
+with target_scopes as (
+  select
+    expected.user_id,
+    expected.role_key,
+    case expected.role_key
+      when 'master' then (
+        select reporting_scope.id
+        from public.crm_reporting_scopes reporting_scope
+        where reporting_scope.scope_type = 'global' and reporting_scope.is_active
+        order by reporting_scope.id
+        limit 1
+      )
+      when 'admin' then (
+        select reporting_scope.id
+        from public.crm_reporting_scopes reporting_scope
+        join public.crm_organizations organization
+          on organization.id = reporting_scope.organization_id
+         and organization.is_active
+        where reporting_scope.scope_type = 'organization' and reporting_scope.is_active
+        order by reporting_scope.id
+        limit 1
+      )
+      when 'manager' then (
+        select reporting_scope.id
+        from public.crm_reporting_scopes reporting_scope
+        join public.crm_teams team on team.id = reporting_scope.team_id and team.is_active
+        join public.crm_organizations organization
+          on organization.id = team.organization_id
+         and organization.is_active
+        where reporting_scope.scope_type = 'team' and reporting_scope.is_active
+        order by reporting_scope.id
+        limit 1
+      )
+      when 'broker' then (
+        select reporting_scope.id
+        from public.crm_reporting_scopes reporting_scope
+        where reporting_scope.scope_key = ${sqlLiteral(brokerScopeKey)}
+      )
+      when 'coordinator' then (
+        select reporting_scope.id
+        from public.crm_reporting_scopes reporting_scope
+        join public.crm_portfolios portfolio
+          on portfolio.id = reporting_scope.portfolio_id
+         and portfolio.is_active
+        where reporting_scope.scope_type = 'portfolio'
+          and reporting_scope.is_active
+          and portfolio.kind = 'partnership'
+        order by reporting_scope.id
+        limit 1
+      )
+      when 'real_estate' then (
+        select reporting_scope.id
+        from public.crm_reporting_scopes reporting_scope
+        join public.crm_organizations organization
+          on organization.id = reporting_scope.organization_id
+         and organization.is_active
+        where reporting_scope.scope_type = 'organization'
+          and reporting_scope.is_active
+          and organization.kind = 'real_estate'
+        order by reporting_scope.id
+        limit 1
+      )
+      when 'house' then (
+        select reporting_scope.id
+        from public.crm_reporting_scopes reporting_scope
+        join public.crm_organizations organization
+          on organization.id = reporting_scope.organization_id
+         and organization.is_active
+        where reporting_scope.scope_type = 'organization'
+          and reporting_scope.is_active
+          and organization.kind = 'house'
+        order by reporting_scope.id
+        limit 1
+      )
+      when 'partnership_channel' then (
+        select reporting_scope.id
+        from public.crm_reporting_scopes reporting_scope
+        join public.crm_portfolios portfolio
+          on portfolio.id = reporting_scope.portfolio_id
+         and portfolio.is_active
+        where reporting_scope.scope_type = 'portfolio'
+          and reporting_scope.is_active
+          and portfolio.kind = 'partnership'
+        order by reporting_scope.id
+        limit 1
+      )
+    end as reporting_scope_id
+  from qa_ephemeral_expected expected
+  where expected.role_key <> 'pending'
+)
+insert into public.crm_user_reporting_scope_grants (
+  user_id,
+  reporting_scope_id,
+  granted_by,
+  reason
+)
+select
+  target.user_id,
+  target.reporting_scope_id,
+  ${persistentMasterId},
+  'Ephemeral hosted Playwright QA scope'
+from target_scopes target;
+
+update public.profiles profile
+set is_active = true,
+    profile_completed = true,
+    access_status = 'approved',
+    approved_at = now(),
+    approved_by = ${persistentMasterId}
+from qa_ephemeral_expected expected
+where profile.user_id = expected.user_id
+  and expected.role_key <> 'pending';
+
+do $qa_verify$
+begin
+  if exists (
+       select 1
+       from qa_ephemeral_expected expected
+       left join public.user_roles user_role
+         on user_role.user_id = expected.user_id
+        and user_role.role_key = expected.role_key
+       where user_role.user_id is null
+     ) or (
+       select count(*)
+       from public.profiles profile
+       where profile.user_id = any(array(select user_id from qa_ephemeral_expected))
+         and profile.is_active
+         and profile.profile_completed
+         and profile.access_status = 'approved'
+         and profile.approved_by = ${persistentMasterId}
+     ) <> 8 or not exists (
+       select 1
+       from qa_ephemeral_expected expected
+       join public.profiles profile on profile.user_id = expected.user_id
+       where expected.role_key = 'pending'
+         and not profile.is_active
+         and not profile.profile_completed
+         and profile.access_status = 'pending'
+         and profile.approved_at is null
+         and profile.approved_by is null
+     ) then
+    raise exception 'ephemeral role or profile matrix is invalid';
+  end if;
+
+  if (select count(*) from public.user_roles where role_key = 'master') <> 1
+     or not exists (
+       select 1
+       from qa_ephemeral_expected expected
+       join public.user_roles user_role on user_role.user_id = expected.user_id
+       where expected.role_key = 'master' and user_role.role_key = 'master'
+     ) or not exists (
+       select 1
+       from public.user_roles user_role
+       join public.profiles profile on profile.user_id = user_role.user_id
+       where user_role.user_id = ${persistentMasterId}
+         and user_role.role_key = 'pending'
+         and not profile.is_active
+         and profile.access_status = 'pending'
+     ) then
+    raise exception 'visual Master parking is invalid';
+  end if;
+
+  if (
+       select count(*)
+       from public.crm_user_reporting_scope_grants scope_grant
+       where scope_grant.user_id = any(array(select user_id from qa_ephemeral_expected))
+         and scope_grant.revoked_at is null
+         and scope_grant.valid_from <= now()
+         and scope_grant.valid_until is null
+     ) <> 8 or exists (
+       select 1
+       from qa_ephemeral_expected expected
+       join public.user_roles user_role on user_role.user_id = expected.user_id
+       where expected.role_key <> 'pending'
+         and not private.user_role_scope_is_valid(expected.user_id, user_role.role_key)
+     ) or exists (
+       select 1
+       from public.crm_user_reporting_scope_grants scope_grant
+       join qa_ephemeral_expected expected on expected.user_id = scope_grant.user_id
+       where expected.role_key = 'pending'
+     ) or exists (
+       select 1 from public.user_permission_overrides
+       where user_id = any(array(select user_id from qa_ephemeral_expected))
+     ) then
+    raise exception 'ephemeral scope matrix is invalid';
+  end if;
+
+  if not exists (
+       select 1
+       from public.crm_people person
+       join public.crm_team_memberships membership on membership.person_id = person.id
+       join public.crm_reporting_scopes reporting_scope on reporting_scope.person_id = person.id
+       join qa_ephemeral_expected expected on expected.user_id = person.auth_user_id
+       where expected.role_key = 'broker'
+         and person.person_key = ${sqlLiteral(brokerPersonKey)}
+         and reporting_scope.scope_key = ${sqlLiteral(brokerScopeKey)}
+         and membership.membership_role = 'broker'
+         and membership.valid_from <= now()
+         and membership.valid_until is null
+     ) then
+    raise exception 'ephemeral broker scope is invalid';
+  end if;
+
+  if (
+       select count(*)
+       from private.legal_acceptance_requirements requirement
+       where requirement.user_id = any(array(select user_id from qa_ephemeral_expected))
+         and requirement.terms_version = ${sqlLiteral(legalDocumentVersions.terms)}
+         and requirement.privacy_version = ${sqlLiteral(legalDocumentVersions.privacy)}
+     ) <> 9 or (
+       select count(*)
+       from private.legal_acceptances acceptance
+       where acceptance.user_id = any(array(select user_id from qa_ephemeral_expected))
+         and acceptance.terms_version = ${sqlLiteral(legalDocumentVersions.terms)}
+         and acceptance.privacy_version = ${sqlLiteral(legalDocumentVersions.privacy)}
+         and acceptance.source = 'public_registration'
+     ) <> 9 or exists (
+       select 1 from auth.sessions
+       where user_id = any(array(select user_id from qa_ephemeral_expected))
+     ) or exists (
+       select 1 from auth.mfa_factors
+       where user_id = any(array(select user_id from qa_ephemeral_expected))
+     ) then
+    raise exception 'ephemeral Auth or legal baseline is invalid';
+  end if;
+end
+$qa_verify$;
+
+commit;
+`;
+}
+
+function persistentMasterRestorationStatements(accounts, persistentMaster) {
+  const ephemeralMaster = accounts.find((account) => account.role === "master");
+  const persistentMasterId = sqlUuid(persistentMaster.id);
+  const ephemeralMasterId = ephemeralMaster ? sqlUuid(ephemeralMaster.id) : null;
+  return `
+${
+  ephemeralMasterId
+    ? `update public.profiles
+set is_active = false,
+    access_status = 'pending'
+where user_id = ${ephemeralMasterId};
+
+update public.user_roles
+set role_key = 'pending'
+where user_id = ${ephemeralMasterId};`
+    : ""
+}
+
+update public.user_roles
+set role_key = 'master'
+where user_id = ${persistentMasterId};
+
+update public.profiles
+set is_active = true,
+    access_status = 'approved'
+where user_id = ${persistentMasterId};
+`;
+}
+
+function persistentMasterRestorationProof(persistentMaster) {
+  const persistentMasterId = sqlUuid(persistentMaster.id);
+  return `
+do $qa_restore$
+begin
+  if (select count(*) from public.user_roles where role_key = 'master') <> 1
+     or not exists (
+       select 1
+       from public.user_roles user_role
+       join public.profiles profile on profile.user_id = user_role.user_id
+       where user_role.user_id = ${persistentMasterId}
+         and user_role.role_key = 'master'
+         and profile.is_active
+         and profile.profile_completed
+         and profile.access_status = 'approved'
+         and private.user_role_scope_is_valid(user_role.user_id, user_role.role_key)
+     ) then
+    raise exception 'persistent visual Master restoration failed';
+  end if;
+end
+$qa_restore$;
+`;
+}
+
+function restorePersistentMasterSql(accounts, persistentMaster) {
+  return `
+begin;
+select pg_advisory_xact_lock(hashtextextended('descomplica-hosted-ephemeral-qa', 0));
+
+${persistentMasterRestorationStatements(accounts, persistentMaster)}
+
+${persistentMasterRestorationProof(persistentMaster)}
+commit;
+`;
+}
+
+function ephemeralDatabaseCleanupSql(accounts, persistentMaster, runId) {
+  if (accounts.length === 0) return restorePersistentMasterSql(accounts, persistentMaster);
+  const userIds = sqlUuidArray(accounts.map((account) => account.id));
+  const brokerPersonKey = `qa-hosted-${runId}-broker`;
+  const brokerScopeKey = `qa-hosted-${runId}-broker-scope`;
+
+  return `
+begin;
+select pg_advisory_xact_lock(hashtextextended('descomplica-hosted-ephemeral-qa', 0));
+
+${persistentMasterRestorationStatements(accounts, persistentMaster)}
+
+${persistentMasterRestorationProof(persistentMaster)}
+
+delete from public.audit_logs
+where actor_id = any(${userIds})
+   or target_user_id = any(${userIds})
+   or reporting_scope_id in (
+     select id from public.crm_reporting_scopes
+     where scope_key = ${sqlLiteral(brokerScopeKey)}
+   );
+
+delete from private.crm_reporting_scope_grant_lineage
+where owner_user_id = any(${userIds})
+   or grant_id in (
+     select id from public.crm_user_reporting_scope_grants
+     where user_id = any(${userIds}) or granted_by = any(${userIds})
+   )
+   or parent_grant_id in (
+     select id from public.crm_user_reporting_scope_grants
+     where user_id = any(${userIds}) or granted_by = any(${userIds})
+   )
+   or root_grant_id in (
+     select id from public.crm_user_reporting_scope_grants
+     where user_id = any(${userIds}) or granted_by = any(${userIds})
+   );
+
+delete from public.crm_user_reporting_scope_grants
+where user_id = any(${userIds}) or granted_by = any(${userIds});
+
+delete from public.user_permission_overrides
+where user_id = any(${userIds});
+
+delete from public.crm_reporting_scopes
+where scope_key = ${sqlLiteral(brokerScopeKey)};
+
+delete from public.crm_people
+where person_key = ${sqlLiteral(brokerPersonKey)}
+   or auth_user_id = any(${userIds});
+
+alter table private.legal_acceptances
+  disable trigger legal_acceptances_append_only;
+delete from private.legal_acceptances
+where user_id = any(${userIds});
+alter table private.legal_acceptances
+  enable trigger legal_acceptances_append_only;
+
+alter table private.legal_acceptance_requirements
+  disable trigger legal_acceptance_requirements_append_only;
+delete from private.legal_acceptance_requirements
+where user_id = any(${userIds});
+alter table private.legal_acceptance_requirements
+  enable trigger legal_acceptance_requirements_append_only;
+
+do $qa_cleanup$
+begin
+  if exists (
+       select 1 from public.audit_logs
+       where actor_id = any(${userIds}) or target_user_id = any(${userIds})
+     ) or exists (
+       select 1 from private.crm_reporting_scope_grant_lineage
+       where owner_user_id = any(${userIds})
+     ) or exists (
+       select 1 from public.crm_user_reporting_scope_grants
+       where user_id = any(${userIds}) or granted_by = any(${userIds})
+     ) or exists (
+       select 1 from public.user_permission_overrides
+       where user_id = any(${userIds})
+     ) or exists (
+       select 1 from public.crm_reporting_scopes
+       where scope_key = ${sqlLiteral(brokerScopeKey)}
+     ) or exists (
+       select 1 from public.crm_people
+       where person_key = ${sqlLiteral(brokerPersonKey)} or auth_user_id = any(${userIds})
+     ) or exists (
+       select 1 from private.legal_acceptances where user_id = any(${userIds})
+     ) or exists (
+       select 1 from private.legal_acceptance_requirements where user_id = any(${userIds})
+     ) then
+    raise exception 'ephemeral hosted QA database cleanup is incomplete';
+  end if;
+end
+$qa_cleanup$;
+
+commit;
+`;
+}
+
+function proveEphemeralAbsenceSql(accounts, persistentMaster, runId) {
+  const userIds = sqlUuidArray(accounts.map((account) => account.id));
+  const textUserIds = `array[${accounts.map((account) => sqlLiteral(account.id)).join(", ")}]::text[]`;
+  const persistentMasterId = sqlUuid(persistentMaster.id);
+  return `
+do $qa_absence$
+begin
+  if exists (select 1 from auth.users where id = any(${userIds}))
+     or exists (select 1 from auth.sessions where user_id = any(${userIds}))
+     or exists (select 1 from auth.identities where user_id = any(${userIds}))
+     or exists (select 1 from auth.refresh_tokens where user_id = any(${textUserIds}))
+     or exists (select 1 from auth.mfa_factors where user_id = any(${userIds}))
+     or exists (select 1 from public.profiles where user_id = any(${userIds}))
+     or exists (select 1 from public.user_roles where user_id = any(${userIds}))
+     or exists (select 1 from public.user_permission_overrides where user_id = any(${userIds}))
+     or exists (select 1 from public.crm_user_reporting_scope_grants where user_id = any(${userIds}))
+     or exists (
+       select 1 from public.audit_logs
+       where actor_id = any(${userIds}) or target_user_id = any(${userIds})
+     )
+     or exists (select 1 from private.legal_acceptances where user_id = any(${userIds}))
+     or exists (
+       select 1 from private.legal_acceptance_requirements where user_id = any(${userIds})
+     )
+     or exists (
+       select 1 from public.crm_people
+       where auth_user_id = any(${userIds})
+          or person_key = ${sqlLiteral(`qa-hosted-${runId}-broker`)}
+     )
+     or exists (
+       select 1 from public.crm_reporting_scopes
+       where scope_key = ${sqlLiteral(`qa-hosted-${runId}-broker-scope`)}
+     )
+     or (select count(*) from public.user_roles where role_key = 'master') <> 1
+     or not exists (
+       select 1
+       from public.user_roles user_role
+       join public.profiles profile on profile.user_id = user_role.user_id
+       where user_role.user_id = ${persistentMasterId}
+         and user_role.role_key = 'master'
+         and profile.is_active
+         and profile.profile_completed
+         and profile.access_status = 'approved'
+         and private.user_role_scope_is_valid(user_role.user_id, user_role.role_key)
+     ) then
+    raise exception 'ephemeral hosted QA absence proof failed';
+  end if;
+end
+$qa_absence$;
+`;
+}
+
+function revokeQaSessions(localModule, database, users) {
+  const userIds = users.map((user) => assertUuid(user.id));
+  if (userIds.length === 0 || new Set(userIds).size !== userIds.length) {
+    fail("Homologation QA session cleanup target is invalid.");
+  }
+  const userIdArray = `array[${userIds.map((userId) => `'${userId}'::uuid`).join(",")}]`;
+  localModule.runLocalSql(
+    database,
+    `begin;\nlock table auth.sessions in share row exclusive mode;\ndelete from auth.sessions where user_id = any(${userIdArray});\ndo $qa_cleanup$\nbegin\n  if exists (select 1 from auth.sessions where user_id = any(${userIdArray})) then\n    raise exception using errcode = 'P0001', message = 'QA sessions remain';\n  end if;\nend\n$qa_cleanup$;\ncommit;\n`,
+    "hosted QA session revocation",
+  );
+}
+
+async function restorePersistentVisualIdentity(
   adminClient,
   localModule,
   database,
   user,
-  originalPassword,
   originalFactorIds,
 ) {
   const userId = assertUuid(user.id);
   let restorationFailed = false;
 
-  // Password restoration is attempted first. Factor and session cleanup run in
-  // nested finally blocks even when an earlier administrative call fails.
   try {
-    const { error } = await adminClient.auth.admin.updateUserById(userId, {
-      password: originalPassword,
-    });
-    restorationFailed ||= Boolean(error);
+    const currentFactorIds = await listFactorIds(adminClient, userId);
+    for (const factorId of currentFactorIds) {
+      if (originalFactorIds.has(factorId)) continue;
+      const { error } = await adminClient.auth.admin.mfa.deleteFactor({ userId, id: factorId });
+      restorationFailed ||= Boolean(error);
+    }
+
+    const restoredFactorIds = await listFactorIds(adminClient, userId);
+    restorationFailed ||=
+      restoredFactorIds.size !== originalFactorIds.size ||
+      [...restoredFactorIds].some((factorId) => !originalFactorIds.has(factorId));
   } catch {
     restorationFailed = true;
   } finally {
     try {
-      const currentFactorIds = await listFactorIds(adminClient, userId);
-      for (const factorId of currentFactorIds) {
-        if (originalFactorIds.has(factorId)) continue;
-        const { error } = await adminClient.auth.admin.mfa.deleteFactor({
-          userId,
-          id: factorId,
-        });
-        restorationFailed ||= Boolean(error);
-      }
-
-      const restoredFactorIds = await listFactorIds(adminClient, userId);
-      restorationFailed ||=
-        restoredFactorIds.size !== originalFactorIds.size ||
-        [...restoredFactorIds].some((factorId) => !originalFactorIds.has(factorId));
+      revokeQaSessions(localModule, database, [user]);
     } catch {
       restorationFailed = true;
-    } finally {
-      try {
-        localModule.runLocalSql(
-          database,
-          `begin;\ndelete from auth.sessions where user_id = '${userId}'::uuid;\ncommit;\n`,
-          "hosted QA session revocation",
-        );
-      } catch {
-        restorationFailed = true;
-      }
     }
   }
 
   if (restorationFailed) fail("Homologation QA identity restoration failed.");
 }
 
-function mailMatchesRecipient(message, recipient) {
+function mailMatchesRecipient(message, recipients) {
   return (
     message !== null &&
     typeof message === "object" &&
     typeof message.ID === "string" &&
     Array.isArray(message.To) &&
     message.To.some(
-      (entry) => entry !== null && typeof entry === "object" && entry.Address === recipient,
+      (entry) => entry !== null && typeof entry === "object" && recipients.has(entry.Address),
     )
   );
 }
 
-async function purgeQaMail(recipient) {
+async function purgeQaMail(recipientList) {
+  const recipients = new Set(recipientList);
+  if (recipients.size === 0 || recipients.size !== recipientList.length) {
+    fail("Homologation SMTP cleanup target is invalid.");
+  }
   for (let attempt = 0; attempt < 3; attempt += 1) {
     let listResponse;
     try {
@@ -481,7 +1178,7 @@ async function purgeQaMail(recipient) {
       fail("Homologation SMTP cleanup response is invalid.");
     }
     const identifiers = payload.messages
-      .filter((message) => mailMatchesRecipient(message, recipient))
+      .filter((message) => mailMatchesRecipient(message, recipients))
       .map((message) => message.ID);
     if (identifiers.length === 0) return;
 
@@ -499,6 +1196,188 @@ async function purgeQaMail(recipient) {
     if (!deleteResponse.ok) fail("Homologation SMTP cleanup failed.");
   }
   fail("Homologation SMTP cleanup proof failed.");
+}
+
+async function cleanupPersistentVisualState({
+  adminClient,
+  localModule,
+  database,
+  apiUrl,
+  publishableKey,
+  masterUser,
+  master,
+  originalFactorIds,
+}) {
+  let cleanupFailed = false;
+  try {
+    await restorePersistentVisualIdentity(
+      adminClient,
+      localModule,
+      database,
+      masterUser,
+      originalFactorIds,
+    );
+  } catch {
+    cleanupFailed = true;
+  }
+  try {
+    await verifyQaCredential(apiUrl, publishableKey, master.email, master.password);
+  } catch {
+    cleanupFailed = true;
+  } finally {
+    try {
+      revokeQaSessions(localModule, database, [masterUser]);
+    } catch {
+      cleanupFailed = true;
+    }
+  }
+  try {
+    await purgeQaMail([master.email]);
+  } catch {
+    cleanupFailed = true;
+  }
+  if (cleanupFailed) fail("Homologation hosted QA cleanup failed.");
+}
+
+function clearEphemeralPasswords(accounts) {
+  for (const account of accounts) account.password = "";
+}
+
+async function removeEphemeralQaState({
+  adminClient,
+  localModule,
+  database,
+  persistentMaster,
+  accounts,
+  runId,
+}) {
+  if (accounts.length === 0) return;
+  const failures = [];
+  const recipients = accounts.map((account) => account.email);
+
+  for (const account of accounts) {
+    try {
+      const factorIds = await listFactorIds(adminClient, assertUuid(account.id));
+      for (const factorId of factorIds) {
+        const { error } = await adminClient.auth.admin.mfa.deleteFactor({
+          userId: account.id,
+          id: factorId,
+        });
+        if (error) failures.push("factor");
+      }
+      if ((await listFactorIds(adminClient, account.id)).size !== 0) failures.push("factor-proof");
+    } catch {
+      failures.push("factor");
+    }
+  }
+
+  try {
+    revokeQaSessions(localModule, database, accounts);
+  } catch {
+    failures.push("sessions");
+  }
+
+  try {
+    localModule.runLocalSql(
+      database,
+      ephemeralDatabaseCleanupSql(accounts, persistentMaster, runId),
+      "hosted ephemeral QA database cleanup",
+    );
+  } catch {
+    failures.push("database");
+  }
+
+  try {
+    localModule.runLocalSql(
+      database,
+      restorePersistentMasterSql(accounts, persistentMaster),
+      "hosted persistent Master restoration",
+    );
+  } catch {
+    failures.push("master");
+  }
+
+  const deletionOrder = [...accounts].sort((left, right) => {
+    if (left.role === "master") return 1;
+    if (right.role === "master") return -1;
+    return 0;
+  });
+  for (const account of deletionOrder) {
+    try {
+      const { error } = await adminClient.auth.admin.deleteUser(assertUuid(account.id), false);
+      if (error) {
+        const lookup = await adminClient.auth.admin.getUserById(account.id);
+        if (lookup.data?.user || !lookup.error) failures.push("identity");
+      }
+    } catch {
+      failures.push("identity");
+    }
+  }
+
+  try {
+    localModule.runLocalSql(
+      database,
+      proveEphemeralAbsenceSql(accounts, persistentMaster, runId),
+      "hosted ephemeral QA absence proof",
+    );
+  } catch {
+    failures.push("proof");
+  }
+
+  try {
+    await purgeQaMail(recipients);
+  } catch {
+    failures.push("mail");
+  }
+
+  if (failures.length > 0) fail("Homologation ephemeral QA cleanup was incomplete.");
+}
+
+async function snapshotHostedLog(file, label) {
+  let logStat;
+  try {
+    logStat = await lstat(file);
+  } catch {
+    fail(label);
+  }
+  if (!logStat.isFile()) fail(label);
+  return { device: logStat.dev, inode: logStat.ino, offset: logStat.size };
+}
+
+async function readHostedLogTail(file, snapshot, label) {
+  let current;
+  try {
+    current = await lstat(file);
+  } catch {
+    fail(label);
+  }
+  if (
+    !current.isFile() ||
+    current.dev !== snapshot.device ||
+    current.ino !== snapshot.inode ||
+    current.size < snapshot.offset
+  ) {
+    fail(label);
+  }
+  const appendedBytes = current.size - snapshot.offset;
+  if (appendedBytes > 8 * 1024 * 1024) fail(label);
+  if (appendedBytes === 0) return "";
+
+  const handle = await open(file, "r");
+  try {
+    const appended = Buffer.alloc(Number(appendedBytes));
+    const { bytesRead } = await handle.read(appended, 0, appended.length, snapshot.offset);
+    if (bytesRead !== appended.length) fail(label);
+    return appended.toString("utf8");
+  } finally {
+    await handle.close();
+  }
+}
+
+function containsSensitiveCallbackMaterial(value) {
+  return /(?:\/auth\/callback|%2fauth%2fcallback|token_hash(?:=|%3d)|type(?:=|%3d)recovery)/iu.test(
+    value,
+  );
 }
 
 async function verifyProxyPrivacyContract() {
@@ -522,6 +1401,8 @@ async function verifyProxyPrivacyContract() {
   ];
   if (
     callbackBlocks.length !== 2 ||
+    configuration.split(`access_log ${accessLogPath};`).length - 1 !== 2 ||
+    configuration.split(`error_log ${errorLogPath};`).length - 1 !== 2 ||
     callbackBlocks.some(
       (match) =>
         !/\baccess_log\s+off\s*;/u.test(match.groups?.body ?? "") ||
@@ -531,37 +1412,28 @@ async function verifyProxyPrivacyContract() {
     fail("Homologation callback logging is not fail-closed.");
   }
 
-  const logStat = await stat(accessLogPath);
-  if (!logStat.isFile()) fail("Homologation access log preflight failed.");
-  return { device: logStat.dev, inode: logStat.ino, offset: logStat.size };
+  const [access, error] = await Promise.all([
+    snapshotHostedLog(accessLogPath, "Homologation access log preflight failed."),
+    snapshotHostedLog(errorLogPath, "Homologation error log preflight failed."),
+  ]);
+  return { access, error };
 }
 
 async function assertHostedAccessLogSafety(snapshot) {
-  const current = await stat(accessLogPath);
+  const [accessLogTail, errorLogTail] = await Promise.all([
+    readHostedLogTail(
+      accessLogPath,
+      snapshot.access,
+      "Homologation access log proof was incomplete.",
+    ),
+    readHostedLogTail(errorLogPath, snapshot.error, "Homologation error log proof was incomplete."),
+  ]);
   if (
-    current.dev !== snapshot.device ||
-    current.ino !== snapshot.inode ||
-    current.size < snapshot.offset
+    containsSensitiveCallbackMaterial(accessLogTail) ||
+    containsSensitiveCallbackMaterial(errorLogTail) ||
+    /"\s+5\d{2}\s/u.test(accessLogTail)
   ) {
-    fail("Homologation access log rotated during callback privacy QA.");
-  }
-  const appendedBytes = current.size - snapshot.offset;
-  if (appendedBytes > 8 * 1024 * 1024) {
-    fail("Homologation access log growth exceeded the bounded QA inspection.");
-  }
-  if (appendedBytes === 0) return;
-
-  const handle = await open(accessLogPath, "r");
-  try {
-    const appended = Buffer.alloc(Number(appendedBytes));
-    const { bytesRead } = await handle.read(appended, 0, appended.length, snapshot.offset);
-    if (bytesRead !== appended.length) fail("Homologation access log proof was incomplete.");
-    const logTail = appended.toString("utf8");
-    if (logTail.includes("/auth/callback") || /"\s+5\d{2}\s/u.test(logTail)) {
-      fail("Homologation access log violated the hosted QA contract.");
-    }
-  } finally {
-    await handle.close();
+    fail("Homologation proxy logs violated the hosted QA contract.");
   }
 }
 
@@ -584,7 +1456,7 @@ async function assertHostedApplicationLogSafety(since) {
   );
   const logs = `${stdout}\n${stderr}`;
   if (
-    /(?:token_hash=|\/auth\/callback\?)/iu.test(logs) ||
+    containsSensitiveCallbackMaterial(logs) ||
     /(?:uncaught exception|unhandled rejection|fatal error)/iu.test(logs)
   ) {
     fail("Homologation application logs violated the hosted QA contract.");
@@ -598,36 +1470,43 @@ async function main() {
 
   await verifyLocalDockerSocket();
   const head = await verifyRepositoryState();
-  const [accountsPayload, access, runtimeEnvironment, localModule] = await Promise.all([
-    readPrivateJson(accountsPath),
-    readPrivateJson(accessPath),
-    readRuntimeEnvironmentContract(),
-    import("../qa/local-authenticated-visual.mjs"),
-  ]);
+  const [accountsPayload, access, runtimeEnvironment, runtimeManifest, localModule] =
+    await Promise.all([
+      readPrivateJson(accountsPath),
+      readPrivateJson(accessPath),
+      readRuntimeEnvironmentContract(),
+      readPrivateJson(runtimeManifestPath),
+      import("../qa/local-authenticated-visual.mjs"),
+    ]);
   await verifySupabaseRuntimeContract();
   await verifyHomologationNetworkIsolation();
   if (runtimeEnvironment.imageTag !== head) {
     fail("Homologation private runtime does not match the checked-out release.");
   }
   if (
+    runtimeManifest?.schemaVersion !== 1 ||
+    runtimeManifest?.environment !== "isolated-homologation" ||
+    runtimeManifest?.dataClassification !== "synthetic-only" ||
+    !/^[a-f0-9]{40}$/u.test(runtimeManifest?.sourceSha ?? "")
+  ) {
+    fail("Homologation runtime manifest does not match the checked-out release.");
+  }
+  const persistentMasterCandidates = Array.isArray(accountsPayload?.accounts)
+    ? accountsPayload.accounts.filter((account) => account?.role === "master")
+    : [];
+  const master = persistentMasterCandidates[0];
+  if (
     accountsPayload?.environment !== "isolated-homologation" ||
     accountsPayload?.dataClassification !== "synthetic-only" ||
-    !Array.isArray(accountsPayload.accounts) ||
-    accountsPayload.accounts.length !== roles.size ||
-    new Set(accountsPayload.accounts.map((account) => account?.role)).size !== roles.size ||
-    [...roles].some(
-      (role) => !accountsPayload.accounts.some((account) => account?.role === role),
-    ) ||
-    accountsPayload.accounts.some(
-      (account) =>
-        typeof account?.email !== "string" ||
-        !/^qa\.rls-[a-z_]+-[a-f0-9]+@local\.invalid$/.test(account.email) ||
-        typeof account?.password !== "string" ||
-        account.password.length < 20,
-    ) ||
-    typeof accountsPayload.visualSourceMarker !== "string"
+    persistentMasterCandidates.length !== 1 ||
+    typeof master?.email !== "string" ||
+    !/^qa\.rls-master-[a-f0-9]+@local\.invalid$/.test(master.email) ||
+    typeof master?.password !== "string" ||
+    master.password.length < 20 ||
+    typeof accountsPayload.visualSourceMarker !== "string" ||
+    accountsPayload.visualSourceMarker.length === 0
   ) {
-    fail("Homologation synthetic account matrix is incomplete.");
+    fail("Homologation persistent visual Master fixture is incomplete.");
   }
   if (
     access?.environment !== "isolated-homologation" ||
@@ -643,18 +1522,23 @@ async function main() {
   }
 
   const local = await localModule.discoverLocalSupabase();
-  const master = accountsPayload.accounts.find((account) => account.role === "master");
   const hostedRuntime = await inspectHostedRuntime(head);
   const officialSimulatorEnvironment = hostedRuntime.officialSimulatorEnvironment;
   await verifyHostedHealth(head, access);
+  await verifyAuthMfaMigrationContract(head);
   const adminClient = createAdminClient(local.apiUrl, local.secretKey);
-  await verifyQaCredential(local.apiUrl, local.publishableKey, master.email, master.password);
   const masterUser = await resolveQaUser(adminClient, master.email);
-  const originalFactorIds = await listFactorIds(adminClient, masterUser.id);
+  const masterUserId = assertUuid(masterUser.id);
+  const originalFactorIds = await listFactorIds(adminClient, masterUserId);
   if (originalFactorIds.size !== 0) {
-    fail("Dedicated Master QA identity must start without enrolled MFA factors.");
+    fail("Dedicated visual Master identity must start without enrolled MFA factors.");
   }
-  await purgeQaMail(master.email);
+  try {
+    await verifyQaCredential(local.apiUrl, local.publishableKey, master.email, master.password);
+  } finally {
+    revokeQaSessions(localModule, local.database, [masterUser]);
+  }
+  await purgeQaMail([master.email]);
   const callbackLogSnapshot = await verifyProxyPrivacyContract();
   const applicationLogSince = new Date(Date.now() - 1_000).toISOString();
   const sharedEnvironment = {
@@ -666,7 +1550,21 @@ async function main() {
 
   let qaFailure;
   let cleanupFailed = false;
+  let privacyFailed = false;
+  const runId = randomBytes(8).toString("hex");
+  const ephemeralAccounts = [];
   try {
+    for (const role of requiredRoles) {
+      ephemeralAccounts.push(await createEphemeralAccount(adminClient, role, runId));
+      throwIfInterrupted();
+    }
+    assertCompleteEphemeralMatrix(ephemeralAccounts);
+    localModule.runLocalSql(
+      local.database,
+      ephemeralMatrixSetupSql(ephemeralAccounts, masterUser, runId),
+      "hosted ephemeral QA matrix setup",
+    );
+    throwIfInterrupted();
     await run("pnpm", ["exec", "playwright", "test", "e2e/release-candidate.spec.ts"], {
       ...sharedEnvironment,
       QA_E2E_REMOTE_HOMOLOGATION: "true",
@@ -674,37 +1572,46 @@ async function main() {
       QA_E2E_MAILPIT_ORIGIN: mailpitOrigin,
       QA_E2E_BASIC_AUTH_USERNAME: access.username,
       QA_E2E_BASIC_AUTH_PASSWORD: access.password,
-      QA_E2E_ACCOUNTS: JSON.stringify(accountsPayload.accounts),
+      QA_E2E_ACCOUNTS: JSON.stringify(ephemeralAccounts),
     });
   } catch (error) {
     qaFailure = error;
   } finally {
+    clearEphemeralPasswords(ephemeralAccounts);
     try {
-      await restoreQaIdentity(
+      await removeEphemeralQaState({
         adminClient,
         localModule,
-        local.database,
-        masterUser,
-        master.password,
-        originalFactorIds,
-      );
-      await verifyQaCredential(local.apiUrl, local.publishableKey, master.email, master.password);
+        database: local.database,
+        persistentMaster: masterUser,
+        accounts: ephemeralAccounts,
+        runId,
+      });
     } catch {
       cleanupFailed = true;
     }
     try {
-      await purgeQaMail(master.email);
+      await cleanupPersistentVisualState({
+        adminClient,
+        localModule,
+        database: local.database,
+        apiUrl: local.apiUrl,
+        publishableKey: local.publishableKey,
+        masterUser,
+        master,
+        originalFactorIds,
+      });
     } catch {
       cleanupFailed = true;
     }
     try {
       await assertHostedAccessLogSafety(callbackLogSnapshot);
     } catch {
-      cleanupFailed = true;
+      privacyFailed = true;
     }
   }
 
-  if (!qaFailure && !cleanupFailed) {
+  if (!qaFailure && !cleanupFailed && !privacyFailed) {
     try {
       await run("node", ["scripts/qa/authenticated-visual.mjs"], {
         ...sharedEnvironment,
@@ -724,7 +1631,22 @@ async function main() {
     }
   }
 
-  let postflightFailed = false;
+  try {
+    await cleanupPersistentVisualState({
+      adminClient,
+      localModule,
+      database: local.database,
+      apiUrl: local.apiUrl,
+      publishableKey: local.publishableKey,
+      masterUser,
+      master,
+      originalFactorIds,
+    });
+  } catch {
+    cleanupFailed = true;
+  }
+
+  let postflightFailed = privacyFailed;
   try {
     await assertHostedAccessLogSafety(callbackLogSnapshot);
   } catch {
@@ -752,9 +1674,20 @@ async function main() {
   process.stdout.write("Remote homologation QA passed; secrets=not-printed.\n");
 }
 
+for (const signal of ["SIGINT", "SIGTERM"]) {
+  process.on(signal, () => {
+    if (requestedSignal) return;
+    requestedSignal = signal;
+    for (const child of activeChildren) child.kill(signal);
+  });
+}
+
 try {
   await main();
+  if (requestedSignal) {
+    process.exitCode = requestedSignal === "SIGINT" ? 130 : 143;
+  }
 } catch {
   process.stderr.write("Remote homologation QA failed; secrets=not-printed.\n");
-  process.exitCode = 1;
+  process.exitCode = requestedSignal === "SIGINT" ? 130 : requestedSignal === "SIGTERM" ? 143 : 1;
 }

@@ -17,7 +17,7 @@ Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 
 | Grupo de papéis                                                             | Páginas herdadas                                                                   | Administração                                       |
 | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `master`                                                                    | 17 em produção; catálogo local completo, Canal e simuladores                       | usuários, papéis, exceções e catálogo               |
+| `master`                                                                    | 17: catálogo produtivo, Canal, hub/WF13 e três páginas administrativas             | usuários, papéis, exceções e catálogo               |
 | `admin`                                                                     | 14: Dashboard, cinco etapas, Ranking, Configurações e três páginas administrativas | escopada; intake somente com `crm_people` confiável |
 | `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | 7: Dashboard, cinco etapas e Ranking                                               | nenhuma                                             |
 | `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                                             | nenhuma                                             |
@@ -85,13 +85,17 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 
 ## Catálogo
 
-`public.app_pages` contém 21 registros versionados:
+`public.app_pages` contém exatamente os 17 registros aprovados em produção:
 
 - dashboard, cinco etapas e ranking;
 - Canal de Parcerias protegido em `/app/canal-de-parcerias`;
 - configurações, metas do funil, parcerias e pontos;
-- hub de simulação e cinco jornadas visuais WF13, WF16, CAIXA, WF14 e WF15;
+- hub de simulação e a jornada WF13;
 - início administrativo, usuários e catálogo de páginas.
+
+O inventário HTTP continua cobrindo 21 rotas protegidas. WF16, CAIXA, WF14 e
+WF15 permanecem versionados no código para incrementos futuros, mas não possuem
+linha em `app_pages`, não aparecem no menu e retornam `403` mesmo ao Master.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
 de integração pendente. A rota de produção continua exigindo
@@ -104,11 +108,11 @@ continua separada e só retorna entries com ID Qlik mapeado, owner ativo,
 vigência e organização dentro do escopo aprovado; ela não é a fonte da página
 v3.
 
-As seis rotas de simulação exigem `crm.simulators.view`. Durante o canário WF13,
-essa permissão é nível 100 e pertence somente ao Master, sem overrides diretos.
-O gate de página permanece separado de `crm.simulators.execute`; possuir um não
-substitui o outro. Somente WF13 pode executar quando sua flag explícita também
-está ativa. WF16, CAIXA, WF14 e WF15 continuam bloqueados.
+O hub e WF13 exigem `crm.simulators.view`. Durante o canário WF13, essa permissão
+é nível 100 e pertence somente ao Master, sem overrides diretos. O gate de
+página permanece separado de `crm.simulators.execute`; possuir um não substitui
+o outro. Somente WF13 pode executar quando sua flag explícita também está ativa.
+WF16, CAIXA, WF14 e WF15 ficam fora do catálogo e continuam bloqueados.
 
 Falta de permissão autenticada usa o interruptor `forbidden()` do Next.js e
 retorna a superfície `AUTH-403`; caminhos realmente inexistentes usam

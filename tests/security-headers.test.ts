@@ -73,15 +73,23 @@ describe("security headers regression", () => {
   });
 
   it("verifies recovery token hashes by POST and never routes them through gateway queries", async () => {
-    const [callback, template, localConfig, homologationConfig, qaLauncher, hostedQaLauncher] =
-      await Promise.all([
-        readFile(path.join(process.cwd(), "app/auth/callback/route.ts"), "utf8"),
-        readFile(path.join(process.cwd(), "supabase/templates/recovery.html"), "utf8"),
-        readFile(path.join(process.cwd(), "supabase/config.toml"), "utf8"),
-        readFile(path.join(process.cwd(), "deploy/homologation/supabase.config.toml"), "utf8"),
-        readFile(path.join(process.cwd(), "scripts/qa/local-rls-api.mjs"), "utf8"),
-        readFile(path.join(process.cwd(), "scripts/homologation/run-remote-qa.mjs"), "utf8"),
-      ]);
+    const [
+      callback,
+      template,
+      localConfig,
+      homologationConfig,
+      qaLauncher,
+      hostedQaLauncher,
+      releaseCandidate,
+    ] = await Promise.all([
+      readFile(path.join(process.cwd(), "app/auth/callback/route.ts"), "utf8"),
+      readFile(path.join(process.cwd(), "supabase/templates/recovery.html"), "utf8"),
+      readFile(path.join(process.cwd(), "supabase/config.toml"), "utf8"),
+      readFile(path.join(process.cwd(), "deploy/homologation/supabase.config.toml"), "utf8"),
+      readFile(path.join(process.cwd(), "scripts/qa/local-rls-api.mjs"), "utf8"),
+      readFile(path.join(process.cwd(), "scripts/homologation/run-remote-qa.mjs"), "utf8"),
+      readFile(path.join(process.cwd(), "e2e/release-candidate.spec.ts"), "utf8"),
+    ]);
 
     expect(callback).toContain("supabase.auth.verifyOtp({");
     expect(callback).toContain('type: "recovery"');
@@ -120,17 +128,70 @@ describe("security headers regression", () => {
     expect(hostedQaLauncher).toContain("assertHostedAccessLogSafety(callbackLogSnapshot)");
     expect(hostedQaLauncher).toContain("assertHostedApplicationLogSafety(applicationLogSince)");
     expect(hostedQaLauncher).toContain("delete from auth.sessions where user_id =");
+    expect(hostedQaLauncher).toContain(
+      'const errorLogPath = "/var/log/nginx/homolog.descomplicapro.com.br.error.log"',
+    );
+    expect(hostedQaLauncher).toContain("containsSensitiveCallbackMaterial(errorLogTail)");
+    expect(hostedQaLauncher).toContain("runtimeRecoveryTemplate !== versionedRecoveryTemplate");
+    expect(hostedQaLauncher).toContain(
+      '["homologation:migrate:auth-mfa", "verify", "--expected-sha", expectedHead]',
+    );
+    expect(hostedQaLauncher.match(/QA_E2E_MAILPIT_ORIGIN: mailpitOrigin/g)).toHaveLength(1);
+    expect(hostedQaLauncher).toContain("async function createEphemeralAccount(");
+    expect(hostedQaLauncher).toContain("email_confirm: true");
+    expect(hostedQaLauncher).toContain("termsVersion: legalDocumentVersions.terms");
+    expect(hostedQaLauncher).toContain("privacyVersion: legalDocumentVersions.privacy");
+    expect(hostedQaLauncher).toContain("clearEphemeralPasswords(ephemeralAccounts)");
+    expect(hostedQaLauncher).toContain("auth.admin.deleteUser(assertUuid(account.id), false)");
+    expect(hostedQaLauncher).toContain("or exists (select 1 from auth.mfa_factors");
+    expect(hostedQaLauncher).toContain("or exists (select 1 from auth.sessions");
+    expect(hostedQaLauncher).toContain("or exists (select 1 from private.legal_acceptances");
+    expect(releaseCandidate).toContain("expect(cookie?.secure).toBe(targetUsesHttps)");
+    expect(releaseCandidate).toContain(
+      'mask: [page.locator("[data-session-identity], [data-account-identity]")]',
+    );
 
     const restoration = hostedQaLauncher.slice(
-      hostedQaLauncher.indexOf("async function restoreQaIdentity("),
+      hostedQaLauncher.indexOf("async function restorePersistentVisualIdentity("),
       hostedQaLauncher.indexOf("function mailMatchesRecipient("),
     );
-    expect(restoration.indexOf("auth.admin.updateUserById")).toBeGreaterThan(-1);
-    expect(restoration.indexOf("auth.admin.mfa.deleteFactor")).toBeGreaterThan(
-      restoration.indexOf("auth.admin.updateUserById"),
-    );
-    expect(restoration.indexOf("delete from auth.sessions")).toBeGreaterThan(
+    expect(restoration).not.toContain("auth.admin.updateUserById");
+    expect(restoration.indexOf("auth.admin.mfa.deleteFactor")).toBeGreaterThan(-1);
+    expect(restoration.indexOf("revokeQaSessions(localModule, database, [user])")).toBeGreaterThan(
       restoration.indexOf("auth.admin.mfa.deleteFactor"),
+    );
+
+    const cleanup = hostedQaLauncher.slice(
+      hostedQaLauncher.indexOf("async function cleanupPersistentVisualState("),
+      hostedQaLauncher.indexOf("async function snapshotHostedLog("),
+    );
+    expect(cleanup.indexOf("restorePersistentVisualIdentity(")).toBeGreaterThan(-1);
+    expect(cleanup.indexOf("verifyQaCredential(")).toBeGreaterThan(
+      cleanup.indexOf("restorePersistentVisualIdentity("),
+    );
+    expect(cleanup.indexOf("revokeQaSessions(")).toBeGreaterThan(
+      cleanup.indexOf("verifyQaCredential("),
+    );
+    expect(cleanup.indexOf("purgeQaMail([master.email])")).toBeGreaterThan(
+      cleanup.indexOf("revokeQaSessions("),
+    );
+
+    const ephemeralCleanup = hostedQaLauncher.slice(
+      hostedQaLauncher.indexOf("async function removeEphemeralQaState("),
+      hostedQaLauncher.indexOf("async function snapshotHostedLog("),
+    );
+    expect(ephemeralCleanup.indexOf("auth.admin.mfa.deleteFactor")).toBeGreaterThan(-1);
+    expect(ephemeralCleanup.indexOf("revokeQaSessions(")).toBeGreaterThan(
+      ephemeralCleanup.indexOf("auth.admin.mfa.deleteFactor"),
+    );
+    expect(ephemeralCleanup.indexOf("ephemeralDatabaseCleanupSql(")).toBeGreaterThan(
+      ephemeralCleanup.indexOf("revokeQaSessions("),
+    );
+    expect(ephemeralCleanup.indexOf("auth.admin.deleteUser")).toBeGreaterThan(
+      ephemeralCleanup.indexOf("restorePersistentMasterSql("),
+    );
+    expect(ephemeralCleanup.indexOf("proveEphemeralAbsenceSql(")).toBeGreaterThan(
+      ephemeralCleanup.indexOf("auth.admin.deleteUser"),
     );
   });
 

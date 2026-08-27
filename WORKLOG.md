@@ -1,5 +1,53 @@
 # Worklog
 
+## 2026-08-27 — gate visual RBAC e cabeçalho móvel
+
+- A comparação detectou 19 divergências esperadas restritas ao hub de Simulação
+  e ao Catálogo de páginas, decorrentes do conjunto 21 → 17 e dos quatro cards
+  release-disabled.
+- A revisão independente encontrou colisão adicional do cabeçalho em 390 px. O
+  breakpoint móvel passou a separar marca, ações e navegação em três linhas; o
+  detector cobre marca × ações, navegação × identidade e pares de ações.
+- A promoção transacional aprovou 119 capturas responsivas, 68 checks de tema,
+  160 auditorias Axe, 160 comparações e 85 checks de zoom. A verificação pós-
+  commit é obrigatória antes de publicar a homologação.
+
+## 2026-08-27 — contas efêmeras no smoke hospedado
+
+- O runner passa a usar o arquivo privado somente para o Master visual. A matriz
+  Playwright de nove papéis é criada em memória via Auth Admin com aceites legais
+  vigentes e grants mínimos compatíveis; nenhuma senha efêmera é persistida.
+- Durante o E2E, o Master visual é estacionado de forma reversível para preservar
+  a unicidade do papel. O `finally` remove fatores, sessões, grants, auditoria,
+  fixture Broker, mensagens e ledger legal antes do hard-delete das nove contas.
+- A prova final consulta Auth, RBAC e ledger e exige ausência integral da matriz,
+  além de restaurar o Master visual único antes das capturas. Evidências visuais
+  hospedadas mascaram identidades e os logs de acesso/erro são verificados sem
+  ecoar conteúdo sensível.
+- Sintaxe Node e 20 testes direcionados passaram. Nenhum ambiente remoto foi
+  consultado ou alterado por este incremento.
+
+## 2026-08-26 — convergência RBAC por conjunto do PR #49
+
+- A fonte produtiva somente leitura e o backup root-only concordaram em 17
+  pares `page_key`/rota/permissão para Master. A diferença mecânica do restore
+  de 21 páginas identificou somente WF16, CAIXA, WF14 e WF15.
+- A migration candidata remove apenas essas quatro identidades quando presentes
+  e exige o conjunto ativo exato. Não altera grants: Master/Admin/legados/futuros
+  permanecem com 20/17/4/0 permissões e 17/14/7/0 páginas.
+- Proxy e SSR agora negam as quatro rotas antes de renderizar; o E2E mantém as
+  21 URLs para provar `403`, enquanto navegação, RLS e catálogo expõem somente
+  as 17 páginas aprovadas.
+- O clean install e o restore lógico independente aprovaram 41 migrations,
+  1.018 pgTAP em 25 arquivos, lint/advisors e fingerprints. A réplica sanitizada
+  do estado produtivo recebeu somente `20260824230058` e `20260824230100`,
+  preservando 8/20/61/17 e o fail-closed Qlik.
+- Foi adicionado executor exclusivo de homologação: exige checkout limpo,
+  manifesto sintético, backup novo root-only com quatro tipos, checksums e
+  restore isolado comprovado, histórico exato 29 + 2, hashes fixos, advisory
+  lock, transações/histórico atômicos e pós-condições navegáveis `17/14/7/0`.
+  Nenhum ambiente remoto foi alterado durante sua implementação.
+
 ## 2026-08-25 — gate de compatibilidade produtiva do PR #49
 
 - A réplica sanitizada PostgreSQL 17 recebeu somente as migrations candidatas

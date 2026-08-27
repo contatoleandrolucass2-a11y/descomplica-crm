@@ -134,6 +134,13 @@ function readTarget(): QaTarget {
 }
 
 const qaTarget = readTarget();
+const targetUsesHttps = new URL(qaTarget.origin).protocol === "https:";
+
+function expectCookieUsesTargetTransport(cookie: { secure: boolean } | undefined) {
+  expect(cookie).toBeDefined();
+  expect(cookie?.secure).toBe(targetUsesHttps);
+}
+
 function readMailpitOrigin(): string {
   const origin = new URL(requiredEnvironment("QA_E2E_MAILPIT_ORIGIN"));
   if (
@@ -157,13 +164,12 @@ const finalStateEvidenceRoot = path.resolve(process.cwd(), "docs/qa/final-states
 async function captureState(page: Page, name: string) {
   if (!captureFinalStateEvidence) return;
   await mkdir(finalStateEvidenceRoot, { recursive: true });
-  await page.locator("[data-session-identity-label]").evaluateAll((labels) => {
-    for (const label of labels) label.textContent = "QA dedicada";
-  });
   await page.screenshot({
     path: path.join(finalStateEvidenceRoot, `${name}.png`),
     fullPage: false,
     animations: "disabled",
+    mask: [page.locator("[data-session-identity], [data-account-identity]")],
+    maskColor: "#334155",
   });
 }
 
@@ -314,6 +320,7 @@ const inheritedAnalyticalRoles = new Set<Role>([
   "real_estate",
 ]);
 const masterOnlyRoles = new Set<Role>(["master"]);
+const noRoles = new Set<Role>();
 const protectedSurfaces = [
   {
     path: "/app",
@@ -384,18 +391,18 @@ const protectedSurfaces = [
   {
     path: "/app/simulacao/calcular-documentacao",
     heading: "Calcular documentação",
-    allowed: masterOnlyRoles,
+    allowed: noRoles,
   },
-  { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: masterOnlyRoles },
+  { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: noRoles },
   {
     path: "/app/simulacao/tabela-direta",
     heading: "Tabela Direta",
-    allowed: masterOnlyRoles,
+    allowed: noRoles,
   },
   {
     path: "/app/simulacao/tabela-investidor",
     heading: "Tabela Investidor",
-    allowed: masterOnlyRoles,
+    allowed: noRoles,
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
   { path: "/admin/usuarios", heading: "Usuários e acessos", allowed: adminRoles },
@@ -408,6 +415,18 @@ function expectedRoutesForRole(role: Role) {
     .map((surface) => surface.path)
     .sort();
 }
+
+const expectedCommercialPageCountByRole: Readonly<Record<Role, number>> = {
+  master: 17,
+  admin: 14,
+  broker: 7,
+  coordinator: 7,
+  real_estate: 7,
+  manager: 0,
+  house: 0,
+  partnership_channel: 0,
+  pending: 0,
+};
 
 function expectedHomeForRole(role: Role) {
   if (inheritedAnalyticalRoles.has(role)) return "/app";
@@ -546,6 +565,13 @@ test.afterAll(() => {
   roleStorageStates.clear();
 });
 
+test("the hosted profile matrix uses the exact approved commercial page sets", () => {
+  expect(protectedSurfaces).toHaveLength(21);
+  for (const role of expectedRoles) {
+    expect(expectedRoutesForRole(role), role).toHaveLength(expectedCommercialPageCountByRole[role]);
+  }
+});
+
 test("anonymous boundaries and generic login failure stay closed", async ({ page }) => {
   const callbackBoundary = await page.context().request.get("/auth/callback?code=invalid", {
     maxRedirects: 0,
@@ -602,6 +628,7 @@ test("cookie choices, legal documents and browser-session lifetimes are explicit
     expect(consentCookie?.httpOnly).toBe(true);
     expect(consentCookie?.sameSite).toBe("Lax");
     expect(consentCookie?.path).toBe("/");
+    expectCookieUsesTargetTransport(consentCookie);
     let consentValue = JSON.parse(decodeURIComponent(consentCookie!.value));
     expect(consentValue.categories).toEqual({
       essential: true,
@@ -682,6 +709,8 @@ test("cookie choices, legal documents and browser-session lifetimes are explicit
       expect(cookie.expires).toBe(-1);
       expect(cookie.httpOnly).toBe(true);
       expect(cookie.sameSite).toBe("Lax");
+      expect(cookie.path).toBe("/");
+      expectCookieUsesTargetTransport(cookie);
     }
     const authStorageKeys = await page.evaluate(() =>
       Object.keys(localStorage).filter((key) =>
@@ -707,6 +736,9 @@ test("cookie choices, legal documents and browser-session lifetimes are explicit
     const authCookies = rememberedCookies.filter((cookie) => cookie.name.includes("-auth-token"));
     expect(marker).toBeDefined();
     expect(marker?.httpOnly).toBe(true);
+    expect(marker?.sameSite).toBe("Lax");
+    expect(marker?.path).toBe("/");
+    expectCookieUsesTargetTransport(marker);
     expect(marker?.expires).toBeGreaterThan(now + 29 * 24 * 60 * 60);
     expect(marker?.expires).toBeLessThanOrEqual(now + 30 * 24 * 60 * 60 + 60);
     expect(authCookies.length).toBeGreaterThan(0);
@@ -714,6 +746,9 @@ test("cookie choices, legal documents and browser-session lifetimes are explicit
       expect(cookie.expires).toBeGreaterThan(now + 29 * 24 * 60 * 60);
       expect(cookie.expires).toBeLessThanOrEqual(marker!.expires);
       expect(cookie.httpOnly).toBe(true);
+      expect(cookie.sameSite).toBe("Lax");
+      expect(cookie.path).toBe("/");
+      expectCookieUsesTargetTransport(cookie);
     }
 
     const invalidRecovery = await page.request.get(
@@ -748,7 +783,12 @@ test("cookie choices, legal documents and browser-session lifetimes are explicit
       cookie.name.includes("-auth-token"),
     );
     expect(downgradedCookies.length).toBeGreaterThan(0);
-    for (const cookie of downgradedCookies) expect(cookie.expires).toBe(-1);
+    for (const cookie of downgradedCookies) {
+      expect(cookie.expires).toBe(-1);
+      expect(cookie.sameSite).toBe("Lax");
+      expect(cookie.path).toBe("/");
+      expectCookieUsesTargetTransport(cookie);
+    }
     await logoutAndAssertBoundary(page, "master");
   } finally {
     await rememberedContext.close();
@@ -771,14 +811,18 @@ for (const role of expectedRoles) {
           ? "[data-account-identity]"
           : "[data-session-identity-label]",
       );
-      await expect(identity).toContainText(accounts[role].email);
+      expect((await identity.textContent())?.includes(accounts[role].email)).toBe(true);
 
       const securityPage = await page.goto("/conta/seguranca");
       expect(securityPage?.status()).toBe(200);
       await expect(
         page.getByRole("heading", { level: 1, name: "Segurança da conta", exact: true }),
       ).toBeVisible();
-      await expect(page.locator("[data-account-identity]")).toContainText(accounts[role].email);
+      expect(
+        (await page.locator("[data-account-identity]").textContent())?.includes(
+          accounts[role].email,
+        ),
+      ).toBe(true);
       reportProgress("account-security");
 
       const dashboardApi = await page.request.get("/api/dashboard/status");
@@ -908,6 +952,25 @@ for (const role of expectedRoles) {
         );
       expect(navigationRoutes).toEqual(expectedNavigationRoutes);
       reportProgress("navigation");
+
+      if (role === "master") {
+        const hubResponse = await page.goto("/app/simulacao");
+        expect(hubResponse?.status()).toBe(200);
+        await expect(
+          page.locator('main a[href="/app/simulacao/associativo-fluxo-linear"]'),
+        ).toHaveCount(1);
+        for (const route of [
+          "/app/simulacao/calcular-documentacao",
+          "/app/simulacao/caixa",
+          "/app/simulacao/tabela-direta",
+          "/app/simulacao/tabela-investidor",
+        ]) {
+          await expect(page.locator(`main a[href="${route}"]`)).toHaveCount(0);
+        }
+        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(4);
+        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(4);
+        reportProgress("simulator-release-gates");
+      }
 
       if (role === "admin") {
         const settingsResponse = await page.goto("/app/configuracoes/metas");
@@ -1200,56 +1263,13 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
       "tabela-direta",
       "tabela-investidor",
     ]) {
-      await page.goto(`/app/simulacao/${simulator}`);
+      const response = await page.goto(`/app/simulacao/${simulator}`);
+      expect(response?.status()).toBe(403);
       await expect(
-        page.getByRole("heading", {
-          name: "Cálculo temporariamente indisponível — regra aguardando validação",
-          exact: true,
-        }),
+        page.getByRole("heading", { level: 1, name: forbiddenHeading, exact: true }),
       ).toBeVisible();
-      await expect(page.locator("main form")).not.toHaveAttribute("action");
-      await expect(page.locator('main form button[type="submit"]')).toHaveCount(0);
-      const calculationAction = page.locator(
-        'main form button[aria-describedby="calculation-blocked-reason"]',
-      );
-      await expect(calculationAction).toHaveCount(1);
-      await expect(calculationAction).toBeDisabled();
-      await expect(calculationAction).toHaveAttribute("data-cta-state", "blocked");
-      await expect(calculationAction.locator("svg")).toHaveCount(1);
-      await expect(page.locator("#calculation-blocked-reason")).toBeVisible();
+      await expect(page.getByRole("button", { name: /^Calcular/u })).toHaveCount(0);
     }
-
-    const enabledAction = page.locator('main form button[data-cta-state="enabled"]').first();
-    const blockedAction = page.locator('main form button[data-cta-state="blocked"]').first();
-    const unavailableAction = page
-      .locator('main form button[data-cta-state="unavailable"]')
-      .first();
-    await expect(enabledAction).toBeEnabled();
-    await expect(blockedAction).toBeDisabled();
-    await expect(unavailableAction).toBeDisabled();
-    const readActionStyle = (locator: typeof enabledAction) =>
-      locator.evaluate((element) => {
-        const style = getComputedStyle(element);
-        return {
-          backgroundColor: style.backgroundColor,
-          borderStyle: style.borderStyle,
-          color: style.color,
-          cursor: style.cursor,
-        };
-      });
-    const [enabledStyle, blockedStyle, unavailableStyle] = await Promise.all([
-      readActionStyle(enabledAction),
-      readActionStyle(blockedAction),
-      readActionStyle(unavailableAction),
-    ]);
-    expect(enabledStyle.cursor).toBe("pointer");
-    expect(blockedStyle.cursor).toBe("not-allowed");
-    expect(unavailableStyle.cursor).toBe("not-allowed");
-    expect(blockedStyle.backgroundColor).not.toBe(enabledStyle.backgroundColor);
-    expect(unavailableStyle.backgroundColor).not.toBe(enabledStyle.backgroundColor);
-    expect(blockedStyle.color).not.toBe(enabledStyle.color);
-    expect(unavailableStyle.borderStyle).toBe("dashed");
-    expect(blockedStyle.borderStyle).toBe("solid");
 
     await page.goto("/app");
     const disclosure = page.locator("header summary").first();

@@ -27,7 +27,7 @@ arquivos `.env`, hashes de senha, chaves Supabase ou cookies para evidências.
 | Portas Supabase      | `55320`–`55329`, conforme configuração             | Firewall `DOCKER-USER`; externas bloqueadas; Mailpit só em loopback      |
 | Runtime              | `/var/lib/descomplica-crm-homologation`            | `root`, sem montagem de dados de produção                                |
 | Configuração privada | `/etc/descomplica-crm/homologation.env`            | `0600`; gerada sem imprimir valores                                      |
-| Contas QA            | `/etc/descomplica-crm/homologation-accounts.json`  | Nove identidades sintéticas, `0600`                                      |
+| Conta visual QA      | `/etc/descomplica-crm/homologation-accounts.json`  | Master sintético persistente, `0600`; matriz E2E é efêmera               |
 | Acesso externo       | `/etc/descomplica-crm/homologation-access.json`    | Credencial Basic privada, `0600`                                         |
 | Logs Nginx           | `homolog.descomplicapro.com.br.{access,error}.log` | Separados dos logs de produção                                           |
 
@@ -162,8 +162,12 @@ sudo env \
 A matriz obrigatória contém exatamente: `master`, `admin`, `manager`, `broker`,
 `coordinator`, `real_estate`, `house`, `partnership_channel` e `pending`. Os
 e-mails terminam em `@local.invalid`; dados, organizações, equipes, carteiras,
-grants e métricas são fixtures controladas. O provisionador deve recusar arquivo
-permissivo, papel ausente, execução fora do runtime isolado ou segunda carga.
+grants e métricas são fixtures controladas. No smoke hospedado, somente a conta
+Master já existente é consumida como fixture visual persistente. As nove contas
+da matriz Playwright são criadas pelo runner a cada execução, mantidas somente
+em memória e removidas com prova de ausência ao final; suas senhas nunca são
+gravadas no arquivo privado. O provisionador deve recusar arquivo permissivo,
+papel ausente, execução fora do runtime isolado ou segunda carga.
 
 Não criar usuário no Supabase remoto. Não importar backup, mapping, policy ou
 dado real. O read model v3 recebe apenas grants sintéticos de homologação.
@@ -181,6 +185,13 @@ pnpm build
 release_sha="$(git rev-parse HEAD)"
 IMAGE_TAG="${release_sha}" pnpm image:build
 IMAGE_TAG="${release_sha}" pnpm image:prove
+backup_manifest="/var/backups/descomplica-crm/<execucao>/SHA256SUMS"
+sudo pnpm homologation:migrate:auth-mfa dry-run --expected-sha "${release_sha}"
+sudo pnpm homologation:migrate:auth-mfa apply \
+  --expected-sha "${release_sha}" \
+  --backup-manifest "${backup_manifest}" \
+  --confirm homologation-auth-mfa-only
+sudo pnpm homologation:migrate:auth-mfa verify --expected-sha "${release_sha}"
 sudo env IMAGE_TAG="${release_sha}" node scripts/homologation/configure-app-env.mjs
 sudo node scripts/release/compose-with-runtime-secret.mjs \
   homologation config --quiet
@@ -194,6 +205,10 @@ curl --fail --silent --show-error http://127.0.0.1:3100/api/health
 
 O `image:prove` exige que ambos os Compose resolvam a mesma referência e o mesmo
 ID imutável, valida os dois perfis de runtime sem rede e não imprime o segredo.
+O `backup_manifest` deve apontar para o backup novo, root-only e restaurado de
+forma isolada conforme o runbook específico de Auth/MFA; `apply` deve listar e
+aplicar somente `20260824230058` e `20260824230100`. O `verify` precisa comprovar
+as 31 versões exatas antes de subir a aplicação e antes de `homologation:qa`.
 Registrar esse ID após homologação e compará-lo, sem rebuild ou nova tag, ao ID
 usado na promoção futura de produção. O healthcheck deve retornar o SHA
 esperado. Confirmar `HOMOLOGATION_MODE=true`, banner visível, cadastro bloqueado,
@@ -290,17 +305,25 @@ ao E2E/visual; o configurador preserva somente valores válidos já existentes e
 usa `off`/vazio quando ainda não houver configuração.
 
 O mesmo runner usa o Mailpit apenas por loopback para provar entrega, origem e
-uso único do link de recuperação. O teste altera temporariamente a senha e o
-fator TOTP da identidade Master/QA sintética; um `finally` administrativo
-restaura primeiro a senha original, remove somente fatores criados pelo gate,
-revoga explicitamente todas as sessões QA no Supabase isolado e comprova a
-credencial final mesmo quando o Playwright falha. Mensagens de recuperação da
-identidade dedicada são eliminadas antes e em `finally`. O runner recusa uma
-identidade que já tenha fator MFA e nunca imprime senha, chave manual, link,
-token ou ID. Antes e depois do callback, valida exatamente os dois blocos Nginx
-ativos e examina somente os bytes novos do access log e os logs do container
-em memória: query de callback, HTTP 5xx, erro fatal, reinício, troca de imagem
-ou mudança de SHA reprovam o gate sem ecoar conteúdo.
+uso único do link de recuperação. Antes do E2E, ele cria via Auth Admin nove
+contas com aceite legal vigente, estaciona temporariamente o Master visual e
+atribui exatamente os nove papéis/estados com o menor conjunto compatível de
+scopes. O Playwright altera senha e TOTP somente no Master efêmero. Em `finally`,
+o runner apaga a senha do objeto em memória, remove fatores e sessões, fixtures,
+grants, auditoria, mensagens e as linhas exatas do ledger legal sintético;
+depois exclui as contas e prova ausência em Auth (`users`, identidades, refresh
+tokens, sessões e fatores), autorização e ledger. O Master visual é restaurado
+como o único Master antes da matriz visual, e sua credencial, fatores e sessões
+são verificados novamente mesmo quando o Playwright falha.
+
+O runner nunca imprime senha, chave manual, link, token, e-mail/UUID da matriz
+efêmera ou conteúdo de log. Antes e depois do callback, valida exatamente os
+dois blocos Nginx ativos e examina somente os bytes novos dos logs de acesso e
+erro, além dos logs do container em memória: query de callback, HTTP 5xx, erro
+fatal, reinício, troca de imagem ou mudança de SHA reprovam o gate sem ecoar
+conteúdo. O template de recuperação e a configuração Supabase efetivos devem
+ser byte a byte iguais aos arquivos versionados; o histórico Auth/MFA também é
+verificado pelo executor allowlisted antes de criar qualquer conta efêmera.
 
 Esses comandos locais não substituem o smoke HTTPS. Na URL real, validar nove
 perfis, 21 rotas, isolamento vertical/horizontal, guards, filtros, estados
@@ -320,7 +343,8 @@ Registrar sem segredo ou PII:
 - consulta DNS antes/depois, cadeia TLS e validade do certificado;
 - checksum do backup Nginx, `nginx -t` e reload bem-sucedidos;
 - versão de `/api/health` da homologação e estados de containers;
-- nove papéis presentes, sem e-mail/senha/UUID de usuário;
+- nove papéis efêmeros presentes durante o E2E e ausentes depois, incluindo
+  sessões, fatores e ledger legal, sem e-mail/senha/UUID de usuário;
 - contagens e marcador `synthetic-only`, sem métricas linha a linha;
 - resultados E2E, RLS, 21 rotas, Axe, temas, viewports, zoom e screenshots;
 - headers, cookies, CSP, `401` pré-gate, `robots` e `noindex`;
