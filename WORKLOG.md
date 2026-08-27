@@ -5,6 +5,7 @@
 - O smoke HTTPS mostrou que a navegação interna do WF13 ainda criava links para quatro páginas `releaseEnabled=false`; o prefetch recebia `403` e gerava ruído de console tardio.
 - A navegação agora cria links apenas para jornadas liberadas pelo catálogo server-side e representa as demais como itens bloqueados, sem mudar grants, migrations, flags ou motores.
 - Cobertura adicionada para provar um link autorizado, quatro itens bloqueados e ausência de `href` para as rotas futuras.
+- A baseline canário foi promovida localmente a partir do HEAD limpo após 119/119 rotas responsivas, 68/68 temas, Axe 160/160, 160/160 comparações e 85/85 checks de zoom; somente 12 capturas em `target-authenticated-canary/simulator.wf13` mudaram.
 
 ## 2026-08-27 — zero 5xx com capacidades desligadas
 
