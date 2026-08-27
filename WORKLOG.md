@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-08-27 — janela TOTP estável no smoke hospedado
+
+- O primeiro smoke do SHA `46c33e7` aprovou 20 de 21 cenários; o caso MFA
+  atingiu o limite global durante o enrollment, sem falha do runtime ou HTTP
+  5xx. A limpeza foi interrompida e as nove identidades sintéticas foram
+  removidas antes da repetição.
+- Enrollment e challenge agora aguardam uma janela TOTP com pelo menos 12
+  segundos restantes, evitando submeter um código que expire durante a ida e
+  volta HTTPS. O cenário complexo recebe o mesmo teto de 180 segundos usado na
+  matriz hospedada e registra somente nomes de fases, nunca chave ou código.
+
 ## 2026-08-27 — sessão de revogação no smoke hospedado
 
 - A primeira execução HTTPS aprovou 19 de 21 cenários e encontrou uma

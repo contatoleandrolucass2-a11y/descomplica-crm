@@ -70,14 +70,16 @@ function currentTotp(secret: string, at = Date.now()): string {
   return value.toString().padStart(6, "0");
 }
 
-async function waitForNextTotp(secret: string, previousCode: string): Promise<string> {
-  const deadline = Date.now() + 35_000;
+async function waitForUsableTotp(secret: string, previousCode = ""): Promise<string> {
+  const deadline = Date.now() + 45_000;
   while (Date.now() < deadline) {
-    const candidate = currentTotp(secret);
-    if (candidate !== previousCode) return candidate;
+    const now = Date.now();
+    const candidate = currentTotp(secret, now);
+    const remainingWindow = 30_000 - (now % 30_000);
+    if (candidate !== previousCode && remainingWindow >= 12_000) return candidate;
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  throw new Error("TOTP window did not advance before timeout.");
+  throw new Error("A stable TOTP window was unavailable before timeout.");
 }
 
 function requiredEnvironment(name: string): string {
@@ -1638,11 +1640,12 @@ test("password recovery is generic, quarantined, one-time and revokes every sess
 test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", async ({
   browser,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
 
   let secret = "";
   let enrollmentCode = "";
   await withRolePage(browser, "master", async (page) => {
+    console.log("[mfa] phase=enrollment");
     await page.goto("/conta/seguranca");
     await page
       .getByRole("button", { name: "Ativar verificação em duas etapas", exact: true })
@@ -1660,7 +1663,7 @@ test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", 
     if (!/^[A-Z2-7]{16,128}$/.test(secret)) {
       throw new Error("MFA enrollment did not expose a valid synthetic manual key.");
     }
-    enrollmentCode = currentTotp(secret);
+    enrollmentCode = await waitForUsableTotp(secret);
     await page.getByLabel("Código de 6 dígitos").fill(enrollmentCode);
     await Promise.all([
       page.waitForURL(
@@ -1679,6 +1682,7 @@ test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", 
   const staleAal1Context = await browser.newContext(qaTarget.contextOptions);
   const challengeContext = await browser.newContext(qaTarget.contextOptions);
   try {
+    console.log("[mfa] phase=aal1-boundary");
     await constrainRemoteRequests(staleAal1Context);
     await constrainRemoteRequests(challengeContext);
     const staleAal1Page = await staleAal1Context.newPage();
@@ -1711,7 +1715,8 @@ test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", 
     await page.goto("/app");
     await expect(page).toHaveURL((url) => url.pathname === "/mfa");
 
-    const challengeCode = await waitForNextTotp(secret, enrollmentCode);
+    console.log("[mfa] phase=aal2-challenge");
+    const challengeCode = await waitForUsableTotp(secret, enrollmentCode);
     await page.getByLabel("Código de 6 dígitos").fill(challengeCode);
     await Promise.all([
       page.waitForURL((url) => url.pathname === "/app"),
@@ -1722,6 +1727,7 @@ test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", 
     ).toBeVisible();
 
     await page.goto("/conta/seguranca");
+    console.log("[mfa] phase=factor-removal");
     await Promise.all([
       page.waitForURL(
         (url) => url.pathname === "/conta/seguranca" && url.search === "?mfa=removed",
@@ -1747,6 +1753,7 @@ test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", 
 
   const noMfaContext = await browser.newContext(qaTarget.contextOptions);
   try {
+    console.log("[mfa] phase=post-removal-login");
     await constrainRemoteRequests(noMfaContext);
     const page = await noMfaContext.newPage();
     await login(page, accounts.master);

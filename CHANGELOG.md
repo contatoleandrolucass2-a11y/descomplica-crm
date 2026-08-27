@@ -468,6 +468,9 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Alterado
 
+- Estabiliza o smoke MFA hospedado ao aguardar janela TOTP útil antes de
+  enrollment/challenge e ampliar somente o teto desse cenário para 180
+  segundos, sem registrar chave, código ou credencial.
 - Base fixada em Node 24.19.0, pnpm 11.20.0, Next.js 16.3.0, React 19.2.8 e Supabase SDK 2.112.0.
 - Supabase SSR passou a usar a publishable key e validação de claims no middleware.
 - Política de scripts de instalação e overrides transitivos de segurança centralizados no workspace pnpm.

@@ -148,4 +148,7 @@ sudo pnpm homologation:qa
 
 O QA deve limpar em `finally` as nove contas efêmeras, sessões, fatores e
 mensagens, mascarar identidades nas evidências e revisar logs sanitizados.
+Enrollment e challenge TOTP aguardam uma janela com pelo menos 12 segundos
+úteis; os únicos checkpoints emitidos são nomes de fases sanitizados. Chaves e
+códigos nunca podem entrar em logs ou evidências.
 Produção, integrações e motores permanecem inalterados.
