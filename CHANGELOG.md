@@ -20,6 +20,9 @@
 
 ## Unreleased
 
+- Torna o smoke de revogação de senha independente da ordem dos cenários: ele
+  abre uma segunda sessão Master real antes do recovery, em vez de reutilizar
+  um storage state já encerrado pelo logout da matriz hospedada.
 - Alinha o contrato da evidência visual ao conjunto release-enabled de 17
   páginas; as quatro URLs futuras continuam cobertas pela matriz funcional de
   21 rotas e falham fechadas, sem produzir capturas de conteúdo indisponível. A

@@ -1527,19 +1527,13 @@ test("password recovery is generic, quarantined, one-time and revokes every sess
   const genericRecoveryMessage =
     "Se houver uma conta elegível para esse e-mail, enviaremos as instruções de redefinição.";
 
-  const masterStorageState = roleStorageStates.get("master");
-  if (!masterStorageState)
-    throw new Error("Master smoke session is unavailable for revocation QA.");
-  const existingSessionContext = await browser.newContext({
-    ...qaTarget.contextOptions,
-    storageState: masterStorageState,
-  });
+  const existingSessionContext = await browser.newContext(qaTarget.contextOptions);
   const recoveryContext = await browser.newContext(qaTarget.contextOptions);
   try {
     await constrainRemoteRequests(existingSessionContext);
     await constrainRemoteRequests(recoveryContext);
     const existingSessionPage = await existingSessionContext.newPage();
-    await existingSessionPage.goto("/app");
+    await login(existingSessionPage, accounts.master);
     await expect(existingSessionPage).toHaveURL((url) => url.pathname === "/app");
 
     const recoveryPage = await recoveryContext.newPage();

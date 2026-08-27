@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-08-27 — sessão de revogação no smoke hospedado
+
+- A primeira execução HTTPS aprovou 19 de 21 cenários e encontrou uma
+  dependência de ordem no recovery: a matriz remota havia encerrado a sessão
+  Master antes de o teste de revogação tentar reutilizá-la.
+- O recovery agora autentica uma segunda sessão Master dedicada, que permanece
+  aberta até a troca de senha comprovar sua revogação. A limpeza hospedada após
+  a falha comprovou zero contas, sessões e fatores efêmeros e zero fator no
+  Master visual persistente.
+
 ## 2026-08-27 — convergência do contrato visual no CI
 
 - O primeiro CI do catálogo 17/21 encontrou uma expectativa residual de 21
