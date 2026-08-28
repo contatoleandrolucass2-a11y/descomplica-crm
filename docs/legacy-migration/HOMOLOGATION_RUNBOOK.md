@@ -28,7 +28,9 @@ O JSON sanitizado do dry-run deve conter somente
 `pendingVersions=["20260828135947"]`, histórico 31 e `mutation=false`. O backup
 cria quatro artefatos `root:root 0600`, `SHA256SUMS` e `restore-proof.json` em
 um diretório novo `0700`; o restore descartável usa `network=none` e precisa
-comprovar 31 versões, zero candidata e 17 páginas.
+comprovar 31 versões, zero candidata e 17 páginas. O restore usa o papel local
+`supabase_admin`, exigido para restaurar objetos internos do Vault na imagem
+Supabase atual; nenhum conteúdo desses objetos é impresso ou consultado.
 
 ## Configuração privada
 

@@ -10,6 +10,7 @@ describe("homologation legacy canary backup", () => {
     );
     expect(source).toContain("process.getuid?.() !== 0");
     expect(source).toContain('"--network",\n        "none"');
+    expect(source).toContain('"--username",\n        "supabase_admin"');
     expect(source).toContain('"database.dump"');
     expect(source).toContain('"migration-history.sql"');
     expect(source).toContain('"homologation-config.tar"');

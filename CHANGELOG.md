@@ -24,6 +24,9 @@
   com o `ConfirmationURL` padrão do Supabase hospedado: somente auth code UUID
   v4 PKCE é trocado, e a redefinição continua exigindo assurance recente de
   recuperação. A location exata permanece sem logs de query.
+- Corrige o restore verificável do backup da homologação para usar o papel
+  administrativo local proprietário dos objetos do Vault; o container segue
+  isolado sem rede e nenhum segredo é lido ou impresso.
 
 ## 2026-08-27
 

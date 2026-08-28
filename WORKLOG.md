@@ -37,6 +37,11 @@
 - Configuração de estoque ausente e escrita da previsão desligada retornam
   `404` fail-closed, reservando 5xx para falhas de capacidades realmente ativas
   e mantendo o smoke do canário sem erro HTTP deliberado.
+- No primeiro backup hospedado, o dump e os artefatos passaram, mas o restore
+  falhou fechado ao copiar um objeto interno do Vault com o papel `postgres`
+  não proprietário. O ensaio sanitizado comprovou `supabase_admin` como papel
+  local necessário; o executor e seu teste foram corrigidos sem ler dados do
+  Vault, e todo diagnóstico descartável foi removido.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 

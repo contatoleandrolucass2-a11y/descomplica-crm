@@ -202,7 +202,7 @@ async function proveRestore(databaseDump, databaseImage, backupId) {
         "--no-owner",
         "--no-privileges",
         "--username",
-        "postgres",
+        "supabase_admin",
         "--dbname",
         "restore",
         "/tmp/database.dump",
