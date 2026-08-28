@@ -1,5 +1,6 @@
 function iconCategory(pageKey: string) {
   if (pageKey.startsWith("crm.simulation")) return "calculator";
+  if (pageKey.startsWith("crm.dialer")) return "phone";
   if (pageKey.startsWith("crm.settings")) return "settings";
   if (pageKey.startsWith("crm.stage")) return "funnel";
   if (pageKey === "crm.ranking") return "trophy";
@@ -38,6 +39,9 @@ export function AppPageIcon({ pageKey }: { pageKey: string }) {
           <circle cx="17" cy="10" r="2.5" />
           <path d="M3.5 20v-1.5A4.5 4.5 0 0 1 8 14h1a4.5 4.5 0 0 1 4.5 4.5V20M14.5 15.5a4 4 0 0 1 6 3.5v1" />
         </>
+      ) : null}
+      {category === "phone" ? (
+        <path d="M7.2 3.8 4.8 6.2c-.7.7-.7 1.8-.2 2.7 2.4 4.3 5.9 7.8 10.2 10.2.9.5 2 .5 2.7-.2l2.4-2.4-3.6-3.1-2.1 1.2a15.5 15.5 0 0 1-4.9-4.9l1.2-2.1-3.3-3.8Z" />
       ) : null}
       {category === "shield" ? (
         <path d="M12 3 20 6v5c0 5-3.2 8.4-8 10-4.8-1.6-8-5-8-10V6l8-3Z" />

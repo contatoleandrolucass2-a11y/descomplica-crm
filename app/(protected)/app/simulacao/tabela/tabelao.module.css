@@ -1,0 +1,127 @@
+.page {
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 2rem);
+}
+
+.container {
+  display: grid;
+  width: min(100%, 92rem);
+  margin-inline: auto;
+  gap: 1.25rem;
+}
+
+.section {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--analytics-line);
+  border-radius: 1.25rem;
+  background: var(--analytics-surface);
+  box-shadow: var(--analytics-shadow);
+}
+
+.heading p {
+  color: var(--analytics-cyan-strong);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.heading h2 {
+  margin-top: 0.25rem;
+  color: var(--analytics-ink);
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.heading span,
+.sourceStatus span {
+  color: var(--analytics-muted);
+}
+
+.inventoryWorkspace {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+}
+
+.sourceStatus {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--analytics-cyan) 10%, transparent);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(10rem, 1fr));
+  align-items: end;
+  gap: 0.75rem;
+}
+
+.filters label {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.filters input,
+.filters select,
+.filters button {
+  min-height: 2.75rem;
+  min-width: 0;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.7rem;
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  font: inherit;
+}
+
+.filters input,
+.filters select {
+  width: 100%;
+  padding-inline: 0.75rem;
+}
+
+.filters button {
+  padding-inline: 1rem;
+  background: var(--analytics-navy);
+  color: white;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.filters :focus-visible {
+  outline: 3px solid var(--analytics-cyan);
+  outline-offset: 2px;
+}
+
+@media (max-width: 64rem) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 36rem) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filters * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

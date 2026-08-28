@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { DataState, PageHeader, SectionHeading } from "@/app/(protected)/app/_components/analytics";
 import { enforcePermission } from "@/lib/authorization/enforce";
-import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+import { getProtectedPageGate, protectedPageGateIsReleased } from "@/lib/authorization/page-gates";
 import { SIMULATOR_LIST } from "@/lib/crm/simulators/catalog";
 import {
   getOfficialSimulatorRuntimeConfiguration,
@@ -55,10 +55,13 @@ export default async function SimulationHubPage() {
     "associativo-fluxo-linear",
     authorization,
   );
-  const authorizedJourneyCount = SIMULATOR_LIST.filter(
-    (simulator) =>
-      getProtectedPageGate(`/app/simulacao/${simulator.slug}`)?.releaseEnabled === true,
-  ).length;
+  const authorizedJourneyCount = SIMULATOR_LIST.filter((simulator) => {
+    const pageGate = getProtectedPageGate(`/app/simulacao/${simulator.slug}`);
+    return pageGate ? protectedPageGateIsReleased(pageGate) : false;
+  }).length;
+  const tabelaoGate = getProtectedPageGate("/app/simulacao/tabela");
+  const tabelaoEnabled = tabelaoGate ? protectedPageGateIsReleased(tabelaoGate) : false;
+  const availableJourneyCount = authorizedJourneyCount + (tabelaoEnabled ? 1 : 0);
 
   return (
     <main className={styles.page}>
@@ -76,7 +79,7 @@ export default async function SimulationHubPage() {
               <CalculatorIcon />
               <span>
                 <small>Ferramentas disponíveis</small>
-                <strong>{authorizedJourneyCount} jornada autorizada</strong>
+                <strong>{availableJourneyCount} jornada(s) autorizada(s)</strong>
               </span>
             </div>
           }
@@ -106,9 +109,41 @@ export default async function SimulationHubPage() {
             description="Cada tela preserva campos, seções, alertas e painel de resultado sem publicar cálculo não validado."
           />
           <div className={styles.hubGrid}>
+            {tabelaoEnabled ? (
+              <Link className={styles.hubCard} href="/app/simulacao/tabela">
+                <span className={styles.hubIcon}>
+                  <CalculatorIcon />
+                </span>
+                <span>
+                  <h2>Tabelão</h2>
+                  <p>Empreendimentos e plantas sem repetição, com o menor valor oficial.</p>
+                  <span className={styles.hubCode}>SPC</span>
+                </span>
+                <span className={styles.hubArrow} aria-hidden="true">
+                  ↗
+                </span>
+              </Link>
+            ) : (
+              <article
+                className={`${styles.hubCard} ${styles.hubCardBlocked}`}
+                data-release-state="blocked"
+              >
+                <span className={styles.hubIcon}>
+                  <CalculatorIcon />
+                </span>
+                <span>
+                  <h2>Tabelão</h2>
+                  <p>Consulta oficial de empreendimentos, plantas e menores valores.</p>
+                  <span className={styles.hubBlocked}>Aguardando autorização</span>
+                </span>
+                <span className={styles.hubArrow} aria-hidden="true">
+                  🔒
+                </span>
+              </article>
+            )}
             {SIMULATOR_LIST.map((simulator) => {
-              const releaseEnabled =
-                getProtectedPageGate(`/app/simulacao/${simulator.slug}`)?.releaseEnabled === true;
+              const pageGate = getProtectedPageGate(`/app/simulacao/${simulator.slug}`);
+              const releaseEnabled = pageGate ? protectedPageGateIsReleased(pageGate) : false;
               return releaseEnabled ? (
                 <Link
                   className={styles.hubCard}

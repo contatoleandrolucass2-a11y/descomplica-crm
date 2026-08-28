@@ -1,0 +1,224 @@
+{
+  "provenance": "legacy-reference-2026-08-28",
+  "cases": [
+    {
+      "engine": "wf16",
+      "sourceSha256": "615a41e0bdcce3b567ee80c708072c44f41908371d4f6f1101ea565685836713",
+      "input": {
+        "businessUnit": "direcional",
+        "modality": "mcmv",
+        "firstProperty": true,
+        "salePrice": "300000",
+        "appraisalValue": "320000",
+        "financing": "240000",
+        "income": "8000",
+        "baseDate": "2026-08-28",
+        "requestedFirstInstallment": ""
+      },
+      "expected": {
+        "ok": true,
+        "effectiveModality": "mcmv",
+        "maximumFinancingCents": "25600000",
+        "financingRateBps": 8000,
+        "incomeRange": 3,
+        "propertyRange": 3,
+        "itbiCents": "597580",
+        "totalRegistrationCents": "296622",
+        "totalCashCents": "1024202",
+        "installments": 40,
+        "installmentValueCents": "34236",
+        "firstInstallmentDate": "2026-12-15"
+      }
+    },
+    {
+      "engine": "caixa",
+      "sourceSha256": "9cf6bb798a8a1a7a2566390af38fe3aca2a391eaaecf2f38f44f90cdcc7c50ef",
+      "input": {
+        "income": "5000",
+        "approvedPayment": "",
+        "propertyValue": "300000",
+        "ownFunds": "30000",
+        "fgts": "",
+        "birthDate": "1990-01-01",
+        "asOf": "2026-08-28",
+        "state": "SP",
+        "city": "São Paulo",
+        "cityLimit": "300000",
+        "populationFactor": "1",
+        "term": "360",
+        "product": "mcmv",
+        "system": "price",
+        "hasFgts36": false,
+        "previousSubsidy": false,
+        "socialFactor": true,
+        "inConstruction": false
+      },
+      "expected": {
+        "ok": true,
+        "product": "mcmv",
+        "system": "price",
+        "age": 36,
+        "term": 360,
+        "maximumTerm": 420,
+        "annualRatePercent": 7,
+        "effectiveAnnualRatePercent": 7.229008,
+        "maximumPaymentByIncomeCents": "150000",
+        "financingCents": "21387298",
+        "subsidyCents": "0",
+        "entryNeededCents": "5612702",
+        "firstPaymentCents": "150000",
+        "commitmentBps": 3000,
+        "fitsProperty": false
+      }
+    },
+    {
+      "engine": "wf14",
+      "sourceSha256": "307ed9ec45f9bcb46e03cfc5a7fc21f3e995a804eba3dcc50c464e2ad0d3ede2",
+      "input": {
+        "developmentName": "Empreendimento sintético",
+        "businessUnit": "direcional",
+        "product": "Unidade sintética",
+        "plant": "2 dormitórios",
+        "description": "Caso de ouro sem dado real",
+        "propertyValue": "300000",
+        "discount": "0",
+        "income": "20000",
+        "baseDate": "2026-08-28",
+        "workEndDate": "2028-08-28"
+      },
+      "expected": {
+        "ok": true,
+        "parking": false,
+        "valueRealCents": "30000000",
+        "preKeysRateBps": 3000,
+        "postKeysRateBps": 6000,
+        "postKeysInstallments": 120,
+        "scenarios": [
+          {
+            "key": "scenario-one",
+            "firstPreKeysDate": "2026-09-15",
+            "preKeysInstallments": 24,
+            "preKeysPaymentCents": "375000",
+            "postKeysPaymentCents": "256945",
+            "firstPostKeysDate": "2028-09-15",
+            "commitmentBps": 1285,
+            "approved": true
+          },
+          {
+            "key": "scenario-two",
+            "firstPreKeysDate": "2026-12-15",
+            "preKeysInstallments": 21,
+            "preKeysPaymentCents": "428571",
+            "postKeysPaymentCents": "256945",
+            "firstPostKeysDate": "2028-09-15",
+            "commitmentBps": 1285,
+            "approved": true
+          }
+        ]
+      }
+    },
+    {
+      "engine": "wf15",
+      "sourceSha256": "4540fa0a11abf5a150466349c07907af3f0110ecee247e594e6c741dd36bf877",
+      "input": {
+        "selectedUnitId": "SYNTHETIC-UNIT-001",
+        "inventoryMatch": true,
+        "propertyValue": "300000",
+        "discountAuthorized": false,
+        "discount": "",
+        "income": "20000",
+        "baseDate": "2026-08-28",
+        "completionDate": "2028-12-31"
+      },
+      "expected": {
+        "ok": true,
+        "sourceInventoryRequired": true,
+        "valueRealCents": "30000000",
+        "scenarios": [
+          {
+            "code": "C1",
+            "installments": 18,
+            "entryCents": "3000000",
+            "signalTotalCents": "0",
+            "intermediaryTotalCents": "0",
+            "balanceCents": "27000000",
+            "installmentValueCents": "1500000",
+            "firstInstallmentDate": "2026-09-15",
+            "available": true
+          },
+          {
+            "code": "C2",
+            "installments": 18,
+            "entryCents": "1800000",
+            "signalTotalCents": "1200000",
+            "intermediaryTotalCents": "0",
+            "balanceCents": "27000000",
+            "installmentValueCents": "1500000",
+            "firstInstallmentDate": "2026-12-15",
+            "available": true
+          },
+          {
+            "code": "C3",
+            "installments": 18,
+            "entryCents": "1800000",
+            "signalTotalCents": "1200000",
+            "intermediaryTotalCents": "4500000",
+            "balanceCents": "22500000",
+            "installmentValueCents": "1250000",
+            "available": true
+          },
+          {
+            "code": "C4",
+            "installments": 18,
+            "entryCents": "3000000",
+            "signalTotalCents": "0",
+            "intermediaryTotalCents": "4500000",
+            "balanceCents": "22500000",
+            "installmentValueCents": "1250000",
+            "available": true
+          },
+          {
+            "code": "C5",
+            "installments": 24,
+            "entryCents": "6000000",
+            "signalTotalCents": "0",
+            "intermediaryTotalCents": "0",
+            "balanceCents": "24000000",
+            "installmentValueCents": "1000000",
+            "available": true
+          },
+          {
+            "code": "C6",
+            "installments": 24,
+            "entryCents": "5100000",
+            "signalTotalCents": "900000",
+            "intermediaryTotalCents": "0",
+            "balanceCents": "24000000",
+            "installmentValueCents": "1000000",
+            "available": true
+          },
+          {
+            "code": "C7",
+            "installments": 24,
+            "entryCents": "5100000",
+            "signalTotalCents": "900000",
+            "intermediaryTotalCents": "6000000",
+            "balanceCents": "18000000",
+            "installmentValueCents": "750000",
+            "available": true
+          },
+          {
+            "code": "C8",
+            "installments": 24,
+            "entryCents": "6000000",
+            "signalTotalCents": "0",
+            "intermediaryTotalCents": "6000000",
+            "balanceCents": "18000000",
+            "installmentValueCents": "750000",
+            "available": true
+          }
+        ]
+      }
+    }
+  ]
+}

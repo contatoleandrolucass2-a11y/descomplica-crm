@@ -1,16 +1,21 @@
 import type { PermissionKey } from "./permissions";
+import {
+  legacyMigrationModuleIsEnabled,
+  type LegacyMigrationModuleKey,
+} from "../crm/legacy-migration/config";
 
 export interface ProtectedPageGate {
   pageKey: string;
   path: string;
   permission: PermissionKey;
   releaseEnabled: boolean;
+  runtimeModule?: LegacyMigrationModuleKey;
 }
 
-// Covers the complete 21-route HTTP smoke inventory. Exactly seventeen entries
-// mirror app_pages; four future simulator routes remain versioned in code but
-// are release-disabled. The database remains authoritative for navigation and
-// RLS; this copy lets Proxy return a real 403 before disabled code can stream.
+// Covers the complete 24-route HTTP smoke inventory. Runtime-gated legacy
+// modules fail closed until their independent canary flags are enabled. The
+// database remains authoritative for navigation and RLS; this copy lets Proxy
+// return a real 403 before disabled or unauthorized code can stream.
 export const PROTECTED_PAGE_GATES = [
   {
     pageKey: "crm.dashboard",
@@ -100,25 +105,50 @@ export const PROTECTED_PAGE_GATES = [
     pageKey: "crm.simulation.wf16",
     path: "/app/simulacao/calcular-documentacao",
     permission: "crm.simulators.view",
-    releaseEnabled: false,
+    releaseEnabled: true,
+    runtimeModule: "simulator.wf16",
   },
   {
     pageKey: "crm.simulation.caixa",
     path: "/app/simulacao/caixa",
     permission: "crm.simulators.view",
-    releaseEnabled: false,
+    releaseEnabled: true,
+    runtimeModule: "simulator.caixa",
   },
   {
     pageKey: "crm.simulation.wf14",
     path: "/app/simulacao/tabela-direta",
     permission: "crm.simulators.view",
-    releaseEnabled: false,
+    releaseEnabled: true,
+    runtimeModule: "simulator.wf14",
   },
   {
     pageKey: "crm.simulation.wf15",
     path: "/app/simulacao/tabela-investidor",
     permission: "crm.simulators.view",
-    releaseEnabled: false,
+    releaseEnabled: true,
+    runtimeModule: "simulator.wf15",
+  },
+  {
+    pageKey: "crm.simulation.tabelao",
+    path: "/app/simulacao/tabela",
+    permission: "crm.simulators.view",
+    releaseEnabled: true,
+    runtimeModule: "simulator.tabelao",
+  },
+  {
+    pageKey: "crm.dialer",
+    path: "/app/discador",
+    permission: "crm.dialer.view",
+    releaseEnabled: true,
+    runtimeModule: "dialer",
+  },
+  {
+    pageKey: "crm.dialer.weekend_forecast",
+    path: "/app/discador/previsao-final-de-semana",
+    permission: "crm.dialer.view",
+    releaseEnabled: true,
+    runtimeModule: "dialer.weekend-forecast",
   },
   {
     pageKey: "admin.home",
@@ -142,4 +172,14 @@ export const PROTECTED_PAGE_GATES = [
 
 export function getProtectedPageGate(pathname: string): ProtectedPageGate | null {
   return PROTECTED_PAGE_GATES.find((page) => page.path === pathname) ?? null;
+}
+
+export function protectedPageGateIsReleased(
+  pageGate: { releaseEnabled: boolean; runtimeModule?: LegacyMigrationModuleKey | undefined },
+  environment: Record<string, string | undefined> = process.env,
+): boolean {
+  return (
+    pageGate.releaseEnabled &&
+    (!pageGate.runtimeModule || legacyMigrationModuleIsEnabled(pageGate.runtimeModule, environment))
+  );
 }

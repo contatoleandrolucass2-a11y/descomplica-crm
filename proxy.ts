@@ -64,13 +64,18 @@
 //     common static asset extensions for the same reason.
 
 import { updateSession } from "@/lib/auth/supabase/middleware";
+import { hasRecoveryAuthenticationMethod } from "@/lib/auth/mfa/assurance";
 import {
   getSalesforceIngestConfiguration,
   getSalesforceRefreshConfiguration,
 } from "@/lib/crm/salesforce/config";
 import { applySecurityHeaders } from "@/lib/security/headers";
 import { isHomologationMode } from "@/lib/homologation/config";
-import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+import {
+  getProtectedPageGate,
+  protectedPageGateIsReleased,
+  type ProtectedPageGate,
+} from "@/lib/authorization/page-gates";
 import { NextResponse, type NextRequest } from "next/server";
 import type { PermissionKey } from "@/lib/authorization/permissions";
 
@@ -85,6 +90,7 @@ interface AuthorizationContextRow {
 function permissionRequiredBeforeStreaming(pathname: string): {
   permission: PermissionKey;
   releaseEnabled: boolean;
+  runtimeModule?: ProtectedPageGate["runtimeModule"] | undefined;
 } | null {
   const pageGate = getProtectedPageGate(pathname);
   if (pageGate) return pageGate;
@@ -117,21 +123,44 @@ function forbiddenBeforeStreaming(request: NextRequest, sessionResponse: NextRes
 
 async function lacksEarlyPermission(
   supabase: Awaited<ReturnType<typeof updateSession>>["supabase"],
-  pageGate: { permission: PermissionKey; releaseEnabled: boolean },
+  pageGate: {
+    permission: PermissionKey;
+    releaseEnabled: boolean;
+    runtimeModule?: ProtectedPageGate["runtimeModule"] | undefined;
+  },
 ) {
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
   if (userError || !user) return false;
-  if (!pageGate.releaseEnabled) return true;
+  if (!protectedPageGateIsReleased(pageGate)) return true;
 
   const { data, error } = await supabase.rpc("get_user_authorization_context", {
     user_uuid: user.id,
   });
   if (error) return true;
-  if (!Array.isArray(data) || data.length === 0) return false;
-  if (data.length !== 1) return true;
+  if (!Array.isArray(data) || data.length !== 1) {
+    // Recovery and AAL1-with-MFA sessions are deliberately quarantined by the
+    // page and API assurance guards. They expose no normal authorization
+    // context, so let the downstream guard redirect them. Every other invalid
+    // cardinality remains fail-closed.
+    const [claimsResult, assuranceResult] = await Promise.all([
+      supabase.auth.getClaims(),
+      supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
+    ]);
+    if (!claimsResult.error && hasRecoveryAuthenticationMethod(claimsResult.data?.claims)) {
+      return false;
+    }
+    if (
+      !assuranceResult.error &&
+      assuranceResult.data?.currentLevel === "aal1" &&
+      assuranceResult.data.nextLevel === "aal2"
+    ) {
+      return false;
+    }
+    return true;
+  }
 
   const permissions = (data[0] as AuthorizationContextRow).permissions;
   return !Array.isArray(permissions) || !permissions.includes(pageGate.permission);

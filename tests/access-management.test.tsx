@@ -196,7 +196,7 @@ describe("catálogo localizado de acesso", () => {
           ].includes(permission),
       ),
     );
-    expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(20);
+    expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(21);
     expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual([
       "users.view",
       "users.manage",

@@ -107,7 +107,7 @@ describe("simulator visual catalog", () => {
       "Unidade selecionada",
       "Monte a proposta",
       "Intermediárias",
-      "Quatro cenários padrão",
+      "Oito cenários de referência",
       "Fluxo personalizado",
     ]);
   });

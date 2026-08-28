@@ -28,7 +28,16 @@ const requiredRoles = [
   "pending",
 ];
 const legacyRoles = new Set(["user", "supervisor", "broker_lead"]);
-const simulatorPageKeys = ["crm.simulation", "crm.simulation.wf13"];
+const simulatorPageKeys = [
+  "crm.simulation",
+  "crm.simulation.wf13",
+  "crm.simulation.wf16",
+  "crm.simulation.caixa",
+  "crm.simulation.wf14",
+  "crm.simulation.wf15",
+  "crm.simulation.tabelao",
+];
+const dialerPageKeys = ["crm.dialer", "crm.dialer.weekend_forecast"];
 const inheritedAnalyticalPageKeys = [
   "crm.dashboard",
   "crm.ranking",
@@ -53,6 +62,7 @@ const expectedPageKeysByRole = {
     ...administrativeCommercialPageKeys,
     ...masterOnlyCommercialPageKeys,
     ...simulatorPageKeys,
+    ...dialerPageKeys,
   ].sort(),
   admin: [
     ...masterAdministrativePageKeys,
@@ -388,7 +398,11 @@ async function startLocalNextServer(local) {
       SUPABASE_URL: local.apiUrl,
       SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
       OFFICIAL_SIMULATOR_RUNTIME_MODE: "active",
-      OFFICIAL_SIMULATOR_ENABLED_KEYS: "simulator.wf13",
+      OFFICIAL_SIMULATOR_ENABLED_KEYS:
+        "simulator.wf13,simulator.wf16,simulator.caixa,simulator.wf14,simulator.wf15",
+      LEGACY_MIGRATION_RUNTIME_MODE: "active",
+      LEGACY_MIGRATION_ENABLED_MODULES:
+        "simulator.wf16,simulator.caixa,simulator.wf14,simulator.wf15,simulator.tabelao,dialer,dialer.weekend-forecast",
     },
     stdio: ["ignore", "ignore", "inherit"],
   });

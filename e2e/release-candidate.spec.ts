@@ -322,7 +322,6 @@ const inheritedAnalyticalRoles = new Set<Role>([
   "real_estate",
 ]);
 const masterOnlyRoles = new Set<Role>(["master"]);
-const noRoles = new Set<Role>();
 const protectedSurfaces = [
   {
     path: "/app",
@@ -393,18 +392,25 @@ const protectedSurfaces = [
   {
     path: "/app/simulacao/calcular-documentacao",
     heading: "Calcular documentação",
-    allowed: noRoles,
+    allowed: masterOnlyRoles,
   },
-  { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: noRoles },
+  { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: masterOnlyRoles },
   {
     path: "/app/simulacao/tabela-direta",
     heading: "Tabela Direta",
-    allowed: noRoles,
+    allowed: masterOnlyRoles,
   },
   {
     path: "/app/simulacao/tabela-investidor",
     heading: "Tabela Investidor",
-    allowed: noRoles,
+    allowed: masterOnlyRoles,
+  },
+  { path: "/app/simulacao/tabela", heading: "Tabelão", allowed: masterOnlyRoles },
+  { path: "/app/discador", heading: "Discador", allowed: masterOnlyRoles },
+  {
+    path: "/app/discador/previsao-final-de-semana",
+    heading: "Previsão Final de Semana",
+    allowed: masterOnlyRoles,
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
   { path: "/admin/usuarios", heading: "Usuários e acessos", allowed: adminRoles },
@@ -419,7 +425,7 @@ function expectedRoutesForRole(role: Role) {
 }
 
 const expectedCommercialPageCountByRole: Readonly<Record<Role, number>> = {
-  master: 17,
+  master: 24,
   admin: 14,
   broker: 7,
   coordinator: 7,
@@ -568,7 +574,7 @@ test.afterAll(() => {
 });
 
 test("the hosted profile matrix uses the exact approved commercial page sets", () => {
-  expect(protectedSurfaces).toHaveLength(21);
+  expect(protectedSurfaces).toHaveLength(24);
   for (const role of expectedRoles) {
     expect(expectedRoutesForRole(role), role).toHaveLength(expectedCommercialPageCountByRole[role]);
   }
@@ -839,12 +845,20 @@ for (const role of expectedRoles) {
       const simulatorStatus = await page.request.get(
         "/api/official-simulator/associativo-fluxo-linear",
       );
+      const inventoryStatus = await page.request.get("/api/inventory");
+      const weekendForecastStatus = await page.request.get("/api/weekend-forecast?week=2026-08-24");
+      const weekendForecastWrite = await page.request.post("/api/weekend-forecast", {
+        data: { schemaVersion: 1 },
+      });
       if (role === "master") {
         expect(simulatorStatus.status()).toBe(200);
         expect(await simulatorStatus.json()).toMatchObject({
           engineKey: "simulator.wf13",
           executionEnabled: true,
         });
+        expect(inventoryStatus.status()).toBe(503);
+        expect(weekendForecastStatus.status()).toBe(200);
+        expect(weekendForecastWrite.status()).toBe(503);
       } else {
         expect(simulatorStatus.status()).toBe(403);
         expect(await simulatorStatus.json()).toEqual({ error: "forbidden" });
@@ -857,6 +871,9 @@ for (const role of expectedRoles) {
         );
         expect(simulatorExecution.status()).toBe(403);
         expect(await simulatorExecution.json()).toEqual({ error: "forbidden" });
+        expect(inventoryStatus.status()).toBe(403);
+        expect(weekendForecastStatus.status()).toBe(403);
+        expect(weekendForecastWrite.status()).toBe(403);
       }
 
       const disabledApiProbes = [
@@ -966,11 +983,12 @@ for (const role of expectedRoles) {
           "/app/simulacao/caixa",
           "/app/simulacao/tabela-direta",
           "/app/simulacao/tabela-investidor",
+          "/app/simulacao/tabela",
         ]) {
-          await expect(page.locator(`main a[href="${route}"]`)).toHaveCount(0);
+          await expect(page.locator(`main a[href="${route}"]`)).toHaveCount(1);
         }
-        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(4);
-        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(4);
+        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(0);
+        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(0);
         reportProgress("simulator-release-gates");
       }
 
@@ -1121,6 +1139,13 @@ test("v3 follows the isolated gate while Qlik relay and commercial engines remai
   });
   expect(officialSimulator.status()).toBe(401);
   await expect(officialSimulator.json()).resolves.toEqual({ error: "unauthenticated" });
+  for (const response of [
+    await request.get("/api/inventory"),
+    await request.get("/api/weekend-forecast?week=2026-08-24"),
+    await request.post("/api/weekend-forecast", { data: { schemaVersion: 1 } }),
+  ]) {
+    expect(response.status()).toBe(401);
+  }
 });
 
 test("isolated homologation exposes its safety controls without sharing production cookies", async ({
@@ -1149,7 +1174,9 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("WF13 runs only for Master while other simulators stay blocked", async ({ browser }) => {
+test("five server-side simulators run only for Master in the isolated canary", async ({
+  browser,
+}) => {
   await withRolePage(browser, "master", async (page) => {
     const status = await page.request.get("/api/official-simulator/associativo-fluxo-linear");
     expect(status.status()).toBe(200);
@@ -1259,18 +1286,107 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     await expect(firstAnnual).not.toHaveAttribute("aria-invalid", "true");
     await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
 
-    for (const simulator of [
-      "calcular-documentacao",
-      "caixa",
-      "tabela-direta",
-      "tabela-investidor",
-    ]) {
-      const response = await page.goto(`/app/simulacao/${simulator}`);
-      expect(response?.status()).toBe(403);
+    const canaryCases = [
+      {
+        slug: "calcular-documentacao",
+        engineKey: "simulator.wf16",
+        expectedOk: true,
+        input: {
+          businessUnit: "direcional",
+          modality: "mcmv",
+          firstProperty: true,
+          salePrice: "300000",
+          appraisalValue: "320000",
+          financing: "240000",
+          income: "8000",
+          baseDate: "2026-08-28",
+          requestedFirstInstallment: "",
+        },
+      },
+      {
+        slug: "caixa",
+        engineKey: "simulator.caixa",
+        expectedOk: true,
+        input: {
+          income: "5000",
+          approvedPayment: "",
+          propertyValue: "300000",
+          ownFunds: "30000",
+          fgts: "",
+          birthDate: "1990-01-01",
+          asOf: "2026-08-28",
+          state: "SP",
+          city: "São Paulo",
+          cityLimit: "300000",
+          populationFactor: "1",
+          term: "360",
+          product: "mcmv",
+          system: "price",
+          hasFgts36: false,
+          previousSubsidy: false,
+          socialFactor: true,
+          inConstruction: false,
+        },
+      },
+      {
+        slug: "tabela-direta",
+        engineKey: "simulator.wf14",
+        expectedOk: true,
+        input: {
+          developmentName: "Empreendimento sintético",
+          businessUnit: "direcional",
+          product: "Unidade sintética",
+          plant: "2 dormitórios",
+          description: "Caso de ouro sem dado real",
+          propertyValue: "300000",
+          discount: "0",
+          income: "20000",
+          baseDate: "2026-08-28",
+          workEndDate: "2028-08-28",
+        },
+      },
+      {
+        slug: "tabela-investidor",
+        engineKey: "simulator.wf15",
+        expectedOk: false,
+        input: {
+          selectedUnitId: "SYNTHETIC-UNTRUSTED-UNIT",
+          inventoryMatch: false,
+          propertyValue: "300000",
+          discountAuthorized: false,
+          discount: "",
+          income: "20000",
+          baseDate: "2026-08-28",
+          completionDate: "2028-12-31",
+        },
+      },
+    ] as const;
+    for (const canaryCase of canaryCases) {
+      const statusResponse = await page.request.get(`/api/official-simulator/${canaryCase.slug}`);
+      expect(statusResponse.status()).toBe(200);
+      expect(await statusResponse.json()).toMatchObject({
+        engineKey: canaryCase.engineKey,
+        executionEnabled: true,
+      });
+      const calculation = await page.request.post(`/api/official-simulator/${canaryCase.slug}`, {
+        headers: { origin: qaTarget.origin },
+        data: { schemaVersion: 1, input: canaryCase.input },
+      });
+      expect(calculation.status()).toBe(200);
+      expect(await calculation.json()).toMatchObject({
+        engineKey: canaryCase.engineKey,
+        result: { ok: canaryCase.expectedOk, provenance: "legacy-reference-2026-08-28" },
+      });
+
+      const response = await page.goto(`/app/simulacao/${canaryCase.slug}`);
+      expect(response?.status()).toBe(200);
       await expect(
-        page.getByRole("heading", { level: 1, name: forbiddenHeading, exact: true }),
+        page.getByRole("heading", {
+          name: "Referência legada em validação Master",
+          exact: true,
+        }),
       ).toBeVisible();
-      await expect(page.getByRole("button", { name: /^Calcular/u })).toHaveCount(0);
+      await expect(page.locator('button[type="submit"][data-cta-state="enabled"]')).toHaveCount(1);
     }
 
     await page.goto("/app");

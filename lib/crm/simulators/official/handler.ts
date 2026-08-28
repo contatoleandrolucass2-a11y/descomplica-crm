@@ -21,7 +21,11 @@ import {
   type OfficialSimulatorRuntimeConfiguration,
 } from "./config";
 import { emitOfficialSimulatorTelemetry, type OfficialSimulatorTelemetryEvent } from "./telemetry";
+import { calculateCaixa, CAIXA_FORMULA, caixaInputSchema } from "./caixa";
 import { calculateWf13, WF13_FORMULA, wf13InputSchema } from "./wf13";
+import { calculateWf14, WF14_FORMULA, wf14InputSchema } from "./wf14";
+import { calculateWf15, WF15_FORMULA, wf15InputSchema } from "./wf15";
+import { calculateWf16, WF16_FORMULA, wf16InputSchema } from "./wf16";
 
 export const OFFICIAL_SIMULATOR_MAX_BODY_BYTES = 64_000;
 
@@ -46,6 +50,38 @@ const calculators: Partial<Record<OfficialSimulatorSlug, Calculator>> = {
     sourceSha256: WF13_FORMULA.sourceSha256,
     execute(input, today) {
       return calculateWf13(wf13InputSchema.parse(input), { today });
+    },
+  },
+  "calcular-documentacao": {
+    engineKey: "simulator.wf16",
+    formulaVersion: WF16_FORMULA.version,
+    sourceSha256: WF16_FORMULA.sourceSha256,
+    execute(input) {
+      return calculateWf16(wf16InputSchema.parse(input));
+    },
+  },
+  caixa: {
+    engineKey: "simulator.caixa",
+    formulaVersion: CAIXA_FORMULA.version,
+    sourceSha256: CAIXA_FORMULA.sourceSha256,
+    execute(input) {
+      return calculateCaixa(caixaInputSchema.parse(input));
+    },
+  },
+  "tabela-direta": {
+    engineKey: "simulator.wf14",
+    formulaVersion: WF14_FORMULA.version,
+    sourceSha256: WF14_FORMULA.sourceSha256,
+    execute(input) {
+      return calculateWf14(wf14InputSchema.parse(input));
+    },
+  },
+  "tabela-investidor": {
+    engineKey: "simulator.wf15",
+    formulaVersion: WF15_FORMULA.version,
+    sourceSha256: WF15_FORMULA.sourceSha256,
+    execute(input) {
+      return calculateWf15(wf15InputSchema.parse(input));
     },
   },
 };

@@ -17,6 +17,7 @@ const APP_SURFACE_PERMISSIONS = [
   "crm.read_model_v3.partnerships.view",
   "crm.read_model_v3.stock.view",
   "crm.simulators.view",
+  "crm.dialer.view",
   "crm.settings.view",
   "crm.settings.manage",
 ] as const satisfies readonly PermissionKey[];
