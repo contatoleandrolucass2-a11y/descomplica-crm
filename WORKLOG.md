@@ -31,6 +31,9 @@
   bloqueado. O detector passou a usar o catálogo exato e o motivo associado ao
   botão. Quando a fonte de estoque está desligada, a página renderiza o estado
   indisponível no servidor e não dispara um `503` esperado no navegador.
+- A recaptura limpa no commit `2868b44` promoveu atomicamente a baseline do
+  canário legado: 168 checks responsivos, 96 de tema, 216 Axe/comparações e
+  120 checks de zoom. Conta e fixtures sintéticas foram removidas no `finally`.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 

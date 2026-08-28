@@ -18,7 +18,7 @@ Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
 cada imagem está em [`manifest.json`](./manifest.json).
 O QA local autenticado está em
-[`authenticated-results.json`](./authenticated-results.json); suas 192 capturas
+[`authenticated-results.json`](./authenticated-results.json); suas 216 capturas
 ficam em [`target-authenticated`](./target-authenticated/).
 
 A baseline canônica continua comprovando todos os simuladores bloqueados. Quando
@@ -146,28 +146,28 @@ O harness executou a captura autenticada local, limpa e transacional com:
 
 - sete viewports: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `390×844`,
   `360×800` e `320×568`;
-- 21 rotas em tema claro nos sete viewports;
-- as 21 rotas em tema escuro móvel no viewport `390×844`;
+- 24 rotas em tema claro nos sete viewports;
+- as 24 rotas em tema escuro móvel no viewport `390×844`;
 - capturas desktop dos temas claro, equilibrado e escuro para as três páginas
   administrativas, além das amostras visuais já existentes;
 - reflow equivalente a zoom de `80%`, `100%`, `125%`, `150%` e `200%`, sempre
   sobre canvas físico de `1440×900`;
-- reduced motion e Axe nas 147 combinações responsivas, nas 24 amostras desktop
-  de tema e nas 21 combinações mobile dark.
+- reduced motion e Axe nas 168 combinações responsivas, nas 24 amostras desktop
+  de tema e nas 24 combinações mobile dark.
 
-A matriz aprovou 147 capturas responsivas, 45 capturas de tema, 192 auditorias
-de acessibilidade, 192 comparações e 105 checks de zoom. A promoção ocorreu por
+A matriz aprovou 168 capturas responsivas, 96 checks de tema, 216 auditorias
+de acessibilidade, 216 comparações e 120 checks de zoom. A promoção ocorreu por
 rename transacional com rollback, a partir de worktree limpa e sem alteração do
 fingerprint durante a captura.
 
 Resultados aprovados:
 
-- 147/147 checks responsivos: 21 rotas em sete viewports;
-- 84/84 checks de tema: 21 rotas em mobile dark e oito amostras desktop nos
+- 168/168 checks responsivos: 24 rotas em sete viewports;
+- 96/96 checks de tema: 24 rotas em mobile dark e 24 rotas desktop nos
   temas claro, equilibrado e escuro;
-- 192/192 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
+- 216/216 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
   de tema, sem violações;
-- 105/105 checks de zoom: 21 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
+- 120/120 checks de zoom: 24 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
 - disclosure aberto por teclado, fechado com `Escape`, foco devolvido e `Tab`
   alcançando controle interativo;
 - campo obrigatório de simulador sinalizado após blur com `aria-invalid`,
@@ -178,8 +178,8 @@ Resultados aprovados:
 - zero colisão entre navegação e identidade de sessão, com truncamento pronto
   para nomes longos;
 - CTAs habilitado, bloqueado e indisponível com estilos computados distintos;
-- 147 capturas rota×viewport e 45 amostras de tema, sem metadados;
-- 192/192 comparações contra o baseline versionado dentro do limiar máximo de 1%
+- 168 capturas rota×viewport e 48 amostras de tema, sem metadados;
+- 216/216 comparações contra o baseline versionado dentro do limiar máximo de 1%
   de pixels alterados, com tolerância de 16 níveis por canal.
 
 As capturas autenticadas usam somente identidades e valores sintéticos com
@@ -233,7 +233,7 @@ O modo padrão nunca altera a baseline versionada. Capturas e diagnóstico da
 execução ficam em `test-results/authenticated-visual/`, ignorado pelo Git. O
 modo `--update-baseline` também exige que a baseline inicial corresponda ao
 `HEAD` e só a promove, por troca atômica com rollback, depois de todos os checks
-funcionais e de acessibilidade passarem. Hashes dos 192 arquivos usados ficam
+funcionais e de acessibilidade passarem. Hashes dos 216 arquivos usados ficam
 registrados na evidência; uma falha nunca atualiza a baseline.
 
 ## Estados do gate final

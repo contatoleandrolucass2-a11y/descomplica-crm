@@ -53,18 +53,7 @@ const expectedProtectedRoutes = [
   "/admin/paginas",
 ];
 
-const runtimeGatedRoutes = new Set([
-  "/app/simulacao/calcular-documentacao",
-  "/app/simulacao/caixa",
-  "/app/simulacao/tabela-direta",
-  "/app/simulacao/tabela-investidor",
-  "/app/simulacao/tabela",
-  "/app/discador",
-  "/app/discador/previsao-final-de-semana",
-]);
-const expectedReleasedProtectedRoutes = expectedProtectedRoutes.filter(
-  (route) => !runtimeGatedRoutes.has(route),
-);
+const expectedReleasedProtectedRoutes = expectedProtectedRoutes;
 
 const expectedExpandedViewports = [
   { key: "desktop-1440x900", width: 1440, height: 900 },
@@ -283,7 +272,7 @@ describe("versioned reference parity catalog", () => {
     expect(visualHarness).toContain('method: "same-filesystem transactional rename with rollback"');
     expect(referenceQaReadme).toContain("Matriz autenticada aprovada no SHA de fechamento");
     expect(referenceQaReadme).toContain(
-      "A matriz aprovou 147 capturas responsivas, 45 capturas de tema, 192 auditorias",
+      "A matriz aprovou 168 capturas responsivas, 96 checks de tema, 216 auditorias",
     );
   });
 
@@ -405,7 +394,8 @@ describe("versioned reference parity catalog", () => {
           !check.horizontalOverflow &&
           !check.topbarCollision &&
           check.identityTruncationReady &&
-          check.blockedActionDistinct &&
+          (check.expectedSimulatorState !== "blocked" || check.blockedActionDistinct) &&
+          (check.expectedSimulatorState !== "enabled" || check.simulatorActionEnabled) &&
           check.unavailableActionDistinct &&
           check.consoleErrorCount === 0 &&
           check.pageErrorCount === 0,
