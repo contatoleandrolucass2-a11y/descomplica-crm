@@ -3,6 +3,7 @@ import { forbidden } from "next/navigation";
 import { DataState, PageHeader } from "@/app/(protected)/app/_components/analytics";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { getProtectedPageGate, protectedPageGateIsReleased } from "@/lib/authorization/page-gates";
+import { inventorySourceIsConfigured } from "@/lib/crm/inventory/handler";
 
 import { InventoryTable } from "./_components/InventoryTable";
 import styles from "./tabelao.module.css";
@@ -16,6 +17,7 @@ export default async function TabelaoPage() {
   if (authorization.roleKey !== "master" || !pageGate || !protectedPageGateIsReleased(pageGate)) {
     forbidden();
   }
+  const inventoryConfigured = inventorySourceIsConfigured();
 
   return (
     <main className={styles.page}>
@@ -37,7 +39,15 @@ export default async function TabelaoPage() {
             <h2 id="inventory-title">Empreendimentos, plantas e menores valores</h2>
             <span>Sem combinações repetidas. Nenhuma reserva é inferida.</span>
           </div>
-          <InventoryTable />
+          {inventoryConfigured ? (
+            <InventoryTable />
+          ) : (
+            <DataState
+              variant="unavailable"
+              title="Estoque temporariamente indisponível"
+              description="Nenhuma disponibilidade, reserva ou condição comercial foi presumida."
+            />
+          )}
         </section>
       </div>
     </main>

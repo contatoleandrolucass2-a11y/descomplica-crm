@@ -8,7 +8,11 @@ import {
 } from "@/lib/crm/dialer/handler";
 import { weekendForecastWriteSchema } from "@/lib/crm/dialer/weekend-forecast";
 import { reconcileInventoryItems, type InventoryItem } from "@/lib/crm/inventory/contract";
-import { handleInventoryGet, type InventoryHandlerDependencies } from "@/lib/crm/inventory/handler";
+import {
+  handleInventoryGet,
+  inventorySourceIsConfigured,
+  type InventoryHandlerDependencies,
+} from "@/lib/crm/inventory/handler";
 import {
   getLegacyMigrationRuntimeConfiguration,
   legacyMigrationModuleIsEnabled,
@@ -73,6 +77,17 @@ describe("flags da migração legado", () => {
 });
 
 describe("contrato seguro do Tabelão", () => {
+  it("detecta configuração completa sem expor a origem ou o segredo", () => {
+    expect(inventorySourceIsConfigured({ CRM_INVENTORY_RUNTIME_MODE: "off" })).toBe(false);
+    expect(
+      inventorySourceIsConfigured({
+        CRM_INVENTORY_RUNTIME_MODE: "active",
+        CRM_INVENTORY_SOURCE_URL: "https://inventory.example.test/v1/items",
+        CRM_INVENTORY_SOURCE_AUTH_FILE: "/run/secrets/inventory_source_auth",
+      }),
+    ).toBe(true);
+  });
+
   const items: InventoryItem[] = [
     {
       businessUnit: "Direcional",

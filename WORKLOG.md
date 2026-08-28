@@ -26,6 +26,11 @@
 - Baseline inicial, pgTAP e E2E local foram executados com dados sintéticos;
   a matriz visual cobre também o viewport obrigatório `360×800`. Evidências
   finais, CI e smoke HTTPS serão registrados no SHA publicado.
+- A primeira recaptura visual identificou duas falhas do próprio gate: Tabelão
+  era classificado como calculadora e placeholders de resultado pareciam CTA
+  bloqueado. O detector passou a usar o catálogo exato e o motivo associado ao
+  botão. Quando a fonte de estoque está desligada, a página renderiza o estado
+  indisponível no servidor e não dispara um `503` esperado no navegador.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 

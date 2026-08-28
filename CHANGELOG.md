@@ -16,6 +16,8 @@
 - Mantém recuperação de senha e MFA à frente do guard RBAC pre-stream: contexto
   comum vazio continua negado, enquanto sessões em quarentena chegam somente às
   rotas de redefinição/AAL2. A matriz visual inclui `360×800`.
+- Evita chamada client-side ao estoque quando sua configuração privada está
+  desligada; Tabelão falha fechado no SSR, sem falso erro de console ou HTTP 5xx.
 - Mantém o callback direto por `TokenHash` e adiciona compatibilidade segura
   com o `ConfirmationURL` padrão do Supabase hospedado: somente auth code UUID
   v4 PKCE é trocado, e a redefinição continua exigindo assurance recente de

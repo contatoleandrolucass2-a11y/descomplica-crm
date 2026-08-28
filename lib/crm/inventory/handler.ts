@@ -76,6 +76,12 @@ function getInventoryConfiguration(
   return { available: true, sourceUrl, authFile };
 }
 
+export function inventorySourceIsConfigured(
+  environment: InventoryEnvironment = process.env,
+): boolean {
+  return getInventoryConfiguration(environment).available;
+}
+
 async function readRootOnlyAuth(path: string): Promise<string> {
   const metadata = await stat(path);
   if (

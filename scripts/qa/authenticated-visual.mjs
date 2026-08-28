@@ -654,7 +654,7 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
   );
   await page.evaluate(() => document.fonts.ready);
 
-  const isSimulatorWorkspace = route.startsWith("/app/simulacao/");
+  const isSimulatorWorkspace = simulatorRuntimeKeysByRoute.has(route);
   const expectsEnabledSimulatorAction = enabledSimulatorRoutes.has(route);
   const snapshot = await page.evaluate((simulatorWorkspace) => {
     const text = document.body.innerText;
@@ -745,8 +745,7 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
       simulatorActionEnabled: Boolean(enabledAction) && !enabledAction?.disabled,
       simulatorFormActionPresent: simulatorForm?.hasAttribute("action") ?? false,
       blockedCalculationMessagePresent:
-        !simulatorWorkspace ||
-        text.includes("Cálculo temporariamente indisponível — regra aguardando validação"),
+        !simulatorWorkspace || Boolean(document.querySelector("#calculation-blocked-reason")),
       blockedActionDistinct:
         !simulatorWorkspace ||
         (Boolean(blockedAction?.querySelector("svg")) &&
