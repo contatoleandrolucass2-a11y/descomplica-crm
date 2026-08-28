@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-08-28 — recovery hospedado sem SMTP próprio
+
+- O preflight produtivo comprovou que o Supabase hospedado usa o mailer padrão
+  e recusa template customizado sem SMTP próprio. Nenhuma credencial SMTP foi
+  inventada e nenhum serviço pago foi criado.
+- O callback agora preserva o contrato `TokenHash` homologado e aceita também
+  o auth code UUID v4 do `ConfirmationURL` padrão. Após a troca PKCE, claims de
+  recovery recentes continuam obrigatórias; callbacks ambíguos, OAuth/login e
+  formatos divergentes falham fechados.
+- Nginx continua suprimindo access/error logs somente em `/auth/callback`, de
+  modo que nem o token hash nem o code aparecem nos logs do proxy.
+
 ## 2026-08-27 — PR #49: navegação do canário WF13
 
 - O smoke HTTPS mostrou que a navegação interna do WF13 ainda criava links para quatro páginas `releaseEnabled=false`; o prefetch recebia `403` e gerava ruído de console tardio.

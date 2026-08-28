@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-28
+
+- Mantém o callback direto por `TokenHash` e adiciona compatibilidade segura
+  com o `ConfirmationURL` padrão do Supabase hospedado: somente auth code UUID
+  v4 PKCE é trocado, e a redefinição continua exigindo assurance recente de
+  recuperação. A location exata permanece sem logs de query.
+
 ## 2026-08-27
 
 - Impede o prefetch das quatro rotas de simuladores ainda bloqueadas no canário WF13, mantendo-as identificadas como indisponíveis e sem ampliar a matriz RBAC aprovada.

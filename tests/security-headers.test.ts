@@ -72,7 +72,7 @@ describe("security headers regression", () => {
     }
   });
 
-  it("verifies recovery token hashes by POST and never routes them through gateway queries", async () => {
+  it("supports no-log token-hash and hosted PKCE recovery callbacks", async () => {
     const [
       callback,
       template,
@@ -94,7 +94,9 @@ describe("security headers regression", () => {
     expect(callback).toContain("supabase.auth.verifyOtp({");
     expect(callback).toContain('type: "recovery"');
     expect(callback).toContain("isRecoveryTokenHash(tokenHash)");
-    expect(callback).not.toContain("exchangeCodeForSession");
+    expect(callback).toContain("isSupabasePkceAuthCode(code)");
+    expect(callback).toContain("exchangeCodeForSession(code)");
+    expect(callback).toContain("isRecoveryRedirect(data)");
     expect(template).toContain("{{ .RedirectTo }}?token_hash={{ .TokenHash }}");
     expect(template).not.toContain("{{ .ConfirmationURL }}");
     expect(template).not.toContain("/auth/v1/verify");

@@ -17,7 +17,7 @@ import {
   hasRecoveryAuthenticationMethod,
   PASSWORD_RECOVERY_ASSURANCE_MAX_AGE_SECONDS,
 } from "../lib/auth/mfa/assurance";
-import { isRecoveryTokenHash } from "../lib/auth/recovery-token";
+import { isRecoveryTokenHash, isSupabasePkceAuthCode } from "../lib/auth/recovery-token";
 import { passwordSchema } from "../lib/auth/schemas/password";
 import { passwordRecoveryRequestSchema, passwordResetSchema } from "../lib/auth/schemas/recovery";
 import {
@@ -41,6 +41,14 @@ describe("password and recovery schemas", () => {
     expect(isRecoveryTokenHash("A".repeat(56))).toBe(false);
     expect(isRecoveryTokenHash("a".repeat(55))).toBe(false);
     expect(isRecoveryTokenHash(undefined)).toBe(false);
+  });
+
+  it("accepts only the current Supabase v4 PKCE auth-code shape", () => {
+    expect(isSupabasePkceAuthCode("123e4567-e89b-42d3-a456-426614174000")).toBe(true);
+    expect(isSupabasePkceAuthCode("123e4567-e89b-12d3-a456-426614174000")).toBe(false);
+    expect(isSupabasePkceAuthCode("123e4567-e89b-42d3-c456-426614174000")).toBe(false);
+    expect(isSupabasePkceAuthCode("invalid")).toBe(false);
+    expect(isSupabasePkceAuthCode(undefined)).toBe(false);
   });
 
   it("accepts 12 and 128 characters with every required class", () => {

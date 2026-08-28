@@ -18,10 +18,16 @@ integrações, read model v3, relay, motores ou políticas comerciais.
 2. O servidor chama `resetPasswordForEmail` somente após validar a entrada e resolver
    um callback fixo a partir de `APP_ORIGIN`. Nenhum host, protocolo ou caminho vindo da
    requisição é usado para construir o callback.
-3. O template de recovery monta diretamente `/auth/callback` com o `TokenHash`.
+3. O template próprio de recovery monta diretamente `/auth/callback` com o `TokenHash`.
    O callback aceita somente SHA-224 em 56 caracteres hexadecimais, puro no fluxo
    implícito ou com o prefixo oficial `pkce_`, e `type=recovery`; verifica por
    `verifyOtp` via POST/body e nunca envia o hash em uma query ao gateway do Auth.
+   Em projeto hospedado que ainda usa o template padrão `ConfirmationURL`, o callback
+   também aceita exclusivamente o auth code UUID v4 emitido pelo fluxo PKCE atual e
+   o troca por sessão com `exchangeCodeForSession`. O retorno precisa declarar
+   `redirectType=recovery`; em ambos os contratos, a sessão só prossegue quando as
+   claims confirmam método de recuperação recente. Códigos de login, magic link ou
+   OAuth não entram no fluxo de redefinição.
    A sessão resultante é temporária, exige AMR estruturado `otp` (emitido pelo
    `verifyOtp` atual) ou `recovery` compatível, aplica `no-store` e envia
    `Referrer-Policy: no-referrer`. Esses métodos ficam em quarentena no SSR, APIs,
