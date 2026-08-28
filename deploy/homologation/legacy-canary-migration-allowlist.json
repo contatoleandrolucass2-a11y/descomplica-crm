@@ -30,7 +30,9 @@
     "20260810201703",
     "20260811120000",
     "20260813143000",
-    "20260814045436"
+    "20260814045436",
+    "20260824230058",
+    "20260824230100"
   ],
   "nonDeployableRepositoryVersions": [
     "20260813115335",
@@ -42,21 +44,24 @@
     "20260813160418",
     "20260813161959",
     "20260813172800",
-    "20260813192928",
-    "20260828135947"
+    "20260813192928"
   ],
-  "candidates": [
+  "foundationCandidates": [
     {
       "version": "20260824230058",
       "name": "auth_mfa_legal_foundation",
-      "file": "20260824230058_auth_mfa_legal_foundation.sql",
       "sha256": "b601be966e6213778def6d9704117feeb45ee129fca5c01f7e16e67ba5c5c164"
     },
     {
       "version": "20260824230100",
       "name": "role_isolation_net_fail_closed",
-      "file": "20260824230100_role_isolation_net_fail_closed.sql",
       "sha256": "dfbe850624b5b9448970812cc5bf28d8a2a2f971442154f41a10544ccd43af1b"
     }
-  ]
+  ],
+  "candidate": {
+    "version": "20260828135947",
+    "name": "legacy_simulators_discador_master_canary",
+    "file": "20260828135947_legacy_simulators_discador_master_canary.sql",
+    "sha256": "e754814a5348b6ef4b805bc20fd3da1866f4724924d24473017c9cf1ae31bde6"
+  }
 }

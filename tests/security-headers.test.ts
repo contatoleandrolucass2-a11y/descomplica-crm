@@ -136,8 +136,9 @@ describe("security headers regression", () => {
     expect(hostedQaLauncher).toContain("containsSensitiveCallbackMaterial(errorLogTail)");
     expect(hostedQaLauncher).toContain("runtimeRecoveryTemplate !== versionedRecoveryTemplate");
     expect(hostedQaLauncher).toContain(
-      '["homologation:migrate:auth-mfa", "verify", "--expected-sha", expectedHead]',
+      '["homologation:migrate:legacy-canary", "verify", "--expected-sha", expectedHead]',
     );
+    expect(hostedQaLauncher).toContain("verifyAuthMfaAndLegacyCanaryMigrationContracts(head)");
     expect(hostedQaLauncher.match(/QA_E2E_MAILPIT_ORIGIN: mailpitOrigin/g)).toHaveLength(1);
     expect(hostedQaLauncher).toContain("async function createEphemeralAccount(");
     expect(hostedQaLauncher).toContain("email_confirm: true");

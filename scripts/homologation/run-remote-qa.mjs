@@ -33,6 +33,7 @@ const origin = "https://homolog.descomplicapro.com.br";
 const mailpitOrigin = "http://127.0.0.1:55324";
 const appContainer = "descomplica-homologation-app";
 const sessionSecretSource = "/etc/descomplica-crm/secrets/homologation-auth-session-cookie-secret";
+const inventorySecretSource = "/etc/descomplica-crm/secrets/homologation-inventory-source-auth";
 const execFileAsync = promisify(execFile);
 const commandEnvironment = Object.freeze({
   PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
@@ -43,6 +44,15 @@ const officialSimulatorKeys = new Set([
   "simulator.caixa",
   "simulator.wf14",
   "simulator.wf15",
+]);
+const legacyMigrationModules = new Set([
+  "simulator.wf16",
+  "simulator.caixa",
+  "simulator.wf14",
+  "simulator.wf15",
+  "simulator.tabelao",
+  "dialer",
+  "dialer.weekend-forecast",
 ]);
 const requiredRoles = Object.freeze([
   "master",
@@ -98,7 +108,7 @@ async function readRuntimeEnvironmentContract() {
   const values = new Map();
   for (const line of contents.split(/\r?\n/u)) {
     const match = line.match(
-      /^(APP_ORIGIN|AUTH_SESSION_COOKIE_SECRET_SOURCE|IMAGE_TAG|SUPABASE_URL)=(.*)$/u,
+      /^(APP_ORIGIN|AUTH_SESSION_COOKIE_SECRET_SOURCE|CRM_INVENTORY_SOURCE_AUTH_SOURCE|IMAGE_TAG|SUPABASE_URL|LEGACY_MIGRATION_RUNTIME_MODE|LEGACY_MIGRATION_ENABLED_MODULES)=(.*)$/u,
     );
     if (!match) continue;
     if (values.has(match[1])) fail("Homologation runtime configuration is duplicated.");
@@ -109,11 +119,16 @@ async function readRuntimeEnvironmentContract() {
     values.get("APP_ORIGIN") !== origin ||
     values.get("SUPABASE_URL") !== "http://kong:8000" ||
     values.get("AUTH_SESSION_COOKIE_SECRET_SOURCE") !== sessionSecretSource ||
+    values.get("CRM_INVENTORY_SOURCE_AUTH_SOURCE") !== inventorySecretSource ||
     !/^[a-f0-9]{40}$/u.test(values.get("IMAGE_TAG") ?? "")
   ) {
     fail("Homologation runtime environment contract is invalid.");
   }
-  return { imageTag: values.get("IMAGE_TAG") };
+  return {
+    imageTag: values.get("IMAGE_TAG"),
+    legacyMigrationMode: values.get("LEGACY_MIGRATION_RUNTIME_MODE"),
+    legacyMigrationModules: values.get("LEGACY_MIGRATION_ENABLED_MODULES"),
+  };
 }
 
 async function captured(command, arguments_, label) {
@@ -271,6 +286,9 @@ async function inspectHostedRuntime(expectedHead) {
     ["QLIK_RELAY_WRITE_ENABLED", "false"],
     ["COMMERCIAL_ENGINE_RUNTIME_MODE", "off"],
     ["COMMERCIAL_ENGINE_ENABLED_KEYS", ""],
+    ["LEGACY_MIGRATION_RUNTIME_MODE", "active"],
+    ["CRM_INVENTORY_RUNTIME_MODE", "off"],
+    ["CRM_INVENTORY_SOURCE_AUTH_FILE", "/run/secrets/inventory_source_auth"],
   ]);
   const officialSimulatorMode = environment.get("OFFICIAL_SIMULATOR_RUNTIME_MODE");
   const officialSimulatorEnabledKeys = environment.get("OFFICIAL_SIMULATOR_ENABLED_KEYS");
@@ -283,12 +301,24 @@ async function inspectHostedRuntime(expectedHead) {
     parsedSimulatorKeys.every((key) => officialSimulatorKeys.has(key)) &&
     ((officialSimulatorMode === "off" && parsedSimulatorKeys.length === 0) ||
       (officialSimulatorMode === "active" && parsedSimulatorKeys.length > 0));
+  const legacyMigrationMode = environment.get("LEGACY_MIGRATION_RUNTIME_MODE");
+  const legacyMigrationEnabledModules = environment.get("LEGACY_MIGRATION_ENABLED_MODULES");
+  const parsedLegacyModules = (legacyMigrationEnabledModules ?? "")
+    .split(",")
+    .map((module) => module.trim())
+    .filter(Boolean);
+  const legacyMigrationContractIsValid =
+    legacyMigrationMode === "active" &&
+    parsedLegacyModules.length === legacyMigrationModules.size &&
+    parsedLegacyModules.length === new Set(parsedLegacyModules).size &&
+    parsedLegacyModules.every((module) => legacyMigrationModules.has(module));
   if (
     [...requiredEnvironment].some(([key, value]) => environment.get(key) !== value) ||
     [...environment.keys()].some((key) => key.startsWith("NEXT_PUBLIC_")) ||
     environment.has("AUTH_SESSION_COOKIE_SECRET") ||
     officialSimulatorEnabledKeys === undefined ||
-    !simulatorContractIsValid
+    !simulatorContractIsValid ||
+    !legacyMigrationContractIsValid
   ) {
     fail("Homologation container runtime contract is invalid.");
   }
@@ -306,6 +336,9 @@ async function inspectHostedRuntime(expectedHead) {
   const sessionSecretMounts = Array.isArray(mounts)
     ? mounts.filter((mount) => mount?.Destination === "/run/secrets/auth_session_cookie_secret")
     : [];
+  const inventorySecretMounts = Array.isArray(mounts)
+    ? mounts.filter((mount) => mount?.Destination === "/run/secrets/inventory_source_auth")
+    : [];
   if (
     unexpected.length !== 0 ||
     !/^sha256:[a-f0-9]{64}$/u.test(imageId ?? "") ||
@@ -317,7 +350,10 @@ async function inspectHostedRuntime(expectedHead) {
     typeof state?.StartedAt !== "string" ||
     sessionSecretMounts.length !== 1 ||
     sessionSecretMounts[0]?.Source !== sessionSecretSource ||
-    sessionSecretMounts[0]?.RW !== false
+    sessionSecretMounts[0]?.RW !== false ||
+    inventorySecretMounts.length !== 1 ||
+    inventorySecretMounts[0]?.Source !== inventorySecretSource ||
+    inventorySecretMounts[0]?.RW !== false
   ) {
     fail("Homologation container is not the expected healthy immutable release.");
   }
@@ -328,6 +364,10 @@ async function inspectHostedRuntime(expectedHead) {
     officialSimulatorEnvironment: {
       OFFICIAL_SIMULATOR_RUNTIME_MODE: officialSimulatorMode,
       OFFICIAL_SIMULATOR_ENABLED_KEYS: officialSimulatorEnabledKeys,
+    },
+    legacyMigrationEnvironment: {
+      LEGACY_MIGRATION_RUNTIME_MODE: legacyMigrationMode,
+      LEGACY_MIGRATION_ENABLED_MODULES: legacyMigrationEnabledModules,
     },
   };
 }
@@ -381,10 +421,10 @@ async function run(command, arguments_, environment) {
   });
 }
 
-async function verifyAuthMfaMigrationContract(expectedHead) {
+async function verifyAuthMfaAndLegacyCanaryMigrationContracts(expectedHead) {
   await run(
     "pnpm",
-    ["homologation:migrate:auth-mfa", "verify", "--expected-sha", expectedHead],
+    ["homologation:migrate:legacy-canary", "verify", "--expected-sha", expectedHead],
     process.env,
   );
 }
@@ -1525,7 +1565,7 @@ async function main() {
   const hostedRuntime = await inspectHostedRuntime(head);
   const officialSimulatorEnvironment = hostedRuntime.officialSimulatorEnvironment;
   await verifyHostedHealth(head, access);
-  await verifyAuthMfaMigrationContract(head);
+  await verifyAuthMfaAndLegacyCanaryMigrationContracts(head);
   const adminClient = createAdminClient(local.apiUrl, local.secretKey);
   const masterUser = await resolveQaUser(adminClient, master.email);
   const masterUserId = assertUuid(masterUser.id);
@@ -1546,6 +1586,7 @@ async function main() {
     HOMOLOGATION_MODE: "true",
     QA_SUPABASE_WORKDIR: runtimeRoot,
     ...officialSimulatorEnvironment,
+    ...hostedRuntime.legacyMigrationEnvironment,
   };
 
   let qaFailure;

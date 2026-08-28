@@ -12,12 +12,22 @@ const configurationDirectory = "/etc/descomplica-crm";
 const destination = "/etc/descomplica-crm/homologation.env";
 const secretDirectory = "/etc/descomplica-crm/secrets";
 const sessionSecretSource = `${secretDirectory}/homologation-auth-session-cookie-secret`;
+const inventorySecretSource = `${secretDirectory}/homologation-inventory-source-auth`;
 const officialSimulatorKeys = new Set([
   "simulator.wf13",
   "simulator.wf16",
   "simulator.caixa",
   "simulator.wf14",
   "simulator.wf15",
+]);
+const legacyMigrationKeys = new Set([
+  "simulator.wf16",
+  "simulator.caixa",
+  "simulator.wf14",
+  "simulator.wf15",
+  "simulator.tabelao",
+  "dialer",
+  "dialer.weekend-forecast",
 ]);
 
 function singleEnvironmentValue(contents, name) {
@@ -51,6 +61,25 @@ export function parseOfficialSimulatorRuntime(contents = "") {
     throw new Error("Official simulator mode and enabled keys are inconsistent.");
   }
   return { mode, enabledKeys: keys.join(",") };
+}
+
+export function parseLegacyMigrationRuntime(contents = "") {
+  const mode = (singleEnvironmentValue(contents, "LEGACY_MIGRATION_RUNTIME_MODE") ?? "off").trim();
+  const rawKeys = singleEnvironmentValue(contents, "LEGACY_MIGRATION_ENABLED_MODULES") ?? "";
+  const keys = rawKeys ? rawKeys.split(",").map((key) => key.trim()) : [];
+  if (!new Set(["off", "active"]).has(mode)) {
+    throw new Error("Legacy migration runtime mode is invalid.");
+  }
+  if (
+    keys.some((key) => !key || !legacyMigrationKeys.has(key)) ||
+    new Set(keys).size !== keys.length
+  ) {
+    throw new Error("Legacy migration enabled modules are invalid.");
+  }
+  if ((mode === "off" && keys.length !== 0) || (mode === "active" && keys.length === 0)) {
+    throw new Error("Legacy migration mode and enabled modules are inconsistent.");
+  }
+  return { mode, enabledModules: keys.join(",") };
 }
 
 async function ensureRootDirectory(directory, mode, label) {
@@ -103,6 +132,27 @@ async function ensureSessionSecret() {
   }
 }
 
+async function ensureInventorySecretPlaceholder() {
+  await ensureRootDirectory(secretDirectory, 0o710, "Runtime secret directory");
+  try {
+    const metadata = await lstat(inventorySecretSource);
+    if (!metadata.isFile() || metadata.isSymbolicLink()) {
+      throw new Error("Inventory source secret must be a regular file.");
+    }
+    await chown(inventorySecretSource, 0, 0);
+    await chmod(inventorySecretSource, 0o640);
+    return;
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      await writeFile(inventorySecretSource, "", { mode: 0o640, flag: "wx" });
+      await chown(inventorySecretSource, 0, 0);
+      await chmod(inventorySecretSource, 0o640);
+      return;
+    }
+    throw error;
+  }
+}
+
 async function readOfficialSimulatorRuntime() {
   try {
     const metadata = await lstat(destination);
@@ -113,6 +163,21 @@ async function readOfficialSimulatorRuntime() {
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
       return parseOfficialSimulatorRuntime();
+    }
+    throw error;
+  }
+}
+
+async function readLegacyMigrationRuntime() {
+  try {
+    const metadata = await lstat(destination);
+    if (!metadata.isFile() || metadata.isSymbolicLink()) {
+      throw new Error("Homologation environment must be a regular file.");
+    }
+    return parseLegacyMigrationRuntime(await readFile(destination, "utf8"));
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
+      return parseLegacyMigrationRuntime();
     }
     throw error;
   }
@@ -166,7 +231,9 @@ async function main() {
 
   await ensureRootDirectory(configurationDirectory, 0o750, "Runtime configuration directory");
   const officialSimulatorRuntime = await readOfficialSimulatorRuntime();
+  const legacyMigrationRuntime = await readLegacyMigrationRuntime();
   await ensureSessionSecret();
+  await ensureInventorySecretPlaceholder();
 
   const { stdout } = await execFileAsync(
     "pnpm",
@@ -194,8 +261,11 @@ async function main() {
     `SUPABASE_PUBLISHABLE_KEY=${publishableKey}`,
     "APP_ORIGIN=https://homolog.descomplicapro.com.br",
     `AUTH_SESSION_COOKIE_SECRET_SOURCE=${sessionSecretSource}`,
+    `CRM_INVENTORY_SOURCE_AUTH_SOURCE=${inventorySecretSource}`,
     `OFFICIAL_SIMULATOR_RUNTIME_MODE=${officialSimulatorRuntime.mode}`,
     `OFFICIAL_SIMULATOR_ENABLED_KEYS=${officialSimulatorRuntime.enabledKeys}`,
+    `LEGACY_MIGRATION_RUNTIME_MODE=${legacyMigrationRuntime.mode}`,
+    `LEGACY_MIGRATION_ENABLED_MODULES=${legacyMigrationRuntime.enabledModules}`,
     "",
   ].join("\n");
   try {
