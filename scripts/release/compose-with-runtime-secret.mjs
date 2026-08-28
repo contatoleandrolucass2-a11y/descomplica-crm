@@ -17,6 +17,7 @@ const environments = {
     environmentGroup: "root",
     environmentMode: 0o600,
     secret: "/etc/descomplica-crm/secrets/homologation-auth-session-cookie-secret",
+    inventorySecret: "/etc/descomplica-crm/secrets/homologation-inventory-source-auth",
   },
   production: {
     compose: path.join(repositoryRoot, "compose.yaml"),
@@ -24,6 +25,7 @@ const environments = {
     environmentGroup: "root",
     environmentMode: 0o600,
     secret: "/etc/descomplica-crm/secrets/production-auth-session-cookie-secret",
+    inventorySecret: "/etc/descomplica-crm/secrets/production-inventory-source-auth",
   },
 };
 
@@ -63,10 +65,9 @@ async function validateOwnedFile(filePath, expectedMode, expectedGroup, label) {
   }
 }
 
-function declaredSecretSource(contents) {
-  const matches = contents
-    .split(/\r?\n/u)
-    .filter((line) => line.startsWith("AUTH_SESSION_COOKIE_SECRET_SOURCE="));
+function declaredSecretSource(contents, name) {
+  const prefix = `${name}=`;
+  const matches = contents.split(/\r?\n/u).filter((line) => line.startsWith(prefix));
   return matches.length === 1 ? matches[0].slice(matches[0].indexOf("=") + 1) : null;
 }
 
@@ -105,10 +106,16 @@ async function main() {
     "Runtime environment file",
   );
   const environmentContents = await readFile(configuration.environment, "utf8");
-  if (declaredSecretSource(environmentContents) !== configuration.secret) {
+  if (
+    declaredSecretSource(environmentContents, "AUTH_SESSION_COOKIE_SECRET_SOURCE") !==
+      configuration.secret ||
+    declaredSecretSource(environmentContents, "CRM_INVENTORY_SOURCE_AUTH_SOURCE") !==
+      configuration.inventorySecret
+  ) {
     fail("Runtime environment does not declare the approved secret source.");
   }
   await validateOwnedFile(configuration.secret, 0o640, 0, "Runtime secret file");
+  await validateOwnedFile(configuration.inventorySecret, 0o640, 0, "Inventory source secret file");
   const secretBytes = await readFile(configuration.secret);
   const contentLength =
     secretBytes.at(-1) === 0x0a

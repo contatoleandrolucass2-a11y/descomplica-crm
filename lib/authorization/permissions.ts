@@ -103,6 +103,11 @@ export const PERMISSIONS = {
     description: "Executa motores oficiais somente na validação controlada do perfil Master.",
     minLevel: 100,
   },
+  "crm.dialer.view": {
+    label: "Visualizar Discador",
+    description: "Acessa o Discador e a previsão em desenvolvimento somente no perfil Master.",
+    minLevel: 100,
+  },
   "crm.commercial_engine.execute": {
     label: "Executar motores comerciais",
     description: "Executa somente motores comerciais não interativos aprovados e vigentes.",

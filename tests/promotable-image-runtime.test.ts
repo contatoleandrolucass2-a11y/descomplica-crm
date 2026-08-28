@@ -7,7 +7,10 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { readSessionPersistenceSecret } from "@/lib/auth/session-persistence";
 import { getSupabaseRuntimeConfiguration } from "@/lib/auth/supabase/runtime";
-import { parseOfficialSimulatorRuntime } from "@/scripts/homologation/configure-app-env.mjs";
+import {
+  parseLegacyMigrationRuntime,
+  parseOfficialSimulatorRuntime,
+} from "@/scripts/homologation/configure-app-env.mjs";
 
 const repositoryRoot = process.cwd();
 const temporaryDirectories: string[] = [];
@@ -192,5 +195,28 @@ describe("homologation official simulator preservation", () => {
     "OFFICIAL_SIMULATOR_RUNTIME_MODE=active\nOFFICIAL_SIMULATOR_ENABLED_KEYS=simulator.wf13\nOFFICIAL_SIMULATOR_RUNTIME_MODE=active",
   ])("fails closed for an invalid existing gate %#", (contents) => {
     expect(() => parseOfficialSimulatorRuntime(contents)).toThrow();
+  });
+});
+
+describe("homologation legacy migration preservation", () => {
+  it("defaults absent flags to off and preserves the exact canary", () => {
+    expect(parseLegacyMigrationRuntime()).toEqual({ mode: "off", enabledModules: "" });
+    expect(
+      parseLegacyMigrationRuntime(
+        [
+          "LEGACY_MIGRATION_RUNTIME_MODE=active",
+          "LEGACY_MIGRATION_ENABLED_MODULES=simulator.wf16, dialer",
+        ].join("\n"),
+      ),
+    ).toEqual({ mode: "active", enabledModules: "simulator.wf16,dialer" });
+  });
+
+  it.each([
+    "LEGACY_MIGRATION_RUNTIME_MODE=active\nLEGACY_MIGRATION_ENABLED_MODULES=",
+    "LEGACY_MIGRATION_RUNTIME_MODE=off\nLEGACY_MIGRATION_ENABLED_MODULES=dialer",
+    "LEGACY_MIGRATION_RUNTIME_MODE=active\nLEGACY_MIGRATION_ENABLED_MODULES=unknown",
+    "LEGACY_MIGRATION_RUNTIME_MODE=active\nLEGACY_MIGRATION_ENABLED_MODULES=dialer,dialer",
+  ])("fails closed for invalid legacy flags %#", (contents) => {
+    expect(() => parseLegacyMigrationRuntime(contents)).toThrow();
   });
 });

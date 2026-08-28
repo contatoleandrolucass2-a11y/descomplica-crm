@@ -299,13 +299,18 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
     detached: true,
     env: {
       ...environmentSubset(["PATH", "HOME", "TZ", "NODE_OPTIONS", "LD_LIBRARY_PATH"]),
-      ...environmentSubset(["OFFICIAL_SIMULATOR_RUNTIME_MODE", "OFFICIAL_SIMULATOR_ENABLED_KEYS"]),
       NODE_ENV: "production",
       APP_ORIGIN: origin,
       AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
       AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
       SUPABASE_URL: apiUrl,
       SUPABASE_PUBLISHABLE_KEY: publishableKey,
+      OFFICIAL_SIMULATOR_RUNTIME_MODE: "active",
+      OFFICIAL_SIMULATOR_ENABLED_KEYS:
+        "simulator.wf13,simulator.wf16,simulator.caixa,simulator.wf14,simulator.wf15",
+      LEGACY_MIGRATION_RUNTIME_MODE: "active",
+      LEGACY_MIGRATION_ENABLED_MODULES:
+        "simulator.wf16,simulator.caixa,simulator.wf14,simulator.wf15,simulator.tabelao,dialer,dialer.weekend-forecast",
     },
     stdio: ["ignore", "ignore", "ignore"],
   });
@@ -1256,6 +1261,8 @@ function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
       "LD_LIBRARY_PATH",
       "OFFICIAL_SIMULATOR_RUNTIME_MODE",
       "OFFICIAL_SIMULATOR_ENABLED_KEYS",
+      "LEGACY_MIGRATION_RUNTIME_MODE",
+      "LEGACY_MIGRATION_ENABLED_MODULES",
     ]),
     QA_AUTH_ORIGIN: origin,
     QA_AUTH_EMAIL: account.email,
@@ -1264,6 +1271,12 @@ function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
     QA_AUTH_SUPABASE_PUBLISHABLE_KEY: publishableKey,
     QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1",
     QA_AUTH_EXPECTED_SOURCE_MARKER: marker,
+    OFFICIAL_SIMULATOR_RUNTIME_MODE: "active",
+    OFFICIAL_SIMULATOR_ENABLED_KEYS:
+      "simulator.wf13,simulator.wf16,simulator.caixa,simulator.wf14,simulator.wf15",
+    LEGACY_MIGRATION_RUNTIME_MODE: "active",
+    LEGACY_MIGRATION_ENABLED_MODULES:
+      "simulator.wf16,simulator.caixa,simulator.wf14,simulator.wf15,simulator.tabelao,dialer,dialer.weekend-forecast",
   };
 
   return new Promise((resolve, reject) => {

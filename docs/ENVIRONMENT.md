@@ -12,6 +12,19 @@ Modo inválido, allowlist vazia, duplicada ou com chave desconhecida falha
 fechado. Essas variáveis não carregam segredo e não substituem autorização no
 banco/servidor.
 
+## Migração legado e estoque
+
+- `LEGACY_MIGRATION_RUNTIME_MODE`: `off` ou `active`;
+- `LEGACY_MIGRATION_ENABLED_MODULES`: allowlist independente das sete páginas;
+- `CRM_INVENTORY_RUNTIME_MODE`: `off` ou `active`;
+- `CRM_INVENTORY_SOURCE_URL`: endpoint HTTPS privado, nunca o domínio legado;
+- `CRM_INVENTORY_SOURCE_AUTH_SOURCE`: arquivo host `root:root 0640`, montado
+  read-only como `/run/secrets/inventory_source_auth`; o caminho interno não é
+  configurável pela aplicação.
+
+Configuração inválida falha fechado. A fonte de estoque não é obrigatória: sem
+contrato privado, Tabelão e WF15 permanecem indisponíveis.
+
 ## Matriz validada
 
 | Ferramenta        |  Versão | Origem/decisão                               |

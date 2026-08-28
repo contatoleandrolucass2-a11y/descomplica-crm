@@ -11,20 +11,20 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  18::bigint,
-  'eighteen platform and CRM permissions are seeded'
+  19::bigint,
+  'nineteen platform and CRM permissions are seeded'
 );
 
 select is(
   (select count(*) from public.app_pages),
-  17::bigint,
+  24::bigint,
   'the catalog contains exactly the approved production pages'
 );
 
 select is(
   (select count(*) from public.app_pages where is_active and is_navigation),
-  17::bigint,
-  'exactly the approved seventeen production pages are active navigation entries'
+  24::bigint,
+  'exactly the approved twenty-four canary pages are active navigation entries'
 );
 
 select is(
@@ -109,8 +109,13 @@ select is(
     where section = 'simulation'
   ),
   'crm.simulation|/app/simulacao|crm.simulators.view|root,'
-    || 'crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view|crm.simulation',
-  'only the simulator hub and WF13 belong to the authorized page hierarchy'
+    || 'crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view|crm.simulation,'
+    || 'crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view|crm.simulation,'
+    || 'crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view|crm.simulation,'
+    || 'crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view|crm.simulation,'
+    || 'crm.simulation.wf15|/app/simulacao/tabela-investidor|crm.simulators.view|crm.simulation,'
+    || 'crm.simulation.tabelao|/app/simulacao/tabela|crm.simulators.view|crm.simulation',
+  'the simulator hub and six Master canary pages form the authorized hierarchy'
 );
 
 select has_function(
@@ -351,7 +356,7 @@ select lives_ok(
 
 select is(
   (select count(*) from public.list_app_pages_for_management()),
-  17::bigint,
+  24::bigint,
   'page manager RPC returns active and inactive catalog entries'
 );
 

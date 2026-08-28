@@ -34,6 +34,11 @@ services:
       COMMERCIAL_ENGINE_DATABASE_URL: "${COMMERCIAL_ENGINE_DATABASE_URL:-}"
       OFFICIAL_SIMULATOR_RUNTIME_MODE: ${OFFICIAL_SIMULATOR_RUNTIME_MODE:-off}
       OFFICIAL_SIMULATOR_ENABLED_KEYS: "${OFFICIAL_SIMULATOR_ENABLED_KEYS:-}"
+      LEGACY_MIGRATION_RUNTIME_MODE: ${LEGACY_MIGRATION_RUNTIME_MODE:-off}
+      LEGACY_MIGRATION_ENABLED_MODULES: "${LEGACY_MIGRATION_ENABLED_MODULES:-}"
+      CRM_INVENTORY_RUNTIME_MODE: ${CRM_INVENTORY_RUNTIME_MODE:-off}
+      CRM_INVENTORY_SOURCE_URL: "${CRM_INVENTORY_SOURCE_URL:-}"
+      CRM_INVENTORY_SOURCE_AUTH_FILE: /run/secrets/inventory_source_auth
       SUPABASE_SECRET_KEY: "${SUPABASE_SECRET_KEY:-}"
       SALESFORCE_INGEST_SECRET: "${SALESFORCE_INGEST_SECRET:-}"
       SALESFORCE_REFRESH_URL: "${SALESFORCE_REFRESH_URL:-}"
@@ -48,6 +53,12 @@ services:
       - type: bind
         source: ${AUTH_SESSION_COOKIE_SECRET_SOURCE:?AUTH_SESSION_COOKIE_SECRET_SOURCE is required}
         target: /run/secrets/auth_session_cookie_secret
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${CRM_INVENTORY_SOURCE_AUTH_SOURCE:-/etc/descomplica-crm/secrets/production-inventory-source-auth}
+        target: /run/secrets/inventory_source_auth
         read_only: true
         bind:
           create_host_path: false

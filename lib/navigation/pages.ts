@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/auth/supabase/server";
 import { requirePermission } from "@/lib/authorization/guards";
 import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
+import { getProtectedPageGate, protectedPageGateIsReleased } from "@/lib/authorization/page-gates";
 import type { AuthorizationContext } from "@/lib/authorization/types";
 
 const appPageRowSchema = z.object({
@@ -87,7 +88,13 @@ export async function getAuthorizedNavigation(context: AuthorizationContext): Pr
   if (!context.permissions.includes("pages.view")) return [];
 
   const pages = await queryPages({ navigationOnly: true, activeOnly: true });
-  return pages.filter((page) => context.permissions.includes(page.permissionKey));
+  return pages.filter((page) => {
+    const gate = getProtectedPageGate(page.path);
+    return (
+      context.permissions.includes(page.permissionKey) &&
+      (!gate || protectedPageGateIsReleased(gate))
+    );
+  });
 }
 
 export async function getManageablePages(): Promise<AppPage[]> {

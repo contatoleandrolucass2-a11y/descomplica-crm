@@ -55,6 +55,10 @@ function checked(values: SimulatorFormValues, id: string): boolean {
   return values[id] === true;
 }
 
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === "string") ? value : [];
+}
+
 function decimal(value: string): string {
   if (!value) return "";
   const compact = value.replace(/\s+/g, "");
@@ -66,30 +70,119 @@ function decimal(value: string): string {
 }
 
 export function officialSimulatorInitialValues(slug: string): SimulatorFormValues {
-  if (slug !== "associativo-fluxo-linear") return {};
-  return {
-    "simulator-official-context-effective-date": localToday(),
-    "simulator-official-context-monthly-due-day": "15",
-    "simulator-pro-soluto-bonus": "0",
-    "simulator-pro-soluto-discount": "0",
-    "simulator-pro-soluto-cashback": "0",
-    "simulator-pro-soluto-cashback-discount": "0",
-    "simulator-pro-soluto-subsidy": "0",
-    "simulator-pro-soluto-fgts": "0",
-    "simulator-pro-soluto-housing-check": "0",
-    "simulator-signals-signal-1": "0",
-    "simulator-signals-signal-2": "0",
-    "simulator-signals-signal-3": "0",
-    "simulator-commercial-policy-ranking": "",
-    "simulator-commercial-policy-approved-limit": "84",
-    "simulator-commercial-policy-requested-installments": "84",
-  };
+  const today = localToday();
+  if (slug === "associativo-fluxo-linear") {
+    return {
+      "simulator-official-context-effective-date": today,
+      "simulator-official-context-monthly-due-day": "15",
+      "simulator-pro-soluto-bonus": "0",
+      "simulator-pro-soluto-discount": "0",
+      "simulator-pro-soluto-cashback": "0",
+      "simulator-pro-soluto-cashback-discount": "0",
+      "simulator-pro-soluto-subsidy": "0",
+      "simulator-pro-soluto-fgts": "0",
+      "simulator-pro-soluto-housing-check": "0",
+      "simulator-signals-signal-1": "0",
+      "simulator-signals-signal-2": "0",
+      "simulator-signals-signal-3": "0",
+      "simulator-commercial-policy-ranking": "",
+      "simulator-commercial-policy-approved-limit": "84",
+      "simulator-commercial-policy-requested-installments": "84",
+    };
+  }
+  if (slug === "calcular-documentacao") {
+    return {};
+  }
+  if (slug === "caixa") {
+    return {
+      "simulator-client-property-approved-payment": "",
+      "simulator-client-property-own-resources": "",
+      "simulator-client-property-fgts": "",
+      "simulator-client-property-applicants": "1",
+      "simulator-financing-term": "360",
+    };
+  }
+  if (slug === "tabela-direta") {
+    return {
+      "simulator-commercial-values-discount": "0",
+    };
+  }
+  if (slug === "tabela-investidor") {
+    return {
+      "simulator-proposal-discount-request": false,
+      "simulator-proposal-income": "",
+    };
+  }
+  return {};
 }
 
 export function buildOfficialSimulatorInput(
   slug: OfficialSimulatorSlug,
   values: SimulatorFormValues,
 ): Record<string, unknown> | null {
+  if (slug === "calcular-documentacao") {
+    const modality = field(values, "simulator-purchase-type-modality").toUpperCase();
+    const firstProperty = field(values, "simulator-purchase-type-first-property");
+    return {
+      businessUnit: field(values, "simulator-profile-builder").toLocaleLowerCase("pt-BR"),
+      modality: modality === "MCMV" ? "mcmv" : modality === "SPBE" ? "spbe" : "",
+      firstProperty: firstProperty === "Sim" ? true : firstProperty === "Não" ? false : null,
+      salePrice: decimal(field(values, "simulator-values-property-value")),
+      appraisalValue: decimal(field(values, "simulator-values-bank-appraisal")),
+      financing: decimal(field(values, "simulator-values-financing")),
+      income: decimal(field(values, "simulator-values-family-income")),
+      baseDate: field(values, "simulator-profile-simulation-date"),
+      requestedFirstInstallment: field(values, "simulator-values-first-installment-date"),
+    };
+  }
+  if (slug === "caixa") {
+    return {
+      income: decimal(field(values, "simulator-client-property-gross-income")),
+      approvedPayment: decimal(field(values, "simulator-client-property-approved-payment")),
+      propertyValue: decimal(field(values, "simulator-client-property-property-value")),
+      ownFunds: decimal(field(values, "simulator-client-property-own-resources")),
+      fgts: decimal(field(values, "simulator-client-property-fgts")),
+      birthDate: field(values, "simulator-financing-birth-date"),
+      asOf: localToday(),
+      state: field(values, "simulator-financing-state"),
+      city: field(values, "simulator-financing-city"),
+      cityLimit: "",
+      populationFactor: "1",
+      term: field(values, "simulator-financing-term"),
+      product: field(values, "simulator-financing-product").toLocaleLowerCase("pt-BR"),
+      system: field(values, "simulator-financing-system").toLocaleLowerCase("pt-BR"),
+      hasFgts36: field(values, "simulator-financing-minimum-fgts-time") === "Sim",
+      previousSubsidy: field(values, "simulator-financing-previous-subsidy") === "Sim",
+      socialFactor: field(values, "simulator-financing-social-factor") === "Sim",
+      inConstruction: field(values, "simulator-financing-off-plan-property") === "Sim",
+    };
+  }
+  if (slug === "tabela-direta") {
+    return {
+      developmentName: field(values, "simulator-property-development"),
+      businessUnit: field(values, "simulator-property-business-unit").toLocaleLowerCase("pt-BR"),
+      product: field(values, "simulator-property-unit"),
+      plant: field(values, "simulator-property-floor-plan"),
+      description: field(values, "simulator-property-description"),
+      propertyValue: decimal(field(values, "simulator-commercial-values-property-value")),
+      discount: decimal(field(values, "simulator-commercial-values-discount")) || "0",
+      income: decimal(field(values, "simulator-commercial-values-monthly-income")),
+      baseDate: field(values, "simulator-dates-simulation-date"),
+      workEndDate: field(values, "simulator-dates-construction-end"),
+    };
+  }
+  if (slug === "tabela-investidor") {
+    return {
+      selectedUnitId: field(values, "simulator-inventory-inventory-search"),
+      inventoryMatch: false,
+      propertyValue: decimal(field(values, "simulator-proposal-property-value")),
+      discountAuthorized: checked(values, "simulator-proposal-discount-request"),
+      discount: "",
+      income: decimal(field(values, "simulator-proposal-income")),
+      baseDate: field(values, "simulator-proposal-simulation-date"),
+      completionDate: field(values, "simulator-proposal-construction-end"),
+    };
+  }
   if (slug !== "associativo-fluxo-linear") return null;
   const entryDate = field(values, "simulator-official-context-effective-date");
   const constructionEnd = field(values, "simulator-official-context-construction-end");
@@ -147,14 +240,104 @@ const percent = new Intl.NumberFormat("pt-BR", {
 const number = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 6 });
 const date = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 
+function currencyFromCents(value: unknown): string | null {
+  if (typeof value !== "string" || !/^\d+$/.test(value)) return null;
+  const cents = BigInt(value);
+  if (cents > BigInt(Number.MAX_SAFE_INTEGER)) return null;
+  return currency.format(Number(cents) / 100);
+}
+
+function booleanLabel(value: unknown): string | null {
+  return typeof value === "boolean" ? (value ? "Sim" : "Não") : null;
+}
+
+function legacyReferenceResultRows(
+  slug: Exclude<OfficialSimulatorSlug, "associativo-fluxo-linear">,
+  result: Record<string, unknown>,
+): OfficialSimulatorResultRow[] | null {
+  const rows: Array<OfficialSimulatorResultRow | null> = [];
+  const money = (label: string, key: string) => {
+    const value = currencyFromCents(result[key]);
+    rows.push(value === null ? null : { label, value });
+  };
+  const numeric = (label: string, key: string) => {
+    const value = finiteNumber(result, key);
+    rows.push(value === null ? null : { label, value: number.format(value) });
+  };
+  const yesNo = (label: string, key: string) => {
+    const value = booleanLabel(result[key]);
+    rows.push(value === null ? null : { label, value });
+  };
+
+  if (slug === "calcular-documentacao") {
+    money("Financiamento máximo", "maximumFinancingCents");
+    money("ITBI", "itbiCents");
+    money("Registro da compra", "purchaseRegistrationCents");
+    money("Registro da alienação", "lienRegistrationCents");
+    money("Despachante", "dispatchFeeCents");
+    money("Seguro CAIXA", "caixaInsuranceCents");
+    money("Total da documentação", "totalCashCents");
+    numeric("Quantidade de parcelas", "installments");
+    money("Valor da parcela", "installmentValueCents");
+    const firstDate = text(result, "firstInstallmentDate");
+    rows.push(
+      firstDate === null
+        ? null
+        : { label: "Primeiro vencimento", value: firstDate ? formatClientDate(firstDate) : "—" },
+    );
+    yesNo("Data corrigida pelo motor", "firstInstallmentCorrected");
+  } else if (slug === "caixa") {
+    money("Prestação aprovada", "approvedPaymentCents");
+    money("Financiamento calculado", "financingCents");
+    money("Financiamento máximo pela renda", "maximumFinancingByIncomeCents");
+    money("Subsídio", "subsidyCents");
+    money("FGTS", "fgtsCents");
+    money("Recursos próprios", "ownFundsCents");
+    money("Total de recursos", "totalResourcesCents");
+    money("Entrada necessária", "entryNeededCents");
+    money("Primeira prestação", "firstPaymentCents");
+    numeric("Prazo", "term");
+    yesNo("Valor do imóvel enquadrado", "fitsProperty");
+  } else {
+    money("Valor real da venda", "valueRealCents");
+    const scenarios = result.scenarios;
+    if (!Array.isArray(scenarios)) return null;
+    for (const [index, rawScenario] of scenarios.entries()) {
+      if (!rawScenario || typeof rawScenario !== "object") return null;
+      const scenario = rawScenario as Record<string, unknown>;
+      const prefix = text(scenario, "label") ?? text(scenario, "code") ?? `Cenário ${index + 1}`;
+      const installment =
+        currencyFromCents(scenario.postKeysPaymentCents) ??
+        currencyFromCents(scenario.installmentValueCents);
+      const balance =
+        currencyFromCents(scenario.postKeysBalanceCents) ??
+        currencyFromCents(scenario.balanceCents);
+      const available = booleanLabel(scenario.approved ?? scenario.available);
+      if (installment === null || balance === null || available === null) return null;
+      rows.push(
+        { label: `${prefix} · parcela`, value: installment },
+        { label: `${prefix} · saldo`, value: balance },
+        { label: `${prefix} · enquadrado`, value: available },
+      );
+    }
+  }
+  return rows.every((row): row is OfficialSimulatorResultRow => row !== null) ? rows : null;
+}
+
+function formatClientDate(value: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "—";
+  return date.format(new Date(`${value}T00:00:00.000Z`));
+}
+
 export function officialSimulatorResultRows(
   slug: OfficialSimulatorSlug,
   rawResult: unknown,
 ): OfficialSimulatorResultRow[] | null {
-  if (slug !== "associativo-fluxo-linear" || !rawResult || typeof rawResult !== "object") {
+  if (!rawResult || typeof rawResult !== "object") {
     return null;
   }
   const result = rawResult as Record<string, unknown>;
+  if (slug !== "associativo-fluxo-linear") return legacyReferenceResultRows(slug, result);
   const values = {
     realSaleValue: finiteNumber(result, "realSaleValue"),
     proSoluto: finiteNumber(result, "proSoluto"),
@@ -228,8 +411,27 @@ export function officialSimulatorMemoryRows(
   slug: OfficialSimulatorSlug,
   rawResult: unknown,
 ): OfficialSimulatorResultRow[] | null {
-  if (slug !== "associativo-fluxo-linear" || !rawResult || typeof rawResult !== "object") {
+  if (!rawResult || typeof rawResult !== "object") {
     return null;
+  }
+  if (slug !== "associativo-fluxo-linear") {
+    const result = rawResult as Record<string, unknown>;
+    const formulaVersion = text(result, "formulaVersion");
+    const provenance = text(result, "provenance");
+    if (!formulaVersion || provenance !== "legacy-reference-2026-08-28") return null;
+    const rows: OfficialSimulatorResultRow[] = [
+      { label: "Versão da fórmula", value: formulaVersion },
+      { label: "Origem auditada", value: provenance },
+    ];
+    if (Array.isArray(result.audit)) {
+      for (const rawItem of result.audit) {
+        if (!rawItem || typeof rawItem !== "object") return null;
+        const item = rawItem as Record<string, unknown>;
+        if (typeof item.label !== "string" || typeof item.ok !== "boolean") return null;
+        rows.push({ label: item.label, value: item.ok ? "Conforme" : "Pendente" });
+      }
+    }
+    return rows;
   }
   const rawMemory = (rawResult as Record<string, unknown>).calculationMemory;
   if (!Array.isArray(rawMemory)) return null;
@@ -325,8 +527,15 @@ export function officialSimulatorViolations(
   slug: OfficialSimulatorSlug,
   rawResult: unknown,
 ): OfficialSimulatorViolation[] | null {
-  if (slug !== "associativo-fluxo-linear" || !rawResult || typeof rawResult !== "object") {
+  if (!rawResult || typeof rawResult !== "object") {
     return null;
+  }
+  if (slug !== "associativo-fluxo-linear") {
+    return stringList((rawResult as Record<string, unknown>).errors).map((message, index) => ({
+      code: `legacy_reference_${index + 1}`,
+      message,
+      fieldPaths: [],
+    }));
   }
   const rawViolations = (rawResult as Record<string, unknown>).violations;
   if (!Array.isArray(rawViolations)) return null;

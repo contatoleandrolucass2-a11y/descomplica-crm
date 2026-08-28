@@ -331,7 +331,7 @@ type OfficialExecutionResult = {
   errors: string[];
   warnings: string[];
   memory: OfficialSimulatorResultRow[];
-  approval: OfficialSimulatorApproval;
+  approval: OfficialSimulatorApproval | null;
   violations: OfficialSimulatorViolation[];
 };
 
@@ -527,11 +527,12 @@ export function SimulatorWorkspace({
         )
       : [];
   const requestedInstallmentsId = "simulator-commercial-policy-requested-installments";
-  const installmentsValidation = validateWf13Installments(
-    String(values[requestedInstallmentsId] ?? ""),
-  );
+  const isWf13 = definition.slug === "associativo-fluxo-linear";
+  const installmentsValidation = isWf13
+    ? validateWf13Installments(String(values[requestedInstallmentsId] ?? ""))
+    : { valid: true as const };
   const clientInstallmentViolation: OfficialSimulatorViolation | null =
-    !installmentsValidation.valid && touchedFields.has(requestedInstallmentsId)
+    isWf13 && !installmentsValidation.valid && touchedFields.has(requestedInstallmentsId)
       ? {
           code: installmentsValidation.code,
           message: installmentsValidation.message,
@@ -551,6 +552,7 @@ export function SimulatorWorkspace({
   const proSolutoSectionInvalid = activeViolations.some((violation) =>
     violation.fieldPaths.includes("section.proSoluto"),
   );
+  const usesLegacyReference = definition.slug !== "associativo-fluxo-linear";
 
   useEffect(() => {
     if (!isOfficialSimulatorSlug(definition.slug)) return;
@@ -645,13 +647,58 @@ export function SimulatorWorkspace({
     setOfficialResult(null);
   }
 
+  function requiredFieldTargets(): Array<{ id: string; group?: string }> {
+    const targets: Array<{ id: string; group?: string }> = [];
+    for (const section of definition.sections) {
+      if (definition.slug === "associativo-fluxo-linear" && section.key === "annuals") continue;
+      const itemNumbers = section.repeatable
+        ? Array.from({ length: repeatCounts[section.key] ?? 1 }, (_, index) => index + 1)
+        : [undefined];
+      for (const itemNumber of itemNumbers) {
+        for (const field of section.fields) {
+          if (
+            field.required !== true ||
+            field.readOnly === true ||
+            !isFieldVisible(section, field, itemNumber)
+          ) {
+            continue;
+          }
+          const id = inputId(section.key, field.key, itemNumber);
+          targets.push(section.group ? { id, group: section.group } : { id });
+        }
+      }
+    }
+    return targets;
+  }
+
+  function focusField(id: string) {
+    const element =
+      document.getElementById(id) ?? document.querySelector<HTMLElement>(`[name="${id}"]`);
+    element?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "center",
+    });
+    element?.focus({ preventScroll: true });
+  }
+
   async function executeOfficialSimulator() {
     if (!executionAllowed || !isOfficialSimulatorSlug(definition.slug)) return;
+    const missingRequired = requiredFieldTargets().filter(({ id }) => {
+      const value = values[id];
+      return typeof value === "boolean" ? value !== true : String(value ?? "").trim() === "";
+    });
+    if (missingRequired.length > 0) {
+      setTouchedFields(
+        (currentFields) => new Set([...currentFields, ...missingRequired.map(({ id }) => id)]),
+      );
+      const first = missingRequired[0]!;
+      if (first.group) setRequestedGroup(first.group);
+      requestAnimationFrame(() => focusField(first.id));
+      return;
+    }
     if (!installmentsValidation.valid) {
       markTouched(requestedInstallmentsId);
-      requestAnimationFrame(() => {
-        document.getElementById(requestedInstallmentsId)?.focus();
-      });
+      requestAnimationFrame(() => focusField(requestedInstallmentsId));
       return;
     }
     const input = buildOfficialSimulatorInput(definition.slug, values);
@@ -679,7 +726,7 @@ export function SimulatorWorkspace({
       if (
         !rows ||
         !memory ||
-        !approval ||
+        (definition.slug === "associativo-fluxo-linear" && !approval) ||
         !violations ||
         typeof envelope.formulaVersion !== "string" ||
         !result ||
@@ -966,7 +1013,7 @@ export function SimulatorWorkspace({
             <div className={styles.headerStatus}>
               <CalculatorIcon />
               <span>
-                <small>Motor de cálculo</small>
+                <small>{usesLegacyReference ? "Referência legada" : "Motor de cálculo"}</small>
                 <strong>{executionAllowed ? "Validação Master" : "Aguardando validação"}</strong>
               </span>
             </div>
@@ -1003,8 +1050,16 @@ export function SimulatorWorkspace({
           <DataState
             variant="warning"
             compact
-            title="Motor oficial em validação Master"
-            description="O cálculo usa a versão oficial identificada na referência viva. O resultado não é persistido nem constitui proposta comercial."
+            title={
+              usesLegacyReference
+                ? "Referência legada em validação Master"
+                : "Motor oficial em validação Master"
+            }
+            description={
+              usesLegacyReference
+                ? "O cálculo reproduz uma versão congelada da referência legada. Não é política comercial oficial, não é persistido e não constitui proposta."
+                : "O cálculo usa a versão oficial validada do WF13. O resultado não é persistido nem constitui proposta comercial."
+            }
           />
         ) : (
           <DataState
@@ -1177,17 +1232,19 @@ export function SimulatorWorkspace({
             </div>
             <p className={styles.resultsDescription}>
               {officialResult
-                ? "Resultado determinístico da fórmula oficial versionada."
+                ? usesLegacyReference
+                  ? "Resultado determinístico da referência legada congelada para validação."
+                  : "Resultado determinístico da fórmula oficial versionada."
                 : "Estrutura pronta para receber somente cálculo oficialmente validado."}
             </p>
-            {officialResult ? (
+            {officialResult?.approval && officialResult.ok ? (
               <ApprovalPanel
                 approval={officialResult.approval}
                 violations={officialResult.violations}
               />
             ) : null}
             <dl className={styles.resultList}>
-              {officialResult
+              {officialResult?.ok
                 ? officialResult.rows.map((item) => (
                     <div key={item.label}>
                       <dt>{item.label}</dt>
@@ -1205,7 +1262,7 @@ export function SimulatorWorkspace({
                     </div>
                   ))}
             </dl>
-            {officialResult ? (
+            {officialResult?.ok ? (
               <details className={styles.resultNotice}>
                 <summary>Memória de cálculo auditável</summary>
                 <dl className={styles.resultList}>
@@ -1226,9 +1283,14 @@ export function SimulatorWorkspace({
                   <strong>
                     {officialResult.ok
                       ? "Cálculo concluído para conferência."
-                      : "Entradas rejeitadas pelas regras oficiais."}
+                      : usesLegacyReference
+                        ? "Entradas rejeitadas pela referência legada; nenhum valor parcial foi aceito."
+                        : "Entradas rejeitadas pelas regras oficiais; nenhum valor parcial foi aceito."}
                   </strong>
-                  <span>Versão da fórmula: {officialResult.formulaVersion}</span>
+                  <span>
+                    {usesLegacyReference ? "Versão da referência" : "Versão da fórmula"}:{" "}
+                    {officialResult.formulaVersion}
+                  </span>
                   {officialResult.errors.map((error) => (
                     <span key={error}>{error}</span>
                   ))}

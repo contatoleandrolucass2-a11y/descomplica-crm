@@ -1,11 +1,11 @@
 begin;
 
-select plan(12);
+select plan(13);
 
 select is(
   (select count(*) from public.app_pages),
-  17::bigint,
-  'the page catalog contains exactly the seventeen approved entries'
+  24::bigint,
+  'the page catalog contains exactly the twenty-four approved canary entries'
 );
 
 select is(
@@ -22,6 +22,8 @@ select is(
     'admin.pages|/admin/paginas|pages.manage|true',
     'admin.users|/admin/usuarios|users.view|true',
     'crm.dashboard|/app|crm.dashboard.view|true',
+    'crm.dialer|/app/discador|crm.dialer.view|true',
+    'crm.dialer.weekend_forecast|/app/discador/previsao-final-de-semana|crm.dialer.view|true',
     'crm.partnerships|/app/canal-de-parcerias|crm.partnerships.view|true',
     'crm.ranking|/app/ranking|crm.ranking.view|true',
     'crm.settings|/app/configuracoes|crm.settings.view|true',
@@ -29,7 +31,12 @@ select is(
     'crm.settings.partnerships|/app/configuracoes/metas/parcerias|crm.settings.manage|true',
     'crm.settings.points|/app/configuracoes/metas/pontos|crm.settings.manage|true',
     'crm.simulation|/app/simulacao|crm.simulators.view|true',
+    'crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view|true',
+    'crm.simulation.tabelao|/app/simulacao/tabela|crm.simulators.view|true',
     'crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view|true',
+    'crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view|true',
+    'crm.simulation.wf15|/app/simulacao/tabela-investidor|crm.simulators.view|true',
+    'crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view|true',
     'crm.stage.appointments|/app/etapas/agendamentos|crm.stages.view|true',
     'crm.stage.folders|/app/etapas/pastas|crm.stages.view|true',
     'crm.stage.opportunities|/app/etapas/oportunidades|crm.stages.view|true',
@@ -41,17 +48,42 @@ select is(
 
 select is(
   (
-    select count(*)
+    select array_agg(key order by key)
     from public.app_pages
     where key in (
+      'crm.dialer',
+      'crm.dialer.weekend_forecast',
       'crm.simulation.caixa',
+      'crm.simulation.tabelao',
       'crm.simulation.wf14',
       'crm.simulation.wf15',
       'crm.simulation.wf16'
     )
   ),
-  0::bigint,
-  'the four restore-only simulator entries are absent from the approved catalog'
+  array[
+    'crm.dialer',
+    'crm.dialer.weekend_forecast',
+    'crm.simulation.caixa',
+    'crm.simulation.tabelao',
+    'crm.simulation.wf14',
+    'crm.simulation.wf15',
+    'crm.simulation.wf16'
+  ]::text[],
+  'the exact seven Master canary pages are present in the approved catalog'
+);
+
+select ok(
+  (
+    select array_agg(role_key order by role_key)
+    from public.role_permissions
+    where permission_key = 'crm.dialer.view'
+  ) = array['master']::text[]
+  and not exists (
+    select 1
+    from public.user_permission_overrides
+    where permission_key = 'crm.dialer.view'
+  ),
+  'the dialer permission is inherited only by Master and has no user override'
 );
 
 select is(
@@ -75,6 +107,8 @@ select is(
     'admin.pages',
     'admin.users',
     'crm.dashboard',
+    'crm.dialer',
+    'crm.dialer.weekend_forecast',
     'crm.partnerships',
     'crm.ranking',
     'crm.settings',
@@ -82,14 +116,19 @@ select is(
     'crm.settings.partnerships',
     'crm.settings.points',
     'crm.simulation',
+    'crm.simulation.caixa',
+    'crm.simulation.tabelao',
     'crm.simulation.wf13',
+    'crm.simulation.wf14',
+    'crm.simulation.wf15',
+    'crm.simulation.wf16',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Master resolves the exact seventeen-page production set'
+  'Master resolves the exact twenty-four-page canary set'
 );
 
 select is(

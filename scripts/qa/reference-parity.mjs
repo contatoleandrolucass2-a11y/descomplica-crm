@@ -78,6 +78,9 @@ const referenceRoutes = [
     key: "simulacao-tabela-investidor",
     route: "/simulacao/tabela-investidor",
   },
+  { key: "simulacao-tabela", route: "/simulacao/tabela" },
+  { key: "discador", route: "/discador" },
+  { key: "previsao-final-de-semana", route: "/previsao-final-de-semana" },
 ];
 
 const protectedRoutes = [
@@ -99,13 +102,19 @@ const protectedRoutes = [
   "/app/simulacao/caixa",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
+  "/app/simulacao/tabela",
+  "/app/discador",
+  "/app/discador/previsao-final-de-semana",
 ];
 
 const viewports = [
   { key: "desktop-1440x900", width: 1440, height: 900 },
   { key: "notebook-1280x720", width: 1280, height: 720 },
+  { key: "tablet-1024x768", width: 1024, height: 768 },
   { key: "tablet-768x1024", width: 768, height: 1024 },
   { key: "mobile-390x844", width: 390, height: 844 },
+  { key: "mobile-360x800", width: 360, height: 800 },
+  { key: "mobile-320x568", width: 320, height: 568 },
 ];
 
 const safeReferenceLabels = [

@@ -22,6 +22,10 @@ export type OfficialSimulatorSlug = keyof typeof OFFICIAL_SIMULATOR_SLUGS;
 
 export const IMPLEMENTED_OFFICIAL_SIMULATORS = [
   "associativo-fluxo-linear",
+  "calcular-documentacao",
+  "caixa",
+  "tabela-direta",
+  "tabela-investidor",
 ] as const satisfies readonly OfficialSimulatorSlug[];
 
 export function isOfficialSimulatorKey(value: string): value is OfficialSimulatorKey {

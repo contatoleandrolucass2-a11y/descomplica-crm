@@ -1,5 +1,54 @@
 # Worklog
 
+## 2026-08-28 — simuladores legados, Tabelão e Discador
+
+- Auditoria GET/HEAD congelou nove superfícies, assets e hashes sem versionar
+  HTML, HAR, cookies ou bundles e sem reproduzir a leitura pública antiga de
+  estoque.
+- WF13 permaneceu no motor oficial. WF16, CAIXA, WF14 e WF15 ganharam contratos
+  Zod estritos, cálculos server-side, centavos, proveniência e casos de ouro da
+  referência `2026-08-28`; valores rejeitados nunca são apresentados como
+  resultado parcial.
+- Tabelão consulta somente um upstream HTTPS privado pelo servidor, reconcilia
+  empreendimento/planta, menor preço, fonte e frescor conservador. Sem fonte
+  autorizada, informa indisponibilidade. WF15 também falha fechado sem vínculo
+  de estoque comprovado.
+- Discador e Previsão foram incorporados ao shell Supabase. GET retorna apenas
+  contrato sintético vazio, POST permanece bloqueado e a interface declara
+  “Página em desenvolvimento”.
+- O Proxy, menus, APIs e migration convergem para flags default-off e matriz
+  `24/14/7/0`. O contexto de autorização com cardinalidade vazia ou ambígua
+  falha fechado antes do streaming; sessões de recuperação e AAL1 com MFA são
+  encaminhadas primeiro às quarentenas de redefinição/AAL2, sem abrir conteúdo.
+- O gate operacional da homologação fixa SHA/hashes, histórico `31 → 32`,
+  invariantes Auth/MFA, backup de quatro artefatos, restore sem rede, sync do
+  runtime, segredo de estoque montado por arquivo e rollback de app/config.
+- Baseline inicial, pgTAP e E2E local foram executados com dados sintéticos;
+  a matriz visual cobre também o viewport obrigatório `360×800`. Evidências
+  finais, CI e smoke HTTPS serão registrados no SHA publicado.
+- A primeira recaptura visual identificou duas falhas do próprio gate: Tabelão
+  era classificado como calculadora e placeholders de resultado pareciam CTA
+  bloqueado. O detector passou a usar o catálogo exato e o motivo associado ao
+  botão. Quando a fonte de estoque está desligada, a página renderiza o estado
+  indisponível no servidor e não dispara um `503` esperado no navegador.
+- A recaptura limpa no commit `2868b44` promoveu atomicamente a baseline do
+  canário legado: 168 checks responsivos, 96 de tema, 216 Axe/comparações e
+  120 checks de zoom. Conta e fixtures sintéticas foram removidas no `finally`.
+- Configuração de estoque ausente e escrita da previsão desligada retornam
+  `404` fail-closed, reservando 5xx para falhas de capacidades realmente ativas
+  e mantendo o smoke do canário sem erro HTTP deliberado.
+- No primeiro backup hospedado, o dump e os artefatos passaram, mas o restore
+  falhou fechado ao copiar um objeto interno do Vault com o papel `postgres`
+  não proprietário. O ensaio sanitizado comprovou `supabase_admin` como papel
+  local necessário; o executor e seu teste foram corrigidos sem ler dados do
+  Vault, e todo diagnóstico descartável foi removido.
+- A primeira aplicação também reverteu integralmente: `postgres` tinha leitura,
+  mas não escrita no catálogo, e um postcondition tentava exigir `FORCE RLS`
+  de 18 tabelas legadas. O restore sem rede comprovou o owner correto; o gate
+  agora escreve como `supabase_admin` e verifica somente as duas tabelas
+  privadas pertencentes à fundação Auth/MFA. História `31`, candidata `0` e
+  container antigo saudável foram confirmados após a falha.
+
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 
 - O preflight produtivo comprovou que o Supabase hospedado usa o mailer padrão
