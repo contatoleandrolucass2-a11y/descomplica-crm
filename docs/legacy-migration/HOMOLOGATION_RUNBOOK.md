@@ -76,6 +76,11 @@ matriz 24/14/7/0 e repete invariantes Auth/MFA. O QA exige imagem/health no SHA,
 zero restart, secrets montados read-only, integrações/motores futuros off e
 limpeza das identidades efêmeras.
 
+O executor conecta ao banco local como `supabase_admin`, owner requerido para o
+catálogo versionado na imagem Supabase atual. Os invariantes Auth/MFA verificam
+`FORCE RLS` somente nas duas tabelas privadas que essa fundação criou; tabelas
+legadas não recebem hardening incidental neste canário.
+
 ## Smoke
 
 - `/api/health` no SHA candidato;

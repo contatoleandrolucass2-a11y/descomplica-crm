@@ -109,7 +109,7 @@ function psql(input, label) {
       "--tuples-only",
       "--no-align",
       "--username",
-      "postgres",
+      "supabase_admin",
       "--dbname",
       "postgres",
     ],

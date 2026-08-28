@@ -196,15 +196,16 @@ begin
     raise exception 'Auth/MFA foundation object postcondition failed' using errcode = '42P01';
   end if;
 
-  if exists (
-       select 1
+  if (
+       select count(*)
        from pg_catalog.pg_class relation
        join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
-       where namespace.nspname = 'public'
+       where namespace.nspname = 'private'
+         and relation.relname in ('legal_acceptances', 'legal_acceptance_requirements')
          and relation.relkind in ('r', 'p')
          and relation.relrowsecurity
-         and not relation.relforcerowsecurity
-     )
+         and relation.relforcerowsecurity
+     ) <> 2
      or pg_catalog.has_function_privilege('anon', 'public.current_session_is_live()', 'EXECUTE')
      or pg_catalog.has_function_privilege('service_role', 'public.current_session_is_live()', 'EXECUTE')
      or not pg_catalog.has_function_privilege('authenticated', 'public.current_session_is_live()', 'EXECUTE')

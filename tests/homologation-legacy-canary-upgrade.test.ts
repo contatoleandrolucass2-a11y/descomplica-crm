@@ -114,7 +114,14 @@ describe("homologation legacy canary migration gate", () => {
     expect(executor).toContain("synthetic-only");
     expect(executor).toContain("homologation-legacy-canary-only");
     expect(executor).toContain("supabase_db_descomplica-homologation");
+    expect(executor).toContain('"--username",\n      "supabase_admin"');
     expect(executor).not.toContain("SUPABASE_DB_URL");
     expect(executor).not.toContain("supabase db push");
+  });
+
+  it("checks only the Auth/MFA-owned RLS tables instead of hardening legacy tables", () => {
+    expect(legacyCanaryPostconditionsSql).toContain("legal_acceptance_requirements");
+    expect(legacyCanaryPostconditionsSql).toContain("relation.relforcerowsecurity");
+    expect(legacyCanaryPostconditionsSql).not.toContain("namespace.nspname = 'public'");
   });
 });

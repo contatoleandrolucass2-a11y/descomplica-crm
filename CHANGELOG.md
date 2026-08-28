@@ -27,6 +27,9 @@
 - Corrige o restore verificável do backup da homologação para usar o papel
   administrativo local proprietário dos objetos do Vault; o container segue
   isolado sem rede e nenhum segredo é lido ou impresso.
+- Executa a migration allowlisted pelo owner local do catálogo e restringe o
+  postcondition de `FORCE RLS` às duas tabelas privadas Auth/MFA, sem alterar
+  as 18 tabelas legadas fora do escopo do canário.
 
 ## 2026-08-27
 

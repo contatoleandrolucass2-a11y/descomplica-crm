@@ -42,6 +42,12 @@
   não proprietário. O ensaio sanitizado comprovou `supabase_admin` como papel
   local necessário; o executor e seu teste foram corrigidos sem ler dados do
   Vault, e todo diagnóstico descartável foi removido.
+- A primeira aplicação também reverteu integralmente: `postgres` tinha leitura,
+  mas não escrita no catálogo, e um postcondition tentava exigir `FORCE RLS`
+  de 18 tabelas legadas. O restore sem rede comprovou o owner correto; o gate
+  agora escreve como `supabase_admin` e verifica somente as duas tabelas
+  privadas pertencentes à fundação Auth/MFA. História `31`, candidata `0` e
+  container antigo saudável foram confirmados após a falha.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 
