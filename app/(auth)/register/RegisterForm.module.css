@@ -51,6 +51,55 @@
   line-height: 1.35;
 }
 
+.passwordHint,
+.legalNote {
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.legalFieldset {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.85rem;
+  padding: 1rem;
+}
+
+.legalFieldset legend {
+  padding-inline: 0.35rem;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.legalChoice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.65rem;
+  color: #334155;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.legalChoice input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.15rem;
+  accent-color: #1d4ed8;
+}
+
+.legalChoice a {
+  color: #1d4ed8;
+  font-weight: 650;
+  text-underline-offset: 0.2rem;
+}
+
+.legalChoice a:hover {
+  text-decoration: underline;
+}
+
 .statusError {
   color: #dc2626;
 }

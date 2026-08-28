@@ -442,22 +442,55 @@ values
 
 select is(
   (
-    select count(*)
+    select string_agg(
+      role_key || ':' || permission_key,
+      ','
+      order by role_key, permission_key
+    )
     from public.role_permissions
-    where role_key <> 'master'
+    where role_key in (
+        'admin', 'broker', 'broker_lead', 'coordinator',
+        'real_estate', 'supervisor', 'user'
+      )
       and permission_key in (
+        'admin.access',
+        'audit.view',
         'crm.dashboard.view',
+        'crm.ingest.manage',
         'crm.stages.view',
         'crm.ranking.view',
         'pages.manage',
+        'pages.view',
+        'permissions.manage',
+        'permissions.view',
+        'roles.manage',
+        'roles.view',
         'crm.settings.view',
         'crm.settings.manage',
         'crm.salesforce.refresh',
-        'crm.ingest.manage'
+        'users.manage',
+        'users.view'
       )
   ),
-  0::bigint,
-  'unscoped v2 commercial and global mutation permissions are Master-only'
+  'admin:admin.access,admin:audit.view,admin:crm.dashboard.view,'
+    || 'admin:crm.ingest.manage,admin:crm.ranking.view,'
+    || 'admin:crm.salesforce.refresh,admin:crm.settings.manage,'
+    || 'admin:crm.settings.view,admin:crm.stages.view,admin:pages.manage,'
+    || 'admin:pages.view,admin:permissions.manage,admin:permissions.view,'
+    || 'admin:roles.manage,admin:roles.view,admin:users.manage,'
+    || 'admin:users.view,broker:crm.dashboard.view,broker:crm.ranking.view,'
+    || 'broker:crm.stages.view,broker:pages.view,'
+    || 'broker_lead:crm.dashboard.view,broker_lead:crm.ranking.view,'
+    || 'broker_lead:crm.stages.view,broker_lead:pages.view,'
+    || 'coordinator:crm.dashboard.view,coordinator:crm.ranking.view,'
+    || 'coordinator:crm.stages.view,coordinator:pages.view,'
+    || 'real_estate:crm.dashboard.view,real_estate:crm.ranking.view,'
+    || 'real_estate:crm.stages.view,real_estate:pages.view,'
+    || 'supervisor:crm.dashboard.view,supervisor:crm.ranking.view,'
+    || 'supervisor:crm.stages.view,supervisor:pages.view,'
+    || 'user:crm.dashboard.view,user:crm.ranking.view,'
+    || 'user:crm.stages.view,user:pages.view',
+  'clean installs preserve the exact inherited production RBAC baseline'
 );
 
 select is(

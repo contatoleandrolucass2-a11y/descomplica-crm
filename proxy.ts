@@ -42,17 +42,12 @@
 //     local services. The combined gate is the only safe signal
 //     for "we are serving real production traffic".
 //
-// Out of scope (M4+):
-//   - No redirects. Real route protection enforcement (per
-//     ROUTE_PROTECTION.md and the B10 verification gate) is
-//     deferred to M4+ once login and verification-pending
-//     surfaces exist. Redirecting before those surfaces exist
-//     would produce loops.
-//   - No branching on user/session state. M3 does not read or
-//     render session material outside the cookie boundary
-//     (AUTH_SECURITY.md > Session Observability Requirements).
-//     Nothing about the user, session, token, cookie, or env is
-//     logged from this file.
+// Authorization boundary:
+//   - Versioned protected pages receive an early permission check so Cache
+//     Components cannot stream an HTTP 200 before a page-level forbidden()
+//     interrupt. Layout/page guards, APIs, RPCs and RLS repeat the check.
+//   - The proxy reads only the authenticated user id and effective permission
+//     keys. It never logs or renders user, session, token, cookie or env data.
 //
 // Route groups note:
 //   - The app/(auth)/ and app/(protected)/ segments are Next.js
@@ -75,27 +70,98 @@ import {
 } from "@/lib/crm/salesforce/config";
 import { applySecurityHeaders } from "@/lib/security/headers";
 import { isHomologationMode } from "@/lib/homologation/config";
+import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 import { NextResponse, type NextRequest } from "next/server";
+import type { PermissionKey } from "@/lib/authorization/permissions";
+
+interface AuthorizationContextRow {
+  permissions?: unknown;
+}
+
+// Cache Components can stream a shared protected shell before a page-level
+// forbidden() interrupt changes the status. Enforce the exact page permission
+// for the versioned route inventory in Proxy as well. Page guards, APIs and RLS
+// remain authoritative and still re-check the same key.
+function permissionRequiredBeforeStreaming(pathname: string): {
+  permission: PermissionKey;
+  releaseEnabled: boolean;
+} | null {
+  const pageGate = getProtectedPageGate(pathname);
+  if (pageGate) return pageGate;
+
+  if (pathname.startsWith("/app/etapas/")) {
+    return { permission: "crm.stages.view", releaseEnabled: true };
+  }
+  if (pathname.startsWith("/app/configuracoes/metas")) {
+    return { permission: "crm.settings.manage", releaseEnabled: true };
+  }
+  if (pathname === "/app/simulacao" || pathname.startsWith("/app/simulacao/")) {
+    return { permission: "crm.simulators.view", releaseEnabled: true };
+  }
+  return null;
+}
+
+function copySessionResponse(source: NextResponse, target: NextResponse) {
+  for (const [name, value] of source.headers) {
+    if (name === "set-cookie" || name.startsWith("x-middleware-")) continue;
+    target.headers.set(name, value);
+  }
+  for (const cookie of source.cookies.getAll()) target.cookies.set(cookie);
+}
+
+function forbiddenBeforeStreaming(request: NextRequest, sessionResponse: NextResponse) {
+  const response = NextResponse.rewrite(new URL("/unauthorized", request.url), { status: 403 });
+  copySessionResponse(sessionResponse, response);
+  return response;
+}
+
+async function lacksEarlyPermission(
+  supabase: Awaited<ReturnType<typeof updateSession>>["supabase"],
+  pageGate: { permission: PermissionKey; releaseEnabled: boolean },
+) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || !user) return false;
+  if (!pageGate.releaseEnabled) return true;
+
+  const { data, error } = await supabase.rpc("get_user_authorization_context", {
+    user_uuid: user.id,
+  });
+  if (error) return true;
+  if (!Array.isArray(data) || data.length === 0) return false;
+  if (data.length !== 1) return true;
+
+  const permissions = (data[0] as AuthorizationContextRow).permissions;
+  return !Array.isArray(permissions) || !permissions.includes(pageGate.permission);
+}
 
 function unavailableSalesforceResponse(request: NextRequest): NextResponse | null {
-  if (
-    request.nextUrl.pathname === "/api/ingest/salesforce" &&
-    !getSalesforceIngestConfiguration().available
-  ) {
-    return NextResponse.json(
-      { error: "ingestion_unavailable" },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
-    );
+  if (request.nextUrl.pathname === "/api/ingest/salesforce") {
+    const configuration = getSalesforceIngestConfiguration();
+    if (!configuration.available) {
+      return NextResponse.json(
+        { error: "ingestion_unavailable" },
+        {
+          status: configuration.enabled ? 503 : 404,
+          headers: { "Cache-Control": "no-store" },
+        },
+      );
+    }
   }
 
-  if (
-    request.nextUrl.pathname === "/api/refresh/salesforce" &&
-    !getSalesforceRefreshConfiguration().available
-  ) {
-    return NextResponse.json(
-      { error: "refresh_unavailable" },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
-    );
+  if (request.nextUrl.pathname === "/api/refresh/salesforce") {
+    const configuration = getSalesforceRefreshConfiguration();
+    if (!configuration.available) {
+      return NextResponse.json(
+        { error: "refresh_unavailable" },
+        {
+          status: configuration.enabled ? 503 : 404,
+          headers: { "Cache-Control": "no-store" },
+        },
+      );
+    }
   }
 
   return null;
@@ -114,10 +180,24 @@ export async function proxy(request: NextRequest) {
     return unavailableResponse;
   }
 
-  const { response } = await updateSession(request);
+  const deferResponseAuthCookies =
+    request.method === "POST" && request.nextUrl.pathname === "/auth/mfa/verify";
+  const { supabase, response: sessionResponse } = await updateSession(request, {
+    deferResponseAuthCookies,
+  });
+  let response = sessionResponse;
+  const earlyPermission =
+    request.method === "GET" || request.method === "HEAD"
+      ? permissionRequiredBeforeStreaming(request.nextUrl.pathname)
+      : null;
+  if (earlyPermission && (await lacksEarlyPermission(supabase, earlyPermission))) {
+    response = forbiddenBeforeStreaming(request, sessionResponse);
+  }
+
   applySecurityHeaders(response.headers, {
     isProd: isSecureProduction,
     noIndex: isHomologationMode(),
+    suppressReferrer: request.nextUrl.pathname === "/auth/callback",
   });
 
   return response;

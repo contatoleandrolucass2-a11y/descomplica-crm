@@ -40,9 +40,9 @@ describe("Salesforce capability flags", () => {
     const ingestResponse = await ingest(new Request(`${endpoint}/api/ingest/salesforce`));
     const refreshResponse = await refresh(new Request(`${endpoint}/api/refresh/salesforce`));
 
-    expect(ingestResponse.status).toBe(503);
+    expect(ingestResponse.status).toBe(404);
     await expect(ingestResponse.json()).resolves.toEqual({ error: "ingestion_unavailable" });
-    expect(refreshResponse.status).toBe(503);
+    expect(refreshResponse.status).toBe(404);
     await expect(refreshResponse.json()).resolves.toEqual({ error: "refresh_unavailable" });
     expect(externalFetch).not.toHaveBeenCalled();
     expect(mocks.authorizeRoute).not.toHaveBeenCalled();
@@ -53,6 +53,29 @@ describe("Salesforce capability flags", () => {
   it("short-circuits disabled Salesforce endpoints before session refresh", async () => {
     vi.stubEnv("SALESFORCE_INGEST_ENABLED", "false");
     vi.stubEnv("SALESFORCE_REFRESH_ENABLED", "false");
+
+    const ingestResponse = await proxy(
+      new NextRequest(`${endpoint}/api/ingest/salesforce`, { method: "POST" }),
+    );
+    const refreshResponse = await proxy(
+      new NextRequest(`${endpoint}/api/refresh/salesforce`, { method: "POST" }),
+    );
+
+    expect(ingestResponse.status).toBe(404);
+    expect(refreshResponse.status).toBe(404);
+    expect(ingestResponse.headers.get("cache-control")).toBe("no-store");
+    expect(refreshResponse.headers.get("cache-control")).toBe("no-store");
+    expect(mocks.updateSession).not.toHaveBeenCalled();
+  });
+
+  it("keeps enabled but incomplete Salesforce endpoints unavailable at the proxy", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SALESFORCE_INGEST_ENABLED", "true");
+    vi.stubEnv("SALESFORCE_INGEST_SECRET", "");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "");
+    vi.stubEnv("SALESFORCE_REFRESH_ENABLED", "true");
+    vi.stubEnv("SALESFORCE_REFRESH_URL", "");
+    vi.stubEnv("SALESFORCE_REFRESH_SECRET", "");
 
     const ingestResponse = await proxy(
       new NextRequest(`${endpoint}/api/ingest/salesforce`, { method: "POST" }),

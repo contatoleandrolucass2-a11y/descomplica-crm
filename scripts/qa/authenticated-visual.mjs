@@ -28,6 +28,12 @@ const environmentLabel = remoteHomologation
 const accountLabel = remoteHomologation
   ? "dedicated persistent synthetic QA account"
   : "dedicated ephemeral QA account";
+const identityEvidencePolicy = Object.freeze({
+  persistedScreenshotsSanitized: remoteHomologation,
+  strategy: remoteHomologation
+    ? "mask visible identity and email regions before persistence"
+    : "local synthetic baseline capture",
+});
 
 function parseMode(argv) {
   if (argv.length === 0) return "verify";
@@ -52,10 +58,6 @@ const routes = [
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
-  "/app/simulacao/calcular-documentacao",
-  "/app/simulacao/caixa",
-  "/app/simulacao/tabela-direta",
-  "/app/simulacao/tabela-investidor",
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
@@ -387,6 +389,61 @@ async function captureComparableScreenshot(page) {
   }
 }
 
+async function capturePersistedScreenshot(page, comparableBuffer) {
+  if (!remoteHomologation) {
+    return comparableBuffer ?? (await page.screenshot({ fullPage: true, animations: "disabled" }));
+  }
+
+  await page.evaluate(() => {
+    const marker = "remote-homologation";
+    const emailPattern =
+      /[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+/iu;
+    const mark = (element) => {
+      if (element instanceof HTMLElement) {
+        element.setAttribute("data-qa-evidence-identity", marker);
+      }
+    };
+
+    for (const element of document.querySelectorAll(
+      "[data-session-identity], [data-account-identity]",
+    )) {
+      mark(element);
+    }
+
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let node = walker.nextNode();
+    while (node) {
+      if (emailPattern.test(node.nodeValue ?? "")) mark(node.parentElement);
+      node = walker.nextNode();
+    }
+
+    for (const element of document.querySelectorAll("[aria-label], [title], input[value]")) {
+      if (
+        ["aria-label", "title", "value"].some((attribute) =>
+          emailPattern.test(element.getAttribute(attribute) ?? ""),
+        )
+      ) {
+        mark(element);
+      }
+    }
+  });
+
+  try {
+    return await page.screenshot({
+      fullPage: true,
+      animations: "disabled",
+      mask: [page.locator('[data-qa-evidence-identity="remote-homologation"]')],
+      maskColor: "#334155",
+    });
+  } finally {
+    await page
+      .locator('[data-qa-evidence-identity="remote-homologation"]')
+      .evaluateAll((elements) => {
+        for (const element of elements) element.removeAttribute("data-qa-evidence-identity");
+      });
+  }
+}
+
 async function compareVisualBaseline(buffer, baselinePath, trackedFiles) {
   const repositoryPath = repositoryRelative(baselinePath);
   if (!trackedFiles.has(repositoryPath)) {
@@ -529,6 +586,16 @@ async function inspectAccessibility(page, route, viewport, theme) {
 
 async function login(page, origin, email, password) {
   await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded" });
+  const acceptAllCookies = page.getByRole("button", {
+    name: "Aceitar todos",
+    exact: true,
+  });
+  if (await acceptAllCookies.isVisible()) {
+    await acceptAllCookies.click();
+    await page
+      .getByRole("button", { name: "Preferências de cookies", exact: true })
+      .waitFor({ state: "visible" });
+  }
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Senha").fill(password);
   await Promise.all([
@@ -556,18 +623,63 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
     const text = document.body.innerText;
     const root = document.documentElement;
     const simulatorForm = simulatorWorkspace ? document.querySelector("main form") : null;
+    const topbarInner = document.querySelector("header > div");
+    const brand = topbarInner?.firstElementChild;
     const navigation = document.querySelector('header nav[aria-label="Navegação autorizada"]');
     const identity = document.querySelector("[data-session-identity]");
     const identityLabel = document.querySelector("[data-session-identity-label]");
-    const navigationBox = navigation?.getBoundingClientRect();
-    const identityBox = identity?.getBoundingClientRect();
-    const overlaps =
-      navigationBox && identityBox
-        ? navigationBox.left < identityBox.right &&
-          navigationBox.right > identityBox.left &&
-          navigationBox.top < identityBox.bottom &&
-          navigationBox.bottom > identityBox.top
-        : false;
+    const actions = identity?.parentElement;
+    const accountLink = document.querySelector('header a[href="/conta/seguranca"]');
+    const actionChildren = actions ? [...actions.children] : [];
+    const elementLabel = (element, index) => {
+      if (element === identity) return "identity";
+      if (element === accountLink) return "accountLink";
+      if (element.matches('[role="group"][aria-label="Aparência da página"]')) {
+        return "themeSwitch";
+      }
+      if (element.matches("form")) return "logoutForm";
+      return `action-${index}`;
+    };
+    const rectanglesOverlap = (first, second) => {
+      if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) return false;
+      if (
+        getComputedStyle(first).display === "none" ||
+        getComputedStyle(second).display === "none"
+      ) {
+        return false;
+      }
+      const firstBox = first.getBoundingClientRect();
+      const secondBox = second.getBoundingClientRect();
+      return (
+        firstBox.left < secondBox.right &&
+        firstBox.right > secondBox.left &&
+        firstBox.top < secondBox.bottom &&
+        firstBox.bottom > secondBox.top
+      );
+    };
+    const topbarCollisionPairs = [];
+    if (rectanglesOverlap(navigation, identity)) {
+      topbarCollisionPairs.push("navigation×identity");
+    }
+    if (rectanglesOverlap(brand, actions)) {
+      topbarCollisionPairs.push("brand×actions");
+    }
+    for (let firstIndex = 0; firstIndex < actionChildren.length; firstIndex += 1) {
+      for (
+        let secondIndex = firstIndex + 1;
+        secondIndex < actionChildren.length;
+        secondIndex += 1
+      ) {
+        if (rectanglesOverlap(actionChildren[firstIndex], actionChildren[secondIndex])) {
+          topbarCollisionPairs.push(
+            `${elementLabel(actionChildren[firstIndex], firstIndex)}×${elementLabel(
+              actionChildren[secondIndex],
+              secondIndex,
+            )}`,
+          );
+        }
+      }
+    }
     const blockedAction = simulatorForm?.querySelector('[data-cta-state="blocked"]');
     const enabledAction = simulatorForm?.querySelector(
       'button[type="submit"][data-cta-state="enabled"]',
@@ -586,7 +698,8 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
       protectedShellPresent: Boolean(document.querySelector("header nav")),
       loginPresent: Boolean(document.querySelector('input[name="password"]')),
       reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
-      topbarCollision: overlaps,
+      topbarCollision: topbarCollisionPairs.length > 0,
+      topbarCollisionPairs,
       identityTruncationReady:
         !identityLabel ||
         getComputedStyle(identityLabel).display === "none" ||
@@ -839,7 +952,7 @@ async function captureHomologationCheckpoints(browser, origin, email, password, 
         artifactRoot,
         `homologation-dashboard-${viewport.width}x${viewport.height}.webp`,
       );
-      const buffer = await page.screenshot({ fullPage: true, animations: "disabled" });
+      const buffer = await capturePersistedScreenshot(page);
       checkpoints.push({
         viewport: viewport.key,
         bannerVisible: await banner.isVisible(),
@@ -1040,6 +1153,7 @@ async function run() {
     data: "synthetic local-only fixtures; never production runtime",
     credentialsPersisted: false,
     storageStatePersisted: false,
+    identityEvidencePolicy,
     artifacts: {
       baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
       baselineResult: repositoryRelative(baselineResultsPath),
@@ -1132,6 +1246,7 @@ async function run() {
           accessibilityChecks.push(await inspectAccessibility(page, route, viewport.key, "light"));
 
           const buffer = await captureComparableScreenshot(page);
+          const persistedBuffer = await capturePersistedScreenshot(page, buffer);
           const destination = path.join(
             candidateScreenshotRoot,
             `${routeKey(route)}-${viewport.width}x${viewport.height}.webp`,
@@ -1146,7 +1261,7 @@ async function run() {
               visualBaselinePath(route, destination),
               trackedFiles,
             ),
-            ...(await saveLosslessWebp(buffer, destination)),
+            ...(await saveLosslessWebp(persistedBuffer, destination)),
           });
         }
 
@@ -1176,6 +1291,7 @@ async function run() {
                   await inspectAccessibility(page, route, viewport.key, theme),
                 );
                 const buffer = await captureComparableScreenshot(page);
+                const persistedBuffer = await capturePersistedScreenshot(page, buffer);
                 const destination = path.join(
                   candidateScreenshotRoot,
                   "themes",
@@ -1191,7 +1307,7 @@ async function run() {
                     visualBaselinePath(route, destination),
                     trackedFiles,
                   ),
-                  ...(await saveLosslessWebp(buffer, destination)),
+                  ...(await saveLosslessWebp(persistedBuffer, destination)),
                 });
               }
             }
@@ -1226,6 +1342,7 @@ async function run() {
             });
             accessibilityChecks.push(await inspectAccessibility(page, route, viewport.key, "dark"));
             const buffer = await captureComparableScreenshot(page);
+            const persistedBuffer = await capturePersistedScreenshot(page, buffer);
             const destination = path.join(
               candidateScreenshotRoot,
               "themes",
@@ -1242,7 +1359,7 @@ async function run() {
                 visualBaselinePath(route, destination),
                 trackedFiles,
               ),
-              ...(await saveLosslessWebp(buffer, destination)),
+              ...(await saveLosslessWebp(persistedBuffer, destination)),
             });
           }
         }
@@ -1288,6 +1405,7 @@ async function run() {
       data: "synthetic local-only fixtures; never production runtime",
       credentialsPersisted: false,
       storageStatePersisted: false,
+      identityEvidencePolicy,
       artifacts: {
         baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
         baselineResult: repositoryRelative(baselineResultsPath),
@@ -1359,6 +1477,7 @@ async function run() {
         data: "synthetic local-only fixtures; never production runtime",
         credentialsPersisted: false,
         storageStatePersisted: false,
+        identityEvidencePolicy,
         artifacts: {
           baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
           baselineResult: repositoryRelative(baselineResultsPath),

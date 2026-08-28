@@ -123,9 +123,9 @@ QA local autenticado abaixo.
 Um build de produção local foi conectado exclusivamente ao Supabase local. O
 runner descobre as chaves locais somente em memória, reserva uma porta loopback,
 inicia e encerra `pnpm start`, cria uma identidade `qa.*@local.invalid` com senha
-efêmera e não persiste credenciais ou storage state. A conta recebe o único
-papel `master` local somente durante a execução, pois os read models v2 globais
-permanecem Master-only até o cutover v3. Dashboard, metas, pontos e ranking recebem
+efêmera e não persiste credenciais ou storage state. A captura visual usa uma
+única conta `master` local durante a execução; a matriz REST/RLS separada prova
+os demais perfis e preserva a baseline produtiva. Dashboard, metas, pontos e ranking recebem
 fixtures marcadas internamente por execução; a visão comercial exibe somente
 `Dados sintéticos de homologação` e mantém o identificador sob `Detalhes
 técnicos`. Contagens e marcador são validados novamente pela sessão QA através

@@ -1,0 +1,509 @@
+{
+  "schemaVersion": 2,
+  "capturedAt": "2026-08-25T20:15:27Z",
+  "environment": "production-read-only",
+  "transactionReadOnly": true,
+  "serverVersionNum": 170006,
+  "counts": {
+    "tables": 22,
+    "functions": 28,
+    "policies": 17,
+    "triggers": 8,
+    "migrations": 26
+  },
+  "authCandidateDependencies": {
+    "capturedAt": "2026-08-25T20:45:00Z",
+    "source": "production-read-only-auth-schema-dump",
+    "sourceSha256": "0a06642806ee7f4d4f4704dd4403b3c7f6d9c5df2f88015894b3629244c78b08",
+    "dataCaptured": false,
+    "tables": [
+      {
+        "name": "auth.sessions",
+        "owner": "supabase_auth_admin",
+        "columns": [
+          "id:uuid:not-null",
+          "user_id:uuid:not-null",
+          "not_after:timestamp with time zone:nullable",
+          "aal:auth.aal_level:nullable"
+        ]
+      },
+      {
+        "name": "auth.mfa_factors",
+        "owner": "supabase_auth_admin",
+        "columns": ["user_id:uuid:not-null", "status:auth.factor_status:not-null"]
+      }
+    ],
+    "types": [
+      {
+        "name": "auth.aal_level",
+        "owner": "supabase_auth_admin",
+        "labels": ["aal1", "aal2", "aal3"]
+      },
+      {
+        "name": "auth.factor_status",
+        "owner": "supabase_auth_admin",
+        "labels": ["unverified", "verified"]
+      }
+    ],
+    "functions": [
+      {
+        "signature": "auth.uid()",
+        "returns": "uuid",
+        "language": "sql",
+        "volatility": "stable",
+        "owner": "supabase_auth_admin"
+      },
+      {
+        "signature": "auth.jwt()",
+        "returns": "jsonb",
+        "language": "sql",
+        "volatility": "stable",
+        "owner": "supabase_auth_admin"
+      }
+    ]
+  },
+  "tables": [
+    {
+      "name": "private.crm_imob_ranking_read_secrets",
+      "rls": false,
+      "forceRls": false,
+      "columns": [
+        "secret_hash:text:not-null",
+        "active:boolean:not-null",
+        "created_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.app_pages",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "key:text:not-null",
+        "path:text:not-null",
+        "name:text:not-null",
+        "description:text:not-null",
+        "section:text:not-null",
+        "permission_key:text:not-null",
+        "parent_key:text:nullable",
+        "sort_order:integer:not-null",
+        "is_navigation:boolean:not-null",
+        "is_active:boolean:not-null",
+        "created_at:timestamptz:not-null",
+        "updated_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.audit_logs",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "id:bigint:not-null",
+        "actor_id:uuid:nullable",
+        "target_user_id:uuid:nullable",
+        "action:text:not-null",
+        "before:jsonb:nullable",
+        "after:jsonb:nullable",
+        "ip:inet:nullable",
+        "user_agent:text:nullable",
+        "created_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_dashboard_metrics",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "snapshot_id:bigint:not-null",
+        "view_key:text:not-null",
+        "stage_key:text:not-null",
+        "current_month:bigint:not-null",
+        "current_week:bigint:not-null",
+        "current_today:bigint:not-null",
+        "goal_month:numeric(14,2):not-null",
+        "goal_week:numeric(14,2):not-null",
+        "goal_today:numeric(14,2):not-null",
+        "previous_month:bigint:nullable",
+        "year_closed_months_average:numeric(14,2):nullable",
+        "last_three_closed_months_average:numeric(14,2):nullable",
+        "previous_fourteen_days:bigint:nullable",
+        "last_fourteen_days:bigint:nullable",
+        "previous_seven_days:bigint:nullable",
+        "last_seven_days:bigint:nullable",
+        "previous_week:bigint:nullable",
+        "yesterday:bigint:nullable"
+      ]
+    },
+    {
+      "name": "public.crm_dashboard_snapshots",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "id:bigint:not-null",
+        "snapshot_key:text:not-null",
+        "reference_date:date:not-null",
+        "generated_at:timestamptz:not-null",
+        "timezone:text:not-null",
+        "source:text:not-null",
+        "created_at:timestamptz:not-null",
+        "updated_at:timestamptz:not-null",
+        "goals_available:boolean:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_dashboard_top_developments",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "snapshot_id:bigint:not-null",
+        "view_key:text:not-null",
+        "rank:smallint:not-null",
+        "name:text:not-null",
+        "total:bigint:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_dashboard_views",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "snapshot_id:bigint:not-null",
+        "view_key:text:not-null",
+        "sales_value_month:numeric(16,2):not-null",
+        "sales_value_week:numeric(16,2):not-null",
+        "sales_value_today:numeric(16,2):not-null"
+      ]
+    },
+    {
+      "name": "public.crm_funnel_goals",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "id:bigint:not-null",
+        "profile_key:text:not-null",
+        "effective_month:date:not-null",
+        "opportunities:bigint:not-null",
+        "appointments:bigint:not-null",
+        "visits:bigint:not-null",
+        "folders:bigint:not-null",
+        "approved_folders:bigint:not-null",
+        "sales:bigint:not-null",
+        "opportunities_rate:numeric(8,2):not-null",
+        "appointments_rate:numeric(8,2):not-null",
+        "visits_rate:numeric(8,2):not-null",
+        "folders_rate:numeric(8,2):not-null",
+        "approved_folders_rate:numeric(8,2):not-null",
+        "broker_minimum_month_1:integer:not-null",
+        "broker_minimum_month_2:integer:not-null",
+        "broker_minimum_month_3:integer:not-null",
+        "broker_minimum_month_4_plus:integer:not-null",
+        "broker_weekly_appointments:integer:not-null",
+        "broker_weekly_visits:integer:not-null",
+        "broker_weekly_folders:integer:not-null",
+        "productive_team_appointments:smallint:not-null",
+        "productive_team_visits:smallint:not-null",
+        "productive_team_folders:smallint:not-null",
+        "productive_team_sales:smallint:not-null",
+        "updated_by:uuid:nullable",
+        "created_at:timestamptz:not-null",
+        "updated_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_imob_ranking_developments",
+      "rls": true,
+      "forceRls": true,
+      "columns": [
+        "run_id:uuid:not-null",
+        "period_month:date:not-null",
+        "business_unit:text:not-null",
+        "development_key:text:not-null",
+        "development_name:text:not-null",
+        "vgv:numeric:not-null",
+        "contracts:integer:not-null",
+        "source_rank_vgv:integer:nullable",
+        "source_rank_contracts:integer:nullable",
+        "created_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_imob_ranking_entries",
+      "rls": true,
+      "forceRls": true,
+      "columns": [
+        "run_id:uuid:not-null",
+        "period_month:date:not-null",
+        "imob_key:text:not-null",
+        "imob_name:text:not-null",
+        "vgv:numeric(18,2):not-null",
+        "contracts:integer:not-null",
+        "source_rank_vgv:integer:nullable",
+        "source_rank_contracts:integer:nullable",
+        "created_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_imob_ranking_runs",
+      "rls": true,
+      "forceRls": true,
+      "columns": [
+        "id:uuid:not-null",
+        "status:text:not-null",
+        "reference_year:smallint:not-null",
+        "generated_at:timestamptz:not-null",
+        "source_updated_at:timestamptz:nullable",
+        "source:text:not-null",
+        "regional:text:not-null",
+        "company:text:not-null",
+        "row_count:integer:not-null",
+        "started_at:timestamptz:not-null",
+        "completed_at:timestamptz:nullable",
+        "error_message:text:nullable",
+        "created_at:timestamptz:not-null",
+        "development_row_count:integer:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_ingestion_runs",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "id:uuid:not-null",
+        "request_key:text:not-null",
+        "kind:text:not-null",
+        "status:text:not-null",
+        "workflow:text:not-null",
+        "requested_by:uuid:nullable",
+        "record_count:integer:not-null",
+        "http_status:smallint:nullable",
+        "error_code:text:nullable",
+        "started_at:timestamptz:not-null",
+        "finished_at:timestamptz:nullable",
+        "created_at:timestamptz:not-null",
+        "updated_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_point_metrics",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "setting_key:text:not-null",
+        "metric_key:text:not-null",
+        "weight:integer:not-null",
+        "target:integer:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_point_settings",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "setting_key:text:not-null",
+        "updated_by:uuid:nullable",
+        "created_at:timestamptz:not-null",
+        "updated_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_ranking_participants",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "snapshot_id:bigint:not-null",
+        "period_key:text:not-null",
+        "broker_key:text:not-null",
+        "broker_name:text:not-null",
+        "manager_name:text:not-null",
+        "roulette:bigint:not-null",
+        "roulette_saturday:bigint:not-null",
+        "roulette_sunday:bigint:not-null",
+        "schedule:bigint:not-null",
+        "visit:bigint:not-null",
+        "approved_folder:bigint:not-null",
+        "sale:bigint:not-null"
+      ]
+    },
+    {
+      "name": "public.crm_ranking_snapshots",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "id:bigint:not-null",
+        "snapshot_key:text:not-null",
+        "reference_date:date:not-null",
+        "generated_at:timestamptz:not-null",
+        "timezone:text:not-null",
+        "source:text:not-null",
+        "created_at:timestamptz:not-null",
+        "updated_at:timestamptz:not-null",
+        "roulette_available:boolean:not-null"
+      ]
+    },
+    {
+      "name": "public.permissions",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "key:text:not-null",
+        "description:text:not-null",
+        "min_level:integer:not-null",
+        "created_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.profiles",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "user_id:uuid:not-null",
+        "email:text:nullable",
+        "is_active:boolean:not-null",
+        "profile_completed:boolean:not-null",
+        "created_at:timestamptz:not-null",
+        "updated_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.role_permissions",
+      "rls": true,
+      "forceRls": false,
+      "columns": ["role_key:text:not-null", "permission_key:text:not-null"]
+    },
+    {
+      "name": "public.roles",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "key:text:not-null",
+        "name:text:not-null",
+        "level:integer:not-null",
+        "is_system:boolean:not-null",
+        "created_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.user_permission_overrides",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "user_id:uuid:not-null",
+        "permission_key:text:not-null",
+        "effect:text:not-null",
+        "reason:text:nullable",
+        "granted_by:uuid:nullable",
+        "created_at:timestamptz:not-null"
+      ]
+    },
+    {
+      "name": "public.user_roles",
+      "rls": true,
+      "forceRls": false,
+      "columns": [
+        "user_id:uuid:not-null",
+        "role_key:text:not-null",
+        "assigned_by:uuid:nullable",
+        "created_at:timestamptz:not-null",
+        "updated_at:timestamptz:not-null"
+      ]
+    }
+  ],
+  "functions": [
+    "private.ingest_crm_salesforce_snapshot_v1_internal(jsonb)",
+    "public._internal_assert_actor_active(uuid)",
+    "public._internal_get_role_level(uuid)",
+    "public._internal_has_permission(uuid,text)",
+    "public._internal_list_permissions(uuid)",
+    "public.assign_user_role(uuid,text,text)",
+    "public.begin_crm_salesforce_refresh(text)",
+    "public.bootstrap_master_user(uuid)",
+    "public.can_assign_role(uuid,text)",
+    "public.can_grant_permission(uuid,text)",
+    "public.finish_crm_salesforce_refresh(uuid,text,integer,text)",
+    "public.get_crm_imob_ranking_snapshot(text)",
+    "public.get_crm_sync_status()",
+    "public.get_role_level(uuid)",
+    "public.get_user_authorization_context(uuid)",
+    "public.handle_new_auth_user()",
+    "public.has_permission(uuid,text)",
+    "public.ingest_crm_salesforce_snapshot(jsonb)",
+    "public.list_app_pages_for_management()",
+    "public.publish_crm_imob_ranking(jsonb,text)",
+    "public.remove_user_permission_override(uuid,text,text)",
+    "public.replace_crm_point_settings(jsonb,jsonb)",
+    "public.rls_auto_enable()",
+    "public.set_app_page_active(text,boolean,text)",
+    "public.set_updated_at()",
+    "public.set_user_active(uuid,boolean,text)",
+    "public.set_user_permission_override(uuid,text,text,text)",
+    "public.upsert_crm_funnel_goals(text,date,bigint,numeric,numeric,numeric,numeric,numeric,integer,integer,integer,integer,integer,integer,integer,smallint,smallint,smallint,smallint)"
+  ],
+  "grants": {
+    "authenticatedTableSelect": [
+      "public.app_pages",
+      "public.audit_logs",
+      "public.crm_dashboard_metrics",
+      "public.crm_dashboard_snapshots",
+      "public.crm_dashboard_top_developments",
+      "public.crm_dashboard_views",
+      "public.crm_funnel_goals",
+      "public.crm_point_metrics",
+      "public.crm_point_settings",
+      "public.crm_ranking_participants",
+      "public.crm_ranking_snapshots",
+      "public.profiles",
+      "public.user_permission_overrides",
+      "public.user_roles"
+    ],
+    "anonFunctionExecute": [
+      "public.get_crm_imob_ranking_snapshot(text)",
+      "public.publish_crm_imob_ranking(jsonb,text)"
+    ],
+    "serviceRoleFunctionExecute": ["public.ingest_crm_salesforce_snapshot(jsonb)"],
+    "qlikDirectTableAccess": [],
+    "privateTableDataApiAccess": []
+  },
+  "policyTables": [
+    "public.app_pages",
+    "public.audit_logs",
+    "public.crm_dashboard_metrics",
+    "public.crm_dashboard_snapshots",
+    "public.crm_dashboard_top_developments",
+    "public.crm_dashboard_views",
+    "public.crm_funnel_goals",
+    "public.crm_point_metrics",
+    "public.crm_point_settings",
+    "public.crm_ranking_participants",
+    "public.crm_ranking_snapshots",
+    "public.permissions",
+    "public.profiles",
+    "public.role_permissions",
+    "public.roles",
+    "public.user_permission_overrides",
+    "public.user_roles"
+  ],
+  "triggerTables": [
+    "public.app_pages",
+    "public.crm_dashboard_snapshots",
+    "public.crm_funnel_goals",
+    "public.crm_ingestion_runs",
+    "public.crm_point_settings",
+    "public.crm_ranking_snapshots",
+    "public.profiles",
+    "public.user_roles"
+  ],
+  "absentCandidateDependencies": [
+    "public.profiles.access_status",
+    "private.is_approved_user(uuid)",
+    "private.user_role_scope_is_valid(uuid,text)",
+    "private.can_manage_user(uuid)",
+    "private.crm_qlik_relay_role_isolated()",
+    "private.crm_commercial_engine_role_isolated()",
+    "role crm_qlik_relay",
+    "role crm_commercial_engine",
+    "public.organizations",
+    "public.crm_teams",
+    "public.crm_people",
+    "public.crm_portfolios",
+    "public.reporting_scopes"
+  ]
+}

@@ -9,7 +9,8 @@ export default async function PointGoalsPage({
 }: {
   searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
-  await enforcePermission("crm.settings.manage");
+  const authorization = await enforcePermission("crm.settings.manage");
+  const canManageDraft = authorization.permissions.includes("crm.commercial_policy.manage");
   const query = await searchParams;
   const notification =
     query.saved === "1"
@@ -20,5 +21,10 @@ export default async function PointGoalsPage({
           ? "save"
           : undefined;
 
-  return <PointSettingsPage {...(notification ? { notification } : {})} />;
+  return (
+    <PointSettingsPage
+      canManageDraft={canManageDraft}
+      {...(canManageDraft && notification ? { notification } : {})}
+    />
+  );
 }

@@ -13,30 +13,40 @@ function applyTheme(theme: ThemeMode) {
   document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
 }
 
-export function ThemeSwitch() {
+export function ThemeSwitch({ canPersist }: { canPersist: boolean }) {
   const [theme, setTheme] = useState<ThemeMode>("light");
 
   useEffect(() => {
     let saved: string | null = null;
-    try {
-      saved = window.localStorage.getItem(STORAGE_KEY);
-    } catch {
-      // Storage can be unavailable in privacy modes. The switch still works
-      // for the current page without persistence.
+    if (canPersist) {
+      try {
+        saved = window.localStorage.getItem(STORAGE_KEY);
+      } catch {
+        // Storage can be unavailable in privacy modes. The switch still works
+        // for the current page without persistence.
+      }
+    } else {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        // Revocation remains effective because storage is never read below.
+      }
     }
     const initial = isThemeMode(saved) ? saved : "light";
     applyTheme(initial);
     const timer = window.setTimeout(() => setTheme(initial), 0);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [canPersist]);
 
   function selectTheme(nextTheme: ThemeMode) {
     setTheme(nextTheme);
     applyTheme(nextTheme);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, nextTheme);
-    } catch {
-      // Keep the in-memory selection when persistence is unavailable.
+    if (canPersist) {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, nextTheme);
+      } catch {
+        // Keep the in-memory selection when persistence is unavailable.
+      }
     }
   }
 

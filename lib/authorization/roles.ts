@@ -12,12 +12,12 @@ export const ROLES = {
     level: 80,
     label: "Administrador",
     description:
-      "Gerencia usuários, acessos e auditoria dentro do escopo aprovado; fatos comerciais v2 permanecem restritos ao Master.",
+      "Mantém Dashboard, etapas, Ranking, Configurações e administração conforme as permissões herdadas.",
   },
   coordinator: {
     level: 60,
     label: "Coordenador",
-    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
   },
   manager: {
     level: 55,
@@ -27,7 +27,7 @@ export const ROLES = {
   supervisor: {
     level: 50,
     label: "Supervisor",
-    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
   },
   house: {
     level: 45,
@@ -37,7 +37,7 @@ export const ROLES = {
   real_estate: {
     level: 40,
     label: "Imobiliária",
-    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
   },
   partnership_channel: {
     level: 35,
@@ -48,17 +48,17 @@ export const ROLES = {
   broker_lead: {
     level: 30,
     label: "Líder de corretores",
-    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
   },
   broker: {
     level: 20,
     label: "Corretor",
-    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
   },
   user: {
     level: 10,
     label: "Usuário",
-    description: "Acessa navegação básica; fatos comerciais aguardam modelos v3 com escopo.",
+    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
   },
   pending: {
     level: 1,

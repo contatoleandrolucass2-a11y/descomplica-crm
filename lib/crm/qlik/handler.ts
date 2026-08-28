@@ -108,8 +108,9 @@ export async function handleQlikRelayPost(
   };
 
   if (!configuration.available) {
-    emit({ outcome: "unavailable", httpStatus: 503 });
-    return json(request, "ingestion_unavailable", 503);
+    const status = configuration.mode === "off" ? 404 : 503;
+    emit({ outcome: "unavailable", httpStatus: status });
+    return json(request, "ingestion_unavailable", status);
   }
 
   if (new URL(request.url).search || request.headers.has("content-encoding")) {

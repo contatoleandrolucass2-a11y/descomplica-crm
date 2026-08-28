@@ -400,12 +400,30 @@ describe("Qlik relay HTTP boundary", () => {
       now: () => NOW,
     });
 
-    expect(response.status).toBe(503);
+    expect(response.status).toBe(404);
     await expect(response.json()).resolves.toEqual({ error: "ingestion_unavailable" });
     expect(bodyTouched).toBe(false);
     expect(execute).not.toHaveBeenCalled();
     expect(emit).toHaveBeenCalledWith(
-      expect.objectContaining({ outcome: "unavailable", httpStatus: 503, mode: "off" }),
+      expect.objectContaining({ outcome: "unavailable", httpStatus: 404, mode: "off" }),
+    );
+  });
+
+  it("reports non-off runtime misconfiguration as unavailable", async () => {
+    const execute = vi.fn();
+    const emit = vi.fn();
+    const response = await handleQlikRelayPost(signedRequest(), {
+      configuration: () => ({ mode: "active", available: false, writeEnabled: false }),
+      execute,
+      emit,
+      now: () => NOW,
+    });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({ error: "ingestion_unavailable" });
+    expect(execute).not.toHaveBeenCalled();
+    expect(emit).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: "unavailable", httpStatus: 503, mode: "active" }),
     );
   });
 

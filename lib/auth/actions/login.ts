@@ -22,9 +22,15 @@
  */
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 import type { LoginActionState } from "@/lib/auth/actions/login-state";
+import { getMfaAssurance } from "@/lib/auth/mfa/assurance";
 import { loginSchema } from "@/lib/auth/schemas/login";
+import {
+  buildSessionPersistenceCookie,
+  issueSessionPersistence,
+} from "@/lib/auth/session-persistence";
 import { createClient } from "@/lib/auth/supabase/server";
 
 const GENERIC_FAILURE_MESSAGE =
@@ -44,12 +50,27 @@ export async function loginAction(
   }
 
   const { email, password } = parsed.data;
-  const supabase = await createClient();
+  const issuedPersistence = issueSessionPersistence(formData.get("rememberBrowser"));
+  const supabase = await createClient({ persistence: issuedPersistence.persistence });
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { status: "error", message: GENERIC_FAILURE_MESSAGE };
   }
 
+  const marker = buildSessionPersistenceCookie(issuedPersistence);
+  const cookieStore = await cookies();
+  cookieStore.set(marker.name, marker.value, marker.options);
+
+  const assurance = await getMfaAssurance(supabase);
+  if (assurance.status === "unavailable") {
+    await supabase.auth.signOut({ scope: "local" });
+    const clearedMarker = buildSessionPersistenceCookie(issueSessionPersistence(undefined));
+    cookieStore.set(clearedMarker.name, clearedMarker.value, clearedMarker.options);
+    return { status: "error", message: GENERIC_FAILURE_MESSAGE };
+  }
+
+  if (assurance.status === "recovery") redirect("/redefinir-senha");
+  if (assurance.status === "required") redirect("/mfa");
   redirect("/");
 }

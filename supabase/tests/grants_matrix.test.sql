@@ -1,6 +1,6 @@
 begin;
 
-select plan(20);
+select plan(21);
 
 select is(
   (
@@ -105,8 +105,20 @@ select is(
 
 select is(
   (select count(*) from pg_catalog.pg_policies where schemaname = 'public'),
-  25::bigint,
-  'the existing policy set is preserved'
+  (
+    select count(*)
+    from pg_catalog.pg_policies
+    where schemaname = 'public'
+      and policyname <> 'authenticated_session_mfa_gate'
+  ) + (
+    select count(*)
+    from pg_catalog.pg_class relation
+    join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relkind in ('r', 'p')
+      and relation.relrowsecurity
+  ),
+  'existing policies plus one session/MFA gate per RLS table are preserved'
 );
 
 select is(
@@ -114,6 +126,7 @@ select is(
     select array_agg(tablename || ':' || policyname order by tablename, policyname)
     from pg_catalog.pg_policies
     where schemaname = 'public'
+      and policyname <> 'authenticated_session_mfa_gate'
   ),
   array[
     'app_pages:app_pages_select_authorized',
@@ -143,6 +156,27 @@ select is(
     'user_roles:user_roles_select_self_or_scoped_manager'
   ]::text[],
   'the complete named policy allowlist is preserved'
+);
+
+select is(
+  (
+    select array_agg(tablename order by tablename)
+    from pg_catalog.pg_policies
+    where schemaname = 'public'
+      and policyname = 'authenticated_session_mfa_gate'
+      and permissive = 'RESTRICTIVE'
+      and roles = array['authenticated']::name[]
+      and cmd = 'ALL'
+  ),
+  (
+    select array_agg(relation.relname order by relation.relname)
+    from pg_catalog.pg_class relation
+    join pg_catalog.pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relkind in ('r', 'p')
+      and relation.relrowsecurity
+  ),
+  'every public RLS table requires the restrictive session/MFA gate'
 );
 
 select ok(
@@ -292,11 +326,13 @@ select is(
     'approve_user_access',
     'assign_user_role',
     'begin_crm_salesforce_refresh',
+    'current_session_is_live',
     'finish_crm_salesforce_refresh',
     'get_crm_commercial_configuration_draft',
     'get_crm_read_model_v3',
     'get_crm_sync_status',
     'get_qlik_relay_health',
+    'get_role_level',
     'get_user_authorization_context',
     'has_permission',
     'list_app_pages_for_management',
@@ -307,6 +343,7 @@ select is(
     'preview_crm_source_identity_mapping_import',
     'remove_user_permission_override',
     'replace_crm_point_settings',
+    'revoke_current_user_sessions_after_password_recovery',
     'save_crm_commercial_configuration_draft',
     'set_app_page_active',
     'set_crm_commercial_engine_gate',
@@ -338,6 +375,7 @@ select ok(
     'can_read_portfolio(p_portfolio_id uuid)',
     'can_read_reporting_scope(p_scope_id uuid)',
     'can_read_team(p_team_id uuid)',
+    'current_session_satisfies_mfa()',
     'current_user_is_master()'
   ]::text[]
   and not exists (

@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
   },
+  logging: {
+    serverFunctions: false,
+    incomingRequests: {
+      ignore: [/^\/auth\/callback(?:\?|$)/],
+    },
+  },
   poweredByHeader: false,
   reactStrictMode: true,
 };

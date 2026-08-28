@@ -94,11 +94,14 @@ function buildCsp(isProd: boolean): string {
 
 export function applySecurityHeaders(
   headers: Headers,
-  options: { isProd: boolean; noIndex?: boolean },
+  options: { isProd: boolean; noIndex?: boolean; suppressReferrer?: boolean },
 ): void {
   headers.set("X-Frame-Options", "DENY");
   headers.set("X-Content-Type-Options", "nosniff");
-  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  headers.set(
+    "Referrer-Policy",
+    options.suppressReferrer ? "no-referrer" : "strict-origin-when-cross-origin",
+  );
   headers.set("Permissions-Policy", PERMISSIONS_POLICY);
   headers.set("Content-Security-Policy", buildCsp(options.isProd));
 

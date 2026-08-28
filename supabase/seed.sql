@@ -1,3 +1,3 @@
--- Dados mínimos de desenvolvimento serão adicionados quando o catálogo de
--- páginas do CRM estiver definido. Este arquivo existe para manter
--- `supabase db reset --local` reproduzível sem depender de arquivos externos.
+-- O catálogo RBAC é integralmente versionado nas migrations. Nenhum papel,
+-- grant ou página é criado aqui: isso mantém os 17 acessos comerciais ativos
+-- reproduzíveis sem transformar fixtures locais em autoridade de produção.

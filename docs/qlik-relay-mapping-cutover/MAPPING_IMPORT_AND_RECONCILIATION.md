@@ -78,8 +78,8 @@ reutilize IDs para encobrir uma correção.
 O comando lê credenciais exclusivamente destas variáveis de ambiente, injetadas
 por canal privado e não persistidas em arquivo, histórico ou documentação:
 
-- `NEXT_PUBLIC_SUPABASE_URL`;
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`;
+- `SUPABASE_URL`;
+- `SUPABASE_PUBLISHABLE_KEY`;
 - `CRM_MAPPING_IMPORT_ACCESS_TOKEN`, contendo sessão curta de um reviewer
   explicitamente autorizado.
 

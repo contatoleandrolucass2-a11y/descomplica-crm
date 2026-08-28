@@ -23,6 +23,7 @@
     "homologation:prepare": "node scripts/homologation/prepare-runtime.mjs",
     "homologation:fixtures": "node scripts/homologation/provision-visual.mjs",
     "homologation:dns": "node scripts/homologation/configure-dns.mjs",
+    "homologation:migrate:auth-mfa": "node scripts/homologation/apply-auth-mfa-migrations.mjs",
     "homologation:qa": "node scripts/homologation/run-remote-qa.mjs",
     "mapping:reconcile": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/mappings/import.ts",
     "commercial-policy:verify": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/commercial-policies/verify.ts",
@@ -36,6 +37,8 @@
     "db:status": "supabase status",
     "db:rehearse": "node scripts/release/isolated-restore-rehearsal.mjs",
     "db:test": "supabase test db",
+    "image:build": "node scripts/release/build-promotable-image.mjs",
+    "image:prove": "node scripts/release/prove-promotable-image.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -60,7 +63,7 @@
     "eslint-config-next": "16.3.0",
     "prettier": "3.8.3",
     "prettier-plugin-tailwindcss": "0.6.14",
-    "supabase": "2.111.0",
+    "supabase": "2.115.0",
     "tailwindcss": "4.3.0",
     "typescript": "5.9.3",
     "vitest": "4.1.10"

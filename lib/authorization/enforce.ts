@@ -2,7 +2,7 @@ import "server-only";
 
 import { forbidden, redirect } from "next/navigation";
 
-import { requireAuthorization, requirePermission } from "./guards";
+import { requireAnyPermission, requireAuthorization, requirePermission } from "./guards";
 import { AuthorizationError } from "./types";
 import type { AuthorizationContext } from "./types";
 import type { PermissionKey } from "./permissions";
@@ -32,6 +32,8 @@ export async function enforceAuthorization(): Promise<AuthorizationContext> {
   }
 
   if (denial === "UNAUTHENTICATED") redirect("/login");
+  if (denial === "MFA_REQUIRED") redirect("/mfa");
+  if (denial === "PASSWORD_RECOVERY_REQUIRED") redirect("/redefinir-senha");
   forbidden();
 }
 
@@ -49,5 +51,28 @@ export async function enforcePermission(permission: PermissionKey): Promise<Auth
   }
 
   if (denial === "UNAUTHENTICATED") redirect("/login");
+  if (denial === "MFA_REQUIRED") redirect("/mfa");
+  if (denial === "PASSWORD_RECOVERY_REQUIRED") redirect("/redefinir-senha");
+  forbidden();
+}
+
+export async function enforceAnyPermission(
+  permissions: readonly PermissionKey[],
+): Promise<AuthorizationContext> {
+  let denial: AuthorizationError["code"] | null = null;
+
+  try {
+    return await requireAnyPermission(permissions);
+  } catch (error) {
+    if (error instanceof AuthorizationError) {
+      denial = error.code;
+    } else {
+      throw error;
+    }
+  }
+
+  if (denial === "UNAUTHENTICATED") redirect("/login");
+  if (denial === "MFA_REQUIRED") redirect("/mfa");
+  if (denial === "PASSWORD_RECOVERY_REQUIRED") redirect("/redefinir-senha");
   forbidden();
 }

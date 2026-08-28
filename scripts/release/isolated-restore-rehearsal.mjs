@@ -17,7 +17,7 @@ import process from "node:process";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const sourceSupabaseRoot = path.join(repositoryRoot, "supabase");
-const expectedPgTapTests = 939;
+const expectedPgTapTests = 1018;
 const applicationSchemas = ["commercial_engine", "private", "public", "qlik_relay"];
 const applicationRoles = ["crm_commercial_engine", "crm_qlik_relay"];
 const excludedServices = [
@@ -321,6 +321,9 @@ async function prepareProject(projectRoot, projectId, ports, includeMigrations) 
   await mkdir(supabaseRoot, { recursive: true });
   const copies = [
     cp(path.join(sourceSupabaseRoot, "tests"), path.join(supabaseRoot, "tests"), {
+      recursive: true,
+    }),
+    cp(path.join(sourceSupabaseRoot, "templates"), path.join(supabaseRoot, "templates"), {
       recursive: true,
     }),
   ];

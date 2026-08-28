@@ -1,0 +1,249 @@
+.page {
+  min-height: calc(100svh - 4.5rem);
+  background: var(--analytics-page);
+  padding: clamp(1.25rem, 4vw, 3rem);
+  color: var(--analytics-ink);
+}
+
+.container {
+  width: min(100%, 56rem);
+  margin-inline: auto;
+}
+
+.eyebrow {
+  color: var(--analytics-cyan-strong);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-top: 0.45rem;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 750;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.lead {
+  max-width: 48rem;
+  margin-top: 0.8rem;
+  color: var(--analytics-muted);
+  line-height: 1.65;
+}
+
+.card {
+  margin-top: 1.5rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 1.25rem;
+  background: var(--analytics-surface);
+  padding: clamp(1.1rem, 3vw, 2rem);
+  box-shadow: var(--analytics-shadow);
+}
+
+.card h2 {
+  font-size: 1.25rem;
+  font-weight: 750;
+}
+
+.card p,
+.hint {
+  margin-top: 0.55rem;
+  color: var(--analytics-muted);
+  line-height: 1.55;
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field label,
+.legend {
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.input {
+  min-height: 3rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.8rem;
+  background: var(--analytics-surface-muted);
+  padding: 0.7rem 0.9rem;
+  color: var(--analytics-ink);
+  font: inherit;
+  letter-spacing: 0.16em;
+}
+
+.button,
+.secondaryButton,
+.dangerButton,
+.linkButton {
+  display: inline-flex;
+  min-height: 2.8rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.8rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.button {
+  background: var(--analytics-lime);
+  color: var(--analytics-navy);
+}
+
+.secondaryButton,
+.linkButton {
+  border-color: var(--analytics-line);
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+}
+
+.dangerButton {
+  border-color: color-mix(in srgb, var(--analytics-danger) 45%, transparent);
+  background: color-mix(in srgb, var(--analytics-danger) 10%, var(--analytics-surface));
+  color: var(--analytics-danger);
+}
+
+.button:disabled,
+.secondaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.status,
+.error {
+  margin-top: 1rem;
+  border-radius: 0.8rem;
+  padding: 0.8rem 0.9rem;
+  font-size: 0.88rem;
+}
+
+.status {
+  border: 1px solid color-mix(in srgb, var(--analytics-positive) 40%, transparent);
+  background: color-mix(in srgb, var(--analytics-positive) 10%, var(--analytics-surface));
+  color: var(--analytics-positive);
+}
+
+.error {
+  border: 1px solid color-mix(in srgb, var(--analytics-danger) 40%, transparent);
+  background: color-mix(in srgb, var(--analytics-danger) 10%, var(--analytics-surface));
+  color: var(--analytics-danger);
+}
+
+.factorList {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.factor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.85rem;
+  padding: 0.85rem;
+}
+
+.factor strong,
+.factor span {
+  display: block;
+}
+
+.factor span {
+  margin-top: 0.2rem;
+  color: var(--analytics-muted);
+  font-size: 0.78rem;
+}
+
+.qrGrid {
+  display: grid;
+  grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.qr {
+  width: 100%;
+  height: auto;
+  border: 0.75rem solid white;
+  border-radius: 1rem;
+  background: white;
+}
+
+.secret {
+  display: block;
+  max-width: 100%;
+  margin-top: 0.55rem;
+  overflow-wrap: anywhere;
+  border-radius: 0.65rem;
+  background: var(--analytics-surface-muted);
+  padding: 0.75rem;
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+}
+
+.factorOptions {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.factorOption {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.8rem;
+}
+
+@media (max-width: 640px) {
+  .qrGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .qr {
+    max-width: 15rem;
+    margin-inline: auto;
+  }
+
+  .factor {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page,
+  .page * {
+    scroll-behavior: auto;
+    transition: none !important;
+  }
+}

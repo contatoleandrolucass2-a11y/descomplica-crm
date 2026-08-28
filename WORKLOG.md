@@ -1,5 +1,318 @@
 # Worklog
 
+## 2026-08-28 — recovery hospedado sem SMTP próprio
+
+- O preflight produtivo comprovou que o Supabase hospedado usa o mailer padrão
+  e recusa template customizado sem SMTP próprio. Nenhuma credencial SMTP foi
+  inventada e nenhum serviço pago foi criado.
+- O callback agora preserva o contrato `TokenHash` homologado e aceita também
+  o auth code UUID v4 do `ConfirmationURL` padrão. Após a troca PKCE, claims de
+  recovery recentes continuam obrigatórias; callbacks ambíguos, OAuth/login e
+  formatos divergentes falham fechados.
+- Nginx continua suprimindo access/error logs somente em `/auth/callback`, de
+  modo que nem o token hash nem o code aparecem nos logs do proxy.
+
+## 2026-08-27 — PR #49: navegação do canário WF13
+
+- O smoke HTTPS mostrou que a navegação interna do WF13 ainda criava links para quatro páginas `releaseEnabled=false`; o prefetch recebia `403` e gerava ruído de console tardio.
+- A navegação agora cria links apenas para jornadas liberadas pelo catálogo server-side e representa as demais como itens bloqueados, sem mudar grants, migrations, flags ou motores.
+- Cobertura adicionada para provar um link autorizado, quatro itens bloqueados e ausência de `href` para as rotas futuras.
+- A baseline canário foi promovida localmente a partir do HEAD limpo após 119/119 rotas responsivas, 68/68 temas, Axe 160/160, 160/160 comparações e 85/85 checks de zoom; somente 12 capturas em `target-authenticated-canary/simulator.wf13` mudaram.
+- O primeiro CI do novo head revelou overflow causado pelo texto visualmente oculto dentro dos itens flex bloqueados; o motivo foi movido para `aria-label`, preservando a semântica sem alterar o min-content.
+- A reprodução reduzida identificou `#calculation-blocked-reason` como origem real: o seletor genérico `.simulatorNav > span` também estilizou a explicação do CTA. O seletor agora exige `.simulatorNavBlocked` e mantém o texto do CTA intacto.
+
+## 2026-08-27 — zero 5xx com capacidades desligadas
+
+- O smoke HTTPS aprovou os 21 cenários, mas o pós-gate detectou 38 respostas
+  `503` deliberadas de Salesforce, Qlik e motores com flags desligadas.
+- O contrato fail-closed agora responde `404` somente quando a capacidade está
+  explicitamente off ou não publicada; configuração ativa inválida, banco,
+  política, auditoria e upstream indisponíveis continuam `503`.
+- A mudança preserva corpo sanitizado, `no-store`, short-circuit antes de auth,
+  payload e banco, e mantém todas as integrações e motores desligados.
+
+## 2026-08-27 — verificação MFA com resposta atômica
+
+- A repetição hospedada no SHA `a23c671` manteve 20 de 21 cenários verdes e
+  isolou a falha real: o Supabase validava o TOTP e ativava o fator, mas o POST
+  da Server Action permanecia aberto até o proxy devolver `502`.
+- Enrollment e challenge agora usam um Route Handler dedicado. O cliente SSR
+  mantém rotações de cookies em memória, valida usuário, sessão, AAL, fluxo,
+  ownership do fator e claims AAL2 antes de gravá-las atomicamente na resposta
+  `204`; qualquer pós-condição divergente descarta a nova sessão e falha fechado.
+- Para esse POST exato, o Proxy espelha eventual refresh somente na requisição e
+  posterga seus `Set-Cookie`; o handler consolida um único valor final por chunk,
+  inclusive deleções `maxAge=0`, evitando pares AAL1/AAL2 duplicados.
+- O POST aceita somente origem canônica, corpo URL-encoded de até 512 bytes e
+  três campos exatos; a leitura do stream interrompe antes de alocar bytes
+  excedentes. A interface preserva QR/chave e erro inline, faz navegação fixa
+  somente após sucesso e nunca envia TOTP, fator ou token pela URL/log.
+- Testes novos cobrem cross-origin, payload inválido, AAL incorreto, fator por
+  status, claims divergentes, cookie chunks obsoletos e política HttpOnly.
+
+## 2026-08-27 — janela TOTP estável no smoke hospedado
+
+- O primeiro smoke do SHA `46c33e7` aprovou 20 de 21 cenários; o caso MFA
+  atingiu o limite global durante o enrollment, sem falha do runtime ou HTTP
+  5xx. A limpeza foi interrompida e as nove identidades sintéticas foram
+  removidas antes da repetição.
+- Enrollment e challenge agora aguardam uma janela TOTP com pelo menos 12
+  segundos restantes, evitando submeter um código que expire durante a ida e
+  volta HTTPS. O cenário complexo recebe o mesmo teto de 180 segundos usado na
+  matriz hospedada e registra somente nomes de fases, nunca chave ou código.
+
+## 2026-08-27 — sessão de revogação no smoke hospedado
+
+- A primeira execução HTTPS aprovou 19 de 21 cenários e encontrou uma
+  dependência de ordem no recovery: a matriz remota havia encerrado a sessão
+  Master antes de o teste de revogação tentar reutilizá-la.
+- O recovery agora autentica uma segunda sessão Master dedicada, que permanece
+  aberta até a troca de senha comprovar sua revogação. A limpeza hospedada após
+  a falha comprovou zero contas, sessões e fatores efêmeros e zero fator no
+  Master visual persistente.
+
+## 2026-08-27 — convergência do contrato visual no CI
+
+- O primeiro CI do catálogo 17/21 encontrou uma expectativa residual de 21
+  páginas na contagem de evidências autenticadas. O teste agora diferencia as
+  21 URLs funcionais das 17 superfícies release-enabled, preservando os `403`
+  dos quatro simuladores futuros.
+- A baseline foi recapturada a partir do commit limpo `0449bab`: 119 capturas
+  responsivas, 68 checks de tema, 160 auditorias/comparações e 85 checks de
+  zoom, com promoção transacional e remoção das fixtures efêmeras.
+
+## 2026-08-27 — gate visual RBAC e cabeçalho móvel
+
+- A comparação detectou 19 divergências esperadas restritas ao hub de Simulação
+  e ao Catálogo de páginas, decorrentes do conjunto 21 → 17 e dos quatro cards
+  release-disabled.
+- A revisão independente encontrou colisão adicional do cabeçalho em 390 px. O
+  breakpoint móvel passou a separar marca, ações e navegação em três linhas; o
+  detector cobre marca × ações, navegação × identidade e pares de ações.
+- A promoção transacional aprovou 119 capturas responsivas, 68 checks de tema,
+  160 auditorias Axe, 160 comparações e 85 checks de zoom. A verificação pós-
+  commit é obrigatória antes de publicar a homologação.
+
+## 2026-08-27 — contas efêmeras no smoke hospedado
+
+- O runner passa a usar o arquivo privado somente para o Master visual. A matriz
+  Playwright de nove papéis é criada em memória via Auth Admin com aceites legais
+  vigentes e grants mínimos compatíveis; nenhuma senha efêmera é persistida.
+- Durante o E2E, o Master visual é estacionado de forma reversível para preservar
+  a unicidade do papel. O `finally` remove fatores, sessões, grants, auditoria,
+  fixture Broker, mensagens e ledger legal antes do hard-delete das nove contas.
+- A prova final consulta Auth, RBAC e ledger e exige ausência integral da matriz,
+  além de restaurar o Master visual único antes das capturas. Evidências visuais
+  hospedadas mascaram identidades e os logs de acesso/erro são verificados sem
+  ecoar conteúdo sensível.
+- Sintaxe Node e 20 testes direcionados passaram. Nenhum ambiente remoto foi
+  consultado ou alterado por este incremento.
+
+## 2026-08-26 — convergência RBAC por conjunto do PR #49
+
+- A fonte produtiva somente leitura e o backup root-only concordaram em 17
+  pares `page_key`/rota/permissão para Master. A diferença mecânica do restore
+  de 21 páginas identificou somente WF16, CAIXA, WF14 e WF15.
+- A migration candidata remove apenas essas quatro identidades quando presentes
+  e exige o conjunto ativo exato. Não altera grants: Master/Admin/legados/futuros
+  permanecem com 20/17/4/0 permissões e 17/14/7/0 páginas.
+- Proxy e SSR agora negam as quatro rotas antes de renderizar; o E2E mantém as
+  21 URLs para provar `403`, enquanto navegação, RLS e catálogo expõem somente
+  as 17 páginas aprovadas.
+- O clean install e o restore lógico independente aprovaram 41 migrations,
+  1.018 pgTAP em 25 arquivos, lint/advisors e fingerprints. A réplica sanitizada
+  do estado produtivo recebeu somente `20260824230058` e `20260824230100`,
+  preservando 8/20/61/17 e o fail-closed Qlik.
+- Foi adicionado executor exclusivo de homologação: exige checkout limpo,
+  manifesto sintético, backup novo root-only com quatro tipos, checksums e
+  restore isolado comprovado, histórico exato 29 + 2, hashes fixos, advisory
+  lock, transações/histórico atômicos e pós-condições navegáveis `17/14/7/0`.
+  Nenhum ambiente remoto foi alterado durante sua implementação.
+
+## 2026-08-25 — gate de compatibilidade produtiva do PR #49
+
+- A réplica sanitizada PostgreSQL 17 recebeu somente as migrations candidatas
+  `20260824230058` e `20260824230100`: oito papéis, 20 permissões, 61 vínculos,
+  17 páginas e as 14 páginas de Admin permaneceram idênticos.
+- Clean install e restore lógico independente aprovaram 41 migrations e 1.004
+  pgTAP em 24 arquivos, lint e advisors na fonte e no alvo, owners, privilégios
+  efetivos e fingerprints. O backup de origem permaneceu sem rede.
+- O E2E local aprovou 19 cenários e manteve um único skip reservado ao smoke
+  hospedado: nove perfis, 21 rotas, APIs, recovery, MFA/AAL2, cookies, sessões e
+  logout foram exercitados; nove identidades sintéticas foram removidas.
+- A matriz visual local aprovou 147 checks responsivos, 84 de temas, 192 Axe,
+  192 comparações candidato/baseline e 105 checks de zoom; conta e fixtures
+  efêmeras foram removidas ao final.
+- A apresentação de acesso agora espelha a baseline produtiva: Master 20 grants,
+  Admin 17 e seis papéis legados quatro. As 21 rotas têm `403` pre-stream no
+  Proxy e repetem o mesmo gate em SSR, API/RPC e RLS.
+- Auditorias encerraram com zero vulnerabilidade de dependência, zero achado OSV
+  em 521 pacotes e zero segredo na árvore ou em 278 commits.
+- Produção e homologação permaneceram inalteradas; o smoke hospedado continua
+  pendente por depender de uma promoção futura expressamente autorizada.
+
+## 2026-08-25 — smoke fixa o daemon Docker local
+
+- O runner hospedado deixou de herdar `HOME`, `DOCKER_HOST`, `DOCKER_CONTEXT` e
+  `PATH` do chamador em comandos capturados; usa somente um `PATH` constante.
+- Inspeções de imagem, mount, estado e logs passam `--host
+unix:///var/run/docker.sock` explicitamente. O gate valida antes que esse alvo
+  seja socket root-owned e sem permissões para outros usuários.
+- Prettier, ESLint, sintaxe Node, testes direcionados e typecheck foram
+  reexecutados localmente. Nenhum daemon, container ou ambiente remoto foi
+  consultado ou alterado.
+
+## 2026-08-25 — contrato de smoke Auth hospedado endurecido
+
+- A configuração isolada de homologação habilita Mailpit, redirect único por
+  `APP_ORIGIN` e frequência compatível com repetição controlada do gate; nenhuma
+  mensagem é encaminhada para fora da VPS.
+- O runner agora exige checkout limpo e vincula HEAD, env privado, imagem,
+  container e `/api/health`. A inspeção de env, mount, logs e configuração
+  Supabase ocorre somente em memória, sem imprimir credenciais ou tokens.
+- Recuperação e MFA usam exclusivamente a identidade Master/QA sintética. O
+  `finally` restaura primeiro a senha, remove somente fatores novos, revoga
+  sessões no banco local isolado, comprova a credencial original e elimina
+  mensagens Mailpit mesmo quando o Playwright falha.
+- Nginx exige exatamente dois blocos sem log para `/auth/callback`; bytes novos
+  do access log e logs do app reprovam query de callback, HTTP 5xx ou erro
+  crítico. Image ID, horário de início, restart count e health devem permanecer
+  estáveis até o pós-gate.
+- Gates locais direcionados aprovaram Prettier, ESLint, sintaxe Node, 30 testes
+  Vitest e descoberta dos 12 cenários Playwright. O smoke HTTPS não foi
+  executado porque este incremento proíbe modificar ou substituir a
+  homologação viva.
+
+## 2026-08-25 — schema remoto e histórico reconciliado
+
+- A inspeção produtiva ocorreu somente em transações de leitura: PostgreSQL
+  17.6, 22 tabelas de aplicação, 28 funções, 17 policies, oito triggers e 26
+  versões remotas. Nenhuma configuração, migration, grant, linha ou usuário foi
+  alterado.
+- As sete versões remotas ausentes foram localizadas no ledger e em backups
+  root-only, classificadas por hash e reconciliadas com markers no-op. SQL
+  inseguro ou contendo verificadores legados não foi copiado para o Git.
+- Um backup corrente verificável alimentou dois projetos PostgreSQL 17 locais,
+  efêmeros e sem rede. O alvo recebeu somente RBAC/catalogação sanitizados e as
+  migrations `20260824230058` e `20260824230100`.
+- O rehearsal preservou fingerprints de oito papéis, 20 permissões, 61 vínculos
+  e 17 páginas; confirmou as 14 páginas de Admin, Qlik sem grant/policy de
+  leitura permissiva e os objetos Auth/MFA/aceites completos. Recursos
+  temporários foram removidos e nenhum ambiente remoto foi alterado.
+- A revisão independente encontrou um preflight local ainda preso ao baseline
+  Master-only anterior. O gate agora compara simetricamente a matriz comercial
+  herdada exata e reprova tanto perda quanto ampliação de permissão.
+- A mesma revisão encontrou a apresentação de herança ainda defasada. O mapa da
+  UI agora espelha os 17 grants de Admin e os quatro grants de cada papel legado;
+  os testes de troca de papel cobrem esse contrato sem tornar a UI autoridade.
+- O E2E comprovou que Cache Components podia emitir `200` antes do interrupt de
+  página. O Proxy agora antecipa a chave exata das 21 rotas, enquanto layouts,
+  páginas, APIs, RPCs e RLS continuam repetindo o gate. Admin mantém as páginas
+  de metas em modo legado somente leitura, sem RPC ou ação de política Master.
+- O primeiro pgTAP integral revelou duas suposições antigas: contagem de policy
+  que incluía o novo gate MFA restritivo e lookup nominal do schema opcional
+  `net`. Os testes agora distinguem policy de leitura do gate MFA; a migration
+  de portabilidade exige atributos e fingerprints exatos antes de corrigir o
+  contrato conhecido; permanece sem efeito onde esses objetos não existem.
+
+## 2026-08-25 — imagem promovível e segredos de runtime
+
+- Eliminada a configuração de ambiente do estágio de build: Supabase público,
+  `APP_ORIGIN`, modo de homologação e flags são validados e consumidos somente
+  no runtime do servidor. O cliente browser não lê `process.env`.
+- Os dois Compose apontam para `descomplica-crm:<SHA completo>`, sem `build:`.
+  `image:build` exige HEAD limpo, grava label OCI da revisão e `image:prove`
+  confirma mesma referência, image ID e revisão nos dois ambientes.
+- `AUTH_SESSION_COOKIE_SECRET` foi ligado aos configuradores privados por
+  arquivo separado. Diretório `root:root 0710`, segredo `root:root 0640` e
+  arquivos de ambiente `root:root 0600` são validados sem imprimir conteúdo;
+  symlinks e argumentos Compose fora da allowlist falham fechados.
+- Docker Compose com fonte de arquivo não aplica `uid/gid/mode`, e o runtime
+  disponível não materializa `secrets.environment`. O fallback comprovado usa
+  bind read-only, `create_host_path: false`, processo `node` com grupo
+  suplementar `0`, zero capabilities e `no-new-privileges`.
+- O configurador de homologação lê sem eco e preserva
+  `OFFICIAL_SIMULATOR_RUNTIME_MODE`/`OFFICIAL_SIMULATOR_ENABLED_KEYS`. Somente
+  `off` com allowlist vazia ou `active` com chaves oficiais únicas são aceitos;
+  ausência usa `off`/vazio e qualquer estado incoerente falha antes do replace.
+- Prova Docker local executou a mesma imagem com os perfis de homologação e
+  produção, mount real `0640` e processo não-root: `sameImage=true`, dois perfis
+  válidos e `secretValuesPrinted=false`. A imagem WIP de prova teve ID
+  `sha256:27124e3a44ef730d6aba381531b5e2e9736bc911b958855cbff058375ba26c5a`;
+  o gate final deve reconstruir uma única vez no SHA limpo integrado.
+- Gate isolado aprovou 80 testes direcionados, ESLint direcionado, typecheck,
+  build sem variáveis de ambiente com 39 rotas, sintaxe Bash/Node, manifests
+  Compose, `git diff --check` e a prova real do container. Nenhum ambiente
+  remoto, serviço, credencial ou dado foi alterado.
+
+## 2026-08-24 — fundação de recuperação, MFA e consentimentos
+
+- Base, arquitetura Next.js/Supabase SSR e implementação anterior foram
+  auditadas antes das mudanças. Trabalho isolado na branch
+  `codex/auth-mfa-legal-foundation`, sem sobrescrever alterações existentes.
+- Baseline local anterior ao incremento aprovou formato, lint, typecheck, 385
+  testes Vitest, oito testes Node, build, Supabase local, 939 pgTAP em 22
+  arquivos e release E2E com oito cenários executados e um skip remoto.
+- Implementados recuperação de senha anti-enumeração, callback fixo por
+  `APP_ORIGIN`, template `TokenHash` SHA-224 verificado via POST/body, senha de
+  12–128 caracteres e revogação server-side de todas as sessões após uma
+  autenticação Auth `otp`/`recovery` recente. Esses AMRs ficam em quarentena também
+  no RLS; callback falso preserva sessão e marker existentes.
+- Implementados enrollment, challenge e remoção TOTP, com QR Code/chave manual,
+  transição AAL1/AAL2 e bloqueio fail-closed compartilhado por guards, Route
+  Handlers, permissionamento, RPCs e policies RLS restritivas. A remoção revoga
+  primeiro as demais sessões do mesmo usuário para impedir ressurgimento AAL1.
+- “Lembrar neste navegador” permanece desmarcado por padrão. Marker HMAC limita
+  a sessão persistente a 30 dias; entrada inválida regride para sessão
+  temporária. Cookies de autenticação não dependem de `localStorage`.
+- Banner de cookies, cinco categorias, personalização e três documentos legais
+  foram adicionados. Termos e Privacidade exigem aceite versionado separado,
+  registrado em tabelas privadas append-only e sem grants para papéis de API.
+- Razão social, contatos, controlador, DPO, bases legais e retenção continuam
+  pendentes de revisão jurídica; nenhum dado legal foi inventado.
+- A matriz de smoke documenta nove perfis e 21 rotas. Após a reconciliação
+  produtiva, Master acessa as 21; Admin preserva 14; `broker`, `coordinator` e
+  `real_estate` preservam Dashboard, cinco etapas e Ranking; os quatro perfis
+  sem herança comercial permanecem apenas na superfície auth-only. MFA e
+  recuperação sobrepõem redirects antes do RBAC.
+- Supabase CLI local foi atualizado de 2.111.0 para 2.115.0 para incorporar a
+  correção oficial de resolução/reload do `content_path` de templates Auth.
+  Auditoria do Auth 2.195.0 confirmou SHA-224 puro no fluxo implícito e prefixo
+  oficial `pkce_` no PKCE; callback e E2E aceitam somente esses dois formatos.
+- Um stack descartável sem a extensão opcional `pg_net` revelou lookup frágil
+  em dois probes preexistentes. Migration separada preserva os predicados e usa
+  OID nulo de forma segura; relay e motor continuam fail-closed e desligados.
+- Todo trabalho permanece local. Nenhum Supabase remoto, produção, homologação,
+  VPS, usuário, sessão, integração, motor, grant ou configuração externa foi
+  alterado.
+- Gate final aprovou `format:check`, lint, typecheck, 427 testes Vitest e oito
+  testes Node, build de 39 rotas, reset do Supabase local e 1.002 pgTAP em 24
+  arquivos. O release E2E aprovou 11 cenários e manteve um skip exclusivo da
+  homologação remota: nove perfis, 21 URLs diretas, APIs, recuperação, MFA,
+  sessões, cookies e aceite legal foram exercitados sem persistir usuários.
+- A revisão independente de rotas confirmou a matriz 9×21, catálogo/menu, guards
+  SSR, Route Handlers e RLS. O P3 de cobertura foi fechado repetindo, para cada
+  perfil, dashboard, status/execução WF13 e os quatro handlers default-off; esses
+  probes terminam antes de qualquer escrita ou chamada externa.
+- Revisão de segurança independente encerrou sem achados P0, P1 ou P2. Evidência
+  sanitizada registrou zero artefatos Playwright, mensagens residuais, parâmetros
+  de token/código em URL, HTTP 5xx, panic ou fatal.
+- `pnpm audit`, OSV sobre 521 pacotes, Gitleaks na árvore e em 266 commits, schema
+  lint e advisors locais de segurança/performance terminaram sem achados.
+- O CI revelou dois contratos desatualizados no rehearsal isolado: total antigo
+  de 939 pgTAP e ausência da nova pasta de templates na cópia efêmera. A correção
+  mantém o ensaio genérico; a repetição local aprovou 34 migrations, 1.002 pgTAP
+  na fonte e no restore, backup lógico, owners, privilégios e fingerprint entre
+  dois projetos PostgreSQL 17 independentes.
+- A matriz visual revelou a suposição antiga de que tema sempre persistia. O
+  harness agora registra consentimento opcional explícito na conta QA antes de
+  alternar temas entre rotas; usuários reais continuam com opcionais desligados.
+  O botão flutuante de preferências é ocultado somente durante screenshots da
+  superfície comercial e permanece exercitado por teclado, Axe e E2E funcional.
+- A repetição visual local aprovou 147 checks responsivos, 84 de tema, 192 Axe,
+  192 comparações de baseline e 105 checks de zoom; conta e fixtures efêmeras
+  foram removidas ao terminar.
+
 ## 2026-08-18 — Hotfix WF13: limite 84 e comprometimento
 
 - Base e produção confirmadas em `3ddbf30362788ecaf1450377742ee162b3984a6c`.

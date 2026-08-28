@@ -1,7 +1,8 @@
-import { notFound } from "next/navigation";
+import { forbidden, notFound } from "next/navigation";
 
 import { enforcePermission } from "@/lib/authorization/enforce";
-import { SIMULATORS, isSimulatorSlug } from "@/lib/crm/simulators/catalog";
+import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+import { SIMULATORS, SIMULATOR_LIST, isSimulatorSlug } from "@/lib/crm/simulators/catalog";
 import { isOfficialSimulatorSlug } from "@/lib/crm/simulators/official/catalog";
 import {
   getOfficialSimulatorRuntimeConfiguration,
@@ -22,6 +23,8 @@ export default async function SimulatorPage({
   const authorization = await enforcePermission("crm.simulators.view");
   const { simulator } = await params;
   if (!isSimulatorSlug(simulator)) notFound();
+  const pageGate = getProtectedPageGate(`/app/simulacao/${simulator}`);
+  if (!pageGate?.releaseEnabled) forbidden();
 
   const configuration = getOfficialSimulatorRuntimeConfiguration();
   const officialSlug = isOfficialSimulatorSlug(simulator) ? simulator : null;
@@ -39,6 +42,10 @@ export default async function SimulatorPage({
       definition={SIMULATORS[simulator]}
       executionEnabled={executionEnabled}
       executionReason={executionReason}
+      releasedSimulatorSlugs={SIMULATOR_LIST.filter(
+        (candidate) =>
+          getProtectedPageGate(`/app/simulacao/${candidate.slug}`)?.releaseEnabled === true,
+      ).map((candidate) => candidate.slug)}
     />
   );
 }

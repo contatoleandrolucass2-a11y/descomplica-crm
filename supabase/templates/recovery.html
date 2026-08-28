@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Redefina sua senha</title>
+  </head>
+  <body>
+    <h1>Redefina sua senha</h1>
+    <p>Recebemos uma solicitação para alterar a senha da sua conta.</p>
+    <p>
+      <a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&amp;type=recovery">
+        Escolher uma nova senha
+      </a>
+    </p>
+    <p>Se você não solicitou esta alteração, ignore esta mensagem.</p>
+  </body>
+</html>

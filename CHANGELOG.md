@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-28
+
+- Mantém o callback direto por `TokenHash` e adiciona compatibilidade segura
+  com o `ConfirmationURL` padrão do Supabase hospedado: somente auth code UUID
+  v4 PKCE é trocado, e a redefinição continua exigindo assurance recente de
+  recuperação. A location exata permanece sem logs de query.
+
+## 2026-08-27
+
+- Impede o prefetch das quatro rotas de simuladores ainda bloqueadas no canário WF13, mantendo-as identificadas como indisponíveis e sem ampliar a matriz RBAC aprovada.
+- Atualiza as 12 evidências visuais específicas do canário WF13 após validar 119 rotas responsivas, 68 temas, 160 auditorias Axe e 85 checks de zoom.
+- Mantém o motivo dos itens bloqueados no nome acessível sem introduzir largura mínima ou overflow em tablet e celular.
+- Restringe o estilo de aba aos itens de navegação bloqueados, sem atingir a explicação próxima do CTA indisponível.
+
 ## 2026-08-18 — Hotfix WF13: limite 84 e pró-soluto
 
 - Fixa o limite comercial em 84 no servidor e na interface somente leitura;
@@ -19,6 +33,113 @@
   reconhece WF13 ativo no canário e continua exigindo os demais motores bloqueados.
 
 ## Unreleased
+
+- Endpoints de integrações, relay e motores explicitamente desligados passam a
+  ocultar a capacidade com `404` e `no-store`, sem autenticar, ler payload ou
+  acessar banco. Configuração ativa inválida e falhas reais continuam `503`,
+  preservando observabilidade sem produzir 5xx no smoke default-off.
+- Substitui somente as duas verificações TOTP mutáveis por um Route Handler com
+  resposta vazia e cookies SSR bufferizados. Enrollment e challenge preservam
+  erro inline, exigem origem canônica, payload mínimo, fator pertencente à
+  sessão e token AAL2 verificado antes do commit dos cookies; elimina o POST
+  Server Action que podia ativar o fator e travar durante o stream RSC. O Proxy
+  posterga cookies somente nessa rota para o handler consolidar refresh,
+  deleções de chunks e sessão AAL2 sem duplicação.
+- Torna o smoke de revogação de senha independente da ordem dos cenários: ele
+  abre uma segunda sessão Master real antes do recovery, em vez de reutilizar
+  um storage state já encerrado pelo logout da matriz hospedada.
+- Alinha o contrato da evidência visual ao conjunto release-enabled de 17
+  páginas; as quatro URLs futuras continuam cobertas pela matriz funcional de
+  21 rotas e falham fechadas, sem produzir capturas de conteúdo indisponível. A
+  baseline autenticada registra checkout limpo e promoção transacional íntegra.
+- Reorganiza o cabeçalho em três linhas nos breakpoints móveis para impedir
+  colisão entre marca, ações, Segurança e navegação; a auditoria visual agora
+  detecta também `brand×actions` e colisões entre ações.
+- Atualiza a baseline autenticada somente para o catálogo produtivo de 17
+  páginas, os quatro cards de simuladores release-disabled e o cabeçalho móvel.
+- Torna a matriz Playwright hospedada integralmente efêmera: nove contas são
+  criadas via Auth Admin apenas em memória, recebem papéis/perfis/scopes exatos
+  e são removidas em `finally` com prova de ausência de sessões, fatores,
+  autorização e ledger legal. Somente o Master persistente segue como fixture
+  visual, restaurado antes das capturas; credenciais e identidades são omitidas.
+- Converge o catálogo RBAC pelo conjunto produtivo comprovado: Master 17 páginas,
+  Admin 14, seis papéis legados sete e papéis futuros/pendente zero. As quatro
+  rotas excedentes WF16, CAIXA, WF14 e WF15 permanecem no inventário HTTP, mas
+  saem de `app_pages` e retornam `403` antes de renderizar.
+- Adiciona contrato compartilhado dos 21 paths, pgTAP por conjunto exato e E2E
+  9×21; grants de permissões permanecem 20/17/4/0 e nenhuma flag ou motor muda.
+- Adiciona executor root-only para a homologação com baseline exato de 29
+  versões, allowlist/hashes das duas migrations Auth/MFA, dry-run fail-closed,
+  backup distinto com restore isolado comprovado, lock advisory, histórico
+  atômico e pós-condições RBAC/RLS/Qlik; as 17 páginas exigem navegação ativa.
+- Fixa todas as inspeções Docker do smoke hospedado no socket local root-owned
+  `/var/run/docker.sock`; comandos capturados usam ambiente mínimo e não herdam
+  `HOME`, `DOCKER_HOST` ou `DOCKER_CONTEXT` do chamador.
+- Habilita SMTP Mailpit estritamente isolado na configuração de homologação e
+  amplia o gate HTTPS para recuperação de senha, MFA/AAL2 e restauração
+  comprovada da conta Master/QA sintética.
+- Vincula o smoke hospedado ao mesmo SHA de checkout, env privado, imagem,
+  container e `/api/health`; valida mount root-only do segredo, APP_ORIGIN,
+  redirects, Nginx sem query logs, ausência de 5xx/restarts e limpeza de
+  sessões, fatores e mensagens sem emitir material sensível.
+- Reconcilia as sete versões existentes somente no histórico remoto com markers
+  sanitizados: três equivalentes canônicos, duas alterações inseguras já
+  supersedidas e dois contratos legados confidenciais permanecem fora do Git.
+- Substitui o preflight Master-only obsoleto por comparação exata da matriz
+  herdada, bloqueando perda ou ampliação de acesso antes do smoke E2E.
+- Alinha também a matriz exibida na administração aos 17 grants de Admin e aos
+  quatro grants dos seis papéis operacionais; Admin conserva as 14 páginas e
+  consulta metas legadas sem receber gestão de política comercial.
+- Antecipada no Proxy a mesma permissão das 21 rotas versionadas, preservando
+  os guards SSR/API/RLS e retornando `403` real antes de qualquer shell streamed.
+- Mantém a migration Auth portável entre produção e clean install: contratos
+  opcionais ausentes não são criados; quando presentes, atributos e fingerprint
+  devem corresponder ao contrato aprovado antes da correção de `pg_net`.
+- Adiciona inventário produtivo somente leitura e rehearsal sobre restore
+  sanitizado PostgreSQL 17. O gate aplica apenas as duas migrations Auth/MFA,
+  preserva os fingerprints RBAC 8/20/61/17 e mantém tabelas Qlik fail-closed.
+- Torna o artefato Docker promovível: homologação e produção usam a mesma
+  imagem imutável por SHA, sem configuração Supabase, origem ou flags congeladas
+  no build. O contrato runtime valida ambiente antes de iniciar o Next.js.
+- Move o HMAC de persistência para arquivo root-only montado read-only, com
+  configuradores atômicos, wrapper Compose de argumentos estritamente
+  allowlisted e falha fechada para symlink, owner, modo ou conteúdo inválido.
+- Adiciona prova automatizada do mesmo image ID nos dois Compose e execução real
+  dos perfis de homologação e produção sobre o mesmo digest, sem eco de segredo.
+- O configurador de homologação preserva somente o gate oficial de simuladores
+  já válido; combinações incoerentes, chaves desconhecidas ou duplicadas
+  interrompem a escrita, sem apagar uma ativação existente.
+- O wrapper root-only fixa o manifest Compose no repositório versionado e não
+  aceita resolução pelo diretório corrente do chamador. Ambiente herdado é
+  removido e o Docker fica restrito ao socket Unix local.
+- Adiciona recuperação de senha com resposta anti-enumeração, callback fixo por
+  `APP_ORIGIN`, template `TokenHash` verificado por POST/body, política forte de
+  12–128 caracteres e revogação de todas as sessões após alteração. Callback falso
+  preserva sessão e marker existentes; AMR `otp`/`recovery` fica em quarentena.
+- Adiciona MFA TOTP com QR Code/chave manual, páginas `/mfa` e
+  `/conta/seguranca` e enforcement AAL2 em SSR, APIs, RPCs e RLS quando houver
+  fator verificado. Remoção AAL2 revoga primeiro as demais sessões e falha fechado.
+- Torna “Lembrar neste navegador” opt-in, com marker HMAC e limite absoluto de
+  30 dias; valor ausente, inválido ou adulterado mantém cookie de sessão.
+- Adiciona consentimento granular de cookies, documentos legais versionados e
+  ledger privado append-only de aceites de Termos e Privacidade, separado das
+  preferências de cookies.
+- Atualiza somente o Supabase CLI de desenvolvimento para 2.115.0, que corrige
+  a resolução/reload do `content_path` de templates Auth. O callback aceita os
+  formatos oficiais SHA-224 puro e `pkce_` + SHA-224, rejeitando outros prefixos.
+- Torna os probes de isolamento do relay Qlik e do motor comercial herméticos
+  quando o schema opcional `net` estiver ausente, sem instalar `pg_net` nem
+  liberar qualquer papel dedicado.
+- Atualiza o rehearsal de restore para copiar templates Auth e validar o total
+  atual de 1.018 pgTAP; fonte e alvo efêmeros continuam independentes.
+- Faz a conta QA visual consentir explicitamente com cookies opcionais antes da
+  matriz de temas; o produto continua opt-out e sem persistência por padrão.
+- Registra a matriz local dos nove perfis e 21 rotas. A reconciliação preserva
+  17 páginas para Master, 14 para Admin, sete para os perfis analíticos
+  herdados e nenhuma herança comercial para os quatro perfis restantes.
+  Alterações permanecem locais; nenhum ambiente remoto, migration, usuário ou
+  configuração foi modificado. Os resultados finais deste novo SHA serão
+  registrados após a repetição integral dos gates.
 
 - Evolui somente o WF13 para `wf13-1.2.0`: ranking obrigatório e versionado,
   comparação exata por dois limites independentes e reprovação explícita de
@@ -372,6 +493,9 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Alterado
 
+- Estabiliza o smoke MFA hospedado ao aguardar janela TOTP útil antes de
+  enrollment/challenge e ampliar somente o teto desse cenário para 180
+  segundos, sem registrar chave, código ou credencial.
 - Base fixada em Node 24.19.0, pnpm 11.20.0, Next.js 16.3.0, React 19.2.8 e Supabase SDK 2.112.0.
 - Supabase SSR passou a usar a publishable key e validação de claims no middleware.
 - Política de scripts de instalação e overrides transitivos de segurança centralizados no workspace pnpm.

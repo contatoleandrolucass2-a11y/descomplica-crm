@@ -1,10 +1,23 @@
 import { PERMISSIONS, type PermissionKey } from "./permissions";
 import type { RoleKey } from "./roles";
 
-const BASE_NAVIGATION_PERMISSIONS = ["pages.view"] as const satisfies readonly PermissionKey[];
+const BASE_NAVIGATION_PERMISSIONS = [
+  "pages.view",
+  "crm.dashboard.view",
+  "crm.stages.view",
+  "crm.ranking.view",
+] as const satisfies readonly PermissionKey[];
 
+const FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION = new Set<PermissionKey>([
+  "crm.read_model_v3.view",
+  "crm.read_model_v3.ranking.view",
+  "crm.read_model_v3.partnerships.view",
+  "crm.read_model_v3.stock.view",
+  "crm.commercial_engine.execute",
+  "crm.commercial_policy.manage",
+]);
 const MASTER_PERMISSIONS = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
-  (permission) => permission !== "crm.commercial_engine.execute",
+  (permission) => !FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION.has(permission),
 );
 const ADMIN_PERMISSIONS = [
   "users.view",
@@ -15,12 +28,18 @@ const ADMIN_PERMISSIONS = [
   "roles.manage",
   "audit.view",
   "admin.access",
+  "pages.manage",
   ...BASE_NAVIGATION_PERMISSIONS,
+  "crm.settings.view",
+  "crm.settings.manage",
+  "crm.salesforce.refresh",
+  "crm.ingest.manage",
 ] as const satisfies readonly PermissionKey[];
 const NO_INHERITED_PERMISSIONS = [] as const satisfies readonly PermissionKey[];
 
-// UI reflection of role_permissions. Database helpers and RLS remain the
-// authority; this map only explains inherited access and builds change summaries.
+// UI reflection of the production role_permissions baseline reconciled by this
+// release. Database helpers and RLS remain authoritative; future foundations
+// cannot appear here before their own production grants are approved.
 export const ROLE_INHERITED_PERMISSIONS: Record<RoleKey, readonly PermissionKey[]> = {
   master: MASTER_PERMISSIONS,
   admin: ADMIN_PERMISSIONS,

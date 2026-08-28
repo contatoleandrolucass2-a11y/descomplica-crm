@@ -10,11 +10,16 @@ import { preparePointSettingsDraftAction } from "../actions";
 import { ConfigurationDraftForm } from "../../_components/ConfigurationDraftForm";
 
 export async function PointSettingsPage({
+  canManageDraft,
   notification,
 }: {
+  canManageDraft: boolean;
   notification?: "saved" | "validation" | "save";
 }) {
-  const [result, draft] = await Promise.all([loadPointSettings(), loadPointSettingsDraft()]);
+  const [result, draft] = await Promise.all([
+    loadPointSettings(),
+    canManageDraft ? loadPointSettingsDraft() : Promise.resolve(null),
+  ]);
   const draftValues = draft ? pointDraftValues(draft.payload) : null;
   const weights = draftValues?.weights ?? (result.status === "ready" ? result.weights : null);
   const targets = draftValues?.targets ?? (result.status === "ready" ? result.targets : null);
@@ -53,7 +58,9 @@ export async function PointSettingsPage({
                       result.status === "ready" ? "bg-[var(--analytics-lime)]" : "bg-amber-300"
                     }`}
                   />
-                  Base legada: somente leitura · Rascunho atual: editável
+                  {canManageDraft
+                    ? "Base legada: somente leitura · Rascunho atual: editável"
+                    : "Base legada: somente leitura · Rascunho atual: indisponível"}
                 </span>
               </div>
 
@@ -61,7 +68,9 @@ export async function PointSettingsPage({
                 Metas de pontos
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
-                Prepare pesos e objetivos como rascunho inativo, sem alterar o ranking.
+                {canManageDraft
+                  ? "Prepare pesos e objetivos como rascunho inativo, sem alterar o ranking."
+                  : "Consulte a base legada. O rascunho permanece indisponível para este perfil."}
               </p>
 
               {updatedAt ? (
@@ -259,6 +268,7 @@ export async function PointSettingsPage({
 
         <ConfigurationDraftForm
           action={preparePointSettingsDraftAction}
+          enabled={canManageDraft}
           saveLabel="Salvar rascunho de pontuação"
         >
           <input type="hidden" name="draftRevision" value={draft?.revision ?? 0} />

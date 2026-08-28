@@ -29,7 +29,9 @@ vi.mock("@/lib/crm/read-model-v3/data", () => ({
 import ForbiddenPage from "@/app/forbidden";
 import ErrorPage from "@/app/error";
 import NotFoundPage from "@/app/not-found";
+import PartnershipsChannelLayout from "@/app/(protected)/app/canal-de-parcerias/layout";
 import PartnershipsChannelPage from "@/app/(protected)/app/canal-de-parcerias/page";
+import SimulationLayout from "@/app/(protected)/app/simulacao/layout";
 import { UserAccessManager } from "@/app/(protected)/admin/usuarios/UserAccessManager";
 import {
   ROLE_INHERITED_PERMISSIONS,
@@ -109,6 +111,30 @@ describe("experiência de acesso", () => {
     await expect(PartnershipsChannelPage()).rejects.toThrow("FORBIDDEN_INTERRUPT");
     expect(mocks.forbidden).toHaveBeenCalled();
   });
+
+  it("aplica gates de rota antes do streaming de Canal e Simulação", async () => {
+    mocks.requirePermission.mockResolvedValue({
+      userId: "81000000-0000-4000-8000-000000000002",
+      roleKey: "master",
+      level: 100,
+      permissions: ["crm.partnerships.view", "crm.simulators.view"],
+    });
+    const partnershipChild = createElement("span", null, "Canal autorizado");
+    const simulationChild = createElement("span", null, "Simulação autorizada");
+
+    expect(
+      renderToStaticMarkup(
+        (await PartnershipsChannelLayout({ children: partnershipChild })) as React.ReactElement,
+      ),
+    ).toContain("Canal autorizado");
+    expect(
+      renderToStaticMarkup(
+        (await SimulationLayout({ children: simulationChild })) as React.ReactElement,
+      ),
+    ).toContain("Simulação autorizada");
+    expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
+    expect(mocks.requirePermission).toHaveBeenCalledWith("crm.simulators.view");
+  });
 });
 
 describe("catálogo localizado de acesso", () => {
@@ -150,13 +176,27 @@ describe("catálogo localizado de acesso", () => {
   });
 
   it("mantém a matriz visual dos papéis alinhada ao catálogo protegido", () => {
-    const baseNavigationPermissions = ["pages.view"];
+    const baseNavigationPermissions = [
+      "pages.view",
+      "crm.dashboard.view",
+      "crm.stages.view",
+      "crm.ranking.view",
+    ];
 
     expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(
       Object.keys(PERMISSIONS).filter(
-        (permission) => permission !== "crm.commercial_engine.execute",
+        (permission) =>
+          ![
+            "crm.read_model_v3.view",
+            "crm.read_model_v3.ranking.view",
+            "crm.read_model_v3.partnerships.view",
+            "crm.read_model_v3.stock.view",
+            "crm.commercial_engine.execute",
+            "crm.commercial_policy.manage",
+          ].includes(permission),
       ),
     );
+    expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(20);
     expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual([
       "users.view",
       "users.manage",
@@ -166,7 +206,12 @@ describe("catálogo localizado de acesso", () => {
       "roles.manage",
       "audit.view",
       "admin.access",
+      "pages.manage",
       ...baseNavigationPermissions,
+      "crm.settings.view",
+      "crm.settings.manage",
+      "crm.salesforce.refresh",
+      "crm.ingest.manage",
     ]);
     for (const roleKey of [
       "coordinator",

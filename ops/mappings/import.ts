@@ -29,8 +29,8 @@ const dispositionOrder: readonly MappingImportDisposition[] = [
 
 type ContractModule = typeof import("../../lib/crm/mappings/import-contract");
 type RuntimeEnvironment = {
-  NEXT_PUBLIC_SUPABASE_URL?: string | undefined;
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string | undefined;
+  SUPABASE_URL?: string | undefined;
+  SUPABASE_PUBLISHABLE_KEY?: string | undefined;
   CRM_MAPPING_IMPORT_ACCESS_TOKEN?: string | undefined;
   CRM_MAPPING_IMPORT_APPLY_ENABLED?: string | undefined;
 };
@@ -68,8 +68,8 @@ Options:
   -h, --help                     Show this help
 
 Credentials are accepted only through environment variables:
-  NEXT_PUBLIC_SUPABASE_URL
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  SUPABASE_URL
+  SUPABASE_PUBLISHABLE_KEY
   CRM_MAPPING_IMPORT_ACCESS_TOKEN
 
 Apply additionally requires CRM_MAPPING_IMPORT_APPLY_ENABLED=true.
@@ -129,8 +129,8 @@ function requiredCredentials(environment: RuntimeEnvironment): {
   publishableKey: string;
   accessToken: string;
 } {
-  const rawUrl = environment.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
-  const publishableKey = environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ?? "";
+  const rawUrl = environment.SUPABASE_URL?.trim() ?? "";
+  const publishableKey = environment.SUPABASE_PUBLISHABLE_KEY?.trim() ?? "";
   const accessToken = environment.CRM_MAPPING_IMPORT_ACCESS_TOKEN?.trim() ?? "";
 
   let baseUrl: URL;
@@ -360,8 +360,8 @@ export async function runMappingImportCli(
     const contract = (await import(CONTRACT_MODULE_URL.href)) as ContractModule;
     const { manifest, manifestHash } = await loadManifest(options.manifest, contract);
     const environment: RuntimeEnvironment = dependencies.environment ?? {
-      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+      SUPABASE_URL: process.env.SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY: process.env.SUPABASE_PUBLISHABLE_KEY,
       CRM_MAPPING_IMPORT_ACCESS_TOKEN: process.env.CRM_MAPPING_IMPORT_ACCESS_TOKEN,
       CRM_MAPPING_IMPORT_APPLY_ENABLED: process.env.CRM_MAPPING_IMPORT_APPLY_ENABLED,
     };

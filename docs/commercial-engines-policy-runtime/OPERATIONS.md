@@ -19,7 +19,7 @@ grant, alteração de flag, canário, cutover ou deploy.
   e pgTAP próprios;
 - nenhum segredo ou token em shell history, PR ou artefato.
 - `COMMERCIAL_ENGINE_DATABASE_URL` usando somente o papel dedicado (ou sufixo
-  de pooler), o mesmo project ref de `NEXT_PUBLIC_SUPABASE_URL`,
+  de pooler), o mesmo project ref de `SUPABASE_URL`,
   `sslmode=verify-full` e senha distinta de HMAC/secret keys.
 
 ## Preparação e dry-run

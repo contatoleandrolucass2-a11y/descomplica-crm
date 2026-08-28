@@ -21,6 +21,7 @@ const BLOCKER_LABELS: Record<string, string> = {
 export function ConfigurationDraftForm({
   action,
   children,
+  enabled = true,
   saveLabel,
 }: {
   action: (
@@ -28,9 +29,28 @@ export function ConfigurationDraftForm({
     formData: FormData,
   ) => Promise<CommercialDraftActionState>;
   children: ReactNode;
+  enabled?: boolean;
   saveLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialCommercialDraftActionState);
+
+  if (!enabled) {
+    return (
+      <section className="mt-5 grid gap-5" aria-label="Rascunho indisponível">
+        <fieldset disabled className="contents">
+          {children}
+        </fieldset>
+        <div
+          role="status"
+          className="rounded-2xl border border-slate-300 bg-slate-100 px-5 py-4 text-sm leading-6 text-slate-700"
+        >
+          <strong className="block text-slate-950">Rascunho indisponível para este perfil</strong>A
+          base legada permanece somente leitura. Nenhuma validação ou gravação de política comercial
+          foi liberada.
+        </div>
+      </section>
+    );
+  }
 
   return (
     <form action={formAction} className="mt-5 grid gap-5">

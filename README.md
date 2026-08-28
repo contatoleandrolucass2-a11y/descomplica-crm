@@ -56,8 +56,8 @@ cp .env.example .env.local
 Preencha em `.env.local` as variáveis públicas e, quando testar a integração, as variáveis server-side:
 
 ```dotenv
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
 MASTER_USER_ID=
 APP_ORIGIN=http://127.0.0.1:3000
 SALESFORCE_INGEST_ENABLED=false
@@ -77,7 +77,7 @@ SALESFORCE_REFRESH_URL=
 SALESFORCE_REFRESH_SECRET=
 ```
 
-Secret key, Bearers e credenciais PostgreSQL nunca podem entrar no bundle da aplicação. A secret key é aceita somente pelo módulo server-only da ingestão M2M. `CRM_READ_MODEL_V3_SHADOW_ENABLED` revela apenas as rotas shadow autenticadas e não autoriza cutover ou ingestão. O relay Qlik exige HMAC e conexão PostgreSQL exclusiva; `off` é o default e nenhuma flag substitui o gate privado no banco. Motores comerciais também exigem modo, allowlist, conexão dedicada vinculada ao mesmo project ref de `NEXT_PUBLIC_SUPABASE_URL`, permissão, policy vigente e gate; neste incremento os três controles de ambiente ficam vazios/off e o papel dedicado permanece `NOLOGIN`. `.env.local` nunca deve entrar no Git.
+Secret key, Bearers e credenciais PostgreSQL nunca podem entrar no bundle da aplicação. A secret key é aceita somente pelo módulo server-only da ingestão M2M. `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY` são lidas em runtime pelo servidor; nenhum valor `NEXT_PUBLIC_*` congela configuração de ambiente na imagem. `CRM_READ_MODEL_V3_SHADOW_ENABLED` revela apenas as rotas shadow autenticadas e não autoriza cutover ou ingestão. O relay Qlik exige HMAC e conexão PostgreSQL exclusiva; `off` é o default e nenhuma flag substitui o gate privado no banco. Motores comerciais também exigem modo, allowlist, conexão dedicada vinculada ao mesmo project ref de `SUPABASE_URL`, permissão, policy vigente e gate; neste incremento os três controles de ambiente ficam vazios/off e o papel dedicado permanece `NOLOGIN`. `.env.local` nunca deve entrar no Git.
 
 ## Banco local e aplicação
 

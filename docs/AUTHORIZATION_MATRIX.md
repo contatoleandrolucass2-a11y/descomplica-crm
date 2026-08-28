@@ -15,12 +15,12 @@ exceções individuais. Uma exceção `deny` vence `allow` e a permissão herdad
 Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 `legacy_review` falham fechados nas policies RLS.
 
-| Grupo de papéis                                                             | Páginas padrão                                                      | Administração                                       |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------- |
-| `master`                                                                    | todas as páginas; único papel com fatos comerciais v2 e simuladores | usuários, papéis, exceções e catálogo               |
-| `admin`                                                                     | navegação básica; nenhum simulador ou fato comercial v2             | escopada; intake somente com `crm_people` confiável |
-| `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | navegação básica; nenhum simulador ou fato comercial v2             | nenhuma                                             |
-| `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                              | nenhuma                                             |
+| Grupo de papéis                                                             | Páginas herdadas                                                                   | Administração                                       |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `master`                                                                    | 17: catálogo produtivo, Canal, hub/WF13 e três páginas administrativas             | usuários, papéis, exceções e catálogo               |
+| `admin`                                                                     | 14: Dashboard, cinco etapas, Ranking, Configurações e três páginas administrativas | escopada; intake somente com `crm_people` confiável |
+| `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | 7: Dashboard, cinco etapas e Ranking                                               | nenhuma                                             |
+| `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                                             | nenhuma                                             |
 
 As permissões administrativas respeitam hierarquia estrita: o ator somente
 modifica usuários e papéis abaixo do próprio nível. O próprio usuário não pode
@@ -57,9 +57,11 @@ lineage e filtros continuam validados no servidor e no banco.
 Nenhum papel herda automaticamente as quatro permissões shadow nesta migration,
 inclusive Master. Os testes criam grants sintéticos locais e transitórios para
 provar a matriz, mas qualquer autorização real futura precisa ser explícita,
-auditada e aplicada em migration posterior compatível com a imagem anterior. Os
-modelos v2 comerciais, configurações, metas e pontos permanecem Master-only.
-Papel, flag ou UI nunca substituem o gate no banco.
+auditada e aplicada em migration posterior compatível com a imagem anterior. O
+PR #49 preserva no v2 as permissões produtivas observadas: Dashboard, etapas e
+Ranking para Admin e os seis papéis operacionais legados; Configurações para
+Admin; Canal e simuladores continuam nos gates Master existentes. Papel, flag
+ou UI nunca substituem o gate no banco.
 
 `get_crm_read_model_v3` falha fechado (`42501`) quando o dataset é desconhecido,
 a permissão correspondente falta, o escopo é nulo ou o grant exato não está
@@ -83,13 +85,17 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 
 ## Catálogo
 
-`public.app_pages` contém 21 registros versionados:
+`public.app_pages` contém exatamente os 17 registros aprovados em produção:
 
 - dashboard, cinco etapas e ranking;
 - Canal de Parcerias protegido em `/app/canal-de-parcerias`;
 - configurações, metas do funil, parcerias e pontos;
-- hub de simulação e cinco jornadas visuais WF13, WF16, CAIXA, WF14 e WF15;
+- hub de simulação e a jornada WF13;
 - início administrativo, usuários e catálogo de páginas.
+
+O inventário HTTP continua cobrindo 21 rotas protegidas. WF16, CAIXA, WF14 e
+WF15 permanecem versionados no código para incrementos futuros, mas não possuem
+linha em `app_pages`, não aparecem no menu e retornam `403` mesmo ao Master.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
 de integração pendente. A rota de produção continua exigindo
@@ -102,11 +108,11 @@ continua separada e só retorna entries com ID Qlik mapeado, owner ativo,
 vigência e organização dentro do escopo aprovado; ela não é a fonte da página
 v3.
 
-As seis rotas de simulação exigem `crm.simulators.view`. Durante o canário WF13,
-essa permissão é nível 100 e pertence somente ao Master, sem overrides diretos.
-O gate de página permanece separado de `crm.simulators.execute`; possuir um não
-substitui o outro. Somente WF13 pode executar quando sua flag explícita também
-está ativa. WF16, CAIXA, WF14 e WF15 continuam bloqueados.
+O hub e WF13 exigem `crm.simulators.view`. Durante o canário WF13, essa permissão
+é nível 100 e pertence somente ao Master, sem overrides diretos. O gate de
+página permanece separado de `crm.simulators.execute`; possuir um não substitui
+o outro. Somente WF13 pode executar quando sua flag explícita também está ativa.
+WF16, CAIXA, WF14 e WF15 ficam fora do catálogo e continuam bloqueados.
 
 Falta de permissão autenticada usa o interruptor `forbidden()` do Next.js e
 retorna a superfície `AUTH-403`; caminhos realmente inexistentes usam
@@ -184,12 +190,13 @@ Nenhuma dessas tabelas aceita escrita direta do papel `authenticated`. A RLS de 
 As páginas de metas exigem `crm.settings.manage` na rota e na Server Action. A
 tabela `crm_funnel_goals` repete a verificação na RLS, e a RPC de escrita
 revalida sessão, conta ativa, permissão e limites antes de alterar qualquer
-linha. No v2 global, somente Master possui essa permissão.
+linha. No baseline produtivo preservado, Master e Admin possuem essa permissão.
 
 As tabelas de pontos aceitam leitura com `crm.ranking.view` ou
 `crm.settings.manage`. A rota de configuração e a RPC de substituição exigem
-`crm.settings.manage`. Ambas são Master-only enquanto o modelo permanecer v2
-global.
+`crm.settings.manage`. O PR conserva os vínculos atuais: leitura de Ranking para
+Master, Admin e os seis papéis operacionais legados; configuração somente para
+Master e Admin.
 
 O catálogo novo separa `crm.simulators.view` de
 `crm.simulators.execute` e usa `crm.commercial_engine.execute` exclusivamente
@@ -203,8 +210,8 @@ server-side.
 
 A rota de ranking de produção conserva `crm.ranking.view` e o read model v2. A
 rota shadow exige `crm.read_model_v3.ranking.view` e usa somente a RPC v3
-escopada. Pesos, objetivos e configuração permanecem no modelo v2 Master-only;
-ranking avançado, bônus e premiações não foram implementados. As tabelas v3 não
+escopada. Pesos, objetivos e configuração permanecem no modelo v2 para Master e
+Admin; ranking avançado, bônus e premiações não foram implementados. As tabelas v3 não
 expõem leitura ou escrita direta a `authenticated` nem a `service_role`.
 
 As tabelas privadas de catálogo comercial, versões, imports, gates e execuções

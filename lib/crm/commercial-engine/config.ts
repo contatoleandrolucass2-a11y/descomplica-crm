@@ -8,7 +8,7 @@ export type CommercialEngineRuntimeMode = "off" | "shadow" | "active";
 
 type RuntimeEnvironment = {
   NODE_ENV?: string;
-  NEXT_PUBLIC_SUPABASE_URL?: string;
+  SUPABASE_URL?: string;
   COMMERCIAL_ENGINE_RUNTIME_MODE?: string;
   COMMERCIAL_ENGINE_ENABLED_KEYS?: string;
   COMMERCIAL_ENGINE_DATABASE_URL?: string;
@@ -99,7 +99,7 @@ function validDatabaseUrl(
       return environment.NODE_ENV !== "production" && username === "crm_commercial_engine";
     }
 
-    const projectRef = supabaseProjectRef(environment.NEXT_PUBLIC_SUPABASE_URL);
+    const projectRef = supabaseProjectRef(environment.SUPABASE_URL);
     if (!projectRef) return false;
     const isDirectDatabase =
       username === "crm_commercial_engine" &&

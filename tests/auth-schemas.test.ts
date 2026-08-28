@@ -25,8 +25,10 @@ describe("signupSchema", () => {
   const validInput = {
     name: "Pessoa Usuária",
     email: "pessoa@example.com",
-    password: "senha-segura",
-    confirmPassword: "senha-segura",
+    password: "Senha-segura1!",
+    confirmPassword: "Senha-segura1!",
+    termsAccepted: "on",
+    privacyAccepted: "on",
   };
 
   it("aceita cadastro consistente", () => {
@@ -40,5 +42,22 @@ describe("signupSchema", () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it("exige aceites legais separados do consentimento de cookies", () => {
+    const withoutLegalAcceptance = {
+      name: validInput.name,
+      email: validInput.email,
+      password: validInput.password,
+      confirmPassword: validInput.confirmPassword,
+    };
+
+    expect(signupSchema.safeParse(withoutLegalAcceptance).success).toBe(false);
+    expect(
+      signupSchema.safeParse({
+        ...validInput,
+        privacyAccepted: "off",
+      }).success,
+    ).toBe(false);
   });
 });

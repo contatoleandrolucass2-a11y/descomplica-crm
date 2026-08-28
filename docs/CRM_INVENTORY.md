@@ -58,7 +58,7 @@ indisponível até um incremento com fonte oficial.
 
 ## Catálogo versionado de páginas do sistema seguro
 
-O catálogo PostgreSQL possui 21 páginas protegidas. A consulta
+O catálogo PostgreSQL possui exatamente 17 páginas produtivas. A consulta
 `getAuthorizedNavigation` seleciona apenas entradas ativas e navegáveis e, em
 seguida, aplica a permissão efetiva do contexto autenticado.
 
@@ -78,10 +78,6 @@ seguida, aplica a permissão efetiva do contexto autenticado.
 | `crm.settings.points`       | `/app/configuracoes/metas/pontos`         | `crm.settings`   | `crm.settings.manage`   |
 | `crm.simulation`            | `/app/simulacao`                          | —                | `crm.simulators.view`   |
 | `crm.simulation.wf13`       | `/app/simulacao/associativo-fluxo-linear` | `crm.simulation` | `crm.simulators.view`   |
-| `crm.simulation.wf16`       | `/app/simulacao/calcular-documentacao`    | `crm.simulation` | `crm.simulators.view`   |
-| `crm.simulation.caixa`      | `/app/simulacao/caixa`                    | `crm.simulation` | `crm.simulators.view`   |
-| `crm.simulation.wf14`       | `/app/simulacao/tabela-direta`            | `crm.simulation` | `crm.simulators.view`   |
-| `crm.simulation.wf15`       | `/app/simulacao/tabela-investidor`        | `crm.simulation` | `crm.simulators.view`   |
 | `admin.home`                | `/admin`                                  | —                | `admin.access`          |
 | `admin.users`               | `/admin/usuarios`                         | `admin.home`     | `users.view`            |
 | `admin.pages`               | `/admin/paginas`                          | `admin.home`     | `pages.manage`          |
@@ -91,7 +87,8 @@ fazem parte de `app_pages`. Elas permanecem separadas do catálogo comercial.
 
 ### Rotas shadow do read model v3
 
-O catálogo de 21 páginas e as 18 rotas oficiais acima não foram alterados. Para
+O catálogo produtivo de 17 páginas e as 18 rotas oficiais acima permanecem
+inventários distintos. Para
 QA local autenticada, o v3 acrescenta superfícies não navegáveis em
 `/app/read-model-v3`, cinco detalhes em `/app/read-model-v3/etapas/[stage]`,
 `/app/read-model-v3/ranking` e
@@ -112,6 +109,7 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 | `/api/dashboard/status`          | Estado da ingestão                     | Exige `crm.dashboard.view`                        |
 | `/api/refresh/salesforce`        | Solicitação de atualização             | Exige permissão, flag e controles server-side     |
 | `/api/ingest/salesforce`         | Ingestão de máquina                    | Bearer dedicado, contrato tipado e RPC mínima     |
+| WF16, CAIXA, WF14 e WF15         | Rotas futuras ainda versionadas        | Fora de `app_pages`; autenticado recebe `403`     |
 
 ## Catálogo completo de componentes de interface relevantes
 

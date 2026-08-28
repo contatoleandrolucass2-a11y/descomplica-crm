@@ -66,7 +66,8 @@
   gap: 0.45rem;
 }
 
-.simulatorNav a {
+.simulatorNav a,
+.simulatorNav > .simulatorNavBlocked {
   display: inline-flex;
   min-height: 2.6rem;
   align-items: center;
@@ -77,6 +78,13 @@
   font-size: 0.75rem;
   font-weight: 750;
   text-decoration: none;
+}
+
+.simulatorNav > .simulatorNavBlocked {
+  border-style: dashed;
+  color: #a9bfcd;
+  cursor: not-allowed;
+  opacity: 0.78;
 }
 
 .simulatorNav a:hover,
@@ -757,6 +765,17 @@
   transform: translateY(-2px);
 }
 
+.hubCardBlocked {
+  border-style: dashed;
+  background: var(--analytics-surface-muted);
+  cursor: not-allowed;
+}
+
+.hubCardBlocked:hover {
+  border-color: var(--analytics-line);
+  transform: none;
+}
+
 .hubCard h2 {
   font-size: 1.15rem;
 }
@@ -778,6 +797,18 @@
   font-size: 0.68rem;
   font-weight: 850;
   letter-spacing: 0.08em;
+}
+
+.hubBlocked {
+  display: inline-flex;
+  margin-top: 0.7rem;
+  margin-left: 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--analytics-muted) 12%, var(--analytics-surface));
+  padding: 0.35rem 0.65rem;
+  color: var(--analytics-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
 }
 
 .hubArrow {

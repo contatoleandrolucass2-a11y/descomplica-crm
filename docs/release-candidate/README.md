@@ -26,7 +26,7 @@ Flags permanecem desligadas por padrão:
   versionado. A verificação usa candidatos separados e nunca regrava o baseline;
   promoção exige comando local explícito e todos os checks verdes.
 - REST/RLS: nove perfis, oito superfícies anônimas, isolamento organizacional,
-  escopos, v2 Master-only e onboarding pending.
+  escopos, baseline v2 produtiva preservada e onboarding pending.
 - Relay: HTTP/HMAC/replay/rate limit em testes de handler e RPC/replay/rate
   limit/canário em pgTAP. O caminho positivo HTTP→DB permanece bloqueado porque
   exige TLS e credencial privada do papel dedicado; nenhum bypass local foi

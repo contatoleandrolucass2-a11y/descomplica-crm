@@ -148,7 +148,11 @@ describe("simulator visual catalog", () => {
 
   it("renders WF13 as actionable only when the server authorizes the Master canary", () => {
     const markup = renderToStaticMarkup(
-      <SimulatorWorkspace definition={SIMULATORS["associativo-fluxo-linear"]} executionEnabled />,
+      <SimulatorWorkspace
+        definition={SIMULATORS["associativo-fluxo-linear"]}
+        executionEnabled
+        releasedSimulatorSlugs={["associativo-fluxo-linear"]}
+      />,
     );
 
     expect(markup).toContain("Motor oficial em validação Master");
@@ -168,6 +172,17 @@ describe("simulator visual catalog", () => {
     expect(markup).toContain("Ranking no Bora Vender");
     expect(markup).toContain('<option value="NÃO ELEGÍVEL">NÃO ELEGÍVEL</option>');
     expect(markup).toContain("Nenhuma data anual disponível");
+    expect(markup).toContain('href="/app/simulacao/associativo-fluxo-linear"');
+    for (const blockedSlug of [
+      "calcular-documentacao",
+      "caixa",
+      "tabela-direta",
+      "tabela-investidor",
+    ]) {
+      expect(markup).not.toContain(`href="/app/simulacao/${blockedSlug}"`);
+    }
+    expect(markup.match(/data-release-state="blocked"/g)).toHaveLength(4);
+    expect(markup.match(/aria-label="[^\"]+ · Aguardando autorização"/g)).toHaveLength(4);
   });
 
   it("renders neutral tabs, repeaters, inventory pagination and local tools", () => {

@@ -35,7 +35,7 @@ alterou credencial, grant, environment ou estado remoto.
 ## Regras
 
 1. Nunca commitar `.env.local`, dumps, certificados, ZIPs, tokens ou credenciais.
-2. Usar `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` no cliente. A secret key Supabase existe somente no módulo server-only da ingestão M2M e nunca entra no bundle, logs ou código cliente. O caller atual invoca uma RPC Salesforce, mas a credencial global pode executar as três RPCs de ingestão versionadas; restringi-la a uma capacidade exige papel de máquina/wrapper futuro e migration testada.
+2. Usar `SUPABASE_PUBLISHABLE_KEY` somente no runtime server-side. Cliente browser futuro recebe a dupla pública explicitamente de um Server Component; nenhuma variável `NEXT_PUBLIC_*` é congelada no bundle. A secret key Supabase existe somente no módulo server-only da ingestão M2M e nunca entra no bundle, logs ou código cliente. O caller atual invoca uma RPC Salesforce, mas a credencial global pode executar as três RPCs de ingestão versionadas; restringi-la a uma capacidade exige papel de máquina/wrapper futuro e migration testada.
 3. Validar a sessão com API confiável do Supabase no servidor (`getClaims`/`getUser` conforme o contexto), nunca confiar em `getSession` para autorização server-side.
 4. Toda entrada externa passa por validação de schema; Zod é a biblioteca padrão.
 5. Toda API exige autenticação e permissão explícitas, salvo endpoint documentado como público.

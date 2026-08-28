@@ -126,7 +126,7 @@ incremento.
 
 | `QLIK_RELAY_MODE`          | `QLIK_RELAY_WRITE_ENABLED` | Comportamento                                                                              |
 | -------------------------- | -------------------------- | ------------------------------------------------------------------------------------------ |
-| ausente, inválido ou `off` | qualquer valor             | Relay indisponível; retorna `503` antes de ler body ou acessar banco                       |
+| ausente, inválido ou `off` | qualquer valor             | Relay desligado; retorna `404` antes de ler body ou acessar banco                          |
 | `shadow`                   | `false`                    | Autentica e compara o snapshot com o run legado de mesmo request ID; não grava fatos Qlik  |
 | `canary`                   | `true`                     | Permite escrita controlada somente quando credential e gate DB aprovados estiverem válidos |
 | `active`                   | `true`                     | Permite escrita normal somente com gate DB em `cutover`, duas janelas shadow e duas canary |
@@ -149,19 +149,20 @@ O banco acrescenta gates independentes:
 
 ## Respostas
 
-| Resultado                                                                  |  HTTP | Corpo público                         |
-| -------------------------------------------------------------------------- | ----: | ------------------------------------- |
-| Relay desligado, configuração inválida, gate fechado ou banco indisponível | `503` | erro genérico de indisponibilidade    |
-| HMAC, key ID, timestamp, nonce ou digest inválido                          | `401` | `unauthorized`                        |
-| Query, encoding ou mídia não suportada                                     | `415` | `unsupported_media_type`              |
-| Body acima do limite                                                       | `413` | `payload_too_large`                   |
-| UTF-8, JSON ou schema inválido                                             | `400` | `invalid_payload`                     |
-| Payload rejeitado pela defesa do banco                                     | `422` | `ingestion_rejected`                  |
-| Replay conflitante ou request ID conflitante                               | `409` | `ingestion_conflict`                  |
-| Rate limit                                                                 | `429` | `rate_limited`, com `Retry-After: 60` |
-| Comparação shadow concluída                                                | `202` | status e contagens sanitizadas        |
-| Snapshot novo persistido                                                   | `201` | status, request ID e contagens        |
-| Snapshot idempotente                                                       | `200` | status, request ID e contagens        |
+| Resultado                                                         |  HTTP | Corpo público                         |
+| ----------------------------------------------------------------- | ----: | ------------------------------------- |
+| Relay desligado                                                   | `404` | erro genérico de indisponibilidade    |
+| Configuração não-off inválida, gate fechado ou banco indisponível | `503` | erro genérico de indisponibilidade    |
+| HMAC, key ID, timestamp, nonce ou digest inválido                 | `401` | `unauthorized`                        |
+| Query, encoding ou mídia não suportada                            | `415` | `unsupported_media_type`              |
+| Body acima do limite                                              | `413` | `payload_too_large`                   |
+| UTF-8, JSON ou schema inválido                                    | `400` | `invalid_payload`                     |
+| Payload rejeitado pela defesa do banco                            | `422` | `ingestion_rejected`                  |
+| Replay conflitante ou request ID conflitante                      | `409` | `ingestion_conflict`                  |
+| Rate limit                                                        | `429` | `rate_limited`, com `Retry-After: 60` |
+| Comparação shadow concluída                                       | `202` | status e contagens sanitizadas        |
+| Snapshot novo persistido                                          | `201` | status, request ID e contagens        |
+| Snapshot idempotente                                              | `200` | status, request ID e contagens        |
 
 Respostas nunca incluem segredo, assinatura, nonce, URL do banco, stack trace,
 mensagem SQL, nomes ou valores comerciais.

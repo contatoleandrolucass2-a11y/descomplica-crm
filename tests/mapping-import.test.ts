@@ -57,8 +57,8 @@ function fixtureJwt(claims: Record<string, string>): string {
 }
 
 const fixtureEnvironment = {
-  NEXT_PUBLIC_SUPABASE_URL: "https://project.supabase.co",
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: fixtureJwt({ role: "anon" }),
+  SUPABASE_URL: "https://project.supabase.co",
+  SUPABASE_PUBLISHABLE_KEY: fixtureJwt({ role: "anon" }),
   CRM_MAPPING_IMPORT_ACCESS_TOKEN: fixtureJwt({
     role: "authenticated",
     sub: "40000000-0000-4000-8000-000000000001",
@@ -295,7 +295,7 @@ describe("mapping import CLI", () => {
       await runMappingImportCli(["--manifest", manifestPath], {
         environment: {
           ...fixtureEnvironment,
-          NEXT_PUBLIC_SUPABASE_URL: "https://credential-collector.example.invalid",
+          SUPABASE_URL: "https://credential-collector.example.invalid",
         },
         fetchImplementation: fetchSpy as typeof fetch,
         output: capture.output,

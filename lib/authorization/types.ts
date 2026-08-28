@@ -16,7 +16,11 @@ export interface AuthorizationContext {
   permissions: PermissionKey[];
 }
 
-export type AuthorizationErrorCode = "UNAUTHENTICATED" | "FORBIDDEN";
+export type AuthorizationErrorCode =
+  | "UNAUTHENTICATED"
+  | "MFA_REQUIRED"
+  | "PASSWORD_RECOVERY_REQUIRED"
+  | "FORBIDDEN";
 
 export class AuthorizationError extends Error {
   readonly code: AuthorizationErrorCode;

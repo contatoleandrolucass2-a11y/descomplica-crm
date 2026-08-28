@@ -114,12 +114,17 @@ export function RegisterForm() {
                   name="password"
                   type="password"
                   required
+                  minLength={12}
+                  maxLength={128}
                   autoComplete="new-password"
                   disabled={isPending}
                   className={authStyles.input}
                   aria-describedby={state.fieldErrors?.password?.[0] ? "password-error" : undefined}
                   aria-invalid={Boolean(state.fieldErrors?.password?.[0])}
                 />
+                <p className={styles.passwordHint}>
+                  Use de 12 a 128 caracteres, com maiúscula, minúscula, número e símbolo.
+                </p>
                 {state.fieldErrors?.password?.[0] ? (
                   <p id="password-error" className={styles.fieldError} role="alert">
                     {state.fieldErrors.password[0]}
@@ -136,6 +141,8 @@ export function RegisterForm() {
                   name="confirmPassword"
                   type="password"
                   required
+                  minLength={12}
+                  maxLength={128}
                   autoComplete="new-password"
                   disabled={isPending}
                   className={authStyles.input}
@@ -150,6 +157,60 @@ export function RegisterForm() {
                   </p>
                 ) : null}
               </div>
+
+              <fieldset className={styles.legalFieldset}>
+                <legend>Documentos obrigatórios</legend>
+                <label className={styles.legalChoice}>
+                  <input
+                    name="termsAccepted"
+                    type="checkbox"
+                    required
+                    disabled={isPending}
+                    aria-describedby={
+                      state.fieldErrors?.termsAccepted?.[0] ? "termsAccepted-error" : undefined
+                    }
+                  />
+                  <span>
+                    Li e aceito os{" "}
+                    <Link href="/termos-de-uso" target="_blank" rel="noreferrer">
+                      Termos de Uso
+                    </Link>
+                    .
+                  </span>
+                </label>
+                {state.fieldErrors?.termsAccepted?.[0] ? (
+                  <p id="termsAccepted-error" className={styles.fieldError} role="alert">
+                    {state.fieldErrors.termsAccepted[0]}
+                  </p>
+                ) : null}
+
+                <label className={styles.legalChoice}>
+                  <input
+                    name="privacyAccepted"
+                    type="checkbox"
+                    required
+                    disabled={isPending}
+                    aria-describedby={
+                      state.fieldErrors?.privacyAccepted?.[0] ? "privacyAccepted-error" : undefined
+                    }
+                  />
+                  <span>
+                    Li e aceito a{" "}
+                    <Link href="/politica-de-privacidade" target="_blank" rel="noreferrer">
+                      Política de Privacidade
+                    </Link>
+                    .
+                  </span>
+                </label>
+                {state.fieldErrors?.privacyAccepted?.[0] ? (
+                  <p id="privacyAccepted-error" className={styles.fieldError} role="alert">
+                    {state.fieldErrors.privacyAccepted[0]}
+                  </p>
+                ) : null}
+                <p className={styles.legalNote}>
+                  Este aceite é versionado e separado das preferências de cookies opcionais.
+                </p>
+              </fieldset>
 
               {state.message ? (
                 <p

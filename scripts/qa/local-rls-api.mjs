@@ -8,10 +8,13 @@ import { promisify } from "node:util";
 
 import { createClient } from "@supabase/supabase-js";
 
+import legalDocumentVersions from "../../lib/legal/versions.json" with { type: "json" };
+
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const homologationRuntimeRoot = "/var/lib/descomplica-crm-homologation";
 const homologationAccountsPath = "/etc/descomplica-crm/homologation-accounts.json";
+const playwrightOutputRoot = "/tmp/descomplica-playwright-results";
 const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const requiredRoles = [
   "master",
@@ -25,41 +28,41 @@ const requiredRoles = [
   "pending",
 ];
 const legacyRoles = new Set(["user", "supervisor", "broker_lead"]);
-const simulatorPageKeys = [
-  "crm.simulation",
-  "crm.simulation.caixa",
-  "crm.simulation.wf13",
-  "crm.simulation.wf14",
-  "crm.simulation.wf15",
-  "crm.simulation.wf16",
-];
-const masterCommercialPageKeys = [
+const simulatorPageKeys = ["crm.simulation", "crm.simulation.wf13"];
+const inheritedAnalyticalPageKeys = [
   "crm.dashboard",
-  "crm.partnerships",
   "crm.ranking",
-  "crm.settings",
-  "crm.settings.goals",
-  "crm.settings.partnerships",
-  "crm.settings.points",
   "crm.stage.appointments",
   "crm.stage.folders",
   "crm.stage.opportunities",
   "crm.stage.sales",
   "crm.stage.visits",
 ];
+const administrativeCommercialPageKeys = [
+  "crm.settings",
+  "crm.settings.goals",
+  "crm.settings.partnerships",
+  "crm.settings.points",
+];
+const masterOnlyCommercialPageKeys = ["crm.partnerships"];
 const masterAdministrativePageKeys = ["admin.home", "admin.pages", "admin.users"];
-const adminPageKeys = ["admin.home", "admin.users"];
 const expectedPageKeysByRole = {
   master: [
     ...masterAdministrativePageKeys,
-    ...masterCommercialPageKeys,
+    ...inheritedAnalyticalPageKeys,
+    ...administrativeCommercialPageKeys,
+    ...masterOnlyCommercialPageKeys,
     ...simulatorPageKeys,
   ].sort(),
-  admin: [...adminPageKeys].sort(),
+  admin: [
+    ...masterAdministrativePageKeys,
+    ...inheritedAnalyticalPageKeys,
+    ...administrativeCommercialPageKeys,
+  ].sort(),
   manager: [],
-  broker: [],
-  coordinator: [],
-  real_estate: [],
+  broker: [...inheritedAnalyticalPageKeys].sort(),
+  coordinator: [...inheritedAnalyticalPageKeys].sort(),
+  real_estate: [...inheritedAnalyticalPageKeys].sort(),
   house: [],
   partnership_channel: [],
   pending: [],
@@ -67,6 +70,11 @@ const expectedPageKeysByRole = {
 const positivePageRoles = new Set(
   Object.entries(expectedPageKeysByRole)
     .filter(([, pageKeys]) => pageKeys.length > 0)
+    .map(([role]) => role),
+);
+const commercialRankingRoles = new Set(
+  Object.entries(expectedPageKeysByRole)
+    .filter(([, pageKeys]) => pageKeys.includes("crm.ranking"))
     .map(([role]) => role),
 );
 const activeChildren = new Set();
@@ -202,6 +210,7 @@ function parseLocalStatus(stdout) {
 
   const apiUrl = parseLoopbackHttpOrigin(status.API_URL);
   const database = parseLoopbackDatabaseUrl(status.DB_URL);
+  const mailpitUrl = parseLoopbackHttpOrigin(status.INBUCKET_URL || status.MAILPIT_URL);
   const publishableKey = status.PUBLISHABLE_KEY || status.ANON_KEY;
   const secretKey = status.SECRET_KEY || status.SERVICE_ROLE_KEY;
 
@@ -212,7 +221,7 @@ function parseLocalStatus(stdout) {
     fail("Local Supabase admin key is unavailable.");
   }
 
-  return { apiUrl, database, publishableKey, secretKey };
+  return { apiUrl, database, mailpitUrl, publishableKey, secretKey };
 }
 
 async function discoverLocalSupabase() {
@@ -374,8 +383,10 @@ async function startLocalNextServer(local) {
       ...environmentSubset(["PATH", "HOME", "TZ", "NODE_OPTIONS", "LD_LIBRARY_PATH"]),
       NODE_ENV: "production",
       APP_ORIGIN: origin,
-      NEXT_PUBLIC_SUPABASE_URL: local.apiUrl,
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
+      AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
+      AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
+      SUPABASE_URL: local.apiUrl,
+      SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
       OFFICIAL_SIMULATOR_RUNTIME_MODE: "active",
       OFFICIAL_SIMULATOR_ENABLED_KEYS: "simulator.wf13",
     },
@@ -416,7 +427,7 @@ async function stopChild(child) {
   }
 }
 
-function runBrowserE2e(origin, accounts) {
+function runBrowserE2e(origin, mailpitUrl, accounts) {
   return new Promise((resolve, reject) => {
     const child = spawn(
       "pnpm",
@@ -436,6 +447,8 @@ function runBrowserE2e(origin, accounts) {
           ]),
           QA_E2E_LOCAL_ONLY: "true",
           QA_E2E_ORIGIN: origin,
+          QA_E2E_MAILPIT_ORIGIN: mailpitUrl,
+          PLAYWRIGHT_NO_COPY_PROMPT: "1",
           ...(process.env.QA_CAPTURE_STATE_EVIDENCE === "true"
             ? { QA_CAPTURE_STATE_EVIDENCE: "true" }
             : {}),
@@ -600,22 +613,59 @@ begin
   end if;
 
   if exists (
+    with expected(role_key, permission_key) as (
+      values
+        ('admin', 'crm.dashboard.view'),
+        ('admin', 'crm.stages.view'),
+        ('admin', 'crm.ranking.view'),
+        ('admin', 'pages.manage'),
+        ('admin', 'crm.settings.view'),
+        ('admin', 'crm.settings.manage'),
+        ('admin', 'crm.salesforce.refresh'),
+        ('admin', 'crm.ingest.manage'),
+        ('coordinator', 'crm.dashboard.view'),
+        ('coordinator', 'crm.stages.view'),
+        ('coordinator', 'crm.ranking.view'),
+        ('supervisor', 'crm.dashboard.view'),
+        ('supervisor', 'crm.stages.view'),
+        ('supervisor', 'crm.ranking.view'),
+        ('real_estate', 'crm.dashboard.view'),
+        ('real_estate', 'crm.stages.view'),
+        ('real_estate', 'crm.ranking.view'),
+        ('broker_lead', 'crm.dashboard.view'),
+        ('broker_lead', 'crm.stages.view'),
+        ('broker_lead', 'crm.ranking.view'),
+        ('broker', 'crm.dashboard.view'),
+        ('broker', 'crm.stages.view'),
+        ('broker', 'crm.ranking.view'),
+        ('user', 'crm.dashboard.view'),
+        ('user', 'crm.stages.view'),
+        ('user', 'crm.ranking.view')
+    ),
+    actual as (
+      select role_permission.role_key, role_permission.permission_key
+      from public.role_permissions role_permission
+      where role_permission.role_key <> 'master'
+        and role_permission.permission_key = any(array[
+          'crm.dashboard.view',
+          'crm.stages.view',
+          'crm.ranking.view',
+          'crm.partnerships.view',
+          'pages.manage',
+          'crm.settings.view',
+          'crm.settings.manage',
+          'crm.salesforce.refresh',
+          'crm.ingest.manage'
+        ])
+    )
     select 1
-    from public.role_permissions role_permission
-    where role_permission.role_key <> 'master'
-      and role_permission.permission_key = any(array[
-        'crm.dashboard.view',
-        'crm.stages.view',
-        'crm.ranking.view',
-        'crm.partnerships.view',
-        'pages.manage',
-        'crm.settings.view',
-        'crm.settings.manage',
-        'crm.salesforce.refresh',
-        'crm.ingest.manage'
-      ])
+    from (
+      (select * from expected except select * from actual)
+      union all
+      (select * from actual except select * from expected)
+    ) difference
   ) then
-    raise exception 'global commercial v2 permissions are not Master-only';
+    raise exception 'inherited commercial permission baseline diverged';
   end if;
 end
 $qa_preflight$;
@@ -1001,6 +1051,23 @@ where id = any(${sqlUuidArray(ids.portfolios)});
 delete from public.crm_organizations
 where id = any(${sqlUuidArray(ids.organizations)});
 
+-- These are synthetic loopback-only acceptances, not legal records. The
+-- append-only triggers remain enabled in every runtime and are disabled only
+-- transactionally around deletion of the exact ephemeral account IDs.
+alter table private.legal_acceptances
+  disable trigger legal_acceptances_append_only;
+delete from private.legal_acceptances
+where user_id = any(${userIds});
+alter table private.legal_acceptances
+  enable trigger legal_acceptances_append_only;
+
+alter table private.legal_acceptance_requirements
+  disable trigger legal_acceptance_requirements_append_only;
+delete from private.legal_acceptance_requirements
+where user_id = any(${userIds});
+alter table private.legal_acceptance_requirements
+  enable trigger legal_acceptance_requirements_append_only;
+
 do $qa_cleanup_verify$
 begin
   if exists (
@@ -1028,6 +1095,12 @@ begin
   ) or exists (
     select 1 from public.crm_organizations
     where id = any(${sqlUuidArray(ids.organizations)})
+  ) or exists (
+    select 1 from private.legal_acceptances
+    where user_id = any(${userIds})
+  ) or exists (
+    select 1 from private.legal_acceptance_requirements
+    where user_id = any(${userIds})
   ) or exists (
     select 1 from public.crm_teams
     where id = any(${sqlUuidArray(ids.teams)})
@@ -1082,6 +1155,14 @@ async function createEphemeralAccount(adminClient, role, runId) {
     password,
     email_confirm: true,
     app_metadata: { qa_ephemeral: true, qa_run_id: runId },
+    user_metadata: {
+      legal_acceptance: {
+        termsAccepted: true,
+        termsVersion: legalDocumentVersions.terms,
+        privacyAccepted: true,
+        privacyVersion: legalDocumentVersions.privacy,
+      },
+    },
   });
 
   if (error || !data.user) fail("Could not create an ephemeral local QA account.");
@@ -1389,11 +1470,9 @@ async function verifyAccountThroughRest(local, account, fixtures) {
     }
 
     const commercialRows = assertSuccessfulRows(commercialResult, "Commercial v2 RLS assertion");
-    if (
-      (account.role === "master" && commercialRows.length !== 1) ||
-      (account.role !== "master" && commercialRows.length !== 0)
-    ) {
-      fail("Commercial v2 visibility is not Master-only.");
+    const expectedCommercialRows = commercialRankingRoles.has(account.role) ? 1 : 0;
+    if (commercialRows.length !== expectedCommercialRows) {
+      fail("Commercial v2 visibility diverges from the inherited ranking permission.");
     }
 
     if (account.role === "pending") {
@@ -1507,7 +1586,7 @@ async function main() {
     }
 
     if (nextServer) {
-      await runBrowserE2e(nextServer.origin, accounts);
+      await runBrowserE2e(nextServer.origin, local.mailpitUrl, accounts);
       browserE2e = 1;
       throwIfInterrupted();
     }
@@ -1522,7 +1601,13 @@ async function main() {
         await removeEphemeralState(local, adminClient, accounts, fixtures);
       }
     } finally {
-      await stopChild(nextServer?.child);
+      try {
+        await stopChild(nextServer?.child);
+      } finally {
+        if (browserE2eEnabled) {
+          await rm(playwrightOutputRoot, { recursive: true, force: true });
+        }
+      }
     }
   }
 
@@ -1533,8 +1618,8 @@ async function main() {
     positivePages: positivePageRoles.size,
     zeroPages: requiredRoles.length - positivePageRoles.size,
     activeScopes: requiredRoles.length - 1,
-    commercialMaster: 1,
-    commercialDenied: requiredRoles.length - 1,
+    commercialAllowed: commercialRankingRoles.size,
+    commercialDenied: requiredRoles.length - commercialRankingRoles.size,
     legacyApproved: 0,
     rpcDenials: 1,
     persisted: persisted ? accounts.length : 0,
@@ -1559,7 +1644,7 @@ try {
     process.exitCode = requestedSignal === "SIGINT" ? 130 : 143;
   } else {
     process.stdout.write(
-      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_master=${counts.commercialMaster} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} browser_e2e=${counts.browserE2e} persisted=${counts.persisted} removed=${counts.removed}\n`,
+      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_allowed=${counts.commercialAllowed} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} browser_e2e=${counts.browserE2e} persisted=${counts.persisted} removed=${counts.removed}\n`,
     );
   }
 } catch (error) {

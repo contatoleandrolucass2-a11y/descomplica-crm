@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-
+import { clearLocalAuthenticationCookies } from "@/lib/auth/clear-session";
 import { createClient } from "@/lib/auth/supabase/server";
 
 // Logout Server Action (M7.2). Always ends the local session and sends the
@@ -13,7 +13,8 @@ import { createClient } from "@/lib/auth/supabase/server";
 export async function logoutAction(): Promise<void> {
   const supabase = await createClient();
 
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({ scope: "global" });
+  await clearLocalAuthenticationCookies();
 
   redirect("/login");
 }

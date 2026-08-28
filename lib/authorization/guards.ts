@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/auth/supabase/server";
+import { getMfaAssurance } from "@/lib/auth/mfa/assurance";
 import { ROLES } from "./roles";
 import { PERMISSIONS } from "./permissions";
 import {
@@ -48,6 +49,17 @@ export async function getCurrentAuthorizationContext(): Promise<AuthorizationCon
 
   if (!user) {
     return null;
+  }
+
+  const assurance = await getMfaAssurance(supabase);
+  if (assurance.status === "required") {
+    throw new AuthorizationError("MFA_REQUIRED", "Additional verification required.");
+  }
+  if (assurance.status === "recovery") {
+    throw new AuthorizationError("PASSWORD_RECOVERY_REQUIRED", "Password recovery required.");
+  }
+  if (assurance.status === "unavailable") {
+    throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
   }
 
   const { data, error } = await supabase.rpc("get_user_authorization_context", {

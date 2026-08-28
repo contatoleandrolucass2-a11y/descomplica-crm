@@ -3,16 +3,8 @@ name: descomplica-homologation
 services:
   app:
     container_name: descomplica-homologation-app
-    image: descomplica-homologation:${IMAGE_TAG:?IMAGE_TAG is required}
-    build:
-      context: ../..
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?NEXT_PUBLIC_SUPABASE_URL is required}
-        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is required}
-        DEPLOYMENT_VERSION: ${IMAGE_TAG:?IMAGE_TAG is required}
-        HOMOLOGATION_MODE: "true"
-        PUBLIC_SIGNUP_ENABLED: "false"
+    image: descomplica-crm:${IMAGE_TAG:?IMAGE_TAG is required}
+    pull_policy: never
     init: true
     restart: unless-stopped
     stop_grace_period: 30s
@@ -26,9 +18,10 @@ services:
       DEPLOYMENT_VERSION: ${IMAGE_TAG:?IMAGE_TAG is required}
       HOMOLOGATION_MODE: "true"
       PUBLIC_SIGNUP_ENABLED: "false"
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?NEXT_PUBLIC_SUPABASE_URL is required}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is required}
+      SUPABASE_URL: ${SUPABASE_URL:?SUPABASE_URL is required}
+      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:?SUPABASE_PUBLISHABLE_KEY is required}
       APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN is required}
+      AUTH_SESSION_COOKIE_SECRET_FILE: /run/secrets/auth_session_cookie_secret
       SALESFORCE_INGEST_ENABLED: "false"
       SALESFORCE_REFRESH_ENABLED: "false"
       CRM_READ_MODEL_V3_SHADOW_ENABLED: "true"
@@ -38,11 +31,19 @@ services:
       COMMERCIAL_ENGINE_ENABLED_KEYS: ""
       OFFICIAL_SIMULATOR_RUNTIME_MODE: ${OFFICIAL_SIMULATOR_RUNTIME_MODE:-off}
       OFFICIAL_SIMULATOR_ENABLED_KEYS: "${OFFICIAL_SIMULATOR_ENABLED_KEYS:-}"
+    group_add:
+      - "0"
     read_only: true
     tmpfs:
       - /tmp:size=64m,mode=1777
     volumes:
       - homologation-next-cache:/app/.next/cache
+      - type: bind
+        source: ${AUTH_SESSION_COOKIE_SECRET_SOURCE:?AUTH_SESSION_COOKIE_SECRET_SOURCE is required}
+        target: /run/secrets/auth_session_cookie_secret
+        read_only: true
+        bind:
+          create_host_path: false
     networks:
       - homologation-supabase
     security_opt:

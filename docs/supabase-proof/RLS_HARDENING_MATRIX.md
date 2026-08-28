@@ -1,5 +1,10 @@
 # Matriz de RLS e onboarding
 
+> Proposta histórica de hardening escopado do read model v3. Ela não descreve a
+> baseline produtiva que o PR #49 deve preservar e não é aplicada por suas duas
+> migrations candidatas. O estado observado está em
+> [`../security/PRODUCTION_RBAC_COMPATIBILITY.md`](../security/PRODUCTION_RBAC_COMPATIBILITY.md).
+
 ## Princípios
 
 - Nome, e-mail, texto de gerente ou nome de imobiliária nunca autoriza acesso.

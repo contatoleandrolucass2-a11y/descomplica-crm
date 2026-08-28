@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-27T04:35:11.874Z",
+  "environment": "two isolated local Supabase/PostgreSQL 17 projects",
+  "source": "root-only production backup",
+  "remoteMutation": false,
+  "sourceNetworkCount": 0,
+  "targetNetworkCount": 0,
+  "backupChecksums": {
+    "roles.sql": "168a95a9c745af5ed4679751f90419ac9dc434240a213b03e32a06d5664c2308",
+    "schema.sql": "5ae74a0fc526e6865ba03c1d6e0de023921561589739e8db401ae9b5ea7e3196",
+    "data.sql": "766d0532930f25abaa01bc0a377e5b4334d151f6e7ab51f1d2e180e794ba2ccc",
+    "history-schema.sql": "ae56295c7e66a8b46ab50df6f00cf57f7866f2478a17fbe3910d9def39e836ab",
+    "history-data.sql": "9f191ea51894762bd07e139e8b78b097beefe31c8797dc1dda28f8ffbf963bf7"
+  },
+  "remoteMigrationCount": 26,
+  "reconciledRemoteOnlyVersions": [
+    "20260813133534",
+    "20260813142723",
+    "20260813142835",
+    "20260813160418",
+    "20260813161959",
+    "20260813172800",
+    "20260813192928"
+  ],
+  "appliedCandidates": [
+    {
+      "version": "20260824230058",
+      "name": "auth_mfa_legal_foundation",
+      "sha256": "b601be966e6213778def6d9704117feeb45ee129fca5c01f7e16e67ba5c5c164"
+    },
+    {
+      "version": "20260824230100",
+      "name": "role_isolation_net_fail_closed",
+      "sha256": "dfbe850624b5b9448970812cc5bf28d8a2a2f971442154f41a10544ccd43af1b"
+    }
+  ],
+  "structuralCounts": {
+    "roles": 8,
+    "profiles": 3,
+    "app_pages": 17,
+    "overrides": 0,
+    "user_roles": 3,
+    "permissions": 20,
+    "role_permissions": 61
+  },
+  "structuralFingerprintsPreserved": true,
+  "sanitizedTarget": true,
+  "qlikTablesFailClosed": true,
+  "legalTablesSecure": true,
+  "sessionFunctionsPresent": true,
+  "registrationTriggerPresent": true,
+  "futureFoundationsAbsent": true,
+  "cleanInstallGate": "run separately with pnpm db:rehearse and pnpm db:test"
+}
