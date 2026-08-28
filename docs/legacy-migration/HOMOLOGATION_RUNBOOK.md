@@ -81,7 +81,7 @@ limpeza das identidades efêmeras.
 - APIs anônimas 401 e perfis não-Master 403;
 - cinco motores: casos sintéticos, versões e memória; WF15 fail-closed;
 - Tabelão: filtros, loading/vazio/erro e ausência de disponibilidade presumida;
-- Discador/Previsão: “Página em desenvolvimento” e POST 503;
+- Discador/Previsão: “Página em desenvolvimento” e POST fechado com 404;
 - sete viewports, três temas, zoom 80/100/125/150/200, teclado,
   reduced-motion, Axe e ausência de overflow/5xx/segredos.
 

@@ -83,5 +83,5 @@ export async function handleWeekendForecastPost(
   }
   const authorization = await authorizeMaster(request, dependencies);
   if (!authorization.ok) return authorization.response;
-  return json(request, { error: "weekend_forecast_writes_disabled" }, 503);
+  return json(request, { error: "weekend_forecast_writes_disabled" }, 404);
 }

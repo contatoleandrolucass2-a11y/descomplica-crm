@@ -34,6 +34,9 @@
 - A recaptura limpa no commit `2868b44` promoveu atomicamente a baseline do
   canário legado: 168 checks responsivos, 96 de tema, 216 Axe/comparações e
   120 checks de zoom. Conta e fixtures sintéticas foram removidas no `finally`.
+- Configuração de estoque ausente e escrita da previsão desligada retornam
+  `404` fail-closed, reservando 5xx para falhas de capacidades realmente ativas
+  e mantendo o smoke do canário sem erro HTTP deliberado.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 

@@ -18,6 +18,8 @@
   rotas de redefinição/AAL2. A matriz visual inclui `360×800`.
 - Evita chamada client-side ao estoque quando sua configuração privada está
   desligada; Tabelão falha fechado no SSR, sem falso erro de console ou HTTP 5xx.
+- Capacidades legadas deliberadamente desligadas respondem `404` no contrato
+  autenticado, sem produzir 5xx esperado no smoke de homologação.
 - Mantém o callback direto por `TokenHash` e adiciona compatibilidade segura
   com o `ConfirmationURL` padrão do Supabase hospedado: somente auth code UUID
   v4 PKCE é trocado, e a redefinição continua exigindo assurance recente de

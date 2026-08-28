@@ -119,7 +119,7 @@ export async function handleInventoryGet(
 
   const configuration = dependencies.configuration();
   if (!configuration.available) {
-    return json(request, { error: "inventory_unavailable" }, 503);
+    return json(request, { error: "inventory_unavailable" }, 404);
   }
 
   try {

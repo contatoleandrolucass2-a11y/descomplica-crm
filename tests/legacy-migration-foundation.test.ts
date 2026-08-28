@@ -119,7 +119,7 @@ describe("contrato seguro do Tabelão", () => {
       new Request("https://crm.example.test/api/inventory"),
       inventoryDependencies({ configuration: () => ({ available: false }), fetchSource }),
     );
-    expect(response.status).toBe(503);
+    expect(response.status).toBe(404);
     expect(fetchSource).not.toHaveBeenCalled();
   });
 
@@ -198,7 +198,7 @@ describe("contrato da previsão em desenvolvimento", () => {
       brokers: [],
       developments: [],
     });
-    expect(postResponse.status).toBe(503);
+    expect(postResponse.status).toBe(404);
     await expect(postResponse.json()).resolves.toEqual({
       error: "weekend_forecast_writes_disabled",
     });

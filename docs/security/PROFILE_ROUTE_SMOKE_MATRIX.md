@@ -74,9 +74,9 @@ estoque e políticas continuam validados separadamente.
 | `GET /api/dashboard/status`                             | 200                    | conforme `crm.dashboard.view` | 401       |
 | `GET /api/official-simulator/associativo-fluxo-linear`  | 200                    | 403                           | 401       |
 | `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro   | 403                           | 401       |
-| `GET /api/inventory`                                    | 200 ou 503 fail-closed | 403                           | 401       |
+| `GET /api/inventory`                                    | 200 ou 404 fail-closed | 403                           | 401       |
 | `GET /api/weekend-forecast`                             | 200, estado sintético  | 403                           | 401       |
-| `POST /api/weekend-forecast`                            | 503, escrita desligada | 403                           | 401       |
+| `POST /api/weekend-forecast`                            | 404, escrita desligada | 403                           | 401       |
 | `POST /api/ingest/qlik`                                 | 404, flag desligada    | 404                           | 404       |
 | `POST /api/ingest/salesforce`                           | 404, flag desligada    | 404                           | 404       |
 | `POST /api/refresh/salesforce`                          | 404, flag desligada    | 404                           | 404       |

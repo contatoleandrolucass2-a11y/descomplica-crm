@@ -856,9 +856,9 @@ for (const role of expectedRoles) {
           engineKey: "simulator.wf13",
           executionEnabled: true,
         });
-        expect(inventoryStatus.status()).toBe(503);
+        expect(inventoryStatus.status()).toBe(404);
         expect(weekendForecastStatus.status()).toBe(200);
-        expect(weekendForecastWrite.status()).toBe(503);
+        expect(weekendForecastWrite.status()).toBe(404);
       } else {
         expect(simulatorStatus.status()).toBe(403);
         expect(await simulatorStatus.json()).toEqual({ error: "forbidden" });
