@@ -148,6 +148,8 @@ const authenticatedResults = JSON.parse(
     route: string;
     pathname: string;
     passed: boolean;
+    expectedSimulatorState: "enabled" | "blocked" | "not-applicable";
+    simulatorActionEnabled: boolean;
     reducedMotion: boolean;
     horizontalOverflow: boolean;
     topbarCollision: boolean;
