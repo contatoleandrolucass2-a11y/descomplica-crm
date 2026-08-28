@@ -19,8 +19,8 @@ e somente um grupo permanece aberto por vez.
 ## Validação
 
 - Vitest valida o catálogo fechado dos três temas e rejeita valores persistidos desconhecidos.
-- O harness versionado cobre as 18 páginas da referência sanitizada. A matriz
-  autenticada e a barreira anônima cobrem as 21 rotas protegidas atuais — as 18
+- O harness versionado cobre as 21 páginas da referência sanitizada. A matriz
+  autenticada e a barreira anônima cobrem as 24 rotas protegidas atuais — as 21
   superfícies de referência e as três rotas administrativas — nos quatro
   viewports com reduced-motion.
 - O QA autenticado complementar usa runner Supabase local, conta QA efêmera e

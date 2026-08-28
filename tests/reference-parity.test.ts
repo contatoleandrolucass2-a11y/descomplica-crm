@@ -21,6 +21,9 @@ const expectedReferenceRoutes = [
   "/simulacao/caixa",
   "/simulacao/tabela-direta",
   "/simulacao/tabela-investidor",
+  "/simulacao/tabela",
+  "/discador",
+  "/previsao-final-de-semana",
 ];
 
 const expectedProtectedRoutes = [
@@ -42,19 +45,25 @@ const expectedProtectedRoutes = [
   "/app/simulacao/caixa",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
+  "/app/simulacao/tabela",
+  "/app/discador",
+  "/app/discador/previsao-final-de-semana",
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
 ];
 
-const futureSimulatorRoutes = new Set([
+const runtimeGatedRoutes = new Set([
   "/app/simulacao/calcular-documentacao",
   "/app/simulacao/caixa",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
+  "/app/simulacao/tabela",
+  "/app/discador",
+  "/app/discador/previsao-final-de-semana",
 ]);
 const expectedReleasedProtectedRoutes = expectedProtectedRoutes.filter(
-  (route) => !futureSimulatorRoutes.has(route),
+  (route) => !runtimeGatedRoutes.has(route),
 );
 
 const expectedExpandedViewports = [
@@ -63,7 +72,7 @@ const expectedExpandedViewports = [
   { key: "tablet-1024x768", width: 1024, height: 768 },
   { key: "tablet-768x1024", width: 768, height: 1024 },
   { key: "mobile-390x844", width: 390, height: 844 },
-  { key: "mobile-375x812", width: 375, height: 812 },
+  { key: "mobile-360x800", width: 360, height: 800 },
   { key: "mobile-320x568", width: 320, height: 568 },
 ];
 const expectedZoomLevels = [80, 100, 125, 150, 200];
@@ -278,15 +287,15 @@ describe("versioned reference parity catalog", () => {
     );
   });
 
-  it("catalogs exactly the eighteen live reference pages in both documents", () => {
+  it("catalogs exactly the twenty-one live reference pages in both documents", () => {
     const inventory = readFileSync(new URL("../docs/CRM_INVENTORY.md", import.meta.url), "utf8");
     const matrix = readFileSync(
       new URL("../docs/REFERENCE_PARITY_MATRIX.md", import.meta.url),
       "utf8",
     );
 
-    expect(inventory.match(/^\| REF-\d{2} \|/gm)).toHaveLength(18);
-    expect(matrix.match(/^\| REF-\d{2} \|/gm)).toHaveLength(18);
+    expect(inventory.match(/^\| REF-\d{2} \|/gm)).toHaveLength(21);
+    expect(matrix.match(/^\| REF-\d{2} \|/gm)).toHaveLength(21);
     for (const route of expectedReferenceRoutes) expect(inventory).toContain(`\`${route}\``);
   });
 
@@ -342,10 +351,10 @@ describe("versioned reference parity catalog", () => {
       const expectedRoutes =
         kind === "target-before"
           ? expectedProtectedRoutes.slice(0, 12)
-          : expectedReferenceRoutes.map((route) => (route === "/" ? "/app" : `/app${route}`));
+          : expectedProtectedRoutes.slice(0, 21);
       expect(result.routes.map((route) => route.route)).toEqual(expectedRoutes);
       expect(result.routes.every((route) => route.securityHeadersPresent)).toBe(true);
-      expect(result.viewports).toHaveLength(4);
+      expect(result.viewports).toHaveLength(kind === "target-before" ? 4 : 7);
       expect(
         result.viewports?.every(
           (viewport) =>

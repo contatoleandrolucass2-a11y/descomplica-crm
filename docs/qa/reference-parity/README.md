@@ -6,14 +6,13 @@ Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
 Os harnesses de QA visual cobrem três fronteiras:
 
-1. captura das 18 páginas públicas da referência viva em `1440×900`, com
+1. captura das 21 páginas públicas da referência viva em `1440×900`, com
    máscara opaca irreversível aplicada antes do screenshot;
-2. verificação sem sessão das 18 rotas CRM protegidas do catálogo, seguida
-   de captura do login vazio em `1440×900`, `1280×720`, `768×1024` e
-   `390×844`;
-3. QA autenticado complementar das 21 rotas protegidas em Supabase local
+2. verificação sem sessão das 21 rotas CRM protegidas do catálogo, seguida
+   de captura do login vazio em sete viewports;
+3. QA autenticado complementar das 24 rotas protegidas em Supabase local
    isolado, incluindo as três páginas administrativas, com
-   conta QA efêmera, fixtures sintéticas e motores de simulação bloqueados.
+   conta QA efêmera, fixtures sintéticas e módulos legados em canário local.
 
 Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
@@ -52,10 +51,10 @@ a baseline canônica de motores bloqueados.
 
 ## Resultado da referência
 
-As 18 rotas responderam `200`, sem erro de página ou erro de aplicação no
-console, e 2.969 regiões foram mascaradas. Erros de rede produzidos pelo bloqueio
+As 21 rotas responderam `200`, sem erro de página ou erro de aplicação no
+console, e 3.911 regiões foram mascaradas. Erros de rede produzidos pelo bloqueio
 intencional do harness são contados separadamente e não ocultam erros da
-aplicação. Os 26 WebP do conjunto completo foram inspecionados com o Sharp e não
+aplicação. Os 32 WebP do conjunto completo foram inspecionados com o Sharp e não
 contêm EXIF, ICC, XMP ou IPTC.
 
 Capturas:
@@ -78,6 +77,9 @@ Capturas:
 - [`CAIXA`](./reference/simulacao-caixa-1440x900.webp)
 - [`tabela direta`](./reference/simulacao-tabela-direta-1440x900.webp)
 - [`tabela investidor`](./reference/simulacao-tabela-investidor-1440x900.webp)
+- [`Tabelão`](./reference/simulacao-tabela-1440x900.webp)
+- [`Discador`](./reference/discador-1440x900.webp)
+- [`Previsão Final de Semana`](./reference/previsao-final-de-semana-1440x900.webp)
 
 ## Limite anônimo antes e depois
 
@@ -106,7 +108,8 @@ No build local, as seis rotas novas também responderam `307` para `/login`:
 - `/app/simulacao/tabela-direta`;
 - `/app/simulacao/tabela-investidor`.
 
-Nos quatro viewports, a navegação terminou em `/login`, o campo comercial
+No build local, Tabelão e as duas rotas do Discador também responderam `307`
+para `/login`. Nos sete viewports, a navegação terminou em `/login`, o campo comercial
 detectado foi zero, CSP/X-Frame-Options/nosniff permaneceram presentes e
 nenhuma credencial foi fornecida. Cada rota usou contexto anônimo isolado; o
 formulário público e a ausência de mutações foram confirmados antes e depois da
@@ -142,7 +145,7 @@ nunca é enviada ao navegador ou ao harness de captura.
 O harness executou a captura autenticada local, limpa e transacional com:
 
 - sete viewports: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `390×844`,
-  `375×812` e `320×568`;
+  `360×800` e `320×568`;
 - 21 rotas em tema claro nos sete viewports;
 - as 21 rotas em tema escuro móvel no viewport `390×844`;
 - capturas desktop dos temas claro, equilibrado e escuro para as três páginas

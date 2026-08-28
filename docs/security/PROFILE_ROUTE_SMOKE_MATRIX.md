@@ -2,9 +2,9 @@
 
 ## Contrato
 
-Esta matriz descreve o inventário HTTP de 21 rotas protegidas e deve ser validada
-com contas QA sintéticas. O catálogo RBAC final contém exatamente 17 páginas;
-as quatro rotas futuras continuam no smoke para comprovar o `403` fail-closed.
+Esta matriz descreve o inventário HTTP de 24 rotas protegidas e deve ser validada
+com contas QA sintéticas. O catálogo RBAC canário contém exatamente 24 páginas;
+as sete páginas migradas continuam fail-closed quando suas flags estão desligadas.
 
 Perfis exigidos:
 
@@ -25,10 +25,9 @@ Legenda:
 - `redirect`: sem sessão vai para `/login`; fator verificado ainda em AAL1 vai para
   `/mfa`; sessão de recovery vai para `/redefinir-senha`.
 
-Produção e instalação limpa convergem para as mesmas 17 entradas de catálogo. A
-migration Auth/MFA remove somente as quatro identidades excedentes encontradas
-no restore (`WF16`, `CAIXA`, `WF14` e `WF15`), preserva `user_roles` e overrides
-e recompõe somente os vínculos herdados já existentes em produção.
+O baseline anterior converge para 17 entradas. A migration canário acrescenta
+somente sete páginas Master-only, preservando `user_roles`, overrides e todos os
+vínculos herdados dos demais papéis.
 
 | Rota protegida                            | `master` | `admin` | `broker`, `coordinator`, `real_estate` | `manager`, `house`, `partnership_channel`, `pending` | visitante |
 | ----------------------------------------- | -------: | ------: | -------------------------------------: | ---------------------------------------------------: | --------: |
@@ -46,10 +45,13 @@ e recompõe somente os vínculos herdados já existentes em produção.
 | `/app/configuracoes/metas/pontos`         |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao`                          |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/associativo-fluxo-linear` |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/calcular-documentacao`    |      403 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/caixa`                    |      403 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/tabela-direta`            |      403 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/tabela-investidor`        |      403 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/calcular-documentacao`    |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/caixa`                    |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/tabela-direta`            |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/tabela-investidor`        |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/tabela`                   |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/discador`                           |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/discador/previsao-final-de-semana`  |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/admin`                                  |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/admin/usuarios`                         |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/admin/paginas`                          |      200 |     200 |                                    403 |                                                  403 |  redirect |
@@ -60,23 +62,26 @@ como fixtures pelos nove perfis do smoke novo, mas entram no fingerprint do rehe
 Produção não possui overrides individuais; o processo continua preservando a tabela
 integralmente caso overrides sejam adicionados antes do cutover.
 
-Autorização de página e execução de motor são gates distintos. Os dois `200` de
-simulação autorizam somente hub e WF13. As outras quatro rotas falham antes da
-renderização. Flags, allowlist, permissão de execução e política comercial
-continuam validadas separadamente.
+Autorização de página e execução de motor são gates distintos. Os `200` das
+sete páginas novas pressupõem o canário de homologação com suas flags explícitas.
+Flags desligadas fazem essas rotas retornarem `403`; permissão de execução,
+estoque e políticas continuam validados separadamente.
 
 ## Matriz de APIs somente leitura/fail-closed
 
-| Contrato                                                | `master`              | outros oito perfis            | visitante |
-| ------------------------------------------------------- | --------------------- | ----------------------------- | --------- |
-| `GET /api/dashboard/status`                             | 200                   | conforme `crm.dashboard.view` | 401       |
-| `GET /api/official-simulator/associativo-fluxo-linear`  | 200                   | 403                           | 401       |
-| `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro  | 403                           | 401       |
-| `POST /api/ingest/qlik`                                 | 404, flag desligada   | 404                           | 404       |
-| `POST /api/ingest/salesforce`                           | 404, flag desligada   | 404                           | 404       |
-| `POST /api/refresh/salesforce`                          | 404, flag desligada   | 404                           | 404       |
-| `POST /api/commercial-engine/simulator.wf14`            | 404, motor desligado  | 404                           | 404       |
-| `GET /api/health`                                       | 200, sem dado privado | 200                           | 200       |
+| Contrato                                                | `master`               | outros oito perfis            | visitante |
+| ------------------------------------------------------- | ---------------------- | ----------------------------- | --------- |
+| `GET /api/dashboard/status`                             | 200                    | conforme `crm.dashboard.view` | 401       |
+| `GET /api/official-simulator/associativo-fluxo-linear`  | 200                    | 403                           | 401       |
+| `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro   | 403                           | 401       |
+| `GET /api/inventory`                                    | 200 ou 503 fail-closed | 403                           | 401       |
+| `GET /api/weekend-forecast`                             | 200, estado sintético  | 403                           | 401       |
+| `POST /api/weekend-forecast`                            | 503, escrita desligada | 403                           | 401       |
+| `POST /api/ingest/qlik`                                 | 404, flag desligada    | 404                           | 404       |
+| `POST /api/ingest/salesforce`                           | 404, flag desligada    | 404                           | 404       |
+| `POST /api/refresh/salesforce`                          | 404, flag desligada    | 404                           | 404       |
+| `POST /api/commercial-engine/simulator.wf14`            | 404, motor desligado   | 404                           | 404       |
+| `GET /api/health`                                       | 200, sem dado privado  | 200                           | 200       |
 
 Os quatro `POST` em `404` retornam antes de qualquer escrita ou chamada externa. O smoke
 os repete nos nove perfis para provar o default-off; WF13 é o único motor executado, com
@@ -108,13 +113,13 @@ Para cada perfil, o E2E deve:
 2. verificar a página inicial autorizada (`/app` para `master`, `admin`, `broker`,
    `coordinator` e `real_estate`; superfície auth-only para os quatro perfis sem página);
 3. comparar o menu com o catálogo permitido;
-4. abrir diretamente cada uma das 21 URLs e comparar o resultado com a tabela;
+4. abrir diretamente cada uma das 24 URLs e comparar o resultado com a tabela;
 5. testar os Route Handlers vinculados às permissões sem gravar dados;
 6. abrir `/conta/seguranca` e provar o estado MFA aplicável;
 7. executar logout e confirmar bloqueio ao voltar, recarregar e reabrir URL protegida.
 
 O `403` é verificado no response HTTP direto e na navegação do navegador. O Proxy
-antecipa a permissão exata das 21 rotas versionadas antes que uma loading boundary
+antecipa a permissão exata das 24 rotas versionadas antes que uma loading boundary
 possa mascará-la com `200` streamed; layout, página, APIs e RLS repetem o gate. Conteúdo
 e título da página negada também devem permanecer ausentes. Para Admin, as três páginas
 de metas carregam a base legada somente leitura e exibem explicitamente o rascunho como

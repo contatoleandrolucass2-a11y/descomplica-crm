@@ -2,6 +2,20 @@
 
 ## 2026-08-28
 
+- Adiciona canário Master-only dos quatro simuladores derivados da referência,
+  Tabelão, Discador e Previsão Final de Semana. As sete superfícies têm flags
+  independentes e desligadas por padrão; motores executam no servidor, Tabelão
+  falha fechado sem fonte privada e Discador não grava nem aciona telefonia.
+- Versiona a transição RBAC exata `17 → 24` para Master, preservando Admin 14,
+  seis papéis legados com sete páginas e futuros/pendente sem páginas
+  comerciais. Migration, histórico, hashes e restore ficam presos a um executor
+  allowlisted exclusivo da homologação sintética.
+- Amplia inventário/paridade para as 21 páginas vivas e adiciona contratos de
+  backup, sync atômico do runtime, promoção imutável, smoke hospedado e rollback
+  app/config sem rollback destrutivo do banco.
+- Mantém recuperação de senha e MFA à frente do guard RBAC pre-stream: contexto
+  comum vazio continua negado, enquanto sessões em quarentena chegam somente às
+  rotas de redefinição/AAL2. A matriz visual inclui `360×800`.
 - Mantém o callback direto por `TokenHash` e adiciona compatibilidade segura
   com o `ConfirmationURL` padrão do Supabase hospedado: somente auth code UUID
   v4 PKCE é trocado, e a redefinição continua exigindo assurance recente de

@@ -1,5 +1,32 @@
 # Worklog
 
+## 2026-08-28 — simuladores legados, Tabelão e Discador
+
+- Auditoria GET/HEAD congelou nove superfícies, assets e hashes sem versionar
+  HTML, HAR, cookies ou bundles e sem reproduzir a leitura pública antiga de
+  estoque.
+- WF13 permaneceu no motor oficial. WF16, CAIXA, WF14 e WF15 ganharam contratos
+  Zod estritos, cálculos server-side, centavos, proveniência e casos de ouro da
+  referência `2026-08-28`; valores rejeitados nunca são apresentados como
+  resultado parcial.
+- Tabelão consulta somente um upstream HTTPS privado pelo servidor, reconcilia
+  empreendimento/planta, menor preço, fonte e frescor conservador. Sem fonte
+  autorizada, informa indisponibilidade. WF15 também falha fechado sem vínculo
+  de estoque comprovado.
+- Discador e Previsão foram incorporados ao shell Supabase. GET retorna apenas
+  contrato sintético vazio, POST permanece bloqueado e a interface declara
+  “Página em desenvolvimento”.
+- O Proxy, menus, APIs e migration convergem para flags default-off e matriz
+  `24/14/7/0`. O contexto de autorização com cardinalidade vazia ou ambígua
+  falha fechado antes do streaming; sessões de recuperação e AAL1 com MFA são
+  encaminhadas primeiro às quarentenas de redefinição/AAL2, sem abrir conteúdo.
+- O gate operacional da homologação fixa SHA/hashes, histórico `31 → 32`,
+  invariantes Auth/MFA, backup de quatro artefatos, restore sem rede, sync do
+  runtime, segredo de estoque montado por arquivo e rollback de app/config.
+- Baseline inicial, pgTAP e E2E local foram executados com dados sintéticos;
+  a matriz visual cobre também o viewport obrigatório `360×800`. Evidências
+  finais, CI e smoke HTTPS serão registrados no SHA publicado.
+
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 
 - O preflight produtivo comprovou que o Supabase hospedado usa o mailer padrão

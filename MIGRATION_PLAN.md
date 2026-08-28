@@ -45,7 +45,7 @@ Gate 1 implementado na branch `feat/gate1-page-catalog`; o encerramento depende 
 
 ### Fundação de paridade com a referência viva
 
-- [x] Inventariar as 18 páginas da referência viva.
+- [x] Inventariar as 21 páginas da referência viva.
 - [x] Versionar matriz de paridade e catálogo de páginas, componentes e fontes.
 - [x] Criar baseline visual sanitizada sem PII ou dados comerciais legíveis.
 - [x] Implementar topbar e navegação hierárquica autorizada.

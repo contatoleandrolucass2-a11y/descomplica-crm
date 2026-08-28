@@ -1,6 +1,6 @@
 # Inventário oficial da referência viva e do CRM seguro
 
-Data de corte: 2026-08-09. Referência visual: `https://descomplicapro.com.br/`.
+Data de corte: 2026-08-28. Referência visual: `https://descomplicapro.com.br/`.
 
 Este inventário substitui o levantamento de 2026-08-04 baseado apenas no
 checkpoint `checkpoint/crm-original-2026-08-03`. O checkpoint continua útil para
@@ -20,74 +20,84 @@ Qlik `crm_imob_ranking_runs` e `crm_imob_ranking_entries` não são lidas por es
 fundação e continuam sem acesso direto por `anon`, `authenticated` ou
 `service_role`.
 
-## As 18 páginas oficiais da referência
+## As 21 páginas oficiais da referência
 
-Este é o conjunto de 18 rotas inventariadas e aprovado no diagnóstico. Sua
+Este é o conjunto de 21 rotas inventariadas e aprovado no diagnóstico. Sua
 proveniência é a navegação superior, os menus hierárquicos e os destinos
 registrados durante o levantamento da referência viva. O harness percorre esse
 catálogo fixo e confirma endereço e resposta; ele funciona como contrato de
 regressão, não como crawler capaz de provar que nenhuma rota não vinculada
 existe.
 
-| ID     | Rota da referência                    | Domínio visual          | Destino seguro                            | Permissão               | Estado deste incremento                                 |
-| ------ | ------------------------------------- | ----------------------- | ----------------------------------------- | ----------------------- | ------------------------------------------------------- |
-| REF-01 | `/`                                   | Dashboard analítico     | `/app`                                    | `crm.dashboard.view`    | Fundação visual concluída                               |
-| REF-02 | `/etapas/oportunidades`               | Etapa Oportunidades     | `/app/etapas/oportunidades`               | `crm.stages.view`       | Concluída                                               |
-| REF-03 | `/etapas/agendamentos`                | Etapa Agendamentos      | `/app/etapas/agendamentos`                | `crm.stages.view`       | Concluída                                               |
-| REF-04 | `/etapas/visitas`                     | Etapa Visitas           | `/app/etapas/visitas`                     | `crm.stages.view`       | Concluída                                               |
-| REF-05 | `/etapas/pastas`                      | Etapa Pastas            | `/app/etapas/pastas`                      | `crm.stages.view`       | Concluída                                               |
-| REF-06 | `/etapas/vendas`                      | Etapa Vendas            | `/app/etapas/vendas`                      | `crm.stages.view`       | Concluída                                               |
-| REF-07 | `/ranking`                            | Ranking comercial       | `/app/ranking`                            | `crm.ranking.view`      | Composição visual completa sobre read model seguro      |
-| REF-08 | `/canal-de-parcerias`                 | Canal de Parcerias      | `/app/canal-de-parcerias`                 | `crm.partnerships.view` | Composição completa; integração sinalizada indisponível |
-| REF-09 | `/configuracoes`                      | Índice de configurações | `/app/configuracoes`                      | `crm.settings.view`     | Índice visual restaurado                                |
-| REF-10 | `/configuracoes/metas`                | Metas do funil          | `/app/configuracoes/metas`                | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
-| REF-11 | `/configuracoes/metas/parcerias`      | Metas de parcerias      | `/app/configuracoes/metas/parcerias`      | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
-| REF-12 | `/configuracoes/metas/pontos`         | Pesos e metas de pontos | `/app/configuracoes/metas/pontos`         | `crm.settings.manage`   | Preview e rascunho versionado; ranking segue bloqueado  |
-| REF-13 | `/simulacao`                          | Índice de simuladores   | `/app/simulacao`                          | `crm.simulators.view`   | Hub visual concluído; motores bloqueados                |
-| REF-14 | `/simulacao/associativo-fluxo-linear` | Associativo WF13        | `/app/simulacao/associativo-fluxo-linear` | `crm.simulators.view`   | Fórmula `wf13-1.3.0`; execução isolada Master-only      |
-| REF-15 | `/simulacao/calcular-documentacao`    | Documentação WF16       | `/app/simulacao/calcular-documentacao`    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
-| REF-16 | `/simulacao/caixa`                    | Simulador CAIXA         | `/app/simulacao/caixa`                    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
-| REF-17 | `/simulacao/tabela-direta`            | Tabela Direta WF14      | `/app/simulacao/tabela-direta`            | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
-| REF-18 | `/simulacao/tabela-investidor`        | Tabela Investidor WF15  | `/app/simulacao/tabela-investidor`        | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
+| ID     | Rota da referência                    | Domínio visual           | Destino seguro                            | Permissão               | Estado deste incremento                                 |
+| ------ | ------------------------------------- | ------------------------ | ----------------------------------------- | ----------------------- | ------------------------------------------------------- |
+| REF-01 | `/`                                   | Dashboard analítico      | `/app`                                    | `crm.dashboard.view`    | Fundação visual concluída                               |
+| REF-02 | `/etapas/oportunidades`               | Etapa Oportunidades      | `/app/etapas/oportunidades`               | `crm.stages.view`       | Concluída                                               |
+| REF-03 | `/etapas/agendamentos`                | Etapa Agendamentos       | `/app/etapas/agendamentos`                | `crm.stages.view`       | Concluída                                               |
+| REF-04 | `/etapas/visitas`                     | Etapa Visitas            | `/app/etapas/visitas`                     | `crm.stages.view`       | Concluída                                               |
+| REF-05 | `/etapas/pastas`                      | Etapa Pastas             | `/app/etapas/pastas`                      | `crm.stages.view`       | Concluída                                               |
+| REF-06 | `/etapas/vendas`                      | Etapa Vendas             | `/app/etapas/vendas`                      | `crm.stages.view`       | Concluída                                               |
+| REF-07 | `/ranking`                            | Ranking comercial        | `/app/ranking`                            | `crm.ranking.view`      | Composição visual completa sobre read model seguro      |
+| REF-08 | `/canal-de-parcerias`                 | Canal de Parcerias       | `/app/canal-de-parcerias`                 | `crm.partnerships.view` | Composição completa; integração sinalizada indisponível |
+| REF-09 | `/configuracoes`                      | Índice de configurações  | `/app/configuracoes`                      | `crm.settings.view`     | Índice visual restaurado                                |
+| REF-10 | `/configuracoes/metas`                | Metas do funil           | `/app/configuracoes/metas`                | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
+| REF-11 | `/configuracoes/metas/parcerias`      | Metas de parcerias       | `/app/configuracoes/metas/parcerias`      | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
+| REF-12 | `/configuracoes/metas/pontos`         | Pesos e metas de pontos  | `/app/configuracoes/metas/pontos`         | `crm.settings.manage`   | Preview e rascunho versionado; ranking segue bloqueado  |
+| REF-13 | `/simulacao`                          | Índice de simuladores    | `/app/simulacao`                          | `crm.simulators.view`   | Hub visual concluído; motores bloqueados                |
+| REF-14 | `/simulacao/associativo-fluxo-linear` | Associativo WF13         | `/app/simulacao/associativo-fluxo-linear` | `crm.simulators.view`   | Fórmula `wf13-1.3.0`; execução isolada Master-only      |
+| REF-15 | `/simulacao/calcular-documentacao`    | Documentação WF16        | `/app/simulacao/calcular-documentacao`    | `crm.simulators.view`   | Motor server-side versionado; canário Master por flag   |
+| REF-16 | `/simulacao/caixa`                    | Simulador CAIXA          | `/app/simulacao/caixa`                    | `crm.simulators.view`   | Motor indicativo; exige confirmação CAIXA               |
+| REF-17 | `/simulacao/tabela-direta`            | Tabela Direta WF14       | `/app/simulacao/tabela-direta`            | `crm.simulators.view`   | Motor server-side versionado; canário Master por flag   |
+| REF-18 | `/simulacao/tabela-investidor`        | Tabela Investidor WF15   | `/app/simulacao/tabela-investidor`        | `crm.simulators.view`   | Falha fechado sem unidade conciliada no estoque         |
+| REF-19 | `/simulacao/tabela`                   | Tabelão                  | `/app/simulacao/tabela`                   | `crm.simulators.view`   | Consulta server-side; fonte indisponível falha fechado  |
+| REF-20 | `/discador`                           | Discador                 | `/app/discador`                           | `crm.dialer.view`       | Página em desenvolvimento; telefonia desligada          |
+| REF-21 | `/previsao-final-de-semana`           | Previsão Final de Semana | `/app/discador/previsao-final-de-semana`  | `crm.dialer.view`       | Contrato sintético; escrita desligada                   |
 
-O mapeamento WF13, WF16, WF14 e WF15 acima foi aprovado explicitamente para
-esta etapa. Ele identifica as jornadas visuais, não valida fórmulas. Nenhuma
-regra dos simuladores foi copiada ou executada: os campos permanecem locais ao
-navegador, o botão de cálculo fica bloqueado e todo resultado aparece como
-indisponível até um incremento com fonte oficial.
+WF13 preserva o motor oficial atual. WF16, CAIXA, WF14 e WF15 usam módulos
+isolados identificados como `legacy-reference-2026-08-28`, casos de ouro
+sintéticos e execução server-side. Eles servem ao canário de homologação e não
+constituem autoridade comercial produtiva. Cada página e cada motor possui flag
+independente, desligada por padrão.
 
 ## Catálogo versionado de páginas do sistema seguro
 
-O catálogo PostgreSQL possui exatamente 17 páginas produtivas. A consulta
+Após a migration canário, o catálogo PostgreSQL possui exatamente 24 páginas. A consulta
 `getAuthorizedNavigation` seleciona apenas entradas ativas e navegáveis e, em
 seguida, aplica a permissão efetiva do contexto autenticado.
 
-| Chave                       | Rota                                      | Pai              | Permissão               |
-| --------------------------- | ----------------------------------------- | ---------------- | ----------------------- |
-| `crm.dashboard`             | `/app`                                    | —                | `crm.dashboard.view`    |
-| `crm.stage.opportunities`   | `/app/etapas/oportunidades`               | `crm.dashboard`  | `crm.stages.view`       |
-| `crm.stage.appointments`    | `/app/etapas/agendamentos`                | `crm.dashboard`  | `crm.stages.view`       |
-| `crm.stage.visits`          | `/app/etapas/visitas`                     | `crm.dashboard`  | `crm.stages.view`       |
-| `crm.stage.folders`         | `/app/etapas/pastas`                      | `crm.dashboard`  | `crm.stages.view`       |
-| `crm.stage.sales`           | `/app/etapas/vendas`                      | `crm.dashboard`  | `crm.stages.view`       |
-| `crm.ranking`               | `/app/ranking`                            | —                | `crm.ranking.view`      |
-| `crm.partnerships`          | `/app/canal-de-parcerias`                 | —                | `crm.partnerships.view` |
-| `crm.settings`              | `/app/configuracoes`                      | —                | `crm.settings.view`     |
-| `crm.settings.goals`        | `/app/configuracoes/metas`                | `crm.settings`   | `crm.settings.manage`   |
-| `crm.settings.partnerships` | `/app/configuracoes/metas/parcerias`      | `crm.settings`   | `crm.settings.manage`   |
-| `crm.settings.points`       | `/app/configuracoes/metas/pontos`         | `crm.settings`   | `crm.settings.manage`   |
-| `crm.simulation`            | `/app/simulacao`                          | —                | `crm.simulators.view`   |
-| `crm.simulation.wf13`       | `/app/simulacao/associativo-fluxo-linear` | `crm.simulation` | `crm.simulators.view`   |
-| `admin.home`                | `/admin`                                  | —                | `admin.access`          |
-| `admin.users`               | `/admin/usuarios`                         | `admin.home`     | `users.view`            |
-| `admin.pages`               | `/admin/paginas`                          | `admin.home`     | `pages.manage`          |
+| Chave                         | Rota                                      | Pai              | Permissão               |
+| ----------------------------- | ----------------------------------------- | ---------------- | ----------------------- |
+| `crm.dashboard`               | `/app`                                    | —                | `crm.dashboard.view`    |
+| `crm.stage.opportunities`     | `/app/etapas/oportunidades`               | `crm.dashboard`  | `crm.stages.view`       |
+| `crm.stage.appointments`      | `/app/etapas/agendamentos`                | `crm.dashboard`  | `crm.stages.view`       |
+| `crm.stage.visits`            | `/app/etapas/visitas`                     | `crm.dashboard`  | `crm.stages.view`       |
+| `crm.stage.folders`           | `/app/etapas/pastas`                      | `crm.dashboard`  | `crm.stages.view`       |
+| `crm.stage.sales`             | `/app/etapas/vendas`                      | `crm.dashboard`  | `crm.stages.view`       |
+| `crm.ranking`                 | `/app/ranking`                            | —                | `crm.ranking.view`      |
+| `crm.partnerships`            | `/app/canal-de-parcerias`                 | —                | `crm.partnerships.view` |
+| `crm.settings`                | `/app/configuracoes`                      | —                | `crm.settings.view`     |
+| `crm.settings.goals`          | `/app/configuracoes/metas`                | `crm.settings`   | `crm.settings.manage`   |
+| `crm.settings.partnerships`   | `/app/configuracoes/metas/parcerias`      | `crm.settings`   | `crm.settings.manage`   |
+| `crm.settings.points`         | `/app/configuracoes/metas/pontos`         | `crm.settings`   | `crm.settings.manage`   |
+| `crm.simulation`              | `/app/simulacao`                          | —                | `crm.simulators.view`   |
+| `crm.simulation.wf13`         | `/app/simulacao/associativo-fluxo-linear` | `crm.simulation` | `crm.simulators.view`   |
+| `crm.simulation.wf16`         | `/app/simulacao/calcular-documentacao`    | `crm.simulation` | `crm.simulators.view`   |
+| `crm.simulation.caixa`        | `/app/simulacao/caixa`                    | `crm.simulation` | `crm.simulators.view`   |
+| `crm.simulation.wf14`         | `/app/simulacao/tabela-direta`            | `crm.simulation` | `crm.simulators.view`   |
+| `crm.simulation.wf15`         | `/app/simulacao/tabela-investidor`        | `crm.simulation` | `crm.simulators.view`   |
+| `crm.simulation.tabelao`      | `/app/simulacao/tabela`                   | `crm.simulation` | `crm.simulators.view`   |
+| `crm.dialer`                  | `/app/discador`                           | —                | `crm.dialer.view`       |
+| `crm.dialer.weekend_forecast` | `/app/discador/previsao-final-de-semana`  | `crm.dialer`     | `crm.dialer.view`       |
+| `admin.home`                  | `/admin`                                  | —                | `admin.access`          |
+| `admin.users`                 | `/admin/usuarios`                         | `admin.home`     | `users.view`            |
+| `admin.pages`                 | `/admin/paginas`                          | `admin.home`     | `pages.manage`          |
 
 Rotas públicas de autenticação, cadastro, saúde e respostas 403/404/500 não
 fazem parte de `app_pages`. Elas permanecem separadas do catálogo comercial.
 
 ### Rotas shadow do read model v3
 
-O catálogo produtivo de 17 páginas e as 18 rotas oficiais acima permanecem
+O catálogo canário de 24 páginas e as 21 rotas oficiais acima permanecem
 inventários distintos. Para
 QA local autenticada, o v3 acrescenta superfícies não navegáveis em
 `/app/read-model-v3`, cinco detalhes em `/app/read-model-v3/etapas/[stage]`,
@@ -109,7 +119,7 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 | `/api/dashboard/status`          | Estado da ingestão                     | Exige `crm.dashboard.view`                        |
 | `/api/refresh/salesforce`        | Solicitação de atualização             | Exige permissão, flag e controles server-side     |
 | `/api/ingest/salesforce`         | Ingestão de máquina                    | Bearer dedicado, contrato tipado e RPC mínima     |
-| WF16, CAIXA, WF14 e WF15         | Rotas futuras ainda versionadas        | Fora de `app_pages`; autenticado recebe `403`     |
+| Sete páginas migradas            | Canário Master-only                    | Catálogo + guard + flag server-side independente  |
 
 ## Catálogo completo de componentes de interface relevantes
 

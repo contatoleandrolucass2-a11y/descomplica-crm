@@ -43,7 +43,7 @@ function parseMode(argv) {
 
 const mode = parseMode(process.argv.slice(2));
 
-const routes = [
+const baseRoutes = [
   "/app",
   "/app/etapas/oportunidades",
   "/app/etapas/agendamentos",
@@ -61,6 +61,36 @@ const routes = [
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
+];
+
+const legacyRoutesByRuntimeKey = new Map([
+  ["simulator.wf16", "/app/simulacao/calcular-documentacao"],
+  ["simulator.caixa", "/app/simulacao/caixa"],
+  ["simulator.wf14", "/app/simulacao/tabela-direta"],
+  ["simulator.wf15", "/app/simulacao/tabela-investidor"],
+  ["simulator.tabelao", "/app/simulacao/tabela"],
+  ["dialer", "/app/discador"],
+  ["dialer.weekend-forecast", "/app/discador/previsao-final-de-semana"],
+]);
+
+function expectedEnabledLegacyRoutes() {
+  if (process.env.LEGACY_MIGRATION_RUNTIME_MODE !== "active") return new Set();
+  const enabledKeys = (process.env.LEGACY_MIGRATION_ENABLED_MODULES ?? "")
+    .split(",")
+    .map((key) => key.trim())
+    .filter(Boolean);
+  const unknownKeys = enabledKeys.filter((key) => !legacyRoutesByRuntimeKey.has(key));
+  if (unknownKeys.length > 0 || new Set(enabledKeys).size !== enabledKeys.length) {
+    throw new Error("Authenticated visual QA received an invalid legacy migration runtime key.");
+  }
+  return new Set(enabledKeys.map((key) => legacyRoutesByRuntimeKey.get(key)));
+}
+
+const enabledLegacyRoutes = expectedEnabledLegacyRoutes();
+const routes = [
+  ...baseRoutes.slice(0, 14),
+  ...[...enabledLegacyRoutes].filter((route) => !baseRoutes.includes(route)),
+  ...baseRoutes.slice(14),
 ];
 
 const simulatorRoutesByRuntimeKey = new Map([
@@ -97,6 +127,13 @@ const simulatorHubCanaryKey =
 
 function visualBaselinePath(route, candidatePath) {
   const relativeCandidatePath = path.relative(candidateScreenshotRoot, candidatePath);
+  if (enabledLegacyRoutes.size > 0) {
+    return path.join(
+      simulatorCanaryBaselineRoot,
+      "legacy-migration-2026-08-28",
+      relativeCandidatePath,
+    );
+  }
   const runtimeKey = simulatorRuntimeKeysByRoute.get(route);
   if (runtimeKey && enabledSimulatorRoutes.has(route)) {
     return path.join(simulatorCanaryBaselineRoot, runtimeKey, relativeCandidatePath);
@@ -113,7 +150,7 @@ const viewports = [
   { key: "tablet-1024x768", width: 1024, height: 768 },
   { key: "tablet-768x1024", width: 768, height: 1024 },
   { key: "mobile-390x844", width: 390, height: 844 },
-  { key: "mobile-375x812", width: 375, height: 812 },
+  { key: "mobile-360x800", width: 360, height: 800 },
   { key: "mobile-320x568", width: 320, height: 568 },
 ];
 
