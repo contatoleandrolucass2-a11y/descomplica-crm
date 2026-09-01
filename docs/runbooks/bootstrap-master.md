@@ -1,119 +1,107 @@
-# Runbook — Bootstrap do Master Developer (M5.4)
+# Runbook — provisionamento source-controlled de Master
 
-## Objetivo
+## Objetivo e limite
 
-Promover **uma vez** um usuário existente ao papel `master` (nível 100),
-usando o UUID definido em `MASTER_USER_ID`. Operação manual, server-side,
-executada por um operador com acesso privilegiado ao banco. Não há UI, endpoint
-público, Server Action nem Service Role no bundle do app.
+O sistema aceita múltiplas identidades `master`, mas nenhuma delas pode ser
+criada ou promovida pela interface, Route Handler, Server Action, Data API,
+`authenticated` ou `service_role`. Cada autorização precisa existir no arquivo
+versionado [`ops/access/master-provisioning.json`](../../ops/access/master-provisioning.json),
+passar por revisão e ser executada pelo runner root-only do mesmo checkout.
 
-## Contexto técnico
+O runner não cria conta, senha ou aceite legal. A pessoa precisa concluir o
+cadastro normal, escolher a própria senha e aceitar as versões vigentes dos
+Termos e da Política de Privacidade. Se a conta ou o ledger legal ainda não
+existir, o provisionamento falha fechado sem alterar papéis.
 
-A lógica já existe no banco (migration M5.2):
+## Contrato de segurança
 
-```sql
-public.bootstrap_master_user(master_user_id uuid)
-```
+- `public.bootstrap_master_user(uuid)` é `SECURITY DEFINER`, pertence a
+  `postgres` e usa `search_path = ''`.
+- `PUBLIC`, `anon`, `authenticated` e `service_role` não possuem `EXECUTE`.
+- `public.user_roles` não aceita escrita direta por papéis da Data API.
+- `public.can_assign_role` exclui `master`, mesmo para um Master existente.
+- Cada identidade recebe papel Master, perfil aprovado e, quando o contrato de
+  escopo existe, somente o escopo global ativo.
+- A execução é serializada, idempotente e registrada em `audit_logs` com a
+  referência da autorização e o SHA do checkout; e-mail, senha e token não
+  entram na auditoria.
+- A remoção da antiga unicidade não altera permissões de páginas nem concede
+  acesso a papéis inferiores.
 
-- É `SECURITY DEFINER` com `search_path = ''`.
-- É **idempotente**: rodar de novo com o **mesmo** UUID retorna
-  `{ ok: true, noop: true }` sem novo registro de auditoria.
-- **Recusa** um master divergente: se já existe um `master` com UUID diferente,
-  levanta `conflict` (SQLSTATE `23505`) e não altera nada.
-- Está **revogada** para `PUBLIC`, `anon`, `authenticated` e `service_role`.
-  Somente o proprietário `postgres` consegue executá-la — por isso o bootstrap
-  roda por conexão administrativa direta, nunca pelo app ou Data API.
-- Garante um `profiles` mínimo, define `user_roles = master` e grava uma linha
-  em `audit_logs` (`authorization.master_bootstrap`).
+## Autorizar uma nova identidade no código
 
-> **Não** exponha essa função via HTTP, Server Action ou Service Role embutido.
-> O caminho autorizado é exclusivamente a conexão `postgres`/`psql`.
+1. Confirme que a pessoa concluiu o cadastro normal no ambiente correto. Não
+   crie a conta por SQL e não marque aceite legal em nome dela.
+2. Normalize o e-mail com `trim` e caixa baixa e calcule SHA-256 localmente. O
+   e-mail em claro não deve entrar no repositório, no comando nem no PR.
+3. Adicione uma entrada única a `ops/access/master-provisioning.json`:
+   ambiente, digest SHA-256, versões legais vigentes, `status=authorized` e uma
+   `changeRef` no formato `master-<ambiente>-AAAA-MM-DD-NN`.
+4. Inclua migration/pgTAP, documentação e testes do runner quando o contrato de
+   banco mudar. Uma entrada adicional que reutilize o contrato já aprovado
+   ainda exige PR, CI e deploy do arquivo versionado.
+5. Não inclua UUID, e-mail, senha, token, URL de banco ou outro dado de acesso
+   no Git.
 
-## Pré-requisitos / checklist antes de executar
+## Preflight
 
-- [ ] O usuário já existe em `auth.users` (foi criado via fluxo de login/Auth).
-- [ ] O UUID foi conferido diretamente na fonte (Supabase Studio ou query
-      privilegiada) — sem copiar de fontes não confiáveis.
-- [ ] `MASTER_USER_ID` está definido **apenas** no ambiente local/seguro
-      (`.env.local`, gitignored) — nunca commitado.
-- [ ] O ambiente-alvo é o correto (local vs. produção). Este runbook cobre o
-      ambiente **local**; produção exige autorização explícita à parte.
-- [ ] Backup/controle adequado do banco no ambiente-alvo.
-- [ ] O remoto **não** será tocado sem autorização.
-
-## Passo 1 — Confirmar o UUID do usuário
-
-No Supabase Studio (Authentication → Users) ou por query privilegiada:
-
-```sql
-select id, email from auth.users where email = '<email-do-master>';
-```
-
-Anote o `id` (UUID). Ele é o valor de `MASTER_USER_ID`.
-
-## Passo 2 — Definir MASTER_USER_ID no ambiente seguro
-
-Defina `MASTER_USER_ID=<uuid>` **somente** em `.env.local` (gitignored) ou no
-gerenciador de segredos do ambiente. Nunca em `.env.example`, nunca no git.
-
-## Passo 3 — Executar o bootstrap (conexão privilegiada)
-
-Ambiente local (Supabase CLI usa a porta 54322 como `postgres`):
+O segredo de conexão administrativa deve estar em arquivo absoluto root-only,
+regular, sem symlink, proprietário `root:root` e modo `0600`. O runner verifica
+SHA exato e worktree limpa antes de abrir uma conexão. Ele retorna somente
+booleans, estado do papel e contagens sanitizadas.
 
 ```bash
-psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" \
-  -c "select public.bootstrap_master_user('<MASTER_USER_ID>'::uuid);"
+pnpm access:master preflight \
+  --change-ref master-production-AAAA-MM-DD-NN \
+  --database-url-file /caminho/root-only/database-url \
+  --environment production \
+  --expected-sha <SHA_DE_40_CARACTERES>
 ```
 
-Substitua `<MASTER_USER_ID>` pelo UUID conferido no Passo 1. Nunca cole um UUID
-real neste arquivo.
+O preflight precisa comprovar:
 
-Retorno esperado:
+- exatamente uma conta corresponde ao digest versionado;
+- aceite legal das versões exatas existe;
+- migration `20260901204113` está aplicada;
+- a sessão administrativa é `postgres`;
+- backup, restore isolado e janela de mudança foram aprovados à parte.
 
-- Primeira execução: `{ "ok": true, "audit_id": <n> }`
-- Reexecução com o mesmo UUID: `{ "ok": true, "audit_id": null, "noop": true }`
-- UUID diferente do master atual: erro `conflict: a different master user already exists`.
+Se `targetExists=false`, a pessoa deve usar o cadastro normal. Não convide,
+crie, redefina senha nem fabrique o ledger legal para contornar esse estado.
 
-## Verificação pós-execução
+## Aplicação
 
-```sql
-select ur.user_id, ur.role_key, r.level
-from public.user_roles ur
-join public.roles r on r.key = ur.role_key
-where ur.role_key = 'master';
+Depois do backup e do preflight verde, execute no mesmo SHA. A confirmação não
+é segredo; ela vincula ambiente, autorização e revisão.
+
+```bash
+pnpm access:master apply \
+  --change-ref master-production-AAAA-MM-DD-NN \
+  --database-url-file /caminho/root-only/database-url \
+  --environment production \
+  --expected-sha <SHA_DE_40_CARACTERES> \
+  --confirm promote:master-production-AAAA-MM-DD-NN:<SHA_DE_40_CARACTERES>
 ```
 
-Deve retornar exatamente uma linha, com `role_key = master` e `level = 100`,
-apontando para o UUID esperado. Confira também a auditoria:
+Resultado esperado: `targetState=master`, contagem final maior em uma unidade,
+ou `noop=true` quando a mesma identidade já estava completa. A saída nunca
+contém e-mail, UUID, URL de banco ou material de autenticação.
 
-```sql
-select id, actor_id, target_user_id, action, created_at
-from public.audit_logs
-where action = 'authorization.master_bootstrap'
-order by created_at desc
-limit 1;
-```
+## Verificação e rollback
 
-## Rollback / correção
+Após aplicar, valide por consultas agregadas e por smoke autenticado da própria
+pessoa: papel exibido, menu, URLs diretas, APIs, RLS, MFA/AAL2 e logout. Confirme
+também que outro perfil não ganhou páginas e que o Master anterior continua
+ativo.
 
-Não há downgrade automático. Corrigir um master incorreto é uma operação
-manual no banco, por conexão privilegiada (revisar `user_roles`/`audit_logs`),
-com o mesmo cuidado de auditoria. Não há caminho pelo app.
-
-## Riscos e mitigação
-
-| Risco                                | Mitigação                                                                                                          |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| UUID errado promovido a master       | Conferir o UUID na fonte (Passo 1); a função registra em `audit_logs`; correção manual documentada acima.          |
-| Execução acidental / repetida        | Função idempotente para o mesmo UUID (`noop`); master divergente é recusado com `23505`.                           |
-| Vazamento de `MASTER_USER_ID`        | É apenas um UUID (não é segredo), mas mantê-lo só em `.env.local` gitignored; placeholder vazio em `.env.example`. |
-| Uso indevido de Service Role         | Service Role **não** entra no app nem no `.env.example`; bootstrap usa a conexão `postgres`.                       |
-| Tentativa via `anon`/`authenticated` | `execute` revogado para ambos na M5.2; a RPC não é chamável pelo cliente.                                          |
-| Ambiente errado (prod vs local)      | Checklist exige confirmar o ambiente; produção só com autorização explícita.                                       |
+Não existe downgrade automático para a migration que permite múltiplos Masters.
+Uma identidade indevida deve ser removida por roll-forward source-controlled,
+com backup e registro de auditoria; nunca apague logs. A aplicação pode voltar
+para a imagem anterior sem reabrir um caminho público de elevação.
 
 ## Referências
 
-- Migration M5.2: `supabase/migrations/20260522010552_access_control_admin_functions.sql`
-  (`bootstrap_master_user`).
-- Migration M5.1: `supabase/migrations/20260519190726_access_control_foundation.sql`
-  (tabelas, RLS, seed de roles/permissions).
+- `supabase/migrations/20260901204113_multi_master_source_controlled.sql`
+- `supabase/tests/multi_master_source_controlled.test.sql`
+- `ops/access/provision-master.mjs`
+- `ops/access/master-provisioning.json`

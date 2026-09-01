@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-01
+
+- Permite múltiplas identidades Master sem criar UI, endpoint ou RPC acessível:
+  remove a unicidade legada, mantém lookup indexado e bloqueia elevação pela
+  hierarquia, Data API e `service_role`.
+- Adiciona autorização por digest no código, runner root-only preso ao SHA e
+  ledger legal vigente. Conta, senha e aceite continuam obrigatoriamente no
+  fluxo normal da própria pessoa; o runner falha fechado se qualquer etapa
+  estiver ausente.
+- Cobre dois Masters simultâneos, escopo global, idempotência, auditoria,
+  privilégios mínimos e não regressão dos demais papéis em pgTAP e Vitest.
+- Atualiza somente a resolução transitiva de `browserslist` para `4.28.7`,
+  eliminando duas vulnerabilidades altas publicadas após o baseline sem
+  adicionar dependência ou alterar código de runtime.
+
 ## 2026-08-28
 
 - Mantém o callback direto por `TokenHash` e adiciona compatibilidade segura

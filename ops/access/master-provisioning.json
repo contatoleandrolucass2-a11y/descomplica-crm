@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "requests": [
+    {
+      "changeRef": "master-production-2026-09-01-01",
+      "environment": "production",
+      "targetEmailSha256": "4477bca7c6361ea61278931852477ba9c6a2dfb0238cbf03ed4a1e42dfb023bd",
+      "termsVersion": "terms-2026-08-24-draft-1",
+      "privacyVersion": "privacy-2026-08-24-draft-1",
+      "status": "authorized"
+    }
+  ]
+}

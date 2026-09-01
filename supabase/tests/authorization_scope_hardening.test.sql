@@ -1,6 +1,6 @@
 begin;
 
-select plan(51);
+select plan(52);
 
 insert into auth.users (id, email)
 values
@@ -500,8 +500,19 @@ select is(
     where schemaname = 'public'
       and indexname = 'user_roles_single_master_unique'
   ),
+  0::bigint,
+  'storage no longer limits source-controlled Master identities to one'
+);
+
+select is(
+  (
+    select count(*)
+    from pg_catalog.pg_indexes
+    where schemaname = 'public'
+      and indexname = 'user_roles_role_key_idx'
+  ),
   1::bigint,
-  'storage enforces one Master role'
+  'role lookups stay indexed after enabling multiple Masters'
 );
 
 select is(
