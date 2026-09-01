@@ -15,6 +15,8 @@ const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const homologationRuntimeRoot = "/var/lib/descomplica-crm-homologation";
 const visualHarnessPath = path.join(import.meta.dirname, "authenticated-visual.mjs");
 const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"]);
+const visualGoalsReferenceTime = "2026-08-27T01:21:00.000Z";
+const visualGoalsEffectiveMonth = "2026-08-01";
 const requiredFixtureCounts = {
   dashboardViews: 3,
   dashboardMetrics: 15,
@@ -303,6 +305,7 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
       NODE_ENV: "production",
       APP_ORIGIN: origin,
       AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
+      QA_VISUAL_GOALS_REFERENCE_TIME: visualGoalsReferenceTime,
       AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
       SUPABASE_URL: apiUrl,
       SUPABASE_PUBLISHABLE_KEY: publishableKey,
@@ -484,7 +487,7 @@ begin
     select 1
     from public.crm_funnel_goals
     where profile_key in ('dv', 'partnerships')
-      and effective_month = date_trunc('month', timezone('America/Sao_Paulo', now()))::date
+      and effective_month = ${sqlLiteral(visualGoalsEffectiveMonth)}::date
   ) then
     raise exception 'reserved funnel-goals fixture slot is occupied';
   end if;
@@ -810,26 +813,29 @@ insert into public.crm_funnel_goals (
   productive_team_visits,
   productive_team_folders,
   productive_team_sales,
-  updated_by
+  updated_by,
+  updated_at
 )
 values
   (
-    'dv', date_trunc('month', timezone('America/Sao_Paulo', now()))::date,
+    'dv', ${sqlLiteral(visualGoalsEffectiveMonth)}::date,
     400, 200, 120, 80, 40, 20,
     2, 1.67, 1.5, 2, 2,
     2, 3, 4, 5,
     5, 3, 2,
     80, 70, 60, 50,
-    ${userIdSql}
+    ${userIdSql},
+    ${sqlLiteral(visualGoalsReferenceTime)}::timestamptz
   ),
   (
-    'partnerships', date_trunc('month', timezone('America/Sao_Paulo', now()))::date,
+    'partnerships', ${sqlLiteral(visualGoalsEffectiveMonth)}::date,
     0, 0, 100, 60, 30, 15,
     0, 0, 1.67, 2, 2,
     1, 2, 3, 4,
     0, 3, 2,
     0, 70, 60, 50,
-    ${userIdSql}
+    ${userIdSql},
+    ${sqlLiteral(visualGoalsReferenceTime)}::timestamptz
   );
 
 do $qa_verify$
@@ -929,7 +935,7 @@ begin
   if (
     select count(*) from public.crm_funnel_goals
     where updated_by = ${userIdSql}
-      and effective_month = date_trunc('month', timezone('America/Sao_Paulo', now()))::date
+      and effective_month = ${sqlLiteral(visualGoalsEffectiveMonth)}::date
   ) <> ${requiredFixtureCounts.funnelGoals}
   then
     raise exception 'funnel fixture marker is missing';

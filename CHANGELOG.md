@@ -14,6 +14,9 @@
 - Atualiza somente a resolução transitiva de `browserslist` para `4.28.7`,
   eliminando duas vulnerabilidades altas publicadas após o baseline sem
   adicionar dependência ou alterar código de runtime.
+- Estabiliza a competência das fixtures visuais somente no modo QA loopback,
+  evitando falso drift na virada do mês; qualquer uso fora desse ambiente
+  isolado falha fechado e o runtime produtivo continua usando a data real.
 
 ## 2026-08-28
 

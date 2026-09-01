@@ -22,6 +22,13 @@
 - `pnpm audit` e OSV detectaram duas CVEs altas novas no `browserslist 4.28.2`.
   Um override transitivo mínimo para `4.28.7` removeu o achado sem adicionar
   pacote ou mudar o runtime da aplicação; gitleaks permaneceu sem vazamentos.
+- O primeiro CI aprovou aplicação, banco, E2E e restore, mas duas de 160
+  comparações visuais mudaram 24 px em 375 px porque a competência virou de
+  agosto para setembro. O fixture agora fixa sua data original somente quando
+  `AUTH_LOCAL_INSECURE_LOOPBACK_QA` e origens loopback estão comprovados;
+  produção não reconhece esse override. A repetição local passou com 119 checks
+  responsivos, 68 de tema, 160 de acessibilidade, 160 comparações de imagem e
+  85 checks de zoom, sem promover baseline.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 
