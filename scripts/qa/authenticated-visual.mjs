@@ -44,6 +44,7 @@ function parseMode(argv) {
 const mode = parseMode(process.argv.slice(2));
 
 const routes = [
+  "/app/simulacao/associativo-fluxo-linear",
   "/app",
   "/app/etapas/oportunidades",
   "/app/etapas/agendamentos",
@@ -57,7 +58,6 @@ const routes = [
   "/app/configuracoes/metas/parcerias",
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
-  "/app/simulacao/associativo-fluxo-linear",
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
@@ -617,7 +617,8 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
   );
   await page.evaluate(() => document.fonts.ready);
 
-  const isSimulatorWorkspace = route.startsWith("/app/simulacao/");
+  const isArchiveAssociativeTable = route === "/app/simulacao/associativo-fluxo-linear";
+  const isSimulatorWorkspace = route.startsWith("/app/simulacao/") && !isArchiveAssociativeTable;
   const expectsEnabledSimulatorAction = enabledSimulatorRoutes.has(route);
   const snapshot = await page.evaluate((simulatorWorkspace) => {
     const text = document.body.innerText;
@@ -803,57 +804,28 @@ async function checkSimulatorValidation(page, origin) {
   await page.goto(`${origin}/app/simulacao/associativo-fluxo-linear`, {
     waitUntil: "domcontentloaded",
   });
-  await page.locator("main form").waitFor({ state: "visible" });
-  await page.evaluate(() => document.querySelector("main form")?.requestSubmit());
-  await page.waitForTimeout(100);
+  await page
+    .getByRole("heading", { name: "Simulador Tabela Associativo", exact: true })
+    .waitFor({ state: "visible" });
+  await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
+    state: "visible",
+  });
   return await page.evaluate(() => {
-    const form = document.querySelector("main form");
-    const resultText = document.querySelector("#resultado-fluxo-linear")?.textContent ?? "";
-    const action = form?.querySelector('button[type="submit"]');
-    const executionEnabled = action?.dataset.ctaState === "enabled" && !action.disabled;
-    const labels = [...(form?.querySelectorAll("label") ?? [])];
-    const inputFor = (text) =>
-      labels.find((label) => label.textContent?.includes(text))?.querySelector("input") ?? null;
-    const policyLimit = inputFor("Limite aprovado");
-    const installments = inputFor("Parcelas mensais solicitadas");
-    const policyConfirmation = inputFor("Política comercial conferida");
-    const exactFieldLabels = [
-      "Empreendimento",
-      "Produto / unidade",
-      "Data vigente",
-      "Término da obra",
-      "Valor do imóvel",
-      "Bônus adimplência",
-      "Desconto",
-      "Financiamento",
-      "Subsídio",
-      "FGTS",
-      "Cheque moradia",
-      "Entrada / ato",
-      "Sinal 1",
-      "Sinal 2",
-      "Sinal 3",
-      "Anual 1",
-      "Anual 2",
-      "Anual 3",
-      "Anual 4",
-      "Anual 5",
-      "Limite aprovado",
-      "Parcelas mensais solicitadas",
-    ];
+    const filters = [...document.querySelectorAll(".investor-stock-filters select")];
+    const selectedUnit = document.querySelector('.investor-stock-unit-button[aria-pressed="true"]');
     return {
-      emptySubmissionBlocked: executionEnabled
-        ? resultText.includes("Cálculo bloqueado")
-        : action?.disabled === true,
-      archiveGateMessageShown: executionEnabled
-        ? resultText.includes("Revise os gates do WF-13")
-        : action?.dataset.ctaState === "blocked",
-      exactFieldsPresent: exactFieldLabels.every((text) => Boolean(inputFor(text))),
-      policyLimitEditable: policyLimit?.value === "84" && !policyLimit.readOnly,
-      installmentsDefaultTo84: installments?.value === "84",
-      policyConfirmationRequired:
-        policyConfirmation?.type === "checkbox" && !policyConfirmation.checked,
-      exactActionPresent: action?.textContent?.includes("Calcular fluxo linear") === true,
+      associativeTableTitlePresent:
+        document.querySelector("h1")?.textContent === "Simulador Tabela Associativo",
+      stockPanelPresent: Boolean(document.querySelector("#investor-stock-title")),
+      stockRowsPresent:
+        document.querySelectorAll(".investor-stock-table tbody tr.selectable").length > 0,
+      fiveStockFiltersPresent: filters.length === 6,
+      firstUnitSelected: Boolean(selectedUnit),
+      guidePresent: Boolean(
+        [...document.querySelectorAll("button")].find((button) =>
+          button.textContent?.includes("Iniciar passo a passo"),
+        ),
+      ),
     };
   });
 }
