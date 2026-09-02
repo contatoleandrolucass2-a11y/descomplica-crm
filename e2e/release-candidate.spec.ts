@@ -1161,60 +1161,23 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     });
 
     await page.goto("/app/simulacao/associativo-fluxo-linear");
-    await expect(page.getByRole("heading", { name: "Simulador Associativo" })).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Entradas do fluxo linear", exact: true }),
+      page.getByRole("heading", { level: 1, name: "Simulador Tabela Associativo" }),
     ).toBeVisible();
-    await page.getByLabel("Empreendimento", { exact: true }).fill("Empreendimento oficial");
-    await page.getByLabel("Produto / unidade", { exact: true }).fill("Unidade oficial");
-    await page
-      .locator("label.doccalc-check", { hasText: "Match 100% confirmado" })
-      .locator('input[type="checkbox"]')
-      .check();
-    await page.getByLabel("Data vigente", { exact: true }).fill("2026-08-06");
-    await page.getByLabel("Término da obra", { exact: true }).fill("2032-12-31");
-    const moneyInput = (label: string) =>
-      page.locator("form label").filter({ hasText: label }).first().locator("input");
-    await moneyInput("Valor do imóvel").fill("300000");
-    await moneyInput("Financiamento").fill("200000");
-    await moneyInput("Subsídio").fill("30000");
-    await moneyInput("FGTS").fill("10000");
-    await moneyInput("Entrada / ato").fill("8000");
-    await moneyInput("Sinal 1").fill("1000");
-    await moneyInput("Sinal 2").fill("1000");
-    for (const annual of ["Anual 1", "Anual 2", "Anual 3", "Anual 4", "Anual 5"]) {
-      await moneyInput(annual).fill("2350");
-    }
-    const policyLimit = page.getByLabel("Limite aprovado", { exact: true });
-    const requestedInstallments = page.getByLabel("Parcelas mensais solicitadas", {
-      exact: true,
-    });
-    await expect(policyLimit).toHaveValue("84");
-    await expect(policyLimit).not.toHaveAttribute("readonly", "");
-    await expect(requestedInstallments).toHaveAttribute("min", "1");
-    await expect(requestedInstallments).toHaveAttribute("step", "1");
-    const policyConfirmation = page
-      .locator("label.doccalc-check", { hasText: "Política comercial conferida" })
-      .locator('input[type="checkbox"]');
-    await expect(policyConfirmation).not.toBeChecked();
-    await policyConfirmation.check();
-
-    await requestedInstallments.fill("85");
-    await page.getByRole("button", { name: /Calcular fluxo linear/ }).click();
-    await expect(page.getByText("Cálculo bloqueado", { exact: true })).toBeVisible();
-    await expect(
-      page.getByText("A quantidade solicitada supera o limite comercial de 84 parcelas."),
-    ).toBeVisible();
-    await requestedInstallments.fill("84");
-    await page.getByRole("button", { name: /Calcular fluxo linear/ }).click();
-    await expect(page.getByText("Simulação validada", { exact: true })).toBeVisible();
-    await expect(page.getByText("R$ 50.000,00", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("R$ 542,70", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("Início em 05/11/2026 • PGTO oficial")).toBeVisible();
-    await expect(page.getByText("73", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("11", { exact: true }).first()).toBeVisible();
-    await page.getByText("Ver auditoria do cálculo", { exact: true }).click();
-    await expect(page.getByText(/D59 \+ D60 fecha D61/)).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: "Escolha a unidade" })).toBeVisible();
+    await expect(page.getByText("Filtros do estoque", { exact: true })).toBeVisible();
+    const stockFilter = (label: string) =>
+      page.locator(".investor-stock-filters label").filter({ hasText: label }).locator("select");
+    await expect(stockFilter("Incorporadora")).toBeVisible();
+    await expect(stockFilter("Nome do Empreendimento")).toBeVisible();
+    await expect(stockFilter("Região")).toBeVisible();
+    await expect(stockFilter("Planta")).toBeVisible();
+    await expect(stockFilter("Valor do Imóvel")).toBeVisible();
+    await expect(page.getByLabel("Ordenar unidades por valor do imóvel")).toHaveValue("asc");
+    await expect(page.getByRole("region", { name: "Estoque completo de unidades" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Produto" })).toBeVisible();
+    await expect(page.locator(".investor-stock-table tbody tr.selected")).toHaveCount(1);
+    await expect(page.getByRole("button", { name: "Iniciar passo a passo" })).toBeVisible();
 
     for (const simulator of [
       "calcular-documentacao",
