@@ -623,6 +623,7 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
     const text = document.body.innerText;
     const root = document.documentElement;
     const simulatorForm = simulatorWorkspace ? document.querySelector("main form") : null;
+    const archiveSimulator = window.location.pathname === "/app/simulacao/associativo-fluxo-linear";
     const topbarInner = document.querySelector("header > div");
     const brand = topbarInner?.firstElementChild;
     const navigation = document.querySelector('header nav[aria-label="Navegação autorizada"]');
@@ -709,13 +710,16 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
       simulatorFormActionPresent: simulatorForm?.hasAttribute("action") ?? false,
       blockedCalculationMessagePresent:
         !simulatorWorkspace ||
+        (archiveSimulator && Boolean(blockedAction?.disabled)) ||
         text.includes("Cálculo temporariamente indisponível — regra aguardando validação"),
       blockedActionDistinct:
         !simulatorWorkspace ||
-        (Boolean(blockedAction?.querySelector("svg")) &&
-          Boolean(document.querySelector("#calculation-blocked-reason")) &&
-          blockedStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
-          blockedStyle?.cursor === "not-allowed"),
+        (archiveSimulator
+          ? Boolean(blockedAction?.disabled) && blockedStyle?.cursor === "not-allowed"
+          : Boolean(blockedAction?.querySelector("svg")) &&
+            Boolean(document.querySelector("#calculation-blocked-reason")) &&
+            blockedStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
+            blockedStyle?.cursor === "not-allowed"),
       unavailableActionDistinct:
         !unavailableAction ||
         (unavailableStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
@@ -805,6 +809,8 @@ async function checkSimulatorValidation(page, origin) {
   return await page.evaluate(() => {
     const form = document.querySelector("main form");
     const resultText = document.querySelector("#resultado-fluxo-linear")?.textContent ?? "";
+    const action = form?.querySelector('button[type="submit"]');
+    const executionEnabled = action?.dataset.ctaState === "enabled" && !action.disabled;
     const labels = [...(form?.querySelectorAll("label") ?? [])];
     const inputFor = (text) =>
       labels.find((label) => label.textContent?.includes(text))?.querySelector("input") ?? null;
@@ -836,17 +842,18 @@ async function checkSimulatorValidation(page, origin) {
       "Parcelas mensais solicitadas",
     ];
     return {
-      emptySubmissionBlocked: resultText.includes("Cálculo bloqueado"),
-      archiveGateMessageShown: resultText.includes("Revise os gates do WF-13"),
+      emptySubmissionBlocked: executionEnabled
+        ? resultText.includes("Cálculo bloqueado")
+        : action?.disabled === true,
+      archiveGateMessageShown: executionEnabled
+        ? resultText.includes("Revise os gates do WF-13")
+        : action?.dataset.ctaState === "blocked",
       exactFieldsPresent: exactFieldLabels.every((text) => Boolean(inputFor(text))),
       policyLimitEditable: policyLimit?.value === "84" && !policyLimit.readOnly,
       installmentsDefaultTo84: installments?.value === "84",
       policyConfirmationRequired:
         policyConfirmation?.type === "checkbox" && !policyConfirmation.checked,
-      exactActionPresent:
-        form
-          ?.querySelector('button[type="submit"]')
-          ?.textContent?.includes("Calcular fluxo linear") === true,
+      exactActionPresent: action?.textContent?.includes("Calcular fluxo linear") === true,
     };
   });
 }
