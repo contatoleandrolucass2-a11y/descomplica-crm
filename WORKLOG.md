@@ -1703,3 +1703,15 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   redirecionamento ao login e `/api/health` permanece 200.
 - As três tabelas Qlik continuaram com zero grant direto e zero policy de
   leitura. Integrações, motores, allowlists e flags não foram ativados.
+
+# 2026-09-02 — paridade visual e funcional do Simulador Associativo
+
+- Fonte comparada: `Descomplica-CRM-completo-20260901-210321.rar`, rota
+  `app/simulacao/associativo-fluxo-linear`.
+- A rota protegida agora usa a mesma hierarquia, textos, campos, resultado e
+  regras WF13 lineares do arquivo; shell, permissão de visualização e execução
+  Master-only do CRM foram preservados.
+- Evidências aprovadas: lint, typecheck, 507 testes Vitest + 8 testes Node,
+  build e matriz autenticada com 119 checks responsivos, 68 de tema, 160 de
+  acessibilidade/comparação visual e 85 de zoom. A rota passou em 375×812,
+  768×1024, 1024×768 e 1440×900, inclusive tema escuro e contraste AA.

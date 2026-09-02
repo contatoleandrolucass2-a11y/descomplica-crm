@@ -16,6 +16,7 @@ import { isHomologationMode } from "@/lib/homologation/config";
 import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
 
 import "./globals.css";
+import "./(protected)/app/simulacao/associative-linear-archive.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   // HOMOLOGATION_MODE belongs to runtime, not the immutable image. Explicitly

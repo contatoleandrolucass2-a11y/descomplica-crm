@@ -2,6 +2,9 @@
 
 ## 2026-09-02
 
+- Restaura na rota “Simulador Associativo” a página WF13 do arquivo original:
+  hero, cinco blocos de entrada, resultado lateral, memória pré/pós-obra,
+  anuais, auditoria, impressão e responsividade, mantendo o gate Master.
 - Renomeia a jornada WF13 para “Simulador Associativo” no menu, no hub e no
   cabeçalho da página, preservando rota, cálculo oficial, gates, permissões e
   conteúdo completo do fluxo linear.

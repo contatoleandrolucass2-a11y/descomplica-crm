@@ -11,6 +11,7 @@ import {
 } from "@/lib/crm/simulators/official/config";
 
 import { SimulatorWorkspace } from "../_components/SimulatorWorkspace";
+import { AssociativeLinearArchive } from "../_components/AssociativeLinearArchive";
 
 export const metadata = { title: "Simulação comercial" };
 export const dynamic = "force-dynamic";
@@ -36,6 +37,10 @@ export default async function SimulatorPage({
   const executionReason = runtimeEnabled
     ? "Disponível somente para o perfil Master nesta etapa de validação."
     : "Cálculo temporariamente indisponível — regra aguardando validação";
+
+  if (simulator === "associativo-fluxo-linear") {
+    return <AssociativeLinearArchive executionEnabled={executionEnabled} />;
+  }
 
   return (
     <SimulatorWorkspace

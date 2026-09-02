@@ -623,6 +623,7 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
     const text = document.body.innerText;
     const root = document.documentElement;
     const simulatorForm = simulatorWorkspace ? document.querySelector("main form") : null;
+    const archiveSimulator = window.location.pathname === "/app/simulacao/associativo-fluxo-linear";
     const topbarInner = document.querySelector("header > div");
     const brand = topbarInner?.firstElementChild;
     const navigation = document.querySelector('header nav[aria-label="Navegação autorizada"]');
@@ -709,13 +710,16 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
       simulatorFormActionPresent: simulatorForm?.hasAttribute("action") ?? false,
       blockedCalculationMessagePresent:
         !simulatorWorkspace ||
+        (archiveSimulator && Boolean(blockedAction?.disabled)) ||
         text.includes("Cálculo temporariamente indisponível — regra aguardando validação"),
       blockedActionDistinct:
         !simulatorWorkspace ||
-        (Boolean(blockedAction?.querySelector("svg")) &&
-          Boolean(document.querySelector("#calculation-blocked-reason")) &&
-          blockedStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
-          blockedStyle?.cursor === "not-allowed"),
+        (archiveSimulator
+          ? Boolean(blockedAction?.disabled) && blockedStyle?.cursor === "not-allowed"
+          : Boolean(blockedAction?.querySelector("svg")) &&
+            Boolean(document.querySelector("#calculation-blocked-reason")) &&
+            blockedStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
+            blockedStyle?.cursor === "not-allowed"),
       unavailableActionDistinct:
         !unavailableAction ||
         (unavailableStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
@@ -799,72 +803,59 @@ async function checkSimulatorValidation(page, origin) {
   await page.goto(`${origin}/app/simulacao/associativo-fluxo-linear`, {
     waitUntil: "domcontentloaded",
   });
-  const field = page.locator("main form input[required]").first();
-  await field.waitFor({ state: "visible" });
-  await field.focus();
-  await page.keyboard.press("Tab");
-  await page.waitForFunction(
-    () =>
-      document.querySelector("main form input[required]")?.getAttribute("aria-invalid") === "true",
-  );
-  const invalidAfterBlur = (await field.getAttribute("aria-invalid")) === "true";
-  const errorId = (await field.getAttribute("aria-describedby"))
-    ?.split(/\s+/)
-    .find((id) => id.endsWith("-error"));
-  if (errorId) await page.locator(`#${errorId}`).waitFor({ state: "visible" });
-  const messageAssociated = Boolean(errorId) && (await page.locator(`#${errorId}`).isVisible());
-  await field.fill("QA visual local");
-  await page.waitForFunction(
-    () =>
-      document.querySelector("main form input[required]")?.getAttribute("aria-invalid") !== "true",
-  );
-  const validAfterInput = (await field.getAttribute("aria-invalid")) !== "true";
-
-  const policyLimit = page.getByLabel("Limite aprovado");
-  const requestedInstallments = page.getByLabel("Parcelas mensais solicitadas *");
-  const calculationAction = page.getByRole("button", { name: "Calcular fluxo linear" });
-  const fixedLimit =
-    (await policyLimit.inputValue()) === "84" &&
-    (await policyLimit.getAttribute("readonly")) !== null &&
-    (await policyLimit.getAttribute("aria-readonly")) === "true";
-  const policyConfirmationIsAutomatic =
-    (await page.locator("#simulator-commercial-policy-policy-confirmed").count()) === 0;
-
-  await requestedInstallments.fill("85");
-  await requestedInstallments.press("Tab");
-  const maximumRejected =
-    (await requestedInstallments.getAttribute("aria-invalid")) === "true" &&
-    (
-      await page.locator("#simulator-commercial-policy-requested-installments-error").textContent()
-    )?.includes("O limite máximo permitido é de 84 parcelas mensais.") === true &&
-    (await calculationAction.isDisabled());
-
-  await requestedInstallments.fill("84.5");
-  await requestedInstallments.press("Tab");
-  const decimalRejected =
-    (
-      await page.locator("#simulator-commercial-policy-requested-installments-error").textContent()
-    )?.includes("Informe uma quantidade inteira de parcelas.") === true;
-
-  await requestedInstallments.fill("84");
-  const expectsEnabledAction = enabledSimulatorRoutes.has(
-    "/app/simulacao/associativo-fluxo-linear",
-  );
-  const correctionClearsError =
-    (await requestedInstallments.getAttribute("aria-invalid")) !== "true" &&
-    ((expectsEnabledAction && !(await calculationAction.isDisabled())) ||
-      (!expectsEnabledAction && (await calculationAction.isDisabled())));
-
-  return {
-    invalidAfterBlur,
-    messageAssociated,
-    validAfterInput,
-    fixedLimit,
-    policyConfirmationIsAutomatic,
-    maximumRejected,
-    decimalRejected,
-    correctionClearsError,
-  };
+  await page.locator("main form").waitFor({ state: "visible" });
+  await page.evaluate(() => document.querySelector("main form")?.requestSubmit());
+  await page.waitForTimeout(100);
+  return await page.evaluate(() => {
+    const form = document.querySelector("main form");
+    const resultText = document.querySelector("#resultado-fluxo-linear")?.textContent ?? "";
+    const action = form?.querySelector('button[type="submit"]');
+    const executionEnabled = action?.dataset.ctaState === "enabled" && !action.disabled;
+    const labels = [...(form?.querySelectorAll("label") ?? [])];
+    const inputFor = (text) =>
+      labels.find((label) => label.textContent?.includes(text))?.querySelector("input") ?? null;
+    const policyLimit = inputFor("Limite aprovado");
+    const installments = inputFor("Parcelas mensais solicitadas");
+    const policyConfirmation = inputFor("Política comercial conferida");
+    const exactFieldLabels = [
+      "Empreendimento",
+      "Produto / unidade",
+      "Data vigente",
+      "Término da obra",
+      "Valor do imóvel",
+      "Bônus adimplência",
+      "Desconto",
+      "Financiamento",
+      "Subsídio",
+      "FGTS",
+      "Cheque moradia",
+      "Entrada / ato",
+      "Sinal 1",
+      "Sinal 2",
+      "Sinal 3",
+      "Anual 1",
+      "Anual 2",
+      "Anual 3",
+      "Anual 4",
+      "Anual 5",
+      "Limite aprovado",
+      "Parcelas mensais solicitadas",
+    ];
+    return {
+      emptySubmissionBlocked: executionEnabled
+        ? resultText.includes("Cálculo bloqueado")
+        : action?.disabled === true,
+      archiveGateMessageShown: executionEnabled
+        ? resultText.includes("Revise os gates do WF-13")
+        : action?.dataset.ctaState === "blocked",
+      exactFieldsPresent: exactFieldLabels.every((text) => Boolean(inputFor(text))),
+      policyLimitEditable: policyLimit?.value === "84" && !policyLimit.readOnly,
+      installmentsDefaultTo84: installments?.value === "84",
+      policyConfirmationRequired:
+        policyConfirmation?.type === "checkbox" && !policyConfirmation.checked,
+      exactActionPresent: action?.textContent?.includes("Calcular fluxo linear") === true,
+    };
+  });
 }
 
 async function checkFixtureSourceMarker(page, origin, expectedMarker) {
