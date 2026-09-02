@@ -820,7 +820,7 @@ async function checkSimulatorValidation(page, origin) {
       stockRowsPresent:
         document.querySelectorAll(".investor-stock-table tbody tr.selectable").length > 0,
       fiveStockFiltersPresent: filters.length === 6,
-      firstUnitSelected: Boolean(selectedUnit),
+      manualSelectionRequired: !selectedUnit,
       guidePresent: Boolean(
         [...document.querySelectorAll("button")].find((button) =>
           button.textContent?.includes("Iniciar passo a passo"),

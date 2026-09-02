@@ -16,7 +16,6 @@ import { isHomologationMode } from "@/lib/homologation/config";
 import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
 
 import "./globals.css";
-import "./(protected)/app/simulacao/associative-linear-archive.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   // HOMOLOGATION_MODE belongs to runtime, not the immutable image. Explicitly
@@ -50,6 +49,14 @@ export default async function RootLayout({
 
   return (
     <html lang="pt-BR" className="h-full">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{const t=localStorage.getItem('descomplica-theme');if(t==='light'||t==='balanced'||t==='dark')document.documentElement.dataset.theme=t;else document.documentElement.dataset.theme='light'}catch{}",
+          }}
+        />
+      </head>
       <body className="min-h-full">
         {homologationMode ? (
           <aside className="homologation-banner" role="status">
