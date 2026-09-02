@@ -812,10 +812,27 @@ async function checkSimulatorValidation(page, origin) {
     const installments = inputFor("Parcelas mensais solicitadas");
     const policyConfirmation = inputFor("Política comercial conferida");
     const exactFieldLabels = [
-      "Empreendimento", "Produto / unidade", "Data vigente", "Término da obra",
-      "Valor do imóvel", "Bônus adimplência", "Desconto", "Financiamento", "Subsídio",
-      "FGTS", "Cheque moradia", "Entrada / ato", "Sinal 1", "Sinal 2", "Sinal 3",
-      "Anual 1", "Anual 2", "Anual 3", "Anual 4", "Anual 5", "Limite aprovado",
+      "Empreendimento",
+      "Produto / unidade",
+      "Data vigente",
+      "Término da obra",
+      "Valor do imóvel",
+      "Bônus adimplência",
+      "Desconto",
+      "Financiamento",
+      "Subsídio",
+      "FGTS",
+      "Cheque moradia",
+      "Entrada / ato",
+      "Sinal 1",
+      "Sinal 2",
+      "Sinal 3",
+      "Anual 1",
+      "Anual 2",
+      "Anual 3",
+      "Anual 4",
+      "Anual 5",
+      "Limite aprovado",
       "Parcelas mensais solicitadas",
     ];
     return {
@@ -827,9 +844,9 @@ async function checkSimulatorValidation(page, origin) {
       policyConfirmationRequired:
         policyConfirmation?.type === "checkbox" && !policyConfirmation.checked,
       exactActionPresent:
-        form?.querySelector('button[type="submit"]')?.textContent?.includes(
-          "Calcular fluxo linear",
-        ) === true,
+        form
+          ?.querySelector('button[type="submit"]')
+          ?.textContent?.includes("Calcular fluxo linear") === true,
     };
   });
 }

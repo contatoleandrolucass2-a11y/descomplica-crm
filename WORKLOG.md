@@ -1703,6 +1703,7 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   redirecionamento ao login e `/api/health` permanece 200.
 - As três tabelas Qlik continuaram com zero grant direto e zero policy de
   leitura. Integrações, motores, allowlists e flags não foram ativados.
+
 # 2026-09-02 — paridade visual e funcional do Simulador Associativo
 
 - Fonte comparada: `Descomplica-CRM-completo-20260901-210321.rar`, rota
