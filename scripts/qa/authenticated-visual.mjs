@@ -44,7 +44,6 @@ function parseMode(argv) {
 const mode = parseMode(process.argv.slice(2));
 
 const routes = [
-  "/app/simulacao/associativo-fluxo-linear",
   "/app",
   "/app/etapas/oportunidades",
   "/app/etapas/agendamentos",
@@ -58,6 +57,7 @@ const routes = [
   "/app/configuracoes/metas/parcerias",
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
+  "/app/simulacao/associativo-fluxo-linear",
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
