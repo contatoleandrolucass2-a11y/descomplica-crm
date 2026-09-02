@@ -71,7 +71,7 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 1.018 testes pgTAP em 25 arquivos. A cobertura inclui
+`supabase test db` planeja 1.019 testes pgTAP em 25 arquivos. A cobertura inclui
 52 casos da fundação Auth/MFA/legal, 12 do isolamento fail-closed e 12 da
 convergência exata de páginas, além das suítes existentes de autorização,
 dashboard, Qlik, Salesforce, read models e runtime comercial. Ela verifica nomes,

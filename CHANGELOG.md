@@ -7,6 +7,7 @@
   conteúdo completo do fluxo linear.
 - Atualiza `browserslist` para `4.28.7`, corrigindo os avisos de segurança
   `GHSA-c83g-rgw3-j3cx` e `GHSA-73wf-gq98-2v4g` detectados pelo CI.
+- Atualiza o gate de restore isolado para o plano vigente de 1.019 testes pgTAP.
 
 ## 2026-08-28
 

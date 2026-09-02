@@ -14,6 +14,8 @@
 - O gate de dependências do CI encontrou dois avisos novos em `browserslist`;
   o override fixa a versão corrigida `4.28.7` sem alterar dependências de
   runtime da aplicação.
+- O gate de restore isolado acompanha o novo teste de nomenclatura do WF13,
+  elevando o plano esperado de 1.018 para 1.019 testes pgTAP.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 
