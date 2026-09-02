@@ -16,6 +16,11 @@
   runtime da aplicação.
 - O gate de restore isolado acompanha o novo teste de nomenclatura do WF13,
   elevando o plano esperado de 1.018 para 1.019 testes pgTAP.
+- A matriz autenticada canônica foi regenerada em árvore limpa: 119 checks
+  responsivos, 68 de tema, 160 de acessibilidade/comparação e 85 de zoom. A
+  promoção transacional atualizou as telas renomeadas e as duas metas que
+  avançaram da competência de agosto para setembro; conta e fixtures efêmeras
+  foram removidas.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 
