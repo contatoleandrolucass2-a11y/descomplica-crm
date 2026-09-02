@@ -1177,7 +1177,11 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     await expect(page.getByRole("region", { name: "Estoque completo de unidades" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Produto" })).toBeVisible();
     await expect(page.locator(".investor-stock-table tbody tr.selected")).toHaveCount(1);
-    await expect(page.getByRole("button", { name: "Iniciar passo a passo" })).toBeVisible();
+    await expect(
+      page
+        .getByLabel("Guia completo do simulador")
+        .getByRole("button", { name: "Iniciar passo a passo" }),
+    ).toBeVisible();
 
     for (const simulator of [
       "calcular-documentacao",
