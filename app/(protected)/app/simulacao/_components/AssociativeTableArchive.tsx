@@ -13,8 +13,13 @@ export function AssociativeTableArchive() {
     <div className="app-shell simulation-page-shell investor-page-shell">
       <header className="topbar simulation-topbar">
         <Link className="brand-lockup brand-link" href="/app">
-          <div className="brand-mark" aria-hidden="true">D</div>
-          <div><strong>Descomplica</strong><span>Inteligência comercial</span></div>
+          <div className="brand-mark" aria-hidden="true">
+            D
+          </div>
+          <div>
+            <strong>Descomplica</strong>
+            <span>Inteligência comercial</span>
+          </div>
         </Link>
         <SiteMenu />
       </header>

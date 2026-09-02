@@ -4402,15 +4402,20 @@ export function InvestorCalculator({
       .then(([liveResult, referenceResult]) => {
         if (!active) return;
         const reference = referenceResult.status === "fulfilled" ? referenceResult.value.items : [];
-        const payload = liveResult.status === "fulfilled"
-          ? liveResult.value
-          : referenceResult.status === "fulfilled" ? referenceResult.value : null;
+        const payload =
+          liveResult.status === "fulfilled"
+            ? liveResult.value
+            : referenceResult.status === "fulfilled"
+              ? referenceResult.value
+              : null;
         if (!payload) throw new Error("inventory_unavailable");
         inventoryReference.current = directTable
           ? reference
           : reference.filter(isInvestorEligibleUnit);
         const enrichedInventory = enrichInventory(payload.items, reference);
-        setInventory(directTable ? enrichedInventory : enrichedInventory.filter(isInvestorEligibleUnit));
+        setInventory(
+          directTable ? enrichedInventory : enrichedInventory.filter(isInvestorEligibleUnit),
+        );
         setInventoryMeta(payload);
         setInventoryStatus("ready");
       })

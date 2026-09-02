@@ -10,12 +10,15 @@ export function useDismissiblePopover() {
   const triggerRef = useRef<HTMLElement | null>(null);
   const [open, setOpenState] = useState(false);
 
-  const setOpen = useCallback((nextOpen: boolean) => {
-    setOpenState(nextOpen);
-    if (nextOpen) {
-      window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: instanceId }));
-    }
-  }, [instanceId]);
+  const setOpen = useCallback(
+    (nextOpen: boolean) => {
+      setOpenState(nextOpen);
+      if (nextOpen) {
+        window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: instanceId }));
+      }
+    },
+    [instanceId],
+  );
 
   const toggle = useCallback(() => setOpen(!open), [open, setOpen]);
 
