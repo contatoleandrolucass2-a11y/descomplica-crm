@@ -12,7 +12,7 @@ A allowlist versionada está em
 Ela fixa:
 
 - as 29 versões que formam o baseline atual da homologação;
-- as dez versões do repositório deliberadamente não promovíveis neste gate,
+- as onze versões do repositório deliberadamente não promovíveis neste gate,
   cuja ausência na homologação já foi reconciliada no rehearsal;
 - os nomes e hashes SHA-256 das duas candidatas;
 - zero migration intermediária, predecessor local, `repair` ou aplicação em

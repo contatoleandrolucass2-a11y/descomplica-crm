@@ -1,6 +1,6 @@
 begin;
 
-select plan(10);
+select plan(11);
 
 select is(
   (select count(*) from public.permissions where key = 'crm.simulators.view'),
@@ -53,6 +53,16 @@ select is(
   ),
   '/app/simulacao/associativo-fluxo-linear|crm.simulators.view|crm.simulation|t|t',
   'the WF13 catalog entry matches the guarded route'
+);
+
+select is(
+  (
+    select name
+    from public.app_pages
+    where key = 'crm.simulation.wf13'
+  ),
+  'Simulador Associativo',
+  'the WF13 navigation entry uses the approved product name'
 );
 
 select is(

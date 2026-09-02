@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-02
+
+- Renomeia a jornada WF13 para “Simulador Associativo” no menu, no hub e no
+  cabeçalho da página, preservando rota, cálculo oficial, gates, permissões e
+  conteúdo completo do fluxo linear.
+
 ## 2026-08-28
 
 - Mantém o callback direto por `TokenHash` e adiciona compatibilidade segura

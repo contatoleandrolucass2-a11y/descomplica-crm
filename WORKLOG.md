@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-09-02 — Simulador Associativo
+
+- A navegação persistida do WF13 passa a usar o nome “Simulador Associativo”.
+- O catálogo visual usa o mesmo nome no hub e no título da página, sem alterar
+  a rota, o motor `wf13-1.3.0`, os campos, os resultados ou a política
+  Master-only.
+- A migration é transacional e falha fechada quando a entrada protegida do
+  catálogo não corresponde ao contrato esperado.
+- O QA autenticado local aprovou 119 rotas responsivas, 68 combinações de tema,
+  160 auditorias de acessibilidade, 160 comparações visuais e 85 verificações
+  de zoom; a baseline canário foi promovida com a nova nomenclatura.
+
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 
 - O preflight produtivo comprovou que o Supabase hospedado usa o mailer padrão

@@ -68,6 +68,21 @@ describe("simulator visual catalog", () => {
     expect(markup).not.toContain("Calcular documentação");
   });
 
+  it("publishes the WF13 journey as Simulador Associativo", () => {
+    const definition = SIMULATORS["associativo-fluxo-linear"];
+    const markup = renderToStaticMarkup(<SimulatorWorkspace definition={definition} />);
+
+    expect(definition).toMatchObject({
+      slug: "associativo-fluxo-linear",
+      code: "WF13",
+      title: "Simulador Associativo",
+      shortTitle: "Simulador Associativo",
+    });
+    expect(markup).toContain("Simulador Associativo");
+    expect(markup).toContain("Formação do pró-soluto");
+    expect(markup).toContain("ANUAIS — vencimentos fixos em 15/12");
+  });
+
   it("keeps the required simulator stages visible", () => {
     expect(SIMULATORS["associativo-fluxo-linear"].sections.map(({ title }) => title)).toEqual([
       "Contexto oficial",
