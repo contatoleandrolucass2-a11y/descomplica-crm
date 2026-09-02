@@ -255,8 +255,10 @@ usa o relay HMAC. O app conecta com o papel dedicado `crm_qlik_relay`, sem
 `qlik_relay.ingest_snapshot`. O papel nasce `NOLOGIN`; qualquer provisionamento
 de senha/login é operação privada, separada e autorizada. As escritas passam por
 transação `SECURITY DEFINER` validada.
-`bootstrap_master_user` permanece exclusiva do proprietário
-`postgres`, conforme o runbook operacional.
+`bootstrap_master_user` permanece exclusiva do proprietário `postgres`. O
+contrato aceita múltiplas identidades Master, mas cada autorização precisa estar
+no manifesto versionado e passar pelo runner root-only do mesmo SHA; a hierarquia
+do app, a Data API e o `service_role` não conseguem promover Master.
 
 As tabelas externas `crm_imob_ranking_runs`, `crm_imob_ranking_entries` e
 `crm_imob_ranking_developments` não

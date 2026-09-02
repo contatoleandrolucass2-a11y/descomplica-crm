@@ -7,9 +7,27 @@
   conteúdo completo do fluxo linear.
 - Atualiza `browserslist` para `4.28.7`, corrigindo os avisos de segurança
   `GHSA-c83g-rgw3-j3cx` e `GHSA-73wf-gq98-2v4g` detectados pelo CI.
-- Atualiza o gate de restore isolado para o plano vigente de 1.019 testes pgTAP.
+- Atualiza o gate de restore isolado para o plano vigente de 1.042 testes pgTAP.
 - Promove atomicamente a baseline autenticada canônica para a nova nomenclatura
-  e para a competência de setembro, mantendo o conjunto canário WF13 separado.
+  mantendo o conjunto canário WF13 separado.
+
+## 2026-09-01
+
+- Permite múltiplas identidades Master sem criar UI, endpoint ou RPC acessível:
+  remove a unicidade legada, mantém lookup indexado e bloqueia elevação pela
+  hierarquia, Data API e `service_role`.
+- Adiciona autorização por digest no código, runner root-only preso ao SHA e
+  ledger legal vigente. Conta, senha e aceite continuam obrigatoriamente no
+  fluxo normal da própria pessoa; o runner falha fechado se qualquer etapa
+  estiver ausente.
+- Cobre dois Masters simultâneos, escopo global, idempotência, auditoria,
+  privilégios mínimos e não regressão dos demais papéis em pgTAP e Vitest.
+- Atualiza somente a resolução transitiva de `browserslist` para `4.28.7`,
+  eliminando duas vulnerabilidades altas publicadas após o baseline sem
+  adicionar dependência ou alterar código de runtime.
+- Estabiliza a competência das fixtures visuais somente no modo QA loopback,
+  evitando falso drift na virada do mês; qualquer uso fora desse ambiente
+  isolado falha fechado e o runtime produtivo continua usando a data real.
 
 ## 2026-08-28
 

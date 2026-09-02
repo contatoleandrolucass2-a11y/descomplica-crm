@@ -15,12 +15,41 @@
   o override fixa a versão corrigida `4.28.7` sem alterar dependências de
   runtime da aplicação.
 - O gate de restore isolado acompanha o novo teste de nomenclatura do WF13,
-  elevando o plano esperado de 1.018 para 1.019 testes pgTAP.
+  elevando o plano esperado após integração de 1.041 para 1.042 testes pgTAP.
 - A matriz autenticada canônica foi regenerada em árvore limpa: 119 checks
   responsivos, 68 de tema, 160 de acessibilidade/comparação e 85 de zoom. A
-  promoção transacional atualizou as telas renomeadas e as duas metas que
-  avançaram da competência de agosto para setembro; conta e fixtures efêmeras
-  foram removidas.
+  promoção transacional atualizou somente as telas renomeadas; conta e fixtures
+  efêmeras foram removidas.
+
+## 2026-09-01 — múltiplos Masters source-controlled
+
+- A cardinalidade única de Master foi substituída por índice não único de
+  consulta. Dois usuários sintéticos conservaram simultaneamente papel Master,
+  perfil aprovado e escopo global; reexecução permaneceu idempotente.
+- O bootstrap continua owner-only, sem `EXECUTE` para Data API ou
+  `service_role`; `can_assign_role` também exclui Master e escrita direta em
+  `user_roles` permanece revogada.
+- A autorização produtiva solicitada foi registrada somente como SHA-256 do
+  e-mail normalizado. O runner exige checkout limpo, SHA exato, conexão em
+  arquivo root-only, conta preexistente e aceite legal real antes de alterar o
+  papel; nenhuma credencial ou identidade em claro foi versionada.
+- Reset local e pgTAP aprovaram 1.041 testes em 26 arquivos. O rehearsal em
+  duas instâncias PostgreSQL 17 independentes aprovou 42 migrations, backup,
+  restore, owners, privilégios, fingerprints, lint e advisors sem rede remota.
+- O histórico produtivo foi consultado somente em leitura: as duas migrations
+  Auth/MFA já estão aplicadas e apenas `20260901204113` deste incremento está
+  ausente. A identidade alvo ainda não existe e nenhum ambiente remoto recebeu
+  migration ou promoção.
+- `pnpm audit` e OSV detectaram duas CVEs altas novas no `browserslist 4.28.2`.
+  Um override transitivo mínimo para `4.28.7` removeu o achado sem adicionar
+  pacote ou mudar o runtime da aplicação; gitleaks permaneceu sem vazamentos.
+- O primeiro CI aprovou aplicação, banco, E2E e restore, mas duas de 160
+  comparações visuais mudaram 24 px em 375 px porque a competência virou de
+  agosto para setembro. O fixture agora fixa sua data original somente quando
+  `AUTH_LOCAL_INSECURE_LOOPBACK_QA` e origens loopback estão comprovados;
+  produção não reconhece esse override. A repetição local passou com 119 checks
+  responsivos, 68 de tema, 160 de acessibilidade, 160 comparações de imagem e
+  85 checks de zoom, sem promover baseline.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 

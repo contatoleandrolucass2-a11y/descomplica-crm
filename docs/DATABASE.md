@@ -2,7 +2,7 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 41 arquivos de
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 42 arquivos de
 migration: 34 etapas canônicas e sete versões remotas reconciliadas por markers
 ou convergências seguras. Nenhuma regra, política ou valor comercial é seedado.
 O rebuild contém 39 tabelas públicas,
@@ -55,6 +55,7 @@ nenhum cutover Qlik ou do read model v3 foi realizado.
 32. `20260814045436_wf13_master_page_access_convergence.sql`: correção forward isolada que cria `crm.simulators.view` Master-only e converge o hub/rota WF13 com o guard, sem ativar outro motor.
 33. `20260824230058_auth_mfa_legal_foundation.sql`: recuperação de senha, MFA, sessão lembrada, consentimentos legais privados e convergência exata do catálogo produtivo de 17 páginas.
 34. `20260824230100_role_isolation_net_fail_closed.sql`: isolamento fail-closed das funções Auth/MFA por identidade, AAL e grants mínimos, sem alterar integrações ou motores.
+35. `20260901204113_multi_master_source_controlled.sql`: remove somente a unicidade legada de Master, preserva lookup indexado e restringe toda nova promoção ao bootstrap owner-only, versionado e auditado.
 
 ## Desenvolvimento local
 
@@ -71,7 +72,7 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 1.019 testes pgTAP em 25 arquivos. A cobertura inclui
+`supabase test db` planeja 1.042 testes pgTAP em 26 arquivos. A cobertura inclui
 52 casos da fundação Auth/MFA/legal, 12 do isolamento fail-closed e 12 da
 convergência exata de páginas, além das suítes existentes de autorização,
 dashboard, Qlik, Salesforce, read models e runtime comercial. Ela verifica nomes,
