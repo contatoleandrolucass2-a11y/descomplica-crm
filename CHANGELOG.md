@@ -5,6 +5,8 @@
 - Renomeia a jornada WF13 para “Simulador Associativo” no menu, no hub e no
   cabeçalho da página, preservando rota, cálculo oficial, gates, permissões e
   conteúdo completo do fluxo linear.
+- Atualiza `browserslist` para `4.28.7`, corrigindo os avisos de segurança
+  `GHSA-c83g-rgw3-j3cx` e `GHSA-73wf-gq98-2v4g` detectados pelo CI.
 
 ## 2026-08-28
 

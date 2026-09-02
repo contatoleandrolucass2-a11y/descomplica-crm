@@ -11,6 +11,9 @@
 - O QA autenticado local aprovou 119 rotas responsivas, 68 combinações de tema,
   160 auditorias de acessibilidade, 160 comparações visuais e 85 verificações
   de zoom; a baseline canário foi promovida com a nova nomenclatura.
+- O gate de dependências do CI encontrou dois avisos novos em `browserslist`;
+  o override fixa a versão corrigida `4.28.7` sem alterar dependências de
+  runtime da aplicação.
 
 ## 2026-08-28 — recovery hospedado sem SMTP próprio
 
