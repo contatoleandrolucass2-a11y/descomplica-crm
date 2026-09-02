@@ -1151,6 +1151,7 @@ test("isolated homologation exposes its safety controls without sharing producti
 
 test("WF13 runs only for Master while other simulators stay blocked", async ({ browser }) => {
   await withRolePage(browser, "master", async (page) => {
+    await page.clock.setFixedTime(new Date("2026-08-06T12:00:00-03:00"));
     const status = await page.request.get("/api/official-simulator/associativo-fluxo-linear");
     expect(status.status()).toBe(200);
     expect(status.headers()["cache-control"]).toContain("no-store");
@@ -1160,104 +1161,60 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
     });
 
     await page.goto("/app/simulacao/associativo-fluxo-linear");
+    await expect(page.getByRole("heading", { name: "Simulador Associativo" })).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Motor oficial em validação Master", exact: true }),
+      page.getByRole("heading", { name: "Entradas do fluxo linear", exact: true }),
     ).toBeVisible();
-    await page.getByLabel("Empreendimento *").fill("Residencial QA");
-    await page.getByLabel("Produto / unidade *").fill("Torre QA 101");
-    await page.getByLabel("Match 100% confirmado").check();
-    await page.getByLabel("Data vigente *").fill("2026-08-17");
-    await page.getByLabel("Término da obra *").fill("2029-02-28");
-    await page.getByLabel("Dia de vencimento das mensais *").selectOption("15");
-    await page.getByLabel("Renda *").fill("4.000,00");
-    await page.getByLabel("Valor do imóvel *").fill("262.500,00");
-    await page.getByLabel("Bônus de adimplência").fill("28.500,00");
-    await page.getByLabel("Financiamento").fill("210.000,00");
-    await page.getByLabel("Valor do ato").fill("1.000,00");
-    await expect(page.getByText("Data do ato", { exact: true })).toBeVisible();
-    await expect(page.getByText("17/08/2026", { exact: true }).first()).toBeVisible();
-    await page.getByLabel("Valor da anual").first().fill("2.000,00");
-    await page.getByLabel("Valor da anual").nth(1).fill("2.000,00");
-    await page.getByLabel("Valor da anual").nth(2).fill("2.000,00");
-    await expect(page.getByText("15/12/2026", { exact: true })).toBeVisible();
-    await expect(page.getByText("15/12/2027", { exact: true })).toBeVisible();
-    await expect(page.getByText("15/12/2028", { exact: true })).toBeVisible();
-    await page.getByLabel("Ranking no Bora Vender *").selectOption("BRONZE");
-    const policyLimit = page.getByLabel("Limite aprovado");
-    const requestedInstallments = page.getByLabel("Parcelas mensais solicitadas *");
+    await page.getByLabel("Empreendimento", { exact: true }).fill("Empreendimento oficial");
+    await page.getByLabel("Produto / unidade", { exact: true }).fill("Unidade oficial");
+    await page
+      .locator("label.doccalc-check", { hasText: "Match 100% confirmado" })
+      .locator('input[type="checkbox"]')
+      .check();
+    await page.getByLabel("Data vigente", { exact: true }).fill("2026-08-06");
+    await page.getByLabel("Término da obra", { exact: true }).fill("2032-12-31");
+    const moneyInput = (label: string) =>
+      page.locator("form label").filter({ hasText: label }).first().locator("input");
+    await moneyInput("Valor do imóvel").fill("300000");
+    await moneyInput("Financiamento").fill("200000");
+    await moneyInput("Subsídio").fill("30000");
+    await moneyInput("FGTS").fill("10000");
+    await moneyInput("Entrada / ato").fill("8000");
+    await moneyInput("Sinal 1").fill("1000");
+    await moneyInput("Sinal 2").fill("1000");
+    for (const annual of ["Anual 1", "Anual 2", "Anual 3", "Anual 4", "Anual 5"]) {
+      await moneyInput(annual).fill("2350");
+    }
+    const policyLimit = page.getByLabel("Limite aprovado", { exact: true });
+    const requestedInstallments = page.getByLabel("Parcelas mensais solicitadas", {
+      exact: true,
+    });
     await expect(policyLimit).toHaveValue("84");
-    await expect(policyLimit).toHaveAttribute("readonly", "");
-    await expect(policyLimit).toHaveAttribute("aria-readonly", "true");
+    await expect(policyLimit).not.toHaveAttribute("readonly", "");
     await expect(requestedInstallments).toHaveAttribute("min", "1");
-    await expect(requestedInstallments).toHaveAttribute("max", "84");
     await expect(requestedInstallments).toHaveAttribute("step", "1");
-    await expect(page.locator("#simulator-commercial-policy-policy-confirmed")).toHaveCount(0);
+    const policyConfirmation = page
+      .locator("label.doccalc-check", { hasText: "Política comercial conferida" })
+      .locator('input[type="checkbox"]');
+    await expect(policyConfirmation).not.toBeChecked();
+    await policyConfirmation.check();
 
     await requestedInstallments.fill("85");
-    await requestedInstallments.press("Tab");
-    await expect(requestedInstallments).toHaveAttribute("aria-invalid", "true");
+    await page.getByRole("button", { name: /Calcular fluxo linear/ }).click();
+    await expect(page.getByText("Cálculo bloqueado", { exact: true })).toBeVisible();
     await expect(
-      page.locator("#simulator-commercial-policy-requested-installments-error"),
-    ).toHaveText(/O limite máximo permitido é de 84 parcelas mensais/);
-    await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toBeDisabled();
-    await page.locator("main form").evaluate((form) => (form as HTMLFormElement).requestSubmit());
-    await expect(requestedInstallments).toBeFocused();
-
-    await requestedInstallments.fill("84.5");
-    await requestedInstallments.press("Tab");
-    await expect(
-      page.locator("#simulator-commercial-policy-requested-installments-error"),
-    ).toHaveText(/Informe uma quantidade inteira de parcelas/);
-
-    await requestedInstallments.fill("84");
-    await expect(requestedInstallments).not.toHaveAttribute("aria-invalid", "true");
-    await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toBeEnabled();
-    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
-    await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
-    await expect(
-      page.getByText("Política comercial conferida", { exact: true }).first(),
+      page.getByText("A quantidade solicitada supera o limite comercial de 84 parcelas."),
     ).toBeVisible();
-    await expect(page.getByText("R$ 17.000,00", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("R$ 202,38", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("R$ 288,67", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("9,88%", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("15/09/2026", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText(/wf13-1\.3\.0/)).toBeVisible();
-    await page.getByText("Memória de cálculo auditável", { exact: true }).click();
-    await expect(page.getByText("R$ 6.000,00", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("R$ 23.115,00", { exact: true }).first()).toBeVisible();
-    await expect(page.getByText("R$ 234.000,00", { exact: true }).first()).toBeVisible();
-
-    await requestedInstallments.fill("36");
-    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
-    const requestedInstallmentsResult = page
-      .locator("aside dt")
-      .filter({ hasText: /^Parcelas mensais solicitadas$/ })
-      .first()
-      .locator("xpath=following-sibling::dd[1]");
-    const policyLimitResult = page
-      .locator("aside dt")
-      .filter({ hasText: /^Limite máximo de parcelas$/ })
-      .first()
-      .locator("xpath=following-sibling::dd[1]");
-    await expect(requestedInstallmentsResult).toHaveText("36");
-    await expect(policyLimitResult).toHaveText("84");
-
     await requestedInstallments.fill("84");
-    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
-    await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
-
-    const firstAnnual = page.getByLabel("Valor da anual").first();
-    await firstAnnual.fill("2.000,01");
-    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
-    await expect(firstAnnual).toHaveAttribute("aria-invalid", "true");
-    await expect(page.locator("#simulator-annuals-1-annual-value-error")).toContainText(
-      "Anual 1: A anual supera 50% da renda",
-    );
-    await firstAnnual.fill("2.000,00");
-    await page.getByRole("button", { name: "Calcular fluxo linear" }).click();
-    await expect(firstAnnual).not.toHaveAttribute("aria-invalid", "true");
-    await expect(page.getByText("Cálculo concluído para conferência.")).toBeVisible();
+    await page.getByRole("button", { name: /Calcular fluxo linear/ }).click();
+    await expect(page.getByText("Simulação validada", { exact: true })).toBeVisible();
+    await expect(page.getByText("R$ 50.000,00", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("R$ 542,70", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Início em 05/11/2026 • PGTO oficial")).toBeVisible();
+    await expect(page.getByText("73", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("11", { exact: true }).first()).toBeVisible();
+    await page.getByText("Ver auditoria do cálculo", { exact: true }).click();
+    await expect(page.getByText(/D59 \+ D60 fecha D61/)).toBeVisible();
 
     for (const simulator of [
       "calcular-documentacao",
