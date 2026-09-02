@@ -4305,6 +4305,7 @@ export function InvestorCalculator({
   const [salePriceFilter, setSalePriceFilter] = useState("Todos");
   const [priceSort, setPriceSort] = useState<"asc" | "desc">("asc");
   const [filterNotice, setFilterNotice] = useState("");
+  const [visibleInventoryCount, setVisibleInventoryCount] = useState(75);
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [salePrice, setSalePrice] = useState("");
   const [completionDate, setCompletionDate] = useState("");
@@ -4397,19 +4398,19 @@ export function InvestorCalculator({
 
   useEffect(() => {
     let active = true;
-    fetchInventory("/data/investor-inventory.json")
-      .then((payload) => {
+    Promise.allSettled([fetchInventory(), fetchInventory("/data/investor-inventory.json")])
+      .then(([liveResult, referenceResult]) => {
         if (!active) return;
-        const reference = payload.items;
+        const reference = referenceResult.status === "fulfilled" ? referenceResult.value.items : [];
+        const payload = liveResult.status === "fulfilled"
+          ? liveResult.value
+          : referenceResult.status === "fulfilled" ? referenceResult.value : null;
+        if (!payload) throw new Error("inventory_unavailable");
         inventoryReference.current = directTable
           ? reference
           : reference.filter(isInvestorEligibleUnit);
         const enrichedInventory = enrichInventory(payload.items, reference);
-        const availableInventory = directTable
-          ? enrichedInventory
-          : enrichedInventory.filter(isInvestorEligibleUnit);
-        setInventory(availableInventory);
-        setSelectedUnitId((current) => current || availableInventory[0]?.id || "");
+        setInventory(directTable ? enrichedInventory : enrichedInventory.filter(isInvestorEligibleUnit));
         setInventoryMeta(payload);
         setInventoryStatus("ready");
       })
@@ -5433,6 +5434,7 @@ export function InvestorCalculator({
     setRegion("Todas");
     setSalePriceFilter("Todos");
     setPriceSort("asc");
+    setVisibleInventoryCount(75);
     setFilterNotice("");
     setSelectedUnitId("");
     setDocumentationAppraisalOverride("");
@@ -5457,6 +5459,7 @@ export function InvestorCalculator({
 
   function updateFilter(setter: (value: string) => void, value: string) {
     setter(value);
+    setVisibleInventoryCount(75);
     setFilterNotice("");
     setSelectedUnitId("");
     setDocumentationAppraisalOverride("");
@@ -6591,7 +6594,10 @@ export function InvestorCalculator({
             <select
               aria-label="Ordenar unidades por valor do imóvel"
               value={priceSort}
-              onChange={(event) => setPriceSort(event.target.value as "asc" | "desc")}
+              onChange={(event) => {
+                setPriceSort(event.target.value as "asc" | "desc");
+                setVisibleInventoryCount(75);
+              }}
             >
               <option value="asc">Menor para o maior</option>
               <option value="desc">Maior para o menor</option>
@@ -6625,6 +6631,14 @@ export function InvestorCalculator({
           aria-label="Estoque completo de unidades"
           tabIndex={0}
           data-tour="inventory"
+          onScroll={(event) => {
+            const element = event.currentTarget;
+            if (element.scrollTop + element.clientHeight >= element.scrollHeight - 180) {
+              setVisibleInventoryCount((current) =>
+                Math.min(current + 75, matchingInventory.length),
+              );
+            }
+          }}
         >
           <table className="investor-stock-table">
             <caption className="sr-only">Unidades encontradas no estoque</caption>
@@ -6663,7 +6677,7 @@ export function InvestorCalculator({
                   </td>
                 </tr>
               ) : null}
-              {matchingInventory.slice(0, 50).map((item) => {
+              {matchingInventory.slice(0, visibleInventoryCount).map((item) => {
                 const canSelect = Boolean(item.finalPrice && item.completionDate);
                 const selected = item.id === selectedUnitId;
                 return (

@@ -29,6 +29,7 @@ import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/co
 
 import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
 import { AuthorizedBreadcrumbs } from "./_components/AuthorizedBreadcrumbs";
+import { ProtectedShellFrame } from "./_components/ProtectedShellFrame";
 import styles from "./_components/ProtectedShell.module.css";
 import { ThemeSwitch } from "./_components/ThemeSwitch";
 
@@ -54,8 +55,8 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
     </>
   );
 
-  return (
-    <div className={styles.shell}>
+  const chrome = (
+    <>
       <header className={styles.topbar}>
         <div className={styles.topbarInner}>
           {navigationHome ? (
@@ -98,7 +99,12 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
         </div>
       </header>
       <AuthorizedBreadcrumbs pages={pages} />
+    </>
+  );
+
+  return (
+    <ProtectedShellFrame shellClassName={styles.shell} chrome={chrome}>
       {children}
-    </div>
+    </ProtectedShellFrame>
   );
 }
