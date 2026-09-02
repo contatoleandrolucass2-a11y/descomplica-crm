@@ -116,14 +116,10 @@ function AssociativeLinearCalculator({ executionEnabled }: { executionEnabled: b
     if (!executionEnabled) return;
     setCalculated(true);
     requestAnimationFrame(() =>
-      document
-        .querySelector("#resultado-fluxo-linear")
-        ?.scrollIntoView({
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-            ? "auto"
-            : "smooth",
-          block: "start",
-        }),
+      document.querySelector("#resultado-fluxo-linear")?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start",
+      }),
     );
   }
 
