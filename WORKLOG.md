@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-09-02 — Simulador Associativo
+
+- A navegação persistida do WF13 passa a usar o nome “Simulador Associativo”.
+- O catálogo visual usa o mesmo nome no hub e no título da página, sem alterar
+  a rota, o motor `wf13-1.3.0`, os campos, os resultados ou a política
+  Master-only.
+- A migration é transacional e falha fechada quando a entrada protegida do
+  catálogo não corresponde ao contrato esperado.
+- O QA autenticado local aprovou 119 rotas responsivas, 68 combinações de tema,
+  160 auditorias de acessibilidade, 160 comparações visuais e 85 verificações
+  de zoom; a baseline canário foi promovida com a nova nomenclatura.
+- O gate de dependências do CI encontrou dois avisos novos em `browserslist`;
+  o override fixa a versão corrigida `4.28.7` sem alterar dependências de
+  runtime da aplicação.
+- O gate de restore isolado acompanha o novo teste de nomenclatura do WF13,
+  elevando o plano esperado após integração de 1.041 para 1.042 testes pgTAP.
+- A matriz autenticada canônica foi regenerada em árvore limpa: 119 checks
+  responsivos, 68 de tema, 160 de acessibilidade/comparação e 85 de zoom. A
+  promoção transacional atualizou somente as telas renomeadas; conta e fixtures
+  efêmeras foram removidas.
+
 ## 2026-09-01 — múltiplos Masters source-controlled
 
 - A cardinalidade única de Master foi substituída por índice não único de

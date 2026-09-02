@@ -94,8 +94,8 @@ export const SIMULATORS = {
   "associativo-fluxo-linear": {
     slug: "associativo-fluxo-linear",
     code: "WF13",
-    title: "Associativo · Fluxo Linear",
-    shortTitle: "Fluxo Linear",
+    title: "Simulador Associativo",
+    shortTitle: "Simulador Associativo",
     description:
       "Estrutura visual para organizar contexto oficial, pró-soluto, sinais, anuais e política comercial.",
     actionLabel: "Calcular fluxo linear",

@@ -16,13 +16,13 @@ incrementos independentes. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 As cinco jornadas preservam a composição visual aprovada. Somente o WF13 possui
 fórmula oficial neste incremento; o bundle da referência não é versionado.
 
-| Código | Rota protegida                            | Jornada visual             |
-| ------ | ----------------------------------------- | -------------------------- |
-| WF13   | `/app/simulacao/associativo-fluxo-linear` | Associativo · Fluxo Linear |
-| WF16   | `/app/simulacao/calcular-documentacao`    | Documentação               |
-| CAIXA  | `/app/simulacao/caixa`                    | Financiamento CAIXA        |
-| WF14   | `/app/simulacao/tabela-direta`            | Tabela Direta              |
-| WF15   | `/app/simulacao/tabela-investidor`        | Tabela Investidor          |
+| Código | Rota protegida                            | Jornada visual        |
+| ------ | ----------------------------------------- | --------------------- |
+| WF13   | `/app/simulacao/associativo-fluxo-linear` | Simulador Associativo |
+| WF16   | `/app/simulacao/calcular-documentacao`    | Documentação          |
+| CAIXA  | `/app/simulacao/caixa`                    | Financiamento CAIXA   |
+| WF14   | `/app/simulacao/tabela-direta`            | Tabela Direta         |
+| WF15   | `/app/simulacao/tabela-investidor`        | Tabela Investidor     |
 
 O hub está em `/app/simulacao`. Todas as seis rotas exigem
 `crm.simulators.view` no guard server-side e no catálogo `app_pages`. A

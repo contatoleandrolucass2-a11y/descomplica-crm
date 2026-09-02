@@ -387,7 +387,7 @@ const protectedSurfaces = [
   { path: "/app/simulacao", heading: "Simulação", allowed: masterOnlyRoles },
   {
     path: "/app/simulacao/associativo-fluxo-linear",
-    heading: "Associativo · Fluxo Linear",
+    heading: "Simulador Associativo",
     allowed: masterOnlyRoles,
   },
   {

@@ -87,7 +87,7 @@ export default async function SimulationHubPage() {
             variant="warning"
             compact
             title="WF13 disponível em canário Master"
-            description="Associativo — Fluxo Linear pode ser calculado sem persistência. Demais motores continuam indisponíveis."
+            description="Simulador Associativo pode ser calculado sem persistência. Demais motores continuam indisponíveis."
           />
         ) : (
           <DataState
