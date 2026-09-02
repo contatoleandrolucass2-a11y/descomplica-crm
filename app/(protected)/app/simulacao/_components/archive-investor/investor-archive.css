@@ -39195,3 +39195,13 @@ body:has(.investor-page-shell) {
 .investor-page-shell .investor-hero-guide-information .investor-info-trigger:focus-visible {
   transform: translate(-50%, -50%);
 }
+
+/* Alvo mínimo acessível das unidades, após todos os estilos legados. */
+@media (min-width: 761px) {
+  .investor-page-shell .investor-stock-unit-button {
+    width: 24px !important;
+    min-width: 24px !important;
+    height: 24px !important;
+    min-height: 24px !important;
+  }
+}
