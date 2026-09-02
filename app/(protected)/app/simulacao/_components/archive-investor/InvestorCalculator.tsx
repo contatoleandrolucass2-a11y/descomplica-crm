@@ -4398,28 +4398,31 @@ export function InvestorCalculator({
 
   useEffect(() => {
     let active = true;
-    Promise.allSettled([fetchInventory(), fetchInventory("/data/investor-inventory.json")])
-      .then(([liveResult, referenceResult]) => {
-        if (!active) return;
-        const reference = referenceResult.status === "fulfilled" ? referenceResult.value.items : [];
-        const payload =
-          liveResult.status === "fulfilled"
-            ? liveResult.value
-            : referenceResult.status === "fulfilled"
-              ? referenceResult.value
-              : null;
-        if (!payload) throw new Error("inventory_unavailable");
-        inventoryReference.current = directTable
-          ? reference
-          : reference.filter(isInvestorEligibleUnit);
-        const enrichedInventory = enrichInventory(payload.items, reference);
-        setInventory(
-          directTable ? enrichedInventory : enrichedInventory.filter(isInvestorEligibleUnit),
-        );
-        setInventoryMeta(payload);
-        setInventoryStatus("ready");
+    const applyInventory = (payload: InventoryPayload, reference: InventoryItem[]) => {
+      if (!active) return;
+      inventoryReference.current = directTable
+        ? reference
+        : reference.filter(isInvestorEligibleUnit);
+      const enrichedInventory = enrichInventory(payload.items, reference);
+      setInventory(
+        directTable ? enrichedInventory : enrichedInventory.filter(isInvestorEligibleUnit),
+      );
+      setInventoryMeta(payload);
+      setInventoryStatus("ready");
+    };
+
+    fetchInventory("/data/investor-inventory.json")
+      .then((referencePayload) => {
+        applyInventory(referencePayload, referencePayload.items);
+        return fetchInventory()
+          .then((livePayload) => applyInventory(livePayload, referencePayload.items))
+          .catch(() => undefined);
       })
-      .catch(() => active && setInventoryStatus("error"));
+      .catch(() =>
+        fetchInventory()
+          .then((livePayload) => applyInventory(livePayload, livePayload.items))
+          .catch(() => active && setInventoryStatus("error")),
+      );
     return () => {
       active = false;
     };
