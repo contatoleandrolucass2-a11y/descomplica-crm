@@ -39172,3 +39172,26 @@ body:has(.investor-page-shell) {
     white-space: normal;
   }
 }
+
+/* Área de toque acessível sem alterar o ícone de 10px da referência. */
+.investor-page-shell .investor-hero-guide-information > .investor-info-hint {
+  position: relative;
+  width: 10px;
+  min-width: 10px;
+  height: 14px;
+  min-height: 14px;
+}
+.investor-page-shell .investor-hero-guide-information .investor-info-trigger {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  transform: translate(-50%, -50%);
+}
+.investor-page-shell .investor-hero-guide-information .investor-info-trigger:hover,
+.investor-page-shell .investor-hero-guide-information .investor-info-trigger:focus-visible {
+  transform: translate(-50%, -50%);
+}
