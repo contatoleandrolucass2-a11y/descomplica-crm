@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/auth/supabase/server";
 import { getEffectiveMonth, type GoalProfileKey } from "./catalog";
+import { getGoalsReferenceDate } from "./reference";
 
 const goalRowSchema = z.object({
   profile_key: z.enum(["dv", "partnerships"]),
@@ -66,7 +67,7 @@ export type FunnelGoalsLoadResult =
   | { status: "ready"; goals: FunnelGoals };
 
 export async function loadFunnelGoals(profile: GoalProfileKey): Promise<FunnelGoalsLoadResult> {
-  const effectiveMonth = getEffectiveMonth();
+  const effectiveMonth = getEffectiveMonth(getGoalsReferenceDate());
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("crm_funnel_goals")
