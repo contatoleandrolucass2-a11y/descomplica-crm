@@ -9,6 +9,7 @@
  */
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { Geist, Geist_Mono } from "next/font/google";
 import { connection } from "next/server";
 
 import { CookieConsentBanner } from "@/app/_components/CookieConsentBanner";
@@ -16,6 +17,16 @@ import { isHomologationMode } from "@/lib/homologation/config";
 import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
 
 import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   // HOMOLOGATION_MODE belongs to runtime, not the immutable image. Explicitly
@@ -57,7 +68,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full">
+      <body className={`min-h-full ${geistSans.variable} ${geistMono.variable}`}>
         {homologationMode ? (
           <aside className="homologation-banner" role="status">
             HOMOLOGAÇÃO — DADOS SINTÉTICOS

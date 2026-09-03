@@ -40,7 +40,7 @@ export function SiteMenu() {
       </a>
       <div
         ref={simulationRootRef as React.RefObject<HTMLDivElement | null>}
-        className={`site-menu-dropdown${simulationOpen ? "open" : ""}${simulationActive ? "is-active" : ""}`}
+        className={`site-menu-dropdown${simulationOpen ? " open" : ""}${simulationActive ? " is-active" : ""}`}
       >
         <button
           ref={simulationTriggerRef as React.RefObject<HTMLButtonElement | null>}
@@ -165,7 +165,7 @@ export function SiteMenu() {
       </a>
       <div
         ref={rootRef as React.RefObject<HTMLDivElement | null>}
-        className={`site-menu-dropdown${isOpen ? "open" : ""}${settingsActive ? "is-active" : ""}`}
+        className={`site-menu-dropdown${isOpen ? " open" : ""}${settingsActive ? " is-active" : ""}`}
       >
         <button
           ref={triggerRef as React.RefObject<HTMLButtonElement | null>}

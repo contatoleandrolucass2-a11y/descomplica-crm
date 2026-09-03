@@ -4,3 +4,7 @@ public/
 pnpm-lock.yaml
 next-env.d.ts
 supabase/.temp/
+# Snapshot oficial: preservar bytes/classes da implementação de referência.
+app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx
+app/(protected)/app/simulacao/_components/archive-investor/SiteMenu.tsx
+app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css

@@ -12,7 +12,7 @@ export async function GET() {
   try {
     const response = await fetch(REFERENCE_INVENTORY_URL, {
       cache: "no-store",
-      signal: AbortSignal.timeout(3_000),
+      signal: AbortSignal.timeout(20_000),
     });
     if (!response.ok) {
       return Response.json({ error: "inventory_query_failed" }, { status: 502 });

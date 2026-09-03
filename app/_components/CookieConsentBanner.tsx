@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { saveCookieConsentAction } from "@/lib/privacy/actions";
@@ -9,7 +10,10 @@ import type { CookieConsent } from "@/lib/privacy/cookie-consent";
 import styles from "./CookieConsentBanner.module.css";
 
 export function CookieConsentBanner({ consent }: { consent: CookieConsent | null }) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(consent === null);
+
+  if (pathname === "/app/simulacao/associativo-fluxo-linear") return null;
 
   if (!open) {
     return (
