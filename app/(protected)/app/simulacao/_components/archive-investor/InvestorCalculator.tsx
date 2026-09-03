@@ -2139,6 +2139,7 @@ export function InvestorCalculator({
     associativeIncomeReady && associativeFinancingModalityReady && Boolean(associativeFirstProperty)
   );
   const associativeQualificationLocked = annualMode && !associativeQualificationComplete;
+  const associativeOptionalPaymentsUnlocked = annualMode && associativeQualificationComplete;
   useEffect(() => {
     const openGuide = (event: Event) => {
       const trigger = (event as CustomEvent<{ trigger?: HTMLButtonElement }>).detail?.trigger ?? null;
@@ -2723,7 +2724,13 @@ export function InvestorCalculator({
 
   function updateAssociativeFirstProperty(value: string) {
     setAssociativeFirstProperty(value);
-    if (value) window.setTimeout(() => guideToSection("flow"), 0);
+    if (value) window.setTimeout(() => {
+      guideToSection("flow");
+      window.requestAnimationFrame(() => {
+        associativeFinancingInputRef.current?.focus({ preventScroll: true });
+        associativeFinancingInputRef.current?.select();
+      });
+    }, 0);
   }
 
   function addSignalField() {
@@ -3607,9 +3614,9 @@ export function InvestorCalculator({
                     <li className="investor-associative-payment-actions-row" role="presentation">
                       <span className="investor-direct-step-number" aria-hidden="true" />
                       <div className="investor-associative-payment-actions-bar" aria-label="Adicionar pagamentos opcionais">
-                        <button ref={signalActionRef} type="button" data-tour="proposal-signals" disabled={!associativeApprovalDetailsUnlocked || visibleSignalCount >= signals.length} onClick={addSignalField}>Inserir Sinal</button>
-                        <button ref={intermediaryActionRef} type="button" data-tour="proposal-intermediaries" disabled={!associativeApprovalDetailsUnlocked || visibleIntermediaryCount >= intermediaryFieldLimit} onClick={addIntermediaryField}>Inserir Anual</button>
-                        <button type="button" data-tour="proposal-discount" disabled={!associativeApprovalDetailsUnlocked} aria-pressed={discountAuthorized} onClick={toggleDiscountField}>{discountAuthorized ? "Remover Desconto" : "Inserir Desconto"}</button>
+                        <button ref={signalActionRef} type="button" data-tour="proposal-signals" disabled={!associativeOptionalPaymentsUnlocked || visibleSignalCount >= signals.length} onClick={addSignalField}>Inserir Sinal</button>
+                        <button ref={intermediaryActionRef} type="button" data-tour="proposal-intermediaries" disabled={!associativeOptionalPaymentsUnlocked || visibleIntermediaryCount >= intermediaryFieldLimit} onClick={addIntermediaryField}>Inserir Anual</button>
+                        <button type="button" data-tour="proposal-discount" disabled={!associativeOptionalPaymentsUnlocked} aria-pressed={discountAuthorized} onClick={toggleDiscountField}>{discountAuthorized ? "Remover Desconto" : "Inserir Desconto"}</button>
                       </div>
                     </li>
 
@@ -3636,8 +3643,8 @@ export function InvestorCalculator({
                           "Desconto comercial opcional. O valor informado reduz a base usada pelos recursos e pagamentos.",
                           `Conta atual: ${money.format(result.context.valueReal + result.context.discount)} − ${money.format(result.context.discount)} = ${money.format(result.context.valueReal)}.`,
                         )}
-                        calculation={<AssociativeMoneyControl inputRef={discountInputRef} label="Desconto" value={discount} disabled={!associativeApprovalDetailsUnlocked} onChange={setDiscount} />}
-                        disabled={!associativeApprovalDetailsUnlocked}
+                        calculation={<AssociativeMoneyControl inputRef={discountInputRef} label="Desconto" value={discount} disabled={!associativeOptionalPaymentsUnlocked} onChange={setDiscount} />}
+                        disabled={!associativeOptionalPaymentsUnlocked}
                       />
                       <AssociativeEditableAccountRow
                         operator="="
@@ -3726,7 +3733,7 @@ export function InvestorCalculator({
                       const value = signals[index];
                       const signal = result.custom.signals[index];
                       const active = currencyInputNumber(value) > 0;
-                      const signalInvalid = associativeApprovalDetailsUnlocked && active && !signal.approved;
+                      const signalInvalid = associativeOptionalPaymentsUnlocked && active && !signal.approved;
                       const statusId = `investor-associative-signal-${index + 1}-status`;
                       const hideActionLabel = index === signals.length - 1
                         ? `Ocultar Sinal ${index + 1} e zerar valor`
@@ -3737,15 +3744,15 @@ export function InvestorCalculator({
                         date={signal.date || undefined}
                         rowClassName="payment-group-child payment-group-child-signal"
                         fieldState="editable"
-                        leadingAction={<button type="button" className="investor-associative-row-remove" aria-label={hideActionLabel} title={hideActionLabel} disabled={!associativeApprovalDetailsUnlocked} onClick={() => hideSignalField(index)}><span aria-hidden="true">×</span></button>}
+                        leadingAction={<button type="button" className="investor-associative-row-remove" aria-label={hideActionLabel} title={hideActionLabel} disabled={!associativeOptionalPaymentsUnlocked} onClick={() => hideSignalField(index)}><span aria-hidden="true">×</span></button>}
                         meta={associativeHelp(
                           `Pagamento opcional em ${formatDate(signal.date)}. O mínimo é ${money.format(150)}. ${index > 0 ? `Preencha primeiro o Sinal ${index}; este sinal não pode ser maior que o anterior.` : "O Sinal 2 não pode ser maior que este valor."}`,
                           `Status atual: ${active ? signal.reason : "não usado"}. Valor que entra no total: ${money.format(active && signal.approved ? signal.value : 0)}.`,
                           `Total atual dos sinais válidos: ${money.format(result.custom.signalTotal)}.`,
                         )}
-                        calculation={<><div className="investor-direct-editable-value investor-associative-line-control"><span aria-hidden="true">R$</span><MoneyInput inputRef={(input) => { signalInputRefs.current[index] = input; }} label={`Sinal ${index + 1}`} describedBy={statusId} invalid={signalInvalid} disabled={!associativeApprovalDetailsUnlocked} value={value} onChange={(nextValue) => updateSignal(index, nextValue)} /></div><span className="sr-only" id={statusId} role={signalInvalid ? "alert" : "status"} aria-live="polite">{!associativeApprovalDetailsUnlocked ? "Sinal bloqueado até selecionar o Ranking" : active ? signal.reason : "Sinal opcional não usado"}</span></>}
+                        calculation={<><div className="investor-direct-editable-value investor-associative-line-control"><span aria-hidden="true">R$</span><MoneyInput inputRef={(input) => { signalInputRefs.current[index] = input; }} label={`Sinal ${index + 1}`} describedBy={statusId} invalid={signalInvalid} disabled={!associativeOptionalPaymentsUnlocked} value={value} onChange={(nextValue) => updateSignal(index, nextValue)} /></div><span className="sr-only" id={statusId} role={signalInvalid ? "alert" : "status"} aria-live="polite">{!associativeOptionalPaymentsUnlocked ? "Sinal bloqueado até concluir o Perfil do financiamento" : active ? signal.reason : "Sinal opcional não usado"}</span></>}
                         invalid={signalInvalid}
-                        disabled={!associativeApprovalDetailsUnlocked}
+                        disabled={!associativeOptionalPaymentsUnlocked}
                       />;
                     })}
 
@@ -3754,7 +3761,7 @@ export function InvestorCalculator({
                       const statusId = `investor-associative-annual-${item.index}-status`;
                       const active = item.value > 0;
                       const exceedsIncomeLimit = active && associativeIncomeValue > 0 && item.value > associativeAnnualIncomeLimit;
-                      const annualInvalid = associativeApprovalDetailsUnlocked && active && (!item.approved || exceedsIncomeLimit);
+                      const annualInvalid = associativeOptionalPaymentsUnlocked && active && (!item.approved || exceedsIncomeLimit);
                       const annualStatus = exceedsIncomeLimit
                         ? `Anual reprovada: ${money.format(item.value)} supera ${percent.format(associativeAnnualIncomeLimitRate)} da renda familiar, limite de ${money.format(associativeAnnualIncomeLimit)}.`
                         : item.approved
@@ -3766,7 +3773,7 @@ export function InvestorCalculator({
                         date={item.date || undefined}
                         rowClassName="payment-group-child payment-group-child-annual"
                         fieldState="editable"
-                        leadingAction={<button type="button" className="investor-associative-row-remove" aria-label={`Ocultar Anual ${item.index} e zerar valor`} title={`Ocultar Anual ${item.index}`} disabled={!associativeApprovalDetailsUnlocked} onClick={() => hideIntermediaryField(index)}><span aria-hidden="true">×</span></button>}
+                        leadingAction={<button type="button" className="investor-associative-row-remove" aria-label={`Ocultar Anual ${item.index} e zerar valor`} title={`Ocultar Anual ${item.index}`} disabled={!associativeOptionalPaymentsUnlocked} onClick={() => hideIntermediaryField(index)}><span aria-hidden="true">×</span></button>}
                         meta={associativeHelp(
                           `Pagamento opcional em ${item.date ? formatDate(item.date) : "data ainda indisponível"}. A anual não reduz o Pró-Soluto nem o Saldo parcelado; ela reduz somente a base distribuída nas mensais e ajuda nos indicadores de renda.`,
                           active && item.approved
@@ -3776,9 +3783,9 @@ export function InvestorCalculator({
                             ? `Conta atual: ${money.format(item.value)} × 1,005 × 1,005^${result.custom.linear?.annualSchedule?.[index]?.months ?? 0} = ${money.format(item.correctedValue)}. Status: ${item.reason}.`
                             : `Conta atual: ${money.format(item.value)} considerada como ${money.format(0)} no total corrigido. Status: ${active ? item.reason : "não usada"}.`,
                         )}
-                        calculation={<><div className="investor-direct-editable-value investor-associative-line-control"><span aria-hidden="true">R$</span><MoneyInput inputRef={(input) => { intermediaryInputRefs.current[index] = input; }} label={`Anual ${item.index}`} describedBy={statusId} invalid={annualInvalid} disabled={!associativeApprovalDetailsUnlocked} value={intermediaries[index]} onChange={(nextValue) => updateIntermediary(index, nextValue)} /></div><span className="sr-only" id={statusId} role={annualInvalid ? "alert" : "status"} aria-live="polite">{!associativeApprovalDetailsUnlocked ? "Anual bloqueada até selecionar o Ranking" : active ? annualStatus : "Anual opcional não usada"}</span></>}
+                        calculation={<><div className="investor-direct-editable-value investor-associative-line-control"><span aria-hidden="true">R$</span><MoneyInput inputRef={(input) => { intermediaryInputRefs.current[index] = input; }} label={`Anual ${item.index}`} describedBy={statusId} invalid={annualInvalid} disabled={!associativeOptionalPaymentsUnlocked} value={intermediaries[index]} onChange={(nextValue) => updateIntermediary(index, nextValue)} /></div><span className="sr-only" id={statusId} role={annualInvalid ? "alert" : "status"} aria-live="polite">{!associativeOptionalPaymentsUnlocked ? "Anual bloqueada até concluir o Perfil do financiamento" : active ? annualStatus : "Anual opcional não usada"}</span></>}
                         invalid={annualInvalid}
-                        disabled={!associativeApprovalDetailsUnlocked}
+                        disabled={!associativeOptionalPaymentsUnlocked}
                       />;
                     })}
 
