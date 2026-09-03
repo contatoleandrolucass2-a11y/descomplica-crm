@@ -834,7 +834,7 @@ async function checkSimulatorValidation(page, origin) {
   await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
     state: "visible",
   });
-  return await page.evaluate(() => {
+  const initialChecks = await page.evaluate(() => {
     const filters = [...document.querySelectorAll(".investor-stock-filters select")];
     const selectedUnit = document.querySelector('.investor-stock-unit-button[aria-pressed="true"]');
     return {
@@ -852,6 +852,34 @@ async function checkSimulatorValidation(page, origin) {
       ),
     };
   });
+
+  await page.locator(".investor-stock-table tbody tr.selectable").first().click();
+  await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("5000");
+  await page.getByRole("radio", { name: "Sim", exact: true }).check();
+
+  const financingInput = page.getByRole("textbox", { name: "Financiamento", exact: true });
+  await financingInput.waitFor({ state: "visible" });
+  await page.waitForFunction(
+    () => document.activeElement?.getAttribute("aria-label") === "Financiamento",
+  );
+
+  const optionalPaymentButtons = ["Inserir Sinal", "Inserir Anual", "Inserir Desconto"];
+  const optionalPaymentsUnlockedAfterProfile = (
+    await Promise.all(
+      optionalPaymentButtons.map(async (name) => {
+        const button = page.getByRole("button", { name, exact: true });
+        return (await button.isEnabled()) && (await button.isVisible());
+      }),
+    )
+  ).every(Boolean);
+
+  return {
+    ...initialChecks,
+    financingFocusedAfterProfile: await financingInput.evaluate(
+      (input) => document.activeElement === input,
+    ),
+    optionalPaymentsUnlockedAfterProfile,
+  };
 }
 
 async function checkFixtureSourceMarker(page, origin, expectedMarker) {
