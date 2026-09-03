@@ -9242,13 +9242,13 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
-          "bytes": 129252,
-          "sha256": "f69256e38fd88fc8f00de67f22287d728039c95306ac563126b22d195e3526e4"
+          "bytes": 123564,
+          "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
-      "bytes": 129252,
-      "sha256": "f69256e38fd88fc8f00de67f22287d728039c95306ac563126b22d195e3526e4",
+      "bytes": 123564,
+      "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
@@ -9538,13 +9538,13 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
           "tracked": true,
-          "bytes": 129252,
-          "sha256": "f69256e38fd88fc8f00de67f22287d728039c95306ac563126b22d195e3526e4"
+          "bytes": 123564,
+          "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a"
         }
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
-      "bytes": 129252,
-      "sha256": "f69256e38fd88fc8f00de67f22287d728039c95306ac563126b22d195e3526e4",
+      "bytes": 123564,
+      "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
@@ -9834,13 +9834,13 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 130080,
-          "sha256": "e89661bbde9e9b8ba76a524ae2ac58d75261d9a19d512790cdfe7fd77887d189"
+          "bytes": 123808,
+          "sha256": "f517a97fed115cf972891c0ef3ccefded2824b45a877354790bd5d6315a4fdd9"
         }
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
-      "bytes": 130080,
-      "sha256": "e89661bbde9e9b8ba76a524ae2ac58d75261d9a19d512790cdfe7fd77887d189",
+      "bytes": 123808,
+      "sha256": "f517a97fed115cf972891c0ef3ccefded2824b45a877354790bd5d6315a4fdd9",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
@@ -10130,13 +10130,13 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 128890,
-          "sha256": "a8a73d46f780cd630edcd84bd26d16d0da675e10f2532565654b9fcfdb81592a"
+          "bytes": 122030,
+          "sha256": "90fd0bf8f49d1ca218ce28fdd41261e443af761045006adc24a118c6d2d2dfb4"
         }
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
-      "bytes": 128890,
-      "sha256": "a8a73d46f780cd630edcd84bd26d16d0da675e10f2532565654b9fcfdb81592a",
+      "bytes": 122030,
+      "sha256": "90fd0bf8f49d1ca218ce28fdd41261e443af761045006adc24a118c6d2d2dfb4",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
@@ -10754,20 +10754,20 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1135360,
+        "totalPixels": 921600,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "tracked": true,
-          "bytes": 126902,
-          "sha256": "277511e2d1387c1d37a0602384bd5dd3b615cc49b84f019ea0b7dcbce4d62548"
+          "bytes": 115718,
+          "sha256": "3e0bb41c2bf12161b07e72992b1fef3c9592a2087077c6f71f2c45669fa5c405"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
-      "bytes": 126902,
-      "sha256": "277511e2d1387c1d37a0602384bd5dd3b615cc49b84f019ea0b7dcbce4d62548",
+      "bytes": 115718,
+      "sha256": "3e0bb41c2bf12161b07e72992b1fef3c9592a2087077c6f71f2c45669fa5c405",
       "width": 1280,
-      "height": 887,
+      "height": 720,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
@@ -11389,20 +11389,20 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1156096,
+        "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
-          "bytes": 121898,
-          "sha256": "aefc4d333e00bb73d0398bef95491488c7fb81b2d5a3c47cb8288e4bac73af93"
+          "bytes": 98022,
+          "sha256": "0069b733b601a18bccd1e54efd53de5e49de5fc7c25aefacbfbbbd53943312b5"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-      "bytes": 121898,
-      "sha256": "aefc4d333e00bb73d0398bef95491488c7fb81b2d5a3c47cb8288e4bac73af93",
+      "bytes": 98022,
+      "sha256": "0069b733b601a18bccd1e54efd53de5e49de5fc7c25aefacbfbbbd53943312b5",
       "width": 1024,
-      "height": 1129,
+      "height": 768,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
@@ -12024,20 +12024,20 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 930816,
+        "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
           "tracked": true,
-          "bytes": 116910,
-          "sha256": "ad7ec5edb6c9f3c28964c0a82ac47969c8597e8d810324d330388efb0fb5e700"
+          "bytes": 99030,
+          "sha256": "c4b1dc11d0187d4b4f79559ade0e0e72e10344cd55a3622079be8646b9bacfa9"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
-      "bytes": 116910,
-      "sha256": "ad7ec5edb6c9f3c28964c0a82ac47969c8597e8d810324d330388efb0fb5e700",
+      "bytes": 99030,
+      "sha256": "c4b1dc11d0187d4b4f79559ade0e0e72e10344cd55a3622079be8646b9bacfa9",
       "width": 768,
-      "height": 1212,
+      "height": 1024,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
@@ -12659,20 +12659,20 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 702390,
+        "totalPixels": 329160,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
           "tracked": true,
-          "bytes": 115926,
-          "sha256": "1f2c3584ff5c003d960ae2e69758cfdd0d5fd217bac58a86727f2e84e4b97751"
+          "bytes": 86194,
+          "sha256": "f7fdc7dbb747f2f278a562b037957ff894cf340f35a39da5d4cee293e2e3da2c"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
-      "bytes": 115926,
-      "sha256": "1f2c3584ff5c003d960ae2e69758cfdd0d5fd217bac58a86727f2e84e4b97751",
+      "bytes": 86194,
+      "sha256": "f7fdc7dbb747f2f278a562b037957ff894cf340f35a39da5d4cee293e2e3da2c",
       "width": 390,
-      "height": 1801,
+      "height": 844,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
@@ -13292,22 +13292,22 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 702390,
+        "totalPixels": 329160,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
           "tracked": true,
-          "bytes": 115550,
-          "sha256": "2e37960b0d838c43c31a58a754750a43c1ba2e56a07e087a4d7b234125ac030e"
+          "bytes": 86060,
+          "sha256": "0a9e06d58b3a0768ed0a6af600036438225532d4ba5565da8c11ed4b98211995"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
-      "bytes": 115550,
-      "sha256": "2e37960b0d838c43c31a58a754750a43c1ba2e56a07e087a4d7b234125ac030e",
+      "bytes": 86060,
+      "sha256": "0a9e06d58b3a0768ed0a6af600036438225532d4ba5565da8c11ed4b98211995",
       "width": 390,
-      "height": 1801,
+      "height": 844,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
@@ -13923,20 +13923,20 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 664875,
+        "totalPixels": 304500,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
           "tracked": true,
-          "bytes": 111164,
-          "sha256": "3b0f4e5c057438556db03e5b0cc8a0df2b292f8577407664c9cda015e7b03ed9"
+          "bytes": 82248,
+          "sha256": "5a43a1ff3b36d76b0f990ec2a49b377e6b2e851ae4de48fbf415584a7c42a128"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
-      "bytes": 111164,
-      "sha256": "3b0f4e5c057438556db03e5b0cc8a0df2b292f8577407664c9cda015e7b03ed9",
+      "bytes": 82248,
+      "sha256": "5a43a1ff3b36d76b0f990ec2a49b377e6b2e851ae4de48fbf415584a7c42a128",
       "width": 375,
-      "height": 1773,
+      "height": 812,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
@@ -14558,20 +14558,20 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 517760,
+        "totalPixels": 181760,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
           "tracked": true,
-          "bytes": 97444,
-          "sha256": "1d03ed6aad265b7dae10ea1a4b86c32c0da2fa67ad220fba18c1eb59402102a7"
+          "bytes": 56388,
+          "sha256": "989fc745999e2fe27dcf5e5a92edeeb3c6cc4e9075d8e9aa88bcb6b328c6030b"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
-      "bytes": 97444,
-      "sha256": "1d03ed6aad265b7dae10ea1a4b86c32c0da2fa67ad220fba18c1eb59402102a7",
+      "bytes": 56388,
+      "sha256": "989fc745999e2fe27dcf5e5a92edeeb3c6cc4e9075d8e9aa88bcb6b328c6030b",
       "width": 320,
-      "height": 1618,
+      "height": 568,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
@@ -15388,44 +15388,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
         "tracked": true,
-        "bytes": 121898,
-        "sha256": "aefc4d333e00bb73d0398bef95491488c7fb81b2d5a3c47cb8288e4bac73af93"
+        "bytes": 98022,
+        "sha256": "0069b733b601a18bccd1e54efd53de5e49de5fc7c25aefacbfbbbd53943312b5"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
         "tracked": true,
-        "bytes": 126902,
-        "sha256": "277511e2d1387c1d37a0602384bd5dd3b615cc49b84f019ea0b7dcbce4d62548"
+        "bytes": 115718,
+        "sha256": "3e0bb41c2bf12161b07e72992b1fef3c9592a2087077c6f71f2c45669fa5c405"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
         "tracked": true,
-        "bytes": 129252,
-        "sha256": "f69256e38fd88fc8f00de67f22287d728039c95306ac563126b22d195e3526e4"
+        "bytes": 123564,
+        "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
         "tracked": true,
-        "bytes": 97444,
-        "sha256": "1d03ed6aad265b7dae10ea1a4b86c32c0da2fa67ad220fba18c1eb59402102a7"
+        "bytes": 56388,
+        "sha256": "989fc745999e2fe27dcf5e5a92edeeb3c6cc4e9075d8e9aa88bcb6b328c6030b"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
         "tracked": true,
-        "bytes": 111164,
-        "sha256": "3b0f4e5c057438556db03e5b0cc8a0df2b292f8577407664c9cda015e7b03ed9"
+        "bytes": 82248,
+        "sha256": "5a43a1ff3b36d76b0f990ec2a49b377e6b2e851ae4de48fbf415584a7c42a128"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
         "tracked": true,
-        "bytes": 115926,
-        "sha256": "1f2c3584ff5c003d960ae2e69758cfdd0d5fd217bac58a86727f2e84e4b97751"
+        "bytes": 86194,
+        "sha256": "f7fdc7dbb747f2f278a562b037957ff894cf340f35a39da5d4cee293e2e3da2c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
         "tracked": true,
-        "bytes": 116910,
-        "sha256": "ad7ec5edb6c9f3c28964c0a82ac47969c8597e8d810324d330388efb0fb5e700"
+        "bytes": 99030,
+        "sha256": "c4b1dc11d0187d4b4f79559ade0e0e72e10344cd55a3622079be8646b9bacfa9"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
@@ -15628,8 +15628,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
         "tracked": true,
-        "bytes": 115550,
-        "sha256": "2e37960b0d838c43c31a58a754750a43c1ba2e56a07e087a4d7b234125ac030e"
+        "bytes": 86060,
+        "sha256": "0a9e06d58b3a0768ed0a6af600036438225532d4ba5565da8c11ed4b98211995"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
@@ -15658,24 +15658,24 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 130080,
-        "sha256": "e89661bbde9e9b8ba76a524ae2ac58d75261d9a19d512790cdfe7fd77887d189"
+        "bytes": 123808,
+        "sha256": "f517a97fed115cf972891c0ef3ccefded2824b45a877354790bd5d6315a4fdd9"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 128890,
-        "sha256": "a8a73d46f780cd630edcd84bd26d16d0da675e10f2532565654b9fcfdb81592a"
+        "bytes": 122030,
+        "sha256": "90fd0bf8f49d1ca218ce28fdd41261e443af761045006adc24a118c6d2d2dfb4"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
         "tracked": true,
-        "bytes": 129252,
-        "sha256": "f69256e38fd88fc8f00de67f22287d728039c95306ac563126b22d195e3526e4"
+        "bytes": 123564,
+        "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a"
       }
     ],
     "fileCount": 160,
-    "manifestSha256": "4242ca772acf270d82a170fcf5193c6cd7c7d38f71b15bb01f62e03b5adf57b2"
+    "manifestSha256": "4510440d538eef55b855a3012b08535e1887d0ddf0cef56ab5c2bdbcd49dfaea"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
