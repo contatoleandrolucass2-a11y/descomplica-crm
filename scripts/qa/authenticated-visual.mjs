@@ -854,7 +854,7 @@ async function checkSimulatorValidation(page, origin) {
   });
 
   await page.locator(".investor-stock-table tbody tr.selectable").first().click();
-  await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("5000");
+  await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
 
   const financingInput = page.getByRole("textbox", { name: "Financiamento", exact: true });
@@ -872,13 +872,126 @@ async function checkSimulatorValidation(page, origin) {
       }),
     )
   ).every(Boolean);
+  const financingFocusedAfterProfile = await financingInput.evaluate(
+    (input) => document.activeElement === input,
+  );
+
+  await financingInput.fill("19000000");
+  const subsidyInput = page.getByRole("textbox", { name: "Subsídio", exact: true });
+  await subsidyInput.waitFor({ state: "visible" });
+  await subsidyInput.fill("0");
+  const fgtsInput = page.getByRole("textbox", { name: "FGTS", exact: true });
+  await fgtsInput.waitFor({ state: "visible" });
+  await fgtsInput.fill("0");
+  const housingCheckInput = page.getByRole("textbox", { name: "Cheque Moradia", exact: true });
+  await housingCheckInput.waitFor({ state: "visible" });
+  await housingCheckInput.fill("0");
+  const entryInput = page.getByRole("textbox", { name: "Entrada", exact: true });
+  await entryInput.waitFor({ state: "visible" });
+  await entryInput.fill("100000");
+  const installmentsInput = page.locator('input[name="quantidade-de-parcelas"]');
+  await installmentsInput.waitFor({ state: "visible" });
+  await installmentsInput.fill("84");
+  const rankingSelect = page.getByRole("combobox", { name: "Selecione o Ranking", exact: true });
+  await rankingSelect.waitFor({ state: "visible" });
+  await rankingSelect.selectOption("diamond");
+
+  const readyProposalButton = page.getByRole("button", {
+    name: "Proposta pronta - Bora Vender",
+    exact: true,
+  });
+  await readyProposalButton.waitFor({ state: "visible" });
+  const readyProposalButtonEnabled = await readyProposalButton.isEnabled();
+  const readyProposalButtonPlacedAfterInstallments = await page.evaluate(() => {
+    const installmentsButton = [...document.querySelectorAll("button")].find(
+      (button) => button.textContent?.trim() === "Exibir parcelas",
+    );
+    const proposalButton = [...document.querySelectorAll("button")].find(
+      (button) => button.textContent?.trim() === "Proposta pronta - Bora Vender",
+    );
+    if (!installmentsButton || !proposalButton) return false;
+    const installmentsBox = installmentsButton.getBoundingClientRect();
+    const proposalBox = proposalButton.getBoundingClientRect();
+    return (
+      proposalButton.previousElementSibling === installmentsButton &&
+      proposalBox.left >= installmentsBox.right
+    );
+  });
+  const releaseStatusUsesSingleDesktopRow = await page
+    .locator(".investor-associative-release-status")
+    .evaluate((element) => {
+      const identity = element.querySelector(".investor-associative-release-status-identity");
+      const reason = element.querySelector(":scope > p");
+      if (!identity || !reason) return false;
+      const identityBox = identity.getBoundingClientRect();
+      const reasonBox = reason.getBoundingClientRect();
+      return (
+        reason.previousElementSibling === identity &&
+        Math.abs(
+          (identityBox.top + identityBox.bottom) / 2 - (reasonBox.top + reasonBox.bottom) / 2,
+        ) < 2
+      );
+    });
+
+  await readyProposalButton.click();
+  const readyProposalDialog = page.getByRole("dialog", {
+    name: "Proposta pronta - Bora Vender",
+    exact: true,
+  });
+  const readyProposalDialogElement = page.locator("#investor-associative-ready-proposal");
+  await readyProposalDialog.waitFor({ state: "visible" });
+  const proposalAppraisalInput = readyProposalDialog.getByRole("textbox", {
+    name: "Avaliação bancária da proposta",
+    exact: true,
+  });
+  await proposalAppraisalInput.fill("35000000");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("#investor-associative-ready-proposal")
+      ?.textContent?.includes("PROPOSTA PRONTA"),
+  );
+  const readyProposalAppraisalEditable =
+    (await proposalAppraisalInput.inputValue()) === "350.000,00";
+  const readyProposalDialogComplete = await readyProposalDialog.evaluate((dialog) => {
+    const text = dialog.textContent || "";
+    return [
+      "Valor real da venda",
+      "Financiamento",
+      "Subsídio",
+      "FGTS",
+      "Cheque Moradia",
+      "Saldo após recursos",
+      "Entrada",
+      "Saldo parcelado",
+      "Qtd. de parcelas",
+      "Valor de contrato",
+      "Diferença na conciliação",
+    ].every((label) => text.includes(label));
+  });
+  const readyProposalDesktopFits = await readyProposalDialog.evaluate((dialog) => {
+    const rect = dialog.getBoundingClientRect();
+    return (
+      rect.left >= 0 &&
+      rect.right <= window.innerWidth &&
+      rect.top >= 0 &&
+      rect.bottom <= window.innerHeight
+    );
+  });
+  await readyProposalDialog
+    .getByRole("button", { name: "Fechar proposta pronta", exact: true })
+    .click();
+  await readyProposalDialogElement.waitFor({ state: "hidden" });
 
   return {
     ...initialChecks,
-    financingFocusedAfterProfile: await financingInput.evaluate(
-      (input) => document.activeElement === input,
-    ),
+    financingFocusedAfterProfile,
     optionalPaymentsUnlockedAfterProfile,
+    readyProposalButtonEnabled,
+    readyProposalButtonPlacedAfterInstallments,
+    releaseStatusUsesSingleDesktopRow,
+    readyProposalAppraisalEditable,
+    readyProposalDialogComplete,
+    readyProposalDesktopFits,
   };
 }
 
