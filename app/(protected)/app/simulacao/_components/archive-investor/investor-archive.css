@@ -19258,12 +19258,13 @@ body:has(.investor-page-shell) {
   background:rgba(111,140,153,.12);
 }
 .investor-page-shell .investor-associative-ready-proposal-dialog {
-  width:min(1120px,calc(100vw - 28px));
+  width:min(900px,calc(100vw - 28px));
   max-height:min(92dvh,900px);
+  overscroll-behavior:contain;
 }
 .investor-page-shell .investor-associative-ready-proposal-dialog>article {
-  gap:14px;
-  padding:20px;
+  gap:12px;
+  padding:18px;
 }
 .investor-page-shell .investor-associative-ready-proposal-dialog>article>header {
   display:grid;
@@ -19375,175 +19376,195 @@ body:has(.investor-page-shell) {
 .investor-page-shell .investor-associative-ready-proposal-appraisal-input>input[aria-invalid="true"] {
   color:#ffd4d7;
 }
-.investor-page-shell .investor-associative-ready-proposal-highlights {
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:9px;
-}
-.investor-page-shell .investor-associative-ready-proposal-highlights>div {
-  display:grid;
-  min-width:0;
-  gap:3px;
-  padding:12px 14px;
-  border:1px solid rgba(102,228,236,.27);
-  border-radius:12px;
-  background:linear-gradient(145deg,rgba(102,228,236,.11),rgba(4,29,46,.52));
-}
-.investor-page-shell .investor-associative-ready-proposal-highlights span {
-  color:#9ebdca;
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:.05em;
-  text-transform:uppercase;
-}
-.investor-page-shell .investor-associative-ready-proposal-highlights strong {
+.investor-page-shell .investor-associative-ready-proposal-sheet {
   overflow:hidden;
-  color:#fff;
-  font-size:clamp(18px,2.2vw,25px);
-  font-variant-numeric:tabular-nums;
-  line-height:1.1;
-  text-overflow:ellipsis;
-  white-space:nowrap;
+  border:1px solid rgba(102,228,236,.36);
+  border-radius:14px;
+  background:linear-gradient(145deg,rgba(10,48,71,.92),rgba(5,34,52,.72));
+  box-shadow:inset 0 1px 0 rgba(184,246,248,.04);
 }
-.investor-page-shell .investor-associative-ready-proposal-highlights small {
-  color:#9ebdca;
-  font-size:10px;
-}
-.investor-page-shell .investor-associative-ready-proposal-layout {
-  display:grid;
-  grid-template-columns:minmax(0,1.2fr) minmax(310px,.8fr);
-  align-items:start;
-  gap:10px;
-}
-.investor-page-shell .investor-associative-ready-proposal-ledger,
-.investor-page-shell .investor-associative-ready-proposal-checks {
-  overflow:hidden;
-  border:1px solid rgba(102,228,236,.27);
-  border-radius:12px;
-  background:rgba(3,27,43,.5);
-}
-.investor-page-shell .investor-associative-ready-proposal-ledger>header,
-.investor-page-shell .investor-associative-ready-proposal-checks>header {
+.investor-page-shell .investor-associative-ready-proposal-sheet>header {
   display:flex;
-  min-height:42px;
+  min-height:46px;
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  padding:7px 10px;
-  border-bottom:1px solid rgba(102,228,236,.27);
+  padding:8px 12px;
+  border-bottom:1px solid rgba(102,228,236,.36);
+  background:rgba(3,27,43,.38);
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger>header>div,
-.investor-page-shell .investor-associative-ready-proposal-checks>header>div {
+.investor-page-shell .investor-associative-ready-proposal-sheet>header>div {
   display:flex;
   align-items:center;
   gap:8px;
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger>header span,
-.investor-page-shell .investor-associative-ready-proposal-checks>header span {
+.investor-page-shell .investor-associative-ready-proposal-sheet>header span {
   display:grid;
-  width:28px;
-  height:28px;
+  width:30px;
+  height:30px;
   place-items:center;
   color:#062536;
   border-radius:8px;
   background:#66e4ec;
-  font-size:10px;
+  font-size:11px;
   font-weight:950;
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger h3,
-.investor-page-shell .investor-associative-ready-proposal-checks h3 {
+.investor-page-shell .investor-associative-ready-proposal-sheet h3 {
   margin:0;
   color:#f6fcff;
-  font-size:13px;
+  font-size:14px;
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger>header small,
-.investor-page-shell .investor-associative-ready-proposal-checks>header small {
+.investor-page-shell .investor-associative-ready-proposal-sheet>header small {
   color:#8dabb9;
-  font-size:9px;
+  font-size:10px;
   white-space:nowrap;
 }
 .investor-page-shell .investor-associative-ready-proposal-table-wrap {
-  max-height:340px;
+  max-height:min(55dvh,570px);
   overflow:auto;
+  scrollbar-gutter:stable;
 }
 .investor-page-shell .investor-associative-ready-proposal-table-wrap:focus-visible {
   outline:2px solid var(--inv-green);
   outline-offset:-2px;
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger table {
+.investor-page-shell .investor-associative-ready-proposal-sheet table {
   width:100%;
-  border-collapse:collapse;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:fixed;
   font-variant-numeric:tabular-nums;
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger tr {
-  border-bottom:1px solid rgba(102,228,236,.16);
+.investor-page-shell .investor-associative-ready-proposal-sheet tr:nth-child(even) {
+  background:rgba(191,219,229,.035);
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger tr:last-child { border-bottom:0; }
-.investor-page-shell .investor-associative-ready-proposal-ledger tr.is-featured { background:rgba(102,228,236,.08); }
-.investor-page-shell .investor-associative-ready-proposal-ledger th,
-.investor-page-shell .investor-associative-ready-proposal-ledger td {
-  height:30px;
-  padding:4px 8px;
-  font-size:10px;
+.investor-page-shell .investor-associative-ready-proposal-sheet th,
+.investor-page-shell .investor-associative-ready-proposal-sheet td {
+  box-sizing:border-box;
+  height:36px;
+  padding:5px 8px;
+  border-bottom:1px solid rgba(91,171,200,.28);
+  font-size:12px;
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger th {
-  color:#dcedf2;
-  font-weight:700;
-  text-align:left;
+.investor-page-shell .investor-associative-ready-proposal-sheet tr:last-child>th,
+.investor-page-shell .investor-associative-ready-proposal-sheet tr:last-child>td {
+  border-bottom:0;
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger td:nth-child(2) {
-  color:#9ebdca;
-  text-align:center;
-  white-space:nowrap;
-}
-.investor-page-shell .investor-associative-ready-proposal-ledger td:nth-child(3) {
-  width:26px;
-  color:#66e4ec;
-  text-align:center;
-}
-.investor-page-shell .investor-associative-ready-proposal-ledger td:last-child {
-  display:grid;
-  grid-template-columns:24px minmax(72px,1fr);
-  align-items:center;
-  gap:5px;
-  color:#66e4ec;
-  text-align:right;
-}
-.investor-page-shell .investor-associative-ready-proposal-ledger td:last-child strong {
+.investor-page-shell .investor-associative-ready-proposal-sheet th {
   overflow:hidden;
-  color:#f6fcff;
+  color:#e7f4f8;
+  font-weight:650;
+  text-align:left;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-.investor-page-shell .investor-associative-ready-proposal-ledger tr.is-featured td:last-child strong { color:#66e4ec; }
-.investor-page-shell .investor-associative-ready-proposal-checks dl {
-  display:grid;
-  margin:0;
+.investor-page-shell .investor-associative-ready-proposal-operator {
+  width:34px;
+  color:#66e4ec;
+  font-weight:800;
+  text-align:center;
 }
-.investor-page-shell .investor-associative-ready-proposal-checks dl>div {
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;
-  gap:12px;
-  min-height:38px;
-  padding:5px 10px;
-  border-bottom:1px solid rgba(102,228,236,.16);
+.investor-page-shell .investor-associative-ready-proposal-currency {
+  width:38px;
+  color:#66e4ec;
+  font-weight:750;
+  text-align:left;
 }
-.investor-page-shell .investor-associative-ready-proposal-checks dl>div:last-child { border-bottom:0; }
-.investor-page-shell .investor-associative-ready-proposal-checks dt {
-  color:#9ebdca;
-  font-size:10px;
-}
-.investor-page-shell .investor-associative-ready-proposal-checks dd {
-  margin:0;
+.investor-page-shell .investor-associative-ready-proposal-value {
+  width:136px;
   color:#f6fcff;
-  font-size:11px;
-  font-variant-numeric:tabular-nums;
+  text-align:right;
+}
+.investor-page-shell .investor-associative-ready-proposal-value>strong {
   font-weight:800;
   white-space:nowrap;
 }
-.investor-page-shell .investor-associative-ready-proposal-checks dd.is-ok { color:var(--inv-green); }
-.investor-page-shell .investor-associative-ready-proposal-checks dd.is-warning { color:#f6bd60; }
+.investor-page-shell .investor-associative-ready-proposal-help {
+  width:44px;
+  padding:0!important;
+  text-align:center;
+}
+.investor-page-shell .investor-associative-ready-proposal-info {
+  display:grid;
+  place-items:center;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  min-height:44px;
+  margin-inline:auto;
+  padding:0;
+  color:#8dabb9;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.investor-page-shell .investor-associative-ready-proposal-info:hover {
+  color:#66e4ec;
+  background:rgba(102,228,236,.1);
+}
+.investor-page-shell .investor-associative-ready-proposal-info:focus-visible {
+  color:#061e2f;
+  outline:2px solid #f6fcff;
+  outline-offset:-3px;
+  background:#66e4ec;
+}
+.investor-page-shell .investor-associative-ready-proposal-popover {
+  position:fixed;
+  inset:auto;
+  top:50%;
+  left:50%;
+  display:none;
+  width:min(320px,calc(100vw - 32px));
+  margin:0;
+  padding:14px;
+  transform:translate(-50%,-50%);
+  color:#dcecf2;
+  border:1px solid rgba(102,228,236,.55);
+  border-radius:12px;
+  background:#06253a;
+  box-shadow:0 16px 42px rgba(0,0,0,.45);
+  font-size:12px;
+  line-height:1.5;
+}
+.investor-page-shell .investor-associative-ready-proposal-popover:popover-open {
+  display:grid;
+  gap:5px;
+}
+.investor-page-shell .investor-associative-ready-proposal-popover>strong {
+  color:#66e4ec;
+  font-size:13px;
+}
+.investor-page-shell .investor-associative-ready-proposal-popover::backdrop {
+  background:rgba(1,15,24,.28);
+}
+.investor-page-shell .investor-associative-ready-proposal-sheet tr.is-featured {
+  background:linear-gradient(90deg,rgba(245,200,94,.16),rgba(245,200,94,.045));
+  box-shadow:inset 4px 0 0 #f5c85e;
+}
+.investor-page-shell .investor-associative-ready-proposal-sheet tr.is-featured .investor-associative-ready-proposal-value>strong {
+  color:#ffd778;
+}
+.investor-page-shell .investor-associative-ready-proposal-sheet tr.is-separated>th,
+.investor-page-shell .investor-associative-ready-proposal-sheet tr.is-separated>td {
+  border-bottom:8px solid #061e2f;
+}
+.investor-page-shell .investor-associative-ready-proposal-sheet tr.is-total {
+  background:linear-gradient(90deg,rgba(102,228,236,.1),rgba(102,228,236,.025) 72%,transparent);
+}
+.investor-page-shell .investor-associative-ready-proposal-sheet tr.is-total>th,
+.investor-page-shell .investor-associative-ready-proposal-sheet tr.is-total>td {
+  border-top:1px solid rgba(102,228,236,.72);
+}
+.investor-page-shell .investor-associative-ready-proposal-sheet tr.is-total .investor-associative-ready-proposal-value>strong {
+  color:#66e4ec;
+  font-weight:850;
+}
+.investor-page-shell .investor-associative-ready-proposal-sheet tr.is-empty .investor-associative-ready-proposal-value>strong {
+  color:#8daebe;
+  font-weight:650;
+}
 .investor-page-shell .investor-associative-ready-proposal-success,
 .investor-page-shell .investor-associative-ready-proposal-warning,
 .investor-page-shell .investor-associative-ready-proposal-blocked {
@@ -19598,9 +19619,7 @@ body:has(.investor-page-shell) {
     grid-column:2;
     grid-row:1;
   }
-  .investor-page-shell .investor-associative-ready-proposal-highlights,
-  .investor-page-shell .investor-associative-ready-proposal-appraisal,
-  .investor-page-shell .investor-associative-ready-proposal-layout {
+  .investor-page-shell .investor-associative-ready-proposal-appraisal {
     grid-template-columns:minmax(0,1fr);
   }
 }
@@ -19615,9 +19634,32 @@ body:has(.investor-page-shell) {
     white-space:normal;
   }
   .investor-page-shell .investor-associative-ready-proposal-heading>h2 { font-size:1.25rem; }
-  .investor-page-shell .investor-associative-ready-proposal-ledger>header,
-  .investor-page-shell .investor-associative-ready-proposal-checks>header { align-items:flex-start; flex-direction:column; }
-  .investor-page-shell .investor-associative-ready-proposal-ledger td:nth-child(2) { font-size:8px; }
-  .investor-page-shell .investor-associative-ready-proposal-ledger th,
-  .investor-page-shell .investor-associative-ready-proposal-ledger td { padding-inline:6px; }
+  .investor-page-shell .investor-associative-ready-proposal-sheet>header {
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-sheet th,
+  .investor-page-shell .investor-associative-ready-proposal-sheet td {
+    height:40px;
+    padding-inline:5px;
+    font-size:11px;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-sheet th {
+    overflow:visible;
+    font-size:10px;
+    line-height:1.25;
+    overflow-wrap:break-word;
+    text-overflow:clip;
+    white-space:normal;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-table-wrap {
+    scrollbar-width:thin;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-table-wrap::-webkit-scrollbar {
+    width:7px;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-operator { width:22px; }
+  .investor-page-shell .investor-associative-ready-proposal-currency { width:24px; }
+  .investor-page-shell .investor-associative-ready-proposal-value { width:88px; }
+  .investor-page-shell .investor-associative-ready-proposal-help { width:44px; }
 }
