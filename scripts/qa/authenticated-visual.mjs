@@ -824,7 +824,7 @@ async function checkKeyboard(page, origin) {
   return { opened: Boolean(opened), closed: Boolean(closed), focusReturned, tabReachedInteractive };
 }
 
-async function checkSimulatorValidation(page, origin) {
+async function checkSimulatorValidation(page, origin, httpCredentials) {
   await page.goto(`${origin}/app/simulacao/associativo-fluxo-linear`, {
     waitUntil: "domcontentloaded",
   });
@@ -953,20 +953,42 @@ async function checkSimulatorValidation(page, origin) {
   const readyProposalAppraisalEditable =
     (await proposalAppraisalInput.inputValue()) === "350.000,00";
   const readyProposalDialogComplete = await readyProposalDialog.evaluate((dialog) => {
-    const text = dialog.textContent || "";
-    return [
-      "Valor real da venda",
+    const expectedLabels = [
+      "Desconto",
+      "Valor de Contrato",
+      "B.A. da Unidade",
       "Financiamento",
-      "Subsídio",
       "FGTS",
       "Cheque Moradia",
-      "Saldo após recursos",
-      "Entrada",
-      "Saldo parcelado",
+      "Sinal CC",
+      "Sinal 1",
+      "Sinal 2",
+      "Sinal 3",
+      "Anual 1",
+      "Anual 2",
+      "Anual 3",
+      "Anual 4",
       "Qtd. de parcelas",
-      "Valor de contrato",
-      "Diferença na conciliação",
-    ].every((label) => text.includes(label));
+    ];
+    const table = dialog.querySelector(".investor-associative-ready-proposal-sheet table");
+    const labels = [...(table?.querySelectorAll("th[scope='row']") ?? [])].map((cell) =>
+      cell.textContent?.trim(),
+    );
+    const valueFor = (label) => {
+      const row = [...(table?.querySelectorAll("tr") ?? [])].find(
+        (candidate) => candidate.querySelector("th")?.textContent?.trim() === label,
+      );
+      return row?.querySelector(".investor-associative-ready-proposal-value")?.textContent?.trim();
+    };
+    return (
+      JSON.stringify(labels) === JSON.stringify(expectedLabels) &&
+      valueFor("Sinal CC") === "1.000,00" &&
+      ["Sinal 1", "Sinal 2", "Sinal 3", "Anual 1", "Anual 2", "Anual 3", "Anual 4"].every(
+        (label) => valueFor(label) === "−",
+      ) &&
+      valueFor("Qtd. de parcelas") === "84" &&
+      !(dialog.textContent || "").includes("Contrato e conferência")
+    );
   });
   const readyProposalDesktopFits = await readyProposalDialog.evaluate((dialog) => {
     const rect = dialog.getBoundingClientRect();
@@ -977,10 +999,102 @@ async function checkSimulatorValidation(page, origin) {
       rect.bottom <= window.innerHeight
     );
   });
+  const firstReadyProposalHelp = readyProposalDialog.getByRole("button", {
+    name: "Explicar Desconto",
+    exact: true,
+  });
+  await firstReadyProposalHelp.click();
+  const readyProposalHelpPopover = readyProposalDialog.locator(
+    "#investor-associative-ready-proposal-help-discount:popover-open",
+  );
+  const readyProposalHelpAccessible = await readyProposalHelpPopover.isVisible();
+  await page.keyboard.press("Escape");
+  await readyProposalHelpPopover.waitFor({ state: "hidden" });
   await readyProposalDialog
     .getByRole("button", { name: "Fechar proposta pronta", exact: true })
     .click();
   await readyProposalDialogElement.waitFor({ state: "hidden" });
+
+  const readyProposalResponsiveChecks = [];
+  await readyProposalDialogElement.evaluate((dialog) => dialog.showModal());
+  await readyProposalDialogElement.waitFor({ state: "visible" });
+  const readyProposalSnapshot = await readyProposalDialogElement.evaluate((dialog) => ({
+    dialogHtml: dialog.outerHTML,
+    stylesheets: [...document.querySelectorAll('link[rel="stylesheet"]')].map((link) => link.href),
+    htmlTheme: document.documentElement.getAttribute("data-theme"),
+  }));
+  const readyProposalViewports = [
+    { key: "desktop-1440x900", width: 1440, height: 900 },
+    { key: "tablet-1024x768", width: 1024, height: 768 },
+    { key: "tablet-768x1024", width: 768, height: 1024 },
+    { key: "mobile-375x812", width: 375, height: 812 },
+  ];
+  const stylesheets = readyProposalSnapshot.stylesheets
+    .map((href) => `<link rel="stylesheet" href="${href}">`)
+    .join("");
+  const themeAttribute = readyProposalSnapshot.htmlTheme
+    ? ` data-theme="${readyProposalSnapshot.htmlTheme}"`
+    : "";
+  await readyProposalDialogElement.evaluate((dialog) => dialog.close());
+  await readyProposalDialogElement.waitFor({ state: "hidden" });
+
+  const snapshotBrowser = page.context().browser();
+  if (!snapshotBrowser) throw new Error("Ready proposal snapshot browser is unavailable.");
+  for (const viewport of readyProposalViewports) {
+    const snapshotContext = await snapshotBrowser.newContext({
+      viewport: { width: viewport.width, height: viewport.height },
+      httpCredentials,
+    });
+    try {
+      const snapshotPage = await snapshotContext.newPage();
+      await snapshotPage.setContent(
+        `<!doctype html><html${themeAttribute}><head><base href="${origin}/">${stylesheets}</head><body><div class="investor-page-shell">${readyProposalSnapshot.dialogHtml}</div></body></html>`,
+        { waitUntil: "networkidle" },
+      );
+      await snapshotPage.locator("dialog").evaluate((dialog) => {
+        dialog.removeAttribute("open");
+        dialog.showModal();
+      });
+      await snapshotPage.evaluate(() => document.fonts.ready);
+      await snapshotPage.locator("dialog").evaluate((dialog) => {
+        dialog.scrollTop = 0;
+        const tableRegion = dialog.querySelector(".investor-associative-ready-proposal-table-wrap");
+        if (tableRegion) tableRegion.scrollTop = 0;
+      });
+      readyProposalResponsiveChecks.push(
+        await snapshotPage.locator("dialog").evaluate((dialog) => {
+          const dialogBox = dialog.getBoundingClientRect();
+          const tableRegion = dialog.querySelector(
+            ".investor-associative-ready-proposal-table-wrap",
+          );
+          const rowLabels = [
+            ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet th"),
+          ];
+          return (
+            dialogBox.left >= 0 &&
+            dialogBox.right <= window.innerWidth &&
+            dialogBox.top >= 0 &&
+            dialogBox.bottom <= window.innerHeight &&
+            dialog.scrollWidth <= dialog.clientWidth + 1 &&
+            tableRegion &&
+            tableRegion.scrollWidth <= tableRegion.clientWidth + 1 &&
+            rowLabels.every((label) => label.scrollWidth <= label.clientWidth + 1)
+          );
+        }),
+      );
+      process.stdout.write(`Ready proposal QA: ${viewport.key} measured\n`);
+      await snapshotPage.screenshot({
+        path: path.join(
+          candidateScreenshotRoot,
+          `associative-ready-proposal-dialog-${viewport.width}x${viewport.height}.png`,
+        ),
+      });
+      process.stdout.write(`Ready proposal QA: ${viewport.key} captured\n`);
+    } finally {
+      await snapshotContext.close();
+    }
+  }
+  const readyProposalResponsive = readyProposalResponsiveChecks.every(Boolean);
 
   return {
     ...initialChecks,
@@ -992,6 +1106,8 @@ async function checkSimulatorValidation(page, origin) {
     readyProposalAppraisalEditable,
     readyProposalDialogComplete,
     readyProposalDesktopFits,
+    readyProposalHelpAccessible,
+    readyProposalResponsive,
   };
 }
 
@@ -1443,7 +1559,7 @@ async function run() {
           currentStage = "keyboard";
           keyboard = await checkKeyboard(page, origin);
           currentStage = "simulator-validation";
-          simulatorValidation = await checkSimulatorValidation(page, origin);
+          simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);
           currentStage = "fixture-source-marker";
           fixtureSourceMarker = await checkFixtureSourceMarker(page, origin, expectedSourceMarker);
         }

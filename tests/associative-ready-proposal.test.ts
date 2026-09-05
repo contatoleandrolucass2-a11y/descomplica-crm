@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 // @ts-expect-error — módulo de regras compartilhado com o componente legado em JavaScript.
-import { buildAssociativeReadyProposal } from "@/lib/archive-investor/associative-ready-proposal.mjs";
+import * as associativeReadyProposalRules from "@/lib/archive-investor/associative-ready-proposal.mjs";
+
+const { buildAssociativeReadyProposal, buildAssociativeReadyProposalResponseRows } =
+  associativeReadyProposalRules;
+
+type ResponseRow = {
+  label: string;
+  value: number;
+  currency: boolean;
+};
 
 const workbookBase = {
   grossSaleValue: 340_000,
@@ -131,5 +140,62 @@ describe("buildAssociativeReadyProposal", () => {
     expect(result.ok).toBe(false);
     expect(result.proposal).toBeNull();
     expect(result.errors).toContain("Informe a avaliação bancária para calcular a proposta.");
+  });
+
+  it("monta a resposta no padrão fixo da planilha revisada", () => {
+    const calculation = buildAssociativeReadyProposal({
+      ...workbookBase,
+      signals: [{ label: "Sinal 2", value: 2_000 }],
+      annuals: [{ label: "Anual 3", value: 3_000 }],
+    });
+    const rows = buildAssociativeReadyProposalResponseRows(calculation) as ResponseRow[];
+
+    expect(rows.map((row) => row.label)).toEqual([
+      "Desconto",
+      "Valor de Contrato",
+      "B.A. da Unidade",
+      "Financiamento",
+      "FGTS",
+      "Cheque Moradia",
+      "Sinal CC",
+      "Sinal 1",
+      "Sinal 2",
+      "Sinal 3",
+      "Anual 1",
+      "Anual 2",
+      "Anual 3",
+      "Anual 4",
+      "Qtd. de parcelas",
+    ]);
+    expect(Object.fromEntries(rows.map((row) => [row.label, row.value]))).toMatchObject({
+      Desconto: 102_500,
+      "Valor de Contrato": 237_500,
+      "B.A. da Unidade": 7_500,
+      Financiamento: 190_000,
+      "Sinal CC": 1_000,
+      "Sinal 1": 0,
+      "Sinal 2": 2_000,
+      "Anual 3": 3_000,
+      "Qtd. de parcelas": 84,
+    });
+  });
+
+  it("não oculta subsídio nem pagamentos além das linhas fixas quando ativos", () => {
+    const calculation = buildAssociativeReadyProposal({
+      ...workbookBase,
+      subsidy: 4_000,
+      signals: [{ label: "Sinal 4", value: 5_000 }],
+      annuals: [{ label: "Anual 5", value: 6_000 }],
+    });
+    const rows = buildAssociativeReadyProposalResponseRows(calculation) as ResponseRow[];
+
+    expect(rows.map((row) => row.label)).toEqual(
+      expect.arrayContaining(["Subsídio", "Sinal 4", "Anual 5"]),
+    );
+    expect(rows.at(-1)).toMatchObject({
+      label: "Qtd. de parcelas",
+      currency: false,
+      value: 84,
+    });
   });
 });

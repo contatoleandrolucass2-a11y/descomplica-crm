@@ -12,7 +12,7 @@ import { buildDocumentationInstallmentSchedule } from "@/lib/archive-investor/do
 import { calculateAssociativeDocumentationView } from "@/lib/archive-investor/associative-documentation-adapter.mjs";
 import { ASSOCIATIVE_COMMISSION_RATES, calculateAssociativeCommercialRemuneration } from "@/lib/archive-investor/associative-commercial-remuneration-rules.mjs";
 import { calculateAssociativeReleaseStatus } from "@/lib/archive-investor/associative-release-rules.mjs";
-import { buildAssociativeReadyProposal } from "@/lib/archive-investor/associative-ready-proposal.mjs";
+import { buildAssociativeReadyProposal, buildAssociativeReadyProposalResponseRows } from "@/lib/archive-investor/associative-ready-proposal.mjs";
 import { evaluateFinancingModality, moneyToCents, MCMV_PROPERTY_LIMIT_CENTS, type FinancingDecision, type FinancingModality } from "@/lib/archive-investor/financing-modality-rules.mjs";
 
 type InventoryItem = {
@@ -1744,7 +1744,6 @@ function AssociativeReadyProposalDialog({
   calculation,
   project,
   unit,
-  entryDate,
   reportedAppraisal,
   appraisalOverride,
   onAppraisalOverrideChange,
@@ -1753,7 +1752,6 @@ function AssociativeReadyProposalDialog({
   calculation: ReturnType<typeof buildAssociativeReadyProposal>;
   project: string;
   unit: string;
-  entryDate: string;
   reportedAppraisal: number;
   appraisalOverride: string;
   onAppraisalOverrideChange: (value: string) => void;
@@ -1761,18 +1759,7 @@ function AssociativeReadyProposalDialog({
   const proposal = calculation.proposal;
   const source = calculation.source;
   const statusLabel = calculation.status === "ready" ? "PROPOSTA PRONTA" : calculation.status === "review" ? "REVISAR PROPOSTA" : "DADOS PENDENTES";
-  const paymentRows = proposal ? [
-    { label: "Valor real da venda", operator: "=", value: source.netSaleValue, featured: true },
-    { label: "Financiamento", operator: "−", value: proposal.financing },
-    { label: "Subsídio", operator: "−", value: source.subsidy },
-    { label: "FGTS", operator: "−", value: source.fgts },
-    { label: "Cheque Moradia", operator: "−", value: source.housingCheck },
-    { label: "Saldo após recursos", operator: "=", value: proposal.balanceAfterResources, featured: true },
-    { label: "Entrada", date: entryDate, operator: "−", value: source.entry },
-    ...source.signals.map((payment: { label: string; date: string; value: number }) => ({ ...payment, operator: "−" })),
-    ...source.annuals.map((payment: { label: string; date: string; value: number }) => ({ ...payment, operator: "−" })),
-    { label: "Saldo parcelado", operator: "=", value: proposal.monthlyBalance, featured: true },
-  ] : [];
+  const responseRows = buildAssociativeReadyProposalResponseRows(calculation);
 
   return <dialog
     ref={dialogRef}
@@ -1802,49 +1789,39 @@ function AssociativeReadyProposalDialog({
         <strong>Não foi possível fechar a proposta.</strong>
         <ul>{calculation.errors.map((error: string) => <li key={error}>{error}</li>)}</ul>
       </section> : <>
-        <section className="investor-associative-ready-proposal-highlights" aria-label="Principais valores da proposta">
-          <div><span>Valor de contrato</span><strong>{money.format(proposal.contractValue)}</strong><small>Base pronta para formalização</small></div>
-          <div><span>Financiamento</span><strong>{money.format(proposal.financing)}</strong><small>{calculation.modality} · cota {percent.format(calculation.quota)}</small></div>
-          <div><span>Saldo mensal</span><strong>{money.format(proposal.monthlyBalance)}</strong><small>{source.installments}x de {money.format(proposal.averageInstallment)} sem encargos</small></div>
-        </section>
-
-        <div className="investor-associative-ready-proposal-layout">
-          <section className="investor-associative-ready-proposal-ledger" aria-labelledby="investor-associative-ready-proposal-ledger-title">
-            <header><div><span>01</span><h3 id="investor-associative-ready-proposal-ledger-title">Resumo da proposta</h3></div><small>Conforme o fluxo preenchido</small></header>
-            <div className="investor-associative-ready-proposal-table-wrap" role="region" aria-label="Composição financeira da proposta" tabIndex={0}>
-              <table>
-                <tbody>
-                  {paymentRows.map((row, index) => <tr key={`${row.label}-${row.date || index}`} className={row.featured ? "is-featured" : undefined}>
+        <section className="investor-associative-ready-proposal-sheet" aria-labelledby="investor-associative-ready-proposal-sheet-title">
+          <header>
+            <div><span>01</span><h3 id="investor-associative-ready-proposal-sheet-title">Resumo da proposta</h3></div>
+            <small>{calculation.modality} · cota {percent.format(calculation.quota)}</small>
+          </header>
+          <div className="investor-associative-ready-proposal-table-wrap" role="region" aria-label="Resposta financeira da proposta" tabIndex={0}>
+            <table>
+              <tbody>
+                {responseRows.map((row: { key: string; label: string; operator: string; value: number; currency: boolean; emptyWhenZero: boolean; featured?: boolean; separated?: boolean; total?: boolean; help: string }) => {
+                  const empty = row.emptyWhenZero && row.value === 0;
+                  const formattedValue = row.currency ? (empty ? "−" : currencyInput.format(row.value)) : String(row.value);
+                  const rowClassName = [row.featured ? "is-featured" : "", row.separated ? "is-separated" : "", row.total ? "is-total" : "", empty ? "is-empty" : ""].filter(Boolean).join(" ");
+                  const helpId = `investor-associative-ready-proposal-help-${row.key}`;
+                  return <tr key={row.key} className={rowClassName || undefined}>
                     <th scope="row">{row.label}</th>
-                    <td>{row.date ? <time dateTime={row.date}>{formatPaymentDate(row.date)}</time> : null}</td>
-                    <td aria-hidden="true">{row.operator}</td>
-                    <td aria-label={`${row.label}: ${money.format(row.value)}`}><span aria-hidden="true">R$</span><strong>{currencyInput.format(row.value)}</strong></td>
-                  </tr>)}
-                  <tr className="is-featured">
-                    <th scope="row">Qtd. de parcelas</th>
-                    <td />
-                    <td aria-hidden="true">÷</td>
-                    <td aria-label={`Quantidade de parcelas: ${source.installments}`}><strong>{source.installments}</strong></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="investor-associative-ready-proposal-checks" aria-labelledby="investor-associative-ready-proposal-checks-title">
-            <header><div><span>02</span><h3 id="investor-associative-ready-proposal-checks-title">Contrato e conferência</h3></div><small>Regras da planilha revisada</small></header>
-            <dl>
-              <div><dt>Valor final com kit</dt><dd>{money.format(source.grossSaleValue)}</dd></div>
-              <div><dt>B.A. da unidade na proposta</dt><dd>{money.format(proposal.proposalUnitBonus)}</dd></div>
-              <div><dt>Desconto na proposta</dt><dd>{money.format(proposal.proposalDiscount)}</dd></div>
-              <div><dt>Avaliação bancária</dt><dd>{money.format(source.appraisal)}</dd></div>
-              <div><dt>Limite pela avaliação</dt><dd>{money.format(proposal.appraisalLimit)}</dd></div>
-              <div><dt>Contrato mínimo para o crédito</dt><dd>{money.format(proposal.contractMinimum)}</dd></div>
-              <div><dt>Crédito não atendido</dt><dd className={proposal.creditShortfall > 0 ? "is-warning" : "is-ok"}>{money.format(proposal.creditShortfall)}</dd></div>
-              <div><dt>Diferença na conciliação</dt><dd className={Math.abs(proposal.reconciliationDifference) > 0.01 ? "is-warning" : "is-ok"}>{money.format(proposal.reconciliationDifference)}</dd></div>
-            </dl>
-          </section>
-        </div>
+                    <td className="investor-associative-ready-proposal-operator" aria-label={row.operator === "=" ? "igual" : row.operator === "−" ? "subtrair" : row.operator === "+" ? "somar" : "dividir"}>{row.operator}</td>
+                    <td className="investor-associative-ready-proposal-currency" aria-hidden="true">{row.currency ? "R$" : ""}</td>
+                    <td className="investor-associative-ready-proposal-value" aria-label={`${row.label}: ${row.currency ? (empty ? "não informado" : money.format(row.value)) : row.value}`}><strong>{formattedValue}</strong></td>
+                    <td className="investor-associative-ready-proposal-help">
+                      <button type="button" className="investor-associative-ready-proposal-info" popoverTarget={helpId} aria-label={`Explicar ${row.label}`}>
+                        <span className="investor-info-mark" aria-hidden="true" />
+                      </button>
+                      <span id={helpId} className="investor-associative-ready-proposal-popover" popover="auto" role="note">
+                        <strong>{row.label}</strong>
+                        <span>{row.help}</span>
+                      </span>
+                    </td>
+                  </tr>;
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         {calculation.warnings.length > 0 ? <section className="investor-associative-ready-proposal-warning" role="alert"><strong>Revisão necessária</strong><ul>{calculation.warnings.map((warning: string) => <li key={warning}>{warning}</li>)}</ul></section> : <p className="investor-associative-ready-proposal-success" role="status"><strong>Conciliação fechada.</strong> A diferença calculada é {money.format(proposal.reconciliationDifference)}.</p>}
         <p className="investor-associative-ready-proposal-note">Simulação comercial. A modalidade, a avaliação e o crédito dependem da confirmação da instituição financeira.</p>
@@ -4011,7 +3988,6 @@ export function InvestorCalculator({
                   calculation={associativeReadyProposal}
                   project={selectedUnit.project}
                   unit={selectedUnit.product}
-                  entryDate={baseDate}
                   reportedAppraisal={selectedUnit.appraisal ?? 0}
                   appraisalOverride={documentationAppraisalOverride}
                   onAppraisalOverrideChange={setDocumentationAppraisalOverride}
