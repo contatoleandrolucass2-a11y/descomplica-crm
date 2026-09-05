@@ -12,6 +12,7 @@ import { buildDocumentationInstallmentSchedule } from "@/lib/archive-investor/do
 import { calculateAssociativeDocumentationView } from "@/lib/archive-investor/associative-documentation-adapter.mjs";
 import { ASSOCIATIVE_COMMISSION_RATES, calculateAssociativeCommercialRemuneration } from "@/lib/archive-investor/associative-commercial-remuneration-rules.mjs";
 import { calculateAssociativeReleaseStatus } from "@/lib/archive-investor/associative-release-rules.mjs";
+import { buildAssociativeReadyProposal } from "@/lib/archive-investor/associative-ready-proposal.mjs";
 import { evaluateFinancingModality, moneyToCents, MCMV_PROPERTY_LIMIT_CENTS, type FinancingDecision, type FinancingModality } from "@/lib/archive-investor/financing-modality-rules.mjs";
 
 type InventoryItem = {
@@ -465,6 +466,7 @@ function AssociativePaymentSummary({
   linearLastDate,
   blocks,
   onShowInstallments,
+  onShowReadyProposal,
 }: {
   available: boolean;
   installments: number;
@@ -474,6 +476,7 @@ function AssociativePaymentSummary({
   linearLastDate: string;
   blocks: AssociativeDecreasingBlockView[];
   onShowInstallments: () => void;
+  onShowReadyProposal: () => void;
 }) {
   const rows = [
     {
@@ -509,6 +512,9 @@ function AssociativePaymentSummary({
       <div className="investor-associative-payment-summary-actions">
         <button type="button" disabled={!available} aria-haspopup="dialog" aria-controls="investor-associative-installments" onClick={onShowInstallments}>
           Exibir parcelas
+        </button>
+        <button type="button" className="investor-associative-ready-proposal-launcher" disabled={!available} aria-haspopup="dialog" aria-controls="investor-associative-ready-proposal" onClick={onShowReadyProposal}>
+          Proposta pronta - Bora Vender
         </button>
         <InvestorInfoHint
           label="Resumo das parcelas"
@@ -1239,17 +1245,15 @@ function AssociativeApprovalPanel({
       </tbody>
     </table>
     <div className={`investor-associative-release-status ${releaseStatus.repasse.status}`} role="status" aria-live="polite" aria-label="Situação do repasse">
-      <div className="investor-associative-release-status-header">
-        <div className="investor-associative-release-status-identity">
-          <h4>Repasse</h4>
-          <strong className={releaseStatus.repasse.status}>{releaseLabel(releaseStatus.repasse)}</strong>
-        </div>
-        {releaseStatus.repasse.releaseDate ? <div className="investor-associative-release-date">
-          <span>Liberação prevista</span>
-          <time dateTime={releaseStatus.repasse.releaseDate}>{formatPaymentDate(releaseStatus.repasse.releaseDate)}</time>
-        </div> : null}
+      <div className="investor-associative-release-status-identity">
+        <h4>Repasse</h4>
+        <strong className={releaseStatus.repasse.status}>{releaseLabel(releaseStatus.repasse)}</strong>
       </div>
       <p>{releaseStatus.repasse.reason}</p>
+      {releaseStatus.repasse.releaseDate ? <div className="investor-associative-release-date">
+        <span>Liberação prevista</span>
+        <time dateTime={releaseStatus.repasse.releaseDate}>{formatPaymentDate(releaseStatus.repasse.releaseDate)}</time>
+      </div> : null}
     </div>
     {hasApplicableAdjustment ? <dialog
       ref={adjustmentsDialogRef}
@@ -1735,6 +1739,120 @@ function DirectPreKeysDialog({ dialogRef, principal, schedule }: { dialogRef: Re
   </dialog>;
 }
 
+function AssociativeReadyProposalDialog({
+  dialogRef,
+  calculation,
+  project,
+  unit,
+  entryDate,
+  reportedAppraisal,
+  appraisalOverride,
+  onAppraisalOverrideChange,
+}: {
+  dialogRef: Ref<HTMLDialogElement>;
+  calculation: ReturnType<typeof buildAssociativeReadyProposal>;
+  project: string;
+  unit: string;
+  entryDate: string;
+  reportedAppraisal: number;
+  appraisalOverride: string;
+  onAppraisalOverrideChange: (value: string) => void;
+}) {
+  const proposal = calculation.proposal;
+  const source = calculation.source;
+  const statusLabel = calculation.status === "ready" ? "PROPOSTA PRONTA" : calculation.status === "review" ? "REVISAR PROPOSTA" : "DADOS PENDENTES";
+  const paymentRows = proposal ? [
+    { label: "Valor real da venda", operator: "=", value: source.netSaleValue, featured: true },
+    { label: "Financiamento", operator: "−", value: proposal.financing },
+    { label: "Subsídio", operator: "−", value: source.subsidy },
+    { label: "FGTS", operator: "−", value: source.fgts },
+    { label: "Cheque Moradia", operator: "−", value: source.housingCheck },
+    { label: "Saldo após recursos", operator: "=", value: proposal.balanceAfterResources, featured: true },
+    { label: "Entrada", date: entryDate, operator: "−", value: source.entry },
+    ...source.signals.map((payment: { label: string; date: string; value: number }) => ({ ...payment, operator: "−" })),
+    ...source.annuals.map((payment: { label: string; date: string; value: number }) => ({ ...payment, operator: "−" })),
+    { label: "Saldo parcelado", operator: "=", value: proposal.monthlyBalance, featured: true },
+  ] : [];
+
+  return <dialog
+    ref={dialogRef}
+    id="investor-associative-ready-proposal"
+    className="investor-documentation-dialog investor-associative-ready-proposal-dialog"
+    aria-labelledby="investor-associative-ready-proposal-title"
+    aria-describedby="investor-associative-ready-proposal-description"
+    onClick={(event) => { if (event.target === event.currentTarget) event.currentTarget.close(); }}
+  >
+    <article>
+      <header>
+        <div className="investor-associative-ready-proposal-heading">
+          <span>Memória comercial</span>
+          <h2 id="investor-associative-ready-proposal-title">Proposta pronta - Bora Vender</h2>
+          <p>{project}{unit ? ` · ${unit}` : ""}</p>
+        </div>
+        <strong className={`investor-associative-ready-proposal-status is-${calculation.status}`} role="status">{statusLabel}</strong>
+        <form method="dialog"><button type="submit" aria-label="Fechar proposta pronta">×</button></form>
+      </header>
+      <p id="investor-associative-ready-proposal-description" className="investor-associative-ready-proposal-intro">Valores atuais do fluxo convertidos na memória de proposta da planilha revisada. Subsídio, sinais e anuais ativos entram na conciliação.</p>
+      <label className={`investor-associative-ready-proposal-appraisal${source.appraisal > 0 ? " is-complete" : " is-required"}`}>
+        <span><strong>Avaliação bancária</strong><small>{reportedAppraisal > 0 && !appraisalOverride ? "Valor informado pelo estoque; edite se necessário." : "Informe o valor oficial usado pelo banco para calcular a cota."}</small></span>
+        <span className="investor-associative-ready-proposal-appraisal-input"><b aria-hidden="true">R$</b><MoneyInput label="Avaliação bancária da proposta" invalid={source.appraisal <= 0} value={appraisalOverride || (reportedAppraisal > 0 ? String(reportedAppraisal) : "")} onChange={onAppraisalOverrideChange} /></span>
+      </label>
+
+      {!proposal ? <section className="investor-associative-ready-proposal-blocked" role="alert">
+        <strong>Não foi possível fechar a proposta.</strong>
+        <ul>{calculation.errors.map((error: string) => <li key={error}>{error}</li>)}</ul>
+      </section> : <>
+        <section className="investor-associative-ready-proposal-highlights" aria-label="Principais valores da proposta">
+          <div><span>Valor de contrato</span><strong>{money.format(proposal.contractValue)}</strong><small>Base pronta para formalização</small></div>
+          <div><span>Financiamento</span><strong>{money.format(proposal.financing)}</strong><small>{calculation.modality} · cota {percent.format(calculation.quota)}</small></div>
+          <div><span>Saldo mensal</span><strong>{money.format(proposal.monthlyBalance)}</strong><small>{source.installments}x de {money.format(proposal.averageInstallment)} sem encargos</small></div>
+        </section>
+
+        <div className="investor-associative-ready-proposal-layout">
+          <section className="investor-associative-ready-proposal-ledger" aria-labelledby="investor-associative-ready-proposal-ledger-title">
+            <header><div><span>01</span><h3 id="investor-associative-ready-proposal-ledger-title">Resumo da proposta</h3></div><small>Conforme o fluxo preenchido</small></header>
+            <div className="investor-associative-ready-proposal-table-wrap" role="region" aria-label="Composição financeira da proposta" tabIndex={0}>
+              <table>
+                <tbody>
+                  {paymentRows.map((row, index) => <tr key={`${row.label}-${row.date || index}`} className={row.featured ? "is-featured" : undefined}>
+                    <th scope="row">{row.label}</th>
+                    <td>{row.date ? <time dateTime={row.date}>{formatPaymentDate(row.date)}</time> : null}</td>
+                    <td aria-hidden="true">{row.operator}</td>
+                    <td aria-label={`${row.label}: ${money.format(row.value)}`}><span aria-hidden="true">R$</span><strong>{currencyInput.format(row.value)}</strong></td>
+                  </tr>)}
+                  <tr className="is-featured">
+                    <th scope="row">Qtd. de parcelas</th>
+                    <td />
+                    <td aria-hidden="true">÷</td>
+                    <td aria-label={`Quantidade de parcelas: ${source.installments}`}><strong>{source.installments}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="investor-associative-ready-proposal-checks" aria-labelledby="investor-associative-ready-proposal-checks-title">
+            <header><div><span>02</span><h3 id="investor-associative-ready-proposal-checks-title">Contrato e conferência</h3></div><small>Regras da planilha revisada</small></header>
+            <dl>
+              <div><dt>Valor final com kit</dt><dd>{money.format(source.grossSaleValue)}</dd></div>
+              <div><dt>B.A. da unidade na proposta</dt><dd>{money.format(proposal.proposalUnitBonus)}</dd></div>
+              <div><dt>Desconto na proposta</dt><dd>{money.format(proposal.proposalDiscount)}</dd></div>
+              <div><dt>Avaliação bancária</dt><dd>{money.format(source.appraisal)}</dd></div>
+              <div><dt>Limite pela avaliação</dt><dd>{money.format(proposal.appraisalLimit)}</dd></div>
+              <div><dt>Contrato mínimo para o crédito</dt><dd>{money.format(proposal.contractMinimum)}</dd></div>
+              <div><dt>Crédito não atendido</dt><dd className={proposal.creditShortfall > 0 ? "is-warning" : "is-ok"}>{money.format(proposal.creditShortfall)}</dd></div>
+              <div><dt>Diferença na conciliação</dt><dd className={Math.abs(proposal.reconciliationDifference) > 0.01 ? "is-warning" : "is-ok"}>{money.format(proposal.reconciliationDifference)}</dd></div>
+            </dl>
+          </section>
+        </div>
+
+        {calculation.warnings.length > 0 ? <section className="investor-associative-ready-proposal-warning" role="alert"><strong>Revisão necessária</strong><ul>{calculation.warnings.map((warning: string) => <li key={warning}>{warning}</li>)}</ul></section> : <p className="investor-associative-ready-proposal-success" role="status"><strong>Conciliação fechada.</strong> A diferença calculada é {money.format(proposal.reconciliationDifference)}.</p>}
+        <p className="investor-associative-ready-proposal-note">Simulação comercial. A modalidade, a avaliação e o crédito dependem da confirmação da instituição financeira.</p>
+      </>}
+    </article>
+  </dialog>;
+}
+
 function AssociativeInstallmentDialog({
   dialogRef,
   comparison,
@@ -2059,6 +2177,7 @@ export function InvestorCalculator({
   const directPreKeysDialog = useRef<HTMLDialogElement>(null);
   const directAmortizationDialog = useRef<HTMLDialogElement>(null);
   const associativeInstallmentsDialog = useRef<HTMLDialogElement>(null);
+  const associativeReadyProposalDialog = useRef<HTMLDialogElement>(null);
   const associativeCommissionDialog = useRef<HTMLDialogElement>(null);
   const proposalTourTrigger = useRef<HTMLButtonElement>(null);
   const tourReturnFocus = useRef<HTMLButtonElement | null>(null);
@@ -2235,6 +2354,29 @@ export function InvestorCalculator({
     intermediaries,
     approvalTierId: associativeApprovalTier,
   }), [directTable, annualMode, selectedUnitId, selectedUnit, baseDate, completionDate, salePrice, discountAuthorized, discount, financing, subsidy, fgts, housingCheck, entryValue, income, installments, signals, intermediaries, associativeApprovalTier]);
+  const associativeReadyProposal = useMemo(() => buildAssociativeReadyProposal({
+    grossSaleValue: result.context.propertyValue,
+    originalUnitBonus: result.context.unitBonus,
+    tableSlack: result.context.tableSlack,
+    sourceDiscount: result.context.discount,
+    netSaleValue: result.context.valueReal,
+    requestedFinancing: result.custom.financing,
+    subsidy: result.custom.subsidy,
+    fgts: result.custom.fgts,
+    housingCheck: result.custom.housingCheck,
+    entry: result.custom.actValue,
+    signals: (result.custom.signals ?? [])
+      .filter((payment: { active: boolean; approved: boolean; value: number }) => payment.active && payment.approved && payment.value > 0)
+      .map((payment: { index: number; date: string; value: number }) => ({ label: `Sinal ${payment.index}`, date: payment.date, value: payment.value })),
+    annuals: (result.custom.intermediaries ?? [])
+      .filter((payment: { approved: boolean; value: number }) => payment.approved && payment.value > 0)
+      .map((payment: { index: number; date: string; value: number }) => ({ label: `Anual ${payment.index}`, date: payment.date, value: payment.value })),
+    installments: result.custom.desiredInstallments,
+    appraisal: currencyInputNumber(documentationAppraisalOverride) > 0
+      ? currencyInputNumber(documentationAppraisalOverride)
+      : selectedUnit?.appraisal ?? 0,
+    modality: associativeFinancingModality,
+  }), [associativeFinancingModality, documentationAppraisalOverride, result.context.discount, result.context.propertyValue, result.context.tableSlack, result.context.unitBonus, result.context.valueReal, result.custom.actValue, result.custom.desiredInstallments, result.custom.fgts, result.custom.financing, result.custom.housingCheck, result.custom.intermediaries, result.custom.signals, result.custom.subsidy, selectedUnit?.appraisal]);
   const directAmortizationSchedule = useMemo(() => directTable
     ? buildDirectTableAmortizationSchedule(result.custom.postKeysBalance, result.custom.firstPostKeysDate, result.custom.postKeysInstallments)
     : [], [directTable, result.custom.postKeysBalance, result.custom.firstPostKeysDate, result.custom.postKeysInstallments]);
@@ -3853,6 +3995,7 @@ export function InvestorCalculator({
                     linearLastDate={lastInstallmentDate}
                     blocks={result.custom.decreasing?.blocks ?? []}
                     onShowInstallments={() => associativeInstallmentsDialog.current?.showModal()}
+                    onShowReadyProposal={() => associativeReadyProposalDialog.current?.showModal()}
                   /> : null}
                 </div> : null}
                 <AssociativeInstallmentDialog
@@ -3862,6 +4005,16 @@ export function InvestorCalculator({
                   preInstallments={result.custom.preInstallments}
                   postInstallments={result.custom.postInstallments}
                   uncorrectedBalance={result.custom.balanceBeforeCorrection}
+                />
+                <AssociativeReadyProposalDialog
+                  dialogRef={associativeReadyProposalDialog}
+                  calculation={associativeReadyProposal}
+                  project={selectedUnit.project}
+                  unit={selectedUnit.product}
+                  entryDate={baseDate}
+                  reportedAppraisal={selectedUnit.appraisal ?? 0}
+                  appraisalOverride={documentationAppraisalOverride}
+                  onAppraisalOverrideChange={setDocumentationAppraisalOverride}
                 />
               </div> : <div className="investor-payment-controls" role="group" aria-labelledby="investor-flow-title">
                 {!directVisualLayout ? <article className="investor-property-value-step investor-payment-step" data-step="01" data-operator="">
