@@ -1797,16 +1797,15 @@ function AssociativeReadyProposalDialog({
           <div className="investor-associative-ready-proposal-table-wrap" role="region" aria-label="Resposta financeira da proposta" tabIndex={0}>
             <table>
               <tbody>
-                {responseRows.map((row: { key: string; label: string; operator: string; value: number; currency: boolean; emptyWhenZero: boolean; featured?: boolean; separated?: boolean; total?: boolean; help: string }) => {
-                  const empty = row.emptyWhenZero && row.value === 0;
-                  const formattedValue = row.currency ? (empty ? "−" : currencyInput.format(row.value)) : String(row.value);
-                  const rowClassName = [row.featured ? "is-featured" : "", row.separated ? "is-separated" : "", row.total ? "is-total" : "", empty ? "is-empty" : ""].filter(Boolean).join(" ");
+                {responseRows.map((row: { key: string; label: string; operator: string; value: number; currency: boolean; featured?: boolean; separated?: boolean; total?: boolean; help: string }) => {
+                  const formattedValue = row.currency ? currencyInput.format(row.value) : String(row.value);
+                  const rowClassName = [row.featured ? "is-featured" : "", row.separated ? "is-separated" : "", row.total ? "is-total" : ""].filter(Boolean).join(" ");
                   const helpId = `investor-associative-ready-proposal-help-${row.key}`;
                   return <tr key={row.key} className={rowClassName || undefined}>
                     <th scope="row">{row.label}</th>
                     <td className="investor-associative-ready-proposal-operator" aria-label={row.operator === "=" ? "igual" : row.operator === "−" ? "subtrair" : row.operator === "+" ? "somar" : "dividir"}>{row.operator}</td>
                     <td className="investor-associative-ready-proposal-currency" aria-hidden="true">{row.currency ? "R$" : ""}</td>
-                    <td className="investor-associative-ready-proposal-value" aria-label={`${row.label}: ${row.currency ? (empty ? "não informado" : money.format(row.value)) : row.value}`}><strong>{formattedValue}</strong></td>
+                    <td className="investor-associative-ready-proposal-value" aria-label={`${row.label}: ${row.currency ? money.format(row.value) : row.value}`}><strong>{formattedValue}</strong></td>
                     <td className="investor-associative-ready-proposal-help">
                       <button type="button" className="investor-associative-ready-proposal-info" popoverTarget={helpId} aria-label={`Explicar ${row.label}`}>
                         <span className="investor-info-mark" aria-hidden="true" />
