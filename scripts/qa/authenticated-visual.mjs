@@ -639,6 +639,12 @@ async function inspectAccessibility(page, route, viewport, theme) {
   };
 }
 
+async function releaseRenderedRoute(page) {
+  // Axe and full-page captures allocate large renderer-side trees. Releasing
+  // each document prevents Chromium accumulation across the 300+ route passes.
+  await page.goto("about:blank", { waitUntil: "commit" });
+}
+
 async function login(page, origin, email, password) {
   await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded" });
   const acceptAllCookies = page.getByRole("button", {
@@ -1216,6 +1222,7 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
           viewport: `zoom-${level.percent}`,
           ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors)),
         });
+        await releaseRenderedRoute(page);
       }
     } finally {
       await context.close();
@@ -1560,6 +1567,7 @@ async function run() {
             ),
             ...(await saveLosslessWebp(persistedBuffer, destination)),
           });
+          await releaseRenderedRoute(page);
         }
 
         if (viewport.key === "desktop-1440x900") {
@@ -1607,6 +1615,7 @@ async function run() {
                   ...(await saveLosslessWebp(persistedBuffer, destination)),
                 });
               }
+              await releaseRenderedRoute(page);
             }
           }
           currentStage = "keyboard";
@@ -1658,6 +1667,7 @@ async function run() {
               ),
               ...(await saveLosslessWebp(persistedBuffer, destination)),
             });
+            await releaseRenderedRoute(page);
           }
         }
       } finally {
