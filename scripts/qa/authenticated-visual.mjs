@@ -645,6 +645,11 @@ async function releaseRenderedRoute(page) {
   await page.goto("about:blank", { waitUntil: "commit" });
 }
 
+function configureQaPage(page) {
+  page.setDefaultTimeout(60_000);
+  page.setDefaultNavigationTimeout(60_000);
+}
+
 async function login(page, origin, email, password) {
   await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded" });
   const acceptAllCookies = page.getByRole("button", {
@@ -1106,6 +1111,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     });
     try {
       const snapshotPage = await snapshotContext.newPage();
+      configureQaPage(snapshotPage);
       await snapshotPage.setContent(
         `<!doctype html><html${themeAttribute}><head><base href="${origin}/">${stylesheets}</head><body><div class="investor-page-shell">${readyProposalSnapshot.dialogHtml}</div></body></html>`,
         { waitUntil: "networkidle" },
@@ -1215,6 +1221,7 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
     });
     await hideHomologationBannerForBaseline(context);
     const page = await context.newPage();
+    configureQaPage(page);
     const consoleErrors = [];
     const pageErrors = [];
     page.on("console", (message) => {
@@ -1265,6 +1272,7 @@ async function captureHomologationCheckpoints(browser, origin, email, password, 
     });
     try {
       const page = await context.newPage();
+      configureQaPage(page);
       await login(page, origin, email, password);
       const banner = page.getByText("HOMOLOGAÇÃO — DADOS SINTÉTICOS", { exact: true });
       await banner.waitFor({ state: "visible", timeout: 20_000 });
@@ -1550,6 +1558,7 @@ async function run() {
       });
       await hideHomologationBannerForBaseline(context);
       const page = await context.newPage();
+      configureQaPage(page);
       const consoleErrors = [];
       const pageErrors = [];
       page.on("console", (message) => {
