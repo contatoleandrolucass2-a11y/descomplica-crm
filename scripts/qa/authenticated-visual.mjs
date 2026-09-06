@@ -667,7 +667,15 @@ async function login(page, origin, email, password) {
   ]);
 }
 
-async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, pageErrors) {
+async function inspectRoute(
+  page,
+  origin,
+  route,
+  expectedTheme,
+  consoleErrors,
+  pageErrors,
+  { waitForArchiveInventory = true } = {},
+) {
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
   const response = await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
@@ -679,7 +687,7 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
   await page.evaluate(() => document.fonts.ready);
 
   const isArchiveSimulator = archiveSimulatorRoutes.has(route);
-  if (isArchiveSimulator) {
+  if (isArchiveSimulator && waitForArchiveInventory) {
     await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
       state: "visible",
       timeout: 25_000,
@@ -1220,7 +1228,15 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
         checks.push({
           zoomPercent: level.percent,
           viewport: `zoom-${level.percent}`,
-          ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors)),
+          ...(await inspectRoute(
+            page,
+            origin,
+            route,
+            "light",
+            consoleErrors,
+            pageErrors,
+            { waitForArchiveInventory: false },
+          )),
         });
         await releaseRenderedRoute(page);
       }
