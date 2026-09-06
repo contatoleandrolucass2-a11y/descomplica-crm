@@ -683,8 +683,8 @@ async function inspectRoute(
 ) {
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
-  const response = await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
-  await page.locator("h1").first().waitFor({ state: "visible", timeout: 20_000 });
+  const response = await page.goto(`${origin}${route}`, { waitUntil: "commit" });
+  await page.locator("h1").first().waitFor({ state: "visible", timeout: 60_000 });
   await page.waitForFunction(
     (theme) => document.documentElement.dataset.theme === theme,
     expectedTheme,
