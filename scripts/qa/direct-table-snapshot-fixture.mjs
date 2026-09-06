@@ -8,7 +8,8 @@ export function buildSyntheticDirectTableQaSnapshot() {
     const projectNumber = (index % 6) + 1;
     const project = `Empreendimento QA ${String(projectNumber).padStart(2, "0")}`;
     const businessUnit = index % 2 === 0 ? "Direcional" : "Riva";
-    const finalPrice = 250_000 + (index % 120) * 1_000;
+    const readyProposalReference = index === 0;
+    const finalPrice = readyProposalReference ? 230_000 : 250_000 + (index % 120) * 1_000;
 
     return {
       id: `qa-stock-${paddedSequence}`,
@@ -19,13 +20,13 @@ export function buildSyntheticDirectTableQaSnapshot() {
       plant: plants[index % plants.length],
       classification: "RESIDENCIAL_QA",
       description: "Unidade sintética para QA visual isolada",
-      finalWithKit: finalPrice,
-      unitBonus: 0,
-      tableSlack: 0,
+      finalWithKit: readyProposalReference ? 340_000 : finalPrice,
+      unitBonus: readyProposalReference ? 95_000 : 0,
+      tableSlack: readyProposalReference ? 15_000 : 0,
       cashBackSlack: 0,
       finalPrice,
       launchPrice: finalPrice,
-      appraisal: finalPrice,
+      appraisal: readyProposalReference ? 350_000 : finalPrice,
       minimumSignal: 1_000,
       privateArea: 35 + (index % 20) * 0.5,
       constructionStatus: "Em obras",

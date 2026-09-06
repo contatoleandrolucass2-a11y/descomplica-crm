@@ -4,6 +4,8 @@ import { describe, it } from "vitest";
 
 // @ts-expect-error — módulo de regras preservado do artefato anexado em JavaScript.
 import * as directTableRules from "../lib/archive-investor/direct-table-file-rules.mjs";
+// @ts-expect-error — módulo legado JavaScript exercitado pela fixture visual compartilhada.
+import * as associativeReadyProposalRules from "../lib/archive-investor/associative-ready-proposal.mjs";
 // @ts-expect-error — fixture JavaScript usada somente pela QA visual isolada.
 import * as directTableQaFixture from "../scripts/qa/direct-table-snapshot-fixture.mjs";
 
@@ -234,6 +236,10 @@ describe("Tabela Direta integral do arquivo anexado", () => {
         businessUnit: string;
         project: string;
         finalPrice: number;
+        finalWithKit: number;
+        unitBonus: number;
+        tableSlack: number;
+        appraisal: number;
         completionDate: string;
         plant: string;
       }>;
@@ -254,9 +260,56 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     );
     assert.ok(payload.items.every((item) => item.id.startsWith("qa-stock-")));
     assert.ok(payload.items.every((item) => item.project.startsWith("Empreendimento QA ")));
-    assert.equal(new Set(payload.items.map((item) => item.finalPrice)).size, 120);
+    assert.equal(new Set(payload.items.map((item) => item.finalPrice)).size, 121);
 
     const selectedUnit = payload.items[0]!;
+    assert.deepEqual(
+      {
+        finalPrice: selectedUnit.finalPrice,
+        finalWithKit: selectedUnit.finalWithKit,
+        unitBonus: selectedUnit.unitBonus,
+        tableSlack: selectedUnit.tableSlack,
+        appraisal: selectedUnit.appraisal,
+      },
+      {
+        finalPrice: 230_000,
+        finalWithKit: 340_000,
+        unitBonus: 95_000,
+        tableSlack: 15_000,
+        appraisal: 350_000,
+      },
+    );
+    const readyProposal = associativeReadyProposalRules.buildAssociativeReadyProposal({
+      grossSaleValue: selectedUnit.finalWithKit,
+      originalUnitBonus: selectedUnit.unitBonus,
+      tableSlack: selectedUnit.tableSlack,
+      sourceDiscount: 0,
+      netSaleValue: selectedUnit.finalPrice,
+      requestedFinancing: 190_000,
+      subsidy: 0,
+      fgts: 0,
+      housingCheck: 0,
+      entry: 1_000,
+      signals: [],
+      annuals: [],
+      installments: 84,
+      appraisal: selectedUnit.appraisal,
+      modality: "MCMV",
+    });
+    assert.equal(readyProposal.status, "ready");
+    assert.deepEqual(
+      associativeReadyProposalRules
+        .buildAssociativeReadyProposalResponseRows(readyProposal)
+        .map((row: { label: string }) => row.label),
+      [
+        "Desconto",
+        "Valor de Contrato",
+        "B.A. da Unidade",
+        "Financiamento",
+        "Sinal CC",
+        "Qtd. de parcelas",
+      ],
+    );
     const option = DIRECT_TABLE_PROPOSAL_OPTIONS.at(-1)!;
     const preset = buildDirectTableProposalPreset(option.id, selectedUnit.finalPrice, {
       baseDate: "2026-09-06",
