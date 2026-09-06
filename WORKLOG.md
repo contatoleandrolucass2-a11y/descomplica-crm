@@ -40,6 +40,12 @@
   regressões corrigidas, inclusive a igualdade entre valor monetário exibido e
   decisão de crédito. A matriz visual autenticada inclui WF14 nos sete
   viewports, três temas, Axe e zoom de 80% a 200%.
+- Para não recolocar dados comerciais no Git nem nas imagens de evidência, a
+  matriz visual cria um estoque sintético determinístico e efêmero de 3.301
+  linhas, removido ao final. Antes da captura local, o runner exige e valida a
+  cópia real por SHA-256, contagem, IDs e qualidade; somente o GitHub Actions,
+  por opt-in explícito e sem o arquivo privado, pode executar o mesmo visual
+  sintético. A matriz completa do anexo também passa antes do deploy.
 - A revisão pré-release eliminou uma divergência de um centavo no ato mínimo,
   passou impressão e cabeçalhos a usar exclusivamente o fluxo atual e incluiu
   no PDF desconto, ato, todos os sinais e todas as intermediárias com valores,

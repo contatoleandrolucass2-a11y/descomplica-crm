@@ -121,6 +121,7 @@ describe("isolated authenticated visual QA contract", () => {
     const script = source("scripts/qa/authenticated-visual.mjs");
     const runner = source("scripts/qa/local-authenticated-visual.mjs");
     const remoteRunner = source("scripts/homologation/run-remote-qa.mjs");
+    const ciWorkflow = source(".github/workflows/ci.yml");
 
     expect(script).toContain('requiredEnvironment("QA_AUTH_FIXTURE_VERIFICATION")');
     expect(script).toContain('requiredEnvironment("QA_AUTH_SUPABASE_URL")');
@@ -148,6 +149,17 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("async function capturePersistedScreenshot(page, comparableBuffer)");
     expect(script).toContain('data-qa-evidence-identity="remote-homologation"');
     expect(script).toContain("mask visible identity and email regions before persistence");
+    expect(script).toContain("installSyntheticInventoryForVisualCapture");
+    expect(script).toContain("buildSyntheticDirectTableQaSnapshot");
+    expect(script).toContain(
+      '["/api/inventory", "/api/inventory/snapshot"].includes(requestUrl.pathname)',
+    );
+    expect(script).toContain(
+      'simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);\n          await stopSyntheticInventory();\n          currentStage = "direct-table-validation"',
+    );
+    expect(script).toContain(
+      'functionalValidation: remoteHomologation\n    ? "protected homologation snapshot without persisted commercial fields"',
+    );
     expect(script).toContain("saveLosslessWebp(persistedBuffer, destination)");
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_RUNTIME_MODE"');
@@ -155,6 +167,13 @@ describe("isolated authenticated visual QA contract", () => {
     expect(runner).toContain("verifyFixturesThroughRls");
     expect(runner).toContain("auth.admin.deleteUser");
     expect(runner).toContain("reserved dashboard fixture slot is occupied");
+    expect(runner).toContain("validatePrivateDirectTableSnapshot");
+    expect(runner).toContain('process.env.QA_ALLOW_MISSING_PRIVATE_INVENTORY === "true"');
+    expect(runner).toContain("buildSyntheticDirectTableQaSnapshot");
+    expect(runner).not.toContain(
+      'INVESTOR_INVENTORY_SNAPSHOT_PATH: path.join(\n        repositoryRoot,\n        "private-data"',
+    );
+    expect(ciWorkflow).toContain('QA_ALLOW_MISSING_PRIVATE_INVENTORY: "true"');
     expect(remoteRunner).toContain(
       'const appEnvironmentPath = "/etc/descomplica-crm/homologation.env"',
     );

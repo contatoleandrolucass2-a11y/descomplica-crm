@@ -1,7 +1,8 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { execFile, spawn, spawnSync } from "node:child_process";
-import { stat } from "node:fs/promises";
+import { lstat, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
@@ -9,11 +10,19 @@ import { promisify } from "node:util";
 import { createClient } from "@supabase/supabase-js";
 
 import legalDocumentVersions from "../../lib/legal/versions.json" with { type: "json" };
+import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const homologationRuntimeRoot = "/var/lib/descomplica-crm-homologation";
 const visualHarnessPath = path.join(import.meta.dirname, "authenticated-visual.mjs");
+const privateDirectTableSnapshotPath = path.join(
+  repositoryRoot,
+  "private-data",
+  "investor-inventory.json",
+);
+const privateDirectTableSnapshotSha256 =
+  "f31e6fe6a8dac204e767744903a6ae957f9bd526ed190e8cdf193c3479e61b24";
 const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const visualGoalsReferenceTime = "2026-08-27T01:21:00.000Z";
 const visualGoalsEffectiveMonth = "2026-08-01";
@@ -293,7 +302,81 @@ async function assertFreshProductionBuild() {
   }
 }
 
-async function startLocalNextServer({ hostname, port, origin, apiUrl, publishableKey }) {
+async function createDirectTableQaSnapshot() {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "descomplica-direct-table-qa-"));
+  try {
+    const snapshotPath = path.join(directory, "inventory.json");
+    const contents = buildSyntheticDirectTableQaSnapshot();
+    await writeFile(snapshotPath, contents, { encoding: "utf8", flag: "wx", mode: 0o600 });
+    return {
+      directory,
+      path: snapshotPath,
+      sha256: createHash("sha256").update(contents).digest("hex"),
+    };
+  } catch (error) {
+    await rm(directory, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+async function validatePrivateDirectTableSnapshot() {
+  let metadata;
+  try {
+    metadata = await lstat(privateDirectTableSnapshotPath);
+  } catch (error) {
+    const missingPrivateSnapshotAllowed =
+      error?.code === "ENOENT" &&
+      process.env.CI === "true" &&
+      process.env.GITHUB_ACTIONS === "true" &&
+      process.env.QA_ALLOW_MISSING_PRIVATE_INVENTORY === "true";
+    if (missingPrivateSnapshotAllowed) return;
+    throw new Error("Private inventory snapshot is required for local authenticated QA.");
+  }
+  if (!metadata.isFile() || metadata.isSymbolicLink()) {
+    throw new Error("Private inventory snapshot must be a regular file, not a symlink.");
+  }
+
+  const contents = await readFile(privateDirectTableSnapshotPath);
+  try {
+    if (createHash("sha256").update(contents).digest("hex") !== privateDirectTableSnapshotSha256) {
+      throw new Error("Private inventory snapshot validation failed.");
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(contents.toString("utf8"));
+    } catch {
+      throw new Error("Private inventory snapshot validation failed.");
+    }
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+    const pricedCount = items.filter(
+      (item) => Number.isFinite(item?.finalPrice) && Number(item.finalPrice) > 0,
+    ).length;
+    if (
+      payload?.source !== "ESTOQUE SPC.xlsx" ||
+      payload?.count !== 3301 ||
+      items.length !== payload.count ||
+      new Set(items.map((item) => item?.id)).size !== payload.count ||
+      pricedCount !== 2987 ||
+      items.length - pricedCount !== 314 ||
+      items.some((item) => !item?.completionDate)
+    ) {
+      throw new Error("Private inventory snapshot validation failed.");
+    }
+  } finally {
+    contents.fill(0);
+  }
+}
+
+async function startLocalNextServer({
+  hostname,
+  port,
+  origin,
+  apiUrl,
+  publishableKey,
+  inventorySnapshotPath,
+  inventorySnapshotSha256,
+}) {
   await assertFreshProductionBuild();
 
   const child = spawn("pnpm", ["start", "--hostname", hostname, "--port", String(port)], {
@@ -306,14 +389,9 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
       APP_ORIGIN: origin,
       AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
       QA_VISUAL_GOALS_REFERENCE_TIME: visualGoalsReferenceTime,
-      INVESTOR_INVENTORY_SNAPSHOT_PATH: path.join(
-        repositoryRoot,
-        "private-data",
-        "investor-inventory.json",
-      ),
+      INVESTOR_INVENTORY_SNAPSHOT_PATH: inventorySnapshotPath,
       INVESTOR_INVENTORY_SNAPSHOT_REFERENCE_DATE: "2026-09-05",
-      INVESTOR_INVENTORY_SNAPSHOT_SHA256:
-        "f31e6fe6a8dac204e767744903a6ae957f9bd526ed190e8cdf193c3479e61b24",
+      INVESTOR_INVENTORY_SNAPSHOT_SHA256: inventorySnapshotSha256,
       AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
       SUPABASE_URL: apiUrl,
       SUPABASE_PUBLISHABLE_KEY: publishableKey,
@@ -1315,60 +1393,69 @@ async function main() {
   const local = await discoverLocalSupabase();
   await assertReachableLoopback(local.apiUrl, "Local Supabase API", "/auth/v1/health");
   throwIfInterrupted();
+  await validatePrivateDirectTableSnapshot();
 
   const qaEndpoint = await resolveQaOrigin();
-  const nextServer = await startLocalNextServer({
-    ...qaEndpoint,
-    apiUrl: local.apiUrl,
-    publishableKey: local.publishableKey,
-  });
-  const { origin } = qaEndpoint;
-  throwIfInterrupted();
+  const inventorySnapshot = await createDirectTableQaSnapshot();
+  let nextServer;
+  try {
+    nextServer = await startLocalNextServer({
+      ...qaEndpoint,
+      apiUrl: local.apiUrl,
+      publishableKey: local.publishableKey,
+      inventorySnapshotPath: inventorySnapshot.path,
+      inventorySnapshotSha256: inventorySnapshot.sha256,
+    });
+    const { origin } = qaEndpoint;
+    throwIfInterrupted();
 
-  const runId = `${Date.now()}-${randomBytes(6).toString("hex")}`;
-  const marker = `QA local synthetic — not production · run ${runId}`;
-  const adminClient = createAdminClient(local.apiUrl, local.secretKey);
-  let account = null;
-  let cleanupPromise = null;
+    const runId = `${Date.now()}-${randomBytes(6).toString("hex")}`;
+    const marker = `QA local synthetic — not production · run ${runId}`;
+    const adminClient = createAdminClient(local.apiUrl, local.secretKey);
+    let account = null;
+    let cleanupPromise = null;
 
-  const cleanup = () => {
-    cleanupPromise ??= (async () => {
-      const failures = [];
+    const cleanup = () => {
+      cleanupPromise ??= (async () => {
+        const failures = [];
 
-      if (account) {
-        try {
-          runLocalSql(local.database, fixtureCleanupSql({ marker, userId: account.id }), "cleanup");
-        } catch (error) {
-          failures.push(error);
-        }
-      }
-
-      if (account) {
-        const { error } = await adminClient.auth.admin.deleteUser(account.id, false);
-        if (error) {
-          failures.push(new Error("Ephemeral local QA account cleanup failed."));
-        } else {
-          const lookup = await adminClient.auth.admin.getUserById(account.id);
-          if (
-            lookup.data?.user ||
-            lookup.error?.status !== 404 ||
-            lookup.error?.code !== "user_not_found"
-          ) {
-            failures.push(new Error("Ephemeral local QA account still exists after cleanup."));
-          } else {
-            account = null;
+        if (account) {
+          try {
+            runLocalSql(
+              local.database,
+              fixtureCleanupSql({ marker, userId: account.id }),
+              "cleanup",
+            );
+          } catch (error) {
+            failures.push(error);
           }
         }
-      }
 
-      if (failures.length > 0) {
-        throw new AggregateError(failures, "Ephemeral local QA cleanup was incomplete.");
-      }
-    })();
-    return cleanupPromise;
-  };
+        if (account) {
+          const { error } = await adminClient.auth.admin.deleteUser(account.id, false);
+          if (error) {
+            failures.push(new Error("Ephemeral local QA account cleanup failed."));
+          } else {
+            const lookup = await adminClient.auth.admin.getUserById(account.id);
+            if (
+              lookup.data?.user ||
+              lookup.error?.status !== 404 ||
+              lookup.error?.code !== "user_not_found"
+            ) {
+              failures.push(new Error("Ephemeral local QA account still exists after cleanup."));
+            } else {
+              account = null;
+            }
+          }
+        }
 
-  try {
+        if (failures.length > 0) {
+          throw new AggregateError(failures, "Ephemeral local QA cleanup was incomplete.");
+        }
+      })();
+      return cleanupPromise;
+    };
+
     try {
       account = await createEphemeralQaUser(adminClient, runId);
       throwIfInterrupted();
@@ -1392,7 +1479,11 @@ async function main() {
       await cleanup();
     }
   } finally {
-    await stopChild(nextServer);
+    try {
+      await stopChild(nextServer);
+    } finally {
+      await rm(inventorySnapshot.directory, { recursive: true, force: true });
+    }
   }
 }
 

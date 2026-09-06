@@ -4,6 +4,8 @@ import { describe, it } from "vitest";
 
 // @ts-expect-error — módulo de regras preservado do artefato anexado em JavaScript.
 import * as directTableRules from "../lib/archive-investor/direct-table-file-rules.mjs";
+// @ts-expect-error — fixture JavaScript usada somente pela QA visual isolada.
+import * as directTableQaFixture from "../scripts/qa/direct-table-snapshot-fixture.mjs";
 
 type ProposalOptionId =
   | "without-signal-without-intermediary"
@@ -218,6 +220,70 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       ).length,
       60,
     );
+  });
+
+  it("gera estoque visual sintético determinístico sem versionar dados comerciais", () => {
+    const first = directTableQaFixture.buildSyntheticDirectTableQaSnapshot();
+    const second = directTableQaFixture.buildSyntheticDirectTableQaSnapshot();
+    const payload = JSON.parse(first) as {
+      source: string;
+      qaFixture: { synthetic: boolean; contract: string };
+      count: number;
+      items: Array<{
+        id: string;
+        businessUnit: string;
+        project: string;
+        finalPrice: number;
+        completionDate: string;
+        plant: string;
+      }>;
+    };
+
+    assert.equal(first, second);
+    assert.equal(payload.source, "ESTOQUE SPC.xlsx");
+    assert.deepEqual(payload.qaFixture, {
+      synthetic: true,
+      contract: "direct-table-visual-v1",
+    });
+    assert.equal(payload.count, directTableQaFixture.directTableQaInventoryCount);
+    assert.equal(payload.items.length, 3_301);
+    assert.equal(new Set(payload.items.map((item) => item.id)).size, 3_301);
+    assert.deepEqual(
+      new Set(payload.items.map((item) => item.businessUnit)),
+      new Set(["Direcional", "Riva"]),
+    );
+    assert.ok(payload.items.every((item) => item.id.startsWith("qa-stock-")));
+    assert.ok(payload.items.every((item) => item.project.startsWith("Empreendimento QA ")));
+    assert.equal(new Set(payload.items.map((item) => item.finalPrice)).size, 120);
+
+    const selectedUnit = payload.items[0]!;
+    const option = DIRECT_TABLE_PROPOSAL_OPTIONS.at(-1)!;
+    const preset = buildDirectTableProposalPreset(option.id, selectedUnit.finalPrice, {
+      baseDate: "2026-09-06",
+      completionDate: selectedUnit.completionDate,
+      plant: selectedUnit.plant,
+    });
+    const result = calculateDirectTableFileFlow({
+      selectedUnitId: selectedUnit.id,
+      developmentName: selectedUnit.project,
+      businessUnit: selectedUnit.businessUnit,
+      product: selectedUnit.project,
+      plant: selectedUnit.plant,
+      description: "Unidade sintética para QA visual isolada",
+      baseDate: "2026-09-06",
+      completionDate: selectedUnit.completionDate,
+      salePrice: selectedUnit.finalPrice,
+      discountAuthorized: false,
+      discount: 0,
+      entryValue: preset.entryValue,
+      income: 100_000,
+      signals: preset.signals,
+      intermediaries: preset.intermediaries,
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.custom.status, "APROVADO");
+    assert.equal(result.custom.signals.filter((item) => item.active).length, 3);
+    assert.equal(result.custom.intermediaries.filter((item) => item.value > 0).length, 6);
   });
 
   it("mantém o snapshot fora de public e exige permissão nas duas fontes", () => {

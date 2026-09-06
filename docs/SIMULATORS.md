@@ -85,6 +85,11 @@ O contrato e o runbook do runtime genérico permanecem em
 
 ## QA local
 
-Fixtures sintéticas podem preencher os campos somente durante QA isolado. Os
-casos de ouro do WF13 são testes versionados, não seeds de produção. Credenciais
-QA, storage state, HTML, HAR e payloads de usuário não são versionados.
+Fixtures sintéticas podem preencher os campos somente durante QA isolado. A
+matriz visual da Tabela Direta gera em diretório temporário 3.301 unidades
+sintéticas determinísticas, para que o snapshot comercial não entre no Git, no
+CI ou nas capturas. A execução local primeiro valida a cópia privada real; a
+ausência dela só é aceita no GitHub Actions com opt-in explícito do workflow.
+Produção continua exigindo a cópia privada com o SHA-256 do anexo. Os casos de
+ouro do WF13 são testes versionados, não seeds de produção. Credenciais QA,
+storage state, HTML, HAR e payloads de usuário não são versionados.

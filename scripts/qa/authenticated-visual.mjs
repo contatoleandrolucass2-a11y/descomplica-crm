@@ -9,6 +9,8 @@ import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 import sharp from "sharp";
 
+import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
+
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const outputRoot = path.join(repositoryRoot, "docs/qa/reference-parity");
 const baselineScreenshotRoot = path.join(outputRoot, "target-authenticated");
@@ -34,6 +36,22 @@ const identityEvidencePolicy = Object.freeze({
     ? "mask visible identity and email regions before persistence"
     : "local synthetic baseline capture",
 });
+const directTableInventoryEvidencePolicy = Object.freeze({
+  persistedVisualCaptures: "deterministic synthetic inventory only",
+  functionalValidation: remoteHomologation
+    ? "protected homologation snapshot without persisted commercial fields"
+    : "deterministic synthetic local runtime",
+});
+const inventoryRoutePattern = "**/api/inventory*";
+const syntheticDirectTableSnapshot = (() => {
+  const contents = buildSyntheticDirectTableQaSnapshot();
+  return JSON.stringify({
+    ...JSON.parse(contents),
+    sourceKind: "versioned-snapshot",
+    snapshotReferenceDate: "2026-09-05",
+    snapshotSha256: createHash("sha256").update(contents).digest("hex"),
+  });
+})();
 
 function parseMode(argv) {
   if (argv.length === 0) return "verify";
@@ -205,6 +223,35 @@ async function hideHomologationBannerForBaseline(context) {
       hideBanner();
     }
   });
+}
+
+async function installSyntheticInventoryForVisualCapture(context, origin) {
+  let installed = true;
+  const handler = async (route) => {
+    const request = route.request();
+    const requestUrl = new URL(request.url());
+    if (
+      request.method() !== "GET" ||
+      requestUrl.origin !== origin ||
+      !["/api/inventory", "/api/inventory/snapshot"].includes(requestUrl.pathname)
+    ) {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      headers: { "cache-control": "no-store" },
+      body: syntheticDirectTableSnapshot,
+    });
+  };
+
+  await context.route(inventoryRoutePattern, handler);
+  return async () => {
+    if (!installed) return;
+    installed = false;
+    await context.unroute(inventoryRoutePattern, handler);
+  };
 }
 
 function parseLocalSupabaseUrl(rawUrl) {
@@ -2112,6 +2159,7 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
       httpCredentials,
     });
     await hideHomologationBannerForBaseline(context);
+    const stopSyntheticInventory = await installSyntheticInventoryForVisualCapture(context, origin);
     const page = await context.newPage();
     const consoleErrors = [];
     const pageErrors = [];
@@ -2131,6 +2179,7 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
         await releaseRenderedRoute(page);
       }
     } finally {
+      await stopSyntheticInventory();
       await context.close();
     }
   }
@@ -2367,6 +2416,7 @@ async function run() {
     credentialsPersisted: false,
     storageStatePersisted: false,
     identityEvidencePolicy,
+    directTableInventoryEvidencePolicy,
     artifacts: {
       baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
       baselineResult: repositoryRelative(baselineResultsPath),
@@ -2443,6 +2493,10 @@ async function run() {
         httpCredentials,
       });
       await hideHomologationBannerForBaseline(context);
+      const stopSyntheticInventory = await installSyntheticInventoryForVisualCapture(
+        context,
+        origin,
+      );
       const page = await context.newPage();
       const consoleErrors = [];
       const pageErrors = [];
@@ -2532,6 +2586,7 @@ async function run() {
           keyboard = await checkKeyboard(page, origin);
           currentStage = "simulator-validation";
           simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);
+          await stopSyntheticInventory();
           currentStage = "direct-table-validation";
           directTableValidation = await checkDirectTableValidation(
             page,
@@ -2588,6 +2643,7 @@ async function run() {
           }
         }
       } finally {
+        await stopSyntheticInventory();
         await context.close();
       }
     }
@@ -2631,6 +2687,7 @@ async function run() {
       credentialsPersisted: false,
       storageStatePersisted: false,
       identityEvidencePolicy,
+      directTableInventoryEvidencePolicy,
       artifacts: {
         baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
         baselineResult: repositoryRelative(baselineResultsPath),
@@ -2709,6 +2766,7 @@ async function run() {
         credentialsPersisted: false,
         storageStatePersisted: false,
         identityEvidencePolicy,
+        directTableInventoryEvidencePolicy,
         artifacts: {
           baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
           baselineResult: repositoryRelative(baselineResultsPath),

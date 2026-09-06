@@ -31,6 +31,9 @@
   limites, pré/pós-chaves, renda, status e auditoria.
 - Corrige menus em tablet/intermediário e evita truncamento dos valores do
   comparativo em 375 px, sem alterar as demais jornadas do simulador.
+- Mantém dados comerciais fora do CI e das capturas: a QA visual usa um estoque
+  sintético efêmero de 3.301 linhas, enquanto o runtime produtivo continua
+  aceitando somente o snapshot privado validado pelo SHA-256 do anexo.
 
 ## 2026-09-02
 
