@@ -1525,7 +1525,7 @@ async function run() {
     email,
     password,
   );
-  const browser = await chromium.launch({ headless: true });
+  let browser = await chromium.launch({ headless: true });
   const routeChecks = [];
   const themeChecks = [];
   const accessibilityChecks = [];
@@ -1695,6 +1695,12 @@ async function run() {
       } finally {
         await context.close();
       }
+
+      // Chromium may retain renderer allocations after a context closes.
+      // Restart between viewports to keep the exhaustive matrix below the
+      // host memory ceiling without reducing coverage.
+      await browser.close();
+      browser = await chromium.launch({ headless: true });
     }
 
     currentStage = "zoom";
