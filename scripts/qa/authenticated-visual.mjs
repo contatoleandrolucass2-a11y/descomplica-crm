@@ -385,7 +385,7 @@ async function captureComparableScreenshot(page) {
     }
   });
   try {
-    return await page.screenshot({ fullPage, animations: "disabled" });
+    return await page.screenshot({ fullPage, animations: "disabled", timeout: 60_000 });
   } finally {
     await page.locator('[data-qa-visual-hidden="true"]').evaluateAll((elements) => {
       for (const element of elements) {
@@ -399,7 +399,10 @@ async function captureComparableScreenshot(page) {
 async function capturePersistedScreenshot(page, comparableBuffer) {
   if (!remoteHomologation) {
     const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
-    return comparableBuffer ?? (await page.screenshot({ fullPage, animations: "disabled" }));
+    return (
+      comparableBuffer ??
+      (await page.screenshot({ fullPage, animations: "disabled", timeout: 60_000 }))
+    );
   }
 
   await page.evaluate(() => {
@@ -441,6 +444,7 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
     return await page.screenshot({
       fullPage,
       animations: "disabled",
+      timeout: 60_000,
       mask: [page.locator('[data-qa-evidence-identity="remote-homologation"]')],
       maskColor: "#334155",
     });
@@ -582,7 +586,33 @@ async function baselineUsageIsUnchanged(baselineUsed) {
 }
 
 async function inspectAccessibility(page, route, viewport, theme) {
-  const analysis = await new AxeBuilder({ page }).withTags(accessibilityTags).analyze();
+  const archiveInventoryRows = archiveSimulatorRoutes.has(route)
+    ? page.locator(".investor-stock-table tbody tr:nth-child(n+51)")
+    : null;
+  if (archiveInventoryRows) {
+    await archiveInventoryRows.evaluateAll((rows) => {
+      for (const row of rows) {
+        row.setAttribute("data-qa-axe-sampled", "true");
+        row.setAttribute("hidden", "");
+      }
+    });
+  }
+
+  let analysis;
+  try {
+    // Repeated stock rows share one semantic template. Sampling keeps Axe from
+    // exhausting Chromium while data tests still validate the complete snapshot.
+    analysis = await new AxeBuilder({ page }).withTags(accessibilityTags).analyze();
+  } finally {
+    if (archiveInventoryRows) {
+      await page.locator('[data-qa-axe-sampled="true"]').evaluateAll((rows) => {
+        for (const row of rows) {
+          row.removeAttribute("hidden");
+          row.removeAttribute("data-qa-axe-sampled");
+        }
+      });
+    }
+  }
   const violations = analysis.violations.map((violation) => ({
     id: violation.id,
     impact: violation.impact,
@@ -606,6 +636,12 @@ async function inspectAccessibility(page, route, viewport, theme) {
     blockingViolations,
     passed: blockingViolations.length === 0,
   };
+}
+
+async function releaseRenderedRoute(page) {
+  // Axe and full-page captures allocate large renderer-side trees. Releasing
+  // each document prevents Chromium accumulation across the full route matrix.
+  await page.goto("about:blank", { waitUntil: "commit" });
 }
 
 async function login(page, origin, email, password) {
@@ -1393,6 +1429,7 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
           viewport: `zoom-${level.percent}`,
           ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors)),
         });
+        await releaseRenderedRoute(page);
       }
     } finally {
       await context.close();
@@ -1741,6 +1778,7 @@ async function run() {
             ),
             ...(await saveLosslessWebp(persistedBuffer, destination)),
           });
+          await releaseRenderedRoute(page);
         }
 
         if (viewport.key === "desktop-1440x900") {
@@ -1788,6 +1826,7 @@ async function run() {
                   ...(await saveLosslessWebp(persistedBuffer, destination)),
                 });
               }
+              await releaseRenderedRoute(page);
             }
           }
           currentStage = "keyboard";
@@ -1846,6 +1885,7 @@ async function run() {
               ),
               ...(await saveLosslessWebp(persistedBuffer, destination)),
             });
+            await releaseRenderedRoute(page);
           }
         }
       } finally {
@@ -1952,7 +1992,12 @@ async function run() {
     process.stdout.write(
       `Authenticated QA passed in ${mode} mode: ${routeChecks.length} responsive, ${themeChecks.length} theme, ${accessibilityChecks.length} accessibility, ${screenshots.length} candidate/baseline comparisons and ${zoom.routes.length} zoom route checks.\n`,
     );
-  } catch {
+  } catch (error) {
+    if (!remoteHomologation && process.env.QA_LOCAL_DIAGNOSTICS === "true") {
+      process.stderr.write(
+        `${error instanceof Error ? error.stack : "Unknown local QA failure."}\n`,
+      );
+    }
     if (!candidateResultWritten) {
       await writeJsonAtomically(candidateResultsPath, {
         schemaVersion: 2,
