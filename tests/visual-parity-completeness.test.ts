@@ -150,7 +150,8 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("mask visible identity and email regions before persistence");
     expect(script).toContain("saveLosslessWebp(persistedBuffer, destination)");
     expect(script).toContain('await page.route("**/api/inventory"');
-    expect(script).toContain("qa_uses_committed_inventory_snapshot");
+    expect(script).toContain("const qaInventorySnapshot = readFileSync(");
+    expect(script).toContain("body: qaInventorySnapshot");
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_RUNTIME_MODE"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_ENABLED_KEYS"');

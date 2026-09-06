@@ -17,6 +17,10 @@ const baselineResultsPath = path.join(outputRoot, "authenticated-results.json");
 const artifactRoot = path.join(repositoryRoot, "test-results/authenticated-visual");
 const candidateScreenshotRoot = path.join(artifactRoot, "candidate");
 const candidateResultsPath = path.join(artifactRoot, "candidate-results.json");
+const qaInventorySnapshot = readFileSync(
+  path.join(repositoryRoot, "public/data/investor-inventory.json"),
+  "utf8",
+);
 const visualDifferenceThreshold = 0.01;
 const visualChannelTolerance = 16;
 const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
@@ -654,9 +658,9 @@ async function configureQaPage(page) {
   // release E2E matrix separately.
   await page.route("**/api/inventory", async (route) => {
     await route.fulfill({
-      status: 503,
+      status: 200,
       contentType: "application/json",
-      body: JSON.stringify({ error: "qa_uses_committed_inventory_snapshot" }),
+      body: qaInventorySnapshot,
     });
   });
 }
