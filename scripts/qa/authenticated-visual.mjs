@@ -958,16 +958,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
       "Valor de Contrato",
       "B.A. da Unidade",
       "Financiamento",
-      "FGTS",
-      "Cheque Moradia",
       "Sinal CC",
-      "Sinal 1",
-      "Sinal 2",
-      "Sinal 3",
-      "Anual 1",
-      "Anual 2",
-      "Anual 3",
-      "Anual 4",
       "Qtd. de parcelas",
     ];
     const table = dialog.querySelector(".investor-associative-ready-proposal-sheet table");
@@ -983,9 +974,17 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     return (
       JSON.stringify(labels) === JSON.stringify(expectedLabels) &&
       valueFor("Sinal CC") === "1.000,00" &&
-      ["Sinal 1", "Sinal 2", "Sinal 3", "Anual 1", "Anual 2", "Anual 3", "Anual 4"].every(
-        (label) => valueFor(label) === "−",
-      ) &&
+      [
+        "FGTS",
+        "Cheque Moradia",
+        "Sinal 1",
+        "Sinal 2",
+        "Sinal 3",
+        "Anual 1",
+        "Anual 2",
+        "Anual 3",
+        "Anual 4",
+      ].every((label) => valueFor(label) === undefined) &&
       valueFor("Qtd. de parcelas") === "84" &&
       !(dialog.textContent || "").includes("Contrato e conferência")
     );
@@ -1070,6 +1069,13 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
           const rowLabels = [
             ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet th"),
           ];
+          const rows = [
+            ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet tbody tr"),
+          ];
+          const usesCompactDesktopSize =
+            window.innerWidth < 481 ||
+            (Math.abs(dialogBox.width - 600) <= 2 &&
+              rows.every((row) => row.getBoundingClientRect().height <= 25));
           return (
             dialogBox.left >= 0 &&
             dialogBox.right <= window.innerWidth &&
@@ -1078,7 +1084,8 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
             dialog.scrollWidth <= dialog.clientWidth + 1 &&
             tableRegion &&
             tableRegion.scrollWidth <= tableRegion.clientWidth + 1 &&
-            rowLabels.every((label) => label.scrollWidth <= label.clientWidth + 1)
+            rowLabels.every((label) => label.scrollWidth <= label.clientWidth + 1) &&
+            usesCompactDesktopSize
           );
         }),
       );

@@ -142,7 +142,7 @@ describe("buildAssociativeReadyProposal", () => {
     expect(result.errors).toContain("Informe a avaliação bancária para calcular a proposta.");
   });
 
-  it("monta a resposta no padrão fixo da planilha revisada", () => {
+  it("monta a resposta na ordem da planilha e oculta valores zerados", () => {
     const calculation = buildAssociativeReadyProposal({
       ...workbookBase,
       signals: [{ label: "Sinal 2", value: 2_000 }],
@@ -155,16 +155,9 @@ describe("buildAssociativeReadyProposal", () => {
       "Valor de Contrato",
       "B.A. da Unidade",
       "Financiamento",
-      "FGTS",
-      "Cheque Moradia",
       "Sinal CC",
-      "Sinal 1",
       "Sinal 2",
-      "Sinal 3",
-      "Anual 1",
-      "Anual 2",
       "Anual 3",
-      "Anual 4",
       "Qtd. de parcelas",
     ]);
     expect(Object.fromEntries(rows.map((row) => [row.label, row.value]))).toMatchObject({
@@ -173,11 +166,11 @@ describe("buildAssociativeReadyProposal", () => {
       "B.A. da Unidade": 7_500,
       Financiamento: 190_000,
       "Sinal CC": 1_000,
-      "Sinal 1": 0,
       "Sinal 2": 2_000,
       "Anual 3": 3_000,
       "Qtd. de parcelas": 84,
     });
+    expect(rows.every((row) => row.value > 0)).toBe(true);
   });
 
   it("não oculta subsídio nem pagamentos além das linhas fixas quando ativos", () => {
