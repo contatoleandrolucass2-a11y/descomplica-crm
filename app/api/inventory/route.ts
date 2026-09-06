@@ -1,5 +1,5 @@
-import { authorizeRoute } from "@/lib/security/route-auth";
 import { noStoreHeaders } from "@/lib/security/api";
+import { authorizeRoute } from "@/lib/security/route-auth";
 
 type InventoryPayload = {
   source?: string;

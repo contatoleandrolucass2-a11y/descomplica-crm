@@ -4,9 +4,9 @@
 
 Esta matriz descreve o inventário HTTP de 21 rotas protegidas e deve ser validada
 com contas QA sintéticas. O catálogo PostgreSQL mantém exatamente 17 entradas em
-`app_pages`; o catálogo HTTP possui 18 rotas habilitadas, pois acrescenta a
-réplica WF14 protegida pelo guard Master-only existente. As outras três rotas de
-simuladores continuam no smoke para comprovar o `403` fail-closed.
+`app_pages`; o catálogo HTTP possui 19 rotas habilitadas, pois acrescenta as
+réplicas WF14 e WF15 protegidas pelo guard Master-only existente. As outras duas
+rotas de simuladores continuam no smoke para comprovar o `403` fail-closed.
 
 Perfis exigidos:
 
@@ -31,9 +31,9 @@ Produção e instalação limpa convergem para as mesmas 17 entradas de `app_pag
 A migration Auth/MFA remove somente as quatro identidades excedentes encontradas
 no restore (`WF16`, `CAIXA`, `WF14` e `WF15`), preserva `user_roles` e overrides
 e recompõe somente os vínculos herdados já existentes em produção. Neste
-candidato, a réplica WF14 acrescenta a 18ª rota HTTP habilitada pelo catálogo
-versionado, sem migration ou nova permissão de banco; WF16, CAIXA e WF15 formam
-as três rotas HTTP bloqueadas restantes.
+candidato, as réplicas WF14 e WF15 acrescentam a 18ª e a 19ª rotas HTTP
+habilitadas pelo catálogo versionado, sem migration ou nova permissão de banco;
+WF16 e CAIXA formam as duas rotas HTTP bloqueadas restantes.
 
 | Rota protegida                            | `master` | `admin` | `broker`, `coordinator`, `real_estate` | `manager`, `house`, `partnership_channel`, `pending` | visitante |
 | ----------------------------------------- | -------: | ------: | -------------------------------------: | ---------------------------------------------------: | --------: |
@@ -54,7 +54,7 @@ as três rotas HTTP bloqueadas restantes.
 | `/app/simulacao/calcular-documentacao`    |      403 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/caixa`                    |      403 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/tabela-direta`            |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/tabela-investidor`        |      403 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/tabela-investidor`        |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/admin`                                  |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/admin/usuarios`                         |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/admin/paginas`                          |      200 |     200 |                                    403 |                                                  403 |  redirect |
@@ -65,11 +65,11 @@ como fixtures pelos nove perfis do smoke novo, mas entram no fingerprint do rehe
 Produção não possui overrides individuais; o processo continua preservando a tabela
 integralmente caso overrides sejam adicionados antes do cutover.
 
-Autorização de página e execução de motor são gates distintos. Os três `200` de
-simulação autorizam o hub, WF13 e a réplica WF14. As outras três rotas falham
-antes da renderização. Flags, allowlist, permissão de execução e política
-comercial continuam validadas separadamente; WF14 não persiste nem chama motor
-oficial.
+Autorização de página e execução de motor são gates distintos. Os quatro `200`
+de simulação autorizam o hub, WF13 e as réplicas WF14 e WF15. As outras duas
+rotas falham antes da renderização. Flags, allowlist, permissão de execução e
+política comercial continuam validadas separadamente; WF14 e WF15 não persistem
+nem chamam motor oficial.
 
 ## Matriz de APIs somente leitura/fail-closed
 

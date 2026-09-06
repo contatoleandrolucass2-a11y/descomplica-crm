@@ -43,23 +43,26 @@ existe.
 | REF-10 | `/configuracoes/metas`                | Metas do funil          | `/app/configuracoes/metas`                | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
 | REF-11 | `/configuracoes/metas/parcerias`      | Metas de parcerias      | `/app/configuracoes/metas/parcerias`      | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
 | REF-12 | `/configuracoes/metas/pontos`         | Pesos e metas de pontos | `/app/configuracoes/metas/pontos`         | `crm.settings.manage`   | Preview e rascunho versionado; ranking segue bloqueado  |
-| REF-13 | `/simulacao`                          | Índice de simuladores   | `/app/simulacao`                          | `crm.simulators.view`   | Hub visual; WF13 canário e réplica WF14 neste candidato |
+| REF-13 | `/simulacao`                          | Índice de simuladores   | `/app/simulacao`                          | `crm.simulators.view`   | Hub visual; WF13 canário e réplicas WF14 e WF15         |
 | REF-14 | `/simulacao/associativo-fluxo-linear` | Simulador Associativo   | `/app/simulacao/associativo-fluxo-linear` | `crm.simulators.view`   | Fórmula `wf13-1.3.0`; execução isolada Master-only      |
 | REF-15 | `/simulacao/calcular-documentacao`    | Documentação WF16       | `/app/simulacao/calcular-documentacao`    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
 | REF-16 | `/simulacao/caixa`                    | Simulador CAIXA         | `/app/simulacao/caixa`                    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
 | REF-17 | `/simulacao/tabela-direta`            | Tabela Direta WF14      | `/app/simulacao/tabela-direta`            | `crm.simulators.view`   | Réplica integral implementada neste candidato           |
-| REF-18 | `/simulacao/tabela-investidor`        | Tabela Investidor WF15  | `/app/simulacao/tabela-investidor`        | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
+| REF-18 | `/simulacao/tabela-investidor`        | Tabela Investidor WF15  | `/app/simulacao/tabela-investidor`        | `crm.simulators.view`   | Réplica funcional completa implementada                 |
 
-O mapeamento WF13, WF16, WF14 e WF15 acima identifica as jornadas protegidas.
-O WF14 reproduz integralmente o artefato anexado com cálculo local, sem
-persistência nem integração; seus parâmetros preservados não são promovidos a
-política oficial do runtime comercial. WF16, CAIXA e WF15 continuam
-indisponíveis até incrementos próprios com fonte aprovada.
+O mapeamento WF13, WF16, WF14 e WF15 acima foi aprovado explicitamente para
+esta etapa. Ele identifica as jornadas protegidas e visuais, não homologa
+fórmulas. WF14 e WF15 reproduzem integralmente os respectivos artefatos anexados
+com cálculo local, sem persistência nem integração; seus parâmetros preservados
+não são promovidos a política oficial do runtime comercial. WF16 e CAIXA
+continuam indisponíveis até incrementos próprios com fonte aprovada.
 
-O snapshot SPC usado pela réplica WF14 não é conteúdo público nem artefato da
+O snapshot SPC usado pelas réplicas não é conteúdo público nem artefato da
 imagem. O arquivo fica fora do Git em volume privado do host, é validado por
-checksum antes do start e montado somente para leitura no contêiner. A aplicação
-o entrega apenas após autorização server-side e nunca permite cache HTTP.
+checksum antes do start e montado somente para leitura no contêiner. A
+aplicação o entrega apenas após autorização server-side e nunca permite cache
+HTTP. O WF14 aceita somente esse snapshot; o WF15 o apresenta primeiro e pode
+receber a atualização protegida da fonte viva sem bloquear a interface.
 Essa correção remove o arquivo do HEAD atual, mas não reescreve objetos de
 commits públicos anteriores; a cópia histórica deve ser tratada como exposta
 até o proprietário autorizar privatização ou purge separado do repositório.
@@ -119,8 +122,8 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 | `/api/dashboard/status`          | Estado da ingestão                      | Exige `crm.dashboard.view`                                   |
 | `/api/refresh/salesforce`        | Solicitação de atualização              | Exige permissão, flag e controles server-side                |
 | `/api/ingest/salesforce`         | Ingestão de máquina                     | Bearer dedicado, contrato tipado e RPC mínima                |
-| WF16, CAIXA e WF15               | Rotas futuras ainda versionadas         | Fora de `app_pages`; autenticado recebe `403`                |
-| WF14                             | Réplica protegida do artefato anexado   | Fora de `app_pages`; Master acessa pelo hub/menu             |
+| WF16 e CAIXA                     | Rotas futuras ainda versionadas         | Fora de `app_pages`; autenticado recebe `403`                |
+| WF14 e WF15                      | Réplicas protegidas dos anexos          | Fora de `app_pages`; Master acessa pelo hub/menu             |
 
 ## Catálogo completo de componentes de interface relevantes
 
@@ -180,7 +183,8 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 | Salesforce                       | Exportador/contrato v2 e RPC de ingestão existentes                                               | Bearer de máquina, validação Zod e transação               | Disponível somente quando flags/configuração estão completas                       |
 | Catálogo visual dos simuladores  | `SIMULATORS`                                                                                      | `crm.simulators.view` + guard server-side                  | Cinco jornadas aprovadas para composição visual                                    |
 | Tabela Direta WF14               | Volume SPC privado, fora do Git, com 3.301 linhas + regras isoladas da réplica                    | `crm.simulators.view`, endpoints `no-store`; cálculo local | Quatro opções; 314 linhas sem preço bloqueadas; referência fixa do arquivo anexado |
-| Motores oficiais dos simuladores | Runtime oficial isolado                                                                           | Flags, allowlist e permissão de execução                   | WF13 canário; WF16, CAIXA, WF14 oficial e WF15 bloqueados                          |
+| Tabela Investidor WF15           | Snapshot SPC protegido com 3.301 linhas + regras isoladas da réplica                              | `crm.simulators.view`, endpoints `no-store`; cálculo local | Oito opções; 122 vagas avulsas excluídas; atualização viva não bloqueante          |
+| Motores oficiais dos simuladores | Runtime oficial isolado                                                                           | Flags, allowlist e permissão de execução                   | WF13 canário; WF16, CAIXA e homologações oficiais de WF14/WF15 bloqueadas          |
 | Read model canônico v3           | `crm_read_model_v3_*` + mappings e autoridade privada da fonte                                    | RPCs por dataset; zero grant direto                        | Shadow local; nenhuma fonte real ativada                                           |
 | Ranking Qlik de imobiliárias     | Tabelas protegidas, sem leitura direta autorizada                                                 | ingestão mínima e leitura escopada; VGV textual            | Caller/cutover ainda bloqueados                                                    |
 | Referência viva                  | Somente composição visual sanitizada                                                              | Nunca usada em runtime                                     | Não é fonte comercial                                                              |

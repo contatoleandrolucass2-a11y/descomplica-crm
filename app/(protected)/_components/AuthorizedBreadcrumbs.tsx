@@ -8,13 +8,15 @@ import { buildBreadcrumbs } from "@/lib/navigation/presentation";
 
 import styles from "./ProtectedShell.module.css";
 
+const ARCHIVE_SIMULATOR_ROUTES = new Set([
+  "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
+  "/app/simulacao/tabela-investidor",
+]);
+
 export function AuthorizedBreadcrumbs({ pages }: { pages: AppPage[] }) {
   const pathname = usePathname();
-  if (
-    pathname === "/app/simulacao/associativo-fluxo-linear" ||
-    pathname === "/app/simulacao/tabela-direta"
-  )
-    return null;
+  if (ARCHIVE_SIMULATOR_ROUTES.has(pathname)) return null;
   const breadcrumbs = buildBreadcrumbs(pathname, pages);
   if (breadcrumbs.length === 0) return null;
 

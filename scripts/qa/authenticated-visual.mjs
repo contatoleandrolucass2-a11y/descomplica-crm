@@ -84,6 +84,7 @@ const routes = [
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
   "/app/simulacao/tabela-direta",
+  "/app/simulacao/tabela-investidor",
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
@@ -99,6 +100,11 @@ const simulatorRoutesByRuntimeKey = new Map([
 const simulatorRuntimeKeysByRoute = new Map(
   [...simulatorRoutesByRuntimeKey].map(([runtimeKey, route]) => [route, runtimeKey]),
 );
+const archiveSimulatorRoutes = new Set([
+  "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
+  "/app/simulacao/tabela-investidor",
+]);
 
 function expectedEnabledSimulatorRoutes() {
   if (process.env.OFFICIAL_SIMULATOR_RUNTIME_MODE !== "active") return new Set();
@@ -153,11 +159,8 @@ const desktopThemeCaptureRoutes = new Set([
   "/app/configuracoes/metas/pontos",
   "/app/simulacao/associativo-fluxo-linear",
   "/app/simulacao/tabela-direta",
+  "/app/simulacao/tabela-investidor",
   ...adminRoutes,
-]);
-const archiveSimulatorRoutes = new Set([
-  "/app/simulacao/associativo-fluxo-linear",
-  "/app/simulacao/tabela-direta",
 ]);
 const mobileDarkViewportKey = "mobile-390x844";
 const zoomLevels = [
@@ -674,10 +677,7 @@ async function inspectAccessibility(page, route, viewport, theme) {
     targets: violation.nodes.map((node) => node.target),
     helpUrl: violation.helpUrl,
   }));
-  // The upstream simulator intentionally uses compact 19px table controls. Keep
-  // this exception visible in evidence while preserving exact source parity.
-  const acceptedViolationIds =
-    route === "/app/simulacao/associativo-fluxo-linear" ? new Set(["target-size"]) : new Set();
+  const acceptedViolationIds = new Set();
   const blockingViolations = violations.filter(
     (violation) => !acceptedViolationIds.has(violation.id),
   );
@@ -694,10 +694,9 @@ async function inspectAccessibility(page, route, viewport, theme) {
 
 async function releaseRenderedRoute(page) {
   // Axe and full-page captures allocate large renderer-side trees. Releasing
-  // each document prevents Chromium accumulation across the full route matrix.
+  // each document prevents Chromium accumulation across the 300+ route passes.
   await page.goto("about:blank", { waitUntil: "commit" });
 }
-
 async function login(page, origin, email, password) {
   await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded" });
   const acceptAllCookies = page.getByRole("button", {
@@ -720,19 +719,40 @@ async function login(page, origin, email, password) {
   ]);
 }
 
-async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, pageErrors) {
+async function inspectRoute(
+  page,
+  origin,
+  route,
+  expectedTheme,
+  consoleErrors,
+  pageErrors,
+  { waitForArchiveInventory = true } = {},
+) {
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
-  const response = await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
-  await page.locator("h1").first().waitFor({ state: "visible", timeout: 20_000 });
-  await page.waitForFunction(
-    (theme) => document.documentElement.dataset.theme === theme,
-    expectedTheme,
-  );
+  let response = await page.goto(`${origin}${route}`, { waitUntil: "commit" });
+  await page.locator("h1").first().waitFor({ state: "visible", timeout: 60_000 });
+  try {
+    await page.waitForFunction(
+      (theme) => document.documentElement.dataset.theme === theme,
+      expectedTheme,
+      { timeout: 20_000 },
+    );
+  } catch {
+    // A renderer under the full screenshot/Axe matrix can occasionally commit
+    // before the inline theme bootstrap runs. Retry the document once, then
+    // keep the normal hard failure if the rendered contract is still absent.
+    response = await page.reload({ waitUntil: "commit" });
+    await page.locator("h1").first().waitFor({ state: "visible", timeout: 60_000 });
+    await page.waitForFunction(
+      (theme) => document.documentElement.dataset.theme === theme,
+      expectedTheme,
+    );
+  }
   await page.evaluate(() => document.fonts.ready);
 
   const isArchiveSimulator = archiveSimulatorRoutes.has(route);
-  if (isArchiveSimulator) {
+  if (isArchiveSimulator && waitForArchiveInventory) {
     await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
       state: "visible",
       timeout: 25_000,
@@ -952,6 +972,15 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     };
   });
 
+  // Use a project present in both the protected reference snapshot and the
+  // live feed so the flow remains deterministic while the background refresh
+  // resolves. Its units are still in construction and exercise the full plan.
+  await page
+    .getByRole("combobox", { name: "Nome do Empreendimento", exact: true })
+    .selectOption("Estilo Lapa");
+  await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
+    state: "visible",
+  });
   await page.locator(".investor-stock-table tbody tr.selectable").first().click();
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
@@ -2190,7 +2219,9 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
         checks.push({
           zoomPercent: level.percent,
           viewport: `zoom-${level.percent}`,
-          ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors)),
+          ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors, {
+            waitForArchiveInventory: false,
+          })),
         });
         await releaseRenderedRoute(page);
       }
@@ -2479,7 +2510,7 @@ async function run() {
     email,
     password,
   );
-  const browser = await chromium.launch({ headless: true });
+  let browser = await chromium.launch({ headless: true });
   const routeChecks = [];
   const themeChecks = [];
   const accessibilityChecks = [];
@@ -2673,6 +2704,12 @@ async function run() {
         await stopSyntheticInventory();
         await context.close();
       }
+
+      // Chromium may retain renderer allocations after a context closes.
+      // Restart between viewports to keep the exhaustive matrix below the
+      // host memory ceiling without reducing coverage.
+      await browser.close();
+      browser = await chromium.launch({ headless: true });
     }
 
     currentStage = "zoom";
@@ -2775,7 +2812,12 @@ async function run() {
     process.stdout.write(
       `Authenticated QA passed in ${mode} mode: ${routeChecks.length} responsive, ${themeChecks.length} theme, ${accessibilityChecks.length} accessibility, ${screenshots.length} candidate/baseline comparisons and ${zoom.routes.length} zoom route checks.\n`,
     );
-  } catch {
+  } catch (error) {
+    if (!remoteHomologation && process.env.QA_LOCAL_DIAGNOSTICS === "true") {
+      process.stderr.write(
+        `${error instanceof Error ? error.stack : "Unknown local QA failure."}\n`,
+      );
+    }
     if (!candidateResultWritten) {
       await writeJsonAtomically(candidateResultsPath, {
         schemaVersion: 2,

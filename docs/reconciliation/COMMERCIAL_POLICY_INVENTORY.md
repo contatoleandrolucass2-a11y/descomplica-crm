@@ -13,8 +13,9 @@ Eles comprovam comportamento histórico, não aprovação, vigência ou autorida
 comercial. Nenhuma política assinada, tabela homologada, proprietário formal ou
 casos de ouro foi localizada. Portanto, “implementada” nunca significa
 “confirmada por fonte oficial”. O runtime oficial continua fail-closed fora do
-WF13; a réplica WF14 calcula localmente, sem submit ao servidor, persistência ou
-integração e sem converter seus parâmetros em política homologada.
+WF13; as réplicas WF14 e WF15 calculam localmente, sem submit ao servidor,
+persistência ou integração e sem converter seus parâmetros em política
+homologada.
 
 ## Classificação consolidada
 
@@ -24,7 +25,7 @@ integração e sem converter seus parâmetros em política homologada.
 | Calcular Documentação / WF16 | Motor histórico `CgilvhfRoj4PGsQR` com faixas e constantes embutidas                       | Implementada sem fonte; divergente; incompleta     | Bloqueada                                 |
 | CAIXA                        | Nenhum motor dedicado; WF18 é stub e o orquestrador histórico declara não simular banco    | Ausente                                            | Bloqueada                                 |
 | Tabela Direta / WF14         | Artefato anexado + snapshot SPC; workflow `Jd8XawLpIAvHbgYg` não portado                   | Réplica funcional; política oficial não homologada | Protegida para Master; sem persistência   |
-| Tabela Investidor / WF15     | Motor histórico `5wbldhDymGu0O5KY`; depende de estoque legado conflitante                  | Implementada sem fonte; divergente; incompleta     | Bloqueada                                 |
+| Tabela Investidor / WF15     | Artefato anexado + snapshot SPC protegido; motor histórico `5wbldhDymGu0O5KY` não portado  | Réplica funcional; política oficial não homologada | Publicada para Master; sem persistência   |
 | Pontuação                    | Sete métricas e pesos sugeridos herdados; tabela/RPC sem seed                              | Implementada sem fonte oficial                     | Só funciona após configuração explícita   |
 | Bônus                        | `floor(base × visitas/agendamentos)` no código atual                                       | Implementada sem fonte oficial                     | Ativa apenas com pesos e snapshot válidos |
 | Arredondamento               | Funil usa `round` por etapa; ranking usa `floor` no bônus; simuladores históricos variam   | Divergente                                         | Não homologado                            |
@@ -96,6 +97,13 @@ upstreams ativos escreviam a mesma tabela antiga de estoque, sem regra de
 precedência. A chave dita idempotente continha relógio e não era persistida. Não
 portar.
 
+A rota protegida publicada em setembro de 2026 não porta esse workflow. Ela
+reproduz o artefato anexado com snapshot SPC versionado, seleção por ID exato,
+oito opções de 18 ou 24 parcelas, fluxo personalizado e validações locais. A
+proposta não é persistida nem enviada a integração. Essa publicação registra
+paridade com o artefato fornecido; não transforma os parâmetros da réplica em
+política oficial do runtime comercial.
+
 ### WF16 — Documentação
 
 O motor histórico embutia enquadramentos, limites, ITBI, 48 faixas cartoriais,
@@ -164,8 +172,9 @@ observado sem definição oficial. Todos continuam indisponíveis.
 Estas são as únicas respostas comerciais necessárias para iniciar motores;
 comportamento legado não será adotado por silêncio.
 
-1. Fornecer, para WF16, CAIXA, WF15 e para a homologação oficial do WF14,
-   política versionada, vigência, aprovador e casos de ouro de entrada/saída.
+1. Fornecer, para WF16 e CAIXA e para a homologação oficial de WF14 e WF15,
+   política oficial versionada, vigência, aprovador e casos de ouro de
+   entrada/saída.
 2. Definir a fonte única oficial de estoque, sua precedência, IDs, moeda,
    remoção/correção e baseline conciliada.
 3. Aprovar métricas, pesos, bônus, arredondamento, desempate e fonte de roleta do
@@ -177,8 +186,8 @@ comportamento legado não será adotado por silêncio.
 6. Definir campanhas e premiações: vigência, público, critérios, valores,
    acumulação, aprovação e auditoria.
 
-Até essas respostas: simuladores, SLA, ranking avançado, roleta, campanhas e
-prêmios continuam fail-closed.
+Até essas respostas: os motores oficiais dos simuladores, SLA, ranking
+avançado, roleta, campanhas e prêmios continuam fail-closed.
 
 ## Fundação versionada de runtime
 

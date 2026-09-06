@@ -70,7 +70,7 @@ sudo install -o root -g root -m 0640 \
 ```
 
 ```bash
-cd /srv/descomplica-crm
+cd /srv/descomplica-crm-simulador-associativo
 git fetch origin main
 git switch main
 git pull --ff-only origin main

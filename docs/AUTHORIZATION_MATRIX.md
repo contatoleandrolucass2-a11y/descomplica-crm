@@ -94,12 +94,12 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 - início administrativo, usuários e catálogo de páginas.
 
 O inventário HTTP continua cobrindo 21 rotas protegidas: 17 correspondem ao
-catálogo PostgreSQL, a réplica WF14 é uma rota adicional habilitada no catálogo
-HTTP versionado e WF16, CAIXA e WF15 permanecem bloqueados. Essas três rotas
-futuras continuam sem linha em `app_pages` e retornam `403` mesmo ao Master. O
-WF14 também permanece fora de `app_pages` para não alterar o banco neste
-candidato; sua réplica integral está implementada no hub e no menu próprio de
-Simulação, e o guard server-side exige a permissão existente
+catálogo PostgreSQL, as réplicas WF14 e WF15 são rotas adicionais habilitadas
+no catálogo HTTP versionado e WF16 e CAIXA permanecem bloqueados. As quatro
+rotas continuam sem linha em `app_pages`; WF16 e CAIXA retornam `403` mesmo ao
+Master. WF14 e WF15 permanecem fora de `app_pages` para não alterar o banco
+neste candidato, mas suas réplicas integrais estão publicadas no hub e no menu
+próprio de Simulação. O guard server-side de ambas exige a permissão existente
 `crm.simulators.view`.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
@@ -113,17 +113,19 @@ continua separada e só retorna entries com ID Qlik mapeado, owner ativo,
 vigência e organização dentro do escopo aprovado; ela não é a fonte da página
 v3.
 
-O hub, WF13 e a réplica WF14 exigem `crm.simulators.view`. Durante o canário
-WF13, essa permissão é nível 100 e pertence somente ao Master, sem overrides
-diretos. O gate de página permanece separado de `crm.simulators.execute`;
-possuir um não substitui o outro. Somente o motor oficial WF13 pode executar
-quando sua flag explícita também está ativa. A réplica WF14 calcula no
-navegador, sem persistência ou integração, a partir do snapshot SPC mantido em
-volume privado fora do Git e montado somente para leitura. O endpoint primário
-`GET /api/inventory/snapshot` repete o gate `crm.simulators.view` e responde com
-`no-store`. A Tabela Direta falha fechado se esse endpoint não estiver
-disponível; `GET /api/inventory` também permanece protegido e `no-store`, mas
-não é fallback do WF14. WF16, CAIXA e WF15 continuam bloqueados.
+O hub, WF13 e as réplicas WF14 e WF15 exigem `crm.simulators.view`. Durante o
+canário WF13, essa permissão é nível 100 e pertence somente ao Master, sem
+overrides diretos. O gate de página permanece separado de
+`crm.simulators.execute`; possuir um não substitui o outro. Somente o motor
+oficial WF13 pode executar quando sua flag explícita também está ativa. As
+réplicas WF14 e WF15 calculam no navegador, sem persistência ou integração. O
+WF14 usa o snapshot SPC mantido em volume privado fora do Git e montado somente
+para leitura. O endpoint primário `GET /api/inventory/snapshot` repete o gate
+`crm.simulators.view` e responde com `no-store`. A Tabela Direta falha fechado
+se esse endpoint não estiver disponível; `GET /api/inventory` também permanece
+protegido e `no-store`, mas não é fallback do WF14. O WF15 apresenta primeiro o
+snapshot protegido e trata a fonte viva como atualização não bloqueante. WF16 e
+CAIXA continuam bloqueados.
 
 Falta de permissão autenticada usa o interruptor `forbidden()` do Next.js e
 retorna a superfície `AUTH-403`; caminhos realmente inexistentes usam

@@ -163,6 +163,9 @@ describe("isolated authenticated visual QA contract", () => {
       'functionalValidation: remoteHomologation\n    ? "protected homologation snapshot without persisted commercial fields"',
     );
     expect(script).toContain("saveLosslessWebp(persistedBuffer, destination)");
+    expect(script).toContain('const inventoryRoutePattern = "**/api/inventory*"');
+    expect(script).toContain("await context.route(inventoryRoutePattern, handler)");
+    expect(script).toContain("body: syntheticDirectTableSnapshot");
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_RUNTIME_MODE"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_ENABLED_KEYS"');

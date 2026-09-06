@@ -85,9 +85,9 @@ export function SiteMenu({ canPersistTheme = true }: { canPersistTheme?: boolean
           </a>
           <a
             role="menuitem"
-            aria-disabled="true"
-            title="Disponível em um próximo incremento"
+            aria-current={activePathname === "/simulacao/caixa" ? "page" : undefined}
             onClick={() => setSimulationOpen(false)}
+            href="/app/simulacao/caixa"
           >
             CAIXA
           </a>
@@ -125,9 +125,13 @@ export function SiteMenu({ canPersistTheme = true }: { canPersistTheme?: boolean
           </a>
           <a
             role="menuitem"
-            aria-disabled="true"
-            title="Disponível em um próximo incremento"
+            aria-current={
+              activePathname === "/simulacao/tabela-investidor" && proposalFile === "3"
+                ? "page"
+                : undefined
+            }
             onClick={() => setSimulationOpen(false)}
+            href="/app/simulacao/tabela-investidor"
           >
             Tabela Investidor
           </a>

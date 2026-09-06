@@ -433,7 +433,11 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       "utf8",
     );
 
-    assert.ok(calculator.includes('return fetchInventory("/api/inventory/snapshot")'));
+    assert.ok(
+      calculator.includes(
+        'const snapshotPayload = await fetchInventory("/api/inventory/snapshot")',
+      ),
+    );
     assert.ok(!calculator.includes('return { ...payload, sourceKind: "live" as const }'));
     assert.ok(calculator.includes("flow: directResult"));
     assert.ok(calculator.includes("Composição atual da Tabela Direta"));

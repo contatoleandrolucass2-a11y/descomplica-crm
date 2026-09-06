@@ -1,13 +1,14 @@
 # Matriz de paridade da referência viva
 
-Versão: 1.2. Data de corte da referência: 2026-08-09. Atualização WF14:
-2026-09-06.
+Versão: 1.2. Data de corte da referência: 2026-08-09. Atualizações WF14 e
+WF15: 2026-09-06.
 
 “Paridade” significa preservar a hierarquia visual e a capacidade útil quando
 ela pode ser sustentada por contratos seguros. Não significa copiar falhas de
-autenticação ou elevar regras da referência viva a política oficial. A réplica
-WF14 usa integralmente o artefato anexado e seu snapshot versionado porque esse
-é o conteúdo explicitamente autorizado para a rota.
+autenticação ou elevar regras da referência viva a política oficial. As
+réplicas WF14 e WF15 usam integralmente os respectivos artefatos anexados e o
+snapshot protegido porque esse é o conteúdo explicitamente autorizado para as
+rotas.
 
 ## Legenda
 
@@ -38,7 +39,7 @@ WF14 usa integralmente o artefato anexado e seu snapshot versionado porque esse
 | REF-15 | Documentação: formulário e resultado WF16                          | Formulário local sem submit                    | Seções, opções e painel completos                                | Fórmula não versionada; resultado indisponível                     | Especificação oficial + testes antes de habilitar                            | Motor bloqueado      |
 | REF-16 | CAIXA: simulador                                                   | Formulário local sem submit                    | Jornada, campos e painel completos                               | Fonte e regra oficial ausentes                                     | Incremento CAIXA próprio                                                     | Motor bloqueado      |
 | REF-17 | Tabela Direta: formulário e resultado WF14                         | Réplica protegida sem persistência             | Estoque, quatro opções, fluxo, memória, guias e painel completos | Parâmetros não homologados como política oficial                   | Testes de paridade, dados, responsividade e acessibilidade                   | Réplica operacional  |
-| REF-18 | Tabela Investidor: formulário e resultado WF15                     | Formulário local sem submit                    | Busca, proposta e painel completos                               | Fórmula e parâmetros oficiais ausentes                             | Contrato oficial + testes                                                    | Motor bloqueado      |
+| REF-18 | Tabela Investidor: formulário e resultado WF15                     | Réplica protegida sem persistência             | Estoque SPC, oito opções, fluxo, guias e painel completos        | Parâmetros não homologados como política oficial                   | Testes de paridade, dados, responsividade e acessibilidade                   | Réplica publicada    |
 
 ## Diferenças intencionais da fundação
 
@@ -52,8 +53,8 @@ WF14 usa integralmente o artefato anexado e seu snapshot versionado porque esse
 5. Filtros de gerente, responsável, empresa e canal detalhado permanecem
    indisponíveis até existir enforcement no servidor e no banco.
 6. Regras editoriais de ritmo, premiação, roleta, ranking avançado e os demais
-   motores funcionais não fazem parte da fundação visual; WF14 é uma réplica
-   isolada do artefato fornecido.
+   motores funcionais não fazem parte da fundação visual; WF14 e WF15 são
+   réplicas isoladas dos artefatos fornecidos.
 
 ## Critério de avanço
 

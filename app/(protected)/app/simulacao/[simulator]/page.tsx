@@ -14,6 +14,7 @@ import {
 import { SimulatorWorkspace } from "../_components/SimulatorWorkspace";
 import { AssociativeTableArchive } from "../_components/AssociativeTableArchive";
 import { DirectTableArchive } from "../_components/DirectTableArchive";
+import { InvestorTableArchive } from "../_components/InvestorTableArchive";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,10 @@ export default async function SimulatorPage({
 
   if (simulator === "tabela-direta") {
     return <DirectTableArchive />;
+  }
+
+  if (simulator === "tabela-investidor") {
+    return <InvestorTableArchive />;
   }
 
   return (
