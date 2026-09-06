@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/auth/supabase/server";
 import { getMfaAssurance } from "@/lib/auth/mfa/assurance";
 import { ROLES } from "./roles";
@@ -40,68 +42,70 @@ function isPermissionKey(value: string): value is PermissionKey {
 // treating it as anonymous would bounce between /login and /app forever because
 // the login page correctly recognizes the still-valid Supabase session.
 // Throws a generic FORBIDDEN error without leaking onboarding/profile details.
-export async function getCurrentAuthorizationContext(): Promise<AuthorizationContext | null> {
-  const supabase = await createClient();
+export const getCurrentAuthorizationContext = cache(
+  async (): Promise<AuthorizationContext | null> => {
+    const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (!user) {
-    return null;
-  }
+    if (!user) {
+      return null;
+    }
 
-  const assurance = await getMfaAssurance(supabase);
-  if (assurance.status === "required") {
-    throw new AuthorizationError("MFA_REQUIRED", "Additional verification required.");
-  }
-  if (assurance.status === "recovery") {
-    throw new AuthorizationError("PASSWORD_RECOVERY_REQUIRED", "Password recovery required.");
-  }
-  if (assurance.status === "unavailable") {
-    throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
-  }
-
-  const { data, error } = await supabase.rpc("get_user_authorization_context", {
-    user_uuid: user.id,
-  });
-
-  if (error) {
-    throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
-  }
-
-  const rows = (data ?? []) as AuthorizationContextRow[];
-  const row = rows[0];
-
-  // The session is valid, so an empty result means authorization denied rather
-  // than unauthenticated. Keep that distinction all the way to forbidden().
-  if (!row) {
-    throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
-  }
-
-  // Defensive: validate the RPC payload against the local catalog before
-  // trusting it. A mismatch means catalog drift — fail closed.
-  if (!isRoleKey(row.role_key)) {
-    throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
-  }
-
-  // Fail closed: an unknown permission key means catalog drift between the
-  // DB and this layer. Do NOT silently filter — reject the whole context.
-  const permissions: PermissionKey[] = [];
-  for (const perm of row.permissions) {
-    if (!isPermissionKey(perm)) {
+    const assurance = await getMfaAssurance(supabase);
+    if (assurance.status === "required") {
+      throw new AuthorizationError("MFA_REQUIRED", "Additional verification required.");
+    }
+    if (assurance.status === "recovery") {
+      throw new AuthorizationError("PASSWORD_RECOVERY_REQUIRED", "Password recovery required.");
+    }
+    if (assurance.status === "unavailable") {
       throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
     }
-    permissions.push(perm);
-  }
 
-  return {
-    userId: row.user_id,
-    roleKey: row.role_key,
-    level: row.level,
-    permissions,
-  };
-}
+    const { data, error } = await supabase.rpc("get_user_authorization_context", {
+      user_uuid: user.id,
+    });
+
+    if (error) {
+      throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
+    }
+
+    const rows = (data ?? []) as AuthorizationContextRow[];
+    const row = rows[0];
+
+    // The session is valid, so an empty result means authorization denied rather
+    // than unauthenticated. Keep that distinction all the way to forbidden().
+    if (!row) {
+      throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
+    }
+
+    // Defensive: validate the RPC payload against the local catalog before
+    // trusting it. A mismatch means catalog drift — fail closed.
+    if (!isRoleKey(row.role_key)) {
+      throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
+    }
+
+    // Fail closed: an unknown permission key means catalog drift between the
+    // DB and this layer. Do NOT silently filter — reject the whole context.
+    const permissions: PermissionKey[] = [];
+    for (const perm of row.permissions) {
+      if (!isPermissionKey(perm)) {
+        throw new AuthorizationError("FORBIDDEN", "Authorization check failed.");
+      }
+      permissions.push(perm);
+    }
+
+    return {
+      userId: row.user_id,
+      roleKey: row.role_key,
+      level: row.level,
+      permissions,
+    };
+  },
+);
 
 // Like getCurrentAuthorizationContext but throws UNAUTHENTICATED when there is
 // no resolvable context.

@@ -3683,7 +3683,7 @@ export function InvestorCalculator({
   return (
     <div className={`investor-workspace${usesDirectDesign ? " investor-direct-workspace" : ""}${directVisualLayout ? " investor-direct-design-copy" : ""}${directTable ? directPrintReady ? " investor-direct-print-ready" : " investor-direct-print-blocked" : ""}`}>
       {directTable && !directPrintReady ? <section className="investor-direct-print-blocked-notice" aria-label="Impressão indisponível">
-        <h1>Impressão indisponível</h1>
+        <h2>Impressão indisponível</h2>
         <p>Corrija todas as pendências e obtenha o resultado APROVADO antes de imprimir a proposta da Tabela Direta.</p>
       </section> : null}
       {tourOpen ? <>

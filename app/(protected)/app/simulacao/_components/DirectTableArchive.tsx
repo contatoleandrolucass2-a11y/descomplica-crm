@@ -21,7 +21,7 @@ export async function DirectTableArchive() {
   return (
     <div className="app-shell simulation-page-shell investor-page-shell investor-direct-table-page">
       <header className="topbar simulation-topbar">
-        <Link className="brand-lockup brand-link" href="/app">
+        <Link className="brand-lockup brand-link" href="/app" prefetch={false}>
           <div className="brand-mark" aria-hidden="true">
             D
           </div>
@@ -36,7 +36,9 @@ export async function DirectTableArchive() {
         <section className="goal-page-hero investor-compact-hero">
           <div className="goal-hero-copy">
             <nav className="documentation-breadcrumb" aria-label="Trilha de navegação">
-              <Link href="/app/simulacao">Simulação</Link>
+              <Link href="/app/simulacao" prefetch={false}>
+                Simulação
+              </Link>
               <span aria-hidden="true">/</span>
               <strong>Simulador Tabela Direta</strong>
             </nav>

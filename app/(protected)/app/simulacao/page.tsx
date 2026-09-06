@@ -113,6 +113,7 @@ export default async function SimulationHubPage() {
                 <Link
                   className={styles.hubCard}
                   href={`/app/simulacao/${simulator.slug}`}
+                  prefetch={false}
                   key={simulator.slug}
                 >
                   <SimulatorCardContent simulator={simulator} releaseEnabled />

@@ -29,7 +29,9 @@ export function AuthorizedBreadcrumbs({ pages }: { pages: AppPage[] }) {
               {current ? (
                 <span aria-current="page">{page.name}</span>
               ) : (
-                <Link href={page.path}>{page.name}</Link>
+                <Link href={page.path} prefetch={false}>
+                  {page.name}
+                </Link>
               )}
             </li>
           );

@@ -62,6 +62,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
           {navigationHome ? (
             <Link
               href={navigationHome.path}
+              prefetch={false}
               className={styles.brand}
               aria-label={`Descomplica CRM — ${navigationHome.name}`}
             >
@@ -86,7 +87,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
                 Sessão ativa
               </span>
             </div>
-            <Link href="/conta/seguranca" className={styles.accountLink}>
+            <Link href="/conta/seguranca" prefetch={false} className={styles.accountLink}>
               Segurança
             </Link>
             <ThemeSwitch canPersist={cookieConsent?.categories.functional === true} />

@@ -973,12 +973,15 @@ export function SimulatorWorkspace({
           }
           footer={
             <nav aria-label="Ferramentas de simulação" className={styles.simulatorNav}>
-              <Link href="/app/simulacao">Todas</Link>
+              <Link href="/app/simulacao" prefetch={false}>
+                Todas
+              </Link>
               {SIMULATOR_LIST.map((simulator) =>
                 releasedSimulatorSlugs.includes(simulator.slug) ? (
                   <Link
                     key={simulator.slug}
                     href={`/app/simulacao/${simulator.slug}`}
+                    prefetch={false}
                     aria-current={simulator.slug === definition.slug ? "page" : undefined}
                   >
                     {simulator.code}
