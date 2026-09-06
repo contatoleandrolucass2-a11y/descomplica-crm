@@ -56,6 +56,9 @@ type InventoryPayload = {
   source: string;
   reportId?: string;
   generatedAt?: string;
+  snapshotReferenceDate?: string;
+  snapshotSha256?: string;
+  sourceKind?: "live" | "versioned-snapshot";
   count: number;
   items: InventoryItem[];
 };
@@ -75,6 +78,8 @@ type DirectCalculationPayment = {
 
 type DirectTableFlowResult = ReturnType<typeof calculateDirectTableFileFlow>;
 type DirectProposalOption = (typeof DIRECT_TABLE_PROPOSAL_OPTIONS)[number];
+
+const DIRECT_TABLE_INVENTORY_PAGE_SIZE = 100;
 
 const INVESTOR_TOUR_STEPS = [
   {
@@ -209,12 +214,12 @@ const DIRECT_TABLE_TOUR_STEPS = [
   { target: "ready-options", eyebrow: "Passo 5 · escolher um modelo", title: "Entenda os 4 botões antes de escolher", description: "01 Pagamento simples: ato de 10%, sem sinais e sem intermediárias. 02 Entrada distribuída: ato de 6% e 3 sinais que completam 4%, sem intermediária. 03 Parcela reduzida: ato de 10%, sem sinais, com intermediárias de até 5% conforme a entrega. 04 Maior flexibilidade: ato de 6%, 3 sinais que completam 4% e intermediárias válidas.", tip: "Sem renda, somente a opção 01 aparece selecionada como referência e nenhum botão altera a proposta. Com renda, escolha um modelo e depois ajuste o fluxo editável.", checklist: ["Compare ato e sinais", "Confira se haverá intermediárias", "Escolha 1 modelo"] },
   { target: "proposal", eyebrow: "Passo 6 · fluxo editável", title: "Este é o Fluxo editável", description: "Este campo mostra como a proposta foi montada, com cada etapa, cálculo e resultado; ele fica bloqueado até a renda ser informada.", tip: "", checklist: [] },
   { target: "proposal-discount", eyebrow: "Passo 7 · valor e desconto", title: "Comece pelo valor real da proposta", description: "O valor do imóvel vem da unidade escolhida. O desconto é opcional e só deve ser aplicado quando estiver autorizado. Ele reduz a base usada em todas as contas seguintes.", tip: "O desconto não pode ser negativo nem igual ou maior que o valor do imóvel.", checklist: ["Confirme o valor", "Verifique a autorização", "Deixe zero quando não houver desconto"] },
-  { target: "proposal-entry", eyebrow: "Passo 8 · entrada", title: "Monte pelo menos 10% de entrada", description: "O ato é pago na data da simulação. Sem sinais, use pelo menos 10% no ato. Com sinais, o ato pode começar em 6% e o restante deve levar a entrada total a 10% ou mais.", tip: "A entrada total precisa atingir pelo menos 10% antes das intermediárias.", checklist: ["Ato de 10% ou mais sem sinais", "Ou ato mínimo de 6%", "Complete pelo menos 10% com sinais"] },
-  { target: "proposal-signals", eyebrow: "Passo 9 · sinais", title: "Adicione até 3 sinais, sempre em ordem", description: "O Sinal 2 só existe depois do Sinal 1, e o Sinal 3 só existe depois do Sinal 2. Cada sinal não pode ser maior que o pagamento anterior. As datas usam os dias comerciais 05, 10 ou 15, sempre depois do pagamento anterior.", tip: "Ocultar um sinal zera essa linha e também os sinais seguintes, preservando a sequência.", checklist: ["Não pule sinais", "Respeite os valores decrescentes", "Confira as datas"] },
+  { target: "proposal-entry", eyebrow: "Passo 8 · entrada", title: "Monte pelo menos 10% de entrada", description: "O ato é pago na data da simulação. Sem sinais, use pelo menos 10% no ato. Com sinais, o ato pode começar em 6% e o restante deve levar a entrada total a 10% ou mais. Tudo o que ultrapassar 10% reduz o saldo pré-chaves, sem alterar o bloco pós-chaves.", tip: "A entrada total precisa atingir pelo menos 10% antes das intermediárias e não pode consumir o bloco pós-chaves.", checklist: ["Ato de 10% ou mais sem sinais", "Ou ato mínimo de 6%", "Complete pelo menos 10% com sinais"] },
+  { target: "proposal-signals", eyebrow: "Passo 9 · sinais", title: "Adicione até 3 sinais, sempre em ordem", description: "O Sinal 2 só existe depois do Sinal 1, e o Sinal 3 só existe depois do Sinal 2. Cada sinal não pode ser maior que o pagamento anterior. As datas usam os dias comerciais 05, 10 ou 15, sempre depois do pagamento anterior e nunca depois da entrega.", tip: "Ocultar um sinal zera essa linha e também os sinais seguintes, preservando a sequência.", checklist: ["Não pule sinais", "Respeite os valores decrescentes", "Confira as datas"] },
   { target: "proposal-intermediaries", eyebrow: "Passo 10 · intermediárias", title: "Use somente as intermediárias liberadas pela entrega", description: "Cada intermediária é opcional e pode chegar a 5% do valor real. Ela precisa coincidir com uma mensal pré-chaves, ocorrer a partir da primeira mensal e no máximo até 3 meses-calendário antes da entrega. A quantidade disponível muda conforme o prazo da obra e o saldo do bloco pré-chaves.", tip: "Na regra geral, o bloco comporta até 30%; para planta com “Vaga”, até 40%. Ocultar uma intermediária afeta somente aquela linha.", checklist: ["Máximo de 5% por linha", "Data até entrega menos 3 meses", "Não ultrapasse o saldo pré-chaves"] },
-  { target: "proposal-prekeys", eyebrow: "Passo 11 · durante a obra", title: "Confira o saldo e as mensais pré-chaves", description: "O simulador reserva 30% do imóvel para a obra, ou 40% quando a planta contém “Vaga”. Intermediárias válidas são descontadas desse bloco, e o saldo restante é dividido pelas mensais disponíveis até a entrega.", tip: "As mensais pré-chaves não têm juros, MIP ou DFI e incluem o mês da entrega.", checklist: ["Confirme o percentual da obra", "Desconte intermediárias válidas", "Confira quantidade, valor e 1ª parcela"] },
+  { target: "proposal-prekeys", eyebrow: "Passo 11 · durante a obra", title: "Confira o saldo e as mensais pré-chaves", description: "O simulador reserva 30% do imóvel para a obra, ou 40% quando a planta contém “Vaga”. A entrada acima de 10% e as intermediárias válidas são descontadas desse bloco; o saldo restante é dividido pelas mensais disponíveis até a entrega.", tip: "As mensais pré-chaves não têm juros, MIP ou DFI e incluem o mês da entrega. Quando esse saldo zera, elas são dispensadas.", checklist: ["Confirme o percentual da obra", "Desconte entrada adicional e intermediárias", "Confira quantidade, valor e 1ª parcela"] },
   { target: "proposal-postkeys", eyebrow: "Passo 12 · depois das chaves", title: "Confira o saldo e a parcela pós-chaves", description: "Na regra geral, 60% ficam para 120 parcelas. Quando a planta contém “Vaga”, 50% ficam para até 66 parcelas. A parcela usa PRICE, juros de 12% ao ano, seguro MIP e seguro DFI.", tip: "Abra o ícone de informação ao lado da parcela para consultar a memória de cálculo e as datas.", checklist: ["Confirme o saldo financiado", "Confira 120 ou 66 parcelas", "Leia valor e 1ª data"] },
-  { target: "credit-status", eyebrow: "Passo 13 · resultado", title: "Entenda APROVADO, REPROVADO ou PENDENTE", description: "O sistema divide a parcela pós-chaves pela renda. Até e incluindo 40% mostra APROVADO; acima de 40% mostra REPROVADO. Sem renda, mostra PENDENTE e mantém a proposta congelada.", tip: "O resultado do simulador não substitui a análise de crédito interna obrigatória.", checklist: ["Confira a parcela", "Leia o percentual da renda", "Veja o resultado"] },
+  { target: "credit-status", eyebrow: "Passo 13 · resultado", title: "Entenda os quatro resultados", description: "O sistema divide a parcela pós-chaves pela renda. Com o fluxo válido, até e incluindo 40% mostra APROVADO e acima de 40% mostra REPROVADO. Sem renda, mostra PENDENTE. Se alguma regra operacional falhar, mostra AJUSTE NECESSÁRIO, mesmo quando o crédito caberia na renda.", tip: "O resultado do simulador não substitui a análise de crédito interna obrigatória.", checklist: ["Confira a parcela", "Leia o percentual da renda", "Veja o resultado e a auditoria"] },
   { target: "resources", eyebrow: "Passo 14 · consultar e imprimir", title: "Saiba para que serve cada botão final", description: "Aprenda + abre políticas, regras e perguntas frequentes. Doc Pessoa Física mostra documentos e comprovantes do cliente. Doc Pessoa Jurídica mostra documentos da empresa e dos sócios. Imprimir prepara a versão limpa para conferência ou entrega.", tip: "Imprima por último, depois de confirmar regras, documentos e auditoria.", checklist: ["Consulte Aprenda +", "Abra a documentação correta", "Imprima somente a versão validada"] },
   { target: "audit", eyebrow: "Passo 15 · validar", title: "Abra a auditoria e procure qualquer reprovação", description: "A auditoria é a conferência final da conta. Abra a lista, leia cada regra e volte ao campo indicado quando aparecer um item reprovado.", tip: "Só apresente a proposta quando unidade, renda, entrada, datas, distribuição e documentação estiverem conferidas.", checklist: ["Abra a auditoria", "Corrija as reprovações", "Confira novamente"] },
 ] as const;
@@ -223,14 +228,14 @@ const DIRECT_TABLE_PROPOSAL_GUIDE_STEPS = [
   { title: "Confirme o imóvel", description: "Veja se empreendimento, unidade, planta, valor e data de entrega são os mesmos escolhidos pelo cliente.", note: "Se algo estiver errado, volte ao item 01 e escolha a linha correta. Essas informações são a base de toda a conta." },
   { title: "Informe a renda real", description: "No item 02, escreva a renda mensal que será usada na análise. Esse preenchimento libera as quatro opções prontas.", note: "Não estime a renda. O sistema divide a parcela pós-chaves pela renda informada para medir o comprometimento." },
   { title: "Escolha um modelo para começar", description: "No item 03, escolha uma das quatro opções: com ou sem sinais e com ou sem intermediárias. Sem renda, a primeira opção permanece visível como exemplo, mas todos os botões ficam congelados.", note: "Depois de informar uma renda válida, os quatro botões são liberados. A opção escolhida apenas prepara a proposta; você ainda pode revisar e ajustar cada valor no fluxo editável." },
-  { title: "Entenda a divisão do pagamento", description: "Na regra geral, a proposta separa 10% para entrada, 30% durante a obra e 60% depois das chaves em 120 parcelas.", note: "Quando o nome da planta contém “Vaga”, a divisão muda para 10% de entrada, 40% durante a obra e 50% depois das chaves em até 66 parcelas." },
+  { title: "Entenda a divisão do pagamento", description: "Na regra geral, a proposta parte de 10% para entrada, 30% durante a obra e 60% depois das chaves em 120 parcelas. A entrada acima de 10% reduz o bloco flexível durante a obra.", note: "Quando o nome da planta contém “Vaga”, a divisão parte de 10% de entrada, 40% durante a obra e 50% depois das chaves em até 66 parcelas. O bloco pós-chaves permanece preservado." },
   { title: "Aplique desconto somente quando autorizado", description: "O desconto é opcional e reduz o valor real usado em todas as contas seguintes.", note: "Sem autorização, deixe o desconto desligado. O valor não pode ser negativo nem igual ou maior que o valor do imóvel." },
-  { title: "Monte a entrada em ordem", description: "A entrada total precisa chegar a pelo menos 10%. O ato de hoje pode ser de 6% ou mais; se ficar abaixo de 10%, complete com até 3 sinais.", note: "Não pule a sequência: Sinal 2 precisa do Sinal 1, e Sinal 3 precisa do Sinal 2. Cada sinal não pode ser maior que o pagamento anterior." },
-  { title: "Confira as datas dos sinais", description: "O simulador procura uma data comercial nos dias 05, 10 ou 15, sempre depois do pagamento anterior e dentro da janela de 31 dias.", note: "Ao ocultar um sinal, os sinais seguintes também são ocultados e zerados para manter a ordem correta." },
+  { title: "Monte a entrada em ordem", description: "A entrada total precisa chegar a pelo menos 10%. O ato de hoje pode ser de 6% ou mais; se ficar abaixo de 10%, complete com até 3 sinais.", note: "Não pule a sequência: Sinal 2 precisa do Sinal 1, e Sinal 3 precisa do Sinal 2. Cada sinal não pode ser maior que o pagamento anterior. A entrada adicional reduz o pré-chaves e não pode consumir o pós-chaves." },
+  { title: "Confira as datas dos sinais", description: "O simulador procura uma data comercial nos dias 05, 10 ou 15, sempre depois do pagamento anterior, dentro da janela de 31 dias e até a data de entrega.", note: "Ao ocultar um sinal, os sinais seguintes também são ocultados e zerados para manter a ordem correta. Um sinal posterior à entrega exige ajuste." },
   { title: "Use intermediárias somente quando fizer sentido", description: "Cada intermediária é opcional e pode chegar a 5% do valor real. A quantidade liberada depende do tempo que falta até a entrega.", note: "Ela precisa coincidir com uma mensal pré-chaves e ocorrer no máximo até 3 meses-calendário antes da entrega. Ocultar uma linha zera somente aquela intermediária." },
-  { title: "Leia as mensais pré-chaves", description: "Depois da entrada, o saldo da fase de obra é dividido pelos meses disponíveis até a entrega: 30% na regra geral ou 40% quando a planta contém “Vaga”.", note: "Intermediárias válidas diminuem esse saldo. As mensais pré-chaves não têm juros, MIP ou DFI." },
+  { title: "Leia as mensais pré-chaves", description: "Depois da entrada, o saldo da fase de obra é dividido pelos meses disponíveis até a entrega: parte de 30% na regra geral ou 40% quando a planta contém “Vaga”.", note: "Entrada acima de 10% e intermediárias válidas diminuem esse saldo. Se ele zerar, as mensais são dispensadas. Elas não têm juros, MIP ou DFI." },
   { title: "Leia as parcelas pós-chaves", description: "Depois da última mensal da obra começa o pós-chaves: 60% em 120 parcelas na regra geral ou 50% em até 66 parcelas para planta com “Vaga”.", note: "A parcela usa sistema PRICE, juros de 12% ao ano, MIP e DFI. Use o ícone de informação ao lado do valor para abrir a memória de cálculo." },
-  { title: "Entenda o resultado da proposta", description: "O sistema compara a parcela pós-chaves com a renda. Até e incluindo 40% mostra APROVADO; acima de 40% mostra REPROVADO.", note: "Esse resultado não substitui a análise de crédito interna obrigatória. Se reprovar, ajuste a proposta ou revise os dados corretos." },
+  { title: "Entenda o resultado da proposta", description: "O sistema primeiro valida todas as regras do fluxo e depois compara a parcela pós-chaves com a renda. Mostra APROVADO até 40%, REPROVADO acima de 40%, PENDENTE sem renda e AJUSTE NECESSÁRIO quando o fluxo contém outra falha.", note: "Esse resultado não substitui a análise de crédito interna obrigatória. Abra a auditoria e corrija qualquer item reprovado." },
   { title: "Faça a conferência final", description: "Abra a Auditoria do cálculo e corrija qualquer item reprovado. Depois consulte Aprenda + e a documentação de Pessoa Física ou Jurídica.", note: "Imprima somente depois de conferir imóvel, renda, pagamentos, datas, resultado, documentos e auditoria." },
 ] as const;
 
@@ -361,7 +366,7 @@ type DirectEditableAccountRowProps = {
 
 function DirectEditableAccountRow({ number, operator, label, date, dateLabel, meta, help, calculation, result, cornerAction, total = false, invalid = false, action = false, tourTarget, twoColumn = false, fieldState, rowClassName = "", leadingAction, sideGuidance, disabled = false }: DirectEditableAccountRowProps) {
   const operatorLabel = operator === "−" ? "subtrair" : operator === "÷" ? "dividir" : operator === "=" ? "igual" : operator === "!" ? "atenção" : operator === "…" ? "pendente" : "";
-  return <li className={`${total ? "total" : ""}${invalid ? " invalid" : ""}${fieldState ? ` field-${fieldState}` : ""}${disabled ? " is-stage-locked" : ""}${sideGuidance ? " has-side-guidance" : ""}${rowClassName ? ` ${rowClassName}` : ""}`} value={number} role={number ? undefined : "presentation"} data-tour={tourTarget} aria-disabled={disabled || undefined}>
+  return <li className={`${total ? "total" : ""}${invalid ? " invalid" : ""}${fieldState ? ` field-${fieldState}` : ""}${disabled ? " is-stage-locked" : ""}${sideGuidance ? " has-side-guidance" : ""}${rowClassName ? ` ${rowClassName}` : ""}`} value={number} role={number ? undefined : "presentation"} data-tour={tourTarget} aria-disabled={disabled || undefined} aria-invalid={invalid || undefined}>
     <span className="investor-direct-step-number" aria-hidden="true">{number ? String(number).padStart(2, "0") : ""}</span>
     <div className="investor-direct-step-content">
       <div className={`investor-direct-step-name${twoColumn ? " investor-associative-label-only" : ""}${leadingAction ? " has-leading-action" : ""}${date ? " has-date" : ""}`}>{leadingAction ?? (twoColumn ? null : <span aria-hidden="true">{operator ?? ""}</span>)}<div className={`investor-direct-step-label${date ? " has-date" : ""}`}>{help ? <span className="investor-associative-row-title"><strong>{label}</strong><InvestorInfoHint label={label} title={help.title} description={help.description} /></span> : <strong>{label}</strong>}{date ? <time className={`investor-associative-row-date${dateLabel ? " has-label" : ""}`} dateTime={date}>{dateLabel ? `${dateLabel} ${formatDate(date)}` : formatDate(date)}</time> : null}{meta ? <small>{meta}</small> : null}</div></div>
@@ -378,29 +383,33 @@ function DirectEditableAccountRow({ number, operator, label, date, dateLabel, me
   </li>;
 }
 
-function DirectComparisonLedgerRow({ label, detail, operator, value, emphasized = false, muted = false }: { label: string; detail: string; operator: "=" | "−" | "÷"; value: number; emphasized?: boolean; muted?: boolean }) {
-  return <div className={`investor-direct-comparison-ledger-row${emphasized ? " is-emphasized" : ""}${muted ? " is-muted" : ""}`} role="row">
+function DirectComparisonLedgerRow({ label, detail, operator, value, displayValue, emphasized = false, muted = false, invalid = false }: { label: string; detail: string; operator: "=" | "−" | "÷" | "!"; value?: number; displayValue?: string; emphasized?: boolean; muted?: boolean; invalid?: boolean }) {
+  return <div className={`investor-direct-comparison-ledger-row${emphasized ? " is-emphasized" : ""}${muted ? " is-muted" : ""}${invalid ? " is-invalid" : ""}`} role="row">
     <div className="investor-direct-comparison-ledger-label" role="rowheader"><strong>{label}</strong></div>
-    <span className="investor-direct-comparison-ledger-operator" role="cell" aria-label={operator === "=" ? "igual" : operator === "−" ? "subtrair" : "dividir"}>{operator}</span>
-    <span className="investor-direct-comparison-ledger-currency" role="cell" aria-hidden="true">R$</span>
-    <strong className="investor-direct-comparison-ledger-value" role="cell">{money.format(value).replace(/^R\$\s?/u, "")}</strong>
+    <span className="investor-direct-comparison-ledger-operator" role="cell" aria-label={operator === "=" ? "igual" : operator === "−" ? "subtrair" : operator === "÷" ? "dividir" : "atenção"}>{operator}</span>
+    <span className="investor-direct-comparison-ledger-currency" role="cell" aria-hidden="true">{displayValue ? "" : "R$"}</span>
+    <strong className="investor-direct-comparison-ledger-value" role="cell">{displayValue ?? money.format(value ?? 0).replace(/^R\$\s?/u, "")}</strong>
     <div className="investor-direct-comparison-ledger-help" role="cell"><InvestorInfoHint label={label} title={label} description={detail} /></div>
   </div>;
 }
 
 function DirectProposalComparisonCard({ option, flow, optionNumber, active, baseDate, policySummary }: { option: DirectProposalOption; flow: DirectTableFlowResult; optionNumber: number; active: boolean; baseDate: string; policySummary: string }) {
   const titleId = useId();
-  const creditState = flow.custom.income <= 0 ? "pending" : flow.custom.creditApproved ? "approved" : "rejected";
-  const creditLabel = flow.custom.income <= 0 ? "PENDENTE" : flow.custom.creditApproved ? "APROVADO" : "REPROVADO";
+  const creditLabel = flow.custom.status;
+  const creditState = creditLabel === "APROVADO" ? "approved" : creditLabel === "REPROVADO" ? "rejected" : creditLabel === "AJUSTE NECESSÁRIO" ? "adjustment" : "pending";
   const approvedSignals = flow.custom.signals.filter((signal: { active: boolean; approved: boolean }) => signal.active && signal.approved);
+  const invalidSignals = flow.custom.signals.filter((signal: { active: boolean; approved: boolean }) => signal.active && !signal.approved);
   const approvedIntermediaries = flow.custom.intermediaries.filter((item: { value: number; approved: boolean }) => item.value > 0 && item.approved);
   const signalDates = approvedSignals.map((signal: { date: string }) => formatDate(signal.date));
   const intermediaryDates = approvedIntermediaries.map((item: { date: string }) => formatDate(item.date));
   const signalPeriod = signalDates.length === 1 ? signalDates[0] : `${signalDates[0]} a ${signalDates[signalDates.length - 1]}`;
   const intermediaryPeriod = intermediaryDates.length === 1 ? intermediaryDates[0] : `${intermediaryDates[0]} a ${intermediaryDates[intermediaryDates.length - 1]}`;
   const signalDetail = approvedSignals.length > 0
-    ? `${approvedSignals.length} pagamentos · ${signalPeriod}`
-    : "Sem sinais nesta opção";
+    ? `${approvedSignals.length} pagamentos válidos · ${signalPeriod}${invalidSignals.length > 0 ? ` · ${invalidSignals.length} não aplicados: ${invalidSignals[0].reason}` : ""}`
+    : invalidSignals.length > 0 ? `${invalidSignals.length} sinais não aplicados: ${invalidSignals[0].reason}` : "Sem sinais nesta opção";
+  const signalSummary = invalidSignals.length > 0
+    ? `${approvedSignals.length} de ${approvedSignals.length + invalidSignals.length} sinais válidos · ${invalidSignals[0].reason}`
+    : option.signalSummary;
   const intermediaryDetail = approvedIntermediaries.length > 0
     ? `${approvedIntermediaries.length} pagamentos · ${intermediaryPeriod}`
     : option.withIntermediary ? "Nenhuma data válida até 3 meses antes da entrega" : "Sem intermediárias nesta opção";
@@ -408,16 +417,29 @@ function DirectProposalComparisonCard({ option, flow, optionNumber, active, base
     ? `${approvedIntermediaries.length} ${approvedIntermediaries.length === 1 ? "intermediária" : "intermediárias"} de 5%`
     : option.withIntermediary ? "Intermediárias indisponíveis nesta entrega" : "Sem intermediária";
   const preKeysAvailable = flow.custom.balance > 0 && flow.custom.desiredInstallments > 0;
-  const preKeysDetail = approvedIntermediaries.length > 0
-    ? `${percent.format(flow.context.preKeysRate)} do imóvel menos ${approvedIntermediaries.length} ${approvedIntermediaries.length === 1 ? "intermediária" : "intermediárias"}`
+  const preKeysDeadlineInsufficient = flow.custom.balance > 0 && flow.custom.desiredInstallments === 0;
+  const preKeysDeductions = [
+    flow.custom.entryExcess > 0 ? `entrada adicional de ${money.format(flow.custom.entryExcess)}` : "",
+    approvedIntermediaries.length > 0 ? `${approvedIntermediaries.length} ${approvedIntermediaries.length === 1 ? "intermediária" : "intermediárias"}` : "",
+  ].filter(Boolean);
+  const preKeysDetail = preKeysDeductions.length > 0
+    ? `${percent.format(flow.context.preKeysRate)} do imóvel menos ${preKeysDeductions.join(" e ")}`
     : `${percent.format(flow.context.preKeysRate)} do valor do imóvel`;
+  const preKeysSettlementDetail = flow.custom.entryExcess > 0
+    ? approvedIntermediaries.length > 0 ? "Saldo coberto pela entrada adicional e pelas intermediárias" : "Saldo absorvido pela entrada adicional"
+    : "Saldo coberto pelas intermediárias";
+  const preKeysPaymentSummary = installmentSummary(
+    flow.custom.desiredInstallments,
+    flow.custom.installmentValue,
+    flow.custom.lastInstallmentValue,
+  );
 
   return <article className={`investor-direct-comparison-card${active ? " is-active" : ""}`} aria-labelledby={titleId} data-selected={active || undefined}>
     <header className="investor-direct-comparison-heading">
       <div>
         <div className="investor-direct-comparison-option-line"><span>Opção {String(optionNumber).padStart(2, "0")}</span></div>
         <h4 id={titleId}>{option.title}</h4>
-        <p>{[option.entrySummary, option.signalSummary, intermediarySummary, policySummary].filter(Boolean).join(" · ")}</p>
+        <p>{[option.entrySummary, signalSummary, intermediarySummary, policySummary].filter(Boolean).join(" · ")}</p>
       </div>
       <div className={`investor-direct-credit-status ${creditState}`}><small>Resultado</small><strong>{creditLabel}</strong><span>{flow.custom.income > 0 ? `${percent.format(flow.custom.commitment)} da renda` : "Informe a renda"}</span></div>
     </header>
@@ -427,7 +449,15 @@ function DirectProposalComparisonCard({ option, flow, optionNumber, active, base
       <DirectComparisonLedgerRow label="Sinais" detail={signalDetail} operator="−" value={flow.custom.signalTotal} muted={approvedSignals.length === 0} />
       <DirectComparisonLedgerRow label="Intermediárias" detail={intermediaryDetail} operator="−" value={flow.custom.validIntermediaryTotal} muted={approvedIntermediaries.length === 0} />
       <DirectComparisonLedgerRow label="Saldo parcelado pré-chaves" detail={preKeysDetail} operator="=" value={flow.custom.balance} />
-      <DirectComparisonLedgerRow label={preKeysAvailable ? `${flow.custom.desiredInstallments} mensais pré-chaves` : "Mensais pré-chaves"} detail={preKeysAvailable ? `1ª em ${formatDate(flow.custom.firstPreKeysDate)}` : "Saldo coberto pelas intermediárias"} operator="÷" value={preKeysAvailable ? flow.custom.installmentValue : 0} muted={!preKeysAvailable} />
+      <DirectComparisonLedgerRow
+        label={preKeysAvailable ? `${flow.custom.desiredInstallments} mensais pré-chaves` : "Mensais pré-chaves"}
+        detail={preKeysAvailable ? `1ª em ${formatDate(flow.custom.firstPreKeysDate)}` : preKeysDeadlineInsufficient ? "A entrega não permite nenhuma mensal pré-chaves; ajuste a composição da entrada." : preKeysSettlementDetail}
+        operator={preKeysAvailable ? "÷" : preKeysDeadlineInsufficient ? "!" : "="}
+        value={preKeysAvailable && flow.custom.installmentValue === flow.custom.lastInstallmentValue ? flow.custom.installmentValue : 0}
+        displayValue={preKeysDeadlineInsufficient ? "Prazo insuficiente" : preKeysAvailable && flow.custom.installmentValue !== flow.custom.lastInstallmentValue ? preKeysPaymentSummary : preKeysAvailable ? undefined : "Dispensadas"}
+        muted={!preKeysAvailable && !preKeysDeadlineInsufficient}
+        invalid={preKeysDeadlineInsufficient}
+      />
       <DirectComparisonLedgerRow label="Saldo financiado" detail={`${percent.format(flow.context.postKeysRate)} do valor do imóvel`} operator="=" value={flow.custom.postKeysBalance} />
       <DirectComparisonLedgerRow label={`${flow.custom.postKeysInstallments} parcelas mensais pós-chaves`} detail={`1ª em ${formatDate(flow.custom.firstPostKeysDate)}`} operator="÷" value={flow.custom.postKeysPayment} emphasized />
     </div>
@@ -556,9 +586,14 @@ async function fetchInventory(source = "/api/inventory") {
 }
 
 function todayIso() {
-  const now = new Date();
-  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 10);
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const part = (type: "year" | "month" | "day") => parts.find((item) => item.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
 }
 
 function formatDate(value?: string | null) {
@@ -567,6 +602,12 @@ function formatDate(value?: string | null) {
 
 function formatPaymentDate(value?: string | null) {
   return value ? formatDate(value) : "Indisponível";
+}
+
+function installmentSummary(count: number, regularValue: number, lastValue: number) {
+  if (count <= 0) return "Dispensadas";
+  if (count === 1 || regularValue === lastValue) return `${count}x de ${money.format(regularValue)}`;
+  return `${count - 1}x de ${money.format(regularValue)} + última de ${money.format(lastValue)}`;
 }
 
 function informationLabel(value?: string | null) {
@@ -1627,14 +1668,14 @@ const DIRECT_TABLE_POLICY_TOPICS = [
       "Regra geral: 10% de entrada, 30% durante a obra e 60% pós-chaves em 120 parcelas. Se o nome da planta contiver “Vaga”: 10% de entrada, 40% durante a obra e 50% pós-chaves em até 66 parcelas.",
       "Sem sinais, o ato pronto corresponde a 10%. Com sinais, o padrão pronto distribui 6% no ato e 4% em três sinais: 1,34%, 1,33% e 1,33%, com ajuste final de centavos para fechar os 10%.",
       "Os sinais são consecutivos: não existe Sinal 2 sem Sinal 1 nem Sinal 3 sem Sinal 2. O Sinal 1 não pode superar o ato; o Sinal 2 não pode superar o Sinal 1; e o Sinal 3 não pode superar o Sinal 2.",
-      "O ato usa a data da simulação. Cada pagamento seguinte usa o último dia comercial disponível entre 5, 10 e 15, sempre depois do anterior e dentro da janela de 31 dias.",
+      "O ato usa a data da simulação. Cada pagamento seguinte usa o último dia comercial disponível entre 5, 10 e 15, sempre depois do anterior, dentro da janela de 31 dias e sem ultrapassar a entrega.",
     ],
   },
   {
     title: "Obra e intermediárias",
     items: [
       "As mensais pré-chaves começam depois do último pagamento da entrada, seguem mês a mês e incluem o mês da entrega. Não possuem juros, MIP ou DFI.",
-      "O saldo pré-chaves é 30% na regra geral ou 40% para planta contendo Vaga. Intermediárias válidas são descontadas desse saldo; o restante é dividido pela quantidade de mensais até a entrega.",
+      "O saldo pré-chaves parte de 30% na regra geral ou 40% para planta contendo Vaga. A entrada que ultrapassa 10% e as intermediárias válidas são descontadas desse saldo; o restante é dividido pela quantidade de mensais até a entrega. Se o saldo zerar, essas mensais são dispensadas.",
       "Cada intermediária é opcional e limitada a 5% do valor real. Precisa respeitar a entrada total de 10%, ocorrer a partir da primeira mensal, coincidir com uma mensal e ficar, no máximo, até três meses-calendário antes da entrega.",
       "Há até oito posições semestrais, mas a quantidade liberada depende da data de entrega e do saldo da obra. Na regra geral, o teto financeiro é seis intermediárias de 5%; em planta contendo Vaga, pode chegar a oito.",
       "Sinais e intermediárias com valor zero são neutros e não entram na composição apresentada.",
@@ -1645,7 +1686,7 @@ const DIRECT_TABLE_POLICY_TOPICS = [
     items: [
       "O pós-chaves começa após a última mensal pré-chaves. O saldo é 60% em 120 parcelas na regra geral ou 50% em até 66 parcelas quando a planta contém Vaga.",
       "A parcela usa o sistema PRICE com juros equivalentes a 12% ao ano, seguro MIP de 0,021% e seguro DFI de 0,007%.",
-      "A renda mensal positiva é obrigatória. O comprometimento corresponde à parcela pós-chaves dividida pela renda: até e incluindo 40% resulta em APROVADO no simulador; acima de 40% resulta em REPROVADO.",
+      "A renda mensal positiva é obrigatória. Com todas as regras operacionais válidas, o comprometimento corresponde à parcela pós-chaves dividida pela renda: até e incluindo 40% resulta em APROVADO; acima de 40% resulta em REPROVADO. Sem renda, o resultado é PENDENTE; qualquer outra falha do fluxo resulta em AJUSTE NECESSÁRIO.",
       "A idade máxima informada para o participante é 79 anos, 11 meses e 29 dias. A elegibilidade final deve ser confirmada na análise interna.",
     ],
   },
@@ -1665,11 +1706,11 @@ const DIRECT_TABLE_FAQ = [
   { question: "Qual das quatro opções devo usar?", answer: "Escolha conforme a forma de entrada desejada: ato único ou ato com três sinais; e com ou sem intermediárias. Compare o fluxo completo e só apresente a alternativa que respeitar a renda e a auditoria." },
   { question: "O que muda quando a planta contém “Vaga”?", answer: "A entrada permanece em 10%. O bloco da obra passa de 30% para 40%, e o pós-chaves passa de 60% em 120 parcelas para 50% em até 66 parcelas." },
   { question: "Posso pular ou aumentar um sinal?", answer: "Não pode haver lacunas: o Sinal 2 depende do Sinal 1, e o Sinal 3 depende do Sinal 2. Cada sinal também precisa ser igual ou menor que o pagamento anterior." },
-  { question: "Como as datas 5, 10 e 15 são escolhidas?", answer: "A partir do pagamento anterior, o simulador procura o último dia válido entre 5, 10 e 15 que seja posterior e esteja dentro de 31 dias. Essa cascata define sinais e o início das mensais." },
-  { question: "Como o pré-chaves é calculado?", answer: "O saldo da obra, de 30% ou 40%, é reduzido pelas intermediárias válidas e dividido pelas mensais desde o fim da entrada até o mês da entrega. Essas mensais não têm juros ou seguros." },
+  { question: "Como as datas 5, 10 e 15 são escolhidas?", answer: "A partir do pagamento anterior, o simulador procura o último dia válido entre 5, 10 e 15 que seja posterior, esteja dentro de 31 dias e não ultrapasse a entrega. Essa cascata define sinais e o início das mensais; qualquer sinal posterior à entrega exige ajuste." },
+  { question: "Como o pré-chaves é calculado?", answer: "O saldo da obra parte de 30% ou 40%, é reduzido pela entrada acima de 10% e pelas intermediárias válidas e, quando positivo, é dividido pelas mensais desde o fim da entrada até o mês da entrega. Se zerar, as mensais são dispensadas. Elas não têm juros ou seguros." },
   { question: "Por que a quantidade de intermediárias muda?", answer: "Porque cada uma precisa coincidir com uma mensal, respeitar o intervalo semestral e terminar até três meses-calendário antes da entrega. O prazo da obra e o teto de 30% ou 40% determinam quantas podem ser usadas." },
   { question: "Como o pós-chaves é calculado?", answer: "O saldo de 60% ou 50% é parcelado pelo sistema PRICE, com juros de 12% ao ano, MIP de 0,021% e DFI de 0,007%. A memória de cálculo mostra parcela, juros, seguros e saldo devedor." },
-  { question: "O que significa APROVADO ou REPROVADO?", answer: "É o resultado do comprometimento da renda no simulador. Até 40% é APROVADO; acima de 40% é REPROVADO. Em todos os casos, a análise de crédito interna continua obrigatória." },
+  { question: "O que significa APROVADO ou REPROVADO?", answer: "Com o fluxo operacional válido, comprometimento de renda até 40% é APROVADO e acima de 40% é REPROVADO. Sem renda, aparece PENDENTE. Se outra regra falhar, aparece AJUSTE NECESSÁRIO. Em todos os casos, a análise de crédito interna continua obrigatória." },
   { question: "Quando o desconto pode ser usado?", answer: "Somente quando estiver autorizado. Ele reduz a base real usada em todos os percentuais e deve ser menor que o valor do imóvel." },
   { question: "O que acontece com campos zerados?", answer: "Sinais e intermediárias zerados são tratados como não utilizados. Eles não somam, não alteram o saldo e não aparecem na composição final." },
   { question: "Onde consulto os documentos do cliente?", answer: "Use os botões Doc Pessoa Física e Doc Pessoa Jurídica no fim da página. Para cliente no exterior, consulte a seção específica dentro da documentação de Pessoa Física." },
@@ -2174,6 +2215,7 @@ export function InvestorCalculator({
   const [region, setRegion] = useState("Todas");
   const [salePriceFilter, setSalePriceFilter] = useState("Todos");
   const [priceSort, setPriceSort] = useState<"asc" | "desc">("asc");
+  const [inventoryPage, setInventoryPage] = useState(1);
   const [filterNotice, setFilterNotice] = useState("");
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [salePrice, setSalePrice] = useState("");
@@ -2252,17 +2294,45 @@ export function InvestorCalculator({
 
   useEffect(() => {
     let active = true;
-    Promise.allSettled([fetchInventory(), fetchInventory("/data/investor-inventory.json")])
-      .then(([liveResult, referenceResult]) => {
-        if (!active) return;
-        const reference = referenceResult.status === "fulfilled" ? referenceResult.value.items : [];
-        const payload = liveResult.status === "fulfilled"
+    async function loadInventory() {
+      if (directTable) {
+        try {
+          return await fetchInventory("/api/inventory/snapshot");
+        } catch {
+          const payload = await fetchInventory();
+          return { ...payload, sourceKind: "live" as const };
+        }
+      }
+
+      const [liveResult, referenceResult] = await Promise.allSettled([
+        fetchInventory(),
+        fetchInventory("/api/inventory/snapshot"),
+      ]);
+      const reference = referenceResult.status === "fulfilled" ? referenceResult.value.items : [];
+      const payload =
+        liveResult.status === "fulfilled"
           ? liveResult.value
-          : referenceResult.status === "fulfilled" ? referenceResult.value : null;
-        if (!payload) throw new Error("inventory_unavailable");
-        inventoryReference.current = directTable ? reference : reference.filter(isInvestorEligibleUnit);
-        const enrichedInventory = enrichInventory(payload.items, reference);
-        setInventory(directTable ? enrichedInventory : enrichedInventory.filter(isInvestorEligibleUnit));
+          : referenceResult.status === "fulfilled"
+            ? referenceResult.value
+            : null;
+      if (!payload) throw new Error("inventory_unavailable");
+      return {
+        ...payload,
+        sourceKind:
+          liveResult.status === "fulfilled"
+            ? ("live" as const)
+            : (payload.sourceKind ?? ("versioned-snapshot" as const)),
+        items: enrichInventory(payload.items, reference),
+      };
+    }
+
+    void loadInventory()
+      .then((payload) => {
+        if (!active) return;
+        inventoryReference.current = directTable
+          ? payload.items
+          : payload.items.filter(isInvestorEligibleUnit);
+        setInventory(directTable ? payload.items : payload.items.filter(isInvestorEligibleUnit));
         setInventoryMeta(payload);
         setInventoryStatus("ready");
       })
@@ -2273,6 +2343,15 @@ export function InvestorCalculator({
   const activeFilters = useMemo(() => ({ businessUnit, project, plant, region, salePrice: salePriceFilter }), [businessUnit, project, plant, region, salePriceFilter]);
   const filterOptions = useMemo(() => buildInvestorFilterOptions(inventory, activeFilters), [inventory, activeFilters]);
   const matchingInventory = useMemo(() => sortInvestorInventoryBySalePrice(inventory.filter((item) => matchesInvestorFilters(item, activeFilters)), priceSort), [inventory, activeFilters, priceSort]);
+  const inventoryPageCount = directTable
+    ? Math.max(1, Math.ceil(matchingInventory.length / DIRECT_TABLE_INVENTORY_PAGE_SIZE))
+    : 1;
+  const currentInventoryPage = Math.min(inventoryPage, inventoryPageCount);
+  const visibleInventory = useMemo(() => {
+    if (!directTable) return matchingInventory;
+    const start = (currentInventoryPage - 1) * DIRECT_TABLE_INVENTORY_PAGE_SIZE;
+    return matchingInventory.slice(start, start + DIRECT_TABLE_INVENTORY_PAGE_SIZE);
+  }, [currentInventoryPage, directTable, matchingInventory]);
 
   useEffect(() => {
     const reconciledFilters = reconcileInvestorFilters(inventory, activeFilters);
@@ -2330,6 +2409,7 @@ export function InvestorCalculator({
     intermediaries,
     approvalTierId: associativeApprovalTier,
   }), [directTable, annualMode, selectedUnitId, selectedUnit, baseDate, completionDate, salePrice, discountAuthorized, discount, financing, subsidy, fgts, housingCheck, entryValue, income, installments, signals, intermediaries, associativeApprovalTier]);
+  const directResult = result as DirectTableFlowResult;
   const associativeReadyProposal = useMemo(() => buildAssociativeReadyProposal({
     grossSaleValue: result.context.propertyValue,
     originalUnitBonus: result.context.unitBonus,
@@ -2357,8 +2437,8 @@ export function InvestorCalculator({
     ? buildDirectTableAmortizationSchedule(result.custom.postKeysBalance, result.custom.firstPostKeysDate, result.custom.postKeysInstallments)
     : [], [directTable, result.custom.postKeysBalance, result.custom.firstPostKeysDate, result.custom.postKeysInstallments]);
   const directPreKeysSchedule = useMemo(() => directTable
-    ? buildDirectTablePreKeysSchedule(result.custom.desiredInstallments * result.custom.installmentValue, result.custom.desiredInstallments, result.custom.firstPreKeysDate)
-    : [], [directTable, result.custom.desiredInstallments, result.custom.installmentValue, result.custom.firstPreKeysDate]);
+    ? buildDirectTablePreKeysSchedule(result.custom.balance, result.custom.desiredInstallments, result.custom.firstPreKeysDate)
+    : [], [directTable, result.custom.balance, result.custom.desiredInstallments, result.custom.firstPreKeysDate]);
   const associativeInstallmentSchedule = useMemo(() => annualMode && result.custom.linear
     ? buildAssociativeInstallmentMemory({
       monthlyDates: result.context.monthlyDates,
@@ -2389,7 +2469,9 @@ export function InvestorCalculator({
       .filter((annual: { value: number; approved: boolean; correctedValue: number }) => annual.value > 0 && annual.approved && annual.correctedValue > 0)
       .map((annual: { index: number; date: string; correctedValue: number }) => ({ index: annual.index, paymentDate: annual.date, correctedValue: annual.correctedValue, approved: true })),
   }), [associativeInstallmentSchedule, baseDate, completionDate, income, result.context.monthlyDates, result.custom.actValue, result.custom.decreasing?.blocks, result.custom.desiredInstallments, result.custom.intermediaries, result.custom.signals, selectedUnit?.progress]);
-  const signalsRequired = !annualMode && result.custom.actRate < 0.1;
+  const signalsRequired = directTable
+    ? directResult.custom.totalEntryValue < directResult.custom.minimumEntryValue
+    : !annualMode && result.custom.actRate < 0.1;
   const associativeEntryPending = annualMode && currencyInputNumber(entryValue) <= 0;
   const associativeEntryRejected = annualMode && !associativeEntryPending && currencyInputNumber(entryValue) < 150;
   const associativeApprovalRule = ASSOCIATIVE_APPROVAL_TIERS.find((item) => item.id === associativeApprovalTier) ?? null;
@@ -2506,7 +2588,9 @@ export function InvestorCalculator({
     .filter((index) => index < intermediaryVisibilityFloor && !hiddenIntermediaryIndexes.includes(index));
   const visibleIntermediaryCount = visibleIntermediaryIndexes.length;
   const intermediariesVisible = visibleIntermediaryCount > 0;
-  const missingForMinimumEntry = Math.max(0, result.context.valueReal * 0.1 - result.custom.totalEntryValue);
+  const missingForMinimumEntry = directTable
+    ? Math.max(0, Number((directResult.custom.minimumEntryValue - directResult.custom.totalEntryValue).toFixed(2)))
+    : Math.max(0, result.context.valueReal * 0.1 - result.custom.totalEntryValue);
   const validInstallmentSchedule = directTable
     ? result.context.maxInstallments > 0
     : result.custom.desiredInstallments > 0 && result.custom.desiredInstallments <= result.context.maxInstallments;
@@ -2568,6 +2652,39 @@ export function InvestorCalculator({
     : "";
   const validDirectIntermediaryCount = result.custom.intermediaries
     .filter((item: { value: number; approved: boolean }) => item.value > 0 && item.approved).length;
+  const directEntryExcess = directTable ? directResult.custom.entryExcess : 0;
+  const directActMinimum = Number((result.context.valueReal * 0.06).toFixed(2));
+  const directActBelowMinimum = directTable && directResult.custom.actValue < directActMinimum;
+  const directEntryAboveMaximum = directTable && directResult.custom.totalEntryValue > directResult.custom.maximumEntryValue;
+  const directActInvalid = directActBelowMinimum || directEntryAboveMaximum;
+  const directEntryMaximumOverage = directEntryAboveMaximum
+    ? Number((directResult.custom.totalEntryValue - directResult.custom.maximumEntryValue).toFixed(2))
+    : 0;
+  const directStatus = directTable ? directResult.custom.status : "PENDENTE";
+  const directPreKeysDeductions = [
+    directEntryExcess > 0 ? `entrada adicional de ${money.format(directEntryExcess)}` : "",
+    result.custom.validIntermediaryTotal > 0 ? `${validDirectIntermediaryCount} ${validDirectIntermediaryCount === 1 ? "intermediária válida" : "intermediárias válidas"}` : "",
+  ].filter(Boolean);
+  const directPreKeysExpression = [
+    money.format(directTable ? directResult.custom.basePreKeysBudget : 0),
+    directEntryExcess > 0 ? `− ${money.format(directEntryExcess)}` : "",
+    result.custom.validIntermediaryTotal > 0 ? `− ${money.format(result.custom.validIntermediaryTotal)}` : "",
+  ].filter(Boolean).join(" ");
+  const directPreKeysCalculation = `Maior entre ${money.format(0)} e ${directPreKeysExpression}`;
+  const directPreKeysMeta = directPreKeysDeductions.length > 0
+    ? `${directPreKeysRateLabel} menos ${directPreKeysDeductions.join(" e ")}`
+    : `${directPreKeysRateLabel} do valor do imóvel`;
+  const directPreKeysSettlement = directEntryExcess > 0
+    ? result.custom.validIntermediaryTotal > 0 ? "Saldo coberto pela entrada adicional e pelas intermediárias" : "Saldo absorvido pela entrada adicional"
+    : "Saldo quitado pelas intermediárias";
+  const directPreKeysAvailable = directResult.custom.balance > 0 && directResult.custom.desiredInstallments > 0;
+  const directPreKeysDeadlineInsufficient = directResult.custom.balance > 0 && directResult.custom.desiredInstallments === 0;
+  const directPreKeysDeadlineMessage = "A entrega não permite nenhuma mensal pré-chaves; ajuste a composição da entrada.";
+  const directPreKeysPaymentSummary = installmentSummary(
+    directResult.custom.desiredInstallments,
+    directResult.custom.installmentValue,
+    directResult.custom.lastInstallmentValue,
+  );
   const directIntermediaryPayments: DirectCalculationPayment[] = selectedDirectProposalOption?.withIntermediary
     ? result.custom.intermediaries
       .filter((item: { value: number }) => item.value > 0)
@@ -2601,15 +2718,15 @@ export function InvestorCalculator({
     ...(selectedDirectProposalOption.withIntermediary && directIntermediaryPayments.length === 0
       ? [{ key: "intermediary-pending", label: "Intermediária", operator: "…", calculation: "Defina o valor", result: "Pendente", meta: "Complete no fluxo editável" }]
       : directIntermediaryPayments),
-    { key: "pre-keys-balance", label: "Saldo parcelado pré-chaves", operator: "−", calculation: result.custom.validIntermediaryTotal > 0 ? `${money.format(result.context.valueReal)} × ${directPreKeysRateLabel} − ${money.format(result.custom.validIntermediaryTotal)}` : `${money.format(result.context.valueReal)} × ${directPreKeysRateLabel}`, result: `− ${money.format(result.custom.balance)}`, amount: result.custom.balance, meta: result.custom.validIntermediaryTotal > 0 ? `${directPreKeysRateLabel} menos ${validDirectIntermediaryCount} ${validDirectIntermediaryCount === 1 ? "intermediária" : "intermediárias"} de 5%` : `${directPreKeysRateLabel} do valor do imóvel` },
-    { key: "pre-keys", label: result.custom.balance > 0 ? `${result.custom.desiredInstallments} Mensais pré-chaves` : "Mensais pré-chaves", operator: result.custom.balance > 0 ? "÷" : "", calculation: result.custom.balance > 0 ? `${money.format(result.custom.balance)} ÷ ${result.custom.desiredInstallments}` : "", result: result.custom.balance > 0 ? money.format(result.custom.installmentValue) : "Dispensadas", amount: result.custom.balance > 0 ? result.custom.installmentValue : undefined, meta: result.custom.balance > 0 ? `1ª parcela em ${formatDate(result.custom.firstPreKeysDate)}` : "Saldo quitado pelas intermediárias" },
+    { key: "pre-keys-balance", label: "Saldo parcelado pré-chaves", operator: "−", calculation: directPreKeysCalculation, result: `− ${money.format(result.custom.balance)}`, amount: result.custom.balance, meta: directPreKeysMeta },
+    { key: "pre-keys", label: directPreKeysAvailable ? `${result.custom.desiredInstallments} Mensais pré-chaves` : "Mensais pré-chaves", operator: directPreKeysAvailable ? "÷" : directPreKeysDeadlineInsufficient ? "!" : "", calculation: directPreKeysAvailable ? `${money.format(result.custom.balance)} ÷ ${result.custom.desiredInstallments}` : "", result: directPreKeysAvailable ? directPreKeysPaymentSummary : directPreKeysDeadlineInsufficient ? "Prazo insuficiente" : "Dispensadas", meta: directPreKeysAvailable ? `1ª parcela em ${formatDate(result.custom.firstPreKeysDate)}` : directPreKeysDeadlineInsufficient ? directPreKeysDeadlineMessage : directPreKeysSettlement, invalid: directPreKeysDeadlineInsufficient },
     { key: "post-keys-balance", label: "Saldo financiado", operator: "=", calculation: `${money.format(result.context.valueReal)} × ${directPostKeysRateLabel}`, result: money.format(result.custom.postKeysBalance), amount: result.custom.postKeysBalance, meta: `Base para ${result.custom.postKeysInstallments} parcelas pós-chaves` },
     { key: "post-keys", label: `${result.custom.postKeysInstallments} Parcelas mensais pós-chaves`, operator: "÷", calculation: "", result: money.format(result.custom.postKeysPayment), amount: result.custom.postKeysPayment, meta: `1ª parcela em ${formatDate(result.custom.firstPostKeysDate)}`, featured: true },
-    { key: "credit", label: "Status", operator: "", calculation: "", result: result.custom.income > 0 ? `${percent.format(result.custom.commitment)} | ${result.custom.creditApproved ? "APROVADO" : "REPROVADO"}` : "Informe a renda", meta: "Limite de comprometimento: 40%" },
+    { key: "credit", label: "Status", operator: "", calculation: "", result: directStatus === "PENDENTE" ? "Informe a renda" : `${percent.format(result.custom.commitment)} | ${directStatus}`, meta: "Limite de comprometimento: 40%" },
   ] : [];
   const directCalculationSteps = directReadyPayments.filter((payment) => payment.key !== "credit");
-  const directCreditState = result.custom.income <= 0 ? "pending" : result.custom.creditApproved ? "approved" : "rejected";
-  const directCreditLabel = result.custom.income <= 0 ? "PENDENTE" : result.custom.creditApproved ? "APROVADO" : "REPROVADO";
+  const directCreditLabel = directStatus;
+  const directCreditState = directCreditLabel === "APROVADO" ? "approved" : directCreditLabel === "REPROVADO" ? "rejected" : directCreditLabel === "AJUSTE NECESSÁRIO" ? "adjustment" : "pending";
 
   useEffect(() => {
     if (directTable) return;
@@ -2937,6 +3054,7 @@ export function InvestorCalculator({
     setRegion("Todas");
     setSalePriceFilter("Todos");
     setPriceSort("asc");
+    setInventoryPage(1);
     setFilterNotice("");
     setSelectedUnitId("");
     setDocumentationAppraisalOverride("");
@@ -2959,6 +3077,7 @@ export function InvestorCalculator({
 
   function updateFilter(setter: (value: string) => void, value: string) {
     setter(value);
+    setInventoryPage(1);
     setFilterNotice("");
     setSelectedUnitId("");
     setDocumentationAppraisalOverride("");
@@ -3149,7 +3268,7 @@ export function InvestorCalculator({
                         </div> : <div className="investor-direct-account investor-associative-compact-account investor-direct-ready-account" role="region" tabIndex={0} aria-label={`${selectedDirectProposalOption.label}: memória de cálculo em formato de conta`}>
                           <ol>{directCalculationSteps.map((payment, index) => {
                             const help = associativeHelp(payment.meta, payment.calculation ? `Cálculo: ${payment.calculation}.` : null);
-                            const action = payment.key === "pre-keys" && result.custom.balance > 0
+                            const action = payment.key === "pre-keys" && directPreKeysAvailable
                               ? <button type="button" className="investor-info-trigger investor-direct-dialog-trigger" aria-label="Ver parcelas pré-chaves" title="Ver parcelas pré-chaves" aria-haspopup="dialog" aria-controls="investor-direct-pre-keys" onClick={() => directPreKeysDialog.current?.showModal()}><span className="investor-info-mark" aria-hidden="true" /></button>
                               : payment.key === "post-keys"
                                 ? <button type="button" className="investor-info-trigger investor-direct-dialog-trigger" aria-label={`Ver amortização das ${result.custom.postKeysInstallments} parcelas pós-chaves`} title={`Ver amortização das ${result.custom.postKeysInstallments} parcelas pós-chaves`} aria-haspopup="dialog" aria-controls="investor-direct-amortization" onClick={() => directAmortizationDialog.current?.showModal()}><span className="investor-info-mark" aria-hidden="true" /></button>
@@ -3173,7 +3292,7 @@ export function InvestorCalculator({
                 </div>
               </section> : null}
             </div>
-            <DirectPreKeysDialog dialogRef={directPreKeysDialog} principal={result.custom.desiredInstallments * result.custom.installmentValue} schedule={directPreKeysSchedule} />
+            <DirectPreKeysDialog dialogRef={directPreKeysDialog} principal={result.custom.balance} schedule={directPreKeysSchedule} />
             <DirectAmortizationDialog dialogRef={directAmortizationDialog} principal={result.custom.postKeysBalance} schedule={directAmortizationSchedule} />
             <p className="investor-scenario-order">{!directIncomeReady ? "A opção 01 e o fluxo editável abaixo estão visíveis como referência, mas permanecem congelados até você informar a renda." : selectedDirectProposalOption ? "Confira a proposta pronta e ajuste os valores no fluxo editável abaixo." : "Escolha uma opção para exibir a proposta pronta."}</p>
           </> : <>
@@ -3396,9 +3515,9 @@ export function InvestorCalculator({
         <header className="investor-section-heading">
           <span>01</span>
           <div><p>Estoque SPC</p><h2 id="investor-stock-title">Escolha a unidade</h2></div>
-          <div className="investor-stock-sync">
+          <div className="investor-stock-sync" role="status" aria-live="polite" aria-atomic="true">
             <small>{inventoryStatus === "ready" ? `${inventory.length.toLocaleString("pt-BR")} unidades` : inventoryStatus === "error" ? "Estoque indisponível" : "Carregando estoque"}</small>
-            {inventoryMeta?.generatedAt ? <small>Atualizado {dateTime.format(new Date(inventoryMeta.generatedAt))}</small> : null}
+            {inventoryMeta?.sourceKind === "versioned-snapshot" && inventoryMeta.snapshotReferenceDate ? <small>Arquivo {inventoryMeta.source || "ESTOQUE SPC.xlsx"} · referência {formatDate(inventoryMeta.snapshotReferenceDate)}</small> : inventoryMeta?.generatedAt ? <small>Atualizado {dateTime.format(new Date(inventoryMeta.generatedAt))}</small> : directTable && inventoryStatus === "ready" ? <small>Fonte viva {inventoryMeta?.source || "estoque protegido"} · atualização não informada</small> : null}
           </div>
         </header>
 
@@ -3419,12 +3538,12 @@ export function InvestorCalculator({
           <label><span>Região</span><select value={region} onChange={(event) => updateFilter(setRegion, event.target.value)}><option value="Todas">Todas ({filterOptions.totals.region.toLocaleString("pt-BR")})</option>{filterOptions.regions.map((item) => <option value={item.value} key={item.value}>{item.value} ({item.count.toLocaleString("pt-BR")})</option>)}</select></label>
           <label><span>Planta</span><select value={plant} onChange={(event) => updateFilter(setPlant, event.target.value)}><option value="Todos">Todos ({filterOptions.totals.plant.toLocaleString("pt-BR")})</option>{filterOptions.plants.map((item) => <option value={item.value} key={item.value}>{item.value} ({item.count.toLocaleString("pt-BR")})</option>)}</select></label>
           <label><span>Valor do Imóvel</span><select value={salePriceFilter} onChange={(event) => updateFilter(setSalePriceFilter, event.target.value)}><option value="Todos">Todos ({filterOptions.totals.salePrice.toLocaleString("pt-BR")})</option>{filterOptions.salePrices.map((item) => <option value={item.value} key={item.value}>{money.format(Number(item.value))} ({item.count.toLocaleString("pt-BR")})</option>)}</select></label>
-          <label className="investor-stock-sort" data-tour="sort"><span>Ordenar valor</span><select aria-label="Ordenar unidades por valor do imóvel" value={priceSort} onChange={(event) => setPriceSort(event.target.value as "asc" | "desc")}><option value="asc">Menor para o maior</option><option value="desc">Maior para o menor</option></select></label>
+          <label className="investor-stock-sort" data-tour="sort"><span>Ordenar valor</span><select aria-label="Ordenar unidades por valor do imóvel" value={priceSort} onChange={(event) => { setPriceSort(event.target.value as "asc" | "desc"); setInventoryPage(1); }}><option value="asc">Menor para o maior</option><option value="desc">Maior para o menor</option></select></label>
           {filterNotice && <span className="sr-only" aria-live="polite">{filterNotice}</span>}
         </div>
 
         <p className="investor-stock-summary sr-only" aria-live="polite">
-          <span>{inventoryStatus === "ready" ? <><strong>{matchingInventory.length.toLocaleString("pt-BR")}</strong> unidades disponíveis</> : inventoryStatus === "loading" ? "Carregando estoque…" : "Estoque indisponível"}</span>
+          <span>{inventoryStatus === "ready" ? <><strong>{matchingInventory.length.toLocaleString("pt-BR")}</strong> unidades encontradas</> : inventoryStatus === "loading" ? "Carregando estoque…" : "Estoque indisponível"}</span>
         </p>
 
         <div className="investor-stock-results" role="region" aria-label="Estoque completo de unidades" tabIndex={0} data-tour="inventory">
@@ -3453,16 +3572,20 @@ export function InvestorCalculator({
             <tbody>
               {inventoryStatus === "loading" ? <tr><td className="investor-empty-result" colSpan={7}>Carregando unidades do estoque…</td></tr> : null}
               {inventoryStatus === "error" ? <tr><td className="investor-empty-result" colSpan={7}>Estoque indisponível. Recarregue a página para tentar novamente.</td></tr> : null}
-              {matchingInventory.map((item) => {
+              {visibleInventory.map((item) => {
                 const canSelect = Boolean(item.finalPrice && item.completionDate);
                 const selected = item.id === selectedUnitId;
+                const unavailableReason = [
+                  !item.finalPrice ? "sem valor informado" : null,
+                  !item.completionDate ? "sem data de entrega" : null,
+                ].filter(Boolean).join(" e ");
                 return <tr
                   key={item.id}
                   className={`${selected ? "selected" : ""} ${canSelect ? "selectable" : "unavailable"}`.trim()}
                   aria-selected={selected}
                   onClick={() => canSelect && selectUnit(item)}
                 >
-                  <td className="investor-stock-start-cell" data-label="Início"><button type="button" className="investor-stock-unit-button" disabled={!canSelect} aria-pressed={selected} onClick={(event) => { event.stopPropagation(); selectUnit(item); }} aria-label={canSelect ? `Iniciar proposta com ${item.identifier ?? item.product}` : `${item.identifier ?? item.product} sem valor ou término da obra`}><span aria-hidden="true">{selected ? "✓" : "›"}</span></button></td>
+                  <td className="investor-stock-start-cell" data-label="Início"><button type="button" className="investor-stock-unit-button" disabled={!canSelect} aria-pressed={selected} onClick={(event) => { event.stopPropagation(); selectUnit(item); }} aria-label={canSelect ? `Iniciar proposta com ${item.identifier ?? item.product}` : `${item.identifier ?? item.product} ${unavailableReason}`}><span aria-hidden="true">{selected ? "✓" : "›"}</span></button></td>
                   <td data-label="Incorporadora">{item.businessUnit}</td>
                   <td className="investor-stock-product" data-label="Produto"><span className="investor-stock-product-text">{item.product}</span></td>
                   <td data-label="Metragem">{item.privateArea != null ? `${decimal.format(item.privateArea)} m²` : "—"}</td>
@@ -3478,9 +3601,19 @@ export function InvestorCalculator({
           </table>
         </div>
 
+        {directTable && inventoryStatus === "ready" && matchingInventory.length > 0 ? <nav className="investor-stock-pagination" aria-label="Paginação do estoque completo">
+          <span>Exibindo {((currentInventoryPage - 1) * DIRECT_TABLE_INVENTORY_PAGE_SIZE + 1).toLocaleString("pt-BR")}–{Math.min(currentInventoryPage * DIRECT_TABLE_INVENTORY_PAGE_SIZE, matchingInventory.length).toLocaleString("pt-BR")} de {matchingInventory.length.toLocaleString("pt-BR")} unidades</span>
+          <div>
+            <button type="button" disabled={currentInventoryPage <= 1} onClick={() => setInventoryPage((page) => Math.max(1, page - 1))}>Anterior</button>
+            <strong>Página {currentInventoryPage.toLocaleString("pt-BR")} de {inventoryPageCount.toLocaleString("pt-BR")}</strong>
+            <button type="button" disabled={currentInventoryPage >= inventoryPageCount} onClick={() => setInventoryPage((page) => Math.min(inventoryPageCount, page + 1))}>Próxima</button>
+          </div>
+        </nav> : null}
+
       </section>
 
       {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} /> : null}
+      {selectedUnit && directTable && selectedUnit.completionDate && selectedUnit.completionDate <= baseDate ? <p className="investor-direct-context-warning" role="alert"><strong>Prazo da obra encerrado.</strong> A entrega em {formatDate(selectedUnit.completionDate)} não é futura em relação à data da simulação. A unidade permanece disponível para conferência, mas a auditoria exigirá ajuste; escolha outra unidade para montar uma proposta válida.</p> : null}
 
       {selectedUnit && annualMode ? <AssociativeQualificationPanel
         income={income}
@@ -3603,8 +3736,9 @@ export function InvestorCalculator({
                     label="Ato"
                     tourTarget="proposal-entry"
                     meta={`Pagamento em ${formatDate(baseDate)}`}
-                    calculation={<>{money.format(result.context.valueReal)} × {percent.format(result.custom.actRate)}<small>Mínimo {money.format(result.context.valueReal * 0.06)} (6%)</small></>}
-                    result={<div className="investor-direct-editable-value"><span aria-hidden="true">R$</span><MoneyInput label="Valor do ato" describedBy="investor-editable-entry-status" value={entryValue} onChange={updateEntryValue} /><small id="investor-editable-entry-status">{percent.format(result.custom.actRate)} do valor real</small></div>}
+                    calculation={<>{money.format(result.context.valueReal)} × {percent.format(result.custom.actRate)}<small>Mínimo do ato: {money.format(result.context.valueReal * 0.06)} (6%) · máximo da entrada total: {money.format(directResult.custom.maximumEntryValue)}</small></>}
+                    invalid={directActInvalid}
+                    result={<div className="investor-direct-editable-value"><span aria-hidden="true">R$</span><MoneyInput label="Valor do ato" describedBy="investor-editable-entry-status" invalid={directActInvalid} value={entryValue} onChange={updateEntryValue} /><small id="investor-editable-entry-status" role={directActInvalid ? "alert" : "status"} aria-live="polite" aria-atomic="true">{directEntryAboveMaximum ? `Entrada total excede o máximo em ${money.format(directEntryMaximumOverage)}. Reduza o ato ou os sinais.` : directActBelowMinimum ? `Ato abaixo do mínimo de ${money.format(directActMinimum)} (6%).` : `${percent.format(result.custom.actRate)} do valor real`}</small></div>}
                   />
                   <DirectEditableAccountRow
                     number={4}
@@ -3637,10 +3771,11 @@ export function InvestorCalculator({
                   <DirectEditableAccountRow
                     label={signalsVisible ? "Adicionar sinal" : "Sinais"}
                     tourTarget="proposal-signals"
-                    meta={signalsRequired ? `Faltam ${money.format(missingForMinimumEntry)} para completar 10%` : "Opcionais · limite de 3 pagamentos"}
+                    meta={directEntryAboveMaximum ? `Entrada total máxima: ${money.format(directResult.custom.maximumEntryValue)} · excedente: ${money.format(directEntryMaximumOverage)}` : signalsRequired ? `Faltam ${money.format(missingForMinimumEntry)} para completar 10%` : "Opcionais · limite de 3 pagamentos"}
                     calculation={`Total atual: ${money.format(result.custom.signalTotal)}`}
+                    invalid={directEntryAboveMaximum}
                     result={<div className="investor-direct-editable-actions">
-                      {visibleSignalCount < signals.length ? <button ref={signalActionRef} type="button" aria-label={signalsVisible ? "Adicionar ou reexibir sinal" : "Adicionar sinal"} title={signalsVisible ? "Adicionar ou reexibir sinal" : "Adicionar sinal"} onClick={addSignalField}><span aria-hidden="true">+</span></button> : <small>Limite atingido</small>}
+                      {directEntryAboveMaximum ? <small className="investor-required-note" role="status" aria-live="polite" aria-atomic="true">Reduza o ato ou os sinais.</small> : visibleSignalCount < signals.length ? <button ref={signalActionRef} type="button" aria-label={signalsVisible ? "Adicionar ou reexibir sinal" : "Adicionar sinal"} title={signalsVisible ? "Adicionar ou reexibir sinal" : "Adicionar sinal"} onClick={addSignalField}><span aria-hidden="true">+</span></button> : <small>Limite atingido</small>}
                     </div>}
                   />
                   {visibleIntermediaryIndexes.map((index, visiblePosition) => {
@@ -3671,18 +3806,19 @@ export function InvestorCalculator({
                     operator="−"
                     label="Saldo parcelado pré-chaves"
                     tourTarget="proposal-prekeys"
-                    meta={result.custom.validIntermediaryTotal > 0 ? `${directPreKeysRateLabel} menos intermediárias válidas` : `${directPreKeysRateLabel} do valor do imóvel`}
-                    calculation={result.custom.validIntermediaryTotal > 0 ? `${money.format(result.context.valueReal)} × ${directPreKeysRateLabel} − ${money.format(result.custom.validIntermediaryTotal)}` : `${money.format(result.context.valueReal)} × ${directPreKeysRateLabel}`}
+                    meta={directPreKeysMeta}
+                    calculation={directPreKeysCalculation}
                     result={<strong>− {money.format(result.custom.balance)}</strong>}
                   />
                   <DirectEditableAccountRow
                     number={6 + visibleSignalCount + visibleIntermediaryCount}
-                    operator={result.custom.balance > 0 ? "÷" : ""}
-                    label={result.custom.balance > 0 ? `${result.custom.desiredInstallments} Mensais pré-chaves` : "Mensais pré-chaves"}
-                    meta={result.custom.balance > 0 ? `1ª parcela em ${formatDate(result.custom.firstPreKeysDate)}` : "Saldo quitado pelas intermediárias"}
-                    calculation={result.custom.balance > 0 ? `${money.format(result.custom.balance)} ÷ ${result.custom.desiredInstallments}` : ""}
-                    action={result.custom.balance > 0}
-                    result={result.custom.balance > 0 ? <><strong>{money.format(result.custom.installmentValue)}</strong><button type="button" className="investor-info-trigger investor-direct-dialog-trigger" aria-label="Ver parcelas pré-chaves" title="Ver parcelas pré-chaves" aria-haspopup="dialog" aria-controls="investor-direct-pre-keys" onClick={() => directPreKeysDialog.current?.showModal()}><span className="investor-info-mark" aria-hidden="true" /></button></> : <strong>Dispensadas</strong>}
+                    operator={directPreKeysAvailable ? "÷" : directPreKeysDeadlineInsufficient ? "!" : ""}
+                    label={directPreKeysAvailable ? `${result.custom.desiredInstallments} Mensais pré-chaves` : "Mensais pré-chaves"}
+                    meta={directPreKeysAvailable ? `1ª parcela em ${formatDate(result.custom.firstPreKeysDate)}` : directPreKeysDeadlineInsufficient ? directPreKeysDeadlineMessage : directPreKeysSettlement}
+                    calculation={directPreKeysAvailable ? `${money.format(result.custom.balance)} ÷ ${result.custom.desiredInstallments}` : ""}
+                    action={directPreKeysAvailable}
+                    invalid={directPreKeysDeadlineInsufficient}
+                    result={directPreKeysAvailable ? <><strong>{directPreKeysPaymentSummary}</strong><button type="button" className="investor-info-trigger investor-direct-dialog-trigger" aria-label="Ver parcelas pré-chaves" title="Ver parcelas pré-chaves" aria-haspopup="dialog" aria-controls="investor-direct-pre-keys" onClick={() => directPreKeysDialog.current?.showModal()}><span className="investor-info-mark" aria-hidden="true" /></button></> : directPreKeysDeadlineInsufficient ? <strong>Prazo insuficiente</strong> : <strong>Dispensadas</strong>}
                   />
                   <DirectEditableAccountRow
                     number={7 + visibleSignalCount + visibleIntermediaryCount}
@@ -3710,7 +3846,7 @@ export function InvestorCalculator({
                     tourTarget="credit-status"
                     meta="Limite de comprometimento: 40%"
                     calculation=""
-                    invalid={result.custom.income > 0 && !result.custom.creditApproved}
+                    invalid={directCreditLabel === "REPROVADO" || directCreditLabel === "AJUSTE NECESSÁRIO"}
                     result={<span className={`investor-direct-credit-result ${directCreditState}`} role="status" aria-live="polite" aria-atomic="true"><strong>{directCreditLabel}</strong>{result.custom.income > 0 ? <small>{percent.format(result.custom.commitment)} da renda</small> : null}</span>}
                   />
                   </ol>
@@ -4170,10 +4306,10 @@ export function InvestorCalculator({
                   <div><dt>Ato ({percent.format(result.custom.actRate)})</dt><dd>{money.format(result.custom.actValue)}</dd></div>
                   {result.custom.signalTotal > 0 ? <div><dt>Sinais<small>Pagamentos em {activeSignalDates.join(", ")}</small></dt><dd>{money.format(result.custom.signalTotal)}</dd></div> : null}
                   {result.custom.validIntermediaryTotal > 0 ? <div><dt>{annualMode ? "Anuais corrigidas" : "Intermediárias válidas"}<small>Pagamentos em {validIntermediaryDates.join(", ")}</small></dt><dd>{money.format(result.custom.validIntermediaryTotal)}</dd></div> : null}
-                  <div><dt>Mensais pré-chaves<small>1ª em {formatPaymentDate(result.custom.firstPreKeysDate)} · última em {formatPaymentDate(result.custom.lastPreKeysDate)}</small></dt><dd><strong>{result.custom.desiredInstallments}x</strong> de {money.format(result.custom.installmentValue)}</dd></div>
+                  {directPreKeysAvailable ? <div><dt>Mensais pré-chaves<small>1ª em {formatPaymentDate(directResult.custom.firstPreKeysDate)} · última em {formatPaymentDate(directResult.custom.lastPreKeysDate)}</small></dt><dd><strong>{directPreKeysPaymentSummary}</strong></dd></div> : directPreKeysDeadlineInsufficient ? <div><dt>Mensais pré-chaves</dt><dd><strong>Prazo insuficiente</strong><small>{directPreKeysDeadlineMessage}</small></dd></div> : <div><dt>Mensais pré-chaves</dt><dd><strong>Dispensadas</strong><small>{directPreKeysSettlement}</small></dd></div>}
                   <div className="investor-result-installment-total"><dt>Mensais pós-chaves<small>1ª em {formatPaymentDate(result.custom.firstPostKeysDate)} · juros, MIP e DFI</small></dt><dd><strong>{result.custom.postKeysInstallments}x</strong> de {money.format(result.custom.postKeysPayment)}</dd></div>
                   <div className="investor-result-breakdown-total"><dt>Renda e comprometimento</dt><dd>{result.custom.income > 0 ? `${money.format(result.custom.income)} · ${percent.format(result.custom.commitment)}` : "Renda não informada"}</dd></div>
-                  <div><dt>Status do crédito</dt><dd><strong>{result.custom.income > 0 ? result.custom.creditApproved ? "APROVADO" : "REPROVADO" : "PENDENTE"}</strong></dd></div>
+                  <div><dt>Resultado da proposta</dt><dd><strong>{directStatus}</strong></dd></div>
                 </dl> : annualMode ? <dl>
                   <div><dt>Valor real da venda<small>Imóvel − B.A. − folga</small></dt><dd>{money.format(result.context.valueReal)}</dd></div>
                   {result.custom.financing > 0 ? <div><dt>Financiamento</dt><dd>− {money.format(result.custom.financing)}</dd></div> : null}

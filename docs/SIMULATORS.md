@@ -8,13 +8,17 @@ por padrão e isolado dos demais motores. Contrato, fontes, caso de ouro do PDF
 Master e rollback estão em
 [`docs/simulators-official/WF13.md`](simulators-official/WF13.md).
 
-Os outros quatro motores permanecem visualmente completos e bloqueados até seus
-incrementos independentes. Nenhum simulador depende de Salesforce, n8n ou Qlik.
+O WF14 implementa a réplica integral da Tabela Direta do arquivo anexado, com
+snapshot SPC em volume privado fora do Git e da imagem, montado somente para
+leitura, e cálculo executado no navegador. Isso não promove o workflow n8n
+histórico nem o runtime de políticas comerciais a fonte oficial. WF16, CAIXA e
+WF15 permanecem bloqueados. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 
 ## Escopo
 
 As cinco jornadas preservam a composição visual aprovada. Somente o WF13 possui
-fórmula oficial neste incremento; o bundle da referência não é versionado.
+fórmula classificada como oficial; o WF14 reproduz integralmente o artefato
+anexado e mantém suas regras isoladas do runtime oficial.
 
 | Código | Rota protegida                            | Jornada visual        |
 | ------ | ----------------------------------------- | --------------------- |
@@ -25,19 +29,30 @@ fórmula oficial neste incremento; o bundle da referência não é versionado.
 | WF15   | `/app/simulacao/tabela-investidor`        | Tabela Investidor     |
 
 O hub está em `/app/simulacao`. Todas as seis rotas exigem
-`crm.simulators.view` no guard server-side e no catálogo `app_pages`. A
-navegação continua recebendo somente as páginas filtradas pelo contexto de
-autorização. No canário atual, essa permissão é exclusiva do Master e não possui
-override direto. O acesso à página e a execução são gates independentes: WF13
-também exige `crm.simulators.execute`, flag e chave oficiais; os demais papéis
-falham antes da renderização e os demais motores permanecem desligados.
+`crm.simulators.view` no guard server-side. O catálogo PostgreSQL permanece com
+17 páginas e a réplica WF14 está implementada neste candidato somente pelo
+catálogo HTTP versionado, sem migration. A navegação continua recebendo somente
+as páginas filtradas pelo contexto de autorização. No canário atual, essa
+permissão é exclusiva do Master e não possui override direto. O acesso à página
+e a execução são gates independentes: WF13 também exige
+`crm.simulators.execute`, flag e chave oficiais. A réplica WF14 não persiste a
+proposta nem habilita um motor oficial.
 
 ## Comportamento fail-closed
 
 - O catálogo tipado define títulos, seções, campos e espaços de resultado.
 - Campos obrigatórios ganham validação associada e `aria-invalid`.
 - As flags oficiais nascem `off` e a allowlist nasce vazia.
-- WF16, CAIXA, WF14 e WF15 mantêm botão bloqueado e `UnavailableValue`.
+- WF16, CAIXA e WF15 mantêm botão bloqueado e `UnavailableValue`.
+- WF14 usa as 3.301 linhas do volume SPC privado, validado por checksum e montado
+  somente para leitura. `GET /api/inventory/snapshot` entrega esse conteúdo e
+  `GET /api/inventory` oferece o fallback vivo; ambos exigem
+  `crm.simulators.view`, respondem com `no-store` e mantêm as linhas sem preço
+  visíveis e indisponíveis. A simulação também exige unidade com valor e término
+  da obra.
+- A Tabela Direta fecha a distribuição no centavo, preserva o bloco pós-chaves
+  e separa pendência de dados, ajuste operacional, aprovação e recusa de
+  crédito.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta

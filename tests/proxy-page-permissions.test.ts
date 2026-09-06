@@ -50,6 +50,7 @@ describe("pre-stream page permission gates", () => {
     ["/app/configuracoes/metas/pontos", "crm.settings.manage"],
     ["/app/simulacao", "crm.simulators.view"],
     ["/app/simulacao/associativo-fluxo-linear", "crm.simulators.view"],
+    ["/app/simulacao/tabela-direta", "crm.simulators.view"],
     ["/admin", "admin.access"],
     ["/admin/usuarios", "users.view"],
     ["/admin/paginas", "pages.manage"],
@@ -85,7 +86,6 @@ describe("pre-stream page permission gates", () => {
   it.each([
     "/app/simulacao/calcular-documentacao",
     "/app/simulacao/caixa",
-    "/app/simulacao/tabela-direta",
     "/app/simulacao/tabela-investidor",
   ])(
     "returns 403 for inactive catalog route %s even when Master has the shared permission",

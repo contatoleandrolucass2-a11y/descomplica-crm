@@ -58,6 +58,7 @@ const routes = [
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
@@ -126,7 +127,12 @@ const desktopThemeCaptureRoutes = new Set([
   "/app/configuracoes/metas",
   "/app/configuracoes/metas/pontos",
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
   ...adminRoutes,
+]);
+const archiveSimulatorRoutes = new Set([
+  "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
 ]);
 const mobileDarkViewportKey = "mobile-390x844";
 const zoomLevels = [
@@ -370,7 +376,7 @@ async function saveLosslessWebp(buffer, destination) {
 }
 
 async function captureComparableScreenshot(page) {
-  const fullPage = new URL(page.url()).pathname !== "/app/simulacao/associativo-fluxo-linear";
+  const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
   const volatileRegions = page.locator("[data-qa-visual-volatile]:not([hidden])");
   await volatileRegions.evaluateAll((elements) => {
     for (const element of elements) {
@@ -392,7 +398,7 @@ async function captureComparableScreenshot(page) {
 
 async function capturePersistedScreenshot(page, comparableBuffer) {
   if (!remoteHomologation) {
-    const fullPage = new URL(page.url()).pathname !== "/app/simulacao/associativo-fluxo-linear";
+    const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
     return comparableBuffer ?? (await page.screenshot({ fullPage, animations: "disabled" }));
   }
 
@@ -431,7 +437,7 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
   });
 
   try {
-    const fullPage = new URL(page.url()).pathname !== "/app/simulacao/associativo-fluxo-linear";
+    const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
     return await page.screenshot({
       fullPage,
       animations: "disabled",
@@ -635,20 +641,23 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
   );
   await page.evaluate(() => document.fonts.ready);
 
-  const isArchiveAssociativeTable = route === "/app/simulacao/associativo-fluxo-linear";
-  if (isArchiveAssociativeTable) {
+  const isArchiveSimulator = archiveSimulatorRoutes.has(route);
+  if (isArchiveSimulator) {
     await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
       state: "visible",
       timeout: 25_000,
     });
   }
-  const isSimulatorWorkspace = route.startsWith("/app/simulacao/") && !isArchiveAssociativeTable;
+  const isSimulatorWorkspace = route.startsWith("/app/simulacao/") && !isArchiveSimulator;
   const expectsEnabledSimulatorAction = enabledSimulatorRoutes.has(route);
   const snapshot = await page.evaluate((simulatorWorkspace) => {
     const text = document.body.innerText;
     const root = document.documentElement;
     const simulatorForm = simulatorWorkspace ? document.querySelector("main form") : null;
-    const archiveSimulator = window.location.pathname === "/app/simulacao/associativo-fluxo-linear";
+    const archiveSimulator = [
+      "/app/simulacao/associativo-fluxo-linear",
+      "/app/simulacao/tabela-direta",
+    ].includes(window.location.pathname);
     const topbarInner = document.querySelector("header > div");
     const brand = topbarInner?.firstElementChild;
     const navigation = document.querySelector('header nav[aria-label="Navegação autorizada"]');
@@ -1118,6 +1127,220 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   };
 }
 
+async function checkDirectTableValidation(page, origin, consoleErrors, pageErrors) {
+  const consoleStart = consoleErrors.length;
+  const pageErrorStart = pageErrors.length;
+  await page.clock.setFixedTime(new Date("2026-09-06T12:00:00-03:00"));
+  await page.goto(`${origin}/app/simulacao/tabela-direta`, {
+    waitUntil: "domcontentloaded",
+  });
+  await page
+    .getByRole("heading", { name: "Simulador Tabela Direta", exact: true })
+    .waitFor({ state: "visible" });
+  const inventoryStatus = page.locator(".investor-stock-sync");
+  await inventoryStatus.getByText("3.301 unidades", { exact: true }).waitFor({
+    state: "visible",
+    timeout: 25_000,
+  });
+
+  const inventoryRows = page.locator(".investor-stock-table tbody tr");
+  const selectedUnitButtons = page.locator('.investor-stock-unit-button[aria-pressed="true"]');
+  const inventoryPagination = page.getByRole("navigation", {
+    name: "Paginação do estoque completo",
+    exact: true,
+  });
+  const previousInventoryPage = inventoryPagination.getByRole("button", {
+    name: "Anterior",
+    exact: true,
+  });
+  const nextInventoryPage = inventoryPagination.getByRole("button", {
+    name: "Próxima",
+    exact: true,
+  });
+  const firstPageHasOneHundredRows = (await inventoryRows.count()) === 100;
+  const startsWithoutSelectedUnit = (await selectedUnitButtons.count()) === 0;
+  const inventoryHeaderText = (await inventoryStatus.innerText()).replace(/\s+/g, " ");
+  const firstPaginationText = (await inventoryPagination.innerText()).replace(/\s+/g, " ");
+  const fullInventoryCountVisible =
+    inventoryHeaderText.includes("3.301 unidades") &&
+    firstPaginationText.includes("Exibindo 1–100 de 3.301 unidades") &&
+    firstPaginationText.includes("Página 1 de 34");
+  const inventoryOriginVisible = inventoryHeaderText.includes(
+    "Arquivo ESTOQUE SPC.xlsx · referência 05/09/2026",
+  );
+  const paginationStartsInExpectedState =
+    (await previousInventoryPage.isDisabled()) && (await nextInventoryPage.isEnabled());
+
+  await nextInventoryPage.click();
+  await inventoryPagination.getByText("Página 2 de 34", { exact: true }).waitFor();
+  const secondPaginationText = (await inventoryPagination.innerText()).replace(/\s+/g, " ");
+  const paginationAdvancesOneHundredRows =
+    (await inventoryRows.count()) === 100 &&
+    secondPaginationText.includes("Exibindo 101–200 de 3.301 unidades");
+  await previousInventoryPage.click();
+  await inventoryPagination.getByText("Página 1 de 34", { exact: true }).waitFor();
+
+  const firstSelectableRow = page.locator(".investor-stock-table tbody tr.selectable").first();
+  await firstSelectableRow.click();
+  const manualUnitSelectionWorks =
+    (await selectedUnitButtons.count()) === 1 &&
+    (await firstSelectableRow.getAttribute("aria-selected")) === "true" &&
+    (await page
+      .getByRole("article", { name: "Descrição do imóvel usado na proposta", exact: true })
+      .isVisible());
+
+  const incomeInput = page.getByRole("textbox", { name: "Renda mensal", exact: true });
+  await incomeInput.fill("10000000");
+  const incomeAccepted =
+    (await incomeInput.inputValue()) === "100.000,00" &&
+    (await page
+      .locator('.investor-direct-editable-freeze fieldset[aria-disabled="false"]')
+      .count()) === 1;
+
+  const proposalOptions = page.locator(".investor-direct-ready-options button");
+  const fourProposalOptionsPresent = (await proposalOptions.count()) === 4;
+  const optionSelectionChecks = [];
+  for (let index = 0; index < (await proposalOptions.count()); index += 1) {
+    const option = proposalOptions.nth(index);
+    const available =
+      (await option.isVisible()) &&
+      (await option.isEnabled()) &&
+      (await option.getAttribute("aria-disabled")) === "false";
+    await option.click();
+    optionSelectionChecks.push(
+      available &&
+        (await option.getAttribute("aria-pressed")) === "true" &&
+        (await page
+          .locator('.investor-direct-ready-options button[aria-pressed="true"]')
+          .count()) === 1,
+    );
+  }
+  const allProposalOptionsSelectable =
+    optionSelectionChecks.length === 4 && optionSelectionChecks.every(Boolean);
+  await proposalOptions.first().click();
+
+  const proposalStatus = page.locator(
+    '.investor-direct-credit-result[role="status"][aria-live="polite"][aria-atomic="true"]',
+  );
+  const approvedProposalStatusVisible =
+    (await proposalStatus.isVisible()) &&
+    (await proposalStatus.locator("strong").textContent())?.trim() === "APROVADO";
+
+  await page.getByRole("button", { name: "Ver parcelas pré-chaves", exact: true }).last().click();
+  const preKeysDialog = page.locator("#investor-direct-pre-keys");
+  await preKeysDialog.waitFor({ state: "visible" });
+  const preKeysDialogWorks = await preKeysDialog.evaluate(
+    (dialog) =>
+      dialog.open &&
+      /\d+ parcelas pré-chaves/.test(dialog.querySelector("h2")?.textContent ?? "") &&
+      dialog.querySelectorAll("tbody tr").length > 1,
+  );
+  await preKeysDialog
+    .getByRole("button", { name: "Fechar tabela das parcelas pré-chaves", exact: true })
+    .click();
+  await preKeysDialog.waitFor({ state: "hidden" });
+
+  await page
+    .getByRole("button", { name: /^Ver amortização das \d+ parcelas pós-chaves$/ })
+    .last()
+    .click();
+  const postKeysDialog = page.locator("#investor-direct-amortization");
+  await postKeysDialog.waitFor({ state: "visible" });
+  const postKeysDialogWorks = await postKeysDialog.evaluate(
+    (dialog) =>
+      dialog.open &&
+      /\d+ parcelas pós-chaves/.test(dialog.querySelector("h2")?.textContent ?? "") &&
+      dialog.querySelectorAll("tbody tr").length > 1,
+  );
+  await postKeysDialog
+    .getByRole("button", { name: "Fechar tabela de amortização", exact: true })
+    .click();
+  await postKeysDialog.waitFor({ state: "hidden" });
+
+  await page.getByRole("button", { name: "Doc Pessoa Física", exact: true }).click();
+  const physicalPersonDialog = page.locator("#investor-documentation-pf");
+  await physicalPersonDialog.waitFor({ state: "visible" });
+  const physicalPersonDocumentationWorks = await physicalPersonDialog.evaluate(
+    (dialog) =>
+      dialog.open &&
+      dialog.querySelector("h2")?.textContent?.trim() ===
+        "Documentação Pessoa Física · Tabela Direta" &&
+      dialog.querySelectorAll(".investor-documentation-sections > section").length === 4 &&
+      dialog.querySelectorAll("li").length > 0,
+  );
+  await physicalPersonDialog
+    .getByRole("button", {
+      name: "Fechar Documentação Pessoa Física · Tabela Direta",
+      exact: true,
+    })
+    .click();
+  await physicalPersonDialog.waitFor({ state: "hidden" });
+
+  await page.getByRole("button", { name: "Doc Pessoa Jurídica", exact: true }).click();
+  const legalEntityDialog = page.locator("#investor-documentation-pj");
+  await legalEntityDialog.waitFor({ state: "visible" });
+  const legalEntityDocumentationWorks = await legalEntityDialog.evaluate(
+    (dialog) =>
+      dialog.open &&
+      dialog.querySelector("h2")?.textContent?.trim() ===
+        "Documentação Pessoa Jurídica · Tabela Direta" &&
+      dialog.querySelectorAll(".investor-documentation-sections > section").length === 3 &&
+      dialog.querySelectorAll("li").length > 0,
+  );
+  await legalEntityDialog
+    .getByRole("button", {
+      name: "Fechar Documentação Pessoa Jurídica · Tabela Direta",
+      exact: true,
+    })
+    .click();
+  await legalEntityDialog.waitFor({ state: "hidden" });
+
+  const actInput = page.getByRole("textbox", { name: "Valor do ato", exact: true });
+  await actInput.fill("100");
+  const actDescriptionId = await actInput.getAttribute("aria-describedby");
+  const actDescription = actDescriptionId ? page.locator(`#${actDescriptionId}`) : null;
+  const belowSixPercentActIsInvalid =
+    (await actInput.getAttribute("aria-invalid")) === "true" &&
+    actDescription !== null &&
+    (await actDescription.getAttribute("role")) === "alert" &&
+    /Ato abaixo do mínimo de R\$\s[\d.,]+ \(6%\)\./.test(
+      (await actDescription.textContent())?.trim() ?? "",
+    );
+
+  const audit = page.locator("details.investor-proposal-audit");
+  await audit.locator("summary").click();
+  const auditOpensWithRejectedAct = await audit.evaluate(
+    (details) =>
+      details.open &&
+      details.querySelectorAll("li").length > 0 &&
+      [...details.querySelectorAll("li.error")].some((item) =>
+        item.textContent?.includes("Ato mínimo de 6%"),
+      ),
+  );
+
+  return {
+    fullInventoryCountVisible,
+    inventoryOriginVisible,
+    firstPageHasOneHundredRows,
+    paginationStartsInExpectedState,
+    paginationAdvancesOneHundredRows,
+    startsWithoutSelectedUnit,
+    manualUnitSelectionWorks,
+    incomeAccepted,
+    fourProposalOptionsPresent,
+    allProposalOptionsSelectable,
+    approvedProposalStatusVisible,
+    belowSixPercentActIsInvalid,
+    preKeysDialogWorks,
+    postKeysDialogWorks,
+    physicalPersonDocumentationWorks,
+    legalEntityDocumentationWorks,
+    auditOpensWithRejectedAct,
+    directFlowHasNoRuntimeErrors:
+      consoleErrors.length === consoleStart && pageErrors.length === pageErrorStart,
+  };
+}
+
 async function checkFixtureSourceMarker(page, origin, expectedMarker) {
   const checks = {};
   for (const [key, route] of [
@@ -1223,6 +1446,7 @@ function functionalChecksPassed({
   screenshots,
   keyboard,
   simulatorValidation,
+  directTableValidation,
   fixtureSourceMarker,
   zoom,
 }) {
@@ -1244,6 +1468,8 @@ function functionalChecksPassed({
     Object.values(keyboard).every(Boolean) &&
     simulatorValidation &&
     Object.values(simulatorValidation).every(Boolean) &&
+    directTableValidation &&
+    Object.values(directTableValidation).every(Boolean) &&
     fixtureSourceMarker &&
     Object.values(fixtureSourceMarker).every(Boolean) &&
     zoom.routes.length === routes.length * zoomLevels.length &&
@@ -1458,6 +1684,7 @@ async function run() {
   const screenshots = [];
   let keyboard = null;
   let simulatorValidation = null;
+  let directTableValidation = null;
   let fixtureSourceMarker = null;
   let homologationCheckpoints = [];
   let currentStage = "homologation-checkpoints";
@@ -1567,6 +1794,13 @@ async function run() {
           keyboard = await checkKeyboard(page, origin);
           currentStage = "simulator-validation";
           simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);
+          currentStage = "direct-table-validation";
+          directTableValidation = await checkDirectTableValidation(
+            page,
+            origin,
+            consoleErrors,
+            pageErrors,
+          );
           currentStage = "fixture-source-marker";
           fixtureSourceMarker = await checkFixtureSourceMarker(page, origin, expectedSourceMarker);
         }
@@ -1628,6 +1862,7 @@ async function run() {
       screenshots,
       keyboard,
       simulatorValidation,
+      directTableValidation,
       fixtureSourceMarker,
       zoom,
     });
@@ -1669,6 +1904,7 @@ async function run() {
       accessibilityChecks,
       keyboard,
       simulatorValidation,
+      directTableValidation,
       homologationCheckpoints,
       zoom,
       screenshots,

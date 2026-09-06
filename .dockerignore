@@ -5,6 +5,7 @@
 !.env.example
 node_modules
 coverage
+private-data
 *.log
 *.pem
 *.key

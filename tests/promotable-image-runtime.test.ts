@@ -71,6 +71,13 @@ describe("promotable image contract", () => {
         "source: ${AUTH_SESSION_COOKIE_SECRET_SOURCE:?AUTH_SESSION_COOKIE_SECRET_SOURCE is required}",
       );
       expect(compose).toContain("target: /run/secrets/auth_session_cookie_secret");
+      expect(compose).toContain(
+        "INVESTOR_INVENTORY_SNAPSHOT_PATH: /run/data/investor-inventory.json",
+      );
+      expect(compose).toContain(
+        "source: /etc/descomplica-crm/data/investor-inventory-2026-09-05.json",
+      );
+      expect(compose).toContain("target: /run/data/investor-inventory.json");
       expect(compose).toContain("create_host_path: false");
       expect(compose).toContain('group_add:\n      - "0"');
       expect(compose).not.toMatch(/^\s+AUTH_SESSION_COOKIE_SECRET:/mu);
@@ -87,6 +94,9 @@ describe("promotable image contract", () => {
       "utf8",
     );
     expect(wrapper).toContain("Runtime secret directory must be root-owned with mode 0710.");
+    expect(wrapper).toContain("Inventory snapshot directory must be root-owned with mode 0710.");
+    expect(wrapper).toContain("Inventory snapshot digest is invalid.");
+    expect(wrapper).toContain("Inventory snapshot contents are invalid.");
     expect(wrapper.match(/environmentMode: 0o600/gu)).toHaveLength(2);
     expect(wrapper.match(/environmentGroup: "root"/gu)).toHaveLength(2);
     expect(wrapper).toContain("path must not be a symlink.");

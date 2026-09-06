@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { forbidden, notFound } from "next/navigation";
 
 import { enforcePermission } from "@/lib/authorization/enforce";
@@ -12,9 +13,29 @@ import {
 
 import { SimulatorWorkspace } from "../_components/SimulatorWorkspace";
 import { AssociativeTableArchive } from "../_components/AssociativeTableArchive";
+import { DirectTableArchive } from "../_components/DirectTableArchive";
 
-export const metadata = { title: "Simulação comercial" };
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ simulator: string }>;
+}): Promise<Metadata> {
+  const { simulator } = await params;
+  if (simulator === "tabela-direta") {
+    return {
+      title: "Simulador Tabela Direta",
+      description:
+        "Escolha uma das quatro opções da Tabela Direta, personalize o fluxo e valide pré-chaves, pós-chaves e análise de crédito.",
+      alternates: { canonical: "/app/simulacao/tabela-direta" },
+    };
+  }
+  if (simulator === "associativo-fluxo-linear") {
+    return { title: "Simulador Tabela Associativo" };
+  }
+  return { title: "Simulação comercial" };
+}
 
 export default async function SimulatorPage({
   params,
@@ -40,6 +61,10 @@ export default async function SimulatorPage({
 
   if (simulator === "associativo-fluxo-linear") {
     return <AssociativeTableArchive />;
+  }
+
+  if (simulator === "tabela-direta") {
+    return <DirectTableArchive />;
   }
 
   return (

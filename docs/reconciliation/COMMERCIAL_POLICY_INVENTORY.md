@@ -12,27 +12,28 @@ permanecem fora do repositório, modo `0600`; seus SHA-256 são:
 Eles comprovam comportamento histórico, não aprovação, vigência ou autoridade
 comercial. Nenhuma política assinada, tabela homologada, proprietário formal ou
 casos de ouro foi localizada. Portanto, “implementada” nunca significa
-“confirmada por fonte oficial”. O CRM novo mantém todos os motores de simulação
-sem submit, fórmula ou persistência.
+“confirmada por fonte oficial”. O runtime oficial continua fail-closed fora do
+WF13; a réplica WF14 calcula localmente, sem submit ao servidor, persistência ou
+integração e sem converter seus parâmetros em política homologada.
 
 ## Classificação consolidada
 
-| Política                     | Evidência encontrada                                                                       | Classificação                                  | Estado no CRM                             |
-| ---------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------- | ----------------------------------------- |
-| Fluxo Linear / WF13          | Motor n8n histórico `3xCd2TjfsPpbozDF`, solvers e cache `RANKING.xlsx`                     | Implementada sem fonte; divergente; incompleta | Bloqueada                                 |
-| Calcular Documentação / WF16 | Motor histórico `CgilvhfRoj4PGsQR` com faixas e constantes embutidas                       | Implementada sem fonte; divergente; incompleta | Bloqueada                                 |
-| CAIXA                        | Nenhum motor dedicado; WF18 é stub e o orquestrador histórico declara não simular banco    | Ausente                                        | Bloqueada                                 |
-| Tabela Direta / WF14         | Motor histórico `Jd8XawLpIAvHbgYg`; caller, trigger e schema incompatíveis                 | Implementada sem fonte; divergente; incompleta | Bloqueada                                 |
-| Tabela Investidor / WF15     | Motor histórico `5wbldhDymGu0O5KY`; depende de estoque legado conflitante                  | Implementada sem fonte; divergente; incompleta | Bloqueada                                 |
-| Pontuação                    | Sete métricas e pesos sugeridos herdados; tabela/RPC sem seed                              | Implementada sem fonte oficial                 | Só funciona após configuração explícita   |
-| Bônus                        | `floor(base × visitas/agendamentos)` no código atual                                       | Implementada sem fonte oficial                 | Ativa apenas com pesos e snapshot válidos |
-| Arredondamento               | Funil usa `round` por etapa; ranking usa `floor` no bônus; simuladores históricos variam   | Divergente                                     | Não homologado                            |
-| Desempate                    | Atual: total, visitas, conversão, pastas, vendas, nome; legado tinha conversões adicionais | Divergente                                     | Não homologado                            |
-| SLA                          | Workflow histórico mede “Criada Pelo SLA” como perda, sem exigir perda/fechamento          | Divergente e incompleta                        | Ausente no contrato novo                  |
-| Equipe produtiva             | Regras históricas conflitantes; sem IDs/vigência                                           | Divergente e incompleta                        | Ausente                                   |
-| Metas                        | Modelo/RPC atual derivados do legado; workflows históricos discordam nas taxas             | Implementada sem fonte; divergente             | Sem seed; Salesforce marca indisponível   |
-| Campanhas                    | Nomes/valores somente no legado                                                            | Ausente como política versionada               | Bloqueada                                 |
-| Premiações/roleta            | Presença manual e valores hardcoded no legado                                              | Implementada sem fonte; incompleta             | Fonte marcada indisponível                |
+| Política                     | Evidência encontrada                                                                       | Classificação                                      | Estado no CRM                             |
+| ---------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------- | ----------------------------------------- |
+| Fluxo Linear / WF13          | Motor n8n histórico `3xCd2TjfsPpbozDF`, solvers e cache `RANKING.xlsx`                     | Implementada sem fonte; divergente; incompleta     | Bloqueada                                 |
+| Calcular Documentação / WF16 | Motor histórico `CgilvhfRoj4PGsQR` com faixas e constantes embutidas                       | Implementada sem fonte; divergente; incompleta     | Bloqueada                                 |
+| CAIXA                        | Nenhum motor dedicado; WF18 é stub e o orquestrador histórico declara não simular banco    | Ausente                                            | Bloqueada                                 |
+| Tabela Direta / WF14         | Artefato anexado + snapshot SPC; workflow `Jd8XawLpIAvHbgYg` não portado                   | Réplica funcional; política oficial não homologada | Protegida para Master; sem persistência   |
+| Tabela Investidor / WF15     | Motor histórico `5wbldhDymGu0O5KY`; depende de estoque legado conflitante                  | Implementada sem fonte; divergente; incompleta     | Bloqueada                                 |
+| Pontuação                    | Sete métricas e pesos sugeridos herdados; tabela/RPC sem seed                              | Implementada sem fonte oficial                     | Só funciona após configuração explícita   |
+| Bônus                        | `floor(base × visitas/agendamentos)` no código atual                                       | Implementada sem fonte oficial                     | Ativa apenas com pesos e snapshot válidos |
+| Arredondamento               | Funil usa `round` por etapa; ranking usa `floor` no bônus; simuladores históricos variam   | Divergente                                         | Não homologado                            |
+| Desempate                    | Atual: total, visitas, conversão, pastas, vendas, nome; legado tinha conversões adicionais | Divergente                                         | Não homologado                            |
+| SLA                          | Workflow histórico mede “Criada Pelo SLA” como perda, sem exigir perda/fechamento          | Divergente e incompleta                            | Ausente no contrato novo                  |
+| Equipe produtiva             | Regras históricas conflitantes; sem IDs/vigência                                           | Divergente e incompleta                            | Ausente                                   |
+| Metas                        | Modelo/RPC atual derivados do legado; workflows históricos discordam nas taxas             | Implementada sem fonte; divergente                 | Sem seed; Salesforce marca indisponível   |
+| Campanhas                    | Nomes/valores somente no legado                                                            | Ausente como política versionada                   | Bloqueada                                 |
+| Premiações/roleta            | Presença manual e valores hardcoded no legado                                              | Implementada sem fonte; incompleta                 | Fonte marcada indisponível                |
 
 As regras de fluxo do WF13 cobertas pelo PDF 2 de 18/08/2026 e pelo asset
 observado estão versionadas em `wf13-1.3.0`. Nenhuma regra dos demais motores
@@ -77,6 +78,14 @@ entregava os campos exigidos e o workflow não expunha o trigger interno usado
 por ele. C1/C2 ignoravam um mínimo recebido; a descrição de cenário discordava
 do cálculo. Dinheiro era ponto flutuante e erros retornavam HTTP 200. Não há
 fonte/vigência para percentuais, taxas ou limites. Não portar.
+
+A rota protegida implementada em setembro de 2026 não porta esse workflow. Ela
+reproduz integralmente o artefato anexado com snapshot SPC versionado, seleção
+por ID exato, quatro opções e proposta personalizada. As regras locais fecham
+valores no centavo, preservam o bloco pós-chaves e falham explicitamente em
+datas e prazos inválidos. A proposta não é persistida nem enviada a integração;
+a implementação registra paridade com o anexo, não homologação dos parâmetros como
+política oficial do runtime comercial.
 
 ### WF15 — Tabela Investidor
 
@@ -155,8 +164,8 @@ observado sem definição oficial. Todos continuam indisponíveis.
 Estas são as únicas respostas comerciais necessárias para iniciar motores;
 comportamento legado não será adotado por silêncio.
 
-1. Fornecer, para WF13, WF16, CAIXA, WF14 e WF15, política oficial versionada,
-   vigência, aprovador e casos de ouro de entrada/saída.
+1. Fornecer, para WF16, CAIXA, WF15 e para a homologação oficial do WF14,
+   política versionada, vigência, aprovador e casos de ouro de entrada/saída.
 2. Definir a fonte única oficial de estoque, sua precedência, IDs, moeda,
    remoção/correção e baseline conciliada.
 3. Aprovar métricas, pesos, bônus, arredondamento, desempate e fonte de roleta do

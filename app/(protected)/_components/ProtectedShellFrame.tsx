@@ -3,7 +3,10 @@
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
-const ASSOCIATIVE_REFERENCE_ROUTE = "/app/simulacao/associativo-fluxo-linear";
+const ARCHIVE_SIMULATOR_ROUTES = new Set([
+  "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
+]);
 
 export function ProtectedShellFrame({
   children,
@@ -16,7 +19,7 @@ export function ProtectedShellFrame({
 }) {
   const pathname = usePathname();
 
-  if (pathname === ASSOCIATIVE_REFERENCE_ROUTE) {
+  if (ARCHIVE_SIMULATOR_ROUTES.has(pathname)) {
     return <>{children}</>;
   }
 

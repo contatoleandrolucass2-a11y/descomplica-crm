@@ -10,12 +10,18 @@ const themes: Array<{ key: ThemeMode; label: string }> = [
   { key: "dark", label: "Escuro" },
 ];
 
-export function ThemeSwitch() {
+export function ThemeSwitch({ canPersist = true }: { canPersist?: boolean }) {
   const [theme, setTheme] = useState<ThemeMode>("light");
   const ready = useRef(false);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("descomplica-theme");
+    let saved: string | null = null;
+    try {
+      if (canPersist) saved = window.localStorage.getItem("descomplica-theme");
+      else window.localStorage.removeItem("descomplica-theme");
+    } catch {
+      // O tema continua disponível apenas nesta página quando storage está bloqueado.
+    }
     const current = document.documentElement.dataset.theme;
     const initial =
       saved === "light" || saved === "balanced" || saved === "dark"
@@ -26,7 +32,7 @@ export function ThemeSwitch() {
 
     const timer = window.setTimeout(() => setTheme(initial), 0);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [canPersist]);
 
   useEffect(() => {
     if (!ready.current) {
@@ -34,8 +40,14 @@ export function ThemeSwitch() {
       return;
     }
     document.documentElement.setAttribute("data-theme", theme);
-    window.localStorage.setItem("descomplica-theme", theme);
-  }, [theme]);
+    if (canPersist) {
+      try {
+        window.localStorage.setItem("descomplica-theme", theme);
+      } catch {
+        // Mantém a escolha apenas em memória quando storage está indisponível.
+      }
+    }
+  }, [canPersist, theme]);
 
   return (
     <div className="theme-switch" role="group" aria-label="Aparência da página">

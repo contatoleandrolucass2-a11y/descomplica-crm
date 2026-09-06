@@ -50,7 +50,6 @@ const expectedProtectedRoutes = [
 const futureSimulatorRoutes = new Set([
   "/app/simulacao/calcular-documentacao",
   "/app/simulacao/caixa",
-  "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
 ]);
 const expectedReleasedProtectedRoutes = expectedProtectedRoutes.filter(
@@ -195,6 +194,7 @@ const authenticatedResults = JSON.parse(
   };
   keyboard: Record<string, boolean>;
   simulatorValidation: Record<string, boolean>;
+  directTableValidation: Record<string, boolean>;
   baselineIntegrity: {
     trackedFilesRequired: boolean;
     committedAtStart: boolean;
@@ -246,6 +246,10 @@ const authenticatedResults = JSON.parse(
 
 describe("versioned reference parity catalog", () => {
   it("prepares the expanded authenticated visual matrix without weakening baseline safety", () => {
+    const routeSource = visualHarness.match(/const routes = \[(.*?)\n\];/s)?.[1] ?? "";
+    const configuredRoutes = [...routeSource.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+    expect(configuredRoutes).toEqual(expectedReleasedProtectedRoutes);
+
     const viewportSource = visualHarness.match(/const viewports = \[(.*?)\n\];/s)?.[1] ?? "";
     const configuredViewports = [
       ...viewportSource.matchAll(/\{ key: "([^"]+)", width: (\d+), height: (\d+) \}/g),
@@ -274,7 +278,7 @@ describe("versioned reference parity catalog", () => {
     expect(visualHarness).toContain('method: "same-filesystem transactional rename with rollback"');
     expect(referenceQaReadme).toContain("Matriz autenticada aprovada no SHA de fechamento");
     expect(referenceQaReadme).toContain(
-      "A matriz aprovou 147 capturas responsivas, 45 capturas de tema, 192 auditorias",
+      "A matriz aprovou 126 capturas responsivas, 45 capturas de tema, 171 auditorias",
     );
   });
 
@@ -415,7 +419,7 @@ describe("versioned reference parity catalog", () => {
         (check) => check.passed && check.reducedMotion && !check.horizontalOverflow,
       ),
     ).toBe(true);
-    const desktopThemeScreenshotCount = 8 * 3;
+    const desktopThemeScreenshotCount = 9 * 3;
     const mobileDarkScreenshotCount = expectedReleasedProtectedRoutes.length;
     const themeScreenshotCount = desktopThemeScreenshotCount + mobileDarkScreenshotCount;
     const visualEvidenceCount = responsiveScreenshotCount + themeScreenshotCount;
@@ -450,6 +454,8 @@ describe("versioned reference parity catalog", () => {
     ).toBe(true);
     expect(Object.values(authenticatedResults.keyboard).every(Boolean)).toBe(true);
     expect(Object.values(authenticatedResults.simulatorValidation).every(Boolean)).toBe(true);
+    expect(Object.keys(authenticatedResults.directTableValidation)).toHaveLength(18);
+    expect(Object.values(authenticatedResults.directTableValidation).every(Boolean)).toBe(true);
 
     expect(authenticatedResults.visualInspectionCoverage).toEqual({
       responsiveScreenshots: responsiveScreenshotCount,

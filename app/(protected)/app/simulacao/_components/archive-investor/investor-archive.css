@@ -19665,3 +19665,115 @@ body:has(.investor-page-shell) {
     min-height:40px;
   }
 }
+
+/* Tabela Direta: estados de validação e proteção responsiva do estoque integral. */
+.investor-page-shell.investor-direct-table-page .investor-stock-pagination {
+  display:flex;
+  min-height:48px;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:8px 14px;
+  color:#b9d2dc;
+  border:1px solid #2a647c;
+  border-top:0;
+  border-radius:0 0 12px 12px;
+  background:#082d40;
+  font-size:11px;
+}
+.investor-page-shell.investor-direct-table-page .investor-stock-pagination>div {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.investor-page-shell.investor-direct-table-page .investor-stock-pagination button {
+  min-width:82px;
+  min-height:36px;
+  padding:7px 10px;
+  color:#dff8fb;
+  border:1px solid #3a829c;
+  border-radius:8px;
+  background:#0c3a50;
+  font:inherit;
+  font-weight:800;
+  cursor:pointer;
+}
+.investor-page-shell.investor-direct-table-page .investor-stock-pagination button:hover:not(:disabled),
+.investor-page-shell.investor-direct-table-page .investor-stock-pagination button:focus-visible {
+  color:#082335;
+  border-color:#bef65a;
+  outline:0;
+  background:#bef65a;
+}
+.investor-page-shell.investor-direct-table-page .investor-stock-pagination button:disabled {
+  cursor:not-allowed;
+  opacity:.45;
+}
+.investor-page-shell .site-menu a[aria-disabled="true"] {
+  cursor:not-allowed;
+  opacity:.52;
+}
+.investor-page-shell .site-menu-panel a[aria-disabled="true"]:hover {
+  color:var(--ink-soft);
+  background:transparent;
+  transform:none;
+}
+.investor-page-shell.investor-direct-table-page .investor-direct-comparison-ledger-row.is-invalid {
+  background:#352b18;
+  box-shadow:inset 3px 0 0 #f5a623;
+}
+.investor-page-shell.investor-direct-table-page .investor-direct-comparison-ledger-row.is-invalid .investor-direct-comparison-ledger-label strong,
+.investor-page-shell.investor-direct-table-page .investor-direct-comparison-ledger-row.is-invalid .investor-direct-comparison-ledger-operator,
+.investor-page-shell.investor-direct-table-page .investor-direct-comparison-ledger-row.is-invalid .investor-direct-comparison-ledger-value {
+  color:#ffd88a;
+}
+.investor-page-shell .investor-direct-credit-status.adjustment strong,
+.investor-page-shell .investor-direct-credit-result.adjustment {
+  color:#ffd88a;
+}
+.investor-page-shell.investor-direct-table-page .investor-direct-context-warning {
+  margin:10px 0 0;
+  padding:10px 14px;
+  color:#ffe0a6;
+  border:1px solid #8f6a2f;
+  border-radius:10px;
+  background:#3a2d1d;
+  font-size:12px;
+  line-height:1.45;
+}
+.investor-page-shell.investor-direct-table-page .investor-direct-context-warning strong {
+  color:#ffbf52;
+}
+@media (max-width:760px) {
+  .investor-page-shell.investor-direct-table-page .investor-stock-pagination {
+    align-items:stretch;
+    flex-direction:column;
+  }
+  .investor-page-shell.investor-direct-table-page .investor-stock-pagination>div {
+    justify-content:space-between;
+  }
+  .investor-page-shell.investor-direct-table-page .investor-stock-panel>.investor-section-heading,
+  .investor-page-shell.investor-standard-table-page .investor-stock-panel>.investor-section-heading {
+    height:auto!important;
+    min-height:84px!important;
+    grid-template-columns:36px minmax(0,1fr);
+    grid-template-rows:auto auto;
+    align-items:center;
+    padding:8px 12px!important;
+  }
+  .investor-page-shell.investor-direct-table-page .investor-stock-panel>.investor-section-heading>span,
+  .investor-page-shell.investor-standard-table-page .investor-stock-panel>.investor-section-heading>span {
+    grid-row:1/3;
+  }
+  .investor-page-shell.investor-direct-table-page .investor-stock-panel>.investor-section-heading>span+div,
+  .investor-page-shell.investor-standard-table-page .investor-stock-panel>.investor-section-heading>span+div {
+    grid-column:2;
+    grid-row:1;
+  }
+  .investor-page-shell.investor-direct-table-page .investor-stock-panel>.investor-section-heading .investor-stock-sync,
+  .investor-page-shell.investor-standard-table-page .investor-stock-panel>.investor-section-heading .investor-stock-sync {
+    grid-column:2;
+    grid-row:2;
+    align-self:start;
+  }
+}

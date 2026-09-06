@@ -2,17 +2,21 @@
 
 /* eslint-disable @next/next/no-html-link-for-pages */
 import { ThemeSwitch } from "./ThemeSwitch";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useDismissiblePopover } from "./useDismissiblePopover";
 
-export function SiteMenu() {
+export function SiteMenu({ canPersistTheme = true }: { canPersistTheme?: boolean }) {
   const pathname = usePathname();
-  const activePathname =
+  const protectedPathname = pathname.startsWith("/app/") ? pathname.slice(4) : pathname;
+  const proposalFile =
     pathname === "/app/simulacao/associativo-fluxo-linear"
-      ? "/simulacao/tabela-investidor"
-      : pathname;
-  const searchParams = useSearchParams();
-  const proposalFile = searchParams.get("ficha") ?? "1";
+      ? "1"
+      : pathname === "/app/simulacao/tabela-direta"
+        ? "2"
+        : pathname === "/app/simulacao/tabela-investidor"
+          ? "3"
+          : null;
+  const activePathname = proposalFile ? "/simulacao/tabela-investidor" : protectedPathname;
   const isRouteActive = (route: string) =>
     route === "/"
       ? activePathname === route
@@ -73,27 +77,25 @@ export function SiteMenu() {
           </a>
           <a
             role="menuitem"
-            aria-current={
-              activePathname === "/simulacao/calcular-documentacao" ? "page" : undefined
-            }
+            aria-disabled="true"
+            title="Disponível em um próximo incremento"
             onClick={() => setSimulationOpen(false)}
-            href="/app/simulacao/calcular-documentacao"
           >
             Calcular documentação
           </a>
           <a
             role="menuitem"
-            aria-current={pathname === "/simulacao/caixa" ? "page" : undefined}
+            aria-disabled="true"
+            title="Disponível em um próximo incremento"
             onClick={() => setSimulationOpen(false)}
-            href="/simulacao/caixa"
           >
             CAIXA
           </a>
           <a
             role="menuitem"
-            aria-current={pathname === "/simulacao/tabela" ? "page" : undefined}
+            aria-current={activePathname === "/simulacao" ? "page" : undefined}
             onClick={() => setSimulationOpen(false)}
-            href="/simulacao/tabela"
+            href="/app/simulacao"
           >
             Tabelão
           </a>
@@ -112,24 +114,20 @@ export function SiteMenu() {
           <a
             role="menuitem"
             aria-current={
-              pathname === "/simulacao/tabela-investidor" && proposalFile === "2"
+              activePathname === "/simulacao/tabela-investidor" && proposalFile === "2"
                 ? "page"
                 : undefined
             }
             onClick={() => setSimulationOpen(false)}
-            href="/simulacao/tabela-investidor?ficha=2"
+            href="/app/simulacao/tabela-direta"
           >
             Tabela Direta
           </a>
           <a
             role="menuitem"
-            aria-current={
-              pathname === "/simulacao/tabela-investidor" && proposalFile === "3"
-                ? "page"
-                : undefined
-            }
+            aria-disabled="true"
+            title="Disponível em um próximo incremento"
             onClick={() => setSimulationOpen(false)}
-            href="/simulacao/tabela-investidor?ficha=3"
           >
             Tabela Investidor
           </a>
@@ -138,28 +136,26 @@ export function SiteMenu() {
       <a
         className={isRouteActive("/ranking") ? "is-active" : undefined}
         aria-current={isRouteActive("/ranking") ? "page" : undefined}
-        href="/ranking"
+        href="/app/ranking"
       >
         Ranking
       </a>
       <a
         className={isRouteActive("/canal-de-parcerias") ? "is-active" : undefined}
         aria-current={isRouteActive("/canal-de-parcerias") ? "page" : undefined}
-        href="/canal-de-parcerias"
+        href="/app/canal-de-parcerias"
       >
         Canal de Parcerias
       </a>
       <a
-        href="/previsao-final-de-semana"
-        aria-current={pathname === "/previsao-final-de-semana" ? "page" : undefined}
-        className={isRouteActive("/previsao-final-de-semana") ? "is-active" : undefined}
+        aria-disabled="true"
+        title="Disponível em um próximo incremento"
       >
         Previsão final de semana
       </a>
       <a
-        aria-current={isRouteActive("/discador") ? "page" : undefined}
-        className={isRouteActive("/discador") ? "is-active" : undefined}
-        href="/discador"
+        aria-disabled="true"
+        title="Disponível em um próximo incremento"
       >
         Discador
       </a>
@@ -180,31 +176,31 @@ export function SiteMenu() {
         <div className="site-menu-panel" id={menuId} role="menu">
           <a
             role="menuitem"
-            aria-current={pathname === "/configuracoes" ? "page" : undefined}
+            aria-current={activePathname === "/configuracoes" ? "page" : undefined}
             onClick={() => setOpen(false)}
-            href="/configuracoes"
+            href="/app/configuracoes"
           >
             Visão geral
           </a>
           <a
             role="menuitem"
-            aria-current={pathname === "/configuracoes/metas" ? "page" : undefined}
+            aria-current={activePathname === "/configuracoes/metas" ? "page" : undefined}
             onClick={() => setOpen(false)}
-            href="/configuracoes/metas"
+            href="/app/configuracoes/metas"
           >
             Configurar metas
           </a>
           <a
             role="menuitem"
-            aria-current={pathname === "/configuracoes/metas/pontos" ? "page" : undefined}
+            aria-current={activePathname === "/configuracoes/metas/pontos" ? "page" : undefined}
             onClick={() => setOpen(false)}
-            href="/configuracoes/metas/pontos"
+            href="/app/configuracoes/metas/pontos"
           >
             Metas por pontos
           </a>
         </div>
       </div>
-      <ThemeSwitch />
+      <ThemeSwitch canPersist={canPersistTheme} />
     </nav>
   );
 }

@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-06 — Tabela Direta integral no CRM
+
+- Implementa a réplica completa da Tabela Direta em
+  `/app/simulacao/tabela-direta`, sob autenticação e permissão já existente
+  `crm.simulators.view`, sem migration, novo papel ou integração externa.
+- Preserva estoque SPC, filtros, quatro opções de proposta, fluxo personalizado,
+  memória pré/pós-chaves, documentação, guias, impressão e todo o conteúdo do
+  artefato anexado, sem substituir dados reais por mocks.
+- Corrige fechamento monetário, entrada acima do mínimo, prazo pré-chaves zero,
+  datas impossíveis ou posteriores à entrega e distingue `PENDENTE`,
+  `AJUSTE NECESSÁRIO`, `APROVADO` e `REPROVADO`.
+- Valida o snapshot integral de 3.301 unidades e 11.948 combinações de proposta
+  calculáveis, incluindo limites de sinais, intermediárias e crédito.
+- Retira o snapshot comercial do HEAD atual e da imagem, monta a cópia validada em
+  volume privado somente leitura e a entrega por endpoint autenticado com
+  `crm.simulators.view`, sem cache compartilhado.
+- Faz toda a amortização pós-chaves em centavos, quita o resíduo na última
+  competência e usa na decisão de crédito o mesmo valor exibido ao usuário.
+
 ## 2026-09-02
 
 - Restaura na rota “Simulador Associativo” a página WF13 do arquivo original:

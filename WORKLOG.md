@@ -1,5 +1,44 @@
 # Worklog
 
+## 2026-09-06 — Tabela Direta na rota protegida
+
+- O código, o container e o proxy de produção foram reconciliados antes da
+  alteração; o checkout vivo é `/srv/descomplica-crm-simulador-associativo` e
+  o Nginx de `crm.descomplicapro.com.br` encaminha para essa aplicação.
+- A composição integral do artefato anexado foi conectada ao slug
+  `/app/simulacao/tabela-direta`, preservando o guard server-side
+  `crm.simulators.view` e sem criar migration, grant, papel ou integração.
+- O item “Tabela Direta” passou a usar a URL protegida exata do CRM. Estoque,
+  filtros, seleção, quatro opções, proposta personalizada, memórias, guias,
+  documentos, impressão e estados de interface permanecem disponíveis.
+- O snapshot SPC privado contém 3.301 IDs únicos. Há 2.987 unidades com
+  preço positivo e término da obra para cálculo; as 314 linhas sem preço
+  válido continuam visíveis, mas indisponíveis para seleção. Nenhuma linha foi
+  resumida ou substituída por mock.
+- O arquivo saiu do HEAD do Git, de `public/` e da imagem: o runtime o monta de
+  `/etc/descomplica-crm/data` em volume somente leitura, após validar ownership,
+  modo, SHA-256, contagem e IDs. A réplica o recebe por endpoint server-only que
+  repete `crm.simulators.view` e cabeçalhos `no-store`; a fonte viva usada como
+  contingência recebeu o mesmo gate.
+- A remoção do HEAD não reescreve commits antigos do repositório público. A
+  cópia histórica deve ser tratada como previamente exposta; privatização ou
+  purge de histórico exigem uma operação separada e destrutiva do proprietário.
+- O anexo informa a fonte `ESTOQUE SPC.xlsx` e a contagem, mas não traz
+  `generatedAt` nem `reportId`. Por isso, WF14 prioriza o snapshot congelado
+  para preservar seu conteúdo integral e não o apresenta como estoque oficial
+  em tempo real; a API viva é usada somente se o snapshot privado falhar.
+- A revisão das regras corrigiu centavos, sobrepagamento por entrada acima de
+  10%, entrada máxima, zero mensal pré-chaves, sinal posterior à entrega, data
+  ISO impossível e a separação dos quatro estados de resultado.
+- A matriz completa avaliou 2.987 unidades por quatro opções: 11.948 fluxos,
+  11.692 propostas prontas, 256 ajustes determinísticos por prazo e nenhum
+  estado inesperado.
+- Testes dedicados cobrem rota, menu, conteúdo integral, qualidade do snapshot,
+  percentuais, datas, limites, arredondamento, amortização, crédito e todas as
+  regressões corrigidas, inclusive a igualdade entre valor monetário exibido e
+  decisão de crédito. A matriz visual autenticada inclui WF14 nos sete
+  viewports, três temas, Axe e zoom de 80% a 200%.
+
 ## 2026-09-02 — Simulador Associativo
 
 - A navegação persistida do WF13 passa a usar o nome “Simulador Associativo”.

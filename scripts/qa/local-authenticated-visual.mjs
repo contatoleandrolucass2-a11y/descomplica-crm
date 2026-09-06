@@ -306,6 +306,14 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
       APP_ORIGIN: origin,
       AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
       QA_VISUAL_GOALS_REFERENCE_TIME: visualGoalsReferenceTime,
+      INVESTOR_INVENTORY_SNAPSHOT_PATH: path.join(
+        repositoryRoot,
+        "private-data",
+        "investor-inventory.json",
+      ),
+      INVESTOR_INVENTORY_SNAPSHOT_REFERENCE_DATE: "2026-09-05",
+      INVESTOR_INVENTORY_SNAPSHOT_SHA256:
+        "f31e6fe6a8dac204e767744903a6ae957f9bd526ed190e8cdf193c3479e61b24",
       AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
       SUPABASE_URL: apiUrl,
       SUPABASE_PUBLISHABLE_KEY: publishableKey,
