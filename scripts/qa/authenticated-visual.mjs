@@ -890,6 +890,15 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     };
   });
 
+  // Use a project present in both the protected reference snapshot and the
+  // live feed so the flow remains deterministic while the background refresh
+  // resolves. Its units are still in construction and exercise the full plan.
+  await page
+    .getByRole("combobox", { name: "Nome do Empreendimento", exact: true })
+    .selectOption("Estilo Lapa");
+  await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
+    state: "visible",
+  });
   await page.locator(".investor-stock-table tbody tr.selectable").first().click();
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
