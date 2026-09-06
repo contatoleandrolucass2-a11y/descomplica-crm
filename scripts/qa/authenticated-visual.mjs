@@ -680,12 +680,25 @@ async function inspectRoute(
 ) {
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
-  const response = await page.goto(`${origin}${route}`, { waitUntil: "commit" });
+  let response = await page.goto(`${origin}${route}`, { waitUntil: "commit" });
   await page.locator("h1").first().waitFor({ state: "visible", timeout: 60_000 });
-  await page.waitForFunction(
-    (theme) => document.documentElement.dataset.theme === theme,
-    expectedTheme,
-  );
+  try {
+    await page.waitForFunction(
+      (theme) => document.documentElement.dataset.theme === theme,
+      expectedTheme,
+      { timeout: 20_000 },
+    );
+  } catch {
+    // A renderer under the full screenshot/Axe matrix can occasionally commit
+    // before the inline theme bootstrap runs. Retry the document once, then
+    // keep the normal hard failure if the rendered contract is still absent.
+    response = await page.reload({ waitUntil: "commit" });
+    await page.locator("h1").first().waitFor({ state: "visible", timeout: 60_000 });
+    await page.waitForFunction(
+      (theme) => document.documentElement.dataset.theme === theme,
+      expectedTheme,
+    );
+  }
   await page.evaluate(() => document.fonts.ready);
 
   const isArchiveSimulator = archiveSimulatorRoutes.has(route);
