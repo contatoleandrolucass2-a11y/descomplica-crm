@@ -385,7 +385,7 @@ async function captureComparableScreenshot(page) {
     }
   });
   try {
-    return await page.screenshot({ fullPage, animations: "disabled" });
+    return await page.screenshot({ fullPage, animations: "disabled", timeout: 60_000 });
   } finally {
     await page.locator('[data-qa-visual-hidden="true"]').evaluateAll((elements) => {
       for (const element of elements) {
@@ -399,7 +399,11 @@ async function captureComparableScreenshot(page) {
 async function capturePersistedScreenshot(page, comparableBuffer) {
   if (!remoteHomologation) {
     const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
-    return comparableBuffer ?? (await page.screenshot({ fullPage, animations: "disabled" }));
+    return comparableBuffer ?? (await page.screenshot({
+      fullPage,
+      animations: "disabled",
+      timeout: 60_000,
+    }));
   }
 
   await page.evaluate(() => {
@@ -441,6 +445,7 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
     return await page.screenshot({
       fullPage,
       animations: "disabled",
+      timeout: 60_000,
       mask: [page.locator('[data-qa-evidence-identity="remote-homologation"]')],
       maskColor: "#334155",
     });
