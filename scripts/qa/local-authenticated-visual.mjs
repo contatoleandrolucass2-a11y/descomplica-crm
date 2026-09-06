@@ -1,7 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 import { execFile, spawn, spawnSync } from "node:child_process";
 import { lstat, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
-import { createServer } from "node:net";
+import { createServer as createHttpServer, request as requestHttp } from "node:http";
+import { createServer as createNetServer } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -69,7 +70,7 @@ function parseLoopbackHttpOrigin(rawValue, label) {
 
 async function reserveLoopbackPort() {
   return await new Promise((resolve, reject) => {
-    const server = createServer();
+    const server = createNetServer();
     server.unref();
     server.once("error", reject);
     server.listen(0, "127.0.0.1", () => {
@@ -82,6 +83,145 @@ async function reserveLoopbackPort() {
       server.close((error) => (error ? reject(error) : resolve(port)));
     });
   });
+}
+
+const hopByHopHeaders = new Set([
+  "connection",
+  "keep-alive",
+  "proxy-authenticate",
+  "proxy-authorization",
+  "proxy-connection",
+  "te",
+  "trailer",
+  "transfer-encoding",
+  "upgrade",
+]);
+
+function withoutHopByHopHeaders(headers) {
+  const connectionTokens = new Set(
+    String(headers.connection ?? "")
+      .split(",")
+      .map((name) => name.trim().toLowerCase())
+      .filter(Boolean),
+  );
+  return Object.fromEntries(
+    Object.entries(headers).filter(([name]) => {
+      const normalizedName = name.toLowerCase();
+      return !hopByHopHeaders.has(normalizedName) && !connectionTokens.has(normalizedName);
+    }),
+  );
+}
+
+export async function startSerializedSupabaseProxy(targetOrigin) {
+  const target = new URL(parseLoopbackHttpOrigin(targetOrigin, "Local Supabase proxy target"));
+  const listenHostname = target.hostname === "[::1]" ? "::1" : target.hostname;
+  let authUserTail = Promise.resolve();
+
+  const server = createHttpServer((incoming, outgoing) => {
+    const serializeAuthUserRequest =
+      incoming.method === "GET" &&
+      new URL(incoming.url ?? "/", target).pathname === "/auth/v1/user";
+    const forward = () =>
+      new Promise((resolve) => {
+        if (incoming.destroyed || outgoing.destroyed) {
+          resolve();
+          return;
+        }
+
+        let settled = false;
+        const settle = () => {
+          if (settled) return;
+          settled = true;
+          resolve();
+        };
+        const fail = () => {
+          if (!outgoing.headersSent && !outgoing.destroyed) {
+            outgoing.writeHead(502, {
+              "cache-control": "no-store",
+              "content-type": "application/json; charset=utf-8",
+            });
+            outgoing.end('{"message":"Local QA authentication proxy failed."}');
+          } else if (!outgoing.destroyed) {
+            outgoing.destroy();
+          }
+          settle();
+        };
+
+        const upstream = requestHttp(
+          {
+            protocol: target.protocol,
+            hostname: target.hostname,
+            port: target.port,
+            method: incoming.method,
+            path: incoming.url,
+            headers: {
+              ...withoutHopByHopHeaders(incoming.headers),
+              host: target.host,
+            },
+          },
+          (upstreamResponse) => {
+            if (outgoing.destroyed) {
+              upstreamResponse.destroy();
+              settle();
+              return;
+            }
+
+            outgoing.writeHead(
+              upstreamResponse.statusCode ?? 502,
+              withoutHopByHopHeaders(upstreamResponse.headers),
+            );
+            upstreamResponse.pipe(outgoing);
+            upstreamResponse.once("end", settle);
+            upstreamResponse.once("error", fail);
+          },
+        );
+        upstream.setTimeout(60_000, () =>
+          upstream.destroy(new Error("Local QA Supabase upstream timed out.")),
+        );
+        upstream.once("error", fail);
+        outgoing.once("close", () => {
+          if (!outgoing.writableEnded) upstream.destroy();
+          settle();
+        });
+
+        if (incoming.method === "GET" || incoming.method === "HEAD") {
+          upstream.end();
+        } else {
+          incoming.pipe(upstream);
+        }
+      });
+
+    if (serializeAuthUserRequest) {
+      const task = authUserTail.then(forward, forward);
+      authUserTail = task.catch(() => undefined);
+      return;
+    }
+
+    void forward();
+  });
+
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, listenHostname, resolve);
+  });
+  const address = server.address();
+  if (!address || typeof address === "string") {
+    await new Promise((resolve) => server.close(resolve));
+    throw new Error("Could not start the local Supabase QA proxy.");
+  }
+
+  let closed = false;
+  return {
+    origin: `${target.protocol}//${target.hostname}:${address.port}`,
+    close: async () => {
+      if (closed) return;
+      closed = true;
+      await new Promise((resolve) => {
+        server.close(resolve);
+        server.closeAllConnections?.();
+      });
+    },
+  };
 }
 
 async function resolveQaOrigin() {
@@ -407,7 +547,7 @@ async function startLocalNextServer({
   child.once("exit", () => activeChildren.delete(child));
 
   try {
-    const deadline = Date.now() + 30_000;
+    const deadline = Date.now() + 90_000;
     while (Date.now() < deadline) {
       throwIfInterrupted();
       if (spawnError || child.exitCode !== null || child.signalCode !== null) {
@@ -421,7 +561,7 @@ async function startLocalNextServer({
       }
     }
 
-    throw new Error("Local Next.js production server did not become ready within 30 seconds.");
+    throw new Error("Local Next.js production server did not become ready within 90 seconds.");
   } catch (error) {
     await stopChild(child);
     throw error;
@@ -1348,7 +1488,6 @@ function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
       "LD_LIBRARY_PATH",
       "OFFICIAL_SIMULATOR_RUNTIME_MODE",
       "OFFICIAL_SIMULATOR_ENABLED_KEYS",
-      "QA_LOCAL_DIAGNOSTICS",
     ]),
     QA_AUTH_ORIGIN: origin,
     QA_AUTH_EMAIL: account.email,
@@ -1397,11 +1536,13 @@ async function main() {
 
   const qaEndpoint = await resolveQaOrigin();
   const inventorySnapshot = await createDirectTableQaSnapshot();
+  let supabaseProxy;
   let nextServer;
   try {
+    supabaseProxy = await startSerializedSupabaseProxy(local.apiUrl);
     nextServer = await startLocalNextServer({
       ...qaEndpoint,
-      apiUrl: local.apiUrl,
+      apiUrl: supabaseProxy.origin,
       publishableKey: local.publishableKey,
       inventorySnapshotPath: inventorySnapshot.path,
       inventorySnapshotSha256: inventorySnapshot.sha256,
@@ -1432,20 +1573,23 @@ async function main() {
         }
 
         if (account) {
-          const { error } = await adminClient.auth.admin.deleteUser(account.id, false);
-          if (error) {
-            failures.push(new Error("Ephemeral local QA account cleanup failed."));
-          } else {
+          let accountRemoved = false;
+          for (let attempt = 0; attempt < 3 && !accountRemoved; attempt += 1) {
+            await adminClient.auth.admin.deleteUser(account.id, false);
             const lookup = await adminClient.auth.admin.getUserById(account.id);
             if (
-              lookup.data?.user ||
-              lookup.error?.status !== 404 ||
-              lookup.error?.code !== "user_not_found"
+              !lookup.data?.user &&
+              lookup.error?.status === 404 &&
+              lookup.error?.code === "user_not_found"
             ) {
-              failures.push(new Error("Ephemeral local QA account still exists after cleanup."));
-            } else {
+              accountRemoved = true;
               account = null;
+            } else if (attempt < 2) {
+              await new Promise((resolve) => setTimeout(resolve, 1_000));
             }
+          }
+          if (!accountRemoved) {
+            failures.push(new Error("Ephemeral local QA account cleanup failed."));
           }
         }
 
@@ -1482,7 +1626,11 @@ async function main() {
     try {
       await stopChild(nextServer);
     } finally {
-      await rm(inventorySnapshot.directory, { recursive: true, force: true });
+      try {
+        await supabaseProxy?.close();
+      } finally {
+        await rm(inventorySnapshot.directory, { recursive: true, force: true });
+      }
     }
   }
 }

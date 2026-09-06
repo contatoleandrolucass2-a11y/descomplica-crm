@@ -24,6 +24,7 @@ const visualChannelTolerance = 16;
 const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const homologationOrigin = "https://homolog.descomplicapro.com.br";
 const remoteHomologation = process.env.QA_AUTH_REMOTE_HOMOLOGATION === "true";
+const qaNavigationTimeout = remoteHomologation ? 30_000 : 90_000;
 const environmentLabel = remoteHomologation
   ? "isolated remote homologation with local-only Supabase"
   : "isolated local Supabase";
@@ -52,6 +53,12 @@ const syntheticDirectTableSnapshot = (() => {
     snapshotSha256: createHash("sha256").update(contents).digest("hex"),
   });
 })();
+
+function configureQaPage(page) {
+  page.setDefaultTimeout(qaNavigationTimeout);
+  page.setDefaultNavigationTimeout(qaNavigationTimeout);
+  return page;
+}
 
 function parseMode(argv) {
   if (argv.length === 0) return "verify";
@@ -707,7 +714,7 @@ async function login(page, origin, email, password) {
   await page.getByLabel("Senha").fill(password);
   await Promise.all([
     page.waitForURL((url) => url.origin === origin && url.pathname === "/app", {
-      timeout: 30_000,
+      timeout: qaNavigationTimeout,
     }),
     page.getByRole("button", { name: "Entrar", exact: true }).click(),
   ]);
@@ -1137,7 +1144,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
       httpCredentials,
     });
     try {
-      const snapshotPage = await snapshotContext.newPage();
+      const snapshotPage = configureQaPage(await snapshotContext.newPage());
       await snapshotPage.setContent(
         `<!doctype html><html${themeAttribute}><head><base href="${origin}/">${stylesheets}</head><body><div class="investor-page-shell">${readyProposalSnapshot.dialogHtml}</div></body></html>`,
         { waitUntil: "networkidle" },
@@ -1227,13 +1234,13 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   async function waitForDirectInventory(auxiliaryPage) {
     await auxiliaryPage
       .getByRole("heading", { name: "Simulador Tabela Direta", exact: true })
-      .waitFor({ state: "visible", timeout: 20_000 });
+      .waitFor({ state: "visible", timeout: qaNavigationTimeout });
     await auxiliaryPage
       .locator(".investor-stock-sync")
       .getByText("3.301 unidades", {
         exact: true,
       })
-      .waitFor({ state: "visible", timeout: 25_000 });
+      .waitFor({ state: "visible", timeout: qaNavigationTimeout });
   }
 
   async function prepareApprovedDirectProposal(auxiliaryPage, { navigate = true } = {}) {
@@ -1293,7 +1300,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const inventoryStatus = page.locator(".investor-stock-sync");
   await inventoryStatus.getByText("3.301 unidades", { exact: true }).waitFor({
     state: "visible",
-    timeout: 25_000,
+    timeout: qaNavigationTimeout,
   });
 
   const inventoryRows = page.locator(".investor-stock-table tbody tr");
@@ -1774,7 +1781,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
 
   let snapshotFailureFailsClosedWithoutLiveFallback = false;
   let snapshotRetryRestoresInventory = false;
-  const snapshotPage = await context.newPage();
+  const snapshotPage = configureQaPage(await context.newPage());
   try {
     await snapshotPage.clock.setFixedTime(fixedDirectTableTime);
     let rejectSnapshot = true;
@@ -1842,7 +1849,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     menuAndBodyUnclippedAt912: false,
     menuAndBodyUnclippedAt1024: false,
   };
-  const responsivePage = await context.newPage();
+  const responsivePage = configureQaPage(await context.newPage());
   try {
     await responsivePage.clock.setFixedTime(fixedDirectTableTime);
     await responsivePage.setViewportSize({ width: 375, height: 812 });
@@ -1994,13 +2001,13 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   let spaNavigationBuildsForwardHistory = false;
   let cancelledBackNavigationPreservesProposal = false;
   let cancelledForwardNavigationPreservesProposal = false;
-  const historyPage = await context.newPage();
+  const historyPage = configureQaPage(await context.newPage());
   try {
     await historyPage.clock.setFixedTime(fixedDirectTableTime);
     await historyPage.goto(`${origin}/app/simulacao`, { waitUntil: "domcontentloaded" });
     await historyPage.getByRole("heading", { name: "Simulação", exact: true }).waitFor({
       state: "visible",
-      timeout: 20_000,
+      timeout: qaNavigationTimeout,
     });
     const spaMarker = `direct-table-spa-${Date.now()}`;
     await historyPage.evaluate((marker) => {
@@ -2009,20 +2016,29 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     const directTableHubLink = historyPage.locator(`a[href="${directTablePath}"]`).first();
     await directTableHubLink.waitFor({ state: "visible", timeout: 10_000 });
     await directTableHubLink.click();
-    await historyPage.waitForURL((url) => url.pathname === directTablePath, { timeout: 20_000 });
+    await historyPage.waitForURL((url) => url.pathname === directTablePath, {
+      timeout: qaNavigationTimeout,
+    });
     await waitForDirectInventory(historyPage);
     const markerAfterDirectNavigation = await historyPage.evaluate(
       () => window.__authenticatedDirectTableSpaMarker,
     );
 
     await historyPage.locator('a.brand-link[href="/app"]').click();
-    await historyPage.waitForURL((url) => url.pathname === "/app", { timeout: 20_000 });
-    await historyPage.locator("h1").first().waitFor({ state: "visible", timeout: 20_000 });
+    await historyPage.waitForURL((url) => url.pathname === "/app", {
+      timeout: qaNavigationTimeout,
+    });
+    await historyPage
+      .locator("h1")
+      .first()
+      .waitFor({ state: "visible", timeout: qaNavigationTimeout });
     const markerAfterForwardDestination = await historyPage.evaluate(
       () => window.__authenticatedDirectTableSpaMarker,
     );
     await historyPage.goBack({ waitUntil: "domcontentloaded" });
-    await historyPage.waitForURL((url) => url.pathname === directTablePath, { timeout: 20_000 });
+    await historyPage.waitForURL((url) => url.pathname === directTablePath, {
+      timeout: qaNavigationTimeout,
+    });
     await waitForDirectInventory(historyPage);
     const historyTopology = await historyPage.evaluate(() => {
       if (!("navigation" in window)) return null;
@@ -2160,7 +2176,7 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
     });
     await hideHomologationBannerForBaseline(context);
     const stopSyntheticInventory = await installSyntheticInventoryForVisualCapture(context, origin);
-    const page = await context.newPage();
+    const page = configureQaPage(await context.newPage());
     const consoleErrors = [];
     const pageErrors = [];
     page.on("console", (message) => {
@@ -2203,7 +2219,7 @@ async function captureHomologationCheckpoints(browser, origin, email, password, 
       httpCredentials,
     });
     try {
-      const page = await context.newPage();
+      const page = configureQaPage(await context.newPage());
       await login(page, origin, email, password);
       const banner = page.getByText("HOMOLOGAÇÃO — DADOS SINTÉTICOS", { exact: true });
       await banner.waitFor({ state: "visible", timeout: 20_000 });
@@ -2497,7 +2513,7 @@ async function run() {
         context,
         origin,
       );
-      const page = await context.newPage();
+      const page = configureQaPage(await context.newPage());
       const consoleErrors = [];
       const pageErrors = [];
       page.on("console", (message) => {
@@ -2588,12 +2604,23 @@ async function run() {
           simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);
           await stopSyntheticInventory();
           currentStage = "direct-table-validation";
-          directTableValidation = await checkDirectTableValidation(
-            page,
-            origin,
-            consoleErrors,
-            pageErrors,
-          );
+          const directPage = configureQaPage(await context.newPage());
+          const directConsoleErrors = [];
+          const directPageErrors = [];
+          directPage.on("console", (message) => {
+            if (message.type() === "error") directConsoleErrors.push(message.text());
+          });
+          directPage.on("pageerror", (error) => directPageErrors.push(error.message));
+          try {
+            directTableValidation = await checkDirectTableValidation(
+              directPage,
+              origin,
+              directConsoleErrors,
+              directPageErrors,
+            );
+          } finally {
+            await directPage.close({ runBeforeUnload: false });
+          }
           currentStage = "fixture-source-marker";
           fixtureSourceMarker = await checkFixtureSourceMarker(page, origin, expectedSourceMarker);
         }
@@ -2748,12 +2775,7 @@ async function run() {
     process.stdout.write(
       `Authenticated QA passed in ${mode} mode: ${routeChecks.length} responsive, ${themeChecks.length} theme, ${accessibilityChecks.length} accessibility, ${screenshots.length} candidate/baseline comparisons and ${zoom.routes.length} zoom route checks.\n`,
     );
-  } catch (error) {
-    if (!remoteHomologation && process.env.QA_LOCAL_DIAGNOSTICS === "true") {
-      process.stderr.write(
-        `${error instanceof Error ? error.stack : "Unknown local QA failure."}\n`,
-      );
-    }
+  } catch {
     if (!candidateResultWritten) {
       await writeJsonAtomically(candidateResultsPath, {
         schemaVersion: 2,

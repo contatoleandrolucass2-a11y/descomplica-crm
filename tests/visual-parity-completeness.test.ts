@@ -151,6 +151,8 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("mask visible identity and email regions before persistence");
     expect(script).toContain("installSyntheticInventoryForVisualCapture");
     expect(script).toContain("buildSyntheticDirectTableQaSnapshot");
+    expect(script).toContain("const directPage = configureQaPage(await context.newPage())");
+    expect(script).toContain("const directConsoleErrors = []");
     expect(script).toContain(
       '["/api/inventory", "/api/inventory/snapshot"].includes(requestUrl.pathname)',
     );
@@ -170,6 +172,8 @@ describe("isolated authenticated visual QA contract", () => {
     expect(runner).toContain("validatePrivateDirectTableSnapshot");
     expect(runner).toContain('process.env.QA_ALLOW_MISSING_PRIVATE_INVENTORY === "true"');
     expect(runner).toContain("buildSyntheticDirectTableQaSnapshot");
+    expect(runner).toContain("startSerializedSupabaseProxy(local.apiUrl)");
+    expect(runner).toContain("apiUrl: supabaseProxy.origin");
     expect(runner).not.toContain(
       'INVESTOR_INVENTORY_SNAPSHOT_PATH: path.join(\n        repositoryRoot,\n        "private-data"',
     );

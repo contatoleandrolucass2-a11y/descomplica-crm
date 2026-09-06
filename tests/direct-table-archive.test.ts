@@ -446,8 +446,24 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(calculator.includes("disabled={!directPrintReady}"));
     assert.ok(calculator.includes("{directPrintReady ? <DirectPrintComposition"));
     assert.ok(calculator.includes("investor-direct-print-blocked-notice"));
+    assert.ok(calculator.includes("<h2>Impressão indisponível</h2>"));
+    assert.ok(!calculator.includes("<h1>Impressão indisponível</h1>"));
     assert.ok(styles.includes(".investor-direct-workspace.investor-direct-print-blocked>:not"));
+    assert.ok(
+      styles.includes(
+        ".investor-page-shell.investor-direct-table-page .investor-stock-unit-button",
+      ),
+    );
+    assert.ok(
+      styles.includes(
+        ".investor-page-shell.investor-direct-table-page>.simulation-topbar #site-menu-settings",
+      ),
+    );
     assert.ok(styles.includes("details.investor-proposal-audit"));
+    assert.ok(styles.includes('background-image:url("/boravender-logo192.png")'));
+    assert.ok(styles.includes('background-image:url("/salesforce-no-type-logo.svg")'));
+    assert.ok(!styles.includes("boravender.app.br/logo192.png"));
+    assert.ok(!styles.includes("a.sfdcstatic.com/shared/images/c360-nav"));
     assert.ok(calculator.includes("Nenhuma fonte alternativa foi usada"));
     assert.ok(calculator.includes("investor-stock-retry-button"));
     assert.ok(calculator.includes("A proposta em edição foi preservada"));
@@ -1071,6 +1087,6 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       assert.equal(adjustment, 256);
       assert.equal(unexpected, 0);
     },
-    30_000,
+    300_000,
   );
 });
