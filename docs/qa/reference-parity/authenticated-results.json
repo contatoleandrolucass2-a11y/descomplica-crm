@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "capturedAt": "2026-09-02T19:30:11.983Z",
-  "captureCommit": "7408b82279d0b40c0664985cd920e143f60a8154",
+  "capturedAt": "2026-09-06T04:49:41.207Z",
+  "captureCommit": "c341809ad5c1808cc44f23905b555bf2d9873224",
   "worktreeDirtyAtCapture": false,
   "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
   "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
@@ -451,6 +451,33 @@
     },
     {
       "viewport": "desktop-1440x900",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "desktop-1440x900",
       "route": "/admin",
       "status": 200,
       "expectedSimulatorState": "not-applicable",
@@ -910,6 +937,33 @@
     },
     {
       "viewport": "notebook-1280x720",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "notebook-1280x720",
       "route": "/admin",
       "status": 200,
       "expectedSimulatorState": "not-applicable",
@@ -1369,6 +1423,33 @@
     },
     {
       "viewport": "tablet-1024x768",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "tablet-1024x768",
       "route": "/admin",
       "status": 200,
       "expectedSimulatorState": "not-applicable",
@@ -1828,6 +1909,33 @@
     },
     {
       "viewport": "tablet-768x1024",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "tablet-768x1024",
       "route": "/admin",
       "status": 200,
       "expectedSimulatorState": "not-applicable",
@@ -2287,6 +2395,33 @@
     },
     {
       "viewport": "mobile-390x844",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-390x844",
       "route": "/admin",
       "status": 200,
       "expectedSimulatorState": "not-applicable",
@@ -2746,6 +2881,33 @@
     },
     {
       "viewport": "mobile-375x812",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-375x812",
       "route": "/admin",
       "status": 200,
       "expectedSimulatorState": "not-applicable",
@@ -3183,6 +3345,33 @@
       "expectedSimulatorState": "not-applicable",
       "simulatorStatePassed": true,
       "pathname": "/app/simulacao/associativo-fluxo-linear",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-320x568",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
       "h1Count": 1,
       "mainCount": 1,
       "theme": "light",
@@ -3682,6 +3871,34 @@
       "matrix": "desktop-themes",
       "viewport": "desktop-1440x900",
       "theme": "light",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "matrix": "desktop-themes",
+      "viewport": "desktop-1440x900",
+      "theme": "light",
       "route": "/admin",
       "status": 200,
       "expectedSimulatorState": "not-applicable",
@@ -4158,6 +4375,34 @@
       "matrix": "desktop-themes",
       "viewport": "desktop-1440x900",
       "theme": "balanced",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "matrix": "desktop-themes",
+      "viewport": "desktop-1440x900",
+      "theme": "balanced",
       "route": "/admin",
       "status": 200,
       "expectedSimulatorState": "not-applicable",
@@ -4634,6 +4879,34 @@
       "matrix": "desktop-themes",
       "viewport": "desktop-1440x900",
       "theme": "dark",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "matrix": "desktop-themes",
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
       "route": "/admin",
       "status": 200,
       "expectedSimulatorState": "not-applicable",
@@ -5087,6 +5360,34 @@
       "expectedSimulatorState": "not-applicable",
       "simulatorStatePassed": true,
       "pathname": "/app/simulacao/associativo-fluxo-linear",
+      "h1Count": 1,
+      "mainCount": 1,
+      "horizontalOverflow": false,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "identityTruncationReady": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "matrix": "mobile-dark",
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "route": "/app/simulacao/tabela-investidor",
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
@@ -5197,6 +5498,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5204,6 +5507,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5211,6 +5516,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5218,6 +5525,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5225,6 +5534,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5232,6 +5543,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5239,6 +5552,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5246,6 +5561,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5253,6 +5570,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5260,6 +5579,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5267,6 +5588,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5274,6 +5597,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5281,13 +5606,158 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "desktop-1440x900",
       "theme": "light",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "desktop-1440x900",
+      "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5295,6 +5765,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5302,6 +5774,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5309,6 +5783,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5316,6 +5792,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5323,6 +5801,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5330,6 +5810,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5337,13 +5819,158 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "desktop-1440x900",
       "theme": "light",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "desktop-1440x900",
+      "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5351,6 +5978,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5358,6 +5987,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5365,6 +5996,8 @@
       "viewport": "desktop-1440x900",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5372,6 +6005,8 @@
       "viewport": "desktop-1440x900",
       "theme": "balanced",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5379,6 +6014,8 @@
       "viewport": "desktop-1440x900",
       "theme": "balanced",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5386,6 +6023,8 @@
       "viewport": "desktop-1440x900",
       "theme": "balanced",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5393,13 +6032,158 @@
       "viewport": "desktop-1440x900",
       "theme": "balanced",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "desktop-1440x900",
       "theme": "balanced",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "desktop-1440x900",
+      "theme": "balanced",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5407,6 +6191,8 @@
       "viewport": "desktop-1440x900",
       "theme": "balanced",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5414,6 +6200,8 @@
       "viewport": "desktop-1440x900",
       "theme": "balanced",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5421,6 +6209,8 @@
       "viewport": "desktop-1440x900",
       "theme": "balanced",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5428,6 +6218,8 @@
       "viewport": "desktop-1440x900",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5435,6 +6227,8 @@
       "viewport": "desktop-1440x900",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5442,6 +6236,8 @@
       "viewport": "desktop-1440x900",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5449,13 +6245,158 @@
       "viewport": "desktop-1440x900",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "desktop-1440x900",
       "theme": "dark",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5463,6 +6404,8 @@
       "viewport": "desktop-1440x900",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5470,6 +6413,8 @@
       "viewport": "desktop-1440x900",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5477,6 +6422,8 @@
       "viewport": "desktop-1440x900",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5484,6 +6431,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5491,6 +6440,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5498,6 +6449,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5505,6 +6458,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5512,6 +6467,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5519,6 +6476,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5526,6 +6485,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5533,6 +6494,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5540,6 +6503,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5547,6 +6512,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5554,6 +6521,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5561,6 +6530,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5568,13 +6539,158 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "notebook-1280x720",
       "theme": "light",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 19,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "notebook-1280x720",
+      "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5582,6 +6698,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5589,6 +6707,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5596,6 +6716,8 @@
       "viewport": "notebook-1280x720",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5603,6 +6725,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5610,6 +6734,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5617,6 +6743,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5624,6 +6752,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5631,6 +6761,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5638,6 +6770,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5645,6 +6779,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5652,6 +6788,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5659,6 +6797,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5666,6 +6806,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5673,6 +6815,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5680,6 +6824,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5687,13 +6833,206 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "tablet-1024x768",
       "theme": "light",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 27,
+          "targets": [
+            [
+              ".active"
+            ],
+            [
+              ".theme-switch > button:nth-child(2)"
+            ],
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0307\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0406\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0506\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0507\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0711\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0911\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 27,
+          "targets": [
+            [
+              ".active"
+            ],
+            [
+              ".theme-switch > button:nth-child(2)"
+            ],
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0307\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0406\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0506\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0507\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0711\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0911\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "tablet-1024x768",
+      "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5701,6 +7040,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5708,6 +7049,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5715,6 +7058,8 @@
       "viewport": "tablet-1024x768",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5722,6 +7067,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5729,6 +7076,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5736,6 +7085,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5743,6 +7094,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5750,6 +7103,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5757,6 +7112,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5764,6 +7121,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5771,6 +7130,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5778,6 +7139,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5785,6 +7148,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5792,6 +7157,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5799,6 +7166,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5806,13 +7175,218 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "tablet-768x1024",
       "theme": "light",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 29,
+          "targets": [
+            [
+              ".active"
+            ],
+            [
+              ".theme-switch > button:nth-child(2)"
+            ],
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0307\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0406\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0506\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0507\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0711\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0911\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-1401\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-1408\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 29,
+          "targets": [
+            [
+              ".active"
+            ],
+            [
+              ".theme-switch > button:nth-child(2)"
+            ],
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-0301\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0202\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0314\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0602\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0615\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0703\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0715\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1014\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-1814\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0310\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0311\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0006\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0007\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0106\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0107\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0207\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0306\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0307\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0406\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0506\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL03-0507\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0711\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL02-0911\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-1401\"]"
+            ],
+            [
+              "button[aria-label=\"Iniciar proposta com BL01-1408\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "tablet-768x1024",
+      "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5820,6 +7394,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5827,6 +7403,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5834,6 +7412,8 @@
       "viewport": "tablet-768x1024",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5841,6 +7421,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5848,6 +7430,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5855,6 +7439,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5862,6 +7448,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5869,6 +7457,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5876,6 +7466,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5883,6 +7475,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5890,6 +7484,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5897,6 +7493,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5904,6 +7502,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5911,6 +7511,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5918,6 +7520,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5925,13 +7529,50 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "mobile-390x844",
       "theme": "light",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 1,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 1,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "mobile-390x844",
+      "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5939,6 +7580,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5946,6 +7589,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5953,6 +7598,8 @@
       "viewport": "mobile-390x844",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5960,6 +7607,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5967,6 +7616,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5974,6 +7625,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5981,6 +7634,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5988,6 +7643,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -5995,6 +7652,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6002,6 +7661,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6009,6 +7670,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6016,6 +7679,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6023,6 +7688,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6030,6 +7697,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6037,6 +7706,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6044,13 +7715,50 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "mobile-390x844",
       "theme": "dark",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 1,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 1,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "mobile-390x844",
+      "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6058,6 +7766,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6065,6 +7775,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6072,6 +7784,8 @@
       "viewport": "mobile-390x844",
       "theme": "dark",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6079,6 +7793,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6086,6 +7802,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6093,6 +7811,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6100,6 +7820,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6107,6 +7829,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6114,6 +7838,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6121,6 +7847,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6128,6 +7856,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6135,6 +7865,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6142,6 +7874,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6149,6 +7883,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6156,6 +7892,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6163,13 +7901,50 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "mobile-375x812",
       "theme": "light",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 1,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 1,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "mobile-375x812",
+      "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6177,6 +7952,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6184,6 +7961,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6191,6 +7970,8 @@
       "viewport": "mobile-375x812",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6198,6 +7979,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6205,6 +7988,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6212,6 +7997,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6219,6 +8006,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6226,6 +8015,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6233,6 +8024,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6240,6 +8033,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6247,6 +8042,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6254,6 +8051,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6261,6 +8060,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6268,6 +8069,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6275,6 +8078,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6282,13 +8087,50 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "mobile-320x568",
       "theme": "light",
+      "violations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 1,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "acceptedViolations": [
+        {
+          "id": "target-size",
+          "impact": "serious",
+          "affectedNodes": 1,
+          "targets": [
+            [
+              "button[title=\"Abrir ajuda: passo a passo\"]"
+            ]
+          ],
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.12/target-size?application=playwright"
+        }
+      ],
+      "blockingViolations": [],
+      "passed": true
+    },
+    {
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "mobile-320x568",
+      "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6296,6 +8138,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6303,6 +8147,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     },
     {
@@ -6310,6 +8156,8 @@
       "viewport": "mobile-320x568",
       "theme": "light",
       "violations": [],
+      "acceptedViolations": [],
+      "blockingViolations": [],
       "passed": true
     }
   ],
@@ -6325,7 +8173,17 @@
     "stockRowsPresent": true,
     "fiveStockFiltersPresent": true,
     "manualSelectionRequired": true,
-    "guidePresent": true
+    "guidePresent": true,
+    "financingFocusedAfterProfile": true,
+    "optionalPaymentsUnlockedAfterProfile": true,
+    "readyProposalButtonEnabled": true,
+    "readyProposalButtonPlacedAfterInstallments": true,
+    "releaseStatusUsesSingleDesktopRow": true,
+    "readyProposalAppraisalEditable": true,
+    "readyProposalDialogComplete": true,
+    "readyProposalDesktopFits": true,
+    "readyProposalHelpAccessible": true,
+    "readyProposalResponsive": true
   },
   "homologationCheckpoints": [],
   "zoom": {
@@ -6758,6 +8616,34 @@
       {
         "zoomPercent": 80,
         "viewport": "zoom-80",
+        "route": "/app/simulacao/tabela-investidor",
+        "status": 200,
+        "expectedSimulatorState": "not-applicable",
+        "simulatorStatePassed": true,
+        "pathname": "/app/simulacao/tabela-investidor",
+        "h1Count": 1,
+        "mainCount": 1,
+        "theme": "light",
+        "horizontalOverflow": false,
+        "hasBrokenValue": false,
+        "protectedShellPresent": true,
+        "loginPresent": false,
+        "reducedMotion": true,
+        "topbarCollision": false,
+        "topbarCollisionPairs": [],
+        "identityTruncationReady": true,
+        "simulatorActionEnabled": false,
+        "simulatorFormActionPresent": false,
+        "blockedCalculationMessagePresent": true,
+        "blockedActionDistinct": true,
+        "unavailableActionDistinct": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "passed": true
+      },
+      {
+        "zoomPercent": 80,
+        "viewport": "zoom-80",
         "route": "/admin",
         "status": 200,
         "expectedSimulatorState": "not-applicable",
@@ -7234,6 +9120,34 @@
       {
         "zoomPercent": 100,
         "viewport": "zoom-100",
+        "route": "/app/simulacao/tabela-investidor",
+        "status": 200,
+        "expectedSimulatorState": "not-applicable",
+        "simulatorStatePassed": true,
+        "pathname": "/app/simulacao/tabela-investidor",
+        "h1Count": 1,
+        "mainCount": 1,
+        "theme": "light",
+        "horizontalOverflow": false,
+        "hasBrokenValue": false,
+        "protectedShellPresent": true,
+        "loginPresent": false,
+        "reducedMotion": true,
+        "topbarCollision": false,
+        "topbarCollisionPairs": [],
+        "identityTruncationReady": true,
+        "simulatorActionEnabled": false,
+        "simulatorFormActionPresent": false,
+        "blockedCalculationMessagePresent": true,
+        "blockedActionDistinct": true,
+        "unavailableActionDistinct": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "passed": true
+      },
+      {
+        "zoomPercent": 100,
+        "viewport": "zoom-100",
         "route": "/admin",
         "status": 200,
         "expectedSimulatorState": "not-applicable",
@@ -7710,6 +9624,34 @@
       {
         "zoomPercent": 125,
         "viewport": "zoom-125",
+        "route": "/app/simulacao/tabela-investidor",
+        "status": 200,
+        "expectedSimulatorState": "not-applicable",
+        "simulatorStatePassed": true,
+        "pathname": "/app/simulacao/tabela-investidor",
+        "h1Count": 1,
+        "mainCount": 1,
+        "theme": "light",
+        "horizontalOverflow": false,
+        "hasBrokenValue": false,
+        "protectedShellPresent": true,
+        "loginPresent": false,
+        "reducedMotion": true,
+        "topbarCollision": false,
+        "topbarCollisionPairs": [],
+        "identityTruncationReady": true,
+        "simulatorActionEnabled": false,
+        "simulatorFormActionPresent": false,
+        "blockedCalculationMessagePresent": true,
+        "blockedActionDistinct": true,
+        "unavailableActionDistinct": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "passed": true
+      },
+      {
+        "zoomPercent": 125,
+        "viewport": "zoom-125",
         "route": "/admin",
         "status": 200,
         "expectedSimulatorState": "not-applicable",
@@ -8186,6 +10128,34 @@
       {
         "zoomPercent": 150,
         "viewport": "zoom-150",
+        "route": "/app/simulacao/tabela-investidor",
+        "status": 200,
+        "expectedSimulatorState": "not-applicable",
+        "simulatorStatePassed": true,
+        "pathname": "/app/simulacao/tabela-investidor",
+        "h1Count": 1,
+        "mainCount": 1,
+        "theme": "light",
+        "horizontalOverflow": false,
+        "hasBrokenValue": false,
+        "protectedShellPresent": true,
+        "loginPresent": false,
+        "reducedMotion": true,
+        "topbarCollision": false,
+        "topbarCollisionPairs": [],
+        "identityTruncationReady": true,
+        "simulatorActionEnabled": false,
+        "simulatorFormActionPresent": false,
+        "blockedCalculationMessagePresent": true,
+        "blockedActionDistinct": true,
+        "unavailableActionDistinct": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "passed": true
+      },
+      {
+        "zoomPercent": 150,
+        "viewport": "zoom-150",
         "route": "/admin",
         "status": 200,
         "expectedSimulatorState": "not-applicable",
@@ -8639,6 +10609,34 @@
         "expectedSimulatorState": "not-applicable",
         "simulatorStatePassed": true,
         "pathname": "/app/simulacao/associativo-fluxo-linear",
+        "h1Count": 1,
+        "mainCount": 1,
+        "theme": "light",
+        "horizontalOverflow": false,
+        "hasBrokenValue": false,
+        "protectedShellPresent": true,
+        "loginPresent": false,
+        "reducedMotion": true,
+        "topbarCollision": false,
+        "topbarCollisionPairs": [],
+        "identityTruncationReady": true,
+        "simulatorActionEnabled": false,
+        "simulatorFormActionPresent": false,
+        "blockedCalculationMessagePresent": true,
+        "blockedActionDistinct": true,
+        "unavailableActionDistinct": true,
+        "consoleErrorCount": 0,
+        "pageErrorCount": 0,
+        "passed": true
+      },
+      {
+        "zoomPercent": 200,
+        "viewport": "zoom-200",
+        "route": "/app/simulacao/tabela-investidor",
+        "status": 200,
+        "expectedSimulatorState": "not-applicable",
+        "simulatorStatePassed": true,
+        "pathname": "/app/simulacao/tabela-investidor",
         "h1Count": 1,
         "mainCount": 1,
         "theme": "light",
@@ -8773,9 +10771,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3119,
+        "changedPixels": 3120,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.0002923039436197331,
+        "changedPixelRatio": 0.00029239766081871346,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
           "tracked": true,
@@ -8810,9 +10808,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2961,
         "totalPixels": 3231360,
-        "changedPixelRatio": 0.0009135472370766488,
+        "changedPixelRatio": 0.0009163324420677362,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1440x900.webp",
           "tracked": true,
@@ -8847,9 +10845,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2961,
         "totalPixels": 3265920,
-        "changedPixelRatio": 0.0009038800705467372,
+        "changedPixelRatio": 0.0009066358024691358,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1440x900.webp",
           "tracked": true,
@@ -8884,9 +10882,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2961,
         "totalPixels": 3265920,
-        "changedPixelRatio": 0.0009038800705467372,
+        "changedPixelRatio": 0.0009066358024691358,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1440x900.webp",
           "tracked": true,
@@ -8921,9 +10919,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2961,
         "totalPixels": 3265920,
-        "changedPixelRatio": 0.0009038800705467372,
+        "changedPixelRatio": 0.0009066358024691358,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1440x900.webp",
           "tracked": true,
@@ -8958,9 +10956,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2961,
         "totalPixels": 3231360,
-        "changedPixelRatio": 0.0009135472370766488,
+        "changedPixelRatio": 0.0009163324420677362,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1440x900.webp",
           "tracked": true,
@@ -8995,9 +10993,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0008980297316499973,
+        "changedPixelRatio": 0.0009004208340165055,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
           "tracked": true,
@@ -9032,9 +11030,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 4134240,
-        "changedPixelRatio": 0.0006359088974031503,
+        "changedPixelRatio": 0.0006376020743836836,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
           "tracked": true,
@@ -9069,9 +11067,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 1329120,
-        "changedPixelRatio": 0.0019780004815216083,
+        "changedPixelRatio": 0.0019832671241121944,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
           "tracked": true,
@@ -9106,9 +11104,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3144,
+        "changedPixels": 3151,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013027048528241846,
+        "changedPixelRatio": 0.0013056052771148238,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1440x900.webp",
           "tracked": true,
@@ -9143,9 +11141,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3144,
+        "changedPixels": 3151,
         "totalPixels": 2174400,
-        "changedPixelRatio": 0.001445916114790287,
+        "changedPixelRatio": 0.0014491353936718174,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1440x900.webp",
           "tracked": true,
@@ -9180,9 +11178,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3084,
+        "changedPixels": 3083,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0010921298657147714,
+        "changedPixelRatio": 0.001091775738002153,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1440x900.webp",
           "tracked": true,
@@ -9217,9 +11215,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2383,
+        "changedPixels": 8384,
         "totalPixels": 2347200,
-        "changedPixelRatio": 0.0010152522154055895,
+        "changedPixelRatio": 0.0035719154737559647,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1440x900.webp",
           "tracked": true,
@@ -9242,26 +11240,69 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
-          "bytes": 123564,
-          "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a"
+          "bytes": 131386,
+          "sha256": "538f26c760bb0525a3e76a78b46611d6aab9053a47ab071b60d7797623b40500"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
-      "bytes": 123564,
-      "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a",
+      "bytes": 131386,
+      "sha256": "538f26c760bb0525a3e76a78b46611d6aab9053a47ab071b60d7797623b40500",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 125252,
+        "changedPixels": 21502,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.09664506172839506,
+        "changedPixelRatio": 0.01659104938271605,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
-          "bytes": 109470,
-          "sha256": "2400787c2133d9b6eed2d8f3db619ad5a498d27990d81c36ae96110ffd59391b"
+          "bytes": 123564,
+          "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a"
+        }
+      }
+    },
+    {
+      "kind": "responsive",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1440x900.webp",
+          "tracked": true,
+          "bytes": 119446,
+          "sha256": "0ecab7a4ee1e81b70638a3121ea9d8866bf27e005ef220dd772d30e43647b7ce"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabela-investidor-1440x900.webp",
+      "bytes": 119446,
+      "sha256": "0ecab7a4ee1e81b70638a3121ea9d8866bf27e005ef220dd772d30e43647b7ce",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 4396
+        },
+        "actual": {
+          "width": 1440,
+          "height": 900
+        },
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1440x900.webp",
+          "tracked": true,
+          "bytes": 611420,
+          "sha256": "c946a5c3f5f22d8b57fdaceeafb1636deeffb5cdb44e622c3d70e7e6baa47762"
         }
       }
     },
@@ -9291,9 +11332,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.0016920245082895685,
+        "changedPixelRatio": 0.0016965297085779014,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1440x900.webp",
           "tracked": true,
@@ -9328,9 +11369,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020285493827160495,
+        "changedPixelRatio": 0.0020339506172839506,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1440x900.webp",
           "tracked": true,
@@ -9365,9 +11406,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 5102,
+        "changedPixels": 5150,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.0015438150568869522,
+        "changedPixelRatio": 0.0015583393851367707,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1440x900.webp",
           "tracked": true,
@@ -9402,9 +11443,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3119,
+        "changedPixels": 3120,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.0002923039436197331,
+        "changedPixelRatio": 0.00029239766081871346,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
           "tracked": true,
@@ -9439,9 +11480,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0008980297316499973,
+        "changedPixelRatio": 0.0009004208340165055,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
           "tracked": true,
@@ -9476,9 +11517,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3144,
+        "changedPixels": 3151,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013027048528241846,
+        "changedPixelRatio": 0.0013056052771148238,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-light-1440x900.webp",
           "tracked": true,
@@ -9513,9 +11554,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3084,
+        "changedPixels": 3083,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0010921298657147714,
+        "changedPixelRatio": 0.001091775738002153,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-light-1440x900.webp",
           "tracked": true,
@@ -9531,7 +11572,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
@@ -9548,16 +11589,51 @@
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": false,
-        "reason": "pixel_drift",
-        "changedPixels": 125252,
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.09664506172839506,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
           "tracked": true,
-          "bytes": 109470,
-          "sha256": "2400787c2133d9b6eed2d8f3db619ad5a498d27990d81c36ae96110ffd59391b"
+          "bytes": 123564,
+          "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a"
+        }
+      }
+    },
+    {
+      "kind": "theme",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "desktop-1440x900",
+      "theme": "light",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 119446,
+          "sha256": "0ecab7a4ee1e81b70638a3121ea9d8866bf27e005ef220dd772d30e43647b7ce"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-tabela-investidor-light-1440x900.webp",
+      "bytes": 119446,
+      "sha256": "0ecab7a4ee1e81b70638a3121ea9d8866bf27e005ef220dd772d30e43647b7ce",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "baseline_not_tracked",
+        "changedPixelRatio": null,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-light-1440x900.webp",
+          "tracked": false,
+          "bytes": null,
+          "sha256": null
         }
       }
     },
@@ -9587,9 +11663,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.0016920245082895685,
+        "changedPixelRatio": 0.0016965297085779014,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-light-1440x900.webp",
           "tracked": true,
@@ -9624,9 +11700,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020285493827160495,
+        "changedPixelRatio": 0.0020339506172839506,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-light-1440x900.webp",
           "tracked": true,
@@ -9661,9 +11737,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 5102,
+        "changedPixels": 5150,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.0015438150568869522,
+        "changedPixelRatio": 0.0015583393851367707,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-light-1440x900.webp",
           "tracked": true,
@@ -9698,9 +11774,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3131,
+        "changedPixels": 3132,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.0002934285500074974,
+        "changedPixelRatio": 0.00029352226720647776,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
           "tracked": true,
@@ -9735,9 +11811,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2641,
+        "changedPixels": 2648,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.000902128764278297,
+        "changedPixelRatio": 0.0009045198666448052,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
           "tracked": true,
@@ -9772,9 +11848,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3156,
+        "changedPixels": 3163,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013076770087509944,
+        "changedPixelRatio": 0.0013105774330416334,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-balanced-1440x900.webp",
           "tracked": true,
@@ -9809,9 +11885,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3096,
+        "changedPixels": 3095,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0010963793982661906,
+        "changedPixelRatio": 0.0010960252705535724,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-balanced-1440x900.webp",
           "tracked": true,
@@ -9827,7 +11903,7 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
@@ -9844,16 +11920,51 @@
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": false,
-        "reason": "pixel_drift",
-        "changedPixels": 125252,
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.09664506172839506,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 109896,
-          "sha256": "ec0fe5b86bc344d50ac6a56b0e81951c7a320263d25e63c90b0e9ce0eca7ae76"
+          "bytes": 123808,
+          "sha256": "f517a97fed115cf972891c0ef3ccefded2824b45a877354790bd5d6315a4fdd9"
+        }
+      }
+    },
+    {
+      "kind": "theme",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "desktop-1440x900",
+      "theme": "balanced",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 120320,
+          "sha256": "32f34a0a1b3f10a1c831ff30f9ea8b97fa5d400762bdaee6459f7fdce0ac44a5"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-tabela-investidor-balanced-1440x900.webp",
+      "bytes": 120320,
+      "sha256": "32f34a0a1b3f10a1c831ff30f9ea8b97fa5d400762bdaee6459f7fdce0ac44a5",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "baseline_not_tracked",
+        "changedPixelRatio": null,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-balanced-1440x900.webp",
+          "tracked": false,
+          "bytes": null,
+          "sha256": null
         }
       }
     },
@@ -9883,9 +11994,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2641,
+        "changedPixels": 2648,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.0016997477087838534,
+        "changedPixelRatio": 0.001704252909072186,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
           "tracked": true,
@@ -9920,9 +12031,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2641,
+        "changedPixels": 2648,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020378086419753087,
+        "changedPixelRatio": 0.00204320987654321,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-balanced-1440x900.webp",
           "tracked": true,
@@ -9957,9 +12068,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 4198,
+        "changedPixels": 4245,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.0012702735415153715,
+        "changedPixelRatio": 0.0012844952795933188,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-balanced-1440x900.webp",
           "tracked": true,
@@ -10031,9 +12142,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2652,
+        "changedPixels": 2660,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0009058862108542384,
+        "changedPixelRatio": 0.0009086188992731049,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-dark-1440x900.webp",
           "tracked": true,
@@ -10068,9 +12179,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3167,
+        "changedPixels": 3175,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.00131223481835057,
+        "changedPixelRatio": 0.0013155495889684433,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-dark-1440x900.webp",
           "tracked": true,
@@ -10123,7 +12234,7 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
@@ -10140,16 +12251,51 @@
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": false,
-        "reason": "pixel_drift",
-        "changedPixels": 85178,
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.06572376543209876,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 133336,
-          "sha256": "78e57953a2aa94fe160cbd8dc3f3c118a3d497d5e8a04f02b9ce28bad5880c5f"
+          "bytes": 122030,
+          "sha256": "90fd0bf8f49d1ca218ce28fdd41261e443af761045006adc24a118c6d2d2dfb4"
+        }
+      }
+    },
+    {
+      "kind": "theme",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "desktop-1440x900",
+      "theme": "dark",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-dark-1440x900.webp",
+          "tracked": true,
+          "bytes": 117666,
+          "sha256": "acc2b4ad8d159998fe9ceefa09408d6bb57cbac8f590cc71a6a6c23935ec6187"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-tabela-investidor-dark-1440x900.webp",
+      "bytes": 117666,
+      "sha256": "acc2b4ad8d159998fe9ceefa09408d6bb57cbac8f590cc71a6a6c23935ec6187",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "baseline_not_tracked",
+        "changedPixelRatio": null,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-dark-1440x900.webp",
+          "tracked": false,
+          "bytes": null,
+          "sha256": null
         }
       }
     },
@@ -10179,9 +12325,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2652,
+        "changedPixels": 2660,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.0017068273092369479,
+        "changedPixelRatio": 0.001711976109566471,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-dark-1440x900.webp",
           "tracked": true,
@@ -10216,9 +12362,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2652,
+        "changedPixels": 2660,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020462962962962965,
+        "changedPixelRatio": 0.002052469135802469,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-dark-1440x900.webp",
           "tracked": true,
@@ -10253,9 +12399,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 4223,
+        "changedPixels": 4274,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.001277838295812152,
+        "changedPixelRatio": 0.0012932703945775842,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-dark-1440x900.webp",
           "tracked": true,
@@ -10290,9 +12436,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3116,
+        "changedPixels": 3120,
         "totalPixels": 9800960,
-        "changedPixelRatio": 0.00031792803970223324,
+        "changedPixelRatio": 0.00031833616298811547,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
           "tracked": true,
@@ -10327,9 +12473,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2963,
         "totalPixels": 2872320,
-        "changedPixelRatio": 0.00102774064171123,
+        "changedPixelRatio": 0.001031570298573975,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1280x720.webp",
           "tracked": true,
@@ -10364,9 +12510,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2963,
         "totalPixels": 2903040,
-        "changedPixelRatio": 0.0010168650793650794,
+        "changedPixelRatio": 0.0010206542107583775,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1280x720.webp",
           "tracked": true,
@@ -10401,9 +12547,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2963,
         "totalPixels": 2903040,
-        "changedPixelRatio": 0.0010168650793650794,
+        "changedPixelRatio": 0.0010206542107583775,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1280x720.webp",
           "tracked": true,
@@ -10438,9 +12584,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2963,
         "totalPixels": 2903040,
-        "changedPixelRatio": 0.0010168650793650794,
+        "changedPixelRatio": 0.0010206542107583775,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1280x720.webp",
           "tracked": true,
@@ -10475,9 +12621,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2952,
+        "changedPixels": 2963,
         "totalPixels": 2872320,
-        "changedPixelRatio": 0.00102774064171123,
+        "changedPixelRatio": 0.001031570298573975,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1280x720.webp",
           "tracked": true,
@@ -10512,9 +12658,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 2602240,
-        "changedPixelRatio": 0.0010102834481062468,
+        "changedPixelRatio": 0.0010129734382685687,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1280x720.webp",
           "tracked": true,
@@ -10549,9 +12695,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 3866880,
-        "changedPixelRatio": 0.0006798762826878517,
+        "changedPixelRatio": 0.0006816865276398544,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
           "tracked": true,
@@ -10586,9 +12732,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 1181440,
-        "changedPixelRatio": 0.0022252505417118093,
+        "changedPixelRatio": 0.002231175514626219,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
           "tracked": true,
@@ -10623,9 +12769,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3149,
+        "changedPixels": 3156,
         "totalPixels": 2196480,
-        "changedPixelRatio": 0.0014336574883449884,
+        "changedPixelRatio": 0.0014368444055944056,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1280x720.webp",
           "tracked": true,
@@ -10660,9 +12806,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3149,
+        "changedPixels": 3156,
         "totalPixels": 1932800,
-        "changedPixelRatio": 0.0016292425496688741,
+        "changedPixelRatio": 0.001632864238410596,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1280x720.webp",
           "tracked": true,
@@ -10697,9 +12843,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3084,
+        "changedPixels": 3083,
         "totalPixels": 2535680,
-        "changedPixelRatio": 0.0012162417970721857,
+        "changedPixelRatio": 0.0012158474255426553,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1280x720.webp",
           "tracked": true,
@@ -10734,9 +12880,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2383,
+        "changedPixels": 8288,
         "totalPixels": 2086400,
-        "changedPixelRatio": 0.0011421587423312883,
+        "changedPixelRatio": 0.00397239263803681,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1280x720.webp",
           "tracked": true,
@@ -10752,7 +12898,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 921600,
         "changedPixelRatio": 0,
@@ -10769,22 +12915,59 @@
       "width": 1280,
       "height": 720,
       "previousBaselineComparison": {
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
+        "totalPixels": 921600,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+          "tracked": true,
+          "bytes": 115718,
+          "sha256": "3e0bb41c2bf12161b07e72992b1fef3c9592a2087077c6f71f2c45669fa5c405"
+        }
+      }
+    },
+    {
+      "kind": "responsive",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "notebook-1280x720",
+      "theme": "light",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 921600,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1280x720.webp",
+          "tracked": true,
+          "bytes": 114164,
+          "sha256": "f1e324f5774888aaefe13dab6ffd4d0cec403308b77cb4b82f4c03222be5a94b"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabela-investidor-1280x720.webp",
+      "bytes": 114164,
+      "sha256": "f1e324f5774888aaefe13dab6ffd4d0cec403308b77cb4b82f4c03222be5a94b",
+      "width": 1280,
+      "height": 720,
+      "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1280,
-          "height": 720
+          "height": 4653
         },
         "actual": {
           "width": 1280,
-          "height": 887
+          "height": 720
         },
         "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1280x720.webp",
           "tracked": true,
-          "bytes": 100682,
-          "sha256": "dcd0fc21e2e0865e91c1c25163c7c722114d49ff430ee5d41c5ddee5df0aa127"
+          "bytes": 631668,
+          "sha256": "7ab02708a03c02838d52cbd797e6206ecb332658f78f9580df576d61c0a48aae"
         }
       }
     },
@@ -10814,9 +12997,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 1150720,
-        "changedPixelRatio": 0.0022846565628476083,
+        "changedPixelRatio": 0.0022907397107897664,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1280x720.webp",
           "tracked": true,
@@ -10851,9 +13034,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2629,
+        "changedPixels": 2636,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.0028526475694444445,
+        "changedPixelRatio": 0.0028602430555555555,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
           "tracked": true,
@@ -10888,9 +13071,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 5103,
+        "changedPixels": 5151,
         "totalPixels": 2937600,
-        "changedPixelRatio": 0.0017371323529411765,
+        "changedPixelRatio": 0.0017534722222222222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1280x720.webp",
           "tracked": true,
@@ -10925,9 +13108,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2847,
+        "changedPixels": 2855,
         "totalPixels": 9229312,
-        "changedPixelRatio": 0.00030847369771441253,
+        "changedPixelRatio": 0.00030934050122045936,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
           "tracked": true,
@@ -10962,9 +13145,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2681,
+        "changedPixels": 2699,
         "totalPixels": 2481152,
-        "changedPixelRatio": 0.001080546455839868,
+        "changedPixelRatio": 0.001087801150433347,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1024x768.webp",
           "tracked": true,
@@ -10999,9 +13182,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2681,
+        "changedPixels": 2700,
         "totalPixels": 2359296,
-        "changedPixelRatio": 0.001136355929904514,
+        "changedPixelRatio": 0.0011444091796875,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
           "tracked": true,
@@ -11036,9 +13219,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2681,
+        "changedPixels": 2699,
         "totalPixels": 2505728,
-        "changedPixelRatio": 0.0010699485339190845,
+        "changedPixelRatio": 0.0010771320749897834,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1024x768.webp",
           "tracked": true,
@@ -11073,9 +13256,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2681,
+        "changedPixels": 2700,
         "totalPixels": 2359296,
-        "changedPixelRatio": 0.001136355929904514,
+        "changedPixelRatio": 0.0011444091796875,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1024x768.webp",
           "tracked": true,
@@ -11110,9 +13293,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2681,
+        "changedPixels": 2700,
         "totalPixels": 2334720,
-        "changedPixelRatio": 0.0011483175712719298,
+        "changedPixelRatio": 0.001156455592105263,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1024x768.webp",
           "tracked": true,
@@ -11147,9 +13330,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2357,
+        "changedPixels": 2371,
         "totalPixels": 2185216,
-        "changedPixelRatio": 0.0010786119083880036,
+        "changedPixelRatio": 0.0010850185977038425,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1024x768.webp",
           "tracked": true,
@@ -11184,9 +13367,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2357,
+        "changedPixels": 2371,
         "totalPixels": 3710976,
-        "changedPixelRatio": 0.0006351428842439294,
+        "changedPixelRatio": 0.0006389154766832229,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
           "tracked": true,
@@ -11221,9 +13404,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2357,
+        "changedPixels": 2371,
         "totalPixels": 1080320,
-        "changedPixelRatio": 0.00218176095971564,
+        "changedPixelRatio": 0.0021947200829383886,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
           "tracked": true,
@@ -11258,9 +13441,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2833,
+        "changedPixels": 2847,
         "totalPixels": 2643968,
-        "changedPixelRatio": 0.0010714955702943454,
+        "changedPixelRatio": 0.0010767906419442293,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
           "tracked": true,
@@ -11295,9 +13478,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2833,
+        "changedPixels": 2847,
         "totalPixels": 2392064,
-        "changedPixelRatio": 0.0011843328606592465,
+        "changedPixelRatio": 0.001190185546875,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1024x768.webp",
           "tracked": true,
@@ -11332,9 +13515,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2812,
+        "changedPixels": 2818,
         "totalPixels": 2163712,
-        "changedPixelRatio": 0.0012996184335068623,
+        "changedPixelRatio": 0.0013023914458116421,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1024x768.webp",
           "tracked": true,
@@ -11369,9 +13552,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2168,
+        "changedPixels": 7629,
         "totalPixels": 1751040,
-        "changedPixelRatio": 0.0012381213450292398,
+        "changedPixelRatio": 0.004356839364035088,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1024x768.webp",
           "tracked": true,
@@ -11387,7 +13570,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
@@ -11404,22 +13587,59 @@
       "width": 1024,
       "height": 768,
       "previousBaselineComparison": {
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+          "tracked": true,
+          "bytes": 98022,
+          "sha256": "0069b733b601a18bccd1e54efd53de5e49de5fc7c25aefacbfbbbd53943312b5"
+        }
+      }
+    },
+    {
+      "kind": "responsive",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "tablet-1024x768",
+      "theme": "light",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1024x768.webp",
+          "tracked": true,
+          "bytes": 105262,
+          "sha256": "3900522f2854298feb3559b9b9b663482ba987fcf404cd493d2249adb7128a21"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabela-investidor-1024x768.webp",
+      "bytes": 105262,
+      "sha256": "3900522f2854298feb3559b9b9b663482ba987fcf404cd493d2249adb7128a21",
+      "width": 1024,
+      "height": 768,
+      "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1024,
-          "height": 768
+          "height": 6914
         },
         "actual": {
           "width": 1024,
-          "height": 1129
+          "height": 768
         },
         "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1024x768.webp",
           "tracked": true,
-          "bytes": 98622,
-          "sha256": "d5cbce797cd5b7fa2bc220775948896e6fc92d7a3a769ebc837a9d1a6377fd9a"
+          "bytes": 684740,
+          "sha256": "93eea6e0e07142d33275acf05e938dfd3220b4df4c3d4f4d18118b21bd62c8e4"
         }
       }
     },
@@ -11449,9 +13669,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2357,
+        "changedPixels": 2371,
         "totalPixels": 969728,
-        "changedPixelRatio": 0.0024305784714889122,
+        "changedPixelRatio": 0.0024450155095036958,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1024x768.webp",
           "tracked": true,
@@ -11486,9 +13706,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2357,
+        "changedPixels": 2371,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.0029970804850260415,
+        "changedPixelRatio": 0.0030148824055989585,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1024x768.webp",
           "tracked": true,
@@ -11523,9 +13743,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 4889,
+        "changedPixels": 4933,
         "totalPixels": 2350080,
-        "changedPixelRatio": 0.002080354711328976,
+        "changedPixelRatio": 0.002099077478213508,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1024x768.webp",
           "tracked": true,
@@ -11560,9 +13780,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2523,
+        "changedPixels": 2513,
         "totalPixels": 7630848,
-        "changedPixelRatio": 0.0003306316676731079,
+        "changedPixelRatio": 0.00032932119732957595,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
           "tracked": true,
@@ -11597,9 +13817,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3549,
+        "changedPixels": 2355,
         "totalPixels": 2215680,
-        "changedPixelRatio": 0.0016017655979202773,
+        "changedPixelRatio": 0.0010628791161178509,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-768x1024.webp",
           "tracked": true,
@@ -11634,9 +13854,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2356,
+        "changedPixels": 2355,
         "totalPixels": 2233344,
-        "changedPixelRatio": 0.0010549203347088492,
+        "changedPixelRatio": 0.0010544725756533701,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-768x1024.webp",
           "tracked": true,
@@ -11671,9 +13891,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2356,
+        "changedPixels": 2355,
         "totalPixels": 2233344,
-        "changedPixelRatio": 0.0010549203347088492,
+        "changedPixelRatio": 0.0010544725756533701,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-768x1024.webp",
           "tracked": true,
@@ -11708,9 +13928,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2356,
+        "changedPixels": 2355,
         "totalPixels": 2233344,
-        "changedPixelRatio": 0.0010549203347088492,
+        "changedPixelRatio": 0.0010544725756533701,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-768x1024.webp",
           "tracked": true,
@@ -11745,9 +13965,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2356,
+        "changedPixels": 2355,
         "totalPixels": 2214912,
-        "changedPixelRatio": 0.0010636991447064263,
+        "changedPixelRatio": 0.0010632476595006934,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-768x1024.webp",
           "tracked": true,
@@ -11967,9 +14187,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2489,
+        "changedPixels": 2481,
         "totalPixels": 1827072,
-        "changedPixelRatio": 0.0013622889519405914,
+        "changedPixelRatio": 0.0013579103614964271,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-768x1024.webp",
           "tracked": true,
@@ -12004,9 +14224,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2005,
+        "changedPixels": 7975,
         "totalPixels": 1598976,
-        "changedPixelRatio": 0.0012539275136087095,
+        "changedPixelRatio": 0.004987567042907461,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-768x1024.webp",
           "tracked": true,
@@ -12022,7 +14242,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
@@ -12039,22 +14259,59 @@
       "width": 768,
       "height": 1024,
       "previousBaselineComparison": {
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "tracked": true,
+          "bytes": 99030,
+          "sha256": "c4b1dc11d0187d4b4f79559ade0e0e72e10344cd55a3622079be8646b9bacfa9"
+        }
+      }
+    },
+    {
+      "kind": "responsive",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "tablet-768x1024",
+      "theme": "light",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-768x1024.webp",
+          "tracked": true,
+          "bytes": 106470,
+          "sha256": "f33b70eb8e526d8eccd90ffb372637ca696aeb63e81f428dad27a2fd57dc6800"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabela-investidor-768x1024.webp",
+      "bytes": 106470,
+      "sha256": "f33b70eb8e526d8eccd90ffb372637ca696aeb63e81f428dad27a2fd57dc6800",
+      "width": 768,
+      "height": 1024,
+      "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 768,
-          "height": 1024
+          "height": 9117
         },
         "actual": {
           "width": 768,
-          "height": 1212
+          "height": 1024
         },
         "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-768x1024.webp",
           "tracked": true,
-          "bytes": 92772,
-          "sha256": "5ad996198b0f0adb7869f473ba2a33bf2529c95be453d614c9068567d974a922"
+          "bytes": 620560,
+          "sha256": "2fb8c20b24cfc14a086dd5460c48d11d15bb077e04873192701e5c0f367c7f55"
         }
       }
     },
@@ -12195,9 +14452,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 535,
+        "changedPixels": 400,
         "totalPixels": 4888260,
-        "changedPixelRatio": 0.00010944589690401084,
+        "changedPixelRatio": 0.00008182870796561558,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
           "tracked": true,
@@ -12232,9 +14489,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.00025405659854903917,
+        "changedPixelRatio": 0.00020490668438832586,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-390x844.webp",
           "tracked": true,
@@ -12269,9 +14526,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1463280,
-        "changedPixelRatio": 0.00025080640752282545,
+        "changedPixelRatio": 0.0002022852769121426,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-390x844.webp",
           "tracked": true,
@@ -12306,9 +14563,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.0002524210410476505,
+        "changedPixelRatio": 0.00020358754264333662,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-390x844.webp",
           "tracked": true,
@@ -12343,9 +14600,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.0002524210410476505,
+        "changedPixelRatio": 0.00020358754264333662,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-390x844.webp",
           "tracked": true,
@@ -12380,9 +14637,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.00025405659854903917,
+        "changedPixelRatio": 0.00020490668438832586,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-390x844.webp",
           "tracked": true,
@@ -12602,9 +14859,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 523,
+        "changedPixels": 416,
         "totalPixels": 1430910,
-        "changedPixelRatio": 0.0003655016737600548,
+        "changedPixelRatio": 0.0002907240846733897,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-390x844.webp",
           "tracked": true,
@@ -12620,28 +14877,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1101750,
+        "totalPixels": 1086540,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-390x844.webp",
           "tracked": true,
-          "bytes": 270952,
-          "sha256": "7ecee8fb417443b3e5e410113487279e8c72b32026716120078793c77315cf1c"
+          "bytes": 268238,
+          "sha256": "10b3365ff1e8bca6e6c0bd4b800aa2ff57968307c1015ac4afea8f5e0e6fd6e2"
         }
       },
       "path": "target-authenticated/simulacao-390x844.webp",
-      "bytes": 270952,
-      "sha256": "7ecee8fb417443b3e5e410113487279e8c72b32026716120078793c77315cf1c",
+      "bytes": 268238,
+      "sha256": "10b3365ff1e8bca6e6c0bd4b800aa2ff57968307c1015ac4afea8f5e0e6fd6e2",
       "width": 390,
-      "height": 2825,
+      "height": 2786,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1101750,
-        "changedPixelRatio": 0,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 2825
+        },
+        "actual": {
+          "width": 390,
+          "height": 2786
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-390x844.webp",
           "tracked": true,
@@ -12657,7 +14920,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
@@ -12674,22 +14937,59 @@
       "width": 390,
       "height": 844,
       "previousBaselineComparison": {
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
+        "totalPixels": 329160,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "tracked": true,
+          "bytes": 86194,
+          "sha256": "f7fdc7dbb747f2f278a562b037957ff894cf340f35a39da5d4cee293e2e3da2c"
+        }
+      }
+    },
+    {
+      "kind": "responsive",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "mobile-390x844",
+      "theme": "light",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 329160,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-390x844.webp",
+          "tracked": true,
+          "bytes": 91188,
+          "sha256": "bc56dfc5c1572b4ba3ba3d543198331d65e8178f342bc9c57a0ae9e4046361e8"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabela-investidor-390x844.webp",
+      "bytes": 91188,
+      "sha256": "bc56dfc5c1572b4ba3ba3d543198331d65e8178f342bc9c57a0ae9e4046361e8",
+      "width": 390,
+      "height": 844,
+      "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 390,
-          "height": 1235
+          "height": 10199
         },
         "actual": {
           "width": 390,
-          "height": 1801
+          "height": 844
         },
         "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-390x844.webp",
           "tracked": true,
-          "bytes": 85234,
-          "sha256": "cd46e437b0ef3d9d367cb6930ce68338b5ab18f956d52e7325733501c83cf0a3"
+          "bytes": 544772,
+          "sha256": "7116e85ad3308b1dd758e25e50ada47817731d13544835f623b8a9680108c443"
         }
       }
     },
@@ -12830,9 +15130,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 535,
+        "changedPixels": 398,
         "totalPixels": 4888260,
-        "changedPixelRatio": 0.00010944589690401084,
+        "changedPixelRatio": 0.0000814195644257875,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
           "tracked": true,
@@ -12867,9 +15167,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 294,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.00025405659854903917,
+        "changedPixelRatio": 0.00020352217976408042,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-oportunidades-dark-390x844.webp",
           "tracked": true,
@@ -12904,9 +15204,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 294,
         "totalPixels": 1463280,
-        "changedPixelRatio": 0.00025080640752282545,
+        "changedPixelRatio": 0.00020091848450057406,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
           "tracked": true,
@@ -12941,9 +15241,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 294,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.0002524210410476505,
+        "changedPixelRatio": 0.00020221195113898977,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-visitas-dark-390x844.webp",
           "tracked": true,
@@ -12978,9 +15278,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 294,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.0002524210410476505,
+        "changedPixelRatio": 0.00020221195113898977,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-pastas-dark-390x844.webp",
           "tracked": true,
@@ -13015,9 +15315,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 294,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.00025405659854903917,
+        "changedPixelRatio": 0.00020352217976408042,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-vendas-dark-390x844.webp",
           "tracked": true,
@@ -13237,9 +15537,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 523,
+        "changedPixels": 416,
         "totalPixels": 1430910,
-        "changedPixelRatio": 0.0003655016737600548,
+        "changedPixelRatio": 0.0002907240846733897,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-metas-pontos-dark-390x844.webp",
           "tracked": true,
@@ -13255,28 +15555,34 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1101750,
+        "totalPixels": 1086540,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
           "tracked": true,
-          "bytes": 282118,
-          "sha256": "c6e6396db56b1a787d57dc1f44dd14f6492643c24868caa74a3060d9206fd0f6"
+          "bytes": 280288,
+          "sha256": "94048ec541b6fdccf5a626e5aa6449d0317f333a3ab528fdef805ed5fcf465aa"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
-      "bytes": 282118,
-      "sha256": "c6e6396db56b1a787d57dc1f44dd14f6492643c24868caa74a3060d9206fd0f6",
+      "bytes": 280288,
+      "sha256": "94048ec541b6fdccf5a626e5aa6449d0317f333a3ab528fdef805ed5fcf465aa",
       "width": 390,
-      "height": 2825,
+      "height": 2786,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1101750,
-        "changedPixelRatio": 0,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 2825
+        },
+        "actual": {
+          "width": 390,
+          "height": 2786
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
           "tracked": true,
@@ -13292,7 +15598,7 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
@@ -13312,13 +15618,56 @@
         "passed": true,
         "reason": "within_threshold",
         "changedPixels": 0,
-        "totalPixels": 702390,
+        "totalPixels": 329160,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
           "tracked": true,
-          "bytes": 115550,
-          "sha256": "2e37960b0d838c43c31a58a754750a43c1ba2e56a07e087a4d7b234125ac030e"
+          "bytes": 86060,
+          "sha256": "0a9e06d58b3a0768ed0a6af600036438225532d4ba5565da8c11ed4b98211995"
+        }
+      }
+    },
+    {
+      "kind": "mobile-dark",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "mobile-390x844",
+      "theme": "dark",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 329160,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabela-investidor-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 90964,
+          "sha256": "f5ac0f6f81bae8a03c62304f11b754aa02ec3d24cf71c1e7a9386fcc0c970c71"
+        }
+      },
+      "path": "target-authenticated/themes/mobile-dark/simulacao-tabela-investidor-dark-390x844.webp",
+      "bytes": 90964,
+      "sha256": "f5ac0f6f81bae8a03c62304f11b754aa02ec3d24cf71c1e7a9386fcc0c970c71",
+      "width": 390,
+      "height": 844,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 10199
+        },
+        "actual": {
+          "width": 390,
+          "height": 844
+        },
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabela-investidor-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 587572,
+          "sha256": "84df4b4c98dd60c6d1060062aa8d570bb9a5d6dcdeec156b8a682cbd55313ae6"
         }
       }
     },
@@ -13459,9 +15808,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 535,
+        "changedPixels": 400,
         "totalPixels": 4751250,
-        "changedPixelRatio": 0.0001126019468560905,
+        "changedPixelRatio": 0.00008418837148118917,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
           "tracked": true,
@@ -13496,9 +15845,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1398000,
-        "changedPixelRatio": 0.0002625178826895565,
+        "changedPixelRatio": 0.0002117310443490701,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-375x812.webp",
           "tracked": true,
@@ -13533,9 +15882,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1407000,
-        "changedPixelRatio": 0.00026083866382373844,
+        "changedPixelRatio": 0.0002103766879886283,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-375x812.webp",
           "tracked": true,
@@ -13570,9 +15919,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1398000,
-        "changedPixelRatio": 0.0002625178826895565,
+        "changedPixelRatio": 0.0002117310443490701,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-375x812.webp",
           "tracked": true,
@@ -13607,9 +15956,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1398000,
-        "changedPixelRatio": 0.0002625178826895565,
+        "changedPixelRatio": 0.0002117310443490701,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-375x812.webp",
           "tracked": true,
@@ -13644,9 +15993,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 296,
         "totalPixels": 1389000,
-        "changedPixelRatio": 0.0002642188624910007,
+        "changedPixelRatio": 0.0002131029517638589,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-375x812.webp",
           "tracked": true,
@@ -13866,9 +16215,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 522,
+        "changedPixels": 413,
         "totalPixels": 1399875,
-        "changedPixelRatio": 0.0003728904366461291,
+        "changedPixelRatio": 0.0002950263416376462,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-375x812.webp",
           "tracked": true,
@@ -13884,28 +16233,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1092000,
+        "totalPixels": 1077375,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-375x812.webp",
           "tracked": true,
-          "bytes": 270502,
-          "sha256": "924aec48adc84e5dbe598079778103800ecbd937303567296496fafe720d6f2d"
+          "bytes": 268382,
+          "sha256": "dfacce849eef562eedb2cc520d04e30a91b5affdaa0487feea67cd2eddecb659"
         }
       },
       "path": "target-authenticated/simulacao-375x812.webp",
-      "bytes": 270502,
-      "sha256": "924aec48adc84e5dbe598079778103800ecbd937303567296496fafe720d6f2d",
+      "bytes": 268382,
+      "sha256": "dfacce849eef562eedb2cc520d04e30a91b5affdaa0487feea67cd2eddecb659",
       "width": 375,
-      "height": 2912,
+      "height": 2873,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1092000,
-        "changedPixelRatio": 0,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 375,
+          "height": 2912
+        },
+        "actual": {
+          "width": 375,
+          "height": 2873
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-375x812.webp",
           "tracked": true,
@@ -13921,7 +16276,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 304500,
         "changedPixelRatio": 0,
@@ -13938,22 +16293,59 @@
       "width": 375,
       "height": 812,
       "previousBaselineComparison": {
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
+        "totalPixels": 304500,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "tracked": true,
+          "bytes": 82248,
+          "sha256": "5a43a1ff3b36d76b0f990ec2a49b377e6b2e851ae4de48fbf415584a7c42a128"
+        }
+      }
+    },
+    {
+      "kind": "responsive",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "mobile-375x812",
+      "theme": "light",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 304500,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-375x812.webp",
+          "tracked": true,
+          "bytes": 87148,
+          "sha256": "56fda2c17430ec9341d6919a043c892a8ef52572e1cde541430616854b1efc6c"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabela-investidor-375x812.webp",
+      "bytes": 87148,
+      "sha256": "56fda2c17430ec9341d6919a043c892a8ef52572e1cde541430616854b1efc6c",
+      "width": 375,
+      "height": 812,
+      "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 375,
-          "height": 1230
+          "height": 10244
         },
         "actual": {
           "width": 375,
-          "height": 1773
+          "height": 812
         },
         "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-375x812.webp",
           "tracked": true,
-          "bytes": 83866,
-          "sha256": "b672d1b2888959a26eaa3242acad070c27f5214e59aa00db1f9b4e0767a48151"
+          "bytes": 542378,
+          "sha256": "7c7cddbdd14039770c6f5223d4bbc14d1feeffb029faf83a8d794dad6f1d1a80"
         }
       }
     },
@@ -14094,9 +16486,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 535,
+        "changedPixels": 400,
         "totalPixels": 4355200,
-        "changedPixelRatio": 0.00012284166054371787,
+        "changedPixelRatio": 0.00009184423218221895,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
           "tracked": true,
@@ -14131,9 +16523,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 295,
         "totalPixels": 1277760,
-        "changedPixelRatio": 0.000287221387427999,
+        "changedPixelRatio": 0.00023087277736038068,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-320x568.webp",
           "tracked": true,
@@ -14168,9 +16560,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 295,
         "totalPixels": 1277120,
-        "changedPixelRatio": 0.0002873653219744425,
+        "changedPixelRatio": 0.00023098847406664995,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-320x568.webp",
           "tracked": true,
@@ -14205,9 +16597,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 295,
         "totalPixels": 1277760,
-        "changedPixelRatio": 0.000287221387427999,
+        "changedPixelRatio": 0.00023087277736038068,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-320x568.webp",
           "tracked": true,
@@ -14242,9 +16634,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 295,
         "totalPixels": 1269760,
-        "changedPixelRatio": 0.00028903099798387096,
+        "changedPixelRatio": 0.00023232736895161291,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-320x568.webp",
           "tracked": true,
@@ -14279,9 +16671,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 367,
+        "changedPixels": 295,
         "totalPixels": 1262080,
-        "changedPixelRatio": 0.00029078980730223126,
+        "changedPixelRatio": 0.00023374112576064908,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-320x568.webp",
           "tracked": true,
@@ -14501,9 +16893,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 510,
+        "changedPixels": 417,
         "totalPixels": 1286720,
-        "changedPixelRatio": 0.0003963566277045511,
+        "changedPixelRatio": 0.00032407983088783885,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-320x568.webp",
           "tracked": true,
@@ -14519,28 +16911,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1059520,
+        "totalPixels": 1033280,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-320x568.webp",
           "tracked": true,
-          "bytes": 266404,
-          "sha256": "a28db03dc42adf709db4e952a6811607308fa601a412665b688a3a988526f7d0"
+          "bytes": 263360,
+          "sha256": "61f1889118a131d2c9cdbcab932daeecbd6f6cd79bf75ed5bb78bf4153b9dee1"
         }
       },
       "path": "target-authenticated/simulacao-320x568.webp",
-      "bytes": 266404,
-      "sha256": "a28db03dc42adf709db4e952a6811607308fa601a412665b688a3a988526f7d0",
+      "bytes": 263360,
+      "sha256": "61f1889118a131d2c9cdbcab932daeecbd6f6cd79bf75ed5bb78bf4153b9dee1",
       "width": 320,
-      "height": 3311,
+      "height": 3229,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 1889,
-        "totalPixels": 1059520,
-        "changedPixelRatio": 0.0017828828148595591,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 320,
+          "height": 3311
+        },
+        "actual": {
+          "width": 320,
+          "height": 3229
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-320x568.webp",
           "tracked": true,
@@ -14556,7 +16954,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 181760,
         "changedPixelRatio": 0,
@@ -14573,22 +16971,59 @@
       "width": 320,
       "height": 568,
       "previousBaselineComparison": {
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
+        "totalPixels": 181760,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
+          "tracked": true,
+          "bytes": 56388,
+          "sha256": "989fc745999e2fe27dcf5e5a92edeeb3c6cc4e9075d8e9aa88bcb6b328c6030b"
+        }
+      }
+    },
+    {
+      "kind": "responsive",
+      "route": "/app/simulacao/tabela-investidor",
+      "viewport": "mobile-320x568",
+      "theme": "light",
+      "visualComparison": {
+        "passed": true,
+        "reason": "baseline_updated",
+        "changedPixels": 0,
+        "totalPixels": 181760,
+        "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-320x568.webp",
+          "tracked": true,
+          "bytes": 61016,
+          "sha256": "f5186727aea56eb6d61e71790603e58f21fd4a1e062b29ad72becee6ca1de4d6"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabela-investidor-320x568.webp",
+      "bytes": 61016,
+      "sha256": "f5186727aea56eb6d61e71790603e58f21fd4a1e062b29ad72becee6ca1de4d6",
+      "width": 320,
+      "height": 568,
+      "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 320,
-          "height": 1245
+          "height": 11204
         },
         "actual": {
           "width": 320,
-          "height": 1618
+          "height": 568
         },
         "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-320x568.webp",
           "tracked": true,
-          "bytes": 81672,
-          "sha256": "12aaef1dd49847a441c0d37d8b6b5c1a263417060966cfcffa8d45df95d4e745"
+          "bytes": 530662,
+          "sha256": "40222f995f8f530a9028551db156c60f1a7e09e88790fafb9e04c5e772018bf0"
         }
       }
     },
@@ -15364,20 +17799,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-320x568.webp",
         "tracked": true,
-        "bytes": 266404,
-        "sha256": "a28db03dc42adf709db4e952a6811607308fa601a412665b688a3a988526f7d0"
+        "bytes": 263360,
+        "sha256": "61f1889118a131d2c9cdbcab932daeecbd6f6cd79bf75ed5bb78bf4153b9dee1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-375x812.webp",
         "tracked": true,
-        "bytes": 270502,
-        "sha256": "924aec48adc84e5dbe598079778103800ecbd937303567296496fafe720d6f2d"
+        "bytes": 268382,
+        "sha256": "dfacce849eef562eedb2cc520d04e30a91b5affdaa0487feea67cd2eddecb659"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-390x844.webp",
         "tracked": true,
-        "bytes": 270952,
-        "sha256": "7ecee8fb417443b3e5e410113487279e8c72b32026716120078793c77315cf1c"
+        "bytes": 268238,
+        "sha256": "10b3365ff1e8bca6e6c0bd4b800aa2ff57968307c1015ac4afea8f5e0e6fd6e2"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-768x1024.webp",
@@ -15400,8 +17835,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
         "tracked": true,
-        "bytes": 123564,
-        "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a"
+        "bytes": 131386,
+        "sha256": "538f26c760bb0525a3e76a78b46611d6aab9053a47ab071b60d7797623b40500"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
@@ -15426,6 +17861,48 @@
         "tracked": true,
         "bytes": 99030,
         "sha256": "c4b1dc11d0187d4b4f79559ade0e0e72e10344cd55a3622079be8646b9bacfa9"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1024x768.webp",
+        "tracked": true,
+        "bytes": 105262,
+        "sha256": "3900522f2854298feb3559b9b9b663482ba987fcf404cd493d2249adb7128a21"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1280x720.webp",
+        "tracked": true,
+        "bytes": 114164,
+        "sha256": "f1e324f5774888aaefe13dab6ffd4d0cec403308b77cb4b82f4c03222be5a94b"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1440x900.webp",
+        "tracked": true,
+        "bytes": 119446,
+        "sha256": "0ecab7a4ee1e81b70638a3121ea9d8866bf27e005ef220dd772d30e43647b7ce"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-320x568.webp",
+        "tracked": true,
+        "bytes": 61016,
+        "sha256": "f5186727aea56eb6d61e71790603e58f21fd4a1e062b29ad72becee6ca1de4d6"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-375x812.webp",
+        "tracked": true,
+        "bytes": 87148,
+        "sha256": "56fda2c17430ec9341d6919a043c892a8ef52572e1cde541430616854b1efc6c"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-390x844.webp",
+        "tracked": true,
+        "bytes": 91188,
+        "sha256": "bc56dfc5c1572b4ba3ba3d543198331d65e8178f342bc9c57a0ae9e4046361e8"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-768x1024.webp",
+        "tracked": true,
+        "bytes": 106470,
+        "sha256": "f33b70eb8e526d8eccd90ffb372637ca696aeb63e81f428dad27a2fd57dc6800"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
@@ -15634,8 +18111,14 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
         "tracked": true,
-        "bytes": 282118,
-        "sha256": "c6e6396db56b1a787d57dc1f44dd14f6492643c24868caa74a3060d9206fd0f6"
+        "bytes": 280288,
+        "sha256": "94048ec541b6fdccf5a626e5aa6449d0317f333a3ab528fdef805ed5fcf465aa"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabela-investidor-dark-390x844.webp",
+        "tracked": true,
+        "bytes": 90964,
+        "sha256": "f5ac0f6f81bae8a03c62304f11b754aa02ec3d24cf71c1e7a9386fcc0c970c71"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
@@ -15672,10 +18155,28 @@
         "tracked": true,
         "bytes": 123564,
         "sha256": "8451902473e1686c3f54a96f862041aad3e09cd213756f62160b25a67464e58a"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-balanced-1440x900.webp",
+        "tracked": true,
+        "bytes": 120320,
+        "sha256": "32f34a0a1b3f10a1c831ff30f9ea8b97fa5d400762bdaee6459f7fdce0ac44a5"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-dark-1440x900.webp",
+        "tracked": true,
+        "bytes": 117666,
+        "sha256": "acc2b4ad8d159998fe9ceefa09408d6bb57cbac8f590cc71a6a6c23935ec6187"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-light-1440x900.webp",
+        "tracked": true,
+        "bytes": 119446,
+        "sha256": "0ecab7a4ee1e81b70638a3121ea9d8866bf27e005ef220dd772d30e43647b7ce"
       }
     ],
-    "fileCount": 160,
-    "manifestSha256": "4510440d538eef55b855a3012b08535e1887d0ddf0cef56ab5c2bdbcd49dfaea"
+    "fileCount": 171,
+    "manifestSha256": "09e1e1c091c6c90161486b682115cf53930bac431babc955c9a52137b9953cef"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -15686,14 +18187,14 @@
     "requested": true,
     "performed": true,
     "method": "same-filesystem transactional rename with rollback",
-    "previousBaselineManifestSha256": "5f69a045a09e243a14162fe80609941659f9ae5cff75d70d331992e1f5833463",
-    "previousBaselineResultSha256": "60472660434b68a730e09c022b552aec588e5bea7c66690e211dbd908448864b"
+    "previousBaselineManifestSha256": "7fdfff851c7565f0d708cfa4c9d5be8b9420d37c0ef9891afb21b7ece964e0e1",
+    "previousBaselineResultSha256": "e7df427a52ee8b930c709d42bd0d1d5d110aac9efec111b08300cb08d7c428b6"
   },
   "visualInspectionCoverage": {
-    "responsiveScreenshots": 119,
-    "themeScreenshots": 41,
-    "accessibilityAudits": 160,
-    "baselineComparisons": 160,
+    "responsiveScreenshots": 126,
+    "themeScreenshots": 45,
+    "accessibilityAudits": 171,
+    "baselineComparisons": 171,
     "changedPixelRatioThreshold": 0.01,
     "channelTolerance": 16
   },
