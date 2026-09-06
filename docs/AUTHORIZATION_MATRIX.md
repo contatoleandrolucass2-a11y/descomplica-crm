@@ -120,9 +120,10 @@ possuir um não substitui o outro. Somente o motor oficial WF13 pode executar
 quando sua flag explícita também está ativa. A réplica WF14 calcula no
 navegador, sem persistência ou integração, a partir do snapshot SPC mantido em
 volume privado fora do Git e montado somente para leitura. O endpoint primário
-`GET /api/inventory/snapshot` e o fallback vivo `GET /api/inventory` repetem o
-gate `crm.simulators.view` e respondem com `no-store`; WF16, CAIXA e WF15
-continuam bloqueados.
+`GET /api/inventory/snapshot` repete o gate `crm.simulators.view` e responde com
+`no-store`. A Tabela Direta falha fechado se esse endpoint não estiver
+disponível; `GET /api/inventory` também permanece protegido e `no-store`, mas
+não é fallback do WF14. WF16, CAIXA e WF15 continuam bloqueados.
 
 Falta de permissão autenticada usa o interruptor `forbidden()` do Next.js e
 retorna a superfície `AUTH-403`; caminhos realmente inexistentes usam

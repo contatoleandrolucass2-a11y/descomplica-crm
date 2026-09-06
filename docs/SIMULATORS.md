@@ -46,10 +46,12 @@ proposta nem habilita um motor oficial.
 - WF16, CAIXA e WF15 mantêm botão bloqueado e `UnavailableValue`.
 - WF14 usa as 3.301 linhas do volume SPC privado, validado por checksum e montado
   somente para leitura. `GET /api/inventory/snapshot` entrega esse conteúdo e
-  `GET /api/inventory` oferece o fallback vivo; ambos exigem
-  `crm.simulators.view`, respondem com `no-store` e mantêm as linhas sem preço
-  visíveis e indisponíveis. A simulação também exige unidade com valor e término
-  da obra.
+  é a única fonte aceita pela Tabela Direta. Se ele falhar, a página informa a
+  indisponibilidade e permite tentar novamente, sem consultar silenciosamente
+  `GET /api/inventory`. Ambos os endpoints continuam exigindo
+  `crm.simulators.view` e respondendo com `no-store`; o endpoint vivo atende
+  somente outras jornadas. Linhas do snapshot sem preço permanecem visíveis e
+  indisponíveis. A simulação também exige unidade com valor e término da obra.
 - A Tabela Direta fecha a distribuição no centavo, preserva o bloco pós-chaves
   e separa pendência de dados, ajuste operacional, aprovação e recusa de
   crédito.

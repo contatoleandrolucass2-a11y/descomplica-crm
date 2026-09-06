@@ -67,6 +67,7 @@ type DirectResult = {
     signals: PaymentSignal[];
     signalTotal: number;
     totalEntryValue: number;
+    minimumActValue: number;
     minimumEntryValue: number;
     maximumEntryValue: number;
     entryExcess: number;
@@ -178,7 +179,6 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       ),
       "utf8",
     );
-
     assert.match(page, /simulator === ["']tabela-direta["']/);
     assert.ok(page.includes("<DirectTableArchive />"));
     assert.ok(archive.includes("investor-direct-table-page"));
@@ -273,6 +273,80 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       result.standardScenarios[1]!.signals.map((signal) => signal.value),
       [5_360, 5_320, 5_320],
     );
+  });
+
+  it("usa o mesmo arredondamento em centavos no limite mínimo do ato", () => {
+    const result = calculateDirectTableFileFlow({
+      ...base,
+      salePrice: 50_000,
+      discountAuthorized: true,
+      discount: 0.75,
+      entryValue: 2_999.95,
+    });
+
+    assert.equal(result.context.valueReal, 49_999.25);
+    assert.equal(result.custom.minimumActValue, 2_999.96);
+    assert.equal(result.audit.find((item) => item.id === "act")?.ok, false);
+
+    const exactBoundary = calculateDirectTableFileFlow({
+      ...base,
+      salePrice: 50_000,
+      discountAuthorized: true,
+      discount: 0.75,
+      entryValue: 2_999.96,
+    });
+    assert.equal(exactBoundary.audit.find((item) => item.id === "act")?.ok, true);
+  });
+
+  it("falha fechado no snapshot e imprime somente o cálculo atual aprovado", () => {
+    const calculator = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const styles = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    assert.ok(calculator.includes('return fetchInventory("/api/inventory/snapshot")'));
+    assert.ok(!calculator.includes('return { ...payload, sourceKind: "live" as const }'));
+    assert.ok(calculator.includes("flow: directResult"));
+    assert.ok(calculator.includes("Composição atual da Tabela Direta"));
+    assert.ok(calculator.includes("Sinais informados"));
+    assert.ok(calculator.includes("Intermediárias informadas"));
+    assert.ok(calculator.includes("Auditoria integral do cálculo"));
+    assert.ok(calculator.includes("flow.audit.map"));
+    assert.ok(calculator.includes("`Ato de ${percent.format(flow.custom.actRate)}`"));
+    assert.ok(!calculator.includes("option.entrySummary, signalSummary"));
+    assert.ok(calculator.includes("disabled={!directPrintReady}"));
+    assert.ok(calculator.includes("{directPrintReady ? <DirectPrintComposition"));
+    assert.ok(calculator.includes("investor-direct-print-blocked-notice"));
+    assert.ok(styles.includes(".investor-direct-workspace.investor-direct-print-blocked>:not"));
+    assert.ok(styles.includes("details.investor-proposal-audit"));
+    assert.ok(calculator.includes("Nenhuma fonte alternativa foi usada"));
+    assert.ok(calculator.includes("investor-stock-retry-button"));
+    assert.ok(calculator.includes("A proposta em edição foi preservada"));
+    assert.ok(calculator.includes("Trocar a unidade descartará a renda e a composição atual"));
+    assert.ok(calculator.includes('window.addEventListener("beforeunload", warnBeforeUnload)'));
+    assert.ok(
+      calculator.includes('browserNavigation?.addEventListener("navigate", confirmNavigationApi)'),
+    );
+    assert.ok(
+      calculator.includes('window.addEventListener("popstate", confirmHistoryNavigation, true)'),
+    );
+    assert.ok(
+      calculator.includes("window.history.go(protectedHistoryIndex - destinationHistoryIndex)"),
+    );
+    assert.ok(calculator.includes("Sair da Tabela Direta descartará a proposta em edição"));
+    assert.ok(calculator.includes("paginationFocusRequested.current = true"));
+    assert.ok(calculator.includes('scrollIntoView({ behavior: "auto", block: "center" })'));
+    assert.ok(calculator.includes('aria-live="polite" aria-atomic="true"'));
   });
 
   it("oferece somente quatro combinações de sinal e intermediária", () => {

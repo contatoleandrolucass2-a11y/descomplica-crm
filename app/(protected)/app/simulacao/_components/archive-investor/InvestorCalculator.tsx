@@ -77,8 +77,6 @@ type DirectCalculationPayment = {
 };
 
 type DirectTableFlowResult = ReturnType<typeof calculateDirectTableFileFlow>;
-type DirectProposalOption = (typeof DIRECT_TABLE_PROPOSAL_OPTIONS)[number];
-
 const DIRECT_TABLE_INVENTORY_PAGE_SIZE = 100;
 
 const INVESTOR_TOUR_STEPS = [
@@ -393,29 +391,32 @@ function DirectComparisonLedgerRow({ label, detail, operator, value, displayValu
   </div>;
 }
 
-function DirectProposalComparisonCard({ option, flow, optionNumber, active, baseDate, policySummary }: { option: DirectProposalOption; flow: DirectTableFlowResult; optionNumber: number; active: boolean; baseDate: string; policySummary: string }) {
+function DirectProposalComparisonCard({ flow, optionNumber, active, baseDate, policySummary }: { flow: DirectTableFlowResult; optionNumber: number; active: boolean; baseDate: string; policySummary: string }) {
   const titleId = useId();
   const creditLabel = flow.custom.status;
   const creditState = creditLabel === "APROVADO" ? "approved" : creditLabel === "REPROVADO" ? "rejected" : creditLabel === "AJUSTE NECESSÁRIO" ? "adjustment" : "pending";
   const approvedSignals = flow.custom.signals.filter((signal: { active: boolean; approved: boolean }) => signal.active && signal.approved);
   const invalidSignals = flow.custom.signals.filter((signal: { active: boolean; approved: boolean }) => signal.active && !signal.approved);
   const approvedIntermediaries = flow.custom.intermediaries.filter((item: { value: number; approved: boolean }) => item.value > 0 && item.approved);
+  const invalidIntermediaries = flow.custom.intermediaries.filter((item: { value: number; approved: boolean }) => item.value > 0 && !item.approved);
   const signalDates = approvedSignals.map((signal: { date: string }) => formatDate(signal.date));
   const intermediaryDates = approvedIntermediaries.map((item: { date: string }) => formatDate(item.date));
   const signalPeriod = signalDates.length === 1 ? signalDates[0] : `${signalDates[0]} a ${signalDates[signalDates.length - 1]}`;
   const intermediaryPeriod = intermediaryDates.length === 1 ? intermediaryDates[0] : `${intermediaryDates[0]} a ${intermediaryDates[intermediaryDates.length - 1]}`;
   const signalDetail = approvedSignals.length > 0
     ? `${approvedSignals.length} pagamentos válidos · ${signalPeriod}${invalidSignals.length > 0 ? ` · ${invalidSignals.length} não aplicados: ${invalidSignals[0].reason}` : ""}`
-    : invalidSignals.length > 0 ? `${invalidSignals.length} sinais não aplicados: ${invalidSignals[0].reason}` : "Sem sinais nesta opção";
-  const signalSummary = invalidSignals.length > 0
-    ? `${approvedSignals.length} de ${approvedSignals.length + invalidSignals.length} sinais válidos · ${invalidSignals[0].reason}`
-    : option.signalSummary;
+    : invalidSignals.length > 0 ? `${invalidSignals.length} sinais não aplicados: ${invalidSignals[0].reason}` : "Sem sinais nesta proposta";
+  const signalRate = flow.context.valueReal > 0 ? flow.custom.signalTotal / flow.context.valueReal : 0;
+  const signalSummary = approvedSignals.length > 0
+    ? `${approvedSignals.length} ${approvedSignals.length === 1 ? "sinal soma" : "sinais somam"} ${percent.format(signalRate)}${invalidSignals.length > 0 ? ` · ${invalidSignals.length} não ${invalidSignals.length === 1 ? "aplicado" : "aplicados"}` : ""}`
+    : invalidSignals.length > 0 ? `${invalidSignals.length} ${invalidSignals.length === 1 ? "sinal requer" : "sinais requerem"} ajuste` : "Sem sinais";
   const intermediaryDetail = approvedIntermediaries.length > 0
     ? `${approvedIntermediaries.length} pagamentos · ${intermediaryPeriod}`
-    : option.withIntermediary ? "Nenhuma data válida até 3 meses antes da entrega" : "Sem intermediárias nesta opção";
+    : invalidIntermediaries.length > 0 ? `${invalidIntermediaries.length} pagamentos não aplicados: ${invalidIntermediaries[0].reason}` : "Sem intermediárias nesta proposta";
+  const intermediaryRate = flow.context.valueReal > 0 ? flow.custom.validIntermediaryTotal / flow.context.valueReal : 0;
   const intermediarySummary = approvedIntermediaries.length > 0
-    ? `${approvedIntermediaries.length} ${approvedIntermediaries.length === 1 ? "intermediária" : "intermediárias"} de 5%`
-    : option.withIntermediary ? "Intermediárias indisponíveis nesta entrega" : "Sem intermediária";
+    ? `${approvedIntermediaries.length} ${approvedIntermediaries.length === 1 ? "intermediária soma" : "intermediárias somam"} ${percent.format(intermediaryRate)}${invalidIntermediaries.length > 0 ? ` · ${invalidIntermediaries.length} não ${invalidIntermediaries.length === 1 ? "aplicada" : "aplicadas"}` : ""}`
+    : invalidIntermediaries.length > 0 ? `${invalidIntermediaries.length} ${invalidIntermediaries.length === 1 ? "intermediária requer" : "intermediárias requerem"} ajuste` : "Sem intermediária";
   const preKeysAvailable = flow.custom.balance > 0 && flow.custom.desiredInstallments > 0;
   const preKeysDeadlineInsufficient = flow.custom.balance > 0 && flow.custom.desiredInstallments === 0;
   const preKeysDeductions = [
@@ -437,13 +438,13 @@ function DirectProposalComparisonCard({ option, flow, optionNumber, active, base
   return <article className={`investor-direct-comparison-card${active ? " is-active" : ""}`} aria-labelledby={titleId} data-selected={active || undefined}>
     <header className="investor-direct-comparison-heading">
       <div>
-        <div className="investor-direct-comparison-option-line"><span>Opção {String(optionNumber).padStart(2, "0")}</span></div>
-        <h4 id={titleId}>{option.title}</h4>
-        <p>{[option.entrySummary, signalSummary, intermediarySummary, policySummary].filter(Boolean).join(" · ")}</p>
+        <div className="investor-direct-comparison-option-line"><span>Base: opção {String(optionNumber).padStart(2, "0")}</span></div>
+        <h4 id={titleId}>Composição atual calculada</h4>
+        <p>{[`Ato de ${percent.format(flow.custom.actRate)}`, signalSummary, intermediarySummary, policySummary].filter(Boolean).join(" · ")}</p>
       </div>
       <div className={`investor-direct-credit-status ${creditState}`}><small>Resultado</small><strong>{creditLabel}</strong><span>{flow.custom.income > 0 ? `${percent.format(flow.custom.commitment)} da renda` : "Informe a renda"}</span></div>
     </header>
-    <div className="investor-direct-comparison-ledger" role="table" aria-label={`Livro-caixa da opção ${String(optionNumber).padStart(2, "0")}`}>
+    <div className="investor-direct-comparison-ledger" role="table" aria-label="Livro-caixa da composição atual">
       <DirectComparisonLedgerRow label="Valor real da venda" detail="Base usada nesta proposta" operator="=" value={flow.context.valueReal} />
       <DirectComparisonLedgerRow label="Ato" detail={`Pagamento em ${formatDate(baseDate)}`} operator="−" value={flow.custom.actValue} />
       <DirectComparisonLedgerRow label="Sinais" detail={signalDetail} operator="−" value={flow.custom.signalTotal} muted={approvedSignals.length === 0} />
@@ -463,6 +464,57 @@ function DirectProposalComparisonCard({ option, flow, optionNumber, active, base
     </div>
     <footer className="investor-direct-comparison-footer"><span>Entrada total <strong>{money.format(flow.custom.totalEntryValue)}</strong></span><span>Percentual <strong>{percent.format(flow.custom.totalEntryRate)}</strong></span></footer>
   </article>;
+}
+
+function DirectPrintComposition({ flow, baseDate, policySummary, discountAuthorized }: { flow: DirectTableFlowResult; baseDate: string; policySummary: string; discountAuthorized: boolean }) {
+  const activeSignals = flow.custom.signals.filter((signal: { active: boolean }) => signal.active);
+  const activeIntermediaries = flow.custom.intermediaries.filter((item: { value: number }) => item.value > 0);
+  const preKeysPaymentSummary = installmentSummary(
+    flow.custom.desiredInstallments,
+    flow.custom.installmentValue,
+    flow.custom.lastInstallmentValue,
+  );
+  const preKeysDetail = flow.custom.desiredInstallments > 0
+    ? `${money.format(flow.custom.balance)} · ${preKeysPaymentSummary} · ${formatDate(flow.custom.firstPreKeysDate)} a ${formatDate(flow.custom.lastPreKeysDate)}`
+    : `Dispensadas · saldo ${money.format(flow.custom.balance)}`;
+
+  return <section className="investor-direct-print-composition" aria-labelledby="investor-direct-print-composition-title">
+    <header>
+      <span>Memória integral</span>
+      <h2 id="investor-direct-print-composition-title">Composição atual da Tabela Direta</h2>
+      <p>{policySummary}</p>
+    </header>
+    <dl>
+      <div><dt>Valor do imóvel</dt><dd>{money.format(flow.context.salePrice)}</dd></div>
+      <div><dt>Desconto autorizado</dt><dd>{discountAuthorized ? money.format(flow.context.discount) : "Não aplicado"}</dd></div>
+      <div><dt>Valor real da venda</dt><dd>{money.format(flow.context.valueReal)}</dd></div>
+      <div><dt>Ato</dt><dd>{money.format(flow.custom.actValue)} · {percent.format(flow.custom.actRate)} · {formatDate(baseDate)}</dd></div>
+      <div><dt>Entrada total</dt><dd>{money.format(flow.custom.totalEntryValue)} · {percent.format(flow.custom.totalEntryRate)}</dd></div>
+      <div><dt>Limites da entrada</dt><dd>Ato mínimo {money.format(flow.custom.minimumActValue)} · entrada mínima {money.format(flow.custom.minimumEntryValue)} · entrada máxima {money.format(flow.custom.maximumEntryValue)}</dd></div>
+      <div><dt>Saldo pré-chaves</dt><dd>{preKeysDetail}</dd></div>
+      <div><dt>Saldo pós-chaves</dt><dd>{money.format(flow.custom.postKeysBalance)} · {flow.custom.postKeysInstallments}x de {money.format(flow.custom.postKeysPayment)} · 1ª em {formatDate(flow.custom.firstPostKeysDate)}</dd></div>
+      <div><dt>Renda e comprometimento</dt><dd>{money.format(flow.custom.income)} · {percent.format(flow.custom.commitment)}</dd></div>
+      <div><dt>Resultado</dt><dd>{flow.custom.status}</dd></div>
+    </dl>
+    <table>
+      <caption>Sinais informados</caption>
+      <thead><tr><th scope="col">Pagamento</th><th scope="col">Data</th><th scope="col">Valor</th><th scope="col">Percentual</th><th scope="col">Validação</th></tr></thead>
+      <tbody>
+        {activeSignals.length > 0 ? activeSignals.map((signal: { index: number; date: string; value: number; rate: number; status: string }) => <tr key={signal.index}><th scope="row">Sinal {signal.index}</th><td>{formatDate(signal.date)}</td><td>{money.format(signal.value)}</td><td>{percent.format(signal.rate)}</td><td>{signal.status}</td></tr>) : <tr><td colSpan={5}>Nenhum sinal utilizado.</td></tr>}
+      </tbody>
+    </table>
+    <table>
+      <caption>Intermediárias informadas</caption>
+      <thead><tr><th scope="col">Pagamento</th><th scope="col">Data</th><th scope="col">Valor</th><th scope="col">Percentual</th><th scope="col">Validação</th></tr></thead>
+      <tbody>
+        {activeIntermediaries.length > 0 ? activeIntermediaries.map((item: { index: number; date: string; value: number; rate: number; status: string }) => <tr key={item.index}><th scope="row">Intermediária {item.index}</th><td>{formatDate(item.date)}</td><td>{money.format(item.value)}</td><td>{percent.format(item.rate)}</td><td>{item.status}</td></tr>) : <tr><td colSpan={5}>Nenhuma intermediária utilizada.</td></tr>}
+      </tbody>
+    </table>
+    <section className="investor-direct-print-audit" aria-labelledby="investor-direct-print-audit-title">
+      <h3 id="investor-direct-print-audit-title">Auditoria integral do cálculo</h3>
+      <ul>{flow.audit.map((item) => <li key={item.id} className={item.ok ? "ok" : "error"}><span aria-hidden="true">{item.ok ? "✓" : "×"}</span>{item.label}</li>)}</ul>
+    </section>
+  </section>;
 }
 
 function AssociativeEditableAccountRow({ label, meta, calculation, ...props }: Omit<DirectEditableAccountRowProps, "twoColumn">) {
@@ -2216,6 +2268,7 @@ export function InvestorCalculator({
   const [salePriceFilter, setSalePriceFilter] = useState("Todos");
   const [priceSort, setPriceSort] = useState<"asc" | "desc">("asc");
   const [inventoryPage, setInventoryPage] = useState(1);
+  const [inventoryReloadKey, setInventoryReloadKey] = useState(0);
   const [filterNotice, setFilterNotice] = useState("");
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [salePrice, setSalePrice] = useState("");
@@ -2241,6 +2294,7 @@ export function InvestorCalculator({
   const [intermediaries, setIntermediaries] = useState(() => Array.from({ length: directTable ? 8 : annualMode ? 5 : 4 }, () => "0"));
   const [hiddenIntermediaryIndexes, setHiddenIntermediaryIndexes] = useState<number[]>([]);
   const [selectedDirectOption, setSelectedDirectOption] = useState("");
+  const [directProposalDirty, setDirectProposalDirty] = useState(false);
   const [directIncomeNotice, setDirectIncomeNotice] = useState("");
   const [visibleScenarioCodes, setVisibleScenarioCodes] = useState<string[]>([]);
   const [expandedScenarioPlans, setExpandedScenarioPlans] = useState<number[]>([]);
@@ -2251,6 +2305,9 @@ export function InvestorCalculator({
   const intermediaryActionRef = useRef<HTMLButtonElement | null>(null);
   const discountInputRef = useRef<HTMLInputElement | null>(null);
   const directIncomeInputRef = useRef<HTMLInputElement | null>(null);
+  const inventoryResultsRef = useRef<HTMLDivElement | null>(null);
+  const paginationFocusRequested = useRef(false);
+  const unsavedNavigationApproved = useRef(false);
   const associativeIncomeInputRef = useRef<HTMLInputElement | null>(null);
   const associativeFinancingInputRef = useRef<HTMLInputElement | null>(null);
   const directIncomeReady = currencyInputNumber(income) > 0;
@@ -2296,12 +2353,7 @@ export function InvestorCalculator({
     let active = true;
     async function loadInventory() {
       if (directTable) {
-        try {
-          return await fetchInventory("/api/inventory/snapshot");
-        } catch {
-          const payload = await fetchInventory();
-          return { ...payload, sourceKind: "live" as const };
-        }
+        return fetchInventory("/api/inventory/snapshot");
       }
 
       const [liveResult, referenceResult] = await Promise.allSettled([
@@ -2338,7 +2390,7 @@ export function InvestorCalculator({
       })
       .catch(() => active && setInventoryStatus("error"));
     return () => { active = false; };
-  }, [directTable]);
+  }, [directTable, inventoryReloadKey]);
 
   const activeFilters = useMemo(() => ({ businessUnit, project, plant, region, salePrice: salePriceFilter }), [businessUnit, project, plant, region, salePriceFilter]);
   const filterOptions = useMemo(() => buildInvestorFilterOptions(inventory, activeFilters), [inventory, activeFilters]);
@@ -2352,6 +2404,120 @@ export function InvestorCalculator({
     const start = (currentInventoryPage - 1) * DIRECT_TABLE_INVENTORY_PAGE_SIZE;
     return matchingInventory.slice(start, start + DIRECT_TABLE_INVENTORY_PAGE_SIZE);
   }, [currentInventoryPage, directTable, matchingInventory]);
+
+  useEffect(() => {
+    if (!paginationFocusRequested.current) return;
+    paginationFocusRequested.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      const results = inventoryResultsRef.current;
+      const firstAvailableUnit = results?.querySelector<HTMLButtonElement>(
+        ".investor-stock-unit-button:not(:disabled)",
+      );
+      const focusTarget = firstAvailableUnit ?? results;
+      focusTarget?.focus({ preventScroll: true });
+      focusTarget?.scrollIntoView({ behavior: "auto", block: "center" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [currentInventoryPage]);
+
+  useEffect(() => {
+    if (!directTable || !directProposalDirty) return;
+
+    const protectedLocation = new URL(window.location.href);
+    const protectedHistoryState = window.history.state;
+    const browserNavigation = "navigation" in window ? window.navigation : null;
+    const protectedHistoryIndex = browserNavigation?.currentEntry?.index;
+    let restoringHistory = false;
+    const confirmDiscard = () => window.confirm(
+      "Sair da Tabela Direta descartará a proposta em edição. Deseja continuar?",
+    );
+    const approveNavigation = () => {
+      unsavedNavigationApproved.current = true;
+      window.setTimeout(() => { unsavedNavigationApproved.current = false; }, 1_000);
+    };
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (unsavedNavigationApproved.current) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const confirmInternalNavigation = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented
+        || event.button !== 0
+        || event.metaKey
+        || event.ctrlKey
+        || event.shiftKey
+        || event.altKey
+        || !(event.target instanceof Element)
+      ) return;
+      const anchor = event.target.closest<HTMLAnchorElement>("a[href]");
+      if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+      const destination = new URL(anchor.href, window.location.href);
+      if (destination.origin !== window.location.origin) return;
+      const current = new URL(window.location.href);
+      if (destination.pathname === current.pathname && destination.search === current.search) return;
+      if (!confirmDiscard()) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      approveNavigation();
+    };
+    const confirmNavigationApi = (event: NavigateEvent) => {
+      if (unsavedNavigationApproved.current || event.hashChange) return;
+      const destination = new URL(event.destination.url);
+      if (destination.origin !== protectedLocation.origin || !event.cancelable) return;
+      if (
+        event.navigationType !== "reload"
+        && destination.pathname === protectedLocation.pathname
+        && destination.search === protectedLocation.search
+      ) return;
+      if (!confirmDiscard()) {
+        event.preventDefault();
+        return;
+      }
+      approveNavigation();
+    };
+    const confirmHistoryNavigation = (event: PopStateEvent) => {
+      if (restoringHistory) {
+        restoringHistory = false;
+        return;
+      }
+      if (unsavedNavigationApproved.current) return;
+      const destination = new URL(window.location.href);
+      if (
+        destination.pathname === protectedLocation.pathname
+        && destination.search === protectedLocation.search
+      ) return;
+      if (confirmDiscard()) {
+        approveNavigation();
+        return;
+      }
+      event.stopImmediatePropagation();
+      const destinationHistoryIndex = browserNavigation?.currentEntry?.index;
+      if (
+        Number.isInteger(protectedHistoryIndex)
+        && Number.isInteger(destinationHistoryIndex)
+        && protectedHistoryIndex !== destinationHistoryIndex
+      ) {
+        restoringHistory = true;
+        window.history.go(protectedHistoryIndex - destinationHistoryIndex);
+        return;
+      }
+      window.history.pushState(protectedHistoryState, "", protectedLocation.href);
+    };
+
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    browserNavigation?.addEventListener("navigate", confirmNavigationApi);
+    window.addEventListener("popstate", confirmHistoryNavigation, true);
+    document.addEventListener("click", confirmInternalNavigation, true);
+    return () => {
+      window.removeEventListener("beforeunload", warnBeforeUnload);
+      browserNavigation?.removeEventListener("navigate", confirmNavigationApi);
+      window.removeEventListener("popstate", confirmHistoryNavigation, true);
+      document.removeEventListener("click", confirmInternalNavigation, true);
+    };
+  }, [directProposalDirty, directTable]);
 
   useEffect(() => {
     const reconciledFilters = reconcileInvestorFilters(inventory, activeFilters);
@@ -2589,7 +2755,11 @@ export function InvestorCalculator({
   const visibleIntermediaryCount = visibleIntermediaryIndexes.length;
   const intermediariesVisible = visibleIntermediaryCount > 0;
   const missingForMinimumEntry = directTable
-    ? Math.max(0, Number((directResult.custom.minimumEntryValue - directResult.custom.totalEntryValue).toFixed(2)))
+    ? Math.max(
+        0,
+        (moneyToCents(directResult.custom.minimumEntryValue)
+          - moneyToCents(directResult.custom.totalEntryValue)) / 100,
+      )
     : Math.max(0, result.context.valueReal * 0.1 - result.custom.totalEntryValue);
   const validInstallmentSchedule = directTable
     ? result.context.maxInstallments > 0
@@ -2620,31 +2790,14 @@ export function InvestorCalculator({
   const directProposalComparison = useMemo(() => {
     if (!directTable || !directIncomeReady || !selectedDirectProposalOption) return [];
     const optionNumber = DIRECT_TABLE_PROPOSAL_OPTIONS.findIndex((option) => option.id === selectedDirectProposalOption.id) + 1;
-    const preset = buildDirectTableProposalPreset(selectedDirectProposalOption.id, result.context.valueReal, { baseDate, completionDate, plant: selectedUnit?.plant ?? "" });
-    if (!preset || optionNumber <= 0) return [];
+    if (optionNumber <= 0) return [];
 
     return [{
       option: selectedDirectProposalOption,
       optionNumber,
-      flow: calculateDirectTableFileFlow({
-        selectedUnitId,
-        developmentName: selectedUnit?.project,
-        businessUnit: selectedUnit?.businessUnit,
-        product: selectedUnit?.product,
-        plant: selectedUnit?.plant,
-        description: selectedUnit?.description ?? selectedUnit?.classification,
-        baseDate,
-        completionDate,
-        salePrice,
-        discountAuthorized,
-        discount,
-        entryValue: preset.entryValue,
-        income,
-        signals: preset.signals,
-        intermediaries: preset.intermediaries,
-      }),
+      flow: directResult,
     }];
-  }, [baseDate, completionDate, directIncomeReady, directTable, discount, discountAuthorized, income, result.context.valueReal, salePrice, selectedDirectProposalOption, selectedUnit?.businessUnit, selectedUnit?.classification, selectedUnit?.description, selectedUnit?.plant, selectedUnit?.product, selectedUnit?.project, selectedUnitId]);
+  }, [directIncomeReady, directResult, directTable, selectedDirectProposalOption]);
   const directPreKeysRateLabel = percent.format(result.context.preKeysRate);
   const directPostKeysRateLabel = percent.format(result.context.postKeysRate);
   const directParkingPolicySummary = result.context.parkingPolicy
@@ -2653,14 +2806,19 @@ export function InvestorCalculator({
   const validDirectIntermediaryCount = result.custom.intermediaries
     .filter((item: { value: number; approved: boolean }) => item.value > 0 && item.approved).length;
   const directEntryExcess = directTable ? directResult.custom.entryExcess : 0;
-  const directActMinimum = Number((result.context.valueReal * 0.06).toFixed(2));
-  const directActBelowMinimum = directTable && directResult.custom.actValue < directActMinimum;
-  const directEntryAboveMaximum = directTable && directResult.custom.totalEntryValue > directResult.custom.maximumEntryValue;
+  const directActMinimum = directTable ? directResult.custom.minimumActValue : 0;
+  const directActBelowMinimum = directTable
+    && moneyToCents(directResult.custom.actValue) < moneyToCents(directActMinimum);
+  const directEntryAboveMaximum = directTable
+    && moneyToCents(directResult.custom.totalEntryValue)
+      > moneyToCents(directResult.custom.maximumEntryValue);
   const directActInvalid = directActBelowMinimum || directEntryAboveMaximum;
   const directEntryMaximumOverage = directEntryAboveMaximum
-    ? Number((directResult.custom.totalEntryValue - directResult.custom.maximumEntryValue).toFixed(2))
+    ? (moneyToCents(directResult.custom.totalEntryValue)
+        - moneyToCents(directResult.custom.maximumEntryValue)) / 100
     : 0;
   const directStatus = directTable ? directResult.custom.status : "PENDENTE";
+  const directPrintReady = directTable && directResult.ok && directStatus === "APROVADO";
   const directPreKeysDeductions = [
     directEntryExcess > 0 ? `entrada adicional de ${money.format(directEntryExcess)}` : "",
     result.custom.validIntermediaryTotal > 0 ? `${validDirectIntermediaryCount} ${validDirectIntermediaryCount === 1 ? "intermediária válida" : "intermediárias válidas"}` : "",
@@ -2892,6 +3050,17 @@ export function InvestorCalculator({
   }
 
   function selectUnit(item: InventoryItem) {
+    if (item.id === selectedUnitId) return;
+    if (
+      directTable
+      && selectedUnitId
+      && directProposalDirty
+      && !window.confirm(
+        "Trocar a unidade descartará a renda e a composição atual da proposta. Deseja continuar?",
+      )
+    ) {
+      return;
+    }
     setSelectedUnitId(item.id);
     setDocumentationAppraisalOverride("");
     setSalePrice(item.finalPrice ? String(item.finalPrice) : "");
@@ -2916,6 +3085,7 @@ export function InvestorCalculator({
     setIntermediaries(Array.from({ length: directTable ? 8 : annualMode ? 5 : 4 }, () => "0"));
     setHiddenIntermediaryIndexes([]);
     setSelectedDirectOption(directTable ? DIRECT_TABLE_PROPOSAL_OPTIONS[0].id : "");
+    setDirectProposalDirty(false);
     setVisibleScenarioCodes([]);
     setExpandedScenarioPlans([]);
     if (tourOpen) {
@@ -2926,17 +3096,20 @@ export function InvestorCalculator({
   }
 
   function updateSignal(index: number, value: string) {
+    if (directTable) setDirectProposalDirty(true);
     setSignalDistributionMode("manual");
     setHiddenSignalIndexes((current) => current.filter((item) => item !== index));
     setSignals((current) => current.map((item, itemIndex) => itemIndex === index ? value : item));
   }
 
   function updateEntryValue(value: string) {
+    if (directTable) setDirectProposalDirty(true);
     setSignalDistributionMode(directTable || annualMode ? "manual" : "auto");
     setEntryValue(value);
   }
 
   function updateIncome(value: string) {
+    if (directTable && selectedUnitId) setDirectProposalDirty(true);
     setIncome(value);
     if (currencyInputNumber(value) > 0) setDirectIncomeNotice("");
     else if (directTable) setDirectProposalPreset(DIRECT_TABLE_PROPOSAL_OPTIONS[0].id);
@@ -2971,12 +3144,14 @@ export function InvestorCalculator({
   function addSignalField() {
     const nextIndex = signals.findIndex((_, index) => !visibleSignalIndexes.includes(index));
     if (nextIndex < 0) return;
+    if (directTable) setDirectProposalDirty(true);
     setHiddenSignalIndexes((current) => current.filter((item) => item !== nextIndex));
     setSignalFieldCount((current) => Math.max(current, nextIndex + 1));
     window.requestAnimationFrame(() => signalInputRefs.current[nextIndex]?.focus());
   }
 
   function hideSignalField(index: number) {
+    if (directTable) setDirectProposalDirty(true);
     setSignalDistributionMode("manual");
     const dependentIndexes = signals.map((_, itemIndex) => itemIndex).filter((itemIndex) => itemIndex >= index);
     setSignals((current) => current.map((item, itemIndex) => itemIndex >= index ? "0" : item));
@@ -2986,6 +3161,7 @@ export function InvestorCalculator({
   }
 
   function clearSignalFields() {
+    if (directTable) setDirectProposalDirty(true);
     setSignalDistributionMode("manual");
     setSignalFieldCount(0);
     setSignals(["0", "0", "0"]);
@@ -2996,18 +3172,21 @@ export function InvestorCalculator({
   function addIntermediaryField() {
     const nextIndex = intermediaries.findIndex((_, index) => index < intermediaryFieldLimit && !visibleIntermediaryIndexes.includes(index));
     if (nextIndex < 0) return;
+    if (directTable) setDirectProposalDirty(true);
     setHiddenIntermediaryIndexes((current) => current.filter((item) => item !== nextIndex));
     setIntermediaryFieldCount((current) => Math.max(current, nextIndex + 1));
     window.requestAnimationFrame(() => intermediaryInputRefs.current[nextIndex]?.focus());
   }
 
   function hideIntermediaryField(index: number) {
+    if (directTable) setDirectProposalDirty(true);
     setIntermediaries((current) => current.map((item, itemIndex) => itemIndex === index ? "0" : item));
     setHiddenIntermediaryIndexes((current) => current.includes(index) ? current : [...current, index]);
     window.requestAnimationFrame(() => intermediaryActionRef.current?.focus());
   }
 
   function clearIntermediaryFields() {
+    if (directTable) setDirectProposalDirty(true);
     setIntermediaryFieldCount(0);
     setIntermediaries(Array.from({ length: directTable ? 8 : annualMode ? 5 : 4 }, () => "0"));
     setHiddenIntermediaryIndexes([]);
@@ -3021,6 +3200,7 @@ export function InvestorCalculator({
       return;
     }
     setDirectProposalPreset(optionId);
+    setDirectProposalDirty(true);
   }
 
   function setDirectProposalPreset(optionId: string) {
@@ -3038,6 +3218,7 @@ export function InvestorCalculator({
   }
 
   function toggleDiscountField() {
+    if (directTable) setDirectProposalDirty(true);
     if (discountAuthorized) {
       setDiscountAuthorized(false);
       setDiscount("0");
@@ -3055,12 +3236,19 @@ export function InvestorCalculator({
     setSalePriceFilter("Todos");
     setPriceSort("asc");
     setInventoryPage(1);
-    setFilterNotice("");
-    setSelectedUnitId("");
-    setDocumentationAppraisalOverride("");
+    if (directTable) {
+      setFilterNotice(
+        selectedUnitId ? "Filtros limpos. A proposta em edição foi preservada." : "",
+      );
+    } else {
+      setFilterNotice("");
+      setSelectedUnitId("");
+      setDocumentationAppraisalOverride("");
+    }
   }
 
   function updateIntermediary(index: number, value: string) {
+    if (directTable) setDirectProposalDirty(true);
     setHiddenIntermediaryIndexes((current) => current.filter((item) => item !== index));
     setIntermediaries((current) => current.map((item, itemIndex) => itemIndex === index ? value : item));
   }
@@ -3078,9 +3266,34 @@ export function InvestorCalculator({
   function updateFilter(setter: (value: string) => void, value: string) {
     setter(value);
     setInventoryPage(1);
-    setFilterNotice("");
-    setSelectedUnitId("");
-    setDocumentationAppraisalOverride("");
+    if (directTable) {
+      setFilterNotice(
+        selectedUnitId ? "Filtro atualizado. A proposta em edição foi preservada." : "",
+      );
+    } else {
+      setFilterNotice("");
+      setSelectedUnitId("");
+      setDocumentationAppraisalOverride("");
+    }
+  }
+
+  function updateDiscount(value: string) {
+    if (directTable) setDirectProposalDirty(true);
+    setDiscount(value);
+  }
+
+  function retryInventory() {
+    setInventory([]);
+    setInventoryMeta(null);
+    setInventoryStatus("loading");
+    setInventoryReloadKey((key) => key + 1);
+  }
+
+  function changeInventoryPage(nextPage: number) {
+    const clampedPage = Math.max(1, Math.min(inventoryPageCount, nextPage));
+    if (clampedPage === currentInventoryPage) return;
+    paginationFocusRequested.current = true;
+    setInventoryPage(clampedPage);
   }
 
   function applyAssociativeProSolutoSuggestion(suggestion: { entry: number; signals: number[]; signalCount: number }) {
@@ -3261,11 +3474,11 @@ export function InvestorCalculator({
               {directIncomeReady && selectedDirectProposalOption ? <section className="investor-scenario-group investor-scenario-option-panel investor-direct-option-panel" data-scenario={selectedDirectProposalOption.withSignals ? 2 : 1}>
                 <div className="investor-scenario-grid">
                   <article>
-                    <section className="investor-direct-calculation" aria-label={`${selectedDirectProposalOption.label}: proposta pronta`}>
+                    <section className="investor-direct-calculation" aria-label="Proposta atual calculada">
                       <div className="investor-direct-calculation-body">
-                        {directProposalComparison.length > 0 ? <div className="investor-direct-comparison-grid is-single" role="region" aria-label={`${selectedDirectProposalOption.label}: composição completa`}>
-                          {directProposalComparison.map(({ option, flow, optionNumber }) => <DirectProposalComparisonCard key={option.id} option={option} flow={flow} optionNumber={optionNumber} active={selectedDirectOption === option.id} baseDate={baseDate} policySummary={directParkingPolicySummary} />)}
-                        </div> : <div className="investor-direct-account investor-associative-compact-account investor-direct-ready-account" role="region" tabIndex={0} aria-label={`${selectedDirectProposalOption.label}: memória de cálculo em formato de conta`}>
+                        {directProposalComparison.length > 0 ? <div className="investor-direct-comparison-grid is-single" role="region" aria-label="Composição atual da proposta">
+                          {directProposalComparison.map(({ option, flow, optionNumber }) => <DirectProposalComparisonCard key={option.id} flow={flow} optionNumber={optionNumber} active={selectedDirectOption === option.id} baseDate={baseDate} policySummary={directParkingPolicySummary} />)}
+                        </div> : <div className="investor-direct-account investor-associative-compact-account investor-direct-ready-account" role="region" tabIndex={0} aria-label="Memória de cálculo da proposta atual">
                           <ol>{directCalculationSteps.map((payment, index) => {
                             const help = associativeHelp(payment.meta, payment.calculation ? `Cálculo: ${payment.calculation}.` : null);
                             const action = payment.key === "pre-keys" && directPreKeysAvailable
@@ -3468,7 +3681,11 @@ export function InvestorCalculator({
   }
 
   return (
-    <div className={`investor-workspace${usesDirectDesign ? " investor-direct-workspace" : ""}${directVisualLayout ? " investor-direct-design-copy" : ""}`}>
+    <div className={`investor-workspace${usesDirectDesign ? " investor-direct-workspace" : ""}${directVisualLayout ? " investor-direct-design-copy" : ""}${directTable ? directPrintReady ? " investor-direct-print-ready" : " investor-direct-print-blocked" : ""}`}>
+      {directTable && !directPrintReady ? <section className="investor-direct-print-blocked-notice" aria-label="Impressão indisponível">
+        <h1>Impressão indisponível</h1>
+        <p>Corrija todas as pendências e obtenha o resultado APROVADO antes de imprimir a proposta da Tabela Direta.</p>
+      </section> : null}
       {tourOpen ? <>
         <div
           className="investor-tour-spotlight"
@@ -3546,7 +3763,7 @@ export function InvestorCalculator({
           <span>{inventoryStatus === "ready" ? <><strong>{matchingInventory.length.toLocaleString("pt-BR")}</strong> unidades encontradas</> : inventoryStatus === "loading" ? "Carregando estoque…" : "Estoque indisponível"}</span>
         </p>
 
-        <div className="investor-stock-results" role="region" aria-label="Estoque completo de unidades" tabIndex={0} data-tour="inventory">
+        <div ref={inventoryResultsRef} className="investor-stock-results" role="region" aria-label={`Estoque completo de unidades. Página ${currentInventoryPage.toLocaleString("pt-BR")} de ${inventoryPageCount.toLocaleString("pt-BR")}`} tabIndex={0} data-tour="inventory">
           <table className="investor-stock-table">
             <caption className="sr-only">Unidades encontradas no estoque</caption>
             <colgroup>
@@ -3571,7 +3788,7 @@ export function InvestorCalculator({
             </thead>
             <tbody>
               {inventoryStatus === "loading" ? <tr><td className="investor-empty-result" colSpan={7}>Carregando unidades do estoque…</td></tr> : null}
-              {inventoryStatus === "error" ? <tr><td className="investor-empty-result" colSpan={7}>Estoque indisponível. Recarregue a página para tentar novamente.</td></tr> : null}
+              {inventoryStatus === "error" ? <tr><td className="investor-empty-result" colSpan={7}>{directTable ? "Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada." : "Estoque indisponível."} <button type="button" className="investor-stock-action-button investor-stock-retry-button" onClick={retryInventory}>Tentar novamente</button></td></tr> : null}
               {visibleInventory.map((item) => {
                 const canSelect = Boolean(item.finalPrice && item.completionDate);
                 const selected = item.id === selectedUnitId;
@@ -3602,11 +3819,11 @@ export function InvestorCalculator({
         </div>
 
         {directTable && inventoryStatus === "ready" && matchingInventory.length > 0 ? <nav className="investor-stock-pagination" aria-label="Paginação do estoque completo">
-          <span>Exibindo {((currentInventoryPage - 1) * DIRECT_TABLE_INVENTORY_PAGE_SIZE + 1).toLocaleString("pt-BR")}–{Math.min(currentInventoryPage * DIRECT_TABLE_INVENTORY_PAGE_SIZE, matchingInventory.length).toLocaleString("pt-BR")} de {matchingInventory.length.toLocaleString("pt-BR")} unidades</span>
+          <span aria-live="polite" aria-atomic="true">Página {currentInventoryPage.toLocaleString("pt-BR")} de {inventoryPageCount.toLocaleString("pt-BR")}. Exibindo {((currentInventoryPage - 1) * DIRECT_TABLE_INVENTORY_PAGE_SIZE + 1).toLocaleString("pt-BR")}–{Math.min(currentInventoryPage * DIRECT_TABLE_INVENTORY_PAGE_SIZE, matchingInventory.length).toLocaleString("pt-BR")} de {matchingInventory.length.toLocaleString("pt-BR")} unidades</span>
           <div>
-            <button type="button" disabled={currentInventoryPage <= 1} onClick={() => setInventoryPage((page) => Math.max(1, page - 1))}>Anterior</button>
+            <button type="button" disabled={currentInventoryPage <= 1} onClick={() => changeInventoryPage(currentInventoryPage - 1)}>Anterior</button>
             <strong>Página {currentInventoryPage.toLocaleString("pt-BR")} de {inventoryPageCount.toLocaleString("pt-BR")}</strong>
-            <button type="button" disabled={currentInventoryPage >= inventoryPageCount} onClick={() => setInventoryPage((page) => Math.min(inventoryPageCount, page + 1))}>Próxima</button>
+            <button type="button" disabled={currentInventoryPage >= inventoryPageCount} onClick={() => changeInventoryPage(currentInventoryPage + 1)}>Próxima</button>
           </div>
         </nav> : null}
 
@@ -3725,7 +3942,7 @@ export function InvestorCalculator({
                     tourTarget="proposal-discount"
                     meta={discountAuthorized ? "Valor autorizado aplicado ao cálculo" : "Opcional · aplique somente com autorização"}
                     calculation={<div className="investor-direct-editable-value has-inline-action">
-                      {discountAuthorized ? <><span aria-hidden="true">R$</span><MoneyInput inputRef={discountInputRef} label="Desconto autorizado" value={discount} onChange={setDiscount} /></> : <strong>{money.format(0)}</strong>}
+                      {discountAuthorized ? <><span aria-hidden="true">R$</span><MoneyInput inputRef={discountInputRef} label="Desconto autorizado" value={discount} onChange={updateDiscount} /></> : <strong>{money.format(0)}</strong>}
                       <button type="button" aria-label={discountAuthorized ? "Remover desconto" : "Aplicar desconto"} title={discountAuthorized ? "Remover desconto" : "Aplicar desconto"} aria-pressed={discountAuthorized} onClick={toggleDiscountField}><span aria-hidden="true">{discountAuthorized ? "×" : "+"}</span></button>
                     </div>}
                     result={<><strong>{money.format(result.context.valueReal)}</strong><small>Valor real da proposta</small></>}
@@ -3736,7 +3953,7 @@ export function InvestorCalculator({
                     label="Ato"
                     tourTarget="proposal-entry"
                     meta={`Pagamento em ${formatDate(baseDate)}`}
-                    calculation={<>{money.format(result.context.valueReal)} × {percent.format(result.custom.actRate)}<small>Mínimo do ato: {money.format(result.context.valueReal * 0.06)} (6%) · máximo da entrada total: {money.format(directResult.custom.maximumEntryValue)}</small></>}
+                    calculation={<>{money.format(result.context.valueReal)} × {percent.format(result.custom.actRate)}<small>Mínimo do ato: {money.format(directActMinimum)} (6%) · máximo da entrada total: {money.format(directResult.custom.maximumEntryValue)}</small></>}
                     invalid={directActInvalid}
                     result={<div className="investor-direct-editable-value"><span aria-hidden="true">R$</span><MoneyInput label="Valor do ato" describedBy="investor-editable-entry-status" invalid={directActInvalid} value={entryValue} onChange={updateEntryValue} /><small id="investor-editable-entry-status" role={directActInvalid ? "alert" : "status"} aria-live="polite" aria-atomic="true">{directEntryAboveMaximum ? `Entrada total excede o máximo em ${money.format(directEntryMaximumOverage)}. Reduza o ato ou os sinais.` : directActBelowMinimum ? `Ato abaixo do mínimo de ${money.format(directActMinimum)} (6%).` : `${percent.format(result.custom.actRate)} do valor real`}</small></div>}
                   />
@@ -4357,12 +4574,13 @@ export function InvestorCalculator({
               <InvestorLearningManual directTable />
               <button type="button" aria-haspopup="dialog" aria-controls="investor-documentation-pf" onClick={() => pfDocumentationDialog.current?.showModal()}>Doc Pessoa Física</button>
               <button type="button" aria-haspopup="dialog" aria-controls="investor-documentation-pj" onClick={() => pjDocumentationDialog.current?.showModal()}>Doc Pessoa Jurídica</button>
-              <button type="button" onClick={() => window.print()} aria-label="Imprimir a proposta">Imprimir</button>
+              <button type="button" disabled={!directPrintReady} onClick={() => window.print()} aria-label={directPrintReady ? "Imprimir a proposta aprovada" : "Impressão indisponível até a proposta ser aprovada"} title={directPrintReady ? "Imprimir a proposta aprovada" : "Corrija todas as pendências antes de imprimir"}>Imprimir</button>
               <InvestorCommercialLinks />
             </section>
             <DocumentationDialog type="pf" dialogRef={pfDocumentationDialog} directTable />
             <DocumentationDialog type="pj" dialogRef={pjDocumentationDialog} directTable />
           </> : null}
+          {directPrintReady ? <DirectPrintComposition flow={directResult} baseDate={baseDate} policySummary={directParkingPolicySummary} discountAuthorized={discountAuthorized} /> : null}
           {!annualMode ? <details className="investor-audit investor-proposal-audit" data-tour="audit">
             <summary>Auditoria do cálculo</summary>
             <ul>{result.audit.map((item) => <li key={item.id} className={item.ok ? "ok" : "error"}><span>{item.ok ? "✓" : "×"}</span>{item.label}</li>)}</ul>

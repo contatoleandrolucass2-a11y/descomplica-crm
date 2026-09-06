@@ -1166,8 +1166,78 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
 async function checkDirectTableValidation(page, origin, consoleErrors, pageErrors) {
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
-  await page.clock.setFixedTime(new Date("2026-09-06T12:00:00-03:00"));
-  await page.goto(`${origin}/app/simulacao/tabela-direta`, {
+  const directTablePath = "/app/simulacao/tabela-direta";
+  const directTableUrl = `${origin}${directTablePath}`;
+  const fixedDirectTableTime = new Date("2026-09-06T12:00:00-03:00");
+  const context = page.context();
+
+  async function closeAuxiliaryPage(auxiliaryPage) {
+    if (!auxiliaryPage.isClosed()) {
+      await auxiliaryPage.close({ runBeforeUnload: false });
+    }
+  }
+
+  async function waitForDirectInventory(auxiliaryPage) {
+    await auxiliaryPage
+      .getByRole("heading", { name: "Simulador Tabela Direta", exact: true })
+      .waitFor({ state: "visible", timeout: 20_000 });
+    await auxiliaryPage
+      .locator(".investor-stock-sync")
+      .getByText("3.301 unidades", {
+        exact: true,
+      })
+      .waitFor({ state: "visible", timeout: 25_000 });
+  }
+
+  async function prepareApprovedDirectProposal(auxiliaryPage, { navigate = true } = {}) {
+    if (navigate) {
+      await auxiliaryPage.goto(directTableUrl, { waitUntil: "domcontentloaded" });
+    }
+    await waitForDirectInventory(auxiliaryPage);
+    await auxiliaryPage
+      .locator(
+        ".investor-stock-table tbody tr.selectable .investor-stock-unit-button:not(:disabled)",
+      )
+      .first()
+      .click();
+    const auxiliaryIncome = auxiliaryPage.getByRole("textbox", {
+      name: "Renda mensal",
+      exact: true,
+    });
+    await auxiliaryIncome.fill("10000000");
+    await auxiliaryPage
+      .locator(
+        '.investor-direct-credit-result[role="status"] strong, .investor-direct-comparison-heading .investor-direct-credit-status strong',
+      )
+      .filter({ hasText: /^APROVADO$/ })
+      .first()
+      .waitFor({ state: "visible", timeout: 10_000 });
+  }
+
+  async function directProposalFingerprint(auxiliaryPage) {
+    return auxiliaryPage.evaluate(() => {
+      const text = (selector) =>
+        document.querySelector(selector)?.textContent?.replace(/\s+/g, " ").trim() ?? "";
+      const inputValue = (label) =>
+        document.querySelector(`input[aria-label="${label}"]`)?.value ?? "";
+      return JSON.stringify({
+        pathname: window.location.pathname,
+        selectedUnit: document
+          .querySelector('.investor-stock-unit-button[aria-pressed="true"]')
+          ?.getAttribute("aria-label"),
+        property: text(
+          '.investor-property-summary[aria-label="Descrição do imóvel usado na proposta"]',
+        ),
+        income: inputValue("Renda mensal"),
+        act: inputValue("Valor do ato"),
+        selectedOption: text('.investor-direct-ready-options button[aria-pressed="true"]'),
+        comparison: text(".investor-direct-comparison-card"),
+      });
+    });
+  }
+
+  await page.clock.setFixedTime(fixedDirectTableTime);
+  await page.goto(directTableUrl, {
     waitUntil: "domcontentloaded",
   });
   await page
@@ -1209,6 +1279,36 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
 
   await nextInventoryPage.click();
   await inventoryPagination.getByText("Página 2 de 34", { exact: true }).waitFor();
+  const firstUnitOnSecondPage = page
+    .locator(".investor-stock-table tbody tr.selectable .investor-stock-unit-button:not(:disabled)")
+    .first();
+  const paginationFocusedFirstVisibleUnit = await page
+    .waitForFunction(
+      () =>
+        document.activeElement ===
+        document.querySelector(
+          ".investor-stock-table tbody tr.selectable .investor-stock-unit-button:not(:disabled)",
+        ),
+      undefined,
+      { timeout: 5_000 },
+    )
+    .then(() => true)
+    .catch(() => false);
+  const paginationFocusedUnitIsVisible = await firstUnitOnSecondPage.evaluate((button) => {
+    const results = button.closest(".investor-stock-results");
+    if (!(results instanceof HTMLElement)) return false;
+    const buttonRect = button.getBoundingClientRect();
+    const resultsRect = results.getBoundingClientRect();
+    return (
+      document.activeElement === button &&
+      buttonRect.top >= Math.max(0, resultsRect.top) - 1 &&
+      buttonRect.bottom <= Math.min(window.innerHeight, resultsRect.bottom) + 1 &&
+      buttonRect.left >= Math.max(0, resultsRect.left) - 1 &&
+      buttonRect.right <= Math.min(window.innerWidth, resultsRect.right) + 1
+    );
+  });
+  const paginationFocusesVisibleFirstUnit =
+    paginationFocusedFirstVisibleUnit && paginationFocusedUnitIsVisible;
   const secondPaginationText = (await inventoryPagination.innerText()).replace(/\s+/g, " ");
   const paginationAdvancesOneHundredRows =
     (await inventoryRows.count()) === 100 &&
@@ -1261,6 +1361,69 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const approvedProposalStatusVisible =
     (await proposalStatus.isVisible()) &&
     (await proposalStatus.locator("strong").textContent())?.trim() === "APROVADO";
+
+  const selectedProperty = page.getByRole("article", {
+    name: "Descrição do imóvel usado na proposta",
+    exact: true,
+  });
+  const propertyBeforeFilter = (await selectedProperty.innerText()).replace(/\s+/g, " ");
+  const incomeBeforeFilter = await incomeInput.inputValue();
+  const selectedUnitLabel = await selectedUnitButtons.first().getAttribute("aria-label");
+  const businessUnitFilter = page
+    .locator(".investor-stock-filters label")
+    .filter({ hasText: /^Incorporadora/ })
+    .locator("select");
+  const selectedBusinessUnit = (
+    await firstSelectableRow.locator("td").nth(1).textContent()
+  )?.trim();
+  const alternativeBusinessUnit = await businessUnitFilter
+    .locator("option")
+    .evaluateAll(
+      (options, currentBusinessUnit) =>
+        options
+          .map((option) => option.value)
+          .find((value) => value !== "Todas" && value !== currentBusinessUnit) ?? "",
+      selectedBusinessUnit,
+    );
+  if (alternativeBusinessUnit) {
+    await businessUnitFilter.selectOption(alternativeBusinessUnit);
+    await page.waitForFunction(
+      (value) => document.querySelector(".investor-stock-filters label select")?.value === value,
+      alternativeBusinessUnit,
+    );
+  }
+  const filterPreservesSelectedUnitAndIncome =
+    alternativeBusinessUnit.length > 0 &&
+    (await selectedProperty.innerText()).replace(/\s+/g, " ") === propertyBeforeFilter &&
+    (await incomeInput.inputValue()) === incomeBeforeFilter &&
+    (await page.locator('.investor-direct-ready-options button[aria-pressed="true"]').count()) ===
+      1;
+
+  await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+  await page.waitForFunction(
+    (label) =>
+      document
+        .querySelector('.investor-stock-unit-button[aria-pressed="true"]')
+        ?.getAttribute("aria-label") === label,
+    selectedUnitLabel,
+  );
+  const proposalBeforeCancelledUnitChange = await directProposalFingerprint(page);
+  const differentUnitButton = page
+    .locator(
+      ".investor-stock-table tbody tr.selectable:not(.selected) .investor-stock-unit-button:not(:disabled)",
+    )
+    .first();
+  let unitChangeConfirmation = "";
+  page.once("dialog", async (dialog) => {
+    unitChangeConfirmation = dialog.message();
+    await dialog.dismiss();
+  });
+  await differentUnitButton.click();
+  await page.waitForTimeout(50);
+  const cancelledUnitChangePreservesProposal =
+    unitChangeConfirmation ===
+      "Trocar a unidade descartará a renda e a composição atual da proposta. Deseja continuar?" &&
+    (await directProposalFingerprint(page)) === proposalBeforeCancelledUnitChange;
 
   await page.getByRole("button", { name: "Ver parcelas pré-chaves", exact: true }).last().click();
   const preKeysDialog = page.locator("#investor-direct-pre-keys");
@@ -1331,7 +1494,22 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     .click();
   await legalEntityDialog.waitFor({ state: "hidden" });
 
+  await proposalOptions.last().click();
+  await page
+    .locator('.investor-direct-ready-options button[aria-pressed="true"]')
+    .filter({ hasText: "Maior flexibilidade" })
+    .waitFor({ state: "visible" });
+  await proposalStatus.getByText("APROVADO", { exact: true }).waitFor({
+    state: "visible",
+    timeout: 10_000,
+  });
+
   const actInput = page.getByRole("textbox", { name: "Valor do ato", exact: true });
+  const actBeforeInvalidState = await actInput.inputValue();
+  const intermediaryAdjustmentInput = page
+    .locator('input[aria-label^="Valor da intermediária "]')
+    .last();
+  const intermediaryBeforeApprovedEdit = await intermediaryAdjustmentInput.inputValue();
   await actInput.fill("100");
   const actDescriptionId = await actInput.getAttribute("aria-describedby");
   const actDescription = actDescriptionId ? page.locator(`#${actDescriptionId}`) : null;
@@ -1342,6 +1520,36 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     /Ato abaixo do mínimo de R\$\s[\d.,]+ \(6%\)\./.test(
       (await actDescription.textContent())?.trim() ?? "",
     );
+  const invalidCompositionDisablesPrint = await page
+    .getByRole("button", {
+      name: "Impressão indisponível até a proposta ser aprovada",
+      exact: true,
+    })
+    .isDisabled();
+  let invalidBrowserPrintShowsBlockedNoticeOnly = false;
+  await page.emulateMedia({ media: "print" });
+  try {
+    const blockedWorkspace = page.locator(
+      ".investor-direct-workspace.investor-direct-print-blocked",
+    );
+    const blockedNotice = blockedWorkspace.locator(
+      ":scope > .investor-direct-print-blocked-notice",
+    );
+    invalidBrowserPrintShowsBlockedNoticeOnly =
+      (await blockedNotice.isVisible()) &&
+      (await blockedNotice.getByRole("heading", { name: "Impressão indisponível" }).isVisible()) &&
+      (await blockedNotice.textContent())?.includes(
+        "Corrija todas as pendências e obtenha o resultado APROVADO antes de imprimir",
+      ) === true &&
+      (await page.locator(".investor-direct-print-composition").count()) === 0 &&
+      (await blockedWorkspace.evaluate((workspace) =>
+        [...workspace.children]
+          .filter((child) => !child.classList.contains("investor-direct-print-blocked-notice"))
+          .every((child) => getComputedStyle(child).display === "none"),
+      ));
+  } finally {
+    await page.emulateMedia({ media: "screen" });
+  }
 
   const audit = page.locator("details.investor-proposal-audit");
   await audit.locator("summary").click();
@@ -1353,6 +1561,479 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
         item.textContent?.includes("Ato mínimo de 6%"),
       ),
   );
+  await audit.locator("summary").click();
+  await page.waitForFunction(
+    () => !document.querySelector("details.investor-proposal-audit")?.hasAttribute("open"),
+  );
+
+  const actAmountBeforeInvalidState = Number(
+    actBeforeInvalidState.replace(/\./g, "").replace(",", "."),
+  );
+  const intermediaryAmountBeforeApprovedEdit = Number(
+    intermediaryBeforeApprovedEdit.replace(/\./g, "").replace(",", "."),
+  );
+  const editedIntermediaryInput = String(
+    Math.round((intermediaryAmountBeforeApprovedEdit - 100) * 100),
+  );
+  const editedActInput = String(Math.round((actAmountBeforeInvalidState + 100) * 100));
+  await intermediaryAdjustmentInput.fill(editedIntermediaryInput);
+  await actInput.fill(editedActInput);
+  const editedActDisplay = await actInput.inputValue();
+  const editedIntermediaryDisplay = await intermediaryAdjustmentInput.inputValue();
+  const comparisonActRow = page
+    .getByRole("row")
+    .filter({ has: page.getByRole("rowheader", { name: "Ato", exact: true }) })
+    .first();
+  const comparisonActValue = comparisonActRow.locator(".investor-direct-comparison-ledger-value");
+  await comparisonActValue.getByText(editedActDisplay, { exact: true }).waitFor({
+    state: "visible",
+    timeout: 10_000,
+  });
+  await proposalStatus.getByText("APROVADO", { exact: true }).waitFor({
+    state: "visible",
+    timeout: 10_000,
+  });
+  const approvedPrintButton = page.getByRole("button", {
+    name: "Imprimir a proposta aprovada",
+    exact: true,
+  });
+  const approvedEditedCompositionEnablesPrint =
+    editedActDisplay !== actBeforeInvalidState &&
+    editedIntermediaryDisplay !== intermediaryBeforeApprovedEdit &&
+    (await approvedPrintButton.isEnabled());
+
+  const printComposition = page.locator(".investor-direct-print-composition");
+  const printCompositionHiddenOnScreen = await printComposition.isHidden();
+  const dynamicPrintPayments = await page
+    .locator('input[aria-label^="Valor do sinal "], input[aria-label^="Valor da intermediária "]')
+    .evaluateAll((inputs) =>
+      inputs
+        .map((input) => ({
+          label: (input.getAttribute("aria-label") ?? "")
+            .replace(/^Valor do sinal /, "Sinal ")
+            .replace(/^Valor da intermediária /, "Intermediária "),
+          value: input.value,
+          amount: Number(input.value.replace(/\./g, "").replace(",", ".")),
+        }))
+        .filter((payment) => Number.isFinite(payment.amount) && payment.amount > 0),
+    );
+  const expectedPrintSignals = dynamicPrintPayments.filter((payment) =>
+    payment.label.startsWith("Sinal "),
+  );
+  const expectedPrintIntermediaries = dynamicPrintPayments.filter((payment) =>
+    payment.label.startsWith("Intermediária "),
+  );
+  const expectedPrintAuditLabels = await audit.locator(":scope > ul > li").allTextContents();
+  let printMediaShowsEditedValues = false;
+  let printMediaShowsCompleteDynamicComposition = false;
+  let printMediaHidesIncomeOptionsAndGuidance = false;
+  let printMediaShowsCompleteAudit = false;
+  await page.emulateMedia({ media: "print" });
+  try {
+    printMediaShowsEditedValues =
+      printCompositionHiddenOnScreen &&
+      (await printComposition.isVisible()) &&
+      (
+        await printComposition
+          .locator("dt")
+          .filter({ hasText: /^Ato$/ })
+          .locator("xpath=following-sibling::dd[1]")
+          .textContent()
+      )
+        ?.replace(/\s+/g, " ")
+        .includes(editedActDisplay) === true;
+    printMediaShowsCompleteDynamicComposition = await printComposition.evaluate(
+      (section, expected) => {
+        const definitionLabels = [...section.querySelectorAll("dt")].map((term) =>
+          term.textContent?.replace(/\s+/g, " ").trim(),
+        );
+        const definitionValue = (label) => {
+          const term = [...section.querySelectorAll("dt")].find(
+            (candidate) => candidate.textContent?.trim() === label,
+          );
+          return term?.parentElement?.querySelector("dd")?.textContent?.replace(/\s+/g, " ").trim();
+        };
+        const tableMatches = (caption, payments) => {
+          const table = [...section.querySelectorAll("table")].find(
+            (candidate) => candidate.querySelector("caption")?.textContent?.trim() === caption,
+          );
+          if (!table || payments.length === 0) return false;
+          return payments.every((payment) => {
+            const row = [...table.querySelectorAll("tbody tr")].find(
+              (candidate) => candidate.querySelector("th")?.textContent?.trim() === payment.label,
+            );
+            return row?.textContent?.includes(payment.value) === true;
+          });
+        };
+        return (
+          getComputedStyle(section).display !== "none" &&
+          section.querySelector("h2")?.textContent?.trim() ===
+            "Composição atual da Tabela Direta" &&
+          JSON.stringify(definitionLabels) ===
+            JSON.stringify([
+              "Valor do imóvel",
+              "Desconto autorizado",
+              "Valor real da venda",
+              "Ato",
+              "Entrada total",
+              "Limites da entrada",
+              "Saldo pré-chaves",
+              "Saldo pós-chaves",
+              "Renda e comprometimento",
+              "Resultado",
+            ]) &&
+          definitionValue("Desconto autorizado") === "Não aplicado" &&
+          definitionValue("Ato")?.includes(expected.editedActDisplay) === true &&
+          definitionValue("Renda e comprometimento")?.includes(expected.incomeDisplay) === true &&
+          definitionValue("Resultado") === "APROVADO" &&
+          expected.signals.length === 3 &&
+          expected.intermediaries.length > 0 &&
+          tableMatches("Sinais informados", expected.signals) &&
+          tableMatches("Intermediárias informadas", expected.intermediaries)
+        );
+      },
+      {
+        editedActDisplay,
+        incomeDisplay: await incomeInput.inputValue(),
+        signals: expectedPrintSignals,
+        intermediaries: expectedPrintIntermediaries,
+      },
+    );
+    printMediaHidesIncomeOptionsAndGuidance =
+      !(await incomeInput.isVisible()) &&
+      !(await page.locator(".investor-direct-ready-options").isVisible()) &&
+      !(await page.locator(".investor-scenario-order").isVisible()) &&
+      !(await page.locator(".investor-direct-five-card-headings").isVisible()) &&
+      !(await page.locator(".investor-direct-five-card-grid").isVisible());
+    printMediaShowsCompleteAudit = await printComposition
+      .locator(".investor-direct-print-audit")
+      .evaluate((printAudit, expectedLabels) => {
+        const actualLabels = [...printAudit.querySelectorAll("li")].map(
+          (item) => item.textContent?.replace(/\s+/g, " ").trim() ?? "",
+        );
+        return (
+          getComputedStyle(printAudit).display !== "none" &&
+          printAudit.getBoundingClientRect().height > 0 &&
+          printAudit.querySelector("h3")?.textContent?.trim() === "Auditoria integral do cálculo" &&
+          actualLabels.length > 0 &&
+          JSON.stringify(actualLabels) ===
+            JSON.stringify(expectedLabels.map((label) => label.replace(/\s+/g, " ").trim()))
+        );
+      }, expectedPrintAuditLabels);
+  } finally {
+    await page.emulateMedia({ media: "screen" });
+  }
+
+  let snapshotFailureFailsClosedWithoutLiveFallback = false;
+  let snapshotRetryRestoresInventory = false;
+  const snapshotPage = await context.newPage();
+  try {
+    await snapshotPage.clock.setFixedTime(fixedDirectTableTime);
+    let rejectSnapshot = true;
+    let snapshotRequestCount = 0;
+    let liveInventoryRequestCount = 0;
+    snapshotPage.on("request", (request) => {
+      const pathname = new URL(request.url()).pathname;
+      if (pathname === "/api/inventory/snapshot") snapshotRequestCount += 1;
+      if (pathname === "/api/inventory") liveInventoryRequestCount += 1;
+    });
+    await snapshotPage.route("**/api/inventory/snapshot*", async (route) => {
+      if (!rejectSnapshot) {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        headers: { "cache-control": "no-store" },
+        body: JSON.stringify({ error: "Synthetic snapshot outage for authenticated QA." }),
+      });
+    });
+    await snapshotPage.goto(directTableUrl, { waitUntil: "domcontentloaded" });
+    const snapshotFailureMessage =
+      "Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.";
+    const snapshotFailure = snapshotPage
+      .locator(".investor-empty-result")
+      .filter({ hasText: snapshotFailureMessage });
+    await snapshotFailure.waitFor({ state: "visible", timeout: 20_000 });
+    const retrySnapshot = snapshotPage.getByRole("button", {
+      name: "Tentar novamente",
+      exact: true,
+    });
+    snapshotFailureFailsClosedWithoutLiveFallback =
+      snapshotRequestCount >= 1 &&
+      liveInventoryRequestCount === 0 &&
+      (await snapshotFailure.innerText()).includes(snapshotFailureMessage) &&
+      (await snapshotPage.locator(".investor-stock-table tbody tr.selectable").count()) === 0 &&
+      (await snapshotPage
+        .getByRole("navigation", { name: "Paginação do estoque completo", exact: true })
+        .count()) === 0 &&
+      (await retrySnapshot.isVisible()) &&
+      (await retrySnapshot.isEnabled());
+
+    const requestsBeforeRetry = snapshotRequestCount;
+    rejectSnapshot = false;
+    await retrySnapshot.click();
+    await waitForDirectInventory(snapshotPage);
+    snapshotRetryRestoresInventory =
+      snapshotRequestCount > requestsBeforeRetry &&
+      liveInventoryRequestCount === 0 &&
+      (await snapshotPage.locator(".investor-stock-table tbody tr").count()) === 100 &&
+      (await snapshotPage
+        .getByRole("navigation", { name: "Paginação do estoque completo", exact: true })
+        .isVisible());
+  } finally {
+    await closeAuxiliaryPage(snapshotPage);
+  }
+
+  let mobileComparisonHasNoTruncationOrOverlap = false;
+  const responsiveMenuChecks = {
+    menuAndBodyUnclippedAt768: false,
+    menuAndBodyUnclippedAt834: false,
+    menuAndBodyUnclippedAt900: false,
+    menuAndBodyUnclippedAt912: false,
+    menuAndBodyUnclippedAt1024: false,
+  };
+  const responsivePage = await context.newPage();
+  try {
+    await responsivePage.clock.setFixedTime(fixedDirectTableTime);
+    await responsivePage.setViewportSize({ width: 375, height: 812 });
+    await prepareApprovedDirectProposal(responsivePage);
+    const mobileComparison = responsivePage.locator(".investor-direct-comparison-card").first();
+    await mobileComparison.waitFor({ state: "visible", timeout: 10_000 });
+    await mobileComparison.scrollIntoViewIfNeeded();
+    mobileComparisonHasNoTruncationOrOverlap = await mobileComparison.evaluate((card) => {
+      const root = document.documentElement;
+      const body = document.body;
+      const cardRect = card.getBoundingClientRect();
+      const rows = [...card.querySelectorAll(".investor-direct-comparison-ledger-row")];
+      const fitsOwnBox = (element) =>
+        element instanceof HTMLElement &&
+        element.scrollWidth <= element.clientWidth + 1 &&
+        element.scrollHeight <= element.clientHeight + 1;
+      const orderedWithoutOverlap = (elements) => {
+        const rectangles = elements.map((element) => element.getBoundingClientRect());
+        return rectangles.every(
+          (rectangle, index) => index === 0 || rectangles[index - 1].right <= rectangle.left + 1,
+        );
+      };
+      return (
+        window.innerWidth === 375 &&
+        root.scrollWidth <= root.clientWidth + 1 &&
+        body.scrollWidth <= body.clientWidth + 1 &&
+        cardRect.left >= -1 &&
+        cardRect.right <= window.innerWidth + 1 &&
+        card.scrollWidth <= card.clientWidth + 1 &&
+        rows.length >= 8 &&
+        rows.every((row) => {
+          const cells = [
+            row.querySelector(".investor-direct-comparison-ledger-label"),
+            row.querySelector(".investor-direct-comparison-ledger-operator"),
+            row.querySelector(".investor-direct-comparison-ledger-currency"),
+            row.querySelector(".investor-direct-comparison-ledger-value"),
+            row.querySelector(".investor-direct-comparison-ledger-help"),
+          ].filter((element) => element instanceof HTMLElement);
+          const label = row.querySelector(".investor-direct-comparison-ledger-label strong");
+          const value = row.querySelector(".investor-direct-comparison-ledger-value");
+          const labelStyle = label ? getComputedStyle(label) : null;
+          const valueStyle = value ? getComputedStyle(value) : null;
+          return (
+            row.scrollWidth <= row.clientWidth + 1 &&
+            cells.length === 5 &&
+            orderedWithoutOverlap(cells) &&
+            fitsOwnBox(label) &&
+            fitsOwnBox(value) &&
+            labelStyle?.textOverflow !== "ellipsis" &&
+            labelStyle?.whiteSpace === "normal" &&
+            valueStyle?.textOverflow !== "ellipsis" &&
+            valueStyle?.whiteSpace === "normal"
+          );
+        })
+      );
+    });
+
+    async function checkOpenMenuPanel(triggerName, panelId) {
+      const trigger = responsivePage.getByRole("button", { name: triggerName, exact: true });
+      const panel = responsivePage.locator(`#${panelId}`);
+      await trigger.click();
+      await responsivePage.waitForFunction(
+        (id) =>
+          document.querySelector(`[aria-controls="${id}"]`)?.getAttribute("aria-expanded") ===
+          "true",
+        panelId,
+        { timeout: 5_000 },
+      );
+      await responsivePage.waitForTimeout(250);
+      const unclipped = await panel.evaluate((menuPanel) => {
+        const viewportTolerance = 1;
+        const panelRect = menuPanel.getBoundingClientRect();
+        const triggerElement = document.querySelector(`[aria-controls="${menuPanel.id}"]`);
+        const triggerRect = triggerElement?.getBoundingClientRect();
+        const menu = menuPanel.closest(".site-menu");
+        const root = document.documentElement;
+        const body = document.body;
+        let ancestor = menuPanel.parentElement;
+        let ancestorDoesNotClip = true;
+        while (ancestor && ancestor !== root) {
+          const style = getComputedStyle(ancestor);
+          const ancestorRect = ancestor.getBoundingClientRect();
+          const clipsX = ["auto", "hidden", "scroll", "clip"].includes(style.overflowX);
+          const clipsY = ["auto", "hidden", "scroll", "clip"].includes(style.overflowY);
+          if (
+            (clipsX &&
+              (panelRect.left < ancestorRect.left - viewportTolerance ||
+                panelRect.right > ancestorRect.right + viewportTolerance)) ||
+            (clipsY &&
+              (panelRect.top < ancestorRect.top - viewportTolerance ||
+                panelRect.bottom > ancestorRect.bottom + viewportTolerance))
+          ) {
+            ancestorDoesNotClip = false;
+            break;
+          }
+          ancestor = ancestor.parentElement;
+        }
+        return (
+          getComputedStyle(menuPanel).visibility === "visible" &&
+          Number(getComputedStyle(menuPanel).opacity) > 0 &&
+          triggerElement?.getAttribute("aria-expanded") === "true" &&
+          Boolean(triggerRect) &&
+          panelRect.width > 0 &&
+          panelRect.height > 0 &&
+          panelRect.left >= -viewportTolerance &&
+          panelRect.right <= window.innerWidth + viewportTolerance &&
+          panelRect.top >= -viewportTolerance &&
+          panelRect.bottom <= window.innerHeight + viewportTolerance &&
+          triggerRect.left >= -viewportTolerance &&
+          triggerRect.right <= window.innerWidth + viewportTolerance &&
+          menu instanceof HTMLElement &&
+          menu.scrollWidth <= menu.clientWidth + viewportTolerance &&
+          menuPanel.scrollWidth <= menuPanel.clientWidth + viewportTolerance &&
+          menuPanel.scrollHeight <= menuPanel.clientHeight + viewportTolerance &&
+          root.scrollWidth <= root.clientWidth + viewportTolerance &&
+          body.scrollWidth <= body.clientWidth + viewportTolerance &&
+          ancestorDoesNotClip
+        );
+      });
+      await trigger.click();
+      await responsivePage.waitForFunction(
+        (id) =>
+          document.querySelector(`[aria-controls="${id}"]`)?.getAttribute("aria-expanded") ===
+          "false",
+        panelId,
+        { timeout: 5_000 },
+      );
+      return unclipped;
+    }
+
+    for (const viewport of [
+      { width: 768, height: 1024 },
+      { width: 834, height: 1112 },
+      { width: 900, height: 1024 },
+      { width: 912, height: 1368 },
+      { width: 1024, height: 768 },
+    ]) {
+      await responsivePage.setViewportSize(viewport);
+      await responsivePage.evaluate(() => window.scrollTo(0, 0));
+      const simulationMenuUnclipped = await checkOpenMenuPanel("Simulação", "site-menu-simulation");
+      const settingsMenuUnclipped = await checkOpenMenuPanel("Configurações", "site-menu-settings");
+      responsiveMenuChecks[`menuAndBodyUnclippedAt${viewport.width}`] =
+        simulationMenuUnclipped && settingsMenuUnclipped;
+    }
+  } finally {
+    await closeAuxiliaryPage(responsivePage);
+  }
+
+  let spaNavigationBuildsForwardHistory = false;
+  let cancelledBackNavigationPreservesProposal = false;
+  let cancelledForwardNavigationPreservesProposal = false;
+  const historyPage = await context.newPage();
+  try {
+    await historyPage.clock.setFixedTime(fixedDirectTableTime);
+    await historyPage.goto(`${origin}/app/simulacao`, { waitUntil: "domcontentloaded" });
+    await historyPage.getByRole("heading", { name: "Simulação", exact: true }).waitFor({
+      state: "visible",
+      timeout: 20_000,
+    });
+    const spaMarker = `direct-table-spa-${Date.now()}`;
+    await historyPage.evaluate((marker) => {
+      window.__authenticatedDirectTableSpaMarker = marker;
+    }, spaMarker);
+    const directTableHubLink = historyPage.locator(`a[href="${directTablePath}"]`).first();
+    await directTableHubLink.waitFor({ state: "visible", timeout: 10_000 });
+    await directTableHubLink.click();
+    await historyPage.waitForURL((url) => url.pathname === directTablePath, { timeout: 20_000 });
+    await waitForDirectInventory(historyPage);
+    const markerAfterDirectNavigation = await historyPage.evaluate(
+      () => window.__authenticatedDirectTableSpaMarker,
+    );
+
+    await historyPage.locator('a.brand-link[href="/app"]').click();
+    await historyPage.waitForURL((url) => url.pathname === "/app", { timeout: 20_000 });
+    await historyPage.locator("h1").first().waitFor({ state: "visible", timeout: 20_000 });
+    const markerAfterForwardDestination = await historyPage.evaluate(
+      () => window.__authenticatedDirectTableSpaMarker,
+    );
+    await historyPage.goBack({ waitUntil: "domcontentloaded" });
+    await historyPage.waitForURL((url) => url.pathname === directTablePath, { timeout: 20_000 });
+    await waitForDirectInventory(historyPage);
+    const historyTopology = await historyPage.evaluate(() => {
+      if (!("navigation" in window)) return null;
+      const entries = window.navigation.entries();
+      const currentIndex = window.navigation.currentEntry?.index;
+      const pathnameAt = (index) => {
+        const entry = entries.find((candidate) => candidate.index === index);
+        return entry ? new URL(entry.url).pathname : null;
+      };
+      return Number.isInteger(currentIndex)
+        ? {
+            currentIndex,
+            previousPathname: pathnameAt(currentIndex - 1),
+            currentPathname: pathnameAt(currentIndex),
+            forwardPathname: pathnameAt(currentIndex + 1),
+          }
+        : null;
+    });
+    spaNavigationBuildsForwardHistory =
+      markerAfterDirectNavigation === spaMarker &&
+      markerAfterForwardDestination === spaMarker &&
+      historyTopology?.previousPathname === "/app/simulacao" &&
+      historyTopology.currentPathname === directTablePath &&
+      historyTopology.forwardPathname === "/app";
+
+    await prepareApprovedDirectProposal(historyPage, { navigate: false });
+    const protectedProposal = await directProposalFingerprint(historyPage);
+    const protectedHistoryIndex = historyTopology?.currentIndex;
+    const discardConfirmation =
+      "Sair da Tabela Direta descartará a proposta em edição. Deseja continuar?";
+
+    async function cancelHistoryNavigation(direction) {
+      const dialogPromise = historyPage.waitForEvent("dialog", { timeout: 5_000 });
+      await historyPage.evaluate((navigationDirection) => {
+        if (navigationDirection === "back") window.history.back();
+        else window.history.forward();
+      }, direction);
+      const dialog = await dialogPromise;
+      const message = dialog.message();
+      await dialog.dismiss();
+      await historyPage.waitForFunction(
+        ({ pathname, historyIndex }) =>
+          window.location.pathname === pathname &&
+          (!("navigation" in window) || window.navigation.currentEntry?.index === historyIndex),
+        { pathname: directTablePath, historyIndex: protectedHistoryIndex },
+        { timeout: 10_000 },
+      );
+      await historyPage.waitForTimeout(100);
+      return (
+        message === discardConfirmation &&
+        (await directProposalFingerprint(historyPage)) === protectedProposal
+      );
+    }
+
+    cancelledBackNavigationPreservesProposal = await cancelHistoryNavigation("back");
+    cancelledForwardNavigationPreservesProposal = await cancelHistoryNavigation("forward");
+  } finally {
+    await closeAuxiliaryPage(historyPage);
+  }
 
   return {
     fullInventoryCountVisible,
@@ -1360,18 +2041,35 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     firstPageHasOneHundredRows,
     paginationStartsInExpectedState,
     paginationAdvancesOneHundredRows,
+    paginationFocusesVisibleFirstUnit,
     startsWithoutSelectedUnit,
     manualUnitSelectionWorks,
     incomeAccepted,
     fourProposalOptionsPresent,
     allProposalOptionsSelectable,
     approvedProposalStatusVisible,
+    filterPreservesSelectedUnitAndIncome,
+    cancelledUnitChangePreservesProposal,
     belowSixPercentActIsInvalid,
+    invalidCompositionDisablesPrint,
+    invalidBrowserPrintShowsBlockedNoticeOnly,
+    approvedEditedCompositionEnablesPrint,
+    printMediaShowsEditedValues,
+    printMediaShowsCompleteDynamicComposition,
+    printMediaHidesIncomeOptionsAndGuidance,
+    printMediaShowsCompleteAudit,
     preKeysDialogWorks,
     postKeysDialogWorks,
     physicalPersonDocumentationWorks,
     legalEntityDocumentationWorks,
     auditOpensWithRejectedAct,
+    snapshotFailureFailsClosedWithoutLiveFallback,
+    snapshotRetryRestoresInventory,
+    mobileComparisonHasNoTruncationOrOverlap,
+    ...responsiveMenuChecks,
+    spaNavigationBuildsForwardHistory,
+    cancelledBackNavigationPreservesProposal,
+    cancelledForwardNavigationPreservesProposal,
     directFlowHasNoRuntimeErrors:
       consoleErrors.length === consoleStart && pageErrors.length === pageErrorStart,
   };

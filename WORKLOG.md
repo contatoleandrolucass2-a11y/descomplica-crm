@@ -18,15 +18,17 @@
 - O arquivo saiu do HEAD do Git, de `public/` e da imagem: o runtime o monta de
   `/etc/descomplica-crm/data` em volume somente leitura, após validar ownership,
   modo, SHA-256, contagem e IDs. A réplica o recebe por endpoint server-only que
-  repete `crm.simulators.view` e cabeçalhos `no-store`; a fonte viva usada como
-  contingência recebeu o mesmo gate.
+  repete `crm.simulators.view` e cabeçalhos `no-store`; o endpoint de fonte viva
+  permanece protegido para outras jornadas, mas nunca substitui o snapshot da
+  Tabela Direta.
 - A remoção do HEAD não reescreve commits antigos do repositório público. A
   cópia histórica deve ser tratada como previamente exposta; privatização ou
   purge de histórico exigem uma operação separada e destrutiva do proprietário.
 - O anexo informa a fonte `ESTOQUE SPC.xlsx` e a contagem, mas não traz
   `generatedAt` nem `reportId`. Por isso, WF14 prioriza o snapshot congelado
   para preservar seu conteúdo integral e não o apresenta como estoque oficial
-  em tempo real; a API viva é usada somente se o snapshot privado falhar.
+  em tempo real; se o snapshot privado falhar, a interface falha fechado,
+  informa a indisponibilidade e oferece nova tentativa sem fallback silencioso.
 - A revisão das regras corrigiu centavos, sobrepagamento por entrada acima de
   10%, entrada máxima, zero mensal pré-chaves, sinal posterior à entrega, data
   ISO impossível e a separação dos quatro estados de resultado.
@@ -38,6 +40,17 @@
   regressões corrigidas, inclusive a igualdade entre valor monetário exibido e
   decisão de crédito. A matriz visual autenticada inclui WF14 nos sete
   viewports, três temas, Axe e zoom de 80% a 200%.
+- A revisão pré-release eliminou uma divergência de um centavo no ato mínimo,
+  passou impressão e cabeçalhos a usar exclusivamente o fluxo atual e incluiu
+  no PDF desconto, ato, todos os sinais e todas as intermediárias com valores,
+  datas, percentuais, validações e a auditoria integral. O botão fica desativado
+  em propostas com pendência e uma impressão manual do navegador oculta os
+  dados parciais, exibindo somente o aviso de bloqueio.
+- Filtros preservam a proposta apenas na Tabela Direta; as jornadas Associativo
+  e Investidor mantêm o comportamento anterior. Troca de unidade, saída por
+  link, recarregamento e navegação Voltar/Avançar protegem alterações não
+  salvas. Paginação anuncia a faixa, move o foco para a primeira nova unidade e
+  os breakpoints de 375 a 1.050 px não truncam menus nem valores do comparativo.
 
 ## 2026-09-02 — Simulador Associativo
 

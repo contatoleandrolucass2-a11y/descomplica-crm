@@ -106,21 +106,21 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 
 ### Superfícies fora de `app_pages`
 
-| Rota ou resposta                 | Responsabilidade                       | Enforcement ou exposição                                     |
-| -------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
-| `/`                              | Entrada que encaminha ao fluxo correto | Não renderiza dados comerciais                               |
-| `/login`                         | Login Supabase SSR                     | Pública; usuário já autenticado segue para `/app`            |
-| `/register`                      | Cadastro preservado                    | Pública; contrato de criação existente                       |
-| `/unauthorized`                  | Compatibilidade para acesso negado     | Resposta dinâmica 403                                        |
-| `forbidden()`, 404 e `error.tsx` | Estados sistêmicos seguros             | Sem detalhes internos ou dados comerciais                    |
-| `/api/health`                    | Liveness                               | Pública; não consulta dados comerciais                       |
-| `GET /api/inventory`             | Fallback protegido da fonte viva       | Master `200`; outros perfis `403`; anônimo `401`; `no-store` |
-| `GET /api/inventory/snapshot`    | Snapshot SPC privado montado           | Master `200`; outros perfis `403`; anônimo `401`; `no-store` |
-| `/api/dashboard/status`          | Estado da ingestão                     | Exige `crm.dashboard.view`                                   |
-| `/api/refresh/salesforce`        | Solicitação de atualização             | Exige permissão, flag e controles server-side                |
-| `/api/ingest/salesforce`         | Ingestão de máquina                    | Bearer dedicado, contrato tipado e RPC mínima                |
-| WF16, CAIXA e WF15               | Rotas futuras ainda versionadas        | Fora de `app_pages`; autenticado recebe `403`                |
-| WF14                             | Réplica protegida do artefato anexado  | Fora de `app_pages`; Master acessa pelo hub/menu             |
+| Rota ou resposta                 | Responsabilidade                        | Enforcement ou exposição                                     |
+| -------------------------------- | --------------------------------------- | ------------------------------------------------------------ |
+| `/`                              | Entrada que encaminha ao fluxo correto  | Não renderiza dados comerciais                               |
+| `/login`                         | Login Supabase SSR                      | Pública; usuário já autenticado segue para `/app`            |
+| `/register`                      | Cadastro preservado                     | Pública; contrato de criação existente                       |
+| `/unauthorized`                  | Compatibilidade para acesso negado      | Resposta dinâmica 403                                        |
+| `forbidden()`, 404 e `error.tsx` | Estados sistêmicos seguros              | Sem detalhes internos ou dados comerciais                    |
+| `/api/health`                    | Liveness                                | Pública; não consulta dados comerciais                       |
+| `GET /api/inventory`             | Fonte viva protegida; não usada no WF14 | Master `200`; outros perfis `403`; anônimo `401`; `no-store` |
+| `GET /api/inventory/snapshot`    | Snapshot SPC privado montado            | Master `200`; outros perfis `403`; anônimo `401`; `no-store` |
+| `/api/dashboard/status`          | Estado da ingestão                      | Exige `crm.dashboard.view`                                   |
+| `/api/refresh/salesforce`        | Solicitação de atualização              | Exige permissão, flag e controles server-side                |
+| `/api/ingest/salesforce`         | Ingestão de máquina                     | Bearer dedicado, contrato tipado e RPC mínima                |
+| WF16, CAIXA e WF15               | Rotas futuras ainda versionadas         | Fora de `app_pages`; autenticado recebe `403`                |
+| WF14                             | Réplica protegida do artefato anexado   | Fora de `app_pages`; Master acessa pelo hub/menu             |
 
 ## Catálogo completo de componentes de interface relevantes
 
