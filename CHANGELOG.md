@@ -13,6 +13,8 @@
 - Protege o endpoint e o snapshot de estoque com a permissão dos simuladores,
   carrega a referência local sem aguardar o timeout da atualização ao vivo e
   mantém a consulta remota como atualização não bloqueante.
+- Eleva os alvos compactos das réplicas para 24 px no desktop e 44 px no
+  mobile/tablet, removendo a exceção legada de acessibilidade do Associativo.
 - Corrige o caminho vivo do checkout no runbook de produção.
 
 ## 2026-09-02

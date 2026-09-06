@@ -621,10 +621,7 @@ async function inspectAccessibility(page, route, viewport, theme) {
     targets: violation.nodes.map((node) => node.target),
     helpUrl: violation.helpUrl,
   }));
-  // The upstream simulator intentionally uses compact 19px table controls. Keep
-  // this exception visible in evidence while preserving exact source parity.
-  const acceptedViolationIds =
-    route === "/app/simulacao/associativo-fluxo-linear" ? new Set(["target-size"]) : new Set();
+  const acceptedViolationIds = new Set();
   const blockingViolations = violations.filter(
     (violation) => !acceptedViolationIds.has(violation.id),
   );

@@ -23,6 +23,9 @@
 - O endpoint e o snapshot local do estoque exigem `crm.simulators.view`; o
   snapshot aparece primeiro e o endpoint ao vivo atualiza os dados sem bloquear
   a interface por até 20 segundos.
+- Os controles compactos do estoque e da ajuda respeitam alvo mínimo de 24 px;
+  em superfícies de toque, os controles principais usam 44 px. A exceção Axe
+  legada de `target-size` do Associativo foi eliminada.
 - A matriz autenticada aprovou 126 checks responsivos, 72 de tema, 171
   auditorias Axe/comparações de imagem e 90 checks de zoom.
 
