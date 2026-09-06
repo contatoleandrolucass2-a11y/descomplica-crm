@@ -93,9 +93,11 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 - hub de simulação e a jornada WF13;
 - início administrativo, usuários e catálogo de páginas.
 
-O inventário HTTP continua cobrindo 21 rotas protegidas. WF16, CAIXA, WF14 e
-WF15 permanecem versionados no código para incrementos futuros, mas não possuem
-linha em `app_pages`, não aparecem no menu e retornam `403` mesmo ao Master.
+O inventário HTTP continua cobrindo 21 rotas protegidas. WF16, CAIXA e WF14
+permanecem versionados no código para incrementos futuros, sem linha em
+`app_pages`, e retornam `403` mesmo ao Master. O WF15 continua fora do catálogo
+PostgreSQL, mas sua réplica é publicada no hub e no menu próprio de Simulação;
+o guard server-side exige `crm.simulators.view`.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
 de integração pendente. A rota de produção continua exigindo
@@ -108,11 +110,12 @@ continua separada e só retorna entries com ID Qlik mapeado, owner ativo,
 vigência e organização dentro do escopo aprovado; ela não é a fonte da página
 v3.
 
-O hub e WF13 exigem `crm.simulators.view`. Durante o canário WF13, essa permissão
+O hub, WF13 e WF15 exigem `crm.simulators.view`. Durante o canário WF13, essa permissão
 é nível 100 e pertence somente ao Master, sem overrides diretos. O gate de
 página permanece separado de `crm.simulators.execute`; possuir um não substitui
-o outro. Somente WF13 pode executar quando sua flag explícita também está ativa.
-WF16, CAIXA, WF14 e WF15 ficam fora do catálogo e continuam bloqueados.
+o outro. Somente o motor oficial WF13 pode executar quando sua flag explícita
+também está ativa. A réplica WF15 calcula no navegador, sem persistência ou
+integração; WF16, CAIXA e WF14 ficam fora do catálogo e continuam bloqueados.
 
 Falta de permissão autenticada usa o interruptor `forbidden()` do Next.js e
 retorna a superfície `AUTH-403`; caminhos realmente inexistentes usam

@@ -9,11 +9,16 @@ import type { CookieConsent } from "@/lib/privacy/cookie-consent";
 
 import styles from "./CookieConsentBanner.module.css";
 
+const ARCHIVE_SIMULATOR_ROUTES = new Set([
+  "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-investidor",
+]);
+
 export function CookieConsentBanner({ consent }: { consent: CookieConsent | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(consent === null);
 
-  if (pathname === "/app/simulacao/associativo-fluxo-linear") return null;
+  if (ARCHIVE_SIMULATOR_ROUTES.has(pathname)) return null;
 
   if (!open) {
     return (

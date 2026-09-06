@@ -4,7 +4,8 @@
 
 Esta matriz descreve o inventário HTTP de 21 rotas protegidas e deve ser validada
 com contas QA sintéticas. O catálogo RBAC final contém exatamente 17 páginas;
-as quatro rotas futuras continuam no smoke para comprovar o `403` fail-closed.
+três rotas futuras continuam no smoke para comprovar o `403` fail-closed e a
+réplica WF15 é validada com o guard Master-only já existente.
 
 Perfis exigidos:
 
@@ -49,7 +50,7 @@ e recompõe somente os vínculos herdados já existentes em produção.
 | `/app/simulacao/calcular-documentacao`    |      403 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/caixa`                    |      403 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/tabela-direta`            |      403 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/tabela-investidor`        |      403 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/tabela-investidor`        |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/admin`                                  |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/admin/usuarios`                         |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/admin/paginas`                          |      200 |     200 |                                    403 |                                                  403 |  redirect |
@@ -61,9 +62,10 @@ Produção não possui overrides individuais; o processo continua preservando a 
 integralmente caso overrides sejam adicionados antes do cutover.
 
 Autorização de página e execução de motor são gates distintos. Os dois `200` de
-simulação autorizam somente hub e WF13. As outras quatro rotas falham antes da
-renderização. Flags, allowlist, permissão de execução e política comercial
-continuam validadas separadamente.
+simulação autorizam o hub, WF13 e a réplica WF15. As outras três rotas falham
+antes da renderização. Flags, allowlist, permissão de execução e política
+comercial continuam validadas separadamente; WF15 não persiste nem chama motor
+oficial.
 
 ## Matriz de APIs somente leitura/fail-closed
 

@@ -143,28 +143,28 @@ O harness executou a captura autenticada local, limpa e transacional com:
 
 - sete viewports: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `390×844`,
   `375×812` e `320×568`;
-- 21 rotas em tema claro nos sete viewports;
-- as 21 rotas em tema escuro móvel no viewport `390×844`;
-- capturas desktop dos temas claro, equilibrado e escuro para as três páginas
-  administrativas, além das amostras visuais já existentes;
+- 18 rotas em tema claro nos sete viewports;
+- as 18 rotas em tema escuro móvel no viewport `390×844`;
+- verificações desktop dos temas claro, equilibrado e escuro nas 18 rotas, com
+  captura das nove amostras visuais definidas pelo harness;
 - reflow equivalente a zoom de `80%`, `100%`, `125%`, `150%` e `200%`, sempre
   sobre canvas físico de `1440×900`;
-- reduced motion e Axe nas 147 combinações responsivas, nas 24 amostras desktop
-  de tema e nas 21 combinações mobile dark.
+- reduced motion e Axe nas 126 combinações responsivas, nas 27 amostras desktop
+  de tema e nas 18 combinações mobile dark.
 
-A matriz aprovou 147 capturas responsivas, 45 capturas de tema, 192 auditorias
-de acessibilidade, 192 comparações e 105 checks de zoom. A promoção ocorreu por
+A matriz aprovou 126 capturas responsivas, 45 capturas de tema, 171 auditorias
+de acessibilidade, 171 comparações e 90 checks de zoom. A promoção ocorreu por
 rename transacional com rollback, a partir de worktree limpa e sem alteração do
 fingerprint durante a captura.
 
 Resultados aprovados:
 
-- 147/147 checks responsivos: 21 rotas em sete viewports;
-- 84/84 checks de tema: 21 rotas em mobile dark e oito amostras desktop nos
-  temas claro, equilibrado e escuro;
-- 192/192 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
+- 126/126 checks responsivos: 18 rotas em sete viewports;
+- 72/72 checks de tema: 18 rotas em mobile dark e 18 rotas desktop nos temas
+  claro, equilibrado e escuro;
+- 171/171 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
   de tema, sem violações;
-- 105/105 checks de zoom: 21 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
+- 90/90 checks de zoom: 18 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
 - disclosure aberto por teclado, fechado com `Escape`, foco devolvido e `Tab`
   alcançando controle interativo;
 - campo obrigatório de simulador sinalizado após blur com `aria-invalid`,

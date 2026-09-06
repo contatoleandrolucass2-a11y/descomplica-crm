@@ -12,6 +12,7 @@ import {
 
 import { SimulatorWorkspace } from "../_components/SimulatorWorkspace";
 import { AssociativeTableArchive } from "../_components/AssociativeTableArchive";
+import { InvestorTableArchive } from "../_components/InvestorTableArchive";
 
 export const metadata = { title: "Simulação comercial" };
 export const dynamic = "force-dynamic";
@@ -40,6 +41,10 @@ export default async function SimulatorPage({
 
   if (simulator === "associativo-fluxo-linear") {
     return <AssociativeTableArchive />;
+  }
+
+  if (simulator === "tabela-investidor") {
+    return <InvestorTableArchive />;
   }
 
   return (

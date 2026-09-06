@@ -2147,6 +2147,7 @@ export function InvestorCalculator({
   const tourSteps = directTable ? DIRECT_TABLE_TOUR_STEPS : directVisualLayout ? ASSOCIATIVE_TOUR_STEPS : INVESTOR_TOUR_STEPS;
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const inventoryReference = useRef<InventoryItem[]>([]);
+  const inventoryInteractionStarted = useRef(false);
   const proposalGuideDialog = useRef<HTMLDialogElement>(null);
   const pfDocumentationDialog = useRef<HTMLDialogElement>(null);
   const pjDocumentationDialog = useRef<HTMLDialogElement>(null);
@@ -2168,6 +2169,9 @@ export function InvestorCalculator({
   const [guidedAttention, setGuidedAttention] = useState<"qualification" | "flow" | null>(null);
   const [inventoryStatus, setInventoryStatus] = useState<"loading" | "ready" | "error">("loading");
   const [inventoryMeta, setInventoryMeta] = useState<InventoryPayload | null>(null);
+  const inventoryResultsRef = useRef<HTMLDivElement>(null);
+  const [inventoryWindowStart, setInventoryWindowStart] = useState(0);
+  const [inventoryRowHeight, setInventoryRowHeight] = useState(23);
   const [businessUnit, setBusinessUnit] = useState("Todas");
   const [project, setProject] = useState("Todos");
   const [plant, setPlant] = useState("Todos");
@@ -2252,27 +2256,59 @@ export function InvestorCalculator({
 
   useEffect(() => {
     let active = true;
-    Promise.allSettled([fetchInventory(), fetchInventory("/data/investor-inventory.json")])
-      .then(([liveResult, referenceResult]) => {
-        if (!active) return;
-        const reference = referenceResult.status === "fulfilled" ? referenceResult.value.items : [];
-        const payload = liveResult.status === "fulfilled"
-          ? liveResult.value
-          : referenceResult.status === "fulfilled" ? referenceResult.value : null;
-        if (!payload) throw new Error("inventory_unavailable");
-        inventoryReference.current = directTable ? reference : reference.filter(isInvestorEligibleUnit);
-        const enrichedInventory = enrichInventory(payload.items, reference);
-        setInventory(directTable ? enrichedInventory : enrichedInventory.filter(isInvestorEligibleUnit));
-        setInventoryMeta(payload);
-        setInventoryStatus("ready");
-      })
-      .catch(() => active && setInventoryStatus("error"));
+    const applyInventory = (payload: InventoryPayload, reference: InventoryItem[]) => {
+      if (!active) return;
+      inventoryReference.current = directTable ? reference : reference.filter(isInvestorEligibleUnit);
+      const enrichedInventory = enrichInventory(payload.items, reference);
+      setInventory(directTable ? enrichedInventory : enrichedInventory.filter(isInvestorEligibleUnit));
+      setInventoryMeta(payload);
+      setInventoryStatus("ready");
+    };
+
+    void (async () => {
+      let referencePayload: InventoryPayload | null = null;
+      try {
+        referencePayload = await fetchInventory("/data/investor-inventory.json");
+        applyInventory(referencePayload, referencePayload.items);
+      } catch {
+        // O endpoint autenticado ao vivo ainda pode atender sem o snapshot local.
+      }
+
+      try {
+        const livePayload = await fetchInventory();
+        if (!inventoryInteractionStarted.current) {
+          applyInventory(livePayload, referencePayload?.items ?? []);
+        }
+      } catch {
+        if (active && !referencePayload) setInventoryStatus("error");
+      }
+    })();
     return () => { active = false; };
   }, [directTable]);
 
   const activeFilters = useMemo(() => ({ businessUnit, project, plant, region, salePrice: salePriceFilter }), [businessUnit, project, plant, region, salePriceFilter]);
   const filterOptions = useMemo(() => buildInvestorFilterOptions(inventory, activeFilters), [inventory, activeFilters]);
   const matchingInventory = useMemo(() => sortInvestorInventoryBySalePrice(inventory.filter((item) => matchesInvestorFilters(item, activeFilters)), priceSort), [inventory, activeFilters, priceSort]);
+  const inventoryWindowSize = 60;
+  const inventoryWindowEnd = Math.min(
+    matchingInventory.length,
+    inventoryWindowStart + inventoryWindowSize,
+  );
+  const visibleInventory = matchingInventory.slice(inventoryWindowStart, inventoryWindowEnd);
+  const inventoryTopSpacer = inventoryWindowStart * inventoryRowHeight;
+  const inventoryBottomSpacer = (matchingInventory.length - inventoryWindowEnd) * inventoryRowHeight;
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 1100px)");
+    const updateRowHeight = () => {
+      setInventoryRowHeight(media.matches ? 44 : 23);
+      setInventoryWindowStart(0);
+      if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
+    };
+    updateRowHeight();
+    media.addEventListener("change", updateRowHeight);
+    return () => media.removeEventListener("change", updateRowHeight);
+  }, []);
 
   useEffect(() => {
     const reconciledFilters = reconcileInvestorFilters(inventory, activeFilters);
@@ -2775,6 +2811,7 @@ export function InvestorCalculator({
   }
 
   function selectUnit(item: InventoryItem) {
+    inventoryInteractionStarted.current = true;
     setSelectedUnitId(item.id);
     setDocumentationAppraisalOverride("");
     setSalePrice(item.finalPrice ? String(item.finalPrice) : "");
@@ -2931,6 +2968,7 @@ export function InvestorCalculator({
   }
 
   function clearFilters() {
+    inventoryInteractionStarted.current = true;
     setBusinessUnit("Todas");
     setProject("Todos");
     setPlant("Todos");
@@ -2940,6 +2978,8 @@ export function InvestorCalculator({
     setFilterNotice("");
     setSelectedUnitId("");
     setDocumentationAppraisalOverride("");
+    setInventoryWindowStart(0);
+    if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
   }
 
   function updateIntermediary(index: number, value: string) {
@@ -2958,10 +2998,21 @@ export function InvestorCalculator({
   }
 
   function updateFilter(setter: (value: string) => void, value: string) {
+    inventoryInteractionStarted.current = true;
     setter(value);
     setFilterNotice("");
     setSelectedUnitId("");
     setDocumentationAppraisalOverride("");
+    setInventoryWindowStart(0);
+    if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
+  }
+
+  function updateInventoryWindow(scrollTop: number) {
+    const overscan = 10;
+    const nextStart = Math.max(0, Math.floor(scrollTop / inventoryRowHeight) - overscan);
+    const maximumStart = Math.max(0, matchingInventory.length - inventoryWindowSize);
+    const boundedStart = Math.min(nextStart, maximumStart);
+    setInventoryWindowStart((current) => boundedStart === current ? current : boundedStart);
   }
 
   function applyAssociativeProSolutoSuggestion(suggestion: { entry: number; signals: number[]; signalCount: number }) {
@@ -3419,16 +3470,20 @@ export function InvestorCalculator({
           <label><span>Região</span><select value={region} onChange={(event) => updateFilter(setRegion, event.target.value)}><option value="Todas">Todas ({filterOptions.totals.region.toLocaleString("pt-BR")})</option>{filterOptions.regions.map((item) => <option value={item.value} key={item.value}>{item.value} ({item.count.toLocaleString("pt-BR")})</option>)}</select></label>
           <label><span>Planta</span><select value={plant} onChange={(event) => updateFilter(setPlant, event.target.value)}><option value="Todos">Todos ({filterOptions.totals.plant.toLocaleString("pt-BR")})</option>{filterOptions.plants.map((item) => <option value={item.value} key={item.value}>{item.value} ({item.count.toLocaleString("pt-BR")})</option>)}</select></label>
           <label><span>Valor do Imóvel</span><select value={salePriceFilter} onChange={(event) => updateFilter(setSalePriceFilter, event.target.value)}><option value="Todos">Todos ({filterOptions.totals.salePrice.toLocaleString("pt-BR")})</option>{filterOptions.salePrices.map((item) => <option value={item.value} key={item.value}>{money.format(Number(item.value))} ({item.count.toLocaleString("pt-BR")})</option>)}</select></label>
-          <label className="investor-stock-sort" data-tour="sort"><span>Ordenar valor</span><select aria-label="Ordenar unidades por valor do imóvel" value={priceSort} onChange={(event) => setPriceSort(event.target.value as "asc" | "desc")}><option value="asc">Menor para o maior</option><option value="desc">Maior para o menor</option></select></label>
+          <label className="investor-stock-sort" data-tour="sort"><span>Ordenar valor</span><select aria-label="Ordenar unidades por valor do imóvel" value={priceSort} onChange={(event) => { inventoryInteractionStarted.current = true; setPriceSort(event.target.value as "asc" | "desc"); setInventoryWindowStart(0); if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0; }}><option value="asc">Menor para o maior</option><option value="desc">Maior para o menor</option></select></label>
           {filterNotice && <span className="sr-only" aria-live="polite">{filterNotice}</span>}
         </div>
 
         <p className="investor-stock-summary sr-only" aria-live="polite">
-          <span>{inventoryStatus === "ready" ? <><strong>{matchingInventory.length.toLocaleString("pt-BR")}</strong> unidades disponíveis</> : inventoryStatus === "loading" ? "Carregando estoque…" : "Estoque indisponível"}</span>
+          <span>{inventoryStatus === "ready"
+            ? matchingInventory.length > 0
+              ? <><strong>{matchingInventory.length.toLocaleString("pt-BR")}</strong> unidades disponíveis.</>
+              : "Nenhuma unidade disponível com os filtros atuais."
+            : inventoryStatus === "loading" ? "Carregando estoque…" : "Estoque indisponível"}</span>
         </p>
 
-        <div className="investor-stock-results" role="region" aria-label="Estoque completo de unidades" tabIndex={0} data-tour="inventory">
-          <table className="investor-stock-table">
+        <div ref={inventoryResultsRef} className="investor-stock-results" role="region" aria-label="Estoque completo de unidades" tabIndex={0} data-tour="inventory" onScroll={(event) => updateInventoryWindow(event.currentTarget.scrollTop)}>
+          <table className="investor-stock-table" aria-rowcount={matchingInventory.length + 1}>
             <caption className="sr-only">Unidades encontradas no estoque</caption>
             <colgroup>
               <col className="investor-stock-col-start" />
@@ -3453,13 +3508,15 @@ export function InvestorCalculator({
             <tbody>
               {inventoryStatus === "loading" ? <tr><td className="investor-empty-result" colSpan={7}>Carregando unidades do estoque…</td></tr> : null}
               {inventoryStatus === "error" ? <tr><td className="investor-empty-result" colSpan={7}>Estoque indisponível. Recarregue a página para tentar novamente.</td></tr> : null}
-              {matchingInventory.map((item) => {
+              {inventoryTopSpacer > 0 ? <tr className="investor-stock-spacer" aria-hidden="true" style={{ "--investor-stock-spacer-height": `${inventoryTopSpacer}px` }}><td colSpan={7} /></tr> : null}
+              {visibleInventory.map((item, visibleIndex) => {
                 const canSelect = Boolean(item.finalPrice && item.completionDate);
                 const selected = item.id === selectedUnitId;
                 return <tr
                   key={item.id}
                   className={`${selected ? "selected" : ""} ${canSelect ? "selectable" : "unavailable"}`.trim()}
                   aria-selected={selected}
+                  aria-rowindex={inventoryWindowStart + visibleIndex + 2}
                   onClick={() => canSelect && selectUnit(item)}
                 >
                   <td className="investor-stock-start-cell" data-label="Início"><button type="button" className="investor-stock-unit-button" disabled={!canSelect} aria-pressed={selected} onClick={(event) => { event.stopPropagation(); selectUnit(item); }} aria-label={canSelect ? `Iniciar proposta com ${item.identifier ?? item.product}` : `${item.identifier ?? item.product} sem valor ou término da obra`}><span aria-hidden="true">{selected ? "✓" : "›"}</span></button></td>
@@ -3471,6 +3528,7 @@ export function InvestorCalculator({
                   <td className="investor-stock-price" data-label="Valor do imóvel">{item.finalPrice ? money.format(item.finalPrice) : "Não informado"}</td>
                 </tr>;
               })}
+              {inventoryBottomSpacer > 0 ? <tr className="investor-stock-spacer" aria-hidden="true" style={{ "--investor-stock-spacer-height": `${inventoryBottomSpacer}px` }}><td colSpan={7} /></tr> : null}
               {inventoryStatus === "ready" && matchingInventory.length === 0 && (
                 <tr><td className="investor-empty-result" colSpan={7}>Nenhuma unidade encontrada com esses filtros.</td></tr>
               )}

@@ -85,7 +85,16 @@ interface AuthorizationContextRow {
 function permissionRequiredBeforeStreaming(pathname: string): {
   permission: PermissionKey;
   releaseEnabled: boolean;
+  requireAuthenticated?: boolean;
 } | null {
+  if (pathname === "/data/investor-inventory.json") {
+    return {
+      permission: "crm.simulators.view",
+      releaseEnabled: true,
+      requireAuthenticated: true,
+    };
+  }
+
   const pageGate = getProtectedPageGate(pathname);
   if (pageGate) return pageGate;
 
@@ -117,20 +126,26 @@ function forbiddenBeforeStreaming(request: NextRequest, sessionResponse: NextRes
 
 async function lacksEarlyPermission(
   supabase: Awaited<ReturnType<typeof updateSession>>["supabase"],
-  pageGate: { permission: PermissionKey; releaseEnabled: boolean },
+  pageGate: {
+    permission: PermissionKey;
+    releaseEnabled: boolean;
+    requireAuthenticated?: boolean;
+  },
 ) {
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
-  if (userError || !user) return false;
+  if (userError || !user) return pageGate.requireAuthenticated === true;
   if (!pageGate.releaseEnabled) return true;
 
   const { data, error } = await supabase.rpc("get_user_authorization_context", {
     user_uuid: user.id,
   });
   if (error) return true;
-  if (!Array.isArray(data) || data.length === 0) return false;
+  if (!Array.isArray(data) || data.length === 0) {
+    return pageGate.requireAuthenticated === true;
+  }
   if (data.length !== 1) return true;
 
   const permissions = (data[0] as AuthorizationContextRow).permissions;

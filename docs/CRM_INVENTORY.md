@@ -48,13 +48,13 @@ existe.
 | REF-15 | `/simulacao/calcular-documentacao`    | Documentação WF16       | `/app/simulacao/calcular-documentacao`    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
 | REF-16 | `/simulacao/caixa`                    | Simulador CAIXA         | `/app/simulacao/caixa`                    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
 | REF-17 | `/simulacao/tabela-direta`            | Tabela Direta WF14      | `/app/simulacao/tabela-direta`            | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
-| REF-18 | `/simulacao/tabela-investidor`        | Tabela Investidor WF15  | `/app/simulacao/tabela-investidor`        | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
+| REF-18 | `/simulacao/tabela-investidor`        | Tabela Investidor WF15  | `/app/simulacao/tabela-investidor`        | `crm.simulators.view`   | Réplica funcional completa; snapshot SPC versionado     |
 
 O mapeamento WF13, WF16, WF14 e WF15 acima foi aprovado explicitamente para
-esta etapa. Ele identifica as jornadas visuais, não valida fórmulas. Nenhuma
-regra dos simuladores foi copiada ou executada: os campos permanecem locais ao
-navegador, o botão de cálculo fica bloqueado e todo resultado aparece como
-indisponível até um incremento com fonte oficial.
+esta etapa. Ele identifica as jornadas visuais, não homologa fórmulas. O WF15
+reproduz o artefato anexado com cálculo local, sem persistência nem integração;
+seus parâmetros não são classificados como política oficial. WF16, CAIXA e
+WF14 continuam indisponíveis até um incremento com fonte oficial.
 
 ## Catálogo versionado de páginas do sistema seguro
 
@@ -109,7 +109,8 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 | `/api/dashboard/status`          | Estado da ingestão                     | Exige `crm.dashboard.view`                        |
 | `/api/refresh/salesforce`        | Solicitação de atualização             | Exige permissão, flag e controles server-side     |
 | `/api/ingest/salesforce`         | Ingestão de máquina                    | Bearer dedicado, contrato tipado e RPC mínima     |
-| WF16, CAIXA, WF14 e WF15         | Rotas futuras ainda versionadas        | Fora de `app_pages`; autenticado recebe `403`     |
+| WF16, CAIXA e WF14               | Rotas futuras ainda versionadas        | Fora de `app_pages`; autenticado recebe `403`     |
+| WF15                             | Réplica protegida do artefato anexado  | Fora de `app_pages`; Master acessa pelo hub/menu  |
 
 ## Catálogo completo de componentes de interface relevantes
 

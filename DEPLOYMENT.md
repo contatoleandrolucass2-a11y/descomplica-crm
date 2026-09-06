@@ -55,7 +55,7 @@ A implantação reproduzível usa `Dockerfile` multi-stage, `compose.yaml` e a s
 pertencer a `root:deploy`, modo `0640`, e nunca entrar no Git.
 
 ```bash
-cd /srv/descomplica-crm
+cd /srv/descomplica-crm-simulador-associativo
 git fetch origin main
 git switch main
 git pull --ff-only origin main
