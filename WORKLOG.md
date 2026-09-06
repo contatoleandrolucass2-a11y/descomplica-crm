@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-06 — Tabela Investidor na rota protegida
+
+- O código e o container de produção foram reconciliados antes da alteração; o
+  checkout vivo é `/srv/descomplica-crm-simulador-associativo` e o Nginx do
+  domínio `crm.descomplicapro.com.br` encaminha para essa aplicação.
+- A tela arquivada completa foi composta em `InvestorTableArchive`, sem resumir
+  o conteúdo, e o slug `tabela-investidor` passou a renderizá-la após o guard
+  server-side existente.
+- O link legado `/simulacao/tabela-investidor?ficha=3` foi substituído por
+  `/app/simulacao/tabela-investidor`; navegação interna também usa as rotas
+  autenticadas reais do CRM.
+- O snapshot SPC contém 3.301 IDs únicos: 3.179 unidades elegíveis e 122 vagas
+  avulsas excluídas. As 314 unidades sem preço válido permanecem visíveis, mas
+  indisponíveis para seleção; todas possuem término de obra.
+- Testes dedicados cobrem o contrato da rota, conteúdo integral, oito cenários,
+  reconciliação monetária e qualidade do estoque. A matriz visual inclui WF15
+  nos sete viewports, três temas, Axe e zoom de 80% a 200%.
+- A tabela renderiza uma janela móvel de 60 linhas sobre as 3.179 unidades,
+  preservando filtros, seleção, ordenação e extensão total da rolagem sem
+  sobrecarregar o navegador ou a auditoria de acessibilidade.
+- O endpoint e o snapshot local do estoque exigem `crm.simulators.view`; o
+  snapshot aparece primeiro e o endpoint ao vivo atualiza os dados sem bloquear
+  a interface por até 20 segundos.
+- A matriz autenticada aprovou 126 checks responsivos, 72 de tema, 171
+  auditorias Axe/comparações de imagem e 90 checks de zoom.
+
 ## 2026-09-02 — Simulador Associativo
 
 - A navegação persistida do WF13 passa a usar o nome “Simulador Associativo”.

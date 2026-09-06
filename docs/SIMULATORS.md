@@ -8,13 +8,17 @@ por padrão e isolado dos demais motores. Contrato, fontes, caso de ouro do PDF
 Master e rollback estão em
 [`docs/simulators-official/WF13.md`](simulators-official/WF13.md).
 
-Os outros quatro motores permanecem visualmente completos e bloqueados até seus
-incrementos independentes. Nenhum simulador depende de Salesforce, n8n ou Qlik.
+O WF15 publica a réplica completa da Tabela Investidor do arquivo anexado, com
+snapshot versionado do estoque e cálculo executado no navegador. Isso não
+promove o workflow n8n histórico nem o runtime de políticas comerciais a fonte
+oficial. WF16, CAIXA e WF14 permanecem bloqueados. Nenhum simulador depende de
+Salesforce, n8n ou Qlik.
 
 ## Escopo
 
 As cinco jornadas preservam a composição visual aprovada. Somente o WF13 possui
-fórmula oficial neste incremento; o bundle da referência não é versionado.
+fórmula classificada como oficial; o WF15 reproduz integralmente o artefato
+anexado e mantém seu cálculo separado do runtime oficial.
 
 | Código | Rota protegida                            | Jornada visual        |
 | ------ | ----------------------------------------- | --------------------- |
@@ -29,15 +33,18 @@ O hub está em `/app/simulacao`. Todas as seis rotas exigem
 navegação continua recebendo somente as páginas filtradas pelo contexto de
 autorização. No canário atual, essa permissão é exclusiva do Master e não possui
 override direto. O acesso à página e a execução são gates independentes: WF13
-também exige `crm.simulators.execute`, flag e chave oficiais; os demais papéis
-falham antes da renderização e os demais motores permanecem desligados.
+também exige `crm.simulators.execute`, flag e chave oficiais. A réplica WF15 é
+renderizada somente após o mesmo guard `crm.simulators.view`, não persiste a
+proposta e não habilita um motor oficial.
 
 ## Comportamento fail-closed
 
 - O catálogo tipado define títulos, seções, campos e espaços de resultado.
 - Campos obrigatórios ganham validação associada e `aria-invalid`.
 - As flags oficiais nascem `off` e a allowlist nasce vazia.
-- WF16, CAIXA, WF14 e WF15 mantêm botão bloqueado e `UnavailableValue`.
+- WF16, CAIXA e WF14 mantêm botão bloqueado e `UnavailableValue`.
+- WF15 usa o estoque SPC versionado, exclui vagas avulsas, exige unidade com
+  valor e término da obra e mantém estados de loading, vazio e erro.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta

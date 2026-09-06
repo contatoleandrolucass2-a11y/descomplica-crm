@@ -50,6 +50,8 @@ describe("pre-stream page permission gates", () => {
     ["/app/configuracoes/metas/pontos", "crm.settings.manage"],
     ["/app/simulacao", "crm.simulators.view"],
     ["/app/simulacao/associativo-fluxo-linear", "crm.simulators.view"],
+    ["/app/simulacao/tabela-investidor", "crm.simulators.view"],
+    ["/data/investor-inventory.json", "crm.simulators.view"],
     ["/admin", "admin.access"],
     ["/admin/usuarios", "users.view"],
     ["/admin/paginas", "pages.manage"],
@@ -82,11 +84,34 @@ describe("pre-stream page permission gates", () => {
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
+  it("blocks the inventory snapshot when there is no authenticated user", async () => {
+    configureSession([]);
+    mocks.getUser.mockResolvedValueOnce({ data: { user: null }, error: null });
+
+    const response = await proxy(
+      new NextRequest(`${origin}/data/investor-inventory.json`),
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);
+  });
+
+  it("fails closed for the inventory snapshot when authorization context is empty", async () => {
+    configureSession(["crm.simulators.view"]);
+    mocks.rpc.mockResolvedValueOnce({ data: [], error: null });
+
+    const response = await proxy(
+      new NextRequest(`${origin}/data/investor-inventory.json`),
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);
+  });
+
   it.each([
     "/app/simulacao/calcular-documentacao",
     "/app/simulacao/caixa",
     "/app/simulacao/tabela-direta",
-    "/app/simulacao/tabela-investidor",
   ])(
     "returns 403 for inactive catalog route %s even when Master has the shared permission",
     async (pathname) => {

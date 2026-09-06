@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-06 — Tabela Investidor no CRM
+
+- Publica a réplica completa da Tabela Investidor em
+  `/app/simulacao/tabela-investidor`, sob autenticação e permissão
+  `crm.simulators.view`, sem alterar banco, papéis ou integrações.
+- Corrige o item “Tabela Investidor” do menu para a rota protegida do CRM e
+  preserva estoque SPC, filtros, oito opções, fluxo personalizado, guias,
+  impressão, estados de erro e conteúdo integral do artefato anexado.
+- Valida o snapshot de 3.301 unidades, exclusão de 122 vagas avulsas,
+  fechamento monetário no centavo, acessibilidade e responsividade.
+- Protege o endpoint e o snapshot de estoque com a permissão dos simuladores,
+  carrega a referência local sem aguardar o timeout da atualização ao vivo e
+  mantém a consulta remota como atualização não bloqueante.
+- Corrige o caminho vivo do checkout no runbook de produção.
+
 ## 2026-09-02
 
 - Restaura na rota “Simulador Associativo” a página WF13 do arquivo original:

@@ -1262,6 +1262,7 @@ function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
       "LD_LIBRARY_PATH",
       "OFFICIAL_SIMULATOR_RUNTIME_MODE",
       "OFFICIAL_SIMULATOR_ENABLED_KEYS",
+      "QA_LOCAL_DIAGNOSTICS",
     ]),
     QA_AUTH_ORIGIN: origin,
     QA_AUTH_EMAIL: account.email,

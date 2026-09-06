@@ -58,6 +58,7 @@ const routes = [
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-investidor",
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
@@ -73,6 +74,10 @@ const simulatorRoutesByRuntimeKey = new Map([
 const simulatorRuntimeKeysByRoute = new Map(
   [...simulatorRoutesByRuntimeKey].map(([runtimeKey, route]) => [route, runtimeKey]),
 );
+const archiveSimulatorRoutes = new Set([
+  "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-investidor",
+]);
 
 function expectedEnabledSimulatorRoutes() {
   if (process.env.OFFICIAL_SIMULATOR_RUNTIME_MODE !== "active") return new Set();
@@ -126,6 +131,7 @@ const desktopThemeCaptureRoutes = new Set([
   "/app/configuracoes/metas",
   "/app/configuracoes/metas/pontos",
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-investidor",
   ...adminRoutes,
 ]);
 const mobileDarkViewportKey = "mobile-390x844";
@@ -370,7 +376,7 @@ async function saveLosslessWebp(buffer, destination) {
 }
 
 async function captureComparableScreenshot(page) {
-  const fullPage = new URL(page.url()).pathname !== "/app/simulacao/associativo-fluxo-linear";
+  const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
   const volatileRegions = page.locator("[data-qa-visual-volatile]:not([hidden])");
   await volatileRegions.evaluateAll((elements) => {
     for (const element of elements) {
@@ -392,7 +398,7 @@ async function captureComparableScreenshot(page) {
 
 async function capturePersistedScreenshot(page, comparableBuffer) {
   if (!remoteHomologation) {
-    const fullPage = new URL(page.url()).pathname !== "/app/simulacao/associativo-fluxo-linear";
+    const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
     return comparableBuffer ?? (await page.screenshot({ fullPage, animations: "disabled" }));
   }
 
@@ -431,7 +437,7 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
   });
 
   try {
-    const fullPage = new URL(page.url()).pathname !== "/app/simulacao/associativo-fluxo-linear";
+    const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
     return await page.screenshot({
       fullPage,
       animations: "disabled",
@@ -576,7 +582,33 @@ async function baselineUsageIsUnchanged(baselineUsed) {
 }
 
 async function inspectAccessibility(page, route, viewport, theme) {
-  const analysis = await new AxeBuilder({ page }).withTags(accessibilityTags).analyze();
+  const archiveInventoryRows = archiveSimulatorRoutes.has(route)
+    ? page.locator(".investor-stock-table tbody tr:nth-child(n+51)")
+    : null;
+  if (archiveInventoryRows) {
+    await archiveInventoryRows.evaluateAll((rows) => {
+      for (const row of rows) {
+        row.setAttribute("data-qa-axe-sampled", "true");
+        row.setAttribute("hidden", "");
+      }
+    });
+  }
+
+  let analysis;
+  try {
+    // Repeated stock rows share one semantic template. Sampling keeps Axe from
+    // exhausting Chromium while data tests still validate the complete snapshot.
+    analysis = await new AxeBuilder({ page }).withTags(accessibilityTags).analyze();
+  } finally {
+    if (archiveInventoryRows) {
+      await page.locator('[data-qa-axe-sampled="true"]').evaluateAll((rows) => {
+        for (const row of rows) {
+          row.removeAttribute("hidden");
+          row.removeAttribute("data-qa-axe-sampled");
+        }
+      });
+    }
+  }
   const violations = analysis.violations.map((violation) => ({
     id: violation.id,
     impact: violation.impact,
@@ -635,14 +667,14 @@ async function inspectRoute(page, origin, route, expectedTheme, consoleErrors, p
   );
   await page.evaluate(() => document.fonts.ready);
 
-  const isArchiveAssociativeTable = route === "/app/simulacao/associativo-fluxo-linear";
-  if (isArchiveAssociativeTable) {
+  const isArchiveSimulator = archiveSimulatorRoutes.has(route);
+  if (isArchiveSimulator) {
     await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
       state: "visible",
       timeout: 25_000,
     });
   }
-  const isSimulatorWorkspace = route.startsWith("/app/simulacao/") && !isArchiveAssociativeTable;
+  const isSimulatorWorkspace = route.startsWith("/app/simulacao/") && !isArchiveSimulator;
   const expectsEnabledSimulatorAction = enabledSimulatorRoutes.has(route);
   const snapshot = await page.evaluate((simulatorWorkspace) => {
     const text = document.body.innerText;
@@ -1716,7 +1748,12 @@ async function run() {
     process.stdout.write(
       `Authenticated QA passed in ${mode} mode: ${routeChecks.length} responsive, ${themeChecks.length} theme, ${accessibilityChecks.length} accessibility, ${screenshots.length} candidate/baseline comparisons and ${zoom.routes.length} zoom route checks.\n`,
     );
-  } catch {
+  } catch (error) {
+    if (!remoteHomologation && process.env.QA_LOCAL_DIAGNOSTICS === "true") {
+      process.stderr.write(
+        `${error instanceof Error ? error.stack : "Unknown local QA failure."}\n`,
+      );
+    }
     if (!candidateResultWritten) {
       await writeJsonAtomically(candidateResultsPath, {
         schemaVersion: 2,

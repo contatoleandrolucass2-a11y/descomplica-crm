@@ -118,7 +118,7 @@ export const PROTECTED_PAGE_GATES = [
     pageKey: "crm.simulation.wf15",
     path: "/app/simulacao/tabela-investidor",
     permission: "crm.simulators.view",
-    releaseEnabled: false,
+    releaseEnabled: true,
   },
   {
     pageKey: "admin.home",
