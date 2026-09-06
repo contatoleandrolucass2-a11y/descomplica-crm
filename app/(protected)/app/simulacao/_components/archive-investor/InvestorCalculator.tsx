@@ -2147,6 +2147,7 @@ export function InvestorCalculator({
   const tourSteps = directTable ? DIRECT_TABLE_TOUR_STEPS : directVisualLayout ? ASSOCIATIVE_TOUR_STEPS : INVESTOR_TOUR_STEPS;
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const inventoryReference = useRef<InventoryItem[]>([]);
+  const inventoryInteractionStarted = useRef(false);
   const proposalGuideDialog = useRef<HTMLDialogElement>(null);
   const pfDocumentationDialog = useRef<HTMLDialogElement>(null);
   const pjDocumentationDialog = useRef<HTMLDialogElement>(null);
@@ -2275,7 +2276,9 @@ export function InvestorCalculator({
 
       try {
         const livePayload = await fetchInventory();
-        applyInventory(livePayload, referencePayload?.items ?? []);
+        if (!inventoryInteractionStarted.current) {
+          applyInventory(livePayload, referencePayload?.items ?? []);
+        }
       } catch {
         if (active && !referencePayload) setInventoryStatus("error");
       }
@@ -2808,6 +2811,7 @@ export function InvestorCalculator({
   }
 
   function selectUnit(item: InventoryItem) {
+    inventoryInteractionStarted.current = true;
     setSelectedUnitId(item.id);
     setDocumentationAppraisalOverride("");
     setSalePrice(item.finalPrice ? String(item.finalPrice) : "");
@@ -2964,6 +2968,7 @@ export function InvestorCalculator({
   }
 
   function clearFilters() {
+    inventoryInteractionStarted.current = true;
     setBusinessUnit("Todas");
     setProject("Todos");
     setPlant("Todos");
@@ -2993,6 +2998,7 @@ export function InvestorCalculator({
   }
 
   function updateFilter(setter: (value: string) => void, value: string) {
+    inventoryInteractionStarted.current = true;
     setter(value);
     setFilterNotice("");
     setSelectedUnitId("");
@@ -3464,7 +3470,7 @@ export function InvestorCalculator({
           <label><span>Região</span><select value={region} onChange={(event) => updateFilter(setRegion, event.target.value)}><option value="Todas">Todas ({filterOptions.totals.region.toLocaleString("pt-BR")})</option>{filterOptions.regions.map((item) => <option value={item.value} key={item.value}>{item.value} ({item.count.toLocaleString("pt-BR")})</option>)}</select></label>
           <label><span>Planta</span><select value={plant} onChange={(event) => updateFilter(setPlant, event.target.value)}><option value="Todos">Todos ({filterOptions.totals.plant.toLocaleString("pt-BR")})</option>{filterOptions.plants.map((item) => <option value={item.value} key={item.value}>{item.value} ({item.count.toLocaleString("pt-BR")})</option>)}</select></label>
           <label><span>Valor do Imóvel</span><select value={salePriceFilter} onChange={(event) => updateFilter(setSalePriceFilter, event.target.value)}><option value="Todos">Todos ({filterOptions.totals.salePrice.toLocaleString("pt-BR")})</option>{filterOptions.salePrices.map((item) => <option value={item.value} key={item.value}>{money.format(Number(item.value))} ({item.count.toLocaleString("pt-BR")})</option>)}</select></label>
-          <label className="investor-stock-sort" data-tour="sort"><span>Ordenar valor</span><select aria-label="Ordenar unidades por valor do imóvel" value={priceSort} onChange={(event) => { setPriceSort(event.target.value as "asc" | "desc"); setInventoryWindowStart(0); if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0; }}><option value="asc">Menor para o maior</option><option value="desc">Maior para o menor</option></select></label>
+          <label className="investor-stock-sort" data-tour="sort"><span>Ordenar valor</span><select aria-label="Ordenar unidades por valor do imóvel" value={priceSort} onChange={(event) => { inventoryInteractionStarted.current = true; setPriceSort(event.target.value as "asc" | "desc"); setInventoryWindowStart(0); if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0; }}><option value="asc">Menor para o maior</option><option value="desc">Maior para o menor</option></select></label>
           {filterNotice && <span className="sr-only" aria-live="polite">{filterNotice}</span>}
         </div>
 

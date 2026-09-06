@@ -58,6 +58,7 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(calculator).toContain("const inventoryWindowSize = 60");
     expect(calculator).toContain("aria-rowcount={matchingInventory.length + 1}");
     expect(calculator).toContain('className="investor-stock-spacer"');
+    expect(calculator).toContain("if (!inventoryInteractionStarted.current)");
   });
 
   it("mantém as oito opções e fecha o valor do imóvel no centavo", () => {
