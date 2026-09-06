@@ -404,7 +404,8 @@ const protectedSurfaces = [
   {
     path: "/app/simulacao/tabela-investidor",
     heading: "Tabela Investidor",
-    allowed: noRoles,
+    allowed: masterOnlyRoles,
+    genericNavigation: false,
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
   { path: "/admin/usuarios", heading: "Usuários e acessos", allowed: adminRoles },
@@ -413,7 +414,11 @@ const protectedSurfaces = [
 
 function expectedRoutesForRole(role: Role) {
   return protectedSurfaces
-    .filter((surface) => surface.allowed.has(role))
+    .filter(
+      (surface) =>
+        surface.allowed.has(role) &&
+        (!("genericNavigation" in surface) || surface.genericNavigation !== false),
+    )
     .map((surface) => surface.path)
     .sort();
 }
@@ -961,16 +966,18 @@ for (const role of expectedRoles) {
         await expect(
           page.locator('main a[href="/app/simulacao/associativo-fluxo-linear"]'),
         ).toHaveCount(1);
+        await expect(page.locator('main a[href="/app/simulacao/tabela-investidor"]')).toHaveCount(
+          1,
+        );
         for (const route of [
           "/app/simulacao/calcular-documentacao",
           "/app/simulacao/caixa",
           "/app/simulacao/tabela-direta",
-          "/app/simulacao/tabela-investidor",
         ]) {
           await expect(page.locator(`main a[href="${route}"]`)).toHaveCount(0);
         }
-        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(4);
-        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(4);
+        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(3);
+        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(3);
         reportProgress("simulator-release-gates");
       }
 
@@ -1149,7 +1156,9 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("WF13 runs only for Master while other simulators stay blocked", async ({ browser }) => {
+test("WF13 and Tabela Investidor run only for Master while other simulators stay blocked", async ({
+  browser,
+}) => {
   await withRolePage(browser, "master", async (page) => {
     await page.clock.setFixedTime(new Date("2026-08-06T12:00:00-03:00"));
     const status = await page.request.get("/api/official-simulator/associativo-fluxo-linear");
@@ -1183,12 +1192,14 @@ test("WF13 runs only for Master while other simulators stay blocked", async ({ b
         .getByRole("button", { name: "Iniciar passo a passo" }),
     ).toBeVisible();
 
-    for (const simulator of [
-      "calcular-documentacao",
-      "caixa",
-      "tabela-direta",
-      "tabela-investidor",
-    ]) {
+    const investorResponse = await page.goto("/app/simulacao/tabela-investidor");
+    expect(investorResponse?.status()).toBe(200);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Simulador Tabela Investidor" }),
+    ).toBeVisible();
+    await expect(page.getByRole("region", { name: "Estoque completo de unidades" })).toBeVisible();
+
+    for (const simulator of ["calcular-documentacao", "caixa", "tabela-direta"]) {
       const response = await page.goto(`/app/simulacao/${simulator}`);
       expect(response?.status()).toBe(403);
       await expect(
