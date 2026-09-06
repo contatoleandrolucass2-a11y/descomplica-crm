@@ -88,9 +88,7 @@ describe("pre-stream page permission gates", () => {
     configureSession([]);
     mocks.getUser.mockResolvedValueOnce({ data: { user: null }, error: null });
 
-    const response = await proxy(
-      new NextRequest(`${origin}/data/investor-inventory.json`),
-    );
+    const response = await proxy(new NextRequest(`${origin}/data/investor-inventory.json`));
 
     expect(response.status).toBe(403);
     expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);
@@ -100,9 +98,7 @@ describe("pre-stream page permission gates", () => {
     configureSession(["crm.simulators.view"]);
     mocks.rpc.mockResolvedValueOnce({ data: [], error: null });
 
-    const response = await proxy(
-      new NextRequest(`${origin}/data/investor-inventory.json`),
-    );
+    const response = await proxy(new NextRequest(`${origin}/data/investor-inventory.json`));
 
     expect(response.status).toBe(403);
     expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);

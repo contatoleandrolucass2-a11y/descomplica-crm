@@ -399,11 +399,14 @@ async function captureComparableScreenshot(page) {
 async function capturePersistedScreenshot(page, comparableBuffer) {
   if (!remoteHomologation) {
     const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
-    return comparableBuffer ?? (await page.screenshot({
-      fullPage,
-      animations: "disabled",
-      timeout: 60_000,
-    }));
+    return (
+      comparableBuffer ??
+      (await page.screenshot({
+        fullPage,
+        animations: "disabled",
+        timeout: 60_000,
+      }))
+    );
   }
 
   await page.evaluate(() => {
@@ -1245,15 +1248,9 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
         checks.push({
           zoomPercent: level.percent,
           viewport: `zoom-${level.percent}`,
-          ...(await inspectRoute(
-            page,
-            origin,
-            route,
-            "light",
-            consoleErrors,
-            pageErrors,
-            { waitForArchiveInventory: false },
-          )),
+          ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors, {
+            waitForArchiveInventory: false,
+          })),
         });
         await releaseRenderedRoute(page);
       }
