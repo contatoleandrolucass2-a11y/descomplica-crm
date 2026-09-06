@@ -645,9 +645,20 @@ async function releaseRenderedRoute(page) {
   await page.goto("about:blank", { waitUntil: "commit" });
 }
 
-function configureQaPage(page) {
+async function configureQaPage(page) {
   page.setDefaultTimeout(60_000);
   page.setDefaultNavigationTimeout(60_000);
+  // Inventory is intentionally live in production, so visual baselines use
+  // the committed full snapshot instead of depending on network timing or a
+  // mutable external dataset. Authorization of the live API is tested by the
+  // release E2E matrix separately.
+  await page.route("**/api/inventory", async (route) => {
+    await route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "qa_uses_committed_inventory_snapshot" }),
+    });
+  });
 }
 
 async function login(page, origin, email, password) {
@@ -1124,7 +1135,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     });
     try {
       const snapshotPage = await snapshotContext.newPage();
-      configureQaPage(snapshotPage);
+      await configureQaPage(snapshotPage);
       await snapshotPage.setContent(
         `<!doctype html><html${themeAttribute}><head><base href="${origin}/">${stylesheets}</head><body><div class="investor-page-shell">${readyProposalSnapshot.dialogHtml}</div></body></html>`,
         { waitUntil: "networkidle" },
@@ -1234,7 +1245,7 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
     });
     await hideHomologationBannerForBaseline(context);
     const page = await context.newPage();
-    configureQaPage(page);
+    await configureQaPage(page);
     const consoleErrors = [];
     const pageErrors = [];
     page.on("console", (message) => {
@@ -1279,7 +1290,7 @@ async function captureHomologationCheckpoints(browser, origin, email, password, 
     });
     try {
       const page = await context.newPage();
-      configureQaPage(page);
+      await configureQaPage(page);
       await login(page, origin, email, password);
       const banner = page.getByText("HOMOLOGAÇÃO — DADOS SINTÉTICOS", { exact: true });
       await banner.waitFor({ state: "visible", timeout: 20_000 });
@@ -1565,7 +1576,7 @@ async function run() {
       });
       await hideHomologationBannerForBaseline(context);
       const page = await context.newPage();
-      configureQaPage(page);
+      await configureQaPage(page);
       const consoleErrors = [];
       const pageErrors = [];
       page.on("console", (message) => {
