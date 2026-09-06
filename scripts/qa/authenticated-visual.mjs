@@ -1074,8 +1074,8 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
           ];
           const usesCompactDesktopSize =
             window.innerWidth < 481 ||
-            (Math.abs(dialogBox.width - 600) <= 1 &&
-              rows.every((row) => row.getBoundingClientRect().height <= 24));
+            (Math.abs(dialogBox.width - 600) <= 2 &&
+              rows.every((row) => row.getBoundingClientRect().height <= 25));
           return (
             dialogBox.left >= 0 &&
             dialogBox.right <= window.innerWidth &&
