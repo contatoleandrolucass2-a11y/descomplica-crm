@@ -1624,6 +1624,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     payment.label.startsWith("Intermediária "),
   );
   const expectedPrintAuditLabels = await audit.locator(":scope > ul > li").allTextContents();
+  const expectedPrintIncomeDisplay = await incomeInput.inputValue();
   let printMediaShowsEditedValues = false;
   let printMediaShowsCompleteDynamicComposition = false;
   let printMediaHidesIncomeOptionsAndGuidance = false;
@@ -1694,7 +1695,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
       },
       {
         editedActDisplay,
-        incomeDisplay: await incomeInput.inputValue(),
+        incomeDisplay: expectedPrintIncomeDisplay,
         signals: expectedPrintSignals,
         intermediaries: expectedPrintIntermediaries,
       },
