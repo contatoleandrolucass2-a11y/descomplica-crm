@@ -25,6 +25,7 @@ const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa
 const homologationOrigin = "https://homolog.descomplicapro.com.br";
 const remoteHomologation = process.env.QA_AUTH_REMOTE_HOMOLOGATION === "true";
 const qaNavigationTimeout = remoteHomologation ? 30_000 : 180_000;
+const qaRouteBootstrapTimeout = remoteHomologation ? 30_000 : 90_000;
 const environmentLabel = remoteHomologation
   ? "isolated remote homologation with local-only Supabase"
   : "isolated local Supabase";
@@ -715,6 +716,39 @@ async function releaseRenderedRoute(page) {
   // each document prevents Chromium accumulation across the 300+ route passes.
   await page.goto("about:blank", { waitUntil: "commit" });
 }
+
+async function openInspectableRoute(page, destination, expectedTheme, consoleErrors, pageErrors) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const consoleAttemptStart = consoleErrors.length;
+    const pageAttemptStart = pageErrors.length;
+    try {
+      const response = await page.goto(destination, { waitUntil: "commit" });
+      await page
+        .locator("h1")
+        .first()
+        .waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
+      await page.waitForFunction(
+        (theme) => document.documentElement.dataset.theme === theme,
+        expectedTheme,
+        { timeout: qaRouteBootstrapTimeout },
+      );
+      if ((response?.status() ?? 200) >= 500) {
+        throw new Error("Authenticated route returned a transient server error.");
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) {
+        consoleErrors.length = consoleAttemptStart;
+        pageErrors.length = pageAttemptStart;
+        await page.waitForTimeout((attempt + 1) * 1_000);
+      }
+    }
+  }
+  throw lastError ?? new Error("Authenticated route did not become inspectable.");
+}
+
 async function login(page, origin, email, password) {
   await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded" });
   const acceptAllCookies = page.getByRole("button", {
@@ -748,25 +782,13 @@ async function inspectRoute(
 ) {
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
-  let response = await page.goto(`${origin}${route}`, { waitUntil: "commit" });
-  await page.locator("h1").first().waitFor({ state: "visible", timeout: qaNavigationTimeout });
-  try {
-    await page.waitForFunction(
-      (theme) => document.documentElement.dataset.theme === theme,
-      expectedTheme,
-      { timeout: 20_000 },
-    );
-  } catch {
-    // A renderer under the full screenshot/Axe matrix can occasionally commit
-    // before the inline theme bootstrap runs. Retry the document once, then
-    // keep the normal hard failure if the rendered contract is still absent.
-    response = await page.reload({ waitUntil: "commit" });
-    await page.locator("h1").first().waitFor({ state: "visible", timeout: qaNavigationTimeout });
-    await page.waitForFunction(
-      (theme) => document.documentElement.dataset.theme === theme,
-      expectedTheme,
-    );
-  }
+  const response = await openInspectableRoute(
+    page,
+    `${origin}${route}`,
+    expectedTheme,
+    consoleErrors,
+    pageErrors,
+  );
   await page.evaluate(() => document.fonts.ready);
 
   const isArchiveSimulator = archiveSimulatorRoutes.has(route);
