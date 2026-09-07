@@ -630,8 +630,8 @@ describe("local authenticated visual Supabase proxy", () => {
     try {
       await Promise.all([protectedUpstreamStarted.promise, restUpstreamStarted.promise]);
       await waitFor(() =>
-        Object.values(proxy.evidence().endpoints).every(
-          (endpoint: { requestsSeen: number }) => endpoint.requestsSeen >= 1,
+        Object.values(proxy.evidence().endpoints as Record<string, { requestsSeen: number }>).every(
+          (endpoint) => endpoint.requestsSeen >= 1,
         ),
       );
       const logout = await fetch(`${proxy.origin}/auth/v1/logout`, {
@@ -868,7 +868,7 @@ describe("local authenticated visual Supabase proxy", () => {
     );
     const url = `${proxy.origin}/rest/v1/expiry`;
     const read = (authorization?: string) =>
-      fetch(url, { headers: authorization ? { authorization } : undefined });
+      fetch(url, authorization ? { headers: { authorization } } : {});
 
     await read(`Bearer ${longToken}`);
     await read(`Bearer ${longToken}`);
@@ -938,8 +938,8 @@ describe("local authenticated visual Supabase proxy", () => {
       body: '{"user_uuid":"qa-user"}',
     }).catch((error: unknown) => error);
     await waitFor(() =>
-      Object.values(proxy.evidence().endpoints).every(
-        (endpoint: { requestsSeen: number }) => endpoint.requestsSeen >= 1,
+      Object.values(proxy.evidence().endpoints as Record<string, { requestsSeen: number }>).every(
+        (endpoint) => endpoint.requestsSeen >= 1,
       ),
     );
     const retryingRead = fetch(`${proxy.origin}/rest/v1/retry-close`, { headers }).catch(
