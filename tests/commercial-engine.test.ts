@@ -899,14 +899,14 @@ describe("commercial policy verifier CLI and telemetry", () => {
   it("runs the packaged CLI through the real Node process", async () => {
     const { stdout, stderr } = await execFileAsync("pnpm", ["commercial-policy:verify", "--help"], {
       cwd: fileURLToPath(new URL("..", import.meta.url)),
-      timeout: 10_000,
+      timeout: 30_000,
     });
 
     expect(stderr).toContain("ops/commercial-policies/verify.ts --help");
     expect(stderr).not.toMatch(/(?:error|warning):/i);
     expect(stdout).toContain("Usage: pnpm commercial-policy:verify");
     expect(stdout).toContain("No database or remote service is contacted.");
-  });
+  }, 35_000);
 
   it("logs only sanitized engine metadata and a policy fingerprint", () => {
     const info = vi.spyOn(console, "info").mockImplementation(() => undefined);

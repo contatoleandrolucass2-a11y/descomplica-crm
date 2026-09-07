@@ -418,7 +418,7 @@ describe("versioned reference parity catalog", () => {
         (check) => check.passed && check.reducedMotion && !check.horizontalOverflow,
       ),
     ).toBe(true);
-    const desktopThemeScreenshotCount = 9 * 3;
+    const desktopThemeScreenshotCount = 10 * 3;
     const mobileDarkScreenshotCount = expectedReleasedProtectedRoutes.length;
     const themeScreenshotCount = desktopThemeScreenshotCount + mobileDarkScreenshotCount;
     const visualEvidenceCount = responsiveScreenshotCount + themeScreenshotCount;
