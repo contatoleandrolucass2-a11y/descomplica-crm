@@ -263,6 +263,7 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.equal(new Set(payload.items.map((item) => item.finalPrice)).size, 121);
 
     const selectedUnit = payload.items[0]!;
+    assert.equal(selectedUnit.project, "Empreendimento QA 01");
     assert.deepEqual(
       {
         finalPrice: selectedUnit.finalPrice,

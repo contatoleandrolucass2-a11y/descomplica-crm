@@ -1044,12 +1044,12 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     };
   });
 
-  // Use a project present in both the protected reference snapshot and the
-  // live feed so the flow remains deterministic while the background refresh
-  // resolves. Its units are still in construction and exercise the full plan.
+  // Use the project that contains the synthetic ready-proposal reference.
+  // Both protected inventory endpoints are intercepted by the same isolated
+  // fixture, so no mutable live feed or commercial field enters this evidence.
   await page
     .getByRole("combobox", { name: "Nome do Empreendimento", exact: true })
-    .selectOption("Estilo Lapa");
+    .selectOption("Empreendimento QA 01");
   await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
     state: "visible",
   });
