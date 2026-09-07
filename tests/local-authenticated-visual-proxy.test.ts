@@ -24,6 +24,7 @@ describe("local authenticated visual Supabase proxy", () => {
     let maxActiveAuthUser = 0;
     let activeOther = 0;
     let maxActiveOther = 0;
+    let flakyAuthUserAttempts = 0;
     const observedHosts = new Set<string>();
 
     const upstream = createServer((request, response) => {
@@ -39,7 +40,13 @@ describe("local authenticated visual Supabase proxy", () => {
       }
 
       setTimeout(() => {
-        const status = requestUrl.searchParams.get("status") === "401" ? 401 : 200;
+        if (exactAuthUser && requestUrl.searchParams.has("flaky")) flakyAuthUserAttempts += 1;
+        const status =
+          requestUrl.searchParams.get("status") === "401"
+            ? 401
+            : exactAuthUser && requestUrl.searchParams.has("flaky") && flakyAuthUserAttempts < 3
+              ? 504
+              : 200;
         response.writeHead(status, {
           "content-type": "application/json",
           "x-upstream-probe": "preserved",
@@ -71,6 +78,7 @@ describe("local authenticated visual Supabase proxy", () => {
       fetch(`${proxy.origin}/auth/v1/user?status=401`),
       fetch(`${proxy.origin}/auth/v1/user?probe=2`),
       fetch(`${proxy.origin}/auth/v1/user?probe=3`),
+      fetch(`${proxy.origin}/auth/v1/user?flaky=1`),
       fetch(`${proxy.origin}/auth/v1/users?probe=1`),
       fetch(`${proxy.origin}/auth/v1/users?probe=2`),
       fetch(`${proxy.origin}/rest/v1/probe?item=1`),
@@ -80,11 +88,13 @@ describe("local authenticated visual Supabase proxy", () => {
 
     expect(maxActiveAuthUser).toBe(1);
     expect(maxActiveOther).toBeGreaterThan(1);
-    expect(responses.slice(0, 3).map((response) => response.status)).toEqual([401, 200, 200]);
+    expect(responses.slice(0, 4).map((response) => response.status)).toEqual([401, 200, 200, 200]);
+    expect(flakyAuthUserAttempts).toBe(3);
     expect(
       responses.every((response) => response.headers.get("x-upstream-probe") === "preserved"),
     ).toBe(true);
     expect(payloads.map((payload) => payload.pathname)).toEqual([
+      "/auth/v1/user",
       "/auth/v1/user",
       "/auth/v1/user",
       "/auth/v1/user",

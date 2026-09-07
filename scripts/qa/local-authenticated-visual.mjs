@@ -129,9 +129,12 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
         }
 
         let settled = false;
+        let activeUpstream = null;
+        let retryTimer = null;
         const settle = () => {
           if (settled) return;
           settled = true;
+          if (retryTimer !== null) clearTimeout(retryTimer);
           resolve();
         };
         const fail = () => {
@@ -146,23 +149,38 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
           }
           settle();
         };
-
-        const upstream = requestHttp(
-          {
-            protocol: target.protocol,
-            hostname: target.hostname,
-            port: target.port,
-            method: incoming.method,
-            path: incoming.url,
-            headers: {
-              ...withoutHopByHopHeaders(incoming.headers),
-              host: target.host,
-            },
+        const requestOptions = {
+          protocol: target.protocol,
+          hostname: target.hostname,
+          port: target.port,
+          method: incoming.method,
+          path: incoming.url,
+          headers: {
+            ...withoutHopByHopHeaders(incoming.headers),
+            host: target.host,
           },
-          (upstreamResponse) => {
+        };
+        const forwardAttempt = (attempt) => {
+          let retryScheduled = false;
+          const scheduleRetry = () => {
+            if (settled || retryScheduled) return;
+            retryScheduled = true;
+            if (!serializeAuthUserRequest || attempt >= 2) {
+              fail();
+              return;
+            }
+            retryTimer = setTimeout(() => forwardAttempt(attempt + 1), (attempt + 1) * 250);
+          };
+          const upstream = requestHttp(requestOptions, (upstreamResponse) => {
             if (outgoing.destroyed) {
               upstreamResponse.destroy();
               settle();
+              return;
+            }
+            if ((upstreamResponse.statusCode ?? 502) >= 500 && attempt < 2) {
+              upstreamResponse.resume();
+              upstreamResponse.once("end", scheduleRetry);
+              upstreamResponse.once("error", scheduleRetry);
               return;
             }
 
@@ -173,22 +191,24 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
             upstreamResponse.pipe(outgoing);
             upstreamResponse.once("end", settle);
             upstreamResponse.once("error", fail);
-          },
-        );
-        upstream.setTimeout(60_000, () =>
-          upstream.destroy(new Error("Local QA Supabase upstream timed out.")),
-        );
-        upstream.once("error", fail);
+          });
+          activeUpstream = upstream;
+          upstream.setTimeout(60_000, () =>
+            upstream.destroy(new Error("Local QA Supabase upstream timed out.")),
+          );
+          upstream.once("error", scheduleRetry);
+
+          if (incoming.method === "GET" || incoming.method === "HEAD") {
+            upstream.end();
+          } else {
+            incoming.pipe(upstream);
+          }
+        };
         outgoing.once("close", () => {
-          if (!outgoing.writableEnded) upstream.destroy();
+          if (!outgoing.writableEnded) activeUpstream?.destroy();
           settle();
         });
-
-        if (incoming.method === "GET" || incoming.method === "HEAD") {
-          upstream.end();
-        } else {
-          incoming.pipe(upstream);
-        }
+        forwardAttempt(0);
       });
 
     if (serializeAuthUserRequest) {
