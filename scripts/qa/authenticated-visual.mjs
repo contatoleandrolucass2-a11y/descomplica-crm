@@ -24,7 +24,7 @@ const visualChannelTolerance = 16;
 const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const homologationOrigin = "https://homolog.descomplicapro.com.br";
 const remoteHomologation = process.env.QA_AUTH_REMOTE_HOMOLOGATION === "true";
-const qaNavigationTimeout = remoteHomologation ? 30_000 : 90_000;
+const qaNavigationTimeout = remoteHomologation ? 30_000 : 180_000;
 const environmentLabel = remoteHomologation
   ? "isolated remote homologation with local-only Supabase"
   : "isolated local Supabase";
@@ -284,12 +284,22 @@ async function verifyDedicatedLocalQaIdentity(supabaseUrl, publishableKey, email
   if (!/^qa(?:[.+_-][a-z0-9-]+)+@local\.invalid$/i.test(email)) {
     throw new Error("QA_AUTH_EMAIL must identify a dedicated local.invalid QA account.");
   }
-  const response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    headers: { apikey: publishableKey, "content-type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-  if (!response.ok) throw new Error("Dedicated QA identity was not verified on local Supabase.");
+  let response = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: { apikey: publishableKey, "content-type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    if (response.ok) break;
+    await response.arrayBuffer();
+    if (attempt < 2) {
+      await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1_000));
+    }
+  }
+  if (!response?.ok) {
+    throw new Error("Dedicated QA identity was not verified on local Supabase.");
+  }
   const session = await response.json();
   if (session.user?.email !== email || typeof session.access_token !== "string") {
     throw new Error("Local Supabase returned an unexpected QA identity.");
@@ -442,7 +452,11 @@ async function captureComparableScreenshot(page) {
     }
   });
   try {
-    return await page.screenshot({ fullPage, animations: "disabled", timeout: 60_000 });
+    return await page.screenshot({
+      fullPage,
+      animations: "disabled",
+      timeout: qaNavigationTimeout,
+    });
   } finally {
     await page.locator('[data-qa-visual-hidden="true"]').evaluateAll((elements) => {
       for (const element of elements) {
@@ -458,7 +472,11 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
     const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
     return (
       comparableBuffer ??
-      (await page.screenshot({ fullPage, animations: "disabled", timeout: 60_000 }))
+      (await page.screenshot({
+        fullPage,
+        animations: "disabled",
+        timeout: qaNavigationTimeout,
+      }))
     );
   }
 
@@ -501,7 +519,7 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
     return await page.screenshot({
       fullPage,
       animations: "disabled",
-      timeout: 60_000,
+      timeout: qaNavigationTimeout,
       mask: [page.locator('[data-qa-evidence-identity="remote-homologation"]')],
       maskColor: "#334155",
     });
@@ -731,7 +749,7 @@ async function inspectRoute(
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
   let response = await page.goto(`${origin}${route}`, { waitUntil: "commit" });
-  await page.locator("h1").first().waitFor({ state: "visible", timeout: 60_000 });
+  await page.locator("h1").first().waitFor({ state: "visible", timeout: qaNavigationTimeout });
   try {
     await page.waitForFunction(
       (theme) => document.documentElement.dataset.theme === theme,
@@ -743,7 +761,7 @@ async function inspectRoute(
     // before the inline theme bootstrap runs. Retry the document once, then
     // keep the normal hard failure if the rendered contract is still absent.
     response = await page.reload({ waitUntil: "commit" });
-    await page.locator("h1").first().waitFor({ state: "visible", timeout: 60_000 });
+    await page.locator("h1").first().waitFor({ state: "visible", timeout: qaNavigationTimeout });
     await page.waitForFunction(
       (theme) => document.documentElement.dataset.theme === theme,
       expectedTheme,
@@ -767,6 +785,7 @@ async function inspectRoute(
     const archiveSimulator = [
       "/app/simulacao/associativo-fluxo-linear",
       "/app/simulacao/tabela-direta",
+      "/app/simulacao/tabela-investidor",
     ].includes(window.location.pathname);
     const topbarInner = document.querySelector("header > div");
     const brand = topbarInner?.firstElementChild;

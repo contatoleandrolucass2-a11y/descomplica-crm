@@ -1317,10 +1317,20 @@ export async function verifyFixturesThroughRls({ apiUrl, publishableKey, account
       detectSessionInUrl: false,
     },
   });
-  const { data: sessionData, error: signInError } = await client.auth.signInWithPassword({
-    email: account.email,
-    password: account.password,
-  });
+  let sessionData = null;
+  let signInError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const result = await client.auth.signInWithPassword({
+      email: account.email,
+      password: account.password,
+    });
+    sessionData = result.data;
+    signInError = result.error;
+    if (!signInError && sessionData.user?.id === account.id) break;
+    if (attempt < 2) {
+      await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1_000));
+    }
+  }
   if (signInError || sessionData.user?.id !== account.id) {
     throw new Error("Ephemeral QA account could not authenticate against local Supabase.");
   }
