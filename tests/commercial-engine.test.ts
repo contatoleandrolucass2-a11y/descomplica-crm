@@ -897,13 +897,28 @@ describe("commercial policy verifier CLI and telemetry", () => {
   });
 
   it("runs the packaged CLI through the real Node process", async () => {
-    const { stdout, stderr } = await execFileAsync("pnpm", ["commercial-policy:verify", "--help"], {
-      cwd: fileURLToPath(new URL("..", import.meta.url)),
-      timeout: 30_000,
-    });
+    const repositoryRoot = fileURLToPath(new URL("..", import.meta.url));
+    const packageJson = JSON.parse(
+      await readFile(new URL("../package.json", import.meta.url), "utf8"),
+    ) as { scripts?: Record<string, string> };
+    expect(packageJson.scripts?.["commercial-policy:verify"]).toBe(
+      "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/commercial-policies/verify.ts",
+    );
 
-    expect(stderr).toContain("ops/commercial-policies/verify.ts --help");
-    expect(stderr).not.toMatch(/(?:error|warning):/i);
+    const { stdout, stderr } = await execFileAsync(
+      process.execPath,
+      [
+        "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+        fileURLToPath(new URL("../ops/commercial-policies/verify.ts", import.meta.url)),
+        "--help",
+      ],
+      {
+        cwd: repositoryRoot,
+        timeout: 30_000,
+      },
+    );
+
+    expect(stderr).toBe("");
     expect(stdout).toContain("Usage: pnpm commercial-policy:verify");
     expect(stdout).toContain("No database or remote service is contacted.");
   }, 35_000);

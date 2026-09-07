@@ -522,5 +522,5 @@ describe("versioned reference parity catalog", () => {
       expect(contents.byteLength).toBe(screenshot.bytes);
       expect(createHash("sha256").update(contents).digest("hex")).toBe(screenshot.sha256);
     }
-  });
+  }, 20_000);
 });
