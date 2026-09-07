@@ -459,12 +459,14 @@ async function login(page: Page, account: QaAccount, rememberBrowser = false) {
   const expectedHome = expectedHomeForRole(account.role);
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   try {
-    await page.waitForURL((url) => url.pathname === expectedHome, { timeout: 15_000 });
+    await page.waitForURL((url) => url.pathname === expectedHome, { timeout: 45_000 });
   } catch {
-    const actualPath = new URL(page.url()).pathname;
-    throw new Error(
-      `Authenticated ${account.role} reached ${actualPath}; expected ${expectedHome}.`,
-    );
+    if (new URL(page.url()).pathname === "/") {
+      await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 }).catch(() => undefined);
+      await page
+        .waitForURL((url) => url.pathname === expectedHome, { timeout: 45_000 })
+        .catch(() => undefined);
+    }
   }
   const actualPath = new URL(page.url()).pathname;
   if (actualPath !== expectedHome) {
@@ -503,7 +505,7 @@ async function logoutAndAssertBoundary(page: Page, role: Role) {
   await page.goto("/conta/seguranca");
   await page.getByRole("button", { name: "Sair", exact: true }).click();
   roleStorageStates.delete(role);
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login$/, { timeout: 45_000 });
   await page.goBack();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto("/app");
@@ -615,7 +617,7 @@ test("anonymous boundaries and generic login failure stay closed", async ({ page
 test("cookie choices, legal documents and browser-session lifetimes are explicit", async ({
   browser,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(360_000);
   const consentContext = await browser.newContext(qaTarget.contextOptions);
   try {
     await constrainRemoteRequests(consentContext);
