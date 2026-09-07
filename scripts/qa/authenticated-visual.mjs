@@ -739,6 +739,9 @@ async function openInspectableRoute(page, destination, expectedTheme, consoleErr
     const pageAttemptStart = pageErrors.length;
     try {
       const response = await page.goto(destination, { waitUntil: "commit" });
+      if ((response?.status() ?? 200) >= 500) {
+        throw new Error("Authenticated route returned a transient server error.");
+      }
       await page
         .locator("h1")
         .first()
@@ -748,16 +751,17 @@ async function openInspectableRoute(page, destination, expectedTheme, consoleErr
         expectedTheme,
         { timeout: qaRouteBootstrapTimeout },
       );
-      if ((response?.status() ?? 200) >= 500) {
-        throw new Error("Authenticated route returned a transient server error.");
-      }
       return response;
     } catch (error) {
       lastError = error;
       if (attempt < 2) {
+        await releaseRenderedRoute(page).catch(() => undefined);
+        await page.waitForTimeout((attempt + 1) * 1_000);
+        // A failed RSC response can report console/page errors after page.goto
+        // settles. Clear them after teardown/backoff so the next successful
+        // attempt is evaluated only against its own diagnostics.
         consoleErrors.length = consoleAttemptStart;
         pageErrors.length = pageAttemptStart;
-        await page.waitForTimeout((attempt + 1) * 1_000);
       }
     }
   }

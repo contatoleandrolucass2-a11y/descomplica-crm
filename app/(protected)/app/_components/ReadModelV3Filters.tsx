@@ -160,6 +160,7 @@ export function ReadModelV3Filters({
         </button>
         <Link
           href={action}
+          prefetch={false}
           className="inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-cyan-900 ring-1 ring-cyan-900/20 hover:bg-cyan-50"
         >
           Limpar

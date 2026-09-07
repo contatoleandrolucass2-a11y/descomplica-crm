@@ -124,6 +124,7 @@ export default async function SettingsPage() {
                 <Link
                   key={setting.href}
                   href={setting.href}
+                  prefetch={false}
                   className="group block rounded-3xl focus-visible:outline-offset-4"
                 >
                   <SettingsCard setting={setting} canManage />

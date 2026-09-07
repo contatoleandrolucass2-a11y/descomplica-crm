@@ -20,6 +20,7 @@ export default async function AdminHomePage() {
           {hasPermission(context, "users.view") ? (
             <Link
               href="/admin/usuarios"
+              prefetch={false}
               className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition hover:ring-slate-400"
             >
               <h2 className="font-medium text-slate-900">Usuários e acessos</h2>
@@ -31,6 +32,7 @@ export default async function AdminHomePage() {
           {hasPermission(context, "pages.manage") ? (
             <Link
               href="/admin/paginas"
+              prefetch={false}
               className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition hover:ring-slate-400"
             >
               <h2 className="font-medium text-slate-900">Catálogo de páginas</h2>

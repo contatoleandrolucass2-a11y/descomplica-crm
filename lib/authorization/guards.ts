@@ -29,6 +29,22 @@ interface AuthorizationContextRow {
   permissions: string[];
 }
 
+// React keeps this lookup scoped to the current Server Component request.
+// Both the protected layout and its nested permission guards need the same
+// verified identity. Sharing the client and user prevents duplicate Auth calls
+// and guarantees MFA/RPC checks observe the same refreshed session.
+const getCurrentAuthState = cache(async () => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return { supabase, user };
+});
+
+export async function getCurrentUser() {
+  return (await getCurrentAuthState()).user;
+}
+
 function isRoleKey(value: string): value is RoleKey {
   return Object.prototype.hasOwnProperty.call(ROLES, value);
 }
@@ -44,11 +60,7 @@ function isPermissionKey(value: string): value is PermissionKey {
 // Throws a generic FORBIDDEN error without leaking onboarding/profile details.
 export const getCurrentAuthorizationContext = cache(
   async (): Promise<AuthorizationContext | null> => {
-    const supabase = await createClient();
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await getCurrentAuthState();
 
     if (!user) {
       return null;

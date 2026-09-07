@@ -189,7 +189,12 @@ export function FilterLink({
   children: ReactNode;
 }) {
   return (
-    <Link className={styles.filterLink} href={href} aria-current={active ? "page" : undefined}>
+    <Link
+      className={styles.filterLink}
+      href={href}
+      prefetch={false}
+      aria-current={active ? "page" : undefined}
+    >
       {children}
     </Link>
   );

@@ -126,6 +126,7 @@ export function ReadModelV3View({
             action={
               <Link
                 href={action}
+                prefetch={false}
                 className="inline-flex min-h-11 items-center rounded-xl bg-cyan-300 px-5 py-2.5 font-semibold text-[#082137]"
               >
                 Limpar filtros
@@ -254,6 +255,7 @@ export function ReadModelV3View({
               <Link
                 className="text-sm font-semibold text-cyan-200 hover:text-white"
                 href={buildReadModelV3Href(backHref, selection)}
+                prefetch={false}
               >
                 ← Voltar ao dashboard
               </Link>

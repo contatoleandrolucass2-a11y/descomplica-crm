@@ -217,6 +217,7 @@ export default async function RankingPage({
               !isEmpty && canManagePoints ? (
                 <Link
                   href="/app/configuracoes/metas/pontos"
+                  prefetch={false}
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-[#082137] hover:bg-cyan-200"
                 >
                   Preparar rascunho de pontuação
