@@ -717,6 +717,21 @@ async function releaseRenderedRoute(page) {
   await page.goto("about:blank", { waitUntil: "commit" });
 }
 
+async function gotoWithServerRetry(page, destination, options) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await page.goto(destination, options);
+      if ((response?.status() ?? 200) < 500) return response;
+      lastError = new Error("Authenticated route returned a transient server error.");
+    } catch (error) {
+      lastError = error;
+    }
+    if (attempt < 2) await page.waitForTimeout((attempt + 1) * 1_000);
+  }
+  throw lastError ?? new Error("Authenticated route navigation failed.");
+}
+
 async function openInspectableRoute(page, destination, expectedTheme, consoleErrors, pageErrors) {
   let lastError = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -750,7 +765,7 @@ async function openInspectableRoute(page, destination, expectedTheme, consoleErr
 }
 
 async function login(page, origin, email, password) {
-  await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded" });
+  await gotoWithServerRetry(page, `${origin}/login`, { waitUntil: "domcontentloaded" });
   const acceptAllCookies = page.getByRole("button", {
     name: "Aceitar todos",
     exact: true,
@@ -959,15 +974,31 @@ async function inspectRoute(
 }
 
 async function setTheme(page, theme) {
-  await page.getByRole("button", { name: themeLabels[theme], exact: true }).click();
-  await page.waitForFunction(
-    (expected) => document.documentElement.dataset.theme === expected,
-    theme,
-  );
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await page
+        .getByRole("button", { name: themeLabels[theme], exact: true })
+        .click({ timeout: qaRouteBootstrapTimeout });
+      await page.waitForFunction(
+        (expected) => document.documentElement.dataset.theme === expected,
+        theme,
+        { timeout: qaRouteBootstrapTimeout },
+      );
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) {
+        await page.waitForTimeout((attempt + 1) * 1_000);
+        await gotoWithServerRetry(page, page.url(), { waitUntil: "domcontentloaded" });
+      }
+    }
+  }
+  throw lastError ?? new Error("Theme control did not become available.");
 }
 
 async function checkKeyboard(page, origin) {
-  await page.goto(`${origin}/app`, { waitUntil: "domcontentloaded" });
+  await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
   const summary = page.locator("summary").first();
   await summary.focus();
   await page.keyboard.press("Enter");
@@ -985,7 +1016,7 @@ async function checkKeyboard(page, origin) {
 }
 
 async function checkSimulatorValidation(page, origin, httpCredentials) {
-  await page.goto(`${origin}/app/simulacao/associativo-fluxo-linear`, {
+  await gotoWithServerRetry(page, `${origin}/app/simulacao/associativo-fluxo-linear`, {
     waitUntil: "domcontentloaded",
   });
   await page
@@ -1315,7 +1346,9 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
 
   async function prepareApprovedDirectProposal(auxiliaryPage, { navigate = true } = {}) {
     if (navigate) {
-      await auxiliaryPage.goto(directTableUrl, { waitUntil: "domcontentloaded" });
+      await gotoWithServerRetry(auxiliaryPage, directTableUrl, {
+        waitUntil: "domcontentloaded",
+      });
     }
     await waitForDirectInventory(auxiliaryPage);
     await auxiliaryPage
@@ -1361,7 +1394,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   }
 
   await page.clock.setFixedTime(fixedDirectTableTime);
-  await page.goto(directTableUrl, {
+  await gotoWithServerRetry(page, directTableUrl, {
     waitUntil: "domcontentloaded",
   });
   await page
@@ -1874,7 +1907,9 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
         body: JSON.stringify({ error: "Synthetic snapshot outage for authenticated QA." }),
       });
     });
-    await snapshotPage.goto(directTableUrl, { waitUntil: "domcontentloaded" });
+    await gotoWithServerRetry(snapshotPage, directTableUrl, {
+      waitUntil: "domcontentloaded",
+    });
     const snapshotFailureMessage =
       "Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.";
     const snapshotFailure = snapshotPage
@@ -2074,7 +2109,9 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const historyPage = configureQaPage(await context.newPage());
   try {
     await historyPage.clock.setFixedTime(fixedDirectTableTime);
-    await historyPage.goto(`${origin}/app/simulacao`, { waitUntil: "domcontentloaded" });
+    await gotoWithServerRetry(historyPage, `${origin}/app/simulacao`, {
+      waitUntil: "domcontentloaded",
+    });
     await historyPage.getByRole("heading", { name: "Simulação", exact: true }).waitFor({
       state: "visible",
       timeout: qaNavigationTimeout,
@@ -2215,7 +2252,7 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
     ["dashboard", "/app"],
     ["stageOpportunities", "/app/etapas/oportunidades"],
   ]) {
-    await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
+    await gotoWithServerRetry(page, `${origin}${route}`, { waitUntil: "domcontentloaded" });
     const sourceLabel = page
       .locator("dt")
       .filter({ hasText: /^Fonte$/ })
@@ -2625,7 +2662,7 @@ async function run() {
         if (viewport.key === "desktop-1440x900") {
           for (const theme of themes) {
             currentStage = `theme:${theme}`;
-            await page.goto(`${origin}/app`, { waitUntil: "domcontentloaded" });
+            await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
             await setTheme(page, theme);
             for (const route of routes) {
               currentStage = `theme:${theme}:${route}`;
@@ -2699,7 +2736,7 @@ async function run() {
 
         if (viewport.key === mobileDarkViewportKey) {
           currentStage = `mobile-dark:${viewport.key}`;
-          await page.goto(`${origin}/app`, { waitUntil: "domcontentloaded" });
+          await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
           await setTheme(page, "dark");
           for (const route of routes) {
             currentStage = `mobile-dark:${viewport.key}:${route}`;
