@@ -25,6 +25,7 @@ describe("local authenticated visual Supabase proxy", () => {
     let activeOther = 0;
     let maxActiveOther = 0;
     let flakyAuthUserAttempts = 0;
+    let cacheableRestAttempts = 0;
     const observedHosts = new Set<string>();
 
     const upstream = createServer((request, response) => {
@@ -38,6 +39,7 @@ describe("local authenticated visual Supabase proxy", () => {
         activeOther += 1;
         maxActiveOther = Math.max(maxActiveOther, activeOther);
       }
+      if (requestUrl.pathname === "/rest/v1/cacheable") cacheableRestAttempts += 1;
 
       setTimeout(() => {
         if (exactAuthUser && requestUrl.searchParams.has("flaky")) flakyAuthUserAttempts += 1;
@@ -85,11 +87,26 @@ describe("local authenticated visual Supabase proxy", () => {
       fetch(`${proxy.origin}/rest/v1/probe?item=2`),
     ]);
     const payloads = await Promise.all(responses.map((response) => response.json()));
+    const firstCachedRestResponse = await fetch(`${proxy.origin}/rest/v1/cacheable?item=1`, {
+      headers: { authorization: "Bearer qa-a" },
+    });
+    const secondCachedRestResponse = await fetch(`${proxy.origin}/rest/v1/cacheable?item=1`, {
+      headers: { authorization: "Bearer qa-a" },
+    });
+    const isolatedCachedRestResponse = await fetch(`${proxy.origin}/rest/v1/cacheable?item=1`, {
+      headers: { authorization: "Bearer qa-b" },
+    });
 
     expect(maxActiveAuthUser).toBe(1);
     expect(maxActiveOther).toBeGreaterThan(1);
     expect(responses.slice(0, 4).map((response) => response.status)).toEqual([401, 200, 200, 200]);
     expect(flakyAuthUserAttempts).toBe(3);
+    expect(cacheableRestAttempts).toBe(2);
+    expect([
+      firstCachedRestResponse.status,
+      secondCachedRestResponse.status,
+      isolatedCachedRestResponse.status,
+    ]).toEqual([200, 200, 200]);
     expect(
       responses.every((response) => response.headers.get("x-upstream-probe") === "preserved"),
     ).toBe(true);

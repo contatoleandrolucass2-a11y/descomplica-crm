@@ -116,11 +116,35 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
   const target = new URL(parseLoopbackHttpOrigin(targetOrigin, "Local Supabase proxy target"));
   const listenHostname = target.hostname === "[::1]" ? "::1" : target.hostname;
   let authUserTail = Promise.resolve();
+  const successfulRestReads = new Map();
 
   const server = createHttpServer((incoming, outgoing) => {
+    const incomingUrl = new URL(incoming.url ?? "/", target);
     const serializeAuthUserRequest =
-      incoming.method === "GET" &&
-      new URL(incoming.url ?? "/", target).pathname === "/auth/v1/user";
+      incoming.method === "GET" && incomingUrl.pathname === "/auth/v1/user";
+    const retryableRequest = incoming.method === "GET" || incoming.method === "HEAD";
+    const cacheableRestRead =
+      incoming.method === "GET" && incomingUrl.pathname.startsWith("/rest/v1/");
+    const cacheKey = cacheableRestRead
+      ? createHash("sha256")
+          .update(
+            JSON.stringify([
+              incoming.url,
+              incoming.headers.authorization ?? "",
+              incoming.headers.apikey ?? "",
+              incoming.headers.accept ?? "",
+              incoming.headers.range ?? "",
+              incoming.headers["accept-profile"] ?? "",
+            ]),
+          )
+          .digest("hex")
+      : null;
+    const cachedResponse = cacheKey ? successfulRestReads.get(cacheKey) : null;
+    if (cachedResponse) {
+      outgoing.writeHead(cachedResponse.status, cachedResponse.headers);
+      outgoing.end(cachedResponse.body);
+      return;
+    }
     const forward = () =>
       new Promise((resolve) => {
         if (incoming.destroyed || outgoing.destroyed) {
@@ -165,7 +189,7 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
           const scheduleRetry = () => {
             if (settled || retryScheduled) return;
             retryScheduled = true;
-            if (!serializeAuthUserRequest || attempt >= 2) {
+            if (!retryableRequest || attempt >= 2) {
               fail();
               return;
             }
@@ -177,17 +201,30 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
               settle();
               return;
             }
-            if ((upstreamResponse.statusCode ?? 502) >= 500 && attempt < 2) {
+            if (retryableRequest && (upstreamResponse.statusCode ?? 502) >= 500 && attempt < 2) {
               upstreamResponse.resume();
               upstreamResponse.once("end", scheduleRetry);
               upstreamResponse.once("error", scheduleRetry);
               return;
             }
 
-            outgoing.writeHead(
-              upstreamResponse.statusCode ?? 502,
-              withoutHopByHopHeaders(upstreamResponse.headers),
-            );
+            const status = upstreamResponse.statusCode ?? 502;
+            const headers = withoutHopByHopHeaders(upstreamResponse.headers);
+            if (cacheKey && status === 200) {
+              const chunks = [];
+              upstreamResponse.on("data", (chunk) => chunks.push(chunk));
+              upstreamResponse.once("end", () => {
+                const body = Buffer.concat(chunks);
+                successfulRestReads.set(cacheKey, { status, headers, body });
+                outgoing.writeHead(status, headers);
+                outgoing.end(body);
+                settle();
+              });
+              upstreamResponse.once("error", fail);
+              return;
+            }
+
+            outgoing.writeHead(status, headers);
             upstreamResponse.pipe(outgoing);
             upstreamResponse.once("end", settle);
             upstreamResponse.once("error", fail);
