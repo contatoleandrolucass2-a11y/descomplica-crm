@@ -97,6 +97,32 @@ const hopByHopHeaders = new Set([
   "upgrade",
 ]);
 
+const replayableRequestBodyLimit = 64 * 1024;
+const protectedReadCacheTtlMs = 5 * 60 * 1000;
+const restReadCacheHeaders = [
+  "accept",
+  "accept-encoding",
+  "accept-profile",
+  "apikey",
+  "content-profile",
+  "content-type",
+  "if-match",
+  "if-modified-since",
+  "if-none-match",
+  "if-range",
+  "if-unmodified-since",
+  "prefer",
+  "range",
+  "range-unit",
+];
+const restWriteMethods = new Set(["POST", "PATCH", "PUT", "DELETE"]);
+const protectedReadHeaders = restReadCacheHeaders;
+const protectedReadEndpoints = new Map([
+  ["GET /auth/v1/user", "authUser"],
+  ["POST /rest/v1/rpc/current_session_is_live", "sessionLive"],
+  ["POST /rest/v1/rpc/get_user_authorization_context", "authorizationContext"],
+]);
+
 function withoutHopByHopHeaders(headers) {
   const connectionTokens = new Set(
     String(headers.connection ?? "")
@@ -112,39 +138,416 @@ function withoutHopByHopHeaders(headers) {
   );
 }
 
-export async function startSerializedSupabaseProxy(targetOrigin) {
+function normalizedHeaderValue(value) {
+  return Array.isArray(value) ? value.join(",") : String(value ?? "");
+}
+
+function bearerTokenFromHeaders(headers) {
+  const authorization = normalizedHeaderValue(headers.authorization);
+  const match = /^Bearer\s+(.+)$/i.exec(authorization);
+  return match?.[1] ?? "";
+}
+
+function jwtExpirationMs(token) {
+  const payloadSegment = token.split(".")[1];
+  if (!payloadSegment) return null;
+
+  try {
+    const payload = JSON.parse(Buffer.from(payloadSegment, "base64url").toString("utf8"));
+    return Number.isFinite(payload?.exp) ? Number(payload.exp) * 1_000 : null;
+  } catch {
+    return null;
+  }
+}
+
+function boundedCacheExpiration(token, currentTime) {
+  const expiration = jwtExpirationMs(token);
+  if (!expiration || expiration <= currentTime) return null;
+  return Math.min(expiration, currentTime + protectedReadCacheTtlMs);
+}
+
+function protectedReadCacheKey({ method, url, token, headers, body }) {
+  const hash = createHash("sha256");
+  hash.update(method);
+  hash.update("\0");
+  hash.update(url);
+  hash.update("\0");
+  hash.update(token);
+  for (const header of protectedReadHeaders) {
+    hash.update("\0");
+    hash.update(header);
+    hash.update(":");
+    hash.update(normalizedHeaderValue(headers[header]));
+  }
+  hash.update("\0");
+  hash.update(body);
+  return hash.digest("hex");
+}
+
+function restReadCacheKey({ method, url, token, headers }) {
+  const hash = createHash("sha256");
+  hash.update(method);
+  hash.update("\0");
+  hash.update(url);
+  hash.update("\0");
+  hash.update(token);
+  for (const header of restReadCacheHeaders) {
+    hash.update("\0");
+    hash.update(header);
+    hash.update(":");
+    hash.update(normalizedHeaderValue(headers[header]));
+  }
+  return hash.digest("hex");
+}
+
+function isValidProtectedReadPayload(endpoint, body) {
+  let payload;
+  try {
+    payload = JSON.parse(body.toString("utf8"));
+  } catch {
+    return false;
+  }
+
+  if (endpoint === "authUser") {
+    return (
+      payload !== null &&
+      typeof payload === "object" &&
+      !Array.isArray(payload) &&
+      typeof payload.id === "string" &&
+      payload.id.length > 0
+    );
+  }
+  if (endpoint === "sessionLive") return payload === true;
+  return (
+    endpoint === "authorizationContext" &&
+    Array.isArray(payload) &&
+    payload.every((row) => row !== null && typeof row === "object" && !Array.isArray(row))
+  );
+}
+
+function isSuccessfulCacheInvalidatingMutation(method, url, status) {
+  if (status < 200 || status >= 300 || method === "GET" || method === "HEAD") return false;
+  if (url.pathname.startsWith("/auth/v1/")) return restWriteMethods.has(method);
+  return url.pathname.startsWith("/rest/v1/") && restWriteMethods.has(method);
+}
+
+function proxyFailureResponse() {
+  return {
+    status: 502,
+    headers: {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    body: Buffer.from('{"message":"Local QA authentication proxy failed."}'),
+  };
+}
+
+function readRequestBody(incoming) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    let settled = false;
+    incoming.on("data", (chunk) => {
+      if (settled) return;
+      const buffer = Buffer.from(chunk);
+      size += buffer.length;
+      if (size > replayableRequestBodyLimit) {
+        settled = true;
+        chunks.length = 0;
+        incoming.resume();
+        resolve(null);
+        return;
+      }
+      chunks.push(buffer);
+    });
+    incoming.once("end", () => {
+      if (settled) return;
+      settled = true;
+      resolve(Buffer.concat(chunks, size));
+    });
+    incoming.once("error", (error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    });
+    incoming.once("aborted", () => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("Local QA proxy request was aborted."));
+    });
+  });
+}
+
+function sendBufferedResponse(outgoing, response) {
+  if (outgoing.destroyed || outgoing.writableEnded) return;
+  outgoing.writeHead(response.status, response.headers);
+  outgoing.end(response.body);
+}
+
+export async function startSerializedSupabaseProxy(targetOrigin, options = {}) {
   const target = new URL(parseLoopbackHttpOrigin(targetOrigin, "Local Supabase proxy target"));
   const listenHostname = target.hostname === "[::1]" ? "::1" : target.hostname;
-  let authUserTail = Promise.resolve();
+  const now = typeof options.now === "function" ? options.now : Date.now;
+  const evidenceSalt = randomBytes(32);
+  let closed = false;
+  let closePromise = null;
+  let protectedReadTail = Promise.resolve();
+  let cacheGeneration = 0;
   const successfulRestReads = new Map();
+  const protectedReadCache = new Map();
+  const protectedReadInFlight = new Map();
+  const activeUpstreamRequests = new Set();
+  const retryTimers = new Set();
+  const pendingOperationCancels = new Set();
+  const tokenFingerprintsSeen = new Set();
+  const tokenFingerprintsWithUpstream = new Set();
+  const evidenceByEndpoint = Object.fromEntries(
+    [...protectedReadEndpoints.values()].map((endpoint) => [
+      endpoint,
+      {
+        requestsSeen: 0,
+        upstreamRequests: 0,
+        upstreamMiss200: 0,
+        cacheHits: 0,
+        singleFlightFollowers: 0,
+      },
+    ]),
+  );
+
+  const tokenFingerprint = (token) =>
+    createHash("sha256").update(evidenceSalt).update(token).digest("hex");
+  const invalidateCaches = () => {
+    cacheGeneration += 1;
+    successfulRestReads.clear();
+    protectedReadCache.clear();
+    protectedReadInFlight.clear();
+  };
+  const clearRetryTimer = (timer) => {
+    if (timer === null) return;
+    clearTimeout(timer);
+    retryTimers.delete(timer);
+  };
+  const scheduleRetryTimer = (callback, delay) => {
+    const timer = setTimeout(() => {
+      retryTimers.delete(timer);
+      callback();
+    }, delay);
+    retryTimers.add(timer);
+    return timer;
+  };
+  const trackUpstreamRequest = (request) => {
+    activeUpstreamRequests.add(request);
+    request.once("close", () => activeUpstreamRequests.delete(request));
+  };
+  const enqueueProtectedRead = (task) => {
+    const run = () => (closed ? proxyFailureResponse() : task());
+    const queued = protectedReadTail.then(run, run);
+    protectedReadTail = queued.catch(() => undefined);
+    return queued;
+  };
+
+  const requestBufferedUpstream = ({ incoming, body, retryable }) =>
+    new Promise((resolve) => {
+      const requestOptions = {
+        protocol: target.protocol,
+        hostname: target.hostname,
+        port: target.port,
+        method: incoming.method,
+        path: incoming.url,
+        headers: {
+          ...withoutHopByHopHeaders(incoming.headers),
+          host: target.host,
+        },
+      };
+      let settled = false;
+      let retryTimer = null;
+      const settle = (response) => {
+        if (settled) return;
+        settled = true;
+        clearRetryTimer(retryTimer);
+        pendingOperationCancels.delete(cancel);
+        resolve(response);
+      };
+      const cancel = () => settle(proxyFailureResponse());
+      pendingOperationCancels.add(cancel);
+      const forwardAttempt = (attempt) => {
+        if (closed) {
+          settle(proxyFailureResponse());
+          return;
+        }
+        let retryScheduled = false;
+        const scheduleRetry = () => {
+          if (settled || retryScheduled) return;
+          retryScheduled = true;
+          if (closed || !retryable || attempt >= 2) {
+            settle(proxyFailureResponse());
+            return;
+          }
+          retryTimer = scheduleRetryTimer(() => forwardAttempt(attempt + 1), (attempt + 1) * 250);
+        };
+        const upstream = requestHttp(requestOptions, (upstreamResponse) => {
+          if ((upstreamResponse.statusCode ?? 502) >= 500 && retryable && attempt < 2) {
+            upstreamResponse.resume();
+            upstreamResponse.once("end", scheduleRetry);
+            upstreamResponse.once("error", scheduleRetry);
+            return;
+          }
+
+          const chunks = [];
+          upstreamResponse.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+          upstreamResponse.once("end", () =>
+            settle({
+              status: upstreamResponse.statusCode ?? 502,
+              headers: withoutHopByHopHeaders(upstreamResponse.headers),
+              body: Buffer.concat(chunks),
+            }),
+          );
+          upstreamResponse.once("error", scheduleRetry);
+        });
+        trackUpstreamRequest(upstream);
+        upstream.setTimeout(60_000, () =>
+          upstream.destroy(new Error("Local QA Supabase upstream timed out.")),
+        );
+        upstream.once("error", scheduleRetry);
+        upstream.end(body);
+      };
+      forwardAttempt(0);
+    });
 
   const server = createHttpServer((incoming, outgoing) => {
     const incomingUrl = new URL(incoming.url ?? "/", target);
-    const serializeAuthUserRequest =
-      incoming.method === "GET" && incomingUrl.pathname === "/auth/v1/user";
+    const method = incoming.method ?? "GET";
+    if (closed) {
+      sendBufferedResponse(outgoing, proxyFailureResponse());
+      return;
+    }
+    const protectedEndpoint = protectedReadEndpoints.get(`${method} ${incomingUrl.pathname}`);
+    if (protectedEndpoint) {
+      void (async () => {
+        let body;
+        try {
+          body = await readRequestBody(incoming);
+        } catch {
+          sendBufferedResponse(outgoing, {
+            status: 502,
+            headers: {
+              "cache-control": "no-store",
+              "content-type": "application/json; charset=utf-8",
+            },
+            body: Buffer.from('{"message":"Local QA authentication proxy failed."}'),
+          });
+          return;
+        }
+        if (body === null) {
+          sendBufferedResponse(outgoing, {
+            status: 413,
+            headers: {
+              "cache-control": "no-store",
+              "content-type": "application/json; charset=utf-8",
+            },
+            body: Buffer.from('{"message":"Local QA proxy request body exceeds 64 KiB."}'),
+          });
+          return;
+        }
+
+        const token = bearerTokenFromHeaders(incoming.headers);
+        const fingerprint = token ? tokenFingerprint(token) : null;
+        if (fingerprint) tokenFingerprintsSeen.add(fingerprint);
+        evidenceByEndpoint[protectedEndpoint].requestsSeen += 1;
+        const requestGeneration = cacheGeneration;
+        const key = protectedReadCacheKey({
+          method,
+          url: incoming.url ?? "/",
+          token,
+          headers: incoming.headers,
+          body,
+        });
+        const currentTime = now();
+        const cached = protectedReadCache.get(key);
+        if (cached && cached.expiresAt > currentTime) {
+          evidenceByEndpoint[protectedEndpoint].cacheHits += 1;
+          sendBufferedResponse(outgoing, cached.response);
+          return;
+        }
+        if (cached) protectedReadCache.delete(key);
+
+        const inFlightKey = `${requestGeneration}:${key}`;
+        let sharedRequest = protectedReadInFlight.get(inFlightKey);
+        if (sharedRequest) {
+          evidenceByEndpoint[protectedEndpoint].singleFlightFollowers += 1;
+        } else {
+          sharedRequest = enqueueProtectedRead(async () => {
+            evidenceByEndpoint[protectedEndpoint].upstreamRequests += 1;
+            if (fingerprint) tokenFingerprintsWithUpstream.add(fingerprint);
+            const response = await requestBufferedUpstream({
+              incoming,
+              body,
+              retryable:
+                body.length <= replayableRequestBodyLimit &&
+                (method === "GET" ||
+                  method === "HEAD" ||
+                  protectedEndpoint === "sessionLive" ||
+                  protectedEndpoint === "authorizationContext"),
+            });
+            const responseTime = now();
+            const expiresAt = boundedCacheExpiration(token, responseTime);
+            if (
+              response.status === 200 &&
+              isValidProtectedReadPayload(protectedEndpoint, response.body)
+            ) {
+              evidenceByEndpoint[protectedEndpoint].upstreamMiss200 += 1;
+              if (
+                body.length <= replayableRequestBodyLimit &&
+                expiresAt &&
+                expiresAt > responseTime &&
+                requestGeneration === cacheGeneration
+              ) {
+                protectedReadCache.set(key, { expiresAt, response });
+              }
+            }
+            return response;
+          });
+          protectedReadInFlight.set(inFlightKey, sharedRequest);
+          void sharedRequest.finally(() => protectedReadInFlight.delete(inFlightKey));
+        }
+
+        sendBufferedResponse(outgoing, await sharedRequest);
+      })().catch(() => {
+        sendBufferedResponse(outgoing, {
+          status: 502,
+          headers: {
+            "cache-control": "no-store",
+            "content-type": "application/json; charset=utf-8",
+          },
+          body: Buffer.from('{"message":"Local QA authentication proxy failed."}'),
+        });
+      });
+      return;
+    }
+
     const retryableRequest = incoming.method === "GET" || incoming.method === "HEAD";
+    const restToken = bearerTokenFromHeaders(incoming.headers);
+    const restCacheExpiration = boundedCacheExpiration(restToken, now());
     const cacheableRestRead =
-      incoming.method === "GET" && incomingUrl.pathname.startsWith("/rest/v1/");
+      incoming.method === "GET" &&
+      incomingUrl.pathname.startsWith("/rest/v1/") &&
+      restCacheExpiration !== null;
     const cacheKey = cacheableRestRead
-      ? createHash("sha256")
-          .update(
-            JSON.stringify([
-              incoming.url,
-              incoming.headers.authorization ?? "",
-              incoming.headers.apikey ?? "",
-              incoming.headers.accept ?? "",
-              incoming.headers.range ?? "",
-              incoming.headers["accept-profile"] ?? "",
-            ]),
-          )
-          .digest("hex")
+      ? restReadCacheKey({
+          method,
+          url: incoming.url ?? "/",
+          token: restToken,
+          headers: incoming.headers,
+        })
       : null;
     const cachedResponse = cacheKey ? successfulRestReads.get(cacheKey) : null;
-    if (cachedResponse) {
+    if (cachedResponse && cachedResponse.expiresAt > now()) {
       outgoing.writeHead(cachedResponse.status, cachedResponse.headers);
       outgoing.end(cachedResponse.body);
       return;
     }
+    if (cacheKey && cachedResponse) successfulRestReads.delete(cacheKey);
+    const requestGeneration = cacheGeneration;
     const forward = () =>
       new Promise((resolve) => {
         if (incoming.destroyed || outgoing.destroyed) {
@@ -158,7 +561,8 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
         const settle = () => {
           if (settled) return;
           settled = true;
-          if (retryTimer !== null) clearTimeout(retryTimer);
+          clearRetryTimer(retryTimer);
+          pendingOperationCancels.delete(cancel);
           resolve();
         };
         const fail = () => {
@@ -173,6 +577,11 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
           }
           settle();
         };
+        const cancel = () => {
+          activeUpstream?.destroy(new Error("Local QA Supabase proxy closed."));
+          fail();
+        };
+        pendingOperationCancels.add(cancel);
         const requestOptions = {
           protocol: target.protocol,
           hostname: target.hostname,
@@ -185,15 +594,19 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
           },
         };
         const forwardAttempt = (attempt) => {
+          if (closed) {
+            fail();
+            return;
+          }
           let retryScheduled = false;
           const scheduleRetry = () => {
             if (settled || retryScheduled) return;
             retryScheduled = true;
-            if (!retryableRequest || attempt >= 2) {
+            if (closed || !retryableRequest || attempt >= 2) {
               fail();
               return;
             }
-            retryTimer = setTimeout(() => forwardAttempt(attempt + 1), (attempt + 1) * 250);
+            retryTimer = scheduleRetryTimer(() => forwardAttempt(attempt + 1), (attempt + 1) * 250);
           };
           const upstream = requestHttp(requestOptions, (upstreamResponse) => {
             if (outgoing.destroyed) {
@@ -210,12 +623,19 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
 
             const status = upstreamResponse.statusCode ?? 502;
             const headers = withoutHopByHopHeaders(upstreamResponse.headers);
+            if (isSuccessfulCacheInvalidatingMutation(method, incomingUrl, status)) {
+              invalidateCaches();
+            }
             if (cacheKey && status === 200) {
               const chunks = [];
               upstreamResponse.on("data", (chunk) => chunks.push(chunk));
               upstreamResponse.once("end", () => {
                 const body = Buffer.concat(chunks);
-                successfulRestReads.set(cacheKey, { status, headers, body });
+                const responseTime = now();
+                const expiresAt = boundedCacheExpiration(restToken, responseTime);
+                if (requestGeneration === cacheGeneration && expiresAt) {
+                  successfulRestReads.set(cacheKey, { status, headers, body, expiresAt });
+                }
                 outgoing.writeHead(status, headers);
                 outgoing.end(body);
                 settle();
@@ -230,6 +650,7 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
             upstreamResponse.once("error", fail);
           });
           activeUpstream = upstream;
+          trackUpstreamRequest(upstream);
           upstream.setTimeout(60_000, () =>
             upstream.destroy(new Error("Local QA Supabase upstream timed out.")),
           );
@@ -247,13 +668,6 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
         });
         forwardAttempt(0);
       });
-
-    if (serializeAuthUserRequest) {
-      const task = authUserTail.then(forward, forward);
-      authUserTail = task.catch(() => undefined);
-      return;
-    }
-
     void forward();
   });
 
@@ -267,16 +681,67 @@ export async function startSerializedSupabaseProxy(targetOrigin) {
     throw new Error("Could not start the local Supabase QA proxy.");
   }
 
-  let closed = false;
+  const evidence = () => ({
+    tokenCount: tokenFingerprintsSeen.size,
+    upstreamTokenCount: tokenFingerprintsWithUpstream.size,
+    allTokensHadUpstream: [...tokenFingerprintsSeen].every((fingerprint) =>
+      tokenFingerprintsWithUpstream.has(fingerprint),
+    ),
+    cacheHits: Object.values(evidenceByEndpoint).reduce(
+      (total, endpoint) => total + endpoint.cacheHits,
+      0,
+    ),
+    singleFlightFollowers: Object.values(evidenceByEndpoint).reduce(
+      (total, endpoint) => total + endpoint.singleFlightFollowers,
+      0,
+    ),
+    activeUpstreamRequests: activeUpstreamRequests.size,
+    retryTimers: retryTimers.size,
+    endpoints: Object.fromEntries(
+      Object.entries(evidenceByEndpoint).map(([endpoint, counts]) => [endpoint, { ...counts }]),
+    ),
+  });
   return {
     origin: `${target.protocol}//${target.hostname}:${address.port}`,
-    close: async () => {
-      if (closed) return;
-      closed = true;
-      await new Promise((resolve) => {
-        server.close(resolve);
-        server.closeAllConnections?.();
-      });
+    evidence,
+    assertEvidence: () => {
+      const snapshot = evidence();
+      if (
+        snapshot.tokenCount < 1 ||
+        !snapshot.allTokensHadUpstream ||
+        Object.values(snapshot.endpoints).some(
+          (endpoint) => endpoint.upstreamMiss200 < 1 || endpoint.cacheHits < 1,
+        )
+      ) {
+        throw new Error(`Local QA proxy evidence is incomplete (${JSON.stringify(snapshot)}).`);
+      }
+    },
+    close: () => {
+      closePromise ??= (async () => {
+        closed = true;
+        invalidateCaches();
+        for (const timer of retryTimers) clearRetryTimer(timer);
+        for (const cancel of [...pendingOperationCancels]) cancel();
+        const upstreamRequests = [...activeUpstreamRequests];
+        const upstreamRequestsClosed = Promise.all(
+          upstreamRequests.map(
+            (request) => new Promise((resolve) => request.once("close", resolve)),
+          ),
+        );
+        for (const request of upstreamRequests) {
+          request.destroy(new Error("Local QA Supabase proxy closed."));
+        }
+        const serverClosed = new Promise((resolve) => {
+          server.close(resolve);
+          server.closeAllConnections?.();
+        });
+        await Promise.all([
+          serverClosed,
+          upstreamRequestsClosed,
+          protectedReadTail.catch(() => undefined),
+        ]);
+      })();
+      return closePromise;
     },
   };
 }
@@ -1687,6 +2152,7 @@ async function main() {
         account,
         marker,
       });
+      supabaseProxy.assertEvidence();
     } finally {
       await cleanup();
     }
