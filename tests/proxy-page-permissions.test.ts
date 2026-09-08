@@ -52,7 +52,6 @@ describe("pre-stream page permission gates", () => {
     ["/app/simulacao/associativo-fluxo-linear", "crm.simulators.view"],
     ["/app/simulacao/tabela-direta", "crm.simulators.view"],
     ["/app/simulacao/tabela-investidor", "crm.simulators.view"],
-    ["/data/investor-inventory.json", "crm.simulators.view"],
     ["/admin", "admin.access"],
     ["/admin/usuarios", "users.view"],
     ["/admin/paginas", "pages.manage"],
@@ -85,24 +84,15 @@ describe("pre-stream page permission gates", () => {
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
-  it("blocks the inventory snapshot when there is no authenticated user", async () => {
+  it("lets the removed legacy public snapshot path resolve as a normal 404", async () => {
     configureSession([]);
-    mocks.getUser.mockResolvedValueOnce({ data: { user: null }, error: null });
 
     const response = await proxy(new NextRequest(`${origin}/data/investor-inventory.json`));
 
-    expect(response.status).toBe(403);
-    expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);
-  });
-
-  it("fails closed for the inventory snapshot when authorization context is empty", async () => {
-    configureSession(["crm.simulators.view"]);
-    mocks.rpc.mockResolvedValueOnce({ data: [], error: null });
-
-    const response = await proxy(new NextRequest(`${origin}/data/investor-inventory.json`));
-
-    expect(response.status).toBe(403);
-    expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
+    expect(mocks.getUser).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
   it.each(["/app/simulacao/calcular-documentacao", "/app/simulacao/caixa"])(

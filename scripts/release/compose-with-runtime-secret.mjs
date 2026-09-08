@@ -149,7 +149,12 @@ async function main() {
     fail("Runtime environment does not declare the approved secret source.");
   }
   await validateOwnedFile(configuration.secret, 0o640, 0, "Runtime secret file");
-  await validateInventorySnapshot(configuration.inventorySnapshot);
+  // Recovery and inspection commands must remain available even if the
+  // application data mount is missing or damaged. Only a start can expose the
+  // snapshot to the runtime, so enforce its integrity immediately before up.
+  if (command === "up") {
+    await validateInventorySnapshot(configuration.inventorySnapshot);
+  }
   const secretBytes = await readFile(configuration.secret);
   const contentLength =
     secretBytes.at(-1) === 0x0a

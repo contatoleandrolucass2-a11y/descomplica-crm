@@ -87,14 +87,6 @@ function permissionRequiredBeforeStreaming(pathname: string): {
   releaseEnabled: boolean;
   requireAuthenticated?: boolean;
 } | null {
-  if (pathname === "/data/investor-inventory.json") {
-    return {
-      permission: "crm.simulators.view",
-      releaseEnabled: true,
-      requireAuthenticated: true,
-    };
-  }
-
   const pageGate = getProtectedPageGate(pathname);
   if (pageGate) return pageGate;
 

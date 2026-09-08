@@ -97,6 +97,7 @@ describe("promotable image contract", () => {
     expect(wrapper).toContain("Inventory snapshot directory must be root-owned with mode 0710.");
     expect(wrapper).toContain("Inventory snapshot digest is invalid.");
     expect(wrapper).toContain("Inventory snapshot contents are invalid.");
+    expect(wrapper).toContain('if (command === "up")');
     expect(wrapper.match(/environmentMode: 0o600/gu)).toHaveLength(2);
     expect(wrapper.match(/environmentGroup: "root"/gu)).toHaveLength(2);
     expect(wrapper).toContain("path must not be a symlink.");
