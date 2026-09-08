@@ -46,14 +46,17 @@ function isMissingOnboardingFoundation(code: string | undefined) {
 export default async function UsersAdminPage() {
   const context = await enforcePermission("users.view");
   const supabase = await createClient();
-  const [profilesResult, rolesResult, overridesResult] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("user_id,email,is_active,created_at,access_status")
-      .order("created_at", { ascending: false }),
-    supabase.from("user_roles").select("user_id,role_key"),
-    supabase.from("user_permission_overrides").select("user_id,permission_key,effect,reason"),
-  ]);
+  // These reads each execute scoped RLS policies. Keeping them serial avoids
+  // multiplying policy work against the same small PostgREST pool while
+  // preserving the exact rows and authorization boundary.
+  const profilesResult = await supabase
+    .from("profiles")
+    .select("user_id,email,is_active,created_at,access_status")
+    .order("created_at", { ascending: false });
+  const rolesResult = await supabase.from("user_roles").select("user_id,role_key");
+  const overridesResult = await supabase
+    .from("user_permission_overrides")
+    .select("user_id,permission_key,effect,reason");
 
   // The approved app-first train must remain readable before the additive
   // onboarding foundation reaches production. Fall back only for the exact
