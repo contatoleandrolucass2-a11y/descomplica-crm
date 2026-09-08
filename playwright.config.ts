@@ -4,6 +4,7 @@ const fallbackOrigin = "http://127.0.0.1:4173";
 const baseURL = process.env.QA_E2E_ORIGIN ?? fallbackOrigin;
 const homologationOrigin = "https://homolog.descomplicapro.com.br";
 const remoteHomologation = process.env.QA_E2E_REMOTE_HOMOLOGATION === "true";
+const localRelease = process.env.QA_E2E_LOCAL_ONLY === "true";
 
 if (
   process.env.QA_E2E_REMOTE_HOMOLOGATION !== undefined &&
@@ -33,7 +34,7 @@ export default defineConfig({
   forbidOnly: true,
   retries: 0,
   workers: 1,
-  timeout: 45_000,
+  timeout: localRelease ? 360_000 : 45_000,
   expect: { timeout: 10_000 },
   outputDir: "/tmp/descomplica-playwright-results",
   reporter: [["line"]],

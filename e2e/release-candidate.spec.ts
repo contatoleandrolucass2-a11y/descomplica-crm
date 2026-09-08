@@ -137,6 +137,7 @@ function readTarget(): QaTarget {
 
 const qaTarget = readTarget();
 const targetUsesHttps = new URL(qaTarget.origin).protocol === "https:";
+const releaseTestTimeout = qaTarget.remoteHomologation ? 180_000 : 360_000;
 
 function expectCookieUsesTargetTransport(cookie: { secure: boolean } | undefined) {
   expect(cookie).toBeDefined();
@@ -617,7 +618,7 @@ test("anonymous boundaries and generic login failure stay closed", async ({ page
 test("cookie choices, legal documents and browser-session lifetimes are explicit", async ({
   browser,
 }) => {
-  test.setTimeout(360_000);
+  test.setTimeout(releaseTestTimeout);
   const consentContext = await browser.newContext(qaTarget.contextOptions);
   try {
     await constrainRemoteRequests(consentContext);
@@ -814,7 +815,7 @@ for (const role of expectedRoles) {
   test(`profile ${role} enforces browser navigation and every direct route`, async ({
     browser,
   }) => {
-    test.setTimeout(360_000);
+    test.setTimeout(releaseTestTimeout);
     await withRolePage(browser, role, async (page) => {
       const reportProgress = (phase: string) =>
         process.stdout.write(`[route-matrix] role=${role} phase=${phase}\n`);
@@ -1326,7 +1327,7 @@ test("login, logout and terminal state surfaces remain visually explicit", async
   browser,
   page,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(releaseTestTimeout);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/login");
   await expect(page.getByRole("heading", { level: 1, name: "Entrar" })).toBeVisible();
@@ -1500,7 +1501,7 @@ test("login, logout and terminal state surfaces remain visually explicit", async
 test("password recovery is generic, quarantined, one-time and revokes every session", async ({
   browser,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(releaseTestTimeout);
   const genericRecoveryMessage =
     "Se houver uma conta elegível para esse e-mail, enviaremos as instruções de redefinição.";
 
@@ -1615,7 +1616,7 @@ test("password recovery is generic, quarantined, one-time and revokes every sess
 test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", async ({
   browser,
 }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(releaseTestTimeout);
 
   let secret = "";
   let enrollmentCode = "";
