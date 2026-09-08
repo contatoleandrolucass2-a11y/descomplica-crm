@@ -35,7 +35,7 @@ export default defineConfig({
   retries: 0,
   workers: 1,
   timeout: localRelease ? 360_000 : 45_000,
-  expect: { timeout: 10_000 },
+  expect: { timeout: localRelease ? 60_000 : 10_000 },
   outputDir: "/tmp/descomplica-playwright-results",
   reporter: [["line"]],
   use: {
