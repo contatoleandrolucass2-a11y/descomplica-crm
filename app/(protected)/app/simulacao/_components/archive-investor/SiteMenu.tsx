@@ -5,7 +5,7 @@ import { ThemeSwitch } from "./ThemeSwitch";
 import { usePathname } from "next/navigation";
 import { useDismissiblePopover } from "./useDismissiblePopover";
 
-export function SiteMenu() {
+export function SiteMenu({ canPersistTheme = true }: { canPersistTheme?: boolean }) {
   const pathname = usePathname();
   const protectedPathname = pathname.startsWith("/app/") ? pathname.slice(4) : pathname;
   const proposalFile =
@@ -77,11 +77,9 @@ export function SiteMenu() {
           </a>
           <a
             role="menuitem"
-            aria-current={
-              activePathname === "/simulacao/calcular-documentacao" ? "page" : undefined
-            }
+            aria-disabled="true"
+            title="Disponível em um próximo incremento"
             onClick={() => setSimulationOpen(false)}
-            href="/app/simulacao/calcular-documentacao"
           >
             Calcular documentação
           </a>
@@ -95,9 +93,9 @@ export function SiteMenu() {
           </a>
           <a
             role="menuitem"
-            aria-current={pathname === "/simulacao/tabela" ? "page" : undefined}
+            aria-current={activePathname === "/simulacao" ? "page" : undefined}
             onClick={() => setSimulationOpen(false)}
-            href="/simulacao/tabela"
+            href="/app/simulacao"
           >
             Tabelão
           </a>
@@ -154,16 +152,14 @@ export function SiteMenu() {
         Canal de Parcerias
       </a>
       <a
-        href="/previsao-final-de-semana"
-        aria-current={pathname === "/previsao-final-de-semana" ? "page" : undefined}
-        className={isRouteActive("/previsao-final-de-semana") ? "is-active" : undefined}
+        aria-disabled="true"
+        title="Disponível em um próximo incremento"
       >
         Previsão final de semana
       </a>
       <a
-        aria-current={isRouteActive("/discador") ? "page" : undefined}
-        className={isRouteActive("/discador") ? "is-active" : undefined}
-        href="/discador"
+        aria-disabled="true"
+        title="Disponível em um próximo incremento"
       >
         Discador
       </a>
@@ -208,7 +204,7 @@ export function SiteMenu() {
           </a>
         </div>
       </div>
-      <ThemeSwitch />
+      <ThemeSwitch canPersist={canPersistTheme} />
     </nav>
   );
 }

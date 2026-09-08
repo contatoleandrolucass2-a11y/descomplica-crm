@@ -10,6 +10,7 @@ import styles from "./ProtectedShell.module.css";
 
 const ARCHIVE_SIMULATOR_ROUTES = new Set([
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
 ]);
 
@@ -30,7 +31,9 @@ export function AuthorizedBreadcrumbs({ pages }: { pages: AppPage[] }) {
               {current ? (
                 <span aria-current="page">{page.name}</span>
               ) : (
-                <Link href={page.path}>{page.name}</Link>
+                <Link href={page.path} prefetch={false}>
+                  {page.name}
+                </Link>
               )}
             </li>
           );

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 // @ts-expect-error — módulo de regras preservado do artefato anexado em JavaScript.
@@ -18,6 +18,8 @@ const baseFlow = {
   signals: [0, 0, 0],
   intermediaries: [0, 0, 0],
 };
+const privateSnapshotUrl = new URL("../private-data/investor-inventory.json", import.meta.url);
+const itWithPrivateSnapshot = existsSync(privateSnapshotUrl) ? it : it.skip;
 
 describe("Tabela Investidor do arquivo anexado", () => {
   it("publica o conteúdo completo na rota protegida e no item correto do menu", () => {
@@ -94,10 +96,8 @@ describe("Tabela Investidor do arquivo anexado", () => {
     ).toBe(true);
   });
 
-  it("valida o snapshot completo e exclui somente vagas avulsas", () => {
-    const payload = JSON.parse(
-      readFileSync(new URL("../public/data/investor-inventory.json", import.meta.url), "utf8"),
-    ) as {
+  itWithPrivateSnapshot("valida o snapshot completo e exclui somente vagas avulsas", () => {
+    const payload = JSON.parse(readFileSync(privateSnapshotUrl, "utf8")) as {
       count: number;
       items: Array<{
         id: string;

@@ -17,7 +17,7 @@ Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 
 | Grupo de papéis                                                             | Páginas herdadas                                                                   | Administração                                       |
 | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `master`                                                                    | 17: catálogo produtivo, Canal, hub/WF13 e três páginas administrativas             | usuários, papéis, exceções e catálogo               |
+| `master`                                                                    | 17 do catálogo produtivo + réplica protegida WF14                                  | usuários, papéis, exceções e catálogo               |
 | `admin`                                                                     | 14: Dashboard, cinco etapas, Ranking, Configurações e três páginas administrativas | escopada; intake somente com `crm_people` confiável |
 | `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | 7: Dashboard, cinco etapas e Ranking                                               | nenhuma                                             |
 | `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                                             | nenhuma                                             |
@@ -93,11 +93,14 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 - hub de simulação e a jornada WF13;
 - início administrativo, usuários e catálogo de páginas.
 
-O inventário HTTP continua cobrindo 21 rotas protegidas. WF16, CAIXA e WF14
-permanecem versionados no código para incrementos futuros, sem linha em
-`app_pages`, e retornam `403` mesmo ao Master. O WF15 continua fora do catálogo
-PostgreSQL, mas sua réplica é publicada no hub e no menu próprio de Simulação;
-o guard server-side exige `crm.simulators.view`.
+O inventário HTTP continua cobrindo 21 rotas protegidas: 17 correspondem ao
+catálogo PostgreSQL, as réplicas WF14 e WF15 são rotas adicionais habilitadas
+no catálogo HTTP versionado e WF16 e CAIXA permanecem bloqueados. As quatro
+rotas continuam sem linha em `app_pages`; WF16 e CAIXA retornam `403` mesmo ao
+Master. WF14 e WF15 permanecem fora de `app_pages` para não alterar o banco
+neste candidato, mas suas réplicas integrais estão publicadas no hub e no menu
+próprio de Simulação. O guard server-side de ambas exige a permissão existente
+`crm.simulators.view`.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
 de integração pendente. A rota de produção continua exigindo
@@ -110,18 +113,30 @@ continua separada e só retorna entries com ID Qlik mapeado, owner ativo,
 vigência e organização dentro do escopo aprovado; ela não é a fonte da página
 v3.
 
-O hub, WF13 e WF15 exigem `crm.simulators.view`. Durante o canário WF13, essa permissão
-é nível 100 e pertence somente ao Master, sem overrides diretos. O gate de
-página permanece separado de `crm.simulators.execute`; possuir um não substitui
-o outro. Somente o motor oficial WF13 pode executar quando sua flag explícita
-também está ativa. A réplica WF15 calcula no navegador, sem persistência ou
-integração; WF16, CAIXA e WF14 ficam fora do catálogo e continuam bloqueados.
+O hub, WF13 e as réplicas WF14 e WF15 exigem `crm.simulators.view`. Durante o
+canário WF13, essa permissão é nível 100 e pertence somente ao Master, sem
+overrides diretos. O gate de página permanece separado de
+`crm.simulators.execute`; possuir um não substitui o outro. Somente o motor
+oficial WF13 pode executar quando sua flag explícita também está ativa. As
+réplicas WF14 e WF15 calculam no navegador, sem persistência ou integração. O
+WF14 usa o snapshot SPC mantido em volume privado fora do Git e montado somente
+para leitura. O endpoint primário `GET /api/inventory/snapshot` repete o gate
+`crm.simulators.view` e responde com `no-store`. A Tabela Direta falha fechado
+se esse endpoint não estiver disponível; `GET /api/inventory` também permanece
+protegido e `no-store`, mas não é fallback do WF14. O WF15 apresenta primeiro o
+snapshot protegido e trata a fonte viva como atualização não bloqueante. WF16 e
+CAIXA continuam bloqueados.
 
 Falta de permissão autenticada usa o interruptor `forbidden()` do Next.js e
 retorna a superfície `AUTH-403`; caminhos realmente inexistentes usam
 `ROUTE-404`, e falhas inesperadas permanecem 500 com mensagem distinta.
 
-O menu consulta somente páginas ativas, marcadas para navegação e permitidas pela RLS. Ocultar um item não concede nem revoga acesso: cada rota mantém sua guarda server-side e cada operação de dados mantém grants, RLS ou RPC próprios.
+A navegação global do shell consulta somente páginas ativas, marcadas para
+navegação e permitidas pela RLS. Essa regra não descreve o menu interno de
+Simulação, que preserva a taxonomia visual do artefato e mantém destinos futuros
+explicitamente desabilitados. Ocultar ou exibir um item em qualquer menu não
+concede nem revoga acesso: cada rota mantém sua guarda server-side e cada
+operação de dados mantém grants, RLS ou RPC próprios.
 
 ## Operações administrativas
 

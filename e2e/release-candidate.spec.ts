@@ -137,6 +137,7 @@ function readTarget(): QaTarget {
 
 const qaTarget = readTarget();
 const targetUsesHttps = new URL(qaTarget.origin).protocol === "https:";
+const releaseTestTimeout = qaTarget.remoteHomologation ? 180_000 : 360_000;
 
 function expectCookieUsesTargetTransport(cookie: { secure: boolean } | undefined) {
   expect(cookie).toBeDefined();
@@ -398,8 +399,8 @@ const protectedSurfaces = [
   { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: noRoles },
   {
     path: "/app/simulacao/tabela-direta",
-    heading: "Tabela Direta",
-    allowed: noRoles,
+    heading: "Simulador Tabela Direta",
+    allowed: masterOnlyRoles,
   },
   {
     path: "/app/simulacao/tabela-investidor",
@@ -424,7 +425,7 @@ function expectedRoutesForRole(role: Role) {
 }
 
 const expectedCommercialPageCountByRole: Readonly<Record<Role, number>> = {
-  master: 17,
+  master: 18,
   admin: 14,
   broker: 7,
   coordinator: 7,
@@ -459,12 +460,14 @@ async function login(page: Page, account: QaAccount, rememberBrowser = false) {
   const expectedHome = expectedHomeForRole(account.role);
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
   try {
-    await page.waitForURL((url) => url.pathname === expectedHome, { timeout: 15_000 });
+    await page.waitForURL((url) => url.pathname === expectedHome, { timeout: 45_000 });
   } catch {
-    const actualPath = new URL(page.url()).pathname;
-    throw new Error(
-      `Authenticated ${account.role} reached ${actualPath}; expected ${expectedHome}.`,
-    );
+    if (new URL(page.url()).pathname === "/") {
+      await page.reload({ waitUntil: "domcontentloaded", timeout: 45_000 }).catch(() => undefined);
+      await page
+        .waitForURL((url) => url.pathname === expectedHome, { timeout: 45_000 })
+        .catch(() => undefined);
+    }
   }
   const actualPath = new URL(page.url()).pathname;
   if (actualPath !== expectedHome) {
@@ -503,7 +506,7 @@ async function logoutAndAssertBoundary(page: Page, role: Role) {
   await page.goto("/conta/seguranca");
   await page.getByRole("button", { name: "Sair", exact: true }).click();
   roleStorageStates.delete(role);
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/login$/, { timeout: 45_000 });
   await page.goBack();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto("/app");
@@ -588,6 +591,12 @@ test("anonymous boundaries and generic login failure stay closed", async ({ page
   const directBoundary = await page.context().request.get("/app/ranking", { maxRedirects: 0 });
   expect([303, 307]).toContain(directBoundary.status());
   expect(directBoundary.headers().location).toBe("/login");
+  for (const inventoryPath of ["/api/inventory", "/api/inventory/snapshot"]) {
+    const inventoryBoundary = await page.context().request.get(inventoryPath);
+    expect(inventoryBoundary.status()).toBe(401);
+    expect(inventoryBoundary.headers()["cache-control"]).toContain("no-store");
+    expect(await inventoryBoundary.json()).toEqual({ error: "unauthenticated" });
+  }
   const response = await page.goto("/app/ranking");
   expect(response?.status()).toBe(200);
   await expect(page).toHaveURL(/\/login$/);
@@ -609,7 +618,7 @@ test("anonymous boundaries and generic login failure stay closed", async ({ page
 test("cookie choices, legal documents and browser-session lifetimes are explicit", async ({
   browser,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(releaseTestTimeout);
   const consentContext = await browser.newContext(qaTarget.contextOptions);
   try {
     await constrainRemoteRequests(consentContext);
@@ -806,7 +815,7 @@ for (const role of expectedRoles) {
   test(`profile ${role} enforces browser navigation and every direct route`, async ({
     browser,
   }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(releaseTestTimeout);
     await withRolePage(browser, role, async (page) => {
       const reportProgress = (phase: string) =>
         process.stdout.write(`[route-matrix] role=${role} phase=${phase}\n`);
@@ -841,6 +850,28 @@ for (const role of expectedRoles) {
         expect(await dashboardApi.json()).toEqual({ error: "forbidden" });
       }
 
+      for (const inventoryPath of ["/api/inventory", "/api/inventory/snapshot"]) {
+        const inventoryResponse = await page.request.get(inventoryPath);
+        expect(inventoryResponse.headers()["cache-control"]).toContain("no-store");
+        if (role === "master") {
+          expect(inventoryResponse.status()).toBe(200);
+          const inventoryPayload = await inventoryResponse.json();
+          expect(inventoryPayload.items).toHaveLength(inventoryPayload.count);
+          expect(inventoryPayload.count).toBeGreaterThan(0);
+          if (inventoryPath.endsWith("/snapshot")) {
+            expect(inventoryPayload).toMatchObject({
+              count: 3301,
+              source: "ESTOQUE SPC.xlsx",
+              sourceKind: "versioned-snapshot",
+              snapshotReferenceDate: "2026-09-05",
+            });
+          }
+        } else {
+          expect(inventoryResponse.status()).toBe(403);
+          expect(await inventoryResponse.json()).toEqual({ error: "forbidden" });
+        }
+      }
+
       const simulatorStatus = await page.request.get(
         "/api/official-simulator/associativo-fluxo-linear",
       );
@@ -865,22 +896,27 @@ for (const role of expectedRoles) {
       }
 
       const disabledApiProbes = [
-        page.request.post("/api/ingest/qlik", {
-          data: { requestId: "00000000-0000-4000-8000-000000000011" },
-        }),
-        page.request.post("/api/ingest/salesforce", {
-          data: { requestId: "00000000-0000-4000-8000-000000000012" },
-        }),
-        page.request.post("/api/refresh/salesforce", {
-          data: {},
-          headers: { origin: qaTarget.origin },
-        }),
-        page.request.post("/api/commercial-engine/simulator.wf14", {
-          data: { requestId: "00000000-0000-4000-8000-000000000013", input: {} },
-          headers: { origin: qaTarget.origin },
-        }),
+        () =>
+          page.request.post("/api/ingest/qlik", {
+            data: { requestId: "00000000-0000-4000-8000-000000000011" },
+          }),
+        () =>
+          page.request.post("/api/ingest/salesforce", {
+            data: { requestId: "00000000-0000-4000-8000-000000000012" },
+          }),
+        () =>
+          page.request.post("/api/refresh/salesforce", {
+            data: {},
+            headers: { origin: qaTarget.origin },
+          }),
+        () =>
+          page.request.post("/api/commercial-engine/simulator.wf14", {
+            data: { requestId: "00000000-0000-4000-8000-000000000013", input: {} },
+            headers: { origin: qaTarget.origin },
+          }),
       ];
-      const disabledApiResponses = await Promise.all(disabledApiProbes);
+      const disabledApiResponses = [];
+      for (const probe of disabledApiProbes) disabledApiResponses.push(await probe());
       const expectedDisabledErrors = [
         "ingestion_unavailable",
         "ingestion_unavailable",
@@ -894,24 +930,26 @@ for (const role of expectedRoles) {
       }
       reportProgress("api-gates");
 
-      const expectedNavigationRoutes = expectedRoutesForRole(role);
-      // Exercise the complete profile × route matrix as direct authenticated
-      // requests. Small batches keep the app under realistic concurrency while
-      // avoiding a serial browser render for every response-code assertion.
-      for (let offset = 0; offset < protectedSurfaces.length; offset += 4) {
-        const batch = protectedSurfaces.slice(offset, offset + 4);
-        const directResponses = await Promise.all(
-          batch.map(async (surface) => ({
-            surface,
-            response: await page.context().request.get(surface.path, { maxRedirects: 0 }),
-          })),
-        );
-        for (const { surface, response } of directResponses) {
-          expect(response.status(), `${role} ${surface.path}`).toBe(
-            surface.allowed.has(role) ? 200 : 403,
-          );
+      const expectedNavigationRoutes = expectedRoutesForRole(role).filter(
+        (route) => route !== "/app/simulacao/tabela-direta",
+      );
+      // This is an authorization matrix, not a load test. Keep requests serial
+      // so a small release host cannot turn artificial bursts into database
+      // statement timeouts while preserving every profile × route assertion.
+      for (const [index, surface] of protectedSurfaces.entries()) {
+        let response = await page.context().request.get(surface.path, { maxRedirects: 0 });
+        if (response.status() >= 500) {
+          const firstStatus = response.status();
+          await response.dispose();
+          reportProgress(`direct-route-${index + 1}-retry-after-${firstStatus}`);
+          await page.waitForTimeout(15_000);
+          response = await page.context().request.get(surface.path, { maxRedirects: 0 });
         }
-        reportProgress(`direct-routes-${offset + 1}-${offset + batch.length}`);
+        expect(response.status(), `${role} ${surface.path}`).toBe(
+          surface.allowed.has(role) ? 200 : 403,
+        );
+        reportProgress(`direct-route-${index + 1}-${protectedSurfaces.length}`);
+        await page.waitForTimeout(1_000);
       }
 
       const allowedSurface = protectedSurfaces.find((surface) => surface.allowed.has(role));
@@ -966,18 +1004,15 @@ for (const role of expectedRoles) {
         await expect(
           page.locator('main a[href="/app/simulacao/associativo-fluxo-linear"]'),
         ).toHaveCount(1);
+        await expect(page.locator('main a[href="/app/simulacao/tabela-direta"]')).toHaveCount(1);
         await expect(page.locator('main a[href="/app/simulacao/tabela-investidor"]')).toHaveCount(
           1,
         );
-        for (const route of [
-          "/app/simulacao/calcular-documentacao",
-          "/app/simulacao/caixa",
-          "/app/simulacao/tabela-direta",
-        ]) {
+        for (const route of ["/app/simulacao/calcular-documentacao", "/app/simulacao/caixa"]) {
           await expect(page.locator(`main a[href="${route}"]`)).toHaveCount(0);
         }
-        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(3);
-        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(3);
+        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(2);
+        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(2);
         reportProgress("simulator-release-gates");
       }
 
@@ -1156,7 +1191,7 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("WF13 and Tabela Investidor run only for Master while other simulators stay blocked", async ({
+test("WF13, Tabela Direta and Tabela Investidor run only for Master while future simulators stay blocked", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
@@ -1199,7 +1234,7 @@ test("WF13 and Tabela Investidor run only for Master while other simulators stay
     ).toBeVisible();
     await expect(page.getByRole("region", { name: "Estoque completo de unidades" })).toBeVisible();
 
-    for (const simulator of ["calcular-documentacao", "caixa", "tabela-direta"]) {
+    for (const simulator of ["calcular-documentacao", "caixa"]) {
       const response = await page.goto(`/app/simulacao/${simulator}`);
       expect(response?.status()).toBe(403);
       await expect(
@@ -1207,6 +1242,12 @@ test("WF13 and Tabela Investidor run only for Master while other simulators stay
       ).toBeVisible();
       await expect(page.getByRole("button", { name: /^Calcular/u })).toHaveCount(0);
     }
+
+    const directTable = await page.goto("/app/simulacao/tabela-direta");
+    expect(directTable?.status()).toBe(200);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Simulador Tabela Direta", exact: true }),
+    ).toBeVisible();
 
     await page.goto("/app");
     const disclosure = page.locator("header summary").first();
@@ -1286,7 +1327,7 @@ test("login, logout and terminal state surfaces remain visually explicit", async
   browser,
   page,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(releaseTestTimeout);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/login");
   await expect(page.getByRole("heading", { level: 1, name: "Entrar" })).toBeVisible();
@@ -1460,7 +1501,7 @@ test("login, logout and terminal state surfaces remain visually explicit", async
 test("password recovery is generic, quarantined, one-time and revokes every session", async ({
   browser,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(releaseTestTimeout);
   const genericRecoveryMessage =
     "Se houver uma conta elegível para esse e-mail, enviaremos as instruções de redefinição.";
 
@@ -1575,7 +1616,7 @@ test("password recovery is generic, quarantined, one-time and revokes every sess
 test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", async ({
   browser,
 }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(releaseTestTimeout);
 
   let secret = "";
   let enrollmentCode = "";

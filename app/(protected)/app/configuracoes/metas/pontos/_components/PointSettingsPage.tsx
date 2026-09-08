@@ -139,6 +139,7 @@ export async function PointSettingsPage({
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className="group rounded-2xl bg-white/[0.07] px-4 py-3 text-sm text-white ring-1 ring-white/10 transition hover:bg-white/15 hover:ring-white/20"
               >
                 <span className="flex items-center justify-between gap-3">
@@ -155,6 +156,7 @@ export async function PointSettingsPage({
             ))}
             <Link
               href="/app/configuracoes/metas/pontos"
+              prefetch={false}
               aria-current="page"
               className="rounded-2xl bg-[var(--analytics-cyan)] px-4 py-3 text-sm text-[var(--analytics-navy)] shadow-lg ring-1 shadow-cyan-950/20 ring-cyan-100/50"
             >

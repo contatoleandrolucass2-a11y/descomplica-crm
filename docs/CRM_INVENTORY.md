@@ -1,6 +1,6 @@
 # Inventário oficial da referência viva e do CRM seguro
 
-Data de corte: 2026-08-09. Referência visual: `https://descomplicapro.com.br/`.
+Data de corte: 2026-09-06. Referência visual: `https://descomplicapro.com.br/`.
 
 Este inventário substitui o levantamento de 2026-08-04 baseado apenas no
 checkpoint `checkpoint/crm-original-2026-08-03`. O checkpoint continua útil para
@@ -43,18 +43,29 @@ existe.
 | REF-10 | `/configuracoes/metas`                | Metas do funil          | `/app/configuracoes/metas`                | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
 | REF-11 | `/configuracoes/metas/parcerias`      | Metas de parcerias      | `/app/configuracoes/metas/parcerias`      | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
 | REF-12 | `/configuracoes/metas/pontos`         | Pesos e metas de pontos | `/app/configuracoes/metas/pontos`         | `crm.settings.manage`   | Preview e rascunho versionado; ranking segue bloqueado  |
-| REF-13 | `/simulacao`                          | Índice de simuladores   | `/app/simulacao`                          | `crm.simulators.view`   | Hub visual concluído; motores bloqueados                |
+| REF-13 | `/simulacao`                          | Índice de simuladores   | `/app/simulacao`                          | `crm.simulators.view`   | Hub visual; WF13 canário e réplicas WF14 e WF15         |
 | REF-14 | `/simulacao/associativo-fluxo-linear` | Simulador Associativo   | `/app/simulacao/associativo-fluxo-linear` | `crm.simulators.view`   | Fórmula `wf13-1.3.0`; execução isolada Master-only      |
 | REF-15 | `/simulacao/calcular-documentacao`    | Documentação WF16       | `/app/simulacao/calcular-documentacao`    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
 | REF-16 | `/simulacao/caixa`                    | Simulador CAIXA         | `/app/simulacao/caixa`                    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
-| REF-17 | `/simulacao/tabela-direta`            | Tabela Direta WF14      | `/app/simulacao/tabela-direta`            | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
-| REF-18 | `/simulacao/tabela-investidor`        | Tabela Investidor WF15  | `/app/simulacao/tabela-investidor`        | `crm.simulators.view`   | Réplica funcional completa; snapshot SPC versionado     |
+| REF-17 | `/simulacao/tabela-direta`            | Tabela Direta WF14      | `/app/simulacao/tabela-direta`            | `crm.simulators.view`   | Réplica integral implementada neste candidato           |
+| REF-18 | `/simulacao/tabela-investidor`        | Tabela Investidor WF15  | `/app/simulacao/tabela-investidor`        | `crm.simulators.view`   | Réplica funcional completa implementada                 |
 
 O mapeamento WF13, WF16, WF14 e WF15 acima foi aprovado explicitamente para
-esta etapa. Ele identifica as jornadas visuais, não homologa fórmulas. O WF15
-reproduz o artefato anexado com cálculo local, sem persistência nem integração;
-seus parâmetros não são classificados como política oficial. WF16, CAIXA e
-WF14 continuam indisponíveis até um incremento com fonte oficial.
+esta etapa. Ele identifica as jornadas protegidas e visuais, não homologa
+fórmulas. WF14 e WF15 reproduzem integralmente os respectivos artefatos anexados
+com cálculo local, sem persistência nem integração; seus parâmetros preservados
+não são promovidos a política oficial do runtime comercial. WF16 e CAIXA
+continuam indisponíveis até incrementos próprios com fonte aprovada.
+
+O snapshot SPC usado pelas réplicas não é conteúdo público nem artefato da
+imagem. O arquivo fica fora do Git em volume privado do host, é validado por
+checksum antes do start e montado somente para leitura no contêiner. A
+aplicação o entrega apenas após autorização server-side e nunca permite cache
+HTTP. O WF14 aceita somente esse snapshot; o WF15 o apresenta primeiro e pode
+receber a atualização protegida da fonte viva sem bloquear a interface.
+Essa correção remove o arquivo do HEAD atual, mas não reescreve objetos de
+commits públicos anteriores; a cópia histórica deve ser tratada como exposta
+até o proprietário autorizar privatização ou purge separado do repositório.
 
 ## Catálogo versionado de páginas do sistema seguro
 
@@ -98,19 +109,21 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 
 ### Superfícies fora de `app_pages`
 
-| Rota ou resposta                 | Responsabilidade                       | Enforcement ou exposição                          |
-| -------------------------------- | -------------------------------------- | ------------------------------------------------- |
-| `/`                              | Entrada que encaminha ao fluxo correto | Não renderiza dados comerciais                    |
-| `/login`                         | Login Supabase SSR                     | Pública; usuário já autenticado segue para `/app` |
-| `/register`                      | Cadastro preservado                    | Pública; contrato de criação existente            |
-| `/unauthorized`                  | Compatibilidade para acesso negado     | Resposta dinâmica 403                             |
-| `forbidden()`, 404 e `error.tsx` | Estados sistêmicos seguros             | Sem detalhes internos ou dados comerciais         |
-| `/api/health`                    | Liveness                               | Pública; não consulta dados comerciais            |
-| `/api/dashboard/status`          | Estado da ingestão                     | Exige `crm.dashboard.view`                        |
-| `/api/refresh/salesforce`        | Solicitação de atualização             | Exige permissão, flag e controles server-side     |
-| `/api/ingest/salesforce`         | Ingestão de máquina                    | Bearer dedicado, contrato tipado e RPC mínima     |
-| WF16, CAIXA e WF14               | Rotas futuras ainda versionadas        | Fora de `app_pages`; autenticado recebe `403`     |
-| WF15                             | Réplica protegida do artefato anexado  | Fora de `app_pages`; Master acessa pelo hub/menu  |
+| Rota ou resposta                 | Responsabilidade                        | Enforcement ou exposição                                     |
+| -------------------------------- | --------------------------------------- | ------------------------------------------------------------ |
+| `/`                              | Entrada que encaminha ao fluxo correto  | Não renderiza dados comerciais                               |
+| `/login`                         | Login Supabase SSR                      | Pública; usuário já autenticado segue para `/app`            |
+| `/register`                      | Cadastro preservado                     | Pública; contrato de criação existente                       |
+| `/unauthorized`                  | Compatibilidade para acesso negado      | Resposta dinâmica 403                                        |
+| `forbidden()`, 404 e `error.tsx` | Estados sistêmicos seguros              | Sem detalhes internos ou dados comerciais                    |
+| `/api/health`                    | Liveness                                | Pública; não consulta dados comerciais                       |
+| `GET /api/inventory`             | Fonte viva protegida; não usada no WF14 | Master `200`; outros perfis `403`; anônimo `401`; `no-store` |
+| `GET /api/inventory/snapshot`    | Snapshot SPC privado montado            | Master `200`; outros perfis `403`; anônimo `401`; `no-store` |
+| `/api/dashboard/status`          | Estado da ingestão                      | Exige `crm.dashboard.view`                                   |
+| `/api/refresh/salesforce`        | Solicitação de atualização              | Exige permissão, flag e controles server-side                |
+| `/api/ingest/salesforce`         | Ingestão de máquina                     | Bearer dedicado, contrato tipado e RPC mínima                |
+| WF16 e CAIXA                     | Rotas futuras ainda versionadas         | Fora de `app_pages`; autenticado recebe `403`                |
+| WF14 e WF15                      | Réplicas protegidas dos anexos          | Fora de `app_pages`; Master acessa pelo hub/menu             |
 
 ## Catálogo completo de componentes de interface relevantes
 
@@ -147,32 +160,34 @@ somente as RPCs v3 escopadas. A flag não constitui cutover.
 
 ## Catálogo de fontes de dados
 
-| Informação                       | Fonte segura                                                                                      | Enforcement                                          | Disponibilidade                                                     |
-| -------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------- |
-| Sessão e papel                   | Supabase Auth SSR + contexto de autorização                                                       | Layout/guards + RPC/RLS                              | Obrigatória                                                         |
-| Perfis, papéis e overrides       | `profiles`, `roles`, `permissions`, `role_permissions`, `user_roles`, `user_permission_overrides` | RPCs/guards/RLS; sem confiança no cliente            | Disponível e preservada                                             |
-| Auditoria administrativa         | `audit_logs`                                                                                      | Escrita por contratos protegidos                     | Disponível                                                          |
-| Navegação                        | `app_pages`                                                                                       | `pages.view`, permissão da página e RLS              | Disponível                                                          |
-| Cabeçalho do dashboard           | `crm_dashboard_snapshots`                                                                         | `crm.dashboard.view` + RLS                           | Disponível quando há snapshot `global`                              |
-| Valor vendido                    | `crm_dashboard_views`                                                                             | Mesma sessão/RLS                                     | Disponível por visão e período                                      |
-| Realizados e históricos          | `crm_dashboard_metrics`                                                                           | Mesma sessão/RLS                                     | Campos nulos permanecem indisponíveis                               |
-| Metas                            | Campos de meta + `goals_available`                                                                | Barreira `availableCommercialValue`                  | Indisponível quando a flag é falsa ou a meta não é positiva         |
-| Oportunidades por empreendimento | `crm_dashboard_top_developments`                                                                  | Mesma sessão/RLS                                     | Até cinco entradas já ordenadas                                     |
-| Visões suportadas                | `DASHBOARD_VIEWS`                                                                                 | Validação fechada de query string                    | `all`, `with_canal_imob`, `without_canal_imob`                      |
-| Períodos suportados              | `DASHBOARD_PERIODS`                                                                               | Validação fechada de query string                    | mês, semana e hoje                                                  |
-| Ordem das etapas                 | `DASHBOARD_STAGES` e `CRM_STAGES`                                                                 | Catálogo versionado                                  | Cinco etapas                                                        |
-| Filtros dimensionais v3          | `get_crm_read_model_v3` + IDs canônicos do run ativo                                              | permissão do dataset, scope, lineage e validação SQL | Disponíveis somente nas rotas shadow                                |
-| Projeção proporcional            | Nenhuma fórmula oficial versionada                                                                | Não implementado                                     | Indisponível                                                        |
-| Metas do funil                   | Legado `crm_funnel_goals` + rascunho privado                                                      | Master-only por RPC; preview/dry-run; zero ativação  | Legado visível; novas propostas permanecem rascunho                 |
-| Pesos e objetivos de pontos      | Legado `crm_point_settings`/`crm_point_metrics` + rascunho privado                                | Master-only por RPC; preview/dry-run; zero ativação  | Propostas não alteram configuração ativa                            |
-| Ranking de corretores            | Snapshots legados preservados para reconciliação                                                  | Fail-closed sem policy runtime oficial               | Bloqueado por política, gates, grants e casos de ouro               |
-| Histórico de ingestão            | `crm_ingestion_runs`                                                                              | Sem acesso direto do navegador                       | Disponível pelos endpoints autorizados                              |
-| Salesforce                       | Exportador/contrato v2 e RPC de ingestão existentes                                               | Bearer de máquina, validação Zod e transação         | Disponível somente quando flags/configuração estão completas        |
-| Catálogo visual dos simuladores  | `SIMULATORS`                                                                                      | `crm.simulators.view` + guard server-side            | Cinco jornadas aprovadas para composição visual                     |
-| Motores dos simuladores          | Nenhuma regra oficial aprovada neste repositório                                                  | Botão bloqueado; sem action ou persistência          | `Cálculo temporariamente indisponível — regra aguardando validação` |
-| Read model canônico v3           | `crm_read_model_v3_*` + mappings e autoridade privada da fonte                                    | RPCs por dataset; zero grant direto                  | Shadow local; nenhuma fonte real ativada                            |
-| Ranking Qlik de imobiliárias     | Tabelas protegidas, sem leitura direta autorizada                                                 | ingestão mínima e leitura escopada; VGV textual      | Caller/cutover ainda bloqueados                                     |
-| Referência viva                  | Somente composição visual sanitizada                                                              | Nunca usada em runtime                               | Não é fonte comercial                                               |
+| Informação                       | Fonte segura                                                                                      | Enforcement                                                | Disponibilidade                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Sessão e papel                   | Supabase Auth SSR + contexto de autorização                                                       | Layout/guards + RPC/RLS                                    | Obrigatória                                                                        |
+| Perfis, papéis e overrides       | `profiles`, `roles`, `permissions`, `role_permissions`, `user_roles`, `user_permission_overrides` | RPCs/guards/RLS; sem confiança no cliente                  | Disponível e preservada                                                            |
+| Auditoria administrativa         | `audit_logs`                                                                                      | Escrita por contratos protegidos                           | Disponível                                                                         |
+| Navegação                        | `app_pages`                                                                                       | `pages.view`, permissão da página e RLS                    | Disponível                                                                         |
+| Cabeçalho do dashboard           | `crm_dashboard_snapshots`                                                                         | `crm.dashboard.view` + RLS                                 | Disponível quando há snapshot `global`                                             |
+| Valor vendido                    | `crm_dashboard_views`                                                                             | Mesma sessão/RLS                                           | Disponível por visão e período                                                     |
+| Realizados e históricos          | `crm_dashboard_metrics`                                                                           | Mesma sessão/RLS                                           | Campos nulos permanecem indisponíveis                                              |
+| Metas                            | Campos de meta + `goals_available`                                                                | Barreira `availableCommercialValue`                        | Indisponível quando a flag é falsa ou a meta não é positiva                        |
+| Oportunidades por empreendimento | `crm_dashboard_top_developments`                                                                  | Mesma sessão/RLS                                           | Até cinco entradas já ordenadas                                                    |
+| Visões suportadas                | `DASHBOARD_VIEWS`                                                                                 | Validação fechada de query string                          | `all`, `with_canal_imob`, `without_canal_imob`                                     |
+| Períodos suportados              | `DASHBOARD_PERIODS`                                                                               | Validação fechada de query string                          | mês, semana e hoje                                                                 |
+| Ordem das etapas                 | `DASHBOARD_STAGES` e `CRM_STAGES`                                                                 | Catálogo versionado                                        | Cinco etapas                                                                       |
+| Filtros dimensionais v3          | `get_crm_read_model_v3` + IDs canônicos do run ativo                                              | permissão do dataset, scope, lineage e validação SQL       | Disponíveis somente nas rotas shadow                                               |
+| Projeção proporcional            | Nenhuma fórmula oficial versionada                                                                | Não implementado                                           | Indisponível                                                                       |
+| Metas do funil                   | Legado `crm_funnel_goals` + rascunho privado                                                      | Master-only por RPC; preview/dry-run; zero ativação        | Legado visível; novas propostas permanecem rascunho                                |
+| Pesos e objetivos de pontos      | Legado `crm_point_settings`/`crm_point_metrics` + rascunho privado                                | Master-only por RPC; preview/dry-run; zero ativação        | Propostas não alteram configuração ativa                                           |
+| Ranking de corretores            | Snapshots legados preservados para reconciliação                                                  | Fail-closed sem policy runtime oficial                     | Bloqueado por política, gates, grants e casos de ouro                              |
+| Histórico de ingestão            | `crm_ingestion_runs`                                                                              | Sem acesso direto do navegador                             | Disponível pelos endpoints autorizados                                             |
+| Salesforce                       | Exportador/contrato v2 e RPC de ingestão existentes                                               | Bearer de máquina, validação Zod e transação               | Disponível somente quando flags/configuração estão completas                       |
+| Catálogo visual dos simuladores  | `SIMULATORS`                                                                                      | `crm.simulators.view` + guard server-side                  | Cinco jornadas aprovadas para composição visual                                    |
+| Tabela Direta WF14               | Volume SPC privado, fora do Git, com 3.301 linhas + regras isoladas da réplica                    | `crm.simulators.view`, endpoints `no-store`; cálculo local | Quatro opções; 314 linhas sem preço bloqueadas; referência fixa do arquivo anexado |
+| Tabela Investidor WF15           | Snapshot SPC protegido com 3.301 linhas + regras isoladas da réplica                              | `crm.simulators.view`, endpoints `no-store`; cálculo local | Oito opções; 122 vagas avulsas excluídas; atualização viva não bloqueante          |
+| Motores oficiais dos simuladores | Runtime oficial isolado                                                                           | Flags, allowlist e permissão de execução                   | WF13 canário; WF16, CAIXA e homologações oficiais de WF14/WF15 bloqueadas          |
+| Read model canônico v3           | `crm_read_model_v3_*` + mappings e autoridade privada da fonte                                    | RPCs por dataset; zero grant direto                        | Shadow local; nenhuma fonte real ativada                                           |
+| Ranking Qlik de imobiliárias     | Tabelas protegidas, sem leitura direta autorizada                                                 | ingestão mínima e leitura escopada; VGV textual            | Caller/cutover ainda bloqueados                                                    |
+| Referência viva                  | Somente composição visual sanitizada                                                              | Nunca usada em runtime                                     | Não é fonte comercial                                                              |
 
 ## APIs legadas
 

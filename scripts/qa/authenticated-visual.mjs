@@ -9,6 +9,8 @@ import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 import sharp from "sharp";
 
+import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
+
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const outputRoot = path.join(repositoryRoot, "docs/qa/reference-parity");
 const baselineScreenshotRoot = path.join(outputRoot, "target-authenticated");
@@ -17,15 +19,13 @@ const baselineResultsPath = path.join(outputRoot, "authenticated-results.json");
 const artifactRoot = path.join(repositoryRoot, "test-results/authenticated-visual");
 const candidateScreenshotRoot = path.join(artifactRoot, "candidate");
 const candidateResultsPath = path.join(artifactRoot, "candidate-results.json");
-const qaInventorySnapshot = readFileSync(
-  path.join(repositoryRoot, "public/data/investor-inventory.json"),
-  "utf8",
-);
 const visualDifferenceThreshold = 0.01;
 const visualChannelTolerance = 16;
 const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const homologationOrigin = "https://homolog.descomplicapro.com.br";
 const remoteHomologation = process.env.QA_AUTH_REMOTE_HOMOLOGATION === "true";
+const qaNavigationTimeout = remoteHomologation ? 30_000 : 180_000;
+const qaRouteBootstrapTimeout = remoteHomologation ? 30_000 : 90_000;
 const environmentLabel = remoteHomologation
   ? "isolated remote homologation with local-only Supabase"
   : "isolated local Supabase";
@@ -38,6 +38,28 @@ const identityEvidencePolicy = Object.freeze({
     ? "mask visible identity and email regions before persistence"
     : "local synthetic baseline capture",
 });
+const directTableInventoryEvidencePolicy = Object.freeze({
+  persistedVisualCaptures: "deterministic synthetic inventory only",
+  functionalValidation: remoteHomologation
+    ? "protected homologation snapshot without persisted commercial fields"
+    : "deterministic synthetic local runtime",
+});
+const inventoryRoutePattern = "**/api/inventory*";
+const syntheticDirectTableSnapshot = (() => {
+  const contents = buildSyntheticDirectTableQaSnapshot();
+  return JSON.stringify({
+    ...JSON.parse(contents),
+    sourceKind: "versioned-snapshot",
+    snapshotReferenceDate: "2026-09-05",
+    snapshotSha256: createHash("sha256").update(contents).digest("hex"),
+  });
+})();
+
+function configureQaPage(page) {
+  page.setDefaultTimeout(qaNavigationTimeout);
+  page.setDefaultNavigationTimeout(qaNavigationTimeout);
+  return page;
+}
 
 function parseMode(argv) {
   if (argv.length === 0) return "verify";
@@ -62,6 +84,7 @@ const routes = [
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
   "/admin",
   "/admin/usuarios",
@@ -80,6 +103,7 @@ const simulatorRuntimeKeysByRoute = new Map(
 );
 const archiveSimulatorRoutes = new Set([
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
 ]);
 
@@ -135,6 +159,7 @@ const desktopThemeCaptureRoutes = new Set([
   "/app/configuracoes/metas",
   "/app/configuracoes/metas/pontos",
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
   ...adminRoutes,
 ]);
@@ -211,6 +236,35 @@ async function hideHomologationBannerForBaseline(context) {
   });
 }
 
+async function installSyntheticInventoryForVisualCapture(context, origin) {
+  let installed = true;
+  const handler = async (route) => {
+    const request = route.request();
+    const requestUrl = new URL(request.url());
+    if (
+      request.method() !== "GET" ||
+      requestUrl.origin !== origin ||
+      !["/api/inventory", "/api/inventory/snapshot"].includes(requestUrl.pathname)
+    ) {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      headers: { "cache-control": "no-store" },
+      body: syntheticDirectTableSnapshot,
+    });
+  };
+
+  await context.route(inventoryRoutePattern, handler);
+  return async () => {
+    if (!installed) return;
+    installed = false;
+    await context.unroute(inventoryRoutePattern, handler);
+  };
+}
+
 function parseLocalSupabaseUrl(rawUrl) {
   const candidate = new URL(rawUrl);
   if (
@@ -231,12 +285,22 @@ async function verifyDedicatedLocalQaIdentity(supabaseUrl, publishableKey, email
   if (!/^qa(?:[.+_-][a-z0-9-]+)+@local\.invalid$/i.test(email)) {
     throw new Error("QA_AUTH_EMAIL must identify a dedicated local.invalid QA account.");
   }
-  const response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    headers: { apikey: publishableKey, "content-type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-  if (!response.ok) throw new Error("Dedicated QA identity was not verified on local Supabase.");
+  let response = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    response = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: { apikey: publishableKey, "content-type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    if (response.ok) break;
+    await response.arrayBuffer();
+    if (attempt < 2) {
+      await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1_000));
+    }
+  }
+  if (!response?.ok) {
+    throw new Error("Dedicated QA identity was not verified on local Supabase.");
+  }
   const session = await response.json();
   if (session.user?.email !== email || typeof session.access_token !== "string") {
     throw new Error("Local Supabase returned an unexpected QA identity.");
@@ -389,7 +453,11 @@ async function captureComparableScreenshot(page) {
     }
   });
   try {
-    return await page.screenshot({ fullPage, animations: "disabled", timeout: 60_000 });
+    return await page.screenshot({
+      fullPage,
+      animations: "disabled",
+      timeout: qaNavigationTimeout,
+    });
   } finally {
     await page.locator('[data-qa-visual-hidden="true"]').evaluateAll((elements) => {
       for (const element of elements) {
@@ -408,7 +476,7 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
       (await page.screenshot({
         fullPage,
         animations: "disabled",
-        timeout: 60_000,
+        timeout: qaNavigationTimeout,
       }))
     );
   }
@@ -452,7 +520,7 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
     return await page.screenshot({
       fullPage,
       animations: "disabled",
-      timeout: 60_000,
+      timeout: qaNavigationTimeout,
       mask: [page.locator('[data-qa-evidence-identity="remote-homologation"]')],
       maskColor: "#334155",
     });
@@ -649,24 +717,59 @@ async function releaseRenderedRoute(page) {
   await page.goto("about:blank", { waitUntil: "commit" });
 }
 
-async function configureQaPage(page) {
-  page.setDefaultTimeout(60_000);
-  page.setDefaultNavigationTimeout(60_000);
-  // Inventory is intentionally live in production, so visual baselines use
-  // the committed full snapshot instead of depending on network timing or a
-  // mutable external dataset. Authorization of the live API is tested by the
-  // release E2E matrix separately.
-  await page.route("**/api/inventory", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: qaInventorySnapshot,
-    });
-  });
+async function gotoWithServerRetry(page, destination, options) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await page.goto(destination, options);
+      if ((response?.status() ?? 200) < 500) return response;
+      lastError = new Error("Authenticated route returned a transient server error.");
+    } catch (error) {
+      lastError = error;
+    }
+    if (attempt < 2) await page.waitForTimeout((attempt + 1) * 1_000);
+  }
+  throw lastError ?? new Error("Authenticated route navigation failed.");
+}
+
+async function openInspectableRoute(page, destination, expectedTheme, consoleErrors, pageErrors) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const consoleAttemptStart = consoleErrors.length;
+    const pageAttemptStart = pageErrors.length;
+    try {
+      const response = await page.goto(destination, { waitUntil: "commit" });
+      if ((response?.status() ?? 200) >= 500) {
+        throw new Error("Authenticated route returned a transient server error.");
+      }
+      await page
+        .locator("h1")
+        .first()
+        .waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
+      await page.waitForFunction(
+        (theme) => document.documentElement.dataset.theme === theme,
+        expectedTheme,
+        { timeout: qaRouteBootstrapTimeout },
+      );
+      return response;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) {
+        await releaseRenderedRoute(page).catch(() => undefined);
+        await page.waitForTimeout((attempt + 1) * 1_000);
+        // A failed RSC response can report console/page errors after page.goto
+        // settles. Clear them after teardown/backoff so the next successful
+        // attempt is evaluated only against its own diagnostics.
+        consoleErrors.length = consoleAttemptStart;
+        pageErrors.length = pageAttemptStart;
+      }
+    }
+  }
+  throw lastError ?? new Error("Authenticated route did not become inspectable.");
 }
 
 async function login(page, origin, email, password) {
-  await page.goto(`${origin}/login`, { waitUntil: "domcontentloaded" });
+  await gotoWithServerRetry(page, `${origin}/login`, { waitUntil: "domcontentloaded" });
   const acceptAllCookies = page.getByRole("button", {
     name: "Aceitar todos",
     exact: true,
@@ -681,7 +784,7 @@ async function login(page, origin, email, password) {
   await page.getByLabel("Senha").fill(password);
   await Promise.all([
     page.waitForURL((url) => url.origin === origin && url.pathname === "/app", {
-      timeout: 30_000,
+      timeout: qaNavigationTimeout,
     }),
     page.getByRole("button", { name: "Entrar", exact: true }).click(),
   ]);
@@ -698,25 +801,13 @@ async function inspectRoute(
 ) {
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
-  let response = await page.goto(`${origin}${route}`, { waitUntil: "commit" });
-  await page.locator("h1").first().waitFor({ state: "visible", timeout: 60_000 });
-  try {
-    await page.waitForFunction(
-      (theme) => document.documentElement.dataset.theme === theme,
-      expectedTheme,
-      { timeout: 20_000 },
-    );
-  } catch {
-    // A renderer under the full screenshot/Axe matrix can occasionally commit
-    // before the inline theme bootstrap runs. Retry the document once, then
-    // keep the normal hard failure if the rendered contract is still absent.
-    response = await page.reload({ waitUntil: "commit" });
-    await page.locator("h1").first().waitFor({ state: "visible", timeout: 60_000 });
-    await page.waitForFunction(
-      (theme) => document.documentElement.dataset.theme === theme,
-      expectedTheme,
-    );
-  }
+  const response = await openInspectableRoute(
+    page,
+    `${origin}${route}`,
+    expectedTheme,
+    consoleErrors,
+    pageErrors,
+  );
   await page.evaluate(() => document.fonts.ready);
 
   const isArchiveSimulator = archiveSimulatorRoutes.has(route);
@@ -732,7 +823,11 @@ async function inspectRoute(
     const text = document.body.innerText;
     const root = document.documentElement;
     const simulatorForm = simulatorWorkspace ? document.querySelector("main form") : null;
-    const archiveSimulator = window.location.pathname === "/app/simulacao/associativo-fluxo-linear";
+    const archiveSimulator = [
+      "/app/simulacao/associativo-fluxo-linear",
+      "/app/simulacao/tabela-direta",
+      "/app/simulacao/tabela-investidor",
+    ].includes(window.location.pathname);
     const topbarInner = document.querySelector("header > div");
     const brand = topbarInner?.firstElementChild;
     const navigation = document.querySelector('header nav[aria-label="Navegação autorizada"]');
@@ -883,15 +978,31 @@ async function inspectRoute(
 }
 
 async function setTheme(page, theme) {
-  await page.getByRole("button", { name: themeLabels[theme], exact: true }).click();
-  await page.waitForFunction(
-    (expected) => document.documentElement.dataset.theme === expected,
-    theme,
-  );
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await page
+        .getByRole("button", { name: themeLabels[theme], exact: true })
+        .click({ timeout: qaRouteBootstrapTimeout });
+      await page.waitForFunction(
+        (expected) => document.documentElement.dataset.theme === expected,
+        theme,
+        { timeout: qaRouteBootstrapTimeout },
+      );
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) {
+        await page.waitForTimeout((attempt + 1) * 1_000);
+        await gotoWithServerRetry(page, page.url(), { waitUntil: "domcontentloaded" });
+      }
+    }
+  }
+  throw lastError ?? new Error("Theme control did not become available.");
 }
 
 async function checkKeyboard(page, origin) {
-  await page.goto(`${origin}/app`, { waitUntil: "domcontentloaded" });
+  await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
   const summary = page.locator("summary").first();
   await summary.focus();
   await page.keyboard.press("Enter");
@@ -909,7 +1020,7 @@ async function checkKeyboard(page, origin) {
 }
 
 async function checkSimulatorValidation(page, origin, httpCredentials) {
-  await page.goto(`${origin}/app/simulacao/associativo-fluxo-linear`, {
+  await gotoWithServerRetry(page, `${origin}/app/simulacao/associativo-fluxo-linear`, {
     waitUntil: "domcontentloaded",
   });
   await page
@@ -937,12 +1048,12 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     };
   });
 
-  // Use a project present in both the protected reference snapshot and the
-  // live feed so the flow remains deterministic while the background refresh
-  // resolves. Its units are still in construction and exercise the full plan.
+  // Use the project that contains the synthetic ready-proposal reference.
+  // Both protected inventory endpoints are intercepted by the same isolated
+  // fixture, so no mutable live feed or commercial field enters this evidence.
   await page
     .getByRole("combobox", { name: "Nome do Empreendimento", exact: true })
-    .selectOption("Estilo Lapa");
+    .selectOption("Empreendimento QA 01");
   await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
     state: "visible",
   });
@@ -1138,8 +1249,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
       httpCredentials,
     });
     try {
-      const snapshotPage = await snapshotContext.newPage();
-      await configureQaPage(snapshotPage);
+      const snapshotPage = configureQaPage(await snapshotContext.newPage());
       await snapshotPage.setContent(
         `<!doctype html><html${themeAttribute}><head><base href="${origin}/">${stylesheets}</head><body><div class="investor-page-shell">${readyProposalSnapshot.dialogHtml}</div></body></html>`,
         { waitUntil: "networkidle" },
@@ -1212,13 +1322,941 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   };
 }
 
+async function checkDirectTableValidation(page, origin, consoleErrors, pageErrors) {
+  const consoleStart = consoleErrors.length;
+  const pageErrorStart = pageErrors.length;
+  const directTablePath = "/app/simulacao/tabela-direta";
+  const directTableUrl = `${origin}${directTablePath}`;
+  const fixedDirectTableTime = new Date("2026-09-06T12:00:00-03:00");
+  const context = page.context();
+
+  async function closeAuxiliaryPage(auxiliaryPage) {
+    if (!auxiliaryPage.isClosed()) {
+      await auxiliaryPage.close({ runBeforeUnload: false });
+    }
+  }
+
+  async function waitForDirectInventory(auxiliaryPage) {
+    await auxiliaryPage
+      .getByRole("heading", { name: "Simulador Tabela Direta", exact: true })
+      .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+    await auxiliaryPage
+      .locator(".investor-stock-sync")
+      .getByText("3.301 unidades", {
+        exact: true,
+      })
+      .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+  }
+
+  async function prepareApprovedDirectProposal(auxiliaryPage, { navigate = true } = {}) {
+    if (navigate) {
+      await gotoWithServerRetry(auxiliaryPage, directTableUrl, {
+        waitUntil: "domcontentloaded",
+      });
+    }
+    await waitForDirectInventory(auxiliaryPage);
+    await auxiliaryPage
+      .locator(
+        ".investor-stock-table tbody tr.selectable .investor-stock-unit-button:not(:disabled)",
+      )
+      .first()
+      .click();
+    const auxiliaryIncome = auxiliaryPage.getByRole("textbox", {
+      name: "Renda mensal",
+      exact: true,
+    });
+    await auxiliaryIncome.fill("10000000");
+    await auxiliaryPage
+      .locator(
+        '.investor-direct-credit-result[role="status"] strong, .investor-direct-comparison-heading .investor-direct-credit-status strong',
+      )
+      .filter({ hasText: /^APROVADO$/ })
+      .first()
+      .waitFor({ state: "visible", timeout: 10_000 });
+  }
+
+  async function directProposalFingerprint(auxiliaryPage) {
+    return auxiliaryPage.evaluate(() => {
+      const text = (selector) =>
+        document.querySelector(selector)?.textContent?.replace(/\s+/g, " ").trim() ?? "";
+      const inputValue = (label) =>
+        document.querySelector(`input[aria-label="${label}"]`)?.value ?? "";
+      return JSON.stringify({
+        pathname: window.location.pathname,
+        selectedUnit: document
+          .querySelector('.investor-stock-unit-button[aria-pressed="true"]')
+          ?.getAttribute("aria-label"),
+        property: text(
+          '.investor-property-summary[aria-label="Descrição do imóvel usado na proposta"]',
+        ),
+        income: inputValue("Renda mensal"),
+        act: inputValue("Valor do ato"),
+        selectedOption: text('.investor-direct-ready-options button[aria-pressed="true"]'),
+        comparison: text(".investor-direct-comparison-card"),
+      });
+    });
+  }
+
+  await page.clock.setFixedTime(fixedDirectTableTime);
+  await gotoWithServerRetry(page, directTableUrl, {
+    waitUntil: "domcontentloaded",
+  });
+  await page
+    .getByRole("heading", { name: "Simulador Tabela Direta", exact: true })
+    .waitFor({ state: "visible" });
+  const inventoryStatus = page.locator(".investor-stock-sync");
+  await inventoryStatus.getByText("3.301 unidades", { exact: true }).waitFor({
+    state: "visible",
+    timeout: qaNavigationTimeout,
+  });
+
+  const inventoryRows = page.locator(".investor-stock-table tbody tr");
+  const selectedUnitButtons = page.locator('.investor-stock-unit-button[aria-pressed="true"]');
+  const inventoryPagination = page.getByRole("navigation", {
+    name: "Paginação do estoque completo",
+    exact: true,
+  });
+  const previousInventoryPage = inventoryPagination.getByRole("button", {
+    name: "Anterior",
+    exact: true,
+  });
+  const nextInventoryPage = inventoryPagination.getByRole("button", {
+    name: "Próxima",
+    exact: true,
+  });
+  const firstPageHasOneHundredRows = (await inventoryRows.count()) === 100;
+  const startsWithoutSelectedUnit = (await selectedUnitButtons.count()) === 0;
+  const inventoryHeaderText = (await inventoryStatus.innerText()).replace(/\s+/g, " ");
+  const firstPaginationText = (await inventoryPagination.innerText()).replace(/\s+/g, " ");
+  const fullInventoryCountVisible =
+    inventoryHeaderText.includes("3.301 unidades") &&
+    firstPaginationText.includes("Exibindo 1–100 de 3.301 unidades") &&
+    firstPaginationText.includes("Página 1 de 34");
+  const inventoryOriginVisible = inventoryHeaderText.includes(
+    "Arquivo ESTOQUE SPC.xlsx · referência 05/09/2026",
+  );
+  const paginationStartsInExpectedState =
+    (await previousInventoryPage.isDisabled()) && (await nextInventoryPage.isEnabled());
+
+  await nextInventoryPage.click();
+  await inventoryPagination.getByText("Página 2 de 34", { exact: true }).waitFor();
+  const firstUnitOnSecondPage = page
+    .locator(".investor-stock-table tbody tr.selectable .investor-stock-unit-button:not(:disabled)")
+    .first();
+  const paginationFocusedFirstVisibleUnit = await page
+    .waitForFunction(
+      () =>
+        document.activeElement ===
+        document.querySelector(
+          ".investor-stock-table tbody tr.selectable .investor-stock-unit-button:not(:disabled)",
+        ),
+      undefined,
+      { timeout: 5_000 },
+    )
+    .then(() => true)
+    .catch(() => false);
+  const paginationFocusedUnitIsVisible = await firstUnitOnSecondPage.evaluate((button) => {
+    const results = button.closest(".investor-stock-results");
+    if (!(results instanceof HTMLElement)) return false;
+    const buttonRect = button.getBoundingClientRect();
+    const resultsRect = results.getBoundingClientRect();
+    return (
+      document.activeElement === button &&
+      buttonRect.top >= Math.max(0, resultsRect.top) - 1 &&
+      buttonRect.bottom <= Math.min(window.innerHeight, resultsRect.bottom) + 1 &&
+      buttonRect.left >= Math.max(0, resultsRect.left) - 1 &&
+      buttonRect.right <= Math.min(window.innerWidth, resultsRect.right) + 1
+    );
+  });
+  const paginationFocusesVisibleFirstUnit =
+    paginationFocusedFirstVisibleUnit && paginationFocusedUnitIsVisible;
+  const secondPaginationText = (await inventoryPagination.innerText()).replace(/\s+/g, " ");
+  const paginationAdvancesOneHundredRows =
+    (await inventoryRows.count()) === 100 &&
+    secondPaginationText.includes("Exibindo 101–200 de 3.301 unidades");
+  await previousInventoryPage.click();
+  await inventoryPagination.getByText("Página 1 de 34", { exact: true }).waitFor();
+
+  const firstSelectableRow = page.locator(".investor-stock-table tbody tr.selectable").first();
+  await firstSelectableRow.click();
+  const manualUnitSelectionWorks =
+    (await selectedUnitButtons.count()) === 1 &&
+    (await firstSelectableRow.getAttribute("aria-selected")) === "true" &&
+    (await page
+      .getByRole("article", { name: "Descrição do imóvel usado na proposta", exact: true })
+      .isVisible());
+
+  const incomeInput = page.getByRole("textbox", { name: "Renda mensal", exact: true });
+  await incomeInput.fill("10000000");
+  const incomeAccepted =
+    (await incomeInput.inputValue()) === "100.000,00" &&
+    (await page
+      .locator('.investor-direct-editable-freeze fieldset[aria-disabled="false"]')
+      .count()) === 1;
+
+  const proposalOptions = page.locator(".investor-direct-ready-options button");
+  const fourProposalOptionsPresent = (await proposalOptions.count()) === 4;
+  const optionSelectionChecks = [];
+  for (let index = 0; index < (await proposalOptions.count()); index += 1) {
+    const option = proposalOptions.nth(index);
+    const available =
+      (await option.isVisible()) &&
+      (await option.isEnabled()) &&
+      (await option.getAttribute("aria-disabled")) === "false";
+    await option.click();
+    optionSelectionChecks.push(
+      available &&
+        (await option.getAttribute("aria-pressed")) === "true" &&
+        (await page
+          .locator('.investor-direct-ready-options button[aria-pressed="true"]')
+          .count()) === 1,
+    );
+  }
+  const allProposalOptionsSelectable =
+    optionSelectionChecks.length === 4 && optionSelectionChecks.every(Boolean);
+  await proposalOptions.first().click();
+
+  const proposalStatus = page.locator(
+    '.investor-direct-credit-result[role="status"][aria-live="polite"][aria-atomic="true"]',
+  );
+  const approvedProposalStatusVisible =
+    (await proposalStatus.isVisible()) &&
+    (await proposalStatus.locator("strong").textContent())?.trim() === "APROVADO";
+
+  const selectedProperty = page.getByRole("article", {
+    name: "Descrição do imóvel usado na proposta",
+    exact: true,
+  });
+  const propertyBeforeFilter = (await selectedProperty.innerText()).replace(/\s+/g, " ");
+  const incomeBeforeFilter = await incomeInput.inputValue();
+  const selectedUnitLabel = await selectedUnitButtons.first().getAttribute("aria-label");
+  const businessUnitFilter = page
+    .locator(".investor-stock-filters label")
+    .filter({ hasText: /^Incorporadora/ })
+    .locator("select");
+  const selectedBusinessUnit = (
+    await firstSelectableRow.locator("td").nth(1).textContent()
+  )?.trim();
+  const alternativeBusinessUnit = await businessUnitFilter
+    .locator("option")
+    .evaluateAll(
+      (options, currentBusinessUnit) =>
+        options
+          .map((option) => option.value)
+          .find((value) => value !== "Todas" && value !== currentBusinessUnit) ?? "",
+      selectedBusinessUnit,
+    );
+  if (alternativeBusinessUnit) {
+    await businessUnitFilter.selectOption(alternativeBusinessUnit);
+    await page.waitForFunction(
+      (value) => document.querySelector(".investor-stock-filters label select")?.value === value,
+      alternativeBusinessUnit,
+    );
+  }
+  const filterPreservesSelectedUnitAndIncome =
+    alternativeBusinessUnit.length > 0 &&
+    (await selectedProperty.innerText()).replace(/\s+/g, " ") === propertyBeforeFilter &&
+    (await incomeInput.inputValue()) === incomeBeforeFilter &&
+    (await page.locator('.investor-direct-ready-options button[aria-pressed="true"]').count()) ===
+      1;
+
+  await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+  await page.waitForFunction(
+    (label) =>
+      document
+        .querySelector('.investor-stock-unit-button[aria-pressed="true"]')
+        ?.getAttribute("aria-label") === label,
+    selectedUnitLabel,
+  );
+  const proposalBeforeCancelledUnitChange = await directProposalFingerprint(page);
+  const differentUnitButton = page
+    .locator(
+      ".investor-stock-table tbody tr.selectable:not(.selected) .investor-stock-unit-button:not(:disabled)",
+    )
+    .first();
+  let unitChangeConfirmation = "";
+  page.once("dialog", async (dialog) => {
+    unitChangeConfirmation = dialog.message();
+    await dialog.dismiss();
+  });
+  await differentUnitButton.click();
+  await page.waitForTimeout(50);
+  const cancelledUnitChangePreservesProposal =
+    unitChangeConfirmation ===
+      "Trocar a unidade descartará a renda e a composição atual da proposta. Deseja continuar?" &&
+    (await directProposalFingerprint(page)) === proposalBeforeCancelledUnitChange;
+
+  await page.getByRole("button", { name: "Ver parcelas pré-chaves", exact: true }).last().click();
+  const preKeysDialog = page.locator("#investor-direct-pre-keys");
+  await preKeysDialog.waitFor({ state: "visible" });
+  const preKeysDialogWorks = await preKeysDialog.evaluate(
+    (dialog) =>
+      dialog.open &&
+      /\d+ parcelas pré-chaves/.test(dialog.querySelector("h2")?.textContent ?? "") &&
+      dialog.querySelectorAll("tbody tr").length > 1,
+  );
+  await preKeysDialog
+    .getByRole("button", { name: "Fechar tabela das parcelas pré-chaves", exact: true })
+    .click();
+  await preKeysDialog.waitFor({ state: "hidden" });
+
+  await page
+    .getByRole("button", { name: /^Ver amortização das \d+ parcelas pós-chaves$/ })
+    .last()
+    .click();
+  const postKeysDialog = page.locator("#investor-direct-amortization");
+  await postKeysDialog.waitFor({ state: "visible" });
+  const postKeysDialogWorks = await postKeysDialog.evaluate(
+    (dialog) =>
+      dialog.open &&
+      /\d+ parcelas pós-chaves/.test(dialog.querySelector("h2")?.textContent ?? "") &&
+      dialog.querySelectorAll("tbody tr").length > 1,
+  );
+  await postKeysDialog
+    .getByRole("button", { name: "Fechar tabela de amortização", exact: true })
+    .click();
+  await postKeysDialog.waitFor({ state: "hidden" });
+
+  await page.getByRole("button", { name: "Doc Pessoa Física", exact: true }).click();
+  const physicalPersonDialog = page.locator("#investor-documentation-pf");
+  await physicalPersonDialog.waitFor({ state: "visible" });
+  const physicalPersonDocumentationWorks = await physicalPersonDialog.evaluate(
+    (dialog) =>
+      dialog.open &&
+      dialog.querySelector("h2")?.textContent?.trim() ===
+        "Documentação Pessoa Física · Tabela Direta" &&
+      dialog.querySelectorAll(".investor-documentation-sections > section").length === 4 &&
+      dialog.querySelectorAll("li").length > 0,
+  );
+  await physicalPersonDialog
+    .getByRole("button", {
+      name: "Fechar Documentação Pessoa Física · Tabela Direta",
+      exact: true,
+    })
+    .click();
+  await physicalPersonDialog.waitFor({ state: "hidden" });
+
+  await page.getByRole("button", { name: "Doc Pessoa Jurídica", exact: true }).click();
+  const legalEntityDialog = page.locator("#investor-documentation-pj");
+  await legalEntityDialog.waitFor({ state: "visible" });
+  const legalEntityDocumentationWorks = await legalEntityDialog.evaluate(
+    (dialog) =>
+      dialog.open &&
+      dialog.querySelector("h2")?.textContent?.trim() ===
+        "Documentação Pessoa Jurídica · Tabela Direta" &&
+      dialog.querySelectorAll(".investor-documentation-sections > section").length === 3 &&
+      dialog.querySelectorAll("li").length > 0,
+  );
+  await legalEntityDialog
+    .getByRole("button", {
+      name: "Fechar Documentação Pessoa Jurídica · Tabela Direta",
+      exact: true,
+    })
+    .click();
+  await legalEntityDialog.waitFor({ state: "hidden" });
+
+  await proposalOptions.last().click();
+  await page
+    .locator('.investor-direct-ready-options button[aria-pressed="true"]')
+    .filter({ hasText: "Maior flexibilidade" })
+    .waitFor({ state: "visible" });
+  await proposalStatus.getByText("APROVADO", { exact: true }).waitFor({
+    state: "visible",
+    timeout: 10_000,
+  });
+
+  const actInput = page.getByRole("textbox", { name: "Valor do ato", exact: true });
+  const actBeforeInvalidState = await actInput.inputValue();
+  const intermediaryAdjustmentInput = page
+    .locator('input[aria-label^="Valor da intermediária "]')
+    .last();
+  const intermediaryBeforeApprovedEdit = await intermediaryAdjustmentInput.inputValue();
+  await actInput.fill("100");
+  const actDescriptionId = await actInput.getAttribute("aria-describedby");
+  const actDescription = actDescriptionId ? page.locator(`#${actDescriptionId}`) : null;
+  const belowSixPercentActIsInvalid =
+    (await actInput.getAttribute("aria-invalid")) === "true" &&
+    actDescription !== null &&
+    (await actDescription.getAttribute("role")) === "alert" &&
+    /Ato abaixo do mínimo de R\$\s[\d.,]+ \(6%\)\./.test(
+      (await actDescription.textContent())?.trim() ?? "",
+    );
+  const invalidCompositionDisablesPrint = await page
+    .getByRole("button", {
+      name: "Impressão indisponível até a proposta ser aprovada",
+      exact: true,
+    })
+    .isDisabled();
+  let invalidBrowserPrintShowsBlockedNoticeOnly = false;
+  await page.emulateMedia({ media: "print" });
+  try {
+    const blockedWorkspace = page.locator(
+      ".investor-direct-workspace.investor-direct-print-blocked",
+    );
+    const blockedNotice = blockedWorkspace.locator(
+      ":scope > .investor-direct-print-blocked-notice",
+    );
+    invalidBrowserPrintShowsBlockedNoticeOnly =
+      (await blockedNotice.isVisible()) &&
+      (await blockedNotice.getByRole("heading", { name: "Impressão indisponível" }).isVisible()) &&
+      (await blockedNotice.textContent())?.includes(
+        "Corrija todas as pendências e obtenha o resultado APROVADO antes de imprimir",
+      ) === true &&
+      (await page.locator(".investor-direct-print-composition").count()) === 0 &&
+      (await blockedWorkspace.evaluate((workspace) =>
+        [...workspace.children]
+          .filter((child) => !child.classList.contains("investor-direct-print-blocked-notice"))
+          .every((child) => getComputedStyle(child).display === "none"),
+      ));
+  } finally {
+    await page.emulateMedia({ media: "screen" });
+  }
+
+  const audit = page.locator("details.investor-proposal-audit");
+  await audit.locator("summary").click();
+  const auditOpensWithRejectedAct = await audit.evaluate(
+    (details) =>
+      details.open &&
+      details.querySelectorAll("li").length > 0 &&
+      [...details.querySelectorAll("li.error")].some((item) =>
+        item.textContent?.includes("Ato mínimo de 6%"),
+      ),
+  );
+  await audit.locator("summary").click();
+  await page.waitForFunction(
+    () => !document.querySelector("details.investor-proposal-audit")?.hasAttribute("open"),
+  );
+
+  const actAmountBeforeInvalidState = Number(
+    actBeforeInvalidState.replace(/\./g, "").replace(",", "."),
+  );
+  const intermediaryAmountBeforeApprovedEdit = Number(
+    intermediaryBeforeApprovedEdit.replace(/\./g, "").replace(",", "."),
+  );
+  const editedIntermediaryInput = String(
+    Math.round((intermediaryAmountBeforeApprovedEdit - 100) * 100),
+  );
+  const editedActInput = String(Math.round((actAmountBeforeInvalidState + 100) * 100));
+  await intermediaryAdjustmentInput.fill(editedIntermediaryInput);
+  await actInput.fill(editedActInput);
+  const editedActDisplay = await actInput.inputValue();
+  const editedIntermediaryDisplay = await intermediaryAdjustmentInput.inputValue();
+  const comparisonActRow = page
+    .getByRole("row")
+    .filter({ has: page.getByRole("rowheader", { name: "Ato", exact: true }) })
+    .first();
+  const comparisonActValue = comparisonActRow.locator(".investor-direct-comparison-ledger-value");
+  await comparisonActValue.getByText(editedActDisplay, { exact: true }).waitFor({
+    state: "visible",
+    timeout: 10_000,
+  });
+  await proposalStatus.getByText("APROVADO", { exact: true }).waitFor({
+    state: "visible",
+    timeout: 10_000,
+  });
+  const approvedPrintButton = page.getByRole("button", {
+    name: "Imprimir a proposta aprovada",
+    exact: true,
+  });
+  const approvedEditedCompositionEnablesPrint =
+    editedActDisplay !== actBeforeInvalidState &&
+    editedIntermediaryDisplay !== intermediaryBeforeApprovedEdit &&
+    (await approvedPrintButton.isEnabled());
+
+  const printComposition = page.locator(".investor-direct-print-composition");
+  const printCompositionHiddenOnScreen = await printComposition.isHidden();
+  const dynamicPrintPayments = await page
+    .locator('input[aria-label^="Valor do sinal "], input[aria-label^="Valor da intermediária "]')
+    .evaluateAll((inputs) =>
+      inputs
+        .map((input) => ({
+          label: (input.getAttribute("aria-label") ?? "")
+            .replace(/^Valor do sinal /, "Sinal ")
+            .replace(/^Valor da intermediária /, "Intermediária "),
+          value: input.value,
+          amount: Number(input.value.replace(/\./g, "").replace(",", ".")),
+        }))
+        .filter((payment) => Number.isFinite(payment.amount) && payment.amount > 0),
+    );
+  const expectedPrintSignals = dynamicPrintPayments.filter((payment) =>
+    payment.label.startsWith("Sinal "),
+  );
+  const expectedPrintIntermediaries = dynamicPrintPayments.filter((payment) =>
+    payment.label.startsWith("Intermediária "),
+  );
+  const expectedPrintAuditLabels = await audit.locator(":scope > ul > li").allTextContents();
+  const expectedPrintIncomeDisplay = await incomeInput.inputValue();
+  let printMediaShowsEditedValues = false;
+  let printMediaShowsCompleteDynamicComposition = false;
+  let printMediaHidesIncomeOptionsAndGuidance = false;
+  let printMediaShowsCompleteAudit = false;
+  await page.emulateMedia({ media: "print" });
+  try {
+    printMediaShowsEditedValues =
+      printCompositionHiddenOnScreen &&
+      (await printComposition.isVisible()) &&
+      (
+        await printComposition
+          .locator("dt")
+          .filter({ hasText: /^Ato$/ })
+          .locator("xpath=following-sibling::dd[1]")
+          .textContent()
+      )
+        ?.replace(/\s+/g, " ")
+        .includes(editedActDisplay) === true;
+    printMediaShowsCompleteDynamicComposition = await printComposition.evaluate(
+      (section, expected) => {
+        const definitionLabels = [...section.querySelectorAll("dt")].map((term) =>
+          term.textContent?.replace(/\s+/g, " ").trim(),
+        );
+        const definitionValue = (label) => {
+          const term = [...section.querySelectorAll("dt")].find(
+            (candidate) => candidate.textContent?.trim() === label,
+          );
+          return term?.parentElement?.querySelector("dd")?.textContent?.replace(/\s+/g, " ").trim();
+        };
+        const tableMatches = (caption, payments) => {
+          const table = [...section.querySelectorAll("table")].find(
+            (candidate) => candidate.querySelector("caption")?.textContent?.trim() === caption,
+          );
+          if (!table || payments.length === 0) return false;
+          return payments.every((payment) => {
+            const row = [...table.querySelectorAll("tbody tr")].find(
+              (candidate) => candidate.querySelector("th")?.textContent?.trim() === payment.label,
+            );
+            return row?.textContent?.includes(payment.value) === true;
+          });
+        };
+        return (
+          getComputedStyle(section).display !== "none" &&
+          section.querySelector("h2")?.textContent?.trim() ===
+            "Composição atual da Tabela Direta" &&
+          JSON.stringify(definitionLabels) ===
+            JSON.stringify([
+              "Valor do imóvel",
+              "Desconto autorizado",
+              "Valor real da venda",
+              "Ato",
+              "Entrada total",
+              "Limites da entrada",
+              "Saldo pré-chaves",
+              "Saldo pós-chaves",
+              "Renda e comprometimento",
+              "Resultado",
+            ]) &&
+          definitionValue("Desconto autorizado") === "Não aplicado" &&
+          definitionValue("Ato")?.includes(expected.editedActDisplay) === true &&
+          definitionValue("Renda e comprometimento")?.includes(expected.incomeDisplay) === true &&
+          definitionValue("Resultado") === "APROVADO" &&
+          expected.signals.length === 3 &&
+          expected.intermediaries.length > 0 &&
+          tableMatches("Sinais informados", expected.signals) &&
+          tableMatches("Intermediárias informadas", expected.intermediaries)
+        );
+      },
+      {
+        editedActDisplay,
+        incomeDisplay: expectedPrintIncomeDisplay,
+        signals: expectedPrintSignals,
+        intermediaries: expectedPrintIntermediaries,
+      },
+    );
+    printMediaHidesIncomeOptionsAndGuidance =
+      !(await incomeInput.isVisible()) &&
+      !(await page.locator(".investor-direct-ready-options").isVisible()) &&
+      !(await page.locator(".investor-scenario-order").isVisible()) &&
+      !(await page.locator(".investor-direct-five-card-headings").isVisible()) &&
+      !(await page.locator(".investor-direct-five-card-grid").isVisible());
+    printMediaShowsCompleteAudit = await printComposition
+      .locator(".investor-direct-print-audit")
+      .evaluate((printAudit, expectedLabels) => {
+        const actualLabels = [...printAudit.querySelectorAll("li")].map(
+          (item) => item.textContent?.replace(/\s+/g, " ").trim() ?? "",
+        );
+        return (
+          getComputedStyle(printAudit).display !== "none" &&
+          printAudit.getBoundingClientRect().height > 0 &&
+          printAudit.querySelector("h3")?.textContent?.trim() === "Auditoria integral do cálculo" &&
+          actualLabels.length > 0 &&
+          JSON.stringify(actualLabels) ===
+            JSON.stringify(expectedLabels.map((label) => label.replace(/\s+/g, " ").trim()))
+        );
+      }, expectedPrintAuditLabels);
+  } finally {
+    await page.emulateMedia({ media: "screen" });
+  }
+
+  let snapshotFailureFailsClosedWithoutLiveFallback = false;
+  let snapshotRetryRestoresInventory = false;
+  const snapshotPage = configureQaPage(await context.newPage());
+  try {
+    await snapshotPage.clock.setFixedTime(fixedDirectTableTime);
+    let rejectSnapshot = true;
+    let snapshotRequestCount = 0;
+    let liveInventoryRequestCount = 0;
+    snapshotPage.on("request", (request) => {
+      const pathname = new URL(request.url()).pathname;
+      if (pathname === "/api/inventory/snapshot") snapshotRequestCount += 1;
+      if (pathname === "/api/inventory") liveInventoryRequestCount += 1;
+    });
+    await snapshotPage.route("**/api/inventory/snapshot*", async (route) => {
+      if (!rejectSnapshot) {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        headers: { "cache-control": "no-store" },
+        body: JSON.stringify({ error: "Synthetic snapshot outage for authenticated QA." }),
+      });
+    });
+    await gotoWithServerRetry(snapshotPage, directTableUrl, {
+      waitUntil: "domcontentloaded",
+    });
+    const snapshotFailureMessage =
+      "Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.";
+    const snapshotFailure = snapshotPage
+      .locator(".investor-empty-result")
+      .filter({ hasText: snapshotFailureMessage });
+    await snapshotFailure.waitFor({ state: "visible", timeout: 20_000 });
+    const retrySnapshot = snapshotPage.getByRole("button", {
+      name: "Tentar novamente",
+      exact: true,
+    });
+    snapshotFailureFailsClosedWithoutLiveFallback =
+      snapshotRequestCount >= 1 &&
+      liveInventoryRequestCount === 0 &&
+      (await snapshotFailure.innerText()).includes(snapshotFailureMessage) &&
+      (await snapshotPage.locator(".investor-stock-table tbody tr.selectable").count()) === 0 &&
+      (await snapshotPage
+        .getByRole("navigation", { name: "Paginação do estoque completo", exact: true })
+        .count()) === 0 &&
+      (await retrySnapshot.isVisible()) &&
+      (await retrySnapshot.isEnabled());
+
+    const requestsBeforeRetry = snapshotRequestCount;
+    rejectSnapshot = false;
+    await retrySnapshot.click();
+    await waitForDirectInventory(snapshotPage);
+    snapshotRetryRestoresInventory =
+      snapshotRequestCount > requestsBeforeRetry &&
+      liveInventoryRequestCount === 0 &&
+      (await snapshotPage.locator(".investor-stock-table tbody tr").count()) === 100 &&
+      (await snapshotPage
+        .getByRole("navigation", { name: "Paginação do estoque completo", exact: true })
+        .isVisible());
+  } finally {
+    await closeAuxiliaryPage(snapshotPage);
+  }
+
+  let mobileComparisonHasNoTruncationOrOverlap = false;
+  const responsiveMenuChecks = {
+    menuAndBodyUnclippedAt768: false,
+    menuAndBodyUnclippedAt834: false,
+    menuAndBodyUnclippedAt900: false,
+    menuAndBodyUnclippedAt912: false,
+    menuAndBodyUnclippedAt1024: false,
+  };
+  const responsivePage = configureQaPage(await context.newPage());
+  try {
+    await responsivePage.clock.setFixedTime(fixedDirectTableTime);
+    await responsivePage.setViewportSize({ width: 375, height: 812 });
+    await prepareApprovedDirectProposal(responsivePage);
+    const mobileComparison = responsivePage.locator(".investor-direct-comparison-card").first();
+    await mobileComparison.waitFor({ state: "visible", timeout: 10_000 });
+    await mobileComparison.scrollIntoViewIfNeeded();
+    mobileComparisonHasNoTruncationOrOverlap = await mobileComparison.evaluate((card) => {
+      const root = document.documentElement;
+      const body = document.body;
+      const cardRect = card.getBoundingClientRect();
+      const rows = [...card.querySelectorAll(".investor-direct-comparison-ledger-row")];
+      const fitsOwnBox = (element) =>
+        element instanceof HTMLElement &&
+        element.scrollWidth <= element.clientWidth + 1 &&
+        element.scrollHeight <= element.clientHeight + 1;
+      const orderedWithoutOverlap = (elements) => {
+        const rectangles = elements.map((element) => element.getBoundingClientRect());
+        return rectangles.every(
+          (rectangle, index) => index === 0 || rectangles[index - 1].right <= rectangle.left + 1,
+        );
+      };
+      return (
+        window.innerWidth === 375 &&
+        root.scrollWidth <= root.clientWidth + 1 &&
+        body.scrollWidth <= body.clientWidth + 1 &&
+        cardRect.left >= -1 &&
+        cardRect.right <= window.innerWidth + 1 &&
+        card.scrollWidth <= card.clientWidth + 1 &&
+        rows.length >= 8 &&
+        rows.every((row) => {
+          const cells = [
+            row.querySelector(".investor-direct-comparison-ledger-label"),
+            row.querySelector(".investor-direct-comparison-ledger-operator"),
+            row.querySelector(".investor-direct-comparison-ledger-currency"),
+            row.querySelector(".investor-direct-comparison-ledger-value"),
+            row.querySelector(".investor-direct-comparison-ledger-help"),
+          ].filter((element) => element instanceof HTMLElement);
+          const label = row.querySelector(".investor-direct-comparison-ledger-label strong");
+          const value = row.querySelector(".investor-direct-comparison-ledger-value");
+          const labelStyle = label ? getComputedStyle(label) : null;
+          const valueStyle = value ? getComputedStyle(value) : null;
+          return (
+            row.scrollWidth <= row.clientWidth + 1 &&
+            cells.length === 5 &&
+            orderedWithoutOverlap(cells) &&
+            fitsOwnBox(label) &&
+            fitsOwnBox(value) &&
+            labelStyle?.textOverflow !== "ellipsis" &&
+            labelStyle?.whiteSpace === "normal" &&
+            valueStyle?.textOverflow !== "ellipsis" &&
+            valueStyle?.whiteSpace === "normal"
+          );
+        })
+      );
+    });
+
+    async function checkOpenMenuPanel(triggerName, panelId) {
+      const trigger = responsivePage.getByRole("button", { name: triggerName, exact: true });
+      const panel = responsivePage.locator(`#${panelId}`);
+      await trigger.click();
+      await responsivePage.waitForFunction(
+        (id) =>
+          document.querySelector(`[aria-controls="${id}"]`)?.getAttribute("aria-expanded") ===
+          "true",
+        panelId,
+        { timeout: 5_000 },
+      );
+      await responsivePage.waitForTimeout(250);
+      const unclipped = await panel.evaluate((menuPanel) => {
+        const viewportTolerance = 1;
+        const panelRect = menuPanel.getBoundingClientRect();
+        const triggerElement = document.querySelector(`[aria-controls="${menuPanel.id}"]`);
+        const triggerRect = triggerElement?.getBoundingClientRect();
+        const menu = menuPanel.closest(".site-menu");
+        const root = document.documentElement;
+        const body = document.body;
+        let ancestor = menuPanel.parentElement;
+        let ancestorDoesNotClip = true;
+        while (ancestor && ancestor !== root) {
+          const style = getComputedStyle(ancestor);
+          const ancestorRect = ancestor.getBoundingClientRect();
+          const clipsX = ["auto", "hidden", "scroll", "clip"].includes(style.overflowX);
+          const clipsY = ["auto", "hidden", "scroll", "clip"].includes(style.overflowY);
+          if (
+            (clipsX &&
+              (panelRect.left < ancestorRect.left - viewportTolerance ||
+                panelRect.right > ancestorRect.right + viewportTolerance)) ||
+            (clipsY &&
+              (panelRect.top < ancestorRect.top - viewportTolerance ||
+                panelRect.bottom > ancestorRect.bottom + viewportTolerance))
+          ) {
+            ancestorDoesNotClip = false;
+            break;
+          }
+          ancestor = ancestor.parentElement;
+        }
+        return (
+          getComputedStyle(menuPanel).visibility === "visible" &&
+          Number(getComputedStyle(menuPanel).opacity) > 0 &&
+          triggerElement?.getAttribute("aria-expanded") === "true" &&
+          Boolean(triggerRect) &&
+          panelRect.width > 0 &&
+          panelRect.height > 0 &&
+          panelRect.left >= -viewportTolerance &&
+          panelRect.right <= window.innerWidth + viewportTolerance &&
+          panelRect.top >= -viewportTolerance &&
+          panelRect.bottom <= window.innerHeight + viewportTolerance &&
+          triggerRect.left >= -viewportTolerance &&
+          triggerRect.right <= window.innerWidth + viewportTolerance &&
+          menu instanceof HTMLElement &&
+          menu.scrollWidth <= menu.clientWidth + viewportTolerance &&
+          menuPanel.scrollWidth <= menuPanel.clientWidth + viewportTolerance &&
+          menuPanel.scrollHeight <= menuPanel.clientHeight + viewportTolerance &&
+          root.scrollWidth <= root.clientWidth + viewportTolerance &&
+          body.scrollWidth <= body.clientWidth + viewportTolerance &&
+          ancestorDoesNotClip
+        );
+      });
+      await trigger.click();
+      await responsivePage.waitForFunction(
+        (id) =>
+          document.querySelector(`[aria-controls="${id}"]`)?.getAttribute("aria-expanded") ===
+          "false",
+        panelId,
+        { timeout: 5_000 },
+      );
+      return unclipped;
+    }
+
+    for (const viewport of [
+      { width: 768, height: 1024 },
+      { width: 834, height: 1112 },
+      { width: 900, height: 1024 },
+      { width: 912, height: 1368 },
+      { width: 1024, height: 768 },
+    ]) {
+      await responsivePage.setViewportSize(viewport);
+      await responsivePage.evaluate(() => window.scrollTo(0, 0));
+      const simulationMenuUnclipped = await checkOpenMenuPanel("Simulação", "site-menu-simulation");
+      const settingsMenuUnclipped = await checkOpenMenuPanel("Configurações", "site-menu-settings");
+      responsiveMenuChecks[`menuAndBodyUnclippedAt${viewport.width}`] =
+        simulationMenuUnclipped && settingsMenuUnclipped;
+    }
+  } finally {
+    await closeAuxiliaryPage(responsivePage);
+  }
+
+  let spaNavigationBuildsForwardHistory = false;
+  let cancelledBackNavigationPreservesProposal = false;
+  let cancelledForwardNavigationPreservesProposal = false;
+  const historyPage = configureQaPage(await context.newPage());
+  try {
+    await historyPage.clock.setFixedTime(fixedDirectTableTime);
+    await gotoWithServerRetry(historyPage, `${origin}/app/simulacao`, {
+      waitUntil: "domcontentloaded",
+    });
+    await historyPage.getByRole("heading", { name: "Simulação", exact: true }).waitFor({
+      state: "visible",
+      timeout: qaNavigationTimeout,
+    });
+    const spaMarker = `direct-table-spa-${Date.now()}`;
+    await historyPage.evaluate((marker) => {
+      window.__authenticatedDirectTableSpaMarker = marker;
+    }, spaMarker);
+    const directTableHubLink = historyPage.locator(`a[href="${directTablePath}"]`).first();
+    await directTableHubLink.waitFor({ state: "visible", timeout: 10_000 });
+    await directTableHubLink.click();
+    await historyPage.waitForURL((url) => url.pathname === directTablePath, {
+      timeout: qaNavigationTimeout,
+    });
+    await waitForDirectInventory(historyPage);
+    const markerAfterDirectNavigation = await historyPage.evaluate(
+      () => window.__authenticatedDirectTableSpaMarker,
+    );
+
+    await historyPage.locator('a.brand-link[href="/app"]').click();
+    await historyPage.waitForURL((url) => url.pathname === "/app", {
+      timeout: qaNavigationTimeout,
+    });
+    await historyPage
+      .locator("h1")
+      .first()
+      .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+    const markerAfterForwardDestination = await historyPage.evaluate(
+      () => window.__authenticatedDirectTableSpaMarker,
+    );
+    await historyPage.goBack({ waitUntil: "domcontentloaded" });
+    await historyPage.waitForURL((url) => url.pathname === directTablePath, {
+      timeout: qaNavigationTimeout,
+    });
+    await waitForDirectInventory(historyPage);
+    const historyTopology = await historyPage.evaluate(() => {
+      if (!("navigation" in window)) return null;
+      const entries = window.navigation.entries();
+      const currentIndex = window.navigation.currentEntry?.index;
+      const pathnameAt = (index) => {
+        const entry = entries.find((candidate) => candidate.index === index);
+        return entry ? new URL(entry.url).pathname : null;
+      };
+      return Number.isInteger(currentIndex)
+        ? {
+            currentIndex,
+            previousPathname: pathnameAt(currentIndex - 1),
+            currentPathname: pathnameAt(currentIndex),
+            forwardPathname: pathnameAt(currentIndex + 1),
+          }
+        : null;
+    });
+    spaNavigationBuildsForwardHistory =
+      markerAfterDirectNavigation === spaMarker &&
+      markerAfterForwardDestination === spaMarker &&
+      historyTopology?.previousPathname === "/app/simulacao" &&
+      historyTopology.currentPathname === directTablePath &&
+      historyTopology.forwardPathname === "/app";
+
+    await prepareApprovedDirectProposal(historyPage, { navigate: false });
+    const protectedProposal = await directProposalFingerprint(historyPage);
+    const protectedHistoryIndex = historyTopology?.currentIndex;
+    const discardConfirmation =
+      "Sair da Tabela Direta descartará a proposta em edição. Deseja continuar?";
+
+    async function cancelHistoryNavigation(direction) {
+      const dialogPromise = historyPage.waitForEvent("dialog", { timeout: 5_000 });
+      await historyPage.evaluate((navigationDirection) => {
+        if (navigationDirection === "back") window.history.back();
+        else window.history.forward();
+      }, direction);
+      const dialog = await dialogPromise;
+      const message = dialog.message();
+      await dialog.dismiss();
+      await historyPage.waitForFunction(
+        ({ pathname, historyIndex }) =>
+          window.location.pathname === pathname &&
+          (!("navigation" in window) || window.navigation.currentEntry?.index === historyIndex),
+        { pathname: directTablePath, historyIndex: protectedHistoryIndex },
+        { timeout: 10_000 },
+      );
+      await historyPage.waitForTimeout(100);
+      return (
+        message === discardConfirmation &&
+        (await directProposalFingerprint(historyPage)) === protectedProposal
+      );
+    }
+
+    cancelledBackNavigationPreservesProposal = await cancelHistoryNavigation("back");
+    cancelledForwardNavigationPreservesProposal = await cancelHistoryNavigation("forward");
+  } finally {
+    await closeAuxiliaryPage(historyPage);
+  }
+
+  return {
+    fullInventoryCountVisible,
+    inventoryOriginVisible,
+    firstPageHasOneHundredRows,
+    paginationStartsInExpectedState,
+    paginationAdvancesOneHundredRows,
+    paginationFocusesVisibleFirstUnit,
+    startsWithoutSelectedUnit,
+    manualUnitSelectionWorks,
+    incomeAccepted,
+    fourProposalOptionsPresent,
+    allProposalOptionsSelectable,
+    approvedProposalStatusVisible,
+    filterPreservesSelectedUnitAndIncome,
+    cancelledUnitChangePreservesProposal,
+    belowSixPercentActIsInvalid,
+    invalidCompositionDisablesPrint,
+    invalidBrowserPrintShowsBlockedNoticeOnly,
+    approvedEditedCompositionEnablesPrint,
+    printMediaShowsEditedValues,
+    printMediaShowsCompleteDynamicComposition,
+    printMediaHidesIncomeOptionsAndGuidance,
+    printMediaShowsCompleteAudit,
+    preKeysDialogWorks,
+    postKeysDialogWorks,
+    physicalPersonDocumentationWorks,
+    legalEntityDocumentationWorks,
+    auditOpensWithRejectedAct,
+    snapshotFailureFailsClosedWithoutLiveFallback,
+    snapshotRetryRestoresInventory,
+    mobileComparisonHasNoTruncationOrOverlap,
+    ...responsiveMenuChecks,
+    spaNavigationBuildsForwardHistory,
+    cancelledBackNavigationPreservesProposal,
+    cancelledForwardNavigationPreservesProposal,
+    directFlowHasNoRuntimeErrors:
+      consoleErrors.length === consoleStart && pageErrors.length === pageErrorStart,
+  };
+}
+
 async function checkFixtureSourceMarker(page, origin, expectedMarker) {
   const checks = {};
   for (const [key, route] of [
     ["dashboard", "/app"],
     ["stageOpportunities", "/app/etapas/oportunidades"],
   ]) {
-    await page.goto(`${origin}${route}`, { waitUntil: "domcontentloaded" });
+    await gotoWithServerRetry(page, `${origin}${route}`, { waitUntil: "domcontentloaded" });
     const sourceLabel = page
       .locator("dt")
       .filter({ hasText: /^Fonte$/ })
@@ -1248,8 +2286,8 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
       httpCredentials,
     });
     await hideHomologationBannerForBaseline(context);
-    const page = await context.newPage();
-    await configureQaPage(page);
+    const stopSyntheticInventory = await installSyntheticInventoryForVisualCapture(context, origin);
+    const page = configureQaPage(await context.newPage());
     const consoleErrors = [];
     const pageErrors = [];
     page.on("console", (message) => {
@@ -1270,6 +2308,7 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
         await releaseRenderedRoute(page);
       }
     } finally {
+      await stopSyntheticInventory();
       await context.close();
     }
   }
@@ -1293,8 +2332,7 @@ async function captureHomologationCheckpoints(browser, origin, email, password, 
       httpCredentials,
     });
     try {
-      const page = await context.newPage();
-      await configureQaPage(page);
+      const page = configureQaPage(await context.newPage());
       await login(page, origin, email, password);
       const banner = page.getByText("HOMOLOGAÇÃO — DADOS SINTÉTICOS", { exact: true });
       await banner.waitFor({ state: "visible", timeout: 20_000 });
@@ -1322,6 +2360,7 @@ function functionalChecksPassed({
   screenshots,
   keyboard,
   simulatorValidation,
+  directTableValidation,
   fixtureSourceMarker,
   zoom,
 }) {
@@ -1343,6 +2382,8 @@ function functionalChecksPassed({
     Object.values(keyboard).every(Boolean) &&
     simulatorValidation &&
     Object.values(simulatorValidation).every(Boolean) &&
+    directTableValidation &&
+    Object.values(directTableValidation).every(Boolean) &&
     fixtureSourceMarker &&
     Object.values(fixtureSourceMarker).every(Boolean) &&
     zoom.routes.length === routes.length * zoomLevels.length &&
@@ -1504,6 +2545,7 @@ async function run() {
     credentialsPersisted: false,
     storageStatePersisted: false,
     identityEvidencePolicy,
+    directTableInventoryEvidencePolicy,
     artifacts: {
       baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
       baselineResult: repositoryRelative(baselineResultsPath),
@@ -1557,6 +2599,7 @@ async function run() {
   const screenshots = [];
   let keyboard = null;
   let simulatorValidation = null;
+  let directTableValidation = null;
   let fixtureSourceMarker = null;
   let homologationCheckpoints = [];
   let currentStage = "homologation-checkpoints";
@@ -1579,8 +2622,11 @@ async function run() {
         httpCredentials,
       });
       await hideHomologationBannerForBaseline(context);
-      const page = await context.newPage();
-      await configureQaPage(page);
+      const stopSyntheticInventory = await installSyntheticInventoryForVisualCapture(
+        context,
+        origin,
+      );
+      const page = configureQaPage(await context.newPage());
       const consoleErrors = [];
       const pageErrors = [];
       page.on("console", (message) => {
@@ -1620,7 +2666,7 @@ async function run() {
         if (viewport.key === "desktop-1440x900") {
           for (const theme of themes) {
             currentStage = `theme:${theme}`;
-            await page.goto(`${origin}/app`, { waitUntil: "domcontentloaded" });
+            await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
             await setTheme(page, theme);
             for (const route of routes) {
               currentStage = `theme:${theme}:${route}`;
@@ -1669,13 +2715,32 @@ async function run() {
           keyboard = await checkKeyboard(page, origin);
           currentStage = "simulator-validation";
           simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);
+          await stopSyntheticInventory();
+          currentStage = "direct-table-validation";
+          const directPage = configureQaPage(await context.newPage());
+          const directConsoleErrors = [];
+          const directPageErrors = [];
+          directPage.on("console", (message) => {
+            if (message.type() === "error") directConsoleErrors.push(message.text());
+          });
+          directPage.on("pageerror", (error) => directPageErrors.push(error.message));
+          try {
+            directTableValidation = await checkDirectTableValidation(
+              directPage,
+              origin,
+              directConsoleErrors,
+              directPageErrors,
+            );
+          } finally {
+            await directPage.close({ runBeforeUnload: false });
+          }
           currentStage = "fixture-source-marker";
           fixtureSourceMarker = await checkFixtureSourceMarker(page, origin, expectedSourceMarker);
         }
 
         if (viewport.key === mobileDarkViewportKey) {
           currentStage = `mobile-dark:${viewport.key}`;
-          await page.goto(`${origin}/app`, { waitUntil: "domcontentloaded" });
+          await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
           await setTheme(page, "dark");
           for (const route of routes) {
             currentStage = `mobile-dark:${viewport.key}:${route}`;
@@ -1718,6 +2783,7 @@ async function run() {
           }
         }
       } finally {
+        await stopSyntheticInventory();
         await context.close();
       }
 
@@ -1737,6 +2803,7 @@ async function run() {
       screenshots,
       keyboard,
       simulatorValidation,
+      directTableValidation,
       fixtureSourceMarker,
       zoom,
     });
@@ -1766,6 +2833,7 @@ async function run() {
       credentialsPersisted: false,
       storageStatePersisted: false,
       identityEvidencePolicy,
+      directTableInventoryEvidencePolicy,
       artifacts: {
         baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
         baselineResult: repositoryRelative(baselineResultsPath),
@@ -1778,6 +2846,7 @@ async function run() {
       accessibilityChecks,
       keyboard,
       simulatorValidation,
+      directTableValidation,
       homologationCheckpoints,
       zoom,
       screenshots,
@@ -1843,6 +2912,7 @@ async function run() {
         credentialsPersisted: false,
         storageStatePersisted: false,
         identityEvidencePolicy,
+        directTableInventoryEvidencePolicy,
         artifacts: {
           baselineScreenshots: repositoryRelative(baselineScreenshotRoot),
           baselineResult: repositoryRelative(baselineResultsPath),

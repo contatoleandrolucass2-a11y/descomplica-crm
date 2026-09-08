@@ -95,6 +95,7 @@ function StageNavigation({
         <Link
           key={item.slug}
           href={stageHref(item.slug, view, period)}
+          prefetch={false}
           aria-current={item.slug === stage.slug ? "page" : undefined}
           className={`inline-flex min-h-11 items-center justify-center rounded-xl px-3 py-2 text-center text-sm font-medium ring-1 ring-white/15 ${
             item.slug === stage.slug
@@ -301,6 +302,7 @@ function EmptyStagePage({
               {previousStage ? (
                 <Link
                   href={stageHref(previousStage.slug, view, period)}
+                  prefetch={false}
                   className="inline-flex min-h-11 items-center rounded-lg bg-white/8 px-3 py-2 text-sm text-white hover:bg-white/15"
                 >
                   ← {previousStage.label}
@@ -311,6 +313,7 @@ function EmptyStagePage({
               {nextStage ? (
                 <Link
                   href={stageHref(nextStage.slug, view, period)}
+                  prefetch={false}
                   className="inline-flex min-h-11 items-center justify-end rounded-lg bg-white/8 px-3 py-2 text-sm text-white hover:bg-white/15"
                 >
                   {nextStage.label} →
@@ -583,6 +586,7 @@ export default async function StagePage({
               {previousStage ? (
                 <Link
                   href={stageHref(previousStage.slug, view, period)}
+                  prefetch={false}
                   className="inline-flex min-h-11 items-center rounded-lg bg-white/8 px-3 py-2 text-sm text-white hover:bg-white/15"
                 >
                   ← {previousStage.label}
@@ -593,6 +597,7 @@ export default async function StagePage({
               {nextStage ? (
                 <Link
                   href={stageHref(nextStage.slug, view, period)}
+                  prefetch={false}
                   className="inline-flex min-h-11 items-center justify-end rounded-lg bg-white/8 px-3 py-2 text-sm text-white hover:bg-white/15"
                 >
                   {nextStage.label} →

@@ -74,6 +74,7 @@ function NavigationDisclosure({ group, pathname }: { group: NavigationGroup; pat
             <Link
               className={styles.menuLink}
               href={page.path}
+              prefetch={false}
               aria-current={current ? "page" : undefined}
               key={page.key}
               onClick={closeDisclosure}
@@ -107,6 +108,7 @@ export function AuthorizedNavigation({ pages }: { pages: NavigationItem[] }) {
             ) : (
               <Link
                 href={group.page.path}
+                prefetch={false}
                 aria-current={pathname === group.page.path ? "page" : undefined}
                 className={styles.navigationLink}
               >

@@ -19,9 +19,9 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 
-import { createClient } from "@/lib/auth/supabase/server";
 import { enforceAuthorization } from "@/lib/authorization/enforce";
 import { logoutAction } from "@/lib/auth/actions/logout";
+import { getCurrentUser } from "@/lib/authorization/guards";
 import { getRoleLabel } from "@/lib/authorization/roles";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 import { getNavigationHome } from "@/lib/navigation/presentation";
@@ -35,10 +35,7 @@ import { ThemeSwitch } from "./_components/ThemeSwitch";
 
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   const context = await enforceAuthorization();
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   const pages = await getAuthorizedNavigation(context);
   const cookieStore = await cookies();
   const cookieConsent = parseCookieConsent(cookieStore.get(COOKIE_CONSENT_COOKIE_NAME)?.value);
@@ -62,6 +59,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
           {navigationHome ? (
             <Link
               href={navigationHome.path}
+              prefetch={false}
               className={styles.brand}
               aria-label={`Descomplica CRM — ${navigationHome.name}`}
             >
@@ -86,7 +84,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
                 Sessão ativa
               </span>
             </div>
-            <Link href="/conta/seguranca" className={styles.accountLink}>
+            <Link href="/conta/seguranca" prefetch={false} className={styles.accountLink}>
               Segurança
             </Link>
             <ThemeSwitch canPersist={cookieConsent?.categories.functional === true} />

@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -9,6 +10,8 @@ const dockerEnvironment = {
   DOCKER_HOST: "unix:///var/run/docker.sock",
   PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 };
+const inventorySnapshot = "/etc/descomplica-crm/data/investor-inventory-2026-09-05.json";
+const inventorySnapshotSha256 = "f31e6fe6a8dac204e767744903a6ae957f9bd526ed190e8cdf193c3479e61b24";
 
 const environments = {
   homologation: {
@@ -17,6 +20,7 @@ const environments = {
     environmentGroup: "root",
     environmentMode: 0o600,
     secret: "/etc/descomplica-crm/secrets/homologation-auth-session-cookie-secret",
+    inventorySnapshot,
   },
   production: {
     compose: path.join(repositoryRoot, "compose.yaml"),
@@ -24,6 +28,7 @@ const environments = {
     environmentGroup: "root",
     environmentMode: 0o600,
     secret: "/etc/descomplica-crm/secrets/production-auth-session-cookie-secret",
+    inventorySnapshot,
   },
 };
 
@@ -60,6 +65,41 @@ async function validateOwnedFile(filePath, expectedMode, expectedGroup, label) {
     (metadata.mode & 0o777) !== expectedMode
   ) {
     fail(`${label} ownership or mode is invalid.`);
+  }
+}
+
+async function validateInventorySnapshot(filePath) {
+  const directory = path.dirname(filePath);
+  if ((await realpath(directory)) !== directory) {
+    fail("Inventory snapshot directory path must not be a symlink.");
+  }
+  const directoryMetadata = await stat(directory);
+  if (
+    !directoryMetadata.isDirectory() ||
+    directoryMetadata.uid !== 0 ||
+    directoryMetadata.gid !== 0 ||
+    (directoryMetadata.mode & 0o777) !== 0o710
+  ) {
+    fail("Inventory snapshot directory must be root-owned with mode 0710.");
+  }
+  await validateOwnedFile(filePath, 0o640, 0, "Inventory snapshot file");
+  const snapshotBytes = await readFile(filePath);
+  try {
+    if (createHash("sha256").update(snapshotBytes).digest("hex") !== inventorySnapshotSha256) {
+      fail("Inventory snapshot digest is invalid.");
+    }
+    const payload = JSON.parse(snapshotBytes.toString("utf8"));
+    if (
+      payload?.source !== "ESTOQUE SPC.xlsx" ||
+      payload?.count !== 3301 ||
+      !Array.isArray(payload?.items) ||
+      payload.items.length !== payload.count ||
+      new Set(payload.items.map((item) => item?.id)).size !== payload.count
+    ) {
+      fail("Inventory snapshot contents are invalid.");
+    }
+  } finally {
+    snapshotBytes.fill(0);
   }
 }
 
@@ -109,6 +149,12 @@ async function main() {
     fail("Runtime environment does not declare the approved secret source.");
   }
   await validateOwnedFile(configuration.secret, 0o640, 0, "Runtime secret file");
+  // Recovery and inspection commands must remain available even if the
+  // application data mount is missing or damaged. Only a start can expose the
+  // snapshot to the runtime, so enforce its integrity immediately before up.
+  if (command === "up") {
+    await validateInventorySnapshot(configuration.inventorySnapshot);
+  }
   const secretBytes = await readFile(configuration.secret);
   const contentLength =
     secretBytes.at(-1) === 0x0a

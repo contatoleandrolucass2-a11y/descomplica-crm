@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
 
 describe("protected commercial page set", () => {
-  it("matches the exact approved eighteen-page production set", () => {
+  it("matches the exact approved nineteen-page production set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -21,6 +21,7 @@ describe("protected commercial page set", () => {
         "crm.settings.points|/app/configuracoes/metas/pontos|crm.settings.manage",
         "crm.settings|/app/configuracoes|crm.settings.view",
         "crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view",
+        "crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view",
         "crm.simulation.wf15|/app/simulacao/tabela-investidor|crm.simulators.view",
         "crm.simulation|/app/simulacao|crm.simulators.view",
         "crm.stage.appointments|/app/etapas/agendamentos|crm.stages.view",
@@ -32,7 +33,7 @@ describe("protected commercial page set", () => {
     );
   });
 
-  it("identifies exactly the three restore-only simulator routes", () => {
+  it("identifies exactly the two restore-only simulator routes", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => !page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -40,7 +41,6 @@ describe("protected commercial page set", () => {
     ).toEqual(
       [
         "crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view",
-        "crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view",
         "crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view",
       ].sort(),
     );

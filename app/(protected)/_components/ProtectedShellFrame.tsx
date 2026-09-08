@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const ARCHIVE_SIMULATOR_ROUTES = new Set([
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
 ]);
 

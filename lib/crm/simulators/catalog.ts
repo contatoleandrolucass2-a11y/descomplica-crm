@@ -738,8 +738,9 @@ export const SIMULATORS = {
     code: "WF14",
     title: "Tabela Direta",
     shortTitle: "Tabela Direta",
-    description: "Dois cenários visuais para organizar uma decisão comercial sem cálculo ativo.",
-    actionLabel: "Gerar dois cenários",
+    description:
+      "Estoque SPC completo, quatro opções prontas, fluxo editável e validação integral da Tabela Direta.",
+    actionLabel: "Abrir Tabela Direta",
     sections: [
       {
         key: "property",
@@ -793,14 +794,19 @@ export const SIMULATORS = {
       {
         key: "comparison",
         title: "Comparação",
-        description:
-          "Os dois cenários permanecem bloqueados até a publicação da regra oficial versionada.",
+        description: "Quatro composições prontas para iniciar e personalizar a proposta.",
         fields: [],
         preview: {
           kind: "scenarios",
-          title: "Comparação indisponível",
-          description: "Os cartões não contêm valores ou parecer comercial.",
-          items: ["Cenário 1", "Cenário 2"],
+          title: "Quatro opções da Tabela Direta",
+          description:
+            "Compare ato, sinais, intermediárias, pré-chaves, pós-chaves e comprometimento de renda.",
+          items: [
+            "Pagamento simples",
+            "Entrada distribuída",
+            "Parcela reduzida",
+            "Maior flexibilidade",
+          ],
         },
       },
     ],

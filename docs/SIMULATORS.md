@@ -8,17 +8,20 @@ por padrão e isolado dos demais motores. Contrato, fontes, caso de ouro do PDF
 Master e rollback estão em
 [`docs/simulators-official/WF13.md`](simulators-official/WF13.md).
 
-O WF15 publica a réplica completa da Tabela Investidor do arquivo anexado, com
-snapshot versionado do estoque e cálculo executado no navegador. Isso não
-promove o workflow n8n histórico nem o runtime de políticas comerciais a fonte
-oficial. WF16, CAIXA e WF14 permanecem bloqueados. Nenhum simulador depende de
-Salesforce, n8n ou Qlik.
+O WF14 implementa a réplica integral da Tabela Direta do arquivo anexado, com
+snapshot SPC em volume privado fora do Git e da imagem, montado somente para
+leitura, e cálculo executado no navegador. O WF15 publica a réplica completa da
+Tabela Investidor do respectivo arquivo anexado, com o mesmo snapshot protegido
+do estoque e cálculo no navegador. Isso não promove os workflows n8n históricos
+nem o runtime de políticas comerciais a fonte oficial. WF16 e CAIXA permanecem
+bloqueados. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 
 ## Escopo
 
 As cinco jornadas preservam a composição visual aprovada. Somente o WF13 possui
-fórmula classificada como oficial; o WF15 reproduz integralmente o artefato
-anexado e mantém seu cálculo separado do runtime oficial.
+fórmula classificada como oficial; WF14 e WF15 reproduzem integralmente os
+respectivos artefatos anexados e mantêm suas regras e cálculos isolados do
+runtime oficial.
 
 | Código | Rota protegida                            | Jornada visual        |
 | ------ | ----------------------------------------- | --------------------- |
@@ -29,22 +32,36 @@ anexado e mantém seu cálculo separado do runtime oficial.
 | WF15   | `/app/simulacao/tabela-investidor`        | Tabela Investidor     |
 
 O hub está em `/app/simulacao`. Todas as seis rotas exigem
-`crm.simulators.view` no guard server-side e no catálogo `app_pages`. A
-navegação continua recebendo somente as páginas filtradas pelo contexto de
-autorização. No canário atual, essa permissão é exclusiva do Master e não possui
-override direto. O acesso à página e a execução são gates independentes: WF13
-também exige `crm.simulators.execute`, flag e chave oficiais. A réplica WF15 é
-renderizada somente após o mesmo guard `crm.simulators.view`, não persiste a
-proposta e não habilita um motor oficial.
+`crm.simulators.view` no guard server-side. O catálogo PostgreSQL permanece com
+17 páginas e as réplicas WF14 e WF15 estão implementadas neste candidato pelo
+catálogo HTTP versionado, sem migration. A navegação continua recebendo somente
+as páginas filtradas pelo contexto de autorização. No canário atual, essa
+permissão é exclusiva do Master e não possui override direto. O acesso à página
+e a execução são gates independentes: WF13 também exige
+`crm.simulators.execute`, flag e chave oficiais. WF14 e WF15 são renderizados
+somente após o mesmo guard `crm.simulators.view`, não persistem propostas nem
+habilitam motores oficiais.
 
 ## Comportamento fail-closed
 
 - O catálogo tipado define títulos, seções, campos e espaços de resultado.
 - Campos obrigatórios ganham validação associada e `aria-invalid`.
 - As flags oficiais nascem `off` e a allowlist nasce vazia.
-- WF16, CAIXA e WF14 mantêm botão bloqueado e `UnavailableValue`.
-- WF15 usa o estoque SPC versionado, exclui vagas avulsas, exige unidade com
-  valor e término da obra e mantém estados de loading, vazio e erro.
+- WF16 e CAIXA mantêm botão bloqueado e `UnavailableValue`.
+- WF14 usa as 3.301 linhas do volume SPC privado, validado por checksum e montado
+  somente para leitura. `GET /api/inventory/snapshot` entrega esse conteúdo e
+  é a única fonte aceita pela Tabela Direta. Se ele falhar, a página informa a
+  indisponibilidade e permite tentar novamente, sem consultar silenciosamente
+  `GET /api/inventory`. Ambos os endpoints continuam exigindo
+  `crm.simulators.view` e respondendo com `no-store`; o endpoint vivo atende
+  somente outras jornadas. Linhas do snapshot sem preço permanecem visíveis e
+  indisponíveis. A simulação também exige unidade com valor e término da obra.
+- A Tabela Direta fecha a distribuição no centavo, preserva o bloco pós-chaves
+  e separa pendência de dados, ajuste operacional, aprovação e recusa de
+  crédito.
+- WF15 usa o snapshot SPC protegido, exclui vagas avulsas, exige unidade com
+  valor e término da obra, mantém estados de loading, vazio e erro e trata
+  `GET /api/inventory` como atualização protegida não bloqueante.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta
@@ -75,6 +92,11 @@ O contrato e o runbook do runtime genérico permanecem em
 
 ## QA local
 
-Fixtures sintéticas podem preencher os campos somente durante QA isolado. Os
-casos de ouro do WF13 são testes versionados, não seeds de produção. Credenciais
-QA, storage state, HTML, HAR e payloads de usuário não são versionados.
+Fixtures sintéticas podem preencher os campos somente durante QA isolado. A
+matriz visual da Tabela Direta gera em diretório temporário 3.301 unidades
+sintéticas determinísticas, para que o snapshot comercial não entre no Git, no
+CI ou nas capturas. A execução local primeiro valida a cópia privada real; a
+ausência dela só é aceita no GitHub Actions com opt-in explícito do workflow.
+Produção continua exigindo a cópia privada com o SHA-256 do anexo. Os casos de
+ouro do WF13 são testes versionados, não seeds de produção. Credenciais QA,
+storage state, HTML, HAR e payloads de usuário não são versionados.

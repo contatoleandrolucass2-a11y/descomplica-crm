@@ -14,6 +14,9 @@ VPS Hostinger KVM 1, Ubuntu 24.04 LTS, aplicação Next.js `standalone`, Docker 
 - `APP_ORIGIN` e flags Salesforce explícitas; segredos distintos por ambiente
   somente para capacidades ativadas, nunca presentes no artefato.
 - Backup validado antes de cada alteração de banco.
+- Snapshot SPC fora do Git em
+  `/etc/descomplica-crm/data/investor-inventory-2026-09-05.json`; diretório
+  `root:root 0710`, arquivo `root:root 0640`.
 
 ## Artefato
 
@@ -52,19 +55,43 @@ Produção não será publicada automaticamente. Exige autorização explícita 
 A implantação reproduzível usa `Dockerfile` multi-stage, `compose.yaml` e a saída
 `standalone`. O processo Next.js publica somente em `127.0.0.1:3000`; Nginx é a
 única entrada HTTP/HTTPS. O arquivo `/etc/descomplica-crm/production.env` deve
-pertencer a `root:deploy`, modo `0640`, e nunca entrar no Git.
+pertencer a `root:root`, modo `0600`, e nunca entrar no Git.
+
+Antes do primeiro `up`, instale por canal privado o snapshot recebido no anexo.
+Ele não pertence ao checkout nem ao contexto Docker. O wrapper valida SHA-256
+`f31e6fe6a8dac204e767744903a6ae957f9bd526ed190e8cdf193c3479e61b24`, fonte,
+3.301 IDs únicos, owner e modos antes de chamar o Compose.
+
+```bash
+sudo install -d -o root -g root -m 0710 /etc/descomplica-crm/data
+sudo install -o root -g root -m 0640 \
+  <snapshot-SPC-validado> \
+  /etc/descomplica-crm/data/investor-inventory-2026-09-05.json
+```
 
 ```bash
 cd /srv/descomplica-crm-simulador-associativo
 git fetch origin main
 git switch main
 git pull --ff-only origin main
-export IMAGE_TAG="$(git rev-parse --short=12 HEAD)"
-docker compose --env-file /etc/descomplica-crm/production.env build --pull
-docker compose --env-file /etc/descomplica-crm/production.env up -d --remove-orphans
-docker compose ps
+export IMAGE_TAG="$(git rev-parse HEAD)"
+pnpm image:build
+pnpm image:prove
+sudo node scripts/release/compose-with-runtime-secret.mjs \
+  production up -d --no-build --remove-orphans
+sudo node scripts/release/compose-with-runtime-secret.mjs production ps
 curl --fail --silent http://127.0.0.1:3000/api/health
+curl --fail --head https://crm.descomplicapro.com.br/app/simulacao/tabela-direta
 ```
+
+Para a publicação da réplica WF14, confirme que o `version` de `/api/health`
+coincide com o SHA implantado, que o acesso anônimo à URL acima redireciona sem
+expor conteúdo comercial e que uma sessão Master com `crm.simulators.view`
+recebe a Tabela Direta completa. O deploy não requer migration, novo segredo ou
+ativação de motor oficial; o rollback continua sendo a imagem imutável anterior.
+Confirme também `404` no caminho legado público
+`/data/investor-inventory.json`, `401` nos dois endpoints de estoque sem sessão e
+`200`/`no-store`/3.301 linhas em `/api/inventory/snapshot` com sessão Master.
 
 Antes do primeiro `up`, preencha todas as variáveis exigidas pelo Compose. Os
 valores `NEXT_PUBLIC_*` são fixados durante o build; qualquer alteração neles
@@ -91,7 +118,7 @@ eco e pergunta primeiro quais capacidades Salesforce serão ativadas. Segredos
 e URL são solicitados ou gerados somente para capacidades ativas; valores já
 existentes de capacidades desativadas permanecem preservados sem serem
 solicitados. A substituição de `/etc/descomplica-crm/production.env` é atômica,
-com `root:deploy` e `0640`. O assistente não inicia containers nem mostra o
+com `root:root` e `0600`. O assistente não inicia containers nem mostra o
 arquivo final.
 
 `SALESFORCE_REFRESH_URL` não é derivada pelo CRM: é a URL HTTPS publicada pela

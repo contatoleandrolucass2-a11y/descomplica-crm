@@ -7,10 +7,11 @@ export interface ProtectedPageGate {
   releaseEnabled: boolean;
 }
 
-// Covers the complete 21-route HTTP smoke inventory. Exactly seventeen entries
-// mirror app_pages; four future simulator routes remain versioned in code but
-// are release-disabled. The database remains authoritative for navigation and
-// RLS; this copy lets Proxy return a real 403 before disabled code can stream.
+// Covers the complete 21-route HTTP smoke inventory. Seventeen entries mirror
+// app_pages; WF14 is an additional release-enabled replica linked from the
+// simulator-local menu, and three future simulator routes remain disabled. The
+// database remains authoritative for global navigation and RLS; this copy lets
+// Proxy return a real 403 before disabled code can stream.
 export const PROTECTED_PAGE_GATES = [
   {
     pageKey: "crm.dashboard",
@@ -112,7 +113,7 @@ export const PROTECTED_PAGE_GATES = [
     pageKey: "crm.simulation.wf14",
     path: "/app/simulacao/tabela-direta",
     permission: "crm.simulators.view",
-    releaseEnabled: false,
+    releaseEnabled: true,
   },
   {
     pageKey: "crm.simulation.wf15",

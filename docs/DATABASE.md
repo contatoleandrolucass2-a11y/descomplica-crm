@@ -6,9 +6,11 @@ O schema versionado usa PostgreSQL 17 no Supabase local. Existem 42 arquivos de
 migration: 34 etapas canônicas e sete versões remotas reconciliadas por markers
 ou convergências seguras. Nenhuma regra, política ou valor comercial é seedado.
 O rebuild contém 39 tabelas públicas,
-17 privadas, 12 papéis, 26 permissões e 17 páginas autorizadas. Quatro rotas
-futuras de simuladores continuam no código, mas fora do catálogo e respondem
-`403` para todo perfil até autorização explícita.
+17 privadas, 12 papéis, 26 permissões e 17 páginas autorizadas. Quatro rotas de
+simuladores permanecem fora de `app_pages`: a réplica WF14 é a rota HTTP
+adicional habilitada pelo catálogo versionado e pelo guard existente, sem
+migration; WF16, CAIXA e WF15 continuam futuras e respondem `403` para todo
+perfil até autorização explícita.
 
 Isso não descreve convergência com produção. A captura somente leitura de 9 de
 agosto encontrou quatro versões então somente remotas, hoje representadas por

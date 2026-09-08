@@ -350,6 +350,7 @@ export default async function AppHomePage({
                 <nav aria-label="Etapas do funil" className="flex flex-wrap gap-2">
                   <Link
                     href={dashboardHref(selectedView, selectedPeriod)}
+                    prefetch={false}
                     aria-current="page"
                     className="inline-flex min-h-11 items-center rounded-xl bg-cyan-300 px-3 py-2 text-sm font-semibold text-[#082137]"
                   >
@@ -359,6 +360,7 @@ export default async function AppHomePage({
                     <Link
                       key={stage.slug}
                       href={`/app/etapas/${stage.slug}?view=${selectedView}&period=${selectedPeriod}`}
+                      prefetch={false}
                       className="inline-flex min-h-11 items-center rounded-xl bg-white/8 px-3 py-2 text-sm font-medium text-white ring-1 ring-white/15 hover:bg-white/15"
                     >
                       {stage.label}
@@ -429,6 +431,7 @@ export default async function AppHomePage({
                   {authorization.permissions.includes("crm.stages.view") ? (
                     <Link
                       href={`/app/etapas/${CRM_STAGES.find((item) => item.key === stageKey)?.slug ?? stageKey}`}
+                      prefetch={false}
                       className="inline-flex min-h-11 items-center justify-center rounded-xl border border-cyan-200 bg-white px-3 py-2 text-sm font-semibold text-cyan-800"
                     >
                       Abrir análise
@@ -703,6 +706,7 @@ export default async function AppHomePage({
               <nav aria-label="Etapas do funil" className="flex flex-wrap gap-2">
                 <Link
                   href={dashboardHref(selectedView, selectedPeriod)}
+                  prefetch={false}
                   aria-current="page"
                   className="inline-flex min-h-11 items-center rounded-xl bg-cyan-300 px-3 py-2 text-sm font-semibold text-[#082137]"
                 >
@@ -712,6 +716,7 @@ export default async function AppHomePage({
                   <Link
                     key={stage.slug}
                     href={`/app/etapas/${stage.slug}?view=${selectedView}&period=${selectedPeriod}`}
+                    prefetch={false}
                     className="inline-flex min-h-11 items-center rounded-xl bg-white/8 px-3 py-2 text-sm font-medium text-white ring-1 ring-white/15 hover:bg-white/15"
                   >
                     {stage.label}
@@ -795,6 +800,7 @@ export default async function AppHomePage({
                   {authorization.permissions.includes("crm.stages.view") && stageSlug ? (
                     <Link
                       href={`/app/etapas/${stageSlug}?view=${selectedView}&period=${selectedPeriod}`}
+                      prefetch={false}
                       className="inline-flex min-h-11 items-center justify-center rounded-xl border border-cyan-200 bg-white px-3 py-2 text-sm font-semibold text-cyan-800"
                     >
                       Abrir análise

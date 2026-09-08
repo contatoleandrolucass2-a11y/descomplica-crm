@@ -21,6 +21,9 @@ services:
       SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:?SUPABASE_PUBLISHABLE_KEY is required}
       APP_ORIGIN: ${APP_ORIGIN:?APP_ORIGIN is required}
       AUTH_SESSION_COOKIE_SECRET_FILE: /run/secrets/auth_session_cookie_secret
+      INVESTOR_INVENTORY_SNAPSHOT_PATH: /run/data/investor-inventory.json
+      INVESTOR_INVENTORY_SNAPSHOT_REFERENCE_DATE: "2026-09-05"
+      INVESTOR_INVENTORY_SNAPSHOT_SHA256: f31e6fe6a8dac204e767744903a6ae957f9bd526ed190e8cdf193c3479e61b24
       SALESFORCE_INGEST_ENABLED: ${SALESFORCE_INGEST_ENABLED:?SALESFORCE_INGEST_ENABLED is required}
       SALESFORCE_REFRESH_ENABLED: ${SALESFORCE_REFRESH_ENABLED:?SALESFORCE_REFRESH_ENABLED is required}
       CRM_READ_MODEL_V3_SHADOW_ENABLED: ${CRM_READ_MODEL_V3_SHADOW_ENABLED:-false}
@@ -48,6 +51,12 @@ services:
       - type: bind
         source: ${AUTH_SESSION_COOKIE_SECRET_SOURCE:?AUTH_SESSION_COOKIE_SECRET_SOURCE is required}
         target: /run/secrets/auth_session_cookie_secret
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: /etc/descomplica-crm/data/investor-inventory-2026-09-05.json
+        target: /run/data/investor-inventory.json
         read_only: true
         bind:
           create_host_path: false

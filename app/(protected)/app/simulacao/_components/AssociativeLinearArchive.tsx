@@ -496,7 +496,9 @@ export function AssociativeLinearArchive({ executionEnabled }: { executionEnable
         <section className="simulation-hero">
           <div>
             <nav className="simulation-breadcrumb" aria-label="Trilha de navegação">
-              <Link href="/app/simulacao">Simulação</Link>
+              <Link href="/app/simulacao" prefetch={false}>
+                Simulação
+              </Link>
               <span aria-hidden="true">/</span>
               <span>Simulador Associativo</span>
             </nav>

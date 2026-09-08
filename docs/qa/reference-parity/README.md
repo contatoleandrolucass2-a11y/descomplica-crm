@@ -11,15 +11,15 @@ Os harnesses de QA visual cobrem três fronteiras:
 2. verificação sem sessão das 18 rotas CRM protegidas do catálogo, seguida
    de captura do login vazio em `1440×900`, `1280×720`, `768×1024` e
    `390×844`;
-3. QA autenticado complementar das 21 rotas protegidas em Supabase local
-   isolado, incluindo as três páginas administrativas, com
+3. QA autenticado complementar das 19 rotas liberadas em Supabase local
+   isolado, combinado ao smoke de autorização das 21 rotas versionadas, com
    conta QA efêmera, fixtures sintéticas e motores de simulação bloqueados.
 
 Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
 cada imagem está em [`manifest.json`](./manifest.json).
 O QA local autenticado está em
-[`authenticated-results.json`](./authenticated-results.json); suas 192 capturas
+[`authenticated-results.json`](./authenticated-results.json); suas 182 capturas
 ficam em [`target-authenticated`](./target-authenticated/).
 
 A baseline canônica continua comprovando todos os simuladores bloqueados. Quando
@@ -143,28 +143,29 @@ O harness executou a captura autenticada local, limpa e transacional com:
 
 - sete viewports: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `390×844`,
   `375×812` e `320×568`;
-- 18 rotas em tema claro nos sete viewports;
-- as 18 rotas em tema escuro móvel no viewport `390×844`;
-- verificações desktop dos temas claro, equilibrado e escuro nas 18 rotas, com
-  captura das nove amostras visuais definidas pelo harness;
+- 19 rotas liberadas em tema claro nos sete viewports;
+- as 19 rotas liberadas em tema escuro móvel no viewport `390×844`;
+- verificações desktop dos temas claro, equilibrado e escuro nas 19 rotas, com
+  capturas das três páginas administrativas, da Tabela Direta, da Tabela
+  Investidor e das demais amostras visuais definidas pelo harness;
 - reflow equivalente a zoom de `80%`, `100%`, `125%`, `150%` e `200%`, sempre
   sobre canvas físico de `1440×900`;
-- reduced motion e Axe nas 126 combinações responsivas, nas 27 amostras desktop
-  de tema e nas 18 combinações mobile dark.
+- reduced motion e Axe nas 133 combinações responsivas, nas 30 amostras desktop
+  de tema e nas 19 combinações mobile dark.
 
-A matriz aprovou 126 capturas responsivas, 45 capturas de tema, 171 auditorias
-de acessibilidade, 171 comparações e 90 checks de zoom. A promoção ocorreu por
+A matriz aprovou 133 capturas responsivas, 49 capturas de tema, 182 auditorias
+de acessibilidade, 182 comparações e 95 checks de zoom. A promoção ocorreu por
 rename transacional com rollback, a partir de worktree limpa e sem alteração do
 fingerprint durante a captura.
 
 Resultados aprovados:
 
-- 126/126 checks responsivos: 18 rotas em sete viewports;
-- 72/72 checks de tema: 18 rotas em mobile dark e 18 rotas desktop nos temas
-  claro, equilibrado e escuro;
-- 171/171 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
+- 133/133 checks responsivos: 19 rotas em sete viewports;
+- 76/76 checks de tema: 19 rotas nos três temas desktop e em mobile dark, com
+  49 capturas nas dez amostras desktop e nas 19 combinações mobile dark;
+- 182/182 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
   de tema, sem violações;
-- 90/90 checks de zoom: 18 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
+- 95/95 checks de zoom: 19 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
 - disclosure aberto por teclado, fechado com `Escape`, foco devolvido e `Tab`
   alcançando controle interativo;
 - campo obrigatório de simulador sinalizado após blur com `aria-invalid`,
@@ -175,8 +176,8 @@ Resultados aprovados:
 - zero colisão entre navegação e identidade de sessão, com truncamento pronto
   para nomes longos;
 - CTAs habilitado, bloqueado e indisponível com estilos computados distintos;
-- 147 capturas rota×viewport e 45 amostras de tema, sem metadados;
-- 192/192 comparações contra o baseline versionado dentro do limiar máximo de 1%
+- 133 capturas rota×viewport e 49 amostras de tema, sem metadados;
+- 182/182 comparações contra o baseline versionado dentro do limiar máximo de 1%
   de pixels alterados, com tolerância de 16 níveis por canal.
 
 As capturas autenticadas usam somente identidades e valores sintéticos com
@@ -230,7 +231,7 @@ O modo padrão nunca altera a baseline versionada. Capturas e diagnóstico da
 execução ficam em `test-results/authenticated-visual/`, ignorado pelo Git. O
 modo `--update-baseline` também exige que a baseline inicial corresponda ao
 `HEAD` e só a promove, por troca atômica com rollback, depois de todos os checks
-funcionais e de acessibilidade passarem. Hashes dos 192 arquivos usados ficam
+funcionais e de acessibilidade passarem. Hashes dos 171 arquivos usados ficam
 registrados na evidência; uma falha nunca atualiza a baseline.
 
 ## Estados do gate final

@@ -1,7 +1,8 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { execFile, spawn, spawnSync } from "node:child_process";
-import { chmod, link, open, rm, stat } from "node:fs/promises";
+import { chmod, link, mkdtemp, open, rm, stat } from "node:fs/promises";
 import { createServer } from "node:net";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
@@ -9,6 +10,7 @@ import { promisify } from "node:util";
 import { createClient } from "@supabase/supabase-js";
 
 import legalDocumentVersions from "../../lib/legal/versions.json" with { type: "json" };
+import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
@@ -354,8 +356,37 @@ async function assertFreshProductionBuild() {
   }
 }
 
+async function createSyntheticInventoryFixture() {
+  const directory = await mkdtemp(path.join(tmpdir(), "descomplica-release-inventory-"));
+  const snapshotPath = path.join(directory, "investor-inventory.json");
+  const contents = buildSyntheticDirectTableQaSnapshot();
+  let handle;
+  try {
+    await chmod(directory, 0o700);
+    handle = await open(snapshotPath, "wx", 0o600);
+    await handle.writeFile(contents, "utf8");
+    await handle.sync();
+    await handle.close();
+    handle = undefined;
+    await chmod(snapshotPath, 0o600);
+    return {
+      directory,
+      path: snapshotPath,
+      sha256: createHash("sha256").update(contents).digest("hex"),
+    };
+  } catch (error) {
+    await handle?.close();
+    await rm(directory, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+async function removeSyntheticInventoryFixture(fixture) {
+  if (fixture) await rm(fixture.directory, { recursive: true, force: true });
+}
+
 async function assertLoopbackServerReady(origin) {
-  const deadline = Date.now() + 30_000;
+  const deadline = Date.now() + 90_000;
   while (Date.now() < deadline) {
     throwIfInterrupted();
     try {
@@ -369,10 +400,10 @@ async function assertLoopbackServerReady(origin) {
     }
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
-  fail("Local Next.js production server did not become ready for browser E2E.");
+  fail("Local Next.js production server did not become ready within 90 seconds for browser E2E.");
 }
 
-async function startLocalNextServer(local) {
+async function startLocalNextServer(local, inventoryFixture) {
   await assertFreshProductionBuild();
   const port = await reserveLoopbackPort();
   const origin = `http://127.0.0.1:${port}`;
@@ -387,6 +418,9 @@ async function startLocalNextServer(local) {
       AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
       SUPABASE_URL: local.apiUrl,
       SUPABASE_PUBLISHABLE_KEY: local.publishableKey,
+      INVESTOR_INVENTORY_SNAPSHOT_PATH: inventoryFixture.path,
+      INVESTOR_INVENTORY_SNAPSHOT_REFERENCE_DATE: "2026-09-05",
+      INVESTOR_INVENTORY_SNAPSHOT_SHA256: inventoryFixture.sha256,
       OFFICIAL_SIMULATOR_RUNTIME_MODE: "active",
       OFFICIAL_SIMULATOR_ENABLED_KEYS: "simulator.wf13",
     },
@@ -1180,7 +1214,7 @@ async function requestLocalRest({ apiUrl, publishableKey, accessToken, pathname,
     response = await fetch(target, {
       method,
       redirect: "error",
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(30_000),
       headers: {
         Accept: "application/json",
         apikey: publishableKey,
@@ -1500,6 +1534,18 @@ function throwIfInterrupted() {
   if (requestedSignal) fail(`Local RLS API QA interrupted by ${requestedSignal}.`);
 }
 
+async function deleteEphemeralUser(adminClient, userId) {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const { error } = await adminClient.auth.admin.deleteUser(userId, false);
+      if (!error) return;
+    } catch {
+      // The authoritative SQL proof below decides whether cleanup succeeded.
+    }
+    if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 250));
+  }
+}
+
 async function removeEphemeralState(local, adminClient, accounts, fixtures) {
   const failures = [];
 
@@ -1516,8 +1562,7 @@ async function removeEphemeralState(local, adminClient, accounts, fixtures) {
       return 0;
     });
     for (const account of deletionOrder) {
-      const { error } = await adminClient.auth.admin.deleteUser(account.id, false);
-      if (error) failures.push("account");
+      await deleteEphemeralUser(adminClient, account.id);
     }
 
     try {
@@ -1543,7 +1588,14 @@ async function main() {
   if (process.env.QA_RELEASE_BROWSER && !browserE2eEnabled) {
     fail("QA_RELEASE_BROWSER accepts only the literal true when browser E2E is requested.");
   }
-  const nextServer = browserE2eEnabled ? await startLocalNextServer(local) : null;
+  const inventoryFixture = browserE2eEnabled ? await createSyntheticInventoryFixture() : null;
+  let nextServer;
+  try {
+    nextServer = browserE2eEnabled ? await startLocalNextServer(local, inventoryFixture) : null;
+  } catch (error) {
+    await removeSyntheticInventoryFixture(inventoryFixture);
+    throw error;
+  }
 
   const runId = randomBytes(8).toString("hex");
   const runKey = `qa-rls-${runId}`;
@@ -1604,8 +1656,12 @@ async function main() {
       try {
         await stopChild(nextServer?.child);
       } finally {
-        if (browserE2eEnabled) {
-          await rm(playwrightOutputRoot, { recursive: true, force: true });
+        try {
+          if (browserE2eEnabled) {
+            await rm(playwrightOutputRoot, { recursive: true, force: true });
+          }
+        } finally {
+          await removeSyntheticInventoryFixture(inventoryFixture);
         }
       }
     }

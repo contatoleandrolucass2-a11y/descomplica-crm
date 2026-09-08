@@ -1,7 +1,9 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { execFile, spawn, spawnSync } from "node:child_process";
-import { stat } from "node:fs/promises";
-import { createServer } from "node:net";
+import { lstat, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { createServer as createHttpServer, request as requestHttp } from "node:http";
+import { createServer as createNetServer } from "node:net";
+import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
@@ -9,11 +11,19 @@ import { promisify } from "node:util";
 import { createClient } from "@supabase/supabase-js";
 
 import legalDocumentVersions from "../../lib/legal/versions.json" with { type: "json" };
+import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const homologationRuntimeRoot = "/var/lib/descomplica-crm-homologation";
 const visualHarnessPath = path.join(import.meta.dirname, "authenticated-visual.mjs");
+const privateDirectTableSnapshotPath = path.join(
+  repositoryRoot,
+  "private-data",
+  "investor-inventory.json",
+);
+const privateDirectTableSnapshotSha256 =
+  "f31e6fe6a8dac204e767744903a6ae957f9bd526ed190e8cdf193c3479e61b24";
 const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const visualGoalsReferenceTime = "2026-08-27T01:21:00.000Z";
 const visualGoalsEffectiveMonth = "2026-08-01";
@@ -60,7 +70,7 @@ function parseLoopbackHttpOrigin(rawValue, label) {
 
 async function reserveLoopbackPort() {
   return await new Promise((resolve, reject) => {
-    const server = createServer();
+    const server = createNetServer();
     server.unref();
     server.once("error", reject);
     server.listen(0, "127.0.0.1", () => {
@@ -73,6 +83,667 @@ async function reserveLoopbackPort() {
       server.close((error) => (error ? reject(error) : resolve(port)));
     });
   });
+}
+
+const hopByHopHeaders = new Set([
+  "connection",
+  "keep-alive",
+  "proxy-authenticate",
+  "proxy-authorization",
+  "proxy-connection",
+  "te",
+  "trailer",
+  "transfer-encoding",
+  "upgrade",
+]);
+
+const replayableRequestBodyLimit = 64 * 1024;
+const protectedReadCacheTtlMs = 5 * 60 * 1000;
+const restReadCacheHeaders = [
+  "accept",
+  "accept-encoding",
+  "accept-profile",
+  "apikey",
+  "content-profile",
+  "content-type",
+  "if-match",
+  "if-modified-since",
+  "if-none-match",
+  "if-range",
+  "if-unmodified-since",
+  "prefer",
+  "range",
+  "range-unit",
+];
+const restWriteMethods = new Set(["POST", "PATCH", "PUT", "DELETE"]);
+const protectedReadHeaders = restReadCacheHeaders;
+const protectedReadEndpoints = new Map([
+  ["GET /auth/v1/user", "authUser"],
+  ["POST /rest/v1/rpc/current_session_is_live", "sessionLive"],
+  ["POST /rest/v1/rpc/get_user_authorization_context", "authorizationContext"],
+]);
+
+function withoutHopByHopHeaders(headers) {
+  const connectionTokens = new Set(
+    String(headers.connection ?? "")
+      .split(",")
+      .map((name) => name.trim().toLowerCase())
+      .filter(Boolean),
+  );
+  return Object.fromEntries(
+    Object.entries(headers).filter(([name]) => {
+      const normalizedName = name.toLowerCase();
+      return !hopByHopHeaders.has(normalizedName) && !connectionTokens.has(normalizedName);
+    }),
+  );
+}
+
+function normalizedHeaderValue(value) {
+  return Array.isArray(value) ? value.join(",") : String(value ?? "");
+}
+
+function bearerTokenFromHeaders(headers) {
+  const authorization = normalizedHeaderValue(headers.authorization);
+  const match = /^Bearer\s+(.+)$/i.exec(authorization);
+  return match?.[1] ?? "";
+}
+
+function jwtExpirationMs(token) {
+  const payloadSegment = token.split(".")[1];
+  if (!payloadSegment) return null;
+
+  try {
+    const payload = JSON.parse(Buffer.from(payloadSegment, "base64url").toString("utf8"));
+    return Number.isFinite(payload?.exp) ? Number(payload.exp) * 1_000 : null;
+  } catch {
+    return null;
+  }
+}
+
+function boundedCacheExpiration(token, currentTime) {
+  const expiration = jwtExpirationMs(token);
+  if (!expiration || expiration <= currentTime) return null;
+  return Math.min(expiration, currentTime + protectedReadCacheTtlMs);
+}
+
+function protectedReadCacheKey({ method, url, token, headers, body }) {
+  const hash = createHash("sha256");
+  hash.update(method);
+  hash.update("\0");
+  hash.update(url);
+  hash.update("\0");
+  hash.update(token);
+  for (const header of protectedReadHeaders) {
+    hash.update("\0");
+    hash.update(header);
+    hash.update(":");
+    hash.update(normalizedHeaderValue(headers[header]));
+  }
+  hash.update("\0");
+  hash.update(body);
+  return hash.digest("hex");
+}
+
+function restReadCacheKey({ method, url, token, headers }) {
+  const hash = createHash("sha256");
+  hash.update(method);
+  hash.update("\0");
+  hash.update(url);
+  hash.update("\0");
+  hash.update(token);
+  for (const header of restReadCacheHeaders) {
+    hash.update("\0");
+    hash.update(header);
+    hash.update(":");
+    hash.update(normalizedHeaderValue(headers[header]));
+  }
+  return hash.digest("hex");
+}
+
+function isValidProtectedReadPayload(endpoint, body) {
+  let payload;
+  try {
+    payload = JSON.parse(body.toString("utf8"));
+  } catch {
+    return false;
+  }
+
+  if (endpoint === "authUser") {
+    return (
+      payload !== null &&
+      typeof payload === "object" &&
+      !Array.isArray(payload) &&
+      typeof payload.id === "string" &&
+      payload.id.length > 0
+    );
+  }
+  if (endpoint === "sessionLive") return payload === true;
+  return (
+    endpoint === "authorizationContext" &&
+    Array.isArray(payload) &&
+    payload.every((row) => row !== null && typeof row === "object" && !Array.isArray(row))
+  );
+}
+
+function isSuccessfulCacheInvalidatingMutation(method, url, status) {
+  if (status < 200 || status >= 300 || method === "GET" || method === "HEAD") return false;
+  if (url.pathname.startsWith("/auth/v1/")) return restWriteMethods.has(method);
+  return url.pathname.startsWith("/rest/v1/") && restWriteMethods.has(method);
+}
+
+function proxyFailureResponse() {
+  return {
+    status: 502,
+    headers: {
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+    },
+    body: Buffer.from('{"message":"Local QA authentication proxy failed."}'),
+  };
+}
+
+function readRequestBody(incoming) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    let settled = false;
+    incoming.on("data", (chunk) => {
+      if (settled) return;
+      const buffer = Buffer.from(chunk);
+      size += buffer.length;
+      if (size > replayableRequestBodyLimit) {
+        settled = true;
+        chunks.length = 0;
+        incoming.resume();
+        resolve(null);
+        return;
+      }
+      chunks.push(buffer);
+    });
+    incoming.once("end", () => {
+      if (settled) return;
+      settled = true;
+      resolve(Buffer.concat(chunks, size));
+    });
+    incoming.once("error", (error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    });
+    incoming.once("aborted", () => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("Local QA proxy request was aborted."));
+    });
+  });
+}
+
+function sendBufferedResponse(outgoing, response) {
+  if (outgoing.destroyed || outgoing.writableEnded) return;
+  outgoing.writeHead(response.status, response.headers);
+  outgoing.end(response.body);
+}
+
+export async function startSerializedSupabaseProxy(targetOrigin, options = {}) {
+  const target = new URL(parseLoopbackHttpOrigin(targetOrigin, "Local Supabase proxy target"));
+  const listenHostname = target.hostname === "[::1]" ? "::1" : target.hostname;
+  const now = typeof options.now === "function" ? options.now : Date.now;
+  const evidenceSalt = randomBytes(32);
+  let closed = false;
+  let closePromise = null;
+  let protectedReadTail = Promise.resolve();
+  let cacheGeneration = 0;
+  const successfulRestReads = new Map();
+  const protectedReadCache = new Map();
+  const protectedReadInFlight = new Map();
+  const activeUpstreamRequests = new Set();
+  const retryTimers = new Set();
+  const pendingOperationCancels = new Set();
+  const tokenFingerprintsSeen = new Set();
+  const tokenFingerprintsWithUpstream = new Set();
+  const evidenceByEndpoint = Object.fromEntries(
+    [...protectedReadEndpoints.values()].map((endpoint) => [
+      endpoint,
+      {
+        requestsSeen: 0,
+        upstreamRequests: 0,
+        upstreamMiss200: 0,
+        cacheHits: 0,
+        singleFlightFollowers: 0,
+      },
+    ]),
+  );
+
+  const tokenFingerprint = (token) =>
+    createHash("sha256").update(evidenceSalt).update(token).digest("hex");
+  const invalidateCaches = () => {
+    cacheGeneration += 1;
+    successfulRestReads.clear();
+    protectedReadCache.clear();
+    protectedReadInFlight.clear();
+  };
+  const clearRetryTimer = (timer) => {
+    if (timer === null) return;
+    clearTimeout(timer);
+    retryTimers.delete(timer);
+  };
+  const scheduleRetryTimer = (callback, delay) => {
+    const timer = setTimeout(() => {
+      retryTimers.delete(timer);
+      callback();
+    }, delay);
+    retryTimers.add(timer);
+    return timer;
+  };
+  const trackUpstreamRequest = (request) => {
+    activeUpstreamRequests.add(request);
+    request.once("close", () => activeUpstreamRequests.delete(request));
+  };
+  const enqueueProtectedRead = (task) => {
+    const run = () => (closed ? proxyFailureResponse() : task());
+    const queued = protectedReadTail.then(run, run);
+    protectedReadTail = queued.catch(() => undefined);
+    return queued;
+  };
+
+  const requestBufferedUpstream = ({ incoming, body, retryable }) =>
+    new Promise((resolve) => {
+      const requestOptions = {
+        protocol: target.protocol,
+        hostname: target.hostname,
+        port: target.port,
+        method: incoming.method,
+        path: incoming.url,
+        headers: {
+          ...withoutHopByHopHeaders(incoming.headers),
+          host: target.host,
+        },
+      };
+      let settled = false;
+      let retryTimer = null;
+      const settle = (response) => {
+        if (settled) return;
+        settled = true;
+        clearRetryTimer(retryTimer);
+        pendingOperationCancels.delete(cancel);
+        resolve(response);
+      };
+      const cancel = () => settle(proxyFailureResponse());
+      pendingOperationCancels.add(cancel);
+      const forwardAttempt = (attempt) => {
+        if (closed) {
+          settle(proxyFailureResponse());
+          return;
+        }
+        let retryScheduled = false;
+        const scheduleRetry = () => {
+          if (settled || retryScheduled) return;
+          retryScheduled = true;
+          if (closed || !retryable || attempt >= 2) {
+            settle(proxyFailureResponse());
+            return;
+          }
+          retryTimer = scheduleRetryTimer(() => forwardAttempt(attempt + 1), (attempt + 1) * 250);
+        };
+        const upstream = requestHttp(requestOptions, (upstreamResponse) => {
+          if ((upstreamResponse.statusCode ?? 502) >= 500 && retryable && attempt < 2) {
+            upstreamResponse.resume();
+            upstreamResponse.once("end", scheduleRetry);
+            upstreamResponse.once("error", scheduleRetry);
+            return;
+          }
+
+          const chunks = [];
+          upstreamResponse.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+          upstreamResponse.once("end", () =>
+            settle({
+              status: upstreamResponse.statusCode ?? 502,
+              headers: withoutHopByHopHeaders(upstreamResponse.headers),
+              body: Buffer.concat(chunks),
+            }),
+          );
+          upstreamResponse.once("error", scheduleRetry);
+        });
+        trackUpstreamRequest(upstream);
+        upstream.setTimeout(60_000, () =>
+          upstream.destroy(new Error("Local QA Supabase upstream timed out.")),
+        );
+        upstream.once("error", scheduleRetry);
+        upstream.end(body);
+      };
+      forwardAttempt(0);
+    });
+
+  const server = createHttpServer((incoming, outgoing) => {
+    const incomingUrl = new URL(incoming.url ?? "/", target);
+    const method = incoming.method ?? "GET";
+    if (closed) {
+      sendBufferedResponse(outgoing, proxyFailureResponse());
+      return;
+    }
+    const protectedEndpoint = protectedReadEndpoints.get(`${method} ${incomingUrl.pathname}`);
+    if (protectedEndpoint) {
+      void (async () => {
+        let body;
+        try {
+          body = await readRequestBody(incoming);
+        } catch {
+          sendBufferedResponse(outgoing, {
+            status: 502,
+            headers: {
+              "cache-control": "no-store",
+              "content-type": "application/json; charset=utf-8",
+            },
+            body: Buffer.from('{"message":"Local QA authentication proxy failed."}'),
+          });
+          return;
+        }
+        if (body === null) {
+          sendBufferedResponse(outgoing, {
+            status: 413,
+            headers: {
+              "cache-control": "no-store",
+              "content-type": "application/json; charset=utf-8",
+            },
+            body: Buffer.from('{"message":"Local QA proxy request body exceeds 64 KiB."}'),
+          });
+          return;
+        }
+
+        const token = bearerTokenFromHeaders(incoming.headers);
+        const fingerprint = token ? tokenFingerprint(token) : null;
+        if (fingerprint) tokenFingerprintsSeen.add(fingerprint);
+        evidenceByEndpoint[protectedEndpoint].requestsSeen += 1;
+        const requestGeneration = cacheGeneration;
+        const key = protectedReadCacheKey({
+          method,
+          url: incoming.url ?? "/",
+          token,
+          headers: incoming.headers,
+          body,
+        });
+        const currentTime = now();
+        const cached = protectedReadCache.get(key);
+        if (cached && cached.expiresAt > currentTime) {
+          evidenceByEndpoint[protectedEndpoint].cacheHits += 1;
+          sendBufferedResponse(outgoing, cached.response);
+          return;
+        }
+        if (cached) protectedReadCache.delete(key);
+
+        const inFlightKey = `${requestGeneration}:${key}`;
+        let sharedRequest = protectedReadInFlight.get(inFlightKey);
+        if (sharedRequest) {
+          evidenceByEndpoint[protectedEndpoint].singleFlightFollowers += 1;
+        } else {
+          sharedRequest = enqueueProtectedRead(async () => {
+            evidenceByEndpoint[protectedEndpoint].upstreamRequests += 1;
+            if (fingerprint) tokenFingerprintsWithUpstream.add(fingerprint);
+            const response = await requestBufferedUpstream({
+              incoming,
+              body,
+              retryable:
+                body.length <= replayableRequestBodyLimit &&
+                (method === "GET" ||
+                  method === "HEAD" ||
+                  protectedEndpoint === "sessionLive" ||
+                  protectedEndpoint === "authorizationContext"),
+            });
+            const responseTime = now();
+            const expiresAt = boundedCacheExpiration(token, responseTime);
+            if (
+              response.status === 200 &&
+              isValidProtectedReadPayload(protectedEndpoint, response.body)
+            ) {
+              evidenceByEndpoint[protectedEndpoint].upstreamMiss200 += 1;
+              if (
+                body.length <= replayableRequestBodyLimit &&
+                expiresAt &&
+                expiresAt > responseTime &&
+                requestGeneration === cacheGeneration
+              ) {
+                protectedReadCache.set(key, { expiresAt, response });
+              }
+            }
+            return response;
+          });
+          protectedReadInFlight.set(inFlightKey, sharedRequest);
+          void sharedRequest.finally(() => protectedReadInFlight.delete(inFlightKey));
+        }
+
+        sendBufferedResponse(outgoing, await sharedRequest);
+      })().catch(() => {
+        sendBufferedResponse(outgoing, {
+          status: 502,
+          headers: {
+            "cache-control": "no-store",
+            "content-type": "application/json; charset=utf-8",
+          },
+          body: Buffer.from('{"message":"Local QA authentication proxy failed."}'),
+        });
+      });
+      return;
+    }
+
+    const retryableRequest = incoming.method === "GET" || incoming.method === "HEAD";
+    const restToken = bearerTokenFromHeaders(incoming.headers);
+    const restCacheExpiration = boundedCacheExpiration(restToken, now());
+    const cacheableRestRead =
+      incoming.method === "GET" &&
+      incomingUrl.pathname.startsWith("/rest/v1/") &&
+      restCacheExpiration !== null;
+    const cacheKey = cacheableRestRead
+      ? restReadCacheKey({
+          method,
+          url: incoming.url ?? "/",
+          token: restToken,
+          headers: incoming.headers,
+        })
+      : null;
+    const cachedResponse = cacheKey ? successfulRestReads.get(cacheKey) : null;
+    if (cachedResponse && cachedResponse.expiresAt > now()) {
+      outgoing.writeHead(cachedResponse.status, cachedResponse.headers);
+      outgoing.end(cachedResponse.body);
+      return;
+    }
+    if (cacheKey && cachedResponse) successfulRestReads.delete(cacheKey);
+    const requestGeneration = cacheGeneration;
+    const forward = () =>
+      new Promise((resolve) => {
+        if (incoming.destroyed || outgoing.destroyed) {
+          resolve();
+          return;
+        }
+
+        let settled = false;
+        let activeUpstream = null;
+        let retryTimer = null;
+        const settle = () => {
+          if (settled) return;
+          settled = true;
+          clearRetryTimer(retryTimer);
+          pendingOperationCancels.delete(cancel);
+          resolve();
+        };
+        const fail = () => {
+          if (!outgoing.headersSent && !outgoing.destroyed) {
+            outgoing.writeHead(502, {
+              "cache-control": "no-store",
+              "content-type": "application/json; charset=utf-8",
+            });
+            outgoing.end('{"message":"Local QA authentication proxy failed."}');
+          } else if (!outgoing.destroyed) {
+            outgoing.destroy();
+          }
+          settle();
+        };
+        const cancel = () => {
+          activeUpstream?.destroy(new Error("Local QA Supabase proxy closed."));
+          fail();
+        };
+        pendingOperationCancels.add(cancel);
+        const requestOptions = {
+          protocol: target.protocol,
+          hostname: target.hostname,
+          port: target.port,
+          method: incoming.method,
+          path: incoming.url,
+          headers: {
+            ...withoutHopByHopHeaders(incoming.headers),
+            host: target.host,
+          },
+        };
+        const forwardAttempt = (attempt) => {
+          if (closed) {
+            fail();
+            return;
+          }
+          let retryScheduled = false;
+          const scheduleRetry = () => {
+            if (settled || retryScheduled) return;
+            retryScheduled = true;
+            if (closed || !retryableRequest || attempt >= 2) {
+              fail();
+              return;
+            }
+            retryTimer = scheduleRetryTimer(() => forwardAttempt(attempt + 1), (attempt + 1) * 250);
+          };
+          const upstream = requestHttp(requestOptions, (upstreamResponse) => {
+            if (outgoing.destroyed) {
+              upstreamResponse.destroy();
+              settle();
+              return;
+            }
+            if (retryableRequest && (upstreamResponse.statusCode ?? 502) >= 500 && attempt < 2) {
+              upstreamResponse.resume();
+              upstreamResponse.once("end", scheduleRetry);
+              upstreamResponse.once("error", scheduleRetry);
+              return;
+            }
+
+            const status = upstreamResponse.statusCode ?? 502;
+            const headers = withoutHopByHopHeaders(upstreamResponse.headers);
+            if (isSuccessfulCacheInvalidatingMutation(method, incomingUrl, status)) {
+              invalidateCaches();
+            }
+            if (cacheKey && status === 200) {
+              const chunks = [];
+              upstreamResponse.on("data", (chunk) => chunks.push(chunk));
+              upstreamResponse.once("end", () => {
+                const body = Buffer.concat(chunks);
+                const responseTime = now();
+                const expiresAt = boundedCacheExpiration(restToken, responseTime);
+                if (requestGeneration === cacheGeneration && expiresAt) {
+                  successfulRestReads.set(cacheKey, { status, headers, body, expiresAt });
+                }
+                outgoing.writeHead(status, headers);
+                outgoing.end(body);
+                settle();
+              });
+              upstreamResponse.once("error", fail);
+              return;
+            }
+
+            outgoing.writeHead(status, headers);
+            upstreamResponse.pipe(outgoing);
+            upstreamResponse.once("end", settle);
+            upstreamResponse.once("error", fail);
+          });
+          activeUpstream = upstream;
+          trackUpstreamRequest(upstream);
+          upstream.setTimeout(60_000, () =>
+            upstream.destroy(new Error("Local QA Supabase upstream timed out.")),
+          );
+          upstream.once("error", scheduleRetry);
+
+          if (incoming.method === "GET" || incoming.method === "HEAD") {
+            upstream.end();
+          } else {
+            incoming.pipe(upstream);
+          }
+        };
+        outgoing.once("close", () => {
+          if (!outgoing.writableEnded) activeUpstream?.destroy();
+          settle();
+        });
+        forwardAttempt(0);
+      });
+    void forward();
+  });
+
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(0, listenHostname, resolve);
+  });
+  const address = server.address();
+  if (!address || typeof address === "string") {
+    await new Promise((resolve) => server.close(resolve));
+    throw new Error("Could not start the local Supabase QA proxy.");
+  }
+
+  const evidence = () => ({
+    tokenCount: tokenFingerprintsSeen.size,
+    upstreamTokenCount: tokenFingerprintsWithUpstream.size,
+    allTokensHadUpstream: [...tokenFingerprintsSeen].every((fingerprint) =>
+      tokenFingerprintsWithUpstream.has(fingerprint),
+    ),
+    cacheHits: Object.values(evidenceByEndpoint).reduce(
+      (total, endpoint) => total + endpoint.cacheHits,
+      0,
+    ),
+    singleFlightFollowers: Object.values(evidenceByEndpoint).reduce(
+      (total, endpoint) => total + endpoint.singleFlightFollowers,
+      0,
+    ),
+    activeUpstreamRequests: activeUpstreamRequests.size,
+    retryTimers: retryTimers.size,
+    endpoints: Object.fromEntries(
+      Object.entries(evidenceByEndpoint).map(([endpoint, counts]) => [endpoint, { ...counts }]),
+    ),
+  });
+  return {
+    origin: `${target.protocol}//${target.hostname}:${address.port}`,
+    evidence,
+    assertEvidence: () => {
+      const snapshot = evidence();
+      if (
+        snapshot.tokenCount < 1 ||
+        !snapshot.allTokensHadUpstream ||
+        Object.values(snapshot.endpoints).some(
+          (endpoint) => endpoint.upstreamMiss200 < 1 || endpoint.cacheHits < 1,
+        )
+      ) {
+        throw new Error(`Local QA proxy evidence is incomplete (${JSON.stringify(snapshot)}).`);
+      }
+    },
+    close: () => {
+      closePromise ??= (async () => {
+        closed = true;
+        invalidateCaches();
+        for (const timer of retryTimers) clearRetryTimer(timer);
+        for (const cancel of [...pendingOperationCancels]) cancel();
+        const upstreamRequests = [...activeUpstreamRequests];
+        const upstreamRequestsClosed = Promise.all(
+          upstreamRequests.map(
+            (request) => new Promise((resolve) => request.once("close", resolve)),
+          ),
+        );
+        for (const request of upstreamRequests) {
+          request.destroy(new Error("Local QA Supabase proxy closed."));
+        }
+        const serverClosed = new Promise((resolve) => {
+          server.close(resolve);
+          server.closeAllConnections?.();
+        });
+        await Promise.all([
+          serverClosed,
+          upstreamRequestsClosed,
+          protectedReadTail.catch(() => undefined),
+        ]);
+      })();
+      return closePromise;
+    },
+  };
 }
 
 async function resolveQaOrigin() {
@@ -293,7 +964,81 @@ async function assertFreshProductionBuild() {
   }
 }
 
-async function startLocalNextServer({ hostname, port, origin, apiUrl, publishableKey }) {
+async function createDirectTableQaSnapshot() {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "descomplica-direct-table-qa-"));
+  try {
+    const snapshotPath = path.join(directory, "inventory.json");
+    const contents = buildSyntheticDirectTableQaSnapshot();
+    await writeFile(snapshotPath, contents, { encoding: "utf8", flag: "wx", mode: 0o600 });
+    return {
+      directory,
+      path: snapshotPath,
+      sha256: createHash("sha256").update(contents).digest("hex"),
+    };
+  } catch (error) {
+    await rm(directory, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+async function validatePrivateDirectTableSnapshot() {
+  let metadata;
+  try {
+    metadata = await lstat(privateDirectTableSnapshotPath);
+  } catch (error) {
+    const missingPrivateSnapshotAllowed =
+      error?.code === "ENOENT" &&
+      process.env.CI === "true" &&
+      process.env.GITHUB_ACTIONS === "true" &&
+      process.env.QA_ALLOW_MISSING_PRIVATE_INVENTORY === "true";
+    if (missingPrivateSnapshotAllowed) return;
+    throw new Error("Private inventory snapshot is required for local authenticated QA.");
+  }
+  if (!metadata.isFile() || metadata.isSymbolicLink()) {
+    throw new Error("Private inventory snapshot must be a regular file, not a symlink.");
+  }
+
+  const contents = await readFile(privateDirectTableSnapshotPath);
+  try {
+    if (createHash("sha256").update(contents).digest("hex") !== privateDirectTableSnapshotSha256) {
+      throw new Error("Private inventory snapshot validation failed.");
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(contents.toString("utf8"));
+    } catch {
+      throw new Error("Private inventory snapshot validation failed.");
+    }
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+    const pricedCount = items.filter(
+      (item) => Number.isFinite(item?.finalPrice) && Number(item.finalPrice) > 0,
+    ).length;
+    if (
+      payload?.source !== "ESTOQUE SPC.xlsx" ||
+      payload?.count !== 3301 ||
+      items.length !== payload.count ||
+      new Set(items.map((item) => item?.id)).size !== payload.count ||
+      pricedCount !== 2987 ||
+      items.length - pricedCount !== 314 ||
+      items.some((item) => !item?.completionDate)
+    ) {
+      throw new Error("Private inventory snapshot validation failed.");
+    }
+  } finally {
+    contents.fill(0);
+  }
+}
+
+async function startLocalNextServer({
+  hostname,
+  port,
+  origin,
+  apiUrl,
+  publishableKey,
+  inventorySnapshotPath,
+  inventorySnapshotSha256,
+}) {
   await assertFreshProductionBuild();
 
   const child = spawn("pnpm", ["start", "--hostname", hostname, "--port", String(port)], {
@@ -306,6 +1051,9 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
       APP_ORIGIN: origin,
       AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
       QA_VISUAL_GOALS_REFERENCE_TIME: visualGoalsReferenceTime,
+      INVESTOR_INVENTORY_SNAPSHOT_PATH: inventorySnapshotPath,
+      INVESTOR_INVENTORY_SNAPSHOT_REFERENCE_DATE: "2026-09-05",
+      INVESTOR_INVENTORY_SNAPSHOT_SHA256: inventorySnapshotSha256,
       AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
       SUPABASE_URL: apiUrl,
       SUPABASE_PUBLISHABLE_KEY: publishableKey,
@@ -321,7 +1069,7 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
   child.once("exit", () => activeChildren.delete(child));
 
   try {
-    const deadline = Date.now() + 30_000;
+    const deadline = Date.now() + 90_000;
     while (Date.now() < deadline) {
       throwIfInterrupted();
       if (spawnError || child.exitCode !== null || child.signalCode !== null) {
@@ -335,7 +1083,7 @@ async function startLocalNextServer({ hostname, port, origin, apiUrl, publishabl
       }
     }
 
-    throw new Error("Local Next.js production server did not become ready within 30 seconds.");
+    throw new Error("Local Next.js production server did not become ready within 90 seconds.");
   } catch (error) {
     await stopChild(child);
     throw error;
@@ -1091,10 +1839,20 @@ export async function verifyFixturesThroughRls({ apiUrl, publishableKey, account
       detectSessionInUrl: false,
     },
   });
-  const { data: sessionData, error: signInError } = await client.auth.signInWithPassword({
-    email: account.email,
-    password: account.password,
-  });
+  let sessionData = null;
+  let signInError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const result = await client.auth.signInWithPassword({
+      email: account.email,
+      password: account.password,
+    });
+    sessionData = result.data;
+    signInError = result.error;
+    if (!signInError && sessionData.user?.id === account.id) break;
+    if (attempt < 2) {
+      await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1_000));
+    }
+  }
   if (signInError || sessionData.user?.id !== account.id) {
     throw new Error("Ephemeral QA account could not authenticate against local Supabase.");
   }
@@ -1307,60 +2065,74 @@ async function main() {
   const local = await discoverLocalSupabase();
   await assertReachableLoopback(local.apiUrl, "Local Supabase API", "/auth/v1/health");
   throwIfInterrupted();
+  await validatePrivateDirectTableSnapshot();
 
   const qaEndpoint = await resolveQaOrigin();
-  const nextServer = await startLocalNextServer({
-    ...qaEndpoint,
-    apiUrl: local.apiUrl,
-    publishableKey: local.publishableKey,
-  });
-  const { origin } = qaEndpoint;
-  throwIfInterrupted();
+  const inventorySnapshot = await createDirectTableQaSnapshot();
+  let supabaseProxy;
+  let nextServer;
+  try {
+    supabaseProxy = await startSerializedSupabaseProxy(local.apiUrl);
+    nextServer = await startLocalNextServer({
+      ...qaEndpoint,
+      apiUrl: supabaseProxy.origin,
+      publishableKey: local.publishableKey,
+      inventorySnapshotPath: inventorySnapshot.path,
+      inventorySnapshotSha256: inventorySnapshot.sha256,
+    });
+    const { origin } = qaEndpoint;
+    throwIfInterrupted();
 
-  const runId = `${Date.now()}-${randomBytes(6).toString("hex")}`;
-  const marker = `QA local synthetic — not production · run ${runId}`;
-  const adminClient = createAdminClient(local.apiUrl, local.secretKey);
-  let account = null;
-  let cleanupPromise = null;
+    const runId = `${Date.now()}-${randomBytes(6).toString("hex")}`;
+    const marker = `QA local synthetic — not production · run ${runId}`;
+    const adminClient = createAdminClient(local.apiUrl, local.secretKey);
+    let account = null;
+    let cleanupPromise = null;
 
-  const cleanup = () => {
-    cleanupPromise ??= (async () => {
-      const failures = [];
+    const cleanup = () => {
+      cleanupPromise ??= (async () => {
+        const failures = [];
 
-      if (account) {
-        try {
-          runLocalSql(local.database, fixtureCleanupSql({ marker, userId: account.id }), "cleanup");
-        } catch (error) {
-          failures.push(error);
-        }
-      }
-
-      if (account) {
-        const { error } = await adminClient.auth.admin.deleteUser(account.id, false);
-        if (error) {
-          failures.push(new Error("Ephemeral local QA account cleanup failed."));
-        } else {
-          const lookup = await adminClient.auth.admin.getUserById(account.id);
-          if (
-            lookup.data?.user ||
-            lookup.error?.status !== 404 ||
-            lookup.error?.code !== "user_not_found"
-          ) {
-            failures.push(new Error("Ephemeral local QA account still exists after cleanup."));
-          } else {
-            account = null;
+        if (account) {
+          try {
+            runLocalSql(
+              local.database,
+              fixtureCleanupSql({ marker, userId: account.id }),
+              "cleanup",
+            );
+          } catch (error) {
+            failures.push(error);
           }
         }
-      }
 
-      if (failures.length > 0) {
-        throw new AggregateError(failures, "Ephemeral local QA cleanup was incomplete.");
-      }
-    })();
-    return cleanupPromise;
-  };
+        if (account) {
+          let accountRemoved = false;
+          for (let attempt = 0; attempt < 3 && !accountRemoved; attempt += 1) {
+            await adminClient.auth.admin.deleteUser(account.id, false);
+            const lookup = await adminClient.auth.admin.getUserById(account.id);
+            if (
+              !lookup.data?.user &&
+              lookup.error?.status === 404 &&
+              lookup.error?.code === "user_not_found"
+            ) {
+              accountRemoved = true;
+              account = null;
+            } else if (attempt < 2) {
+              await new Promise((resolve) => setTimeout(resolve, 1_000));
+            }
+          }
+          if (!accountRemoved) {
+            failures.push(new Error("Ephemeral local QA account cleanup failed."));
+          }
+        }
 
-  try {
+        if (failures.length > 0) {
+          throw new AggregateError(failures, "Ephemeral local QA cleanup was incomplete.");
+        }
+      })();
+      return cleanupPromise;
+    };
+
     try {
       account = await createEphemeralQaUser(adminClient, runId);
       throwIfInterrupted();
@@ -1380,11 +2152,20 @@ async function main() {
         account,
         marker,
       });
+      supabaseProxy.assertEvidence();
     } finally {
       await cleanup();
     }
   } finally {
-    await stopChild(nextServer);
+    try {
+      await stopChild(nextServer);
+    } finally {
+      try {
+        await supabaseProxy?.close();
+      } finally {
+        await rm(inventorySnapshot.directory, { recursive: true, force: true });
+      }
+    }
   }
 }
 

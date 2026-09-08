@@ -202,6 +202,7 @@ export async function FunnelGoalsPage({
               <Link
                 key={key}
                 href={item.href}
+                prefetch={false}
                 aria-current={profile === key ? "page" : undefined}
                 className={`group flex min-h-12 flex-1 items-center justify-between gap-4 rounded-xl border px-4 py-2.5 text-sm transition sm:max-w-sm ${
                   profile === key
