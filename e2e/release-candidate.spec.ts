@@ -936,11 +936,19 @@ for (const role of expectedRoles) {
       // so a small release host cannot turn artificial bursts into database
       // statement timeouts while preserving every profile × route assertion.
       for (const [index, surface] of protectedSurfaces.entries()) {
-        const response = await page.context().request.get(surface.path, { maxRedirects: 0 });
+        let response = await page.context().request.get(surface.path, { maxRedirects: 0 });
+        if (response.status() >= 500) {
+          const firstStatus = response.status();
+          await response.dispose();
+          reportProgress(`direct-route-${index + 1}-retry-after-${firstStatus}`);
+          await page.waitForTimeout(15_000);
+          response = await page.context().request.get(surface.path, { maxRedirects: 0 });
+        }
         expect(response.status(), `${role} ${surface.path}`).toBe(
           surface.allowed.has(role) ? 200 : 403,
         );
         reportProgress(`direct-route-${index + 1}-${protectedSurfaces.length}`);
+        await page.waitForTimeout(1_000);
       }
 
       const allowedSurface = protectedSurfaces.find((surface) => surface.allowed.has(role));
