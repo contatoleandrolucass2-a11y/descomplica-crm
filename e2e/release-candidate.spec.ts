@@ -814,7 +814,7 @@ for (const role of expectedRoles) {
   test(`profile ${role} enforces browser navigation and every direct route`, async ({
     browser,
   }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(360_000);
     await withRolePage(browser, role, async (page) => {
       const reportProgress = (phase: string) =>
         process.stdout.write(`[route-matrix] role=${role} phase=${phase}\n`);
@@ -895,22 +895,27 @@ for (const role of expectedRoles) {
       }
 
       const disabledApiProbes = [
-        page.request.post("/api/ingest/qlik", {
-          data: { requestId: "00000000-0000-4000-8000-000000000011" },
-        }),
-        page.request.post("/api/ingest/salesforce", {
-          data: { requestId: "00000000-0000-4000-8000-000000000012" },
-        }),
-        page.request.post("/api/refresh/salesforce", {
-          data: {},
-          headers: { origin: qaTarget.origin },
-        }),
-        page.request.post("/api/commercial-engine/simulator.wf14", {
-          data: { requestId: "00000000-0000-4000-8000-000000000013", input: {} },
-          headers: { origin: qaTarget.origin },
-        }),
+        () =>
+          page.request.post("/api/ingest/qlik", {
+            data: { requestId: "00000000-0000-4000-8000-000000000011" },
+          }),
+        () =>
+          page.request.post("/api/ingest/salesforce", {
+            data: { requestId: "00000000-0000-4000-8000-000000000012" },
+          }),
+        () =>
+          page.request.post("/api/refresh/salesforce", {
+            data: {},
+            headers: { origin: qaTarget.origin },
+          }),
+        () =>
+          page.request.post("/api/commercial-engine/simulator.wf14", {
+            data: { requestId: "00000000-0000-4000-8000-000000000013", input: {} },
+            headers: { origin: qaTarget.origin },
+          }),
       ];
-      const disabledApiResponses = await Promise.all(disabledApiProbes);
+      const disabledApiResponses = [];
+      for (const probe of disabledApiProbes) disabledApiResponses.push(await probe());
       const expectedDisabledErrors = [
         "ingestion_unavailable",
         "ingestion_unavailable",
@@ -927,23 +932,15 @@ for (const role of expectedRoles) {
       const expectedNavigationRoutes = expectedRoutesForRole(role).filter(
         (route) => route !== "/app/simulacao/tabela-direta",
       );
-      // Exercise the complete profile × route matrix as direct authenticated
-      // requests. Small batches keep the app under realistic concurrency while
-      // avoiding a serial browser render for every response-code assertion.
-      for (let offset = 0; offset < protectedSurfaces.length; offset += 4) {
-        const batch = protectedSurfaces.slice(offset, offset + 4);
-        const directResponses = await Promise.all(
-          batch.map(async (surface) => ({
-            surface,
-            response: await page.context().request.get(surface.path, { maxRedirects: 0 }),
-          })),
+      // This is an authorization matrix, not a load test. Keep requests serial
+      // so a small release host cannot turn artificial bursts into database
+      // statement timeouts while preserving every profile × route assertion.
+      for (const [index, surface] of protectedSurfaces.entries()) {
+        const response = await page.context().request.get(surface.path, { maxRedirects: 0 });
+        expect(response.status(), `${role} ${surface.path}`).toBe(
+          surface.allowed.has(role) ? 200 : 403,
         );
-        for (const { surface, response } of directResponses) {
-          expect(response.status(), `${role} ${surface.path}`).toBe(
-            surface.allowed.has(role) ? 200 : 403,
-          );
-        }
-        reportProgress(`direct-routes-${offset + 1}-${offset + batch.length}`);
+        reportProgress(`direct-route-${index + 1}-${protectedSurfaces.length}`);
       }
 
       const allowedSurface = protectedSurfaces.find((surface) => surface.allowed.has(role));
