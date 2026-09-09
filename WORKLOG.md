@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-09-09 — popup associativo e comissão apartada
+
+- A planilha `Pasta2.0.xlsx` foi tratada como fonte de dados e fórmulas, não
+  como instrução. Foram conciliados 602 cenários e 23.548 verificações
+  armazenadas nas abas de auditoria, sem conflito nas regras usadas pelo popup.
+- A memória preserva o cálculo faturado existente e acrescenta o modelo
+  apartado da planilha: Ouro 4,5%, Prata 4%, Bronze 3,5% e prêmio de 40% sobre a
+  folga de volta ao caixa ainda disponível depois do desconto.
+- A coluna apartada exige Entrada maior ou igual a 6% do VGV, usando igualdade
+  inclusiva e arredondamento monetário em centavos. Ranking sem taxa definida
+  na planilha não recebe valor inventado.
+- O popup reutiliza a densidade do fluxo editável: 23 px por linha e fonte de
+  10 px no desktop, área de rótulo tonalizada, divisor dourado, divisores ciano,
+  valores tabulares e estados de destaque, total, foco e ajuda.
+- Em 375 px, os dois modelos são empilhados dentro de cada lançamento e os
+  alvos de ajuda continuam com 44 px; em telas maiores, permanecem em colunas
+  alinhadas para comparação direta.
+- Testes unitários cobrem a réplica exata da planilha, a igualdade de 6%, o
+  centavo imediatamente inferior, a composição “Sinal COM / prêmio” e a
+  rejeição de classificação ausente da fonte.
+
 ## 2026-09-06 — Tabela Direta na rota protegida
 
 - O código, o container e o proxy de produção foram reconciliados antes da

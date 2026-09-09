@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-09 — comissão apartada na proposta associativa
+
+- Alinha o popup “Proposta pronta - Bora Vender” à densidade visual do fluxo
+  editável: linhas de 23 px, texto de 10 px, bloco de descrição destacado e
+  separadores do mesmo livro-caixa.
+- Exibe a coluna “Comissão apartada” somente quando a Entrada alcança 6% do VGV
+  e o ranking possui regra na planilha `Pasta2.0.xlsx` (Ouro, Prata ou Bronze).
+- Replica no centavo comissão, prêmio, desconto, contrato, B.A., financiamento
+  e conciliação do modelo apartado, mantendo vazios os valores zerados.
+- Mantém a proposta faturada sem alteração abaixo do limite e reorganiza as
+  duas respostas em linhas empilhadas no mobile, sem rolagem horizontal.
+
 ## 2026-09-06 — Tabela Direta integral no CRM
 
 - Implementa a réplica completa da Tabela Direta em
