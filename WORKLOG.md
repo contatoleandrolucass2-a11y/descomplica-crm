@@ -20,6 +20,9 @@
 - Testes unitários cobrem a réplica exata da planilha, a igualdade de 6%, o
   centavo imediatamente inferior, a composição “Sinal COM / prêmio” e a
   rejeição de classificação ausente da fonte.
+- O gate remoto identificou avisos publicados em 08/09/2026 no Next.js, Sharp e
+  `js-yaml`. As versões foram elevadas aos primeiros releases corrigidos e o
+  override transitivo permanece explícito para impedir regressão do lockfile.
 
 ## 2026-09-06 — Tabela Direta na rota protegida
 

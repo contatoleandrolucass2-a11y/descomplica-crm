@@ -11,6 +11,8 @@
   e conciliação do modelo apartado, mantendo vazios os valores zerados.
 - Mantém a proposta faturada sem alteração abaixo do limite e reorganiza as
   duas respostas em linhas empilhadas no mobile, sem rolagem horizontal.
+- Atualiza Next.js, Sharp e a resolução transitiva de `js-yaml` para versões
+  corrigidas após novos avisos críticos/altos bloquearem o gate de segurança.
 
 ## 2026-09-06 — Tabela Direta integral no CRM
 
