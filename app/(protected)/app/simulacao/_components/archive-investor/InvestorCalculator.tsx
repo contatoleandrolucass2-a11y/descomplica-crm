@@ -1851,13 +1851,14 @@ function AssociativeReadyProposalDialog({
 }) {
   const proposal = calculation.proposal;
   const source = calculation.source;
+  const separatedCommissionVisible = Boolean(calculation.separatedCommission?.eligible);
   const statusLabel = calculation.status === "ready" ? "PROPOSTA PRONTA" : calculation.status === "review" ? "REVISAR PROPOSTA" : "DADOS PENDENTES";
   const responseRows = buildAssociativeReadyProposalResponseRows(calculation);
 
   return <dialog
     ref={dialogRef}
     id="investor-associative-ready-proposal"
-    className="investor-documentation-dialog investor-associative-ready-proposal-dialog"
+    className={`investor-documentation-dialog investor-associative-ready-proposal-dialog${separatedCommissionVisible ? " has-separated-commission" : ""}`}
     aria-labelledby="investor-associative-ready-proposal-title"
     aria-describedby="investor-associative-ready-proposal-description"
     onClick={(event) => { if (event.target === event.currentTarget) event.currentTarget.close(); }}
@@ -1889,16 +1890,41 @@ function AssociativeReadyProposalDialog({
           </header>
           <div className="investor-associative-ready-proposal-table-wrap" role="region" aria-label="Resposta financeira da proposta" tabIndex={0}>
             <table>
+              <caption className="sr-only">{separatedCommissionVisible ? "Comparação entre a proposta faturada e o modelo de comissão apartada" : "Resumo financeiro da proposta faturada"}</caption>
+              {separatedCommissionVisible ? <colgroup className="investor-associative-ready-proposal-columns">
+                <col className="is-label" />
+                <col className="is-operator" />
+                <col className="is-currency" />
+                <col className="is-value" />
+                <col className="is-operator" />
+                <col className="is-currency" />
+                <col className="is-value" />
+                <col className="is-help" />
+              </colgroup> : null}
+              {separatedCommissionVisible ? <thead>
+                <tr>
+                  <th scope="col">Composição</th>
+                  <th scope="col" colSpan={3}><span className="is-full">Proposta faturada</span><span className="is-compact">Faturada</span></th>
+                  <th scope="col" colSpan={3}><span className="is-full">Comissão apartada</span><span className="is-compact">Apartada</span></th>
+                  <th scope="col"><span className="sr-only">Ajuda</span></th>
+                </tr>
+              </thead> : null}
               <tbody>
-                {responseRows.map((row: { key: string; label: string; operator: string; value: number; currency: boolean; featured?: boolean; separated?: boolean; total?: boolean; help: string }) => {
-                  const formattedValue = row.currency ? currencyInput.format(row.value) : String(row.value);
+                {responseRows.map((row: { key: string; label: string; operator: string; value: number | null; separatedCommissionValue: number | null; currency: boolean; featured?: boolean; separated?: boolean; total?: boolean; help: string }) => {
+                  const formattedValue = row.value === null ? "" : row.currency ? currencyInput.format(row.value) : String(row.value);
+                  const formattedSeparatedValue = row.separatedCommissionValue === null ? "" : row.currency ? currencyInput.format(row.separatedCommissionValue) : String(row.separatedCommissionValue);
                   const rowClassName = [row.featured ? "is-featured" : "", row.separated ? "is-separated" : "", row.total ? "is-total" : ""].filter(Boolean).join(" ");
                   const helpId = `investor-associative-ready-proposal-help-${row.key}`;
                   return <tr key={row.key} className={rowClassName || undefined}>
                     <th scope="row">{row.label}</th>
-                    <td className="investor-associative-ready-proposal-operator" aria-label={row.operator === "=" ? "igual" : row.operator === "−" ? "subtrair" : row.operator === "+" ? "somar" : "dividir"}>{row.operator}</td>
-                    <td className="investor-associative-ready-proposal-currency" aria-hidden="true">{row.currency ? "R$" : ""}</td>
-                    <td className="investor-associative-ready-proposal-value" aria-label={`${row.label}: ${row.currency ? money.format(row.value) : row.value}`}><strong>{formattedValue}</strong></td>
+                    <td className="investor-associative-ready-proposal-operator is-invoiced" aria-label={row.value === null ? undefined : row.operator === "=" ? "igual" : row.operator === "−" ? "subtrair" : row.operator === "+" ? "somar" : "dividir"}>{row.value === null ? "" : row.operator}</td>
+                    <td className="investor-associative-ready-proposal-currency is-invoiced" aria-hidden="true">{row.value !== null && row.currency ? "R$" : ""}</td>
+                    <td className="investor-associative-ready-proposal-value is-invoiced" data-model="proposal-invoiced" aria-label={row.value === null ? undefined : `Proposta faturada, ${row.label}: ${row.currency ? money.format(row.value) : row.value}`}><strong>{formattedValue}</strong></td>
+                    {separatedCommissionVisible ? <>
+                      <td className="investor-associative-ready-proposal-operator is-separated-commission" aria-label={row.separatedCommissionValue === null ? undefined : row.operator === "=" ? "igual" : row.operator === "−" ? "subtrair" : row.operator === "+" ? "somar" : "dividir"}>{row.separatedCommissionValue === null ? "" : row.operator}</td>
+                      <td className="investor-associative-ready-proposal-currency is-separated-commission" aria-hidden="true">{row.separatedCommissionValue !== null && row.currency ? "R$" : ""}</td>
+                      <td className="investor-associative-ready-proposal-value is-separated-commission" data-model="separated-commission" aria-label={row.separatedCommissionValue === null ? undefined : `Comissão apartada, ${row.label}: ${row.currency ? money.format(row.separatedCommissionValue) : row.separatedCommissionValue}`}><strong>{formattedSeparatedValue}</strong></td>
+                    </> : null}
                     <td className="investor-associative-ready-proposal-help">
                       <button type="button" className="investor-associative-ready-proposal-info" popoverTarget={helpId} aria-label={`Explicar ${row.label}`}>
                         <span className="investor-info-mark" aria-hidden="true" />
@@ -1915,7 +1941,7 @@ function AssociativeReadyProposalDialog({
           </div>
         </section>
 
-        {calculation.warnings.length > 0 ? <section className="investor-associative-ready-proposal-warning" role="alert"><strong>Revisão necessária</strong><ul>{calculation.warnings.map((warning: string) => <li key={warning}>{warning}</li>)}</ul></section> : <p className="investor-associative-ready-proposal-success" role="status"><strong>Conciliação fechada.</strong> A diferença calculada é {money.format(proposal.reconciliationDifference)}.</p>}
+        {calculation.warnings.length > 0 ? <section className="investor-associative-ready-proposal-warning" role="alert"><strong>Revisão necessária</strong><ul>{calculation.warnings.map((warning: string) => <li key={warning}>{warning}</li>)}</ul></section> : <p className="investor-associative-ready-proposal-success" role="status"><strong>{separatedCommissionVisible ? "Conciliações fechadas." : "Conciliação fechada."}</strong> {separatedCommissionVisible ? `Diferenças: faturada ${money.format(proposal.reconciliationDifference)} · apartada ${money.format(calculation.separatedCommission.proposal.reconciliationDifference)}.` : `A diferença calculada é ${money.format(proposal.reconciliationDifference)}.`}</p>}
         <p className="investor-associative-ready-proposal-note">Simulação comercial. A modalidade, a avaliação e o crédito dependem da confirmação da instituição financeira.</p>
       </>}
     </article>
@@ -2631,7 +2657,9 @@ export function InvestorCalculator({
       ? currencyInputNumber(documentationAppraisalOverride)
       : selectedUnit?.appraisal ?? 0,
     modality: associativeFinancingModality,
-  }), [associativeFinancingModality, documentationAppraisalOverride, result.context.discount, result.context.propertyValue, result.context.tableSlack, result.context.unitBonus, result.context.valueReal, result.custom.actValue, result.custom.desiredInstallments, result.custom.fgts, result.custom.financing, result.custom.housingCheck, result.custom.intermediaries, result.custom.signals, result.custom.subsidy, selectedUnit?.appraisal]);
+    commissionRankingId: associativeApprovalTier,
+    cashBackSlack: selectedUnit?.cashBackSlack ?? 0,
+  }), [associativeApprovalTier, associativeFinancingModality, documentationAppraisalOverride, result.context.discount, result.context.propertyValue, result.context.tableSlack, result.context.unitBonus, result.context.valueReal, result.custom.actValue, result.custom.desiredInstallments, result.custom.fgts, result.custom.financing, result.custom.housingCheck, result.custom.intermediaries, result.custom.signals, result.custom.subsidy, selectedUnit?.appraisal, selectedUnit?.cashBackSlack]);
   const directAmortizationSchedule = useMemo(() => directTable
     ? buildDirectTableAmortizationSchedule(result.custom.postKeysBalance, result.custom.firstPostKeysDate, result.custom.postKeysInstallments)
     : [], [directTable, result.custom.postKeysBalance, result.custom.firstPostKeysDate, result.custom.postKeysInstallments]);

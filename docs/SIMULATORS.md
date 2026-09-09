@@ -31,6 +31,12 @@ runtime oficial.
 | WF14   | `/app/simulacao/tabela-direta`            | Tabela Direta         |
 | WF15   | `/app/simulacao/tabela-investidor`        | Tabela Investidor     |
 
+Na jornada associativa da Tabela Investidor, o popup “Proposta pronta - Bora
+Vender” mantém a proposta faturada e acrescenta a memória de comissão apartada
+da planilha `Pasta2.0.xlsx` quando a Entrada alcança 6% do VGV. A segunda coluna
+usa somente os rankings definidos pela fonte (Ouro, Prata e Bronze), preserva
+valores em centavos e permanece oculta abaixo do limite.
+
 O hub está em `/app/simulacao`. Todas as seis rotas exigem
 `crm.simulators.view` no guard server-side. O catálogo PostgreSQL permanece com
 17 páginas e as réplicas WF14 e WF15 estão implementadas neste candidato pelo

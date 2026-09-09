@@ -19456,6 +19456,9 @@ body:has(.investor-page-shell) {
   max-height:min(92dvh,760px);
   overscroll-behavior:contain;
 }
+.investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission {
+  width:min(900px,calc(100vw - 28px));
+}
 .investor-page-shell .investor-associative-ready-proposal-dialog>article {
   gap:8px;
   padding:12px;
@@ -19629,6 +19632,32 @@ body:has(.investor-page-shell) {
   table-layout:fixed;
   font-variant-numeric:tabular-nums;
 }
+.investor-page-shell .investor-associative-ready-proposal-columns>.is-label { width:38%; }
+.investor-page-shell .investor-associative-ready-proposal-columns>.is-operator { width:4%; }
+.investor-page-shell .investor-associative-ready-proposal-columns>.is-currency { width:5%; }
+.investor-page-shell .investor-associative-ready-proposal-columns>.is-value { width:20%; }
+.investor-page-shell .investor-associative-ready-proposal-columns>.is-help { width:4%; }
+.investor-page-shell .investor-associative-ready-proposal-sheet thead .is-compact { display:none; }
+.investor-page-shell .investor-associative-ready-proposal-sheet thead th {
+  height:23px;
+  color:#9fc0cc;
+  border-bottom-color:rgba(102,228,236,.42);
+  background:#07293d;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.035em;
+  text-align:center;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.investor-page-shell .investor-associative-ready-proposal-sheet thead th:first-child {
+  border-right:2px solid #f6bd60;
+  text-align:left;
+}
+.investor-page-shell .investor-associative-ready-proposal-sheet thead th:nth-child(3) {
+  border-left:1px solid rgba(102,228,236,.55);
+  color:#66e4ec;
+}
 .investor-page-shell .investor-associative-ready-proposal-sheet tr:nth-child(even) {
   background:rgba(191,219,229,.035);
 }
@@ -19652,6 +19681,10 @@ body:has(.investor-page-shell) {
   text-overflow:ellipsis;
   white-space:nowrap;
 }
+.investor-page-shell .investor-associative-ready-proposal-sheet tbody>tr>th {
+  border-right:2px solid #f6bd60;
+  background:rgba(157,169,166,.17);
+}
 .investor-page-shell .investor-associative-ready-proposal-operator {
   width:26px;
   color:#66e4ec;
@@ -19672,6 +19705,12 @@ body:has(.investor-page-shell) {
 .investor-page-shell .investor-associative-ready-proposal-value>strong {
   font-weight:800;
   white-space:nowrap;
+}
+.investor-page-shell .investor-associative-ready-proposal-operator.is-separated-commission {
+  border-left:1px solid rgba(102,228,236,.55);
+}
+.investor-page-shell .investor-associative-ready-proposal-value.is-separated-commission>strong {
+  color:#dffbfc;
 }
 .investor-page-shell .investor-associative-ready-proposal-help {
   width:28px;
@@ -19857,6 +19896,89 @@ body:has(.investor-page-shell) {
     min-width:44px;
     height:40px;
     min-height:40px;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet table,
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead,
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet tbody {
+    display:block;
+    width:100%;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-columns,
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead .is-full {
+    display:none;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead .is-compact {
+    display:inline;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead>tr,
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet tbody>tr {
+    display:grid;
+    grid-template-columns:minmax(92px,1fr) 18px 20px minmax(72px,86px) 44px;
+    grid-template-rows:23px 23px;
+    width:100%;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead>tr {
+    grid-template-rows:23px 23px;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead th:first-child {
+    grid-column:1;
+    grid-row:1/3;
+    height:46px;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead th:nth-child(2),
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead th:nth-child(3) {
+    grid-column:2/5;
+    height:23px;
+    border-left:0;
+    font-size:8px;
+    line-height:23px;
+    text-align:right;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead th:nth-child(2) { grid-row:1; }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead th:nth-child(3) { grid-row:2; }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet thead th:last-child { display:none; }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet tbody>tr>th {
+    grid-column:1;
+    grid-row:1/3;
+    width:auto;
+    height:46px;
+    font-size:10px;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet tbody>tr>.is-invoiced { grid-row:1; }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet tbody>tr>.is-separated-commission { grid-row:2; }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-operator {
+    grid-column:2;
+    width:auto;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-currency {
+    grid-column:3;
+    width:auto;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-value {
+    grid-column:4;
+    width:auto;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-sheet tbody>tr>td {
+    height:23px;
+    font-size:10px;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-operator.is-separated-commission {
+    border-left:0;
+    border-top:1px dashed rgba(102,228,236,.2);
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-currency.is-separated-commission,
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-value.is-separated-commission {
+    border-top:1px dashed rgba(102,228,236,.2);
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-help {
+    grid-column:5;
+    grid-row:1/3;
+    width:auto;
+    height:46px;
+  }
+  .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission .investor-associative-ready-proposal-info {
+    height:44px;
+    min-height:44px;
   }
 }
 

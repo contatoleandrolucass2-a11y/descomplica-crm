@@ -7,7 +7,8 @@ const { buildAssociativeReadyProposal, buildAssociativeReadyProposalResponseRows
 
 type ResponseRow = {
   label: string;
-  value: number;
+  value: number | null;
+  separatedCommissionValue: number | null;
   currency: boolean;
 };
 
@@ -45,7 +46,7 @@ describe("buildAssociativeReadyProposal", () => {
       proposalDiscount: 102_500,
       balanceAfterResources: 40_000,
       monthlyBalance: 39_000,
-      averageInstallment: 464.29,
+      averageInstallment: 464.28,
       creditShortfall: 0,
       reconciliationDifference: 0,
     });
@@ -78,7 +79,7 @@ describe("buildAssociativeReadyProposal", () => {
       proposalUnitBonus: 3_010,
       balanceAfterResources: 44_490,
       monthlyBalance: 43_490,
-      averageInstallment: 517.74,
+      averageInstallment: 517.73,
     });
   });
 
@@ -101,7 +102,7 @@ describe("buildAssociativeReadyProposal", () => {
       signalTotal: 5_000,
       annualTotal: 13_000,
       monthlyBalance: 12_000,
-      averageInstallment: 142.86,
+      averageInstallment: 142.85,
       reconciliationDifference: 0,
     });
   });
@@ -131,6 +132,46 @@ describe("buildAssociativeReadyProposal", () => {
       creditShortfall: 0.01,
       monthlyBalance: 39_000.01,
       reconciliationDifference: 0,
+    });
+  });
+
+  it("replica ROUND, ROUNDUP e ROUNDDOWN da planilha em fronteiras binárias", () => {
+    const contractBoundary = buildAssociativeReadyProposal({
+      ...workbookBase,
+      requestedFinancing: 104_857.96,
+    });
+    const appraisalBoundary = buildAssociativeReadyProposal({
+      ...workbookBase,
+      appraisal: 100_000.05,
+    });
+    const commissionBoundary = buildAssociativeReadyProposal({
+      ...workbookBase,
+      grossSaleValue: 200_000,
+      netSaleValue: 100_005,
+      requestedFinancing: 50_000,
+      appraisal: 200_000,
+      commissionRankingId: "gold",
+    });
+
+    expect(contractBoundary.proposal.contractMinimum).toBe(131_072.45);
+    expect(appraisalBoundary.proposal.appraisalLimit).toBe(80_000.04);
+    expect(commissionBoundary.separatedCommission.commissionValue).toBe(4_500.23);
+  });
+
+  it("limita o financiamento antes de calcular o contrato faturado", () => {
+    const result = buildAssociativeReadyProposal({
+      ...workbookBase,
+      grossSaleValue: 200_000,
+      netSaleValue: 80_000,
+      appraisal: 100_000.01,
+      requestedFinancing: 200_000,
+    });
+
+    expect(result.proposal).toMatchObject({
+      appraisalLimit: 80_000,
+      financing: 80_000,
+      contractMinimum: 100_000,
+      contractValue: 100_000,
     });
   });
 
@@ -170,7 +211,7 @@ describe("buildAssociativeReadyProposal", () => {
       "Anual 3": 3_000,
       "Qtd. de parcelas": 84,
     });
-    expect(rows.every((row) => row.value > 0)).toBe(true);
+    expect(rows.every((row) => row.value !== null && row.value > 0)).toBe(true);
   });
 
   it("não oculta subsídio nem pagamentos além das linhas fixas quando ativos", () => {
@@ -189,6 +230,116 @@ describe("buildAssociativeReadyProposal", () => {
       label: "Qtd. de parcelas",
       currency: false,
       value: 84,
+    });
+  });
+
+  it("replica o modelo de comissão apartada da Pasta2.0.xlsx", () => {
+    const result = buildAssociativeReadyProposal({
+      ...workbookBase,
+      netSaleValue: 240_000,
+      appraisal: 370_000,
+      cashBackSlack: 10_000,
+      commissionRankingId: "gold",
+    });
+
+    expect(result.separatedCommission).toMatchObject({
+      eligible: false,
+      entryThreshold: 14_400,
+      entryRate: 0.06,
+      ranking: { label: "Ouro", rate: 0.045 },
+      commissionBase: 240_000,
+      commissionValue: 10_800,
+      awardBase: 10_000,
+      awardRate: 0.4,
+      awardValue: 4_000,
+      totalRemuneration: 14_800,
+      proposal: {
+        contractValue: 237_500,
+        financing: 190_000,
+        proposalUnitBonus: 12_300,
+        proposalDiscount: 87_700,
+        balanceAfterResources: 35_200,
+        monthlyBalance: 34_200,
+        averageInstallment: 407.14,
+        reconciliationDifference: 0,
+      },
+    });
+  });
+
+  it("exibe comissão apartada na igualdade de 6% e oculta um centavo abaixo", () => {
+    const base = {
+      ...workbookBase,
+      netSaleValue: 240_000,
+      appraisal: 370_000,
+      cashBackSlack: 10_000,
+      commissionRankingId: "gold",
+    };
+
+    expect(
+      buildAssociativeReadyProposal({ ...base, entry: 14_399.99 }).separatedCommission.eligible,
+    ).toBe(false);
+    const eligible = buildAssociativeReadyProposal({ ...base, entry: 14_400 });
+    expect(eligible.separatedCommission.eligible).toBe(true);
+    expect(eligible.separatedCommission.proposal.monthlyBalance).toBe(20_800);
+    expect(eligible.separatedCommission.proposal.averageInstallment).toBe(247.61);
+
+    const thresholdBoundary = {
+      ...base,
+      grossSaleValue: 200_000,
+      netSaleValue: 100_005.75,
+    };
+    expect(
+      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 6_000.34 }).separatedCommission
+        .eligible,
+    ).toBe(false);
+    expect(
+      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 6_000.35 }).separatedCommission,
+    ).toMatchObject({ eligible: true, entryThreshold: 6_000.35 });
+  });
+
+  it("inclui a coluna apartada e o Sinal COM somente quando elegíveis", () => {
+    const calculation = buildAssociativeReadyProposal({
+      ...workbookBase,
+      netSaleValue: 240_000,
+      entry: 14_400,
+      appraisal: 370_000,
+      cashBackSlack: 10_000,
+      commissionRankingId: "gold",
+    });
+    const rows = buildAssociativeReadyProposalResponseRows(calculation) as ResponseRow[];
+    const byLabel = Object.fromEntries(rows.map((row) => [row.label, row]));
+
+    expect(byLabel.Desconto).toMatchObject({
+      value: 100_000,
+      separatedCommissionValue: 87_700,
+    });
+    expect(byLabel["Valor de Contrato"]).toMatchObject({
+      value: 240_000,
+      separatedCommissionValue: 237_500,
+    });
+    expect(byLabel["B.A. da Unidade"]).toMatchObject({
+      value: null,
+      separatedCommissionValue: 12_300,
+    });
+    expect(byLabel["Sinal COM / prêmio"]).toMatchObject({
+      value: null,
+      separatedCommissionValue: 14_800,
+    });
+  });
+
+  it("não inventa comissão para classificação ausente da planilha", () => {
+    const result = buildAssociativeReadyProposal({
+      ...workbookBase,
+      entry: 13_800,
+      commissionRankingId: "diamond",
+    });
+
+    expect(result.separatedCommission).toMatchObject({
+      eligible: false,
+      ranking: null,
+      commissionValue: 0,
+      awardValue: 0,
+      totalRemuneration: 0,
     });
   });
 });

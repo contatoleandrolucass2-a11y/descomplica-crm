@@ -23,7 +23,7 @@ export function buildSyntheticDirectTableQaSnapshot() {
       finalWithKit: readyProposalReference ? 340_000 : finalPrice,
       unitBonus: readyProposalReference ? 95_000 : 0,
       tableSlack: readyProposalReference ? 15_000 : 0,
-      cashBackSlack: 0,
+      cashBackSlack: readyProposalReference ? 10_000 : 0,
       finalPrice,
       launchPrice: finalPrice,
       appraisal: readyProposalReference ? 350_000 : finalPrice,

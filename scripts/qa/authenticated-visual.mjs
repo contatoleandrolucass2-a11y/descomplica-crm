@@ -1098,7 +1098,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   await installmentsInput.fill("84");
   const rankingSelect = page.getByRole("combobox", { name: "Selecione o Ranking", exact: true });
   await rankingSelect.waitFor({ state: "visible" });
-  await rankingSelect.selectOption("diamond");
+  await rankingSelect.selectOption("gold");
 
   const readyProposalButton = page.getByRole("button", {
     name: "Proposta pronta - Bora Vender",
@@ -1190,6 +1190,8 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
         "Anual 4",
       ].every((label) => valueFor(label) === undefined) &&
       valueFor("Qtd. de parcelas") === "84" &&
+      !(dialog.textContent || "").includes("Comissão apartada") &&
+      !dialog.querySelector("[data-model='separated-commission']") &&
       !(dialog.textContent || "").includes("Contrato e conferência")
     );
   });
@@ -1219,8 +1221,25 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   await readyProposalDialogElement.waitFor({ state: "hidden" });
 
   const readyProposalResponsiveChecks = [];
-  await readyProposalDialogElement.evaluate((dialog) => dialog.showModal());
+  await entryInput.fill("1380000");
+  await readyProposalButton.click();
   await readyProposalDialogElement.waitFor({ state: "visible" });
+  const readyProposalSeparatedCommissionVisible = await readyProposalDialog.evaluate((dialog) => {
+    const rowFor = (label) =>
+      [...dialog.querySelectorAll("tbody tr")].find(
+        (row) => row.querySelector("th")?.textContent?.trim() === label,
+      );
+    const valueFor = (label, model) =>
+      rowFor(label)?.querySelector(`[data-model='${model}']`)?.textContent?.trim();
+    return (
+      dialog.classList.contains("has-separated-commission") &&
+      (dialog.textContent || "").includes("Comissão apartada") &&
+      valueFor("Desconto", "proposal-invoiced") === "102.500,00" &&
+      valueFor("Desconto", "separated-commission") === "88.150,00" &&
+      valueFor("Sinal COM / prêmio", "proposal-invoiced") === "" &&
+      valueFor("Sinal COM / prêmio", "separated-commission") === "14.350,00"
+    );
+  });
   const readyProposalSnapshot = await readyProposalDialogElement.evaluate((dialog) => ({
     dialogHtml: dialog.outerHTML,
     stylesheets: [...document.querySelectorAll('link[rel="stylesheet"]')].map((link) => link.href),
@@ -1264,23 +1283,21 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
         const tableRegion = dialog.querySelector(".investor-associative-ready-proposal-table-wrap");
         if (tableRegion) tableRegion.scrollTop = 0;
       });
-      readyProposalResponsiveChecks.push(
-        await snapshotPage.locator("dialog").evaluate((dialog) => {
-          const dialogBox = dialog.getBoundingClientRect();
-          const tableRegion = dialog.querySelector(
-            ".investor-associative-ready-proposal-table-wrap",
-          );
-          const rowLabels = [
-            ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet th"),
-          ];
-          const rows = [
-            ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet tbody tr"),
-          ];
-          const usesCompactDesktopSize =
-            window.innerWidth < 481 ||
-            (Math.abs(dialogBox.width - 600) <= 2 &&
-              rows.every((row) => row.getBoundingClientRect().height <= 25));
-          return (
+      const responsiveMeasurement = await snapshotPage.locator("dialog").evaluate((dialog) => {
+        const dialogBox = dialog.getBoundingClientRect();
+        const tableRegion = dialog.querySelector(".investor-associative-ready-proposal-table-wrap");
+        const rowLabels = [
+          ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet th"),
+        ];
+        const rows = [
+          ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet tbody tr"),
+        ];
+        const usesCompactDesktopSize =
+          window.innerWidth < 481 ||
+          (Math.abs(dialogBox.width - Math.min(900, window.innerWidth - 28)) <= 8 &&
+            rows.every((row) => row.getBoundingClientRect().height <= 25));
+        return {
+          passed:
             dialogBox.left >= 0 &&
             dialogBox.right <= window.innerWidth &&
             dialogBox.top >= 0 &&
@@ -1289,11 +1306,20 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
             tableRegion &&
             tableRegion.scrollWidth <= tableRegion.clientWidth + 1 &&
             rowLabels.every((label) => label.scrollWidth <= label.clientWidth + 1) &&
-            usesCompactDesktopSize
-          );
-        }),
+            usesCompactDesktopSize,
+          dialogOverflow: dialog.scrollWidth - dialog.clientWidth,
+          tableOverflow: tableRegion ? tableRegion.scrollWidth - tableRegion.clientWidth : null,
+          truncatedLabels: rowLabels
+            .filter((label) => label.scrollWidth > label.clientWidth + 1)
+            .map((label) => label.textContent?.trim()),
+          width: dialogBox.width,
+          maximumRowHeight: Math.max(...rows.map((row) => row.getBoundingClientRect().height)),
+        };
+      });
+      readyProposalResponsiveChecks.push(responsiveMeasurement.passed);
+      process.stdout.write(
+        `Ready proposal QA: ${viewport.key} measured ${JSON.stringify(responsiveMeasurement)}\n`,
       );
-      process.stdout.write(`Ready proposal QA: ${viewport.key} measured\n`);
       await snapshotPage.screenshot({
         path: path.join(
           candidateScreenshotRoot,
@@ -1318,6 +1344,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     readyProposalDialogComplete,
     readyProposalDesktopFits,
     readyProposalHelpAccessible,
+    readyProposalSeparatedCommissionVisible,
     readyProposalResponsive,
   };
 }
