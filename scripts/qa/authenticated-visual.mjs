@@ -1284,22 +1284,20 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
         if (tableRegion) tableRegion.scrollTop = 0;
       });
       const responsiveMeasurement = await snapshotPage.locator("dialog").evaluate((dialog) => {
-          const dialogBox = dialog.getBoundingClientRect();
-          const tableRegion = dialog.querySelector(
-            ".investor-associative-ready-proposal-table-wrap",
-          );
-          const rowLabels = [
-            ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet th"),
-          ];
-          const rows = [
-            ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet tbody tr"),
-          ];
-          const usesCompactDesktopSize =
-            window.innerWidth < 481 ||
-            (Math.abs(dialogBox.width - Math.min(900, window.innerWidth - 28)) <= 8 &&
-              rows.every((row) => row.getBoundingClientRect().height <= 25));
-          return {
-            passed: (
+        const dialogBox = dialog.getBoundingClientRect();
+        const tableRegion = dialog.querySelector(".investor-associative-ready-proposal-table-wrap");
+        const rowLabels = [
+          ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet th"),
+        ];
+        const rows = [
+          ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet tbody tr"),
+        ];
+        const usesCompactDesktopSize =
+          window.innerWidth < 481 ||
+          (Math.abs(dialogBox.width - Math.min(900, window.innerWidth - 28)) <= 8 &&
+            rows.every((row) => row.getBoundingClientRect().height <= 25));
+        return {
+          passed:
             dialogBox.left >= 0 &&
             dialogBox.right <= window.innerWidth &&
             dialogBox.top >= 0 &&
@@ -1308,17 +1306,20 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
             tableRegion &&
             tableRegion.scrollWidth <= tableRegion.clientWidth + 1 &&
             rowLabels.every((label) => label.scrollWidth <= label.clientWidth + 1) &&
-            usesCompactDesktopSize
-            ),
-            dialogOverflow: dialog.scrollWidth - dialog.clientWidth,
-            tableOverflow: tableRegion ? tableRegion.scrollWidth - tableRegion.clientWidth : null,
-            truncatedLabels: rowLabels.filter((label) => label.scrollWidth > label.clientWidth + 1).map((label) => label.textContent?.trim()),
-            width: dialogBox.width,
-            maximumRowHeight: Math.max(...rows.map((row) => row.getBoundingClientRect().height)),
-          };
-        });
+            usesCompactDesktopSize,
+          dialogOverflow: dialog.scrollWidth - dialog.clientWidth,
+          tableOverflow: tableRegion ? tableRegion.scrollWidth - tableRegion.clientWidth : null,
+          truncatedLabels: rowLabels
+            .filter((label) => label.scrollWidth > label.clientWidth + 1)
+            .map((label) => label.textContent?.trim()),
+          width: dialogBox.width,
+          maximumRowHeight: Math.max(...rows.map((row) => row.getBoundingClientRect().height)),
+        };
+      });
       readyProposalResponsiveChecks.push(responsiveMeasurement.passed);
-      process.stdout.write(`Ready proposal QA: ${viewport.key} measured ${JSON.stringify(responsiveMeasurement)}\n`);
+      process.stdout.write(
+        `Ready proposal QA: ${viewport.key} measured ${JSON.stringify(responsiveMeasurement)}\n`,
+      );
       await snapshotPage.screenshot({
         path: path.join(
           candidateScreenshotRoot,

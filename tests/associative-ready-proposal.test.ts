@@ -276,8 +276,7 @@ describe("buildAssociativeReadyProposal", () => {
     };
 
     expect(
-      buildAssociativeReadyProposal({ ...base, entry: 14_399.99 }).separatedCommission
-        .eligible,
+      buildAssociativeReadyProposal({ ...base, entry: 14_399.99 }).separatedCommission.eligible,
     ).toBe(false);
     const eligible = buildAssociativeReadyProposal({ ...base, entry: 14_400 });
     expect(eligible.separatedCommission.eligible).toBe(true);
@@ -290,12 +289,11 @@ describe("buildAssociativeReadyProposal", () => {
       netSaleValue: 100_005.75,
     };
     expect(
-      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 6_000.34 })
-        .separatedCommission.eligible,
+      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 6_000.34 }).separatedCommission
+        .eligible,
     ).toBe(false);
     expect(
-      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 6_000.35 })
-        .separatedCommission,
+      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 6_000.35 }).separatedCommission,
     ).toMatchObject({ eligible: true, entryThreshold: 6_000.35 });
   });
 
