@@ -67,6 +67,6 @@
     "supabase": "2.115.0",
     "tailwindcss": "4.3.0",
     "typescript": "5.9.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   }
 }
