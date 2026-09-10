@@ -69,6 +69,11 @@ habilitam motores oficiais.
 - WF15 usa o snapshot SPC protegido, exclui vagas avulsas, exige unidade com
   valor e término da obra, mantém estados de loading, vazio e erro e trata
   `GET /api/inventory` como atualização protegida não bloqueante.
+- Na Tabela Investidor, as oito propostas permanecem divididas em quatro opções
+  para 18 parcelas e quatro para 24. A escolha rápida exibe uma opção por vez em
+  livro-caixa; o fluxo editável usa o mesmo padrão em linhas e mantém os limites
+  do motor: três sinais consecutivos, intermediária de até 5% e até três/quatro
+  intermediárias conforme o prazo selecionado e a entrada total válida.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta

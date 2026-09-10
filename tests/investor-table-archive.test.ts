@@ -61,6 +61,45 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(calculator).toContain("aria-rowcount={matchingInventory.length + 1}");
     expect(calculator).toContain('className="investor-stock-spacer"');
     expect(calculator).toContain("if (!inventoryInteractionStarted.current)");
+    expect(calculator).toContain('className="investor-standard-plan-switch"');
+    expect(calculator).toContain(
+      'className="investor-direct-ready-options investor-standard-ready-options"',
+    );
+    expect(calculator).toContain("<InvestorScenarioComparisonCard");
+    expect(calculator).toContain("Inserir Sinal");
+    expect(calculator).toContain("Inserir Intermediária");
+    expect(calculator).toContain("Máximo válido nesta composição");
+    expect(calculator).toContain("limitToMax");
+    expect(calculator).toContain('aria-describedby="investor-standard-signal-action-status"');
+    expect(calculator).toContain('aria-describedby="investor-standard-intermediary-action-status"');
+    expect(calculator).toContain("sameCurrencyAmount");
+    expect(calculator).not.toContain('className="investor-payment-controls"');
+  });
+
+  it("mantém os limites de sinais e intermediárias no fluxo compacto", () => {
+    const plan18 = calculateInvestorFlow(baseFlow);
+    const plan24 = calculateInvestorFlow({
+      ...baseFlow,
+      entryValue: 80_000,
+      installments: 24,
+    });
+    const invalidPayments = calculateInvestorFlow({
+      ...baseFlow,
+      entryValue: 24_000,
+      signals: [6_000, 7_000, 3_000],
+      intermediaries: [20_000.01, 0, 0],
+    });
+
+    expect(plan18.context.maxIntermediaries).toBe(3);
+    expect(plan24.context.maxIntermediaries).toBe(4);
+    expect(invalidPayments.custom.signals[1]).toMatchObject({ approved: false });
+    expect(invalidPayments.custom.intermediaries[0]).toMatchObject({ approved: false });
+    expect(invalidPayments.audit.find((item: { id: string }) => item.id === "signals")?.ok).toBe(
+      false,
+    );
+    expect(
+      invalidPayments.audit.find((item: { id: string }) => item.id === "intermediaries")?.ok,
+    ).toBe(false);
   });
 
   it("mantém as oito opções e fecha o valor do imóvel no centavo", () => {

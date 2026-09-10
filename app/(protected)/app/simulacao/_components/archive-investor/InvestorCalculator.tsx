@@ -124,8 +124,8 @@ const INVESTOR_TOUR_STEPS = [
     target: "scenarios",
     eyebrow: "Compare os planos prontos",
     title: "Compare as oito propostas prontas",
-    description: "Abra os planos de 18 ou 24 parcelas e escolha entre as combinações com ou sem sinais e intermediárias. Cada opção detalha entrada, pagamentos, saldo e primeira mensal.",
-    tip: "Abra mais de uma opção para comparar antes de montar a proposta personalizada.",
+    description: "Selecione o plano de 18 ou 24 parcelas e escolha entre as quatro combinações com ou sem sinais e intermediárias. Cada opção abre a composição completa no livro-caixa.",
+    tip: "Analise uma opção por vez e alterne entre os planos sem perder as oito possibilidades.",
     checklist: ["Escolha o prazo desejado", "Compare entrada e pagamentos adicionais", "Observe o valor e o início das mensais"],
   },
   {
@@ -133,7 +133,7 @@ const INVESTOR_TOUR_STEPS = [
     eyebrow: "Monte a proposta",
     title: "Monte a proposta personalizada",
     description: "A entrada inicia em 10% e continua editável. Se necessário, adicione sinais, intermediárias ou desconto e escolha a quantidade de parcelas permitida.",
-    tip: "Acompanhe percentuais, vencimentos, limites e avisos dentro de cada cartão; valores fora da regra são destacados.",
+    tip: "Acompanhe percentuais, vencimentos, limites e avisos em cada linha; valores fora da regra são destacados.",
     checklist: ["Entrada mínima de 6%", "Entrada total mínima de 10%", "Sinais e intermediárias devem respeitar os avisos"],
   },
   {
@@ -276,6 +276,10 @@ function currencyInputNumber(value: string | number) {
   return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
 }
 
+function sameCurrencyAmount(first: number, second: number) {
+  return Math.round(first * 100) === Math.round(second * 100);
+}
+
 function parseCurrencyInput(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 15);
   return digits ? (Number(digits) / 100).toFixed(2) : "";
@@ -285,7 +289,7 @@ function inputName(label: string) {
   return label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-function MoneyInput({ id, value, onChange, label, describedBy, invalid = false, disabled = false, max, inputRef }: { id?: string; value: string; onChange: (value: string) => void; label: string; describedBy?: string; invalid?: boolean; disabled?: boolean; max?: number; inputRef?: Ref<HTMLInputElement> }) {
+function MoneyInput({ id, value, onChange, label, describedBy, invalid = false, disabled = false, max, limitToMax = false, inputRef }: { id?: string; value: string; onChange: (value: string) => void; label: string; describedBy?: string; invalid?: boolean; disabled?: boolean; max?: number; limitToMax?: boolean; inputRef?: Ref<HTMLInputElement> }) {
   return <input
     id={id}
     ref={inputRef}
@@ -299,16 +303,21 @@ function MoneyInput({ id, value, onChange, label, describedBy, invalid = false, 
     type="text"
     value={value ? currencyInput.format(currencyInputNumber(value)) : ""}
     onFocus={(event) => event.currentTarget.select()}
-    onChange={(event) => onChange(parseCurrencyInput(event.target.value))}
+    onChange={(event) => {
+      const parsedValue = parseCurrencyInput(event.target.value);
+      onChange(limitToMax && max != null && currencyInputNumber(parsedValue) > max
+        ? Math.max(0, max).toFixed(2)
+        : parsedValue);
+    }}
     placeholder="0,00"
     data-max={max}
   />;
 }
 
-function AssociativeMoneyControl({ label, value, onChange, describedBy, invalid = false, disabled = false, max, inputRef }: { label: string; value: string; onChange: (value: string) => void; describedBy?: string; invalid?: boolean; disabled?: boolean; max?: number; inputRef?: Ref<HTMLInputElement> }) {
+function AssociativeMoneyControl({ label, value, onChange, describedBy, invalid = false, disabled = false, max, limitToMax = false, inputRef }: { label: string; value: string; onChange: (value: string) => void; describedBy?: string; invalid?: boolean; disabled?: boolean; max?: number; limitToMax?: boolean; inputRef?: Ref<HTMLInputElement> }) {
   return <div className="investor-direct-editable-value investor-associative-line-control">
     <span aria-hidden="true">R$</span>
-    <MoneyInput inputRef={inputRef} label={label} describedBy={describedBy} invalid={invalid} disabled={disabled} max={max} value={value} onChange={onChange} />
+    <MoneyInput inputRef={inputRef} label={label} describedBy={describedBy} invalid={invalid} disabled={disabled} max={max} limitToMax={limitToMax} value={value} onChange={onChange} />
   </div>;
 }
 
@@ -454,8 +463,8 @@ function DirectProposalComparisonCard({ flow, optionNumber, active, baseDate, po
         label={preKeysAvailable ? `${flow.custom.desiredInstallments} mensais pré-chaves` : "Mensais pré-chaves"}
         detail={preKeysAvailable ? `1ª em ${formatDate(flow.custom.firstPreKeysDate)}` : preKeysDeadlineInsufficient ? "A entrega não permite nenhuma mensal pré-chaves; ajuste a composição da entrada." : preKeysSettlementDetail}
         operator={preKeysAvailable ? "÷" : preKeysDeadlineInsufficient ? "!" : "="}
-        value={preKeysAvailable && flow.custom.installmentValue === flow.custom.lastInstallmentValue ? flow.custom.installmentValue : 0}
-        displayValue={preKeysDeadlineInsufficient ? "Prazo insuficiente" : preKeysAvailable && flow.custom.installmentValue !== flow.custom.lastInstallmentValue ? preKeysPaymentSummary : preKeysAvailable ? undefined : "Dispensadas"}
+        value={preKeysAvailable && sameCurrencyAmount(flow.custom.installmentValue, flow.custom.lastInstallmentValue) ? flow.custom.installmentValue : 0}
+        displayValue={preKeysDeadlineInsufficient ? "Prazo insuficiente" : preKeysAvailable && !sameCurrencyAmount(flow.custom.installmentValue, flow.custom.lastInstallmentValue) ? preKeysPaymentSummary : preKeysAvailable ? undefined : "Dispensadas"}
         muted={!preKeysAvailable && !preKeysDeadlineInsufficient}
         invalid={preKeysDeadlineInsufficient}
       />
@@ -463,6 +472,68 @@ function DirectProposalComparisonCard({ flow, optionNumber, active, baseDate, po
       <DirectComparisonLedgerRow label={`${flow.custom.postKeysInstallments} parcelas mensais pós-chaves`} detail={`1ª em ${formatDate(flow.custom.firstPostKeysDate)}`} operator="÷" value={flow.custom.postKeysPayment} emphasized />
     </div>
     <footer className="investor-direct-comparison-footer"><span>Entrada total <strong>{money.format(flow.custom.totalEntryValue)}</strong></span><span>Percentual <strong>{percent.format(flow.custom.totalEntryRate)}</strong></span></footer>
+  </article>;
+}
+
+function InvestorScenarioComparisonCard({ scenario, option, optionNumber, valueReal, baseDate }: {
+  scenario: ReturnType<typeof calculateInvestorFlow>["standardScenarios"][number];
+  option: { plan: number; title: string; description: string | null };
+  optionNumber: number;
+  valueReal: number;
+  baseDate: string;
+}) {
+  const titleId = useId();
+  const signalDates = scenario.signals.map((signal: { date: string }) => formatDate(signal.date));
+  const intermediaryDates = scenario.intermediaryDates.map((paymentDate: string) => formatDate(paymentDate));
+  const signalDetail = scenario.signals.length > 0
+    ? `${scenario.signals.length} sinais · pagamentos em ${signalDates.join(", ")}`
+    : "Sem sinais nesta proposta";
+  const intermediaryDetail = scenario.intermediaryCount > 0
+    ? `${scenario.intermediaryCount} intermediárias de até 5% · pagamentos em ${intermediaryDates.join(", ")}`
+    : "Sem intermediárias nesta proposta";
+  const paymentSummary = installmentSummary(
+    scenario.installments,
+    scenario.installmentValue,
+    scenario.lastInstallmentValue,
+  );
+  const lastInstallmentDate = scenario.monthlyDates.at(-1) ?? "";
+
+  return <article className="investor-direct-comparison-card investor-standard-comparison-card is-active" aria-labelledby={titleId} data-selected="true">
+    <header className="investor-direct-comparison-heading">
+      <div>
+        <div className="investor-direct-comparison-option-line"><span>{`Base: plano ${option.plan} · opção ${String(optionNumber).padStart(2, "0")}`}</span></div>
+        <h4 id={titleId}>Composição atual calculada</h4>
+        <p>{[
+          `Entrada de ${percent.format(scenario.entryRate)}`,
+          scenario.signals.length > 0 ? `${scenario.signals.length} sinais somam ${percent.format(scenario.signalTotal / valueReal)}` : "sem sinais",
+          scenario.intermediaryCount > 0 ? `${scenario.intermediaryCount} intermediárias somam ${percent.format(scenario.intermediaryTotal / valueReal)}` : "sem intermediárias",
+        ].join(" · ")}</p>
+      </div>
+      <div className={`investor-direct-comparison-status ${scenario.available ? "approved" : "pending"}`}>
+        <small>Resultado</small>
+        <strong>{scenario.available ? "VALIDADO" : "INDISPONÍVEL"}</strong>
+        <span>{scenario.available ? `Plano em ${scenario.installments} parcelas` : "Prazo da obra insuficiente"}</span>
+      </div>
+    </header>
+    <div className="investor-direct-comparison-ledger" role="table" aria-label={`${option.title}: composição completa`}>
+      <DirectComparisonLedgerRow label="Valor real da venda" detail="Base usada nesta proposta pronta" operator="=" value={valueReal} />
+      <DirectComparisonLedgerRow label="Entrada" detail={`Pagamento em ${formatDate(baseDate)} · ${percent.format(scenario.entryRate)} do valor`} operator="−" value={scenario.entry} />
+      <DirectComparisonLedgerRow label="Sinais" detail={signalDetail} operator="−" value={scenario.signalTotal} muted={scenario.signals.length === 0} />
+      <DirectComparisonLedgerRow label="Intermediárias" detail={intermediaryDetail} operator="−" value={scenario.intermediaryTotal} muted={scenario.intermediaryCount === 0} />
+      <DirectComparisonLedgerRow label="Saldo parcelado" detail="Valor restante depois da entrada, sinais e intermediárias" operator="=" value={scenario.balance} />
+      <DirectComparisonLedgerRow
+        label={`${scenario.installments} parcelas mensais`}
+        detail={`1ª em ${formatDate(scenario.firstInstallmentDate)}${lastInstallmentDate ? ` · última em ${formatDate(lastInstallmentDate)}` : ""}`}
+        operator="÷"
+        value={sameCurrencyAmount(scenario.installmentValue, scenario.lastInstallmentValue) ? scenario.installmentValue : undefined}
+        displayValue={sameCurrencyAmount(scenario.installmentValue, scenario.lastInstallmentValue) ? undefined : paymentSummary}
+        emphasized
+      />
+    </div>
+    <footer className="investor-direct-comparison-footer">
+      <span>Primeira mensal <strong>{formatDate(scenario.firstInstallmentDate)}</strong></span>
+      <span>Última mensal <strong>{formatDate(lastInstallmentDate)}</strong></span>
+    </footer>
   </article>;
 }
 
@@ -658,8 +729,16 @@ function formatPaymentDate(value?: string | null) {
 
 function installmentSummary(count: number, regularValue: number, lastValue: number) {
   if (count <= 0) return "Dispensadas";
-  if (count === 1 || regularValue === lastValue) return `${count}x de ${money.format(regularValue)}`;
+  if (count === 1 || sameCurrencyAmount(regularValue, lastValue)) return `${count}x de ${money.format(regularValue)}`;
   return `${count - 1}x de ${money.format(regularValue)} + última de ${money.format(lastValue)}`;
+}
+
+function installmentSummaryFromBalance(count: number, balance: number) {
+  if (count <= 0) return "Dispensadas";
+  const balanceInCents = Math.max(0, Math.round(balance * 100));
+  const regularInCents = Math.floor(balanceInCents / count);
+  const lastInCents = balanceInCents - regularInCents * Math.max(0, count - 1);
+  return installmentSummary(count, regularInCents / 100, lastInCents / 100);
 }
 
 function informationLabel(value?: string | null) {
@@ -2342,7 +2421,7 @@ export function InvestorCalculator({
   const [directProposalDirty, setDirectProposalDirty] = useState(false);
   const [directIncomeNotice, setDirectIncomeNotice] = useState("");
   const [visibleScenarioCodes, setVisibleScenarioCodes] = useState<string[]>([]);
-  const [expandedScenarioPlans, setExpandedScenarioPlans] = useState<number[]>([]);
+  const [selectedScenarioPlan, setSelectedScenarioPlan] = useState<number>(18);
   const [baseDate] = useState(todayIso);
   const signalInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const intermediaryInputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -3168,7 +3247,7 @@ export function InvestorCalculator({
     setSelectedDirectOption(directTable ? DIRECT_TABLE_PROPOSAL_OPTIONS[0].id : "");
     setDirectProposalDirty(false);
     setVisibleScenarioCodes([]);
-    setExpandedScenarioPlans([]);
+    setSelectedScenarioPlan(18);
     if (tourOpen) {
       if (annualMode) setTourOpen(false);
       else setTourStep((current) => tourSteps[current].target === "inventory" ? current + 1 : current);
@@ -3241,15 +3320,6 @@ export function InvestorCalculator({
     window.requestAnimationFrame(() => signalActionRef.current?.focus());
   }
 
-  function clearSignalFields() {
-    if (directTable) setDirectProposalDirty(true);
-    setSignalDistributionMode("manual");
-    setSignalFieldCount(0);
-    setSignals(["0", "0", "0"]);
-    setHiddenSignalIndexes([]);
-    window.requestAnimationFrame(() => signalActionRef.current?.focus());
-  }
-
   function addIntermediaryField() {
     const nextIndex = intermediaries.findIndex((_, index) => index < intermediaryFieldLimit && !visibleIntermediaryIndexes.includes(index));
     if (nextIndex < 0) return;
@@ -3263,14 +3333,6 @@ export function InvestorCalculator({
     if (directTable) setDirectProposalDirty(true);
     setIntermediaries((current) => current.map((item, itemIndex) => itemIndex === index ? "0" : item));
     setHiddenIntermediaryIndexes((current) => current.includes(index) ? current : [...current, index]);
-    window.requestAnimationFrame(() => intermediaryActionRef.current?.focus());
-  }
-
-  function clearIntermediaryFields() {
-    if (directTable) setDirectProposalDirty(true);
-    setIntermediaryFieldCount(0);
-    setIntermediaries(Array.from({ length: directTable ? 8 : annualMode ? 5 : 4 }, () => "0"));
-    setHiddenIntermediaryIndexes([]);
     window.requestAnimationFrame(() => intermediaryActionRef.current?.focus());
   }
 
@@ -3341,10 +3403,9 @@ export function InvestorCalculator({
     setVisibleScenarioCodes((current) => current[0] === code ? [] : [code]);
   }
 
-  function toggleScenarioPlan(plan: number) {
-    setExpandedScenarioPlans((current) => current.includes(plan)
-      ? current.filter((item) => item !== plan)
-      : [...current, plan]);
+  function selectScenarioPlan(plan: number) {
+    setSelectedScenarioPlan(plan);
+    setVisibleScenarioCodes((current) => current.filter((code) => scenarioOptions[code]?.plan === plan));
   }
 
   function updateFilter(setter: (value: string) => void, value: string) {
@@ -3512,7 +3573,7 @@ export function InvestorCalculator({
         <section className={`investor-standard-panel ${directTable ? "investor-direct-combined-panel" : directVisualLayout ? "investor-associative-direct-panel" : ""}${associativeCalculatedProposalLocked ? " is-locked" : ""}${annualMode && associativeQualificationComplete && !associativeFinancingValueReady ? " is-awaiting-financing" : ""}`} aria-labelledby={directTable ? "investor-direct-income-title investor-standard-title" : "investor-standard-title"} data-locked={associativeCalculatedProposalLocked || undefined} data-tour="scenarios">
           {!directTable ? <header className="investor-section-heading investor-standard-heading">
             <span>{annualMode ? "04" : "02"}</span>
-            <div><p>Proposta calculada</p><h2 id="investor-standard-title">{directVisualLayout ? "1 plano · 4 opções" : "2 cenários · 8 opções"}</h2></div>
+            <div><p>{annualMode ? "Proposta calculada" : "Escolha rápida"}</p><h2 id="investor-standard-title">{directVisualLayout ? "1 plano · 4 opções" : "8 opções prontas disponíveis"}</h2></div>
             <div className="investor-standard-actions">
               <InvestorInfoHint
                 label="propostas prontas"
@@ -3629,37 +3690,43 @@ export function InvestorCalculator({
                   </div>;
                 })}
               </div>
-            </div> : <div className="investor-scenario-plan-picker" aria-label="Escolha o plano para ver as propostas">
-              {scenarioPlans.map((plan) => {
-                const expanded = expandedScenarioPlans.includes(plan);
-                const planId = `investor-scenario-plan-${plan}`;
-                return <section key={plan} className="investor-scenario-plan" data-scenario={plan === 18 ? 1 : 2}>
-                  <button
-                    id={`${planId}-button`}
-                    className="investor-scenario-plan-button"
-                    type="button"
-                    aria-expanded={expanded}
-                    aria-controls={planId}
-                    onClick={() => toggleScenarioPlan(plan)}
-                  >{`Plano em ${plan} Parcelas`} <span aria-hidden="true">{expanded ? "−" : "+"}</span></button>
-                  <div id={planId} className="investor-scenario-subpicker" role="group" aria-labelledby={`${planId}-button`} hidden={!expanded}>
-                    {result.standardScenarios.filter((scenario) => scenarioOptions[scenario.code]?.plan === plan).map((scenario) => {
-                      const option = scenarioOptions[scenario.code];
-                      const visible = visibleScenarioCodes.includes(scenario.code);
-                      const availabilityId = `investor-scenario-availability-${scenario.code}`;
-                      return <button
-                        key={scenario.code}
-                        type="button"
-                        aria-pressed={visible}
-                        aria-disabled={!scenario.available}
-                        aria-describedby={!scenario.available ? availabilityId : undefined}
-                        title={!scenario.available ? `O prazo da obra não comporta ${option.plan} parcelas completas` : undefined}
-                        onClick={() => { if (scenario.available) toggleScenarioOption(scenario.code); }}
-                      ><span>{option.title}</span>{!scenario.available ? <small id={availabilityId}>Prazo da obra insuficiente</small> : null}</button>;
-                    })}
-                  </div>
-                </section>;
-              })}
+            </div> : <div className="investor-standard-quick-picker">
+              <div className="investor-standard-plan-switch" role="group" aria-label="Prazo das propostas prontas">
+                {scenarioPlans.map((plan) => <button
+                  key={plan}
+                  id={`investor-scenario-plan-${plan}-button`}
+                  type="button"
+                  aria-pressed={selectedScenarioPlan === plan}
+                  aria-controls="investor-standard-ready-options"
+                  onClick={() => selectScenarioPlan(plan)}
+                >Plano em <strong>{plan} parcelas</strong></button>)}
+              </div>
+              <div id="investor-standard-ready-options" className="investor-direct-ready-options investor-standard-ready-options" role="group" aria-label={`Opções prontas do plano em ${selectedScenarioPlan} parcelas`}>
+                {result.standardScenarios.filter((scenario) => scenarioOptions[scenario.code]?.plan === selectedScenarioPlan).map((scenario, index) => {
+                  const option = scenarioOptions[scenario.code];
+                  const visible = visibleScenarioCodes.includes(scenario.code);
+                  const availabilityId = `investor-scenario-availability-${scenario.code}`;
+                  const availabilityMessage = `O prazo da obra não comporta ${option.plan} parcelas completas`;
+                  return <div key={scenario.code} className="investor-scenario-plan" data-scenario="1">
+                    <button
+                      type="button"
+                      aria-pressed={visible}
+                      aria-describedby={!scenario.available ? availabilityId : undefined}
+                      disabled={!scenario.available}
+                      title={!scenario.available ? availabilityMessage : undefined}
+                      onClick={() => toggleScenarioOption(scenario.code)}
+                    >
+                      <span className="investor-direct-option-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                      <strong>{option.title}</strong>
+                      <span className="investor-direct-option-entry">Entrada de {percent.format(scenario.entryRate)}</span>
+                      <small id={!scenario.available ? availabilityId : undefined}>{scenario.available
+                        ? <>{scenario.signals.length > 0 ? `${scenario.signals.length} sinais somam ${percent.format(scenario.signalTotal / result.context.valueReal)}` : "Sem sinais"}<br />{scenario.intermediaryCount > 0 ? `${scenario.intermediaryCount} intermediárias somam ${percent.format(scenario.intermediaryTotal / result.context.valueReal)}` : "Sem intermediária"}</>
+                        : "Prazo da obra insuficiente"}</small>
+                      {visible ? <span className="investor-direct-option-selected">Selecionada</span> : null}
+                    </button>
+                  </div>;
+                })}
+              </div>
             </div>}
             <div className="investor-scenario-stack" aria-live="polite">
               {visibleScenarioCodes.map((code) => {
@@ -3669,22 +3736,6 @@ export function InvestorCalculator({
                 if (!option) return null;
                 const optionTitle = `Plano em ${scenario.installments} parcelas · ${option.title}`;
                 const optionDescription = option.description;
-                const payments = [
-                { key: "property", label: "Valor do imóvel", value: money.format(result.context.valueReal), meta: "Base do plano" },
-                { key: "entry", label: "Entrada", value: money.format(scenario.entry), meta: `${percent.format(scenario.entryRate)} do valor do imóvel` },
-                ...scenario.signals.map((signal) => ({ key: `signal-${signal.index}`, label: `Sinal ${signal.index}`, value: money.format(signal.value), meta: `Pagamento em ${formatDate(signal.date)}` })),
-                ...scenario.intermediaryDates.map((date, index) => ({ key: `intermediary-${index + 1}`, label: `${annualMode ? "Anual" : "Intermediária"} ${index + 1}`, value: money.format(scenario.intermediaryValues?.[index] ?? scenario.intermediaryTotal / scenario.intermediaryCount), meta: `Pagamento em ${formatDate(date)}` })),
-                { key: "balance", label: "Saldo parcelado", value: money.format(scenario.balance), meta: "Valor dividido nas mensais" },
-                {
-                  key: "installment",
-                  label: "Parcela mensal",
-                  value: scenario.lastInstallmentValue === scenario.installmentValue
-                    ? `${scenario.installments}x de ${money.format(scenario.installmentValue)}`
-                    : `${scenario.installments - 1}x de ${money.format(scenario.installmentValue)} + última de ${money.format(scenario.lastInstallmentValue)}`,
-                  meta: `1ª em ${formatDate(scenario.firstInstallmentDate)}`,
-                  featured: true,
-                },
-                ];
                 const linear = scenario.linear;
                 const verticalPayments = linear ? [
                   { key: "property", label: "Valor real do imóvel", operator: "", calculation: "Preço do imóvel − deduções comerciais", result: money.format(linear.realSaleValue), meta: "Base selecionada no estoque" },
@@ -3750,24 +3801,18 @@ export function InvestorCalculator({
                     </article></div>
                   </section>;
                 }
-                return <section id={`investor-scenario-option-${scenario.code}`} key={scenario.code} className="investor-scenario-group investor-scenario-option-panel" data-scenario={option.plan === 18 ? 1 : 2}>
-                  <header>
-                    <div><h3>{optionTitle}</h3>{optionDescription ? <p>{optionDescription}</p> : null}</div>
-                    <button type="button" onClick={() => toggleScenarioOption(scenario.code)} aria-label={`Ocultar ${optionTitle}`}>Ocultar opção</button>
-                  </header>
+                return <section id={`investor-scenario-option-${scenario.code}`} key={scenario.code} className="investor-scenario-group investor-scenario-option-panel investor-direct-option-panel investor-standard-option-panel" data-scenario="1">
                   <div className="investor-scenario-grid">
-                    <article className={!scenario.available ? "unavailable" : ""}>
-                      {scenario.available ? <dl className={`investor-scenario-flow investor-scenario-flow-${payments.length}`} role="region" tabIndex={payments.length >= 10 ? 0 : undefined} aria-label={`${optionTitle}: pagamentos em sequência`}>
-                        {payments.map((payment) => <div key={payment.key} className={payment.featured ? "featured" : ""}>
-                          <dt>{payment.label}</dt><dd>{payment.value}</dd><small>{payment.meta}</small>
-                        </div>)}
-                      </dl> : <div className="investor-scenario-unavailable"><strong>Opção indisponível</strong><p>O prazo da obra não permite esta quantidade de parcelas.</p></div>}
+                    <article>
+                      <div className="investor-direct-comparison-grid is-single" role="region" aria-label={`${optionTitle}: resultado calculado`}>
+                        <InvestorScenarioComparisonCard scenario={scenario} option={option} optionNumber={result.standardScenarios.filter((candidate) => scenarioOptions[candidate.code]?.plan === option.plan).findIndex((candidate) => candidate.code === scenario.code) + 1} valueReal={result.context.valueReal} baseDate={baseDate} />
+                      </div>
                     </article>
                   </div>
                 </section>;
               })}
             </div>
-            <p className="investor-scenario-order">{annualMode ? "Compare as opções liberadas após o financiamento informado no fluxo acima." : "Compare as opções acima e, se necessário, monte a sua proposta personalizada abaixo."}</p>
+            <p className="investor-scenario-order">{annualMode ? "Compare as opções liberadas após o financiamento informado no fluxo acima." : "Selecione uma opção pronta por vez e, se necessário, ajuste a composição completa no fluxo editável abaixo."}</p>
           </>}
           </fieldset>
         </section>
@@ -4172,14 +4217,6 @@ export function InvestorCalculator({
                   </div>
                 </fieldset>
               </div> : <>
-              {!directVisualLayout ? <ol className="investor-stage-trail investor-payment-stage-trail" aria-label="Etapas para montar a proposta">
-                <li><span>1</span>Valor do imóvel</li>
-                <li><span>2</span>Entrada</li>
-                <li><span>3</span>Sinais</li>
-                <li><span>4</span>{annualMode ? "Anuais" : "Intermediárias"}</li>
-                <li><span>5</span>Desconto</li>
-                <li><span>6</span>Parcelas</li>
-              </ol> : null}
               {directVisualLayout ? <div className="investor-associative-workspace">
                 <div className="investor-associative-ledger" role="group" aria-labelledby="investor-flow-title">
                 <div className="investor-direct-account investor-direct-editable-account investor-associative-compact-account">
@@ -4446,97 +4483,101 @@ export function InvestorCalculator({
                   appraisalOverride={documentationAppraisalOverride}
                   onAppraisalOverrideChange={setDocumentationAppraisalOverride}
                 />
-              </div> : <div className="investor-payment-controls" role="group" aria-labelledby="investor-flow-title">
-                {!directVisualLayout ? <article className="investor-property-value-step investor-payment-step" data-step="01" data-operator="">
-                  <span>Valor do imóvel</span>
-                  <strong>{money.format(result.context.valueReal)}</strong>
-                </article> : null}
-                <label className={`investor-entry-field investor-payment-step${associativeEntryRejected ? " rejected" : ""}`} data-step={directVisualLayout ? "01" : "02"} data-operator="−">
-                  <span className="investor-control-heading">
-                    <span className="investor-entry-title">Entrada</span>
-                    <small className="investor-entry-minimum"><span>Mínimo</span><span>{annualMode ? money.format(150) : `${money.format(result.context.valueReal * 0.06)} (6%)`}</span></small>
-                  </span>
-                  <div><b>R$</b><MoneyInput label="Entrada" describedBy="investor-entry-meta" invalid={associativeEntryRejected} value={entryValue} onChange={updateEntryValue} /></div>
-                  <small className="investor-money-meta" id="investor-entry-meta"><b role={associativeEntryRejected ? "alert" : undefined}>{annualMode ? associativeEntryPending ? "Informe a entrada" : associativeEntryRejected ? "Reprovada · mínimo R$ 150,00" : "Entrada válida" : `${percent.format(result.custom.actRate)} do valor real`}</b><span>Pagamento {formatDate(baseDate)}</span></small>
-                </label>
+              </div> : <div className="investor-standard-ledger-workspace">
+                <div className="investor-associative-ledger investor-standard-ledger" role="group" aria-labelledby="investor-flow-title">
+                  <div className="investor-direct-account investor-direct-editable-account investor-associative-compact-account">
+                    <ol onKeyDown={focusNextAssociativeRow}>
+                      <li className="investor-associative-payment-actions-row" role="presentation">
+                        <span className="investor-direct-step-number" aria-hidden="true" />
+                        <div className="investor-associative-payment-actions-bar" aria-label="Adicionar pagamentos opcionais">
+                          <button ref={signalActionRef} type="button" data-tour="proposal-signals" aria-describedby="investor-standard-signal-action-status" disabled={visibleSignalCount >= signals.length} title={visibleSignalCount >= signals.length ? "Limite de 3 sinais atingido" : "Adicionar sinal dentro das regras do fluxo"} onClick={addSignalField}>Inserir Sinal</button>
+                          <button ref={intermediaryActionRef} type="button" data-tour="proposal-intermediaries" aria-describedby="investor-standard-intermediary-action-status" disabled={result.context.maxIntermediaries <= 0 || visibleIntermediaryCount >= result.context.maxIntermediaries} title={result.context.maxIntermediaries <= 0 ? "Complete 10% de entrada para liberar intermediárias" : visibleIntermediaryCount >= result.context.maxIntermediaries ? `Limite de ${result.context.maxIntermediaries} intermediárias atingido` : "Adicionar intermediária dentro do limite válido"} onClick={addIntermediaryField}>Inserir Intermediária</button>
+                          <button type="button" data-tour="proposal-discount" aria-pressed={discountAuthorized} onClick={toggleDiscountField}>{discountAuthorized ? "Remover Desconto" : "Inserir Desconto"}</button>
+                          <span className="sr-only" id="investor-standard-signal-action-status" aria-live="polite">{visibleSignalCount >= signals.length ? "Limite de 3 sinais atingido." : `${signals.length - visibleSignalCount} sinais ainda podem ser incluídos.`}</span>
+                          <span className="sr-only" id="investor-standard-intermediary-action-status" aria-live="polite">{result.context.maxIntermediaries <= 0 ? "Complete 10% de entrada total para liberar intermediárias." : visibleIntermediaryCount >= result.context.maxIntermediaries ? `Limite de ${result.context.maxIntermediaries} intermediárias atingido.` : `${result.context.maxIntermediaries - visibleIntermediaryCount} intermediárias ainda podem ser incluídas.`}</span>
+                        </div>
+                      </li>
 
-                <div className={`investor-signal-disclosure ${signalsRequired ? "required" : "optional"}`} data-step={directVisualLayout ? "02" : "03"} data-operator="−">
-                  <div className="investor-option-heading">
-                    <strong>Sinais</strong>
-                    <InvestorInfoHint label="sinais" title="Quer usar sinais?" description="Sinal 1, 2 e 3 são opcionais e podem aumentar a entrada ou liberar mais parcelas." />
-                  </div>
-                  <fieldset className="investor-intermediaries investor-inline-payment-fields investor-signal-fields" id="investor-signal-fields" hidden={!signalsVisible}>
-                    <legend className="sr-only">Sinais da entrada</legend>
-                    <div>{signals.slice(0, visibleSignalCount).map((value, index) => {
-                      const signal = result.custom.signals[index];
-                      const active = currencyInputNumber(value) > 0;
-                      return <label key={index} className={active ? signal.approved ? "approved" : "rejected" : ""}>
-                        <span>Sinal {index + 1}<small>{signal.status}</small></span>
-                        <div><b>R$</b><MoneyInput inputRef={(input) => { signalInputRefs.current[index] = input; }} label={`Sinal ${index + 1}`} value={value} onChange={(nextValue) => updateSignal(index, nextValue)} /></div>
-                        <em role={active && !signal.approved ? "alert" : undefined}>{active ? `${percent.format(signal.rate)} do valor · ${formatDate(signal.date)} · ${signal.reason}` : `Previsto para ${formatDate(signal.date)}`}</em>
-                      </label>;
-                    })}</div>
-                  </fieldset>
-                  {signalsRequired ? <small className="investor-required-note" role="status" aria-live="polite">Entrada abaixo de 10%. Faltam <b>{money.format(missingForMinimumEntry)}</b>.</small> : null}
-                  <div className="investor-disclosure-actions">
-                    {directVisualLayout ? <span className="investor-ledger-result-summary"><small>Total em sinais</small><strong>{money.format(result.custom.signalTotal)}</strong></span> : null}
-                    {visibleSignalCount < signals.length ? <button ref={signalActionRef} className="investor-option-toggle" type="button" aria-expanded={signalsVisible} aria-controls="investor-signal-fields" onClick={addSignalField}>{signalsVisible ? "Adicionar outro sinal" : "Adicionar sinal"}</button> : <span className="investor-option-limit">Limite de 3 sinais</span>}
-                    {signalsRequired && signalDistributionMode === "manual" ? <button className="investor-option-reset" type="button" onClick={() => setSignalDistributionMode("auto")}>Redistribuir automaticamente</button> : null}
-                    {signalsVisible ? <button className="investor-option-reset" type="button" onClick={clearSignalFields}>{signalsRequired ? "Zerar sinais" : "Ocultar e zerar"}</button> : null}
+                      <AssociativeEditableAccountRow number={1} operator="=" label="Valor do imóvel" fieldState="locked" meta="Valor original da unidade escolhida no estoque." calculation={<AssociativeMoneyValue label="Valor do imóvel" value={result.context.salePrice} />} />
+                      {discountAuthorized ? <AssociativeEditableAccountRow
+                        operator="−"
+                        label="Desconto"
+                        fieldState="editable"
+                        rowClassName="investor-associative-discount-line"
+                        meta="Desconto comercial opcional. Use somente quando estiver autorizado; ele reduz o valor real da venda."
+                        calculation={<AssociativeMoneyControl inputRef={discountInputRef} label="Desconto autorizado" max={Math.max(0, result.context.salePrice - 0.01)} value={discount} onChange={setDiscount} />}
+                      /> : null}
+                      <AssociativeEditableAccountRow number={2} operator="=" label="Valor real da venda" fieldState="locked" meta="Valor do imóvel menos o desconto autorizado." calculation={<AssociativeMoneyValue label="Valor real da venda" value={result.context.valueReal} />} total />
+                      <AssociativeEditableAccountRow
+                        number={3}
+                        operator="−"
+                        label="Entrada"
+                        date={baseDate}
+                        fieldState="editable"
+                        invalid={result.custom.actRate < 0.06}
+                        meta={`Mínimo de ${money.format(result.context.valueReal * 0.06)} (6%). Com sinais, a entrada total precisa atingir 10%; a partir de 20%, o plano pode chegar a 24 parcelas.`}
+                        calculation={<><AssociativeMoneyControl label="Entrada" describedBy="investor-entry-meta" invalid={result.custom.actRate < 0.06} max={Math.max(0, result.context.valueReal - 0.01)} value={entryValue} onChange={updateEntryValue} /><span className="sr-only" id="investor-entry-meta" role={result.custom.actRate < 0.06 ? "alert" : "status"} aria-live="polite">{result.custom.actRate < 0.06 ? `Entrada abaixo do mínimo de ${money.format(result.context.valueReal * 0.06)}` : `Entrada corresponde a ${percent.format(result.custom.actRate)} do valor real`}</span></>}
+                      />
+
+                      {visibleSignalIndexes.map((index) => {
+                        const value = signals[index];
+                        const signal = result.custom.signals[index];
+                        const active = currencyInputNumber(value) > 0;
+                        const invalid = active && !signal.approved;
+                        const otherSignals = signals.reduce((total, current, currentIndex) => currentIndex === index ? total : total + currencyInputNumber(current), 0);
+                        const previousSignalLimit = index === 0 ? result.context.valueReal : currencyInputNumber(signals[index - 1]);
+                        const remainingLimit = Math.max(0, (Math.round((result.context.valueReal - result.custom.actValue - result.custom.validIntermediaryTotal - otherSignals) * 100) - 1) / 100);
+                        const maximumSignalValue = Math.max(0, Math.min(previousSignalLimit, remainingLimit));
+                        const statusId = `investor-standard-signal-${index + 1}-status`;
+                        return <AssociativeEditableAccountRow
+                          key={index}
+                          operator={invalid ? "!" : "−"}
+                          label={`Sinal ${index + 1}`}
+                          date={signal.date || undefined}
+                          rowClassName="payment-group-child payment-group-child-signal"
+                          fieldState="editable"
+                          leadingAction={<button type="button" className="investor-associative-row-remove" aria-label={`Ocultar Sinal ${index + 1} e zerar os sinais seguintes`} title={`Ocultar Sinal ${index + 1}`} onClick={() => hideSignalField(index)}><span aria-hidden="true">×</span></button>}
+                          meta={`Mínimo de ${money.format(150)}. Máximo válido nesta composição: ${money.format(maximumSignalValue)}. Os sinais são consecutivos e não podem crescer.`}
+                          calculation={<><AssociativeMoneyControl inputRef={(input) => { signalInputRefs.current[index] = input; }} label={`Sinal ${index + 1}`} describedBy={statusId} invalid={invalid} max={maximumSignalValue} limitToMax value={value} onChange={(nextValue) => updateSignal(index, nextValue)} /><span className="sr-only" id={statusId} role={invalid ? "alert" : "status"} aria-live="polite">{active ? signal.reason : "Sinal opcional não usado"}</span></>}
+                          invalid={invalid}
+                        />;
+                      })}
+
+                      {visibleIntermediaryIndexes.map((index) => {
+                        const item = result.custom.intermediaries[index];
+                        const invalid = item.value > 0 && !item.approved;
+                        const remainingLimit = Math.max(0, (Math.round((result.custom.balance + (item.approved ? item.value : 0)) * 100) - 1) / 100);
+                        const percentageLimit = Math.floor(result.context.valueReal * 0.05 * 100) / 100;
+                        const maximumIntermediaryValue = Math.max(0, Math.min(percentageLimit, remainingLimit));
+                        const statusId = `investor-standard-intermediary-${item.index}-status`;
+                        return <AssociativeEditableAccountRow
+                          key={item.index}
+                          operator={invalid ? "!" : "−"}
+                          label={`Intermediária ${item.index}`}
+                          date={item.date || undefined}
+                          rowClassName="payment-group-child payment-group-child-annual"
+                          fieldState="editable"
+                          leadingAction={<button type="button" className="investor-associative-row-remove" aria-label={`Ocultar Intermediária ${item.index} e zerar valor`} title={`Ocultar Intermediária ${item.index}`} onClick={() => hideIntermediaryField(index)}><span aria-hidden="true">×</span></button>}
+                          meta={`Máximo válido de ${money.format(maximumIntermediaryValue)} (até 5% do valor real), respeitando a data limite de ${formatDate(result.context.deadline)}.`}
+                          calculation={<><AssociativeMoneyControl inputRef={(input) => { intermediaryInputRefs.current[index] = input; }} label={`Intermediária ${item.index}`} describedBy={statusId} invalid={invalid} max={maximumIntermediaryValue} limitToMax value={intermediaries[index]} onChange={(nextValue) => updateIntermediary(index, nextValue)} /><span className="sr-only" id={statusId} role={invalid ? "alert" : "status"} aria-live="polite">{item.value > 0 ? item.reason : "Intermediária opcional não usada"}</span></>}
+                          invalid={invalid}
+                        />;
+                      })}
+
+                      <AssociativeEditableAccountRow number={8} operator="=" label="Saldo parcelado" fieldState="locked" meta={`Valor real menos entrada, sinais válidos e intermediárias válidas. Total dos sinais: ${money.format(result.custom.signalTotal)}; total das intermediárias: ${money.format(result.custom.validIntermediaryTotal)}.`} calculation={<AssociativeMoneyValue label="Saldo parcelado" value={result.custom.balance} />} total />
+                      <AssociativeEditableAccountRow
+                        number={9}
+                        operator="÷"
+                        label="Qtd. de parcelas"
+                        fieldState="editable"
+                        invalid={!validInstallmentSchedule}
+                        meta={`Use um número inteiro entre 1 e ${result.context.maxInstallments || 0}. O máximo depende da entrada total e do prazo da obra.`}
+                        calculation={<div className="investor-direct-editable-value investor-associative-line-control investor-standard-installment-control"><span aria-hidden="true">×</span><input aria-label="Quantidade de parcelas" name="quantidade-de-parcelas-investidor" autoComplete="off" aria-describedby="investor-installment-guidance" aria-invalid={!validInstallmentSchedule || undefined} type="number" min="1" max={result.context.maxInstallments || 1} step="1" value={result.context.maxInstallments > 0 ? installments : ""} placeholder="0" disabled={result.context.maxInstallments <= 0} onChange={(event) => setInstallments(event.target.value)} /></div>}
+                      />
+                      <AssociativeEditableAccountRow number={10} operator="=" label="Parcela mensal" fieldState="locked" date={firstInstallmentDate || undefined} dateLabel="1ª em" meta={`Última mensal em ${formatPaymentDate(lastInstallmentDate)}. O fechamento preserva os centavos na última parcela.`} calculation={<div className="investor-standard-monthly-value"><strong>{installmentSummaryFromBalance(result.custom.desiredInstallments, result.custom.balance)}</strong></div>} total />
+                    </ol>
                   </div>
                 </div>
-
-                <div className="investor-signal-disclosure investor-intermediary-disclosure optional" data-step={directVisualLayout ? "03" : "04"} data-operator="−">
-                  <div className="investor-option-heading">
-                    <strong>{annualMode ? "Anuais" : "Intermediárias"}</strong>
-                    <InvestorInfoHint
-                      label={annualMode ? "anuais" : "intermediárias"}
-                      title={annualMode ? "Quer usar anuais?" : "Quer usar intermediárias?"}
-                      description={annualMode
-                        ? "Até 5 anuais opcionais, com vencimento em 15/12 e limite pelo término da obra. O valor é corrigido em 0,5% no início e 0,5% ao mês."
-                        : `Opcional · até 5% cada · máximo ${intermediaryFieldLimit || 3} pagamentos neste fluxo.`}
-                    />
-                  </div>
-                  <fieldset className="investor-intermediaries investor-inline-payment-fields" id="investor-intermediary-fields" hidden={!intermediariesVisible}>
-                    <legend className="sr-only">{annualMode ? "Anuais" : "Intermediárias"}</legend>
-                    <div>{result.custom.intermediaries.slice(0, visibleIntermediaryCount).map((item, index) => (
-                      <label key={item.index} className={item.value > 0 ? item.approved ? "approved" : "rejected" : ""}>
-                        <span>{annualMode ? "Anual" : "Intermediária"} {item.index}<small>{item.date ? `Pagamento ${formatDate(item.date)}` : "Data indisponível"}</small></span>
-                        <div><b>R$</b><MoneyInput inputRef={(input) => { intermediaryInputRefs.current[index] = input; }} label={`${annualMode ? "Anual" : "Intermediária"} ${item.index}`} max={annualMode ? undefined : result.context.valueReal * 0.05} value={intermediaries[index]} onChange={(nextValue) => updateIntermediary(index, nextValue)} /></div>
-                        <em>{item.value > 0
-                          ? annualMode && item.approved ? `Corrigida: ${money.format(item.correctedValue)} · ${item.reason}` : `${percent.format(item.rate)} do valor · ${item.reason}`
-                          : annualMode ? "Opcional" : `Máximo ${money.format(result.context.valueReal * 0.05)}`}</em>
-                      </label>
-                    ))}</div>
-                  </fieldset>
-                  <div className="investor-disclosure-actions">
-                    {directVisualLayout ? <span className="investor-ledger-result-summary"><small>{annualMode ? "Total corrigido" : "Total válido"}</small><strong>{money.format(result.custom.validIntermediaryTotal)}</strong></span> : null}
-                    {visibleIntermediaryCount < intermediaryFieldLimit ? <button ref={intermediaryActionRef} className="investor-option-toggle" type="button" aria-expanded={intermediariesVisible} aria-controls="investor-intermediary-fields" onClick={addIntermediaryField}>{intermediariesVisible ? `Adicionar outra ${annualMode ? "anual" : "intermediária"}` : `Adicionar ${annualMode ? "anual" : "intermediária"}`}</button> : intermediaryFieldLimit > 0 ? <span className="investor-option-limit">Limite de {intermediaryFieldLimit} {annualMode ? "anuais" : "intermediárias"}</span> : <span className="investor-option-limit">Libere com 10% de entrada</span>}
-                    {intermediariesVisible ? <button className="investor-option-reset" type="button" onClick={clearIntermediaryFields}>Ocultar e zerar</button> : null}
-                  </div>
-                </div>
-
-                <div className="investor-final-field investor-final-action" data-step={directVisualLayout ? "04" : "05"} data-operator="−">
-                  <span className="investor-final-field-heading"><span>Desconto</span><InvestorInfoHint label="desconto" title="Como funciona o desconto?" description="Use somente quando o cliente solicitar. Sem impacto enquanto estiver desativado e aplicado apenas quando autorizado." /></span>
-                  {directVisualLayout ? <>
-                    <div className="investor-ledger-control-stack">
-                      <label className="investor-discount-field investor-inline-discount-field" id="investor-discount-field" hidden={!discountAuthorized}><span>Valor autorizado</span><div><b>R$</b><MoneyInput inputRef={discountInputRef} label="Desconto autorizado" value={discount} onChange={setDiscount} /></div></label>
-                      <button className={`investor-option-toggle ${discountAuthorized ? "active" : ""}`} type="button" aria-pressed={discountAuthorized} aria-expanded={discountAuthorized} aria-controls="investor-discount-field" onClick={toggleDiscountField}>{discountAuthorized ? "Ocultar e zerar desconto" : "Aplicar desconto"}</button>
-                    </div>
-                    <span className="investor-ledger-result-summary"><small>Valor real</small><strong>{money.format(result.context.valueReal)}</strong></span>
-                  </> : <>
-                    <label className="investor-discount-field investor-inline-discount-field" id="investor-discount-field" hidden={!discountAuthorized}><span>Valor autorizado</span><div><b>R$</b><MoneyInput inputRef={discountInputRef} label="Desconto autorizado" value={discount} onChange={setDiscount} /></div></label>
-                    <button className={`investor-option-toggle ${discountAuthorized ? "active" : ""}`} type="button" aria-pressed={discountAuthorized} aria-expanded={discountAuthorized} aria-controls="investor-discount-field" onClick={toggleDiscountField}>{discountAuthorized ? "Ocultar e zerar desconto" : "Aplicar desconto"}</button>
-                  </>}
-                </div>
-                <label className="investor-installments-field" data-step={directVisualLayout ? "05" : "06"} data-operator="÷">
-                  <span className="investor-installments-heading"><span>Qtd. de parcelas</span><small>{annualMode ? "Plano fixo" : `Máximo ${result.context.maxInstallments}`}</small></span>
-                  <input aria-describedby="investor-installment-guidance" aria-readonly={annualMode} readOnly={annualMode} type="number" min="1" max={result.context.maxInstallments || 1} step="1" value={result.context.maxInstallments > 0 ? installments : ""} placeholder="Indisponível" disabled={result.context.maxInstallments <= 0} onChange={(event) => { if (!annualMode) setInstallments(event.target.value); }} />
-                  <span className="investor-installments-preview">
-                    <span>{annualMode ? <><strong>Parcela corrigida</strong> {money.format(result.custom.installmentValue)}</> : <><strong>{result.custom.desiredInstallments}x</strong> de {money.format(result.custom.installmentValue)}</>}</span>
-                    <small>{annualMode ? `${result.custom.preInstallments} pré + ${result.custom.postInstallments} pós = ${result.custom.desiredInstallments}` : `1ª em ${formatPaymentDate(firstInstallmentDate)}`}</small>
-                  </span>
-                </label>
               </div>}
               <span className="sr-only" id="investor-installment-guidance">{annualMode ? "Informe uma quantidade inteira entre 1 e 84 parcelas para o plano Associativo." : "A quantidade máxima de parcelas varia conforme a entrada total e o prazo da obra."}</span>
               </>}
