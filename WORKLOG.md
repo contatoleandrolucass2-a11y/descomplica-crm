@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-09-10 — Tabela Investidor alinhada às guias de simulação
+
+- A rota protegida `/app/simulacao/tabela-investidor` mantém o estoque, os
+  filtros e as oito propostas originais, mas substitui os acordeões por uma
+  escolha rápida: prazo de 18 ou 24 parcelas e quatro combinações completas
+  por prazo.
+- A opção selecionada abre uma composição em livro-caixa com valor real,
+  entrada, sinais, intermediárias, saldo, parcelas e datas. O fechamento em
+  centavos e a disponibilidade pelo prazo da obra continuam vindos do motor
+  WF15 existente.
+- O fluxo editável deixa os seis cartões e adota linhas financeiras compactas,
+  no padrão visual das guias Associativo e Direta. Os botões são “Inserir
+  Sinal”, “Inserir Intermediária” e “Inserir Desconto”.
+- Sinais permanecem consecutivos, com mínimo de R$ 150,00 e ordem não
+  crescente. Intermediárias continuam limitadas a 5% cada e só podem ser
+  incluídas depois que a entrada total válida alcança 10%; o prazo de 18
+  parcelas libera até três e o de 24 libera até quatro.
+- Estados selecionado, foco, limite atingido, valor inválido e desconto ativo
+  não dependem somente da cor. O layout usa quatro colunas no desktop, duas no
+  tablet e uma no celular, com controles de 44 px nas larguras de toque.
+- A validação automatizada reconcilia C1–C8 no centavo e cobre valores acima do
+  limite para sinais e intermediárias. A inspeção visual autenticada usa apenas
+  estoque sintético local e não grava proposta nem altera produção.
+
 ## 2026-09-09 — popup associativo e comissão apartada
 
 - A planilha `Pasta2.0.xlsx` foi tratada como fonte de dados e fórmulas, não

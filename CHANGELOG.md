@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-10 — seleção e fluxo da Tabela Investidor
+
+- Alinha `/app/simulacao/tabela-investidor` ao padrão das guias Tabela
+  Associativo e Tabela Direta, sem alterar rota, autorização, dados ou motor de
+  cálculo.
+- Troca os acordeões por seleção rápida de 18/24 parcelas e quatro opções por
+  prazo, preservando as oito combinações completas e a seleção exclusiva.
+- Exibe a opção escolhida em livro-caixa, com composição, centavos, datas e
+  situação de disponibilidade pelo prazo da obra.
+- Converte o fluxo editável em linhas compactas e renomeia a ação para “Inserir
+  Intermediária”, ao lado de “Inserir Sinal” e “Inserir Desconto”.
+- Mantém sinais consecutivos e intermediárias de até 5%, liberando até três no
+  plano de 18 parcelas e até quatro no plano de 24 somente quando a entrada
+  total alcança o mínimo válido.
+- Acrescenta estados acessíveis de foco, seleção, disabled e erro e adapta a
+  grade para desktop, tablet e celular sem rolagem horizontal da página.
+
 ## 2026-09-09 — comissão apartada na proposta associativa
 
 - Alinha o popup “Proposta pronta - Bora Vender” à densidade visual do fluxo
