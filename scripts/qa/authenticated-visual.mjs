@@ -1222,9 +1222,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
 
   const readyProposalResponsiveChecks = [];
   await entryInput.fill("1500000");
-  await page
-    .getByRole("button", { name: "Abrir remuneração comercial", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Abrir remuneração comercial", exact: true }).click();
   const commissionDialog = page.getByRole("dialog", {
     name: "Comissão + Prêmio da venda",
     exact: true,

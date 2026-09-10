@@ -319,18 +319,21 @@ describe("buildAssociativeReadyProposal", () => {
     ["Ouro", "gold", 10_350],
     ["Prata", "silver", 9_200],
     ["Bronze", "bronze", 8_050],
-  ])("mapeia Imobiliária %s e aceita entrada igual à comissão", (classification, rankingId, commission) => {
-    expect(findAssociativeSeparatedCommissionRankingId("Imobiliária", classification)).toBe(
-      rankingId,
-    );
-    expect(
-      buildAssociativeReadyProposal({
-        ...workbookBase,
-        entry: commission,
-        commissionRankingId: rankingId,
-      }).separatedCommission,
-    ).toMatchObject({ eligible: true, commissionValue: commission });
-  });
+  ])(
+    "mapeia Imobiliária %s e aceita entrada igual à comissão",
+    (classification, rankingId, commission) => {
+      expect(findAssociativeSeparatedCommissionRankingId("Imobiliária", classification)).toBe(
+        rankingId,
+      );
+      expect(
+        buildAssociativeReadyProposal({
+          ...workbookBase,
+          entry: commission,
+          commissionRankingId: rankingId,
+        }).separatedCommission,
+      ).toMatchObject({ eligible: true, commissionValue: commission });
+    },
+  );
 
   it("não converte classificação House em comissão apartada", () => {
     expect(findAssociativeSeparatedCommissionRankingId("House", "Ouro")).toBe("");
