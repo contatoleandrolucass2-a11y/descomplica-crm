@@ -62,7 +62,9 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(calculator).toContain('className="investor-stock-spacer"');
     expect(calculator).toContain("if (!inventoryInteractionStarted.current)");
     expect(calculator).toContain('className="investor-standard-plan-switch"');
-    expect(calculator).toContain('className="investor-direct-ready-options investor-standard-ready-options"');
+    expect(calculator).toContain(
+      'className="investor-direct-ready-options investor-standard-ready-options"',
+    );
     expect(calculator).toContain("<InvestorScenarioComparisonCard");
     expect(calculator).toContain("Inserir Sinal");
     expect(calculator).toContain("Inserir Intermediária");
@@ -92,8 +94,12 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(plan24.context.maxIntermediaries).toBe(4);
     expect(invalidPayments.custom.signals[1]).toMatchObject({ approved: false });
     expect(invalidPayments.custom.intermediaries[0]).toMatchObject({ approved: false });
-    expect(invalidPayments.audit.find((item: { id: string }) => item.id === "signals")?.ok).toBe(false);
-    expect(invalidPayments.audit.find((item: { id: string }) => item.id === "intermediaries")?.ok).toBe(false);
+    expect(invalidPayments.audit.find((item: { id: string }) => item.id === "signals")?.ok).toBe(
+      false,
+    );
+    expect(
+      invalidPayments.audit.find((item: { id: string }) => item.id === "intermediaries")?.ok,
+    ).toBe(false);
   });
 
   it("mantém as oito opções e fecha o valor do imóvel no centavo", () => {
