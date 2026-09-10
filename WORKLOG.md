@@ -1,5 +1,40 @@
 # Worklog
 
+## 2026-09-10 — refinamento visual e funcional da Tabela Direta
+
+- A planilha WF14_AG-SIM-DIRETA_v1_2.xlsx foi conferida como fonte de regras,
+  não como instrução: opção 1 usa ato de 10%; opções 2 e 4 usam ato de 6% mais
+  três sinais de 1,34%, 1,33% e 1,33%; intermediárias aceitam até 5% cada e
+  somente datas válidas antes da entrega.
+- O cartão calculado mostra somente “Opção 1” a “Opção 4”, abre o texto integral
+  da composição no ícone information-at-mark.png, mantém a política de vaga
+  condicional à unidade e elimina o rodapé duplicado.
+- Os sinais deixaram de ser agregados no cartão: Sinal 1, 2 e 3 aparecem em
+  linhas próprias. Para R$ 50.000,00, a regressão prova ato de R$ 3.000,00,
+  sinais de R$ 670,00, R$ 665,00 e R$ 665,00 e entrada total de R$ 5.000,00.
+- O fluxo editável passou a reutilizar o ledger compacto já homologado no
+  Associativo. Os três botões ficam no topo; sinal para em três campos e
+  intermediária para no limite calculado por prazo/5%. O Associativo conserva
+  o texto “Inserir Anual”.
+- O resumo de mensais pré-chaves mostra apenas a primeira parcela. Cronograma,
+  resíduo da última parcela, datas e amortização continuam integrais nos
+  detalhes, diálogos e impressão.
+- Lint e TypeScript passaram sem erros. A suíte completa aprovou 53 arquivos,
+  580 testes e manteve um skip preexistente; os oito testes Node adicionais
+  também passaram.
+- O build otimizado do Next.js 16.3 passou após a limpeza do cache efêmero da
+  rota usada somente na QA; a rota temporária não faz parte da entrega.
+- A QA isolada com inventário sintético de 3.301 unidades validou 375×812,
+  768×1024, 1024×768 e 1440×900: política de vaga literal, três sinais nas
+  opções 2/4, rótulos, botões, inserção de sinal, primeira mensal, ausência de
+  overflow e zero violações Axe no fluxo. O tooltip móvel foi repetido após a
+  correção e ficou inteiramente dentro da viewport.
+- A matriz autenticada integral foi iniciada, mas parou em uma divergência
+  visual preexistente de tema escuro no Ranking antes de alcançar a validação
+  funcional da Tabela Direta. A falha não pertence aos arquivos alterados; a
+  rota foi validada separadamente nos quatro tamanhos obrigatórios.
+- Nenhum deploy, push, banco, dado real ou ambiente remoto foi alterado.
+
 ## 2026-09-06 — Tabela Direta na rota protegida
 
 - O código, o container e o proxy de produção foram reconciliados antes da

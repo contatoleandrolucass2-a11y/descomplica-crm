@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-10 — refinamento WF14 da Tabela Direta
+
+- Simplifica o resumo calculado para exibir somente a opção selecionada, inclui
+  a ajuda contextual com a política de vaga completa e remove o rodapé
+  redundante de entrada total e percentual.
+- Detalha Sinal 1, Sinal 2 e Sinal 3 nas opções com entrada distribuída,
+  preservando ato de 6%, sinais somando 4% e entrada total de 10%.
+- Exibe somente o valor da primeira mensal pré-chaves no ledger; a memória
+  completa continua disponível na ajuda e no diálogo de parcelas.
+- Replica no fluxo editável o ledger compacto do Associativo com os botões
+  “Inserir Sinal”, “Inserir Intermediária” e “Inserir Desconto”, respeitando
+  três sinais, teto individual de 5% e datas válidas antes da entrega.
+- Mantém “Inserir Anual” exclusivamente no Associativo e não altera banco,
+  autenticação, permissões, rotas, APIs ou integrações.
+- Corrige semântica de lista, alvos de toque em tablet, tooltip em 375 px e
+  overflow responsivo do fluxo.
+
 ## 2026-09-06 — Tabela Direta integral no CRM
 
 - Implementa a réplica completa da Tabela Direta em
