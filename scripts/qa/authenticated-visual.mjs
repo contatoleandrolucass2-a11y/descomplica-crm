@@ -1144,18 +1144,25 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   });
   const readyProposalDialogElement = page.locator("#investor-associative-ready-proposal");
   await readyProposalDialog.waitFor({ state: "visible" });
-  const proposalAppraisalInput = readyProposalDialog.getByRole("textbox", {
-    name: "Avaliação bancária da proposta",
-    exact: true,
-  });
-  await proposalAppraisalInput.fill("35000000");
   await page.waitForFunction(() =>
     document
       .querySelector("#investor-associative-ready-proposal")
       ?.textContent?.includes("PROPOSTA PRONTA"),
   );
-  const readyProposalAppraisalEditable =
-    (await proposalAppraisalInput.inputValue()) === "350.000,00";
+  const readyProposalAppraisalAutomatic = await readyProposalDialog.evaluate((dialog) => {
+    const appraisal = dialog.querySelector(".investor-associative-ready-proposal-appraisal-value");
+    const appraisalInput = dialog.querySelector(
+      'input[aria-label="Avaliação bancária da proposta"]',
+    );
+    return (
+      appraisal?.querySelector("small")?.textContent?.trim() === "Automática" &&
+      appraisal?.querySelector("b")?.textContent?.trim() === "R$" &&
+      appraisal?.querySelector("strong")?.textContent?.trim() === "350.000,00" &&
+      appraisal?.getAttribute("aria-label")?.replace(/\s+/g, " ") ===
+        "Avaliação bancária automática: R$ 350.000,00" &&
+      appraisalInput === null
+    );
+  });
   const readyProposalDialogComplete = await readyProposalDialog.evaluate((dialog) => {
     const expectedLabels = [
       "Desconto",
@@ -1347,6 +1354,43 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   }
   const readyProposalResponsive = readyProposalResponsiveChecks.every(Boolean);
 
+  await page.getByRole("button", { name: "Iniciar proposta com QA-0007", exact: true }).click();
+  await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
+  await page.getByRole("radio", { name: "Sim", exact: true }).check();
+  await page.getByRole("textbox", { name: "Financiamento", exact: true }).fill("19000000");
+  await page.getByRole("textbox", { name: "Subsídio", exact: true }).fill("0");
+  await page.getByRole("textbox", { name: "FGTS", exact: true }).fill("0");
+  await page.getByRole("textbox", { name: "Cheque Moradia", exact: true }).fill("0");
+  await page.getByRole("textbox", { name: "Entrada", exact: true }).fill("100000");
+  await page.locator('input[name="quantidade-de-parcelas"]').fill("84");
+  await page
+    .getByRole("combobox", { name: "Selecione o Ranking", exact: true })
+    .selectOption("gold");
+  await readyProposalButton.click();
+  await readyProposalDialogElement.waitFor({ state: "visible" });
+  const fallbackAppraisalInput = readyProposalDialog.getByRole("textbox", {
+    name: "Avaliação bancária da proposta",
+    exact: true,
+  });
+  await fallbackAppraisalInput.fill("35000000");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("#investor-associative-ready-proposal")
+      ?.textContent?.includes("PROPOSTA PRONTA"),
+  );
+  const readyProposalAppraisalFallback =
+    (await fallbackAppraisalInput.inputValue()) === "350.000,00" &&
+    (await readyProposalDialog
+      .locator(".investor-associative-ready-proposal-appraisal-value")
+      .count()) === 0;
+  process.stdout.write(
+    `Ready proposal appraisal QA: automatic=${readyProposalAppraisalAutomatic} fallback=${readyProposalAppraisalFallback}\n`,
+  );
+  await readyProposalDialog
+    .getByRole("button", { name: "Fechar proposta pronta", exact: true })
+    .click();
+  await readyProposalDialogElement.waitFor({ state: "hidden" });
+
   return {
     ...initialChecks,
     financingFocusedAfterProfile,
@@ -1354,7 +1398,8 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     readyProposalButtonEnabled,
     readyProposalButtonPlacedAfterInstallments,
     releaseStatusUsesSingleDesktopRow,
-    readyProposalAppraisalEditable,
+    readyProposalAppraisalAutomatic,
+    readyProposalAppraisalFallback,
     readyProposalDialogComplete,
     readyProposalDesktopFits,
     readyProposalHelpAccessible,
