@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 // @ts-expect-error — módulo de regras compartilhado com o componente legado em JavaScript.
 import * as associativeReadyProposalRules from "@/lib/archive-investor/associative-ready-proposal.mjs";
 
-const { buildAssociativeReadyProposal, buildAssociativeReadyProposalResponseRows } =
-  associativeReadyProposalRules;
+const {
+  buildAssociativeReadyProposal,
+  buildAssociativeReadyProposalResponseRows,
+  findAssociativeSeparatedCommissionRankingId,
+} = associativeReadyProposalRules;
 
 type ResponseRow = {
   label: string;
@@ -244,8 +247,8 @@ describe("buildAssociativeReadyProposal", () => {
 
     expect(result.separatedCommission).toMatchObject({
       eligible: false,
-      entryThreshold: 14_400,
-      entryRate: 0.06,
+      entryThreshold: 10_800,
+      entryRate: 0.045,
       ranking: { label: "Ouro", rate: 0.045 },
       commissionBase: 240_000,
       commissionValue: 10_800,
@@ -266,7 +269,7 @@ describe("buildAssociativeReadyProposal", () => {
     });
   });
 
-  it("exibe comissão apartada na igualdade de 6% e oculta um centavo abaixo", () => {
+  it("exibe comissão apartada quando a entrada alcança a comissão e oculta um centavo abaixo", () => {
     const base = {
       ...workbookBase,
       netSaleValue: 240_000,
@@ -276,12 +279,12 @@ describe("buildAssociativeReadyProposal", () => {
     };
 
     expect(
-      buildAssociativeReadyProposal({ ...base, entry: 14_399.99 }).separatedCommission.eligible,
+      buildAssociativeReadyProposal({ ...base, entry: 10_799.99 }).separatedCommission.eligible,
     ).toBe(false);
-    const eligible = buildAssociativeReadyProposal({ ...base, entry: 14_400 });
+    const eligible = buildAssociativeReadyProposal({ ...base, entry: 10_800 });
     expect(eligible.separatedCommission.eligible).toBe(true);
-    expect(eligible.separatedCommission.proposal.monthlyBalance).toBe(20_800);
-    expect(eligible.separatedCommission.proposal.averageInstallment).toBe(247.61);
+    expect(eligible.separatedCommission.proposal.monthlyBalance).toBe(24_400);
+    expect(eligible.separatedCommission.proposal.averageInstallment).toBe(290.47);
 
     const thresholdBoundary = {
       ...base,
@@ -289,19 +292,58 @@ describe("buildAssociativeReadyProposal", () => {
       netSaleValue: 100_005.75,
     };
     expect(
-      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 6_000.34 }).separatedCommission
+      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 4_500.25 }).separatedCommission
         .eligible,
     ).toBe(false);
     expect(
-      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 6_000.35 }).separatedCommission,
-    ).toMatchObject({ eligible: true, entryThreshold: 6_000.35 });
+      buildAssociativeReadyProposal({ ...thresholdBoundary, entry: 4_500.26 }).separatedCommission,
+    ).toMatchObject({ eligible: true, entryThreshold: 4_500.26 });
+  });
+
+  it("libera o cenário informado: entrada de R$ 15.000 supera comissão Ouro de R$ 10.552,05", () => {
+    const result = buildAssociativeReadyProposal({
+      ...workbookBase,
+      netSaleValue: 234_490,
+      entry: 15_000,
+      commissionRankingId: "gold",
+    });
+
+    expect(result.separatedCommission).toMatchObject({
+      eligible: true,
+      entryThreshold: 10_552.05,
+      commissionValue: 10_552.05,
+    });
+  });
+
+  it.each([
+    ["Ouro", "gold", 10_350],
+    ["Prata", "silver", 9_200],
+    ["Bronze", "bronze", 8_050],
+  ])(
+    "mapeia Imobiliária %s e aceita entrada igual à comissão",
+    (classification, rankingId, commission) => {
+      expect(findAssociativeSeparatedCommissionRankingId("Imobiliária", classification)).toBe(
+        rankingId,
+      );
+      expect(
+        buildAssociativeReadyProposal({
+          ...workbookBase,
+          entry: commission,
+          commissionRankingId: rankingId,
+        }).separatedCommission,
+      ).toMatchObject({ eligible: true, commissionValue: commission });
+    },
+  );
+
+  it("não converte classificação House em comissão apartada", () => {
+    expect(findAssociativeSeparatedCommissionRankingId("House", "Ouro")).toBe("");
   });
 
   it("inclui a coluna apartada e o Sinal COM somente quando elegíveis", () => {
     const calculation = buildAssociativeReadyProposal({
       ...workbookBase,
       netSaleValue: 240_000,
-      entry: 14_400,
+      entry: 10_800,
       appraisal: 370_000,
       cashBackSlack: 10_000,
       commissionRankingId: "gold",
