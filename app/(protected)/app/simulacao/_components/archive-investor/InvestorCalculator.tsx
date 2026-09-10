@@ -9,7 +9,7 @@ import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilt
 import { ASSOCIATIVE_APPROVAL_TIERS, calculateAssociativeApproval, findAssociativeApprovalPlan } from "@/lib/archive-investor/associative-approval-rules.mjs";
 import { buildAssociativeInstallmentMemory, buildAssociativePaymentComparison } from "@/lib/archive-investor/associative-installment-memory.mjs";
 import { buildDocumentationInstallmentSchedule } from "@/lib/archive-investor/documentation-calculator-rules.mjs";
-import { calculateAssociativeDocumentationView } from "@/lib/archive-investor/associative-documentation-adapter.mjs";
+import { calculateAssociativeDocumentationView, resolveAssociativeAppraisal } from "@/lib/archive-investor/associative-documentation-adapter.mjs";
 import { ASSOCIATIVE_COMMISSION_RATES, calculateAssociativeCommercialRemuneration } from "@/lib/archive-investor/associative-commercial-remuneration-rules.mjs";
 import { calculateAssociativeReleaseStatus } from "@/lib/archive-investor/associative-release-rules.mjs";
 import { buildAssociativeReadyProposal, buildAssociativeReadyProposalResponseRows, findAssociativeSeparatedCommissionRankingId } from "@/lib/archive-investor/associative-ready-proposal.mjs";
@@ -1887,10 +1887,15 @@ function AssociativeReadyProposalDialog({
         <form method="dialog"><button type="submit" aria-label="Fechar proposta pronta">×</button></form>
       </header>
       <p id="investor-associative-ready-proposal-description" className="investor-associative-ready-proposal-intro">Valores atuais do fluxo convertidos na memória de proposta da planilha revisada. Subsídio, sinais e anuais ativos entram na conciliação.</p>
-      <label className={`investor-associative-ready-proposal-appraisal${source.appraisal > 0 ? " is-complete" : " is-required"}`}>
-        <span><strong>Avaliação bancária</strong><small>{reportedAppraisal > 0 && !appraisalOverride ? "Valor informado pelo estoque; edite se necessário." : "Informe o valor oficial usado pelo banco para calcular a cota."}</small></span>
-        <span className="investor-associative-ready-proposal-appraisal-input"><b aria-hidden="true">R$</b><MoneyInput label="Avaliação bancária da proposta" invalid={source.appraisal <= 0} value={appraisalOverride || (reportedAppraisal > 0 ? String(reportedAppraisal) : "")} onChange={onAppraisalOverrideChange} /></span>
-      </label>
+      {reportedAppraisal > 0 ? <div className="investor-associative-ready-proposal-appraisal is-complete is-automatic">
+        <span><strong>Avaliação bancária</strong><small>Valor oficial preenchido automaticamente pela unidade selecionada.</small></span>
+        <output className="investor-associative-ready-proposal-appraisal-value" aria-label={`Avaliação bancária automática: ${money.format(reportedAppraisal)}`} aria-live="polite">
+          <small>Automática</small><b aria-hidden="true">R$</b><strong>{currencyInput.format(reportedAppraisal)}</strong>
+        </output>
+      </div> : <label className="investor-associative-ready-proposal-appraisal is-required" htmlFor="investor-associative-ready-proposal-appraisal-input">
+        <span><strong>Avaliação bancária</strong><small id="investor-associative-ready-proposal-appraisal-help">A unidade não trouxe avaliação. Informe o valor oficial usado pelo banco.</small></span>
+        <span className="investor-associative-ready-proposal-appraisal-input"><b aria-hidden="true">R$</b><MoneyInput id="investor-associative-ready-proposal-appraisal-input" label="Avaliação bancária da proposta" describedBy="investor-associative-ready-proposal-appraisal-help" invalid={source.appraisal <= 0} value={appraisalOverride} onChange={onAppraisalOverrideChange} /></span>
+      </label>}
 
       {!proposal ? <section className="investor-associative-ready-proposal-blocked" role="alert">
         <strong>Não foi possível fechar a proposta.</strong>
@@ -2672,9 +2677,10 @@ export function InvestorCalculator({
       .filter((payment: { approved: boolean; value: number }) => payment.approved && payment.value > 0)
       .map((payment: { index: number; date: string; value: number }) => ({ label: `Anual ${payment.index}`, date: payment.date, value: payment.value })),
     installments: result.custom.desiredInstallments,
-    appraisal: currencyInputNumber(documentationAppraisalOverride) > 0
-      ? currencyInputNumber(documentationAppraisalOverride)
-      : selectedUnit?.appraisal ?? 0,
+    appraisal: resolveAssociativeAppraisal(
+      selectedUnit?.appraisal,
+      currencyInputNumber(documentationAppraisalOverride),
+    ),
     modality: associativeFinancingModality,
     commissionRankingId: associativeCommissionRankingId,
     cashBackSlack: selectedUnit?.cashBackSlack ?? 0,
