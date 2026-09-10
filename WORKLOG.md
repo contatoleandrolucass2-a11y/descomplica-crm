@@ -24,6 +24,22 @@
   limite para sinais e intermediárias. A inspeção visual autenticada usa apenas
   estoque sintético local e não grava proposta nem altera produção.
 
+## 2026-09-10 — correção da comissão apartada
+
+- A auditoria confirmou que a classificação escolhida no popup de remuneração
+  ficava em estado local, enquanto a proposta pronta consultava o ranking de
+  aprovação. Os estados foram separados corretamente: aprovação continua com
+  sua regra e remuneração passa a alimentar a comissão apartada.
+- A aba “Regras e auditoria” de `Pasta2.0.xlsx` declara que seus percentuais não
+  validam elegibilidade comercial. O corte anterior de 6% foi removido; a regra
+  explícita agora compara a Entrada com a própria comissão calculada e aceita a
+  igualdade no centavo.
+- A regressão do cenário informado valida VGV líquido de R$ 234.490,00, Ouro
+  4,5%, comissão de R$ 10.552,05 e Entrada de R$ 15.000,00 como elegível.
+- O popup usa 900 px sem comparação e 1.180 px com a coluna apartada. O QA
+  autenticado aprovou 375×812, 768×1024, 1024×768 e 1440×900 sem overflow ou
+  truncamento, além das matrizes responsiva, temática, acessível e de zoom.
+
 ## 2026-09-09 — popup associativo e comissão apartada
 
 - A planilha `Pasta2.0.xlsx` foi tratada como fonte de dados e fórmulas, não

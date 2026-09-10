@@ -17,6 +17,17 @@
 - Acrescenta estados acessíveis de foco, seleção, disabled e erro e adapta a
   grade para desktop, tablet e celular sem rolagem horizontal da página.
 
+## 2026-09-10 — elegibilidade e largura da comissão apartada
+
+- Conecta o canal e a classificação escolhidos em “Comissão + Prêmio da venda”
+  ao popup “Proposta pronta - Bora Vender”, eliminando o estado isolado que
+  ocultava a coluna apartada.
+- Exibe a comissão apartada para Imobiliária Ouro, Prata ou Bronze quando a
+  Entrada é maior ou igual ao valor da comissão calculada, inclusive na
+  igualdade monetária em centavos.
+- Amplia o popup para 900 px no resumo e 1.180 px na comparação, preservando
+  leitura sem rolagem horizontal de 375 px a 1.440 px.
+
 ## 2026-09-09 — comissão apartada na proposta associativa
 
 - Alinha o popup “Proposta pronta - Bora Vender” à densidade visual do fluxo

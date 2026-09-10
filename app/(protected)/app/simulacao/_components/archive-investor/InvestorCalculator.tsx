@@ -12,7 +12,7 @@ import { buildDocumentationInstallmentSchedule } from "@/lib/archive-investor/do
 import { calculateAssociativeDocumentationView } from "@/lib/archive-investor/associative-documentation-adapter.mjs";
 import { ASSOCIATIVE_COMMISSION_RATES, calculateAssociativeCommercialRemuneration } from "@/lib/archive-investor/associative-commercial-remuneration-rules.mjs";
 import { calculateAssociativeReleaseStatus } from "@/lib/archive-investor/associative-release-rules.mjs";
-import { buildAssociativeReadyProposal, buildAssociativeReadyProposalResponseRows } from "@/lib/archive-investor/associative-ready-proposal.mjs";
+import { buildAssociativeReadyProposal, buildAssociativeReadyProposalResponseRows, findAssociativeSeparatedCommissionRankingId } from "@/lib/archive-investor/associative-ready-proposal.mjs";
 import { evaluateFinancingModality, moneyToCents, MCMV_PROPERTY_LIMIT_CENTS, type FinancingDecision, type FinancingModality } from "@/lib/archive-investor/financing-modality-rules.mjs";
 
 type InventoryItem = {
@@ -1085,20 +1085,25 @@ const ASSOCIATIVE_COMMISSION_OPTIONS: Record<AssociativeCommissionChannel, reado
   House: Object.entries(ASSOCIATIVE_COMMISSION_RATES.House).map(([classification, rate]) => ({ classification, rate })),
   Imobiliária: Object.entries(ASSOCIATIVE_COMMISSION_RATES.Imobiliária).map(([classification, rate]) => ({ classification, rate })),
 };
-
 function AssociativeCommissionPanel({
   realSaleValue,
   propertyValue,
   cashBackSlack,
+  channel,
+  classification,
+  onChannelChange,
+  onClassificationChange,
 }: {
   realSaleValue: number;
   propertyValue: number;
   cashBackSlack: number;
+  channel: "" | AssociativeCommissionChannel;
+  classification: string;
+  onChannelChange: (value: "" | AssociativeCommissionChannel) => void;
+  onClassificationChange: (value: string) => void;
 }) {
   const channelId = useId();
   const classificationId = useId();
-  const [channel, setChannel] = useState<"" | AssociativeCommissionChannel>("");
-  const [classification, setClassification] = useState("");
   const classificationOptions = channel ? ASSOCIATIVE_COMMISSION_OPTIONS[channel] : [];
   const remuneration = calculateAssociativeCommercialRemuneration({ channel, classification, realSaleValue, propertyValue, cashBackSlack });
   const { commissionBase, commissionRate, commissionValue, awardBase, awardRate, awardValue, hasAward, totalValue, totalRate } = remuneration;
@@ -1113,8 +1118,8 @@ function AssociativeCommissionPanel({
       <label htmlFor={channelId}>
         <span>Canal de venda</span>
         <select id={channelId} value={channel} onChange={(event) => {
-          setChannel(event.target.value as "" | AssociativeCommissionChannel);
-          setClassification("");
+          onChannelChange(event.target.value as "" | AssociativeCommissionChannel);
+          onClassificationChange("");
         }}>
           <option value="">Selecione o canal</option>
           <option value="House">House</option>
@@ -1123,7 +1128,7 @@ function AssociativeCommissionPanel({
       </label>
       <label htmlFor={classificationId}>
         <span>Classificação</span>
-        <select id={classificationId} value={classification} disabled={!channel} onChange={(event) => setClassification(event.target.value)}>
+        <select id={classificationId} value={classification} disabled={!channel} onChange={(event) => onClassificationChange(event.target.value)}>
           <option value="">Selecione a classificação</option>
           {classificationOptions.map((option) => <option key={option.classification} value={option.classification}>{option.classification} · {percent.format(option.rate)}</option>)}
         </select>
@@ -1169,11 +1174,19 @@ function AssociativeCommissionDialog({
   realSaleValue,
   propertyValue,
   cashBackSlack,
+  channel,
+  classification,
+  onChannelChange,
+  onClassificationChange,
 }: {
   dialogRef: Ref<HTMLDialogElement>;
   realSaleValue: number;
   propertyValue: number;
   cashBackSlack: number;
+  channel: "" | AssociativeCommissionChannel;
+  classification: string;
+  onChannelChange: (value: "" | AssociativeCommissionChannel) => void;
+  onClassificationChange: (value: string) => void;
 }) {
   return <dialog
     ref={dialogRef}
@@ -1184,7 +1197,7 @@ function AssociativeCommissionDialog({
   >
     <article>
       <form method="dialog" className="investor-associative-commission-close"><button type="submit" aria-label="Fechar comissão e prêmio">×</button></form>
-      <AssociativeCommissionPanel realSaleValue={realSaleValue} propertyValue={propertyValue} cashBackSlack={cashBackSlack} />
+      <AssociativeCommissionPanel realSaleValue={realSaleValue} propertyValue={propertyValue} cashBackSlack={cashBackSlack} channel={channel} classification={classification} onChannelChange={onChannelChange} onClassificationChange={onClassificationChange} />
     </article>
   </dialog>;
 }
@@ -2394,6 +2407,8 @@ export function InvestorCalculator({
   const [associativeManualModalityPreference, setAssociativeManualModalityPreference] = useState<FinancingModality | null>(null);
   const [associativeFirstProperty, setAssociativeFirstProperty] = useState("");
   const [associativeApprovalTier, setAssociativeApprovalTier] = useState("");
+  const [associativeCommissionChannel, setAssociativeCommissionChannel] = useState<"" | AssociativeCommissionChannel>("");
+  const [associativeCommissionClassification, setAssociativeCommissionClassification] = useState("");
   const [documentationAppraisalOverride, setDocumentationAppraisalOverride] = useState("");
   const [signalFieldCount, setSignalFieldCount] = useState(0);
   const [signals, setSignals] = useState(["0", "0", "0"]);
@@ -2714,6 +2729,10 @@ export function InvestorCalculator({
     approvalTierId: associativeApprovalTier,
   }), [directTable, annualMode, selectedUnitId, selectedUnit, baseDate, completionDate, salePrice, discountAuthorized, discount, financing, subsidy, fgts, housingCheck, entryValue, income, installments, signals, intermediaries, associativeApprovalTier]);
   const directResult = result as DirectTableFlowResult;
+  const associativeCommissionRankingId = findAssociativeSeparatedCommissionRankingId(
+    associativeCommissionChannel,
+    associativeCommissionClassification,
+  );
   const associativeReadyProposal = useMemo(() => buildAssociativeReadyProposal({
     grossSaleValue: result.context.propertyValue,
     originalUnitBonus: result.context.unitBonus,
@@ -2736,9 +2755,9 @@ export function InvestorCalculator({
       ? currencyInputNumber(documentationAppraisalOverride)
       : selectedUnit?.appraisal ?? 0,
     modality: associativeFinancingModality,
-    commissionRankingId: associativeApprovalTier,
+    commissionRankingId: associativeCommissionRankingId,
     cashBackSlack: selectedUnit?.cashBackSlack ?? 0,
-  }), [associativeApprovalTier, associativeFinancingModality, documentationAppraisalOverride, result.context.discount, result.context.propertyValue, result.context.tableSlack, result.context.unitBonus, result.context.valueReal, result.custom.actValue, result.custom.desiredInstallments, result.custom.fgts, result.custom.financing, result.custom.housingCheck, result.custom.intermediaries, result.custom.signals, result.custom.subsidy, selectedUnit?.appraisal, selectedUnit?.cashBackSlack]);
+  }), [associativeCommissionRankingId, associativeFinancingModality, documentationAppraisalOverride, result.context.discount, result.context.propertyValue, result.context.tableSlack, result.context.unitBonus, result.context.valueReal, result.custom.actValue, result.custom.desiredInstallments, result.custom.fgts, result.custom.financing, result.custom.housingCheck, result.custom.intermediaries, result.custom.signals, result.custom.subsidy, selectedUnit?.appraisal, selectedUnit?.cashBackSlack]);
   const directAmortizationSchedule = useMemo(() => directTable
     ? buildDirectTableAmortizationSchedule(result.custom.postKeysBalance, result.custom.firstPostKeysDate, result.custom.postKeysInstallments)
     : [], [directTable, result.custom.postKeysBalance, result.custom.firstPostKeysDate, result.custom.postKeysInstallments]);
@@ -4598,6 +4617,10 @@ export function InvestorCalculator({
               realSaleValue={result.context.valueReal + result.context.discount}
               propertyValue={result.context.valueReal}
               cashBackSlack={selectedUnit.cashBackSlack ?? 0}
+              channel={associativeCommissionChannel}
+              classification={associativeCommissionClassification}
+              onChannelChange={setAssociativeCommissionChannel}
+              onClassificationChange={setAssociativeCommissionClassification}
             />
           </div> : null}
 

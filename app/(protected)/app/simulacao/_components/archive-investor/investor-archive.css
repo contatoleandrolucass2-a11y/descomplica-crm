@@ -19819,12 +19819,12 @@ body:has(.investor-page-shell) {
   background:rgba(111,140,153,.12);
 }
 .investor-page-shell .investor-associative-ready-proposal-dialog {
-  width:min(600px,calc(100vw - 28px));
+  width:min(900px,calc(100vw - 28px));
   max-height:min(92dvh,760px);
   overscroll-behavior:contain;
 }
 .investor-page-shell .investor-associative-ready-proposal-dialog.has-separated-commission {
-  width:min(900px,calc(100vw - 28px));
+  width:min(1180px,calc(100vw - 28px));
 }
 .investor-page-shell .investor-associative-ready-proposal-dialog>article {
   gap:8px;
