@@ -1221,7 +1221,23 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   await readyProposalDialogElement.waitFor({ state: "hidden" });
 
   const readyProposalResponsiveChecks = [];
-  await entryInput.fill("1380000");
+  await entryInput.fill("1500000");
+  await page
+    .getByRole("button", { name: "Abrir remuneração comercial", exact: true })
+    .click();
+  const commissionDialog = page.getByRole("dialog", {
+    name: "Comissão + Prêmio da venda",
+    exact: true,
+  });
+  await commissionDialog
+    .getByRole("combobox", { name: "Canal de venda", exact: true })
+    .selectOption("Imobiliária");
+  await commissionDialog
+    .getByRole("combobox", { name: "Classificação", exact: true })
+    .selectOption("Ouro");
+  await commissionDialog
+    .getByRole("button", { name: "Fechar comissão e prêmio", exact: true })
+    .click();
   await readyProposalButton.click();
   await readyProposalDialogElement.waitFor({ state: "visible" });
   const readyProposalSeparatedCommissionVisible = await readyProposalDialog.evaluate((dialog) => {
@@ -1294,7 +1310,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
         ];
         const usesCompactDesktopSize =
           window.innerWidth < 481 ||
-          (Math.abs(dialogBox.width - Math.min(900, window.innerWidth - 28)) <= 8 &&
+          (Math.abs(dialogBox.width - Math.min(1180, window.innerWidth - 28)) <= 8 &&
             rows.every((row) => row.getBoundingClientRect().height <= 25));
         return {
           passed:
