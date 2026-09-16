@@ -1,5 +1,35 @@
 # Worklog
 
+## 2026-09-16 — rolagem integral e composição individual da Tabela Direta
+
+- A paginação de 100 linhas foi removida. O estoque integral de 3.301 unidades
+  permanece acessível por uma única barra interna; a janela móvel de 60 linhas
+  reduz custo de DOM sem criar páginas, botões ou ocultar opções da rolagem.
+- Seleção, filtro, ordenação e “Limpar filtros” reposicionam corretamente a janela.
+  Quando uma linha focada sai da janela virtual, o foco retorna à região de
+  estoque em vez de cair no documento.
+- As opções 2 e 4 renderizam Sinal 1, 2 e 3. As opções 3 e 4 renderizam
+  Intermediária 1, 2 e 3 separadamente, inclusive estado inválido, data e ajuda
+  contextual; linhas agregadas ficam somente para grupos sem pagamento.
+- Para Vaga de R$ 55.000,00, a validação de dados confirmou ato de R$ 3.300,00,
+  sinais de R$ 737,00, R$ 731,50 e R$ 731,50, intermediárias de R$ 2.750,00 cada,
+  saldo financiado de R$ 27.500,00 e 66 parcelas pós-chaves de R$ 570,28. A
+  política geral de 60%/120 parcelas do XLSX continua aplicada a plantas comuns.
+- O ledger editável da Tabela Direta ganhou avanço por Enter no mesmo padrão de
+  uso do Associativo. O handler foi escopado à conta editável; guia e rota
+  Associativo não foram alterados.
+- Os ícones de ajuda do comparativo passaram a ter alvo de 24 px sem perder o
+  desenho compacto. A QA com Axe encontrou zero violações nos quatro tamanhos.
+- A QA isolada no navegador validou 375×812, 768×1024, 1024×768 e 1440×900:
+  3.301 unidades na mesma rolagem, chegada à última linha, ausência de paginação,
+  opções 2/3/4, política Vaga, reconciliação monetária, ausência de overflow,
+  zero erros de página e zero violações Axe.
+- `pnpm verify` passou: lint, TypeScript, 53 arquivos e 581 testes Vitest
+  aprovados com 1 skip preexistente, 8 testes Node aprovados e build Next.js
+  16.3 com 41 rotas. O Associativo permaneceu fora do escopo funcional.
+- Nenhum deploy, push, banco, dado real, API, permissão ou ambiente remoto foi
+  alterado.
+
 ## 2026-09-10 — refinamento visual e funcional da Tabela Direta
 
 - A planilha WF14_AG-SIM-DIRETA_v1_2.xlsx foi conferida como fonte de regras,

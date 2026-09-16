@@ -1412,70 +1412,45 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
 
   const inventoryRows = page.locator(".investor-stock-table tbody tr");
   const selectedUnitButtons = page.locator('.investor-stock-unit-button[aria-pressed="true"]');
-  const inventoryPagination = page.getByRole("navigation", {
-    name: "Paginação do estoque completo",
+  const inventoryResults = page.getByRole("region", {
+    name: "Estoque completo de unidades",
     exact: true,
   });
-  const previousInventoryPage = inventoryPagination.getByRole("button", {
-    name: "Anterior",
-    exact: true,
-  });
-  const nextInventoryPage = inventoryPagination.getByRole("button", {
-    name: "Próxima",
-    exact: true,
-  });
-  const firstPageHasOneHundredRows = (await inventoryRows.count()) === 100;
+  const allInventoryRowsInSingleScroll =
+    (await inventoryRows.count()) > 0 &&
+    (await inventoryRows.count()) < 3_301 &&
+    (await page.locator(".investor-stock-table").getAttribute("aria-rowcount")) === "3302";
   const startsWithoutSelectedUnit = (await selectedUnitButtons.count()) === 0;
   const inventoryHeaderText = (await inventoryStatus.innerText()).replace(/\s+/g, " ");
-  const firstPaginationText = (await inventoryPagination.innerText()).replace(/\s+/g, " ");
-  const fullInventoryCountVisible =
-    inventoryHeaderText.includes("3.301 unidades") &&
-    firstPaginationText.includes("Exibindo 1–100 de 3.301 unidades") &&
-    firstPaginationText.includes("Página 1 de 34");
+  const fullInventoryCountVisible = inventoryHeaderText.includes("3.301 unidades");
   const inventoryOriginVisible = inventoryHeaderText.includes(
     "Arquivo ESTOQUE SPC.xlsx · referência 05/09/2026",
   );
-  const paginationStartsInExpectedState =
-    (await previousInventoryPage.isDisabled()) && (await nextInventoryPage.isEnabled());
-
-  await nextInventoryPage.click();
-  await inventoryPagination.getByText("Página 2 de 34", { exact: true }).waitFor();
-  const firstUnitOnSecondPage = page
-    .locator(".investor-stock-table tbody tr.selectable .investor-stock-unit-button:not(:disabled)")
-    .first();
-  const paginationFocusedFirstVisibleUnit = await page
-    .waitForFunction(
-      () =>
-        document.activeElement ===
-        document.querySelector(
-          ".investor-stock-table tbody tr.selectable .investor-stock-unit-button:not(:disabled)",
-        ),
-      undefined,
-      { timeout: 5_000 },
-    )
-    .then(() => true)
-    .catch(() => false);
-  const paginationFocusedUnitIsVisible = await firstUnitOnSecondPage.evaluate((button) => {
-    const results = button.closest(".investor-stock-results");
+  const paginationControlsRemoved =
+    (await page.getByRole("navigation", { name: "Paginação do estoque completo" }).count()) === 0;
+  const stockUsesSingleScrollbar = await inventoryResults.evaluate((element) => {
+    if (!(element instanceof HTMLElement)) return false;
+    return element.scrollHeight > element.clientHeight;
+  });
+  await inventoryResults.evaluate((element) => {
+    if (element instanceof HTMLElement) element.scrollTop = element.scrollHeight;
+  });
+  const lastInventoryRow = page.locator('.investor-stock-table tbody tr[aria-rowindex="3302"]');
+  await lastInventoryRow.waitFor({ timeout: qaNavigationTimeout });
+  const scrollReachesLastInventoryRow = await lastInventoryRow.evaluate((row) => {
+    const results = row.closest(".investor-stock-results");
     if (!(results instanceof HTMLElement)) return false;
-    const buttonRect = button.getBoundingClientRect();
+    const rowRect = row.getBoundingClientRect();
     const resultsRect = results.getBoundingClientRect();
     return (
-      document.activeElement === button &&
-      buttonRect.top >= Math.max(0, resultsRect.top) - 1 &&
-      buttonRect.bottom <= Math.min(window.innerHeight, resultsRect.bottom) + 1 &&
-      buttonRect.left >= Math.max(0, resultsRect.left) - 1 &&
-      buttonRect.right <= Math.min(window.innerWidth, resultsRect.right) + 1
+      row.getAttribute("aria-rowindex") === "3302" &&
+      rowRect.bottom <= resultsRect.bottom + 1 &&
+      rowRect.bottom >= resultsRect.top
     );
   });
-  const paginationFocusesVisibleFirstUnit =
-    paginationFocusedFirstVisibleUnit && paginationFocusedUnitIsVisible;
-  const secondPaginationText = (await inventoryPagination.innerText()).replace(/\s+/g, " ");
-  const paginationAdvancesOneHundredRows =
-    (await inventoryRows.count()) === 100 &&
-    secondPaginationText.includes("Exibindo 101–200 de 3.301 unidades");
-  await previousInventoryPage.click();
-  await inventoryPagination.getByText("Página 1 de 34", { exact: true }).waitFor();
+  await inventoryResults.evaluate((element) => {
+    if (element instanceof HTMLElement) element.scrollTop = 0;
+  });
 
   const firstSelectableRow = page.locator(".investor-stock-table tbody tr.selectable").first();
   await firstSelectableRow.click();
@@ -1497,6 +1472,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const proposalOptions = page.locator(".investor-direct-ready-options button");
   const fourProposalOptionsPresent = (await proposalOptions.count()) === 4;
   const optionSelectionChecks = [];
+  const optionPaymentRowChecks = [];
   for (let index = 0; index < (await proposalOptions.count()); index += 1) {
     const option = proposalOptions.nth(index);
     const available =
@@ -1511,9 +1487,45 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
           .locator('.investor-direct-ready-options button[aria-pressed="true"]')
           .count()) === 1,
     );
+    optionPaymentRowChecks.push(await page.locator(".investor-direct-comparison-card").first().evaluate((card, optionIndex) => {
+      const parseAmount = (value) => Number(
+        value.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", "."),
+      );
+      const rows = [...card.querySelectorAll(".investor-direct-comparison-ledger-row")].map((row) => ({
+        label: row.querySelector(".investor-direct-comparison-ledger-label strong")?.textContent?.trim() ?? "",
+        value: parseAmount(row.querySelector(".investor-direct-comparison-ledger-value")?.textContent ?? ""),
+        invalid: row.classList.contains("is-invalid"),
+      }));
+      const individualLabels = rows
+        .map((row) => row.label)
+        .filter((label) => /^(Sinal|Intermediária) \d+$/u.test(label));
+      const expectedLabels = optionIndex === 0
+        ? []
+        : optionIndex === 1
+          ? ["Sinal 1", "Sinal 2", "Sinal 3"]
+          : optionIndex === 2
+            ? ["Intermediária 1", "Intermediária 2", "Intermediária 3"]
+            : ["Sinal 1", "Sinal 2", "Sinal 3", "Intermediária 1", "Intermediária 2", "Intermediária 3"];
+      const amountFor = (label) => rows.find((row) => row.label === label)?.value ?? 0;
+      const signals = rows.filter((row) => /^Sinal \d+$/u.test(row.label));
+      const intermediaries = rows.filter((row) => /^Intermediária \d+$/u.test(row.label));
+      const reconciled = amountFor("Valor real da venda")
+        - amountFor("Ato")
+        - signals.reduce((total, row) => total + row.value, 0)
+        - intermediaries.reduce((total, row) => total + row.value, 0)
+        - amountFor("Saldo parcelado pré-chaves")
+        - amountFor("Saldo financiado");
+      return (
+        JSON.stringify(individualLabels) === JSON.stringify(expectedLabels)
+        && [...signals, ...intermediaries].every((row) => row.value > 0 && !row.invalid)
+        && Math.abs(reconciled) <= 0.02
+      );
+    }, index));
   }
   const allProposalOptionsSelectable =
     optionSelectionChecks.length === 4 && optionSelectionChecks.every(Boolean);
+  const individualProposalPaymentsRendered =
+    optionPaymentRowChecks.length === 4 && optionPaymentRowChecks.every(Boolean);
   await proposalOptions.first().click();
 
   const proposalStatus = page.locator(
@@ -1942,10 +1954,11 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     snapshotRetryRestoresInventory =
       snapshotRequestCount > requestsBeforeRetry &&
       liveInventoryRequestCount === 0 &&
-      (await snapshotPage.locator(".investor-stock-table tbody tr").count()) === 100 &&
+      (await snapshotPage.locator(".investor-stock-table").getAttribute("aria-rowcount")) === "3302" &&
+      (await snapshotPage.locator(".investor-stock-table tbody tr.selectable").count()) > 0 &&
       (await snapshotPage
         .getByRole("navigation", { name: "Paginação do estoque completo", exact: true })
-        .isVisible());
+        .count()) === 0;
   } finally {
     await closeAuxiliaryPage(snapshotPage);
   }
@@ -2213,15 +2226,16 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   return {
     fullInventoryCountVisible,
     inventoryOriginVisible,
-    firstPageHasOneHundredRows,
-    paginationStartsInExpectedState,
-    paginationAdvancesOneHundredRows,
-    paginationFocusesVisibleFirstUnit,
+    allInventoryRowsInSingleScroll,
+    paginationControlsRemoved,
+    stockUsesSingleScrollbar,
+    scrollReachesLastInventoryRow,
     startsWithoutSelectedUnit,
     manualUnitSelectionWorks,
     incomeAccepted,
     fourProposalOptionsPresent,
     allProposalOptionsSelectable,
+    individualProposalPaymentsRendered,
     approvedProposalStatusVisible,
     filterPreservesSelectedUnitAndIncome,
     cancelledUnitChangePreservesProposal,

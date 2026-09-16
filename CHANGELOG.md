@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-16 — estoque contínuo e pagamentos completos na Tabela Direta
+
+- Remove a paginação do estoque da Tabela Direta e mantém as 3.301 unidades em
+  uma única barra de rolagem interna, com janela virtual para preservar a
+  resposta da seleção, filtros e ordenação.
+- Exibe Sinal 1, Sinal 2 e Sinal 3 separadamente nas opções 2 e 4, com a divisão
+  monetária fechando no centavo.
+- Exibe cada intermediária válida em linha própria nas opções 3 e 4, preservando
+  valor, ordem, data, percentual e estado de validação de cada pagamento.
+- Mantém a política especial de Vaga em 10% de entrada, 40% durante a obra e 50%
+  pós-chaves em até 66 parcelas; plantas comuns continuam seguindo a regra geral
+  do arquivo WF14.
+- Aproxima o fluxo editável da usabilidade compacta do Associativo, incluindo
+  avanço por Enter, sem alterar a rota ou o comportamento do Associativo.
+- Corrige foco na rolagem virtual, alvo de toque dos ícones de ajuda, overflow e
+  reconciliação automatizada das linhas individuais com os totais da proposta.
+
 ## 2026-09-10 — refinamento WF14 da Tabela Direta
 
 - Simplifica o resumo calculado para exibir somente a opção selecionada, inclui

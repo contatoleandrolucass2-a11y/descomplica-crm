@@ -7371,6 +7371,10 @@ a {
   height:24px!important;
   min-height:24px!important;
 }
+.investor-page-shell.investor-direct-table-page .investor-stock-table tbody tr {
+  content-visibility:auto;
+  contain-intrinsic-size:auto 24px;
+}
 .investor-page-shell.investor-direct-table-page .investor-stock-unit-button {
   width:24px!important;
   min-width:24px!important;
@@ -19638,8 +19642,8 @@ body:has(.investor-page-shell) {
   display:grid;
   box-sizing:border-box;
   min-width:0;
-  height:23px;
-  min-height:23px;
+  height:25px;
+  min-height:25px;
   grid-template-columns:minmax(240px,1.15fr) 26px 38px minmax(130px,.85fr) 30px;
   align-items:center;
   border-bottom:1px solid #2c7b91;
@@ -19649,7 +19653,7 @@ body:has(.investor-page-shell) {
 .investor-page-shell .investor-direct-comparison-ledger-row:hover { background:#0e3a4f; }
 .investor-page-shell .investor-direct-comparison-ledger-label {
   display:flex;
-  height:22px;
+  height:24px;
   min-height:0;
   min-width:0;
   align-self:center;
@@ -19674,7 +19678,7 @@ body:has(.investor-page-shell) {
 .investor-page-shell .investor-direct-comparison-ledger-value,
 .investor-page-shell .investor-direct-comparison-ledger-help {
   display:flex;
-  height:22px;
+  height:24px;
   min-height:0;
   min-width:0;
   align-self:center;
@@ -19700,7 +19704,15 @@ body:has(.investor-page-shell) {
 }
 .investor-page-shell .investor-direct-comparison-ledger-help .investor-info-trigger {
   margin:0;
-  transform:scale(.58);
+  width:24px;
+  min-width:24px;
+  height:24px;
+  min-height:24px;
+  transform:none;
+}
+.investor-page-shell .investor-direct-comparison-ledger-help .investor-info-mark {
+  width:12px;
+  height:12px;
 }
 .investor-page-shell .investor-direct-comparison-ledger-row.is-muted {
   background:#0a3043;
@@ -20206,48 +20218,6 @@ body:has(.investor-page-shell) {
 }
 
 /* Tabela Direta: estados de validação e proteção responsiva do estoque integral. */
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination {
-  display:flex;
-  min-height:48px;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:8px 14px;
-  color:#b9d2dc;
-  border:1px solid #2a647c;
-  border-top:0;
-  border-radius:0 0 12px 12px;
-  background:#082d40;
-  font-size:11px;
-}
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination>div {
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination button {
-  min-width:82px;
-  min-height:36px;
-  padding:7px 10px;
-  color:#dff8fb;
-  border:1px solid #3a829c;
-  border-radius:8px;
-  background:#0c3a50;
-  font:inherit;
-  font-weight:800;
-  cursor:pointer;
-}
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination button:hover:not(:disabled),
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination button:focus-visible {
-  color:#082335;
-  border-color:#bef65a;
-  outline:0;
-  background:#bef65a;
-}
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination button:disabled {
-  cursor:not-allowed;
-  opacity:.45;
-}
 .investor-page-shell .site-menu a[aria-disabled="true"] {
   cursor:not-allowed;
   opacity:.52;
@@ -20284,13 +20254,6 @@ body:has(.investor-page-shell) {
   color:#ffbf52;
 }
 @media (max-width:760px) {
-  .investor-page-shell.investor-direct-table-page .investor-stock-pagination {
-    align-items:stretch;
-    flex-direction:column;
-  }
-  .investor-page-shell.investor-direct-table-page .investor-stock-pagination>div {
-    justify-content:space-between;
-  }
   .investor-page-shell.investor-direct-table-page .investor-stock-panel>.investor-section-heading,
   .investor-page-shell.investor-standard-table-page .investor-stock-panel>.investor-section-heading {
     height:auto!important;
