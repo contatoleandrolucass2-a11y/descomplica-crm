@@ -485,8 +485,14 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     );
     assert.ok(calculator.includes("Sair da Tabela Direta descartará a proposta em edição"));
     assert.ok(calculator.includes("matchingInventory.slice("));
-    assert.ok(calculator.includes('onScroll={(event) => updateInventoryWindow(event.currentTarget.scrollTop)}'));
-    assert.ok(calculator.includes('querySelector<HTMLTableRowElement>("tr:focus-within[aria-rowindex]")'));
+    assert.ok(
+      calculator.includes(
+        "onScroll={(event) => updateInventoryWindow(event.currentTarget.scrollTop)}",
+      ),
+    );
+    assert.ok(
+      calculator.includes('querySelector<HTMLTableRowElement>("tr:focus-within[aria-rowindex]")'),
+    );
     assert.ok(calculator.includes("inventoryResultsRef.current?.focus({ preventScroll: true })"));
     assert.ok(calculator.includes('aria-label="Estoque completo de unidades"'));
     assert.ok(!calculator.includes("DIRECT_TABLE_INVENTORY_PAGE_SIZE"));

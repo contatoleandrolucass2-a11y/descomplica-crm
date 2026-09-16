@@ -33,6 +33,7 @@
   autenticação, permissões, rotas, APIs ou integrações.
 - Corrige semântica de lista, alvos de toque em tablet, tooltip em 375 px e
   overflow responsivo do fluxo.
+
 ## 2026-09-10 — elegibilidade e largura da comissão apartada
 
 - Conecta o canal e a classificação escolhidos em “Comissão + Prêmio da venda”

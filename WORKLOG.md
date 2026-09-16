@@ -64,6 +64,7 @@
   funcional da Tabela Direta. A falha não pertence aos arquivos alterados; a
   rota foi validada separadamente nos quatro tamanhos obrigatórios.
 - Nenhum deploy, push, banco, dado real ou ambiente remoto foi alterado.
+
 ## 2026-09-10 — correção da comissão apartada
 
 - A auditoria confirmou que a classificação escolhida no popup de remuneração

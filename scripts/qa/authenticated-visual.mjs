@@ -1573,40 +1573,65 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
           .locator('.investor-direct-ready-options button[aria-pressed="true"]')
           .count()) === 1,
     );
-    optionPaymentRowChecks.push(await page.locator(".investor-direct-comparison-card").first().evaluate((card, optionIndex) => {
-      const parseAmount = (value) => Number(
-        value.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", "."),
-      );
-      const rows = [...card.querySelectorAll(".investor-direct-comparison-ledger-row")].map((row) => ({
-        label: row.querySelector(".investor-direct-comparison-ledger-label strong")?.textContent?.trim() ?? "",
-        value: parseAmount(row.querySelector(".investor-direct-comparison-ledger-value")?.textContent ?? ""),
-        invalid: row.classList.contains("is-invalid"),
-      }));
-      const individualLabels = rows
-        .map((row) => row.label)
-        .filter((label) => /^(Sinal|Intermediária) \d+$/u.test(label));
-      const expectedLabels = optionIndex === 0
-        ? []
-        : optionIndex === 1
-          ? ["Sinal 1", "Sinal 2", "Sinal 3"]
-          : optionIndex === 2
-            ? ["Intermediária 1", "Intermediária 2", "Intermediária 3"]
-            : ["Sinal 1", "Sinal 2", "Sinal 3", "Intermediária 1", "Intermediária 2", "Intermediária 3"];
-      const amountFor = (label) => rows.find((row) => row.label === label)?.value ?? 0;
-      const signals = rows.filter((row) => /^Sinal \d+$/u.test(row.label));
-      const intermediaries = rows.filter((row) => /^Intermediária \d+$/u.test(row.label));
-      const reconciled = amountFor("Valor real da venda")
-        - amountFor("Ato")
-        - signals.reduce((total, row) => total + row.value, 0)
-        - intermediaries.reduce((total, row) => total + row.value, 0)
-        - amountFor("Saldo parcelado pré-chaves")
-        - amountFor("Saldo financiado");
-      return (
-        JSON.stringify(individualLabels) === JSON.stringify(expectedLabels)
-        && [...signals, ...intermediaries].every((row) => row.value > 0 && !row.invalid)
-        && Math.abs(reconciled) <= 0.02
-      );
-    }, index));
+    optionPaymentRowChecks.push(
+      await page
+        .locator(".investor-direct-comparison-card")
+        .first()
+        .evaluate((card, optionIndex) => {
+          const parseAmount = (value) =>
+            Number(
+              value
+                .replace(/[^\d,.-]/g, "")
+                .replace(/\./g, "")
+                .replace(",", "."),
+            );
+          const rows = [...card.querySelectorAll(".investor-direct-comparison-ledger-row")].map(
+            (row) => ({
+              label:
+                row
+                  .querySelector(".investor-direct-comparison-ledger-label strong")
+                  ?.textContent?.trim() ?? "",
+              value: parseAmount(
+                row.querySelector(".investor-direct-comparison-ledger-value")?.textContent ?? "",
+              ),
+              invalid: row.classList.contains("is-invalid"),
+            }),
+          );
+          const individualLabels = rows
+            .map((row) => row.label)
+            .filter((label) => /^(Sinal|Intermediária) \d+$/u.test(label));
+          const expectedLabels =
+            optionIndex === 0
+              ? []
+              : optionIndex === 1
+                ? ["Sinal 1", "Sinal 2", "Sinal 3"]
+                : optionIndex === 2
+                  ? ["Intermediária 1", "Intermediária 2", "Intermediária 3"]
+                  : [
+                      "Sinal 1",
+                      "Sinal 2",
+                      "Sinal 3",
+                      "Intermediária 1",
+                      "Intermediária 2",
+                      "Intermediária 3",
+                    ];
+          const amountFor = (label) => rows.find((row) => row.label === label)?.value ?? 0;
+          const signals = rows.filter((row) => /^Sinal \d+$/u.test(row.label));
+          const intermediaries = rows.filter((row) => /^Intermediária \d+$/u.test(row.label));
+          const reconciled =
+            amountFor("Valor real da venda") -
+            amountFor("Ato") -
+            signals.reduce((total, row) => total + row.value, 0) -
+            intermediaries.reduce((total, row) => total + row.value, 0) -
+            amountFor("Saldo parcelado pré-chaves") -
+            amountFor("Saldo financiado");
+          return (
+            JSON.stringify(individualLabels) === JSON.stringify(expectedLabels) &&
+            [...signals, ...intermediaries].every((row) => row.value > 0 && !row.invalid) &&
+            Math.abs(reconciled) <= 0.02
+          );
+        }, index),
+    );
   }
   const allProposalOptionsSelectable =
     optionSelectionChecks.length === 4 && optionSelectionChecks.every(Boolean);
@@ -2040,7 +2065,8 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     snapshotRetryRestoresInventory =
       snapshotRequestCount > requestsBeforeRetry &&
       liveInventoryRequestCount === 0 &&
-      (await snapshotPage.locator(".investor-stock-table").getAttribute("aria-rowcount")) === "3302" &&
+      (await snapshotPage.locator(".investor-stock-table").getAttribute("aria-rowcount")) ===
+        "3302" &&
       (await snapshotPage.locator(".investor-stock-table tbody tr.selectable").count()) > 0 &&
       (await snapshotPage
         .getByRole("navigation", { name: "Paginação do estoque completo", exact: true })
