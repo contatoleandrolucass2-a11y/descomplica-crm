@@ -9,6 +9,7 @@ export function buildSyntheticDirectTableQaSnapshot() {
     const project = `Empreendimento QA ${String(projectNumber).padStart(2, "0")}`;
     const businessUnit = index % 2 === 0 ? "Direcional" : "Riva";
     const readyProposalReference = index === 0;
+    const missingAppraisalReference = index === 6;
     const finalPrice = readyProposalReference ? 230_000 : 250_000 + (index % 120) * 1_000;
 
     return {
@@ -23,10 +24,10 @@ export function buildSyntheticDirectTableQaSnapshot() {
       finalWithKit: readyProposalReference ? 340_000 : finalPrice,
       unitBonus: readyProposalReference ? 95_000 : 0,
       tableSlack: readyProposalReference ? 15_000 : 0,
-      cashBackSlack: 0,
+      cashBackSlack: readyProposalReference ? 10_000 : 0,
       finalPrice,
       launchPrice: finalPrice,
-      appraisal: readyProposalReference ? 350_000 : finalPrice,
+      appraisal: missingAppraisalReference ? null : readyProposalReference ? 350_000 : finalPrice,
       minimumSignal: 1_000,
       privateArea: 35 + (index % 20) * 0.5,
       constructionStatus: "Em obras",

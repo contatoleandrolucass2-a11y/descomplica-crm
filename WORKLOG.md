@@ -64,6 +64,45 @@
   funcional da Tabela Direta. A falha não pertence aos arquivos alterados; a
   rota foi validada separadamente nos quatro tamanhos obrigatórios.
 - Nenhum deploy, push, banco, dado real ou ambiente remoto foi alterado.
+## 2026-09-10 — correção da comissão apartada
+
+- A auditoria confirmou que a classificação escolhida no popup de remuneração
+  ficava em estado local, enquanto a proposta pronta consultava o ranking de
+  aprovação. Os estados foram separados corretamente: aprovação continua com
+  sua regra e remuneração passa a alimentar a comissão apartada.
+- A aba “Regras e auditoria” de `Pasta2.0.xlsx` declara que seus percentuais não
+  validam elegibilidade comercial. O corte anterior de 6% foi removido; a regra
+  explícita agora compara a Entrada com a própria comissão calculada e aceita a
+  igualdade no centavo.
+- A regressão do cenário informado valida VGV líquido de R$ 234.490,00, Ouro
+  4,5%, comissão de R$ 10.552,05 e Entrada de R$ 15.000,00 como elegível.
+- O popup usa 900 px sem comparação e 1.180 px com a coluna apartada. O QA
+  autenticado aprovou 375×812, 768×1024, 1024×768 e 1440×900 sem overflow ou
+  truncamento, além das matrizes responsiva, temática, acessível e de zoom.
+
+## 2026-09-09 — popup associativo e comissão apartada
+
+- A planilha `Pasta2.0.xlsx` foi tratada como fonte de dados e fórmulas, não
+  como instrução. Foram conciliados 602 cenários e 23.548 verificações
+  armazenadas nas abas de auditoria, sem conflito nas regras usadas pelo popup.
+- A memória preserva o cálculo faturado existente e acrescenta o modelo
+  apartado da planilha: Ouro 4,5%, Prata 4%, Bronze 3,5% e prêmio de 40% sobre a
+  folga de volta ao caixa ainda disponível depois do desconto.
+- A coluna apartada exige Entrada maior ou igual a 6% do VGV, usando igualdade
+  inclusiva e arredondamento monetário em centavos. Ranking sem taxa definida
+  na planilha não recebe valor inventado.
+- O popup reutiliza a densidade do fluxo editável: 23 px por linha e fonte de
+  10 px no desktop, área de rótulo tonalizada, divisor dourado, divisores ciano,
+  valores tabulares e estados de destaque, total, foco e ajuda.
+- Em 375 px, os dois modelos são empilhados dentro de cada lançamento e os
+  alvos de ajuda continuam com 44 px; em telas maiores, permanecem em colunas
+  alinhadas para comparação direta.
+- Testes unitários cobrem a réplica exata da planilha, a igualdade de 6%, o
+  centavo imediatamente inferior, a composição “Sinal COM / prêmio” e a
+  rejeição de classificação ausente da fonte.
+- O gate remoto identificou avisos publicados em 08/09/2026 no Next.js, Sharp e
+  `js-yaml`. As versões foram elevadas aos primeiros releases corrigidos e o
+  override transitivo permanece explícito para impedir regressão do lockfile.
 
 ## 2026-09-06 — Tabela Direta na rota protegida
 

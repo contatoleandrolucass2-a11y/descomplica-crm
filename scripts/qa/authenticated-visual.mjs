@@ -1098,7 +1098,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   await installmentsInput.fill("84");
   const rankingSelect = page.getByRole("combobox", { name: "Selecione o Ranking", exact: true });
   await rankingSelect.waitFor({ state: "visible" });
-  await rankingSelect.selectOption("diamond");
+  await rankingSelect.selectOption("gold");
 
   const readyProposalButton = page.getByRole("button", {
     name: "Proposta pronta - Bora Vender",
@@ -1144,18 +1144,25 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   });
   const readyProposalDialogElement = page.locator("#investor-associative-ready-proposal");
   await readyProposalDialog.waitFor({ state: "visible" });
-  const proposalAppraisalInput = readyProposalDialog.getByRole("textbox", {
-    name: "Avaliação bancária da proposta",
-    exact: true,
-  });
-  await proposalAppraisalInput.fill("35000000");
   await page.waitForFunction(() =>
     document
       .querySelector("#investor-associative-ready-proposal")
       ?.textContent?.includes("PROPOSTA PRONTA"),
   );
-  const readyProposalAppraisalEditable =
-    (await proposalAppraisalInput.inputValue()) === "350.000,00";
+  const readyProposalAppraisalAutomatic = await readyProposalDialog.evaluate((dialog) => {
+    const appraisal = dialog.querySelector(".investor-associative-ready-proposal-appraisal-value");
+    const appraisalInput = dialog.querySelector(
+      'input[aria-label="Avaliação bancária da proposta"]',
+    );
+    return (
+      appraisal?.querySelector("small")?.textContent?.trim() === "Automática" &&
+      appraisal?.querySelector("b")?.textContent?.trim() === "R$" &&
+      appraisal?.querySelector("strong")?.textContent?.trim() === "350.000,00" &&
+      appraisal?.getAttribute("aria-label")?.replace(/\s+/g, " ") ===
+        "Avaliação bancária automática: R$ 350.000,00" &&
+      appraisalInput === null
+    );
+  });
   const readyProposalDialogComplete = await readyProposalDialog.evaluate((dialog) => {
     const expectedLabels = [
       "Desconto",
@@ -1190,6 +1197,8 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
         "Anual 4",
       ].every((label) => valueFor(label) === undefined) &&
       valueFor("Qtd. de parcelas") === "84" &&
+      !(dialog.textContent || "").includes("Comissão apartada") &&
+      !dialog.querySelector("[data-model='separated-commission']") &&
       !(dialog.textContent || "").includes("Contrato e conferência")
     );
   });
@@ -1219,8 +1228,39 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   await readyProposalDialogElement.waitFor({ state: "hidden" });
 
   const readyProposalResponsiveChecks = [];
-  await readyProposalDialogElement.evaluate((dialog) => dialog.showModal());
+  await entryInput.fill("1500000");
+  await page.getByRole("button", { name: "Abrir remuneração comercial", exact: true }).click();
+  const commissionDialog = page.getByRole("dialog", {
+    name: "Comissão + Prêmio da venda",
+    exact: true,
+  });
+  await commissionDialog
+    .getByRole("combobox", { name: "Canal de venda", exact: true })
+    .selectOption("Imobiliária");
+  await commissionDialog
+    .getByRole("combobox", { name: "Classificação", exact: true })
+    .selectOption("Ouro");
+  await commissionDialog
+    .getByRole("button", { name: "Fechar comissão e prêmio", exact: true })
+    .click();
+  await readyProposalButton.click();
   await readyProposalDialogElement.waitFor({ state: "visible" });
+  const readyProposalSeparatedCommissionVisible = await readyProposalDialog.evaluate((dialog) => {
+    const rowFor = (label) =>
+      [...dialog.querySelectorAll("tbody tr")].find(
+        (row) => row.querySelector("th")?.textContent?.trim() === label,
+      );
+    const valueFor = (label, model) =>
+      rowFor(label)?.querySelector(`[data-model='${model}']`)?.textContent?.trim();
+    return (
+      dialog.classList.contains("has-separated-commission") &&
+      (dialog.textContent || "").includes("Comissão apartada") &&
+      valueFor("Desconto", "proposal-invoiced") === "102.500,00" &&
+      valueFor("Desconto", "separated-commission") === "88.150,00" &&
+      valueFor("Sinal COM / prêmio", "proposal-invoiced") === "" &&
+      valueFor("Sinal COM / prêmio", "separated-commission") === "14.350,00"
+    );
+  });
   const readyProposalSnapshot = await readyProposalDialogElement.evaluate((dialog) => ({
     dialogHtml: dialog.outerHTML,
     stylesheets: [...document.querySelectorAll('link[rel="stylesheet"]')].map((link) => link.href),
@@ -1264,23 +1304,21 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
         const tableRegion = dialog.querySelector(".investor-associative-ready-proposal-table-wrap");
         if (tableRegion) tableRegion.scrollTop = 0;
       });
-      readyProposalResponsiveChecks.push(
-        await snapshotPage.locator("dialog").evaluate((dialog) => {
-          const dialogBox = dialog.getBoundingClientRect();
-          const tableRegion = dialog.querySelector(
-            ".investor-associative-ready-proposal-table-wrap",
-          );
-          const rowLabels = [
-            ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet th"),
-          ];
-          const rows = [
-            ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet tbody tr"),
-          ];
-          const usesCompactDesktopSize =
-            window.innerWidth < 481 ||
-            (Math.abs(dialogBox.width - 600) <= 2 &&
-              rows.every((row) => row.getBoundingClientRect().height <= 25));
-          return (
+      const responsiveMeasurement = await snapshotPage.locator("dialog").evaluate((dialog) => {
+        const dialogBox = dialog.getBoundingClientRect();
+        const tableRegion = dialog.querySelector(".investor-associative-ready-proposal-table-wrap");
+        const rowLabels = [
+          ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet th"),
+        ];
+        const rows = [
+          ...dialog.querySelectorAll(".investor-associative-ready-proposal-sheet tbody tr"),
+        ];
+        const usesCompactDesktopSize =
+          window.innerWidth < 481 ||
+          (Math.abs(dialogBox.width - Math.min(1180, window.innerWidth - 28)) <= 8 &&
+            rows.every((row) => row.getBoundingClientRect().height <= 25));
+        return {
+          passed:
             dialogBox.left >= 0 &&
             dialogBox.right <= window.innerWidth &&
             dialogBox.top >= 0 &&
@@ -1289,11 +1327,20 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
             tableRegion &&
             tableRegion.scrollWidth <= tableRegion.clientWidth + 1 &&
             rowLabels.every((label) => label.scrollWidth <= label.clientWidth + 1) &&
-            usesCompactDesktopSize
-          );
-        }),
+            usesCompactDesktopSize,
+          dialogOverflow: dialog.scrollWidth - dialog.clientWidth,
+          tableOverflow: tableRegion ? tableRegion.scrollWidth - tableRegion.clientWidth : null,
+          truncatedLabels: rowLabels
+            .filter((label) => label.scrollWidth > label.clientWidth + 1)
+            .map((label) => label.textContent?.trim()),
+          width: dialogBox.width,
+          maximumRowHeight: Math.max(...rows.map((row) => row.getBoundingClientRect().height)),
+        };
+      });
+      readyProposalResponsiveChecks.push(responsiveMeasurement.passed);
+      process.stdout.write(
+        `Ready proposal QA: ${viewport.key} measured ${JSON.stringify(responsiveMeasurement)}\n`,
       );
-      process.stdout.write(`Ready proposal QA: ${viewport.key} measured\n`);
       await snapshotPage.screenshot({
         path: path.join(
           candidateScreenshotRoot,
@@ -1307,6 +1354,43 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   }
   const readyProposalResponsive = readyProposalResponsiveChecks.every(Boolean);
 
+  await page.getByRole("button", { name: "Iniciar proposta com QA-0007", exact: true }).click();
+  await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
+  await page.getByRole("radio", { name: "Sim", exact: true }).check();
+  await page.getByRole("textbox", { name: "Financiamento", exact: true }).fill("19000000");
+  await page.getByRole("textbox", { name: "Subsídio", exact: true }).fill("0");
+  await page.getByRole("textbox", { name: "FGTS", exact: true }).fill("0");
+  await page.getByRole("textbox", { name: "Cheque Moradia", exact: true }).fill("0");
+  await page.getByRole("textbox", { name: "Entrada", exact: true }).fill("100000");
+  await page.locator('input[name="quantidade-de-parcelas"]').fill("84");
+  await page
+    .getByRole("combobox", { name: "Selecione o Ranking", exact: true })
+    .selectOption("gold");
+  await readyProposalButton.click();
+  await readyProposalDialogElement.waitFor({ state: "visible" });
+  const fallbackAppraisalInput = readyProposalDialog.getByRole("textbox", {
+    name: "Avaliação bancária da proposta",
+    exact: true,
+  });
+  await fallbackAppraisalInput.fill("35000000");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("#investor-associative-ready-proposal")
+      ?.textContent?.includes("PROPOSTA PRONTA"),
+  );
+  const readyProposalAppraisalFallback =
+    (await fallbackAppraisalInput.inputValue()) === "350.000,00" &&
+    (await readyProposalDialog
+      .locator(".investor-associative-ready-proposal-appraisal-value")
+      .count()) === 0;
+  process.stdout.write(
+    `Ready proposal appraisal QA: automatic=${readyProposalAppraisalAutomatic} fallback=${readyProposalAppraisalFallback}\n`,
+  );
+  await readyProposalDialog
+    .getByRole("button", { name: "Fechar proposta pronta", exact: true })
+    .click();
+  await readyProposalDialogElement.waitFor({ state: "hidden" });
+
   return {
     ...initialChecks,
     financingFocusedAfterProfile,
@@ -1314,10 +1398,12 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     readyProposalButtonEnabled,
     readyProposalButtonPlacedAfterInstallments,
     releaseStatusUsesSingleDesktopRow,
-    readyProposalAppraisalEditable,
+    readyProposalAppraisalAutomatic,
+    readyProposalAppraisalFallback,
     readyProposalDialogComplete,
     readyProposalDesktopFits,
     readyProposalHelpAccessible,
+    readyProposalSeparatedCommissionVisible,
     readyProposalResponsive,
   };
 }

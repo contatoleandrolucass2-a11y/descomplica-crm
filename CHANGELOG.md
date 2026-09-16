@@ -33,6 +33,30 @@
   autenticação, permissões, rotas, APIs ou integrações.
 - Corrige semântica de lista, alvos de toque em tablet, tooltip em 375 px e
   overflow responsivo do fluxo.
+## 2026-09-10 — elegibilidade e largura da comissão apartada
+
+- Conecta o canal e a classificação escolhidos em “Comissão + Prêmio da venda”
+  ao popup “Proposta pronta - Bora Vender”, eliminando o estado isolado que
+  ocultava a coluna apartada.
+- Exibe a comissão apartada para Imobiliária Ouro, Prata ou Bronze quando a
+  Entrada é maior ou igual ao valor da comissão calculada, inclusive na
+  igualdade monetária em centavos.
+- Amplia o popup para 900 px no resumo e 1.180 px na comparação, preservando
+  leitura sem rolagem horizontal de 375 px a 1.440 px.
+
+## 2026-09-09 — comissão apartada na proposta associativa
+
+- Alinha o popup “Proposta pronta - Bora Vender” à densidade visual do fluxo
+  editável: linhas de 23 px, texto de 10 px, bloco de descrição destacado e
+  separadores do mesmo livro-caixa.
+- Exibe a coluna “Comissão apartada” somente quando a Entrada alcança 6% do VGV
+  e o ranking possui regra na planilha `Pasta2.0.xlsx` (Ouro, Prata ou Bronze).
+- Replica no centavo comissão, prêmio, desconto, contrato, B.A., financiamento
+  e conciliação do modelo apartado, mantendo vazios os valores zerados.
+- Mantém a proposta faturada sem alteração abaixo do limite e reorganiza as
+  duas respostas em linhas empilhadas no mobile, sem rolagem horizontal.
+- Atualiza Next.js, Sharp e a resolução transitiva de `js-yaml` para versões
+  corrigidas após novos avisos críticos/altos bloquearem o gate de segurança.
 
 ## 2026-09-06 — Tabela Direta integral no CRM
 
