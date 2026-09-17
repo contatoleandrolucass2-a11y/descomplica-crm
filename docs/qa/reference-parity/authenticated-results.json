@@ -7475,7 +7475,7 @@
     "incomeAccepted": true,
     "fourProposalOptionsPresent": true,
     "allProposalOptionsSelectable": true,
-    "individualProposalPaymentsRendered": false,
+    "individualProposalPaymentsRendered": true,
     "approvedProposalStatusVisible": true,
     "filterPreservesSelectedUnitAndIncome": true,
     "cancelledUnitChangePreservesProposal": true,

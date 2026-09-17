@@ -453,7 +453,7 @@ describe("versioned reference parity catalog", () => {
     ).toBe(true);
     expect(Object.values(authenticatedResults.keyboard).every(Boolean)).toBe(true);
     expect(Object.values(authenticatedResults.simulatorValidation).every(Boolean)).toBe(true);
-    expect(Object.keys(authenticatedResults.directTableValidation)).toHaveLength(39);
+    expect(Object.keys(authenticatedResults.directTableValidation)).toHaveLength(40);
     expect(Object.values(authenticatedResults.directTableValidation).every(Boolean)).toBe(true);
 
     expect(authenticatedResults.visualInspectionCoverage).toEqual({

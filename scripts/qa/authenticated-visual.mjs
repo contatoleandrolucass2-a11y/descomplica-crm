@@ -1600,24 +1600,25 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
           const individualLabels = rows
             .map((row) => row.label)
             .filter((label) => /^(Sinal|Intermediária) \d+$/u.test(label));
-          const expectedLabels =
-            optionIndex === 0
-              ? []
-              : optionIndex === 1
-                ? ["Sinal 1", "Sinal 2", "Sinal 3"]
-                : optionIndex === 2
-                  ? ["Intermediária 1", "Intermediária 2", "Intermediária 3"]
-                  : [
-                      "Sinal 1",
-                      "Sinal 2",
-                      "Sinal 3",
-                      "Intermediária 1",
-                      "Intermediária 2",
-                      "Intermediária 3",
-                    ];
           const amountFor = (label) => rows.find((row) => row.label === label)?.value ?? 0;
           const signals = rows.filter((row) => /^Sinal \d+$/u.test(row.label));
           const intermediaries = rows.filter((row) => /^Intermediária \d+$/u.test(row.label));
+          const expectedSignalLabels =
+            optionIndex === 1 || optionIndex === 3 ? ["Sinal 1", "Sinal 2", "Sinal 3"] : [];
+          const intermediaryLabels = intermediaries.map((row) => row.label);
+          const expectsIntermediaries = optionIndex === 2 || optionIndex === 3;
+          const intermediariesAreConsecutive = intermediaryLabels.every(
+            (label, intermediaryIndex) => label === `Intermediária ${intermediaryIndex + 1}`,
+          );
+          const expectedLabels = [...expectedSignalLabels, ...intermediaryLabels];
+          const labelsMatch =
+            JSON.stringify(signals.map((row) => row.label)) ===
+              JSON.stringify(expectedSignalLabels) &&
+            (expectsIntermediaries
+              ? intermediaryLabels.length > 0
+              : intermediaryLabels.length === 0) &&
+            intermediariesAreConsecutive &&
+            JSON.stringify(individualLabels) === JSON.stringify(expectedLabels);
           const reconciled =
             amountFor("Valor real da venda") -
             amountFor("Ato") -
@@ -1626,7 +1627,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
             amountFor("Saldo parcelado pré-chaves") -
             amountFor("Saldo financiado");
           return (
-            JSON.stringify(individualLabels) === JSON.stringify(expectedLabels) &&
+            labelsMatch &&
             [...signals, ...intermediaries].every((row) => row.value > 0 && !row.invalid) &&
             Math.abs(reconciled) <= 0.02
           );
