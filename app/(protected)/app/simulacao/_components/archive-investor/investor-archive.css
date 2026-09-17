@@ -4247,6 +4247,351 @@ a {
   .goal-hero-actions .goal-save-button { width: 100%; }
 }
 
+/* Tabela Direta WF14: resumo selecionado e fluxo editável no mesmo ledger compacto do Associativo. */
+.investor-page-shell.investor-direct-table-page .investor-direct-comparison-card {
+  overflow: visible;
+}
+
+.investor-page-shell.investor-direct-table-page .investor-direct-comparison-heading {
+  border-radius: 11px 11px 0 0;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-ledger-row:last-child {
+  border-bottom: 0;
+  border-radius: 0 0 11px 11px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line {
+  gap: 4px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  > .investor-info-hint,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  .investor-info-trigger {
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  .investor-info-mark {
+  width: 13px;
+  height: 13px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  .investor-info-dialog {
+  top: calc(100% + 4px);
+  right: auto;
+  bottom: auto;
+  left: 0;
+  width: min(460px, calc(100vw - 48px));
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  .investor-info-dialog::before {
+  top: -5px;
+  right: auto;
+  bottom: auto;
+  left: 10px;
+  border: 0;
+  border-top: 1px solid #9bdce4;
+  border-left: 1px solid #9bdce4;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-heading
+  p {
+  max-width: 720px;
+  text-wrap: pretty;
+}
+
+.investor-page-shell.investor-direct-table-page .investor-direct-table-ledger {
+  width: min(980px, 100%);
+  margin-inline: auto;
+  overflow: visible;
+  border-radius: 14px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account {
+  width: 100%;
+  padding-bottom: 0;
+  overflow: visible;
+  border-block: 0;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  li:not(.investor-associative-payment-actions-row),
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  li:not(.investor-associative-payment-actions-row)
+  > .investor-direct-step-content {
+  height: 36px !important;
+  min-height: 36px !important;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  li:not(.investor-associative-payment-actions-row)
+  :where(strong, b, span, time, input, button) {
+  font-size: 11px !important;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-direct-step-content {
+  padding-right: 0;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  li.investor-associative-payment-actions-row {
+  height: 45px !important;
+  min-height: 45px !important;
+  overflow: visible;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-actions {
+  height: 35px;
+  min-height: 35px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-actions
+  > button {
+  height: 33px;
+  min-height: 33px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-actions
+  > button[aria-pressed="true"] {
+  color: #062536;
+  border-color: #66e4ec;
+  background: #66e4ec;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-associative-line-control,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-direct-step-composition,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-direct-step-calculation,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-associative-value-help {
+  height: 35px;
+  min-height: 35px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-associative-line-control
+  > input,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-associative-line-control
+  > strong {
+  height: 33px;
+  line-height: 33px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-associative-row-remove {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  min-height: 20px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-direct-step-name.investor-associative-label-only.has-leading-action {
+  grid-template-columns: 22px minmax(0, 1fr);
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-compact-payment-value {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 2px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-compact-payment-value
+  > .investor-info-trigger {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-compact-text {
+  display: block;
+  width: 100%;
+  padding-right: 8px;
+  color: #f4fbfd;
+  text-align: right;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-table-compact-account
+  .investor-direct-credit-result {
+  width: 100%;
+  padding-right: 8px;
+  align-items: flex-end;
+}
+
+@media (min-width: 761px) and (max-width: 1024px) {
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    li.investor-associative-payment-actions-row {
+    height: 54px !important;
+    min-height: 54px !important;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-actions,
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-actions
+    > button {
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 760px) {
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-comparison-option-line
+    > .investor-info-hint,
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-comparison-option-line
+    .investor-info-trigger {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    li.investor-associative-payment-actions-row {
+    height: 54px !important;
+    min-height: 54px !important;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-actions {
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-actions
+    > button {
+    height: 44px;
+    min-height: 44px;
+    padding-inline: 8px;
+    font-size: 11px;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    li:not(.investor-associative-payment-actions-row),
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    li:not(.investor-associative-payment-actions-row)
+    > .investor-direct-step-content {
+    height: 48px !important;
+    min-height: 48px !important;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    .investor-associative-line-control,
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    .investor-direct-step-composition,
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    .investor-direct-step-calculation,
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    .investor-associative-value-help {
+    height: 47px;
+    min-height: 47px;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    .investor-associative-line-control
+    > input,
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    .investor-associative-line-control
+    > strong {
+    height: 44px;
+    font-size: 16px !important;
+    line-height: 44px;
+  }
+}
+
+@media (max-width: 520px) {
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    li.investor-associative-payment-actions-row {
+    height: 150px !important;
+    min-height: 150px !important;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-actions {
+    grid-template-columns: minmax(0, 1fr);
+    height: 140px;
+    min-height: 140px;
+    gap: 4px;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account {
+    --investor-associative-ledger-columns: minmax(0, 1fr) minmax(150px, 0.9fr);
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    .investor-direct-step-label.has-date {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    .investor-associative-row-date {
+    display: none;
+  }
+}
+
 .goal-studio-partnerships .goal-conversion-panel .goal-panel-note {
   margin-block: 6px;
 }
@@ -7025,6 +7370,10 @@ a {
 .investor-page-shell.investor-direct-table-page .investor-stock-table td {
   height:24px!important;
   min-height:24px!important;
+}
+.investor-page-shell.investor-direct-table-page .investor-stock-table tbody tr {
+  content-visibility:auto;
+  contain-intrinsic-size:auto 24px;
 }
 .investor-page-shell.investor-direct-table-page .investor-stock-unit-button {
   width:24px!important;
@@ -19293,8 +19642,8 @@ body:has(.investor-page-shell) {
   display:grid;
   box-sizing:border-box;
   min-width:0;
-  height:23px;
-  min-height:23px;
+  height:25px;
+  min-height:25px;
   grid-template-columns:minmax(240px,1.15fr) 26px 38px minmax(130px,.85fr) 30px;
   align-items:center;
   border-bottom:1px solid #2c7b91;
@@ -19304,7 +19653,7 @@ body:has(.investor-page-shell) {
 .investor-page-shell .investor-direct-comparison-ledger-row:hover { background:#0e3a4f; }
 .investor-page-shell .investor-direct-comparison-ledger-label {
   display:flex;
-  height:22px;
+  height:24px;
   min-height:0;
   min-width:0;
   align-self:center;
@@ -19329,7 +19678,7 @@ body:has(.investor-page-shell) {
 .investor-page-shell .investor-direct-comparison-ledger-value,
 .investor-page-shell .investor-direct-comparison-ledger-help {
   display:flex;
-  height:22px;
+  height:24px;
   min-height:0;
   min-width:0;
   align-self:center;
@@ -19355,7 +19704,15 @@ body:has(.investor-page-shell) {
 }
 .investor-page-shell .investor-direct-comparison-ledger-help .investor-info-trigger {
   margin:0;
-  transform:scale(.58);
+  width:24px;
+  min-width:24px;
+  height:24px;
+  min-height:24px;
+  transform:none;
+}
+.investor-page-shell .investor-direct-comparison-ledger-help .investor-info-mark {
+  width:12px;
+  height:12px;
 }
 .investor-page-shell .investor-direct-comparison-ledger-row.is-muted {
   background:#0a3043;
@@ -20020,48 +20377,6 @@ body:has(.investor-page-shell) {
 }
 
 /* Tabela Direta: estados de validação e proteção responsiva do estoque integral. */
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination {
-  display:flex;
-  min-height:48px;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:8px 14px;
-  color:#b9d2dc;
-  border:1px solid #2a647c;
-  border-top:0;
-  border-radius:0 0 12px 12px;
-  background:#082d40;
-  font-size:11px;
-}
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination>div {
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination button {
-  min-width:82px;
-  min-height:36px;
-  padding:7px 10px;
-  color:#dff8fb;
-  border:1px solid #3a829c;
-  border-radius:8px;
-  background:#0c3a50;
-  font:inherit;
-  font-weight:800;
-  cursor:pointer;
-}
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination button:hover:not(:disabled),
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination button:focus-visible {
-  color:#082335;
-  border-color:#bef65a;
-  outline:0;
-  background:#bef65a;
-}
-.investor-page-shell.investor-direct-table-page .investor-stock-pagination button:disabled {
-  cursor:not-allowed;
-  opacity:.45;
-}
 .investor-page-shell .site-menu a[aria-disabled="true"] {
   cursor:not-allowed;
   opacity:.52;
@@ -20098,13 +20413,6 @@ body:has(.investor-page-shell) {
   color:#ffbf52;
 }
 @media (max-width:760px) {
-  .investor-page-shell.investor-direct-table-page .investor-stock-pagination {
-    align-items:stretch;
-    flex-direction:column;
-  }
-  .investor-page-shell.investor-direct-table-page .investor-stock-pagination>div {
-    justify-content:space-between;
-  }
   .investor-page-shell.investor-direct-table-page .investor-stock-panel>.investor-section-heading,
   .investor-page-shell.investor-standard-table-page .investor-stock-panel>.investor-section-heading {
     height:auto!important;
@@ -20377,5 +20685,24 @@ body:has(.investor-page-shell) {
     .investor-filter-heading
     > button {
     top: 0;
+  }
+}
+
+/* Tabela Direta WF14: ajustes finais precisam vencer as regras legadas deste arquivo. */
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  > span:first-child {
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+@media (max-width: 520px) {
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-comparison-option-line
+    .investor-info-dialog {
+    box-sizing: border-box;
+    width: min(246px, calc(100vw - 32px)) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 32px);
   }
 }

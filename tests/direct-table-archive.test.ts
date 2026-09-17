@@ -484,8 +484,19 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       calculator.includes("window.history.go(protectedHistoryIndex - destinationHistoryIndex)"),
     );
     assert.ok(calculator.includes("Sair da Tabela Direta descartará a proposta em edição"));
-    assert.ok(calculator.includes("paginationFocusRequested.current = true"));
-    assert.ok(calculator.includes('scrollIntoView({ behavior: "auto", block: "center" })'));
+    assert.ok(calculator.includes("matchingInventory.slice("));
+    assert.ok(
+      calculator.includes(
+        "onScroll={(event) => updateInventoryWindow(event.currentTarget.scrollTop)}",
+      ),
+    );
+    assert.ok(
+      calculator.includes('querySelector<HTMLTableRowElement>("tr:focus-within[aria-rowindex]")'),
+    );
+    assert.ok(calculator.includes("inventoryResultsRef.current?.focus({ preventScroll: true })"));
+    assert.ok(calculator.includes('aria-label="Estoque completo de unidades"'));
+    assert.ok(!calculator.includes("DIRECT_TABLE_INVENTORY_PAGE_SIZE"));
+    assert.ok(!calculator.includes('aria-label="Paginação do estoque completo"'));
     assert.ok(calculator.includes('aria-live="polite" aria-atomic="true"'));
   });
 
@@ -499,6 +510,101 @@ describe("Tabela Direta integral do arquivo anexado", () => {
         "Opção com sinal e com intermediária",
       ],
     );
+  });
+
+  it("mantém somente a opção selecionada no resumo e replica o ledger compacto no fluxo", () => {
+    const calculator = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    assert.ok(calculator.includes("<span>Opção {optionNumber}</span>"));
+    assert.ok(!calculator.includes("Base: opção"));
+    assert.ok(calculator.includes('title="Composição da opção selecionada"'));
+    assert.ok(!calculator.includes('<footer className="investor-direct-comparison-footer"'));
+    assert.ok(calculator.includes("label={`Sinal ${signal.index}`}"));
+    assert.ok(calculator.includes("label={`Intermediária ${item.index}`}"));
+    assert.ok(calculator.includes("key={`comparison-intermediary-${item.index}`}"));
+    assert.ok(calculator.includes("value={preKeysAvailable ? flow.custom.installmentValue : 0}"));
+    assert.ok(calculator.includes("investor-direct-table-compact-account"));
+    assert.equal(calculator.match(/<ol onKeyDown=\{focusNextAssociativeRow\}>/g)?.length, 2);
+    assert.ok(calculator.includes(">Inserir Sinal</button>"));
+    assert.ok(calculator.includes(">Inserir Intermediária</button>"));
+    assert.ok(calculator.includes(">Inserir Anual</button>"));
+  });
+
+  it("expõe os três sinais do cenário distribuído e fecha a entrada de R$ 50 mil em 10%", () => {
+    for (const optionId of [
+      "with-signal-without-intermediary",
+      "with-signal-with-intermediary",
+    ] as const) {
+      const preset = buildDirectTableProposalPreset(optionId, 50_000, {
+        baseDate: "2026-09-10",
+        completionDate: "2029-12-31",
+        plant: "Vaga",
+      });
+      const result = calculateDirectTableFileFlow({
+        ...base,
+        plant: "Vaga",
+        baseDate: "2026-09-10",
+        completionDate: "2029-12-31",
+        salePrice: 50_000,
+        entryValue: preset.entryValue,
+        signals: preset.signals,
+        intermediaries: preset.intermediaries,
+      });
+
+      assert.equal(preset.entryValue, 3_000);
+      assert.deepEqual(preset.signals, [670, 665, 665]);
+      assert.deepEqual(
+        result.custom.signals.map((signal) => signal.value),
+        [670, 665, 665],
+      );
+      assert.equal(result.custom.signalTotal, 2_000);
+      assert.equal(result.custom.totalEntryValue, 5_000);
+    }
+  });
+
+  it("divide corretamente sinais e intermediárias do cenário de R$ 55 mil", () => {
+    const dates = {
+      baseDate: "2026-09-15",
+      completionDate: "2028-06-30",
+      plant: "Vaga",
+    };
+
+    for (const optionId of [
+      "with-signal-without-intermediary",
+      "without-signal-with-intermediary",
+      "with-signal-with-intermediary",
+    ] as const) {
+      const preset = buildDirectTableProposalPreset(optionId, 55_000, dates);
+      const result = calculateDirectTableFileFlow({
+        ...base,
+        ...dates,
+        salePrice: 55_000,
+        entryValue: preset.entryValue,
+        signals: preset.signals,
+        intermediaries: preset.intermediaries,
+      });
+
+      if (optionId !== "without-signal-with-intermediary") {
+        assert.deepEqual(preset.signals, [737, 731.5, 731.5]);
+        assert.equal(result.custom.signalTotal, 2_200);
+        assert.equal(result.custom.totalEntryValue, 5_500);
+      }
+
+      if (optionId !== "with-signal-without-intermediary") {
+        assert.deepEqual(
+          result.custom.intermediaries.filter((item) => item.value > 0).map((item) => item.value),
+          [2_750, 2_750, 2_750],
+        );
+        assert.equal(result.custom.validIntermediaryTotal, 8_250);
+        assert.equal(result.custom.balance, 13_750);
+      }
+    }
   });
 
   it("prepara entrada, sinais e intermediária nas quatro opções", () => {

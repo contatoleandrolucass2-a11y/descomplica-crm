@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-09-16 — estoque contínuo e pagamentos completos na Tabela Direta
+
+- Remove a paginação do estoque da Tabela Direta e mantém as 3.301 unidades em
+  uma única barra de rolagem interna, com janela virtual para preservar a
+  resposta da seleção, filtros e ordenação.
+- Exibe Sinal 1, Sinal 2 e Sinal 3 separadamente nas opções 2 e 4, com a divisão
+  monetária fechando no centavo.
+- Exibe cada intermediária válida em linha própria nas opções 3 e 4, preservando
+  valor, ordem, data, percentual e estado de validação de cada pagamento.
+- Mantém a política especial de Vaga em 10% de entrada, 40% durante a obra e 50%
+  pós-chaves em até 66 parcelas; plantas comuns continuam seguindo a regra geral
+  do arquivo WF14.
+- Aproxima o fluxo editável da usabilidade compacta do Associativo, incluindo
+  avanço por Enter, sem alterar a rota ou o comportamento do Associativo.
+- Corrige foco na rolagem virtual, alvo de toque dos ícones de ajuda, overflow e
+  reconciliação automatizada das linhas individuais com os totais da proposta.
+
+## 2026-09-10 — refinamento WF14 da Tabela Direta
+
+- Simplifica o resumo calculado para exibir somente a opção selecionada, inclui
+  a ajuda contextual com a política de vaga completa e remove o rodapé
+  redundante de entrada total e percentual.
+- Detalha Sinal 1, Sinal 2 e Sinal 3 nas opções com entrada distribuída,
+  preservando ato de 6%, sinais somando 4% e entrada total de 10%.
+- Exibe somente o valor da primeira mensal pré-chaves no ledger; a memória
+  completa continua disponível na ajuda e no diálogo de parcelas.
+- Replica no fluxo editável o ledger compacto do Associativo com os botões
+  “Inserir Sinal”, “Inserir Intermediária” e “Inserir Desconto”, respeitando
+  três sinais, teto individual de 5% e datas válidas antes da entrega.
+- Mantém “Inserir Anual” exclusivamente no Associativo e não altera banco,
+  autenticação, permissões, rotas, APIs ou integrações.
+- Corrige semântica de lista, alvos de toque em tablet, tooltip em 375 px e
+  overflow responsivo do fluxo.
+
 ## 2026-09-10 — elegibilidade e largura da comissão apartada
 
 - Conecta o canal e a classificação escolhidos em “Comissão + Prêmio da venda”

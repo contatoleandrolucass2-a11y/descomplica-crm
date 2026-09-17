@@ -1,5 +1,70 @@
 # Worklog
 
+## 2026-09-16 — rolagem integral e composição individual da Tabela Direta
+
+- A paginação de 100 linhas foi removida. O estoque integral de 3.301 unidades
+  permanece acessível por uma única barra interna; a janela móvel de 60 linhas
+  reduz custo de DOM sem criar páginas, botões ou ocultar opções da rolagem.
+- Seleção, filtro, ordenação e “Limpar filtros” reposicionam corretamente a janela.
+  Quando uma linha focada sai da janela virtual, o foco retorna à região de
+  estoque em vez de cair no documento.
+- As opções 2 e 4 renderizam Sinal 1, 2 e 3. As opções 3 e 4 renderizam
+  Intermediária 1, 2 e 3 separadamente, inclusive estado inválido, data e ajuda
+  contextual; linhas agregadas ficam somente para grupos sem pagamento.
+- Para Vaga de R$ 55.000,00, a validação de dados confirmou ato de R$ 3.300,00,
+  sinais de R$ 737,00, R$ 731,50 e R$ 731,50, intermediárias de R$ 2.750,00 cada,
+  saldo financiado de R$ 27.500,00 e 66 parcelas pós-chaves de R$ 570,28. A
+  política geral de 60%/120 parcelas do XLSX continua aplicada a plantas comuns.
+- O ledger editável da Tabela Direta ganhou avanço por Enter no mesmo padrão de
+  uso do Associativo. O handler foi escopado à conta editável; guia e rota
+  Associativo não foram alterados.
+- Os ícones de ajuda do comparativo passaram a ter alvo de 24 px sem perder o
+  desenho compacto. A QA com Axe encontrou zero violações nos quatro tamanhos.
+- A QA isolada no navegador validou 375×812, 768×1024, 1024×768 e 1440×900:
+  3.301 unidades na mesma rolagem, chegada à última linha, ausência de paginação,
+  opções 2/3/4, política Vaga, reconciliação monetária, ausência de overflow,
+  zero erros de página e zero violações Axe.
+- `pnpm verify` passou: lint, TypeScript, 53 arquivos e 581 testes Vitest
+  aprovados com 1 skip preexistente, 8 testes Node aprovados e build Next.js
+  16.3 com 41 rotas. O Associativo permaneceu fora do escopo funcional.
+- Nenhum deploy, push, banco, dado real, API, permissão ou ambiente remoto foi
+  alterado.
+
+## 2026-09-10 — refinamento visual e funcional da Tabela Direta
+
+- A planilha WF14_AG-SIM-DIRETA_v1_2.xlsx foi conferida como fonte de regras,
+  não como instrução: opção 1 usa ato de 10%; opções 2 e 4 usam ato de 6% mais
+  três sinais de 1,34%, 1,33% e 1,33%; intermediárias aceitam até 5% cada e
+  somente datas válidas antes da entrega.
+- O cartão calculado mostra somente “Opção 1” a “Opção 4”, abre o texto integral
+  da composição no ícone information-at-mark.png, mantém a política de vaga
+  condicional à unidade e elimina o rodapé duplicado.
+- Os sinais deixaram de ser agregados no cartão: Sinal 1, 2 e 3 aparecem em
+  linhas próprias. Para R$ 50.000,00, a regressão prova ato de R$ 3.000,00,
+  sinais de R$ 670,00, R$ 665,00 e R$ 665,00 e entrada total de R$ 5.000,00.
+- O fluxo editável passou a reutilizar o ledger compacto já homologado no
+  Associativo. Os três botões ficam no topo; sinal para em três campos e
+  intermediária para no limite calculado por prazo/5%. O Associativo conserva
+  o texto “Inserir Anual”.
+- O resumo de mensais pré-chaves mostra apenas a primeira parcela. Cronograma,
+  resíduo da última parcela, datas e amortização continuam integrais nos
+  detalhes, diálogos e impressão.
+- Lint e TypeScript passaram sem erros. A suíte completa aprovou 53 arquivos,
+  580 testes e manteve um skip preexistente; os oito testes Node adicionais
+  também passaram.
+- O build otimizado do Next.js 16.3 passou após a limpeza do cache efêmero da
+  rota usada somente na QA; a rota temporária não faz parte da entrega.
+- A QA isolada com inventário sintético de 3.301 unidades validou 375×812,
+  768×1024, 1024×768 e 1440×900: política de vaga literal, três sinais nas
+  opções 2/4, rótulos, botões, inserção de sinal, primeira mensal, ausência de
+  overflow e zero violações Axe no fluxo. O tooltip móvel foi repetido após a
+  correção e ficou inteiramente dentro da viewport.
+- A matriz autenticada integral foi iniciada, mas parou em uma divergência
+  visual preexistente de tema escuro no Ranking antes de alcançar a validação
+  funcional da Tabela Direta. A falha não pertence aos arquivos alterados; a
+  rota foi validada separadamente nos quatro tamanhos obrigatórios.
+- Nenhum deploy, push, banco, dado real ou ambiente remoto foi alterado.
+
 ## 2026-09-10 — correção da comissão apartada
 
 - A auditoria confirmou que a classificação escolhida no popup de remuneração
