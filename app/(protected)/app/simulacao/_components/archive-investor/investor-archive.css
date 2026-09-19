@@ -4312,7 +4312,39 @@ a {
   .investor-direct-comparison-heading
   p {
   max-width: 720px;
+  margin-top: 2px;
+  line-height: 1.3;
   text-wrap: pretty;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-heading {
+  min-height: 50px;
+  padding-block: 7px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line {
+  margin-bottom: 0;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-ledger-row {
+  height: 23px;
+  min-height: 23px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-ledger-label,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-ledger-operator,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-ledger-currency,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-ledger-value,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-ledger-help {
+  height: 22px;
 }
 
 .investor-page-shell.investor-direct-table-page .investor-direct-table-ledger {
@@ -4460,8 +4492,12 @@ a {
   .investor-direct-table-compact-account
   .investor-direct-credit-result {
   width: 100%;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 6px;
   padding-right: 8px;
-  align-items: flex-end;
+  align-items: center;
+  white-space: nowrap;
 }
 
 @media (min-width: 761px) and (max-width: 1120px) {
@@ -20722,5 +20758,44 @@ body:has(.investor-page-shell) {
     width: min(246px, calc(100vw - 32px)) !important;
     min-width: 0 !important;
     max-width: calc(100vw - 32px);
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    li.investor-direct-credit-result-row,
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    li.investor-direct-credit-result-row
+    > .investor-direct-step-content {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-compact-account
+    li.investor-direct-credit-result-row
+    > .investor-direct-step-content {
+    grid-template-columns: minmax(96px, 0.7fr) minmax(205px, 1.3fr);
+    gap: 0;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-credit-result-row
+    .investor-associative-value-help {
+    grid-template-columns: minmax(0, 1fr) 36px;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-credit-result-row
+    .investor-direct-credit-result {
+    gap: 4px;
+    padding-right: 2px;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-credit-result-row
+    .investor-direct-credit-result
+    > :where(strong, small) {
+    font-size: 9px !important;
   }
 }

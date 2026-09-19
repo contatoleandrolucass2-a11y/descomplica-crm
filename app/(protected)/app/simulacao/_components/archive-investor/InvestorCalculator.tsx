@@ -431,10 +431,9 @@ function DirectProposalComparisonCard({ flow, optionNumber, active, baseDate, po
     <header className="investor-direct-comparison-heading">
       <div>
         <div className="investor-direct-comparison-option-line">
-          <span>Opção {optionNumber}</span>
+          <span id={titleId}>Opção {optionNumber}</span>
           <InvestorInfoHint label={`resumo da opção ${optionNumber}`} title="Composição da opção selecionada" description={compositionSummary} />
         </div>
-        <h4 id={titleId}>Composição atual calculada</h4>
         <p>{compositionSummary}</p>
       </div>
       <div className={`investor-direct-credit-status ${creditState}`}><small>Resultado</small><strong>{creditLabel}</strong><span>{flow.custom.income > 0 ? `${percent.format(flow.custom.commitment)} da renda` : "Informe a renda"}</span></div>
@@ -4199,6 +4198,7 @@ export function InvestorCalculator({
                   <AssociativeEditableAccountRow
                     operator=""
                     label="Resultado da proposta"
+                    rowClassName="investor-direct-credit-result-row"
                     tourTarget="credit-status"
                     fieldState="locked"
                     meta={result.custom.income > 0 ? `Comprometimento atual de ${percent.format(result.custom.commitment)} da renda. Limite: 40%.` : "Informe a renda mensal para calcular o comprometimento. Limite: 40%."}

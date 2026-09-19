@@ -521,8 +521,9 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       "utf8",
     );
 
-    assert.ok(calculator.includes("<span>Opção {optionNumber}</span>"));
+    assert.ok(calculator.includes("<span id={titleId}>Opção {optionNumber}</span>"));
     assert.ok(!calculator.includes("Base: opção"));
+    assert.ok(!calculator.includes("Composição atual calculada"));
     assert.ok(calculator.includes('title="Composição da opção selecionada"'));
     assert.ok(!calculator.includes('<footer className="investor-direct-comparison-footer"'));
     assert.ok(calculator.includes("label={`Sinal ${signal.index}`}"));
@@ -530,6 +531,7 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(calculator.includes("key={`comparison-intermediary-${item.index}`}"));
     assert.ok(calculator.includes("value={preKeysAvailable ? flow.custom.installmentValue : 0}"));
     assert.ok(calculator.includes("investor-direct-table-compact-account"));
+    assert.ok(calculator.includes('rowClassName="investor-direct-credit-result-row"'));
     assert.equal(calculator.match(/<ol onKeyDown=\{focusNextAssociativeRow\}>/g)?.length, 2);
     assert.ok(calculator.includes(">Inserir Sinal</button>"));
     assert.ok(calculator.includes(">Inserir Intermediária</button>"));
