@@ -4316,7 +4316,7 @@ a {
 }
 
 .investor-page-shell.investor-direct-table-page .investor-direct-table-ledger {
-  width: min(980px, 100%);
+  width: 50%;
   margin-inline: auto;
   overflow: visible;
   border-radius: 14px;
@@ -4337,15 +4337,15 @@ a {
   .investor-direct-table-compact-account
   li:not(.investor-associative-payment-actions-row)
   > .investor-direct-step-content {
-  height: 36px !important;
-  min-height: 36px !important;
+  height: 25px !important;
+  min-height: 25px !important;
 }
 
 .investor-page-shell.investor-direct-table-page
   .investor-direct-table-compact-account
   li:not(.investor-associative-payment-actions-row)
   :where(strong, b, span, time, input, button) {
-  font-size: 11px !important;
+  font-size: 10px !important;
 }
 
 .investor-page-shell.investor-direct-table-page
@@ -4357,22 +4357,22 @@ a {
 .investor-page-shell.investor-direct-table-page
   .investor-direct-table-compact-account
   li.investor-associative-payment-actions-row {
-  height: 45px !important;
-  min-height: 45px !important;
+  height: 36px !important;
+  min-height: 36px !important;
   overflow: visible;
 }
 
 .investor-page-shell.investor-direct-table-page
   .investor-direct-table-actions {
-  height: 35px;
-  min-height: 35px;
+  height: 27px;
+  min-height: 27px;
 }
 
 .investor-page-shell.investor-direct-table-page
   .investor-direct-table-actions
   > button {
-  height: 33px;
-  min-height: 33px;
+  height: 25px;
+  min-height: 25px;
   overflow-wrap: anywhere;
   white-space: normal;
 }
@@ -4397,8 +4397,8 @@ a {
 .investor-page-shell.investor-direct-table-page
   .investor-direct-table-compact-account
   .investor-associative-value-help {
-  height: 35px;
-  min-height: 35px;
+  height: 24px;
+  min-height: 24px;
 }
 
 .investor-page-shell.investor-direct-table-page
@@ -4409,8 +4409,8 @@ a {
   .investor-direct-table-compact-account
   .investor-associative-line-control
   > strong {
-  height: 33px;
-  line-height: 33px;
+  height: 23px;
+  line-height: 23px;
 }
 
 .investor-page-shell.investor-direct-table-page
@@ -4431,7 +4431,7 @@ a {
 .investor-page-shell.investor-direct-table-page
   .investor-direct-compact-payment-value {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 32px;
+  grid-template-columns: minmax(0, 1fr) 24px;
   width: 100%;
   min-width: 0;
   align-items: center;
@@ -4441,10 +4441,10 @@ a {
 .investor-page-shell.investor-direct-table-page
   .investor-direct-compact-payment-value
   > .investor-info-trigger {
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
-  min-height: 32px;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
 }
 
 .investor-page-shell.investor-direct-table-page
@@ -4464,7 +4464,11 @@ a {
   align-items: flex-end;
 }
 
-@media (min-width: 761px) and (max-width: 1024px) {
+@media (min-width: 761px) and (max-width: 1120px) {
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-table-ledger {
+    width: 100%;
+  }
   .investor-page-shell.investor-direct-table-page
     .investor-direct-table-compact-account
     li.investor-associative-payment-actions-row {
@@ -4483,6 +4487,20 @@ a {
 }
 
 @media (max-width: 760px) {
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-compact-payment-value {
+    grid-template-columns: minmax(0, 1fr) 44px;
+  }
+
+  .investor-page-shell.investor-direct-table-page
+    .investor-direct-compact-payment-value
+    > .investor-info-trigger {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+
   .investor-page-shell.investor-direct-table-page
     .investor-direct-comparison-option-line
     > .investor-info-hint,
