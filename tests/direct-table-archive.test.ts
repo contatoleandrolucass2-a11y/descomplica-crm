@@ -525,6 +525,7 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(!calculator.includes("Base: opção"));
     assert.ok(!calculator.includes("Composição atual calculada"));
     assert.ok(calculator.includes('title="Composição da opção selecionada"'));
+    assert.ok(!calculator.includes("<p>{compositionSummary}</p>"));
     assert.ok(!calculator.includes('<footer className="investor-direct-comparison-footer"'));
     assert.ok(calculator.includes("label={`Sinal ${signal.index}`}"));
     assert.ok(calculator.includes("label={`Intermediária ${item.index}`}"));
@@ -536,6 +537,37 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(calculator.includes(">Inserir Sinal</button>"));
     assert.ok(calculator.includes(">Inserir Intermediária</button>"));
     assert.ok(calculator.includes(">Inserir Anual</button>"));
+  });
+
+  it("preserva sinais e intermediárias manuais ao trocar a opção de referência", () => {
+    const calculator = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const handler = calculator.slice(
+      calculator.indexOf("function applyDirectProposalOption"),
+      calculator.indexOf("function toggleDiscountField"),
+    );
+
+    assert.ok(handler.includes("buildDirectTableProposalPreset"));
+    assert.ok(handler.includes("setSelectedDirectOption(optionId)"));
+    assert.ok(handler.includes("setEntryValue(preset.entryValue.toFixed(2))"));
+    assert.ok(handler.includes('setSignalDistributionMode("manual")'));
+    assert.ok(!handler.includes("setDirectProposalPreset(optionId)"));
+    assert.ok(!handler.includes("setSignals("));
+    assert.ok(!handler.includes("setSignalFieldCount("));
+    assert.ok(!handler.includes("setIntermediaries("));
+    assert.ok(!handler.includes("setIntermediaryFieldCount("));
+    assert.ok(calculator.includes("signalsRequired && !directTable ? 1 : 0"));
+
+    const incomeHandler = calculator.slice(
+      calculator.indexOf("function updateIncome"),
+      calculator.indexOf("function updateAssociativeIncome"),
+    );
+    assert.ok(!incomeHandler.includes("setDirectProposalPreset"));
   });
 
   it("expõe os três sinais do cenário distribuído e fecha a entrada de R$ 50 mil em 10%", () => {

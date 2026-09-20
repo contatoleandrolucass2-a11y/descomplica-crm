@@ -201,14 +201,14 @@ const ASSOCIATIVE_TOUR_STEPS = [...INVESTOR_TOUR_STEPS.filter((step) => step.tar
 });
 
 const DIRECT_TABLE_TOUR_STEPS = [
-  { target: "welcome", eyebrow: "Vamos começar", title: "Monte a proposta como um quebra-cabeça", description: "Primeiro você escolhe o imóvel. Depois informa a renda, escolhe um modelo pronto, confere os pagamentos e valida o resultado. O simulador faz as contas; você confirma se os dados estão corretos.", tip: "O guia apenas explica e aponta os lugares da tela. Ele não muda nenhum valor sozinho.", checklist: ["Escolha o imóvel", "Monte os pagamentos", "Confira antes de imprimir"] },
+  { target: "welcome", eyebrow: "Vamos começar", title: "Monte a proposta como um quebra-cabeça", description: "Primeiro você escolhe o imóvel. Depois informa a renda, escolhe um modelo de referência, insere os pagamentos opcionais e valida o resultado. O simulador faz as contas; você confirma se os dados estão corretos.", tip: "O guia apenas explica e aponta os lugares da tela. Ele não muda nenhum valor sozinho.", checklist: ["Escolha o imóvel", "Monte os pagamentos", "Confira antes de imprimir"] },
   { target: "information", eyebrow: "Ajuda sempre disponível", title: "Este símbolo explica a tela", description: "Quando encontrar este ícone ao lado de um valor ou título, passe o mouse, use o teclado ou clique para abrir uma explicação curta. Feche a ajuda e continue: nenhum valor da proposta será alterado.", tip: "", checklist: [] },
   { target: "filters", eyebrow: "Passo 1 · procurar", title: "Filtre o estoque até encontrar o imóvel", description: "Escolha incorporadora, empreendimento, região, planta e faixa de valor. Cada filtro diminui a lista para mostrar somente as unidades que combinam com o que o cliente procura.", tip: "Se a busca ficar confusa, use Limpar filtros e comece novamente.", checklist: ["Escolha os filtros", "Veja quantas unidades restaram", "Compare as opções"] },
   { target: "inventory", eyebrow: "Passo 2 · escolher", title: "Confira a unidade e selecione a linha correta", description: "Leia produto, metragem, data de entrega, planta e valor. Esses dados alimentam todas as contas, por isso o guia só deixa avançar depois que uma unidade for escolhida.", tip: "Se qualquer informação estiver errada, não avance: escolha outra unidade.", checklist: ["Confirme o produto", "Confira entrega e planta", "Selecione a unidade"] },
   { target: "sort", eyebrow: "Organize a lista", title: "Coloque os preços na ordem mais útil", description: "Escolha do menor para o maior ou do maior para o menor. Isso apenas muda a ordem visual da lista; não altera o imóvel nem o cálculo.", tip: "Use a ordenação para comparar rapidamente unidades próximas de preço.", checklist: ["Escolha a ordem", "Compare os valores", "Mantenha a unidade correta"] },
   { target: "property-summary", eyebrow: "Passo 3 · conhecer o imóvel", title: "Leia a ficha do imóvel antes de calcular", description: "Confira o empreendimento e a descrição da unidade, a incorporadora, a planta, a metragem, o andar, o andamento da obra, a data de entrega e o valor. A planta também define a política: quando contém “Vaga”, a obra recebe 40% e o pós-chaves 50% em até 66 parcelas; nas demais, são 30% e 60% em 120 parcelas.", tip: "Data de entrega e planta mudam datas, intermediárias e quantidade de parcelas. Se algo estiver errado, volte ao estoque.", checklist: ["Descrição e incorporadora", "Planta, metragem e andar", "Andamento, entrega e valor"] },
-  { target: "income", eyebrow: "Passo 4 · informar a renda", title: "Digite a renda mensal real do cliente", description: "A renda precisa ser maior que zero. Enquanto ela não for informada, a primeira opção e todo o fluxo editável ficam visíveis, mas congelados. Depois do preenchimento, o sistema libera os controles e compara a parcela pós-chaves com a renda.", tip: "O limite de comprometimento é 40%. A simulação orienta o atendimento, mas não substitui a análise de crédito interna.", checklist: ["Use a renda mensal real", "Digite um valor maior que zero", "Aguarde a liberação automática"] },
-  { target: "ready-options", eyebrow: "Passo 5 · escolher um modelo", title: "Entenda os 4 botões antes de escolher", description: "01 Pagamento simples: ato de 10%, sem sinais e sem intermediárias. 02 Entrada distribuída: ato de 6% e 3 sinais que completam 4%, sem intermediária. 03 Parcela reduzida: ato de 10%, sem sinais, com intermediárias de até 5% conforme a entrega. 04 Maior flexibilidade: ato de 6%, 3 sinais que completam 4% e intermediárias válidas.", tip: "Sem renda, somente a opção 01 aparece selecionada como referência e nenhum botão altera a proposta. Com renda, escolha um modelo e depois ajuste o fluxo editável.", checklist: ["Compare ato e sinais", "Confira se haverá intermediárias", "Escolha 1 modelo"] },
+  { target: "income", eyebrow: "Passo 4 · informar a renda", title: "Digite a renda mensal real do cliente", description: "A renda precisa ser maior que zero. Enquanto ela não for informada, a opção selecionada e todo o fluxo editável ficam visíveis, mas congelados. Depois do preenchimento, o sistema libera os controles e compara a parcela pós-chaves com a renda.", tip: "O limite de comprometimento é 40%. A simulação orienta o atendimento, mas não substitui a análise de crédito interna.", checklist: ["Use a renda mensal real", "Digite um valor maior que zero", "Aguarde a liberação automática"] },
+  { target: "ready-options", eyebrow: "Passo 5 · escolher um modelo", title: "Entenda os 4 botões antes de escolher", description: "01 Pagamento simples: ato de 10%, sem sinais e sem intermediárias. 02 Entrada distribuída: ato de 6%, com sinais preenchidos manualmente, sem intermediária. 03 Parcela reduzida: ato de 10%, sem sinais, com intermediárias preenchidas manualmente. 04 Maior flexibilidade: ato de 6%, com sinais e intermediárias preenchidos manualmente.", tip: "A opção define somente o ato de referência. Sinais e intermediárias nunca são adicionados nem alterados automaticamente: use os botões do fluxo editável.", checklist: ["Compare o ato", "Escolha 1 modelo", "Insira os pagamentos manualmente"] },
   { target: "proposal", eyebrow: "Passo 6 · fluxo editável", title: "Este é o Fluxo editável", description: "Este campo mostra como a proposta foi montada, com cada etapa, cálculo e resultado; ele fica bloqueado até a renda ser informada.", tip: "", checklist: [] },
   { target: "proposal-discount", eyebrow: "Passo 7 · valor e desconto", title: "Comece pelo valor real da proposta", description: "O valor do imóvel vem da unidade escolhida. O desconto é opcional e só deve ser aplicado quando estiver autorizado. Ele reduz a base usada em todas as contas seguintes.", tip: "O desconto não pode ser negativo nem igual ou maior que o valor do imóvel.", checklist: ["Confirme o valor", "Verifique a autorização", "Deixe zero quando não houver desconto"] },
   { target: "proposal-entry", eyebrow: "Passo 8 · entrada", title: "Monte pelo menos 10% de entrada", description: "O ato é pago na data da simulação. Sem sinais, use pelo menos 10% no ato. Com sinais, o ato pode começar em 6% e o restante deve levar a entrada total a 10% ou mais. Tudo o que ultrapassar 10% reduz o saldo pré-chaves, sem alterar o bloco pós-chaves.", tip: "A entrada total precisa atingir pelo menos 10% antes das intermediárias e não pode consumir o bloco pós-chaves.", checklist: ["Ato de 10% ou mais sem sinais", "Ou ato mínimo de 6%", "Complete pelo menos 10% com sinais"] },
@@ -223,8 +223,8 @@ const DIRECT_TABLE_TOUR_STEPS = [
 
 const DIRECT_TABLE_PROPOSAL_GUIDE_STEPS = [
   { title: "Confirme o imóvel", description: "Veja se empreendimento, unidade, planta, valor e data de entrega são os mesmos escolhidos pelo cliente.", note: "Se algo estiver errado, volte ao item 01 e escolha a linha correta. Essas informações são a base de toda a conta." },
-  { title: "Informe a renda real", description: "No item 02, escreva a renda mensal que será usada na análise. Esse preenchimento libera as quatro opções prontas.", note: "Não estime a renda. O sistema divide a parcela pós-chaves pela renda informada para medir o comprometimento." },
-  { title: "Escolha um modelo para começar", description: "No item 03, escolha uma das quatro opções: com ou sem sinais e com ou sem intermediárias. Sem renda, a primeira opção permanece visível como exemplo, mas todos os botões ficam congelados.", note: "Depois de informar uma renda válida, os quatro botões são liberados. A opção escolhida apenas prepara a proposta; você ainda pode revisar e ajustar cada valor no fluxo editável." },
+  { title: "Informe a renda real", description: "No item 02, escreva a renda mensal que será usada na análise. Esse preenchimento libera as quatro opções de referência.", note: "Não estime a renda. O sistema divide a parcela pós-chaves pela renda informada para medir o comprometimento." },
+  { title: "Escolha um modelo para começar", description: "No item 03, escolha uma das quatro opções de referência. Sem renda, a opção selecionada permanece visível, mas todos os botões ficam congelados.", note: "A opção escolhida ajusta somente o ato para 6% ou 10%. Sinais e intermediárias permanecem como estão e devem ser inseridos manualmente pelos botões do fluxo editável." },
   { title: "Entenda a divisão do pagamento", description: "Na regra geral, a proposta parte de 10% para entrada, 30% durante a obra e 60% depois das chaves em 120 parcelas. A entrada acima de 10% reduz o bloco flexível durante a obra.", note: "Quando o nome da planta contém “Vaga”, a divisão parte de 10% de entrada, 40% durante a obra e 50% depois das chaves em até 66 parcelas. O bloco pós-chaves permanece preservado." },
   { title: "Aplique desconto somente quando autorizado", description: "O desconto é opcional e reduz o valor real usado em todas as contas seguintes.", note: "Sem autorização, deixe o desconto desligado. O valor não pode ser negativo nem igual ou maior que o valor do imóvel." },
   { title: "Monte a entrada em ordem", description: "A entrada total precisa chegar a pelo menos 10%. O ato de hoje pode ser de 6% ou mais; se ficar abaixo de 10%, complete com até 3 sinais.", note: "Não pule a sequência: Sinal 2 precisa do Sinal 1, e Sinal 3 precisa do Sinal 2. Cada sinal não pode ser maior que o pagamento anterior. A entrada adicional reduz o pré-chaves e não pode consumir o pós-chaves." },
@@ -434,7 +434,6 @@ function DirectProposalComparisonCard({ flow, optionNumber, active, baseDate, po
           <span id={titleId}>Opção {optionNumber}</span>
           <InvestorInfoHint label={`resumo da opção ${optionNumber}`} title="Composição da opção selecionada" description={compositionSummary} />
         </div>
-        <p>{compositionSummary}</p>
       </div>
       <div className={`investor-direct-credit-status ${creditState}`}><small>Resultado</small><strong>{creditLabel}</strong><span>{flow.custom.income > 0 ? `${percent.format(flow.custom.commitment)} da renda` : "Informe a renda"}</span></div>
     </header>
@@ -1766,7 +1765,7 @@ const DIRECT_TABLE_POLICY_TOPICS = [
     title: "Distribuição, ato e sinais",
     items: [
       "Regra geral: 10% de entrada, 30% durante a obra e 60% pós-chaves em 120 parcelas. Se o nome da planta contiver “Vaga”: 10% de entrada, 40% durante a obra e 50% pós-chaves em até 66 parcelas.",
-      "Sem sinais, o ato pronto corresponde a 10%. Com sinais, o padrão pronto distribui 6% no ato e 4% em três sinais: 1,34%, 1,33% e 1,33%, com ajuste final de centavos para fechar os 10%.",
+      "Sem sinais, use 10% no ato. Nas opções com sinais, o ato de referência corresponde a 6%; o usuário insere manualmente até três sinais para completar pelo menos 10% de entrada, sem preenchimento automático.",
       "Os sinais são consecutivos: não existe Sinal 2 sem Sinal 1 nem Sinal 3 sem Sinal 2. O Sinal 1 não pode superar o ato; o Sinal 2 não pode superar o Sinal 1; e o Sinal 3 não pode superar o Sinal 2.",
       "O ato usa a data da simulação. Cada pagamento seguinte usa o último dia comercial disponível entre 5, 10 e 15, sempre depois do anterior, dentro da janela de 31 dias e sem ultrapassar a entrega.",
     ],
@@ -1803,7 +1802,7 @@ const DIRECT_TABLE_POLICY_TOPICS = [
 
 const DIRECT_TABLE_FAQ = [
   { question: "Para quem serve a Tabela Direta?", answer: "Para clientes que comportam parcelas maiores, querem quitar o imóvel em menos tempo, possuem restrição para financiamento CAIXA ou preferem financiar em outra instituição. A modalidade continua sujeita à análise interna." },
-  { question: "Qual das quatro opções devo usar?", answer: "Escolha conforme a forma de entrada desejada: ato único ou ato com três sinais; e com ou sem intermediárias. Compare o fluxo completo e só apresente a alternativa que respeitar a renda e a auditoria." },
+  { question: "Qual das quatro opções devo usar?", answer: "Escolha conforme a forma de entrada desejada: ato único ou ato com sinais; e com ou sem intermediárias. A opção ajusta somente o ato de referência. Insira sinais e intermediárias manualmente no fluxo, confira a conta e só apresente a alternativa que respeitar a renda e a auditoria." },
   { question: "O que muda quando a planta contém “Vaga”?", answer: "A entrada permanece em 10%. O bloco da obra passa de 30% para 40%, e o pós-chaves passa de 60% em 120 parcelas para 50% em até 66 parcelas." },
   { question: "Posso pular ou aumentar um sinal?", answer: "Não pode haver lacunas: o Sinal 2 depende do Sinal 1, e o Sinal 3 depende do Sinal 2. Cada sinal também precisa ser igual ou menor que o pagamento anterior." },
   { question: "Como as datas 5, 10 e 15 são escolhidas?", answer: "A partir do pagamento anterior, o simulador procura o último dia válido entre 5, 10 e 15 que seja posterior, esteja dentro de 31 dias e não ultrapasse a entrega. Essa cascata define sinais e o início das mensais; qualquer sinal posterior à entrega exige ajuste." },
@@ -2830,7 +2829,7 @@ export function InvestorCalculator({
                 ? result.errors?.[0] || "Revise os campos destacados no Fluxo editável."
                 : undefined;
   const activeSignalFieldCount = signals.reduce((latest, value, index) => currencyInputNumber(value) > 0 ? index + 1 : latest, 0);
-  const signalVisibilityFloor = Math.max(signalFieldCount, activeSignalFieldCount, signalsRequired ? 1 : 0);
+  const signalVisibilityFloor = Math.max(signalFieldCount, activeSignalFieldCount, signalsRequired && !directTable ? 1 : 0);
   const visibleSignalIndexes = signals
     .map((_, index) => index)
     .filter((index) => index < signalVisibilityFloor && !hiddenSignalIndexes.includes(index));
@@ -3213,7 +3212,6 @@ export function InvestorCalculator({
     if (directTable && selectedUnitId) setDirectProposalDirty(true);
     setIncome(value);
     if (currencyInputNumber(value) > 0) setDirectIncomeNotice("");
-    else if (directTable) setDirectProposalPreset(DIRECT_TABLE_PROPOSAL_OPTIONS[0].id);
   }
 
   function updateAssociativeIncome(value: string) {
@@ -3296,26 +3294,16 @@ export function InvestorCalculator({
 
   function applyDirectProposalOption(optionId: string) {
     if (!directIncomeReady) {
-      setDirectIncomeNotice("Informe a renda mensal para liberar as quatro opções prontas.");
+      setDirectIncomeNotice("Informe a renda mensal para liberar as quatro opções de referência.");
       window.requestAnimationFrame(() => directIncomeInputRef.current?.focus());
       return;
     }
-    setDirectProposalPreset(optionId);
-    setDirectProposalDirty(true);
-  }
-
-  function setDirectProposalPreset(optionId: string) {
     const preset = buildDirectTableProposalPreset(optionId, result.context.valueReal, { baseDate, completionDate, plant: selectedUnit?.plant ?? "" });
     if (!preset) return;
     setSelectedDirectOption(optionId);
     setEntryValue(preset.entryValue.toFixed(2));
     setSignalDistributionMode("manual");
-    setSignals(preset.signals.map((value: number) => value > 0 ? value.toFixed(2) : "0"));
-    setSignalFieldCount(preset.signalFieldCount);
-    setHiddenSignalIndexes([]);
-    setIntermediaries(preset.intermediaries.map((value: number) => value > 0 ? value.toFixed(2) : "0"));
-    setIntermediaryFieldCount(preset.intermediaryFieldCount);
-    setHiddenIntermediaryIndexes([]);
+    setDirectProposalDirty(true);
   }
 
   function toggleDiscountField() {
@@ -3563,7 +3551,7 @@ export function InvestorCalculator({
               </header>
               <header className="investor-section-heading investor-standard-heading investor-direct-choice-heading">
                 <span>03</span>
-                <div><p>Escolha rápida</p><h2 id="investor-standard-title">4 opções prontas disponíveis</h2></div>
+                <div><p>Escolha rápida</p><h2 id="investor-standard-title">4 opções de referência</h2></div>
               </header>
             </div>
             <div className="investor-direct-five-card-grid" role="group" aria-label="Renda e opções de proposta da Tabela Direta">
@@ -3623,7 +3611,7 @@ export function InvestorCalculator({
             </div>
             <DirectPreKeysDialog dialogRef={directPreKeysDialog} principal={result.custom.balance} schedule={directPreKeysSchedule} />
             <DirectAmortizationDialog dialogRef={directAmortizationDialog} principal={result.custom.postKeysBalance} schedule={directAmortizationSchedule} />
-            <p className="investor-scenario-order">{!directIncomeReady ? "A opção 01 e o fluxo editável abaixo estão visíveis como referência, mas permanecem congelados até você informar a renda." : selectedDirectProposalOption ? "Confira a proposta pronta e ajuste os valores no fluxo editável abaixo." : "Escolha uma opção para exibir a proposta pronta."}</p>
+            <p className="investor-scenario-order">{!directIncomeReady ? "A opção selecionada e o fluxo editável abaixo estão visíveis como referência, mas permanecem congelados até você informar a renda." : selectedDirectProposalOption ? "Confira o modelo de referência e ajuste os valores no fluxo editável abaixo." : "Escolha uma opção para exibir o modelo de referência."}</p>
           </> : <>
             {directVisualLayout ? <div className="investor-direct-five-card-grid investor-associative-direct-grid" role="group" aria-label="Opções prontas da Tabela Associativo">
               <div className="investor-direct-ready-options">
@@ -4041,7 +4029,7 @@ export function InvestorCalculator({
                   <div>
                     <p>Fluxo visível e congelado</p>
                     <h3>Informe a renda no item 02 para editar esta proposta.</h3>
-                    <small>A opção 01 permanece como referência. Nenhum campo abaixo pode ser alterado até o preenchimento da renda.</small>
+                    <small>A opção selecionada permanece como referência. Nenhum campo abaixo pode ser alterado até o preenchimento da renda.</small>
                   </div>
                   <button type="button" onClick={() => directIncomeInputRef.current?.focus()}>Informar renda</button>
                 </div> : null}

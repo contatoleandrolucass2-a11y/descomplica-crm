@@ -1558,7 +1558,8 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const proposalOptions = page.locator(".investor-direct-ready-options button");
   const fourProposalOptionsPresent = (await proposalOptions.count()) === 4;
   const optionSelectionChecks = [];
-  const optionPaymentRowChecks = [];
+  const optionManualFlowChecks = [];
+  const parsePtBrAmount = (value) => Number(value.replace(/\./g, "").replace(",", "."));
   for (let index = 0; index < (await proposalOptions.count()); index += 1) {
     const option = proposalOptions.nth(index);
     const available =
@@ -1573,71 +1574,70 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
           .locator('.investor-direct-ready-options button[aria-pressed="true"]')
           .count()) === 1,
     );
-    optionPaymentRowChecks.push(
-      await page
-        .locator(".investor-direct-comparison-card")
-        .first()
-        .evaluate((card, optionIndex) => {
-          const parseAmount = (value) =>
-            Number(
-              value
-                .replace(/[^\d,.-]/g, "")
-                .replace(/\./g, "")
-                .replace(",", "."),
-            );
-          const rows = [...card.querySelectorAll(".investor-direct-comparison-ledger-row")].map(
-            (row) => ({
-              label:
-                row
-                  .querySelector(".investor-direct-comparison-ledger-label strong")
-                  ?.textContent?.trim() ?? "",
-              value: parseAmount(
-                row.querySelector(".investor-direct-comparison-ledger-value")?.textContent ?? "",
-              ),
-              invalid: row.classList.contains("is-invalid"),
-            }),
-          );
-          const individualLabels = rows
-            .map((row) => row.label)
-            .filter((label) => /^(Sinal|Intermediária) \d+$/u.test(label));
-          const amountFor = (label) => rows.find((row) => row.label === label)?.value ?? 0;
-          const signals = rows.filter((row) => /^Sinal \d+$/u.test(row.label));
-          const intermediaries = rows.filter((row) => /^Intermediária \d+$/u.test(row.label));
-          const expectedSignalLabels =
-            optionIndex === 1 || optionIndex === 3 ? ["Sinal 1", "Sinal 2", "Sinal 3"] : [];
-          const intermediaryLabels = intermediaries.map((row) => row.label);
-          const expectsIntermediaries = optionIndex === 2 || optionIndex === 3;
-          const intermediariesAreConsecutive = intermediaryLabels.every(
-            (label, intermediaryIndex) => label === `Intermediária ${intermediaryIndex + 1}`,
-          );
-          const expectedLabels = [...expectedSignalLabels, ...intermediaryLabels];
-          const labelsMatch =
-            JSON.stringify(signals.map((row) => row.label)) ===
-              JSON.stringify(expectedSignalLabels) &&
-            (expectsIntermediaries
-              ? intermediaryLabels.length > 0
-              : intermediaryLabels.length === 0) &&
-            intermediariesAreConsecutive &&
-            JSON.stringify(individualLabels) === JSON.stringify(expectedLabels);
-          const reconciled =
-            amountFor("Valor real da venda") -
-            amountFor("Ato") -
-            signals.reduce((total, row) => total + row.value, 0) -
-            intermediaries.reduce((total, row) => total + row.value, 0) -
-            amountFor("Saldo parcelado pré-chaves") -
-            amountFor("Saldo financiado");
-          return (
-            labelsMatch &&
-            [...signals, ...intermediaries].every((row) => row.value > 0 && !row.invalid) &&
-            Math.abs(reconciled) <= 0.02
-          );
-        }, index),
+    optionManualFlowChecks.push(
+      (await page.locator('input[aria-label^="Valor do sinal "]').count()) === 0 &&
+        (await page.locator('input[aria-label^="Valor da intermediária "]').count()) === 0 &&
+        (await page
+          .locator(".investor-direct-comparison-card .investor-direct-comparison-ledger-row")
+          .evaluateAll(
+            (rows, expectedActRate) => {
+              const parseAmount = (value) =>
+                Number(
+                  value
+                    .replace(/[^\d,.-]/g, "")
+                    .replace(/\./g, "")
+                    .replace(",", "."),
+                );
+              const amounts = new Map(
+                rows.map((row) => [
+                  row
+                    .querySelector(".investor-direct-comparison-ledger-label strong")
+                    ?.textContent?.trim() ?? "",
+                  parseAmount(
+                    row.querySelector(".investor-direct-comparison-ledger-value")?.textContent ??
+                      "",
+                  ),
+                ]),
+              );
+              const valueReal = amounts.get("Valor real da venda") ?? 0;
+              const act = amounts.get("Ato") ?? 0;
+              return (
+                valueReal > 0 &&
+                Math.abs(act / valueReal - expectedActRate) < 0.000001 &&
+                rows.every(
+                  (row) =>
+                    !/^(Sinal|Intermediária) \d+$/u.test(
+                      row
+                        .querySelector(".investor-direct-comparison-ledger-label strong")
+                        ?.textContent?.trim() ?? "",
+                    ),
+                )
+              );
+            },
+            index === 1 || index === 3 ? 0.06 : 0.1,
+          )),
     );
   }
   const allProposalOptionsSelectable =
     optionSelectionChecks.length === 4 && optionSelectionChecks.every(Boolean);
-  const individualProposalPaymentsRendered =
-    optionPaymentRowChecks.length === 4 && optionPaymentRowChecks.every(Boolean);
+  const optionsKeepOptionalPaymentsManual =
+    optionManualFlowChecks.length === 4 && optionManualFlowChecks.every(Boolean);
+  const summaryInfoButton = page.getByRole("button", {
+    name: /Informações sobre resumo da opção \d/u,
+  });
+  const summaryRemovedFromCard =
+    (await page.locator(".investor-direct-comparison-heading p").count()) === 0 &&
+    (await summaryInfoButton.count()) === 1;
+  await summaryInfoButton.click();
+  const summaryInfoNote = page.getByRole("note", { name: "Composição da opção selecionada" });
+  const summaryInfoText = (await summaryInfoNote.textContent())?.replace(/\s+/g, " ").trim() ?? "";
+  const selectedOptionSummaryOnlyInInfo =
+    summaryRemovedFromCard &&
+    (await summaryInfoNote.isVisible()) &&
+    summaryInfoText.includes("Ato de 6,0%") &&
+    summaryInfoText.includes("Sem sinais") &&
+    summaryInfoText.includes("Sem intermediária");
+  await page.keyboard.press("Escape");
   await proposalOptions.first().click();
 
   const proposalStatus = page.locator(
@@ -1784,16 +1784,49 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     .locator('.investor-direct-ready-options button[aria-pressed="true"]')
     .filter({ hasText: "Maior flexibilidade" })
     .waitFor({ state: "visible" });
+
+  const actInput = page.getByRole("textbox", { name: "Valor do ato", exact: true });
+  const directValueReal = parsePtBrAmount(await actInput.inputValue()) / 0.06;
+  const signalRates = [0.0134, 0.0133, 0.0133];
+  const insertSignal = page.getByRole("button", { name: "Inserir Sinal", exact: true });
+  for (let index = 0; index < signalRates.length; index += 1) {
+    await insertSignal.click();
+    await page
+      .getByRole("textbox", { name: `Valor do sinal ${index + 1}`, exact: true })
+      .fill(String(Math.round(directValueReal * signalRates[index] * 100)));
+  }
+  await page.getByRole("button", { name: "Inserir Intermediária", exact: true }).click();
+  const intermediaryAdjustmentInput = page
+    .locator('input[aria-label^="Valor da intermediária "]')
+    .last();
+  await intermediaryAdjustmentInput.fill(String(Math.round(directValueReal * 0.05 * 100)));
+
+  const manualSignalValues = await page
+    .locator('input[aria-label^="Valor do sinal "]')
+    .evaluateAll((inputs) => inputs.map((input) => input.value));
+  const manualIntermediaryValues = await page
+    .locator('input[aria-label^="Valor da intermediária "]')
+    .evaluateAll((inputs) => inputs.map((input) => input.value));
+  await proposalOptions.nth(2).click();
+  await proposalOptions.last().click();
+  const manualOptionalPaymentsPersist =
+    JSON.stringify(
+      await page
+        .locator('input[aria-label^="Valor do sinal "]')
+        .evaluateAll((inputs) => inputs.map((input) => input.value)),
+    ) === JSON.stringify(manualSignalValues) &&
+    JSON.stringify(
+      await page
+        .locator('input[aria-label^="Valor da intermediária "]')
+        .evaluateAll((inputs) => inputs.map((input) => input.value)),
+    ) === JSON.stringify(manualIntermediaryValues);
+
   await proposalStatus.getByText("APROVADO", { exact: true }).waitFor({
     state: "visible",
     timeout: 10_000,
   });
 
-  const actInput = page.getByRole("textbox", { name: "Valor do ato", exact: true });
   const actBeforeInvalidState = await actInput.inputValue();
-  const intermediaryAdjustmentInput = page
-    .locator('input[aria-label^="Valor da intermediária "]')
-    .last();
   const intermediaryBeforeApprovedEdit = await intermediaryAdjustmentInput.inputValue();
   await actInput.fill("100");
   const actDescriptionId = await actInput.getAttribute("aria-describedby");
@@ -2348,7 +2381,9 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     incomeAccepted,
     fourProposalOptionsPresent,
     allProposalOptionsSelectable,
-    individualProposalPaymentsRendered,
+    optionsKeepOptionalPaymentsManual,
+    selectedOptionSummaryOnlyInInfo,
+    manualOptionalPaymentsPersist,
     approvedProposalStatusVisible,
     filterPreservesSelectedUnitAndIncome,
     cancelledUnitChangePreservesProposal,
