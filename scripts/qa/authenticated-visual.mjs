@@ -1458,7 +1458,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
       .click();
     await auxiliaryPage
       .locator(
-        '.investor-direct-credit-result[role="status"] strong, .investor-direct-comparison-heading .investor-direct-credit-status strong',
+        '.investor-direct-table-compact-account .investor-direct-credit-result[role="status"] strong',
       )
       .filter({ hasText: /^APROVADO$/ })
       .first()
@@ -1563,6 +1563,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const fourProposalOptionsPresent = (await proposalOptions.count()) === 4;
   const optionSelectionChecks = [];
   const optionPaymentRowChecks = [];
+  const optionResultLayoutChecks = [];
   for (let index = 0; index < (await proposalOptions.count()); index += 1) {
     const option = proposalOptions.nth(index);
     const available =
@@ -1637,11 +1638,42 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
           );
         }, index),
     );
+    optionResultLayoutChecks.push(
+      await page
+        .locator(".investor-direct-comparison-card")
+        .first()
+        .evaluate((card) => {
+          const heading = card.querySelector(".investor-direct-comparison-heading");
+          const rows = [...card.querySelectorAll(".investor-direct-comparison-ledger-row")];
+          const resultRow = rows.at(-1);
+          const resultStatus = resultRow?.querySelector(
+            ".investor-direct-comparison-result-value .investor-direct-credit-result",
+          );
+          const resultLabel = resultStatus?.querySelector("strong")?.textContent?.trim() ?? "";
+          const resultCommitment = resultStatus?.querySelector("small")?.textContent?.trim() ?? "";
+          return (
+            heading instanceof HTMLElement &&
+            Math.abs(heading.getBoundingClientRect().height - 100) <= 1 &&
+            heading.querySelector(".investor-direct-credit-status") === null &&
+            resultRow
+              ?.querySelector(".investor-direct-comparison-ledger-label strong")
+              ?.textContent?.trim() === "Resultado da proposta" &&
+            resultStatus instanceof HTMLElement &&
+            resultStatus.getAttribute("role") === null &&
+            resultStatus.getAttribute("aria-live") === null &&
+            resultStatus.parentElement?.getAttribute("aria-colspan") === "3" &&
+            /^(APROVADO|REPROVADO|AJUSTE NECESSÁRIO|PENDENTE)$/u.test(resultLabel) &&
+            (resultCommitment === "" || /^\d+,\d+% da renda$/u.test(resultCommitment))
+          );
+        }),
+    );
   }
   const allProposalOptionsSelectable =
     optionSelectionChecks.length === 4 && optionSelectionChecks.every(Boolean);
   const individualProposalPaymentsRendered =
     optionPaymentRowChecks.length === 4 && optionPaymentRowChecks.every(Boolean);
+  const proposalResultMovedToLedger =
+    optionResultLayoutChecks.length === 4 && optionResultLayoutChecks.every(Boolean);
   const summaryInfoButton = page.getByRole("button", {
     name: /Informações sobre resumo da opção \d/u,
   });
@@ -1661,7 +1693,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   await proposalOptions.first().click();
 
   const proposalStatus = page.locator(
-    '.investor-direct-credit-result[role="status"][aria-live="polite"][aria-atomic="true"]',
+    '.investor-direct-table-compact-account .investor-direct-credit-result[role="status"][aria-live="polite"][aria-atomic="true"]',
   );
   const approvedProposalStatusVisible =
     (await proposalStatus.isVisible()) &&
@@ -2150,7 +2182,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     const mobileComparison = responsivePage.locator(".investor-direct-comparison-card").first();
     await mobileComparison.waitFor({ state: "visible", timeout: 10_000 });
     await mobileComparison.scrollIntoViewIfNeeded();
-    mobileComparisonHasNoTruncationOrOverlap = await mobileComparison.evaluate((card) => {
+    const mobileComparisonDiagnostics = await mobileComparison.evaluate((card) => {
       const root = document.documentElement;
       const body = document.body;
       const cardRect = card.getBoundingClientRect();
@@ -2165,40 +2197,113 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
           (rectangle, index) => index === 0 || rectangles[index - 1].right <= rectangle.left + 1,
         );
       };
-      return (
-        window.innerWidth === 375 &&
-        root.scrollWidth <= root.clientWidth + 1 &&
-        body.scrollWidth <= body.clientWidth + 1 &&
-        cardRect.left >= -1 &&
-        cardRect.right <= window.innerWidth + 1 &&
-        card.scrollWidth <= card.clientWidth + 1 &&
-        rows.length >= 8 &&
-        rows.every((row) => {
-          const cells = [
-            row.querySelector(".investor-direct-comparison-ledger-label"),
-            row.querySelector(".investor-direct-comparison-ledger-operator"),
-            row.querySelector(".investor-direct-comparison-ledger-currency"),
-            row.querySelector(".investor-direct-comparison-ledger-value"),
-            row.querySelector(".investor-direct-comparison-ledger-help"),
-          ].filter((element) => element instanceof HTMLElement);
-          const label = row.querySelector(".investor-direct-comparison-ledger-label strong");
-          const value = row.querySelector(".investor-direct-comparison-ledger-value");
-          const labelStyle = label ? getComputedStyle(label) : null;
-          const valueStyle = value ? getComputedStyle(value) : null;
-          return (
-            row.scrollWidth <= row.clientWidth + 1 &&
-            cells.length === 5 &&
-            orderedWithoutOverlap(cells) &&
-            fitsOwnBox(label) &&
-            fitsOwnBox(value) &&
-            labelStyle?.textOverflow !== "ellipsis" &&
-            labelStyle?.whiteSpace === "normal" &&
-            valueStyle?.textOverflow !== "ellipsis" &&
-            valueStyle?.whiteSpace === "normal"
-          );
-        })
-      );
+      const measurementCanvas = document.createElement("canvas");
+      const measurementContext = measurementCanvas.getContext("2d");
+      const measureText = (element, text) => {
+        if (!(element instanceof HTMLElement) || !measurementContext)
+          return Number.POSITIVE_INFINITY;
+        measurementContext.font = getComputedStyle(element).font;
+        return measurementContext.measureText(text).width;
+      };
+      const rowDiagnostics = rows.map((row) => {
+        const isResultRow = row.classList.contains("investor-direct-comparison-result-row");
+        const cells = [
+          row.querySelector(".investor-direct-comparison-ledger-label"),
+          row.querySelector(
+            isResultRow
+              ? ".investor-direct-comparison-result-value"
+              : ".investor-direct-comparison-ledger-operator",
+          ),
+          isResultRow ? null : row.querySelector(".investor-direct-comparison-ledger-currency"),
+          isResultRow ? null : row.querySelector(".investor-direct-comparison-ledger-value"),
+          row.querySelector(".investor-direct-comparison-ledger-help"),
+        ].filter((element) => element instanceof HTMLElement);
+        const label = row.querySelector(".investor-direct-comparison-ledger-label strong");
+        const value = row.querySelector(
+          isResultRow
+            ? ".investor-direct-comparison-result-value"
+            : ".investor-direct-comparison-ledger-value",
+        );
+        const valueContent = isResultRow
+          ? row.querySelector(".investor-direct-credit-result")
+          : value;
+        const labelStyle = label ? getComputedStyle(label) : null;
+        const valueStyle = value ? getComputedStyle(value) : null;
+        const resultStrong = isResultRow ? valueContent?.querySelector("strong") : null;
+        const resultSmall = isResultRow ? valueContent?.querySelector("small") : null;
+        const resultGap =
+          isResultRow && valueContent instanceof HTMLElement
+            ? Number.parseFloat(getComputedStyle(valueContent).columnGap) || 0
+            : 0;
+        const worstResultWidth = isResultRow
+          ? measureText(resultStrong, "AJUSTE NECESSÁRIO") +
+            resultGap +
+            measureText(resultSmall, "999,99% da renda")
+          : 0;
+        const labelRect = label?.parentElement?.getBoundingClientRect();
+        const valueRect = value?.getBoundingClientRect();
+        const helpRect = cells.at(-1)?.getBoundingClientRect();
+        const cellsOrdered = isResultRow
+          ? Boolean(
+              labelRect &&
+              valueRect &&
+              helpRect &&
+              labelRect.bottom <= valueRect.top + 1 &&
+              valueRect.right <= helpRect.left + 1,
+            )
+          : orderedWithoutOverlap(cells);
+        const checks = {
+          rowFits: row.scrollWidth <= row.clientWidth + 1,
+          cellCount: cells.length === (isResultRow ? 3 : 5),
+          cellOrder: cellsOrdered,
+          labelFits: fitsOwnBox(label),
+          valueFits: fitsOwnBox(value),
+          valueContentFits: fitsOwnBox(valueContent),
+          resultWorstCaseFits:
+            !isResultRow ||
+            (valueContent instanceof HTMLElement &&
+              worstResultWidth <= valueContent.clientWidth + 1),
+          labelNotEllipsized: labelStyle?.textOverflow !== "ellipsis",
+          labelWraps: labelStyle?.whiteSpace === "normal",
+          valueNotEllipsized: valueStyle?.textOverflow !== "ellipsis",
+          valueWraps: valueStyle?.whiteSpace === "normal",
+        };
+        return {
+          label: label?.textContent?.trim() ?? "",
+          passed: Object.values(checks).every(Boolean),
+          checks,
+          rowWidth: [row.clientWidth, row.scrollWidth],
+          valueWidth: value instanceof HTMLElement ? [value.clientWidth, value.scrollWidth] : null,
+          valueContentWidth:
+            valueContent instanceof HTMLElement
+              ? [valueContent.clientWidth, valueContent.scrollWidth]
+              : null,
+          worstResultWidth: isResultRow ? Math.ceil(worstResultWidth) : null,
+        };
+      });
+      const checks = {
+        windowWidth: window.innerWidth === 375,
+        rootFits: root.scrollWidth <= root.clientWidth + 1,
+        bodyFits: body.scrollWidth <= body.clientWidth + 1,
+        cardLeftFits: cardRect.left >= -1,
+        cardRightFits: cardRect.right <= window.innerWidth + 1,
+        cardContentFits: card.scrollWidth <= card.clientWidth + 1,
+        rowCount: rows.length >= 8,
+        rowsPass: rowDiagnostics.every((row) => row.passed),
+      };
+      return {
+        passed: Object.values(checks).every(Boolean),
+        checks,
+        cardWidth: [card.clientWidth, card.scrollWidth],
+        failedRows: rowDiagnostics.filter((row) => !row.passed),
+      };
     });
+    mobileComparisonHasNoTruncationOrOverlap = mobileComparisonDiagnostics.passed;
+    if (!mobileComparisonHasNoTruncationOrOverlap) {
+      process.stdout.write(
+        `Mobile comparison diagnostics: ${JSON.stringify(mobileComparisonDiagnostics)}\n`,
+      );
+    }
 
     async function checkOpenMenuPanel(triggerName, panelId) {
       const trigger = responsivePage.getByRole("button", { name: triggerName, exact: true });
@@ -2407,6 +2512,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     fourProposalOptionsPresent,
     allProposalOptionsSelectable,
     individualProposalPaymentsRendered,
+    proposalResultMovedToLedger,
     selectedOptionSummaryOnlyInInfo,
     readyOptionalPaymentInputs,
     optionalPaymentsPersistAfterIncomeChange,
