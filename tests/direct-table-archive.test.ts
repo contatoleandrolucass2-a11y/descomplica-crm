@@ -532,16 +532,50 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(calculator.includes('title="Composição da opção selecionada"'));
     assert.ok(!calculator.includes("<p>{compositionSummary}</p>"));
     assert.ok(!calculator.includes('<footer className="investor-direct-comparison-footer"'));
+    assert.ok(
+      !calculator.includes(
+        "<div className={`investor-direct-credit-status ${creditState}`}><small>Resultado</small>",
+      ),
+    );
     assert.ok(calculator.includes("label={`Sinal ${signal.index}`}"));
     assert.ok(calculator.includes("label={`Intermediária ${item.index}`}"));
     assert.ok(calculator.includes("key={`comparison-intermediary-${item.index}`}"));
     assert.ok(calculator.includes("value={preKeysAvailable ? flow.custom.installmentValue : 0}"));
+    assert.ok(calculator.includes("function DirectComparisonResultRow"));
+    assert.ok(calculator.includes('label="Resultado da proposta"'));
+    assert.ok(calculator.includes("status={creditLabel}"));
+    assert.ok(calculator.includes("state={creditState}"));
+    assert.ok(calculator.includes("commitment={flow.custom.commitment}"));
+    assert.ok(calculator.includes('role="cell" aria-colspan={3}'));
+    const comparisonResultRow = calculator.slice(
+      calculator.indexOf("function DirectComparisonResultRow"),
+      calculator.indexOf("function DirectProposalComparisonCard"),
+    );
+    assert.ok(!comparisonResultRow.includes('role="status"'));
+    assert.ok(!comparisonResultRow.includes("aria-live"));
     assert.ok(calculator.includes("investor-direct-table-compact-account"));
     assert.ok(calculator.includes('rowClassName="investor-direct-credit-result-row"'));
     assert.equal(calculator.match(/<ol onKeyDown=\{focusNextAssociativeRow\}>/g)?.length, 2);
     assert.ok(calculator.includes(">Inserir Sinal</button>"));
     assert.ok(calculator.includes(">Inserir Intermediária</button>"));
     assert.ok(calculator.includes(">Inserir Anual</button>"));
+  });
+
+  it("mantém o cabeçalho da opção com 100 px e o resultado no fim do ledger", () => {
+    const styles = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    assert.match(
+      styles,
+      /\.investor-page-shell\.investor-direct-table-page\s+\.investor-direct-comparison-heading\s*\{[^}]*height:\s*100px;[^}]*min-height:\s*100px;/su,
+    );
+    assert.ok(styles.includes(".investor-direct-comparison-result-row"));
+    assert.ok(styles.includes(".investor-direct-comparison-result-value"));
   });
 
   it("carrega a resposta pronta e mantém o fluxo editável", () => {

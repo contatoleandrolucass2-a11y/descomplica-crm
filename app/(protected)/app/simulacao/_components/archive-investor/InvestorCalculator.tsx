@@ -390,6 +390,21 @@ function DirectComparisonLedgerRow({ label, detail, operator, value, displayValu
   </div>;
 }
 
+function DirectComparisonResultRow({ label, detail, status, state, commitment, showCommitment }: { label: string; detail: string; status: string; state: "approved" | "rejected" | "adjustment" | "pending"; commitment: number; showCommitment: boolean }) {
+  const invalid = state === "rejected" || state === "adjustment";
+
+  return <div className={`investor-direct-comparison-ledger-row investor-direct-comparison-result-row${invalid ? " is-invalid" : ""}`} role="row">
+    <div className="investor-direct-comparison-ledger-label" role="rowheader"><strong>{label}</strong></div>
+    <div className="investor-direct-comparison-result-value" role="cell" aria-colspan={3}>
+      <span className={`investor-direct-credit-result ${state}`}>
+        <strong>{status}</strong>
+        {showCommitment ? <small>{percent.format(commitment)} da renda</small> : null}
+      </span>
+    </div>
+    <div className="investor-direct-comparison-ledger-help" role="cell"><InvestorInfoHint label={label} title={label} description={detail} /></div>
+  </div>;
+}
+
 function DirectProposalComparisonCard({ flow, optionNumber, active, baseDate, policySummary }: { flow: DirectTableFlowResult; optionNumber: number; active: boolean; baseDate: string; policySummary: string }) {
   const titleId = useId();
   const creditLabel = flow.custom.status;
@@ -435,7 +450,6 @@ function DirectProposalComparisonCard({ flow, optionNumber, active, baseDate, po
           <InvestorInfoHint label={`resumo da opção ${optionNumber}`} title="Composição da opção selecionada" description={compositionSummary} />
         </div>
       </div>
-      <div className={`investor-direct-credit-status ${creditState}`}><small>Resultado</small><strong>{creditLabel}</strong><span>{flow.custom.income > 0 ? `${percent.format(flow.custom.commitment)} da renda` : "Informe a renda"}</span></div>
     </header>
     <div className="investor-direct-comparison-ledger" role="table" aria-label="Livro-caixa da composição atual">
       <DirectComparisonLedgerRow label="Valor real da venda" detail="Base usada nesta proposta" operator="=" value={flow.context.valueReal} />
@@ -472,6 +486,14 @@ function DirectProposalComparisonCard({ flow, optionNumber, active, baseDate, po
       />
       <DirectComparisonLedgerRow label="Saldo financiado" detail={`${percent.format(flow.context.postKeysRate)} do valor do imóvel`} operator="=" value={flow.custom.postKeysBalance} />
       <DirectComparisonLedgerRow label={`${flow.custom.postKeysInstallments} parcelas mensais pós-chaves`} detail={`1ª em ${formatDate(flow.custom.firstPostKeysDate)}`} operator="÷" value={flow.custom.postKeysPayment} emphasized />
+      <DirectComparisonResultRow
+        label="Resultado da proposta"
+        detail={flow.custom.income > 0 ? `Comprometimento atual de ${percent.format(flow.custom.commitment)} da renda. Limite: 40%.` : "Informe a renda mensal para calcular o comprometimento. Limite: 40%."}
+        status={creditLabel}
+        state={creditState}
+        commitment={flow.custom.commitment}
+        showCommitment={flow.custom.income > 0}
+      />
     </div>
   </article>;
 }
