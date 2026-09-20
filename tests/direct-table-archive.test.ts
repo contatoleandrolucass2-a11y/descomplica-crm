@@ -108,6 +108,11 @@ const buildDirectTableProposalPreset = directTableRules.buildDirectTableProposal
   value: number,
   dates?: { baseDate?: string; completionDate?: string; plant?: string | null },
 ) => ProposalPreset;
+const isDirectTableProposalPresetComplete =
+  directTableRules.isDirectTableProposalPresetComplete as (
+    optionId: ProposalOptionId,
+    preset: ProposalPreset | null,
+  ) => boolean;
 const calculateDirectTableFileFlow = directTableRules.calculateDirectTableFileFlow as (
   input: DirectInput,
 ) => DirectResult;
@@ -539,7 +544,7 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(calculator.includes(">Inserir Anual</button>"));
   });
 
-  it("preserva sinais e intermediárias manuais ao trocar a opção de referência", () => {
+  it("carrega a resposta pronta e mantém o fluxo editável", () => {
     const calculator = readFileSync(
       new URL(
         "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
@@ -557,10 +562,19 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(handler.includes("setEntryValue(preset.entryValue.toFixed(2))"));
     assert.ok(handler.includes('setSignalDistributionMode("manual")'));
     assert.ok(!handler.includes("setDirectProposalPreset(optionId)"));
-    assert.ok(!handler.includes("setSignals("));
-    assert.ok(!handler.includes("setSignalFieldCount("));
-    assert.ok(!handler.includes("setIntermediaries("));
-    assert.ok(!handler.includes("setIntermediaryFieldCount("));
+    assert.ok(handler.includes("setSignals(preset.signals.map"));
+    assert.ok(handler.includes("setSignalFieldCount(preset.signalFieldCount)"));
+    assert.ok(handler.includes("setHiddenSignalIndexes([])"));
+    assert.ok(handler.includes("setIntermediaries(preset.intermediaries.map"));
+    assert.ok(handler.includes("setIntermediaryFieldCount(preset.intermediaryFieldCount)"));
+    assert.ok(handler.includes("setHiddenIntermediaryIndexes([])"));
+    assert.ok(handler.includes("directProposalOptionAvailability.get(optionId)"));
+    assert.ok(calculator.includes('setSelectedDirectOption("")'));
+    assert.ok(
+      calculator.includes(
+        "directProposalOptionAvailability.get(selectedDirectOption)?.ready === true",
+      ),
+    );
     assert.ok(calculator.includes("signalsRequired && !directTable ? 1 : 0"));
 
     const incomeHandler = calculator.slice(
@@ -587,6 +601,7 @@ describe("Tabela Direta integral do arquivo anexado", () => {
         completionDate: "2029-12-31",
         salePrice: 50_000,
         entryValue: preset.entryValue,
+        income: 5_000,
         signals: preset.signals,
         intermediaries: preset.intermediaries,
       });
@@ -599,6 +614,11 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       );
       assert.equal(result.custom.signalTotal, 2_000);
       assert.equal(result.custom.totalEntryValue, 5_000);
+      assert.equal(result.custom.postKeysBalance, 25_000);
+      assert.equal(result.custom.postKeysInstallments, 66);
+      assert.equal(result.custom.postKeysPayment, 518.43);
+      assert.equal(result.proposalReady, true);
+      assert.equal(result.custom.status, "APROVADO");
     }
   });
 
@@ -667,6 +687,33 @@ describe("Tabela Direta integral do arquivo anexado", () => {
         withAll.intermediaryFieldCount,
       ],
       [24_000, [5_360, 5_320, 5_320], [20_000, 20_000, 20_000, 20_000, 0, 0, 0, 0], 3, 4],
+    );
+  });
+
+  it("não oferece como pronta a opção sem intermediária válida antes da entrega", () => {
+    const dates = { baseDate: "2026-08-19", completionDate: "2027-05-14" };
+    const withIntermediary = buildDirectTableProposalPreset(
+      "without-signal-with-intermediary",
+      400_000,
+      dates,
+    );
+    const withoutIntermediary = buildDirectTableProposalPreset(
+      "without-signal-without-intermediary",
+      400_000,
+      dates,
+    );
+
+    assert.equal(withIntermediary.intermediaryFieldCount, 0);
+    assert.equal(
+      isDirectTableProposalPresetComplete("without-signal-with-intermediary", withIntermediary),
+      false,
+    );
+    assert.equal(
+      isDirectTableProposalPresetComplete(
+        "without-signal-without-intermediary",
+        withoutIntermediary,
+      ),
+      true,
     );
   });
 
