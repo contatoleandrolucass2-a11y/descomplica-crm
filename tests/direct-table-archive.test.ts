@@ -603,8 +603,8 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       calculator.indexOf("export function InvestorGuideLauncher"),
     );
     assert.ok(infoHint.includes('popover="auto"'));
-    assert.ok(infoHint.includes('dialog.showPopover()'));
-    assert.ok(infoHint.includes('dialog.hidePopover()'));
+    assert.ok(infoHint.includes("dialog.showPopover()"));
+    assert.ok(infoHint.includes("dialog.hidePopover()"));
     assert.ok(infoHint.includes('dialog.matches(":popover-open")'));
     assert.ok(infoHint.includes('window.addEventListener("scroll", reposition, true)'));
     assert.ok(infoHint.includes("window.innerWidth"));
@@ -636,7 +636,9 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(calculator.includes("Para Vaga"));
     assert.ok(calculator.includes("scrollToGuidedSection(directJourneySectionRef.current)"));
     assert.ok(calculator.includes("scrollToGuidedSection(associativeFlowSectionRef.current)"));
-    assert.ok(calculator.includes("sectionRef={directTable ? directJourneySectionRef : undefined}"));
+    assert.ok(
+      calculator.includes("sectionRef={directTable ? directJourneySectionRef : undefined}"),
+    );
     assert.ok(calculator.includes('block: "start"'));
   });
 

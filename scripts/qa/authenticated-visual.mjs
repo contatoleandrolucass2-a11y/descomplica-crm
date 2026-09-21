@@ -1545,7 +1545,9 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const firstSelectableRow = page.locator(".investor-stock-table tbody tr.selectable").first();
   await firstSelectableRow.click();
   await page.waitForFunction(() => {
-    const target = document.querySelector(".investor-property-summary.investor-guided-scroll-target");
+    const target = document.querySelector(
+      ".investor-property-summary.investor-guided-scroll-target",
+    );
     if (!(target instanceof HTMLElement)) return false;
     const rectangle = target.getBoundingClientRect();
     return rectangle.top >= 0 && rectangle.top < window.innerHeight;
@@ -1589,20 +1591,24 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
       (await option.getAttribute("aria-disabled")) === "false";
     await option.click();
     await page.waitForFunction(() => {
-      const target = document.querySelector(".investor-direct-flow-panel.investor-guided-scroll-target");
+      const target = document.querySelector(
+        ".investor-direct-flow-panel.investor-guided-scroll-target",
+      );
       if (!(target instanceof HTMLElement)) return false;
       const rectangle = target.getBoundingClientRect();
       return rectangle.top >= 0 && rectangle.top < window.innerHeight;
     });
     optionGuidedScrollChecks.push(
-      await page.locator(".investor-direct-flow-panel.investor-guided-scroll-target").evaluate((target) => {
-        const rectangle = target.getBoundingClientRect();
-        return (
-          target === document.activeElement &&
-          rectangle.top >= 0 &&
-          rectangle.top < window.innerHeight
-        );
-      }),
+      await page
+        .locator(".investor-direct-flow-panel.investor-guided-scroll-target")
+        .evaluate((target) => {
+          const rectangle = target.getBoundingClientRect();
+          return (
+            target === document.activeElement &&
+            rectangle.top >= 0 &&
+            rectangle.top < window.innerHeight
+          );
+        }),
     );
     optionSelectionChecks.push(
       available &&
@@ -1777,7 +1783,8 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   await paymentRulesTrigger.click();
   const paymentRulesNote = page.getByRole("note", { name: "Como o parcelamento funciona?" });
   await paymentRulesNote.waitFor({ state: "visible", timeout: 2_000 });
-  const paymentRulesText = (await paymentRulesNote.textContent())?.replace(/\s+/g, " ").trim() ?? "";
+  const paymentRulesText =
+    (await paymentRulesNote.textContent())?.replace(/\s+/g, " ").trim() ?? "";
   const detailedPaymentRulesWork =
     paymentRulesLabelVisible &&
     (await paymentRulesNote.evaluate((note) => note.matches(":popover-open"))) &&
@@ -2309,9 +2316,11 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     });
     const mobileInfoDialogFitsViewport =
       mobileInfoDialogDiagnostics.bounds.left >= -1 &&
-      mobileInfoDialogDiagnostics.bounds.right <= mobileInfoDialogDiagnostics.bounds.viewportWidth + 1 &&
+      mobileInfoDialogDiagnostics.bounds.right <=
+        mobileInfoDialogDiagnostics.bounds.viewportWidth + 1 &&
       mobileInfoDialogDiagnostics.bounds.top >= -1 &&
-      mobileInfoDialogDiagnostics.bounds.bottom <= mobileInfoDialogDiagnostics.bounds.viewportHeight + 1 &&
+      mobileInfoDialogDiagnostics.bounds.bottom <=
+        mobileInfoDialogDiagnostics.bounds.viewportHeight + 1 &&
       mobileInfoDialogDiagnostics.dialogFitsWidth &&
       mobileInfoDialogDiagnostics.dialogFitsHeight &&
       mobileInfoDialogDiagnostics.rootFits &&
