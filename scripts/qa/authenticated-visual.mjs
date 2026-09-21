@@ -1582,33 +1582,31 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const optionSelectionChecks = [];
   const optionPaymentRowChecks = [];
   const optionResultLayoutChecks = [];
-  const optionGuidedScrollChecks = [];
+  const optionReadyAnswerChecks = [];
   for (let index = 0; index < (await proposalOptions.count()); index += 1) {
     const option = proposalOptions.nth(index);
     const available =
       (await option.isVisible()) &&
       (await option.isEnabled()) &&
       (await option.getAttribute("aria-disabled")) === "false";
+    const scrollBeforeSelection = await page.evaluate(() => window.scrollY);
     await option.click();
-    await page.waitForFunction(() => {
-      const target = document.querySelector(
-        ".investor-direct-flow-panel.investor-guided-scroll-target",
-      );
-      if (!(target instanceof HTMLElement)) return false;
-      const rectangle = target.getBoundingClientRect();
-      return rectangle.top >= 0 && rectangle.top < window.innerHeight;
-    });
-    optionGuidedScrollChecks.push(
-      await page
-        .locator(".investor-direct-flow-panel.investor-guided-scroll-target")
-        .evaluate((target) => {
-          const rectangle = target.getBoundingClientRect();
-          return (
-            target === document.activeElement &&
-            rectangle.top >= 0 &&
-            rectangle.top < window.innerHeight
-          );
-        }),
+    const readyAnswer = page.locator(".investor-direct-comparison-card").first();
+    await readyAnswer.waitFor({ state: "visible", timeout: 10_000 });
+    optionReadyAnswerChecks.push(
+      await option.evaluate((button, initialScrollY) => {
+        const answer = document.querySelector(".investor-direct-comparison-card");
+        const flow = document.querySelector(".investor-direct-flow-panel");
+        const answerRectangle = answer?.getBoundingClientRect();
+        return (
+          button === document.activeElement &&
+          Math.abs(window.scrollY - initialScrollY) <= 2 &&
+          answerRectangle instanceof DOMRect &&
+          answerRectangle.top >= 0 &&
+          answerRectangle.top < window.innerHeight &&
+          flow !== document.activeElement
+        );
+      }, scrollBeforeSelection),
     );
     optionSelectionChecks.push(
       available &&
@@ -1730,8 +1728,8 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     optionPaymentRowChecks.length === 4 && optionPaymentRowChecks.every(Boolean);
   const proposalResultMovedToLedger =
     optionResultLayoutChecks.length === 4 && optionResultLayoutChecks.every(Boolean);
-  const optionSelectionContinuesGuidedJourney =
-    optionGuidedScrollChecks.length === 4 && optionGuidedScrollChecks.every(Boolean);
+  const optionSelectionStaysOnReadyAnswer =
+    optionReadyAnswerChecks.length === 4 && optionReadyAnswerChecks.every(Boolean);
   const summaryInfoButton = page.getByRole("button", {
     name: /Informações sobre resumo da opção \d/u,
   });
@@ -1781,11 +1779,11 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     .getByText("Regra", { exact: true })
     .isVisible();
   await paymentRulesTrigger.click();
-  const paymentRulesNote = page.getByRole("note", { name: "Como o parcelamento funciona?" });
+  const paymentRulesNote = page.getByRole("note", { name: "Regras de parcelamento" });
   await paymentRulesNote.waitFor({ state: "visible", timeout: 2_000 });
   const paymentRulesText =
     (await paymentRulesNote.textContent())?.replace(/\s+/g, " ").trim() ?? "";
-  const detailedPaymentRulesWork =
+  const paymentRulesAreConciseAndCompact =
     paymentRulesLabelVisible &&
     (await paymentRulesNote.evaluate((note) => note.matches(":popover-open"))) &&
     [
@@ -1794,10 +1792,15 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
       "3. Intermediárias:",
       "4. Parcelas pré-chaves:",
       "5. Parcelas pós-chaves:",
-      "Para Apartamento",
-      "Para Vaga",
-      "40% da renda mensal",
-    ].every((expected) => paymentRulesText.includes(expected));
+      "6. Renda:",
+      "dentro do saldo pré-chaves",
+      "coincidir com uma mensal",
+    ].every((expected) => paymentRulesText.includes(expected)) &&
+    !paymentRulesText.includes("Imagine") &&
+    (await paymentRulesNote.evaluate((note) => {
+      const rectangle = note.getBoundingClientRect();
+      return rectangle.width <= 421 && rectangle.height <= 421;
+    }));
   await page.keyboard.press("Escape");
   await paymentRulesNote.waitFor({ state: "hidden", timeout: 2_000 });
 
@@ -2663,10 +2666,10 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     allProposalOptionsSelectable,
     individualProposalPaymentsRendered,
     proposalResultMovedToLedger,
-    optionSelectionContinuesGuidedJourney,
+    optionSelectionStaysOnReadyAnswer,
     selectedOptionSummaryOnlyInInfo,
     contextualHelpUsesTopLayer,
-    detailedPaymentRulesWork,
+    paymentRulesAreConciseAndCompact,
     readyOptionalPaymentInputs,
     optionalPaymentsPersistAfterIncomeChange,
     optionSwitchReloadsReadyPreset,

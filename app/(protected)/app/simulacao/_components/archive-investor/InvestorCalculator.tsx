@@ -3042,21 +3042,17 @@ export function InvestorCalculator({
   const directParkingPolicySummary = result.context.parkingPolicy
     ? `Política Vaga: 10% de entrada · ${directPreKeysRateLabel} durante a obra · ${directPostKeysRateLabel} pós-chaves em até ${result.custom.postKeysInstallments} parcelas`
     : "";
-  const directPaymentRulesHelp = `Imagine o valor real do imóvel como um bolo dividido em 100 partes. Cada pagamento fica em uma parte certa para a soma fechar.
+  const directPaymentRulesHelp = `1. Entrada: mínimo de 10% do valor real. Pode ser Ato de 10% ou Ato mínimo de 6% mais até 3 Sinais que completem os 4% restantes.
 
-1. Entrada: a entrada total precisa somar pelo menos 10% do valor real. Ela pode ser paga inteira no Ato, com 10%, ou dividida em Ato de no mínimo 6% mais até 3 Sinais que completam os 4% restantes. O Ato é pago primeiro, na data da proposta.
+2. Sinais: até 3 pagamentos, antes da entrega, nos dias 05, 10 ou 15. Cada valor não pode superar o pagamento anterior.
 
-2. Sinais: são pagamentos opcionais logo depois do Ato. O usuário escolhe se quer inserir 1, 2 ou 3 sinais e informa os valores manualmente. Eles precisam ficar em ordem, antes da entrega, nos dias comerciais permitidos (05, 10 ou 15). Cada sinal não pode ser maior que o pagamento anterior. A soma de Ato e Sinais forma a entrada total.
+3. Intermediárias: opcionais, com até 5% do valor real cada e dentro do saldo pré-chaves. Devem coincidir com uma mensal, após o início do pré-chaves e no mínimo 3 meses antes da entrega.
 
-3. Intermediárias: são reforços opcionais durante a obra. O usuário insere cada valor manualmente. Cada intermediária pode valer no máximo 5% do valor real. A data precisa ficar depois do começo das mensais pré-chaves e pelo menos 3 meses antes da entrega. O simulador mostra somente as datas válidas e desconta apenas as intermediárias aprovadas do saldo pré-chaves.
+4. Parcelas pré-chaves: 30% para Apartamento e 40% para Vaga. Entrada adicional e intermediárias válidas reduzem esse saldo. Sem juros e seguros.
 
-4. Parcelas pré-chaves: são as mensais pagas durante a obra. Para Apartamento, essa parte começa em 30% do valor real. Para Vaga, começa em 40%. Entrada adicional e intermediárias válidas diminuem esse saldo. O simulador divide o que restar pelos meses disponíveis até a entrega, sem juros e sem seguros.
+5. Parcelas pós-chaves: 60% para Apartamento em até 120 parcelas; 50% para Vaga em até 66 parcelas. Tabela PRICE, juros nominais de 12% ao ano, MIP e DFI.
 
-5. Parcelas pós-chaves: começam depois da entrega. Para Apartamento, o saldo é 60% e pode ser dividido em até 120 parcelas. Para Vaga, o saldo é 50% e pode ser dividido em até 66 parcelas. Essa etapa usa a Tabela PRICE, com juros nominais de 12% ao ano e os seguros MIP e DFI.
-
-Regra desta unidade: ${result.context.parkingPolicy ? `Vaga — entrada total de 10%, ${directPreKeysRateLabel} durante a obra e ${directPostKeysRateLabel} pós-chaves em até ${result.custom.postKeysInstallments} parcelas.` : `Apartamento — entrada total de 10%, ${directPreKeysRateLabel} durante a obra e ${directPostKeysRateLabel} pós-chaves em até ${result.custom.postKeysInstallments} parcelas.`}
-
-No fim, confira o Resultado da proposta. A primeira parcela pós-chaves pode comprometer no máximo 40% da renda mensal informada.`;
+6. Renda: a primeira parcela pós-chaves pode comprometer no máximo 40% da renda mensal.`;
   const validDirectIntermediaryCount = result.custom.intermediaries
     .filter((item: { value: number; approved: boolean }) => item.value > 0 && item.approved).length;
   const directEntryExcess = directTable ? directResult.custom.entryExcess : 0;
@@ -3494,14 +3490,6 @@ No fim, confira o Resultado da proposta. A primeira parcela pós-chaves pode com
     setIntermediaryFieldCount(preset.intermediaryFieldCount);
     setHiddenIntermediaryIndexes([]);
     setDirectProposalDirty(true);
-    if (tourOpen) {
-      if (tourSteps[tourStep].target === "ready-options") {
-        const proposalStep = tourSteps.findIndex((step) => step.target === "proposal");
-        if (proposalStep >= 0) setTourStep(proposalStep);
-      }
-    } else {
-      window.setTimeout(() => scrollToGuidedSection(associativeFlowSectionRef.current), 0);
-    }
   }
 
   function toggleDiscountField() {
@@ -4399,7 +4387,7 @@ No fim, confira o Resultado da proposta. A primeira parcela pós-chaves pode com
                 </fieldset>
                   <div className="investor-direct-rule-help" aria-label="Regra de parcelamento">
                     <span>Regra</span>
-                    <InvestorInfoHint label="regra de parcelamento" title="Como o parcelamento funciona?" description={directPaymentRulesHelp} variant="rules" />
+                    <InvestorInfoHint label="regra de parcelamento" title="Regras de parcelamento" description={directPaymentRulesHelp} variant="rules" />
                   </div>
               </div> : <>
               {!directVisualLayout ? <ol className="investor-stage-trail investor-payment-stage-trail" aria-label="Etapas para montar a proposta">

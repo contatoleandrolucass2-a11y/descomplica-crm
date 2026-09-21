@@ -616,7 +616,7 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(styles.includes(".investor-info-dialog[popover]:not(:popover-open)"));
   });
 
-  it("explica a regra completa e conduz a unidade e a opção para a próxima etapa", () => {
+  it("explica as regras sem enfeite e conduz somente a unidade para a próxima etapa", () => {
     const calculator = readFileSync(
       new URL(
         "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
@@ -626,16 +626,17 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     );
 
     assert.ok(calculator.includes('aria-label="Regra de parcelamento"'));
-    assert.ok(calculator.includes('title="Como o parcelamento funciona?"'));
+    assert.ok(calculator.includes('title="Regras de parcelamento"'));
     assert.ok(calculator.includes("1. Entrada:"));
     assert.ok(calculator.includes("2. Sinais:"));
     assert.ok(calculator.includes("3. Intermediárias:"));
     assert.ok(calculator.includes("4. Parcelas pré-chaves:"));
     assert.ok(calculator.includes("5. Parcelas pós-chaves:"));
-    assert.ok(calculator.includes("Para Apartamento"));
-    assert.ok(calculator.includes("Para Vaga"));
+    assert.ok(calculator.includes("6. Renda:"));
+    assert.ok(calculator.includes("dentro do saldo pré-chaves"));
+    assert.ok(calculator.includes("coincidir com uma mensal"));
+    assert.ok(!calculator.includes("Imagine o valor real do imóvel como um bolo"));
     assert.ok(calculator.includes("scrollToGuidedSection(directJourneySectionRef.current)"));
-    assert.ok(calculator.includes("scrollToGuidedSection(associativeFlowSectionRef.current)"));
     assert.ok(
       calculator.includes("sectionRef={directTable ? directJourneySectionRef : undefined}"),
     );
@@ -667,6 +668,8 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(handler.includes("setIntermediaryFieldCount(preset.intermediaryFieldCount)"));
     assert.ok(handler.includes("setHiddenIntermediaryIndexes([])"));
     assert.ok(handler.includes("directProposalOptionAvailability.get(optionId)"));
+    assert.ok(!handler.includes("scrollToGuidedSection"));
+    assert.ok(!handler.includes("setTourStep"));
     assert.ok(calculator.includes('setSelectedDirectOption("")'));
     assert.ok(
       calculator.includes(
