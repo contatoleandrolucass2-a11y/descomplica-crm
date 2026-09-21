@@ -11253,6 +11253,152 @@ a {
 }
 .investor-scenario-plan button:hover { border-color:var(--scenario-option-accent); transform:translateY(-1px); }
 .investor-scenario-plan button:focus-visible { outline:3px solid color-mix(in srgb,var(--scenario-option-accent) 38%,transparent); outline-offset:2px; }
+
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-picker {
+  display:grid;
+  gap:14px;
+  padding:14px 24px 12px;
+  scroll-margin-block-start:96px;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row {
+  --standard-plan-accent:#38bdf8;
+  display:grid;
+  gap:10px;
+  min-width:0;
+  padding:12px;
+  border:1px solid color-mix(in srgb,var(--standard-plan-accent) 52%,#315f78);
+  border-top:3px solid var(--standard-plan-accent);
+  border-radius:14px;
+  background:#08283f;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row[data-plan="24"] { --standard-plan-accent:#a5b4fc; }
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row-heading {
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row-heading>span {
+  display:grid;
+  width:42px;
+  height:42px;
+  place-items:center;
+  color:#061c2d;
+  border-radius:12px;
+  background:var(--standard-plan-accent);
+  font-size:13px;
+  font-weight:900;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row-heading>div { display:grid; gap:1px; min-width:0; }
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row-heading small {
+  color:var(--standard-plan-accent);
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row-heading h3 {
+  margin:0;
+  color:#f2fbff;
+  font-size:16px;
+  line-height:1.2;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row {
+  display:grid;
+  grid-auto-columns:minmax(205px,1fr);
+  grid-auto-flow:column;
+  gap:8px;
+  min-width:0;
+  max-width:100%;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:1px 1px 7px;
+  overscroll-behavior-inline:contain;
+  scrollbar-gutter:stable;
+  scroll-snap-type:inline proximity;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row>button {
+  position:relative;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr);
+  align-content:start;
+  align-items:start;
+  gap:4px 9px;
+  min-width:0;
+  min-height:118px;
+  padding:12px;
+  color:#dceffa;
+  border:1px solid #315f78;
+  border-radius:10px;
+  background:#0a2d46;
+  box-shadow:none;
+  font:inherit;
+  font-variant-numeric:tabular-nums;
+  text-align:left;
+  touch-action:manipulation;
+  cursor:pointer;
+  scroll-snap-align:start;
+  transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row>button:hover:not(:disabled) {
+  border-color:var(--standard-plan-accent);
+  background:color-mix(in srgb,var(--standard-plan-accent) 8%,#0a2d46);
+  transform:translateY(-1px);
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row>button:focus-visible {
+  outline:3px solid color-mix(in srgb,var(--standard-plan-accent) 52%,transparent);
+  outline-offset:2px;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row>button[aria-pressed="true"] {
+  color:#f5fcff;
+  border-color:var(--standard-plan-accent);
+  background:color-mix(in srgb,var(--standard-plan-accent) 14%,#0a2d46);
+  box-shadow:inset 3px 0 0 var(--standard-plan-accent),0 0 0 1px color-mix(in srgb,var(--standard-plan-accent) 32%,transparent);
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row>button:disabled {
+  cursor:not-allowed;
+  opacity:.58;
+  filter:saturate(.45);
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-number {
+  grid-row:1/span 2;
+  color:var(--standard-plan-accent);
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.04em;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-copy { display:grid; gap:4px; min-width:0; }
+.investor-page-shell.investor-standard-table-page .investor-standard-option-copy>strong {
+  color:#f2fbff;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.25;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-copy>small {
+  display:grid;
+  gap:1px;
+  color:#9fbdcf;
+  font-size:11px;
+  font-weight:650;
+  line-height:1.25;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-unavailable { color:#ffb7c8!important; }
+.investor-page-shell.investor-standard-table-page .investor-standard-option-selected {
+  grid-column:2;
+  align-self:end;
+  justify-self:start;
+  margin-top:3px;
+  padding:3px 7px;
+  color:#061c2d;
+  border-radius:999px;
+  background:var(--standard-plan-accent);
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
 .investor-scenario-stack { display:grid; gap:10px; padding:0 24px 10px; }
 .investor-scenario-option-panel { padding:10px 12px; }
 .investor-scenario-option-panel>header { align-items:flex-start; justify-content:space-between; gap:14px; }
@@ -11443,6 +11589,9 @@ a {
   .investor-tour-launcher ul { padding-bottom:2px; }
   .investor-scenario-plan-picker { grid-template-columns:1fr; padding-inline:14px; }
   .investor-scenario-subpicker { grid-template-columns:1fr; }
+  .investor-page-shell.investor-standard-table-page .investor-standard-plan-picker { padding-inline:14px; }
+  .investor-page-shell.investor-standard-table-page .investor-standard-plan-row { padding:10px; }
+  .investor-page-shell.investor-standard-table-page .investor-standard-option-row { grid-auto-columns:minmax(218px,82vw); }
   .investor-scenario-stack { padding-inline:14px; }
   .investor-scenario-option-panel>header { align-items:stretch; flex-direction:column; }
   .investor-scenario-option-panel>header>button { width:100%; }
@@ -11459,11 +11608,14 @@ a {
   .investor-guided-start,.investor-guided-start::after { animation:none; transform:none; }
   .investor-scenario-plan button { transition:none; }
   .investor-scenario-plan button:hover { transform:none; }
+  .investor-page-shell.investor-standard-table-page .investor-standard-option-row>button { transition:none; }
+  .investor-page-shell.investor-standard-table-page .investor-standard-option-row>button:hover:not(:disabled) { transform:none; }
   .investor-stage-trail li:not(:last-child)::after,.investor-tour-launcher li:not(:last-child)::after { animation:none; filter:none; }
 }
 
 @media print {
   .investor-scenario-plan-picker { display:none!important; }
+  .investor-standard-plan-picker { display:none!important; }
   .investor-scenario-stack { padding:0!important; }
   .investor-scenario-option-panel { color:#173b58!important; border-color:#7c9caf!important; background:#fff!important; box-shadow:none!important; filter:none!important; transform:none!important; }
   .investor-scenario-option-panel::after,.investor-scenario-option-panel>header>button { display:none!important; }
