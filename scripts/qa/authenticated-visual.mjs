@@ -2199,7 +2199,33 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     const mobileComparison = responsivePage.locator(".investor-direct-comparison-card").first();
     await mobileComparison.waitFor({ state: "visible", timeout: 10_000 });
     await mobileComparison.scrollIntoViewIfNeeded();
-    const mobileComparisonDiagnostics = await mobileComparison.evaluate((card) => {
+    await responsivePage.mouse.move(0, 0);
+    await responsivePage.keyboard.press("Escape");
+    const mobileInfoDialog = mobileComparison.locator(
+      ".investor-direct-comparison-heading .investor-info-dialog",
+    );
+    await mobileComparison
+      .locator(".investor-direct-comparison-heading .investor-info-trigger")
+      .click();
+    await mobileInfoDialog.waitFor({ state: "visible", timeout: 2_000 });
+    const mobileInfoDialogFitsViewport = await mobileInfoDialog.evaluate((dialog) => {
+      const root = document.documentElement;
+      const body = document.body;
+      const rectangle = dialog.getBoundingClientRect();
+      return (
+        rectangle.left >= -1 &&
+        rectangle.right <= window.innerWidth + 1 &&
+        rectangle.top >= -1 &&
+        rectangle.bottom <= window.innerHeight + 1 &&
+        dialog.scrollWidth <= dialog.clientWidth + 1 &&
+        dialog.scrollHeight <= dialog.clientHeight + 1 &&
+        root.scrollWidth <= root.clientWidth + 1 &&
+        body.scrollWidth <= body.clientWidth + 1
+      );
+    });
+    await responsivePage.keyboard.press("Escape");
+    await mobileInfoDialog.waitFor({ state: "hidden", timeout: 2_000 });
+    const mobileComparisonDiagnostics = await mobileComparison.evaluate((card, infoDialogFits) => {
       const root = document.documentElement;
       const body = document.body;
       const cardRect = card.getBoundingClientRect();
@@ -2299,6 +2325,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
         };
       });
       const checks = {
+        infoDialogFitsViewport: infoDialogFits,
         windowWidth: window.innerWidth === 375,
         rootFits: root.scrollWidth <= root.clientWidth + 1,
         bodyFits: body.scrollWidth <= body.clientWidth + 1,
@@ -2314,7 +2341,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
         cardWidth: [card.clientWidth, card.scrollWidth],
         failedRows: rowDiagnostics.filter((row) => !row.passed),
       };
-    });
+    }, mobileInfoDialogFitsViewport);
     mobileComparisonHasNoTruncationOrOverlap = mobileComparisonDiagnostics.passed;
     if (!mobileComparisonHasNoTruncationOrOverlap) {
       process.stdout.write(
