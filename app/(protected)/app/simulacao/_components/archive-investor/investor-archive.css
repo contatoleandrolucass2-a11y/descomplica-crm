@@ -20948,3 +20948,84 @@ body:has(.investor-page-shell) {
     padding-inline: 4px;
   }
 }
+
+/* Ajuda contextual: o Popover API mantém todos os “i” na camada superior da página. */
+.investor-page-shell .investor-info-dialog[popover] {
+  position: fixed !important;
+  top: var(--investor-info-top, 16px) !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: var(--investor-info-left, 16px) !important;
+  z-index: 2147483647;
+  max-height: calc(100dvh - 32px);
+  margin: 0 !important;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: none !important;
+}
+
+.investor-page-shell .investor-info-dialog[popover]:not(:popover-open) {
+  display: none !important;
+}
+
+.investor-page-shell .investor-info-dialog[popover]:popover-open {
+  display: grid;
+}
+
+.investor-page-shell .investor-info-dialog[popover]::before {
+  display: none !important;
+}
+
+.investor-page-shell .investor-info-dialog-rules[popover] {
+  width: min(520px, calc(100vw - 32px));
+  min-width: min(320px, calc(100vw - 32px));
+  max-width: min(520px, calc(100vw - 32px));
+}
+
+.investor-page-shell .investor-info-dialog-rules[popover]:focus-visible {
+  outline: 2px solid var(--inv-cyan);
+  outline-offset: -4px;
+}
+
+.investor-page-shell .investor-direct-rule-help {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 0 4px;
+  color: var(--inv-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.investor-page-shell .investor-direct-rule-help > span:first-child {
+  white-space: nowrap;
+}
+
+.investor-page-shell .investor-direct-rule-help .investor-info-hint,
+.investor-page-shell .investor-direct-rule-help .investor-info-trigger {
+  flex: 0 0 44px;
+}
+
+.investor-page-shell .investor-guided-scroll-target {
+  scroll-margin-block-start: 112px;
+}
+
+.investor-page-shell .investor-guided-scroll-target:focus-visible {
+  outline: 2px solid var(--inv-cyan);
+  outline-offset: 4px;
+}
+
+@media (max-width: 520px) {
+  .investor-page-shell .investor-info-dialog-rules[popover] {
+    width: calc(100vw - 32px) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 32px) !important;
+  }
+
+  .investor-page-shell .investor-guided-scroll-target {
+    scroll-margin-block-start: 88px;
+  }
+}

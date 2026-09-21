@@ -1544,12 +1544,28 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
 
   const firstSelectableRow = page.locator(".investor-stock-table tbody tr.selectable").first();
   await firstSelectableRow.click();
+  await page.waitForFunction(() => {
+    const target = document.querySelector(".investor-property-summary.investor-guided-scroll-target");
+    if (!(target instanceof HTMLElement)) return false;
+    const rectangle = target.getBoundingClientRect();
+    return rectangle.top >= 0 && rectangle.top < window.innerHeight;
+  });
   const manualUnitSelectionWorks =
     (await selectedUnitButtons.count()) === 1 &&
     (await firstSelectableRow.getAttribute("aria-selected")) === "true" &&
     (await page
       .getByRole("article", { name: "Descrição do imóvel usado na proposta", exact: true })
       .isVisible());
+  const unitSelectionStartsGuidedJourney = await page
+    .getByRole("article", { name: "Descrição do imóvel usado na proposta", exact: true })
+    .evaluate((target) => {
+      const rectangle = target.getBoundingClientRect();
+      return (
+        target === document.activeElement &&
+        rectangle.top >= 0 &&
+        rectangle.top < window.innerHeight
+      );
+    });
 
   const incomeInput = page.getByRole("textbox", { name: "Renda mensal", exact: true });
   await incomeInput.fill("10000000");
@@ -1564,6 +1580,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const optionSelectionChecks = [];
   const optionPaymentRowChecks = [];
   const optionResultLayoutChecks = [];
+  const optionGuidedScrollChecks = [];
   for (let index = 0; index < (await proposalOptions.count()); index += 1) {
     const option = proposalOptions.nth(index);
     const available =
@@ -1571,6 +1588,22 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
       (await option.isEnabled()) &&
       (await option.getAttribute("aria-disabled")) === "false";
     await option.click();
+    await page.waitForFunction(() => {
+      const target = document.querySelector(".investor-direct-flow-panel.investor-guided-scroll-target");
+      if (!(target instanceof HTMLElement)) return false;
+      const rectangle = target.getBoundingClientRect();
+      return rectangle.top >= 0 && rectangle.top < window.innerHeight;
+    });
+    optionGuidedScrollChecks.push(
+      await page.locator(".investor-direct-flow-panel.investor-guided-scroll-target").evaluate((target) => {
+        const rectangle = target.getBoundingClientRect();
+        return (
+          target === document.activeElement &&
+          rectangle.top >= 0 &&
+          rectangle.top < window.innerHeight
+        );
+      }),
+    );
     optionSelectionChecks.push(
       available &&
         (await option.getAttribute("aria-pressed")) === "true" &&
@@ -1691,6 +1724,8 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     optionPaymentRowChecks.length === 4 && optionPaymentRowChecks.every(Boolean);
   const proposalResultMovedToLedger =
     optionResultLayoutChecks.length === 4 && optionResultLayoutChecks.every(Boolean);
+  const optionSelectionContinuesGuidedJourney =
+    optionGuidedScrollChecks.length === 4 && optionGuidedScrollChecks.every(Boolean);
   const summaryInfoButton = page.getByRole("button", {
     name: /Informações sobre resumo da opção \d/u,
   });
@@ -1706,6 +1741,21 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     summaryInfoText.includes("Ato de 6,0%") &&
     summaryInfoText.includes("3 sinais somam 4,0%") &&
     summaryInfoText.includes("intermediárias somam");
+  const contextualHelpUsesTopLayer = await summaryInfoNote.evaluate((note) => {
+    const rectangle = note.getBoundingClientRect();
+    const center = document.elementFromPoint(
+      rectangle.left + rectangle.width / 2,
+      rectangle.top + Math.min(rectangle.height / 2, 24),
+    );
+    return (
+      note.matches(":popover-open") &&
+      (center === note || note.contains(center)) &&
+      rectangle.left >= -1 &&
+      rectangle.right <= window.innerWidth + 1 &&
+      rectangle.top >= -1 &&
+      rectangle.bottom <= window.innerHeight + 1
+    );
+  });
   await page.keyboard.press("Escape");
   await proposalOptions.first().click();
 
@@ -1715,6 +1765,34 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
   const approvedProposalStatusVisible =
     (await proposalStatus.isVisible()) &&
     (await proposalStatus.locator("strong").textContent())?.trim() === "APROVADO";
+
+  const paymentRulesTrigger = page.getByRole("button", {
+    name: "Informações sobre regra de parcelamento",
+    exact: true,
+  });
+  const paymentRulesLabelVisible = await page
+    .locator(".investor-direct-rule-help")
+    .getByText("Regra", { exact: true })
+    .isVisible();
+  await paymentRulesTrigger.click();
+  const paymentRulesNote = page.getByRole("note", { name: "Como o parcelamento funciona?" });
+  await paymentRulesNote.waitFor({ state: "visible", timeout: 2_000 });
+  const paymentRulesText = (await paymentRulesNote.textContent())?.replace(/\s+/g, " ").trim() ?? "";
+  const detailedPaymentRulesWork =
+    paymentRulesLabelVisible &&
+    (await paymentRulesNote.evaluate((note) => note.matches(":popover-open"))) &&
+    [
+      "1. Entrada:",
+      "2. Sinais:",
+      "3. Intermediárias:",
+      "4. Parcelas pré-chaves:",
+      "5. Parcelas pós-chaves:",
+      "Para Apartamento",
+      "Para Vaga",
+      "40% da renda mensal",
+    ].every((expected) => paymentRulesText.includes(expected));
+  await page.keyboard.press("Escape");
+  await paymentRulesNote.waitFor({ state: "hidden", timeout: 2_000 });
 
   const selectedProperty = page.getByRole("article", {
     name: "Descrição do imóvel usado na proposta",
@@ -2208,21 +2286,39 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
       .locator(".investor-direct-comparison-heading .investor-info-trigger")
       .click();
     await mobileInfoDialog.waitFor({ state: "visible", timeout: 2_000 });
-    const mobileInfoDialogFitsViewport = await mobileInfoDialog.evaluate((dialog) => {
+    const mobileInfoDialogDiagnostics = await mobileInfoDialog.evaluate((dialog) => {
       const root = document.documentElement;
       const body = document.body;
       const rectangle = dialog.getBoundingClientRect();
-      return (
-        rectangle.left >= -1 &&
-        rectangle.right <= window.innerWidth + 1 &&
-        rectangle.top >= -1 &&
-        rectangle.bottom <= window.innerHeight + 1 &&
-        dialog.scrollWidth <= dialog.clientWidth + 1 &&
-        dialog.scrollHeight <= dialog.clientHeight + 1 &&
-        root.scrollWidth <= root.clientWidth + 1 &&
-        body.scrollWidth <= body.clientWidth + 1
-      );
+      return {
+        bounds: {
+          left: rectangle.left,
+          right: rectangle.right,
+          top: rectangle.top,
+          bottom: rectangle.bottom,
+          width: rectangle.width,
+          height: rectangle.height,
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight,
+        },
+        dialogFitsWidth: dialog.scrollWidth <= dialog.clientWidth + 1,
+        dialogFitsHeight: dialog.scrollHeight <= dialog.clientHeight + 1,
+        rootFits: root.scrollWidth <= root.clientWidth + 1,
+        bodyFits: body.scrollWidth <= body.clientWidth + 1,
+      };
     });
+    const mobileInfoDialogFitsViewport =
+      mobileInfoDialogDiagnostics.bounds.left >= -1 &&
+      mobileInfoDialogDiagnostics.bounds.right <= mobileInfoDialogDiagnostics.bounds.viewportWidth + 1 &&
+      mobileInfoDialogDiagnostics.bounds.top >= -1 &&
+      mobileInfoDialogDiagnostics.bounds.bottom <= mobileInfoDialogDiagnostics.bounds.viewportHeight + 1 &&
+      mobileInfoDialogDiagnostics.dialogFitsWidth &&
+      mobileInfoDialogDiagnostics.dialogFitsHeight &&
+      mobileInfoDialogDiagnostics.rootFits &&
+      mobileInfoDialogDiagnostics.bodyFits;
+    if (!mobileInfoDialogFitsViewport) {
+      console.log(`Mobile info dialog diagnostics: ${JSON.stringify(mobileInfoDialogDiagnostics)}`);
+    }
     await responsivePage.keyboard.press("Escape");
     await mobileInfoDialog.waitFor({ state: "hidden", timeout: 2_000 });
     const mobileComparisonDiagnostics = await mobileComparison.evaluate((card, infoDialogFits) => {
@@ -2552,12 +2648,16 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     scrollReachesLastInventoryRow,
     startsWithoutSelectedUnit,
     manualUnitSelectionWorks,
+    unitSelectionStartsGuidedJourney,
     incomeAccepted,
     fourProposalOptionsPresent,
     allProposalOptionsSelectable,
     individualProposalPaymentsRendered,
     proposalResultMovedToLedger,
+    optionSelectionContinuesGuidedJourney,
     selectedOptionSummaryOnlyInInfo,
+    contextualHelpUsesTopLayer,
+    detailedPaymentRulesWork,
     readyOptionalPaymentInputs,
     optionalPaymentsPersistAfterIncomeChange,
     optionSwitchReloadsReadyPreset,
@@ -3060,9 +3160,15 @@ async function run() {
           const directConsoleErrors = [];
           const directPageErrors = [];
           directPage.on("console", (message) => {
-            if (message.type() === "error") directConsoleErrors.push(message.text());
+            if (message.type() === "error") {
+              directConsoleErrors.push(message.text());
+              console.log(`Direct table console error: ${message.text()}`);
+            }
           });
-          directPage.on("pageerror", (error) => directPageErrors.push(error.message));
+          directPage.on("pageerror", (error) => {
+            directPageErrors.push(error.message);
+            console.log(`Direct table page error: ${error.message}`);
+          });
           try {
             directTableValidation = await checkDirectTableValidation(
               directPage,

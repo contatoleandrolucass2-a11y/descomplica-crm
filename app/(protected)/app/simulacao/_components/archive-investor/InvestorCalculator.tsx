@@ -758,53 +758,141 @@ function propertyAddress(item: InventoryItem) {
   return `${streetAndNumber}${neighborhood ? ` - ${neighborhood}` : ""}${cityAndState ? `, ${cityAndState}` : ""}` || "Endereço não informado";
 }
 
-export function InvestorInfoHint({ label, title, description }: { label: string; title: string; description: string }) {
+export function InvestorInfoHint({ label, title, description, variant = "default" }: { label: string; title: string; description: string; variant?: "default" | "rules" }) {
   const [open, setOpen] = useState(false);
-  const [pinned, setPinned] = useState(false);
   const hintId = useId();
   const containerRef = useRef<HTMLSpanElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLSpanElement>(null);
+  const pinnedRef = useRef(false);
+  const showingRef = useRef(false);
+  const restoringFocusRef = useRef(false);
+  const showRetryTimerRef = useRef<number | null>(null);
+
+  function positionDialog() {
+    const trigger = triggerRef.current;
+    const dialog = dialogRef.current;
+    if (!trigger || !dialog || !dialog.matches(":popover-open")) return;
+
+    const viewportPadding = 16;
+    const gap = 8;
+    const triggerRect = trigger.getBoundingClientRect();
+    const dialogRect = dialog.getBoundingClientRect();
+    const maximumLeft = Math.max(viewportPadding, window.innerWidth - dialogRect.width - viewportPadding);
+    const left = Math.min(Math.max(viewportPadding, triggerRect.right - dialogRect.width), maximumLeft);
+    const spaceAbove = triggerRect.top - viewportPadding;
+    const spaceBelow = window.innerHeight - triggerRect.bottom - viewportPadding;
+    const showAbove = spaceAbove >= dialogRect.height + gap || spaceAbove >= spaceBelow;
+    const preferredTop = showAbove ? triggerRect.top - dialogRect.height - gap : triggerRect.bottom + gap;
+    const maximumTop = Math.max(viewportPadding, window.innerHeight - dialogRect.height - viewportPadding);
+    const top = Math.min(Math.max(viewportPadding, preferredTop), maximumTop);
+
+    dialog.style.setProperty("--investor-info-left", `${Math.round(left)}px`);
+    dialog.style.setProperty("--investor-info-top", `${Math.round(top)}px`);
+    dialog.dataset.placement = showAbove ? "above" : "below";
+  }
+
+  function showDialog(pin = false) {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (pin) pinnedRef.current = true;
+    if (!dialog.matches(":popover-open") && !showingRef.current) {
+      showingRef.current = true;
+      try {
+        dialog.showPopover();
+      } catch (error) {
+        const competingPopoverOperation = error instanceof DOMException
+          && error.name === "InvalidStateError"
+          && error.message.includes("another show operation");
+        if (!competingPopoverOperation) throw error;
+        if (showRetryTimerRef.current !== null) window.clearTimeout(showRetryTimerRef.current);
+        showRetryTimerRef.current = window.setTimeout(() => {
+          showRetryTimerRef.current = null;
+          showDialog(pin);
+        }, 0);
+        return;
+      } finally {
+        window.queueMicrotask(() => { showingRef.current = false; });
+      }
+    }
+    setOpen(true);
+    positionDialog();
+    window.requestAnimationFrame(() => {
+      positionDialog();
+      if (pin && variant === "rules") dialog.focus({ preventScroll: true });
+    });
+  }
+
+  function hideDialog() {
+    if (showRetryTimerRef.current !== null) {
+      window.clearTimeout(showRetryTimerRef.current);
+      showRetryTimerRef.current = null;
+    }
+    pinnedRef.current = false;
+    const dialog = dialogRef.current;
+    if (dialog?.matches(":popover-open")) dialog.hidePopover();
+    setOpen(false);
+  }
 
   useEffect(() => {
     if (!open) return;
-    const closeOutside = (event: PointerEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setPinned(false);
-        setOpen(false);
-      }
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setPinned(false);
-        setOpen(false);
-      }
-    };
-    document.addEventListener("pointerdown", closeOutside);
-    document.addEventListener("keydown", closeOnEscape);
+    const reposition = () => window.requestAnimationFrame(positionDialog);
+    const settleTimer = window.setTimeout(positionDialog, 100);
+    positionDialog();
+    window.addEventListener("resize", reposition);
+    window.addEventListener("scroll", reposition, true);
     return () => {
-      document.removeEventListener("pointerdown", closeOutside);
-      document.removeEventListener("keydown", closeOnEscape);
+      window.clearTimeout(settleTimer);
+      window.removeEventListener("resize", reposition);
+      window.removeEventListener("scroll", reposition, true);
     };
   }, [open]);
+
+  useEffect(() => () => {
+    if (showRetryTimerRef.current !== null) window.clearTimeout(showRetryTimerRef.current);
+  }, []);
 
   return <span
     className="investor-info-hint"
     ref={containerRef}
-    onPointerEnter={() => setOpen(true)}
+    onPointerEnter={() => showDialog()}
     onPointerLeave={() => {
-      if (!pinned && !containerRef.current?.contains(document.activeElement)) setOpen(false);
+      if (!pinnedRef.current && !containerRef.current?.contains(document.activeElement)) hideDialog();
     }}
-    onFocusCapture={() => setOpen(true)}
+    onFocusCapture={(event) => {
+      if (
+        event.target === triggerRef.current
+        && !restoringFocusRef.current
+        && !pinnedRef.current
+      ) showDialog();
+    }}
     onBlurCapture={(event) => {
-      if (!pinned && !event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false);
+      if (!pinnedRef.current && !event.currentTarget.contains(event.relatedTarget as Node | null)) hideDialog();
     }}
   >
-    <button type="button" className="investor-info-trigger" title={`Abrir ajuda: ${label}`} aria-label={`Informações sobre ${label}`} aria-expanded={open} aria-controls={hintId} aria-describedby={open ? hintId : undefined} onClick={() => { setPinned(true); setOpen(true); }}>
+    <button ref={triggerRef} type="button" className="investor-info-trigger" title={`Abrir ajuda: ${label}`} aria-label={`Informações sobre ${label}`} aria-expanded={open} aria-controls={hintId} aria-describedby={open ? hintId : undefined} onClick={() => open && pinnedRef.current ? hideDialog() : showDialog(true)}>
       <span className="investor-info-mark" aria-hidden="true" />
     </button>
-    {open ? <span className="investor-info-dialog" id={hintId} role="note" aria-label={title}>
+    <span ref={dialogRef} tabIndex={variant === "rules" ? 0 : undefined} className={`investor-info-dialog${variant === "rules" ? " investor-info-dialog-rules" : ""}`} id={hintId} popover="auto" role="note" aria-label={title} onToggle={(event) => {
+      const nextOpen = event.newState === "open";
+      setOpen(nextOpen);
+      if (!nextOpen) {
+        const restoreTriggerFocus = variant === "rules" && document.activeElement === dialogRef.current;
+        pinnedRef.current = false;
+        if (restoreTriggerFocus) window.requestAnimationFrame(() => {
+          restoringFocusRef.current = true;
+          triggerRef.current?.focus({ preventScroll: true });
+          window.setTimeout(() => { restoringFocusRef.current = false; }, 0);
+        });
+      }
+      else {
+        positionDialog();
+        window.requestAnimationFrame(positionDialog);
+      }
+    }}>
       <strong>{title}</strong>
       <span>{description}</span>
-    </span> : null}
+    </span>
   </span>;
 }
 
@@ -2219,8 +2307,8 @@ export function InvestorLearningManual({ directTable = false, associative = fals
   </section>;
 }
 
-function PropertySummary({ item, label, associative = false }: { item: InventoryItem; label: string; associative?: boolean }) {
-  return <article className={`investor-selected-unit investor-property-summary${associative ? " is-associative" : ""}`} aria-label={label} data-tour="property-summary">
+function PropertySummary({ item, label, associative = false, sectionRef }: { item: InventoryItem; label: string; associative?: boolean; sectionRef?: Ref<HTMLElement> }) {
+  return <article ref={sectionRef} tabIndex={sectionRef ? -1 : undefined} className={`investor-selected-unit investor-property-summary${associative ? " is-associative" : ""}${sectionRef ? " investor-guided-scroll-target" : ""}`} aria-label={label} data-tour="property-summary">
     <header>
       <div className="investor-unit-identity">
         <h2>Descrição do Imóvel</h2>
@@ -2354,6 +2442,7 @@ export function InvestorCalculator({
   const tourPanel = useRef<HTMLElement>(null);
   const associativeQualificationSectionRef = useRef<HTMLElement>(null);
   const associativeFlowSectionRef = useRef<HTMLElement>(null);
+  const directJourneySectionRef = useRef<HTMLElement>(null);
   const guidedAttentionTimer = useRef<number | null>(null);
   const [tourOpen, setTourOpen] = useState(false);
   const [tourStep, setTourStep] = useState(0);
@@ -2953,6 +3042,21 @@ export function InvestorCalculator({
   const directParkingPolicySummary = result.context.parkingPolicy
     ? `Política Vaga: 10% de entrada · ${directPreKeysRateLabel} durante a obra · ${directPostKeysRateLabel} pós-chaves em até ${result.custom.postKeysInstallments} parcelas`
     : "";
+  const directPaymentRulesHelp = `Imagine o valor real do imóvel como um bolo dividido em 100 partes. Cada pagamento fica em uma parte certa para a soma fechar.
+
+1. Entrada: a entrada total precisa somar pelo menos 10% do valor real. Ela pode ser paga inteira no Ato, com 10%, ou dividida em Ato de no mínimo 6% mais até 3 Sinais que completam os 4% restantes. O Ato é pago primeiro, na data da proposta.
+
+2. Sinais: são pagamentos opcionais logo depois do Ato. O usuário escolhe se quer inserir 1, 2 ou 3 sinais e informa os valores manualmente. Eles precisam ficar em ordem, antes da entrega, nos dias comerciais permitidos (05, 10 ou 15). Cada sinal não pode ser maior que o pagamento anterior. A soma de Ato e Sinais forma a entrada total.
+
+3. Intermediárias: são reforços opcionais durante a obra. O usuário insere cada valor manualmente. Cada intermediária pode valer no máximo 5% do valor real. A data precisa ficar depois do começo das mensais pré-chaves e pelo menos 3 meses antes da entrega. O simulador mostra somente as datas válidas e desconta apenas as intermediárias aprovadas do saldo pré-chaves.
+
+4. Parcelas pré-chaves: são as mensais pagas durante a obra. Para Apartamento, essa parte começa em 30% do valor real. Para Vaga, começa em 40%. Entrada adicional e intermediárias válidas diminuem esse saldo. O simulador divide o que restar pelos meses disponíveis até a entrega, sem juros e sem seguros.
+
+5. Parcelas pós-chaves: começam depois da entrega. Para Apartamento, o saldo é 60% e pode ser dividido em até 120 parcelas. Para Vaga, o saldo é 50% e pode ser dividido em até 66 parcelas. Essa etapa usa a Tabela PRICE, com juros nominais de 12% ao ano e os seguros MIP e DFI.
+
+Regra desta unidade: ${result.context.parkingPolicy ? `Vaga — entrada total de 10%, ${directPreKeysRateLabel} durante a obra e ${directPostKeysRateLabel} pós-chaves em até ${result.custom.postKeysInstallments} parcelas.` : `Apartamento — entrada total de 10%, ${directPreKeysRateLabel} durante a obra e ${directPostKeysRateLabel} pós-chaves em até ${result.custom.postKeysInstallments} parcelas.`}
+
+No fim, confira o Resultado da proposta. A primeira parcela pós-chaves pode comprometer no máximo 40% da renda mensal informada.`;
   const validDirectIntermediaryCount = result.custom.intermediaries
     .filter((item: { value: number; approved: boolean }) => item.value > 0 && item.approved).length;
   const directEntryExcess = directTable ? directResult.custom.entryExcess : 0;
@@ -3173,6 +3277,13 @@ export function InvestorCalculator({
     }, 3400);
   }
 
+  function scrollToGuidedSection(section: HTMLElement | null) {
+    if (!section) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    section.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start", inline: "nearest" });
+    section.focus({ preventScroll: true });
+  }
+
   function focusNextAssociativeRow(event: ReactKeyboardEvent<HTMLOListElement>) {
     if (event.key !== "Enter" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.nativeEvent.isComposing) return;
     const currentInput = event.target;
@@ -3241,9 +3352,15 @@ export function InvestorCalculator({
     setExpandedScenarioPlans([]);
     if (tourOpen) {
       if (annualMode) setTourOpen(false);
+      else if (directTable) setTourStep((current) => {
+        if (tourSteps[current].target !== "inventory") return current;
+        const propertySummaryStep = tourSteps.findIndex((step) => step.target === "property-summary");
+        return propertySummaryStep >= 0 ? propertySummaryStep : current;
+      });
       else setTourStep((current) => tourSteps[current].target === "inventory" ? current + 1 : current);
     }
     if (annualMode) window.setTimeout(() => guideToSection("qualification"), 0);
+    if (directTable && !tourOpen) window.setTimeout(() => scrollToGuidedSection(directJourneySectionRef.current), 0);
   }
 
   function selectInventoryRow(event: ReactMouseEvent<HTMLTableSectionElement>) {
@@ -3377,6 +3494,14 @@ export function InvestorCalculator({
     setIntermediaryFieldCount(preset.intermediaryFieldCount);
     setHiddenIntermediaryIndexes([]);
     setDirectProposalDirty(true);
+    if (tourOpen) {
+      if (tourSteps[tourStep].target === "ready-options") {
+        const proposalStep = tourSteps.findIndex((step) => step.target === "proposal");
+        if (proposalStep >= 0) setTourStep(proposalStep);
+      }
+    } else {
+      window.setTimeout(() => scrollToGuidedSection(associativeFlowSectionRef.current), 0);
+    }
   }
 
   function toggleDiscountField() {
@@ -4013,7 +4138,7 @@ export function InvestorCalculator({
 
       </section>
 
-      {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} /> : null}
+      {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} sectionRef={directTable ? directJourneySectionRef : undefined} /> : null}
       {selectedUnit && directTable && selectedUnit.completionDate && selectedUnit.completionDate <= baseDate ? <p className="investor-direct-context-warning" role="alert"><strong>Prazo da obra encerrado.</strong> A entrega em {formatDate(selectedUnit.completionDate)} não é futura em relação à data da simulação. A unidade permanece disponível para conferência, mas a auditoria exigirá ajuste; escolha outra unidade para montar uma proposta válida.</p> : null}
 
       {selectedUnit && annualMode ? <AssociativeQualificationPanel
@@ -4033,7 +4158,7 @@ export function InvestorCalculator({
 
       {selectedUnit ? (
         <div className="investor-proposal-layout">
-          <section ref={annualMode ? associativeFlowSectionRef : undefined} tabIndex={annualMode ? -1 : undefined} className={`investor-flow-panel${usesDirectDesign ? " investor-direct-flow-panel" : ""}${annualMode ? " investor-associative-flow-panel" : ""}${associativeQualificationLocked ? " is-locked" : ""}${guidedAttention === "flow" ? " is-guided-active" : ""}`} aria-labelledby="investor-flow-title" data-locked={associativeQualificationLocked || undefined} data-tour="proposal">
+          <section ref={annualMode || directTable ? associativeFlowSectionRef : undefined} tabIndex={annualMode || directTable ? -1 : undefined} className={`investor-flow-panel${usesDirectDesign ? " investor-direct-flow-panel" : ""}${annualMode ? " investor-associative-flow-panel" : ""}${annualMode || directTable ? " investor-guided-scroll-target" : ""}${associativeQualificationLocked ? " is-locked" : ""}${guidedAttention === "flow" ? " is-guided-active" : ""}`} aria-labelledby="investor-flow-title" data-locked={associativeQualificationLocked || undefined} data-tour="proposal">
             <header className="investor-section-heading investor-flow-heading">
               <span>{directTable ? "04" : "03"}</span>
               <div><p>Fluxo editável</p><h2 id="investor-flow-title">Monte a proposta</h2></div>
@@ -4272,6 +4397,10 @@ export function InvestorCalculator({
                   </div>
                   </div>
                 </fieldset>
+                  <div className="investor-direct-rule-help" aria-label="Regra de parcelamento">
+                    <span>Regra</span>
+                    <InvestorInfoHint label="regra de parcelamento" title="Como o parcelamento funciona?" description={directPaymentRulesHelp} variant="rules" />
+                  </div>
               </div> : <>
               {!directVisualLayout ? <ol className="investor-stage-trail investor-payment-stage-trail" aria-label="Etapas para montar a proposta">
                 <li><span>1</span>Valor do imóvel</li>

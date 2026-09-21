@@ -582,6 +582,64 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(styles.includes(".investor-direct-comparison-result-value"));
   });
 
+  it("mantém toda ajuda contextual na camada superior e dentro da tela", () => {
+    const calculator = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const styles = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    const infoHint = calculator.slice(
+      calculator.indexOf("export function InvestorInfoHint"),
+      calculator.indexOf("export function InvestorGuideLauncher"),
+    );
+    assert.ok(infoHint.includes('popover="auto"'));
+    assert.ok(infoHint.includes('dialog.showPopover()'));
+    assert.ok(infoHint.includes('dialog.hidePopover()'));
+    assert.ok(infoHint.includes('dialog.matches(":popover-open")'));
+    assert.ok(infoHint.includes('window.addEventListener("scroll", reposition, true)'));
+    assert.ok(infoHint.includes("window.innerWidth"));
+    assert.ok(infoHint.includes("window.innerHeight"));
+    assert.match(
+      styles,
+      /\.investor-page-shell \.investor-info-dialog\[popover\]\s*\{[^}]*position:\s*fixed\s*!important;[^}]*max-height:\s*calc\(100dvh\s*-\s*32px\);[^}]*overflow-y:\s*auto;/su,
+    );
+    assert.ok(styles.includes(".investor-info-dialog[popover]:not(:popover-open)"));
+  });
+
+  it("explica a regra completa e conduz a unidade e a opção para a próxima etapa", () => {
+    const calculator = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    assert.ok(calculator.includes('aria-label="Regra de parcelamento"'));
+    assert.ok(calculator.includes('title="Como o parcelamento funciona?"'));
+    assert.ok(calculator.includes("1. Entrada:"));
+    assert.ok(calculator.includes("2. Sinais:"));
+    assert.ok(calculator.includes("3. Intermediárias:"));
+    assert.ok(calculator.includes("4. Parcelas pré-chaves:"));
+    assert.ok(calculator.includes("5. Parcelas pós-chaves:"));
+    assert.ok(calculator.includes("Para Apartamento"));
+    assert.ok(calculator.includes("Para Vaga"));
+    assert.ok(calculator.includes("scrollToGuidedSection(directJourneySectionRef.current)"));
+    assert.ok(calculator.includes("scrollToGuidedSection(associativeFlowSectionRef.current)"));
+    assert.ok(calculator.includes("sectionRef={directTable ? directJourneySectionRef : undefined}"));
+    assert.ok(calculator.includes('block: "start"'));
+  });
+
   it("carrega a resposta pronta e mantém o fluxo editável", () => {
     const calculator = readFileSync(
       new URL(
