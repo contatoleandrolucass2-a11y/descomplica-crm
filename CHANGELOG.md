@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-21 — propostas visíveis na Tabela Investidor
+
+- Exibe simultaneamente as quatro opções de 18 parcelas em uma linha e as
+  quatro opções de 24 parcelas na linha seguinte, sem acordeões.
+- Alinha a leitura dos cartões ao padrão visual da Tabela Direta, com numeração,
+  resumo do ato, sinais, intermediárias e indicação textual da opção selecionada.
+- Mantém os oito cenários C1–C8 e todas as regras financeiras inalterados.
+- Escopa o layout à Tabela Investidor para não modificar a Tabela Direta.
+
 ## 2026-09-16 — estoque contínuo e pagamentos completos na Tabela Direta
 
 - Remove a paginação do estoque da Tabela Direta e mantém as 3.301 unidades em

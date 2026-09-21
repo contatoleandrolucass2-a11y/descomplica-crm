@@ -267,6 +267,22 @@ const ASSOCIATIVE_SCENARIO_OPTIONS = {
 
 const STANDARD_SCENARIO_PLANS = [18, 24] as const;
 
+const STANDARD_SCENARIO_CARD_ORDER = {
+  18: ["C1", "C2", "C4", "C3"],
+  24: ["C5", "C6", "C8", "C7"],
+} as const;
+
+const STANDARD_SCENARIO_CARD_COPY = {
+  C1: { title: "Pagamento simples", details: ["Ato de 10%", "Sem sinais", "Sem intermediárias"] },
+  C2: { title: "Entrada distribuída", details: ["Ato de 6%", "3 sinais somam 4%", "Sem intermediárias"] },
+  C3: { title: "Maior flexibilidade", details: ["Ato de 6%", "3 sinais somam 4%", "Até 3 intermediárias de 5%"] },
+  C4: { title: "Parcela reduzida", details: ["Ato de 10%", "Sem sinais", "Até 3 intermediárias de 5%"] },
+  C5: { title: "Pagamento simples", details: ["Ato de 20%", "Sem sinais", "Sem intermediárias"] },
+  C6: { title: "Entrada distribuída", details: ["Ato de 17%", "3 sinais somam 3%", "Sem intermediárias"] },
+  C7: { title: "Maior flexibilidade", details: ["Ato de 17%", "3 sinais somam 3%", "Até 4 intermediárias de 5%"] },
+  C8: { title: "Parcela reduzida", details: ["Ato de 20%", "Sem sinais", "Até 4 intermediárias de 5%"] },
+} as const;
+
 function currencyInputNumber(value: string | number) {
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
   const clean = value.trim().replace(/[^\d,.-]/g, "");
@@ -2491,7 +2507,6 @@ export function InvestorCalculator({
   const [directProposalDirty, setDirectProposalDirty] = useState(false);
   const [directIncomeNotice, setDirectIncomeNotice] = useState("");
   const [visibleScenarioCodes, setVisibleScenarioCodes] = useState<string[]>([]);
-  const [expandedScenarioPlans, setExpandedScenarioPlans] = useState<number[]>([]);
   const [baseDate] = useState(todayIso);
   const signalInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const intermediaryInputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -3021,7 +3036,6 @@ export function InvestorCalculator({
   const scenarioOptions: Record<string, { plan: number; title: string; description: string | null }> = annualMode
     ? ASSOCIATIVE_SCENARIO_OPTIONS
     : STANDARD_SCENARIO_OPTIONS;
-  const scenarioPlans: readonly number[] = annualMode ? [84] : STANDARD_SCENARIO_PLANS;
   const selectedDirectProposalReady = directProposalOptionAvailability.get(selectedDirectOption)?.ready === true;
   const selectedDirectProposalOption = directTable && selectedDirectProposalReady
     ? DIRECT_TABLE_PROPOSAL_OPTIONS.find((option) => option.id === selectedDirectOption) ?? null
@@ -3345,7 +3359,6 @@ export function InvestorCalculator({
     setSelectedDirectOption("");
     setDirectProposalDirty(false);
     setVisibleScenarioCodes([]);
-    setExpandedScenarioPlans([]);
     if (tourOpen) {
       if (annualMode) setTourOpen(false);
       else if (directTable) setTourStep((current) => {
@@ -3534,12 +3547,6 @@ export function InvestorCalculator({
     setVisibleScenarioCodes((current) => current[0] === code ? [] : [code]);
   }
 
-  function toggleScenarioPlan(plan: number) {
-    setExpandedScenarioPlans((current) => current.includes(plan)
-      ? current.filter((item) => item !== plan)
-      : [...current, plan]);
-  }
-
   function updateFilter(setter: (value: string) => void, value: string) {
     inventoryInteractionStarted.current = true;
     setter(value);
@@ -3707,7 +3714,7 @@ export function InvestorCalculator({
         <section className={`investor-standard-panel ${directTable ? "investor-direct-combined-panel" : directVisualLayout ? "investor-associative-direct-panel" : ""}${associativeCalculatedProposalLocked ? " is-locked" : ""}${annualMode && associativeQualificationComplete && !associativeFinancingValueReady ? " is-awaiting-financing" : ""}`} aria-labelledby={directTable ? "investor-direct-income-title investor-standard-title" : "investor-standard-title"} data-locked={associativeCalculatedProposalLocked || undefined} data-tour="scenarios">
           {!directTable ? <header className="investor-section-heading investor-standard-heading">
             <span>{annualMode ? "04" : "02"}</span>
-            <div><p>Proposta calculada</p><h2 id="investor-standard-title">{directVisualLayout ? "1 plano · 4 opções" : "2 cenários · 8 opções"}</h2></div>
+            <div><p>Proposta calculada</p><h2 id="investor-standard-title">{directVisualLayout ? "1 plano · 4 opções" : "2 planos · 8 opções"}</h2></div>
             <div className="investor-standard-actions">
               <InvestorInfoHint
                 label="propostas prontas"
@@ -3826,33 +3833,41 @@ export function InvestorCalculator({
                   </div>;
                 })}
               </div>
-            </div> : <div className="investor-scenario-plan-picker" aria-label="Escolha o plano para ver as propostas">
-              {scenarioPlans.map((plan) => {
-                const expanded = expandedScenarioPlans.includes(plan);
-                const planId = `investor-scenario-plan-${plan}`;
-                return <section key={plan} className="investor-scenario-plan" data-scenario={plan === 18 ? 1 : 2}>
-                  <button
-                    id={`${planId}-button`}
-                    className="investor-scenario-plan-button"
-                    type="button"
-                    aria-expanded={expanded}
-                    aria-controls={planId}
-                    onClick={() => toggleScenarioPlan(plan)}
-                  >{`Plano em ${plan} Parcelas`} <span aria-hidden="true">{expanded ? "−" : "+"}</span></button>
-                  <div id={planId} className="investor-scenario-subpicker" role="group" aria-labelledby={`${planId}-button`} hidden={!expanded}>
-                    {result.standardScenarios.filter((scenario) => scenarioOptions[scenario.code]?.plan === plan).map((scenario) => {
+            </div> : <div className="investor-standard-plan-picker" aria-label="Escolha uma proposta pronta">
+              {STANDARD_SCENARIO_PLANS.map((plan) => {
+                const planTitleId = `investor-standard-plan-${plan}-title`;
+                const scenarioByCode = new Map(result.standardScenarios.map((scenario) => [scenario.code, scenario]));
+                return <section key={plan} className="investor-standard-plan-row" data-plan={plan} aria-labelledby={planTitleId}>
+                  <header className="investor-standard-plan-row-heading">
+                    <span aria-hidden="true">{plan === 18 ? "01" : "02"}</span>
+                    <div><small>Plano pronto</small><h3 id={planTitleId}>{`Plano em ${plan} parcelas`}</h3></div>
+                  </header>
+                  <div className="investor-standard-option-row" role="group" aria-labelledby={planTitleId}>
+                    {STANDARD_SCENARIO_CARD_ORDER[plan].map((code, index) => {
+                      const scenario = scenarioByCode.get(code);
+                      if (!scenario) return null;
                       const option = scenarioOptions[scenario.code];
+                      const cardCopy = STANDARD_SCENARIO_CARD_COPY[code];
                       const visible = visibleScenarioCodes.includes(scenario.code);
                       const availabilityId = `investor-scenario-availability-${scenario.code}`;
+                      const descriptionId = `investor-standard-option-${scenario.code}-description`;
                       return <button
                         key={scenario.code}
                         type="button"
                         aria-pressed={visible}
-                        aria-disabled={!scenario.available}
-                        aria-describedby={!scenario.available ? availabilityId : undefined}
+                        aria-describedby={scenario.available ? descriptionId : availabilityId}
+                        disabled={!scenario.available}
                         title={!scenario.available ? `O prazo da obra não comporta ${option.plan} parcelas completas` : undefined}
-                        onClick={() => { if (scenario.available) toggleScenarioOption(scenario.code); }}
-                      ><span>{option.title}</span>{!scenario.available ? <small id={availabilityId}>Prazo da obra insuficiente</small> : null}</button>;
+                        onClick={() => toggleScenarioOption(scenario.code)}
+                      >
+                        <span className="investor-standard-option-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                        <span className="investor-standard-option-copy">
+                          <strong>{cardCopy.title}</strong>
+                          <small id={scenario.available ? descriptionId : undefined}>{cardCopy.details.map((detail) => <span key={detail}>{detail}</span>)}</small>
+                          {!scenario.available ? <small id={availabilityId} className="investor-standard-option-unavailable">Prazo da obra insuficiente</small> : null}
+                        </span>
+                        {visible ? <span className="investor-standard-option-selected">Selecionada</span> : null}
+                      </button>;
                     })}
                   </div>
                 </section>;

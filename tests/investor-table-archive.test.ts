@@ -78,6 +78,14 @@ describe("Tabela Investidor do arquivo anexado", () => {
       "C8",
     ]);
     expect(
+      result.standardScenarios.map(
+        (scenario: { installmentLimit: number }) => scenario.installmentLimit,
+      ),
+    ).toEqual([18, 18, 18, 18, 24, 24, 24, 24]);
+    expect(
+      result.standardScenarios.map((scenario: { entryRate: number }) => scenario.entryRate),
+    ).toEqual([0.1, 0.06, 0.06, 0.1, 0.2, 0.17, 0.17, 0.2]);
+    expect(
       result.standardScenarios.every(
         (scenario: {
           entry: number;
@@ -94,6 +102,44 @@ describe("Tabela Investidor do arquivo anexado", () => {
           ) === Math.round(baseFlow.salePrice * 100),
       ),
     ).toBe(true);
+  });
+
+  it("mostra quatro opções de 18 parcelas e quatro de 24 em duas linhas permanentes", () => {
+    const calculator = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const styles = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const directArchive = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/DirectTableArchive.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    expect(calculator).toContain('18: ["C1", "C2", "C4", "C3"]');
+    expect(calculator).toContain('24: ["C5", "C6", "C8", "C7"]');
+    expect(calculator).toContain('className="investor-standard-plan-picker"');
+    expect(calculator).toContain('className="investor-standard-option-row"');
+    expect(calculator).toContain("disabled={!scenario.available}");
+    expect(calculator).not.toContain("expandedScenarioPlans");
+    expect(styles).toContain(
+      ".investor-page-shell.investor-standard-table-page .investor-standard-plan-picker",
+    );
+    expect(styles).toContain("grid-auto-flow:column");
+    expect(directArchive).toContain(
+      "<InvestorCalculator directTable directVisualLayout={false} />",
+    );
   });
 
   itWithPrivateSnapshot("valida o snapshot completo e exclui somente vagas avulsas", () => {

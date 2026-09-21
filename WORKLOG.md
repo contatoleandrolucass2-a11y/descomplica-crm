@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-21 — opções horizontais da Tabela Investidor
+
+- A etapa “Proposta calculada” da rota `/app/simulacao/tabela-investidor`
+  deixou de esconder as opções em acordeões: as quatro propostas de 18 parcelas
+  aparecem juntas na primeira linha e as quatro de 24 parcelas, juntas na linha
+  seguinte.
+- Os cartões seguem a leitura rápida da Tabela Direta, com numeração de 01 a 04,
+  título, ato, sinais, intermediárias, seleção textual, foco visível e estado
+  desabilitado sem depender somente de cor.
+- A ordem visual prioriza pagamento simples, entrada distribuída, parcela
+  reduzida e maior flexibilidade, sem alterar os códigos C1–C8, cálculos,
+  percentuais, datas, estoque, autenticação ou permissões.
+- O CSS novo está limitado por `investor-standard-table-page`; a rota
+  `/app/simulacao/tabela-direta` e seu componente continuam intactos.
+- Em telas estreitas, cada prazo permanece em uma única linha horizontal com
+  rolagem interna deliberada, preservando os oito cartões e alvos de toque.
+- A QA no navegador renderizou o componente real com estoque sintético em
+  375×812, 768×1024, 1024×768 e 1440×900: duas linhas, quatro botões alinhados
+  por linha, sem overflow da página, seleção por teclado, zero erro de console e
+  zero violação Axe no seletor alterado. Em 375 e 768 px, a rolagem fica contida
+  em cada linha; em 1024 e 1440 px, as quatro opções ficam integralmente visíveis.
+- O harness autenticado completo não pôde reutilizar o banco Supabase local já
+  ocupado por um Master de outra QA (`SQLSTATE P0001`). Nenhum dado local foi
+  apagado ou reconfigurado; a validação visual usou rota efêmera removida antes
+  do build final, e o limite de autenticação será conferido novamente no deploy.
+
 ## 2026-09-16 — rolagem integral e composição individual da Tabela Direta
 
 - A paginação de 100 linhas foi removida. O estoque integral de 3.301 unidades
