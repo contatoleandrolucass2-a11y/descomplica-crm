@@ -1644,6 +1644,8 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
         .first()
         .evaluate((card) => {
           const heading = card.querySelector(".investor-direct-comparison-heading");
+          const optionLine = heading?.querySelector(".investor-direct-comparison-option-line");
+          const infoTrigger = optionLine?.querySelector(".investor-info-trigger");
           const rows = [...card.querySelectorAll(".investor-direct-comparison-ledger-row")];
           const resultRow = rows.at(-1);
           const resultStatus = resultRow?.querySelector(
@@ -1651,9 +1653,24 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
           );
           const resultLabel = resultStatus?.querySelector("strong")?.textContent?.trim() ?? "";
           const resultCommitment = resultStatus?.querySelector("small")?.textContent?.trim() ?? "";
+          const headingRect = heading?.getBoundingClientRect();
+          const optionLineRect = optionLine?.getBoundingClientRect();
+          const infoTriggerRect = infoTrigger?.getBoundingClientRect();
+          const infoHitArea =
+            infoTrigger instanceof HTMLElement ? getComputedStyle(infoTrigger, "::before") : null;
           return (
             heading instanceof HTMLElement &&
-            Math.abs(heading.getBoundingClientRect().height - 100) <= 1 &&
+            optionLine instanceof HTMLElement &&
+            infoTrigger instanceof HTMLButtonElement &&
+            headingRect !== undefined &&
+            optionLineRect !== undefined &&
+            infoTriggerRect !== undefined &&
+            Math.abs(headingRect.height - 23) <= 1 &&
+            Math.abs(infoTriggerRect.height - 23) <= 1 &&
+            optionLineRect.top >= headingRect.top - 1 &&
+            optionLineRect.bottom <= headingRect.bottom + 1 &&
+            infoHitArea?.width === "44px" &&
+            infoHitArea.height === "44px" &&
             heading.querySelector(".investor-direct-credit-status") === null &&
             resultRow
               ?.querySelector(".investor-direct-comparison-ledger-label strong")

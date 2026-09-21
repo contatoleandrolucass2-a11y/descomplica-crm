@@ -561,7 +561,7 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(calculator.includes(">Inserir Anual</button>"));
   });
 
-  it("mantém o cabeçalho da opção com 100 px e o resultado no fim do ledger", () => {
+  it("mantém o cabeçalho da opção com 23 px e o resultado no fim do ledger", () => {
     const styles = readFileSync(
       new URL(
         "../app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css",
@@ -572,7 +572,11 @@ describe("Tabela Direta integral do arquivo anexado", () => {
 
     assert.match(
       styles,
-      /\.investor-page-shell\.investor-direct-table-page\s+\.investor-direct-comparison-heading\s*\{[^}]*height:\s*100px;[^}]*min-height:\s*100px;/su,
+      /\.investor-page-shell\.investor-direct-table-page\s+\.investor-direct-comparison-heading\s*\{[^}]*height:\s*23px;[^}]*min-height:\s*23px;[^}]*padding-block:\s*0;/su,
+    );
+    assert.match(
+      styles,
+      /\.investor-page-shell\.investor-direct-table-page\s+\.investor-direct-comparison-option-line\s+\.investor-info-trigger::before\s*\{[^}]*width:\s*44px;[^}]*height:\s*44px;/su,
     );
     assert.ok(styles.includes(".investor-direct-comparison-result-row"));
     assert.ok(styles.includes(".investor-direct-comparison-result-value"));

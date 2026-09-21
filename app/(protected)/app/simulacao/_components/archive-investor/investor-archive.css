@@ -20753,12 +20753,40 @@ body:has(.investor-page-shell) {
 .investor-page-shell.investor-direct-table-page
   .investor-direct-comparison-heading {
   box-sizing: border-box;
-  height: 100px;
-  min-height: 100px;
+  height: 23px;
+  min-height: 23px;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  padding-block: 7px;
+  padding-block: 0;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  > .investor-info-hint,
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  .investor-info-trigger {
+  height: 23px;
+  min-height: 23px;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  .investor-info-trigger {
+  position: relative;
+}
+
+.investor-page-shell.investor-direct-table-page
+  .investor-direct-comparison-option-line
+  .investor-info-trigger::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  content: "";
+  transform: translate(-50%, -50%);
 }
 
 .investor-page-shell.investor-direct-table-page
