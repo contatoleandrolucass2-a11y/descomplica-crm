@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-22 — fluxo compacto e guiado na Tabela Investidor
+
+- Reduz a altura dos oito cartões de proposta para 94 px, mantendo as quatro
+  opções de 18 parcelas na primeira linha e as quatro de 24 parcelas na segunda.
+- Ao selecionar uma unidade, conduz a visualização para os planos prontos; ao
+  selecionar uma opção, conduz para a composição completa centralizada.
+- Substitui o resumo horizontal da opção aberta pelo livro-caixa já usado como
+  referência visual na Tabela Direta, preservando entrada, sinais,
+  intermediárias, saldo, quantidade de parcelas, datas e fechamento monetário.
+- Limita a mudança à rota da Tabela Investidor; a Tabela Direta, suas regras e
+  seus componentes não foram alterados.
+
 ## 2026-09-21 — propostas visíveis na Tabela Investidor
 
 - Exibe simultaneamente as quatro opções de 18 parcelas em uma linha e as

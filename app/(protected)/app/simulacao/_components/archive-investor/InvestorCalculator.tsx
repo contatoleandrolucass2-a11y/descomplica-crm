@@ -2459,6 +2459,8 @@ export function InvestorCalculator({
   const associativeQualificationSectionRef = useRef<HTMLElement>(null);
   const associativeFlowSectionRef = useRef<HTMLElement>(null);
   const directJourneySectionRef = useRef<HTMLElement>(null);
+  const standardProposalSectionRef = useRef<HTMLElement>(null);
+  const standardScenarioDetailRef = useRef<HTMLElement>(null);
   const guidedAttentionTimer = useRef<number | null>(null);
   const [tourOpen, setTourOpen] = useState(false);
   const [tourStep, setTourStep] = useState(0);
@@ -3294,6 +3296,13 @@ export function InvestorCalculator({
     section.focus({ preventScroll: true });
   }
 
+  function scrollToCenteredGuidedSection(section: HTMLElement | null) {
+    if (!section) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    section.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center", inline: "nearest" });
+    section.focus({ preventScroll: true });
+  }
+
   function focusNextAssociativeRow(event: ReactKeyboardEvent<HTMLOListElement>) {
     if (event.key !== "Enter" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.nativeEvent.isComposing) return;
     const currentInput = event.target;
@@ -3370,6 +3379,7 @@ export function InvestorCalculator({
     }
     if (annualMode) window.setTimeout(() => guideToSection("qualification"), 0);
     if (directTable && !tourOpen) window.setTimeout(() => scrollToGuidedSection(directJourneySectionRef.current), 0);
+    if (!directTable && !annualMode) window.setTimeout(() => scrollToGuidedSection(standardProposalSectionRef.current), 0);
   }
 
   function selectInventoryRow(event: ReactMouseEvent<HTMLTableSectionElement>) {
@@ -3544,7 +3554,11 @@ export function InvestorCalculator({
   }
 
   function toggleScenarioOption(code: string) {
-    setVisibleScenarioCodes((current) => current[0] === code ? [] : [code]);
+    const closingCurrentOption = visibleScenarioCodes[0] === code;
+    setVisibleScenarioCodes(closingCurrentOption ? [] : [code]);
+    if (!closingCurrentOption && !directTable && !annualMode) {
+      window.setTimeout(() => scrollToCenteredGuidedSection(standardScenarioDetailRef.current), 0);
+    }
   }
 
   function updateFilter(setter: (value: string) => void, value: string) {
@@ -3711,7 +3725,7 @@ export function InvestorCalculator({
 
   function renderCalculatedProposal() {
     return (
-        <section className={`investor-standard-panel ${directTable ? "investor-direct-combined-panel" : directVisualLayout ? "investor-associative-direct-panel" : ""}${associativeCalculatedProposalLocked ? " is-locked" : ""}${annualMode && associativeQualificationComplete && !associativeFinancingValueReady ? " is-awaiting-financing" : ""}`} aria-labelledby={directTable ? "investor-direct-income-title investor-standard-title" : "investor-standard-title"} data-locked={associativeCalculatedProposalLocked || undefined} data-tour="scenarios">
+        <section ref={!directTable && !directVisualLayout ? standardProposalSectionRef : undefined} tabIndex={!directTable && !directVisualLayout ? -1 : undefined} className={`investor-standard-panel${!directTable && !directVisualLayout ? " investor-guided-scroll-target" : ""} ${directTable ? "investor-direct-combined-panel" : directVisualLayout ? "investor-associative-direct-panel" : ""}${associativeCalculatedProposalLocked ? " is-locked" : ""}${annualMode && associativeQualificationComplete && !associativeFinancingValueReady ? " is-awaiting-financing" : ""}`} aria-labelledby={directTable ? "investor-direct-income-title investor-standard-title" : "investor-standard-title"} data-locked={associativeCalculatedProposalLocked || undefined} data-tour="scenarios">
           {!directTable ? <header className="investor-section-heading investor-standard-heading">
             <span>{annualMode ? "04" : "02"}</span>
             <div><p>Proposta calculada</p><h2 id="investor-standard-title">{directVisualLayout ? "1 plano · 4 opções" : "2 planos · 8 opções"}</h2></div>
@@ -3882,19 +3896,20 @@ export function InvestorCalculator({
                 const optionTitle = `Plano em ${scenario.installments} parcelas · ${option.title}`;
                 const optionDescription = option.description;
                 const payments = [
-                { key: "property", label: "Valor do imóvel", value: money.format(result.context.valueReal), meta: "Base do plano" },
-                { key: "entry", label: "Entrada", value: money.format(scenario.entry), meta: `${percent.format(scenario.entryRate)} do valor do imóvel` },
-                ...scenario.signals.map((signal) => ({ key: `signal-${signal.index}`, label: `Sinal ${signal.index}`, value: money.format(signal.value), meta: `Pagamento em ${formatDate(signal.date)}` })),
-                ...scenario.intermediaryDates.map((date, index) => ({ key: `intermediary-${index + 1}`, label: `${annualMode ? "Anual" : "Intermediária"} ${index + 1}`, value: money.format(scenario.intermediaryValues?.[index] ?? scenario.intermediaryTotal / scenario.intermediaryCount), meta: `Pagamento em ${formatDate(date)}` })),
-                { key: "balance", label: "Saldo parcelado", value: money.format(scenario.balance), meta: "Valor dividido nas mensais" },
+                { key: "property", label: "Valor do imóvel", amount: result.context.valueReal, detail: "Base do plano", operator: "=" as const },
+                { key: "entry", label: "Entrada", amount: scenario.entry, detail: `${percent.format(scenario.entryRate)} do valor do imóvel`, operator: "−" as const },
+                ...scenario.signals.map((signal) => ({ key: `signal-${signal.index}`, label: `Sinal ${signal.index}`, amount: signal.value, detail: `Pagamento em ${formatDate(signal.date)}`, operator: "−" as const })),
+                ...scenario.intermediaryDates.map((date, index) => ({ key: `intermediary-${index + 1}`, label: `${annualMode ? "Anual" : "Intermediária"} ${index + 1}`, amount: scenario.intermediaryValues?.[index] ?? scenario.intermediaryTotal / scenario.intermediaryCount, detail: `Pagamento em ${formatDate(date)}`, operator: "−" as const })),
+                { key: "balance", label: "Saldo parcelado", amount: scenario.balance, detail: "Valor dividido nas mensais", operator: "=" as const },
                 {
                   key: "installment",
-                  label: "Parcela mensal",
-                  value: scenario.lastInstallmentValue === scenario.installmentValue
-                    ? `${scenario.installments}x de ${money.format(scenario.installmentValue)}`
-                    : `${scenario.installments - 1}x de ${money.format(scenario.installmentValue)} + última de ${money.format(scenario.lastInstallmentValue)}`,
-                  meta: `1ª em ${formatDate(scenario.firstInstallmentDate)}`,
-                  featured: true,
+                  label: `${scenario.installments} parcelas mensais`,
+                  amount: scenario.installmentValue,
+                  detail: scenario.lastInstallmentValue === scenario.installmentValue
+                    ? `${scenario.installments} parcelas de ${money.format(scenario.installmentValue)} · 1ª em ${formatDate(scenario.firstInstallmentDate)}`
+                    : `${scenario.installments - 1} parcelas de ${money.format(scenario.installmentValue)} + última de ${money.format(scenario.lastInstallmentValue)} · 1ª em ${formatDate(scenario.firstInstallmentDate)}`,
+                  operator: "÷" as const,
+                  emphasized: true,
                 },
                 ];
                 const linear = scenario.linear;
@@ -3962,20 +3977,22 @@ export function InvestorCalculator({
                     </article></div>
                   </section>;
                 }
-                return <section id={`investor-scenario-option-${scenario.code}`} key={scenario.code} className="investor-scenario-group investor-scenario-option-panel" data-scenario={option.plan === 18 ? 1 : 2}>
-                  <header>
-                    <div><h3>{optionTitle}</h3>{optionDescription ? <p>{optionDescription}</p> : null}</div>
-                    <button type="button" onClick={() => toggleScenarioOption(scenario.code)} aria-label={`Ocultar ${optionTitle}`}>Ocultar opção</button>
-                  </header>
-                  <div className="investor-scenario-grid">
-                    <article className={!scenario.available ? "unavailable" : ""}>
-                      {scenario.available ? <dl className={`investor-scenario-flow investor-scenario-flow-${payments.length}`} role="region" tabIndex={payments.length >= 10 ? 0 : undefined} aria-label={`${optionTitle}: pagamentos em sequência`}>
-                        {payments.map((payment) => <div key={payment.key} className={payment.featured ? "featured" : ""}>
-                          <dt>{payment.label}</dt><dd>{payment.value}</dd><small>{payment.meta}</small>
-                        </div>)}
-                      </dl> : <div className="investor-scenario-unavailable"><strong>Opção indisponível</strong><p>O prazo da obra não permite esta quantidade de parcelas.</p></div>}
-                    </article>
-                  </div>
+                const optionNumber = STANDARD_SCENARIO_CARD_ORDER[option.plan].indexOf(scenario.code) + 1;
+                const optionTitleId = `investor-standard-detail-${scenario.code}-title`;
+                return <section ref={standardScenarioDetailRef} tabIndex={-1} id={`investor-scenario-option-${scenario.code}`} key={scenario.code} className="investor-standard-detail investor-guided-scroll-target" aria-labelledby={optionTitleId} data-plan={option.plan}>
+                  <article className="investor-direct-comparison-card is-active">
+                    <header className="investor-direct-comparison-heading">
+                      <div>
+                        <div className="investor-direct-comparison-option-line"><span>Opção {optionNumber}</span></div>
+                        <h3 id={optionTitleId}>{optionTitle}</h3>
+                        {optionDescription ? <p>{optionDescription}</p> : null}
+                      </div>
+                      <button className="investor-standard-detail-close" type="button" onClick={() => toggleScenarioOption(scenario.code)} aria-label={`Ocultar ${optionTitle}`}>Ocultar opção</button>
+                    </header>
+                    {scenario.available ? <div className="investor-direct-comparison-ledger" role="table" aria-label={`${optionTitle}: composição completa`}>
+                      {payments.map((payment) => <DirectComparisonLedgerRow key={payment.key} label={payment.label} detail={payment.detail} operator={payment.operator} value={payment.amount} emphasized={payment.emphasized} />)}
+                    </div> : <div className="investor-scenario-unavailable"><strong>Opção indisponível</strong><p>O prazo da obra não permite esta quantidade de parcelas.</p></div>}
+                  </article>
                 </section>;
               })}
             </div>

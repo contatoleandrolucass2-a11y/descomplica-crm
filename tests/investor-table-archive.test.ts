@@ -142,6 +142,45 @@ describe("Tabela Investidor do arquivo anexado", () => {
     );
   });
 
+  it("compacta os cards, centraliza o detalhe completo e guia cada seleção", () => {
+    const calculator = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const styles = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    expect(calculator).toContain("const standardProposalSectionRef");
+    expect(calculator).toContain("const standardScenarioDetailRef");
+    expect(calculator).toContain("scrollToGuidedSection(standardProposalSectionRef.current)");
+    expect(calculator).toContain(
+      "scrollToCenteredGuidedSection(standardScenarioDetailRef.current)",
+    );
+    expect(calculator).toContain(
+      'className="investor-standard-detail investor-guided-scroll-target"',
+    );
+    expect(calculator).toContain('className="investor-direct-comparison-ledger"');
+    expect(calculator).toContain("payments.map((payment)");
+    expect(calculator).toContain("DirectComparisonLedgerRow");
+    expect(calculator).toContain("label: `${scenario.installments} parcelas mensais`");
+    expect(styles).toContain(
+      ".investor-page-shell.investor-standard-table-page .investor-standard-option-row > button",
+    );
+    expect(styles).toContain("min-height: 94px");
+    expect(styles).toContain(
+      ".investor-page-shell.investor-standard-table-page .investor-standard-detail",
+    );
+    expect(styles).toContain("width: min(880px, calc(100% - 48px))");
+  });
+
   itWithPrivateSnapshot("valida o snapshot completo e exclui somente vagas avulsas", () => {
     const payload = JSON.parse(readFileSync(privateSnapshotUrl, "utf8")) as {
       count: number;
