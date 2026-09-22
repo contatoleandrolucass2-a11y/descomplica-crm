@@ -1,28 +1,39 @@
 # Worklog
 
-## 2026-09-22 — compactação e condução da Tabela Investidor
+## 2026-09-22 — composição compacta e completa na Tabela Investidor
 
-- Os cartões das oito propostas prontas passaram a ter 94 px de altura e menor
+- Os cartões das oito propostas prontas passaram a ter 88 px de altura e menor
   espaçamento interno, sem retirar título, ato, sinais, intermediárias,
   indisponibilidade ou indicação de seleção.
+- O cabeçalho “Proposta calculada” passou a 78 px em tablet e desktop; as duas
+  linhas de opções usam divisórias contínuas e faixa superior de seleção.
 - A seleção de uma unidade agora desloca e posiciona o foco na etapa “Proposta
   calculada”. A seleção de uma proposta desloca e posiciona o foco no detalhe
   correspondente, respeitando a preferência de movimento reduzido.
 - O detalhe selecionado reutiliza o livro-caixa visual da Tabela Direta, fica
-  centralizado com largura máxima de 880 px e mantém uma linha por pagamento,
+  centralizado com 50% do painel em desktop e mantém uma linha por pagamento,
   incluindo todos os sinais, todas as intermediárias válidas e a quantidade de
   parcelas no rótulo principal.
+- O fluxo editável agora usa o mesmo padrão compacto: ações opcionais no topo,
+  uma linha por entrada, sinal, intermediária, saldo, quantidade, parcela e
+  resultado. Os handlers, limites, datas, valores e auditoria existentes foram
+  preservados.
+- O painel grande de composição foi removido. A barra final reúne Aprenda,
+  documentos PF/PJ, impressão, Bora Vendas e Salesforce, seguida imediatamente
+  pela auditoria do cálculo; o manual foi movido do rodapé para evitar IDs
+  duplicados.
 - As mudanças estão escopadas por `investor-standard-table-page`; a rota
   `/app/simulacao/tabela-direta`, suas regras e seu fluxo não foram modificados.
 - A QA isolada renderizou o componente real com 3.301 unidades sintéticas em
-  375×812, 768×1024, 1024×768 e 1440×900. Confirmou oito opções, altura de
-  94 px, detalhe centralizado, dez linhas na opção completa, foco e rolagem nas
-  duas transições, ausência de overflow horizontal e zero violação Axe grave ou
-  crítica na área alterada.
+  375×812, 768×1024, 1024×768 e 1440×900. Confirmou oito opções de 88 px,
+  detalhe e fluxo centralizados, seis ações finais, auditoria na sequência,
+  inserção de sinal e intermediária, ausência de overflow horizontal, zero erro
+  de navegador e zero violação Axe grave ou crítica.
 - A rota e o script usados somente na QA foram removidos antes do build final;
   nenhuma fixture sintética ou endpoint público integra a entrega.
-- O gate local aprovou lint, TypeScript, 54 arquivos e 599 testes Vitest, com
-  quatro skips preexistentes, oito testes Node e o build Next.js com 41 rotas.
+- O gate local aprovou lint sem avisos, TypeScript, 54 arquivos e 599 testes
+  Vitest com quatro skips preexistentes, oito testes Node e o build Next.js com
+  41 rotas.
 
 ## 2026-09-21 — opções horizontais da Tabela Investidor
 

@@ -1,14 +1,21 @@
 # Changelog
 
-## 2026-09-22 — fluxo compacto e guiado na Tabela Investidor
+## 2026-09-22 — composição compacta e completa na Tabela Investidor
 
-- Reduz a altura dos oito cartões de proposta para 94 px, mantendo as quatro
+- Reduz a altura dos oito cartões de proposta para 88 px, mantendo as quatro
   opções de 18 parcelas na primeira linha e as quatro de 24 parcelas na segunda.
+- Compacta o cabeçalho de “Proposta calculada” e aplica aos cartões a leitura
+  segmentada da Tabela Direta, sem retirar títulos ou condições comerciais.
 - Ao selecionar uma unidade, conduz a visualização para os planos prontos; ao
   selecionar uma opção, conduz para a composição completa centralizada.
 - Substitui o resumo horizontal da opção aberta pelo livro-caixa já usado como
   referência visual na Tabela Direta, preservando entrada, sinais,
   intermediárias, saldo, quantidade de parcelas, datas e fechamento monetário.
+- Substitui os seis cartões altos do fluxo editável por um livro-caixa central,
+  com ações para inserir sinal, intermediária e desconto e resultado anunciado.
+- Remove o painel redundante “Resultado da proposta” e move ajuda, documentos,
+  impressão, Bora Vendas e Salesforce para uma barra horizontal antes da
+  auditoria do cálculo.
 - Limita a mudança à rota da Tabela Investidor; a Tabela Direta, suas regras e
   seus componentes não foram alterados.
 
