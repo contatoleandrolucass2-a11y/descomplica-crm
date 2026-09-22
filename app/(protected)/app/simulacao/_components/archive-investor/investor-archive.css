@@ -4522,6 +4522,7 @@ a {
   }
 }
 
+
 @media (max-width: 760px) {
   .investor-page-shell.investor-direct-table-page
     .investor-direct-compact-payment-value {
@@ -21349,4 +21350,142 @@ body:has(.investor-page-shell) {
   .investor-page-shell .investor-guided-scroll-target {
     scroll-margin-block-start: 88px;
   }
+}
+
+/* Overrides finais e isolados da Tabela Investidor. */
+.investor-page-shell.investor-standard-table-page .investor-standard-panel > .investor-standard-heading {
+  min-height: 78px;
+  padding: 10px 24px;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-panel > .investor-standard-heading > span {
+  width: 44px;
+  height: 44px;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-picker {
+  gap: 12px;
+  padding-block: 12px;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row {
+  gap: 8px;
+  padding: 10px 0 0;
+  overflow: hidden;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row-heading { padding-inline: 16px; }
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row {
+  gap: 0;
+  padding: 0;
+  border-top: 1px solid rgba(91, 171, 200, 0.34);
+  scrollbar-gutter: auto;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row > button {
+  min-height: 88px;
+  height: 88px;
+  padding: 9px 14px;
+  border: 0;
+  border-right: 1px solid rgba(91, 171, 200, 0.3);
+  border-radius: 0;
+  background: transparent;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row > button:last-child { border-right: 0; }
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row > button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--standard-plan-accent) 8%, transparent);
+  transform: none;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row > button[aria-pressed="true"] {
+  border-color: transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--standard-plan-accent) 16%, transparent), color-mix(in srgb, var(--standard-plan-accent) 4%, transparent));
+  box-shadow: inset 0 3px 0 var(--standard-plan-accent);
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-option-selected {
+  right: 10px;
+  bottom: 6px;
+  left: auto;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-detail,
+.investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger {
+  width: 50%;
+  margin-inline: auto;
+}
+.investor-page-shell.investor-standard-table-page .investor-flow-form { padding-block: 12px 16px; }
+.investor-page-shell.investor-standard-table-page .investor-payment-stage-trail { display: none; }
+.investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger { max-width: none; }
+.investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-direct-account { border-radius: 12px; }
+.investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-payment-actions-row {
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 5px 8px !important;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-payment-actions-bar,
+.investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-payment-actions-bar > button {
+  height: 32px;
+  min-height: 32px;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-payment-actions-bar:has(> button:nth-child(4)) {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (min-width: 1101px) {
+  .investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-compact-account li:not(.investor-associative-payment-actions-row),
+  .investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-compact-account li:not(.investor-associative-payment-actions-row) > .investor-direct-step-content {
+    height: 38px;
+    min-height: 38px;
+  }
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-installments-control {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 30px;
+  padding: 0 10px;
+  color: var(--inv-text);
+  color-scheme: dark;
+  border: 1px solid #315e79;
+  border-radius: 7px;
+  outline: 0;
+  background: #071f35;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-installments-control:focus-visible {
+  border-color: var(--inv-cyan);
+  box-shadow: 0 0 0 3px rgba(99, 225, 231, 0.14);
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-ledger-status {
+  display: flex;
+  min-height: 30px;
+  align-items: center;
+  justify-content: center;
+  color: #6ce6bc;
+  font-variant-numeric: tabular-nums;
+}
+.investor-page-shell.investor-standard-table-page .investor-standard-ledger-status.adjustment { color: #ff9dab; }
+.investor-page-shell.investor-standard-table-page .investor-standard-resource-actions { margin-top: 0; }
+@media (max-width: 1120px) {
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail,
+  .investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger { width: calc(100% - 48px); }
+}
+@media (max-width: 760px) {
+  .investor-page-shell.investor-standard-table-page .investor-standard-panel > .investor-standard-heading {
+    min-height: 0;
+    padding: 10px 14px;
+  }
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail,
+  .investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger { width: calc(100% - 28px); }
+  .investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-compact-account li:not(.investor-associative-payment-actions-row),
+  .investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-compact-account li:not(.investor-associative-payment-actions-row) > .investor-direct-step-content {
+    height: auto;
+    min-height: 0;
+  }
+}
+
+.investor-page-shell.investor-standard-table-page .investor-property-summary .investor-unit-identity {
+  overflow: visible;
+}
+.investor-page-shell.investor-standard-table-page .investor-property-summary .investor-property-summary-line {
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+@media print {
+  .investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger { width: 100% !important; }
+  .investor-page-shell.investor-standard-table-page .investor-standard-resource-actions { display: none !important; }
 }

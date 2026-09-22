@@ -4,7 +4,6 @@ import {
   InvestorCalculator,
   InvestorGuideLauncher,
   InvestorInfoHint,
-  InvestorLearningManual,
 } from "./archive-investor/InvestorCalculator";
 import { SiteMenu } from "./archive-investor/SiteMenu";
 import "./archive-investor/investor-archive.css";
@@ -55,7 +54,6 @@ export function InvestorTableArchive() {
           de formalizar a proposta.
         </p>
       </main>
-      <InvestorLearningManual />
       <footer className="investor-page-footer">
         <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>
         <small>Desenvolvido e gerenciado por Leandro Lucas</small>

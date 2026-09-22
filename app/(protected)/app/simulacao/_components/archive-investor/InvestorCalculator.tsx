@@ -3000,7 +3000,6 @@ export function InvestorCalculator({
     .map((_, index) => index)
     .filter((index) => index < signalVisibilityFloor && !hiddenSignalIndexes.includes(index));
   const visibleSignalCount = visibleSignalIndexes.length;
-  const signalsVisible = visibleSignalCount > 0;
   const intermediaryFieldLimit = Math.min(intermediaries.length, result.context.intermediaryInputLimit);
   const activeIntermediaryFieldCount = intermediaries.reduce((latest, value, index) => currencyInputNumber(value) > 0 ? index + 1 : latest, 0);
   const intermediaryVisibilityFloor = Math.min(intermediaryFieldLimit, Math.max(intermediaryFieldCount, activeIntermediaryFieldCount));
@@ -3008,14 +3007,6 @@ export function InvestorCalculator({
     .map((_, index) => index)
     .filter((index) => index < intermediaryVisibilityFloor && !hiddenIntermediaryIndexes.includes(index));
   const visibleIntermediaryCount = visibleIntermediaryIndexes.length;
-  const intermediariesVisible = visibleIntermediaryCount > 0;
-  const missingForMinimumEntry = directTable
-    ? Math.max(
-        0,
-        (moneyToCents(directResult.custom.minimumEntryValue)
-          - moneyToCents(directResult.custom.totalEntryValue)) / 100,
-      )
-    : Math.max(0, result.context.valueReal * 0.1 - result.custom.totalEntryValue);
   const validInstallmentSchedule = directTable
     ? result.context.maxInstallments > 0
     : result.custom.desiredInstallments > 0 && result.custom.desiredInstallments <= result.context.maxInstallments;
@@ -3029,12 +3020,6 @@ export function InvestorCalculator({
     && !associativeInstallmentsRejected
     && Boolean(result.custom.decreasing?.ok)
     && result.custom.installmentValue > 0;
-  const activeSignalDates = result.custom.signals
-    .filter((item: { active: boolean; approved: boolean; date: string }) => item.active && item.approved && item.date)
-    .map((item: { date: string }) => formatDate(item.date));
-  const validIntermediaryDates = result.custom.intermediaries
-    .filter((item: { value: number; approved: boolean; date: string }) => item.value > 0 && item.approved && item.date)
-    .map((item: { date: string }) => formatDate(item.date));
   const scenarioOptions: Record<string, { plan: number; title: string; description: string | null }> = annualMode
     ? ASSOCIATIVE_SCENARIO_OPTIONS
     : STANDARD_SCENARIO_OPTIONS;
@@ -3456,15 +3441,6 @@ export function InvestorCalculator({
     window.requestAnimationFrame(() => signalActionRef.current?.focus());
   }
 
-  function clearSignalFields() {
-    if (directTable) setDirectProposalDirty(true);
-    setSignalDistributionMode("manual");
-    setSignalFieldCount(0);
-    setSignals(["0", "0", "0"]);
-    setHiddenSignalIndexes([]);
-    window.requestAnimationFrame(() => signalActionRef.current?.focus());
-  }
-
   function addIntermediaryField() {
     const nextIndex = intermediaries.findIndex((_, index) => index < intermediaryFieldLimit && !visibleIntermediaryIndexes.includes(index));
     if (nextIndex < 0) return;
@@ -3478,14 +3454,6 @@ export function InvestorCalculator({
     if (directTable) setDirectProposalDirty(true);
     setIntermediaries((current) => current.map((item, itemIndex) => itemIndex === index ? "0" : item));
     setHiddenIntermediaryIndexes((current) => current.includes(index) ? current : [...current, index]);
-    window.requestAnimationFrame(() => intermediaryActionRef.current?.focus());
-  }
-
-  function clearIntermediaryFields() {
-    if (directTable) setDirectProposalDirty(true);
-    setIntermediaryFieldCount(0);
-    setIntermediaries(Array.from({ length: directTable ? 8 : annualMode ? 5 : 4 }, () => "0"));
-    setHiddenIntermediaryIndexes([]);
     window.requestAnimationFrame(() => intermediaryActionRef.current?.focus());
   }
 
@@ -4696,97 +4664,113 @@ export function InvestorCalculator({
                   appraisalOverride={documentationAppraisalOverride}
                   onAppraisalOverrideChange={setDocumentationAppraisalOverride}
                 />
-              </div> : <div className="investor-payment-controls" role="group" aria-labelledby="investor-flow-title">
-                {!directVisualLayout ? <article className="investor-property-value-step investor-payment-step" data-step="01" data-operator="">
-                  <span>Valor do imóvel</span>
-                  <strong>{money.format(result.context.valueReal)}</strong>
-                </article> : null}
-                <label className={`investor-entry-field investor-payment-step${associativeEntryRejected ? " rejected" : ""}`} data-step={directVisualLayout ? "01" : "02"} data-operator="−">
-                  <span className="investor-control-heading">
-                    <span className="investor-entry-title">Entrada</span>
-                    <small className="investor-entry-minimum"><span>Mínimo</span><span>{annualMode ? money.format(150) : `${money.format(result.context.valueReal * 0.06)} (6%)`}</span></small>
-                  </span>
-                  <div><b>R$</b><MoneyInput label="Entrada" describedBy="investor-entry-meta" invalid={associativeEntryRejected} value={entryValue} onChange={updateEntryValue} /></div>
-                  <small className="investor-money-meta" id="investor-entry-meta"><b role={associativeEntryRejected ? "alert" : undefined}>{annualMode ? associativeEntryPending ? "Informe a entrada" : associativeEntryRejected ? "Reprovada · mínimo R$ 150,00" : "Entrada válida" : `${percent.format(result.custom.actRate)} do valor real`}</b><span>Pagamento {formatDate(baseDate)}</span></small>
-                </label>
-
-                <div className={`investor-signal-disclosure ${signalsRequired ? "required" : "optional"}`} data-step={directVisualLayout ? "02" : "03"} data-operator="−">
-                  <div className="investor-option-heading">
-                    <strong>Sinais</strong>
-                    <InvestorInfoHint label="sinais" title="Quer usar sinais?" description="Sinal 1, 2 e 3 são opcionais e podem aumentar a entrada ou liberar mais parcelas." />
-                  </div>
-                  <fieldset className="investor-intermediaries investor-inline-payment-fields investor-signal-fields" id="investor-signal-fields" hidden={!signalsVisible}>
-                    <legend className="sr-only">Sinais da entrada</legend>
-                    <div>{signals.slice(0, visibleSignalCount).map((value, index) => {
+              </div> : <div className="investor-associative-ledger investor-standard-editable-ledger" role="group" aria-labelledby="investor-flow-title">
+                <div className="investor-direct-account investor-direct-editable-account investor-associative-compact-account">
+                  <ol onKeyDown={focusNextAssociativeRow}>
+                    <li className="investor-associative-payment-actions-row">
+                      <span className="investor-direct-step-number" aria-hidden="true" />
+                      <div className="investor-associative-payment-actions-bar" role="group" aria-label="Adicionar pagamentos opcionais">
+                        <button ref={signalActionRef} type="button" disabled={visibleSignalCount >= signals.length} onClick={addSignalField}>Inserir Sinal</button>
+                        <button ref={intermediaryActionRef} type="button" disabled={visibleIntermediaryCount >= intermediaryFieldLimit} onClick={addIntermediaryField}>Inserir Intermediária</button>
+                        <button type="button" aria-pressed={discountAuthorized} onClick={toggleDiscountField}>{discountAuthorized ? "Remover Desconto" : "Inserir Desconto"}</button>
+                        {signalsRequired && signalDistributionMode === "manual" ? <button type="button" aria-label="Redistribuir sinais automaticamente" onClick={() => setSignalDistributionMode("auto")}>Redistribuir</button> : null}
+                      </div>
+                    </li>
+                    <AssociativeEditableAccountRow
+                      operator="="
+                      label="Valor real da venda"
+                      fieldState="locked"
+                      meta={associativeHelp("Base usada nesta proposta.", discountAuthorized ? `Valor do imóvel menos ${money.format(result.context.discount)} de desconto autorizado.` : "Sem desconto aplicado.")}
+                      calculation={<AssociativeMoneyValue label="Valor real da venda" value={result.context.valueReal} />}
+                      total
+                    />
+                    {discountAuthorized ? <AssociativeEditableAccountRow
+                      operator="−"
+                      label="Desconto"
+                      fieldState="editable"
+                      meta="Desconto comercial opcional. Use somente quando houver autorização."
+                      calculation={<AssociativeMoneyControl inputRef={discountInputRef} label="Desconto autorizado" value={discount} onChange={updateDiscount} />}
+                    /> : null}
+                    <AssociativeEditableAccountRow
+                      operator="−"
+                      label="Entrada"
+                      date={baseDate}
+                      fieldState="editable"
+                      meta={associativeHelp(`Mínimo de ${money.format(result.context.valueReal * 0.06)} (6%).`, `Percentual atual: ${percent.format(result.custom.actRate)} do valor real.`)}
+                      calculation={<><AssociativeMoneyControl label="Entrada" describedBy="investor-entry-meta" invalid={result.custom.actRate < 0.06} value={entryValue} onChange={updateEntryValue} /><span className="sr-only" id="investor-entry-meta" role={result.custom.actRate < 0.06 ? "alert" : "status"} aria-live="polite">{result.custom.actRate < 0.06 ? `Entrada abaixo do mínimo de ${money.format(result.context.valueReal * 0.06)}.` : `Entrada válida: ${percent.format(result.custom.actRate)} do valor real.`}</span></>}
+                      invalid={result.custom.actRate < 0.06}
+                    />
+                    {visibleSignalIndexes.map((index) => {
+                      const value = signals[index];
                       const signal = result.custom.signals[index];
                       const active = currencyInputNumber(value) > 0;
-                      return <label key={index} className={active ? signal.approved ? "approved" : "rejected" : ""}>
-                        <span>Sinal {index + 1}<small>{signal.status}</small></span>
-                        <div><b>R$</b><MoneyInput inputRef={(input) => { signalInputRefs.current[index] = input; }} label={`Sinal ${index + 1}`} value={value} onChange={(nextValue) => updateSignal(index, nextValue)} /></div>
-                        <em role={active && !signal.approved ? "alert" : undefined}>{active ? `${percent.format(signal.rate)} do valor · ${formatDate(signal.date)} · ${signal.reason}` : `Previsto para ${formatDate(signal.date)}`}</em>
-                      </label>;
-                    })}</div>
-                  </fieldset>
-                  {signalsRequired ? <small className="investor-required-note" role="status" aria-live="polite">Entrada abaixo de 10%. Faltam <b>{money.format(missingForMinimumEntry)}</b>.</small> : null}
-                  <div className="investor-disclosure-actions">
-                    {directVisualLayout ? <span className="investor-ledger-result-summary"><small>Total em sinais</small><strong>{money.format(result.custom.signalTotal)}</strong></span> : null}
-                    {visibleSignalCount < signals.length ? <button ref={signalActionRef} className="investor-option-toggle" type="button" aria-expanded={signalsVisible} aria-controls="investor-signal-fields" onClick={addSignalField}>{signalsVisible ? "Adicionar outro sinal" : "Adicionar sinal"}</button> : <span className="investor-option-limit">Limite de 3 sinais</span>}
-                    {signalsRequired && signalDistributionMode === "manual" ? <button className="investor-option-reset" type="button" onClick={() => setSignalDistributionMode("auto")}>Redistribuir automaticamente</button> : null}
-                    {signalsVisible ? <button className="investor-option-reset" type="button" onClick={clearSignalFields}>{signalsRequired ? "Zerar sinais" : "Ocultar e zerar"}</button> : null}
-                  </div>
-                </div>
-
-                <div className="investor-signal-disclosure investor-intermediary-disclosure optional" data-step={directVisualLayout ? "03" : "04"} data-operator="−">
-                  <div className="investor-option-heading">
-                    <strong>{annualMode ? "Anuais" : "Intermediárias"}</strong>
-                    <InvestorInfoHint
-                      label={annualMode ? "anuais" : "intermediárias"}
-                      title={annualMode ? "Quer usar anuais?" : "Quer usar intermediárias?"}
-                      description={annualMode
-                        ? "Até 5 anuais opcionais, com vencimento em 15/12 e limite pelo término da obra. O valor é corrigido em 0,5% no início e 0,5% ao mês."
-                        : `Opcional · até 5% cada · máximo ${intermediaryFieldLimit || 3} pagamentos neste fluxo.`}
+                      const statusId = `investor-editable-signal-${index + 1}-status`;
+                      return <AssociativeEditableAccountRow
+                        key={`standard-editable-signal-${index}`}
+                        operator={active && !signal.approved ? "!" : "−"}
+                        label={`Sinal ${index + 1}`}
+                        date={signal.date}
+                        rowClassName="payment-group-child payment-group-child-signal"
+                        fieldState="editable"
+                        leadingAction={<button type="button" className="investor-associative-row-remove" aria-label={`Ocultar Sinal ${index + 1} e zerar valor`} onClick={() => hideSignalField(index)}><span aria-hidden="true">×</span></button>}
+                        meta={associativeHelp(`Pagamento previsto em ${formatDate(signal.date)}.`, active ? signal.reason : "Pagamento opcional não utilizado.", `Total válido em sinais: ${money.format(result.custom.signalTotal)}.`)}
+                        calculation={<><AssociativeMoneyControl inputRef={(input) => { signalInputRefs.current[index] = input; }} label={`Valor do sinal ${index + 1}`} describedBy={statusId} invalid={active && !signal.approved} value={value} onChange={(nextValue) => updateSignal(index, nextValue)} /><span className="sr-only" id={statusId} role={active && !signal.approved ? "alert" : "status"} aria-live="polite">{active ? signal.reason : "Sinal opcional não utilizado"}</span></>}
+                        invalid={active && !signal.approved}
+                      />;
+                    })}
+                    {visibleIntermediaryIndexes.map((index) => {
+                      const item = result.custom.intermediaries[index];
+                      const active = item.value > 0;
+                      const statusId = `investor-editable-intermediary-${item.index}-status`;
+                      return <AssociativeEditableAccountRow
+                        key={`standard-editable-intermediary-${item.index}`}
+                        operator={active && !item.approved ? "!" : "−"}
+                        label={`Intermediária ${item.index}`}
+                        date={item.date || undefined}
+                        rowClassName="payment-group-child payment-group-child-intermediary"
+                        fieldState="editable"
+                        leadingAction={<button type="button" className="investor-associative-row-remove" aria-label={`Ocultar Intermediária ${item.index} e zerar valor`} onClick={() => hideIntermediaryField(index)}><span aria-hidden="true">×</span></button>}
+                        meta={associativeHelp(item.date ? `Pagamento previsto em ${formatDate(item.date)}.` : "Data de pagamento indisponível.", `Máximo de ${money.format(result.context.valueReal * 0.05)} (5%) por intermediária.`, active ? item.reason : "Pagamento opcional não utilizado.")}
+                        calculation={<><AssociativeMoneyControl inputRef={(input) => { intermediaryInputRefs.current[index] = input; }} label={`Valor da intermediária ${item.index}`} describedBy={statusId} invalid={active && !item.approved} max={result.context.valueReal * 0.05} value={intermediaries[index]} onChange={(nextValue) => updateIntermediary(index, nextValue)} /><span className="sr-only" id={statusId} role={active && !item.approved ? "alert" : "status"} aria-live="polite">{active ? item.reason : "Intermediária opcional não utilizada"}</span></>}
+                        invalid={active && !item.approved}
+                      />;
+                    })}
+                    <AssociativeEditableAccountRow
+                      operator="="
+                      label="Saldo parcelado"
+                      fieldState="locked"
+                      meta={associativeHelp("Valor restante depois da entrada e dos pagamentos válidos.", `Saldo atual: ${money.format(result.custom.balance)}.`)}
+                      calculation={<AssociativeMoneyValue label="Saldo parcelado" value={result.custom.balance} />}
+                      total
                     />
-                  </div>
-                  <fieldset className="investor-intermediaries investor-inline-payment-fields" id="investor-intermediary-fields" hidden={!intermediariesVisible}>
-                    <legend className="sr-only">{annualMode ? "Anuais" : "Intermediárias"}</legend>
-                    <div>{result.custom.intermediaries.slice(0, visibleIntermediaryCount).map((item, index) => (
-                      <label key={item.index} className={item.value > 0 ? item.approved ? "approved" : "rejected" : ""}>
-                        <span>{annualMode ? "Anual" : "Intermediária"} {item.index}<small>{item.date ? `Pagamento ${formatDate(item.date)}` : "Data indisponível"}</small></span>
-                        <div><b>R$</b><MoneyInput inputRef={(input) => { intermediaryInputRefs.current[index] = input; }} label={`${annualMode ? "Anual" : "Intermediária"} ${item.index}`} max={annualMode ? undefined : result.context.valueReal * 0.05} value={intermediaries[index]} onChange={(nextValue) => updateIntermediary(index, nextValue)} /></div>
-                        <em>{item.value > 0
-                          ? annualMode && item.approved ? `Corrigida: ${money.format(item.correctedValue)} · ${item.reason}` : `${percent.format(item.rate)} do valor · ${item.reason}`
-                          : annualMode ? "Opcional" : `Máximo ${money.format(result.context.valueReal * 0.05)}`}</em>
-                      </label>
-                    ))}</div>
-                  </fieldset>
-                  <div className="investor-disclosure-actions">
-                    {directVisualLayout ? <span className="investor-ledger-result-summary"><small>{annualMode ? "Total corrigido" : "Total válido"}</small><strong>{money.format(result.custom.validIntermediaryTotal)}</strong></span> : null}
-                    {visibleIntermediaryCount < intermediaryFieldLimit ? <button ref={intermediaryActionRef} className="investor-option-toggle" type="button" aria-expanded={intermediariesVisible} aria-controls="investor-intermediary-fields" onClick={addIntermediaryField}>{intermediariesVisible ? `Adicionar outra ${annualMode ? "anual" : "intermediária"}` : `Adicionar ${annualMode ? "anual" : "intermediária"}`}</button> : intermediaryFieldLimit > 0 ? <span className="investor-option-limit">Limite de {intermediaryFieldLimit} {annualMode ? "anuais" : "intermediárias"}</span> : <span className="investor-option-limit">Libere com 10% de entrada</span>}
-                    {intermediariesVisible ? <button className="investor-option-reset" type="button" onClick={clearIntermediaryFields}>Ocultar e zerar</button> : null}
-                  </div>
+                    <AssociativeEditableAccountRow
+                      operator="÷"
+                      label="Qtd. de parcelas"
+                      fieldState="editable"
+                      meta={associativeHelp(`Use um número inteiro entre 1 e ${result.context.maxInstallments}.`, "O máximo varia conforme a entrada total e o prazo da obra.")}
+                      calculation={<input className="investor-standard-installments-control" aria-label="Quantidade de parcelas" aria-describedby="investor-installment-guidance" type="number" min="1" max={result.context.maxInstallments || 1} step="1" value={result.context.maxInstallments > 0 ? installments : ""} placeholder="Indisponível" disabled={result.context.maxInstallments <= 0} onChange={(event) => setInstallments(event.target.value)} />}
+                      invalid={!validInstallmentSchedule}
+                    />
+                    <AssociativeEditableAccountRow
+                      operator="="
+                      label="Parcela mensal"
+                      date={firstInstallmentDate || undefined}
+                      fieldState="locked"
+                      meta={validInstallmentSchedule ? `${result.custom.desiredInstallments} parcelas; última em ${formatPaymentDate(lastInstallmentDate)}.` : "Ajuste a entrada ou a quantidade de parcelas."}
+                      calculation={<AssociativeMoneyValue label="Parcela mensal" value={result.custom.installmentValue} />}
+                      total
+                    />
+                    <AssociativeEditableAccountRow
+                      operator=""
+                      label="Resultado da proposta"
+                      rowClassName="investor-standard-result-row"
+                      fieldState="locked"
+                      meta={result.ok ? "Todos os critérios da proposta foram validados." : result.errors?.[0] || "Abra a auditoria para conferir os ajustes necessários."}
+                      calculation={<span className={`investor-standard-ledger-status ${result.ok ? "approved" : "adjustment"}`} role="status" aria-live="polite"><strong>{result.ok ? "PROPOSTA DENTRO DA REGRA" : "AJUSTE NECESSÁRIO"}</strong></span>}
+                      invalid={!result.ok}
+                    />
+                  </ol>
                 </div>
-
-                <div className="investor-final-field investor-final-action" data-step={directVisualLayout ? "04" : "05"} data-operator="−">
-                  <span className="investor-final-field-heading"><span>Desconto</span><InvestorInfoHint label="desconto" title="Como funciona o desconto?" description="Use somente quando o cliente solicitar. Sem impacto enquanto estiver desativado e aplicado apenas quando autorizado." /></span>
-                  {directVisualLayout ? <>
-                    <div className="investor-ledger-control-stack">
-                      <label className="investor-discount-field investor-inline-discount-field" id="investor-discount-field" hidden={!discountAuthorized}><span>Valor autorizado</span><div><b>R$</b><MoneyInput inputRef={discountInputRef} label="Desconto autorizado" value={discount} onChange={setDiscount} /></div></label>
-                      <button className={`investor-option-toggle ${discountAuthorized ? "active" : ""}`} type="button" aria-pressed={discountAuthorized} aria-expanded={discountAuthorized} aria-controls="investor-discount-field" onClick={toggleDiscountField}>{discountAuthorized ? "Ocultar e zerar desconto" : "Aplicar desconto"}</button>
-                    </div>
-                    <span className="investor-ledger-result-summary"><small>Valor real</small><strong>{money.format(result.context.valueReal)}</strong></span>
-                  </> : <>
-                    <label className="investor-discount-field investor-inline-discount-field" id="investor-discount-field" hidden={!discountAuthorized}><span>Valor autorizado</span><div><b>R$</b><MoneyInput inputRef={discountInputRef} label="Desconto autorizado" value={discount} onChange={setDiscount} /></div></label>
-                    <button className={`investor-option-toggle ${discountAuthorized ? "active" : ""}`} type="button" aria-pressed={discountAuthorized} aria-expanded={discountAuthorized} aria-controls="investor-discount-field" onClick={toggleDiscountField}>{discountAuthorized ? "Ocultar e zerar desconto" : "Aplicar desconto"}</button>
-                  </>}
-                </div>
-                <label className="investor-installments-field" data-step={directVisualLayout ? "05" : "06"} data-operator="÷">
-                  <span className="investor-installments-heading"><span>Qtd. de parcelas</span><small>{annualMode ? "Plano fixo" : `Máximo ${result.context.maxInstallments}`}</small></span>
-                  <input aria-describedby="investor-installment-guidance" aria-readonly={annualMode} readOnly={annualMode} type="number" min="1" max={result.context.maxInstallments || 1} step="1" value={result.context.maxInstallments > 0 ? installments : ""} placeholder="Indisponível" disabled={result.context.maxInstallments <= 0} onChange={(event) => { if (!annualMode) setInstallments(event.target.value); }} />
-                  <span className="investor-installments-preview">
-                    <span>{annualMode ? <><strong>Parcela corrigida</strong> {money.format(result.custom.installmentValue)}</> : <><strong>{result.custom.desiredInstallments}x</strong> de {money.format(result.custom.installmentValue)}</>}</span>
-                    <small>{annualMode ? `${result.custom.preInstallments} pré + ${result.custom.postInstallments} pós = ${result.custom.desiredInstallments}` : `1ª em ${formatPaymentDate(firstInstallmentDate)}`}</small>
-                  </span>
-                </label>
               </div>}
               <span className="sr-only" id="investor-installment-guidance">{annualMode ? "Informe uma quantidade inteira entre 1 e 84 parcelas para o plano Associativo." : "A quantidade máxima de parcelas varia conforme a entrada total e o prazo da obra."}</span>
               </>}
@@ -4833,88 +4817,6 @@ export function InvestorCalculator({
             />
           </div> : null}
 
-          {!directTable && !annualMode ? <section className={`investor-result-panel ${result.ok ? "approved" : "blocked"}${directVisualLayout ? " investor-direct-copy-result" : ""}`} aria-labelledby="investor-result-title" data-tour="result">
-            <header className="investor-result-heading">
-                <span>{directTable ? "05" : annualMode ? "05" : "04"}</span>
-              <div>
-                <p>Resultado da proposta</p>
-                <h2 id="investor-result-title">{directTable ? "Resultado Tabela Direta" : "Valor do parcelamento"}</h2>
-                <small className="investor-result-status" role="status" aria-live="polite">{directTable ? result.status : result.ok ? "Proposta dentro da regra" : "Ajuste necessário"}</small>
-              </div>
-              <div className="investor-result-actions" data-tour="documents">
-                <button type="button" aria-haspopup="dialog" aria-controls="investor-documentation-pf" onClick={() => pfDocumentationDialog.current?.showModal()}>Doc Pessoa Física</button>
-                <button type="button" aria-haspopup="dialog" aria-controls="investor-documentation-pj" onClick={() => pjDocumentationDialog.current?.showModal()}>Doc Pessoa Jurídica</button>
-                <button type="button" onClick={() => window.print()}>Imprimir</button>
-                <InvestorCommercialLinks />
-              </div>
-            </header>
-            <DocumentationDialog type="pf" dialogRef={pfDocumentationDialog} directTable={directTable} />
-            <DocumentationDialog type="pj" dialogRef={pjDocumentationDialog} directTable={directTable} />
-            <div className="investor-result-summary-grid">
-              <section className="investor-result-breakdown" aria-labelledby="investor-composition-title">
-                <h3 id="investor-composition-title">Composição</h3>
-                {directTable ? <ol className="investor-stage-trail investor-result-stage-trail" aria-label="Etapas da composição da proposta">
-                  <li><span>1</span>Valor do imóvel</li>
-                  <li><span>2</span>Entrada</li>
-                  <li><span>3</span>Pré-chaves</li>
-                  <li><span>4</span>Pós-chaves</li>
-                  <li><span>5</span>Crédito</li>
-                </ol> : <ol className="investor-stage-trail investor-result-stage-trail" aria-label="Etapas da composição da proposta">
-                  <li><span>1</span>Valor do imóvel</li>
-                  <li><span>2</span>Entrada</li>
-                  {result.custom.signalTotal > 0 ? <>
-                    <li><span>3</span>Sinais</li>
-                    <li><span>4</span>Entrada total</li>
-                  </> : null}
-                  {result.custom.validIntermediaryTotal > 0 ? <li><span>{result.custom.signalTotal > 0 ? 5 : 3}</span>{annualMode ? "Anuais" : "Intermediárias"}</li> : null}
-                  <li><span>{3 + (result.custom.signalTotal > 0 ? 2 : 0) + (result.custom.validIntermediaryTotal > 0 ? 1 : 0)}</span>{annualMode ? "Pró-soluto corrigido" : "Saldo parcelado"}</li>
-                  {annualMode ? <>
-                    {result.custom.preInstallments > 0 ? <li><span>→</span>Mensais pré-obra</li> : null}
-                    {result.custom.postInstallments > 0 ? <li><span>→</span>Mensais pós-obra</li> : null}
-                  </> : null}
-                  <li><span>{annualMode ? "=" : 4 + (result.custom.signalTotal > 0 ? 2 : 0) + (result.custom.validIntermediaryTotal > 0 ? 1 : 0)}</span>{annualMode ? "Parcela corrigida" : "Parcela mensal"}</li>
-                </ol>}
-                 {directTable ? <dl>
-                  <div><dt>Valor real da venda</dt><dd>{money.format(result.context.valueReal)}</dd></div>
-                  <div><dt>Ato ({percent.format(result.custom.actRate)})</dt><dd>{money.format(result.custom.actValue)}</dd></div>
-                  {result.custom.signalTotal > 0 ? <div><dt>Sinais<small>Pagamentos em {activeSignalDates.join(", ")}</small></dt><dd>{money.format(result.custom.signalTotal)}</dd></div> : null}
-                  {result.custom.validIntermediaryTotal > 0 ? <div><dt>{annualMode ? "Anuais corrigidas" : "Intermediárias válidas"}<small>Pagamentos em {validIntermediaryDates.join(", ")}</small></dt><dd>{money.format(result.custom.validIntermediaryTotal)}</dd></div> : null}
-                  {directPreKeysAvailable ? <div><dt>Mensais pré-chaves<small>1ª em {formatPaymentDate(directResult.custom.firstPreKeysDate)} · última em {formatPaymentDate(directResult.custom.lastPreKeysDate)}</small></dt><dd><strong>{directPreKeysPaymentSummary}</strong></dd></div> : directPreKeysDeadlineInsufficient ? <div><dt>Mensais pré-chaves</dt><dd><strong>Prazo insuficiente</strong><small>{directPreKeysDeadlineMessage}</small></dd></div> : <div><dt>Mensais pré-chaves</dt><dd><strong>Dispensadas</strong><small>{directPreKeysSettlement}</small></dd></div>}
-                  <div className="investor-result-installment-total"><dt>Mensais pós-chaves<small>1ª em {formatPaymentDate(result.custom.firstPostKeysDate)} · juros, MIP e DFI</small></dt><dd><strong>{result.custom.postKeysInstallments}x</strong> de {money.format(result.custom.postKeysPayment)}</dd></div>
-                  <div className="investor-result-breakdown-total"><dt>Renda e comprometimento</dt><dd>{result.custom.income > 0 ? `${money.format(result.custom.income)} · ${percent.format(result.custom.commitment)}` : "Renda não informada"}</dd></div>
-                  <div><dt>Resultado da proposta</dt><dd><strong>{directStatus}</strong></dd></div>
-                </dl> : annualMode ? <dl>
-                  <div><dt>Valor real da venda<small>Imóvel − B.A. − folga</small></dt><dd>{money.format(result.context.valueReal)}</dd></div>
-                  {result.custom.financing > 0 ? <div><dt>Financiamento</dt><dd>− {money.format(result.custom.financing)}</dd></div> : null}
-                  {result.custom.subsidy > 0 ? <div><dt>Subsídio</dt><dd>− {money.format(result.custom.subsidy)}</dd></div> : null}
-                  {result.custom.fgts > 0 ? <div><dt>FGTS</dt><dd>− {money.format(result.custom.fgts)}</dd></div> : null}
-                  {result.custom.housingCheck > 0 ? <div><dt>Cheque Moradia</dt><dd>− {money.format(result.custom.housingCheck)}</dd></div> : null}
-                  <div className="investor-result-breakdown-total"><dt>Saldo após recursos</dt><dd>{money.format(result.custom.balanceAfterResources)}</dd></div>
-                  <div><dt>Entrada ({percent.format(result.custom.actRate)})</dt><dd>{money.format(result.custom.actValue)}</dd></div>
-                  {result.custom.signalTotal > 0 ? <>
-                    <div><dt>Sinais<small>Pagamentos em {activeSignalDates.join(", ")}</small></dt><dd>{money.format(result.custom.signalTotal)}</dd></div>
-                    <div className="investor-result-breakdown-total"><dt>Entrada total ({percent.format(result.custom.totalEntryRate)})</dt><dd>{money.format(result.custom.totalEntryValue)}</dd></div>
-                  </> : null}
-                  {result.custom.validIntermediaryTotal > 0 ? <div><dt>Anuais corrigidas<small>Pagamentos em {validIntermediaryDates.join(", ")}</small></dt><dd>{money.format(result.custom.validIntermediaryTotal)}</dd></div> : null}
-                  <div><dt>Pró-soluto<small>Saldo antes da correção</small></dt><dd>{money.format(result.custom.linear?.proSoluto ?? 0)}</dd></div>
-                  <div><dt>Pró-soluto corrigido<small>Taxa-base de {percent.format(result.custom.linear?.baseRate ?? 0)} a.m. · anuais não reduzem</small></dt><dd>{money.format(result.custom.correctedProSoluto)}</dd></div>
-                  {result.custom.preInstallments > 0 ? <div><dt>Mensais pré-obra<small>Taxa de 0,5% a.m.</small></dt><dd><strong>{result.custom.preInstallments}x</strong> de {money.format(result.custom.linear?.prePayment ?? 0)}</dd></div> : null}
-                  {result.custom.postInstallments > 0 ? <div><dt>Mensais pós-obra<small>Taxa de 1,5% a.m.</small></dt><dd><strong>{result.custom.postInstallments}x</strong> de {money.format(result.custom.linear?.postPayment ?? 0)}</dd></div> : null}
-                  <div className="investor-result-installment-total"><dt>Parcela corrigida<small>1ª em {formatPaymentDate(firstInstallmentDate)} · última em {formatPaymentDate(lastInstallmentDate)}</small></dt><dd>{money.format(result.custom.installmentValue)}</dd></div>
-                </dl> : <dl>
-                  <div><dt>Valor do imóvel</dt><dd>{money.format(result.context.valueReal)}</dd></div>
-                  <div><dt>Entrada ({percent.format(result.custom.actRate)})</dt><dd>{money.format(result.custom.actValue)}</dd></div>
-                  {result.custom.signalTotal > 0 ? <>
-                    <div><dt>Sinais<small>Pagamentos em {activeSignalDates.join(", ")}</small></dt><dd>{money.format(result.custom.signalTotal)}</dd></div>
-                    <div className="investor-result-breakdown-total"><dt>Entrada total ({percent.format(result.custom.totalEntryRate)})</dt><dd>{money.format(result.custom.totalEntryValue)}</dd></div>
-                  </> : null}
-                  {result.custom.validIntermediaryTotal > 0 ? <div><dt>{annualMode ? "Anuais corrigidas" : "Intermediárias válidas"}<small>Pagamentos em {validIntermediaryDates.join(", ")}</small></dt><dd>{money.format(result.custom.validIntermediaryTotal)}</dd></div> : null}
-                  <div><dt>Saldo parcelado</dt><dd>{money.format(result.custom.balance)}</dd></div>
-                  <div className="investor-result-installment-total"><dt>Parcela mensal<small>1ª em {formatPaymentDate(firstInstallmentDate)} · última em {formatPaymentDate(lastInstallmentDate)}</small></dt><dd><strong>{result.custom.desiredInstallments}x</strong> de {money.format(result.custom.installmentValue)}</dd></div>
-                </dl>}
-              </section>
-            </div>
-          </section> : null}
           {annualMode ? <>
             <section className="investor-direct-resource-actions investor-associative-resource-actions" aria-labelledby="investor-associative-resources-title" data-tour="documents">
               <h2 id="investor-associative-resources-title" className="sr-only">Ajuda, documentação e impressão do Associativo</h2>
@@ -4935,7 +4837,18 @@ export function InvestorCalculator({
             </section>
             <DocumentationDialog type="pf" dialogRef={pfDocumentationDialog} directTable />
             <DocumentationDialog type="pj" dialogRef={pjDocumentationDialog} directTable />
-          </> : null}
+          </> : <>
+            <section className="investor-direct-resource-actions investor-standard-resource-actions" aria-labelledby="investor-standard-resources-title" data-tour="resources">
+              <h2 id="investor-standard-resources-title" className="sr-only">Ajuda, documentação e impressão da Tabela Investidor</h2>
+              <InvestorLearningManual />
+              <button type="button" aria-haspopup="dialog" aria-controls="investor-documentation-pf" onClick={() => pfDocumentationDialog.current?.showModal()}>Doc Pessoa Física</button>
+              <button type="button" aria-haspopup="dialog" aria-controls="investor-documentation-pj" onClick={() => pjDocumentationDialog.current?.showModal()}>Doc Pessoa Jurídica</button>
+              <button type="button" disabled={visibleScenarioCodes.length === 0 || associativeCalculatedProposalLocked} onClick={() => window.print()} aria-label={visibleScenarioCodes.length === 0 ? "Abra uma opção para imprimir" : "Imprimir a proposta da Tabela Investidor"} title={visibleScenarioCodes.length === 0 ? "Abra pelo menos uma opção para imprimir" : "Imprimir a proposta da Tabela Investidor"}>Imprimir</button>
+              <InvestorCommercialLinks />
+            </section>
+            <DocumentationDialog type="pf" dialogRef={pfDocumentationDialog} />
+            <DocumentationDialog type="pj" dialogRef={pjDocumentationDialog} />
+          </>}
           {directPrintReady ? <DirectPrintComposition flow={directResult} baseDate={baseDate} policySummary={directParkingPolicySummary} discountAuthorized={discountAuthorized} /> : null}
           {!annualMode ? <details className="investor-audit investor-proposal-audit" data-tour="audit">
             <summary>Auditoria do cálculo</summary>

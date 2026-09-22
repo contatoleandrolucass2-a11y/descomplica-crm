@@ -53,7 +53,7 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(page).toContain("<InvestorTableArchive />");
     expect(archive).toContain("investor-standard-table-page");
     expect(archive).toContain("<InvestorCalculator />");
-    expect(archive).toContain("<InvestorLearningManual />");
+    expect(archive).not.toContain("<InvestorLearningManual />");
     expect(archive).toContain("Simulador Tabela Investidor");
     expect(menu).toContain('href="/app/simulacao/tabela-investidor"');
     expect(menu).not.toContain('href="/simulacao/tabela-investidor?ficha=3"');
@@ -61,6 +61,10 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(calculator).toContain("aria-rowcount={matchingInventory.length + 1}");
     expect(calculator).toContain('className="investor-stock-spacer"');
     expect(calculator).toContain("if (!inventoryInteractionStarted.current)");
+    expect(calculator).toContain(
+      'className="investor-direct-resource-actions investor-standard-resource-actions"',
+    );
+    expect(calculator).toContain("<InvestorLearningManual />");
   });
 
   it("mantém as oito opções e fecha o valor do imóvel no centavo", () => {
@@ -174,11 +178,28 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(styles).toContain(
       ".investor-page-shell.investor-standard-table-page .investor-standard-option-row > button",
     );
-    expect(styles).toContain("min-height: 94px");
+    expect(styles).toContain("min-height: 88px");
     expect(styles).toContain(
       ".investor-page-shell.investor-standard-table-page .investor-standard-detail",
     );
-    expect(styles).toContain("width: min(880px, calc(100% - 48px))");
+    expect(styles).toContain("width: 50%");
+    expect(calculator).toContain(
+      'className="investor-associative-ledger investor-standard-editable-ledger"',
+    );
+    expect(calculator).toContain('label="Resultado da proposta"');
+    expect(calculator).toContain('id="investor-entry-meta"');
+    expect(calculator).toContain("Redistribuir sinais automaticamente");
+    expect(calculator).toContain(
+      "disabled={visibleScenarioCodes.length === 0 || associativeCalculatedProposalLocked}",
+    );
+    expect(calculator).not.toContain(
+      "!directTable && !annualMode ? <section className={`investor-result-panel",
+    );
+    expect(calculator).toContain("Doc Pessoa Jurídica</button>");
+    expect(styles).toContain(
+      ".investor-page-shell.investor-standard-table-page .investor-standard-resource-actions",
+    );
+    expect(styles).toContain("@media (min-width: 1101px)");
   });
 
   itWithPrivateSnapshot("valida o snapshot completo e exclui somente vagas avulsas", () => {

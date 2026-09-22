@@ -555,7 +555,8 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(!comparisonResultRow.includes("aria-live"));
     assert.ok(calculator.includes("investor-direct-table-compact-account"));
     assert.ok(calculator.includes('rowClassName="investor-direct-credit-result-row"'));
-    assert.equal(calculator.match(/<ol onKeyDown=\{focusNextAssociativeRow\}>/g)?.length, 2);
+    assert.equal(calculator.match(/<ol onKeyDown=\{focusNextAssociativeRow\}>/g)?.length, 3);
+    assert.ok(calculator.includes("investor-standard-editable-ledger"));
     assert.ok(calculator.includes(">Inserir Sinal</button>"));
     assert.ok(calculator.includes(">Inserir Intermediária</button>"));
     assert.ok(calculator.includes(">Inserir Anual</button>"));
