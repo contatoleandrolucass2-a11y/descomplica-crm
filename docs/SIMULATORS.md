@@ -42,7 +42,11 @@ Na Tabela Investidor, a seleção de propostas prontas mantém os oito cenários
 simultaneamente disponíveis: quatro opções de 18 parcelas na primeira linha e
 quatro opções de 24 parcelas na linha seguinte. A mudança é somente de
 apresentação; códigos, percentuais, pagamentos e cálculos de WF15 permanecem
-inalterados.
+inalterados. Os cartões usam altura compacta e, depois da seleção da unidade, o
+foco avança para os planos. Ao abrir uma opção, a página conduz ao livro-caixa
+centralizado, que preserva entrada, sinais, intermediárias, saldo, parcela e
+datas em linhas individuais. Esse comportamento é exclusivo de WF15 e não
+altera a Tabela Direta.
 
 O hub está em `/app/simulacao`. Todas as seis rotas exigem
 `crm.simulators.view` no guard server-side. O catálogo PostgreSQL permanece com

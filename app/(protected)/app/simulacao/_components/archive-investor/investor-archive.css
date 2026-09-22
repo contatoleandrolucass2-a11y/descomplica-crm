@@ -21171,6 +21171,174 @@ body:has(.investor-page-shell) {
   outline-offset: 4px;
 }
 
+/* Tabela Investidor: planos compactos e detalhe no livro-caixa central. */
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-picker {
+  gap: 10px;
+  padding: 12px 24px 10px;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row {
+  gap: 8px;
+  padding: 10px;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row-heading {
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row-heading > span {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-plan-row-heading h3 {
+  font-size: 15px;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-option-row > button {
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 2px 8px;
+  min-height: 94px;
+  padding: 9px 10px;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-option-copy {
+  gap: 2px;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-option-copy > strong {
+  font-size: 12px;
+  line-height: 1.18;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-option-copy > small {
+  gap: 0;
+  font-size: 10px;
+  line-height: 1.18;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-option-selected {
+  position: absolute;
+  bottom: 6px;
+  left: 48px;
+  margin: 0;
+  padding: 2px 6px;
+  font-size: 8px;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-detail {
+  width: min(880px, calc(100% - 48px));
+  min-width: 0;
+  margin: 2px auto 0;
+  scroll-margin-block-start: 112px;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-card {
+  border-color: #2c7b91;
+  box-shadow: inset 4px 0 0 #f5c85e, 0 14px 32px rgba(1, 18, 30, 0.18);
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading {
+  min-height: 64px;
+  background: linear-gradient(90deg, rgba(245, 200, 94, 0.14), rgba(245, 200, 94, 0.035));
+  box-shadow: inset 0 1px 0 rgba(245, 200, 94, 0.82), inset 0 -1px 0 rgba(245, 200, 94, 0.82);
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading h3 {
+  margin: 0;
+  color: #f5fbfe;
+  font-size: 16px;
+  font-weight: 850;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-detail-close {
+  min-height: 44px;
+  flex: 0 0 auto;
+  padding: 0 14px;
+  color: #f5fbfe;
+  border: 1px solid #2c7b91;
+  border-radius: 10px;
+  background: #082d40;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-detail-close:hover {
+  color: #061c2d;
+  border-color: #f5c85e;
+  background: #f5c85e;
+}
+
+.investor-page-shell.investor-standard-table-page .investor-standard-detail-close:focus-visible {
+  outline: 3px solid #f5c85e;
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .investor-page-shell.investor-standard-table-page .investor-standard-plan-picker {
+    padding-inline: 14px;
+  }
+
+  .investor-page-shell.investor-standard-table-page .investor-standard-plan-row {
+    padding: 8px;
+  }
+
+  .investor-page-shell.investor-standard-table-page .investor-standard-option-row {
+    grid-auto-columns: minmax(210px, 78vw);
+  }
+
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail {
+    width: calc(100% - 28px);
+    scroll-margin-block-start: 88px;
+  }
+
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading {
+    align-items: stretch;
+  }
+
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail-close {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .investor-page-shell.investor-standard-table-page .investor-standard-option-row > button {
+    transition: none;
+  }
+}
+
+@media print {
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail {
+    width: 100% !important;
+    margin-inline: 0 !important;
+  }
+
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail-close {
+    display: none !important;
+  }
+
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-card,
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading,
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-ledger-row {
+    color: #173b58 !important;
+    border-color: #7c9caf !important;
+    background: #fff !important;
+    box-shadow: none !important;
+  }
+
+  .investor-page-shell.investor-standard-table-page .investor-standard-detail :is(h3, p, strong) {
+    color: #173b58 !important;
+  }
+}
+
 @media (max-width: 520px) {
   .investor-page-shell .investor-info-dialog-rules[popover] {
     width: calc(100vw - 32px) !important;
