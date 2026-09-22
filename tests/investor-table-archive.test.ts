@@ -21,6 +21,28 @@ const baseFlow = {
 const privateSnapshotUrl = new URL("../private-data/investor-inventory.json", import.meta.url);
 const itWithPrivateSnapshot = existsSync(privateSnapshotUrl) ? it : it.skip;
 
+function latestCssRule(source: string, selector: string) {
+  const start = source.lastIndexOf(`${selector} {`);
+  if (start < 0) return "";
+  const end = source.indexOf("}", start);
+  return end < 0 ? "" : source.slice(start, end + 1);
+}
+
+function cssRules(source: string, selector: string) {
+  const rules: string[] = [];
+  const needle = `${selector} {`;
+  let cursor = 0;
+  while (cursor < source.length) {
+    const start = source.indexOf(needle, cursor);
+    if (start < 0) break;
+    const end = source.indexOf("}", start);
+    if (end < 0) break;
+    rules.push(source.slice(start, end + 1));
+    cursor = end + 1;
+  }
+  return rules;
+}
+
 describe("Tabela Investidor do arquivo anexado", () => {
   it("publica o conteúdo completo na rota protegida e no item correto do menu", () => {
     const page = readFileSync(
@@ -180,12 +202,90 @@ describe("Tabela Investidor do arquivo anexado", () => {
     );
     expect(styles).toContain("min-height: 88px");
     expect(styles).toContain(
+      ".investor-page-shell.investor-standard-table-page .investor-standard-option-row > button:not(:last-child)::after",
+    );
+    const dividerRule = latestCssRule(
+      styles,
+      ".investor-page-shell.investor-standard-table-page .investor-standard-option-row > button:not(:last-child)::after",
+    );
+    expect(dividerRule).toContain("top: 12px;");
+    expect(dividerRule).toContain("bottom: 12px;");
+    expect(dividerRule).toContain("width: 1px;");
+    expect(styles).not.toContain("border-right: 1px solid rgba(91, 171, 200, 0.3);");
+    expect(styles).toContain(
       ".investor-page-shell.investor-standard-table-page .investor-standard-detail",
     );
     expect(styles).toContain("width: 50%");
+    expect(
+      cssRules(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading",
+      ).some((rule) => rule.includes("min-height: 50px;")),
+    ).toBe(true);
+    expect(
+      latestCssRule(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading h3",
+      ),
+    ).toContain("font-size: 13px;");
+    expect(
+      latestCssRule(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading p",
+      ),
+    ).toContain("font-size: 9px;");
     expect(calculator).toContain(
       'className="investor-associative-ledger investor-standard-editable-ledger"',
     );
+    expect(
+      cssRules(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-payment-actions-row",
+      ).some((rule) => rule.includes("height: 36px !important;")),
+    ).toBe(true);
+    expect(
+      cssRules(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-payment-actions-bar",
+      ).some((rule) => rule.includes("height: 27px;")),
+    ).toBe(true);
+    expect(
+      cssRules(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-payment-actions-bar > button",
+      ).some((rule) => rule.includes("height: 25px;")),
+    ).toBe(true);
+    expect(
+      cssRules(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-compact-account li:not(.investor-associative-payment-actions-row) > .investor-direct-step-content",
+      ).some((rule) => rule.includes("height: 25px;")),
+    ).toBe(true);
+    expect(
+      latestCssRule(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-installments-control",
+      ),
+    ).toContain("height: 24px;");
+    const mobileGuideButtonRule = latestCssRule(
+      styles,
+      ".investor-page-shell.investor-standard-table-page .investor-flow-heading .investor-proposal-help-cta > .investor-guided-start",
+    );
+    expect(mobileGuideButtonRule).toContain("width: 154px;");
+    expect(mobileGuideButtonRule).toContain("min-height: 44px;");
+    expect(mobileGuideButtonRule).toContain("white-space: nowrap;");
+    expect(
+      cssRules(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-payment-actions-bar > button",
+      ).some((rule) => rule.includes("min-height: 44px;")),
+    ).toBe(true);
+    expect(
+      cssRules(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-installments-control,\n  .investor-page-shell.investor-standard-table-page .investor-standard-ledger-status",
+      ).some((rule) => rule.includes("min-height: 44px;")),
+    ).toBe(true);
     expect(calculator).toContain('label="Resultado da proposta"');
     expect(calculator).toContain('id="investor-entry-meta"');
     expect(calculator).toContain("Redistribuir sinais automaticamente");

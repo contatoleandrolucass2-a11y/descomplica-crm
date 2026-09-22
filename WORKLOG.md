@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-09-22 — acabamento visual da Tabela Investidor
+
+- As bordas verticais contínuas dos cartões foram substituídas por divisores de
+  1 px com 12 px de respiro nas duas extremidades, sem unir cabeçalho e rodapé.
+- O fluxo editável foi alinhado ao livro-caixa compacto da Tabela Direta: faixa
+  de ações com 36 px, botões com 25 px e linhas de 25 px em desktop.
+- O cabeçalho da opção selecionada caiu de 64 px para 50 px de altura mínima;
+  título, identificação, explicação e botão receberam tipografia proporcional.
+- Em 375 px, o botão “Iniciar passo a passo” permanece em uma única linha e os
+  controles editáveis conservam alvos de toque de 44 px ou mais.
+- A QA visual validou 375×812, 768×1024, 1024×768 e 1440×900, sem overflow da
+  página, sem erros de navegador e sem violações Axe graves ou críticas.
+- A mudança está escopada por `investor-standard-table-page`; dados, fórmulas,
+  estoque e a rota `/app/simulacao/tabela-direta` não foram modificados.
+- O gate local aprovou lint, TypeScript, 54 arquivos e 599 testes Vitest com
+  quatro skips preexistentes, oito testes Node e o build Next.js com 41 rotas.
+
 ## 2026-09-22 — composição compacta e completa na Tabela Investidor
 
 - Os cartões das oito propostas prontas passaram a ter 88 px de altura e menor

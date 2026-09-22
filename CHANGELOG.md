@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-22 — acabamento visual da Tabela Investidor
+
+- Interrompe as divisórias verticais entre as quatro opções de cada plano, com
+  respiro superior e inferior igual ao padrão visual da Tabela Direta.
+- Reduz a altura, os controles e a tipografia do fluxo editável para a mesma
+  densidade do livro-caixa usado como referência, preservando todas as linhas.
+- Compacta o cabeçalho da proposta selecionada, inclusive título, explicação e
+  ação de fechar, sem ocultar a composição comercial.
+- Corrige a organização do guia em telas estreitas e mantém alvos de toque,
+  foco visível e leitura sem overflow da página.
+- Limita todo o refinamento à Tabela Investidor; a Tabela Direta e os cálculos,
+  dados, regras, rotas e integrações permanecem inalterados.
+
 ## 2026-09-22 — composição compacta e completa na Tabela Investidor
 
 - Reduz a altura dos oito cartões de proposta para 88 px, mantendo as quatro
