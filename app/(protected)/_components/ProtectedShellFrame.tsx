@@ -7,6 +7,7 @@ const ARCHIVE_SIMULATOR_ROUTES = new Set([
   "/app/simulacao/associativo-fluxo-linear",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
+  "/app/simulacao/tabelao",
 ]);
 
 export function ProtectedShellFrame({

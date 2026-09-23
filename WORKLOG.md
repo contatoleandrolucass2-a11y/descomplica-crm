@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-09-23 — Tabelão protegido
+
+- Criada a rota estática `/app/simulacao/tabelao` fora do segmento dinâmico dos
+  cinco motores, com `crm.simulators.view` repetido no Proxy, layout, página e
+  endpoint `GET /api/inventory` já existente.
+- A composição replica integralmente `/simulacao/tabela`: cabeçalho, breadcrumb,
+  hero, aviso, sete controles, quatro indicadores, tabela, cartões mobile e
+  disclaimer. CSS e regras arquivados foram reutilizados sem nova biblioteca.
+- O item Tabelão deixou de retornar ao hub e agora aponta para a rota dedicada,
+  com `aria-current` correto.
+- O shell protegido e o breadcrumb autorizado reconhecem o Tabelão como réplica
+  arquivada; assim, somente o cabeçalho próprio da referência é renderizado.
+- A revisão Axe encontrou contraste insuficiente herdado no breadcrumb e no
+  texto dos cartões, sobretudo no tema escuro; seletores escopados ao Tabelão
+  passaram a usar seus tokens semânticos. O título do banner de cookies recebeu
+  cor explícita. O `html` agora suprime somente a diferença esperada do tema
+  aplicado pelo script antes da hidratação.
+- A inspeção em navegador corrigiu o overflow do menu e da tabela no tablet. A
+  matriz final em `375x812`, `768x1024`, `1024x768` e `1440x900` passou sem
+  overflow de documento e sem violações Axe WCAG A/AA nos temas claro, médio e
+  escuro; vazio, limpar, ordenar, erro e nova tentativa também foram exercitados.
+- A validação somente leitura da fonte viva confirmou payload coerente: 2.243
+  itens declarados e recebidos, zero empreendimento/planta ausente, zero preço
+  inválido, 53 combinações exclusivas, 23 empreendimentos e 19 plantas em
+  `2026-08-07T04:04:47.972Z`. Cada menor preço foi recalculado contra as linhas
+  do respectivo grupo.
+- Testes cobrem rota/menu, ausência de fallback, estados, temas, responsividade,
+  grão exclusivo, desempate, filtros, ordenação, resumo e autorização pre-stream.
+- Site público de referência, banco, migrations, dados, APIs, integrações e
+  produção permaneceram intactos.
+
 ## 2026-09-22 — acabamento visual da Tabela Investidor
 
 - As bordas verticais contínuas dos cartões foram substituídas por divisores de

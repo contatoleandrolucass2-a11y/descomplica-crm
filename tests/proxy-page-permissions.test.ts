@@ -52,6 +52,7 @@ describe("pre-stream page permission gates", () => {
     ["/app/simulacao/associativo-fluxo-linear", "crm.simulators.view"],
     ["/app/simulacao/tabela-direta", "crm.simulators.view"],
     ["/app/simulacao/tabela-investidor", "crm.simulators.view"],
+    ["/app/simulacao/tabelao", "crm.simulators.view"],
     ["/admin", "admin.access"],
     ["/admin/usuarios", "users.view"],
     ["/admin/paginas", "pages.manage"],

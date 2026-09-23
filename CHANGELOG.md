@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-23 — Tabelão integral no CRM
+
+- Publica a réplica completa do Tabelão em `/app/simulacao/tabelao`, mantendo a
+  referência pública somente como fonte de conhecimento e sem alterá-la.
+- Conecta o item Tabelão do menu à nova rota protegida por
+  `crm.simulators.view`, com guard no Proxy, layout, página e API de estoque.
+- Registra a rota como réplica arquivada no shell protegido, evitando cabeçalho
+  e breadcrumb globais duplicados sobre a composição original.
+- Preserva busca, filtros, ordenação, resumo, tabela desktop, cartões mobile,
+  três temas e estados de carregamento, vazio, erro, atualização e desabilitado.
+- Corrige contraste de breadcrumb, títulos, conteúdo dos cartões e banner de
+  cookies nos três temas; elimina o aviso esperado de hidratação causado pela
+  aplicação inicial do tema e o overflow do cabeçalho/tabela em tablets.
+- Mantém o estoque real em `GET /api/inventory`, sem mock ou fallback, e garante
+  uma linha por empreendimento + planta com o menor preço positivo disponível.
+- Não altera banco, migration, papel, permissão, regra comercial, integração,
+  fonte pública ou ambiente de produção.
+
 ## 2026-09-22 — acabamento visual da Tabela Investidor
 
 - Interrompe as divisórias verticais entre as quatro opções de cada plano, com

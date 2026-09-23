@@ -59,7 +59,7 @@ export default async function RootLayout({
   const homologationMode = isHomologationMode();
 
   return (
-    <html lang="pt-BR" className="h-full">
+    <html lang="pt-BR" className="h-full" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
