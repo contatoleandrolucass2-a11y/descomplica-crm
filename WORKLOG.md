@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-09-23 — Tabelão unitário e compacto
+
+- Removidos do Tabelão o painel “Consulta exclusiva”, sete filtros e os quatro
+  KPIs, conforme a referência visual indicada.
+- A tabela deixou de agrupar empreendimento + planta e passou a mostrar uma
+  linha por unidade, ordenada pelo valor, com as mesmas sete colunas e medidas
+  visuais da Tabela Direta.
+- A primeira coluna abre a rota existente da Tabela Direta sem alterar seu
+  código ou pré-selecionar dados; o Tabelão continua somente leitura.
+- A lista usa janela de 60 linhas, cabeçalho fixo e estados de carregamento,
+  vazio e erro dentro da própria tabela.
+- A fonte viva respondeu com 2.243 linhas declaradas e recebidas, 2.243 IDs
+  únicos, zero duplicidade, ausência ou valor/formato inválido nas sete colunas;
+  a atualização informada pela origem permanece em `2026-08-07T04:04:47.972Z`.
+- O navegador validou `375x812`, `768x1024`, `1024x768` e `1440x900`: sete
+  cabeçalhos, 60 linhas na janela, alcance da última unidade, foco visível,
+  nenhum overflow de documento, erro de console/request ou violação Axe.
+
 ## 2026-09-23 — Tabelão protegido
 
 - Criada a rota estática `/app/simulacao/tabelao` fora do segmento dinâmico dos

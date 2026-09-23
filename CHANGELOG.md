@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-23 — Tabelão no padrão da Tabela Direta
+
+- Remove do Tabelão a faixa de status, filtros e quatro indicadores solicitados.
+- Substitui a visão resumida por todas as unidades do estoque vivo, com as sete
+  colunas, fonte, tipografia e densidade de linhas da Tabela Direta.
+- Mantém carregamento, vazio, erro, nova tentativa, foco visível e janela
+  virtualizada de 60 linhas, sem mock nem fallback de dados.
+- Preserva a rota, permissão, API e a página de Tabela Direta sem alterações.
+
 ## 2026-09-23 — Tabelão integral no CRM
 
 - Publica a réplica completa do Tabelão em `/app/simulacao/tabelao`, mantendo a
