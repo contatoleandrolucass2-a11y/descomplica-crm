@@ -4700,6 +4700,7 @@ export function InvestorCalculator({
                       label="Entrada"
                       date={baseDate}
                       fieldState="editable"
+                      rowClassName="investor-key-field"
                       meta={associativeHelp(`Mínimo de ${money.format(result.context.valueReal * 0.06)} (6%).`, `Percentual atual: ${percent.format(result.custom.actRate)} do valor real.`)}
                       calculation={<><AssociativeMoneyControl label="Entrada" describedBy="investor-entry-meta" invalid={result.custom.actRate < 0.06} value={entryValue} onChange={updateEntryValue} /><span className="sr-only" id="investor-entry-meta" role={result.custom.actRate < 0.06 ? "alert" : "status"} aria-live="polite">{result.custom.actRate < 0.06 ? `Entrada abaixo do mínimo de ${money.format(result.context.valueReal * 0.06)}.` : `Entrada válida: ${percent.format(result.custom.actRate)} do valor real.`}</span></>}
                       invalid={result.custom.actRate < 0.06}
@@ -4751,8 +4752,9 @@ export function InvestorCalculator({
                       operator="÷"
                       label="Qtd. de parcelas"
                       fieldState="editable"
+                      rowClassName="investor-key-field"
                       meta={associativeHelp(`Use um número inteiro entre 1 e ${result.context.maxInstallments}.`, "O máximo varia conforme a entrada total e o prazo da obra.")}
-                      calculation={<input className="investor-standard-installments-control" aria-label="Quantidade de parcelas" aria-describedby="investor-installment-guidance" type="number" min="1" max={result.context.maxInstallments || 1} step="1" value={result.context.maxInstallments > 0 ? installments : ""} placeholder="Indisponível" disabled={result.context.maxInstallments <= 0} onChange={(event) => setInstallments(event.target.value)} />}
+                      calculation={<div className="investor-direct-editable-value investor-associative-installment-control"><input aria-label="Quantidade de parcelas" name="quantidade-de-parcelas" autoComplete="off" aria-describedby="investor-installment-guidance" aria-invalid={!validInstallmentSchedule || undefined} type="number" min="1" max={result.context.maxInstallments || 1} step="1" value={result.context.maxInstallments > 0 ? installments : ""} placeholder="Indisponível" disabled={result.context.maxInstallments <= 0} onChange={(event) => setInstallments(event.target.value)} /></div>}
                       invalid={!validInstallmentSchedule}
                     />
                     <AssociativeEditableAccountRow
