@@ -3947,15 +3947,19 @@ export function InvestorCalculator({
                 }
                 const optionNumber = STANDARD_SCENARIO_CARD_ORDER[option.plan].indexOf(scenario.code) + 1;
                 const optionTitleId = `investor-standard-detail-${scenario.code}-title`;
+                const optionCardCopy = STANDARD_SCENARIO_CARD_COPY[scenario.code];
+                const optionInformation = [optionCardCopy.title, ...optionCardCopy.details, optionDescription].filter(Boolean).join("\n");
                 return <section ref={standardScenarioDetailRef} tabIndex={-1} id={`investor-scenario-option-${scenario.code}`} key={scenario.code} className="investor-standard-detail investor-guided-scroll-target" aria-labelledby={optionTitleId} data-plan={option.plan}>
                   <article className="investor-direct-comparison-card is-active">
                     <header className="investor-direct-comparison-heading">
-                      <div>
-                        <div className="investor-direct-comparison-option-line"><span>Opção {optionNumber}</span></div>
-                        <h3 id={optionTitleId}>{optionTitle}</h3>
-                        {optionDescription ? <p>{optionDescription}</p> : null}
+                      <div className="investor-direct-comparison-option-line">
+                        <span id={optionTitleId}>Opção {optionNumber}</span>
+                        <InvestorInfoHint
+                          label={`informações completas da opção ${optionNumber}`}
+                          title={optionTitle}
+                          description={optionInformation}
+                        />
                       </div>
-                      <button className="investor-standard-detail-close" type="button" onClick={() => toggleScenarioOption(scenario.code)} aria-label={`Ocultar ${optionTitle}`}>Ocultar opção</button>
                     </header>
                     {scenario.available ? <div className="investor-direct-comparison-ledger" role="table" aria-label={`${optionTitle}: composição completa`}>
                       {payments.map((payment) => <DirectComparisonLedgerRow key={payment.key} label={payment.label} detail={payment.detail} operator={payment.operator} value={payment.amount} emphasized={payment.emphasized} />)}
