@@ -220,20 +220,28 @@ describe("Tabela Investidor do arquivo anexado", () => {
       cssRules(
         styles,
         ".investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading",
-      ).some((rule) => rule.includes("min-height: 50px;")),
+      ).some(
+        (rule) =>
+          rule.includes("height: 23px;") &&
+          rule.includes("min-height: 23px;") &&
+          rule.includes("padding: 0 16px;"),
+      ),
     ).toBe(true);
     expect(
       latestCssRule(
         styles,
-        ".investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading h3",
+        ".investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-option-line .investor-info-trigger::before",
       ),
-    ).toContain("font-size: 13px;");
-    expect(
-      latestCssRule(
-        styles,
-        ".investor-page-shell.investor-standard-table-page .investor-standard-detail .investor-direct-comparison-heading p",
-      ),
-    ).toContain("font-size: 9px;");
+    ).toMatch(/width: 44px;[\s\S]*height: 44px;/);
+    expect(calculator).toContain(
+      "const optionInformation = [optionCardCopy.title, ...optionCardCopy.details, optionDescription]",
+    );
+    expect(calculator).toContain("label={`informações completas da opção ${optionNumber}`}");
+    expect(calculator).toContain("description={optionInformation}");
+    expect(calculator).toContain("<span id={optionTitleId}>Opção {optionNumber}</span>");
+    expect(calculator).not.toContain('className="investor-standard-detail-close"');
+    expect(styles).toContain("border-radius: 11px 11px 0 0;");
+    expect(styles).toContain("border-radius: 0 0 11px 11px;");
     expect(calculator).toContain(
       'className="investor-associative-ledger investor-standard-editable-ledger"',
     );

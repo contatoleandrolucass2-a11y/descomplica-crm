@@ -45,8 +45,12 @@ apresentação; códigos, percentuais, pagamentos e cálculos de WF15 permanecem
 inalterados. Os cartões usam altura fixa de 88 px e, depois da seleção da
 unidade, o foco avança para os planos. Ao abrir uma opção, a página conduz ao
 livro-caixa centralizado, que preserva entrada, sinais, intermediárias, saldo,
-parcela e datas em linhas individuais. O fluxo editável repete esse livro-caixa
-com ações opcionais no topo. A área final reúne manual, documentos, impressão e
+parcela e datas em linhas individuais. O cabeçalho desse livro-caixa repete a
+barra compacta de 23 px da Tabela Direta: mostra somente o número da opção e o
+ícone de informação; plano, modalidade, percentuais, sinais, intermediárias e
+descrição integral permanecem disponíveis no popover acessível do ícone. O
+fluxo editável repete esse livro-caixa com ações opcionais no topo. A área final
+reúne manual, documentos, impressão e
 atalhos comerciais antes da auditoria, sem o antigo painel redundante de
 composição. Esse comportamento é exclusivo de WF15 e não altera a Tabela Direta.
 
