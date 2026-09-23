@@ -17,10 +17,10 @@ nem o runtime de políticas comerciais a fonte oficial. WF16 e CAIXA permanecem
 bloqueados. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 
 O Tabelão é uma consulta de estoque, não um motor de simulação. A rota protegida
-`/app/simulacao/tabelao` replica a referência pública em modo somente leitura,
-consome `GET /api/inventory` com `no-store` e reduz o estoque ao grão
-empreendimento + planta, preservando somente o menor valor disponível. Ausência
-ou erro da fonte não aciona mock, snapshot alternativo ou cálculo implícito.
+`/app/simulacao/tabelao` opera em modo somente leitura, consome
+`GET /api/inventory` com `no-store` e preserva uma linha por unidade no mesmo
+modelo visual da grade da Tabela Direta. Ausência ou erro da fonte não aciona
+mock, snapshot alternativo ou cálculo implícito.
 
 ## Escopo
 
@@ -91,8 +91,8 @@ habilitam motores oficiais.
 - WF15 usa o snapshot SPC protegido, exclui vagas avulsas, exige unidade com
   valor e término da obra, mantém estados de loading, vazio e erro e trata
   `GET /api/inventory` como atualização protegida não bloqueante.
-- Tabelão usa somente o estoque vivo protegido, exige empreendimento, planta e
-  preço positivo para compor a visão exclusiva e informa fonte/data de atualização.
+- Tabelão usa somente o estoque vivo protegido, preserva o grão unitário e
+  ordena preços válidos do menor para o maior, mantendo valores ausentes ao fim.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta

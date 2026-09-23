@@ -37,17 +37,12 @@ export async function TabelaoArchive() {
             </nav>
             <p className="goal-kicker">Estoque comercial</p>
             <h1>Tabelão</h1>
-            <p>
-              Cada empreendimento e planta aparece uma única vez, sempre com o menor valor
-              disponível.
-            </p>
+            <p>Consulte cada unidade disponível no estoque SPC em uma única tabela.</p>
           </div>
           <aside className="tabelao-hero-note" aria-label="Como usar o Tabelão">
-            <span>Visão exclusiva</span>
-            <strong>Sem combinações repetidas. Só a melhor referência.</strong>
-            <p>
-              Compare empreendimento, planta e menor valor com uma leitura direta do estoque real.
-            </p>
+            <span>Consulta completa</span>
+            <strong>Uma linha para cada unidade do estoque.</strong>
+            <p>Compare incorporadora, produto, metragem, entrega, planta e valor do imóvel.</p>
           </aside>
         </section>
         <TabelaoClient />

@@ -6,8 +6,7 @@ import { TabelaoArchive } from "../_components/TabelaoArchive";
 
 export const metadata: Metadata = {
   title: "Tabelão | Estoque SPC",
-  description:
-    "Consulte cada empreendimento e planta uma única vez, sempre com o menor valor disponível no estoque SPC.",
+  description: "Consulte todas as unidades disponíveis no estoque SPC em uma tabela completa.",
   alternates: { canonical: "/app/simulacao/tabelao" },
 };
 export const dynamic = "force-dynamic";
