@@ -93,13 +93,13 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 - hub de simulação e a jornada WF13;
 - início administrativo, usuários e catálogo de páginas.
 
-O inventário HTTP continua cobrindo 21 rotas protegidas: 17 correspondem ao
-catálogo PostgreSQL, as réplicas WF14 e WF15 são rotas adicionais habilitadas
-no catálogo HTTP versionado e WF16 e CAIXA permanecem bloqueados. As quatro
+O inventário HTTP cobre 22 rotas protegidas: 17 correspondem ao catálogo
+PostgreSQL, Tabelão e as réplicas WF14 e WF15 são rotas adicionais habilitadas
+no catálogo HTTP versionado e WF16 e CAIXA permanecem bloqueados. Essas cinco
 rotas continuam sem linha em `app_pages`; WF16 e CAIXA retornam `403` mesmo ao
-Master. WF14 e WF15 permanecem fora de `app_pages` para não alterar o banco
-neste candidato, mas suas réplicas integrais estão publicadas no hub e no menu
-próprio de Simulação. O guard server-side de ambas exige a permissão existente
+Master. Tabelão, WF14 e WF15 permanecem fora de `app_pages` para não alterar o
+banco neste candidato, mas suas réplicas integrais estão publicadas no menu
+próprio de Simulação. O guard server-side das três exige a permissão existente
 `crm.simulators.view`.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
@@ -113,7 +113,7 @@ continua separada e só retorna entries com ID Qlik mapeado, owner ativo,
 vigência e organização dentro do escopo aprovado; ela não é a fonte da página
 v3.
 
-O hub, WF13 e as réplicas WF14 e WF15 exigem `crm.simulators.view`. Durante o
+O hub, WF13, Tabelão e as réplicas WF14 e WF15 exigem `crm.simulators.view`. Durante o
 canário WF13, essa permissão é nível 100 e pertence somente ao Master, sem
 overrides diretos. O gate de página permanece separado de
 `crm.simulators.execute`; possuir um não substitui o outro. Somente o motor

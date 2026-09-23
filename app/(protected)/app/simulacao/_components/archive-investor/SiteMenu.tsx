@@ -93,9 +93,9 @@ export function SiteMenu({ canPersistTheme = true }: { canPersistTheme?: boolean
           </a>
           <a
             role="menuitem"
-            aria-current={activePathname === "/simulacao" ? "page" : undefined}
+            aria-current={activePathname === "/simulacao/tabelao" ? "page" : undefined}
             onClick={() => setSimulationOpen(false)}
-            href="/app/simulacao"
+            href="/app/simulacao/tabelao"
           >
             Tabelão
           </a>

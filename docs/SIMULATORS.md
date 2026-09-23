@@ -16,6 +16,12 @@ do estoque e cálculo no navegador. Isso não promove os workflows n8n históric
 nem o runtime de políticas comerciais a fonte oficial. WF16 e CAIXA permanecem
 bloqueados. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 
+O Tabelão é uma consulta de estoque, não um motor de simulação. A rota protegida
+`/app/simulacao/tabelao` replica a referência pública em modo somente leitura,
+consome `GET /api/inventory` com `no-store` e reduz o estoque ao grão
+empreendimento + planta, preservando somente o menor valor disponível. Ausência
+ou erro da fonte não aciona mock, snapshot alternativo ou cálculo implícito.
+
 ## Escopo
 
 As cinco jornadas preservam a composição visual aprovada. Somente o WF13 possui
@@ -54,9 +60,9 @@ reúne manual, documentos, impressão e
 atalhos comerciais antes da auditoria, sem o antigo painel redundante de
 composição. Esse comportamento é exclusivo de WF15 e não altera a Tabela Direta.
 
-O hub está em `/app/simulacao`. Todas as seis rotas exigem
+O hub está em `/app/simulacao`. As cinco jornadas e a consulta Tabelão exigem
 `crm.simulators.view` no guard server-side. O catálogo PostgreSQL permanece com
-17 páginas e as réplicas WF14 e WF15 estão implementadas neste candidato pelo
+17 páginas; Tabelão, WF14 e WF15 estão implementados neste candidato pelo
 catálogo HTTP versionado, sem migration. A navegação continua recebendo somente
 as páginas filtradas pelo contexto de autorização. No canário atual, essa
 permissão é exclusiva do Master e não possui override direto. O acesso à página
@@ -85,6 +91,8 @@ habilitam motores oficiais.
 - WF15 usa o snapshot SPC protegido, exclui vagas avulsas, exige unidade com
   valor e término da obra, mantém estados de loading, vazio e erro e trata
   `GET /api/inventory` como atualização protegida não bloqueante.
+- Tabelão usa somente o estoque vivo protegido, exige empreendimento, planta e
+  preço positivo para compor a visão exclusiva e informa fonte/data de atualização.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta
