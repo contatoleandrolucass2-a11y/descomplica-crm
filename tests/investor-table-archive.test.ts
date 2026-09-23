@@ -269,12 +269,34 @@ describe("Tabela Investidor do arquivo anexado", () => {
         ".investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-compact-account li:not(.investor-associative-payment-actions-row) > .investor-direct-step-content",
       ).some((rule) => rule.includes("height: 25px;")),
     ).toBe(true);
-    expect(
-      latestCssRule(
-        styles,
-        ".investor-page-shell.investor-standard-table-page .investor-standard-installments-control",
+    const standardEditableLedger = calculator.slice(
+      calculator.indexOf(
+        'className="investor-associative-ledger investor-standard-editable-ledger"',
       ),
-    ).toContain("height: 24px;");
+      calculator.indexOf(
+        "</ol>",
+        calculator.indexOf(
+          'className="investor-associative-ledger investor-standard-editable-ledger"',
+        ),
+      ),
+    );
+    expect(standardEditableLedger.match(/rowClassName="investor-key-field"/gu)).toHaveLength(2);
+    expect(calculator).toContain(
+      'className="investor-direct-editable-value investor-associative-installment-control"',
+    );
+    const editableValueRule = latestCssRule(
+      styles,
+      ".investor-page-shell .investor-direct-editable-value",
+    );
+    expect(editableValueRule).toContain("border-bottom:1px solid rgba(102,228,236,.62);");
+    expect(
+      cssRules(styles, ".investor-page-shell .investor-associative-installment-control>input").some(
+        (rule) =>
+          rule.includes("border:0;") &&
+          rule.includes("background:transparent;") &&
+          rule.includes("text-align:right;"),
+      ),
+    ).toBe(true);
     const mobileGuideButtonRule = latestCssRule(
       styles,
       ".investor-page-shell.investor-standard-table-page .investor-flow-heading .investor-proposal-help-cta > .investor-guided-start",
@@ -288,11 +310,20 @@ describe("Tabela Investidor do arquivo anexado", () => {
         ".investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-payment-actions-bar > button",
       ).some((rule) => rule.includes("min-height: 44px;")),
     ).toBe(true);
+    expect(styles).toContain(
+      ".investor-page-shell .investor-associative-installment-control>input {\n    font-size:16px;",
+    );
     expect(
       cssRules(
         styles,
-        ".investor-page-shell.investor-standard-table-page .investor-standard-installments-control,\n  .investor-page-shell.investor-standard-table-page .investor-standard-ledger-status",
-      ).some((rule) => rule.includes("min-height: 44px;")),
+        ".investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-installment-control > input",
+      ).some((rule) => rule.includes("appearance: textfield;")),
+    ).toBe(true);
+    expect(
+      cssRules(
+        styles,
+        ".investor-page-shell.investor-standard-table-page .investor-standard-editable-ledger .investor-associative-installment-control > input",
+      ).some((rule) => rule.includes("height: 44px;") && rule.includes("min-height: 44px;")),
     ).toBe(true);
     expect(calculator).toContain('label="Resultado da proposta"');
     expect(calculator).toContain('id="investor-entry-meta"');
