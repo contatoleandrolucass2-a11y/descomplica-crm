@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-09-24 — remoção dos filtros do Tabelão
+
+- Removida a faixa visual “Filtros do estoque” de `/app/simulacao/tabelao`,
+  incluindo os selects de incorporadora, empreendimento, região, planta, valor,
+  ordenação e o botão de limpar filtros.
+- O Tabelão continua buscando exclusivamente `GET /api/inventory` com
+  `no-store`, exibindo o estoque completo em sete colunas, janela virtual de 60
+  linhas e atalho para a Tabela Direta.
+- A ordenação fica fixa em valor crescente e o guia deixou de mencionar passos
+  de filtro ou ordenação.
+- Validação do recorte: `pnpm vitest run tests/tabelao-archive.test.ts`,
+  `pnpm lint`, `pnpm typecheck` e `pnpm build` passaram com Node 24.19.0 e pnpm
+  11.20.0.
+- `pnpm test` completo ainda falha em Windows apenas nos asserts existentes de
+  modo `0600` em `tests/mapping-import.test.ts` e
+  `tests/commercial-engine.test.ts`, que recebem `0666`; o teste do Tabelão
+  passou.
+
 ## 2026-09-24 — cópia visual do Associativo no Tabelão
 
 - A estrutura ativa de `/app/simulacao/associativo-fluxo-linear` foi usada como

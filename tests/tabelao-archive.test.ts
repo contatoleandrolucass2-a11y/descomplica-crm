@@ -96,7 +96,7 @@ describe("Tabelão protegido", () => {
     expect(authorizedBreadcrumbs).toContain('"/app/simulacao/tabelao"');
   });
 
-  it("replica o painel, os filtros, a densidade e as sete colunas do Associativo", () => {
+  it("replica o painel, remove os filtros e preserva a densidade e as sete colunas", () => {
     const client = readFileSync(
       new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
       "utf8",
@@ -124,7 +124,6 @@ describe("Tabelão protegido", () => {
       "investor-workspace investor-direct-workspace investor-direct-design-copy",
       "investor-stock-panel",
       "investor-section-heading",
-      "investor-stock-filters",
       "investor-stock-results",
       "investor-stock-table",
     ]) {
@@ -138,11 +137,13 @@ describe("Tabelão protegido", () => {
       "Ordenar valor",
       "Limpar filtros",
     ]) {
-      expect(client).toContain(label);
+      expect(client).not.toContain(label);
     }
-    expect(client).toContain("buildInvestorFilterOptions");
-    expect(client).toContain("matchesInvestorFilters");
-    expect(client).toContain("reconcileInvestorFilters");
+    expect(client).not.toContain("investor-stock-filters");
+    expect(client).not.toContain("buildInvestorFilterOptions");
+    expect(client).not.toContain("matchesInvestorFilters");
+    expect(client).not.toContain("reconcileInvestorFilters");
+    expect(client).toContain('sortInvestorInventoryBySalePrice(inventory, "asc")');
     expect(client).toContain("INVENTORY_WINDOW_SIZE = 60");
     expect(client).toContain('href="/app/simulacao/tabela-direta"');
     expect(client).toContain('window.addEventListener("investor:start-guide"');

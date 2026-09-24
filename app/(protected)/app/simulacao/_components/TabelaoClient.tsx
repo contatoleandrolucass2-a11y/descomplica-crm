@@ -6,8 +6,6 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 // @ts-expect-error — módulo compartilhado preservado em JavaScript.
 import * as investorFilterOptions from "@/lib/archive-investor/investor-filter-options.mjs";
 
-import { InvestorInfoHint } from "./archive-investor/InvestorCalculator";
-
 type InventoryItem = {
   id: string;
   businessUnit: string;
@@ -33,38 +31,8 @@ type InventoryPayload = {
 };
 
 type LoadState = "loading" | "ready" | "error";
-type InventoryFilters = {
-  businessUnit: string;
-  project: string;
-  plant: string;
-  region: string;
-  salePrice: string;
-};
-type FilterOption = { value: string; count: number };
-type InventoryFilterOptions = {
-  businessUnits: FilterOption[];
-  projects: FilterOption[];
-  plants: FilterOption[];
-  regions: FilterOption[];
-  salePrices: FilterOption[];
-  totals: Record<keyof InventoryFilters, number>;
-};
 
-const {
-  buildInvestorFilterOptions,
-  matchesInvestorFilters,
-  reconcileInvestorFilters,
-  sortInvestorInventoryBySalePrice,
-} = investorFilterOptions as {
-  buildInvestorFilterOptions: (
-    inventory: InventoryItem[],
-    filters: InventoryFilters,
-  ) => InventoryFilterOptions;
-  matchesInvestorFilters: (item: InventoryItem, filters: InventoryFilters) => boolean;
-  reconcileInvestorFilters: (
-    inventory: InventoryItem[],
-    filters: InventoryFilters,
-  ) => InventoryFilters;
+const { sortInvestorInventoryBySalePrice } = investorFilterOptions as {
   sortInvestorInventoryBySalePrice: (
     inventory: InventoryItem[],
     direction: "asc" | "desc",
@@ -80,9 +48,9 @@ const TABELAO_TOUR_STEPS = [
     eyebrow: "Visão geral",
     title: "Consulte o estoque completo",
     description:
-      "O Tabelão reúne todas as unidades do estoque SPC. O guia mostra como filtrar, comparar e abrir a unidade na Tabela Direta.",
-    tip: "Avançar no guia não altera filtros nem abre outra página.",
-    checklist: ["Consulte o estoque", "Combine os filtros", "Abra a unidade correta"],
+      "O Tabelão reúne todas as unidades do estoque SPC. O guia mostra como consultar, comparar e abrir a unidade na Tabela Direta.",
+    tip: "Avançar no guia não altera a lista nem abre outra página.",
+    checklist: ["Consulte o estoque", "Compare as unidades", "Abra a unidade correta"],
   },
   {
     target: "information",
@@ -94,15 +62,6 @@ const TABELAO_TOUR_STEPS = [
     checklist: ["Localize o ícone", "Leia a orientação", "Continue a consulta"],
   },
   {
-    target: "filters",
-    eyebrow: "Encontre o imóvel",
-    title: "Defina o perfil desejado",
-    description:
-      "Combine Incorporadora, Empreendimento, Região, Planta e Valor do Imóvel. Cada escolha atualiza as opções e o total encontrado.",
-    tip: "Use Limpar filtros para recomeçar.",
-    checklist: ["Combine os filtros", "Confira o total", "Ajuste a busca"],
-  },
-  {
     target: "inventory",
     eyebrow: "Consulte as unidades",
     title: "Confira a unidade correta",
@@ -110,15 +69,6 @@ const TABELAO_TOUR_STEPS = [
       "Revise produto, metragem, entrega, planta e valor. O botão circular da primeira coluna abre a página Tabela Direta para continuar o atendimento.",
     tip: "Confirme os dados antes de iniciar a proposta.",
     checklist: ["Confira produto e planta", "Revise entrega e valor", "Abra a Tabela Direta"],
-  },
-  {
-    target: "sort",
-    eyebrow: "Organize a comparação",
-    title: "Ordene as unidades por valor",
-    description:
-      "Escolha Menor para o maior ou Maior para o menor. A ordenação muda somente a sequência da lista.",
-    tip: "Use a ordenação para comparar unidades próximas de preço.",
-    checklist: ["Escolha a direção", "Compare os valores", "Confirme a unidade"],
   },
 ] as const;
 
@@ -149,13 +99,6 @@ export function TabelaoClient() {
   const [inventoryMeta, setInventoryMeta] = useState<InventoryPayload | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [loadKey, setLoadKey] = useState(0);
-  const [businessUnit, setBusinessUnit] = useState("Todas");
-  const [project, setProject] = useState("Todos");
-  const [plant, setPlant] = useState("Todos");
-  const [region, setRegion] = useState("Todas");
-  const [salePriceFilter, setSalePriceFilter] = useState("Todos");
-  const [priceSort, setPriceSort] = useState<"asc" | "desc">("asc");
-  const [filterNotice, setFilterNotice] = useState("");
   const [inventoryWindowStart, setInventoryWindowStart] = useState(0);
   const [inventoryRowHeight, setInventoryRowHeight] = useState(DESKTOP_ROW_HEIGHT);
   const [tourOpen, setTourOpen] = useState(false);
@@ -216,21 +159,9 @@ export function TabelaoClient() {
     return () => window.removeEventListener("investor:start-guide", openGuide);
   }, []);
 
-  const activeFilters = useMemo(
-    () => ({ businessUnit, project, plant, region, salePrice: salePriceFilter }),
-    [businessUnit, plant, project, region, salePriceFilter],
-  );
-  const filterOptions = useMemo(
-    () => buildInvestorFilterOptions(inventory, activeFilters),
-    [activeFilters, inventory],
-  );
   const matchingInventory = useMemo(
-    () =>
-      sortInvestorInventoryBySalePrice(
-        inventory.filter((item) => matchesInvestorFilters(item, activeFilters)),
-        priceSort,
-      ) as InventoryItem[],
-    [activeFilters, inventory, priceSort],
+    () => sortInvestorInventoryBySalePrice(inventory, "asc") as InventoryItem[],
+    [inventory],
   );
   const visibleInventory = useMemo(
     () =>
@@ -244,24 +175,6 @@ export function TabelaoClient() {
   const inventoryTopSpacer = inventoryWindowStart * inventoryRowHeight;
   const inventoryBottomSpacer =
     (matchingInventory.length - inventoryWindowEnd) * inventoryRowHeight;
-
-  useEffect(() => {
-    const reconciledFilters = reconcileInvestorFilters(inventory, activeFilters);
-    const changedDimension = (
-      ["businessUnit", "project", "plant", "region", "salePrice"] as const
-    ).find((dimension) => reconciledFilters[dimension] !== activeFilters[dimension]);
-    if (!changedDimension) return;
-
-    const resetInvalidFilters = window.setTimeout(() => {
-      setBusinessUnit(reconciledFilters.businessUnit);
-      setProject(reconciledFilters.project);
-      setPlant(reconciledFilters.plant);
-      setRegion(reconciledFilters.region);
-      setSalePriceFilter(reconciledFilters.salePrice);
-      setFilterNotice("Uma seleção indisponível foi limpa após a atualização do estoque.");
-    }, 0);
-    return () => window.clearTimeout(resetInvalidFilters);
-  }, [activeFilters, inventory]);
 
   useEffect(() => {
     if (!tourOpen) return;
@@ -351,28 +264,6 @@ export function TabelaoClient() {
     setInventoryWindowStart(0);
     setLoadState("loading");
     setLoadKey((value) => value + 1);
-  }
-
-  function clearFilters() {
-    setBusinessUnit("Todas");
-    setProject("Todos");
-    setPlant("Todos");
-    setRegion("Todas");
-    setSalePriceFilter("Todos");
-    setPriceSort("asc");
-    setFilterNotice("");
-    resetInventoryWindow();
-  }
-
-  function updateFilter(setter: (value: string) => void, value: string) {
-    setter(value);
-    setFilterNotice("");
-    resetInventoryWindow();
-  }
-
-  function resetInventoryWindow() {
-    setInventoryWindowStart(0);
-    if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
   }
 
   function updateInventoryWindow(scrollTop: number) {
@@ -503,123 +394,11 @@ export function TabelaoClient() {
           </div>
         </header>
 
-        <div className="investor-stock-filters" data-tour="filters">
-          <div className="investor-filter-heading">
-            <div className="investor-filter-title-row">
-              <strong>Filtros do estoque</strong>
-              <InvestorInfoHint
-                label="orientação dos filtros"
-                title="Como usar os filtros?"
-                description="Use os filtros para localizar a unidade exata do estoque SPC que será consultada no Tabelão."
-              />
-            </div>
-            <button type="button" onClick={clearFilters}>
-              Limpar filtros
-            </button>
-          </div>
-          <label>
-            <span>Incorporadora</span>
-            <select
-              value={businessUnit}
-              onChange={(event) => updateFilter(setBusinessUnit, event.target.value)}
-            >
-              <option value="Todas">
-                Todas ({filterOptions.totals.businessUnit.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.businessUnits.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {item.value} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Nome do Empreendimento</span>
-            <select
-              value={project}
-              onChange={(event) => updateFilter(setProject, event.target.value)}
-            >
-              <option value="Todos">
-                Todos ({filterOptions.totals.project.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.projects.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {item.value} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Região</span>
-            <select
-              value={region}
-              onChange={(event) => updateFilter(setRegion, event.target.value)}
-            >
-              <option value="Todas">
-                Todas ({filterOptions.totals.region.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.regions.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {item.value} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Planta</span>
-            <select value={plant} onChange={(event) => updateFilter(setPlant, event.target.value)}>
-              <option value="Todos">
-                Todos ({filterOptions.totals.plant.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.plants.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {item.value} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Valor do Imóvel</span>
-            <select
-              value={salePriceFilter}
-              onChange={(event) => updateFilter(setSalePriceFilter, event.target.value)}
-            >
-              <option value="Todos">
-                Todos ({filterOptions.totals.salePrice.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.salePrices.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {money.format(Number(item.value))} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="investor-stock-sort" data-tour="sort">
-            <span>Ordenar valor</span>
-            <select
-              aria-label="Ordenar unidades por valor do imóvel"
-              value={priceSort}
-              onChange={(event) => {
-                setPriceSort(event.target.value as "asc" | "desc");
-                resetInventoryWindow();
-              }}
-            >
-              <option value="asc">Menor para o maior</option>
-              <option value="desc">Maior para o menor</option>
-            </select>
-          </label>
-          {filterNotice ? (
-            <span className="sr-only" aria-live="polite">
-              {filterNotice}
-            </span>
-          ) : null}
-        </div>
-
         <p className="investor-stock-summary sr-only" aria-live="polite">
           {loadState === "ready"
             ? matchingInventory.length > 0
               ? `${matchingInventory.length.toLocaleString("pt-BR")} unidades encontradas.`
-              : "Nenhuma unidade disponível com os filtros atuais."
+              : "Nenhuma unidade disponível no estoque."
             : loadState === "loading"
               ? "Carregando estoque…"
               : "Estoque indisponível"}
@@ -745,7 +524,7 @@ export function TabelaoClient() {
               {loadState === "ready" && matchingInventory.length === 0 ? (
                 <tr>
                   <td className="investor-empty-result" colSpan={7}>
-                    Nenhuma unidade encontrada com esses filtros.
+                    Nenhuma unidade disponível no estoque.
                   </td>
                 </tr>
               ) : null}

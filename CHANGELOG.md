@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-24 — Tabelão sem barra de filtros
+
+- Remove do Tabelão o painel “Filtros do estoque”, incluindo incorporadora,
+  empreendimento, região, planta, valor, ordenação e ação de limpar filtros.
+- Mantém o estoque completo somente leitura, a tabela de sete colunas, a janela
+  virtual de 60 linhas, o atalho para a Tabela Direta e a ordenação padrão por
+  menor valor.
+- Atualiza o guia do Tabelão para não apontar para filtros ou ordenação
+  removidos.
+- Preserva rota, permissão, API de estoque, banco, dados, integrações e regras
+  comerciais.
+
 ## 2026-09-24 — Tabelão no layout da Tabela Associativo
 
 - Replica no Tabelão o shell, hero, guia, painel de estoque, filtros, cores,
