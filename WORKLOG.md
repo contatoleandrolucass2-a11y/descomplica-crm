@@ -21,9 +21,10 @@
   16 px nos viewports estreitos.
 - O guia possui cinco passos funcionais, destaque do alvo, Escape, progresso,
   navegação anterior/próximo e devolução de foco ao botão inicial.
-- Validação focada aprovou TypeScript, 31 testes e build Next.js com 41 rotas;
-  a matriz final de navegador e o gate completo estão registrados abaixo após
-  sua execução.
+- Validação focada aprovou TypeScript, 31 testes e build Next.js com 41 rotas.
+  A matriz autenticada final aprovou 140 checks responsivos, 80 checks de tema,
+  193 auditorias Axe e comparações visuais e 100 checks de zoom; os 13 checks
+  funcionais exclusivos do Tabelão também passaram.
 
 ## 2026-09-23 — Tabelão unitário e compacto
 

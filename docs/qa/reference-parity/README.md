@@ -231,7 +231,7 @@ O modo padrão nunca altera a baseline versionada. Capturas e diagnóstico da
 execução ficam em `test-results/authenticated-visual/`, ignorado pelo Git. O
 modo `--update-baseline` também exige que a baseline inicial corresponda ao
 `HEAD` e só a promove, por troca atômica com rollback, depois de todos os checks
-funcionais e de acessibilidade passarem. Hashes dos 171 arquivos usados ficam
+funcionais e de acessibilidade passarem. Hashes dos 193 arquivos usados ficam
 registrados na evidência; uma falha nunca atualiza a baseline.
 
 ## Estados do gate final
