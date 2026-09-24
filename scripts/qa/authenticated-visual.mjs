@@ -84,6 +84,7 @@ const routes = [
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabelao",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
   "/admin",
@@ -103,6 +104,7 @@ const simulatorRuntimeKeysByRoute = new Map(
 );
 const archiveSimulatorRoutes = new Set([
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabelao",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
 ]);
@@ -159,6 +161,7 @@ const desktopThemeCaptureRoutes = new Set([
   "/app/configuracoes/metas",
   "/app/configuracoes/metas/pontos",
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabelao",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
   ...adminRoutes,
@@ -812,10 +815,15 @@ async function inspectRoute(
 
   const isArchiveSimulator = archiveSimulatorRoutes.has(route);
   if (isArchiveSimulator && waitForArchiveInventory) {
-    await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
-      state: "visible",
-      timeout: 25_000,
-    });
+    await page
+      .locator(
+        ".investor-stock-table tbody tr.selectable, .investor-stock-table tbody tr[data-inventory-unit-id]",
+      )
+      .first()
+      .waitFor({
+        state: "visible",
+        timeout: 25_000,
+      });
   }
   const isSimulatorWorkspace = route.startsWith("/app/simulacao/") && !isArchiveSimulator;
   const expectsEnabledSimulatorAction = enabledSimulatorRoutes.has(route);
@@ -825,6 +833,7 @@ async function inspectRoute(
     const simulatorForm = simulatorWorkspace ? document.querySelector("main form") : null;
     const archiveSimulator = [
       "/app/simulacao/associativo-fluxo-linear",
+      "/app/simulacao/tabelao",
       "/app/simulacao/tabela-direta",
       "/app/simulacao/tabela-investidor",
     ].includes(window.location.pathname);
@@ -1405,6 +1414,286 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     readyProposalHelpAccessible,
     readyProposalSeparatedCommissionVisible,
     readyProposalResponsive,
+  };
+}
+
+async function checkTabelaoValidation(page, origin) {
+  const route = "/app/simulacao/tabelao";
+  const url = `${origin}${route}`;
+  const requiredViewports = [
+    { key: "desktop-1440x900", width: 1440, height: 900, rowHeight: 23, targetSize: 24 },
+    { key: "tablet-1024x768", width: 1024, height: 768, rowHeight: 44, targetSize: 44 },
+    { key: "tablet-768x1024", width: 768, height: 1024, rowHeight: 44, targetSize: 44 },
+    { key: "mobile-375x812", width: 375, height: 812, rowHeight: 44, targetSize: 44 },
+  ];
+  const viewportChecks = [];
+
+  for (const viewport of requiredViewports) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await gotoWithServerRetry(page, url, { waitUntil: "domcontentloaded" });
+    await page
+      .locator(".investor-stock-sync")
+      .getByText("3.301 unidades", { exact: true })
+      .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+    await page.locator('tr[data-inventory-unit-id="qa-stock-0001"]').waitFor({
+      state: "visible",
+      timeout: qaNavigationTimeout,
+    });
+
+    const initial = await page.evaluate(({ rowHeight, targetSize }) => {
+      const root = document.documentElement;
+      const results = document.querySelector(".investor-stock-results");
+      const table = document.querySelector(".investor-stock-table");
+      const firstRow = document.querySelector("tr[data-inventory-unit-id]");
+      const firstAction = firstRow?.querySelector(".investor-stock-unit-button");
+      const controls = [...document.querySelectorAll(".investor-stock-filters select")];
+      const clearButton = document.querySelector(".investor-filter-heading > button");
+      const actionBox = firstAction?.getBoundingClientRect();
+      const rowBox = firstRow?.getBoundingClientRect();
+      const expectedScrollHeight = 3301 * rowHeight;
+      return {
+        title: document.querySelector("h1")?.textContent?.trim() === "Simulador Tabelão",
+        columns: document.querySelectorAll(".investor-stock-table thead th").length === 7,
+        filters: controls.length === 6,
+        rowCount: table?.getAttribute("aria-rowcount") === "3302",
+        noRootOverflow: root.scrollWidth <= root.clientWidth + 1,
+        rowHeight:
+          rowBox != null && Math.abs(rowBox.height - rowHeight) <= (rowHeight === 23 ? 1 : 2),
+        actionSize:
+          actionBox != null &&
+          actionBox.width >= targetSize - 1 &&
+          actionBox.height >= targetSize - 1,
+        controlsAccessible:
+          window.innerWidth > 1100 ||
+          [...controls, clearButton].every(
+            (control) => control && control.getBoundingClientRect().height >= 43,
+          ),
+        scrollHeightStable:
+          results != null &&
+          Math.abs(results.scrollHeight - expectedScrollHeight) <= expectedScrollHeight * 0.03,
+      };
+    }, viewport);
+
+    const results = page.locator(".investor-stock-results");
+    await results.evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+    await page.waitForFunction(
+      () =>
+        [...document.querySelectorAll("tr[data-inventory-unit-id]")]
+          .at(-1)
+          ?.getAttribute("data-inventory-unit-id") === "qa-stock-3301",
+      undefined,
+      { timeout: qaNavigationTimeout },
+    );
+    const bottom = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll("tr[data-inventory-unit-id]")];
+      const last = rows.at(-1);
+      const results = document.querySelector(".investor-stock-results");
+      return {
+        lastId: last?.getAttribute("data-inventory-unit-id") === "qa-stock-3301",
+        lastAriaRow: last?.getAttribute("aria-rowindex") === "3302",
+        scrolledToBottom:
+          results != null && results.scrollTop + results.clientHeight >= results.scrollHeight - 3,
+      };
+    });
+    viewportChecks.push({ key: viewport.key, ...initial, ...bottom });
+  }
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await gotoWithServerRetry(page, url, { waitUntil: "domcontentloaded" });
+  await page
+    .locator(".investor-stock-sync")
+    .getByText("3.301 unidades", { exact: true })
+    .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+
+  const guideLauncher = page.getByRole("button", {
+    name: "Iniciar passo a passo",
+    exact: true,
+  });
+  await guideLauncher.click();
+  const guide = page.locator("#investor-guided-tour");
+  await guide.waitFor({ state: "visible" });
+  const spotlightSized = await page.locator(".investor-tour-spotlight").evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    return box.width > 0 && box.height > 0;
+  });
+  let placementClassApplied = false;
+  for (let step = 1; step < 5; step += 1) {
+    await guide.getByRole("button", { name: "Próximo", exact: true }).click();
+    await page.waitForTimeout(80);
+    placementClassApplied ||= await guide.evaluate(
+      (element) => element.classList.contains("at-top") || element.classList.contains("at-left"),
+    );
+  }
+  const guideReachedLastStep = await guide
+    .getByRole("heading", { name: "Ordene as unidades por valor", exact: true })
+    .isVisible();
+  await guide.getByRole("button", { name: "Concluir guia", exact: true }).click();
+  await guide.waitFor({ state: "hidden" });
+  const guideCompletionReturnedFocus = await guideLauncher.evaluate(
+    (element) => document.activeElement === element,
+  );
+  await guideLauncher.click();
+  await guide.waitFor({ state: "visible" });
+  await page.keyboard.press("Escape");
+  await guide.waitFor({ state: "hidden" });
+  const guideEscapeReturnedFocus = await guideLauncher.evaluate(
+    (element) => document.activeElement === element,
+  );
+
+  const businessUnit = page.getByRole("combobox", { name: "Incorporadora", exact: true });
+  const project = page.getByRole("combobox", {
+    name: "Nome do Empreendimento",
+    exact: true,
+  });
+  const region = page.getByRole("combobox", { name: "Região", exact: true });
+  const plant = page.getByRole("combobox", { name: "Planta", exact: true });
+  const salePrice = page.getByRole("combobox", { name: "Valor do Imóvel", exact: true });
+  const sort = page.getByRole("combobox", {
+    name: "Ordenar unidades por valor do imóvel",
+    exact: true,
+  });
+  const stockResults = page.locator(".investor-stock-results");
+  await stockResults.evaluate((element) => {
+    element.scrollTop = 300;
+  });
+  await businessUnit.selectOption("Direcional");
+  await project.selectOption("Empreendimento QA 01");
+  await region.selectOption("Outros");
+  await plant.selectOption("Tipo 1Q");
+  await salePrice.selectOption("230000");
+  await page.waitForFunction(
+    () => document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") === "2",
+  );
+  const filterCascade =
+    (await page.locator('tr[data-inventory-unit-id="qa-stock-0001"]').count()) === 1 &&
+    (await stockResults.evaluate((element) => element.scrollTop)) === 0;
+
+  await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+  await page.waitForFunction(
+    () => document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") === "3302",
+  );
+  const clearReset =
+    (await businessUnit.inputValue()) === "Todas" &&
+    (await project.inputValue()) === "Todos" &&
+    (await region.inputValue()) === "Todas" &&
+    (await plant.inputValue()) === "Todos" &&
+    (await salePrice.inputValue()) === "Todos" &&
+    (await sort.inputValue()) === "asc" &&
+    (await stockResults.evaluate((element) => element.scrollTop)) === 0;
+
+  const firstAscendingId = await page
+    .locator("tr[data-inventory-unit-id]")
+    .first()
+    .getAttribute("data-inventory-unit-id");
+  await sort.selectOption("desc");
+  await page.waitForFunction(
+    (ascendingId) =>
+      document
+        .querySelector("tr[data-inventory-unit-id]")
+        ?.getAttribute("data-inventory-unit-id") !== ascendingId,
+    firstAscendingId,
+  );
+  const firstDescendingId = await page
+    .locator("tr[data-inventory-unit-id]")
+    .first()
+    .getAttribute("data-inventory-unit-id");
+  const bothSortDirections =
+    firstAscendingId === "qa-stock-0001" &&
+    firstDescendingId != null &&
+    firstDescendingId !== firstAscendingId;
+
+  const emptyHandler = async (interceptedRoute) => {
+    await interceptedRoute.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({ source: "QA empty", count: 0, items: [] }),
+    });
+  };
+  await page.route("**/api/inventory", emptyHandler);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const emptyMessage = page.getByText("Nenhuma unidade encontrada com esses filtros.", {
+    exact: true,
+  });
+  await emptyMessage.waitFor({ state: "visible" });
+  const emptyStateVisible = await emptyMessage.isVisible();
+  await page.unroute("**/api/inventory", emptyHandler);
+
+  const errorHandler = async (interceptedRoute) => {
+    await interceptedRoute.fulfill({
+      status: 503,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({ error: "qa_inventory_unavailable" }),
+    });
+  };
+  await page.route("**/api/inventory", errorHandler);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  const errorMessage = page.getByText(
+    "Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.",
+    { exact: false },
+  );
+  await errorMessage.waitFor({ state: "visible" });
+  const retryButton = page.getByRole("button", { name: "Tentar novamente", exact: true });
+  const errorStateAccessible =
+    (await retryButton.isVisible()) &&
+    (await retryButton.evaluate((element) => element.getBoundingClientRect().height >= 43));
+  await page.unroute("**/api/inventory", errorHandler);
+  await retryButton.click();
+  await page
+    .locator(".investor-stock-sync")
+    .getByText("3.301 unidades", { exact: true })
+    .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+
+  let releaseLoadingRequest;
+  const loadingGate = new Promise((resolve) => {
+    releaseLoadingRequest = resolve;
+  });
+  const loadingHandler = async (interceptedRoute) => {
+    await loadingGate;
+    await interceptedRoute.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: syntheticDirectTableSnapshot,
+    });
+  };
+  await page.route("**/api/inventory", loadingHandler);
+  const loadingReload = page.reload({ waitUntil: "domcontentloaded" });
+  const loadingMessage = page.getByText("Carregando unidades do estoque…", { exact: true });
+  await loadingMessage.waitFor({ state: "visible" });
+  const loadingStateVisible = await loadingMessage.isVisible();
+  releaseLoadingRequest();
+  await loadingReload;
+  await page.unroute("**/api/inventory", loadingHandler);
+  await page
+    .locator(".investor-stock-sync")
+    .getByText("3.301 unidades", { exact: true })
+    .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+
+  const cookieBannerHidden =
+    (await page.getByRole("button", { name: "Preferências de cookies", exact: true }).count()) ===
+    0;
+  const responsiveGrid = viewportChecks.every((check) =>
+    Object.entries(check)
+      .filter(([key]) => key !== "key")
+      .every(([, value]) => value === true),
+  );
+  process.stdout.write(`Tabelão QA: ${JSON.stringify(viewportChecks)}\n`);
+
+  return {
+    responsiveGrid,
+    spotlightSized,
+    placementClassApplied,
+    guideReachedLastStep,
+    guideCompletionReturnedFocus,
+    guideEscapeReturnedFocus,
+    filterCascade,
+    clearReset,
+    bothSortDirections,
+    emptyStateVisible,
+    errorStateAccessible,
+    loadingStateVisible,
+    cookieBannerHidden,
   };
 }
 
@@ -2811,6 +3100,7 @@ function functionalChecksPassed({
   screenshots,
   keyboard,
   simulatorValidation,
+  tabelaoValidation,
   directTableValidation,
   fixtureSourceMarker,
   zoom,
@@ -2833,6 +3123,8 @@ function functionalChecksPassed({
     Object.values(keyboard).every(Boolean) &&
     simulatorValidation &&
     Object.values(simulatorValidation).every(Boolean) &&
+    tabelaoValidation &&
+    Object.values(tabelaoValidation).every(Boolean) &&
     directTableValidation &&
     Object.values(directTableValidation).every(Boolean) &&
     fixtureSourceMarker &&
@@ -3050,6 +3342,7 @@ async function run() {
   const screenshots = [];
   let keyboard = null;
   let simulatorValidation = null;
+  let tabelaoValidation = null;
   let directTableValidation = null;
   let fixtureSourceMarker = null;
   let homologationCheckpoints = [];
@@ -3166,6 +3459,8 @@ async function run() {
           keyboard = await checkKeyboard(page, origin);
           currentStage = "simulator-validation";
           simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);
+          currentStage = "tabelao-validation";
+          tabelaoValidation = await checkTabelaoValidation(page, origin);
           await stopSyntheticInventory();
           currentStage = "direct-table-validation";
           const directPage = configureQaPage(await context.newPage());
@@ -3260,6 +3555,7 @@ async function run() {
       screenshots,
       keyboard,
       simulatorValidation,
+      tabelaoValidation,
       directTableValidation,
       fixtureSourceMarker,
       zoom,
@@ -3303,6 +3599,7 @@ async function run() {
       accessibilityChecks,
       keyboard,
       simulatorValidation,
+      tabelaoValidation,
       directTableValidation,
       homologationCheckpoints,
       zoom,

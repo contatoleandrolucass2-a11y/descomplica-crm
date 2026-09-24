@@ -38,6 +38,7 @@ const expectedProtectedRoutes = [
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/tabelao",
   "/app/simulacao/calcular-documentacao",
   "/app/simulacao/caixa",
   "/app/simulacao/tabela-direta",
@@ -193,6 +194,7 @@ const authenticatedResults = JSON.parse(
   };
   keyboard: Record<string, boolean>;
   simulatorValidation: Record<string, boolean>;
+  tabelaoValidation: Record<string, boolean>;
   directTableValidation: Record<string, boolean>;
   baselineIntegrity: {
     trackedFilesRequired: boolean;
@@ -277,7 +279,7 @@ describe("versioned reference parity catalog", () => {
     expect(visualHarness).toContain('method: "same-filesystem transactional rename with rollback"');
     expect(referenceQaReadme).toContain("Matriz autenticada aprovada no SHA de fechamento");
     expect(referenceQaReadme).toContain(
-      "A matriz aprovou 133 capturas responsivas, 49 capturas de tema, 182 auditorias",
+      "A matriz aprovou 140 capturas responsivas, 53 capturas de tema, 193 auditorias",
     );
   });
 
@@ -418,7 +420,7 @@ describe("versioned reference parity catalog", () => {
         (check) => check.passed && check.reducedMotion && !check.horizontalOverflow,
       ),
     ).toBe(true);
-    const desktopThemeScreenshotCount = 10 * 3;
+    const desktopThemeScreenshotCount = 11 * 3;
     const mobileDarkScreenshotCount = expectedReleasedProtectedRoutes.length;
     const themeScreenshotCount = desktopThemeScreenshotCount + mobileDarkScreenshotCount;
     const visualEvidenceCount = responsiveScreenshotCount + themeScreenshotCount;
@@ -453,6 +455,8 @@ describe("versioned reference parity catalog", () => {
     ).toBe(true);
     expect(Object.values(authenticatedResults.keyboard).every(Boolean)).toBe(true);
     expect(Object.values(authenticatedResults.simulatorValidation).every(Boolean)).toBe(true);
+    expect(Object.keys(authenticatedResults.tabelaoValidation)).toHaveLength(13);
+    expect(Object.values(authenticatedResults.tabelaoValidation).every(Boolean)).toBe(true);
     expect(Object.keys(authenticatedResults.directTableValidation)).toHaveLength(40);
     expect(Object.values(authenticatedResults.directTableValidation).every(Boolean)).toBe(true);
 
