@@ -2,6 +2,8 @@
 
 ## 2026-09-24 — bootstrap local do Windows e seleção segura de modelo
 
+- Adicionada política `.gitattributes` para LF, normalização segura do checkout
+  e compatibilidade do teste de modo `0600` com o Windows.
 - A preparação do Windows agora usa o Node 24.19.0 portátil em
   `%LOCALAPPDATA%\DescomplicaCRM\tools`, com validação SHA-256 e PATH persistente.
 - A ausência de Astra e dos fallbacks conhecidos deixou de bloquear a preparação

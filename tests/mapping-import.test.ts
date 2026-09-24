@@ -237,7 +237,11 @@ describe("mapping import CLI", () => {
       if (mapping.decision === "verify") expect(capture.stdout()).not.toContain(mapping.targetId);
     }
 
-    expect((await stat(detailPath)).mode & 0o777).toBe(0o600);
+    // Windows não expõe os bits POSIX aplicados pelo mode 0600. A garantia é
+    // verificada nos sistemas que implementam essas permissões.
+    if (process.platform !== "win32") {
+      expect((await stat(detailPath)).mode & 0o777).toBe(0o600);
+    }
     expect(await readFile(detailPath, "utf8")).toContain("fixture-org-a");
   });
 

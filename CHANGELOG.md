@@ -2,6 +2,8 @@
 
 ## 2026-09-24 — preparação do projeto local no Windows
 
+- Padroniza arquivos textuais em LF no Windows e limita a asserção de permissão
+  `0600` aos sistemas que implementam bits POSIX.
 - Instala automaticamente a distribuição portátil oficial do Node 24.19.0,
   validada por SHA-256, evitando falhas do Windows Installer como o código 1603.
 - Evita interromper o bootstrap quando a conta ainda não possui Astra nem um

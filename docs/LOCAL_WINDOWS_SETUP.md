@@ -18,6 +18,10 @@ Se esse repositório ainda não tiver commit e contiver arquivos, a pasta inteir
 é renomeada com o sufixo `backup-AAAAMMDD-HHMMSS` antes de um clone limpo. Nada
 é descartado.
 
+O bootstrap configura o checkout local com finais de linha LF e regrava apenas
+os arquivos versionados depois de preservar mudanças locais. Isso mantém os
+testes textuais idênticos entre Windows e Linux.
+
 Execute no PowerShell:
 
 ```powershell

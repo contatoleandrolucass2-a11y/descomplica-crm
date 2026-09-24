@@ -53,6 +53,51 @@ function Add-UserPathEntry {
   $env:Path = "$Entry;$env:Path"
 }
 
+function Convert-TrackedTextFilesToLf {
+  $EolInventory = @(& git ls-files --eol)
+  if ($LASTEXITCODE -ne 0) {
+    throw "Não foi possível consultar os finais de linha dos arquivos versionados."
+  }
+
+  $NormalizedCount = 0
+  foreach ($InventoryLine in $EolInventory) {
+    $TabIndex = $InventoryLine.IndexOf("`t")
+    if ($TabIndex -lt 0) {
+      continue
+    }
+
+    $Metadata = $InventoryLine.Substring(0, $TabIndex)
+    if ($Metadata -notmatch "w/(crlf|mixed)") {
+      continue
+    }
+
+    $RepositoryPath = $InventoryLine.Substring($TabIndex + 1)
+    $FilePath = Join-Path (Get-Location).Path $RepositoryPath
+    if (-not (Test-Path -LiteralPath $FilePath -PathType Leaf)) {
+      continue
+    }
+
+    $Bytes = [IO.File]::ReadAllBytes($FilePath)
+    $HasUtf8Bom =
+      $Bytes.Length -ge 3 -and
+      $Bytes[0] -eq 0xEF -and
+      $Bytes[1] -eq 0xBB -and
+      $Bytes[2] -eq 0xBF
+    $Offset = if ($HasUtf8Bom) { 3 } else { 0 }
+    $Utf8 = [Text.UTF8Encoding]::new($false, $true)
+    $Text = $Utf8.GetString($Bytes, $Offset, $Bytes.Length - $Offset)
+    $NormalizedText = $Text.Replace("`r`n", "`n")
+    if ($NormalizedText -ne $Text) {
+      [IO.File]::WriteAllText($FilePath, $NormalizedText, [Text.UTF8Encoding]::new($HasUtf8Bom))
+      $NormalizedCount += 1
+    }
+  }
+
+  if ($NormalizedCount -gt 0) {
+    Write-Host "$NormalizedCount arquivo(s) textual(is) normalizado(s) para LF."
+  }
+}
+
 function Install-OfficialNode {
   param([Parameter(Mandatory = $true)][string]$Version)
 
@@ -185,6 +230,8 @@ try {
     $LocationPushed = $true
   }
 
+  Invoke-Native git config --local core.autocrlf false
+  Invoke-Native git config --local core.eol lf
   Invoke-Native git fetch origin $SyncBranch
 
   & git show-ref --verify --quiet "refs/heads/$SyncBranch"
@@ -195,6 +242,10 @@ try {
   else {
     Invoke-Native git switch --create $SyncBranch --track "origin/$SyncBranch"
   }
+
+  # O checkout está limpo neste ponto. Normalize somente os arquivos que o Git
+  # identifica como texto em CRLF/misto, preservando binários e conteúdo local.
+  Convert-TrackedTextFilesToLf
 
   $RawCatalog = (& codex debug models 2>$null | Out-String).Trim()
   if (-not $RawCatalog) {
