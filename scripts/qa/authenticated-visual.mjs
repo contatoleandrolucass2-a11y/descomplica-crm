@@ -269,7 +269,14 @@ async function installSyntheticInventoryForVisualCapture(context, origin) {
   return async () => {
     if (!installed) return;
     installed = false;
-    await context.unroute(inventoryRoutePattern, handler);
+    if (context.isClosed()) return;
+    try {
+      await context.unroute(inventoryRoutePattern, handler);
+    } catch (error) {
+      // Preserve the original capture failure when Chromium has already
+      // closed the context (for example after an external OOM kill).
+      if (!context.isClosed()) throw error;
+    }
   };
 }
 
