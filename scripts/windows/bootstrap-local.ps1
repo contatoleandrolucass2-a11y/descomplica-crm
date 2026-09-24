@@ -50,27 +50,20 @@ $LocationPushed = $false
 Push-Location $TargetPath
 $LocationPushed = $true
 try {
-  $OriginOutput = & git remote get-url origin 2>$null
-  $OriginExitCode = $LASTEXITCODE
-  $OriginUrl = if ($null -eq $OriginOutput) {
-    ""
+  $RemoteNames = @(& git remote)
+  if ($LASTEXITCODE -ne 0) {
+    throw "Não foi possível consultar os remotes do repositório local."
+  }
+
+  if ($RemoteNames -contains "origin") {
+    $OriginOutput = & git remote get-url origin
+    if ($LASTEXITCODE -ne 0) {
+      throw "Não foi possível consultar a URL do remote origin."
+    }
+    $OriginUrl = ($OriginOutput | Out-String).Trim()
   }
   else {
-    ($OriginOutput | Out-String).Trim()
-  }
-
-  if ($OriginExitCode -ne 0 -or -not $OriginUrl) {
-    $RemoteNames = @(& git remote)
-    if ($LASTEXITCODE -ne 0) {
-      throw "Não foi possível consultar os remotes do repositório local."
-    }
-
-    if ($RemoteNames -contains "origin") {
-      Invoke-Native git remote set-url origin $RepositoryUrl
-    }
-    else {
-      Invoke-Native git remote add origin $RepositoryUrl
-    }
+    Invoke-Native git remote add origin $RepositoryUrl
     $OriginUrl = $RepositoryUrl
   }
 
@@ -78,8 +71,12 @@ try {
     throw "O remote origin não corresponde ao repositório Descomplica CRM. Encontrado: $OriginUrl"
   }
 
-  & git rev-parse --verify HEAD *> $null
-  $RepositoryHasHead = $LASTEXITCODE -eq 0
+  $BranchState = @(& git status --porcelain=v2 --branch)
+  if ($LASTEXITCODE -ne 0) {
+    throw "Não foi possível verificar a referência HEAD local."
+  }
+  $HeadState = @($BranchState | Where-Object { $_ -like "# branch.oid *" })
+  $RepositoryHasHead = $HeadState.Count -eq 1 -and $HeadState[0] -ne "# branch.oid (initial)"
   $DirtyState = & git status --porcelain
   if ($LASTEXITCODE -ne 0) {
     throw "Não foi possível verificar o estado Git local."

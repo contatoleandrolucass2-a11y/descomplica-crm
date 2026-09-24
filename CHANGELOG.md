@@ -2,8 +2,8 @@
 
 ## 2026-09-24 — preparação do projeto local no Windows
 
-- Corrige a inicialização em pastas Git sem remote `origin`, sem aceitar uma URL
-  divergente quando o remote já existe.
+- Corrige a inicialização em pastas Git sem remote `origin`, inclusive no
+  Windows PowerShell 5, sem aceitar uma URL divergente quando o remote existe.
 - Adiciona configuração Codex escopada ao projeto e bootstrap seguro para
   sincronizar o ambiente local a partir da branch de transporte do servidor.
 - Detecta a disponibilidade real de GPT-6 Astra antes de ativá-la e mantém

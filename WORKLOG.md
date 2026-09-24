@@ -2,8 +2,8 @@
 
 ## 2026-09-24 — bootstrap local do Windows e seleção segura de modelo
 
-- O bootstrap agora trata repositórios locais sem remote `origin`, adicionando
-  apenas a URL oficial do projeto antes da sincronização.
+- O bootstrap agora trata repositórios locais sem remote `origin` no Windows
+  PowerShell 5, adicionando apenas a URL oficial antes da sincronização.
 - Criada configuração de projeto em `.codex/config.toml`, com GPT-5.6 Sol como
   fallback enquanto GPT-6 Astra não aparece no catálogo autenticado.
 - Adicionado bootstrap idempotente para o projeto local no Windows: valida o
