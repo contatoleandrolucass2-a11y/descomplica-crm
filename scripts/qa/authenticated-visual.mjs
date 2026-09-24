@@ -9,6 +9,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 import sharp from "sharp";
 
+import { sortInvestorInventoryBySalePrice } from "../../lib/archive-investor/investor-filter-options.mjs";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
@@ -54,6 +55,10 @@ const syntheticDirectTableSnapshot = (() => {
     snapshotSha256: createHash("sha256").update(contents).digest("hex"),
   });
 })();
+const syntheticTabelaoLastInventoryId = sortInvestorInventoryBySalePrice(
+  JSON.parse(syntheticDirectTableSnapshot).items,
+  "asc",
+).at(-1)?.id;
 
 function configureQaPage(page) {
   page.setDefaultTimeout(qaNavigationTimeout);
@@ -1421,7 +1426,7 @@ async function checkTabelaoValidation(page, origin) {
   const route = "/app/simulacao/tabelao";
   const url = `${origin}${route}`;
   const requiredViewports = [
-    { key: "desktop-1440x900", width: 1440, height: 900, rowHeight: 23, targetSize: 24 },
+    { key: "desktop-1440x900", width: 1440, height: 900, rowHeight: 24, targetSize: 24 },
     { key: "tablet-1024x768", width: 1024, height: 768, rowHeight: 44, targetSize: 44 },
     { key: "tablet-768x1024", width: 768, height: 1024, rowHeight: 44, targetSize: 44 },
     { key: "mobile-375x812", width: 375, height: 812, rowHeight: 44, targetSize: 44 },
@@ -1458,8 +1463,7 @@ async function checkTabelaoValidation(page, origin) {
         filters: controls.length === 6,
         rowCount: table?.getAttribute("aria-rowcount") === "3302",
         noRootOverflow: root.scrollWidth <= root.clientWidth + 1,
-        rowHeight:
-          rowBox != null && Math.abs(rowBox.height - rowHeight) <= (rowHeight === 23 ? 1 : 2),
+        rowHeight: rowBox != null && Math.abs(rowBox.height - rowHeight) <= 2,
         actionSize:
           actionBox != null &&
           actionBox.width >= targetSize - 1 &&
@@ -1481,24 +1485,24 @@ async function checkTabelaoValidation(page, origin) {
       element.dispatchEvent(new Event("scroll", { bubbles: true }));
     });
     await page.waitForFunction(
-      () =>
+      (expectedLastId) =>
         [...document.querySelectorAll("tr[data-inventory-unit-id]")]
           .at(-1)
-          ?.getAttribute("data-inventory-unit-id") === "qa-stock-3301",
-      undefined,
+          ?.getAttribute("data-inventory-unit-id") === expectedLastId,
+      syntheticTabelaoLastInventoryId,
       { timeout: 10_000 },
     );
-    const bottom = await page.evaluate(() => {
+    const bottom = await page.evaluate((expectedLastId) => {
       const rows = [...document.querySelectorAll("tr[data-inventory-unit-id]")];
       const last = rows.at(-1);
       const results = document.querySelector(".investor-stock-results");
       return {
-        lastId: last?.getAttribute("data-inventory-unit-id") === "qa-stock-3301",
+        lastId: last?.getAttribute("data-inventory-unit-id") === expectedLastId,
         lastAriaRow: last?.getAttribute("aria-rowindex") === "3302",
         scrolledToBottom:
           results != null && results.scrollTop + results.clientHeight >= results.scrollHeight - 3,
       };
-    });
+    }, syntheticTabelaoLastInventoryId);
     viewportChecks.push({ key: viewport.key, ...initial, ...bottom });
     process.stdout.write(`Tabelão QA: concluiu ${viewport.key}\n`);
   }

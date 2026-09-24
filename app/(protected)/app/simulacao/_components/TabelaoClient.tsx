@@ -72,7 +72,7 @@ const {
 };
 
 const INVENTORY_WINDOW_SIZE = 60;
-const DESKTOP_ROW_HEIGHT = 23;
+const DESKTOP_ROW_HEIGHT = 24;
 const MOBILE_ROW_HEIGHT = 44;
 const TABELAO_TOUR_STEPS = [
   {
