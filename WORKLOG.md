@@ -18,6 +18,16 @@
   excluída. Fonte gerada em 07/08/2026, sem afirmar atualização comercial posterior.
 - Tipos e build local aprovados. Suíte Windows: somente as duas falhas já
   conhecidas de permissões POSIX; confirmação completa será feita no Linux.
+- Suíte Linux aprovada: 635 testes (627 Vitest e oito Node), quatro skips.
+  Lint local/Linux, tipos, build e validação geral do CI aprovados.
+- Publicada `8ae74956a3fa5c5ec831273e789da32767cdb25c` após prova de imagem.
+  Health público confirmado e API anônima responde 401. Conferência autenticada:
+  53 plantas exclusivas em 23 empreendimentos, nomes e fórmulas corretos, quatro
+  larguras sem sobreposição ou overflow da página, console sem erros.
+- Matriz CI interrompida duas vezes na etapa do Tabelão. O teste enviava Escape
+  sem aguardar o foco transferido por requestAnimationFrame; o acionador tem
+  aria-haspopup e Escape nele não fecha o painel. QA passa a aguardar foco no
+  painel e retorno ao acionador; logs registram subetapas sem dados comerciais.
 
 ## 2026-09-24 — agrupamento das opções por empreendimento
 

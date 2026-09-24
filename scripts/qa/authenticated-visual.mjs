@@ -1545,6 +1545,12 @@ async function checkTabelaoValidation(page, origin) {
   await guideLauncher.click();
   const guide = page.locator("#investor-guided-tour");
   await guide.waitFor({ state: "visible" });
+  await page.waitForFunction(
+    () => document.activeElement === document.querySelector("#investor-guided-tour"),
+    undefined,
+    { timeout: 10_000 },
+  );
+  process.stdout.write("Tabelão QA: guia aberto com foco\n");
   const spotlightSized = await page.locator(".investor-tour-spotlight").evaluate((element) => {
     const box = element.getBoundingClientRect();
     return box.width > 0 && box.height > 0;
@@ -1562,16 +1568,32 @@ async function checkTabelaoValidation(page, origin) {
     .isVisible();
   await guide.getByRole("button", { name: "Concluir guia", exact: true }).click();
   await guide.waitFor({ state: "hidden" });
+  await page.waitForFunction(
+    () => document.activeElement === document.querySelector(".investor-guided-start"),
+    undefined,
+    { timeout: 10_000 },
+  );
   const guideCompletionReturnedFocus = await guideLauncher.evaluate(
     (element) => document.activeElement === element,
   );
   await guideLauncher.click();
   await guide.waitFor({ state: "visible" });
+  await page.waitForFunction(
+    () => document.activeElement === document.querySelector("#investor-guided-tour"),
+    undefined,
+    { timeout: 10_000 },
+  );
   await page.keyboard.press("Escape");
   await guide.waitFor({ state: "hidden" });
+  await page.waitForFunction(
+    () => document.activeElement === document.querySelector(".investor-guided-start"),
+    undefined,
+    { timeout: 10_000 },
+  );
   const guideEscapeReturnedFocus = await guideLauncher.evaluate(
     (element) => document.activeElement === element,
   );
+  process.stdout.write("Tabelão QA: guia concluído e Escape verificado\n");
 
   const rendered = await page.locator("tr[data-inventory-unit-id]").evaluateAll((rows) =>
     rows.map((row) => ({
@@ -1628,6 +1650,7 @@ async function checkTabelaoValidation(page, origin) {
     });
   await emptyMessage.waitFor({ state: "visible" });
   const emptyStateVisible = await emptyMessage.isVisible();
+  process.stdout.write("Tabelão QA: estado vazio verificado\n");
   await page.unroute("**/api/inventory", emptyHandler);
 
   const errorHandler = async (interceptedRoute) => {
@@ -1654,6 +1677,7 @@ async function checkTabelaoValidation(page, origin) {
     .locator(".investor-stock-sync")
     .getByText(syntheticTabelaoCountLabel, { exact: true })
     .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+  process.stdout.write("Tabelão QA: erro e recuperação verificados\n");
 
   let releaseLoadingRequest;
   const loadingGate = new Promise((resolve) => {

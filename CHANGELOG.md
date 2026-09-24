@@ -9,6 +9,7 @@
 - Preserva a fórmula com kit, B.A. e folga em centavos e o agrupamento por empreendimento.
   Área inválida não impede a comparação; aparece como traço, sem inventar metragem.
 - Atualiza regressões, auditoria independente, guia e validação visual para a nova chave.
+- Sincroniza o teste de Escape com o foco assíncrono do guia, sem relaxar critérios.
 
 ## 2026-09-24 — Tabelão agrupado por empreendimento
 
