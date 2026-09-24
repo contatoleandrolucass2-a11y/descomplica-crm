@@ -10,6 +10,8 @@
   Área inválida não impede a comparação; aparece como traço, sem inventar metragem.
 - Atualiza regressões, auditoria independente, guia e validação visual para a nova chave.
 - Sincroniza o teste de Escape com o foco assíncrono do guia, sem relaxar critérios.
+- Atualiza nove referências visuais sintéticas após revisão e aprovação funcional
+  da matriz completa, preservando as demais páginas e tolerâncias.
 
 ## 2026-09-24 — Tabelão agrupado por empreendimento
 

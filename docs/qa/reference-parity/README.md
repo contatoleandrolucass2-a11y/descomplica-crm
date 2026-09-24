@@ -4,6 +4,22 @@ Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
 ## Atualização do Tabelão em 24/09/2026
 
+Após a correção solicitada pelos prints, nove capturas foram atualizadas para
+uma linha por empreendimento e planta, sem separar por área, e coluna com apenas
+o empreendimento. CI `36059484259`, captura
+`f413c11546f868dfbcdb7f059db3f5591dbc6e8c`, árvore idêntica a
+`f32dca294338f4b4cb821a1f5811efc97f664e04`. Esse commit só acrescenta sincronização
+de foco no QA ao código publicado `8ae74956a3fa5c5ec831273e789da32767cdb25c`.
+
+Os 13 critérios do Tabelão passaram, incluindo guia, Escape, foco, estados vazio,
+erro, recuperação e carregamento. Também passaram 140 checks responsivos,
+80 de tema, 193 de acessibilidade, 100 de zoom e os demais critérios funcionais.
+Revisão visual e hashes conferidos; promoção transacional preservou as outras
+184 referências, incluindo todas as outras rotas e os limiares existentes.
+Capturas usam apenas fixtures sintéticas, sem dados comerciais ou credenciais.
+
+### Captura anterior do agrupamento
+
 Dez capturas sintéticas desta rota foram atualizadas para as opções exclusivas
 agrupadas por empreendimento, sem filtros, com valores líquidos e cabeçalho móvel
 sem sobreposição. A evidência veio do CI `36015516477`, commit de captura

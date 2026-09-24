@@ -28,6 +28,11 @@
   sem aguardar o foco transferido por requestAnimationFrame; o acionador tem
   aria-haspopup e Escape nele não fecha o painel. QA passa a aguardar foco no
   painel e retorno ao acionador; logs registram subetapas sem dados comerciais.
+- CI `36059484259` confirmou todos os critérios funcionais, incluindo os 13 do
+  Tabelão; o bloqueio do guia deixou de ocorrer após sincronização de foco.
+  Restaram somente nove diferenças visuais da mudança solicitada. Referências
+  revisadas e promovidas com hashes e árvore Git conferidos, preservando outras
+  184 imagens e todos os limiares. Proveniência em docs/qa/reference-parity.
 
 ## 2026-09-24 — agrupamento das opções por empreendimento
 
