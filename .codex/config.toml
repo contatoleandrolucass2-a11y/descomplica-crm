@@ -1,0 +1,5 @@
+# Configuração local do projeto. O bootstrap troca automaticamente para
+# gpt-6-astra assim que o modelo aparecer no catálogo da conta autenticada.
+# Enquanto a liberação não existe, mantém o melhor modelo atualmente disponível.
+model = "gpt-5.6-sol"
+model_reasoning_effort = "medium"

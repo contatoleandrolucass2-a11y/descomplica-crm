@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-24 — preparação do projeto local no Windows
+
+- Adiciona configuração Codex escopada ao projeto e bootstrap seguro para
+  sincronizar o ambiente local a partir da branch de transporte do servidor.
+- Detecta a disponibilidade real de GPT-6 Astra antes de ativá-la e mantém
+  GPT-5.6 Sol como fallback funcional quando o acesso ainda não foi liberado.
+- Preserva trabalho local existente, não transporta segredos e valida Node,
+  pnpm, dependências, lint, tipos, testes e build.
+
 ## 2026-09-23 — Tabelão no padrão da Tabela Direta
 
 - Remove do Tabelão a faixa de status, filtros e quatro indicadores solicitados.

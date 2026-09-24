@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-09-24 — bootstrap local do Windows e seleção segura de modelo
+
+- Criada configuração de projeto em `.codex/config.toml`, com GPT-5.6 Sol como
+  fallback enquanto GPT-6 Astra não aparece no catálogo autenticado.
+- Adicionado bootstrap idempotente para o projeto local no Windows: valida o
+  remote Git, preserva alterações locais em stash, sincroniza a branch de
+  transporte, detecta modelos realmente disponíveis, prepara Node 24.19.x e
+  pnpm 11.20.x, instala dependências e executa o gate completo.
+- Nenhum `.env.local`, token, chave ou segredo do servidor integra a entrega;
+  ambientes locais partem apenas de `.env.example`.
+
 ## 2026-09-23 — Tabelão unitário e compacto
 
 - Removidos do Tabelão o painel “Consulta exclusiva”, sete filtros e os quatro
