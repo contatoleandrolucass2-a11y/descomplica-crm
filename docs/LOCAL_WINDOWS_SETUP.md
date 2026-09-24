@@ -6,6 +6,14 @@ do servidor com o projeto local, preserva alterações locais existentes em um
 Codex, prepara Node/pnpm, cria `.env.local` a partir do exemplo quando necessário
 e executa o gate completo do repositório.
 
+Se a pasta já for um repositório Git sem remote `origin`, o bootstrap adiciona
+o remote oficial automaticamente. Um `origin` existente com outra URL continua
+falhando fechado para evitar sincronizar o projeto errado.
+
+Se esse repositório ainda não tiver commit e contiver arquivos, a pasta inteira
+é renomeada com o sufixo `backup-AAAAMMDD-HHMMSS` antes de um clone limpo. Nada
+é descartado.
+
 Execute no PowerShell:
 
 ```powershell

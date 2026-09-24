@@ -9,6 +9,7 @@ $SyncBranch = "codex/local-bootstrap-gpt6-astra"
 $RequiredNode = "24.19.0"
 $RequiredPnpm = "11.20.0"
 $BackupLabel = $null
+$RepositoryBackupPath = $null
 
 function Invoke-Native {
   param(
@@ -45,21 +46,57 @@ if (-not (Test-Path -LiteralPath (Join-Path $TargetPath ".git"))) {
   throw "A pasta existe, mas não é um repositório Git: $TargetPath"
 }
 
+$LocationPushed = $false
 Push-Location $TargetPath
+$LocationPushed = $true
 try {
-  $OriginUrl = (& git remote get-url origin).Trim()
-  if ($LASTEXITCODE -ne 0 -or $OriginUrl -ne $RepositoryUrl) {
+  $OriginOutput = & git remote get-url origin 2>$null
+  $OriginExitCode = $LASTEXITCODE
+  $OriginUrl = if ($null -eq $OriginOutput) {
+    ""
+  }
+  else {
+    ($OriginOutput | Out-String).Trim()
+  }
+
+  if ($OriginExitCode -ne 0 -or -not $OriginUrl) {
+    $RemoteNames = @(& git remote)
+    if ($LASTEXITCODE -ne 0) {
+      throw "Não foi possível consultar os remotes do repositório local."
+    }
+
+    if ($RemoteNames -contains "origin") {
+      Invoke-Native git remote set-url origin $RepositoryUrl
+    }
+    else {
+      Invoke-Native git remote add origin $RepositoryUrl
+    }
+    $OriginUrl = $RepositoryUrl
+  }
+
+  if ($OriginUrl -ne $RepositoryUrl) {
     throw "O remote origin não corresponde ao repositório Descomplica CRM. Encontrado: $OriginUrl"
   }
 
+  & git rev-parse --verify HEAD *> $null
+  $RepositoryHasHead = $LASTEXITCODE -eq 0
   $DirtyState = & git status --porcelain
   if ($LASTEXITCODE -ne 0) {
     throw "Não foi possível verificar o estado Git local."
   }
 
-  if ($DirtyState) {
+  if ($DirtyState -and $RepositoryHasHead) {
     $BackupLabel = "codex-auto-backup-before-bootstrap-$((Get-Date).ToString('yyyyMMdd-HHmmss'))"
     Invoke-Native git stash push --include-untracked --message $BackupLabel
+  }
+  elseif ($DirtyState) {
+    $RepositoryBackupPath = "$TargetPath-backup-$((Get-Date).ToString('yyyyMMdd-HHmmss'))"
+    Pop-Location
+    $LocationPushed = $false
+    Move-Item -LiteralPath $TargetPath -Destination $RepositoryBackupPath
+    Invoke-Native git clone --branch $SyncBranch --single-branch $RepositoryUrl $TargetPath
+    Push-Location $TargetPath
+    $LocationPushed = $true
   }
 
   Invoke-Native git fetch origin $SyncBranch
@@ -138,7 +175,12 @@ model_reasoning_effort = "$ReasoningEffort"
   if ($BackupLabel) {
     Write-Host "Alterações locais anteriores foram preservadas no stash: $BackupLabel"
   }
+  if ($RepositoryBackupPath) {
+    Write-Host "A pasta Git sem commit inicial foi preservada em: $RepositoryBackupPath"
+  }
 }
 finally {
-  Pop-Location
+  if ($LocationPushed) {
+    Pop-Location
+  }
 }
