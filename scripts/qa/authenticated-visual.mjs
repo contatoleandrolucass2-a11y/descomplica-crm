@@ -1467,6 +1467,10 @@ async function checkTabelaoValidation(page, origin) {
         const controls = [...document.querySelectorAll(".investor-stock-filters select")];
         const actionBox = firstAction?.getBoundingClientRect();
         const rowBox = firstRow?.getBoundingClientRect();
+        const headingBox = document
+          .querySelector(".investor-stock-panel > .investor-section-heading")
+          ?.getBoundingClientRect();
+        const syncBox = document.querySelector(".investor-stock-sync")?.getBoundingClientRect();
         const expectedScrollHeight =
           count * rowHeight + (table?.querySelector("thead")?.getBoundingClientRect().height ?? 0);
         return {
@@ -1475,6 +1479,11 @@ async function checkTabelaoValidation(page, origin) {
           filtersRemoved: controls.length === 0,
           rowCount: table?.getAttribute("aria-rowcount") === String(count + 1),
           noRootOverflow: root.scrollWidth <= root.clientWidth + 1,
+          noHeaderOverlap:
+            headingBox != null &&
+            syncBox != null &&
+            syncBox.bottom <= headingBox.bottom + 1 &&
+            headingBox.bottom <= (results?.getBoundingClientRect().top ?? 0) + 1,
           rowHeight: rowBox != null && Math.abs(rowBox.height - rowHeight) <= 2,
           actionSize:
             actionBox != null &&

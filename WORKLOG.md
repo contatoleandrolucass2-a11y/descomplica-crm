@@ -22,6 +22,11 @@
   está disponível para a conferência responsiva após a promoção da imagem.
 - PR #87 aberto. Corrigida a formatação do cliente e do changelog apontada pelo
   primeiro CI; a imagem passou na prova dos perfis de homologação e produção.
+- Publicação inicial confirmada em sessão autenticada: 120 IDs únicos acessíveis
+  nas janelas inicial/final, índices 2 a 121 e conta completa nos valores. A revisão
+  em 1440, 1024, 768 e 375 px detectou cabeçalho móvel fixo em 40 px sobrepondo
+  contador/data à tabela; aplicado ajuste escopado e incluído critério de não
+  sobreposição no QA responsivo.
 
 ## 2026-09-24 — remoção dos filtros do Tabelão
 

@@ -10,6 +10,8 @@ Folga de Tabela)`, calculado em centavos, com desempate determinístico.
   linhas excluídas da comparação são informadas. Filtros permanecem removidos.
 - Acrescenta testes de regras e auditoria independente da fonte; atualiza o QA
   visual para a seleção exclusiva e o guia de três passos.
+- Corrige a altura do cabeçalho no celular para que contadores e data não
+  sobreponham a tabela; a correção fica restrita ao Tabelão.
 
 ## 2026-09-24 — Tabelão sem barra de filtros
 

@@ -21423,6 +21423,44 @@ body:has(.investor-page-shell) {
 }
 
 /* Tabelão: mantém a grade virtual linear e todos os controles acessíveis em telas estreitas. */
+@media (max-width: 760px) {
+  .investor-page-shell.tabelao-page-shell .investor-stock-panel > .investor-section-heading {
+    height: auto !important;
+    min-height: 84px !important;
+    grid-template-columns: 28px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    padding: 8px 12px !important;
+    row-gap: 6px;
+  }
+
+  .tabelao-page-shell .investor-stock-panel > .investor-section-heading > span {
+    grid-row: 1 / 3;
+  }
+
+  .tabelao-page-shell .investor-stock-panel > .investor-section-heading > span + div {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .tabelao-page-shell .investor-stock-panel > .investor-section-heading .investor-stock-sync {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .tabelao-page-shell .investor-stock-panel > .investor-section-heading .investor-stock-sync small {
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
 @media (max-width: 1239px) {
   .tabelao-page-shell .investor-stock-results {
     overflow-x: auto;
