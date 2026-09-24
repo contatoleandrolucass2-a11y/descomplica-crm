@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
 
+import { InvestorGuideLauncher, InvestorInfoHint } from "./archive-investor/InvestorCalculator";
 import { SiteMenu } from "./archive-investor/SiteMenu";
 import "./archive-investor/investor-archive.css";
 import { TabelaoClient } from "./TabelaoClient";
@@ -12,7 +13,7 @@ export async function TabelaoArchive() {
   const consent = parseCookieConsent(cookieStore.get(COOKIE_CONSENT_COOKIE_NAME)?.value);
 
   return (
-    <div className="app-shell tabelao-page-shell">
+    <div className="app-shell simulation-page-shell investor-page-shell tabelao-page-shell">
       <header className="topbar simulation-topbar">
         <Link className="brand-lockup brand-link" href="/app" prefetch={false}>
           <div className="brand-mark" aria-hidden="true">
@@ -25,25 +26,27 @@ export async function TabelaoArchive() {
         </Link>
         <SiteMenu canPersistTheme={consent?.categories.functional === true} />
       </header>
-      <main className="tabelao-main">
-        <section className="tabelao-hero">
-          <div>
+      <main className="investor-main">
+        <section className="goal-page-hero investor-compact-hero">
+          <div className="goal-hero-copy">
             <nav className="documentation-breadcrumb" aria-label="Trilha de navegação">
               <Link href="/app/simulacao" prefetch={false}>
                 Simulação
               </Link>
               <span aria-hidden="true">/</span>
-              <strong>Tabelão</strong>
+              <strong>Simulador Tabelão</strong>
             </nav>
-            <p className="goal-kicker">Estoque comercial</p>
-            <h1>Tabelão</h1>
-            <p>Consulte cada unidade disponível no estoque SPC em uma única tabela.</p>
+            <p className="goal-kicker">Simulação comercial</p>
+            <div className="investor-hero-title">
+              <h1>Simulador Tabelão</h1>
+              <InvestorInfoHint
+                label="Tabelão"
+                title="Tabelão"
+                description="Consulta completa de cada unidade disponível no estoque SPC."
+              />
+            </div>
           </div>
-          <aside className="tabelao-hero-note" aria-label="Como usar o Tabelão">
-            <span>Consulta completa</span>
-            <strong>Uma linha para cada unidade do estoque.</strong>
-            <p>Compare incorporadora, produto, metragem, entrega, planta e valor do imóvel.</p>
-          </aside>
+          <InvestorGuideLauncher />
         </section>
         <TabelaoClient />
         <p className="simulation-disclaimer">
@@ -51,6 +54,10 @@ export async function TabelaoArchive() {
           fluxo oficial antes de formalizar a proposta.
         </p>
       </main>
+      <footer className="investor-page-footer">
+        <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>
+        <small>Desenvolvido e gerenciado por Leandro Lucas</small>
+      </footer>
     </div>
   );
 }

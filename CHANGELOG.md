@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-24 — Tabelão no layout da Tabela Associativo
+
+- Replica no Tabelão o shell, hero, guia, painel de estoque, filtros, cores,
+  tipografia, densidade e rodapé da página Tabela Associativo, sem modificar a
+  rota usada como referência.
+- Restaura os cinco filtros encadeados e a ordenação por valor com os mesmos
+  componentes e helpers do estoque, mantendo todas as unidades da fonte viva.
+- Mantém a consulta somente leitura, uma linha por unidade, o atalho para a
+  Tabela Direta, os estados de carregamento, vazio, erro e nova tentativa e a
+  janela virtual de 60 linhas, sem mock ou fallback.
+- Corrige o guia completo do Tabelão, o foco devolvido ao acionador e a grade
+  virtual em telas estreitas; controles passam a respeitar alvos de 44 px sem
+  causar overflow da página.
+- Preserva rota, permissão, API, autenticação, banco, regras comerciais e as
+  páginas Associativo e Tabela Direta.
+
 ## 2026-09-23 — Tabelão no padrão da Tabela Direta
 
 - Remove do Tabelão a faixa de status, filtros e quatro indicadores solicitados.

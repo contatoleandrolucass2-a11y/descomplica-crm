@@ -2,7 +2,10 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 // @ts-expect-error — módulo de filtros preservado da Tabela Direta em JavaScript.
-import { sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
+import * as investorFilterOptions from "@/lib/archive-investor/investor-filter-options.mjs";
+
+const { buildInvestorFilterOptions, matchesInvestorFilters, sortInvestorInventoryBySalePrice } =
+  investorFilterOptions;
 
 const inventory = [
   {
@@ -56,6 +59,10 @@ describe("Tabelão protegido", () => {
       "utf8",
     );
     const rootLayout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
+    const cookieBanner = readFileSync(
+      new URL("../app/_components/CookieConsentBanner.tsx", import.meta.url),
+      "utf8",
+    );
     const protectedShell = readFileSync(
       new URL("../app/(protected)/_components/ProtectedShellFrame.tsx", import.meta.url),
       "utf8",
@@ -70,18 +77,26 @@ describe("Tabelão protegido", () => {
     expect(page).toContain("<TabelaoArchive />");
     expect(menu).toContain('href="/app/simulacao/tabelao"');
     expect(menu).toContain('activePathname === "/simulacao/tabelao"');
-    expect(archive).toContain("<h1>Tabelão</h1>");
-    expect(archive).toContain("Uma linha para cada unidade do estoque.");
+    expect(archive).toContain(
+      'className="app-shell simulation-page-shell investor-page-shell tabelao-page-shell"',
+    );
+    expect(archive).toContain('className="goal-page-hero investor-compact-hero"');
+    expect(archive).toContain("<h1>Simulador Tabelão</h1>");
+    expect(archive).toContain("<InvestorInfoHint");
+    expect(archive).toContain("<InvestorGuideLauncher />");
     expect(archive).toContain("<TabelaoClient />");
+    expect(archive).toContain('className="investor-page-footer"');
     expect(client).toContain('fetch("/api/inventory"');
     expect(client).not.toContain("investor-inventory.json");
+    expect(client).not.toContain("isInvestorEligibleUnit");
     expect(client).toContain("Nenhuma fonte alternativa foi usada");
     expect(rootLayout).toContain("suppressHydrationWarning");
+    expect(cookieBanner).toContain('"/app/simulacao/tabelao"');
     expect(protectedShell).toContain('"/app/simulacao/tabelao"');
     expect(authorizedBreadcrumbs).toContain('"/app/simulacao/tabelao"');
   });
 
-  it("replica as sete colunas e remove resumo, filtros e KPIs", () => {
+  it("replica o painel, os filtros, a densidade e as sete colunas do Associativo", () => {
     const client = readFileSync(
       new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
       "utf8",
@@ -103,27 +118,62 @@ describe("Tabelão protegido", () => {
       "Planta",
       "Valor do imóvel",
     ]) {
-      expect(client).toContain(`<th>${label}</th>`);
+      expect(client).toContain(label);
     }
-    for (const removedClass of [
-      "tabelao-command-bar",
-      "tabelao-filters",
-      "tabelao-summary",
-      "tabelao-mobile-list",
+    for (const sharedClass of [
+      "investor-workspace investor-direct-workspace investor-direct-design-copy",
+      "investor-stock-panel",
+      "investor-section-heading",
+      "investor-stock-filters",
+      "investor-stock-results",
+      "investor-stock-table",
     ]) {
-      expect(client).not.toContain(removedClass);
-      expect(styles).not.toContain(`.${removedClass}`);
+      expect(client).toContain(sharedClass);
     }
+    for (const label of [
+      "Filtros do estoque",
+      "Nome do Empreendimento",
+      "Região",
+      "Valor do Imóvel",
+      "Ordenar valor",
+      "Limpar filtros",
+    ]) {
+      expect(client).toContain(label);
+    }
+    expect(client).toContain("buildInvestorFilterOptions");
+    expect(client).toContain("matchesInvestorFilters");
+    expect(client).toContain("reconcileInvestorFilters");
     expect(client).toContain("INVENTORY_WINDOW_SIZE = 60");
     expect(client).toContain('href="/app/simulacao/tabela-direta"');
-    expect(styles).toContain("height:24px");
+    expect(client).toContain('window.addEventListener("investor:start-guide"');
+    expect(client).toContain('.join(" ")');
+    expect(client).toContain('window.matchMedia("(max-width: 1239px)")');
+    expect(styles).toContain("herda integralmente o visual da Tabela Associativo");
+    expect(styles).toContain("mantém a grade virtual linear");
+    expect(styles).toContain(".tabelao-page-shell .investor-stock-unit-button");
+    expect(styles).toContain("height:23px!important");
     expect(styles).toContain("font-size:10px");
     expect(styles).toContain("@media (prefers-reduced-motion:reduce)");
+    expect(styles).not.toContain(".tabelao-main");
+    expect(styles).not.toContain(".tabelao-hero-note");
   });
 
-  it("preserva cada unidade e ordena pelo valor como a Tabela Direta", () => {
+  it("preserva cada unidade, filtra e ordena com os helpers do estoque", () => {
+    const allFilters = {
+      businessUnit: "Todas",
+      project: "Todos",
+      plant: "Todos",
+      region: "Todas",
+      salePrice: "Todos",
+    };
+
+    expect(inventory.filter((item) => matchesInvestorFilters(item, allFilters))).toHaveLength(3);
+    expect(buildInvestorFilterOptions(inventory, allFilters).totals.businessUnit).toBe(3);
     expect(
       sortInvestorInventoryBySalePrice(inventory, "asc").map((item: { id?: string }) => item.id),
     ).toEqual(["1", "2", "3"]);
+    expect(
+      sortInvestorInventoryBySalePrice(inventory, "desc").map((item: { id?: string }) => item.id),
+    ).toEqual(["3", "2", "1"]);
   });
 });

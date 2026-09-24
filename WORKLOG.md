@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-24 — cópia visual do Associativo no Tabelão
+
+- A estrutura ativa de `/app/simulacao/associativo-fluxo-linear` foi usada como
+  referência direta: shell, cabeçalho, breadcrumb, hero, ajuda, guia, painel 01,
+  filtros, tabela, disclaimer e rodapé agora compõem o Tabelão.
+- O Tabelão continua somente leitura e usa exclusivamente `GET /api/inventory`
+  com `no-store`; não incorporou o motor, os cálculos, o snapshot nem a exclusão
+  de vagas da modalidade Associativo.
+- A fonte viva respondeu com 2.243 itens declarados e recebidos, 2.243 IDs
+  únicos e nenhuma ausência ou invalidade nas sete colunas. O campo bruto de
+  região não existe, mas o resolver compartilhado derivou região para 100% das
+  unidades. A origem informa atualização em `2026-08-07T04:04:47.972Z`, ponto
+  de atenção de frescor por não existir SLA conhecido.
+- Os filtros encadeados usam os helpers já consolidados da Tabela Associativo;
+  a janela continua limitada a 60 linhas e conserva todas as 2.243 unidades.
+- Em até 1.239 px, o Tabelão mantém tabela linear com rolagem interna e linha de
+  44 px, evitando a incompatibilidade entre cards de altura variável e os
+  espaçadores do virtualizador. Controles também mantêm 44 px e selects de
+  16 px nos viewports estreitos.
+- O guia possui cinco passos funcionais, destaque do alvo, Escape, progresso,
+  navegação anterior/próximo e devolução de foco ao botão inicial.
+- Validação focada aprovou TypeScript, 31 testes e build Next.js com 41 rotas.
+  A matriz autenticada final aprovou 140 checks responsivos, 80 checks de tema,
+  193 auditorias Axe e comparações visuais e 100 checks de zoom; os 13 checks
+  funcionais exclusivos do Tabelão também passaram.
+
 ## 2026-09-23 — Tabelão unitário e compacto
 
 - Removidos do Tabelão o painel “Consulta exclusiva”, sete filtros e os quatro

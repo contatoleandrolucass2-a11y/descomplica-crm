@@ -19,8 +19,10 @@ bloqueados. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 O Tabelão é uma consulta de estoque, não um motor de simulação. A rota protegida
 `/app/simulacao/tabelao` opera em modo somente leitura, consome
 `GET /api/inventory` com `no-store` e preserva uma linha por unidade no mesmo
-modelo visual da grade da Tabela Direta. Ausência ou erro da fonte não aciona
-mock, snapshot alternativo ou cálculo implícito.
+shell e modelo visual da Tabela Associativo. O painel replica seus filtros,
+ordenação, densidade, ajuda e guia, mas não incorpora seu motor, snapshot,
+cálculos ou exclusão de vagas. Ausência ou erro da fonte não aciona mock,
+snapshot alternativo ou cálculo implícito.
 
 ## Escopo
 
@@ -92,7 +94,8 @@ habilitam motores oficiais.
   valor e término da obra, mantém estados de loading, vazio e erro e trata
   `GET /api/inventory` como atualização protegida não bloqueante.
 - Tabelão usa somente o estoque vivo protegido, preserva o grão unitário e
-  ordena preços válidos do menor para o maior, mantendo valores ausentes ao fim.
+  oferece os filtros encadeados do layout Associativo. Preços válidos podem ser
+  ordenados nos dois sentidos e valores ausentes permanecem ao fim.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta
