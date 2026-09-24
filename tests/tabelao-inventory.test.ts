@@ -64,7 +64,7 @@ describe("Menor valor por tipologia no Tabelão", () => {
     expect(source).toEqual(before);
   });
 
-  it("preserva todas as plantas e áreas, inclusive vagas e lojas, separadas por empreendimento e incorporadora", () => {
+  it("preserva todas as plantas, vagas e lojas por empreendimento e incorporadora sem duplicar por área", () => {
     const source = [
       unit("1"),
       unit("2", { privateArea: 42.01 }),
@@ -76,10 +76,37 @@ describe("Menor valor por tipologia no Tabelão", () => {
       unit("8", { privateArea: 42.001 }),
     ];
     const result = buildTabelaoExclusiveInventory(source);
-    expect(result).toHaveLength(8);
-    expect(new Set(result.map((item) => item.exclusiveKey)).size).toBe(8);
-    expect(summarizeTabelao(result)).toMatchObject({ exclusiveOptions: 8, projects: 3 });
+    expect(result).toHaveLength(6);
+    expect(new Set(result.map((item) => item.exclusiveKey)).size).toBe(6);
+    expect(summarizeTabelao(result)).toMatchObject({ exclusiveOptions: 6, projects: 3 });
+    expect(result[0]).toMatchObject({ id: "1", availableUnits: 3 });
   });
+
+  it("compara todas as áreas da mesma planta e preserva a área da unidade de menor líquido", () => {
+    const source = [
+      unit("101", { privateArea: 42, finalWithKit: 290_000, unitBonus: 0, tableSlack: 0 }),
+      unit("201", { privateArea: 50, finalWithKit: 320_000, unitBonus: 40_000 }),
+      unit("301", { privateArea: 42.001, finalWithKit: 300_000 }),
+    ];
+    expect(buildTabelaoExclusiveInventory(source)).toMatchObject([
+      { id: "201", privateArea: 50, minimumPrice: 275_000, availableUnits: 3 },
+    ]);
+    expect(buildTabelaoExclusiveInventory([...source].reverse())).toEqual(
+      buildTabelaoExclusiveInventory(source),
+    );
+  });
+
+  it.each([null, 0, NaN, Infinity])(
+    "não exclui o menor preço por falta de área válida (%s), que não define exclusividade",
+    (privateArea) => {
+      expect(
+        buildTabelaoExclusiveInventory([
+          unit("1"),
+          unit("2", { privateArea, finalWithKit: 250_000 }),
+        ]),
+      ).toMatchObject([{ id: "2", minimumPrice: 235_000, availableUnits: 2 }]);
+    },
+  );
 
   it("normaliza apenas os nomes do grupo e mantém o registro completo da unidade vencedora", () => {
     const winner = unit("1", { project: "Residencial São Paulo" });
@@ -118,7 +145,7 @@ describe("Menor valor por tipologia no Tabelão", () => {
     },
   );
 
-  it("recusa líquido não positivo e grupos sem identidade ou metragem válida", () => {
+  it("recusa líquido não positivo e grupos sem identidade", () => {
     for (const fields of [
       { finalWithKit: 0 },
       { unitBonus: 300_000 },
@@ -126,10 +153,6 @@ describe("Menor valor por tipologia no Tabelão", () => {
       { businessUnit: "" },
       { project: " " },
       { plant: null },
-      { privateArea: null },
-      { privateArea: 0 },
-      { privateArea: NaN },
-      { privateArea: Infinity },
     ]) {
       expect(buildTabelaoExclusiveInventory([unit("1", fields)])).toEqual([]);
     }
@@ -138,6 +161,7 @@ describe("Menor valor por tipologia no Tabelão", () => {
   it("não limita a um empreendimento ou às 60 primeiras opções da janela visual", () => {
     const source = Array.from({ length: 150 }, (_, index) =>
       unit(String(index), {
+        plant: `Planta ${index}`,
         privateArea: 40 + index / 100,
         finalWithKit: 350_000 - index * 100,
       }),
@@ -170,7 +194,7 @@ describe("Menor valor por tipologia no Tabelão", () => {
         finalWithKit: 500_000,
         unitBonus: 250_000,
       }),
-      unit("b-2", { project: "Bosque", privateArea: 50, finalWithKit: 220_000 }),
+      unit("b-2", { project: "Bosque", plant: "Tipo 3Q", privateArea: 50, finalWithKit: 220_000 }),
     ];
     const exclusive = buildTabelaoExclusiveInventory(source);
     const before = structuredClone(exclusive);

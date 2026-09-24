@@ -23,7 +23,6 @@ const required = [
   "businessUnit",
   "project",
   "plant",
-  "privateArea",
   "finalWithKit",
   "unitBonus",
   "tableSlack",
@@ -46,7 +45,6 @@ const key = (row) =>
         .trim()
         .replace(/\s+/g, " "),
     ),
-    row.privateArea,
   ]);
 const cents = (value) => Number(value.toFixed(2).replace(".", ""));
 const expected = new Map();
@@ -55,9 +53,6 @@ for (const row of rows) {
   const numbers = [row.finalWithKit, row.unitBonus, row.tableSlack];
   if (
     required.some((field) => row[field] == null || String(row[field]).trim() === "") ||
-    typeof row.privateArea !== "number" ||
-    !Number.isFinite(row.privateArea) ||
-    row.privateArea <= 0 ||
     numbers.some((value) => typeof value !== "number" || !Number.isFinite(value) || value < 0)
   ) {
     excluded += 1;

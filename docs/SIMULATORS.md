@@ -20,7 +20,7 @@ O Tabelão é uma consulta de estoque, não um motor de simulação. A rota prot
 `/app/simulacao/tabelao` opera em modo somente leitura, consome
 `GET /api/inventory` com `no-store`. No mesmo shell e modelo visual da Tabela
 Associativo, exibe uma unidade por combinação de incorporadora, empreendimento,
-tipo de planta e área privativa, escolhida pelo menor valor líquido. Todas as
+planta, escolhida pelo menor valor líquido independentemente da área. Todas as
 combinações válidas permanecem acessíveis pela rolagem; a janela de 60 linhas é
 apenas uma otimização de renderização, não um limite de resultados. Vagas e lojas
 continuam elegíveis. A barra de filtros permanece removida.
@@ -30,15 +30,18 @@ tableSlack)`, correspondentes a **Valor Final Com Kit - (B.A. da Unidade + Folga
 de Tabela)**. Cada parcela monetária é convertida em centavos antes da subtração;
 `finalPrice` não substitui nenhum campo. Exigem-se valores numéricos finitos,
 abatimentos não negativos, resultado positivo, identificador, incorporadora,
-empreendimento, planta e área positiva. Ausências não viram zero: a interface
+empreendimento e planta. Ausências financeiras não viram zero: a interface
 informa quantas linhas não puderam participar, qualificando a comparação.
 
 Nomes são normalizados apenas na chave do grupo (caixa, acentos e espaços). Áreas
-distintas não são arredondadas para deduplicar. Empates usam identificador natural,
+distintas da mesma planta não criam opções adicionais. Empates usam identificador natural,
 produto e ID, sem depender da ordem da fonte. A unidade vencedora mantém seus
 dados completos; as opções ficam juntas por empreendimento em ordem alfabética,
 separadas por incorporadora quando o nome coincide, e por valor líquido crescente
-dentro de cada empreendimento. Contadores
+dentro de cada empreendimento. A coluna Empreendimento exibe apenas o nome do
+empreendimento, sem o produto ou código da unidade. Metragem e entrega pertencem
+à unidade vencedora; área ausente ou inválida aparece como traço e não exclui um
+preço válido. A ação mantém a identificação acessível da unidade. Contadores
 mostram opções e empreendimentos distintos, não o total bruto de unidades.
 
 A fonte e sua data de geração continuam explícitas. Ausência ou erro não aciona

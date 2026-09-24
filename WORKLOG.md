@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-09-24 — correção da exclusividade pela coluna Planta
+
+- Aplicada a correção dos dois prints: coluna Empreendimento sem produto/unidade e
+  apenas uma opção por empreendimento e planta, escolhida pelo menor líquido em centavos.
+  Incorporadora continua separando empreendimentos homônimos. Área não define o grupo.
+- Mantidas as sete colunas, as plantas distintas, os dados da unidade vencedora,
+  a ordenação por empreendimento e a fórmula solicitada. Área inválida aparece
+  como traço, sem excluir o menor preço nem alterar a fonte.
+- Skills Data aplicadas ao contrato da métrica, qualidade da fonte e reconciliação
+  independente; UX, acessibilidade e React aplicados ao componente existente.
+- Regressões cobrem áreas diferentes da mesma planta, menor líquido versus bruto,
+  empate, ausência de área, preservação de todas as plantas e nome exibido.
+  Sem alteração de API, autorização, banco ou workflows n8n.
+- Auditoria independente da fonte SPC: 2.243 unidades e IDs únicos, 53 opções
+  em 23 empreendimentos; todos os mínimos e grupos reconciliados, nenhuma linha
+  excluída. Fonte gerada em 07/08/2026, sem afirmar atualização comercial posterior.
+- Tipos e build local aprovados. Suíte Windows: somente as duas falhas já
+  conhecidas de permissões POSIX; confirmação completa será feita no Linux.
+
 ## 2026-09-24 — agrupamento das opções por empreendimento
 
 - Alterada apenas a ordem do Tabelão: empreendimento alfabético, incorporadora

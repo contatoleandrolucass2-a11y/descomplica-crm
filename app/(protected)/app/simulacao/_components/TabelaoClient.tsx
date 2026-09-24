@@ -47,7 +47,7 @@ const TABELAO_TOUR_STEPS = [
     eyebrow: "Visão geral",
     title: "Consulte todas as tipologias",
     description:
-      "Cada empreendimento apresenta uma unidade por tipo de planta e metragem, escolhida pelo menor valor: Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela). Todas as combinações com dados válidos permanecem disponíveis.",
+      "Cada empreendimento apresenta uma unidade por planta, escolhida pelo menor valor: Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela). Metragens diferentes da mesma planta não criam opções repetidas. Todas as plantas com dados válidos permanecem disponíveis.",
     tip: "Avançar no guia não altera a lista nem abre outra página.",
     checklist: ["Consulte o estoque", "Compare as unidades", "Abra a unidade correta"],
   },
@@ -65,9 +65,13 @@ const TABELAO_TOUR_STEPS = [
     eyebrow: "Consulte as unidades",
     title: "Confira a unidade correta",
     description:
-      "Revise produto, metragem, entrega, planta e valor. O botão circular da primeira coluna abre a página Tabela Direta para continuar o atendimento.",
+      "Revise empreendimento, metragem, entrega, planta e valor. O botão circular da primeira coluna abre a página Tabela Direta para continuar o atendimento.",
     tip: "Confirme os dados antes de iniciar a proposta.",
-    checklist: ["Confira produto e planta", "Revise entrega e valor", "Abra a Tabela Direta"],
+    checklist: [
+      "Confira empreendimento e planta",
+      "Revise entrega e valor",
+      "Abra a Tabela Direta",
+    ],
   },
 ] as const;
 
@@ -419,15 +423,15 @@ export function TabelaoClient() {
           ref={inventoryResultsRef}
           className="investor-stock-results"
           role="region"
-          aria-label="Menores valores por empreendimento, planta e metragem"
+          aria-label="Menores valores por empreendimento e planta"
           tabIndex={0}
           data-tour="inventory"
           onScroll={(event) => updateInventoryWindow(event.currentTarget.scrollTop)}
         >
           <table className="investor-stock-table" aria-rowcount={matchingInventory.length + 1}>
             <caption className="sr-only">
-              Todas as tipologias por empreendimento e metragem. Menor valor = Valor Final Com Kit −
-              (B.A. da Unidade + Folga de Tabela).
+              Todas as plantas por empreendimento. Menor valor = Valor Final Com Kit − (B.A. da
+              Unidade + Folga de Tabela).
             </caption>
             <colgroup>
               <col className="investor-stock-col-start" />
@@ -442,7 +446,7 @@ export function TabelaoClient() {
               <tr>
                 <th className="investor-stock-start-heading">Início</th>
                 <th>Incorporadora</th>
-                <th>Empreendimento / Unidade</th>
+                <th>Empreendimento</th>
                 <th>Metragem</th>
                 <th>Data de Entrega</th>
                 <th>Planta</th>
@@ -507,13 +511,17 @@ export function TabelaoClient() {
                   </td>
                   <td
                     className="investor-stock-product"
-                    data-label="Empreendimento / Unidade"
-                    title={item.product}
+                    data-label="Empreendimento"
+                    title={item.project}
                   >
-                    <span className="investor-stock-product-text">{item.product}</span>
+                    <span className="investor-stock-product-text">{item.project}</span>
                   </td>
                   <td data-label="Metragem">
-                    {item.privateArea != null ? `${decimal.format(item.privateArea)} m²` : "—"}
+                    {typeof item.privateArea === "number" &&
+                    Number.isFinite(item.privateArea) &&
+                    item.privateArea > 0
+                      ? `${decimal.format(item.privateArea)} m²`
+                      : "—"}
                   </td>
                   <td data-label="Data de Entrega">{formatDate(item.completionDate)}</td>
                   <td

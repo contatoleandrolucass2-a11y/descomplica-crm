@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-24 — exclusividade por empreendimento e planta
+
+- Corrige a seleção para uma única unidade de menor valor por empreendimento e
+  pelo texto da coluna Planta, sem repetir a mesma planta por diferença de área.
+- Substitui Empreendimento / Unidade por Empreendimento, exibindo somente seu nome.
+  Mantém as demais colunas com os dados da unidade vencedora e todos os tipos de planta.
+- Preserva a fórmula com kit, B.A. e folga em centavos e o agrupamento por empreendimento.
+  Área inválida não impede a comparação; aparece como traço, sem inventar metragem.
+- Atualiza regressões, auditoria independente, guia e validação visual para a nova chave.
+
 ## 2026-09-24 — Tabelão agrupado por empreendimento
 
 - Reúne as opções de cada empreendimento em sequência alfabética, com preços

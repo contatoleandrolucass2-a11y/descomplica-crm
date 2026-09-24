@@ -112,7 +112,7 @@ describe("Tabelão protegido", () => {
     for (const label of [
       "Início",
       "Incorporadora",
-      "Empreendimento / Unidade",
+      "Empreendimento",
       "Metragem",
       "Data de Entrega",
       "Planta",
@@ -140,6 +140,8 @@ describe("Tabelão protegido", () => {
       expect(client).not.toContain(label);
     }
     expect(client).not.toContain("investor-stock-filters");
+    expect(client).not.toContain("Empreendimento / Unidade");
+    expect(client).toContain('<span className="investor-stock-product-text">{item.project}</span>');
     expect(client).not.toContain("buildInvestorFilterOptions");
     expect(client).not.toContain("matchesInvestorFilters");
     expect(client).not.toContain("reconcileInvestorFilters");

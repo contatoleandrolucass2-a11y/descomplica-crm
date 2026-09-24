@@ -1472,8 +1472,10 @@ async function checkTabelaoValidation(page, origin) {
           .querySelector(".investor-stock-panel > .investor-section-heading")
           ?.getBoundingClientRect();
         const syncBox = document.querySelector(".investor-stock-sync")?.getBoundingClientRect();
-        const expectedScrollHeight =
-          count * rowHeight + (table?.querySelector("thead")?.getBoundingClientRect().height ?? 0);
+        const expectedScrollHeight = Math.max(
+          results?.clientHeight ?? 0,
+          count * rowHeight + (table?.querySelector("thead")?.getBoundingClientRect().height ?? 0),
+        );
         return {
           title: document.querySelector("h1")?.textContent?.trim() === "Simulador Tabelão",
           columns: document.querySelectorAll(".investor-stock-table thead th").length === 7,
@@ -1575,6 +1577,8 @@ async function checkTabelaoValidation(page, origin) {
     rows.map((row) => ({
       id: row.getAttribute("data-inventory-unit-id"),
       project: row.getAttribute("data-inventory-project"),
+      projectLabel: row.querySelector(".investor-stock-product-text")?.textContent?.trim(),
+      plant: row.querySelector(".investor-stock-plant")?.textContent?.trim(),
       businessUnit: row.getAttribute("data-inventory-business-unit"),
       price: row.querySelector(".investor-stock-price")?.textContent?.trim(),
     })),
@@ -1582,7 +1586,14 @@ async function checkTabelaoValidation(page, origin) {
   const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
   const exclusiveRows =
     rendered.length === syntheticTabelaoInventory.length &&
-    rendered.every((row, index) => row.id === syntheticTabelaoInventory[index].id);
+    new Set(rendered.map((row) => JSON.stringify([row.businessUnit, row.project, row.plant])))
+      .size === rendered.length &&
+    rendered.every(
+      (row, index) =>
+        row.id === syntheticTabelaoInventory[index].id &&
+        row.projectLabel === syntheticTabelaoInventory[index].project &&
+        row.plant === syntheticTabelaoInventory[index].plant,
+    );
   const netPrices = rendered.every(
     (row, index) => row.price === currency.format(syntheticTabelaoInventory[index].minimumPrice),
   );
