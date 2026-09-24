@@ -112,11 +112,11 @@ describe("Tabelão protegido", () => {
     for (const label of [
       "Início",
       "Incorporadora",
-      "Produto",
+      "Empreendimento / Unidade",
       "Metragem",
       "Data de Entrega",
       "Planta",
-      "Valor do imóvel",
+      "Menor valor",
     ]) {
       expect(client).toContain(label);
     }
@@ -143,7 +143,7 @@ describe("Tabelão protegido", () => {
     expect(client).not.toContain("buildInvestorFilterOptions");
     expect(client).not.toContain("matchesInvestorFilters");
     expect(client).not.toContain("reconcileInvestorFilters");
-    expect(client).toContain('sortInvestorInventoryBySalePrice(inventory, "asc")');
+    expect(client).toContain("sortTabelaoInventory(buildTabelaoExclusiveInventory(inventory))");
     expect(client).toContain("INVENTORY_WINDOW_SIZE = 60");
     expect(client).toContain('href="/app/simulacao/tabela-direta"');
     expect(client).toContain('window.addEventListener("investor:start-guide"');

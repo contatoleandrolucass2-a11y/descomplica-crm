@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-09-24 — menor valor líquido por empreendimento, planta e área
+
+- Aplicadas as skills solicitadas de definição da métrica, qualidade e validação
+  de dados, UX, interfaces e React ao recorte do Tabelão.
+- Conectado o helper exclusivo à página, com chave de incorporadora,
+  empreendimento, planta e área sem arredondamento. Mantidos dados completos da
+  unidade vencedora, vagas, lojas, fonte e data, sete colunas e janela virtual.
+- Conta em centavos: `finalWithKit - unitBonus - tableSlack`; sem fallback para
+  `finalPrice` ou zero em campo ausente. Desempate por identificador/produto/ID.
+- Auditoria independente da origem em 24/09/2026: 2.243 linhas e IDs únicos,
+  zero ausências nos campos exigidos, zero exclusões, 120 opções em 23
+  empreendimentos; todos os mínimos e grupos conferidos, incluindo inversão da
+  ordem da fonte. A origem informa geração em 07/08/2026, não em 24/09.
+- Node 24.19.0 / pnpm 11.20.0: `pnpm lint`, `pnpm typecheck` e `pnpm build`
+  aprovados; 19 testes focados aprovados. `pnpm test` no Linux aprovou 619 testes
+  Vitest (quatro skips existentes) e oito testes operacionais. No Windows, apenas
+  os dois asserts preexistentes de modo POSIX 0600 falham, recebendo 0666.
+- QA visual versionado atualizado para os grupos exclusivos, preços líquidos,
+  ausência dos filtros e guia de três passos. A sessão autenticada do navegador
+  está disponível para a conferência responsiva após a promoção da imagem.
+
 ## 2026-09-24 — remoção dos filtros do Tabelão
 
 - Removida a faixa visual “Filtros do estoque” de `/app/simulacao/tabelao`,

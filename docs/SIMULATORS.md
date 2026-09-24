@@ -18,11 +18,30 @@ bloqueados. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 
 O Tabelão é uma consulta de estoque, não um motor de simulação. A rota protegida
 `/app/simulacao/tabelao` opera em modo somente leitura, consome
-`GET /api/inventory` com `no-store` e preserva uma linha por unidade no mesmo
-shell e modelo visual da Tabela Associativo. O painel replica seus filtros,
-ordenação, densidade, ajuda e guia, mas não incorpora seu motor, snapshot,
-cálculos ou exclusão de vagas. Ausência ou erro da fonte não aciona mock,
-snapshot alternativo ou cálculo implícito.
+`GET /api/inventory` com `no-store`. No mesmo shell e modelo visual da Tabela
+Associativo, exibe uma unidade por combinação de incorporadora, empreendimento,
+tipo de planta e área privativa, escolhida pelo menor valor líquido. Todas as
+combinações válidas permanecem acessíveis pela rolagem; a janela de 60 linhas é
+apenas uma otimização de renderização, não um limite de resultados. Vagas e lojas
+continuam elegíveis. A barra de filtros permanece removida.
+
+O valor exibido e a seleção usam exatamente `finalWithKit - (unitBonus +
+tableSlack)`, correspondentes a **Valor Final Com Kit - (B.A. da Unidade + Folga
+de Tabela)**. Cada parcela monetária é convertida em centavos antes da subtração;
+`finalPrice` não substitui nenhum campo. Exigem-se valores numéricos finitos,
+abatimentos não negativos, resultado positivo, identificador, incorporadora,
+empreendimento, planta e área positiva. Ausências não viram zero: a interface
+informa quantas linhas não puderam participar, qualificando a comparação.
+
+Nomes são normalizados apenas na chave do grupo (caixa, acentos e espaços). Áreas
+distintas não são arredondadas para deduplicar. Empates usam identificador natural,
+produto e ID, sem depender da ordem da fonte. A unidade vencedora mantém seus
+dados completos; grupos são ordenados por valor líquido crescente. Contadores
+mostram opções e empreendimentos distintos, não o total bruto de unidades.
+
+A fonte e sua data de geração continuam explícitas. Ausência ou erro não aciona
+mock, snapshot alternativo ou motor de simulação. O atalho continua abrindo a
+página Tabela Direta; não promete seleção automática entre fontes distintas.
 
 ## Escopo
 
@@ -93,9 +112,9 @@ habilitam motores oficiais.
 - WF15 usa o snapshot SPC protegido, exclui vagas avulsas, exige unidade com
   valor e término da obra, mantém estados de loading, vazio e erro e trata
   `GET /api/inventory` como atualização protegida não bloqueante.
-- Tabelão usa somente o estoque vivo protegido, preserva o grão unitário e
-  oferece os filtros encadeados do layout Associativo. Preços válidos podem ser
-  ordenados nos dois sentidos e valores ausentes permanecem ao fim.
+- Tabelão consulta o estoque protegido e seleciona uma unidade por empreendimento,
+  planta e área, pelo líquido com kit e os dois abatimentos. Dados inválidos são
+  contabilizados explicitamente; não geram um falso menor preço.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta
@@ -134,3 +153,9 @@ ausência dela só é aceita no GitHub Actions com opt-in explícito do workflow
 Produção continua exigindo a cópia privada com o SHA-256 do anexo. Os casos de
 ouro do WF13 são testes versionados, não seeds de produção. Credenciais QA,
 storage state, HTML, HAR e payloads de usuário não são versionados.
+
+`node scripts/qa/tabelao-exclusive-audit.mjs` consulta a mesma origem do proxy e
+recalcula independentemente o mínimo de todos os grupos, a cobertura, campos
+ausentes e estabilidade ao inverter a fonte. Aceita um caminho de payload local
+não versionado como argumento. A saída contém somente agregados, sem registros
+comerciais. `tests/tabelao-inventory.test.ts` cobre a regra com dados sintéticos.

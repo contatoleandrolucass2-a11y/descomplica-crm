@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-24 — Tabelão com menor valor por tipologia
+
+- Exibe uma unidade por incorporadora, empreendimento, planta e área, mantendo
+  todas as opções de tipologia e a identificação completa da unidade vencedora.
+- Seleciona, ordena e mostra o valor `Valor Final Com Kit - (B.A. da Unidade +
+  Folga de Tabela)`, calculado em centavos, com desempate determinístico.
+- Corrige os contadores, cabeçalhos e ajuda; campos inválidos não viram zero e
+  linhas excluídas da comparação são informadas. Filtros permanecem removidos.
+- Acrescenta testes de regras e auditoria independente da fonte; atualiza o QA
+  visual para a seleção exclusiva e o guia de três passos.
+
 ## 2026-09-24 — Tabelão sem barra de filtros
 
 - Remove do Tabelão o painel “Filtros do estoque”, incluindo incorporadora,

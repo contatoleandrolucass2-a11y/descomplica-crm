@@ -6,6 +6,10 @@ export interface TabelaoInventoryItem {
   identifier?: string | null;
   plant?: string | null;
   finalPrice?: number | null;
+  finalWithKit?: number | null;
+  unitBonus?: number | null;
+  tableSlack?: number | null;
+  privateArea?: number | null;
   neighborhood?: string | null;
   district?: string | null;
   region?: string | null;
@@ -13,8 +17,10 @@ export interface TabelaoInventoryItem {
 }
 
 export interface TabelaoExclusiveFields {
+  businessUnit: string;
   project: string;
   plant: string;
+  minimumPrice: number;
   exclusiveKey: string;
   availableUnits: number;
 }
@@ -44,6 +50,8 @@ export interface TabelaoSummary {
 }
 
 export const TABELAO_PRICE_RANGES: ReadonlyArray<{ value: string; label: string }>;
+
+export function calculateTabelaoPrice(item: TabelaoInventoryItem): number | null;
 
 export function buildTabelaoExclusiveInventory<T extends TabelaoInventoryItem>(
   items: readonly T[],

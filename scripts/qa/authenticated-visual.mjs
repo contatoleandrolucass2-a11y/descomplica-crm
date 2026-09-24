@@ -9,7 +9,10 @@ import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 import sharp from "sharp";
 
-import { sortInvestorInventoryBySalePrice } from "../../lib/archive-investor/investor-filter-options.mjs";
+import {
+  buildTabelaoExclusiveInventory,
+  sortTabelaoInventory,
+} from "../../lib/archive-investor/tabelao-inventory.mjs";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
@@ -55,10 +58,11 @@ const syntheticDirectTableSnapshot = (() => {
     snapshotSha256: createHash("sha256").update(contents).digest("hex"),
   });
 })();
-const syntheticTabelaoLastInventoryId = sortInvestorInventoryBySalePrice(
-  JSON.parse(syntheticDirectTableSnapshot).items,
-  "asc",
-).at(-1)?.id;
+const syntheticTabelaoInventory = sortTabelaoInventory(
+  buildTabelaoExclusiveInventory(JSON.parse(syntheticDirectTableSnapshot).items),
+);
+const syntheticTabelaoLastInventoryId = syntheticTabelaoInventory.at(-1)?.id;
+const syntheticTabelaoCountLabel = `${syntheticTabelaoInventory.length} opções exclusivas · 6 empreendimentos`;
 
 function configureQaPage(page) {
   page.setDefaultTimeout(qaNavigationTimeout);
@@ -1446,45 +1450,43 @@ async function checkTabelaoValidation(page, origin) {
     await gotoWithServerRetry(page, url, { waitUntil: "domcontentloaded" });
     await page
       .locator(".investor-stock-sync")
-      .getByText("3.301 unidades", { exact: true })
+      .getByText(syntheticTabelaoCountLabel, { exact: true })
       .waitFor({ state: "visible", timeout: qaNavigationTimeout });
     await page.locator('tr[data-inventory-unit-id="qa-stock-0001"]').waitFor({
       state: "visible",
       timeout: qaNavigationTimeout,
     });
 
-    const initial = await page.evaluate(({ rowHeight, targetSize }) => {
-      const root = document.documentElement;
-      const results = document.querySelector(".investor-stock-results");
-      const table = document.querySelector(".investor-stock-table");
-      const firstRow = document.querySelector("tr[data-inventory-unit-id]");
-      const firstAction = firstRow?.querySelector(".investor-stock-unit-button");
-      const controls = [...document.querySelectorAll(".investor-stock-filters select")];
-      const clearButton = document.querySelector(".investor-filter-heading > button");
-      const actionBox = firstAction?.getBoundingClientRect();
-      const rowBox = firstRow?.getBoundingClientRect();
-      const expectedScrollHeight = 3301 * rowHeight;
-      return {
-        title: document.querySelector("h1")?.textContent?.trim() === "Simulador Tabelão",
-        columns: document.querySelectorAll(".investor-stock-table thead th").length === 7,
-        filters: controls.length === 6,
-        rowCount: table?.getAttribute("aria-rowcount") === "3302",
-        noRootOverflow: root.scrollWidth <= root.clientWidth + 1,
-        rowHeight: rowBox != null && Math.abs(rowBox.height - rowHeight) <= 2,
-        actionSize:
-          actionBox != null &&
-          actionBox.width >= targetSize - 1 &&
-          actionBox.height >= targetSize - 1,
-        controlsAccessible:
-          window.innerWidth > 1100 ||
-          [...controls, clearButton].every(
-            (control) => control && control.getBoundingClientRect().height >= 43,
-          ),
-        scrollHeightStable:
-          results != null &&
-          Math.abs(results.scrollHeight - expectedScrollHeight) <= expectedScrollHeight * 0.03,
-      };
-    }, viewport);
+    const initial = await page.evaluate(
+      ({ rowHeight, targetSize, count }) => {
+        const root = document.documentElement;
+        const results = document.querySelector(".investor-stock-results");
+        const table = document.querySelector(".investor-stock-table");
+        const firstRow = document.querySelector("tr[data-inventory-unit-id]");
+        const firstAction = firstRow?.querySelector(".investor-stock-unit-button");
+        const controls = [...document.querySelectorAll(".investor-stock-filters select")];
+        const actionBox = firstAction?.getBoundingClientRect();
+        const rowBox = firstRow?.getBoundingClientRect();
+        const expectedScrollHeight =
+          count * rowHeight + (table?.querySelector("thead")?.getBoundingClientRect().height ?? 0);
+        return {
+          title: document.querySelector("h1")?.textContent?.trim() === "Simulador Tabelão",
+          columns: document.querySelectorAll(".investor-stock-table thead th").length === 7,
+          filtersRemoved: controls.length === 0,
+          rowCount: table?.getAttribute("aria-rowcount") === String(count + 1),
+          noRootOverflow: root.scrollWidth <= root.clientWidth + 1,
+          rowHeight: rowBox != null && Math.abs(rowBox.height - rowHeight) <= 2,
+          actionSize:
+            actionBox != null &&
+            actionBox.width >= targetSize - 1 &&
+            actionBox.height >= targetSize - 1,
+          scrollHeightStable:
+            results != null &&
+            Math.abs(results.scrollHeight - expectedScrollHeight) <= expectedScrollHeight * 0.03,
+        };
+      },
+      { ...viewport, count: syntheticTabelaoInventory.length },
+    );
 
     const results = page.locator(".investor-stock-results");
     await results.evaluate((element) => {
@@ -1499,17 +1501,20 @@ async function checkTabelaoValidation(page, origin) {
       syntheticTabelaoLastInventoryId,
       { timeout: 10_000 },
     );
-    const bottom = await page.evaluate((expectedLastId) => {
-      const rows = [...document.querySelectorAll("tr[data-inventory-unit-id]")];
-      const last = rows.at(-1);
-      const results = document.querySelector(".investor-stock-results");
-      return {
-        lastId: last?.getAttribute("data-inventory-unit-id") === expectedLastId,
-        lastAriaRow: last?.getAttribute("aria-rowindex") === "3302",
-        scrolledToBottom:
-          results != null && results.scrollTop + results.clientHeight >= results.scrollHeight - 3,
-      };
-    }, syntheticTabelaoLastInventoryId);
+    const bottom = await page.evaluate(
+      ({ expectedLastId, count }) => {
+        const rows = [...document.querySelectorAll("tr[data-inventory-unit-id]")];
+        const last = rows.at(-1);
+        const results = document.querySelector(".investor-stock-results");
+        return {
+          lastId: last?.getAttribute("data-inventory-unit-id") === expectedLastId,
+          lastAriaRow: last?.getAttribute("aria-rowindex") === String(count + 1),
+          scrolledToBottom:
+            results != null && results.scrollTop + results.clientHeight >= results.scrollHeight - 3,
+        };
+      },
+      { expectedLastId: syntheticTabelaoLastInventoryId, count: syntheticTabelaoInventory.length },
+    );
     viewportChecks.push({ key: viewport.key, ...initial, ...bottom });
     process.stdout.write(`Tabelão QA: concluiu ${viewport.key}\n`);
   }
@@ -1518,7 +1523,7 @@ async function checkTabelaoValidation(page, origin) {
   await gotoWithServerRetry(page, url, { waitUntil: "domcontentloaded" });
   await page
     .locator(".investor-stock-sync")
-    .getByText("3.301 unidades", { exact: true })
+    .getByText(syntheticTabelaoCountLabel, { exact: true })
     .waitFor({ state: "visible", timeout: qaNavigationTimeout });
 
   const guideLauncher = page.getByRole("button", {
@@ -1533,7 +1538,7 @@ async function checkTabelaoValidation(page, origin) {
     return box.width > 0 && box.height > 0;
   });
   let placementClassApplied = false;
-  for (let step = 1; step < 5; step += 1) {
+  for (let step = 1; step < 3; step += 1) {
     await guide.getByRole("button", { name: "Próximo", exact: true }).click();
     await page.waitForTimeout(80);
     placementClassApplied ||= await guide.evaluate(
@@ -1541,7 +1546,7 @@ async function checkTabelaoValidation(page, origin) {
     );
   }
   const guideReachedLastStep = await guide
-    .getByRole("heading", { name: "Ordene as unidades por valor", exact: true })
+    .getByRole("heading", { name: "Confira a unidade correta", exact: true })
     .isVisible();
   await guide.getByRole("button", { name: "Concluir guia", exact: true }).click();
   await guide.waitFor({ state: "hidden" });
@@ -1556,67 +1561,22 @@ async function checkTabelaoValidation(page, origin) {
     (element) => document.activeElement === element,
   );
 
-  const businessUnit = page.getByRole("combobox", { name: "Incorporadora", exact: true });
-  const project = page.getByRole("combobox", {
-    name: "Nome do Empreendimento",
-    exact: true,
-  });
-  const region = page.getByRole("combobox", { name: "Região", exact: true });
-  const plant = page.getByRole("combobox", { name: "Planta", exact: true });
-  const salePrice = page.getByRole("combobox", { name: "Valor do Imóvel", exact: true });
-  const sort = page.getByRole("combobox", {
-    name: "Ordenar unidades por valor do imóvel",
-    exact: true,
-  });
-  const stockResults = page.locator(".investor-stock-results");
-  await stockResults.evaluate((element) => {
-    element.scrollTop = 300;
-  });
-  await businessUnit.selectOption("Direcional");
-  await project.selectOption("Empreendimento QA 01");
-  await region.selectOption("Outros");
-  await plant.selectOption("Tipo 1Q");
-  await salePrice.selectOption("230000");
-  await page.waitForFunction(
-    () => document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") === "2",
+  const rendered = await page.locator("tr[data-inventory-unit-id]").evaluateAll((rows) =>
+    rows.map((row) => ({
+      id: row.getAttribute("data-inventory-unit-id"),
+      price: row.querySelector(".investor-stock-price")?.textContent?.trim(),
+    })),
   );
-  const filterCascade =
-    (await page.locator('tr[data-inventory-unit-id="qa-stock-0001"]').count()) === 1 &&
-    (await stockResults.evaluate((element) => element.scrollTop)) === 0;
-
-  await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
-  await page.waitForFunction(
-    () => document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") === "3302",
+  const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const exclusiveRows =
+    rendered.length === syntheticTabelaoInventory.length &&
+    rendered.every((row, index) => row.id === syntheticTabelaoInventory[index].id);
+  const netPrices = rendered.every(
+    (row, index) => row.price === currency.format(syntheticTabelaoInventory[index].minimumPrice),
   );
-  const clearReset =
-    (await businessUnit.inputValue()) === "Todas" &&
-    (await project.inputValue()) === "Todos" &&
-    (await region.inputValue()) === "Todas" &&
-    (await plant.inputValue()) === "Todos" &&
-    (await salePrice.inputValue()) === "Todos" &&
-    (await sort.inputValue()) === "asc" &&
-    (await stockResults.evaluate((element) => element.scrollTop)) === 0;
-
-  const firstAscendingId = await page
-    .locator("tr[data-inventory-unit-id]")
-    .first()
-    .getAttribute("data-inventory-unit-id");
-  await sort.selectOption("desc");
-  await page.waitForFunction(
-    (ascendingId) =>
-      document
-        .querySelector("tr[data-inventory-unit-id]")
-        ?.getAttribute("data-inventory-unit-id") !== ascendingId,
-    firstAscendingId,
+  const ascendingPrices = syntheticTabelaoInventory.every(
+    (row, index, rows) => index === 0 || rows[index - 1].minimumPrice <= row.minimumPrice,
   );
-  const firstDescendingId = await page
-    .locator("tr[data-inventory-unit-id]")
-    .first()
-    .getAttribute("data-inventory-unit-id");
-  const bothSortDirections =
-    firstAscendingId === "qa-stock-0001" &&
-    firstDescendingId != null &&
-    firstDescendingId !== firstAscendingId;
 
   const emptyHandler = async (interceptedRoute) => {
     await interceptedRoute.fulfill({
@@ -1627,9 +1587,11 @@ async function checkTabelaoValidation(page, origin) {
   };
   await page.route("**/api/inventory", emptyHandler);
   await page.reload({ waitUntil: "domcontentloaded" });
-  const emptyMessage = page.getByText("Nenhuma unidade encontrada com esses filtros.", {
-    exact: true,
-  });
+  const emptyMessage = page
+    .locator("td")
+    .getByText("Nenhuma unidade com dados válidos para comparar.", {
+      exact: true,
+    });
   await emptyMessage.waitFor({ state: "visible" });
   const emptyStateVisible = await emptyMessage.isVisible();
   await page.unroute("**/api/inventory", emptyHandler);
@@ -1656,7 +1618,7 @@ async function checkTabelaoValidation(page, origin) {
   await retryButton.click();
   await page
     .locator(".investor-stock-sync")
-    .getByText("3.301 unidades", { exact: true })
+    .getByText(syntheticTabelaoCountLabel, { exact: true })
     .waitFor({ state: "visible", timeout: qaNavigationTimeout });
 
   let releaseLoadingRequest;
@@ -1681,7 +1643,7 @@ async function checkTabelaoValidation(page, origin) {
   await page.unroute("**/api/inventory", loadingHandler);
   await page
     .locator(".investor-stock-sync")
-    .getByText("3.301 unidades", { exact: true })
+    .getByText(syntheticTabelaoCountLabel, { exact: true })
     .waitFor({ state: "visible", timeout: qaNavigationTimeout });
 
   const cookieBannerHidden =
@@ -1701,9 +1663,9 @@ async function checkTabelaoValidation(page, origin) {
     guideReachedLastStep,
     guideCompletionReturnedFocus,
     guideEscapeReturnedFocus,
-    filterCascade,
-    clearReset,
-    bothSortDirections,
+    exclusiveRows,
+    netPrices,
+    ascendingPrices,
     emptyStateVisible,
     errorStateAccessible,
     loadingStateVisible,

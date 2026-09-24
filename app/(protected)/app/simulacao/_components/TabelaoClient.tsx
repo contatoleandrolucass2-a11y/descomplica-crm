@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
-// @ts-expect-error — módulo compartilhado preservado em JavaScript.
-import * as investorFilterOptions from "@/lib/archive-investor/investor-filter-options.mjs";
+import {
+  buildTabelaoExclusiveInventory,
+  sortTabelaoInventory,
+  summarizeTabelao,
+} from "@/lib/archive-investor/tabelao-inventory.mjs";
 
 type InventoryItem = {
   id: string;
@@ -14,6 +17,9 @@ type InventoryItem = {
   identifier: string | null;
   plant: string | null;
   finalPrice: number | null;
+  finalWithKit: number | null;
+  unitBonus: number | null;
+  tableSlack: number | null;
   privateArea: number | null;
   completionDate: string | null;
   region: string | null;
@@ -32,13 +38,6 @@ type InventoryPayload = {
 
 type LoadState = "loading" | "ready" | "error";
 
-const { sortInvestorInventoryBySalePrice } = investorFilterOptions as {
-  sortInvestorInventoryBySalePrice: (
-    inventory: InventoryItem[],
-    direction: "asc" | "desc",
-  ) => InventoryItem[];
-};
-
 const INVENTORY_WINDOW_SIZE = 60;
 const DESKTOP_ROW_HEIGHT = 24;
 const MOBILE_ROW_HEIGHT = 44;
@@ -46,9 +45,9 @@ const TABELAO_TOUR_STEPS = [
   {
     target: "welcome",
     eyebrow: "Visão geral",
-    title: "Consulte o estoque completo",
+    title: "Consulte todas as tipologias",
     description:
-      "O Tabelão reúne todas as unidades do estoque SPC. O guia mostra como consultar, comparar e abrir a unidade na Tabela Direta.",
+      "Cada empreendimento apresenta uma unidade por tipo de planta e metragem, escolhida pelo menor valor: Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela). Todas as combinações com dados válidos permanecem disponíveis.",
     tip: "Avançar no guia não altera a lista nem abre outra página.",
     checklist: ["Consulte o estoque", "Compare as unidades", "Abra a unidade correta"],
   },
@@ -87,7 +86,8 @@ const dateTime = new Intl.DateTimeFormat("pt-BR", {
 });
 
 function formatDate(value?: string | null) {
-  return value ? date.format(new Date(`${value}T12:00:00.000Z`)) : "Não informada";
+  const parsed = value ? new Date(`${value}T12:00:00.000Z`) : null;
+  return parsed && Number.isFinite(parsed.getTime()) ? date.format(parsed) : "Não informada";
 }
 
 function informationLabel(value?: string | null) {
@@ -160,9 +160,16 @@ export function TabelaoClient() {
   }, []);
 
   const matchingInventory = useMemo(
-    () => sortInvestorInventoryBySalePrice(inventory, "asc") as InventoryItem[],
+    () => sortTabelaoInventory(buildTabelaoExclusiveInventory(inventory)),
     [inventory],
   );
+  const inventorySummary = useMemo(
+    () => summarizeTabelao(matchingInventory),
+    [matchingInventory],
+  );
+  const excludedUnits =
+    inventory.length - matchingInventory.reduce((total, item) => total + item.availableUnits, 0);
+  const sourceUpdatedAt = inventoryMeta?.generatedAt ? new Date(inventoryMeta.generatedAt) : null;
   const visibleInventory = useMemo(
     () =>
       matchingInventory.slice(
@@ -367,12 +374,12 @@ export function TabelaoClient() {
           <span>01</span>
           <div>
             <p>Estoque SPC</p>
-            <h2 id="tabelao-stock-title">Escolha a unidade</h2>
+            <h2 id="tabelao-stock-title">Menor valor por tipologia</h2>
           </div>
           <div className="investor-stock-sync" role="status" aria-live="polite" aria-atomic="true">
             <small>
               {loadState === "ready"
-                ? `${inventory.length.toLocaleString("pt-BR")} unidades`
+                ? `${matchingInventory.length.toLocaleString("pt-BR")} opções exclusivas · ${inventorySummary.projects.toLocaleString("pt-BR")} empreendimentos`
                 : loadState === "error"
                   ? "Estoque indisponível"
                   : "Carregando estoque"}
@@ -383,8 +390,8 @@ export function TabelaoClient() {
                 Arquivo {inventoryMeta.source || "ESTOQUE SPC.xlsx"} · referência{" "}
                 {formatDate(inventoryMeta.snapshotReferenceDate)}
               </small>
-            ) : inventoryMeta?.generatedAt ? (
-              <small>Atualizado {dateTime.format(new Date(inventoryMeta.generatedAt))}</small>
+            ) : sourceUpdatedAt && Number.isFinite(sourceUpdatedAt.getTime()) ? (
+              <small>Atualizado {dateTime.format(sourceUpdatedAt)}</small>
             ) : loadState === "ready" ? (
               <small>
                 Fonte viva {inventoryMeta?.source || "estoque protegido"} · atualização não
@@ -394,11 +401,18 @@ export function TabelaoClient() {
           </div>
         </header>
 
+        {loadState === "ready" && excludedUnits > 0 ? (
+          <p className="investor-stock-summary" role="status">
+            {excludedUnits.toLocaleString("pt-BR")} unidades com dados incompletos ou inválidos
+            não participam da comparação. Menores valores entre as unidades com dados válidos.
+          </p>
+        ) : null}
+
         <p className="investor-stock-summary sr-only" aria-live="polite">
           {loadState === "ready"
             ? matchingInventory.length > 0
-              ? `${matchingInventory.length.toLocaleString("pt-BR")} unidades encontradas.`
-              : "Nenhuma unidade disponível no estoque."
+              ? `${matchingInventory.length.toLocaleString("pt-BR")} opções exclusivas por empreendimento, planta e metragem, em ordem de menor valor.`
+              : "Nenhuma unidade com dados válidos para comparar."
             : loadState === "loading"
               ? "Carregando estoque…"
               : "Estoque indisponível"}
@@ -408,13 +422,16 @@ export function TabelaoClient() {
           ref={inventoryResultsRef}
           className="investor-stock-results"
           role="region"
-          aria-label="Estoque completo de unidades"
+          aria-label="Menores valores por empreendimento, planta e metragem"
           tabIndex={0}
           data-tour="inventory"
           onScroll={(event) => updateInventoryWindow(event.currentTarget.scrollTop)}
         >
           <table className="investor-stock-table" aria-rowcount={matchingInventory.length + 1}>
-            <caption className="sr-only">Unidades encontradas no estoque</caption>
+            <caption className="sr-only">
+              Todas as tipologias por empreendimento e metragem. Menor valor = Valor Final Com Kit
+              − (B.A. da Unidade + Folga de Tabela).
+            </caption>
             <colgroup>
               <col className="investor-stock-col-start" />
               <col className="investor-stock-col-business" />
@@ -428,11 +445,11 @@ export function TabelaoClient() {
               <tr>
                 <th className="investor-stock-start-heading">Início</th>
                 <th>Incorporadora</th>
-                <th>Produto</th>
+                <th>Empreendimento / Unidade</th>
                 <th>Metragem</th>
                 <th>Data de Entrega</th>
                 <th>Planta</th>
-                <th>Valor do imóvel</th>
+                <th>Menor valor</th>
               </tr>
             </thead>
             <tbody>
@@ -481,7 +498,7 @@ export function TabelaoClient() {
                       className="investor-stock-unit-button tabelao-stock-unit-link"
                       href="/app/simulacao/tabela-direta"
                       prefetch={false}
-                      aria-label="Abrir a página Tabela Direta"
+                      aria-label={`Abrir a página Tabela Direta · ${item.product}`}
                     >
                       <span aria-hidden="true">›</span>
                     </Link>
@@ -489,7 +506,11 @@ export function TabelaoClient() {
                   <td data-label="Incorporadora" title={item.businessUnit}>
                     {item.businessUnit}
                   </td>
-                  <td className="investor-stock-product" data-label="Produto" title={item.product}>
+                  <td
+                    className="investor-stock-product"
+                    data-label="Empreendimento / Unidade"
+                    title={item.product}
+                  >
                     <span className="investor-stock-product-text">{item.product}</span>
                   </td>
                   <td data-label="Metragem">
@@ -503,8 +524,12 @@ export function TabelaoClient() {
                   >
                     {informationLabel(item.plant)}
                   </td>
-                  <td className="investor-stock-price" data-label="Valor do imóvel">
-                    {item.finalPrice ? money.format(item.finalPrice) : "Não informado"}
+                  <td
+                    className="investor-stock-price"
+                    data-label="Menor valor"
+                    title={`Valor Final Com Kit ${money.format(item.finalWithKit!)} − (B.A. da Unidade ${money.format(item.unitBonus!)} + Folga de Tabela ${money.format(item.tableSlack!)}) = ${money.format(item.minimumPrice)}`}
+                  >
+                    {money.format(item.minimumPrice)}
                   </td>
                 </tr>
               ))}
@@ -524,7 +549,7 @@ export function TabelaoClient() {
               {loadState === "ready" && matchingInventory.length === 0 ? (
                 <tr>
                   <td className="investor-empty-result" colSpan={7}>
-                    Nenhuma unidade disponível no estoque.
+                    Nenhuma unidade com dados válidos para comparar.
                   </td>
                 </tr>
               ) : null}
