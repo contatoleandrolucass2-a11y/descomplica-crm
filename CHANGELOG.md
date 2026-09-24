@@ -8,6 +8,9 @@
   valor, os dados completos e a rolagem virtual sem limite de opções.
 - Ajusta a estimativa da altura de linha no desktop para incluir a borda e
   manter o posicionamento da rolagem virtual alinhado à grade renderizada.
+- Atualiza dez referências visuais sintéticas do Tabelão após aprovação dos
+  critérios funcionais da matriz completa e revisão das imagens, sem alterar
+  tolerâncias ou referências de outras páginas.
 
 ## 2026-09-24 — Tabelão com menor valor por tipologia
 

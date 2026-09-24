@@ -16,6 +16,27 @@
   QA anterior e confirmada por medição do navegador; mantidos os alvos de toque.
 - Auditoria da fonte confirmou 2.243 unidades, 120 opções em 23 empreendimentos,
   sem perda de tipologias, grupos intercalados ou preços fora de ordem interna.
+- Validação: formatação, lint, tipos e build aprovados; 22 testes focados e 630
+  testes completos no Linux (622 Vitest, quatro skips existentes, oito Node).
+  No Windows persistem somente os dois asserts POSIX 0600 já documentados.
+- Publicada a imagem `1492a18e7fef89afce79731aa072a78150744d07`, após prova dos
+  dois perfis de runtime. Health local e público confirmados; backup do ambiente
+  anterior preservado para rollback.
+- Conferência autenticada de todas as 120 opções: IDs únicos, 23 grupos
+  contíguos, preços crescentes dentro de cada grupo e 120 fórmulas corretas em
+  centavos. Telas de 1440, 1024, 768 e 375 px sem overflow da página ou sobreposição
+  do cabeçalho; console sem erros.
+- A captura completa na VPS parou na leitura das fixtures do Supabase local de
+  QA. Conta e dados efêmeros foram limpos; nenhuma migration, policy ou dado de
+  produção foi alterado. A matriz limpa do CI continua sendo a evidência de
+  regressão visual, separada da conferência autenticada em produção.
+- CI `36015516477`: todos os critérios funcionais aprovados, inclusive os 13 do
+  Tabelão; falha restrita a dez imagens antigas desta rota. Capturas sintéticas
+  revisadas em todos os tamanhos/temas afetados e promovidas pelo mecanismo
+  transacional existente, com validação dos hashes, igualdade da árvore Git do
+  código capturado e integridade da baseline anterior. Evidência registra a
+  origem do artefato CI; nenhum limiar ou teste foi relaxado e nenhuma captura
+  de outra rota foi alterada.
 
 ## 2026-09-24 — menor valor líquido por empreendimento, planta e área
 

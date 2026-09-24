@@ -2,6 +2,21 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Atualização do Tabelão em 24/09/2026
+
+Dez capturas sintéticas desta rota foram atualizadas para as opções exclusivas
+agrupadas por empreendimento, sem filtros, com valores líquidos e cabeçalho móvel
+sem sobreposição. A evidência veio do CI `36015516477`, commit de captura
+`434f5f057be38ac5f2731c8ae1a6a0765defafe1`, cuja árvore é idêntica ao código
+publicado `1492a18e7fef89afce79731aa072a78150744d07`.
+
+Passaram os 140 checks responsivos, 80 de tema, 193 de acessibilidade, 100 de zoom
+e todos os critérios funcionais, incluindo os 13 do Tabelão. As dez diferenças
+visuais esperadas foram inspecionadas e promovidas com as funções transacionais
+existentes, após conferir hashes das imagens e baseline, integridade e árvore
+Git. `promotionSource` registra a origem CI. As imagens das demais rotas e os
+limiares de comparação foram preservados; não há dados comerciais nas capturas.
+
 ## Escopo executável
 
 Os harnesses de QA visual cobrem três fronteiras:
