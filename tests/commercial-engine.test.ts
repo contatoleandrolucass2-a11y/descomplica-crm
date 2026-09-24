@@ -889,7 +889,11 @@ describe("commercial policy verifier CLI and telemetry", () => {
     expect(exitCode).toBe(0);
     expect(stderr).toBe("");
     expect(stdout).toContain('"goldenCaseCount": 2');
-    expect((await stat(manifestPath)).mode & 0o777).toBe(0o600);
+    // Windows não expõe os bits POSIX aplicados pelo mode 0600. A garantia é
+    // verificada nos sistemas que implementam essas permissões.
+    if (process.platform !== "win32") {
+      expect((await stat(manifestPath)).mode & 0o777).toBe(0o600);
+    }
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<string, unknown>;
     expect(manifest.requestId).toBe(REQUEST_ID);
     expect(manifest).toHaveProperty("policyHash");
