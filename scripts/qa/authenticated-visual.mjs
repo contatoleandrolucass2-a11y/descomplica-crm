@@ -1429,6 +1429,7 @@ async function checkTabelaoValidation(page, origin) {
   const viewportChecks = [];
 
   for (const viewport of requiredViewports) {
+    process.stdout.write(`Tabelão QA: iniciando ${viewport.key}\n`);
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await gotoWithServerRetry(page, url, { waitUntil: "domcontentloaded" });
     await page
@@ -1476,7 +1477,8 @@ async function checkTabelaoValidation(page, origin) {
 
     const results = page.locator(".investor-stock-results");
     await results.evaluate((element) => {
-      element.scrollTop = element.scrollHeight;
+      element.scrollTop = element.scrollHeight - element.clientHeight;
+      element.dispatchEvent(new Event("scroll", { bubbles: true }));
     });
     await page.waitForFunction(
       () =>
@@ -1484,7 +1486,7 @@ async function checkTabelaoValidation(page, origin) {
           .at(-1)
           ?.getAttribute("data-inventory-unit-id") === "qa-stock-3301",
       undefined,
-      { timeout: qaNavigationTimeout },
+      { timeout: 10_000 },
     );
     const bottom = await page.evaluate(() => {
       const rows = [...document.querySelectorAll("tr[data-inventory-unit-id]")];
@@ -1498,6 +1500,7 @@ async function checkTabelaoValidation(page, origin) {
       };
     });
     viewportChecks.push({ key: viewport.key, ...initial, ...bottom });
+    process.stdout.write(`Tabelão QA: concluiu ${viewport.key}\n`);
   }
 
   await page.setViewportSize({ width: 1440, height: 900 });
