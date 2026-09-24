@@ -163,10 +163,7 @@ export function TabelaoClient() {
     () => sortTabelaoInventory(buildTabelaoExclusiveInventory(inventory)),
     [inventory],
   );
-  const inventorySummary = useMemo(
-    () => summarizeTabelao(matchingInventory),
-    [matchingInventory],
-  );
+  const inventorySummary = useMemo(() => summarizeTabelao(matchingInventory), [matchingInventory]);
   const excludedUnits =
     inventory.length - matchingInventory.reduce((total, item) => total + item.availableUnits, 0);
   const sourceUpdatedAt = inventoryMeta?.generatedAt ? new Date(inventoryMeta.generatedAt) : null;
@@ -403,8 +400,8 @@ export function TabelaoClient() {
 
         {loadState === "ready" && excludedUnits > 0 ? (
           <p className="investor-stock-summary" role="status">
-            {excludedUnits.toLocaleString("pt-BR")} unidades com dados incompletos ou inválidos
-            não participam da comparação. Menores valores entre as unidades com dados válidos.
+            {excludedUnits.toLocaleString("pt-BR")} unidades com dados incompletos ou inválidos não
+            participam da comparação. Menores valores entre as unidades com dados válidos.
           </p>
         ) : null}
 
@@ -429,8 +426,8 @@ export function TabelaoClient() {
         >
           <table className="investor-stock-table" aria-rowcount={matchingInventory.length + 1}>
             <caption className="sr-only">
-              Todas as tipologias por empreendimento e metragem. Menor valor = Valor Final Com Kit
-              − (B.A. da Unidade + Folga de Tabela).
+              Todas as tipologias por empreendimento e metragem. Menor valor = Valor Final Com Kit −
+              (B.A. da Unidade + Folga de Tabela).
             </caption>
             <colgroup>
               <col className="investor-stock-col-start" />

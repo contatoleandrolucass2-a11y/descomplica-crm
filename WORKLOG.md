@@ -20,6 +20,8 @@
 - QA visual versionado atualizado para os grupos exclusivos, preços líquidos,
   ausência dos filtros e guia de três passos. A sessão autenticada do navegador
   está disponível para a conferência responsiva após a promoção da imagem.
+- PR #87 aberto. Corrigida a formatação do cliente e do changelog apontada pelo
+  primeiro CI; a imagem passou na prova dos perfis de homologação e produção.
 
 ## 2026-09-24 — remoção dos filtros do Tabelão
 
