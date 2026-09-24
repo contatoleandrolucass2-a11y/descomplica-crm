@@ -20,9 +20,11 @@ Execute no PowerShell:
 powershell -ExecutionPolicy Bypass -File .\scripts\windows\bootstrap-local.ps1
 ```
 
-O modelo `gpt-6-astra` só é gravado quando aparece em `codex debug models`.
-Configuração local não concede acesso a um modelo indisponível. Enquanto a Astra
-não estiver liberada, o bootstrap mantém `gpt-5.6-sol` como fallback funcional.
+A Astra só é gravada quando aparece no catálogo autenticado, pelo identificador
+ou pelo nome exibido. Configuração local não concede acesso a um modelo
+indisponível. Enquanto a Astra não estiver liberada, o bootstrap seleciona o
+melhor fallback conhecido; se o cliente não informar nenhum deles, deixa o
+Codex usar automaticamente o modelo padrão disponível para a conta.
 
 Segredos do servidor não são copiados. O `.env.local` nasce apenas do
 `.env.example` e deve receber credenciais próprias do ambiente local.

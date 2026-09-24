@@ -113,29 +113,57 @@ try {
   }
 
   $Catalog = $RawCatalog | ConvertFrom-Json
-  $AvailableModels = @($Catalog.models | ForEach-Object { $_.slug })
+  $CatalogModels = @($Catalog.models)
+  $AvailableModels = @($CatalogModels | ForEach-Object { $_.slug } | Where-Object { $_ })
+  $AstraModel = $CatalogModels |
+    Where-Object { $_.slug -and ($_.slug -eq "gpt-6-astra" -or $_.display_name -match "Astra") } |
+    Select-Object -First 1
 
-  if ($AvailableModels -contains "gpt-6-astra") {
-    $SelectedModel = "gpt-6-astra"
+  $SelectedModel = $null
+  $ReasoningEffort = $null
+
+  if ($AstraModel) {
+    $SelectedModel = $AstraModel.slug
     $ReasoningEffort = "low"
   }
-  elseif ($AvailableModels -contains "gpt-5.6-sol") {
-    $SelectedModel = "gpt-5.6-sol"
-    $ReasoningEffort = "medium"
-    Write-Warning "GPT-6 Astra ainda não está liberada nesta conta. GPT-5.6 Sol foi mantida como fallback funcional."
-  }
   else {
-    throw "Nem GPT-6 Astra nem GPT-5.6 Sol aparecem no catálogo desta conta."
+    $FallbackOrder = @(
+      "gpt-6-sol",
+      "gpt-6-luna",
+      "gpt-5.6-sol",
+      "gpt-5.6-terra",
+      "gpt-5.6-luna",
+      "gpt-5.5"
+    )
+    $SelectedModel = $FallbackOrder |
+      Where-Object { $AvailableModels -contains $_ } |
+      Select-Object -First 1
+    if ($SelectedModel) {
+      $ReasoningEffort = "medium"
+      Write-Warning "Astra ainda não está liberada nesta conta. O melhor fallback disponível foi selecionado: $SelectedModel."
+    }
+    else {
+      Write-Warning "Astra não está liberada e nenhum fallback conhecido apareceu. O Codex usará o modelo padrão disponível para esta conta."
+      Write-Host "Modelos informados pelo cliente: $($AvailableModels -join ', ')"
+    }
   }
 
   $CodexDirectory = Join-Path $TargetPath ".codex"
   New-Item -ItemType Directory -Force -Path $CodexDirectory | Out-Null
   $ConfigPath = Join-Path $CodexDirectory "config.toml"
-  $ConfigText = @"
+  if ($SelectedModel) {
+    $ConfigText = @"
 # Gerado por scripts/windows/bootstrap-local.ps1.
 model = "$SelectedModel"
 model_reasoning_effort = "$ReasoningEffort"
 "@
+  }
+  else {
+    $ConfigText = @"
+# Gerado por scripts/windows/bootstrap-local.ps1.
+# O modelo não foi fixado porque a conta deve usar o padrão disponível.
+"@
+  }
   [System.IO.File]::WriteAllText($ConfigPath, $ConfigText, [System.Text.UTF8Encoding]::new($false))
 
   $NodeReady = $false
@@ -168,7 +196,12 @@ model_reasoning_effort = "$ReasoningEffort"
   Invoke-Native pnpm verify
 
   Write-Host "Projeto local configurado em: $TargetPath"
-  Write-Host "Modelo selecionado: $SelectedModel ($ReasoningEffort)"
+  if ($SelectedModel) {
+    Write-Host "Modelo selecionado: $SelectedModel ($ReasoningEffort)"
+  }
+  else {
+    Write-Host "Modelo selecionado: padrão disponível da conta"
+  }
   if ($BackupLabel) {
     Write-Host "Alterações locais anteriores foram preservadas no stash: $BackupLabel"
   }

@@ -2,6 +2,8 @@
 
 ## 2026-09-24 — preparação do projeto local no Windows
 
+- Evita interromper o bootstrap quando a conta ainda não possui Astra nem um
+  fallback conhecido, permitindo que o Codex use seu modelo padrão disponível.
 - Corrige a inicialização em pastas Git sem remote `origin`, inclusive no
   Windows PowerShell 5, sem aceitar uma URL divergente quando o remote existe.
 - Adiciona configuração Codex escopada ao projeto e bootstrap seguro para
