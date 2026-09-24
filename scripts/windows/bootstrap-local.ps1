@@ -33,6 +33,60 @@ function Require-Command {
   }
 }
 
+function Update-ProcessPath {
+  $MachinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+  $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+  $env:Path = @($MachinePath, $UserPath) -join ";"
+}
+
+function Install-OfficialNode {
+  param([Parameter(Mandatory = $true)][string]$Version)
+
+  $DetectedArchitecture = if ($env:PROCESSOR_ARCHITEW6432) {
+    $env:PROCESSOR_ARCHITEW6432
+  }
+  else {
+    $env:PROCESSOR_ARCHITECTURE
+  }
+
+  $NodeArchitecture = switch ($DetectedArchitecture.ToUpperInvariant()) {
+    "AMD64" { "x64" }
+    "ARM64" { "arm64" }
+    default { throw "Arquitetura do Windows não suportada pelo instalador automático do Node: $DetectedArchitecture" }
+  }
+
+  $NodeInstallerName = "node-v$Version-$NodeArchitecture.msi"
+  $NodeDownloadBase = "https://nodejs.org/dist/v$Version"
+  $NodeInstallerPath = Join-Path $env:TEMP $NodeInstallerName
+  $NodeChecksumsPath = Join-Path $env:TEMP "node-v$Version-SHASUMS256.txt"
+
+  Write-Host "Baixando Node $Version ($NodeArchitecture) do site oficial..."
+  Invoke-WebRequest -UseBasicParsing -Uri "$NodeDownloadBase/$NodeInstallerName" -OutFile $NodeInstallerPath
+  Invoke-WebRequest -UseBasicParsing -Uri "$NodeDownloadBase/SHASUMS256.txt" -OutFile $NodeChecksumsPath
+
+  $ChecksumLine = Get-Content -LiteralPath $NodeChecksumsPath |
+    Where-Object { $_ -match "\s+$([Regex]::Escape($NodeInstallerName))$" } |
+    Select-Object -First 1
+  if (-not $ChecksumLine) {
+    throw "O checksum oficial do instalador $NodeInstallerName não foi encontrado."
+  }
+
+  $ExpectedChecksum = ($ChecksumLine -split "\s+")[0].ToUpperInvariant()
+  $ActualChecksum = (Get-FileHash -LiteralPath $NodeInstallerPath -Algorithm SHA256).Hash.ToUpperInvariant()
+  if ($ActualChecksum -ne $ExpectedChecksum) {
+    throw "A verificação SHA-256 do instalador oficial do Node falhou."
+  }
+
+  Write-Host "Instalando Node $Version..."
+  $InstallerArguments = "/i `"$NodeInstallerPath`" /qn /norestart"
+  $InstallerProcess = Start-Process -FilePath "msiexec.exe" -ArgumentList $InstallerArguments -Wait -PassThru
+  if ($InstallerProcess.ExitCode -notin @(0, 3010)) {
+    throw "O instalador do Node terminou com o código $($InstallerProcess.ExitCode)."
+  }
+
+  Update-ProcessPath
+}
+
 Require-Command "git"
 Require-Command "codex"
 
@@ -175,12 +229,21 @@ model_reasoning_effort = "$ReasoningEffort"
   if (-not $NodeReady -and (Get-Command nvm -ErrorAction SilentlyContinue)) {
     Invoke-Native nvm install $RequiredNode
     Invoke-Native nvm use $RequiredNode
+    Update-ProcessPath
     $NodeVersion = (& node --version).TrimStart("v")
     $NodeReady = $NodeVersion.StartsWith("24.19.")
   }
 
   if (-not $NodeReady) {
-    throw "Instale o Node 24.19.x (ou o NVM para Windows) e execute novamente."
+    Install-OfficialNode $RequiredNode
+    if (Get-Command node -ErrorAction SilentlyContinue) {
+      $NodeVersion = (& node --version).TrimStart("v")
+      $NodeReady = $NodeVersion.StartsWith("24.19.")
+    }
+  }
+
+  if (-not $NodeReady) {
+    throw "O Node 24.19.x foi instalado, mas ainda não está disponível no PATH. Reinicie o PowerShell e execute novamente."
   }
 
   Require-Command "corepack"

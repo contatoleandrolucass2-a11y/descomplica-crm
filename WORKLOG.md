@@ -2,6 +2,8 @@
 
 ## 2026-09-24 — bootstrap local do Windows e seleção segura de modelo
 
+- A preparação do Windows agora instala o Node 24.19.0 a partir da distribuição
+  oficial, com validação SHA-256 antes de executar o MSI.
 - A ausência de Astra e dos fallbacks conhecidos deixou de bloquear a preparação
   local; nesse caso, o projeto usa o modelo padrão fornecido pela conta.
 - O bootstrap agora trata repositórios locais sem remote `origin` no Windows

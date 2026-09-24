@@ -3,8 +3,11 @@
 O script `scripts/windows/bootstrap-local.ps1` sincroniza a branch de transporte
 do servidor com o projeto local, preserva alterações locais existentes em um
 `git stash`, seleciona o melhor modelo disponível no catálogo autenticado do
-Codex, prepara Node/pnpm, cria `.env.local` a partir do exemplo quando necessário
-e executa o gate completo do repositório.
+Codex, instala e verifica o Node 24.19.0 oficial quando necessário, prepara pnpm,
+cria `.env.local` a partir do exemplo e executa o gate completo do repositório.
+
+O instalador do Node é baixado de `nodejs.org`, conferido com o SHA-256 publicado
+na mesma distribuição oficial e instalado silenciosamente pelo Windows Installer.
 
 Se a pasta já for um repositório Git sem remote `origin`, o bootstrap adiciona
 o remote oficial automaticamente. Um `origin` existente com outra URL continua
