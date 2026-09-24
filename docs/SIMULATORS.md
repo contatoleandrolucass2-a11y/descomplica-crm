@@ -36,7 +36,9 @@ informa quantas linhas não puderam participar, qualificando a comparação.
 Nomes são normalizados apenas na chave do grupo (caixa, acentos e espaços). Áreas
 distintas não são arredondadas para deduplicar. Empates usam identificador natural,
 produto e ID, sem depender da ordem da fonte. A unidade vencedora mantém seus
-dados completos; grupos são ordenados por valor líquido crescente. Contadores
+dados completos; as opções ficam juntas por empreendimento em ordem alfabética,
+separadas por incorporadora quando o nome coincide, e por valor líquido crescente
+dentro de cada empreendimento. Contadores
 mostram opções e empreendimentos distintos, não o total bruto de unidades.
 
 A fonte e sua data de geração continuam explícitas. Ausência ou erro não aciona

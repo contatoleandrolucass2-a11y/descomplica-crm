@@ -143,7 +143,9 @@ describe("Tabelão protegido", () => {
     expect(client).not.toContain("buildInvestorFilterOptions");
     expect(client).not.toContain("matchesInvestorFilters");
     expect(client).not.toContain("reconcileInvestorFilters");
-    expect(client).toContain("sortTabelaoInventory(buildTabelaoExclusiveInventory(inventory))");
+    expect(client).toContain(
+      'sortTabelaoInventory(buildTabelaoExclusiveInventory(inventory), "project")',
+    );
     expect(client).toContain("INVENTORY_WINDOW_SIZE = 60");
     expect(client).toContain('href="/app/simulacao/tabela-direta"');
     expect(client).toContain('window.addEventListener("investor:start-guide"');

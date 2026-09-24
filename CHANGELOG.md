@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-24 — Tabelão agrupado por empreendimento
+
+- Reúne as opções de cada empreendimento em sequência alfabética, com preços
+  líquidos crescentes dentro do grupo e incorporadoras homônimas separadas.
+- Preserva todas as combinações exclusivas de planta e área, a fórmula do menor
+  valor, os dados completos e a rolagem virtual sem limite de opções.
+- Ajusta a estimativa da altura de linha no desktop para incluir a borda e
+  manter o posicionamento da rolagem virtual alinhado à grade renderizada.
+
 ## 2026-09-24 — Tabelão com menor valor por tipologia
 
 - Exibe uma unidade por incorporadora, empreendimento, planta e área, mantendo

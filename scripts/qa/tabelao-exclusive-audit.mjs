@@ -90,6 +90,36 @@ assert.deepEqual(
   selected,
   sortTabelaoInventory(buildTabelaoExclusiveInventory([...rows].reverse())),
 );
+const grouped = sortTabelaoInventory(selected, "project");
+const seenProjects = new Set();
+const projectCollator = new Intl.Collator("pt-BR", { numeric: true, sensitivity: "base" });
+let previousProject = null;
+let previousRow = null;
+for (const row of grouped) {
+  const [business, project] = JSON.parse(key(row));
+  const projectKey = JSON.stringify([project, business]);
+  if (projectKey !== previousProject) {
+    assert.equal(seenProjects.has(projectKey), false, "Project split across the table");
+    if (previousProject) {
+      const [lastProject, lastBusiness] = JSON.parse(previousProject);
+      assert.ok(
+        (projectCollator.compare(lastProject, project) ||
+          projectCollator.compare(lastBusiness, business)) <= 0,
+        "Projects not alphabetically ordered",
+      );
+    }
+    seenProjects.add(projectKey);
+  } else {
+    assert.ok(previousRow.minimumPrice <= row.minimumPrice, "Prices not ascending inside project");
+  }
+  previousProject = projectKey;
+  previousRow = row;
+}
+assert.deepEqual(new Set(grouped.map(key)), new Set(selected.map(key)), "Grouping lost options");
+assert.deepEqual(
+  grouped,
+  sortTabelaoInventory(buildTabelaoExclusiveInventory([...rows].reverse()), "project"),
+);
 console.log(
   JSON.stringify(
     {
@@ -109,6 +139,8 @@ console.log(
       allGroupsChecked: true,
       allMinimaChecked: true,
       sourceOrderIndependent: true,
+      allProjectsContiguous: true,
+      ascendingPricesWithinProjects: true,
     },
     null,
     2,

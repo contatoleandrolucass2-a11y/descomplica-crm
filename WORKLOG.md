@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-09-24 — agrupamento das opções por empreendimento
+
+- Alterada apenas a ordem do Tabelão: empreendimento alfabético, incorporadora
+  para separar homônimos e menor valor líquido dentro de cada grupo. Nomes usam
+  a mesma normalização da seleção exclusiva, sem modificar os dados exibidos.
+- Mantidas todas as plantas e metragens, a fórmula em centavos, os contadores,
+  a janela de 60 linhas e os dados completos da unidade. Sem alteração de API,
+  autorização, banco ou workflows de simulação.
+- Acrescentadas regressões para agrupamento, nomes normalizados, homônimos,
+  valores líquidos, empate e preservação integral das opções; QA visual passa a
+  conferir os grupos e preços internos em vez de ordenação global por preço.
+- Corrigida a altura virtual no desktop para 25 px: o alvo de 24 px mais a borda
+  da célula produzia linhas maiores que os 24 px estimados. Falha observada no
+  QA anterior e confirmada por medição do navegador; mantidos os alvos de toque.
+- Auditoria da fonte confirmou 2.243 unidades, 120 opções em 23 empreendimentos,
+  sem perda de tipologias, grupos intercalados ou preços fora de ordem interna.
+
 ## 2026-09-24 — menor valor líquido por empreendimento, planta e área
 
 - Aplicadas as skills solicitadas de definição da métrica, qualidade e validação

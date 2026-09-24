@@ -60,6 +60,7 @@ const syntheticDirectTableSnapshot = (() => {
 })();
 const syntheticTabelaoInventory = sortTabelaoInventory(
   buildTabelaoExclusiveInventory(JSON.parse(syntheticDirectTableSnapshot).items),
+  "project",
 );
 const syntheticTabelaoLastInventoryId = syntheticTabelaoInventory.at(-1)?.id;
 const syntheticTabelaoCountLabel = `${syntheticTabelaoInventory.length} opções exclusivas · 6 empreendimentos`;
@@ -1437,7 +1438,7 @@ async function checkTabelaoValidation(page, origin) {
   const route = "/app/simulacao/tabelao";
   const url = `${origin}${route}`;
   const requiredViewports = [
-    { key: "desktop-1440x900", width: 1440, height: 900, rowHeight: 24, targetSize: 24 },
+    { key: "desktop-1440x900", width: 1440, height: 900, rowHeight: 25, targetSize: 24 },
     { key: "tablet-1024x768", width: 1024, height: 768, rowHeight: 44, targetSize: 44 },
     { key: "tablet-768x1024", width: 768, height: 1024, rowHeight: 44, targetSize: 44 },
     { key: "mobile-375x812", width: 375, height: 812, rowHeight: 44, targetSize: 44 },
@@ -1573,6 +1574,8 @@ async function checkTabelaoValidation(page, origin) {
   const rendered = await page.locator("tr[data-inventory-unit-id]").evaluateAll((rows) =>
     rows.map((row) => ({
       id: row.getAttribute("data-inventory-unit-id"),
+      project: row.getAttribute("data-inventory-project"),
+      businessUnit: row.getAttribute("data-inventory-business-unit"),
       price: row.querySelector(".investor-stock-price")?.textContent?.trim(),
     })),
   );
@@ -1583,9 +1586,20 @@ async function checkTabelaoValidation(page, origin) {
   const netPrices = rendered.every(
     (row, index) => row.price === currency.format(syntheticTabelaoInventory[index].minimumPrice),
   );
-  const ascendingPrices = syntheticTabelaoInventory.every(
-    (row, index, rows) => index === 0 || rows[index - 1].minimumPrice <= row.minimumPrice,
-  );
+  const projectCollator = new Intl.Collator("pt-BR", { numeric: true, sensitivity: "base" });
+  const groupedProjects = rendered.every((row, index, rows) => {
+    if (index === 0) return true;
+    const previous = rows[index - 1];
+    const groupOrder =
+      projectCollator.compare(previous.project, row.project) ||
+      projectCollator.compare(previous.businessUnit, row.businessUnit);
+    return (
+      groupOrder < 0 ||
+      (groupOrder === 0 &&
+        syntheticTabelaoInventory[index - 1].minimumPrice <=
+          syntheticTabelaoInventory[index].minimumPrice)
+    );
+  });
 
   const emptyHandler = async (interceptedRoute) => {
     await interceptedRoute.fulfill({
@@ -1674,7 +1688,7 @@ async function checkTabelaoValidation(page, origin) {
     guideEscapeReturnedFocus,
     exclusiveRows,
     netPrices,
-    ascendingPrices,
+    groupedProjects,
     emptyStateVisible,
     errorStateAccessible,
     loadingStateVisible,

@@ -158,4 +158,66 @@ describe("Menor valor por tipologia no Tabelão", () => {
     const source = [unit("1", { finalWithKit: null }), unit("2"), unit("3", { unitBonus: null })];
     expect(sortTabelaoInventory(source).map((item) => item.id)).toEqual(["2", "1", "3"]);
   });
+
+  it("agrupa empreendimentos antes do preço e ordena o líquido dentro de cada grupo", () => {
+    const source = [
+      unit("b-1", { project: "Bosque", finalWithKit: 200_000 }),
+      unit("a-2", { project: "Águas", plant: "Tipo 1Q", finalWithKit: 400_000 }),
+      unit("a-3", { project: "aguas", businessUnit: "Outra", finalWithKit: 180_000 }),
+      unit("a-1", {
+        project: " AGUAS  ",
+        plant: "Tipo 3Q",
+        finalWithKit: 500_000,
+        unitBonus: 250_000,
+      }),
+      unit("b-2", { project: "Bosque", privateArea: 50, finalWithKit: 220_000 }),
+    ];
+    const exclusive = buildTabelaoExclusiveInventory(source);
+    const before = structuredClone(exclusive);
+    const grouped = sortTabelaoInventory(exclusive, "project");
+
+    expect(grouped.map((item) => item.id)).toEqual(["a-1", "a-2", "a-3", "b-1", "b-2"]);
+    expect(grouped.map((item) => item.minimumPrice)).toEqual([
+      245_000, 385_000, 165_000, 185_000, 205_000,
+    ]);
+    expect(new Set(grouped.map((item) => item.exclusiveKey))).toEqual(
+      new Set(exclusive.map((item) => item.exclusiveKey)),
+    );
+    expect(exclusive).toEqual(before);
+    expect(sortTabelaoInventory([...exclusive].reverse(), "project")).toEqual(grouped);
+  });
+
+  it("mantém desempate natural e preços ausentes no fim do respectivo empreendimento", () => {
+    const source = [
+      unit("B-1", { project: "B", finalWithKit: 100_000 }),
+      unit("A-10", { project: "A" }),
+      unit("A-0", { project: "A", finalWithKit: null }),
+      unit("A-2", { project: "A" }),
+    ];
+    expect(sortTabelaoInventory(source, "project").map((item) => item.id)).toEqual([
+      "A-2",
+      "A-10",
+      "A-0",
+      "B-1",
+    ]);
+    expect(sortTabelaoInventory([...source].reverse(), "project")).toEqual(
+      sortTabelaoInventory(source, "project"),
+    );
+    expect(sortTabelaoInventory([], "project")).toEqual([]);
+  });
+
+  it("não intercala grupos distintos que a ordenação natural considera equivalentes", () => {
+    const source = [
+      unit("1", { project: "Residencial 1", finalWithKit: 200_000 }),
+      unit("2", { project: "Residencial 01", finalWithKit: 300_000 }),
+      unit("3", { project: "Residencial 1", finalWithKit: 400_000 }),
+      unit("4", { project: "Residencial 01", finalWithKit: 500_000 }),
+    ];
+    expect(sortTabelaoInventory(source, "project").map((item) => item.id)).toEqual([
+      "2",
+      "4",
+      "1",
+      "3",
+    ]);
+  });
 });

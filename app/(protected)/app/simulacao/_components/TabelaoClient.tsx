@@ -39,7 +39,7 @@ type InventoryPayload = {
 type LoadState = "loading" | "ready" | "error";
 
 const INVENTORY_WINDOW_SIZE = 60;
-const DESKTOP_ROW_HEIGHT = 24;
+const DESKTOP_ROW_HEIGHT = 25;
 const MOBILE_ROW_HEIGHT = 44;
 const TABELAO_TOUR_STEPS = [
   {
@@ -160,7 +160,7 @@ export function TabelaoClient() {
   }, []);
 
   const matchingInventory = useMemo(
-    () => sortTabelaoInventory(buildTabelaoExclusiveInventory(inventory)),
+    () => sortTabelaoInventory(buildTabelaoExclusiveInventory(inventory), "project"),
     [inventory],
   );
   const inventorySummary = useMemo(() => summarizeTabelao(matchingInventory), [matchingInventory]);
@@ -408,7 +408,7 @@ export function TabelaoClient() {
         <p className="investor-stock-summary sr-only" aria-live="polite">
           {loadState === "ready"
             ? matchingInventory.length > 0
-              ? `${matchingInventory.length.toLocaleString("pt-BR")} opções exclusivas por empreendimento, planta e metragem, em ordem de menor valor.`
+              ? `${matchingInventory.length.toLocaleString("pt-BR")} opções exclusivas agrupadas por empreendimento, em ordem alfabética, com valores crescentes dentro de cada empreendimento.`
               : "Nenhuma unidade com dados válidos para comparar."
             : loadState === "loading"
               ? "Carregando estoque…"
@@ -489,6 +489,8 @@ export function TabelaoClient() {
                   key={item.id}
                   aria-rowindex={inventoryWindowStart + visibleIndex + 2}
                   data-inventory-unit-id={item.id}
+                  data-inventory-project={item.project}
+                  data-inventory-business-unit={item.businessUnit}
                 >
                   <td className="investor-stock-start-cell" data-label="Início">
                     <Link
