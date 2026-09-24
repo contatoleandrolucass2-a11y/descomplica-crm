@@ -6,8 +6,9 @@ do servidor com o projeto local, preserva alterações locais existentes em um
 Codex, instala e verifica o Node 24.19.0 oficial quando necessário, prepara pnpm,
 cria `.env.local` a partir do exemplo e executa o gate completo do repositório.
 
-O instalador do Node é baixado de `nodejs.org`, conferido com o SHA-256 publicado
-na mesma distribuição oficial e instalado silenciosamente pelo Windows Installer.
+A distribuição portátil do Node é baixada de `nodejs.org`, conferida com o
+SHA-256 oficial, instalada em `%LOCALAPPDATA%\DescomplicaCRM\tools` e adicionada
+ao PATH do usuário. O processo não depende do Windows Installer.
 
 Se a pasta já for um repositório Git sem remote `origin`, o bootstrap adiciona
 o remote oficial automaticamente. Um `origin` existente com outra URL continua

@@ -39,6 +39,20 @@ function Update-ProcessPath {
   $env:Path = @($MachinePath, $UserPath) -join ";"
 }
 
+function Add-UserPathEntry {
+  param([Parameter(Mandatory = $true)][string]$Entry)
+
+  $UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+  $UserPathEntries = @($UserPath -split ";" | Where-Object { $_ })
+  if ($UserPathEntries -notcontains $Entry) {
+    $UpdatedUserPath = @($UserPathEntries + $Entry) -join ";"
+    [Environment]::SetEnvironmentVariable("Path", $UpdatedUserPath, "User")
+  }
+
+  Update-ProcessPath
+  $env:Path = "$Entry;$env:Path"
+}
+
 function Install-OfficialNode {
   param([Parameter(Mandatory = $true)][string]$Version)
 
@@ -55,36 +69,57 @@ function Install-OfficialNode {
     default { throw "Arquitetura do Windows não suportada pelo instalador automático do Node: $DetectedArchitecture" }
   }
 
-  $NodeInstallerName = "node-v$Version-$NodeArchitecture.msi"
+  $NodeArchiveName = "node-v$Version-win-$NodeArchitecture.zip"
+  $NodeDirectoryName = [IO.Path]::GetFileNameWithoutExtension($NodeArchiveName)
   $NodeDownloadBase = "https://nodejs.org/dist/v$Version"
-  $NodeInstallerPath = Join-Path $env:TEMP $NodeInstallerName
+  $NodeArchivePath = Join-Path $env:TEMP $NodeArchiveName
   $NodeChecksumsPath = Join-Path $env:TEMP "node-v$Version-SHASUMS256.txt"
+  $NodeToolsRoot = Join-Path $env:LOCALAPPDATA "DescomplicaCRM\tools"
+  $NodeInstallPath = Join-Path $NodeToolsRoot $NodeDirectoryName
+  $NodeExecutable = Join-Path $NodeInstallPath "node.exe"
+
+  if (Test-Path -LiteralPath $NodeExecutable) {
+    $InstalledVersion = (& $NodeExecutable --version).TrimStart("v")
+    if ($InstalledVersion -eq $Version) {
+      Add-UserPathEntry $NodeInstallPath
+      return
+    }
+  }
 
   Write-Host "Baixando Node $Version ($NodeArchitecture) do site oficial..."
-  Invoke-WebRequest -UseBasicParsing -Uri "$NodeDownloadBase/$NodeInstallerName" -OutFile $NodeInstallerPath
+  Invoke-WebRequest -UseBasicParsing -Uri "$NodeDownloadBase/$NodeArchiveName" -OutFile $NodeArchivePath
   Invoke-WebRequest -UseBasicParsing -Uri "$NodeDownloadBase/SHASUMS256.txt" -OutFile $NodeChecksumsPath
 
   $ChecksumLine = Get-Content -LiteralPath $NodeChecksumsPath |
-    Where-Object { $_ -match "\s+$([Regex]::Escape($NodeInstallerName))$" } |
+    Where-Object { $_ -match "\s+$([Regex]::Escape($NodeArchiveName))$" } |
     Select-Object -First 1
   if (-not $ChecksumLine) {
-    throw "O checksum oficial do instalador $NodeInstallerName não foi encontrado."
+    throw "O checksum oficial do arquivo $NodeArchiveName não foi encontrado."
   }
 
   $ExpectedChecksum = ($ChecksumLine -split "\s+")[0].ToUpperInvariant()
-  $ActualChecksum = (Get-FileHash -LiteralPath $NodeInstallerPath -Algorithm SHA256).Hash.ToUpperInvariant()
+  $ActualChecksum = (Get-FileHash -LiteralPath $NodeArchivePath -Algorithm SHA256).Hash.ToUpperInvariant()
   if ($ActualChecksum -ne $ExpectedChecksum) {
-    throw "A verificação SHA-256 do instalador oficial do Node falhou."
+    throw "A verificação SHA-256 da distribuição oficial do Node falhou."
   }
 
-  Write-Host "Instalando Node $Version..."
-  $InstallerArguments = "/i `"$NodeInstallerPath`" /qn /norestart"
-  $InstallerProcess = Start-Process -FilePath "msiexec.exe" -ArgumentList $InstallerArguments -Wait -PassThru
-  if ($InstallerProcess.ExitCode -notin @(0, 3010)) {
-    throw "O instalador do Node terminou com o código $($InstallerProcess.ExitCode)."
+  New-Item -ItemType Directory -Force -Path $NodeToolsRoot | Out-Null
+  if (Test-Path -LiteralPath $NodeInstallPath) {
+    $NodeBackupPath = "$NodeInstallPath-backup-$((Get-Date).ToString('yyyyMMdd-HHmmss'))"
+    Move-Item -LiteralPath $NodeInstallPath -Destination $NodeBackupPath
   }
 
-  Update-ProcessPath
+  $ExtractionRoot = Join-Path $env:TEMP "$NodeDirectoryName-extract-$([Guid]::NewGuid().ToString('N'))"
+  New-Item -ItemType Directory -Force -Path $ExtractionRoot | Out-Null
+  Write-Host "Preparando Node $Version no perfil local do Windows..."
+  Expand-Archive -LiteralPath $NodeArchivePath -DestinationPath $ExtractionRoot
+  $ExtractedNodePath = Join-Path $ExtractionRoot $NodeDirectoryName
+  if (-not (Test-Path -LiteralPath (Join-Path $ExtractedNodePath "node.exe"))) {
+    throw "A distribuição oficial do Node não contém node.exe no local esperado."
+  }
+
+  Move-Item -LiteralPath $ExtractedNodePath -Destination $NodeInstallPath
+  Add-UserPathEntry $NodeInstallPath
 }
 
 Require-Command "git"
@@ -226,14 +261,6 @@ model_reasoning_effort = "$ReasoningEffort"
     $NodeReady = $NodeVersion.StartsWith("24.19.")
   }
 
-  if (-not $NodeReady -and (Get-Command nvm -ErrorAction SilentlyContinue)) {
-    Invoke-Native nvm install $RequiredNode
-    Invoke-Native nvm use $RequiredNode
-    Update-ProcessPath
-    $NodeVersion = (& node --version).TrimStart("v")
-    $NodeReady = $NodeVersion.StartsWith("24.19.")
-  }
-
   if (-not $NodeReady) {
     Install-OfficialNode $RequiredNode
     if (Get-Command node -ErrorAction SilentlyContinue) {
@@ -243,7 +270,7 @@ model_reasoning_effort = "$ReasoningEffort"
   }
 
   if (-not $NodeReady) {
-    throw "O Node 24.19.x foi instalado, mas ainda não está disponível no PATH. Reinicie o PowerShell e execute novamente."
+    throw "O Node portátil 24.19.x foi preparado, mas ainda não está disponível no PATH. Reinicie o PowerShell e execute novamente."
   }
 
   Require-Command "corepack"

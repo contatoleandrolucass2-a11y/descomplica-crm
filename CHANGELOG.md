@@ -2,8 +2,8 @@
 
 ## 2026-09-24 — preparação do projeto local no Windows
 
-- Instala automaticamente o Node 24.19.0 oficial quando ele não existe no
-  Windows e valida o instalador contra o manifesto SHA-256 da distribuição.
+- Instala automaticamente a distribuição portátil oficial do Node 24.19.0,
+  validada por SHA-256, evitando falhas do Windows Installer como o código 1603.
 - Evita interromper o bootstrap quando a conta ainda não possui Astra nem um
   fallback conhecido, permitindo que o Codex use seu modelo padrão disponível.
 - Corrige a inicialização em pastas Git sem remote `origin`, inclusive no
