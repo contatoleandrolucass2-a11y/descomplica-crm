@@ -12,6 +12,8 @@
 - Ajusta contadores no singular e mantém rótulos acessíveis explícitos nos filtros.
 - Corrige a altura do cabeçalho dos filtros no celular para preservar Limpar filtros
   sem sobreposição com os seletores e mantém os alvos de toque de 44 px.
+- Atualiza dez referências visuais sintéticas após revisão e aprovação funcional
+  da matriz completa, preservando outras 183 imagens e todos os limiares.
 
 ## 2026-09-24 — exclusividade por empreendimento e planta
 

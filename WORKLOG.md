@@ -24,6 +24,16 @@
 - Corrigida sobreposição mobile de Limpar filtros com o primeiro seletor: cabeçalho
   em duas linhas de 44 px e altura automática apenas no Tabelão. QA passa a medir
   a separação entre botão e primeiro campo nos quatro viewports.
+- `pnpm verify` completo aprovado no Linux após a correção. Publicada imagem
+  `b9a9379d1a6111f099a57b39a0010efe8658baaa`, comprovada em dois perfis de runtime.
+  Health público confirmado; navegador autenticado validou combinações dos cinco
+  filtros, limpeza, singular, ordenação dentro dos grupos, quatro larguras sem
+  sobreposição/overflow e console sem erros. API anônima permanece 401.
+- CI `36081141236` aprovou código, restauração, autorização, E2E e todos os
+  critérios funcionais da matriz: 140 responsivos, 80 temas, 193 acessibilidade,
+  100 zoom e 13 critérios do Tabelão. Apenas dez diferenças visuais desta rota.
+  Capturas revisadas e promovidas com hashes/árvore conferidos; outras 183 imagens
+  e limiares preservados. Proveniência em docs/qa/reference-parity.
 
 ## 2026-09-24 — correção da exclusividade pela coluna Planta
 

@@ -4,6 +4,25 @@ Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
 ## Atualização do Tabelão em 24/09/2026
 
+### Filtros encadeados restaurados
+
+Dez capturas foram atualizadas após revisão do painel solicitado, com os cinco
+filtros dimensionais, ordenação e Limpar filtros. CI `36081141236`, captura
+`2fc4a2e6be33822d96a1951cd4020a12545b3eba`, árvore idêntica ao código publicado
+`b9a9379d1a6111f099a57b39a0010efe8658baaa`.
+
+Passaram 140 checks responsivos, 80 de tema, 193 de acessibilidade, 100 de zoom,
+teclado, simuladores e os 13 critérios do Tabelão. Este último inclui combinações
+dos filtros, limpeza, contagens, reinício da rolagem e separação entre Limpar
+filtros e o primeiro campo em 1440, 1024, 768 e 375 px. A revisão autenticada da
+versão publicada também confirmou o cabeçalho mobile sem sobreposição.
+
+Hashes, origem isolada, árvore Git e baseline conferidos antes da promoção
+transacional. Outras 183 imagens e todos os limiares preservados; capturas
+contêm somente fixtures sintéticas, sem dados comerciais ou credenciais.
+
+### Captura anterior da exclusividade por planta
+
 Após a correção solicitada pelos prints, nove capturas foram atualizadas para
 uma linha por empreendimento e planta, sem separar por área, e coluna com apenas
 o empreendimento. CI `36059484259`, captura
