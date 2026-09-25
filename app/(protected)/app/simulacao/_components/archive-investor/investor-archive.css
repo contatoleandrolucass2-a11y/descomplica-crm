@@ -21621,3 +21621,22 @@ body:has(.investor-page-shell) {
     line-height: 12px !important;
   }
 }
+
+@media (max-width: 760px) {
+  .tabelao-page-shell .investor-stock-filters .investor-filter-heading {
+    height: auto !important;
+    min-height: 96px !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 44px 44px;
+    align-items: start;
+    gap: 8px !important;
+  }
+
+  .tabelao-page-shell .investor-stock-filters .investor-filter-heading > button {
+    justify-self: start;
+  }
+
+  .tabelao-page-shell .investor-stock-filters .investor-stock-sort select {
+    width: 100%;
+  }
+}

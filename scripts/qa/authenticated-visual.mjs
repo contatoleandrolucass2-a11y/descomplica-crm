@@ -1487,6 +1487,10 @@ async function checkTabelaoValidation(page, origin) {
                 control.labels.length > 0 &&
                 control.getBoundingClientRect().height >= targetSize - 1,
             ),
+          filterHeadingClear:
+            document.querySelector(".investor-filter-heading > button").getBoundingClientRect()
+              .bottom <=
+            document.querySelector(".investor-stock-filters > label").getBoundingClientRect().top,
           rowCount: table?.getAttribute("aria-rowcount") === String(count + 1),
           noRootOverflow: root.scrollWidth <= root.clientWidth + 1,
           noHeaderOverlap:

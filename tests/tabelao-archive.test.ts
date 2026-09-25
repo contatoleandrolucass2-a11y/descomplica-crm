@@ -175,6 +175,8 @@ describe("Tabelão protegido", () => {
     expect(styles).toContain("height:23px!important");
     expect(styles).toContain("font-size:10px");
     expect(styles).toContain("@media (prefers-reduced-motion:reduce)");
+    expect(styles).toContain("grid-template-rows: 44px 44px");
+    expect(styles).toContain("min-height: 96px !important");
     expect(styles).not.toContain(".tabelao-main");
     expect(styles).not.toContain(".tabelao-hero-note");
   });

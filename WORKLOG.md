@@ -17,6 +17,13 @@
   com 629 testes aprovados e somente as duas falhas conhecidas de modo POSIX 0600.
   Auditoria independente: 2.243 unidades, 53 opções, 23 empreendimentos, nenhuma
   exclusão e 2.503 combinações de filtros reconciliadas. Data da fonte preservada.
+- Suíte Linux completa aprovada: 639 testes (631 Vitest e oito Node), quatro skips.
+  Imagem comprovada nos dois perfis e publicada; health público e proteção 401
+  confirmados. Conferência autenticada motivou ajuste de singular nos contadores
+  e nomes acessíveis explícitos nos seletores.
+- Corrigida sobreposição mobile de Limpar filtros com o primeiro seletor: cabeçalho
+  em duas linhas de 44 px e altura automática apenas no Tabelão. QA passa a medir
+  a separação entre botão e primeiro campo nos quatro viewports.
 
 ## 2026-09-24 — correção da exclusividade pela coluna Planta
 

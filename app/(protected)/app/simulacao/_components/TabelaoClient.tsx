@@ -414,7 +414,7 @@ export function TabelaoClient() {
           <div className="investor-stock-sync" role="status" aria-live="polite" aria-atomic="true">
             <small>
               {loadState === "ready"
-                ? `${matchingInventory.length.toLocaleString("pt-BR")} opções exclusivas · ${inventorySummary.projects.toLocaleString("pt-BR")} empreendimentos`
+                ? `${matchingInventory.length.toLocaleString("pt-BR")} ${matchingInventory.length === 1 ? "opção exclusiva" : "opções exclusivas"} · ${inventorySummary.projects.toLocaleString("pt-BR")} ${inventorySummary.projects === 1 ? "empreendimento" : "empreendimentos"}`
                 : loadState === "error"
                   ? "Estoque indisponível"
                   : "Carregando estoque"}
@@ -459,7 +459,7 @@ export function TabelaoClient() {
         <p className="investor-stock-summary sr-only" aria-live="polite">
           {loadState === "ready"
             ? matchingInventory.length > 0
-              ? `${matchingInventory.length.toLocaleString("pt-BR")} opções exclusivas agrupadas por empreendimento, em ordem alfabética, com valores ${priceOrder === "desc" ? "decrescentes" : "crescentes"} dentro de cada empreendimento.`
+              ? `${matchingInventory.length.toLocaleString("pt-BR")} ${matchingInventory.length === 1 ? "opção exclusiva agrupada" : "opções exclusivas agrupadas"} por empreendimento, em ordem alfabética, com valores ${priceOrder === "desc" ? "decrescentes" : "crescentes"} dentro de cada empreendimento.`
               : exclusiveInventory.length > 0
                 ? "Nenhuma opção encontrada com esses filtros."
                 : "Nenhuma unidade com dados válidos para comparar."

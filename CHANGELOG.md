@@ -9,6 +9,9 @@
 - Preserva agrupamento por empreendimento nas duas ordens de preço; limpar e
   alterar filtros reiniciam a janela e rolagem da tabela.
 - Amplia testes de combinação, contagem, preço líquido e responsividade dos controles.
+- Ajusta contadores no singular e mantém rótulos acessíveis explícitos nos filtros.
+- Corrige a altura do cabeçalho dos filtros no celular para preservar Limpar filtros
+  sem sobreposição com os seletores e mantém os alvos de toque de 44 px.
 
 ## 2026-09-24 — exclusividade por empreendimento e planta
 

@@ -53,6 +53,7 @@ export function TabelaoFilters({
           <span>{label}</span>
           <select
             name={dimension}
+            aria-label={label}
             value={filters[dimension]}
             disabled={disabled}
             onChange={(event) => onChange(dimension, event.target.value)}
