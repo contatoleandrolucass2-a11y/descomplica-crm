@@ -3,6 +3,9 @@ import { readFile } from "node:fs/promises";
 
 import {
   buildTabelaoExclusiveInventory,
+  buildTabelaoFacets,
+  matchesTabelaoFacets,
+  TABELAO_FILTER_DEFAULTS,
   sortTabelaoInventory,
 } from "../../lib/archive-investor/tabelao-inventory.mjs";
 
@@ -115,6 +118,57 @@ assert.deepEqual(
   grouped,
   sortTabelaoInventory(buildTabelaoExclusiveInventory([...rows].reverse()), "project"),
 );
+const normalize = (value) =>
+  String(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, " ");
+let filterCombinationsChecked = 0;
+for (const [dimension, facet] of Object.entries(
+  buildTabelaoFacets(selected, TABELAO_FILTER_DEFAULTS),
+)) {
+  assert.equal(facet.total, selected.length);
+  assert.equal(
+    facet.options.reduce((total, option) => total + option.count, 0),
+    selected.length,
+  );
+  for (const option of facet.options) {
+    const filters = { ...TABELAO_FILTER_DEFAULTS, [dimension]: option.value };
+    const matching = selected.filter((row) => matchesTabelaoFacets(row, filters));
+    assert.equal(matching.length, option.count);
+    for (const row of matching) {
+      if (dimension === "price")
+        assert.equal(
+          String(cents(row.finalWithKit) - cents(row.unitBonus) - cents(row.tableSlack)),
+          option.value,
+        );
+      else if (dimension !== "region") assert.equal(normalize(row[dimension]), option.value);
+    }
+    const prices = buildTabelaoFacets(selected, filters).price;
+    if (dimension !== "price") assert.equal(prices.total, matching.length);
+    for (const price of prices.options) {
+      const combined = { ...filters, price: price.value };
+      const actual = selected.filter((row) => matchesTabelaoFacets(row, combined));
+      const expectedPriceRows = (dimension === "price" ? selected : matching).filter(
+        (row) =>
+          String(cents(row.finalWithKit) - cents(row.unitBonus) - cents(row.tableSlack)) ===
+          price.value,
+      );
+      assert.deepEqual(
+        actual.map((row) => row.id),
+        expectedPriceRows.map((row) => row.id),
+      );
+      assert.equal(actual.length, price.count);
+      filterCombinationsChecked += 1;
+    }
+  }
+}
+assert.deepEqual(
+  selected.filter((row) => matchesTabelaoFacets(row, TABELAO_FILTER_DEFAULTS)),
+  selected,
+);
 console.log(
   JSON.stringify(
     {
@@ -136,6 +190,8 @@ console.log(
       sourceOrderIndependent: true,
       allProjectsContiguous: true,
       ascendingPricesWithinProjects: true,
+      filterCombinationsChecked,
+      filterCountsReconciled: true,
     },
     null,
     2,

@@ -1479,14 +1479,27 @@ async function checkTabelaoValidation(page, origin) {
         return {
           title: document.querySelector("h1")?.textContent?.trim() === "Simulador Tabelão",
           columns: document.querySelectorAll(".investor-stock-table thead th").length === 7,
-          filtersRemoved: controls.length === 0,
+          filtersPresent:
+            controls.length === 6 &&
+            controls.every(
+              (control) =>
+                !control.disabled &&
+                control.labels.length > 0 &&
+                control.getBoundingClientRect().height >= targetSize - 1,
+            ),
           rowCount: table?.getAttribute("aria-rowcount") === String(count + 1),
           noRootOverflow: root.scrollWidth <= root.clientWidth + 1,
           noHeaderOverlap:
             headingBox != null &&
             syncBox != null &&
             syncBox.bottom <= headingBox.bottom + 1 &&
-            headingBox.bottom <= (results?.getBoundingClientRect().top ?? 0) + 1,
+            headingBox.bottom <=
+              (document.querySelector(".investor-stock-filters")?.getBoundingClientRect().top ??
+                0) +
+                1 &&
+            (document.querySelector(".investor-stock-filters")?.getBoundingClientRect().bottom ??
+              Infinity) <=
+              (results?.getBoundingClientRect().top ?? 0) + 1,
           rowHeight: rowBox != null && Math.abs(rowBox.height - rowHeight) <= 2,
           actionSize:
             actionBox != null &&
@@ -1527,7 +1540,65 @@ async function checkTabelaoValidation(page, origin) {
       },
       { expectedLastId: syntheticTabelaoLastInventoryId, count: syntheticTabelaoInventory.length },
     );
-    viewportChecks.push({ key: viewport.key, ...initial, ...bottom });
+    let filtersWorking = true;
+    const filterPanel = page.locator(".investor-stock-filters");
+    for (const dimension of ["businessUnit", "project", "region", "plant", "price"]) {
+      const select = filterPanel.locator(`select[name="${dimension}"]`);
+      const option = await select
+        .locator("option")
+        .nth(1)
+        .evaluate((element) => ({
+          value: element.value,
+          count: Number(element.textContent.match(/\(([\d.]+)\)$/)?.[1].replaceAll(".", "")),
+        }));
+      await select.selectOption(option.value);
+      await page.waitForFunction(
+        (expected) =>
+          document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") ===
+          String(expected + 1),
+        option.count,
+      );
+      filtersWorking &&= await results.evaluate((element) => element.scrollTop === 0);
+      const selectedRows = await page.locator("tr[data-inventory-unit-id]").evaluateAll((rows) =>
+        rows.map((row) => ({
+          businessUnit: row.getAttribute("data-inventory-business-unit"),
+          project: row.getAttribute("data-inventory-project"),
+          plant: row.querySelector(".investor-stock-plant")?.textContent.trim(),
+          price: row.querySelector(".investor-stock-price")?.textContent.replace(/\D/g, ""),
+        })),
+      );
+      const normalize = (value) =>
+        value
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/\s+/g, " ")
+          .trim();
+      filtersWorking &&=
+        selectedRows.length === option.count &&
+        selectedRows.every(
+          (row) =>
+            dimension === "region" ||
+            (dimension === "price"
+              ? row.price === option.value
+              : normalize(row[dimension]) === option.value),
+        );
+    }
+    await filterPanel.locator('select[name="priceOrder"]').selectOption("desc");
+    filtersWorking &&=
+      (await filterPanel.locator('select[name="priceOrder"]').inputValue()) === "desc";
+    await filterPanel.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+    await page
+      .locator(".investor-stock-sync")
+      .getByText(syntheticTabelaoCountLabel, { exact: true })
+      .waitFor({ state: "visible" });
+    filtersWorking &&= await filterPanel
+      .locator("select")
+      .evaluateAll((controls) =>
+        controls.every((control) => control.value === (control.name === "priceOrder" ? "asc" : "")),
+      );
+    filtersWorking &&= await results.evaluate((element) => element.scrollTop === 0);
+    viewportChecks.push({ key: viewport.key, ...initial, ...bottom, filtersWorking });
     process.stdout.write(`Tabelão QA: concluiu ${viewport.key}\n`);
   }
 

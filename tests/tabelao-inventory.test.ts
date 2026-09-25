@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildTabelaoExclusiveInventory,
+  buildTabelaoFacets,
+  matchesTabelaoFacets,
+  TABELAO_FILTER_DEFAULTS,
   calculateTabelaoPrice,
   sortTabelaoInventory,
   summarizeTabelao,
@@ -24,6 +27,101 @@ const unit = (id: string, fields: Partial<TabelaoInventoryItem> = {}) => ({
 });
 
 describe("Menor valor por tipologia no Tabelão", () => {
+  const filterSource = () =>
+    buildTabelaoExclusiveInventory([
+      unit("a1", { project: "Águas", plant: "Tipo 1Q", region: "Zona Sul" }),
+      unit("a2", { project: "aguas", plant: "TIPO 2Q", region: "Zona Sul", finalWithKit: 320_000 }),
+      unit("a3", { project: "Águas", plant: "Tipo 1Q", region: "Zona Sul", finalWithKit: 400_000 }),
+      unit("b1", {
+        project: "Bosque",
+        plant: "Tipo 1Q",
+        region: "Zona Norte",
+        businessUnit: "Outra",
+      }),
+    ]);
+
+  it("filtra os mínimos já escolhidos, não o preço bruto nem a unidade mais cara", () => {
+    const source = filterSource();
+    const before = structuredClone(source);
+    const filters = { ...TABELAO_FILTER_DEFAULTS, price: "28500000" };
+    expect(
+      source.filter((item) => matchesTabelaoFacets(item, filters)).map((item) => item.id),
+    ).toEqual(["a1", "b1"]);
+    expect(
+      source.filter((item) => matchesTabelaoFacets(item, { ...filters, price: "40000000" })),
+    ).toEqual([]);
+    const facets = buildTabelaoFacets(source, TABELAO_FILTER_DEFAULTS);
+    expect(facets.price.options).toEqual([
+      { value: "28500000", label: "28500000", count: 2 },
+      { value: "30500000", label: "30500000", count: 1 },
+    ]);
+    expect(source).toEqual(before);
+  });
+
+  it("normaliza opções e encadeia contagens ignorando apenas a própria dimensão", () => {
+    const source = filterSource();
+    const defaults = buildTabelaoFacets(source, TABELAO_FILTER_DEFAULTS);
+    expect(defaults.project.options).toEqual([
+      { value: "aguas", label: "Águas", count: 2 },
+      { value: "bosque", label: "Bosque", count: 1 },
+    ]);
+    const filters = { ...TABELAO_FILTER_DEFAULTS, project: "aguas", plant: "tipo 1q" };
+    const facets = buildTabelaoFacets(source, filters);
+    expect(facets.project.total).toBe(2);
+    expect(facets.plant.total).toBe(2);
+    expect(facets.price.options).toEqual([{ value: "28500000", label: "28500000", count: 1 }]);
+    expect(
+      source.filter((item) => matchesTabelaoFacets(item, filters)).map((item) => item.id),
+    ).toEqual(["a1"]);
+    for (const facet of Object.values(facets)) {
+      expect(facet.options.reduce((sum, option) => sum + option.count, 0)).toBe(facet.total);
+    }
+  });
+
+  it("combina as cinco dimensões e limpar restaura todas as opções", () => {
+    const source = filterSource();
+    const filters = {
+      businessUnit: "outra",
+      project: "bosque",
+      region: "zona norte",
+      plant: "tipo 1q",
+      price: "28500000",
+    };
+    expect(
+      source.filter((item) => matchesTabelaoFacets(item, filters)).map((item) => item.id),
+    ).toEqual(["b1"]);
+    expect(
+      source.filter((item) => matchesTabelaoFacets(item, { ...filters, region: "zona sul" })),
+    ).toEqual([]);
+    expect(source.filter((item) => matchesTabelaoFacets(item, TABELAO_FILTER_DEFAULTS))).toEqual(
+      source,
+    );
+    expect(
+      Object.values(buildTabelaoFacets([], TABELAO_FILTER_DEFAULTS)).every(
+        (facet) => facet.total === 0 && facet.options.length === 0,
+      ),
+    ).toBe(true);
+  });
+
+  it("inverte preços dentro do empreendimento sem separar o grupo ou alterar os mínimos", () => {
+    const source = filterSource();
+    expect(sortTabelaoInventory(source, "project-desc").map((item) => item.id)).toEqual([
+      "a2",
+      "a1",
+      "b1",
+    ]);
+    expect(sortTabelaoInventory(source, "project").map((item) => item.id)).toEqual([
+      "a1",
+      "a2",
+      "b1",
+    ]);
+    expect(
+      sortTabelaoInventory(
+        [unit("invalid", { finalWithKit: null }), unit("valid")],
+        "project-desc",
+      ).map((item) => item.id),
+    ).toEqual(["valid", "invalid"]);
+  });
   it("aplica os dois abatimentos com kit, sem substituir pelo finalPrice", () => {
     expect(
       calculateTabelaoPrice(

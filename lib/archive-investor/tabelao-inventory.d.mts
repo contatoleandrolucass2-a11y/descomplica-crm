@@ -70,3 +70,20 @@ export function sortTabelaoInventory<T extends TabelaoInventoryItem>(
 export function buildTabelaoOptions(items: readonly TabelaoInventoryItem[]): TabelaoOptions;
 
 export function summarizeTabelao(items: readonly TabelaoInventoryItem[]): TabelaoSummary;
+
+export type TabelaoFilterDimension = "businessUnit" | "project" | "region" | "plant" | "price";
+export type TabelaoFacetFilters = Record<TabelaoFilterDimension, string>;
+export const TABELAO_FILTER_DEFAULTS: Readonly<TabelaoFacetFilters>;
+export interface TabelaoFacet {
+  total: number;
+  options: Array<{ value: string; label: string; count: number }>;
+}
+export function matchesTabelaoFacets(
+  item: TabelaoInventoryItem,
+  filters: TabelaoFacetFilters,
+  ignoredDimension?: TabelaoFilterDimension | null,
+): boolean;
+export function buildTabelaoFacets(
+  items: readonly TabelaoInventoryItem[],
+  filters: TabelaoFacetFilters,
+): Record<TabelaoFilterDimension, TabelaoFacet>;

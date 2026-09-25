@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-09-24 — restauração dos filtros solicitados
+
+- Reaproveitado o visual do painel da Tabela Associativo para os seis controles
+  do print, com ajuda contextual e Limpar filtros. Sem alteração nas sete colunas.
+- Seleção por incorporadora, empreendimento, região, planta e valor líquido ocorre
+  após a escolha da unidade mínima. Contadores representam opções exclusivas,
+  considerando as demais dimensões ativas; valores são comparados em centavos.
+- Ordenação atua dentro de cada empreendimento; limpeza restaura ordem crescente
+  e todas as opções. Filtros e ordenação reposicionam a rolagem; exclusões por dados
+  inválidos permanecem separadas das linhas ocultas por seleção.
+- Skills Data aplicadas ao grão, denominadores e reconciliação; UX e React ao
+  reaproveitamento visual, controles nativos rotulados e cálculos memorizados.
+  Sem mudanças de fonte, autenticação, banco, ACL ou workflows n8n.
+- Validação local: lint, tipos, build e 31 testes focados aprovados. Suíte Windows
+  com 629 testes aprovados e somente as duas falhas conhecidas de modo POSIX 0600.
+  Auditoria independente: 2.243 unidades, 53 opções, 23 empreendimentos, nenhuma
+  exclusão e 2.503 combinações de filtros reconciliadas. Data da fonte preservada.
+
 ## 2026-09-24 — correção da exclusividade pela coluna Planta
 
 - Aplicada a correção dos dois prints: coluna Empreendimento sem produto/unidade e

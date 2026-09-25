@@ -23,7 +23,17 @@ Associativo, exibe uma unidade por combinação de incorporadora, empreendimento
 planta, escolhida pelo menor valor líquido independentemente da área. Todas as
 combinações válidas permanecem acessíveis pela rolagem; a janela de 60 linhas é
 apenas uma otimização de renderização, não um limite de resultados. Vagas e lojas
-continuam elegíveis. A barra de filtros permanece removida.
+continuam elegíveis. O painel Filtros do estoque permite selecionar incorporadora,
+empreendimento, região, planta e valor do imóvel, além de ordenar valores e limpar
+todos os filtros. Mantém o mesmo visual da Tabela Associativo.
+
+Os filtros são aplicados depois da escolha dos mínimos, sem promover uma unidade
+mais cara. As opções e contagens são encadeadas pelas demais dimensões ativas e
+contam tipologias exclusivas, não unidades brutas. Valor do Imóvel usa o líquido
+em centavos, nunca `finalPrice`. A ordem crescente ou decrescente atua dentro de
+cada empreendimento, preservando seus grupos. Limpar restaura todos os resultados,
+a ordem crescente e a rolagem inicial. Controles ficam desabilitados durante carga
+ou erro; linhas ocultas por filtros não contam como dados inválidos.
 
 O valor exibido e a seleção usam exatamente `finalWithKit - (unitBonus +
 tableSlack)`, correspondentes a **Valor Final Com Kit - (B.A. da Unidade + Folga

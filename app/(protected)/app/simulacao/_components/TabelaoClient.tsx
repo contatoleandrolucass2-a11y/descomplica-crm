@@ -5,9 +5,15 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react"
 
 import {
   buildTabelaoExclusiveInventory,
+  buildTabelaoFacets,
+  matchesTabelaoFacets,
+  TABELAO_FILTER_DEFAULTS,
+  type TabelaoFacetFilters,
+  type TabelaoFilterDimension,
   sortTabelaoInventory,
   summarizeTabelao,
 } from "@/lib/archive-investor/tabelao-inventory.mjs";
+import { TabelaoFilters } from "./TabelaoFilters";
 
 type InventoryItem = {
   id: string;
@@ -103,6 +109,8 @@ export function TabelaoClient() {
   const [inventoryMeta, setInventoryMeta] = useState<InventoryPayload | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [loadKey, setLoadKey] = useState(0);
+  const [filters, setFilters] = useState<TabelaoFacetFilters>(TABELAO_FILTER_DEFAULTS);
+  const [priceOrder, setPriceOrder] = useState<"asc" | "desc">("asc");
   const [inventoryWindowStart, setInventoryWindowStart] = useState(0);
   const [inventoryRowHeight, setInventoryRowHeight] = useState(DESKTOP_ROW_HEIGHT);
   const [tourOpen, setTourOpen] = useState(false);
@@ -163,13 +171,22 @@ export function TabelaoClient() {
     return () => window.removeEventListener("investor:start-guide", openGuide);
   }, []);
 
+  const exclusiveInventory = useMemo(() => buildTabelaoExclusiveInventory(inventory), [inventory]);
+  const facets = useMemo(
+    () => buildTabelaoFacets(exclusiveInventory, filters),
+    [exclusiveInventory, filters],
+  );
   const matchingInventory = useMemo(
-    () => sortTabelaoInventory(buildTabelaoExclusiveInventory(inventory), "project"),
-    [inventory],
+    () =>
+      sortTabelaoInventory(
+        exclusiveInventory.filter((item) => matchesTabelaoFacets(item, filters)),
+        priceOrder === "desc" ? "project-desc" : "project",
+      ),
+    [exclusiveInventory, filters, priceOrder],
   );
   const inventorySummary = useMemo(() => summarizeTabelao(matchingInventory), [matchingInventory]);
   const excludedUnits =
-    inventory.length - matchingInventory.reduce((total, item) => total + item.availableUnits, 0);
+    inventory.length - exclusiveInventory.reduce((total, item) => total + item.availableUnits, 0);
   const sourceUpdatedAt = inventoryMeta?.generatedAt ? new Date(inventoryMeta.generatedAt) : null;
   const visibleInventory = useMemo(
     () =>
@@ -267,11 +284,28 @@ export function TabelaoClient() {
   }
 
   function reloadInventory() {
+    clearFilters();
     setInventory([]);
     setInventoryMeta(null);
     setInventoryWindowStart(0);
     setLoadState("loading");
     setLoadKey((value) => value + 1);
+  }
+
+  function resetInventoryWindow() {
+    setInventoryWindowStart(0);
+    if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
+  }
+
+  function changeFilter(dimension: TabelaoFilterDimension, value: string) {
+    setFilters((current) => ({ ...current, [dimension]: value }));
+    resetInventoryWindow();
+  }
+
+  function clearFilters() {
+    setFilters(TABELAO_FILTER_DEFAULTS);
+    setPriceOrder("asc");
+    resetInventoryWindow();
   }
 
   function updateInventoryWindow(scrollTop: number) {
@@ -402,6 +436,19 @@ export function TabelaoClient() {
           </div>
         </header>
 
+        <TabelaoFilters
+          filters={filters}
+          facets={facets}
+          order={priceOrder}
+          disabled={loadState !== "ready"}
+          onChange={changeFilter}
+          onClear={clearFilters}
+          onOrderChange={(order) => {
+            setPriceOrder(order);
+            resetInventoryWindow();
+          }}
+        />
+
         {loadState === "ready" && excludedUnits > 0 ? (
           <p className="investor-stock-summary" role="status">
             {excludedUnits.toLocaleString("pt-BR")} unidades com dados incompletos ou inválidos não
@@ -412,8 +459,10 @@ export function TabelaoClient() {
         <p className="investor-stock-summary sr-only" aria-live="polite">
           {loadState === "ready"
             ? matchingInventory.length > 0
-              ? `${matchingInventory.length.toLocaleString("pt-BR")} opções exclusivas agrupadas por empreendimento, em ordem alfabética, com valores crescentes dentro de cada empreendimento.`
-              : "Nenhuma unidade com dados válidos para comparar."
+              ? `${matchingInventory.length.toLocaleString("pt-BR")} opções exclusivas agrupadas por empreendimento, em ordem alfabética, com valores ${priceOrder === "desc" ? "decrescentes" : "crescentes"} dentro de cada empreendimento.`
+              : exclusiveInventory.length > 0
+                ? "Nenhuma opção encontrada com esses filtros."
+                : "Nenhuma unidade com dados válidos para comparar."
             : loadState === "loading"
               ? "Carregando estoque…"
               : "Estoque indisponível"}
@@ -556,7 +605,9 @@ export function TabelaoClient() {
               {loadState === "ready" && matchingInventory.length === 0 ? (
                 <tr>
                   <td className="investor-empty-result" colSpan={7}>
-                    Nenhuma unidade com dados válidos para comparar.
+                    {exclusiveInventory.length > 0
+                      ? "Nenhuma opção encontrada com esses filtros."
+                      : "Nenhuma unidade com dados válidos para comparar."}
                   </td>
                 </tr>
               ) : null}

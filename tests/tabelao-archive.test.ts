@@ -96,9 +96,13 @@ describe("Tabelão protegido", () => {
     expect(authorizedBreadcrumbs).toContain('"/app/simulacao/tabelao"');
   });
 
-  it("replica o painel, remove os filtros e preserva a densidade e as sete colunas", () => {
+  it("replica os seis filtros e preserva a densidade e as sete colunas", () => {
     const client = readFileSync(
       new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
+      "utf8",
+    );
+    const filters = readFileSync(
+      new URL("../app/(protected)/app/simulacao/_components/TabelaoFilters.tsx", import.meta.url),
       "utf8",
     );
     const styles = readFileSync(
@@ -137,17 +141,29 @@ describe("Tabelão protegido", () => {
       "Ordenar valor",
       "Limpar filtros",
     ]) {
-      expect(client).not.toContain(label);
+      expect(filters).toContain(label);
     }
-    expect(client).not.toContain("investor-stock-filters");
+    expect(filters).toContain('className="investor-stock-filters"');
+    expect(filters).toContain("disabled={disabled}");
+    expect(filters).toContain('name="priceOrder"');
+    expect(client.indexOf("<TabelaoFilters")).toBeGreaterThan(
+      client.indexOf('id="tabelao-stock-title"'),
+    );
+    expect(client.indexOf("<TabelaoFilters")).toBeLessThan(
+      client.indexOf('className="investor-stock-results"'),
+    );
     expect(client).not.toContain("Empreendimento / Unidade");
     expect(client).toContain('<span className="investor-stock-product-text">{item.project}</span>');
     expect(client).not.toContain("buildInvestorFilterOptions");
     expect(client).not.toContain("matchesInvestorFilters");
     expect(client).not.toContain("reconcileInvestorFilters");
+    expect(client).toContain("buildTabelaoExclusiveInventory(inventory)");
     expect(client).toContain(
-      'sortTabelaoInventory(buildTabelaoExclusiveInventory(inventory), "project")',
+      "exclusiveInventory.filter((item) => matchesTabelaoFacets(item, filters))",
     );
+    expect(client).toContain('priceOrder === "desc" ? "project-desc" : "project"');
+    expect(client).toContain("setFilters(TABELAO_FILTER_DEFAULTS)");
+    expect(client).toContain("inventoryResultsRef.current.scrollTop = 0");
     expect(client).toContain("INVENTORY_WINDOW_SIZE = 60");
     expect(client).toContain('href="/app/simulacao/tabela-direta"');
     expect(client).toContain('window.addEventListener("investor:start-guide"');

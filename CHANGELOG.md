@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-24 — filtros encadeados no Tabelão
+
+- Restaura os filtros do print: incorporadora, empreendimento, região, planta,
+  valor do imóvel e ordenação, com ajuda e Limpar filtros no visual existente.
+- Aplica filtros e contagens às opções exclusivas, mantendo o menor líquido por
+  empreendimento e planta, sem repetir por área ou usar o preço bruto.
+- Preserva agrupamento por empreendimento nas duas ordens de preço; limpar e
+  alterar filtros reiniciam a janela e rolagem da tabela.
+- Amplia testes de combinação, contagem, preço líquido e responsividade dos controles.
+
 ## 2026-09-24 — exclusividade por empreendimento e planta
 
 - Corrige a seleção para uma única unidade de menor valor por empreendimento e
