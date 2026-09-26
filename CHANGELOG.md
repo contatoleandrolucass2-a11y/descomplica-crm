@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-26 — cabeçalhos compactos do Tabelão
+
+- Encurta os rótulos visíveis para Entrega, Estoque, Valor Imóvel, Volta ao
+  Caixa, Avaliação, Endereço, % Obra e Limitador, mantendo os nomes completos
+  como rótulos acessíveis.
+- Reduz literalmente 4 px nos cabeçalhos: Incorporadora passa de 8 px para 4 px
+  e os outros onze passam de 10 px para 6 px; o corpo da tabela não muda.
+- Preserva ordem, agrupamento, filtros, quantidade, fórmula do menor valor,
+  detalhes da unidade vencedora, fonte, rota, autorização e APIs.
+
 ## 2026-09-26 — largura automática das colunas do Tabelão
 
 - Substitui a grade fixa de 2.080 px pelo cálculo nativo de largura conforme o

@@ -546,32 +546,32 @@ export function TabelaoClient() {
                 <th scope="col" id="tabelao-area">
                   Metragem
                 </th>
-                <th scope="col" id="tabelao-delivery">
-                  Data de Entrega
+                <th scope="col" id="tabelao-delivery" aria-label="Data de Entrega">
+                  Entrega
                 </th>
                 <th scope="col" id="tabelao-plant">
                   Planta
                 </th>
-                <th scope="col" id="tabelao-quantity">
-                  Unidades
+                <th scope="col" id="tabelao-quantity" aria-label="Unidades no estoque publicado">
+                  Estoque
                 </th>
-                <th scope="col" id="tabelao-price">
-                  Menor valor
+                <th scope="col" id="tabelao-price" aria-label="Menor valor do imóvel">
+                  Valor Imóvel
                 </th>
-                <th scope="col" id="tabelao-cashback">
-                  Folga Volta ao Caixa
+                <th scope="col" id="tabelao-cashback" aria-label="Folga Volta ao Caixa">
+                  Volta ao Caixa
                 </th>
-                <th scope="col" id="tabelao-appraisal">
-                  Valor de Avaliação Bancária
+                <th scope="col" id="tabelao-appraisal" aria-label="Valor de Avaliação Bancária">
+                  Avaliação
                 </th>
-                <th scope="col" id="tabelao-address">
-                  Logradouro Obra / Número / Bairro
+                <th scope="col" id="tabelao-address" aria-label="Logradouro Obra / Número / Bairro">
+                  Endereço
                 </th>
-                <th scope="col" id="tabelao-progress">
-                  Total do andamento da obra (%)
+                <th scope="col" id="tabelao-progress" aria-label="Total do andamento da obra (%)">
+                  % Obra
                 </th>
-                <th scope="col" id="tabelao-description">
-                  Outras descrições
+                <th scope="col" id="tabelao-description" aria-label="Outras descrições">
+                  Limitador
                 </th>
               </tr>
             </thead>
@@ -658,7 +658,7 @@ export function TabelaoClient() {
                           ? `${decimal.format(item.privateArea)} m²`
                           : "—"}
                       </td>
-                      <td data-label="Data de Entrega" headers={`tabelao-delivery ${groupHeaders}`}>
+                      <td data-label="Entrega" headers={`tabelao-delivery ${groupHeaders}`}>
                         {formatDate(item.completionDate)}
                       </td>
                       <td
@@ -671,7 +671,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="tabelao-stock-quantity"
-                        data-label="Unidades"
+                        data-label="Estoque"
                         headers={`tabelao-quantity ${groupHeaders}`}
                         title={`${item.availableUnits.toLocaleString("pt-BR")} unidades no estoque publicado · ${item.project} · ${item.plant}`}
                       >
@@ -679,7 +679,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="investor-stock-price"
-                        data-label="Menor valor"
+                        data-label="Valor Imóvel"
                         headers={`tabelao-price ${groupHeaders}`}
                         title={`Valor Final Com Kit ${money.format(item.finalWithKit!)} − (B.A. da Unidade ${money.format(item.unitBonus!)} + Folga de Tabela ${money.format(item.tableSlack!)}) = ${money.format(item.minimumPrice)}`}
                       >
@@ -687,7 +687,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="tabelao-stock-money"
-                        data-label="Folga Volta ao Caixa"
+                        data-label="Volta ao Caixa"
                         headers={`tabelao-cashback ${groupHeaders}`}
                         title={formatMoneyValue(item.cashBackSlack)}
                       >
@@ -695,7 +695,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="tabelao-stock-money"
-                        data-label="Valor de Avaliação Bancária"
+                        data-label="Avaliação"
                         headers={`tabelao-appraisal ${groupHeaders}`}
                         title={formatMoneyValue(item.appraisal)}
                       >
@@ -703,7 +703,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="tabelao-stock-long-text"
-                        data-label="Logradouro Obra / Número / Bairro"
+                        data-label="Endereço"
                         headers={`tabelao-address ${groupHeaders}`}
                         title={address}
                       >
@@ -711,7 +711,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="tabelao-stock-progress"
-                        data-label="Total do andamento da obra (%)"
+                        data-label="% Obra"
                         headers={`tabelao-progress ${groupHeaders}`}
                         title={formatProgress(item.progress)}
                       >
@@ -719,7 +719,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="tabelao-stock-long-text"
-                        data-label="Outras descrições"
+                        data-label="Limitador"
                         headers={`tabelao-description ${groupHeaders}`}
                         title={classification}
                       >

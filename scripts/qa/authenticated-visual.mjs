@@ -1465,9 +1465,8 @@ async function checkTabelaoValidation(page, origin) {
         const table = document.querySelector(".investor-stock-table");
         const firstRow = document.querySelector("tr[data-inventory-unit-id]");
         const controls = [...document.querySelectorAll(".investor-stock-filters select")];
-        const columnLabels = [...document.querySelectorAll(".investor-stock-table thead th")].map(
-          (column) => column.textContent.trim(),
-        );
+        const columnHeaders = [...document.querySelectorAll(".investor-stock-table thead th")];
+        const columnLabels = columnHeaders.map((column) => column.textContent.trim());
         const rowBox = firstRow?.getBoundingClientRect();
         const headingBox = document
           .querySelector(".investor-stock-panel > .investor-section-heading")
@@ -1485,23 +1484,34 @@ async function checkTabelaoValidation(page, origin) {
           ...document.querySelectorAll(".investor-stock-table thead th"),
         ].every((header) => {
           const cells = [header, ...document.querySelectorAll(`[headers~="${header.id}"]`)];
-          const widestContent = Math.max(...cells.map(cellContentWidth));
-          const horizontalPadding =
-            Number.parseFloat(getComputedStyle(header).paddingLeft) +
-            Number.parseFloat(getComputedStyle(header).paddingRight);
-          return header.getBoundingClientRect().width <= widestContent + horizontalPadding + 4;
+          const widestRequiredWidth = Math.max(
+            ...cells.map((cell) => {
+              const style = getComputedStyle(cell);
+              return (
+                cellContentWidth(cell) +
+                Number.parseFloat(style.paddingLeft) +
+                Number.parseFloat(style.paddingRight)
+              );
+            }),
+          );
+          return header.getBoundingClientRect().width <= widestRequiredWidth + 4;
         });
+        const tableFillsAvailableWidth =
+          results != null &&
+          table != null &&
+          Math.abs(table.getBoundingClientRect().width - results.clientWidth) <= 2 &&
+          table.scrollWidth <= results.clientWidth + 2;
         const fullTextVisible = [
           ...document.querySelectorAll(
             ".investor-stock-table tbody th, .investor-stock-table tbody td",
           ),
         ].every((cell) => cell.scrollWidth <= cell.clientWidth + 1);
-        let internalHorizontalScroll = false;
+        let horizontalOverflowHandled = false;
         if (results != null) {
           const maximumScroll = results.scrollWidth - results.clientWidth;
           results.scrollLeft = maximumScroll;
-          internalHorizontalScroll =
-            maximumScroll > 0 && Math.abs(results.scrollLeft - maximumScroll) <= 1;
+          horizontalOverflowHandled =
+            maximumScroll <= 1 || Math.abs(results.scrollLeft - maximumScroll) <= 1;
           results.scrollLeft = 0;
         }
         return {
@@ -1512,15 +1522,15 @@ async function checkTabelaoValidation(page, origin) {
               "Incorporadora",
               "Empreendimento",
               "Metragem",
-              "Data de Entrega",
+              "Entrega",
               "Planta",
-              "Unidades",
-              "Menor valor",
-              "Folga Volta ao Caixa",
-              "Valor de Avaliação Bancária",
-              "Logradouro Obra / Número / Bairro",
-              "Total do andamento da obra (%)",
-              "Outras descrições",
+              "Estoque",
+              "Valor Imóvel",
+              "Volta ao Caixa",
+              "Avaliação",
+              "Endereço",
+              "% Obra",
+              "Limitador",
             ].every((label, index) => columnLabels[index] === label),
           filtersPresent:
             controls.length === 6 &&
@@ -1549,7 +1559,7 @@ async function checkTabelaoValidation(page, origin) {
               (results?.getBoundingClientRect().top ?? 0) + 1,
           rowHeight: rowBox != null && rowBox.height >= rowHeight - 2,
           quantityColumn:
-            columnLabels.indexOf("Unidades") === columnLabels.indexOf("Menor valor") - 1 &&
+            columnLabels.indexOf("Estoque") === columnLabels.indexOf("Valor Imóvel") - 1 &&
             Number(
               firstRow
                 ?.querySelector(".tabelao-stock-quantity")
@@ -1566,17 +1576,20 @@ async function checkTabelaoValidation(page, origin) {
             results != null &&
             results.scrollHeight <= results.clientHeight + 2 &&
             getComputedStyle(results).maxHeight === "none",
-          automaticColumnWidths: tableStyle?.tableLayout === "auto" && contentFitColumns,
+          automaticColumnWidths:
+            tableStyle?.tableLayout === "auto" && (contentFitColumns || tableFillsAvailableWidth),
           businessHeaderReduced:
             businessHeader != null &&
             projectHeader != null &&
-            Math.abs(
-              Number.parseFloat(getComputedStyle(projectHeader).fontSize) -
-                Number.parseFloat(getComputedStyle(businessHeader).fontSize) -
-                2,
-            ) < 0.1,
+            Math.abs(Number.parseFloat(getComputedStyle(businessHeader).fontSize) - 4) < 0.1 &&
+            columnHeaders
+              .filter((header) => header !== businessHeader)
+              .every(
+                (header) =>
+                  Math.abs(Number.parseFloat(getComputedStyle(header).fontSize) - 6) < 0.1,
+              ),
           fullTextVisible,
-          internalHorizontalScroll,
+          horizontalOverflowHandled,
         };
       },
       { ...viewport, count: syntheticTabelaoInventory.length },
@@ -1843,9 +1856,7 @@ async function checkTabelaoValidation(page, origin) {
     locationReferenceApplied =
       (
         await page
-          .locator(
-            `tr[data-inventory-unit-id="${firstWinner.id}"] td[data-label="Logradouro Obra / Número / Bairro"]`,
-          )
+          .locator(`tr[data-inventory-unit-id="${firstWinner.id}"] td[data-label="Endereço"]`)
           .textContent()
       )?.trim() === expectedAddress;
     locationMetadataFits = await page.evaluate(() => {

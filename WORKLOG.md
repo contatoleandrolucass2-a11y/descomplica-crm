@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-09-26 — rótulos e tipografia dos cabeçalhos do Tabelão
+
+- Medições no Chromium confirmaram 8 px em Incorporadora e 10 px nos outros
+  onze cabeçalhos, nos quatro viewports obrigatórios. A redução literal pedida
+  definiu os novos valores em 4 px e 6 px, sem alterar o texto do corpo.
+- Os oito rótulos longos foram substituídos apenas na apresentação visual e nos
+  `data-label` responsivos. Os nomes completos permanecem nos `aria-label` dos
+  cabeçalhos para preservar o contexto exposto a tecnologias assistivas.
+- A semântica foi reconciliada com os campos oficiais: Estoque usa
+  `availableUnits`; Valor Imóvel usa `minimumPrice`; Volta ao Caixa usa
+  `cashBackSlack`; Avaliação usa `appraisal`; Endereço usa a composição
+  protegida; % Obra usa `progress`; e Limitador usa `classification`.
+
 ## 2026-09-26 — colunas automáticas e densidade horizontal do Tabelão
 
 - Confirmado que as doze larguras fixas somavam 2.080 px e ampliavam inclusive
