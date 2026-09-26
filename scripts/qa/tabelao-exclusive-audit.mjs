@@ -4,24 +4,42 @@ import { readFile } from "node:fs/promises";
 import {
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
+  enrichTabelaoLocationFields,
   groupTabelaoInventoryByProject,
   matchesTabelaoFacets,
+  normalizeTabelaoProgress,
   TABELAO_FILTER_DEFAULTS,
   sortTabelaoInventory,
 } from "../../lib/archive-investor/tabelao-inventory.mjs";
 
-// Pass a local, untracked payload path to audit an archived response without consulting the live source.
+async function loadPayload(source) {
+  return source.startsWith("https://")
+    ? fetch(source, { signal: AbortSignal.timeout(30_000) }).then((response) => {
+        assert.equal(response.ok, true, `Source HTTP ${response.status}`);
+        return response.json();
+      })
+    : JSON.parse(await readFile(source, "utf8"));
+}
+
+// Pass local, untracked payload paths to audit archived live and address-reference responses.
 const source = process.argv[2] ?? "https://descomplicapro.com.br/api/inventory";
-const payload = source.startsWith("https://")
-  ? await fetch(source, { signal: AbortSignal.timeout(30_000) }).then((response) => {
-      assert.equal(response.ok, true, `Source HTTP ${response.status}`);
-      return response.json();
-    })
-  : JSON.parse(await readFile(source, "utf8"));
+const referenceSource = process.argv[3] ?? null;
+const payload = await loadPayload(source);
+const referencePayload = referenceSource ? await loadPayload(referenceSource) : null;
 
 const rows = payload.items;
 assert.equal(rows.length, Number(payload.count));
 assert.equal(new Set(rows.map((row) => row.id)).size, rows.length, "Duplicate source IDs");
+const sourceById = new Map(rows.map((row) => [row.id, row]));
+const detailFields = [
+  "cashBackSlack",
+  "appraisal",
+  "street",
+  "streetNumber",
+  "neighborhood",
+  "progress",
+  "classification",
+];
 const required = [
   "id",
   "businessUnit",
@@ -37,19 +55,16 @@ const missing = Object.fromEntries(
     rows.filter((row) => row[field] == null || row[field] === "").length,
   ]),
 );
+const normalize = (value) =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, " ");
 
 // Independent oracle: group the source directly and recompute from decimal cents, not the production price helper.
-const key = (row) =>
-  JSON.stringify([
-    ...[row.businessUnit, row.project, row.plant].map((value) =>
-      String(value ?? "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, " "),
-    ),
-  ]);
+const key = (row) => JSON.stringify([...[row.businessUnit, row.project, row.plant].map(normalize)]);
 const cents = (value) => Number(value.toFixed(2).replace(".", ""));
 const expected = new Map();
 const stockUnits = new Map();
@@ -84,6 +99,7 @@ assert.equal(selected.length, expected.size, "Lost or duplicated typologies");
 assert.equal(new Set(selected.map(key)).size, selected.length);
 for (const row of selected) {
   const group = expected.get(key(row));
+  const sourceRow = sourceById.get(row.id);
   const minimum = Math.min(...group.map((candidate) => candidate.price));
   assert.equal(Math.round(row.minimumPrice * 100), minimum, "Incorrect net minimum");
   assert.equal(
@@ -92,6 +108,13 @@ for (const row of selected) {
   );
   assert.equal(row.availableUnits, stockUnits.get(key(row)).size);
   assert.equal(row.pricedUnits, group.length);
+  for (const field of detailFields) {
+    assert.deepEqual(
+      row[field],
+      sourceRow[field],
+      `Detail ${field} did not come from winning unit`,
+    );
+  }
 }
 assert.equal(
   selected.reduce((sum, row) => sum + row.pricedUnits, 0),
@@ -146,13 +169,115 @@ assert.deepEqual(
   grouped,
   sortTabelaoInventory(buildTabelaoExclusiveInventory([...rows].reverse()), "project"),
 );
-const normalize = (value) =>
-  String(value)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, " ");
+
+const locationFields = ["street", "streetNumber", "neighborhood"];
+const withoutLocation = (row) =>
+  Object.fromEntries(Object.entries(row).filter(([field]) => !locationFields.includes(field)));
+const locationCandidate = (row) => {
+  const candidate = Object.fromEntries(
+    locationFields.map((field) => [
+      field,
+      typeof row[field] === "string" && row[field].trim() ? row[field].trim() : null,
+    ]),
+  );
+  const values = locationFields.map((field) => candidate[field]);
+  if (values.every((value) => value === null)) return null;
+  return candidate;
+};
+const uniqueLocation = (candidates) => {
+  const unique = new Map();
+  for (const row of candidates) {
+    const candidate = locationCandidate(row);
+    if (!candidate) continue;
+    const signature = JSON.stringify(locationFields.map((field) => normalize(candidate[field])));
+    if (!unique.has(signature)) unique.set(signature, candidate);
+  }
+  return unique.size === 1 ? unique.values().next().value : null;
+};
+const compatibleLocation = (row, candidate, requireComplete) => {
+  if (!candidate) return null;
+  if (requireComplete && locationFields.some((field) => !candidate[field])) return null;
+  if (
+    locationFields.some(
+      (field) =>
+        row[field]?.trim() &&
+        (!candidate[field] || normalize(row[field]) !== normalize(candidate[field])),
+    )
+  ) {
+    return null;
+  }
+  return locationFields.some((field) => !row[field]?.trim() && candidate[field]) ? candidate : null;
+};
+let addressEnrichment = null;
+if (referencePayload) {
+  assert.equal(referencePayload.items.length, Number(referencePayload.count));
+  assert.equal(
+    new Set(referencePayload.items.map((row) => row.id)).size,
+    referencePayload.items.length,
+    "Duplicate address-reference IDs",
+  );
+  const displayed = enrichTabelaoLocationFields(selected, referencePayload.items);
+  const provenance = { live: 0, exactUnit: 0, uniqueProject: 0, unresolved: 0 };
+  assert.equal(displayed.length, selected.length);
+  for (let index = 0; index < selected.length; index += 1) {
+    const row = selected[index];
+    const actual = displayed[index];
+    assert.equal(actual.id, row.id, "Address enrichment changed row identity or order");
+    assert.deepEqual(
+      withoutLocation(actual),
+      withoutLocation(row),
+      "Address enrichment changed data",
+    );
+    const sameProject = referencePayload.items.filter(
+      (candidate) =>
+        normalize(candidate.businessUnit) === normalize(row.businessUnit) &&
+        normalize(candidate.project) === normalize(row.project),
+    );
+    const exactRows = row.identifier
+      ? sameProject.filter(
+          (candidate) => normalize(candidate.identifier) === normalize(row.identifier),
+        )
+      : [];
+    const exact = compatibleLocation(row, uniqueLocation(exactRows), false);
+    const projectCandidate = uniqueLocation(sameProject);
+    const project = compatibleLocation(row, projectCandidate, true);
+    const locationSource = exact ?? project;
+    const expected = Object.fromEntries(
+      locationFields.map((field) => [field, row[field]?.trim() || locationSource?.[field] || null]),
+    );
+    assert.deepEqual(
+      Object.fromEntries(locationFields.map((field) => [field, actual[field]])),
+      expected,
+      "Displayed address has no coherent source",
+    );
+    const completedFields = locationFields.filter(
+      (field) => !row[field]?.trim() && actual[field]?.trim(),
+    );
+    if (completedFields.length === 0) {
+      provenance[locationFields.every((field) => actual[field]?.trim()) ? "live" : "unresolved"] +=
+        1;
+    } else if (completedFields.every((field) => actual[field] === exact?.[field])) {
+      provenance.exactUnit += 1;
+    } else {
+      assert.equal(
+        completedFields.every((field) => actual[field] === project?.[field]),
+        true,
+        "Project fallback is not a unique coherent address",
+      );
+      provenance.uniqueProject += 1;
+    }
+  }
+  addressEnrichment = {
+    referenceSource,
+    referenceRows: referencePayload.items.length,
+    displayedRows: displayed.length,
+    provenance,
+    liveRowsAndOrderPreserved: true,
+    nonLocationFieldsPreserved: true,
+    coherentAddressRequired: true,
+  };
+}
+
 let filterCombinationsChecked = 0;
 for (const [dimension, facet] of Object.entries(
   buildTabelaoFacets(selected, TABELAO_FILTER_DEFAULTS),
@@ -207,6 +332,34 @@ console.log(
       sourceRows: rows.length,
       uniqueIds: new Set(rows.map((row) => row.id)).size,
       missing,
+      selectedDetailPresence: Object.fromEntries(
+        detailFields.map((field) => [
+          field,
+          selected.filter(
+            (row) =>
+              row[field] != null &&
+              (typeof row[field] !== "string" || row[field].trim().length > 0),
+          ).length,
+        ]),
+      ),
+      selectedDisplayedDetailPresence: Object.fromEntries(
+        detailFields.map((field) => [
+          field,
+          selected.filter((row) => {
+            if (field === "classification") {
+              return (
+                typeof row[field] === "string" &&
+                row[field].trim().length > 0 &&
+                row[field].trim() !== "0"
+              );
+            }
+            if (field === "progress") return normalizeTabelaoProgress(row[field]) !== null;
+            return (
+              row[field] != null && (typeof row[field] !== "string" || row[field].trim().length > 0)
+            );
+          }).length,
+        ]),
+      ),
       excluded,
       exclusiveOptions: selected.length,
       projects: new Set(selected.map((row) => JSON.stringify([row.businessUnit, row.project])))
@@ -218,6 +371,8 @@ console.log(
       availableUnitsInDisplayedGroups: selected.reduce((sum, row) => sum + row.availableUnits, 0),
       allRowSpansChecked: true,
       allMinimaChecked: true,
+      allDetailsFromWinningUnit: true,
+      addressEnrichment,
       sourceOrderIndependent: true,
       allProjectsContiguous: true,
       ascendingPricesWithinProjects: true,

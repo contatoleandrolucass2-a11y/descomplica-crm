@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
+  enrichTabelaoLocationFields,
   groupTabelaoInventoryByProject,
   matchesTabelaoFacets,
+  normalizeTabelaoProgress,
   TABELAO_FILTER_DEFAULTS,
   calculateTabelaoPrice,
   sortTabelaoInventory,
@@ -23,6 +25,13 @@ const unit = (id: string, fields: Partial<TabelaoInventoryItem> = {}) => ({
   finalWithKit: 300_000,
   unitBonus: 10_000,
   tableSlack: 5_000,
+  cashBackSlack: 3_000,
+  appraisal: 330_000,
+  classification: "Residencial",
+  street: "Rua QA",
+  streetNumber: "10",
+  neighborhood: "Bairro QA",
+  progress: 0.42,
   finalPrice: 300_000,
   ...fields,
 });
@@ -236,6 +245,169 @@ describe("Menor valor por tipologia no Tabelão", () => {
       },
     ]);
     expect(source).toEqual(before);
+  });
+
+  it("mantém os novos detalhes da mesma unidade que define o menor valor", () => {
+    const expensive = unit("101", {
+      finalWithKit: 400_000,
+      cashBackSlack: 11_000,
+      appraisal: 500_000,
+      classification: "Detalhe caro",
+      street: "Rua Cara",
+      streetNumber: "101",
+      neighborhood: "Bairro Caro",
+      progress: 0.8,
+    });
+    const minimum = unit("201", {
+      finalWithKit: 300_000,
+      cashBackSlack: 0,
+      appraisal: 0,
+      classification: "Detalhe mínimo",
+      street: "Rua Mínima",
+      streetNumber: "201",
+      neighborhood: "Bairro Mínimo",
+      progress: 0.25,
+    });
+
+    expect(buildTabelaoExclusiveInventory([expensive, minimum])).toMatchObject([
+      {
+        id: "201",
+        availableUnits: 2,
+        cashBackSlack: 0,
+        appraisal: 0,
+        classification: "Detalhe mínimo",
+        street: "Rua Mínima",
+        streetNumber: "201",
+        neighborhood: "Bairro Mínimo",
+        progress: 0.25,
+      },
+    ]);
+  });
+
+  it("complementa somente endereço ausente por referência coerente da unidade ou empreendimento", () => {
+    const live = [
+      unit("1", { street: null, streetNumber: null, neighborhood: "Bairro vivo" }),
+      unit("2", {
+        project: "Projeto com referência única",
+        identifier: "sem-correspondencia",
+        street: null,
+        streetNumber: null,
+        neighborhood: null,
+      }),
+      unit("3", {
+        businessUnit: "Outra",
+        street: null,
+        streetNumber: null,
+        neighborhood: null,
+      }),
+    ];
+    const reference = [
+      unit("r1", {
+        identifier: "1",
+        street: "Rua de referência",
+        streetNumber: "100",
+        neighborhood: "Bairro vivo",
+      }),
+      unit("r2", {
+        project: "Projeto com referência única",
+        identifier: "outra-unidade",
+        street: "Rua do projeto",
+        streetNumber: "200",
+        neighborhood: "Bairro do projeto",
+      }),
+    ];
+    const before = structuredClone(live);
+
+    expect(enrichTabelaoLocationFields(live, reference)).toMatchObject([
+      {
+        street: "Rua de referência",
+        streetNumber: "100",
+        neighborhood: "Bairro vivo",
+      },
+      {
+        street: "Rua do projeto",
+        streetNumber: "200",
+        neighborhood: "Bairro do projeto",
+      },
+      { street: null, streetNumber: null, neighborhood: null },
+    ]);
+    expect(live).toEqual(before);
+  });
+
+  it("não combina referência com componente vivo conflitante", () => {
+    const live = [unit("1", { street: null, streetNumber: null, neighborhood: "Bairro atual" })];
+    const reference = [
+      unit("r1", {
+        identifier: "1",
+        street: "Rua antiga",
+        streetNumber: "100",
+        neighborhood: "Bairro antigo",
+      }),
+    ];
+
+    expect(enrichTabelaoLocationFields(live, reference)).toMatchObject([
+      { street: null, streetNumber: null, neighborhood: "Bairro atual" },
+    ]);
+  });
+
+  it("não fabrica endereço ao combinar registros ou escolher projeto ambíguo", () => {
+    const live = [
+      unit("1", {
+        identifier: "sem-correspondencia",
+        street: null,
+        streetNumber: null,
+        neighborhood: null,
+      }),
+      unit("2", {
+        project: "Projeto ambíguo",
+        identifier: "sem-correspondencia-2",
+        street: null,
+        streetNumber: null,
+        neighborhood: null,
+      }),
+    ];
+    const reference = [
+      unit("r1", {
+        identifier: "outra-1",
+        street: "Rua A",
+        streetNumber: null,
+        neighborhood: "Bairro A",
+      }),
+      unit("r2", {
+        identifier: "outra-2",
+        street: null,
+        streetNumber: "10",
+        neighborhood: "Bairro A",
+      }),
+      unit("r3", {
+        project: "Projeto ambíguo",
+        identifier: "outra-3",
+        street: "Rua B",
+        streetNumber: "20",
+        neighborhood: "Bairro B",
+      }),
+      unit("r4", {
+        project: "Projeto ambíguo",
+        identifier: "outra-4",
+        street: "Rua C",
+        streetNumber: "30",
+        neighborhood: "Bairro C",
+      }),
+    ];
+
+    expect(enrichTabelaoLocationFields(live, reference)).toMatchObject([
+      { street: null, streetNumber: null, neighborhood: null },
+      { street: null, streetNumber: null, neighborhood: null },
+    ]);
+  });
+
+  it("aceita somente a escala oficial de andamento entre zero e um", () => {
+    expect(normalizeTabelaoProgress(0)).toBe(0);
+    expect(normalizeTabelaoProgress(0.42)).toBe(0.42);
+    expect(normalizeTabelaoProgress(1)).toBe(1);
+    for (const value of [-0.01, 1.01, 42, NaN, Infinity, null, "0.42"]) {
+      expect(normalizeTabelaoProgress(value)).toBeNull();
+    }
   });
 
   it("preserva todas as plantas, vagas e lojas por empreendimento e incorporadora sem duplicar por área", () => {

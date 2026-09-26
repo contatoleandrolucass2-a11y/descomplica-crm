@@ -5,8 +5,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
+  enrichTabelaoLocationFields,
   groupTabelaoInventoryByProject,
   matchesTabelaoFacets,
+  normalizeTabelaoProgress,
   TABELAO_FILTER_DEFAULTS,
   type TabelaoFacetFilters,
   type TabelaoFilterDimension,
@@ -26,8 +28,15 @@ type InventoryItem = {
   finalWithKit: number | null;
   unitBonus: number | null;
   tableSlack: number | null;
+  cashBackSlack: number | null;
+  appraisal: number | null;
+  classification: string | null;
   privateArea: number | null;
   completionDate: string | null;
+  street?: string | null;
+  streetNumber?: string | null;
+  neighborhood?: string | null;
+  progress: number | null;
   region: string | null;
   city: string | null;
   state: string | null;
@@ -41,6 +50,8 @@ type InventoryPayload = {
   count: number;
   items: InventoryItem[];
 };
+
+type InventoryMeta = Omit<InventoryPayload, "items">;
 
 type LoadState = "loading" | "ready" | "error";
 
@@ -68,11 +79,11 @@ const TABELAO_TOUR_STEPS = [
     eyebrow: "Consulte as unidades",
     title: "Confira a unidade correta",
     description:
-      "Revise empreendimento, metragem, entrega, planta e valor. A primeira coluna informa a quantidade de unidades disponíveis no estoque de cada empreendimento e planta. Incorporadora e empreendimento aparecem uma única vez por grupo.",
+      "Revise empreendimento, metragem, entrega, planta, menor valor e os detalhes da unidade que define esse valor. O endereço prioriza o estoque publicado e pode ser completado por uma referência protegida única e compatível da unidade ou do empreendimento. Unidades informa o total publicado no mesmo grupo.",
     tip: "Confirme os dados antes de iniciar a proposta.",
     checklist: [
       "Confira empreendimento e planta",
-      "Revise entrega e valor",
+      "Revise entrega, valor e detalhes",
       "Confira as unidades disponíveis",
     ],
   },
@@ -85,6 +96,10 @@ const money = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 2,
 });
 const decimal = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 });
+const percent = new Intl.NumberFormat("pt-BR", {
+  style: "percent",
+  maximumFractionDigits: 2,
+});
 const date = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 const dateTime = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "short",
@@ -101,9 +116,53 @@ function informationLabel(value?: string | null) {
   return value?.trim() || "Não informado";
 }
 
+function descriptiveLabel(value?: string | null) {
+  const normalized = value?.trim();
+  return normalized && normalized !== "0" ? normalized : "Não informado";
+}
+
+function formatMoneyValue(value?: number | null) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? money.format(value)
+    : "Não informado";
+}
+
+function formatProgress(value?: number | null) {
+  const normalized = normalizeTabelaoProgress(value);
+  return normalized === null ? "Não informado" : percent.format(normalized);
+}
+
+function formatAddress(item: InventoryItem) {
+  return [item.street, item.streetNumber, item.neighborhood]
+    .map((value) => value?.trim() || "Não informado")
+    .join(" / ");
+}
+
+async function fetchInventoryPayload(url: string, signal: AbortSignal) {
+  const response = await fetch(url, { cache: "no-store", signal });
+  if (!response.ok) throw new Error("inventory_unavailable");
+  const payload = (await response.json()) as InventoryPayload;
+  if (!Array.isArray(payload.items) || payload.items.length !== Number(payload.count)) {
+    throw new Error("inventory_payload_invalid");
+  }
+  return payload;
+}
+
+function inventoryMetadata(payload: InventoryPayload): InventoryMeta {
+  const metadata: InventoryMeta = { count: payload.count };
+  if (payload.source !== undefined) metadata.source = payload.source;
+  if (payload.generatedAt !== undefined) metadata.generatedAt = payload.generatedAt;
+  if (payload.snapshotReferenceDate !== undefined) {
+    metadata.snapshotReferenceDate = payload.snapshotReferenceDate;
+  }
+  if (payload.sourceKind !== undefined) metadata.sourceKind = payload.sourceKind;
+  return metadata;
+}
+
 export function TabelaoClient() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [inventoryMeta, setInventoryMeta] = useState<InventoryPayload | null>(null);
+  const [inventoryMeta, setInventoryMeta] = useState<InventoryMeta | null>(null);
+  const [locationReferenceMeta, setLocationReferenceMeta] = useState<InventoryMeta | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [loadKey, setLoadKey] = useState(0);
   const [filters, setFilters] = useState<TabelaoFacetFilters>(TABELAO_FILTER_DEFAULTS);
@@ -123,22 +182,50 @@ export function TabelaoClient() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/inventory", { cache: "no-store", signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("inventory_unavailable");
-        const payload = (await response.json()) as InventoryPayload;
-        if (!Array.isArray(payload.items) || payload.items.length !== Number(payload.count)) {
-          throw new Error("inventory_payload_invalid");
+    let active = true;
+
+    const loadLocationReference = async (payload: InventoryPayload) => {
+      try {
+        const referencePayload = await fetchInventoryPayload(
+          "/api/inventory/snapshot",
+          controller.signal,
+        );
+        if (!active) return;
+        const enrichedItems = enrichTabelaoLocationFields(payload.items, referencePayload.items);
+        const locationReferenceApplied = payload.items.some((item, index) =>
+          (["street", "streetNumber", "neighborhood"] as const).some(
+            (field) => !item[field]?.trim() && Boolean(enrichedItems[index]?.[field]?.trim()),
+          ),
+        );
+        if (locationReferenceApplied) {
+          setInventory(enrichedItems);
+          setLocationReferenceMeta(inventoryMetadata(referencePayload));
         }
+      } catch {
+        // Address reference is optional; the live inventory remains authoritative and visible.
+      }
+    };
+
+    const loadInventory = async () => {
+      try {
+        const payload = await fetchInventoryPayload("/api/inventory", controller.signal);
+        if (!active) return;
         setInventory(payload.items);
-        setInventoryMeta(payload);
+        setInventoryMeta(inventoryMetadata(payload));
+        setLocationReferenceMeta(null);
         setLoadState("ready");
-      })
-      .catch((error) => {
+        void loadLocationReference(payload);
+      } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
-        setLoadState("error");
-      });
-    return () => controller.abort();
+        if (active) setLoadState("error");
+      }
+    };
+
+    void loadInventory();
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [loadKey]);
 
   useEffect(() => {
@@ -260,6 +347,7 @@ export function TabelaoClient() {
     clearFilters();
     setInventory([]);
     setInventoryMeta(null);
+    setLocationReferenceMeta(null);
     setLoadState("loading");
     setLoadKey((value) => value + 1);
   }
@@ -371,11 +459,17 @@ export function TabelaoClient() {
                 {formatDate(inventoryMeta.snapshotReferenceDate)}
               </small>
             ) : sourceUpdatedAt && Number.isFinite(sourceUpdatedAt.getTime()) ? (
-              <small>Atualizado {dateTime.format(sourceUpdatedAt)}</small>
+              <small>Estoque publicado em {dateTime.format(sourceUpdatedAt)}</small>
             ) : loadState === "ready" ? (
               <small>
                 Fonte viva {inventoryMeta?.source || "estoque protegido"} · atualização não
                 informada
+              </small>
+            ) : null}
+            {locationReferenceMeta?.snapshotReferenceDate ? (
+              <small>
+                Endereços complementados pela referência{" "}
+                {formatDate(locationReferenceMeta.snapshotReferenceDate)}
               </small>
             ) : null}
           </div>
@@ -420,23 +514,29 @@ export function TabelaoClient() {
           <table className="investor-stock-table" aria-rowcount={matchingInventory.length + 1}>
             <caption className="sr-only">
               Todas as plantas por empreendimento. Menor valor = Valor Final Com Kit − (B.A. da
-              Unidade + Folga de Tabela). Unidades: quantidade disponível no estoque por
-              incorporadora, empreendimento e planta, independentemente dos filtros.
+              Unidade + Folga de Tabela). Folga Volta ao Caixa, avaliação bancária, andamento da
+              obra e outras descrições pertencem à mesma unidade que define o menor valor. O
+              endereço prioriza essa unidade no estoque publicado e pode ser completado por uma
+              referência protegida única e compatível da unidade ou do empreendimento. Unidades é a
+              quantidade no estoque publicado por incorporadora, empreendimento e planta,
+              independentemente dos filtros.
             </caption>
             <colgroup>
-              <col className="tabelao-stock-col-quantity" />
               <col className="investor-stock-col-business" />
-              <col className="investor-stock-col-product" />
+              <col className="tabelao-stock-col-project" />
               <col className="investor-stock-col-area" />
               <col className="investor-stock-col-date" />
               <col className="investor-stock-col-plant" />
+              <col className="tabelao-stock-col-quantity" />
               <col className="investor-stock-col-price" />
+              <col className="tabelao-stock-col-cashback" />
+              <col className="tabelao-stock-col-appraisal" />
+              <col className="tabelao-stock-col-address" />
+              <col className="tabelao-stock-col-progress" />
+              <col className="tabelao-stock-col-description" />
             </colgroup>
             <thead>
               <tr>
-                <th scope="col" id="tabelao-quantity">
-                  Unidades
-                </th>
                 <th scope="col" id="tabelao-business">
                   Incorporadora
                 </th>
@@ -452,8 +552,26 @@ export function TabelaoClient() {
                 <th scope="col" id="tabelao-plant">
                   Planta
                 </th>
+                <th scope="col" id="tabelao-quantity">
+                  Unidades
+                </th>
                 <th scope="col" id="tabelao-price">
                   Menor valor
+                </th>
+                <th scope="col" id="tabelao-cashback">
+                  Folga Volta ao Caixa
+                </th>
+                <th scope="col" id="tabelao-appraisal">
+                  Valor de Avaliação Bancária
+                </th>
+                <th scope="col" id="tabelao-address">
+                  Logradouro Obra / Número / Bairro
+                </th>
+                <th scope="col" id="tabelao-progress">
+                  Total do andamento da obra (%)
+                </th>
+                <th scope="col" id="tabelao-description">
+                  Outras descrições
                 </th>
               </tr>
             </thead>
@@ -461,14 +579,14 @@ export function TabelaoClient() {
               <tbody>
                 {loadState === "loading" ? (
                   <tr>
-                    <td className="investor-empty-result" colSpan={7}>
+                    <td className="investor-empty-result" colSpan={12}>
                       Carregando unidades do estoque…
                     </td>
                   </tr>
                 ) : null}
                 {loadState === "error" ? (
                   <tr>
-                    <td className="investor-empty-result" colSpan={7}>
+                    <td className="investor-empty-result" colSpan={12}>
                       Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.{" "}
                       <button
                         type="button"
@@ -482,7 +600,7 @@ export function TabelaoClient() {
                 ) : null}
                 {loadState === "ready" ? (
                   <tr>
-                    <td className="investor-empty-result" colSpan={7}>
+                    <td className="investor-empty-result" colSpan={12}>
                       {exclusiveInventory.length > 0
                         ? "Nenhuma opção encontrada com esses filtros."
                         : "Nenhuma unidade com dados válidos para comparar."}
@@ -495,6 +613,8 @@ export function TabelaoClient() {
               <tbody key={group.key} className="tabelao-project-group">
                 {group.items.map((item, itemIndex) => {
                   const groupHeaders = `tabelao-business-${groupIndex} tabelao-project-${groupIndex}`;
+                  const address = formatAddress(item);
+                  const classification = descriptiveLabel(item.classification);
                   return (
                     <tr
                       key={item.id}
@@ -503,14 +623,6 @@ export function TabelaoClient() {
                       data-inventory-project={item.project}
                       data-inventory-business-unit={item.businessUnit}
                     >
-                      <td
-                        className="tabelao-stock-quantity"
-                        data-label="Unidades"
-                        headers={`tabelao-quantity ${groupHeaders}`}
-                        title={`${item.availableUnits.toLocaleString("pt-BR")} unidades disponíveis no estoque · ${item.project} · ${item.plant}`}
-                      >
-                        {item.availableUnits.toLocaleString("pt-BR")}
-                      </td>
                       {itemIndex === 0 ? (
                         <>
                           <th
@@ -535,7 +647,11 @@ export function TabelaoClient() {
                           </th>
                         </>
                       ) : null}
-                      <td data-label="Metragem" headers={`tabelao-area ${groupHeaders}`}>
+                      <td
+                        className="tabelao-stock-area"
+                        data-label="Metragem"
+                        headers={`tabelao-area ${groupHeaders}`}
+                      >
                         {typeof item.privateArea === "number" &&
                         Number.isFinite(item.privateArea) &&
                         item.privateArea > 0
@@ -554,12 +670,60 @@ export function TabelaoClient() {
                         {informationLabel(item.plant)}
                       </td>
                       <td
+                        className="tabelao-stock-quantity"
+                        data-label="Unidades"
+                        headers={`tabelao-quantity ${groupHeaders}`}
+                        title={`${item.availableUnits.toLocaleString("pt-BR")} unidades no estoque publicado · ${item.project} · ${item.plant}`}
+                      >
+                        {item.availableUnits.toLocaleString("pt-BR")}
+                      </td>
+                      <td
                         className="investor-stock-price"
                         data-label="Menor valor"
                         headers={`tabelao-price ${groupHeaders}`}
                         title={`Valor Final Com Kit ${money.format(item.finalWithKit!)} − (B.A. da Unidade ${money.format(item.unitBonus!)} + Folga de Tabela ${money.format(item.tableSlack!)}) = ${money.format(item.minimumPrice)}`}
                       >
                         {money.format(item.minimumPrice)}
+                      </td>
+                      <td
+                        className="tabelao-stock-money"
+                        data-label="Folga Volta ao Caixa"
+                        headers={`tabelao-cashback ${groupHeaders}`}
+                        title={formatMoneyValue(item.cashBackSlack)}
+                      >
+                        {formatMoneyValue(item.cashBackSlack)}
+                      </td>
+                      <td
+                        className="tabelao-stock-money"
+                        data-label="Valor de Avaliação Bancária"
+                        headers={`tabelao-appraisal ${groupHeaders}`}
+                        title={formatMoneyValue(item.appraisal)}
+                      >
+                        {formatMoneyValue(item.appraisal)}
+                      </td>
+                      <td
+                        className="tabelao-stock-long-text"
+                        data-label="Logradouro Obra / Número / Bairro"
+                        headers={`tabelao-address ${groupHeaders}`}
+                        title={address}
+                      >
+                        {address}
+                      </td>
+                      <td
+                        className="tabelao-stock-progress"
+                        data-label="Total do andamento da obra (%)"
+                        headers={`tabelao-progress ${groupHeaders}`}
+                        title={formatProgress(item.progress)}
+                      >
+                        {formatProgress(item.progress)}
+                      </td>
+                      <td
+                        className="tabelao-stock-long-text"
+                        data-label="Outras descrições"
+                        headers={`tabelao-description ${groupHeaders}`}
+                        title={classification}
+                      >
+                        {classification}
                       </td>
                     </tr>
                   );

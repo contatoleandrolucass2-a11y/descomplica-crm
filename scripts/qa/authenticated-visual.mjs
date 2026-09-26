@@ -1465,6 +1465,9 @@ async function checkTabelaoValidation(page, origin) {
         const table = document.querySelector(".investor-stock-table");
         const firstRow = document.querySelector("tr[data-inventory-unit-id]");
         const controls = [...document.querySelectorAll(".investor-stock-filters select")];
+        const columnLabels = [...document.querySelectorAll(".investor-stock-table thead th")].map(
+          (column) => column.textContent.trim(),
+        );
         const rowBox = firstRow?.getBoundingClientRect();
         const headingBox = document
           .querySelector(".investor-stock-panel > .investor-section-heading")
@@ -1472,7 +1475,22 @@ async function checkTabelaoValidation(page, origin) {
         const syncBox = document.querySelector(".investor-stock-sync")?.getBoundingClientRect();
         return {
           title: document.querySelector("h1")?.textContent?.trim() === "Simulador Tabelão",
-          columns: document.querySelectorAll(".investor-stock-table thead th").length === 7,
+          columns:
+            columnLabels.length === 12 &&
+            [
+              "Incorporadora",
+              "Empreendimento",
+              "Metragem",
+              "Data de Entrega",
+              "Planta",
+              "Unidades",
+              "Menor valor",
+              "Folga Volta ao Caixa",
+              "Valor de Avaliação Bancária",
+              "Logradouro Obra / Número / Bairro",
+              "Total do andamento da obra (%)",
+              "Outras descrições",
+            ].every((label, index) => columnLabels[index] === label),
           filtersPresent:
             controls.length === 6 &&
             controls.every(
@@ -1500,7 +1518,7 @@ async function checkTabelaoValidation(page, origin) {
               (results?.getBoundingClientRect().top ?? 0) + 1,
           rowHeight: rowBox != null && rowBox.height >= rowHeight - 2,
           quantityColumn:
-            table?.querySelector("thead th")?.textContent.trim() === "Unidades" &&
+            columnLabels.indexOf("Unidades") === columnLabels.indexOf("Menor valor") - 1 &&
             Number(
               firstRow
                 ?.querySelector(".tabelao-stock-quantity")
@@ -1508,6 +1526,10 @@ async function checkTabelaoValidation(page, origin) {
                 .replaceAll(".", ""),
             ) > 0 &&
             table.querySelectorAll(".investor-stock-unit-button").length === 0,
+          detailColumns:
+            firstRow?.querySelector(".tabelao-stock-money")?.textContent.trim().length > 0 &&
+            firstRow?.querySelector(".tabelao-stock-progress")?.textContent.trim() === "50%" &&
+            firstRow?.querySelectorAll(".tabelao-stock-long-text").length === 2,
           allRowsRendered: table?.querySelectorAll("tr[data-inventory-unit-id]").length === count,
           noInternalVerticalScroll:
             results != null &&
@@ -1713,6 +1735,100 @@ async function checkTabelaoValidation(page, origin) {
           syntheticTabelaoInventory[index].minimumPrice)
     );
   });
+
+  const referencePayload = JSON.parse(syntheticDirectTableSnapshot);
+  const livePayload = {
+    ...referencePayload,
+    source: "QA synthetic live inventory",
+    generatedAt: "2026-09-26T12:00:00.000Z",
+    sourceKind: "live",
+    items: referencePayload.items.map((item) => ({
+      ...item,
+      street: null,
+      streetNumber: null,
+      neighborhood: null,
+    })),
+  };
+  const protectedReferencePayload = {
+    ...referencePayload,
+    sourceKind: "versioned-snapshot",
+    snapshotReferenceDate: "2026-09-05",
+  };
+  let releaseLocationReference;
+  const locationReferenceGate = new Promise((resolve) => {
+    releaseLocationReference = resolve;
+  });
+  const liveLocationHandler = async (interceptedRoute) =>
+    interceptedRoute.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify(livePayload),
+    });
+  const protectedLocationHandler = async (interceptedRoute) => {
+    await locationReferenceGate;
+    await interceptedRoute.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify(protectedReferencePayload),
+    });
+  };
+  let liveAvailableBeforeLocationReference = false;
+  let locationReferenceApplied = false;
+  let locationMetadataFits = false;
+  await page.route("**/api/inventory", liveLocationHandler);
+  await page.route("**/api/inventory/snapshot*", protectedLocationHandler);
+  try {
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page
+      .locator(".investor-stock-sync")
+      .getByText(syntheticTabelaoCountLabel, { exact: true })
+      .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+    liveAvailableBeforeLocationReference =
+      (await page.locator("tr[data-inventory-unit-id]").count()) ===
+        syntheticTabelaoInventory.length &&
+      (await page.getByText(/Endereços complementados pela referência/u).count()) === 0;
+    releaseLocationReference();
+    await page
+      .getByText("Endereços complementados pela referência 05/09/2026", { exact: true })
+      .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+    const firstWinner = syntheticTabelaoInventory[0];
+    const firstReference = referencePayload.items.find((item) => item.id === firstWinner.id);
+    const expectedAddress = [
+      firstReference.street,
+      firstReference.streetNumber,
+      firstReference.neighborhood,
+    ].join(" / ");
+    locationReferenceApplied =
+      (
+        await page
+          .locator(
+            `tr[data-inventory-unit-id="${firstWinner.id}"] td[data-label="Logradouro Obra / Número / Bairro"]`,
+          )
+          .textContent()
+      )?.trim() === expectedAddress;
+    locationMetadataFits = await page.evaluate(() => {
+      const heading = document.querySelector(".investor-stock-panel > .investor-section-heading");
+      const sync = document.querySelector(".investor-stock-sync");
+      const filters = document.querySelector(".investor-stock-filters");
+      const headingBox = heading?.getBoundingClientRect();
+      const syncBox = sync?.getBoundingClientRect();
+      const filtersBox = filters?.getBoundingClientRect();
+      return (
+        headingBox != null &&
+        syncBox != null &&
+        filtersBox != null &&
+        sync?.querySelectorAll("small").length === 3 &&
+        syncBox.top >= headingBox.top - 1 &&
+        syncBox.bottom <= headingBox.bottom + 1 &&
+        headingBox.bottom <= filtersBox.top + 1
+      );
+    });
+    process.stdout.write("Tabelão QA: complemento de endereço não bloqueante verificado\n");
+  } finally {
+    releaseLocationReference();
+    await page.unroute("**/api/inventory/snapshot*", protectedLocationHandler);
+    await page.unroute("**/api/inventory", liveLocationHandler);
+  }
 
   // More than the former 60-row window, with multiple plants per project and one unpriced unit.
   const stressItems = Array.from({ length: 130 }, (_, index) =>
@@ -1920,6 +2036,9 @@ async function checkTabelaoValidation(page, origin) {
     exclusiveRows,
     netPrices,
     groupedProjects,
+    liveAvailableBeforeLocationReference,
+    locationReferenceApplied,
+    locationMetadataFits,
     emptyStateVisible,
     errorStateAccessible,
     loadingStateVisible,

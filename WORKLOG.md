@@ -1,5 +1,37 @@
 # Worklog
 
+## 2026-09-26 — novas colunas e endereço completo no Tabelão
+
+- Continuada a implementação agrupada da PR #87. Unidades saiu da primeira
+  posição e ficou imediatamente antes de Menor valor; a tabela agora possui
+  doze colunas e mantém as células mescladas por empreendimento.
+- Mapeados os campos oficiais: `cashBackSlack`, `appraisal`, `street` +
+  `streetNumber` + `neighborhood`, `progress` e `classification`. Todos os
+  detalhes comerciais pertencem à unidade vencedora do menor valor; quantidade
+  continua sendo `COUNT DISTINCT id` no grupo.
+- A fonte viva de 2.243 IDs contém folga, avaliação, bairro e andamento nos 53
+  representantes e `classification` bruto em 52; após remover o sentinela `0`,
+  Outras descrições possui conteúdo exibível em 50. A fonte não contém logradouro
+  nem número.
+  O snapshot protegido complementa somente os campos de endereço ausentes por
+  correspondência da unidade ou por endereço completo e único do empreendimento.
+  Referências ambíguas ou conflitantes com componentes vivos não são combinadas.
+  A interface informa a referência do complemento, sem bloquear a exibição da
+  fonte viva, e qualifica sua data como estoque publicado, não atualização atual.
+- Cobertura adicionada para zero monetário, preservação dos detalhes da unidade
+  vencedora, escala de andamento 0–1, enriquecimento coerente sem mutação, doze
+  cabeçalhos, ordem Unidades/Menor valor, estados com `colSpan` completo e QA
+  responsivo.
+- Auditoria real reconciliou 2.243 IDs, 53 opções, 23 empreendimentos, zero
+  exclusões e 2.503 combinações de filtros. Entre as 53 linhas vencedoras, 28
+  receberam endereço por unidade compatível, sete por endereço completo e único
+  do empreendimento e 18 permaneceram explicitamente sem complemento.
+- QA autenticado aprovou quatro larguras do Tabelão, carga viva antes da
+  referência, três linhas de metadados sem sobreposição, endereço posterior,
+  vazio, erro, recuperação, guia e expansão acima de 60 linhas. A matriz completa
+  aprovou 140 checks responsivos, 80 de tema, 193 de acessibilidade, 193
+  comparações visuais e 100 de zoom antes da revisão final.
+
 ## 2026-09-26 — Tabelão expansivo, quantidades e células mescladas
 
 - Removidos janela de 60 linhas, espaçadores e limite vertical somente no Tabelão.

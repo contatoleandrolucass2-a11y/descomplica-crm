@@ -10,10 +10,16 @@ export interface TabelaoInventoryItem {
   unitBonus?: number | null;
   tableSlack?: number | null;
   privateArea?: number | null;
+  cashBackSlack?: number | null;
+  appraisal?: number | null;
+  classification?: string | null;
+  street?: string | null;
+  streetNumber?: string | null;
   neighborhood?: string | null;
   district?: string | null;
   region?: string | null;
   postalCode?: string | null;
+  progress?: number | null;
 }
 
 export interface TabelaoExclusiveFields {
@@ -61,6 +67,13 @@ export interface TabelaoSummary {
 }
 
 export const TABELAO_PRICE_RANGES: ReadonlyArray<{ value: string; label: string }>;
+
+export function enrichTabelaoLocationFields<T extends TabelaoInventoryItem>(
+  items: readonly T[],
+  reference: readonly TabelaoInventoryItem[],
+): Array<T & Pick<TabelaoInventoryItem, "street" | "streetNumber" | "neighborhood">>;
+
+export function normalizeTabelaoProgress(value: unknown): number | null;
 
 export function calculateTabelaoPrice(item: TabelaoInventoryItem): number | null;
 

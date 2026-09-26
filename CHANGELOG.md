@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-26 — detalhes completos no Tabelão
+
+- Move Unidades para imediatamente antes de Menor valor e amplia a grade de sete
+  para doze colunas, preservando agrupamento, filtros e densidade visual.
+- Inclui Folga Volta ao Caixa, Valor de Avaliação Bancária, Logradouro Obra /
+  Número / Bairro, Total do andamento da obra (%) e Outras descrições com os
+  dados da unidade que determina o menor valor; endereço ausente pode receber
+  uma referência protegida única e coerente da unidade ou do empreendimento.
+- Preserva valores monetários iguais a zero, aceita somente a escala oficial de
+  andamento entre zero e um e trata ausências explicitamente sem criar conteúdo.
+- Mantém a fonte viva como autoridade do estoque e usa o snapshot protegido
+  somente para completar endereço ausente, sem combinar registros ambíguos ou
+  conflitantes, com referência visível, carga não bloqueante e falha segura.
+- Identifica a data como “Estoque publicado em”, evitando apresentar a quantidade
+  de uma fonte defasada como disponibilidade em tempo real.
+- Adiciona largura mínima e rolagem horizontal interna para manter as doze
+  colunas legíveis sem provocar overflow da página.
+
 ## 2026-09-26 — Tabelão expansivo por empreendimento
 
 - Exibe todas as plantas em uma tabela que cresce com a página, sem rolagem

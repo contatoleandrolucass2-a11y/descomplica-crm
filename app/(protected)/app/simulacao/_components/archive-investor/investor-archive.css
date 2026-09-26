@@ -21423,20 +21423,77 @@ body:has(.investor-page-shell) {
 }
 
 /* Tabelão: grade completa, expansiva e acessível em telas estreitas. */
+.tabelao-page-shell .investor-stock-panel > .investor-section-heading {
+  height: auto !important;
+  min-height: 48px !important;
+}
+
 .tabelao-page-shell .investor-stock-results {
   height: auto;
   min-height: 0;
   max-height: none;
-  overflow: visible;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior-inline: contain;
   scrollbar-gutter: auto;
 }
 
-.tabelao-page-shell .tabelao-stock-col-quantity,
+.tabelao-page-shell .investor-stock-table {
+  min-width: 2080px;
+}
+
+.tabelao-page-shell .investor-stock-table thead th {
+  height: 48px;
+  overflow: visible;
+  line-height: 1.2;
+  text-overflow: clip;
+  white-space: normal;
+  vertical-align: middle;
+}
+
 .tabelao-page-shell .investor-stock-table thead th:first-child,
+.tabelao-page-shell .investor-stock-table tbody td:first-child {
+  width: auto;
+  text-align: left;
+}
+
+.tabelao-page-shell .investor-stock-col-business { width: 112px; }
+.tabelao-page-shell .tabelao-stock-col-project { width: 250px; }
+.tabelao-page-shell .investor-stock-col-area { width: 90px; }
+.tabelao-page-shell .investor-stock-col-date { width: 120px; }
+.tabelao-page-shell .investor-stock-col-plant { width: 180px; }
+.tabelao-page-shell .tabelao-stock-col-quantity { width: 78px; }
+.tabelao-page-shell .investor-stock-col-price { width: 150px; }
+.tabelao-page-shell .tabelao-stock-col-cashback { width: 160px; }
+.tabelao-page-shell .tabelao-stock-col-appraisal { width: 178px; }
+.tabelao-page-shell .tabelao-stock-col-address { width: 330px; }
+.tabelao-page-shell .tabelao-stock-col-progress { width: 174px; }
+.tabelao-page-shell .tabelao-stock-col-description { width: 258px; }
+
 .tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-quantity {
-  width: 68px;
+  width: 78px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+.tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-area {
+  width: auto;
+  padding: 2px 7px;
+  text-align: left;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tabelao-page-shell .investor-stock-table .tabelao-stock-money,
+.tabelao-page-shell .investor-stock-table .tabelao-stock-progress {
+  font-variant-numeric: tabular-nums;
+}
+
+.tabelao-page-shell .investor-stock-table .tabelao-stock-long-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tabelao-page-shell .investor-stock-table tbody th.tabelao-group-cell {
@@ -21511,7 +21568,7 @@ body:has(.investor-page-shell) {
   .tabelao-page-shell .investor-stock-table {
     display: table;
     width: 100%;
-    min-width: 900px;
+    min-width: 2080px;
     table-layout: fixed;
   }
 
@@ -21589,9 +21646,9 @@ body:has(.investor-page-shell) {
     display: none;
   }
 
-  .tabelao-page-shell .investor-stock-table tbody td:first-child {
+  .tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-quantity {
     padding-inline: 2px !important;
-    overflow: visible;
+    overflow: hidden;
     text-align: center;
   }
 
