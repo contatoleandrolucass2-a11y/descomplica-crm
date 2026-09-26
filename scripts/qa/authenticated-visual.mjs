@@ -1464,18 +1464,12 @@ async function checkTabelaoValidation(page, origin) {
         const results = document.querySelector(".investor-stock-results");
         const table = document.querySelector(".investor-stock-table");
         const firstRow = document.querySelector("tr[data-inventory-unit-id]");
-        const firstAction = firstRow?.querySelector(".investor-stock-unit-button");
         const controls = [...document.querySelectorAll(".investor-stock-filters select")];
-        const actionBox = firstAction?.getBoundingClientRect();
         const rowBox = firstRow?.getBoundingClientRect();
         const headingBox = document
           .querySelector(".investor-stock-panel > .investor-section-heading")
           ?.getBoundingClientRect();
         const syncBox = document.querySelector(".investor-stock-sync")?.getBoundingClientRect();
-        const expectedScrollHeight = Math.max(
-          results?.clientHeight ?? 0,
-          count * rowHeight + (table?.querySelector("thead")?.getBoundingClientRect().height ?? 0),
-        );
         return {
           title: document.querySelector("h1")?.textContent?.trim() === "Simulador Tabelão",
           columns: document.querySelectorAll(".investor-stock-table thead th").length === 7,
@@ -1504,24 +1498,28 @@ async function checkTabelaoValidation(page, origin) {
             (document.querySelector(".investor-stock-filters")?.getBoundingClientRect().bottom ??
               Infinity) <=
               (results?.getBoundingClientRect().top ?? 0) + 1,
-          rowHeight: rowBox != null && Math.abs(rowBox.height - rowHeight) <= 2,
-          actionSize:
-            actionBox != null &&
-            actionBox.width >= targetSize - 1 &&
-            actionBox.height >= targetSize - 1,
-          scrollHeightStable:
+          rowHeight: rowBox != null && rowBox.height >= rowHeight - 2,
+          quantityColumn:
+            table?.querySelector("thead th")?.textContent.trim() === "Unidades" &&
+            Number(
+              firstRow
+                ?.querySelector(".tabelao-stock-quantity")
+                ?.textContent.trim()
+                .replaceAll(".", ""),
+            ) > 0 &&
+            table.querySelectorAll(".investor-stock-unit-button").length === 0,
+          allRowsRendered: table?.querySelectorAll("tr[data-inventory-unit-id]").length === count,
+          noInternalVerticalScroll:
             results != null &&
-            Math.abs(results.scrollHeight - expectedScrollHeight) <= expectedScrollHeight * 0.03,
+            results.scrollHeight <= results.clientHeight + 2 &&
+            getComputedStyle(results).maxHeight === "none",
         };
       },
       { ...viewport, count: syntheticTabelaoInventory.length },
     );
 
     const results = page.locator(".investor-stock-results");
-    await results.evaluate((element) => {
-      element.scrollTop = element.scrollHeight - element.clientHeight;
-      element.dispatchEvent(new Event("scroll", { bubbles: true }));
-    });
+    await page.locator("tr[data-inventory-unit-id]").last().scrollIntoViewIfNeeded();
     await page.waitForFunction(
       (expectedLastId) =>
         [...document.querySelectorAll("tr[data-inventory-unit-id]")]
@@ -1674,10 +1672,16 @@ async function checkTabelaoValidation(page, origin) {
     rows.map((row) => ({
       id: row.getAttribute("data-inventory-unit-id"),
       project: row.getAttribute("data-inventory-project"),
-      projectLabel: row.querySelector(".investor-stock-product-text")?.textContent?.trim(),
+      projectLabel: row
+        .closest("tbody")
+        ?.querySelector(".investor-stock-product-text")
+        ?.textContent?.trim(),
       plant: row.querySelector(".investor-stock-plant")?.textContent?.trim(),
       businessUnit: row.getAttribute("data-inventory-business-unit"),
       price: row.querySelector(".investor-stock-price")?.textContent?.trim(),
+      availableUnits: Number(
+        row.querySelector(".tabelao-stock-quantity")?.textContent.trim().replaceAll(".", ""),
+      ),
     })),
   );
   const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -1689,7 +1693,8 @@ async function checkTabelaoValidation(page, origin) {
       (row, index) =>
         row.id === syntheticTabelaoInventory[index].id &&
         row.projectLabel === syntheticTabelaoInventory[index].project &&
-        row.plant === syntheticTabelaoInventory[index].plant,
+        row.plant === syntheticTabelaoInventory[index].plant &&
+        row.availableUnits === syntheticTabelaoInventory[index].availableUnits,
     );
   const netPrices = rendered.every(
     (row, index) => row.price === currency.format(syntheticTabelaoInventory[index].minimumPrice),
@@ -1708,6 +1713,122 @@ async function checkTabelaoValidation(page, origin) {
           syntheticTabelaoInventory[index].minimumPrice)
     );
   });
+
+  // More than the former 60-row window, with multiple plants per project and one unpriced unit.
+  const stressItems = Array.from({ length: 130 }, (_, index) =>
+    [0, 1].map((variant) => ({
+      ...syntheticTabelaoInventory[0],
+      id: `qa-tabelao-${index}-${variant}`,
+      identifier: `${index}-${variant}`,
+      businessUnit: "Incorporadora QA",
+      project: `Empreendimento QA ${Math.floor(index / 50)}`,
+      plant: `Planta ${String(index).padStart(3, "0")}`,
+      finalWithKit: 300_000 + index * 1_000 + variant * 10_000,
+      unitBonus: 10_000,
+      tableSlack: 5_000,
+    })),
+  ).flat();
+  stressItems.push({ ...stressItems[0], id: "qa-tabelao-unpriced", finalWithKit: null });
+  const stressHandler = async (interceptedRoute) =>
+    interceptedRoute.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({
+        source: "QA synthetic grouped inventory",
+        count: stressItems.length,
+        items: stressItems,
+      }),
+    });
+  await page.route("**/api/inventory", stressHandler);
+  try {
+    for (const viewport of requiredViewports) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page
+        .locator('tr[data-inventory-unit-id="qa-tabelao-129-0"]')
+        .waitFor({ state: "attached" });
+      const expansiveGroups = await page.evaluate(() => {
+        const results = document.querySelector(".investor-stock-results");
+        const groups = [...document.querySelectorAll(".tabelao-project-group")];
+        const rows = [...document.querySelectorAll("tr[data-inventory-unit-id]")];
+        return (
+          groups.length === 3 &&
+          rows.length === 130 &&
+          groups.every((group, index) => {
+            const headers = [...group.querySelectorAll('th[scope="rowgroup"]')];
+            return (
+              group.rows.length === [50, 50, 30][index] &&
+              headers.length === 2 &&
+              headers.every(
+                (header) =>
+                  header.rowSpan === group.rows.length &&
+                  header.scrollWidth <= header.clientWidth + 1,
+              )
+            );
+          }) &&
+          rows.every(
+            (row, index) =>
+              Number(row.querySelector(".tabelao-stock-quantity").textContent.trim()) ===
+                (index === 0 ? 3 : 2) &&
+              row.getAttribute("aria-rowindex") === String(index + 2) &&
+              [...row.querySelectorAll("td")].every((cell) =>
+                cell.headers.split(" ").every((id) => document.getElementById(id)),
+              ),
+          ) &&
+          results.scrollHeight <= results.clientHeight + 2 &&
+          document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
+        );
+      });
+      await page.locator('tr[data-inventory-unit-id="qa-tabelao-129-0"]').scrollIntoViewIfNeeded();
+      const lastRowReachable = await page
+        .locator('tr[data-inventory-unit-id="qa-tabelao-129-0"]')
+        .evaluate((row) => {
+          const box = row.getBoundingClientRect();
+          return box.top >= 0 && box.bottom <= innerHeight + 1 && window.scrollY > 0;
+        });
+      const panel = page.locator(".investor-stock-filters");
+      await panel.locator('select[name="priceOrder"]').selectOption("desc");
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector("tr[data-inventory-unit-id]")
+            ?.getAttribute("data-inventory-unit-id") === "qa-tabelao-49-0",
+      );
+      await panel.locator('select[name="plant"]').selectOption("planta 000");
+      await page.waitForFunction(
+        () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 1,
+      );
+      const filteredMerge = await page.evaluate(() => {
+        const headers = [...document.querySelectorAll('th[scope="rowgroup"]')];
+        return (
+          headers.length === 2 &&
+          headers.every((header) => header.rowSpan === 1) &&
+          document.querySelector(".tabelao-stock-quantity").textContent.trim() === "3"
+        );
+      });
+      await panel.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+      await page.waitForFunction(
+        () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 130,
+      );
+      const restoredMerge = await page
+        .locator('th[scope="rowgroup"]')
+        .evaluateAll(
+          (headers) =>
+            headers.length === 6 &&
+            headers.map((header) => header.rowSpan).join(",") === "50,50,50,50,30,30",
+        );
+      viewportChecks.push({
+        key: `grouped-${viewport.key}`,
+        expansiveGroups,
+        lastRowReachable,
+        filteredMerge,
+        restoredMerge,
+      });
+    }
+  } finally {
+    await page.unroute("**/api/inventory", stressHandler);
+    await page.setViewportSize({ width: 1440, height: 900 });
+  }
 
   const emptyHandler = async (interceptedRoute) => {
     await interceptedRoute.fulfill({

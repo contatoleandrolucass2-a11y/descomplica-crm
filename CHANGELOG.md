@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-26 — Tabelão expansivo por empreendimento
+
+- Exibe todas as plantas em uma tabela que cresce com a página, sem rolagem
+  vertical interna ou limite de linhas.
+- Substitui Início pela quantidade disponível por empreendimento e planta,
+  mantendo a contagem do estoque mesmo ao filtrar ou ordenar os resultados.
+- Mescla incorporadora e empreendimento uma vez por grupo, com cabeçalhos
+  acessíveis, sem eliminar opções ou alterar a fórmula do menor valor.
+- Preserva os seis filtros; valida agrupamento e expansão acima de 60 linhas,
+  inclusive após filtros e em telas estreitas.
+
 ## 2026-09-24 — filtros encadeados no Tabelão
 
 - Restaura os filtros do print: incorporadora, empreendimento, região, planta,

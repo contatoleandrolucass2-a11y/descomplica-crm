@@ -21422,7 +21422,49 @@ body:has(.investor-page-shell) {
   .investor-page-shell.investor-standard-table-page .investor-standard-resource-actions { display: none !important; }
 }
 
-/* Tabelão: mantém a grade virtual linear e todos os controles acessíveis em telas estreitas. */
+/* Tabelão: grade completa, expansiva e acessível em telas estreitas. */
+.tabelao-page-shell .investor-stock-results {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  scrollbar-gutter: auto;
+}
+
+.tabelao-page-shell .tabelao-stock-col-quantity,
+.tabelao-page-shell .investor-stock-table thead th:first-child,
+.tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-quantity {
+  width: 68px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabelao-page-shell .investor-stock-table tbody th.tabelao-group-cell {
+  position: static;
+  display: table-cell;
+  height: auto !important;
+  padding: 6px 7px !important;
+  color: var(--inv-text);
+  background: #0a2940;
+  vertical-align: middle;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.3 !important;
+}
+
+.tabelao-page-shell .investor-stock-table tbody th.tabelao-group-cell,
+.tabelao-page-shell .investor-stock-table .tabelao-group-cell .investor-stock-product-text {
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+
+.tabelao-page-shell .tabelao-project-group + .tabelao-project-group > tr:first-child > * {
+  border-top: 2px solid #35748c;
+}
+
 @media (max-width: 760px) {
   .investor-page-shell.tabelao-page-shell .investor-stock-panel > .investor-section-heading {
     height: auto !important;
@@ -21571,11 +21613,13 @@ body:has(.investor-page-shell) {
     white-space: nowrap;
   }
 
-  .tabelao-page-shell .investor-stock-unit-button {
-    width: 44px !important;
-    min-width: 44px !important;
-    height: 44px !important;
-    min-height: 44px !important;
+  .tabelao-page-shell .investor-stock-table tbody th.tabelao-group-cell {
+    font-size: 12px !important;
+  }
+
+  .tabelao-page-shell .investor-stock-table tbody td.investor-stock-plant {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 

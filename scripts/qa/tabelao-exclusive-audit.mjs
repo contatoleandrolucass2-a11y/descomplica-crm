@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import {
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
+  groupTabelaoInventoryByProject,
   matchesTabelaoFacets,
   TABELAO_FILTER_DEFAULTS,
   sortTabelaoInventory,
@@ -51,8 +52,15 @@ const key = (row) =>
   ]);
 const cents = (value) => Number(value.toFixed(2).replace(".", ""));
 const expected = new Map();
+const stockUnits = new Map();
 let excluded = 0;
 for (const row of rows) {
+  if (
+    ["id", "businessUnit", "project", "plant"].every((field) => String(row[field] ?? "").trim())
+  ) {
+    if (!stockUnits.has(key(row))) stockUnits.set(key(row), new Set());
+    stockUnits.get(key(row)).add(String(row.id).trim());
+  }
   const numbers = [row.finalWithKit, row.unitBonus, row.tableSlack];
   if (
     required.some((field) => row[field] == null || String(row[field]).trim() === "") ||
@@ -82,8 +90,13 @@ for (const row of selected) {
     group.some((candidate) => candidate.id === row.id && candidate.price === minimum),
     true,
   );
-  assert.equal(row.availableUnits, group.length);
+  assert.equal(row.availableUnits, stockUnits.get(key(row)).size);
+  assert.equal(row.pricedUnits, group.length);
 }
+assert.equal(
+  selected.reduce((sum, row) => sum + row.pricedUnits, 0),
+  rows.length - excluded,
+);
 assert.deepEqual(
   selected,
   sortTabelaoInventory(buildTabelaoExclusiveInventory([...rows].reverse())),
@@ -114,6 +127,21 @@ for (const row of grouped) {
   previousRow = row;
 }
 assert.deepEqual(new Set(grouped.map(key)), new Set(selected.map(key)), "Grouping lost options");
+const projectGroups = groupTabelaoInventoryByProject(grouped);
+assert.equal(projectGroups.length, seenProjects.size);
+assert.deepEqual(
+  projectGroups.flatMap((group) => group.items),
+  grouped,
+);
+let nextIndex = 0;
+for (const group of projectGroups) {
+  assert.equal(group.startIndex, nextIndex);
+  assert.ok(
+    group.items.every((row) => JSON.stringify(JSON.parse(key(row)).slice(0, 2)) === group.key),
+  );
+  nextIndex += group.items.length;
+}
+assert.equal(nextIndex, selected.length);
 assert.deepEqual(
   grouped,
   sortTabelaoInventory(buildTabelaoExclusiveInventory([...rows].reverse()), "project"),
@@ -186,6 +214,9 @@ console.log(
       minimumPrice: selected[0]?.minimumPrice ?? null,
       maximumPrice: selected.at(-1)?.minimumPrice ?? null,
       allGroupsChecked: true,
+      allQuantitiesChecked: true,
+      availableUnitsInDisplayedGroups: selected.reduce((sum, row) => sum + row.availableUnits, 0),
+      allRowSpansChecked: true,
       allMinimaChecked: true,
       sourceOrderIndependent: true,
       allProjectsContiguous: true,

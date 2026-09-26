@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-26 — Tabelão expansivo, quantidades e células mescladas
+
+- Removidos janela de 60 linhas, espaçadores e limite vertical somente no Tabelão.
+  Todas as plantas filtradas são renderizadas; a página cresce com o estoque.
+- Primeira coluna passa a informar IDs distintos do estoque por incorporadora,
+  empreendimento e planta. Quantidade independe dos filtros e da elegibilidade
+  financeira; `pricedUnits` mantém o aviso de dados incompletos separado.
+- Cada empreendimento usa um `tbody` e duas células `rowSpan`, preservando todas
+  as opções, filtros, ordenação, fórmula e detalhes da unidade de menor valor.
+  Cabeçalhos de grupo associados às células e nomes completos com quebra de linha.
+- Adicionada regressão sintética de 130 plantas, três empreendimentos e unidade
+  sem preço, em quatro viewports: expansão, quantidades, mesclagem, ordenação,
+  filtro, limpeza e alcance da última linha. Auditoria independente confere
+  quantidades e extensão de todos os grupos sem persistir unidades comerciais.
+- Instaladas as 20 skills do pacote JuliusBrussee/caveman no diretório pessoal
+  `.codex/skills`, fixadas em `2fd153c67988e980fb0b2455c90832159a6a5a25`.
+  Sem instalar proxy, alterar preferências ou comprimir conteúdo desta entrega.
+- Verificados por hash os 48 arquivos das 20 skills instaladas.
+- Auditoria da fonte em 26/09/2026: 2.243 IDs distintos, 53 opções e 23 grupos;
+  soma das quantidades igual a 2.243, todos os mínimos e `rowSpan` reconciliados,
+  2.503 combinações de filtros verificadas. Fonte gerada em 07/08/2026, sem
+  campos obrigatórios ausentes; não representa atualização comercial em setembro.
+- Typecheck e build locais passaram. Suíte Windows: 632 testes passaram, quatro
+  ignorados e duas falhas preexistentes de modo POSIX `0600` retornando `0666`.
+  A validação Linux completa e as evidências visuais acompanham a publicação.
+
 ## 2026-09-24 — restauração dos filtros solicitados
 
 - Reaproveitado o visual do painel da Tabela Associativo para os seis controles

@@ -23,7 +23,18 @@ export interface TabelaoExclusiveFields {
   minimumPrice: number;
   exclusiveKey: string;
   availableUnits: number;
+  pricedUnits: number;
 }
+
+export function groupTabelaoInventoryByProject<T extends TabelaoInventoryItem>(
+  items: readonly T[],
+): Array<{
+  key: string;
+  businessUnit: T["businessUnit"];
+  project: T["project"];
+  startIndex: number;
+  items: T[];
+}>;
 
 export interface TabelaoFilters {
   query?: string;

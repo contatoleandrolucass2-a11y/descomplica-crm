@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
+  groupTabelaoInventoryByProject,
   matchesTabelaoFacets,
   TABELAO_FILTER_DEFAULTS,
   calculateTabelaoPrice,
@@ -27,6 +28,81 @@ const unit = (id: string, fields: Partial<TabelaoInventoryItem> = {}) => ({
 });
 
 describe("Menor valor por tipologia no Tabelão", () => {
+  it("conta unidades distintas do estoque inclusive sem preço, mantendo a comparação válida", () => {
+    const source = [
+      unit("1"),
+      unit("2", { privateArea: 60, finalWithKit: 400_000 }),
+      unit("3", { plant: " TIPO 2q ", finalWithKit: null }),
+      unit("4", { plant: "Tipo 1Q" }),
+      unit("5", { project: "Outro" }),
+      unit("6", { businessUnit: "Outra" }),
+      unit("7", { project: "Sem preço", unitBonus: null }),
+    ];
+    const before = structuredClone(source);
+    const result = buildTabelaoExclusiveInventory(source);
+    expect(result).toHaveLength(4);
+    expect(result[0]).toMatchObject({
+      id: "1",
+      availableUnits: 3,
+      pricedUnits: 2,
+      minimumPrice: 285_000,
+    });
+    expect(result.reduce((total, item) => total + item.pricedUnits, 0)).toBe(5);
+    expect(result.reduce((total, item) => total + item.availableUnits, 0)).toBe(6);
+    expect(
+      buildTabelaoExclusiveInventory([source[0]!, source[0]!, source[1]!])[0]!.availableUnits,
+    ).toBe(2);
+    expect(source).toEqual(before);
+  });
+
+  it("mescla apenas o mesmo empreendimento e incorporadora, preservando todas as plantas", () => {
+    const source = buildTabelaoExclusiveInventory([
+      unit("1", { project: "Águas", plant: "Tipo 1Q" }),
+      unit("2", { project: " AGUAS ", plant: "Tipo 2Q", finalWithKit: 320_000 }),
+      unit("3", { project: "Águas", businessUnit: "Outra" }),
+      unit("4", { project: "Bosque" }),
+    ]);
+    const before = structuredClone(source);
+    const grouped = groupTabelaoInventoryByProject(sortTabelaoInventory(source, "project"));
+    expect(grouped.map((group) => group.items.map((item) => item.id))).toEqual([
+      ["1", "2"],
+      ["3"],
+      ["4"],
+    ]);
+    expect(grouped.map((group) => group.startIndex)).toEqual([0, 2, 3]);
+    expect(new Set(grouped.map((group) => group.key)).size).toBe(3);
+    expect(
+      groupTabelaoInventoryByProject(sortTabelaoInventory(source, "project-desc"))[0]!.items.map(
+        (item) => item.id,
+      ),
+    ).toEqual(["2", "1"]);
+    const filtered = source.filter((item) =>
+      matchesTabelaoFacets(item, { ...TABELAO_FILTER_DEFAULTS, plant: "tipo 1q" }),
+    );
+    expect(groupTabelaoInventoryByProject(filtered).map((group) => group.items.length)).toEqual([
+      1,
+    ]);
+    expect(filtered[0]!.availableUnits).toBe(source[0]!.availableUnits);
+    expect(source).toEqual(before);
+    expect(groupTabelaoInventoryByProject([])).toEqual([]);
+  });
+
+  it("não limita grupos ou plantas ao tamanho da antiga janela de 60 linhas", () => {
+    const source = Array.from({ length: 130 }, (_, index) =>
+      unit(String(index), {
+        project: `Projeto ${Math.floor(index / 50)}`,
+        plant: `Planta ${index}`,
+      }),
+    );
+    const groups = groupTabelaoInventoryByProject(
+      sortTabelaoInventory(buildTabelaoExclusiveInventory(source), "project"),
+    );
+    expect(groups.map((group) => group.items.length)).toEqual([50, 50, 30]);
+    expect(groups.map((group) => group.startIndex)).toEqual([0, 50, 100]);
+    expect(groups.flatMap((group) => group.items)).toHaveLength(130);
+    expect(groups.at(-1)?.items.at(-1)?.id).toBe("129");
+  });
+
   const filterSource = () =>
     buildTabelaoExclusiveInventory([
       unit("a1", { project: "Águas", plant: "Tipo 1Q", region: "Zona Sul" }),

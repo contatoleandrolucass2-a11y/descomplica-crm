@@ -114,7 +114,7 @@ describe("Tabelão protegido", () => {
     );
 
     for (const label of [
-      "Início",
+      "Unidades",
       "Incorporadora",
       "Empreendimento",
       "Metragem",
@@ -153,7 +153,7 @@ describe("Tabelão protegido", () => {
       client.indexOf('className="investor-stock-results"'),
     );
     expect(client).not.toContain("Empreendimento / Unidade");
-    expect(client).toContain('<span className="investor-stock-product-text">{item.project}</span>');
+    expect(client).toContain("{group.project}");
     expect(client).not.toContain("buildInvestorFilterOptions");
     expect(client).not.toContain("matchesInvestorFilters");
     expect(client).not.toContain("reconcileInvestorFilters");
@@ -163,15 +163,26 @@ describe("Tabelão protegido", () => {
     );
     expect(client).toContain('priceOrder === "desc" ? "project-desc" : "project"');
     expect(client).toContain("setFilters(TABELAO_FILTER_DEFAULTS)");
-    expect(client).toContain("inventoryResultsRef.current.scrollTop = 0");
-    expect(client).toContain("INVENTORY_WINDOW_SIZE = 60");
-    expect(client).toContain('href="/app/simulacao/tabela-direta"');
+    expect(client).toContain("groupTabelaoInventoryByProject(matchingInventory)");
+    expect(client).toContain("inventoryGroups.map");
+    expect(client).toContain("group.items.map");
+    expect(client.match(/rowSpan=\{group.items.length\}/g)).toHaveLength(2);
+    expect(client.match(/scope="rowgroup"/g)).toHaveLength(2);
+    expect(client).toContain('item.availableUnits.toLocaleString("pt-BR")');
+    expect(client).toContain("total + item.pricedUnits");
+    expect(client).not.toContain("INVENTORY_WINDOW_SIZE");
+    expect(client).not.toContain("Spacer");
+    expect(client).not.toContain("onScroll=");
+    expect(client).not.toContain("matchingInventory.slice");
+    expect(client).not.toContain('href="/app/simulacao/tabela-direta"');
     expect(client).toContain('window.addEventListener("investor:start-guide"');
     expect(client).toContain('.join(" ")');
-    expect(client).toContain('window.matchMedia("(max-width: 1239px)")');
     expect(styles).toContain("herda integralmente o visual da Tabela Associativo");
-    expect(styles).toContain("mantém a grade virtual linear");
-    expect(styles).toContain(".tabelao-page-shell .investor-stock-unit-button");
+    expect(styles).toContain("grade completa, expansiva");
+    expect(styles).toContain(".tabelao-page-shell .tabelao-stock-col-quantity");
+    expect(styles).toMatch(
+      /\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*max-height: none;[^}]*overflow: visible;/,
+    );
     expect(styles).toContain("height:23px!important");
     expect(styles).toContain("font-size:10px");
     expect(styles).toContain("@media (prefers-reduced-motion:reduce)");

@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
+  groupTabelaoInventoryByProject,
   matchesTabelaoFacets,
   TABELAO_FILTER_DEFAULTS,
   type TabelaoFacetFilters,
@@ -44,9 +44,6 @@ type InventoryPayload = {
 
 type LoadState = "loading" | "ready" | "error";
 
-const INVENTORY_WINDOW_SIZE = 60;
-const DESKTOP_ROW_HEIGHT = 25;
-const MOBILE_ROW_HEIGHT = 44;
 const TABELAO_TOUR_STEPS = [
   {
     target: "welcome",
@@ -55,7 +52,7 @@ const TABELAO_TOUR_STEPS = [
     description:
       "Cada empreendimento apresenta uma unidade por planta, escolhida pelo menor valor: Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela). Metragens diferentes da mesma planta não criam opções repetidas. Todas as plantas com dados válidos permanecem disponíveis.",
     tip: "Avançar no guia não altera a lista nem abre outra página.",
-    checklist: ["Consulte o estoque", "Compare as unidades", "Abra a unidade correta"],
+    checklist: ["Consulte o estoque", "Compare as unidades", "Confira as quantidades"],
   },
   {
     target: "information",
@@ -71,12 +68,12 @@ const TABELAO_TOUR_STEPS = [
     eyebrow: "Consulte as unidades",
     title: "Confira a unidade correta",
     description:
-      "Revise empreendimento, metragem, entrega, planta e valor. O botão circular da primeira coluna abre a página Tabela Direta para continuar o atendimento.",
+      "Revise empreendimento, metragem, entrega, planta e valor. A primeira coluna informa a quantidade de unidades disponíveis no estoque de cada empreendimento e planta. Incorporadora e empreendimento aparecem uma única vez por grupo.",
     tip: "Confirme os dados antes de iniciar a proposta.",
     checklist: [
       "Confira empreendimento e planta",
       "Revise entrega e valor",
-      "Abra a Tabela Direta",
+      "Confira as unidades disponíveis",
     ],
   },
 ] as const;
@@ -111,8 +108,6 @@ export function TabelaoClient() {
   const [loadKey, setLoadKey] = useState(0);
   const [filters, setFilters] = useState<TabelaoFacetFilters>(TABELAO_FILTER_DEFAULTS);
   const [priceOrder, setPriceOrder] = useState<"asc" | "desc">("asc");
-  const [inventoryWindowStart, setInventoryWindowStart] = useState(0);
-  const [inventoryRowHeight, setInventoryRowHeight] = useState(DESKTOP_ROW_HEIGHT);
   const [tourOpen, setTourOpen] = useState(false);
   const [tourStep, setTourStep] = useState(0);
   const [tourSpotlight, setTourSpotlight] = useState({
@@ -122,7 +117,6 @@ export function TabelaoClient() {
     height: 0,
   });
   const [tourPlacement, setTourPlacement] = useState({ top: false, left: false });
-  const inventoryResultsRef = useRef<HTMLDivElement>(null);
   const tourPanel = useRef<HTMLElement>(null);
   const tourReturnFocus = useRef<HTMLButtonElement | null>(null);
   const currentTourStep = TABELAO_TOUR_STEPS[tourStep] ?? TABELAO_TOUR_STEPS[0];
@@ -138,7 +132,6 @@ export function TabelaoClient() {
         }
         setInventory(payload.items);
         setInventoryMeta(payload);
-        setInventoryWindowStart(0);
         setLoadState("ready");
       })
       .catch((error) => {
@@ -147,18 +140,6 @@ export function TabelaoClient() {
       });
     return () => controller.abort();
   }, [loadKey]);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 1239px)");
-    const updateRowHeight = () => {
-      setInventoryRowHeight(media.matches ? MOBILE_ROW_HEIGHT : DESKTOP_ROW_HEIGHT);
-      setInventoryWindowStart(0);
-      if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
-    };
-    updateRowHeight();
-    media.addEventListener("change", updateRowHeight);
-    return () => media.removeEventListener("change", updateRowHeight);
-  }, []);
 
   useEffect(() => {
     const openGuide = (event: Event) => {
@@ -185,21 +166,13 @@ export function TabelaoClient() {
     [exclusiveInventory, filters, priceOrder],
   );
   const inventorySummary = useMemo(() => summarizeTabelao(matchingInventory), [matchingInventory]);
-  const excludedUnits =
-    inventory.length - exclusiveInventory.reduce((total, item) => total + item.availableUnits, 0);
-  const sourceUpdatedAt = inventoryMeta?.generatedAt ? new Date(inventoryMeta.generatedAt) : null;
-  const visibleInventory = useMemo(
-    () =>
-      matchingInventory.slice(
-        inventoryWindowStart,
-        Math.min(matchingInventory.length, inventoryWindowStart + INVENTORY_WINDOW_SIZE),
-      ),
-    [inventoryWindowStart, matchingInventory],
+  const inventoryGroups = useMemo(
+    () => groupTabelaoInventoryByProject(matchingInventory),
+    [matchingInventory],
   );
-  const inventoryWindowEnd = inventoryWindowStart + visibleInventory.length;
-  const inventoryTopSpacer = inventoryWindowStart * inventoryRowHeight;
-  const inventoryBottomSpacer =
-    (matchingInventory.length - inventoryWindowEnd) * inventoryRowHeight;
+  const excludedUnits =
+    inventory.length - exclusiveInventory.reduce((total, item) => total + item.pricedUnits, 0);
+  const sourceUpdatedAt = inventoryMeta?.generatedAt ? new Date(inventoryMeta.generatedAt) : null;
 
   useEffect(() => {
     if (!tourOpen) return;
@@ -287,45 +260,17 @@ export function TabelaoClient() {
     clearFilters();
     setInventory([]);
     setInventoryMeta(null);
-    setInventoryWindowStart(0);
     setLoadState("loading");
     setLoadKey((value) => value + 1);
   }
 
-  function resetInventoryWindow() {
-    setInventoryWindowStart(0);
-    if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
-  }
-
   function changeFilter(dimension: TabelaoFilterDimension, value: string) {
     setFilters((current) => ({ ...current, [dimension]: value }));
-    resetInventoryWindow();
   }
 
   function clearFilters() {
     setFilters(TABELAO_FILTER_DEFAULTS);
     setPriceOrder("asc");
-    resetInventoryWindow();
-  }
-
-  function updateInventoryWindow(scrollTop: number) {
-    const overscan = 10;
-    const nextStart = Math.max(0, Math.floor(scrollTop / inventoryRowHeight) - overscan);
-    const maximumStart = Math.max(0, matchingInventory.length - INVENTORY_WINDOW_SIZE);
-    const boundedStart = Math.min(nextStart, maximumStart);
-    if (boundedStart !== inventoryWindowStart) {
-      const focusedRow = inventoryResultsRef.current?.querySelector<HTMLTableRowElement>(
-        "tr:focus-within[aria-rowindex]",
-      );
-      const focusedIndex = Number(focusedRow?.getAttribute("aria-rowindex")) - 2;
-      if (
-        Number.isInteger(focusedIndex) &&
-        (focusedIndex < boundedStart || focusedIndex >= boundedStart + INVENTORY_WINDOW_SIZE)
-      ) {
-        inventoryResultsRef.current?.focus({ preventScroll: true });
-      }
-    }
-    setInventoryWindowStart((current) => (boundedStart === current ? current : boundedStart));
   }
 
   return (
@@ -443,10 +388,7 @@ export function TabelaoClient() {
           disabled={loadState !== "ready"}
           onChange={changeFilter}
           onClear={clearFilters}
-          onOrderChange={(order) => {
-            setPriceOrder(order);
-            resetInventoryWindow();
-          }}
+          onOrderChange={setPriceOrder}
         />
 
         {loadState === "ready" && excludedUnits > 0 ? (
@@ -469,21 +411,20 @@ export function TabelaoClient() {
         </p>
 
         <div
-          ref={inventoryResultsRef}
           className="investor-stock-results"
           role="region"
           aria-label="Menores valores por empreendimento e planta"
           tabIndex={0}
           data-tour="inventory"
-          onScroll={(event) => updateInventoryWindow(event.currentTarget.scrollTop)}
         >
           <table className="investor-stock-table" aria-rowcount={matchingInventory.length + 1}>
             <caption className="sr-only">
               Todas as plantas por empreendimento. Menor valor = Valor Final Com Kit − (B.A. da
-              Unidade + Folga de Tabela).
+              Unidade + Folga de Tabela). Unidades: quantidade disponível no estoque por
+              incorporadora, empreendimento e planta, independentemente dos filtros.
             </caption>
             <colgroup>
-              <col className="investor-stock-col-start" />
+              <col className="tabelao-stock-col-quantity" />
               <col className="investor-stock-col-business" />
               <col className="investor-stock-col-product" />
               <col className="investor-stock-col-area" />
@@ -493,125 +434,138 @@ export function TabelaoClient() {
             </colgroup>
             <thead>
               <tr>
-                <th className="investor-stock-start-heading">Início</th>
-                <th>Incorporadora</th>
-                <th>Empreendimento</th>
-                <th>Metragem</th>
-                <th>Data de Entrega</th>
-                <th>Planta</th>
-                <th>Menor valor</th>
+                <th scope="col" id="tabelao-quantity">
+                  Unidades
+                </th>
+                <th scope="col" id="tabelao-business">
+                  Incorporadora
+                </th>
+                <th scope="col" id="tabelao-project">
+                  Empreendimento
+                </th>
+                <th scope="col" id="tabelao-area">
+                  Metragem
+                </th>
+                <th scope="col" id="tabelao-delivery">
+                  Data de Entrega
+                </th>
+                <th scope="col" id="tabelao-plant">
+                  Planta
+                </th>
+                <th scope="col" id="tabelao-price">
+                  Menor valor
+                </th>
               </tr>
             </thead>
-            <tbody>
-              {loadState === "loading" ? (
-                <tr>
-                  <td className="investor-empty-result" colSpan={7}>
-                    Carregando unidades do estoque…
-                  </td>
-                </tr>
-              ) : null}
-              {loadState === "error" ? (
-                <tr>
-                  <td className="investor-empty-result" colSpan={7}>
-                    Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.{" "}
-                    <button
-                      type="button"
-                      className="investor-stock-action-button investor-stock-retry-button"
-                      onClick={reloadInventory}
+            {matchingInventory.length === 0 ? (
+              <tbody>
+                {loadState === "loading" ? (
+                  <tr>
+                    <td className="investor-empty-result" colSpan={7}>
+                      Carregando unidades do estoque…
+                    </td>
+                  </tr>
+                ) : null}
+                {loadState === "error" ? (
+                  <tr>
+                    <td className="investor-empty-result" colSpan={7}>
+                      Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.{" "}
+                      <button
+                        type="button"
+                        className="investor-stock-action-button investor-stock-retry-button"
+                        onClick={reloadInventory}
+                      >
+                        Tentar novamente
+                      </button>
+                    </td>
+                  </tr>
+                ) : null}
+                {loadState === "ready" ? (
+                  <tr>
+                    <td className="investor-empty-result" colSpan={7}>
+                      {exclusiveInventory.length > 0
+                        ? "Nenhuma opção encontrada com esses filtros."
+                        : "Nenhuma unidade com dados válidos para comparar."}
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            ) : null}
+            {inventoryGroups.map((group, groupIndex) => (
+              <tbody key={group.key} className="tabelao-project-group">
+                {group.items.map((item, itemIndex) => {
+                  const groupHeaders = `tabelao-business-${groupIndex} tabelao-project-${groupIndex}`;
+                  return (
+                    <tr
+                      key={item.id}
+                      aria-rowindex={group.startIndex + itemIndex + 2}
+                      data-inventory-unit-id={item.id}
+                      data-inventory-project={item.project}
+                      data-inventory-business-unit={item.businessUnit}
                     >
-                      Tentar novamente
-                    </button>
-                  </td>
-                </tr>
-              ) : null}
-              {inventoryTopSpacer > 0 ? (
-                <tr
-                  className="investor-stock-spacer"
-                  aria-hidden="true"
-                  style={
-                    {
-                      "--investor-stock-spacer-height": `${inventoryTopSpacer}px`,
-                    } as CSSProperties
-                  }
-                >
-                  <td colSpan={7} />
-                </tr>
-              ) : null}
-              {visibleInventory.map((item, visibleIndex) => (
-                <tr
-                  key={item.id}
-                  aria-rowindex={inventoryWindowStart + visibleIndex + 2}
-                  data-inventory-unit-id={item.id}
-                  data-inventory-project={item.project}
-                  data-inventory-business-unit={item.businessUnit}
-                >
-                  <td className="investor-stock-start-cell" data-label="Início">
-                    <Link
-                      className="investor-stock-unit-button tabelao-stock-unit-link"
-                      href="/app/simulacao/tabela-direta"
-                      prefetch={false}
-                      aria-label={`Abrir a página Tabela Direta · ${item.product}`}
-                    >
-                      <span aria-hidden="true">›</span>
-                    </Link>
-                  </td>
-                  <td data-label="Incorporadora" title={item.businessUnit}>
-                    {item.businessUnit}
-                  </td>
-                  <td
-                    className="investor-stock-product"
-                    data-label="Empreendimento"
-                    title={item.project}
-                  >
-                    <span className="investor-stock-product-text">{item.project}</span>
-                  </td>
-                  <td data-label="Metragem">
-                    {typeof item.privateArea === "number" &&
-                    Number.isFinite(item.privateArea) &&
-                    item.privateArea > 0
-                      ? `${decimal.format(item.privateArea)} m²`
-                      : "—"}
-                  </td>
-                  <td data-label="Data de Entrega">{formatDate(item.completionDate)}</td>
-                  <td
-                    className="investor-stock-plant"
-                    data-label="Planta"
-                    title={informationLabel(item.plant)}
-                  >
-                    {informationLabel(item.plant)}
-                  </td>
-                  <td
-                    className="investor-stock-price"
-                    data-label="Menor valor"
-                    title={`Valor Final Com Kit ${money.format(item.finalWithKit!)} − (B.A. da Unidade ${money.format(item.unitBonus!)} + Folga de Tabela ${money.format(item.tableSlack!)}) = ${money.format(item.minimumPrice)}`}
-                  >
-                    {money.format(item.minimumPrice)}
-                  </td>
-                </tr>
-              ))}
-              {inventoryBottomSpacer > 0 ? (
-                <tr
-                  className="investor-stock-spacer"
-                  aria-hidden="true"
-                  style={
-                    {
-                      "--investor-stock-spacer-height": `${inventoryBottomSpacer}px`,
-                    } as CSSProperties
-                  }
-                >
-                  <td colSpan={7} />
-                </tr>
-              ) : null}
-              {loadState === "ready" && matchingInventory.length === 0 ? (
-                <tr>
-                  <td className="investor-empty-result" colSpan={7}>
-                    {exclusiveInventory.length > 0
-                      ? "Nenhuma opção encontrada com esses filtros."
-                      : "Nenhuma unidade com dados válidos para comparar."}
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
+                      <td
+                        className="tabelao-stock-quantity"
+                        data-label="Unidades"
+                        headers={`tabelao-quantity ${groupHeaders}`}
+                        title={`${item.availableUnits.toLocaleString("pt-BR")} unidades disponíveis no estoque · ${item.project} · ${item.plant}`}
+                      >
+                        {item.availableUnits.toLocaleString("pt-BR")}
+                      </td>
+                      {itemIndex === 0 ? (
+                        <>
+                          <th
+                            scope="rowgroup"
+                            rowSpan={group.items.length}
+                            id={`tabelao-business-${groupIndex}`}
+                            headers="tabelao-business"
+                            className="tabelao-group-cell"
+                            data-label="Incorporadora"
+                          >
+                            {group.businessUnit}
+                          </th>
+                          <th
+                            scope="rowgroup"
+                            rowSpan={group.items.length}
+                            id={`tabelao-project-${groupIndex}`}
+                            headers="tabelao-project"
+                            className="tabelao-group-cell investor-stock-product"
+                            data-label="Empreendimento"
+                          >
+                            <span className="investor-stock-product-text">{group.project}</span>
+                          </th>
+                        </>
+                      ) : null}
+                      <td data-label="Metragem" headers={`tabelao-area ${groupHeaders}`}>
+                        {typeof item.privateArea === "number" &&
+                        Number.isFinite(item.privateArea) &&
+                        item.privateArea > 0
+                          ? `${decimal.format(item.privateArea)} m²`
+                          : "—"}
+                      </td>
+                      <td data-label="Data de Entrega" headers={`tabelao-delivery ${groupHeaders}`}>
+                        {formatDate(item.completionDate)}
+                      </td>
+                      <td
+                        className="investor-stock-plant"
+                        data-label="Planta"
+                        headers={`tabelao-plant ${groupHeaders}`}
+                        title={informationLabel(item.plant)}
+                      >
+                        {informationLabel(item.plant)}
+                      </td>
+                      <td
+                        className="investor-stock-price"
+                        data-label="Menor valor"
+                        headers={`tabelao-price ${groupHeaders}`}
+                        title={`Valor Final Com Kit ${money.format(item.finalWithKit!)} − (B.A. da Unidade ${money.format(item.unitBonus!)} + Folga de Tabela ${money.format(item.tableSlack!)}) = ${money.format(item.minimumPrice)}`}
+                      >
+                        {money.format(item.minimumPrice)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            ))}
           </table>
         </div>
       </section>

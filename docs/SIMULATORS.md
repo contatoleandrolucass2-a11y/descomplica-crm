@@ -21,8 +21,9 @@ O Tabelão é uma consulta de estoque, não um motor de simulação. A rota prot
 `GET /api/inventory` com `no-store`. No mesmo shell e modelo visual da Tabela
 Associativo, exibe uma unidade por combinação de incorporadora, empreendimento,
 planta, escolhida pelo menor valor líquido independentemente da área. Todas as
-combinações válidas permanecem acessíveis pela rolagem; a janela de 60 linhas é
-apenas uma otimização de renderização, não um limite de resultados. Vagas e lojas
+combinações válidas são renderizadas integralmente, sem janela, paginação ou
+rolagem vertical interna. A tabela cresce com a página; telas estreitas mantêm
+apenas rolagem horizontal para preservar as sete colunas. Vagas e lojas
 continuam elegíveis. O painel Filtros do estoque permite selecionar incorporadora,
 empreendimento, região, planta e valor do imóvel, além de ordenar valores e limpar
 todos os filtros. Mantém o mesmo visual da Tabela Associativo.
@@ -32,7 +33,7 @@ mais cara. As opções e contagens são encadeadas pelas demais dimensões ativa
 contam tipologias exclusivas, não unidades brutas. Valor do Imóvel usa o líquido
 em centavos, nunca `finalPrice`. A ordem crescente ou decrescente atua dentro de
 cada empreendimento, preservando seus grupos. Limpar restaura todos os resultados,
-a ordem crescente e a rolagem inicial. Controles ficam desabilitados durante carga
+a ordem crescente. Controles ficam desabilitados durante carga
 ou erro; linhas ocultas por filtros não contam como dados inválidos.
 
 O valor exibido e a seleção usam exatamente `finalWithKit - (unitBonus +
@@ -51,12 +52,22 @@ separadas por incorporadora quando o nome coincide, e por valor líquido crescen
 dentro de cada empreendimento. A coluna Empreendimento exibe apenas o nome do
 empreendimento, sem o produto ou código da unidade. Metragem e entrega pertencem
 à unidade vencedora; área ausente ou inválida aparece como traço e não exclui um
-preço válido. A ação mantém a identificação acessível da unidade. Contadores
-mostram opções e empreendimentos distintos, não o total bruto de unidades.
+preço válido. Incorporadora e empreendimento usam células mescladas por grupo,
+com `rowSpan` recalculado após filtros e cabeçalhos associados às células de dados.
+Nomes completos podem quebrar linha. Nenhuma planta é removida pela mesclagem.
+
+A primeira coluna, **Unidades**, substitui o atalho da Tabela Direta e conta IDs
+distintos no estoque da mesma incorporadora, empreendimento e planta, antes dos
+filtros e independentemente da metragem. Inclui unidades sem preço válido quando
+há uma unidade elegível na mesma planta. `pricedUnits` registra separadamente as
+linhas elegíveis para manter o aviso de dados inválidos; não confundir quantidade
+do estoque com amostra da comparação. Grupos sem nenhum preço válido continuam
+fora da comparação. Contadores do cabeçalho e dos filtros mostram opções e
+empreendimentos distintos, não o total bruto de unidades.
 
 A fonte e sua data de geração continuam explícitas. Ausência ou erro não aciona
-mock, snapshot alternativo ou motor de simulação. O atalho continua abrindo a
-página Tabela Direta; não promete seleção automática entre fontes distintas.
+mock, snapshot alternativo ou motor de simulação. A quantidade se refere ao
+estoque publicado na data informada pela fonte, não a uma promessa de reserva.
 
 ## Escopo
 
