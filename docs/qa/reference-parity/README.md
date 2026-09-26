@@ -2,12 +2,28 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
-## Largura automática do Tabelão em 26/09/2026
+## Cabeçalhos compactos do Tabelão em 26/09/2026
+
+Sete capturas do Tabelão foram revisadas e promovidas a partir da árvore limpa
+no commit `51c95928f09e75dad570066f0038fb6ababadcd0`. Os rótulos visíveis passaram a
+Entrega, Estoque, Valor Imóvel, Volta ao Caixa, Avaliação, Endereço, % Obra e
+Limitador. O cabeçalho Incorporadora usa 4 px e os outros onze usam 6 px; os
+nomes completos permanecem disponíveis como rótulos acessíveis.
+
+A execução de promoção aprovou 140 checks responsivos, 80 de tema, 193 de
+acessibilidade, 193 comparações visuais e 100 de zoom. Todos os critérios do
+Tabelão passaram nos viewports 1440×900, 1024×768, 768×1024 e 375×812,
+incluindo larguras automáticas, ausência de overflow na página e rolagem
+horizontal interna somente quando necessária. Somente as sete referências
+esperadas foram atualizadas; as outras 186 foram preservadas.
+
+## Largura automática do Tabelão em 26/09/2026 — baseline anterior
 
 As doze colunas deixaram de usar larguras fixas que somavam 2.080 px. O navegador
 agora calcula cada largura pelo conteúdo integral, mantendo mínimo de 100% do
-painel e rolagem horizontal interna quando o conjunto ultrapassa o viewport. O
-cabeçalho Incorporadora usa 8 px, exatamente 2 px abaixo dos demais cabeçalhos.
+painel e rolagem horizontal interna quando o conjunto ultrapassa o viewport. Na
+referência anterior, o cabeçalho Incorporadora usava 8 px, exatamente 2 px
+abaixo dos demais cabeçalhos.
 
 O QA específico verifica nos quatro viewports obrigatórios o algoritmo automático,
 ocupação pelo conteúdo, ausência de truncamento, alcance da última coluna pela

@@ -113,21 +113,40 @@ describe("Tabelão protegido", () => {
       "utf8",
     );
 
-    for (const label of [
+    const visibleColumnLabels = [
       "Incorporadora",
       "Empreendimento",
       "Metragem",
-      "Data de Entrega",
+      "Entrega",
       "Planta",
-      "Unidades",
-      "Menor valor",
+      "Estoque",
+      "Valor Imóvel",
+      "Volta ao Caixa",
+      "Avaliação",
+      "Endereço",
+      "% Obra",
+      "Limitador",
+    ];
+    const tableHeaderSource = client.slice(client.indexOf("<thead>"), client.indexOf("</thead>"));
+    const renderedColumnLabels = [
+      ...tableHeaderSource.matchAll(/<th[^>]*>\s*([^<]+?)\s*<\/th>/g),
+    ].map((match) => match[1]?.trim() ?? "");
+
+    expect(renderedColumnLabels).toEqual(visibleColumnLabels);
+    for (const label of visibleColumnLabels) {
+      expect(client).toContain(`data-label="${label}"`);
+    }
+    for (const accessibleLabel of [
+      "Data de Entrega",
+      "Unidades no estoque publicado",
+      "Menor valor do imóvel",
       "Folga Volta ao Caixa",
       "Valor de Avaliação Bancária",
       "Logradouro Obra / Número / Bairro",
       "Total do andamento da obra (%)",
       "Outras descrições",
     ]) {
-      expect(client).toContain(label);
+      expect(tableHeaderSource).toContain(`aria-label="${accessibleLabel}"`);
     }
     for (const sharedClass of [
       "investor-workspace investor-direct-workspace investor-direct-design-copy",
@@ -215,7 +234,10 @@ describe("Tabelão protegido", () => {
     );
     expect(styles).toMatch(/\.tabelao-page-shell \.investor-stock-table col\s*\{[^}]*width: auto;/);
     expect(styles).toMatch(
-      /\.tabelao-page-shell \.investor-stock-table thead th#tabelao-business\s*\{[^}]*font-size: 8px !important;/,
+      /\.investor-page-shell\.tabelao-page-shell \.investor-stock-table thead th\s*\{[^}]*font-size: 6px !important;/,
+    );
+    expect(styles).toMatch(
+      /\.investor-page-shell\.tabelao-page-shell \.investor-stock-table thead th#tabelao-business\s*\{[^}]*font-size: 4px !important;/,
     );
     expect(styles).not.toContain("min-width: 2080px");
     expect(styles).not.toMatch(

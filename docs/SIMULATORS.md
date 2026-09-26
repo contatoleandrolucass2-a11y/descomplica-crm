@@ -50,20 +50,21 @@ produto e ID, sem depender da ordem da fonte. A unidade vencedora mantém seus
 dados completos; as opções ficam juntas por empreendimento em ordem alfabética,
 separadas por incorporadora quando o nome coincide, e por valor líquido crescente
 dentro de cada empreendimento. A coluna Empreendimento exibe apenas o nome do
-empreendimento, sem o produto ou código da unidade. Metragem, entrega, Folga
-Volta ao Caixa, Valor de Avaliação Bancária, andamento da obra e Outras
-descrições pertencem à unidade vencedora; não representam um agregado do grupo.
+empreendimento, sem o produto ou código da unidade. As colunas visíveis Entrega,
+Volta ao Caixa, Avaliação, % Obra e Limitador representam, respectivamente,
+`completionDate`, `cashBackSlack`, `appraisal`, `progress` e `classification` da
+unidade vencedora; não representam um agregado do grupo.
 O endereço prioriza a unidade viva e segue a regra de complemento descrita
 abaixo. Valores monetários iguais a zero são preservados. Progresso aceita
 somente a escala oficial de 0 a 1 e é exibido como percentual; valores fora do
-contrato aparecem como não informados. `classification` alimenta Outras
-descrições; o valor sentinela `0` aparece como não informado. Área ausente ou
+contrato aparecem como não informados. `classification` alimenta Limitador; o
+valor sentinela `0` aparece como não informado. Área ausente ou
 inválida aparece como traço e não exclui um preço válido. Incorporadora e
 empreendimento usam células mescladas por grupo,
 com `rowSpan` recalculado após filtros e cabeçalhos associados às células de dados.
 Nomes completos podem quebrar linha. Nenhuma planta é removida pela mesclagem.
 
-A coluna **Unidades** fica imediatamente antes de **Menor valor** e conta IDs
+A coluna **Estoque** fica imediatamente antes de **Valor Imóvel** e conta IDs
 distintos no estoque da mesma incorporadora, empreendimento e planta, antes dos
 filtros e independentemente da metragem. Inclui unidades sem preço válido quando
 há uma unidade elegível na mesma planta. `pricedUnits` registra separadamente as

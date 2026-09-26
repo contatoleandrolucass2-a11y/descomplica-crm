@@ -21445,17 +21445,18 @@ body:has(.investor-page-shell) {
   table-layout: auto;
 }
 
-.tabelao-page-shell .investor-stock-table thead th {
+.investor-page-shell.tabelao-page-shell .investor-stock-table thead th {
   height: 48px;
   overflow: visible;
+  font-size: 6px !important;
   line-height: 1.2;
   text-overflow: clip;
   white-space: nowrap;
   vertical-align: middle;
 }
 
-.tabelao-page-shell .investor-stock-table thead th#tabelao-business {
-  font-size: 8px !important;
+.investor-page-shell.tabelao-page-shell .investor-stock-table thead th#tabelao-business {
+  font-size: 4px !important;
 }
 
 .tabelao-page-shell .investor-stock-table thead th:first-child,
