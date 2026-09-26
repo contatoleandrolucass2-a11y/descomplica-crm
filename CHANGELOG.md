@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-26 — largura automática das colunas do Tabelão
+
+- Substitui a grade fixa de 2.080 px pelo cálculo nativo de largura conforme o
+  maior conteúdo real de cada coluna, preservando as doze colunas completas.
+- Remove espaços horizontais artificiais e truncamento por reticências somente
+  no Tabelão; o painel mantém a rolagem horizontal interna quando necessária.
+- Reduz em exatamente 2 px o cabeçalho Incorporadora, sem alterar os valores da
+  coluna, a densidade das linhas ou a tipografia das demais informações.
+- Preserva agrupamento, filtros, quantidades, fórmula do menor valor, detalhes da
+  unidade vencedora, fonte, rota, autorização e APIs.
+
 ## 2026-09-26 — detalhes completos no Tabelão
 
 - Move Unidades para imediatamente antes de Menor valor e amplia a grade de sete

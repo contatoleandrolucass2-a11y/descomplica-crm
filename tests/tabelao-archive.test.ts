@@ -202,15 +202,25 @@ describe("Tabelão protegido", () => {
     expect(client).toContain('.join(" ")');
     expect(styles).toContain("herda integralmente o visual da Tabela Associativo");
     expect(styles).toContain("grade completa, expansiva");
-    expect(styles).toContain(".tabelao-page-shell .tabelao-stock-col-quantity");
-    expect(styles).toContain(".tabelao-page-shell .tabelao-stock-col-address");
+    expect(client).toContain('className="tabelao-stock-col-quantity"');
+    expect(client).toContain('className="tabelao-stock-col-address"');
     expect(styles).toContain(
       ".tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-area",
     );
     expect(styles).toMatch(
       /\.tabelao-page-shell \.investor-stock-panel > \.investor-section-heading\s*\{[^}]*height: auto !important;[^}]*min-height: 48px !important;/,
     );
-    expect(styles).toContain("min-width: 2080px");
+    expect(styles).toMatch(
+      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*width: max-content;[^}]*min-width: 100%;[^}]*table-layout: auto;/,
+    );
+    expect(styles).toMatch(/\.tabelao-page-shell \.investor-stock-table col\s*\{[^}]*width: auto;/);
+    expect(styles).toMatch(
+      /\.tabelao-page-shell \.investor-stock-table thead th#tabelao-business\s*\{[^}]*font-size: 8px !important;/,
+    );
+    expect(styles).not.toContain("min-width: 2080px");
+    expect(styles).not.toMatch(
+      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*table-layout: fixed;/,
+    );
     expect(styles).toMatch(
       /\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*max-height: none;[^}]*overflow-x: auto;[^}]*overflow-y: visible;/,
     );

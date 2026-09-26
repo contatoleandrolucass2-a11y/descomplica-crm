@@ -1473,6 +1473,37 @@ async function checkTabelaoValidation(page, origin) {
           .querySelector(".investor-stock-panel > .investor-section-heading")
           ?.getBoundingClientRect();
         const syncBox = document.querySelector(".investor-stock-sync")?.getBoundingClientRect();
+        const businessHeader = document.querySelector("#tabelao-business");
+        const projectHeader = document.querySelector("#tabelao-project");
+        const tableStyle = table == null ? null : getComputedStyle(table);
+        const cellContentWidth = (cell) => {
+          const range = document.createRange();
+          range.selectNodeContents(cell);
+          return range.getBoundingClientRect().width;
+        };
+        const contentFitColumns = [
+          ...document.querySelectorAll(".investor-stock-table thead th"),
+        ].every((header) => {
+          const cells = [header, ...document.querySelectorAll(`[headers~="${header.id}"]`)];
+          const widestContent = Math.max(...cells.map(cellContentWidth));
+          const horizontalPadding =
+            Number.parseFloat(getComputedStyle(header).paddingLeft) +
+            Number.parseFloat(getComputedStyle(header).paddingRight);
+          return header.getBoundingClientRect().width <= widestContent + horizontalPadding + 4;
+        });
+        const fullTextVisible = [
+          ...document.querySelectorAll(
+            ".investor-stock-table tbody th, .investor-stock-table tbody td",
+          ),
+        ].every((cell) => cell.scrollWidth <= cell.clientWidth + 1);
+        let internalHorizontalScroll = false;
+        if (results != null) {
+          const maximumScroll = results.scrollWidth - results.clientWidth;
+          results.scrollLeft = maximumScroll;
+          internalHorizontalScroll =
+            maximumScroll > 0 && Math.abs(results.scrollLeft - maximumScroll) <= 1;
+          results.scrollLeft = 0;
+        }
         return {
           title: document.querySelector("h1")?.textContent?.trim() === "Simulador Tabelão",
           columns:
@@ -1535,6 +1566,17 @@ async function checkTabelaoValidation(page, origin) {
             results != null &&
             results.scrollHeight <= results.clientHeight + 2 &&
             getComputedStyle(results).maxHeight === "none",
+          automaticColumnWidths: tableStyle?.tableLayout === "auto" && contentFitColumns,
+          businessHeaderReduced:
+            businessHeader != null &&
+            projectHeader != null &&
+            Math.abs(
+              Number.parseFloat(getComputedStyle(projectHeader).fontSize) -
+                Number.parseFloat(getComputedStyle(businessHeader).fontSize) -
+                2,
+            ) < 0.1,
+          fullTextVisible,
+          internalHorizontalScroll,
         };
       },
       { ...viewport, count: syntheticTabelaoInventory.length },

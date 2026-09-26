@@ -21440,7 +21440,9 @@ body:has(.investor-page-shell) {
 }
 
 .tabelao-page-shell .investor-stock-table {
-  min-width: 2080px;
+  width: max-content;
+  min-width: 100%;
+  table-layout: auto;
 }
 
 .tabelao-page-shell .investor-stock-table thead th {
@@ -21448,8 +21450,12 @@ body:has(.investor-page-shell) {
   overflow: visible;
   line-height: 1.2;
   text-overflow: clip;
-  white-space: normal;
+  white-space: nowrap;
   vertical-align: middle;
+}
+
+.tabelao-page-shell .investor-stock-table thead th#tabelao-business {
+  font-size: 8px !important;
 }
 
 .tabelao-page-shell .investor-stock-table thead th:first-child,
@@ -21458,21 +21464,12 @@ body:has(.investor-page-shell) {
   text-align: left;
 }
 
-.tabelao-page-shell .investor-stock-col-business { width: 112px; }
-.tabelao-page-shell .tabelao-stock-col-project { width: 250px; }
-.tabelao-page-shell .investor-stock-col-area { width: 90px; }
-.tabelao-page-shell .investor-stock-col-date { width: 120px; }
-.tabelao-page-shell .investor-stock-col-plant { width: 180px; }
-.tabelao-page-shell .tabelao-stock-col-quantity { width: 78px; }
-.tabelao-page-shell .investor-stock-col-price { width: 150px; }
-.tabelao-page-shell .tabelao-stock-col-cashback { width: 160px; }
-.tabelao-page-shell .tabelao-stock-col-appraisal { width: 178px; }
-.tabelao-page-shell .tabelao-stock-col-address { width: 330px; }
-.tabelao-page-shell .tabelao-stock-col-progress { width: 174px; }
-.tabelao-page-shell .tabelao-stock-col-description { width: 258px; }
+.tabelao-page-shell .investor-stock-table col {
+  width: auto;
+}
 
 .tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-quantity {
-  width: 78px;
+  width: auto;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
@@ -21491,8 +21488,8 @@ body:has(.investor-page-shell) {
 }
 
 .tabelao-page-shell .investor-stock-table .tabelao-stock-long-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
   white-space: nowrap;
 }
 
@@ -21513,8 +21510,8 @@ body:has(.investor-page-shell) {
 .tabelao-page-shell .investor-stock-table tbody th.tabelao-group-cell,
 .tabelao-page-shell .investor-stock-table .tabelao-group-cell .investor-stock-product-text {
   overflow: visible;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
   text-overflow: clip;
 }
 
@@ -21567,9 +21564,9 @@ body:has(.investor-page-shell) {
 
   .tabelao-page-shell .investor-stock-table {
     display: table;
-    width: 100%;
-    min-width: 2080px;
-    table-layout: fixed;
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto;
   }
 
   .tabelao-page-shell .investor-stock-table colgroup {
@@ -21631,14 +21628,14 @@ body:has(.investor-page-shell) {
     height: 44px !important;
     min-height: 44px !important;
     padding: 0 7px !important;
-    overflow: hidden;
+    overflow: visible;
     border-right: 1px solid #2b5c74;
     border-bottom: 1px solid #2b5c74;
     background: transparent;
     box-shadow: none;
     font-size: 12px !important;
     line-height: 1.2 !important;
-    text-overflow: ellipsis;
+    text-overflow: clip;
     white-space: nowrap;
   }
 
@@ -21648,7 +21645,7 @@ body:has(.investor-page-shell) {
 
   .tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-quantity {
     padding-inline: 2px !important;
-    overflow: hidden;
+    overflow: visible;
     text-align: center;
   }
 
@@ -21665,8 +21662,8 @@ body:has(.investor-page-shell) {
   .tabelao-page-shell .investor-stock-product,
   .tabelao-page-shell .investor-stock-plant,
   .tabelao-page-shell .investor-stock-product-text {
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    text-overflow: clip;
     white-space: nowrap;
   }
 
@@ -21675,8 +21672,8 @@ body:has(.investor-page-shell) {
   }
 
   .tabelao-page-shell .investor-stock-table tbody td.investor-stock-plant {
-    white-space: normal;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
+    overflow-wrap: normal;
   }
 }
 
