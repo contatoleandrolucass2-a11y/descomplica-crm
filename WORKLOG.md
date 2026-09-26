@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-09-26 — colunas automáticas e densidade horizontal do Tabelão
+
+- Confirmado que as doze larguras fixas somavam 2.080 px e ampliavam inclusive
+  colunas cujo conteúdo exigia menos espaço. O Tabelão passou a usar
+  `table-layout: auto`, largura intrínseca e mínimo de 100% do painel.
+- Removido o truncamento local por reticências. Textos completos determinam a
+  largura natural e continuam contidos pela rolagem horizontal do painel, sem
+  criar overflow na raiz da página.
+- O rótulo de cabeçalho Incorporadora foi reduzido de 10 px para 8 px. Valores
+  comerciais e demais textos mantêm seus tamanhos anteriores.
+- Nenhum helper, agrupamento, filtro, valor, API, autorização ou fonte de dados
+  foi alterado. Auditoria independente reconciliou novamente 2.243 IDs, 53
+  opções, 23 empreendimentos, 2.503 combinações de filtros, quantidades,
+  `rowSpan`, mínimos, ordem e detalhes da unidade vencedora.
+- A primeira matriz autenticada aprovou os quatro viewports do Tabelão, incluindo
+  largura automática, diferença exata de 2 px, conteúdo integral, rolagem até a
+  última coluna, 130 linhas agrupadas e zero overflow na página. Também passaram
+  140 checks responsivos, 80 de tema, 193 auditorias Axe e 100 de zoom; somente
+  as sete imagens esperadas do Tabelão diferiram da referência fixa anterior.
+- Lint, tipos, build de 41 rotas, 642 testes Vitest e oito testes Node passaram.
+  Duas revisões independentes não encontraram bloqueios; uma registrou apenas que
+  a captura móvel geral termina antes da tabela, coberta funcionalmente em 375 px.
+
 ## 2026-09-26 — novas colunas e endereço completo no Tabelão
 
 - Continuada a implementação agrupada da PR #87. Unidades saiu da primeira

@@ -2,6 +2,18 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Largura automática do Tabelão em 26/09/2026
+
+As doze colunas deixaram de usar larguras fixas que somavam 2.080 px. O navegador
+agora calcula cada largura pelo conteúdo integral, mantendo mínimo de 100% do
+painel e rolagem horizontal interna quando o conjunto ultrapassa o viewport. O
+cabeçalho Incorporadora usa 8 px, exatamente 2 px abaixo dos demais cabeçalhos.
+
+O QA específico verifica nos quatro viewports obrigatórios o algoritmo automático,
+ocupação pelo conteúdo, ausência de truncamento, alcance da última coluna pela
+rolagem interna e ausência de overflow da página. Agrupamento, quantidades, menor
+valor e detalhes comerciais continuam cobertos pelos contratos existentes.
+
 ## Tabelão expansivo em 26/09/2026
 
 Sete capturas revisadas e atualizadas para a coluna Unidades, tabela sem limite
