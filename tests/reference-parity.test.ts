@@ -455,7 +455,12 @@ describe("versioned reference parity catalog", () => {
     ).toBe(true);
     expect(Object.values(authenticatedResults.keyboard).every(Boolean)).toBe(true);
     expect(Object.values(authenticatedResults.simulatorValidation).every(Boolean)).toBe(true);
-    expect(Object.keys(authenticatedResults.tabelaoValidation)).toHaveLength(13);
+    expect(Object.keys(authenticatedResults.tabelaoValidation)).toHaveLength(16);
+    expect(authenticatedResults.tabelaoValidation).toMatchObject({
+      liveAvailableBeforeLocationReference: true,
+      locationReferenceApplied: true,
+      locationMetadataFits: true,
+    });
     expect(Object.values(authenticatedResults.tabelaoValidation).every(Boolean)).toBe(true);
     expect(Object.keys(authenticatedResults.directTableValidation)).toHaveLength(49);
     expect(Object.values(authenticatedResults.directTableValidation).every(Boolean)).toBe(true);

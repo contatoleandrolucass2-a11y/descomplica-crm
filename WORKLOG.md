@@ -1,5 +1,230 @@
 # Worklog
 
+## 2026-09-26 — novas colunas e endereço completo no Tabelão
+
+- Continuada a implementação agrupada da PR #87. Unidades saiu da primeira
+  posição e ficou imediatamente antes de Menor valor; a tabela agora possui
+  doze colunas e mantém as células mescladas por empreendimento.
+- Mapeados os campos oficiais: `cashBackSlack`, `appraisal`, `street` +
+  `streetNumber` + `neighborhood`, `progress` e `classification`. Todos os
+  detalhes comerciais pertencem à unidade vencedora do menor valor; quantidade
+  continua sendo `COUNT DISTINCT id` no grupo.
+- A fonte viva de 2.243 IDs contém folga, avaliação, bairro e andamento nos 53
+  representantes e `classification` bruto em 52; após remover o sentinela `0`,
+  Outras descrições possui conteúdo exibível em 50. A fonte não contém logradouro
+  nem número.
+  O snapshot protegido complementa somente os campos de endereço ausentes por
+  correspondência da unidade ou por endereço completo e único do empreendimento.
+  Referências ambíguas ou conflitantes com componentes vivos não são combinadas.
+  A interface informa a referência do complemento, sem bloquear a exibição da
+  fonte viva, e qualifica sua data como estoque publicado, não atualização atual.
+- Cobertura adicionada para zero monetário, preservação dos detalhes da unidade
+  vencedora, escala de andamento 0–1, enriquecimento coerente sem mutação, doze
+  cabeçalhos, ordem Unidades/Menor valor, estados com `colSpan` completo e QA
+  responsivo.
+- Auditoria real reconciliou 2.243 IDs, 53 opções, 23 empreendimentos, zero
+  exclusões e 2.503 combinações de filtros. Entre as 53 linhas vencedoras, 28
+  receberam endereço por unidade compatível, sete por endereço completo e único
+  do empreendimento e 18 permaneceram explicitamente sem complemento.
+- QA autenticado aprovou quatro larguras do Tabelão, carga viva antes da
+  referência, três linhas de metadados sem sobreposição, endereço posterior,
+  vazio, erro, recuperação, guia e expansão acima de 60 linhas. A matriz completa
+  aprovou 140 checks responsivos, 80 de tema, 193 de acessibilidade, 193
+  comparações visuais e 100 de zoom antes da revisão final.
+
+## 2026-09-26 — Tabelão expansivo, quantidades e células mescladas
+
+- Removidos janela de 60 linhas, espaçadores e limite vertical somente no Tabelão.
+  Todas as plantas filtradas são renderizadas; a página cresce com o estoque.
+- Primeira coluna passa a informar IDs distintos do estoque por incorporadora,
+  empreendimento e planta. Quantidade independe dos filtros e da elegibilidade
+  financeira; `pricedUnits` mantém o aviso de dados incompletos separado.
+- Cada empreendimento usa um `tbody` e duas células `rowSpan`, preservando todas
+  as opções, filtros, ordenação, fórmula e detalhes da unidade de menor valor.
+  Cabeçalhos de grupo associados às células e nomes completos com quebra de linha.
+- Adicionada regressão sintética de 130 plantas, três empreendimentos e unidade
+  sem preço, em quatro viewports: expansão, quantidades, mesclagem, ordenação,
+  filtro, limpeza e alcance da última linha. Auditoria independente confere
+  quantidades e extensão de todos os grupos sem persistir unidades comerciais.
+- Instaladas as 20 skills do pacote JuliusBrussee/caveman no diretório pessoal
+  `.codex/skills`, fixadas em `2fd153c67988e980fb0b2455c90832159a6a5a25`.
+  Sem instalar proxy, alterar preferências ou comprimir conteúdo desta entrega.
+- Verificados por hash os 48 arquivos das 20 skills instaladas.
+- Auditoria da fonte em 26/09/2026: 2.243 IDs distintos, 53 opções e 23 grupos;
+  soma das quantidades igual a 2.243, todos os mínimos e `rowSpan` reconciliados,
+  2.503 combinações de filtros verificadas. Fonte gerada em 07/08/2026, sem
+  campos obrigatórios ausentes; não representa atualização comercial em setembro.
+- Typecheck e build locais passaram. Suíte Windows: 632 testes passaram, quatro
+  ignorados e duas falhas preexistentes de modo POSIX `0600` retornando `0666`.
+  A validação Linux completa e as evidências visuais acompanham a publicação.
+- `pnpm verify` aprovado na VPS: lint, typecheck, 634 testes Vitest e oito testes
+  Node, quatro ignorados e build concluído. Imagem
+  `sha256:cd252b6cc0551eed44a09da32f5a09b3b677d46f38e3ebeae72ba72b731d116c`
+  comprovada sem rebuild nos dois perfis de runtime.
+- Publicado `809a048c8fed52d4cb4a2cdda731b2a07abdbce8` com backup e rollback.
+  Health público confirmou a revisão; `GET /api/inventory` anônimo retornou 401.
+  Revisão autenticada em 1440, 1024, 768 e 375 px confirmou 53 linhas, 23 grupos,
+  2.243 unidades, filtros, ordenação, ausência de overflow horizontal da página,
+  tabela sem rolagem vertical interna e última opção acessível. Nenhum erro JS.
+- CI `36220767591`: todos os critérios funcionais, 140 checks de rota, 80 de
+  tema, 193 de acessibilidade e 100 de zoom aprovados. Diferenças restritas a sete
+  imagens do Tabelão. Inspecionadas e promovidas da captura limpa
+  `d28120044ccac5aaf6eea239336a0b4a5101150f`, com árvore igual à versão publicada,
+  hashes e baseline conferidos; 186 imagens existentes e limiares preservados.
+
+## 2026-09-24 — restauração dos filtros solicitados
+
+- Reaproveitado o visual do painel da Tabela Associativo para os seis controles
+  do print, com ajuda contextual e Limpar filtros. Sem alteração nas sete colunas.
+- Seleção por incorporadora, empreendimento, região, planta e valor líquido ocorre
+  após a escolha da unidade mínima. Contadores representam opções exclusivas,
+  considerando as demais dimensões ativas; valores são comparados em centavos.
+- Ordenação atua dentro de cada empreendimento; limpeza restaura ordem crescente
+  e todas as opções. Filtros e ordenação reposicionam a rolagem; exclusões por dados
+  inválidos permanecem separadas das linhas ocultas por seleção.
+- Skills Data aplicadas ao grão, denominadores e reconciliação; UX e React ao
+  reaproveitamento visual, controles nativos rotulados e cálculos memorizados.
+  Sem mudanças de fonte, autenticação, banco, ACL ou workflows n8n.
+- Validação local: lint, tipos, build e 31 testes focados aprovados. Suíte Windows
+  com 629 testes aprovados e somente as duas falhas conhecidas de modo POSIX 0600.
+  Auditoria independente: 2.243 unidades, 53 opções, 23 empreendimentos, nenhuma
+  exclusão e 2.503 combinações de filtros reconciliadas. Data da fonte preservada.
+- Suíte Linux completa aprovada: 639 testes (631 Vitest e oito Node), quatro skips.
+  Imagem comprovada nos dois perfis e publicada; health público e proteção 401
+  confirmados. Conferência autenticada motivou ajuste de singular nos contadores
+  e nomes acessíveis explícitos nos seletores.
+- Corrigida sobreposição mobile de Limpar filtros com o primeiro seletor: cabeçalho
+  em duas linhas de 44 px e altura automática apenas no Tabelão. QA passa a medir
+  a separação entre botão e primeiro campo nos quatro viewports.
+- `pnpm verify` completo aprovado no Linux após a correção. Publicada imagem
+  `b9a9379d1a6111f099a57b39a0010efe8658baaa`, comprovada em dois perfis de runtime.
+  Health público confirmado; navegador autenticado validou combinações dos cinco
+  filtros, limpeza, singular, ordenação dentro dos grupos, quatro larguras sem
+  sobreposição/overflow e console sem erros. API anônima permanece 401.
+- CI `36081141236` aprovou código, restauração, autorização, E2E e todos os
+  critérios funcionais da matriz: 140 responsivos, 80 temas, 193 acessibilidade,
+  100 zoom e 13 critérios do Tabelão. Apenas dez diferenças visuais desta rota.
+  Capturas revisadas e promovidas com hashes/árvore conferidos; outras 183 imagens
+  e limiares preservados. Proveniência em docs/qa/reference-parity.
+
+## 2026-09-24 — correção da exclusividade pela coluna Planta
+
+- Aplicada a correção dos dois prints: coluna Empreendimento sem produto/unidade e
+  apenas uma opção por empreendimento e planta, escolhida pelo menor líquido em centavos.
+  Incorporadora continua separando empreendimentos homônimos. Área não define o grupo.
+- Mantidas as sete colunas, as plantas distintas, os dados da unidade vencedora,
+  a ordenação por empreendimento e a fórmula solicitada. Área inválida aparece
+  como traço, sem excluir o menor preço nem alterar a fonte.
+- Skills Data aplicadas ao contrato da métrica, qualidade da fonte e reconciliação
+  independente; UX, acessibilidade e React aplicados ao componente existente.
+- Regressões cobrem áreas diferentes da mesma planta, menor líquido versus bruto,
+  empate, ausência de área, preservação de todas as plantas e nome exibido.
+  Sem alteração de API, autorização, banco ou workflows n8n.
+- Auditoria independente da fonte SPC: 2.243 unidades e IDs únicos, 53 opções
+  em 23 empreendimentos; todos os mínimos e grupos reconciliados, nenhuma linha
+  excluída. Fonte gerada em 07/08/2026, sem afirmar atualização comercial posterior.
+- Tipos e build local aprovados. Suíte Windows: somente as duas falhas já
+  conhecidas de permissões POSIX; confirmação completa será feita no Linux.
+- Suíte Linux aprovada: 635 testes (627 Vitest e oito Node), quatro skips.
+  Lint local/Linux, tipos, build e validação geral do CI aprovados.
+- Publicada `8ae74956a3fa5c5ec831273e789da32767cdb25c` após prova de imagem.
+  Health público confirmado e API anônima responde 401. Conferência autenticada:
+  53 plantas exclusivas em 23 empreendimentos, nomes e fórmulas corretos, quatro
+  larguras sem sobreposição ou overflow da página, console sem erros.
+- Matriz CI interrompida duas vezes na etapa do Tabelão. O teste enviava Escape
+  sem aguardar o foco transferido por requestAnimationFrame; o acionador tem
+  aria-haspopup e Escape nele não fecha o painel. QA passa a aguardar foco no
+  painel e retorno ao acionador; logs registram subetapas sem dados comerciais.
+- CI `36059484259` confirmou todos os critérios funcionais, incluindo os 13 do
+  Tabelão; o bloqueio do guia deixou de ocorrer após sincronização de foco.
+  Restaram somente nove diferenças visuais da mudança solicitada. Referências
+  revisadas e promovidas com hashes e árvore Git conferidos, preservando outras
+  184 imagens e todos os limiares. Proveniência em docs/qa/reference-parity.
+
+## 2026-09-24 — agrupamento das opções por empreendimento
+
+- Alterada apenas a ordem do Tabelão: empreendimento alfabético, incorporadora
+  para separar homônimos e menor valor líquido dentro de cada grupo. Nomes usam
+  a mesma normalização da seleção exclusiva, sem modificar os dados exibidos.
+- Mantidas todas as plantas e metragens, a fórmula em centavos, os contadores,
+  a janela de 60 linhas e os dados completos da unidade. Sem alteração de API,
+  autorização, banco ou workflows de simulação.
+- Acrescentadas regressões para agrupamento, nomes normalizados, homônimos,
+  valores líquidos, empate e preservação integral das opções; QA visual passa a
+  conferir os grupos e preços internos em vez de ordenação global por preço.
+- Corrigida a altura virtual no desktop para 25 px: o alvo de 24 px mais a borda
+  da célula produzia linhas maiores que os 24 px estimados. Falha observada no
+  QA anterior e confirmada por medição do navegador; mantidos os alvos de toque.
+- Auditoria da fonte confirmou 2.243 unidades, 120 opções em 23 empreendimentos,
+  sem perda de tipologias, grupos intercalados ou preços fora de ordem interna.
+- Validação: formatação, lint, tipos e build aprovados; 22 testes focados e 630
+  testes completos no Linux (622 Vitest, quatro skips existentes, oito Node).
+  No Windows persistem somente os dois asserts POSIX 0600 já documentados.
+- Publicada a imagem `1492a18e7fef89afce79731aa072a78150744d07`, após prova dos
+  dois perfis de runtime. Health local e público confirmados; backup do ambiente
+  anterior preservado para rollback.
+- Conferência autenticada de todas as 120 opções: IDs únicos, 23 grupos
+  contíguos, preços crescentes dentro de cada grupo e 120 fórmulas corretas em
+  centavos. Telas de 1440, 1024, 768 e 375 px sem overflow da página ou sobreposição
+  do cabeçalho; console sem erros.
+- A captura completa na VPS parou na leitura das fixtures do Supabase local de
+  QA. Conta e dados efêmeros foram limpos; nenhuma migration, policy ou dado de
+  produção foi alterado. A matriz limpa do CI continua sendo a evidência de
+  regressão visual, separada da conferência autenticada em produção.
+- CI `36015516477`: todos os critérios funcionais aprovados, inclusive os 13 do
+  Tabelão; falha restrita a dez imagens antigas desta rota. Capturas sintéticas
+  revisadas em todos os tamanhos/temas afetados e promovidas pelo mecanismo
+  transacional existente, com validação dos hashes, igualdade da árvore Git do
+  código capturado e integridade da baseline anterior. Evidência registra a
+  origem do artefato CI; nenhum limiar ou teste foi relaxado e nenhuma captura
+  de outra rota foi alterada.
+
+## 2026-09-24 — menor valor líquido por empreendimento, planta e área
+
+- Aplicadas as skills solicitadas de definição da métrica, qualidade e validação
+  de dados, UX, interfaces e React ao recorte do Tabelão.
+- Conectado o helper exclusivo à página, com chave de incorporadora,
+  empreendimento, planta e área sem arredondamento. Mantidos dados completos da
+  unidade vencedora, vagas, lojas, fonte e data, sete colunas e janela virtual.
+- Conta em centavos: `finalWithKit - unitBonus - tableSlack`; sem fallback para
+  `finalPrice` ou zero em campo ausente. Desempate por identificador/produto/ID.
+- Auditoria independente da origem em 24/09/2026: 2.243 linhas e IDs únicos,
+  zero ausências nos campos exigidos, zero exclusões, 120 opções em 23
+  empreendimentos; todos os mínimos e grupos conferidos, incluindo inversão da
+  ordem da fonte. A origem informa geração em 07/08/2026, não em 24/09.
+- Node 24.19.0 / pnpm 11.20.0: `pnpm lint`, `pnpm typecheck` e `pnpm build`
+  aprovados; 19 testes focados aprovados. `pnpm test` no Linux aprovou 619 testes
+  Vitest (quatro skips existentes) e oito testes operacionais. No Windows, apenas
+  os dois asserts preexistentes de modo POSIX 0600 falham, recebendo 0666.
+- QA visual versionado atualizado para os grupos exclusivos, preços líquidos,
+  ausência dos filtros e guia de três passos. A sessão autenticada do navegador
+  está disponível para a conferência responsiva após a promoção da imagem.
+- PR #87 aberto. Corrigida a formatação do cliente e do changelog apontada pelo
+  primeiro CI; a imagem passou na prova dos perfis de homologação e produção.
+- Publicação inicial confirmada em sessão autenticada: 120 IDs únicos acessíveis
+  nas janelas inicial/final, índices 2 a 121 e conta completa nos valores. A revisão
+  em 1440, 1024, 768 e 375 px detectou cabeçalho móvel fixo em 40 px sobrepondo
+  contador/data à tabela; aplicado ajuste escopado e incluído critério de não
+  sobreposição no QA responsivo.
+
+## 2026-09-24 — remoção dos filtros do Tabelão
+
+- Removida a faixa visual “Filtros do estoque” de `/app/simulacao/tabelao`,
+  incluindo os selects de incorporadora, empreendimento, região, planta, valor,
+  ordenação e o botão de limpar filtros.
+- O Tabelão continua buscando exclusivamente `GET /api/inventory` com
+  `no-store`, exibindo o estoque completo em sete colunas, janela virtual de 60
+  linhas e atalho para a Tabela Direta.
+- A ordenação fica fixa em valor crescente e o guia deixou de mencionar passos
+  de filtro ou ordenação.
+- Validação do recorte: `pnpm vitest run tests/tabelao-archive.test.ts`,
+  `pnpm lint`, `pnpm typecheck` e `pnpm build` passaram com Node 24.19.0 e pnpm
+  11.20.0.
+- `pnpm test` completo ainda falha em Windows apenas nos asserts existentes de
+  modo `0600` em `tests/mapping-import.test.ts` e
+  `tests/commercial-engine.test.ts`, que recebem `0666`; o teste do Tabelão
+  passou.
+
 ## 2026-09-24 — cópia visual do Associativo no Tabelão
 
 - A estrutura ativa de `/app/simulacao/associativo-fluxo-linear` foi usada como

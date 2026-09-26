@@ -42,7 +42,7 @@ export async function TabelaoArchive() {
               <InvestorInfoHint
                 label="Tabelão"
                 title="Tabelão"
-                description="Consulta completa de cada unidade disponível no estoque SPC."
+                description="Todas as plantas de cada empreendimento, com uma unidade de menor valor por planta, independentemente da metragem. Menor valor = Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela)."
               />
             </div>
           </div>

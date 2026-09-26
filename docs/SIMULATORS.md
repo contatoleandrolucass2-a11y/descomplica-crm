@@ -18,11 +18,73 @@ bloqueados. Nenhum simulador depende de Salesforce, n8n ou Qlik.
 
 O Tabelão é uma consulta de estoque, não um motor de simulação. A rota protegida
 `/app/simulacao/tabelao` opera em modo somente leitura, consome
-`GET /api/inventory` com `no-store` e preserva uma linha por unidade no mesmo
-shell e modelo visual da Tabela Associativo. O painel replica seus filtros,
-ordenação, densidade, ajuda e guia, mas não incorpora seu motor, snapshot,
-cálculos ou exclusão de vagas. Ausência ou erro da fonte não aciona mock,
-snapshot alternativo ou cálculo implícito.
+`GET /api/inventory` com `no-store`. No mesmo shell e modelo visual da Tabela
+Associativo, exibe uma unidade por combinação de incorporadora, empreendimento,
+planta, escolhida pelo menor valor líquido independentemente da área. Todas as
+combinações válidas são renderizadas integralmente, sem janela, paginação ou
+rolagem vertical interna. A tabela cresce com a página; telas estreitas mantêm
+apenas rolagem horizontal para preservar as doze colunas. Vagas e lojas
+continuam elegíveis. O painel Filtros do estoque permite selecionar incorporadora,
+empreendimento, região, planta e valor do imóvel, além de ordenar valores e limpar
+todos os filtros. Mantém o mesmo visual da Tabela Associativo.
+
+Os filtros são aplicados depois da escolha dos mínimos, sem promover uma unidade
+mais cara. As opções e contagens são encadeadas pelas demais dimensões ativas e
+contam tipologias exclusivas, não unidades brutas. Valor do Imóvel usa o líquido
+em centavos, nunca `finalPrice`. A ordem crescente ou decrescente atua dentro de
+cada empreendimento, preservando seus grupos. Limpar restaura todos os resultados,
+a ordem crescente. Controles ficam desabilitados durante carga
+ou erro; linhas ocultas por filtros não contam como dados inválidos.
+
+O valor exibido e a seleção usam exatamente `finalWithKit - (unitBonus +
+tableSlack)`, correspondentes a **Valor Final Com Kit - (B.A. da Unidade + Folga
+de Tabela)**. Cada parcela monetária é convertida em centavos antes da subtração;
+`finalPrice` não substitui nenhum campo. Exigem-se valores numéricos finitos,
+abatimentos não negativos, resultado positivo, identificador, incorporadora,
+empreendimento e planta. Ausências financeiras não viram zero: a interface
+informa quantas linhas não puderam participar, qualificando a comparação.
+
+Nomes são normalizados apenas na chave do grupo (caixa, acentos e espaços). Áreas
+distintas da mesma planta não criam opções adicionais. Empates usam identificador natural,
+produto e ID, sem depender da ordem da fonte. A unidade vencedora mantém seus
+dados completos; as opções ficam juntas por empreendimento em ordem alfabética,
+separadas por incorporadora quando o nome coincide, e por valor líquido crescente
+dentro de cada empreendimento. A coluna Empreendimento exibe apenas o nome do
+empreendimento, sem o produto ou código da unidade. Metragem, entrega, Folga
+Volta ao Caixa, Valor de Avaliação Bancária, andamento da obra e Outras
+descrições pertencem à unidade vencedora; não representam um agregado do grupo.
+O endereço prioriza a unidade viva e segue a regra de complemento descrita
+abaixo. Valores monetários iguais a zero são preservados. Progresso aceita
+somente a escala oficial de 0 a 1 e é exibido como percentual; valores fora do
+contrato aparecem como não informados. `classification` alimenta Outras
+descrições; o valor sentinela `0` aparece como não informado. Área ausente ou
+inválida aparece como traço e não exclui um preço válido. Incorporadora e
+empreendimento usam células mescladas por grupo,
+com `rowSpan` recalculado após filtros e cabeçalhos associados às células de dados.
+Nomes completos podem quebrar linha. Nenhuma planta é removida pela mesclagem.
+
+A coluna **Unidades** fica imediatamente antes de **Menor valor** e conta IDs
+distintos no estoque da mesma incorporadora, empreendimento e planta, antes dos
+filtros e independentemente da metragem. Inclui unidades sem preço válido quando
+há uma unidade elegível na mesma planta. `pricedUnits` registra separadamente as
+linhas elegíveis para manter o aviso de dados inválidos; não confundir quantidade
+do estoque com amostra da comparação. Grupos sem nenhum preço válido continuam
+fora da comparação. Contadores do cabeçalho e dos filtros mostram opções e
+empreendimentos distintos, não o total bruto de unidades.
+
+A fonte e sua data de geração continuam explícitas. Ausência ou erro não aciona
+mock, estoque alternativo ou motor de simulação. A fonte viva continua definindo
+linhas, quantidades, preço e detalhes. Como ela não fornece logradouro nem número,
+esses dois campos ausentes são complementados somente pela correspondência de
+unidade do snapshot SPC protegido ou, sem essa correspondência, por um único
+endereço completo e coerente do empreendimento; referência ambígua ou conflitante
+com qualquer componente vivo não é usada. Campos vivos têm prioridade e nenhuma
+parte é combinada entre endereços distintos. A data de referência desse
+complemento aparece na interface. O estoque vivo é exibido sem aguardar o
+snapshot; se ele falhar, os campos ausentes são informados sem impedir a consulta
+nem inventar endereço. A interface chama a data da fonte de **estoque publicado
+em**, sem sugerir atualização em tempo real. A quantidade se refere ao estoque
+publicado nessa data, não a uma promessa de reserva.
 
 ## Escopo
 
@@ -93,9 +155,9 @@ habilitam motores oficiais.
 - WF15 usa o snapshot SPC protegido, exclui vagas avulsas, exige unidade com
   valor e término da obra, mantém estados de loading, vazio e erro e trata
   `GET /api/inventory` como atualização protegida não bloqueante.
-- Tabelão usa somente o estoque vivo protegido, preserva o grão unitário e
-  oferece os filtros encadeados do layout Associativo. Preços válidos podem ser
-  ordenados nos dois sentidos e valores ausentes permanecem ao fim.
+- Tabelão consulta o estoque protegido e seleciona uma unidade por empreendimento,
+  planta e área, pelo líquido com kit e os dois abatimentos. Dados inválidos são
+  contabilizados explicitamente; não geram um falso menor preço.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
   papel Master coincidem.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta
@@ -134,3 +196,12 @@ ausência dela só é aceita no GitHub Actions com opt-in explícito do workflow
 Produção continua exigindo a cópia privada com o SHA-256 do anexo. Os casos de
 ouro do WF13 são testes versionados, não seeds de produção. Credenciais QA,
 storage state, HTML, HAR e payloads de usuário não são versionados.
+
+`node scripts/qa/tabelao-exclusive-audit.mjs [fonte-viva] [referência-de-endereço]`
+consulta a mesma origem do proxy e recalcula independentemente o mínimo de todos
+os grupos, a cobertura, campos ausentes e estabilidade ao inverter a fonte. O
+segundo argumento opcional executa a cadeia completa de complemento e comprova
+proveniência coerente, ordem e preservação dos demais campos. Os argumentos
+aceitam payloads locais não versionados. A saída contém somente agregados, sem
+registros comerciais. `tests/tabelao-inventory.test.ts` cobre a regra com dados
+sintéticos.

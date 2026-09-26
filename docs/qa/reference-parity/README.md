@@ -2,6 +2,75 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Tabelão expansivo em 26/09/2026
+
+Sete capturas revisadas e atualizadas para a coluna Unidades, tabela sem limite
+vertical e células mescladas por empreendimento. CI `36220767591`, captura
+`d28120044ccac5aaf6eea239336a0b4a5101150f`, árvore idêntica ao código publicado
+`809a048c8fed52d4cb4a2cdda731b2a07abdbce8`.
+
+Passaram 140 checks responsivos, 80 de tema, 193 de acessibilidade, 100 de zoom,
+teclado, simuladores e os 13 critérios do Tabelão. A regressão específica usa
+130 plantas em três empreendimentos, 260 unidades com preço e uma sem preço,
+em 1440, 1024, 768 e 375 px: todas as linhas renderizadas, quantidade distinta
+da amostra financeira, `rowSpan` íntegro, filtro, limpeza, ordenação e última
+linha acessível pela rolagem da página. Os 34 testes focados também passaram.
+
+Somente sete diferenças visuais da rota foram promovidas depois de inspeção,
+conferência de hashes, integridade da baseline e árvore Git. Outras 186 imagens
+e os limiares originais foram preservados. Nenhum dado comercial, credencial ou
+estado de autenticação foi incluído nas capturas versionadas.
+
+## Atualização do Tabelão em 24/09/2026
+
+### Filtros encadeados restaurados
+
+Dez capturas foram atualizadas após revisão do painel solicitado, com os cinco
+filtros dimensionais, ordenação e Limpar filtros. CI `36081141236`, captura
+`2fc4a2e6be33822d96a1951cd4020a12545b3eba`, árvore idêntica ao código publicado
+`b9a9379d1a6111f099a57b39a0010efe8658baaa`.
+
+Passaram 140 checks responsivos, 80 de tema, 193 de acessibilidade, 100 de zoom,
+teclado, simuladores e os 13 critérios do Tabelão. Este último inclui combinações
+dos filtros, limpeza, contagens, reinício da rolagem e separação entre Limpar
+filtros e o primeiro campo em 1440, 1024, 768 e 375 px. A revisão autenticada da
+versão publicada também confirmou o cabeçalho mobile sem sobreposição.
+
+Hashes, origem isolada, árvore Git e baseline conferidos antes da promoção
+transacional. Outras 183 imagens e todos os limiares preservados; capturas
+contêm somente fixtures sintéticas, sem dados comerciais ou credenciais.
+
+### Captura anterior da exclusividade por planta
+
+Após a correção solicitada pelos prints, nove capturas foram atualizadas para
+uma linha por empreendimento e planta, sem separar por área, e coluna com apenas
+o empreendimento. CI `36059484259`, captura
+`f413c11546f868dfbcdb7f059db3f5591dbc6e8c`, árvore idêntica a
+`f32dca294338f4b4cb821a1f5811efc97f664e04`. Esse commit só acrescenta sincronização
+de foco no QA ao código publicado `8ae74956a3fa5c5ec831273e789da32767cdb25c`.
+
+Os 13 critérios do Tabelão passaram, incluindo guia, Escape, foco, estados vazio,
+erro, recuperação e carregamento. Também passaram 140 checks responsivos,
+80 de tema, 193 de acessibilidade, 100 de zoom e os demais critérios funcionais.
+Revisão visual e hashes conferidos; promoção transacional preservou as outras
+184 referências, incluindo todas as outras rotas e os limiares existentes.
+Capturas usam apenas fixtures sintéticas, sem dados comerciais ou credenciais.
+
+### Captura anterior do agrupamento
+
+Dez capturas sintéticas desta rota foram atualizadas para as opções exclusivas
+agrupadas por empreendimento, sem filtros, com valores líquidos e cabeçalho móvel
+sem sobreposição. A evidência veio do CI `36015516477`, commit de captura
+`434f5f057be38ac5f2731c8ae1a6a0765defafe1`, cuja árvore é idêntica ao código
+publicado `1492a18e7fef89afce79731aa072a78150744d07`.
+
+Passaram os 140 checks responsivos, 80 de tema, 193 de acessibilidade, 100 de zoom
+e todos os critérios funcionais, incluindo os 13 do Tabelão. As dez diferenças
+visuais esperadas foram inspecionadas e promovidas com as funções transacionais
+existentes, após conferir hashes das imagens e baseline, integridade e árvore
+Git. `promotionSource` registra a origem CI. As imagens das demais rotas e os
+limiares de comparação foram preservados; não há dados comerciais nas capturas.
+
 ## Escopo executável
 
 Os harnesses de QA visual cobrem três fronteiras:

@@ -86,7 +86,7 @@ describe("Tabelão protegido", () => {
     expect(archive).toContain("<InvestorGuideLauncher />");
     expect(archive).toContain("<TabelaoClient />");
     expect(archive).toContain('className="investor-page-footer"');
-    expect(client).toContain('fetch("/api/inventory"');
+    expect(client).toContain('fetchInventoryPayload("/api/inventory"');
     expect(client).not.toContain("investor-inventory.json");
     expect(client).not.toContain("isInvestorEligibleUnit");
     expect(client).toContain("Nenhuma fonte alternativa foi usada");
@@ -96,9 +96,13 @@ describe("Tabelão protegido", () => {
     expect(authorizedBreadcrumbs).toContain('"/app/simulacao/tabelao"');
   });
 
-  it("replica o painel, os filtros, a densidade e as sete colunas do Associativo", () => {
+  it("replica os seis filtros e preserva a densidade e as doze colunas", () => {
     const client = readFileSync(
       new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
+      "utf8",
+    );
+    const filters = readFileSync(
+      new URL("../app/(protected)/app/simulacao/_components/TabelaoFilters.tsx", import.meta.url),
       "utf8",
     );
     const styles = readFileSync(
@@ -110,13 +114,18 @@ describe("Tabelão protegido", () => {
     );
 
     for (const label of [
-      "Início",
       "Incorporadora",
-      "Produto",
+      "Empreendimento",
       "Metragem",
       "Data de Entrega",
       "Planta",
-      "Valor do imóvel",
+      "Unidades",
+      "Menor valor",
+      "Folga Volta ao Caixa",
+      "Valor de Avaliação Bancária",
+      "Logradouro Obra / Número / Bairro",
+      "Total do andamento da obra (%)",
+      "Outras descrições",
     ]) {
       expect(client).toContain(label);
     }
@@ -124,7 +133,6 @@ describe("Tabelão protegido", () => {
       "investor-workspace investor-direct-workspace investor-direct-design-copy",
       "investor-stock-panel",
       "investor-section-heading",
-      "investor-stock-filters",
       "investor-stock-results",
       "investor-stock-table",
     ]) {
@@ -138,22 +146,79 @@ describe("Tabelão protegido", () => {
       "Ordenar valor",
       "Limpar filtros",
     ]) {
-      expect(client).toContain(label);
+      expect(filters).toContain(label);
     }
-    expect(client).toContain("buildInvestorFilterOptions");
-    expect(client).toContain("matchesInvestorFilters");
-    expect(client).toContain("reconcileInvestorFilters");
-    expect(client).toContain("INVENTORY_WINDOW_SIZE = 60");
-    expect(client).toContain('href="/app/simulacao/tabela-direta"');
+    expect(filters).toContain('className="investor-stock-filters"');
+    expect(filters).toContain("disabled={disabled}");
+    expect(filters).toContain('name="priceOrder"');
+    expect(client.indexOf("<TabelaoFilters")).toBeGreaterThan(
+      client.indexOf('id="tabelao-stock-title"'),
+    );
+    expect(client.indexOf("<TabelaoFilters")).toBeLessThan(
+      client.indexOf('className="investor-stock-results"'),
+    );
+    expect(client).not.toContain("Empreendimento / Unidade");
+    expect(client).toContain("{group.project}");
+    expect(client).not.toContain("buildInvestorFilterOptions");
+    expect(client).not.toContain("matchesInvestorFilters");
+    expect(client).not.toContain("reconcileInvestorFilters");
+    expect(client).toContain("buildTabelaoExclusiveInventory(inventory)");
+    expect(client).toContain('"/api/inventory/snapshot"');
+    expect(client).toContain("enrichTabelaoLocationFields(payload.items, referencePayload.items)");
+    expect(client).not.toContain("Promise.all([");
+    expect(client).not.toContain("referenceRequest");
+    expect(client.indexOf('setLoadState("ready")')).toBeLessThan(
+      client.indexOf("void loadLocationReference(payload)"),
+    );
+    expect(client).toContain("setLocationReferenceMeta(inventoryMetadata(referencePayload))");
+    expect(client).toContain(
+      "exclusiveInventory.filter((item) => matchesTabelaoFacets(item, filters))",
+    );
+    expect(client).toContain('priceOrder === "desc" ? "project-desc" : "project"');
+    expect(client).toContain("setFilters(TABELAO_FILTER_DEFAULTS)");
+    expect(client).toContain("groupTabelaoInventoryByProject(matchingInventory)");
+    expect(client).toContain("inventoryGroups.map");
+    expect(client).toContain("group.items.map");
+    expect(client.match(/rowSpan=\{group.items.length\}/g)).toHaveLength(2);
+    expect(client.match(/scope="rowgroup"/g)).toHaveLength(2);
+    expect(client).toContain('item.availableUnits.toLocaleString("pt-BR")');
+    expect(client.indexOf('id="tabelao-quantity"')).toBeLessThan(
+      client.indexOf('id="tabelao-price"'),
+    );
+    expect(client).toContain("formatMoneyValue(item.cashBackSlack)");
+    expect(client).toContain("formatMoneyValue(item.appraisal)");
+    expect(client).toContain("formatAddress(item)");
+    expect(client).toContain("formatProgress(item.progress)");
+    expect(client).toContain("descriptiveLabel(item.classification)");
+    expect(client).toContain('className="tabelao-stock-area"');
+    expect(client.match(/colSpan=\{12\}/g)).toHaveLength(3);
+    expect(client).toContain("total + item.pricedUnits");
+    expect(client).not.toContain("INVENTORY_WINDOW_SIZE");
+    expect(client).not.toContain("Spacer");
+    expect(client).not.toContain("onScroll=");
+    expect(client).not.toContain("matchingInventory.slice");
+    expect(client).not.toContain('href="/app/simulacao/tabela-direta"');
     expect(client).toContain('window.addEventListener("investor:start-guide"');
     expect(client).toContain('.join(" ")');
-    expect(client).toContain('window.matchMedia("(max-width: 1239px)")');
     expect(styles).toContain("herda integralmente o visual da Tabela Associativo");
-    expect(styles).toContain("mantém a grade virtual linear");
-    expect(styles).toContain(".tabelao-page-shell .investor-stock-unit-button");
+    expect(styles).toContain("grade completa, expansiva");
+    expect(styles).toContain(".tabelao-page-shell .tabelao-stock-col-quantity");
+    expect(styles).toContain(".tabelao-page-shell .tabelao-stock-col-address");
+    expect(styles).toContain(
+      ".tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-area",
+    );
+    expect(styles).toMatch(
+      /\.tabelao-page-shell \.investor-stock-panel > \.investor-section-heading\s*\{[^}]*height: auto !important;[^}]*min-height: 48px !important;/,
+    );
+    expect(styles).toContain("min-width: 2080px");
+    expect(styles).toMatch(
+      /\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*max-height: none;[^}]*overflow-x: auto;[^}]*overflow-y: visible;/,
+    );
     expect(styles).toContain("height:23px!important");
     expect(styles).toContain("font-size:10px");
     expect(styles).toContain("@media (prefers-reduced-motion:reduce)");
+    expect(styles).toContain("grid-template-rows: 44px 44px");
+    expect(styles).toContain("min-height: 96px !important");
     expect(styles).not.toContain(".tabelao-main");
     expect(styles).not.toContain(".tabelao-hero-note");
   });

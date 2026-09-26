@@ -1,12 +1,21 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-// @ts-expect-error — módulo compartilhado preservado em JavaScript.
-import * as investorFilterOptions from "@/lib/archive-investor/investor-filter-options.mjs";
-
-import { InvestorInfoHint } from "./archive-investor/InvestorCalculator";
+import {
+  buildTabelaoExclusiveInventory,
+  buildTabelaoFacets,
+  enrichTabelaoLocationFields,
+  groupTabelaoInventoryByProject,
+  matchesTabelaoFacets,
+  normalizeTabelaoProgress,
+  TABELAO_FILTER_DEFAULTS,
+  type TabelaoFacetFilters,
+  type TabelaoFilterDimension,
+  sortTabelaoInventory,
+  summarizeTabelao,
+} from "@/lib/archive-investor/tabelao-inventory.mjs";
+import { TabelaoFilters } from "./TabelaoFilters";
 
 type InventoryItem = {
   id: string;
@@ -16,8 +25,18 @@ type InventoryItem = {
   identifier: string | null;
   plant: string | null;
   finalPrice: number | null;
+  finalWithKit: number | null;
+  unitBonus: number | null;
+  tableSlack: number | null;
+  cashBackSlack: number | null;
+  appraisal: number | null;
+  classification: string | null;
   privateArea: number | null;
   completionDate: string | null;
+  street?: string | null;
+  streetNumber?: string | null;
+  neighborhood?: string | null;
+  progress: number | null;
   region: string | null;
   city: string | null;
   state: string | null;
@@ -32,57 +51,19 @@ type InventoryPayload = {
   items: InventoryItem[];
 };
 
+type InventoryMeta = Omit<InventoryPayload, "items">;
+
 type LoadState = "loading" | "ready" | "error";
-type InventoryFilters = {
-  businessUnit: string;
-  project: string;
-  plant: string;
-  region: string;
-  salePrice: string;
-};
-type FilterOption = { value: string; count: number };
-type InventoryFilterOptions = {
-  businessUnits: FilterOption[];
-  projects: FilterOption[];
-  plants: FilterOption[];
-  regions: FilterOption[];
-  salePrices: FilterOption[];
-  totals: Record<keyof InventoryFilters, number>;
-};
 
-const {
-  buildInvestorFilterOptions,
-  matchesInvestorFilters,
-  reconcileInvestorFilters,
-  sortInvestorInventoryBySalePrice,
-} = investorFilterOptions as {
-  buildInvestorFilterOptions: (
-    inventory: InventoryItem[],
-    filters: InventoryFilters,
-  ) => InventoryFilterOptions;
-  matchesInvestorFilters: (item: InventoryItem, filters: InventoryFilters) => boolean;
-  reconcileInvestorFilters: (
-    inventory: InventoryItem[],
-    filters: InventoryFilters,
-  ) => InventoryFilters;
-  sortInvestorInventoryBySalePrice: (
-    inventory: InventoryItem[],
-    direction: "asc" | "desc",
-  ) => InventoryItem[];
-};
-
-const INVENTORY_WINDOW_SIZE = 60;
-const DESKTOP_ROW_HEIGHT = 24;
-const MOBILE_ROW_HEIGHT = 44;
 const TABELAO_TOUR_STEPS = [
   {
     target: "welcome",
     eyebrow: "Visão geral",
-    title: "Consulte o estoque completo",
+    title: "Consulte todas as tipologias",
     description:
-      "O Tabelão reúne todas as unidades do estoque SPC. O guia mostra como filtrar, comparar e abrir a unidade na Tabela Direta.",
-    tip: "Avançar no guia não altera filtros nem abre outra página.",
-    checklist: ["Consulte o estoque", "Combine os filtros", "Abra a unidade correta"],
+      "Cada empreendimento apresenta uma unidade por planta, escolhida pelo menor valor: Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela). Metragens diferentes da mesma planta não criam opções repetidas. Todas as plantas com dados válidos permanecem disponíveis.",
+    tip: "Avançar no guia não altera a lista nem abre outra página.",
+    checklist: ["Consulte o estoque", "Compare as unidades", "Confira as quantidades"],
   },
   {
     target: "information",
@@ -94,31 +75,17 @@ const TABELAO_TOUR_STEPS = [
     checklist: ["Localize o ícone", "Leia a orientação", "Continue a consulta"],
   },
   {
-    target: "filters",
-    eyebrow: "Encontre o imóvel",
-    title: "Defina o perfil desejado",
-    description:
-      "Combine Incorporadora, Empreendimento, Região, Planta e Valor do Imóvel. Cada escolha atualiza as opções e o total encontrado.",
-    tip: "Use Limpar filtros para recomeçar.",
-    checklist: ["Combine os filtros", "Confira o total", "Ajuste a busca"],
-  },
-  {
     target: "inventory",
     eyebrow: "Consulte as unidades",
     title: "Confira a unidade correta",
     description:
-      "Revise produto, metragem, entrega, planta e valor. O botão circular da primeira coluna abre a página Tabela Direta para continuar o atendimento.",
+      "Revise empreendimento, metragem, entrega, planta, menor valor e os detalhes da unidade que define esse valor. O endereço prioriza o estoque publicado e pode ser completado por uma referência protegida única e compatível da unidade ou do empreendimento. Unidades informa o total publicado no mesmo grupo.",
     tip: "Confirme os dados antes de iniciar a proposta.",
-    checklist: ["Confira produto e planta", "Revise entrega e valor", "Abra a Tabela Direta"],
-  },
-  {
-    target: "sort",
-    eyebrow: "Organize a comparação",
-    title: "Ordene as unidades por valor",
-    description:
-      "Escolha Menor para o maior ou Maior para o menor. A ordenação muda somente a sequência da lista.",
-    tip: "Use a ordenação para comparar unidades próximas de preço.",
-    checklist: ["Escolha a direção", "Compare os valores", "Confirme a unidade"],
+    checklist: [
+      "Confira empreendimento e planta",
+      "Revise entrega, valor e detalhes",
+      "Confira as unidades disponíveis",
+    ],
   },
 ] as const;
 
@@ -129,6 +96,10 @@ const money = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 2,
 });
 const decimal = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 });
+const percent = new Intl.NumberFormat("pt-BR", {
+  style: "percent",
+  maximumFractionDigits: 2,
+});
 const date = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 const dateTime = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "short",
@@ -137,27 +108,65 @@ const dateTime = new Intl.DateTimeFormat("pt-BR", {
 });
 
 function formatDate(value?: string | null) {
-  return value ? date.format(new Date(`${value}T12:00:00.000Z`)) : "Não informada";
+  const parsed = value ? new Date(`${value}T12:00:00.000Z`) : null;
+  return parsed && Number.isFinite(parsed.getTime()) ? date.format(parsed) : "Não informada";
 }
 
 function informationLabel(value?: string | null) {
   return value?.trim() || "Não informado";
 }
 
+function descriptiveLabel(value?: string | null) {
+  const normalized = value?.trim();
+  return normalized && normalized !== "0" ? normalized : "Não informado";
+}
+
+function formatMoneyValue(value?: number | null) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? money.format(value)
+    : "Não informado";
+}
+
+function formatProgress(value?: number | null) {
+  const normalized = normalizeTabelaoProgress(value);
+  return normalized === null ? "Não informado" : percent.format(normalized);
+}
+
+function formatAddress(item: InventoryItem) {
+  return [item.street, item.streetNumber, item.neighborhood]
+    .map((value) => value?.trim() || "Não informado")
+    .join(" / ");
+}
+
+async function fetchInventoryPayload(url: string, signal: AbortSignal) {
+  const response = await fetch(url, { cache: "no-store", signal });
+  if (!response.ok) throw new Error("inventory_unavailable");
+  const payload = (await response.json()) as InventoryPayload;
+  if (!Array.isArray(payload.items) || payload.items.length !== Number(payload.count)) {
+    throw new Error("inventory_payload_invalid");
+  }
+  return payload;
+}
+
+function inventoryMetadata(payload: InventoryPayload): InventoryMeta {
+  const metadata: InventoryMeta = { count: payload.count };
+  if (payload.source !== undefined) metadata.source = payload.source;
+  if (payload.generatedAt !== undefined) metadata.generatedAt = payload.generatedAt;
+  if (payload.snapshotReferenceDate !== undefined) {
+    metadata.snapshotReferenceDate = payload.snapshotReferenceDate;
+  }
+  if (payload.sourceKind !== undefined) metadata.sourceKind = payload.sourceKind;
+  return metadata;
+}
+
 export function TabelaoClient() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [inventoryMeta, setInventoryMeta] = useState<InventoryPayload | null>(null);
+  const [inventoryMeta, setInventoryMeta] = useState<InventoryMeta | null>(null);
+  const [locationReferenceMeta, setLocationReferenceMeta] = useState<InventoryMeta | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [loadKey, setLoadKey] = useState(0);
-  const [businessUnit, setBusinessUnit] = useState("Todas");
-  const [project, setProject] = useState("Todos");
-  const [plant, setPlant] = useState("Todos");
-  const [region, setRegion] = useState("Todas");
-  const [salePriceFilter, setSalePriceFilter] = useState("Todos");
-  const [priceSort, setPriceSort] = useState<"asc" | "desc">("asc");
-  const [filterNotice, setFilterNotice] = useState("");
-  const [inventoryWindowStart, setInventoryWindowStart] = useState(0);
-  const [inventoryRowHeight, setInventoryRowHeight] = useState(DESKTOP_ROW_HEIGHT);
+  const [filters, setFilters] = useState<TabelaoFacetFilters>(TABELAO_FILTER_DEFAULTS);
+  const [priceOrder, setPriceOrder] = useState<"asc" | "desc">("asc");
   const [tourOpen, setTourOpen] = useState(false);
   const [tourStep, setTourStep] = useState(0);
   const [tourSpotlight, setTourSpotlight] = useState({
@@ -167,43 +176,57 @@ export function TabelaoClient() {
     height: 0,
   });
   const [tourPlacement, setTourPlacement] = useState({ top: false, left: false });
-  const inventoryResultsRef = useRef<HTMLDivElement>(null);
   const tourPanel = useRef<HTMLElement>(null);
   const tourReturnFocus = useRef<HTMLButtonElement | null>(null);
   const currentTourStep = TABELAO_TOUR_STEPS[tourStep] ?? TABELAO_TOUR_STEPS[0];
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/inventory", { cache: "no-store", signal: controller.signal })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("inventory_unavailable");
-        const payload = (await response.json()) as InventoryPayload;
-        if (!Array.isArray(payload.items) || payload.items.length !== Number(payload.count)) {
-          throw new Error("inventory_payload_invalid");
-        }
-        setInventory(payload.items);
-        setInventoryMeta(payload);
-        setInventoryWindowStart(0);
-        setLoadState("ready");
-      })
-      .catch((error) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setLoadState("error");
-      });
-    return () => controller.abort();
-  }, [loadKey]);
+    let active = true;
 
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 1239px)");
-    const updateRowHeight = () => {
-      setInventoryRowHeight(media.matches ? MOBILE_ROW_HEIGHT : DESKTOP_ROW_HEIGHT);
-      setInventoryWindowStart(0);
-      if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
+    const loadLocationReference = async (payload: InventoryPayload) => {
+      try {
+        const referencePayload = await fetchInventoryPayload(
+          "/api/inventory/snapshot",
+          controller.signal,
+        );
+        if (!active) return;
+        const enrichedItems = enrichTabelaoLocationFields(payload.items, referencePayload.items);
+        const locationReferenceApplied = payload.items.some((item, index) =>
+          (["street", "streetNumber", "neighborhood"] as const).some(
+            (field) => !item[field]?.trim() && Boolean(enrichedItems[index]?.[field]?.trim()),
+          ),
+        );
+        if (locationReferenceApplied) {
+          setInventory(enrichedItems);
+          setLocationReferenceMeta(inventoryMetadata(referencePayload));
+        }
+      } catch {
+        // Address reference is optional; the live inventory remains authoritative and visible.
+      }
     };
-    updateRowHeight();
-    media.addEventListener("change", updateRowHeight);
-    return () => media.removeEventListener("change", updateRowHeight);
-  }, []);
+
+    const loadInventory = async () => {
+      try {
+        const payload = await fetchInventoryPayload("/api/inventory", controller.signal);
+        if (!active) return;
+        setInventory(payload.items);
+        setInventoryMeta(inventoryMetadata(payload));
+        setLocationReferenceMeta(null);
+        setLoadState("ready");
+        void loadLocationReference(payload);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        if (active) setLoadState("error");
+      }
+    };
+
+    void loadInventory();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [loadKey]);
 
   useEffect(() => {
     const openGuide = (event: Event) => {
@@ -216,52 +239,27 @@ export function TabelaoClient() {
     return () => window.removeEventListener("investor:start-guide", openGuide);
   }, []);
 
-  const activeFilters = useMemo(
-    () => ({ businessUnit, project, plant, region, salePrice: salePriceFilter }),
-    [businessUnit, plant, project, region, salePriceFilter],
-  );
-  const filterOptions = useMemo(
-    () => buildInvestorFilterOptions(inventory, activeFilters),
-    [activeFilters, inventory],
+  const exclusiveInventory = useMemo(() => buildTabelaoExclusiveInventory(inventory), [inventory]);
+  const facets = useMemo(
+    () => buildTabelaoFacets(exclusiveInventory, filters),
+    [exclusiveInventory, filters],
   );
   const matchingInventory = useMemo(
     () =>
-      sortInvestorInventoryBySalePrice(
-        inventory.filter((item) => matchesInvestorFilters(item, activeFilters)),
-        priceSort,
-      ) as InventoryItem[],
-    [activeFilters, inventory, priceSort],
-  );
-  const visibleInventory = useMemo(
-    () =>
-      matchingInventory.slice(
-        inventoryWindowStart,
-        Math.min(matchingInventory.length, inventoryWindowStart + INVENTORY_WINDOW_SIZE),
+      sortTabelaoInventory(
+        exclusiveInventory.filter((item) => matchesTabelaoFacets(item, filters)),
+        priceOrder === "desc" ? "project-desc" : "project",
       ),
-    [inventoryWindowStart, matchingInventory],
+    [exclusiveInventory, filters, priceOrder],
   );
-  const inventoryWindowEnd = inventoryWindowStart + visibleInventory.length;
-  const inventoryTopSpacer = inventoryWindowStart * inventoryRowHeight;
-  const inventoryBottomSpacer =
-    (matchingInventory.length - inventoryWindowEnd) * inventoryRowHeight;
-
-  useEffect(() => {
-    const reconciledFilters = reconcileInvestorFilters(inventory, activeFilters);
-    const changedDimension = (
-      ["businessUnit", "project", "plant", "region", "salePrice"] as const
-    ).find((dimension) => reconciledFilters[dimension] !== activeFilters[dimension]);
-    if (!changedDimension) return;
-
-    const resetInvalidFilters = window.setTimeout(() => {
-      setBusinessUnit(reconciledFilters.businessUnit);
-      setProject(reconciledFilters.project);
-      setPlant(reconciledFilters.plant);
-      setRegion(reconciledFilters.region);
-      setSalePriceFilter(reconciledFilters.salePrice);
-      setFilterNotice("Uma seleção indisponível foi limpa após a atualização do estoque.");
-    }, 0);
-    return () => window.clearTimeout(resetInvalidFilters);
-  }, [activeFilters, inventory]);
+  const inventorySummary = useMemo(() => summarizeTabelao(matchingInventory), [matchingInventory]);
+  const inventoryGroups = useMemo(
+    () => groupTabelaoInventoryByProject(matchingInventory),
+    [matchingInventory],
+  );
+  const excludedUnits =
+    inventory.length - exclusiveInventory.reduce((total, item) => total + item.pricedUnits, 0);
+  const sourceUpdatedAt = inventoryMeta?.generatedAt ? new Date(inventoryMeta.generatedAt) : null;
 
   useEffect(() => {
     if (!tourOpen) return;
@@ -346,53 +344,21 @@ export function TabelaoClient() {
   }
 
   function reloadInventory() {
+    clearFilters();
     setInventory([]);
     setInventoryMeta(null);
-    setInventoryWindowStart(0);
+    setLocationReferenceMeta(null);
     setLoadState("loading");
     setLoadKey((value) => value + 1);
   }
 
+  function changeFilter(dimension: TabelaoFilterDimension, value: string) {
+    setFilters((current) => ({ ...current, [dimension]: value }));
+  }
+
   function clearFilters() {
-    setBusinessUnit("Todas");
-    setProject("Todos");
-    setPlant("Todos");
-    setRegion("Todas");
-    setSalePriceFilter("Todos");
-    setPriceSort("asc");
-    setFilterNotice("");
-    resetInventoryWindow();
-  }
-
-  function updateFilter(setter: (value: string) => void, value: string) {
-    setter(value);
-    setFilterNotice("");
-    resetInventoryWindow();
-  }
-
-  function resetInventoryWindow() {
-    setInventoryWindowStart(0);
-    if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
-  }
-
-  function updateInventoryWindow(scrollTop: number) {
-    const overscan = 10;
-    const nextStart = Math.max(0, Math.floor(scrollTop / inventoryRowHeight) - overscan);
-    const maximumStart = Math.max(0, matchingInventory.length - INVENTORY_WINDOW_SIZE);
-    const boundedStart = Math.min(nextStart, maximumStart);
-    if (boundedStart !== inventoryWindowStart) {
-      const focusedRow = inventoryResultsRef.current?.querySelector<HTMLTableRowElement>(
-        "tr:focus-within[aria-rowindex]",
-      );
-      const focusedIndex = Number(focusedRow?.getAttribute("aria-rowindex")) - 2;
-      if (
-        Number.isInteger(focusedIndex) &&
-        (focusedIndex < boundedStart || focusedIndex >= boundedStart + INVENTORY_WINDOW_SIZE)
-      ) {
-        inventoryResultsRef.current?.focus({ preventScroll: true });
-      }
-    }
-    setInventoryWindowStart((current) => (boundedStart === current ? current : boundedStart));
+    setFilters(TABELAO_FILTER_DEFAULTS);
+    setPriceOrder("asc");
   }
 
   return (
@@ -476,12 +442,12 @@ export function TabelaoClient() {
           <span>01</span>
           <div>
             <p>Estoque SPC</p>
-            <h2 id="tabelao-stock-title">Escolha a unidade</h2>
+            <h2 id="tabelao-stock-title">Menor valor por tipologia</h2>
           </div>
           <div className="investor-stock-sync" role="status" aria-live="polite" aria-atomic="true">
             <small>
               {loadState === "ready"
-                ? `${inventory.length.toLocaleString("pt-BR")} unidades`
+                ? `${matchingInventory.length.toLocaleString("pt-BR")} ${matchingInventory.length === 1 ? "opção exclusiva" : "opções exclusivas"} · ${inventorySummary.projects.toLocaleString("pt-BR")} ${inventorySummary.projects === 1 ? "empreendimento" : "empreendimentos"}`
                 : loadState === "error"
                   ? "Estoque indisponível"
                   : "Carregando estoque"}
@@ -492,264 +458,278 @@ export function TabelaoClient() {
                 Arquivo {inventoryMeta.source || "ESTOQUE SPC.xlsx"} · referência{" "}
                 {formatDate(inventoryMeta.snapshotReferenceDate)}
               </small>
-            ) : inventoryMeta?.generatedAt ? (
-              <small>Atualizado {dateTime.format(new Date(inventoryMeta.generatedAt))}</small>
+            ) : sourceUpdatedAt && Number.isFinite(sourceUpdatedAt.getTime()) ? (
+              <small>Estoque publicado em {dateTime.format(sourceUpdatedAt)}</small>
             ) : loadState === "ready" ? (
               <small>
                 Fonte viva {inventoryMeta?.source || "estoque protegido"} · atualização não
                 informada
               </small>
             ) : null}
+            {locationReferenceMeta?.snapshotReferenceDate ? (
+              <small>
+                Endereços complementados pela referência{" "}
+                {formatDate(locationReferenceMeta.snapshotReferenceDate)}
+              </small>
+            ) : null}
           </div>
         </header>
 
-        <div className="investor-stock-filters" data-tour="filters">
-          <div className="investor-filter-heading">
-            <div className="investor-filter-title-row">
-              <strong>Filtros do estoque</strong>
-              <InvestorInfoHint
-                label="orientação dos filtros"
-                title="Como usar os filtros?"
-                description="Use os filtros para localizar a unidade exata do estoque SPC que será consultada no Tabelão."
-              />
-            </div>
-            <button type="button" onClick={clearFilters}>
-              Limpar filtros
-            </button>
-          </div>
-          <label>
-            <span>Incorporadora</span>
-            <select
-              value={businessUnit}
-              onChange={(event) => updateFilter(setBusinessUnit, event.target.value)}
-            >
-              <option value="Todas">
-                Todas ({filterOptions.totals.businessUnit.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.businessUnits.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {item.value} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Nome do Empreendimento</span>
-            <select
-              value={project}
-              onChange={(event) => updateFilter(setProject, event.target.value)}
-            >
-              <option value="Todos">
-                Todos ({filterOptions.totals.project.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.projects.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {item.value} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Região</span>
-            <select
-              value={region}
-              onChange={(event) => updateFilter(setRegion, event.target.value)}
-            >
-              <option value="Todas">
-                Todas ({filterOptions.totals.region.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.regions.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {item.value} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Planta</span>
-            <select value={plant} onChange={(event) => updateFilter(setPlant, event.target.value)}>
-              <option value="Todos">
-                Todos ({filterOptions.totals.plant.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.plants.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {item.value} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Valor do Imóvel</span>
-            <select
-              value={salePriceFilter}
-              onChange={(event) => updateFilter(setSalePriceFilter, event.target.value)}
-            >
-              <option value="Todos">
-                Todos ({filterOptions.totals.salePrice.toLocaleString("pt-BR")})
-              </option>
-              {filterOptions.salePrices.map((item: { value: string; count: number }) => (
-                <option value={item.value} key={item.value}>
-                  {money.format(Number(item.value))} ({item.count.toLocaleString("pt-BR")})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="investor-stock-sort" data-tour="sort">
-            <span>Ordenar valor</span>
-            <select
-              aria-label="Ordenar unidades por valor do imóvel"
-              value={priceSort}
-              onChange={(event) => {
-                setPriceSort(event.target.value as "asc" | "desc");
-                resetInventoryWindow();
-              }}
-            >
-              <option value="asc">Menor para o maior</option>
-              <option value="desc">Maior para o menor</option>
-            </select>
-          </label>
-          {filterNotice ? (
-            <span className="sr-only" aria-live="polite">
-              {filterNotice}
-            </span>
-          ) : null}
-        </div>
+        <TabelaoFilters
+          filters={filters}
+          facets={facets}
+          order={priceOrder}
+          disabled={loadState !== "ready"}
+          onChange={changeFilter}
+          onClear={clearFilters}
+          onOrderChange={setPriceOrder}
+        />
+
+        {loadState === "ready" && excludedUnits > 0 ? (
+          <p className="investor-stock-summary" role="status">
+            {excludedUnits.toLocaleString("pt-BR")} unidades com dados incompletos ou inválidos não
+            participam da comparação. Menores valores entre as unidades com dados válidos.
+          </p>
+        ) : null}
 
         <p className="investor-stock-summary sr-only" aria-live="polite">
           {loadState === "ready"
             ? matchingInventory.length > 0
-              ? `${matchingInventory.length.toLocaleString("pt-BR")} unidades encontradas.`
-              : "Nenhuma unidade disponível com os filtros atuais."
+              ? `${matchingInventory.length.toLocaleString("pt-BR")} ${matchingInventory.length === 1 ? "opção exclusiva agrupada" : "opções exclusivas agrupadas"} por empreendimento, em ordem alfabética, com valores ${priceOrder === "desc" ? "decrescentes" : "crescentes"} dentro de cada empreendimento.`
+              : exclusiveInventory.length > 0
+                ? "Nenhuma opção encontrada com esses filtros."
+                : "Nenhuma unidade com dados válidos para comparar."
             : loadState === "loading"
               ? "Carregando estoque…"
               : "Estoque indisponível"}
         </p>
 
         <div
-          ref={inventoryResultsRef}
           className="investor-stock-results"
           role="region"
-          aria-label="Estoque completo de unidades"
+          aria-label="Menores valores por empreendimento e planta"
           tabIndex={0}
           data-tour="inventory"
-          onScroll={(event) => updateInventoryWindow(event.currentTarget.scrollTop)}
         >
           <table className="investor-stock-table" aria-rowcount={matchingInventory.length + 1}>
-            <caption className="sr-only">Unidades encontradas no estoque</caption>
+            <caption className="sr-only">
+              Todas as plantas por empreendimento. Menor valor = Valor Final Com Kit − (B.A. da
+              Unidade + Folga de Tabela). Folga Volta ao Caixa, avaliação bancária, andamento da
+              obra e outras descrições pertencem à mesma unidade que define o menor valor. O
+              endereço prioriza essa unidade no estoque publicado e pode ser completado por uma
+              referência protegida única e compatível da unidade ou do empreendimento. Unidades é a
+              quantidade no estoque publicado por incorporadora, empreendimento e planta,
+              independentemente dos filtros.
+            </caption>
             <colgroup>
-              <col className="investor-stock-col-start" />
               <col className="investor-stock-col-business" />
-              <col className="investor-stock-col-product" />
+              <col className="tabelao-stock-col-project" />
               <col className="investor-stock-col-area" />
               <col className="investor-stock-col-date" />
               <col className="investor-stock-col-plant" />
+              <col className="tabelao-stock-col-quantity" />
               <col className="investor-stock-col-price" />
+              <col className="tabelao-stock-col-cashback" />
+              <col className="tabelao-stock-col-appraisal" />
+              <col className="tabelao-stock-col-address" />
+              <col className="tabelao-stock-col-progress" />
+              <col className="tabelao-stock-col-description" />
             </colgroup>
             <thead>
               <tr>
-                <th className="investor-stock-start-heading">Início</th>
-                <th>Incorporadora</th>
-                <th>Produto</th>
-                <th>Metragem</th>
-                <th>Data de Entrega</th>
-                <th>Planta</th>
-                <th>Valor do imóvel</th>
+                <th scope="col" id="tabelao-business">
+                  Incorporadora
+                </th>
+                <th scope="col" id="tabelao-project">
+                  Empreendimento
+                </th>
+                <th scope="col" id="tabelao-area">
+                  Metragem
+                </th>
+                <th scope="col" id="tabelao-delivery">
+                  Data de Entrega
+                </th>
+                <th scope="col" id="tabelao-plant">
+                  Planta
+                </th>
+                <th scope="col" id="tabelao-quantity">
+                  Unidades
+                </th>
+                <th scope="col" id="tabelao-price">
+                  Menor valor
+                </th>
+                <th scope="col" id="tabelao-cashback">
+                  Folga Volta ao Caixa
+                </th>
+                <th scope="col" id="tabelao-appraisal">
+                  Valor de Avaliação Bancária
+                </th>
+                <th scope="col" id="tabelao-address">
+                  Logradouro Obra / Número / Bairro
+                </th>
+                <th scope="col" id="tabelao-progress">
+                  Total do andamento da obra (%)
+                </th>
+                <th scope="col" id="tabelao-description">
+                  Outras descrições
+                </th>
               </tr>
             </thead>
-            <tbody>
-              {loadState === "loading" ? (
-                <tr>
-                  <td className="investor-empty-result" colSpan={7}>
-                    Carregando unidades do estoque…
-                  </td>
-                </tr>
-              ) : null}
-              {loadState === "error" ? (
-                <tr>
-                  <td className="investor-empty-result" colSpan={7}>
-                    Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.{" "}
-                    <button
-                      type="button"
-                      className="investor-stock-action-button investor-stock-retry-button"
-                      onClick={reloadInventory}
+            {matchingInventory.length === 0 ? (
+              <tbody>
+                {loadState === "loading" ? (
+                  <tr>
+                    <td className="investor-empty-result" colSpan={12}>
+                      Carregando unidades do estoque…
+                    </td>
+                  </tr>
+                ) : null}
+                {loadState === "error" ? (
+                  <tr>
+                    <td className="investor-empty-result" colSpan={12}>
+                      Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.{" "}
+                      <button
+                        type="button"
+                        className="investor-stock-action-button investor-stock-retry-button"
+                        onClick={reloadInventory}
+                      >
+                        Tentar novamente
+                      </button>
+                    </td>
+                  </tr>
+                ) : null}
+                {loadState === "ready" ? (
+                  <tr>
+                    <td className="investor-empty-result" colSpan={12}>
+                      {exclusiveInventory.length > 0
+                        ? "Nenhuma opção encontrada com esses filtros."
+                        : "Nenhuma unidade com dados válidos para comparar."}
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            ) : null}
+            {inventoryGroups.map((group, groupIndex) => (
+              <tbody key={group.key} className="tabelao-project-group">
+                {group.items.map((item, itemIndex) => {
+                  const groupHeaders = `tabelao-business-${groupIndex} tabelao-project-${groupIndex}`;
+                  const address = formatAddress(item);
+                  const classification = descriptiveLabel(item.classification);
+                  return (
+                    <tr
+                      key={item.id}
+                      aria-rowindex={group.startIndex + itemIndex + 2}
+                      data-inventory-unit-id={item.id}
+                      data-inventory-project={item.project}
+                      data-inventory-business-unit={item.businessUnit}
                     >
-                      Tentar novamente
-                    </button>
-                  </td>
-                </tr>
-              ) : null}
-              {inventoryTopSpacer > 0 ? (
-                <tr
-                  className="investor-stock-spacer"
-                  aria-hidden="true"
-                  style={
-                    {
-                      "--investor-stock-spacer-height": `${inventoryTopSpacer}px`,
-                    } as CSSProperties
-                  }
-                >
-                  <td colSpan={7} />
-                </tr>
-              ) : null}
-              {visibleInventory.map((item, visibleIndex) => (
-                <tr
-                  key={item.id}
-                  aria-rowindex={inventoryWindowStart + visibleIndex + 2}
-                  data-inventory-unit-id={item.id}
-                >
-                  <td className="investor-stock-start-cell" data-label="Início">
-                    <Link
-                      className="investor-stock-unit-button tabelao-stock-unit-link"
-                      href="/app/simulacao/tabela-direta"
-                      prefetch={false}
-                      aria-label="Abrir a página Tabela Direta"
-                    >
-                      <span aria-hidden="true">›</span>
-                    </Link>
-                  </td>
-                  <td data-label="Incorporadora" title={item.businessUnit}>
-                    {item.businessUnit}
-                  </td>
-                  <td className="investor-stock-product" data-label="Produto" title={item.product}>
-                    <span className="investor-stock-product-text">{item.product}</span>
-                  </td>
-                  <td data-label="Metragem">
-                    {item.privateArea != null ? `${decimal.format(item.privateArea)} m²` : "—"}
-                  </td>
-                  <td data-label="Data de Entrega">{formatDate(item.completionDate)}</td>
-                  <td
-                    className="investor-stock-plant"
-                    data-label="Planta"
-                    title={informationLabel(item.plant)}
-                  >
-                    {informationLabel(item.plant)}
-                  </td>
-                  <td className="investor-stock-price" data-label="Valor do imóvel">
-                    {item.finalPrice ? money.format(item.finalPrice) : "Não informado"}
-                  </td>
-                </tr>
-              ))}
-              {inventoryBottomSpacer > 0 ? (
-                <tr
-                  className="investor-stock-spacer"
-                  aria-hidden="true"
-                  style={
-                    {
-                      "--investor-stock-spacer-height": `${inventoryBottomSpacer}px`,
-                    } as CSSProperties
-                  }
-                >
-                  <td colSpan={7} />
-                </tr>
-              ) : null}
-              {loadState === "ready" && matchingInventory.length === 0 ? (
-                <tr>
-                  <td className="investor-empty-result" colSpan={7}>
-                    Nenhuma unidade encontrada com esses filtros.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
+                      {itemIndex === 0 ? (
+                        <>
+                          <th
+                            scope="rowgroup"
+                            rowSpan={group.items.length}
+                            id={`tabelao-business-${groupIndex}`}
+                            headers="tabelao-business"
+                            className="tabelao-group-cell"
+                            data-label="Incorporadora"
+                          >
+                            {group.businessUnit}
+                          </th>
+                          <th
+                            scope="rowgroup"
+                            rowSpan={group.items.length}
+                            id={`tabelao-project-${groupIndex}`}
+                            headers="tabelao-project"
+                            className="tabelao-group-cell investor-stock-product"
+                            data-label="Empreendimento"
+                          >
+                            <span className="investor-stock-product-text">{group.project}</span>
+                          </th>
+                        </>
+                      ) : null}
+                      <td
+                        className="tabelao-stock-area"
+                        data-label="Metragem"
+                        headers={`tabelao-area ${groupHeaders}`}
+                      >
+                        {typeof item.privateArea === "number" &&
+                        Number.isFinite(item.privateArea) &&
+                        item.privateArea > 0
+                          ? `${decimal.format(item.privateArea)} m²`
+                          : "—"}
+                      </td>
+                      <td data-label="Data de Entrega" headers={`tabelao-delivery ${groupHeaders}`}>
+                        {formatDate(item.completionDate)}
+                      </td>
+                      <td
+                        className="investor-stock-plant"
+                        data-label="Planta"
+                        headers={`tabelao-plant ${groupHeaders}`}
+                        title={informationLabel(item.plant)}
+                      >
+                        {informationLabel(item.plant)}
+                      </td>
+                      <td
+                        className="tabelao-stock-quantity"
+                        data-label="Unidades"
+                        headers={`tabelao-quantity ${groupHeaders}`}
+                        title={`${item.availableUnits.toLocaleString("pt-BR")} unidades no estoque publicado · ${item.project} · ${item.plant}`}
+                      >
+                        {item.availableUnits.toLocaleString("pt-BR")}
+                      </td>
+                      <td
+                        className="investor-stock-price"
+                        data-label="Menor valor"
+                        headers={`tabelao-price ${groupHeaders}`}
+                        title={`Valor Final Com Kit ${money.format(item.finalWithKit!)} − (B.A. da Unidade ${money.format(item.unitBonus!)} + Folga de Tabela ${money.format(item.tableSlack!)}) = ${money.format(item.minimumPrice)}`}
+                      >
+                        {money.format(item.minimumPrice)}
+                      </td>
+                      <td
+                        className="tabelao-stock-money"
+                        data-label="Folga Volta ao Caixa"
+                        headers={`tabelao-cashback ${groupHeaders}`}
+                        title={formatMoneyValue(item.cashBackSlack)}
+                      >
+                        {formatMoneyValue(item.cashBackSlack)}
+                      </td>
+                      <td
+                        className="tabelao-stock-money"
+                        data-label="Valor de Avaliação Bancária"
+                        headers={`tabelao-appraisal ${groupHeaders}`}
+                        title={formatMoneyValue(item.appraisal)}
+                      >
+                        {formatMoneyValue(item.appraisal)}
+                      </td>
+                      <td
+                        className="tabelao-stock-long-text"
+                        data-label="Logradouro Obra / Número / Bairro"
+                        headers={`tabelao-address ${groupHeaders}`}
+                        title={address}
+                      >
+                        {address}
+                      </td>
+                      <td
+                        className="tabelao-stock-progress"
+                        data-label="Total do andamento da obra (%)"
+                        headers={`tabelao-progress ${groupHeaders}`}
+                        title={formatProgress(item.progress)}
+                      >
+                        {formatProgress(item.progress)}
+                      </td>
+                      <td
+                        className="tabelao-stock-long-text"
+                        data-label="Outras descrições"
+                        headers={`tabelao-description ${groupHeaders}`}
+                        title={classification}
+                      >
+                        {classification}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            ))}
           </table>
         </div>
       </section>

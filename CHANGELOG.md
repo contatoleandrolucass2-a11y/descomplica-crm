@@ -1,5 +1,101 @@
 # Changelog
 
+## 2026-09-26 — detalhes completos no Tabelão
+
+- Move Unidades para imediatamente antes de Menor valor e amplia a grade de sete
+  para doze colunas, preservando agrupamento, filtros e densidade visual.
+- Inclui Folga Volta ao Caixa, Valor de Avaliação Bancária, Logradouro Obra /
+  Número / Bairro, Total do andamento da obra (%) e Outras descrições com os
+  dados da unidade que determina o menor valor; endereço ausente pode receber
+  uma referência protegida única e coerente da unidade ou do empreendimento.
+- Preserva valores monetários iguais a zero, aceita somente a escala oficial de
+  andamento entre zero e um e trata ausências explicitamente sem criar conteúdo.
+- Mantém a fonte viva como autoridade do estoque e usa o snapshot protegido
+  somente para completar endereço ausente, sem combinar registros ambíguos ou
+  conflitantes, com referência visível, carga não bloqueante e falha segura.
+- Identifica a data como “Estoque publicado em”, evitando apresentar a quantidade
+  de uma fonte defasada como disponibilidade em tempo real.
+- Adiciona largura mínima e rolagem horizontal interna para manter as doze
+  colunas legíveis sem provocar overflow da página.
+
+## 2026-09-26 — Tabelão expansivo por empreendimento
+
+- Exibe todas as plantas em uma tabela que cresce com a página, sem rolagem
+  vertical interna ou limite de linhas.
+- Substitui Início pela quantidade disponível por empreendimento e planta,
+  mantendo a contagem do estoque mesmo ao filtrar ou ordenar os resultados.
+- Mescla incorporadora e empreendimento uma vez por grupo, com cabeçalhos
+  acessíveis, sem eliminar opções ou alterar a fórmula do menor valor.
+- Preserva os seis filtros; valida agrupamento e expansão acima de 60 linhas,
+  inclusive após filtros e em telas estreitas.
+- Atualiza sete referências visuais sintéticas após revisão e aprovação de todos
+  os testes funcionais, de acessibilidade, teclado e zoom; preserva as outras 186.
+
+## 2026-09-24 — filtros encadeados no Tabelão
+
+- Restaura os filtros do print: incorporadora, empreendimento, região, planta,
+  valor do imóvel e ordenação, com ajuda e Limpar filtros no visual existente.
+- Aplica filtros e contagens às opções exclusivas, mantendo o menor líquido por
+  empreendimento e planta, sem repetir por área ou usar o preço bruto.
+- Preserva agrupamento por empreendimento nas duas ordens de preço; limpar e
+  alterar filtros reiniciam a janela e rolagem da tabela.
+- Amplia testes de combinação, contagem, preço líquido e responsividade dos controles.
+- Ajusta contadores no singular e mantém rótulos acessíveis explícitos nos filtros.
+- Corrige a altura do cabeçalho dos filtros no celular para preservar Limpar filtros
+  sem sobreposição com os seletores e mantém os alvos de toque de 44 px.
+- Atualiza dez referências visuais sintéticas após revisão e aprovação funcional
+  da matriz completa, preservando outras 183 imagens e todos os limiares.
+
+## 2026-09-24 — exclusividade por empreendimento e planta
+
+- Corrige a seleção para uma única unidade de menor valor por empreendimento e
+  pelo texto da coluna Planta, sem repetir a mesma planta por diferença de área.
+- Substitui Empreendimento / Unidade por Empreendimento, exibindo somente seu nome.
+  Mantém as demais colunas com os dados da unidade vencedora e todos os tipos de planta.
+- Preserva a fórmula com kit, B.A. e folga em centavos e o agrupamento por empreendimento.
+  Área inválida não impede a comparação; aparece como traço, sem inventar metragem.
+- Atualiza regressões, auditoria independente, guia e validação visual para a nova chave.
+- Sincroniza o teste de Escape com o foco assíncrono do guia, sem relaxar critérios.
+- Atualiza nove referências visuais sintéticas após revisão e aprovação funcional
+  da matriz completa, preservando as demais páginas e tolerâncias.
+
+## 2026-09-24 — Tabelão agrupado por empreendimento
+
+- Reúne as opções de cada empreendimento em sequência alfabética, com preços
+  líquidos crescentes dentro do grupo e incorporadoras homônimas separadas.
+- Preserva todas as combinações exclusivas de planta e área, a fórmula do menor
+  valor, os dados completos e a rolagem virtual sem limite de opções.
+- Ajusta a estimativa da altura de linha no desktop para incluir a borda e
+  manter o posicionamento da rolagem virtual alinhado à grade renderizada.
+- Atualiza dez referências visuais sintéticas do Tabelão após aprovação dos
+  critérios funcionais da matriz completa e revisão das imagens, sem alterar
+  tolerâncias ou referências de outras páginas.
+
+## 2026-09-24 — Tabelão com menor valor por tipologia
+
+- Exibe uma unidade por incorporadora, empreendimento, planta e área, mantendo
+  todas as opções de tipologia e a identificação completa da unidade vencedora.
+- Seleciona, ordena e mostra o valor `Valor Final Com Kit - (B.A. da Unidade +
+Folga de Tabela)`, calculado em centavos, com desempate determinístico.
+- Corrige os contadores, cabeçalhos e ajuda; campos inválidos não viram zero e
+  linhas excluídas da comparação são informadas. Filtros permanecem removidos.
+- Acrescenta testes de regras e auditoria independente da fonte; atualiza o QA
+  visual para a seleção exclusiva e o guia de três passos.
+- Corrige a altura do cabeçalho no celular para que contadores e data não
+  sobreponham a tabela; a correção fica restrita ao Tabelão.
+
+## 2026-09-24 — Tabelão sem barra de filtros
+
+- Remove do Tabelão o painel “Filtros do estoque”, incluindo incorporadora,
+  empreendimento, região, planta, valor, ordenação e ação de limpar filtros.
+- Mantém o estoque completo somente leitura, a tabela de sete colunas, a janela
+  virtual de 60 linhas, o atalho para a Tabela Direta e a ordenação padrão por
+  menor valor.
+- Atualiza o guia do Tabelão para não apontar para filtros ou ordenação
+  removidos.
+- Preserva rota, permissão, API de estoque, banco, dados, integrações e regras
+  comerciais.
+
 ## 2026-09-24 — Tabelão no layout da Tabela Associativo
 
 - Replica no Tabelão o shell, hero, guia, painel de estoque, filtros, cores,

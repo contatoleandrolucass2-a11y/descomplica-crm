@@ -6,18 +6,41 @@ export interface TabelaoInventoryItem {
   identifier?: string | null;
   plant?: string | null;
   finalPrice?: number | null;
+  finalWithKit?: number | null;
+  unitBonus?: number | null;
+  tableSlack?: number | null;
+  privateArea?: number | null;
+  cashBackSlack?: number | null;
+  appraisal?: number | null;
+  classification?: string | null;
+  street?: string | null;
+  streetNumber?: string | null;
   neighborhood?: string | null;
   district?: string | null;
   region?: string | null;
   postalCode?: string | null;
+  progress?: number | null;
 }
 
 export interface TabelaoExclusiveFields {
+  businessUnit: string;
   project: string;
   plant: string;
+  minimumPrice: number;
   exclusiveKey: string;
   availableUnits: number;
+  pricedUnits: number;
 }
+
+export function groupTabelaoInventoryByProject<T extends TabelaoInventoryItem>(
+  items: readonly T[],
+): Array<{
+  key: string;
+  businessUnit: T["businessUnit"];
+  project: T["project"];
+  startIndex: number;
+  items: T[];
+}>;
 
 export interface TabelaoFilters {
   query?: string;
@@ -45,6 +68,15 @@ export interface TabelaoSummary {
 
 export const TABELAO_PRICE_RANGES: ReadonlyArray<{ value: string; label: string }>;
 
+export function enrichTabelaoLocationFields<T extends TabelaoInventoryItem>(
+  items: readonly T[],
+  reference: readonly TabelaoInventoryItem[],
+): Array<T & Pick<TabelaoInventoryItem, "street" | "streetNumber" | "neighborhood">>;
+
+export function normalizeTabelaoProgress(value: unknown): number | null;
+
+export function calculateTabelaoPrice(item: TabelaoInventoryItem): number | null;
+
 export function buildTabelaoExclusiveInventory<T extends TabelaoInventoryItem>(
   items: readonly T[],
 ): Array<T & TabelaoExclusiveFields>;
@@ -62,3 +94,20 @@ export function sortTabelaoInventory<T extends TabelaoInventoryItem>(
 export function buildTabelaoOptions(items: readonly TabelaoInventoryItem[]): TabelaoOptions;
 
 export function summarizeTabelao(items: readonly TabelaoInventoryItem[]): TabelaoSummary;
+
+export type TabelaoFilterDimension = "businessUnit" | "project" | "region" | "plant" | "price";
+export type TabelaoFacetFilters = Record<TabelaoFilterDimension, string>;
+export const TABELAO_FILTER_DEFAULTS: Readonly<TabelaoFacetFilters>;
+export interface TabelaoFacet {
+  total: number;
+  options: Array<{ value: string; label: string; count: number }>;
+}
+export function matchesTabelaoFacets(
+  item: TabelaoInventoryItem,
+  filters: TabelaoFacetFilters,
+  ignoredDimension?: TabelaoFilterDimension | null,
+): boolean;
+export function buildTabelaoFacets(
+  items: readonly TabelaoInventoryItem[],
+  filters: TabelaoFacetFilters,
+): Record<TabelaoFilterDimension, TabelaoFacet>;
