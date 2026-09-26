@@ -2,6 +2,25 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Tabelão expansivo em 26/09/2026
+
+Sete capturas revisadas e atualizadas para a coluna Unidades, tabela sem limite
+vertical e células mescladas por empreendimento. CI `36220767591`, captura
+`d28120044ccac5aaf6eea239336a0b4a5101150f`, árvore idêntica ao código publicado
+`809a048c8fed52d4cb4a2cdda731b2a07abdbce8`.
+
+Passaram 140 checks responsivos, 80 de tema, 193 de acessibilidade, 100 de zoom,
+teclado, simuladores e os 13 critérios do Tabelão. A regressão específica usa
+130 plantas em três empreendimentos, 260 unidades com preço e uma sem preço,
+em 1440, 1024, 768 e 375 px: todas as linhas renderizadas, quantidade distinta
+da amostra financeira, `rowSpan` íntegro, filtro, limpeza, ordenação e última
+linha acessível pela rolagem da página. Os 34 testes focados também passaram.
+
+Somente sete diferenças visuais da rota foram promovidas depois de inspeção,
+conferência de hashes, integridade da baseline e árvore Git. Outras 186 imagens
+e os limiares originais foram preservados. Nenhum dado comercial, credencial ou
+estado de autenticação foi incluído nas capturas versionadas.
+
 ## Atualização do Tabelão em 24/09/2026
 
 ### Filtros encadeados restaurados

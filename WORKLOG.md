@@ -25,6 +25,20 @@
 - Typecheck e build locais passaram. Suíte Windows: 632 testes passaram, quatro
   ignorados e duas falhas preexistentes de modo POSIX `0600` retornando `0666`.
   A validação Linux completa e as evidências visuais acompanham a publicação.
+- `pnpm verify` aprovado na VPS: lint, typecheck, 634 testes Vitest e oito testes
+  Node, quatro ignorados e build concluído. Imagem
+  `sha256:cd252b6cc0551eed44a09da32f5a09b3b677d46f38e3ebeae72ba72b731d116c`
+  comprovada sem rebuild nos dois perfis de runtime.
+- Publicado `809a048c8fed52d4cb4a2cdda731b2a07abdbce8` com backup e rollback.
+  Health público confirmou a revisão; `GET /api/inventory` anônimo retornou 401.
+  Revisão autenticada em 1440, 1024, 768 e 375 px confirmou 53 linhas, 23 grupos,
+  2.243 unidades, filtros, ordenação, ausência de overflow horizontal da página,
+  tabela sem rolagem vertical interna e última opção acessível. Nenhum erro JS.
+- CI `36220767591`: todos os critérios funcionais, 140 checks de rota, 80 de
+  tema, 193 de acessibilidade e 100 de zoom aprovados. Diferenças restritas a sete
+  imagens do Tabelão. Inspecionadas e promovidas da captura limpa
+  `d28120044ccac5aaf6eea239336a0b4a5101150f`, com árvore igual à versão publicada,
+  hashes e baseline conferidos; 186 imagens existentes e limiares preservados.
 
 ## 2026-09-24 — restauração dos filtros solicitados
 

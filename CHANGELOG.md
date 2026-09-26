@@ -10,6 +10,8 @@
   acessíveis, sem eliminar opções ou alterar a fórmula do menor valor.
 - Preserva os seis filtros; valida agrupamento e expansão acima de 60 linhas,
   inclusive após filtros e em telas estreitas.
+- Atualiza sete referências visuais sintéticas após revisão e aprovação de todos
+  os testes funcionais, de acessibilidade, teclado e zoom; preserva as outras 186.
 
 ## 2026-09-24 — filtros encadeados no Tabelão
 
