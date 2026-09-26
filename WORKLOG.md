@@ -12,6 +12,13 @@
   `availableUnits`; Valor Imóvel usa `minimumPrice`; Volta ao Caixa usa
   `cashBackSlack`; Avaliação usa `appraisal`; Endereço usa a composição
   protegida; % Obra usa `progress`; e Limitador usa `classification`.
+- A matriz autenticada validou os quatro viewports exigidos, agrupamento,
+  filtros, carga, vazio, erro, recuperação, foco, Escape, largura automática e
+  overflow. Passaram 140 checks responsivos, 80 de tema, 193 de acessibilidade,
+  193 comparações visuais e 100 de zoom.
+- Sete referências visuais do Tabelão foram promovidas transacionalmente a
+  partir da árvore limpa no commit
+  `51c95928f09e75dad570066f0038fb6ababadcd0`; as outras 186 foram preservadas.
 
 ## 2026-09-26 — colunas automáticas e densidade horizontal do Tabelão
 
