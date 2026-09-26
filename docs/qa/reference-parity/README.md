@@ -14,6 +14,12 @@ ocupação pelo conteúdo, ausência de truncamento, alcance da última coluna p
 rolagem interna e ausência de overflow da página. Agrupamento, quantidades, menor
 valor e detalhes comerciais continuam cobertos pelos contratos existentes.
 
+As sete diferenças esperadas foram inspecionadas e promovidas a partir da árvore
+limpa no commit `2032282713c781b4e46536f93f26d3d022a016fd`. A execução final
+aprovou 140 checks responsivos, 80 de tema, 193 auditorias de acessibilidade, 193
+comparações visuais e 100 checks de zoom. As outras 186 referências e seus
+limiares permaneceram inalterados.
+
 ## Tabelão expansivo em 26/09/2026
 
 Sete capturas revisadas e atualizadas para a coluna Unidades, tabela sem limite

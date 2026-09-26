@@ -19,6 +19,10 @@
   última coluna, 130 linhas agrupadas e zero overflow na página. Também passaram
   140 checks responsivos, 80 de tema, 193 auditorias Axe e 100 de zoom; somente
   as sete imagens esperadas do Tabelão diferiram da referência fixa anterior.
+- As sete imagens revisadas foram promovidas por troca transacional a partir da
+  árvore limpa no commit `2032282713c781b4e46536f93f26d3d022a016fd`. A execução
+  final aprovou 140 checks responsivos, 80 de tema, 193 de acessibilidade, 193
+  comparações visuais e 100 de zoom; as outras 186 referências foram preservadas.
 - Lint, tipos, build de 41 rotas, 642 testes Vitest e oito testes Node passaram.
   Duas revisões independentes não encontraram bloqueios; uma registrou apenas que
   a captura móvel geral termina antes da tabela, coberta funcionalmente em 375 px.
