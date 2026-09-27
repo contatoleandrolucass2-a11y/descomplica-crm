@@ -163,9 +163,14 @@ describe("isolated authenticated visual QA contract", () => {
       'functionalValidation: remoteHomologation\n    ? "protected homologation snapshot without persisted commercial fields"',
     );
     expect(script).toContain("saveLosslessWebp(persistedBuffer, destination)");
-    expect(script).toContain('const inventoryRoutePattern = "**/api/inventory*"');
+    expect(script).toContain(
+      "const inventoryRoutePattern = /\\/api\\/inventory(?:\\/snapshot)?(?:\\?.*)?$/;",
+    );
     expect(script).toContain("await context.route(inventoryRoutePattern, handler)");
     expect(script).toContain("body: syntheticDirectTableSnapshot");
+    expect(script).toContain('await projectFilter.selectOption("Todos")');
+    expect(script).toContain('tr[data-inventory-unit-id="qa-stock-0007"]');
+    expect(script).toContain('element.dispatchEvent(new Event("scroll"))');
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_RUNTIME_MODE"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_ENABLED_KEYS"');
