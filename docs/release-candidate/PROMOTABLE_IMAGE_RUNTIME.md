@@ -58,8 +58,13 @@ contrato Supabase inválido antes de iniciar o Next.js.
 Após congelar o SHA final:
 
 ```bash
-IMAGE_TAG="$(git rev-parse HEAD)" pnpm image:build
-IMAGE_TAG="$(git rev-parse HEAD)" pnpm image:prove
+release_sha="$(git rev-parse HEAD)"
+IMAGE_TAG="${release_sha}" pnpm image:build
+IMAGE_TAG="${release_sha}" pnpm image:prove
+homologated_image_id="$(
+  sudo docker image inspect "descomplica-crm:${release_sha}" --format '{{.Id}}'
+)"
+test "${#homologated_image_id}" -eq 71
 ```
 
 `image:prove` renderiza ambos os Compose com fixtures não sensíveis, confirma a
@@ -67,11 +72,34 @@ mesma referência, confere o image ID e label OCI e executa o validador interno
 com dois perfis de runtime sobre a mesma imagem. A saída contém apenas imagem,
 digest, contagens e booleanos; nenhum segredo.
 
-Promoção usa wrapper root-only e nunca recompila:
+Homologação usa o wrapper root-only e nunca recompila:
 
 ```bash
 sudo node scripts/release/compose-with-runtime-secret.mjs homologation up -d --no-build --remove-orphans
-sudo node scripts/release/compose-with-runtime-secret.mjs production up -d --no-build --remove-orphans
+```
+
+Após QA verde e autorização de produção, a promoção primeiro faz CAS atômico da
+única linha `IMAGE_TAG` no arquivo privado. O wrapper ignora o ambiente do shell;
+sem esse bind ele reutilizaria silenciosamente a tag antiga do arquivo:
+
+```bash
+production_current_sha="$(
+  sudo sed -n 's/^IMAGE_TAG=//p' /etc/descomplica-crm/production.env
+)"
+test "${#production_current_sha}" -eq 40
+production_previous_image_id="$(
+  sudo docker image inspect \
+    "descomplica-crm:${production_current_sha}" --format '{{.Id}}'
+)"
+test "${#production_previous_image_id}" -eq 71
+sudo pnpm release:bind-production-image \
+  --expected-old-sha "${production_current_sha}" \
+  --new-sha "${release_sha}" \
+  --expected-image-id "${homologated_image_id}"
+sudo node scripts/release/compose-with-runtime-secret.mjs \
+  production config --quiet
+sudo node scripts/release/compose-with-runtime-secret.mjs \
+  production up -d --no-build --remove-orphans
 ```
 
 O wrapper aceita somente `config --quiet`, `up -d --no-build
@@ -94,6 +122,21 @@ interface `_FILE` da aplicação.
 Antes de produção, comparar image ID registrado após homologação. Divergência
 interrompe gate.
 
-Rollback reaponta ambos os Compose para a tag e image ID anteriores, preserva
-secret stores e não altera banco. Migrations aditivas já aplicadas exigem
-roll-forward; nunca rollback destrutivo.
+Se `config`, `up` ou health de produção falhar, manter o checkout limpo no SHA
+novo e executar o CAS reverso comprovando a tag corrente e o image ID anterior:
+
+```bash
+sudo pnpm release:bind-production-image rollback \
+  --expected-current-sha "${release_sha}" \
+  --rollback-sha "${production_current_sha}" \
+  --expected-image-id "${production_previous_image_id}"
+sudo node scripts/release/compose-with-runtime-secret.mjs \
+  production config --quiet
+sudo node scripts/release/compose-with-runtime-secret.mjs \
+  production up -d --no-build --remove-orphans
+```
+
+O rollback reaponta o Compose para a tag e image ID anteriores, preserva secret
+stores e não altera banco. Não fazer checkout, rebuild, retag nem edição manual
+do `production.env`. Migrations aditivas já aplicadas exigem roll-forward; nunca
+rollback destrutivo.

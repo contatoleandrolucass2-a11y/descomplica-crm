@@ -127,6 +127,10 @@ describe("security headers regression", () => {
     expect(hostedQaLauncher).toContain("verifyHostedHealth(head, access)");
     expect(hostedQaLauncher).toContain('"{{json .Mounts}}"');
     expect(hostedQaLauncher).toContain('environment.has("AUTH_SESSION_COOKIE_SECRET")');
+    expect(hostedQaLauncher).toContain('values.get("LEGACY_MIGRATION_RUNTIME_MODE") !== "off"');
+    expect(hostedQaLauncher).toContain('values.get("LEGACY_MIGRATION_ENABLED_MODULES") !== ""');
+    expect(hostedQaLauncher).toContain('["LEGACY_MIGRATION_RUNTIME_MODE", "off"]');
+    expect(hostedQaLauncher).toContain('["LEGACY_MIGRATION_ENABLED_MODULES", ""]');
     expect(hostedQaLauncher).toContain("assertHostedAccessLogSafety(callbackLogSnapshot)");
     expect(hostedQaLauncher).toContain("assertHostedApplicationLogSafety(applicationLogSince)");
     expect(hostedQaLauncher).toContain("delete from auth.sessions where user_id =");
@@ -135,7 +139,11 @@ describe("security headers regression", () => {
     );
     expect(hostedQaLauncher).toContain("containsSensitiveCallbackMaterial(errorLogTail)");
     expect(hostedQaLauncher).toContain("runtimeRecoveryTemplate !== versionedRecoveryTemplate");
+    expect(hostedQaLauncher).toContain("runtimeManifest?.sourceSha !== head");
     expect(hostedQaLauncher).toContain(
+      '["homologation:migrate:legacy-canary-retirement", "verify", "--expected-sha", expectedHead]',
+    );
+    expect(hostedQaLauncher).not.toContain(
       '["homologation:migrate:auth-mfa", "verify", "--expected-sha", expectedHead]',
     );
     expect(hostedQaLauncher.match(/QA_E2E_MAILPIT_ORIGIN: mailpitOrigin/g)).toHaveLength(1);

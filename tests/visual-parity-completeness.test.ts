@@ -221,7 +221,7 @@ describe("isolated authenticated visual QA contract", () => {
     );
     expect(remoteRunner).toContain("assertHostedAccessLogSafety(callbackLogSnapshot)");
     expect(remoteRunner).toContain("errorLogPath");
-    expect(remoteRunner).toContain("verifyAuthMfaMigrationContract(head)");
+    expect(remoteRunner).toContain("verifyLegacyCanaryRetirementContract(head)");
     expect(remoteRunner).toContain("runtimeRecoveryTemplate !== versionedRecoveryTemplate");
   });
 });

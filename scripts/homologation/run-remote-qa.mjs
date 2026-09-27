@@ -98,7 +98,7 @@ async function readRuntimeEnvironmentContract() {
   const values = new Map();
   for (const line of contents.split(/\r?\n/u)) {
     const match = line.match(
-      /^(APP_ORIGIN|AUTH_SESSION_COOKIE_SECRET_SOURCE|IMAGE_TAG|SUPABASE_URL)=(.*)$/u,
+      /^(APP_ORIGIN|AUTH_SESSION_COOKIE_SECRET_SOURCE|IMAGE_TAG|LEGACY_MIGRATION_ENABLED_MODULES|LEGACY_MIGRATION_RUNTIME_MODE|SUPABASE_URL)=(.*)$/u,
     );
     if (!match) continue;
     if (values.has(match[1])) fail("Homologation runtime configuration is duplicated.");
@@ -109,6 +109,8 @@ async function readRuntimeEnvironmentContract() {
     values.get("APP_ORIGIN") !== origin ||
     values.get("SUPABASE_URL") !== "http://kong:8000" ||
     values.get("AUTH_SESSION_COOKIE_SECRET_SOURCE") !== sessionSecretSource ||
+    values.get("LEGACY_MIGRATION_RUNTIME_MODE") !== "off" ||
+    values.get("LEGACY_MIGRATION_ENABLED_MODULES") !== "" ||
     !/^[a-f0-9]{40}$/u.test(values.get("IMAGE_TAG") ?? "")
   ) {
     fail("Homologation runtime environment contract is invalid.");
@@ -271,6 +273,8 @@ async function inspectHostedRuntime(expectedHead) {
     ["QLIK_RELAY_WRITE_ENABLED", "false"],
     ["COMMERCIAL_ENGINE_RUNTIME_MODE", "off"],
     ["COMMERCIAL_ENGINE_ENABLED_KEYS", ""],
+    ["LEGACY_MIGRATION_RUNTIME_MODE", "off"],
+    ["LEGACY_MIGRATION_ENABLED_MODULES", ""],
   ]);
   const officialSimulatorMode = environment.get("OFFICIAL_SIMULATOR_RUNTIME_MODE");
   const officialSimulatorEnabledKeys = environment.get("OFFICIAL_SIMULATOR_ENABLED_KEYS");
@@ -381,10 +385,10 @@ async function run(command, arguments_, environment) {
   });
 }
 
-async function verifyAuthMfaMigrationContract(expectedHead) {
+async function verifyLegacyCanaryRetirementContract(expectedHead) {
   await run(
     "pnpm",
-    ["homologation:migrate:auth-mfa", "verify", "--expected-sha", expectedHead],
+    ["homologation:migrate:legacy-canary-retirement", "verify", "--expected-sha", expectedHead],
     process.env,
   );
 }
@@ -1487,7 +1491,7 @@ async function main() {
     runtimeManifest?.schemaVersion !== 1 ||
     runtimeManifest?.environment !== "isolated-homologation" ||
     runtimeManifest?.dataClassification !== "synthetic-only" ||
-    !/^[a-f0-9]{40}$/u.test(runtimeManifest?.sourceSha ?? "")
+    runtimeManifest?.sourceSha !== head
   ) {
     fail("Homologation runtime manifest does not match the checked-out release.");
   }
@@ -1525,7 +1529,7 @@ async function main() {
   const hostedRuntime = await inspectHostedRuntime(head);
   const officialSimulatorEnvironment = hostedRuntime.officialSimulatorEnvironment;
   await verifyHostedHealth(head, access);
-  await verifyAuthMfaMigrationContract(head);
+  await verifyLegacyCanaryRetirementContract(head);
   const adminClient = createAdminClient(local.apiUrl, local.secretKey);
   const masterUser = await resolveQaUser(adminClient, master.email);
   const masterUserId = assertUuid(masterUser.id);
