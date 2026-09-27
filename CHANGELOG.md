@@ -8,6 +8,8 @@
   consulta por grupo simultaneo, mantendo autorizacao e respostas `no-store`.
 - Otimiza filtros encadeados, ordenacao e renderizacao das opcoes de preco;
   melhora os estados de carregamento e registra tempos nos cabecalhos da API.
+- Corrige a sobreposicao de Limpar filtros no Associativo mobile e acrescenta
+  verificacao geometrica dos controles e metadados do estoque na matriz visual.
 
 ## 2026-09-26 — cabeçalhos compactos do Tabelão
 

@@ -10,7 +10,7 @@ import "./archive-investor/investor-archive.css";
 
 export function AssociativeTableArchive() {
   return (
-    <div className="app-shell simulation-page-shell investor-page-shell">
+    <div className="app-shell simulation-page-shell investor-page-shell investor-associative-table-page">
       <header className="topbar simulation-topbar">
         <Link className="brand-lockup brand-link" href="/app" prefetch={false}>
           <div className="brand-mark" aria-hidden="true">

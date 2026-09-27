@@ -18,6 +18,10 @@
 - Lint, TypeScript e build com 41 rotas aprovados no Windows. A suite integral
   passou no Linux: 724 testes Vitest e 8 testes Node, com um caso opcional
   ignorado. As seis falhas locais de permissoes POSIX nao ocorrem no Linux.
+- A revisao visual encontrou sobreposicao preexistente entre Limpar filtros e o
+  primeiro campo no celular. Cabecalhos do Associativo passam a crescer com o
+  conteudo; o botao tem alvo minimo de 44 px. A matriz visual mede colisoes entre
+  titulo, botao, campos e metadados do estoque, alem da comparacao de imagens.
 
 ## 2026-09-26 — rótulos e tipografia dos cabeçalhos do Tabelão
 

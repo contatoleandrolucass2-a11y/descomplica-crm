@@ -20,6 +20,9 @@
 - Filtros calculam as facetas numa passagem, preservam contagens e valores exatos.
   A ordenacao e reutilizada entre filtros. Opcoes dos selects sao memoizadas;
   editar a proposta nao recria centenas de opcoes. A janela continua em 60 linhas.
+- No Associativo mobile, os cabecalhos crescem com o conteudo. O botao Limpar
+  filtros possui alvo de 44 px e nao deve sobrepor o primeiro campo nem os
+  metadados do estoque; a matriz autenticada verifica essas colisoes.
 
 ## Medicao
 
