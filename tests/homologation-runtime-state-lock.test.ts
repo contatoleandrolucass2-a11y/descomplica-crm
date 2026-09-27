@@ -36,6 +36,19 @@ describe("homologation runtime state serialization", () => {
     }
   });
 
+  it("parses retirement arguments only after the lock marker is removed", async () => {
+    const runner = await readFile(
+      path.join(repositoryRoot, "scripts/homologation/apply-legacy-canary-retirement.mjs"),
+      "utf8",
+    );
+    const dispatch = runner.slice(runner.indexOf("async function dispatch()"));
+
+    expect(dispatch).not.toContain("parseRetirementArguments(process.argv.slice(2))");
+    expect(dispatch.indexOf("await enterRuntimeStateLock({")).toBeLessThan(
+      dispatch.indexOf("await main(state.arguments_)"),
+    );
+  });
+
   it("CAS-checks the environment snapshot after slow discovery and verifies the write", async () => {
     const source = await readFile(
       path.join(repositoryRoot, "scripts/homologation/configure-app-env.mjs"),

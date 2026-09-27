@@ -382,7 +382,6 @@ async function main(commandArguments) {
 }
 
 async function dispatch() {
-  parseRetirementArguments(process.argv.slice(2));
   const state = await enterRuntimeStateLock({
     arguments_: process.argv.slice(2),
     scriptPath: fileURLToPath(import.meta.url),
