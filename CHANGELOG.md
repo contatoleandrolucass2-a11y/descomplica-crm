@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-27 — carregamento do estoque
+
+- Inicia em paralelo as fontes do Associativo e Investidor, com cancelamento
+  ao sair, preservacao do enriquecimento e da proposta em andamento.
+- Reduz consultas repetidas com cache de 30 segundos no servidor e uma unica
+  consulta por grupo simultaneo, mantendo autorizacao e respostas `no-store`.
+- Otimiza filtros encadeados, ordenacao e renderizacao das opcoes de preco;
+  melhora os estados de carregamento e registra tempos nos cabecalhos da API.
+
 ## 2026-09-26 — cabeçalhos compactos do Tabelão
 
 - Encurta os rótulos visíveis para Entrega, Estoque, Valor Imóvel, Volta ao

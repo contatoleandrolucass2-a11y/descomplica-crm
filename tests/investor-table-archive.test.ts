@@ -82,7 +82,7 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(calculator).toContain("const inventoryWindowSize = 60");
     expect(calculator).toContain("aria-rowcount={matchingInventory.length + 1}");
     expect(calculator).toContain('className="investor-stock-spacer"');
-    expect(calculator).toContain("if (!inventoryInteractionStarted.current)");
+    expect(calculator).toContain("canReplace: () => !inventoryInteractionStarted.current");
     expect(calculator).toContain(
       'className="investor-direct-resource-actions investor-standard-resource-actions"',
     );
