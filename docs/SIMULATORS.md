@@ -156,6 +156,13 @@ habilitam motores oficiais.
 - WF15 usa o snapshot SPC protegido, exclui vagas avulsas, exige unidade com
   valor e término da obra, mantém estados de loading, vazio e erro e trata
   `GET /api/inventory` como atualização protegida não bloqueante.
+- Associativo e Investidor iniciam snapshot e estoque vivo em paralelo. O
+  snapshot continua enriquecendo os dados antes de permitir a seleção; uma
+  proposta iniciada não recebe substituição automática de estoque.
+- O estoque vivo possui cache de 30 segundos apenas em memória do servidor,
+  com autorização por requisição e deduplicação das consultas simultâneas.
+  Respostas HTTP continuam `no-store`; falhas não renovam nem prolongam o cache.
+  Diagnóstico e ferramentas estão no [runbook de desempenho](runbooks/inventory-performance.md).
 - Tabelão consulta o estoque protegido e seleciona uma unidade por empreendimento,
   planta e área, pelo líquido com kit e os dois abatimentos. Dados inválidos são
   contabilizados explicitamente; não geram um falso menor preço.
