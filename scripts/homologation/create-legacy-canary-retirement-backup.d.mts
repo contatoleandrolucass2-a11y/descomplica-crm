@@ -54,6 +54,12 @@ export function buildRestoreRolePreparationSql(
     value: Readonly<{
       roles: readonly unknown[];
       memberships: readonly unknown[];
+      unsupportedGlobals: Readonly<{
+        customTablespaces: number;
+        parameterAcls: number;
+        roleSecurityLabels: number;
+        databaseRoleSettings: number;
+      }>;
     }>;
     passwordVerifiers: readonly Readonly<{
       name: string;
@@ -69,4 +75,17 @@ export function buildRestoreDatabaseBoundarySql(
     }>;
   }>,
   databaseName: string,
+): string;
+
+export function buildRestoreObjectAclSql(
+  contract: Readonly<{
+    value: Readonly<{
+      schemas: readonly unknown[];
+      relations: readonly unknown[];
+      columns: readonly unknown[];
+      routines: readonly unknown[];
+      types: readonly unknown[];
+      defaultAcls: readonly unknown[];
+    }>;
+  }>,
 ): string;
