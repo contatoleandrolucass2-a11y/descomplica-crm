@@ -48,7 +48,7 @@ const directTableInventoryEvidencePolicy = Object.freeze({
     ? "protected homologation snapshot without persisted commercial fields"
     : "deterministic synthetic local runtime",
 });
-const inventoryRoutePattern = "**/api/inventory*";
+const inventoryRoutePattern = /\/api\/inventory(?:\/snapshot)?(?:\?.*)?$/;
 const syntheticDirectTableSnapshot = (() => {
   const contents = buildSyntheticDirectTableQaSnapshot();
   return JSON.stringify({
@@ -1101,13 +1101,29 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   // Use the project that contains the synthetic ready-proposal reference.
   // Both protected inventory endpoints are intercepted by the same isolated
   // fixture, so no mutable live feed or commercial field enters this evidence.
+  const projectFilter = page.getByRole("combobox", {
+    name: "Nome do Empreendimento",
+    exact: true,
+  });
+  await projectFilter.selectOption("Empreendimento QA 01");
+  await page.waitForFunction(
+    () => document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") === "552",
+  );
   await page
-    .getByRole("combobox", { name: "Nome do Empreendimento", exact: true })
-    .selectOption("Empreendimento QA 01");
-  await page.locator(".investor-stock-table tbody tr.selectable").first().waitFor({
+    .getByRole("region", { name: "Estoque completo de unidades", exact: true })
+    .evaluate((element) => {
+      if (!(element instanceof HTMLElement)) return;
+      element.scrollTop = 0;
+      element.dispatchEvent(new Event("scroll"));
+    });
+  const readyProposalUnitButton = page.getByRole("button", {
+    name: "Iniciar proposta com QA-0001",
+    exact: true,
+  });
+  await readyProposalUnitButton.waitFor({
     state: "visible",
   });
-  await page.locator(".investor-stock-table tbody tr.selectable").first().click();
+  await readyProposalUnitButton.click();
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
 
@@ -1404,7 +1420,27 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   }
   const readyProposalResponsive = readyProposalResponsiveChecks.every(Boolean);
 
-  await page.getByRole("button", { name: "Iniciar proposta com QA-0007", exact: true }).click();
+  await projectFilter.selectOption("Todos");
+  await page.waitForFunction(
+    () => document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") === "3302",
+  );
+  await projectFilter.selectOption("Empreendimento QA 01");
+  await page.waitForFunction(
+    () => document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") === "552",
+  );
+  await page
+    .getByRole("region", { name: "Estoque completo de unidades", exact: true })
+    .evaluate((element) => {
+      if (!(element instanceof HTMLElement)) return;
+      element.scrollTop = 0;
+      element.dispatchEvent(new Event("scroll"));
+    });
+  const missingAppraisalUnitButton = page.getByRole("button", {
+    name: "Iniciar proposta com QA-0007",
+    exact: true,
+  });
+  await missingAppraisalUnitButton.waitFor({ state: "visible" });
+  await missingAppraisalUnitButton.click();
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
   await page.getByRole("textbox", { name: "Financiamento", exact: true }).fill("19000000");
