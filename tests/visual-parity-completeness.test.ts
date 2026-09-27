@@ -142,6 +142,7 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("const simulatorCanaryBaselineRoot = path.join(");
     expect(script).toContain("visualBaselinePath(route, destination)");
     expect(script).toContain("enabledSimulatorRoutes.has(route)");
+    expect(script).toContain("!archiveSimulatorRoutes.has(route)");
     expect(script).toContain('route === "/app/simulacao" && simulatorHubCanaryKey');
     expect(script).toContain('topbarCollisionPairs.push("brand×actions")');
     expect(script).toContain("actionChildren[firstIndex]");
