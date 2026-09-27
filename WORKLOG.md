@@ -1,5 +1,35 @@
 # Worklog
 
+## 2026-09-27 — desempenho do estoque Associativo
+
+- A origem publica levou 3,43 s para responder 1.268.041 bytes na medicao inicial
+  desta maquina. O cliente aguardava o snapshot antes de iniciar a consulta viva.
+- As fontes agora sao consultadas em paralelo, preservando o enriquecimento do
+  snapshot antes da selecao e o estoque de propostas ja iniciadas. Consultas sao
+  canceladas ao sair da pagina; a Tabela Direta permanece exclusiva do snapshot.
+- O servidor reutiliza JSON validado por 30 segundos e deduplica requisicoes
+  simultaneas, com autorizacao em todas as chamadas e HTTP `no-store`.
+- Adicionados tempos de autorizacao/estoque e estado do cache nos cabecalhos.
+  Facetas usam uma passagem; ordenacao e opcoes dos selects sao reutilizadas.
+  Filtros ficam desabilitados durante carga/erro e a tabela informa `aria-busy`.
+- Instalados Node 24.19.0 portatil e dependencias do lockfile no checkout.
+  Figma, Datadog, PostHog, Linear e Supabase ja estavam instalados. PostHog exige
+  autenticacao; nao foi adicionado SDK nem criada conta externa.
+- Lint, TypeScript e build com 41 rotas aprovados no Windows. A suite integral
+  passou no Linux: 724 testes Vitest e 8 testes Node, com um caso opcional
+  ignorado. As seis falhas locais de permissoes POSIX nao ocorrem no Linux.
+- A revisao visual encontrou sobreposicao preexistente entre Limpar filtros e o
+  primeiro campo no celular. Cabecalhos do Associativo passam a crescer com o
+  conteudo; o botao tem alvo minimo de 44 px. A matriz visual mede colisoes entre
+  titulo, botao, campos e metadados do estoque, alem da comparacao de imagens.
+- `pnpm verify` completo aprovado no Linux no commit `7068a1c`, incluindo build
+  das 41 rotas. A matriz autenticada aprovou 140 checks responsivos, 80 de tema,
+  193 de acessibilidade e 100 de zoom, sem colisoes no estoque Associativo.
+  Foram promovidas somente tres referencias mobile; as outras 190 permaneceram.
+- Benchmark com 3.301 unidades e 100 amostras: a mediana das facetas por regiao
+  caiu de 57,023 ms para 12,449 ms, com resultados equivalentes. Esse ganho nao
+  representa o tempo total de abertura, que continua dependente da origem fria.
+
 ## 2026-09-26 — rótulos e tipografia dos cabeçalhos do Tabelão
 
 - Medições no Chromium confirmaram 8 px em Incorporadora e 10 px nos outros

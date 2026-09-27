@@ -912,6 +912,14 @@ async function inspectRoute(
       }
     }
     const blockedAction = simulatorForm?.querySelector('[data-cta-state="blocked"]');
+    const associativeStock = document.querySelector(
+      ".investor-associative-table-page .investor-stock-panel",
+    );
+    const stockFilters = associativeStock?.querySelector(".investor-stock-filters");
+    const filterTitle = stockFilters?.querySelector(".investor-filter-title-row");
+    const clearFilters = stockFilters?.querySelector(".investor-filter-heading > button");
+    const firstFilter = stockFilters?.querySelector(":scope > label");
+    const stockSync = associativeStock?.querySelector(".investor-stock-sync");
     const enabledAction = simulatorForm?.querySelector(
       'button[type="submit"][data-cta-state="enabled"]',
     );
@@ -931,6 +939,20 @@ async function inspectRoute(
       reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
       topbarCollision: topbarCollisionPairs.length > 0,
       topbarCollisionPairs,
+      associativeStockControlsPresent:
+        window.location.pathname !== "/app/simulacao/associativo-fluxo-linear" ||
+        Boolean(
+          associativeStock &&
+          stockFilters &&
+          filterTitle &&
+          clearFilters &&
+          firstFilter &&
+          stockSync,
+        ),
+      associativeStockCollision:
+        rectanglesOverlap(filterTitle, clearFilters) ||
+        rectanglesOverlap(clearFilters, firstFilter) ||
+        rectanglesOverlap(stockSync, stockFilters),
       identityTruncationReady:
         !identityLabel ||
         getComputedStyle(identityLabel).display === "none" ||
@@ -981,6 +1003,8 @@ async function inspectRoute(
     !snapshot.loginPresent &&
     snapshot.reducedMotion &&
     !snapshot.topbarCollision &&
+    snapshot.associativeStockControlsPresent &&
+    !snapshot.associativeStockCollision &&
     snapshot.identityTruncationReady &&
     simulatorStatePassed &&
     snapshot.unavailableActionDistinct &&

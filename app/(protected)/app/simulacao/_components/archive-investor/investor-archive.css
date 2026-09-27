@@ -21739,3 +21739,25 @@ body:has(.investor-page-shell) {
     width: 100%;
   }
 }
+
+@media (max-width: 760px) {
+  .investor-associative-table-page .investor-stock-panel > .investor-section-heading {
+    height: auto !important;
+    padding-block: 8px !important;
+  }
+
+  .investor-associative-table-page .investor-stock-filters .investor-filter-heading {
+    height: auto;
+    grid-template-rows: auto;
+    gap: 8px;
+  }
+
+  .investor-associative-table-page .investor-stock-filters .investor-filter-title-row,
+  .investor-associative-table-page .investor-stock-filters .investor-filter-heading > button {
+    top: 0;
+  }
+
+  .investor-associative-table-page .investor-stock-filters .investor-filter-heading > button {
+    min-height: 44px;
+  }
+}
