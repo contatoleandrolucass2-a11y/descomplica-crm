@@ -10,6 +10,8 @@
   melhora os estados de carregamento e registra tempos nos cabecalhos da API.
 - Corrige a sobreposicao de Limpar filtros no Associativo mobile e acrescenta
   verificacao geometrica dos controles e metadados do estoque na matriz visual.
+- Atualiza tres referencias visuais mobile do Associativo apos aprovacao da
+  matriz completa, preservando as outras 190 imagens.
 
 ## 2026-09-26 — cabeçalhos compactos do Tabelão
 

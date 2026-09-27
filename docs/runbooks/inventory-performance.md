@@ -38,6 +38,25 @@ Inspecionar a requisicao autenticada `/api/inventory` no navegador:
 A data `generatedAt` continua sendo a data informada pela origem, e nao a hora
 da consulta. Cache rapido nao significa estoque atualizado na origem.
 
+### Benchmark De Facetas
+
+Medicao em Windows com Node 24.19.0, 3.301 unidades, 20 aquecimentos e 100
+amostras por cenario. O script compara os resultados completos com a versao
+anterior antes de informar tempos; nao imprime dados do estoque.
+
+| Cenario        | Mediana anterior | Mediana nova |
+| -------------- | ---------------: | -----------: |
+| Sem filtro     |        12,689 ms |    12,571 ms |
+| Regiao         |        57,023 ms |    12,449 ms |
+| Empreendimento |         0,936 ms |     0,642 ms |
+
+O ganho de 78% no cenario Regiao mede apenas o helper de facetas, nao o tempo
+total de abertura da pagina. A primeira consulta sem cache ainda depende da origem.
+
+```bash
+node scripts/qa/inventory-benchmark.mjs <snapshot-privado> <checkout-anterior>
+```
+
 ## Ferramentas E Uso
 
 - `investigate-first`: localizar a causa da demora antes de editar.

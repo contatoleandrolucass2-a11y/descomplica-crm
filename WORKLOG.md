@@ -22,6 +22,13 @@
   primeiro campo no celular. Cabecalhos do Associativo passam a crescer com o
   conteudo; o botao tem alvo minimo de 44 px. A matriz visual mede colisoes entre
   titulo, botao, campos e metadados do estoque, alem da comparacao de imagens.
+- `pnpm verify` completo aprovado no Linux no commit `7068a1c`, incluindo build
+  das 41 rotas. A matriz autenticada aprovou 140 checks responsivos, 80 de tema,
+  193 de acessibilidade e 100 de zoom, sem colisoes no estoque Associativo.
+  Foram promovidas somente tres referencias mobile; as outras 190 permaneceram.
+- Benchmark com 3.301 unidades e 100 amostras: a mediana das facetas por regiao
+  caiu de 57,023 ms para 12,449 ms, com resultados equivalentes. Esse ganho nao
+  representa o tempo total de abertura, que continua dependente da origem fria.
 
 ## 2026-09-26 — rótulos e tipografia dos cabeçalhos do Tabelão
 
