@@ -54,6 +54,12 @@ export function buildRestoreRolePreparationSql(
     value: Readonly<{
       roles: readonly unknown[];
       memberships: readonly unknown[];
+      unsupportedGlobals: Readonly<{
+        customTablespaces: number;
+        parameterAcls: number;
+        roleSecurityLabels: number;
+        databaseRoleSettings: number;
+      }>;
     }>;
     passwordVerifiers: readonly Readonly<{
       name: string;
