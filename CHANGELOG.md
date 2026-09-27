@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-27 — alvo de toque do Associativo
+
+- Garante 44 px em Limpar filtros no celular mesmo diante da regra compacta
+  herdada e acrescenta verificacao da altura efetiva no navegador.
+
 ## 2026-09-27 — carregamento do estoque
 
 - Inicia em paralelo as fontes do Associativo e Investidor, com cancelamento

@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-09-27 — alvo de toque do Associativo
+
+- A conferencia na pagina publicada confirmou estoque real carregado e ausencia
+  de sobreposicao. A altura de Limpar filtros ainda era 25 px devido a um
+  `min-height` herdado com `!important`; a regra mobile agora tem a mesma prioridade.
+- A matriz autenticada passa a medir tambem a altura real minima de 44 px do
+  botao em viewports ate 760 px, sem alterar outros simuladores ou calculos.
+
 ## 2026-09-27 — desempenho do estoque Associativo
 
 - A origem publica levou 3,43 s para responder 1.268.041 bytes na medicao inicial

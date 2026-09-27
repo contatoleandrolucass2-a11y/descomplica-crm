@@ -953,6 +953,10 @@ async function inspectRoute(
         rectanglesOverlap(filterTitle, clearFilters) ||
         rectanglesOverlap(clearFilters, firstFilter) ||
         rectanglesOverlap(stockSync, stockFilters),
+      associativeStockTouchTargetReady:
+        !associativeStock ||
+        root.clientWidth > 760 ||
+        (clearFilters?.getBoundingClientRect().height ?? 0) >= 44,
       identityTruncationReady:
         !identityLabel ||
         getComputedStyle(identityLabel).display === "none" ||
@@ -1005,6 +1009,7 @@ async function inspectRoute(
     !snapshot.topbarCollision &&
     snapshot.associativeStockControlsPresent &&
     !snapshot.associativeStockCollision &&
+    snapshot.associativeStockTouchTargetReady &&
     snapshot.identityTruncationReady &&
     simulatorStatePassed &&
     snapshot.unavailableActionDistinct &&
