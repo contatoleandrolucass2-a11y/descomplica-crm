@@ -1,10 +1,22 @@
 import { execFile } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { chmod, chown, lstat, mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import {
+  chmod,
+  chown,
+  lstat,
+  mkdir,
+  open,
+  readFile,
+  rename,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
+
+import { enterRuntimeStateLock } from "./runtime-state-lock.mjs";
 
 const execFileAsync = promisify(execFile);
 const runtimeRoot = "/var/lib/descomplica-crm-homologation";
@@ -18,6 +30,15 @@ const officialSimulatorKeys = new Set([
   "simulator.caixa",
   "simulator.wf14",
   "simulator.wf15",
+]);
+const legacyMigrationModules = new Set([
+  "simulator.wf16",
+  "simulator.caixa",
+  "simulator.wf14",
+  "simulator.wf15",
+  "simulator.tabelao",
+  "dialer",
+  "dialer.weekend-forecast",
 ]);
 
 function singleEnvironmentValue(contents, name) {
@@ -51,6 +72,25 @@ export function parseOfficialSimulatorRuntime(contents = "") {
     throw new Error("Official simulator mode and enabled keys are inconsistent.");
   }
   return { mode, enabledKeys: keys.join(",") };
+}
+
+export function parseLegacyMigrationRuntime(contents = "") {
+  const mode = (singleEnvironmentValue(contents, "LEGACY_MIGRATION_RUNTIME_MODE") ?? "off").trim();
+  const rawModules = singleEnvironmentValue(contents, "LEGACY_MIGRATION_ENABLED_MODULES") ?? "";
+  const modules = rawModules ? rawModules.split(",").map((module) => module.trim()) : [];
+  if (!new Set(["off", "active"]).has(mode)) {
+    throw new Error("Legacy migration runtime mode is invalid.");
+  }
+  if (
+    modules.some((module) => !module || !legacyMigrationModules.has(module)) ||
+    new Set(modules).size !== modules.length
+  ) {
+    throw new Error("Legacy migration enabled modules are invalid.");
+  }
+  if ((mode === "off" && modules.length !== 0) || (mode === "active" && modules.length === 0)) {
+    throw new Error("Legacy migration mode and enabled modules are inconsistent.");
+  }
+  return { mode, enabledModules: modules.join(",") };
 }
 
 async function ensureRootDirectory(directory, mode, label) {
@@ -103,18 +143,60 @@ async function ensureSessionSecret() {
   }
 }
 
-async function readOfficialSimulatorRuntime() {
+async function readEnvironmentSnapshot() {
   try {
     const metadata = await lstat(destination);
-    if (!metadata.isFile() || metadata.isSymbolicLink()) {
-      throw new Error("Homologation environment must be a regular file.");
+    if (
+      !metadata.isFile() ||
+      metadata.isSymbolicLink() ||
+      metadata.uid !== 0 ||
+      metadata.gid !== 0 ||
+      (metadata.mode & 0o777) !== 0o600
+    ) {
+      throw new Error("Homologation environment must be root:root mode 0600.");
     }
-    return parseOfficialSimulatorRuntime(await readFile(destination, "utf8"));
+    return { exists: true, contents: await readFile(destination, "utf8") };
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
-      return parseOfficialSimulatorRuntime();
+      return { exists: false, contents: "" };
     }
     throw error;
+  }
+}
+
+async function assertEnvironmentSnapshot(snapshot) {
+  const current = await readEnvironmentSnapshot();
+  if (current.exists !== snapshot.exists || current.contents !== snapshot.contents) {
+    throw new Error("Homologation environment changed during app configuration.");
+  }
+}
+
+async function writeEnvironmentAtomically(contents, originalSnapshot) {
+  const temporary = `${destination}.tmp-${process.pid}-${randomBytes(12).toString("hex")}`;
+  let temporaryCreated = false;
+  try {
+    const handle = await open(temporary, "wx", 0o600);
+    temporaryCreated = true;
+    try {
+      await handle.writeFile(contents, "utf8");
+      await handle.chown(0, 0);
+      await handle.chmod(0o600);
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+
+    await assertEnvironmentSnapshot(originalSnapshot);
+    await rename(temporary, destination);
+    const directory = await open(configurationDirectory, "r");
+    try {
+      await directory.sync();
+    } finally {
+      await directory.close();
+    }
+    await assertEnvironmentSnapshot({ exists: true, contents });
+  } finally {
+    if (temporaryCreated) await rm(temporary, { force: true });
   }
 }
 
@@ -157,15 +239,18 @@ function extractSingleJsonObject(stdout) {
   return parsed;
 }
 
-async function main() {
+async function main(arguments_) {
   if (process.getuid?.() !== 0) throw new Error("App environment configuration requires root.");
+  if (arguments_.length !== 0) throw new Error("App environment configuration takes no arguments.");
   const imageTag = process.env.IMAGE_TAG;
   if (!/^[0-9a-f]{40}$/.test(imageTag ?? "")) {
     throw new Error("IMAGE_TAG must be a full immutable Git SHA.");
   }
 
   await ensureRootDirectory(configurationDirectory, 0o750, "Runtime configuration directory");
-  const officialSimulatorRuntime = await readOfficialSimulatorRuntime();
+  const originalSnapshot = await readEnvironmentSnapshot();
+  const officialSimulatorRuntime = parseOfficialSimulatorRuntime(originalSnapshot.contents);
+  const legacyMigrationRuntime = parseLegacyMigrationRuntime(originalSnapshot.contents);
   await ensureSessionSecret();
 
   const { stdout } = await execFileAsync(
@@ -187,7 +272,6 @@ async function main() {
     throw new Error("Supabase publishable key is unavailable.");
   }
 
-  const temporary = `${destination}.tmp-${process.pid}`;
   const contents = [
     `IMAGE_TAG=${imageTag}`,
     "SUPABASE_URL=http://kong:8000",
@@ -196,22 +280,33 @@ async function main() {
     `AUTH_SESSION_COOKIE_SECRET_SOURCE=${sessionSecretSource}`,
     `OFFICIAL_SIMULATOR_RUNTIME_MODE=${officialSimulatorRuntime.mode}`,
     `OFFICIAL_SIMULATOR_ENABLED_KEYS=${officialSimulatorRuntime.enabledKeys}`,
+    `LEGACY_MIGRATION_RUNTIME_MODE=${legacyMigrationRuntime.mode}`,
+    `LEGACY_MIGRATION_ENABLED_MODULES=${legacyMigrationRuntime.enabledModules}`,
     "",
   ].join("\n");
-  try {
-    await writeFile(temporary, contents, { encoding: "utf8", mode: 0o600, flag: "wx" });
-    await chown(temporary, 0, 0);
-    await chmod(temporary, 0o600);
-    await rename(temporary, destination);
-  } finally {
-    await rm(temporary, { force: true });
-  }
+  await writeEnvironmentAtomically(contents, originalSnapshot);
   process.stdout.write("Homologation app environment configured: secrets=not-printed\n");
+}
+
+async function dispatch() {
+  if (process.getuid?.() !== 0) throw new Error("App environment configuration requires root.");
+  await ensureRootDirectory(configurationDirectory, 0o750, "Runtime configuration directory");
+  const environment = Object.fromEntries(
+    ["IMAGE_TAG", "HOME", "XDG_CONFIG_HOME", "XDG_RUNTIME_DIR", "DOCKER_HOST"].flatMap((name) =>
+      process.env[name] ? [[name, process.env[name]]] : [],
+    ),
+  );
+  const state = await enterRuntimeStateLock({
+    arguments_: process.argv.slice(2),
+    environment,
+    scriptPath: fileURLToPath(import.meta.url),
+  });
+  if (!state.delegated) await main(state.arguments_);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   try {
-    await main();
+    await dispatch();
   } catch {
     process.stderr.write("Homologation app environment failed; no diagnostic secrets emitted.\n");
     process.exitCode = 1;

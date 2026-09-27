@@ -174,7 +174,7 @@ dado real. O read model v3 recebe apenas grants sintéticos de homologação.
 
 ## Gate 3 — imagem e aplicação
 
-Depois dos gates locais no SHA aprovado:
+Depois dos gates locais, construir e provar uma única imagem no SHA aprovado:
 
 ```bash
 pnpm install --frozen-lockfile
@@ -185,35 +185,28 @@ pnpm build
 release_sha="$(git rev-parse HEAD)"
 IMAGE_TAG="${release_sha}" pnpm image:build
 IMAGE_TAG="${release_sha}" pnpm image:prove
-backup_manifest="/var/backups/descomplica-crm/<execucao>/SHA256SUMS"
-sudo pnpm homologation:migrate:auth-mfa dry-run --expected-sha "${release_sha}"
-sudo pnpm homologation:migrate:auth-mfa apply \
-  --expected-sha "${release_sha}" \
-  --backup-manifest "${backup_manifest}" \
-  --confirm homologation-auth-mfa-only
-sudo pnpm homologation:migrate:auth-mfa verify --expected-sha "${release_sha}"
-sudo env IMAGE_TAG="${release_sha}" node scripts/homologation/configure-app-env.mjs
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  homologation config --quiet
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  homologation up -d --no-build --remove-orphans
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  homologation ps
 sudo docker image inspect "descomplica-crm:${release_sha}" --format '{{.Id}}'
-curl --fail --silent --show-error http://127.0.0.1:3100/api/health
 ```
 
 O `image:prove` exige que ambos os Compose resolvam a mesma referência e o mesmo
 ID imutável, valida os dois perfis de runtime sem rede e não imprime o segredo.
-O `backup_manifest` deve apontar para o backup novo, root-only e restaurado de
-forma isolada conforme o runbook específico de Auth/MFA; `apply` deve listar e
-aplicar somente `20260824230058` e `20260824230100`. O `verify` precisa comprovar
-as 31 versões exatas antes de subir a aplicação e antes de `homologation:qa`.
-Registrar esse ID após homologação e compará-lo, sem rebuild ou nova tag, ao ID
-usado na promoção futura de produção. O healthcheck deve retornar o SHA
-esperado. Confirmar `HOMOLOGATION_MODE=true`, banner visível, cadastro bloqueado,
-endpoints de integração indisponíveis e ausência de chamadas externas antes de
-publicar DNS.
+Registrar esse ID e executar integralmente
+[`docs/runbooks/legacy-canary-retirement.md`](../runbooks/legacy-canary-retirement.md).
+Esse é o gate do estado atual da homologação: vincula o runtime ao SHA, cria e
+restaura um backup fresco, ensaia a retirada, grava as flags legadas em
+`off`/vazio, para a aplicação, aplica somente a transição `32/24 → 33/17`,
+verifica, sobe a mesma imagem sem rebuild e executa `homologation:qa`.
+
+O gate Auth/MFA `29 → 31` permanece documentado apenas como transição histórica;
+não usar seu `verify` de 31 versões para o estado canário atual. Não executar
+`migration repair`, apagar histórico, promover a PR 50 nem aplicar migration de
+canário/retirada em produção. Produção permanece em 31 versões/17 páginas. Uma
+promoção futura, autorizada separadamente, reutiliza o mesmo image ID aprovado
+em homologação e não inclui migration de banco.
+
+O healthcheck deve retornar o SHA esperado. Confirmar
+`HOMOLOGATION_MODE=true`, banner visível, cadastro bloqueado, endpoints de
+integração indisponíveis e ausência de chamadas externas antes de publicar DNS.
 
 ## Gate 4 — DNS, Nginx e TLS
 

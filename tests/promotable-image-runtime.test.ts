@@ -7,7 +7,10 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { readSessionPersistenceSecret } from "@/lib/auth/session-persistence";
 import { getSupabaseRuntimeConfiguration } from "@/lib/auth/supabase/runtime";
-import { parseOfficialSimulatorRuntime } from "@/scripts/homologation/configure-app-env.mjs";
+import {
+  parseLegacyMigrationRuntime,
+  parseOfficialSimulatorRuntime,
+} from "@/scripts/homologation/configure-app-env.mjs";
 
 const repositoryRoot = process.cwd();
 const temporaryDirectories: string[] = [];
@@ -80,6 +83,12 @@ describe("promotable image contract", () => {
       expect(compose).toContain("target: /run/data/investor-inventory.json");
       expect(compose).toContain("create_host_path: false");
       expect(compose).toContain('group_add:\n      - "0"');
+      expect(compose).toContain(
+        "LEGACY_MIGRATION_RUNTIME_MODE: ${LEGACY_MIGRATION_RUNTIME_MODE:-off}",
+      );
+      expect(compose).toContain(
+        'LEGACY_MIGRATION_ENABLED_MODULES: "${LEGACY_MIGRATION_ENABLED_MODULES:-}"',
+      );
       expect(compose).not.toMatch(/^\s+AUTH_SESSION_COOKIE_SECRET:/mu);
     }
     expect(productionExample).toContain(
@@ -88,6 +97,10 @@ describe("promotable image contract", () => {
     expect(homologationExample).toContain(
       "AUTH_SESSION_COOKIE_SECRET_SOURCE=/etc/descomplica-crm/secrets/homologation-auth-session-cookie-secret",
     );
+    for (const example of [productionExample, homologationExample]) {
+      expect(example).toContain("LEGACY_MIGRATION_RUNTIME_MODE=off");
+      expect(example).toContain("LEGACY_MIGRATION_ENABLED_MODULES=");
+    }
 
     const wrapper = await readFile(
       path.join(repositoryRoot, "scripts/release/compose-with-runtime-secret.mjs"),
@@ -203,5 +216,43 @@ describe("homologation official simulator preservation", () => {
     "OFFICIAL_SIMULATOR_RUNTIME_MODE=active\nOFFICIAL_SIMULATOR_ENABLED_KEYS=simulator.wf13\nOFFICIAL_SIMULATOR_RUNTIME_MODE=active",
   ])("fails closed for an invalid existing gate %#", (contents) => {
     expect(() => parseOfficialSimulatorRuntime(contents)).toThrow();
+  });
+});
+
+describe("homologation legacy migration preservation", () => {
+  it("defaults absent flags to off and preserves the seven-module allowlist", () => {
+    expect(parseLegacyMigrationRuntime()).toEqual({ mode: "off", enabledModules: "" });
+    expect(
+      parseLegacyMigrationRuntime(
+        [
+          "LEGACY_MIGRATION_RUNTIME_MODE=active",
+          [
+            "LEGACY_MIGRATION_ENABLED_MODULES=simulator.wf16",
+            "simulator.caixa",
+            "simulator.wf14",
+            "simulator.wf15",
+            "simulator.tabelao",
+            "dialer",
+            "dialer.weekend-forecast",
+          ].join(", "),
+        ].join("\n"),
+      ),
+    ).toEqual({
+      mode: "active",
+      enabledModules:
+        "simulator.wf16,simulator.caixa,simulator.wf14,simulator.wf15,simulator.tabelao,dialer,dialer.weekend-forecast",
+    });
+  });
+
+  it.each([
+    "LEGACY_MIGRATION_RUNTIME_MODE=canary\nLEGACY_MIGRATION_ENABLED_MODULES=",
+    "LEGACY_MIGRATION_RUNTIME_MODE=active\nLEGACY_MIGRATION_ENABLED_MODULES=",
+    "LEGACY_MIGRATION_RUNTIME_MODE=off\nLEGACY_MIGRATION_ENABLED_MODULES=dialer",
+    "LEGACY_MIGRATION_RUNTIME_MODE=active\nLEGACY_MIGRATION_ENABLED_MODULES=unknown",
+    "LEGACY_MIGRATION_RUNTIME_MODE=active\nLEGACY_MIGRATION_ENABLED_MODULES=dialer,dialer",
+    "LEGACY_MIGRATION_RUNTIME_MODE=active\nLEGACY_MIGRATION_ENABLED_MODULES=dialer\nLEGACY_MIGRATION_RUNTIME_MODE=active",
+    "LEGACY_MIGRATION_RUNTIME_MODE=active\nLEGACY_MIGRATION_ENABLED_MODULES=dialer\nLEGACY_MIGRATION_ENABLED_MODULES=dialer.weekend-forecast",
+  ])("fails closed for invalid legacy flags %#", (contents) => {
+    expect(() => parseLegacyMigrationRuntime(contents)).toThrow();
   });
 });
