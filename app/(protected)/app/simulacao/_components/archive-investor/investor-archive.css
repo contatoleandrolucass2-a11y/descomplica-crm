@@ -21758,6 +21758,6 @@ body:has(.investor-page-shell) {
   }
 
   .investor-associative-table-page .investor-stock-filters .investor-filter-heading > button {
-    min-height: 44px;
+    min-height: 44px !important;
   }
 }
