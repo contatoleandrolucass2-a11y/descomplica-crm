@@ -296,6 +296,10 @@ Os gates `OFFICIAL_SIMULATOR_RUNTIME_MODE` e
 `OFFICIAL_SIMULATOR_ENABLED_KEYS` são lidos do container efetivo e repassados
 ao E2E/visual; o configurador preserva somente valores válidos já existentes e
 usa `off`/vazio quando ainda não houver configuração.
+O compose isolado também fixa `QA_VISUAL_GOALS_REFERENCE_TIME` na competência
+sintética versionada. A aplicação aceita essa referência somente em loopback QA
+ou em `HOMOLOGATION_MODE=true` com a origem exata de homologação; produção
+continua usando a data corrente e falha fechada se a variável for injetada.
 
 O mesmo runner usa o Mailpit apenas por loopback para provar entrega, origem e
 uso único do link de recuperação. Antes do E2E, ele cria via Auth Admin nove

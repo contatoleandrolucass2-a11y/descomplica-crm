@@ -143,7 +143,7 @@ const simulatorHubCanaryKey =
 function visualBaselinePath(route, candidatePath) {
   const relativeCandidatePath = path.relative(candidateScreenshotRoot, candidatePath);
   const runtimeKey = simulatorRuntimeKeysByRoute.get(route);
-  if (runtimeKey && enabledSimulatorRoutes.has(route)) {
+  if (runtimeKey && enabledSimulatorRoutes.has(route) && !archiveSimulatorRoutes.has(route)) {
     return path.join(simulatorCanaryBaselineRoot, runtimeKey, relativeCandidatePath);
   }
   if (route === "/app/simulacao" && simulatorHubCanaryKey) {
