@@ -169,8 +169,12 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("await context.route(inventoryRoutePattern, handler)");
     expect(script).toContain("body: syntheticDirectTableSnapshot");
     expect(script).toContain('await projectFilter.selectOption("Todos")');
-    expect(script).toContain('tr[data-inventory-unit-id="qa-stock-0007"]');
+    expect(script).toContain('name: "Iniciar proposta com QA-0001"');
+    expect(script).toContain('name: "Iniciar proposta com QA-0007"');
     expect(script).toContain('element.dispatchEvent(new Event("scroll"))');
+    expect(script.match(/element\.dispatchEvent\(new Event\("scroll"\)\)/g)).toHaveLength(2);
+    expect(script).toContain("await readyProposalUnitButton.click()");
+    expect(script).toContain("await missingAppraisalUnitButton.click()");
     expect(runner).toContain('QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_RUNTIME_MODE"');
     expect(runner).toContain('"OFFICIAL_SIMULATOR_ENABLED_KEYS"');

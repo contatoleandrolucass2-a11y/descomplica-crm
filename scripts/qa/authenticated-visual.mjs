@@ -1085,10 +1085,21 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   await page.waitForFunction(
     () => document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") === "552",
   );
-  await page.locator('tr[data-inventory-unit-id="qa-stock-0001"]').waitFor({
+  await page
+    .getByRole("region", { name: "Estoque completo de unidades", exact: true })
+    .evaluate((element) => {
+      if (!(element instanceof HTMLElement)) return;
+      element.scrollTop = 0;
+      element.dispatchEvent(new Event("scroll"));
+    });
+  const readyProposalUnitButton = page.getByRole("button", {
+    name: "Iniciar proposta com QA-0001",
+    exact: true,
+  });
+  await readyProposalUnitButton.waitFor({
     state: "visible",
   });
-  await page.locator(".investor-stock-table tbody tr.selectable").first().click();
+  await readyProposalUnitButton.click();
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
 
@@ -1400,11 +1411,12 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
       element.scrollTop = 0;
       element.dispatchEvent(new Event("scroll"));
     });
-  const missingAppraisalUnitRow = page.locator('tr[data-inventory-unit-id="qa-stock-0007"]');
-  await missingAppraisalUnitRow.waitFor({ state: "visible" });
-  await missingAppraisalUnitRow
-    .getByRole("button", { name: "Iniciar proposta com QA-0007", exact: true })
-    .click();
+  const missingAppraisalUnitButton = page.getByRole("button", {
+    name: "Iniciar proposta com QA-0007",
+    exact: true,
+  });
+  await missingAppraisalUnitButton.waitFor({ state: "visible" });
+  await missingAppraisalUnitButton.click();
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
   await page.getByRole("textbox", { name: "Financiamento", exact: true }).fill("19000000");
