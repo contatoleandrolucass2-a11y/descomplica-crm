@@ -209,6 +209,7 @@ const roleContractSql = `select jsonb_build_object(
   'roles', coalesce((
     select jsonb_agg(jsonb_build_object(
       'name', role_row.rolname,
+      'bootstrap', role_row.oid = 10,
       'superuser', role_row.rolsuper,
       'inherit', role_row.rolinherit,
       'createRole', role_row.rolcreaterole,
@@ -218,7 +219,13 @@ const roleContractSql = `select jsonb_build_object(
       'bypassRls', role_row.rolbypassrls,
       'connectionLimit', role_row.rolconnlimit,
       'validUntil', role_row.rolvaliduntil::text,
-      'configuration', coalesce(to_jsonb(role_row.rolconfig), '[]'::jsonb),
+      'configuration', coalesce((
+        select jsonb_agg(setting order by setting)
+        from pg_catalog.pg_db_role_setting role_setting
+        cross join lateral unnest(role_setting.setconfig) setting
+        where role_setting.setrole = role_row.oid
+          and role_setting.setdatabase = 0
+      ), '[]'::jsonb),
       'passwordVerifier', role_row.rolpassword
     ) order by role_row.rolname)
     from pg_catalog.pg_authid role_row
@@ -229,7 +236,9 @@ const roleContractSql = `select jsonb_build_object(
       'role', granted_role.rolname,
       'member', member_role.rolname,
       'grantor', grantor_role.rolname,
-      'adminOption', membership.admin_option
+      'adminOption', membership.admin_option,
+      'inheritOption', membership.inherit_option,
+      'setOption', membership.set_option
     ) order by granted_role.rolname, member_role.rolname, grantor_role.rolname)
     from pg_catalog.pg_auth_members membership
     join pg_catalog.pg_roles granted_role on granted_role.oid = membership.roleid
@@ -273,8 +282,15 @@ select jsonb_build_object(
       'name', namespace.nspname,
       'owner', pg_catalog.pg_get_userbyid(namespace.nspowner),
       'acl', coalesce((
-        select jsonb_agg(acl_entry::text order by acl_entry::text)
-        from unnest(coalesce(namespace.nspacl, '{}'::aclitem[])) acl_entry
+        select jsonb_agg(jsonb_build_object(
+          'grantor', pg_catalog.pg_get_userbyid(acl_entry.grantor),
+          'grantee', case when acl_entry.grantee = 0 then 'PUBLIC'
+            else pg_catalog.pg_get_userbyid(acl_entry.grantee) end,
+          'privilege', acl_entry.privilege_type,
+          'grantable', acl_entry.is_grantable
+        ) order by acl_entry.grantee, acl_entry.grantor, acl_entry.privilege_type)
+        from unnest(coalesce(namespace.nspacl, '{}'::aclitem[])) raw_acl(item)
+        cross join lateral pg_catalog.aclexplode(array[raw_acl.item]) acl_entry
       ), '[]'::jsonb)
     ) order by namespace.nspname)
     from user_namespace namespace
@@ -288,8 +304,15 @@ select jsonb_build_object(
       'rowSecurity', relation.relrowsecurity,
       'forceRowSecurity', relation.relforcerowsecurity,
       'acl', coalesce((
-        select jsonb_agg(acl_entry::text order by acl_entry::text)
-        from unnest(coalesce(relation.relacl, '{}'::aclitem[])) acl_entry
+        select jsonb_agg(jsonb_build_object(
+          'grantor', pg_catalog.pg_get_userbyid(acl_entry.grantor),
+          'grantee', case when acl_entry.grantee = 0 then 'PUBLIC'
+            else pg_catalog.pg_get_userbyid(acl_entry.grantee) end,
+          'privilege', acl_entry.privilege_type,
+          'grantable', acl_entry.is_grantable
+        ) order by acl_entry.grantee, acl_entry.grantor, acl_entry.privilege_type)
+        from unnest(coalesce(relation.relacl, '{}'::aclitem[])) raw_acl(item)
+        cross join lateral pg_catalog.aclexplode(array[raw_acl.item]) acl_entry
       ), '[]'::jsonb)
     ) order by namespace.nspname, relation.relname, relation.relkind)
     from pg_catalog.pg_class relation
@@ -301,8 +324,15 @@ select jsonb_build_object(
       'relation', relation.relname,
       'column', attribute.attname,
       'acl', coalesce((
-        select jsonb_agg(acl_entry::text order by acl_entry::text)
-        from unnest(coalesce(attribute.attacl, '{}'::aclitem[])) acl_entry
+        select jsonb_agg(jsonb_build_object(
+          'grantor', pg_catalog.pg_get_userbyid(acl_entry.grantor),
+          'grantee', case when acl_entry.grantee = 0 then 'PUBLIC'
+            else pg_catalog.pg_get_userbyid(acl_entry.grantee) end,
+          'privilege', acl_entry.privilege_type,
+          'grantable', acl_entry.is_grantable
+        ) order by acl_entry.grantee, acl_entry.grantor, acl_entry.privilege_type)
+        from unnest(coalesce(attribute.attacl, '{}'::aclitem[])) raw_acl(item)
+        cross join lateral pg_catalog.aclexplode(array[raw_acl.item]) acl_entry
       ), '[]'::jsonb)
     ) order by namespace.nspname, relation.relname, attribute.attnum)
     from pg_catalog.pg_attribute attribute
@@ -314,11 +344,19 @@ select jsonb_build_object(
     select jsonb_agg(jsonb_build_object(
       'schema', namespace.nspname,
       'name', routine.proname,
+      'kind', routine.prokind,
       'identityArguments', pg_catalog.pg_get_function_identity_arguments(routine.oid),
       'owner', pg_catalog.pg_get_userbyid(routine.proowner),
       'acl', coalesce((
-        select jsonb_agg(acl_entry::text order by acl_entry::text)
-        from unnest(coalesce(routine.proacl, '{}'::aclitem[])) acl_entry
+        select jsonb_agg(jsonb_build_object(
+          'grantor', pg_catalog.pg_get_userbyid(acl_entry.grantor),
+          'grantee', case when acl_entry.grantee = 0 then 'PUBLIC'
+            else pg_catalog.pg_get_userbyid(acl_entry.grantee) end,
+          'privilege', acl_entry.privilege_type,
+          'grantable', acl_entry.is_grantable
+        ) order by acl_entry.grantee, acl_entry.grantor, acl_entry.privilege_type)
+        from unnest(coalesce(routine.proacl, '{}'::aclitem[])) raw_acl(item)
+        cross join lateral pg_catalog.aclexplode(array[raw_acl.item]) acl_entry
       ), '[]'::jsonb)
     ) order by namespace.nspname, routine.proname, pg_catalog.pg_get_function_identity_arguments(routine.oid))
     from pg_catalog.pg_proc routine
@@ -330,8 +368,15 @@ select jsonb_build_object(
       'name', type_row.typname,
       'owner', pg_catalog.pg_get_userbyid(type_row.typowner),
       'acl', coalesce((
-        select jsonb_agg(acl_entry::text order by acl_entry::text)
-        from unnest(coalesce(type_row.typacl, '{}'::aclitem[])) acl_entry
+        select jsonb_agg(jsonb_build_object(
+          'grantor', pg_catalog.pg_get_userbyid(acl_entry.grantor),
+          'grantee', case when acl_entry.grantee = 0 then 'PUBLIC'
+            else pg_catalog.pg_get_userbyid(acl_entry.grantee) end,
+          'privilege', acl_entry.privilege_type,
+          'grantable', acl_entry.is_grantable
+        ) order by acl_entry.grantee, acl_entry.grantor, acl_entry.privilege_type)
+        from unnest(coalesce(type_row.typacl, '{}'::aclitem[])) raw_acl(item)
+        cross join lateral pg_catalog.aclexplode(array[raw_acl.item]) acl_entry
       ), '[]'::jsonb)
     ) order by namespace.nspname, type_row.typname)
     from pg_catalog.pg_type type_row
@@ -343,8 +388,15 @@ select jsonb_build_object(
       'owner', pg_catalog.pg_get_userbyid(default_acl.defaclrole),
       'objectType', default_acl.defaclobjtype,
       'acl', coalesce((
-        select jsonb_agg(acl_entry::text order by acl_entry::text)
-        from unnest(coalesce(default_acl.defaclacl, '{}'::aclitem[])) acl_entry
+        select jsonb_agg(jsonb_build_object(
+          'grantor', pg_catalog.pg_get_userbyid(acl_entry.grantor),
+          'grantee', case when acl_entry.grantee = 0 then 'PUBLIC'
+            else pg_catalog.pg_get_userbyid(acl_entry.grantee) end,
+          'privilege', acl_entry.privilege_type,
+          'grantable', acl_entry.is_grantable
+        ) order by acl_entry.grantee, acl_entry.grantor, acl_entry.privilege_type)
+        from unnest(coalesce(default_acl.defaclacl, '{}'::aclitem[])) raw_acl(item)
+        cross join lateral pg_catalog.aclexplode(array[raw_acl.item]) acl_entry
       ), '[]'::jsonb)
     ) order by coalesce(namespace.nspname, ''), pg_catalog.pg_get_userbyid(default_acl.defaclrole), default_acl.defaclobjtype)
     from pg_catalog.pg_default_acl default_acl
@@ -501,6 +553,7 @@ export function buildRestoreRolePreparationSql(contract) {
     if (
       !role ||
       typeof role.name !== "string" ||
+      typeof role.bootstrap !== "boolean" ||
       !Number.isSafeInteger(role.connectionLimit) ||
       !Array.isArray(role.configuration) ||
       ![
@@ -553,26 +606,54 @@ $prepare_role$;`);
       if (!/^[a-z_][a-z0-9_.]*$/u.test(name)) {
         fail("Source role contract contains an invalid role setting name.");
       }
-      statements.push(`alter role ${identifier} set ${name} to ${quoteSqlLiteral(value)};`);
+      if (name === "search_path" || name === "session_preload_libraries") {
+        statements.push(
+          `select pg_catalog.set_config(${quoteSqlLiteral(name)}, ${quoteSqlLiteral(value)}, false);`,
+        );
+        statements.push(`alter role ${identifier} set ${name} from current;`);
+        statements.push(`reset ${name};`);
+      } else {
+        statements.push(`alter role ${identifier} set ${name} to ${quoteSqlLiteral(value)};`);
+      }
     }
   }
+  const bootstrapRoles = roles.filter((role) => role.bootstrap === true);
+  if (bootstrapRoles.length !== 1 || bootstrapRoles[0].superuser !== true) {
+    fail("Source role contract must contain exactly one bootstrap superuser.");
+  }
+  const bootstrapRole = bootstrapRoles[0].name;
+  statements.unshift(`do $assert_bootstrap_role$
+begin
+  if not exists (
+    select 1 from pg_catalog.pg_authid
+    where oid = 10 and rolname = ${quoteSqlLiteral(bootstrapRole)}
+  ) then
+    raise exception 'Restore cluster bootstrap superuser differs from the source contract.';
+  end if;
+end;
+$assert_bootstrap_role$;`);
   for (const membership of memberships) {
     if (
       !membership ||
       typeof membership.role !== "string" ||
       typeof membership.member !== "string" ||
       typeof membership.grantor !== "string" ||
-      typeof membership.adminOption !== "boolean"
+      typeof membership.adminOption !== "boolean" ||
+      typeof membership.inheritOption !== "boolean" ||
+      typeof membership.setOption !== "boolean" ||
+      membership.grantor !== bootstrapRole
     ) {
       fail("Source role membership contract is invalid.");
     }
-    statements.push(`set role ${quoteSqlIdentifier(membership.grantor)};`);
     statements.push(
-      `grant ${quoteSqlIdentifier(membership.role)} to ${quoteSqlIdentifier(membership.member)}${
-        membership.adminOption ? " with admin option" : ""
-      };`,
+      `grant ${quoteSqlIdentifier(membership.role)} to ${quoteSqlIdentifier(membership.member)} with admin ${membership.adminOption};`,
     );
-    statements.push("reset role;");
+    statements.push(
+      `grant ${quoteSqlIdentifier(membership.role)} to ${quoteSqlIdentifier(membership.member)} with inherit ${membership.inheritOption};`,
+    );
+    statements.push(
+      `grant ${quoteSqlIdentifier(membership.role)} to ${quoteSqlIdentifier(membership.member)} with set ${membership.setOption};`,
+    );
   }
   return `${statements.join("\n")}\n`;
 }
@@ -619,6 +700,202 @@ export function buildRestoreDatabaseBoundarySql(contract, databaseName) {
       }${entry.grantable ? " with grant option" : ""};`,
     );
     statements.push("reset role;");
+  }
+  return `${statements.join("\n")}\n`;
+}
+
+const schemaPrivileges = new Set(["CREATE", "USAGE"]);
+const tablePrivileges = new Set([
+  "DELETE",
+  "INSERT",
+  "MAINTAIN",
+  "REFERENCES",
+  "SELECT",
+  "TRIGGER",
+  "TRUNCATE",
+  "UPDATE",
+]);
+const sequencePrivileges = new Set(["SELECT", "UPDATE", "USAGE"]);
+const columnPrivileges = new Set(["INSERT", "REFERENCES", "SELECT", "UPDATE"]);
+
+function groupAclEntries(entries, allowedPrivileges, label) {
+  if (!Array.isArray(entries)) fail(`${label} is invalid.`);
+  const groups = new Map();
+  for (const entry of entries) {
+    if (
+      !entry ||
+      typeof entry.grantor !== "string" ||
+      typeof entry.grantee !== "string" ||
+      !allowedPrivileges.has(entry.privilege) ||
+      typeof entry.grantable !== "boolean"
+    ) {
+      fail(`${label} is invalid.`);
+    }
+    const key = JSON.stringify([entry.grantor, entry.grantee, entry.grantable]);
+    const group = groups.get(key) ?? {
+      grantor: entry.grantor,
+      grantee: entry.grantee,
+      grantable: entry.grantable,
+      privileges: [],
+    };
+    if (!group.privileges.includes(entry.privilege)) group.privileges.push(entry.privilege);
+    groups.set(key, group);
+  }
+  return [...groups.values()];
+}
+
+function appendObjectAclStatements(statements, entries, allowedPrivileges, target, label, column) {
+  for (const group of groupAclEntries(entries, allowedPrivileges, label)) {
+    const privileges = group.privileges
+      .map((privilege) =>
+        column === null ? privilege : `${privilege} (${quoteSqlIdentifier(column)})`,
+      )
+      .join(", ");
+    statements.push(`set role ${quoteSqlIdentifier(group.grantor)};`);
+    statements.push(
+      `grant ${privileges} on ${target} to ${
+        group.grantee === "PUBLIC" ? "public" : quoteSqlIdentifier(group.grantee)
+      }${group.grantable ? " with grant option" : ""};`,
+    );
+    statements.push("reset role;");
+  }
+}
+
+export function buildRestoreObjectAclSql(contract) {
+  const value = contract?.value;
+  if (
+    !value ||
+    !Array.isArray(value.schemas) ||
+    !Array.isArray(value.relations) ||
+    !Array.isArray(value.columns) ||
+    !Array.isArray(value.routines) ||
+    !Array.isArray(value.types) ||
+    !Array.isArray(value.defaultAcls)
+  ) {
+    fail("Source object ACL contract is invalid.");
+  }
+  const statements = [];
+  for (const schema of value.schemas) {
+    if (!schema || typeof schema.name !== "string") fail("Source schema ACL contract is invalid.");
+    appendObjectAclStatements(
+      statements,
+      schema.acl,
+      schemaPrivileges,
+      `schema ${quoteSqlIdentifier(schema.name)}`,
+      "Source schema ACL contract",
+      null,
+    );
+  }
+  for (const relation of value.relations) {
+    if (
+      !relation ||
+      typeof relation.schema !== "string" ||
+      typeof relation.name !== "string" ||
+      typeof relation.kind !== "string"
+    ) {
+      fail("Source relation ACL contract is invalid.");
+    }
+    const sequence = relation.kind === "S";
+    appendObjectAclStatements(
+      statements,
+      relation.acl,
+      sequence ? sequencePrivileges : tablePrivileges,
+      `${sequence ? "sequence" : "table"} ${quoteSqlIdentifier(relation.schema)}.${quoteSqlIdentifier(
+        relation.name,
+      )}`,
+      "Source relation ACL contract",
+      null,
+    );
+  }
+  for (const column of value.columns) {
+    if (
+      !column ||
+      typeof column.schema !== "string" ||
+      typeof column.relation !== "string" ||
+      typeof column.column !== "string"
+    ) {
+      fail("Source column ACL contract is invalid.");
+    }
+    appendObjectAclStatements(
+      statements,
+      column.acl,
+      columnPrivileges,
+      `table ${quoteSqlIdentifier(column.schema)}.${quoteSqlIdentifier(column.relation)}`,
+      "Source column ACL contract",
+      column.column,
+    );
+  }
+  for (const routine of value.routines) {
+    if (
+      !routine ||
+      typeof routine.schema !== "string" ||
+      typeof routine.name !== "string" ||
+      typeof routine.kind !== "string" ||
+      typeof routine.identityArguments !== "string"
+    ) {
+      fail("Source routine ACL contract is invalid.");
+    }
+    appendObjectAclStatements(
+      statements,
+      routine.acl,
+      new Set(["EXECUTE"]),
+      `${routine.kind === "p" ? "procedure" : "function"} ${quoteSqlIdentifier(
+        routine.schema,
+      )}.${quoteSqlIdentifier(routine.name)}(${routine.identityArguments})`,
+      "Source routine ACL contract",
+      null,
+    );
+  }
+  for (const type of value.types) {
+    if (!type || typeof type.schema !== "string" || typeof type.name !== "string") {
+      fail("Source type ACL contract is invalid.");
+    }
+    appendObjectAclStatements(
+      statements,
+      type.acl,
+      new Set(["USAGE"]),
+      `type ${quoteSqlIdentifier(type.schema)}.${quoteSqlIdentifier(type.name)}`,
+      "Source type ACL contract",
+      null,
+    );
+  }
+  const defaultObjectTypes = new Map([
+    ["r", "tables"],
+    ["S", "sequences"],
+    ["f", "functions"],
+  ]);
+  for (const defaultAcl of value.defaultAcls) {
+    if (
+      !defaultAcl ||
+      typeof defaultAcl.schema !== "string" ||
+      typeof defaultAcl.owner !== "string" ||
+      typeof defaultAcl.objectType !== "string" ||
+      !defaultObjectTypes.has(defaultAcl.objectType)
+    ) {
+      fail("Source default ACL contract is invalid.");
+    }
+    for (const group of groupAclEntries(
+      defaultAcl.acl,
+      defaultAcl.objectType === "r"
+        ? tablePrivileges
+        : defaultAcl.objectType === "S"
+          ? sequencePrivileges
+          : new Set(["EXECUTE"]),
+      "Source default ACL contract",
+    )) {
+      if (group.grantor !== defaultAcl.owner) fail("Source default ACL grantor is invalid.");
+      statements.push(`set role ${quoteSqlIdentifier(defaultAcl.owner)};`);
+      statements.push(
+        `alter default privileges${
+          defaultAcl.schema === "" ? "" : ` in schema ${quoteSqlIdentifier(defaultAcl.schema)}`
+        } grant ${group.privileges.join(", ")} on ${defaultObjectTypes.get(
+          defaultAcl.objectType,
+        )} to ${
+          group.grantee === "PUBLIC" ? "public" : quoteSqlIdentifier(group.grantee)
+        }${group.grantable ? " with grant option" : ""};`,
+      );
+      statements.push("reset role;");
+    }
   }
   return `${statements.join("\n")}\n`;
 }
@@ -960,7 +1237,7 @@ function waitForRestoreDatabase(container) {
   fail("Isolated restore database did not become ready.");
 }
 
-function readIdentityRoleContract(container, label, ignoredHarnessRole) {
+function readIdentityRoleContract(container, label, username, ignoredHarnessRole) {
   const output = docker(
     [
       "exec",
@@ -981,7 +1258,7 @@ function readIdentityRoleContract(container, label, ignoredHarnessRole) {
       "--port",
       "55432",
       "--username",
-      "postgres",
+      username,
       "--dbname",
       "postgres",
     ],
@@ -992,18 +1269,33 @@ function readIdentityRoleContract(container, label, ignoredHarnessRole) {
 }
 
 function proveIdentityArchive(container, databaseGlobalsFile, sourceRoleContract) {
-  const bootstrapRole = "descomplica_restore_bootstrap";
-  if (sourceRoleContract.value.roles?.some?.((role) => role?.name === bootstrapRole) === true) {
-    fail("Identity restore bootstrap role collides with the source role contract.");
+  const bootstrapRoles = sourceRoleContract.value.roles?.filter?.(
+    (role) => role?.bootstrap === true,
+  );
+  if (bootstrapRoles?.length !== 1 || bootstrapRoles[0]?.superuser !== true) {
+    fail("Identity restore requires exactly one source bootstrap superuser.");
   }
+  const bootstrapRole = bootstrapRoles[0].name;
   docker(["exec", container, "mkdir", "--parents", "/identity/socket"], "Identity restore root");
   docker(
-    ["cp", databaseGlobalsFile, `${container}:/identity/database-globals.sql`],
-    "Identity archive copy",
+    ["cp", databaseGlobalsFile, `${container}:/tmp/database-globals.sql`],
+    "Identity archive staging copy",
+  );
+  docker(
+    ["exec", container, "cp", "/tmp/database-globals.sql", "/identity/database-globals.sql"],
+    "Identity archive tmpfs copy",
   );
   docker(
     ["exec", container, "chown", "--recursive", "postgres:postgres", "/identity"],
     "Identity restore ownership",
+  );
+  docker(
+    ["exec", container, "chmod", "0600", "/identity/database-globals.sql"],
+    "Identity archive permissions",
+  );
+  docker(
+    ["exec", container, "rm", "-f", "/tmp/database-globals.sql"],
+    "Identity archive staging cleanup",
   );
   docker(
     [
@@ -1073,6 +1365,7 @@ function proveIdentityArchive(container, databaseGlobalsFile, sourceRoleContract
       container,
       "Identity archive role contract",
       bootstrapRole,
+      null,
     );
     assertExactSecurityContract(
       sourceRoleContract,
@@ -1190,6 +1483,13 @@ async function proveRestore(
 ) {
   const container = `descomplica-homologation-retirement-restore-${backupId.slice(-12)}`;
   const restorePassword = randomBytes(36).toString("base64url");
+  const bootstrapRoles = sourceRoleContract.value.roles?.filter?.(
+    (role) => role?.bootstrap === true,
+  );
+  if (bootstrapRoles?.length !== 1 || bootstrapRoles[0]?.superuser !== true) {
+    fail("Database restore requires exactly one source bootstrap superuser.");
+  }
+  const bootstrapRole = bootstrapRoles[0].name;
   try {
     docker(
       [
@@ -1237,7 +1537,7 @@ async function proveRestore(
         container,
         "createdb",
         "--username",
-        "postgres",
+        bootstrapRole,
         "--owner",
         sourceDatabaseSecurityContract.value.database.owner,
         "restore",
@@ -1258,12 +1558,18 @@ async function proveRestore(
         "pg_restore",
         "--exit-on-error",
         "--username",
-        "postgres",
+        bootstrapRole,
         "--dbname",
         "restore",
         "/tmp/database.dump",
       ],
       "Isolated database restore",
+    );
+    psql(
+      container,
+      "restore",
+      buildRestoreObjectAclSql(sourceDatabaseSecurityContract),
+      "Restored object ACL replay",
     );
     const restoredDatabaseSecurityContract = readJsonContract(
       container,
@@ -1445,13 +1751,12 @@ async function main(arguments_) {
         databaseDump,
         "Database backup",
       );
-      await dockerToFile(
-        ["exec", databaseContainer, "pg_dumpall", "--globals-only", "--username", "supabase_admin"],
-        databaseGlobalsFile,
-        "Database global identity backup",
-      );
-      const databaseGlobals = await artifact(databaseGlobalsFile, "database-globals");
+      await writeFile(databaseGlobalsFile, buildRestoreRolePreparationSql(sourceRoleContract), {
+        mode: 0o600,
+        flag: "wx",
+      });
       await syncRegularFile(databaseGlobalsFile);
+      const databaseGlobals = await artifact(databaseGlobalsFile, "database-globals");
       await writeFile(
         databaseSecurityFile,
         `${JSON.stringify(

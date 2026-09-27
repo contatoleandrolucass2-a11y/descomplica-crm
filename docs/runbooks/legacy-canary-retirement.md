@@ -115,10 +115,11 @@ O comando cria um diretório novo `root:root 0700` sob
 `/var/backups/descomplica-crm`, grava quatro cargas, a prova de restore e o
 manifesto de checksums como `root:root 0600`, sincroniza todos os arquivos e os
 diretórios no disco, restaura o dump em PostgreSQL isolado sem rede e ensaia a
-transição completa `32/24 → 33/17`. O arquivo de configuração inclui o dump
-de identidades globais do PostgreSQL, com verificadores de senha necessários
-para recuperação de desastre; todo o diretório deve permanecer restrito a
-root e nunca pode ser copiado para logs ou saída do comando. A prova compara
+transição completa `32/24 → 33/17`. O arquivo de configuração inclui um arquivo
+SQL de identidades globais gerado do contrato exato de papéis do PostgreSQL,
+com verificadores de senha necessários para recuperação de desastre; todo o
+diretório deve permanecer restrito a root e nunca pode ser copiado para logs ou
+saída do comando. A prova compara
 papéis, fingerprints dos verificadores, memberships, owners e ACLs de banco,
 schemas, relações, colunas, rotinas, tipos, defaults e policies, além de
 exercitar o tar de configuração e a imagem imutável do app. Copiar da saída

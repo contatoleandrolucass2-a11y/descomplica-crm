@@ -8,6 +8,8 @@ import { sha256 } from "../scripts/homologation/auth-mfa-upgrade-lib.mjs";
 import {
   assertExactSecurityContract,
   assertHeadBoundBytes,
+  buildRestoreObjectAclSql,
+  buildRestoreRolePreparationSql,
   collectRequiredConfigurationSources,
   finalizeBackupDurability,
   openPrivateBackupParent,
@@ -189,6 +191,134 @@ describe("homologation legacy canary retirement backup", () => {
     ).toThrow(/differs from the source database/u);
   });
 
+  it("reads global role settings from the PostgreSQL 17 catalog", async () => {
+    const source = await readFile(scriptPath, "utf8");
+
+    expect(source).not.toContain("role_row.rolconfig");
+    expect(source).toContain("from pg_catalog.pg_db_role_setting role_setting");
+    expect(source).toContain("cross join lateral unnest(role_setting.setconfig) setting");
+    expect(source).toContain("role_setting.setrole = role_row.oid");
+    expect(source).toContain("role_setting.setdatabase = 0");
+    expect(source).toContain("'bootstrap', role_row.oid = 10");
+    expect(source).toContain("'inheritOption', membership.inherit_option");
+    expect(source).toContain("'setOption', membership.set_option");
+  });
+
+  it("builds a deterministic replayable identity archive without pg_dumpall grantor syntax", () => {
+    const contract = {
+      value: {
+        roles: [
+          {
+            name: "supabase_admin",
+            bootstrap: true,
+            superuser: true,
+            inherit: true,
+            createRole: true,
+            createDb: true,
+            canLogin: true,
+            replication: true,
+            bypassRls: true,
+            connectionLimit: -1,
+            validUntil: null,
+            configuration: ['search_path="$user", public', "statement_timeout=0"],
+          },
+          {
+            name: "anon",
+            bootstrap: false,
+            superuser: false,
+            inherit: true,
+            createRole: false,
+            createDb: false,
+            canLogin: false,
+            replication: false,
+            bypassRls: false,
+            connectionLimit: -1,
+            validUntil: null,
+            configuration: ["default_transaction_read_only=on"],
+          },
+        ],
+        memberships: [
+          {
+            role: "anon",
+            member: "supabase_admin",
+            grantor: "supabase_admin",
+            adminOption: true,
+            inheritOption: false,
+            setOption: true,
+          },
+        ],
+      },
+      passwordVerifiers: [
+        { name: "supabase_admin", verifier: "SCRAM-SHA-256$fixture" },
+        { name: "anon", verifier: null },
+      ],
+    };
+
+    const archive = buildRestoreRolePreparationSql(contract);
+    expect(archive).toContain('alter role "supabase_admin" with\n  superuser');
+    expect(archive).toContain(
+      `select pg_catalog.set_config('search_path', '"$user", public', false);`,
+    );
+    expect(archive).toContain('alter role "supabase_admin" set search_path from current;');
+    expect(archive).toContain("alter role \"supabase_admin\" set statement_timeout to '0';");
+    expect(archive).toContain("alter role \"anon\" set default_transaction_read_only to 'on';");
+    expect(archive).toContain('grant "anon" to "supabase_admin" with admin true;');
+    expect(archive).toContain('grant "anon" to "supabase_admin" with inherit false;');
+    expect(archive).toContain('grant "anon" to "supabase_admin" with set true;');
+    expect(archive).not.toContain("GRANTED BY");
+  });
+
+  it("replays source object and default ACL grants with their original grantors", () => {
+    const grant = (grantor: string, grantee: string, privilege: string) => ({
+      grantor,
+      grantee,
+      privilege,
+      grantable: false,
+    });
+    const sql = buildRestoreObjectAclSql({
+      value: {
+        schemas: [{ name: "graphql", acl: [grant("supabase_admin", "anon", "USAGE")] }],
+        relations: [
+          {
+            schema: "private",
+            name: "drafts",
+            kind: "r",
+            acl: [grant("postgres", "postgres", "SELECT")],
+          },
+        ],
+        columns: [],
+        routines: [
+          {
+            schema: "public",
+            name: "calculate",
+            kind: "f",
+            identityArguments: "integer",
+            acl: [grant("postgres", "authenticated", "EXECUTE")],
+          },
+        ],
+        types: [],
+        defaultAcls: [
+          {
+            schema: "graphql",
+            owner: "supabase_admin",
+            objectType: "r",
+            acl: [grant("supabase_admin", "anon", "SELECT")],
+          },
+        ],
+      },
+    });
+
+    expect(sql).toContain('set role "supabase_admin";');
+    expect(sql).toContain('grant USAGE on schema "graphql" to "anon";');
+    expect(sql).toContain('grant SELECT on table "private"."drafts" to "postgres";');
+    expect(sql).toContain(
+      'grant EXECUTE on function "public"."calculate"(integer) to "authenticated";',
+    );
+    expect(sql).toContain(
+      'alter default privileges in schema "graphql" grant SELECT on tables to "anon";',
+    );
+  });
+
   it("requires release-bound candidate, security, and 33/17 rehearsal evidence", async () => {
     const manifest = await loadManifest();
     const allowlistSha256 = sha256(await readFile(allowlistPath));
@@ -314,14 +444,34 @@ describe("homologation legacy canary retirement backup", () => {
 
   it("exercises identity, configuration, image, owner, and ACL restore paths under one lock", async () => {
     const source = await readFile(scriptPath, "utf8");
-    expect(source).toMatch(/"pg_dumpall",\s*"--globals-only"/u);
+    expect(source).not.toContain("pg_dumpall");
+    expect(source).toMatch(
+      /writeFile\(databaseGlobalsFile, buildRestoreRolePreparationSql\(sourceRoleContract\)/u,
+    );
     expect(source).toContain('"Identity archive restore"');
+    expect(source).toMatch(
+      /readIdentityRoleContract\(\s*container,\s*"Identity archive role contract",\s*bootstrapRole,\s*null/mu,
+    );
     expect(source).toContain('"--extract", "--file", configurationFile');
     expect(source).toContain('["image", "load", "--input", imageFile]');
-    expect(source).toMatch(/"pg_restore",\s*"--exit-on-error",\s*"--username",\s*"postgres"/u);
+    expect(source).toMatch(/"pg_restore",\s*"--exit-on-error",\s*"--username",\s*bootstrapRole/u);
+    expect(source).toMatch(/"createdb",\s*"--username",\s*bootstrapRole/u);
+    expect(source.indexOf('"Restored object ACL replay"')).toBeLessThan(
+      source.indexOf('"Restored ownership and ACL contract"'),
+    );
     expect(source).not.toContain('"--no-owner"');
     expect(source).not.toContain('"--no-privileges"');
     expect(source).not.toContain('"--no-role-passwords"');
+    expect(source).toContain("`${container}:/tmp/database-globals.sql`");
+    expect(source).toContain(
+      '["exec", container, "cp", "/tmp/database-globals.sql", "/identity/database-globals.sql"]',
+    );
+    expect(source).toContain(
+      '["exec", container, "chmod", "0600", "/identity/database-globals.sql"]',
+    );
+    expect(source.indexOf('"Identity archive staging cleanup"')).toBeLessThan(
+      source.indexOf('"Identity archive restore"'),
+    );
     expect(source).toMatch(
       /file: "\/etc\/nginx\/\.htpasswd-descomplica-homologation",\s+allowedGids: Object\.freeze\(\[33\]\),\s+expectedMode: 0o640/u,
     );

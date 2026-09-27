@@ -70,3 +70,16 @@ export function buildRestoreDatabaseBoundarySql(
   }>,
   databaseName: string,
 ): string;
+
+export function buildRestoreObjectAclSql(
+  contract: Readonly<{
+    value: Readonly<{
+      schemas: readonly unknown[];
+      relations: readonly unknown[];
+      columns: readonly unknown[];
+      routines: readonly unknown[];
+      types: readonly unknown[];
+      defaultAcls: readonly unknown[];
+    }>;
+  }>,
+): string;
