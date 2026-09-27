@@ -219,6 +219,12 @@ const roleContractSql = `select jsonb_build_object(
       'bypassRls', role_row.rolbypassrls,
       'connectionLimit', role_row.rolconnlimit,
       'validUntil', role_row.rolvaliduntil::text,
+      'comment', (
+        select description.description
+        from pg_catalog.pg_shdescription description
+        where description.objoid = role_row.oid
+          and description.classoid = 'pg_catalog.pg_authid'::regclass
+      ),
       'configuration', coalesce((
         select jsonb_agg(setting order by setting)
         from pg_catalog.pg_db_role_setting role_setting
@@ -244,8 +250,26 @@ const roleContractSql = `select jsonb_build_object(
     join pg_catalog.pg_roles granted_role on granted_role.oid = membership.roleid
     join pg_catalog.pg_roles member_role on member_role.oid = membership.member
     join pg_catalog.pg_roles grantor_role on grantor_role.oid = membership.grantor
-    where granted_role.rolname !~ '^pg_' and member_role.rolname !~ '^pg_'
-  ), '[]'::jsonb)
+    where not (granted_role.rolname ~ '^pg_' and member_role.rolname ~ '^pg_')
+  ), '[]'::jsonb),
+  'unsupportedGlobals', jsonb_build_object(
+    'customTablespaces', (
+      select count(*) from pg_catalog.pg_tablespace tablespace
+      where tablespace.spcname not in ('pg_default', 'pg_global')
+    ),
+    'parameterAcls', (select count(*) from pg_catalog.pg_parameter_acl),
+    'roleSecurityLabels', (
+      select count(*) from pg_catalog.pg_shseclabel label
+      where label.classoid = 'pg_catalog.pg_authid'::regclass
+    ),
+    'databaseRoleSettings', (
+      select count(*)
+      from pg_catalog.pg_db_role_setting role_setting
+      join pg_catalog.pg_authid role_row on role_row.oid = role_setting.setrole
+      join pg_catalog.pg_database database_row on database_row.oid = role_setting.setdatabase
+      where role_setting.setdatabase <> 0
+    )
+  )
 );`;
 
 const databaseSecurityContractSql = `with user_namespace as (
@@ -526,13 +550,21 @@ function quoteSqlLiteral(value) {
 export function buildRestoreRolePreparationSql(contract) {
   const roles = contract?.value?.roles;
   const memberships = contract?.value?.memberships;
+  const unsupportedGlobals = contract?.value?.unsupportedGlobals;
   const passwordVerifiers = contract?.passwordVerifiers;
   if (
     !Array.isArray(roles) ||
     !Array.isArray(memberships) ||
     !Array.isArray(passwordVerifiers) ||
     roles.length === 0 ||
-    passwordVerifiers.length !== roles.length
+    passwordVerifiers.length !== roles.length ||
+    !unsupportedGlobals ||
+    typeof unsupportedGlobals !== "object" ||
+    Array.isArray(unsupportedGlobals) ||
+    Object.keys(unsupportedGlobals).length !== 4 ||
+    !["customTablespaces", "parameterAcls", "roleSecurityLabels", "databaseRoleSettings"].every(
+      (name) => Number.isSafeInteger(unsupportedGlobals[name]) && unsupportedGlobals[name] === 0,
+    )
   ) {
     fail("Source role contract is invalid.");
   }
@@ -554,6 +586,7 @@ export function buildRestoreRolePreparationSql(contract) {
       !role ||
       typeof role.name !== "string" ||
       typeof role.bootstrap !== "boolean" ||
+      (role.comment !== null && typeof role.comment !== "string") ||
       !Number.isSafeInteger(role.connectionLimit) ||
       !Array.isArray(role.configuration) ||
       ![
@@ -596,6 +629,14 @@ $prepare_role$;`);
       };`,
     );
     statements.push(`alter role ${identifier} reset all;`);
+  }
+  for (const role of roles) {
+    const identifier = quoteSqlIdentifier(role.name);
+    statements.push(
+      `comment on role ${identifier} is ${
+        role.comment === null ? "null" : quoteSqlLiteral(role.comment)
+      };`,
+    );
     for (const setting of role.configuration) {
       if (typeof setting !== "string" || !setting.includes("=")) {
         fail("Source role contract contains an invalid role setting.");
@@ -1157,7 +1198,7 @@ async function assertRuntimeBoundary(manifest, sourceSha) {
   ) {
     fail("Homologation database is not the exact 32-migration, 24-page canary baseline.");
   }
-  return { sourceSha, history };
+  return { sourceSha, history, state };
 }
 
 async function artifact(file, kind) {
@@ -1678,7 +1719,7 @@ async function main(arguments_) {
   const { manifest, candidate, sourceInputs } = await loadHeadBoundRetirementInputs(sourceSha);
   let backupParentHandle;
   try {
-    const { history } = await assertRuntimeBoundary(manifest, sourceSha);
+    const { history, state } = await assertRuntimeBoundary(manifest, sourceSha);
     const configurationSources = await collectRequiredConfigurationSources();
     backupParentHandle = await openPrivateBackupParent(backupParent);
     const createdAt = new Date().toISOString();
@@ -1818,6 +1859,63 @@ async function main(arguments_) {
         sourceRoleContract,
         sourceDatabaseSecurityContract,
       );
+      const finalSourceRoleContract = readRoleContract(
+        databaseContainer,
+        "postgres",
+        "Final source database role contract",
+      );
+      assertExactSecurityContract(
+        sourceRoleContract,
+        finalSourceRoleContract,
+        "Final source database role contract",
+      );
+      const finalSourceDatabaseSecurityContract = readJsonContract(
+        databaseContainer,
+        "postgres",
+        databaseSecurityContractSql,
+        "Final source database ownership and ACL contract",
+      );
+      assertExactSecurityContract(
+        sourceDatabaseSecurityContract,
+        finalSourceDatabaseSecurityContract,
+        "Final source database ownership and ACL contract",
+      );
+      const finalHistory = readHistory(
+        databaseContainer,
+        "postgres",
+        manifest,
+        "Final source canary history",
+      );
+      validateRetirementHistory(manifest, "dry-run", finalHistory);
+      const finalState = readDatabaseState(
+        databaseContainer,
+        "postgres",
+        manifest,
+        "Final source database state",
+      );
+      if (
+        JSON.stringify(finalHistory) !== JSON.stringify(history) ||
+        JSON.stringify(finalState) !== JSON.stringify(state)
+      ) {
+        fail("Homologation database changed while the retirement backup was being created.");
+      }
+      psql(
+        databaseContainer,
+        "postgres",
+        `begin read only;\n${buildRetirementPreconditionsSql(manifest)}\nrollback;`,
+        "Final source canary preconditions",
+      );
+      const finalDatabaseImage = docker(
+        ["inspect", "--format", "{{.Image}}", databaseContainer],
+        "Final database image inventory",
+      ).trim();
+      const finalAppImage = docker(
+        ["inspect", "--format", "{{.Image}}", appContainer],
+        "Final application image inventory",
+      ).trim();
+      if (finalDatabaseImage !== databaseImage || finalAppImage !== appImage) {
+        fail("Homologation containers changed while the retirement backup was being created.");
+      }
       await rm(databaseGlobalsFile);
       await rm(databaseSecurityFile);
       const artifacts = await Promise.all([

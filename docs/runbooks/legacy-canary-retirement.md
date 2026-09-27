@@ -117,7 +117,11 @@ manifesto de checksums como `root:root 0600`, sincroniza todos os arquivos e os
 diretórios no disco, restaura o dump em PostgreSQL isolado sem rede e ensaia a
 transição completa `32/24 → 33/17`. O arquivo de configuração inclui um arquivo
 SQL de identidades globais gerado do contrato exato de papéis do PostgreSQL,
-com verificadores de senha necessários para recuperação de desastre; todo o
+incluindo comentários, opções completas dos memberships e verificadores de senha
+necessários para recuperação de desastre. O gate exige ausência de tablespaces
+customizados, ACLs de parâmetros, security labels de papéis e configurações de
+papel específicas por banco, porque esses globals não fazem parte do arquivo;
+todo o
 diretório deve permanecer restrito a root e nunca pode ser copiado para logs ou
 saída do comando. A prova compara
 papéis, fingerprints dos verificadores, memberships, owners e ACLs de banco,

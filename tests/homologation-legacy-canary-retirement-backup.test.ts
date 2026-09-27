@@ -202,6 +202,9 @@ describe("homologation legacy canary retirement backup", () => {
     expect(source).toContain("'bootstrap', role_row.oid = 10");
     expect(source).toContain("'inheritOption', membership.inherit_option");
     expect(source).toContain("'setOption', membership.set_option");
+    expect(source).toContain(
+      "where not (granted_role.rolname ~ '^pg_' and member_role.rolname ~ '^pg_')",
+    );
   });
 
   it("builds a deterministic replayable identity archive without pg_dumpall grantor syntax", () => {
@@ -220,6 +223,7 @@ describe("homologation legacy canary retirement backup", () => {
             bypassRls: true,
             connectionLimit: -1,
             validUntil: null,
+            comment: "Database bootstrap",
             configuration: ['search_path="$user", public', "statement_timeout=0"],
           },
           {
@@ -234,6 +238,7 @@ describe("homologation legacy canary retirement backup", () => {
             bypassRls: false,
             connectionLimit: -1,
             validUntil: null,
+            comment: null,
             configuration: ["default_transaction_read_only=on"],
           },
         ],
@@ -246,7 +251,21 @@ describe("homologation legacy canary retirement backup", () => {
             inheritOption: false,
             setOption: true,
           },
+          {
+            role: "pg_monitor",
+            member: "anon",
+            grantor: "supabase_admin",
+            adminOption: false,
+            inheritOption: true,
+            setOption: false,
+          },
         ],
+        unsupportedGlobals: {
+          customTablespaces: 0,
+          parameterAcls: 0,
+          roleSecurityLabels: 0,
+          databaseRoleSettings: 0,
+        },
       },
       passwordVerifiers: [
         { name: "supabase_admin", verifier: "SCRAM-SHA-256$fixture" },
@@ -256,6 +275,8 @@ describe("homologation legacy canary retirement backup", () => {
 
     const archive = buildRestoreRolePreparationSql(contract);
     expect(archive).toContain('alter role "supabase_admin" with\n  superuser');
+    expect(archive).toContain("comment on role \"supabase_admin\" is 'Database bootstrap';");
+    expect(archive).toContain('comment on role "anon" is null;');
     expect(archive).toContain(
       `select pg_catalog.set_config('search_path', '"$user", public', false);`,
     );
@@ -265,7 +286,20 @@ describe("homologation legacy canary retirement backup", () => {
     expect(archive).toContain('grant "anon" to "supabase_admin" with admin true;');
     expect(archive).toContain('grant "anon" to "supabase_admin" with inherit false;');
     expect(archive).toContain('grant "anon" to "supabase_admin" with set true;');
+    expect(archive).toContain('grant "pg_monitor" to "anon" with admin false;');
+    expect(archive.lastIndexOf("$prepare_role$;")).toBeLessThan(
+      archive.indexOf("set search_path from current"),
+    );
     expect(archive).not.toContain("GRANTED BY");
+    expect(() =>
+      buildRestoreRolePreparationSql({
+        ...contract,
+        value: {
+          ...contract.value,
+          unsupportedGlobals: { ...contract.value.unsupportedGlobals, customTablespaces: 1 },
+        },
+      }),
+    ).toThrow(/role contract is invalid/u);
   });
 
   it("replays source object and default ACL grants with their original grantors", () => {
@@ -483,6 +517,11 @@ describe("homologation legacy canary retirement backup", () => {
     );
     expect(source.indexOf('"Identity archive restore"')).toBeLessThan(
       source.indexOf('"Prepared restore role contract"'),
+    );
+    expect(source).toContain('"Final source database role contract"');
+    expect(source).toContain('"Final source database ownership and ACL contract"');
+    expect(source).toContain(
+      "Homologation database changed while the retirement backup was being created.",
     );
     expect(source).toContain("enterRuntimeStateLock");
   });
