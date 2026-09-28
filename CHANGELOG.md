@@ -6,6 +6,7 @@
 - Mantem cabecalho, navegacao e fechar disponiveis durante a leitura.
 - Ajusta celular, teclado e tres temas sem alterar regras ou calculos.
 - Preserva conteudo, fontes e comportamento dos demais manuais.
+- Testes aguardam o fechamento nativo antes de conferir a limpeza da ancora.
 
 ## 2026-09-28 - Publicacao validada do Associativo
 

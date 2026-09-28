@@ -114,7 +114,7 @@ export async function checkAssociativeLearningManual(page, artifactRoot, setThem
         await page.keyboard.press("Escape");
         await expect(dialog).toBeHidden();
         await expect(trigger).toBeFocused();
-        assert.equal(new URL(page.url()).hash, "");
+        await expect.poll(() => new URL(page.url()).hash).toBe("");
         await trigger.click();
         await close.click();
         await expect(trigger).toBeFocused();

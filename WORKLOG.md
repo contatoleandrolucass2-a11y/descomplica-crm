@@ -12,6 +12,8 @@
   seis falhas POSIX ja existentes. Oito Node passaram. Matriz local do manual:
   30 capturas/axe e interacoes aprovadas. CI Linux integrada ainda pendente.
 - Detalhes: docs/audits/associativo-manual-2026-09-28.md.
+- QA aguarda o evento nativo close antes de conferir a limpeza da ancora;
+  fechamento e retorno do foco podem anteceder esse evento do navegador.
 
 ## 2026-09-28 - Publicacao e evidencias finais do Associativo
 
