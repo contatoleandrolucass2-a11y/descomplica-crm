@@ -2,6 +2,8 @@
 
 ## 2026-09-28 - recursos e recuperacao de conhecimento
 
+- Entrega e checks: PR #99, branch codex/recursos-memoria-crm.
+
 - Audita 40 arquivos de paginas/APIs em nove areas e inspeciona 19 rotas em
   producao somente em leitura. Bloqueios de metas, ranking e conciliacao ficam
   documentados, sem alterar politicas ou dados para remove-los.

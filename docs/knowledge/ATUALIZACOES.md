@@ -7,7 +7,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 ## 2026-09-28: recursos e busca entre chats
 
 - Status: validado (mecanismo e instalacao local; gates Linux vinculados ao PR).
-- Fonte: docs/audits/recursos-crm-2026-09-28.md; scripts/knowledge;
+- Fonte: PR #99 (recursos-memoria-crm); docs/audits/recursos-crm-2026-09-28.md; scripts/knowledge;
   tests/obsidian-knowledge.test.ts; tests/project-resources.test.ts.
 - Conhecimento compartilhado e documental: agentes registram aprendizados,
   nao conversas completas. knowledge:search recupera trechos do checkout e
