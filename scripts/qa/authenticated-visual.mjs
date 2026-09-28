@@ -1589,11 +1589,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     .click();
   await readyProposalDialogElement.waitFor({ state: "hidden" });
 
-  const learningManualAccessible = await checkAssociativeLearningManual(
-    page,
-    artifactRoot,
-    setTheme,
-  );
+  const learningManualAccessible = await checkAssociativeLearningManual(page, artifactRoot);
 
   return {
     ...initialChecks,

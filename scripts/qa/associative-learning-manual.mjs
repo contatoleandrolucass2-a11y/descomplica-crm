@@ -3,7 +3,20 @@ import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 
-export async function checkAssociativeLearningManual(page, artifactRoot, setTheme) {
+async function setArchiveTheme(page, theme) {
+  const labels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
+  await page
+    .getByRole("group", { name: "Aparência da página" })
+    .getByRole("button", { name: labels[theme], exact: true })
+    .click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+}
+
+export async function checkAssociativeLearningManual(
+  page,
+  artifactRoot,
+  setTheme = setArchiveTheme,
+) {
   const originalViewport = page.viewportSize();
   const originalTheme = await page.locator("html").getAttribute("data-theme");
   const trigger = page.getByRole("button", { name: "Aprenda", exact: true });

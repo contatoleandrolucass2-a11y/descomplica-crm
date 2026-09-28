@@ -16,6 +16,8 @@
   fechamento e retorno do foco podem anteceder esse evento do navegador.
 - Isola cores dos titulos e foco contra CSS legado carregado depois do modulo,
   conforme a ordem observada no manifesto do build Next.
+- QA usa o seletor de tema real do simulador (Medio), distinto do shell geral
+  (Equilibrado), sem navegar para fora da proposta sintetica selecionada.
 
 ## 2026-09-28 - Publicacao e evidencias finais do Associativo
 

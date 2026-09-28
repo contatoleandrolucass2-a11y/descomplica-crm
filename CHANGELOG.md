@@ -8,6 +8,7 @@
 - Preserva conteudo, fontes e comportamento dos demais manuais.
 - Testes aguardam o fechamento nativo antes de conferir a limpeza da ancora.
 - Impede que CSS legado sobrescreva contraste dos titulos e foco do manual.
+- Matriz usa os controles de tema proprios do simulador.
 
 ## 2026-09-28 - Publicacao validada do Associativo
 

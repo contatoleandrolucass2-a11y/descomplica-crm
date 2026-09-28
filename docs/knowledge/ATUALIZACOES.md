@@ -24,6 +24,8 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   fechamento; hidden/foco podem ocorrer antes da limpeza da ancora.
 - O manifesto Next carrega CSS legado apos o modulo: regras de titulo/foco
   precisam de especificidade suficiente, nao apenas da ordem dos imports.
+- Tema intermediario no SiteMenu do arquivo chama-se Medio; no shell geral,
+  Equilibrado. A matriz do manual usa o controle local, preservando a proposta.
 
 ## 2026-09-28: Associativo, estoque e publicacao automatica
 
