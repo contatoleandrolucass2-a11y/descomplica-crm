@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-09-27 — conhecimento local no Obsidian
+
+- Adiciona contexto, aprendizados e matriz de selecao automatica de ferramentas
+  para todos os chats do projeto, sem exigir mencoes repetidas do usuario.
+- Sincronizador local de documentos selecionados, separado por checkout, com
+  historico idempotente, verificacao de integridade e recusa de links/credenciais.
+- Hooks Git compartilhados entre worktrees; nao altera hooks de confianca do
+  Codex, contas externas, telemetria, workflows n8n nem runtime do CRM.
+- Instalacao local conferida nos tres checkouts e pelo CLI do Obsidian; backup
+  anterior com 77 arquivos restaurados e hashes equivalentes.
+- Passaram 14 testes especificos, lint, tipos e build das 41 rotas no Windows.
+  A suite geral encontrou as seis falhas preexistentes de permissoes POSIX;
+  a CI Linux do PR e a referencia para a validacao integral.
+
 ## 2026-09-27 — alvo de toque do Associativo
 
 - A conferencia na pagina publicada confirmou estoque real carregado e ausencia
