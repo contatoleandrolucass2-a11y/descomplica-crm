@@ -15,6 +15,8 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   Validar payload antes do cache e cada usuario antes de compartilhar resposta.
 - Validar parcelas antes de alocacao; calendario estrito, indices anuais reais
   e comparacao monetaria em centavos, inclusive painel e sugestoes.
+- CI integrada detectou clamp assincrono de parcelas: invalidade precisa
+  permanecer visivel, nao ser aceita em um estado transitorio de um frame.
 - Usuario reiterou autorizacao permanente de publicar alteracoes concluidas
   apos validacao em qualquer chat deste Git comum. Persistida nas instrucoes
   globais delimitadas ao projeto e automatic-publication.md. Sem ampliar

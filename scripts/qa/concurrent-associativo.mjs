@@ -307,6 +307,14 @@ async function checkLargeInstallmentCount(page) {
       input.getAttribute("aria-invalid") === "true"
     );
   });
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  );
+  check(
+    (await installments.inputValue()) === "4294967296" &&
+      (await installments.getAttribute("aria-invalid")) === "true",
+    "large_quantity_silently_changed",
+  );
   await installments.fill("84");
   check((await installments.inputValue()) === "84", "large_quantity_recovery_failed");
   await page
@@ -400,6 +408,7 @@ export async function runConcurrentAssociativo({
         baseURL: origin,
         locale: "pt-BR",
         timezoneId: "America/Sao_Paulo",
+        reducedMotion: "reduce",
         serviceWorkers: "block",
       });
       contexts.push(context);
@@ -607,7 +616,12 @@ export async function runConcurrentAssociativo({
     );
     await batch(
       "largeInstallmentCount",
-      pages.slice(0, 2).map((page) => () => checkLargeInstallmentCount(page)),
+      pages
+        .slice(0, 2)
+        .map(
+          (page) => () =>
+            browserStep("large_installment_count", () => checkLargeInstallmentCount(page)),
+        ),
       { concurrency: 2, timeoutMs: 90_000 },
     );
     check(report.liveInventoryResponses >= 2, "local_live_inventory_not_exercised");

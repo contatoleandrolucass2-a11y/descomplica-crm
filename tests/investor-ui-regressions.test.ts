@@ -118,4 +118,7 @@ it("wires field errors and eligible indexes into the rendered proposal", async (
   expect(source).toContain("decreasingApproval.checks.some");
   expect(source).toContain('approved: valid && candidateApproval.status === "approved"');
   expect(source).not.toMatch(/row\.(?:linearValue|decreasingValue) > row\.limit/u);
+  expect(source).toContain(
+    "if (directTable || annualMode) return;\n    const limit = result.context.maxInstallments;",
+  );
 });

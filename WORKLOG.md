@@ -2,6 +2,11 @@
 
 ## 2026-09-28 - Auditoria Associativo e concorrencia
 
+- Segunda CI confirmou isolamento de propostas e bloqueio de anual acima de
+  50%; revelou clamp silencioso de parcelas no Associativo. Remove somente esse
+  clamp, mantendo valor invalido visivel e calculo bloqueado. QA confere estado
+  estavel apos frames e usa reduced motion, como a suite E2E existente.
+
 - CI inicial: 947 testes Linux e transferencia concorrente Nginx passaram;
   ensaio HTTP integrado passou, mas segunda sessao UI falhou. Acrescenta
   codigos de etapa sem logs de credenciais para diagnosticar, sem reduzir gates.

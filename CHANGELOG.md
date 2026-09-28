@@ -2,6 +2,8 @@
 
 ## 2026-09-28 - Robustez e concorrencia do Associativo
 
+- Parcelas invalidas permanecem visiveis para correcao, sem substituicao silenciosa.
+
 - Diagnostico de QA identifica etapa da interacao sem expor logs sensiveis.
 
 - Comprime estoque no proxy e rejeita payloads invalidos antes do cache.

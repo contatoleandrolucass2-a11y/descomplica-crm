@@ -3130,13 +3130,13 @@ export function InvestorCalculator({
   const directCreditState = directCreditLabel === "APROVADO" ? "approved" : directCreditLabel === "REPROVADO" ? "rejected" : directCreditLabel === "AJUSTE NECESSÁRIO" ? "adjustment" : "pending";
 
   useEffect(() => {
-    if (directTable) return;
+    if (directTable || annualMode) return;
     const limit = result.context.maxInstallments;
     if (limit > 0 && Number(installments) > limit) {
       const clampInstallments = window.setTimeout(() => setInstallments(String(limit)), 0);
       return () => window.clearTimeout(clampInstallments);
     }
-  }, [directTable, installments, result.context.maxInstallments]);
+  }, [directTable, annualMode, installments, result.context.maxInstallments]);
 
   useEffect(() => {
     if (directTable || annualMode || signalDistributionMode !== "auto") return;
