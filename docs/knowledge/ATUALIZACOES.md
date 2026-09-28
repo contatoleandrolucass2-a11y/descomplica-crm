@@ -6,7 +6,8 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-28: Manual Associativo com abas acessiveis
 
-- Status: pendente_validacao integrada na CI; implementado, ainda nao publicado.
+- Status: comportamento validado na CI 36486887891; referencia visual atualizada
+  para o menu corrigido. Evidencias finais de CI/publicacao: PR #104.
 - Fonte: AssociativeLearningManual.tsx/module.css; InvestorCalculator;
   docs/audits/associativo-manual-2026-09-28.md.
 - Isolar a moldura interativa do manual preserva textos e os outros simuladores.
@@ -30,6 +31,11 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   no navegador publicado. Cabecalho Associativo passa a duas linhas entre
   821 e 1100px, sem alterar os demais simuladores. QA mede o seletor de tema;
   referencia de 1024px requer atualizacao visual justificada, sem relaxar gates.
+- CI 36486887891: 30 capturas/axe do manual aprovadas; matriz funcional inteira
+  aprovada. Unica divergencia foi a imagem 1024x768 do cabecalho corrigido,
+  inspecionada e atualizada com hashes/proveniencia no relatorio. Demais 192
+  comparacoes preservadas; nova CI confirma a referencia. Consultar evidencias
+  do PR #104 para o estado final, nao inferir deploy deste checkpoint.
 
 ## 2026-09-28: Associativo, estoque e publicacao automatica
 

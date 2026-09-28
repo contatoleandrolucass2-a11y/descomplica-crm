@@ -37,6 +37,23 @@
 
 ## Publicacao
 
+### Checkpoint integrado
+
+- CI 36486887891, commit `58a0254719296d5400e3f7577b6fb4c9d8865cba`:
+  validacao, restore, banco e E2E aprovados. Manual: 30 capturas/axe, cinco
+  viewports e tres temas aprovados. Matriz geral: 140 verificacoes responsivas,
+  80 de tema, 193 axe e 100 de zoom aprovados, incluindo demais simuladores.
+- Unica divergencia entre 193 comparacoes: Associativo 1024x768, pelo cabecalho
+  que agora exibe os temas. Captura sintetica inspecionada; atualiza somente
+  `target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp`.
+- Artefato fonte: `authenticated-visual-candidate-9e1b4a40454f71c0802c7407b78f7918361296b9`.
+  SHA256 anterior: `3021cd327501abe95dbd57810171e2e362f12fc332eab6cc2bff6210902cc6e3`.
+  SHA256 novo: `9c952daba9d9892941cd3f8bfa617b39a97f9fa110b625b58c7d3fdef9c6ae0a`.
+  Referencia historica da matriz permanece intacta; este registro documenta
+  o delta revisado. Nenhum limiar, assercao ou outro baseline foi relaxado.
+- Nova CI deve confirmar a referencia atualizada. O estado final de merge,
+  CI e publicacao fica nas evidencias do [PR #104](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/104).
+
 Seguir o runbook de publicacao automatica: PR/CI, imagem imutavel comprovada,
 backup, CAS, rollback e verificacao autenticada depois da promocao. Nao fazer
 build no VPS compartilhado nem reiniciar por alteracoes somente documentais.

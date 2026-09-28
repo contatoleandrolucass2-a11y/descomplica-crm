@@ -2,6 +2,11 @@
 
 ## 2026-09-28 - Navegacao do manual Associativo
 
+- CI 36486887891 aprovou funcionalidade do manual (30 capturas/axe), 140 rotas,
+  80 temas, 193 axe e 100 verificacoes de zoom. Apenas a referencia Associativo
+  1024x768 diferiu pelo menu corrigido. Inspeciona e atualiza somente essa imagem,
+  com hashes/proveniencia no relatorio. Demais referencias e gates intactos.
+
 - Destaca Politica e Perguntas como abas acessiveis com icones, selecao visivel,
   cabecalho fixo e rolagem por assunto. Preserva todo conteudo comercial.
 - Isola a interface em componente/CSS proprio; outros simuladores e calculos
