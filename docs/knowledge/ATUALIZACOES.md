@@ -22,6 +22,8 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Sem alteracao de calculos, politica comercial, backend, migrations ou n8n.
 - QA deve aguardar o evento nativo close para validar efeitos posteriores ao
   fechamento; hidden/foco podem ocorrer antes da limpeza da ancora.
+- O manifesto Next carrega CSS legado apos o modulo: regras de titulo/foco
+  precisam de especificidade suficiente, nao apenas da ordem dos imports.
 
 ## 2026-09-28: Associativo, estoque e publicacao automatica
 

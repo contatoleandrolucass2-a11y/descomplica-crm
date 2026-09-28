@@ -14,6 +14,8 @@
 - Detalhes: docs/audits/associativo-manual-2026-09-28.md.
 - QA aguarda o evento nativo close antes de conferir a limpeza da ancora;
   fechamento e retorno do foco podem anteceder esse evento do navegador.
+- Isola cores dos titulos e foco contra CSS legado carregado depois do modulo,
+  conforme a ordem observada no manifesto do build Next.
 
 ## 2026-09-28 - Publicacao e evidencias finais do Associativo
 

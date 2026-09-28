@@ -116,7 +116,8 @@
 .dialog :is(.tab, .close):is(:active, :focus-visible) {
   transform: none;
 }
-.dialog :is(button, summary, a):focus-visible {
+.dialog :is(button, summary, a):focus-visible,
+.dialog .panel :is(summary, a):focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 3px;
 }
@@ -148,7 +149,7 @@
   color: var(--analytics-muted);
   letter-spacing: 0;
 }
-.panel :is(h4, summary) {
+.dialog .panel :is(h4, summary) {
   color: var(--analytics-ink);
 }
 .panel :is(p, li) {
