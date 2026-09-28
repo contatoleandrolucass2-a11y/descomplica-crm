@@ -265,6 +265,7 @@ async function inspectHostedRuntime(expectedHead) {
     ["AUTH_SESSION_COOKIE_SECRET_FILE", "/run/secrets/auth_session_cookie_secret"],
     ["DEPLOYMENT_VERSION", expectedHead],
     ["HOMOLOGATION_MODE", "true"],
+    ["QA_VISUAL_GOALS_REFERENCE_TIME", "2026-08-27T01:21:00.000Z"],
     ["PUBLIC_SIGNUP_ENABLED", "false"],
     ["SALESFORCE_INGEST_ENABLED", "false"],
     ["SALESFORCE_REFRESH_ENABLED", "false"],
