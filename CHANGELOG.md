@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-28 - Manual Associativo mais acessivel
+
+- Destaca Politica e Perguntas com abas, icones e selecao visivel.
+- Mantem cabecalho, navegacao e fechar disponiveis durante a leitura.
+- Ajusta celular, teclado e tres temas sem alterar regras ou calculos.
+- Preserva conteudo, fontes e comportamento dos demais manuais.
+- Testes aguardam o fechamento nativo antes de conferir a limpeza da ancora.
+- Impede que CSS legado sobrescreva contraste dos titulos e foco do manual.
+- Matriz usa os controles de tema proprios do simulador.
+- Corrige menu superior do Associativo cortado em tablets de largura intermediaria.
+- Atualiza somente a referencia visual de 1024px, apos inspecao da captura da CI.
+- Mantem o catalogo de QA coerente com a captura revisada e sua proveniencia.
+
 ## 2026-09-28 - Publicacao validada do Associativo
 
 - Publica release 3d92b7a e registra evidencias de concorrencia, autorizacao,

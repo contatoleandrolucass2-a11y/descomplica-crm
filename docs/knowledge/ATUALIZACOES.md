@@ -4,6 +4,43 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-28: Manual Associativo com abas acessiveis
+
+- Atualizar uma imagem revisada exige atualizar seu tamanho/hash no catalogo
+  authenticated-results.json. Registrar origem por baselineRevision e manter
+  delta anterior real; o teste de integridade nao deve ser enfraquecido.
+
+- Status: comportamento validado na CI 36486887891; referencia visual atualizada
+  para o menu corrigido. Evidencias finais de CI/publicacao: PR #104.
+- Fonte: AssociativeLearningManual.tsx/module.css; InvestorCalculator;
+  docs/audits/associativo-manual-2026-09-28.md.
+- Isolar a moldura interativa do manual preserva textos e os outros simuladores.
+  Manter abas e fechar fora da area rolavel evita perder a navegacao em celular.
+- Ancoras policy/faq sao preservadas quando o componente esta montado; a
+  selecao da unidade continua sendo previa aos recursos finais da simulacao.
+- Testes: tres unitarios novos aprovados; lint, tipos e build locais aprovados.
+  Windows: 948 pass, um skip e seis falhas POSIX preexistentes. CI Linux exigida.
+- Matriz acrescentada: cinco viewports, tres temas, ambos os paineis,
+  teclado, foco, ancoras, axe, geometria e capturas. Evidencias em test-results.
+  Rodada local isolada do componente passou com 30 capturas e zero violacoes
+  axe; oito testes Node tambem passaram. Sem dados ou credenciais de producao.
+- Sem alteracao de calculos, politica comercial, backend, migrations ou n8n.
+- QA deve aguardar o evento nativo close para validar efeitos posteriores ao
+  fechamento; hidden/foco podem ocorrer antes da limpeza da ancora.
+- O manifesto Next carrega CSS legado apos o modulo: regras de titulo/foco
+  precisam de especificidade suficiente, nao apenas da ordem dos imports.
+- Tema intermediario no SiteMenu do arquivo chama-se Medio; no shell geral,
+  Equilibrado. A matriz do manual usa o controle local, preservando a proposta.
+- CI 36483450994 identificou corte preexistente do menu em 1024px; reproduzido
+  no navegador publicado. Cabecalho Associativo passa a duas linhas entre
+  821 e 1100px, sem alterar os demais simuladores. QA mede o seletor de tema;
+  referencia de 1024px requer atualizacao visual justificada, sem relaxar gates.
+- CI 36486887891: 30 capturas/axe do manual aprovadas; matriz funcional inteira
+  aprovada. Unica divergencia foi a imagem 1024x768 do cabecalho corrigido,
+  inspecionada e atualizada com hashes/proveniencia no relatorio. Demais 192
+  comparacoes preservadas; nova CI confirma a referencia. Consultar evidencias
+  do PR #104 para o estado final, nao inferir deploy deste checkpoint.
+
 ## 2026-09-28: Associativo, estoque e publicacao automatica
 
 - Status: validado; PR #102 integrado e release 3d92b7a publicada em 15:01 UTC.

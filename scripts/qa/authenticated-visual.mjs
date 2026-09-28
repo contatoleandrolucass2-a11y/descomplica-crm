@@ -14,6 +14,7 @@ import {
   sortTabelaoInventory,
 } from "../../lib/archive-investor/tabelao-inventory.mjs";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
+import { checkAssociativeLearningManual } from "./associative-learning-manual.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const outputRoot = path.join(repositoryRoot, "docs/qa/reference-parity");
@@ -1588,8 +1589,11 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
     .click();
   await readyProposalDialogElement.waitFor({ state: "hidden" });
 
+  const learningManualAccessible = await checkAssociativeLearningManual(page, artifactRoot);
+
   return {
     ...initialChecks,
+    learningManualAccessible,
     lateLivePreservesProposal,
     liveRefreshAfterFiltering,
     filterPreservesAssociativeProposal,

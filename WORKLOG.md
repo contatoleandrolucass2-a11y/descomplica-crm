@@ -1,5 +1,37 @@
 # Worklog
 
+## 2026-09-28 - Navegacao do manual Associativo
+
+- Sincroniza tamanho/hash da unica imagem revisada no catalogo de QA; preserva
+  origem da captura nova e delta real contra a anterior. Sem alterar assercoes.
+
+- CI 36486887891 aprovou funcionalidade do manual (30 capturas/axe), 140 rotas,
+  80 temas, 193 axe e 100 verificacoes de zoom. Apenas a referencia Associativo
+  1024x768 diferiu pelo menu corrigido. Inspeciona e atualiza somente essa imagem,
+  com hashes/proveniencia no relatorio. Demais referencias e gates intactos.
+
+- Destaca Politica e Perguntas como abas acessiveis com icones, selecao visivel,
+  cabecalho fixo e rolagem por assunto. Preserva todo conteudo comercial.
+- Isola a interface em componente/CSS proprio; outros simuladores e calculos
+  permanecem iguais. Lucide 1.48.0 fixado e usado nos quatro icones do manual.
+- Acrescenta tres testes unitarios e matriz Playwright com cinco viewports,
+  tres temas, teclado, foco, ancoras, axe e capturas de ambos os paineis.
+- Lint, tipos e build locais aprovados; suite Windows: 948 pass, um skip e
+  seis falhas POSIX ja existentes. Oito Node passaram. Matriz local do manual:
+  30 capturas/axe e interacoes aprovadas. CI Linux integrada ainda pendente.
+- Detalhes: docs/audits/associativo-manual-2026-09-28.md.
+- QA aguarda o evento nativo close antes de conferir a limpeza da ancora;
+  fechamento e retorno do foco podem anteceder esse evento do navegador.
+- Isola cores dos titulos e foco contra CSS legado carregado depois do modulo,
+  conforme a ordem observada no manifesto do build Next.
+- QA usa o seletor de tema real do simulador (Medio), distinto do shell geral
+  (Equilibrado), sem navegar para fora da proposta sintetica selecionada.
+- CI 36483450994: manual passou em 375/768, mas o menu legado cortou os temas
+  em 1024px. Reproduzido na web; corrige somente o cabecalho Associativo entre
+  821 e 1100px, usando o padrao existente nos outros simuladores. QA verifica
+  a geometria do seletor e informa a etapa sem dados sensiveis. Referencia
+  visual de 1024px deve ser inspecionada e atualizada; demais baselines intactas.
+
 ## 2026-09-28 - Publicacao e evidencias finais do Associativo
 
 - PR #102 e CI main 36437130674 aprovados; release 3d92b7a publicada em 15:01 UTC,
