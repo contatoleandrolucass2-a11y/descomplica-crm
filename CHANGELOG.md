@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-27 — referências WF13 e estoque Associativo mobile
+
+- Atualiza as oito referências canário do hub para as três jornadas atualmente
+  autorizadas, sem alterar as referências das rotas de simuladores arquivados.
+- Reserva duas linhas reais para os metadados e para as ações do estoque
+  Associativo em telas de até 760 px, eliminando sobreposição e preservando o
+  alvo mínimo de toque de 44 px em Limpar filtros.
+- Atualiza somente as três referências mobile do Associativo afetadas pela
+  correção; Tabelão, Direta, Investidor, dados e regras de cálculo não mudam.
+
 ## 2026-09-27 — memoria tecnica e ferramentas automaticas
 
 - Integra notas tecnicas selecionadas com Obsidian local e historico por checkout.

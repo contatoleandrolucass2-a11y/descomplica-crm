@@ -21741,23 +21741,81 @@ body:has(.investor-page-shell) {
 }
 
 @media (max-width: 760px) {
-  .investor-associative-table-page .investor-stock-panel > .investor-section-heading {
+  .investor-page-shell.investor-associative-table-page
+    .investor-stock-panel
+    > .investor-section-heading {
     height: auto !important;
-    padding-block: 8px !important;
+    min-height: 84px !important;
+    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    padding: 8px 12px !important;
   }
 
-  .investor-associative-table-page .investor-stock-filters .investor-filter-heading {
-    height: auto;
-    grid-template-rows: auto;
-    gap: 8px;
+  .investor-page-shell.investor-associative-table-page
+    .investor-stock-panel
+    > .investor-section-heading
+    > span {
+    grid-column: 1;
+    grid-row: 1 / 3;
   }
 
-  .investor-associative-table-page .investor-stock-filters .investor-filter-title-row,
-  .investor-associative-table-page .investor-stock-filters .investor-filter-heading > button {
+  .investor-page-shell.investor-associative-table-page
+    .investor-stock-panel
+    > .investor-section-heading
+    > span
+    + div {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .investor-page-shell.investor-associative-table-page
+    .investor-stock-panel
+    > .investor-section-heading
+    .investor-stock-sync {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    min-width: 0;
+  }
+
+  .investor-page-shell.investor-associative-table-page
+    .investor-stock-panel
+    > .investor-section-heading
+    .investor-stock-sync
+    small {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    text-align: left;
+  }
+
+  .investor-page-shell.investor-associative-table-page
+    .investor-stock-filters
+    .investor-filter-heading {
+    height: auto !important;
+    min-height: 96px !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 44px 44px;
+    align-items: start;
+    gap: 8px !important;
+  }
+
+  .investor-page-shell.investor-associative-table-page
+    .investor-stock-filters
+    .investor-filter-title-row,
+  .investor-page-shell.investor-associative-table-page
+    .investor-stock-filters
+    .investor-filter-heading
+    > button {
     top: 0;
   }
 
-  .investor-associative-table-page .investor-stock-filters .investor-filter-heading > button {
+  .investor-page-shell.investor-associative-table-page
+    .investor-stock-filters
+    .investor-filter-heading
+    > button {
+    justify-self: start;
+    height: 44px !important;
     min-height: 44px !important;
   }
 }

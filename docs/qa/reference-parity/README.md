@@ -125,12 +125,13 @@ O QA local autenticado está em
 [`authenticated-results.json`](./authenticated-results.json); suas 193 capturas
 ficam em [`target-authenticated`](./target-authenticated/).
 
-A baseline canônica continua comprovando todos os simuladores bloqueados. Quando
-uma única chave oficial é liberada para canário, a rota correspondente e o hub
-de simulação são comparados com suas baselines de estado habilitado em
-[`target-authenticated-canary`](./target-authenticated-canary/). O primeiro
-conjunto versionado é `simulator.wf13`; chave desconhecida ou rota sem conjunto
-versionado falha fechada, sem aceitar diferença visual genérica.
+A baseline canônica continua comprovando as rotas arquivadas dos simuladores.
+Quando uma única chave oficial é liberada para canário, o hub de simulação é
+comparado com sua baseline de catálogo habilitado em
+[`target-authenticated-canary`](./target-authenticated-canary/); as rotas
+arquivadas permanecem na baseline canônica. O primeiro conjunto versionado é
+`simulator.wf13`; chave desconhecida ou hub sem conjunto versionado falha
+fechada, sem aceitar diferença visual genérica.
 As 11 capturas desse conjunto refletem também os campos de calendário, ranking,
 anuais e memória auditável exigidos pela política WF13 `wf13-1.2.0`, sem alterar
 a baseline canônica de motores bloqueados.
