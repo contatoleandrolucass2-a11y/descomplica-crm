@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-09-28 - Navegacao do manual Associativo
+
+- Destaca Politica e Perguntas como abas acessiveis com icones, selecao visivel,
+  cabecalho fixo e rolagem por assunto. Preserva todo conteudo comercial.
+- Isola a interface em componente/CSS proprio; outros simuladores e calculos
+  permanecem iguais. Lucide 1.48.0 fixado e usado nos quatro icones do manual.
+- Acrescenta tres testes unitarios e matriz Playwright com cinco viewports,
+  tres temas, teclado, foco, ancoras, axe e capturas de ambos os paineis.
+- Lint, tipos e build locais aprovados; suite Windows: 948 pass, um skip e
+  seis falhas POSIX ja existentes. Oito Node passaram. Matriz local do manual:
+  30 capturas/axe e interacoes aprovadas. CI Linux integrada ainda pendente.
+- Detalhes: docs/audits/associativo-manual-2026-09-28.md.
+
 ## 2026-09-28 - Publicacao e evidencias finais do Associativo
 
 - PR #102 e CI main 36437130674 aprovados; release 3d92b7a publicada em 15:01 UTC,

@@ -1,0 +1,231 @@
+.trigger svg {
+  flex: 0 0 auto;
+}
+
+.dialog {
+  width: min(900px, calc(100vw - 32px));
+  max-width: none;
+  height: min(760px, calc(100dvh - 48px));
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  color: var(--analytics-ink);
+  background: var(--analytics-surface);
+  border: 1px solid var(--analytics-line);
+  border-radius: 8px;
+  box-shadow: var(--analytics-shadow);
+  letter-spacing: 0;
+}
+.dialog::backdrop {
+  background: rgb(2 15 27 / 76%);
+}
+.frame {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100%;
+  min-width: 0;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px 16px;
+}
+.header > div {
+  min-width: 0;
+}
+.eyebrow {
+  color: var(--analytics-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+.header h2 {
+  margin: 4px 0 0;
+  color: var(--analytics-ink);
+  font-size: 24px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+.dialog .close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  color: var(--analytics-ink);
+  background: var(--analytics-surface-muted);
+  border: 1px solid var(--analytics-line);
+  border-radius: 6px;
+  box-shadow: none;
+  transform: none;
+  cursor: pointer;
+}
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0 24px 16px;
+  border-bottom: 1px solid var(--analytics-line);
+}
+.dialog .tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 12px;
+  color: var(--analytics-ink);
+  background: var(--analytics-surface-muted);
+  border: 1px solid var(--analytics-muted);
+  border-radius: 6px;
+  box-shadow: none;
+  transform: none;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 750;
+  line-height: 1.25;
+  cursor: pointer;
+  letter-spacing: 0;
+}
+.dialog .tab svg {
+  flex: 0 0 auto;
+}
+.dialog .tab[aria-selected="true"] {
+  color: #062536;
+  background: #55cfff;
+  border-color: #55cfff;
+  box-shadow: inset 0 -3px 0 #006f85;
+}
+.dialog .tab:hover,
+.dialog .close:hover {
+  color: var(--analytics-ink);
+  background: var(--analytics-surface-muted);
+  border-color: var(--analytics-cyan-strong);
+  box-shadow: inset 0 0 0 1px var(--analytics-cyan-strong);
+  transform: none;
+}
+.dialog .tab[aria-selected="true"]:hover {
+  color: #062536;
+  background: #55cfff;
+}
+.dialog :is(.tab, .close):is(:active, :focus-visible) {
+  transform: none;
+}
+.dialog :is(button, summary, a):focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+.panel {
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 24px;
+  scroll-padding-block: 16px;
+}
+.panel[hidden] {
+  display: none;
+}
+.panel:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -5px;
+}
+.panel :global(.investor-direct-learning-section-heading) {
+  border-color: var(--analytics-line);
+  padding-bottom: 16px;
+}
+.panel :global(.investor-direct-learning-section-heading) h3 {
+  color: var(--analytics-ink);
+  font-size: 20px;
+}
+.panel :global(.investor-direct-learning-section-heading) > span {
+  color: var(--analytics-muted);
+  letter-spacing: 0;
+}
+.panel :is(h4, summary) {
+  color: var(--analytics-ink);
+}
+.panel :is(p, li) {
+  color: var(--analytics-muted);
+}
+.panel :global(.investor-associative-learning-summary) strong {
+  color: var(--analytics-cyan-strong);
+}
+.panel :global(.investor-associative-learning-summary) span {
+  color: var(--analytics-muted);
+}
+.panel :global(.investor-associative-learning-sources) a {
+  color: var(--analytics-cyan-strong);
+}
+.panel :global(.investor-associative-learning-sources) a:hover {
+  color: var(--analytics-ink);
+}
+.panel :global(.investor-direct-learning-policy) > div:last-child > section,
+.panel :global(.investor-associative-learning-faq-groups) > section,
+.panel :global(.investor-direct-learning-faq) details {
+  border-color: var(--analytics-line);
+}
+.panel :global(.investor-direct-learning-faq) summary {
+  min-height: 52px;
+  color: var(--analytics-ink);
+}
+.panel :global(.investor-direct-learning-faq) summary::after {
+  color: var(--analytics-cyan-strong);
+}
+.panel :global(.investor-direct-learning-faq) details p {
+  color: var(--analytics-muted);
+}
+.panel :global(.investor-direct-learning-policy) li::before {
+  background: var(--analytics-cyan-strong);
+}
+
+@media (max-width: 600px) {
+  .dialog {
+    width: calc(100vw - 16px);
+    height: calc(100dvh - 24px);
+  }
+  .header {
+    gap: 12px;
+    padding: 16px;
+  }
+  .header h2 {
+    font-size: 20px;
+  }
+  .tabs {
+    gap: 8px;
+    padding: 0 16px 12px;
+  }
+  .dialog .tab {
+    gap: 8px;
+    font-size: 15px;
+  }
+  .panel {
+    padding: 20px 16px;
+  }
+}
+@media (max-height: 450px) {
+  .header {
+    padding-block: 8px;
+  }
+  .eyebrow {
+    display: none;
+  }
+  .tabs {
+    padding-bottom: 8px;
+  }
+  .dialog .tab {
+    min-height: 44px;
+    padding-block: 8px;
+  }
+}
+@media print {
+  .dialog {
+    display: none !important;
+  }
+}

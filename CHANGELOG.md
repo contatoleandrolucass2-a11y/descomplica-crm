@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-28 - Manual Associativo mais acessivel
+
+- Destaca Politica e Perguntas com abas, icones e selecao visivel.
+- Mantem cabecalho, navegacao e fechar disponiveis durante a leitura.
+- Ajusta celular, teclado e tres temas sem alterar regras ou calculos.
+- Preserva conteudo, fontes e comportamento dos demais manuais.
+
 ## 2026-09-28 - Publicacao validada do Associativo
 
 - Publica release 3d92b7a e registra evidencias de concorrencia, autorizacao,

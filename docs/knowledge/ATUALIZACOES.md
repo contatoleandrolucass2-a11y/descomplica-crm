@@ -4,6 +4,23 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-28: Manual Associativo com abas acessiveis
+
+- Status: pendente_validacao integrada na CI; implementado, ainda nao publicado.
+- Fonte: AssociativeLearningManual.tsx/module.css; InvestorCalculator;
+  docs/audits/associativo-manual-2026-09-28.md.
+- Isolar a moldura interativa do manual preserva textos e os outros simuladores.
+  Manter abas e fechar fora da area rolavel evita perder a navegacao em celular.
+- Ancoras policy/faq sao preservadas quando o componente esta montado; a
+  selecao da unidade continua sendo previa aos recursos finais da simulacao.
+- Testes: tres unitarios novos aprovados; lint, tipos e build locais aprovados.
+  Windows: 948 pass, um skip e seis falhas POSIX preexistentes. CI Linux exigida.
+- Matriz acrescentada: cinco viewports, tres temas, ambos os paineis,
+  teclado, foco, ancoras, axe, geometria e capturas. Evidencias em test-results.
+  Rodada local isolada do componente passou com 30 capturas e zero violacoes
+  axe; oito testes Node tambem passaram. Sem dados ou credenciais de producao.
+- Sem alteracao de calculos, politica comercial, backend, migrations ou n8n.
+
 ## 2026-09-28: Associativo, estoque e publicacao automatica
 
 - Status: validado; PR #102 integrado e release 3d92b7a publicada em 15:01 UTC.

@@ -3,6 +3,7 @@
 "use client";
 
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
+import { AssociativeLearningManual } from "./AssociativeLearningManual";
 import { buildDirectTableAmortizationSchedule, buildDirectTablePreKeysSchedule, buildDirectTableProposalPreset, calculateDirectTableFileFlow, DIRECT_TABLE_PROPOSAL_OPTIONS, isDirectTableProposalPresetComplete } from "@/lib/archive-investor/direct-table-file-rules.mjs";
 import { calculateInvestorFlow, distributeSignalBalance } from "@/lib/archive-investor/investor-calculator-rules.mjs";
 import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilters, reconcileInvestorFilters, sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
@@ -2195,6 +2196,52 @@ export function InvestorLearningManual({ directTable = false, associative = fals
   const dialogRef = useRef<HTMLDialogElement>(null);
   const modality = directTable ? "Tabela Direta" : associative ? "Associativo" : "Tabela Investidor";
 
+  if (associative && !directTable) return <AssociativeLearningManual
+    policy={<section className="investor-direct-learning-policy" aria-labelledby="investor-associative-learning-policy-title">
+      <div className="investor-direct-learning-section-heading"><span aria-hidden="true">01</span><h3 id="investor-associative-learning-policy-title">Política</h3></div>
+      <div>
+        <section>
+          <h4>Resumo da simulação</h4>
+          <ul className="investor-associative-learning-summary" aria-label="Resumo do manual">
+            <li><strong>2</strong><span>fluxos comparados</span></li>
+            <li><strong>3</strong><span>sinais no máximo</span></li>
+            <li><strong>Até 84</strong><span>parcelas máximas</span></li>
+            <li><strong>PF</strong><span>documentação do cliente</span></li>
+          </ul>
+        </section>
+        <section>
+          <h4>Checklist antes de apresentar</h4>
+          <ul>
+            <li>Unidade, valor e data de entrega confirmados.</li>
+            <li>Entrada, sinais, anuais e mensais reconciliados.</li>
+            <li>Parâmetros de aprovação e memória comparativa conferidos.</li>
+            <li>Resultado validado no fluxo comercial oficial.</li>
+          </ul>
+        </section>
+        <section>
+          <h4>Fontes oficiais</h4>
+          <ul className="investor-associative-learning-sources">
+            {ASSOCIATIVE_LEARNING_SOURCES.map((source) => <li key={source.href}><a href={source.href} target="_blank" rel="noopener noreferrer">{source.label}<span aria-hidden="true">↗</span></a></li>)}
+          </ul>
+        </section>
+      </div>
+    </section>}
+    questions={<section className="investor-direct-learning-faq investor-associative-learning-faq" aria-labelledby="investor-associative-learning-faq-title">
+      <div className="investor-direct-learning-section-heading"><span aria-hidden="true">02</span><h3 id="investor-associative-learning-faq-title">Perguntas</h3></div>
+      <div className="investor-associative-learning-faq-groups">
+        {ASSOCIATIVE_MANUAL_SECTIONS.map((section, sectionIndex) => <section key={section.title} aria-labelledby={`investor-associative-learning-faq-group-${sectionIndex}`}>
+          <h4 id={`investor-associative-learning-faq-group-${sectionIndex}`}>{section.title}</h4>
+          <div>
+            {section.questions.map((item) => <details key={item.question}>
+              <summary>{item.question}</summary>
+              <p>{item.answer}</p>
+            </details>)}
+          </div>
+        </section>)}
+      </div>
+    </section>}
+  />;
+
   return <section className="investor-learning-manual" aria-label={`Manual da ${modality}`}>
     <button
       type="button"
@@ -2243,54 +2290,6 @@ export function InvestorLearningManual({ directTable = false, associative = fals
                 <summary>{item.question}</summary>
                 <p>{item.answer}</p>
               </details>)}
-            </div>
-          </section>
-        </div> : associative ? <div className="investor-direct-learning-content investor-associative-learning-content">
-          <nav aria-label="Navegação do manual">
-            <a href="#investor-associative-learning-policy">Política</a>
-            <a href="#investor-associative-learning-faq">Perguntas</a>
-          </nav>
-          <section id="investor-associative-learning-policy" className="investor-direct-learning-policy" aria-labelledby="investor-associative-learning-policy-title">
-            <div className="investor-direct-learning-section-heading"><span aria-hidden="true">01</span><h3 id="investor-associative-learning-policy-title">Política</h3></div>
-            <div>
-              <section>
-                <h4>Resumo da simulação</h4>
-                <ul className="investor-associative-learning-summary" aria-label="Resumo do manual">
-                  <li><strong>2</strong><span>fluxos comparados</span></li>
-                  <li><strong>3</strong><span>sinais no máximo</span></li>
-                  <li><strong>Até 84</strong><span>parcelas máximas</span></li>
-                  <li><strong>PF</strong><span>documentação do cliente</span></li>
-                </ul>
-              </section>
-              <section>
-                <h4>Checklist antes de apresentar</h4>
-                <ul>
-                  <li>Unidade, valor e data de entrega confirmados.</li>
-                  <li>Entrada, sinais, anuais e mensais reconciliados.</li>
-                  <li>Parâmetros de aprovação e memória comparativa conferidos.</li>
-                  <li>Resultado validado no fluxo comercial oficial.</li>
-                </ul>
-              </section>
-              <section>
-                <h4>Fontes oficiais</h4>
-                <ul className="investor-associative-learning-sources">
-                  {ASSOCIATIVE_LEARNING_SOURCES.map((source) => <li key={source.href}><a href={source.href} target="_blank" rel="noopener noreferrer">{source.label}<span aria-hidden="true">↗</span></a></li>)}
-                </ul>
-              </section>
-            </div>
-          </section>
-          <section id="investor-associative-learning-faq" className="investor-direct-learning-faq investor-associative-learning-faq" aria-labelledby="investor-associative-learning-faq-title">
-            <div className="investor-direct-learning-section-heading"><span aria-hidden="true">02</span><h3 id="investor-associative-learning-faq-title">Perguntas</h3></div>
-            <div className="investor-associative-learning-faq-groups">
-              {ASSOCIATIVE_MANUAL_SECTIONS.map((section, sectionIndex) => <section key={section.title} aria-labelledby={`investor-associative-learning-faq-group-${sectionIndex}`}>
-                <h4 id={`investor-associative-learning-faq-group-${sectionIndex}`}>{section.title}</h4>
-                <div>
-                  {section.questions.map((item) => <details key={item.question}>
-                    <summary>{item.question}</summary>
-                    <p>{item.answer}</p>
-                  </details>)}
-                </div>
-              </section>)}
             </div>
           </section>
         </div> : <>
