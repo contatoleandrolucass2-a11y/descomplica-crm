@@ -7,7 +7,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 ## 2026-09-28: Caveman automatico e regressao do estoque
 
 - Status: validado (local; gates Linux vinculados ao PR, sem publicacao).
-- Fonte: docs/audits/caveman-ferramentas-2026-09-28.md; FERRAMENTAS.md;
+- Fonte: PR #101; docs/audits/caveman-ferramentas-2026-09-28.md; FERRAMENTAS.md;
   InvestorCalculator.tsx; rota inventory/snapshot; testes e QA sintetico.
 - Caveman Lite rege concisao, nao exatidao financeira; Cavecrew complementa os
   sete agentes crm-\* existentes. Onze skills locais constam no inventario.

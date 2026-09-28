@@ -166,7 +166,7 @@ nativa Linux e diagnostico com Chrome 149+ continuam pendentes; testes de
 protocolo nao comprovam bloqueio real da rede do navegador.
 
 Depois da correcao, `pnpm audit --audit-level low` e `pnpm security:osv` passaram
-sem vulnerabilidades conhecidas; OSV verificou 608 pacotes. Protocolo e docs MCP
+sem vulnerabilidades conhecidas; OSV verificou 610 pacotes apos alinhar o lockfile ao PR #65. Protocolo e docs MCP
 retestados com SDK 1.30.1. O [advisory oficial](https://github.com/modelcontextprotocol/typescript-sdk/security/advisories/GHSA-345p-7cg4-v4c7)
 descreve a correcao a partir de 1.26.0; nenhuma excecao de auditoria foi adicionada.
 Os 24 testes tambem passaram na suite completa com Vitest 4.1.11.

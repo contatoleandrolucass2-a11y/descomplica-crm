@@ -75,7 +75,7 @@ integrais; Obsidian recebe somente os registros curados do projeto.
 - Testes novos: 21 do snapshot e 24 dos devtools; inventario inclui omissao de
   skill/matriz. Regressao de navegador cobre filtros, resposta viva durante
   exploracao e resposta que remove a unidade apos iniciar proposta.
-- pnpm audit em nivel low e OSV (608 pacotes) passaram sem achados conhecidos;
+- pnpm audit em nivel low e OSV (610 pacotes apos integrar o lockfile do PR #65) passaram sem achados conhecidos;
   Gitleaks passou. Corrigido tambem o SDK transitivo do Next MCP, 1.25.2 para
   1.30.1, por override restrito e protocolo retestado, sem ignorar advisory.
 - Next dev respondeu em 127.0.0.1:3137; MCP confirmou o checkout e identificou
@@ -83,6 +83,6 @@ integrais; Obsidian recebe somente os registros curados do projeto.
   reais para resolver ambiente de QA; jornadas autenticadas usam CI isolada.
 - Revisao independente pediu cobertura de resposta tardia apos proposta;
   acrescentada. Nao apontou outro bug funcional confirmado no recorte lido.
-- Build local passou. Formatacao e CI devem ser conferidas no SHA final do PR. Gates verdes
+- Build e formatacao locais passaram. CI no SHA final do [PR #101](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/101). Gates verdes
   nao significam publicacao. Nenhuma mudanca desta branch foi aplicada ao site
   de producao durante a inspecao.
