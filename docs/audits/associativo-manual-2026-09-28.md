@@ -49,8 +49,11 @@
 - Artefato fonte: `authenticated-visual-candidate-9e1b4a40454f71c0802c7407b78f7918361296b9`.
   SHA256 anterior: `3021cd327501abe95dbd57810171e2e362f12fc332eab6cc2bff6210902cc6e3`.
   SHA256 novo: `9c952daba9d9892941cd3f8bfa617b39a97f9fa110b625b58c7d3fdef9c6ae0a`.
-  Referencia historica da matriz permanece intacta; este registro documenta
-  o delta revisado. Nenhum limiar, assercao ou outro baseline foi relaxado.
+  Catalogo atualiza somente esse registro, com baselineRevision para a origem
+  nova e previousBaselineComparison para o delta real (233485/786432 pixels).
+  Metadados da captura original e outros registros permanecem intactos.
+  CI 36495001616 detectou o catalogo desatualizado; corrige tamanho/hash sem
+  mudar testes, limiares ou assercoes. Nenhum outro baseline foi relaxado.
 - Nova CI deve confirmar a referencia atualizada. O estado final de merge,
   CI e publicacao fica nas evidencias do [PR #104](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/104).
 

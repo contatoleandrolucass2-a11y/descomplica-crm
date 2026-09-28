@@ -14919,30 +14919,39 @@
       "route": "/app/simulacao/associativo-fluxo-linear",
       "viewport": "tablet-1024x768",
       "theme": "light",
+      "baselineRevision": {
+        "capturedAt": "2026-09-28T21:55:05.464Z",
+        "captureCommit": "9e1b4a40454f71c0802c7407b78f7918361296b9",
+        "sourceRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36486887891",
+        "sourceArtifact": "authenticated-visual-candidate-9e1b4a40454f71c0802c7407b78f7918361296b9",
+        "method": "single reviewed synthetic screenshot copied byte-for-byte",
+        "reason": "Associativo tablet header wraps so theme controls remain visible",
+        "review": "docs/audits/associativo-manual-2026-09-28.md"
+      },
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
-          "bytes": 97698,
-          "sha256": "3021cd327501abe95dbd57810171e2e362f12fc332eab6cc2bff6210902cc6e3"
+          "bytes": 112692,
+          "sha256": "9c952daba9d9892941cd3f8bfa617b39a97f9fa110b625b58c7d3fdef9c6ae0a"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-      "bytes": 97698,
-      "sha256": "3021cd327501abe95dbd57810171e2e362f12fc332eab6cc2bff6210902cc6e3",
+      "bytes": 112692,
+      "sha256": "9c952daba9d9892941cd3f8bfa617b39a97f9fa110b625b58c7d3fdef9c6ae0a",
       "width": 1024,
       "height": 768,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 233485,
         "totalPixels": 786432,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.2968915303548177,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,

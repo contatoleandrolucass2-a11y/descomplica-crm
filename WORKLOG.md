@@ -2,6 +2,9 @@
 
 ## 2026-09-28 - Navegacao do manual Associativo
 
+- Sincroniza tamanho/hash da unica imagem revisada no catalogo de QA; preserva
+  origem da captura nova e delta real contra a anterior. Sem alterar assercoes.
+
 - CI 36486887891 aprovou funcionalidade do manual (30 capturas/axe), 140 rotas,
   80 temas, 193 axe e 100 verificacoes de zoom. Apenas a referencia Associativo
   1024x768 diferiu pelo menu corrigido. Inspeciona e atualiza somente essa imagem,

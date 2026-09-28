@@ -6,6 +6,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-28: Manual Associativo com abas acessiveis
 
+- Atualizar uma imagem revisada exige atualizar seu tamanho/hash no catalogo
+  authenticated-results.json. Registrar origem por baselineRevision e manter
+  delta anterior real; o teste de integridade nao deve ser enfraquecido.
+
 - Status: comportamento validado na CI 36486887891; referencia visual atualizada
   para o menu corrigido. Evidencias finais de CI/publicacao: PR #104.
 - Fonte: AssociativeLearningManual.tsx/module.css; InvestorCalculator;

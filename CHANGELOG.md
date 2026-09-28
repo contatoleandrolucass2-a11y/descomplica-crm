@@ -11,6 +11,7 @@
 - Matriz usa os controles de tema proprios do simulador.
 - Corrige menu superior do Associativo cortado em tablets de largura intermediaria.
 - Atualiza somente a referencia visual de 1024px, apos inspecao da captura da CI.
+- Mantem o catalogo de QA coerente com a captura revisada e sua proveniencia.
 
 ## 2026-09-28 - Publicacao validada do Associativo
 
