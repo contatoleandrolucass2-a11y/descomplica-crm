@@ -10,6 +10,14 @@
 - Atualiza somente as três referências mobile do Associativo afetadas pela
   correção; Tabelão, Direta, Investidor, dados e regras de cálculo não mudam.
 
+## 2026-09-27 — memoria tecnica e ferramentas automaticas
+
+- Integra notas tecnicas selecionadas com Obsidian local e historico por checkout.
+- Define selecao automatica de skills/plugins e registro de aprendizados no
+  AGENTS.md, preservando limites de autorizacao e dados sensiveis.
+- Acrescenta comandos knowledge e hooks Git locais opcionais para sincronizar
+  atualizacoes sem instalar dependencias ou plugins comunitarios.
+
 ## 2026-09-27 — alvo de toque do Associativo
 
 - Garante 44 px em Limpar filtros no celular mesmo diante da regra compacta
