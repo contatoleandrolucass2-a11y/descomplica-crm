@@ -4,6 +4,32 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-28: prontidao e selecao das ferramentas
+
+- Status: validado (instalacoes e verificacoes locais; gates Linux vinculados ao PR).
+- Fonte: scripts/knowledge/doctor.mjs; tests/project-resource-doctor.test.ts;
+  catalogo de plugins; releases oficiais Gitleaks v8.30.1 e OSV-Scanner v2.6.0.
+- Codex Security agora consta instalado/habilitado, atualizando a observacao
+  historica anterior. Selecionar skill por alvo, cumprir preflight e preservar
+  aprovacoes; nao acionar scans completos em tarefas sem demanda de seguranca.
+- Gitleaks/OSV instalados em ~/.local/bin no Windows, com hashes verificados.
+  secrets passou; OSV encontrou somente o advisory moderado GHSA-82fw-gwwq-j7x9
+  em Vitest/@vitest/mocker 4.1.10, rastreado no PR #65; achado nao foi suprimido.
+- resources:doctor distingue disponibilidade local de autenticacao e testes.
+  Docker nao instalado neste desktop; gates isolados continuam na CI Linux.
+- Doctor real, 16 testes novos, 26 de conhecimento/inventario, lint, tipos,
+  build e formatacao passaram. Suite geral Windows tem seis falhas POSIX
+  preexistentes; um timeout inicial nao repetiu com dois workers. Oito testes
+  Node Salesforce passaram separadamente; CI Linux valida o candidato integral.
+- Revisao independente corrigiu falsos positivos de Supabase sem binario e
+  scanner antigo. O diagnostico exige CLI Supabase na versao do pacote e
+  Gitleaks 8.19+ serie 8 / OSV serie 2; novos majors precisam ser validados.
+- Perfil crm-qa aplicado em delegacao real e inventario validado: 40 arquivos,
+  nove areas, sete perfis e quatro skills. Nao foram executados todos os perfis.
+- Pendencias: conferir conexoes quando forem usadas; MCP n8n nao exposto nesta
+  sessao, sem alteracao de workflow nem fallback REST. PostHog/Datadog opcionais
+  nao equivalem a telemetria do CRM configurada. Sem SDK, conta nova ou deploy.
+
 ## 2026-09-28: recursos e busca entre chats
 
 - Status: validado (mecanismo e instalacao local; gates Linux vinculados ao PR).

@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-09-28 - disponibilidade e selecao de ferramentas
+
+- Confirma Codex Security instalado/habilitado no catalogo e acrescenta rotas
+  para auditoria de diff/repositorio sem rodar todos os scans automaticamente.
+- Instala Gitleaks 8.30.1 e OSV-Scanner 2.6.0 de releases oficiais, conferindo
+  SHA-256 antes de executar; PATH existente e scripts anteriores preservados.
+- Gitleaks passou. OSV executou e encontrou o advisory moderado conhecido do
+  Vitest 4.1.10, cuja correcao esta proposta no PR Dependabot #65; nao criou ignore.
+- Adiciona resources:doctor e 16 testes de runtime incorreto, pacotes ausentes,
+  exports privados, resposta invalida de CLI e Docker opcional no desktop.
+- Revisao independente encontrou e corrigiu dois falsos positivos: Supabase
+  sem binario de plataforma e scanners de versoes incompativeis com os scripts.
+- Delegacao real crm-qa confirmou perfil recebido e inventario de 40 rotas/
+  APIs, nove areas, sete perfis e quatro skills proprias sem lacuna impeditiva.
+- Doctor real passou; lint, tipos, build e formatacao aprovados localmente.
+  Os 16 testes novos e os 26 de conhecimento/inventario passaram. Suite geral
+  Windows mantem seis falhas POSIX conhecidas; timeout inicial de conhecimento
+  nao se repetiu com dois workers. Oito testes Salesforce passaram separadamente.
+- Gates Linux vinculados ao PR desta branch; sem deploy nem dados remotos alterados.
+
 ## 2026-09-28 - recursos e recuperacao de conhecimento
 
 - Entrega e checks: PR #99, branch codex/recursos-memoria-crm.

@@ -8,4 +8,8 @@ Observe a proibicao de grants diretos nas tabelas Qlik e de bootstrap publico.
 Nao consulte clientes, extraia credenciais, altere politicas ou execute ataques remotos.
 Nao trate ausencia de achados como garantia de seguranca.
 Entregue severidade, arquivo/linha, caminho exploravel demonstrado e teste faltante.
+Quando o pedido exigir auditoria de seguranca, selecione a skill Codex Security pertinente:
+security-diff-scan para diff imutavel; security-scan para repositorio; deep-security-scan
+somente quando explicitamente solicitado. Leia a skill e respeite seu preflight,
+autorizacoes e contrato de execucao antes da varredura. Revisao pontual nao exige scan total.
 """
