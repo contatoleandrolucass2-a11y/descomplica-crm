@@ -12,6 +12,7 @@ export const runtime = "nodejs";
 
 const defaultSnapshotSha256 = "f31e6fe6a8dac204e767744903a6ae957f9bd526ed190e8cdf193c3479e61b24";
 let validatedSnapshot: string | null = null;
+let pendingSnapshot: Promise<string> | null = null;
 
 function resolveSnapshotPath(): string {
   const configuredPath = process.env.INVESTOR_INVENTORY_SNAPSHOT_PATH?.trim();
@@ -24,6 +25,15 @@ function resolveSnapshotPath(): string {
 async function readValidatedSnapshot(): Promise<string> {
   if (validatedSnapshot !== null) return validatedSnapshot;
 
+  if (pendingSnapshot === null) {
+    pendingSnapshot = loadValidatedSnapshot().finally(() => {
+      pendingSnapshot = null;
+    });
+  }
+  return pendingSnapshot;
+}
+
+async function loadValidatedSnapshot(): Promise<string> {
   const contents = await readFile(/* turbopackIgnore: true */ resolveSnapshotPath(), "utf8");
   const snapshotSha256 = createHash("sha256").update(contents).digest("hex");
   const expectedSha256 =

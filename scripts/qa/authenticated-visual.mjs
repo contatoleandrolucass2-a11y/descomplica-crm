@@ -1074,10 +1074,84 @@ async function checkKeyboard(page, origin) {
   return { opened: Boolean(opened), closed: Boolean(closed), focusReturned, tabReachedInteractive };
 }
 
-async function checkSimulatorValidation(page, origin, httpCredentials) {
-  await gotoWithServerRetry(page, `${origin}/app/simulacao/associativo-fluxo-linear`, {
-    waitUntil: "domcontentloaded",
+async function checkDeferredInventory(page, origin, proposalStarted = false) {
+  let releaseLiveInventory;
+  const liveInventoryGate = new Promise((resolve) => {
+    releaseLiveInventory = resolve;
   });
+  const liveInventoryUrl = `${origin}/api/inventory`;
+  const source = JSON.parse(syntheticDirectTableSnapshot);
+  const liveItems = proposalStarted
+    ? source.items.filter((item) => item.id !== "qa-stock-0001")
+    : source.items;
+  const deferredLiveInventory = async (route) => {
+    await liveInventoryGate;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ...source,
+        items: liveItems,
+        count: liveItems.length,
+        sourceKind: "live",
+        generatedAt: "2026-09-28T12:00:00.000Z",
+      }),
+    });
+  };
+  await page.route(liveInventoryUrl, deferredLiveInventory);
+  // Release on failures too, so a failed assertion cannot leave a pending route.
+  try {
+    await gotoWithServerRetry(page, `${origin}/app/simulacao/associativo-fluxo-linear`, {
+      waitUntil: "domcontentloaded",
+    });
+    const projectFilter = page.getByRole("combobox", {
+      name: "Nome do Empreendimento",
+      exact: true,
+    });
+    await projectFilter.selectOption("Empreendimento QA 01");
+    if (proposalStarted) {
+      const unit = page.getByRole("button", { name: "Iniciar proposta com QA-0001", exact: true });
+      await unit.click();
+      const income = page.getByRole("textbox", { name: "Renda Familiar", exact: true });
+      await income.fill("500000");
+      await page.getByRole("radio", { name: "Sim", exact: true }).check();
+      const financing = page.getByRole("textbox", { name: "Financiamento", exact: true });
+      await financing.fill("19000000");
+      const before = [await income.inputValue(), await financing.inputValue()];
+      const responsePromise = page.waitForResponse(liveInventoryUrl);
+      releaseLiveInventory();
+      await (await responsePromise).finished();
+      await page.evaluate(
+        () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+      );
+      return (
+        (await unit.getAttribute("aria-pressed")) === "true" &&
+        (await income.isVisible()) &&
+        (await financing.isVisible()) &&
+        JSON.stringify(before) ===
+          JSON.stringify([await income.inputValue(), await financing.inputValue()]) &&
+        (await page.locator(".investor-stock-sync").innerText()).includes("Arquivo")
+      );
+    }
+    await page
+      .getByRole("combobox", { name: "Ordenar unidades por valor do imóvel", exact: true })
+      .selectOption("desc");
+    await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+    await projectFilter.selectOption("Empreendimento QA 01");
+    releaseLiveInventory();
+    await page.waitForFunction(() =>
+      document.querySelector(".investor-stock-sync")?.textContent?.includes("Atualizado"),
+    );
+    return (await projectFilter.inputValue()) === "Empreendimento QA 01";
+  } finally {
+    releaseLiveInventory();
+    await page.unroute(liveInventoryUrl, deferredLiveInventory);
+  }
+}
+
+async function checkSimulatorValidation(page, origin, httpCredentials) {
+  const lateLivePreservesProposal = await checkDeferredInventory(page, origin, true);
+  const liveRefreshAfterFiltering = await checkDeferredInventory(page, origin);
   await page
     .getByRole("heading", { name: "Simulador Tabela Associativo", exact: true })
     .waitFor({ state: "visible" });
@@ -1170,6 +1244,38 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   const rankingSelect = page.getByRole("combobox", { name: "Selecione o Ranking", exact: true });
   await rankingSelect.waitFor({ state: "visible" });
   await rankingSelect.selectOption("gold");
+
+  const proposalInputs = [
+    page.getByRole("textbox", { name: "Renda Familiar", exact: true }),
+    financingInput,
+    subsidyInput,
+    fgtsInput,
+    housingCheckInput,
+    entryInput,
+    installmentsInput,
+  ];
+  const proposalBeforeFiltering = await Promise.all(
+    proposalInputs.map((input) => input.inputValue()),
+  );
+  await projectFilter.selectOption("Empreendimento QA 02");
+  await page.waitForFunction(
+    () => !document.querySelector('.investor-stock-unit-button[aria-pressed="true"]'),
+  );
+  const filteredProposalValues = await Promise.all(
+    proposalInputs.map((input) => input.inputValue()),
+  );
+  await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Iniciar proposta com QA-0001", exact: true })
+    .waitFor({ state: "visible" });
+  const filterPreservesAssociativeProposal =
+    JSON.stringify(proposalBeforeFiltering) === JSON.stringify(filteredProposalValues) &&
+    JSON.stringify(proposalBeforeFiltering) ===
+      JSON.stringify(await Promise.all(proposalInputs.map((input) => input.inputValue()))) &&
+    (await page
+      .getByRole("button", { name: "Iniciar proposta com QA-0001", exact: true })
+      .getAttribute("aria-pressed")) === "true" &&
+    (await rankingSelect.inputValue()) === "gold";
 
   const readyProposalButton = page.getByRole("button", {
     name: "Proposta pronta - Bora Vender",
@@ -1484,6 +1590,9 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
 
   return {
     ...initialChecks,
+    lateLivePreservesProposal,
+    liveRefreshAfterFiltering,
+    filterPreservesAssociativeProposal,
     financingFocusedAfterProfile,
     optionalPaymentsUnlockedAfterProfile,
     readyProposalButtonEnabled,
