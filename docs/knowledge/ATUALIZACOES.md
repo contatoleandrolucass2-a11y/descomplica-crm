@@ -33,6 +33,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   100 arquivos restaurado com hashes equivalentes em 28/09/2026.
 - Audit: dois moderados em Vitest/@vitest/mocker, sem altos/criticos. Atualizacao
   ja proposta no PR Dependabot #65; nao foi misturada a esta entrega.
+- Diagnostico CLI: configuracao carregada, mas verificacao opcional do MCP n8n
+  sofreu timeout. Revalidar o conector quando necessario; nenhuma alteracao de
+  workflow ou credenciais foi tentada e nao existe fallback REST autorizado.
 - Nenhuma publicacao em producao ou alteracao de dados remotos.
 
 ## 2026-09-27: desempenho do estoque

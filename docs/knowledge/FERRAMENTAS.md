@@ -92,4 +92,9 @@ perfis versionados quando a mudanca estiver integrada nelas.
   Nao instalar SDK de rastreamento, enviar dados ou abrir contas automaticamente.
 - Nao alterar configuracoes de seguranca, confianca de hooks ou permissoes para
   forcar uma ferramenta. Comunicar bloqueios reais com precisao.
+- Em 28/09/2026, o diagnostico CLI reportou timeout na verificacao opcional do
+  MCP n8n. Isso nao prova indisponibilidade permanente, mas exige confirmar o
+  MCP antes de qualquer tarefa n8n. Nao usar REST nem alterar credenciais para
+  contornar. O aviso de ambiente node_repl no CLI isolado nao prova falha do
+  navegador no app, que foi utilizado nesta auditoria.
 - As regras de autorizacao e seguranca de AGENTS.md permanecem prioritarias.

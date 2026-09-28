@@ -91,6 +91,15 @@ garante precisao e aumenta manutencao, superficie de acesso e ruido de contexto.
 
 ## Precisao e automacao
 
+Diagnostico local `codex doctor` (28/09, CLI 0.157.1): configuracao carregada,
+instalacao consistente e nenhuma falha fatal, com avisos opcionais. A sondagem
+do MCP n8n sofreu timeout; nao permite certificar conexao utilizavel nem inferir
+queda permanente. Revalidar pelo MCP antes de tarefas n8n, sem fallback REST.
+O CLI isolado tambem nao recebeu CODEX_WINDOWS_REGISTERED_CORE; nao inventar
+essa variavel nem alterar o ambiente global, pois o navegador no app funcionou.
+Avisos genericos de Defender/Dev Drive nao justificam excluir antivirus, mover
+repositorios ou apagar historicos. Nenhuma dessas alteracoes foi realizada.
+
 O ciclo e: recuperar conhecimento pertinente, confirmar estado atual, localizar
 o dominio, escolher skills/agentes, implementar no escopo, validar com evidencias,
 registrar aprendizado e sincronizar. Autonomia nao substitui politica aprovada.

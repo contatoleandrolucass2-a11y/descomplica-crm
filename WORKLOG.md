@@ -3,6 +3,8 @@
 ## 2026-09-28 - recursos e recuperacao de conhecimento
 
 - Entrega e checks: PR #99, branch codex/recursos-memoria-crm.
+- Diagnostico do CLI carregou configuracao; sondagem opcional n8n teve timeout,
+  registrado sem alterar credenciais, permissoes ou usar REST.
 
 - Audita 40 arquivos de paginas/APIs em nove areas e inspeciona 19 rotas em
   producao somente em leitura. Bloqueios de metas, ranking e conciliacao ficam
