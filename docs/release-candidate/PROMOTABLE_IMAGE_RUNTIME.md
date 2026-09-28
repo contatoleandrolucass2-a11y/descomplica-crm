@@ -66,6 +66,35 @@ de baixar e carregar a imagem. Verificar `sha256sum -c image.sha256`, SHA em
 Nao reconstruir no VPS. Os comandos abaixo continuam sendo a prova local
 equivalente; o bind e a promocao reutilizam a imagem aprovada.
 
+### Identidade entre armazenamentos Docker
+
+O Docker classic pode expor o digest da configuracao em `.Id`, enquanto o
+containerd expoe o digest do manifesto OCI. A diferenca foi reproduzida nesta
+release e consta no [registro do Moby](https://github.com/moby/moby/issues/51934);
+consultar tambem a [documentacao do armazenamento](https://docs.docker.com/engine/storage/containerd/).
+Nao substituir o ID esperado somente porque a tag ou label coincide.
+
+Se os IDs divergirem, interromper a promocao e comprovar, sobre o mesmo arquivo
+aprovado pela CI, todos os pontos abaixo:
+
+1. Checksum do arquivo comprimido, revision e imagem exata do artefato.
+2. `index.json` aponta ao manifesto correto; SHA-256 dos bytes desse manifesto
+   coincide com o descriptor e `.Id` do Docker containerd de destino.
+3. `manifest.config.digest` coincide com o ID da CI; recalcular SHA-256 do blob
+   de configuracao e conferir seus tamanhos, plataforma e label da release.
+4. Manifesto Docker legado, manifesto OCI e `rootfs.diff_ids` da configuracao
+   referem as mesmas camadas. Comparar com `RootFS.Layers` da imagem carregada.
+   A prova de 28/09 usa camadas tar sem compressao interna; nao extrapolar para
+   outro formato, indice multi-platform ou attestation sem prova equivalente.
+5. Reexecutar `image:prove` no destino com fixtures isoladas. Registrar os dois
+   digests e usar o ID local comprovado no CAS, sem rebuild ou retag.
+
+Qualquer divergencia de conteudo, plataforma, cadeia de hashes ou perfil
+mantem o gate bloqueado. Evidencia aplicada em
+`docs/audits/associativo-concorrencia-2026-09-28.md`.
+
+### Comandos de prova e promocao
+
 Após congelar o SHA final:
 
 ```bash

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-28 - Publicacao validada do Associativo
+
+- Publica release 3d92b7a e registra evidencias de concorrencia, autorizacao,
+  carregamento do estoque e validacoes de formulario em producao.
+- Esclarece prova de identidade da imagem entre Docker classic e containerd.
+- Preserva pendencias de fonte/autoridade comercial e limites do teste de carga.
+
 ## 2026-09-28 - Robustez e concorrencia do Associativo
 
 - Parcelas invalidas permanecem visiveis para correcao, sem substituicao silenciosa.

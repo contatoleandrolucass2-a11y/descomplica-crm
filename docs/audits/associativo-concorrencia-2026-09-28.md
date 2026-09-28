@@ -1,7 +1,8 @@
 # Associativo: auditoria e concorrencia
 
 Data: 2026-09-28. Branch: `codex/associativo-auditoria-concorrencia`.
-Status: candidato em validacao; CI e publicacao devem ser comprovadas pelo PR.
+Status: validado e publicado em 28/09/2026, 15:01 UTC.
+Release: `3d92b7aaa4fccbfed3f5be33d47688ec8b3bfabb`, PR #102.
 
 ## Evidencia inicial
 
@@ -53,7 +54,7 @@ Status: candidato em validacao; CI e publicacao devem ser comprovadas pelo PR.
 ## Validacao local
 
 Windows, Node 24.19.0, pnpm 11.20.0: tipos e build passaram; Vitest com
-944 aprovados, seis falhas POSIX preexistentes e um ignorado. Oito testes Node
+945 aprovados, seis falhas POSIX preexistentes e um ignorado. Oito testes Node
 Salesforce passaram separadamente. Audit sem vulnerabilidades conhecidas,
 Gitleaks sem achados e inventario de 40 rotas/onze skills validado.
 Revisao independente nao encontrou achados acionaveis no diff de cache,
@@ -67,3 +68,54 @@ image ID, backup, CAS e rollback obrigatorios. Nginx: teste antes do reload.
 Confirmar versao, estoque autenticado, negacao anonima e ausencia de novos erros.
 Resultados da execucao e versao publicada vinculados ao PR; observacao inicial
 preservada, sem alegar capacidade de producao a partir de fixture.
+
+## Resultado integrado
+
+- [PR #102](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/102)
+  integrado apos CI verde. [CI da release](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36437130674):
+  validate, release-gates, isolated-restore e promotable-image aprovados.
+- Linux: 948 testes Vitest aprovados, quatro skips de plataforma, oito testes
+  Node aprovados, 1.042 pgTAP e 20 E2E de navegador aprovados. Lint, tipos,
+  build, audit e restore isolado passaram.
+- Concorrencia integrada: quatro identidades e quatro contextos isolados;
+  duas sessoes com permissao e duas negadas. Burst de 20 requisicoes, zero
+  erros, p50 491,93 ms e p95 736,62 ms. Dez referencias seriais e 16 casos
+  negativos passaram; propostas, anuais acima de 50% e parcelas extremas
+  conferidas nas duas sessoes autorizadas. Nao foram 20 usuarios distintos.
+- Nginx isolado: 20 transferencias sem erro, corpos identicos apos descompressao;
+  fixture de 2.748.647 para 47.136 bytes, p95 206,05 ms. Nao e medicao da origem real.
+- Matriz visual: sete viewports, 140 verificacoes de rotas, 193 capturas e
+  verificacoes de acessibilidade. Teclado e larguras equivalentes a zoom CSS
+  de 80/100/125/150/200% passaram; nao representa zoom nativo do navegador.
+- Dez usuarios QA removidos; zero propostas persistidas. Nenhuma carga sintetica
+  contra o feed externo, banco remoto ou clientes de producao.
+
+## Verificacao depois da publicacao
+
+- Checksum do arquivo da CI aprovado; nao houve rebuild no VPS. Docker da CI
+  usa digest da configuracao; containerd no VPS usa digest do manifesto OCI.
+  Equivalencia comprovada por SHA-256 do arquivo, manifesto e config, vinculo
+  entre os digests, label, plataforma e onze camadas. Dois perfis de runtime
+  revalidados no host com fixtures, sem rede nem segredos reais.
+- Config digest CI: `sha256:2382a4ccf27e0e0759ee96578b219d6f1def2cdb5d38ea74962c7e7c67fbc24b`.
+- Manifest digest VPS: `sha256:f0539b72235ef993d55fe68ef84f98e838c4805cd0695a3a0068380c324a8973`.
+- Archive SHA-256: `e68a6680d57cea42a7d9cab21095f5868ca614d28784d0819f8a5448ee6e5495`.
+- Backup privado root-only de Nginx, ambiente e identidade anterior em
+  `/var/backups/descomplica-crm/releases/3d92b7aaa4fccbfed3f5be33d47688ec8b3bfabb.cJ7Pt9`.
+  CAS executado; imagem anterior preservada para rollback. Nginx validado e
+  recarregado; nenhuma migration, mudanca de DNS ou workflow n8n.
+- Health HTTPS confirmou a release. Smoke somente leitura: 12 requisicoes,
+  concorrencia maxima quatro, zero erros; health 200, estoque e snapshot 401
+  sem sessao. Nao houve teste de saturacao da producao.
+- Navegador autenticado passou de erro para estoque disponivel. Nginx registrou
+  corpos comprimidos completos de 105.825 bytes (snapshot) e 56.526 bytes (live).
+  Nao converter essa comparacao em percentual de velocidade ou SLA.
+- Na pagina publicada: quantidade `4294967296` permanece visivel e invalida,
+  sem travar; anual ficticia acima de 50% da renda rejeitada; filtro preserva
+  valores preenchidos. Console sem avisos/erros. Teste mobile sem overflow
+  global; dados ficticios limpos por reload e viewport restaurado ao terminar.
+- A fonte live ainda informa atualizacao em 07/08/2026. Transferencia atual
+  nao certifica atualidade comercial: investigar a origem em demanda propria,
+  sem substituir datas ou dados por suposicao.
+- Divergencia preexistente WF13/arquivo permanece pendente de autoridade
+  comercial. Nenhuma nova formula, taxa ou politica foi adotada nesta auditoria.

@@ -6,7 +6,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-28: Associativo, estoque e publicacao automatica
 
-- Status: pendente_validacao (candidato; gates e publicacao rastreados no PR).
+- Status: validado; PR #102 integrado e release 3d92b7a publicada em 15:01 UTC.
 - Fonte: docs/audits/associativo-concorrencia-2026-09-28.md; rotas inventory;
   calculator-rules, approval-rules, installment-memory e testes de concorrencia.
 - HTTP 200 nao comprova corpo recebido: duas aberturas falharam com transferencias
@@ -23,8 +23,19 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   permissoes para DNS, contas, cobrancas, migrations ou dados remotos.
 - Concorrencia usa identidades/dados sinteticos locais; nao prova capacidade
   de producao. Build da imagem ocorre no runner CI, nao no VPS.
-- Pendencias: gates Linux e verificacao da release; divergencia preexistente
-  de autoridade entre WF13 oficial e arquivo nao autoriza substituir formulas.
+- CI 36437130674: 948 Vitest, oito Node, 1.042 pgTAP e 20 E2E aprovados;
+  restore, lint, tipos e build passaram. Quatro sessoes, 20 chamadas simultaneas
+  e zero erros em ambiente sintetico; nao equivale a 20 usuarios distintos.
+- Producao: estoque autenticado carregou, duas respostas comprimidas completas,
+  12 sondagens de leitura sem erro e acesso anonimo negado. Quantidade extrema,
+  anual acima do limite e preservacao de proposta conferidas na pagina publicada.
+- Docker classic identifica config; containerd identifica manifesto. Nao
+  comparar digests de tipos distintos nem ignorar diferenca: provar checksum,
+  ligacao manifesto/config, plataforma, label e camadas; revalidar dois perfis
+  e registrar ID do host antes do CAS. Prova e hashes no relatorio de auditoria.
+- Pendencias: fonte live informa 07/08/2026; transporte funcionando nao comprova
+  atualidade comercial. Divergencia preexistente de autoridade entre WF13
+  oficial e arquivo nao autoriza substituir formulas.
 
 ## 2026-09-28: Caveman automatico e regressao do estoque
 
