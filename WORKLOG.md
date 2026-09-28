@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-09-28 - Publicacao e evidencias finais do Associativo
+
+- PR #102 e CI main 36437130674 aprovados; release 3d92b7a publicada em 15:01 UTC,
+  com backup, CAS, imagem anterior preservada e verificacao autenticada.
+- Esclarece ID config versus manifesto entre Docker classic/containerd com
+  prova criptografica e onze camadas equivalentes; sem rebuild ou retag no VPS.
+- Registra testes Linux, quatro sessoes/20 chamadas, smoke real limitado e
+  rejeicao de anual/parcelas invalidas no navegador publicado.
+- Documenta limites: atualidade da fonte e autoridade WF13/arquivo pendentes.
+  Esta etapa altera somente documentacao; publicar no Git e sincronizar
+  conhecimento, sem novo restart ou deploy da aplicacao.
+
 ## 2026-09-28 - Auditoria Associativo e concorrencia
 
 - Segunda CI confirmou isolamento de propostas e bloqueio de anual acima de
