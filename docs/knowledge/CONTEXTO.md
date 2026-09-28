@@ -1,8 +1,8 @@
 # Contexto do DESCOMPLICA-CRM
 
 status: validado
-atualizado_em: 2026-09-27
-verificado_em: 2026-09-27
+atualizado_em: 2026-09-28
+verificado_em: 2026-09-28
 fonte: AGENTS.md, package.json, docs/runbooks/inventory-performance.md
 
 ## Antes de trabalhar
@@ -28,6 +28,8 @@ fonte: AGENTS.md, package.json, docs/runbooks/inventory-performance.md
 - `docs/knowledge/recursos.json` mapeia paginas e APIs para area, agente, skill e
   referencias. `pnpm resources:check` detecta rotas novas sem mapeamento. Isso
   nao substitui cobertura funcional nem prova disponibilidade de integracoes.
+- Host novo ou erro de ferramenta: executar `pnpm resources:doctor`. Consultar
+  FERRAMENTAS.md para recursos locais, plugins condicionais e limites de acesso.
 
 ## Estoque e simuladores
 

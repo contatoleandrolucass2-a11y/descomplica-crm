@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-28 - prontidao das ferramentas de desenvolvimento
+
+- Adiciona diagnostico local de runtime, pacotes, Chromium e CLIs de seguranca.
+- Integra Codex Security ao roteamento por demanda, preservando preflight,
+  aprovacoes e a distincao entre instalar uma ferramenta e conectar um servico.
+- Registra instalacao verificada de Gitleaks/OSV no Windows e uso automatico
+  dos recursos pertinentes, sem SDK novo, dependencia npm ou mudanca em producao.
+
 ## 2026-09-28 - agentes e memoria reutilizavel
 
 - Busca aprendizados tecnicos por assunto entre worktrees, com fonte e limites.

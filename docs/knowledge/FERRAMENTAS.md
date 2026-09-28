@@ -1,8 +1,8 @@
 # Selecao automatica de ferramentas
 
 status: validado
-atualizado_em: 2026-09-27
-verificado_em: 2026-09-27
+atualizado_em: 2026-09-28
+verificado_em: 2026-09-28
 fonte: inventario local de skills e plugins; AGENTS.md
 
 Estas regras valem para qualquer chat deste projeto. O usuario nao precisa
@@ -12,27 +12,30 @@ Nao acionar todas em toda mensagem nem consumir servicos sem necessidade.
 
 ## Roteamento
 
-| Situacao                                    | Ferramenta ou skill                         | Motivo                                                                                                    |
-| ------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Inicio e fim de tarefa tecnica              | knowledge:context e knowledge:sync          | Consultar contexto e registrar atualizacoes locais no Obsidian.                                           |
-| Lentidao, erro ou causa desconhecida        | investigate-first                           | Medir e localizar a causa antes de editar.                                                                |
-| React, Next.js e desempenho                 | vercel-react-best-practices                 | Revisar consultas, estado, efeitos e renderizacao.                                                        |
-| UX, fluxo ou interface confusa              | descomplica-ux-audit                        | Avaliar a jornada e a ergonomia do CRM.                                                                   |
-| Layout e acessibilidade                     | web-design-guidelines                       | Conferir hierarquia, foco, legibilidade e responsividade.                                                 |
-| Testes de interface                         | playwright ou computer-use                  | Validar o fluxo real e inspecionar desktop e celular. Respeitar as regras de controle do navegador ativo. |
-| Correcao pontual                            | surgical-patch                              | Resolver no menor escopo responsavel.                                                                     |
-| Nova funcionalidade                         | lean-build                                  | Entregar um fluxo completo sem complexidade desnecessaria.                                                |
-| Refatoracao                                 | safe-refactor                               | Preservar comportamento e limites entre modulos.                                                          |
-| Compatibilidade ou schema                   | migration                                   | Planejar transicao reversivel e validacao.                                                                |
-| Banco, SQL, RPC ou RLS                      | Supabase e supabase-postgres-best-practices | Investigar desempenho e autorizacao no servidor/banco.                                                    |
-| Design visual maior ou arquivo Figma        | Figma e sua skill especifica                | Reutilizar componentes e referencias de design.                                                           |
-| Latencia ou erros com telemetria disponivel | Datadog                                     | Usar evidencias operacionais reais.                                                                       |
-| Jornadas ou funis com coleta disponivel     | PostHog                                     | Analisar comportamento agregado do produto.                                                               |
-| Codigo, PR e CI                             | GitHub ou gh                                | Versionar, revisar e verificar gates.                                                                     |
-| Backlog solicitado                          | Linear                                      | Organizar trabalho; nao criar tickets sem necessidade ou autorizacao.                                     |
-| Documentacao do Codex                       | openai-docs                                 | Consultar comportamento atual e oficial.                                                                  |
-| Validacao final                             | verify-and-stop                             | Comprovar o resultado e encerrar sem ampliar o escopo.                                                    |
-| Workflow existente no n8n                   | MCP n8n                                     | Aplicar o fluxo de validacao, alteracao e releitura exigido.                                              |
+| Situacao                                      | Ferramenta ou skill                         | Motivo                                                                                                    |
+| --------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Inicio e fim de tarefa tecnica                | knowledge:context e knowledge:sync          | Consultar contexto e registrar atualizacoes locais no Obsidian.                                           |
+| Lentidao, erro ou causa desconhecida          | investigate-first                           | Medir e localizar a causa antes de editar.                                                                |
+| React, Next.js e desempenho                   | vercel-react-best-practices                 | Revisar consultas, estado, efeitos e renderizacao.                                                        |
+| UX, fluxo ou interface confusa                | descomplica-ux-audit                        | Avaliar a jornada e a ergonomia do CRM.                                                                   |
+| Layout e acessibilidade                       | web-design-guidelines                       | Conferir hierarquia, foco, legibilidade e responsividade.                                                 |
+| Testes de interface                           | playwright ou computer-use                  | Validar o fluxo real e inspecionar desktop e celular. Respeitar as regras de controle do navegador ativo. |
+| Correcao pontual                              | surgical-patch                              | Resolver no menor escopo responsavel.                                                                     |
+| Nova funcionalidade                           | lean-build                                  | Entregar um fluxo completo sem complexidade desnecessaria.                                                |
+| Refatoracao                                   | safe-refactor                               | Preservar comportamento e limites entre modulos.                                                          |
+| Compatibilidade ou schema                     | migration                                   | Planejar transicao reversivel e validacao.                                                                |
+| Banco, SQL, RPC ou RLS                        | Supabase e supabase-postgres-best-practices | Investigar desempenho e autorizacao no servidor/banco.                                                    |
+| Design visual maior ou arquivo Figma          | Figma e sua skill especifica                | Reutilizar componentes e referencias de design.                                                           |
+| Latencia ou erros com telemetria disponivel   | Datadog                                     | Usar evidencias operacionais reais.                                                                       |
+| Jornadas ou funis com coleta disponivel       | PostHog                                     | Analisar comportamento agregado do produto.                                                               |
+| Codigo, PR e CI                               | GitHub ou gh                                | Versionar, revisar e verificar gates.                                                                     |
+| Auditoria de seguranca de diff ou repositorio | Codex Security e crm-seguranca              | Escolher security-diff-scan ou security-scan conforme o alvo; respeitar preflight e aprovacoes.           |
+| Segredos ou dependencias                      | Gitleaks, OSV-Scanner e pnpm audit          | Detectar credenciais e vulnerabilidades; triar achados sem ignorar para obter verde.                      |
+| Host novo ou ferramenta indisponivel          | resources:doctor                            | Verificar runtime, pacotes, navegador e CLIs antes de depender deles.                                     |
+| Backlog solicitado                            | Linear                                      | Organizar trabalho; nao criar tickets sem necessidade ou autorizacao.                                     |
+| Documentacao do Codex                         | openai-docs                                 | Consultar comportamento atual e oficial.                                                                  |
+| Validacao final                               | verify-and-stop                             | Comprovar o resultado e encerrar sem ampliar o escopo.                                                    |
+| Workflow existente no n8n                     | MCP n8n                                     | Aplicar o fluxo de validacao, alteracao e releitura exigido.                                              |
 
 ## Recursos proprios do projeto
 
@@ -72,6 +75,11 @@ perfis versionados quando a mudanca estiver integrada nelas.
   proprietario duplicado ou arquivo de verificacao/agente/skill ausente.
 - `tests/project-resources.test.ts` integra essa conferencia ao `pnpm test` e
   a CI existente. Ao mudar catalogos dinamicos, ampliar os testes do dominio.
+- `pnpm resources:doctor`: confere Node, pnpm, pacotes, Chromium, execucao do
+  Supabase CLI e scanners compativeis (Gitleaks 8.19+ da serie 8, OSV serie 2).
+  Nao altera o projeto nem acessa dados do CRM; o CLI pode consultar atualizacoes.
+  Docker e opcional no desktop porque os gates de banco/restore rodam na CI.
+  Nao comprova autenticacao de plugins, funcionamento do daemon nem testes.
 - Auditoria e lacunas: `docs/audits/recursos-crm-2026-09-28.md`.
 
 ## Disponibilidade confirmada
@@ -83,11 +91,23 @@ perfis versionados quando a mudanca estiver integrada nelas.
 - Catalogo consultado em 27/09/2026 confirmou GitHub, Supabase, Figma, Datadog,
   PostHog e OpenAI Developers instalados. Isso nao confirma autenticacao,
   projeto selecionado ou coleta do CRM. Conferir no momento do uso.
-- Codex Security foi sugerido como complemento opcional; instalacao/conexao
-  ainda nao confirmada. Os gates locais/CI nao dependem dele.
+- Em 28/09/2026, o catalogo confirmou Codex Security instalado e habilitado.
+  O plugin exige a skill e seu preflight antes de qualquer scan; deep-security-scan
+  apenas quando explicitamente solicitado. Nao rodar scan total a cada chat nem
+  conceder confianca automaticamente. Os gates locais/CI nao dependem dele.
 - Playwright, axe, Vitest, pgTAP, pnpm audit e restore isolado ja fazem parte
-  do projeto. Gitleaks/OSV tem scripts, mas disponibilidade dos executaveis
-  precisa ser confirmada no host; nao declarar varredura sem executa-los.
+  do projeto. Gitleaks 8.30.1 e OSV-Scanner 2.6.0 foram instalados neste Windows
+  em `~/.local/bin`, ja presente no PATH, com SHA-256 dos releases oficiais.
+  `pnpm security:secrets` passou; `pnpm security:osv` detectou somente o advisory
+  moderado GHSA-82fw-gwwq-j7x9 em Vitest e @vitest/mocker 4.1.10, tratado no
+  PR Dependabot #65. Saida 1 de achados nao significa falha de instalacao.
+  Verificar novamente em outro host; nao declarar varredura sem executa-la.
+- Fontes de instalacao: [Gitleaks](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1)
+  e [OSV-Scanner](https://github.com/google/osv-scanner/releases/tag/v2.6.0).
+  Nao baixar binarios de espelhos nem executar instaladores sem verificar origem.
+- Os sete perfis foram expostos pela ferramenta de subagentes nesta sessao.
+  Uma delegacao real crm-qa confirmou aplicacao das instrucoes. Isso nao prova
+  execucao dos outros seis perfis; selecionar somente quando a tarefa precisar.
 - Em falta de conector, usar uma alternativa local verificavel quando existir.
   Nao instalar SDK de rastreamento, enviar dados ou abrir contas automaticamente.
 - Nao alterar configuracoes de seguranca, confianca de hooks ou permissoes para

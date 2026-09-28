@@ -53,6 +53,9 @@ Crie branch por etapa, faça commits pequenos e descritivos, abra pull request e
 - Ao criar/remover rotas, atualizar `docs/knowledge/recursos.json` com area,
   agente, skill e referencias de verificacao. Executar `pnpm resources:check`;
   a suite de testes verifica o inventario para evitar rotas esquecidas.
+- Em host novo ou indisponibilidade de ferramenta, executar `pnpm resources:doctor`.
+  Consultar FERRAMENTAS.md para selecionar verificacoes de seguranca pertinentes;
+  nao iniciar auditoria completa ou conectar contas em toda tarefa.
 - Ao iniciar e encerrar trabalho tecnico, executar `pnpm knowledge:sync`.
   Registrar aprendizados duraveis, fontes, testes e pendencias nas notas
   versionadas antes da sincronizacao final. Nao copiar chats, credenciais ou
