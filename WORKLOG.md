@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-09-28 - recursos e recuperacao de conhecimento
+
+- Audita 40 arquivos de paginas/APIs em nove areas e inspeciona 19 rotas em
+  producao somente em leitura. Bloqueios de metas, ranking e conciliacao ficam
+  documentados, sem alterar politicas ou dados para remove-los.
+- Adiciona busca local de aprendizados entre worktrees, com proveniencia,
+  deduplicacao, limites, protecao de integridade e sem ler chats/notas privadas.
+- Versiona sete perfis de agentes e quatro skills de dominio, com escolha
+  automatica e delegacao proporcional no AGENTS, sem ampliar permissoes.
+- Inventario verificavel associa cada rota a area, agente, skill e referencias;
+  testes falham quando uma nova rota nao estiver mapeada.
+- Validacao local: 26 testes especificos, lint, tipos, build e formatacao passam;
+  suite geral: 744 passam, seis falham por pressupostos POSIX no Windows e um
+  skip existente. Os oito testes Node Salesforce passaram separadamente.
+- Sete TOMLs e quatro skills validados. Revisao independente da busca levou a
+  quatro endurecimentos, cobertos por testes; nova revisao sem achado restante.
+- Runtime atualizado nos tres checkouts locais, busca pela branch antiga e
+  leitura no Obsidian verificadas. Backup de 100 arquivos restaurado por hash.
+- Audit nao encontrou altas/criticas; dois alertas moderados do mesmo advisory
+  Vitest permanecem rastreados no PR Dependabot #65. CI Linux valida o candidato.
+- Sem deploy, migration, alteracao de n8n, SDK novo ou conexao de conta.
+
 ## 2026-09-27 — promoção final das referências do Tabelão
 
 - O QA hospedado do candidato aprovou o Tabelão nos quatro viewports exigidos,

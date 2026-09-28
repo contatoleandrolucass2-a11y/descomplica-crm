@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "areas": [
+    {
+      "name": "Autenticacao e conta",
+      "agent": "crm-seguranca",
+      "skill": "descomplica-validacao",
+      "routes": [
+        "app/page.tsx",
+        "app/unauthorized/page.tsx",
+        "app/(auth)/login/page.tsx",
+        "app/(auth)/register/page.tsx",
+        "app/(auth)/esqueci-senha/page.tsx",
+        "app/(auth)/redefinir-senha/page.tsx",
+        "app/(account)/mfa/page.tsx",
+        "app/(account)/conta/seguranca/page.tsx",
+        "app/auth/callback/route.ts",
+        "app/auth/mfa/verify/route.ts"
+      ],
+      "evidence": [
+        "tests/auth-security-foundation.test.ts",
+        "tests/session-persistence.test.ts",
+        "supabase/tests/auth_mfa_legal_foundation.test.sql"
+      ]
+    },
+    {
+      "name": "Privacidade e documentos legais",
+      "agent": "crm-interface",
+      "skill": "descomplica-interface",
+      "routes": [
+        "app/(legal)/politica-de-cookies/page.tsx",
+        "app/(legal)/politica-de-privacidade/page.tsx",
+        "app/(legal)/termos-de-uso/page.tsx"
+      ],
+      "evidence": [
+        "lib/legal/documents.ts",
+        "lib/privacy/cookie-consent.ts",
+        "tests/signup-legal-action.test.ts"
+      ]
+    },
+    {
+      "name": "Administracao",
+      "agent": "crm-seguranca",
+      "skill": "descomplica-dados-integracoes",
+      "routes": [
+        "app/(protected)/admin/page.tsx",
+        "app/(protected)/admin/usuarios/page.tsx",
+        "app/(protected)/admin/paginas/page.tsx"
+      ],
+      "evidence": [
+        "tests/access-management.test.tsx",
+        "tests/page-gates.test.ts",
+        "supabase/tests/rls_scope_matrix.test.sql"
+      ]
+    },
+    {
+      "name": "Dashboard, funil e ranking",
+      "agent": "crm-dados",
+      "skill": "descomplica-dados-integracoes",
+      "routes": [
+        "app/(protected)/app/page.tsx",
+        "app/(protected)/app/etapas/[stage]/page.tsx",
+        "app/(protected)/app/ranking/page.tsx",
+        "app/(protected)/app/canal-de-parcerias/page.tsx",
+        "app/api/dashboard/status/route.ts"
+      ],
+      "evidence": [
+        "tests/dashboard.test.ts",
+        "tests/ranking.test.ts",
+        "tests/source-availability.test.ts",
+        "supabase/tests/partnerships_rbac_convergence.test.sql"
+      ]
+    },
+    {
+      "name": "Read model v3",
+      "agent": "crm-dados",
+      "skill": "descomplica-dados-integracoes",
+      "routes": [
+        "app/(protected)/app/read-model-v3/page.tsx",
+        "app/(protected)/app/read-model-v3/etapas/[stage]/page.tsx",
+        "app/(protected)/app/read-model-v3/canal-de-parcerias/page.tsx",
+        "app/(protected)/app/read-model-v3/ranking/page.tsx"
+      ],
+      "evidence": [
+        "tests/read-model-v3-contracts.test.ts",
+        "tests/read-model-v3-config.test.ts",
+        "supabase/tests/read_model_v3.test.sql"
+      ]
+    },
+    {
+      "name": "Metas e pontuacao",
+      "agent": "crm-dados",
+      "skill": "descomplica-dados-integracoes",
+      "routes": [
+        "app/(protected)/app/configuracoes/page.tsx",
+        "app/(protected)/app/configuracoes/metas/page.tsx",
+        "app/(protected)/app/configuracoes/metas/parcerias/page.tsx",
+        "app/(protected)/app/configuracoes/metas/pontos/page.tsx"
+      ],
+      "evidence": [
+        "tests/funnel-goals.test.ts",
+        "tests/point-settings.test.ts",
+        "supabase/tests/funnel_goals.test.sql"
+      ]
+    },
+    {
+      "name": "Simuladores e motores oficiais",
+      "agent": "crm-simuladores",
+      "skill": "descomplica-simuladores",
+      "routes": [
+        "app/(protected)/app/simulacao/page.tsx",
+        "app/(protected)/app/simulacao/[simulator]/page.tsx",
+        "app/(protected)/app/simulacao/tabelao/page.tsx",
+        "app/api/official-simulator/[simulator]/route.ts",
+        "app/api/commercial-engine/[engine]/route.ts"
+      ],
+      "evidence": [
+        "tests/wf13-policy.test.ts",
+        "tests/wf13-looker-matrix.test.ts",
+        "tests/commercial-engine.test.ts",
+        "tests/simulators.test.tsx",
+        "lib/crm/simulators/catalog.ts",
+        "lib/crm/stages/catalog.ts"
+      ]
+    },
+    {
+      "name": "Estoque",
+      "agent": "crm-performance",
+      "skill": "descomplica-dados-integracoes",
+      "routes": ["app/api/inventory/route.ts", "app/api/inventory/snapshot/route.ts"],
+      "evidence": [
+        "tests/inventory-api.test.ts",
+        "tests/inventory-loading.test.ts",
+        "docs/runbooks/inventory-performance.md"
+      ]
+    },
+    {
+      "name": "Integracoes e operacao",
+      "agent": "crm-dados",
+      "skill": "descomplica-dados-integracoes",
+      "routes": [
+        "app/api/ingest/qlik/route.ts",
+        "app/api/ingest/salesforce/route.ts",
+        "app/api/refresh/salesforce/route.ts",
+        "app/api/health/route.ts"
+      ],
+      "evidence": [
+        "tests/qlik-relay.test.ts",
+        "tests/ingestion.test.ts",
+        "tests/health-route.test.ts",
+        "docs/runbooks/salesforce-n8n-migration.md",
+        "docs/runbooks/qlik-ranking-ingestion.md"
+      ]
+    }
+  ]
+}

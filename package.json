@@ -36,6 +36,8 @@
     "knowledge:install": "node scripts/knowledge/obsidian.mjs install",
     "knowledge:sync": "node scripts/knowledge/obsidian.mjs sync",
     "knowledge:context": "node scripts/knowledge/obsidian.mjs context",
+    "knowledge:search": "node scripts/knowledge/obsidian.mjs search",
+    "resources:check": "node scripts/knowledge/resources.mjs",
     "knowledge:status": "node scripts/knowledge/obsidian.mjs status",
     "audit": "pnpm audit --audit-level high",
     "security:secrets": "gitleaks dir . --redact=100 --no-banner",

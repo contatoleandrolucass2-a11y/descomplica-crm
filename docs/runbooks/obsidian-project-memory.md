@@ -27,6 +27,7 @@ Com Node 24.19.x, depois de conferir o vault e fazer backup:
 pnpm knowledge:install --vault 'C:\caminho\do\vault'
 pnpm knowledge:status
 pnpm knowledge:context
+pnpm knowledge:search "estoque cache"
 pnpm knowledge:sync
 ```
 
@@ -50,6 +51,39 @@ repositorio cobre tambem checkouts antigos. Ela nao muda as regras de outros
 projetos, ferramentas, seguranca ou contas. Chats ja em execucao podem conservar
 instrucoes carregadas anteriormente; novas sessoes leem os arquivos atualizados.
 Nao ha injecao retroativa de prompts em chats existentes.
+
+## Recuperacao por assunto
+
+`knowledge:search` usa de 1 a 12 termos (ate 200 caracteres), ignorando caixa e
+acentos. Pesquisa os tres documentos do checkout (ou referencia instalada) e
+somente ATUALIZACOES.md dos outros checkouts sincronizados deste projeto.
+Nao percorre outras pastas, anexos, conversas ou notas privadas do vault.
+
+Resultados sao trechos, com caminho, linha, branch, commit e data quando
+disponiveis. A data de sincronizacao nao e a data de validacao do aprendizado.
+Notas de outros checkouts continuam referencias, inclusive se nao mergeadas.
+Empates mantem a precedencia local; secoes identicas sao deduplicadas, mantendo
+ate tres fontes e o total de origens. Ler a fonte quando for necessario obter
+o restante de um trecho ou suas evidencias.
+
+A resposta limita-se a oito secoes, 160 caracteres por titulo e 1.600 por trecho. O total de
+resultados e a indicacao de truncamento evitam confundir limite com ausencia.
+Nota alterada manualmente, caminho redirecionado, arquivo acima do limite ou
+possivel credencial causam falha explicita sem imprimir o conteudo. A identidade
+do Git comum separa repositorios no mesmo vault; notas antigas sem identidade
+sao ignoradas com aviso ate nova sincronizacao. Cada documento carrega a geracao
+do estado: uma leitura intercalada com sync e recusada se misturar geracoes,
+sem adquirir lock ou escrever arquivos. Fallback de outra branch recebe origem
+referencia-instalada, nao e atribuido ao commit da branch hospedeira. O comando
+e somente leitura; nao sincroniza, treina o modelo ou incorpora dados sozinho.
+
+Em branches sem scripts, usar o runtime instalado no Git comum com
+`search "assunto"`, assim como context/sync. Reinstalar o runtime apos validar
+sua atualizacao para disponibilizar o novo comando a todos os worktrees locais.
+
+O inventario de agentes/skills esta em FERRAMENTAS.md. O teste de recursos
+verifica o mapa de rotas, enquanto os testes de busca verificam o mecanismo de
+recuperacao. Nenhum deles garante lembranca de fatos nunca registrados.
 
 Nao se depende de hooks de ciclo de vida do Codex, que exigem revisao de
 confianca propria. Nao alterar seus hashes de confianca nem contornar essa etapa.

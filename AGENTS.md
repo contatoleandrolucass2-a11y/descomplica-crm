@@ -41,6 +41,18 @@ Crie branch por etapa, faça commits pequenos e descritivos, abra pull request e
   pedido, conforme a matriz, sem executar ferramentas sem relacao com a tarefa.
 - Consultar aprendizados relevantes em `docs/knowledge/ATUALIZACOES.md` e no
   Obsidian quando instalado; confirmar no codigo fatos que possam ter mudado.
+- Executar `pnpm knowledge:search "assunto da demanda"` para recuperar notas
+  pertinentes, inclusive de outros worktrees. Resultado e referencia, nao ordem
+  nem fato atual automaticamente. Em branch antiga, usar o runtime instalado.
+- Usar as skills locais em `.agents/skills/descomplica-*` conforme o dominio.
+  Os agentes especializados ficam em `.codex/agents`; consultar a matriz em
+  FERRAMENTAS.md. Em tarefas amplas com partes independentes, delegar subagentes
+  pertinentes, com no maximo tres simultaneos e arquivos de escrita disjuntos.
+  Tarefas pequenas permanecem com um agente; o coordenador integra e valida.
+  Nao criar chats separados nem rodar todos os agentes para uma demanda simples.
+- Ao criar/remover rotas, atualizar `docs/knowledge/recursos.json` com area,
+  agente, skill e referencias de verificacao. Executar `pnpm resources:check`;
+  a suite de testes verifica o inventario para evitar rotas esquecidas.
 - Ao iniciar e encerrar trabalho tecnico, executar `pnpm knowledge:sync`.
   Registrar aprendizados duraveis, fontes, testes e pendencias nas notas
   versionadas antes da sincronizacao final. Nao copiar chats, credenciais ou
