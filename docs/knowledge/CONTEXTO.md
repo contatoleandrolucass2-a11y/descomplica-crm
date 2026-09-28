@@ -43,9 +43,12 @@ fonte: AGENTS.md, package.json, docs/runbooks/inventory-performance.md
 ## Limites permanentes
 
 - Nao registrar credenciais, dados pessoais, propostas, dumps ou estoque bruto.
-- Nao mudar producao, DNS, cobrancas ou dados remotos sem autorizacao explicita
-  aplicavel a tarefa. Uma regra de selecao automatica de ferramentas nao amplia
-  permissoes nem autoriza conexoes, publicacoes ou operacoes externas.
+- O usuario autorizou permanentemente, em 28/09/2026, publicar alteracoes
+  concluidas deste projeto apos validacao, em qualquer chat, sem pedir novamente.
+  Seguir docs/runbooks/automatic-publication.md e manter gates, backup e rollback.
+  DNS, cobrancas, contas, politicas comerciais e mutacoes de dados remotos fora
+  do deploy continuam exigindo autorizacao especifica. Selecao de ferramentas
+  nao amplia essas permissoes. Pedido posterior de nao publicar prevalece.
 - Workflow existente no n8n: somente MCP, validate_workflow_code antes de
   update_workflow e releitura depois. Falha do MCP bloqueia a alteracao; nao
   contornar com REST, salvo pedido explicito do usuario.

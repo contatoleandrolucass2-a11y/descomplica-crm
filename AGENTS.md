@@ -18,7 +18,11 @@ Este repositório consolida o sistema de login e o Descomplica CRM. O login Next
   automatizada usa exclusivamente a RPC versionada; qualquer mudança de ACL ou
   policy exige migration e pgTAP.
 - Atualize `WORKLOG.md`, `CHANGELOG.md` e a documentação afetada no mesmo commit.
-- Produção, DNS, cobranças e dados remotos exigem autorização explícita.
+- Publicacao de alteracoes concluidas deste projeto tem autorizacao permanente
+  do usuario desde 28/09/2026, apos validacao, sem nova confirmacao por chat.
+  Cumprir `docs/runbooks/automatic-publication.md`; gates falhos bloqueiam deploy.
+  DNS, cobrancas, contas, politicas comerciais e mutacoes de dados remotos fora
+  do deploy continuam exigindo autorizacao especifica.
 
 ## Estrutura
 

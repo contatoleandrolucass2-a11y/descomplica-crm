@@ -1,14 +1,6 @@
 import { noStoreHeaders } from "@/lib/security/api";
 import { authorizeRoute } from "@/lib/security/route-auth";
 
-type InventoryPayload = {
-  source?: string;
-  reportId?: string;
-  generatedAt?: string;
-  count?: number;
-  items?: unknown[];
-};
-
 const REFERENCE_INVENTORY_URL = "https://descomplicapro.com.br/api/inventory";
 const INVENTORY_TTL_MS = 30_000;
 
@@ -18,6 +10,10 @@ type InventoryCache = { body: string; fetchedAt: number };
 let cachedInventory: InventoryCache | null = null;
 let pendingInventory: Promise<InventoryCache> | null = null;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 async function fetchValidatedInventory(): Promise<InventoryCache> {
   const response = await fetch(REFERENCE_INVENTORY_URL, {
     cache: "no-store",
@@ -25,8 +21,23 @@ async function fetchValidatedInventory(): Promise<InventoryCache> {
   });
   if (!response.ok) throw new Error("inventory_query_failed");
 
-  const payload = (await response.json()) as InventoryPayload | null;
-  if (!payload || !Array.isArray(payload.items) || payload.items.length !== Number(payload.count)) {
+  const payload: unknown = await response.json();
+  if (
+    !isRecord(payload) ||
+    !Array.isArray(payload.items) ||
+    !(
+      typeof payload.count === "number" ||
+      (typeof payload.count === "string" && payload.count.trim() !== "")
+    ) ||
+    payload.items.length !== Number(payload.count) ||
+    !payload.items.every(
+      (item: unknown) =>
+        isRecord(item) &&
+        ["id", "businessUnit", "project", "product"].every(
+          (field) => typeof item[field] === "string",
+        ),
+    )
+  ) {
     throw new Error("inventory_payload_invalid");
   }
 

@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-09-28 - Auditoria Associativo e concorrencia
+
+- Segunda CI confirmou isolamento de propostas e bloqueio de anual acima de
+  50%; revelou clamp silencioso de parcelas no Associativo. Remove somente esse
+  clamp, mantendo valor invalido visivel e calculo bloqueado. QA confere estado
+  estavel apos frames e usa reduced motion, como a suite E2E existente.
+
+- CI inicial: 947 testes Linux e transferencia concorrente Nginx passaram;
+  ensaio HTTP integrado passou, mas segunda sessao UI falhou. Acrescenta
+  codigos de etapa sem logs de credenciais para diagnosticar, sem reduzir gates.
+
+- Reproduz estoque indisponivel em duas aberturas autenticadas; correlaciona
+  transferencia JSON parcial com timeout de leitura, antes de qualquer carga.
+- Corrige contrato do inventario, identidade ambigua entre fontes, parcelas
+  extremas, datas invalidas e incoerencias da aprovacao monetaria.
+- Preserva indice anual elegivel, datas de sinais do core e evolucao em meses
+  com sinais/anuais, sem criar taxas ou politicas comerciais.
+- Adiciona testes concorrentes isolados e compressao Nginx com dados sinteticos.
+  Imagens construidas/provadas na CI, fora do VPS.
+- Persiste autorizacao permanente de publicacao apos validacao, delimitada a
+  este repositorio, nas regras compartilhadas e no runbook automatic-publication.
+- Evidencia inicial: docs/audits/associativo-concorrencia-2026-09-28.md. Resultado
+  final de CI, release e verificacao operacional vinculado ao PR.
+
 ## 2026-09-28 - Caveman e revisao de recursos/estoque
 
 - Pesquisa fontes oficiais Caveman, Vercel/Next, Chrome DevTools, Codex e advisory

@@ -7,6 +7,8 @@ import { buildDirectTableAmortizationSchedule, buildDirectTablePreKeysSchedule, 
 import { calculateInvestorFlow, distributeSignalBalance } from "@/lib/archive-investor/investor-calculator-rules.mjs";
 import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilters, reconcileInvestorFilters, sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
 import { loadInvestorInventory } from "@/lib/archive-investor/load-inventory";
+import { inventoryIdentityKey, uniqueInventoryReferences } from "@/lib/archive-investor/inventory-reference";
+import { eligibleIntermediaryIndexes } from "@/lib/archive-investor/intermediary-fields";
 import { ASSOCIATIVE_APPROVAL_TIERS, calculateAssociativeApproval, findAssociativeApprovalPlan } from "@/lib/archive-investor/associative-approval-rules.mjs";
 import { buildAssociativeInstallmentMemory, buildAssociativePaymentComparison } from "@/lib/archive-investor/associative-installment-memory.mjs";
 import { buildDocumentationInstallmentSchedule } from "@/lib/archive-investor/documentation-calculator-rules.mjs";
@@ -1362,6 +1364,9 @@ function AssociativeApprovalPanel({
   const adjustmentsDialogRef = useRef<HTMLDialogElement>(null);
   const [preparedSuggestions, setPreparedSuggestions] = useState<Partial<Record<AssociativeFlow, AssociativeFlowSuggestion | null>>>({});
   const approval = calculateAssociativeApproval({ tierId, income, realSaleValue, proSoluto, linearInstallment, decreasingInstallment, linearMaximumIncomePayment, decreasingMaximumIncomePayment, proposalValid, paymentComparisonValid: comparisonReady });
+  const commonApprovalInput = { tierId, income, realSaleValue, proSoluto, proposalValid, paymentComparisonValid: comparisonReady };
+  const linearApproval = calculateAssociativeApproval({ ...commonApprovalInput, linearInstallment, decreasingInstallment: linearInstallment, linearMaximumIncomePayment, decreasingMaximumIncomePayment: linearMaximumIncomePayment });
+  const decreasingApproval = calculateAssociativeApproval({ ...commonApprovalInput, linearInstallment: decreasingInstallment, decreasingInstallment, linearMaximumIncomePayment: decreasingMaximumIncomePayment, decreasingMaximumIncomePayment });
   const tier = approval.tier;
   const rows = [
     {
@@ -1395,8 +1400,8 @@ function AssociativeApprovalPanel({
   ];
   const approvalReady = Boolean(financingReady && !entryPending && !entryRejected && tier && comparisonReady && proposalValid);
   const tierRejectsAll = tier?.id === "not-eligible";
-  const linearFailures = rows.filter((row) => row.limit != null && row.linearValue > row.limit);
-  const decreasingFailures = rows.filter((row) => row.limit != null && row.decreasingValue > row.limit);
+  const linearFailures = rows.filter((row) => linearApproval.checks.some((check) => check.id === row.id && !check.ok));
+  const decreasingFailures = rows.filter((row) => decreasingApproval.checks.some((check) => check.id === row.id && !check.ok));
   const linearStatus = approvalReady ? (tierRejectsAll || linearFailures.length > 0 ? "rejected" : "approved") : "pending";
   const decreasingStatus = approvalReady ? (tierRejectsAll || decreasingFailures.length > 0 ? "rejected" : "approved") : "pending";
   const adjustmentFor = (flow: AssociativeFlow, suggestion: AssociativeFlowSuggestion | null | undefined) => {
@@ -1491,8 +1496,8 @@ function AssociativeApprovalPanel({
       <caption className="sr-only">Comparação entre os resultados atuais e as regras da classificação selecionada</caption>
       <thead><tr><th>Regra de aprovação</th><th>Resultado Linear</th><th>Resultado Decrescente</th><th>Limite</th></tr></thead>
       <tbody>{rows.map((row) => {
-        const linearFailed = row.limit != null && row.linearValue > row.limit;
-        const decreasingFailed = row.limit != null && row.decreasingValue > row.limit;
+        const linearFailed = linearFailures.includes(row);
+        const decreasingFailed = decreasingFailures.includes(row);
         const failed = linearFailed || decreasingFailed;
         return <tr key={row.id} className={failed ? "failed" : row.limit != null ? "passed" : "pending"}>
           <th scope="row"><span className="investor-associative-approval-rule"><span>{row.label}</span><InvestorInfoHint label={row.label} title={`Entenda ${row.label}`} description={row.help} /></span></th>
@@ -2370,12 +2375,8 @@ function compactProductDescription(product: string, project: string) {
     : trimmedProduct;
 }
 
-function inventoryKey(item: Pick<InventoryItem, "businessUnit" | "project" | "identifier">) {
-  return [item.businessUnit, item.project, item.identifier ?? ""].join("|");
-}
-
 function inventoryProjectKey(item: Pick<InventoryItem, "businessUnit" | "project">) {
-  return [item.businessUnit, item.project].join("|");
+  return JSON.stringify([item.businessUnit, item.project]);
 }
 
 function inferLocation(identifier: string | null) {
@@ -2392,10 +2393,11 @@ function inferUnitType(product: string) {
 }
 
 function enrichInventory(items: InventoryItem[], reference: InventoryItem[]) {
-  const referenceByKey = new Map(reference.map((item) => [inventoryKey(item), item]));
+  const referenceByKey = uniqueInventoryReferences(items, reference);
   const referenceByProject = new Map(reference.map((item) => [inventoryProjectKey(item), item]));
   return items.map((item) => {
-    const source = referenceByKey.get(inventoryKey(item));
+    const key = inventoryIdentityKey(item);
+    const source = key === null ? undefined : referenceByKey.get(key);
     const projectSource = referenceByProject.get(inventoryProjectKey(item));
     const inferred = inferLocation(item.identifier);
     const finalWithKit = item.finalWithKit ?? source?.finalWithKit ?? null;
@@ -2981,12 +2983,20 @@ export function InvestorCalculator({
     .map((_, index) => index)
     .filter((index) => index < signalVisibilityFloor && !hiddenSignalIndexes.includes(index));
   const visibleSignalCount = visibleSignalIndexes.length;
-  const intermediaryFieldLimit = Math.min(intermediaries.length, result.context.intermediaryInputLimit);
+  const allowedIntermediaryIndexes = useMemo(() => eligibleIntermediaryIndexes({
+    annualMode,
+    payments: result.custom.intermediaries,
+    baseDate,
+    completionDate,
+    inputLimit: result.context.intermediaryInputLimit,
+  }), [annualMode, baseDate, completionDate, result.custom.intermediaries, result.context.intermediaryInputLimit]);
+  const intermediaryFieldLimit = allowedIntermediaryIndexes.length;
+  const intermediaryIndexLimit = (allowedIntermediaryIndexes.at(-1) ?? -1) + 1;
   const activeIntermediaryFieldCount = intermediaries.reduce((latest, value, index) => currencyInputNumber(value) > 0 ? index + 1 : latest, 0);
-  const intermediaryVisibilityFloor = Math.min(intermediaryFieldLimit, Math.max(intermediaryFieldCount, activeIntermediaryFieldCount));
+  const intermediaryVisibilityFloor = Math.min(intermediaryIndexLimit, Math.max(intermediaryFieldCount, activeIntermediaryFieldCount));
   const visibleIntermediaryIndexes = intermediaries
     .map((_, index) => index)
-    .filter((index) => index < intermediaryVisibilityFloor && !hiddenIntermediaryIndexes.includes(index));
+    .filter((index) => allowedIntermediaryIndexes.includes(index) && index < intermediaryVisibilityFloor && !hiddenIntermediaryIndexes.includes(index));
   const visibleIntermediaryCount = visibleIntermediaryIndexes.length;
   const validInstallmentSchedule = directTable
     ? result.context.maxInstallments > 0
@@ -2998,6 +3008,7 @@ export function InvestorCalculator({
     : 0;
   const associativePaymentSummaryAvailable = annualMode
     && result.ok
+    && !associativeProposalError
     && !associativeInstallmentsRejected
     && Boolean(result.custom.decreasing?.ok)
     && result.custom.installmentValue > 0;
@@ -3119,13 +3130,13 @@ export function InvestorCalculator({
   const directCreditState = directCreditLabel === "APROVADO" ? "approved" : directCreditLabel === "REPROVADO" ? "rejected" : directCreditLabel === "AJUSTE NECESSÁRIO" ? "adjustment" : "pending";
 
   useEffect(() => {
-    if (directTable) return;
+    if (directTable || annualMode) return;
     const limit = result.context.maxInstallments;
     if (limit > 0 && Number(installments) > limit) {
       const clampInstallments = window.setTimeout(() => setInstallments(String(limit)), 0);
       return () => window.clearTimeout(clampInstallments);
     }
-  }, [directTable, installments, result.context.maxInstallments]);
+  }, [directTable, annualMode, installments, result.context.maxInstallments]);
 
   useEffect(() => {
     if (directTable || annualMode || signalDistributionMode !== "auto") return;
@@ -3139,16 +3150,15 @@ export function InvestorCalculator({
   }, [directTable, annualMode, entryValue, result.context.valueReal, result.custom.actRate, signalDistributionMode]);
 
   useEffect(() => {
-    if (intermediaryFieldCount <= intermediaryFieldLimit && intermediaries
-      .slice(intermediaryFieldLimit)
-      .every((value) => currencyInputNumber(value) === 0)) return;
+    if (intermediaryFieldCount <= intermediaryIndexLimit && intermediaries
+      .every((value, index) => allowedIntermediaryIndexes.includes(index) || currencyInputNumber(value) === 0)) return;
 
     const reconcileIntermediaryFields = window.setTimeout(() => {
-      setIntermediaryFieldCount((current) => Math.min(current, intermediaryFieldLimit));
-      setIntermediaries((current) => current.map((value, index) => index < intermediaryFieldLimit ? value : "0"));
+      setIntermediaryFieldCount((current) => Math.min(current, intermediaryIndexLimit));
+      setIntermediaries((current) => current.map((value, index) => allowedIntermediaryIndexes.includes(index) ? value : "0"));
     }, 0);
     return () => window.clearTimeout(reconcileIntermediaryFields);
-  }, [intermediaries, intermediaryFieldCount, intermediaryFieldLimit]);
+  }, [intermediaries, intermediaryFieldCount, intermediaryIndexLimit, allowedIntermediaryIndexes]);
 
   useEffect(() => {
     if (!tourOpen) return;
@@ -3423,8 +3433,8 @@ export function InvestorCalculator({
   }
 
   function addIntermediaryField() {
-    const nextIndex = intermediaries.findIndex((_, index) => index < intermediaryFieldLimit && !visibleIntermediaryIndexes.includes(index));
-    if (nextIndex < 0) return;
+    const nextIndex = allowedIntermediaryIndexes.find((index) => !visibleIntermediaryIndexes.includes(index));
+    if (nextIndex === undefined) return;
     if (directTable) setDirectProposalDirty(true);
     setHiddenIntermediaryIndexes((current) => current.filter((item) => item !== nextIndex));
     setIntermediaryFieldCount((current) => Math.max(current, nextIndex + 1));
@@ -3626,27 +3636,24 @@ export function InvestorCalculator({
             .filter((annual: { value: number; approved: boolean; correctedValue: number }) => annual.value > 0 && annual.approved && annual.correctedValue > 0)
             .map((annual: { index: number; date: string; correctedValue: number }) => ({ index: annual.index, paymentDate: annual.date, correctedValue: annual.correctedValue, approved: true })),
         });
+        const candidateInstallment = flow === "linear" ? candidateComparison.highestLinearPayment : candidateComparison.highestDecreasingPayment;
+        const candidateMaximumIncomePayment = flow === "linear" ? candidateComparison.highestLinearTotal : candidateComparison.highestDecreasingTotal;
         const candidateApproval = calculateAssociativeApproval({
           tierId: associativeApprovalTier,
           income: currencyInputNumber(income),
           realSaleValue: candidateResult.context.valueReal,
           proSoluto: candidateResult.custom.balanceBeforeCorrection,
-          linearInstallment: candidateComparison.highestLinearPayment,
-          decreasingInstallment: candidateComparison.highestDecreasingPayment,
-          linearMaximumIncomePayment: candidateComparison.highestLinearTotal,
-          decreasingMaximumIncomePayment: candidateComparison.highestDecreasingTotal,
+          linearInstallment: candidateInstallment,
+          decreasingInstallment: candidateInstallment,
+          linearMaximumIncomePayment: candidateMaximumIncomePayment,
+          decreasingMaximumIncomePayment: candidateMaximumIncomePayment,
           proposalValid: candidateResult.ok,
           paymentComparisonValid: candidateComparison.comparisonAvailable,
         });
-        const commitmentRate = flow === "linear" ? candidateApproval.linearCommitmentRate : candidateApproval.decreasingCommitmentRate;
-        const maximumIncomeRate = flow === "linear" ? candidateApproval.linearMaximumIncomeRate : candidateApproval.decreasingMaximumIncomeRate;
         const valid = candidateResult.ok && candidateComparison.comparisonAvailable;
         return {
           valid,
-          approved: valid
-            && candidateApproval.proSolutoRate <= associativeApprovalRule.proSolutoRate
-            && commitmentRate <= associativeApprovalRule.commitmentRate
-            && maximumIncomeRate <= associativeApprovalRule.annualIncomeLimitRate,
+          approved: valid && candidateApproval.status === "approved",
         };
       },
     }) as AssociativeFlowSuggestion | null;
@@ -4594,7 +4601,7 @@ export function InvestorCalculator({
                     linearMaximumIncomeDate={associativePaymentComparison.highestLinearTotalRow?.paymentDate}
                     decreasingMaximumIncomeDate={associativePaymentComparison.highestDecreasingTotalRow?.paymentDate}
                     comparisonReady={associativePaymentComparison.comparisonAvailable && Boolean(result.custom.decreasing?.ok)}
-                    proposalValid={result.ok && Boolean(result.custom.decreasing?.ok)}
+                    proposalValid={result.ok && Boolean(result.custom.decreasing?.ok) && !associativeProposalError}
                     proposalError={associativeProposalError}
                     financingReady={associativeFinancingValueReady}
                     entryPending={associativeEntryPending}

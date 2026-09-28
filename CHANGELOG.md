@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-28 - Robustez e concorrencia do Associativo
+
+- Parcelas invalidas permanecem visiveis para correcao, sem substituicao silenciosa.
+
+- Diagnostico de QA identifica etapa da interacao sem expor logs sensiveis.
+
+- Comprime estoque no proxy e rejeita payloads invalidos antes do cache.
+- Impede enriquecimento financeiro por identificadores ambiguos.
+- Corrige aprovacao de anuais invalidas, limites monetarios, parcelas extremas,
+  datas de calendario, sinais e preservacao de anuais elegiveis.
+- Considera evolucao em linhas de sinais/anuais sem cobrar em duplicidade.
+- Acrescenta testes concorrentes e imagem imutavel produzida pela CI.
+- Persiste autorizacao de publicacao automatica apos validacao neste projeto.
+
 ## 2026-09-28 - Caveman, diagnosticos locais e preservacao de propostas
 
 - Integra Caveman Lite e Cavecrew a matriz automatica e aos sete perfis do CRM,

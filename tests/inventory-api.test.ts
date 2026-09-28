@@ -106,7 +106,7 @@ describe("inventory API authorization and cache boundaries", () => {
         source: "live-protected-source",
         generatedAt: "2026-09-06T03:00:00.000Z",
         count: 1,
-        items: [{ id: "unit-1" }],
+        items: [{ id: "unit-1", businessUnit: "QA", project: "Projeto sintetico", product: "101" }],
       }),
     );
     vi.stubGlobal("fetch", upstreamFetch);
