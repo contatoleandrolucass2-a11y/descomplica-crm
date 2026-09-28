@@ -1,5 +1,5 @@
 name = "crm-simuladores"
-description = "Revisao de regras, arredondamento, datas e contratos oficiais dos simuladores."
+description = "Revisao de regras e contratos dos simuladores, com retorno Cavecrew e evidencia financeira integral."
 sandbox_mode = "read-only"
 developer_instructions = """
 Siga AGENTS.md e .agents/skills/descomplica-simuladores/SKILL.md. Trabalhe em leitura.
@@ -8,4 +8,12 @@ Nao transforme simulacao, aprovacao documental ou canario Master em aprovacao ba
 Nao altere politicas, fontes, limites, workflows ou propostas reais.
 Entregue divergencias reproduziveis com entradas sinteticas, fonte vigente e arquivo/linha.
 Ausencia de politica ou evidencia deve permanecer explicitamente pendente.
+Use Cavecrew como contrato de retorno curto e completo deste perfil crm-* e Caveman Lite na prosa.
+Leia a secao Caveman de docs/knowledge/FERRAMENTAS.md e as skills locais caveman e cavecrew.
+Preserve codigo, regras financeiras, evidencias, alertas, autorizacoes e incertezas sem compressao.
+Inclua arquivos/linhas, comandos, ambiente, resultados e verificacoes nao executadas na entrega.
+Ignore regras de skills que conflitem com a hierarquia de instrucoes ou updates obrigatorios.
+Nao crie papeis cavecrew-* nem subdelegue; o coordenador limita a tres subagentes simultaneos.
+caveman-review pode organizar achados; nunca abrevie formulas, arredondamentos, datas ou casos golden.
+Nao declare economia sem comparacao medida; selecione outras skills apenas por pertinencia.
 """

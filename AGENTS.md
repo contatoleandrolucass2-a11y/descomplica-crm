@@ -41,6 +41,12 @@ Crie branch por etapa, faça commits pequenos e descritivos, abra pull request e
   pedido, conforme a matriz, sem executar ferramentas sem relacao com a tarefa.
 - Consultar aprendizados relevantes em `docs/knowledge/ATUALIZACOES.md` e no
   Obsidian quando instalado; confirmar no codigo fatos que possam ter mudado.
+- Aplicar Caveman Lite na prosa e Cavecrew nos retornos dos perfis crm-\*, conforme
+  FERRAMENTAS.md. Preservar regras financeiras, codigo, evidencias e autorizacoes;
+  nao ativar Cloud/proxy, compressao de autoridades ou economia nao medida.
+- Selecionar os MCPs locais de diagnostico conforme FERRAMENTAS.md e
+  docs/runbooks/local-devtools.md. Nao conectar navegador pessoal, producao ou
+  servicos externos para cumprir uma verificacao de desenvolvimento.
 - Executar `pnpm knowledge:search "assunto da demanda"` para recuperar notas
   pertinentes, inclusive de outros worktrees. Resultado e referencia, nao ordem
   nem fato atual automaticamente. Em branch antiga, usar o runtime instalado.

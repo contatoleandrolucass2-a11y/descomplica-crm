@@ -4,6 +4,28 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-28: Caveman automatico e regressao do estoque
+
+- Status: validado (local; gates Linux vinculados ao PR, sem publicacao).
+- Fonte: docs/audits/caveman-ferramentas-2026-09-28.md; FERRAMENTAS.md;
+  InvestorCalculator.tsx; rota inventory/snapshot; testes e QA sintetico.
+- Caveman Lite rege concisao, nao exatidao financeira; Cavecrew complementa os
+  sete agentes crm-\* existentes. Onze skills locais constam no inventario.
+- Next DevTools/Chrome DevTools sao diagnosticos locais, sem contas novas,
+  telemetria, CrUX ou conexao a navegador pessoal. MCP configurado nao implica
+  ferramenta carregada no chat atual; conferir em nova sessao e usar runbook.
+- Filtrar nao inicia proposta: somente selecao da unidade bloqueia substituicao
+  pela fonte viva. Filtrar/limpar deve preservar unidade e valores preenchidos.
+- Snapshot frio precisa compartilhar leitura em andamento e limpar falhas para
+  retry, sempre apos autorizacao individual; no-store e integridade preservados.
+- Vitest 4.1.11 aprovado no PR #65 e integrado; nao migrar major sem necessidade.
+- Testes Windows: 806 aprovados, seis falhas POSIX preexistentes e um skip;
+  oito testes Salesforce passaram separadamente. Lint/tipos, inventario, MCPs,
+  Gitleaks, pnpm audit e OSV passaram; scanners sem achados conhecidos apos
+  corrigir o SDK transitivo do Next MCP para 1.30.1. Sem ignores de seguranca.
+- Pendencias: gates finais desta branch, fontes/politicas de negocio e eventual
+  publicacao explicitamente autorizada. Nenhum ganho percentual foi medido.
+
 ## 2026-09-28: prontidao e selecao das ferramentas
 
 - Status: validado (instalacoes e verificacoes locais; gates Linux vinculados ao PR).

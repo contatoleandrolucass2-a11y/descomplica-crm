@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-28 - Caveman, diagnosticos locais e preservacao de propostas
+
+- Integra Caveman Lite e Cavecrew a matriz automatica e aos sete perfis do CRM,
+  com inventario das onze skills locais e verificacao de omissoes.
+- Configura Next DevTools e Chrome DevTools somente para desenvolvimento local,
+  com versoes fixas, navegador isolado e telemetria/CrUX desativados.
+- Preserva propostas ao filtrar/limpar estoque, permite resposta viva durante
+  exploracao e compartilha leitura fria concorrente do snapshot autorizado.
+- Acrescenta testes de regressao sem mudar fonte, valores ou regras comerciais.
+- Integra a correcao de seguranca Vitest 4.1.11 revisada no PR Dependabot #65.
+
 ## 2026-09-28 - prontidao das ferramentas de desenvolvimento
 
 - Adiciona diagnostico local de runtime, pacotes, Chromium e CLIs de seguranca.

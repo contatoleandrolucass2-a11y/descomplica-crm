@@ -2443,7 +2443,7 @@ export function InvestorCalculator({
   const tourSteps = directTable ? DIRECT_TABLE_TOUR_STEPS : directVisualLayout ? ASSOCIATIVE_TOUR_STEPS : INVESTOR_TOUR_STEPS;
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const inventoryReference = useRef<InventoryItem[]>([]);
-  const inventoryInteractionStarted = useRef(false);
+  const inventoryProposalStarted = useRef(false);
   const proposalGuideDialog = useRef<HTMLDialogElement>(null);
   const pfDocumentationDialog = useRef<HTMLDialogElement>(null);
   const pjDocumentationDialog = useRef<HTMLDialogElement>(null);
@@ -2569,13 +2569,14 @@ export function InvestorCalculator({
         directTable ? enrichedInventory : enrichedInventory.filter(isInvestorEligibleUnit),
       );
       setInventoryMeta(payload);
+      setInventoryWindowStart(0);
       setInventoryStatus("ready");
     };
 
     void loadInvestorInventory<InventoryPayload>({
       snapshotOnly: directTable,
       signal: controller.signal,
-      canReplace: () => !inventoryInteractionStarted.current,
+      canReplace: () => !inventoryProposalStarted.current,
       onInventory: applyInventory,
     }).catch(() => {
       if (!controller.signal.aborted) setInventoryStatus("error");
@@ -3306,7 +3307,7 @@ export function InvestorCalculator({
     ) {
       return;
     }
-    inventoryInteractionStarted.current = true;
+    inventoryProposalStarted.current = true;
     setSelectedUnitId(item.id);
     setDocumentationAppraisalOverride("");
     setSalePrice(item.finalPrice ? String(item.finalPrice) : "");
@@ -3475,7 +3476,6 @@ export function InvestorCalculator({
   }
 
   function clearFilters() {
-    inventoryInteractionStarted.current = true;
     setBusinessUnit("Todas");
     setProject("Todos");
     setPlant("Todos");
@@ -3484,15 +3484,9 @@ export function InvestorCalculator({
     setPriceSort("asc");
     setInventoryWindowStart(0);
     if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
-    if (directTable) {
-      setFilterNotice(
-        selectedUnitId ? "Filtros limpos. A proposta em edição foi preservada." : "",
-      );
-    } else {
-      setFilterNotice("");
-      setSelectedUnitId("");
-      setDocumentationAppraisalOverride("");
-    }
+    setFilterNotice(
+      selectedUnitId ? "Filtros limpos. A proposta em edição foi preservada." : "",
+    );
   }
 
   function updateIntermediary(index: number, value: string) {
@@ -3510,19 +3504,12 @@ export function InvestorCalculator({
   }
 
   function updateFilter(setter: (value: string) => void, value: string) {
-    inventoryInteractionStarted.current = true;
     setter(value);
     setInventoryWindowStart(0);
     if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
-    if (directTable) {
-      setFilterNotice(
-        selectedUnitId ? "Filtro atualizado. A proposta em edição foi preservada." : "",
-      );
-    } else {
-      setFilterNotice("");
-      setSelectedUnitId("");
-      setDocumentationAppraisalOverride("");
-    }
+    setFilterNotice(
+      selectedUnitId ? "Filtro atualizado. A proposta em edição foi preservada." : "",
+    );
   }
 
   function updateDiscount(value: string) {
@@ -3531,7 +3518,7 @@ export function InvestorCalculator({
   }
 
   function retryInventory() {
-    inventoryInteractionStarted.current = false;
+    inventoryProposalStarted.current = false;
     setInventoryWindowStart(0);
     setInventory([]);
     setInventoryMeta(null);
@@ -4033,7 +4020,7 @@ export function InvestorCalculator({
           <label><span>Região</span><select disabled={inventoryStatus !== "ready"} value={region} onChange={(event) => updateFilter(setRegion, event.target.value)}><option value="Todas">Todas ({filterOptions.totals.region.toLocaleString("pt-BR")})</option><InvestorFilterOptions options={filterOptions.regions} /></select></label>
           <label><span>Planta</span><select disabled={inventoryStatus !== "ready"} value={plant} onChange={(event) => updateFilter(setPlant, event.target.value)}><option value="Todos">Todos ({filterOptions.totals.plant.toLocaleString("pt-BR")})</option><InvestorFilterOptions options={filterOptions.plants} /></select></label>
           <label><span>Valor do Imóvel</span><select disabled={inventoryStatus !== "ready"} value={salePriceFilter} onChange={(event) => updateFilter(setSalePriceFilter, event.target.value)}><option value="Todos">Todos ({filterOptions.totals.salePrice.toLocaleString("pt-BR")})</option><InvestorFilterOptions options={filterOptions.salePrices} currency /></select></label>
-          <label className="investor-stock-sort" data-tour="sort"><span>Ordenar valor</span><select disabled={inventoryStatus !== "ready"} aria-label="Ordenar unidades por valor do imóvel" value={priceSort} onChange={(event) => { inventoryInteractionStarted.current = true; setPriceSort(event.target.value as "asc" | "desc"); setInventoryWindowStart(0); if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0; }}><option value="asc">Menor para o maior</option><option value="desc">Maior para o menor</option></select></label>
+          <label className="investor-stock-sort" data-tour="sort"><span>Ordenar valor</span><select disabled={inventoryStatus !== "ready"} aria-label="Ordenar unidades por valor do imóvel" value={priceSort} onChange={(event) => { setPriceSort(event.target.value as "asc" | "desc"); setInventoryWindowStart(0); if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0; }}><option value="asc">Menor para o maior</option><option value="desc">Maior para o menor</option></select></label>
           {filterNotice && <span className="sr-only" aria-live="polite">{filterNotice}</span>}
         </div>
 

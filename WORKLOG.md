@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-09-28 - Caveman e revisao de recursos/estoque
+
+- Pesquisa fontes oficiais Caveman, Vercel/Next, Chrome DevTools, Codex e advisory
+  Vitest; catalogo confirmou Context7 disponivel, sem necessidade de instalar.
+- Matriz integra sete skills Caveman locais e sete globais condicionais; sete
+  perfis crm-\* recebem retorno Cavecrew sem perder evidencias ou autorizacoes.
+- Inventario confere onze skills locais e presenca na matriz, alem de 40 rotas.
+- Instala/configura MCPs de desenvolvimento local; sem gateway de prompts,
+  SDK de rastreamento, conta adicional, trust ou permissao ampliada.
+- Corrige perda da selecao/proposta por filtros e bloqueio indevido da resposta
+  viva; adiciona regressao de navegador com fontes inteiramente sinteticas.
+- Compartilha leitura validada do snapshot entre chamadas concorrentes, mantendo
+  autorizacao individual e no-store; falhas liberam nova tentativa.
+- Revalida Associativo em quatro larguras e estados de dashboard/ranking/parcerias
+  em producao somente leitura. Sem benchmark de melhora ou certificado integral.
+- PR #65 (Vitest 4.1.11) revisado no SHA 4985705 e integrado com os tres gates
+  aprovados; merge b563460. Nenhum workflow n8n ou dado remoto alterado.
+- Validacao final e evidencias vinculadas ao PR desta branch; sem deploy.
+- Local: lint, tipos, build, inventario e protocolo MCP passaram; 806 testes
+  Vitest aprovados, seis falhas POSIX preexistentes e um skip. Oito testes Node
+  Salesforce passaram separadamente. Gitleaks, audit e OSV passaram sem achados;
+  SDK transitivo do Next corrigido para 1.30.1 e protocolo retestado.
+
 ## 2026-09-28 - disponibilidade e selecao de ferramentas
 
 - Confirma Codex Security instalado/habilitado no catalogo e acrescenta rotas

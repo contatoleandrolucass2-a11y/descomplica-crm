@@ -1,0 +1,28 @@
+# Project-local stdio servers. Open the chat at the checkout root.
+# Omit cwd so Codex uses the chat's working directory; the launcher pins child cwd.
+# No credentials, trust, approval, sandbox or global configuration changes.
+[mcp_servers.next-devtools]
+command = "node"
+args = ["scripts/knowledge/devtools.mjs", "next"]
+startup_timeout_sec = 30
+enabled_tools = ["nextjs_index", "nextjs_call", "nextjs_docs"]
+env = { NEXT_TELEMETRY_DISABLED = "1", NEXT_DEVTOOLS_HOST = "127.0.0.1" }
+
+[mcp_servers.chrome-devtools]
+command = "node"
+args = ["scripts/knowledge/devtools.mjs", "chrome"]
+startup_timeout_sec = 30
+enabled_tools = [
+  "list_pages",
+  "new_page",
+  "navigate_page",
+  "close_page",
+  "list_console_messages",
+  "get_console_message",
+  "list_network_requests",
+  "get_network_request",
+  "performance_start_trace",
+  "performance_stop_trace",
+  "performance_analyze_insight"
+]
+env = { NEXT_TELEMETRY_DISABLED = "1", CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS = "1", CHROME_DEVTOOLS_MCP_NO_UPDATE_CHECKS = "1" }

@@ -12,6 +12,7 @@ const relativeFile = z
 const resourceName = z.string().regex(/^crm-[a-z-]+$|^descomplica-[a-z-]+$/);
 const manifestSchema = z.object({
   version: z.literal(1),
+  skills: z.array(z.string().regex(/^[a-z][a-z0-9-]+$/)).min(1),
   areas: z
     .array(
       z.object({
@@ -41,6 +42,21 @@ export async function checkResources(root) {
     JSON.parse(await readFile(path.join(root, "docs/knowledge/recursos.json"), "utf8")),
   );
   const routes = await routesIn(root);
+  const skillRoot = path.join(root, ".agents/skills");
+  const skills = await readdir(skillRoot, { withFileTypes: true });
+  const matrix = await readFile(path.join(root, "docs/knowledge/FERRAMENTAS.md"), "utf8");
+  if (new Set(manifest.skills).size !== manifest.skills.length)
+    throw new Error("Skill duplicada no inventario.");
+  for (const skill of skills) {
+    if (skill.isSymbolicLink()) throw new Error("Links nao sao aceitos no inventario de skills.");
+    if (skill.isDirectory() && !manifest.skills.includes(skill.name))
+      throw new Error(`Skill sem inventario: ${skill.name}`);
+  }
+  for (const skill of manifest.skills) {
+    if (!(await stat(path.join(skillRoot, skill, "SKILL.md")).catch(() => null))?.isFile())
+      throw new Error(`Skill ausente: ${skill}`);
+    if (!matrix.includes(skill)) throw new Error(`Skill sem referencia na matriz: ${skill}`);
+  }
   const owned = new Set();
   for (const area of manifest.areas) {
     for (const route of area.routes) {
@@ -63,6 +79,7 @@ export async function checkResources(root) {
     status: "ok",
     areas: manifest.areas.length,
     routeFiles: routes.length,
+    skills: manifest.skills.length,
     scope:
       "Inventario de recursos; nao comprova execucao de testes, cobertura funcional ou conexao de plugins.",
   };
