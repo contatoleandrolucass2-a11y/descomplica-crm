@@ -25,6 +25,7 @@ export async function checkAssociativeLearningManual(
   const faq = dialog.getByRole("tab", { name: "Perguntas", exact: true });
   const close = dialog.getByRole("button", { name: "Fechar manual da Associativo" });
   let captures = 0;
+  let checkpoint = "initial";
 
   try {
     for (const viewport of [
@@ -36,7 +37,18 @@ export async function checkAssociativeLearningManual(
     ]) {
       await page.setViewportSize(viewport);
       for (const theme of ["light", "balanced", "dark"]) {
+        checkpoint = `${viewport.width}x${viewport.height}:${theme}:theme`;
         await setTheme(page, theme);
+        if (viewport.width === 1024) {
+          const themeFits = await page
+            .getByRole("group", { name: "Aparência da página" })
+            .evaluate((element) => {
+              const rect = element.getBoundingClientRect();
+              return rect.left >= 0 && rect.right <= innerWidth;
+            });
+          assert.equal(themeFits, true, "Tablet theme controls must not be clipped");
+        }
+        checkpoint = `${viewport.width}x${viewport.height}:${theme}:open`;
         await trigger.click();
         await policy.click();
         await expect(policy).toBeFocused();
@@ -47,6 +59,7 @@ export async function checkAssociativeLearningManual(
           ["policy", policy],
           ["faq", faq],
         ]) {
+          checkpoint = `${viewport.width}x${viewport.height}:${theme}:${key}`;
           await tab.click();
           const panel = dialog.getByRole("tabpanel");
           await expect(panel).toBeVisible();
@@ -114,6 +127,7 @@ export async function checkAssociativeLearningManual(
           if (key === "faq") await panel.locator("details[open] summary").first().click();
         }
 
+        checkpoint = `${viewport.width}x${viewport.height}:${theme}:keyboard-close`;
         await faq.press("Home");
         await expect(policy).toBeFocused();
         await policy.press("ArrowLeft");
@@ -148,6 +162,9 @@ export async function checkAssociativeLearningManual(
       `Associative manual QA: ${captures} captures, 5 viewports, 3 themes, keyboard, focus, anchors and axe passed.\n`,
     );
     return true;
+  } catch (error) {
+    process.stderr.write(`Associative manual QA failed: ${checkpoint} (${error.name}).\n`);
+    throw error;
   } finally {
     if (await dialog.isVisible()) await close.click();
     await page.setViewportSize(originalViewport);

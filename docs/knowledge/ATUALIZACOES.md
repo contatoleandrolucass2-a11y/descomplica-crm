@@ -26,6 +26,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   precisam de especificidade suficiente, nao apenas da ordem dos imports.
 - Tema intermediario no SiteMenu do arquivo chama-se Medio; no shell geral,
   Equilibrado. A matriz do manual usa o controle local, preservando a proposta.
+- CI 36483450994 identificou corte preexistente do menu em 1024px; reproduzido
+  no navegador publicado. Cabecalho Associativo passa a duas linhas entre
+  821 e 1100px, sem alterar os demais simuladores. QA mede o seletor de tema;
+  referencia de 1024px requer atualizacao visual justificada, sem relaxar gates.
 
 ## 2026-09-28: Associativo, estoque e publicacao automatica
 

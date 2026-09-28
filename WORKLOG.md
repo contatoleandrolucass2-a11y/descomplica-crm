@@ -18,6 +18,11 @@
   conforme a ordem observada no manifesto do build Next.
 - QA usa o seletor de tema real do simulador (Medio), distinto do shell geral
   (Equilibrado), sem navegar para fora da proposta sintetica selecionada.
+- CI 36483450994: manual passou em 375/768, mas o menu legado cortou os temas
+  em 1024px. Reproduzido na web; corrige somente o cabecalho Associativo entre
+  821 e 1100px, usando o padrao existente nos outros simuladores. QA verifica
+  a geometria do seletor e informa a etapa sem dados sensiveis. Referencia
+  visual de 1024px deve ser inspecionada e atualizada; demais baselines intactas.
 
 ## 2026-09-28 - Publicacao e evidencias finais do Associativo
 

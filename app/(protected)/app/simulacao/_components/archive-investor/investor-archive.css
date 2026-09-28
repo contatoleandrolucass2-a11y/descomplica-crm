@@ -20585,6 +20585,29 @@ body:has(.investor-page-shell) {
   }
 }
 
+/* Associativo: mantém os temas acessíveis entre o menu móvel e o desktop. */
+@media (min-width: 821px) and (max-width: 1100px) {
+  .investor-page-shell.investor-associative-table-page > .simulation-topbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding-inline: 18px;
+  }
+
+  .investor-page-shell.investor-associative-table-page > .simulation-topbar .site-menu {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    row-gap: 4px;
+    overflow: visible;
+  }
+
+  .investor-page-shell.investor-associative-table-page > .simulation-topbar .theme-switch {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+}
+
 /* Tabela Investidor: preserva a referência desktop e mantém os controles usáveis em telas menores. */
 
 @media (min-width: 521px) and (max-width: 1100px) {
