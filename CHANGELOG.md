@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-28 - agentes e memoria reutilizavel
+
+- Busca aprendizados tecnicos por assunto entre worktrees, com fonte e limites.
+- Acrescenta sete agentes e quatro skills proprios para tarefas do CRM inteiro.
+- Verifica inventario de rotas e recursos na suite existente e documenta lacunas
+  de configuracao, observabilidade e validacao sem alterar o runtime do CRM.
+
 ## 2026-09-27 — referências WF13 e estoque Associativo mobile
 
 - Atualiza as oito referências canário do hub para as três jornadas atualmente

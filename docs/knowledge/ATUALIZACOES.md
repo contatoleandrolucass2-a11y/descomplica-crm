@@ -4,6 +4,40 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-28: recursos e busca entre chats
+
+- Status: validado (mecanismo e instalacao local; gates Linux vinculados ao PR).
+- Fonte: PR #99 (recursos-memoria-crm); docs/audits/recursos-crm-2026-09-28.md; scripts/knowledge;
+  tests/obsidian-knowledge.test.ts; tests/project-resources.test.ts.
+- Conhecimento compartilhado e documental: agentes registram aprendizados,
+  nao conversas completas. knowledge:search recupera trechos do checkout e
+  aprendizados de outros worktrees sincronizados; nao treina o modelo.
+- Sete agentes locais e quatro skills de dominio. Novas sessoes carregam os
+  arquivos; nao ha injecao retroativa em chats nem autorizacao adicional.
+- Manifesto cobre 40 arquivos de rotas/APIs em nove areas, com teste que detecta
+  rotas novas sem mapeamento. Nao certifica todos os slugs ou papeis dinamicos.
+- Navegador em 27/09: 19 rotas inspecionadas em leitura com Master. Dashboard
+  sem overflow global nas quatro larguras, mas metas ainda sem fonte segura;
+  ranking bloqueado por politica e parcerias aguardando conciliacao. Confirmar
+  estado atual antes de agir; nao remover bloqueios por suposicao.
+- Catalogo confirmou plugins principais instalados; autenticacao e telemetria
+  sao verificacoes separadas. Codex Security apenas sugerido, nao confirmado.
+- Validacao: 26 testes especificos, lint, tipos, build e formatacao passam.
+  Suite geral Windows: 744 passam, seis falhas POSIX conhecidas e um skip;
+  oito testes Node Salesforce passam em execucao separada. CI Linux e o gate
+  integral, nao suprimir as falhas locais para obter resultado verde.
+- Revisao independente corrigiu isolamento entre repositorios, proveniencia de
+  fallback, geracoes intercaladas e tamanho dos titulos; regressao automatizada.
+- Instalacao compartilhada atualizada e conferida nos tres checkouts, inclusive
+  busca a partir da branch antiga e leitura pelo CLI do Obsidian. Backup de
+  100 arquivos restaurado com hashes equivalentes em 28/09/2026.
+- Audit: dois moderados em Vitest/@vitest/mocker, sem altos/criticos. Atualizacao
+  ja proposta no PR Dependabot #65; nao foi misturada a esta entrega.
+- Diagnostico CLI: configuracao carregada, mas verificacao opcional do MCP n8n
+  sofreu timeout. Revalidar o conector quando necessario; nenhuma alteracao de
+  workflow ou credenciais foi tentada e nao existe fallback REST autorizado.
+- Nenhuma publicacao em producao ou alteracao de dados remotos.
+
 ## 2026-09-27: desempenho do estoque
 
 - Status: validado.

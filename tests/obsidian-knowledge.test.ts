@@ -68,6 +68,152 @@ async function fixture() {
 }
 
 describe("local Obsidian project knowledge", () => {
+  it("ignores notes of another repository sharing the same vault", async () => {
+    const f = await fixture();
+    f.install();
+    const foreign = await fixture();
+    await writeFile(
+      path.join(foreign.docs, "ATUALIZACOES.md"),
+      "## Foreign\nPrivate cross-repository canary\n",
+    );
+    expect(foreign.run(["install", "--vault", f.vault]).status).toBe(0);
+    const result = JSON.parse(f.run(["search", "canary"]).stdout);
+    expect(result.results).toEqual([]);
+    expect(result.ignoredCheckouts.foreign).toBe(1);
+  });
+
+  it("labels fallback notes from older checkouts without attributing them to that commit", async () => {
+    const f = await fixture();
+    await writeFile(
+      path.join(f.docs, "ATUALIZACOES.md"),
+      "## Installed\nUnique fallback reference\n",
+    );
+    f.install();
+    const other = path.join(f.root, "legacy");
+    f.git(["worktree", "add", "-b", "legacy", other]);
+    await rename(path.join(other, "docs/knowledge"), path.join(other, "older-docs"));
+    expect(f.run(["sync"], other).status).toBe(0);
+    await writeFile(path.join(f.docs, "ATUALIZACOES.md"), "# Current\n");
+    const result = JSON.parse(f.run(["search", "fallback"]).stdout);
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].sources[0]).toMatchObject({
+      kind: "installed-reference",
+      branch: null,
+      head: null,
+      checkoutBranch: "legacy",
+    });
+  });
+
+  it("rejects individually valid notes from different sync generations and repairs them on sync", async () => {
+    const f = await fixture();
+    f.install();
+    const other = path.join(f.root, "other");
+    f.git(["worktree", "add", "-b", "other", other]);
+    const { worktree } = JSON.parse(f.run(["sync"], other).stdout);
+    const file = path.join(f.base, "Worktrees", worktree, "ATUALIZACOES.md");
+    const original = await readFile(file, "utf8");
+    const body = original
+      .slice(original.indexOf("\n") + 1)
+      .replace(/^geracao: [a-f0-9]+$/m, `geracao: ${"0".repeat(64)}`);
+    await writeFile(
+      file,
+      `<!-- descomplica-crm-knowledge-v1 sha256:${createHash("sha256").update(body).digest("hex")} -->\n${body}`,
+    );
+    expect(f.run(["search", "sintetico"]).stderr).toContain("Geracoes de conhecimento divergentes");
+    expect(f.run(["sync"], other).status).toBe(0);
+    expect(f.run(["search", "sintetico"]).status).toBe(0);
+  });
+
+  it("bounds headings as well as excerpts", async () => {
+    const f = await fixture();
+    await writeFile(path.join(f.docs, "ATUALIZACOES.md"), `## Estoque ${"x".repeat(240_000)}\n`);
+    const result = f.run(["search", "estoque"]);
+    expect(result.status).toBe(0);
+    expect(result.stdout.length).toBeLessThan(5_000);
+    expect(JSON.parse(result.stdout).results[0].headingTruncated).toBe(true);
+  });
+
+  it("finds bounded accent-insensitive context locally without requiring a vault", async () => {
+    const f = await fixture();
+    await writeFile(
+      path.join(f.docs, "ATUALIZACOES.md"),
+      "# Notas\n\n## Validacao\n\nA conciliação do estoque usa RPC.\n",
+    );
+    const result = JSON.parse(f.run(["search", "conciliacao", "estoque"]).stdout);
+    expect(result.vault).toBe("not-configured");
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].score).toBe(2);
+    expect(result.results[0].sources[0].kind).toBe("current-checkout");
+    expect(result.results[0].excerpt).toContain("RPC");
+    expect(JSON.parse(f.run(["search", "inexistente"]).stdout).results).toEqual([]);
+    expect(f.run(["search"]).status).toBe(1);
+    expect(f.run(["search", "x".repeat(201)]).status).toBe(1);
+  });
+
+  it("retrieves unique knowledge from another checkout with branch provenance only", async () => {
+    const f = await fixture();
+    f.install();
+    const other = path.join(f.root, "other");
+    f.git(["worktree", "add", "-b", "knowledge-other", other]);
+    await writeFile(
+      path.join(other, "docs/knowledge/ATUALIZACOES.md"),
+      "# Notas\n\n## Estoque\n\nMedicao sintetica exclusiva.\n",
+    );
+    expect(f.run(["sync"], other).status).toBe(0);
+    await writeFile(path.join(f.vault, "Privado.md"), "Medicao nao deve aparecer");
+    const result = JSON.parse(f.run(["search", "medicao"]).stdout);
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].sources[0]).toMatchObject({
+      kind: "other-checkout-reference",
+      branch: "knowledge-other",
+    });
+    expect(result.results[0].sources[0].updatedAt).toBeTruthy();
+    expect(JSON.stringify(result)).not.toContain("nao deve aparecer");
+    await writeFile(
+      path.join(f.docs, "ATUALIZACOES.md"),
+      "# Notas\n\n## Estoque\n\nMedicao sintetica exclusiva.\n",
+    );
+    const duplicate = JSON.parse(f.run(["search", "medicao"]).stdout);
+    expect(duplicate.results).toHaveLength(1);
+    expect(duplicate.results[0].sourceCount).toBe(2);
+    expect(duplicate.results[0].sources[0].kind).toBe("current-checkout");
+  });
+
+  it("bounds result count and excerpt length and reports truncation", async () => {
+    const f = await fixture();
+    await writeFile(
+      path.join(f.docs, "ATUALIZACOES.md"),
+      Array.from({ length: 12 }, (_, i) => `## Nota ${i}\nEstoque ${"dado ".repeat(500)}\n`).join(
+        "\n",
+      ),
+    );
+    const result = JSON.parse(f.run(["search", "estoque"]).stdout);
+    expect(result.totalMatches).toBe(12);
+    expect(result.results).toHaveLength(8);
+    for (const match of result.results) {
+      expect(match.excerpt.length).toBeLessThanOrEqual(1600);
+      expect(match.truncated).toBe(true);
+    }
+  });
+
+  it("refuses tampered or redirected cross-checkout notes without printing content", async () => {
+    const f = await fixture();
+    f.install();
+    const other = path.join(f.root, "other");
+    f.git(["worktree", "add", "-b", "other", other]);
+    const { worktree } = JSON.parse(f.run(["sync"], other).stdout);
+    const folder = path.join(f.base, "Worktrees", worktree);
+    const note = path.join(folder, "ATUALIZACOES.md");
+    await writeFile(note, "private-canary");
+    const result = f.run(["search", "canary"]);
+    expect(result.status).toBe(1);
+    expect(result.stdout + result.stderr).not.toContain("private-canary");
+    const outside = path.join(f.root, "preserved");
+    await rename(folder, outside);
+    await symlink(outside, folder, process.platform === "win32" ? "junction" : "dir");
+    expect(f.run(["search", "estoque"]).stderr).toContain("Link simbolico recusado");
+  });
+
   it("reports an unconfigured host without creating files", async () => {
     const f = await fixture();
     expect(JSON.parse(f.run(["sync"]).stdout).status).toBe("not-configured");
