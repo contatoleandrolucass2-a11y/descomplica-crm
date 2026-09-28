@@ -4,6 +4,26 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-28: Associativo, estoque e publicacao automatica
+
+- Status: pendente_validacao (candidato; gates e publicacao rastreados no PR).
+- Fonte: docs/audits/associativo-concorrencia-2026-09-28.md; rotas inventory;
+  calculator-rules, approval-rules, installment-memory e testes de concorrencia.
+- HTTP 200 nao comprova corpo recebido: duas aberturas falharam com transferencias
+  parciais e timeout de 25 segundos. Compressao so nas duas rotas autorizadas.
+- Identidade ausente/duplicada nao deve enriquecer valores financeiros.
+  Validar payload antes do cache e cada usuario antes de compartilhar resposta.
+- Validar parcelas antes de alocacao; calendario estrito, indices anuais reais
+  e comparacao monetaria em centavos, inclusive painel e sugestoes.
+- Usuario reiterou autorizacao permanente de publicar alteracoes concluidas
+  apos validacao em qualquer chat deste Git comum. Persistida nas instrucoes
+  globais delimitadas ao projeto e automatic-publication.md. Sem ampliar
+  permissoes para DNS, contas, cobrancas, migrations ou dados remotos.
+- Concorrencia usa identidades/dados sinteticos locais; nao prova capacidade
+  de producao. Build da imagem ocorre no runner CI, nao no VPS.
+- Pendencias: gates Linux e verificacao da release; divergencia preexistente
+  de autoridade entre WF13 oficial e arquivo nao autoriza substituir formulas.
+
 ## 2026-09-28: Caveman automatico e regressao do estoque
 
 - Status: validado (local; gates Linux vinculados ao PR, sem publicacao).

@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { noStoreHeaders } from "@/lib/security/api";
+
 const mocks = vi.hoisted(() => ({
   authorizeRoute: vi.fn(),
   fetch: vi.fn(),
@@ -8,6 +10,32 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/security/route-auth", () => ({ authorizeRoute: mocks.authorizeRoute }));
 
 let GET: typeof import("@/app/api/inventory/route").GET;
+
+const unit = {
+  id: "unit-1",
+  businessUnit: "Direcional",
+  project: "Synthetic project",
+  product: "Apartamento A-101",
+};
+const validPayload = {
+  source: "synthetic-live-source",
+  generatedAt: "2026-09-28T12:00:00.000Z",
+  count: 1,
+  items: [unit],
+};
+
+function expectNoStore(response: Response) {
+  expect(response.headers.get("cache-control")).toBe("no-store, max-age=0");
+  expect(response.headers.get("pragma")).toBe("no-cache");
+}
+
+function deferredFetch() {
+  let resolve!: (response: Response) => void;
+  const promise = new Promise<Response>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
 
 beforeEach(async () => {
   vi.resetModules();
@@ -37,9 +65,7 @@ describe("inventory route authorization", () => {
   it("reuses validated stock for 30 seconds with authorization and private no-store responses", async () => {
     vi.useFakeTimers();
     mocks.authorizeRoute.mockResolvedValue({ ok: true, context: {} });
-    mocks.fetch.mockResolvedValue(
-      Response.json({ count: 1, items: [{ id: "unit-1" }] }, { status: 200 }),
-    );
+    mocks.fetch.mockResolvedValue(Response.json(validPayload, { status: 200 }));
 
     const response = await GET();
 
@@ -68,7 +94,7 @@ describe("inventory route authorization", () => {
 
   it("never exposes a warm cache to a user who lost permission", async () => {
     mocks.authorizeRoute.mockResolvedValue({ ok: true });
-    mocks.fetch.mockResolvedValue(Response.json({ count: 1, items: [{ id: "unit-1" }] }));
+    mocks.fetch.mockResolvedValue(Response.json(validPayload));
     await GET();
     mocks.authorizeRoute.mockResolvedValue({
       ok: false,
@@ -80,48 +106,199 @@ describe("inventory route authorization", () => {
     expect(mocks.fetch).toHaveBeenCalledTimes(1);
   });
 
-  it("shares one upstream request between concurrent authorized users", async () => {
+  it("authorizes 20 cold, in-flight and warm requests while sharing one upstream fetch", async () => {
     mocks.authorizeRoute.mockResolvedValue({ ok: true });
-    let resolveFetch!: (response: Response) => void;
-    mocks.fetch.mockReturnValue(
-      new Promise<Response>((resolve) => {
-        resolveFetch = resolve;
-      }),
-    );
-    const requests = [GET(), GET(), GET()];
+    const pending = deferredFetch();
+    mocks.fetch.mockReturnValueOnce(pending.promise);
+    const requests = Array.from({ length: 20 }, () => GET());
     await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(1));
-    resolveFetch(Response.json({ count: 0, items: [] }));
-    const responses = await Promise.all(requests);
+    const inFlight = Array.from({ length: 20 }, () => GET());
+    await vi.waitFor(() => expect(mocks.authorizeRoute).toHaveBeenCalledTimes(40));
+    pending.resolve(Response.json(validPayload));
+    const responses = await Promise.all([...requests, ...inFlight]);
     expect(responses.map((response) => response.headers.get("x-inventory-cache"))).toEqual([
       "MISS",
-      "COALESCED",
-      "COALESCED",
+      ...Array(39).fill("COALESCED"),
     ]);
-    expect(await Promise.all(responses.map((response) => response.json()))).toEqual([
-      { count: 0, items: [] },
-      { count: 0, items: [] },
-      { count: 0, items: [] },
-    ]);
+
+    const warm = await Promise.all(Array.from({ length: 20 }, () => GET()));
+    expect(warm.map((response) => response.headers.get("x-inventory-cache"))).toEqual(
+      Array(20).fill("HIT"),
+    );
+    for (const response of [...responses, ...warm]) {
+      expect(response.status).toBe(200);
+      expectNoStore(response);
+      await expect(response.json()).resolves.toEqual(validPayload);
+    }
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    expect(mocks.authorizeRoute.mock.calls).toEqual(
+      Array.from({ length: 60 }, () => ["crm.simulators.view"]),
+    );
   });
 
-  it.each([null, { count: 2, items: [] }])(
-    "does not cache an invalid upstream payload: %j",
-    async (payload) => {
-      mocks.authorizeRoute.mockResolvedValue({ ok: true });
-      mocks.fetch.mockResolvedValueOnce(Response.json(payload));
-      const failed = await GET();
-      expect(failed.status).toBe(502);
-      await expect(failed.json()).resolves.toEqual({ error: "inventory_payload_invalid" });
-      mocks.fetch.mockResolvedValueOnce(Response.json({ count: 0, items: [] }));
-      expect((await GET()).status).toBe(200);
-      expect(mocks.fetch).toHaveBeenCalledTimes(2);
+  it.each([401, 403])(
+    "denies 20 requests with %i on cold, in-flight and warm caches",
+    async (status) => {
+      const error = status === 401 ? "unauthenticated" : "forbidden";
+      mocks.authorizeRoute.mockImplementation(async () => ({
+        ok: false,
+        response: Response.json({ error }, { status, headers: noStoreHeaders() }),
+      }));
+      const checkDenied = async () => {
+        const responses = await Promise.all(Array.from({ length: 20 }, () => GET()));
+        for (const response of responses) {
+          expect(response.status).toBe(status);
+          expectNoStore(response);
+          expect(response.headers.get("x-inventory-cache")).toBeNull();
+          expect(response.headers.get("x-inventory-cache-age")).toBeNull();
+          await expect(response.json()).resolves.toEqual({ error });
+        }
+      };
+
+      await checkDenied();
+      expect(mocks.fetch).not.toHaveBeenCalled();
+
+      const pending = deferredFetch();
+      mocks.fetch.mockReturnValueOnce(pending.promise);
+      mocks.authorizeRoute.mockResolvedValueOnce({ ok: true });
+      const allowed = GET();
+      await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(1));
+      // Denied callers must finish before the authorized upstream request resolves.
+      await checkDenied();
+      expect(mocks.fetch).toHaveBeenCalledTimes(1);
+      pending.resolve(Response.json(validPayload));
+      expect((await allowed).status).toBe(200);
+
+      await checkDenied();
+      expect(mocks.fetch).toHaveBeenCalledTimes(1);
+      expect(mocks.authorizeRoute.mock.calls).toEqual(
+        Array.from({ length: 61 }, () => ["crm.simulators.view"]),
+      );
     },
   );
+
+  it.each([
+    null,
+    false,
+    [],
+    "invalid",
+    {},
+    { count: 2, items: [] },
+    { count: 0, items: null },
+    { count: 0, items: {} },
+    ...[undefined, null, false, true, "", " ", [], {}, -1, 0.5, "invalid"].map((count) => ({
+      count,
+      items: count === true ? [unit] : [],
+    })),
+    ...[null, false, true, 0, 1, "unit", [], [unit]].map((item) => ({
+      count: 1,
+      items: [item],
+    })),
+    ...["id", "businessUnit", "project", "product"].flatMap((field) =>
+      [undefined, null, false, 1, [], {}].map((value) => ({
+        count: 1,
+        items: [{ ...unit, [field]: value }],
+      })),
+    ),
+    { count: 2, items: [unit, null] },
+  ])("does not cache an invalid upstream payload: %j", async (payload) => {
+    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.fetch.mockResolvedValueOnce(Response.json(payload));
+    const failed = await GET();
+    expect(failed.status).toBe(502);
+    expectNoStore(failed);
+    expect(failed.headers.get("x-inventory-cache")).toBeNull();
+    await expect(failed.json()).resolves.toEqual({ error: "inventory_payload_invalid" });
+    mocks.fetch.mockResolvedValueOnce(Response.json(validPayload));
+    const retry = await GET();
+    expect(retry.status).toBe(200);
+    expect(retry.headers.get("x-inventory-cache")).toBe("MISS");
+    await expect(retry.json()).resolves.toEqual(validPayload);
+    const warm = await GET();
+    expect(warm.headers.get("x-inventory-cache")).toBe("HIT");
+    await expect(warm.json()).resolves.toEqual(validPayload);
+    expect(mocks.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([0, "0", 1, "1"])("preserves compatible numeric counts: %j", async (count) => {
+    const payload = { ...validPayload, count, items: Number(count) === 0 ? [] : [unit] };
+    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.fetch.mockResolvedValueOnce(Response.json(payload));
+    for (const cache of ["MISS", "HIT"]) {
+      const response = await GET();
+      expect(response.status).toBe(200);
+      expectNoStore(response);
+      expect(response.headers.get("x-inventory-cache")).toBe(cache);
+      await expect(response.json()).resolves.toEqual(payload);
+    }
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves optional null fields and upstream commercial data without normalization", async () => {
+    const payload = {
+      ...validPayload,
+      items: [
+        {
+          ...unit,
+          identifier: null,
+          plant: null,
+          finalPrice: null,
+          finalWithKit: 300_000,
+          unitBonus: 10_000,
+          tableSlack: 5_000,
+          completionDate: null,
+        },
+      ],
+    };
+    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.fetch.mockResolvedValueOnce(Response.json(payload));
+    for (const cache of ["MISS", "HIT"]) {
+      const response = await GET();
+      expect(response.status).toBe(200);
+      expect(response.headers.get("x-inventory-cache")).toBe(cache);
+      await expect(response.json()).resolves.toEqual(payload);
+    }
+  });
+
+  it("shares an invalid payload across 20 requests and retries once before warming the cache", async () => {
+    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    const invalid = deferredFetch();
+    mocks.fetch.mockReturnValueOnce(invalid.promise);
+    const requests = Array.from({ length: 20 }, () => GET());
+    await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(1));
+    invalid.resolve(Response.json({ count: 1, items: [null] }));
+    for (const response of await Promise.all(requests)) {
+      expect(response.status).toBe(502);
+      expectNoStore(response);
+      expect(response.headers.get("x-inventory-cache")).toBeNull();
+      await expect(response.json()).resolves.toEqual({ error: "inventory_payload_invalid" });
+    }
+
+    const valid = deferredFetch();
+    mocks.fetch.mockReturnValueOnce(valid.promise);
+    const retries = Array.from({ length: 20 }, () => GET());
+    await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(2));
+    valid.resolve(Response.json(validPayload));
+    const recovered = await Promise.all(retries);
+    expect(recovered.map((response) => response.headers.get("x-inventory-cache"))).toEqual([
+      "MISS",
+      ...Array(19).fill("COALESCED"),
+    ]);
+    const warm = await GET();
+    expect(warm.headers.get("x-inventory-cache")).toBe("HIT");
+    for (const response of [...recovered, warm]) {
+      expect(response.status).toBe(200);
+      expectNoStore(response);
+      await expect(response.json()).resolves.toEqual(validPayload);
+    }
+    expect(mocks.fetch).toHaveBeenCalledTimes(2);
+    expect(mocks.authorizeRoute).toHaveBeenCalledTimes(41);
+  });
 
   it("fails closed when the expired cache cannot be refreshed", async () => {
     vi.useFakeTimers();
     mocks.authorizeRoute.mockResolvedValue({ ok: true });
-    mocks.fetch.mockResolvedValueOnce(Response.json({ count: 1, items: [{ id: "old" }] }));
+    mocks.fetch.mockResolvedValueOnce(Response.json(validPayload));
     await GET();
     vi.advanceTimersByTime(30_000);
     mocks.fetch.mockRejectedValueOnce(new Error("network error"));

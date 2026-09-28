@@ -51,6 +51,12 @@ jobs:
       - name: Audit high and critical vulnerabilities
         run: pnpm audit --audit-level high
 
+      - name: Validate inventory compression with isolated Nginx
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --yes --no-install-recommends nginx
+          node scripts/qa/nginx-inventory-transfer.mjs
+
       - name: Build
         run: pnpm build
 
@@ -165,3 +171,44 @@ jobs:
           path: docs/release-candidate/ci-isolated-restore-results.json
           if-no-files-found: error
           retention-days: 14
+
+  promotable-image:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout immutable release
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Node.js 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Build immutable image outside production
+        run: node scripts/release/build-promotable-image.mjs
+
+      - name: Prove both runtime profiles with synthetic secrets
+        run: sudo --preserve-env=IMAGE_TAG "$(command -v node)" scripts/release/prove-promotable-image.mjs
+
+      - name: Export release artifact
+        run: |
+          mkdir -p "${RUNNER_TEMP}/crm-release"
+          docker image inspect --format '{{.Id}}' "descomplica-crm:${IMAGE_TAG}" > "${RUNNER_TEMP}/crm-release/image-id.txt"
+          printf '%s\n' "${IMAGE_TAG}" > "${RUNNER_TEMP}/crm-release/revision.txt"
+          docker save "descomplica-crm:${IMAGE_TAG}" | gzip -1 > "${RUNNER_TEMP}/crm-release/image.tar.gz"
+          cd "${RUNNER_TEMP}/crm-release"
+          sha256sum image.tar.gz > image.sha256
+
+      - name: Upload verified image without deployment credentials
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: promotable-image-${{ github.sha }}
+          path: ${{ runner.temp }}/crm-release
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

@@ -55,6 +55,17 @@ contrato Supabase inválido antes de iniciar o Next.js.
 
 ## Prova
 
+### Artefato da CI
+
+O job `promotable-image` em pushes da `main` executa build e prova no runner,
+sem credenciais de deploy. Publica `promotable-image-<SHA>` por sete dias:
+`image.tar.gz`, `image.sha256`, `image-id.txt` e `revision.txt`.
+Confirmar todos os jobs da mesma execucao, inclusive release e restore, antes
+de baixar e carregar a imagem. Verificar `sha256sum -c image.sha256`, SHA em
+`revision.txt`, depois `docker load --input image.tar.gz` e image ID/label OCI.
+Nao reconstruir no VPS. Os comandos abaixo continuam sendo a prova local
+equivalente; o bind e a promocao reutilizam a imagem aprovada.
+
 Após congelar o SHA final:
 
 ```bash

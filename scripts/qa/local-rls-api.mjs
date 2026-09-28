@@ -6,11 +6,17 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 import { promisify } from "node:util";
+import { pathToFileURL } from "node:url";
 
 import { createClient } from "@supabase/supabase-js";
 
 import legalDocumentVersions from "../../lib/legal/versions.json" with { type: "json" };
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
+import { runConcurrentAssociativo } from "./concurrent-associativo.mjs";
+import {
+  assertLocalQaEnvironment,
+  startSyntheticInventoryUpstream,
+} from "./concurrent-inventory.mjs";
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
@@ -80,6 +86,7 @@ const commercialRankingRoles = new Set(
     .map(([role]) => role),
 );
 const activeChildren = new Set();
+const concurrentQaCancellation = new AbortController();
 
 class LocalQaError extends Error {}
 
@@ -403,7 +410,7 @@ async function assertLoopbackServerReady(origin) {
   fail("Local Next.js production server did not become ready within 90 seconds for browser E2E.");
 }
 
-async function startLocalNextServer(local, inventoryFixture) {
+async function startLocalNextServer(local, inventoryFixture, inventoryUpstream) {
   await assertFreshProductionBuild();
   const port = await reserveLoopbackPort();
   const origin = `http://127.0.0.1:${port}`;
@@ -413,6 +420,15 @@ async function startLocalNextServer(local, inventoryFixture) {
     env: {
       ...environmentSubset(["PATH", "HOME", "TZ", "NODE_OPTIONS", "LD_LIBRARY_PATH"]),
       NODE_ENV: "production",
+      NODE_OPTIONS: [
+        process.env.NODE_OPTIONS,
+        `--import=${pathToFileURL(path.join(repositoryRoot, "scripts/qa/concurrent-inventory-preload.mjs")).href}`,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      NEXT_TELEMETRY_DISABLED: "1",
+      QA_E2E_LOCAL_ONLY: "true",
+      QA_CONCURRENT_INVENTORY_ORIGIN: inventoryUpstream.origin,
       APP_ORIGIN: origin,
       AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
       AUTH_SESSION_COOKIE_SECRET: randomBytes(32).toString("base64url"),
@@ -1588,12 +1604,21 @@ async function main() {
   if (process.env.QA_RELEASE_BROWSER && !browserE2eEnabled) {
     fail("QA_RELEASE_BROWSER accepts only the literal true when browser E2E is requested.");
   }
+  if (browserE2eEnabled) assertLocalQaEnvironment();
   const inventoryFixture = browserE2eEnabled ? await createSyntheticInventoryFixture() : null;
   let nextServer;
+  let inventoryUpstream;
   try {
-    nextServer = browserE2eEnabled ? await startLocalNextServer(local, inventoryFixture) : null;
+    inventoryUpstream = browserE2eEnabled ? await startSyntheticInventoryUpstream() : null;
+    nextServer = browserE2eEnabled
+      ? await startLocalNextServer(local, inventoryFixture, inventoryUpstream)
+      : null;
   } catch (error) {
-    await removeSyntheticInventoryFixture(inventoryFixture);
+    try {
+      await inventoryUpstream?.close();
+    } finally {
+      await removeSyntheticInventoryFixture(inventoryFixture);
+    }
     throw error;
   }
 
@@ -1602,6 +1627,7 @@ async function main() {
   const fixtures = createFixtures(runKey);
   const adminClient = createLocalClient(local.apiUrl, local.secretKey);
   const accounts = [];
+  const concurrentAccounts = [];
   const accountsDestination = persistentAccountsPath();
   let persisted = false;
   let anonymousDenied = 0;
@@ -1638,7 +1664,31 @@ async function main() {
     }
 
     if (nextServer) {
+      // Reuse the same local account factory, SQL-only bootstrap and authenticated
+      // RLS verification. Register immediately so partial setup is cleaned up too.
+      const secondMaster = await createEphemeralAccount(adminClient, "master", `${runId}01`);
+      concurrentAccounts.push(secondMaster);
+      runLocalSql(
+        local.database,
+        `begin; select public.bootstrap_master_user(${sqlUuid(secondMaster.id)}); commit;`,
+        "concurrent master setup",
+      );
+      await verifyAccountThroughRest(local, secondMaster, fixtures);
+      throwIfInterrupted();
+      try {
+        await runConcurrentAssociativo({
+          origin: nextServer.origin,
+          accounts: [...accounts, ...concurrentAccounts],
+          inventoryIsolation: inventoryUpstream.contract,
+          signal: concurrentQaCancellation.signal,
+        });
+      } catch {
+        fail("Concurrent Associativo QA failed; see sanitized Concurrent QA report.");
+      }
+      throwIfInterrupted();
       await runBrowserE2e(nextServer.origin, local.mailpitUrl, accounts);
+      if (inventoryUpstream.requestCount() === 0)
+        fail("Synthetic inventory upstream was not exercised.");
       browserE2e = 1;
       throwIfInterrupted();
     }
@@ -1650,11 +1700,20 @@ async function main() {
   } finally {
     try {
       if (!persisted) {
-        await removeEphemeralState(local, adminClient, accounts, fixtures);
+        await removeEphemeralState(
+          local,
+          adminClient,
+          [...accounts, ...concurrentAccounts],
+          fixtures,
+        );
       }
     } finally {
       try {
-        await stopChild(nextServer?.child);
+        try {
+          await stopChild(nextServer?.child);
+        } finally {
+          await inventoryUpstream?.close();
+        }
       } finally {
         try {
           if (browserE2eEnabled) {
@@ -1668,18 +1727,18 @@ async function main() {
   }
 
   return {
-    users: accounts.length,
-    profiles: accounts.length,
-    organizationRows: 9,
-    positivePages: positivePageRoles.size,
+    users: accounts.length + concurrentAccounts.length,
+    profiles: accounts.length + concurrentAccounts.length,
+    organizationRows: 9 + concurrentAccounts.length * 2,
+    positivePages: positivePageRoles.size + concurrentAccounts.length,
     zeroPages: requiredRoles.length - positivePageRoles.size,
-    activeScopes: requiredRoles.length - 1,
-    commercialAllowed: commercialRankingRoles.size,
+    activeScopes: requiredRoles.length - 1 + concurrentAccounts.length,
+    commercialAllowed: commercialRankingRoles.size + concurrentAccounts.length,
     commercialDenied: requiredRoles.length - commercialRankingRoles.size,
     legacyApproved: 0,
     rpcDenials: 1,
     persisted: persisted ? accounts.length : 0,
-    removed: persisted ? 0 : accounts.length,
+    removed: persisted ? 0 : accounts.length + concurrentAccounts.length,
     anonymousDenied,
     anonymousRows,
     dualAffiliationDenied,
@@ -1690,6 +1749,7 @@ async function main() {
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.on(signal, () => {
     requestedSignal ??= signal;
+    concurrentQaCancellation.abort();
     for (const child of activeChildren) signalChildGroup(child, signal);
   });
 }
