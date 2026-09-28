@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-09-27 — promoção final das referências do Tabelão
+
+- O QA hospedado do candidato aprovou o Tabelão nos quatro viewports exigidos,
+  incluindo todas as colunas, agrupamentos, filtros, última linha, estados de
+  carga/vazio/erro/recuperação, foco e Escape. Oito comparações restantes eram
+  apenas referências antigas do hub, ainda anteriores às três jornadas ativas.
+- A primeira promoção local foi recusada ao detectar no Associativo uma colisão
+  móvel entre os metadados do estoque e os filtros, além do alvo de toque
+  insuficiente de Limpar filtros. A transação não gravou referências parciais.
+- O cabeçalho e a ação dos filtros agora usam duas linhas explícitas somente em
+  `.investor-associative-table-page` até 760 px. O seletor não alcança Tabelão,
+  Direta, Investidor nem desktop e não modifica dados ou regras comerciais.
+- A matriz autenticada final aprovou 140 checks responsivos, 80 de tema, 193 de
+  acessibilidade, 193 comparações e 100 de zoom. Foram promovidas oito imagens
+  canário do hub e três imagens mobile do Associativo; as outras 182 referências
+  permaneceram inalteradas.
+
 ## 2026-09-27 — alvo de toque do Associativo
 
 - A conferencia na pagina publicada confirmou estoque real carregado e ausencia
