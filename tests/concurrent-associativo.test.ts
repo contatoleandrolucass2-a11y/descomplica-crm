@@ -15,6 +15,7 @@ const {
   simulatorEndpoint,
   syntheticProposal,
   selectConcurrentAccounts,
+  browserStep,
 } = concurrentAssociativo;
 
 function envelope(index: number) {
@@ -30,6 +31,15 @@ function envelope(index: number) {
 }
 
 describe("Associativo concurrent assertions", () => {
+  it("reports only a fixed browser stage instead of raw Playwright call logs", async () => {
+    await expect(
+      browserStep("select_unit", () => {
+        throw new Error("private-test-value");
+      }),
+    ).rejects.toThrow(/^browser_select_unit_failed$/);
+    await expect(browserStep("unsafe value", () => true)).rejects.toThrow("invalid_browser_stage");
+    await expect(browserStep("select_unit", () => 42)).resolves.toBe(42);
+  });
   it("uses twelve valid, distinguishable synthetic proposals with the real calculator", () => {
     const fingerprints = new Set();
     for (let index = 0; index < 12; index += 1) {

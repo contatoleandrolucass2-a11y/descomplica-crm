@@ -191,32 +191,60 @@ function money(value) {
   }).format(value);
 }
 
+export async function browserStep(stage, action) {
+  check(/^[a-z_]+$/u.test(stage), "invalid_browser_stage");
+  try {
+    return await action();
+  } catch (error) {
+    if (error instanceof ConcurrentQaError) throw error;
+    throw new ConcurrentQaError(`browser_${stage}_failed`);
+  }
+}
+
 async function fillProposal(page, index, origin) {
   const unit = snapshot.items[index];
-  await page.goto(`${origin}${simulatorPage}`, { waitUntil: "domcontentloaded" });
-  await page
-    .getByRole("combobox", { name: "Nome do Empreendimento", exact: true })
-    .selectOption(unit.project);
-  await page
-    .getByRole("button", { name: `Iniciar proposta com ${unit.identifier}`, exact: true })
-    .click();
-  await page
-    .getByRole("textbox", { name: "Renda Familiar", exact: true })
-    .fill(String((5_000 + index * 100) * 100));
-  await page.getByRole("radio", { name: "Sim", exact: true }).check();
-  await page
-    .getByRole("textbox", { name: "Financiamento", exact: true })
-    .fill(String((190_000 + index * 1_000) * 100));
+  await browserStep("open_simulator", () =>
+    page.goto(`${origin}${simulatorPage}`, { waitUntil: "domcontentloaded" }),
+  );
+  await browserStep("select_project", () =>
+    page
+      .getByRole("combobox", { name: "Nome do Empreendimento", exact: true })
+      .selectOption(unit.project),
+  );
+  await browserStep("select_unit", () =>
+    page
+      .getByRole("button", { name: `Iniciar proposta com ${unit.identifier}`, exact: true })
+      .click(),
+  );
+  await browserStep("fill_income", () =>
+    page
+      .getByRole("textbox", { name: "Renda Familiar", exact: true })
+      .fill(String((5_000 + index * 100) * 100)),
+  );
+  await browserStep("first_property", () =>
+    page.getByRole("radio", { name: "Sim", exact: true }).check(),
+  );
+  await browserStep("fill_financing", () =>
+    page
+      .getByRole("textbox", { name: "Financiamento", exact: true })
+      .fill(String((190_000 + index * 1_000) * 100)),
+  );
   for (const name of ["Subs\u00eddio", "FGTS", "Cheque Moradia"]) {
-    await page.getByRole("textbox", { name, exact: true }).fill("0");
+    await browserStep("fill_resources", () =>
+      page.getByRole("textbox", { name, exact: true }).fill("0"),
+    );
   }
-  await page
-    .getByRole("textbox", { name: "Entrada", exact: true })
-    .fill(String((1_000 + index * 100) * 100));
-  await page.locator('input[name="quantidade-de-parcelas"]').fill("84");
-  await page
-    .getByRole("combobox", { name: "Selecione o Ranking", exact: true })
-    .selectOption("gold");
+  await browserStep("fill_entry", () =>
+    page
+      .getByRole("textbox", { name: "Entrada", exact: true })
+      .fill(String((1_000 + index * 100) * 100)),
+  );
+  await browserStep("fill_installments", () =>
+    page.locator('input[name="quantidade-de-parcelas"]').fill("84"),
+  );
+  await browserStep("select_ranking", () =>
+    page.getByRole("combobox", { name: "Selecione o Ranking", exact: true }).selectOption("gold"),
+  );
 }
 
 async function assertProposal(page, index, income = 5_000 + index * 100) {

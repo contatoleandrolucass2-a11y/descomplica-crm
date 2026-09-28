@@ -2,6 +2,8 @@
 
 ## 2026-09-28 - Robustez e concorrencia do Associativo
 
+- Diagnostico de QA identifica etapa da interacao sem expor logs sensiveis.
+
 - Comprime estoque no proxy e rejeita payloads invalidos antes do cache.
 - Impede enriquecimento financeiro por identificadores ambiguos.
 - Corrige aprovacao de anuais invalidas, limites monetarios, parcelas extremas,

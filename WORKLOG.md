@@ -2,6 +2,10 @@
 
 ## 2026-09-28 - Auditoria Associativo e concorrencia
 
+- CI inicial: 947 testes Linux e transferencia concorrente Nginx passaram;
+  ensaio HTTP integrado passou, mas segunda sessao UI falhou. Acrescenta
+  codigos de etapa sem logs de credenciais para diagnosticar, sem reduzir gates.
+
 - Reproduz estoque indisponivel em duas aberturas autenticadas; correlaciona
   transferencia JSON parcial com timeout de leitura, antes de qualquer carga.
 - Corrige contrato do inventario, identidade ambigua entre fontes, parcelas
