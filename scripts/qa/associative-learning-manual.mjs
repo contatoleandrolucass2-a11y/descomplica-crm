@@ -63,6 +63,9 @@ export async function checkAssociativeLearningManual(
           await tab.click();
           const panel = dialog.getByRole("tabpanel");
           await expect(panel).toBeVisible();
+          await panel.evaluate((element) => {
+            element.scrollTop = 0;
+          });
           assert.equal(new URL(page.url()).hash, `#investor-associative-learning-${key}`);
           const geometry = await dialog.evaluate((element) => {
             const rect = element.getBoundingClientRect();
@@ -95,6 +98,32 @@ export async function checkAssociativeLearningManual(
             const first = panel.locator("summary").first();
             await first.click();
             await expect(panel.locator("details[open]").first().locator("p")).toBeVisible();
+            const field = panel
+              .locator("summary")
+              .filter({ hasText: /^Composição da documentação$/ });
+            await field.click();
+            await expect(field.locator("..").locator("p")).toContainText(
+              "Onde se aplica: Resumo financeiro",
+            );
+            await expect(field.locator("..").locator("p")).toBeInViewport();
+            await field.click();
+            await first.scrollIntoViewIfNeeded();
+          } else {
+            await expect(
+              panel.getByRole("heading", {
+                name: "Renda familiar e capacidade de pagamento",
+                exact: true,
+              }),
+            ).toBeAttached();
+            await expect(
+              panel.getByRole("heading", {
+                name: "MCMV e SBPE: finalidade e impacto",
+                exact: true,
+              }),
+            ).toBeAttached();
+            await expect(
+              panel.getByRole("heading", { name: "Primeiro imóvel e documentação", exact: true }),
+            ).toBeAttached();
           }
           const accessibility = await new AxeBuilder({ page })
             .include("#investor-learning-dialog")

@@ -4,6 +4,7 @@
 
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
+import { ASSOCIATIVE_FIELD_GUIDE_SECTION, ASSOCIATIVE_POLICY_TOPICS, ASSOCIATIVE_PROFILE_HELP } from "./associative-learning-content";
 import { buildDirectTableAmortizationSchedule, buildDirectTablePreKeysSchedule, buildDirectTableProposalPreset, calculateDirectTableFileFlow, DIRECT_TABLE_PROPOSAL_OPTIONS, isDirectTableProposalPresetComplete } from "@/lib/archive-investor/direct-table-file-rules.mjs";
 import { calculateInvestorFlow, distributeSignalBalance } from "@/lib/archive-investor/investor-calculator-rules.mjs";
 import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilters, reconcileInvestorFilters, sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
@@ -654,8 +655,8 @@ function AssociativePaymentSummary({
           label="Resumo das parcelas"
           title="Como este resumo é calculado"
             description={associativeHelp(
-              `Linear sem correção: saldo parcelado ÷ ${installments || 0}.`,
-              "Linear com correção: usa 0,5% ao mês antes da entrega e 1,5% ao mês depois da entrega.",
+              `Linear sem correção: base das mensais após anuais válidas ÷ ${installments || 0}.`,
+              "Linear com correção: usa 0,5% ao mês antes do mês de entrega e 1,5% ao mês a partir do mês de entrega.",
               "Decrescente: separa o saldo em 4 blocos de 40%, 30%, 20% e 10%. As parcelas ficam menores a cada bloco.",
               "As datas seguem o mesmo calendário mensal da proposta.",
             )}
@@ -993,14 +994,14 @@ function AssociativeQualificationPanel({
     </header>
     <div className="investor-associative-qualification-grid">
       <div className={`investor-associative-question ${incomeReady ? "complete" : "current"}`}>
-        <div className="investor-associative-question-heading"><span><b>1</b>Renda Familiar</span><InvestorInfoHint label="Renda Familiar" title="Qual renda devo informar?" description="Digite a renda mensal somada de todas as pessoas que participarão da compra. Ela ajuda a indicar a faixa municipal e a modalidade. A aprovação final depende da análise oficial." /></div>
+        <div className="investor-associative-question-heading"><span><b>1</b>Renda Familiar</span><InvestorInfoHint label="Renda Familiar" {...ASSOCIATIVE_PROFILE_HELP.income} /></div>
         <div className="investor-associative-question-money"><span aria-hidden="true">R$</span><MoneyInput inputRef={incomeInputRef} label="Renda Familiar" describedBy="investor-associative-income-status" value={income} onChange={onIncomeChange} /></div>
         <small id="investor-associative-income-status" role="status" aria-live="polite">{incomeReady ? `Enquadramento municipal: ${incomeBand} · ${incomeBandPropertyLimit ? `imóvel até ${money.format(incomeBandPropertyLimit)}` : "sem teto HIS/HMP"}` : "Informe um valor maior que zero"}</small>
       </div>
 
       <fieldset className={`investor-associative-question${!incomeReady ? " locked" : modalityReady ? " complete" : " current"}`}>
         <legend className="sr-only">Modalidade do Financiamento</legend>
-        <div className="investor-associative-question-heading"><span><b>2</b>Modalidade do Financiamento</span><InvestorInfoHint label="Modalidade do Financiamento" title="Como a modalidade é escolhida?" description="O sistema verifica renda, valor do imóvel e primeiro imóvel. Se o cliente estiver dentro das regras, começa em MCMV. Quando não estiver, usa SBPE. A instituição financeira confirma a modalidade na análise final." /></div>
+        <div className="investor-associative-question-heading"><span><b>2</b>Modalidade do Financiamento</span><InvestorInfoHint label="Modalidade do Financiamento" {...ASSOCIATIVE_PROFILE_HELP.modality} /></div>
         <div className="investor-associative-choice-row">
           {(["MCMV", "SBPE"] as FinancingModality[]).map((option) => {
             const unavailable = option === "MCMV" && modalityDecision.forced;
@@ -1028,7 +1029,7 @@ function AssociativeQualificationPanel({
 
       <fieldset className={`investor-associative-question${!modalityReady ? " locked" : firstPropertyReady ? " complete" : " current"}`}>
         <legend className="sr-only">Primeiro imóvel?</legend>
-        <div className="investor-associative-question-heading"><span><b>3</b>Primeiro imóvel?</span><InvestorInfoHint label="Primeiro imóvel" title="Quando devo marcar Sim?" description="Marque Sim quando o cliente não possui outro imóvel residencial e não tem financiamento habitacional ativo. Marque Não quando uma dessas situações existir." /></div>
+        <div className="investor-associative-question-heading"><span><b>3</b>Primeiro imóvel?</span><InvestorInfoHint label="Primeiro imóvel" {...ASSOCIATIVE_PROFILE_HELP.firstProperty} /></div>
         <div className="investor-associative-choice-row investor-associative-yes-no">
           {[{ value: "SIM", label: "Sim" }, { value: "NAO", label: "Não" }].map((option) => <label key={option.value} className={firstProperty === option.value ? "selected" : ""}>
             <input type="radio" name="primeiro-imovel-associativo" value={option.value} checked={firstProperty === option.value} disabled={!modalityReady} onChange={(event) => onFirstPropertyChange(event.target.value)} />
@@ -1813,17 +1814,24 @@ const INVESTOR_MANUAL_SECTIONS = [
 
 const ASSOCIATIVE_MANUAL_SECTIONS = [
   {
+    title: "Renda e orçamento familiar",
+    questions: [
+      { question: "Por que a renda é importante nesta simulação?", answer: ASSOCIATIVE_PROFILE_HELP.income.description },
+      { question: "Comprometimento e máximo da renda mensal são a mesma coisa?", answer: "Não. O comprometimento usa a maior mensal corrigida sem Evolução de Obra. O máximo mensal, chamado no painel de % Máximo da renda por anual, usa o maior total de mensal corrigida + Evolução de Obra. Ambos dividem pela renda familiar e consideram separadamente cada fluxo. Anuais, documentação e despesas reais do banco/família também precisam de conferência; esses dois indicadores não são um orçamento completo." },
+    ],
+  },
+  {
     title: "MCMV e SBPE",
     questions: [
-      { question: "Como a modalidade é selecionada?", answer: "A renda atualiza o enquadramento imediatamente. Até R$ 13.000,00, sem outro imóvel residencial ou financiamento habitacional ativo e com unidade dentro do limite vigente, a opção inicial é MCMV; o cliente elegível ainda pode escolher SBPE. Acima dos limites ou fora da regra de primeiro imóvel, o sistema aplica SBPE." },
-      { question: "Quais são as faixas urbanas do MCMV em 2026?", answer: "Faixa 1: até R$ 3.200,00; Faixa 2: de R$ 3.200,01 a R$ 5.000,00; Faixa 3: de R$ 5.000,01 a R$ 9.600,00; Classe Média: de R$ 9.600,01 a R$ 13.000,00. O limite do imóvel usado nesta simulação é R$ 600.000,00. HIS-1, HIS-2 e HMP são enquadramentos municipais separados." },
+      { question: "Como a modalidade é selecionada?", answer: ASSOCIATIVE_PROFILE_HELP.modality.description },
+      { question: "Quais são as faixas urbanas do MCMV em 2026?", answer: "A configuração desta página utiliza Faixa 1 até R$ 3.200,00; Faixa 2 de R$ 3.200,01 a R$ 5.000,00; Faixa 3 de R$ 5.000,01 a R$ 9.600,00; Classe Média de R$ 9.600,01 a R$ 13.000,00. O teto simplificado de imóvel na triagem é R$ 600.000,00, mas não vale indistintamente para todas as faixas e localidades: confirme os limites oficiais aplicáveis. HIS-1, HIS-2 e HMP são enquadramentos municipais separados." },
       { question: "O enquadramento confirma o crédito ou o percentual financiado?", answer: "Não. É uma triagem preliminar. A contratação, o percentual financiável e as condições dependem da instituição, do produto, da avaliação, do sistema de amortização, da localização e da análise de crédito." },
     ],
   },
   {
     title: "Como funciona o Associativo",
     questions: [
-      { question: "O que é a modalidade Associativo?", answer: "É a aquisição com crédito imobiliário contratado com a CAIXA e um pró-soluto pago à Direcional. O pró-soluto é a diferença que permanece depois de descontar financiamento, subsídio, FGTS, Cheque Moradia, entrada, sinais e anuais válidas." },
+      { question: "O que é a modalidade Associativo?", answer: "É a aquisição com crédito imobiliário contratado com a CAIXA e um pró-soluto pago à construtora. Nesta composição, o pró-soluto é a diferença após financiamento, subsídio, FGTS, Cheque Moradia, entrada e sinais válidos. Anuais não reduzem o pró-soluto; reduzem somente a base distribuída nas mensais." },
       { question: "Quem faz a análise de crédito?", answer: "Na modalidade Associativo, a análise de crédito é realizada diretamente pela CAIXA. O simulador compara a proposta com a classificação informada, mas não substitui a aprovação do agente financeiro." },
     ],
   },
@@ -1831,16 +1839,16 @@ const ASSOCIATIVE_MANUAL_SECTIONS = [
     title: "Entrada, sinais e anuais",
     questions: [
       { question: "Como a entrada e os sinais são validados?", answer: "A entrada é obrigatória e precisa ter ao menos R$ 150,00. Há até três sinais opcionais: cada sinal ativo precisa ter ao menos R$ 150,00, seguir a sequência e não superar o sinal anterior." },
-      { question: "Como funcionam as anuais?", answer: "Há até cinco anuais opcionais com vencimento em 15/12 e somente até o término da obra. Cada anual válida recebe a correção do WF-13 e aparece, na sua data, junto do cronograma completo de pagamentos." },
-      { question: "Por que os campos aparecem somente quando adicionados?", answer: "Sinais e anuais começam resumidos para manter a leitura compacta. O botão + adiciona uma linha por vez; × oculta a linha e zera o valor correspondente sem alterar os demais pagamentos válidos." },
+      { question: "Como funcionam as anuais?", answer: "Há até cinco anuais opcionais com vencimento em 15/12 e somente até o término da obra. Cada anual válida recebe a correção do cálculo local e aparece, na sua data, junto do cronograma completo de pagamentos. A correção usa valor × 1,005 × 1,005 elevado aos meses completos até o vencimento; o valor nominal de cada anual é limitado a 50% da renda mensal nesta tela." },
+      { question: "Por que os campos aparecem somente quando adicionados?", answer: "Sinais e anuais começam resumidos para manter a leitura compacta. Inserir Sinal e Inserir Anual adicionam uma linha por vez. Ocultar uma anual zera seu valor; ocultar um sinal também pode zerar os sinais seguintes para preservar a sequência. Confira o aviso do botão antes de remover." },
     ],
   },
   {
     title: "Fluxos linear e decrescente",
     questions: [
-      { question: "Como é calculada a parcela linear?", answer: "O saldo parcelado é dividido entre o período pré-obra e pós-obra. O WF-13 aplica PRICE a 0,5% ao mês no pré-obra e 1,5% ao mês no pós-obra; a parcela linear corrigida é o maior pagamento calculado entre os dois períodos." },
-      { question: "Como é calculado o fluxo decrescente?", answer: "O WF-13B distribui o mesmo saldo em quatro blocos sequenciais: 40%, 30%, 20% e 10%. Cada bloco calcula seus períodos pré e pós-obra e exibe o maior pagamento corrigido do bloco." },
-      { question: "O que é Evolução de Obra?", answer: "É renda familiar × 30% × andamento estimado da obra. O andamento aparece em todos os vencimentos, parte do percentual informado no relatório, evolui mensalmente até 100% na entrega e permanece congelado em 100% depois dela. O mês da simulação e o mês seguinte ficam sem cobrança; a cobrança começa no terceiro mês programado." },
+      { question: "Como é calculada a parcela linear?", answer: "O cálculo local desta página desconta as anuais corrigidas da base das mensais e separa os períodos antes e a partir do mês de entrega. Usa PRICE a 0,5% ao mês no período pré-obra e 1,5% no pós-obra, com a correção inicial da memória; a parcela corrigida exibida é o maior pagamento calculado entre os períodos. Não é a prestação bancária nem uma confirmação de execução do WF-13 oficial." },
+      { question: "Como é calculado o fluxo decrescente?", answer: "O cálculo local distribui a base das mensais em quatro blocos sequenciais de 40%, 30%, 20% e 10%. Cada bloco considera seus períodos pré e pós-obra e exibe o maior pagamento corrigido. Confira o cronograma real de cada bloco; essa memória local não comprova equivalência com o WF-13B oficial." },
+      { question: "O que é Evolução de Obra?", answer: "Na projeção desta página, é renda familiar × 30% × andamento estimado da obra. O andamento aparece nos vencimentos, parte do percentual informado no relatório, evolui mensalmente até 100% na entrega e permanece congelado em 100% depois dela. O mês da simulação e o mês seguinte ficam sem cobrança; a cobrança começa no terceiro mês programado. É uma estimativa comercial, não o encargo bancário real: confira o contrato e a cobrança da instituição financeira." },
     ],
   },
   {
@@ -1855,10 +1863,11 @@ const ASSOCIATIVE_MANUAL_SECTIONS = [
     questions: [
       { question: "As anuais diminuem o Pró-Soluto?", answer: "Não. O Pró-Soluto e o Saldo parcelado são calculados depois dos recursos, da Entrada e dos Sinais, sem descontar anuais. A anual reduz somente a base distribuída nas parcelas mensais; por isso pode melhorar o Comprometimento da Renda e o Máximo da renda por anual sem alterar o percentual de Pró-Soluto." },
       { question: "O que é % Comprometimento da Renda?", answer: "O simulador consulta todas as parcelas corrigidas, sem a Evolução de Obra, escolhe a maior e divide pela renda familiar. O resultado e a data do pico são mostrados separadamente para o fluxo Linear e para o Decrescente." },
-      { question: "O que é % Máximo da renda por anual?", answer: "O simulador consulta o popup inteiro, soma parcela corrigida + Evolução de Obra em cada mensal, escolhe a maior carga e divide pela renda familiar. Assim o atendimento considera o mês mais pesado de cada fluxo, e não presume que a primeira parcela é a maior." },
-      { question: "Como a classificação é aplicada?", answer: "Diamante, Ouro, Prata, Bronze e Aço definem limites próprios de pró-soluto, comprometimento mensal e anual. A proposta só é aprovada quando todos os parâmetros, a proposta e a memória comparativa estão dentro da regra selecionada." },
+      { question: "O que é % Máximo da renda por anual?", answer: "É o máximo da renda mensal: entre as linhas mensais, o simulador escolhe a maior soma de parcela corrigida + Evolução de Obra e divide pela renda familiar. Os picos de cada fluxo podem ocorrer depois da primeira parcela. Apesar do nome, o indicador não inclui o valor da anual, mesmo quando ela integra o total da mesma linha mensal no cronograma; confira também esse pagamento e as demais despesas no orçamento." },
+      { question: "Como a classificação é aplicada?", answer: "Diamante, Ouro, Prata, Bronze e Aço definem limites próprios de pró-soluto, comprometimento e máxima carga mensal com obra. O indicador desta última mantém o nome % Máximo da renda por anual no painel. O status comercial depende das regras da proposta e da memória comparativa selecionadas; não substitui a aprovação de crédito do banco." },
     ],
   },
+  ASSOCIATIVE_FIELD_GUIDE_SECTION,
 ] as const;
 
 const ASSOCIATIVE_PROPOSAL_GUIDE_STEPS = [
@@ -1877,6 +1886,11 @@ const ASSOCIATIVE_PROPOSAL_GUIDE_STEPS = [
 ] as const;
 
 const ASSOCIATIVE_LEARNING_SOURCES = [
+  { label: "Ministério das Cidades: finalidade do MCMV", href: "https://www.gov.br/cidades/pt-br/acesso-a-informacao/acoes-e-programas/habitacao/programa-minha-casa-minha-vida/sobre-o-minha-casa-minha-vida-1" },
+  { label: "Ministério das Cidades: MCMV, linha financiada", href: "https://www.gov.br/cidades/pt-br/acesso-a-informacao/acoes-e-programas/habitacao/programa-minha-casa-minha-vida/mcmv-fgts" },
+  { label: "Banco Central: finalidade e recursos do SBPE", href: "https://normativos.bcb.gov.br/Lists/Normativos/Attachments/50628/Res_4676_v17_P.pdf" },
+  { label: "CAIXA: imóvel, avaliação e documentação", href: "https://www.caixa.gov.br/voce/habitacao/perguntas-frequentes-novos-financiamentos/Paginas/default.aspx" },
+  { label: "Prefeitura de São Paulo: condições de isenção do ITBI", href: "https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517" },
   { label: "Ministério das Cidades — regras e faixas do MCMV", href: "https://www.gov.br/cidades/pt-br/acesso-a-informacao/perguntas-frequentes/habitacao" },
   { label: "Ministério das Cidades — MCMV Classe Média", href: "https://www.gov.br/cidades/pt-br/acesso-a-informacao/acoes-e-programas/habitacao/programa-minha-casa-minha-vida/minha-casa-minha-vida-classe-media/minha-casa-minha-vida-classe-media-1" },
   { label: "Banco Central — Sistema Brasileiro de Poupança e Empréstimo", href: "https://www.bcb.gov.br/estabilidadefinanceira/associacaopoupancaemprestimo" },
@@ -2209,12 +2223,18 @@ export function InvestorLearningManual({ directTable = false, associative = fals
             <li><strong>PF</strong><span>documentação do cliente</span></li>
           </ul>
         </section>
+        {ASSOCIATIVE_POLICY_TOPICS.map((topic) => <section key={topic.title}>
+          <h4>{topic.title}</h4>
+          <ul>{topic.items.map((item) => <li key={item}>{item}</li>)}</ul>
+        </section>)}
         <section>
           <h4>Checklist antes de apresentar</h4>
           <ul>
             <li>Unidade, valor e data de entrega confirmados.</li>
+            <li>Renda comprovável, modalidade e histórico de primeiro imóvel conferidos.</li>
             <li>Entrada, sinais, anuais e mensais reconciliados.</li>
             <li>Parâmetros de aprovação e memória comparativa conferidos.</li>
+            <li>Avaliação bancária, documentação e despesas do banco consideradas no orçamento.</li>
             <li>Resultado validado no fluxo comercial oficial.</li>
           </ul>
         </section>
