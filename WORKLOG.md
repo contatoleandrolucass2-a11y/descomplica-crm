@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-09-28 - Conteudo do Aprenda Associativo
+
+- Amplia Politica com renda, indicadores, MCMV/SBPE, primeiro imovel e custos.
+  Acrescenta 27 topicos de ajuda com local de aplicacao em Perguntas.
+- Compartilha as explicacoes do perfil com o manual; corrige pro-soluto/anuais
+  no texto, delimita estimativas locais e preserva todos os calculos.
+- Revisao independente: 145 testes de dominio aprovados; cinco testes do manual.
+  Suite Windows: 950 pass, um skip e seis falhas POSIX conhecidas, sem relaxar gates.
+- Lint, tipos, build, oito testes Node e QA isolado do manual (30 capturas/axe)
+  aprovados. CI Linux e verificacao publicada permanecem gates obrigatorios.
+- Fontes, limites e publicacao: docs/audits/associativo-manual-conteudo-2026-09-28.md.
+
 ## 2026-09-28 - Navegacao do manual Associativo
 
 - Sincroniza tamanho/hash da unica imagem revisada no catalogo de QA; preserva

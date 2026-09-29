@@ -4,6 +4,27 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-28: Conteudo e ajudas do Associativo
+
+- Status: pendente_validacao integrada/publicacao. Base publicada: b297614.
+- Fonte: associative-learning-content.ts, InvestorCalculator e auditoria
+  docs/audits/associativo-manual-conteudo-2026-09-28.md; referencias oficiais nela.
+- Perfil e manual compartilham tres ajudas. Guia possui 27 topicos e seus locais.
+- Indicador "Maximo da renda por anual" exclui a anual mesmo quando o total
+  da mesma linha mensal a inclui. Descrever exatamente o indicador, nao como
+  comprometimento global de todas as despesas da familia.
+- Motor local e WF13 versionado nao sao equivalentes. Perfil/documentacao usam
+  bases diferentes e podem divergir de modalidade perto dos limites. Explicar
+  essas limitacoes; nao alterar calculos em pedido exclusivamente editorial.
+- ITBI e registro sao estimativas locais; primeiro imovel declarado nao e prova
+  de primeira aquisicao nem garantia de isencao. Exigir conferencia oficial.
+- Testes: 145 de dominio e cinco do manual aprovados. Suite Windows: 950 pass,
+  um skip, seis falhas POSIX preexistentes. CI Linux e QA final ainda exigidos.
+- Lint, tipos, build, oito testes Node e QA isolado (30 capturas/axe) aprovados.
+  Matriz integrada deve confirmar o mesmo comportamento no build autenticado.
+- Evidencias finais de CI e release devem ficar no PR da branch
+  codex/associativo-manual-conteudo, sem inferir publicacao deste checkpoint.
+
 ## 2026-09-28: Manual Associativo com abas acessiveis
 
 - Atualizar uma imagem revisada exige atualizar seu tamanho/hash no catalogo

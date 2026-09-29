@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-28 - Explicacoes do Associativo
+
+- Explica a renda nos indicadores, as finalidades de MCMV/SBPE e o impacto de
+  primeiro imovel, preco e avaliacao na estimativa documental.
+- Inclui guia de 27 topicos de informacao com local e aplicacao na pagina.
+- Esclarece limites das estimativas locais e corrige textos de anuais e entrega,
+  sem alterar regras, calculos ou outros simuladores.
+
 ## 2026-09-28 - Manual Associativo mais acessivel
 
 - Destaca Politica e Perguntas com abas, icones e selecao visivel.
