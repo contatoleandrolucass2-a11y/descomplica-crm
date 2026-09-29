@@ -1612,6 +1612,288 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   };
 }
 
+function buildTabelaoCompactFixture() {
+  const project = "Residencial QA Alameda das Flores do Horizonte";
+  const street = "Avenida QA das Palmeiras e Jardins do Horizonte";
+  const classification = "Programa residencial especial";
+  const items = Array.from({ length: 10 }, (_, index) => ({
+    id: `qa-compact-${index + 1}`,
+    identifier: String(index + 1),
+    businessUnit: index < 7 ? "Incorporadora QA A" : "Incorporadora QA B",
+    project: index < 9 ? project : "Residencial QA Outro Horizonte",
+    product: `Apartamento QA ${index + 1}`,
+    plant: `Tipo ${String(index + 1).padStart(2, "0")}`,
+    privateArea: 42 + index,
+    finalWithKit: 300_000 + index * 1_000,
+    unitBonus: 10_000,
+    tableSlack: 5_000,
+    cashBackSlack: 3_000,
+    appraisal: 330_000,
+    completionDate: "2027-12-01",
+    progress: 0.5,
+    street: index === 2 ? `${street} II` : index === 1 ? ` ${street} ` : street,
+    streetNumber: "1234",
+    neighborhood: "Bairro QA Jardim Central",
+    region: index === 2 || index === 3 ? "Zona Norte" : "Zona Sul",
+    classification:
+      index < 3
+        ? index === 1
+          ? ` ${classification} `
+          : classification
+        : index === 3
+          ? classification.toLowerCase()
+          : index === 4
+            ? ""
+            : index === 5
+              ? "0"
+              : null,
+  }));
+  // The more expensive unit must affect stock quantity, never replace the winning plant.
+  items.push({ ...items[0], id: "qa-compact-expensive", finalWithKit: 900_000 });
+  return items;
+}
+
+function readTabelaoCompactLayout() {
+  const results = document.querySelector(".investor-stock-results");
+  const table = document.querySelector(".investor-stock-table");
+  const resultBox = results?.getBoundingClientRect();
+  const panelBox = results?.closest(".investor-stock-panel")?.getBoundingClientRect();
+  const columns = [
+    ["tabelao-project", ".investor-stock-product-text", 100],
+    ["tabelao-address", ".tabelao-stock-wrapped-text", 130],
+    ["tabelao-description", ".tabelao-stock-wrapped-text", 58],
+  ].map(([id, selector, contentWidth]) => {
+    const header = document.getElementById(id);
+    const cells = [...document.querySelectorAll(`[headers~="${id}"]`)];
+    return {
+      id,
+      width: header?.getBoundingClientRect().width ?? 0,
+      fontSize: cells[0] ? getComputedStyle(cells[0]).fontSize : null,
+      bounded:
+        cells.length > 0 &&
+        cells.every((cell) => {
+          const wrapper = cell.querySelector(selector);
+          const style = getComputedStyle(cell);
+          const expectedWidth =
+            contentWidth +
+            Number.parseFloat(style.paddingLeft) +
+            Number.parseFloat(style.paddingRight) +
+            Number.parseFloat(style.borderLeftWidth) +
+            Number.parseFloat(style.borderRightWidth);
+          return (
+            wrapper != null &&
+            Math.abs(wrapper.getBoundingClientRect().width - contentWidth) <= 1 &&
+            Math.abs(header.getBoundingClientRect().width - expectedWidth) <= 2
+          );
+        }),
+      wrapsWithoutClipping:
+        cells.length > 0 &&
+        cells.every((cell) => {
+          const wrapper = cell.querySelector(selector);
+          if (!wrapper) return false;
+          const range = document.createRange();
+          range.selectNodeContents(wrapper);
+          const box = wrapper.getBoundingClientRect();
+          const cellBox = cell.getBoundingClientRect();
+          const style = getComputedStyle(wrapper);
+          return (
+            style.whiteSpace === "normal" &&
+            style.overflowWrap === "anywhere" &&
+            style.textOverflow !== "ellipsis" &&
+            style.webkitLineClamp === "none" &&
+            style.overflowX === "visible" &&
+            style.overflowY === "visible" &&
+            wrapper.scrollWidth <= wrapper.clientWidth + 1 &&
+            wrapper.scrollHeight <= wrapper.clientHeight + 1 &&
+            box.top >= cellBox.top - 1 &&
+            box.bottom <= cellBox.bottom + 1 &&
+            [...range.getClientRects()].every(
+              (rect) =>
+                rect.left >= box.left - 1 &&
+                rect.right <= box.right + 1 &&
+                rect.top >= box.top - 1 &&
+                rect.bottom <= box.bottom + 1,
+            )
+          );
+        }),
+    };
+  });
+  return {
+    columns,
+    compactFrameInsidePanel:
+      resultBox != null &&
+      panelBox != null &&
+      resultBox.left >= panelBox.left &&
+      resultBox.right <= panelBox.right,
+    compactFrameFitsTable:
+      results != null &&
+      table != null &&
+      results.clientWidth <= table.getBoundingClientRect().width + 1,
+    compactColumnWidths: columns.every((column) => column.bounded),
+    compactTextFullyVisible: columns.every((column) => column.wrapsWithoutClipping),
+  };
+}
+
+function readTabelaoMergedRows() {
+  return [...document.querySelectorAll(".tabelao-project-group")].map((group) => {
+    const rows = [...group.rows];
+    const headers = [...group.querySelectorAll('th[scope="rowgroup"]')];
+    const readRuns = (column) =>
+      rows.flatMap((row, index) =>
+        [...row.querySelectorAll(`td[headers~="${column}"]`)].map((cell) => ({
+          start: index,
+          span: cell.rowSpan,
+          text: cell.textContent.trim(),
+          title: cell.title,
+          headersValid:
+            cell.colSpan === 1 &&
+            cell.headers.split(/\s+/).every((id) => document.getElementById(id)) &&
+            headers.every((header) => cell.headers.split(/\s+/).includes(header.id)),
+        })),
+      );
+    return {
+      ids: rows.map((row) => row.dataset.inventoryUnitId),
+      identity: rows.map((row) => [
+        row.dataset.inventoryBusinessUnit,
+        row.dataset.inventoryProject,
+      ]),
+      plants: rows.map((row) => row.querySelector('[headers~="tabelao-plant"]').textContent.trim()),
+      prices: rows.map((row) =>
+        row.querySelector('[headers~="tabelao-price"]').textContent.replace(/\D/g, ""),
+      ),
+      quantities: rows.map((row) =>
+        Number(row.querySelector(".tabelao-stock-quantity").textContent.trim()),
+      ),
+      ariaRows: rows.map((row) => Number(row.getAttribute("aria-rowindex"))),
+      groupHeadersValid:
+        headers.length === 2 && headers.every((header) => header.rowSpan === rows.length),
+      address: readRuns("tabelao-address"),
+      description: readRuns("tabelao-description"),
+    };
+  });
+}
+
+async function checkTabelaoCompactFixture(page) {
+  const items = buildTabelaoCompactFixture();
+  const byId = new Map(items.map((item) => [item.id, item]));
+  const checks = [];
+  const verify = async (idsByGroup, expectedSpans) => {
+    await page.waitForFunction(
+      (expectedGroups) => {
+        const actualGroups = [...document.querySelectorAll(".tabelao-project-group")].map((group) =>
+          [...group.rows].map((row) => row.dataset.inventoryUnitId),
+        );
+        return JSON.stringify(actualGroups) === JSON.stringify(expectedGroups);
+      },
+      idsByGroup.map((ids) => ids.map((id) => `qa-compact-${id}`)),
+    );
+    const groups = await page.evaluate(readTabelaoMergedRows);
+    const layout = await page.evaluate(readTabelaoCompactLayout);
+    let rowIndex = 2;
+    const passed =
+      groups.length === idsByGroup.length &&
+      groups.every((group, groupIndex) => {
+        const expectedIds = idsByGroup[groupIndex].map((id) => `qa-compact-${id}`);
+        const expectedItems = expectedIds.map((id) => byId.get(id));
+        const rowsPreserved =
+          JSON.stringify(group.ids) === JSON.stringify(expectedIds) &&
+          group.groupHeadersValid &&
+          group.ariaRows.every((index) => index === rowIndex++) &&
+          expectedItems.every(
+            (item, index) =>
+              group.identity[index][0] === item.businessUnit &&
+              group.identity[index][1] === item.project &&
+              group.plants[index] === item.plant &&
+              group.prices[index] === String((item.finalWithKit - 15_000) * 100) &&
+              group.quantities[index] === (item.id === "qa-compact-1" ? 2 : 1),
+          );
+        const mergedColumns = ["address", "description"].every((column, columnIndex) => {
+          const expectedLabels = expectedItems.map((item) =>
+            column === "address"
+              ? `${item.street.trim()} / ${item.streetNumber} / ${item.neighborhood}`
+              : item.classification?.trim() && item.classification.trim() !== "0"
+                ? item.classification.trim()
+                : "Não informado",
+          );
+          const cells = group[column];
+          let nextStart = 0;
+          return (
+            JSON.stringify(cells.map((cell) => cell.span)) ===
+              JSON.stringify(expectedSpans[groupIndex][columnIndex]) &&
+            cells.every((cell) => {
+              const startsHere = cell.start === nextStart;
+              nextStart += cell.span;
+              return (
+                startsHere &&
+                cell.headersValid &&
+                cell.title === cell.text &&
+                expectedLabels.slice(cell.start, nextStart).every((label) => label === cell.text) &&
+                (nextStart === expectedLabels.length || expectedLabels[nextStart] !== cell.text)
+              );
+            }) &&
+            nextStart === expectedLabels.length
+          );
+        });
+        return rowsPreserved && mergedColumns;
+      }) &&
+      (await page.locator(".investor-stock-table").getAttribute("aria-rowcount")) ===
+        String(idsByGroup.flat().length + 1) &&
+      layout.compactColumnWidths &&
+      layout.compactTextFullyVisible &&
+      layout.compactFrameFitsTable &&
+      layout.compactFrameInsidePanel;
+    checks.push(passed);
+  };
+  await verify(
+    [[1, 2, 3, 4, 5, 6, 7], [8, 9], [10]],
+    [
+      [
+        [2, 1, 4],
+        [3, 1, 3],
+      ],
+      [[2], [2]],
+      [[1], [1]],
+    ],
+  );
+  const panel = page.locator(".investor-stock-filters");
+  await panel.locator('select[name="priceOrder"]').selectOption("desc");
+  await verify(
+    [[7, 6, 5, 4, 3, 2, 1], [9, 8], [10]],
+    [
+      [
+        [4, 1, 2],
+        [3, 1, 3],
+      ],
+      [[2], [2]],
+      [[1], [1]],
+    ],
+  );
+  await panel.locator('select[name="region"]').selectOption("zona sul");
+  await verify(
+    [[7, 6, 5, 2, 1], [9, 8], [10]],
+    [
+      [[5], [3, 2]],
+      [[2], [2]],
+      [[1], [1]],
+    ],
+  );
+  await panel.locator('select[name="plant"]').selectOption("tipo 02");
+  await verify([[2]], [[[1], [1]]]);
+  await panel.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+  await verify(
+    [[1, 2, 3, 4, 5, 6, 7], [8, 9], [10]],
+    [
+      [
+        [2, 1, 4],
+        [3, 1, 3],
+      ],
+      [[2], [2]],
+      [[1], [1]],
+    ],
+  );
+  return checks.length === 5 && checks.every(Boolean);
+}
+
 async function checkTabelaoValidation(page, origin) {
   const route = "/app/simulacao/tabelao";
   const url = `${origin}${route}`;
@@ -1666,7 +1948,13 @@ async function checkTabelaoValidation(page, origin) {
             ...cells.map((cell) => {
               const style = getComputedStyle(cell);
               return (
-                cellContentWidth(cell) +
+                Math.max(
+                  cellContentWidth(cell),
+                  // Compact columns reserve a bounded wrapping box, even for short labels.
+                  cell
+                    .querySelector(".investor-stock-product-text, .tabelao-stock-wrapped-text")
+                    ?.getBoundingClientRect().width ?? 0,
+                ) +
                 Number.parseFloat(style.paddingLeft) +
                 Number.parseFloat(style.paddingRight)
               );
@@ -1773,6 +2061,11 @@ async function checkTabelaoValidation(page, origin) {
       { ...viewport, count: syntheticTabelaoInventory.length },
     );
 
+    const compactLayout = await page.evaluate(readTabelaoCompactLayout);
+    initial.compactColumnWidths = compactLayout.compactColumnWidths;
+    initial.compactTextFullyVisible = compactLayout.compactTextFullyVisible;
+    initial.compactFrameFitsTable = compactLayout.compactFrameFitsTable;
+    initial.compactFrameInsidePanel = compactLayout.compactFrameInsidePanel;
     const results = page.locator(".investor-stock-results");
     await page.locator("tr[data-inventory-unit-id]").last().scrollIntoViewIfNeeded();
     await page.waitForFunction(
@@ -2450,6 +2743,40 @@ async function checkTabelaoValidation(page, origin) {
     }
   } finally {
     await page.unroute("**/api/inventory", stressHandler);
+    await page.setViewportSize({ width: 1440, height: 900 });
+  }
+
+  const compactItems = buildTabelaoCompactFixture();
+  const compactHandler = async (interceptedRoute) =>
+    interceptedRoute.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify({
+        source: "QA compact synthetic inventory",
+        count: compactItems.length,
+        items: compactItems,
+      }),
+    });
+  await page.route("**/api/inventory", compactHandler);
+  try {
+    for (const viewport of requiredViewports) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page
+        .locator('tr[data-inventory-unit-id="qa-compact-10"]')
+        .waitFor({ state: "attached" });
+      const layout = await page.evaluate(readTabelaoCompactLayout);
+      viewportChecks.push({
+        key: `compact-${viewport.key}`,
+        compactColumnWidths: layout.compactColumnWidths,
+        compactTextFullyVisible: layout.compactTextFullyVisible,
+        compactFrameFitsTable: layout.compactFrameFitsTable,
+        compactFrameInsidePanel: layout.compactFrameInsidePanel,
+        consecutiveDisplayedValuesOnly: await checkTabelaoCompactFixture(page),
+      });
+    }
+  } finally {
+    await page.unroute("**/api/inventory", compactHandler);
     await page.setViewportSize({ width: 1440, height: 900 });
   }
 

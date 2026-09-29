@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-29 - Colunas compactas do Tabelao
+
+- Compacta Empreendimento, Endereco e Limitador com quebra de linha e texto integral.
+- Unifica enderecos e limitadores consecutivos iguais dentro de cada empreendimento.
+- Preserva plantas, quantidades, valores distintos, filtros e ordenacao.
+- Mantem a borda e a rolagem da grade dentro do painel em telas estreitas.
+- Atualiza somente as sete referencias visuais afetadas, apos inspecao da CI.
+
 ## 2026-09-29 - Topo mais direto no Associativo
 
 - Remove textos repetidos acima do titulo do simulador.

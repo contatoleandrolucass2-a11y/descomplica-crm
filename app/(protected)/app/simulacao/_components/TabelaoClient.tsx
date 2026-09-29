@@ -10,6 +10,7 @@ import {
 } from "@/lib/archive-investor/tabelao-payload";
 
 import {
+  buildTabelaoCellSpans,
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
   enrichTabelaoLocationFields,
@@ -218,7 +219,14 @@ export function TabelaoClient() {
   );
   const inventorySummary = useMemo(() => summarizeTabelao(matchingInventory), [matchingInventory]);
   const inventoryGroups = useMemo(
-    () => groupTabelaoInventoryByProject(matchingInventory),
+    () =>
+      groupTabelaoInventoryByProject(matchingInventory).map((group) => ({
+        ...group,
+        addressSpans: buildTabelaoCellSpans(group.items.map(formatAddress)),
+        classificationSpans: buildTabelaoCellSpans(
+          group.items.map((item) => descriptiveLabel(item.classification)),
+        ),
+      })),
     [matchingInventory],
   );
   const excludedUnits =
@@ -579,6 +587,8 @@ export function TabelaoClient() {
                   const groupHeaders = `tabelao-business-${groupIndex} tabelao-project-${groupIndex}`;
                   const address = formatAddress(item);
                   const classification = descriptiveLabel(item.classification);
+                  const addressSpan = group.addressSpans[itemIndex] ?? 1;
+                  const classificationSpan = group.classificationSpans[itemIndex] ?? 1;
                   return (
                     <tr
                       key={item.id}
@@ -665,14 +675,17 @@ export function TabelaoClient() {
                       >
                         {formatMoneyValue(item.appraisal)}
                       </td>
-                      <td
-                        className="tabelao-stock-long-text"
-                        data-label="Endereço"
-                        headers={`tabelao-address ${groupHeaders}`}
-                        title={address}
-                      >
-                        {address}
-                      </td>
+                      {addressSpan > 0 ? (
+                        <td
+                          className="tabelao-stock-long-text"
+                          data-label="Endereço"
+                          headers={`tabelao-address ${groupHeaders}`}
+                          rowSpan={addressSpan}
+                          title={address}
+                        >
+                          <span className="tabelao-stock-wrapped-text">{address}</span>
+                        </td>
+                      ) : null}
                       <td
                         className="tabelao-stock-progress"
                         data-label="% Obra"
@@ -681,14 +694,17 @@ export function TabelaoClient() {
                       >
                         {formatProgress(item.progress)}
                       </td>
-                      <td
-                        className="tabelao-stock-long-text"
-                        data-label="Limitador"
-                        headers={`tabelao-description ${groupHeaders}`}
-                        title={classification}
-                      >
-                        {classification}
-                      </td>
+                      {classificationSpan > 0 ? (
+                        <td
+                          className="tabelao-stock-long-text"
+                          data-label="Limitador"
+                          headers={`tabelao-description ${groupHeaders}`}
+                          rowSpan={classificationSpan}
+                          title={classification}
+                        >
+                          <span className="tabelao-stock-wrapped-text">{classification}</span>
+                        </td>
+                      ) : null}
                     </tr>
                   );
                 })}

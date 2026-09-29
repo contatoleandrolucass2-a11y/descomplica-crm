@@ -230,7 +230,7 @@ describe("Tabelão protegido", () => {
       /\.tabelao-page-shell \.investor-stock-panel > \.investor-section-heading\s*\{[^}]*height: auto !important;[^}]*min-height: 48px !important;/,
     );
     expect(styles).toMatch(
-      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*width: max-content;[^}]*min-width: 100%;[^}]*table-layout: auto;/,
+      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*width: max-content;[^}]*min-width: 0;[^}]*table-layout: auto;/,
     );
     expect(styles).toMatch(/\.tabelao-page-shell \.investor-stock-table col\s*\{[^}]*width: auto;/);
     expect(styles).toMatch(
@@ -253,6 +253,45 @@ describe("Tabelão protegido", () => {
     expect(styles).toContain("min-height: 96px !important");
     expect(styles).not.toContain(".tabelao-main");
     expect(styles).not.toContain(".tabelao-hero-note");
+  });
+
+  it("compacta textos completos e mescla apenas células consecutivas dentro do projeto", () => {
+    const client = readFileSync(
+      new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
+      "utf8",
+    );
+    const styles = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    expect(client).toContain("buildTabelaoCellSpans(group.items.map(formatAddress))");
+    expect(client).toContain("group.items.map((item) => descriptiveLabel(item.classification))");
+    expect(client).toContain("const addressSpan = group.addressSpans[itemIndex] ?? 1");
+    expect(client).toContain(
+      "const classificationSpan = group.classificationSpans[itemIndex] ?? 1",
+    );
+    expect(client).toContain("rowSpan={addressSpan}");
+    expect(client).toContain("rowSpan={classificationSpan}");
+    expect(client).toContain("addressSpan > 0");
+    expect(client).toContain("classificationSpan > 0");
+    expect(styles).toMatch(
+      /\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*width: fit-content;[^}]*max-width: calc\(100% - 48px\);/,
+    );
+    expect(styles).toMatch(
+      /@media \(max-width: 760px\)\s*\{\s*\.tabelao-page-shell \.investor-stock-results\s*\{\s*max-width: calc\(100% - 28px\);/,
+    );
+    expect(styles).toMatch(
+      /\.tabelao-group-cell \.investor-stock-product-text\s*\{[^}]*width: 100px;[^}]*white-space: normal;[^}]*overflow-wrap: anywhere;/,
+    );
+    expect(styles).toMatch(
+      /\[headers~="tabelao-address"\] \.tabelao-stock-wrapped-text\s*\{\s*width: 130px;/,
+    );
+    expect(styles).toMatch(
+      /\[headers~="tabelao-description"\] \.tabelao-stock-wrapped-text\s*\{\s*width: 58px;/,
+    );
   });
 
   it("preserva cada unidade, filtra e ordena com os helpers do estoque", () => {

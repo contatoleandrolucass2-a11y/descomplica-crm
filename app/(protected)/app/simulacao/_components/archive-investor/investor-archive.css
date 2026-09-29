@@ -21472,10 +21472,11 @@ body:has(.investor-page-shell) {
 }
 
 .tabelao-page-shell .investor-stock-results {
+  width: fit-content;
   height: auto;
   min-height: 0;
   max-height: none;
-  max-width: 100%;
+  max-width: calc(100% - 48px);
   overflow-x: auto;
   overflow-y: visible;
   overscroll-behavior-inline: contain;
@@ -21484,7 +21485,7 @@ body:has(.investor-page-shell) {
 
 .tabelao-page-shell .investor-stock-table {
   width: max-content;
-  min-width: 100%;
+  min-width: 0;
   table-layout: auto;
 }
 
@@ -21564,6 +21565,10 @@ body:has(.investor-page-shell) {
 }
 
 @media (max-width: 760px) {
+  .tabelao-page-shell .investor-stock-results {
+    max-width: calc(100% - 28px);
+  }
+
   .investor-page-shell.tabelao-page-shell .investor-stock-panel > .investor-section-heading {
     height: auto !important;
     min-height: 84px !important;
@@ -21609,7 +21614,7 @@ body:has(.investor-page-shell) {
   .tabelao-page-shell .investor-stock-table {
     display: table;
     width: max-content;
-    min-width: 100%;
+    min-width: 0;
     table-layout: auto;
   }
 
@@ -21719,6 +21724,31 @@ body:has(.investor-page-shell) {
     white-space: nowrap;
     overflow-wrap: normal;
   }
+}
+
+/* Limites incluem o texto integral, sem alargar a grade pelos maiores rótulos. */
+.tabelao-page-shell .investor-stock-table .investor-stock-product-text,
+.tabelao-page-shell .investor-stock-table .tabelao-stock-wrapped-text {
+  display: block;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  line-height: 1.3;
+}
+
+.tabelao-page-shell .investor-stock-table .tabelao-group-cell .investor-stock-product-text {
+  width: 100px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.tabelao-page-shell [headers~="tabelao-address"] .tabelao-stock-wrapped-text {
+  width: 130px;
+}
+
+.tabelao-page-shell [headers~="tabelao-description"] .tabelao-stock-wrapped-text {
+  width: 58px;
 }
 
 @media (max-width: 1100px) {

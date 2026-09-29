@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildTabelaoCellSpans,
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
   enrichTabelaoLocationFields,
@@ -37,6 +38,54 @@ const unit = (id: string, fields: Partial<TabelaoInventoryItem> = {}) => ({
 });
 
 describe("Menor valor por tipologia no Tabelão", () => {
+  it.each([
+    [[], []],
+    [["R2V"], [1]],
+    [
+      ["R2V", "R2V", "HIS-2", "HIS-2", "PCD"],
+      [2, 0, 2, 0, 1],
+    ],
+    [
+      ["R2V", "HIS-2", "R2V"],
+      [1, 1, 1],
+    ],
+    [
+      ["Rua A / 1 / Centro", "Rua A / 2 / Centro"],
+      [1, 1],
+    ],
+    [
+      ["HIS-2", "HIS-2 - Adaptável PCD/PNE"],
+      [1, 1],
+    ],
+    [
+      ["Não informado", "Não informado"],
+      [2, 0],
+    ],
+  ])("mescla somente sequências de rótulos idênticos: %j", (labels, expected) => {
+    const before = [...labels];
+    const spans = buildTabelaoCellSpans(labels as string[]);
+    expect(spans).toEqual(expected);
+    expect(spans.reduce((sum, value) => sum + value, 0)).toBe(labels.length);
+    expect(labels).toEqual(before);
+  });
+
+  it("recalcula células mescladas por projeto, incorporadora, filtro e ordem", () => {
+    const source = [
+      unit("1", { plant: "A", finalWithKit: 300_000, classification: "HIS-2" }),
+      unit("2", { plant: "B", finalWithKit: 320_000, classification: "HIS-2" }),
+      unit("3", { plant: "C", finalWithKit: 340_000, classification: "R2V" }),
+      unit("4", { businessUnit: "Outra", classification: "R2V" }),
+      unit("5", { project: "Outro", classification: "R2V" }),
+    ];
+    const spansByProject = (items: typeof source, order = "project") =>
+      groupTabelaoInventoryByProject(sortTabelaoInventory(items, order)).map((group) =>
+        buildTabelaoCellSpans(group.items.map((item) => item.classification ?? "Não informado")),
+      );
+    expect(spansByProject(source)).toEqual([[2, 0, 1], [1], [1]]);
+    expect(spansByProject(source, "project-desc")).toEqual([[1, 2, 0], [1], [1]]);
+    expect(spansByProject(source.filter((item) => item.plant === "B"))).toEqual([[1]]);
+  });
+
   it("conta unidades distintas do estoque inclusive sem preço, mantendo a comparação válida", () => {
     const source = [
       unit("1"),

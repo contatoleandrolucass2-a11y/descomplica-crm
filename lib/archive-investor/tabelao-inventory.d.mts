@@ -42,6 +42,9 @@ export function groupTabelaoInventoryByProject<T extends TabelaoInventoryItem>(
   items: T[];
 }>;
 
+/** Consecutive identical labels share one cell; zero marks a covered row. */
+export function buildTabelaoCellSpans(values: readonly string[]): number[];
+
 export interface TabelaoFilters {
   query?: string;
   businessUnit?: string;
