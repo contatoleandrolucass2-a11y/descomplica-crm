@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-09-29 - Cabecalho compacto do Associativo
+
+- Remove a trilha redundante e o rotulo "Simulacao comercial" do topo.
+- Preserva o titulo principal, a ajuda contextual e o guia da pagina.
+- Reduz somente os espacamentos do cabecalho Associativo em desktop e celular.
+- Acrescenta teste de escopo para impedir retorno dos textos ou impacto em outros simuladores.
+- Lint, tipos, inventario e build aprovados. Suite Windows: 972 testes aprovados,
+  um skip e seis falhas POSIX preexistentes; CI Linux e QA visual ainda exigidos.
+
 ## 2026-09-28 - Carregamento concorrente do Tabelao
 
 - Corrige repeticao de consultas apos falha com intervalo de cinco segundos

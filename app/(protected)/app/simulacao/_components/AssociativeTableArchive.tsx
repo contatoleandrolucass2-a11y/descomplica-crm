@@ -24,16 +24,8 @@ export function AssociativeTableArchive() {
         <SiteMenu />
       </header>
       <main className="investor-main">
-        <section className="goal-page-hero investor-compact-hero">
+        <section className="goal-page-hero investor-compact-hero investor-associative-hero">
           <div className="goal-hero-copy">
-            <nav className="documentation-breadcrumb" aria-label="Trilha de navegação">
-              <Link href="/app/simulacao" prefetch={false}>
-                Simulação
-              </Link>
-              <span aria-hidden="true">/</span>
-              <strong>Simulador Tabela Associativo</strong>
-            </nav>
-            <p className="goal-kicker">Simulação comercial</p>
             <div className="investor-hero-title">
               <h1>Simulador Tabela Associativo</h1>
               <InvestorInfoHint

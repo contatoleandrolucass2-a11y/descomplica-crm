@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-29 - Topo mais direto no Associativo
+
+- Remove textos repetidos acima do titulo do simulador.
+- Fecha os espacos excedentes sem alterar o restante da pagina.
+
 ## 2026-09-28 - Robustez do carregamento do Tabelao
 
 - Contem tentativas repetidas quando a fonte de estoque esta indisponivel.
