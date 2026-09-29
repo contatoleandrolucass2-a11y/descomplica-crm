@@ -4,6 +4,20 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-29: Colunas compactas e celulas repetidas do Tabelao
+
+- Status: validacao local concluida; CI/publicacao pendentes; branch codex/tabelao-colunas-compactas.
+- Fonte: TabelaoClient.tsx, investor-archive.css e tabelao-inventory.mjs.
+- Textos de empreendimento, endereco e limitador passam a quebrar em larguras
+  delimitadas. O min-width da tabela nao deve redistribuir espaco excedente.
+- Mesclar rotulos consecutivos somente depois de agrupar por empreendimento e
+  incorporadora. Nao excluir plantas nem unir A/B/A atraves de um valor distinto.
+- Testes focados iniciais: 62 aprovados. Lint, tipos, build e Gitleaks aprovados.
+  Suite Windows: 978 aprovados, quatro skips e seis falhas POSIX preexistentes;
+  oito testes Node aprovados. Navegador sintetico local passou em sete cenarios,
+  revisao independente sem achados; 75 testes focados finais aprovados.
+  Evidencias: docs/audits/tabelao-colunas-2026-09-29.md.
+
 ## 2026-09-29: Cabecalho compacto do Associativo
 
 - Status: validacao local e inspecao visual concluidas; nova CI integrada e publicacao pendentes.
