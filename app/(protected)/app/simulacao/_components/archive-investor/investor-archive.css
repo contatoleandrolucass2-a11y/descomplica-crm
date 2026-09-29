@@ -15,6 +15,26 @@
   --shadow: 0 20px 60px rgba(25, 48, 80, 0.1);
 }
 
+/* Associativo: o titulo principal ja identifica a pagina; evite espaco duplicado no topo. */
+.investor-page-shell.investor-associative-table-page .investor-main {
+  padding-top: 16px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-hero {
+  padding-top: 0;
+  padding-bottom: 16px;
+}
+
+@media (max-width: 760px) {
+  .investor-page-shell.investor-associative-table-page .investor-main {
+    padding-top: 12px;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-associative-hero {
+    padding-bottom: 12px;
+  }
+}
+
 :root[data-theme="balanced"] {
   --ink: #132943;
   --ink-soft: #53687d;

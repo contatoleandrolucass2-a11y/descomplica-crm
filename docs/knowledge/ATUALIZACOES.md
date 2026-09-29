@@ -4,6 +4,20 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-29: Cabecalho compacto do Associativo
+
+- Status: validacao local e inspecao visual concluidas; nova CI integrada e publicacao pendentes.
+- Fonte: AssociativeTableArchive.tsx e investor-archive.css.
+- Remove somente a trilha e o rotulo redundantes do topo; preserva H1, ajuda e guia.
+- Espacamento reduzido fica limitado a investor-associative-table-page.
+- Captura autenticada da CI 36520154289 validou navegacao, acessibilidade,
+  teclado, zoom e responsividade; onze referencias exclusivas do Associativo
+  foram inspecionadas e promovidas.
+- O teste do catalogo passa a reconhecer as vinte verificacoes do Tabelao que
+  o capturador atual ja executava; nenhuma referencia visual do Tabelao mudou.
+- Teste especifico, lint, tipos, inventario e build aprovados. Suite Windows:
+  972 aprovados, um skip e seis falhas POSIX preexistentes; nova CI Linux exigida.
+
 ## 2026-09-28: Tabelao e indisponibilidade concorrente
 
 - Status: validacao local concluida com limitacao POSIX; branch codex/tabelao-concorrencia.
