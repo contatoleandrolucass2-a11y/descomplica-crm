@@ -44,7 +44,17 @@ plantas ou unidades do estoque. Nenhum calculo, API, permissao ou workflow n8n m
 - Revisao independente sem achados: nove cenarios Chromium, axe da tabela e
   9.841 sequencias do helper. Sem teste de leitor de tela real.
 - 75 testes focados de Tabelao e contratos de QA aprovados apos a integracao.
-- CI Linux, referencias visuais e publicacao sao gates pendentes.
+- CI 36526268323, head 3801cbe e merge de teste 0f4616b: Linux aprovou 984
+  testes Vitest (quatro skips), oito testes Node, lint, tipos, build e audit.
+  Banco, advisors, E2E de autorizacao e restore isolado passaram.
+- Matriz autenticada: 140 verificacoes responsivas, 80 de tema, 193 axe e
+  100 de zoom aprovadas; todos os contratos do Tabelao passaram, incluindo
+  celulas mescladas, geometria, filtros e acessos concorrentes.
+- A comparacao visual falhou somente em sete capturas do Tabelao, pela mudanca
+  solicitada. Desktop 1280/1440, tablet 768/1024 e tres temas foram inspecionados.
+  Somente essas sete imagens foram promovidas; 186 referencias ficaram intactas.
+  O catalogo registra hashes, comparacao anterior, SHA e URL da captura por item.
+- Uma nova CI no commit com essas referencias e a publicacao seguem pendentes.
 
 ## Publicacao
 

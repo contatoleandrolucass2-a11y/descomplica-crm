@@ -16,6 +16,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   Suite Windows: 978 aprovados, quatro skips e seis falhas POSIX preexistentes;
   oito testes Node aprovados. Navegador sintetico local passou em sete cenarios,
   revisao independente sem achados; 75 testes focados finais aprovados.
+  CI 36526268323: 984 testes Linux, matriz funcional/acessibilidade e restore
+  aprovados. Sete referencias do Tabelao inspecionadas e atualizadas, com
+  proveniencia por imagem; outras 186 preservadas. Nova CI e publicacao pendentes.
   Evidencias: docs/audits/tabelao-colunas-2026-09-29.md.
 
 ## 2026-09-29: Cabecalho compacto do Associativo

@@ -6,6 +6,7 @@
 - Unifica enderecos e limitadores consecutivos iguais dentro de cada empreendimento.
 - Preserva plantas, quantidades, valores distintos, filtros e ordenacao.
 - Mantem a borda e a rolagem da grade dentro do painel em telas estreitas.
+- Atualiza somente as sete referencias visuais afetadas, apos inspecao da CI.
 
 ## 2026-09-29 - Topo mais direto no Associativo
 

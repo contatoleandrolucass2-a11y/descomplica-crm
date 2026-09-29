@@ -12265,10 +12265,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
+          "tracked": true,
+          "bytes": 113952,
+          "sha256": "4efd366caf79e74006b1f250729a694b83d550e734edab333525dcf4c6cc0102"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabelao-1440x900.webp",
+      "bytes": 113952,
+      "sha256": "4efd366caf79e74006b1f250729a694b83d550e734edab333525dcf4c6cc0102",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 208083,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.16055787037037036,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
           "tracked": true,
@@ -12276,23 +12294,12 @@
           "sha256": "34ff81eab3b0e706e8974f5cfd98d5c4590b850b5784b64e54b06d1084f5f673"
         }
       },
-      "path": "target-authenticated/simulacao-tabelao-1440x900.webp",
-      "bytes": 115570,
-      "sha256": "34ff81eab3b0e706e8974f5cfd98d5c4590b850b5784b64e54b06d1084f5f673",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
-          "tracked": true,
-          "bytes": 115570,
-          "sha256": "34ff81eab3b0e706e8974f5cfd98d5c4590b850b5784b64e54b06d1084f5f673"
-        }
+      "captureSource": {
+        "commit": "0f4616b22b86fd26fd7c8fa9d3888c8a1d65c96a",
+        "headCommit": "3801cbeb5da265f359882e21f6c42db91dc40584",
+        "capturedAt": "2026-09-29T05:49:46.464Z",
+        "run": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36526268323",
+        "reason": "Inspecao das sete capturas afetadas pela compactacao solicitada do Tabelao"
       }
     },
     {
@@ -12672,10 +12679,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 113952,
+          "sha256": "4efd366caf79e74006b1f250729a694b83d550e734edab333525dcf4c6cc0102"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
+      "bytes": 113952,
+      "sha256": "4efd366caf79e74006b1f250729a694b83d550e734edab333525dcf4c6cc0102",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 208083,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.16055787037037036,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
           "tracked": true,
@@ -12683,23 +12708,12 @@
           "sha256": "34ff81eab3b0e706e8974f5cfd98d5c4590b850b5784b64e54b06d1084f5f673"
         }
       },
-      "path": "target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
-      "bytes": 115570,
-      "sha256": "34ff81eab3b0e706e8974f5cfd98d5c4590b850b5784b64e54b06d1084f5f673",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
-          "tracked": true,
-          "bytes": 115570,
-          "sha256": "34ff81eab3b0e706e8974f5cfd98d5c4590b850b5784b64e54b06d1084f5f673"
-        }
+      "captureSource": {
+        "commit": "0f4616b22b86fd26fd7c8fa9d3888c8a1d65c96a",
+        "headCommit": "3801cbeb5da265f359882e21f6c42db91dc40584",
+        "capturedAt": "2026-09-29T05:49:46.464Z",
+        "run": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36526268323",
+        "reason": "Inspecao das sete capturas afetadas pela compactacao solicitada do Tabelao"
       }
     },
     {
@@ -13079,10 +13093,28 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 113682,
+          "sha256": "88d6432c11ff84d1cb53338b8a4b8a1e726d5ccbf4570cbe22bcc293f52b19c3"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
+      "bytes": 113682,
+      "sha256": "88d6432c11ff84d1cb53338b8a4b8a1e726d5ccbf4570cbe22bcc293f52b19c3",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 208083,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.16055787037037036,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
           "tracked": true,
@@ -13090,23 +13122,12 @@
           "sha256": "e43e1f0475b8c3ccadd00a699dbce19b9e9c5e133c17534546f1603f921a6cf3"
         }
       },
-      "path": "target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
-      "bytes": 115666,
-      "sha256": "e43e1f0475b8c3ccadd00a699dbce19b9e9c5e133c17534546f1603f921a6cf3",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
-          "tracked": true,
-          "bytes": 115666,
-          "sha256": "e43e1f0475b8c3ccadd00a699dbce19b9e9c5e133c17534546f1603f921a6cf3"
-        }
+      "captureSource": {
+        "commit": "0f4616b22b86fd26fd7c8fa9d3888c8a1d65c96a",
+        "headCommit": "3801cbeb5da265f359882e21f6c42db91dc40584",
+        "capturedAt": "2026-09-29T05:49:46.464Z",
+        "run": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36526268323",
+        "reason": "Inspecao das sete capturas afetadas pela compactacao solicitada do Tabelao"
       }
     },
     {
@@ -13486,10 +13507,28 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
+          "tracked": true,
+          "bytes": 112874,
+          "sha256": "09a5cb228a0f3a2ae10329871bb28a7de1fc97cc7d403764415a09732d62de80"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
+      "bytes": 112874,
+      "sha256": "09a5cb228a0f3a2ae10329871bb28a7de1fc97cc7d403764415a09732d62de80",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 209225,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.16143904320987654,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
           "tracked": true,
@@ -13497,23 +13536,12 @@
           "sha256": "0fa7d1f06dd7d708bd55bb4edf25c4ca7525af6ea0f5f47a954940a011570f81"
         }
       },
-      "path": "target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
-      "bytes": 113278,
-      "sha256": "0fa7d1f06dd7d708bd55bb4edf25c4ca7525af6ea0f5f47a954940a011570f81",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
-          "tracked": true,
-          "bytes": 113278,
-          "sha256": "0fa7d1f06dd7d708bd55bb4edf25c4ca7525af6ea0f5f47a954940a011570f81"
-        }
+      "captureSource": {
+        "commit": "0f4616b22b86fd26fd7c8fa9d3888c8a1d65c96a",
+        "headCommit": "3801cbeb5da265f359882e21f6c42db91dc40584",
+        "capturedAt": "2026-09-29T05:49:46.464Z",
+        "run": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36526268323",
+        "reason": "Inspecao das sete capturas afetadas pela compactacao solicitada do Tabelao"
       }
     },
     {
@@ -14226,10 +14254,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 921600,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
+          "tracked": true,
+          "bytes": 107450,
+          "sha256": "7c331424a68fe68ad617c5cd8d88d170f6383ae7d469e9bfed5413caaca1048d"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabelao-1280x720.webp",
+      "bytes": 107450,
+      "sha256": "7c331424a68fe68ad617c5cd8d88d170f6383ae7d469e9bfed5413caaca1048d",
+      "width": 1280,
+      "height": 720,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 169270,
+        "totalPixels": 921600,
+        "changedPixelRatio": 0.18366970486111112,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
           "tracked": true,
@@ -14237,23 +14283,12 @@
           "sha256": "a67834b00e2674f83aa06a0d1e3be68258392f84a72e7566b71db7245ac567a8"
         }
       },
-      "path": "target-authenticated/simulacao-tabelao-1280x720.webp",
-      "bytes": 114956,
-      "sha256": "a67834b00e2674f83aa06a0d1e3be68258392f84a72e7566b71db7245ac567a8",
-      "width": 1280,
-      "height": 720,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 921600,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
-          "tracked": true,
-          "bytes": 114956,
-          "sha256": "a67834b00e2674f83aa06a0d1e3be68258392f84a72e7566b71db7245ac567a8"
-        }
+      "captureSource": {
+        "commit": "0f4616b22b86fd26fd7c8fa9d3888c8a1d65c96a",
+        "headCommit": "3801cbeb5da265f359882e21f6c42db91dc40584",
+        "capturedAt": "2026-09-29T05:49:46.464Z",
+        "run": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36526268323",
+        "reason": "Inspecao das sete capturas afetadas pela compactacao solicitada do Tabelao"
       }
     },
     {
@@ -14966,10 +15001,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
+          "tracked": true,
+          "bytes": 93590,
+          "sha256": "716dee99c9eb7a0e06879149e51838b440c7290c7740a94228e07f12c20de4bc"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabelao-1024x768.webp",
+      "bytes": 93590,
+      "sha256": "716dee99c9eb7a0e06879149e51838b440c7290c7740a94228e07f12c20de4bc",
+      "width": 1024,
+      "height": 768,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 45756,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0.0581817626953125,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
           "tracked": true,
@@ -14977,23 +15030,12 @@
           "sha256": "99d69d2f0469f289361262e7bb8e1edd76e003d5da31b26d27f272a5ff7b92bd"
         }
       },
-      "path": "target-authenticated/simulacao-tabelao-1024x768.webp",
-      "bytes": 91876,
-      "sha256": "99d69d2f0469f289361262e7bb8e1edd76e003d5da31b26d27f272a5ff7b92bd",
-      "width": 1024,
-      "height": 768,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 786432,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
-          "tracked": true,
-          "bytes": 91876,
-          "sha256": "99d69d2f0469f289361262e7bb8e1edd76e003d5da31b26d27f272a5ff7b92bd"
-        }
+      "captureSource": {
+        "commit": "0f4616b22b86fd26fd7c8fa9d3888c8a1d65c96a",
+        "headCommit": "3801cbeb5da265f359882e21f6c42db91dc40584",
+        "capturedAt": "2026-09-29T05:49:46.464Z",
+        "run": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36526268323",
+        "reason": "Inspecao das sete capturas afetadas pela compactacao solicitada do Tabelao"
       }
     },
     {
@@ -15706,10 +15748,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
+          "tracked": true,
+          "bytes": 104224,
+          "sha256": "cb8fe899ce13d9ca02ec4436dd4d266a2d9d411138dc363dbc91fab799b0dab6"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabelao-768x1024.webp",
+      "bytes": 104224,
+      "sha256": "cb8fe899ce13d9ca02ec4436dd4d266a2d9d411138dc363dbc91fab799b0dab6",
+      "width": 768,
+      "height": 1024,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 59147,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0.0752092997233073,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
           "tracked": true,
@@ -15717,23 +15777,12 @@
           "sha256": "16cad6224f9875eb4769770e386072963e98342cf0cf2d9177ad5c98b7e264fa"
         }
       },
-      "path": "target-authenticated/simulacao-tabelao-768x1024.webp",
-      "bytes": 103352,
-      "sha256": "16cad6224f9875eb4769770e386072963e98342cf0cf2d9177ad5c98b7e264fa",
-      "width": 768,
-      "height": 1024,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 786432,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
-          "tracked": true,
-          "bytes": 103352,
-          "sha256": "16cad6224f9875eb4769770e386072963e98342cf0cf2d9177ad5c98b7e264fa"
-        }
+      "captureSource": {
+        "commit": "0f4616b22b86fd26fd7c8fa9d3888c8a1d65c96a",
+        "headCommit": "3801cbeb5da265f359882e21f6c42db91dc40584",
+        "capturedAt": "2026-09-29T05:49:46.464Z",
+        "run": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36526268323",
+        "reason": "Inspecao das sete capturas afetadas pela compactacao solicitada do Tabelao"
       }
     },
     {
@@ -19692,20 +19741,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
         "tracked": true,
-        "bytes": 91876,
-        "sha256": "99d69d2f0469f289361262e7bb8e1edd76e003d5da31b26d27f272a5ff7b92bd"
+        "bytes": 93590,
+        "sha256": "716dee99c9eb7a0e06879149e51838b440c7290c7740a94228e07f12c20de4bc"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
         "tracked": true,
-        "bytes": 114956,
-        "sha256": "a67834b00e2674f83aa06a0d1e3be68258392f84a72e7566b71db7245ac567a8"
+        "bytes": 107450,
+        "sha256": "7c331424a68fe68ad617c5cd8d88d170f6383ae7d469e9bfed5413caaca1048d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
         "tracked": true,
-        "bytes": 115570,
-        "sha256": "34ff81eab3b0e706e8974f5cfd98d5c4590b850b5784b64e54b06d1084f5f673"
+        "bytes": 113952,
+        "sha256": "4efd366caf79e74006b1f250729a694b83d550e734edab333525dcf4c6cc0102"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-320x568.webp",
@@ -19728,8 +19777,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
         "tracked": true,
-        "bytes": 103352,
-        "sha256": "16cad6224f9875eb4769770e386072963e98342cf0cf2d9177ad5c98b7e264fa"
+        "bytes": 104224,
+        "sha256": "cb8fe899ce13d9ca02ec4436dd4d266a2d9d411138dc363dbc91fab799b0dab6"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
@@ -20034,24 +20083,24 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 115666,
-        "sha256": "e43e1f0475b8c3ccadd00a699dbce19b9e9c5e133c17534546f1603f921a6cf3"
+        "bytes": 113682,
+        "sha256": "88d6432c11ff84d1cb53338b8a4b8a1e726d5ccbf4570cbe22bcc293f52b19c3"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 113278,
-        "sha256": "0fa7d1f06dd7d708bd55bb4edf25c4ca7525af6ea0f5f47a954940a011570f81"
+        "bytes": 112874,
+        "sha256": "09a5cb228a0f3a2ae10329871bb28a7de1fc97cc7d403764415a09732d62de80"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
         "tracked": true,
-        "bytes": 115570,
-        "sha256": "34ff81eab3b0e706e8974f5cfd98d5c4590b850b5784b64e54b06d1084f5f673"
+        "bytes": 113952,
+        "sha256": "4efd366caf79e74006b1f250729a694b83d550e734edab333525dcf4c6cc0102"
       }
     ],
     "fileCount": 193,
-    "manifestSha256": "9aa65c810c14a43b73ffce3c2dae39721e2b6cd87143f5378b60405a8b9ff53f"
+    "manifestSha256": "1ebcf131ad5d365dc6de6a5d5502f1e58fab53e6d991ba70f9ccdb3127bc7a5e"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -20073,5 +20122,22 @@
     "changedPixelRatioThreshold": 0.01,
     "channelTolerance": 16
   },
-  "passed": true
+  "passed": true,
+  "selectiveBaselineUpdates": [
+    {
+      "route": "/app/simulacao/tabelao",
+      "captureCommit": "0f4616b22b86fd26fd7c8fa9d3888c8a1d65c96a",
+      "previousCatalogSha256": "56a704ba1597ee9cc9729cae0caec20bf0452714c5f6da05e49ccf2975e62770",
+      "paths": [
+        "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp"
+      ],
+      "provenance": "CI 36526268323, PR #108; funcionalidade aprovada, sete diferencas visuais inspecionadas"
+    }
+  ]
 }

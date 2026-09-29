@@ -9,6 +9,9 @@
 - Acrescenta testes de valores distintos, repeticoes separadas e limites de grupo.
 - Desconta margens laterais na largura maxima da grade; harness final aprova
   os sete cenarios tambem com a borda inteiramente contida no painel.
+- CI 36526268323 aprovou os contratos funcionais, acessibilidade, temas e zoom.
+  Inspeciona e atualiza somente sete referencias visuais do Tabelao, preservando
+  as demais 186 e registrando hashes/proveniencia. Nova CI integrada exigida.
 - Validacao e evidencia: docs/audits/tabelao-colunas-2026-09-29.md.
 
 ## 2026-09-29 - Cabecalho compacto do Associativo
