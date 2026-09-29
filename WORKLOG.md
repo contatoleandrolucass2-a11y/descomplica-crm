@@ -6,8 +6,12 @@
 - Preserva o titulo principal, a ajuda contextual e o guia da pagina.
 - Reduz somente os espacamentos do cabecalho Associativo em desktop e celular.
 - Acrescenta teste de escopo para impedir retorno dos textos ou impacto em outros simuladores.
+- Inspeciona as capturas da CI em 1440, 375 e 320 px e promove somente as onze
+  referencias do Associativo, incluindo temas, tablet e celular.
+- Alinha o catalogo com as vinte verificacoes do Tabelao ja executadas pelo QA,
+  corrigindo a contagem antiga de dezesseis sem mudar o comportamento da tela.
 - Lint, tipos, inventario e build aprovados. Suite Windows: 972 testes aprovados,
-  um skip e seis falhas POSIX preexistentes; CI Linux e QA visual ainda exigidos.
+  um skip e seis falhas POSIX preexistentes; nova CI Linux exigida.
 
 ## 2026-09-28 - Carregamento concorrente do Tabelao
 
