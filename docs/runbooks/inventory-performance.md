@@ -17,6 +17,15 @@
   mudar para estoque por organizacao, o cache devera ser particionado ou removido.
 - Respostas mantem `Cache-Control: no-store`; nao existe cache publico, persistencia
   no navegador nem retorno de entrada vencida quando a origem falha.
+- Falha de consulta inicia intervalo de cinco segundos por processo antes de
+  nova tentativa na origem ou arquivo. Respostas incluem Retry-After, continuam
+  autorizadas individualmente e nao prolongam o intervalo. A recuperacao volta
+  a compartilhar uma unica tentativa. Leitura do snapshot limita-se a vinte
+  segundos; resultado tardio nao pode preencher o cache apos esse prazo.
+- Tabelao limita cada consulta a vinte e cinco segundos, valida o payload antes
+  de renderizar e mantem cancelamento por pagina. Estoque vivo fica disponivel
+  antes do complemento de enderecos; se vazio ou com enderecos completos, nao
+  consulta esse complemento. Falha apenas do complemento preserva a lista viva.
 - Filtros calculam as facetas numa passagem, preservam contagens e valores exatos.
   A ordenacao e reutilizada entre filtros. Opcoes dos selects sao memoizadas;
   editar a proposta nao recria centenas de opcoes. A janela continua em 60 linhas.

@@ -2061,6 +2061,282 @@ async function checkTabelaoValidation(page, origin) {
     await page.unroute("**/api/inventory", liveLocationHandler);
   }
 
+  const completeLivePayload = { ...livePayload, items: referencePayload.items };
+  const malformedPayloads = [
+    { name: "items-object", payload: { ...completeLivePayload, items: {} } },
+    {
+      name: "count-mismatch",
+      payload: { ...completeLivePayload, count: completeLivePayload.count + 1 },
+    },
+    ...[
+      ["plant", 42],
+      ["streetNumber", { value: "123" }],
+      ["completionDate", 20291231],
+    ].map(([field, value]) => ({
+      name: `${field}-invalid-type`,
+      payload: {
+        ...completeLivePayload,
+        items: completeLivePayload.items.map((item, index) =>
+          index === 0 ? { ...item, [field]: value } : item,
+        ),
+      },
+    })),
+  ];
+  let currentPayload = completeLivePayload;
+  let payloadRequestCount = 0;
+  let completeLiveSnapshotRequests = 0;
+  let malformedPayloadPageErrors = 0;
+  const recordMalformedPageError = () => {
+    malformedPayloadPageErrors += 1;
+  };
+  const payloadHandler = async (interceptedRoute) => {
+    payloadRequestCount += 1;
+    await interceptedRoute.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: JSON.stringify(currentPayload),
+    });
+  };
+  const unexpectedSnapshotHandler = async (interceptedRoute) => {
+    completeLiveSnapshotRequests += 1;
+    await interceptedRoute.fulfill({
+      status: 200,
+      contentType: "application/json; charset=utf-8",
+      body: syntheticDirectTableSnapshot,
+    });
+  };
+  let malformedPayloadRecoverable = true;
+  let malformedPayloadRetryRestoresInventory = true;
+  let completeLiveSkipsLocationReference = true;
+  page.on("pageerror", recordMalformedPageError);
+  await page.route("**/api/inventory", payloadHandler);
+  await page.route("**/api/inventory/snapshot*", unexpectedSnapshotHandler);
+  try {
+    for (const malformed of malformedPayloads) {
+      currentPayload = malformed.payload;
+      await page.reload({ waitUntil: "domcontentloaded" });
+      const invalidPayloadMessage = page.getByText(
+        "Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.",
+        { exact: false },
+      );
+      await invalidPayloadMessage.waitFor({ state: "visible" });
+      const retry = page.getByRole("button", { name: "Tentar novamente", exact: true });
+      const recoverable =
+        (await retry.isVisible()) &&
+        (await retry.isEnabled()) &&
+        (await page.locator("tr[data-inventory-unit-id]").count()) === 0 &&
+        (await page.getByText("Carregando unidades do estoque…", { exact: true }).count()) === 0 &&
+        malformedPayloadPageErrors === 0;
+      malformedPayloadRecoverable &&= recoverable;
+
+      currentPayload = completeLivePayload;
+      const requestsBeforeRetry = payloadRequestCount;
+      await retry.click();
+      await page
+        .locator(".investor-stock-sync")
+        .getByText(syntheticTabelaoCountLabel, { exact: true })
+        .waitFor({ state: "visible", timeout: qaNavigationTimeout });
+      const restored =
+        payloadRequestCount > requestsBeforeRetry &&
+        (await invalidPayloadMessage.count()) === 0 &&
+        (await page.locator("tr[data-inventory-unit-id]").count()) ===
+          syntheticTabelaoInventory.length &&
+        (await page.locator('.investor-stock-filters select[name="project"]').isEnabled()) &&
+        malformedPayloadPageErrors === 0;
+      malformedPayloadRetryRestoresInventory &&= restored;
+      completeLiveSkipsLocationReference &&=
+        completeLiveSnapshotRequests === 0 &&
+        (await page.getByText(/Endereços complementados pela referência/u).count()) === 0 &&
+        (
+          await page
+            .locator(
+              `tr[data-inventory-unit-id="${syntheticTabelaoInventory[0].id}"] td[data-label="Endereço"]`,
+            )
+            .textContent()
+        )?.trim() ===
+          ["street", "streetNumber", "neighborhood"]
+            .map((field) => syntheticTabelaoInventory[0][field])
+            .join(" / ");
+      process.stdout.write(
+        `Tabelão QA: payload ${malformed.name} ${JSON.stringify({ recoverable, restored })}\n`,
+      );
+    }
+  } finally {
+    await page.unroute("**/api/inventory", payloadHandler);
+    await page.unroute("**/api/inventory/snapshot*", unexpectedSnapshotHandler);
+    page.off("pageerror", recordMalformedPageError);
+  }
+
+  // Reuse the synthetic login in two tabs; keep both live and reference requests in flight.
+  const concurrentPages = [];
+  let concurrentPageErrors = 0;
+  let concurrentResponsesKeepFiltersIndependent = true;
+  async function concurrentSelectionMatches(state, enriched) {
+    return state.page.evaluate(
+      ({ project, order, expectedRows, enriched }) => {
+        const rows = [...document.querySelectorAll("tr[data-inventory-unit-id]")];
+        return (
+          document.querySelector('select[name="project"]')?.value === project &&
+          document.querySelector('select[name="priceOrder"]')?.value === order &&
+          document.querySelector(".investor-stock-table")?.getAttribute("aria-rowcount") ===
+            String(expectedRows.length + 1) &&
+          rows.length === expectedRows.length &&
+          rows.every((row, index) => {
+            const expected = expectedRows[index];
+            return (
+              row.getAttribute("data-inventory-unit-id") === expected.id &&
+              row.querySelector(".investor-stock-price")?.textContent.trim() === expected.price &&
+              (!enriched ||
+                row.querySelector('td[data-label="Endereço"]')?.textContent.trim() ===
+                  expected.address)
+            );
+          })
+        );
+      },
+      { project: state.project, order: state.order, expectedRows: state.expectedRows, enriched },
+    );
+  }
+  try {
+    for (const index of [0, 1]) {
+      const items = referencePayload.items.slice(0, 4).map((item, itemIndex) => ({
+        ...item,
+        id: `qa-concurrent-${index}-${itemIndex}`,
+        identifier: `QA-CONCURRENT-${index}-${itemIndex}`,
+        businessUnit: "Incorporadora QA",
+        project: `Empreendimento concorrente ${Math.floor(itemIndex / 2) + 1}`,
+        plant: `Planta ${itemIndex % 2}`,
+        finalWithKit: 250_000 + itemIndex * 10_000,
+        unitBonus: 0,
+        tableSlack: 0,
+        street: `Rua concorrente ${index}`,
+        streetNumber: String(itemIndex + 1),
+        neighborhood: "Bairro QA",
+      }));
+      const state = {
+        page: configureQaPage(await page.context().newPage()),
+        liveGate: Promise.withResolvers(),
+        referenceGate: Promise.withResolvers(),
+        project: `empreendimento concorrente ${index + 1}`,
+        order: index === 0 ? "desc" : "asc",
+        expectedRows: items
+          .filter(
+            (item) => item.project.toLowerCase() === `empreendimento concorrente ${index + 1}`,
+          )
+          .sort((left, right) => (index === 0 ? -1 : 1) * (left.finalWithKit - right.finalWithKit))
+          .map((item) => ({
+            id: item.id,
+            price: currency.format(item.finalWithKit),
+            address: [item.street, item.streetNumber, item.neighborhood].join(" / "),
+          })),
+      };
+      concurrentPages.push(state);
+      state.page.on("pageerror", () => {
+        concurrentPageErrors += 1;
+      });
+      await state.page.route("**/api/inventory", async (interceptedRoute) => {
+        await state.liveGate.promise;
+        await interceptedRoute.fulfill({
+          status: 200,
+          contentType: "application/json; charset=utf-8",
+          body: JSON.stringify({
+            ...livePayload,
+            count: items.length,
+            items: items.map((item) => ({
+              ...item,
+              street: null,
+              streetNumber: null,
+              neighborhood: null,
+            })),
+          }),
+        });
+      });
+      await state.page.route("**/api/inventory/snapshot*", async (interceptedRoute) => {
+        await state.referenceGate.promise;
+        await interceptedRoute.fulfill({
+          status: 200,
+          contentType: "application/json; charset=utf-8",
+          body: JSON.stringify({ ...protectedReferencePayload, count: items.length, items }),
+        });
+      });
+    }
+    await Promise.all(
+      concurrentPages.map(async (state) => {
+        await Promise.all([
+          state.page.waitForRequest(
+            (request) => new URL(request.url()).pathname === "/api/inventory",
+          ),
+          gotoWithServerRetry(state.page, url, { waitUntil: "domcontentloaded" }),
+        ]);
+        await state.page
+          .getByText("Carregando unidades do estoque…", { exact: true })
+          .waitFor({ state: "visible" });
+      }),
+    );
+    // Resolve the second tab first, and set its filters while the first tab is still loading.
+    for (const index of [1, 0]) {
+      const state = concurrentPages[index];
+      const referenceRequested = state.page.waitForRequest(
+        (request) => new URL(request.url()).pathname === "/api/inventory/snapshot",
+      );
+      state.liveGate.resolve();
+      await referenceRequested;
+      await state.page
+        .getByText("4 opções exclusivas · 2 empreendimentos", { exact: true })
+        .waitFor({ state: "visible" });
+      await state.page
+        .locator('.investor-stock-filters select[name="project"]')
+        .selectOption(state.project);
+      await state.page
+        .locator('.investor-stock-filters select[name="priceOrder"]')
+        .selectOption(state.order);
+      concurrentResponsesKeepFiltersIndependent &&= await concurrentSelectionMatches(state, false);
+      if (index === 1) {
+        concurrentResponsesKeepFiltersIndependent &&=
+          (await concurrentPages[0].page
+            .getByText("Carregando unidades do estoque…", { exact: true })
+            .isVisible()) &&
+          (await concurrentPages[0].page.locator('select[name="project"]').inputValue()) === "";
+      }
+    }
+    for (const index of [1, 0]) {
+      concurrentPages[index].referenceGate.resolve();
+      await concurrentPages[index].page
+        .getByText("Endereços complementados pela referência 05/09/2026", { exact: true })
+        .waitFor({ state: "visible" });
+      for (const [pageIndex, state] of concurrentPages.entries()) {
+        concurrentResponsesKeepFiltersIndependent &&= await concurrentSelectionMatches(
+          state,
+          index === 0 || pageIndex === 1,
+        );
+      }
+    }
+    await concurrentPages[0].page
+      .getByRole("button", { name: "Limpar filtros", exact: true })
+      .click();
+    await concurrentPages[0].page
+      .getByText("4 opções exclusivas · 2 empreendimentos", { exact: true })
+      .waitFor({ state: "visible" });
+    concurrentResponsesKeepFiltersIndependent &&=
+      (await concurrentPages[0].page.locator('select[name="project"]').inputValue()) === "" &&
+      (await concurrentPages[0].page.locator("tr[data-inventory-unit-id]").count()) === 4 &&
+      (await concurrentSelectionMatches(concurrentPages[1], true)) &&
+      concurrentPageErrors === 0;
+    process.stdout.write(
+      `Tabelão QA: filtros independentes sob respostas concorrentes ${concurrentResponsesKeepFiltersIndependent}\n`,
+    );
+  } finally {
+    for (const state of concurrentPages) {
+      state.liveGate.resolve();
+      state.referenceGate.resolve();
+    }
+    await Promise.all(
+      concurrentPages.map(async (state) => {
+        await state.page.unrouteAll({ behavior: "wait" });
+        await state.page.close({ runBeforeUnload: false });
+      }),
+    );
+  }
+
   // More than the former 60-row window, with multiple plants per project and one unpriced unit.
   const stressItems = Array.from({ length: 130 }, (_, index) =>
     [0, 1].map((variant) => ({
@@ -2270,6 +2546,10 @@ async function checkTabelaoValidation(page, origin) {
     liveAvailableBeforeLocationReference,
     locationReferenceApplied,
     locationMetadataFits,
+    malformedPayloadRecoverable,
+    malformedPayloadRetryRestoresInventory,
+    completeLiveSkipsLocationReference,
+    concurrentResponsesKeepFiltersIndependent,
     emptyStateVisible,
     errorStateAccessible,
     loadingStateVisible,

@@ -45,6 +45,7 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });
@@ -202,6 +203,7 @@ describe("inventory route authorization", () => {
     ),
     { count: 2, items: [unit, null] },
   ])("does not cache an invalid upstream payload: %j", async (payload) => {
+    vi.useFakeTimers();
     mocks.authorizeRoute.mockResolvedValue({ ok: true });
     mocks.fetch.mockResolvedValueOnce(Response.json(payload));
     const failed = await GET();
@@ -210,6 +212,11 @@ describe("inventory route authorization", () => {
     expect(failed.headers.get("x-inventory-cache")).toBeNull();
     await expect(failed.json()).resolves.toEqual({ error: "inventory_payload_invalid" });
     mocks.fetch.mockResolvedValueOnce(Response.json(validPayload));
+    const cooldown = await GET();
+    expect(cooldown.status).toBe(502);
+    await expect(cooldown.json()).resolves.toEqual({ error: "inventory_payload_invalid" });
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(5_000);
     const retry = await GET();
     expect(retry.status).toBe(200);
     expect(retry.headers.get("x-inventory-cache")).toBe("MISS");
@@ -261,6 +268,7 @@ describe("inventory route authorization", () => {
   });
 
   it("shares an invalid payload across 20 requests and retries once before warming the cache", async () => {
+    vi.useFakeTimers();
     mocks.authorizeRoute.mockResolvedValue({ ok: true });
     const invalid = deferredFetch();
     mocks.fetch.mockReturnValueOnce(invalid.promise);
@@ -276,6 +284,7 @@ describe("inventory route authorization", () => {
 
     const valid = deferredFetch();
     mocks.fetch.mockReturnValueOnce(valid.promise);
+    vi.advanceTimersByTime(5_000);
     const retries = Array.from({ length: 20 }, () => GET());
     await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(2));
     valid.resolve(Response.json(validPayload));
@@ -305,5 +314,119 @@ describe("inventory route authorization", () => {
     const response = await GET();
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({ error: "inventory_unreachable" });
+  });
+
+  it("bounds successive failure retries and shares recovery after the cooldown", async () => {
+    vi.useFakeTimers();
+    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.fetch.mockRejectedValue(new Error("synthetic upstream failure"));
+
+    for (let index = 0; index < 20; index += 1) {
+      const response = await GET();
+      expect(response.status).toBe(502);
+      expectNoStore(response);
+      expect(response.headers.get("retry-after")).toBe("5");
+      await expect(response.json()).resolves.toEqual({ error: "inventory_unreachable" });
+    }
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(4_999);
+    expect((await GET()).headers.get("retry-after")).toBe("1");
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+
+    mocks.authorizeRoute.mockResolvedValueOnce({
+      ok: false,
+      response: Response.json({ error: "forbidden" }, { status: 403 }),
+    });
+    const denied = await GET();
+    expect(denied.status).toBe(403);
+    expect(denied.headers.get("retry-after")).toBeNull();
+
+    vi.advanceTimersByTime(1);
+    const pending = deferredFetch();
+    mocks.fetch.mockReturnValueOnce(pending.promise);
+    const recovery = Array.from({ length: 20 }, () => GET());
+    await Promise.resolve();
+    expect(mocks.fetch).toHaveBeenCalledTimes(2);
+    pending.resolve(Response.json(validPayload));
+    for (const response of await Promise.all(recovery)) {
+      expect(response.status).toBe(200);
+      expect(response.headers.get("retry-after")).toBeNull();
+      await expect(response.json()).resolves.toEqual(validPayload);
+    }
+    expect((await GET()).headers.get("x-inventory-cache")).toBe("HIT");
+    expect(mocks.authorizeRoute).toHaveBeenCalledTimes(43);
+    expect(mocks.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the shared upstream request alive when one caller disconnects", async () => {
+    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    const pending = deferredFetch();
+    mocks.fetch.mockReturnValueOnce(pending.promise);
+    const controller = new AbortController();
+    const disconnected: Promise<Response> = Reflect.apply(GET, undefined, [
+      new Request("http://localhost/api/inventory", { signal: controller.signal }),
+    ]);
+    const waiting = GET();
+    await Promise.resolve();
+    const upstreamSignal = mocks.fetch.mock.calls[0]?.[1]?.signal as AbortSignal | undefined;
+    controller.abort();
+    expect(upstreamSignal?.aborted).toBe(false);
+    pending.resolve(Response.json(validPayload));
+    await disconnected;
+    await expect((await waiting).json()).resolves.toEqual(validPayload);
+    expect((await GET()).headers.get("x-inventory-cache")).toBe("HIT");
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["headers", "body"])("limits shared upstream %s waits to 20 seconds", async (phase) => {
+    vi.useFakeTimers();
+    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    const controller = new AbortController();
+    vi.spyOn(AbortSignal, "timeout").mockImplementationOnce((delay) => {
+      setTimeout(() => controller.abort(new DOMException("Timed out", "TimeoutError")), delay);
+      return controller.signal;
+    });
+    if (phase === "headers") {
+      mocks.fetch.mockImplementationOnce(
+        () =>
+          new Promise((_, reject) => {
+            controller.signal.addEventListener("abort", () => reject(controller.signal.reason));
+          }),
+      );
+    } else {
+      mocks.fetch.mockResolvedValueOnce(
+        new Response(
+          new ReadableStream({
+            start(stream) {
+              controller.signal.addEventListener("abort", () =>
+                stream.error(controller.signal.reason),
+              );
+            },
+          }),
+        ),
+      );
+    }
+    const responses: Response[] = [];
+    const pending = Promise.all(
+      Array.from({ length: 20 }, async () => responses.push(await GET())),
+    );
+    await vi.advanceTimersByTimeAsync(19_999);
+    expect(responses).toHaveLength(0);
+    expect(AbortSignal.timeout).toHaveBeenCalledExactlyOnceWith(20_000);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(responses).toHaveLength(20);
+    await pending;
+    for (const response of responses) {
+      expect(response.status).toBe(502);
+      expectNoStore(response);
+      expect(response.headers.get("retry-after")).toBe("5");
+      await expect(response.json()).resolves.toEqual({ error: "inventory_unreachable" });
+    }
+    expect((await GET()).status).toBe(502);
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(5_000);
+    mocks.fetch.mockResolvedValueOnce(Response.json(validPayload));
+    expect((await GET()).status).toBe(200);
+    expect(mocks.fetch).toHaveBeenCalledTimes(2);
   });
 });

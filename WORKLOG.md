@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-09-28 - Carregamento concorrente do Tabelao
+
+- Corrige repeticao de consultas apos falha com intervalo de cinco segundos
+  por processo, autorizacao em cada acesso e recuperacao compartilhada.
+- Limita leitura do snapshot no servidor a vinte segundos e consultas do
+  Tabelao no cliente a vinte e cinco segundos, incluindo o corpo da resposta.
+- Valida o payload antes da renderizacao; evita buscar complemento quando os
+  enderecos vivos ja estao completos. Preserva valores, filtros e formulas.
+- Acrescenta testes de falha, recuperacao, cancelamento e acessos concorrentes.
+  Evidencias e limites: docs/audits/tabelao-concorrencia-2026-09-28.md.
+- Lint, typecheck, build e formatacao aprovados. Windows: 967 testes aprovados,
+  quatro skips condicionais e seis falhas POSIX preexistentes; CI Linux exigida.
+  Gitleaks passou. Matriz autenticada ampliada aguarda execucao na CI.
+
 ## 2026-09-28 - Conteudo do Aprenda Associativo
 
 - Amplia Politica com renda, indicadores, MCMV/SBPE, primeiro imovel e custos.

@@ -4,6 +4,23 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-28: Tabelao e indisponibilidade concorrente
+
+- Status: validacao local concluida com limitacao POSIX; branch codex/tabelao-concorrencia.
+- Fonte: app/api/inventory e snapshot; TabelaoClient; tabelao-payload.ts;
+  docs/audits/tabelao-concorrencia-2026-09-28.md.
+- Deduplicar somente promessas em andamento nao contem consultas sucessivas
+  quando a origem falha rapidamente. O intervalo de cinco segundos deve comecar
+  na falha compartilhada, sem ser prolongado por cada novo acesso.
+- Cada acesso continua autorizado antes do cache ou erro compartilhado; nunca
+  reutilizar sessao nem devolver estoque vencido como recuperacao.
+- Deadline da pagina inclui leitura do corpo; cancelamento de uma pagina nao
+  pode cancelar a consulta compartilhada de outros usuarios no servidor.
+- Lint, tipos, build e formatacao aprovados. Windows: 967 testes aprovados,
+  quatro skips condicionais e seis falhas POSIX preexistentes. Endpoints:
+  92 testes aprovados; payload exercita trinta consultas isoladas. Gitleaks
+  passou. Gates Linux, navegador e publicacao pendentes; consultar auditoria/PR.
+
 ## 2026-09-28: Conteudo e ajudas do Associativo
 
 - Status: pendente_validacao integrada/publicacao. Base publicada: b297614.
