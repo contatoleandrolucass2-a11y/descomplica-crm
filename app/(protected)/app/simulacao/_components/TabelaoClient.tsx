@@ -3,6 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  fetchInventoryPayload,
+  needsTabelaoLocationReference,
+  type TabelaoPayload as InventoryPayload,
+  type TabelaoPayloadItem as InventoryItem,
+} from "@/lib/archive-investor/tabelao-payload";
+
+import {
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
   enrichTabelaoLocationFields,
@@ -16,40 +23,6 @@ import {
   summarizeTabelao,
 } from "@/lib/archive-investor/tabelao-inventory.mjs";
 import { TabelaoFilters } from "./TabelaoFilters";
-
-type InventoryItem = {
-  id: string;
-  businessUnit: string;
-  project: string;
-  product: string;
-  identifier: string | null;
-  plant: string | null;
-  finalPrice: number | null;
-  finalWithKit: number | null;
-  unitBonus: number | null;
-  tableSlack: number | null;
-  cashBackSlack: number | null;
-  appraisal: number | null;
-  classification: string | null;
-  privateArea: number | null;
-  completionDate: string | null;
-  street?: string | null;
-  streetNumber?: string | null;
-  neighborhood?: string | null;
-  progress: number | null;
-  region: string | null;
-  city: string | null;
-  state: string | null;
-};
-
-type InventoryPayload = {
-  source?: string;
-  generatedAt?: string;
-  snapshotReferenceDate?: string;
-  sourceKind?: "live" | "versioned-snapshot";
-  count: number;
-  items: InventoryItem[];
-};
 
 type InventoryMeta = Omit<InventoryPayload, "items">;
 
@@ -138,16 +111,6 @@ function formatAddress(item: InventoryItem) {
     .join(" / ");
 }
 
-async function fetchInventoryPayload(url: string, signal: AbortSignal) {
-  const response = await fetch(url, { cache: "no-store", signal });
-  if (!response.ok) throw new Error("inventory_unavailable");
-  const payload = (await response.json()) as InventoryPayload;
-  if (!Array.isArray(payload.items) || payload.items.length !== Number(payload.count)) {
-    throw new Error("inventory_payload_invalid");
-  }
-  return payload;
-}
-
 function inventoryMetadata(payload: InventoryPayload): InventoryMeta {
   const metadata: InventoryMeta = { count: payload.count };
   if (payload.source !== undefined) metadata.source = payload.source;
@@ -185,6 +148,7 @@ export function TabelaoClient() {
     let active = true;
 
     const loadLocationReference = async (payload: InventoryPayload) => {
+      if (!needsTabelaoLocationReference(payload.items)) return;
       try {
         const referencePayload = await fetchInventoryPayload(
           "/api/inventory/snapshot",

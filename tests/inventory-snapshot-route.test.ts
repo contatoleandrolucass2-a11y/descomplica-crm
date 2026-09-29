@@ -60,6 +60,7 @@ async function expectUnavailable(response: Response) {
 }
 
 beforeEach(async () => {
+  vi.useFakeTimers();
   vi.resetModules();
   vi.resetAllMocks();
   vi.stubEnv("INVESTOR_INVENTORY_SNAPSHOT_PATH", ` ${snapshotPath} `);
@@ -73,9 +74,76 @@ beforeEach(async () => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllEnvs();
+  vi.useRealTimers();
 });
 
 describe("inventory snapshot route", () => {
+  it("bounds successive read failures before allowing a shared retry", async () => {
+    mocks.readFile.mockRejectedValue(new Error("synthetic_read_failure"));
+    for (let index = 0; index < 20; index += 1) {
+      const response = await GET();
+      expect(response.headers.get("retry-after")).toBe("5");
+      await expectUnavailable(response);
+    }
+    expect(mocks.readFile).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(4_999);
+    expect((await GET()).headers.get("retry-after")).toBe("1");
+    expect(mocks.readFile).toHaveBeenCalledTimes(1);
+    mocks.authorizeRoute.mockResolvedValueOnce({
+      ok: false,
+      response: Response.json({ error: "forbidden" }, { status: 403 }),
+    });
+    const denied = await GET();
+    expect(denied.status).toBe(403);
+    expect(denied.headers.get("retry-after")).toBeNull();
+
+    vi.advanceTimersByTime(1);
+    mocks.readFile.mockResolvedValue(contents);
+    for (const response of await Promise.all(Array.from({ length: 20 }, () => GET()))) {
+      expect(response.status).toBe(200);
+      expectNoStore(response);
+      expect(response.headers.get("retry-after")).toBeNull();
+      await expect(response.json()).resolves.toEqual(expectedSnapshot);
+    }
+    expect(mocks.readFile).toHaveBeenCalledTimes(2);
+    expect(mocks.authorizeRoute).toHaveBeenCalledTimes(42);
+  });
+
+  it("releases all waiters after the read deadline and ignores a late read", async () => {
+    const stuck = deferredRead();
+    mocks.readFile.mockReturnValueOnce(stuck.promise);
+    const responses: Response[] = [];
+    const pending = Promise.all(
+      Array.from({ length: 20 }, async () => responses.push(await GET())),
+    );
+    await vi.advanceTimersByTimeAsync(19_999);
+    expect(responses).toHaveLength(0);
+    expect(mocks.readFile).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(responses).toHaveLength(20);
+    await pending;
+    expect(mocks.readFile.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+    for (const response of responses) await expectUnavailable(response);
+
+    await vi.advanceTimersByTimeAsync(5_000);
+    const retry = deferredRead();
+    mocks.readFile.mockReturnValueOnce(retry.promise);
+    const recovering = GET();
+    await Promise.resolve();
+    stuck.resolve(contents);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(createHash).not.toHaveBeenCalled();
+    const joined = GET();
+    await Promise.resolve();
+    expect(mocks.readFile).toHaveBeenCalledTimes(2);
+    retry.resolve(contents);
+    for (const response of await Promise.all([recovering, joined, GET()])) {
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual(expectedSnapshot);
+    }
+    expect(createHash).toHaveBeenCalledExactlyOnceWith("sha256");
+  });
+
   it("shares cold reading, hashing and parsing while authorizing every request", async () => {
     const pending = deferredRead();
     mocks.readFile.mockReturnValue(pending.promise);
@@ -92,7 +160,11 @@ describe("inventory snapshot route", () => {
     pending.resolve(contents);
     const responses = await Promise.all(requests);
 
-    expect(mocks.readFile).toHaveBeenCalledExactlyOnceWith(snapshotPath, "utf8");
+    expect(mocks.readFile).toHaveBeenCalledExactlyOnceWith(snapshotPath, {
+      encoding: "utf8",
+      signal: expect.any(AbortSignal),
+    });
+    expect(vi.getTimerCount()).toBe(0);
     expect(createHash).toHaveBeenCalledExactlyOnceWith("sha256");
     expect(parse.mock.calls.filter(([value]) => value === contents)).toHaveLength(1);
     for (const response of responses) {
@@ -192,6 +264,7 @@ describe("inventory snapshot route", () => {
       expect(mocks.readFile).toHaveBeenCalledTimes(1);
 
       vi.stubEnv("INVESTOR_INVENTORY_SNAPSHOT_SHA256", snapshotSha256);
+      vi.advanceTimersByTime(5_000);
       const retry = await GET();
       expect(retry.status).toBe(200);
       expectNoStore(retry);
@@ -226,6 +299,7 @@ describe("inventory snapshot route", () => {
     await expectUnavailable(await GET());
 
     vi.stubEnv("INVESTOR_INVENTORY_SNAPSHOT_SHA256", snapshotSha256);
+    vi.advanceTimersByTime(5_000);
     const retry = await GET();
     expect(retry.status).toBe(200);
     await expect(retry.json()).resolves.toEqual(expectedSnapshot);
@@ -240,10 +314,14 @@ describe("inventory snapshot route", () => {
       expect(mocks.readFile).not.toHaveBeenCalled();
 
       vi.stubEnv("INVESTOR_INVENTORY_SNAPSHOT_PATH", snapshotPath);
+      vi.advanceTimersByTime(5_000);
       const retry = await GET();
       expect(retry.status).toBe(200);
       await expect(retry.json()).resolves.toEqual(expectedSnapshot);
-      expect(mocks.readFile).toHaveBeenCalledExactlyOnceWith(snapshotPath, "utf8");
+      expect(mocks.readFile).toHaveBeenCalledExactlyOnceWith(snapshotPath, {
+        encoding: "utf8",
+        signal: expect.any(AbortSignal),
+      });
     },
   );
 
@@ -254,6 +332,7 @@ describe("inventory snapshot route", () => {
       await expectUnavailable(await GET());
 
       vi.stubEnv("INVESTOR_INVENTORY_SNAPSHOT_SHA256", snapshotSha256);
+      vi.advanceTimersByTime(5_000);
       expect((await GET()).status).toBe(200);
       expect(mocks.readFile).toHaveBeenCalledTimes(2);
     },

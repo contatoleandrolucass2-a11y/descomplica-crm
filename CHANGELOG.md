@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-28 - Robustez do carregamento do Tabelao
+
+- Contem tentativas repetidas quando a fonte de estoque esta indisponivel.
+- Encerra consultas travadas e permite recuperar o carregamento.
+- Evita complemento de enderecos desnecessario e rejeita dados malformados
+  antes que interrompam a tela.
+- Preserva autorizacao individual, isolamento dos filtros e regras comerciais.
+
 ## 2026-09-28 - Explicacoes do Associativo
 
 - Explica a renda nos indicadores, as finalidades de MCMV/SBPE e o impacto de
