@@ -25,6 +25,8 @@ plantas ou unidades do estoque. Nenhum calculo, API, permissao ou workflow n8n m
 - Cada agrupamento respeita empreendimento e incorporadora e e reconstruido
   depois de filtros e ordenacao. Headers acessiveis e todas as linhas permanecem.
 - Rolagem horizontal fica restrita a tabela quando a tela nao comporta a grade.
+- A largura maxima desconta as margens de 24 px no desktop e 14 px no celular,
+  evitando que fit-content leve a borda direita para fora do painel.
 
 ## Validacao
 
@@ -37,6 +39,8 @@ plantas ou unidades do estoque. Nenhum calculo, API, permissao ou workflow n8n m
   sete cenarios aprovados, com viewports 375/390/768/1024/1440, filtros e ordem
   inversa. Colunas externas 115/145/73 px, textos integrais e quadro ajustado a
   largura da grade. Capturas desktop/celular inspecionadas. Nao substitui auth.
+- Reexecucao final incluiu compactFrameInsidePanel: sete cenarios passaram,
+  com 48 testes de layout/agrupamento aprovados apos o ajuste das margens.
 - Revisao independente sem achados: nove cenarios Chromium, axe da tabela e
   9.841 sequencias do helper. Sem teste de leitor de tela real.
 - 75 testes focados de Tabelao e contratos de QA aprovados apos a integracao.

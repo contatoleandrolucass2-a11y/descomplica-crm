@@ -278,6 +278,12 @@ describe("Tabelão protegido", () => {
     expect(client).toContain("addressSpan > 0");
     expect(client).toContain("classificationSpan > 0");
     expect(styles).toMatch(
+      /\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*width: fit-content;[^}]*max-width: calc\(100% - 48px\);/,
+    );
+    expect(styles).toMatch(
+      /@media \(max-width: 760px\)\s*\{\s*\.tabelao-page-shell \.investor-stock-results\s*\{\s*max-width: calc\(100% - 28px\);/,
+    );
+    expect(styles).toMatch(
       /\.tabelao-group-cell \.investor-stock-product-text\s*\{[^}]*width: 100px;[^}]*white-space: normal;[^}]*overflow-wrap: anywhere;/,
     );
     expect(styles).toMatch(
