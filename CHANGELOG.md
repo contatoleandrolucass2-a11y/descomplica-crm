@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-30 - Compactacao disponivel na web
+
+- Publica os quatro ajustes do Associativo na release d9c2bee.
+- Confirma dez unidades visiveis, destaque dourado, cabecalho compacto,
+  temas somente com texto/icones e titulo reduzido, preservando as cores.
+- Inclui foco resiliente do menu e patch de seguranca Next.js 16.3.6.
+
 ## 2026-09-30 - Interface mais compacta
 
 - Atualiza 44 referencias visuais revisadas dos simuladores, preservando as demais.

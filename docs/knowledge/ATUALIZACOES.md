@@ -4,6 +4,22 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Compactacao publicada e verificada
+
+- Status: validado; runtime d9c2bee07fd6304006e28e357bf8e918a2031bf4.
+- Fonte: PR #114, CI main 36764731943, health e navegador autenticado;
+  docs/audits/compactacao-associativo-2026-09-30.md.
+- Estoque Associativo mostra dez unidades por vez sem limitar resultados.
+  Hover/foco dourado; passo virtual alinhado a 26px/48px no breakpoint 760px.
+- Cabecalho compartilhado 56px em desktop/tablet; temas sem caixas, com texto,
+  icones e sublinhado ativo. Titulo Associativo 2rem desktop e 1.475rem mobile.
+- Mantem azul-marinho e tres paletas. Next 16.3.6 atende advisory critico; gates
+  completos aprovados. Foco do menu preservado mesmo quando CSS oculta o controle.
+- Publicacao com imagem imutavel, backup/CAS/rollback e dois perfis comprovados.
+  Doze GETs anonimos sem erro, sem prova de carga. Confirmacao UI sem propostas
+  ou dados alterados; nova aba evita descartar trabalho na aba do usuario.
+- Registro apenas documental: publicar no Git e sincronizar sem reiniciar runtime.
+
 ## 2026-09-30: Dez linhas e cabecalho compacto
 
 - Evidencia: CI 36758571149 aprovou gates funcionais, 40 navegacoes, 193 axe e
