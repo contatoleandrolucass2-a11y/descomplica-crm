@@ -87,6 +87,27 @@ Consultadas em 2026-09-29; referencias de interacao, nao copias de marca:
 
 ## Publicacao
 
+### Bloqueio da imagem e correcao de dependencia
+
+- CI final do PR 36662908716 passou todos os gates, incluindo matriz visual.
+  PR #109 integrado no SHA 83f1b2fe66f7026ae777406b740202ebc55360f5.
+- CI main 36664719186 falhou no audit: quatro alertas altos e dois moderados
+  de brace-expansion, transitivo de ESLint/minimatch. Imagem nao gerada e
+  producao nao alterada. Nao se trata de regressao visual.
+- Atualizacao pontual para 1.1.21 e 5.0.12, mesma linha major e Node compativel;
+  demais resolucoes do lock preservadas. Instalacao frozen, supply-chain e
+  audit sem vulnerabilidades conhecidas aprovados localmente.
+- Fontes oficiais das correcoes:
+  [recursao na expansao](https://github.com/advisories/GHSA-qhr7-859c-m2p7),
+  [recursao no parser](https://github.com/advisories/GHSA-6j4f-fj2g-mc7p) e
+  [reescrita quadratica](https://github.com/advisories/GHSA-q2hr-2g5m-vwhr).
+- Nova CI e publicacao pendentes; gate de seguranca preservado.
+- Smoke local Node 24.19: expansao comum preservada nas duas versoes;
+  tres entradas sinteticas limitadas por versao (aninhamento, parser e reescrita)
+  sem excecao, em 259/258 ms. Nao representa benchmark de capacidade do CRM.
+- Lint, typecheck e build aprovados apos a atualizacao. Suite Windows: 987
+  aprovados, um skip e seis falhas POSIX conhecidas; nenhuma falha nova.
+
 ### Referencias revisadas em 2026-09-30
 
 - CI 36660701681 do candidato 8e6cb0c: validacao Linux, banco, advisors,

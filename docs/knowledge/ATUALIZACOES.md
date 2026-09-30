@@ -4,6 +4,20 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Auditoria pode mudar entre PR e main
+
+- Status: pendente_validacao; branch codex/correcao-auditoria-identidade.
+- Fonte: CI PR 36662908716 aprovada; merge 83f1b2f; CI main 36664719186 bloqueada
+  por brace-expansion. Advisories GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p e
+  GHSA-q2hr-2g5m-vwhr consultados na base oficial GitHub em 2026-09-30.
+- Atualiza somente as duas resolucoes para 1.1.21 e 5.0.12. Instalacao frozen
+  e politica supply-chain aprovadas; audit passou sem vulnerabilidades conhecidas.
+- A CI do PR nao dispensa a CI do SHA final. Nao ignorar auditoria nem publicar
+  imagem antiga quando um novo advisory aparecer. Producao permanece inalterada.
+- Reteste local: lint, tipos e build aprovados; 987 testes passaram, um skip
+  e seis falhas POSIX preexistentes no Windows. Nao alterar essas assercoes.
+- Pendente: CI Linux integrada, imagem imutavel e publicacao.
+
 ## 2026-09-30: Validacao da identidade e referencias
 
 - Status: pendente_validacao; branch codex/identidade-navegacao-temas.
