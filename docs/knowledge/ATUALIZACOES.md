@@ -4,6 +4,27 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Dez linhas e cabecalho compacto
+
+- Evidencia: CI 36758571149 aprovou gates funcionais, 40 navegacoes, 193 axe e
+  100 zoom. Revisa/promove 44 capturas e preserva as demais 149/thresholds.
+  Preview final 40/40; Next 16.3.6 com lint/tipos/build/audit aprovados.
+  CI das referencias e publicacao ainda pendentes.
+- CI 36757589260 bloqueou Next 16.3.3 por advisory critico atualizado em 30/09;
+  patch oficial 16.3.6. Revalidar deps mesmo quando o commit anterior passou.
+- matchMedia pode receber change apos o browser desfocar o controle oculto.
+  Menu preserva ultimo foco interno, limpando referencia ao interagir fora.
+- Status: pendente_validacao; branch codex/compactacao-associativo.
+- Fonte: quatro capturas e pedido direto do usuario; auditoria de compactacao.
+- Dez unidades visiveis significa viewport limitado, sem truncar estoque.
+  Alinhar alturas CSS e passo virtual: 26px desktop, 48px ate 760px.
+- Dourado reservado ao hover/foco da linha selecionavel; preservar temas azuis
+  e fundo Escuro original. Temas sem caixas e com indicador textual de selecao.
+- Cabecalho compartilhado compacto; titulo reduzido apenas no Associativo.
+- Lint/tipos/build passaram; Windows com seis falhas POSIX e um timeout DevTools.
+  Reteste isolado DevTools passou. QA integrado e publicacao pendentes.
+  Sem alteracao financeira; aguardar transicoes CSS antes de conferir cores.
+
 ## 2026-09-30: Correcao azul publicada e confirmada
 
 - Status: validado; runtime b55fa6fc95eb26087c70736d618bf019818c5876.

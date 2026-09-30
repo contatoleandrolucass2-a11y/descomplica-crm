@@ -26,6 +26,40 @@
   padding-bottom: 16px;
 }
 
+.investor-page-shell.investor-associative-table-page .investor-hero-title h1 {
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+/* Ten visible units plus the sticky heading; keep the complete virtualized stock. */
+.investor-page-shell.investor-associative-table-page .investor-stock-results {
+  --associative-stock-row-height: 26px;
+  max-height: calc(11 * var(--associative-stock-row-height) + 3px);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-table :is(thead th, tbody tr[aria-rowindex], tbody tr[aria-rowindex] > td) {
+  height: var(--associative-stock-row-height) !important;
+  min-height: var(--associative-stock-row-height) !important;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within) > td {
+  color: #302107 !important;
+  background: #e9bd54 !important;
+  border-color: #946b17 !important;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within) :is(.investor-stock-product-text, .investor-stock-price, .investor-stock-unit-button) {
+  color: #302107 !important;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within) .investor-stock-unit-button {
+  border-color: #302107;
+  background: transparent;
+  box-shadow: none;
+  outline-color: #302107;
+}
+
 @media (max-width: 760px) {
   .investor-page-shell.investor-associative-table-page .investor-main {
     padding-top: 12px;
@@ -33,6 +67,14 @@
 
   .investor-page-shell.investor-associative-table-page .investor-associative-hero {
     padding-bottom: 12px;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-hero-title h1 {
+    font-size: 1.475rem;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-stock-results {
+    --associative-stock-row-height: 48px;
   }
 }
 

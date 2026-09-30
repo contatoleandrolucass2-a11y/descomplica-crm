@@ -3,6 +3,10 @@ import { pathToFileURL } from "node:url";
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 import sharp from "sharp";
+import {
+  checkCompactArchiveHeader,
+  checkAssociativeCompactStock,
+} from "./associative-compact-layout.mjs";
 
 export const archiveNavigationRoutes = [
   "/app/simulacao/associativo-fluxo-linear",
@@ -537,8 +541,14 @@ export async function checkArchiveNavigation(
             await expect(themes.locator('[aria-pressed="true"]')).toHaveCount(1);
             await assertHeaderGeometry(page, compact);
             await waitForArchiveHeaderTheme(page, theme, check.headerSurfaces);
+            check.compactHeader ??= {};
+            check.compactHeader[theme] = await checkCompactArchiveHeader(page);
             if (scope === "header-and-content")
               check.mainSurfaces[theme] = await inspectMainSurface(page);
+            if (scope === "header-and-content" && route === archiveNavigationRoutes[0]) {
+              check.compactStock ??= {};
+              check.compactStock[theme] = await checkAssociativeCompactStock(page);
+            }
             if (viewport.width === 320 || viewport.width === 1181) {
               await ensureArchiveNavigationOpen(page);
               await simulation.click();
@@ -635,6 +645,15 @@ export async function checkArchiveNavigation(
             await ensureArchiveNavigationOpen(page);
             await page.mouse.click(1, viewport.height - 1);
             await expect(nav).toBeHidden();
+          }
+          if (scope === "header-and-content") {
+            stage = "resize-preserves-content-focus";
+            const stock = page.locator(".investor-stock-results");
+            await page.setViewportSize({ width: 1181, height: 900 });
+            await stock.focus();
+            await page.setViewportSize({ width: 1180, height: 900 });
+            await expect(stock).toBeFocused();
+            await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
           }
           stage = "resize-reset";
           await page.setViewportSize({ width: 1181, height: 900 });
