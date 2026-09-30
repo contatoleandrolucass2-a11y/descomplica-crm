@@ -4,6 +4,21 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Alinhamento superior do titulo e guia
+
+- Status: pendente_validacao; branch codex/topo-associativo-compacto.
+- Fonte: pedido e duas capturas do usuario; investor-archive.css e contrato
+  scripts/qa/associative-compact-layout.mjs.
+- Escopo somente Associativo: titulo e guia alinhados pelo topo, margem de 8px
+  apos o menu e entre linhas no celular; botao 36px, com 44px para ponteiro coarse.
+- Preservar as tres paletas, altura do menu e regras financeiras. Validacao
+  deve conferir geometria real, toque, guia funcional, temas e zoom.
+- Geometria: 30 combinacoes largura/tema e dois contextos de toque aprovados.
+  Guia/Escape/foco/axe passaram em desktop/celular. Lint/tipos/build aprovados;
+  Windows 994 testes aprovados, um skip, seis falhas POSIX. Oito testes Node passaram.
+- CI Linux, referencias visuais e publicacao pendentes; nao interpretar
+  implementado como publicado. Evidencia: docs/audits/topo-associativo-2026-09-30.md.
+
 ## 2026-09-30: Compactacao publicada e verificada
 
 - Status: validado; runtime d9c2bee07fd6304006e28e357bf8e918a2031bf4.

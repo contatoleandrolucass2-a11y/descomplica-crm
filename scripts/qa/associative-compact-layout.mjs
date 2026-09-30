@@ -33,6 +33,30 @@ export async function checkCompactArchiveHeader(page) {
 }
 
 export async function checkAssociativeCompactStock(page) {
+  const hero = await page.locator(".investor-associative-hero").evaluate((element) => {
+    const bounds = (selector) => document.querySelector(selector).getBoundingClientRect();
+    const header = bounds("header:has(#archive-navigation)");
+    const title = bounds(".investor-hero-title h1");
+    const titleRow = bounds(".investor-hero-title");
+    const guide = bounds(".investor-hero-guide-information");
+    const button = bounds(".investor-hero-guide .investor-guided-start");
+    const stacked = getComputedStyle(element).gridTemplateColumns.split(" ").length === 1;
+    return {
+      titleTopGap: title.top - header.bottom,
+      guideTopGap: guide.top - (stacked ? titleRow.bottom : header.bottom),
+      buttonHeight: button.height,
+      expectedButtonHeight: matchMedia("(pointer: coarse)").matches ? 44 : 36,
+      buttonFits: button.bottom <= element.getBoundingClientRect().bottom,
+    };
+  });
+  assert.ok(Math.abs(hero.titleTopGap - 8) <= 1, "Title must sit close to the menu divider");
+  assert.ok(Math.abs(hero.guideTopGap - 8) <= 1, "Guide must align at the top without excess gaps");
+  assert.equal(
+    hero.buttonHeight,
+    hero.expectedButtonHeight,
+    "Guide button must be compact and touch-aware",
+  );
+  assert.ok(hero.buttonFits, "Guide button must remain inside the heading section");
   const stock = page.locator(".investor-associative-table-page .investor-stock-results");
   const rows = stock.locator("tbody tr[aria-rowindex]");
   await expect(rows.first()).toBeAttached();
@@ -97,5 +121,5 @@ export async function checkAssociativeCompactStock(page) {
     .toBe(true);
   await stock.focus();
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  return { ...geometry, allInventoryReachable: true, goldHoverAndFocus: true };
+  return { ...geometry, hero, allInventoryReachable: true, goldHoverAndFocus: true };
 }
