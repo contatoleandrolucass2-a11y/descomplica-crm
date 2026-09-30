@@ -6,6 +6,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-30: Dez linhas e cabecalho compacto
 
+- CI 36757589260 bloqueou Next 16.3.3 por advisory critico atualizado em 30/09;
+  patch oficial 16.3.6. Revalidar deps mesmo quando o commit anterior passou.
+- matchMedia pode receber change apos o browser desfocar o controle oculto.
+  Menu preserva ultimo foco interno, limpando referencia ao interagir fora.
 - Status: pendente_validacao; branch codex/compactacao-associativo.
 - Fonte: quatro capturas e pedido direto do usuario; auditoria de compactacao.
 - Dez unidades visiveis significa viewport limitado, sem truncar estoque.

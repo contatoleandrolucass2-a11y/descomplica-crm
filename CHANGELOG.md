@@ -2,6 +2,8 @@
 
 ## 2026-09-30 - Interface mais compacta
 
+- Corrige foco do menu ao alternar entre larguras mobile e desktop.
+- Atualiza Next.js para 16.3.6 para atender a correcao de seguranca do gate.
 - Associativo exibe dez unidades por vez e destaca a linha em dourado no mouse/teclado.
 - Reduz espacos verticais do cabecalho e tamanho do titulo do Associativo.
 - Seletor de temas mostra apenas texto e icones, com tema ativo sublinhado.

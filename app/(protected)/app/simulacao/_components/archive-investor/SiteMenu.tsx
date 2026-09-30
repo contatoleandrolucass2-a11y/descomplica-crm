@@ -56,8 +56,18 @@ export function SiteMenu({ canPersistTheme = false }: { canPersistTheme?: boolea
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 1180px)");
+    let lastFocused: HTMLElement | null = null;
+    const rememberFocus = (event: FocusEvent) => {
+      lastFocused = navigationRef.current?.contains(event.target as Node)
+        ? event.target as HTMLElement : null;
+    };
+    const clearOutsideFocus = (event: PointerEvent) => {
+      if (!navigationRef.current?.contains(event.target as Node)) lastFocused = null;
+    };
     const resetMenu = () => {
-      const active = document.activeElement;
+      // CSS can hide the focused control before matchMedia dispatches its change.
+      const active = document.activeElement === document.body && lastFocused && !lastFocused.getClientRects().length
+        ? lastFocused : document.activeElement;
       if (media.matches) {
         if (navigationRef.current?.querySelector("nav")?.contains(active)) mobileTriggerRef.current?.focus();
       } else if (active === mobileTriggerRef.current || simulationRootRef.current?.contains(active)) {
@@ -69,8 +79,14 @@ export function SiteMenu({ canPersistTheme = false }: { canPersistTheme?: boolea
       setOpen(false);
       setSimulationOpen(false);
     };
+    document.addEventListener("focusin", rememberFocus);
+    document.addEventListener("pointerdown", clearOutsideFocus, true);
     media.addEventListener("change", resetMenu);
-    return () => media.removeEventListener("change", resetMenu);
+    return () => {
+      document.removeEventListener("focusin", rememberFocus);
+      document.removeEventListener("pointerdown", clearOutsideFocus, true);
+      media.removeEventListener("change", resetMenu);
+    };
   }, [setOpen, setSimulationOpen, rootRef, triggerRef, simulationRootRef, simulationTriggerRef]);
 
   function closeNavigation() {

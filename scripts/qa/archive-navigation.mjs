@@ -646,6 +646,15 @@ export async function checkArchiveNavigation(
             await page.mouse.click(1, viewport.height - 1);
             await expect(nav).toBeHidden();
           }
+          if (scope === "header-and-content") {
+            stage = "resize-preserves-content-focus";
+            const stock = page.locator(".investor-stock-results");
+            await page.setViewportSize({ width: 1181, height: 900 });
+            await stock.focus();
+            await page.setViewportSize({ width: 1180, height: 900 });
+            await expect(stock).toBeFocused();
+            await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+          }
           stage = "resize-reset";
           await page.setViewportSize({ width: 1181, height: 900 });
           await expect(nav).toBeVisible();

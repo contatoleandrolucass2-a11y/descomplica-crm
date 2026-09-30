@@ -32,4 +32,22 @@ Status: implementado, validacao integrada e publicacao pendentes.
   aguarda a transicao CSS antes de conferir cores, sem reduzir assercoes.
 - Matriz completa pendente. Referencias visuais somente serao
   atualizadas depois de inspecao das capturas e aprovacao dos gates funcionais.
-- Nenhuma alteracao de banco, contas, dependencias ou n8n.
+- Nenhuma alteracao de banco, contas ou n8n.
+
+## Bloqueios Encontrados
+
+- CI 36757589260 aprovou lint, tipos e testes Linux, mas interrompeu no audit:
+  Next 16.3.3 atingido pelo alerta critico GHSA-vcvr-r3jv-pc5j, publicado na
+  base em 30/09. Atualiza Next e eslint-config-next para o patch 16.3.6.
+  Fonte: [release oficial](https://github.com/vercel/next.js/releases/tag/v16.3.6).
+  Nao ha import de next/og ou ImageResponse em app/lib; isso nao dispensa patch.
+- QA local confirmou Associativo, Direta e Investidor, mas revelou perda de
+  foco no Tabelao ao cruzar o breakpoint do menu. O navegador pode retirar o
+  foco do elemento ocultado pelo CSS antes do evento matchMedia.
+- Menu agora conserva a referencia do ultimo foco interno somente para esse
+  caso; foco ou clique fora do menu limpam a referencia. Mantem o contrato de
+  retorno ao controle visivel, sem roubar foco de campos externos.
+- Revalidacao completa obrigatoria apos as duas correcoes; gates preservados.
+- Audit apos patch: nenhuma vulnerabilidade conhecida. Teste isolado: 20
+  ciclos de redimensionamento passaram; foco externo preservado. O contrato
+  de navegador tambem verifica que o menu nao toma o foco do estoque.

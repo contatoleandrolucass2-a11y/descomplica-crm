@@ -2,6 +2,10 @@
 
 ## 2026-09-30 - Compactacao do Associativo
 
+- Gate 36757589260 bloqueou Next 16.3.3 por GHSA-vcvr-r3jv-pc5j. Atualiza Next
+  e eslint-config-next para 16.3.6, sem desabilitar auditoria.
+- Corrige perda de foco no breakpoint do menu observada no Tabelao durante QA.
+  Revalidacao completa pendente apos patch de runtime e navegacao.
 - Dez unidades visiveis por vez, rolagem integral e hover/foco dourado.
 - Alinha altura visual e passo da virtualizacao; preserva filtros e selecao.
 - Compacta cabecalho, remove caixas dos temas e reduz titulo do Associativo.
