@@ -5,7 +5,7 @@ import {
   InvestorGuideLauncher,
   InvestorInfoHint,
 } from "./archive-investor/InvestorCalculator";
-import { SiteMenu } from "./archive-investor/SiteMenu";
+import { ArchiveHeader } from "./archive-investor/ArchiveHeader";
 import "./archive-investor/investor-archive.css";
 
 const INVESTOR_DESCRIPTION =
@@ -14,18 +14,7 @@ const INVESTOR_DESCRIPTION =
 export function InvestorTableArchive() {
   return (
     <div className="app-shell simulation-page-shell investor-page-shell investor-standard-table-page">
-      <header className="topbar simulation-topbar">
-        <Link className="brand-lockup brand-link" href="/app" prefetch={false}>
-          <div className="brand-mark" aria-hidden="true">
-            D
-          </div>
-          <div>
-            <strong>Descomplica</strong>
-            <span>Inteligência comercial</span>
-          </div>
-        </Link>
-        <SiteMenu />
-      </header>
+      <ArchiveHeader />
       <main className="investor-main">
         <section className="goal-page-hero investor-compact-hero">
           <div className="goal-hero-copy">

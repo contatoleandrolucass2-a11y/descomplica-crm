@@ -193,7 +193,7 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(archive.includes("investor-direct-table-page"));
     assert.match(archive, /<InvestorCalculator\s+directTable/);
     assert.ok(archive.includes("Simulador Tabela Direta"));
-    assert.ok(menu.includes('href="/app/simulacao/tabela-direta"'));
+    assert.ok(menu.includes('href: "/app/simulacao/tabela-direta"'));
     assert.ok(!menu.includes('href="/simulacao/tabela-investidor?ficha=2"'));
     assert.ok(calculator.includes("DIRECT_TABLE_PROPOSAL_OPTIONS"));
     assert.ok(calculator.includes("DIRECT_TABLE_PROPOSAL_GUIDE_STEPS"));

@@ -1,31 +1,14 @@
-import { cookies } from "next/headers";
 import Link from "next/link";
 
-import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
-
 import { InvestorGuideLauncher, InvestorInfoHint } from "./archive-investor/InvestorCalculator";
-import { SiteMenu } from "./archive-investor/SiteMenu";
+import { ArchiveHeader } from "./archive-investor/ArchiveHeader";
 import "./archive-investor/investor-archive.css";
 import { TabelaoClient } from "./TabelaoClient";
 
 export async function TabelaoArchive() {
-  const cookieStore = await cookies();
-  const consent = parseCookieConsent(cookieStore.get(COOKIE_CONSENT_COOKIE_NAME)?.value);
-
   return (
     <div className="app-shell simulation-page-shell investor-page-shell tabelao-page-shell">
-      <header className="topbar simulation-topbar">
-        <Link className="brand-lockup brand-link" href="/app" prefetch={false}>
-          <div className="brand-mark" aria-hidden="true">
-            D
-          </div>
-          <div>
-            <strong>Descomplica</strong>
-            <span>Inteligência comercial</span>
-          </div>
-        </Link>
-        <SiteMenu canPersistTheme={consent?.categories.functional === true} />
-      </header>
+      <ArchiveHeader />
       <main className="investor-main">
         <section className="goal-page-hero investor-compact-hero">
           <div className="goal-hero-copy">

@@ -15,6 +15,11 @@ import {
 } from "../../lib/archive-investor/tabelao-inventory.mjs";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 import { checkAssociativeLearningManual } from "./associative-learning-manual.mjs";
+import {
+  archiveNavigationPassed,
+  checkArchiveMenuPanel,
+  checkArchiveNavigation,
+} from "./archive-navigation.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const outputRoot = path.join(repositoryRoot, "docs/qa/reference-parity");
@@ -24,6 +29,7 @@ const baselineResultsPath = path.join(outputRoot, "authenticated-results.json");
 const artifactRoot = path.join(repositoryRoot, "test-results/authenticated-visual");
 const candidateScreenshotRoot = path.join(artifactRoot, "candidate");
 const candidateResultsPath = path.join(artifactRoot, "candidate-results.json");
+const archiveNavigationResultsPath = path.join(artifactRoot, "archive-navigation-results.json");
 const visualDifferenceThreshold = 0.01;
 const visualChannelTolerance = 16;
 const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
@@ -3933,79 +3939,6 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
       );
     }
 
-    async function checkOpenMenuPanel(triggerName, panelId) {
-      const trigger = responsivePage.getByRole("button", { name: triggerName, exact: true });
-      const panel = responsivePage.locator(`#${panelId}`);
-      await trigger.click();
-      await responsivePage.waitForFunction(
-        (id) =>
-          document.querySelector(`[aria-controls="${id}"]`)?.getAttribute("aria-expanded") ===
-          "true",
-        panelId,
-        { timeout: 5_000 },
-      );
-      await responsivePage.waitForTimeout(250);
-      const unclipped = await panel.evaluate((menuPanel) => {
-        const viewportTolerance = 1;
-        const panelRect = menuPanel.getBoundingClientRect();
-        const triggerElement = document.querySelector(`[aria-controls="${menuPanel.id}"]`);
-        const triggerRect = triggerElement?.getBoundingClientRect();
-        const menu = menuPanel.closest(".site-menu");
-        const root = document.documentElement;
-        const body = document.body;
-        let ancestor = menuPanel.parentElement;
-        let ancestorDoesNotClip = true;
-        while (ancestor && ancestor !== root) {
-          const style = getComputedStyle(ancestor);
-          const ancestorRect = ancestor.getBoundingClientRect();
-          const clipsX = ["auto", "hidden", "scroll", "clip"].includes(style.overflowX);
-          const clipsY = ["auto", "hidden", "scroll", "clip"].includes(style.overflowY);
-          if (
-            (clipsX &&
-              (panelRect.left < ancestorRect.left - viewportTolerance ||
-                panelRect.right > ancestorRect.right + viewportTolerance)) ||
-            (clipsY &&
-              (panelRect.top < ancestorRect.top - viewportTolerance ||
-                panelRect.bottom > ancestorRect.bottom + viewportTolerance))
-          ) {
-            ancestorDoesNotClip = false;
-            break;
-          }
-          ancestor = ancestor.parentElement;
-        }
-        return (
-          getComputedStyle(menuPanel).visibility === "visible" &&
-          Number(getComputedStyle(menuPanel).opacity) > 0 &&
-          triggerElement?.getAttribute("aria-expanded") === "true" &&
-          Boolean(triggerRect) &&
-          panelRect.width > 0 &&
-          panelRect.height > 0 &&
-          panelRect.left >= -viewportTolerance &&
-          panelRect.right <= window.innerWidth + viewportTolerance &&
-          panelRect.top >= -viewportTolerance &&
-          panelRect.bottom <= window.innerHeight + viewportTolerance &&
-          triggerRect.left >= -viewportTolerance &&
-          triggerRect.right <= window.innerWidth + viewportTolerance &&
-          menu instanceof HTMLElement &&
-          menu.scrollWidth <= menu.clientWidth + viewportTolerance &&
-          menuPanel.scrollWidth <= menuPanel.clientWidth + viewportTolerance &&
-          menuPanel.scrollHeight <= menuPanel.clientHeight + viewportTolerance &&
-          root.scrollWidth <= root.clientWidth + viewportTolerance &&
-          body.scrollWidth <= body.clientWidth + viewportTolerance &&
-          ancestorDoesNotClip
-        );
-      });
-      await trigger.click();
-      await responsivePage.waitForFunction(
-        (id) =>
-          document.querySelector(`[aria-controls="${id}"]`)?.getAttribute("aria-expanded") ===
-          "false",
-        panelId,
-        { timeout: 5_000 },
-      );
-      return unclipped;
-    }
-
     for (const viewport of [
       { width: 768, height: 1024 },
       { width: 834, height: 1112 },
@@ -4015,8 +3948,16 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     ]) {
       await responsivePage.setViewportSize(viewport);
       await responsivePage.evaluate(() => window.scrollTo(0, 0));
-      const simulationMenuUnclipped = await checkOpenMenuPanel("Simulação", "site-menu-simulation");
-      const settingsMenuUnclipped = await checkOpenMenuPanel("Configurações", "site-menu-settings");
+      const simulationMenuUnclipped = await checkArchiveMenuPanel(
+        responsivePage,
+        "Simulação",
+        "site-menu-simulation",
+      );
+      const settingsMenuUnclipped = await checkArchiveMenuPanel(
+        responsivePage,
+        "Configurações",
+        "site-menu-settings",
+      );
       responsiveMenuChecks[`menuAndBodyUnclippedAt${viewport.width}`] =
         simulationMenuUnclipped && settingsMenuUnclipped;
     }
@@ -4289,6 +4230,7 @@ function functionalChecksPassed({
   simulatorValidation,
   tabelaoValidation,
   directTableValidation,
+  archiveNavigation,
   fixtureSourceMarker,
   zoom,
 }) {
@@ -4314,6 +4256,7 @@ function functionalChecksPassed({
     Object.values(tabelaoValidation).every(Boolean) &&
     directTableValidation &&
     Object.values(directTableValidation).every(Boolean) &&
+    archiveNavigationPassed(archiveNavigation) &&
     fixtureSourceMarker &&
     Object.values(fixtureSourceMarker).every(Boolean) &&
     zoom.routes.length === routes.length * zoomLevels.length &&
@@ -4531,6 +4474,7 @@ async function run() {
   let simulatorValidation = null;
   let tabelaoValidation = null;
   let directTableValidation = null;
+  let archiveNavigation = null;
   let fixtureSourceMarker = null;
   let homologationCheckpoints = [];
   let currentStage = "homologation-checkpoints";
@@ -4595,6 +4539,27 @@ async function run() {
         }
 
         if (viewport.key === "desktop-1440x900") {
+          currentStage = "archive-navigation";
+          const navigationPage = configureQaPage(await context.newPage());
+          try {
+            archiveNavigation = await checkArchiveNavigation(navigationPage, origin, {
+              openRoute: (destination) =>
+                gotoWithServerRetry(navigationPage, destination, { waitUntil: "domcontentloaded" }),
+            });
+            await writeJsonAtomically(archiveNavigationResultsPath, {
+              ...getCaptureProvenance(),
+              environment: environmentLabel,
+              data: "synthetic local-only fixtures; never production runtime",
+              ...archiveNavigation,
+            });
+            if (!archiveNavigationPassed(archiveNavigation)) {
+              throw new Error(
+                "Archive navigation QA failed. Inspect archive-navigation-results.json.",
+              );
+            }
+          } finally {
+            await navigationPage.close({ runBeforeUnload: false });
+          }
           for (const theme of themes) {
             currentStage = `theme:${theme}`;
             await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
@@ -4744,6 +4709,7 @@ async function run() {
       simulatorValidation,
       tabelaoValidation,
       directTableValidation,
+      archiveNavigation,
       fixtureSourceMarker,
       zoom,
     });
@@ -4788,6 +4754,7 @@ async function run() {
       simulatorValidation,
       tabelaoValidation,
       directTableValidation,
+      archiveNavigation,
       homologationCheckpoints,
       zoom,
       screenshots,
@@ -4882,6 +4849,7 @@ async function run() {
           unchangedDuringCapture: null,
         },
         failure: { stage: currentStage, kind: "sanitized" },
+        archiveNavigation,
         passed: false,
       });
     }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-29 - Nova identidade nos simuladores
+
+- Nova marca Descomplica sem subtitulo, cabecalho compacto e navegacao com icones.
+- Menu recolhivel no celular e acesso direto aos tres temas de aparencia.
+- Escolha do tema salva apenas com consentimento para preferencias funcionais.
+
 ## 2026-09-29 - Colunas compactas do Tabelao
 
 - Compacta Empreendimento, Endereco e Limitador com quebra de linha e texto integral.

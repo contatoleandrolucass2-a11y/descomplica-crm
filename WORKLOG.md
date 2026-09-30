@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-09-29 - Identidade e navegacao dos simuladores
+
+- Unifica marca e cabecalho dos quatro simuladores, sem "Inteligencia comercial".
+- Navegacao recolhivel com submenus, fechamento externo, Escape e retorno de foco.
+- Mantem Claro, Medio e Escuro visiveis; respeita consentimento funcional para
+  persistir a escolha e corrige aplicacao inicial do tema e color-scheme.
+- Preserva rotas, dados, formulas e politicas comerciais.
+- Evidencias: docs/audits/identidade-navegacao-2026-09-29.md.
+- Validacao em andamento; merge e publicacao pendentes.
+
 ## 2026-09-29 - Colunas e repeticoes do Tabelao
 
 - Limita as tres colunas indicadas nos prints, permitindo texto em varias linhas.

@@ -1,0 +1,406 @@
+.header.header {
+  --header-bg: #ffffff;
+  --header-text: #242b32;
+  --header-muted: #57636d;
+  --header-line: #d9e0e3;
+  --header-hover: #f0f4f3;
+  --header-accent: #087461;
+  --header-active: #e4f5ee;
+  --header-selected: #ffffff;
+  position: sticky;
+  z-index: 40;
+  top: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 28px;
+  min-height: 76px;
+  padding: 12px 24px;
+  color: var(--header-text);
+  border-bottom: 1px solid var(--header-line);
+  background: var(--header-bg);
+  box-shadow: 0 2px 8px #00000008;
+  backdrop-filter: none;
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+:global(:root[data-theme="balanced"]) .header.header {
+  --header-bg: #e8eeed;
+  --header-text: #263430;
+  --header-muted: #4c605a;
+  --header-line: #bccbc5;
+  --header-hover: #dbe4e0;
+  --header-accent: #096b59;
+  --header-active: #cce6dc;
+  --header-selected: #f9fcfa;
+}
+
+:global(:root[data-theme="dark"]) .header.header {
+  --header-bg: #181e23;
+  --header-text: #edf3f2;
+  --header-muted: #b3c2be;
+  --header-line: #3b4945;
+  --header-hover: #29352f;
+  --header-accent: #81e3bb;
+  --header-active: #203e34;
+  --header-selected: #344c42;
+}
+
+.header .brand {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--header-text);
+  text-decoration: none;
+}
+
+.header .brandMark {
+  position: relative;
+  display: grid;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #087e6a;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.header .brandMark > span {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--header-bg);
+  border-radius: 3px;
+  background: #a7ec7d;
+}
+
+.header .brandName {
+  font-size: 20px;
+  font-weight: 760;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.header .brandDot {
+  color: var(--header-accent);
+}
+
+.header .navigation {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.header .menu {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.header .navItem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--header-muted);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.header .navItem:hover {
+  color: var(--header-text);
+  background: var(--header-hover);
+}
+.header .navItem[data-active="true"],
+.header .navItem[aria-current="page"] {
+  color: var(--header-accent);
+  background: var(--header-active);
+  box-shadow: inset 0 -2px 0 var(--header-accent);
+}
+
+.header :is(a, button):focus-visible {
+  outline: 2px solid var(--header-accent);
+  outline-offset: 3px;
+}
+
+.header :is(button, a) {
+  touch-action: manipulation;
+}
+.header svg {
+  flex-shrink: 0;
+}
+.header [aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+.header .dropdown {
+  position: relative;
+}
+
+.header .panel {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + 10px);
+  left: 0;
+  display: grid;
+  width: 268px;
+  max-height: calc(100dvh - 110px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  border: 1px solid var(--header-line);
+  border-radius: 8px;
+  color: var(--header-text);
+  background: var(--header-bg);
+  box-shadow: 0 12px 30px #00000024;
+}
+
+.header .panel[hidden] {
+  display: none;
+}
+.header .settingsPanel {
+  right: 0;
+  left: auto;
+}
+.header .panel a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  color: var(--header-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.header .panel a:hover {
+  background: var(--header-hover);
+}
+.header .panel a[aria-current="page"] {
+  color: var(--header-accent);
+  background: var(--header-active);
+  box-shadow: inset 3px 0 0 var(--header-accent);
+  font-weight: 700;
+}
+
+.header .future {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--header-line);
+}
+.header .unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  color: var(--header-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.header .unavailable small {
+  flex-shrink: 0;
+  font-size: 10px;
+}
+
+.header .themeSwitch.themeSwitch {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  border: 1px solid var(--header-line);
+  border-radius: 8px;
+  background: var(--header-hover);
+  box-shadow: none;
+}
+
+.header .themeSwitch.themeSwitch button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 70px;
+  min-height: 38px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: var(--header-muted);
+  background: transparent;
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  transition: none;
+  cursor: pointer;
+}
+
+.header .themeSwitch.themeSwitch button:hover {
+  color: var(--header-text);
+  background: var(--header-bg);
+}
+.header .themeSwitch.themeSwitch button[aria-pressed="true"] {
+  color: var(--header-accent);
+  border-color: var(--header-line);
+  background: var(--header-selected);
+  box-shadow: 0 1px 3px #00000014;
+}
+
+.header .mobileTrigger {
+  display: none;
+}
+
+@media (min-width: 1181px) and (max-width: 1380px) {
+  .header.header {
+    gap: 16px;
+    padding-inline: 16px;
+  }
+  .header .navigation {
+    gap: 10px;
+  }
+  .header .menu {
+    gap: 2px;
+  }
+  .header .navItem {
+    gap: 6px;
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+  .header .themeSwitch.themeSwitch button {
+    min-width: 64px;
+    padding-inline: 6px;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .header.header {
+    min-height: 68px;
+    padding: 10px 20px;
+    gap: 16px;
+  }
+  .header .navigation {
+    justify-content: flex-end;
+  }
+  .header .mobileTrigger {
+    display: grid;
+    order: 2;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 1px solid var(--header-line);
+    border-radius: 6px;
+    color: var(--header-text);
+    background: var(--header-bg);
+    cursor: pointer;
+  }
+  .header .mobileTrigger:hover,
+  .header .mobileTrigger[aria-expanded="true"] {
+    background: var(--header-active);
+    color: var(--header-accent);
+  }
+  .header .menu {
+    position: absolute;
+    top: 100%;
+    right: 16px;
+    display: none;
+    width: min(360px, calc(100% - 32px));
+    max-height: calc(100dvh - 90px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 8px;
+    border: 1px solid var(--header-line);
+    border-radius: 8px;
+    background: var(--header-bg);
+    box-shadow: 0 12px 30px #00000024;
+  }
+  .header .menu[data-open="true"] {
+    display: grid;
+  }
+  .header .navItem {
+    width: 100%;
+    justify-content: flex-start;
+    min-height: 46px;
+    font-size: 14px;
+  }
+  .header .chevron {
+    margin-left: auto;
+  }
+  .header .panel {
+    position: static;
+    width: 100%;
+    max-height: none;
+    margin-block: 4px;
+    padding: 4px 4px 4px 18px;
+    border: 0;
+    border-left: 2px solid var(--header-line);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .header .themeSwitch.themeSwitch button {
+    min-height: 38px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header.header {
+    display: grid;
+    grid-template-columns: 1fr 44px;
+    gap: 8px 12px;
+    padding: 8px 16px 10px;
+  }
+  .header .navigation {
+    display: contents;
+  }
+  .header .brandName {
+    font-size: 20px;
+  }
+  .header .mobileTrigger {
+    order: 0;
+    grid-area: 1 / 2;
+  }
+  .header .themeSwitch.themeSwitch {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .header .themeSwitch.themeSwitch button {
+    min-width: 0;
+    min-height: 36px;
+    font-size: 13px;
+  }
+  .header .menu {
+    max-height: calc(100dvh - 132px);
+  }
+}
+
+@media print {
+  .header.header {
+    display: none;
+  }
+}
