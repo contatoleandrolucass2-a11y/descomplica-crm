@@ -13,7 +13,12 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Correcao restrita aos tokens dos quatro simuladores e cabecalho compartilhado,
   sem novo redesign nem alteracao financeira. Erros e avisos seguem distinguiveis.
 - Testes de contrato protegem fundos originais, paleta azul e contraste.
-- Evidencia: docs/audits/cores-azuis-2026-09-30.md; testes e publicacao pendentes.
+- Evidencia: docs/audits/cores-azuis-2026-09-30.md; lint/tipos/build locais e
+  preview 40/40 aprovados. Timeouts DevTools passaram no reteste isolado.
+  Seis testes POSIX exigem Linux; validate e restore da CI 36726351781 passaram.
+  Matriz: 40 navegacoes, 193 auditorias axe e 100 cenarios de zoom aprovados.
+  Revisa e promove 44 referencias afetadas; preserva as demais 149 e limites.
+  CI integrada das referencias e publicacao pendentes.
 
 ## 2026-09-30: Identidade publicada na web
 
