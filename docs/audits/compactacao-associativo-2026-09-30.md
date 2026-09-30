@@ -2,7 +2,7 @@
 
 Data: 2026-09-30. Branch: codex/compactacao-associativo.
 Fonte: quatro capturas e pedido direto do usuario.
-Status: funcional e visual revisados; CI das referencias e publicacao pendentes.
+Status: validado e publicado na release d9c2bee07fd6304006e28e357bf8e918a2031bf4.
 
 ## Escopo
 
@@ -66,3 +66,22 @@ Status: funcional e visual revisados; CI das referencias e publicacao pendentes.
   proveniencia, hashes, gates funcionais e checkout de captura limpo conferidos.
   Preserva as demais 149 imagens e thresholds de 1%/16 por canal.
 - Formata o manifesto gerado antes do commit. CI integrada final e deploy pendentes.
+
+## Publicacao Confirmada
+
+- PR #114 integrado apos CI 36761755035 aprovada. CI main 36764731943
+  inteiramente aprovada no SHA d9c2bee07fd6304006e28e357bf8e918a2031bf4.
+- Promove a imagem da CI, sem rebuild: checksum, configuracao, manifesto e onze
+  camadas equivalentes verificados; dois perfis de runtime aprovados no destino.
+  Digest local: sha256:71cb4df5627462556039e30f56b65a3cd05f51b68587a8d5e04790616265e026.
+- Backup privado, CAS da release b55fa6fc95eb26087c70736d618bf019818c5876 e
+  rollback preparados. Nginx, banco, contas e politicas comerciais preservados.
+- Health local/publico confirmou a versao. Smoke anonimo: doze GETs, quatro
+  concorrentes, sem erro; estoque/snapshot seguem 401 e no-store. Nao e teste de carga.
+- Navegador autenticado em nova aba, sem recarregar a aba em uso: dez linhas,
+  rolagem disponivel, altura de linha 26px, cabecalho 56px e titulo 28px em 1280px.
+  Temas com fundo transparente e borda zero. Foco da linha dourado #e9bd54 com
+  texto #302107, sem iniciar proposta. Tres temas conferidos, zero erros de console.
+- Modo Escuro restabelecido: pagina #061f35, cabecalho #071a31. Nova aba mantida
+  aberta com a versao publicada; nenhuma alteracao de proposta ou dado de cliente.
+- Este registro e documental; nao reiniciar a aplicacao ao integra-lo.

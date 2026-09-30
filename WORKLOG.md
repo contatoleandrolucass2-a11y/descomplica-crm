@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-09-30 - Compactacao publicada
+
+- PR #114 e CI main 36764731943 aprovados. Publica d9c2bee07fd6304006e28e357bf8e918a2031bf4.
+- Imagem imutavel, onze camadas, dois perfis, backup, CAS e rollback comprovados.
+- Health e doze GETs anonimos passaram; estoque protegido. Navegador confirma
+  dez linhas, dourado, cabecalho compacto, temas sem caixas e titulo menor.
+- Tres temas preservados, zero erros de console observados. Nova aba atualizada
+  mantida aberta; aba de trabalho do usuario nao recarregada.
+- Registra conhecimento e evidencia final; nenhuma nova mudanca de runtime.
+
 ## 2026-09-30 - Compactacao do Associativo
 
 - Revalidacao Next 16.3.6: lint/tipos/build e audit passaram; Windows 994 passaram,
