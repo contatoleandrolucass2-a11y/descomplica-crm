@@ -1,7 +1,7 @@
 # Identidade e navegacao dos simuladores
 
 Data: 2026-09-29. Branch: codex/identidade-navegacao-temas.
-Status: implementacao e validacao em andamento; nao publicado.
+Status: implementado; PR #109 em validacao visual. Ainda nao publicado.
 
 ## Escopo
 
@@ -67,6 +67,18 @@ Consultadas em 2026-09-29; referencias de interacao, nao copias de marca:
 - Novo gate verifica quatro rotas, dez viewports e tres temas, sem reduzir
   o manifesto historico nem seus limites de regressao. Preview sem autenticacao
   nao aprova a evidencia integrada.
+- Preview final do cabecalho: 40 combinacoes e tres temas aprovados, incluindo
+  pontos 1180/1181, teclado, troca de disclosure e foco. Next APIs simuladas;
+  nao e evidencia de autenticacao nem dos quatro conteudos completos.
+- CI Linux 36650605575, candidato ecb015f: formatacao, lint, typecheck, testes,
+  audit, compressao Nginx e build aprovados. Banco, advisors, restauracao
+  isolada e E2E autenticado aprovados. Matriz parou no novo gate de navegacao:
+  uma acao na Direta/320 expirou e seis leituras de cor ocorreram em transicao.
+  Nenhuma baseline foi promovida com esse resultado.
+- O gate aguarda tema, token computado, fim de transicao e duas amostras iguais.
+  Acoes limitadas a dez segundos; timeout de navegacao preservado. Progresso e
+  diagnostico estrutural sanitizado sao persistidos por caso, com screenshot
+  de falha apenas na fixture CI isolada. Casos e thresholds inalterados.
 
 ## Publicacao
 

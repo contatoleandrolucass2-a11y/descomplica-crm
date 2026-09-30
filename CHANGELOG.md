@@ -5,6 +5,7 @@
 - Nova marca Descomplica sem subtitulo, cabecalho compacto e navegacao com icones.
 - Menu recolhivel no celular e acesso direto aos tres temas de aparencia.
 - Escolha do tema salva apenas com consentimento para preferencias funcionais.
+- Validacao de temas aguarda a cor renderizada, com diagnostico incremental.
 
 ## 2026-09-29 - Colunas compactas do Tabelao
 

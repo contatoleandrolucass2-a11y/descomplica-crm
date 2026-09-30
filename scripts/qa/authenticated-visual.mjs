@@ -16,6 +16,7 @@ import {
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 import { checkAssociativeLearningManual } from "./associative-learning-manual.mjs";
 import {
+  archiveNavigationActionTimeout,
   archiveNavigationPassed,
   checkArchiveMenuPanel,
   checkArchiveNavigation,
@@ -4541,17 +4542,82 @@ async function run() {
         if (viewport.key === "desktop-1440x900") {
           currentStage = "archive-navigation";
           const navigationPage = configureQaPage(await context.newPage());
-          try {
-            archiveNavigation = await checkArchiveNavigation(navigationPage, origin, {
-              openRoute: (destination) =>
-                gotoWithServerRetry(navigationPage, destination, { waitUntil: "domcontentloaded" }),
-            });
+          navigationPage.setDefaultTimeout(archiveNavigationActionTimeout);
+          const navigationProvenance = getCaptureProvenance();
+          const candidateProgress = JSON.parse(await readFile(candidateResultsPath, "utf8"));
+          archiveNavigation = {
+            contract: "archive-navigation-v1",
+            scope: "header-and-content",
+            checks: [],
+            passed: false,
+          };
+          const persistNavigationProgress = async () => {
+            const capturedAt = new Date().toISOString();
             await writeJsonAtomically(archiveNavigationResultsPath, {
-              ...getCaptureProvenance(),
+              ...navigationProvenance,
+              capturedAt,
               environment: environmentLabel,
               data: "synthetic local-only fixtures; never production runtime",
               ...archiveNavigation,
             });
+            await writeJsonAtomically(candidateResultsPath, {
+              ...candidateProgress,
+              capturedAt,
+              failure: { stage: currentStage, kind: "sanitized" },
+              archiveNavigation,
+              passed: false,
+            });
+          };
+          try {
+            await persistNavigationProgress();
+            archiveNavigation = await checkArchiveNavigation(navigationPage, origin, {
+              openRoute: (destination) =>
+                gotoWithServerRetry(navigationPage, destination, { waitUntil: "domcontentloaded" }),
+              onCheck: async (check) => {
+                archiveNavigation.checks.push(check);
+                currentStage = `archive-navigation:${check.route}:${check.width}:${check.failedStage ?? "complete"}`;
+                await persistNavigationProgress();
+                process.stderr.write(
+                  `[archive-navigation] ${check.route} ${check.width}px: ${check.passed ? "passed" : `failed (${check.failedStage})`}\n`,
+                );
+                if (check.passed) return;
+
+                // Persist structural evidence first, even if screenshot capture fails or is unsafe.
+                const safeFixtureCapture =
+                  process.env.CI === "true" &&
+                  !remoteHomologation &&
+                  fixtureVerification === "rls-marker-v1" &&
+                  identityVerification.accountPolicy === "qa.*@local.invalid" &&
+                  navigationPage.url() === `${origin}${check.route}`;
+                check.failureScreenshot = {
+                  status: "skipped",
+                  reason: "requires-verified-local-ci-fixture-on-expected-route",
+                };
+                if (safeFixtureCapture) {
+                  try {
+                    const buffer = await navigationPage.screenshot({
+                      fullPage: false,
+                      animations: "allow",
+                      timeout: archiveNavigationActionTimeout,
+                    });
+                    check.failureScreenshot = {
+                      status: "saved",
+                      ...(await saveLosslessWebp(
+                        buffer,
+                        path.join(
+                          candidateScreenshotRoot,
+                          `archive-navigation-failure-${routeKey(check.route)}-${check.width}x${check.height}.webp`,
+                        ),
+                      )),
+                    };
+                  } catch {
+                    check.failureScreenshot = { status: "unavailable", kind: "sanitized" };
+                  }
+                }
+                await persistNavigationProgress();
+              },
+            });
+            await persistNavigationProgress();
             if (!archiveNavigationPassed(archiveNavigation)) {
               throw new Error(
                 "Archive navigation QA failed. Inspect archive-navigation-results.json.",

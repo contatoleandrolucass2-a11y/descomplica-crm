@@ -11,12 +11,20 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Cabecalho compartilhado substitui quatro copias de marca; remove subtitulo.
 - Navegacao compacta usa estado independente dos popovers para que abrir
   um submenu nao feche o pai. Escape fecha um nivel por vez e restaura foco.
+- Em accordion, fechar no pointerdown pode deslocar o proximo acionador antes
+  do click. Fronteira de dismiss compartilhada preserva o gesto e a exclusao
+  mutua; nao alterar globalmente todos os popovers por esse caso.
 - Temas permanecem visiveis e so persistem com consentimento funcional.
 - CSS legado fixava cores escuras nos simuladores; trocar apenas data-theme
   nao comprova aplicacao visual do tema. Validar tambem conteudo e controles.
 - Primeira rodada: tipos/build aprovados, 57 contratos das tabelas aprovados;
   22 testes Obsidian passaram isolados apos dois timeouts por concorrencia.
-- CI autenticada, temas completos e publicacao pendentes. Sem alteracao financeira.
+- Preview: 40 combinacoes de rota/largura e tres temas do cabecalho aprovados.
+  CI Linux 36650605575 passou validacao, banco, restore e E2E autenticado;
+  matriz parou em sete checks de navegacao (seis cores durante transicao e
+  um timeout de clique). Gate agora espera a cor final e guarda diagnostico
+  incremental. Nova matriz/publicacao pendentes; nenhuma baseline promovida.
+  Sem alteracao financeira.
 
 ## 2026-09-29: Colunas compactas e celulas repetidas do Tabelao
 

@@ -8,6 +8,8 @@
   persistir a escolha e corrige aplicacao inicial do tema e color-scheme.
 - Preserva rotas, dados, formulas e politicas comerciais.
 - Evidencias: docs/audits/identidade-navegacao-2026-09-29.md.
+- QA mede cores estabilizadas e persiste falhas de navegacao por caso. Mantem
+  bloqueio da publicacao e baselines antigas enquanto a matriz nao passar.
 - Validacao em andamento; merge e publicacao pendentes.
 
 ## 2026-09-29 - Colunas e repeticoes do Tabelao

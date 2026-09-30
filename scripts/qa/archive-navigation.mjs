@@ -39,6 +39,130 @@ const settingsLinks = [
 const navigation = (page) => page.locator("#archive-navigation");
 const mobileTrigger = (page) => page.locator('button[aria-controls="archive-navigation"]');
 const appearance = (page) => page.getByRole("group", { name: "Aparência da página", exact: true });
+export const archiveNavigationActionTimeout = 10_000;
+
+export async function waitForArchiveHeaderTheme(page, theme, surfaces = {}) {
+  let previous = null;
+  await expect
+    .poll(
+      async () => {
+        const surface = await navigation(page).evaluate((nav) => {
+          const header = nav.closest("header");
+          const style = getComputedStyle(header);
+          const token = style.getPropertyValue("--header-bg").trim();
+          const probe = document.createElement("span");
+          probe.style.cssText =
+            "all:initial!important;position:fixed!important;visibility:hidden!important;pointer-events:none!important;transition:none!important;animation:none!important";
+          probe.style.setProperty("background-color", token, "important");
+          document.body.append(probe);
+          try {
+            const selectedTheme = document.documentElement.getAttribute("data-theme");
+            return {
+              theme: ["light", "balanced", "dark"].includes(selectedTheme) ? selectedTheme : null,
+              backgroundColor: style.backgroundColor,
+              tokenColor:
+                token && CSS.supports("background-color", token)
+                  ? getComputedStyle(probe).backgroundColor
+                  : null,
+              transitioning: header
+                .getAnimations()
+                .some(
+                  (animation) =>
+                    (animation.pending || animation.playState === "running") &&
+                    animation.effect?.getKeyframes().some((frame) => "backgroundColor" in frame),
+                ),
+            };
+          } finally {
+            probe.remove();
+          }
+        });
+        const signature = JSON.stringify(surface);
+        const settled =
+          surface.theme === theme &&
+          surface.tokenColor !== null &&
+          surface.backgroundColor === surface.tokenColor &&
+          !surface.transitioning &&
+          signature === previous;
+        previous = signature;
+        surfaces[theme] = { ...surface, settled };
+        return settled;
+      },
+      {
+        message: "Archive header surface must settle on --header-bg for the selected theme",
+        timeout: archiveNavigationActionTimeout,
+        intervals: [50, 100, 100],
+      },
+    )
+    .toBe(true);
+  return surfaces[theme];
+}
+
+export async function inspectArchiveNavigationFailure(page) {
+  // Only geometry, CSS and allowlisted header state; never body text or arbitrary attributes.
+  return page.evaluate(() => {
+    const nav = document.querySelector("#archive-navigation");
+    const header = nav?.closest("header");
+    const settings = header?.querySelector('[aria-controls="site-menu-settings"]');
+    const inspect = (element) => {
+      if (!element) return null;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        tag: element.tagName,
+        rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+        zIndex: style.zIndex,
+        display: style.display,
+        visibility: style.visibility,
+        scrollTop: element.scrollTop,
+        scrollHeight: element.scrollHeight,
+        clientHeight: element.clientHeight,
+        expanded: ["true", "false"].includes(element.getAttribute("aria-expanded"))
+          ? element.getAttribute("aria-expanded")
+          : null,
+      };
+    };
+    const rect = settings?.getBoundingClientRect();
+    const point = rect ? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 } : null;
+    const hit = point ? document.elementFromPoint(point.x, point.y) : null;
+    const active = header?.contains(document.activeElement) ? document.activeElement : null;
+    const label = active?.getAttribute("aria-label");
+    const safeLabels = [
+      "Abrir navegação",
+      "Fechar navegação",
+      "Navegação principal",
+      "Aparência da página",
+      "Claro",
+      "Médio",
+      "Escuro",
+      "Simulação",
+      "Configurações",
+      "Descomplica",
+    ];
+    return {
+      viewport: { width: innerWidth, height: innerHeight, scrollX, scrollY },
+      navigation: inspect(nav),
+      settings: inspect(settings),
+      simulation: inspect(header?.querySelector('[aria-controls="site-menu-simulation"]')),
+      mobileTrigger: inspect(header?.querySelector('button[aria-controls="archive-navigation"]')),
+      settingsCenter: point,
+      elementAtSettingsCenter: inspect(hit),
+      settingsReceivesPointer: Boolean(hit && settings?.contains(hit)),
+      activeHeaderElement: active
+        ? { tag: active.tagName, ariaLabel: safeLabels.includes(label) ? label : null }
+        : null,
+    };
+  });
+}
+
+function sanitizedNavigationFailure(error) {
+  const firstLine = error instanceof Error ? error.message.split("\n")[0] : "";
+  if (error?.code === "ERR_ASSERTION") return firstLine;
+  const timeout = firstLine.match(/^(?:locator|page)\.[a-zA-Z]+: Timeout \d+ms exceeded\.$/);
+  if (timeout) return timeout[0];
+  if (firstLine === "Archive header surface must settle on --header-bg for the selected theme")
+    return firstLine;
+  return "Navigation action or expectation failed; details omitted for privacy";
+}
 
 export async function ensureArchiveNavigationOpen(page) {
   const trigger = mobileTrigger(page);
@@ -357,7 +481,7 @@ export async function checkArchiveNavigation(
           }
           await page.evaluate(() => window.scrollTo(0, 0));
           await assertHeaderGeometry(page, compact);
-          const colors = [];
+          check.headerSurfaces = {};
           check.mainSurfaces = {};
           for (const [theme, label] of Object.entries(themeLabels)) {
             stage = `theme:${theme}`;
@@ -367,11 +491,7 @@ export async function checkArchiveNavigation(
             await expect(button).toHaveAttribute("aria-pressed", "true");
             await expect(themes.locator('[aria-pressed="true"]')).toHaveCount(1);
             await assertHeaderGeometry(page, compact);
-            colors.push(
-              await brand.evaluate(
-                (element) => getComputedStyle(element.closest("header")).backgroundColor,
-              ),
-            );
+            await waitForArchiveHeaderTheme(page, theme, check.headerSurfaces);
             if (scope === "header-and-content")
               check.mainSurfaces[theme] = await inspectMainSurface(page);
             if (viewport.width === 320 || viewport.width === 1181) {
@@ -392,8 +512,11 @@ export async function checkArchiveNavigation(
             }
             check.themes[theme] = true;
           }
+          stage = "header-surface-themes";
           assert.equal(
-            new Set(colors).size,
+            new Set(
+              Object.values(check.headerSurfaces).map(({ backgroundColor }) => backgroundColor),
+            ).size,
             3,
             "The three themes must render distinct header surfaces",
           );
@@ -523,9 +646,10 @@ export async function checkArchiveNavigation(
           check.passed = true;
         } catch (error) {
           check.failedStage = stage;
-          check.failure =
-            error instanceof Error ? error.message.split("\n")[0] : "Unknown navigation failure";
-          if (process.env.QA_LOCAL_DIAGNOSTICS === "true") console.error(error);
+          check.failure = sanitizedNavigationFailure(error);
+          check.diagnostics = await inspectArchiveNavigationFailure(page).catch(() => ({
+            unavailable: true,
+          }));
         }
         check.runtimeErrorCount = runtimeErrors.length - errorStart;
         await onCheck(check);
