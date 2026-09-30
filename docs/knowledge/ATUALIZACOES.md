@@ -6,6 +6,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-30: Dez linhas e cabecalho compacto
 
+- Evidencia: CI 36758571149 aprovou gates funcionais, 40 navegacoes, 193 axe e
+  100 zoom. Revisa/promove 44 capturas e preserva as demais 149/thresholds.
+  Preview final 40/40; Next 16.3.6 com lint/tipos/build/audit aprovados.
+  CI das referencias e publicacao ainda pendentes.
 - CI 36757589260 bloqueou Next 16.3.3 por advisory critico atualizado em 30/09;
   patch oficial 16.3.6. Revalidar deps mesmo quando o commit anterior passou.
 - matchMedia pode receber change apos o browser desfocar o controle oculto.

@@ -2,7 +2,7 @@
 
 Data: 2026-09-30. Branch: codex/compactacao-associativo.
 Fonte: quatro capturas e pedido direto do usuario.
-Status: implementado, validacao integrada e publicacao pendentes.
+Status: funcional e visual revisados; CI das referencias e publicacao pendentes.
 
 ## Escopo
 
@@ -51,3 +51,18 @@ Status: implementado, validacao integrada e publicacao pendentes.
 - Audit apos patch: nenhuma vulnerabilidade conhecida. Teste isolado: 20
   ciclos de redimensionamento passaram; foco externo preservado. O contrato
   de navegador tambem verifica que o menu nao toma o foco do estoque.
+
+## Evidencia Integrada
+
+- Next 16.3.6: lint, tipos e build locais passaram. Suite Windows: 994 passaram,
+  um skip e seis falhas POSIX; oito testes Node passaram. Nenhum timeout no reteste.
+- Preview final: 40/40 combinacoes de quatro rotas e dez larguras, nos tres temas,
+  sem erros de navegador. Dez unidades, acesso ao fim e hover/foco aprovados.
+- CI 36758571149: validate, banco, advisors, restore e E2E aprovados. Matriz:
+  40 navegacoes, 193 auditorias axe e 100 cenarios de zoom aprovados.
+- As 44 divergencias visuais correspondem somente aos quatro simuladores.
+  Revisa todas em onze grupos de tema/largura; sem novas colisoes identificadas.
+- Promocao canonica do merge be1c82b4cbe03773953f1f5bdb7c38224d282755:
+  proveniencia, hashes, gates funcionais e checkout de captura limpo conferidos.
+  Preserva as demais 149 imagens e thresholds de 1%/16 por canal.
+- Formata o manifesto gerado antes do commit. CI integrada final e deploy pendentes.

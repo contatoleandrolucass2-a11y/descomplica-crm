@@ -2,6 +2,11 @@
 
 ## 2026-09-30 - Compactacao do Associativo
 
+- Revalidacao Next 16.3.6: lint/tipos/build e audit passaram; Windows 994 passaram,
+  um skip e seis falhas POSIX. Oito testes Node passaram; preview 40/40 aprovado.
+- CI 36758571149 aprovou gates funcionais, 193 axe e 100 zoom. Revisa e promove
+  44 capturas dos simuladores; preserva 149 imagens e limites do comparador.
+  CI final das referencias e publicacao pendentes.
 - Gate 36757589260 bloqueou Next 16.3.3 por GHSA-vcvr-r3jv-pc5j. Atualiza Next
   e eslint-config-next para 16.3.6, sem desabilitar auditoria.
 - Corrige perda de foco no breakpoint do menu observada no Tabelao durante QA.

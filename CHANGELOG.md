@@ -2,6 +2,7 @@
 
 ## 2026-09-30 - Interface mais compacta
 
+- Atualiza 44 referencias visuais revisadas dos simuladores, preservando as demais.
 - Corrige foco do menu ao alternar entre larguras mobile e desktop.
 - Atualiza Next.js para 16.3.6 para atender a correcao de seguranca do gate.
 - Associativo exibe dez unidades por vez e destaca a linha em dourado no mouse/teclado.
