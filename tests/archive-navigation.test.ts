@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 // @ts-expect-error Operational ESM script, also exercised directly by the CLI.
 import * as navigationQa from "../scripts/qa/archive-navigation.mjs";
 
@@ -31,6 +32,26 @@ function completeResult() {
 }
 
 describe("archive navigation evidence gate", () => {
+  it("keeps navigation above the privacy shortcut but below the consent panel", () => {
+    const header = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/ArchiveHeader.module.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const privacy = readFileSync(
+      new URL("../app/_components/CookieConsentBanner.module.css", import.meta.url),
+      "utf8",
+    );
+    const headerLayer = Number(header.match(/\.header\.header\s*\{[\s\S]*?z-index:\s*(\d+)/)?.[1]);
+    const shortcutLayer = Number(
+      privacy.match(/\.preferencesButton\s*\{[\s\S]*?z-index:\s*(\d+)/)?.[1],
+    );
+    const panelLayer = Number(privacy.match(/\.banner\s*\{[\s\S]*?z-index:\s*(\d+)/)?.[1]);
+    expect(headerLayer).toBeGreaterThan(shortcutLayer);
+    expect(headerLayer).toBeLessThan(panelLayer);
+  });
   it("requires complete route/viewport/theme evidence independently of the historical manifest", () => {
     expect(archiveNavigationPassed(completeResult())).toBe(true);
     expect(archiveNavigationPassed(null)).toBe(false);

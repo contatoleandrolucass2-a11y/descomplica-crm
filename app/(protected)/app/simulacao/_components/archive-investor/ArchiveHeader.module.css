@@ -8,7 +8,8 @@
   --header-active: #e4f5ee;
   --header-selected: #ffffff;
   position: sticky;
-  z-index: 40;
+  /* Above the floating privacy shortcut (85), below the consent panel (90). */
+  z-index: 86;
   top: 0;
   display: flex;
   flex-direction: row;

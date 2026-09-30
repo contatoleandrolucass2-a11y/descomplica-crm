@@ -6,6 +6,7 @@
 - Menu recolhivel no celular e acesso direto aos tres temas de aparencia.
 - Escolha do tema salva apenas com consentimento para preferencias funcionais.
 - Validacao de temas aguarda a cor renderizada, com diagnostico incremental.
+- Menu mobile permanece clicavel quando o atalho de cookies esta visivel.
 
 ## 2026-09-29 - Colunas compactas do Tabelao
 

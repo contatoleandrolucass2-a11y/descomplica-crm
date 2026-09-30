@@ -10,6 +10,8 @@
 - Evidencias: docs/audits/identidade-navegacao-2026-09-29.md.
 - QA mede cores estabilizadas e persiste falhas de navegacao por caso. Mantem
   bloqueio da publicacao e baselines antigas enquanto a matriz nao passar.
+- Corrige sobreposicao do atalho de cookies no menu da Direta em 320 px;
+  painel de consentimento continua acima da navegacao. Teste protege as camadas.
 - Validacao em andamento; merge e publicacao pendentes.
 
 ## 2026-09-29 - Colunas e repeticoes do Tabelao

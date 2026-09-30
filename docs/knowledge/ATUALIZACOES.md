@@ -24,7 +24,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   matriz parou em sete checks de navegacao (seis cores durante transicao e
   um timeout de clique). Gate agora espera a cor final e guarda diagnostico
   incremental. Nova matriz/publicacao pendentes; nenhuma baseline promovida.
+  Preview completo posterior: 40/40, tres temas e zero erros de navegador,
+  incluindo Direta/320. Fonte: test-results/identity-full-preview.json local.
   Sem alteracao financeira.
+- CI 36653241052: navegacao 39/40; atalho global de cookies interceptava clique
+  na Direta/320. Camadas corrigidas para atalho < navegacao < painel de cookies.
+  Seis testes do gate aprovados; CUA confirmou troca de submenu e abertura/
+  fechamento de preferencias com o componente real no preview. CI final pendente.
 
 ## 2026-09-29: Colunas compactas e celulas repetidas do Tabelao
 

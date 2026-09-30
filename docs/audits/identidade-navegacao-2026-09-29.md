@@ -79,8 +79,22 @@ Consultadas em 2026-09-29; referencias de interacao, nao copias de marca:
   Acoes limitadas a dez segundos; timeout de navegacao preservado. Progresso e
   diagnostico estrutural sanitizado sao persistidos por caso, com screenshot
   de falha apenas na fixture CI isolada. Casos e thresholds inalterados.
+- Preview completo dos quatro componentes, apos a estabilizacao: 40/40 checks,
+  tres temas por caso, mudanca de pixels do conteudo e zero erros de navegador.
+  Direta/320 aprovada. Evidencia local em test-results/identity-full-preview.json;
+  APIs Next simuladas, inventario sintetico e fonte de sistema. Nao substitui
+  autenticacao, fontes reais e verificacao financeira na CI.
 
 ## Publicacao
+
+- CI 36653241052: validacao Linux, banco, E2E e restore aprovados; navegacao
+  39/40. Diagnostico e captura identificaram o atalho de cookies (camada 85)
+  cobrindo Configuracoes na Direta/320. Cabecalho passa a camada 86, abaixo
+  do painel de consentimento (90). Teste de regressao compara as tres camadas.
+  Preview anterior nao incluia o componente global de cookies; harness ajustado
+  para incluir o componente real, sem habilitar suas Server Actions.
+- Reteste CUA Direta/320 com componente de cookies real: Simulacao -> Configuracoes,
+  Escape, abertura e fechamento do painel aprovados. Seis testes do gate aprovados.
 
 Exige CI do candidato, inspecao dos diffs visuais, PR, imagem imutavel validada,
 backup, compare-and-swap, rollback e health pos-publicacao.
