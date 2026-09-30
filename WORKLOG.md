@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-09-30 - Topo compacto publicado
+
+- PR #116 integrado apos CI 36777405809 verde. CI main 36780351488 aprovada
+  no SHA 843fd113a3a1f6b6fd3b6b12b6de58de180256ce, publicado sem rebuild.
+- Checksum, manifesto, onze camadas, dois perfis, backup/CAS/rollback conferidos.
+- Health confirma a release; doze GETs anonimos sem erro, estoque protegido.
+- Navegador confirma titulo/guia a 8px do menu e botao 36px; guia, Escape e
+  retorno de foco funcionais, zero erros de console. Nenhuma unidade selecionada.
+- Documenta e sincroniza o resultado; este registro nao exige novo deploy.
+
 ## 2026-09-30 - Titulo e guia proximos ao menu
 
 - CI 36774530982: validacao Linux, banco, restore, E2E, 40 navegacoes e 193

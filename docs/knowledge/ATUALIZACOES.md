@@ -4,6 +4,19 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Topo compacto publicado e conferido
+
+- Status: validado; runtime 843fd113a3a1f6b6fd3b6b12b6de58de180256ce.
+- Fonte: PR #116, CI main 36780351488, health e navegador autenticado;
+  docs/audits/topo-associativo-2026-09-30.md.
+- Titulo e Guia completo ficam a 8px da linha do menu; botao 36px em ponteiro
+  preciso e 44px em toque. Mantem tres paletas e tamanho do titulo.
+- CI integral aprovada; imagem imutavel com onze camadas e dois perfis comprovados,
+  backup/CAS/rollback preservados. Doze GETs anonimos sem erro; nao prova carga.
+- UI publicada confirmou geometria, guia, Escape, retorno de foco e nenhum erro
+  de console. Usa nova aba sem recarregar a aba de trabalho; nao altera propostas.
+- Registro documental: publicar no Git e sincronizar sem reiniciar a aplicacao.
+
 ## 2026-09-30: Alinhamento superior do titulo e guia
 
 - CI 36774530982 aprovou testes Linux, banco, restore, E2E, navegacao e axe.
