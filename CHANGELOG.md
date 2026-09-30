@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-30 - Nova identidade disponivel na web
+
+- Publica cabecalho renovado e Claro, Medio e Escuro nos quatro simuladores.
+- Confirma menu, temas e carregamento do estoque em producao na release 2c002df.
+- Registra validacao, backup e rollback, sem alteracao de regras financeiras.
+
 ## 2026-09-30 - Correcao da dependencia de desenvolvimento
 
 - Atualiza brace-expansion nas duas linhas utilizadas por ESLint/minimatch,
