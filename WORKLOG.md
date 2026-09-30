@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-09-30 - Azul original nos temas
+
+- Corrige a paleta a pedido do usuario: restaura o azul-marinho original do
+  modo escuro e substitui verdes por azul nos tres temas dos simuladores.
+- Mantem geometria, navegacao e regras financeiras; tokens limitados ao shell.
+- Adiciona regressao para fundos originais, destaques azuis e contraste textual.
+- Evidencia: docs/audits/cores-azuis-2026-09-30.md. Validacao e deploy pendentes.
+- Lint, tipos e build locais aprovados; preview 40/40 nos tres temas.
+- Suite Windows: 992 passaram, um skip, seis falhas POSIX e dois timeouts.
+  Reteste isolado DevTools/cores/navegacao: 37 passaram; oito testes Node passaram.
+  CI 36726351781 aprovou validate, banco, restore e E2E.
+- Matriz: 40 navegacoes, 193 auditorias axe e 100 cenarios de zoom aprovados.
+  Revisa 44 capturas afetadas e promove referencias via contrato canonico;
+  preserva outras 149 e thresholds. Nova CI integrada e deploy pendentes.
+- Normaliza manifesto gerado com Prettier apos falha de formatacao na CI
+  36730344413; conteudo semantico e imagens preservados.
+
 ## 2026-09-30 - Identidade publicada e verificada
 
 - Publica 2c002df10fa2777165fec5b96f707ed971422e74 apos PRs #109/#110 e CI main

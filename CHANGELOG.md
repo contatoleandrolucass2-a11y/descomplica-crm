@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-30 - Correcao das cores dos temas
+
+- Restaura o fundo azul-marinho original do modo Escuro.
+- Substitui verdes por azul na marca, destaques e estados dos tres temas.
+- Preserva layout, funcionamento e calculos dos simuladores.
+- Atualiza 44 referencias visuais revisadas, preservando as demais 149.
+
 ## 2026-09-30 - Nova identidade disponivel na web
 
 - Publica cabecalho renovado e Claro, Medio e Escuro nos quatro simuladores.
