@@ -1,5 +1,34 @@
 # Worklog
 
+## 2026-09-30 - Referencias da nova identidade
+
+- CI 36660701681 aprovou validacao Linux, banco, advisors, restore e E2E.
+- Matriz autenticada: 40 navegacoes, 193 auditorias de acessibilidade e 100
+  cenarios de zoom aprovados; somente 44 diferencas visuais previstas no escopo.
+- Inspecao das capturas confirmou as correcoes de temas/tablet e filtros/mobile.
+  Promove 44 referencias do merge e985f6791de4dfd5681cc47429a6d5f06bc61d25;
+  preserva outras 149, hashes/proveniencia e limites de regressao.
+- Reteste local: 63 testes focados e 40/40 cenarios do preview com cookies reais.
+  Revisao independente estatica sem novos achados; nao substitui CI integrada.
+- Nova CI das referencias, merge e publicacao permanecem pendentes.
+
+## 2026-09-29 - Identidade e navegacao dos simuladores
+
+- Unifica marca e cabecalho dos quatro simuladores, sem "Inteligencia comercial".
+- Navegacao recolhivel com submenus, fechamento externo, Escape e retorno de foco.
+- Mantem Claro, Medio e Escuro visiveis; respeita consentimento funcional para
+  persistir a escolha e corrige aplicacao inicial do tema e color-scheme.
+- Preserva rotas, dados, formulas e politicas comerciais.
+- Evidencias: docs/audits/identidade-navegacao-2026-09-29.md.
+- QA mede cores estabilizadas e persiste falhas de navegacao por caso. Mantem
+  bloqueio da publicacao e baselines antigas enquanto a matriz nao passar.
+- Corrige sobreposicao do atalho de cookies no menu da Direta em 320 px;
+  painel de consentimento continua acima da navegacao. Teste protege as camadas.
+- Inspecao da CI detectou regra legada de 44 px nos temas em tablets e colisao
+  entre Limpar filtros e o primeiro campo da Direta mobile. Corrige os escopos
+  e amplia QA para medir conteudo dos botoes e separacao dos filtros.
+- Validacao em andamento; merge e publicacao pendentes.
+
 ## 2026-09-29 - Colunas e repeticoes do Tabelao
 
 - Limita as tres colunas indicadas nos prints, permitindo texto em varias linhas.

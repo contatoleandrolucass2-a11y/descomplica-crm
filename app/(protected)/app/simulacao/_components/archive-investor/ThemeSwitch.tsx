@@ -1,64 +1,75 @@
 "use client";
 
+import { Contrast, Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import styles from "./ArchiveHeader.module.css";
 
 export type ThemeMode = "light" | "balanced" | "dark";
 
-const themes: Array<{ key: ThemeMode; label: string }> = [
-  { key: "light", label: "Claro" },
-  { key: "balanced", label: "Médio" },
-  { key: "dark", label: "Escuro" },
-];
+const themes = [
+  { key: "light", label: "Claro", icon: Sun },
+  { key: "balanced", label: "Médio", icon: Contrast },
+  { key: "dark", label: "Escuro", icon: Moon },
+] as const;
 
-export function ThemeSwitch({ canPersist = true }: { canPersist?: boolean }) {
+function applyTheme(theme: ThemeMode) {
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
+}
+
+export function ThemeSwitch({ canPersist = false }: { canPersist?: boolean }) {
   const [theme, setTheme] = useState<ThemeMode>("light");
-  const ready = useRef(false);
+  const selectedTheme = useRef<ThemeMode | null>(null);
 
   useEffect(() => {
-    let saved: string | null = null;
+    const initializing = selectedTheme.current === null;
+    let initial = selectedTheme.current ?? "light";
     try {
-      if (canPersist) saved = window.localStorage.getItem("descomplica-theme");
-      else window.localStorage.removeItem("descomplica-theme");
+      if (initializing && canPersist) {
+        const saved = window.localStorage.getItem("descomplica-theme");
+        if (saved === "light" || saved === "balanced" || saved === "dark") initial = saved;
+      }
+      if (!canPersist) window.localStorage.removeItem("descomplica-theme");
+      else if (!initializing) window.localStorage.setItem("descomplica-theme", initial);
     } catch {
       // O tema continua disponível apenas nesta página quando storage está bloqueado.
     }
-    const current = document.documentElement.dataset.theme;
-    const initial =
-      saved === "light" || saved === "balanced" || saved === "dark"
-        ? saved
-        : current === "balanced" || current === "dark"
-          ? current
-          : "light";
 
+    selectedTheme.current = initial;
+    applyTheme(initial);
     const timer = window.setTimeout(() => setTheme(initial), 0);
     return () => window.clearTimeout(timer);
   }, [canPersist]);
 
-  useEffect(() => {
-    if (!ready.current) {
-      ready.current = true;
-      return;
-    }
-    document.documentElement.setAttribute("data-theme", theme);
+  function selectTheme(nextTheme: ThemeMode) {
+    selectedTheme.current = nextTheme;
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
     if (canPersist) {
       try {
-        window.localStorage.setItem("descomplica-theme", theme);
+        window.localStorage.setItem("descomplica-theme", nextTheme);
       } catch {
         // Mantém a escolha apenas em memória quando storage está indisponível.
       }
     }
-  }, [canPersist, theme]);
+  }
 
   return (
-    <div className="theme-switch" role="group" aria-label="Aparência da página">
-      {themes.map(({ key, label }) => (
+    <div
+      className={`theme-switch ${styles.themeSwitch}`}
+      role="group"
+      aria-label="Aparência da página"
+    >
+      {themes.map(({ key, label, icon: Icon }) => (
         <button
           key={key}
           type="button"
           className={theme === key ? "active" : ""}
           aria-pressed={theme === key}
-          onClick={() => setTheme(key)}
+          title={`Tema ${label.toLocaleLowerCase("pt-BR")}`}
+          onClick={() => selectTheme(key)}
         >
+          <Icon aria-hidden="true" size={16} />
           {label}
         </button>
       ))}

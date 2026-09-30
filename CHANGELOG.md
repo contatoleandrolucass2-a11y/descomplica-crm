@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-30 - Referencias visuais da identidade
+
+- Registra 44 capturas revisadas dos quatro simuladores, nos tres temas,
+  desktop, tablet e celular; preserva as demais referencias e limites de QA.
+
+## 2026-09-29 - Nova identidade nos simuladores
+
+- Nova marca Descomplica sem subtitulo, cabecalho compacto e navegacao com icones.
+- Menu recolhivel no celular e acesso direto aos tres temas de aparencia.
+- Escolha do tema salva apenas com consentimento para preferencias funcionais.
+- Validacao de temas aguarda a cor renderizada, com diagnostico incremental.
+- Menu mobile permanece clicavel quando o atalho de cookies esta visivel.
+- Corrige largura dos temas em tablets e separa Limpar filtros dos campos da Direta mobile.
+
 ## 2026-09-29 - Colunas compactas do Tabelao
 
 - Compacta Empreendimento, Endereco e Limitador com quebra de linha e texto integral.

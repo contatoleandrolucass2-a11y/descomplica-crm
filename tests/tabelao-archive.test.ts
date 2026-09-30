@@ -75,8 +75,8 @@ describe("Tabelão protegido", () => {
     expect(page).toContain('await enforcePermission("crm.simulators.view")');
     expect(page).toContain('alternates: { canonical: "/app/simulacao/tabelao" }');
     expect(page).toContain("<TabelaoArchive />");
-    expect(menu).toContain('href="/app/simulacao/tabelao"');
-    expect(menu).toContain('activePathname === "/simulacao/tabelao"');
+    expect(menu).toContain('href: "/app/simulacao/tabelao"');
+    expect(menu).toContain('aria-current={pathname === href ? "page" : undefined}');
     expect(archive).toContain(
       'className="app-shell simulation-page-shell investor-page-shell tabelao-page-shell"',
     );

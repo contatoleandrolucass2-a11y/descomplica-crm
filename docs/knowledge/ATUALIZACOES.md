@@ -4,6 +4,52 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Validacao da identidade e referencias
+
+- Status: pendente_validacao; branch codex/identidade-navegacao-temas.
+- Fonte: CI 36660701681, captura e985f6791de4dfd5681cc47429a6d5f06bc61d25,
+  docs/audits/identidade-navegacao-2026-09-29.md e authenticated-results.json.
+- Linux, banco, advisors, restore e E2E aprovados. Navegacao 40/40,
+  acessibilidade 193 e zoom 100 aprovados; somente 44 diffs visuais previstos.
+- Capturas inspecionadas apos corrigir temas/tablet e filtros/mobile;
+  44 referencias promovidas, outras 149 preservadas, sem afrouxar thresholds.
+- Reteste local: 63 testes focados e preview 40/40 com cookies reais;
+  revisao estatica independente sem novos achados. Preview usa dados sinteticos.
+- Pendente: CI integrada das referencias, merge e publicacao com imagem imutavel.
+
+## 2026-09-29: Identidade e navegacao dos simuladores
+
+- Status: pendente_validacao; branch codex/identidade-navegacao-temas.
+- Fonte: ArchiveHeader.tsx, SiteMenu.tsx, ThemeSwitch.tsx e auditoria de identidade.
+- Cabecalho compartilhado substitui quatro copias de marca; remove subtitulo.
+- Navegacao compacta usa estado independente dos popovers para que abrir
+  um submenu nao feche o pai. Escape fecha um nivel por vez e restaura foco.
+- Em accordion, fechar no pointerdown pode deslocar o proximo acionador antes
+  do click. Fronteira de dismiss compartilhada preserva o gesto e a exclusao
+  mutua; nao alterar globalmente todos os popovers por esse caso.
+- Temas permanecem visiveis e so persistem com consentimento funcional.
+- CSS legado fixava cores escuras nos simuladores; trocar apenas data-theme
+  nao comprova aplicacao visual do tema. Validar tambem conteudo e controles.
+- Primeira rodada: tipos/build aprovados, 57 contratos das tabelas aprovados;
+  22 testes Obsidian passaram isolados apos dois timeouts por concorrencia.
+- Preview: 40 combinacoes de rota/largura e tres temas do cabecalho aprovados.
+  CI Linux 36650605575 passou validacao, banco, restore e E2E autenticado;
+  matriz parou em sete checks de navegacao (seis cores durante transicao e
+  um timeout de clique). Gate agora espera a cor final e guarda diagnostico
+  incremental. Nova matriz/publicacao pendentes; nenhuma baseline promovida.
+  Preview completo posterior: 40/40, tres temas e zero erros de navegador,
+  incluindo Direta/320. Fonte: test-results/identity-full-preview.json local.
+  Sem alteracao financeira.
+- CI 36653241052: navegacao 39/40; atalho global de cookies interceptava clique
+  na Direta/320. Camadas corrigidas para atalho < navegacao < painel de cookies.
+  Seis testes do gate aprovados; CUA confirmou troca de submenu e abertura/
+  fechamento de preferencias com o componente real no preview. CI final pendente.
+- CI 36655323860 aprovou 40 navegacoes, 193 auditorias de acessibilidade e 100
+  cenarios de zoom; diferencas visuais limitadas a 44 capturas dos simuladores.
+  Inspecao manual identificou largura legada de 44 px nos temas/tablet e colisao
+  de Limpar filtros na Direta/mobile. Correcoes e checks geometricos adicionados;
+  nao promover capturas anteriores com esses defeitos. Nova CI obrigatoria.
+
 ## 2026-09-29: Colunas compactas e celulas repetidas do Tabelao
 
 - Status: validacao local concluida; CI/publicacao pendentes; branch codex/tabelao-colunas-compactas.

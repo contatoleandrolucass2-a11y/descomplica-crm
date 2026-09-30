@@ -77,7 +77,7 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(archive).toContain("<InvestorCalculator />");
     expect(archive).not.toContain("<InvestorLearningManual />");
     expect(archive).toContain("Simulador Tabela Investidor");
-    expect(menu).toContain('href="/app/simulacao/tabela-investidor"');
+    expect(menu).toContain('href: "/app/simulacao/tabela-investidor"');
     expect(menu).not.toContain('href="/simulacao/tabela-investidor?ficha=3"');
     expect(calculator).toContain("const inventoryWindowSize = 60");
     expect(calculator).toContain("aria-rowcount={matchingInventory.length + 1}");
@@ -288,7 +288,8 @@ describe("Tabela Investidor do arquivo anexado", () => {
       styles,
       ".investor-page-shell .investor-direct-editable-value",
     );
-    expect(editableValueRule).toContain("border-bottom:1px solid rgba(102,228,236,.62);");
+    expect(editableValueRule).toContain("border-bottom:1px solid color-mix(");
+    expect(editableValueRule).toContain("var(--inv-color-accent, rgba(102,228,236,.62))");
     expect(
       cssRules(styles, ".investor-page-shell .investor-associative-installment-control>input").some(
         (rule) =>

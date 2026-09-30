@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
 
 const OPEN_EVENT = "descomplica:popover-open";
 
-export function useDismissiblePopover() {
+export function useDismissiblePopover(dismissBoundaryRef?: RefObject<HTMLElement | null>) {
   const instanceId = useId();
   const rootRef = useRef<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
@@ -26,10 +26,12 @@ export function useDismissiblePopover() {
     if (!open) return;
 
     const closeFromOutside = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpenState(false);
+      if (!(dismissBoundaryRef?.current ?? rootRef.current)?.contains(event.target as Node))
+        setOpenState(false);
     };
     const closeFromFocus = (event: FocusEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpenState(false);
+      if (!(dismissBoundaryRef?.current ?? rootRef.current)?.contains(event.target as Node))
+        setOpenState(false);
     };
     const closeFromKeyboard = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
@@ -51,7 +53,7 @@ export function useDismissiblePopover() {
       document.removeEventListener("keydown", closeFromKeyboard);
       window.removeEventListener(OPEN_EVENT, closeOtherPopover);
     };
-  }, [instanceId, open]);
+  }, [instanceId, open, dismissBoundaryRef]);
 
   return [rootRef, triggerRef, open, setOpen, toggle] as const;
 }
