@@ -18,12 +18,30 @@
 
 /* Associativo: o titulo principal ja identifica a pagina; evite espaco duplicado no topo. */
 .investor-page-shell.investor-associative-table-page .investor-main {
-  padding-top: 16px;
+  padding-top: 8px;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-hero {
+  align-items: start;
+  row-gap: 8px;
   padding-top: 0;
-  padding-bottom: 16px;
+  padding-bottom: 8px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-hero-title {
+  align-items: start;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-hero-guide .investor-guided-start {
+  min-height: 36px;
+  padding-block: 4px;
+  line-height: 1.2;
+}
+
+@media (pointer: coarse) {
+  .investor-page-shell.investor-associative-table-page .investor-hero-guide .investor-guided-start {
+    min-height: 44px;
+  }
 }
 
 .investor-page-shell.investor-associative-table-page .investor-hero-title h1 {
@@ -61,14 +79,6 @@
 }
 
 @media (max-width: 760px) {
-  .investor-page-shell.investor-associative-table-page .investor-main {
-    padding-top: 12px;
-  }
-
-  .investor-page-shell.investor-associative-table-page .investor-associative-hero {
-    padding-bottom: 12px;
-  }
-
   .investor-page-shell.investor-associative-table-page .investor-hero-title h1 {
     font-size: 1.475rem;
   }

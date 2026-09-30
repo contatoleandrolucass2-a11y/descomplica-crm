@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-30 - Topo do Associativo mais proximo ao menu
+
+- Atualiza onze referencias visuais revisadas do Associativo, sem alterar as demais.
+- Aproxima o titulo e o Guia completo da linha inferior do menu.
+- Reduz a altura do botao Iniciar passo a passo e os espacos do bloco.
+- Preserva cores, tamanho do titulo, acesso por toque e regras do simulador.
+
 ## 2026-09-30 - Compactacao disponivel na web
 
 - Publica os quatro ajustes do Associativo na release d9c2bee.

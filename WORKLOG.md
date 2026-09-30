@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-09-30 - Titulo e guia proximos ao menu
+
+- CI 36774530982: validacao Linux, banco, restore, E2E, 40 navegacoes e 193
+  auditorias axe aprovados. Revisa/promove onze imagens exclusivas do Associativo;
+  preserva as outras 182 e thresholds. Nova CI integrada e publicacao pendentes.
+- Associativo: aproxima titulo e Guia completo da divisoria com 8px de margem.
+- Alinha o bloco pelo topo, reduz o intervalo no celular e o botao para 36px;
+  preserva alvo de 44px em dispositivos de toque.
+- Amplia contrato de navegador para conferir distancias, altura e contencao.
+- Sem mudanca em temas, calculos, estoque ou outros simuladores.
+- Lint, tipos e build aprovados; 994 testes passaram, um skip e seis falhas de
+  permissoes POSIX no Windows. Oito testes Node aprovados. CI Linux exigida.
+- Geometria passou em dez larguras/tres temas e dois contextos de toque.
+  Guia, Escape, retorno de foco e axe do topo aprovados em desktop/celular.
+- CI visual e publicacao pendentes. Evidencia: docs/audits/topo-associativo-2026-09-30.md.
+
 ## 2026-09-30 - Compactacao publicada
 
 - PR #114 e CI main 36764731943 aprovados. Publica d9c2bee07fd6304006e28e357bf8e918a2031bf4.
