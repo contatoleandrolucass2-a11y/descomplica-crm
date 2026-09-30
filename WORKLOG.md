@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-09-30 - Referencias da nova identidade
+
+- CI 36660701681 aprovou validacao Linux, banco, advisors, restore e E2E.
+- Matriz autenticada: 40 navegacoes, 193 auditorias de acessibilidade e 100
+  cenarios de zoom aprovados; somente 44 diferencas visuais previstas no escopo.
+- Inspecao das capturas confirmou as correcoes de temas/tablet e filtros/mobile.
+  Promove 44 referencias do merge e985f6791de4dfd5681cc47429a6d5f06bc61d25;
+  preserva outras 149, hashes/proveniencia e limites de regressao.
+- Reteste local: 63 testes focados e 40/40 cenarios do preview com cookies reais.
+  Revisao independente estatica sem novos achados; nao substitui CI integrada.
+- Nova CI das referencias, merge e publicacao permanecem pendentes.
+
 ## 2026-09-29 - Identidade e navegacao dos simuladores
 
 - Unifica marca e cabecalho dos quatro simuladores, sem "Inteligencia comercial".

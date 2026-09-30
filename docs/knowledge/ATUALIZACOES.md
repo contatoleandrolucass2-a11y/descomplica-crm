@@ -4,6 +4,19 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Validacao da identidade e referencias
+
+- Status: pendente_validacao; branch codex/identidade-navegacao-temas.
+- Fonte: CI 36660701681, captura e985f6791de4dfd5681cc47429a6d5f06bc61d25,
+  docs/audits/identidade-navegacao-2026-09-29.md e authenticated-results.json.
+- Linux, banco, advisors, restore e E2E aprovados. Navegacao 40/40,
+  acessibilidade 193 e zoom 100 aprovados; somente 44 diffs visuais previstos.
+- Capturas inspecionadas apos corrigir temas/tablet e filtros/mobile;
+  44 referencias promovidas, outras 149 preservadas, sem afrouxar thresholds.
+- Reteste local: 63 testes focados e preview 40/40 com cookies reais;
+  revisao estatica independente sem novos achados. Preview usa dados sinteticos.
+- Pendente: CI integrada das referencias, merge e publicacao com imagem imutavel.
+
 ## 2026-09-29: Identidade e navegacao dos simuladores
 
 - Status: pendente_validacao; branch codex/identidade-navegacao-temas.

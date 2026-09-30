@@ -87,6 +87,26 @@ Consultadas em 2026-09-29; referencias de interacao, nao copias de marca:
 
 ## Publicacao
 
+### Referencias revisadas em 2026-09-30
+
+- CI 36660701681 do candidato 8e6cb0c: validacao Linux, banco, advisors,
+  restauracao isolada e E2E aprovados. Navegacao 40/40, 193 auditorias axe,
+  100 cenarios de zoom e todos os contratos funcionais aprovados.
+- Captura do merge e985f6791de4dfd5681cc47429a6d5f06bc61d25: somente 44
+  diferencas visuais, limitadas aos quatro simuladores. Inspecao visual dos
+  onze mosaicos confirmou espacamento dos temas/tablet, filtros/mobile e as
+  tres paletas. As 32 capturas nao afetadas pelas duas ultimas correcoes
+  mantiveram o mesmo hash da rodada anterior; as outras doze foram reinspecionadas.
+- Gate funcional canonico aprovado antes da promocao transacional de 44 imagens.
+  Outras 149 preservadas; proveniencia por imagem e SHA registrados. Limites
+  de 1% e canal 16 inalterados. Nenhuma baseline mudou durante a captura.
+- Reteste local: 63 testes focados e 40/40 combinacoes do preview com componente
+  real de cookies. Revisao independente estatica sem novos achados concretos;
+  nao equivale a validacao visual autenticada.
+- Pendente: nova CI integrada das referencias, merge e publicacao.
+
+### Rodadas anteriores
+
 - CI 36655323860, candidato f6fa77c: navegacao 40/40, 193 auditorias axe,
   100 cenarios de zoom e contratos funcionais aprovados. 44 diferencas visuais,
   exclusivamente nas quatro rotas do escopo; outras 149 dentro do limite.

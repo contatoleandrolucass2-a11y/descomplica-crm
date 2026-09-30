@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-30 - Referencias visuais da identidade
+
+- Registra 44 capturas revisadas dos quatro simuladores, nos tres temas,
+  desktop, tablet e celular; preserva as demais referencias e limites de QA.
+
 ## 2026-09-29 - Nova identidade nos simuladores
 
 - Nova marca Descomplica sem subtitulo, cabecalho compacto e navegacao com icones.
