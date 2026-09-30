@@ -43,6 +43,8 @@ tokens nao substitui axe e verificacao visual sobre o resultado renderizado.
 - Promocao pelo contrato canonico: verifica gates funcionais, proveniencia,
   hashes, checkout limpo na captura e baseline inalterada. Promove 44 imagens,
   preserva as outras 149 e os limites de 1%/16 por canal.
+- CI 36730344413 parou na formatacao do manifesto gerado. Normaliza com
+  Prettier apos a promocao, sem alterar conteudo semantico, imagens ou gates.
 
 Pendente: nova CI integrada das referencias e publicacao pelo artefato imutavel
 do SHA final, com backup, CAS e verificacao pos-publicacao.

@@ -14,6 +14,8 @@
 - Matriz: 40 navegacoes, 193 auditorias axe e 100 cenarios de zoom aprovados.
   Revisa 44 capturas afetadas e promove referencias via contrato canonico;
   preserva outras 149 e thresholds. Nova CI integrada e deploy pendentes.
+- Normaliza manifesto gerado com Prettier apos falha de formatacao na CI
+  36730344413; conteudo semantico e imagens preservados.
 
 ## 2026-09-30 - Identidade publicada e verificada
 

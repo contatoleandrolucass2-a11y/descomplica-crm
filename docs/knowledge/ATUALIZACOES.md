@@ -19,6 +19,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   Matriz: 40 navegacoes, 193 auditorias axe e 100 cenarios de zoom aprovados.
   Revisa e promove 44 referencias afetadas; preserva as demais 149 e limites.
   CI integrada das referencias e publicacao pendentes.
+- A promocao canonica pode gerar JSON fora do estilo Prettier: formatar o
+  manifesto e executar seus contratos antes do push. CI 36730344413 mostrou
+  essa diferenca de formatacao; nao alterar evidencias para corrigi-la.
 
 ## 2026-09-30: Identidade publicada na web
 
