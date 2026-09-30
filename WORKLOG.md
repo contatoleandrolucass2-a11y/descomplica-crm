@@ -8,7 +8,8 @@
 - Atualiza somente os overrides e resolucoes 1.1.18 -> 1.1.21 e 5.0.9 -> 5.0.12.
   Preserva as demais dependencias, requisitos Node/pnpm e todos os gates.
 - Instalacao frozen e supply-chain aprovadas; pnpm audit sem vulnerabilidades
-  conhecidas no reteste. Lint, tipos, testes, build e nova CI em verificacao.
+  conhecidas no reteste. Lint, tipos e build aprovados. Suite Windows: 987
+  aprovados, um skip e seis falhas POSIX preexistentes; nova CI Linux obrigatoria.
 
 ## 2026-09-30 - Referencias da nova identidade
 

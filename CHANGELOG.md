@@ -4,6 +4,7 @@
 
 - Atualiza brace-expansion nas duas linhas utilizadas por ESLint/minimatch,
   corrigindo alertas de recursao e consumo excessivo de CPU antes do deploy.
+- Mantem os gates de seguranca e verifica a compatibilidade com o build do CRM.
 
 ## 2026-09-30 - Referencias visuais da identidade
 

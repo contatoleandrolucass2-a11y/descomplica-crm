@@ -14,7 +14,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   e politica supply-chain aprovadas; audit passou sem vulnerabilidades conhecidas.
 - A CI do PR nao dispensa a CI do SHA final. Nao ignorar auditoria nem publicar
   imagem antiga quando um novo advisory aparecer. Producao permanece inalterada.
-- Pendente: concluir reteste local, CI integrada, imagem imutavel e publicacao.
+- Reteste local: lint, tipos e build aprovados; 987 testes passaram, um skip
+  e seis falhas POSIX preexistentes no Windows. Nao alterar essas assercoes.
+- Pendente: CI Linux integrada, imagem imutavel e publicacao.
 
 ## 2026-09-30: Validacao da identidade e referencias
 

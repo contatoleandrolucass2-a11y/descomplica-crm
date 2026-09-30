@@ -105,6 +105,8 @@ Consultadas em 2026-09-29; referencias de interacao, nao copias de marca:
 - Smoke local Node 24.19: expansao comum preservada nas duas versoes;
   tres entradas sinteticas limitadas por versao (aninhamento, parser e reescrita)
   sem excecao, em 259/258 ms. Nao representa benchmark de capacidade do CRM.
+- Lint, typecheck e build aprovados apos a atualizacao. Suite Windows: 987
+  aprovados, um skip e seis falhas POSIX conhecidas; nenhuma falha nova.
 
 ### Referencias revisadas em 2026-09-30
 
