@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-30 - Correcao da dependencia de desenvolvimento
+
+- Atualiza brace-expansion nas duas linhas utilizadas por ESLint/minimatch,
+  corrigindo alertas de recursao e consumo excessivo de CPU antes do deploy.
+
 ## 2026-09-30 - Referencias visuais da identidade
 
 - Registra 44 capturas revisadas dos quatro simuladores, nos tres temas,

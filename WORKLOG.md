@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-09-30 - Auditoria bloqueante antes da publicacao
+
+- PR #109 integrado em 83f1b2f apos CI 36662908716 inteiramente aprovada.
+- CI da main 36664719186 bloqueou a imagem por seis alertas de brace-expansion
+  recem-incorporados ao resultado da auditoria; nenhuma publicacao ocorreu.
+- Atualiza somente os overrides e resolucoes 1.1.18 -> 1.1.21 e 5.0.9 -> 5.0.12.
+  Preserva as demais dependencias, requisitos Node/pnpm e todos os gates.
+- Instalacao frozen e supply-chain aprovadas; pnpm audit sem vulnerabilidades
+  conhecidas no reteste. Lint, tipos, testes, build e nova CI em verificacao.
+
 ## 2026-09-30 - Referencias da nova identidade
 
 - CI 36660701681 aprovou validacao Linux, banco, advisors, restore e E2E.
