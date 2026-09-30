@@ -2491,7 +2491,7 @@ export function InvestorCalculator({
   const [inventoryMeta, setInventoryMeta] = useState<InventoryPayload | null>(null);
   const inventoryResultsRef = useRef<HTMLDivElement>(null);
   const [inventoryWindowStart, setInventoryWindowStart] = useState(0);
-  const [inventoryRowHeight, setInventoryRowHeight] = useState(directTable ? 24 : 23);
+  const [inventoryRowHeight, setInventoryRowHeight] = useState(directTable ? 24 : directVisualLayout ? 26 : 23);
   const [businessUnit, setBusinessUnit] = useState("Todas");
   const [project, setProject] = useState("Todos");
   const [plant, setPlant] = useState("Todos");
@@ -2720,16 +2720,16 @@ export function InvestorCalculator({
 
   useEffect(() => {
     if (directTable) return;
-    const media = window.matchMedia("(max-width: 1100px)");
+    const media = window.matchMedia(directVisualLayout ? "(max-width: 760px)" : "(max-width: 1100px)");
     const updateRowHeight = () => {
-      setInventoryRowHeight(media.matches ? 44 : 23);
+      setInventoryRowHeight(directVisualLayout ? (media.matches ? 48 : 26) : (media.matches ? 44 : 23));
       setInventoryWindowStart(0);
       if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
     };
     updateRowHeight();
     media.addEventListener("change", updateRowHeight);
     return () => media.removeEventListener("change", updateRowHeight);
-  }, [directTable]);
+  }, [directTable, directVisualLayout]);
 
   useEffect(() => {
     const reconciledFilters = reconcileInvestorFilters(inventory, activeFilters);

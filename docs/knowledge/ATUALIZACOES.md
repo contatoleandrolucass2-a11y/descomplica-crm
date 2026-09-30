@@ -4,6 +4,19 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Dez linhas e cabecalho compacto
+
+- Status: pendente_validacao; branch codex/compactacao-associativo.
+- Fonte: quatro capturas e pedido direto do usuario; auditoria de compactacao.
+- Dez unidades visiveis significa viewport limitado, sem truncar estoque.
+  Alinhar alturas CSS e passo virtual: 26px desktop, 48px ate 760px.
+- Dourado reservado ao hover/foco da linha selecionavel; preservar temas azuis
+  e fundo Escuro original. Temas sem caixas e com indicador textual de selecao.
+- Cabecalho compartilhado compacto; titulo reduzido apenas no Associativo.
+- Lint/tipos/build passaram; Windows com seis falhas POSIX e um timeout DevTools.
+  Reteste isolado DevTools passou. QA integrado e publicacao pendentes.
+  Sem alteracao financeira; aguardar transicoes CSS antes de conferir cores.
+
 ## 2026-09-30: Correcao azul publicada e confirmada
 
 - Status: validado; runtime b55fa6fc95eb26087c70736d618bf019818c5876.

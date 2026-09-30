@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-30 - Interface mais compacta
+
+- Associativo exibe dez unidades por vez e destaca a linha em dourado no mouse/teclado.
+- Reduz espacos verticais do cabecalho e tamanho do titulo do Associativo.
+- Seletor de temas mostra apenas texto e icones, com tema ativo sublinhado.
+- Mantem estoque completo, tres paletas atuais e regras da simulacao.
+
 ## 2026-09-30 - Temas azuis disponiveis na web
 
 - Publica a correcao na release b55fa6f e verifica Claro, Medio e Escuro no site.

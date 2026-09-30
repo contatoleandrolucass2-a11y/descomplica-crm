@@ -15,8 +15,8 @@
   flex-direction: row;
   align-items: center;
   gap: 28px;
-  min-height: 76px;
-  padding: 12px 24px;
+  min-height: 56px;
+  padding: 5px 24px;
   color: var(--header-text);
   border-bottom: 1px solid var(--header-line);
   background: var(--header-bg);
@@ -234,10 +234,10 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2px;
   margin: 0;
-  padding: 3px;
-  border: 1px solid var(--header-line);
-  border-radius: 8px;
-  background: var(--header-hover);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
 }
 
@@ -247,10 +247,10 @@
   justify-content: center;
   gap: 6px;
   min-width: 70px;
-  min-height: 38px;
+  min-height: 44px;
   padding: 6px 8px;
-  border: 1px solid transparent;
-  border-radius: 5px;
+  border: 0;
+  border-radius: 0;
   color: var(--header-muted);
   background: transparent;
   box-shadow: none;
@@ -264,13 +264,16 @@
 
 .header .themeSwitch.themeSwitch button:hover {
   color: var(--header-text);
-  background: var(--header-bg);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .header .themeSwitch.themeSwitch button[aria-pressed="true"] {
   color: var(--header-accent);
-  border-color: var(--header-line);
-  background: var(--header-selected);
-  box-shadow: 0 1px 3px #00000014;
+  background: transparent;
+  box-shadow: none;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
 
 .header .mobileTrigger {
@@ -302,8 +305,8 @@
 
 @media (max-width: 1180px) {
   .header.header {
-    min-height: 68px;
-    padding: 10px 20px;
+    min-height: 56px;
+    padding: 5px 20px;
     gap: 16px;
   }
   .header .navigation {
@@ -364,17 +367,14 @@
     border-radius: 0;
     box-shadow: none;
   }
-  .header .themeSwitch.themeSwitch button {
-    min-height: 38px;
-  }
 }
 
 @media (max-width: 600px) {
   .header.header {
     display: grid;
     grid-template-columns: 1fr 44px;
-    gap: 8px 12px;
-    padding: 8px 16px 10px;
+    gap: 0 12px;
+    padding: 4px 16px;
   }
   .header .navigation {
     display: contents;
@@ -392,7 +392,7 @@
   }
   .header .themeSwitch.themeSwitch button {
     min-width: 0;
-    min-height: 36px;
+    min-height: 44px;
     font-size: 13px;
   }
   .header .menu {

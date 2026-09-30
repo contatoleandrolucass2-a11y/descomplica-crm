@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-09-30 - Compactacao do Associativo
+
+- Dez unidades visiveis por vez, rolagem integral e hover/foco dourado.
+- Alinha altura visual e passo da virtualizacao; preserva filtros e selecao.
+- Compacta cabecalho, remove caixas dos temas e reduz titulo do Associativo.
+- Contrato de navegador adicionado; azul-marinho e regras financeiras preservados.
+- Lint/tipos/build passaram. Suite Windows: 993 passaram, um skip, seis falhas
+  POSIX e um timeout DevTools. Reteste: 24 DevTools, 13 cores/navegacao e oito
+  testes Node passaram. Matriz integrada e deploy pendentes.
+- Evidencia: docs/audits/compactacao-associativo-2026-09-30.md.
+
 ## 2026-09-30 - Temas azuis publicados
 
 - PR #112 e CI main 36734239866 aprovados. Publica a imagem imutavel da release
