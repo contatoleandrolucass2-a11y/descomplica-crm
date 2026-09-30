@@ -1,7 +1,7 @@
 # Correcao das cores dos simuladores
 
 Data: 2026-09-30. Branch: codex/temas-azul-original.
-Status: implementado e capturas revisadas; CI integrada e publicacao pendentes.
+Status: validado e publicado na release b55fa6fc95eb26087c70736d618bf019818c5876.
 
 ## Escopo
 
@@ -46,5 +46,20 @@ tokens nao substitui axe e verificacao visual sobre o resultado renderizado.
 - CI 36730344413 parou na formatacao do manifesto gerado. Normaliza com
   Prettier apos a promocao, sem alterar conteudo semantico, imagens ou gates.
 
-Pendente: nova CI integrada das referencias e publicacao pelo artefato imutavel
-do SHA final, com backup, CAS e verificacao pos-publicacao.
+## Publicacao
+
+- PR #112 integrado apos CI 36730636073 aprovada. CI main 36734239866
+  inteiramente aprovada no SHA b55fa6fc95eb26087c70736d618bf019818c5876.
+- Imagem da CI carregada sem rebuild, checksum, configuracao, manifesto e onze
+  camadas verificados. Digest local:
+  sha256:fa82d6a5b01dff6edaaca3dbdcb2e0634070d2c350a9484422f7ed77c1746f80.
+  Dois perfis de runtime aprovados no destino.
+- Backup privado, CAS da release 2c002df10fa2777165fec5b96f707ed971422e74 e
+  rollback preparado. Nginx preservado; nenhuma alteracao de banco ou contas.
+- Health local e publico confirmam a nova release. Doze GETs anonimos, quatro
+  concorrentes, zero falhas; estoque/snapshot continuam 401 e no-store.
+  Esse smoke nao e benchmark de capacidade.
+- Navegador autenticado confirma Claro #f3f6fa/#0754a6, Medio #d9e1eb/#084b92
+  e Escuro #061f35/#7dd3fc (pagina/destaque). Estoque carregado, zero erros de
+  console observados e modo Escuro restabelecido ao encerrar a verificacao.
+- Registro final apenas documental: nao reiniciar a aplicacao por este commit.

@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-09-30 - Temas azuis publicados
+
+- PR #112 e CI main 36734239866 aprovados. Publica a imagem imutavel da release
+  b55fa6fc95eb26087c70736d618bf019818c5876, sem rebuild no servidor.
+- Checksum, manifesto, configuracao, onze camadas e dois perfis comprovados.
+  Backup privado, CAS da versao anterior e rollback preservados.
+- Health confirma a versao; smoke somente leitura de doze GETs, concorrencia
+  quatro, sem falhas. Estoque anonimo negado; nao comprova capacidade.
+- Confirma os tres temas em producao e encerra no Escuro azul-marinho original.
+  Estoque carregado e nenhum erro de console observado.
+- Preferencia de cores documentada e sincronizada. Este registro nao exige deploy.
+
 ## 2026-09-30 - Azul original nos temas
 
 - Corrige a paleta a pedido do usuario: restaura o azul-marinho original do
