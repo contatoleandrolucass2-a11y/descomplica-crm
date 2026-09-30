@@ -27,3 +27,15 @@ Branch: codex/topo-associativo-compacto. Base: 610d461.
   devolve foco ao botao. Axe no topo: nenhuma violacao. Capturas inspecionadas.
 - Preview e somente apoio local; nao substitui build autenticado/CI.
 - Publicacao e nova referencia visual aguardam a CI e inspecao das capturas.
+
+## Revisao Integrada
+
+- CI 36774530982 no merge 622598a25a39a7da7f719089e4122234a65629e9: validacao
+  Linux, banco, restore e E2E aprovados. Matriz funcional aprovada: 40 navegacoes,
+  193 auditorias axe, zoom, teclado, manual e proposta. Apenas comparacao visual
+  diferiu, em onze capturas exclusivas da rota Associativo.
+- Inspecao das onze capturas confirma alinhamento, botao menor, texto legivel e
+  ausencia de novas sobreposicoes. As demais 182 imagens permanecem intactas.
+- Promocao canonica valida SHA, checkout limpo, hashes, proveniencia e gates
+  funcionais. Thresholds de 1% e 16 por canal preservados; manifesto formatado.
+- Nova CI com referencias atualizadas e publicacao permanecem pendentes.

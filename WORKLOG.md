@@ -2,6 +2,9 @@
 
 ## 2026-09-30 - Titulo e guia proximos ao menu
 
+- CI 36774530982: validacao Linux, banco, restore, E2E, 40 navegacoes e 193
+  auditorias axe aprovados. Revisa/promove onze imagens exclusivas do Associativo;
+  preserva as outras 182 e thresholds. Nova CI integrada e publicacao pendentes.
 - Associativo: aproxima titulo e Guia completo da divisoria com 8px de margem.
 - Alinha o bloco pelo topo, reduz o intervalo no celular e o botao para 36px;
   preserva alvo de 44px em dispositivos de toque.

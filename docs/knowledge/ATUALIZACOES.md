@@ -6,6 +6,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-30: Alinhamento superior do titulo e guia
 
+- CI 36774530982 aprovou testes Linux, banco, restore, E2E, navegacao e axe.
+  Onze capturas revisadas e promovidas; demais 182 preservadas. Comparador
+  continua em 1%/16 por canal. CI final e publicacao ainda pendentes.
 - Status: pendente_validacao; branch codex/topo-associativo-compacto.
 - Fonte: pedido e duas capturas do usuario; investor-archive.css e contrato
   scripts/qa/associative-compact-layout.mjs.
