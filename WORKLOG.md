@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-09-30 - Azul original nos temas
+
+- Corrige a paleta a pedido do usuario: restaura o azul-marinho original do
+  modo escuro e substitui verdes por azul nos tres temas dos simuladores.
+- Mantem geometria, navegacao e regras financeiras; tokens limitados ao shell.
+- Adiciona regressao para fundos originais, destaques azuis e contraste textual.
+- Evidencia: docs/audits/cores-azuis-2026-09-30.md. Validacao e deploy pendentes.
+
 ## 2026-09-30 - Identidade publicada e verificada
 
 - Publica 2c002df10fa2777165fec5b96f707ed971422e74 apos PRs #109/#110 e CI main

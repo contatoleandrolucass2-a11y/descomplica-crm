@@ -4,6 +4,17 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Preservar o azul-marinho; retirar verdes
+
+- Status: pendente_validacao; branch codex/temas-azul-original.
+- Fonte: correcao direta do usuario e paleta anterior no commit 96410f9.
+- Preferencia explicita: nao substituir a base azul-marinho do modo escuro.
+  Nos tres temas, destaques e estados antes verdes devem ser azuis.
+- Correcao restrita aos tokens dos quatro simuladores e cabecalho compartilhado,
+  sem novo redesign nem alteracao financeira. Erros e avisos seguem distinguiveis.
+- Testes de contrato protegem fundos originais, paleta azul e contraste.
+- Evidencia: docs/audits/cores-azuis-2026-09-30.md; testes e publicacao pendentes.
+
 ## 2026-09-30: Identidade publicada na web
 
 - Status: validado; runtime 2c002df10fa2777165fec5b96f707ed971422e74.

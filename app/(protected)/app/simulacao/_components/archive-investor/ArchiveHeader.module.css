@@ -3,9 +3,9 @@
   --header-text: #242b32;
   --header-muted: #57636d;
   --header-line: #d9e0e3;
-  --header-hover: #f0f4f3;
-  --header-accent: #087461;
-  --header-active: #e4f5ee;
+  --header-hover: #f0f4f9;
+  --header-accent: #145bb5;
+  --header-active: #e4effd;
   --header-selected: #ffffff;
   position: sticky;
   /* Above the floating privacy shortcut (85), below the consent panel (90). */
@@ -27,25 +27,25 @@
 }
 
 :global(:root[data-theme="balanced"]) .header.header {
-  --header-bg: #e8eeed;
-  --header-text: #263430;
-  --header-muted: #4c605a;
-  --header-line: #bccbc5;
-  --header-hover: #dbe4e0;
-  --header-accent: #096b59;
-  --header-active: #cce6dc;
-  --header-selected: #f9fcfa;
+  --header-bg: #e8eef6;
+  --header-text: #24364d;
+  --header-muted: #465c76;
+  --header-line: #b8c9de;
+  --header-hover: #dbe6f3;
+  --header-accent: #124f9c;
+  --header-active: #cddff7;
+  --header-selected: #f9fbff;
 }
 
 :global(:root[data-theme="dark"]) .header.header {
-  --header-bg: #181e23;
-  --header-text: #edf3f2;
-  --header-muted: #b3c2be;
-  --header-line: #3b4945;
-  --header-hover: #29352f;
-  --header-accent: #81e3bb;
-  --header-active: #203e34;
-  --header-selected: #344c42;
+  --header-bg: #071a31;
+  --header-text: #f3fbff;
+  --header-muted: #b2cad8;
+  --header-line: #31556d;
+  --header-hover: #102f4a;
+  --header-accent: #7dd3fc;
+  --header-active: #123b5c;
+  --header-selected: #194a70;
 }
 
 .header .brand {
@@ -67,7 +67,7 @@
   place-items: center;
   border-radius: 8px;
   color: #ffffff;
-  background: #087e6a;
+  background: #2563eb;
   font-size: 26px;
   font-weight: 800;
   line-height: 1;
@@ -81,7 +81,7 @@
   height: 10px;
   border: 2px solid var(--header-bg);
   border-radius: 3px;
-  background: #a7ec7d;
+  background: #7dd3fc;
 }
 
 .header .brandName {
