@@ -7,6 +7,7 @@
 - Escolha do tema salva apenas com consentimento para preferencias funcionais.
 - Validacao de temas aguarda a cor renderizada, com diagnostico incremental.
 - Menu mobile permanece clicavel quando o atalho de cookies esta visivel.
+- Corrige largura dos temas em tablets e separa Limpar filtros dos campos da Direta mobile.
 
 ## 2026-09-29 - Colunas compactas do Tabelao
 

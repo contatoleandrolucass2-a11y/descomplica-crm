@@ -87,6 +87,15 @@ Consultadas em 2026-09-29; referencias de interacao, nao copias de marca:
 
 ## Publicacao
 
+- CI 36655323860, candidato f6fa77c: navegacao 40/40, 193 auditorias axe,
+  100 cenarios de zoom e contratos funcionais aprovados. 44 diferencas visuais,
+  exclusivamente nas quatro rotas do escopo; outras 149 dentro do limite.
+  Inspecao das capturas detectou largura legada de 44 px comprimindo icones e
+  textos dos temas em tablets, e Limpar filtros colidindo com o primeiro campo
+  na Direta/mobile. Isola a regra ao cabecalho antigo e aplica o espacamento
+  mobile ja usado no Associativo. QA passa a medir conteudo dos botoes e filtros.
+  Baselines nao promovidas; nova CI e inspecao exigidas.
+
 - CI 36653241052: validacao Linux, banco, E2E e restore aprovados; navegacao
   39/40. Diagnostico e captura identificaram o atalho de cookies (camada 85)
   cobrindo Configuracoes na Direta/320. Cabecalho passa a camada 86, abaixo

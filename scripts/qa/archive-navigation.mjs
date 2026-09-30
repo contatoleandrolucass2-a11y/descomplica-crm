@@ -293,6 +293,28 @@ async function assertHeaderGeometry(page, compact) {
         document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1 &&
         document.body.scrollWidth <= document.body.clientWidth + 1,
       brandTextFits: brand.scrollWidth <= brand.clientWidth + 1,
+      themeContentFits: [...themes.querySelectorAll("button")].every((button) => {
+        const box = button.getBoundingClientRect();
+        const content = [...button.childNodes].flatMap((node) => {
+          if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            return [...range.getClientRects()];
+          }
+          return node instanceof Element ? [node.getBoundingClientRect()] : [];
+        });
+        return (
+          content.length >= 2 &&
+          content.every(
+            (rect) =>
+              rect.left >= box.left + 1 &&
+              rect.right <= box.right - 1 &&
+              rect.top >= box.top &&
+              rect.bottom <= box.bottom,
+          ) &&
+          content[0].right <= content[1].left
+        );
+      }),
       touchTrigger: !isCompact || (boxes[2].width >= 44 && boxes[2].height >= 44),
     };
   }, compact);
@@ -304,6 +326,7 @@ async function assertHeaderGeometry(page, compact) {
       themeRow: true,
       noOverflow: true,
       brandTextFits: true,
+      themeContentFits: true,
       touchTrigger: true,
     },
     "Archive header geometry failed",
@@ -481,6 +504,28 @@ export async function checkArchiveNavigation(
           }
           await page.evaluate(() => window.scrollTo(0, 0));
           await assertHeaderGeometry(page, compact);
+          if (scope === "header-and-content") {
+            const filters = page.locator(".investor-stock-filters");
+            await expect(filters).toBeVisible();
+            assert.equal(
+              await filters.evaluate((element) => {
+                const heading = element.querySelector(".investor-filter-heading");
+                const clear = heading?.querySelector("button");
+                const label = element.querySelector(":scope > label");
+                if (!heading || !clear || !label) return false;
+                const bounds = heading.getBoundingClientRect();
+                const action = clear.getBoundingClientRect();
+                const first = label.getBoundingClientRect();
+                return (
+                  action.top >= bounds.top - 1 &&
+                  action.bottom <= bounds.bottom + 1 &&
+                  bounds.bottom <= first.top + 1
+                );
+              }),
+              true,
+              "Stock filter heading and clear action must not overlap the first field",
+            );
+          }
           check.headerSurfaces = {};
           check.mainSurfaces = {};
           for (const [theme, label] of Object.entries(themeLabels)) {

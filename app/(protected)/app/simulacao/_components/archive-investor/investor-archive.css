@@ -20586,11 +20586,11 @@ body:has(.investor-page-shell) {
 }
 
 @media (min-width: 761px) and (max-width: 1100px) {
-  .investor-page-shell .theme-switch {
+  .investor-page-shell > .simulation-topbar .theme-switch {
     min-width: 146px !important;
   }
 
-  .investor-page-shell .theme-switch button {
+  .investor-page-shell > .simulation-topbar .theme-switch button {
     width: 44px !important;
     min-width: 44px !important;
     min-height: 44px !important;
@@ -21865,6 +21865,9 @@ body:has(.investor-page-shell) {
 
   .investor-page-shell.investor-associative-table-page
     .investor-stock-filters
+    .investor-filter-heading,
+  .investor-page-shell.investor-direct-table-page
+    .investor-stock-filters
     .investor-filter-heading {
     height: auto !important;
     min-height: 96px !important;
@@ -21880,11 +21883,22 @@ body:has(.investor-page-shell) {
   .investor-page-shell.investor-associative-table-page
     .investor-stock-filters
     .investor-filter-heading
+    > button,
+  .investor-page-shell.investor-direct-table-page
+    .investor-stock-filters
+    .investor-filter-title-row,
+  .investor-page-shell.investor-direct-table-page
+    .investor-stock-filters
+    .investor-filter-heading
     > button {
     top: 0;
   }
 
   .investor-page-shell.investor-associative-table-page
+    .investor-stock-filters
+    .investor-filter-heading
+    > button,
+  .investor-page-shell.investor-direct-table-page
     .investor-stock-filters
     .investor-filter-heading
     > button {

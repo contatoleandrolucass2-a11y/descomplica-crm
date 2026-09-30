@@ -12,6 +12,9 @@
   bloqueio da publicacao e baselines antigas enquanto a matriz nao passar.
 - Corrige sobreposicao do atalho de cookies no menu da Direta em 320 px;
   painel de consentimento continua acima da navegacao. Teste protege as camadas.
+- Inspecao da CI detectou regra legada de 44 px nos temas em tablets e colisao
+  entre Limpar filtros e o primeiro campo da Direta mobile. Corrige os escopos
+  e amplia QA para medir conteudo dos botoes e separacao dos filtros.
 - Validacao em andamento; merge e publicacao pendentes.
 
 ## 2026-09-29 - Colunas e repeticoes do Tabelao

@@ -31,6 +31,11 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   na Direta/320. Camadas corrigidas para atalho < navegacao < painel de cookies.
   Seis testes do gate aprovados; CUA confirmou troca de submenu e abertura/
   fechamento de preferencias com o componente real no preview. CI final pendente.
+- CI 36655323860 aprovou 40 navegacoes, 193 auditorias de acessibilidade e 100
+  cenarios de zoom; diferencas visuais limitadas a 44 capturas dos simuladores.
+  Inspecao manual identificou largura legada de 44 px nos temas/tablet e colisao
+  de Limpar filtros na Direta/mobile. Correcoes e checks geometricos adicionados;
+  nao promover capturas anteriores com esses defeitos. Nova CI obrigatoria.
 
 ## 2026-09-29: Colunas compactas e celulas repetidas do Tabelao
 
