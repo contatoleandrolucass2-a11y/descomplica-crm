@@ -87,6 +87,29 @@ Consultadas em 2026-09-29; referencias de interacao, nao copias de marca:
 
 ## Publicacao
 
+### Resultado final em 2026-09-30
+
+- Publicada a release `2c002df10fa2777165fec5b96f707ed971422e74`, apos PRs #109
+  e #110. CI main `36667629540` aprovada em todos os jobs: validate, release-gates,
+  isolated-restore e promotable-image. Nenhum gate foi reduzido.
+- Arquivo da imagem SHA-256 `df64c5c8fd17798ea8c55b562b8a742113e9f55fb6694301baab8ab5973649fc`.
+  Config da CI `sha256:e468dcfb0ba6c6312fe3f250daadbed3d25a6ac940c3ef137809924678d029c0`;
+  manifesto no destino `sha256:486b459bfe8805b36327945916be6ee2502eb26bb6b5473c03ab8f7f561cf5ce`.
+  Onze camadas equivalentes, sem rebuild, dois perfis de runtime aprovados.
+- Versao anterior `96410f928340d3a7c6ac29a54590d6df03237a37`; troca com CAS,
+  backup privado em `/var/backups/descomplica-crm/releases/2c002df10fa2777165fec5b96f707ed971422e74.zHovSi`
+  e rollback preparado. Nginx mantido e validado.
+- Health interno e publico confirmaram a nova versao. Smoke publico somente
+  leitura: doze GETs, concorrencia quatro, nenhum erro; health 200 e estoque/
+  snapshot anonimos 401, todos no-store. Latencias observadas de 174 a 880 ms;
+  amostra pequena, sem prova de capacidade ou melhoria de desempenho.
+- Navegador autenticado no Associativo publicado confirmou marca sem subtitulo,
+  Claro/Medio/Escuro, submenu Simulacao, Escape, estoque com linhas e filtros
+  habilitados. Nenhum erro de console observado. Tema original Escuro restaurado.
+- A CI cobre quatro rotas, quarenta combinacoes de navegacao, 193 auditorias axe
+  e cem cenarios de zoom. Nao foram alteradas propostas, dados ou politicas.
+- Este fechamento e documental e nao exige outra implantacao de runtime.
+
 ### Bloqueio da imagem e correcao de dependencia
 
 - CI final do PR 36662908716 passou todos os gates, incluindo matriz visual.

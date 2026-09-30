@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-09-30 - Identidade publicada e verificada
+
+- Publica 2c002df10fa2777165fec5b96f707ed971422e74 apos PRs #109/#110 e CI main
+  36667629540 inteiramente aprovada, incluindo imagem, banco, restore e navegador.
+- Imagem da CI carregada sem rebuild; checksum, configuracao, manifesto OCI e
+  onze camadas equivalentes. Dois perfis de runtime aprovados no destino.
+- Backup privado e CAS da versao 96410f9; Nginx preservado e rollback preparado.
+- Health publico confirma a release; smoke de doze GETs, quatro concorrentes,
+  sem erro. Estoque e snapshot anonimos continuam 401/no-store.
+- Navegador autenticado confirma marca sem subtitulo, tres temas, submenu/Escape,
+  estoque carregado e nenhum erro de console observado. Nao prova capacidade.
+- Este registro e documental; nao exige nova reinicializacao da aplicacao.
+
 ## 2026-09-30 - Auditoria bloqueante antes da publicacao
 
 - PR #109 integrado em 83f1b2f apos CI 36662908716 inteiramente aprovada.

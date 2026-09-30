@@ -4,6 +4,21 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Identidade publicada na web
+
+- Status: validado; runtime 2c002df10fa2777165fec5b96f707ed971422e74.
+- Fonte: PRs #109/#110, CI main 36667629540 aprovada, health publico e navegador
+  autenticado em crm.descomplicapro.com.br; auditoria de identidade versionada.
+- Imagem imutavel conferida por checksum, config, manifesto e onze camadas;
+  dois perfis de runtime aprovados. Backup privado, CAS e rollback preservados.
+- Marca sem Inteligencia comercial; Claro/Medio/Escuro, menu/Escape e estoque
+  confirmados no Associativo publicado, sem erros de console observados.
+- Smoke anonimo somente leitura: doze GETs com concorrencia quatro, health 200
+  na nova versao, inventory/snapshot 401 e no-store, zero falhas.
+- Limites: nao houve benchmark de capacidade nem mutacao de propostas/dados.
+  Navegacao nas quatro rotas, temas, acessibilidade e zoom validados na CI.
+- Atualizacoes deste registro sao documentais; nao reiniciar a aplicacao por elas.
+
 ## 2026-09-30: Auditoria pode mudar entre PR e main
 
 - Status: pendente_validacao; branch codex/correcao-auditoria-identidade.
