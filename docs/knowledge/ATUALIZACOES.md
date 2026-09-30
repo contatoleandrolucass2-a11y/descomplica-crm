@@ -4,6 +4,19 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Correcao azul publicada e confirmada
+
+- Status: validado; runtime b55fa6fc95eb26087c70736d618bf019818c5876.
+- Fonte: PR #112, CI main 36734239866 aprovada, health publico e navegador
+  autenticado; docs/audits/cores-azuis-2026-09-30.md.
+- Nos tres temas, marca, destaques e positivos sao azuis. Escuro preserva a
+  pagina #061f35 e o cabecalho #071a31. Nao redesenhar essa base sem novo pedido.
+- Imagem imutavel comprovada, dois perfis aprovados, backup/CAS/rollback
+  preservados. Nenhuma mudanca de formulas, dados, banco, contas ou n8n.
+- Navegador confirmou os tres temas e estoque carregado; zero erros de console
+  observados. Smoke de doze GETs e quatro concorrentes passou, sem prova de carga.
+- Conhecimento final documental; nao reiniciar o runtime ao integrar esse registro.
+
 ## 2026-09-30: Preservar o azul-marinho; retirar verdes
 
 - Status: pendente_validacao; branch codex/temas-azul-original.

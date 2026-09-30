@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-09-30 - Temas azuis disponiveis na web
+
+- Publica a correcao na release b55fa6f e verifica Claro, Medio e Escuro no site.
+- Confirma o fundo azul-marinho original, sem os destaques verdes anteriores.
+- Mantem layout, calculos e controles; registra testes, backup e rollback.
+
 ## 2026-09-30 - Correcao das cores dos temas
 
 - Restaura o fundo azul-marinho original do modo Escuro.
