@@ -2,6 +2,10 @@
 
 ## 2026-09-30 - Estoque Associativo e filtros compactos
 
+- CI 36797025028 aprova validacao Linux/banco/restore e concorrencia sintetica;
+  E2E ainda exigia o rotulo removido. Atualiza o contrato para o novo cabecalho.
+- Matriz local completa aprovada: 40 navegacoes/tres temas, sem erros de runtime.
+
 - Dourado persistente na selecao; icones alinhados e guia sem rotulo redundante.
 - Limpar filtros no cabecalho com metadados a esquerda; filtros sem linha vazia.
 - Compacta margens mantendo dez linhas, estoque completo e alvos de toque.

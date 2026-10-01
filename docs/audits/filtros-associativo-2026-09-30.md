@@ -24,7 +24,12 @@ Branch: `codex/associativo-filtros-compactos`.
   timeouts de fixtures Obsidian. Reexecucao isolada aprovou todos os 22 testes
   Obsidian, incluindo os dois timeouts; restam somente as seis limitacoes POSIX.
   Oito testes Node aprovados. CI Linux obrigatoria, sem ignorar os gates.
-- Matriz de navegacao integral, CI Linux e revisao visual canonica pendentes.
+- Matriz local completa: 40 navegacoes nos quatro arquivos/tres temas aprovadas,
+  sem erros de runtime. Metadados com contagem/data tambem testados em toque.
+- CI 36797025028: validacao Linux, banco e restore aprovados; concorrencia
+  sintetica com quatro usuarios e pico de 20 requisicoes sem erros. Nao prova
+  capacidade de producao. E2E parou em assercao do rotulo removido, atualizada
+  para exigir ajuda, metadados e acao no cabecalho. CI integral/visual pendentes.
 
 Contratos verificam alinhamento real, contencao, dez linhas, virtualizacao,
 dourado persistente, filtros funcionais e preservacao da proposta selecionada.

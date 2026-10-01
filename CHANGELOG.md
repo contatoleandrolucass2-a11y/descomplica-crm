@@ -2,6 +2,8 @@
 
 ## 2026-09-30 - Estoque e filtros mais compactos
 
+- Atualiza a regressao autenticada para exigir o novo cabecalho sem rotulos extras.
+
 - Restaura dourado na unidade selecionada e alinha as ajudas aos titulos.
 - Remove rotulos redundantes e aproxima o botao do guia da linha do menu.
 - Move Limpar filtros para o cabecalho e reduz os espacos vazios do estoque.

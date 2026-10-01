@@ -1209,7 +1209,18 @@ test("WF13, Tabela Direta and Tabela Investidor run only for Master while future
       page.getByRole("heading", { level: 1, name: "Simulador Tabela Associativo" }),
     ).toBeVisible();
     await expect(page.getByRole("heading", { level: 2, name: "Escolha a unidade" })).toBeVisible();
-    await expect(page.getByText("Filtros do estoque", { exact: true })).toBeVisible();
+    await expect(page.getByText("Filtros do estoque", { exact: true })).toHaveCount(0);
+    const stockHeader = page.locator(".investor-stock-panel > header");
+    await expect(
+      stockHeader.getByRole("button", { name: "Limpar filtros", exact: true }),
+    ).toBeVisible();
+    await expect(
+      stockHeader.locator(".investor-stock-title-row .investor-info-trigger"),
+    ).toBeVisible();
+    await expect(
+      stockHeader.locator(".investor-stock-header-actions .investor-stock-sync"),
+    ).toBeVisible();
+    await expect(page.locator(".investor-hero-guide-information small")).toHaveCount(0);
     const stockFilter = (label: string) =>
       page.locator(".investor-stock-filters label").filter({ hasText: label }).locator("select");
     await expect(stockFilter("Incorporadora")).toBeVisible();

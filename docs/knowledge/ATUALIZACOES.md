@@ -6,6 +6,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-30: Estoque Associativo compacto e selecao dourada
 
+- CI 36797025028: validacao Linux, banco, restore e concorrencia sintetica passam.
+  E2E exigia Filtros do estoque; contrato atualizado para ajuda/acao no cabecalho.
+  Matriz local completa passou em 40 navegacoes/tres temas. CI integral pendente.
+
 - Status: pendente_validacao; branch codex/associativo-filtros-compactos.
 - Fonte: nove capturas do usuario, InvestorCalculator.tsx, CSS com escopo
   Associativo e docs/audits/filtros-associativo-2026-09-30.md.
