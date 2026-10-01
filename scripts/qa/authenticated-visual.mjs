@@ -928,6 +928,11 @@ async function inspectRoute(
     const clearFilters = associativeStock?.querySelector(".investor-stock-header-actions > button");
     const firstFilter = stockFilters?.querySelector(":scope > label");
     const stockSync = associativeStock?.querySelector(".investor-stock-sync");
+    const associativeClosing = document.querySelector(
+      ".investor-associative-table-page .investor-page-closing",
+    );
+    const associativeDisclaimer = associativeClosing?.querySelector(".simulation-disclaimer");
+    const associativeFooter = associativeClosing?.querySelector(".investor-page-footer");
     const enabledAction = simulatorForm?.querySelector(
       'button[type="submit"][data-cta-state="enabled"]',
     );
@@ -966,6 +971,20 @@ async function inspectRoute(
         !associativeStock ||
         root.clientWidth > 760 ||
         (clearFilters?.getBoundingClientRect().height ?? 0) >= 44,
+      associativeClosingAligned:
+        window.location.pathname !== "/app/simulacao/associativo-fluxo-linear" ||
+        Boolean(
+          associativeClosing &&
+          associativeDisclaimer &&
+          associativeFooter &&
+          (root.clientWidth <= 760
+            ? associativeFooter.getBoundingClientRect().top >=
+              associativeDisclaimer.getBoundingClientRect().bottom
+            : Math.abs(
+                associativeFooter.getBoundingClientRect().top -
+                  associativeDisclaimer.getBoundingClientRect().top,
+              ) <= 1),
+        ),
       identityTruncationReady:
         !identityLabel ||
         getComputedStyle(identityLabel).display === "none" ||
@@ -1019,6 +1038,7 @@ async function inspectRoute(
     snapshot.associativeStockControlsPresent &&
     !snapshot.associativeStockCollision &&
     snapshot.associativeStockTouchTargetReady &&
+    snapshot.associativeClosingAligned &&
     snapshot.identityTruncationReady &&
     simulatorStatePassed &&
     snapshot.unavailableActionDistinct &&

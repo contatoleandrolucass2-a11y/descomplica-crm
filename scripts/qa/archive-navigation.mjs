@@ -4,6 +4,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 import sharp from "sharp";
 import {
+  checkAssociativeClosingAlignment,
   checkCompactArchiveHeader,
   checkAssociativeCompactStock,
   checkAssociativeSelectedGold,
@@ -554,6 +555,8 @@ export async function checkArchiveNavigation(
             if (scope === "header-and-content" && route === archiveNavigationRoutes[0]) {
               check.compactStock ??= {};
               check.compactStock[theme] = await checkAssociativeCompactStock(page);
+              check.associativeClosing ??= {};
+              check.associativeClosing[theme] = await checkAssociativeClosingAlignment(page);
               await checkAssociativeSelectedGold(page);
               await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
             }

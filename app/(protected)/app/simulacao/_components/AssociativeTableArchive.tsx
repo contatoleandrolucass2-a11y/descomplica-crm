@@ -25,14 +25,16 @@ export function AssociativeTableArchive() {
           <InvestorGuideLauncher compact />
         </section>
         <InvestorCalculator directTable={false} directVisualLayout />
-        <p className="simulation-disclaimer">
-          Resultado preliminar sujeito à política comercial vigente.
-        </p>
+        <div className="investor-page-closing">
+          <p className="simulation-disclaimer">
+            Resultado preliminar sujeito à política comercial vigente.
+          </p>
+          <footer className="investor-page-footer">
+            <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>
+            <small>Desenvolvido e gerenciado por Leandro Lucas</small>
+          </footer>
+        </div>
       </main>
-      <footer className="investor-page-footer">
-        <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>
-        <small>Desenvolvido e gerenciado por Leandro Lucas</small>
-      </footer>
     </div>
   );
 }
