@@ -215,3 +215,24 @@ export async function checkAssociativeSelectedGold(page) {
   );
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
 }
+
+export async function checkAssociativeClosingAlignment(page) {
+  const result = await page.locator(".investor-page-closing").evaluate((closing) => {
+    const disclaimer = closing.querySelector(".simulation-disclaimer").getBoundingClientRect();
+    const footer = closing.querySelector(".investor-page-footer").getBoundingClientRect();
+    const stacked = innerWidth <= 760;
+    return {
+      display: getComputedStyle(closing).display,
+      stacked,
+      topDelta: Math.abs(disclaimer.top - footer.top),
+      stackedWithoutOverlap: footer.top >= disclaimer.bottom,
+    };
+  });
+  assert.equal(result.display, "grid", "Associative closing content must share one grid");
+  if (result.stacked) {
+    assert.ok(result.stackedWithoutOverlap, "Mobile closing content must stack without overlap");
+  } else {
+    assert.ok(result.topDelta <= 1, "Right footer copy must align with the left disclaimer");
+  }
+  return result;
+}

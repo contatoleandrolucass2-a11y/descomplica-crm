@@ -33,4 +33,17 @@ describe("cabecalho do simulador Associativo", () => {
     expect(styles).toMatch(/\.investor-associative-hero\s*\{[\s\S]*?padding-top:\s*0;/u);
     expect(styles).toMatch(/\.investor-associative-hero\s*\{[\s\S]*?padding-bottom:\s*16px;/u);
   });
+
+  it("mantem aviso e rodape na mesma faixa responsiva", () => {
+    expect(archive).toContain('className="investor-page-closing"');
+    expect(archive).toMatch(
+      /investor-page-closing[\s\S]*simulation-disclaimer[\s\S]*investor-page-footer/u,
+    );
+    expect(styles).toMatch(
+      /\.investor-page-closing\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s*auto;[\s\S]*?align-items:\s*start;/u,
+    );
+    expect(styles).toMatch(
+      /@media\s*\(max-width:\s*760px\)[\s\S]*?\.investor-page-closing\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\);/u,
+    );
+  });
 });

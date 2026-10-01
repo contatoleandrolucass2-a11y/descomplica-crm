@@ -211,6 +211,25 @@
   align-items: start;
 }
 
+.investor-page-shell.investor-associative-table-page .investor-page-closing {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 24px;
+  margin-top: 10px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-page-closing .simulation-disclaimer,
+.investor-page-shell.investor-associative-table-page .investor-page-closing .investor-page-footer {
+  margin: 0;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-page-closing .investor-page-footer {
+  width: auto;
+  max-width: 100%;
+  padding-bottom: 16px;
+}
+
 @media (min-width: 561px) and (max-width: 1100px) {
   .investor-page-shell.investor-associative-table-page .investor-associative-flow-panel > .investor-flow-heading > .investor-proposal-help {
     grid-column: 3 !important;
@@ -220,6 +239,11 @@
 }
 
 @media (max-width: 760px) {
+  .investor-page-shell.investor-associative-table-page .investor-page-closing {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
   .investor-page-shell.investor-associative-table-page .investor-stock-panel > .investor-section-heading {
     display: grid;
     grid-template-columns: 28px minmax(0, 1fr);

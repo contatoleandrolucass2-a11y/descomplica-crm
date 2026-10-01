@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-01 - Rodape do Associativo alinhado
+
+- Sobe o texto de contato da direita para a mesma linha inicial do aviso da esquerda.
+- Preserva a leitura no celular, os tres temas e as regras da simulacao.
+
 ## 2026-10-01 - Filtros compactos disponiveis na web
 
 - Publica de72d1b: selecao dourada, guia compacto, ajudas alinhadas e Limpar

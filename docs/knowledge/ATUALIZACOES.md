@@ -4,6 +4,21 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-01: Alinhamento do fechamento do Associativo
+
+- Status: pendente_validacao; branch codex/associativo-rodape-alinhado.
+- Fonte: captura e pedido do usuario; AssociativeTableArchive.tsx,
+  investor-archive.css e docs/audits/rodape-associativo-2026-10-01.md.
+- O aviso preliminar e o contato pertencem a uma grade comum alinhada pelo topo;
+  abaixo de 760px passam para uma coluna, sem sobreposicao ou overflow horizontal.
+- Navegador local com dados sinteticos mediu 0px de diferenca no desktop e
+  empilhamento correto no celular, sem erros ou avisos no console.
+- Matriz de navegacao 40/40 aprovada nos quatro simuladores, tres temas e dez
+  larguras por rota, sem erros de runtime.
+- Lint, tipos, teste focado e build aprovados. Suite Windows: 994 aprovados,
+  um skip e sete falhas de POSIX/symlink ou timeout Chrome; CI Linux pendente.
+- Preservar textos, tres temas, estoque, simulacao e demais rotas.
+
 ## 2026-10-01: Filtros compactos publicados e conferidos
 
 - Status: validado; runtime de72d1bb37b29cae7a61ac3ebd28f745b0e0bc2c.

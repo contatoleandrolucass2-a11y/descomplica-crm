@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-01 - Rodape do Associativo alinhado
+
+- Coloca aviso preliminar e contato do suporte na mesma faixa, alinhados pelo topo.
+- Em telas estreitas, mantem os textos empilhados sem sobreposicao ou overflow.
+- Regressao estatica e matriz local 40/40 aprovadas: tres temas, dez larguras
+  por simulador e diferenca de 0px no desktop observado.
+- Lint, tipos e build aprovados; 994 testes passaram, um skip e sete falhas
+  locais de POSIX/symlink ou timeout do parser Chrome. CI Linux pendente.
+- Evidencia: docs/audits/rodape-associativo-2026-10-01.md.
+
 ## 2026-10-01 - Filtros compactos publicados
 
 - PR #118 integrado com CI 36806006230 verde; CI main 36807945046 aprovada.
