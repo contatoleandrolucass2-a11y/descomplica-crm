@@ -5,6 +5,7 @@
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
 import { ASSOCIATIVE_FIELD_GUIDE_SECTION, ASSOCIATIVE_POLICY_TOPICS, ASSOCIATIVE_PROFILE_HELP } from "./associative-learning-content";
+import { ASSOCIATIVE_FAQ_REFERENCE, ASSOCIATIVE_FAQ_SECTIONS, type AssociativeFaqSection } from "./associative-faq-content";
 import { buildDirectTableAmortizationSchedule, buildDirectTablePreKeysSchedule, buildDirectTableProposalPreset, calculateDirectTableFileFlow, DIRECT_TABLE_PROPOSAL_OPTIONS, isDirectTableProposalPresetComplete } from "@/lib/archive-investor/direct-table-file-rules.mjs";
 import { calculateInvestorFlow, distributeSignalBalance } from "@/lib/archive-investor/investor-calculator-rules.mjs";
 import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilters, reconcileInvestorFilters, sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
@@ -1812,63 +1813,20 @@ const INVESTOR_MANUAL_SECTIONS = [
   },
 ] as const;
 
-const ASSOCIATIVE_MANUAL_SECTIONS = [
+const ASSOCIATIVE_MANUAL_SECTIONS: readonly AssociativeFaqSection[] = [
+  ...ASSOCIATIVE_FAQ_SECTIONS,
   {
-    title: "Renda e orçamento familiar",
+    title: "Contexto de preenchimento nesta página",
     questions: [
       { question: "Por que a renda é importante nesta simulação?", answer: ASSOCIATIVE_PROFILE_HELP.income.description },
-      { question: "Comprometimento e máximo da renda mensal são a mesma coisa?", answer: "Não. O comprometimento usa a maior mensal corrigida sem Evolução de Obra. O máximo mensal, chamado no painel de % Máximo da renda por anual, usa o maior total de mensal corrigida + Evolução de Obra. Ambos dividem pela renda familiar e consideram separadamente cada fluxo. Anuais, documentação e despesas reais do banco/família também precisam de conferência; esses dois indicadores não são um orçamento completo." },
-    ],
-  },
-  {
-    title: "MCMV e SBPE",
-    questions: [
       { question: "Como a modalidade é selecionada?", answer: ASSOCIATIVE_PROFILE_HELP.modality.description },
-      { question: "Quais são as faixas urbanas do MCMV em 2026?", answer: "A configuração desta página utiliza Faixa 1 até R$ 3.200,00; Faixa 2 de R$ 3.200,01 a R$ 5.000,00; Faixa 3 de R$ 5.000,01 a R$ 9.600,00; Classe Média de R$ 9.600,01 a R$ 13.000,00. O teto simplificado de imóvel na triagem é R$ 600.000,00, mas não vale indistintamente para todas as faixas e localidades: confirme os limites oficiais aplicáveis. HIS-1, HIS-2 e HMP são enquadramentos municipais separados." },
-      { question: "O enquadramento confirma o crédito ou o percentual financiado?", answer: "Não. É uma triagem preliminar. A contratação, o percentual financiável e as condições dependem da instituição, do produto, da avaliação, do sistema de amortização, da localização e da análise de crédito." },
-    ],
-  },
-  {
-    title: "Como funciona o Associativo",
-    questions: [
-      { question: "O que é a modalidade Associativo?", answer: "É a aquisição com crédito imobiliário contratado com a CAIXA e um pró-soluto pago à construtora. Nesta composição, o pró-soluto é a diferença após financiamento, subsídio, FGTS, Cheque Moradia, entrada e sinais válidos. Anuais não reduzem o pró-soluto; reduzem somente a base distribuída nas mensais." },
-      { question: "Quem faz a análise de crédito?", answer: "Na modalidade Associativo, a análise de crédito é realizada diretamente pela CAIXA. O simulador compara a proposta com a classificação informada, mas não substitui a aprovação do agente financeiro." },
-    ],
-  },
-  {
-    title: "Entrada, sinais e anuais",
-    questions: [
-      { question: "Como a entrada e os sinais são validados?", answer: "A entrada é obrigatória e precisa ter ao menos R$ 150,00. Há até três sinais opcionais: cada sinal ativo precisa ter ao menos R$ 150,00, seguir a sequência e não superar o sinal anterior." },
-      { question: "Como funcionam as anuais?", answer: "Há até cinco anuais opcionais com vencimento em 15/12 e somente até o término da obra. Cada anual válida recebe a correção do cálculo local e aparece, na sua data, junto do cronograma completo de pagamentos. A correção usa valor × 1,005 × 1,005 elevado aos meses completos até o vencimento; o valor nominal de cada anual é limitado a 50% da renda mensal nesta tela." },
       { question: "Por que os campos aparecem somente quando adicionados?", answer: "Sinais e anuais começam resumidos para manter a leitura compacta. Inserir Sinal e Inserir Anual adicionam uma linha por vez. Ocultar uma anual zera seu valor; ocultar um sinal também pode zerar os sinais seguintes para preservar a sequência. Confira o aviso do botão antes de remover." },
-    ],
-  },
-  {
-    title: "Fluxos linear e decrescente",
-    questions: [
-      { question: "Como é calculada a parcela linear?", answer: "O cálculo local desta página desconta as anuais corrigidas da base das mensais e separa os períodos antes e a partir do mês de entrega. Usa PRICE a 0,5% ao mês no período pré-obra e 1,5% no pós-obra, com a correção inicial da memória; a parcela corrigida exibida é o maior pagamento calculado entre os períodos. Não é a prestação bancária nem uma confirmação de execução do WF-13 oficial." },
-      { question: "Como é calculado o fluxo decrescente?", answer: "O cálculo local distribui a base das mensais em quatro blocos sequenciais de 40%, 30%, 20% e 10%. Cada bloco considera seus períodos pré e pós-obra e exibe o maior pagamento corrigido. Confira o cronograma real de cada bloco; essa memória local não comprova equivalência com o WF-13B oficial." },
-      { question: "O que é Evolução de Obra?", answer: "Na projeção desta página, é renda familiar × 30% × andamento estimado da obra. O andamento aparece nos vencimentos, parte do percentual informado no relatório, evolui mensalmente até 100% na entrega e permanece congelado em 100% depois dela. O mês da simulação e o mês seguinte ficam sem cobrança; a cobrança começa no terceiro mês programado. É uma estimativa comercial, não o encargo bancário real: confira o contrato e a cobrança da instituição financeira." },
-    ],
-  },
-  {
-    title: "Jornada guiada e documentação",
-    questions: [
       { question: "Qual é a ordem correta de preenchimento?", answer: "Siga o destaque dourado: Financiamento, Subsídio, FGTS, Cheque Moradia, Entrada, quantidade de parcelas e Ranking. Cada resposta válida libera a etapa seguinte; use zero nos recursos que não existirem." },
       { question: "Onde consultar parcelas e remuneração?", answer: "Em Resumo financeiro, Exibir parcelas abre somente número, vencimento e valor da documentação. Depois de selecionar o Ranking, o ícone $ no canto inferior direito abre a remuneração comercial." },
     ],
   },
-  {
-    title: "Parâmetros de aprovação",
-    questions: [
-      { question: "As anuais diminuem o Pró-Soluto?", answer: "Não. O Pró-Soluto e o Saldo parcelado são calculados depois dos recursos, da Entrada e dos Sinais, sem descontar anuais. A anual reduz somente a base distribuída nas parcelas mensais; por isso pode melhorar o Comprometimento da Renda e o Máximo da renda por anual sem alterar o percentual de Pró-Soluto." },
-      { question: "O que é % Comprometimento da Renda?", answer: "O simulador consulta todas as parcelas corrigidas, sem a Evolução de Obra, escolhe a maior e divide pela renda familiar. O resultado e a data do pico são mostrados separadamente para o fluxo Linear e para o Decrescente." },
-      { question: "O que é % Máximo da renda por anual?", answer: "É o máximo da renda mensal: entre as linhas mensais, o simulador escolhe a maior soma de parcela corrigida + Evolução de Obra e divide pela renda familiar. Os picos de cada fluxo podem ocorrer depois da primeira parcela. Apesar do nome, o indicador não inclui o valor da anual, mesmo quando ela integra o total da mesma linha mensal no cronograma; confira também esse pagamento e as demais despesas no orçamento." },
-      { question: "Como a classificação é aplicada?", answer: "Diamante, Ouro, Prata, Bronze e Aço definem limites próprios de pró-soluto, comprometimento e máxima carga mensal com obra. O indicador desta última mantém o nome % Máximo da renda por anual no painel. O status comercial depende das regras da proposta e da memória comparativa selecionadas; não substitui a aprovação de crédito do banco." },
-    ],
-  },
   ASSOCIATIVE_FIELD_GUIDE_SECTION,
-] as const;
+];
 
 const ASSOCIATIVE_PROPOSAL_GUIDE_STEPS = [
   { title: "Confira os valores que vieram do estoque", description: "Leia Valor real da venda, B.A. da unidade e Folga de tabela. Esses campos já vêm preenchidos e não precisam ser digitados.", note: "Se o imóvel ou algum valor estiver errado, volte ao estoque e escolha a unidade correta antes de continuar." },
@@ -2248,13 +2206,17 @@ export function InvestorLearningManual({ directTable = false, associative = fals
     </section>}
     questions={<section className="investor-direct-learning-faq investor-associative-learning-faq" aria-labelledby="investor-associative-learning-faq-title">
       <div className="investor-direct-learning-section-heading"><span aria-hidden="true">02</span><h3 id="investor-associative-learning-faq-title">Perguntas</h3></div>
+      <p>{ASSOCIATIVE_FAQ_REFERENCE}</p>
       <div className="investor-associative-learning-faq-groups">
         {ASSOCIATIVE_MANUAL_SECTIONS.map((section, sectionIndex) => <section key={section.title} aria-labelledby={`investor-associative-learning-faq-group-${sectionIndex}`}>
           <h4 id={`investor-associative-learning-faq-group-${sectionIndex}`}>{section.title}</h4>
           <div>
             {section.questions.map((item) => <details key={item.question}>
-              <summary>{item.question}</summary>
-              <p>{item.answer}</p>
+              <summary>{item.id ? `${item.id}. ` : ""}{item.question}</summary>
+              {(typeof item.answer === "string" ? [item.answer] : item.answer).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              {item.sources?.length ? <ul className="investor-associative-learning-sources" aria-label="Fontes desta resposta">
+                {item.sources.map((source) => <li key={source.href}><a href={source.href} target="_blank" rel="noopener noreferrer">{source.label}<span aria-hidden="true">↗</span></a></li>)}
+              </ul> : null}
             </details>)}
           </div>
         </section>)}

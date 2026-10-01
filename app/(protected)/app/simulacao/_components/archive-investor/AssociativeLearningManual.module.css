@@ -173,7 +173,7 @@
   border-color: var(--analytics-line);
 }
 .panel :global(.investor-direct-learning-faq) summary {
-  min-height: 52px;
+  min-height: 44px;
   color: var(--analytics-ink);
 }
 .panel :global(.investor-direct-learning-faq) summary::after {
@@ -184,6 +184,38 @@
 }
 .panel :global(.investor-direct-learning-policy) li::before {
   background: var(--analytics-cyan-strong);
+}
+
+.dialog .panel :global(.investor-associative-learning-faq-groups) > section {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 16px 0;
+}
+
+.panel :global(.investor-associative-learning-faq) > p {
+  margin-block: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.panel :global(.investor-associative-learning-faq-groups) h4 {
+  padding-left: 10px;
+  border-left: 3px solid var(--analytics-cyan-strong);
+  font-size: 13px;
+  font-weight: 700;
+  text-wrap: wrap;
+}
+
+.dialog .panel :global(.investor-direct-learning-faq) summary {
+  padding-block: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.dialog .panel :global(.investor-direct-learning-faq) details p {
+  max-width: none;
+  margin-block: 0;
+  padding-bottom: 10px;
 }
 
 @media (max-width: 600px) {

@@ -4,6 +4,19 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-01: Layout inicial e FAQ do Associativo
+
+- Status: pendente_validacao; branch codex/associativo-layout-manual.
+- Fonte: quatro capturas e material de FAQ fornecidos pelo usuario;
+  investor-archive.css, AssociativeLearningManual.module.css e QA compacto.
+- Compactacao reduz margens e remove contorno duplicado dos filtros, sem
+  overflow:hidden global, sem truncar estoque e sem alterar altura virtual.
+- Guia usa largura intrinseca; ouro metalizado aplica-se a hover, foco e selecao.
+- Paineis usam contornos de 6/8px, sem sombras amplas ou brilho continuo do guia.
+- Anexo educacional nao e politica comercial: preservar exemplos e ressalvas,
+  verificar fontes oficiais e explicitar divergencias com o runtime vigente.
+- Previa em 1280x580 coube sem rolagem global. CI e publicacao pendentes.
+
 ## 2026-10-01: Alinhamento do fechamento do Associativo
 
 - Status: validado; runtime 5878c3bce83990496d886c3311527724beb7d9f9.

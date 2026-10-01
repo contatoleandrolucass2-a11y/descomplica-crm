@@ -97,7 +97,7 @@ export async function checkAssociativeLearningManual(
           if (key === "faq") {
             const first = panel.locator("summary").first();
             await first.click();
-            await expect(panel.locator("details[open]").first().locator("p")).toBeVisible();
+            await expect(panel.locator("details[open]").first().locator("p").first()).toBeVisible();
             const field = panel
               .locator("summary")
               .filter({ hasText: /^Composição da documentação$/ });

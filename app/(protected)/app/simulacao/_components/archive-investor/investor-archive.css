@@ -19,6 +19,7 @@
 /* Associativo: o titulo principal ja identifica a pagina; evite espaco duplicado no topo. */
 .investor-page-shell.investor-associative-table-page .investor-main {
   padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-hero {
@@ -51,8 +52,8 @@
 
 .investor-page-shell.investor-associative-table-page .investor-hero-guide .investor-proposal-help-cta {
   display: flex;
-  width: min(260px, 100%);
-  max-width: none;
+  width: max-content;
+  max-width: 100%;
   align-items: center;
   gap: 4px;
 }
@@ -71,10 +72,27 @@
 }
 
 .investor-page-shell.investor-associative-table-page .investor-hero-guide .investor-guided-start {
-  max-width: none;
+  width: max-content;
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 0 auto;
   min-height: 32px;
-  padding-block: 4px;
+  padding: 4px 12px;
   line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 6px;
+  box-shadow: none;
+  animation: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-guided-start::after {
+  display: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-guided-start {
+  border-radius: 6px;
+  box-shadow: none;
+  animation: none;
 }
 
 @media (pointer: coarse) {
@@ -93,7 +111,8 @@
 .investor-page-shell.investor-associative-table-page .investor-stock-results {
   --associative-stock-row-height: 26px;
   max-height: calc(11 * var(--associative-stock-row-height) + 3px);
-  margin-bottom: 8px;
+  margin: 0 16px 6px;
+  border-radius: 4px;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-stock-table :is(thead th, tbody tr[aria-rowindex], tbody tr[aria-rowindex] > td) {
@@ -103,9 +122,9 @@
 
 .investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within, .selected) > td {
   color: #302107 !important;
-  background: #e9bd54 !important;
+  background: linear-gradient(180deg, #fae9ac 0%, #e9bd54 44%, #d8a735 52%, #f2d47c 100%) #e9bd54 !important;
   border-color: #946b17 !important;
-  box-shadow: none;
+  box-shadow: inset 0 1px 0 #fff0bb, inset 0 -1px 0 #b48828;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within, .selected) :is(.investor-stock-product-text, .investor-stock-price, .investor-stock-unit-button) {
@@ -190,8 +209,16 @@
   height: auto !important;
   min-height: 0 !important;
   grid-template-rows: auto;
-  margin-block: 6px !important;
-  padding-block: 4px !important;
+  margin: 4px 16px !important;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-filters select {
+  border-radius: 5px;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-stock-filters > label {
@@ -211,12 +238,45 @@
   align-items: start;
 }
 
+/* Shared contours within this simulator; theme tokens keep all three palettes. */
+.investor-page-shell.investor-associative-table-page :is(.investor-stock-panel, .investor-flow-panel, .investor-standard-panel, .investor-result-panel, .investor-property-summary, .investor-associative-qualification) {
+  border-radius: 8px;
+  border-width: 1px;
+  box-shadow: none;
+  background: var(--inv-color-panel);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-panel {
+  border-top: 2px solid var(--inv-color-accent);
+}
+
+.investor-page-shell.investor-associative-table-page :is(.investor-associative-question, .investor-associative-ledger, .investor-direct-account, .investor-associative-results-stack .investor-associative-approval, .investor-associative-payment-summary) {
+  border-radius: 6px;
+  box-shadow: none;
+  background: var(--inv-color-panel);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question {
+  border-left-width: 2px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current {
+  border-left-width: 2px !important;
+  border-radius: 6px !important;
+  background: var(--inv-color-panel-muted) !important;
+  box-shadow: none !important;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current::after {
+  display: none;
+}
+
 .investor-page-shell.investor-associative-table-page .investor-page-closing {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
   gap: 24px;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-page-closing .simulation-disclaimer,
@@ -227,7 +287,12 @@
 .investor-page-shell.investor-associative-table-page .investor-page-closing .investor-page-footer {
   width: auto;
   max-width: 100%;
-  padding-bottom: 16px;
+  padding-bottom: 0;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-page-closing :is(p, small) {
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 @media (min-width: 561px) and (max-width: 1100px) {

@@ -5,6 +5,7 @@ import { expect } from "@playwright/test";
 import sharp from "sharp";
 import {
   checkAssociativeClosingAlignment,
+  checkAssociativeInitialViewport,
   checkCompactArchiveHeader,
   checkAssociativeCompactStock,
   checkAssociativeSelectedGold,
@@ -555,9 +556,19 @@ export async function checkArchiveNavigation(
             if (scope === "header-and-content" && route === archiveNavigationRoutes[0]) {
               check.compactStock ??= {};
               check.compactStock[theme] = await checkAssociativeCompactStock(page);
+              check.initialViewport ??= {};
+              check.initialViewport[theme] = await checkAssociativeInitialViewport(page);
+              if (viewport.width === 1440) {
+                try {
+                  await page.setViewportSize({ width: 1280, height: 580 });
+                  check.shortInitialViewport ??= {};
+                  check.shortInitialViewport[theme] = await checkAssociativeInitialViewport(page);
+                } finally {
+                  await page.setViewportSize(viewport);
+                }
+              }
               check.associativeClosing ??= {};
               check.associativeClosing[theme] = await checkAssociativeClosingAlignment(page);
-              await checkAssociativeSelectedGold(page);
               await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
             }
             if (viewport.width === 320 || viewport.width === 1181) {
@@ -577,6 +588,14 @@ export async function checkArchiveNavigation(
               if (compact) await trigger.click();
             }
             check.themes[theme] = true;
+          }
+          if (scope === "header-and-content" && route === archiveNavigationRoutes[0]) {
+            for (const [theme, label] of Object.entries(themeLabels)) {
+              stage = `selected-stock:${theme}`;
+              await themes.getByRole("button", { name: label, exact: true }).click();
+              await waitForArchiveHeaderTheme(page, theme);
+              await checkAssociativeSelectedGold(page);
+            }
           }
           stage = "header-surface-themes";
           assert.equal(

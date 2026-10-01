@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-01 - Layout e manual do Associativo
+
+- Escopo: altura inicial, selecao dourada metalizada, guia intrinseco,
+  contornos uniformes e FAQ completo do anexo, sem alterar motor financeiro.
+- Tela inicial observada em 1280x580 sem rolagem global ou recorte de conteudo.
+  Mobile e zoom restrito conservam rolagem para manter a leitura e os alvos.
+- Skills interface, simuladores e validacao selecionadas; implementacao do FAQ
+  delegada em escopo disjunto. Nenhuma dependencia ou servico novo instalado.
+- Validacao final, referencias autenticadas, CI e publicacao pendentes.
+
 ## 2026-10-01 - Rodape alinhado publicado
 
 - PR #120 integrado; CI final da main 36881065033 totalmente verde.

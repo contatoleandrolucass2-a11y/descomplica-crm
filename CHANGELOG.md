@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-01 - Associativo compacto e manual completo
+
+- Reduz espacos da tela inicial, contornos duplicados e sombras dos paineis.
+- Ajusta o guia a largura do texto e restaura o destaque dourado metalizado.
+- Organiza o manual por assunto com as 43 perguntas do material fornecido,
+  distinguindo referencias contratuais, exemplos e regras da pagina.
+- Preserva os tres temas, dez unidades visiveis e os calculos existentes.
+
 ## 2026-10-01 - Rodape alinhado disponivel na web
 
 - Publica a release 5878c3b com o contato da direita alinhado ao aviso da esquerda.
