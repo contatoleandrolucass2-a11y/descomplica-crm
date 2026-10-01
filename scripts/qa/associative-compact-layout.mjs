@@ -42,6 +42,9 @@ export async function checkAssociativeCompactStock(page) {
     const guide = bounds(".investor-hero-guide");
     const hint = bounds(".investor-hero-title .investor-info-mark");
     const button = bounds(".investor-hero-guide .investor-guided-start");
+    const buttonElement = document.querySelector(".investor-hero-guide .investor-guided-start");
+    const label = document.createRange();
+    label.selectNodeContents(buttonElement);
     const stacked = getComputedStyle(element).gridTemplateColumns.split(" ").length === 1;
     return {
       titleTopGap: title.top - header.bottom,
@@ -49,6 +52,7 @@ export async function checkAssociativeCompactStock(page) {
       buttonHeight: button.height,
       expectedButtonHeight: matchMedia("(pointer: coarse)").matches ? 44 : 32,
       buttonFits: button.bottom <= element.getBoundingClientRect().bottom,
+      buttonExtraWidth: button.width - label.getBoundingClientRect().width,
       hintCentered: Math.abs((hint.top + hint.bottom - title.top - title.bottom) / 2) <= 2,
       guideLabelRemoved: !element.querySelector(".investor-hero-guide-information small"),
     };
@@ -61,6 +65,7 @@ export async function checkAssociativeCompactStock(page) {
     "Guide button must be compact and touch-aware",
   );
   assert.ok(hero.buttonFits, "Guide button must remain inside the heading section");
+  assert.ok(hero.buttonExtraWidth <= 28, "Guide outline must fit the label with compact padding");
   assert.ok(hero.hintCentered, "Title help icon must be centered on the same line");
   assert.ok(hero.guideLabelRemoved, "Redundant guide label must be removed");
   const header = await page.locator(".investor-stock-panel").evaluate((panel) => {
@@ -140,7 +145,11 @@ export async function checkAssociativeCompactStock(page) {
     firstRow.evaluate((row) =>
       [...row.cells].every((cell) => {
         const css = getComputedStyle(cell);
-        return css.backgroundColor === "rgb(233, 189, 84)" && css.color === "rgb(48, 33, 7)";
+        return (
+          css.backgroundColor === "rgb(233, 189, 84)" &&
+          css.backgroundImage.includes("linear-gradient") &&
+          css.color === "rgb(48, 33, 7)"
+        );
       }),
     );
   await firstRow.hover();
@@ -174,7 +183,7 @@ export async function checkAssociativeSelectedGold(page) {
             const css = getComputedStyle(cell);
             return (
               css.backgroundColor === "rgb(233, 189, 84)" &&
-              css.backgroundImage === "none" &&
+              css.backgroundImage.includes("linear-gradient") &&
               css.color === "rgb(48, 33, 7)"
             );
           }),
@@ -233,6 +242,32 @@ export async function checkAssociativeClosingAlignment(page) {
     assert.ok(result.stackedWithoutOverlap, "Mobile closing content must stack without overlap");
   } else {
     assert.ok(result.topDelta <= 1, "Right footer copy must align with the left disclaimer");
+  }
+  return result;
+}
+
+export async function checkAssociativeInitialViewport(page) {
+  const result = await page.locator(".investor-main").evaluate((main) => {
+    const footer = main.querySelector(".investor-page-closing").getBoundingClientRect();
+    return {
+      width: innerWidth,
+      height: innerHeight,
+      initial: !main.querySelector(".investor-associative-qualification"),
+      overflow: document.documentElement.scrollHeight - innerHeight,
+      footerBottom: footer.bottom,
+      clipping: [document.documentElement, document.body, main].some((element) =>
+        ["hidden", "clip"].includes(getComputedStyle(element).overflowY),
+      ),
+    };
+  });
+  assert.ok(result.initial, "Initial viewport check must run before selecting a unit");
+  if (
+    (result.width >= 1180 && result.height >= 560) ||
+    (result.width >= 768 && result.height >= 768)
+  ) {
+    assert.ok(result.overflow <= 1, "Initial desktop must fit without whole-page scrolling");
+    assert.ok(result.footerBottom <= result.height, "Footer must remain visible, not clipped");
+    assert.ok(!result.clipping, "Fitting the page must not hide overflowing content");
   }
   return result;
 }
