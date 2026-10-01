@@ -1,8 +1,8 @@
 # Associativo: layout compacto e manual
 
 Data: 01/10/2026. Branch: `codex/associativo-layout-manual`.
-Status: validacao local e matriz funcional autenticada aprovadas;
-referencias revisadas, CI final e publicacao pendentes.
+Status: publicado e verificado em producao;
+runtime `f1d71da81a21cf139acc26b95a6cacc218b79325`.
 
 ## Escopo
 
@@ -50,6 +50,31 @@ referencias revisadas, CI final e publicacao pendentes.
 
 ## Publicacao
 
-Pendente. Exige PR, CI no SHA candidato, revisao visual das diferencas esperadas,
-imagem imutavel, checksum, prova dos perfis, backup, CAS e verificacao pos-deploy.
-Nenhuma captura de estoque real, dado de cliente ou anexo privado foi versionado.
+- PR #122 integrado. CI final do PR `36919448507` e da main `36923454213`
+  integralmente verdes, incluindo a matriz autenticada contra as referencias revisadas.
+- Release `f1d71da81a21cf139acc26b95a6cacc218b79325`;
+  anterior `5878c3bce83990496d886c3311527724beb7d9f9`.
+- Arquivo da imagem SHA-256
+  `901f2a1d5ad06782dbf623ee4c4d746be17743df8452b3f6de80eea4736dacf8`.
+- Configuracao da imagem da CI
+  `sha256:912ca908f37a158303a161fac1bab3653b9767524c7094bc2ff2d5240c01aff6`;
+  manifesto carregado
+  `sha256:33bd2f02b431ee5d49800aa78a2261e2cfa281ed51fe0593b4b690ddcac9ac54`.
+  Onze camadas equivalentes, sem rebuild; dois perfis de runtime aprovados.
+- Backup privado de configuracao e imagem anterior em
+  `/var/backups/descomplica-crm/releases/f1d71da81a21cf139acc26b95a6cacc218b79325.0KRX4M`.
+  CAS da versao anterior conferido; rollback preparado; nao foi necessario aciona-lo.
+- Health local/publico confirma a release. Nginx permaneceu identico e valido.
+  Estoque e snapshot anonimos retornam 401.
+- Smoke observacional: doze GETs, concorrencia quatro, zero erros, 141–543ms.
+  Nao executa carga no banco de producao e nao comprova capacidade multiusuario.
+- Navegador autenticado: 1280x580 nos tres temas, overflow global zero e rodape
+  termina em 537,11px. Dez linhas visiveis, botao 32px, folga horizontal total
+  25,33px, contorno externo 8px. Gradiente dourado e texto escuro conferidos.
+- Abaixo da altura desktop validada, a rolagem e preservada: 1280x529 apresentou
+  16px de overflow, sem esconder ou recortar o conteudo. Mobile/zoom seguem acessiveis.
+- Guia abre e fecha por Escape com retorno de foco ao acionador. Nenhum erro ou
+  aviso de console. Nenhuma unidade real selecionada ou proposta alterada.
+- Viewport temporario removido, tema original restaurado e pagina atualizada aberta.
+- Nenhuma captura de estoque real, dado de cliente ou anexo privado foi versionado.
+  A atualizacao deste registro e apenas documental: Git/Obsidian, sem novo restart.

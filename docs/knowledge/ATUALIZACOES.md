@@ -28,7 +28,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-01: Layout inicial e FAQ do Associativo
 
-- Status: pendente_validacao; branch codex/associativo-layout-manual.
+- Status: validado; runtime f1d71da81a21cf139acc26b95a6cacc218b79325.
+- Publicacao: PR #122, CI final do PR 36919448507 e CI main 36923454213 verdes.
+  Imagem imutavel verificada em onze camadas e dois perfis, com backup/CAS/rollback.
 - Fonte: quatro capturas e material de FAQ fornecidos pelo usuario;
   investor-archive.css, AssociativeLearningManual.module.css e QA compacto.
 - Compactacao reduz margens e remove contorno duplicado dos filtros, sem
@@ -45,7 +47,16 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   em 30 capturas. Onze diferencas exclusivas do Associativo foram revisadas
   e promovidas pela rotina canonica; demais 182 referencias preservadas.
 - Lint, tipos e build locais aprovados; seis falhas Windows de POSIX/symlink
-  nao reproduziram na CI Linux. CI final e publicacao ainda pendentes.
+  nao reproduziram na CI Linux. Publicacao e verificacao pos-deploy concluidas.
+- Health local/publico confirma a release; doze GETs anonimos sem erros, com
+  estoque e snapshot protegidos por 401. Esse smoke nao comprova capacidade.
+- UI autenticada em 1280x580: zero rolagem global nos tres temas, dez linhas,
+  guia 32px com 25,33px de folga total e card 8px. Ouro metalizado confirmado
+  por foco, sem selecionar unidade real. Guia/Escape/retorno de foco aprovados.
+- Em viewport muito baixo, preservar acesso ao conteudo: 1280x529 exigiu 16px
+  de rolagem. Nunca esconder overflow global para simular uma tela que cabe.
+- Console sem erros/avisos; nenhuma proposta alterada. Evidencia completa em
+  docs/audits/layout-manual-associativo-2026-10-01.md. Registro documental sem restart.
 
 ## 2026-10-01: Alinhamento do fechamento do Associativo
 
