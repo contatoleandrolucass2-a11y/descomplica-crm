@@ -7,6 +7,7 @@
 - Organiza o manual por assunto com as 43 perguntas do material fornecido,
   distinguindo referencias contratuais, exemplos e regras da pagina.
 - Preserva os tres temas, dez unidades visiveis e os calculos existentes.
+- Atualiza onze referencias visuais revisadas, somente do Associativo.
 
 ## 2026-10-01 - Rodape alinhado disponivel na web
 

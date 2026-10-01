@@ -1,7 +1,8 @@
 # Associativo: layout compacto e manual
 
 Data: 01/10/2026. Branch: `codex/associativo-layout-manual`.
-Status: validacao local; CI e publicacao pendentes.
+Status: validacao local e matriz funcional autenticada aprovadas;
+referencias revisadas, CI final e publicacao pendentes.
 
 ## Escopo
 
@@ -29,6 +30,23 @@ Status: validacao local; CI e publicacao pendentes.
   na aprovacao; corrigidos com cores solidas dos tokens e seletor especifico.
 - Lint, tipos, formatacao e testes financeiros/visuais sao gates separados.
   Falhas POSIX no Windows nao sao ignoradas; exigir CI Linux verde.
+
+## Matriz autenticada
+
+- PR #122; CI 36915441302, captura limpa
+  `97af50e34c8b877488fff044ea39186350561e10`, mesma arvore do candidato.
+- Linux: 82 arquivos, 1.006 testes aprovados, quatro skips condicionais;
+  oito testes Node adicionais aprovados. Lint, tipos, formatacao e build verdes.
+- Banco, advisors, restore isolado e E2E de autorizacao aprovados.
+- Matriz funcional canonica aprovada: 40 navegacoes, 193 auditorias axe,
+  zoom, teclado e manual em 30 capturas, cinco viewports e tres temas.
+- Onze diferencas esperadas em capturas do Associativo, revisadas em desktop,
+  tablet e mobile. As demais 182 referencias permanecem sem alteracao.
+- Promocao pela rotina canonica transacional, verificando hashes de candidato
+  e baseline, captura limpa e gate funcional. Limiares mantidos em 1%/16.
+- Windows local: 1.003 aprovados, um skip e seis falhas POSIX/symlink;
+  a semantica correspondente foi validada em Linux, sem ignorar testes.
+- QA local: 40/40 navegacoes e 30 capturas do manual. Build final aprovado.
 
 ## Publicacao
 

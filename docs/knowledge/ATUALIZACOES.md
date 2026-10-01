@@ -15,7 +15,15 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Paineis usam contornos de 6/8px, sem sombras amplas ou brilho continuo do guia.
 - Anexo educacional nao e politica comercial: preservar exemplos e ressalvas,
   verificar fontes oficiais e explicitar divergencias com o runtime vigente.
-- Previa em 1280x580 coube sem rolagem global. CI e publicacao pendentes.
+- Previa em 1280x580 coube sem rolagem global; CI verifica esse tamanho e os
+  tres temas antes de qualquer selecao. Nao misturar essa verificacao com o
+  estado de proposta aberta, que deve conservar rolagem normal.
+- CI 36915441302 aprova Linux (1.006 testes, quatro skips condicionais e oito
+  Node), banco, restore, E2E, 40 navegacoes, 193 axe, zoom/teclado e manual
+  em 30 capturas. Onze diferencas exclusivas do Associativo foram revisadas
+  e promovidas pela rotina canonica; demais 182 referencias preservadas.
+- Lint, tipos e build locais aprovados; seis falhas Windows de POSIX/symlink
+  nao reproduziram na CI Linux. CI final e publicacao ainda pendentes.
 
 ## 2026-10-01: Alinhamento do fechamento do Associativo
 
