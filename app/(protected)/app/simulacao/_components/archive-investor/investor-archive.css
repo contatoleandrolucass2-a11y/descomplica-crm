@@ -211,6 +211,14 @@
   align-items: start;
 }
 
+@media (min-width: 561px) and (max-width: 1100px) {
+  .investor-page-shell.investor-associative-table-page .investor-associative-flow-panel > .investor-flow-heading > .investor-proposal-help {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    width: auto !important;
+  }
+}
+
 @media (max-width: 760px) {
   .investor-page-shell.investor-associative-table-page .investor-stock-panel > .investor-section-heading {
     display: grid;

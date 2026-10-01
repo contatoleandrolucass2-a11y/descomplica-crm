@@ -13,6 +13,8 @@ Branch: `codex/associativo-filtros-compactos`.
 - Elimina a linha vazia dos filtros, reduz margens do estoque e preserva
   dez unidades visiveis com acesso ao estoque completo por rolagem.
 - Preserva outras rotas, tres paletas, regras financeiras e propostas ao limpar.
+- Corrige guia da proposta selecionada em tablet: mantem a terceira coluna
+  entre 561px e 1100px, evitando transbordar do cabecalho fixo para o bloco seguinte.
 
 ## Validacao
 

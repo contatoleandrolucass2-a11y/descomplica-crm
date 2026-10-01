@@ -6,6 +6,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-30: Estoque Associativo compacto e selecao dourada
 
+- Proposta selecionada: regra antiga movia a ajuda para segunda linha em
+  561-1100px com cabecalho fixo de 40px. Mantem a ajuda na terceira coluna;
+  QA exige botao contido e sem colidir com titulo/conteudo seguinte.
+
 - CI 36798139339 aprova E2E; falha visual em 768px mostrou o guia em duas linhas.
   Largura em vw encolhia o texto junto da ajuda. Usa 260px limitado ao conteiner;
   conferir fontes reais, nao apenas fallback Arial, antes de homologar geometria.

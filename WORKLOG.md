@@ -2,6 +2,9 @@
 
 ## 2026-09-30 - Estoque Associativo e filtros compactos
 
+- Corrige o guia da proposta entre 561px e 1100px: permanece na linha do
+  cabecalho, sem transbordar sobre o bloqueio. QA passa a exigir contencao.
+
 - CI 36798139339 aprova E2E, mas identifica quebra do botao em 768px com Geist.
   Corrige largura estavel de 260px limitada ao conteiner; nao relaxa altura/testes.
 

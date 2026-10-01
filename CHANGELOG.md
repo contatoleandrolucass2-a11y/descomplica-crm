@@ -2,6 +2,8 @@
 
 ## 2026-09-30 - Estoque e filtros mais compactos
 
+- Evita sobreposicao do guia da proposta ao abrir uma unidade no tablet.
+
 - Mantem o texto do guia em uma linha tambem no tablet com a fonte real.
 
 - Atualiza a regressao autenticada para exigir o novo cabecalho sem rotulos extras.

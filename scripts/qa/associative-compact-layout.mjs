@@ -195,5 +195,23 @@ export async function checkAssociativeSelectedGold(page) {
   await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", count);
   await expect(first).toHaveAttribute("aria-selected", "true");
   await expect(page.locator(".investor-associative-qualification")).toBeVisible();
+  const proposalGuideFits = await page
+    .locator(".investor-associative-flow-panel > header")
+    .evaluate((header) => {
+      const bounds = header.getBoundingClientRect();
+      const guide = header.querySelector(".investor-guided-start").getBoundingClientRect();
+      const title = header.querySelector("h2").getBoundingClientRect();
+      return (
+        guide.top >= bounds.top &&
+        guide.bottom <= bounds.bottom &&
+        guide.left >= bounds.left &&
+        guide.right <= bounds.right &&
+        (guide.left >= title.right || guide.top >= title.bottom)
+      );
+    });
+  assert.ok(
+    proposalGuideFits,
+    "Proposal guide must fit its header without overlapping title or following content",
+  );
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
 }
