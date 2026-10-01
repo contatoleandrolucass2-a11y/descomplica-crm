@@ -538,7 +538,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "desktop-1440x900",
@@ -1158,7 +1159,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "notebook-1280x720",
@@ -1778,7 +1780,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "tablet-1024x768",
@@ -2398,7 +2401,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "tablet-768x1024",
@@ -3018,7 +3022,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "mobile-390x844",
@@ -3638,7 +3643,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "mobile-375x812",
@@ -4258,7 +4264,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "mobile-320x568",
@@ -4895,7 +4902,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "matrix": "desktop-themes",
@@ -5535,7 +5543,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "matrix": "desktop-themes",
@@ -6175,7 +6184,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "matrix": "desktop-themes",
@@ -6815,7 +6825,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "matrix": "mobile-dark",
@@ -7112,7 +7123,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7211,7 +7223,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7310,7 +7323,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7409,7 +7423,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7589,7 +7604,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7769,7 +7785,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7949,7 +7966,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -8129,7 +8147,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -8309,7 +8328,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -8489,7 +8509,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -8669,7 +8690,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -17638,10 +17660,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
+          "tracked": true,
+          "bytes": 66754,
+          "sha256": "f23e99b050d381c520f179dc21c1ff7f4f8324addcb5d2b038a38192f62a1a14"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabelao-1440x900.webp",
+      "bytes": 66754,
+      "sha256": "f23e99b050d381c520f179dc21c1ff7f4f8324addcb5d2b038a38192f62a1a14",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 56595,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.04366898148148148,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
           "tracked": true,
@@ -17649,24 +17689,8 @@
           "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f"
         }
       },
-      "path": "target-authenticated/simulacao-tabelao-1440x900.webp",
-      "bytes": 65350,
-      "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
-          "tracked": true,
-          "bytes": 65350,
-          "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f"
-        }
-      }
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "responsive",
@@ -18045,10 +18069,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 66754,
+          "sha256": "f23e99b050d381c520f179dc21c1ff7f4f8324addcb5d2b038a38192f62a1a14"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
+      "bytes": 66754,
+      "sha256": "f23e99b050d381c520f179dc21c1ff7f4f8324addcb5d2b038a38192f62a1a14",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 56595,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.04366898148148148,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
           "tracked": true,
@@ -18056,24 +18098,8 @@
           "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f"
         }
       },
-      "path": "target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
-      "bytes": 65350,
-      "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
-          "tracked": true,
-          "bytes": 65350,
-          "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f"
-        }
-      }
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "theme",
@@ -18452,10 +18478,28 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 65910,
+          "sha256": "eddf9788b8126b2de225cc57bd623583f76a9c86ffe1be2a87408268e8a30fbb"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
+      "bytes": 65910,
+      "sha256": "eddf9788b8126b2de225cc57bd623583f76a9c86ffe1be2a87408268e8a30fbb",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 54592,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.042123456790123456,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
           "tracked": true,
@@ -18463,24 +18507,8 @@
           "sha256": "9784971d69a6a211f4734f3f26b9aa505f0f3ea542d1c65e4570a18b7fc4aaac"
         }
       },
-      "path": "target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
-      "bytes": 64816,
-      "sha256": "9784971d69a6a211f4734f3f26b9aa505f0f3ea542d1c65e4570a18b7fc4aaac",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
-          "tracked": true,
-          "bytes": 64816,
-          "sha256": "9784971d69a6a211f4734f3f26b9aa505f0f3ea542d1c65e4570a18b7fc4aaac"
-        }
-      }
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "theme",
@@ -18859,10 +18887,28 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
+          "tracked": true,
+          "bytes": 67494,
+          "sha256": "b229dbce234c7982dfe08e96ad621180f405782d5e112b44c6ce59a42f8c0a6a"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
+      "bytes": 67494,
+      "sha256": "b229dbce234c7982dfe08e96ad621180f405782d5e112b44c6ce59a42f8c0a6a",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 57688,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.04451234567901235,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
           "tracked": true,
@@ -18870,24 +18916,8 @@
           "sha256": "8870de73be6e09434b945f9240cfafdf23380b98e7ccdfdcc8ccf7131c95f72b"
         }
       },
-      "path": "target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
-      "bytes": 66150,
-      "sha256": "8870de73be6e09434b945f9240cfafdf23380b98e7ccdfdcc8ccf7131c95f72b",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
-          "tracked": true,
-          "bytes": 66150,
-          "sha256": "8870de73be6e09434b945f9240cfafdf23380b98e7ccdfdcc8ccf7131c95f72b"
-        }
-      }
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "theme",
@@ -19599,10 +19629,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 921600,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
+          "tracked": true,
+          "bytes": 63350,
+          "sha256": "d8fd863f249ac76037c6e86e4cf055a179b33dbd4417ffefcfcef7bcfe75d388"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabelao-1280x720.webp",
+      "bytes": 63350,
+      "sha256": "d8fd863f249ac76037c6e86e4cf055a179b33dbd4417ffefcfcef7bcfe75d388",
+      "width": 1280,
+      "height": 720,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 56595,
+        "totalPixels": 921600,
+        "changedPixelRatio": 0.06140950520833333,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
           "tracked": true,
@@ -19610,24 +19658,8 @@
           "sha256": "7ab566f50bbd42a10a629271da9349337b43664ad94502d18cea8f17b33ea15f"
         }
       },
-      "path": "target-authenticated/simulacao-tabelao-1280x720.webp",
-      "bytes": 62060,
-      "sha256": "7ab566f50bbd42a10a629271da9349337b43664ad94502d18cea8f17b33ea15f",
-      "width": 1280,
-      "height": 720,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 921600,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
-          "tracked": true,
-          "bytes": 62060,
-          "sha256": "7ab566f50bbd42a10a629271da9349337b43664ad94502d18cea8f17b33ea15f"
-        }
-      }
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "responsive",
@@ -20339,10 +20371,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
+          "tracked": true,
+          "bytes": 57862,
+          "sha256": "5500f7520397123040319ed998ca07cfdd3a3493fb791dac4397d8cd8135ffca"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabelao-1024x768.webp",
+      "bytes": 57862,
+      "sha256": "5500f7520397123040319ed998ca07cfdd3a3493fb791dac4397d8cd8135ffca",
+      "width": 1024,
+      "height": 768,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 82285,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0.1046307881673177,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
           "tracked": true,
@@ -20350,24 +20400,8 @@
           "sha256": "9d72eb1280aded6d12cbcb2ffea7a5a6f9d134d021704d32f9033493ab777ddf"
         }
       },
-      "path": "target-authenticated/simulacao-tabelao-1024x768.webp",
-      "bytes": 57872,
-      "sha256": "9d72eb1280aded6d12cbcb2ffea7a5a6f9d134d021704d32f9033493ab777ddf",
-      "width": 1024,
-      "height": 768,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 786432,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
-          "tracked": true,
-          "bytes": 57872,
-          "sha256": "9d72eb1280aded6d12cbcb2ffea7a5a6f9d134d021704d32f9033493ab777ddf"
-        }
-      }
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "responsive",
@@ -21079,10 +21113,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
+          "tracked": true,
+          "bytes": 58030,
+          "sha256": "2451a67dce9ecb9ec10d715bbf881641add1672ac30709f4ed7d42858432c4d3"
+        }
+      },
+      "path": "target-authenticated/simulacao-tabelao-768x1024.webp",
+      "bytes": 58030,
+      "sha256": "2451a67dce9ecb9ec10d715bbf881641add1672ac30709f4ed7d42858432c4d3",
+      "width": 768,
+      "height": 1024,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 92991,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0.11824417114257812,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
           "tracked": true,
@@ -21090,24 +21142,8 @@
           "sha256": "f97ff980a70eb48683e1f1b41b3df4d5e1f6bf396ac99e8bd1218b7b278c7701"
         }
       },
-      "path": "target-authenticated/simulacao-tabelao-768x1024.webp",
-      "bytes": 58840,
-      "sha256": "f97ff980a70eb48683e1f1b41b3df4d5e1f6bf396ac99e8bd1218b7b278c7701",
-      "width": 768,
-      "height": 1024,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
-        "totalPixels": 786432,
-        "changedPixelRatio": 0,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
-          "tracked": true,
-          "bytes": 58840,
-          "sha256": "f97ff980a70eb48683e1f1b41b3df4d5e1f6bf396ac99e8bd1218b7b278c7701"
-        }
-      }
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "responsive",
@@ -25065,20 +25101,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
         "tracked": true,
-        "bytes": 57872,
-        "sha256": "9d72eb1280aded6d12cbcb2ffea7a5a6f9d134d021704d32f9033493ab777ddf"
+        "bytes": 57862,
+        "sha256": "5500f7520397123040319ed998ca07cfdd3a3493fb791dac4397d8cd8135ffca"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
         "tracked": true,
-        "bytes": 62060,
-        "sha256": "7ab566f50bbd42a10a629271da9349337b43664ad94502d18cea8f17b33ea15f"
+        "bytes": 63350,
+        "sha256": "d8fd863f249ac76037c6e86e4cf055a179b33dbd4417ffefcfcef7bcfe75d388"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
         "tracked": true,
-        "bytes": 65350,
-        "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f"
+        "bytes": 66754,
+        "sha256": "f23e99b050d381c520f179dc21c1ff7f4f8324addcb5d2b038a38192f62a1a14"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-320x568.webp",
@@ -25101,8 +25137,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
         "tracked": true,
-        "bytes": 58840,
-        "sha256": "f97ff980a70eb48683e1f1b41b3df4d5e1f6bf396ac99e8bd1218b7b278c7701"
+        "bytes": 58030,
+        "sha256": "2451a67dce9ecb9ec10d715bbf881641add1672ac30709f4ed7d42858432c4d3"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
@@ -25407,24 +25443,24 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 64816,
-        "sha256": "9784971d69a6a211f4734f3f26b9aa505f0f3ea542d1c65e4570a18b7fc4aaac"
+        "bytes": 65910,
+        "sha256": "eddf9788b8126b2de225cc57bd623583f76a9c86ffe1be2a87408268e8a30fbb"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 66150,
-        "sha256": "8870de73be6e09434b945f9240cfafdf23380b98e7ccdfdcc8ccf7131c95f72b"
+        "bytes": 67494,
+        "sha256": "b229dbce234c7982dfe08e96ad621180f405782d5e112b44c6ce59a42f8c0a6a"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
         "tracked": true,
-        "bytes": 65350,
-        "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f"
+        "bytes": 66754,
+        "sha256": "f23e99b050d381c520f179dc21c1ff7f4f8324addcb5d2b038a38192f62a1a14"
       }
     ],
     "fileCount": 193,
-    "manifestSha256": "f6956baa37a4c4c0dff5c14dcf61115c5f0f480b072aa88df65901a5e1800c01"
+    "manifestSha256": "46c8d869bf4ed786af2808f78f7c731b755ec6ae7787e8b6b0ea114ece86a86e"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -25446,5 +25482,23 @@
     "changedPixelRatioThreshold": 0.01,
     "channelTolerance": 16
   },
-  "passed": true
+  "passed": true,
+  "baselineMerge": {
+    "method": "merge existing reviewed captures by route; no new capture",
+    "upstreamCommit": "f1d71da81a21cf139acc26b95a6cacc218b79325",
+    "upstreamCapture": "97af50e34c8b877488fff044ea39186350561e10",
+    "tabelaoCommit": "6c04eb7e598967d2712cc7cfe353cead1cfe33f1",
+    "tabelaoCapture": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+    "tabelaoRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36919972124",
+    "replacedPaths": [
+      "target-authenticated/simulacao-tabelao-1024x768.webp",
+      "target-authenticated/simulacao-tabelao-1280x720.webp",
+      "target-authenticated/simulacao-tabelao-1440x900.webp",
+      "target-authenticated/simulacao-tabelao-768x1024.webp",
+      "target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
+      "target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
+      "target-authenticated/themes/simulacao-tabelao-light-1440x900.webp"
+    ],
+    "combinedValidation": "pending fresh CI on merge commit"
+  }
 }

@@ -21792,29 +21792,47 @@ body:has(.investor-page-shell) {
 }
 
 .tabelao-page-shell .investor-stock-table {
+  --tabelao-cell-font-size: 10px;
   width: max-content;
   min-width: 0;
   table-layout: auto;
 }
 
-.investor-page-shell.tabelao-page-shell .investor-stock-table thead th {
-  height: 48px;
-  overflow: visible;
-  font-size: 6px !important;
-  line-height: 1.2;
-  text-overflow: clip;
-  white-space: nowrap;
+.investor-page-shell.tabelao-page-shell .investor-stock-table :is(th, td) {
+  font-size: var(--tabelao-cell-font-size) !important;
+  text-align: center;
   vertical-align: middle;
 }
 
-.investor-page-shell.tabelao-page-shell .investor-stock-table thead th#tabelao-business {
-  font-size: 4px !important;
+.investor-page-shell.tabelao-page-shell .investor-stock-table thead th {
+  height: auto !important;
+  padding: 6px 7px !important;
+  overflow: visible;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-overflow: clip;
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+
+.tabelao-page-shell .investor-stock-table #tabelao-project {
+  max-width: 100px;
+}
+
+.tabelao-page-shell .investor-stock-table #tabelao-address {
+  max-width: 130px;
+}
+
+.tabelao-page-shell .investor-stock-table #tabelao-description {
+  max-width: 58px;
 }
 
 .tabelao-page-shell .investor-stock-table thead th:first-child,
 .tabelao-page-shell .investor-stock-table tbody td:first-child {
   width: auto;
-  text-align: left;
+  text-align: center;
 }
 
 .tabelao-page-shell .investor-stock-table col {
@@ -21830,7 +21848,7 @@ body:has(.investor-page-shell) {
 .tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-area {
   width: auto;
   padding: 2px 7px;
-  text-align: left;
+  text-align: center;
   background: transparent;
   box-shadow: none;
 }
@@ -21846,6 +21864,10 @@ body:has(.investor-page-shell) {
   white-space: nowrap;
 }
 
+.tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-long-text {
+  padding-inline: 7px;
+}
+
 .tabelao-page-shell .investor-stock-table tbody th.tabelao-group-cell {
   position: static;
   display: table-cell;
@@ -21854,7 +21876,7 @@ body:has(.investor-page-shell) {
   color: var(--inv-text);
   background: var(--inv-color-panel, #0a2940);
   vertical-align: middle;
-  text-align: left;
+  text-align: center;
   text-transform: none;
   letter-spacing: 0;
   line-height: 1.3 !important;
@@ -21920,6 +21942,7 @@ body:has(.investor-page-shell) {
   }
 
   .tabelao-page-shell .investor-stock-table {
+    --tabelao-cell-font-size: 12px;
     display: table;
     width: max-content;
     min-width: 0;
@@ -22038,6 +22061,7 @@ body:has(.investor-page-shell) {
 .tabelao-page-shell .investor-stock-table .investor-stock-product-text,
 .tabelao-page-shell .investor-stock-table .tabelao-stock-wrapped-text {
   display: block;
+  margin-inline: auto;
   overflow: visible;
   white-space: normal;
   overflow-wrap: anywhere;
