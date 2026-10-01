@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-01 - Rodape alinhado disponivel na web
+
+- Publica a release 5878c3b com o contato da direita alinhado ao aviso da esquerda.
+- Confirma desktop e celular sem sobreposicao, preservando estoque, temas e regras.
+
 ## 2026-10-01 - Rodape do Associativo alinhado
 
 - Sobe o texto de contato da direita para a mesma linha inicial do aviso da esquerda.
