@@ -1,8 +1,10 @@
 # FAQ do Associativo: 43 perguntas
 
 Data da conferência: 01/10/2026. Branch compartilhada: `codex/associativo-layout-manual`.
-Status: conteúdo implementado; 13 testes focados e lint dos arquivos alterados aprovados.
-Gates gerais, QA visual integrado, sincronização, commit e publicação pertencem ao coordenador.
+Status: conteúdo integrado pelo PR #122 e publicado no runtime
+`f1d71da81a21cf139acc26b95a6cacc218b79325`. Os 13 testes focados, gates gerais e
+QA visual passaram. Publicação e limites registrados na
+[auditoria integrada](layout-manual-associativo-2026-10-01.md).
 
 ## Fonte e limites da conferência
 
@@ -184,3 +186,12 @@ Ambiente: Windows/PowerShell, Node 24.19.0 pelo runtime instalado, pnpm 11.20.x.
 - Não executados neste escopo: gates completos `pnpm lint`, `pnpm typecheck`,
   `pnpm test`, `pnpm build`, sync, commit, deploy ou validação n8n. O coordenador
   integra esses resultados antes de publicar.
+
+## Resultado da integração
+
+O coordenador executou os gates locais e as CIs `36919448507` e `36923454213`,
+ambas verdes. A matriz autenticada aprovou 30 capturas do manual em cinco
+viewports e três temas, teclado, foco, âncoras e axe. Os 43 itens de origem,
+cinco perguntas contextuais e 27 campos permanecem no manual publicado.
+O deploy utilizou imagem imutável, backup, CAS e conferência pública da versão.
+Não houve alteração ou execução de workflow n8n nem mudança de regra financeira.

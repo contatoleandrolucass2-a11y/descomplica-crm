@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-01 - Layout e FAQ do Associativo disponiveis na web
+
+- Publica f1d71da8: tela inicial compacta, ouro metalizado, guia ajustado ao
+  texto, contornos discretos e 43 perguntas do anexo organizadas por assunto.
+- Confirma a pagina online nos tres temas, preservando o estoque e os calculos.
+
 ## 2026-10-01 - Associativo compacto e manual completo
 
 - Reduz espacos da tela inicial, contornos duplicados e sombras dos paineis.

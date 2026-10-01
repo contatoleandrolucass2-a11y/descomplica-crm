@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-01 - Layout e manual do Associativo publicados
+
+- PR #122 integrado; CI final do PR 36919448507 e da main 36923454213 verdes.
+- Publica f1d71da81a21cf139acc26b95a6cacc218b79325 pela imagem imutavel da CI,
+  com onze camadas, dois perfis, checksum, backup, CAS e rollback preparados.
+- Health local/publico e Nginx aprovados; doze GETs anonimos, concorrencia quatro,
+  sem erros, com estoque e snapshot negados por 401. Nao e prova de capacidade.
+- UI autenticada em 1280x580: overflow global zero nos tres temas, dez linhas,
+  guia 32px e largura intrinseca, contorno 8px e foco dourado metalizado.
+- Guia abre/fecha por Escape e devolve foco; zero erros/avisos de console.
+  Nenhuma unidade real foi selecionada; nenhuma proposta foi criada ou alterada.
+- Em janelas muito baixas, mobile e zoom restrito, a rolagem continua acessivel.
+  Na observacao 1280x529 houve 16px de rolagem, sem recortar o rodape.
+- Registro final publicado no Git e sincronizado com Obsidian, sem novo deploy
+  por esta atualizacao exclusivamente documental.
+
 ## 2026-10-01 - Layout e manual do Associativo
 
 - Escopo: altura inicial, selecao dourada metalizada, guia intrinseco,
