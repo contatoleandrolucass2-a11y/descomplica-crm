@@ -60,7 +60,12 @@ migrations ou workflows n8n.
   byte a byte. Sem mudar thresholds, fixtures, assercoes ou gates para passar.
 - Manifesto promovido: eab74fdeb3c3ec59fe363044ea4af12c3321b38eee55982238db6b21d818e92f.
 
-CI final e publicacao pendentes.
+CI final 36919972124 aprovada no head 6c04eb7e598967d2712cc7cfe353cead1cfe33f1.
+A main avancou para f1d71da (PR #122) antes do merge. Integracao preserva codigo,
+manual e onze capturas do Associativo. Catalogo parte da main e incorpora somente
+as sete capturas revisadas do Tabelao, com proveniencia e hashes por fonte.
+Nao houve nova captura nessa conciliacao; nova CI conjunta obrigatoria.
+Publicacao pendente.
 Publicar pelo PR/CI com imagem imutavel, backup, CAS e verificacao posterior,
 conforme docs/runbooks/automatic-publication.md. Evidencias finais no PR com
 SHA, CI, identidade da imagem, backup, saude, limites e sincronizacao.

@@ -16,7 +16,26 @@
   passou com 140 rotas, 80 temas, 193 axe e 100 verificacoes de zoom.
 - Sete capturas alteradas somente do Tabelao revisadas e promovidas pela rotina
   canonica; 186 referencias preservadas byte a byte, sem alterar limiares.
-- CI final e publicacao pendentes; fechamento e identidade da release no PR #123.
+- CI final 36919972124 aprovada antes da integracao da main f1d71da (PR #122).
+- Preserva o Associativo e suas onze capturas; concilia apenas metadados de
+  referencia por rota, mantendo proveniencia. Nova CI conjunta obrigatoria.
+- Publicacao pendente; fechamento e identidade da release no PR #123.
+
+## 2026-10-01 - Layout e manual do Associativo
+
+- Escopo: altura inicial, selecao dourada metalizada, guia intrinseco,
+  contornos uniformes e FAQ completo do anexo, sem alterar motor financeiro.
+- Tela inicial observada em 1280x580 sem rolagem global ou recorte de conteudo.
+  Mobile e zoom restrito conservam rolagem para manter a leitura e os alvos.
+- Skills interface, simuladores e validacao selecionadas; implementacao do FAQ
+  delegada em escopo disjunto. Nenhuma dependencia ou servico novo instalado.
+- Lint, tipos, formatacao e build locais aprovados; Windows: 1.003 testes
+  aprovados, um skip e seis falhas de semantica POSIX/symlink. CI Linux
+  36915441302: 1.006 aprovados, quatro skips condicionais e oito testes Node.
+- CI aprova banco, restore, E2E e matriz funcional: 40 navegacoes, 193 axe,
+  zoom/teclado e 30 capturas do manual. Onze diferencas visuais exclusivas do
+  Associativo revisadas e promovidas; demais 182 referencias preservadas.
+- CI final e publicacao pendentes; thresholds visuais nao foram relaxados.
 
 ## 2026-10-01 - Rodape alinhado publicado
 

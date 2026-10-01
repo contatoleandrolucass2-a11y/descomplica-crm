@@ -22,7 +22,30 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   CI 36916047513 aprovou Linux, banco, restore, E2E e toda a matriz funcional.
 - Sete capturas revisadas com fontes reais e tres temas, apenas do Tabelao;
   promocao canonica preservou as outras 186 referencias e os limiares 1%/16.
-  CI final/publicacao pendentes; resultado da release sera registrado no PR #123.
+  CI final 36919972124 aprovada; main f1d71da integrada posteriormente sem
+  sobrescrever o Associativo. Catalogo conciliado por rota com proveniencia;
+  capturas preservadas. Nova CI conjunta/publicacao pendentes, fechamento no PR #123.
+
+## 2026-10-01: Layout inicial e FAQ do Associativo
+
+- Status: pendente_validacao; branch codex/associativo-layout-manual.
+- Fonte: quatro capturas e material de FAQ fornecidos pelo usuario;
+  investor-archive.css, AssociativeLearningManual.module.css e QA compacto.
+- Compactacao reduz margens e remove contorno duplicado dos filtros, sem
+  overflow:hidden global, sem truncar estoque e sem alterar altura virtual.
+- Guia usa largura intrinseca; ouro metalizado aplica-se a hover, foco e selecao.
+- Paineis usam contornos de 6/8px, sem sombras amplas ou brilho continuo do guia.
+- Anexo educacional nao e politica comercial: preservar exemplos e ressalvas,
+  verificar fontes oficiais e explicitar divergencias com o runtime vigente.
+- Previa em 1280x580 coube sem rolagem global; CI verifica esse tamanho e os
+  tres temas antes de qualquer selecao. Nao misturar essa verificacao com o
+  estado de proposta aberta, que deve conservar rolagem normal.
+- CI 36915441302 aprova Linux (1.006 testes, quatro skips condicionais e oito
+  Node), banco, restore, E2E, 40 navegacoes, 193 axe, zoom/teclado e manual
+  em 30 capturas. Onze diferencas exclusivas do Associativo foram revisadas
+  e promovidas pela rotina canonica; demais 182 referencias preservadas.
+- Lint, tipos e build locais aprovados; seis falhas Windows de POSIX/symlink
+  nao reproduziram na CI Linux. CI final e publicacao ainda pendentes.
 
 ## 2026-10-01: Alinhamento do fechamento do Associativo
 

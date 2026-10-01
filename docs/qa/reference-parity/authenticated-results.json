@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "capturedAt": "2026-10-01T20:06:49.303Z",
-  "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+  "capturedAt": "2026-10-01T20:03:32.131Z",
+  "captureCommit": "97af50e34c8b877488fff044ea39186350561e10",
   "worktreeDirtyAtCapture": false,
   "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
   "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
@@ -35,7 +35,7 @@
   "artifacts": {
     "baselineScreenshots": "docs/qa/reference-parity/target-authenticated",
     "baselineResult": "docs/qa/reference-parity/authenticated-results.json",
-    "candidateDiagnostics": "test-results/tabelao-headers-36916047513"
+    "candidateDiagnostics": "test-results/authenticated-visual"
   },
   "viewports": [
     {
@@ -538,7 +538,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "desktop-1440x900",
@@ -1158,7 +1159,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "notebook-1280x720",
@@ -1778,7 +1780,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "tablet-1024x768",
@@ -2398,7 +2401,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "tablet-768x1024",
@@ -3018,7 +3022,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "mobile-390x844",
@@ -3638,7 +3643,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "mobile-375x812",
@@ -4258,7 +4264,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "viewport": "mobile-320x568",
@@ -4895,7 +4902,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "matrix": "desktop-themes",
@@ -5535,7 +5543,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "matrix": "desktop-themes",
@@ -6175,7 +6184,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "matrix": "desktop-themes",
@@ -6815,7 +6825,8 @@
       "unavailableActionDistinct": true,
       "consoleErrorCount": 0,
       "pageErrorCount": 0,
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "matrix": "mobile-dark",
@@ -7112,7 +7123,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7211,7 +7223,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7310,7 +7323,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7409,7 +7423,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7589,7 +7604,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7769,7 +7785,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -7949,7 +7966,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -8129,7 +8147,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -8309,7 +8328,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -8489,7 +8509,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -8669,7 +8690,8 @@
       "violations": [],
       "acceptedViolations": [],
       "blockingViolations": [],
-      "passed": true
+      "passed": true,
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce"
     },
     {
       "route": "/app/simulacao/tabela-direta",
@@ -8877,7 +8899,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [213, 222, 233],
+            "rgb": [214, 222, 233],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -8885,7 +8907,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [6, 32, 55],
+            "rgb": [6, 31, 54],
             "shellBackground": "rgb(6, 31, 53)"
           }
         },
@@ -8928,6 +8950,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -8936,7 +8959,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -8957,6 +8980,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -8965,7 +8989,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -8986,6 +9010,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -8994,30 +9019,56 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
           }
         },
+        "initialViewport": {
+          "light": {
+            "width": 320,
+            "height": 568,
+            "initial": true,
+            "overflow": 798,
+            "footerBottom": 1358.03125,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 320,
+            "height": 568,
+            "initial": true,
+            "overflow": 798,
+            "footerBottom": 1358.03125,
+            "clipping": false
+          },
+          "dark": {
+            "width": 320,
+            "height": 568,
+            "initial": true,
+            "overflow": 798,
+            "footerBottom": 1358.03125,
+            "clipping": false
+          }
+        },
         "associativeClosing": {
           "light": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 40.78125,
+            "topDelta": 39.59375,
             "stackedWithoutOverlap": true
           },
           "balanced": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 40.78125,
+            "topDelta": 39.59375,
             "stackedWithoutOverlap": true
           },
           "dark": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 40.78125,
+            "topDelta": 39.59375,
             "stackedWithoutOverlap": true
           }
         },
@@ -9077,7 +9128,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [213, 222, 233],
+            "rgb": [214, 221, 231],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -9085,7 +9136,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [6, 32, 55],
+            "rgb": [5, 31, 52],
             "shellBackground": "rgb(6, 31, 53)"
           }
         },
@@ -9128,6 +9179,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9136,7 +9188,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9157,6 +9209,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9165,7 +9218,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9186,6 +9239,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9194,30 +9248,56 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
           }
         },
+        "initialViewport": {
+          "light": {
+            "width": 375,
+            "height": 812,
+            "initial": true,
+            "overflow": 537,
+            "footerBottom": 1341.234375,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 375,
+            "height": 812,
+            "initial": true,
+            "overflow": 537,
+            "footerBottom": 1341.234375,
+            "clipping": false
+          },
+          "dark": {
+            "width": 375,
+            "height": 812,
+            "initial": true,
+            "overflow": 537,
+            "footerBottom": 1341.234375,
+            "clipping": false
+          }
+        },
         "associativeClosing": {
           "light": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 40.78125,
+            "topDelta": 39.59375,
             "stackedWithoutOverlap": true
           },
           "balanced": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 40.78125,
+            "topDelta": 39.59375,
             "stackedWithoutOverlap": true
           },
           "dark": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 40.78125,
+            "topDelta": 39.59375,
             "stackedWithoutOverlap": true
           }
         },
@@ -9277,7 +9357,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [213, 222, 232],
+            "rgb": [214, 222, 232],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -9285,7 +9365,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [6, 32, 55],
+            "rgb": [5, 31, 53],
             "shellBackground": "rgb(6, 31, 53)"
           }
         },
@@ -9328,6 +9408,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9336,7 +9417,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9357,6 +9438,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9365,7 +9447,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9386,6 +9468,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9394,30 +9477,56 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
           }
         },
+        "initialViewport": {
+          "light": {
+            "width": 390,
+            "height": 844,
+            "initial": true,
+            "overflow": 488,
+            "footerBottom": 1324.4375,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 390,
+            "height": 844,
+            "initial": true,
+            "overflow": 488,
+            "footerBottom": 1324.4375,
+            "clipping": false
+          },
+          "dark": {
+            "width": 390,
+            "height": 844,
+            "initial": true,
+            "overflow": 488,
+            "footerBottom": 1324.4375,
+            "clipping": false
+          }
+        },
         "associativeClosing": {
           "light": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 23.390625,
+            "topDelta": 22.796875,
             "stackedWithoutOverlap": true
           },
           "balanced": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 23.390625,
+            "topDelta": 22.796875,
             "stackedWithoutOverlap": true
           },
           "dark": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 23.390625,
+            "topDelta": 22.796875,
             "stackedWithoutOverlap": true
           }
         },
@@ -9477,7 +9586,7 @@
               "x": 14,
               "y": 99
             },
-            "rgb": [214, 222, 233],
+            "rgb": [214, 222, 232],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -9485,7 +9594,7 @@
               "x": 14,
               "y": 99
             },
-            "rgb": [6, 31, 54],
+            "rgb": [5, 30, 52],
             "shellBackground": "rgb(6, 31, 53)"
           }
         },
@@ -9528,6 +9637,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9536,7 +9646,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9557,6 +9667,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9565,7 +9676,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9586,6 +9697,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9594,30 +9706,56 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
           }
         },
+        "initialViewport": {
+          "light": {
+            "width": 600,
+            "height": 800,
+            "initial": true,
+            "overflow": 288,
+            "footerBottom": 1079.515625,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 600,
+            "height": 800,
+            "initial": true,
+            "overflow": 288,
+            "footerBottom": 1079.515625,
+            "clipping": false
+          },
+          "dark": {
+            "width": 600,
+            "height": 800,
+            "initial": true,
+            "overflow": 288,
+            "footerBottom": 1079.515625,
+            "clipping": false
+          }
+        },
         "associativeClosing": {
           "light": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 23.390625,
+            "topDelta": 22.796875,
             "stackedWithoutOverlap": true
           },
           "balanced": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 23.390625,
+            "topDelta": 22.796875,
             "stackedWithoutOverlap": true
           },
           "dark": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 23.390625,
+            "topDelta": 22.796875,
             "stackedWithoutOverlap": true
           }
         },
@@ -9677,7 +9815,7 @@
               "x": 14,
               "y": 58
             },
-            "rgb": [213, 222, 232],
+            "rgb": [214, 222, 232],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -9685,7 +9823,7 @@
               "x": 14,
               "y": 58
             },
-            "rgb": [5, 31, 53],
+            "rgb": [5, 30, 52],
             "shellBackground": "rgb(6, 31, 53)"
           }
         },
@@ -9728,6 +9866,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9736,7 +9875,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9757,6 +9896,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9765,7 +9905,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9786,6 +9926,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9794,30 +9935,56 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
           }
         },
+        "initialViewport": {
+          "light": {
+            "width": 601,
+            "height": 800,
+            "initial": true,
+            "overflow": 247,
+            "footerBottom": 1038.515625,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 601,
+            "height": 800,
+            "initial": true,
+            "overflow": 247,
+            "footerBottom": 1038.515625,
+            "clipping": false
+          },
+          "dark": {
+            "width": 601,
+            "height": 800,
+            "initial": true,
+            "overflow": 247,
+            "footerBottom": 1038.515625,
+            "clipping": false
+          }
+        },
         "associativeClosing": {
           "light": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 23.390625,
+            "topDelta": 22.796875,
             "stackedWithoutOverlap": true
           },
           "balanced": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 23.390625,
+            "topDelta": 22.796875,
             "stackedWithoutOverlap": true
           },
           "dark": {
             "display": "grid",
             "stacked": true,
-            "topDelta": 23.390625,
+            "topDelta": 22.796875,
             "stackedWithoutOverlap": true
           }
         },
@@ -9928,6 +10095,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9936,7 +10104,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9957,6 +10125,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9965,7 +10134,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -9986,6 +10155,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -9994,11 +10164,37 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
+          }
+        },
+        "initialViewport": {
+          "light": {
+            "width": 768,
+            "height": 1024,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 625.78125,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 768,
+            "height": 1024,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 625.78125,
+            "clipping": false
+          },
+          "dark": {
+            "width": 768,
+            "height": 1024,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 625.78125,
+            "clipping": false
           }
         },
         "associativeClosing": {
@@ -10128,6 +10324,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10136,7 +10333,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -10157,6 +10354,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10165,7 +10363,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -10186,6 +10384,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10194,11 +10393,37 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
+          }
+        },
+        "initialViewport": {
+          "light": {
+            "width": 1024,
+            "height": 768,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 625.78125,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 1024,
+            "height": 768,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 625.78125,
+            "clipping": false
+          },
+          "dark": {
+            "width": 1024,
+            "height": 768,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 625.78125,
+            "clipping": false
           }
         },
         "associativeClosing": {
@@ -10328,6 +10553,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10336,7 +10562,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -10357,6 +10583,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10365,7 +10592,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -10386,6 +10613,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10394,11 +10622,37 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
+          }
+        },
+        "initialViewport": {
+          "light": {
+            "width": 1180,
+            "height": 800,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 1180,
+            "height": 800,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
+          },
+          "dark": {
+            "width": 1180,
+            "height": 800,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
           }
         },
         "associativeClosing": {
@@ -10528,6 +10782,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10536,7 +10791,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -10557,6 +10812,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10565,7 +10821,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -10586,6 +10842,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10594,11 +10851,37 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
+          }
+        },
+        "initialViewport": {
+          "light": {
+            "width": 1181,
+            "height": 800,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 1181,
+            "height": 800,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
+          },
+          "dark": {
+            "width": 1181,
+            "height": 800,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
           }
         },
         "associativeClosing": {
@@ -10728,6 +11011,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10736,7 +11020,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -10757,6 +11041,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10765,7 +11050,7 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
@@ -10786,6 +11071,7 @@
               "buttonHeight": 32,
               "expectedButtonHeight": 32,
               "buttonFits": true,
+              "buttonExtraWidth": 26,
               "hintCentered": true,
               "guideLabelRemoved": true
             },
@@ -10794,11 +11080,63 @@
               "metadataLeftOfClear": true,
               "clearInsideHeader": true,
               "filterHeadingRemoved": true,
-              "filterGap": 11,
+              "filterGap": 4,
               "noEmptyFilterRow": true
             },
             "allInventoryReachable": true,
             "goldHoverAndFocus": true
+          }
+        },
+        "initialViewport": {
+          "light": {
+            "width": 1440,
+            "height": 900,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 1440,
+            "height": 900,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
+          },
+          "dark": {
+            "width": 1440,
+            "height": 900,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
+          }
+        },
+        "shortInitialViewport": {
+          "light": {
+            "width": 1280,
+            "height": 580,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
+          },
+          "balanced": {
+            "width": 1280,
+            "height": 580,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
+          },
+          "dark": {
+            "width": 1280,
+            "height": 580,
+            "initial": true,
+            "overflow": 0,
+            "footerBottom": 537.78125,
+            "clipping": false
           }
         },
         "associativeClosing": {
@@ -12689,7 +13027,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [239, 243, 247],
+            "rgb": [239, 242, 247],
             "shellBackground": "rgb(243, 246, 250)"
           },
           "balanced": {
@@ -12697,7 +13035,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [214, 222, 233],
+            "rgb": [213, 222, 233],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -12871,7 +13209,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [240, 243, 247],
+            "rgb": [239, 243, 247],
             "shellBackground": "rgb(243, 246, 250)"
           },
           "balanced": {
@@ -12879,7 +13217,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [214, 222, 232],
+            "rgb": [214, 221, 232],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -12887,7 +13225,7 @@
               "x": 34,
               "y": 99
             },
-            "rgb": [5, 31, 53],
+            "rgb": [5, 31, 52],
             "shellBackground": "rgb(6, 31, 53)"
           }
         },
@@ -16823,9 +17161,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3246,
+        "changedPixels": 3223,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.0003042060278902384,
+        "changedPixelRatio": 0.0003020505323136902,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
           "tracked": true,
@@ -16860,9 +17198,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3017,
+        "changedPixels": 2995,
         "totalPixels": 3231360,
-        "changedPixelRatio": 0.0009336626064567241,
+        "changedPixelRatio": 0.0009268543275896217,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1440x900.webp",
           "tracked": true,
@@ -16897,9 +17235,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3017,
+        "changedPixels": 2995,
         "totalPixels": 3265920,
-        "changedPixelRatio": 0.0009237825788751715,
+        "changedPixelRatio": 0.0009170463452870861,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1440x900.webp",
           "tracked": true,
@@ -16934,9 +17272,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3017,
+        "changedPixels": 2995,
         "totalPixels": 3265920,
-        "changedPixelRatio": 0.0009237825788751715,
+        "changedPixelRatio": 0.0009170463452870861,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1440x900.webp",
           "tracked": true,
@@ -16971,9 +17309,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3017,
+        "changedPixels": 2995,
         "totalPixels": 3265920,
-        "changedPixelRatio": 0.0009237825788751715,
+        "changedPixelRatio": 0.0009170463452870861,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1440x900.webp",
           "tracked": true,
@@ -17008,9 +17346,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3017,
+        "changedPixels": 2995,
         "totalPixels": 3231360,
-        "changedPixelRatio": 0.0009336626064567241,
+        "changedPixelRatio": 0.0009268543275896217,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1440x900.webp",
           "tracked": true,
@@ -17045,9 +17383,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0009069109690113133,
+        "changedPixelRatio": 0.0009082773132207465,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
           "tracked": true,
@@ -17082,9 +17420,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 4134240,
-        "changedPixelRatio": 0.0006421978404737025,
+        "changedPixelRatio": 0.0006431653701768644,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
           "tracked": true,
@@ -17119,9 +17457,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 1329120,
-        "changedPixelRatio": 0.0019975622968580716,
+        "changedPixelRatio": 0.002000571806909835,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
           "tracked": true,
@@ -17156,9 +17494,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3170,
+        "changedPixels": 3174,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013134778573322726,
+        "changedPixelRatio": 0.0013151352426412093,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1440x900.webp",
           "tracked": true,
@@ -17193,9 +17531,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3170,
+        "changedPixels": 3174,
         "totalPixels": 2174400,
-        "changedPixelRatio": 0.0014578734363502575,
+        "changedPixelRatio": 0.0014597130242825606,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1440x900.webp",
           "tracked": true,
@@ -17230,9 +17568,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3149,
+        "changedPixels": 3123,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0011151481670349595,
+        "changedPixelRatio": 0.0011059408465068843,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1440x900.webp",
           "tracked": true,
@@ -17267,9 +17605,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 20328,
+        "changedPixels": 20341,
         "totalPixels": 2347200,
-        "changedPixelRatio": 0.008660531697341513,
+        "changedPixelRatio": 0.00866607021131561,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1440x900.webp",
           "tracked": true,
@@ -17285,28 +17623,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
-          "bytes": 53210,
-          "sha256": "905af41b47a2ef1aa22317814854fd46adad6e7d4be90624cf46e908a47d178e"
+          "bytes": 42472,
+          "sha256": "dd6f412c3c18ef614c89a334d7a940ec4dad86854e6a4b7cbf894eb383275efa"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
-      "bytes": 53210,
-      "sha256": "905af41b47a2ef1aa22317814854fd46adad6e7d4be90624cf46e908a47d178e",
+      "bytes": 42472,
+      "sha256": "dd6f412c3c18ef614c89a334d7a940ec4dad86854e6a4b7cbf894eb383275efa",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 10427,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 213741,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008045524691358025,
+        "changedPixelRatio": 0.16492361111111112,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
@@ -17350,7 +17688,9 @@
           "bytes": 65350,
           "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f"
         }
-      }
+      },
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "responsive",
@@ -17452,9 +17792,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.001708758109360519,
+        "changedPixelRatio": 0.0017113325095252806,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1440x900.webp",
           "tracked": true,
@@ -17489,9 +17829,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020486111111111113,
+        "changedPixelRatio": 0.0020516975308641975,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1440x900.webp",
           "tracked": true,
@@ -17526,9 +17866,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 5174,
+        "changedPixels": 5187,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.00156560154926168,
+        "changedPixelRatio": 0.0015695352214960057,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1440x900.webp",
           "tracked": true,
@@ -17563,9 +17903,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3246,
+        "changedPixels": 3223,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.0003042060278902384,
+        "changedPixelRatio": 0.0003020505323136902,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
           "tracked": true,
@@ -17600,9 +17940,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0009069109690113133,
+        "changedPixelRatio": 0.0009082773132207465,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
           "tracked": true,
@@ -17637,9 +17977,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3170,
+        "changedPixels": 3174,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013134778573322726,
+        "changedPixelRatio": 0.0013151352426412093,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-light-1440x900.webp",
           "tracked": true,
@@ -17674,9 +18014,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3149,
+        "changedPixels": 3123,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0011151481670349595,
+        "changedPixelRatio": 0.0011059408465068843,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-light-1440x900.webp",
           "tracked": true,
@@ -17692,28 +18032,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
           "tracked": true,
-          "bytes": 53210,
-          "sha256": "905af41b47a2ef1aa22317814854fd46adad6e7d4be90624cf46e908a47d178e"
+          "bytes": 42472,
+          "sha256": "dd6f412c3c18ef614c89a334d7a940ec4dad86854e6a4b7cbf894eb383275efa"
         }
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
-      "bytes": 53210,
-      "sha256": "905af41b47a2ef1aa22317814854fd46adad6e7d4be90624cf46e908a47d178e",
+      "bytes": 42472,
+      "sha256": "dd6f412c3c18ef614c89a334d7a940ec4dad86854e6a4b7cbf894eb383275efa",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 10427,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 213741,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008045524691358025,
+        "changedPixelRatio": 0.16492361111111112,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
           "tracked": true,
@@ -17757,7 +18097,9 @@
           "bytes": 65350,
           "sha256": "e28110e105f67587ff446c9bde9614e5d802454fe21ba064597f92f33ea32e6f"
         }
-      }
+      },
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "theme",
@@ -17859,9 +18201,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.001708758109360519,
+        "changedPixelRatio": 0.0017113325095252806,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-light-1440x900.webp",
           "tracked": true,
@@ -17896,9 +18238,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020486111111111113,
+        "changedPixelRatio": 0.0020516975308641975,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-light-1440x900.webp",
           "tracked": true,
@@ -17933,9 +18275,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 5174,
+        "changedPixels": 5187,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.00156560154926168,
+        "changedPixelRatio": 0.0015695352214960057,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-light-1440x900.webp",
           "tracked": true,
@@ -17970,9 +18312,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3256,
+        "changedPixels": 3233,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.000305143199880042,
+        "changedPixelRatio": 0.0003029877043034938,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
           "tracked": true,
@@ -18007,9 +18349,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2665,
+        "changedPixels": 2669,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0009103268295348964,
+        "changedPixelRatio": 0.0009116931737443297,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
           "tracked": true,
@@ -18044,9 +18386,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3180,
+        "changedPixels": 3184,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013176213206046142,
+        "changedPixelRatio": 0.0013192787059135508,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-balanced-1440x900.webp",
           "tracked": true,
@@ -18081,9 +18423,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3159,
+        "changedPixels": 3133,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0011186894441611423,
+        "changedPixelRatio": 0.001109482123633067,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-balanced-1440x900.webp",
           "tracked": true,
@@ -18099,28 +18441,28 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 53056,
-          "sha256": "36a76ccf4a14fb520ec6ad7e3dcc0a71424e62e6469ab989d972463a53a48fbd"
+          "bytes": 42214,
+          "sha256": "2eb00de494208e5f3bacc77b5324e716e50ef7d4e8d3fa6cf86d21caa4b02ac0"
         }
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
-      "bytes": 53056,
-      "sha256": "36a76ccf4a14fb520ec6ad7e3dcc0a71424e62e6469ab989d972463a53a48fbd",
+      "bytes": 42214,
+      "sha256": "2eb00de494208e5f3bacc77b5324e716e50ef7d4e8d3fa6cf86d21caa4b02ac0",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 10280,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 175385,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.007932098765432098,
+        "changedPixelRatio": 0.13532793209876542,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
           "tracked": true,
@@ -18164,7 +18506,9 @@
           "bytes": 64816,
           "sha256": "9784971d69a6a211f4734f3f26b9aa505f0f3ea542d1c65e4570a18b7fc4aaac"
         }
-      }
+      },
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "theme",
@@ -18266,9 +18610,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2665,
+        "changedPixels": 2669,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.001715194109772423,
+        "changedPixelRatio": 0.0017177685099371847,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
           "tracked": true,
@@ -18303,9 +18647,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2665,
+        "changedPixels": 2669,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.002056327160493827,
+        "changedPixelRatio": 0.0020594135802469134,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-balanced-1440x900.webp",
           "tracked": true,
@@ -18340,9 +18684,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 4266,
+        "changedPixels": 4280,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.0012908496732026145,
+        "changedPixelRatio": 0.0012950859356088114,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-balanced-1440x900.webp",
           "tracked": true,
@@ -18377,9 +18721,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3266,
+        "changedPixels": 3244,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.00030608037186984554,
+        "changedPixelRatio": 0.0003040185934922777,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
           "tracked": true,
@@ -18414,9 +18758,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2675,
+        "changedPixels": 2680,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0009137426900584795,
+        "changedPixelRatio": 0.0009154506203202711,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-dark-1440x900.webp",
           "tracked": true,
@@ -18451,9 +18795,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3190,
+        "changedPixels": 3195,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013217647838769558,
+        "changedPixelRatio": 0.0013238365155131264,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-dark-1440x900.webp",
           "tracked": true,
@@ -18488,9 +18832,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3169,
+        "changedPixels": 3144,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0011222307212873251,
+        "changedPixelRatio": 0.001113377528471868,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-dark-1440x900.webp",
           "tracked": true,
@@ -18506,28 +18850,28 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 52860,
-          "sha256": "b2bf40dd59452fe397c8c798830112979b05de312bdeb33ce1b84f132e4faccf"
+          "bytes": 44222,
+          "sha256": "e4ed9158cf3aca10dca920152d9ba545a0e6b7632db5ea06ba40810ba43a4ef7"
         }
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
-      "bytes": 52860,
-      "sha256": "b2bf40dd59452fe397c8c798830112979b05de312bdeb33ce1b84f132e4faccf",
+      "bytes": 44222,
+      "sha256": "e4ed9158cf3aca10dca920152d9ba545a0e6b7632db5ea06ba40810ba43a4ef7",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 10646,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 200793,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008214506172839506,
+        "changedPixelRatio": 0.15493287037037037,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
@@ -18571,7 +18915,9 @@
           "bytes": 66150,
           "sha256": "8870de73be6e09434b945f9240cfafdf23380b98e7ccdfdcc8ccf7131c95f72b"
         }
-      }
+      },
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "theme",
@@ -18673,9 +19019,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2675,
+        "changedPixels": 2680,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.001721630110184327,
+        "changedPixelRatio": 0.0017248481103902791,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-dark-1440x900.webp",
           "tracked": true,
@@ -18710,9 +19056,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2675,
+        "changedPixels": 2680,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.002064043209876543,
+        "changedPixelRatio": 0.002067901234567901,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-dark-1440x900.webp",
           "tracked": true,
@@ -18747,9 +19093,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 4294,
+        "changedPixels": 4307,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.0012993221980150086,
+        "changedPixelRatio": 0.0013032558702493343,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-dark-1440x900.webp",
           "tracked": true,
@@ -18784,9 +19130,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3242,
+        "changedPixels": 3219,
         "totalPixels": 9800960,
-        "changedPixelRatio": 0.00033078392320752255,
+        "changedPixelRatio": 0.00032843721431369987,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
           "tracked": true,
@@ -18821,9 +19167,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3018,
+        "changedPixels": 2995,
         "totalPixels": 2872320,
-        "changedPixelRatio": 0.0010507185828877005,
+        "changedPixelRatio": 0.0010427111185383243,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1280x720.webp",
           "tracked": true,
@@ -18858,9 +19204,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3018,
+        "changedPixels": 2995,
         "totalPixels": 2903040,
-        "changedPixelRatio": 0.0010395998677248676,
+        "changedPixelRatio": 0.0010316771384479718,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1280x720.webp",
           "tracked": true,
@@ -18895,9 +19241,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3018,
+        "changedPixels": 2995,
         "totalPixels": 2903040,
-        "changedPixelRatio": 0.0010395998677248676,
+        "changedPixelRatio": 0.0010316771384479718,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1280x720.webp",
           "tracked": true,
@@ -18932,9 +19278,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3018,
+        "changedPixels": 2995,
         "totalPixels": 2903040,
-        "changedPixelRatio": 0.0010395998677248676,
+        "changedPixelRatio": 0.0010316771384479718,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1280x720.webp",
           "tracked": true,
@@ -18969,9 +19315,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3018,
+        "changedPixels": 2995,
         "totalPixels": 2872320,
-        "changedPixelRatio": 0.0010507185828877005,
+        "changedPixelRatio": 0.0010427111185383243,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1280x720.webp",
           "tracked": true,
@@ -19006,9 +19352,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 2602240,
-        "changedPixelRatio": 0.0010202748401377274,
+        "changedPixelRatio": 0.0010218119773733399,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1280x720.webp",
           "tracked": true,
@@ -19043,9 +19389,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 3866880,
-        "changedPixelRatio": 0.000686600049652433,
+        "changedPixelRatio": 0.0006876344753392916,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
           "tracked": true,
@@ -19080,9 +19426,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 1181440,
-        "changedPixelRatio": 0.0022472575839653304,
+        "changedPixelRatio": 0.0022506432827735646,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
           "tracked": true,
@@ -19117,9 +19463,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3175,
+        "changedPixels": 3179,
         "totalPixels": 2196480,
-        "changedPixelRatio": 0.0014454946095571095,
+        "changedPixelRatio": 0.0014473157051282052,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1280x720.webp",
           "tracked": true,
@@ -19154,9 +19500,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3175,
+        "changedPixels": 3179,
         "totalPixels": 1932800,
-        "changedPixelRatio": 0.001642694536423841,
+        "changedPixelRatio": 0.001644764072847682,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1280x720.webp",
           "tracked": true,
@@ -19191,9 +19537,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3149,
+        "changedPixels": 3123,
         "totalPixels": 2535680,
-        "changedPixelRatio": 0.0012418759464916708,
+        "changedPixelRatio": 0.0012316222867238768,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1280x720.webp",
           "tracked": true,
@@ -19228,9 +19574,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 18060,
+        "changedPixels": 18073,
         "totalPixels": 2086400,
-        "changedPixelRatio": 0.00865605828220859,
+        "changedPixelRatio": 0.008662289110429449,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1280x720.webp",
           "tracked": true,
@@ -19246,28 +19592,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 921600,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "tracked": true,
-          "bytes": 53750,
-          "sha256": "ee043f250da215d1fded09ea1cf7cba9a3031b4ef62c5040abcc3e66d9d9caf6"
+          "bytes": 41964,
+          "sha256": "ce07606e8e3c560ef1c6f3c412cb11a06b191ab65b35cf9d2a7e95044478263c"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
-      "bytes": 53750,
-      "sha256": "ee043f250da215d1fded09ea1cf7cba9a3031b4ef62c5040abcc3e66d9d9caf6",
+      "bytes": 41964,
+      "sha256": "ce07606e8e3c560ef1c6f3c412cb11a06b191ab65b35cf9d2a7e95044478263c",
       "width": 1280,
       "height": 720,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 196581,
         "totalPixels": 921600,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.21330403645833335,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "tracked": true,
@@ -19311,7 +19657,9 @@
           "bytes": 62060,
           "sha256": "7ab566f50bbd42a10a629271da9349337b43664ad94502d18cea8f17b33ea15f"
         }
-      }
+      },
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "responsive",
@@ -19413,9 +19761,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 1150720,
-        "changedPixelRatio": 0.0023072511123470524,
+        "changedPixelRatio": 0.0023107271968854284,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1280x720.webp",
           "tracked": true,
@@ -19450,9 +19798,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2655,
+        "changedPixels": 2659,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.002880859375,
+        "changedPixelRatio": 0.0028851996527777778,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
           "tracked": true,
@@ -19487,9 +19835,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 5175,
+        "changedPixels": 5188,
         "totalPixels": 2937600,
-        "changedPixelRatio": 0.0017616421568627451,
+        "changedPixelRatio": 0.0017660675381263617,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1280x720.webp",
           "tracked": true,
@@ -19524,9 +19872,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2969,
+        "changedPixels": 2941,
         "totalPixels": 9229312,
-        "changedPixelRatio": 0.00032169245118162656,
+        "changedPixelRatio": 0.00031865863891046266,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
           "tracked": true,
@@ -19561,9 +19909,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2742,
+        "changedPixels": 2714,
         "totalPixels": 2481152,
-        "changedPixelRatio": 0.0011051318097399917,
+        "changedPixelRatio": 0.0010938467292612463,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1024x768.webp",
           "tracked": true,
@@ -19598,9 +19946,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2747,
+        "changedPixels": 2721,
         "totalPixels": 2359296,
-        "changedPixelRatio": 0.0011643303765190972,
+        "changedPixelRatio": 0.0011533101399739583,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
           "tracked": true,
@@ -19635,9 +19983,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2742,
+        "changedPixels": 2714,
         "totalPixels": 2505728,
-        "changedPixelRatio": 0.0010942927564364527,
+        "changedPixelRatio": 0.0010831183592153657,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1024x768.webp",
           "tracked": true,
@@ -19672,9 +20020,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2747,
+        "changedPixels": 2721,
         "totalPixels": 2359296,
-        "changedPixelRatio": 0.0011643303765190972,
+        "changedPixelRatio": 0.0011533101399739583,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1024x768.webp",
           "tracked": true,
@@ -19709,9 +20057,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2747,
+        "changedPixels": 2721,
         "totalPixels": 2334720,
-        "changedPixelRatio": 0.001176586485745614,
+        "changedPixelRatio": 0.0011654502467105263,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1024x768.webp",
           "tracked": true,
@@ -19746,9 +20094,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2381,
+        "changedPixels": 2382,
         "totalPixels": 2185216,
-        "changedPixelRatio": 0.001089594804358013,
+        "changedPixelRatio": 0.00109005242502343,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1024x768.webp",
           "tracked": true,
@@ -19783,9 +20131,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2381,
+        "changedPixels": 2382,
         "totalPixels": 3710976,
-        "changedPixelRatio": 0.0006416101855684327,
+        "changedPixelRatio": 0.0006418796564569536,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
           "tracked": true,
@@ -19820,9 +20168,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2381,
+        "changedPixels": 2382,
         "totalPixels": 1080320,
-        "changedPixelRatio": 0.0022039765995260662,
+        "changedPixelRatio": 0.002204902251184834,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
           "tracked": true,
@@ -19857,9 +20205,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2857,
+        "changedPixels": 2858,
         "totalPixels": 2643968,
-        "changedPixelRatio": 0.0010805728359798606,
+        "changedPixelRatio": 0.0010809510553834237,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
           "tracked": true,
@@ -19894,9 +20242,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2857,
+        "changedPixels": 2858,
         "totalPixels": 2392064,
-        "changedPixelRatio": 0.0011943660370291097,
+        "changedPixelRatio": 0.0011947840860445206,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1024x768.webp",
           "tracked": true,
@@ -19931,9 +20279,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2875,
+        "changedPixels": 2846,
         "totalPixels": 2163712,
-        "changedPixelRatio": 0.0013287350627070515,
+        "changedPixelRatio": 0.0013153321699006153,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1024x768.webp",
           "tracked": true,
@@ -19968,9 +20316,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 16978,
+        "changedPixels": 16993,
         "totalPixels": 1751040,
-        "changedPixelRatio": 0.009695952119883042,
+        "changedPixelRatio": 0.009704518457602338,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1024x768.webp",
           "tracked": true,
@@ -19986,28 +20334,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
-          "bytes": 49712,
-          "sha256": "6804e4bda93f1399468f7226ee29e7ebe16ed41d4416ea7e0706924ad99c2076"
+          "bytes": 37856,
+          "sha256": "e00ff03d55d2037cf1de05de5cebe514c81dd6021960a070672d99c9e23174b8"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-      "bytes": 49712,
-      "sha256": "6804e4bda93f1399468f7226ee29e7ebe16ed41d4416ea7e0706924ad99c2076",
+      "bytes": 37856,
+      "sha256": "e00ff03d55d2037cf1de05de5cebe514c81dd6021960a070672d99c9e23174b8",
       "width": 1024,
       "height": 768,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 180863,
         "totalPixels": 786432,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.22997919718424478,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
@@ -20051,7 +20399,9 @@
           "bytes": 57872,
           "sha256": "9d72eb1280aded6d12cbcb2ffea7a5a6f9d134d021704d32f9033493ab777ddf"
         }
-      }
+      },
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "responsive",
@@ -20153,9 +20503,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2381,
+        "changedPixels": 2382,
         "totalPixels": 969728,
-        "changedPixelRatio": 0.0024553276795142554,
+        "changedPixelRatio": 0.0024563588965153117,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1024x768.webp",
           "tracked": true,
@@ -20190,9 +20540,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2381,
+        "changedPixels": 2382,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.0030275980631510415,
+        "changedPixelRatio": 0.00302886962890625,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1024x768.webp",
           "tracked": true,
@@ -20227,9 +20577,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 4975,
+        "changedPixels": 4990,
         "totalPixels": 2350080,
-        "changedPixelRatio": 0.0021169492102396516,
+        "changedPixelRatio": 0.00212333197167756,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1024x768.webp",
           "tracked": true,
@@ -20264,9 +20614,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2635,
+        "changedPixels": 2606,
         "totalPixels": 7630848,
-        "changedPixelRatio": 0.0003453089355206656,
+        "changedPixelRatio": 0.00034150857152442297,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
           "tracked": true,
@@ -20301,9 +20651,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2399,
+        "changedPixels": 2370,
         "totalPixels": 2215680,
-        "changedPixelRatio": 0.0010827375794338532,
+        "changedPixelRatio": 0.001069649046793761,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-768x1024.webp",
           "tracked": true,
@@ -20338,9 +20688,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2399,
+        "changedPixels": 2370,
         "totalPixels": 2233344,
-        "changedPixelRatio": 0.0010741739740944521,
+        "changedPixelRatio": 0.001061188961485557,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-768x1024.webp",
           "tracked": true,
@@ -20375,9 +20725,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2399,
+        "changedPixels": 2370,
         "totalPixels": 2233344,
-        "changedPixelRatio": 0.0010741739740944521,
+        "changedPixelRatio": 0.001061188961485557,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-768x1024.webp",
           "tracked": true,
@@ -20412,9 +20762,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2399,
+        "changedPixels": 2370,
         "totalPixels": 2233344,
-        "changedPixelRatio": 0.0010741739740944521,
+        "changedPixelRatio": 0.001061188961485557,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-768x1024.webp",
           "tracked": true,
@@ -20449,9 +20799,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2399,
+        "changedPixels": 2370,
         "totalPixels": 2214912,
-        "changedPixelRatio": 0.0010831130085529358,
+        "changedPixelRatio": 0.0010700199375866851,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-768x1024.webp",
           "tracked": true,
@@ -20671,9 +21021,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2526,
+        "changedPixels": 2496,
         "totalPixels": 1827072,
-        "changedPixelRatio": 0.0013825399327448509,
+        "changedPixelRatio": 0.001366120218579235,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-768x1024.webp",
           "tracked": true,
@@ -20726,28 +21076,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
           "tracked": true,
-          "bytes": 49410,
-          "sha256": "5d6f260ea648cc51e0b2022509615bd386093eb1606840fd0dc90b291fc8f167"
+          "bytes": 36394,
+          "sha256": "1ce60774e0e265f1b73c536a84a5fa36774c7b6272b766bf40cad49df208ec8f"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
-      "bytes": 49410,
-      "sha256": "5d6f260ea648cc51e0b2022509615bd386093eb1606840fd0dc90b291fc8f167",
+      "bytes": 36394,
+      "sha256": "1ce60774e0e265f1b73c536a84a5fa36774c7b6272b766bf40cad49df208ec8f",
       "width": 768,
       "height": 1024,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 145929,
         "totalPixels": 786432,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.18555831909179688,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
           "tracked": true,
@@ -20791,7 +21141,9 @@
           "bytes": 58840,
           "sha256": "f97ff980a70eb48683e1f1b41b3df4d5e1f6bf396ac99e8bd1218b7b278c7701"
         }
-      }
+      },
+      "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+      "capturedAt": "2026-10-01T20:06:49.303Z"
     },
     {
       "kind": "responsive",
@@ -21004,9 +21356,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 649,
+        "changedPixels": 653,
         "totalPixels": 4888260,
-        "changedPixelRatio": 0.00013276707867421127,
+        "changedPixelRatio": 0.00013358536575386744,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
           "tracked": true,
@@ -21041,9 +21393,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.0002942072326521571,
+        "changedPixelRatio": 0.00029697624190064796,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-390x844.webp",
           "tracked": true,
@@ -21078,9 +21430,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1463280,
-        "changedPixelRatio": 0.0002904433874583128,
+        "changedPixelRatio": 0.0002931769722814499,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-390x844.webp",
           "tracked": true,
@@ -21115,9 +21467,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.0002923131946737097,
+        "changedPixelRatio": 0.0002950643776824034,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-390x844.webp",
           "tracked": true,
@@ -21152,9 +21504,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.0002923131946737097,
+        "changedPixelRatio": 0.0002950643776824034,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-390x844.webp",
           "tracked": true,
@@ -21189,9 +21541,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.0002942072326521571,
+        "changedPixelRatio": 0.00029697624190064796,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-390x844.webp",
           "tracked": true,
@@ -21411,9 +21763,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 582,
+        "changedPixels": 598,
         "totalPixels": 1430910,
-        "changedPixelRatio": 0.0004067341761536365,
+        "changedPixelRatio": 0.00041791587171799763,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-390x844.webp",
           "tracked": true,
@@ -21466,28 +21818,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
           "tracked": true,
-          "bytes": 63168,
-          "sha256": "e5456d94580c9a389b235131e4e2cd386df4e02ccc77f56f8d0c92bd4c387efb"
+          "bytes": 34140,
+          "sha256": "3b62f3e330938cf9b5693f34baca30d8fb6f1ad59f0e758d56d47e6ed4ddfb30"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
-      "bytes": 63168,
-      "sha256": "e5456d94580c9a389b235131e4e2cd386df4e02ccc77f56f8d0c92bd4c387efb",
+      "bytes": 34140,
+      "sha256": "3b62f3e330938cf9b5693f34baca30d8fb6f1ad59f0e758d56d47e6ed4ddfb30",
       "width": 390,
       "height": 844,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 59407,
         "totalPixels": 329160,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.18048061732895856,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
           "tracked": true,
@@ -21744,9 +22096,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 649,
+        "changedPixels": 653,
         "totalPixels": 4888260,
-        "changedPixelRatio": 0.00013276707867421127,
+        "changedPixelRatio": 0.00013358536575386744,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
           "tracked": true,
@@ -21781,9 +22133,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.0002942072326521571,
+        "changedPixelRatio": 0.00029697624190064796,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-oportunidades-dark-390x844.webp",
           "tracked": true,
@@ -21818,9 +22170,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1463280,
-        "changedPixelRatio": 0.0002904433874583128,
+        "changedPixelRatio": 0.0002931769722814499,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
           "tracked": true,
@@ -21855,9 +22207,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.0002923131946737097,
+        "changedPixelRatio": 0.0002950643776824034,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-visitas-dark-390x844.webp",
           "tracked": true,
@@ -21892,9 +22244,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.0002923131946737097,
+        "changedPixelRatio": 0.0002950643776824034,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-pastas-dark-390x844.webp",
           "tracked": true,
@@ -21929,9 +22281,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.0002942072326521571,
+        "changedPixelRatio": 0.00029697624190064796,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-vendas-dark-390x844.webp",
           "tracked": true,
@@ -22151,9 +22503,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 582,
+        "changedPixels": 598,
         "totalPixels": 1430910,
-        "changedPixelRatio": 0.0004067341761536365,
+        "changedPixelRatio": 0.00041791587171799763,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-metas-pontos-dark-390x844.webp",
           "tracked": true,
@@ -22206,28 +22558,28 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
           "tracked": true,
-          "bytes": 61180,
-          "sha256": "a69c80fe83677a820e0fcb9d8eca60877482a7928c6311239710e7effe65931b"
+          "bytes": 32726,
+          "sha256": "5a5cd29acdcd99dc6e404a4e2edcc7ae309298a9576aed102d569328599e0439"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
-      "bytes": 61180,
-      "sha256": "a69c80fe83677a820e0fcb9d8eca60877482a7928c6311239710e7effe65931b",
+      "bytes": 32726,
+      "sha256": "5a5cd29acdcd99dc6e404a4e2edcc7ae309298a9576aed102d569328599e0439",
       "width": 390,
       "height": 844,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 69428,
         "totalPixels": 329160,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.21092477822335642,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
           "tracked": true,
@@ -22484,9 +22836,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 649,
+        "changedPixels": 653,
         "totalPixels": 4751250,
-        "changedPixelRatio": 0.00013659563272822942,
+        "changedPixelRatio": 0.0001374375164430413,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
           "tracked": true,
@@ -22521,9 +22873,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1398000,
-        "changedPixelRatio": 0.00030400572246065807,
+        "changedPixelRatio": 0.00030686695278969955,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-375x812.webp",
           "tracked": true,
@@ -22558,9 +22910,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1407000,
-        "changedPixelRatio": 0.00030206112295664536,
+        "changedPixelRatio": 0.0003049040511727079,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-375x812.webp",
           "tracked": true,
@@ -22595,9 +22947,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1398000,
-        "changedPixelRatio": 0.00030400572246065807,
+        "changedPixelRatio": 0.00030686695278969955,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-375x812.webp",
           "tracked": true,
@@ -22632,9 +22984,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1398000,
-        "changedPixelRatio": 0.00030400572246065807,
+        "changedPixelRatio": 0.00030686695278969955,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-375x812.webp",
           "tracked": true,
@@ -22669,9 +23021,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1389000,
-        "changedPixelRatio": 0.00030597552195824333,
+        "changedPixelRatio": 0.00030885529157667385,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-375x812.webp",
           "tracked": true,
@@ -22891,9 +23243,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 577,
+        "changedPixels": 593,
         "totalPixels": 1399875,
-        "changedPixelRatio": 0.0004121796588981159,
+        "changedPixelRatio": 0.0004236092508259666,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-375x812.webp",
           "tracked": true,
@@ -22946,28 +23298,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 304500,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
           "tracked": true,
-          "bytes": 61738,
-          "sha256": "3de3ee76f06238afdb74921597876feab0c99c4ed983a5b79ca46c8521ba0733"
+          "bytes": 33784,
+          "sha256": "ec1dc7102679f8d3776e23f5db0f9f8101c2ea423594072bded18ae10110fab0"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
-      "bytes": 61738,
-      "sha256": "3de3ee76f06238afdb74921597876feab0c99c4ed983a5b79ca46c8521ba0733",
+      "bytes": 33784,
+      "sha256": "ec1dc7102679f8d3776e23f5db0f9f8101c2ea423594072bded18ae10110fab0",
       "width": 375,
       "height": 812,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 54902,
         "totalPixels": 304500,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.18030213464696224,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
           "tracked": true,
@@ -23224,9 +23576,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 649,
+        "changedPixels": 653,
         "totalPixels": 4355200,
-        "changedPixelRatio": 0.00014901726671565026,
+        "changedPixelRatio": 0.00014993570903747245,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
           "tracked": true,
@@ -23261,9 +23613,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1277760,
-        "changedPixelRatio": 0.0003326133233158027,
+        "changedPixelRatio": 0.00033574380165289256,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-320x568.webp",
           "tracked": true,
@@ -23298,9 +23650,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1277120,
-        "changedPixelRatio": 0.0003327800050112754,
+        "changedPixelRatio": 0.00033591205211726385,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-320x568.webp",
           "tracked": true,
@@ -23335,9 +23687,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1277760,
-        "changedPixelRatio": 0.0003326133233158027,
+        "changedPixelRatio": 0.00033574380165289256,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-320x568.webp",
           "tracked": true,
@@ -23372,9 +23724,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1269760,
-        "changedPixelRatio": 0.0003347089213709677,
+        "changedPixelRatio": 0.00033785912298387095,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-320x568.webp",
           "tracked": true,
@@ -23409,9 +23761,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 425,
+        "changedPixels": 429,
         "totalPixels": 1262080,
-        "changedPixelRatio": 0.00033674568965517244,
+        "changedPixelRatio": 0.000339915060851927,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-320x568.webp",
           "tracked": true,
@@ -23631,9 +23983,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 576,
+        "changedPixels": 589,
         "totalPixels": 1286720,
-        "changedPixelRatio": 0.0004476498383486695,
+        "changedPixelRatio": 0.0004577530465058443,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-320x568.webp",
           "tracked": true,
@@ -23686,28 +24038,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 181760,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
           "tracked": true,
-          "bytes": 52774,
-          "sha256": "934dcdb73b00da1b12f91882b0554b10a8cfb9015c9247f0d50008328cc28390"
+          "bytes": 29178,
+          "sha256": "bcbb338c9dda043780cf739f7e6d002ae2ef0013422ed953411cc1dcd75e94a6"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
-      "bytes": 52774,
-      "sha256": "934dcdb73b00da1b12f91882b0554b10a8cfb9015c9247f0d50008328cc28390",
+      "bytes": 29178,
+      "sha256": "bcbb338c9dda043780cf739f7e6d002ae2ef0013422ed953411cc1dcd75e94a6",
       "width": 320,
       "height": 568,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 28305,
         "totalPixels": 181760,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.15572733274647887,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
           "tracked": true,
@@ -24623,44 +24975,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
         "tracked": true,
-        "bytes": 49712,
-        "sha256": "6804e4bda93f1399468f7226ee29e7ebe16ed41d4416ea7e0706924ad99c2076"
+        "bytes": 37856,
+        "sha256": "e00ff03d55d2037cf1de05de5cebe514c81dd6021960a070672d99c9e23174b8"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
         "tracked": true,
-        "bytes": 53750,
-        "sha256": "ee043f250da215d1fded09ea1cf7cba9a3031b4ef62c5040abcc3e66d9d9caf6"
+        "bytes": 41964,
+        "sha256": "ce07606e8e3c560ef1c6f3c412cb11a06b191ab65b35cf9d2a7e95044478263c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
         "tracked": true,
-        "bytes": 53210,
-        "sha256": "905af41b47a2ef1aa22317814854fd46adad6e7d4be90624cf46e908a47d178e"
+        "bytes": 42472,
+        "sha256": "dd6f412c3c18ef614c89a334d7a940ec4dad86854e6a4b7cbf894eb383275efa"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
         "tracked": true,
-        "bytes": 52774,
-        "sha256": "934dcdb73b00da1b12f91882b0554b10a8cfb9015c9247f0d50008328cc28390"
+        "bytes": 29178,
+        "sha256": "bcbb338c9dda043780cf739f7e6d002ae2ef0013422ed953411cc1dcd75e94a6"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
         "tracked": true,
-        "bytes": 61738,
-        "sha256": "3de3ee76f06238afdb74921597876feab0c99c4ed983a5b79ca46c8521ba0733"
+        "bytes": 33784,
+        "sha256": "ec1dc7102679f8d3776e23f5db0f9f8101c2ea423594072bded18ae10110fab0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
         "tracked": true,
-        "bytes": 63168,
-        "sha256": "e5456d94580c9a389b235131e4e2cd386df4e02ccc77f56f8d0c92bd4c387efb"
+        "bytes": 34140,
+        "sha256": "3b62f3e330938cf9b5693f34baca30d8fb6f1ad59f0e758d56d47e6ed4ddfb30"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
         "tracked": true,
-        "bytes": 49410,
-        "sha256": "5d6f260ea648cc51e0b2022509615bd386093eb1606840fd0dc90b291fc8f167"
+        "bytes": 36394,
+        "sha256": "1ce60774e0e265f1b73c536a84a5fa36774c7b6272b766bf40cad49df208ec8f"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-1024x768.webp",
@@ -24989,8 +25341,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
         "tracked": true,
-        "bytes": 61180,
-        "sha256": "a69c80fe83677a820e0fcb9d8eca60877482a7928c6311239710e7effe65931b"
+        "bytes": 32726,
+        "sha256": "5a5cd29acdcd99dc6e404a4e2edcc7ae309298a9576aed102d569328599e0439"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
@@ -25037,20 +25389,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 53056,
-        "sha256": "36a76ccf4a14fb520ec6ad7e3dcc0a71424e62e6469ab989d972463a53a48fbd"
+        "bytes": 42214,
+        "sha256": "2eb00de494208e5f3bacc77b5324e716e50ef7d4e8d3fa6cf86d21caa4b02ac0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 52860,
-        "sha256": "b2bf40dd59452fe397c8c798830112979b05de312bdeb33ce1b84f132e4faccf"
+        "bytes": 44222,
+        "sha256": "e4ed9158cf3aca10dca920152d9ba545a0e6b7632db5ea06ba40810ba43a4ef7"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
         "tracked": true,
-        "bytes": 53210,
-        "sha256": "905af41b47a2ef1aa22317814854fd46adad6e7d4be90624cf46e908a47d178e"
+        "bytes": 42472,
+        "sha256": "dd6f412c3c18ef614c89a334d7a940ec4dad86854e6a4b7cbf894eb383275efa"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-direta-balanced-1440x900.webp",
@@ -25108,7 +25460,7 @@
       }
     ],
     "fileCount": 193,
-    "manifestSha256": "eab74fdeb3c3ec59fe363044ea4af12c3321b38eee55982238db6b21d818e92f"
+    "manifestSha256": "46c8d869bf4ed786af2808f78f7c731b755ec6ae7787e8b6b0ea114ece86a86e"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -25131,10 +25483,22 @@
     "channelTolerance": 16
   },
   "passed": true,
-  "promotionSource": {
-    "run": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36916047513",
-    "headCommit": "0c2269315231df65666eb9c1423e64d3b314d8d9",
-    "captureCommit": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
-    "reason": "Cabecalhos no tamanho das linhas, endereco na terceira coluna e centralizacao; capturas revisadas individualmente."
+  "baselineMerge": {
+    "method": "merge existing reviewed captures by route; no new capture",
+    "upstreamCommit": "f1d71da81a21cf139acc26b95a6cacc218b79325",
+    "upstreamCapture": "97af50e34c8b877488fff044ea39186350561e10",
+    "tabelaoCommit": "6c04eb7e598967d2712cc7cfe353cead1cfe33f1",
+    "tabelaoCapture": "434dc8dafe2522bd775a17ecd8706f982be7cfce",
+    "tabelaoRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/36919972124",
+    "replacedPaths": [
+      "target-authenticated/simulacao-tabelao-1024x768.webp",
+      "target-authenticated/simulacao-tabelao-1280x720.webp",
+      "target-authenticated/simulacao-tabelao-1440x900.webp",
+      "target-authenticated/simulacao-tabelao-768x1024.webp",
+      "target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
+      "target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
+      "target-authenticated/themes/simulacao-tabelao-light-1440x900.webp"
+    ],
+    "combinedValidation": "pending fresh CI on merge commit"
   }
 }
