@@ -924,8 +924,8 @@ async function inspectRoute(
       ".investor-associative-table-page .investor-stock-panel",
     );
     const stockFilters = associativeStock?.querySelector(".investor-stock-filters");
-    const filterTitle = stockFilters?.querySelector(".investor-filter-title-row");
-    const clearFilters = stockFilters?.querySelector(".investor-filter-heading > button");
+    const filterTitle = associativeStock?.querySelector(".investor-stock-title-row");
+    const clearFilters = associativeStock?.querySelector(".investor-stock-header-actions > button");
     const firstFilter = stockFilters?.querySelector(":scope > label");
     const stockSync = associativeStock?.querySelector(".investor-stock-sync");
     const enabledAction = simulatorForm?.querySelector(
@@ -959,6 +959,7 @@ async function inspectRoute(
         ),
       associativeStockCollision:
         rectanglesOverlap(filterTitle, clearFilters) ||
+        rectanglesOverlap(stockSync, clearFilters) ||
         rectanglesOverlap(clearFilters, firstFilter) ||
         rectanglesOverlap(stockSync, stockFilters),
       associativeStockTouchTargetReady:

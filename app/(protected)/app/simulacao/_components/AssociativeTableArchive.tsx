@@ -22,7 +22,7 @@ export function AssociativeTableArchive() {
               />
             </div>
           </div>
-          <InvestorGuideLauncher />
+          <InvestorGuideLauncher compact />
         </section>
         <InvestorCalculator directTable={false} directVisualLayout />
         <p className="simulation-disclaimer">

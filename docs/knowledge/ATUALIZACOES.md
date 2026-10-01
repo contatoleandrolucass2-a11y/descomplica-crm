@@ -4,6 +4,21 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-09-30: Estoque Associativo compacto e selecao dourada
+
+- Status: pendente_validacao; branch codex/associativo-filtros-compactos.
+- Fonte: nove capturas do usuario, InvestorCalculator.tsx, CSS com escopo
+  Associativo e docs/audits/filtros-associativo-2026-09-30.md.
+- Selecao persistente usa o mesmo dourado do hover/foco, com texto escuro.
+- Limpar filtros fica no cabecalho, metadados a esquerda; ajuda ao lado de
+  Escolha a unidade. Sem Guia completo ou Filtros do estoque redundantes.
+- CSS compartilhado tem sobrescritas tardias: conferir geometria renderizada,
+  altura dos campos no celular e alinhamento dos icones; nao alterar outras rotas.
+- Preservar propostas ao limpar filtros, dez linhas e estoque virtual completo.
+- Local: lint/tipos/build, 30 combinacoes de geometria e dois contextos de toque
+  aprovados. Obsidian 22/22 na reexecucao; seis limitacoes POSIX exigem CI Linux.
+- CI, revisao visual e publicacao pendentes. Nao confundir codigo com release.
+
 ## 2026-09-30: Topo compacto publicado e conferido
 
 - Status: validado; runtime 843fd113a3a1f6b6fd3b6b12b6de58de180256ce.

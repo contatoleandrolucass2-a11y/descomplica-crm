@@ -33,20 +33,24 @@ export async function checkCompactArchiveHeader(page) {
 }
 
 export async function checkAssociativeCompactStock(page) {
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   const hero = await page.locator(".investor-associative-hero").evaluate((element) => {
     const bounds = (selector) => document.querySelector(selector).getBoundingClientRect();
     const header = bounds("header:has(#archive-navigation)");
     const title = bounds(".investor-hero-title h1");
     const titleRow = bounds(".investor-hero-title");
-    const guide = bounds(".investor-hero-guide-information");
+    const guide = bounds(".investor-hero-guide");
+    const hint = bounds(".investor-hero-title .investor-info-mark");
     const button = bounds(".investor-hero-guide .investor-guided-start");
     const stacked = getComputedStyle(element).gridTemplateColumns.split(" ").length === 1;
     return {
       titleTopGap: title.top - header.bottom,
       guideTopGap: guide.top - (stacked ? titleRow.bottom : header.bottom),
       buttonHeight: button.height,
-      expectedButtonHeight: matchMedia("(pointer: coarse)").matches ? 44 : 36,
+      expectedButtonHeight: matchMedia("(pointer: coarse)").matches ? 44 : 32,
       buttonFits: button.bottom <= element.getBoundingClientRect().bottom,
+      hintCentered: Math.abs((hint.top + hint.bottom - title.top - title.bottom) / 2) <= 2,
+      guideLabelRemoved: !element.querySelector(".investor-hero-guide-information small"),
     };
   });
   assert.ok(Math.abs(hero.titleTopGap - 8) <= 1, "Title must sit close to the menu divider");
@@ -57,6 +61,35 @@ export async function checkAssociativeCompactStock(page) {
     "Guide button must be compact and touch-aware",
   );
   assert.ok(hero.buttonFits, "Guide button must remain inside the heading section");
+  assert.ok(hero.hintCentered, "Title help icon must be centered on the same line");
+  assert.ok(hero.guideLabelRemoved, "Redundant guide label must be removed");
+  const header = await page.locator(".investor-stock-panel").evaluate((panel) => {
+    const bounds = (selector) => panel.querySelector(selector).getBoundingClientRect();
+    const heading = bounds(":scope > header");
+    const title = bounds("#investor-stock-title");
+    const hint = bounds(".investor-stock-title-row .investor-info-mark");
+    const clear = bounds(".investor-stock-clear");
+    const sync = bounds(".investor-stock-sync");
+    const filters = bounds(".investor-stock-filters");
+    const first = bounds(".investor-stock-filters > label");
+    return {
+      hintCentered: Math.abs((hint.top + hint.bottom - title.top - title.bottom) / 2) <= 2,
+      metadataLeftOfClear: sync.right <= clear.left,
+      clearInsideHeader: clear.top >= heading.top && clear.bottom <= heading.bottom,
+      filterHeadingRemoved: !panel.querySelector(".investor-filter-heading"),
+      filterGap: first.top - heading.bottom,
+      noEmptyFilterRow: first.top - filters.top <= 6,
+    };
+  });
+  assert.ok(header.hintCentered, "Stock help icon must align with Escolha a unidade");
+  assert.ok(header.metadataLeftOfClear, "Stock count and update must stay left of clear action");
+  assert.ok(header.clearInsideHeader, "Clear action must be inside the stock header");
+  assert.ok(header.filterHeadingRemoved, "Redundant filter heading must be removed");
+  assert.ok(
+    header.filterGap >= 0 && header.filterGap <= 12,
+    "Filters must follow the divider closely",
+  );
+  assert.ok(header.noEmptyFilterRow, "Removed heading must not leave an empty grid row");
   const stock = page.locator(".investor-associative-table-page .investor-stock-results");
   const rows = stock.locator("tbody tr[aria-rowindex]");
   await expect(rows.first()).toBeAttached();
@@ -121,5 +154,46 @@ export async function checkAssociativeCompactStock(page) {
     .toBe(true);
   await stock.focus();
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  return { ...geometry, hero, allInventoryReachable: true, goldHoverAndFocus: true };
+  return { ...geometry, hero, header, allInventoryReachable: true, goldHoverAndFocus: true };
+}
+
+export async function checkAssociativeSelectedGold(page) {
+  const stock = page.locator(".investor-associative-table-page .investor-stock-results");
+  const first = stock.locator("tbody tr.selectable[aria-rowindex]").first();
+  const wasSelected = (await first.getAttribute("aria-selected")) === "true";
+  await first.getByRole("button").click();
+  await expect(first).toHaveAttribute("aria-selected", "true");
+  if (!wasSelected) await expect(page.locator(".investor-associative-qualification")).toBeFocused();
+  await page.mouse.move(0, 0);
+  await stock.focus();
+  await expect
+    .poll(
+      () =>
+        first.evaluate((row) =>
+          [...row.cells].every((cell) => {
+            const css = getComputedStyle(cell);
+            return (
+              css.backgroundColor === "rgb(233, 189, 84)" &&
+              css.backgroundImage === "none" &&
+              css.color === "rgb(48, 33, 7)"
+            );
+          }),
+        ),
+      { message: "Selected row must remain gold without hover or focus" },
+    )
+    .toBe(true);
+  await expect(first.getByRole("button")).toHaveAttribute("aria-pressed", "true");
+  const filters = page.locator(".investor-stock-filters");
+  const count = await stock.locator("table").getAttribute("aria-rowcount");
+  const developer = filters.locator(":scope > label").first().getByRole("combobox");
+  await developer.selectOption({ index: 1 });
+  await expect(stock.locator("table")).not.toHaveAttribute("aria-rowcount", count);
+  await filters.getByLabel("Ordenar unidades por valor do imóvel").selectOption("desc");
+  await page.locator(".investor-stock-clear").click();
+  await expect(developer).toHaveValue("Todas");
+  await expect(filters.getByLabel("Ordenar unidades por valor do imóvel")).toHaveValue("asc");
+  await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", count);
+  await expect(first).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".investor-associative-qualification")).toBeVisible();
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
 }

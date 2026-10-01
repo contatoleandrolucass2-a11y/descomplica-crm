@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-09-30 - Estoque Associativo e filtros compactos
+
+- Dourado persistente na selecao; icones alinhados e guia sem rotulo redundante.
+- Limpar filtros no cabecalho com metadados a esquerda; filtros sem linha vazia.
+- Compacta margens mantendo dez linhas, estoque completo e alvos de toque.
+- Regras financeiras, temas e outros simuladores preservados.
+- Amplia QA de geometria, selecao, limpeza e preservacao da proposta.
+- Lint/tipos/build aprovados, 30 combinacoes visuais e dois contextos de toque.
+- Seis falhas POSIX no Windows; dois timeouts Obsidian passaram na reexecucao
+  isolada (22 testes). Oito testes Node aprovados. CI Linux exigida.
+- Validacao e publicacao pendentes: docs/audits/filtros-associativo-2026-09-30.md.
+
 ## 2026-09-30 - Topo compacto publicado
 
 - PR #116 integrado apos CI 36777405809 verde. CI main 36780351488 aprovada
