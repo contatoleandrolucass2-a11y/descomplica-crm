@@ -4,6 +4,20 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-01: Filtros compactos publicados e conferidos
+
+- Status: validado; runtime de72d1bb37b29cae7a61ac3ebd28f745b0e0bc2c.
+- Fonte: PR #118, CI main 36807945046, health e navegador autenticado;
+  docs/audits/filtros-associativo-2026-09-30.md.
+- CI integral verde; imagem imutavel, onze camadas/dois perfis, backup e CAS.
+- UI real confirma titulo a 8px do menu, guia de 32px, ajudas alinhadas,
+  metadados a esquerda de Limpar filtros e dez linhas, sem overflow da pagina.
+- Guia/ajuda/Escape/foco passaram; nenhum erro de console. Sem selecionar
+  unidades reais ou alterar propostas. Doze GETs anonimos passaram; nao prova carga.
+- Preservar navy/azuis e selecao dourada. Para layouts compactos, conferir
+  tambem fonte real e proposta aberta em tablet, nao somente estado inicial.
+- Resultado apenas documental: publicar no Git e sincronizar sem novo deploy.
+
 ## 2026-09-30: Estoque Associativo compacto e selecao dourada
 
 - CI 36800158280: gates funcionais, banco, restore, E2E, 40 navegacoes,

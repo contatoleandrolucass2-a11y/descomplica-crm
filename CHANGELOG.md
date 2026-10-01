@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-01 - Filtros compactos disponiveis na web
+
+- Publica de72d1b: selecao dourada, guia compacto, ajudas alinhadas e Limpar
+  filtros no cabecalho, com menos espacos vazios e sem rotulos redundantes.
+- Confirma a pagina online, preservando dez linhas, temas e regras financeiras.
+
 ## 2026-09-30 - Estoque e filtros mais compactos
 
 - Atualiza onze referencias visuais revisadas do Associativo, sem mudar as demais.
