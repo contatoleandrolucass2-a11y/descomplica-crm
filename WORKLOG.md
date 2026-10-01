@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-01 - Rodape alinhado publicado
+
+- PR #120 integrado; CI final da main 36881065033 totalmente verde.
+- Publica 5878c3bce83990496d886c3311527724beb7d9f9 pela imagem imutavel
+  provada na CI, com onze camadas, dois perfis, backup, CAS e rollback.
+- Health local/publico, Nginx e doze GETs anonimos concorrentes aprovados;
+  estoque e snapshot permaneceram protegidos por 401.
+- Navegador autenticado confirma alinhamento de 0px no desktop e empilhamento
+  sem sobreposicao/overflow no celular, com zero erros de console e selecoes.
+- Registro documental sincronizado sem novo restart da aplicacao.
+
 ## 2026-10-01 - Rodape do Associativo alinhado
 
 - Coloca aviso preliminar e contato do suporte na mesma faixa, alinhados pelo topo.
@@ -10,7 +21,7 @@
   e sinalizou tres capturas esperadas do Associativo. Revisadas e promovidas
   transacionalmente, preservando as outras 190 referencias e os limiares.
 - Lint, tipos e build aprovados; 994 testes passaram, um skip e sete falhas
-  locais de POSIX/symlink ou timeout do parser Chrome. CI Linux final pendente.
+  locais de POSIX/symlink ou timeout do parser Chrome. CI Linux final aprovada.
 - Evidencia: docs/audits/rodape-associativo-2026-10-01.md.
 
 ## 2026-10-01 - Filtros compactos publicados

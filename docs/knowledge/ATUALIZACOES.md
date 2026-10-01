@@ -6,9 +6,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-01: Alinhamento do fechamento do Associativo
 
-- Status: pendente_validacao; branch codex/associativo-rodape-alinhado.
+- Status: validado; runtime 5878c3bce83990496d886c3311527724beb7d9f9.
 - Fonte: captura e pedido do usuario; AssociativeTableArchive.tsx,
-  investor-archive.css e docs/audits/rodape-associativo-2026-10-01.md.
+  investor-archive.css, PR #120, CI main 36881065033, health, navegador
+  autenticado e docs/audits/rodape-associativo-2026-10-01.md.
 - O aviso preliminar e o contato pertencem a uma grade comum alinhada pelo topo;
   abaixo de 760px passam para uma coluna, sem sobreposicao ou overflow horizontal.
 - Navegador local com dados sinteticos mediu 0px de diferenca no desktop e
@@ -19,8 +20,12 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   diferencas visuais esperadas em 768, 1024 e 1280px foram inspecionadas e
   promovidas pela rotina canonica; outras 190 referencias foram preservadas.
 - Lint, tipos, teste focado e build aprovados. Suite Windows: 994 aprovados,
-  um skip e sete falhas de POSIX/symlink ou timeout Chrome; CI Linux final pendente.
+  um skip e sete falhas de POSIX/symlink ou timeout Chrome; CI Linux aprovada.
+- Imagem imutavel com onze camadas e dois perfis, backup/CAS/rollback verificados.
+  Doze GETs anonimos sem erro nao provam capacidade. UI publicada confirmou 0px
+  no desktop e empilhamento correto no celular, sem console ou selecao de unidade.
 - Preservar textos, tres temas, estoque, simulacao e demais rotas.
+- Este registro documental deve ser integrado e sincronizado sem novo deploy.
 
 ## 2026-10-01: Filtros compactos publicados e conferidos
 
