@@ -1,23 +1,5 @@
 # Worklog
 
-## 2026-10-01 - Layout e manual do Associativo publicados
-
-- PR #122 integrado; CI final do PR 36919448507 e da main 36923454213 verdes.
-- Publica f1d71da81a21cf139acc26b95a6cacc218b79325 pela imagem imutavel da CI,
-  com onze camadas, dois perfis, checksum, backup, CAS e rollback preparados.
-- Health local/publico e Nginx aprovados; doze GETs anonimos, concorrencia quatro,
-  sem erros, com estoque e snapshot negados por 401. Nao e prova de capacidade.
-- UI autenticada em 1280x580: overflow global zero nos tres temas, dez linhas,
-  guia 32px e largura intrinseca, contorno 8px e foco dourado metalizado.
-- Guia abre/fecha por Escape e devolve foco; zero erros/avisos de console.
-  Nenhuma unidade real foi selecionada; nenhuma proposta foi criada ou alterada.
-- Em janelas muito baixas, mobile e zoom restrito, a rolagem continua acessivel.
-  Na observacao 1280x529 houve 16px de rolagem, sem recortar o rodape.
-- Registro final publicado no Git e sincronizado com Obsidian, sem novo deploy
-  por esta atualizacao exclusivamente documental.
-- Concilia os registros com o PR #123, preservando integralmente o Tabelao;
-  o diff deste fechamento contra a main permanece restrito a documentacao.
-
 ## 2026-10-01 - Cabecalhos legiveis e colunas centralizadas no Tabelao
 
 - Remove as fontes de 4/6px dos cabecalhos: titulos e conteudo compartilham 10px
@@ -53,7 +35,21 @@
 - CI aprova banco, restore, E2E e matriz funcional: 40 navegacoes, 193 axe,
   zoom/teclado e 30 capturas do manual. Onze diferencas visuais exclusivas do
   Associativo revisadas e promovidas; demais 182 referencias preservadas.
-- CI final e publicacao pendentes; thresholds visuais nao foram relaxados.
+- PR #122 integrado; CI final do PR 36919448507 e da main 36923454213 verdes.
+  Thresholds visuais nao foram relaxados.
+- Publica f1d71da81a21cf139acc26b95a6cacc218b79325 pela imagem imutavel da CI,
+  com onze camadas, dois perfis, checksum, backup, CAS e rollback preparados.
+- Health local/publico e Nginx aprovados; doze GETs anonimos, concorrencia quatro,
+  sem erros, com estoque e snapshot negados por 401. Nao e prova de capacidade.
+- UI autenticada em 1280x580: overflow global zero nos tres temas, dez linhas,
+  guia 32px e largura intrinseca, contorno 8px e foco dourado metalizado.
+- Guia abre/fecha por Escape e devolve foco; zero erros/avisos de console.
+  Nenhuma unidade real foi selecionada; nenhuma proposta foi criada ou alterada.
+- Em janelas muito baixas, mobile e zoom restrito, a rolagem continua acessivel.
+  Na observacao 1280x529 houve 16px de rolagem, sem recortar o rodape.
+- Registro final publicado no Git e sincronizado com Obsidian, sem novo deploy
+  por esta atualizacao exclusivamente documental. Registro mantido nesta secao
+  do Associativo, preservando o trabalho simultaneo do Tabelao no PR #123.
 
 ## 2026-10-01 - Rodape alinhado publicado
 
