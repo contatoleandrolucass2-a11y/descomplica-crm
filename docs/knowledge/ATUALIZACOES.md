@@ -15,8 +15,11 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   empilhamento correto no celular, sem erros ou avisos no console.
 - Matriz de navegacao 40/40 aprovada nos quatro simuladores, tres temas e dez
   larguras por rota, sem erros de runtime.
+- CI 36862800456 aprovou validacao Linux, banco, E2E e restore isolado. Tres
+  diferencas visuais esperadas em 768, 1024 e 1280px foram inspecionadas e
+  promovidas pela rotina canonica; outras 190 referencias foram preservadas.
 - Lint, tipos, teste focado e build aprovados. Suite Windows: 994 aprovados,
-  um skip e sete falhas de POSIX/symlink ou timeout Chrome; CI Linux pendente.
+  um skip e sete falhas de POSIX/symlink ou timeout Chrome; CI Linux final pendente.
 - Preservar textos, tres temas, estoque, simulacao e demais rotas.
 
 ## 2026-10-01: Filtros compactos publicados e conferidos

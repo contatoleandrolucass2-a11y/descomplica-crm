@@ -6,8 +6,11 @@
 - Em telas estreitas, mantem os textos empilhados sem sobreposicao ou overflow.
 - Regressao estatica e matriz local 40/40 aprovadas: tres temas, dez larguras
   por simulador e diferenca de 0px no desktop observado.
+- CI 36862800456 aprovou Linux, banco, E2E e restore; a matriz funcional passou
+  e sinalizou tres capturas esperadas do Associativo. Revisadas e promovidas
+  transacionalmente, preservando as outras 190 referencias e os limiares.
 - Lint, tipos e build aprovados; 994 testes passaram, um skip e sete falhas
-  locais de POSIX/symlink ou timeout do parser Chrome. CI Linux pendente.
+  locais de POSIX/symlink ou timeout do parser Chrome. CI Linux final pendente.
 - Evidencia: docs/audits/rodape-associativo-2026-10-01.md.
 
 ## 2026-10-01 - Filtros compactos publicados

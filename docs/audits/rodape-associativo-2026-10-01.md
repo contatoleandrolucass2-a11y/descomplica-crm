@@ -24,8 +24,14 @@
 - `pnpm lint`, `pnpm typecheck` e `pnpm build`: aprovados.
 - `pnpm test`: 994 aprovados, um ignorado e sete falhas locais sem relacao com
   o diff: permissoes POSIX, symlink no Windows e timeout do parser Chrome.
+- CI 36862800456: validacao Linux, banco, E2E e restore isolado aprovados.
+- A matriz funcional autenticada concluiu; o comparador sinalizou somente tres
+  capturas do Associativo em 768, 1024 e 1280px, com razoes entre 1,13% e 1,36%.
+- As tres imagens foram revisadas e promovidas pela rotina canonica transacional
+  com rollback. As demais 190 referencias e os limiares 1%/16 foram preservados.
+- Testes de integridade da referencia e do layout: 9/9 aprovados.
 
 ## Pendencias
 
-- Validar a matriz Linux, referencias visuais e CI no SHA candidato.
+- Reexecutar a CI no SHA candidato com as referencias promovidas.
 - Publicar somente com os gates verdes, imagem imutavel, backup, CAS e rollback.
