@@ -4,6 +4,23 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-01: Cabecalhos e alinhamento do Tabelao
+
+- Status: pendente_validacao; branch codex/tabelao-cabecalhos-centralizados.
+- Fonte: pedido e captura do usuario, TabelaoClient.tsx, investor-archive.css,
+  scripts/qa/authenticated-visual.mjs e auditoria tabelao-cabecalhos-2026-10-01.
+- Titulo e corpo devem compartilhar o tamanho de fonte. Remover regras de
+  4/6px, permitir altura automatica e manter limites de largura para quebra.
+- Mover uma coluna exige atualizar colgroup, thead e tbody juntos. Com rowspan,
+  td:first-child nao identifica a primeira coluna logica; conferir padding e
+  geometria das celulas pelos headers depois de filtros e ordenacao.
+- Centralizacao inclui th de rowgroup, td, titulos e wrappers de texto.
+- Sete cenarios locais aprovados, com componente/CSS reais e fixtures; colunas
+  compactas mantidas em 115/145/73px externos, sem corte de texto ou overflow.
+  Typecheck e 55 testes focados aprovados; 992 testes Windows aprovados,
+  quatro skips e seis falhas POSIX conhecidas. Build e lint do codigo aprovados.
+  CI/publicacao pendentes.
+
 ## 2026-10-01: Alinhamento do fechamento do Associativo
 
 - Status: validado; runtime 5878c3bce83990496d886c3311527724beb7d9f9.

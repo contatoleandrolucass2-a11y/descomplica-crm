@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-01 - Titulos e colunas do Tabelao
+
+- Igualar a fonte dos cabecalhos ao tamanho das linhas, preservando a compactacao.
+- Mover Endereco para depois de Empreendimento e centralizar textos e valores.
+- Preservar quebras de linha, agrupamentos, filtros, plantas e valores distintos.
+
 ## 2026-10-01 - Rodape alinhado disponivel na web
 
 - Publica a release 5878c3b com o contato da direita alinhado ao aviso da esquerda.
