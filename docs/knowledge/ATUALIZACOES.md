@@ -6,6 +6,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-30: Estoque Associativo compacto e selecao dourada
 
+- CI 36800158280: gates funcionais, banco, restore, E2E, 40 navegacoes,
+  193 axe e zoom aprovados. Onze capturas revisadas/promovidas, exclusivas
+  do Associativo; demais 182 e thresholds preservados. CI final/deploy pendentes.
+
 - Proposta selecionada: regra antiga movia a ajuda para segunda linha em
   561-1100px com cabecalho fixo de 40px. Mantem a ajuda na terceira coluna;
   QA exige botao contido e sem colidir com titulo/conteudo seguinte.

@@ -2,6 +2,10 @@
 
 ## 2026-09-30 - Estoque Associativo e filtros compactos
 
+- CI 36800158280: gates funcionais, banco, restore, E2E, 40 navegacoes,
+  193 axe e zoom aprovados. Revisa/promove onze capturas somente Associativo,
+  preservando outras 182 e thresholds 1%/16. Nova CI final/publicacao pendentes.
+
 - Corrige o guia da proposta entre 561px e 1100px: permanece na linha do
   cabecalho, sem transbordar sobre o bloqueio. QA passa a exigir contencao.
 

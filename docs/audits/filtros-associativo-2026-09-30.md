@@ -18,6 +18,17 @@ Branch: `codex/associativo-filtros-compactos`.
 
 ## Validacao
 
+- CI 36800158280, captura b414e8b864db96abdc48be5dec35b0791eed908b:
+  validacao Linux, banco, restore, E2E e gates funcionais aprovados. Matriz
+  completou 40 navegacoes, 140 rotas, 80 temas, 193 axe e zoom sem falhas.
+  Onze diferencas visuais esperadas somente Associativo foram inspecionadas
+  e promovidas pelo mecanismo canonico, com hashes e transacao/rollback.
+  Demais 182 capturas preservadas; thresholds permanecem 1%/16 por canal.
+  A CI final com referencias atualizadas e publicacao ainda estao pendentes.
+- Reexecucao local com Geist real: 30 combinacoes de largura/tema aprovadas;
+  390px/toque, 768px/ponteiro e 1440px/toque aprovados com metadados de data,
+  guia/Escape/foco, ajuda, limpeza preservando proposta e axe sem violacoes.
+
 - CI 36798139339 aprovou E2E, banco, restore e validacao Linux. A matriz parou
   na altura do guia em 768px: com Geist, a largura em vw quebrava o texto.
   Corrige para largura estavel limitada ao conteiner, preservando a assercao.
