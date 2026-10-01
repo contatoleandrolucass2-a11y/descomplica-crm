@@ -40,7 +40,7 @@ migrations ou workflows n8n.
 - Capturas desktop e tablet inspecionadas. Harness usa fonte local de fallback
   e nao substitui a matriz autenticada da CI com fontes reais, temas e axe.
 - Lint simples encontrou bundles locais gerados em test-results (nao versionados).
-  pnpm lint --ignore-pattern "test-results/**" passou, excluindo somente esses
+  pnpm lint --ignore-pattern "test-results/\*\*" passou, excluindo somente esses
   artefatos. CI limpa continua executando pnpm lint sem exclusoes extras.
 - Build Next 16.3.6 aprovado, com todas as 41 paginas geradas.
 
