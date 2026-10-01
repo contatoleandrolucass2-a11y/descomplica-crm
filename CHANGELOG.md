@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-30 - Topo compacto disponivel na web
+
+- Publica 843fd11: titulo e Guia completo proximos da linha do menu.
+- Confirma botao menor e guia funcional, preservando cores e regras do sistema.
+
 ## 2026-09-30 - Topo do Associativo mais proximo ao menu
 
 - Atualiza onze referencias visuais revisadas do Associativo, sem alterar as demais.
