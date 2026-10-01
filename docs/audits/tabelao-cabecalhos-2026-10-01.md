@@ -46,8 +46,21 @@ migrations ou workflows n8n.
 
 ## Gates e publicacao
 
-CI, referencias visuais e publicacao pendentes.
-Revisar somente capturas alteradas pelo pedido e preservar as demais e limiares.
+- CI 36916047513, head 0c2269315231df65666eb9c1423e64d3b314d8d9:
+  lint simples, tipos, testes Linux, build, banco, restore isolado e E2E aprovados.
+- Captura limpa 434dc8dafe2522bd775a17ecd8706f982be7cfce, arvore identica ao head.
+  Apenas fixtures sinteticas locais, sem credenciais ou storage state persistidos.
+- Toda a matriz funcional aprovada: 140 rotas, 80 temas, 193 axe, 100 verificacoes
+  de zoom e os 20 contratos do Tabelao, incluindo concorrencia e recuperacao.
+- Sete diferencas visuais esperadas inspecionadas individualmente: desktop,
+  notebook, dois tablets e os tres temas. Cabecalhos legiveis, Endereco na
+  terceira coluna e valores centralizados; rolamento restrito ao quadro.
+- Promocao transacional pelas funcoes canonicas de authenticated-visual.mjs.
+  Hashes e proveniencia verificados; 186 referencias restantes preservadas
+  byte a byte. Sem mudar thresholds, fixtures, assercoes ou gates para passar.
+- Manifesto promovido: eab74fdeb3c3ec59fe363044ea4af12c3321b38eee55982238db6b21d818e92f.
+
+CI final e publicacao pendentes.
 Publicar pelo PR/CI com imagem imutavel, backup, CAS e verificacao posterior,
 conforme docs/runbooks/automatic-publication.md. Evidencias finais no PR com
 SHA, CI, identidade da imagem, backup, saude, limites e sincronizacao.

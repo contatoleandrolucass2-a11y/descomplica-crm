@@ -19,7 +19,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   compactas mantidas em 115/145/73px externos, sem corte de texto ou overflow.
   Typecheck e 55 testes focados aprovados; 992 testes Windows aprovados,
   quatro skips e seis falhas POSIX conhecidas. Build e lint do codigo aprovados.
-  CI/publicacao pendentes.
+  CI 36916047513 aprovou Linux, banco, restore, E2E e toda a matriz funcional.
+- Sete capturas revisadas com fontes reais e tres temas, apenas do Tabelao;
+  promocao canonica preservou as outras 186 referencias e os limiares 1%/16.
+  CI final/publicacao pendentes; resultado da release sera registrado no PR #123.
 
 ## 2026-10-01: Alinhamento do fechamento do Associativo
 

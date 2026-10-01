@@ -5,6 +5,7 @@
 - Igualar a fonte dos cabecalhos ao tamanho das linhas, preservando a compactacao.
 - Mover Endereco para depois de Empreendimento e centralizar textos e valores.
 - Preservar quebras de linha, agrupamentos, filtros, plantas e valores distintos.
+- Atualizar sete referencias visuais revisadas do Tabelao, preservando as demais.
 
 ## 2026-10-01 - Rodape alinhado disponivel na web
 

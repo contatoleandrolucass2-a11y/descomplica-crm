@@ -12,7 +12,11 @@
   quatro skips e seis falhas POSIX conhecidas; CI Linux obrigatoria.
 - Evidencias e limites: docs/audits/tabelao-cabecalhos-2026-10-01.md.
 - Lint do codigo (sem bundles locais de test-results) e build aprovados.
-- CI, revisao das capturas alteradas e publicacao ainda pendentes.
+- CI 36916047513 aprovou validacao Linux, banco, restore e E2E; matriz funcional
+  passou com 140 rotas, 80 temas, 193 axe e 100 verificacoes de zoom.
+- Sete capturas alteradas somente do Tabelao revisadas e promovidas pela rotina
+  canonica; 186 referencias preservadas byte a byte, sem alterar limiares.
+- CI final e publicacao pendentes; fechamento e identidade da release no PR #123.
 
 ## 2026-10-01 - Rodape alinhado publicado
 
