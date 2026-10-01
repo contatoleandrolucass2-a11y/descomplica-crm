@@ -496,6 +496,7 @@ export function TabelaoClient() {
             <colgroup>
               <col className="investor-stock-col-business" />
               <col className="tabelao-stock-col-project" />
+              <col className="tabelao-stock-col-address" />
               <col className="investor-stock-col-area" />
               <col className="investor-stock-col-date" />
               <col className="investor-stock-col-plant" />
@@ -503,7 +504,6 @@ export function TabelaoClient() {
               <col className="investor-stock-col-price" />
               <col className="tabelao-stock-col-cashback" />
               <col className="tabelao-stock-col-appraisal" />
-              <col className="tabelao-stock-col-address" />
               <col className="tabelao-stock-col-progress" />
               <col className="tabelao-stock-col-description" />
             </colgroup>
@@ -514,6 +514,9 @@ export function TabelaoClient() {
                 </th>
                 <th scope="col" id="tabelao-project">
                   Empreendimento
+                </th>
+                <th scope="col" id="tabelao-address" aria-label="Logradouro Obra / Número / Bairro">
+                  Endereço
                 </th>
                 <th scope="col" id="tabelao-area">
                   Metragem
@@ -535,9 +538,6 @@ export function TabelaoClient() {
                 </th>
                 <th scope="col" id="tabelao-appraisal" aria-label="Valor de Avaliação Bancária">
                   Avaliação
-                </th>
-                <th scope="col" id="tabelao-address" aria-label="Logradouro Obra / Número / Bairro">
-                  Endereço
                 </th>
                 <th scope="col" id="tabelao-progress" aria-label="Total do andamento da obra (%)">
                   % Obra
@@ -621,6 +621,17 @@ export function TabelaoClient() {
                           </th>
                         </>
                       ) : null}
+                      {addressSpan > 0 ? (
+                        <td
+                          className="tabelao-stock-long-text"
+                          data-label="Endereço"
+                          headers={`tabelao-address ${groupHeaders}`}
+                          rowSpan={addressSpan}
+                          title={address}
+                        >
+                          <span className="tabelao-stock-wrapped-text">{address}</span>
+                        </td>
+                      ) : null}
                       <td
                         className="tabelao-stock-area"
                         data-label="Metragem"
@@ -675,17 +686,6 @@ export function TabelaoClient() {
                       >
                         {formatMoneyValue(item.appraisal)}
                       </td>
-                      {addressSpan > 0 ? (
-                        <td
-                          className="tabelao-stock-long-text"
-                          data-label="Endereço"
-                          headers={`tabelao-address ${groupHeaders}`}
-                          rowSpan={addressSpan}
-                          title={address}
-                        >
-                          <span className="tabelao-stock-wrapped-text">{address}</span>
-                        </td>
-                      ) : null}
                       <td
                         className="tabelao-stock-progress"
                         data-label="% Obra"

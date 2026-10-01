@@ -116,6 +116,7 @@ describe("Tabelão protegido", () => {
     const visibleColumnLabels = [
       "Incorporadora",
       "Empreendimento",
+      "Endereço",
       "Metragem",
       "Entrega",
       "Planta",
@@ -123,7 +124,6 @@ describe("Tabelão protegido", () => {
       "Valor Imóvel",
       "Volta ao Caixa",
       "Avaliação",
-      "Endereço",
       "% Obra",
       "Limitador",
     ];
@@ -136,6 +136,13 @@ describe("Tabelão protegido", () => {
     for (const label of visibleColumnLabels) {
       expect(client).toContain(`data-label="${label}"`);
     }
+    const renderedCellLabels = [...client.matchAll(/data-label="([^"]+)"/g)].map(
+      (match) => match[1],
+    );
+    expect(renderedCellLabels).toEqual(visibleColumnLabels);
+    expect(client.indexOf('className="tabelao-stock-col-address"')).toBeLessThan(
+      client.indexOf('className="investor-stock-col-area"'),
+    );
     for (const accessibleLabel of [
       "Data de Entrega",
       "Unidades no estoque publicado",
@@ -234,11 +241,14 @@ describe("Tabelão protegido", () => {
     );
     expect(styles).toMatch(/\.tabelao-page-shell \.investor-stock-table col\s*\{[^}]*width: auto;/);
     expect(styles).toMatch(
-      /\.investor-page-shell\.tabelao-page-shell \.investor-stock-table thead th\s*\{[^}]*font-size: 6px !important;/,
+      /\.investor-page-shell\.tabelao-page-shell \.investor-stock-table :is\(th, td\)\s*\{[^}]*font-size: var\(--tabelao-cell-font-size\) !important;[^}]*text-align: center;[^}]*vertical-align: middle;/,
     );
     expect(styles).toMatch(
-      /\.investor-page-shell\.tabelao-page-shell \.investor-stock-table thead th#tabelao-business\s*\{[^}]*font-size: 4px !important;/,
+      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*--tabelao-cell-font-size: 10px;/,
     );
+    expect(styles).toContain("--tabelao-cell-font-size: 12px;");
+    expect(styles).not.toContain("font-size: 6px !important;");
+    expect(styles).not.toContain("font-size: 4px !important;");
     expect(styles).not.toContain("min-width: 2080px");
     expect(styles).not.toMatch(
       /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*table-layout: fixed;/,

@@ -6,6 +6,13 @@
   texto, contornos discretos e 43 perguntas do anexo organizadas por assunto.
 - Confirma a pagina online nos tres temas, preservando o estoque e os calculos.
 
+## 2026-10-01 - Titulos e colunas do Tabelao
+
+- Igualar a fonte dos cabecalhos ao tamanho das linhas, preservando a compactacao.
+- Mover Endereco para depois de Empreendimento e centralizar textos e valores.
+- Preservar quebras de linha, agrupamentos, filtros, plantas e valores distintos.
+- Atualizar sete referencias visuais revisadas do Tabelao, preservando as demais.
+
 ## 2026-10-01 - Associativo compacto e manual completo
 
 - Reduz espacos da tela inicial, contornos duplicados e sombras dos paineis.

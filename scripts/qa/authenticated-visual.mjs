@@ -1748,6 +1748,16 @@ function readTabelaoCompactLayout() {
   });
   return {
     columns,
+    columnsAligned: [...table.querySelectorAll("tbody th, tbody td")].every((cell) => {
+      const header = document.getElementById(cell.headers.split(/\s+/)[0]);
+      if (!header) return false;
+      const cellBox = cell.getBoundingClientRect();
+      const headerBox = header.getBoundingClientRect();
+      return (
+        Math.abs(cellBox.left - headerBox.left) <= 1 &&
+        Math.abs(cellBox.width - headerBox.width) <= 1
+      );
+    }),
     compactFrameInsidePanel:
       resultBox != null &&
       panelBox != null &&
@@ -1867,6 +1877,7 @@ async function checkTabelaoCompactFixture(page) {
       (await page.locator(".investor-stock-table").getAttribute("aria-rowcount")) ===
         String(idsByGroup.flat().length + 1) &&
       layout.compactColumnWidths &&
+      layout.columnsAligned &&
       layout.compactTextFullyVisible &&
       layout.compactFrameFitsTable &&
       layout.compactFrameInsidePanel;
@@ -1960,8 +1971,6 @@ async function checkTabelaoValidation(page, origin) {
           .querySelector(".investor-stock-panel > .investor-section-heading")
           ?.getBoundingClientRect();
         const syncBox = document.querySelector(".investor-stock-sync")?.getBoundingClientRect();
-        const businessHeader = document.querySelector("#tabelao-business");
-        const projectHeader = document.querySelector("#tabelao-project");
         const tableStyle = table == null ? null : getComputedStyle(table);
         const cellContentWidth = (cell) => {
           const range = document.createRange();
@@ -2015,6 +2024,7 @@ async function checkTabelaoValidation(page, origin) {
             [
               "Incorporadora",
               "Empreendimento",
+              "Endereço",
               "Metragem",
               "Entrega",
               "Planta",
@@ -2022,7 +2032,6 @@ async function checkTabelaoValidation(page, origin) {
               "Valor Imóvel",
               "Volta ao Caixa",
               "Avaliação",
-              "Endereço",
               "% Obra",
               "Limitador",
             ].every((label, index) => columnLabels[index] === label),
@@ -2072,16 +2081,36 @@ async function checkTabelaoValidation(page, origin) {
             getComputedStyle(results).maxHeight === "none",
           automaticColumnWidths:
             tableStyle?.tableLayout === "auto" && (contentFitColumns || tableFillsAvailableWidth),
-          businessHeaderReduced:
-            businessHeader != null &&
-            projectHeader != null &&
-            Math.abs(Number.parseFloat(getComputedStyle(businessHeader).fontSize) - 4) < 0.1 &&
-            columnHeaders
-              .filter((header) => header !== businessHeader)
-              .every(
-                (header) =>
-                  Math.abs(Number.parseFloat(getComputedStyle(header).fontSize) - 6) < 0.1,
-              ),
+          headersMatchRows:
+            firstRow != null &&
+            columnHeaders.every(
+              (header) =>
+                getComputedStyle(header).fontSize ===
+                getComputedStyle(firstRow.querySelector("td")).fontSize,
+            ),
+          cellsCentered: [...table.querySelectorAll("th, td")].every((cell) => {
+            const style = getComputedStyle(cell);
+            const wrapper = cell.querySelector(
+              ".investor-stock-product-text, .tabelao-stock-wrapped-text",
+            );
+            return (
+              style.textAlign === "center" &&
+              style.verticalAlign === "middle" &&
+              (wrapper == null || getComputedStyle(wrapper).textAlign === "center")
+            );
+          }),
+          headersFullyVisible: columnHeaders.every((header) => {
+            const range = document.createRange();
+            range.selectNodeContents(header);
+            const box = header.getBoundingClientRect();
+            return [...range.getClientRects()].every(
+              (rect) =>
+                rect.left >= box.left - 1 &&
+                rect.right <= box.right + 1 &&
+                rect.top >= box.top - 1 &&
+                rect.bottom <= box.bottom + 1,
+            );
+          }),
           fullTextVisible,
           horizontalOverflowHandled,
         };
@@ -2091,6 +2120,7 @@ async function checkTabelaoValidation(page, origin) {
 
     const compactLayout = await page.evaluate(readTabelaoCompactLayout);
     initial.compactColumnWidths = compactLayout.compactColumnWidths;
+    initial.columnsAligned = compactLayout.columnsAligned;
     initial.compactTextFullyVisible = compactLayout.compactTextFullyVisible;
     initial.compactFrameFitsTable = compactLayout.compactFrameFitsTable;
     initial.compactFrameInsidePanel = compactLayout.compactFrameInsidePanel;

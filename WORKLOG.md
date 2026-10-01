@@ -15,6 +15,29 @@
   Na observacao 1280x529 houve 16px de rolagem, sem recortar o rodape.
 - Registro final publicado no Git e sincronizado com Obsidian, sem novo deploy
   por esta atualizacao exclusivamente documental.
+- Concilia os registros com o PR #123, preservando integralmente o Tabelao;
+  o diff deste fechamento contra a main permanece restrito a documentacao.
+
+## 2026-10-01 - Cabecalhos legiveis e colunas centralizadas no Tabelao
+
+- Remove as fontes de 4/6px dos cabecalhos: titulos e conteudo compartilham 10px
+  no desktop e 12px abaixo de 1240px, com altura automatica e quebra de linha.
+- Move Endereco no colgroup, cabecalho e corpo; preserva rowspans e associacoes.
+- Centraliza horizontal e verticalmente todas as celulas, incluindo grupos.
+- Corrige padding do endereco quando ele e a primeira celula fisica da linha.
+- Sete cenarios locais com componente/CSS reais e dados sinteticos aprovados;
+  55 testes focados e typecheck aprovados. Suite Windows: 992 aprovados,
+  quatro skips e seis falhas POSIX conhecidas; CI Linux obrigatoria.
+- Evidencias e limites: docs/audits/tabelao-cabecalhos-2026-10-01.md.
+- Lint do codigo (sem bundles locais de test-results) e build aprovados.
+- CI 36916047513 aprovou validacao Linux, banco, restore e E2E; matriz funcional
+  passou com 140 rotas, 80 temas, 193 axe e 100 verificacoes de zoom.
+- Sete capturas alteradas somente do Tabelao revisadas e promovidas pela rotina
+  canonica; 186 referencias preservadas byte a byte, sem alterar limiares.
+- CI final 36919972124 aprovada antes da integracao da main f1d71da (PR #122).
+- Preserva o Associativo e suas onze capturas; concilia apenas metadados de
+  referencia por rota, mantendo proveniencia. Nova CI conjunta obrigatoria.
+- Publicacao pendente; fechamento e identidade da release no PR #123.
 
 ## 2026-10-01 - Layout e manual do Associativo
 
