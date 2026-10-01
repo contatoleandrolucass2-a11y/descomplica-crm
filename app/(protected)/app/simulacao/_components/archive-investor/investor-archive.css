@@ -51,6 +51,7 @@
 
 .investor-page-shell.investor-associative-table-page .investor-hero-guide .investor-proposal-help-cta {
   display: flex;
+  width: min(260px, 100%);
   max-width: none;
   align-items: center;
   gap: 4px;

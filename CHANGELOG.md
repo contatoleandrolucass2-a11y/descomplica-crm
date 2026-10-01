@@ -2,6 +2,8 @@
 
 ## 2026-09-30 - Estoque e filtros mais compactos
 
+- Mantem o texto do guia em uma linha tambem no tablet com a fonte real.
+
 - Atualiza a regressao autenticada para exigir o novo cabecalho sem rotulos extras.
 
 - Restaura dourado na unidade selecionada e alinha as ajudas aos titulos.

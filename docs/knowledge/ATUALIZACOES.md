@@ -6,6 +6,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-09-30: Estoque Associativo compacto e selecao dourada
 
+- CI 36798139339 aprova E2E; falha visual em 768px mostrou o guia em duas linhas.
+  Largura em vw encolhia o texto junto da ajuda. Usa 260px limitado ao conteiner;
+  conferir fontes reais, nao apenas fallback Arial, antes de homologar geometria.
+
 - CI 36797025028: validacao Linux, banco, restore e concorrencia sintetica passam.
   E2E exigia Filtros do estoque; contrato atualizado para ajuda/acao no cabecalho.
   Matriz local completa passou em 40 navegacoes/tres temas. CI integral pendente.

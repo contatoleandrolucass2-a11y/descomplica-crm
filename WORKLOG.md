@@ -2,6 +2,9 @@
 
 ## 2026-09-30 - Estoque Associativo e filtros compactos
 
+- CI 36798139339 aprova E2E, mas identifica quebra do botao em 768px com Geist.
+  Corrige largura estavel de 260px limitada ao conteiner; nao relaxa altura/testes.
+
 - CI 36797025028 aprova validacao Linux/banco/restore e concorrencia sintetica;
   E2E ainda exigia o rotulo removido. Atualiza o contrato para o novo cabecalho.
 - Matriz local completa aprovada: 40 navegacoes/tres temas, sem erros de runtime.

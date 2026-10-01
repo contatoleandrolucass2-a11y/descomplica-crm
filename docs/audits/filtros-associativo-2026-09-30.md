@@ -16,6 +16,11 @@ Branch: `codex/associativo-filtros-compactos`.
 
 ## Validacao
 
+- CI 36798139339 aprovou E2E, banco, restore e validacao Linux. A matriz parou
+  na altura do guia em 768px: com Geist, a largura em vw quebrava o texto.
+  Corrige para largura estavel limitada ao conteiner, preservando a assercao.
+  Nao promoveu referencias nem publicou esta rodada incompleta.
+
 - Lint, tipos e build aprovados localmente; geometria aprovada em dez larguras
   e tres temas, incluindo selecao dourada persistente.
 - Dois contextos de toque: botao 44px, guia/Escape/foco, ajuda dos filtros,
