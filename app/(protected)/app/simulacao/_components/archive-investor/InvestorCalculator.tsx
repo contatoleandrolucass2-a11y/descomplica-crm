@@ -915,11 +915,11 @@ export function InvestorInfoHint({ label, title, description, variant = "default
   </span>;
 }
 
-export function InvestorGuideLauncher() {
+export function InvestorGuideLauncher({ compact = false }: { compact?: boolean }) {
   return <aside className="investor-hero-guide" aria-label="Guia completo do simulador" data-tour="welcome">
     <div className="investor-proposal-help-cta">
       <span className="investor-hero-guide-information" data-tour="information">
-        <small>Guia completo</small>
+        {!compact && <small>Guia completo</small>}
         <InvestorInfoHint label="passo a passo" title="Como funciona o guia?" description="Abra o guia e leia um passo por vez. Ele mostra onde clicar, o que digitar e como conferir o resultado. O guia não muda nenhum valor." />
       </span>
       <button
@@ -2460,6 +2460,7 @@ export function InvestorCalculator({
   directVisualLayout?: boolean;
 }) {
   const usesDirectDesign = directTable || directVisualLayout;
+  const compactAssociativeStock = directVisualLayout && !directTable;
   const annualMode = directVisualLayout;
   const tourSteps = directTable ? DIRECT_TABLE_TOUR_STEPS : directVisualLayout ? ASSOCIATIVE_TOUR_STEPS : INVESTOR_TOUR_STEPS;
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -3971,6 +3972,11 @@ export function InvestorCalculator({
     );
   }
 
+  const stockSync = <div className="investor-stock-sync" role="status" aria-live="polite" aria-atomic="true">
+    <small>{inventoryStatus === "ready" ? `${inventory.length.toLocaleString("pt-BR")} unidades` : inventoryStatus === "error" ? "Estoque indisponível" : "Carregando estoque"}</small>
+    {inventoryMeta?.sourceKind === "versioned-snapshot" && inventoryMeta.snapshotReferenceDate ? <small>Arquivo {inventoryMeta.source || "ESTOQUE SPC.xlsx"} · referência {formatDate(inventoryMeta.snapshotReferenceDate)}</small> : inventoryMeta?.generatedAt ? <small>Atualizado {dateTime.format(new Date(inventoryMeta.generatedAt))}</small> : directTable && inventoryStatus === "ready" ? <small>Fonte viva {inventoryMeta?.source || "estoque protegido"} · atualização não informada</small> : null}
+  </div>;
+
   return (
     <div className={`investor-workspace${usesDirectDesign ? " investor-direct-workspace" : ""}${directVisualLayout ? " investor-direct-design-copy" : ""}${directTable ? directPrintReady ? " investor-direct-print-ready" : " investor-direct-print-blocked" : ""}`}>
       {directTable && !directPrintReady ? <section className="investor-direct-print-blocked-notice" aria-label="Impressão indisponível">
@@ -4022,15 +4028,15 @@ export function InvestorCalculator({
       <section className="investor-stock-panel" aria-labelledby="investor-stock-title">
         <header className="investor-section-heading">
           <span>01</span>
-          <div><p>Estoque SPC</p><h2 id="investor-stock-title">Escolha a unidade</h2></div>
-          <div className="investor-stock-sync" role="status" aria-live="polite" aria-atomic="true">
-            <small>{inventoryStatus === "ready" ? `${inventory.length.toLocaleString("pt-BR")} unidades` : inventoryStatus === "error" ? "Estoque indisponível" : "Carregando estoque"}</small>
-            {inventoryMeta?.sourceKind === "versioned-snapshot" && inventoryMeta.snapshotReferenceDate ? <small>Arquivo {inventoryMeta.source || "ESTOQUE SPC.xlsx"} · referência {formatDate(inventoryMeta.snapshotReferenceDate)}</small> : inventoryMeta?.generatedAt ? <small>Atualizado {dateTime.format(new Date(inventoryMeta.generatedAt))}</small> : directTable && inventoryStatus === "ready" ? <small>Fonte viva {inventoryMeta?.source || "estoque protegido"} · atualização não informada</small> : null}
-          </div>
+          <div><p>Estoque SPC</p>{compactAssociativeStock ? <div className="investor-stock-title-row"><h2 id="investor-stock-title">Escolha a unidade</h2><InvestorInfoHint label="orientação dos filtros" title="Como usar os filtros?" description="Use os filtros para localizar uma unidade elegível para a Tabela Associativo. Vagas de garagem avulsas não são comercializadas nesta simulação." /></div> : <h2 id="investor-stock-title">Escolha a unidade</h2>}</div>
+          {compactAssociativeStock ? <div className="investor-stock-header-actions">
+            {stockSync}
+            <button className="investor-stock-clear" type="button" disabled={inventoryStatus !== "ready"} onClick={clearFilters}>Limpar filtros</button>
+          </div> : stockSync}
         </header>
 
         <div className="investor-stock-filters" data-tour="filters">
-          <div className="investor-filter-heading">
+          {!compactAssociativeStock && <div className="investor-filter-heading">
             <div className="investor-filter-title-row">
               <strong>Filtros do estoque</strong>
               <InvestorInfoHint
@@ -4040,7 +4046,7 @@ export function InvestorCalculator({
               />
             </div>
             <button type="button" disabled={inventoryStatus !== "ready"} onClick={clearFilters}>Limpar filtros</button>
-          </div>
+          </div>}
           <label><span>Incorporadora</span><select disabled={inventoryStatus !== "ready"} value={businessUnit} onChange={(event) => updateFilter(setBusinessUnit, event.target.value)}><option value="Todas">Todas ({filterOptions.totals.businessUnit.toLocaleString("pt-BR")})</option><InvestorFilterOptions options={filterOptions.businessUnits} /></select></label>
           <label><span>Nome do Empreendimento</span><select disabled={inventoryStatus !== "ready"} value={project} onChange={(event) => updateFilter(setProject, event.target.value)}><option value="Todos">Todos ({filterOptions.totals.project.toLocaleString("pt-BR")})</option><InvestorFilterOptions options={filterOptions.projects} /></select></label>
           <label><span>Região</span><select disabled={inventoryStatus !== "ready"} value={region} onChange={(event) => updateFilter(setRegion, event.target.value)}><option value="Todas">Todas ({filterOptions.totals.region.toLocaleString("pt-BR")})</option><InvestorFilterOptions options={filterOptions.regions} /></select></label>
@@ -4153,7 +4159,7 @@ export function InvestorCalculator({
                 <div className="investor-proposal-help-action">
                   <InvestorInfoHint label="guia da proposta" title="O que este guia explica?" description={directTable ? "Mostra a proposta inteira em ordem, com palavras simples: imóvel, renda, entrada, sinais, intermediárias, pré-chaves, pós-chaves, resultado e conferência final." : annualMode ? "Ensina a preencher Financiamento, Subsídio, FGTS, Cheque Moradia, Entrada, parcelas e Ranking. Também explica sinais, anuais, ajustes e a conferência final." : "Explica entrada, pagamentos e parcelas em ordem."} />
                   <div className="investor-proposal-help-cta">
-                    <small>Guia completo</small>
+                    {!compactAssociativeStock && <small>Guia completo</small>}
                     <button
                       ref={directTable ? proposalTourTrigger : undefined}
                       className="investor-guided-start"

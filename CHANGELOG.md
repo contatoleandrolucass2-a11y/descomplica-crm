@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-30 - Estoque e filtros mais compactos
+
+- Atualiza onze referencias visuais revisadas do Associativo, sem mudar as demais.
+
+- Evita sobreposicao do guia da proposta ao abrir uma unidade no tablet.
+
+- Mantem o texto do guia em uma linha tambem no tablet com a fonte real.
+
+- Atualiza a regressao autenticada para exigir o novo cabecalho sem rotulos extras.
+
+- Restaura dourado na unidade selecionada e alinha as ajudas aos titulos.
+- Remove rotulos redundantes e aproxima o botao do guia da linha do menu.
+- Move Limpar filtros para o cabecalho e reduz os espacos vazios do estoque.
+- Mantem os tres temas, dez unidades visiveis e o funcionamento da simulacao.
+
 ## 2026-09-30 - Topo compacto disponivel na web
 
 - Publica 843fd11: titulo e Guia completo proximos da linha do menu.

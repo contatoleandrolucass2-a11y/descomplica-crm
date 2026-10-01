@@ -6,6 +6,7 @@ import sharp from "sharp";
 import {
   checkCompactArchiveHeader,
   checkAssociativeCompactStock,
+  checkAssociativeSelectedGold,
 } from "./associative-compact-layout.mjs";
 
 export const archiveNavigationRoutes = [
@@ -513,8 +514,13 @@ export async function checkArchiveNavigation(
             await expect(filters).toBeVisible();
             assert.equal(
               await filters.evaluate((element) => {
-                const heading = element.querySelector(".investor-filter-heading");
-                const clear = heading?.querySelector("button");
+                const associative = Boolean(element.closest(".investor-associative-table-page"));
+                const heading = associative
+                  ? element.closest(".investor-stock-panel").querySelector(":scope > header")
+                  : element.querySelector(".investor-filter-heading");
+                const clear = heading?.querySelector(
+                  associative ? ".investor-stock-clear" : "button",
+                );
                 const label = element.querySelector(":scope > label");
                 if (!heading || !clear || !label) return false;
                 const bounds = heading.getBoundingClientRect();
@@ -548,6 +554,8 @@ export async function checkArchiveNavigation(
             if (scope === "header-and-content" && route === archiveNavigationRoutes[0]) {
               check.compactStock ??= {};
               check.compactStock[theme] = await checkAssociativeCompactStock(page);
+              await checkAssociativeSelectedGold(page);
+              await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
             }
             if (viewport.width === 320 || viewport.width === 1181) {
               await ensureArchiveNavigationOpen(page);

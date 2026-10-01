@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-09-30 - Estoque Associativo e filtros compactos
+
+- CI 36800158280: gates funcionais, banco, restore, E2E, 40 navegacoes,
+  193 axe e zoom aprovados. Revisa/promove onze capturas somente Associativo,
+  preservando outras 182 e thresholds 1%/16. Nova CI final/publicacao pendentes.
+
+- Corrige o guia da proposta entre 561px e 1100px: permanece na linha do
+  cabecalho, sem transbordar sobre o bloqueio. QA passa a exigir contencao.
+
+- CI 36798139339 aprova E2E, mas identifica quebra do botao em 768px com Geist.
+  Corrige largura estavel de 260px limitada ao conteiner; nao relaxa altura/testes.
+
+- CI 36797025028 aprova validacao Linux/banco/restore e concorrencia sintetica;
+  E2E ainda exigia o rotulo removido. Atualiza o contrato para o novo cabecalho.
+- Matriz local completa aprovada: 40 navegacoes/tres temas, sem erros de runtime.
+
+- Dourado persistente na selecao; icones alinhados e guia sem rotulo redundante.
+- Limpar filtros no cabecalho com metadados a esquerda; filtros sem linha vazia.
+- Compacta margens mantendo dez linhas, estoque completo e alvos de toque.
+- Regras financeiras, temas e outros simuladores preservados.
+- Amplia QA de geometria, selecao, limpeza e preservacao da proposta.
+- Lint/tipos/build aprovados, 30 combinacoes visuais e dois contextos de toque.
+- Seis falhas POSIX no Windows; dois timeouts Obsidian passaram na reexecucao
+  isolada (22 testes). Oito testes Node aprovados. CI Linux exigida.
+- Validacao e publicacao pendentes: docs/audits/filtros-associativo-2026-09-30.md.
+
 ## 2026-09-30 - Topo compacto publicado
 
 - PR #116 integrado apos CI 36777405809 verde. CI main 36780351488 aprovada
