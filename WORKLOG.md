@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-01 - Filtros compactos publicados
+
+- PR #118 integrado com CI 36806006230 verde; CI main 36807945046 aprovada.
+- Publica de72d1bb37b29cae7a61ac3ebd28f745b0e0bc2c com imagem imutavel,
+  checksum, onze camadas e dois perfis comprovados; backup/CAS/rollback preservados.
+- Health confirma a release; doze GETs anonimos sem erros e estoque protegido.
+- Navegador autenticado: titulo a 8px, guia 32px, icones alinhados, filtros
+  proximos da divisoria e dez linhas. Guia/ajuda/Escape/foco passaram, sem erros
+  de console ou selecao de unidade. Aba de trabalho existente preservada.
+- Registro documental e sincronizacao do Obsidian, sem novo restart da aplicacao.
+
 ## 2026-09-30 - Estoque Associativo e filtros compactos
 
 - CI 36800158280: gates funcionais, banco, restore, E2E, 40 navegacoes,

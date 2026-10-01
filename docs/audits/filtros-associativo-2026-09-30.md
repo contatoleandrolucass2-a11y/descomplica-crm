@@ -55,5 +55,25 @@ Preview local usa estoque sintetico; nao comprova autenticacao nem producao.
 
 ## Publicacao
 
-Pendente. Exige PR/CI verde, imagem imutavel, backup, CAS, rollback e
-verificacao pos-publicacao. Nao houve alteracao de banco, n8n ou dependencias.
+Concluida em 01/10/2026, apos PR #118 com CI 36806006230 verde e CI main
+36807945046 aprovada. Nao houve alteracao de banco, n8n ou dependencias.
+
+- Runtime: `de72d1bb37b29cae7a61ac3ebd28f745b0e0bc2c`.
+- Anterior: `843fd113a3a1f6b6fd3b6b12b6de58de180256ce`.
+- Manifesto carregado: `sha256:388da80de9c6c262061f16974654d457e9c6f9993c5ccce4218e06870192331f`.
+- Config da CI: `sha256:8d2059368c37808fd37e523a0a6009cbc492e659fafa13b5924e5fc5c65c0a56`.
+- Checksum do arquivo: `060316191553dbf7df97022dc99fc77f862c0226a6bc2c0bd91254f1adeb5260`.
+- Onze camadas verificadas e dois perfis comprovados, sem rebuild na VPS.
+- Backup protegido: `/var/backups/descomplica-crm/releases/de72d1bb37b29cae7a61ac3ebd28f745b0e0bc2c.yXebYX`.
+- CAS confirmou a versao anterior; health local/publico validou a nova.
+  Nginx preservado; rollback preparado, nao necessario.
+- Doze GETs anonimos, quatro concorrentes, sem erro: health 200 com SHA correto
+  e estoque/snapshot 401 no-store. Nao representa teste de capacidade.
+- Navegador autenticado em nova aba, sem recarregar trabalho existente:
+  titulo a 8px do menu, guia 32px, icones centralizados, filtros a 10,67px da
+  divisoria, metadados a esquerda da limpeza e dez linhas visiveis. Sem overflow.
+- Guia e ajuda funcionais, Escape/retorno do foco aprovados, zero erros de
+  console observados. Nenhuma unidade real selecionada ou proposta alterada.
+- Observacao operacional: preflight encontrou 7,7GB livres/93% de uso na VPS.
+  Nao executou limpeza destrutiva nem alterou recursos de outros trabalhos.
+- Este registro documental nao requer reiniciar a aplicacao.
