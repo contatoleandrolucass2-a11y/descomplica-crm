@@ -34,7 +34,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-02: Azul noturno e retorno ao dourado no Associativo
 
-- Status: pendente_validacao; branch codex/associativo-azul-noturno-dourado.
+- Status: validado e publicado; PR #134, runtime d79bf8c.
 - Fonte: pedido posterior do usuario, investor-archive.css e testes de temas.
 - A solicitacao mais recente substitui o prata por dourado metalico e pede
   azul quase preto; nao reaplicar #001c54/#002774 por referencia anterior.
@@ -44,7 +44,11 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   e em todas as paradas do gradiente dourado. CI 37030093010 aprovou 1369 Vitest,
   oito Node, banco, restore, E2E e matriz funcional completa. Apenas duas
   capturas escuras diferiram, revisadas e promovidas sem alterar tolerancias;
-  191 referencias preservadas. Nova CI e publicacao pendentes.
+  191 referencias preservadas. CIs 37034089884 e 37037035430 verdes.
+- Publicacao por imagem imutavel, onze camadas/dois perfis comprovados,
+  backup/CAS/rollback verificados e doze leituras publicas sem erro.
+- Navegador autenticado confirmou cores computadas e brilho 3s; selecao local
+  descartada ao final, sem salvar proposta. Registro posterior nao muda runtime.
 
 ## 2026-10-02: Ordem territorial e falhas transitorias do Tabelao
 
