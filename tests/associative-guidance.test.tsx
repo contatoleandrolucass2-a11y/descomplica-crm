@@ -2,21 +2,88 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   assertAssociativeMoneySpacing,
+  assertAssociativeCommissionGeometry,
   assertAssociativeQuantityGeometry,
+  assertAssociativeShimmer,
   assertAssociativeSummaryGaps,
-  isGuidanceGold,
+  assertAssociativeWorkspaceGaps,
+  hasGuidanceSilverSurface,
+  isGuidanceSilver,
   isGuidanceGoldText,
 } from "../scripts/qa/associative-guidance.mjs";
 
 describe("Associativo guidance regression gates", () => {
-  it("accepts gold and rejects blue, green and transparent surfaces", () => {
-    expect(isGuidanceGold([233, 189, 84, 255])).toBe(true);
+  it("matches the 22-28px central gap to equal flow padding on desktop", () => {
+    const valid = { sideBySide: true, gap: 28, paddingLeft: 28, paddingRight: 28 };
+    expect(() => assertAssociativeWorkspaceGaps(valid)).not.toThrow();
+    expect(() =>
+      assertAssociativeWorkspaceGaps({
+        sideBySide: false,
+        gap: -300,
+        paddingLeft: 12,
+        paddingRight: 12,
+      }),
+    ).not.toThrow();
+    for (const patch of [{ gap: 21 }, { gap: 29 }, { paddingLeft: 25 }, { paddingRight: 25 }]) {
+      expect(() => assertAssociativeWorkspaceGaps({ ...valid, ...patch })).toThrow();
+    }
+  });
+  it("accepts silver and rejects gold, blue, green, dark and transparent surfaces", () => {
+    expect(isGuidanceSilver([205, 213, 224, 255])).toBe(true);
     for (const color of [
+      [233, 189, 84, 255],
       [102, 228, 236, 255],
       [25, 180, 100, 255],
-      [233, 189, 84, 0],
+      [80, 85, 90, 255],
+      [205, 213, 224, 0],
     ]) {
-      expect(isGuidanceGold(color)).toBe(false);
+      expect(isGuidanceSilver(color)).toBe(false);
+    }
+  });
+
+  it("requires a metallic gradient, not flat gray or the previous gold", () => {
+    const silver = {
+      background: [205, 213, 224, 255],
+      gradient: [
+        [248, 250, 252, 255],
+        [164, 175, 190, 255],
+      ],
+    };
+    expect(hasGuidanceSilverSurface(silver)).toBe(true);
+    expect(hasGuidanceSilverSurface({ ...silver, gradient: [] })).toBe(false);
+    expect(
+      hasGuidanceSilverSurface({ ...silver, gradient: [silver.background, silver.background] }),
+    ).toBe(false);
+    expect(
+      hasGuidanceSilverSurface({ ...silver, gradient: [...silver.gradient, [233, 189, 84, 255]] }),
+    ).toBe(false);
+  });
+
+  it("requires exactly 3s infinite shimmer only while current/required", () => {
+    const animation = {
+      name: "associative-action-shine",
+      duration: 3000,
+      iterations: "infinite",
+      playState: "running",
+      visibleDuringCycle: true,
+    };
+    const active = { active: true, reducedMotion: false, animations: [animation] };
+    expect(() => assertAssociativeShimmer(active)).not.toThrow();
+    expect(() => assertAssociativeShimmer({ ...active, animations: [] })).toThrow(/must shimmer/u);
+    for (const patch of [
+      { duration: 2600 },
+      { iterations: "2" },
+      { playState: "paused" },
+      { name: "border-pulse" },
+      { visibleDuringCycle: false },
+    ]) {
+      expect(() =>
+        assertAssociativeShimmer({ ...active, animations: [{ ...animation, ...patch }] }),
+      ).toThrow();
+    }
+    for (const patch of [{ active: false }, { reducedMotion: true }]) {
+      expect(() => assertAssociativeShimmer({ ...active, ...patch })).toThrow(/must not shimmer/u);
+      expect(() => assertAssociativeShimmer({ ...active, ...patch, animations: [] })).not.toThrow();
     }
   });
 
@@ -33,7 +100,7 @@ describe("Associativo guidance regression gates", () => {
     ).not.toThrow();
   });
 
-  it("rejects a blue clipped glyph even when computed color is gold", () => {
+  it("keeps the commission gold and rejects a blue clipped glyph despite computed color", () => {
     const paint = {
       foreground: [233, 189, 84, 255],
       textFill: [0, 0, 0, 0],
@@ -47,6 +114,7 @@ describe("Associativo guidance regression gates", () => {
     expect(isGuidanceGoldText(paint)).toBe(false);
     expect(isGuidanceGoldText({ ...paint, gradient: [paint.foreground] })).toBe(true);
     expect(isGuidanceGoldText({ ...paint, textFill: paint.foreground })).toBe(true);
+    expect(isGuidanceGoldText({ ...paint, textFill: [205, 213, 224, 255] })).toBe(false);
     expect(isGuidanceGoldText({ ...paint, gradient: [] })).toBe(false);
     expect(
       isGuidanceGoldText({ ...paint, backgroundClip: "border-box", gradient: [paint.foreground] }),
@@ -72,20 +140,79 @@ describe("Associativo guidance regression gates", () => {
   });
 
   it("separates Linear while keeping all four decreasing blocks together", () => {
+    const rules = {
+      linearBottomRule: { width: 1, style: "solid", alpha: 255 },
+      decreasingTopRule: { width: 1, style: "solid", alpha: 255 },
+    };
     expect(() =>
-      assertAssociativeSummaryGaps({ separation: 8, decreasingGaps: [0, 0, 0] }),
+      assertAssociativeSummaryGaps({ ...rules, separation: 8, decreasingGaps: [0, 0, 0] }),
     ).not.toThrow();
     for (const separation of [0, 3, 13]) {
-      expect(() => assertAssociativeSummaryGaps({ separation, decreasingGaps: [0, 0, 0] })).toThrow(
-        /4-12px/u,
-      );
+      expect(() =>
+        assertAssociativeSummaryGaps({ ...rules, separation, decreasingGaps: [0, 0, 0] }),
+      ).toThrow(/4-12px/u);
     }
     expect(() =>
-      assertAssociativeSummaryGaps({ separation: 8, decreasingGaps: [0, 8, 0] }),
+      assertAssociativeSummaryGaps({ ...rules, separation: 8, decreasingGaps: [0, 8, 0] }),
     ).toThrow(/together/u);
-    expect(() => assertAssociativeSummaryGaps({ separation: 8, decreasingGaps: [0, 0] })).toThrow(
-      /four/u,
-    );
+    expect(() =>
+      assertAssociativeSummaryGaps({ ...rules, separation: 8, decreasingGaps: [0, 0] }),
+    ).toThrow(/four/u);
+    for (const name of ["linearBottomRule", "decreasingTopRule"]) {
+      for (const rule of [
+        { width: 0, style: "solid", alpha: 255 },
+        { width: 1, style: "none", alpha: 255 },
+        { width: 1, style: "solid", alpha: 0 },
+      ]) {
+        expect(() =>
+          assertAssociativeSummaryGaps({
+            ...rules,
+            [name]: rule,
+            separation: 8,
+            decreasingGaps: [0, 0, 0],
+          }),
+        ).toThrow(/separating rule/u);
+      }
+    }
+  });
+
+  it("keeps the 18px commission icon beside the last date with a 44px coarse target", () => {
+    const valid = {
+      width: 44,
+      height: 44,
+      minimumTarget: 44,
+      insideSummary: true,
+      insideLastRow: true,
+      insideWidth: true,
+      dateGap: 6,
+      centerDelta: 0,
+      overlaps: false,
+      iconOnly: true,
+      iconSize: 18,
+      borderless: true,
+      transparent: true,
+    };
+    expect(() => assertAssociativeCommissionGeometry(valid)).not.toThrow();
+    expect(() =>
+      assertAssociativeCommissionGeometry({ ...valid, minimumTarget: 18, width: 18, height: 18 }),
+    ).not.toThrow();
+    for (const patch of [
+      { insideSummary: false },
+      { insideLastRow: false },
+      { insideWidth: false },
+      { dateGap: -1 },
+      { dateGap: 17 },
+      { centerDelta: 3 },
+      { overlaps: true },
+      { iconOnly: false },
+      { iconSize: 24 },
+      { width: 43 },
+      { height: 43 },
+      { borderless: false },
+      { transparent: false },
+    ]) {
+      expect(() => assertAssociativeCommissionGeometry({ ...valid, ...patch })).toThrow();
+    }
   });
 
   it("runs guidance after initial geometry and selected-unit checks", () => {

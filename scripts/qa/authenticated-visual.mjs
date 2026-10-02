@@ -1144,6 +1144,7 @@ async function checkDeferredInventory(page, origin, proposalStarted = false) {
       await unit.click();
       const income = page.getByRole("textbox", { name: "Renda Familiar", exact: true });
       await income.fill("500000");
+      await page.getByRole("button", { name: "MCMV", exact: true }).click();
       await page.getByRole("radio", { name: "Sim", exact: true }).check();
       const financing = page.getByRole("textbox", { name: "Financiamento", exact: true });
       await financing.fill("19000000");
@@ -1234,6 +1235,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   });
   await readyProposalUnitButton.click();
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
+  await page.getByRole("button", { name: "MCMV", exact: true }).click();
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
 
   const financingInput = page.getByRole("textbox", { name: "Financiamento", exact: true });
@@ -1583,6 +1585,7 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   await missingAppraisalUnitButton.waitFor({ state: "visible" });
   await missingAppraisalUnitButton.click();
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
+  await page.getByRole("button", { name: "MCMV", exact: true }).click();
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
   await page.getByRole("textbox", { name: "Financiamento", exact: true }).fill("19000000");
   await page.getByRole("textbox", { name: "Subsídio", exact: true }).fill("0");

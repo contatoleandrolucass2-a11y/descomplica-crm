@@ -2,6 +2,8 @@
 
 ## 2026-10-02 - Validacao da documentacao
 
+- Preserva a atualizacao paralela de identidade/cabecalho e suas referencias ao
+  integrar a main, sem substituir capturas das outras paginas pelas antigas.
 - Atualiza somente sete referencias visuais do hub para a documentacao disponivel,
   apos revisao das capturas autenticadas; preserva 186 imagens e os limiares existentes.
 - Corrige a expectativa antiga de item desabilitado na matriz responsiva do menu.
@@ -21,6 +23,20 @@
 - Reutiliza as regras locais existentes, conferidas contra 2.048 casos da referencia,
   sem alterar formulas, publicar politicas ou acionar workflows.
 - Acrescenta testes de limites, permissao e uma matriz de navegador dedicada.
+
+## 2026-10-02 - Associativo prata e perfil sequencial
+
+- Substitui o destaque dourado por prata metalizado, com brilho a cada tres
+  segundos somente durante a acao pendente e respeito a movimento reduzido.
+- Exige confirmar a modalidade entre renda e primeiro imovel, sem alterar
+  enquadramento, regras comerciais ou calculos.
+- Usa fundo #001C54 e paineis #002774 no tema escuro do Associativo.
+- Compacta o cabecalho compartilhado e integra o D fornecido ao nome sem ponto.
+- Iguala o vao central e as margens do fluxo; separa Linear e Decrescente com
+  duas linhas e posiciona o simbolo de remuneracao junto da ultima data.
+- Reorganiza resumo e aprovacao no celular, com rotulos completos por regra.
+- Atualiza 44 referencias visuais das tabelas compartilhadas apos revisao,
+  preservando as demais referencias e os criterios dos gates.
 
 ## 2026-10-02 - Consulta fria das regioes
 

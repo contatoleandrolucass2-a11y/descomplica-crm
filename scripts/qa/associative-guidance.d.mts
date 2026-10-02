@@ -1,6 +1,11 @@
 import type { Page } from "@playwright/test";
 
 export const associativeGuidanceWidths: number[];
+export function isGuidanceSilver(color: number[]): boolean;
+export function hasGuidanceSilverSurface(paint: {
+  background: number[];
+  gradient: number[][];
+}): boolean;
 export function isGuidanceGold(color: number[]): boolean;
 export function isGuidanceGoldText(paint: {
   textFill: number[];
@@ -9,6 +14,17 @@ export function isGuidanceGoldText(paint: {
   gradient: number[][];
   foreground?: number[];
 }): boolean;
+export function assertAssociativeShimmer(measurement: {
+  active: boolean;
+  reducedMotion: boolean;
+  animations: {
+    name: string;
+    duration: number;
+    iterations: string;
+    playState: string;
+    visibleDuringCycle: boolean;
+  }[];
+}): void;
 export function assertAssociativeMoneySpacing(
   measurements: { gap: number; fits: boolean; height?: number; minimumHeight?: number }[],
 ): void;
@@ -20,12 +36,37 @@ export function assertAssociativeQuantityGeometry(geometry: {
 export function assertAssociativeSummaryGaps(geometry: {
   separation: number;
   decreasingGaps: number[];
+  linearBottomRule: { width: number; style: string; alpha: number };
+  decreasingTopRule: { width: number; style: string; alpha: number };
+}): void;
+export function assertAssociativeWorkspaceGaps(geometry: {
+  sideBySide: boolean;
+  gap: number;
+  paddingLeft: number;
+  paddingRight: number;
+}): void;
+export function assertAssociativeCommissionGeometry(geometry: {
+  width: number;
+  height: number;
+  minimumTarget: number;
+  insideSummary: boolean;
+  insideLastRow: boolean;
+  insideWidth: boolean;
+  dateGap: number;
+  centerDelta: number;
+  overlaps: boolean;
+  iconOnly: boolean;
+  iconSize: number;
+  borderless: boolean;
+  transparent: boolean;
 }): void;
 export function checkAssociativeMoneySpacing(page: Page): Promise<{ gap: number; fits: boolean }[]>;
 export function checkAssociativeGuidance(
   page: Page,
   options?: {
-    onState?: (state: "profile" | "financing" | "complete") => Promise<void>;
+    onState?: (
+      state: "profile" | "modality" | "first-property" | "financing" | "complete",
+    ) => Promise<void>;
   },
 ): Promise<{ contract: string; passed: boolean; [key: string]: unknown }>;
 export function inspectAssociativeGuidanceContrast(page: Page): Promise<

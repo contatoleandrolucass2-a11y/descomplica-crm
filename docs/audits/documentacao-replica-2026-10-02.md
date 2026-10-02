@@ -93,6 +93,12 @@ Runtime oficial WF16, integracoes n8n e politicas comerciais permanecem inaltera
   Baselines mais antigos do hub desktop tambem refletiam estados ja superados na main;
   nenhuma outra pagina foi atualizada. Limiares permanecem 1% e tolerancia 16.
   Nova CI deve confirmar a comparacao final antes de merge/publicacao.
+- A main avancou para 29a487b durante a validacao. Integrados o cabecalho atual,
+  a identidade/fluxo do Associativo e suas 44 referencias, sem sobrescrever trabalho
+  paralelo. Manifesto combinado preserva 186 registros da main e sete do hub,
+  todos conferidos contra os arquivos; composedBaselineProvenance identifica as
+  duas capturas. Essa composicao nao e uma nova captura nem prova do runtime
+  integrado; CI nova obrigatoria antes da publicacao.
 
 ## Seguranca e retorno
 

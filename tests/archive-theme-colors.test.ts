@@ -1,6 +1,20 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { describe, expect, it } from "vitest";
+import { createElement, type ComponentProps } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => undefined }),
+}));
+vi.mock("next/image", () => ({
+  default: (props: ComponentProps<"img">) => createElement("img", props),
+}));
+vi.mock("../app/(protected)/app/simulacao/_components/archive-investor/SiteMenu", () => ({
+  SiteMenu: () => null,
+}));
+
+import { ArchiveHeader } from "../app/(protected)/app/simulacao/_components/archive-investor/ArchiveHeader";
 
 const require = createRequire(import.meta.url);
 const { parse } = createRequire(require.resolve("next/package.json"))("postcss") as {
@@ -69,6 +83,43 @@ function contrast(a: string, b: string) {
 }
 
 describe("archive theme color contract", () => {
+  it("uses the supplied symbol as the first letter of the accessible home link", async () => {
+    const markup = renderToStaticMarkup(await ArchiveHeader());
+    const brand = markup.match(/<a\b[^>]*>[\s\S]*?<\/a>/)?.[0] ?? "";
+    const symbol = brand.match(/<img\b[^>]*>/)?.[0] ?? "";
+
+    expect(brand).toContain('href="/app"');
+    expect(brand).toContain('aria-label="Descomplica, início"');
+    expect(brand.replace(/<[^>]*>/g, "").trim()).toBe("escomplica");
+    expect(brand.match(/<img\b/g)).toHaveLength(1);
+    expect(brand).toMatch(/<img\b[^>]*\/>\s*<span\b[^>]*>escomplica<\/span>/);
+    expect(symbol).toContain('src="/descomplica-symbol.png"');
+    expect(symbol).toContain('alt=""');
+    expect(symbol).toContain('aria-hidden="true"');
+    expect(existsSync(new URL("../public/descomplica-symbol.png", import.meta.url))).toBe(true);
+  });
+
+  it("keeps the symbol unframed and contained instead of restoring the blue badge", () => {
+    const brand = declarations("ArchiveHeader.module.css", ".header .brandMark");
+    expect(brand["object-fit"]).toBe("contain");
+    expect(brand.width).toBe(brand.height);
+    expect(brand.filter).toBe("var(--header-brand-shadow)");
+    expect(
+      Object.keys(brand).filter((property) => /^(background|border|box-shadow)/.test(property)),
+    ).toEqual([]);
+    const css = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/ArchiveHeader.module.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    parse(css).walkRules(({ selector }) => {
+      expect(selector).not.toContain(".brandMark > span");
+      expect(selector).not.toContain(".brandDot");
+    });
+  });
+
   it("preserves the original navy dark surfaces", () => {
     const colors = content("dark");
     expect(colors["--inv-color-page"]).toBe("#061f35");
@@ -78,17 +129,19 @@ describe("archive theme color contract", () => {
   });
 
   for (const theme of ["light", "balanced", "dark"]) {
-    it(`${theme}: uses blue accents, positive states and brand, without green theme tokens`, () => {
+    it(`${theme}: preserves the white symbol contrast treatment without recoloring it`, () => {
+      expect(header(theme)["--header-brand-shadow"]).toBe(
+        theme === "dark" ? "none" : "drop-shadow(0 0 0.75px #242b3299)",
+      );
+    });
+
+    it(`${theme}: uses blue accents and positive states, without green theme tokens`, () => {
       const colors = content(theme);
       const navigation = header(theme);
-      const brand = declarations("ArchiveHeader.module.css", ".header .brandMark");
-      const corner = declarations("ArchiveHeader.module.css", ".header .brandMark > span");
       for (const hex of [
         colors["--inv-color-accent"],
         colors["--inv-color-success"],
         navigation["--header-accent"],
-        brand.background,
-        corner.background,
       ]) {
         const [r, g, b] = rgb(hex!);
         expect(b!, hex).toBeGreaterThan(g!);

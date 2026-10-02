@@ -221,6 +221,9 @@ async function fillProposal(page, index, origin) {
       .getByRole("textbox", { name: "Renda Familiar", exact: true })
       .fill(String((5_000 + index * 100) * 100)),
   );
+  await browserStep("confirm_modality", () =>
+    page.getByRole("button", { name: "MCMV", exact: true }).click(),
+  );
   await browserStep("first_property", () =>
     page.getByRole("radio", { name: "Sim", exact: true }).check(),
   );
@@ -598,6 +601,17 @@ export async function runConcurrentAssociativo({
         await page
           .getByRole("textbox", { name: "Renda Familiar", exact: true })
           .fill(String((5_200 + index * 100) * 100));
+        await page.getByRole("button", { name: "MCMV", exact: true }).click();
+        await page.getByRole("radio", { name: "Sim", exact: true }).check();
+        const ranking = page.getByRole("combobox", { name: "Selecione o Ranking", exact: true });
+        check((await ranking.inputValue()) === "", "income_edit_kept_stale_ranking");
+        check(
+          (await page
+            .getByRole("button", { name: "Proposta pronta - Bora Vender", exact: true })
+            .count()) === 0,
+          "income_edit_did_not_require_ranking_confirmation",
+        );
+        await ranking.selectOption("gold");
       }),
       { concurrency: 2, timeoutMs: 90_000 },
     );

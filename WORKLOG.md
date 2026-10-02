@@ -2,6 +2,11 @@
 
 ## 2026-10-02 - Validacao da guia de documentacao
 
+- Integracao da main 29a487b preserva identidade prata, fluxo do Associativo,
+  cabecalho e 44 referencias aprovadas nesse trabalho paralelo. O manifesto combina
+  os 186 registros da main com os sete do hub, com proveniencia explicita e hashes
+  verificados; a validacao do runtime combinado permanece pendente da nova CI.
+
 - CI 36971939367 aprovou todos os criterios funcionais: 140 responsivos, 80 de tema,
   193 de acessibilidade, 100 de zoom, 40 combinacoes de navegacao e a matriz dedicada
   de documentacao. Sete diferencas esperadas do hub revisadas e promovidas com hashes
@@ -42,6 +47,34 @@
   navegador, CI e publicacao pendentes nesta etapa.
 - A pagina mantem crm.simulators.view; nenhum grant, migration ou workflow alterado.
 - Evidencias e limites: docs/audits/documentacao-replica-2026-10-02.md.
+
+## 2026-10-02 - Identidade prata e sequencia do Associativo
+
+- Branch codex/associativo-prata-sequencial, base 0ef7b2f. Fonte: pedido e
+  dezoito prints do usuario. As referencias anteriores nao foram alteradas.
+- Escopo: perfil, orientacao visual, espacos do fluxo e cabecalho compartilhado.
+  Sem alteracoes em formulas, autorizacao, banco ou workflows n8n.
+- Paleta escura restrita ao Associativo; Claro e Medio preservados. Prata
+  indica proxima acao, shimmer de 3s; movimento reduzido conserva estado estatico.
+- D derivado do simbolo fornecido com a ferramenta integrada de imagem, somente
+  extracao do fundo azul; asset de marca em public/descomplica-symbol.png.
+- Build, typecheck, lint do codigo e 26 testes focados aprovados. Suite Windows
+  interrompida por limites POSIX/timeouts, sem reduzir gates; CI Linux obrigatoria.
+- Repeticao visual final, CI, revisao das referencias e publicacao pendentes.
+- QA encontrou contraste do simbolo no Medio e resumo cortado no celular.
+  Dourado escuro refinado; consultas de largura agora usam o container real
+  de resultados, com rotulos completos, datas e acao dentro do resumo.
+  Evidencias consolidadas em docs/audits/associativo-prata-2026-10-02.md.
+- CI 36967153629 aprovou validate e restore. Ajustado o roteiro concorrente
+  para exigir nova confirmacao de Ranking apos editar a renda, preservando
+  isolamento entre usuarios. Tabela de aprovacao mobile ganha rotulos completos
+  por regra; seis cenarios de orientacao passaram na preview anterior.
+- Revalidacao final: cabecalho 24/24, jornadas 6/6, tres jornadas coarse e
+  aprovacao mobile sem extravasamento. Edicao de renda exige reconfirmar Ranking;
+  proposta reaparece habilitada. Regressao focada 26/26; CI 36968663861 em curso.
+- CI 36968663861 aprovou gates funcionais completos, banco, restore e E2E;
+  44 referencias das quatro rotas compartilhadas revisadas e promovidas pelo
+  mecanismo canonico. Outras 149 preservadas; limiar/tolerancia inalterados.
 
 ## 2026-10-02 - Fila fria das regioes do Tabelao
 
