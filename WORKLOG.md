@@ -10,8 +10,11 @@
   preservados. Nomes proprios, valores dos filtros e chaves comerciais intactos.
 - Nove cenarios Playwright, 42 testes do formatador, 17 contratos focados,
   lint do codigo, tipos e build aprovados. Suite Windows: 1405 aprovados,
-  quatro skips e seis falhas POSIX; oito testes Node aprovados. CI Linux e
-  publicacao pendentes. Evidencias em docs/audits/tabelao-tipografia-2026-10-02.md.
+  quatro skips e seis falhas POSIX; oito testes Node aprovados.
+- CI Linux 37028915320: 1411 Vitest e oito Node aprovados, banco/restore/E2E
+  e matriz funcional verdes. Sete capturas do Tabelao revisadas e promovidas,
+  186 preservadas; reexecucao e publicacao pendentes no PR #133.
+  Evidencias em docs/audits/tabelao-tipografia-2026-10-02.md.
 
 ## 2026-10-02 - Regioes e leitura continua do Tabelao
 

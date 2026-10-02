@@ -2,6 +2,7 @@
 
 ## 2026-10-02 - Titulos legiveis e texto compacto no Tabelao
 
+- Atualiza sete referencias visuais revisadas; demais 186 capturas preservadas.
 - Reduz a fonte da tabela para 11px e mantem os titulos completos na mesma linha.
 - Troca Incorporadora por Empresa e aplica caixa de frase aos titulos e descricoes.
 - Compacta Planta com quebra de linha e corrige acentos na apresentacao,

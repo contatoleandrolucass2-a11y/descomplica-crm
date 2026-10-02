@@ -48,8 +48,19 @@
 - Apos as regressoes da revisao: 1405 aprovados, quatro skips e as mesmas seis
   falhas POSIX. Build, tipos, lint do codigo e nove cenarios Playwright repetidos
   e aprovados com os dois casos corrigidos.
-- CI Linux completa, referencias autenticadas e publicacao pendentes. Sem
-  consulta ao banco, migration, n8n ou dependencia nova.
+- CI Linux [37028915320](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/37028915320):
+  1411 testes Vitest e oito Node aprovados, quatro skips existentes; lint, tipos,
+  build, auditoria, banco, restore e E2E aprovados. Matriz funcional aprovada,
+  incluindo 140 rotas, 80 temas e 193 verificacoes de acessibilidade.
+- O gate visual parou somente por sete diferencas de pixels do Tabelao,
+  revisadas individualmente em desktop/tablet e nos tres temas. Promocao
+  transacional canonica da captura `019691986860780a59cbe6ec07f70bfdda0919a1`,
+  equivalente ao candidato `a43a08fc8246bdeb58ad88c9a67f14ed6f01ffca`.
+  Demais 186 imagens preservadas por hash; nenhuma tolerancia foi alterada.
+- Reexecucao da CI final e publicacao pendentes no
+  [PR #133](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/133).
+  Evidencia de fechamento sera registrada no PR apos health e jornada real.
+  Sem consulta ao banco, migration, n8n ou dependencia nova.
 - Revisao independente identificou dois casos corrigidos antes da publicacao:
   nomes/siglas ligados por hifen e rotulos distintos com C/AP ou C/ AP. O
   formatador agora limita a caixa de frase ao vocabulario comum conhecido,
