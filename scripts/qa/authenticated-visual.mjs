@@ -1836,11 +1836,38 @@ function readTabelaoCompactLayout() {
   const resultBox = results?.getBoundingClientRect();
   const tableBox = table?.getBoundingClientRect();
   const panelBox = results?.closest(".investor-stock-panel")?.getBoundingClientRect();
+  const expectedHeaders = [
+    "Região",
+    "Empresa",
+    "Empreendimento",
+    "Endereço",
+    "Metragem",
+    "Entrega",
+    "Planta",
+    "Vagas",
+    "Estoque",
+    "Valor do imóvel",
+    "Volta ao caixa",
+    "Avaliação",
+    "% obra",
+    "Limitador",
+  ];
+  const headers = [...table.querySelectorAll("thead th")];
+  const expectedFilters = [
+    ["businessUnit", "Empresa"],
+    ["project", "Nome do empreendimento"],
+    ["region", "Região"],
+    ["plant", "Planta"],
+    ["parkingSpaces", "Quantidade de vagas"],
+    ["price", "Valor do imóvel"],
+    ["priceOrder", "Ordenar valor"],
+  ];
   const columns = [
-    ["tabelao-region", ".tabelao-region-vertical, .tabelao-stock-wrapped-text", 0.04],
+    ["tabelao-region", ".tabelao-region-vertical, .tabelao-stock-wrapped-text", 0.045],
     ["tabelao-project", ".investor-stock-product-text", 0.11],
     ["tabelao-address", ".tabelao-stock-wrapped-text", 0.12],
-    ["tabelao-parking", ".tabelao-stock-wrapped-text", 0.035],
+    ["tabelao-plant", ".tabelao-stock-plant-text", 0.065],
+    ["tabelao-parking", ".tabelao-stock-wrapped-text", 0.04],
     ["tabelao-description", ".tabelao-stock-wrapped-text", 0.07],
   ].map(([id, selector, proportion]) => {
     const header = document.getElementById(id);
@@ -1877,7 +1904,8 @@ function readTabelaoCompactLayout() {
           const style = getComputedStyle(wrapper);
           return (
             (wrapper.matches(".tabelao-region-vertical") ||
-              (style.whiteSpace === "normal" && style.overflowWrap === "anywhere")) &&
+              (style.whiteSpace === (id === "tabelao-plant" ? "pre-line" : "normal") &&
+                style.overflowWrap === "anywhere")) &&
             style.textOverflow !== "ellipsis" &&
             style.webkitLineClamp === "none" &&
             style.overflowX === "visible" &&
@@ -1899,6 +1927,25 @@ function readTabelaoCompactLayout() {
   });
   return {
     columns,
+    localizedLabels:
+      headers.length === expectedHeaders.length &&
+      headers.every((header, index) => header.textContent.trim() === expectedHeaders[index]) &&
+      [
+        ["tabelao-delivery", "Data de entrega"],
+        ["tabelao-cashback", "Folga volta ao caixa"],
+        ["tabelao-appraisal", "Valor de avaliação bancária"],
+        ["tabelao-address", "Logradouro da obra / Número / Bairro"],
+      ].every(([id, label]) => document.getElementById(id).getAttribute("aria-label") === label),
+    localizedFilters:
+      document.querySelectorAll(".investor-stock-filters select").length === 7 &&
+      expectedFilters.every(([name, label]) => {
+        const select = document.querySelector(`.investor-stock-filters select[name="${name}"]`);
+        return (
+          select?.closest("label")?.querySelector("span")?.textContent.trim() === label &&
+          select.getAttribute("aria-label") ===
+            (name === "priceOrder" ? "Ordenar unidades por valor do imóvel" : label)
+        );
+      }),
     columnsAligned: [...table.querySelectorAll("tbody th, tbody td")].every((cell) => {
       const header = document.getElementById(cell.headers.split(/\s+/)[0]);
       if (!header) return false;
@@ -1921,7 +1968,36 @@ function readTabelaoCompactLayout() {
     compactColumnWidths: columns.every((column) => column.bounded),
     compactTextFullyVisible: columns.every((column) => column.wrapsWithoutClipping),
     readableText: [...table.querySelectorAll("th, td")].every(
-      (cell) => Number.parseFloat(getComputedStyle(cell).fontSize) >= 12,
+      (cell) => getComputedStyle(cell).fontSize === "11px",
+    ),
+    headersSingleLine: [...table.querySelectorAll("thead th")].every((header) => {
+      const style = getComputedStyle(header);
+      const range = document.createRange();
+      range.selectNodeContents(header);
+      const rects = [...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0);
+      const box = header.getBoundingClientRect();
+      return (
+        style.whiteSpace === "nowrap" &&
+        style.textTransform === "none" &&
+        style.fontSize === "11px" &&
+        rects.length === 1 &&
+        rects[0].left >= box.left - 1 &&
+        rects[0].right <= box.right + 1 &&
+        rects[0].top >= box.top - 1 &&
+        rects[0].bottom <= box.bottom + 1
+      );
+    }),
+    adjustedColumnProportions: [
+      ["tabelao-region", 0.045],
+      ["tabelao-area", 0.06],
+      ["tabelao-plant", 0.065],
+      ["tabelao-parking", 0.04],
+      ["tabelao-quantity", 0.05],
+    ].every(
+      ([id, proportion]) =>
+        Math.abs(
+          document.getElementById(id).getBoundingClientRect().width - tableBox.width * proportion,
+        ) <= 2,
     ),
     desktopFitsWithoutHorizontalScroll:
       innerWidth < 1280 ||
@@ -2171,6 +2247,10 @@ async function checkTabelaoRegionOrderFixture(page, viewports) {
         layout.compactTextFullyVisible &&
         layout.columnsAligned &&
         layout.readableText &&
+        layout.localizedLabels &&
+        layout.localizedFilters &&
+        layout.headersSingleLine &&
+        layout.adjustedColumnProportions &&
         layout.desktopFitsWithoutHorizontalScroll &&
         layout.desktopLimitadorVisible;
       ordered = passed && ordered;
@@ -2210,7 +2290,9 @@ function readTabelaoMergedRows() {
         row.dataset.inventoryBusinessUnit,
         row.dataset.inventoryProject,
       ]),
-      plants: rows.map((row) => row.querySelector('[headers~="tabelao-plant"]').textContent.trim()),
+      plants: rows.map((row) =>
+        row.querySelector('[headers~="tabelao-plant"]').textContent.trim().replace(/\s+/g, " "),
+      ),
       prices: rows.map((row) =>
         row.querySelector('[headers~="tabelao-price"]').textContent.replace(/\D/g, ""),
       ),
@@ -2224,6 +2306,192 @@ function readTabelaoMergedRows() {
       description: readRuns("tabelao-description"),
     };
   });
+}
+
+async function checkTabelaoTypographyFixture(page, viewports) {
+  const cases = [
+    {
+      raw: "TIPO 2Q",
+      plant: "Tipo\n2Q",
+      option: "Tipo 2Q",
+      value: "tipo 2q",
+      twoLines: true,
+      description: "HIS-2 - ADAPTAVEL PCD/PNE",
+      displayedDescription: "HIS-2 - adaptável PCD/PNE",
+    },
+    {
+      raw: "Terreo 1Q PCD",
+      plant: "Térreo\n1Q PCD",
+      option: "Térreo 1Q PCD",
+      value: "terreo 1q pcd",
+      twoLines: true,
+      description: "R2V",
+      displayedDescription: "R2V",
+    },
+    {
+      raw: "TERREO 2Q C/AP",
+      plant: "Térreo\n2Q C/AP",
+      option: "Térreo 2Q C/AP",
+      value: "terreo 2q c/ap",
+      twoLines: true,
+      description: "R2-V - UNIDADE ADAPTAVEL PCD",
+      displayedDescription: "R2-V - unidade adaptável PCD",
+    },
+    {
+      raw: "TIPO 2Q ADAPTAVEL PCD",
+      plant: "Tipo\n2Q adaptável PCD",
+      option: "Tipo 2Q adaptável PCD",
+      value: "tipo 2q adaptavel pcd",
+      twoLines: false,
+      description: "UNIDADE ADAPTAVEL PARA PCD",
+      displayedDescription: "Unidade adaptável para PCD",
+    },
+    {
+      raw: "VAGA",
+      plant: "Vaga",
+      option: "Vaga",
+      value: "vaga",
+      twoLines: false,
+      description: "VAGA AVULSA",
+      displayedDescription: "Vaga avulsa",
+    },
+    {
+      raw: "TIPO 1Q",
+      plant: "Tipo\n1Q",
+      option: "Tipo 1Q",
+      value: "tipo 1q",
+      twoLines: true,
+      description: "HMP / 2Q / 1Q / AP / QA",
+      displayedDescription: "HMP / 2Q / 1Q / AP / QA",
+    },
+  ];
+  const items = cases.map((entry, index) => ({
+    ...buildTabelaoCompactFixture()[0],
+    id: `qa-typography-${index}`,
+    businessUnit: "RIVA QA",
+    project: "Condomínio São Miguel QA",
+    street: "Rua Caetano José Batista",
+    streetNumber: "149",
+    neighborhood: "Brooklin",
+    plant: entry.raw,
+    classification: entry.description,
+    finalWithKit: 300_000 + index * 10_000,
+  }));
+  const handler = (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ count: items.length, items }),
+    });
+  await page.route("**/api/inventory", handler);
+  let passed = true;
+  try {
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.locator('tr[data-inventory-unit-id="qa-typography-5"]').waitFor();
+    for (const viewport of viewports) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      const layout = await page.evaluate(readTabelaoCompactLayout);
+      const presentation = await page.evaluate((expected) => {
+        const rows = [...document.querySelectorAll("tr[data-inventory-unit-id]")];
+        const options = [
+          ...document.querySelectorAll('.investor-stock-filters select[name="plant"] option'),
+        ].filter((option) => option.value);
+        const properNames =
+          document.querySelector('[headers="tabelao-business"]')?.textContent.trim() ===
+            "RIVA QA" &&
+          document.querySelector(".investor-stock-product-text")?.textContent ===
+            "Condomínio São Miguel QA" &&
+          document.querySelector('[headers~="tabelao-address"]')?.textContent.trim() ===
+            "Rua Caetano José Batista / 149 / Brooklin";
+        return (
+          properNames &&
+          rows.length === expected.length &&
+          options.length === expected.length &&
+          expected.every((entry, index) => {
+            const row = rows[index];
+            const cell = row.querySelector('[headers~="tabelao-plant"]');
+            const span = cell.querySelector(".tabelao-stock-plant-text");
+            const box = span?.getBoundingClientRect();
+            const cellBox = cell.getBoundingClientRect();
+            if (
+              !span ||
+              row.dataset.inventoryUnitId !== `qa-typography-${index}` ||
+              span.textContent !== entry.plant ||
+              getComputedStyle(span).whiteSpace !== "pre-line" ||
+              getComputedStyle(span).fontSize !== "11px"
+            )
+              return false;
+            const text = span.firstChild;
+            if (text?.nodeType !== Node.TEXT_NODE) return false;
+            const range = document.createRange();
+            // Count actual glyph lines, excluding the preserved newline's zero-width rectangle.
+            const lineTops = new Set();
+            for (let offset = 0; offset < text.length; offset += 1) {
+              if (/\s/.test(text.textContent[offset])) continue;
+              range.setStart(text, offset);
+              range.setEnd(text, offset + 1);
+              const rect = range.getBoundingClientRect();
+              lineTops.add(Math.round(rect.top * 10) / 10);
+              if (
+                rect.left < cellBox.left - 1 ||
+                rect.right > cellBox.right + 1 ||
+                rect.top < cellBox.top - 1 ||
+                rect.bottom > cellBox.bottom + 1
+              )
+                return false;
+            }
+            const option = options.find((candidate) => candidate.value === entry.value);
+            return (
+              (!entry.twoLines || lineTops.size === 2) &&
+              box.top >= cellBox.top - 1 &&
+              box.bottom <= cellBox.bottom + 1 &&
+              span.scrollWidth <= span.clientWidth + 1 &&
+              span.scrollHeight <= span.clientHeight + 1 &&
+              option?.textContent.trim() === `${entry.option} (1)` &&
+              cell.title === entry.option &&
+              row.querySelector('[headers~="tabelao-description"]')?.textContent.trim() ===
+                entry.displayedDescription
+            );
+          })
+        );
+      }, cases);
+      passed =
+        presentation &&
+        layout.readableText &&
+        layout.headersSingleLine &&
+        layout.adjustedColumnProportions &&
+        layout.localizedLabels &&
+        layout.localizedFilters &&
+        layout.compactTextFullyVisible &&
+        layout.desktopFitsWithoutHorizontalScroll &&
+        layout.desktopLimitadorVisible &&
+        passed;
+      process.stdout.write(
+        `Tabelão QA: tipografia e português ${viewport.key} ${JSON.stringify({ presentation, ...layout })}\n`,
+      );
+    }
+    const filter = page.locator('.investor-stock-filters select[name="plant"]');
+    for (const [index, entry] of cases.entries()) {
+      await filter.selectOption(entry.value);
+      await page.waitForFunction(
+        () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 1,
+      );
+      passed =
+        (await page
+          .locator("tr[data-inventory-unit-id]")
+          .getAttribute("data-inventory-unit-id")) === `qa-typography-${index}` && passed;
+      passed = (await filter.inputValue()) === entry.value && passed;
+    }
+    await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+    await page.waitForFunction(
+      () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 6,
+    );
+    process.stdout.write(`Tabelão QA: apresentação e valores originais dos filtros ${passed}\n`);
+    return passed;
+  } finally {
+    await page.unroute("**/api/inventory", handler);
+    await page.setViewportSize({ width: 1440, height: 900 });
+  }
 }
 
 async function checkTabelaoCompactFixture(page) {
@@ -2265,9 +2533,17 @@ async function checkTabelaoCompactFixture(page) {
             column === "address"
               ? `${item.street.trim()} / ${item.streetNumber} / ${item.neighborhood}`
               : item.classification?.trim() && item.classification.trim() !== "0"
-                ? item.classification.trim()
+                ? "Programa residencial especial"
                 : "Não informado",
           );
+          const groupingLabels =
+            column === "address"
+              ? expectedLabels
+              : expectedItems.map((item) =>
+                  item.classification?.trim() && item.classification.trim() !== "0"
+                    ? item.classification.trim()
+                    : "Não informado",
+                );
           const cells = group[column];
           let nextStart = 0;
           return (
@@ -2281,7 +2557,8 @@ async function checkTabelaoCompactFixture(page) {
                 cell.headersValid &&
                 cell.title === cell.text &&
                 expectedLabels.slice(cell.start, nextStart).every((label) => label === cell.text) &&
-                (nextStart === expectedLabels.length || expectedLabels[nextStart] !== cell.text)
+                (nextStart === groupingLabels.length ||
+                  groupingLabels[nextStart] !== groupingLabels[cell.start])
               );
             }) &&
             nextStart === expectedLabels.length
@@ -2295,7 +2572,12 @@ async function checkTabelaoCompactFixture(page) {
       layout.columnsAligned &&
       layout.compactTextFullyVisible &&
       layout.compactFrameFitsTable &&
-      layout.compactFrameInsidePanel;
+      layout.compactFrameInsidePanel &&
+      layout.readableText &&
+      layout.localizedLabels &&
+      layout.localizedFilters &&
+      layout.headersSingleLine &&
+      layout.adjustedColumnProportions;
     checks.push(passed);
   };
   await verify(
@@ -2412,7 +2694,7 @@ async function checkTabelaoValidation(page, origin) {
             columnLabels.length === 14 &&
             [
               "Região",
-              "Incorporadora",
+              "Empresa",
               "Empreendimento",
               "Endereço",
               "Metragem",
@@ -2420,10 +2702,10 @@ async function checkTabelaoValidation(page, origin) {
               "Planta",
               "Vagas",
               "Estoque",
-              "Valor Imóvel",
-              "Volta ao Caixa",
+              "Valor do imóvel",
+              "Volta ao caixa",
               "Avaliação",
-              "% Obra",
+              "% obra",
               "Limitador",
             ].every((label, index) => columnLabels[index] === label),
           filtersPresent:
@@ -2453,7 +2735,7 @@ async function checkTabelaoValidation(page, origin) {
               (results?.getBoundingClientRect().top ?? 0) + 1,
           rowHeight: rowBox != null && rowBox.height >= rowHeight - 2,
           quantityColumn:
-            columnLabels.indexOf("Estoque") === columnLabels.indexOf("Valor Imóvel") - 1 &&
+            columnLabels.indexOf("Estoque") === columnLabels.indexOf("Valor do imóvel") - 1 &&
             Number(
               firstRow
                 ?.querySelector(".tabelao-stock-quantity")
@@ -2518,6 +2800,10 @@ async function checkTabelaoValidation(page, origin) {
     initial.compactFrameFitsTable = compactLayout.compactFrameFitsTable;
     initial.compactFrameInsidePanel = compactLayout.compactFrameInsidePanel;
     initial.readableText = compactLayout.readableText;
+    initial.localizedLabels = compactLayout.localizedLabels;
+    initial.localizedFilters = compactLayout.localizedFilters;
+    initial.headersSingleLine = compactLayout.headersSingleLine;
+    initial.adjustedColumnProportions = compactLayout.adjustedColumnProportions;
     initial.desktopFitsWithoutHorizontalScroll = compactLayout.desktopFitsWithoutHorizontalScroll;
     initial.desktopLimitadorVisible = compactLayout.desktopLimitadorVisible;
     const results = page.locator(".investor-stock-results");
@@ -2685,7 +2971,7 @@ async function checkTabelaoValidation(page, origin) {
         .closest("tbody")
         ?.querySelector(".investor-stock-product-text")
         ?.textContent?.trim(),
-      plant: row.querySelector(".investor-stock-plant")?.textContent?.trim(),
+      plant: row.querySelector(".investor-stock-plant")?.textContent?.trim().replace(/\s+/g, " "),
       businessUnit: row.getAttribute("data-inventory-business-unit"),
       region: row.getAttribute("data-inventory-region"),
       parkingSpaces: row.getAttribute("data-inventory-parking-spaces"),
@@ -3248,6 +3534,10 @@ async function checkTabelaoValidation(page, origin) {
         compactFrameFitsTable: layout.compactFrameFitsTable,
         compactFrameInsidePanel: layout.compactFrameInsidePanel,
         readableText: layout.readableText,
+        localizedLabels: layout.localizedLabels,
+        localizedFilters: layout.localizedFilters,
+        headersSingleLine: layout.headersSingleLine,
+        adjustedColumnProportions: layout.adjustedColumnProportions,
         desktopFitsWithoutHorizontalScroll: layout.desktopFitsWithoutHorizontalScroll,
         desktopLimitadorVisible: layout.desktopLimitadorVisible,
         consecutiveDisplayedValuesOnly: await checkTabelaoCompactFixture(page),
@@ -3339,9 +3629,10 @@ async function checkTabelaoValidation(page, origin) {
   process.stdout.write(`Tabelão QA: ${JSON.stringify(viewportChecks)}\n`);
   const regionParkingFlow = await checkTabelaoRegionParkingFixture(page);
   const regionOrderAndLayout = await checkTabelaoRegionOrderFixture(page, requiredViewports);
+  const typographyAndLabels = await checkTabelaoTypographyFixture(page, requiredViewports);
 
   return {
-    responsiveGrid,
+    responsiveGrid: responsiveGrid && typographyAndLabels,
     spotlightSized,
     placementClassApplied,
     guideReachedLastStep,

@@ -115,7 +115,7 @@ describe("Tabelão protegido", () => {
 
     const visibleColumnLabels = [
       "Região",
-      "Incorporadora",
+      "Empresa",
       "Empreendimento",
       "Endereço",
       "Metragem",
@@ -123,10 +123,10 @@ describe("Tabelão protegido", () => {
       "Planta",
       "Vagas",
       "Estoque",
-      "Valor Imóvel",
-      "Volta ao Caixa",
+      "Valor do imóvel",
+      "Volta ao caixa",
       "Avaliação",
-      "% Obra",
+      "% obra",
       "Limitador",
     ];
     const tableHeaderSource = client.slice(client.indexOf("<thead>"), client.indexOf("</thead>"));
@@ -151,12 +151,12 @@ describe("Tabelão protegido", () => {
       client.indexOf('className="investor-stock-col-area"'),
     );
     for (const accessibleLabel of [
-      "Data de Entrega",
+      "Data de entrega",
       "Unidades no estoque publicado",
       "Menor valor do imóvel",
-      "Folga Volta ao Caixa",
-      "Valor de Avaliação Bancária",
-      "Logradouro Obra / Número / Bairro",
+      "Folga volta ao caixa",
+      "Valor de avaliação bancária",
+      "Logradouro da obra / Número / Bairro",
       "Total do andamento da obra (%)",
       "Outras descrições",
       "Quantidade de vagas",
@@ -174,9 +174,10 @@ describe("Tabelão protegido", () => {
     }
     for (const label of [
       "Filtros do estoque",
-      "Nome do Empreendimento",
+      "Empresa",
+      "Nome do empreendimento",
       "Região",
-      "Valor do Imóvel",
+      "Valor do imóvel",
       "Ordenar valor",
       "Limpar filtros",
       "Quantidade de vagas",
@@ -185,6 +186,7 @@ describe("Tabelão protegido", () => {
     }
     expect(filters).toContain('className="investor-stock-filters"');
     expect(filters).toContain("disabled={disabled}");
+    expect(filters).toContain('{ dimension: "plant", label: "Planta", all: "Todas" }');
     expect(filters).toContain('name="priceOrder"');
     expect(filters.match(/\{ dimension: "/g)).toHaveLength(6);
     expect(filters.match(/<select\b/g)).toHaveLength(2);
@@ -263,9 +265,23 @@ describe("Tabelão protegido", () => {
       /\.investor-page-shell\.tabelao-page-shell \.investor-stock-table :is\(th, td\)\s*\{[^}]*font-size: var\(--tabelao-cell-font-size\) !important;[^}]*text-align: center;[^}]*vertical-align: middle;/,
     );
     expect(styles).toMatch(
-      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*--tabelao-cell-font-size: 12px;/,
+      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*--tabelao-cell-font-size: 11px;/,
     );
-    expect(styles).toContain("--tabelao-cell-font-size: 12px;");
+    expect(styles).not.toContain("--tabelao-cell-font-size: 12px;");
+    expect(styles).toMatch(
+      /\.investor-page-shell\.tabelao-page-shell \.investor-stock-table thead th\s*\{[^}]*white-space: nowrap;[^}]*text-transform: none;/,
+    );
+    for (const [column, width] of [
+      ["tabelao-stock-col-region", "4.5"],
+      ["investor-stock-col-area", "6"],
+      ["investor-stock-col-plant", "6.5"],
+      ["tabelao-stock-col-parking", "4"],
+      ["tabelao-stock-col-quantity", "5"],
+    ]) {
+      expect(styles).toContain(
+        `.tabelao-page-shell .investor-stock-table .${column} { width: ${width}%; }`,
+      );
+    }
     expect(styles).not.toContain("font-size: 6px !important;");
     expect(styles).not.toContain("font-size: 4px !important;");
     expect(styles).not.toContain("min-width: 2080px");
@@ -282,6 +298,43 @@ describe("Tabelão protegido", () => {
     expect(styles).toContain("min-height: 96px !important");
     expect(styles).not.toContain(".tabelao-main");
     expect(styles).not.toContain(".tabelao-hero-note");
+  });
+
+  it("formata apenas a apresentação das plantas e descrições, preservando agrupamento e nomes próprios", () => {
+    const client = readFileSync(
+      new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
+      "utf8",
+    );
+    const filters = readFileSync(
+      new URL("../app/(protected)/app/simulacao/_components/TabelaoFilters.tsx", import.meta.url),
+      "utf8",
+    );
+    const styles = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    expect(client).toContain('className="tabelao-stock-plant-text"');
+    expect(client).toContain("{formatTabelaoPlant(item.plant)}");
+    expect(client).toContain("title={informationLabel(item.plant)}");
+    expect(client).toContain("group.items.map((item) => descriptiveLabel(item.classification))");
+    expect(client).toMatch(
+      /const classification = formatTabelaoDescription\(\s*descriptiveLabel\(item.classification\),?\s*\)/,
+    );
+    expect(client).toContain(
+      'return normalized && normalized !== "0" ? normalized : "Não informado"',
+    );
+    expect(client).toContain("{group.businessUnit}");
+    expect(client).toContain("{group.project}");
+    expect(client).toContain("[item.street, item.streetNumber, item.neighborhood]");
+    expect(filters).toContain('dimension === "plant"');
+    expect(filters).toContain("formatTabelaoDescription(item.label)");
+    expect(filters).toContain("value={item.value}");
+    expect(styles).toMatch(
+      /\.tabelao-page-shell \.investor-stock-table \.tabelao-stock-plant-text\s*\{[^}]*white-space: pre-line;/,
+    );
   });
 
   it("compacta textos completos e mescla apenas células consecutivas dentro do projeto", () => {

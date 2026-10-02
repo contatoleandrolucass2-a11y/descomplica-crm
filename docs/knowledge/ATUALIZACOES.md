@@ -4,6 +4,24 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-02: Tipografia e caixa de frase no Tabelao
+
+- Status: pendente_validacao; branch codex/tabelao-tipografia-ptbr, base d7c06b6.
+- Fonte: sete capturas e confirmacao do usuario para preservar nomes proprios
+  e siglas; TabelaoClient, TabelaoFilters, CSS local e tabelao-presentation.
+- Fonte unica de 11px para corpo/cabecalho; titulos nao quebram palavras nem
+  dependem da caixa alta herdada. A coluna Planta libera espaco para os titulos
+  Regiao, Metragem, Vagas e Estoque, mantendo o total das larguras em 100%.
+- Formatar somente o rotulo exibido; manter valores dos selects, identificadores
+  de estoque e comparadores comerciais originais. Isso evita regressao de filtros
+  ao corrigir acentos ou a grafia de Terreo/Tipo/Adaptavel.
+- Trocar Incorporadora por Empresa apenas na pagina solicitada. Outras tabelas
+  usam seus contratos existentes e nao pertencem a esta mudanca.
+- Nove cenarios Playwright locais, 25 testes do formatador, 17 contratos focados,
+  lint do codigo, tipos e build aprovados. Suite Windows: 1388 aprovados e seis
+  falhas POSIX; oito testes Node aprovados. CI Linux, referencias autenticadas e
+  publicacao pendentes. Auditoria: tabelao-tipografia-2026-10-02.
+
 ## 2026-10-02: Ordem territorial e falhas transitorias do Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-regioes-layout, base 727c858.

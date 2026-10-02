@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-02 - Titulos legiveis e texto compacto no Tabelao
+
+- Reduz a fonte da tabela para 11px e mantem os titulos completos na mesma linha.
+- Troca Incorporadora por Empresa e aplica caixa de frase aos titulos e descricoes.
+- Compacta Planta com quebra de linha e corrige acentos na apresentacao,
+  preservando nomes proprios, siglas, filtros e todos os valores do estoque.
+
 ## 2026-10-02 - Regioes ordenadas no Tabelao
 
 - Sete referencias visuais revisadas para a nova geometria e rotulo territorial;
