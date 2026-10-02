@@ -42,6 +42,8 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Estilos legados de background-clip/text-fill podem manter o $ azul mesmo com
   color dourado; verificar a pintura efetiva, nao apenas computed color.
 - Inputs iguais no desktop nao devem diminuir alvos mobile: manter 44px.
+- `hasTouch` isolado nao comprovou ponteiro coarse neste host. Usar contexto
+  mobile real e conferir media query; neutralizar transform legado fora do hover.
 - Jornada visual 6/6, lint/tipos/build aprovados. Suite Windows 1008 pass;
   seis falhas POSIX e timeout Obsidian aprovado em repeticao. CI/publicacao
   pendentes; nenhuma alteracao nos sites de referencia.

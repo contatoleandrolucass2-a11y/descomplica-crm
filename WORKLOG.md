@@ -35,6 +35,8 @@
   1 skip, seis falhas POSIX e um timeout aprovado em repeticao isolada.
 - CI Linux e publicacao pendentes; evidencia em
   docs/audits/associativo-guia-dourado-2026-10-01.md.
+- Revisao coarse remove a translacao legada do botao de remuneracao; a escala
+  continua restrita a dispositivos com hover e sem movimento reduzido.
 
 ## 2026-10-01 - Layout e manual do Associativo
 

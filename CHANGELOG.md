@@ -13,6 +13,7 @@
 - Corrige contornos excedentes e iguala os campos monetarios e de quantidade.
 - Afasta a renda da borda, separa Linear dos blocos decrescentes e realca o $.
 - Amplia levemente os botoes no hover, sem movimento quando reduzido no sistema.
+- Preserva o alvo de toque de remuneracao sem translacao legada no celular.
 - Usa % Maximo da renda mensal no painel, manual e FAQ; calculos preservados.
 
 ## 2026-10-01 - Associativo compacto e manual completo
