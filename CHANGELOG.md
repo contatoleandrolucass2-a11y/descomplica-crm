@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-02 - Regioes ordenadas no Tabelao
+
+- Reconcilia logradouros divergentes por CODLOG oficial via GeoSampa HTTPS,
+  resolvendo os dois conflitos atuais sem tabela fixa de empreendimentos.
+- Mostra regioes em letras verticais eretas; compacta as 14 colunas com texto
+  integral e fonte de 12px e acompanha a rolagem com o cabecalho original.
+- Agrupa as opcoes por Zona Leste, Sul, Norte, Oeste e Centro, com empreendimentos
+  alfabeticos e precos crescentes dentro de cada empreendimento.
+- Substitui o rotulo territorial antigo por estados distintos de consulta e
+  indisponibilidade, preservando a verificacao da origem sem inferir zonas.
+- Repete uma vez lotes com falha transitoria de transporte, sem aumentar chamadas
+  simultaneas e sem repetir pedidos negados ou respostas contraditorias.
+
 ## 2026-10-02 - Validacao da documentacao
 
 - Preserva a atualizacao paralela de identidade/cabecalho e suas referencias ao

@@ -22262,7 +22262,8 @@ body:has(.investor-page-shell) {
 }
 
 .tabelao-page-shell .investor-stock-results {
-  width: fit-content;
+  box-sizing: border-box;
+  width: calc(100% - 48px);
   height: auto;
   min-height: 0;
   max-height: none;
@@ -22274,21 +22275,42 @@ body:has(.investor-page-shell) {
 }
 
 .tabelao-page-shell .investor-stock-table {
-  --tabelao-cell-font-size: 10px;
-  width: max-content;
-  min-width: 0;
-  table-layout: auto;
+  --tabelao-cell-font-size: 12px;
+  width: 100%;
+  min-width: 1100px;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.tabelao-page-shell .investor-stock-table tr {
+  height: auto !important;
 }
 
 .investor-page-shell.tabelao-page-shell .investor-stock-table :is(th, td) {
+  height: auto !important;
+  min-height: 32px !important;
+  padding: 6px 4px !important;
+  overflow: visible;
+  border-top: 0;
+  border-left: 0;
   font-size: var(--tabelao-cell-font-size) !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0;
   text-align: center;
   vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
 }
 
 .investor-page-shell.tabelao-page-shell .investor-stock-table thead th {
+  position: relative;
+  top: auto;
+  transform: translateY(var(--tabelao-heading-offset, 0px));
+  transition: none !important;
   height: auto !important;
-  padding: 6px 7px !important;
+  padding: 8px 4px !important;
   overflow: visible;
   letter-spacing: 0;
   line-height: 1.2;
@@ -22317,9 +22339,20 @@ body:has(.investor-page-shell) {
   text-align: center;
 }
 
-.tabelao-page-shell .investor-stock-table col {
-  width: auto;
-}
+.tabelao-page-shell .investor-stock-table .tabelao-stock-col-region { width: 4%; }
+.tabelao-page-shell .investor-stock-table .investor-stock-col-business { width: 6%; }
+.tabelao-page-shell .investor-stock-table .tabelao-stock-col-project { width: 11%; }
+.tabelao-page-shell .investor-stock-table .tabelao-stock-col-address { width: 12%; }
+.tabelao-page-shell .investor-stock-table .investor-stock-col-area { width: 5.5%; }
+.tabelao-page-shell .investor-stock-table .investor-stock-col-date { width: 7%; }
+.tabelao-page-shell .investor-stock-table .investor-stock-col-plant { width: 8.5%; }
+.tabelao-page-shell .investor-stock-table .tabelao-stock-col-parking { width: 3.5%; }
+.tabelao-page-shell .investor-stock-table .tabelao-stock-col-quantity { width: 4.5%; }
+.tabelao-page-shell .investor-stock-table .investor-stock-col-price { width: 9%; }
+.tabelao-page-shell .investor-stock-table .tabelao-stock-col-cashback { width: 8.5%; }
+.tabelao-page-shell .investor-stock-table .tabelao-stock-col-appraisal { width: 9%; }
+.tabelao-page-shell .investor-stock-table .tabelao-stock-col-progress { width: 4.5%; }
+.tabelao-page-shell .investor-stock-table .tabelao-stock-col-description { width: 7%; }
 
 .tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-quantity {
   width: auto;
@@ -22343,7 +22376,7 @@ body:has(.investor-page-shell) {
 .tabelao-page-shell .investor-stock-table .tabelao-stock-long-text {
   overflow: visible;
   text-overflow: clip;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .tabelao-page-shell .investor-stock-table tbody td.tabelao-stock-long-text {
@@ -22354,7 +22387,7 @@ body:has(.investor-page-shell) {
   position: static;
   display: table-cell;
   height: auto !important;
-  padding: 6px 7px !important;
+  padding: 6px 4px !important;
   color: var(--inv-text);
   background: var(--inv-color-panel, #0a2940);
   vertical-align: middle;
@@ -22367,8 +22400,8 @@ body:has(.investor-page-shell) {
 .tabelao-page-shell .investor-stock-table tbody th.tabelao-group-cell,
 .tabelao-page-shell .investor-stock-table .tabelao-group-cell .investor-stock-product-text {
   overflow: visible;
-  white-space: nowrap;
-  overflow-wrap: normal;
+  white-space: normal;
+  overflow-wrap: anywhere;
   text-overflow: clip;
 }
 
@@ -22378,6 +22411,7 @@ body:has(.investor-page-shell) {
 
 @media (max-width: 760px) {
   .tabelao-page-shell .investor-stock-results {
+    width: calc(100% - 28px);
     max-width: calc(100% - 28px);
   }
 
@@ -22426,9 +22460,9 @@ body:has(.investor-page-shell) {
   .tabelao-page-shell .investor-stock-table {
     --tabelao-cell-font-size: 12px;
     display: table;
-    width: max-content;
-    min-width: 0;
-    table-layout: auto;
+    width: 100%;
+    min-width: 1100px;
+    table-layout: fixed;
   }
 
   .tabelao-page-shell .investor-stock-table colgroup {
@@ -22489,7 +22523,7 @@ body:has(.investor-page-shell) {
     width: auto;
     height: 44px !important;
     min-height: 44px !important;
-    padding: 0 7px !important;
+    padding: 6px 4px !important;
     overflow: visible;
     border-right: 1px solid var(--inv-color-line, #2b5c74);
     border-bottom: 1px solid var(--inv-color-line, #2b5c74);
@@ -22498,7 +22532,7 @@ body:has(.investor-page-shell) {
     font-size: 12px !important;
     line-height: 1.2 !important;
     text-overflow: clip;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .tabelao-page-shell .investor-stock-table tbody td::before {
@@ -22526,7 +22560,7 @@ body:has(.investor-page-shell) {
   .tabelao-page-shell .investor-stock-product-text {
     overflow: visible;
     text-overflow: clip;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .tabelao-page-shell .investor-stock-table tbody th.tabelao-group-cell {
@@ -22534,8 +22568,8 @@ body:has(.investor-page-shell) {
   }
 
   .tabelao-page-shell .investor-stock-table tbody td.investor-stock-plant {
-    white-space: nowrap;
-    overflow-wrap: normal;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -22543,6 +22577,8 @@ body:has(.investor-page-shell) {
 .tabelao-page-shell .investor-stock-table .investor-stock-product-text,
 .tabelao-page-shell .investor-stock-table .tabelao-stock-wrapped-text {
   display: block;
+  width: 100%;
+  max-width: 100%;
   margin-inline: auto;
   overflow: visible;
   white-space: normal;
@@ -22552,25 +22588,31 @@ body:has(.investor-page-shell) {
 }
 
 .tabelao-page-shell .investor-stock-table .tabelao-group-cell .investor-stock-product-text {
-  width: 100px;
+  width: 100%;
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
-.tabelao-page-shell [headers~="tabelao-address"] .tabelao-stock-wrapped-text {
-  width: 130px;
+.tabelao-page-shell .tabelao-region-vertical {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding-block: 6px;
+  text-transform: uppercase;
 }
 
-.tabelao-page-shell [headers~="tabelao-description"] .tabelao-stock-wrapped-text {
-  width: 58px;
+.tabelao-page-shell .tabelao-region-vertical > span {
+  writing-mode: vertical-lr;
+  text-orientation: upright;
+  line-height: 1.4;
+  letter-spacing: 0;
 }
 
-.tabelao-page-shell [headers~="tabelao-region"] .tabelao-stock-wrapped-text {
-  width: 66px;
-}
-
-.tabelao-page-shell [headers~="tabelao-parking"] .tabelao-stock-wrapped-text {
-  width: 48px;
+@media print {
+  .tabelao-page-shell .investor-stock-table thead th {
+    transform: none;
+  }
 }
 
 @media (min-width: 1101px) {

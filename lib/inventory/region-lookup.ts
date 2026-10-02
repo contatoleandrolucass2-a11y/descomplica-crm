@@ -90,7 +90,9 @@ function nodeText(node: HtmlNode): string {
     : "";
 }
 
-export function parseLocalizaDistricts(html: string, postalCode: string, street: string): string[] {
+type LocalizaAddress = { street: string; district: string; streetCode: string };
+
+function parseLocalizaAddresses(html: string, postalCode: string): LocalizaAddress[] {
   const document = parse(html);
   const tables = descendants(document, "table").filter((node) =>
     node.attrs.some((attr) => attr.name === "id" && attr.value === "myTable"),
@@ -110,19 +112,100 @@ export function parseLocalizaDistricts(html: string, postalCode: string, street:
   ) {
     throw new Error("region_provider_invalid");
   }
-  const districts = new Set<string>();
+  const addresses: LocalizaAddress[] = [];
   for (const row of rows.slice(1)) {
     const cells = descendants(row, "td").map(nodeText);
     if (
       cells.length !== 7 ||
       normalizeTabelaoPostalCode(cells[0]) !== postalCode ||
       !cells[3] ||
-      normalize(cells[1]!) !== normalize(street)
+      !cells[1]
     )
       throw new Error("region_address_conflict");
-    districts.add(cells[3]);
+    addresses.push({ street: cells[1], district: cells[3], streetCode: cells[6]! });
   }
-  return [...districts];
+  return addresses;
+}
+
+export function parseLocalizaDistricts(html: string, postalCode: string, street: string): string[] {
+  const addresses = parseLocalizaAddresses(html, postalCode);
+  if (addresses.some((address) => normalize(address.street) !== normalize(street)))
+    throw new Error("region_address_conflict");
+  return [...new Set(addresses.map((address) => address.district))];
+}
+
+async function resolveLocalizaDistricts(
+  html: string,
+  postalCode: string,
+  street: string,
+  signal: AbortSignal,
+): Promise<string[]> {
+  const addresses = parseLocalizaAddresses(html, postalCode);
+  const canonicalStreet = normalize(street);
+  if (addresses.some((address) => normalize(address.street) !== canonicalStreet)) {
+    const streetCode = addresses[0]!.streetCode;
+    const name = /^(rua|avenida) (.+)$/.exec(canonicalStreet)?.[2];
+    // A type/title discrepancy is only a candidate, never proof of the same street.
+    if (
+      !name ||
+      !/^\d{6}$/.test(streetCode) ||
+      addresses.some(
+        (address) =>
+          address.streetCode !== streetCode ||
+          /^(rua|avenida) (?:professor )?(.+)$/.exec(normalize(address.street))?.[2] !== name,
+      )
+    ) {
+      throw new Error("region_address_conflict");
+    }
+    const url = new URL("https://wfs.geosampa.prefeitura.sp.gov.br/geoserver/geoportal/wfs");
+    url.search = new URLSearchParams({
+      service: "WFS",
+      version: "2.0.0",
+      request: "GetFeature",
+      typeNames: "geoportal:segmento_logradouro",
+      outputFormat: "application/json",
+      count: "256",
+      CQL_FILTER: `codlog = '${streetCode}'`,
+    }).toString();
+    const payload: unknown = JSON.parse(await fetchLimited(url.href, 500_000, signal));
+    if (
+      !record(payload) ||
+      payload.type !== "FeatureCollection" ||
+      !Array.isArray(payload.features) ||
+      payload.features.length < 1 ||
+      payload.features.length > 256 ||
+      payload.features.length !== payload.numberMatched ||
+      payload.features.length !== payload.numberReturned
+    ) {
+      throw new Error("region_provider_invalid");
+    }
+    // Require the entire code-filtered municipal street to agree with ViaCEP over TLS.
+    // No fuzzy names, dropped name tokens, CEP ranges or project-to-region overrides.
+    for (const feature of payload.features) {
+      const properties = record(feature) ? feature.properties : null;
+      if (
+        !record(properties) ||
+        properties.codlog !== streetCode ||
+        !text(properties.nm_logradouro) ||
+        properties.cd_titulo_logradouro !== null ||
+        (properties.tx_preposicao_logradouro !== null && !text(properties.tx_preposicao_logradouro))
+      ) {
+        throw new Error("region_address_conflict");
+      }
+      const type =
+        properties.cd_tipo_logradouro === "R"
+          ? "rua"
+          : properties.cd_tipo_logradouro === "AV"
+            ? "avenida"
+            : null;
+      const officialStreet = [type, properties.tx_preposicao_logradouro, properties.nm_logradouro]
+        .filter(Boolean)
+        .join(" ");
+      if (!type || normalize(officialStreet) !== canonicalStreet)
+        throw new Error("region_address_conflict");
+    }
+  }
+  return [...new Set(addresses.map((address) => address.district))];
 }
 
 async function fetchLimited(url: string, maxBytes: number, signal: AbortSignal): Promise<string> {
@@ -260,7 +343,7 @@ async function resolvePostalCode(postalCode: string): Promise<TabelaoRegionResol
       fetchLimited(`${LOCALIZA_URL}?r2=${postalCode}`, 250_000, signal),
       withinDeadline(getDistrictRegions(), signal),
     ]);
-    const districts = parseLocalizaDistricts(html, postalCode, value.logradouro);
+    const districts = await resolveLocalizaDistricts(html, postalCode, value.logradouro, signal);
     const regions = districts.map((district) => districtRegions.get(normalize(district)));
     const unique = new Set(regions);
     // A CEP can cross a zone boundary. Never choose its first district or infer from a bairro.

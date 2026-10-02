@@ -17,6 +17,7 @@ export interface TabelaoRegionItem {
   city?: unknown;
   state?: unknown;
   regionResolution?: unknown;
+  regionLookupPending?: boolean;
 }
 
 export function normalizeTabelaoPostalCode(value: unknown): string | null;
@@ -26,7 +27,11 @@ export function parseTabelaoRegionResolution(
 ): TabelaoRegionResolution | null;
 export function resolveTabelaoRegion(
   item: TabelaoRegionItem | null | undefined,
-): TabelaoRegionName | "Fora de S\u00e3o Paulo" | "N\u00e3o confirmada";
+):
+  | TabelaoRegionName
+  | "Fora de S\u00e3o Paulo"
+  | "Localizando"
+  | "Localiza\u00e7\u00e3o indispon\u00edvel";
 export function formatTabelaoRegionTitle(item: TabelaoRegionItem | null | undefined): string;
 export function fetchTabelaoRegion(
   postalCode: unknown,

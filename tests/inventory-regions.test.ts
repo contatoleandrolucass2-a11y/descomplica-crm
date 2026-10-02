@@ -68,9 +68,10 @@ function localizaHtml(
   districts = ["Liberdade"],
   street = STREET,
   count = districts.length,
+  streetCode = "LOCAL-1",
 ) {
   const rows = districts.map((district) =>
-    [postalCode, street, "1 a 999", district, "9005", "Distrito Oeste Sintetico", "LOCAL-1"]
+    [postalCode, street, "1 a 999", district, "9005", "Distrito Oeste Sintetico", streetCode]
       .map((value) => `<td>${value}</td>`)
       .join(""),
   );
@@ -79,11 +80,46 @@ function localizaHtml(
     <tbody>${rows.map((row) => `<tr>${row}</tr>`).join("")}</tbody></table></body></html>`;
 }
 
+function streetUrl(code: string) {
+  const url = new URL("https://wfs.geosampa.prefeitura.sp.gov.br/geoserver/geoportal/wfs");
+  url.search = new URLSearchParams({
+    service: "WFS",
+    version: "2.0.0",
+    request: "GetFeature",
+    typeNames: "geoportal:segmento_logradouro",
+    outputFormat: "application/json",
+    count: "256",
+    CQL_FILTER: `codlog = '${code}'`,
+  }).toString();
+  return url.href;
+}
+
+function streetFixture(code = "123456", name = "SINTETICA DE TESTE", type = "R", count = 2) {
+  return {
+    type: "FeatureCollection",
+    numberMatched: count,
+    numberReturned: count,
+    features: Array.from({ length: count }, (_, index) => ({
+      type: "Feature",
+      id: `segmento_logradouro.${index}`,
+      geometry: null,
+      properties: {
+        codlog: code,
+        cd_tipo_logradouro: type,
+        cd_titulo_logradouro: null,
+        tx_preposicao_logradouro: null,
+        nm_logradouro: name,
+      },
+    })),
+  };
+}
+
 type Provider = (postalCode: string, signal: AbortSignal) => Response | Promise<Response>;
 type Providers = {
   viaCep?: Provider;
   localiza?: Provider;
   geoSampa?: (signal: AbortSignal) => Response | Promise<Response>;
+  street?: (code: string, signal: AbortSignal) => Response | Promise<Response>;
 };
 
 function serve(providers: Providers = {}) {
@@ -105,6 +141,10 @@ function serve(providers: Providers = {}) {
     }
     if (url.href === GEOSAMPA_URL) {
       return providers.geoSampa?.(signal) ?? Response.json(districtFixture());
+    }
+    const code = /^codlog = '(\d{6})'$/.exec(url.searchParams.get("CQL_FILTER") ?? "")?.[1];
+    if (code && url.href === streetUrl(code)) {
+      return providers.street?.(code, signal) ?? Response.json(streetFixture(code));
     }
     unexpectedUrls.push(url.href);
     throw new Error("unexpected_synthetic_provider_url");
@@ -172,9 +212,13 @@ afterEach(() => {
 });
 
 describe("Tabelao client and protected region queue", () => {
-  it.each([1, 4])(
-    "resolves 22 cold CEPs for %i simultaneous pages without exhausting the queue",
-    async (pages) => {
+  it.each([
+    { pages: 1, reconcile: false },
+    { pages: 4, reconcile: false },
+    { pages: 4, reconcile: true },
+  ])(
+    "resolves 22 cold CEPs for $pages simultaneous pages (street reconciliation: $reconcile)",
+    async ({ pages, reconcile }) => {
       let active = 0;
       let peak = 0;
       serve({
@@ -187,8 +231,28 @@ describe("Tabelao client and protected region queue", () => {
             peak = Math.max(peak, ++active);
             setTimeout(() => {
               active--;
-              resolve(new Response(localizaHtml(postalCode)));
+              resolve(
+                new Response(
+                  reconcile
+                    ? localizaHtml(
+                        postalCode,
+                        ["Liberdade"],
+                        "RUA PROFESSOR SINTETICA DE TESTE",
+                        1,
+                        "123456",
+                      )
+                    : localizaHtml(postalCode),
+                ),
+              );
             }, 6_000);
+          }),
+        street: (code) =>
+          new Promise<Response>((resolve) => {
+            peak = Math.max(peak, ++active);
+            setTimeout(() => {
+              active--;
+              resolve(Response.json(streetFixture(code)));
+            }, 2_000);
           }),
       });
       vi.stubGlobal(
@@ -211,7 +275,7 @@ describe("Tabelao client and protected region queue", () => {
           callback,
         ),
       );
-      await vi.advanceTimersByTimeAsync(8_000);
+      await vi.advanceTimersByTimeAsync(10_000);
       const progressiveResults = callbacks.map((callback) => callback.mock.calls.length);
       await vi.advanceTimersByTimeAsync(60_000);
       await Promise.all(pending);
@@ -229,7 +293,7 @@ describe("Tabelao client and protected region queue", () => {
       expect(active).toBe(0);
       expect(providerCalls("viacep.com.br")).toHaveLength(22);
       expect(providerCalls("www.sinasc.saude.prefeitura.sp.gov.br")).toHaveLength(22);
-      expect(providerCalls("wfs.geosampa.prefeitura.sp.gov.br")).toHaveLength(1);
+      expect(providerCalls("wfs.geosampa.prefeitura.sp.gov.br")).toHaveLength(reconcile ? 23 : 1);
       expect(mocks.authorizeRoute).toHaveBeenCalledTimes(8 * pages);
     },
   );
@@ -369,6 +433,341 @@ describe("LocalizaSampa HTML parser", () => {
         STREET,
       ),
     ).toThrow();
+  });
+});
+
+describe("Official street identity reconciliation", () => {
+  function serveAlias(overrides: Providers = {}) {
+    serve({
+      localiza: (postalCode) =>
+        new Response(
+          localizaHtml(postalCode, ["Liberdade"], "RUA PROFESSOR SINTETICA DE TESTE", 1, "123456"),
+        ),
+      ...overrides,
+    });
+  }
+
+  // Public provider fields observed on 2026-10-02, not inventory or project-to-region fixtures.
+  it.each([
+    {
+      postalCode: "04703020",
+      street: "Rua Caetano José Batista",
+      localiza: "RUA PROFESSOR CAETANO JOSE BATISTA",
+      code: "038229",
+      name: "CAETANO JOSE BATISTA",
+      type: "R",
+      districts: ["ITAIM BIBI"],
+      region: "Oeste",
+    },
+    {
+      postalCode: "08040115",
+      street: "Avenida Afonso Lopes de Baião",
+      localiza: "RUA AFONSO LOPES DE BAIAO",
+      code: "346160",
+      name: "AFONSO LOPES DE BAIAO",
+      type: "AV",
+      districts: ["SAO MIGUEL", "VILA JACUI"],
+      region: "Leste",
+    },
+  ])(
+    "resolves $postalCode only after GeoSampa corroborates its municipal street code",
+    async (item) => {
+      const map = districtFixture();
+      item.districts.forEach((district, index) => {
+        Object.assign(map.features[index + 6]!.properties, {
+          nm_distrito_municipal: district,
+          nm_regiao_05: item.region,
+        });
+      });
+      serve({
+        viaCep: (postalCode) => Response.json({ ...viaCep(postalCode), logradouro: item.street }),
+        localiza: (postalCode) =>
+          new Response(
+            localizaHtml(
+              postalCode,
+              item.districts,
+              item.localiza,
+              item.districts.length,
+              item.code,
+            ),
+          ),
+        geoSampa: () => Response.json(map),
+        street: (code) => Response.json(streetFixture(code, item.name, item.type)),
+      });
+      const response = await GET(request(item.postalCode));
+      expectNoStore(response);
+      await expect(response.json()).resolves.toMatchObject({
+        postalCode: item.postalCode,
+        status: "confirmed",
+        region: `Zona ${item.region}`,
+        districts: item.districts,
+        source: SOURCE,
+      });
+      expect(mocks.fetch).toHaveBeenCalledWith(streetUrl(item.code), expect.any(Object));
+      expect(mocks.fetch).toHaveBeenCalledTimes(4);
+    },
+  );
+
+  it.each(["RUA PROFESSOR SINTETICA DE TESTE", "AVENIDA SINTETICA DE TESTE"])(
+    "reconciles only the type/title using current municipal identity: %s",
+    async (street) => {
+      serveAlias({
+        localiza: (postalCode) =>
+          new Response(localizaHtml(postalCode, ["Liberdade"], street, 1, "234567")),
+      });
+      await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+        status: "confirmed",
+        region: "Centro",
+      });
+      expect(mocks.fetch).toHaveBeenCalledWith(streetUrl("234567"), expect.any(Object));
+    },
+  );
+
+  it.each([
+    "RUA PROFESSOR SINTETICA DE TESTE OUTRA",
+    "RUA PROFESSOR SINTETICA",
+    "RUA PROFESSOR TESTE DE SINTETICA",
+    "RUA DOUTOR SINTETICA DE TESTE",
+    "TRAVESSA SINTETICA DE TESTE",
+    "RUA PROFESSOR SINTETICO DE TESTE",
+  ])("rejects unverified names/titles instead of fuzzy matching: %s", async (street) => {
+    serveAlias({
+      localiza: (postalCode) =>
+        new Response(localizaHtml(postalCode, ["Liberdade"], street, 1, "123456")),
+    });
+    await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+      status: "unconfirmed",
+      region: null,
+      reason: "region_address_conflict",
+    });
+    expect(mocks.fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it.each(["", "12345", "1234567", "12.345-6", "123456' OR '1'='1"])(
+    "never queries a malformed municipal street code: %s",
+    async (code) => {
+      serveAlias({
+        localiza: (postalCode) =>
+          new Response(
+            localizaHtml(postalCode, ["Liberdade"], "AVENIDA SINTETICA DE TESTE", 1, code),
+          ),
+      });
+      await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+        status: "unconfirmed",
+        reason: "region_address_conflict",
+      });
+      expect(mocks.fetch).toHaveBeenCalledTimes(3);
+    },
+  );
+
+  it.each(["name", "code"])("rejects a contradictory later Localiza row (%s)", async (kind) => {
+    const html = localizaHtml(
+      POSTAL_CODE,
+      ["Liberdade", "Bela Vista"],
+      "AVENIDA SINTETICA DE TESTE",
+      2,
+      "123456",
+    );
+    const token = kind === "name" ? "AVENIDA SINTETICA DE TESTE" : "123456";
+    const index = html.lastIndexOf(token);
+    const modified =
+      html.slice(0, index) +
+      html.slice(index).replace(token, kind === "name" ? "RUA DIFERENTE" : "234567");
+    serveAlias({ localiza: () => new Response(modified) });
+    await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+      status: "unconfirmed",
+      reason: "region_address_conflict",
+    });
+    expect(mocks.fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it.each([
+    { codlog: "234567" },
+    { codlog: 123456 },
+    { nm_logradouro: "OUTRA SINTETICA DE TESTE" },
+    { nm_logradouro: "TESTE DE SINTETICA" },
+    { nm_logradouro: null },
+    { cd_tipo_logradouro: "AV" },
+    { cd_tipo_logradouro: "TV" },
+    { cd_titulo_logradouro: "PROF" },
+    { cd_titulo_logradouro: undefined },
+    { tx_preposicao_logradouro: "DE" },
+    { tx_preposicao_logradouro: undefined },
+  ])(
+    "requires every official segment to corroborate the complete ViaCEP street: %j",
+    async (fields) => {
+      const payload = streetFixture();
+      Object.assign(payload.features[1]!.properties, fields);
+      serveAlias({ street: () => Response.json(payload) });
+      await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+        status: "unconfirmed",
+        region: null,
+        reason: "region_address_conflict",
+      });
+    },
+  );
+
+  it.each([
+    null,
+    {},
+    { ...streetFixture(), type: "other" },
+    { ...streetFixture(), numberMatched: 3 },
+    { ...streetFixture(), numberReturned: 1 },
+    { ...streetFixture(), numberMatched: "2" },
+    streetFixture("123456", "SINTETICA DE TESTE", "R", 0),
+    streetFixture("123456", "SINTETICA DE TESTE", "R", 257),
+  ])("rejects missing, incomplete or excessive street collections (%#)", async (payload) => {
+    serveAlias({ street: () => Response.json(payload) });
+    await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+      status: "unconfirmed",
+      region: null,
+      reason: "region_provider_invalid",
+    });
+  });
+
+  it.each(["http", "redirect", "network", "tls", "json"])(
+    "does not accept an alias when corroboration fails (%s)",
+    async (failure) => {
+      serveAlias({
+        street: () => {
+          if (failure === "network") throw new Error("synthetic network failure");
+          if (failure === "tls")
+            throw new TypeError("fetch failed", {
+              cause: Object.assign(new Error("synthetic invalid certificate"), {
+                code: "CERT_HAS_EXPIRED",
+              }),
+            });
+          return new Response(failure === "json" ? '{"features":' : "unavailable", {
+            status: failure === "http" ? 503 : failure === "redirect" ? 301 : 200,
+          });
+        },
+      });
+      await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+        status: "unconfirmed",
+        region: null,
+        reason: "region_provider_unavailable",
+      });
+      expect(mocks.fetch).toHaveBeenCalledTimes(4);
+      expect(mocks.fetch).toHaveBeenCalledWith(
+        streetUrl("123456"),
+        expect.objectContaining({ redirect: "error" }),
+      );
+    },
+  );
+
+  it("keeps cross-region ambiguity after corroborating the street", async () => {
+    serveAlias({
+      localiza: (postalCode) =>
+        new Response(
+          localizaHtml(
+            postalCode,
+            ["Liberdade", "Distrito Oeste Sintetico"],
+            "AVENIDA SINTETICA DE TESTE",
+            2,
+            "123456",
+          ),
+        ),
+    });
+    await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+      status: "unconfirmed",
+      region: null,
+      reason: "ambiguous-postal-code",
+      districts: ["Liberdade", "Distrito Oeste Sintetico"],
+    });
+    expect(mocks.fetch).toHaveBeenCalledTimes(4);
+  });
+
+  it("coalesces the additional request and caches its resolution for simultaneous pages", async () => {
+    const gate = deferred<Response>();
+    serveAlias({ street: () => gate.promise });
+    const requests = Array.from({ length: 30 }, () => GET(request()));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mocks.fetch).toHaveBeenCalledTimes(4);
+    gate.resolve(Response.json(streetFixture()));
+    for (const response of await Promise.all(requests)) {
+      await expect(response.json()).resolves.toMatchObject({
+        status: "confirmed",
+        region: "Centro",
+      });
+    }
+    const warm = await GET(request());
+    await expect(warm.json()).resolves.toMatchObject({ status: "confirmed" });
+    expect(mocks.fetch).toHaveBeenCalledTimes(4);
+    expect(mocks.authorizeRoute).toHaveBeenCalledTimes(31);
+  });
+
+  it("bounds the additional streamed body at 500 KB even if content-length lies", async () => {
+    const cancel = vi.fn();
+    serveAlias({
+      street: () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(new Uint8Array(500_001).fill(32));
+            },
+            cancel,
+          }),
+          { headers: { "content-length": "1" } },
+        ),
+    });
+    await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+      status: "unconfirmed",
+      region: null,
+      reason: "region_provider_invalid",
+    });
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("retains the original 18-second deadline through the additional body and recovers after cooldown", async () => {
+    const cancel = vi.fn();
+    let signal: AbortSignal | undefined;
+    serveAlias({
+      localiza: (postalCode) =>
+        new Promise<Response>((resolve) =>
+          setTimeout(
+            () =>
+              resolve(
+                new Response(
+                  localizaHtml(
+                    postalCode,
+                    ["Liberdade"],
+                    "AVENIDA SINTETICA DE TESTE",
+                    1,
+                    "123456",
+                  ),
+                ),
+              ),
+            10_000,
+          ),
+        ),
+      street: (_code, requestSignal) => {
+        signal = requestSignal;
+        return new Response(new ReadableStream<Uint8Array>({ cancel }));
+      },
+    });
+    const resolved = vi.fn();
+    const result = backend.lookupInventoryRegion(POSTAL_CODE).then(resolved);
+    await vi.advanceTimersByTimeAsync(17_999);
+    expect(resolved).not.toHaveBeenCalled();
+    expect(signal?.aborted).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await result;
+    expect(signal?.aborted).toBe(true);
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(resolved).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "unconfirmed", reason: "region_provider_unavailable" }),
+    );
+    const calls = mocks.fetch.mock.calls.length;
+    serveAlias();
+    await vi.advanceTimersByTimeAsync(59_999);
+    await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+      status: "unconfirmed",
+    });
+    expect(mocks.fetch).toHaveBeenCalledTimes(calls);
+    await vi.advanceTimersByTimeAsync(1);
+    await expect(backend.lookupInventoryRegion(POSTAL_CODE)).resolves.toMatchObject({
+      status: "confirmed",
+    });
   });
 });
 
