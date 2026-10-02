@@ -4,6 +4,34 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-02: Tipografia e caixa de frase no Tabelao
+
+- Status: pendente_validacao; branch codex/tabelao-tipografia-ptbr, base d7c06b6.
+- Fonte: sete capturas e confirmacao do usuario para preservar nomes proprios
+  e siglas; TabelaoClient, TabelaoFilters, CSS local e tabelao-presentation.
+- Fonte unica de 11px para corpo/cabecalho; titulos nao quebram palavras nem
+  dependem da caixa alta herdada. A coluna Planta libera espaco para os titulos
+  Regiao, Metragem, Vagas e Estoque, mantendo o total das larguras em 100%.
+- Formatar somente o rotulo exibido; manter valores dos selects, identificadores
+  de estoque e comparadores comerciais originais. Isso evita regressao de filtros
+  ao corrigir acentos ou a grafia de Terreo/Tipo/Adaptavel.
+- Trocar Incorporadora por Empresa apenas na pagina solicitada. Outras tabelas
+  usam seus contratos existentes e nao pertencem a esta mudanca.
+- Nove cenarios Playwright locais, 42 testes do formatador, 17 contratos focados,
+  lint do codigo, tipos e build aprovados. Suite Windows: 1405 aprovados e seis
+  falhas POSIX; oito testes Node aprovados. Auditoria: tabelao-tipografia-2026-10-02.
+- CI Linux 37028915320: 1411 Vitest e oito Node aprovados, banco/restore/E2E
+  e matriz funcional verdes. Sete capturas revistas e promovidas; 186 imagens
+  preservadas por hash. Reexecucao final/publicacao pendentes no PR #133,
+  que recebera a evidencia de fechamento apos validacao da release real.
+- A revisao detectou siglas compostas e filtros C/AP versus C/ AP. Normalizar
+  somente vocabulario comum na apresentacao; preservar palavras desconhecidas
+  e separadores evita descaracterizar nomes ou tornar opcoes indistinguiveis.
+- CI 37033511673 aprovada antes da atualizacao paralela de main d79bf8c.
+  Ao integrar manifestos visuais concorrentes, reconciliar registros por caminho
+  com JSON, manter proveniencias e validar todos os hashes instalados. Preservadas
+  sete imagens Tabelao, duas Associativo e 184 comuns; CI combinada pendente.
+
 ## 2026-10-02: Azul noturno e retorno ao dourado no Associativo
 
 - Status: pendente_validacao; branch codex/associativo-azul-noturno-dourado.

@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-02 - Tipografia e titulos do Tabelao
+
+- Fonte de 12 para 11px, titulos inteiros em uma linha e caixa de frase,
+  Incorporadora substituida por Empresa no Tabelao e seu filtro.
+- Planta com quebra apos o tipo de pavimento, largura de 8,5% para 6,5%;
+  espaco redistribuido para Regiao, Metragem, Vagas e Estoque.
+- Formatacao de descricoes somente na apresentacao, com acentos e siglas
+  preservados. Nomes proprios, valores dos filtros e chaves comerciais intactos.
+- Nove cenarios Playwright, 42 testes do formatador, 17 contratos focados,
+  lint do codigo, tipos e build aprovados. Suite Windows: 1405 aprovados,
+  quatro skips e seis falhas POSIX; oito testes Node aprovados.
+- CI Linux 37028915320: 1411 Vitest e oito Node aprovados, banco/restore/E2E
+  e matriz funcional verdes. Sete capturas do Tabelao revisadas e promovidas,
+  186 preservadas; reexecucao e publicacao pendentes no PR #133.
+  Evidencias em docs/audits/tabelao-tipografia-2026-10-02.md.
+- CI 37033511673 integralmente aprovada. Integra main d79bf8c (PR #134) sem
+  reverter Associativo; concilia sete referencias Tabelao e duas Associativo,
+  verificando todos os 193 hashes. CI combinada/publicacao pendentes.
+
 ## 2026-10-02 - Azul noturno e dourado no Associativo
 
 - Pedido posterior substitui a paleta azul saturada/prata: fundo #040d19,

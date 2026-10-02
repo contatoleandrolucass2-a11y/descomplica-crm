@@ -117,6 +117,32 @@ describe("complete visual composition on the scoped v3 read model", () => {
 });
 
 describe("isolated authenticated visual QA contract", () => {
+  it("exige tipografia de 11px, português e plantas com expectativas independentes no Tabelão", () => {
+    const script = source("scripts/qa/authenticated-visual.mjs");
+    const fixture = script.slice(
+      script.indexOf("async function checkTabelaoTypographyFixture("),
+      script.indexOf("async function checkTabelaoCompactFixture("),
+    );
+    expect(script).toContain('getComputedStyle(cell).fontSize === "11px"');
+    expect(script).toContain('style.whiteSpace === "nowrap"');
+    expect(script).toContain('style.textTransform === "none"');
+    expect(script).toContain("rects.length === 1");
+    expect(script).toContain("adjustedColumnProportions:");
+    expect(script).toContain("localizedFilters:");
+    expect(fixture).toContain('plant: "Tipo\\n2Q"');
+    expect(fixture).toContain('plant: "Térreo\\n1Q PCD"');
+    expect(fixture).toContain('displayedDescription: "HIS-2 - adaptável PCD/PNE"');
+    expect(fixture).toContain('displayedDescription: "R2-V - unidade adaptável PCD"');
+    expect(fixture).toContain('displayedDescription: "HMP / 2Q / 1Q / AP / QA"');
+    expect(fixture).toContain('"Condomínio São Miguel QA"');
+    expect(fixture).toContain("lineTops.size === 2");
+    expect(fixture).toContain("option?.textContent.trim() === `${entry.option} (1)`");
+    expect(fixture).toContain("await filter.selectOption(entry.value)");
+    expect(fixture).not.toContain("formatTabelao");
+    expect(script).not.toMatch(/import[\s\S]*?from ["'][^"']*tabelao-presentation\.mjs["']/);
+    expect(script).toContain("responsiveGrid: responsiveGrid && typographyAndLabels");
+  });
+
   it("exige regiões ordenadas, estados honestos e preços independentes do helper de produção no Tabelão", () => {
     const script = source("scripts/qa/authenticated-visual.mjs");
     const fixture = script.slice(

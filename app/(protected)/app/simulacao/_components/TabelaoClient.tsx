@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  formatTabelaoDescription,
+  formatTabelaoPlant,
+} from "@/lib/archive-investor/tabelao-presentation.mjs";
 
 import {
   formatTabelaoRegionTitle as formatRegionTitle,
@@ -96,7 +100,7 @@ function formatDate(value?: string | null) {
 }
 
 function informationLabel(value?: string | null) {
-  return value?.trim() || "Não informado";
+  return formatTabelaoDescription(value);
 }
 
 function descriptiveLabel(value?: string | null) {
@@ -628,18 +632,22 @@ export function TabelaoClient() {
                   Região
                 </th>
                 <th scope="col" id="tabelao-business">
-                  Incorporadora
+                  Empresa
                 </th>
                 <th scope="col" id="tabelao-project">
                   Empreendimento
                 </th>
-                <th scope="col" id="tabelao-address" aria-label="Logradouro Obra / Número / Bairro">
+                <th
+                  scope="col"
+                  id="tabelao-address"
+                  aria-label="Logradouro da obra / Número / Bairro"
+                >
                   Endereço
                 </th>
                 <th scope="col" id="tabelao-area">
                   Metragem
                 </th>
-                <th scope="col" id="tabelao-delivery" aria-label="Data de Entrega">
+                <th scope="col" id="tabelao-delivery" aria-label="Data de entrega">
                   Entrega
                 </th>
                 <th scope="col" id="tabelao-plant">
@@ -652,16 +660,16 @@ export function TabelaoClient() {
                   Estoque
                 </th>
                 <th scope="col" id="tabelao-price" aria-label="Menor valor do imóvel">
-                  Valor Imóvel
+                  Valor do imóvel
                 </th>
-                <th scope="col" id="tabelao-cashback" aria-label="Folga Volta ao Caixa">
-                  Volta ao Caixa
+                <th scope="col" id="tabelao-cashback" aria-label="Folga volta ao caixa">
+                  Volta ao caixa
                 </th>
-                <th scope="col" id="tabelao-appraisal" aria-label="Valor de Avaliação Bancária">
+                <th scope="col" id="tabelao-appraisal" aria-label="Valor de avaliação bancária">
                   Avaliação
                 </th>
                 <th scope="col" id="tabelao-progress" aria-label="Total do andamento da obra (%)">
-                  % Obra
+                  % obra
                 </th>
                 <th scope="col" id="tabelao-description" aria-label="Outras descrições">
                   Limitador
@@ -709,7 +717,9 @@ export function TabelaoClient() {
                   const region = resolveTabelaoRegion(item);
                   const regionSpan = group.regionSpans[itemIndex] ?? 1;
                   const address = formatAddress(item);
-                  const classification = descriptiveLabel(item.classification);
+                  const classification = formatTabelaoDescription(
+                    descriptiveLabel(item.classification),
+                  );
                   const addressSpan = group.addressSpans[itemIndex] ?? 1;
                   const classificationSpan = group.classificationSpans[itemIndex] ?? 1;
                   return (
@@ -741,7 +751,7 @@ export function TabelaoClient() {
                             id={`tabelao-business-${groupIndex}`}
                             headers="tabelao-business"
                             className="tabelao-group-cell"
-                            data-label="Incorporadora"
+                            data-label="Empresa"
                           >
                             {group.businessUnit}
                           </th>
@@ -788,7 +798,9 @@ export function TabelaoClient() {
                         headers={`tabelao-plant ${groupHeaders}`}
                         title={informationLabel(item.plant)}
                       >
-                        {informationLabel(item.plant)}
+                        <span className="tabelao-stock-plant-text">
+                          {formatTabelaoPlant(item.plant)}
+                        </span>
                       </td>
                       <td
                         className="tabelao-stock-parking"
@@ -810,7 +822,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="investor-stock-price"
-                        data-label="Valor Imóvel"
+                        data-label="Valor do imóvel"
                         headers={`tabelao-price ${groupHeaders}`}
                         title={`Valor Final Com Kit ${money.format(item.finalWithKit!)} − (B.A. da Unidade ${money.format(item.unitBonus!)} + Folga de Tabela ${money.format(item.tableSlack!)}) = ${money.format(item.minimumPrice)}`}
                       >
@@ -818,7 +830,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="tabelao-stock-money"
-                        data-label="Volta ao Caixa"
+                        data-label="Volta ao caixa"
                         headers={`tabelao-cashback ${groupHeaders}`}
                         title={formatMoneyValue(item.cashBackSlack)}
                       >
@@ -834,7 +846,7 @@ export function TabelaoClient() {
                       </td>
                       <td
                         className="tabelao-stock-progress"
-                        data-label="% Obra"
+                        data-label="% obra"
                         headers={`tabelao-progress ${groupHeaders}`}
                         title={formatProgress(item.progress)}
                       >
