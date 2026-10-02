@@ -74,6 +74,15 @@
 
 ## 2026-10-02 - Identidade prata e sequencia do Associativo
 
+- Publicacao: PR #129 validado nas CIs 36971256999/36973571026. Main
+  reconciliada; promovida 727c8583ab46a51f81fddb7e0c0ec01b4803a531 apos os
+  gates de 36998281910, substituindo 6f2c2aa com CAS/backup/rollback.
+- Imagem da CI, 11 camadas e dois perfis conferidos, sem rebuild. Backup
+  validado; Nginx intacto; smoke publico 12/12, acesso anonimo negado.
+- Jornada autenticada confirmou marca, paleta e sequencia 1 -> 2 -> 3 com
+  brilho de 3s apenas na etapa atual. Nenhuma proposta real enviada.
+  Fechamento documental nao demanda reinicio da aplicacao.
+
 - Branch codex/associativo-prata-sequencial, base 0ef7b2f. Fonte: pedido e
   dezoito prints do usuario. As referencias anteriores nao foram alteradas.
 - Escopo: perfil, orientacao visual, espacos do fluxo e cabecalho compartilhado.
