@@ -128,16 +128,18 @@ describe("archive theme color contract", () => {
     expect(header("dark")["--header-bg"]).toBe("#071a31");
   });
 
-  it("uses near-black navy only for Associativo dark surfaces with readable text", () => {
+  it("inherits the Tabelao palette while keeping only the dark gold icon override", () => {
+    const overrides = declarations(
+      "investor-archive.css",
+      ':root[data-theme="dark"] .investor-page-shell.investor-associative-table-page',
+    );
+    expect(overrides).toEqual({ "--associative-money-ink": "#e9bd54" });
     const colors = {
       ...content("dark"),
-      ...declarations(
-        "investor-archive.css",
-        ':root[data-theme="dark"] .investor-page-shell.investor-associative-table-page',
-      ),
+      ...overrides,
     };
-    expect(colors["--inv-color-page"]).toBe("#040d19");
-    expect(colors["--inv-color-panel"]).toBe("#091a2c");
+    expect(colors["--inv-color-page"]).toBe("#061f35");
+    expect(colors["--inv-color-panel"]).toBe("#0a2b47");
     for (const background of ["page", "panel", "panel-muted", "panel-strong", "input"])
       for (const foreground of [
         "text",

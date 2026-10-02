@@ -295,18 +295,6 @@
 
 :root[data-theme="dark"] .investor-page-shell.investor-associative-table-page {
   --associative-money-ink: #e9bd54;
-  --inv-color-page: #040d19;
-  --inv-color-panel: #091a2c;
-  --inv-color-panel-muted: #10263d;
-  --inv-color-panel-strong: #152e48;
-  --inv-color-input: #050f1d;
-  --inv-color-line: #526b84;
-  --inv-color-text: #f5f8ff;
-  --inv-color-muted: #c1d1e9;
-  --inv-color-accent: #b8d9ff;
-  --inv-color-accent-soft: #18334f;
-  --inv-color-alternate: #d2def0;
-  --inv-color-alternate-soft: #1c3148;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-question.current {

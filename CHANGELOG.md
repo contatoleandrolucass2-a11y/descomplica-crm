@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-02 - Associativo com as cores do Tabelao
+
+- Alinha fundo, paineis, campos, bordas e textos a paleta existente do Tabelao.
+- Mantem selecoes e proximas acoes em dourado metalico, com brilho de 3s.
+- Tabelao, temas compartilhados, layout e calculos permanecem inalterados.
+- Atualiza duas referencias escuras revisadas; demais 191 preservadas.
+
 ## 2026-10-02 - Titulos legiveis e texto compacto no Tabelao
 
 - Atualiza sete referencias visuais revisadas; demais 186 capturas preservadas.

@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-02 - Paleta do Tabelao no Associativo
+
+- Pedido posterior: Associativo com as cores do Tabelao, consultado somente
+  como referencia. Nenhuma mudanca no Tabelao ou nos tokens compartilhados.
+- Remove apenas doze substituicoes de cor exclusivas do Associativo. Herda
+  fundo #061f35, paineis #0a2b47, campos #071a31 e demais cores da referencia.
+- Preserva dourado metalico, brilho de tres segundos, etapas e calculos.
+- 28 testes focados, lint, typecheck, build e 8 testes Node aprovados.
+- Navegador: 6/6 jornadas e 3/3 comparacoes exatas da paleta aprovadas.
+- Suite Windows: 1410 aprovados, 1 ignorado e 6 falhas POSIX conhecidas;
+  suite integral confirmada na CI Linux 37063588639.
+- Gate funcional autenticado e restore aprovados. Duas capturas escuras
+  revisadas/promovidas; outras 191 preservadas. Nova CI e publicacao pendentes.
+- Evidencias: docs/audits/associativo-paleta-tabelao-2026-10-02.md.
+
 ## 2026-10-02 - Tipografia e titulos do Tabelao
 
 - Fonte de 12 para 11px, titulos inteiros em uma linha e caixa de frase,
