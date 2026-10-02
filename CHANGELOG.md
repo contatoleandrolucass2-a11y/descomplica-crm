@@ -11,6 +11,8 @@
 - Iguala o vao central e as margens do fluxo; separa Linear e Decrescente com
   duas linhas e posiciona o simbolo de remuneracao junto da ultima data.
 - Reorganiza resumo e aprovacao no celular, com rotulos completos por regra.
+- Atualiza 44 referencias visuais das tabelas compartilhadas apos revisao,
+  preservando as demais referencias e os criterios dos gates.
 
 ## 2026-10-02 - Consulta fria das regioes
 

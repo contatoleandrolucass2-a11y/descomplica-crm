@@ -58,3 +58,35 @@ Dados de QA sinteticos, sem clientes, propostas reais ou estoque bruto nos artef
   O roteiro agora exige Ranking vazio e proposta desabilitada antes de confirmar
   novamente; as assercoes de isolamento de valores e unidades foram preservadas.
   Nova execucao integral e referencias visuais permanecem pendentes.
+
+### Revalidacao local final
+
+- Cabecalho: 24/24 combinacoes nas quatro rotas compartilhadas, tres temas,
+  desktop 1440px e mobile 375px. Alturas 48px/91px; controles, outline de foco
+  e dropdowns sem extravasamento. Evidencia local: header-compact-60211/results.json.
+- Orientacao: 6/6 jornadas, tres temas na mesma pagina em cada viewport.
+  Coarse foi conferido separadamente porque screenshots longos alteram a
+  emulacao de ponteiro nesta versao do navegador; tres jornadas coarse continuas
+  preservaram alvo de 44px, simbolo de 18px e ausencia de colisao.
+- Aprovacao mobile final: fonte de 12px, regras identificadas e zero textos
+  extravasando. Evidencia local: guidance/55578-375-dark-approval-locator.png.
+- Edicao de renda: Ranking vazio e proposta ausente antes da reconfirmacao;
+  selecionar gold restaura a proposta habilitada. Evidencia sintetica local:
+  guidance/55578-income-edit-ranking.json. Nenhuma proposta foi enviada.
+- Nova repeticao dos tres arquivos de regressao: 26/26 testes aprovados.
+- Preview local encerrada; nenhuma prova local substitui a CI Linux integral.
+
+### CI e referencias
+
+- Run 36968663861, candidato aef65a0, captura limpa do merge sintetico
+  ae5906f24f3b0538121ebb0753f528986cb6b495. Validate, restore isolado, banco e
+  E2E autenticado aprovados; concorrencia completa sem erros ou timeouts.
+- Gate funcional canonico da matriz aprovado, incluindo navegacao, teclado,
+  zoom e 193 auditorias de acessibilidade. Falha restrita a 44 comparacoes
+  visuais das quatro rotas que compartilham ArchiveHeader.
+- As 44 capturas foram inspecionadas em onze pranchas por viewport/tema.
+  Promocao usa as funcoes canonicas extraidas do harness, com hashes da captura
+  e baseline conferidos, staging no mesmo filesystem e rollback. As outras
+  149 referencias sao preservadas por hash; tolerancia 16 e limiar 1% intactos.
+- Artefato de origem: 11211741666. Nova CI sobre as referencias revisadas e
+  publicacao continuam pendentes; nenhuma versao foi promovida nesta etapa.

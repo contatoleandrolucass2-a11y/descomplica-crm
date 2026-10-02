@@ -19,8 +19,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   revisar o escopo completo antes de promover referencias visuais.
 - Alterar renda invalida confirmacoes dependentes, inclusive Ranking. QA de
   edicao precisa confirmar novamente, exigindo proposta bloqueada antes disso.
+- Tabela de aprovacao conserva alturas fixas legadas com !important: layout
+  mobile por regra precisa liberar alturas de tr/th/td, nao apenas quebrar texto.
 - Testes, CI e publicacao pendentes; fonte de evidencias:
   docs/audits/associativo-prata-2026-10-02.md.
+- CI 36968663861: funcional completo aprovado; 44 referencias alteradas
+  somente nas quatro tabelas, revisadas por viewport e tema. Promocao canonica
+  preserva 149 imagens fora do escopo, mesmo quando ha drift abaixo de 1%.
 
 ## 2026-10-02: Capacidade por CEP, nao apenas por lote
 

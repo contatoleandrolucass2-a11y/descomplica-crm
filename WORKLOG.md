@@ -21,6 +21,12 @@
   para exigir nova confirmacao de Ranking apos editar a renda, preservando
   isolamento entre usuarios. Tabela de aprovacao mobile ganha rotulos completos
   por regra; seis cenarios de orientacao passaram na preview anterior.
+- Revalidacao final: cabecalho 24/24, jornadas 6/6, tres jornadas coarse e
+  aprovacao mobile sem extravasamento. Edicao de renda exige reconfirmar Ranking;
+  proposta reaparece habilitada. Regressao focada 26/26; CI 36968663861 em curso.
+- CI 36968663861 aprovou gates funcionais completos, banco, restore e E2E;
+  44 referencias das quatro rotas compartilhadas revisadas e promovidas pelo
+  mecanismo canonico. Outras 149 preservadas; limiar/tolerancia inalterados.
 
 ## 2026-10-02 - Fila fria das regioes do Tabelao
 
