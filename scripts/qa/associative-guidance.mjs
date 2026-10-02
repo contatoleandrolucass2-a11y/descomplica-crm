@@ -3,6 +3,17 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium, expect } from "@playwright/test";
+import {
+  checkAssociativeCommissionGeometry,
+  checkAssociativeSummaryGeometry,
+  checkAssociativeWorkspaceGaps,
+  checkAssociativeSelectedSilverPaint,
+} from "./associative-compact-layout.mjs";
+export {
+  assertAssociativeCommissionGeometry,
+  assertAssociativeSummaryGaps,
+  assertAssociativeWorkspaceGaps,
+} from "./associative-compact-layout.mjs";
 
 const root = ".investor-associative-table-page";
 const question = ".investor-associative-question";
@@ -10,19 +21,55 @@ const activeRow = ".investor-associative-flow-panel li.investor-key-field.is-act
 const timeout = 5_000;
 export const associativeGuidanceWidths = [375, 1440];
 
+export function isGuidanceSilver([r, g, b, alpha = 255]) {
+  return (
+    alpha >= 220 &&
+    Math.min(r, g, b) >= 140 &&
+    Math.max(r, g, b) - Math.min(r, g, b) <= 35 &&
+    b >= r - 5
+  );
+}
+
+export function hasGuidanceSilverSurface(paint) {
+  const brightness = paint.gradient.map((color) => (color[0] + color[1] + color[2]) / 3);
+  return (
+    paint.gradient.length >= 2 &&
+    paint.gradient.every(isGuidanceSilver) &&
+    Math.max(...brightness) - Math.min(...brightness) >= 20
+  );
+}
+
 export function isGuidanceGold([r, g, b, alpha = 255]) {
   return alpha >= 220 && r >= 150 && g >= 90 && r > g && g - b >= 35 && r - g <= 110;
 }
 
-function hasGoldSurface(paint) {
-  return paint.gradient.length > 0
-    ? paint.gradient.every(isGuidanceGold)
-    : isGuidanceGold(paint.background);
-}
-
 export function isGuidanceGoldText(paint) {
   if (paint.textFill[3] !== 0) return isGuidanceGold(paint.textFill);
-  return paint.backgroundClip.includes("text") && hasGoldSurface(paint);
+  return (
+    paint.backgroundClip.includes("text") &&
+    (paint.gradient.length > 0
+      ? paint.gradient.every(isGuidanceGold)
+      : isGuidanceGold(paint.background))
+  );
+}
+
+export function assertAssociativeShimmer({ active, reducedMotion, animations }) {
+  if (!active || reducedMotion) {
+    assert.equal(animations.length, 0, "Inactive/reduced-motion guidance must not shimmer");
+    return;
+  }
+  assert.ok(animations.length > 0, "Current/required guidance must shimmer");
+  for (const animation of animations) {
+    assert.match(animation.name, /(?:shine|shimmer)/u, "Only the guidance shimmer may animate");
+    assert.equal(animation.duration, 3000, "Guidance shimmer must last exactly 3s");
+    assert.equal(animation.iterations, "infinite", "Guidance shimmer must repeat while required");
+    assert.equal(animation.playState, "running", "Guidance shimmer must actually run");
+    assert.equal(
+      animation.visibleDuringCycle,
+      true,
+      "Guidance shimmer must not remain hidden throughout its cycle",
+    );
+  }
 }
 
 export function assertAssociativeMoneySpacing(measurements) {
@@ -56,18 +103,6 @@ export function assertAssociativeQuantityGeometry({ quantity, money, minimumHeig
       );
     }
   }
-}
-
-export function assertAssociativeSummaryGaps({ separation, decreasingGaps }) {
-  assert.ok(
-    separation >= 4 && separation <= 12,
-    "Linear needs a small 4-12px gap before Decrescente",
-  );
-  assert.equal(decreasingGaps.length, 3, "All four decreasing blocks must be present");
-  assert.ok(
-    decreasingGaps.every((gap) => gap >= -1 && gap <= 1),
-    "The four decreasing blocks must remain together",
-  );
 }
 
 async function inspectPaint(locator) {
@@ -126,7 +161,6 @@ async function inspectPaint(locator) {
           return (
             internal(css) &&
             css.transform === "none" &&
-            css.animationName === "none" &&
             (Number.parseFloat(css.borderTopWidth) === 0 || css.boxSizing === "border-box") &&
             [css.top, css.right, css.bottom, css.left].every(
               (offset) => offset === "auto" || Number.parseFloat(offset) >= 0,
@@ -152,25 +186,26 @@ async function checkCurrentQuestion(page, index) {
     await expect(cards.nth(index)).toHaveAttribute("aria-current", "step");
     assert.ok(
       (await inspectPaint(cards.nth(index))).leftBorderWidth >= 4,
-      "Current card must reinforce its gold edge with a >=4px border",
+      "Current card must reinforce its silver edge with a >=4px border",
     );
     await expect(page.locator(`${root} ${activeRow}`)).toHaveCount(0);
     await expect
-      .poll(async () => hasGoldSurface(await inspectPaint(cards.nth(index))), {
+      .poll(async () => hasGuidanceSilverSurface(await inspectPaint(cards.nth(index))), {
         timeout,
-        message: `Current qualification card ${index + 1} must have a gold surface`,
+        message: `Current qualification card ${index + 1} must have a metallic silver surface`,
       })
       .toBe(true);
   }
   for (let i = 0; i < 3; i += 1) {
     if (i === index) continue;
     await expect
-      .poll(async () => hasGoldSurface(await inspectPaint(cards.nth(i))), {
+      .poll(async () => hasGuidanceSilverSurface(await inspectPaint(cards.nth(i))), {
         timeout,
-        message: `Inactive qualification card ${i + 1} must not remain gold`,
+        message: `Inactive qualification card ${i + 1} must not remain silver`,
       })
       .toBe(false);
   }
+  await checkGuidanceShimmer(page);
   if (index !== null) await checkGuidanceContrast(page);
   return { current: index === null ? null : index + 1 };
 }
@@ -193,7 +228,7 @@ async function checkRequiredRow(page, label) {
         paint = await inspectPaint(rows);
         return (
           paint.contained &&
-          hasGoldSurface(paint) &&
+          hasGuidanceSilverSurface(paint) &&
           paint.attentionBorder.length === 4 &&
           paint.attentionBorder.every(
             (border) => border.width >= 2 && !["none", "hidden"].includes(border.style),
@@ -202,11 +237,12 @@ async function checkRequiredRow(page, label) {
       },
       {
         timeout,
-        message: `${label}: next required row must be gold without an external outline or shadow`,
+        message: `${label}: next required row must be silver without an external outline or shadow`,
       },
     )
     .toBe(true);
   await checkGuidanceContrast(page);
+  await checkGuidanceShimmer(page);
   return { field: label, ...paint };
 }
 
@@ -220,7 +256,7 @@ async function checkGuidanceContrast(page) {
           measurements.every((item) => item.minimumContrast !== null && item.minimumContrast >= 4.5)
         );
       },
-      { timeout, message: "Gold guidance text and inputs require at least 4.5:1 contrast" },
+      { timeout, message: "Silver guidance text and inputs require at least 4.5:1 contrast" },
     )
     .toBe(true);
 }
@@ -354,92 +390,88 @@ async function checkHover(page, locator, reducedMotion, allowScale = true) {
   return motion;
 }
 
-async function checkCommissionGeometry(commission) {
-  const geometry = await commission.evaluate((button) => {
-    const rect = button.getBoundingClientRect();
-    const panel = button.closest(".investor-associative-flow-panel");
-    const bounds = panel.getBoundingClientRect();
-    const overlaps = [
-      ...document.querySelectorAll(
-        ".investor-associative-payment-summary, .investor-associative-documentation-strip, .investor-associative-results-stack, .investor-associative-compact-account",
-      ),
-    ]
-      .filter((element) => element.checkVisibility())
-      .some((element) => {
-        const other = element.getBoundingClientRect();
-        return (
-          rect.left < other.right &&
-          rect.right > other.left &&
-          rect.top < other.bottom &&
-          rect.bottom > other.top
-        );
-      });
-    return {
-      width: rect.width,
-      height: rect.height,
-      minimumTarget: matchMedia("(pointer: coarse)").matches ? 44 : 32,
-      insidePanel:
-        rect.left >= bounds.left &&
-        rect.right <= bounds.right &&
-        rect.top >= bounds.top &&
-        rect.bottom <= bounds.bottom,
-      insideWidth: rect.left >= 0 && rect.right <= innerWidth,
-      overlaps,
-    };
-  });
-  assert.ok(
-    geometry.width >= geometry.minimumTarget && geometry.height >= geometry.minimumTarget,
-    "Commission action must retain its pointer-specific target size",
-  );
-  assert.ok(
-    geometry.insidePanel && geometry.insideWidth && !geometry.overlaps,
-    "Commission action must remain inside its panel without overlapping summaries",
-  );
-  return geometry;
+async function checkGuidanceShimmer(page) {
+  const measurements = await page
+    .locator(
+      `${root} ${question}, ${root} .investor-key-field, ${root} .investor-associative-step-guide`,
+    )
+    .evaluateAll((elements) =>
+      elements
+        .filter((element) => element.checkVisibility())
+        .map((element) => ({
+          label: element.querySelector("input")?.getAttribute("aria-label") ?? element.className,
+          active: element.matches(
+            ".current, .is-active, .investor-associative-step-guide.guidance",
+          ),
+          reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+          animations: element
+            .getAnimations({ subtree: true })
+            .filter((animation) => {
+              if (!(animation instanceof CSSAnimation)) return false;
+              const target = animation.effect.target;
+              // Help icons have their own motion contract; inspect only the guidance owners.
+              return (
+                target === element ||
+                (element.matches(".investor-key-field") &&
+                  target === element.querySelector(":scope > .investor-direct-step-content")) ||
+                (element.matches(".investor-associative-step-guide") &&
+                  target === element.querySelector(":scope > span"))
+              );
+            })
+            .map((animation) => {
+              const timing = animation.effect.getTiming();
+              const style = getComputedStyle(
+                animation.effect.target,
+                animation.effect.pseudoElement,
+              );
+              const opacityFrames = animation.effect
+                .getKeyframes()
+                .filter((frame) => frame.opacity !== undefined)
+                .map((frame) => Number(frame.opacity));
+              const maximumOpacity = opacityFrames.length
+                ? Math.max(...opacityFrames)
+                : Number(style.opacity);
+              return {
+                name: animation.animationName,
+                duration: timing.duration,
+                iterations: timing.iterations === Infinity ? "infinite" : String(timing.iterations),
+                playState: animation.playState,
+                visibleDuringCycle:
+                  maximumOpacity > 0 && style.display !== "none" && style.visibility === "visible",
+              };
+            }),
+        })),
+    );
+  assert.ok(measurements.length >= 3, "Guidance animation owners must be present");
+  for (const measurement of measurements) {
+    try {
+      assertAssociativeShimmer(measurement);
+    } catch (error) {
+      error.message = `${measurement.label}: ${error.message}`;
+      throw error;
+    }
+  }
+  return measurements;
 }
 
-async function checkCurrentCardMotion(page) {
-  const current = page.locator(`${root} ${question}.current`);
-  await current.hover();
-  const shine = await current.evaluate((card) => {
-    const style = getComputedStyle(card, "::after");
-    return {
-      name: style.animationName,
-      iterations: Number(style.animationIterationCount),
-      duration: style.animationDuration,
-    };
-  });
-  assert.equal(shine.name, "investor-guided-card-shine");
-  assert.ok(
-    Number.isFinite(shine.iterations) && shine.iterations > 0 && shine.iterations <= 2,
-    "Current card shine must finish after at most two iterations",
-  );
+async function checkReducedGuidanceMotion(page, locator) {
+  const normal = await checkGuidanceShimmer(page);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect
-    .poll(
-      () =>
-        current.evaluate((card) => {
-          const style = getComputedStyle(card);
-          return (
-            getComputedStyle(card, "::after").animationName === "none" &&
-            style.transform === "none" &&
-            ["none", "1"].includes(style.scale)
-          );
-        }),
-      {
-        timeout,
-        message: "Current card must suppress shine and hover movement under reduced motion",
-      },
-    )
-    .toBe(true);
-  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await checkHover(page, locator, "reduce");
+  const reduced = await checkGuidanceShimmer(page);
   await page.mouse.move(0, 0);
-  return shine;
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  return { normal, reduced };
 }
 
 // Call only on an isolated synthetic page, after initial viewport checks and unit selection.
 export async function checkAssociativeGuidance(page, { onState = async () => {} } = {}) {
-  const result = { contract: "associative-guidance-v1", questions: [], rows: [], passed: false };
+  const result = {
+    contract: "associative-guidance-silver-sequential-v2",
+    questions: [],
+    rows: [],
+    passed: false,
+  };
   const field = (label) =>
     page.locator(`${root} input`).and(page.getByLabel(label, { exact: true }));
   const qualification = page.locator(`${root} .investor-associative-qualification`);
@@ -468,9 +500,13 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     await expect(qualification.locator('input[type="radio"]:checked')).toHaveCount(0);
     await qualification.focus();
     await page.mouse.move(0, 0);
+    await checkAssociativeSelectedSilverPaint(page);
     await onState("profile");
     result.questions.push(await checkCurrentQuestion(page, 0));
-    result.currentCardMotion = await checkCurrentCardMotion(page);
+    result.currentCardMotion = await checkReducedGuidanceMotion(
+      page,
+      qualification.locator(`${question}.current`),
+    );
     await expect(flow).toHaveAttribute("data-locked", "true");
     await expect(field("Financiamento")).toBeDisabled();
     await expect(qualification.getByRole("button", { name: "SBPE", exact: true })).toHaveAttribute(
@@ -482,17 +518,21 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
 
     await field("Renda Familiar").fill("800000");
     await field("Renda Familiar").blur();
-    // Financing rules currently preselect a modality; a future explicit confirmation can retain card 2.
-    const modalitySelected = await qualification
-      .locator('.investor-associative-choice-row button[aria-pressed="true"]')
-      .count();
-    result.questions.push(await checkCurrentQuestion(page, modalitySelected ? 2 : 1));
+    // A calculated modality is a suggestion, never confirmation of step 2.
+    result.questions.push(await checkCurrentQuestion(page, 1));
+    await expect(qualification.getByRole("radio", { name: "Sim", exact: true })).toBeDisabled();
+    await expect(qualification.getByRole("radio", { name: "Não", exact: true })).toBeDisabled();
+    await expect(flow).toHaveAttribute("data-locked", "true");
+    await expect(field("Financiamento")).toBeDisabled();
+    await onState("modality");
     await qualification.getByRole("button", { name: "SBPE", exact: true }).click();
     await expect(qualification.getByRole("button", { name: "SBPE", exact: true })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
     result.questions.push(await checkCurrentQuestion(page, 2));
+    await expect(qualification.getByRole("radio", { name: "Sim", exact: true })).toBeEnabled();
+    await onState("first-property");
     await expect(flow).toHaveAttribute("data-locked", "true");
     await expect(field("Financiamento")).toBeDisabled();
     await qualification.getByRole("radio", { name: "Sim", exact: true }).check();
@@ -509,6 +549,11 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     for (const [label, value, next] of steps) {
       if (label === "Financiamento") await onState("financing");
       result.rows.push(await checkRequiredRow(page, label));
+      if (label === "Financiamento")
+        result.requiredRowMotion = await checkReducedGuidanceMotion(
+          page,
+          page.locator(`${root} ${activeRow}`),
+        );
       await expect(field(next)).toBeDisabled();
       if (label === "Financiamento") {
         await field(label).fill("0");
@@ -531,10 +576,12 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     await expect(
       page.getByRole("combobox", { name: "Selecione o Ranking", exact: true }),
     ).toHaveValue("");
+    result.rankingMotion = await checkGuidanceShimmer(page);
     await page
       .getByRole("combobox", { name: "Selecione o Ranking", exact: true })
       .selectOption("gold");
     await expect(page.locator(`${root} ${activeRow}`)).toHaveCount(0);
+    result.completedMotion = await checkGuidanceShimmer(page);
     await expect(
       page
         .locator(`${root} .investor-associative-approval-rule > span`)
@@ -546,22 +593,11 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
         .filter({ hasText: /% Máximo da renda por anual/u }),
     ).toHaveCount(0);
 
-    const summary = page.locator(`${root} .investor-associative-payment-table`);
-    await expect(summary.locator(".is-linear")).toHaveCount(1);
-    await expect(summary.locator(".is-decreasing")).toHaveCount(4);
-    result.summary = await summary.evaluate((table) => {
-      const linear = table.querySelector(".is-linear").getBoundingClientRect();
-      const blocks = [...table.querySelectorAll(".is-decreasing")].map((row) =>
-        row.getBoundingClientRect(),
-      );
-      return {
-        separation: blocks[0].top - linear.bottom,
-        decreasingGaps: blocks.slice(1).map((block, index) => block.top - blocks[index].bottom),
-      };
-    });
-    assertAssociativeSummaryGaps(result.summary);
+    result.summary = await checkAssociativeSummaryGeometry(page);
+    result.workspace = await checkAssociativeWorkspaceGaps(page);
     const commission = page.locator(`${root} .investor-associative-commission-launcher`);
     await expect(commission).toBeVisible();
+    await expect(commission).toHaveAccessibleName("Abrir remuneração comercial");
     await expect
       .poll(
         async () => {
@@ -575,7 +611,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
       )
       .toBe(true);
     await checkGuidanceContrast(page);
-    result.commission = await checkCommissionGeometry(commission);
+    result.commission = await checkAssociativeCommissionGeometry(commission);
     await commission.click();
     await expect(page.locator("#investor-associative-commission-dialog")).toBeVisible();
     await page.keyboard.press("Escape");
@@ -609,7 +645,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
 export async function inspectAssociativeGuidanceContrast(page) {
   return page
     .locator(
-      `${root} ${question}.current .investor-associative-question-heading > span, ${root} ${question}.current > small, ${root} ${question}.current input:not([type="radio"]), ${root} ${activeRow} input, ${root} ${activeRow} .investor-direct-step-name strong, ${root} .investor-associative-commission-launcher > span`,
+      `${root} ${question}.current .investor-associative-question-heading > span, ${root} ${question}.current > small, ${root} ${question}.current input:not([type="radio"]), ${root} ${question}.current .investor-associative-choice-row > button:not([aria-disabled="true"]), ${root} ${question}.current .investor-associative-yes-no label, ${root} ${activeRow} input, ${root} ${activeRow} .investor-direct-step-name strong, ${root} .investor-associative-commission-launcher > span`,
     )
     .evaluateAll((elements) => {
       const canvas = document.createElement("canvas");
@@ -713,7 +749,8 @@ export async function runAssociativeGuidancePreview(
     );
   try {
     for (const viewport of viewports) {
-      const context = await browser.newContext({ viewport, hasTouch: viewport.width <= 600 });
+      const mobile = viewport.width <= 600;
+      const context = await browser.newContext({ viewport, isMobile: mobile, hasTouch: mobile });
       await context.route("**/*", (route) => {
         const request = route.request();
         return new URL(request.url()).origin === target.origin && request.method() === "GET"
@@ -721,15 +758,33 @@ export async function runAssociativeGuidancePreview(
           : route.abort();
       });
       try {
+        // Reuse the selected page across themes, matching the CI stateful journey.
+        const page = await context.newPage();
+        await page.goto(url, { waitUntil: "networkidle" });
+        await page.evaluate(() => document.fonts.ready);
+        const pointer = await page.evaluate(() => ({
+          coarse: matchMedia("(pointer: coarse)").matches,
+          fine: matchMedia("(pointer: fine)").matches,
+          hover: matchMedia("(hover: hover)").matches,
+          maxTouchPoints: navigator.maxTouchPoints,
+        }));
+        assert.equal(pointer.coarse, mobile, "Mobile QA must exercise a real coarse pointer");
+        assert.equal(pointer.fine, !mobile, "Desktop QA must exercise a fine pointer");
         for (const [theme, label] of themes) {
-          const page = await context.newPage();
-          const check = { width: viewport.width, theme, passed: false, captures: [], contrast: {} };
+          const check = {
+            width: viewport.width,
+            theme,
+            pointer,
+            passed: false,
+            captures: [],
+            contrast: {},
+          };
           const capture = async (state) => {
             const filename = `${target.port}-${viewport.width}-${theme}-${state}.png`;
             await page.mouse.move(0, 0);
             await page.keyboard.press("Escape");
             const panel = page.locator(
-              `${root} ${state === "profile" ? ".investor-associative-qualification" : ".investor-associative-flow-panel"}`,
+              `${root} ${["profile", "modality", "first-property"].includes(state) ? ".investor-associative-qualification" : ".investor-associative-flow-panel"}`,
             );
             await panel.evaluate((element) => {
               const header = document.querySelector("header:has(#archive-navigation)");
@@ -758,8 +813,6 @@ export async function runAssociativeGuidancePreview(
             check.contrast[state] = await inspectAssociativeGuidanceContrast(page);
           };
           try {
-            await page.goto(url, { waitUntil: "networkidle" });
-            await page.evaluate(() => document.fonts.ready);
             await page
               .getByRole("group", { name: "Aparência da página", exact: true })
               .getByRole("button", { name: label, exact: true })
@@ -773,7 +826,7 @@ export async function runAssociativeGuidancePreview(
             for (const [state, contrast] of Object.entries(check.contrast)) {
               assert.ok(
                 contrast.length > 0 && contrast.every((item) => item.minimumContrast >= 4.5),
-                `${state}: gold guidance text requires at least 4.5:1 contrast`,
+                `${state}: silver guidance text requires at least 4.5:1 contrast`,
               );
             }
             check.passed = true;
@@ -786,8 +839,6 @@ export async function runAssociativeGuidancePreview(
             } catch (captureError) {
               check.captureError = String(captureError.message);
             }
-          } finally {
-            await page.close();
           }
           results.push(check);
           await saveResults();

@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-02 - Identidade prata e sequencia do Associativo
+
+- Branch codex/associativo-prata-sequencial, base 0ef7b2f. Fonte: pedido e
+  dezoito prints do usuario. As referencias anteriores nao foram alteradas.
+- Escopo: perfil, orientacao visual, espacos do fluxo e cabecalho compartilhado.
+  Sem alteracoes em formulas, autorizacao, banco ou workflows n8n.
+- Paleta escura restrita ao Associativo; Claro e Medio preservados. Prata
+  indica proxima acao, shimmer de 3s; movimento reduzido conserva estado estatico.
+- D derivado do simbolo fornecido com a ferramenta integrada de imagem, somente
+  extracao do fundo azul; asset de marca em public/descomplica-symbol.png.
+- Build, typecheck, lint do codigo e 26 testes focados aprovados. Suite Windows
+  interrompida por limites POSIX/timeouts, sem reduzir gates; CI Linux obrigatoria.
+- Repeticao visual final, CI, revisao das referencias e publicacao pendentes.
+  Evidencias consolidadas em docs/audits/associativo-prata-2026-10-02.md.
+
 ## 2026-10-01 - Regiao automatica e possibilidades de vagas no Tabelao
 
 - Branch codex/tabelao-regioes-vagas. Campos canonicos postalCode e parkingSpaces

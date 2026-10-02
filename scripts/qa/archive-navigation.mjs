@@ -269,6 +269,47 @@ async function assertHeaderGeometry(page, compact) {
     const nav = element.querySelector("#archive-navigation");
     const nodes = [brand, themes, isCompact ? control : nav];
     if (nodes.some((node) => !node)) return { fits: false };
+    const containedInHeader = (node) => {
+      const bounds = element.getBoundingClientRect();
+      const rect = node.getBoundingClientRect();
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        rect.top >= bounds.top - 1 &&
+        rect.bottom <= bounds.bottom + 1 &&
+        rect.left >= bounds.left - 1 &&
+        rect.right <= bounds.right + 1
+      );
+    };
+    // Only top-level controls belong inside the header; disclosure panels may extend beyond it.
+    const activeNavItems = [
+      ...nav.querySelectorAll(
+        ':scope > a[aria-current="page"], :scope > div > button[data-active="true"]',
+      ),
+    ];
+    const themeButtons = [...themes.querySelectorAll("button")];
+    const fixedControls = [brand, themes, ...themeButtons, ...(isCompact ? [control] : [])];
+    const activeNavContained =
+      isCompact || (activeNavItems.length === 1 && activeNavItems.every(containedInHeader));
+    const headerControlsContained = fixedControls.every(containedInHeader);
+    const focusTargets = [...themeButtons, ...(isCompact ? [control] : activeNavItems)];
+    const previousFocus = document.activeElement;
+    let focusedControlsContained;
+    try {
+      focusedControlsContained = focusTargets.every((node) => {
+        node.focus({ preventScroll: true });
+        return (
+          document.activeElement === node &&
+          containedInHeader(node) &&
+          fixedControls.every(containedInHeader) &&
+          (isCompact || activeNavItems.every(containedInHeader))
+        );
+      });
+    } finally {
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
+        previousFocus.focus({ preventScroll: true });
+    }
     const boxes = nodes.map((node) => node.getBoundingClientRect());
     const fits = boxes.every(
       (box) =>
@@ -293,6 +334,9 @@ async function assertHeaderGeometry(page, compact) {
     return {
       fits,
       overlaps,
+      activeNavContained,
+      headerControlsContained,
+      focusedControlsContained,
       themeRow:
         innerWidth <= 600
           ? boxes[1].top >= Math.max(boxes[0].bottom, boxes[2].bottom) - 1
@@ -331,6 +375,9 @@ async function assertHeaderGeometry(page, compact) {
     {
       fits: true,
       overlaps: false,
+      activeNavContained: true,
+      headerControlsContained: true,
+      focusedControlsContained: true,
       themeRow: true,
       noOverflow: true,
       brandTextFits: true,

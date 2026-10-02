@@ -4,6 +4,22 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-02: Prata e confirmacao explicita no Associativo
+
+- Status: pendente_validacao; branch codex/associativo-prata-sequencial.
+- Fonte: dezoito prints do usuario, InvestorCalculator.tsx, investor-archive.css
+  e ArchiveHeader. Nova direcao visual substitui o dourado da etapa anterior.
+- Enquadramento automatico nao equivale a confirmacao do usuario. Renda libera
+  modalidade; somente sua confirmacao libera primeiro imovel, sem mudar regras.
+- Usar um unico espacamento para padding do formulario e gap das duas colunas;
+  recalcular a posicao da orientacao e sua seta com o mesmo token.
+- Brilho recorrente de 3s deve depender do estado pendente, ter contorno interno
+  e desligar em prefers-reduced-motion. Nao animar o painel inteiro.
+- D de marca e cabecalho compartilhados afetam capturas de outras tabelas;
+  revisar o escopo completo antes de promover referencias visuais.
+- Testes, CI e publicacao pendentes; fonte de evidencias:
+  docs/audits/associativo-prata-2026-10-02.md.
+
 ## 2026-10-01: Regioes e vagas do Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-regioes-vagas.

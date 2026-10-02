@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import Image from "next/image";
 import Link from "next/link";
 
 import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
@@ -18,11 +19,17 @@ export async function ArchiveHeader() {
         prefetch={false}
         aria-label="Descomplica, início"
       >
-        <span className={styles.brandMark} aria-hidden="true">
-          D<span />
-        </span>
-        <span className={styles.brandName}>
-          Descomplica<span className={styles.brandDot}>.</span>
+        <Image
+          className={styles.brandMark}
+          src="/descomplica-symbol.png"
+          alt=""
+          aria-hidden="true"
+          width={22}
+          height={22}
+          loading="eager"
+        />
+        <span className={styles.brandName} aria-hidden="true">
+          escomplica
         </span>
       </Link>
       <SiteMenu canPersistTheme={consent?.categories.functional === true} />

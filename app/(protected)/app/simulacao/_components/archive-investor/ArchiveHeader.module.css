@@ -7,6 +7,7 @@
   --header-accent: #145bb5;
   --header-active: #e4effd;
   --header-selected: #ffffff;
+  --header-brand-shadow: drop-shadow(0 0 0.75px #242b3299);
   position: sticky;
   /* Above the floating privacy shortcut (85), below the consent panel (90). */
   z-index: 86;
@@ -15,8 +16,9 @@
   flex-direction: row;
   align-items: center;
   gap: 28px;
-  min-height: 56px;
-  padding: 5px 24px;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 1px 24px;
   color: var(--header-text);
   border-bottom: 1px solid var(--header-line);
   background: var(--header-bg);
@@ -46,42 +48,29 @@
   --header-accent: #7dd3fc;
   --header-active: #123b5c;
   --header-selected: #194a70;
+  --header-brand-shadow: none;
 }
 
 .header .brand {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: 10px;
+  gap: 0;
   min-height: 44px;
   color: var(--header-text);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .header .brandMark {
-  position: relative;
-  display: grid;
-  flex: 0 0 38px;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border-radius: 8px;
-  color: #ffffff;
-  background: #2563eb;
-  font-size: 26px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.header .brandMark > span {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--header-bg);
-  border-radius: 3px;
-  background: #7dd3fc;
+  display: block;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  margin-inline-end: -2px;
+  object-fit: contain;
+  filter: var(--header-brand-shadow);
+  transform: translateY(-1px);
 }
 
 .header .brandName {
@@ -89,10 +78,6 @@
   font-weight: 760;
   line-height: 1.2;
   letter-spacing: 0;
-}
-
-.header .brandDot {
-  color: var(--header-accent);
 }
 
 .header .navigation {
@@ -163,7 +148,7 @@
 .header .panel {
   position: absolute;
   z-index: 1;
-  top: calc(100% + 10px);
+  top: calc(100% + 4px);
   left: 0;
   display: grid;
   width: 268px;
@@ -305,8 +290,8 @@
 
 @media (max-width: 1180px) {
   .header.header {
-    min-height: 56px;
-    padding: 5px 20px;
+    min-height: 48px;
+    padding: 1px 20px;
     gap: 16px;
   }
   .header .navigation {
@@ -374,7 +359,7 @@
     display: grid;
     grid-template-columns: 1fr 44px;
     gap: 0 12px;
-    padding: 4px 16px;
+    padding: 1px 16px;
   }
   .header .navigation {
     display: contents;

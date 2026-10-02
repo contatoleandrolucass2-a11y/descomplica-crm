@@ -603,6 +603,7 @@ function AssociativePaymentSummary({
   blocks,
   onShowInstallments,
   onShowReadyProposal,
+  onShowCommission,
 }: {
   available: boolean;
   installments: number;
@@ -613,6 +614,7 @@ function AssociativePaymentSummary({
   blocks: AssociativeDecreasingBlockView[];
   onShowInstallments: () => void;
   onShowReadyProposal: () => void;
+  onShowCommission: () => void;
 }) {
   const rows = [
     {
@@ -673,13 +675,24 @@ function AssociativePaymentSummary({
         <span role="columnheader">1ª mensal</span>
         <span role="columnheader">Última mensal</span>
       </div>
-      {rows.map((row) => <div key={row.key} className={`investor-associative-payment-table-row ${row.featured ? "is-linear" : "is-decreasing"}`} role="row">
+      {rows.map((row, rowIndex) => <div key={row.key} className={`investor-associative-payment-table-row ${row.featured ? "is-linear" : "is-decreasing"}`} role="row">
         <strong role="rowheader">{row.label}</strong>
         <span role="cell" data-label="Quantidade" aria-label={`${row.count} parcelas`}>{available ? row.count : "—"}</span>
         <span role="cell" data-label="Sem correção" aria-label={`Sem correção: ${available ? money.format(row.uncorrected) : "indisponível"}`}>{available ? money.format(row.uncorrected) : "—"}</span>
         <span role="cell" data-label="Com correção" aria-label={`Com correção: ${available ? money.format(row.corrected) : "indisponível"}`}>{available ? money.format(row.corrected) : "—"}</span>
         <time role="cell" data-label="1ª mensal" aria-label={`Primeira mensal: ${available ? formatDate(row.firstDate) : "indisponível"}`} dateTime={available ? row.firstDate : undefined}>{available ? formatDate(row.firstDate) : "—"}</time>
-        <time role="cell" data-label="Última mensal" aria-label={`Última mensal: ${available ? formatDate(row.lastDate) : "indisponível"}`} dateTime={available ? row.lastDate : undefined}>{available ? formatDate(row.lastDate) : "—"}</time>
+        <span role="cell" data-label="Última mensal" className="investor-associative-payment-last-date">
+          <time aria-label={`Última mensal: ${available ? formatDate(row.lastDate) : "indisponível"}`} dateTime={available ? row.lastDate : undefined}>{available ? formatDate(row.lastDate) : "—"}</time>
+          {!row.featured && rowIndex === rows.length - 1 ? <button
+            type="button"
+            className="investor-associative-commission-launcher"
+            aria-label="Abrir remuneração comercial"
+            title="Abrir remuneração comercial"
+            aria-haspopup="dialog"
+            aria-controls="investor-associative-commission-dialog"
+            onClick={onShowCommission}
+          ><span aria-hidden="true">$</span></button> : null}
+        </span>
       </div>)}
     </div>
   </section>;
@@ -958,6 +971,7 @@ function associativeModalityMessage(decision: FinancingDecision) {
 function AssociativeQualificationPanel({
   income,
   modality,
+  modalityConfirmed,
   modalityDecision,
   firstProperty,
   sectionRef,
@@ -969,6 +983,7 @@ function AssociativeQualificationPanel({
 }: {
   income: string;
   modality: string;
+  modalityConfirmed: boolean;
   modalityDecision: FinancingDecision;
   firstProperty: string;
   sectionRef: Ref<HTMLElement>;
@@ -983,8 +998,8 @@ function AssociativeQualificationPanel({
   const incomeValue = currencyInputNumber(income);
   const incomeBand = municipalHousingBand(incomeValue);
   const incomeBandPropertyLimit = municipalHousingPriceLimit(incomeValue);
-  const modalityReady = Boolean(modality);
-  const firstPropertyReady = Boolean(firstProperty);
+  const modalityReady = incomeReady && modalityConfirmed && Boolean(modality);
+  const firstPropertyReady = modalityReady && Boolean(firstProperty);
   const completed = Number(incomeReady) + Number(modalityReady) + Number(firstPropertyReady);
 
   return <section ref={sectionRef} tabIndex={-1} className={`investor-associative-qualification${completed === 3 ? " is-complete" : ""}${guided ? " is-guided-active" : ""}`} aria-labelledby="investor-associative-qualification-title" data-tour="qualification">
@@ -1009,8 +1024,8 @@ function AssociativeQualificationPanel({
             return <button
               key={option}
               type="button"
-              className={`${modality === option ? "selected" : ""}${unavailable ? " unavailable" : ""}`}
-              aria-pressed={modality === option}
+              className={`${modalityReady && modality === option ? "selected" : ""}${unavailable ? " unavailable" : ""}`}
+              aria-pressed={modalityReady && modality === option}
               aria-disabled={!incomeReady || unavailable}
               aria-describedby="investor-associative-modality-status"
               onClick={() => {
@@ -1025,7 +1040,7 @@ function AssociativeQualificationPanel({
             >{option}{unavailable ? <small>Indisponível</small> : null}</button>;
           })}
         </div>
-        <small id="investor-associative-modality-status" className="investor-associative-modality-result" role="status" aria-live="polite" aria-atomic="true">{blockedMcmvAttempt ? `MCMV indisponível. ${associativeModalityMessage(modalityDecision)}` : associativeModalityMessage(modalityDecision)} <span>Enquadramento preliminar.</span></small>
+        <small id="investor-associative-modality-status" className="investor-associative-modality-result" role="status" aria-live="polite" aria-atomic="true">{blockedMcmvAttempt ? `MCMV indisponível. ${associativeModalityMessage(modalityDecision)}` : associativeModalityMessage(modalityDecision)} <span>{incomeReady && !modalityReady ? "Confirme a modalidade para continuar." : "Enquadramento preliminar."}</span></small>
       </fieldset>
 
       <fieldset className={`investor-associative-question${!modalityReady ? " locked" : firstPropertyReady ? " complete" : " current"}`} aria-current={modalityReady && !firstPropertyReady ? "step" : undefined}>
@@ -2476,6 +2491,7 @@ export function InvestorCalculator({
   const [installments, setInstallments] = useState(annualMode ? "" : directVisualLayout ? "84" : "18");
   const [income, setIncome] = useState("0");
   const [associativeManualModalityPreference, setAssociativeManualModalityPreference] = useState<FinancingModality | null>(null);
+  const [associativeModalityConfirmed, setAssociativeModalityConfirmed] = useState(false);
   const [associativeFirstProperty, setAssociativeFirstProperty] = useState("");
   const [associativeApprovalTier, setAssociativeApprovalTier] = useState("");
   const [associativeCommissionChannel, setAssociativeCommissionChannel] = useState<"" | AssociativeCommissionChannel>("");
@@ -2512,7 +2528,7 @@ export function InvestorCalculator({
     mcmvPropertyLimitCents: MCMV_PROPERTY_LIMIT_CENTS,
   }), [associativeFirstProperty, associativeManualModalityPreference, income, salePrice]);
   const associativeFinancingModality = associativeFinancingDecision.effectiveModality ?? "";
-  const associativeFinancingModalityReady = Boolean(associativeFinancingModality);
+  const associativeFinancingModalityReady = associativeIncomeReady && associativeModalityConfirmed && Boolean(associativeFinancingModality);
   const associativeFinancingValueReady = currencyInputNumber(financing) > 0;
   const associativeSubsidyComplete = subsidy.trim() !== "";
   const associativeFgtsComplete = fgts.trim() !== "";
@@ -3316,6 +3332,7 @@ export function InvestorCalculator({
     setInstallments(annualMode ? "" : directVisualLayout ? "84" : "18");
     setIncome("0");
     setAssociativeManualModalityPreference(null);
+    setAssociativeModalityConfirmed(false);
     setAssociativeFirstProperty("");
     setAssociativeApprovalTier("");
     setSignalFieldCount(0);
@@ -3373,20 +3390,28 @@ export function InvestorCalculator({
 
   function updateAssociativeIncome(value: string) {
     updateIncome(value);
-    if (currencyInputNumber(value) <= 0) {
+    if (moneyToCents(value) !== moneyToCents(income) || currencyInputNumber(value) <= 0) {
       setAssociativeManualModalityPreference(null);
+      setAssociativeModalityConfirmed(false);
       setAssociativeFirstProperty("");
       setAssociativeApprovalTier("");
     }
   }
 
   function updateAssociativeModality(value: string) {
+    if (!associativeIncomeReady) return;
     if (value === "MCMV" && associativeFinancingDecision.forced) return;
-    setAssociativeManualModalityPreference(value === "MCMV" || value === "SBPE" ? value : null);
-    if (!value) setAssociativeFirstProperty("");
+    const preference = value === "MCMV" || value === "SBPE" ? value : null;
+    setAssociativeManualModalityPreference(preference);
+    setAssociativeModalityConfirmed(Boolean(preference));
+    if (preference !== associativeManualModalityPreference || !preference) {
+      setAssociativeFirstProperty("");
+      setAssociativeApprovalTier("");
+    }
   }
 
   function updateAssociativeFirstProperty(value: string) {
+    if (!associativeFinancingModalityReady) return;
     setAssociativeFirstProperty(value);
     if (value) window.setTimeout(() => {
       guideToSection("flow");
@@ -4101,6 +4126,7 @@ export function InvestorCalculator({
       {selectedUnit && annualMode ? <AssociativeQualificationPanel
         income={income}
         modality={associativeFinancingModality}
+        modalityConfirmed={associativeModalityConfirmed}
         modalityDecision={associativeFinancingDecision}
         firstProperty={associativeFirstProperty}
         sectionRef={associativeQualificationSectionRef}
@@ -4614,6 +4640,7 @@ export function InvestorCalculator({
                     blocks={result.custom.decreasing?.blocks ?? []}
                     onShowInstallments={() => associativeInstallmentsDialog.current?.showModal()}
                     onShowReadyProposal={() => associativeReadyProposalDialog.current?.showModal()}
+                    onShowCommission={() => associativeCommissionDialog.current?.showModal()}
                   /> : null}
                 </div> : null}
                 <AssociativeInstallmentDialog
@@ -4747,17 +4774,6 @@ export function InvestorCalculator({
               </>}
               </div>
             </fieldset>
-            {annualMode && associativeApprovalDetailsUnlocked ? <button
-              type="button"
-              className="investor-associative-commission-launcher"
-              aria-label="Abrir remuneração comercial"
-              title="Abrir remuneração comercial"
-              aria-haspopup="dialog"
-              aria-controls="investor-associative-commission-dialog"
-              onClick={() => associativeCommissionDialog.current?.showModal()}
-            >
-              <span aria-hidden="true">$</span>
-            </button> : null}
           </section>
 
           {annualMode ? <div className="investor-associative-documentation-strip">
