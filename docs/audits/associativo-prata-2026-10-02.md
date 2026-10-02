@@ -45,3 +45,7 @@ Dados de QA sinteticos, sem clientes, propostas reais ou estoque bruto nos artef
   escuro nesse tema e no Medio; Escuro conserva o dourado luminoso.
 - Pendente: repeticao visual final desktop/mobile, CI Linux integral e revisao
   das capturas afetadas. Publicacao bloqueada ate todos os gates passarem.
+- Repeticao encontrou 4,08:1 no simbolo do tema Medio, corrigido com #965A0A.
+  No celular, o resumo usava uma consulta de container sem ancestral nomeado;
+  results-stack agora define esse container, habilitando o layout responsivo.
+  Validacao visual desse refinamento ainda pendente.

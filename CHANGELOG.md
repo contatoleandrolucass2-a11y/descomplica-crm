@@ -10,6 +10,7 @@
 - Compacta o cabecalho compartilhado e integra o D fornecido ao nome sem ponto.
 - Iguala o vao central e as margens do fluxo; separa Linear e Decrescente com
   duas linhas e posiciona o simbolo de remuneracao junto da ultima data.
+- Reorganiza o resumo no celular e permite quebra dos rotulos de aprovacao.
 
 ## 2026-10-01 - Regioes e vagas no Tabelao
 

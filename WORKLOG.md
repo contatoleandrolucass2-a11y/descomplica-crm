@@ -13,6 +13,9 @@
 - Build, typecheck, lint do codigo e 26 testes focados aprovados. Suite Windows
   interrompida por limites POSIX/timeouts, sem reduzir gates; CI Linux obrigatoria.
 - Repeticao visual final, CI, revisao das referencias e publicacao pendentes.
+- QA encontrou contraste do simbolo no Medio e resumo cortado no celular.
+  Dourado escuro refinado; consultas de largura agora usam o container real
+  de resultados, com rotulos completos, datas e acao dentro do resumo.
   Evidencias consolidadas em docs/audits/associativo-prata-2026-10-02.md.
 
 ## 2026-10-01 - Regiao automatica e possibilidades de vagas no Tabelao
