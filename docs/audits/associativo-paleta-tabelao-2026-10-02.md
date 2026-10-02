@@ -26,7 +26,13 @@
   das transicoes finitas antes de medir; nenhuma tolerancia adicionada.
 - Capturas desktop/celular revisadas: fundo e paineis da referencia, dourado
   na acao corrente, textos legiveis e sem sobreposicao.
-- CI e revisao das referencias autenticadas: pendentes.
+- CI 37063588639: validacao Linux e restore aprovados; gate funcional
+  autenticado aprovado. Comparacao visual sinalizou somente duas capturas
+  escuras do Associativo (desktop 1440x900 e celular 390x844).
+- Captura limpa 6a1a80fee6f41c6231980ef1c07f2aec8b4ed338, artefato
+  11251914554: duas capturas revisadas visualmente e promovidas pelo codigo
+  canonico transacional. Outras 191 preservadas, incluindo todo o Tabelao.
+- Nenhum gate, tolerancia ou mascara alterado. Nova CI integral pendente.
 - Promover apenas diferencas visuais revisadas do Associativo, sem reduzir
   gates ou alterar referencias do Tabelao e das demais rotas.
 

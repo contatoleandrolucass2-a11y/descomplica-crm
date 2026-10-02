@@ -17,7 +17,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - 28 testes focados, lint, tipos, build e 8 testes Node aprovados. Navegador:
   6/6 jornadas, 3/3 comparacoes de paleta e revisao desktop/celular aprovadas.
 - Suite Windows: 1410 aprovados, 1 ignorado e 6 falhas POSIX conhecidas.
-  CI Linux integral e publicacao pendentes; nao reduzir gates.
+  CI Linux 37063588639 aprovou suite, build, restore e gate funcional.
+- Duas capturas escuras do Associativo revisadas/promovidas; demais 191
+  preservadas, inclusive Tabelao. Nova CI integral e publicacao pendentes.
 
 ## 2026-10-02: Tipografia e caixa de frase no Tabelao
 

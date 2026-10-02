@@ -10,7 +10,9 @@
 - 28 testes focados, lint, typecheck, build e 8 testes Node aprovados.
 - Navegador: 6/6 jornadas e 3/3 comparacoes exatas da paleta aprovadas.
 - Suite Windows: 1410 aprovados, 1 ignorado e 6 falhas POSIX conhecidas;
-  confirmar suite integral na CI Linux. CI e publicacao pendentes.
+  suite integral confirmada na CI Linux 37063588639.
+- Gate funcional autenticado e restore aprovados. Duas capturas escuras
+  revisadas/promovidas; outras 191 preservadas. Nova CI e publicacao pendentes.
 - Evidencias: docs/audits/associativo-paleta-tabelao-2026-10-02.md.
 
 ## 2026-10-02 - Tipografia e titulos do Tabelao
