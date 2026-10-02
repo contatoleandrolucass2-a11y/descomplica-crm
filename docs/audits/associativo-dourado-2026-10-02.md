@@ -28,11 +28,27 @@
   visuais, Associativo dark desktop 1440x900 e mobile 390x844. Inspecao visual
   confirmou a nova paleta, sem regressao de geometria. Demais 191 preservadas.
 - Promocao pelo gate canonico, proveniencia/hashes conferidos e troca atomica;
-  limiar de 1% e tolerancia 16 mantidos. Confirmacao CI/publicacao pendentes.
+  limiar de 1% e tolerancia 16 mantidos. CI 37034089884 totalmente aprovada.
 - Gate visual deve revisar somente diferencas do Associativo, preservando
   referencias de outras rotas e tolerancias existentes.
 
 ## Publicacao
 
-Pendente. Exigir CI integral, imagem imutavel, backup, compare-and-swap,
-rollback e verificacoes observacionais de saude/versao e acesso anonimo.
+Publicado em 02/10/2026 pelo PR #134. CI main 37037035430 totalmente aprovada.
+
+- Runtime: d79bf8c508b1e47873853822dabca17e8ca6ede9.
+- Anterior: d7c06b6ffe2114a4ce3e996ceb20873335a3286d.
+- Arquivo SHA-256: 8657f402376805670c7d6ce32ceb6d927706451f6d94f4c2d1dd883c4c281692.
+- Config CI: sha256:2c64f6523ef09934f2744314d7883fadf7a018f393bde7f87a4978e8c2b499f5.
+- Manifesto local: sha256:e170a28ab47de00b27ac34dce49d5a4ca683ce795e16d92a60c300a220c6208e.
+- Onze camadas e dois perfis sobre a mesma imagem; sem recompilar no VPS.
+- Backup: /var/backups/descomplica-crm/releases/d79bf8c508b1e47873853822dabca17e8ca6ede9.me8N6J.
+- Checksums de nginx.conf, production.env e previous-image.txt aprovados,
+  sem imprimir segredos. Compare-and-swap e rollback preparados; Nginx inalterado.
+- Doze GETs observacionais, concorrencia quatro: health 200/versao correta,
+  estoque/snapshot 401 e no-store, zero erros. Nao representa prova de carga.
+- Navegador autenticado: fundo RGB(4,13,25), painel RGB(9,26,44), linha e card
+  com gradiente dourado e brilho de 3s. Selecao descartada por reload, sem
+  proposta salva. Pagina deixada no tema escuro, pronta para uso.
+- Espaco livre apos publicacao: 5,3 GB; sem limpeza destrutiva de imagens/dados.
+- Fechamento apenas documental; nao reiniciar a aplicacao para este registro.

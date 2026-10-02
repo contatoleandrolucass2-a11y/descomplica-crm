@@ -15,6 +15,7 @@
   de tres segundos enquanto a acao estiver pendente e a acessibilidade.
 - Sem alteracoes nos calculos, nas etapas ou nas outras tabelas.
 - Duas referencias visuais escuras revisadas; outras 191 capturas preservadas.
+- Publicado no PR #134, runtime d79bf8c, com CI integral e verificacao ao vivo.
 
 ## 2026-10-02 - Regioes ordenadas no Tabelao
 

@@ -31,7 +31,12 @@
   seis falhas POSIX/symlink ja conhecidas. CI Linux 37030093010: 1369 Vitest,
   oito Node, banco, restore e E2E aprovados. Matriz funcional completa aprovada.
 - Duas capturas escuras do Associativo revisadas; 191 referencias preservadas,
-  sem alterar tolerancias. Confirmacao da nova CI e publicacao pendentes.
+  sem alterar tolerancias. CIs 37034089884 e 37037035430 totalmente aprovadas.
+- PR #134 integrado e runtime d79bf8c publicado. Imagem imutavel comprovada
+  (onze camadas, dois perfis), backup/CAS/rollback e checksums verificados.
+- Doze leituras publicas sem erro e navegador autenticado confirmaram fundo
+  quase preto, selecao/card dourados e brilho de 3s. Nenhuma proposta salva.
+- Fechamento documental: sem novo deploy ou reinicio da aplicacao.
 - Evidencias e acompanhamento: docs/audits/associativo-dourado-2026-10-02.md.
 
 ## 2026-10-02 - Regioes e leitura continua do Tabelao
