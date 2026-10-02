@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-02 - Fila fria das regioes do Tabelao
+
+- Na verificacao real de 598e117 (PR #125), 51 das 57 opcoes apareceram sem
+  regiao, incluindo motivo region_lookup_busy. A pagina enviava ate 24 CEPs,
+  enquanto o servidor aceita tres consultas e cinco segundos de fila.
+- Regressao integrada cliente/rota/backend reproduziu a falha com uma e quatro
+  paginas, mapa frio de oito segundos e consultas de seis segundos.
+- Cliente passa a um lote de tres CEPs por vez, com atualizacao progressiva.
+  Preserva autorizacao, prazos, cache/coalescencia e limite de oito CEPs da API.
+  Nao aumenta concorrencia externa nem altera fontes, vagas ou classificacao.
+- Testes antes: dois cenarios integrados falharam. Depois: 235 testes de regioes
+  passaram, incluindo os dois cenarios. Gates completos e publicacao pendentes.
+- Release 598e117 encontrada ja publicada; imagem conferida com a CI 36958962302
+  (checksum, manifesto/config/camadas), dois perfis de runtime e backup validos.
+  Nao houve novo restart nesta verificacao; nenhum dado remoto alterado.
+
 ## 2026-10-01 - Regiao automatica e possibilidades de vagas no Tabelao
 
 - Branch codex/tabelao-regioes-vagas. Campos canonicos postalCode e parkingSpaces

@@ -401,22 +401,22 @@ describe("Tabelao region batch contract", () => {
 });
 
 describe("Tabelao region concurrency and lifecycle", () => {
-  it("loads 22 distinct CEPs with only three protected requests", async () => {
+  it("loads 22 distinct CEPs with eight protected requests that fit the server slots", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn((url) => Promise.resolve(responseFor(url))),
     );
     const onResolution = vi.fn();
     await loadTabelaoRegions(postalCodeList(22), new AbortController().signal, onResolution);
-    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(fetch).toHaveBeenCalledTimes(8);
     expect(vi.mocked(fetch).mock.calls.map(([url]) => requestedPostalCodes(url).length)).toEqual([
-      8, 8, 6,
+      3, 3, 3, 3, 3, 3, 3, 1,
     ]);
     expect(onResolution).toHaveBeenCalledTimes(22);
   });
 
-  it("turns a malformed batch into eight unknown CEPs and preserves the other batch", async () => {
-    const postalCodes = postalCodeList(9);
+  it("turns a malformed batch into three unknown CEPs and preserves the other batch", async () => {
+    const postalCodes = postalCodeList(4);
     vi.stubGlobal(
       "fetch",
       vi.fn((url) =>
@@ -435,16 +435,16 @@ describe("Tabelao region concurrency and lifecycle", () => {
     );
     const onResolution = vi.fn();
     await loadTabelaoRegions(postalCodes, new AbortController().signal, onResolution);
-    for (const value of postalCodes.slice(0, 8))
+    for (const value of postalCodes.slice(0, 3))
       expect(onResolution).toHaveBeenCalledWith(value, null);
     expect(onResolution).toHaveBeenCalledWith(
-      postalCodes[8],
+      postalCodes[3],
       expect.objectContaining({ status: "confirmed" }),
     );
-    expect(onResolution).toHaveBeenCalledTimes(9);
+    expect(onResolution).toHaveBeenCalledTimes(4);
   });
 
-  it("deduplicates and sorts CEPs in groups of eight with at most three concurrent batches", async () => {
+  it("deduplicates and sorts CEPs in groups of three with only one active batch", async () => {
     const pending: Array<{ url: unknown; finish: (response: Response) => void }> = [];
     let active = 0;
     let peak = 0;
@@ -470,19 +470,21 @@ describe("Tabelao region concurrency and lifecycle", () => {
       new AbortController().signal,
       onResolution,
     );
-    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect(pending.flatMap(({ url }) => requestedPostalCodes(url))).toEqual(
-      postalCodes.slice(0, 24),
+      postalCodes.slice(0, 3),
     );
-    pending[1]!.finish(responseFor(pending[1]!.url));
-    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(4));
-    pending[0]!.finish(responseFor(pending[0]!.url));
-    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(5));
-    for (const entry of pending.slice(2)) entry.finish(responseFor(entry.url));
+    for (let index = 0; index < 14; index++) {
+      await vi.waitFor(() => expect(pending).toHaveLength(index + 1));
+      pending[index]!.finish(responseFor(pending[index]!.url));
+    }
     await request;
-    expect(peak).toBe(3);
+    expect(peak).toBe(1);
     expect(onResolution).toHaveBeenCalledTimes(40);
-    expect(pending.map(({ url }) => requestedPostalCodes(url).length)).toEqual([8, 8, 8, 8, 8]);
+    expect(pending.map(({ url }) => requestedPostalCodes(url).length)).toEqual([
+      ...Array(13).fill(3),
+      1,
+    ]);
   });
 
   it("bounds each load to 256 distinct CEPs already in the inventory", async () => {
@@ -495,7 +497,7 @@ describe("Tabelao region concurrency and lifecycle", () => {
     ).reverse();
     const onResolution = vi.fn();
     await loadTabelaoRegions(postalCodes, new AbortController().signal, onResolution);
-    expect(fetch).toHaveBeenCalledTimes(32);
+    expect(fetch).toHaveBeenCalledTimes(86);
     expect(onResolution).toHaveBeenCalledTimes(256);
     expect(vi.mocked(fetch).mock.calls.flatMap(([url]) => requestedPostalCodes(url))).toEqual(
       [...postalCodes].sort().slice(0, 256),
@@ -514,10 +516,10 @@ describe("Tabelao region concurrency and lifecycle", () => {
     );
     const onResolution = vi.fn();
     await loadTabelaoRegions(postalCodes, new AbortController().signal, onResolution);
-    for (const value of postalCodes.slice(0, 8))
+    for (const value of postalCodes.slice(0, 3))
       expect(onResolution).toHaveBeenCalledWith(value, null);
     expect(onResolution).toHaveBeenCalledTimes(33);
-    expect(fetch).toHaveBeenCalledTimes(5);
+    expect(fetch).toHaveBeenCalledTimes(11);
     expect(onResolution).toHaveBeenCalledWith(
       postalCodes[32],
       expect.objectContaining({ status: "confirmed" }),
@@ -552,19 +554,20 @@ describe("Tabelao region concurrency and lifecycle", () => {
       ),
     );
     const onResolution = vi.fn();
-    const postalCodes = postalCodeList(9);
+    const postalCodes = postalCodeList(4);
     const request = loadTabelaoRegions(postalCodes, new AbortController().signal, onResolution);
-    await vi.waitFor(() => expect(finish).toHaveLength(2));
+    await vi.waitFor(() => expect(finish).toHaveLength(1));
     deadlines[0]!.abort(new DOMException("Timeout", "TimeoutError"));
-    await vi.waitFor(() => expect(onResolution).toHaveBeenCalledTimes(8));
-    for (const value of postalCodes.slice(0, 8))
+    await vi.waitFor(() => expect(onResolution).toHaveBeenCalledTimes(3));
+    for (const value of postalCodes.slice(0, 3))
       expect(onResolution).toHaveBeenCalledWith(value, null);
+    await vi.waitFor(() => expect(finish).toHaveLength(2));
     expect(deadlines[1]!.signal.aborted).toBe(false);
     finish[1]!();
     await request;
     finish[0]!();
     await Promise.resolve();
-    expect(onResolution).toHaveBeenCalledTimes(9);
+    expect(onResolution).toHaveBeenCalledTimes(4);
     expect(timeout).toHaveBeenCalledWith(25_000);
   });
 
@@ -588,7 +591,7 @@ describe("Tabelao region concurrency and lifecycle", () => {
     const previous = loadTabelaoRegions(postalCodeList(33), controller.signal, abandoned);
     controller.abort();
     await previous;
-    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect(pending.every(({ signal }) => signal.aborted)).toBe(true);
     const onResolution = vi.fn();
     const current = loadTabelaoRegions(

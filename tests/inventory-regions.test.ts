@@ -171,6 +171,70 @@ afterEach(() => {
   expect(unexpectedUrls).toEqual([]);
 });
 
+describe("Tabelao client and protected region queue", () => {
+  it.each([1, 4])(
+    "resolves 22 cold CEPs for %i simultaneous pages without exhausting the queue",
+    async (pages) => {
+      let active = 0;
+      let peak = 0;
+      serve({
+        geoSampa: () =>
+          new Promise<Response>((resolve) =>
+            setTimeout(() => resolve(Response.json(districtFixture())), 8_000),
+          ),
+        localiza: (postalCode) =>
+          new Promise<Response>((resolve) => {
+            peak = Math.max(peak, ++active);
+            setTimeout(() => {
+              active--;
+              resolve(new Response(localizaHtml(postalCode)));
+            }, 6_000);
+          }),
+      });
+      vi.stubGlobal(
+        "fetch",
+        vi.fn((input: string | URL | Request, init?: RequestInit) => {
+          const url = String(input);
+          if (url.startsWith("/api/inventory/regions?")) {
+            return GET(new Request("https://crm.example.test" + url, init));
+          }
+          return mocks.fetch(input, init);
+        }),
+      );
+      const { loadTabelaoRegions } = await import("@/lib/archive-investor/tabelao-region.mjs");
+      const postalCodes = Array.from({ length: 22 }, (_, index) => String(16000000 + index));
+      const callbacks = Array.from({ length: pages }, () => vi.fn());
+      const pending = callbacks.map((callback, index) =>
+        loadTabelaoRegions(
+          index % 2 ? [...postalCodes].reverse() : postalCodes,
+          new AbortController().signal,
+          callback,
+        ),
+      );
+      await vi.advanceTimersByTimeAsync(8_000);
+      const progressiveResults = callbacks.map((callback) => callback.mock.calls.length);
+      await vi.advanceTimersByTimeAsync(60_000);
+      await Promise.all(pending);
+      for (const callback of callbacks) {
+        expect(callback).toHaveBeenCalledTimes(22);
+        expect(
+          callback.mock.calls.every(
+            ([, resolution]) =>
+              resolution?.status === "confirmed" && resolution.region === "Centro",
+          ),
+        ).toBe(true);
+      }
+      expect(progressiveResults.every((count) => count > 0 && count < 22)).toBe(true);
+      expect(peak).toBeLessThanOrEqual(3);
+      expect(active).toBe(0);
+      expect(providerCalls("viacep.com.br")).toHaveLength(22);
+      expect(providerCalls("www.sinasc.saude.prefeitura.sp.gov.br")).toHaveLength(22);
+      expect(providerCalls("wfs.geosampa.prefeitura.sp.gov.br")).toHaveLength(1);
+      expect(mocks.authorizeRoute).toHaveBeenCalledTimes(8 * pages);
+    },
+  );
+});
+
 describe("GeoSampa district parser", () => {
   it("maps all 96 distinct names to five regions, without joining district codes", () => {
     const fixture = districtFixture();

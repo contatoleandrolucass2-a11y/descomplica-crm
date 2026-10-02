@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-02 - Consulta fria das regioes
+
+- Ajusta os lotes de CEP a capacidade do servidor para evitar regioes ausentes
+  por fila ocupada na primeira abertura, mantendo resultados progressivos.
+
 ## 2026-10-01 - Regioes e vagas no Tabelao
 
 - Adiciona Regiao na primeira coluna, com consulta automatica por CEP e fontes

@@ -55,8 +55,11 @@ somente em memoria, sem cookies, usuarios, projetos ou valores comerciais.
   ativas por processo, fila de ate 32 com espera maxima de cinco segundos.
 - Origem limitada a 18 segundos, GeoSampa compartilhado a 15 segundos e 6 MB;
   HTML a 250 KB e ViaCEP a 20 KB. Sem redirecionamentos externos.
-- Cliente tem tres lotes simultaneos de ate oito CEPs, ate 256 CEPs distintos e
-  25 segundos por lote. Para 22 CEPs, tres autorizacoes por pagina em vez de 22.
+- Cliente envia um lote de ate tres CEPs por vez, ate 256 CEPs distintos e
+  25 segundos por lote. Para 22 CEPs, oito autorizacoes por pagina em vez de 22.
+  Lotes seguem a capacidade de tres consultas do servidor, evitando esgotar a
+  fila de cinco segundos durante a carga fria do mapa municipal. A API continua
+  aceitando ate oito CEPs por compatibilidade; isso nao e a concorrencia do cliente.
   Aborta ao sair/recarregar, sem cancelar consultas de outros usuarios.
 - Estoque aparece antes da localizacao. Respostas geograficas preservam enderecos,
   filtros e ordenacao; selecao sem correspondencias continua visivel com contagem zero.
@@ -87,6 +90,9 @@ fria/quente, contratos malformados, ambiguidade, filas/coalescencia, TTL e falha
 vagas 0/1/2/desconhecidas, minimo/estoque por grupo e filtros autoexcludentes.
 A matriz autenticada usa fontes sinteticas e valida 14 colunas, responsividade,
 texto completo, centralizacao e chegada de regioes sem perder selecoes.
+Regressao cliente + rota + provedores simulados cobre 22 CEPs com mapa frio de
+oito segundos, consultas de seis segundos e quatro paginas simultaneas, sem
+descartar CEPs pela fila. Resultados chegam progressivamente em cada pagina.
 
 Promover apenas imagem imutavel com gates aprovados, backup e CAS. Rollback
 da aplicacao remove esta funcionalidade sem reversao de schema ou de dados.
