@@ -1,17 +1,5 @@
 # Aprendizados e atualizacoes
 
-## 2026-10-02: Associativo prata publicado com main reconciliada
-
-- Status: validado e publicado. Fonte: PR #129, CIs 36971256999,
-  36973571026 e 36998281910; auditoria associativo-prata-2026-10-02.md.
-- Runtime 727c8583ab46a51f81fddb7e0c0ec01b4803a531 inclui o Associativo e a
-  integracao paralela da documentacao. Nenhuma mudanca paralela foi revertida.
-- Gate de origem recusou preparar revisao anterior quando a main avancou.
-  Reconciliar tip, CI e versao viva antes de CAS; nao contornar a verificacao.
-- Imagem imutavel comprovada, backup validado, health correto e 12 leituras
-  publicas sem erro. Jornada autenticada confirmou etapas estritamente sequenciais.
-- Fechamento documental nao altera runtime nem exige reinicio.
-
 Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
@@ -52,7 +40,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-02: Prata e confirmacao explicita no Associativo
 
-- Status: pendente_validacao; branch codex/associativo-prata-sequencial.
+- Status: validado e publicado. PR #129; CIs 36971256999, 36973571026 e
+  36998281910. Runtime 727c8583ab46a51f81fddb7e0c0ec01b4803a531 inclui o
+  Associativo e a integracao paralela, sem reverter trabalho de outro escopo.
+- Gate de origem recusou preparar revisao anterior quando a main avancou.
+  Reconciliar tip, CI e versao viva antes de CAS; nao contornar a verificacao.
+- Imagem imutavel comprovada, backup validado e 12 leituras publicas sem erro.
+  Jornada autenticada confirmou etapas sequenciais. Fechamento sem novo runtime.
 - Fonte: dezoito prints do usuario, InvestorCalculator.tsx, investor-archive.css
   e ArchiveHeader. Nova direcao visual substitui o dourado da etapa anterior.
 - Enquadramento automatico nao equivale a confirmacao do usuario. Renda libera

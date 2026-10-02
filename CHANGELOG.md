@@ -1,11 +1,5 @@
 # Changelog
 
-## 2026-10-02 - Associativo prata publicado
-
-- Publica nova marca, cabecalho compacto, paleta azul/prata e perfil sequencial.
-- Registra verificacao de producao, imagem imutavel, backup e controle de versao.
-  Sem alteracao adicional de runtime neste fechamento documental.
-
 ## 2026-10-02 - Validacao da documentacao
 
 - Preserva a atualizacao paralela de identidade/cabecalho e suas referencias ao
@@ -32,6 +26,8 @@
 
 ## 2026-10-02 - Associativo prata e perfil sequencial
 
+- Publicado com verificacao de producao, imagem imutavel e backup conferido.
+  Fechamento documental sem alteracao adicional de runtime.
 - Substitui o destaque dourado por prata metalizado, com brilho a cada tres
   segundos somente durante a acao pendente e respeito a movimento reduzido.
 - Exige confirmar a modalidade entre renda e primeiro imovel, sem alterar
