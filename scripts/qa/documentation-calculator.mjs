@@ -103,10 +103,8 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
       matrix.push({ width, theme, overflow, accessibilityViolations: 0 });
     }
   }
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.evaluate(() => {
-    document.documentElement.style.zoom = "2";
-  });
+  // Browser zoom reflows the CSS viewport; CSS zoom alone does not update media queries.
+  await page.setViewportSize({ width: 720, height: 450 });
   assert.equal(
     await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1),
     false,
@@ -116,9 +114,7 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
     fullPage: true,
     animations: "disabled",
   });
-  await page.evaluate(() => {
-    document.documentElement.style.zoom = "";
-  });
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.emulateMedia({ media: "print" });
   await expect(result).toBeVisible();
   await page.screenshot({
@@ -138,7 +134,7 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
     hintsKeyboard: true,
     audit: true,
     printSurface: true,
-    zoom200: true,
+    zoom200: { passed: true, method: "Equivalent 720x450 CSS layout for a 1440x900 viewport" },
     matrix,
   };
 }

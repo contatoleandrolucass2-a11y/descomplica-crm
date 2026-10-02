@@ -7,7 +7,8 @@
   de infraestrutura sob carga; CI Linux obrigatoria antes da publicacao.
 - Revisao independente corrigiu classes de estado; capturas identificaram recorte
   ao redimensionar. CSS localizado impede scroll interno oculto e melhora contraste.
-- Matriz de QA inclui geometria do perfil, tres temas, quatro larguras e zoom 200%.
+- Matriz de QA inclui geometria do perfil, tres temas, quatro larguras e layout
+  equivalente a zoom 200% (720x450 CSS em tela 1440x900), sem CSS zoom artificial.
 
 ## 2026-10-02 - Replica da guia Calcular documentacao
 
