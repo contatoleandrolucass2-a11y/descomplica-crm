@@ -2,6 +2,12 @@
 
 ## 2026-10-02 - Validacao da guia de documentacao
 
+- CI 36970005859 aprovou validate, restore, 20 E2E (um skip) e a matriz dedicada
+  da calculadora autenticada: 12 combinacoes, calculos, limites, ajudas, auditoria,
+  impressao e zoom. A matriz de navegacao conservava uma segunda expectativa
+  obsoleta de item desabilitado; corrigida para exigir zero itens bloqueados nesse
+  menu, preservando a assercao do link e os gates das demais paginas.
+
 - CI 36968955807 aprovou validate (1.293 Vitest, oito Node, lint/tipos/build) e restore.
   E2E detectou expectativa antiga de 403 para a guia liberada; matriz atualizada para
   Master e negacao dos outros perfis, mantendo CAIXA bloqueada e APIs oficiais inalteradas.

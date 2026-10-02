@@ -24,6 +24,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - CI 36968955807: 1.293 testes Vitest e oito Node aprovados, restore aprovado;
   E2E conservava a expectativa antiga de 403. Ao liberar pagina de arquivo, atualizar
   tambem protectedSurfaces, hub e smoke, preservando perfis negados e APIs oficiais.
+- CI 36970005859: validate, restore, 20 E2E (um skip) e matriz dedicada autenticada
+  aprovados. Atualizar tambem assertDisabledItems de archive-navigation ao ativar
+  um link; simulationLinks sozinho nao remove a expectativa antiga de bloqueio.
+  Artefato 11211986933 conferido por SHA-256; nenhum baseline promovido com gate falho.
 
 ## 2026-10-02: Capacidade por CEP, nao apenas por lote
 

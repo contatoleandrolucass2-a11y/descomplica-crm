@@ -2,6 +2,8 @@
 
 ## 2026-10-02 - Validacao da documentacao
 
+- Corrige a expectativa antiga de item desabilitado na matriz responsiva do menu.
+  A matriz dedicada da calculadora passou tambem no navegador autenticado da CI.
 - Atualiza E2E de autorizacao e menu para a guia liberada, sem abrir acesso a outros
   perfis ou habilitar o motor oficial WF16; preserva CAIXA bloqueada.
 - Registra matriz local aprovada em tres temas e quatro larguras, com impressao e

@@ -75,6 +75,12 @@ Runtime oficial WF16, integracoes n8n e politicas comerciais permanecem inaltera
 - Oito testes Node/Salesforce aprovados. CI Linux e publicacao pendentes no PR #130;
   nao promover em caso de gate reprovado. Evidencia final sera anexada ao PR.
 - Docker local indisponivel; gates de banco/restore devem rodar na CI Linux.
+- CI 36970005859: validate, restore e 20 testes E2E aprovados (um skip).
+  documentation-results.json confirma a matriz dedicada autenticada integral,
+  incluindo 12 combinacoes sem overflow/violacoes Axe. Artefato 11211986933,
+  ZIP SHA-256 52ba7ebebd9e20fe0e25955527d9973e1f239aa989aff339c7dae6a1a313d026.
+  A matriz das outras paginas parou na expectativa antiga de documentacao bloqueada;
+  expectativa corrigida, sem reduzir verificacoes de links, teclado ou geometria.
 
 ## Seguranca e retorno
 
