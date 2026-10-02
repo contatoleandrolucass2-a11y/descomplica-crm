@@ -53,6 +53,7 @@ describe("pre-stream page permission gates", () => {
     ["/app/simulacao/tabela-direta", "crm.simulators.view"],
     ["/app/simulacao/tabela-investidor", "crm.simulators.view"],
     ["/app/simulacao/tabelao", "crm.simulators.view"],
+    ["/app/simulacao/calcular-documentacao", "crm.simulators.view"],
     ["/admin", "admin.access"],
     ["/admin/usuarios", "users.view"],
     ["/admin/paginas", "pages.manage"],
@@ -96,7 +97,7 @@ describe("pre-stream page permission gates", () => {
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
-  it.each(["/app/simulacao/calcular-documentacao", "/app/simulacao/caixa"])(
+  it.each(["/app/simulacao/caixa"])(
     "returns 403 for inactive catalog route %s even when Master has the shared permission",
     async (pathname) => {
       configureSession(["crm.simulators.view"]);

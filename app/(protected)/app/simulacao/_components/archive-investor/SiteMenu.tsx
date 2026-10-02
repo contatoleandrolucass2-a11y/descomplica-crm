@@ -15,6 +15,7 @@ const simulations = [
   { href: "/app/simulacao/tabela-investidor", label: "Tabela Investidor" },
   { href: "/app/simulacao/tabelao", label: "Tabelão" },
   { href: "/app/simulacao/caixa", label: "CAIXA" },
+  { href: "/app/simulacao/calcular-documentacao", label: "Calcular documentação" },
 ];
 const settings = [
   { href: "/app/configuracoes", label: "Visão geral" },
@@ -114,7 +115,6 @@ export function SiteMenu({ canPersistTheme = false }: { canPersistTheme?: boolea
           </button>
           <div id="site-menu-simulation" className={styles.panel} hidden={!simulationOpen}>
             {simulations.map(({ href, label }) => <a key={href} href={href} aria-current={pathname === href ? "page" : undefined} onClick={closeNavigation}>{label}</a>)}
-            <span className={styles.unavailable} aria-disabled="true">Calcular documentação <small>Em breve</small></span>
           </div>
         </div>
         <a className={styles.navItem} aria-current={pathname.startsWith("/app/ranking") ? "page" : undefined} href="/app/ranking" onClick={closeNavigation}>

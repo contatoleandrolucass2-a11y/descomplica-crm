@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
 
 describe("protected commercial page set", () => {
-  it("matches the exact approved twenty-page production set", () => {
+  it("matches the exact approved twenty-one-page production set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -23,6 +23,7 @@ describe("protected commercial page set", () => {
         "crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view",
         "crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view",
         "crm.simulation.wf15|/app/simulacao/tabela-investidor|crm.simulators.view",
+        "crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view",
         "crm.simulation.tabelao|/app/simulacao/tabelao|crm.simulators.view",
         "crm.simulation|/app/simulacao|crm.simulators.view",
         "crm.stage.appointments|/app/etapas/agendamentos|crm.stages.view",
@@ -34,17 +35,12 @@ describe("protected commercial page set", () => {
     );
   });
 
-  it("identifies exactly the two restore-only simulator routes", () => {
+  it("keeps CAIXA as the only restore-only simulator route", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => !page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
         .sort(),
-    ).toEqual(
-      [
-        "crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view",
-        "crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view",
-      ].sort(),
-    );
+    ).toEqual(["crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view"].sort());
   });
 
   it("keeps the full twenty-two-route smoke inventory unique", () => {

@@ -4,6 +4,40 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-02: Replica de Calcular documentacao
+
+- Status: pendente_validacao; branch codex/calcular-documentacao.
+- Fonte: pedido do usuario e pagina publica /simulacao/calcular-documentacao,
+  bundles DocumentationCalculator-BjH7PIsT.js e documentation-calculator-rules-DI3ss1MX.js.
+- O modulo lib/archive-investor/documentation-calculator-rules.mjs ja corresponde
+  a referencia em 2.048 entradas comparadas, incluindo limites e erros; reutilizar
+  sem criar outro motor. Esta evidencia nao homologa a politica como regra oficial.
+- A nova replica usa a rota protegida existente e o item antes Em breve no SiteMenu.
+  Nao requer habilitar runtime WF16, n8n, migrations ou novas permissoes.
+- Conteudo integral inclui ajudas Em construcao, impressao, auditoria e alertas.
+- Lint, typecheck, build, 32 testes focados e oito testes Node aprovados. Matriz local
+  final: 12 combinacoes sem overflow ou violacoes Axe, impressao e layout de zoom 200%.
+- Decoracao com overflow hidden podia gerar scroll interno ao focar e redimensionar;
+  overflow clip localizado preserva a geometria. Testar limites internos, nao so o body.
+- Suite Windows: 1.271 aprovados, quatro skips e 20 falhas POSIX/timeouts sob carga.
+  CI Linux e publicacao pendentes no PR #130; gates nao foram reduzidos.
+- CI 36968955807: 1.293 testes Vitest e oito Node aprovados, restore aprovado;
+  E2E conservava a expectativa antiga de 403. Ao liberar pagina de arquivo, atualizar
+  tambem protectedSurfaces, hub e smoke, preservando perfis negados e APIs oficiais.
+- CI 36970005859: validate, restore, 20 E2E (um skip) e matriz dedicada autenticada
+  aprovados. Atualizar tambem assertDisabledItems de archive-navigation ao ativar
+  um link; simulationLinks sozinho nao remove a expectativa antiga de bloqueio.
+  Artefato 11211986933 conferido por SHA-256; nenhum baseline promovido com gate falho.
+- CI 36971939367: todos os criterios funcionais aprovados, incluindo 140 responsivos,
+  80 de tema, 193 auditorias Axe, 100 de zoom e navegacao 4 rotas x 10 larguras.
+  Sete diferencas visuais intencionais do hub foram revisadas e promovidas pelo
+  promotor transacional existente; outras 186 imagens preservadas por hash.
+  Captura 47318329 tem arvore identica a 5ec9311; artefato 11213300733 validado.
+  Nova CI e publicacao pendentes, sem reduzir limite de diferenca ou tolerancia.
+- Integracao com main 29a487b: manifestos concorrentes devem ser unidos por caminho,
+  preservando imagens e hashes aprovados de cada escopo. Os 186 registros da main
+  e sete do hub tem proveniencia separada; isso nao substitui nova CI integrada.
+
 ## 2026-10-02: Prata e confirmacao explicita no Associativo
 
 - Status: pendente_validacao; branch codex/associativo-prata-sequencial.

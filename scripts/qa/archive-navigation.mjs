@@ -38,6 +38,7 @@ const simulationLinks = [
   ["Tabela Investidor", archiveNavigationRoutes[2]],
   ["Tabelão", archiveNavigationRoutes[3]],
   ["CAIXA", "/app/simulacao/caixa"],
+  ["Calcular documentação", "/app/simulacao/calcular-documentacao"],
 ];
 const settingsLinks = [
   ["Visão geral", "/app/configuracoes"],
@@ -706,7 +707,7 @@ export async function checkArchiveNavigation(
           await page.keyboard.press("Tab");
           await expect(page.locator("#site-menu-simulation a").first()).toBeFocused();
           await assertLinks(page, "site-menu-simulation", simulationLinks, route);
-          await assertDisabledItems(page, "site-menu-simulation", ["Calcular documentação"]);
+          await assertDisabledItems(page, "site-menu-simulation", []);
           await expect(nav.locator('a[aria-current="page"]')).toHaveCount(1);
           stage = "switch-disclosure-by-pointer";
           await settings.click();

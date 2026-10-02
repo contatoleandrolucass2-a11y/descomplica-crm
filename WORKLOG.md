@@ -1,5 +1,53 @@
 # Worklog
 
+## 2026-10-02 - Validacao da guia de documentacao
+
+- Integracao da main 29a487b preserva identidade prata, fluxo do Associativo,
+  cabecalho e 44 referencias aprovadas nesse trabalho paralelo. O manifesto combina
+  os 186 registros da main com os sete do hub, com proveniencia explicita e hashes
+  verificados; a validacao do runtime combinado permanece pendente da nova CI.
+
+- CI 36971939367 aprovou todos os criterios funcionais: 140 responsivos, 80 de tema,
+  193 de acessibilidade, 100 de zoom, 40 combinacoes de navegacao e a matriz dedicada
+  de documentacao. Sete diferencas esperadas do hub revisadas e promovidas com hashes
+  e arvore Git conferidos; 186 baselines preservados. Nova verificacao da CI pendente.
+
+- CI 36970005859 aprovou validate, restore, 20 E2E (um skip) e a matriz dedicada
+  da calculadora autenticada: 12 combinacoes, calculos, limites, ajudas, auditoria,
+  impressao e zoom. A matriz de navegacao conservava uma segunda expectativa
+  obsoleta de item desabilitado; corrigida para exigir zero itens bloqueados nesse
+  menu, preservando a assercao do link e os gates das demais paginas.
+
+- CI 36968955807 aprovou validate (1.293 Vitest, oito Node, lint/tipos/build) e restore.
+  E2E detectou expectativa antiga de 403 para a guia liberada; matriz atualizada para
+  Master e negacao dos outros perfis, mantendo CAIXA bloqueada e APIs oficiais inalteradas.
+  Banner generico segue o mesmo tratamento das demais paginas de arquivo nesta guia.
+
+- PR #130. Matriz local final aprovada: 12 combinacoes, sem overflow ou violacoes Axe,
+  fluxo completo, impressao e layout equivalente a 200%. Oito testes Node aprovados.
+  CI Linux e publicacao ainda pendentes; evidencia final sera registrada no PR.
+
+- Lint, typecheck, build e 32 testes focados aprovados; motor igual a referencia em
+  2.048 casos. Suite Windows: 1.271 aprovados, 4 ignorados e 20 falhas POSIX/timeouts
+  de infraestrutura sob carga; CI Linux obrigatoria antes da publicacao.
+- Revisao independente corrigiu classes de estado; capturas identificaram recorte
+  ao redimensionar. CSS localizado impede scroll interno oculto e melhora contraste.
+- Matriz de QA inclui geometria do perfil, tres temas, quatro larguras e layout
+  equivalente a zoom 200% (720x450 CSS em tela 1440x900), sem CSS zoom artificial.
+
+## 2026-10-02 - Replica da guia Calcular documentacao
+
+- Branch codex/calcular-documentacao; checkout isolado da branch originalmente aberta.
+- Referencia consultada somente por leitura: https://descomplicapro.com.br/simulacao/calcular-documentacao.
+- Conteudo completo do formulario e resultado reconstruido em React/Next; estilos
+  originais ja presentes em investor-archive.css reutilizados. Menu e cabecalho do CRM mantidos.
+- Nenhuma formula modificada: 2.048 combinacoes de construtora, modalidade, primeiro
+  imovel, renda e fronteiras financeiras comparadas com o bundle publico da referencia.
+- Testes focados: 32 aprovados. Typecheck inicial aprovado. Validacao integral,
+  navegador, CI e publicacao pendentes nesta etapa.
+- A pagina mantem crm.simulators.view; nenhum grant, migration ou workflow alterado.
+- Evidencias e limites: docs/audits/documentacao-replica-2026-10-02.md.
+
 ## 2026-10-02 - Identidade prata e sequencia do Associativo
 
 - Branch codex/associativo-prata-sequencial, base 0ef7b2f. Fonte: pedido e

@@ -15,6 +15,7 @@ import { SimulatorWorkspace } from "../_components/SimulatorWorkspace";
 import { AssociativeTableArchive } from "../_components/AssociativeTableArchive";
 import { DirectTableArchive } from "../_components/DirectTableArchive";
 import { InvestorTableArchive } from "../_components/InvestorTableArchive";
+import { DocumentationArchive } from "../_components/DocumentationArchive";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,9 @@ export async function generateMetadata({
   }
   if (simulator === "associativo-fluxo-linear") {
     return { title: "Simulador Tabela Associativo" };
+  }
+  if (simulator === "calcular-documentacao") {
+    return { title: "Calcular documentação" };
   }
   return { title: "Simulação comercial" };
 }
@@ -70,6 +74,10 @@ export default async function SimulatorPage({
 
   if (simulator === "tabela-investidor") {
     return <InvestorTableArchive />;
+  }
+
+  if (simulator === "calcular-documentacao") {
+    return <DocumentationArchive />;
   }
 
   return (

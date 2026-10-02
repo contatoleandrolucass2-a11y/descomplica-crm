@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-10-02 - Validacao da documentacao
+
+- Preserva a atualizacao paralela de identidade/cabecalho e suas referencias ao
+  integrar a main, sem substituir capturas das outras paginas pelas antigas.
+- Atualiza somente sete referencias visuais do hub para a documentacao disponivel,
+  apos revisao das capturas autenticadas; preserva 186 imagens e os limiares existentes.
+- Corrige a expectativa antiga de item desabilitado na matriz responsiva do menu.
+  A matriz dedicada da calculadora passou tambem no navegador autenticado da CI.
+- Atualiza E2E de autorizacao e menu para a guia liberada, sem abrir acesso a outros
+  perfis ou habilitar o motor oficial WF16; preserva CAIXA bloqueada.
+- Registra matriz local aprovada em tres temas e quatro larguras, com impressao e
+  layout equivalente a zoom 200%; CI e publicacao acompanhadas no PR #130.
+- Corrige classes dos estados sequenciais e recorte interno ao redimensionar a nova
+  guia; reforca contraste e verificacao de geometria/zoom sem mudar formulas.
+
+## 2026-10-02 - Calcular documentacao
+
+- Habilita Calcular documentacao no menu Simulacao e na rota protegida existente.
+- Reproduz integralmente formulario, etapas, ajudas, alertas, resultado, composicao,
+  plano de parcelas, impressao e auditoria da pagina de referencia do usuario.
+- Reutiliza as regras locais existentes, conferidas contra 2.048 casos da referencia,
+  sem alterar formulas, publicar politicas ou acionar workflows.
+- Acrescenta testes de limites, permissao e uma matriz de navegador dedicada.
+
 ## 2026-10-02 - Associativo prata e perfil sequencial
 
 - Substitui o destaque dourado por prata metalizado, com brilho a cada tres
