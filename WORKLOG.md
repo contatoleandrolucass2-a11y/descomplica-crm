@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-10-02 - Regioes e leitura continua do Tabelao
+
+- CI 37003636668: 1367 testes Vitest e oito Node aprovados, lint/tipos/build,
+  banco, restore e E2E verdes. Matriz funcional completa aprovada: 140 rotas,
+  80 temas, 193 acessibilidades, 100 zooms e 40 navegacoes. Sete capturas do
+  Tabelao revisadas e promovidas; outras 186 preservadas. Nova CI pendente.
+- Branch codex/tabelao-regioes-layout, base 727c858; preserva as entregas paralelas
+  do Associativo e da calculadora de documentacao. Escopo restrito ao Tabelao.
+- Ordenacao por Leste, Sul, Norte, Oeste e Centro, empreendimento alfabetico e
+  preco crescente por padrao; a selecao manual decrescente preserva os grupos.
+- Distingue consulta territorial em andamento de falha efetiva, sem atribuir uma
+  regiao inventada. Falhas transitorias de transporte recebem uma nova tentativa
+  limitada apos os demais lotes, sem elevar a concorrencia nem repetir negacoes.
+- CODLOG municipal por HTTPS comprova as divergencias de tipo/titulo dos dois
+  logradouros. Backend local confirmou 22/22 CEPs atuais nas fontes publicas,
+  em 02/10 as 08:37 BRT. Sem estoque bruto persistido nem zonas fixas.
+- 405 testes focados, typecheck, build e oito testes Node aprovados com Node
+  24.19.0. Suite final Windows: 1361 aprovados, quatro skips condicionais e seis
+  falhas POSIX preexistentes. Lint bruto encontrou apenas erros em
+  artefatos locais ignorados; lint do codigo passou. CI limpa obrigatoria.
+- Chromium local aprovou nove cenarios, incluindo geometria compacta, rotulos
+  verticais, ordenacao, filtros e cabecalho rolando. Capturas desktop/mobile
+  revisadas; transicao herdada do cabecalho removida. CI/publicacao pendentes.
+
 ## 2026-10-02 - Validacao da guia de documentacao
 
 - Integracao da main 29a487b preserva identidade prata, fluxo do Associativo,

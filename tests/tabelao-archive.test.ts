@@ -250,21 +250,27 @@ describe("Tabelão protegido", () => {
       /\.tabelao-page-shell \.investor-stock-panel > \.investor-section-heading\s*\{[^}]*height: auto !important;[^}]*min-height: 48px !important;/,
     );
     expect(styles).toMatch(
-      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*width: max-content;[^}]*min-width: 0;[^}]*table-layout: auto;/,
+      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*width: 100%;[^}]*min-width: 1100px;[^}]*table-layout: fixed;/,
     );
-    expect(styles).toMatch(/\.tabelao-page-shell \.investor-stock-table col\s*\{[^}]*width: auto;/);
+    const columnWidths = [
+      ...styles.matchAll(
+        /\.tabelao-page-shell \.investor-stock-table \.[\w-]+-col-[\w-]+\s*\{\s*width: ([\d.]+)%;\s*\}/g,
+      ),
+    ].map((match) => Number(match[1]));
+    expect(columnWidths).toHaveLength(14);
+    expect(columnWidths.reduce((total, width) => total + width, 0)).toBe(100);
     expect(styles).toMatch(
       /\.investor-page-shell\.tabelao-page-shell \.investor-stock-table :is\(th, td\)\s*\{[^}]*font-size: var\(--tabelao-cell-font-size\) !important;[^}]*text-align: center;[^}]*vertical-align: middle;/,
     );
     expect(styles).toMatch(
-      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*--tabelao-cell-font-size: 10px;/,
+      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*--tabelao-cell-font-size: 12px;/,
     );
     expect(styles).toContain("--tabelao-cell-font-size: 12px;");
     expect(styles).not.toContain("font-size: 6px !important;");
     expect(styles).not.toContain("font-size: 4px !important;");
     expect(styles).not.toContain("min-width: 2080px");
     expect(styles).not.toMatch(
-      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*table-layout: fixed;/,
+      /\.tabelao-page-shell \.investor-stock-table\s*\{[^}]*width: max-content;/,
     );
     expect(styles).toMatch(
       /\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*max-height: none;[^}]*overflow-x: auto;[^}]*overflow-y: visible;/,
@@ -307,23 +313,24 @@ describe("Tabelão protegido", () => {
     expect(client).toContain("rowSpan={classificationSpan}");
     expect(client).toContain("addressSpan > 0");
     expect(client).toContain("classificationSpan > 0");
+    expect(client).toContain("<TabelaoRegionLabel region={region} />");
+    expect(client).toContain('<span className="sr-only">{region}</span>');
+    expect(client).toContain('className="tabelao-region-vertical" aria-hidden="true"');
+    expect(client).toContain('region.split(" ").map((word)');
     expect(styles).toMatch(
-      /\[headers~="tabelao-region"\] \.tabelao-stock-wrapped-text\s*\{\s*width: 66px;/,
+      /\.tabelao-page-shell \.tabelao-region-vertical > span\s*\{[^}]*writing-mode: vertical-lr;[^}]*text-orientation: upright;/,
     );
     expect(styles).toMatch(
-      /\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*width: fit-content;[^}]*max-width: calc\(100% - 48px\);/,
+      /\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*width: calc\(100% - 48px\);[^}]*max-width: calc\(100% - 48px\);/,
     );
     expect(styles).toMatch(
-      /@media \(max-width: 760px\)\s*\{\s*\.tabelao-page-shell \.investor-stock-results\s*\{\s*max-width: calc\(100% - 28px\);/,
+      /@media \(max-width: 760px\)\s*\{\s*\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*width: calc\(100% - 28px\);[^}]*max-width: calc\(100% - 28px\);/,
     );
     expect(styles).toMatch(
-      /\.tabelao-group-cell \.investor-stock-product-text\s*\{[^}]*width: 100px;[^}]*white-space: normal;[^}]*overflow-wrap: anywhere;/,
+      /\.tabelao-group-cell \.investor-stock-product-text\s*\{[^}]*width: 100%;[^}]*white-space: normal;[^}]*overflow-wrap: anywhere;/,
     );
     expect(styles).toMatch(
-      /\[headers~="tabelao-address"\] \.tabelao-stock-wrapped-text\s*\{\s*width: 130px;/,
-    );
-    expect(styles).toMatch(
-      /\[headers~="tabelao-description"\] \.tabelao-stock-wrapped-text\s*\{\s*width: 58px;/,
+      /\.tabelao-page-shell \.investor-stock-table \.tabelao-stock-wrapped-text\s*\{[^}]*width: 100%;[^}]*max-width: 100%;[^}]*overflow: visible;[^}]*white-space: normal;[^}]*overflow-wrap: anywhere;/,
     );
   });
 
@@ -344,15 +351,49 @@ describe("Tabelão protegido", () => {
       client.indexOf("void loadTabelaoRegions("),
     );
     expect(client).toContain("[inventory, regionResolutions]");
-    expect(client).toMatch(/inventory\.map\(\(item\) => \(\{\s*\.\.\.item,\s*regionResolution:/);
-    expect(client).toContain("regionResolutions.get(normalizeTabelaoPostalCode(item.postalCode)");
+    expect(client).toContain("const postalCode = normalizeTabelaoPostalCode(item.postalCode)");
+    expect(client).toMatch(
+      /return \{\s*\.\.\.item,\s*regionResolution: regionResolutions.get\(postalCode \?\? ""\) \?\? null,/,
+    );
     expect(client).toContain(
-      'regionResolutions.get(normalizeTabelaoPostalCode(item.postalCode) ?? "") ?? null',
+      "regionLookupPending: postalCode !== null && !regionResolutions.has(postalCode)",
     );
     expect(client).not.toContain("?? item.regionResolution");
     expect(client).toContain("active = false;");
     expect(client).toContain("controller.abort();");
     expect(client).toContain("}, [loadKey]);");
+  });
+
+  it("mantém o cabeçalho original sob a navegação e limpa observadores ao desmontar", () => {
+    const client = readFileSync(
+      new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
+      "utf8",
+    );
+    const styles = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/investor-archive.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    expect(client).toContain("ref={stockTable}");
+    expect(client).toContain('querySelector<HTMLElement>(":scope > .topbar")');
+    expect(client).toContain("window.requestAnimationFrame(updateHeading)");
+    expect(client).toContain(
+      "Math.min(top - headingRect.top, tableRect.bottom - headingRect.bottom)",
+    );
+    expect(client).toContain("new ResizeObserver(scheduleHeading)");
+    expect(client).toContain(
+      'window.addEventListener("scroll", scheduleHeading, { capture: true, passive: true })',
+    );
+    expect(client).toContain('window.removeEventListener("scroll", scheduleHeading, true)');
+    expect(client).toContain("observer.disconnect()");
+    expect(client).toContain("window.cancelAnimationFrame(frame)");
+    expect(client).toContain('table.style.removeProperty("--tabelao-heading-offset")');
+    expect(client).not.toContain("cloneNode");
+    expect(styles).toMatch(
+      /\.investor-page-shell\.tabelao-page-shell \.investor-stock-table thead th\s*\{[^}]*transform: translateY\(var\(--tabelao-heading-offset, 0px\)\);/,
+    );
   });
 
   it("preserva cada unidade, filtra e ordena com os helpers do estoque", () => {

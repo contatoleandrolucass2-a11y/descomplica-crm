@@ -58,6 +58,62 @@ const unit = (id: string, fields: Partial<TabelaoInventoryItem> = {}) => ({
 });
 
 describe("Menor valor por tipologia no Tabelão", () => {
+  it("ordena regiões na sequência comercial, empreendimentos alfabeticamente e preços crescentes", () => {
+    const regions: TabelaoRegionName[] = [
+      "Zona Leste",
+      "Zona Sul",
+      "Zona Norte",
+      "Zona Oeste",
+      "Centro",
+    ];
+    const source = regions
+      .flatMap((region, index) => [
+        unit(`${index}-z`, { ...verifiedRegion(region), project: "Zeta", finalWithKit: 180_000 }),
+        unit(`${index}-a2`, {
+          ...verifiedRegion(region),
+          project: "Águas",
+          plant: "Tipo 3Q",
+          finalWithKit: 420_000,
+        }),
+        unit(`${index}-a1`, { ...verifiedRegion(region), project: "Águas", finalWithKit: 310_000 }),
+      ])
+      .reverse();
+    const before = structuredClone(source);
+    const sorted = sortTabelaoInventory(source, "project");
+    expect(sorted.map((item) => item.id)).toEqual(
+      regions.flatMap((_, index) => [`${index}-a1`, `${index}-a2`, `${index}-z`]),
+    );
+    expect(sortTabelaoInventory(source, "project-desc").map((item) => item.id)).toEqual(
+      regions.flatMap((_, index) => [`${index}-a2`, `${index}-a1`, `${index}-z`]),
+    );
+    expect(groupTabelaoInventoryByProject(sorted).map((group) => group.items.length)).toEqual(
+      regions.flatMap(() => [2, 1]),
+    );
+    expect(buildTabelaoOptions(source).regions).toEqual(regions);
+    expect(
+      buildTabelaoFacets(source, TABELAO_FILTER_DEFAULTS).region.options.map((item) => item.label),
+    ).toEqual(regions);
+    expect(source).toEqual(before);
+  });
+
+  it("não reúne projetos homônimos de zonas distintas e mantém falhas depois das regiões", () => {
+    const source = [
+      unit("unknown", { project: "A", finalWithKit: 100_000 }),
+      unit("south", { ...verifiedRegion("Zona Sul"), finalWithKit: 200_000 }),
+      unit("east", { ...verifiedRegion("Zona Leste"), finalWithKit: 300_000 }),
+    ];
+    const sorted = sortTabelaoInventory(source, "project");
+    expect(sorted.map((item) => item.id)).toEqual(["east", "south", "unknown"]);
+    const groups = groupTabelaoInventoryByProject(sorted);
+    expect(groups.map((group) => group.items.map((item) => item.id))).toEqual([
+      ["east"],
+      ["south"],
+      ["unknown"],
+    ]);
+    expect(groups.map((group) => group.startIndex)).toEqual([0, 1, 2]);
+    expect(new Set(groups.map((group) => group.key)).size).toBe(3);
+  });
+
   it.each([
     [[], []],
     [["R2V"], [1]],
@@ -913,7 +969,7 @@ describe("Quantidade de vagas no Tabelão", () => {
       projects: ["Empreendimento QA", "Outro"],
       plants: ["Tipo 2Q", "Tipo 3Q"],
       parkingSpaces: ["0", "1", "2", "10", "unknown"],
-      regions: ["Zona Norte", "Zona Sul"],
+      regions: ["Zona Sul", "Zona Norte"],
     });
     const filters = {
       businessUnit: "Incorporadora QA",

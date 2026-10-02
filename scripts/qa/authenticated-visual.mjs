@@ -1778,7 +1778,7 @@ async function checkTabelaoRegionParkingFixture(page) {
           .locator("option")
           .evaluateAll((options) => options.map((option) => option.value)),
       ) === JSON.stringify(["", "0", "1", "2", "unknown"]);
-    await filters.locator('select[name="region"]').selectOption("nao confirmada");
+    await filters.locator('select[name="region"]').selectOption("localizando");
     await filters.locator('select[name="project"]').selectOption("projeto a");
     await parking.selectOption("1");
     await filters.locator('select[name="priceOrder"]').selectOption("desc");
@@ -1792,10 +1792,10 @@ async function checkTabelaoRegionParkingFixture(page) {
       .getByText("Nenhuma opção encontrada com esses filtros.", { exact: true })
       .last()
       .waitFor();
-    passed &&= (await filters.locator('select[name="region"]').inputValue()) === "nao confirmada";
+    passed &&= (await filters.locator('select[name="region"]').inputValue()) === "localizando";
     passed &&=
       (await filters.locator('select[name="region"] option:checked').textContent()).trim() ===
-      "Não confirmada (0)";
+      "Localizando (0)";
     passed &&= (await parking.inputValue()) === "1";
     passed &&= (await filters.locator('select[name="project"]').inputValue()) === "projeto a";
     passed &&= (await filters.locator('select[name="priceOrder"]').inputValue()) === "desc";
@@ -1810,7 +1810,7 @@ async function checkTabelaoRegionParkingFixture(page) {
     await filters.locator('select[name="region"]').selectOption("zona norte");
     await page.locator('tr[data-inventory-unit-id="qa-parking-b"]').waitFor();
     passed &&= (await page.locator("tr[data-inventory-unit-id]").count()) === 1;
-    await filters.locator('select[name="region"]').selectOption("nao confirmada");
+    await filters.locator('select[name="region"]').selectOption("localizacao indisponivel");
     await page.locator('tr[data-inventory-unit-id="qa-parking-c"]').waitFor();
     passed &&= (await page.locator("tr[data-inventory-unit-id]").count()) === 1;
     await filters.getByRole("button", { name: "Limpar filtros", exact: true }).click();
@@ -1818,6 +1818,9 @@ async function checkTabelaoRegionParkingFixture(page) {
       () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 6,
     );
     passed &&= requested.length === 3 && new Set(requested).size === 3 && regionRequestCount === 1;
+    passed &&= !(await page.locator(".investor-stock-panel").textContent()).includes(
+      "Não confirmada",
+    );
     process.stdout.write(`Tabelão QA: regiões assíncronas e vagas ${passed}\n`);
     return passed;
   } finally {
@@ -1831,14 +1834,15 @@ function readTabelaoCompactLayout() {
   const results = document.querySelector(".investor-stock-results");
   const table = document.querySelector(".investor-stock-table");
   const resultBox = results?.getBoundingClientRect();
+  const tableBox = table?.getBoundingClientRect();
   const panelBox = results?.closest(".investor-stock-panel")?.getBoundingClientRect();
   const columns = [
-    ["tabelao-region", ".tabelao-stock-wrapped-text", 66],
-    ["tabelao-project", ".investor-stock-product-text", 100],
-    ["tabelao-address", ".tabelao-stock-wrapped-text", 130],
-    ["tabelao-parking", ".tabelao-stock-wrapped-text", 48],
-    ["tabelao-description", ".tabelao-stock-wrapped-text", 58],
-  ].map(([id, selector, contentWidth]) => {
+    ["tabelao-region", ".tabelao-region-vertical, .tabelao-stock-wrapped-text", 0.04],
+    ["tabelao-project", ".investor-stock-product-text", 0.11],
+    ["tabelao-address", ".tabelao-stock-wrapped-text", 0.12],
+    ["tabelao-parking", ".tabelao-stock-wrapped-text", 0.035],
+    ["tabelao-description", ".tabelao-stock-wrapped-text", 0.07],
+  ].map(([id, selector, proportion]) => {
     const header = document.getElementById(id);
     const cells = [...document.querySelectorAll(`[headers~="${id}"]`)];
     return {
@@ -1850,16 +1854,15 @@ function readTabelaoCompactLayout() {
         cells.every((cell) => {
           const wrapper = cell.querySelector(selector);
           const style = getComputedStyle(cell);
-          const expectedWidth =
-            contentWidth +
-            Number.parseFloat(style.paddingLeft) +
-            Number.parseFloat(style.paddingRight) +
-            Number.parseFloat(style.borderLeftWidth) +
-            Number.parseFloat(style.borderRightWidth);
+          const contentWidth =
+            cell.clientWidth -
+            Number.parseFloat(style.paddingLeft) -
+            Number.parseFloat(style.paddingRight);
           return (
             wrapper != null &&
-            Math.abs(wrapper.getBoundingClientRect().width - contentWidth) <= 1 &&
-            Math.abs(header.getBoundingClientRect().width - expectedWidth) <= 2
+            wrapper.getBoundingClientRect().width > 0 &&
+            wrapper.getBoundingClientRect().width <= contentWidth + 1 &&
+            Math.abs(header.getBoundingClientRect().width - tableBox.width * proportion) <= 2
           );
         }),
       wrapsWithoutClipping:
@@ -1873,8 +1876,8 @@ function readTabelaoCompactLayout() {
           const cellBox = cell.getBoundingClientRect();
           const style = getComputedStyle(wrapper);
           return (
-            style.whiteSpace === "normal" &&
-            style.overflowWrap === "anywhere" &&
+            (wrapper.matches(".tabelao-region-vertical") ||
+              (style.whiteSpace === "normal" && style.overflowWrap === "anywhere")) &&
             style.textOverflow !== "ellipsis" &&
             style.webkitLineClamp === "none" &&
             style.overflowX === "visible" &&
@@ -1917,7 +1920,271 @@ function readTabelaoCompactLayout() {
       results.clientWidth <= table.getBoundingClientRect().width + 1,
     compactColumnWidths: columns.every((column) => column.bounded),
     compactTextFullyVisible: columns.every((column) => column.wrapsWithoutClipping),
+    readableText: [...table.querySelectorAll("th, td")].every(
+      (cell) => Number.parseFloat(getComputedStyle(cell).fontSize) >= 12,
+    ),
+    desktopFitsWithoutHorizontalScroll:
+      innerWidth < 1280 ||
+      (results.scrollWidth <= results.clientWidth + 1 &&
+        tableBox.width <= results.clientWidth + 1 &&
+        document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1),
+    desktopLimitadorVisible:
+      innerWidth < 1280 ||
+      (results.scrollLeft === 0 &&
+        [...table.querySelectorAll('#tabelao-description, [headers~="tabelao-description"]')].every(
+          (cell) => {
+            const box = cell.getBoundingClientRect();
+            return (
+              box.width > 0 &&
+              box.left >= resultBox.left - 1 &&
+              box.right <= resultBox.right + 1 &&
+              box.right <= document.documentElement.clientWidth
+            );
+          },
+        )),
   };
+}
+
+function readTabelaoVerticalRegions() {
+  const cells = [...document.querySelectorAll('[headers~="tabelao-region"]')];
+  const regions = new Set();
+  const valid =
+    cells.length > 0 &&
+    cells.every((cell) => {
+      const region = cell.closest("tr")?.dataset.inventoryRegion;
+      if (!["Zona Leste", "Zona Sul", "Zona Norte", "Zona Oeste", "Centro"].includes(region))
+        return false;
+      regions.add(region);
+      const wrapper = cell.querySelector(".tabelao-region-vertical");
+      const accessible = cell.querySelector(".sr-only");
+      if (
+        !wrapper ||
+        wrapper.getAttribute("aria-hidden") !== "true" ||
+        accessible?.textContent !== region
+      )
+        return false;
+      const words = [...wrapper.children];
+      const expected = region.split(" ");
+      const cellBox = cell.getBoundingClientRect();
+      return (
+        words.length === expected.length &&
+        words.every((word, index) => {
+          const style = getComputedStyle(word);
+          const box = word.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(word);
+          const previousText = document.createRange();
+          if (index > 0) previousText.selectNodeContents(words[index - 1]);
+          return (
+            word.textContent === expected[index] &&
+            style.writingMode === "vertical-lr" &&
+            style.textOrientation === "upright" &&
+            style.transform === "none" &&
+            box.height > box.width &&
+            box.top >= cellBox.top - 1 &&
+            box.bottom <= cellBox.bottom + 1 &&
+            box.left >= cellBox.left - 1 &&
+            box.right <= cellBox.right + 1 &&
+            (index === 0 ||
+              range.getBoundingClientRect().left >=
+                previousText.getBoundingClientRect().right - 1) &&
+            // Glyph ink can exceed the inline line box; the visible cell remains the boundary.
+            [...range.getClientRects()].every(
+              (rect) =>
+                rect.top >= cellBox.top - 1 &&
+                rect.bottom <= cellBox.bottom + 1 &&
+                rect.left >= cellBox.left - 1 &&
+                rect.right <= cellBox.right + 1,
+            )
+          );
+        })
+      );
+    });
+  return valid && regions.size === 5;
+}
+
+function readTabelaoPinnedHeader() {
+  const table = document.querySelector(".investor-stock-table");
+  const results = document.querySelector(".investor-stock-results");
+  const navigation = document.querySelector(".tabelao-page-shell > .topbar");
+  const headers = [...(table?.querySelectorAll("thead th") ?? [])];
+  const navigationBox = navigation?.getBoundingClientRect();
+  const tableBox = table?.getBoundingClientRect();
+  const frameBox = results?.getBoundingClientRect();
+  const clientLeft = frameBox.left + results.clientLeft;
+  const clientRight = clientLeft + results.clientWidth;
+  const visibleTop = Math.max(0, navigationBox?.bottom ?? 0);
+  return (
+    navigationBox != null &&
+    headers.length === 14 &&
+    window.scrollY > 0 &&
+    tableBox.top < visibleTop &&
+    results.scrollTop === 0 &&
+    headers.every((header) => {
+      const box = header.getBoundingClientRect();
+      if (Math.abs(box.top - visibleTop) > 2 || box.bottom > tableBox.bottom + 1) return false;
+      const left = Math.max(box.left, clientLeft, 0);
+      const right = Math.min(box.right, clientRight, innerWidth);
+      if (right <= left) return true;
+      const hit = document.elementFromPoint((left + right) / 2, box.top + box.height / 2);
+      return hit === header || header.contains(hit);
+    })
+  );
+}
+
+async function checkTabelaoHeaderScrolling(page) {
+  let pinned = true;
+  for (const fraction of [0.25, 0.65]) {
+    await page.evaluate(async (position) => {
+      const tableBox = document.querySelector(".investor-stock-table").getBoundingClientRect();
+      window.scrollTo(0, scrollY + tableBox.top + tableBox.height * position);
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }, fraction);
+    pinned = (await page.evaluate(readTabelaoPinnedHeader)) && pinned;
+  }
+  await page.locator(".investor-stock-results").evaluate(async (results) => {
+    results.scrollLeft = results.scrollWidth - results.clientWidth;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+  pinned = (await page.evaluate(readTabelaoPinnedHeader)) && pinned;
+  await page.evaluate(async () => {
+    document.querySelector(".investor-stock-results").scrollLeft = 0;
+    window.scrollTo(0, 0);
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+  const reset = await page.evaluate(() => {
+    const table = document.querySelector(".investor-stock-table");
+    const top = table.tHead.getBoundingClientRect().top;
+    return [...table.querySelectorAll("thead th")].every(
+      (header) => Math.abs(header.getBoundingClientRect().top - top) <= 2,
+    );
+  });
+  return pinned && reset;
+}
+
+async function checkTabelaoRegionOrderFixture(page, viewports) {
+  const regions = ["Zona Leste", "Zona Sul", "Zona Norte", "Zona Oeste", "Centro"];
+  const projects = ["Álamo", "Projeto 2", "Projeto 10"];
+  const base = buildTabelaoCompactFixture()[0];
+  const orderedItems = regions.flatMap((region, regionIndex) =>
+    projects.flatMap((project, projectIndex) =>
+      [0, 1].map((priceIndex) => ({
+        ...base,
+        id: `qa-region-${regionIndex}-${projectIndex}-${priceIndex}`,
+        businessUnit: "Incorporadora QA",
+        project,
+        plant: `Tipo ${regionIndex + 1}.${priceIndex + 1}`,
+        postalCode: `0100100${regionIndex + 1}`,
+        finalWithKit: 300_000 + priceIndex * 10_000,
+        // Misleading legacy labels must not override the authenticated resolution.
+        region: regions[(regionIndex + 1) % regions.length],
+      })),
+    ),
+  );
+  const inventoryHandler = (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ count: orderedItems.length, items: [...orderedItems].reverse() }),
+    });
+  const regionHandler = (route) => {
+    const postalCodes = new URL(route.request().url()).searchParams.get("postalCodes").split(",");
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        results: postalCodes.map((postalCode) => ({
+          postalCode,
+          region: regions[Number(postalCode.at(-1)) - 1],
+          status: "confirmed",
+          reason: "single-region-for-postal-code",
+          municipality: "São Paulo",
+          state: "SP",
+          districts: ["Distrito QA"],
+          checkedAt: "2026-10-02T12:00:00.000Z",
+          source: "viacep+localizasampa+geosampa",
+        })),
+      }),
+    });
+  };
+  await page.route("**/api/inventory", inventoryHandler);
+  await page.route("**/api/inventory/regions?*", regionHandler);
+  try {
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForFunction((count) => {
+      const rows = [...document.querySelectorAll("tr[data-inventory-unit-id]")];
+      return (
+        rows.length === count &&
+        rows.every((row) =>
+          ["Zona Leste", "Zona Sul", "Zona Norte", "Zona Oeste", "Centro"].includes(
+            row.dataset.inventoryRegion,
+          ),
+        )
+      );
+    }, orderedItems.length);
+    const filters = page.locator(".investor-stock-filters");
+    const readOrder = () =>
+      page
+        .locator("tr[data-inventory-unit-id]")
+        .evaluateAll((rows) => rows.map((row) => row.dataset.inventoryUnitId));
+    const expectedAsc = orderedItems.map((item) => item.id);
+    const expectedDesc = regions.flatMap((_, regionIndex) =>
+      projects.flatMap((_, projectIndex) =>
+        [1, 0].map((priceIndex) => `qa-region-${regionIndex}-${projectIndex}-${priceIndex}`),
+      ),
+    );
+    const regionFacets = await filters
+      .locator('select[name="region"] option')
+      .evaluateAll((options) =>
+        options.filter((option) => option.value).map((option) => option.textContent.trim()),
+      );
+    let ordered = JSON.stringify(await readOrder()) === JSON.stringify(expectedAsc);
+    ordered &&=
+      JSON.stringify(regionFacets) === JSON.stringify(regions.map((region) => `${region} (6)`));
+    ordered &&= await page.locator(".tabelao-project-group").evaluateAll(
+      (groups) =>
+        groups.length === 15 &&
+        groups.every((group) => {
+          const rows = [...group.rows];
+          return (
+            rows.length === 2 &&
+            new Set(rows.map((row) => row.dataset.inventoryRegion)).size === 1 &&
+            [...group.querySelectorAll('th[scope="rowgroup"]')].every((cell) => cell.rowSpan === 2)
+          );
+        }),
+    );
+    await filters.locator('select[name="priceOrder"]').selectOption("desc");
+    ordered &&= JSON.stringify(await readOrder()) === JSON.stringify(expectedDesc);
+    await filters.locator('select[name="region"]').selectOption("zona sul");
+    ordered &&= JSON.stringify(await readOrder()) === JSON.stringify(expectedDesc.slice(6, 12));
+    await filters.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+    ordered &&= JSON.stringify(await readOrder()) === JSON.stringify(expectedAsc);
+    for (const viewport of viewports) {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      const vertical = await page.evaluate(readTabelaoVerticalRegions);
+      const layout = await page.evaluate(readTabelaoCompactLayout);
+      const sticky = await checkTabelaoHeaderScrolling(page);
+      const passed =
+        vertical &&
+        sticky &&
+        layout.compactColumnWidths &&
+        layout.compactTextFullyVisible &&
+        layout.columnsAligned &&
+        layout.readableText &&
+        layout.desktopFitsWithoutHorizontalScroll &&
+        layout.desktopLimitadorVisible;
+      ordered = passed && ordered;
+      process.stdout.write(
+        `Tabelão QA: regiões verticais e cabeçalho ${viewport.key} ${JSON.stringify({ vertical, sticky, ...layout })}\n`,
+      );
+    }
+    process.stdout.write(`Tabelão QA: regiões, projetos homônimos e preços ${ordered}\n`);
+    return ordered;
+  } finally {
+    await page.unroute("**/api/inventory/regions?*", regionHandler);
+    await page.unroute("**/api/inventory", inventoryHandler);
+    await page.setViewportSize({ width: 1440, height: 900 });
+  }
 }
 
 function readTabelaoMergedRows() {
@@ -2085,7 +2352,8 @@ async function checkTabelaoValidation(page, origin) {
   const route = "/app/simulacao/tabelao";
   const url = `${origin}${route}`;
   const requiredViewports = [
-    { key: "desktop-1440x900", width: 1440, height: 900, rowHeight: 25, targetSize: 24 },
+    { key: "desktop-1440x900", width: 1440, height: 900, rowHeight: 32, targetSize: 24 },
+    { key: "desktop-1280x800", width: 1280, height: 800, rowHeight: 32, targetSize: 24 },
     { key: "tablet-1024x768", width: 1024, height: 768, rowHeight: 44, targetSize: 44 },
     { key: "tablet-768x1024", width: 768, height: 1024, rowHeight: 44, targetSize: 44 },
     { key: "mobile-375x812", width: 375, height: 812, rowHeight: 44, targetSize: 44 },
@@ -2120,33 +2388,6 @@ async function checkTabelaoValidation(page, origin) {
           ?.getBoundingClientRect();
         const syncBox = document.querySelector(".investor-stock-sync")?.getBoundingClientRect();
         const tableStyle = table == null ? null : getComputedStyle(table);
-        const cellContentWidth = (cell) => {
-          const range = document.createRange();
-          range.selectNodeContents(cell);
-          return range.getBoundingClientRect().width;
-        };
-        const contentFitColumns = [
-          ...document.querySelectorAll(".investor-stock-table thead th"),
-        ].every((header) => {
-          const cells = [header, ...document.querySelectorAll(`[headers~="${header.id}"]`)];
-          const widestRequiredWidth = Math.max(
-            ...cells.map((cell) => {
-              const style = getComputedStyle(cell);
-              return (
-                Math.max(
-                  cellContentWidth(cell),
-                  // Compact columns reserve a bounded wrapping box, even for short labels.
-                  cell
-                    .querySelector(".investor-stock-product-text, .tabelao-stock-wrapped-text")
-                    ?.getBoundingClientRect().width ?? 0,
-                ) +
-                Number.parseFloat(style.paddingLeft) +
-                Number.parseFloat(style.paddingRight)
-              );
-            }),
-          );
-          return header.getBoundingClientRect().width <= widestRequiredWidth + 4;
-        });
         const tableFillsAvailableWidth =
           results != null &&
           table != null &&
@@ -2229,8 +2470,10 @@ async function checkTabelaoValidation(page, origin) {
             results != null &&
             results.scrollHeight <= results.clientHeight + 2 &&
             getComputedStyle(results).maxHeight === "none",
-          automaticColumnWidths:
-            tableStyle?.tableLayout === "auto" && (contentFitColumns || tableFillsAvailableWidth),
+          proportionalColumnWidths:
+            tableStyle?.tableLayout === "fixed" &&
+            (innerWidth < 1280 || tableFillsAvailableWidth) &&
+            [...table.querySelectorAll("colgroup col")].length === 14,
           headersMatchRows:
             firstRow != null &&
             columnHeaders.every(
@@ -2274,6 +2517,9 @@ async function checkTabelaoValidation(page, origin) {
     initial.compactTextFullyVisible = compactLayout.compactTextFullyVisible;
     initial.compactFrameFitsTable = compactLayout.compactFrameFitsTable;
     initial.compactFrameInsidePanel = compactLayout.compactFrameInsidePanel;
+    initial.readableText = compactLayout.readableText;
+    initial.desktopFitsWithoutHorizontalScroll = compactLayout.desktopFitsWithoutHorizontalScroll;
+    initial.desktopLimitadorVisible = compactLayout.desktopLimitadorVisible;
     const results = page.locator(".investor-stock-results");
     await page.locator("tr[data-inventory-unit-id]").last().scrollIntoViewIfNeeded();
     await page.waitForFunction(
@@ -2441,6 +2687,7 @@ async function checkTabelaoValidation(page, origin) {
         ?.textContent?.trim(),
       plant: row.querySelector(".investor-stock-plant")?.textContent?.trim(),
       businessUnit: row.getAttribute("data-inventory-business-unit"),
+      region: row.getAttribute("data-inventory-region"),
       parkingSpaces: row.getAttribute("data-inventory-parking-spaces"),
       price: row.querySelector(".investor-stock-price")?.textContent?.trim(),
       availableUnits: Number(
@@ -2468,10 +2715,16 @@ async function checkTabelaoValidation(page, origin) {
     (row, index) => row.price === currency.format(syntheticTabelaoInventory[index].minimumPrice),
   );
   const projectCollator = new Intl.Collator("pt-BR", { numeric: true, sensitivity: "base" });
+  const regionOrder = ["Zona Leste", "Zona Sul", "Zona Norte", "Zona Oeste", "Centro"];
+  const rankRegion = (region) => {
+    const index = regionOrder.indexOf(region);
+    return index < 0 ? regionOrder.length : index;
+  };
   const groupedProjects = rendered.every((row, index, rows) => {
     if (index === 0) return true;
     const previous = rows[index - 1];
     const groupOrder =
+      rankRegion(previous.region) - rankRegion(row.region) ||
       projectCollator.compare(previous.project, row.project) ||
       projectCollator.compare(previous.businessUnit, row.businessUnit);
     return (
@@ -2922,6 +3175,7 @@ async function checkTabelaoValidation(page, origin) {
           const box = row.getBoundingClientRect();
           return box.top >= 0 && box.bottom <= innerHeight + 1 && window.scrollY > 0;
         });
+      const headerFollowsPageScroll = await checkTabelaoHeaderScrolling(page);
       const panel = page.locator(".investor-stock-filters");
       await panel.locator('select[name="priceOrder"]').selectOption("desc");
       await page.waitForFunction(
@@ -2957,6 +3211,7 @@ async function checkTabelaoValidation(page, origin) {
         key: `grouped-${viewport.key}`,
         expansiveGroups,
         lastRowReachable,
+        headerFollowsPageScroll,
         filteredMerge,
         restoredMerge,
       });
@@ -2992,6 +3247,9 @@ async function checkTabelaoValidation(page, origin) {
         compactTextFullyVisible: layout.compactTextFullyVisible,
         compactFrameFitsTable: layout.compactFrameFitsTable,
         compactFrameInsidePanel: layout.compactFrameInsidePanel,
+        readableText: layout.readableText,
+        desktopFitsWithoutHorizontalScroll: layout.desktopFitsWithoutHorizontalScroll,
+        desktopLimitadorVisible: layout.desktopLimitadorVisible,
         consecutiveDisplayedValuesOnly: await checkTabelaoCompactFixture(page),
       });
     }
@@ -3080,6 +3338,7 @@ async function checkTabelaoValidation(page, origin) {
   );
   process.stdout.write(`Tabelão QA: ${JSON.stringify(viewportChecks)}\n`);
   const regionParkingFlow = await checkTabelaoRegionParkingFixture(page);
+  const regionOrderAndLayout = await checkTabelaoRegionOrderFixture(page, requiredViewports);
 
   return {
     responsiveGrid,
@@ -3090,7 +3349,7 @@ async function checkTabelaoValidation(page, origin) {
     guideEscapeReturnedFocus,
     exclusiveRows: exclusiveRows && regionParkingFlow,
     netPrices,
-    groupedProjects,
+    groupedProjects: groupedProjects && regionOrderAndLayout,
     liveAvailableBeforeLocationReference,
     locationReferenceApplied,
     locationMetadataFits,

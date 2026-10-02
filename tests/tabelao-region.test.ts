@@ -99,14 +99,14 @@ describe("Tabelao confirmed geography", () => {
 
   it("never falls back to legacy region, neighborhood, project or postal ranges", () => {
     const legacy = { postalCode, region: "Zona Norte", neighborhood: "Centro", project: "Centro" };
-    expect(resolveTabelaoRegion(legacy)).toBe("N\u00e3o confirmada");
-    expect(resolveTabelaoRegion(null)).toBe("N\u00e3o confirmada");
+    expect(resolveTabelaoRegion(legacy)).toBe("Localiza\u00e7\u00e3o indispon\u00edvel");
+    expect(resolveTabelaoRegion(null)).toBe("Localiza\u00e7\u00e3o indispon\u00edvel");
     expect(
       resolveTabelaoRegion({
         ...legacy,
         regionResolution: { ...confirmed, postalCode: "12345678" },
       }),
-    ).toBe("N\u00e3o confirmada");
+    ).toBe("Localiza\u00e7\u00e3o indispon\u00edvel");
   });
 
   it.each([
@@ -116,7 +116,7 @@ describe("Tabelao confirmed geography", () => {
     { city: 123 },
   ])("does not confirm a location that conflicts with inventory: %j", (location) => {
     expect(resolveTabelaoRegion({ postalCode, regionResolution: confirmed, ...location })).toBe(
-      "N\u00e3o confirmada",
+      "Localiza\u00e7\u00e3o indispon\u00edvel",
     );
   });
 
@@ -136,9 +136,11 @@ describe("Tabelao confirmed geography", () => {
       }),
     ).toBe("Fora de S\u00e3o Paulo");
     expect(resolveTabelaoRegion({ postalCode, city: "Sao Paulo", regionResolution: outside })).toBe(
-      "N\u00e3o confirmada",
+      "Localiza\u00e7\u00e3o indispon\u00edvel",
     );
-    expect(resolveTabelaoRegion({ postalCode, city: "Guarulhos" })).toBe("N\u00e3o confirmada");
+    expect(resolveTabelaoRegion({ postalCode, city: "Guarulhos" })).toBe(
+      "Localiza\u00e7\u00e3o indispon\u00edvel",
+    );
     expect(
       resolveTabelaoRegion({
         postalCode,
@@ -149,7 +151,7 @@ describe("Tabelao confirmed geography", () => {
           reason: "ambiguous_districts",
         },
       }),
-    ).toBe("N\u00e3o confirmada");
+    ).toBe("Localiza\u00e7\u00e3o indispon\u00edvel");
   });
 
   it("merges only consecutive identical region labels within each project", () => {
@@ -175,7 +177,7 @@ describe("Tabelao confirmed geography", () => {
         reason: "ambiguous_districts",
       },
     };
-    expect(resolveTabelaoRegion(item)).toBe("N\u00e3o confirmada");
+    expect(resolveTabelaoRegion(item)).toBe("Localiza\u00e7\u00e3o indispon\u00edvel");
   });
 });
 
@@ -283,16 +285,22 @@ describe("Tabelao region tooltip", () => {
     });
     expect(title).toContain(label);
     expect(title).not.toContain(reason);
-    expect(title).toContain("Situa\u00e7\u00e3o: N\u00e3o confirmada");
+    expect(title).toContain("Situa\u00e7\u00e3o: Localiza\u00e7\u00e3o indispon\u00edvel");
     expect(title).toContain("Distritos: Distrito QA");
     expect(title).toContain("Verificado em:");
   });
 
   it("does not invent a provider failure while pending or expose unknown error codes", () => {
-    expect(formatTabelaoRegionTitle({ postalCode })).toBe("N\u00e3o confirmada");
-    expect(formatTabelaoRegionTitle({ postalCode, regionResolution: null })).toBe(
-      "N\u00e3o confirmada",
+    expect(resolveTabelaoRegion({ postalCode, regionLookupPending: true })).toBe("Localizando");
+    expect(formatTabelaoRegionTitle({ postalCode, regionLookupPending: true })).toContain(
+      "Consultando",
     );
+    expect(formatTabelaoRegionTitle({ postalCode, regionResolution: null })).toBe(
+      "Localiza\u00e7\u00e3o indispon\u00edvel. Atualize a consulta para tentar novamente.",
+    );
+    expect(
+      resolveTabelaoRegion({ postalCode, regionLookupPending: true, regionResolution: confirmed }),
+    ).toBe("Centro");
     for (const reason of ["unmapped_internal_error", "toString", "__proto__"]) {
       expect(
         formatTabelaoRegionTitle({
@@ -498,13 +506,135 @@ describe("Tabelao region concurrency and lifecycle", () => {
     const onResolution = vi.fn();
     await loadTabelaoRegions(postalCodes, new AbortController().signal, onResolution);
     expect(fetch).toHaveBeenCalledTimes(86);
-    expect(onResolution).toHaveBeenCalledTimes(256);
+    expect(onResolution).toHaveBeenCalledTimes(300);
+    for (const postalCode of [...postalCodes].sort().slice(256)) {
+      expect(onResolution).toHaveBeenCalledWith(postalCode, null);
+    }
     expect(vi.mocked(fetch).mock.calls.flatMap(([url]) => requestedPostalCodes(url))).toEqual(
       [...postalCodes].sort().slice(0, 256),
     );
   });
 
-  it("resolves every CEP in a failed batch as unknown while continuing the queue", async () => {
+  it.each([401, 403, 400])("does not retry denied or invalid requests (%s)", async (status) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve(new Response(null, { status }))),
+    );
+    const onResolution = vi.fn();
+    await loadTabelaoRegions([postalCode], new AbortController().signal, onResolution);
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(onResolution).toHaveBeenCalledExactlyOnceWith(postalCode, null);
+  });
+
+  it("does not retry a contradictory response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve(Response.json({ results: [] }))),
+    );
+    const onResolution = vi.fn();
+    await loadTabelaoRegions([postalCode], new AbortController().signal, onResolution);
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(onResolution).toHaveBeenCalledExactlyOnceWith(postalCode, null);
+  });
+
+  it.each(["2", "Fri, 02 Oct 2026 12:00:02 GMT"])(
+    "respects Retry-After %s before retrying",
+    async (retryAfter) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-10-02T12:00:00Z"));
+      try {
+        let calls = 0;
+        vi.stubGlobal(
+          "fetch",
+          vi.fn((url) =>
+            Promise.resolve(
+              ++calls === 1
+                ? new Response(null, { status: 429, headers: { "Retry-After": retryAfter } })
+                : responseFor(url),
+            ),
+          ),
+        );
+        const pending = loadTabelaoRegions([postalCode], new AbortController().signal, vi.fn());
+        await vi.advanceTimersByTimeAsync(1999);
+        expect(fetch).toHaveBeenCalledOnce();
+        await vi.advanceTimersByTimeAsync(1);
+        await pending;
+        expect(fetch).toHaveBeenCalledTimes(2);
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
+
+  it("does not retry before a server wait beyond the bounded lookup budget", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve(
+          new Response(null, {
+            status: 503,
+            headers: { "Retry-After": "60" },
+          }),
+        ),
+      ),
+    );
+    const onResolution = vi.fn();
+    await loadTabelaoRegions([postalCode], new AbortController().signal, onResolution);
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(onResolution).toHaveBeenCalledExactlyOnceWith(postalCode, null);
+  });
+
+  it("cancels the retry wait on navigation without issuing another request", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => Promise.resolve(new Response(null, { status: 503 }))),
+      );
+      const controller = new AbortController();
+      const onResolution = vi.fn();
+      const pending = loadTabelaoRegions([postalCode], controller.signal, onResolution);
+      await vi.advanceTimersByTimeAsync(0);
+      controller.abort();
+      await pending;
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(fetch).toHaveBeenCalledOnce();
+      expect(onResolution).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it.each([429, 503])("retries a transient batch once after healthy CEPs (%s)", async (status) => {
+    const postalCodes = postalCodeList(4);
+    let first = true;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url) => {
+        if (first) {
+          first = false;
+          return Promise.resolve(new Response(null, { status }));
+        }
+        return Promise.resolve(responseFor(url));
+      }),
+    );
+    const onResolution = vi.fn();
+    await loadTabelaoRegions(postalCodes, new AbortController().signal, onResolution);
+    expect(vi.mocked(fetch).mock.calls.map(([url]) => requestedPostalCodes(url))).toEqual([
+      postalCodes.slice(0, 3),
+      postalCodes.slice(3),
+      postalCodes.slice(0, 3),
+    ]);
+    expect(onResolution.mock.calls.map(([code]) => code)).toEqual([
+      postalCodes[3],
+      ...postalCodes.slice(0, 3),
+    ]);
+    expect(onResolution.mock.calls.every(([, result]) => result?.status === "confirmed")).toBe(
+      true,
+    );
+  });
+
+  it("resolves every CEP after a bounded failed retry while continuing the queue", async () => {
     const postalCodes = postalCodeList(33);
     vi.stubGlobal(
       "fetch",
@@ -519,7 +649,7 @@ describe("Tabelao region concurrency and lifecycle", () => {
     for (const value of postalCodes.slice(0, 3))
       expect(onResolution).toHaveBeenCalledWith(value, null);
     expect(onResolution).toHaveBeenCalledTimes(33);
-    expect(fetch).toHaveBeenCalledTimes(11);
+    expect(fetch).toHaveBeenCalledTimes(12);
     expect(onResolution).toHaveBeenCalledWith(
       postalCodes[32],
       expect.objectContaining({ status: "confirmed" }),
@@ -558,14 +688,18 @@ describe("Tabelao region concurrency and lifecycle", () => {
     const request = loadTabelaoRegions(postalCodes, new AbortController().signal, onResolution);
     await vi.waitFor(() => expect(finish).toHaveLength(1));
     deadlines[0]!.abort(new DOMException("Timeout", "TimeoutError"));
-    await vi.waitFor(() => expect(onResolution).toHaveBeenCalledTimes(3));
-    for (const value of postalCodes.slice(0, 3))
-      expect(onResolution).toHaveBeenCalledWith(value, null);
     await vi.waitFor(() => expect(finish).toHaveLength(2));
+    expect(onResolution).not.toHaveBeenCalled();
     expect(deadlines[1]!.signal.aborted).toBe(false);
     finish[1]!();
+    await vi.waitFor(() => expect(finish).toHaveLength(3));
+    expect(onResolution).toHaveBeenCalledTimes(1);
+    deadlines[2]!.abort(new DOMException("Timeout", "TimeoutError"));
     await request;
+    for (const value of postalCodes.slice(0, 3))
+      expect(onResolution).toHaveBeenCalledWith(value, null);
     finish[0]!();
+    finish[2]!();
     await Promise.resolve();
     expect(onResolution).toHaveBeenCalledTimes(4);
     expect(timeout).toHaveBeenCalledWith(25_000);

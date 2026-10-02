@@ -25,6 +25,7 @@ export interface TabelaoInventoryItem {
   city?: string | null;
   state?: string | null;
   regionResolution?: TabelaoRegionResolution | null;
+  regionLookupPending?: boolean;
   progress?: number | null;
 }
 

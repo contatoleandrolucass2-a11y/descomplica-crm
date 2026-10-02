@@ -23,7 +23,8 @@ const regionLabels: Record<string, string> = {
   "zona sul": "Zona Sul",
   "zona leste": "Zona Leste",
   "zona oeste": "Zona Oeste",
-  "nao confirmada": "Não confirmada",
+  localizando: "Localizando",
+  "localizacao indisponivel": "Localização indisponível",
   "fora de sao paulo": "Fora de São Paulo",
 };
 

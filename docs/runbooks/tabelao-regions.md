@@ -34,8 +34,17 @@ vem de `nm_regiao_05`, nao de aliases de bairros nem de faixas aproximadas de CE
 Somente Sao Paulo/SP, IBGE 3550308, e elegivel. CEP e logradouro precisam
 concordar nas fontes de endereco. A resposta municipal precisa conter todos
 os registros anunciados, com colunas e campos validos. Todos os distritos do
-CEP devem existir no GeoSampa e pertencer a uma unica regiao. Caso contrario,
-exibir **Nao confirmada**. Municipio confirmado diferente: **Fora de Sao Paulo**.
+CEP devem existir no GeoSampa e pertencer a uma unica regiao. Diferencas de tipo
+ou titulo do logradouro exigem uma consulta adicional a camada municipal
+`geoportal:segmento_logradouro`, por CODLOG exato de seis digitos. A consulta
+TLS deve devolver todos os segmentos e concordar com o nome do ViaCEP; retirar
+um titulo ou aproximar nomes, isoladamente, nunca confirma a identidade.
+
+Enquanto a consulta esta pendente, exibir **Localizando**. Se as fontes nao
+permitirem confirmar, exibir **Localizacao indisponivel**, com o motivo no
+titulo da celula. Municipio confirmado diferente: **Fora de Sao Paulo**.
+O rotulo antigo nao e usado e nenhum empreendimento e ocultado para aparentar
+cobertura completa. Erro de cadastro ou fonte fora do ar nao autoriza inventar zona.
 
 Exemplos publicos de verificacao: 01509-020 resulta em Liberdade/Centro;
 01311-000 retorna Vila Mariana e Jardim Paulista, portanto permanece ambiguo;
@@ -54,13 +63,20 @@ somente em memoria, sem cookies, usuarios, projetos ou valores comerciais.
 - Chamadas simultaneas do mesmo CEP compartilham a consulta. Tres consultas
   ativas por processo, fila de ate 32 com espera maxima de cinco segundos.
 - Origem limitada a 18 segundos, GeoSampa compartilhado a 15 segundos e 6 MB;
-  HTML a 250 KB e ViaCEP a 20 KB. Sem redirecionamentos externos.
+  HTML a 250 KB, ViaCEP a 20 KB e reconciliacao de logradouro a 500 KB no mesmo
+  prazo de 18 segundos. Sem redirecionamentos externos.
 - Cliente envia um lote de ate tres CEPs por vez, ate 256 CEPs distintos e
   25 segundos por lote. Para 22 CEPs, oito autorizacoes por pagina em vez de 22.
   Lotes seguem a capacidade de tres consultas do servidor, evitando esgotar a
   fila de cinco segundos durante a carga fria do mapa municipal. A API continua
   aceitando ate oito CEPs por compatibilidade; isso nao e a concorrencia do cliente.
   Aborta ao sair/recarregar, sem cancelar consultas de outros usuarios.
+  Uma falha de transporte, 429 ou 5xx recebe uma nova tentativa depois dos
+  outros lotes. Negacoes, pedidos invalidos e contratos contraditorios nao
+  repetem. Espera abortavel minima de 750 ms, respeitando `Retry-After` ate dez
+  segundos; se o servidor pedir mais, nao antecipar uma nova chamada. Falha
+  definitiva encerra o estado de carga, sem repetir indefinidamente. CEPs acima
+  do limite de 256 encerram como indisponiveis, nunca como carga permanente.
 - Estoque aparece antes da localizacao. Respostas geograficas preservam enderecos,
   filtros e ordenacao; selecao sem correspondencias continua visivel com contagem zero.
 
@@ -77,11 +93,26 @@ validacao cadastral/geografica posterior. O snapshot de enderecos nao e autorida
 para inventar uma zona nem para vagas mensais de novas unidades.
 
 `parse5` e dependencia de runtime para analisar HTML sem executa-lo. Somente
-CEPs sao enviados para os provedores; nomes, estoque e dados de clientes nao saem.
+CEPs e, quando necessario, CODLOG publico sao enviados para os provedores;
+nomes comerciais, estoque e dados de clientes nao saem.
 O contrato territorial exige os 96 distritos verificados; mudanca dessa cardinalidade
 exige revisao da base, nao classificacao silenciosa. Novos empreendimentos e CEPs nao
 exigem alteracao dessa lista. O mapa de distritos tem TTL de 24 horas e cooldown de um minuto. Reinicios
 descartam os caches; multiplos processos nao compartilham memoria.
+
+## Apresentacao
+
+As regioes seguem Leste, Sul, Norte, Oeste e Centro. Empreendimentos ficam em
+ordem alfabetica natural pt-BR e seus valores em ordem crescente por padrao.
+Ordenacao manual decrescente nao mistura as regioes. Vagas e contagens mantem
+o contrato comercial anterior. Projetos homonimos de zonas diferentes nao
+compartilham celulas mescladas na apresentacao.
+
+Rotulos regionais usam letras verticais eretas e nome integral para leitores
+de tela. As 14 colunas cabem no desktop a partir de 1280px, com fonte de 12px e
+quebra de texto. Abaixo disso, preservar a rolagem horizontal da tabela. O
+cabecalho original acompanha a rolagem vertical, abaixo da navegacao e limitado
+ao fim da tabela, sem duplicar IDs ou celulas acessiveis.
 
 ## Validacao e reversao
 

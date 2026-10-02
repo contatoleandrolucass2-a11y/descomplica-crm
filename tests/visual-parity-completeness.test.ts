@@ -117,6 +117,57 @@ describe("complete visual composition on the scoped v3 read model", () => {
 });
 
 describe("isolated authenticated visual QA contract", () => {
+  it("exige regiões ordenadas, estados honestos e preços independentes do helper de produção no Tabelão", () => {
+    const script = source("scripts/qa/authenticated-visual.mjs");
+    const fixture = script.slice(
+      script.indexOf("async function checkTabelaoRegionOrderFixture("),
+      script.indexOf("function readTabelaoMergedRows("),
+    );
+    expect(fixture).toContain('["Zona Leste", "Zona Sul", "Zona Norte", "Zona Oeste", "Centro"]');
+    expect(fixture).toContain('["Álamo", "Projeto 2", "Projeto 10"]');
+    expect(fixture).toContain("items: [...orderedItems].reverse()");
+    expect(fixture).toContain("JSON.stringify(expectedAsc)");
+    expect(fixture).toContain("JSON.stringify(expectedDesc)");
+    expect(fixture).toContain("JSON.stringify(expectedDesc.slice(6, 12))");
+    expect(fixture).toContain("new Set(rows.map((row) => row.dataset.inventoryRegion)).size === 1");
+    expect(fixture).not.toContain("sortTabelaoInventory");
+    expect(script).toContain('"Localizando (0)"');
+    expect(script).toContain('selectOption("localizacao indisponivel")');
+    expect(script).not.toContain('"Não confirmada (0)"');
+    expect(script).toContain("groupedProjects: groupedProjects && regionOrderAndLayout");
+    expect(script).toContain("exclusiveRows: exclusiveRows && regionParkingFlow");
+  });
+
+  it("mede a largura, letras verticais e cabeçalho original durante a rolagem do Tabelão", () => {
+    const script = source("scripts/qa/authenticated-visual.mjs");
+    expect(script).toContain('key: "desktop-1280x800", width: 1280');
+    expect(script).toMatch(/desktopFitsWithoutHorizontalScroll:\s*innerWidth < 1280/);
+    expect(script).toContain("results.scrollWidth <= results.clientWidth + 1");
+    expect(script).toMatch(/desktopLimitadorVisible:\s*innerWidth < 1280/);
+    expect(script).toContain('style.writingMode === "vertical-lr"');
+    expect(script).toContain('style.textOrientation === "upright"');
+    expect(script).toContain('style.transform === "none"');
+    expect(script).toContain("valid && regions.size === 5");
+    expect(script).toContain("Math.abs(box.top - visibleTop) > 2");
+    expect(script).toContain("const clientLeft = frameBox.left + results.clientLeft");
+    expect(script).toContain("const clientRight = clientLeft + results.clientWidth");
+    expect(script).toContain("Math.max(box.left, clientLeft, 0)");
+    expect(script).toContain("Math.min(box.right, clientRight, innerWidth)");
+    expect(script).toContain("return hit === header || header.contains(hit)");
+    expect(script).toContain("document.elementFromPoint(");
+    expect(script).toContain("for (const fraction of [0.25, 0.65])");
+    expect(script).toContain("results.scrollLeft = results.scrollWidth - results.clientWidth");
+    expect(script).toContain(
+      "const headerFollowsPageScroll = await checkTabelaoHeaderScrolling(page)",
+    );
+    expect(script).toContain("const sticky = await checkTabelaoHeaderScrolling(page)");
+    expect(script).toContain("const vertical = await page.evaluate(readTabelaoVerticalRegions)");
+    expect(script).toContain(
+      "initial.desktopLimitadorVisible = compactLayout.desktopLimitadorVisible",
+    );
+    expect(script).toContain(".every(([, value]) => value === true)");
+  });
+
   it("requires a local Supabase QA identity and captures every responsive route", () => {
     const script = source("scripts/qa/authenticated-visual.mjs");
     const runner = source("scripts/qa/local-authenticated-visual.mjs");

@@ -4,6 +4,34 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-02: Ordem territorial e falhas transitorias do Tabelao
+
+- Status: pendente_validacao; branch codex/tabelao-regioes-layout, base 727c858.
+- CI 37003636668 aprovou 1367 Vitest, oito Node, validacoes de banco/restore,
+  E2E e todos os criterios funcionais da matriz autenticada. Sete diferencas
+  visuais restritas ao Tabelao foram revisadas e promovidas com proveniencia;
+  186 referencias preservadas. CI das referencias/publicacao ainda pendentes.
+- Fonte: pedido e capturas do usuario, tabelao-inventory.mjs, tabelao-region.mjs
+  e testes de inventario/regiao. A consulta real foi somente observacional.
+- Prioridade comercial das regioes: Leste, Sul, Norte, Oeste e Centro. Agrupar
+  por regiao antes do nome evita misturar zonas; a chave de apresentacao inclui
+  regiao para nao reunir projetos homonimos de localizacoes distintas.
+- O rótulo de carga depende de consulta realmente pendente. Timeout/falha nao
+  podem continuar indefinidamente como carga nem virar regiao presumida.
+- Retry de transporte limitado a uma tentativa depois dos demais lotes, com
+  os mesmos tres CEPs por lote; 401/403/400 e contrato contraditorio nao repetem.
+- Divergencias atuais eram tipo/titulo do logradouro. CODLOG na camada municipal
+  segmento_logradouro por HTTPS comprova identidade, sem remover tokens como
+  prova ou criar mapa projeto/zona. Backend local confirmou 22/22 CEPs atuais em
+  02/10/2026 08:37 BRT; Itaim Bibi pertence a Oeste mesmo com bairro Brooklin.
+- Retry respeita Retry-After com espera abortavel ate dez segundos. Acima do
+  orcamento, nao chamar antes do prazo. CEPs excedentes ao limite nao ficam pendentes.
+- 405 testes focados, lint do codigo, tipos, build e oito testes Node aprovados.
+  Suite Windows: 1361 aprovados, quatro skips e seis falhas POSIX preexistentes.
+  Chromium local: nove cenarios aprovados para letras verticais, ordem, filtros,
+  colunas compactas e cabecalho rolando, com capturas revisadas. CI autenticada
+  e publicacao pendentes; nao usar esta nota como prova de release.
+
 ## 2026-10-02: Replica de Calcular documentacao
 
 - Status: pendente_validacao; branch codex/calcular-documentacao.

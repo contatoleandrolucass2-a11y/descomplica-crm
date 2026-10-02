@@ -121,6 +121,22 @@ function formatAddress(item: InventoryItem) {
     .join(" / ");
 }
 
+function TabelaoRegionLabel({ region }: { region: string }) {
+  const vertical = /^(Zona (Leste|Sul|Norte|Oeste)|Centro)$/.test(region);
+  if (!vertical) return <span className="tabelao-stock-wrapped-text">{region}</span>;
+
+  return (
+    <>
+      <span className="sr-only">{region}</span>
+      <span className="tabelao-region-vertical" aria-hidden="true">
+        {region.split(" ").map((word) => (
+          <span key={word}>{word}</span>
+        ))}
+      </span>
+    </>
+  );
+}
+
 function inventoryMetadata(payload: InventoryPayload): InventoryMeta {
   const metadata: InventoryMeta = { count: payload.count };
   if (payload.source !== undefined) metadata.source = payload.source;
@@ -153,8 +169,62 @@ export function TabelaoClient() {
   });
   const [tourPlacement, setTourPlacement] = useState({ top: false, left: false });
   const tourPanel = useRef<HTMLElement>(null);
+  const stockTable = useRef<HTMLTableElement>(null);
   const tourReturnFocus = useRef<HTMLButtonElement | null>(null);
   const currentTourStep = TABELAO_TOUR_STEPS[tourStep] ?? TABELAO_TOUR_STEPS[0];
+
+  useEffect(() => {
+    const table = stockTable.current;
+    const heading = table?.tHead;
+    if (!table || !heading) return;
+    const shell = table.closest<HTMLElement>(".tabelao-page-shell");
+    const navigation = shell?.querySelector<HTMLElement>(":scope > .topbar");
+    const viewport = window.visualViewport;
+    let frame = 0;
+    let previousOffset = -1;
+
+    // Keep the original column headers inside the horizontal scroller, without clones.
+    const updateHeading = () => {
+      frame = 0;
+      const tableRect = table.getBoundingClientRect();
+      const headingRect = heading.getBoundingClientRect();
+      const top = Math.max(
+        viewport?.offsetTop ?? 0,
+        navigation?.getBoundingClientRect().bottom ?? 0,
+      );
+      const offset = Math.max(
+        0,
+        Math.min(top - headingRect.top, tableRect.bottom - headingRect.bottom),
+      );
+      if (offset !== previousOffset) {
+        table.style.setProperty("--tabelao-heading-offset", `${offset}px`);
+        previousOffset = offset;
+      }
+    };
+    const scheduleHeading = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateHeading);
+    };
+    const observer = new ResizeObserver(scheduleHeading);
+    observer.observe(table);
+    observer.observe(heading);
+    if (navigation) observer.observe(navigation);
+    if (shell) observer.observe(shell);
+    window.addEventListener("scroll", scheduleHeading, { capture: true, passive: true });
+    window.addEventListener("resize", scheduleHeading);
+    viewport?.addEventListener("resize", scheduleHeading);
+    viewport?.addEventListener("scroll", scheduleHeading);
+    scheduleHeading();
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("scroll", scheduleHeading, true);
+      window.removeEventListener("resize", scheduleHeading);
+      viewport?.removeEventListener("resize", scheduleHeading);
+      viewport?.removeEventListener("scroll", scheduleHeading);
+      table.style.removeProperty("--tabelao-heading-offset");
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -229,11 +299,14 @@ export function TabelaoClient() {
 
   const inventoryWithRegions = useMemo(
     () =>
-      inventory.map((item) => ({
-        ...item,
-        regionResolution:
-          regionResolutions.get(normalizeTabelaoPostalCode(item.postalCode) ?? "") ?? null,
-      })),
+      inventory.map((item) => {
+        const postalCode = normalizeTabelaoPostalCode(item.postalCode);
+        return {
+          ...item,
+          regionResolution: regionResolutions.get(postalCode ?? "") ?? null,
+          regionLookupPending: postalCode !== null && !regionResolutions.has(postalCode),
+        };
+      }),
     [inventory, regionResolutions],
   );
   const exclusiveInventory = useMemo(
@@ -503,7 +576,7 @@ export function TabelaoClient() {
         <p className="investor-stock-summary sr-only" aria-live="polite">
           {loadState === "ready"
             ? matchingInventory.length > 0
-              ? `${matchingInventory.length.toLocaleString("pt-BR")} ${matchingInventory.length === 1 ? "opção exclusiva agrupada" : "opções exclusivas agrupadas"} por empreendimento, em ordem alfabética, com valores ${priceOrder === "desc" ? "decrescentes" : "crescentes"} dentro de cada empreendimento.`
+              ? `${matchingInventory.length.toLocaleString("pt-BR")} ${matchingInventory.length === 1 ? "opção exclusiva agrupada" : "opções exclusivas agrupadas"} por região e empreendimento, em ordem alfabética, com valores ${priceOrder === "desc" ? "decrescentes" : "crescentes"} dentro de cada empreendimento.`
               : exclusiveInventory.length > 0
                 ? "Nenhuma opção encontrada com esses filtros."
                 : "Nenhuma unidade com dados válidos para comparar."
@@ -519,7 +592,11 @@ export function TabelaoClient() {
           tabIndex={0}
           data-tour="inventory"
         >
-          <table className="investor-stock-table" aria-rowcount={matchingInventory.length + 1}>
+          <table
+            ref={stockTable}
+            className="investor-stock-table"
+            aria-rowcount={matchingInventory.length + 1}
+          >
             <caption className="sr-only">
               Todas as combinações de planta e vagas por empreendimento. Menor valor = Valor Final
               Com Kit − (B.A. da Unidade + Folga de Tabela). Folga Volta ao Caixa, avaliação
@@ -653,7 +730,7 @@ export function TabelaoClient() {
                           rowSpan={regionSpan}
                           title={formatRegionTitle(item)}
                         >
-                          <span className="tabelao-stock-wrapped-text">{region}</span>
+                          <TabelaoRegionLabel region={region} />
                         </td>
                       ) : null}
                       {itemIndex === 0 ? (
