@@ -2364,6 +2364,15 @@ async function checkTabelaoTypographyFixture(page, viewports) {
       description: "HMP / 2Q / 1Q / AP / QA",
       displayedDescription: "HMP / 2Q / 1Q / AP / QA",
     },
+    {
+      raw: "TERREO 2Q C/ AP",
+      plant: "Térreo\n2Q C/ AP",
+      option: "Térreo 2Q C/ AP",
+      value: "terreo 2q c/ ap",
+      twoLines: true,
+      description: "R2V-Adaptavel",
+      displayedDescription: "R2V-adaptável",
+    },
   ];
   const items = cases.map((entry, index) => ({
     ...buildTabelaoCompactFixture()[0],
@@ -2387,7 +2396,7 @@ async function checkTabelaoTypographyFixture(page, viewports) {
   let passed = true;
   try {
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page.locator('tr[data-inventory-unit-id="qa-typography-5"]').waitFor();
+    await page.locator('tr[data-inventory-unit-id="qa-typography-6"]').waitFor();
     for (const viewport of viewports) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       const layout = await page.evaluate(readTabelaoCompactLayout);
@@ -2484,7 +2493,7 @@ async function checkTabelaoTypographyFixture(page, viewports) {
     }
     await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
     await page.waitForFunction(
-      () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 6,
+      () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 7,
     );
     process.stdout.write(`Tabelão QA: apresentação e valores originais dos filtros ${passed}\n`);
     return passed;

@@ -10,7 +10,7 @@ describe("apresentacao do Tabelao em portugues brasileiro", () => {
     ["TIPO 2Q", "Tipo 2Q"],
     ["TERREO 2Q", "T\u00e9rreo 2Q"],
     ["Terreo 1Q PCD", "T\u00e9rreo 1Q PCD"],
-    ["Tipo 2Q C/ AP", "Tipo 2Q C/AP"],
+    ["Tipo 2Q C/ AP", "Tipo 2Q C/ AP"],
     ["Tipo 2Q C/S", "Tipo 2Q C/S"],
     ["HIS-2 - ADAPTAVEL PCD/PNE", "HIS-2 - adapt\u00e1vel PCD/PNE"],
     ["UNIDADE ADAPT\u00c1VEL PARA PCD", "Unidade adapt\u00e1vel para PCD"],
@@ -33,13 +33,46 @@ describe("apresentacao do Tabelao em portugues brasileiro", () => {
 
   it.each([
     ["TIPO 2Q", "Tipo\n2Q"],
-    ["TERREO 2Q C/ AP", "T\u00e9rreo\n2Q C/AP"],
+    ["TERREO 2Q C/ AP", "T\u00e9rreo\n2Q C/ AP"],
     ["Tipo 1Q PCD", "Tipo\n1Q PCD"],
     ["VAGA", "Vaga"],
     ["Garden 3Q", "Garden 3Q"],
   ])("quebra a planta %s depois do tipo de pavimento", (input, expected) => {
     expect(formatTabelaoPlant(input)).toBe(expected);
     expect(formatTabelaoPlant(input).replace(/\s+/g, " ")).toBe(formatTabelaoDescription(input));
+  });
+
+  it.each([
+    ["Tipo 2Q S\u00e3o Miguel", "Tipo 2Q S\u00e3o Miguel"],
+    ["UNIDADE Brooklin Sky PCD", "Unidade Brooklin Sky PCD"],
+    ["PROGRAMA Minha Casa Minha Vida", "Programa Minha Casa Minha Vida"],
+    ["iTower RESIDENCIAL XYZ", "iTower residencial XYZ"],
+    ["UNIDADE NR FGTS IPHAN", "Unidade NR FGTS IPHAN"],
+    ["R2V-Adaptavel PCD", "R2V-adapt\u00e1vel PCD"],
+    ["r2-v-adaptavel PCD", "R2-V-adapt\u00e1vel PCD"],
+    ["TIPO 2Q HIS-2-PCD", "Tipo 2Q HIS-2-PCD"],
+    ["his-2-ADAPTAVEL pcd/pne", "HIS-2-adapt\u00e1vel PCD/PNE"],
+  ])("preserva nomes e codigos em %s", (input, expected) => {
+    expect(formatTabelaoDescription(input)).toBe(expected);
+  });
+
+  it.each([
+    ["c/ap", "C/AP"],
+    ["c/ ap", "C/ AP"],
+    ["c /ap", "C /AP"],
+    ["c / ap", "C / AP"],
+    ["c/  ap", "C/  AP"],
+    ["c/s", "C/S"],
+    ["c/ s", "C/ S"],
+  ])("preserva espacos ao redor da barra em %s", (input, expected) => {
+    expect(formatTabelaoDescription(input)).toBe(expected);
+  });
+
+  it("mantem distintos os rotulos de plantas com C/AP e C/ AP", () => {
+    const inputs = ["TIPO 2Q C/AP", "TIPO 2Q C/ AP"];
+    expect(inputs.map(formatTabelaoDescription)).toEqual(["Tipo 2Q C/AP", "Tipo 2Q C/ AP"]);
+    expect(new Set(inputs.map(formatTabelaoDescription)).size).toBe(2);
+    expect(inputs.map(formatTabelaoPlant)).toEqual(["Tipo\n2Q C/AP", "Tipo\n2Q C/ AP"]);
   });
 
   it("nao modifica os campos que identificam e agrupam o estoque", () => {

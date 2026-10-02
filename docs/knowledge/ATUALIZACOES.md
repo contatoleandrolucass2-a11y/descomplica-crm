@@ -17,10 +17,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   ao corrigir acentos ou a grafia de Terreo/Tipo/Adaptavel.
 - Trocar Incorporadora por Empresa apenas na pagina solicitada. Outras tabelas
   usam seus contratos existentes e nao pertencem a esta mudanca.
-- Nove cenarios Playwright locais, 25 testes do formatador, 17 contratos focados,
-  lint do codigo, tipos e build aprovados. Suite Windows: 1388 aprovados e seis
+- Nove cenarios Playwright locais, 42 testes do formatador, 17 contratos focados,
+  lint do codigo, tipos e build aprovados. Suite Windows: 1405 aprovados e seis
   falhas POSIX; oito testes Node aprovados. CI Linux, referencias autenticadas e
   publicacao pendentes. Auditoria: tabelao-tipografia-2026-10-02.
+- A revisao detectou siglas compostas e filtros C/AP versus C/ AP. Normalizar
+  somente vocabulario comum na apresentacao; preservar palavras desconhecidas
+  e separadores evita descaracterizar nomes ou tornar opcoes indistinguiveis.
 
 ## 2026-10-02: Ordem territorial e falhas transitorias do Tabelao
 

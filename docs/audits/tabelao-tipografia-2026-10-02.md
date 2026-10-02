@@ -31,7 +31,7 @@
 
 ## Evidencias
 
-- 25 testes unitarios do formatador e 17 contratos focados aprovados em Node
+- 42 testes unitarios do formatador e 17 contratos focados aprovados em Node
   24.19.0. Typecheck, build, lint do codigo e Prettier aprovados.
 - Playwright local com o componente/CSS reais e dados sinteticos: nove cenarios
   entre 375 e 1920px, incluindo escala de 150%. Todos os titulos em uma linha,
@@ -45,8 +45,16 @@
   timeouts locais. Nova execucao integral com dois workers: 1388 aprovados,
   quatro skips e somente seis falhas POSIX de modos/symlinks. Nenhum teste foi
   desativado ou teve criterio relaxado. Oito testes Node tambem aprovados.
+- Apos as regressoes da revisao: 1405 aprovados, quatro skips e as mesmas seis
+  falhas POSIX. Build, tipos, lint do codigo e nove cenarios Playwright repetidos
+  e aprovados com os dois casos corrigidos.
 - CI Linux completa, referencias autenticadas e publicacao pendentes. Sem
   consulta ao banco, migration, n8n ou dependencia nova.
+- Revisao independente identificou dois casos corrigidos antes da publicacao:
+  nomes/siglas ligados por hifen e rotulos distintos com C/AP ou C/ AP. O
+  formatador agora limita a caixa de frase ao vocabulario comum conhecido,
+  preservando palavras desconhecidas e espacos junto a barra. A fixture real
+  passou de seis para sete opcoes e verifica ambas as selecoes separadamente.
 
 ## Reversao
 

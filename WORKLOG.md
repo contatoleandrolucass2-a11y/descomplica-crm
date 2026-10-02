@@ -8,8 +8,8 @@
   espaco redistribuido para Regiao, Metragem, Vagas e Estoque.
 - Formatacao de descricoes somente na apresentacao, com acentos e siglas
   preservados. Nomes proprios, valores dos filtros e chaves comerciais intactos.
-- Nove cenarios Playwright, 25 testes do formatador, 17 contratos focados,
-  lint do codigo, tipos e build aprovados. Suite Windows: 1388 aprovados,
+- Nove cenarios Playwright, 42 testes do formatador, 17 contratos focados,
+  lint do codigo, tipos e build aprovados. Suite Windows: 1405 aprovados,
   quatro skips e seis falhas POSIX; oito testes Node aprovados. CI Linux e
   publicacao pendentes. Evidencias em docs/audits/tabelao-tipografia-2026-10-02.md.
 
