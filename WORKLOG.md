@@ -17,6 +17,10 @@
   Dourado escuro refinado; consultas de largura agora usam o container real
   de resultados, com rotulos completos, datas e acao dentro do resumo.
   Evidencias consolidadas em docs/audits/associativo-prata-2026-10-02.md.
+- CI 36967153629 aprovou validate e restore. Ajustado o roteiro concorrente
+  para exigir nova confirmacao de Ranking apos editar a renda, preservando
+  isolamento entre usuarios. Tabela de aprovacao mobile ganha rotulos completos
+  por regra; seis cenarios de orientacao passaram na preview anterior.
 
 ## 2026-10-02 - Fila fria das regioes do Tabelao
 

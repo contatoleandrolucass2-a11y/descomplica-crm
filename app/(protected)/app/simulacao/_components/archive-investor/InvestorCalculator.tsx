@@ -1519,16 +1519,16 @@ function AssociativeApprovalPanel({
         const failed = linearFailed || decreasingFailed;
         return <tr key={row.id} className={failed ? "failed" : row.limit != null ? "passed" : "pending"}>
           <th scope="row"><span className="investor-associative-approval-rule"><span>{row.label}</span><InvestorInfoHint label={row.label} title={`Entenda ${row.label}`} description={row.help} /></span></th>
-          <td className={linearFailed ? "failed-value" : undefined}>{percent.format(row.linearValue)}</td>
-          <td className={decreasingFailed ? "failed-value" : undefined}>{percent.format(row.decreasingValue)}</td>
-          <td>{row.limit == null ? "—" : `≤ ${percent.format(row.limit)}`}</td>
+          <td data-label="Linear" className={linearFailed ? "failed-value" : undefined}>{percent.format(row.linearValue)}</td>
+          <td data-label="Decrescente" className={decreasingFailed ? "failed-value" : undefined}>{percent.format(row.decreasingValue)}</td>
+          <td data-label="Limite">{row.limit == null ? "—" : `≤ ${percent.format(row.limit)}`}</td>
         </tr>;
       })}
         <tr className="investor-associative-approval-status-row">
           <th scope="row">Status da proposta</th>
-          <td><strong className={`investor-associative-flow-status ${linearStatus}`}>{linearStatus === "approved" ? "APROVADO" : linearStatus === "rejected" ? "REPROVADO" : "PENDENTE"}</strong></td>
-          <td><strong className={`investor-associative-flow-status ${decreasingStatus}`}>{decreasingStatus === "approved" ? "APROVADO" : decreasingStatus === "rejected" ? "REPROVADO" : "PENDENTE"}</strong></td>
-          <td>—</td>
+          <td data-label="Linear"><strong className={`investor-associative-flow-status ${linearStatus}`}>{linearStatus === "approved" ? "APROVADO" : linearStatus === "rejected" ? "REPROVADO" : "PENDENTE"}</strong></td>
+          <td data-label="Decrescente"><strong className={`investor-associative-flow-status ${decreasingStatus}`}>{decreasingStatus === "approved" ? "APROVADO" : decreasingStatus === "rejected" ? "REPROVADO" : "PENDENTE"}</strong></td>
+          <td data-label="Limite">—</td>
         </tr>
       </tbody>
     </table>

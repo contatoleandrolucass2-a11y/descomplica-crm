@@ -48,4 +48,13 @@ Dados de QA sinteticos, sem clientes, propostas reais ou estoque bruto nos artef
 - Repeticao encontrou 4,08:1 no simbolo do tema Medio, corrigido com #965A0A.
   No celular, o resumo usava uma consulta de container sem ancestral nomeado;
   results-stack agora define esse container, habilitando o layout responsivo.
-  Validacao visual desse refinamento ainda pendente.
+  Seis cenarios de orientacao aprovados na preview sintetica 64303: Claro,
+  Medio e Escuro em 1440px e 375px. Inspecao das capturas ainda encontrou
+  sobreposicao na tabela de aprovacao mobile; cada regra agora ocupa uma linha
+  inteira, seguida de tres resultados identificados, sem comprimir textos.
+- CI 36967153629: validate e isolated-restore aprovados. Release E2E encontrou
+  roteiro desatualizado em proposalAfterConcurrentEdits: renda invalida a
+  confirmacao do Ranking, mas o teste tentava abrir a proposta sem reconfirma-la.
+  O roteiro agora exige Ranking vazio e proposta desabilitada antes de confirmar
+  novamente; as assercoes de isolamento de valores e unidades foram preservadas.
+  Nova execucao integral e referencias visuais permanecem pendentes.

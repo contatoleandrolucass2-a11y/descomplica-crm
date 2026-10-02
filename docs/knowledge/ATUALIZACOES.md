@@ -17,6 +17,8 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   e desligar em prefers-reduced-motion. Nao animar o painel inteiro.
 - D de marca e cabecalho compartilhados afetam capturas de outras tabelas;
   revisar o escopo completo antes de promover referencias visuais.
+- Alterar renda invalida confirmacoes dependentes, inclusive Ranking. QA de
+  edicao precisa confirmar novamente, exigindo proposta bloqueada antes disso.
 - Testes, CI e publicacao pendentes; fonte de evidencias:
   docs/audits/associativo-prata-2026-10-02.md.
 
