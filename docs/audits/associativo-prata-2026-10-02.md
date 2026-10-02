@@ -1,5 +1,7 @@
 # Associativo: prata e perfil sequencial
 
+Status final: validado e publicado em 02/10/2026. Registro cronologico abaixo.
+
 ## Escopo
 
 Pedido de 02/10/2026, dezoito capturas. Branch
@@ -90,3 +92,31 @@ Dados de QA sinteticos, sem clientes, propostas reais ou estoque bruto nos artef
   149 referencias sao preservadas por hash; tolerancia 16 e limiar 1% intactos.
 - Artefato de origem: 11211741666. Nova CI sobre as referencias revisadas e
   publicacao continuam pendentes; nenhuma versao foi promovida nesta etapa.
+
+## Publicacao verificada
+
+- PR #129 integrado em 29a487b3ec1d81cf18cef382e48ca067529cbd9a. CI do PR
+  36971256999 e CI main 36973571026: todos os gates aplicaveis aprovados.
+- A main avancou durante a espera, incluindo o PR independente da calculadora
+  de documentacao. A primeira preparacao recusou a revisao antiga antes de
+  promover runtime. Reconciliada a main atual, sem reverter trabalho paralelo.
+- Publicado 727c8583ab46a51f81fddb7e0c0ec01b4803a531, que inclui integralmente
+  o Associativo. CI 36998281910: validate, release-gates, isolated-restore e
+  promotable-image aprovados. Versao anterior: 6f2c2aa863a023a32ebffb2c40c228db503f10e6.
+- Imagem imutavel da CI, sem rebuild na VPS. SHA-256 do arquivo:
+  0225f4544a4748e3dda1f2ffe2ee4c7e3bef0d7b24af489dd2056a99f0b9cbcb.
+  Config digest: 6ea8d7707f554662b9ed4a02591896162244d3e05527bd8bdf63a39ae74d7d76.
+  Manifest digest local: 3455e0fab74f7a82427f93ac7633c4cc94554dbaab49fa36c8d2fe994f780951.
+  Equivalencia comprovada para 11 camadas e os dois perfis de runtime.
+- Backup privado: /var/backups/descomplica-crm/releases/
+  727c8583ab46a51f81fddb7e0c0ec01b4803a531.oj3u1M. Checksums de Nginx,
+  ambiente e referencia da imagem anterior conferidos; nenhum segredo exposto.
+  CAS e rollback preparados. Nginx permaneceu inalterado e validado.
+- Health local/publico retornou a revisao esperada. Smoke observacional:
+  12 requests, concorrencia quatro, zero erros; health 200, inventory e
+  snapshot 401 anonimos, todos no-store. Nao e prova de capacidade de producao.
+- Conferencia autenticada no Chrome: marca carregada, cabecalho de 48px,
+  fundo rgb(0,28,84); renda libera somente modalidade, confirmacao libera
+  primeiro imovel. Brilho de 3s migra para a etapa atual e cessa nas concluidas.
+  Valor de teste nao persistido e pagina recarregada ao finalizar.
+- O fechamento e somente documental: nao exige nova troca de imagem.

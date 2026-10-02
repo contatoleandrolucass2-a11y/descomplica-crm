@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-02 - Publicacao do Associativo prata
+
+- PR #129 validado nas CIs 36971256999/36973571026. Main reconciliada com
+  trabalho paralelo; promovida 727c8583ab46a51f81fddb7e0c0ec01b4803a531 apos
+  todos os gates de 36998281910, substituindo 6f2c2aa com CAS/backup/rollback.
+- Imagem aprovada da CI, 11 camadas e dois perfis conferidos, sem rebuild.
+  Backup verificado; Nginx intacto; smoke publico 12/12, acesso anonimo negado.
+- Jornada autenticada confirmou marca, paleta e sequencia 1 -> 2 -> 3 com
+  brilho de 3s apenas na etapa atual. Nenhuma proposta real enviada.
+- Evidencias: docs/audits/associativo-prata-2026-10-02.md.
+  Este fechamento documental nao demanda reinicio da aplicacao.
+
 ## 2026-10-02 - Validacao da guia de documentacao
 
 - Integracao da main 29a487b preserva identidade prata, fluxo do Associativo,
