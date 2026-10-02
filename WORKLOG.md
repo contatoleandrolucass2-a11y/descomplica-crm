@@ -21,6 +21,23 @@
   referencia por rota, mantendo proveniencia. Nova CI conjunta obrigatoria.
 - Publicacao pendente; fechamento e identidade da release no PR #123.
 
+## 2026-10-01 - Jornada dourada do Associativo
+
+- Destaque metalizado somente na pergunta atual e na proxima linha financeira.
+- Corrige borda animada que ultrapassava a linha: contorno interno sem escala.
+- Padroniza largura/altura dos campos, com folga para o valor da renda.
+- Separa Linear do bloco decrescente, destaca remuneracao com simbolo dourado
+  e adiciona hover sem alterar a geometria do layout; respeita movimento reduzido.
+- Renomeia o indicador e suas ajudas para % Maximo da renda mensal, sem
+  modificar formulas, limites, fontes ou regras de enquadramento automatico.
+- Referencias ranking e calcular-documentacao consultadas somente para leitura.
+- Lint, tipos, build e jornada visual 6/6 aprovados. Suite Windows: 1008 pass,
+  1 skip, seis falhas POSIX e um timeout aprovado em repeticao isolada.
+- CI Linux e publicacao pendentes; evidencia em
+  docs/audits/associativo-guia-dourado-2026-10-01.md.
+- Revisao coarse remove a translacao legada do botao de remuneracao; a escala
+  continua restrita a dispositivos com hover e sem movimento reduzido.
+
 ## 2026-10-01 - Layout e manual do Associativo
 
 - Escopo: altura inicial, selecao dourada metalizada, guia intrinseco,

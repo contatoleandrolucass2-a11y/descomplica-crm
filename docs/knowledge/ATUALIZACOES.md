@@ -26,6 +26,28 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   sobrescrever o Associativo. Catalogo conciliado por rota com proveniencia;
   capturas preservadas. Nova CI conjunta/publicacao pendentes, fechamento no PR #123.
 
+## 2026-10-01: Proxima acao dourada no Associativo
+
+- Status: validado_local_com_limites_windows; branch codex/associativo-guia-dourado.
+- Fonte: nove capturas e pedido do usuario; referencias publicas somente leitura,
+  InvestorCalculator.tsx, investor-archive.css e auditoria guia-dourado.
+- Dourado indica etapa atual, sem mudar as paletas azuis. Nao destacar a linha
+  Financiamento enquanto o Perfil estiver incompleto: usar estagio qualification.
+- Borda pulsante com scale ultrapassava o ledger. Usar pseudo-elemento interno
+  inset 0, border-box, sem transform; manter popovers e foco acessiveis.
+- Quantidade precisa reservar a mesma coluna de 26px do prefixo R$; igualar
+  apenas wrappers nao igualava a largura das caixas de edicao.
+- % Maximo da renda mensal e mudanca de rotulo, nao de regra. Manter indicadores
+  de maior mensal e maior mensal + Evolucao de Obra distintos e atualizar ajudas.
+- Estilos legados de background-clip/text-fill podem manter o $ azul mesmo com
+  color dourado; verificar a pintura efetiva, nao apenas computed color.
+- Inputs iguais no desktop nao devem diminuir alvos mobile: manter 44px.
+- `hasTouch` isolado nao comprovou ponteiro coarse neste host. Usar contexto
+  mobile real e conferir media query; neutralizar transform legado fora do hover.
+- Jornada visual 6/6, lint/tipos/build aprovados. Suite Windows 1008 pass;
+  seis falhas POSIX e timeout Obsidian aprovado em repeticao. CI/publicacao
+  pendentes; nenhuma alteracao nos sites de referencia.
+
 ## 2026-10-01: Layout inicial e FAQ do Associativo
 
 - Status: validado; runtime f1d71da81a21cf139acc26b95a6cacc218b79325.

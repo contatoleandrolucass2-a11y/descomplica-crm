@@ -3,6 +3,7 @@ import { pathToFileURL } from "node:url";
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 import sharp from "sharp";
+import { associativeGuidanceWidths, checkAssociativeGuidance } from "./associative-guidance.mjs";
 import {
   checkAssociativeClosingAlignment,
   checkAssociativeInitialViewport,
@@ -436,6 +437,12 @@ export async function checkArchiveNavigation(
   } = {},
 ) {
   assert.ok(["header-only", "header-and-content"].includes(scope));
+  assert.ok(
+    associativeGuidanceWidths.every((width) =>
+      archiveNavigationViewports.some((viewport) => viewport.width === width),
+    ),
+    "Guidance widths must be exercised by the archive navigation matrix",
+  );
   const result = { contract: "archive-navigation-v1", scope, checks: [], passed: false };
   const runtimeErrors = [];
   const onError = () => runtimeErrors.push(true);
@@ -595,6 +602,11 @@ export async function checkArchiveNavigation(
               await themes.getByRole("button", { name: label, exact: true }).click();
               await waitForArchiveHeaderTheme(page, theme);
               await checkAssociativeSelectedGold(page);
+              if (associativeGuidanceWidths.includes(viewport.width)) {
+                stage = `associative-guidance:${theme}`;
+                check.associativeGuidance ??= {};
+                check.associativeGuidance[theme] = await checkAssociativeGuidance(page);
+              }
             }
           }
           stage = "header-surface-themes";

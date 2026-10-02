@@ -994,13 +994,13 @@ function AssociativeQualificationPanel({
       <strong aria-live="polite">{completed}/3 concluídas</strong>
     </header>
     <div className="investor-associative-qualification-grid">
-      <div className={`investor-associative-question ${incomeReady ? "complete" : "current"}`}>
+      <div className={`investor-associative-question ${incomeReady ? "complete" : "current"}`} aria-current={!incomeReady ? "step" : undefined}>
         <div className="investor-associative-question-heading"><span><b>1</b>Renda Familiar</span><InvestorInfoHint label="Renda Familiar" {...ASSOCIATIVE_PROFILE_HELP.income} /></div>
         <div className="investor-associative-question-money"><span aria-hidden="true">R$</span><MoneyInput inputRef={incomeInputRef} label="Renda Familiar" describedBy="investor-associative-income-status" value={income} onChange={onIncomeChange} /></div>
         <small id="investor-associative-income-status" role="status" aria-live="polite">{incomeReady ? `Enquadramento municipal: ${incomeBand} · ${incomeBandPropertyLimit ? `imóvel até ${money.format(incomeBandPropertyLimit)}` : "sem teto HIS/HMP"}` : "Informe um valor maior que zero"}</small>
       </div>
 
-      <fieldset className={`investor-associative-question${!incomeReady ? " locked" : modalityReady ? " complete" : " current"}`}>
+      <fieldset className={`investor-associative-question${!incomeReady ? " locked" : modalityReady ? " complete" : " current"}`} aria-current={incomeReady && !modalityReady ? "step" : undefined}>
         <legend className="sr-only">Modalidade do Financiamento</legend>
         <div className="investor-associative-question-heading"><span><b>2</b>Modalidade do Financiamento</span><InvestorInfoHint label="Modalidade do Financiamento" {...ASSOCIATIVE_PROFILE_HELP.modality} /></div>
         <div className="investor-associative-choice-row">
@@ -1028,7 +1028,7 @@ function AssociativeQualificationPanel({
         <small id="investor-associative-modality-status" className="investor-associative-modality-result" role="status" aria-live="polite" aria-atomic="true">{blockedMcmvAttempt ? `MCMV indisponível. ${associativeModalityMessage(modalityDecision)}` : associativeModalityMessage(modalityDecision)} <span>Enquadramento preliminar.</span></small>
       </fieldset>
 
-      <fieldset className={`investor-associative-question${!modalityReady ? " locked" : firstPropertyReady ? " complete" : " current"}`}>
+      <fieldset className={`investor-associative-question${!modalityReady ? " locked" : firstPropertyReady ? " complete" : " current"}`} aria-current={modalityReady && !firstPropertyReady ? "step" : undefined}>
         <legend className="sr-only">Primeiro imóvel?</legend>
         <div className="investor-associative-question-heading"><span><b>3</b>Primeiro imóvel?</span><InvestorInfoHint label="Primeiro imóvel" {...ASSOCIATIVE_PROFILE_HELP.firstProperty} /></div>
         <div className="investor-associative-choice-row investor-associative-yes-no">
@@ -1392,7 +1392,7 @@ function AssociativeApprovalPanel({
     },
     {
       id: "annual-income",
-      label: "% Máximo da renda por anual",
+      label: "% Máximo da renda mensal",
       linearValue: approval.linearMaximumIncomeRate,
       decreasingValue: approval.decreasingMaximumIncomeRate,
       limit: tier?.annualIncomeLimitRate,
@@ -2896,21 +2896,23 @@ export function InvestorCalculator({
     && !associativeInstallmentsRejected;
   const associativeRankingUnlocked = annualMode && associativeInstallmentsReady;
   const associativeApprovalDetailsUnlocked = associativeRankingUnlocked && Boolean(associativeApprovalTier);
-  const associativeGuidanceStage = !associativeFinancingValueReady
-    ? "financing"
-    : !associativeSubsidyComplete
-      ? "subsidy"
-      : !associativeFgtsComplete
-        ? "fgts"
-        : !associativeHousingCheckComplete
-          ? "housingCheck"
-          : !associativeEntryReady
-            ? "entry"
-            : !associativeInstallmentsReady
-              ? "installments"
-              : !associativeApprovalTier
-                ? "ranking"
-                : "complete";
+  const associativeGuidanceStage = associativeQualificationLocked
+    ? "qualification"
+    : !associativeFinancingValueReady
+      ? "financing"
+      : !associativeSubsidyComplete
+        ? "subsidy"
+        : !associativeFgtsComplete
+          ? "fgts"
+          : !associativeHousingCheckComplete
+            ? "housingCheck"
+            : !associativeEntryReady
+              ? "entry"
+              : !associativeInstallmentsReady
+                ? "installments"
+                : !associativeApprovalTier
+                  ? "ranking"
+                  : "complete";
   const associativeCalculatedProposalLocked = annualMode && (
     associativeQualificationLocked || !associativeFinancingValueReady || !associativeEntryReady || !associativeInstallmentsReady
   );
@@ -4560,8 +4562,8 @@ export function InvestorCalculator({
                         `A entrega separa as parcelas antes e depois da obra. Conta atual: ${result.custom.preInstallments} antes + ${result.custom.postInstallments} depois = ${result.custom.desiredInstallments} parcelas.`,
                         `Status atual: ${associativeInstallmentsRejected ? !result.context.installmentsInteger ? "informe um número inteiro" : associativeBlockDistributionError || `use de 1 a ${result.context.maxInstallments}` : "quantidade dentro da regra"}.`,
                       )}
-                      calculation={<><div className="investor-direct-editable-value investor-associative-installment-control"><input aria-label="Quantidade de parcelas" name="quantidade-de-parcelas" autoComplete="off" aria-describedby="investor-installment-guidance investor-associative-installment-status" aria-invalid={associativeInstallmentsUnlocked && associativeInstallmentsRejected || undefined} type="number" min="1" max={result.context.maxInstallments || 1} step="1" value={installments} placeholder="0" disabled={!associativeInstallmentsUnlocked || result.context.maxInstallments <= 0} onChange={(event) => setInstallments(event.target.value)} /></div><span className="sr-only" id="investor-associative-installment-status" role={associativeInstallmentsUnlocked && associativeInstallmentsRejected ? "alert" : "status"} aria-live="polite" aria-atomic="true">{associativeInstallmentsRejected ? !result.context.installmentsInteger ? "Informe um número inteiro" : associativeBlockDistributionError || `Use de 1 a ${result.context.maxInstallments} parcelas` : `${result.custom.preInstallments} parcelas pré-obra mais ${result.custom.postInstallments} parcelas pós-obra totalizam ${result.custom.desiredInstallments}`}</span></>}
-                      invalid={associativeInstallmentsUnlocked && associativeInstallmentsRejected}
+                      calculation={<><div className="investor-direct-editable-value investor-associative-installment-control"><input aria-label="Quantidade de parcelas" name="quantidade-de-parcelas" autoComplete="off" aria-describedby="investor-installment-guidance investor-associative-installment-status" aria-invalid={associativeInstallmentsUnlocked && installments !== "" && associativeInstallmentsRejected || undefined} type="number" min="1" max={result.context.maxInstallments || 1} step="1" value={installments} placeholder="0" disabled={!associativeInstallmentsUnlocked || result.context.maxInstallments <= 0} onChange={(event) => setInstallments(event.target.value)} /></div><span className="sr-only" id="investor-associative-installment-status" role={associativeInstallmentsUnlocked && installments !== "" && associativeInstallmentsRejected ? "alert" : "status"} aria-live="polite" aria-atomic="true">{installments === "" ? "Informe a quantidade de parcelas" : associativeInstallmentsRejected ? !result.context.installmentsInteger ? "Informe um número inteiro" : associativeBlockDistributionError || `Use de 1 a ${result.context.maxInstallments} parcelas` : `${result.custom.preInstallments} parcelas pré-obra mais ${result.custom.postInstallments} parcelas pós-obra totalizam ${result.custom.desiredInstallments}`}</span></>}
+                      invalid={associativeInstallmentsUnlocked && installments !== "" && associativeInstallmentsRejected}
                       disabled={!associativeInstallmentsUnlocked}
                       sideGuidance={associativeGuidanceStage === "installments" ? <AssociativeStepGuide
                         title="Informe a Qtd. de parcelas"
@@ -4749,6 +4751,7 @@ export function InvestorCalculator({
               type="button"
               className="investor-associative-commission-launcher"
               aria-label="Abrir remuneração comercial"
+              title="Abrir remuneração comercial"
               aria-haspopup="dialog"
               aria-controls="investor-associative-commission-dialog"
               onClick={() => associativeCommissionDialog.current?.showModal()}
