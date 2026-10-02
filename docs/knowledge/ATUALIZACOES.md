@@ -4,6 +4,21 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-02: Paleta do Tabelao como referencia do Associativo
+
+- Status: pendente_validacao; branch codex/associativo-paleta-tabelao.
+- Fonte: novo pedido do usuario e leitura da pagina /app/simulacao/tabelao.
+- Referencia escura confirmada no DOM: fundo #061f35, painel #0a2b47,
+  cabecalho de secao #0e4163 e campos #071a31. Tabelao somente leitura.
+- A nova direcao substitui o azul quase preto anterior. Remover overrides
+  exclusivos para herdar os tokens comuns evita duplicar a paleta; nao alterar
+  tokens compartilhados nem seletores do Tabelao para atender o Associativo.
+- Dourado e brilho de 3s continuam exclusivos das selecoes/proximas acoes.
+- 28 testes focados, lint, tipos, build e 8 testes Node aprovados. Navegador:
+  6/6 jornadas, 3/3 comparacoes de paleta e revisao desktop/celular aprovadas.
+- Suite Windows: 1410 aprovados, 1 ignorado e 6 falhas POSIX conhecidas.
+  CI Linux integral e publicacao pendentes; nao reduzir gates.
+
 ## 2026-10-02: Tipografia e caixa de frase no Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-tipografia-ptbr, base d7c06b6.
