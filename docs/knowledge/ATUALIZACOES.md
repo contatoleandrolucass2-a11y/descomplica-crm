@@ -40,8 +40,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-02: Prata e confirmacao explicita no Associativo
 
-- Status: validado e publicado. PR #129; CIs 36971256999, 36973571026 e
-  36998281910. Runtime 727c8583ab46a51f81fddb7e0c0ec01b4803a531 inclui o
+- Status: validado e publicado. PR #129; CIs 36971256999, 36973571026 e 36998281910. Runtime 727c8583ab46a51f81fddb7e0c0ec01b4803a531 inclui o
   Associativo e a integracao paralela, sem reverter trabalho de outro escopo.
 - Gate de origem recusou preparar revisao anterior quando a main avancou.
   Reconciliar tip, CI e versao viva antes de CAS; nao contornar a verificacao.
@@ -61,7 +60,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   edicao precisa confirmar novamente, exigindo proposta bloqueada antes disso.
 - Tabela de aprovacao conserva alturas fixas legadas com !important: layout
   mobile por regra precisa liberar alturas de tr/th/td, nao apenas quebrar texto.
-- Testes, CI e publicacao pendentes; fonte de evidencias:
+- Evidencias completas da implementacao e publicacao:
   docs/audits/associativo-prata-2026-10-02.md.
 - CI 36968663861: funcional completo aprovado; 44 referencias alteradas
   somente nas quatro tabelas, revisadas por viewport e tema. Promocao canonica
