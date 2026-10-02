@@ -7,8 +7,8 @@ import {
   assertAssociativeShimmer,
   assertAssociativeSummaryGaps,
   assertAssociativeWorkspaceGaps,
-  hasGuidanceSilverSurface,
-  isGuidanceSilver,
+  hasGuidanceGoldSurface,
+  isGuidanceGoldSurfaceColor,
   isGuidanceGoldText,
 } from "../scripts/qa/associative-guidance.mjs";
 
@@ -28,34 +28,34 @@ describe("Associativo guidance regression gates", () => {
       expect(() => assertAssociativeWorkspaceGaps({ ...valid, ...patch })).toThrow();
     }
   });
-  it("accepts silver and rejects gold, blue, green, dark and transparent surfaces", () => {
-    expect(isGuidanceSilver([205, 213, 224, 255])).toBe(true);
+  it("accepts gold and rejects silver, blue, green, dark and transparent surfaces", () => {
+    expect(isGuidanceGoldSurfaceColor([233, 189, 84, 255])).toBe(true);
     for (const color of [
-      [233, 189, 84, 255],
+      [205, 213, 224, 255],
       [102, 228, 236, 255],
       [25, 180, 100, 255],
       [80, 85, 90, 255],
-      [205, 213, 224, 0],
+      [233, 189, 84, 0],
     ]) {
-      expect(isGuidanceSilver(color)).toBe(false);
+      expect(isGuidanceGoldSurfaceColor(color)).toBe(false);
     }
   });
 
-  it("requires a metallic gradient, not flat gray or the previous gold", () => {
-    const silver = {
-      background: [205, 213, 224, 255],
+  it("requires a metallic gradient, not flat gold or the previous silver", () => {
+    const gold = {
+      background: [233, 189, 84, 255],
       gradient: [
-        [248, 250, 252, 255],
-        [164, 175, 190, 255],
+        [248, 226, 160, 255],
+        [207, 158, 45, 255],
       ],
     };
-    expect(hasGuidanceSilverSurface(silver)).toBe(true);
-    expect(hasGuidanceSilverSurface({ ...silver, gradient: [] })).toBe(false);
+    expect(hasGuidanceGoldSurface(gold)).toBe(true);
+    expect(hasGuidanceGoldSurface({ ...gold, gradient: [] })).toBe(false);
+    expect(hasGuidanceGoldSurface({ ...gold, gradient: [gold.background, gold.background] })).toBe(
+      false,
+    );
     expect(
-      hasGuidanceSilverSurface({ ...silver, gradient: [silver.background, silver.background] }),
-    ).toBe(false);
-    expect(
-      hasGuidanceSilverSurface({ ...silver, gradient: [...silver.gradient, [233, 189, 84, 255]] }),
+      hasGuidanceGoldSurface({ ...gold, gradient: [...gold.gradient, [205, 213, 224, 255]] }),
     ).toBe(false);
   });
 

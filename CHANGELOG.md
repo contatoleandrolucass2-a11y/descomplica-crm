@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-02 - Associativo em azul noturno e dourado metalico
+
+- Escurece o tema escuro para azul proximo do preto, com superficies distintas.
+- Substitui os destaques prateados por dourado metalico, preservando o brilho
+  de tres segundos enquanto a acao estiver pendente e a acessibilidade.
+- Sem alteracoes nos calculos, nas etapas ou nas outras tabelas.
+- Duas referencias visuais escuras revisadas; outras 191 capturas preservadas.
+
 ## 2026-10-02 - Regioes ordenadas no Tabelao
 
 - Sete referencias visuais revisadas para a nova geometria e rotulo territorial;

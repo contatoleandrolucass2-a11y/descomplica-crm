@@ -128,6 +128,44 @@ describe("archive theme color contract", () => {
     expect(header("dark")["--header-bg"]).toBe("#071a31");
   });
 
+  it("uses near-black navy only for Associativo dark surfaces with readable text", () => {
+    const colors = {
+      ...content("dark"),
+      ...declarations(
+        "investor-archive.css",
+        ':root[data-theme="dark"] .investor-page-shell.investor-associative-table-page',
+      ),
+    };
+    expect(colors["--inv-color-page"]).toBe("#040d19");
+    expect(colors["--inv-color-panel"]).toBe("#091a2c");
+    for (const background of ["page", "panel", "panel-muted", "panel-strong", "input"])
+      for (const foreground of [
+        "text",
+        "muted",
+        "accent",
+        "alternate",
+        "success",
+        "danger",
+        "warning",
+      ])
+        expect(
+          contrast(colors[`--inv-color-${foreground}`]!, colors[`--inv-color-${background}`]!),
+          `Associativo dark: ${foreground} on ${background}`,
+        ).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("keeps metallic gold and its darkest stop readable for all guidance states", () => {
+    const colors = declarations(
+      "investor-archive.css",
+      ".investor-page-shell.investor-associative-table-page",
+    );
+    expect(colors["--associative-gold"]).toBe("#e9bd54");
+    const stops = colors["--associative-gold-metal"]!.match(/#[\da-f]{6}/gi)!;
+    expect(stops.length).toBeGreaterThanOrEqual(3);
+    for (const background of [...stops, colors["--associative-gold-input"]!])
+      expect(contrast(colors["--associative-gold-ink"]!, background)).toBeGreaterThanOrEqual(4.5);
+  });
+
   for (const theme of ["light", "balanced", "dark"]) {
     it(`${theme}: preserves the white symbol contrast treatment without recoloring it`, () => {
       expect(header(theme)["--header-brand-shadow"]).toBe(

@@ -7,7 +7,7 @@ import {
   checkAssociativeCommissionGeometry,
   checkAssociativeSummaryGeometry,
   checkAssociativeWorkspaceGaps,
-  checkAssociativeSelectedSilverPaint,
+  checkAssociativeSelectedGoldPaint,
 } from "./associative-compact-layout.mjs";
 export {
   assertAssociativeCommissionGeometry,
@@ -21,20 +21,15 @@ const activeRow = ".investor-associative-flow-panel li.investor-key-field.is-act
 const timeout = 5_000;
 export const associativeGuidanceWidths = [375, 1440];
 
-export function isGuidanceSilver([r, g, b, alpha = 255]) {
-  return (
-    alpha >= 220 &&
-    Math.min(r, g, b) >= 140 &&
-    Math.max(r, g, b) - Math.min(r, g, b) <= 35 &&
-    b >= r - 5
-  );
+export function isGuidanceGoldSurfaceColor([r, g, b, alpha = 255]) {
+  return alpha >= 220 && r >= 200 && g >= 150 && r > g && g - b >= 35 && r - g <= 80;
 }
 
-export function hasGuidanceSilverSurface(paint) {
+export function hasGuidanceGoldSurface(paint) {
   const brightness = paint.gradient.map((color) => (color[0] + color[1] + color[2]) / 3);
   return (
     paint.gradient.length >= 2 &&
-    paint.gradient.every(isGuidanceSilver) &&
+    paint.gradient.every(isGuidanceGoldSurfaceColor) &&
     Math.max(...brightness) - Math.min(...brightness) >= 20
   );
 }
@@ -186,22 +181,22 @@ async function checkCurrentQuestion(page, index) {
     await expect(cards.nth(index)).toHaveAttribute("aria-current", "step");
     assert.ok(
       (await inspectPaint(cards.nth(index))).leftBorderWidth >= 4,
-      "Current card must reinforce its silver edge with a >=4px border",
+      "Current card must reinforce its gold edge with a >=4px border",
     );
     await expect(page.locator(`${root} ${activeRow}`)).toHaveCount(0);
     await expect
-      .poll(async () => hasGuidanceSilverSurface(await inspectPaint(cards.nth(index))), {
+      .poll(async () => hasGuidanceGoldSurface(await inspectPaint(cards.nth(index))), {
         timeout,
-        message: `Current qualification card ${index + 1} must have a metallic silver surface`,
+        message: `Current qualification card ${index + 1} must have a metallic gold surface`,
       })
       .toBe(true);
   }
   for (let i = 0; i < 3; i += 1) {
     if (i === index) continue;
     await expect
-      .poll(async () => hasGuidanceSilverSurface(await inspectPaint(cards.nth(i))), {
+      .poll(async () => hasGuidanceGoldSurface(await inspectPaint(cards.nth(i))), {
         timeout,
-        message: `Inactive qualification card ${i + 1} must not remain silver`,
+        message: `Inactive qualification card ${i + 1} must not remain gold`,
       })
       .toBe(false);
   }
@@ -228,7 +223,7 @@ async function checkRequiredRow(page, label) {
         paint = await inspectPaint(rows);
         return (
           paint.contained &&
-          hasGuidanceSilverSurface(paint) &&
+          hasGuidanceGoldSurface(paint) &&
           paint.attentionBorder.length === 4 &&
           paint.attentionBorder.every(
             (border) => border.width >= 2 && !["none", "hidden"].includes(border.style),
@@ -237,7 +232,7 @@ async function checkRequiredRow(page, label) {
       },
       {
         timeout,
-        message: `${label}: next required row must be silver without an external outline or shadow`,
+        message: `${label}: next required row must be gold without an external outline or shadow`,
       },
     )
     .toBe(true);
@@ -256,7 +251,7 @@ async function checkGuidanceContrast(page) {
           measurements.every((item) => item.minimumContrast !== null && item.minimumContrast >= 4.5)
         );
       },
-      { timeout, message: "Silver guidance text and inputs require at least 4.5:1 contrast" },
+      { timeout, message: "Gold guidance text and inputs require at least 4.5:1 contrast" },
     )
     .toBe(true);
 }
@@ -467,7 +462,7 @@ async function checkReducedGuidanceMotion(page, locator) {
 // Call only on an isolated synthetic page, after initial viewport checks and unit selection.
 export async function checkAssociativeGuidance(page, { onState = async () => {} } = {}) {
   const result = {
-    contract: "associative-guidance-silver-sequential-v2",
+    contract: "associative-guidance-gold-sequential-v3",
     questions: [],
     rows: [],
     passed: false,
@@ -500,7 +495,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     await expect(qualification.locator('input[type="radio"]:checked')).toHaveCount(0);
     await qualification.focus();
     await page.mouse.move(0, 0);
-    await checkAssociativeSelectedSilverPaint(page);
+    await checkAssociativeSelectedGoldPaint(page);
     await onState("profile");
     result.questions.push(await checkCurrentQuestion(page, 0));
     result.currentCardMotion = await checkReducedGuidanceMotion(
@@ -826,7 +821,7 @@ export async function runAssociativeGuidancePreview(
             for (const [state, contrast] of Object.entries(check.contrast)) {
               assert.ok(
                 contrast.length > 0 && contrast.every((item) => item.minimumContrast >= 4.5),
-                `${state}: silver guidance text requires at least 4.5:1 contrast`,
+                `${state}: gold guidance text requires at least 4.5:1 contrast`,
               );
             }
             check.passed = true;
