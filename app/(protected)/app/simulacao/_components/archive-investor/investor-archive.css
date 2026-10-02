@@ -256,19 +256,288 @@
   background: var(--inv-color-panel);
 }
 
-.investor-page-shell.investor-associative-table-page .investor-associative-question {
+.investor-page-shell.investor-associative-table-page .investor-associative-question,
+.investor-page-shell.investor-associative-table-page .investor-associative-question:hover {
   border-left-width: 2px;
+  transform: none;
+  filter: none;
+}
+
+/* Gold denotes the next action, independently of the three blue themes. */
+.investor-page-shell.investor-associative-table-page {
+  --associative-gold: #e9bd54;
+  --associative-gold-edge: #946b17;
+  --associative-gold-ink: #302107;
+  --associative-gold-metal: linear-gradient(135deg, #fae9ac 0%, #e9bd54 42%, #d8a735 53%, #f2d47c 76%, #fae9ac 100%);
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-question.current {
-  border-left-width: 2px !important;
+  color: var(--associative-gold-ink);
+  border-color: var(--associative-gold-edge) !important;
+  border-left-width: 4px !important;
   border-radius: 6px !important;
-  background: var(--inv-color-panel-muted) !important;
-  box-shadow: none !important;
+  background: var(--associative-gold-metal) !important;
+  box-shadow: inset 0 1px #fff3cc, inset 0 -1px #bb8928 !important;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-question.current::after {
+  display: block;
+  inset: 1px;
+  border-radius: 4px;
+  background-image: linear-gradient(105deg, transparent 35%, #fff6d7a6 48%, transparent 61%);
+  animation: investor-guided-card-shine 2.6s ease-in-out 2;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current :is(.investor-associative-question-heading, .investor-associative-question-heading > span, .investor-associative-question-heading b, .investor-info-trigger, .investor-associative-question-money > span),
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current > small,
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current > small span {
+  color: var(--associative-gold-ink) !important;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current .investor-associative-question-heading b {
+  background: #fff3cc;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question-money {
+  column-gap: 10px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question-money input {
+  padding-inline: 10px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current :is(.investor-associative-question-money, .investor-associative-choice-row > button:not([aria-disabled="true"]), .investor-associative-choice-row > label) {
+  color: var(--associative-gold-ink);
+  border: 1px solid var(--associative-gold-edge);
+  border-radius: 5px;
+  background: #fff8e1;
+  box-shadow: inset 0 1px #fff;
+  animation: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current input,
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current input::placeholder {
+  color: var(--associative-gold-ink) !important;
+  opacity: 1;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current input {
+  background: #fff8e1 !important;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-question.current :is(.investor-associative-question-money:focus-within, button:focus-visible, label:has(input:focus-visible)) {
+  outline: 2px solid var(--associative-gold-ink);
+  outline-offset: 2px;
+}
+
+.investor-page-shell.investor-associative-table-page :is(.investor-associative-qualification, .investor-associative-flow-panel).is-guided-active {
+  border-color: var(--inv-color-line) !important;
+  box-shadow: none !important;
+  animation: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field:not(.invalid),
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field:not(.invalid) .investor-direct-step-composition {
+  background: transparent;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field.is-active:not(.invalid) {
+  color: var(--associative-gold-ink);
+  background: var(--associative-gold-metal);
+  box-shadow: inset 4px 0 var(--associative-gold-edge);
+}
+
+/* The attention border stays inside the row; it must never scale over its neighbours. */
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field.is-active:not(.invalid)::after {
+  box-sizing: border-box;
+  inset: 0;
+  z-index: 2;
+  border: 2px solid var(--associative-gold-edge);
+  border-radius: 0;
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field.is-active > .investor-direct-step-content {
+  overflow: visible;
+  border-radius: 0;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field.is-active > .investor-direct-step-content::after {
   display: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field.is-active:not(.invalid) :is(.investor-direct-step-name strong, .investor-associative-ledger-operator, .investor-associative-line-control > span, .investor-info-trigger) {
+  color: var(--associative-gold-ink);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account :is(.investor-associative-line-control, .investor-associative-installment-control) {
+  box-sizing: border-box;
+  grid-template-columns: 26px minmax(0, 1fr);
+  column-gap: 0;
+  width: 100%;
+  height: 23px;
+  min-height: 23px;
+  padding: 0 4px 0 8px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account :is(.investor-associative-line-control, .investor-associative-installment-control) > input {
+  box-sizing: border-box;
+  grid-column: 2;
+  width: 100%;
+  height: 21px;
+  min-height: 21px;
+  margin: 0;
+  padding-inline: 8px;
+  border-radius: 3px;
+  line-height: 21px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field.is-active:not(.invalid) input {
+  color: var(--associative-gold-ink);
+  background: #fff8e1;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field.is-active:not(.invalid) input::placeholder {
+  color: var(--associative-gold-ink) !important;
+  opacity: 1;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-compact-account input:focus-visible {
+  outline: 2px solid var(--associative-gold-edge);
+  outline-offset: -2px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-step-guide.guidance {
+  border-color: var(--associative-gold-edge);
+  background: var(--inv-color-panel);
+  box-shadow: inset 3px 0 var(--associative-gold);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-step-guide::after {
+  display: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-step-guide.guidance > span {
+  color: var(--associative-gold-ink);
+  background: var(--associative-gold-metal);
+  letter-spacing: 0;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-step-guide.guidance::before,
+.investor-page-shell.investor-associative-table-page .investor-associative-results-stack.is-ranking-only::before {
+  background: var(--associative-gold-metal);
+  filter: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-approval-editable.investor-key-field.is-active > select {
+  color: var(--associative-gold-ink);
+  border: 2px solid var(--associative-gold-edge);
+  background: var(--associative-gold-metal);
+  box-shadow: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-approval-editable.investor-key-field.is-active::after {
+  display: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-table-row.is-linear + .is-decreasing {
+  margin-top: 8px;
+  border-top: 1px solid var(--inv-color-line);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-commission-launcher,
+.investor-page-shell.investor-associative-table-page .investor-associative-commission-launcher:hover {
+  position: relative;
+  inset: auto;
+  width: 36px;
+  height: 32px;
+  min-height: 32px;
+  margin: 2px 12px 8px auto;
+  color: var(--associative-gold);
+  border: 1px solid var(--associative-gold-edge);
+  border-radius: 6px;
+  background: #1d2835;
+  box-shadow: inset 0 1px #fff3cc;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-commission-launcher > span:first-child {
+  color: var(--associative-gold);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  filter: none;
+  animation: none;
+  font-size: 20px;
+  line-height: 1;
+  text-shadow: 0 1px #946b17;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .investor-page-shell.investor-associative-table-page :is(button, .investor-associative-choice-row > label) {
+    transition: scale .16s ease, background-color .16s ease, border-color .16s ease;
+  }
+
+  .investor-page-shell.investor-associative-table-page button:hover:not(:disabled):not([aria-disabled="true"]),
+  .investor-page-shell.investor-associative-table-page .investor-associative-choice-row > label:hover:not(:has(input:disabled)) {
+    transform: none;
+    scale: 1.04;
+  }
+}
+
+@media (pointer: coarse) {
+  .investor-page-shell.investor-associative-table-page .investor-associative-commission-launcher,
+  .investor-page-shell.investor-associative-table-page .investor-associative-commission-launcher:hover {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .investor-page-shell.investor-associative-table-page .investor-associative-question {
+    grid-template-rows: minmax(20px, auto) 46px minmax(24px, auto);
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-associative-question-money {
+    height: 46px !important;
+    min-height: 46px !important;
+  }
+
+  .investor-page-shell.investor-associative-table-page :is(.investor-associative-question-money input, .investor-associative-choice-row > button, .investor-associative-choice-row > label) {
+    height: 44px !important;
+    min-height: 44px !important;
+    font-size: 16px;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-associative-compact-account :is(.investor-associative-line-control, .investor-associative-installment-control) {
+    height: 46px;
+    min-height: 46px;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-associative-compact-account :is(.investor-associative-line-control, .investor-associative-installment-control) > input {
+    height: 44px;
+    min-height: 44px;
+    font-size: 16px !important;
+    line-height: 44px;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-associative-compact-account li:has(.investor-associative-line-control, .investor-associative-installment-control),
+  .investor-page-shell.investor-associative-table-page .investor-associative-compact-account li:has(.investor-associative-line-control, .investor-associative-installment-control) > .investor-direct-step-content {
+    height: auto;
+    min-height: 46px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .investor-page-shell.investor-associative-table-page .investor-associative-question.current::after {
+    animation: none;
+  }
+
+  .investor-page-shell.investor-associative-table-page :is(button, .investor-associative-choice-row > label) {
+    transition: none !important;
+    scale: none;
+  }
 }
 
 .investor-page-shell.investor-associative-table-page .investor-page-closing {

@@ -390,7 +390,7 @@ export const ASSOCIATIVE_FAQ_SECTIONS: readonly AssociativeFaqSection[] = [
           "É necessário distinguir o percentual consumido pela proposta do limite máximo permitido pela política. O material de referência fornecido descreve em Associativo!M59: % total = (parcela da construtora + reserva estimada para evolução/banco) ÷ renda.",
           "Como a reserva relatada em K59 é de 30% da renda, nesse modelo % total = comprometimento da parcela da construtora + 30%. Exemplo: renda de R$ 4 mil, mensal da construtora de R$ 600 e reserva de R$ 1.200 resultam em R$ 1.800, equivalentes a 45%.",
           "Esse resultado deve ser comparado com o limite autorizado para o perfil. Os 45% do exemplo são um resultado matemático, não uma regra universal de aprovação.",
-          "Na simulação desta página, o painel chama o indicador de % Máximo da renda por anual, mas calcula o maior total de mensal corrigida + Evolução de Obra dividido pela renda, separadamente por fluxo. Como a evolução varia com o andamento estimado, não é sempre o comprometimento acrescido de 30 pontos percentuais.",
+          "Na simulação desta página, o indicador % Máximo da renda mensal calcula o maior total de mensal corrigida + Evolução de Obra dividido pela renda, separadamente por fluxo. Como a evolução varia com o andamento estimado, não é sempre o comprometimento acrescido de 30 pontos percentuais.",
           "Apesar do nome, o indicador não inclui o valor da anual, mesmo quando ela integra o total da mesma linha mensal no cronograma. Confira também anuais, documentação, prestação bancária e demais despesas familiares; esses indicadores não formam um orçamento completo.",
         ],
       },
