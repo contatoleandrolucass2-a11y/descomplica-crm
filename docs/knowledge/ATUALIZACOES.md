@@ -4,6 +4,20 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-02: Replica de Calcular documentacao
+
+- Status: pendente_validacao; branch codex/calcular-documentacao.
+- Fonte: pedido do usuario e pagina publica /simulacao/calcular-documentacao,
+  bundles DocumentationCalculator-BjH7PIsT.js e documentation-calculator-rules-DI3ss1MX.js.
+- O modulo lib/archive-investor/documentation-calculator-rules.mjs ja corresponde
+  a referencia em 2.048 entradas comparadas, incluindo limites e erros; reutilizar
+  sem criar outro motor. Esta evidencia nao homologa a politica como regra oficial.
+- A nova replica usa a rota protegida existente e o item antes Em breve no SiteMenu.
+  Nao requer habilitar runtime WF16, n8n, migrations ou novas permissoes.
+- Conteudo integral inclui ajudas Em construcao, impressao, auditoria e alertas.
+- Testes focados: 32 aprovados; typecheck inicial aprovado. Restam validacao integral,
+  navegador e gates de publicacao. Registro detalhado no documento de auditoria.
+
 ## 2026-10-01: Regioes e vagas do Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-regioes-vagas.

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-02 - Calcular documentacao
+
+- Habilita Calcular documentacao no menu Simulacao e na rota protegida existente.
+- Reproduz integralmente formulario, etapas, ajudas, alertas, resultado, composicao,
+  plano de parcelas, impressao e auditoria da pagina de referencia do usuario.
+- Reutiliza as regras locais existentes, conferidas contra 2.048 casos da referencia,
+  sem alterar formulas, publicar politicas ou acionar workflows.
+- Acrescenta testes de limites, permissao e uma matriz de navegador dedicada.
+
 ## 2026-10-01 - Regioes e vagas no Tabelao
 
 - Adiciona Regiao na primeira coluna, com consulta automatica por CEP e fontes

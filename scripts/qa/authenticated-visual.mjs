@@ -8,6 +8,7 @@ import process from "node:process";
 import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 import sharp from "sharp";
+import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
 
 import {
   buildTabelaoExclusiveInventory,
@@ -4750,6 +4751,21 @@ async function run() {
         }
 
         if (viewport.key === "desktop-1440x900") {
+          currentStage = "documentation-calculator";
+          const documentationPage = configureQaPage(await context.newPage());
+          try {
+            const documentation = await checkDocumentationCalculator(
+              documentationPage,
+              origin,
+              path.join(artifactRoot, "documentation"),
+            );
+            await writeFile(
+              path.join(artifactRoot, "documentation-results.json"),
+              JSON.stringify(documentation, null, 2),
+            );
+          } finally {
+            await documentationPage.close({ runBeforeUnload: false });
+          }
           currentStage = "archive-navigation";
           const navigationPage = configureQaPage(await context.newPage());
           navigationPage.setDefaultTimeout(archiveNavigationActionTimeout);

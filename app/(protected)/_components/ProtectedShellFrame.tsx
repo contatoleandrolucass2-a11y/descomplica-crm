@@ -8,6 +8,7 @@ const ARCHIVE_SIMULATOR_ROUTES = new Set([
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
   "/app/simulacao/tabelao",
+  "/app/simulacao/calcular-documentacao",
 ]);
 
 export function ProtectedShellFrame({

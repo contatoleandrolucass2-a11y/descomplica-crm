@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-02 - Replica da guia Calcular documentacao
+
+- Branch codex/calcular-documentacao; checkout isolado da branch originalmente aberta.
+- Referencia consultada somente por leitura: https://descomplicapro.com.br/simulacao/calcular-documentacao.
+- Conteudo completo do formulario e resultado reconstruido em React/Next; estilos
+  originais ja presentes em investor-archive.css reutilizados. Menu e cabecalho do CRM mantidos.
+- Nenhuma formula modificada: 2.048 combinacoes de construtora, modalidade, primeiro
+  imovel, renda e fronteiras financeiras comparadas com o bundle publico da referencia.
+- Testes focados: 32 aprovados. Typecheck inicial aprovado. Validacao integral,
+  navegador, CI e publicacao pendentes nesta etapa.
+- A pagina mantem crm.simulators.view; nenhum grant, migration ou workflow alterado.
+- Evidencias e limites: docs/audits/documentacao-replica-2026-10-02.md.
+
 ## 2026-10-01 - Regiao automatica e possibilidades de vagas no Tabelao
 
 - Branch codex/tabelao-regioes-vagas. Campos canonicos postalCode e parkingSpaces

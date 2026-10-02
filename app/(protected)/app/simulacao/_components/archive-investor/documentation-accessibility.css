@@ -1,0 +1,3 @@
+:root:not([data-theme="dark"]) .documentation-summary-result > header > span {
+  color: #067080;
+}

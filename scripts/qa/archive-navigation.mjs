@@ -38,6 +38,7 @@ const simulationLinks = [
   ["Tabela Investidor", archiveNavigationRoutes[2]],
   ["Tabelão", archiveNavigationRoutes[3]],
   ["CAIXA", "/app/simulacao/caixa"],
+  ["Calcular documentação", "/app/simulacao/calcular-documentacao"],
 ];
 const settingsLinks = [
   ["Visão geral", "/app/configuracoes"],
