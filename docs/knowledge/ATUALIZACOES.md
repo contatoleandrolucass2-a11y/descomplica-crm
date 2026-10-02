@@ -13,7 +13,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Tokens restritos ao Associativo preservam as outras tabelas. O brilho de 3s
   continua somente na acao pendente e respeita prefers-reduced-motion.
 - Testes focados: 28 aprovados, incluindo contraste >=4.5:1 nos fundos escuros
-  e em todas as paradas do gradiente dourado. CI/publicacao pendentes.
+  e em todas as paradas do gradiente dourado. CI 37030093010 aprovou 1369 Vitest,
+  oito Node, banco, restore, E2E e matriz funcional completa. Apenas duas
+  capturas escuras diferiram, revisadas e promovidas sem alterar tolerancias;
+  191 referencias preservadas. Nova CI e publicacao pendentes.
 
 ## 2026-10-02: Ordem territorial e falhas transitorias do Tabelao
 

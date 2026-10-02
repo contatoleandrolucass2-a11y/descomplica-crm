@@ -9,7 +9,10 @@
 - Testes focados: 28 aprovados; navegador 6/6 (tres temas, desktop/celular),
   contraste, brilho, sequencia, geometria inicial e estoque aprovados.
 - Lint, tipos e build aprovados. Windows: 1366 testes aprovados, um skip e
-  seis falhas POSIX/symlink ja conhecidas; CI Linux e publicacao pendentes.
+  seis falhas POSIX/symlink ja conhecidas. CI Linux 37030093010: 1369 Vitest,
+  oito Node, banco, restore e E2E aprovados. Matriz funcional completa aprovada.
+- Duas capturas escuras do Associativo revisadas; 191 referencias preservadas,
+  sem alterar tolerancias. Confirmacao da nova CI e publicacao pendentes.
 - Evidencias e acompanhamento: docs/audits/associativo-dourado-2026-10-02.md.
 
 ## 2026-10-02 - Regioes e leitura continua do Tabelao

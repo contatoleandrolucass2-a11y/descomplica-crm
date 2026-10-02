@@ -20,7 +20,15 @@
   inicial sem rolagem global no desktop testado; hover/foco dourados aprovados.
 - Lint, typecheck e build aprovados. Windows: 1366 testes aprovados, um skip,
   seis falhas de permissao POSIX/symlink; sem skips ou enfraquecimento de gates.
-- CI Linux, referencias visuais autenticadas e publicacao: pendentes.
+- CI Linux 37030093010: 1369 testes Vitest aprovados, quatro skips existentes,
+  oito testes Node aprovados, lint/tipos/build, banco, restore e E2E verdes.
+- Matriz funcional: 140 verificacoes responsivas, 80 de temas, 193 de
+  acessibilidade e 40 de navegacao aprovadas, incluindo a jornada dourada.
+- Candidato 36e87a7f72a3b70a14919134930a4ebd449a9ebe: somente duas diferencas
+  visuais, Associativo dark desktop 1440x900 e mobile 390x844. Inspecao visual
+  confirmou a nova paleta, sem regressao de geometria. Demais 191 preservadas.
+- Promocao pelo gate canonico, proveniencia/hashes conferidos e troca atomica;
+  limiar de 1% e tolerancia 16 mantidos. Confirmacao CI/publicacao pendentes.
 - Gate visual deve revisar somente diferencas do Associativo, preservando
   referencias de outras rotas e tolerancias existentes.
 
