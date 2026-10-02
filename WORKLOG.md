@@ -15,6 +15,24 @@
   e matriz funcional verdes. Sete capturas do Tabelao revisadas e promovidas,
   186 preservadas; reexecucao e publicacao pendentes no PR #133.
   Evidencias em docs/audits/tabelao-tipografia-2026-10-02.md.
+- CI 37033511673 integralmente aprovada. Integra main d79bf8c (PR #134) sem
+  reverter Associativo; concilia sete referencias Tabelao e duas Associativo,
+  verificando todos os 193 hashes. CI combinada/publicacao pendentes.
+
+## 2026-10-02 - Azul noturno e dourado no Associativo
+
+- Pedido posterior substitui a paleta azul saturada/prata: fundo #040d19,
+  paineis #091a2c e dourado metalico nas selecoes e proximas acoes.
+- Escopo somente visual no Associativo; preserva claro/medio, cabecalho,
+  calculos, confirmacao sequencial e brilho de tres segundos com reduced-motion.
+- Testes focados: 28 aprovados; navegador 6/6 (tres temas, desktop/celular),
+  contraste, brilho, sequencia, geometria inicial e estoque aprovados.
+- Lint, tipos e build aprovados. Windows: 1366 testes aprovados, um skip e
+  seis falhas POSIX/symlink ja conhecidas. CI Linux 37030093010: 1369 Vitest,
+  oito Node, banco, restore e E2E aprovados. Matriz funcional completa aprovada.
+- Duas capturas escuras do Associativo revisadas; 191 referencias preservadas,
+  sem alterar tolerancias. Confirmacao da nova CI e publicacao pendentes.
+- Evidencias e acompanhamento: docs/audits/associativo-dourado-2026-10-02.md.
 
 ## 2026-10-02 - Regioes e leitura continua do Tabelao
 

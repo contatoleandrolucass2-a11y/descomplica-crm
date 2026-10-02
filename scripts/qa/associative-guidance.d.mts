@@ -1,8 +1,8 @@
 import type { Page } from "@playwright/test";
 
 export const associativeGuidanceWidths: number[];
-export function isGuidanceSilver(color: number[]): boolean;
-export function hasGuidanceSilverSurface(paint: {
+export function isGuidanceGoldSurfaceColor(color: number[]): boolean;
+export function hasGuidanceGoldSurface(paint: {
   background: number[];
   gradient: number[][];
 }): boolean;

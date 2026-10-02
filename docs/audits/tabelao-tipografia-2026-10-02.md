@@ -61,6 +61,13 @@
   [PR #133](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/133).
   Evidencia de fechamento sera registrada no PR apos health e jornada real.
   Sem consulta ao banco, migration, n8n ou dependencia nova.
+- CI [37033511673](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/37033511673)
+  aprovou todos os gates obrigatorios do candidato `156e7a0`.
+- Durante essa execucao, main recebeu `d79bf8c` (PR #134, Associativo dourado).
+  Merge preserva seu codigo e duas capturas, alem das sete do Tabelao. Manifesto
+  reconciliado por caminho, com as duas proveniencias explicitas e 193 hashes
+  verificados; 184 imagens comuns permanecem identicas. CI combinada obrigatoria
+  antes do merge do PR #133. Nenhuma imagem ou criterio da outra entrega revertido.
 - Revisao independente identificou dois casos corrigidos antes da publicacao:
   nomes/siglas ligados por hifen e rotulos distintos com C/AP ou C/ AP. O
   formatador agora limita a caixa de frase ao vocabulario comum conhecido,
