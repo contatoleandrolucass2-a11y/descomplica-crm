@@ -7,6 +7,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 ## 2026-10-02: Ordem territorial e falhas transitorias do Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-regioes-layout, base 727c858.
+- CI 37003636668 aprovou 1367 Vitest, oito Node, validacoes de banco/restore,
+  E2E e todos os criterios funcionais da matriz autenticada. Sete diferencas
+  visuais restritas ao Tabelao foram revisadas e promovidas com proveniencia;
+  186 referencias preservadas. CI das referencias/publicacao ainda pendentes.
 - Fonte: pedido e capturas do usuario, tabelao-inventory.mjs, tabelao-region.mjs
   e testes de inventario/regiao. A consulta real foi somente observacional.
 - Prioridade comercial das regioes: Leste, Sul, Norte, Oeste e Centro. Agrupar

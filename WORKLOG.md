@@ -2,6 +2,10 @@
 
 ## 2026-10-02 - Regioes e leitura continua do Tabelao
 
+- CI 37003636668: 1367 testes Vitest e oito Node aprovados, lint/tipos/build,
+  banco, restore e E2E verdes. Matriz funcional completa aprovada: 140 rotas,
+  80 temas, 193 acessibilidades, 100 zooms e 40 navegacoes. Sete capturas do
+  Tabelao revisadas e promovidas; outras 186 preservadas. Nova CI pendente.
 - Branch codex/tabelao-regioes-layout, base 727c858; preserva as entregas paralelas
   do Associativo e da calculadora de documentacao. Escopo restrito ao Tabelao.
 - Ordenacao por Leste, Sul, Norte, Oeste e Centro, empreendimento alfabetico e

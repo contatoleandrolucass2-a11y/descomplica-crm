@@ -59,8 +59,18 @@
   homonimos e cabecalho rolando; sem erros de navegador. Capturas sinteticas
   desktop/mobile e rolagem revisadas. A transicao CSS herdada que atrasava os
   titulos foi removida. Esse harness nao substitui a matriz autenticada da CI.
-- CI limpa, revisao de referencias e publicacao ainda pendentes nesta etapa.
-  Evidencias posteriores devem substituir este status.
+- CI 37003636668, head `67c5176`, captura `020bed73d45b5a584a173c6e3fdddfe5a09d5fac`:
+  1367 Vitest e oito Node aprovados, quatro skips condicionais preexistentes.
+  Lint/tipos/build, banco, restore isolado e E2E aprovados. Matriz funcional:
+  140 rotas, 80 temas, 193 verificacoes de acessibilidade, 100 zooms e 40
+  navegacoes aprovadas, incluindo todos os contratos do Tabelao.
+- As sete diferencas de pixels eram exclusivas do Tabelao. Revisao individual
+  das capturas em 1440/1280/1024/768px e nos tres temas; promocao transacional
+  com arvore Git/captura e hashes verificados, preservando as outras 186 imagens.
+  Manifesto resultante: `5cc7811703cbc8287355efd49279f0b650c936e42084381273e5e394c731f5be`.
+  Fixtures sanitizadas sem CEP valido mostram o estado indisponivel; a matriz
+  dedicada confirma as cinco regioes, letras verticais e cabecalho rolando.
+- Nova CI das referencias e publicacao pendentes. Fechamento posterior no PR #132.
 
 ### Proveniencia Territorial
 

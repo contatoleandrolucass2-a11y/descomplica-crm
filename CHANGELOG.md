@@ -2,6 +2,8 @@
 
 ## 2026-10-02 - Regioes ordenadas no Tabelao
 
+- Sete referencias visuais revisadas para a nova geometria e rotulo territorial;
+  demais 186 capturas e criterios de aprovacao preservados.
 - Reconcilia logradouros divergentes por CODLOG oficial via GeoSampa HTTPS,
   resolvendo os dois conflitos atuais sem tabela fixa de empreendimentos.
 - Mostra regioes em letras verticais eretas; compacta as 14 colunas com texto
