@@ -2,6 +2,11 @@
 
 ## 2026-10-02 - Validacao da guia de documentacao
 
+- CI 36971939367 aprovou todos os criterios funcionais: 140 responsivos, 80 de tema,
+  193 de acessibilidade, 100 de zoom, 40 combinacoes de navegacao e a matriz dedicada
+  de documentacao. Sete diferencas esperadas do hub revisadas e promovidas com hashes
+  e arvore Git conferidos; 186 baselines preservados. Nova verificacao da CI pendente.
+
 - CI 36970005859 aprovou validate, restore, 20 E2E (um skip) e a matriz dedicada
   da calculadora autenticada: 12 combinacoes, calculos, limites, ajudas, auditoria,
   impressao e zoom. A matriz de navegacao conservava uma segunda expectativa

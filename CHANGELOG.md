@@ -2,6 +2,8 @@
 
 ## 2026-10-02 - Validacao da documentacao
 
+- Atualiza somente sete referencias visuais do hub para a documentacao disponivel,
+  apos revisao das capturas autenticadas; preserva 186 imagens e os limiares existentes.
 - Corrige a expectativa antiga de item desabilitado na matriz responsiva do menu.
   A matriz dedicada da calculadora passou tambem no navegador autenticado da CI.
 - Atualiza E2E de autorizacao e menu para a guia liberada, sem abrir acesso a outros

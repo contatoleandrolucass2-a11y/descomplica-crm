@@ -2,6 +2,24 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Documentacao disponivel no hub em 02/10/2026
+
+Sete capturas de `/app/simulacao` foram revisadas e promovidas apos a liberacao de
+Calcular documentacao: 1440, 1280, 1024, 390, 375 e 320px, mais escuro em 390px.
+CI `36971939367`, artefato `11213300733`, captura limpa
+`47318329ce6032c79ec937c9da3fbb3c215005e2`, arvore identica a
+`5ec93114e0410b7d6b84cd627e2eebded03fd145`. Hash do ZIP:
+`2c30cfd7936bfb90abd0dd14567a2c93e0f28dca96dfc7ee5bab85030b50cead`.
+
+Passaram 140 checks responsivos, 80 de tema, 193 auditorias de acessibilidade,
+100 de zoom, teclado, simuladores e 40 combinacoes do menu. A nova calculadora
+tem ainda matriz dedicada autenticada de 12 combinacoes, independente das 193
+capturas historicas. Somente as sete diferencas intencionais do hub foram
+promovidas pelo helper transacional existente apos revisao, conferencia de
+arvore, integridade e hashes. Outras 186 imagens e limiares permanecem intactos.
+As referencias mais antigas do hub desktop tambem tinham estados anteriores
+as liberacoes ja presentes na main; nenhuma outra pagina foi promovida.
+
 ## Cabeçalhos compactos do Tabelão em 26/09/2026
 
 Sete capturas do Tabelão foram revisadas e promovidas a partir da árvore limpa

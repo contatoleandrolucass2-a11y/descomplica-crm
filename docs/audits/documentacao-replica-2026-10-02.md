@@ -81,6 +81,18 @@ Runtime oficial WF16, integracoes n8n e politicas comerciais permanecem inaltera
   ZIP SHA-256 52ba7ebebd9e20fe0e25955527d9973e1f239aa989aff339c7dae6a1a313d026.
   A matriz das outras paginas parou na expectativa antiga de documentacao bloqueada;
   expectativa corrigida, sem reduzir verificacoes de links, teclado ou geometria.
+- CI 36971939367: validate, restore e E2E aprovados. Todos os criterios funcionais
+  visuais aprovados: 140 responsivos, 80 de tema, 193 auditorias Axe, 100 de zoom,
+  40 combinacoes do menu e matriz dedicada da documentacao. Restaram somente sete
+  diferencas do hub /app/simulacao pela liberacao da guia. Capturas revisadas em
+  1440, 1280, 1024, 390, 375 e 320px, incluindo escuro em 390px.
+  Promocao seletiva pelo helper transacional existente; 186 imagens preservadas.
+  Arvore da captura 47318329ce6032c79ec937c9da3fbb3c215005e2 identica a 5ec9311.
+  Artefato 11213300733, ZIP SHA-256
+  2c30cfd7936bfb90abd0dd14567a2c93e0f28dca96dfc7ee5bab85030b50cead.
+  Baselines mais antigos do hub desktop tambem refletiam estados ja superados na main;
+  nenhuma outra pagina foi atualizada. Limiares permanecem 1% e tolerancia 16.
+  Nova CI deve confirmar a comparacao final antes de merge/publicacao.
 
 ## Seguranca e retorno
 

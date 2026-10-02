@@ -28,6 +28,12 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   aprovados. Atualizar tambem assertDisabledItems de archive-navigation ao ativar
   um link; simulationLinks sozinho nao remove a expectativa antiga de bloqueio.
   Artefato 11211986933 conferido por SHA-256; nenhum baseline promovido com gate falho.
+- CI 36971939367: todos os criterios funcionais aprovados, incluindo 140 responsivos,
+  80 de tema, 193 auditorias Axe, 100 de zoom e navegacao 4 rotas x 10 larguras.
+  Sete diferencas visuais intencionais do hub foram revisadas e promovidas pelo
+  promotor transacional existente; outras 186 imagens preservadas por hash.
+  Captura 47318329 tem arvore identica a 5ec9311; artefato 11213300733 validado.
+  Nova CI e publicacao pendentes, sem reduzir limite de diferenca ou tolerancia.
 
 ## 2026-10-02: Capacidade por CEP, nao apenas por lote
 
