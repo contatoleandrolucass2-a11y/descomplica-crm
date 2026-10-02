@@ -9,6 +9,7 @@
 - Preserva compactacao, textos completos, centralizacao e Endereco apos Empreendimento.
 - Protege e limita as consultas de localizacao, sem bloquear o estoque.
 - Atualiza sete referencias visuais revisadas, sem mudar as demais rotas.
+- Preserva o guia atualizado do Associativo na integracao com a main.
 
 ## 2026-10-01 - Titulos e colunas do Tabelao
 
@@ -16,6 +17,15 @@
 - Mover Endereco para depois de Empreendimento e centralizar textos e valores.
 - Preservar quebras de linha, agrupamentos, filtros, plantas e valores distintos.
 - Atualizar sete referencias visuais revisadas do Tabelao, preservando as demais.
+
+## 2026-10-01 - Orientacao dourada no Associativo
+
+- Destaca uma pergunta ou campo por vez com acabamento dourado metalizado.
+- Corrige contornos excedentes e iguala os campos monetarios e de quantidade.
+- Afasta a renda da borda, separa Linear dos blocos decrescentes e realca o $.
+- Amplia levemente os botoes no hover, sem movimento quando reduzido no sistema.
+- Preserva o alvo de toque de remuneracao sem translacao legada no celular.
+- Usa % Maximo da renda mensal no painel, manual e FAQ; calculos preservados.
 
 ## 2026-10-01 - Associativo compacto e manual completo
 

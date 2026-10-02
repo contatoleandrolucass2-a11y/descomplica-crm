@@ -56,7 +56,7 @@ describe("Associative learning manual", () => {
       "Qtd. de parcelas",
       "% Pró-Soluto",
       "% Comprometimento da Renda",
-      "% Máximo da renda por anual",
+      "% Máximo da renda mensal",
       "Resumo das parcelas",
       "Composição da documentação",
     ]) {

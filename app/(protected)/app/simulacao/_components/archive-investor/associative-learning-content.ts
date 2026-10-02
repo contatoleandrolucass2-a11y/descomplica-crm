@@ -2,7 +2,7 @@ export const ASSOCIATIVE_PROFILE_HELP = {
   income: {
     title: "Qual renda devo informar?",
     description:
-      "Digite a renda mensal somada de todas as pessoas que participarão da compra, conforme os comprovantes aceitos pelo banco. Além do enquadramento municipal e da modalidade, ela é a base do % Comprometimento da Renda e do máximo da renda mensal, chamado no painel de % Máximo da renda por anual. Também participa da estimativa de Evolução de Obra e do limite das anuais. Renda incorreta distorce esses resultados. A aprovação final depende da análise oficial.",
+      "Digite a renda mensal somada de todas as pessoas que participarão da compra, conforme os comprovantes aceitos pelo banco. Além do enquadramento municipal e da modalidade, ela é a base do % Comprometimento da Renda e do % Máximo da renda mensal. Também participa da estimativa de Evolução de Obra e do limite das anuais. Renda incorreta distorce esses resultados. A aprovação final depende da análise oficial.",
   },
   modality: {
     title: "Como a modalidade é escolhida?",
@@ -22,7 +22,7 @@ export const ASSOCIATIVE_POLICY_TOPICS = [
     items: [
       ASSOCIATIVE_PROFILE_HELP.income.description,
       "% Comprometimento da Renda = maior parcela mensal corrigida do cronograma ÷ renda familiar × 100. Não soma Evolução de Obra. O cálculo é separado para Linear e Decrescente; confira também a data do pico na ajuda do indicador.",
-      "O máximo da renda mensal aparece com o nome % Máximo da renda por anual. A regra atual procura, entre os meses do cronograma, o maior total de parcela corrigida + Evolução de Obra e divide pela renda familiar. Apesar do nome, não é renda anual nem a soma de todos os pagamentos de dezembro. O indicador exclui a anual, mesmo quando ela compõe o total da mesma linha mensal na memória; esse pagamento também precisa caber no orçamento.",
+      "O % Máximo da renda mensal procura, entre os meses do cronograma, o maior total de parcela corrigida + Evolução de Obra e divide pela renda familiar. Não é renda anual nem a soma de todos os pagamentos de dezembro. O indicador exclui a anual, mesmo quando ela compõe o total da mesma linha mensal na memória; esse pagamento também precisa caber no orçamento.",
       "Exemplo ilustrativo: renda de R$ 5.000,00 e maior mensal corrigida de R$ 750,00 representam 15% de comprometimento. Se o maior total mensal com Evolução de Obra for R$ 2.000,00, o outro indicador será 40%. Os picos podem ocorrer em datas diferentes. Compare cada resultado com o limite do Ranking selecionado, não com um percentual bancário universal.",
       "A renda também limita cada anual nominal a 50% da renda mensal nesta página e compõe a estimativa de Evolução de Obra: renda × 30% × andamento. Essa projeção comercial não é o cálculo do encargo bancário real e não reúne todas as despesas da família. Não aumente a renda apenas para obter aprovação.",
     ],
@@ -180,7 +180,7 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
       "Maior parcela mensal corrigida ÷ renda familiar × 100, sem Evolução de Obra. A ajuda identifica valor e data do pico de cada fluxo. Não usa apenas a primeira mensal e não representa a análise completa de endividamento do banco.",
   },
   {
-    label: "% Máximo da renda por anual",
+    label: "% Máximo da renda mensal",
     location: "Parâmetros de aprovação, terceira regra",
     detail:
       "É o indicador de máxima carga mensal: maior soma de mensal corrigida + Evolução de Obra, dividida pela renda familiar. A ajuda identifica os picos Linear e Decrescente. Não inclui o valor da anual, mesmo quando ela integra o total da mesma linha mensal no cronograma; revise também esse pagamento e as demais despesas do cliente.",

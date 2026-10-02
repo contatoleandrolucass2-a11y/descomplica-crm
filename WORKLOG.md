@@ -30,6 +30,9 @@
   canonica; outras 186 preservadas byte a byte, sem reduzir limiares.
 - PR #125; captura dd373aa, codigo 02074e7. Nova CI com referencias revisadas e
   publicacao pendentes. Evidencia final de release sera registrada no PR.
+- CI 36954481187 totalmente aprovada em 805e0ca. Main ef0a2fb (PR #126)
+  integrada sem conflito e sem modificar o guia do Associativo; repetir CI
+  conjunta antes do merge. Nenhum deploy do Tabelao realizado ate esta etapa.
 - Runbook: docs/runbooks/tabelao-regions.md. Sem n8n, migration ou escrita remota.
 
 ## 2026-10-01 - Cabecalhos legiveis e colunas centralizadas no Tabelao
@@ -52,6 +55,23 @@
 - Preserva o Associativo e suas onze capturas; concilia apenas metadados de
   referencia por rota, mantendo proveniencia. Nova CI conjunta obrigatoria.
 - Publicacao pendente; fechamento e identidade da release no PR #123.
+
+## 2026-10-01 - Jornada dourada do Associativo
+
+- Destaque metalizado somente na pergunta atual e na proxima linha financeira.
+- Corrige borda animada que ultrapassava a linha: contorno interno sem escala.
+- Padroniza largura/altura dos campos, com folga para o valor da renda.
+- Separa Linear do bloco decrescente, destaca remuneracao com simbolo dourado
+  e adiciona hover sem alterar a geometria do layout; respeita movimento reduzido.
+- Renomeia o indicador e suas ajudas para % Maximo da renda mensal, sem
+  modificar formulas, limites, fontes ou regras de enquadramento automatico.
+- Referencias ranking e calcular-documentacao consultadas somente para leitura.
+- Lint, tipos, build e jornada visual 6/6 aprovados. Suite Windows: 1008 pass,
+  1 skip, seis falhas POSIX e um timeout aprovado em repeticao isolada.
+- CI Linux e publicacao pendentes; evidencia em
+  docs/audits/associativo-guia-dourado-2026-10-01.md.
+- Revisao coarse remove a translacao legada do botao de remuneracao; a escala
+  continua restrita a dispositivos com hover e sem movimento reduzido.
 
 ## 2026-10-01 - Layout e manual do Associativo
 
