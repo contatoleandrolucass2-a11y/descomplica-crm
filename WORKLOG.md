@@ -68,10 +68,14 @@
 - Referencias ranking e calcular-documentacao consultadas somente para leitura.
 - Lint, tipos, build e jornada visual 6/6 aprovados. Suite Windows: 1008 pass,
   1 skip, seis falhas POSIX e um timeout aprovado em repeticao isolada.
-- CI Linux e publicacao pendentes; evidencia em
-  docs/audits/associativo-guia-dourado-2026-10-01.md.
+- Publicado em 02/10 no runtime integrado 598e1171, preservando PR #125.
+  PR #126 e CIs 36954146586, 36956549122 e 36958962302 verdes.
+- Imagem imutavel verificada, backup/CAS/rollback e 12 GETs sem erro;
+  navegador autenticado confirmou pagina, estoque e estilos dourados.
+- Evidencia: docs/audits/associativo-guia-dourado-2026-10-01.md.
 - Revisao coarse remove a translacao legada do botao de remuneracao; a escala
   continua restrita a dispositivos com hover e sem movimento reduzido.
+- Encerramento documental sem novo deploy; prova coarse real/desktop 2/2.
 
 ## 2026-10-01 - Layout e manual do Associativo
 
