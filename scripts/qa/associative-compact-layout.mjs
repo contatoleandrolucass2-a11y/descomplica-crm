@@ -1,6 +1,227 @@
 import assert from "node:assert/strict";
 import { expect } from "@playwright/test";
 
+export function assertAssociativeWorkspaceGaps({ sideBySide, gap, paddingLeft, paddingRight }) {
+  assert.ok(Math.abs(paddingLeft - paddingRight) <= 1, "Flow must have equal horizontal padding");
+  if (sideBySide) {
+    assert.ok(gap >= 22 && gap <= 28, "Desktop workspace needs a 22-28px central gap");
+    assert.ok(Math.abs(gap - paddingLeft) <= 1, "Central gap must equal the flow padding");
+  }
+}
+
+export async function checkAssociativeWorkspaceGaps(page) {
+  const geometry = await page
+    .locator(".investor-associative-table-page .investor-associative-workspace")
+    .evaluate((workspace) => {
+      const ledger = workspace
+        .querySelector(".investor-associative-ledger")
+        .getBoundingClientRect();
+      const results = workspace
+        .querySelector(".investor-associative-results-stack")
+        .getBoundingClientRect();
+      const style = getComputedStyle(workspace.closest(".investor-flow-form"));
+      return {
+        sideBySide: results.left >= ledger.right,
+        gap: results.left - ledger.right,
+        paddingLeft: Number.parseFloat(style.paddingLeft),
+        paddingRight: Number.parseFloat(style.paddingRight),
+      };
+    });
+  assertAssociativeWorkspaceGaps(geometry);
+  return geometry;
+}
+
+async function stockRowIsSilver(row) {
+  return row.evaluate((element) =>
+    [...element.cells].every((cell) => {
+      const style = getComputedStyle(cell);
+      const stops = (style.backgroundImage.match(/rgba?\([^)]*\)/gu) ?? []).map((color) =>
+        color.match(/[\d.]+/gu).map(Number),
+      );
+      return (
+        style.backgroundColor === "rgb(220, 228, 239)" &&
+        style.color === "rgb(20, 36, 59)" &&
+        stops.length >= 2 &&
+        stops.every(
+          ([r, g, b, alpha = 1]) =>
+            alpha === 1 &&
+            Math.min(r, g, b) >= 140 &&
+            Math.max(r, g, b) - Math.min(r, g, b) <= 35 &&
+            b >= r - 5,
+        ) &&
+        Math.max(...stops.map(([r]) => r)) - Math.min(...stops.map(([r]) => r)) >= 20
+      );
+    }),
+  );
+}
+
+export async function checkAssociativeSelectedSilverPaint(page) {
+  const selected = page.locator(
+    '.investor-associative-table-page .investor-stock-table tr[aria-selected="true"]',
+  );
+  await expect(selected).toHaveCount(1);
+  await expect
+    .poll(() => stockRowIsSilver(selected), {
+      message: "Selected row must remain silver without hover or focus",
+    })
+    .toBe(true);
+}
+
+export function assertAssociativeSummaryGaps({
+  separation,
+  decreasingGaps,
+  linearBottomRule,
+  decreasingTopRule,
+}) {
+  assert.ok(
+    separation >= 4 && separation <= 12,
+    "Linear needs a small 4-12px gap before Decrescente",
+  );
+  assert.equal(decreasingGaps.length, 3, "All four decreasing blocks must be present");
+  assert.ok(
+    decreasingGaps.every((gap) => gap >= -1 && gap <= 1),
+    "The four decreasing blocks must remain together",
+  );
+  for (const [name, rule] of [
+    ["Linear bottom", linearBottomRule],
+    ["Decrescente top", decreasingTopRule],
+  ]) {
+    assert.ok(
+      rule && rule.width >= 1 && !["none", "hidden"].includes(rule.style) && rule.alpha > 0,
+      `${name} must have a visible separating rule`,
+    );
+  }
+}
+
+export function assertAssociativeCommissionGeometry(geometry) {
+  assert.ok(
+    geometry.insideSummary && geometry.insideLastRow && geometry.insideWidth,
+    "Commission must remain inside the summary and the last Decrescente 10% row",
+  );
+  assert.ok(
+    geometry.dateGap >= 0 && geometry.dateGap <= 16 && geometry.centerDelta <= 2,
+    "Commission must sit immediately right of the last date, on the same line",
+  );
+  assert.ok(!geometry.overlaps, "Commission must not overlap dates, values or adjacent content");
+  assert.ok(
+    geometry.iconOnly && Math.abs(geometry.iconSize - 18) <= 0.1,
+    "Commission must render only its 18px dollar icon",
+  );
+  assert.ok(
+    geometry.width >= geometry.minimumTarget && geometry.height >= geometry.minimumTarget,
+    "Commission action must retain its pointer-specific target size",
+  );
+  assert.ok(
+    geometry.borderless && geometry.transparent,
+    "Commission must remain icon-only without a button box",
+  );
+}
+
+export async function checkAssociativeSummaryGeometry(page) {
+  const table = page.locator(
+    ".investor-associative-table-page .investor-associative-payment-table",
+  );
+  await expect(table.locator(".is-linear")).toHaveCount(1);
+  await expect(table.locator(".is-decreasing")).toHaveCount(4);
+  const geometry = await table.evaluate((element) => {
+    const linear = element.querySelector(".is-linear");
+    const blocks = [...element.querySelectorAll(".is-decreasing")];
+    const rects = blocks.map((row) => row.getBoundingClientRect());
+    const rule = (row, side) => {
+      const style = getComputedStyle(row);
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = 1;
+      const context = canvas.getContext("2d");
+      context.fillStyle = style[`border${side}Color`];
+      context.fillRect(0, 0, 1, 1);
+      return {
+        width: Number.parseFloat(style[`border${side}Width`]),
+        style: style[`border${side}Style`],
+        alpha: context.getImageData(0, 0, 1, 1).data[3],
+      };
+    };
+    return {
+      separation: rects[0].top - linear.getBoundingClientRect().bottom,
+      decreasingGaps: rects.slice(1).map((rect, index) => rect.top - rects[index].bottom),
+      linearBottomRule: rule(linear, "Bottom"),
+      decreasingTopRule: rule(blocks[0], "Top"),
+    };
+  });
+  assertAssociativeSummaryGaps(geometry);
+  return geometry;
+}
+
+export async function checkAssociativeCommissionGeometry(commission) {
+  const geometry = await commission.evaluate((button) => {
+    const summary = button.closest(".investor-associative-payment-summary");
+    const row = summary?.querySelector(".is-decreasing:last-child");
+    const date = row?.querySelector(".investor-associative-payment-last-date > time");
+    const rect = button.getBoundingClientRect();
+    const contains = (element) => {
+      if (!element?.contains(button)) return false;
+      const outer = element.getBoundingClientRect();
+      return (
+        rect.left >= outer.left &&
+        rect.right <= outer.right &&
+        rect.top >= outer.top &&
+        rect.bottom <= outer.bottom
+      );
+    };
+    const textBounds = (element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return range.getBoundingClientRect();
+    };
+    const dateRect = date ? textBounds(date) : null;
+    const icon = button.querySelector('span[aria-hidden="true"]');
+    const iconRect = icon ? textBounds(icon) : null;
+    const style = getComputedStyle(button);
+    // Text ranges exclude blank grid space, but detect overlap with any rendered value/date.
+    const content = [
+      ...document.querySelectorAll(
+        '.investor-associative-payment-table [role="cell"], .investor-associative-payment-table [role="rowheader"], .investor-associative-documentation-strip, .investor-associative-compact-account',
+      ),
+    ].filter((element) => element.checkVisibility() && !element.contains(button));
+    if (date) content.push(date);
+    return {
+      width: rect.width,
+      height: rect.height,
+      minimumTarget: matchMedia("(pointer: coarse)").matches ? 44 : 18,
+      insideSummary: contains(summary),
+      insideLastRow:
+        contains(row) &&
+        /Decrescente\s+10%/u.test(row?.querySelector('[role="rowheader"]')?.textContent ?? ""),
+      insideWidth: rect.left >= 0 && rect.right <= innerWidth,
+      dateGap: dateRect ? rect.left - dateRect.right : -1,
+      centerDelta:
+        dateRect && iconRect
+          ? Math.abs((dateRect.top + dateRect.bottom - iconRect.top - iconRect.bottom) / 2)
+          : Infinity,
+      overlaps: content.some((element) => {
+        const other = textBounds(element);
+        return (
+          rect.left < other.right &&
+          rect.right > other.left &&
+          rect.top < other.bottom &&
+          rect.bottom > other.top
+        );
+      }),
+      iconOnly: button.textContent.trim() === "$" && Boolean(icon),
+      iconSize: icon ? Number.parseFloat(getComputedStyle(icon).fontSize) : 0,
+      borderless:
+        [
+          style.borderTopWidth,
+          style.borderRightWidth,
+          style.borderBottomWidth,
+          style.borderLeftWidth,
+        ].every((width) => Number.parseFloat(width) === 0) && style.boxShadow === "none",
+      transparent: style.backgroundColor === "rgba(0, 0, 0, 0)" && style.backgroundImage === "none",
+    };
+  });
+  assertAssociativeCommissionGeometry(geometry);
+  return geometry;
+}
+
 export async function checkCompactArchiveHeader(page) {
   const result = await page.locator("header:has(#archive-navigation)").evaluate((header) => {
     const group = header.querySelector('[role="group"][aria-label="Aparência da página"]');
@@ -141,31 +362,22 @@ export async function checkAssociativeCompactStock(page) {
   });
   await expect(rows.first()).toHaveAttribute("aria-rowindex", "2");
   const firstRow = rows.first();
-  const goldRow = () =>
-    firstRow.evaluate((row) =>
-      [...row.cells].every((cell) => {
-        const css = getComputedStyle(cell);
-        return (
-          css.backgroundColor === "rgb(233, 189, 84)" &&
-          css.backgroundImage.includes("linear-gradient") &&
-          css.color === "rgb(48, 33, 7)"
-        );
-      }),
-    );
+  const silverRow = () => stockRowIsSilver(firstRow);
   await firstRow.hover();
   await expect
-    .poll(goldRow, { message: "Entire hovered row must be gold with dark readable text" })
+    .poll(silverRow, { message: "Entire hovered row must be silver with dark readable text" })
     .toBe(true);
   await page.mouse.move(0, 0);
   await firstRow.getByRole("button").focus();
   await expect
-    .poll(goldRow, { message: "Keyboard focus must receive the same gold row highlight" })
+    .poll(silverRow, { message: "Keyboard focus must receive the same silver row highlight" })
     .toBe(true);
   await stock.focus();
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  return { ...geometry, hero, header, allInventoryReachable: true, goldHoverAndFocus: true };
+  return { ...geometry, hero, header, allInventoryReachable: true, silverHoverAndFocus: true };
 }
 
+// Keep the imported CI entry point stable; the selection contract is now metallic silver.
 export async function checkAssociativeSelectedGold(page) {
   const stock = page.locator(".investor-associative-table-page .investor-stock-results");
   const first = stock.locator("tbody tr.selectable[aria-rowindex]").first();
@@ -175,22 +387,7 @@ export async function checkAssociativeSelectedGold(page) {
   if (!wasSelected) await expect(page.locator(".investor-associative-qualification")).toBeFocused();
   await page.mouse.move(0, 0);
   await stock.focus();
-  await expect
-    .poll(
-      () =>
-        first.evaluate((row) =>
-          [...row.cells].every((cell) => {
-            const css = getComputedStyle(cell);
-            return (
-              css.backgroundColor === "rgb(233, 189, 84)" &&
-              css.backgroundImage.includes("linear-gradient") &&
-              css.color === "rgb(48, 33, 7)"
-            );
-          }),
-        ),
-      { message: "Selected row must remain gold without hover or focus" },
-    )
-    .toBe(true);
+  await checkAssociativeSelectedSilverPaint(page);
   await expect(first.getByRole("button")).toHaveAttribute("aria-pressed", "true");
   const filters = page.locator(".investor-stock-filters");
   const count = await stock.locator("table").getAttribute("aria-rowcount");

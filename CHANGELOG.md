@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-02 - Associativo prata e perfil sequencial
+
+- Substitui o destaque dourado por prata metalizado, com brilho a cada tres
+  segundos somente durante a acao pendente e respeito a movimento reduzido.
+- Exige confirmar a modalidade entre renda e primeiro imovel, sem alterar
+  enquadramento, regras comerciais ou calculos.
+- Usa fundo #001C54 e paineis #002774 no tema escuro do Associativo.
+- Compacta o cabecalho compartilhado e integra o D fornecido ao nome sem ponto.
+- Iguala o vao central e as margens do fluxo; separa Linear e Decrescente com
+  duas linhas e posiciona o simbolo de remuneracao junto da ultima data.
+- Reorganiza resumo e aprovacao no celular, com rotulos completos por regra.
+- Atualiza 44 referencias visuais das tabelas compartilhadas apos revisao,
+  preservando as demais referencias e os criterios dos gates.
+
 ## 2026-10-02 - Consulta fria das regioes
 
 - Ajusta os lotes de CEP a capacidade do servidor para evitar regioes ausentes
