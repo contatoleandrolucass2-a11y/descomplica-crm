@@ -2,7 +2,7 @@
 
 - Data: 2026-10-01 (America/Sao_Paulo).
 - Branch: `codex/associativo-guia-dourado`, base `f57ed36e`.
-- Status: validacao local concluida com limites Windows; CI e publicacao pendentes.
+- Status: publicado e verificado em 2026-10-02 (America/Sao_Paulo).
 - Rota: `/app/simulacao/associativo-fluxo-linear`.
 - Tarefa: orientar o preenchimento do perfil e da proposta. Os perfis comerciais
   que acessam a rota recebem a mesma orientacao; nenhuma permissao foi alterada.
@@ -55,3 +55,33 @@ nao substitui autenticacao, servidor Next ou gates isolados da CI.
 - Nao houve escrita de dados remotos, migracao, dependencia nova ou workflow n8n.
 - Publicacao exige PR/CI verdes, imagem imutavel, backup/CAS/rollback e verificacao
   apos deploy, conforme `docs/runbooks/automatic-publication.md`.
+
+## Publicacao e verificacao
+
+- PR #126 integrado em `ef0a2fba878fed9d36d7b8b0f21e40960237f379`.
+  CI do PR `36954146586` e da main `36956549122` aprovadas, incluindo testes
+  Linux, restore, RLS/API, navegador e matriz visual. Nenhum baseline alterado
+  pelo ajuste do Associativo.
+- A main avancou pelo PR #125 do Tabelao. Confirmadas ancestralidade e
+  preservacao dos componentes do Associativo; o delta CSS adicional era
+  exclusivo de `.tabelao-page-shell`. Publicada a versao integrada
+  `598e11713d23da1af26365822220fc638623decb`, com CI `36958962302` verde.
+- Artefato imutavel: checksum
+  `c903dec3ebab5af27f8df5f6dfb691f4d7ba93b300c84a65017a144a235cbb00`.
+  Config CI `sha256:d41f3df82ed14a941002068f46be1aaf54bf18355149eb10d9e3f1a295fba1c7`;
+  manifesto local `sha256:d9a6876ae0c9d72f910af0f4a59275912b66890f231a4a15a29eb922e017c9e6`.
+  Onze camadas equivalentes e dois perfis de runtime verificados; sem rebuild.
+- Backup privado:
+  `/var/backups/descomplica-crm/releases/598e11713d23da1af26365822220fc638623decb.Gg3f4w`.
+  CAS partiu de `f6730acee979cf894f0e0d581c4c5be8a74375b6`; rollback preparado,
+  nao acionado. Nginx preservado e validado.
+- Smoke limitado: 12 GETs, concorrencia 4, zero erros. Health 200 com SHA exato;
+  estoque e snapshot anonimos 401; `no-store` preservado. Nao e teste de capacidade.
+- Navegador autenticado: rota carregou o estoque, sem overflow horizontal,
+  com token `--associative-gold: #e9bd54` e gradiente metalizado publicados.
+  Nenhuma proposta ou dado remoto foi criado durante a conferencia.
+- Prova adicional local: mesma pagina em tres temas 3/3; coarse real 375 e
+  desktop 1440 2/2, com alvo 44x44, hover 1.04 e reduced motion estavel.
+  Evidencias: `62452-same-page.json` e `55666-coarse-desktop-proof.json` em
+  `test-results/guidance`. Capturas por painel evitam artefatos de header sticky.
+- Este encerramento e somente documental: nao requer nova troca de runtime.

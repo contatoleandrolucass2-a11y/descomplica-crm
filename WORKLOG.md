@@ -11,7 +11,12 @@
   Preserva autorizacao, prazos, cache/coalescencia e limite de oito CEPs da API.
   Nao aumenta concorrencia externa nem altera fontes, vagas ou classificacao.
 - Testes antes: dois cenarios integrados falharam. Depois: 235 testes de regioes
-  passaram, incluindo os dois cenarios. Gates completos e publicacao pendentes.
+  passaram, incluindo os dois cenarios. Tipos, build, lint sem bundles locais
+  e oito testes Node aprovados. Windows: 1.281 testes aprovados, quatro skips e
+  seis falhas POSIX conhecidas, sem flexibilizar os gates.
+- CI 36961528199 aprovada integralmente em 825d8a3. Main documental 0ef7b2f
+  (PR #127) integrada sem alterar runtime. Nova CI conjunta obrigatoria.
+  Publicacao da correcao pendente; evidencia final de release no PR #128.
 - Release 598e117 encontrada ja publicada; imagem conferida com a CI 36958962302
   (checksum, manifesto/config/camadas), dois perfis de runtime e backup validos.
   Nao houve novo restart nesta verificacao; nenhum dado remoto alterado.
@@ -84,10 +89,14 @@
 - Referencias ranking e calcular-documentacao consultadas somente para leitura.
 - Lint, tipos, build e jornada visual 6/6 aprovados. Suite Windows: 1008 pass,
   1 skip, seis falhas POSIX e um timeout aprovado em repeticao isolada.
-- CI Linux e publicacao pendentes; evidencia em
-  docs/audits/associativo-guia-dourado-2026-10-01.md.
+- Publicado em 02/10 no runtime integrado 598e1171, preservando PR #125.
+  PR #126 e CIs 36954146586, 36956549122 e 36958962302 verdes.
+- Imagem imutavel verificada, backup/CAS/rollback e 12 GETs sem erro;
+  navegador autenticado confirmou pagina, estoque e estilos dourados.
+- Evidencia: docs/audits/associativo-guia-dourado-2026-10-01.md.
 - Revisao coarse remove a translacao legada do botao de remuneracao; a escala
   continua restrita a dispositivos com hover e sem movimento reduzido.
+- Encerramento documental sem novo deploy; prova coarse real/desktop 2/2.
 
 ## 2026-10-01 - Layout e manual do Associativo
 

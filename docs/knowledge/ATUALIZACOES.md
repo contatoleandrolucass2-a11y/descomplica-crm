@@ -6,7 +6,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-02: Capacidade por CEP, nao apenas por lote
 
-- Status: pendente_validacao; branch codex/tabelao-regioes-fila.
+- Status: validado (regressao e CI); publicacao pendente; branch codex/tabelao-regioes-fila.
 - Fonte: smoke real de 598e117, lib/archive-investor/tabelao-region.mjs,
   tests/inventory-regions.test.ts e docs/runbooks/tabelao-regions.md.
 - Tres requests de oito CEPs equivalem a 24 consultas, nao tres. Com mapa frio,
@@ -14,7 +14,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Cliente usa um lote de tres CEPs, ordenado e progressivo; paginas simultaneas
   compartilham consultas por CEP no servidor. API preserva contrato de oito CEPs.
 - Duas regressoes integradas falharam antes e passaram depois; 235 testes focados
-  aprovados. Gates completos e publicacao da correcao ainda pendentes.
+  aprovados. CI 36961528199 totalmente aprovada em 825d8a3. Tipos, build, lint
+  do codigo e oito testes Node locais aprovados; seis falhas POSIX no Windows.
+- Main documental 0ef7b2f integrada, sem mudar runtime; CI conjunta obrigatoria.
+  Evidencia final da publicacao e da carga real de regioes sera registrada no PR #128.
 - Nao confundir region_lookup_busy com ambiguidade geografica. Contagem de
   requests HTTP reduzida nao basta para provar o comportamento com cache frio.
 
@@ -71,7 +74,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-01: Proxima acao dourada no Associativo
 
-- Status: validado_local_com_limites_windows; branch codex/associativo-guia-dourado.
+- Status: publicado_verificado_2026-10-02; runtime 598e1171; PR #126.
 - Fonte: nove capturas e pedido do usuario; referencias publicas somente leitura,
   InvestorCalculator.tsx, investor-archive.css e auditoria guia-dourado.
 - Dourado indica etapa atual, sem mudar as paletas azuis. Nao destacar a linha
@@ -87,9 +90,14 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Inputs iguais no desktop nao devem diminuir alvos mobile: manter 44px.
 - `hasTouch` isolado nao comprovou ponteiro coarse neste host. Usar contexto
   mobile real e conferir media query; neutralizar transform legado fora do hover.
-- Jornada visual 6/6, lint/tipos/build aprovados. Suite Windows 1008 pass;
-  seis falhas POSIX e timeout Obsidian aprovado em repeticao. CI/publicacao
-  pendentes; nenhuma alteracao nos sites de referencia.
+- Jornada visual 6/6, mesma pagina 3/3 e coarse real/desktop 2/2. Suite Windows
+  com limites POSIX registrados; CI Linux do PR 36954146586, main 36956549122 e
+  integrada 36958962302 aprovadas. Nenhum gate enfraquecido.
+- Main avancou com PR #125 do Tabelao; publicar descendente validado em vez
+  de sobrescrever o trabalho concorrente. Imagem/backup/CAS/rollback verificados,
+  12 GETs sem erro e pagina autenticada carregada. Referencias permaneceram intactas.
+- Fonte final: docs/audits/associativo-guia-dourado-2026-10-01.md. Encerramento
+  documental nao requer outro deploy nem prova de capacidade em producao.
 
 ## 2026-10-01: Layout inicial e FAQ do Associativo
 

@@ -4,6 +4,7 @@
 
 - Ajusta os lotes de CEP a capacidade do servidor para evitar regioes ausentes
   por fila ocupada na primeira abertura, mantendo resultados progressivos.
+- Valida a carga fria com paginas simultaneas e preserva o registro da release anterior.
 
 ## 2026-10-01 - Regioes e vagas no Tabelao
 
@@ -25,6 +26,7 @@
 
 ## 2026-10-01 - Orientacao dourada no Associativo
 
+- Disponivel em producao desde 02/10, runtime integrado 598e1171; PR #126.
 - Destaca uma pergunta ou campo por vez com acabamento dourado metalizado.
 - Corrige contornos excedentes e iguala os campos monetarios e de quantidade.
 - Afasta a renda da borda, separa Linear dos blocos decrescentes e realca o $.
