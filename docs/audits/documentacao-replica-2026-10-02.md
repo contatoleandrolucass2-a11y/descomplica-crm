@@ -1,6 +1,7 @@
 # Replica de Calcular documentacao
 
-Status: pendente_validacao. Data: 2026-10-02. Branch: codex/calcular-documentacao.
+Status: validado_local; CI e publicacao pendentes. Data: 2026-10-02.
+Branch: codex/calcular-documentacao. PR: #130.
 
 ## Fonte e escopo
 
@@ -66,7 +67,13 @@ Runtime oficial WF16, integracoes n8n e politicas comerciais permanecem inaltera
 - Primeira matriz local: 12 combinacoes sem overflow global e sem violacoes Axe;
   revisao das capturas detectou scroll horizontal interno do perfil ao redimensionar.
   Corrigido com overflow: clip local; adicionadas assercao geometrica e captura a 200%.
-- Matriz final, CI Linux e publicacao pendentes.
+- Matriz local final aprovada: 12 combinacoes (320/390/768/1440px e tres temas),
+  sem overflow ou violacoes Axe, com assercao de geometria do perfil.
+  Fluxo completo, valores de referencia, teclado/ajudas, invalidacao e impressao aprovados.
+- Layout equivalente a 200% (720x450 CSS em tela de 1440x900) aprovado.
+  O teste nao usa CSS zoom, que nao reproduz a mudanca de media queries do navegador.
+- Oito testes Node/Salesforce aprovados. CI Linux e publicacao pendentes no PR #130;
+  nao promover em caso de gate reprovado. Evidencia final sera anexada ao PR.
 - Docker local indisponivel; gates de banco/restore devem rodar na CI Linux.
 
 ## Seguranca e retorno

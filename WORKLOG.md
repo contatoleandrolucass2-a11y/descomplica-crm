@@ -2,6 +2,10 @@
 
 ## 2026-10-02 - Validacao da guia de documentacao
 
+- PR #130. Matriz local final aprovada: 12 combinacoes, sem overflow ou violacoes Axe,
+  fluxo completo, impressao e layout equivalente a 200%. Oito testes Node aprovados.
+  CI Linux e publicacao ainda pendentes; evidencia final sera registrada no PR.
+
 - Lint, typecheck, build e 32 testes focados aprovados; motor igual a referencia em
   2.048 casos. Suite Windows: 1.271 aprovados, 4 ignorados e 20 falhas POSIX/timeouts
   de infraestrutura sob carga; CI Linux obrigatoria antes da publicacao.

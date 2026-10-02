@@ -2,6 +2,8 @@
 
 ## 2026-10-02 - Validacao da documentacao
 
+- Registra matriz local aprovada em tres temas e quatro larguras, com impressao e
+  layout equivalente a zoom 200%; CI e publicacao acompanhadas no PR #130.
 - Corrige classes dos estados sequenciais e recorte interno ao redimensionar a nova
   guia; reforca contraste e verificacao de geometria/zoom sem mudar formulas.
 

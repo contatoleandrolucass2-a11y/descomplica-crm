@@ -15,8 +15,12 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - A nova replica usa a rota protegida existente e o item antes Em breve no SiteMenu.
   Nao requer habilitar runtime WF16, n8n, migrations ou novas permissoes.
 - Conteudo integral inclui ajudas Em construcao, impressao, auditoria e alertas.
-- Testes focados: 32 aprovados; typecheck inicial aprovado. Restam validacao integral,
-  navegador e gates de publicacao. Registro detalhado no documento de auditoria.
+- Lint, typecheck, build, 32 testes focados e oito testes Node aprovados. Matriz local
+  final: 12 combinacoes sem overflow ou violacoes Axe, impressao e layout de zoom 200%.
+- Decoracao com overflow hidden podia gerar scroll interno ao focar e redimensionar;
+  overflow clip localizado preserva a geometria. Testar limites internos, nao so o body.
+- Suite Windows: 1.271 aprovados, quatro skips e 20 falhas POSIX/timeouts sob carga.
+  CI Linux e publicacao pendentes no PR #130; gates nao foram reduzidos.
 
 ## 2026-10-02: Capacidade por CEP, nao apenas por lote
 
