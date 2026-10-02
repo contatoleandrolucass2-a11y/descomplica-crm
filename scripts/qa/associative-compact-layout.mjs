@@ -31,7 +31,7 @@ export async function checkAssociativeWorkspaceGaps(page) {
   return geometry;
 }
 
-async function stockRowIsSilver(row) {
+async function stockRowIsGold(row) {
   return row.evaluate((element) =>
     [...element.cells].every((cell) => {
       const style = getComputedStyle(cell);
@@ -39,15 +39,12 @@ async function stockRowIsSilver(row) {
         color.match(/[\d.]+/gu).map(Number),
       );
       return (
-        style.backgroundColor === "rgb(220, 228, 239)" &&
-        style.color === "rgb(20, 36, 59)" &&
+        style.backgroundColor === "rgb(233, 189, 84)" &&
+        style.color === "rgb(46, 35, 12)" &&
         stops.length >= 2 &&
         stops.every(
           ([r, g, b, alpha = 1]) =>
-            alpha === 1 &&
-            Math.min(r, g, b) >= 140 &&
-            Math.max(r, g, b) - Math.min(r, g, b) <= 35 &&
-            b >= r - 5,
+            alpha === 1 && r >= 200 && g >= 150 && r > g && g - b >= 35 && r - g <= 80,
         ) &&
         Math.max(...stops.map(([r]) => r)) - Math.min(...stops.map(([r]) => r)) >= 20
       );
@@ -55,14 +52,14 @@ async function stockRowIsSilver(row) {
   );
 }
 
-export async function checkAssociativeSelectedSilverPaint(page) {
+export async function checkAssociativeSelectedGoldPaint(page) {
   const selected = page.locator(
     '.investor-associative-table-page .investor-stock-table tr[aria-selected="true"]',
   );
   await expect(selected).toHaveCount(1);
   await expect
-    .poll(() => stockRowIsSilver(selected), {
-      message: "Selected row must remain silver without hover or focus",
+    .poll(() => stockRowIsGold(selected), {
+      message: "Selected row must remain gold without hover or focus",
     })
     .toBe(true);
 }
@@ -362,22 +359,22 @@ export async function checkAssociativeCompactStock(page) {
   });
   await expect(rows.first()).toHaveAttribute("aria-rowindex", "2");
   const firstRow = rows.first();
-  const silverRow = () => stockRowIsSilver(firstRow);
+  const goldRow = () => stockRowIsGold(firstRow);
   await firstRow.hover();
   await expect
-    .poll(silverRow, { message: "Entire hovered row must be silver with dark readable text" })
+    .poll(goldRow, { message: "Entire hovered row must be gold with dark readable text" })
     .toBe(true);
   await page.mouse.move(0, 0);
   await firstRow.getByRole("button").focus();
   await expect
-    .poll(silverRow, { message: "Keyboard focus must receive the same silver row highlight" })
+    .poll(goldRow, { message: "Keyboard focus must receive the same gold row highlight" })
     .toBe(true);
   await stock.focus();
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  return { ...geometry, hero, header, allInventoryReachable: true, silverHoverAndFocus: true };
+  return { ...geometry, hero, header, allInventoryReachable: true, goldHoverAndFocus: true };
 }
 
-// Keep the imported CI entry point stable; the selection contract is now metallic silver.
+// Keep the imported CI entry point stable; the selection contract is now metallic gold.
 export async function checkAssociativeSelectedGold(page) {
   const stock = page.locator(".investor-associative-table-page .investor-stock-results");
   const first = stock.locator("tbody tr.selectable[aria-rowindex]").first();
@@ -387,7 +384,7 @@ export async function checkAssociativeSelectedGold(page) {
   if (!wasSelected) await expect(page.locator(".investor-associative-qualification")).toBeFocused();
   await page.mouse.move(0, 0);
   await stock.focus();
-  await checkAssociativeSelectedSilverPaint(page);
+  await checkAssociativeSelectedGoldPaint(page);
   await expect(first.getByRole("button")).toHaveAttribute("aria-pressed", "true");
   const filters = page.locator(".investor-stock-filters");
   const count = await stock.locator("table").getAttribute("aria-rowcount");

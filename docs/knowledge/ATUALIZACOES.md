@@ -4,6 +4,17 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-02: Azul noturno e retorno ao dourado no Associativo
+
+- Status: pendente_validacao; branch codex/associativo-azul-noturno-dourado.
+- Fonte: pedido posterior do usuario, investor-archive.css e testes de temas.
+- A solicitacao mais recente substitui o prata por dourado metalico e pede
+  azul quase preto; nao reaplicar #001c54/#002774 por referencia anterior.
+- Tokens restritos ao Associativo preservam as outras tabelas. O brilho de 3s
+  continua somente na acao pendente e respeita prefers-reduced-motion.
+- Testes focados: 28 aprovados, incluindo contraste >=4.5:1 nos fundos escuros
+  e em todas as paradas do gradiente dourado. CI/publicacao pendentes.
+
 ## 2026-10-02: Ordem territorial e falhas transitorias do Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-regioes-layout, base 727c858.
