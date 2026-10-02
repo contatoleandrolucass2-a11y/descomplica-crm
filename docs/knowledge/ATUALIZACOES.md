@@ -18,6 +18,23 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Testes focados: 32 aprovados; typecheck inicial aprovado. Restam validacao integral,
   navegador e gates de publicacao. Registro detalhado no documento de auditoria.
 
+## 2026-10-02: Capacidade por CEP, nao apenas por lote
+
+- Status: validado (regressao e CI); publicacao pendente; branch codex/tabelao-regioes-fila.
+- Fonte: smoke real de 598e117, lib/archive-investor/tabelao-region.mjs,
+  tests/inventory-regions.test.ts e docs/runbooks/tabelao-regions.md.
+- Tres requests de oito CEPs equivalem a 24 consultas, nao tres. Com mapa frio,
+  a fila de cinco segundos descartava CEPs antes dos tres slots serem liberados.
+- Cliente usa um lote de tres CEPs, ordenado e progressivo; paginas simultaneas
+  compartilham consultas por CEP no servidor. API preserva contrato de oito CEPs.
+- Duas regressoes integradas falharam antes e passaram depois; 235 testes focados
+  aprovados. CI 36961528199 totalmente aprovada em 825d8a3. Tipos, build, lint
+  do codigo e oito testes Node locais aprovados; seis falhas POSIX no Windows.
+- Main documental 0ef7b2f integrada, sem mudar runtime; CI conjunta obrigatoria.
+  Evidencia final da publicacao e da carga real de regioes sera registrada no PR #128.
+- Nao confundir region_lookup_busy com ambiguidade geografica. Contagem de
+  requests HTTP reduzida nao basta para provar o comportamento com cache frio.
+
 ## 2026-10-01: Regioes e vagas do Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-regioes-vagas.
