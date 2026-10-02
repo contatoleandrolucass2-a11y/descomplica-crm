@@ -96,7 +96,7 @@ describe("Tabelão protegido", () => {
     expect(authorizedBreadcrumbs).toContain('"/app/simulacao/tabelao"');
   });
 
-  it("replica os seis filtros e preserva a densidade e as doze colunas", () => {
+  it("preserva sete selects e quatorze colunas compactas", () => {
     const client = readFileSync(
       new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
       "utf8",
@@ -114,12 +114,14 @@ describe("Tabelão protegido", () => {
     );
 
     const visibleColumnLabels = [
+      "Região",
       "Incorporadora",
       "Empreendimento",
       "Endereço",
       "Metragem",
       "Entrega",
       "Planta",
+      "Vagas",
       "Estoque",
       "Valor Imóvel",
       "Volta ao Caixa",
@@ -140,6 +142,11 @@ describe("Tabelão protegido", () => {
       (match) => match[1],
     );
     expect(renderedCellLabels).toEqual(visibleColumnLabels);
+    const columnSource = client.slice(client.indexOf("<colgroup>"), client.indexOf("</colgroup>"));
+    expect(columnSource.match(/<col className=/g)).toHaveLength(14);
+    expect(client.indexOf('className="tabelao-stock-col-region"')).toBeLessThan(
+      client.indexOf('className="investor-stock-col-business"'),
+    );
     expect(client.indexOf('className="tabelao-stock-col-address"')).toBeLessThan(
       client.indexOf('className="investor-stock-col-area"'),
     );
@@ -152,6 +159,7 @@ describe("Tabelão protegido", () => {
       "Logradouro Obra / Número / Bairro",
       "Total do andamento da obra (%)",
       "Outras descrições",
+      "Quantidade de vagas",
     ]) {
       expect(tableHeaderSource).toContain(`aria-label="${accessibleLabel}"`);
     }
@@ -171,12 +179,16 @@ describe("Tabelão protegido", () => {
       "Valor do Imóvel",
       "Ordenar valor",
       "Limpar filtros",
+      "Quantidade de vagas",
     ]) {
       expect(filters).toContain(label);
     }
     expect(filters).toContain('className="investor-stock-filters"');
     expect(filters).toContain("disabled={disabled}");
     expect(filters).toContain('name="priceOrder"');
+    expect(filters.match(/\{ dimension: "/g)).toHaveLength(6);
+    expect(filters.match(/<select\b/g)).toHaveLength(2);
+    expect(filters).toContain("{fields.map(");
     expect(client.indexOf("<TabelaoFilters")).toBeGreaterThan(
       client.indexOf('id="tabelao-stock-title"'),
     );
@@ -188,7 +200,7 @@ describe("Tabelão protegido", () => {
     expect(client).not.toContain("buildInvestorFilterOptions");
     expect(client).not.toContain("matchesInvestorFilters");
     expect(client).not.toContain("reconcileInvestorFilters");
-    expect(client).toContain("buildTabelaoExclusiveInventory(inventory)");
+    expect(client).toContain("buildTabelaoExclusiveInventory(inventoryWithRegions)");
     expect(client).toContain('"/api/inventory/snapshot"');
     expect(client).toContain("enrichTabelaoLocationFields(payload.items, referencePayload.items)");
     expect(client).not.toContain("Promise.all([");
@@ -217,7 +229,8 @@ describe("Tabelão protegido", () => {
     expect(client).toContain("formatProgress(item.progress)");
     expect(client).toContain("descriptiveLabel(item.classification)");
     expect(client).toContain('className="tabelao-stock-area"');
-    expect(client.match(/colSpan=\{12\}/g)).toHaveLength(3);
+    expect(client.match(/colSpan=\{14\}/g)).toHaveLength(3);
+    expect(client).toContain('item.parkingSpaces ?? "Não informado"');
     expect(client).toContain("total + item.pricedUnits");
     expect(client).not.toContain("INVENTORY_WINDOW_SIZE");
     expect(client).not.toContain("Spacer");
@@ -278,6 +291,13 @@ describe("Tabelão protegido", () => {
       "utf8",
     );
     expect(client).toContain("buildTabelaoCellSpans(group.items.map(formatAddress))");
+    expect(client).toContain("buildTabelaoCellSpans(group.items.map(resolveTabelaoRegion))");
+    expect(client).toContain("const regionSpan = group.regionSpans[itemIndex] ?? 1");
+    expect(client).toContain("rowSpan={regionSpan}");
+    expect(client).toContain("regionSpan > 0");
+    expect(client).toMatch(/<td\s+className="tabelao-stock-long-text"\s+data-label="Região"/);
+    expect(client).toContain("title={formatRegionTitle(item)}");
+    expect(client).toContain("data-inventory-region={resolveTabelaoRegion(item)}");
     expect(client).toContain("group.items.map((item) => descriptiveLabel(item.classification))");
     expect(client).toContain("const addressSpan = group.addressSpans[itemIndex] ?? 1");
     expect(client).toContain(
@@ -287,6 +307,9 @@ describe("Tabelão protegido", () => {
     expect(client).toContain("rowSpan={classificationSpan}");
     expect(client).toContain("addressSpan > 0");
     expect(client).toContain("classificationSpan > 0");
+    expect(styles).toMatch(
+      /\[headers~="tabelao-region"\] \.tabelao-stock-wrapped-text\s*\{\s*width: 66px;/,
+    );
     expect(styles).toMatch(
       /\.tabelao-page-shell \.investor-stock-results\s*\{[^}]*width: fit-content;[^}]*max-width: calc\(100% - 48px\);/,
     );
@@ -302,6 +325,34 @@ describe("Tabelão protegido", () => {
     expect(styles).toMatch(
       /\[headers~="tabelao-description"\] \.tabelao-stock-wrapped-text\s*\{\s*width: 58px;/,
     );
+  });
+
+  it("combina regiões sem substituir estoque, complementar endereço ou redefinir filtros", () => {
+    const client = readFileSync(
+      new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
+      "utf8",
+    );
+    const regionLoad = client.slice(
+      client.indexOf("void loadTabelaoRegions("),
+      client.indexOf("} catch (error)"),
+    );
+    expect(regionLoad).toContain("controller.signal");
+    expect(regionLoad).toContain("if (!active) return");
+    expect(regionLoad).toContain("new Map(current).set(postalCode, resolution)");
+    expect(regionLoad).not.toMatch(/setInventory|setFilters|clearFilters|setLoadState/);
+    expect(client.indexOf('setLoadState("ready")')).toBeLessThan(
+      client.indexOf("void loadTabelaoRegions("),
+    );
+    expect(client).toContain("[inventory, regionResolutions]");
+    expect(client).toMatch(/inventory\.map\(\(item\) => \(\{\s*\.\.\.item,\s*regionResolution:/);
+    expect(client).toContain("regionResolutions.get(normalizeTabelaoPostalCode(item.postalCode)");
+    expect(client).toContain(
+      'regionResolutions.get(normalizeTabelaoPostalCode(item.postalCode) ?? "") ?? null',
+    );
+    expect(client).not.toContain("?? item.regionResolution");
+    expect(client).toContain("active = false;");
+    expect(client).toContain("controller.abort();");
+    expect(client).toContain("}, [loadKey]);");
   });
 
   it("preserva cada unidade, filtra e ordena com os helpers do estoque", () => {

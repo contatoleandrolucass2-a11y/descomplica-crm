@@ -1,5 +1,40 @@
 # Worklog
 
+## 2026-10-01 - Regiao automatica e possibilidades de vagas no Tabelao
+
+- Branch codex/tabelao-regioes-vagas. Campos canonicos postalCode e parkingSpaces
+  ja preservados pela API viva; nao e necessario consultar outro banco ou migrar schema.
+- Agrupamento acrescenta vagas, com minimo liquido e quantidade por combinacao.
+  Zero nao equivale a ausente; formula financeira e outras tabelas preservadas.
+- Regiao ocupa a primeira coluna. Consulta por CEP cruza municipio/IBGE do ViaCEP,
+  todos os distritos do Localiza Sampa e nomes de regiao do GeoSampa. CEP ambiguo,
+  conflito de fontes, resposta incompleta ou indisponibilidade falham sem inferencia.
+- Consulta protegida, no-store, cache limitado e coalescencia por CEP. Tres consultas
+  simultaneas, fila limitada, prazos e cooldown; nenhum enriquecimento bloqueia estoque.
+- Fonte territorial oficial HTTP e sem SLA permanece uma limitacao documentada;
+  nao se promete precisao absoluta, nem se converte bairro em distrito por suposicao.
+- Typecheck, build, lint do codigo e oito testes Node aprovados. Testes de cliente,
+  inventario e UI: 200 aprovados; backend: 135 aprovados. Sete cenarios Chromium
+  locais passam com filtros, textos, centralizacao, lotes, mobile e zoom.
+- Auditoria agregada da fonte atual: 20 dos 22 CEPs confirmados; dois conflitos
+  de endereco permanecem nao confirmados. Smoke publico cobre CEP ambiguo e outra cidade.
+- pnpm lint inicial encontrou bundles locais nao versionados; lint sem test-results
+  passou. Suite Windows: 1.205 aprovados, quatro skips, seis falhas POSIX e dois
+  timeouts de conhecimento; repeticao isolada: 21/22, um timeout. Nenhum gate
+  reduzido; CI Linux, comparacao visual e publicacao permanecem pendentes.
+- CI Linux 36952238409 aprovou 1.279 testes Vitest (quatro skips), oito Node,
+  formato, lint, tipos, build, banco, restore isolado e E2E de autorizacao.
+- Matriz funcional aprovada: 140 rotas, 80 temas, 193 axe, 100 checks de zoom;
+  regioes assincronas e vagas passaram. Somente sete capturas do Tabelao com
+  pixel drift intencional, revisadas individualmente e promovidas pela rotina
+  canonica; outras 186 preservadas byte a byte, sem reduzir limiares.
+- PR #125; captura dd373aa, codigo 02074e7. Nova CI com referencias revisadas e
+  publicacao pendentes. Evidencia final de release sera registrada no PR.
+- CI 36954481187 totalmente aprovada em 805e0ca. Main ef0a2fb (PR #126)
+  integrada sem conflito e sem modificar o guia do Associativo; repetir CI
+  conjunta antes do merge. Nenhum deploy do Tabelao realizado ate esta etapa.
+- Runbook: docs/runbooks/tabelao-regions.md. Sem n8n, migration ou escrita remota.
+
 ## 2026-10-01 - Cabecalhos legiveis e colunas centralizadas no Tabelao
 
 - Remove as fontes de 4/6px dos cabecalhos: titulos e conteudo compartilham 10px

@@ -22353,6 +22353,20 @@ body:has(.investor-page-shell) {
   width: 58px;
 }
 
+.tabelao-page-shell [headers~="tabelao-region"] .tabelao-stock-wrapped-text {
+  width: 66px;
+}
+
+.tabelao-page-shell [headers~="tabelao-parking"] .tabelao-stock-wrapped-text {
+  width: 48px;
+}
+
+@media (min-width: 1101px) {
+  .investor-page-shell.tabelao-page-shell .investor-stock-filters {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 1100px) {
   .tabelao-page-shell .investor-stock-filters .investor-filter-heading {
     height: 44px !important;

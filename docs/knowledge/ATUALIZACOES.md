@@ -4,6 +4,35 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-01: Regioes e vagas do Tabelao
+
+- Status: pendente_validacao; branch codex/tabelao-regioes-vagas.
+- Fonte: pedido do usuario, origem de estoque configurada, ViaCEP, Localiza Sampa,
+  GeoSampa WFS; lib/inventory/region-lookup.ts e docs/runbooks/tabelao-regions.md.
+- postalCode e parkingSpaces ja chegam da origem HTTP. A consulta atual nao prova
+  atualizacao do estoque nem vinculo com uma coluna SQL; preservar generatedAt.
+- CEP pode abranger distritos de zonas diferentes. Nao usar primeiro resultado,
+  faixas aproximadas de CEP, bairro como distrito ou codigos entre sistemas.
+- Localiza Sampa e GeoSampa usam codigos de distrito diferentes. Cruzar os nomes
+  oficiais e nm_regiao_05; nao interpretar o codigo de regiao isoladamente.
+- Fonte HTML sem API/SLA e apenas HTTP verificado: parse estrutural, contagem de
+  linhas, CEP e logradouro cruzados; qualquer conflito fica nao confirmado.
+- Cache territorial nao leva sessao; autorizar cada request antes dele. Consultas
+  opcionais nao podem sobrescrever endereco, selecoes ou impedir uso do estoque.
+- Vagas entram na chave da opcao, no estoque e nas facetas. null nao vira zero.
+- 335 testes focados aprovados; sete cenarios Chromium com componente/CSS reais
+  passam. Fonte atual: 20/22 CEPs confirmados, dois conflitos mantidos nao confirmados.
+- Lint do codigo, tipos, build e oito testes Node aprovados. Windows registra seis
+  falhas POSIX e timeouts na suite de conhecimento, sem alterar gates.
+- CI Linux 36952238409: 1.279 Vitest e oito Node aprovados, quatro skips;
+  formato, lint, tipos, build, banco, restore isolado e E2E aprovados.
+- Matriz funcional passou (140 rotas, 80 temas, 193 axe, 100 zoom). Sete capturas
+  do Tabelao revisadas e promovidas; outras 186 preservadas. PR #125, captura
+  dd373aa e codigo 02074e7. CI final e publicacao pendentes; fechamento no PR.
+- CI 36954481187 passou integralmente em 805e0ca. Integrada main ef0a2fb
+  (guia do Associativo, PR #126), preservando seus arquivos e as referencias
+  visuais. Nova CI conjunta e publicacao pendentes; nenhum deploy desta etapa.
+
 ## 2026-10-01: Cabecalhos e alinhamento do Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-cabecalhos-centralizados.

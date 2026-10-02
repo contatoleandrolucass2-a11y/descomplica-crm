@@ -42,6 +42,9 @@ describe("Tabelao payload and request lifecycle", () => {
     { count: 1, items: [{ ...item, plant: {} }] },
     { count: 1, items: [{ ...item, streetNumber: 10 }] },
     { count: 1, items: [{ ...item, finalWithKit: "300000" }] },
+    { count: 1, items: [{ ...item, parkingSpaces: "1" }] },
+    { count: 1, items: [{ ...item, parkingSpaces: -1 }] },
+    { count: 1, items: [{ ...item, parkingSpaces: 1.5 }] },
     { ...payload, generatedAt: {} },
   ])("rejects malformed data before it can crash rendering: %j", async (invalid) => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(invalid)));
@@ -56,6 +59,23 @@ describe("Tabelao payload and request lifecycle", () => {
     expect(needsTabelaoLocationReference([{ ...item, streetNumber: " " }])).toBe(true);
     expect(needsTabelaoLocationReference([{ ...item, neighborhood: null }])).toBe(true);
   });
+
+  it.each([0, 1, 2, null, undefined])(
+    "preserves parking spaces including zero and unknown: %s",
+    async (parkingSpaces) => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(
+          Response.json({
+            count: 1,
+            items: [{ ...item, parkingSpaces }],
+          }),
+        ),
+      );
+      const result = await fetchInventoryPayload(url, new AbortController().signal);
+      expect(result.items[0]?.parkingSpaces).toBe(parkingSpaces);
+    },
+  );
 
   it("bounds waiting for headers to 25 seconds and permits a subsequent retry", async () => {
     const deadline = new AbortController();

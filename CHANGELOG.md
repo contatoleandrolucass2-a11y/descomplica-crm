@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-01 - Regioes e vagas no Tabelao
+
+- Adiciona Regiao na primeira coluna, com consulta automatica por CEP e fontes
+  de municipio, distrito e regiao; casos ambiguos permanecem nao confirmados.
+- Separa os menores valores e o estoque por empreendimento, planta e vagas,
+  com coluna e filtro de vagas, distinguindo zero de quantidade desconhecida.
+- Preserva compactacao, textos completos, centralizacao e Endereco apos Empreendimento.
+- Protege e limita as consultas de localizacao, sem bloquear o estoque.
+- Atualiza sete referencias visuais revisadas, sem mudar as demais rotas.
+- Preserva o guia atualizado do Associativo na integracao com a main.
+
 ## 2026-10-01 - Titulos e colunas do Tabelao
 
 - Igualar a fonte dos cabecalhos ao tamanho das linhas, preservando a compactacao.

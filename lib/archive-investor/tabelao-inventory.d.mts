@@ -1,3 +1,5 @@
+import type { TabelaoRegionResolution } from "./tabelao-region.mjs";
+
 export interface TabelaoInventoryItem {
   id?: string;
   businessUnit?: string | null;
@@ -5,6 +7,7 @@ export interface TabelaoInventoryItem {
   product?: string | null;
   identifier?: string | null;
   plant?: string | null;
+  parkingSpaces?: number | null;
   finalPrice?: number | null;
   finalWithKit?: number | null;
   unitBonus?: number | null;
@@ -19,6 +22,9 @@ export interface TabelaoInventoryItem {
   district?: string | null;
   region?: string | null;
   postalCode?: string | null;
+  city?: string | null;
+  state?: string | null;
+  regionResolution?: TabelaoRegionResolution | null;
   progress?: number | null;
 }
 
@@ -26,6 +32,7 @@ export interface TabelaoExclusiveFields {
   businessUnit: string;
   project: string;
   plant: string;
+  parkingSpaces: number | null;
   minimumPrice: number;
   exclusiveKey: string;
   availableUnits: number;
@@ -50,6 +57,7 @@ export interface TabelaoFilters {
   businessUnit?: string;
   project?: string;
   plant?: string;
+  parkingSpaces?: string;
   region?: string;
   priceRange?: string;
 }
@@ -58,6 +66,7 @@ export interface TabelaoOptions {
   businessUnits: string[];
   projects: string[];
   plants: string[];
+  parkingSpaces: string[];
   regions: string[];
 }
 
@@ -77,6 +86,10 @@ export function enrichTabelaoLocationFields<T extends TabelaoInventoryItem>(
 ): Array<T & Pick<TabelaoInventoryItem, "street" | "streetNumber" | "neighborhood">>;
 
 export function normalizeTabelaoProgress(value: unknown): number | null;
+
+export function normalizeTabelaoParkingSpaces(value: unknown): number | null;
+
+export function formatTabelaoParkingSpaces(value: unknown): string;
 
 export function calculateTabelaoPrice(item: TabelaoInventoryItem): number | null;
 
@@ -98,7 +111,13 @@ export function buildTabelaoOptions(items: readonly TabelaoInventoryItem[]): Tab
 
 export function summarizeTabelao(items: readonly TabelaoInventoryItem[]): TabelaoSummary;
 
-export type TabelaoFilterDimension = "businessUnit" | "project" | "region" | "plant" | "price";
+export type TabelaoFilterDimension =
+  | "businessUnit"
+  | "project"
+  | "region"
+  | "plant"
+  | "parkingSpaces"
+  | "price";
 export type TabelaoFacetFilters = Record<TabelaoFilterDimension, string>;
 export const TABELAO_FILTER_DEFAULTS: Readonly<TabelaoFacetFilters>;
 export interface TabelaoFacet {

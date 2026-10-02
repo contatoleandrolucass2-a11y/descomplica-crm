@@ -58,7 +58,11 @@ function isItem(value: unknown): value is TabelaoPayloadItem {
     numberFields.every(
       (field) =>
         value[field] == null || (typeof value[field] === "number" && Number.isFinite(value[field])),
-    )
+    ) &&
+    (value.parkingSpaces == null ||
+      (typeof value.parkingSpaces === "number" &&
+        Number.isSafeInteger(value.parkingSpaces) &&
+        value.parkingSpaces >= 0))
   );
 }
 

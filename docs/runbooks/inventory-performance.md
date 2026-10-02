@@ -96,4 +96,6 @@ preservacao da proposta e contagens de filtros. Conferir em navegador autenticad
 desktop/mobile e comparar cache frio/quente separadamente.
 
 Reverter a versao da aplicacao remove o cache e restaura a sequencia anterior.
-Nao ha migration, alteracao de workflow n8n ou nova dependencia de runtime.
+Nao ha migration ou alteracao de workflow n8n. O complemento territorial do
+Tabelao usa parse5 e consultas separadas, limitadas e nao bloqueantes; conferir
+[Regioes e vagas](tabelao-regions.md) para fontes, contratos, caches e limites.
