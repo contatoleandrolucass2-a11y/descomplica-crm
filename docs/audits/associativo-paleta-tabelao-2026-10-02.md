@@ -32,11 +32,32 @@
 - Captura limpa 6a1a80fee6f41c6231980ef1c07f2aec8b4ed338, artefato
   11251914554: duas capturas revisadas visualmente e promovidas pelo codigo
   canonico transacional. Outras 191 preservadas, incluindo todo o Tabelao.
-- Nenhum gate, tolerancia ou mascara alterado. Nova CI integral pendente.
+- Nenhum gate, tolerancia ou mascara alterado. CI PR 37067036288 aprovada.
+- PR #136 integrado em 150b77129723db56c09e896a42a4703f0df0fbfe. CI main
+  37069870083 integralmente aprovada, incluindo imagem imutavel.
 - Promover apenas diferencas visuais revisadas do Associativo, sem reduzir
   gates ou alterar referencias do Tabelao e das demais rotas.
 
 ## Publicacao
 
-Pendente. Exigir CI integral, imagem imutavel, backup, CAS, rollback e
-verificacao observacional da versao/saude e jornada publicada.
+- Runtime publicado: 150b77129723db56c09e896a42a4703f0df0fbfe.
+- Anterior: d77b2d8d0e680f742d298ea37288c5164efad471.
+- SHA-256 do arquivo: 4cae9aa14937d925aba7bb2f8281bd88862bab79e5634eac6a0e534527464f28.
+- Config CI: sha256:87327f015a34b5487fcb1f2c1ff0b8d6ac15f09d34397ba4e68c20d8b91d4cae.
+- Manifesto carregado: sha256:9c498c84618cf0eca0daa24f87a3de051b7d6f4af385dda885084da56cad87e8.
+- Equivalencia comprovada por cadeia de hashes e 11 camadas; dois perfis de
+  runtime aprovados na mesma imagem. Sem rebuild no VPS.
+- Backup privado: /var/backups/descomplica-crm/releases/150b77129723db56c09e896a42a4703f0df0fbfe.GiKy6m.
+  Checksums de ambiente, Nginx e imagem anterior conferidos. CAS e rollback
+  preparado; Nginx preservado e valido. Nenhum dado remoto alterado.
+- Health local/publico com versao exata e status ok. Smoke observacional:
+  12 requisicoes, concorrencia 4, zero erro; health 200, inventario e snapshot
+  401 sem autenticacao. Nao representa prova de capacidade de producao.
+- Navegador autenticado: fundo #061f35, painel #0a2b47, cabecalho #0e4163,
+  campos #071a31 e bordas #3d7898 confirmados. Card corrente com gradiente
+  dourado metalico, texto #2e230c e investor-guided-card-shine de 3s.
+- Duas etapas seguintes bloqueadas durante a primeira; selecao visual local
+  desfeita por reload ao terminar, sem salvar proposta ou dados de cliente.
+- Tabelao somente consultado como referencia. Nenhuma mudanca em seu CSS,
+  tokens compartilhados, dados ou configuracoes.
+- Fechamento documental publicado pelo Git; nao requer novo deploy/restart.

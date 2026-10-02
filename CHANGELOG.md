@@ -6,6 +6,7 @@
 - Mantem selecoes e proximas acoes em dourado metalico, com brilho de 3s.
 - Tabelao, temas compartilhados, layout e calculos permanecem inalterados.
 - Atualiza duas referencias escuras revisadas; demais 191 preservadas.
+- Publicado em 150b771 apos CI integral e verificacao da pagina no ar.
 
 ## 2026-10-02 - Titulos legiveis e texto compacto no Tabelao
 
