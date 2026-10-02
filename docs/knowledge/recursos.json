@@ -140,9 +140,14 @@
       "name": "Estoque",
       "agent": "crm-performance",
       "skill": "descomplica-dados-integracoes",
-      "routes": ["app/api/inventory/route.ts", "app/api/inventory/snapshot/route.ts"],
+      "routes": [
+        "app/api/inventory/route.ts",
+        "app/api/inventory/snapshot/route.ts",
+        "app/api/inventory/regions/route.ts"
+      ],
       "evidence": [
         "tests/inventory-api.test.ts",
+        "tests/inventory-regions.test.ts",
         "tests/inventory-loading.test.ts",
         "docs/runbooks/inventory-performance.md"
       ]

@@ -3,6 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  formatTabelaoRegionTitle as formatRegionTitle,
+  loadTabelaoRegions,
+  normalizeTabelaoPostalCode,
+  resolveTabelaoRegion,
+  type TabelaoRegionResolution,
+} from "@/lib/archive-investor/tabelao-region.mjs";
+
+import {
   fetchInventoryPayload,
   needsTabelaoLocationReference,
   type TabelaoPayload as InventoryPayload,
@@ -14,6 +22,7 @@ import {
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
   enrichTabelaoLocationFields,
+  formatTabelaoParkingSpaces,
   groupTabelaoInventoryByProject,
   matchesTabelaoFacets,
   normalizeTabelaoProgress,
@@ -35,7 +44,7 @@ const TABELAO_TOUR_STEPS = [
     eyebrow: "Visão geral",
     title: "Consulte todas as tipologias",
     description:
-      "Cada empreendimento apresenta uma unidade por planta, escolhida pelo menor valor: Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela). Metragens diferentes da mesma planta não criam opções repetidas. Todas as plantas com dados válidos permanecem disponíveis.",
+      "Cada empreendimento apresenta uma unidade por planta e quantidade de vagas, escolhida pelo menor valor: Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela). Metragens diferentes da mesma planta e quantidade de vagas não criam opções repetidas. Todas as combinações com dados válidos permanecem disponíveis.",
     tip: "Avançar no guia não altera a lista nem abre outra página.",
     checklist: ["Consulte o estoque", "Compare as unidades", "Confira as quantidades"],
   },
@@ -125,6 +134,9 @@ function inventoryMetadata(payload: InventoryPayload): InventoryMeta {
 
 export function TabelaoClient() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [regionResolutions, setRegionResolutions] = useState<
+    Map<string, TabelaoRegionResolution | null>
+  >(() => new Map());
   const [inventoryMeta, setInventoryMeta] = useState<InventoryMeta | null>(null);
   const [locationReferenceMeta, setLocationReferenceMeta] = useState<InventoryMeta | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
@@ -176,10 +188,21 @@ export function TabelaoClient() {
         const payload = await fetchInventoryPayload("/api/inventory", controller.signal);
         if (!active) return;
         setInventory(payload.items);
+        setRegionResolutions(new Map());
         setInventoryMeta(inventoryMetadata(payload));
         setLocationReferenceMeta(null);
         setLoadState("ready");
         void loadLocationReference(payload);
+        void loadTabelaoRegions(
+          payload.items.map((item) => item.postalCode),
+          controller.signal,
+          (postalCode, resolution) => {
+            if (!active) return;
+            setRegionResolutions((current) =>
+              active ? new Map(current).set(postalCode, resolution) : current,
+            );
+          },
+        );
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
         if (active) setLoadState("error");
@@ -204,7 +227,19 @@ export function TabelaoClient() {
     return () => window.removeEventListener("investor:start-guide", openGuide);
   }, []);
 
-  const exclusiveInventory = useMemo(() => buildTabelaoExclusiveInventory(inventory), [inventory]);
+  const inventoryWithRegions = useMemo(
+    () =>
+      inventory.map((item) => ({
+        ...item,
+        regionResolution:
+          regionResolutions.get(normalizeTabelaoPostalCode(item.postalCode) ?? "") ?? null,
+      })),
+    [inventory, regionResolutions],
+  );
+  const exclusiveInventory = useMemo(
+    () => buildTabelaoExclusiveInventory(inventoryWithRegions),
+    [inventoryWithRegions],
+  );
   const facets = useMemo(
     () => buildTabelaoFacets(exclusiveInventory, filters),
     [exclusiveInventory, filters],
@@ -222,6 +257,7 @@ export function TabelaoClient() {
     () =>
       groupTabelaoInventoryByProject(matchingInventory).map((group) => ({
         ...group,
+        regionSpans: buildTabelaoCellSpans(group.items.map(resolveTabelaoRegion)),
         addressSpans: buildTabelaoCellSpans(group.items.map(formatAddress)),
         classificationSpans: buildTabelaoCellSpans(
           group.items.map((item) => descriptiveLabel(item.classification)),
@@ -479,27 +515,29 @@ export function TabelaoClient() {
         <div
           className="investor-stock-results"
           role="region"
-          aria-label="Menores valores por empreendimento e planta"
+          aria-label="Menores valores por empreendimento, planta e vagas"
           tabIndex={0}
           data-tour="inventory"
         >
           <table className="investor-stock-table" aria-rowcount={matchingInventory.length + 1}>
             <caption className="sr-only">
-              Todas as plantas por empreendimento. Menor valor = Valor Final Com Kit − (B.A. da
-              Unidade + Folga de Tabela). Folga Volta ao Caixa, avaliação bancária, andamento da
-              obra e outras descrições pertencem à mesma unidade que define o menor valor. O
-              endereço prioriza essa unidade no estoque publicado e pode ser completado por uma
-              referência protegida única e compatível da unidade ou do empreendimento. Unidades é a
-              quantidade no estoque publicado por incorporadora, empreendimento e planta,
-              independentemente dos filtros.
+              Todas as combinações de planta e vagas por empreendimento. Menor valor = Valor Final
+              Com Kit − (B.A. da Unidade + Folga de Tabela). Folga Volta ao Caixa, avaliação
+              bancária, andamento da obra e outras descrições pertencem à mesma unidade que define o
+              menor valor. O endereço prioriza essa unidade no estoque publicado e pode ser
+              completado por uma referência protegida única e compatível da unidade ou do
+              empreendimento. Unidades é a quantidade no estoque publicado por incorporadora,
+              empreendimento, planta e vagas, independentemente dos filtros.
             </caption>
             <colgroup>
+              <col className="tabelao-stock-col-region" />
               <col className="investor-stock-col-business" />
               <col className="tabelao-stock-col-project" />
               <col className="tabelao-stock-col-address" />
               <col className="investor-stock-col-area" />
               <col className="investor-stock-col-date" />
               <col className="investor-stock-col-plant" />
+              <col className="tabelao-stock-col-parking" />
               <col className="tabelao-stock-col-quantity" />
               <col className="investor-stock-col-price" />
               <col className="tabelao-stock-col-cashback" />
@@ -509,6 +547,9 @@ export function TabelaoClient() {
             </colgroup>
             <thead>
               <tr>
+                <th scope="col" id="tabelao-region">
+                  Região
+                </th>
                 <th scope="col" id="tabelao-business">
                   Incorporadora
                 </th>
@@ -526,6 +567,9 @@ export function TabelaoClient() {
                 </th>
                 <th scope="col" id="tabelao-plant">
                   Planta
+                </th>
+                <th scope="col" id="tabelao-parking" aria-label="Quantidade de vagas">
+                  Vagas
                 </th>
                 <th scope="col" id="tabelao-quantity" aria-label="Unidades no estoque publicado">
                   Estoque
@@ -551,14 +595,14 @@ export function TabelaoClient() {
               <tbody>
                 {loadState === "loading" ? (
                   <tr>
-                    <td className="investor-empty-result" colSpan={12}>
+                    <td className="investor-empty-result" colSpan={14}>
                       Carregando unidades do estoque…
                     </td>
                   </tr>
                 ) : null}
                 {loadState === "error" ? (
                   <tr>
-                    <td className="investor-empty-result" colSpan={12}>
+                    <td className="investor-empty-result" colSpan={14}>
                       Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada.{" "}
                       <button
                         type="button"
@@ -572,7 +616,7 @@ export function TabelaoClient() {
                 ) : null}
                 {loadState === "ready" ? (
                   <tr>
-                    <td className="investor-empty-result" colSpan={12}>
+                    <td className="investor-empty-result" colSpan={14}>
                       {exclusiveInventory.length > 0
                         ? "Nenhuma opção encontrada com esses filtros."
                         : "Nenhuma unidade com dados válidos para comparar."}
@@ -585,6 +629,8 @@ export function TabelaoClient() {
               <tbody key={group.key} className="tabelao-project-group">
                 {group.items.map((item, itemIndex) => {
                   const groupHeaders = `tabelao-business-${groupIndex} tabelao-project-${groupIndex}`;
+                  const region = resolveTabelaoRegion(item);
+                  const regionSpan = group.regionSpans[itemIndex] ?? 1;
                   const address = formatAddress(item);
                   const classification = descriptiveLabel(item.classification);
                   const addressSpan = group.addressSpans[itemIndex] ?? 1;
@@ -596,7 +642,20 @@ export function TabelaoClient() {
                       data-inventory-unit-id={item.id}
                       data-inventory-project={item.project}
                       data-inventory-business-unit={item.businessUnit}
+                      data-inventory-region={resolveTabelaoRegion(item)}
+                      data-inventory-parking-spaces={item.parkingSpaces ?? "unknown"}
                     >
+                      {regionSpan > 0 ? (
+                        <td
+                          className="tabelao-stock-long-text"
+                          data-label="Região"
+                          headers={`tabelao-region ${groupHeaders}`}
+                          rowSpan={regionSpan}
+                          title={formatRegionTitle(item)}
+                        >
+                          <span className="tabelao-stock-wrapped-text">{region}</span>
+                        </td>
+                      ) : null}
                       {itemIndex === 0 ? (
                         <>
                           <th
@@ -655,10 +714,20 @@ export function TabelaoClient() {
                         {informationLabel(item.plant)}
                       </td>
                       <td
+                        className="tabelao-stock-parking"
+                        data-label="Vagas"
+                        headers={`tabelao-parking ${groupHeaders}`}
+                        title={formatTabelaoParkingSpaces(item.parkingSpaces)}
+                      >
+                        <span className="tabelao-stock-wrapped-text">
+                          {item.parkingSpaces ?? "Não informado"}
+                        </span>
+                      </td>
+                      <td
                         className="tabelao-stock-quantity"
                         data-label="Estoque"
                         headers={`tabelao-quantity ${groupHeaders}`}
-                        title={`${item.availableUnits.toLocaleString("pt-BR")} unidades no estoque publicado · ${item.project} · ${item.plant}`}
+                        title={`${item.availableUnits.toLocaleString("pt-BR")} unidades no estoque publicado · ${item.project} · ${item.plant} · ${formatTabelaoParkingSpaces(item.parkingSpaces)}`}
                       >
                         {item.availableUnits.toLocaleString("pt-BR")}
                       </td>

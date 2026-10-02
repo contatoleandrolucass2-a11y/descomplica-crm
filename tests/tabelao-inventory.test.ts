@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
+import type { TabelaoRegionName } from "@/lib/archive-investor/tabelao-region.mjs";
 
 import {
   buildTabelaoCellSpans,
   buildTabelaoExclusiveInventory,
   buildTabelaoFacets,
+  buildTabelaoOptions,
   enrichTabelaoLocationFields,
+  formatTabelaoParkingSpaces,
   groupTabelaoInventoryByProject,
   matchesTabelaoFacets,
+  matchesTabelaoFilters,
+  normalizeTabelaoParkingSpaces,
   normalizeTabelaoProgress,
   TABELAO_FILTER_DEFAULTS,
   calculateTabelaoPrice,
@@ -14,6 +19,21 @@ import {
   summarizeTabelao,
   type TabelaoInventoryItem,
 } from "@/lib/archive-investor/tabelao-inventory.mjs";
+
+const verifiedRegion = (region: TabelaoRegionName): Partial<TabelaoInventoryItem> => ({
+  postalCode: "01001000",
+  regionResolution: {
+    postalCode: "01001000",
+    region,
+    status: "confirmed",
+    reason: "single-region-for-postal-code",
+    municipality: "São Paulo",
+    state: "SP",
+    districts: ["Distrito QA"],
+    checkedAt: "2026-10-01T12:00:00.000Z",
+    source: "viacep+localizasampa+geosampa",
+  },
+});
 
 const unit = (id: string, fields: Partial<TabelaoInventoryItem> = {}) => ({
   id,
@@ -163,13 +183,23 @@ describe("Menor valor por tipologia no Tabelão", () => {
 
   const filterSource = () =>
     buildTabelaoExclusiveInventory([
-      unit("a1", { project: "Águas", plant: "Tipo 1Q", region: "Zona Sul" }),
-      unit("a2", { project: "aguas", plant: "TIPO 2Q", region: "Zona Sul", finalWithKit: 320_000 }),
-      unit("a3", { project: "Águas", plant: "Tipo 1Q", region: "Zona Sul", finalWithKit: 400_000 }),
+      unit("a1", { project: "Águas", plant: "Tipo 1Q", ...verifiedRegion("Zona Sul") }),
+      unit("a2", {
+        project: "aguas",
+        plant: "TIPO 2Q",
+        ...verifiedRegion("Zona Sul"),
+        finalWithKit: 320_000,
+      }),
+      unit("a3", {
+        project: "Águas",
+        plant: "Tipo 1Q",
+        ...verifiedRegion("Zona Sul"),
+        finalWithKit: 400_000,
+      }),
       unit("b1", {
         project: "Bosque",
         plant: "Tipo 1Q",
-        region: "Zona Norte",
+        ...verifiedRegion("Zona Norte"),
         businessUnit: "Outra",
       }),
     ]);
@@ -212,13 +242,14 @@ describe("Menor valor por tipologia no Tabelão", () => {
     }
   });
 
-  it("combina as cinco dimensões e limpar restaura todas as opções", () => {
+  it("combina as seis dimensões e limpar restaura todas as opções", () => {
     const source = filterSource();
     const filters = {
       businessUnit: "outra",
       project: "bosque",
       region: "zona norte",
       plant: "tipo 1q",
+      parkingSpaces: "unknown",
       price: "28500000",
     };
     expect(
@@ -638,5 +669,276 @@ describe("Menor valor por tipologia no Tabelão", () => {
       "1",
       "3",
     ]);
+  });
+});
+
+describe("Quantidade de vagas no Tabelão", () => {
+  it.each([
+    [0, "0 vagas"],
+    [1, "1 vaga"],
+    [2, "2 vagas"],
+    [10, "10 vagas"],
+    [Number.MAX_SAFE_INTEGER, `${Number.MAX_SAFE_INTEGER} vagas`],
+  ])("preserva o inteiro seguro %s e formata seu rótulo", (value, label) => {
+    expect(normalizeTabelaoParkingSpaces(value)).toBe(value);
+    expect(formatTabelaoParkingSpaces(value)).toBe(label);
+  });
+
+  it("normaliza zero negativo como zero vagas", () => {
+    expect(normalizeTabelaoParkingSpaces(-0)).toBe(0);
+    expect(formatTabelaoParkingSpaces(-0)).toBe("0 vagas");
+    expect(
+      buildTabelaoExclusiveInventory([
+        unit("a", { parkingSpaces: -0 }),
+        unit("b", { parkingSpaces: 0 }),
+      ]),
+    ).toMatchObject([{ parkingSpaces: 0, availableUnits: 2, pricedUnits: 2 }]);
+  });
+
+  it.each([
+    undefined,
+    null,
+    "0",
+    "1",
+    " 2 ",
+    "",
+    -1,
+    0.5,
+    NaN,
+    Infinity,
+    -Infinity,
+    Number.MAX_SAFE_INTEGER + 1,
+    true,
+    false,
+    {},
+    [],
+    1n,
+  ])("mantém a entrada inválida %s como desconhecida, separada de zero", (value) => {
+    expect(normalizeTabelaoParkingSpaces(value)).toBeNull();
+    expect(formatTabelaoParkingSpaces(value)).toBe("Não informado");
+    const invalid = Object.assign(unit("invalid"), { parkingSpaces: value });
+    // Exercise malformed source values at the runtime boundary.
+    const source = [
+      invalid as TabelaoInventoryItem,
+      unit("missing"),
+      unit("zero", { parkingSpaces: 0 }),
+    ];
+    const result = buildTabelaoExclusiveInventory(source);
+    expect(result).toHaveLength(2);
+    expect(result).toMatchObject([
+      { parkingSpaces: null, availableUnits: 2, pricedUnits: 2 },
+      { parkingSpaces: 0, availableUnits: 1, pricedUnits: 1 },
+    ]);
+    expect(buildTabelaoFacets(source, TABELAO_FILTER_DEFAULTS).parkingSpaces).toEqual({
+      total: 3,
+      options: [
+        { value: "0", label: "0 vagas", count: 1 },
+        { value: "unknown", label: "Não informado", count: 2 },
+      ],
+    });
+    expect(matchesTabelaoFilters(source[0]!, { parkingSpaces: "unknown" })).toBe(true);
+    expect(matchesTabelaoFilters(source[0]!, { parkingSpaces: "0" })).toBe(false);
+  });
+
+  it("separa 0/1/2/desconhecido, escolhe o menor líquido e conta IDs por grupo", () => {
+    const parkingCounts = [0, 1, 2, null];
+    const source = parkingCounts.flatMap((parkingSpaces, index) => {
+      const winner = unit(`${index}-net`, {
+        parkingSpaces,
+        finalWithKit: 320_000 + index * 10_000,
+        unitBonus: 30_000,
+        tableSlack: 20_000,
+        privateArea: 50,
+      });
+      return [
+        unit(`${index}-gross`, {
+          parkingSpaces,
+          finalWithKit: 290_000 + index * 10_000,
+          unitBonus: 0,
+          tableSlack: 0,
+          finalPrice: 1,
+        }),
+        winner,
+        unit(`${index}-no-price`, { parkingSpaces, finalWithKit: null }),
+        { ...winner, id: ` ${winner.id} ` },
+      ];
+    });
+    const before = structuredClone(source);
+    const result = buildTabelaoExclusiveInventory(source);
+
+    expect(result).toHaveLength(4);
+    expect(new Set(result.map((item) => item.exclusiveKey)).size).toBe(4);
+    for (const [index, parkingSpaces] of parkingCounts.entries()) {
+      expect(result[index]).toMatchObject({
+        parkingSpaces,
+        minimumPrice: 270_000 + index * 10_000,
+        privateArea: 50,
+        availableUnits: 3,
+        pricedUnits: 2,
+      });
+      expect(JSON.parse(result[index]!.exclusiveKey)).toEqual([
+        "incorporadora qa",
+        "empreendimento qa",
+        "tipo 2q",
+        parkingSpaces,
+      ]);
+    }
+    expect(sortTabelaoInventory(buildTabelaoExclusiveInventory([...source].reverse()))).toEqual(
+      sortTabelaoInventory(result),
+    );
+    expect(summarizeTabelao(result)).toMatchObject({ exclusiveOptions: 4, projects: 1, plants: 1 });
+    expect(source).toEqual(before);
+  });
+
+  it.each([0, 1, 2, null])(
+    "deduplica IDs sem perder o menor preço e desempata de forma determinística (%s)",
+    (parkingSpaces) => {
+      const source = [
+        unit("A-10", { parkingSpaces }),
+        unit("A-2", { parkingSpaces, finalWithKit: 400_000 }),
+        unit("A-3", { parkingSpaces, finalWithKit: null }),
+        unit("A-2", { parkingSpaces }),
+        unit("A-2", { parkingSpaces }),
+      ];
+      const result = buildTabelaoExclusiveInventory(source);
+      expect(result).toMatchObject([
+        { id: "A-2", parkingSpaces, minimumPrice: 285_000, availableUnits: 3, pricedUnits: 2 },
+      ]);
+      expect(buildTabelaoExclusiveInventory([...source].reverse())).toEqual(result);
+
+      const tied = ["a", "A"].map((id) =>
+        unit(id, { parkingSpaces, identifier: "mesma unidade", product: "mesmo produto" }),
+      );
+      expect(buildTabelaoExclusiveInventory(tied)[0]!.id).toBe("A");
+      expect(buildTabelaoExclusiveInventory([...tied].reverse())).toEqual(
+        buildTabelaoExclusiveInventory(tied),
+      );
+    },
+  );
+
+  const facetSource = () =>
+    buildTabelaoExclusiveInventory([
+      ...[0, 1, 2, 10, null].map((parkingSpaces, index) =>
+        unit(`a-${index}`, { parkingSpaces, ...verifiedRegion("Zona Sul") }),
+      ),
+      unit("a-duplicate", {
+        parkingSpaces: 1,
+        ...verifiedRegion("Zona Sul"),
+        finalWithKit: 400_000,
+      }),
+      unit("a-expensive", {
+        parkingSpaces: 1,
+        ...verifiedRegion("Zona Sul"),
+        plant: "Tipo 3Q",
+        finalWithKit: 400_000,
+      }),
+      unit("b", { parkingSpaces: 1, ...verifiedRegion("Zona Sul"), project: "Outro" }),
+      unit("c", { parkingSpaces: 1, ...verifiedRegion("Zona Norte"), businessUnit: "Outra" }),
+    ]);
+
+  it("oferece facetas rotuladas em ordem numérica e conta opções exclusivas", () => {
+    const source = facetSource();
+    expect(buildTabelaoFacets(source, TABELAO_FILTER_DEFAULTS).parkingSpaces).toEqual({
+      total: 8,
+      options: [
+        { value: "0", label: "0 vagas", count: 1 },
+        { value: "1", label: "1 vaga", count: 4 },
+        { value: "2", label: "2 vagas", count: 1 },
+        { value: "10", label: "10 vagas", count: 1 },
+        { value: "unknown", label: "Não informado", count: 1 },
+      ],
+    });
+    expect(source.find((item) => item.id === "a-1")!.availableUnits).toBe(2);
+  });
+
+  it("combina vagas com as demais facetas, excluindo somente a própria dimensão da contagem", () => {
+    const source = facetSource();
+    const filters = {
+      businessUnit: "incorporadora qa",
+      project: "empreendimento qa",
+      region: "zona sul",
+      plant: "tipo 2q",
+      parkingSpaces: "1",
+      price: "28500000",
+    };
+    const facets = buildTabelaoFacets(source, filters);
+    expect(
+      source.filter((item) => matchesTabelaoFacets(item, filters)).map((item) => item.id),
+    ).toEqual(["a-1"]);
+    expect(facets.parkingSpaces).toEqual({
+      total: 5,
+      options: [
+        { value: "0", label: "0 vagas", count: 1 },
+        { value: "1", label: "1 vaga", count: 1 },
+        { value: "2", label: "2 vagas", count: 1 },
+        { value: "10", label: "10 vagas", count: 1 },
+        { value: "unknown", label: "Não informado", count: 1 },
+      ],
+    });
+    expect(facets.project.options).toEqual([
+      { value: "empreendimento qa", label: "Empreendimento QA", count: 1 },
+      { value: "outro", label: "Outro", count: 1 },
+    ]);
+    expect(facets.plant.total).toBe(1);
+    expect(facets.price.options).toEqual([{ value: "28500000", label: "28500000", count: 1 }]);
+    for (const facet of Object.values(facets)) {
+      expect(facet.options.reduce((sum, option) => sum + option.count, 0)).toBe(facet.total);
+    }
+    for (const [parkingSpaces, id] of [
+      ["0", "a-0"],
+      ["unknown", "a-4"],
+    ] as const) {
+      expect(
+        source
+          .filter((item) => matchesTabelaoFacets(item, { ...filters, parkingSpaces }))
+          .map((item) => item.id),
+      ).toEqual([id]);
+    }
+    expect(
+      source.filter((item) => matchesTabelaoFacets(item, { ...filters, parkingSpaces: "3" })),
+    ).toEqual([]);
+    expect(buildTabelaoFacets(source, { ...filters, parkingSpaces: "3" }).parkingSpaces).toEqual(
+      facets.parkingSpaces,
+    );
+    expect(source.filter((item) => matchesTabelaoFacets(item, TABELAO_FILTER_DEFAULTS))).toEqual(
+      source,
+    );
+  });
+
+  it("preserva filtros legados e acrescenta opções de vagas sem perder zero ou desconhecido", () => {
+    const source = facetSource();
+    const options = buildTabelaoOptions(source);
+    expect(options).toMatchObject({
+      businessUnits: ["Incorporadora QA", "Outra"],
+      projects: ["Empreendimento QA", "Outro"],
+      plants: ["Tipo 2Q", "Tipo 3Q"],
+      parkingSpaces: ["0", "1", "2", "10", "unknown"],
+      regions: ["Zona Norte", "Zona Sul"],
+    });
+    const filters = {
+      businessUnit: "Incorporadora QA",
+      project: "Empreendimento QA",
+      plant: "Tipo 2Q",
+      region: "Zona Sul",
+      priceRange: "200-to-300",
+      query: "empreendimento",
+    };
+    expect(source.filter((item) => matchesTabelaoFilters(item, filters))).toHaveLength(5);
+    for (const [parkingSpaces, id] of [
+      ["0", "a-0"],
+      ["1", "a-1"],
+      ["unknown", "a-4"],
+    ] as const) {
+      expect(
+        source
+          .filter((item) => matchesTabelaoFilters(item, { ...filters, parkingSpaces }))
+          .map((item) => item.id),
+      ).toEqual([id]);
+    }
+    expect(
+      source.filter((item) => matchesTabelaoFilters(item, { ...filters, parkingSpaces: "all" })),
+    ).toEqual(source.filter((item) => matchesTabelaoFilters(item, filters)));
+    expect(matchesTabelaoFilters(source[0]!)).toBe(true);
+    expect(buildTabelaoOptions([]).parkingSpaces).toEqual([]);
   });
 });

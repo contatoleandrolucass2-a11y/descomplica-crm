@@ -79,6 +79,7 @@ nem chamam motor oficial.
 | `GET /api/dashboard/status`                             | 200                   | conforme `crm.dashboard.view` | 401       |
 | `GET /api/inventory`                                    | 200, `no-store`       | 403                           | 401       |
 | `GET /api/inventory/snapshot`                           | 200, `no-store`       | 403                           | 401       |
+| `GET /api/inventory/regions?postalCode=01509020`        | 200, `no-store`       | 403                           | 401       |
 | `GET /api/official-simulator/associativo-fluxo-linear`  | 200                   | 403                           | 401       |
 | `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro  | 403                           | 401       |
 | `POST /api/ingest/qlik`                                 | 404, flag desligada   | 404                           | 404       |

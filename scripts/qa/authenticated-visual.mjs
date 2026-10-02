@@ -1663,6 +1663,7 @@ function buildTabelaoCompactFixture() {
     streetNumber: "1234",
     neighborhood: "Bairro QA Jardim Central",
     region: index === 2 || index === 3 ? "Zona Norte" : "Zona Sul",
+    parkingSpaces: index === 2 || index === 3 ? 1 : 0,
     classification:
       index < 3
         ? index === 1
@@ -1681,14 +1682,157 @@ function buildTabelaoCompactFixture() {
   return items;
 }
 
+async function checkTabelaoRegionParkingFixture(page) {
+  const base = {
+    businessUnit: "Incorporadora QA",
+    product: "Unidade QA",
+    plant: "Tipo 2Q",
+    privateArea: 42,
+    finalWithKit: 300_000,
+    unitBonus: 10_000,
+    tableSlack: 5_000,
+    cashBackSlack: 10_000,
+    appraisal: 350_000,
+    progress: 0.5,
+    completionDate: "2029-12-31",
+    classification: "QA",
+    street: "Rua QA",
+    streetNumber: "100",
+    neighborhood: "Bairro QA",
+  };
+  const items = [
+    ...[0, 1, 2, null].map((parkingSpaces, index) => ({
+      ...base,
+      id: `qa-parking-a${index}`,
+      project: "Projeto A",
+      postalCode: "01001000",
+      parkingSpaces,
+      finalWithKit: 300_000 + index * 10_000,
+    })),
+    {
+      ...base,
+      id: "qa-parking-expensive",
+      project: "Projeto A",
+      postalCode: "01001000",
+      parkingSpaces: 1,
+      finalWithKit: 500_000,
+    },
+    { ...base, id: "qa-parking-b", project: "Projeto B", postalCode: "02001000", parkingSpaces: 1 },
+    { ...base, id: "qa-parking-c", project: "Projeto C", postalCode: "03001000", parkingSpaces: 0 },
+  ];
+  let releaseRegions;
+  const gate = new Promise((resolve) => {
+    releaseRegions = resolve;
+  });
+  const requested = [];
+  let regionRequestCount = 0;
+  const inventoryHandler = (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ count: items.length, items }),
+    });
+  const regionHandler = async (route) => {
+    const postalCodes = new URL(route.request().url()).searchParams.get("postalCodes").split(",");
+    requested.push(...postalCodes);
+    regionRequestCount += 1;
+    await gate;
+    const results = postalCodes.map((postalCode) => {
+      const region =
+        postalCode === "01001000" ? "Centro" : postalCode === "02001000" ? "Zona Norte" : null;
+      return {
+        postalCode,
+        region,
+        status: region ? "confirmed" : "unconfirmed",
+        reason: region ? "single-region-for-postal-code" : "ambiguous-postal-code",
+        municipality: "São Paulo",
+        state: "SP",
+        districts: ["Distrito QA"],
+        checkedAt: "2026-10-01T12:00:00.000Z",
+        source: "viacep+localizasampa+geosampa",
+      };
+    });
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ results }),
+    });
+  };
+  await page.route("**/api/inventory", inventoryHandler);
+  await page.route("**/api/inventory/regions?*", regionHandler);
+  let passed = true;
+  try {
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForFunction(
+      () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 6,
+    );
+    const filters = page.locator(".investor-stock-filters");
+    const parking = filters.locator('select[name="parkingSpaces"]');
+    passed &&=
+      JSON.stringify(
+        await parking
+          .locator("option")
+          .evaluateAll((options) => options.map((option) => option.value)),
+      ) === JSON.stringify(["", "0", "1", "2", "unknown"]);
+    await filters.locator('select[name="region"]').selectOption("nao confirmada");
+    await filters.locator('select[name="project"]').selectOption("projeto a");
+    await parking.selectOption("1");
+    await filters.locator('select[name="priceOrder"]').selectOption("desc");
+    await page.waitForFunction(
+      () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 1,
+    );
+    passed &&= await page.locator('tr[data-inventory-unit-id="qa-parking-a1"]').isVisible();
+    passed &&= (await page.locator(".tabelao-stock-quantity").textContent()).trim() === "2";
+    releaseRegions();
+    await page
+      .getByText("Nenhuma opção encontrada com esses filtros.", { exact: true })
+      .last()
+      .waitFor();
+    passed &&= (await filters.locator('select[name="region"]').inputValue()) === "nao confirmada";
+    passed &&=
+      (await filters.locator('select[name="region"] option:checked').textContent()).trim() ===
+      "Não confirmada (0)";
+    passed &&= (await parking.inputValue()) === "1";
+    passed &&= (await filters.locator('select[name="project"]').inputValue()) === "projeto a";
+    passed &&= (await filters.locator('select[name="priceOrder"]').inputValue()) === "desc";
+    await filters.locator('select[name="region"]').selectOption("");
+    await page.locator('tr[data-inventory-unit-id="qa-parking-a1"]').waitFor();
+    passed &&=
+      (await page.locator("tr[data-inventory-unit-id]").getAttribute("data-inventory-region")) ===
+      "Centro";
+    passed &&=
+      (await page.locator(".investor-stock-price").textContent()).replace(/\D/g, "") === "29500000";
+    await filters.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+    await filters.locator('select[name="region"]').selectOption("zona norte");
+    await page.locator('tr[data-inventory-unit-id="qa-parking-b"]').waitFor();
+    passed &&= (await page.locator("tr[data-inventory-unit-id]").count()) === 1;
+    await filters.locator('select[name="region"]').selectOption("nao confirmada");
+    await page.locator('tr[data-inventory-unit-id="qa-parking-c"]').waitFor();
+    passed &&= (await page.locator("tr[data-inventory-unit-id]").count()) === 1;
+    await filters.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+    await page.waitForFunction(
+      () => document.querySelectorAll("tr[data-inventory-unit-id]").length === 6,
+    );
+    passed &&= requested.length === 3 && new Set(requested).size === 3 && regionRequestCount === 1;
+    process.stdout.write(`Tabelão QA: regiões assíncronas e vagas ${passed}\n`);
+    return passed;
+  } finally {
+    releaseRegions();
+    await page.unroute("**/api/inventory/regions?*", regionHandler);
+    await page.unroute("**/api/inventory", inventoryHandler);
+  }
+}
+
 function readTabelaoCompactLayout() {
   const results = document.querySelector(".investor-stock-results");
   const table = document.querySelector(".investor-stock-table");
   const resultBox = results?.getBoundingClientRect();
   const panelBox = results?.closest(".investor-stock-panel")?.getBoundingClientRect();
   const columns = [
+    ["tabelao-region", ".tabelao-stock-wrapped-text", 66],
     ["tabelao-project", ".investor-stock-product-text", 100],
     ["tabelao-address", ".tabelao-stock-wrapped-text", 130],
+    ["tabelao-parking", ".tabelao-stock-wrapped-text", 48],
     ["tabelao-description", ".tabelao-stock-wrapped-text", 58],
   ].map(([id, selector, contentWidth]) => {
     const header = document.getElementById(id);
@@ -1907,7 +2051,7 @@ async function checkTabelaoCompactFixture(page) {
       [[1], [1]],
     ],
   );
-  await panel.locator('select[name="region"]').selectOption("zona sul");
+  await panel.locator('select[name="parkingSpaces"]').selectOption("0");
   await verify(
     [[7, 6, 5, 2, 1], [9, 8], [10]],
     [
@@ -2020,14 +2164,16 @@ async function checkTabelaoValidation(page, origin) {
         return {
           title: document.querySelector("h1")?.textContent?.trim() === "Simulador Tabelão",
           columns:
-            columnLabels.length === 12 &&
+            columnLabels.length === 14 &&
             [
+              "Região",
               "Incorporadora",
               "Empreendimento",
               "Endereço",
               "Metragem",
               "Entrega",
               "Planta",
+              "Vagas",
               "Estoque",
               "Valor Imóvel",
               "Volta ao Caixa",
@@ -2036,7 +2182,7 @@ async function checkTabelaoValidation(page, origin) {
               "Limitador",
             ].every((label, index) => columnLabels[index] === label),
           filtersPresent:
-            controls.length === 6 &&
+            controls.length === 7 &&
             controls.every(
               (control) =>
                 !control.disabled &&
@@ -2073,7 +2219,7 @@ async function checkTabelaoValidation(page, origin) {
           detailColumns:
             firstRow?.querySelector(".tabelao-stock-money")?.textContent.trim().length > 0 &&
             firstRow?.querySelector(".tabelao-stock-progress")?.textContent.trim() === "50%" &&
-            firstRow?.querySelectorAll(".tabelao-stock-long-text").length === 2,
+            firstRow?.querySelectorAll(".tabelao-stock-long-text").length === 3,
           allRowsRendered: table?.querySelectorAll("tr[data-inventory-unit-id]").length === count,
           noInternalVerticalScroll:
             results != null &&
@@ -2150,7 +2296,14 @@ async function checkTabelaoValidation(page, origin) {
     );
     let filtersWorking = true;
     const filterPanel = page.locator(".investor-stock-filters");
-    for (const dimension of ["businessUnit", "project", "region", "plant", "price"]) {
+    for (const dimension of [
+      "businessUnit",
+      "project",
+      "region",
+      "plant",
+      "parkingSpaces",
+      "price",
+    ]) {
       const select = filterPanel.locator(`select[name="${dimension}"]`);
       const option = await select
         .locator("option")
@@ -2172,6 +2325,8 @@ async function checkTabelaoValidation(page, origin) {
           businessUnit: row.getAttribute("data-inventory-business-unit"),
           project: row.getAttribute("data-inventory-project"),
           plant: row.querySelector(".investor-stock-plant")?.textContent.trim(),
+          region: row.getAttribute("data-inventory-region"),
+          parkingSpaces: row.getAttribute("data-inventory-parking-spaces"),
           price: row.querySelector(".investor-stock-price")?.textContent.replace(/\D/g, ""),
         })),
       );
@@ -2184,12 +2339,10 @@ async function checkTabelaoValidation(page, origin) {
           .trim();
       filtersWorking &&=
         selectedRows.length === option.count &&
-        selectedRows.every(
-          (row) =>
-            dimension === "region" ||
-            (dimension === "price"
-              ? row.price === option.value
-              : normalize(row[dimension]) === option.value),
+        selectedRows.every((row) =>
+          dimension === "price"
+            ? row.price === option.value
+            : normalize(row[dimension]) === option.value,
         );
     }
     await filterPanel.locator('select[name="priceOrder"]').selectOption("desc");
@@ -2284,6 +2437,7 @@ async function checkTabelaoValidation(page, origin) {
         ?.textContent?.trim(),
       plant: row.querySelector(".investor-stock-plant")?.textContent?.trim(),
       businessUnit: row.getAttribute("data-inventory-business-unit"),
+      parkingSpaces: row.getAttribute("data-inventory-parking-spaces"),
       price: row.querySelector(".investor-stock-price")?.textContent?.trim(),
       availableUnits: Number(
         row.querySelector(".tabelao-stock-quantity")?.textContent.trim().replaceAll(".", ""),
@@ -2293,13 +2447,17 @@ async function checkTabelaoValidation(page, origin) {
   const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
   const exclusiveRows =
     rendered.length === syntheticTabelaoInventory.length &&
-    new Set(rendered.map((row) => JSON.stringify([row.businessUnit, row.project, row.plant])))
-      .size === rendered.length &&
+    new Set(
+      rendered.map((row) =>
+        JSON.stringify([row.businessUnit, row.project, row.plant, row.parkingSpaces]),
+      ),
+    ).size === rendered.length &&
     rendered.every(
       (row, index) =>
         row.id === syntheticTabelaoInventory[index].id &&
         row.projectLabel === syntheticTabelaoInventory[index].project &&
         row.plant === syntheticTabelaoInventory[index].plant &&
+        row.parkingSpaces === String(syntheticTabelaoInventory[index].parkingSpaces ?? "unknown") &&
         row.availableUnits === syntheticTabelaoInventory[index].availableUnits,
     );
   const netPrices = rendered.every(
@@ -2917,6 +3075,7 @@ async function checkTabelaoValidation(page, origin) {
       .every(([, value]) => value === true),
   );
   process.stdout.write(`Tabelão QA: ${JSON.stringify(viewportChecks)}\n`);
+  const regionParkingFlow = await checkTabelaoRegionParkingFixture(page);
 
   return {
     responsiveGrid,
@@ -2925,7 +3084,7 @@ async function checkTabelaoValidation(page, origin) {
     guideReachedLastStep,
     guideCompletionReturnedFocus,
     guideEscapeReturnedFocus,
-    exclusiveRows,
+    exclusiveRows: exclusiveRows && regionParkingFlow,
     netPrices,
     groupedProjects,
     liveAvailableBeforeLocationReference,
