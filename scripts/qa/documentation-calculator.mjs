@@ -72,12 +72,14 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const theme of ["light", "balanced", "dark"]) {
-      // Theme fixtures are confined to this isolated QA page.
-      await page.evaluate(
-        (value) => document.documentElement.setAttribute("data-theme", value),
-        theme,
-      );
+      const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
+      await page.getByRole("button", { name: themeLabels[theme], exact: true }).click();
       await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+      const profile = form.locator(".documentation-profile-panel");
+      const panelBounds = await profile.boundingBox();
+      const headingBounds = await profile.getByRole("heading").boundingBox();
+      assert.ok(headingBounds.x >= panelBounds.x, `Profile content clipped at ${width}px/${theme}`);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth > innerWidth + 1,
       );
@@ -96,10 +98,27 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
       await page.screenshot({
         path: path.join(outputDirectory, `documentation-${theme}-${width}.png`),
         fullPage: true,
+        animations: "disabled",
       });
       matrix.push({ width, theme, overflow, accessibilityViolations: 0 });
     }
   }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.evaluate(() => {
+    document.documentElement.style.zoom = "2";
+  });
+  assert.equal(
+    await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1),
+    false,
+  );
+  await page.screenshot({
+    path: path.join(outputDirectory, "documentation-zoom-200.png"),
+    fullPage: true,
+    animations: "disabled",
+  });
+  await page.evaluate(() => {
+    document.documentElement.style.zoom = "";
+  });
   await page.emulateMedia({ media: "print" });
   await expect(result).toBeVisible();
   await page.screenshot({
@@ -119,6 +138,7 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
     hintsKeyboard: true,
     audit: true,
     printSurface: true,
+    zoom200: true,
     matrix,
   };
 }

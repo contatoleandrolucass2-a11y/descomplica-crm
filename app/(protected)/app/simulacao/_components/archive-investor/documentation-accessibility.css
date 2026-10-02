@@ -1,3 +1,8 @@
 :root:not([data-theme="dark"]) .documentation-summary-result > header > span {
   color: #067080;
 }
+
+/* Decorative overflow must not create a hidden horizontal focus scrollport. */
+.documentation-page-shell .documentation-panel {
+  overflow: clip;
+}

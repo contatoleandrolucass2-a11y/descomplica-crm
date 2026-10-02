@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-02 - Validacao da documentacao
+
+- Corrige classes dos estados sequenciais e recorte interno ao redimensionar a nova
+  guia; reforca contraste e verificacao de geometria/zoom sem mudar formulas.
+
 ## 2026-10-02 - Calcular documentacao
 
 - Habilita Calcular documentacao no menu Simulacao e na rota protegida existente.

@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-02 - Validacao da guia de documentacao
+
+- Lint, typecheck, build e 32 testes focados aprovados; motor igual a referencia em
+  2.048 casos. Suite Windows: 1.271 aprovados, 4 ignorados e 20 falhas POSIX/timeouts
+  de infraestrutura sob carga; CI Linux obrigatoria antes da publicacao.
+- Revisao independente corrigiu classes de estado; capturas identificaram recorte
+  ao redimensionar. CSS localizado impede scroll interno oculto e melhora contraste.
+- Matriz de QA inclui geometria do perfil, tres temas, quatro larguras e zoom 200%.
+
 ## 2026-10-02 - Replica da guia Calcular documentacao
 
 - Branch codex/calcular-documentacao; checkout isolado da branch originalmente aberta.

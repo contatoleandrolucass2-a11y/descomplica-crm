@@ -59,8 +59,14 @@ Runtime oficial WF16, integracoes n8n e politicas comerciais permanecem inaltera
   MCMV, SBPE, limite, invalidacao, auditoria, impressao, 4 larguras e 3 temas.
 - Revisao independente identificou classes de estado concatenadas; corrigidas e
   cobertas por assercoes dos estados inicial, preenchido e calculado.
-- Suite completa em Windows apresenta falhas POSIX e timeouts sob carga;
-  execucao final, build, matriz visual, CI Linux e publicacao pendentes.
+- Build de producao aprovado no Windows.
+- Suite completa Windows (Vitest com 2 workers): 1.271 aprovados, 4 ignorados,
+  20 falhas em testes POSIX, timeouts de infraestrutura/MCP e conhecimento sob carga.
+  Nenhuma dessas falhas pertence aos testes da nova calculadora.
+- Primeira matriz local: 12 combinacoes sem overflow global e sem violacoes Axe;
+  revisao das capturas detectou scroll horizontal interno do perfil ao redimensionar.
+  Corrigido com overflow: clip local; adicionadas assercao geometrica e captura a 200%.
+- Matriz final, CI Linux e publicacao pendentes.
 - Docker local indisponivel; gates de banco/restore devem rodar na CI Linux.
 
 ## Seguranca e retorno
