@@ -21,6 +21,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   overflow clip localizado preserva a geometria. Testar limites internos, nao so o body.
 - Suite Windows: 1.271 aprovados, quatro skips e 20 falhas POSIX/timeouts sob carga.
   CI Linux e publicacao pendentes no PR #130; gates nao foram reduzidos.
+- CI 36968955807: 1.293 testes Vitest e oito Node aprovados, restore aprovado;
+  E2E conservava a expectativa antiga de 403. Ao liberar pagina de arquivo, atualizar
+  tambem protectedSurfaces, hub e smoke, preservando perfis negados e APIs oficiais.
 
 ## 2026-10-02: Capacidade por CEP, nao apenas por lote
 

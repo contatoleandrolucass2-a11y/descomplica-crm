@@ -2,6 +2,8 @@
 
 ## 2026-10-02 - Validacao da documentacao
 
+- Atualiza E2E de autorizacao e menu para a guia liberada, sem abrir acesso a outros
+  perfis ou habilitar o motor oficial WF16; preserva CAIXA bloqueada.
 - Registra matriz local aprovada em tres temas e quatro larguras, com impressao e
   layout equivalente a zoom 200%; CI e publicacao acompanhadas no PR #130.
 - Corrige classes dos estados sequenciais e recorte interno ao redimensionar a nova

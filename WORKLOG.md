@@ -2,6 +2,11 @@
 
 ## 2026-10-02 - Validacao da guia de documentacao
 
+- CI 36968955807 aprovou validate (1.293 Vitest, oito Node, lint/tipos/build) e restore.
+  E2E detectou expectativa antiga de 403 para a guia liberada; matriz atualizada para
+  Master e negacao dos outros perfis, mantendo CAIXA bloqueada e APIs oficiais inalteradas.
+  Banner generico segue o mesmo tratamento das demais paginas de arquivo nesta guia.
+
 - PR #130. Matriz local final aprovada: 12 combinacoes, sem overflow ou violacoes Axe,
   fluxo completo, impressao e layout equivalente a 200%. Oito testes Node aprovados.
   CI Linux e publicacao ainda pendentes; evidencia final sera registrada no PR.

@@ -13,6 +13,7 @@ const ARCHIVE_SIMULATOR_ROUTES = new Set([
   "/app/simulacao/associativo-fluxo-linear",
   "/app/simulacao/tabelao",
   "/app/simulacao/tabela-investidor",
+  "/app/simulacao/calcular-documentacao",
 ]);
 
 export function CookieConsentBanner({ consent }: { consent: CookieConsent | null }) {

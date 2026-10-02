@@ -394,7 +394,8 @@ const protectedSurfaces = [
   {
     path: "/app/simulacao/calcular-documentacao",
     heading: "Calcular documentação",
-    allowed: noRoles,
+    allowed: masterOnlyRoles,
+    genericNavigation: false,
   },
   { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: noRoles },
   {
@@ -1008,11 +1009,12 @@ for (const role of expectedRoles) {
         await expect(page.locator('main a[href="/app/simulacao/tabela-investidor"]')).toHaveCount(
           1,
         );
-        for (const route of ["/app/simulacao/calcular-documentacao", "/app/simulacao/caixa"]) {
-          await expect(page.locator(`main a[href="${route}"]`)).toHaveCount(0);
-        }
-        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(2);
-        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(2);
+        await expect(
+          page.locator('main a[href="/app/simulacao/calcular-documentacao"]'),
+        ).toHaveCount(1);
+        await expect(page.locator('main a[href="/app/simulacao/caixa"]')).toHaveCount(0);
+        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(1);
+        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(1);
         reportProgress("simulator-release-gates");
       }
 
@@ -1191,7 +1193,7 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("WF13, Tabela Direta and Tabela Investidor run only for Master while future simulators stay blocked", async ({
+test("released simulators and documentation run only for Master while CAIXA stays blocked", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
@@ -1245,14 +1247,23 @@ test("WF13, Tabela Direta and Tabela Investidor run only for Master while future
     ).toBeVisible();
     await expect(page.getByRole("region", { name: "Estoque completo de unidades" })).toBeVisible();
 
-    for (const simulator of ["calcular-documentacao", "caixa"]) {
-      const response = await page.goto(`/app/simulacao/${simulator}`);
-      expect(response?.status()).toBe(403);
-      await expect(
-        page.getByRole("heading", { level: 1, name: forbiddenHeading, exact: true }),
-      ).toBeVisible();
-      await expect(page.getByRole("button", { name: /^Calcular/u })).toHaveCount(0);
-    }
+    const documentation = await page.goto("/app/simulacao/calcular-documentacao");
+    expect(documentation?.status()).toBe(200);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Calcular documentação", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Calcular documentação Data/u })).toBeDisabled();
+    await page.getByRole("button", { name: "Simulação", exact: true }).click();
+    await expect(
+      page.locator('#archive-navigation a[href="/app/simulacao/calcular-documentacao"]'),
+    ).toBeVisible();
+
+    const caixa = await page.goto("/app/simulacao/caixa");
+    expect(caixa?.status()).toBe(403);
+    await expect(
+      page.getByRole("heading", { level: 1, name: forbiddenHeading, exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Calcular/u })).toHaveCount(0);
 
     const directTable = await page.goto("/app/simulacao/tabela-direta");
     expect(directTable?.status()).toBe(200);
