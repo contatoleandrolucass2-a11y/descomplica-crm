@@ -8,6 +8,7 @@
   com coluna e filtro de vagas, distinguindo zero de quantidade desconhecida.
 - Preserva compactacao, textos completos, centralizacao e Endereco apos Empreendimento.
 - Protege e limita as consultas de localizacao, sem bloquear o estoque.
+- Atualiza sete referencias visuais revisadas, sem mudar as demais rotas.
 
 ## 2026-10-01 - Titulos e colunas do Tabelao
 

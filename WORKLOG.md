@@ -22,6 +22,14 @@
   passou. Suite Windows: 1.205 aprovados, quatro skips, seis falhas POSIX e dois
   timeouts de conhecimento; repeticao isolada: 21/22, um timeout. Nenhum gate
   reduzido; CI Linux, comparacao visual e publicacao permanecem pendentes.
+- CI Linux 36952238409 aprovou 1.279 testes Vitest (quatro skips), oito Node,
+  formato, lint, tipos, build, banco, restore isolado e E2E de autorizacao.
+- Matriz funcional aprovada: 140 rotas, 80 temas, 193 axe, 100 checks de zoom;
+  regioes assincronas e vagas passaram. Somente sete capturas do Tabelao com
+  pixel drift intencional, revisadas individualmente e promovidas pela rotina
+  canonica; outras 186 preservadas byte a byte, sem reduzir limiares.
+- PR #125; captura dd373aa, codigo 02074e7. Nova CI com referencias revisadas e
+  publicacao pendentes. Evidencia final de release sera registrada no PR.
 - Runbook: docs/runbooks/tabelao-regions.md. Sem n8n, migration ou escrita remota.
 
 ## 2026-10-01 - Cabecalhos legiveis e colunas centralizadas no Tabelao

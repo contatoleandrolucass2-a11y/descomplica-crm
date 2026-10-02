@@ -23,7 +23,12 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - 335 testes focados aprovados; sete cenarios Chromium com componente/CSS reais
   passam. Fonte atual: 20/22 CEPs confirmados, dois conflitos mantidos nao confirmados.
 - Lint do codigo, tipos, build e oito testes Node aprovados. Windows registra seis
-  falhas POSIX e timeouts na suite de conhecimento, sem alterar gates. CI/publicacao pendentes.
+  falhas POSIX e timeouts na suite de conhecimento, sem alterar gates.
+- CI Linux 36952238409: 1.279 Vitest e oito Node aprovados, quatro skips;
+  formato, lint, tipos, build, banco, restore isolado e E2E aprovados.
+- Matriz funcional passou (140 rotas, 80 temas, 193 axe, 100 zoom). Sete capturas
+  do Tabelao revisadas e promovidas; outras 186 preservadas. PR #125, captura
+  dd373aa e codigo 02074e7. CI final e publicacao pendentes; fechamento no PR.
 
 ## 2026-10-01: Cabecalhos e alinhamento do Tabelao
 
