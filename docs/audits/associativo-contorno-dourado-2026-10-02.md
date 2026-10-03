@@ -29,6 +29,24 @@
 
 ## Publicacao
 
-Pendente. Exigir CI integral, imagem imutavel, backup conferido, CAS, rollback
-e verificacao observacional da versao/saude e jornada publicada. Nao alterar
-referencias visuais sem revisao nem ampliar tolerancias para obter aprovacao.
+- PR #138 aprovado e integrado. CI PR 37082276489 e main 37084410555
+  integralmente verdes. Baselines, mascaras e tolerancias visuais intocados.
+- Runtime: 506b9e3a98f27f246c278287d0486a2e51e8a993.
+- Anterior: 150b77129723db56c09e896a42a4703f0df0fbfe.
+- SHA-256 do arquivo: 0486220cf66173524f6a0785d65b886e5927b478fd520665879b2be0fe27ffaa.
+- Config CI: sha256:5d93f5d6065a2cebf6ec2b66a03bd84acda8e8e58c2c9422962f91196ca40bb9.
+- Manifesto carregado: sha256:b8ca4df15442c152d15469a922722a5ed74d04f59a304e51d6928e1242b85352.
+- Equivalencia comprovada em 11 camadas, dois perfis de runtime na mesma
+  imagem, sem rebuild na VPS.
+- Backup privado: /var/backups/descomplica-crm/releases/506b9e3a98f27f246c278287d0486a2e51e8a993.SHlnxv.
+  Checksums de ambiente, Nginx e imagem anterior conferidos. CAS concluido,
+  rollback preparado, Nginx preservado/valido. Sem mutacao de dados remotos.
+- Health local/publico com versao exata e status ok. Smoke observacional:
+  12 requisicoes, concorrencia 4, zero erro; health 200 e inventario/snapshot
+  401 sem autenticacao. Nao constitui teste de capacidade em producao.
+- Navegador autenticado: token de estoque #b99545; card corrente #0a2b47,
+  sem gradiente de fundo; borda #9f7628 e associative-edge-shine de 3s com
+  background-size 280% 2px. Campo transparente vazio e apos valor sintetico;
+  etapa 2 ativa depois da renda. Sessao de teste descartada por reload.
+- Nenhuma proposta ou dado pessoal salvo. Tabelao e paleta-base intocados.
+- Fechamento documental pelo Git e sincronizacao local, sem novo restart.

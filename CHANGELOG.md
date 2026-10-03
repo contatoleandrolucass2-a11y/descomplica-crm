@@ -6,6 +6,7 @@
 - Remove os fundos dourado e escuro dos campos de edicao; conserva a paleta
   da pagina, com contorno dourado e linha de brilho a cada tres segundos.
 - Mantem sequencia, acessibilidade, erros e calculos sem alterar o Tabelao.
+- Publicado em 506b9e3 apos CI integral e verificacao no navegador.
 
 ## 2026-10-02 - Associativo com as cores do Tabelao
 
