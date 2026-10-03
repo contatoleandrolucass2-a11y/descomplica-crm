@@ -5,6 +5,7 @@
 - Substitui o buscador de diretorios do plugin Next por tinyglobby, com patch
   versionado e testes de compatibilidade. Mantem todas as regras de lint.
 - Remove a cadeia vulneravel do lockfile e inclui patches no build Docker.
+- Testes da regra mantem verificacao estrita de resultados presentes e validos.
 
 ## 2026-10-03 - Estado da politica comercial do Tabelao
 

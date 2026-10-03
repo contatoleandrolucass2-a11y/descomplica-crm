@@ -37,6 +37,8 @@ autenticacao e configuracao de regras ESLint nao mudam.
   tres pacotes retirados e resolucao efetiva do tinyglobby pelo plugin.
 - Dez testes de regressao aprovados no Windows. Lint integral local interrompido
   sob memoria livre inferior a 500 MB; nao declarar aprovacao. CI Linux obrigatoria.
+- Typecheck local identificou resultados de lint potencialmente ausentes nos novos
+  testes. Acesso opcional preserva a falha da assercao quando nao houver resultado.
 - Validacao completa, CI Linux, matriz visual, restore e imagem permanecem
   obrigatorios antes da publicacao. Resultados finais constam no PR #139.
 

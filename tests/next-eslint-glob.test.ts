@@ -94,13 +94,13 @@ describe("Next lint directory discovery without the vulnerable braces dependency
     const [invalid] = await eslint.lintText('export default () => <a href="/about">About</a>', {
       filePath: "component.jsx",
     });
-    expect(invalid.messages.map((message) => message.ruleId)).toContain(
+    expect(invalid?.messages.map((message) => message.ruleId)).toContain(
       "@next/next/no-html-link-for-pages",
     );
     const [valid] = await eslint.lintText(
       'import Link from "next/link"; export default () => <Link href="/about">About</Link>',
       { filePath: "component.jsx" },
     );
-    expect(valid.errorCount).toBe(0);
+    expect(valid?.errorCount).toBe(0);
   });
 });

@@ -8,6 +8,7 @@
   Docker recebe patches antes de instalar; lockfile registra a correcao.
 - Dez testes de regressao aprovados; audit limpo. Lint local interrompido por
   pressao de memoria; demais comprovacoes integrais exigidas na CI Linux.
+- Corrige tipos estritos dos resultados do ESLint nos testes sem aceitar ausencia.
 - Evidencias: docs/audits/next-eslint-glob-2026-10-03.md. Gates completos exigidos.
 
 ## 2026-10-03 - Politica desabilitada e revalidacao do release
