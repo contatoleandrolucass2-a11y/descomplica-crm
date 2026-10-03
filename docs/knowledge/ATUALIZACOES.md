@@ -4,6 +4,20 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-03: Tabelao publicado com evidencia de producao
+
+- Status: validado; fonte: PR #139, CI 37136895575, CI main 37144378453 e
+  verificacao HTTP/DOM autenticado em crm.descomplicapro.com.br.
+- Runtime publicado: 8e158cc9d13beeff0087064df6d9b58d87790379. Todos os gates
+  verdes; imagem imutavel comprovada por hashes/camadas e dois perfis no destino.
+- Backup privado e rollback preservados; CAS concluido. Health confirmou SHA,
+  acesso anonimo negado e pagina autenticada exibiu layout, ordem, dourado,
+  Maps e recursos. Politica comercial continua disabled, sem destino.
+- Endereco ausente na origem oficial continua sem link; nao inventar logradouro.
+  Alteracao nao muda origem do estoque, regra financeira, dados ou migrations.
+- Evidencias: docs/audits/tabelao-layout-maps-2026-10-02.md. Sem pendencia de
+  publicacao do runtime. Registro documental posterior nao exige restart.
+
 ## 2026-10-03: Tabelao validado funcionalmente e referencias revisadas
 
 - Status: pendente_validacao final; fonte: CI 37134880142 e artefato 11278718828.
