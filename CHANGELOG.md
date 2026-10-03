@@ -6,6 +6,7 @@
 - Reordena colunas e destaca o valor do imovel em dourado.
 - Adiciona links Google Maps aos enderecos da origem oficial existente.
 - Inclui recursos finais com icones e impressao da consulta completa.
+- Mantem textos legiveis e dourado de alto contraste na impressao dos tres temas.
 - Politica comercial aguarda documento oficial; nenhum conteudo foi inventado.
 
 ## 2026-10-02 - Contorno dourado no Associativo

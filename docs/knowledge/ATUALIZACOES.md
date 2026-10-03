@@ -16,12 +16,19 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Nova ordem exige colgroup, cabecalho, corpo e oraculos de QA consistentes.
 - CSS legado de impressao oculta investor-stock-panel. Restaurar somente no
   Tabelao e verificar presenca de todas as linhas antes de aprovar Imprimir.
+  Conferir tambem textos descendentes e variaveis de tema: somente restaurar a
+  tabela deixa Empresa/Empreendimento claros sobre branco. QA exige 4,5:1;
+  capturas devem esperar o fim das transicoes antes de inspecionar o papel.
 - Enriquecimento compara cidade/UF/CEP conhecidos antes de completar endereco;
   referencias ambiguas nao podem escolher arbitrariamente uma localizacao.
 - Lint, tipos e build iniciais aprovados; 283 testes de dados e 18 de interface
   aprovados. Seis larguras, tres temas, Maps e impressao conferidos localmente.
   Duas suites Windows interrompidas por timeouts/baixa memoria e falhas POSIX.
   Gates completos pendentes. Politica depende de documento/destino do usuario.
+- CI 37086002430/PR #139: 1465 Vitest e oito Node aprovados; audit bloqueia
+  braces@3.0.3, GHSA-vfj7-8cjw-p6xm. Em 02/10, npm retornou E404 para 3.0.4
+  e GitHub Advisory informou nenhuma versao corrigida. Nao ignorar esse gate.
+  Publicacao, imagem e matriz visual autenticada continuam pendentes.
 - Evidencias: docs/audits/tabelao-layout-maps-2026-10-02.md. Sem migration ou n8n.
 
 ## 2026-10-02: Contorno dourado sem preenchimento nos editaveis

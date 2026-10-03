@@ -11,12 +11,20 @@
 - Rodape: Aprenda +, Politica comercial, Imprimir, Bora Vender e Salesforce,
   com icones. Politica permanece desabilitada ate receber documento/destino.
 - Impressao restaura a tabela ocultada pelo CSS legado; sem alterar outras guias.
+  Revisao visual corrigiu texto branco e dourado claro sobre papel branco.
+  QA mede contraste minimo 4,5:1 em todos os textos impressos, nos tres temas.
 - Lint, tipos e build iniciais aprovados. Suite Windows interrompida apos falhas
-  POSIX e timeouts sob baixa memoria, inclusive com dois workers. CI pendente.
+  POSIX e timeouts sob baixa memoria, inclusive com dois workers.
 - Dados: 283 testes aprovados e timeout de snapshot aprovado isoladamente.
   Interface: 18/18; oito testes Node aprovados. Provas locais de seis larguras,
   tres temas, Maps, guia e impressao passaram; preview teve tres assets 404.
 - Evidencias e limites em docs/audits/tabelao-layout-maps-2026-10-02.md.
+- PR #139; CI 37086002430 aprovou 1465 testes Vitest (4 ignorados), oito Node,
+  lint e tipos. Audit bloqueou braces@3.0.3 (GHSA-vfj7-8cjw-p6xm).
+  Registry retornou E404 para 3.0.4; advisory informa nenhuma versao corrigida.
+  Sem supressao do gate, imagem promovida ou alteracao em producao.
+- Apos revisao de print: lint, tipos, build, 73 testes focados e 20 verificacoes
+  de navegador por largura (1440/390px) aprovados.
 
 ## 2026-10-02 - Dourado fechado e edicao sem preenchimento
 

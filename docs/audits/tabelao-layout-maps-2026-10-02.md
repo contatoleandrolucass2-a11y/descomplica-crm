@@ -18,7 +18,8 @@ simuladores. A pagina publica de documentacao nao pertence a esta alteracao.
    Maps montada a partir dos componentes presentes. Sem logradouro, sem link.
 5. Recursos finais nesta ordem e com icones: Aprenda +, Politica comercial,
    Imprimir, Bora Vender e Salesforce. Aprenda + abre o guia existente.
-6. Impressao mostra a tabela e suas linhas; controles interativos nao aparecem.
+6. Impressao mostra a tabela e suas linhas, com contraste textual minimo 4,5:1
+   nos tres temas; controles interativos nao aparecem.
 7. Teclado, foco, celular, tablet, desktop, temas e ausencia de dados preservados.
 
 ## Limites de dados
@@ -52,6 +53,31 @@ simuladores. A pagina publica de documentacao nao pertence a esta alteracao.
   seis larguras por tres temas. Runner completo registrou tres assets 404 do
   preview, portanto nao foi declarado integralmente aprovado.
 - CI, referencias visuais revisadas, imagem, publicacao e smoke final pendentes.
+
+## Revisao final e bloqueio de publicacao
+
+- PR [#139](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/139).
+  Main 506b9e3 integrado em 8bf5572, preservando o ajuste concorrente do Associativo.
+- CI [37086002430](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/37086002430)
+  aprovou formatacao, lint, tipos, 1465 testes Vitest (4 ignorados) e oito Node.
+  Audit falhou em braces@3.0.3, transitivo do eslint-config-next. Build e gates
+  posteriores nao executaram nessa CI; nao declarar aprovacao integral.
+- [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm):
+  advisory consultado em 02/10/2026 informa nenhuma versao corrigida. A consulta
+  `pnpm view braces@3.0.4 version dist.integrity dist.tarball --json` retornou E404.
+  Nenhuma dependencia, excecao de auditoria ou limiar de release foi alterado.
+- Revisao das capturas detectou texto claro sobre fundo branco na impressao.
+  Correcao restrita ao print do Tabelao, com dourado escuro e textos de alto contraste.
+  QA agora examina a cor dos textos descendentes e contraste em cada tema.
+- Preview sintetico reconstruido: 20/20 verificacoes em 1440px e 390px, incluindo
+  print em tres temas, guia, foco, ordem e Maps. Capturas desktop/celular e print
+  inspecionadas; a captura de impressao espera terminar as transicoes de cor.
+- Apos a correcao final: `pnpm lint`, `pnpm typecheck`, `pnpm build` e os 73
+  testes de tabelao-archive/tabelao-presentation aprovados novamente.
+- Evidencias locais: `%TEMP%/descomplica-tabelao-preview/captures/`, incluindo
+  seis PNGs de tela, PNG/PDF de impressao e results.json. Sem dados de clientes.
+- Producao nao foi modificada. Referencias visuais autenticadas, imagem imutavel,
+  backup/rollback de release e verificacao pos-publicacao permanecem pendentes.
 
 ## Reversao
 

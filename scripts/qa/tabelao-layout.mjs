@@ -249,8 +249,57 @@ export async function checkTabelaoLayout(page) {
         )
       );
     });
+    for (const theme of ["light", "balanced", "dark"]) {
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+      await page.waitForFunction(() =>
+        [...document.getAnimations()].every(
+          (animation) =>
+            animation.constructor.name !== "CSSTransition" || animation.playState === "finished",
+        ),
+      );
+      checks[`printReadable_${theme}`] = await page.evaluate(() => {
+        const shell = document.querySelector(".tabelao-page-shell");
+        const table = shell.querySelector(".investor-stock-table");
+        const cells = [...table.querySelectorAll("th, td")];
+        const prices = [...table.querySelectorAll('[headers~="tabelao-price"]')];
+        const walker = document.createTreeWalker(
+          shell.querySelector(".investor-main"),
+          NodeFilter.SHOW_TEXT,
+        );
+        const visibleText = [];
+        while (walker.nextNode()) {
+          const element = walker.currentNode.parentElement;
+          if (walker.currentNode.textContent.trim() && element?.checkVisibility()) {
+            visibleText.push(element);
+          }
+        }
+        const contrastOnWhite = (color) => {
+          const rgb = color.match(/^rgb\((\d+), (\d+), (\d+)\)$/);
+          if (!rgb) return 0;
+          const linear = rgb.slice(1).map((channel) => {
+            const value = Number(channel) / 255;
+            return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+          });
+          return 1.05 / (0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2] + 0.05);
+        };
+        return (
+          getComputedStyle(shell).backgroundColor === "rgb(255, 255, 255)" &&
+          visibleText.length > cells.length &&
+          visibleText.every((element) => contrastOnWhite(getComputedStyle(element).color) >= 4.5) &&
+          cells.every((cell) => getComputedStyle(cell).backgroundColor === "rgb(255, 255, 255)") &&
+          prices.length > 0 &&
+          prices.every((cell) => getComputedStyle(cell).color === "rgb(128, 96, 0)")
+        );
+      });
+    }
   } finally {
     await page.emulateMedia({ media: null });
+    await page.evaluate((theme) => {
+      if (theme === null) document.documentElement.removeAttribute("data-theme");
+      else document.documentElement.setAttribute("data-theme", theme);
+    }, originalTheme);
   }
   return checks;
 }

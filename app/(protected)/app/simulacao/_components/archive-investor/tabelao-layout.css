@@ -173,7 +173,15 @@
 @media print {
   .investor-page-shell.tabelao-page-shell {
     page: tabelao;
-    --tabelao-price-gold: #806000;
+    background: #fff !important;
+    --tabelao-price-gold: #806000 !important;
+  }
+
+  .investor-page-shell.tabelao-page-shell .investor-main,
+  .investor-page-shell.tabelao-page-shell .investor-main * {
+    color: #182a40 !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   .investor-page-shell.tabelao-page-shell :is(.investor-stock-panel, .investor-compact-hero) {
@@ -216,9 +224,12 @@
   }
 
   .investor-page-shell.tabelao-page-shell .investor-stock-table :is(th, td) {
-    color: #182a40;
     background: #fff !important;
     print-color-adjust: exact;
+  }
+
+  .investor-page-shell.tabelao-page-shell .investor-stock-table tbody td.investor-stock-price {
+    color: var(--tabelao-price-gold) !important;
   }
 
   .investor-page-shell.tabelao-page-shell .tabelao-address-link {
