@@ -18,6 +18,7 @@ simuladores. A pagina publica de documentacao nao pertence a esta alteracao.
    Maps montada a partir dos componentes presentes. Sem logradouro, sem link.
 5. Recursos finais nesta ordem e com icones: Aprenda +, Politica comercial,
    Imprimir, Bora Vender e Salesforce. Aprenda + abre o guia existente.
+   Em 03/10, usuario confirmou Politica comercial desabilitada e sem destino.
 6. Impressao mostra a tabela e suas linhas, com contraste textual minimo 4,5:1
    nos tres temas; controles interativos nao aparecem.
 7. Teclado, foco, celular, tablet, desktop, temas e ausencia de dados preservados.
@@ -32,8 +33,8 @@ simuladores. A pagina publica de documentacao nao pertence a esta alteracao.
 - Sintaxe conferida na [documentacao oficial Maps URLs](https://developers.google.com/maps/documentation/urls/get-started).
 - Enriquecimento recusa conflitos conhecidos de cidade, UF ou CEP; ausencias
   nao criam divergencias ficticias e multiplos contextos ambiguos nao sao unidos.
-- Destino de Politica comercial solicitado ao usuario, ainda nao informado.
-  Controle permanece visivel e desabilitado; nao reutiliza politica de outro motor.
+- Politica comercial permanece visivel, desabilitada e sem destino, conforme
+  confirmacao do usuario em 03/10. Nao ha documento pendente para esta entrega.
 
 ## Verificacao
 
@@ -78,6 +79,23 @@ simuladores. A pagina publica de documentacao nao pertence a esta alteracao.
   seis PNGs de tela, PNG/PDF de impressao e results.json. Sem dados de clientes.
 - Producao nao foi modificada. Referencias visuais autenticadas, imagem imutavel,
   backup/rollback de release e verificacao pos-publicacao permanecem pendentes.
+
+## Rechecagem em 03/10/2026
+
+- Pedido de concluir/publicar mantem Politica comercial desabilitada. O componente
+  ja possui `disabled`, sem href ou handler; nenhuma mudanca de runtime necessaria.
+- PR #139 aberto, mergeable_state blocked, head 562465b, base 506b9e3.
+  CI [37086793201](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/37086793201)
+  passou formatacao, lint, tipos, 1465 Vitest (4 ignorados) e oito Node; audit
+  falhou no mesmo GHSA. Build, release-gates, restore e imagem nao executados.
+- `pnpm audit --audit-level high` local reproduziu uma vulnerabilidade alta.
+  `pnpm view braces version time.modified dist.integrity dist.tarball --json`
+  confirmou latest 3.0.3, nao uma correcao. Advisory oficial ainda lista None.
+- Consultas oficiais npm de fast-glob, micromatch e @next/eslint-plugin-next:
+  latest 3.3.3, 4.0.8 e 16.3.8 respectivamente. Todos preservam o caminho para
+  braces; uma atualizacao direta desses consumidores nao elimina o bloqueio.
+- Sem instalar fork, modificar auditoria ou reduzir verificacoes. Producao nao
+  foi alterada; correcao da dependencia e gates posteriores continuam pendentes.
 
 ## Reversao
 

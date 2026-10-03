@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-03 - Estado da politica comercial do Tabelao
+
+- Confirma por solicitacao do usuario que Politica comercial permanece visivel,
+  desabilitada e sem redirecionamento. Nenhum destino e necessario nesta entrega.
+- Publicacao continua bloqueada pela auditoria de dependencia preexistente.
+
 ## 2026-10-02 - Layout e enderecos do Tabelao
 
 - Compacta o cabecalho e alinha o icone de informacao ao titulo.

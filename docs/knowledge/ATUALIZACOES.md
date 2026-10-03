@@ -4,6 +4,18 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-03: Politica desabilitada e bloqueio de auditoria do Tabelao
+
+- Status: pendente_validacao; branch codex/tabelao-layout-maps, runtime 562465b.
+- Fonte: confirmacao direta do usuario e rechecagem do PR #139/CI 37086793201.
+- Politica comercial desabilitada e sem destino e o estado solicitado, nao uma
+  pendencia de documento. Componente e QA existentes ja preservam esse contrato.
+- CI aprovou formatacao, lint, tipos e testes; pnpm audit local tambem confirmou
+  GHSA-vfj7-8cjw-p6xm alto. npm latest de braces permanece 3.0.3, sem correcao
+  segundo GitHub Advisory. As ultimas versoes dos consumidores mantem a cadeia.
+- Sem mudanca de runtime ou dependencia, bypass, merge ou deploy. Evidencias:
+  docs/audits/tabelao-layout-maps-2026-10-02.md. Release segue pendente do gate.
+
 ## 2026-10-02: Layout e Maps no Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-layout-maps, base 3960724.

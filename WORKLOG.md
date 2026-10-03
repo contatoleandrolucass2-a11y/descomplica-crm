@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-03 - Politica desabilitada e revalidacao do release
+
+- Usuario confirmou Politica comercial visivel, desabilitada e sem destino.
+  TabelaoResources ja implementa esse estado; nenhuma alteracao de runtime.
+- PR #139 segue aberto e bloqueado. CI 37086793201 no SHA 562465b aprovou
+  formatacao, lint, tipos e testes, mas falhou no audit de braces@3.0.3.
+- Nova auditoria local confirmou uma vulnerabilidade alta GHSA-vfj7-8cjw-p6xm.
+  npm informa braces 3.0.3 como latest; fast-glob 3.3.3 e micromatch 4.0.8
+  continuam nessa cadeia, inclusive no plugin Next mais recente, 16.3.8.
+- GitHub Advisory ainda informa nenhuma versao corrigida. Sem supressao,
+  alteracao de dependencias, merge ou publicacao em producao.
+
 ## 2026-10-02 - Cabecalho, colunas e recursos do Tabelao
 
 - Escopo exclusivo de /app/simulacao/tabelao, conforme sete capturas do usuario.
