@@ -15,6 +15,9 @@
   imagem imutavel, backup conferido e CAS. Health, 12 verificacoes anonimas e
   leitura autenticada de fundo/borda/animacao aprovados. Sem proposta salva.
 - Fechamento documental sem novo runtime ou restart da aplicacao.
+- PR documental #140 bloqueado no audit da CI 37086964349 por
+  GHSA-vfj7-8cjw-p6xm (braces 3.0.3). Lint, tipos e testes passaram nesse run;
+  nenhum gate ignorado. Runtime visual ja publicado permanece em 506b9e3.
 - Evidencias: docs/audits/associativo-contorno-dourado-2026-10-02.md.
 
 ## 2026-10-02 - Paleta do Tabelao no Associativo

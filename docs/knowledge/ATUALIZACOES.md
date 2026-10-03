@@ -27,6 +27,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   associative-edge-shine de 3s/2px confirmados; selecao descartada por reload.
 - Evidencias na auditoria vinculada ao WORKLOG. Fechamento documental no Git
   e sincronizacao local; nao exige novo deploy nem prova carga de producao.
+- Pendencia posterior: PR documental #140 bloqueado no audit da CI
+  37086964349 por GHSA-vfj7-8cjw-p6xm, braces 3.0.3 via eslint-config-next.
+  Nao houve bypass, mudanca de dependencia ou novo deploy. Correcao dessa
+  dependencia exige validacao propria; entrega visual permanece publicada.
 
 ## 2026-10-02: Paleta do Tabelao como referencia do Associativo
 

@@ -50,3 +50,16 @@
   etapa 2 ativa depois da renda. Sessao de teste descartada por reload.
 - Nenhuma proposta ou dado pessoal salvo. Tabelao e paleta-base intocados.
 - Fechamento documental pelo Git e sincronizacao local, sem novo restart.
+
+## Pendencia Documental
+
+- PR #140, head faa21f4: CI 37086964349 passou formatacao, lint, tipos e
+  testes, mas falhou em pnpm audit --audit-level high. Integracao bloqueada.
+- Alerta GHSA-vfj7-8cjw-p6xm em braces 3.0.3, confirmado no lock e por
+  pnpm why: eslint-config-next -> @next/eslint-plugin-next -> fast-glob ->
+  micromatch -> braces. Caminho identificado de desenvolvimento; isso nao
+  substitui avaliacao de exposicao ou validacao da correcao da dependencia.
+- Fonte: https://github.com/advisories/GHSA-vfj7-8cjw-p6xm, consultada em
+  02/10/2026 (local). Nenhuma tolerancia, gate ou dependencia alterada.
+- Registro publicado na branch e sincronizado; merge documental pendente.
+  Runtime 506b9e3 preservado e health publico reconferido com status ok.
