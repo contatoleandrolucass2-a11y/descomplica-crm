@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-03 - Tabelao publicado e verificado
+
+- Publica o PR #139 na versao 8e158cc e confirma layout, Maps, colunas,
+  valores dourados e recursos na pagina autenticada de producao.
+- Politica comercial permanece visivel, desabilitada e sem destino.
+- Registro posterior somente documental, sem novo deploy ou restart.
+
 ## 2026-10-03 - Referencias revisadas do Tabelao
 
 - Atualiza somente 11 capturas do Tabelao para o layout solicitado, mantendo

@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-03 - Publicacao concluida do Tabelao
+
+- PR #139 integrado apos CI 37136895575 verde. Arvore de f618ba6 identica ao
+  merge 8e158cc9d13beeff0087064df6d9b58d87790379.
+- CI main 37144378453 aprovou validate, release-gates, isolated-restore e
+  promotable-image. Imagem transferida somente depois dos quatro gates verdes.
+- ZIP, arquivo comprimido, manifest/config OCI e 11 camadas conferidos.
+  Perfis de homologacao/producao aprovados novamente no destino, sem rebuild.
+- Backup privado, imagem anterior preservada, Nginx valido, CAS e troca pelo
+  wrapper oficial. Health interno/publico confirmou a versao exata; APIs de
+  estoque retornaram 401 anonimo, Tabelao 307 para login. Sem rollback necessario.
+- Pagina autenticada de producao inspecionada: titulo, ordem, dourado, Maps e
+  rodape corretos. Politica comercial disabled confirmado no DOM. Sem exportar
+  estoque ou credenciais para o repositorio. Aba publicada deixada aberta.
+- Evidencias completas: docs/audits/tabelao-layout-maps-2026-10-02.md.
+  Este registro nao altera runtime nem requer nova troca de imagem.
+
 ## 2026-10-03 - Revisao visual autenticada do Tabelao
 
 - CI 37134880142 em c6432d3: formatacao, lint, tipos, 1475 testes Vitest,
