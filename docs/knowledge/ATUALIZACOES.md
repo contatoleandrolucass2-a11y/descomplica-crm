@@ -4,6 +4,26 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-02: Layout e Maps no Tabelao
+
+- Status: pendente_validacao; branch codex/tabelao-layout-maps, base 3960724.
+- Fonte: sete prints, rota explicitada pelo usuario e confirmacao de manter
+  a origem oficial atual para os enderecos.
+- O endpoint protegido de estoque repassa uma API externa; o complemento de
+  endereco vem do snapshot ESTOQUE SPC. Nao afirmar consulta direta ao banco.
+- URL Maps usa somente componentes presentes e URLSearchParams. Sem logradouro,
+  manter ausencia explicita sem link; rowspan deve comparar texto e destino.
+- Nova ordem exige colgroup, cabecalho, corpo e oraculos de QA consistentes.
+- CSS legado de impressao oculta investor-stock-panel. Restaurar somente no
+  Tabelao e verificar presenca de todas as linhas antes de aprovar Imprimir.
+- Enriquecimento compara cidade/UF/CEP conhecidos antes de completar endereco;
+  referencias ambiguas nao podem escolher arbitrariamente uma localizacao.
+- Lint, tipos e build iniciais aprovados; 283 testes de dados e 18 de interface
+  aprovados. Seis larguras, tres temas, Maps e impressao conferidos localmente.
+  Duas suites Windows interrompidas por timeouts/baixa memoria e falhas POSIX.
+  Gates completos pendentes. Politica depende de documento/destino do usuario.
+- Evidencias: docs/audits/tabelao-layout-maps-2026-10-02.md. Sem migration ou n8n.
+
 ## 2026-10-02: Paleta do Tabelao como referencia do Associativo
 
 - Status: validado; PR #136, runtime 150b771.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-02 - Layout e enderecos do Tabelao
+
+- Compacta o cabecalho e alinha o icone de informacao ao titulo.
+- Reordena colunas e destaca o valor do imovel em dourado.
+- Adiciona links Google Maps aos enderecos da origem oficial existente.
+- Inclui recursos finais com icones e impressao da consulta completa.
+- Politica comercial aguarda documento oficial; nenhum conteudo foi inventado.
+
 ## 2026-10-02 - Associativo com as cores do Tabelao
 
 - Alinha fundo, paineis, campos, bordas e textos a paleta existente do Tabelao.

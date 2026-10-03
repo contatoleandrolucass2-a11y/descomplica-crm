@@ -1,0 +1,233 @@
+.investor-page-shell.tabelao-page-shell {
+  --tabelao-price-gold: #806000;
+}
+
+:root[data-theme="dark"] .investor-page-shell.tabelao-page-shell {
+  --tabelao-price-gold: #f5cf70;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-main {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-compact-hero {
+  align-items: start;
+  row-gap: 8px;
+  padding-top: 0;
+  padding-bottom: 8px;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-hero-title {
+  align-items: center;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-hero-title h1 {
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-hero-title > .investor-info-hint {
+  flex: 0 0 24px;
+  align-self: center;
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  transform: none;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-hero-title .investor-info-trigger {
+  place-items: center;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  min-height: 24px;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-hero-guide .investor-proposal-help-cta {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  gap: 4px;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-hero-guide-information {
+  order: 1;
+  flex: 0 0 24px;
+  height: auto;
+}
+
+.investor-page-shell.tabelao-page-shell
+  .investor-hero-guide-information
+  :is(.investor-info-hint, .investor-info-trigger) {
+  width: 24px;
+  min-width: 24px;
+  height: 32px;
+  min-height: 32px;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-hero-guide .investor-guided-start {
+  flex: 0 0 auto;
+  width: max-content;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 4px 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 6px;
+  box-shadow: none;
+  animation: none;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-guided-start::after {
+  display: none;
+}
+
+.investor-page-shell.tabelao-page-shell .investor-stock-table tbody td.investor-stock-price {
+  color: var(--tabelao-price-gold);
+  font-weight: 900 !important;
+}
+
+.investor-page-shell.tabelao-page-shell .tabelao-address-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--inv-color-accent);
+  text-underline-offset: 3px;
+}
+
+.investor-page-shell.tabelao-page-shell .tabelao-address-link:hover {
+  color: var(--inv-color-accent);
+}
+
+.tabelao-page-shell .tabelao-resources {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.tabelao-page-shell .tabelao-resources > :is(button, a) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 58px;
+  padding: 12px;
+  border: 1px solid var(--inv-color-accent);
+  border-radius: 8px;
+  color: var(--inv-color-text);
+  background: var(--inv-color-panel-muted);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-align: center;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.tabelao-page-shell .tabelao-resources svg {
+  flex: 0 0 22px;
+}
+
+.tabelao-page-shell .tabelao-resources > :is(button, a):hover:not(:disabled) {
+  background: var(--inv-color-accent-soft);
+}
+
+.tabelao-page-shell .tabelao-resources > button:disabled {
+  color: var(--inv-color-muted);
+  cursor: not-allowed;
+}
+
+.tabelao-page-shell
+  :is(.tabelao-address-link, .tabelao-resources > button, .tabelao-resources > a):focus-visible {
+  outline: 2px solid var(--inv-color-accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .investor-page-shell.tabelao-page-shell .investor-hero-title h1 {
+    font-size: 1.475rem;
+  }
+
+  .tabelao-page-shell .tabelao-resources {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tabelao-page-shell .tabelao-resources > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (pointer: coarse) {
+  .investor-page-shell.tabelao-page-shell .investor-hero-guide .investor-guided-start {
+    min-height: 44px;
+  }
+}
+
+@media print {
+  .investor-page-shell.tabelao-page-shell {
+    page: tabelao;
+    --tabelao-price-gold: #806000;
+  }
+
+  .investor-page-shell.tabelao-page-shell :is(.investor-stock-panel, .investor-compact-hero) {
+    display: block !important;
+  }
+
+  .investor-page-shell.tabelao-page-shell .investor-main {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  .tabelao-page-shell
+    :is(
+      .tabelao-resources,
+      .investor-hero-guide,
+      .investor-info-hint,
+      .investor-stock-filters,
+      .investor-guided-tour,
+      .investor-tour-spotlight
+    ) {
+    display: none !important;
+  }
+
+  .investor-page-shell.tabelao-page-shell .investor-stock-results {
+    width: 100%;
+    max-width: none;
+    overflow: visible;
+    margin: 12px 0;
+  }
+
+  .tabelao-page-shell .investor-stock-table {
+    min-width: 0;
+    --tabelao-cell-font-size: 8pt;
+  }
+
+  .investor-page-shell.tabelao-page-shell .investor-stock-table thead th {
+    transform: none;
+    white-space: normal;
+  }
+
+  .investor-page-shell.tabelao-page-shell .investor-stock-table :is(th, td) {
+    color: #182a40;
+    background: #fff !important;
+    print-color-adjust: exact;
+  }
+
+  .investor-page-shell.tabelao-page-shell .tabelao-address-link {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@page tabelao {
+  size: A4 landscape;
+  margin: 12mm;
+}

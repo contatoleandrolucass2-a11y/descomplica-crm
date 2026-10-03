@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildTabelaoMapsUrl,
+  formatTabelaoAddress,
   formatTabelaoDescription,
   formatTabelaoPlant,
 } from "../lib/archive-investor/tabelao-presentation.mjs";
+import { enrichTabelaoLocationFields } from "../lib/archive-investor/tabelao-inventory.mjs";
+import type { TabelaoPayloadItem } from "../lib/archive-investor/tabelao-payload";
 
 describe("apresentacao do Tabelao em portugues brasileiro", () => {
   it.each([
@@ -90,5 +94,175 @@ describe("apresentacao do Tabelao em portugues brasileiro", () => {
       project: "Residencial S\u00e3o Miguel",
       street: "Rua S\u00e3o Jo\u00e3o",
     });
+  });
+});
+
+describe("endereco e Google Maps do Tabelao", () => {
+  const item = Object.freeze({
+    id: "qa-address",
+    businessUnit: "QA",
+    project: "Projeto QA",
+    product: "Unidade QA",
+    street: "  Rua S\u00e3o Teste  ",
+    streetNumber: "  10-A  ",
+    neighborhood: "  Bairro QA  ",
+    city: "  Cidade QA  ",
+    state: "  UF  ",
+    postalCode: "  00001-234  ",
+  } satisfies TabelaoPayloadItem);
+
+  it("preserva o formato visual, acentos e caixa dos componentes recebidos", () => {
+    expect(formatTabelaoAddress(item)).toBe("Rua S\u00e3o Teste / 10-A / Bairro QA");
+  });
+
+  it.each([null, "", " \t\n "])("explicita cada componente ausente: %s", (value) => {
+    expect(formatTabelaoAddress({ street: value, streetNumber: value, neighborhood: value })).toBe(
+      "N\u00e3o informado / N\u00e3o informado / N\u00e3o informado",
+    );
+    expect(formatTabelaoAddress({ ...item, streetNumber: value })).toBe(
+      "Rua S\u00e3o Teste / N\u00e3o informado / Bairro QA",
+    );
+    expect(formatTabelaoAddress({ ...item, neighborhood: value })).toBe(
+      "Rua S\u00e3o Teste / 10-A / N\u00e3o informado",
+    );
+  });
+
+  it("aceita os campos opcionais omitidos pelo payload", () => {
+    expect(formatTabelaoAddress({})).toBe(
+      "N\u00e3o informado / N\u00e3o informado / N\u00e3o informado",
+    );
+    expect(formatTabelaoAddress({ street: item.street, neighborhood: item.neighborhood })).toBe(
+      "Rua S\u00e3o Teste / N\u00e3o informado / Bairro QA",
+    );
+    expect(formatTabelaoAddress({ street: item.street, streetNumber: item.streetNumber })).toBe(
+      "Rua S\u00e3o Teste / 10-A / N\u00e3o informado",
+    );
+  });
+
+  it("combina os seis componentes reais em uma busca no Maps", () => {
+    const url = new URL(buildTabelaoMapsUrl(item)!);
+    expect(url.origin).toBe("https://www.google.com");
+    expect(url.pathname).toBe("/maps/search/");
+    expect([...url.searchParams]).toEqual([
+      ["api", "1"],
+      ["query", "Rua S\u00e3o Teste, 10-A, Bairro QA, Cidade QA, UF, 00001-234"],
+    ]);
+    expect(url.hash).toBe("");
+  });
+
+  it.each([null, "", " \t\n ", "N\u00e3o informado", " NAO INFORMADA "])(
+    "nao cria link sem logradouro, mesmo com contexto geografico: %s",
+    (street) => {
+      expect(buildTabelaoMapsUrl({ ...item, street })).toBeNull();
+    },
+  );
+
+  it("nao transforma bairro, municipio, UF ou CEP isolados em endereco do imovel", () => {
+    expect(buildTabelaoMapsUrl({})).toBeNull();
+    expect(buildTabelaoMapsUrl({ neighborhood: "Bairro QA" })).toBeNull();
+    expect(
+      buildTabelaoMapsUrl({ city: "Cidade QA", state: "UF", postalCode: "00001-234" }),
+    ).toBeNull();
+  });
+
+  it("usa somente o logradouro quando o restante nao foi informado", () => {
+    expect(buildTabelaoMapsUrl({ street: "Rua QA" })).toBe(
+      "https://www.google.com/maps/search/?api=1&query=Rua+QA",
+    );
+  });
+
+  it("omite ausencias da busca sem inventar numero, municipio, UF ou pais", () => {
+    const partial = {
+      street: "Rua QA",
+      streetNumber: null,
+      neighborhood: "Bairro QA",
+      city: "",
+      state: " \t ",
+      postalCode: "00001-234",
+    };
+    expect(formatTabelaoAddress(partial)).toBe("Rua QA / N\u00e3o informado / Bairro QA");
+    expect(new URL(buildTabelaoMapsUrl(partial)!).searchParams.get("query")).toBe(
+      "Rua QA, Bairro QA, 00001-234",
+    );
+  });
+
+  it("nao envia rotulos de ausencia como componentes para o Maps", () => {
+    const url = buildTabelaoMapsUrl({
+      street: "Rua QA",
+      streetNumber: "N\u00e3o informado",
+      neighborhood: " NAO INFORMADO ",
+      city: "N\u00e3o informada",
+      state: null,
+    });
+    expect(new URL(url!).searchParams.get("query")).toBe("Rua QA");
+  });
+
+  it.each(["0", "s/n", "0010-B"])("preserva o numero textual da origem: %s", (streetNumber) => {
+    const address = { street: "Rua QA", streetNumber };
+    expect(formatTabelaoAddress(address)).toBe(`Rua QA / ${streetNumber} / N\u00e3o informado`);
+    expect(new URL(buildTabelaoMapsUrl(address)!).searchParams.get("query")).toBe(
+      `Rua QA, ${streetNumber}`,
+    );
+  });
+
+  it("codifica caracteres reservados sem permitir trocar host, parametros ou fragmento", () => {
+    const street = "Rua QA &api=0&query=https://example.invalid/#teste + 50% / a\u00e7\u00e3o?";
+    const url = new URL(buildTabelaoMapsUrl({ street, streetNumber: "1&x=2" })!);
+    expect(url.origin).toBe("https://www.google.com");
+    expect(url.pathname).toBe("/maps/search/");
+    expect([...url.searchParams]).toEqual([
+      ["api", "1"],
+      ["query", `${street}, 1&x=2`],
+    ]);
+    expect(url.hash).toBe("");
+  });
+
+  it("nao cria link com endereco de referencia geograficamente conflitante", () => {
+    const live = { ...item, street: null, streetNumber: null, neighborhood: null };
+    const reference = {
+      ...item,
+      city: "Cidade da referencia",
+      state: "XX",
+      postalCode: "00009-999",
+    };
+    const [enriched] = enrichTabelaoLocationFields([live], [reference]);
+    expect(enriched).toEqual(live);
+    expect(formatTabelaoAddress(enriched!)).toBe(
+      "N\u00e3o informado / N\u00e3o informado / N\u00e3o informado",
+    );
+    expect(buildTabelaoMapsUrl(enriched!)).toBeNull();
+  });
+
+  it("monta Maps com referencia compativel e preserva a geografia viva", () => {
+    const live = { ...item, street: null, streetNumber: null, neighborhood: null };
+    const [enriched] = enrichTabelaoLocationFields(
+      [live],
+      [{ ...item, city: "cidade qa", state: "uf", postalCode: "00001234" }],
+    );
+    expect(new URL(buildTabelaoMapsUrl(enriched!)!).searchParams.get("query")).toBe(
+      "Rua S\u00e3o Teste, 10-A, Bairro QA, Cidade QA, UF, 00001-234",
+    );
+    expect(enriched).toMatchObject({
+      city: item.city,
+      state: item.state,
+      postalCode: item.postalCode,
+    });
+  });
+
+  it("nao usa nome comercial, regiao ou distrito para completar o endereco", () => {
+    const address = {
+      street: "Rua QA",
+      project: "Projeto QA",
+      district: "Distrito QA",
+      region: "Zona QA",
+    };
+    expect(new URL(buildTabelaoMapsUrl(address)!).searchParams.get("query")).toBe("Rua QA");
+  });
+
+  it("e deterministico e nao modifica o item do payload", () => {
+    const original = { ...item };
+    expect(formatTabelaoAddress(item)).toBe(formatTabelaoAddress(item));
+    expect(buildTabelaoMapsUrl(item)).toBe(buildTabelaoMapsUrl(item));
+    expect(item).toEqual(original);
   });
 });

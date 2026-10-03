@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-10-02 - Cabecalho, colunas e recursos do Tabelao
+
+- Escopo exclusivo de /app/simulacao/tabelao, conforme sete capturas do usuario.
+- Cabecalho compacto, somente titulo e informacao alinhada, com guia existente.
+- Apos Estoque: % obra, Limitador, Volta ao Caixa, Avaliacao e Valor do Imovel.
+  Preco em dourado com contraste por tema; regras de calculo preservadas.
+- Enderecos viram links Maps codificados, com contexto geografico disponivel.
+  Usuario confirmou manter a origem oficial atual. Ausencia nao cria local ficticio.
+- Rodape: Aprenda +, Politica comercial, Imprimir, Bora Vender e Salesforce,
+  com icones. Politica permanece desabilitada ate receber documento/destino.
+- Impressao restaura a tabela ocultada pelo CSS legado; sem alterar outras guias.
+- Lint, tipos e build iniciais aprovados. Suite Windows interrompida apos falhas
+  POSIX e timeouts sob baixa memoria, inclusive com dois workers. CI pendente.
+- Dados: 283 testes aprovados e timeout de snapshot aprovado isoladamente.
+  Interface: 18/18; oito testes Node aprovados. Provas locais de seis larguras,
+  tres temas, Maps, guia e impressao passaram; preview teve tres assets 404.
+- Evidencias e limites em docs/audits/tabelao-layout-maps-2026-10-02.md.
+
 ## 2026-10-02 - Paleta do Tabelao no Associativo
 
 - Pedido posterior: Associativo com as cores do Tabelao, consultado somente
