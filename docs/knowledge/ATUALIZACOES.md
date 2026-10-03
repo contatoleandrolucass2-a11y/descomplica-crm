@@ -4,6 +4,18 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-03: Substituicao do glob no lint Next
+
+- Status: pendente_validacao; fonte: codigo Next 16.3.6 e guia oficial tinyglobby.
+- getRootDirs e o unico consumidor do fast-glob no plugin. Patch pnpm troca por
+  tinyglobby 0.2.17 ja presente, com packageExtensions e remocao da cadeia antiga.
+- Desabilitar expandDirectories e preservar saidas relativas/absolutas e aliases
+  Windows 8.3. Testar a regra Next real, nao somente a ausencia no lockfile.
+- Docker precisa copiar patches antes do install. Auditar normalmente, sem ignore.
+- Dez testes focados passaram; primeira auditoria limpa. Lint local interrompido
+  sob baixa memoria. Conclusao depende da CI e demais gates.
+  Evidencias: docs/audits/next-eslint-glob-2026-10-03.md; PR #139.
+
 ## 2026-10-03: Politica desabilitada e bloqueio de auditoria do Tabelao
 
 - Status: pendente_validacao; branch codex/tabelao-layout-maps, runtime 562465b.

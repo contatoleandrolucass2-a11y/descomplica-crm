@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-03 - Dependencias de lint sem braces
+
+- Substitui o buscador de diretorios do plugin Next por tinyglobby, com patch
+  versionado e testes de compatibilidade. Mantem todas as regras de lint.
+- Remove a cadeia vulneravel do lockfile e inclui patches no build Docker.
+
 ## 2026-10-03 - Estado da politica comercial do Tabelao
 
 - Confirma por solicitacao do usuario que Politica comercial permanece visivel,

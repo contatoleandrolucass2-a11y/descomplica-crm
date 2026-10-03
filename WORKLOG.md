@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-03 - Remocao de braces da cadeia do lint
+
+- Patch versionado do plugin Next 16.3.6 usa tinyglobby existente, removendo
+  fast-glob/micromatch/braces sem desativar regras ou ignorar auditoria.
+- Testes reais do plugin cobrem caminhos, Windows e deteccao de links invalidos.
+  Docker recebe patches antes de instalar; lockfile registra a correcao.
+- Dez testes de regressao aprovados; audit limpo. Lint local interrompido por
+  pressao de memoria; demais comprovacoes integrais exigidas na CI Linux.
+- Evidencias: docs/audits/next-eslint-glob-2026-10-03.md. Gates completos exigidos.
+
 ## 2026-10-03 - Politica desabilitada e revalidacao do release
 
 - Usuario confirmou Politica comercial visivel, desabilitada e sem destino.
