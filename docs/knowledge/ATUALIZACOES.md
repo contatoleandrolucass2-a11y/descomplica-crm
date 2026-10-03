@@ -6,7 +6,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-02: Paleta do Tabelao como referencia do Associativo
 
-- Status: pendente_validacao; branch codex/associativo-paleta-tabelao.
+- Status: validado; PR #136, runtime 150b771.
 - Fonte: novo pedido do usuario e leitura da pagina /app/simulacao/tabelao.
 - Referencia escura confirmada no DOM: fundo #061f35, painel #0a2b47,
   cabecalho de secao #0e4163 e campos #071a31. Tabelao somente leitura.
@@ -19,7 +19,11 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Suite Windows: 1410 aprovados, 1 ignorado e 6 falhas POSIX conhecidas.
   CI Linux 37063588639 aprovou suite, build, restore e gate funcional.
 - Duas capturas escuras do Associativo revisadas/promovidas; demais 191
-  preservadas, inclusive Tabelao. Nova CI integral e publicacao pendentes.
+  preservadas, inclusive Tabelao. CI PR 37067036288 e main 37069870083 verdes.
+- Publicacao por imagem imutavel comprovada, backup e CAS; health correto,
+  acesso anonimo negado e paleta/dourado de 3s confirmados no DOM publicado.
+- Limite: verificacoes de producao observacionais, sem prova de capacidade.
+  Fechamento documental nao demanda reinicio. Auditoria vinculada no WORKLOG.
 
 ## 2026-10-02: Tipografia e caixa de frase no Tabelao
 

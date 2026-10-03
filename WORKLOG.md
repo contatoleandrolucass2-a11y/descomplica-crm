@@ -12,7 +12,12 @@
 - Suite Windows: 1410 aprovados, 1 ignorado e 6 falhas POSIX conhecidas;
   suite integral confirmada na CI Linux 37063588639.
 - Gate funcional autenticado e restore aprovados. Duas capturas escuras
-  revisadas/promovidas; outras 191 preservadas. Nova CI e publicacao pendentes.
+  revisadas/promovidas; outras 191 preservadas.
+- PR #136 integrado com CI 37067036288 verde. Main 150b771 com CI
+  37069870083 integralmente verde, incluindo imagem imutavel.
+- Publicado com backup conferido, CAS e rollback preparado. Health/versao,
+  12 verificacoes anonimas e cores/dourado no navegador autenticado aprovados.
+- Fechamento documental sem alteracao de runtime ou novo restart.
 - Evidencias: docs/audits/associativo-paleta-tabelao-2026-10-02.md.
 
 ## 2026-10-02 - Tipografia e titulos do Tabelao
