@@ -8,6 +8,13 @@
 - Inclui recursos finais com icones e impressao da consulta completa.
 - Politica comercial aguarda documento oficial; nenhum conteudo foi inventado.
 
+## 2026-10-02 - Contorno dourado no Associativo
+
+- Escurece o dourado metalico da unidade selecionada.
+- Remove os fundos dourado e escuro dos campos de edicao; conserva a paleta
+  da pagina, com contorno dourado e linha de brilho a cada tres segundos.
+- Mantem sequencia, acessibilidade, erros e calculos sem alterar o Tabelao.
+
 ## 2026-10-02 - Associativo com as cores do Tabelao
 
 - Alinha fundo, paineis, campos, bordas e textos a paleta existente do Tabelao.

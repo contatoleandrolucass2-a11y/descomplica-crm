@@ -24,6 +24,23 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   Gates completos pendentes. Politica depende de documento/destino do usuario.
 - Evidencias: docs/audits/tabelao-layout-maps-2026-10-02.md. Sem migration ou n8n.
 
+## 2026-10-02: Contorno dourado sem preenchimento nos editaveis
+
+- Status: pendente_validacao; branch codex/associativo-contorno-dourado.
+- Fonte: duas capturas e pedido posterior do usuario, CSS e QA de guidance.
+- A direcao nova substitui o preenchimento dourado das etapas por contorno;
+  apenas a selecao do estoque preserva preenchimento metalico, mais escuro.
+- Campos preenchidos precisam continuar transparentes. O seletor global de
+  formularios tem alta especificidade: aplicar a excecao local tambem ao
+  Ranking, sem mudar tokens compartilhados ou outras tabelas.
+- Brilho limitado a 2px junto a borda, ciclo de 3s, sem cobrir texto. Mantem
+  reduced motion e destaque somente na etapa pendente, sem pular modalidade.
+- Contratos de QA atualizados para a solicitacao: rejeitam fundos dourados,
+  caixas escuras, brilho branco/azul, faixa larga ou estatica. Contraste >=4.5
+  para texto e >=3 para contorno nos tres temas; nenhuma tolerancia relaxada.
+- 28 testes focados, lint, tipos, build, 8 Node e 6/6 jornadas aprovados.
+  Windows com 6 falhas POSIX conhecidas; CI Linux e publicacao pendentes.
+
 ## 2026-10-02: Paleta do Tabelao como referencia do Associativo
 
 - Status: validado; PR #136, runtime 150b771.

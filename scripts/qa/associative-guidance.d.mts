@@ -1,11 +1,18 @@
 import type { Page } from "@playwright/test";
 
 export const associativeGuidanceWidths: number[];
-export function isGuidanceGoldSurfaceColor(color: number[]): boolean;
-export function hasGuidanceGoldSurface(paint: {
+export function hasGuidanceGoldBorder(paint: {
+  borders: number[][];
+  attentionBorder: { color: number[] }[];
+}): boolean;
+export function hasGuidanceThemeSurface(paint: {
   background: number[];
   gradient: number[][];
+  themeSurface: number[];
 }): boolean;
+export function assertAssociativeTransparentFields(
+  fields: { label: string; background: number[]; gradient: unknown[] }[],
+): void;
 export function isGuidanceGold(color: number[]): boolean;
 export function isGuidanceGoldText(paint: {
   textFill: number[];
@@ -23,6 +30,9 @@ export function assertAssociativeShimmer(measurement: {
     iterations: string;
     playState: string;
     visibleDuringCycle: boolean;
+    edgeHeight: number;
+    goldLine: boolean;
+    moving: boolean;
   }[];
 }): void;
 export function assertAssociativeMoneySpacing(

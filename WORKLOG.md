@@ -18,6 +18,19 @@
   tres temas, Maps, guia e impressao passaram; preview teve tres assets 404.
 - Evidencias e limites em docs/audits/tabelao-layout-maps-2026-10-02.md.
 
+## 2026-10-02 - Dourado fechado e edicao sem preenchimento
+
+- Branch codex/associativo-contorno-dourado, base 3960724. Novo pedido em duas
+  capturas: selecao mais escura, campos sem caixa escura/dourada e linha de 3s.
+- Estoque com dourado antigo #b99545; etapas, linhas e Ranking mantem o fundo
+  do tema, contorno #9f7628 e varredura dourada restrita a uma faixa de 2px.
+- Campos monetarios, quantidade e renda transparentes antes/depois de editar.
+  Etapas, erros, calculos, paleta-base e Tabelao preservados.
+- 28 testes focados, lint, tipos, build, 8 testes Node e 6/6 jornadas aprovados.
+- Suite Windows: 1410 aprovados, 1 ignorado, 6 falhas POSIX conhecidas. Exigir
+  CI Linux completa; publicacao pendente.
+- Evidencias: docs/audits/associativo-contorno-dourado-2026-10-02.md.
+
 ## 2026-10-02 - Paleta do Tabelao no Associativo
 
 - Pedido posterior: Associativo com as cores do Tabelao, consultado somente
