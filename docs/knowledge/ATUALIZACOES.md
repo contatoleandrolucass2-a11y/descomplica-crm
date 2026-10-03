@@ -4,6 +4,17 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-03: Tabelao validado funcionalmente e referencias revisadas
+
+- Status: pendente_validacao final; fonte: CI 37134880142 e artefato 11278718828.
+- Build, lint, tipos, 1475 Vitest, oito Node, audit, banco, restore e E2E aprovados.
+- Matriz funcional integral aprovada. Somente 11 capturas do Tabelao divergiram;
+  revisao visual confirmou cabecalho compacto, Maps, ordem, dourado e rodape.
+- Promocao transacional conferiu arvore limpa, hashes e predicado funcional
+  original; 182 imagens preservadas, sem mudar tolerancias. Politica continua
+  desabilitada e sem destino. Pendencias: nova CI, imagem e verificacao de producao.
+- Evidencia: docs/audits/tabelao-layout-maps-2026-10-02.md; PR #139.
+
 ## 2026-10-03: Substituicao do glob no lint Next
 
 - Status: pendente_validacao; fonte: codigo Next 16.3.6 e guia oficial tinyglobby.

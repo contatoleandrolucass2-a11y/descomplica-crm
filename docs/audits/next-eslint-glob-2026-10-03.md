@@ -44,6 +44,12 @@ autenticacao e configuracao de regras ESLint nao mudam.
 
 ## Fontes
 
+CI 37134880142 em c6432d3 aprovou lint integral, typecheck, 1475 testes Vitest
+(quatro skips existentes), oito Node, audit sem vulnerabilidades e build.
+Banco, restore e E2E tambem passaram. A etapa visual divergiu apenas nas 11
+capturas esperadas do Tabelao, revisadas no registro de layout. Nova CI e imagem
+continuam exigidas antes do deploy; nenhum gate foi dispensado.
+
 - [Codigo oficial Next 16.3.6](https://raw.githubusercontent.com/vercel/next.js/v16.3.6/packages/eslint-plugin-next/src/utils/get-root-dirs.ts).
 - [Migracao oficial tinyglobby](https://superchupu.dev/tinyglobby/migration).
 - [Patches pnpm](https://pnpm.io/cli/patch) e [resolucao de dependencias](https://pnpm.io/settings/dependency-resolution).

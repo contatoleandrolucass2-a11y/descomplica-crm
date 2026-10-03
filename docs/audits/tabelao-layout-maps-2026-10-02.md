@@ -97,7 +97,29 @@ simuladores. A pagina publica de documentacao nao pertence a esta alteracao.
 - Sem instalar fork, modificar auditoria ou reduzir verificacoes. Producao nao
   foi alterada; correcao da dependencia e gates posteriores continuam pendentes.
 
-## Reversao
+## Gates e revisao visual em 03/10/2026
+
+- Bloqueio de braces resolvido por substituicao do glob no plugin Next, sem
+  ignorar auditoria. Detalhes: next-eslint-glob-2026-10-03.md.
+- CI 37134880142 em c6432d3 aprovou formatacao, lint, tipos, 1475 Vitest,
+  oito Node, audit sem vulnerabilidades, build, banco/advisors, E2E e restore.
+- Matriz funcional aprovada: 140 rotas, 80 temas, 193 auditorias de acessibilidade,
+  100 zooms, teclado, simuladores e calculadora de documentacao em 12 combinacoes.
+  Vinte criterios novos do Tabelao e quatro de Maps passaram; print legivel nos
+  tres temas, politica desabilitada, foco e navegacao confirmados.
+- Somente 11 comparacoes visuais do Tabelao divergiram. Capturas inspecionadas
+  em 1440, 1280, 1024, 768, 390, 375 e 320px, tres temas desktop e escuro mobile.
+  Layout compacto, ordem, dourado, links sublinhados e recursos correspondem ao
+  pedido. Rolagem horizontal confinada a tabela nos tamanhos estreitos.
+- Artefato 11278718828; ZIP SHA256
+  `0c62d3c5da1fdcd64f4beaf54a62a5c05eded4b89c465e7764b1e7bab3942c46`.
+  Captura limpa 9949368034252f31ee00e229b96ad18806636021, arvore igual ao head
+  c6432d3d31b9e3e880b183c3fc7d9a1bbd953d20. Todos os hashes conferidos.
+- Promotor transacional versionado executado com predicado funcional original;
+  11 referencias atualizadas, outras 182 byte a byte preservadas. Limiares
+  permanecem 1% de pixels e tolerancia de canal 16. CI final/deploy pendentes.
+
+## Reversao da publicacao
 
 Seguir automatic-publication.md e o runbook de imagem promovivel. Reverter por
 imagem anterior com CAS; nao alterar estoque ou demais dados para reverter layout.

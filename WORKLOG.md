@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-03 - Revisao visual autenticada do Tabelao
+
+- CI 37134880142 em c6432d3: formatacao, lint, tipos, 1475 testes Vitest,
+  oito Node, audit sem vulnerabilidades e build aprovados. Quatro skips existentes.
+- Banco, advisors, E2E de autorizacao e restore isolado aprovados.
+- Matriz funcional completa aprovada: 140 rotas, 80 temas, 193 auditorias de
+  acessibilidade, 100 zooms, teclado e simuladores. Tabelao passou tambem nos
+  20 criterios novos de layout/recursos/print e quatro criterios de destinos Maps.
+- Comparacao visual divergiu somente em 11 capturas intencionais do Tabelao.
+  Todas inspecionadas, hash/arvore conferidos e promovidas pelo helper transacional
+  existente. Preservadas 182 imagens e limiares 1%/16. CI final e deploy pendentes.
+- Evidencia: artefato 11278718828, docs/audits/tabelao-layout-maps-2026-10-02.md.
+
 ## 2026-10-03 - Remocao de braces da cadeia do lint
 
 - Patch versionado do plugin Next 16.3.6 usa tinyglobby existente, removendo

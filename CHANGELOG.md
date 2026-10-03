@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-03 - Referencias revisadas do Tabelao
+
+- Atualiza somente 11 capturas do Tabelao para o layout solicitado, mantendo
+  outras 182 imagens e os limiares de comparacao.
+- CI aprovou os testes funcionais, banco, restore e auditoria sem vulnerabilidades.
+
 ## 2026-10-03 - Dependencias de lint sem braces
 
 - Substitui o buscador de diretorios do plugin Next por tinyglobby, com patch
@@ -11,7 +17,7 @@
 
 - Confirma por solicitacao do usuario que Politica comercial permanece visivel,
   desabilitada e sem redirecionamento. Nenhum destino e necessario nesta entrega.
-- Publicacao continua bloqueada pela auditoria de dependencia preexistente.
+- A auditoria bloqueava a publicacao naquele momento; cadeia removida nesta data.
 
 ## 2026-10-02 - Layout e enderecos do Tabelao
 
@@ -20,7 +26,7 @@
 - Adiciona links Google Maps aos enderecos da origem oficial existente.
 - Inclui recursos finais com icones e impressao da consulta completa.
 - Mantem textos legiveis e dourado de alto contraste na impressao dos tres temas.
-- Politica comercial aguarda documento oficial; nenhum conteudo foi inventado.
+- Politica comercial permanece desabilitada e sem destino, conforme confirmacao.
 
 ## 2026-10-02 - Contorno dourado no Associativo
 
