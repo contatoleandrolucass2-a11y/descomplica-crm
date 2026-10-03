@@ -39,12 +39,19 @@ async function stockRowIsGold(row) {
         color.match(/[\d.]+/gu).map(Number),
       );
       return (
-        style.backgroundColor === "rgb(233, 189, 84)" &&
-        style.color === "rgb(46, 35, 12)" &&
+        style.backgroundColor === "rgb(185, 149, 69)" &&
+        style.color === "rgb(23, 18, 9)" &&
         stops.length >= 2 &&
         stops.every(
           ([r, g, b, alpha = 1]) =>
-            alpha === 1 && r >= 200 && g >= 150 && r > g && g - b >= 35 && r - g <= 80,
+            alpha === 1 &&
+            r >= 160 &&
+            r <= 214 &&
+            g >= 120 &&
+            g <= 186 &&
+            r > g &&
+            g - b >= 35 &&
+            r - g <= 80,
         ) &&
         Math.max(...stops.map(([r]) => r)) - Math.min(...stops.map(([r]) => r)) >= 20
       );
