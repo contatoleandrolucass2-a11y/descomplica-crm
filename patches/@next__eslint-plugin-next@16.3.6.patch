@@ -1,0 +1,32 @@
+diff --git a/dist/utils/get-root-dirs.js b/dist/utils/get-root-dirs.js
+index 47108c943514a1d7e686c5eb18aad00a59963c83..f0b3556ce3b7b007f121df0c57f56d9f66d7775e 100644
+--- a/dist/utils/get-root-dirs.js	
++++ b/dist/utils/get-root-dirs.js	
+@@ -8,12 +8,24 @@ Object.defineProperty(exports, "getRootDirs", {
+         return getRootDirs;
+     }
+ });
+-var _fastglob = require("fast-glob");
++var _tinyglobby = require("tinyglobby");
++var _path = require("node:path");
+ /**
+  * Process a Next.js root directory glob.
+  */ var processRootDir = function(rootDir) {
+-    return (0, _fastglob.globSync)(rootDir.replace(/\\/g, '/'), {
+-        onlyDirectories: true
++    var pattern = rootDir.replace(/\\/g, '/');
++    if (/^!(?!\()/.test(pattern)) return [];
++    var absolute = _path.isAbsolute(pattern);
++    var absolutePattern = _path.resolve(pattern).replace(/\\/g, '/');
++    return (0, _tinyglobby.globSync)(absolutePattern, {
++        absolute: true,
++        cwd: _path.parse(absolutePattern).root,
++        onlyDirectories: true,
++        expandDirectories: false
++    }).map(function(dir) {
++        if (!absolute) return _path.relative(process.cwd(), dir).replace(/\\/g, '/') || '.';
++        var root = _path.parse(dir).root.replace(/\\/g, '/');
++        return dir === root ? dir : dir.replace(/\/$/, '');
+     });
+ };
+ var getRootDirs = function(context) {

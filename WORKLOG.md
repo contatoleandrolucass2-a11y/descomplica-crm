@@ -1,5 +1,67 @@
 # Worklog
 
+## 2026-10-03 - Revisao visual autenticada do Tabelao
+
+- CI 37134880142 em c6432d3: formatacao, lint, tipos, 1475 testes Vitest,
+  oito Node, audit sem vulnerabilidades e build aprovados. Quatro skips existentes.
+- Banco, advisors, E2E de autorizacao e restore isolado aprovados.
+- Matriz funcional completa aprovada: 140 rotas, 80 temas, 193 auditorias de
+  acessibilidade, 100 zooms, teclado e simuladores. Tabelao passou tambem nos
+  20 criterios novos de layout/recursos/print e quatro criterios de destinos Maps.
+- Comparacao visual divergiu somente em 11 capturas intencionais do Tabelao.
+  Todas inspecionadas, hash/arvore conferidos e promovidas pelo helper transacional
+  existente. Preservadas 182 imagens e limiares 1%/16. CI final e deploy pendentes.
+- Evidencia: artefato 11278718828, docs/audits/tabelao-layout-maps-2026-10-02.md.
+
+## 2026-10-03 - Remocao de braces da cadeia do lint
+
+- Patch versionado do plugin Next 16.3.6 usa tinyglobby existente, removendo
+  fast-glob/micromatch/braces sem desativar regras ou ignorar auditoria.
+- Testes reais do plugin cobrem caminhos, Windows e deteccao de links invalidos.
+  Docker recebe patches antes de instalar; lockfile registra a correcao.
+- Dez testes de regressao aprovados; audit limpo. Lint local interrompido por
+  pressao de memoria; demais comprovacoes integrais exigidas na CI Linux.
+- Corrige tipos estritos dos resultados do ESLint nos testes sem aceitar ausencia.
+- Evidencias: docs/audits/next-eslint-glob-2026-10-03.md. Gates completos exigidos.
+
+## 2026-10-03 - Politica desabilitada e revalidacao do release
+
+- Usuario confirmou Politica comercial visivel, desabilitada e sem destino.
+  TabelaoResources ja implementa esse estado; nenhuma alteracao de runtime.
+- PR #139 segue aberto e bloqueado. CI 37086793201 no SHA 562465b aprovou
+  formatacao, lint, tipos e testes, mas falhou no audit de braces@3.0.3.
+- Nova auditoria local confirmou uma vulnerabilidade alta GHSA-vfj7-8cjw-p6xm.
+  npm informa braces 3.0.3 como latest; fast-glob 3.3.3 e micromatch 4.0.8
+  continuam nessa cadeia, inclusive no plugin Next mais recente, 16.3.8.
+- GitHub Advisory ainda informa nenhuma versao corrigida. Sem supressao,
+  alteracao de dependencias, merge ou publicacao em producao.
+
+## 2026-10-02 - Cabecalho, colunas e recursos do Tabelao
+
+- Escopo exclusivo de /app/simulacao/tabelao, conforme sete capturas do usuario.
+- Cabecalho compacto, somente titulo e informacao alinhada, com guia existente.
+- Apos Estoque: % obra, Limitador, Volta ao Caixa, Avaliacao e Valor do Imovel.
+  Preco em dourado com contraste por tema; regras de calculo preservadas.
+- Enderecos viram links Maps codificados, com contexto geografico disponivel.
+  Usuario confirmou manter a origem oficial atual. Ausencia nao cria local ficticio.
+- Rodape: Aprenda +, Politica comercial, Imprimir, Bora Vender e Salesforce,
+  com icones. Politica permanece desabilitada ate receber documento/destino.
+- Impressao restaura a tabela ocultada pelo CSS legado; sem alterar outras guias.
+  Revisao visual corrigiu texto branco e dourado claro sobre papel branco.
+  QA mede contraste minimo 4,5:1 em todos os textos impressos, nos tres temas.
+- Lint, tipos e build iniciais aprovados. Suite Windows interrompida apos falhas
+  POSIX e timeouts sob baixa memoria, inclusive com dois workers.
+- Dados: 283 testes aprovados e timeout de snapshot aprovado isoladamente.
+  Interface: 18/18; oito testes Node aprovados. Provas locais de seis larguras,
+  tres temas, Maps, guia e impressao passaram; preview teve tres assets 404.
+- Evidencias e limites em docs/audits/tabelao-layout-maps-2026-10-02.md.
+- PR #139; CI 37086002430 aprovou 1465 testes Vitest (4 ignorados), oito Node,
+  lint e tipos. Audit bloqueou braces@3.0.3 (GHSA-vfj7-8cjw-p6xm).
+  Registry retornou E404 para 3.0.4; advisory informa nenhuma versao corrigida.
+  Sem supressao do gate, imagem promovida ou alteracao em producao.
+- Apos revisao de print: lint, tipos, build, 73 testes focados e 20 verificacoes
+  de navegador por largura (1440/390px) aprovados.
+
 ## 2026-10-02 - Dourado fechado e edicao sem preenchimento
 
 - Branch codex/associativo-contorno-dourado, base 3960724. Novo pedido em duas

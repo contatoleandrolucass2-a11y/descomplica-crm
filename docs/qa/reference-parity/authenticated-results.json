@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "capturedAt": "2026-10-02T21:22:20.761Z",
-  "captureCommit": "6a1a80fee6f41c6231980ef1c07f2aec8b4ed338",
+  "capturedAt": "2026-10-03T16:22:46.735Z",
+  "captureCommit": "9949368034252f31ee00e229b96ad18806636021",
   "worktreeDirtyAtCapture": false,
   "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
   "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
@@ -35,7 +35,7 @@
   "artifacts": {
     "baselineScreenshots": "docs/qa/reference-parity/target-authenticated",
     "baselineResult": "docs/qa/reference-parity/authenticated-results.json",
-    "candidateDiagnostics": "test-results/pr136-37063588639"
+    "candidateDiagnostics": "test-results/authenticated-visual"
   },
   "viewports": [
     {
@@ -9281,7 +9281,7 @@
         },
         "associativeGuidance": {
           "light": {
-            "contract": "associative-guidance-gold-sequential-v3",
+            "contract": "associative-guidance-gold-border-v4",
             "questions": [
               {
                 "current": 1
@@ -9300,43 +9300,42 @@
               {
                 "field": "Financiamento",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 83, 166, 77],
                   [127, 149, 173, 255]
                 ],
@@ -9345,43 +9344,42 @@
               {
                 "field": "Subsídio",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 83, 166, 77],
                   [127, 149, 173, 255]
                 ],
@@ -9390,43 +9388,42 @@
               {
                 "field": "FGTS",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 83, 166, 77],
                   [127, 149, 173, 255]
                 ],
@@ -9435,43 +9432,42 @@
               {
                 "field": "Cheque Moradia",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 83, 166, 77],
                   [127, 149, 173, 255]
                 ],
@@ -9480,43 +9476,42 @@
               {
                 "field": "Entrada",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 83, 166, 77],
                   [127, 149, 173, 255]
                 ],
@@ -9525,44 +9520,43 @@
               {
                 "field": "Quantidade de parcelas",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [127, 149, 173, 255]
                 ],
                 "contained": true
@@ -9577,10 +9571,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "investor-guided-card-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -9767,10 +9764,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -9781,10 +9781,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -10019,10 +10022,13 @@
                 "reducedMotion": false,
                 "animations": [
                   {
-                    "name": "associative-action-shine",
+                    "name": "associative-edge-shine",
                     "duration": 3000,
                     "iterations": "infinite",
                     "playState": "running",
+                    "edgeHeight": 2,
+                    "goldLine": true,
+                    "moving": true,
                     "visibleDuringCycle": true
                   }
                 ]
@@ -10090,6 +10096,50 @@
                 "animations": []
               }
             ],
+            "filledFields": [
+              {
+                "label": "Renda Familiar",
+                "value": "8.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Financiamento",
+                "value": "100.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Subsídio",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "FGTS",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Cheque Moradia",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Entrada",
+                "value": "150,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Quantidade de parcelas",
+                "value": "84",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              }
+            ],
             "summary": {
               "separation": 8,
               "decreasingGaps": [0, 0, 0],
@@ -10112,6 +10162,7 @@
             },
             "commissionPaint": {
               "background": [0, 0, 0, 0],
+              "themeSurface": [255, 255, 255, 255],
               "foreground": [150, 90, 10, 255],
               "textFill": [150, 90, 10, 255],
               "backgroundClip": "border-box",
@@ -10205,7 +10256,7 @@
             }
           },
           "balanced": {
-            "contract": "associative-guidance-gold-sequential-v3",
+            "contract": "associative-guidance-gold-border-v4",
             "questions": [
               {
                 "current": 1
@@ -10224,43 +10275,42 @@
               {
                 "field": "Financiamento",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 76, 146, 77],
                   [113, 136, 161, 255]
                 ],
@@ -10269,43 +10319,42 @@
               {
                 "field": "Subsídio",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 76, 146, 77],
                   [113, 136, 161, 255]
                 ],
@@ -10314,43 +10363,42 @@
               {
                 "field": "FGTS",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 76, 146, 77],
                   [113, 136, 161, 255]
                 ],
@@ -10359,43 +10407,42 @@
               {
                 "field": "Cheque Moradia",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 76, 146, 77],
                   [113, 136, 161, 255]
                 ],
@@ -10404,43 +10451,42 @@
               {
                 "field": "Entrada",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [7, 76, 146, 77],
                   [113, 136, 161, 255]
                 ],
@@ -10449,44 +10495,43 @@
               {
                 "field": "Quantidade de parcelas",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [113, 136, 161, 255]
                 ],
                 "contained": true
@@ -10501,10 +10546,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "investor-guided-card-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -10691,10 +10739,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -10705,10 +10756,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -10943,10 +10997,13 @@
                 "reducedMotion": false,
                 "animations": [
                   {
-                    "name": "associative-action-shine",
+                    "name": "associative-edge-shine",
                     "duration": 3000,
                     "iterations": "infinite",
                     "playState": "running",
+                    "edgeHeight": 2,
+                    "goldLine": true,
+                    "moving": true,
                     "visibleDuringCycle": true
                   }
                 ]
@@ -11014,6 +11071,50 @@
                 "animations": []
               }
             ],
+            "filledFields": [
+              {
+                "label": "Renda Familiar",
+                "value": "8.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Financiamento",
+                "value": "100.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Subsídio",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "FGTS",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Cheque Moradia",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Entrada",
+                "value": "150,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Quantidade de parcelas",
+                "value": "84",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              }
+            ],
             "summary": {
               "separation": 8,
               "decreasingGaps": [0, 0, 0],
@@ -11036,6 +11137,7 @@
             },
             "commissionPaint": {
               "background": [0, 0, 0, 0],
+              "themeSurface": [231, 237, 245, 255],
               "foreground": [150, 90, 10, 255],
               "textFill": [150, 90, 10, 255],
               "backgroundClip": "border-box",
@@ -11129,7 +11231,7 @@
             }
           },
           "dark": {
-            "contract": "associative-guidance-gold-sequential-v3",
+            "contract": "associative-guidance-gold-border-v4",
             "questions": [
               {
                 "current": 1
@@ -11148,43 +11250,42 @@
               {
                 "field": "Financiamento",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [126, 212, 252, 77],
                   [61, 120, 152, 255]
                 ],
@@ -11193,43 +11294,42 @@
               {
                 "field": "Subsídio",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [126, 212, 252, 77],
                   [61, 120, 152, 255]
                 ],
@@ -11238,43 +11338,42 @@
               {
                 "field": "FGTS",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [126, 212, 252, 77],
                   [61, 120, 152, 255]
                 ],
@@ -11283,43 +11382,42 @@
               {
                 "field": "Cheque Moradia",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [126, 212, 252, 77],
                   [61, 120, 152, 255]
                 ],
@@ -11328,43 +11426,42 @@
               {
                 "field": "Entrada",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [126, 212, 252, 77],
                   [61, 120, 152, 255]
                 ],
@@ -11373,44 +11470,43 @@
               {
                 "field": "Quantidade de parcelas",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [61, 120, 152, 255]
                 ],
                 "contained": true
@@ -11425,10 +11521,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "investor-guided-card-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -11615,10 +11714,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -11629,10 +11731,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -11867,10 +11972,13 @@
                 "reducedMotion": false,
                 "animations": [
                   {
-                    "name": "associative-action-shine",
+                    "name": "associative-edge-shine",
                     "duration": 3000,
                     "iterations": "infinite",
                     "playState": "running",
+                    "edgeHeight": 2,
+                    "goldLine": true,
+                    "moving": true,
                     "visibleDuringCycle": true
                   }
                 ]
@@ -11938,6 +12046,50 @@
                 "animations": []
               }
             ],
+            "filledFields": [
+              {
+                "label": "Renda Familiar",
+                "value": "8.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Financiamento",
+                "value": "100.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Subsídio",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "FGTS",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Cheque Moradia",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Entrada",
+                "value": "150,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Quantidade de parcelas",
+                "value": "84",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              }
+            ],
             "summary": {
               "separation": 8,
               "decreasingGaps": [0, 0, 0],
@@ -11960,6 +12112,7 @@
             },
             "commissionPaint": {
               "background": [0, 0, 0, 0],
+              "themeSurface": [10, 43, 71, 255],
               "foreground": [233, 189, 84, 255],
               "textFill": [233, 189, 84, 255],
               "backgroundClip": "border-box",
@@ -13913,7 +14066,7 @@
         },
         "associativeGuidance": {
           "light": {
-            "contract": "associative-guidance-gold-sequential-v3",
+            "contract": "associative-guidance-gold-border-v4",
             "questions": [
               {
                 "current": 1
@@ -13932,43 +14085,42 @@
               {
                 "field": "Financiamento",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 82, 164, 56],
                   [127, 149, 173, 255]
                 ],
@@ -13977,43 +14129,42 @@
               {
                 "field": "Subsídio",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 82, 164, 56],
                   [127, 149, 173, 255]
                 ],
@@ -14022,43 +14173,42 @@
               {
                 "field": "FGTS",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 82, 164, 56],
                   [127, 149, 173, 255]
                 ],
@@ -14067,43 +14217,42 @@
               {
                 "field": "Cheque Moradia",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 82, 164, 56],
                   [127, 149, 173, 255]
                 ],
@@ -14112,43 +14261,42 @@
               {
                 "field": "Entrada",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 82, 164, 56],
                   [127, 149, 173, 255]
                 ],
@@ -14157,44 +14305,43 @@
               {
                 "field": "Quantidade de parcelas",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [255, 255, 255, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [127, 149, 173, 255]
                 ],
                 "contained": true
@@ -14209,10 +14356,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "investor-guided-card-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -14399,10 +14549,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -14413,10 +14566,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -14651,10 +14807,13 @@
                 "reducedMotion": false,
                 "animations": [
                   {
-                    "name": "associative-action-shine",
+                    "name": "associative-edge-shine",
                     "duration": 3000,
                     "iterations": "infinite",
                     "playState": "running",
+                    "edgeHeight": 2,
+                    "goldLine": true,
+                    "moving": true,
                     "visibleDuringCycle": true
                   }
                 ]
@@ -14722,6 +14881,50 @@
                 "animations": []
               }
             ],
+            "filledFields": [
+              {
+                "label": "Renda Familiar",
+                "value": "8.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Financiamento",
+                "value": "100.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Subsídio",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "FGTS",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Cheque Moradia",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Entrada",
+                "value": "150,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Quantidade de parcelas",
+                "value": "84",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              }
+            ],
             "summary": {
               "separation": 8,
               "decreasingGaps": [0, 0, 0],
@@ -14744,6 +14947,7 @@
             },
             "commissionPaint": {
               "background": [0, 0, 0, 0],
+              "themeSurface": [255, 255, 255, 255],
               "foreground": [150, 90, 10, 255],
               "textFill": [150, 90, 10, 255],
               "backgroundClip": "border-box",
@@ -14837,7 +15041,7 @@
             }
           },
           "balanced": {
-            "contract": "associative-guidance-gold-sequential-v3",
+            "contract": "associative-guidance-gold-border-v4",
             "questions": [
               {
                 "current": 1
@@ -14856,43 +15060,42 @@
               {
                 "field": "Financiamento",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 73, 146, 56],
                   [113, 136, 161, 255]
                 ],
@@ -14901,43 +15104,42 @@
               {
                 "field": "Subsídio",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 73, 146, 56],
                   [113, 136, 161, 255]
                 ],
@@ -14946,43 +15148,42 @@
               {
                 "field": "FGTS",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 73, 146, 56],
                   [113, 136, 161, 255]
                 ],
@@ -14991,43 +15192,42 @@
               {
                 "field": "Cheque Moradia",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 73, 146, 56],
                   [113, 136, 161, 255]
                 ],
@@ -15036,43 +15236,42 @@
               {
                 "field": "Entrada",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [9, 73, 146, 56],
                   [113, 136, 161, 255]
                 ],
@@ -15081,44 +15280,43 @@
               {
                 "field": "Quantidade de parcelas",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [231, 237, 245, 255],
+                "foreground": [24, 42, 64, 255],
+                "textFill": [24, 42, 64, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
+                  [24, 42, 64, 255],
                   [113, 136, 161, 255]
                 ],
                 "contained": true
@@ -15133,10 +15331,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "investor-guided-card-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -15323,10 +15524,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -15337,10 +15541,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -15575,10 +15782,13 @@
                 "reducedMotion": false,
                 "animations": [
                   {
-                    "name": "associative-action-shine",
+                    "name": "associative-edge-shine",
                     "duration": 3000,
                     "iterations": "infinite",
                     "playState": "running",
+                    "edgeHeight": 2,
+                    "goldLine": true,
+                    "moving": true,
                     "visibleDuringCycle": true
                   }
                 ]
@@ -15646,6 +15856,50 @@
                 "animations": []
               }
             ],
+            "filledFields": [
+              {
+                "label": "Renda Familiar",
+                "value": "8.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Financiamento",
+                "value": "100.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Subsídio",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "FGTS",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Cheque Moradia",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Entrada",
+                "value": "150,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Quantidade de parcelas",
+                "value": "84",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              }
+            ],
             "summary": {
               "separation": 8,
               "decreasingGaps": [0, 0, 0],
@@ -15668,6 +15922,7 @@
             },
             "commissionPaint": {
               "background": [0, 0, 0, 0],
+              "themeSurface": [231, 237, 245, 255],
               "foreground": [150, 90, 10, 255],
               "textFill": [150, 90, 10, 255],
               "backgroundClip": "border-box",
@@ -15761,7 +16016,7 @@
             }
           },
           "dark": {
-            "contract": "associative-guidance-gold-sequential-v3",
+            "contract": "associative-guidance-gold-border-v4",
             "questions": [
               {
                 "current": 1
@@ -15780,43 +16035,42 @@
               {
                 "field": "Financiamento",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [123, 209, 250, 56],
                   [61, 120, 152, 255]
                 ],
@@ -15825,43 +16079,42 @@
               {
                 "field": "Subsídio",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [123, 209, 250, 56],
                   [61, 120, 152, 255]
                 ],
@@ -15870,43 +16123,42 @@
               {
                 "field": "FGTS",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [123, 209, 250, 56],
                   [61, 120, 152, 255]
                 ],
@@ -15915,43 +16167,42 @@
               {
                 "field": "Cheque Moradia",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [123, 209, 250, 56],
                   [61, 120, 152, 255]
                 ],
@@ -15960,43 +16211,42 @@
               {
                 "field": "Entrada",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [123, 209, 250, 56],
                   [61, 120, 152, 255]
                 ],
@@ -16005,44 +16255,43 @@
               {
                 "field": "Quantidade de parcelas",
                 "background": [0, 0, 0, 0],
-                "foreground": [46, 35, 12, 255],
-                "textFill": [46, 35, 12, 255],
+                "themeSurface": [10, 43, 71, 255],
+                "foreground": [243, 251, 255, 255],
+                "textFill": [243, 251, 255, 255],
                 "backgroundClip": "border-box",
                 "leftBorderWidth": 0,
                 "attentionBorder": [
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   },
                   {
                     "width": 2,
-                    "style": "solid"
+                    "style": "solid",
+                    "color": [159, 118, 40, 255]
                   }
                 ],
-                "gradient": [
-                  [248, 226, 160, 255],
-                  [231, 193, 91, 255],
-                  [207, 158, 45, 255],
-                  [245, 217, 130, 255],
-                  [227, 182, 80, 255]
-                ],
+                "gradient": [],
                 "outline": {
                   "style": "none",
                   "width": "3px",
                   "offset": "0px"
                 },
                 "borders": [
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
-                  [46, 35, 12, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
+                  [243, 251, 255, 255],
                   [61, 120, 152, 255]
                 ],
                 "contained": true
@@ -16057,10 +16306,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "investor-guided-card-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -16247,10 +16499,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -16261,10 +16516,13 @@
                   "reducedMotion": false,
                   "animations": [
                     {
-                      "name": "associative-action-shine",
+                      "name": "associative-edge-shine",
                       "duration": 3000,
                       "iterations": "infinite",
                       "playState": "running",
+                      "edgeHeight": 2,
+                      "goldLine": true,
+                      "moving": true,
                       "visibleDuringCycle": true
                     }
                   ]
@@ -16499,10 +16757,13 @@
                 "reducedMotion": false,
                 "animations": [
                   {
-                    "name": "associative-action-shine",
+                    "name": "associative-edge-shine",
                     "duration": 3000,
                     "iterations": "infinite",
                     "playState": "running",
+                    "edgeHeight": 2,
+                    "goldLine": true,
+                    "moving": true,
                     "visibleDuringCycle": true
                   }
                 ]
@@ -16570,6 +16831,50 @@
                 "animations": []
               }
             ],
+            "filledFields": [
+              {
+                "label": "Renda Familiar",
+                "value": "8.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Financiamento",
+                "value": "100.000,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Subsídio",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "FGTS",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Cheque Moradia",
+                "value": "0,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Entrada",
+                "value": "150,00",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              },
+              {
+                "label": "Quantidade de parcelas",
+                "value": "84",
+                "background": [0, 0, 0, 0],
+                "gradient": []
+              }
+            ],
             "summary": {
               "separation": 8,
               "decreasingGaps": [0, 0, 0],
@@ -16592,6 +16897,7 @@
             },
             "commissionPaint": {
               "background": [0, 0, 0, 0],
+              "themeSurface": [10, 43, 71, 255],
               "foreground": [233, 189, 84, 255],
               "textFill": [233, 189, 84, 255],
               "backgroundClip": "border-box",
@@ -18553,7 +18859,7 @@
               "x": 34,
               "y": 93
             },
-            "rgb": [239, 243, 247],
+            "rgb": [240, 242, 247],
             "shellBackground": "rgb(243, 246, 250)"
           },
           "balanced": {
@@ -18561,7 +18867,7 @@
               "x": 34,
               "y": 93
             },
-            "rgb": [213, 222, 233],
+            "rgb": [214, 222, 233],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -18644,7 +18950,7 @@
               "x": 34,
               "y": 93
             },
-            "rgb": [239, 242, 247],
+            "rgb": [239, 243, 247],
             "shellBackground": "rgb(243, 246, 250)"
           },
           "balanced": {
@@ -18652,7 +18958,7 @@
               "x": 34,
               "y": 93
             },
-            "rgb": [213, 222, 232],
+            "rgb": [214, 222, 233],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -18735,7 +19041,7 @@
               "x": 34,
               "y": 93
             },
-            "rgb": [239, 242, 247],
+            "rgb": [239, 243, 247],
             "shellBackground": "rgb(243, 246, 250)"
           },
           "balanced": {
@@ -18743,7 +19049,7 @@
               "x": 34,
               "y": 93
             },
-            "rgb": [214, 222, 233],
+            "rgb": [214, 223, 233],
             "shellBackground": "rgb(217, 225, 235)"
           },
           "dark": {
@@ -22687,9 +22993,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3264,
+        "changedPixels": 3227,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.00030589293747188483,
+        "changedPixelRatio": 0.00030242540110961166,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
           "tracked": true,
@@ -22724,9 +23030,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 3231360,
-        "changedPixelRatio": 0.0009407803525450585,
+        "changedPixelRatio": 0.000929639532580709,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1440x900.webp",
           "tracked": true,
@@ -22761,9 +23067,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 3265920,
-        "changedPixelRatio": 0.000930825004899079,
+        "changedPixelRatio": 0.0009198020772094846,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1440x900.webp",
           "tracked": true,
@@ -22798,9 +23104,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 3265920,
-        "changedPixelRatio": 0.000930825004899079,
+        "changedPixelRatio": 0.0009198020772094846,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1440x900.webp",
           "tracked": true,
@@ -22835,9 +23141,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 3265920,
-        "changedPixelRatio": 0.000930825004899079,
+        "changedPixelRatio": 0.0009198020772094846,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1440x900.webp",
           "tracked": true,
@@ -22872,9 +23178,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 3231360,
-        "changedPixelRatio": 0.0009407803525450585,
+        "changedPixelRatio": 0.000929639532580709,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1440x900.webp",
           "tracked": true,
@@ -22909,9 +23215,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0009031535224353719,
+        "changedPixelRatio": 0.000893247526916981,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
           "tracked": true,
@@ -22946,9 +23252,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 4134240,
-        "changedPixelRatio": 0.0006395371337900073,
+        "changedPixelRatio": 0.0006325225434420837,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
           "tracked": true,
@@ -22983,9 +23289,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 1329120,
-        "changedPixelRatio": 0.0019892861442157217,
+        "changedPixelRatio": 0.0019674671963404358,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
           "tracked": true,
@@ -23020,9 +23326,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3159,
+        "changedPixels": 3130,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013089200477326968,
+        "changedPixelRatio": 0.0012969040042429064,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1440x900.webp",
           "tracked": true,
@@ -23057,9 +23363,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3159,
+        "changedPixels": 3130,
         "totalPixels": 2174400,
-        "changedPixelRatio": 0.0014528145695364239,
+        "changedPixelRatio": 0.001439477557027226,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1440x900.webp",
           "tracked": true,
@@ -23094,9 +23400,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3181,
+        "changedPixels": 3134,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0011264802538387443,
+        "changedPixelRatio": 0.0011098362513456853,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1440x900.webp",
           "tracked": true,
@@ -23131,9 +23437,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 254,
+        "changedPixels": 377,
         "totalPixels": 2347200,
-        "changedPixelRatio": 0.00010821404226312202,
+        "changedPixelRatio": 0.00016061690524880708,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1440x900.webp",
           "tracked": true,
@@ -23186,28 +23492,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
           "tracked": true,
-          "bytes": 77340,
-          "sha256": "1dd7e1073e09b63ba39c78d1e0bef8eecd9e1e6f8520becc1ef4e8e5fc01ae4c"
+          "bytes": 59276,
+          "sha256": "f7072d60dff026d14565fd8c55bb312ee8a77d131af8f75ffd86963cb6bc5f9b"
         }
       },
       "path": "target-authenticated/simulacao-tabelao-1440x900.webp",
-      "bytes": 77340,
-      "sha256": "1dd7e1073e09b63ba39c78d1e0bef8eecd9e1e6f8520becc1ef4e8e5fc01ae4c",
+      "bytes": 59276,
+      "sha256": "f7072d60dff026d14565fd8c55bb312ee8a77d131af8f75ffd86963cb6bc5f9b",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 478824,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.36946296296296294,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
           "tracked": true,
@@ -23316,9 +23622,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.0017016785089074245,
+        "changedPixelRatio": 0.0016830141077129029,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1440x900.webp",
           "tracked": true,
@@ -23353,9 +23659,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020401234567901235,
+        "changedPixelRatio": 0.002017746913580247,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1440x900.webp",
           "tracked": true,
@@ -23390,9 +23696,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 5185,
+        "changedPixels": 5128,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.0015689300411522633,
+        "changedPixelRatio": 0.0015516824013556039,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1440x900.webp",
           "tracked": true,
@@ -23427,9 +23733,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3264,
+        "changedPixels": 3227,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.00030589293747188483,
+        "changedPixelRatio": 0.00030242540110961166,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
           "tracked": true,
@@ -23464,9 +23770,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0009031535224353719,
+        "changedPixelRatio": 0.000893247526916981,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
           "tracked": true,
@@ -23501,9 +23807,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3159,
+        "changedPixels": 3130,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013089200477326968,
+        "changedPixelRatio": 0.0012969040042429064,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-light-1440x900.webp",
           "tracked": true,
@@ -23538,9 +23844,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3181,
+        "changedPixels": 3134,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0011264802538387443,
+        "changedPixelRatio": 0.0011098362513456853,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-light-1440x900.webp",
           "tracked": true,
@@ -23593,28 +23899,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
           "tracked": true,
-          "bytes": 77340,
-          "sha256": "1dd7e1073e09b63ba39c78d1e0bef8eecd9e1e6f8520becc1ef4e8e5fc01ae4c"
+          "bytes": 59276,
+          "sha256": "f7072d60dff026d14565fd8c55bb312ee8a77d131af8f75ffd86963cb6bc5f9b"
         }
       },
       "path": "target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
-      "bytes": 77340,
-      "sha256": "1dd7e1073e09b63ba39c78d1e0bef8eecd9e1e6f8520becc1ef4e8e5fc01ae4c",
+      "bytes": 59276,
+      "sha256": "f7072d60dff026d14565fd8c55bb312ee8a77d131af8f75ffd86963cb6bc5f9b",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 478824,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.36946296296296294,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
           "tracked": true,
@@ -23723,9 +24029,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.0017016785089074245,
+        "changedPixelRatio": 0.0016830141077129029,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-light-1440x900.webp",
           "tracked": true,
@@ -23760,9 +24066,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020401234567901235,
+        "changedPixelRatio": 0.002017746913580247,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-light-1440x900.webp",
           "tracked": true,
@@ -23797,9 +24103,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 5185,
+        "changedPixels": 5128,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.0015689300411522633,
+        "changedPixelRatio": 0.0015516824013556039,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-light-1440x900.webp",
           "tracked": true,
@@ -23834,9 +24140,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3274,
+        "changedPixels": 3237,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.0003068301094616884,
+        "changedPixelRatio": 0.0003033625730994152,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
           "tracked": true,
@@ -23871,9 +24177,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2654,
+        "changedPixels": 2625,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.000906569382958955,
+        "changedPixelRatio": 0.000896663387440564,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
           "tracked": true,
@@ -23908,9 +24214,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3169,
+        "changedPixels": 3140,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.0013130635110050384,
+        "changedPixelRatio": 0.001301047467515248,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-balanced-1440x900.webp",
           "tracked": true,
@@ -23945,9 +24251,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3191,
+        "changedPixels": 3144,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.0011300215309649271,
+        "changedPixelRatio": 0.001113377528471868,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-balanced-1440x900.webp",
           "tracked": true,
@@ -24000,28 +24306,28 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 80598,
-          "sha256": "cb6e621f590aa7f4eeea151daf7fbc2f259ab5497417caa6c79ecb7ca62d07d9"
+          "bytes": 59504,
+          "sha256": "646ae30695902317d9f6de9abaf8d679de5b75036bdb945dffbee44deb68d7c0"
         }
       },
       "path": "target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
-      "bytes": 80598,
-      "sha256": "cb6e621f590aa7f4eeea151daf7fbc2f259ab5497417caa6c79ecb7ca62d07d9",
+      "bytes": 59504,
+      "sha256": "646ae30695902317d9f6de9abaf8d679de5b75036bdb945dffbee44deb68d7c0",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 316722,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.24438425925925925,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
           "tracked": true,
@@ -24130,9 +24436,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2654,
+        "changedPixels": 2625,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.0017081145093193286,
+        "changedPixelRatio": 0.001689450108124807,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
           "tracked": true,
@@ -24167,9 +24473,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2654,
+        "changedPixels": 2625,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020478395061728394,
+        "changedPixelRatio": 0.002025462962962963,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-balanced-1440x900.webp",
           "tracked": true,
@@ -24204,9 +24510,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 4277,
+        "changedPixels": 4220,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.0012941781650931978,
+        "changedPixelRatio": 0.0012769305252965384,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-balanced-1440x900.webp",
           "tracked": true,
@@ -24241,9 +24547,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3284,
+        "changedPixels": 3249,
         "totalPixels": 10670400,
-        "changedPixelRatio": 0.00030776728145149196,
+        "changedPixelRatio": 0.0003044871794871795,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
           "tracked": true,
@@ -24278,9 +24584,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2664,
+        "changedPixels": 2636,
         "totalPixels": 2927520,
-        "changedPixelRatio": 0.0009099852434825382,
+        "changedPixelRatio": 0.0009004208340165055,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-dark-1440x900.webp",
           "tracked": true,
@@ -24315,9 +24621,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3179,
+        "changedPixels": 3151,
         "totalPixels": 2413440,
-        "changedPixelRatio": 0.00131720697427738,
+        "changedPixelRatio": 0.0013056052771148238,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-dark-1440x900.webp",
           "tracked": true,
@@ -24352,9 +24658,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3201,
+        "changedPixels": 3155,
         "totalPixels": 2823840,
-        "changedPixelRatio": 0.00113356280809111,
+        "changedPixelRatio": 0.001117272933310669,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-dark-1440x900.webp",
           "tracked": true,
@@ -24370,7 +24676,7 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
@@ -24387,16 +24693,16 @@
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": false,
-        "reason": "pixel_drift",
-        "changedPixels": 1193504,
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.9209135802469136,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 44868,
-          "sha256": "44a2f3942e3ff62744d09fe0645de7c49913d749a490cddd4eadec3f69386ab7"
+          "bytes": 44608,
+          "sha256": "30224281ceb0b3d0f3e70b6bf78ad404f8656a691ea0399f69d7ef49ba813aed"
         }
       }
     },
@@ -24407,28 +24713,28 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 69446,
-          "sha256": "1d3c62d33ea86f666a8d49dc04093ad8057f744e9f0f85e5c6586c4d9f12aa1d"
+          "bytes": 59518,
+          "sha256": "dac7f4b18037553736a44d2c14afbc688c48d8dff62b488d90d7d3cf2358b50c"
         }
       },
       "path": "target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
-      "bytes": 69446,
-      "sha256": "1d3c62d33ea86f666a8d49dc04093ad8057f744e9f0f85e5c6586c4d9f12aa1d",
+      "bytes": 59518,
+      "sha256": "dac7f4b18037553736a44d2c14afbc688c48d8dff62b488d90d7d3cf2358b50c",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 536574,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.41402314814814817,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
           "tracked": true,
@@ -24537,9 +24843,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2664,
+        "changedPixels": 2636,
         "totalPixels": 1553760,
-        "changedPixelRatio": 0.0017145505097312327,
+        "changedPixelRatio": 0.0016965297085779014,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-dark-1440x900.webp",
           "tracked": true,
@@ -24574,9 +24880,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2664,
+        "changedPixels": 2636,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0020555555555555557,
+        "changedPixelRatio": 0.0020339506172839506,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-dark-1440x900.webp",
           "tracked": true,
@@ -24611,9 +24917,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 4303,
+        "changedPixels": 4246,
         "totalPixels": 3304800,
-        "changedPixelRatio": 0.0013020455095618495,
+        "changedPixelRatio": 0.00128479786976519,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-dark-1440x900.webp",
           "tracked": true,
@@ -24648,9 +24954,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3260,
+        "changedPixels": 3224,
         "totalPixels": 9800960,
-        "changedPixelRatio": 0.0003326204779939924,
+        "changedPixelRatio": 0.0003289473684210526,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
           "tracked": true,
@@ -24685,9 +24991,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 2872320,
-        "changedPixelRatio": 0.0010583778966131907,
+        "changedPixelRatio": 0.0010458444741532978,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1280x720.webp",
           "tracked": true,
@@ -24722,9 +25028,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 2903040,
-        "changedPixelRatio": 0.0010471781305114638,
+        "changedPixelRatio": 0.0010347773368606702,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1280x720.webp",
           "tracked": true,
@@ -24759,9 +25065,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 2903040,
-        "changedPixelRatio": 0.0010471781305114638,
+        "changedPixelRatio": 0.0010347773368606702,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1280x720.webp",
           "tracked": true,
@@ -24796,9 +25102,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 2903040,
-        "changedPixelRatio": 0.0010471781305114638,
+        "changedPixelRatio": 0.0010347773368606702,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1280x720.webp",
           "tracked": true,
@@ -24833,9 +25139,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3040,
+        "changedPixels": 3004,
         "totalPixels": 2872320,
-        "changedPixelRatio": 0.0010583778966131907,
+        "changedPixelRatio": 0.0010458444741532978,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1280x720.webp",
           "tracked": true,
@@ -24870,9 +25176,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 2602240,
-        "changedPixelRatio": 0.0010160477127397934,
+        "changedPixelRatio": 0.0010049034677816035,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1280x720.webp",
           "tracked": true,
@@ -24907,9 +25213,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 3866880,
-        "changedPixelRatio": 0.0006837553790135717,
+        "changedPixelRatio": 0.0006762557927838464,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
           "tracked": true,
@@ -24944,9 +25250,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 1181440,
-        "changedPixelRatio": 0.002237946912242687,
+        "changedPixelRatio": 0.0022134005958829904,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
           "tracked": true,
@@ -24981,9 +25287,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3164,
+        "changedPixels": 3135,
         "totalPixels": 2196480,
-        "changedPixelRatio": 0.0014404865967365967,
+        "changedPixelRatio": 0.0014272836538461538,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1280x720.webp",
           "tracked": true,
@@ -25018,9 +25324,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3164,
+        "changedPixels": 3135,
         "totalPixels": 1932800,
-        "changedPixelRatio": 0.0016370033112582782,
+        "changedPixelRatio": 0.0016219991721854305,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1280x720.webp",
           "tracked": true,
@@ -25055,9 +25361,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3181,
+        "changedPixels": 3134,
         "totalPixels": 2535680,
-        "changedPixelRatio": 0.0012544958354366482,
+        "changedPixelRatio": 0.0012359603735487127,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1280x720.webp",
           "tracked": true,
@@ -25092,9 +25398,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 254,
+        "changedPixels": 377,
         "totalPixels": 2086400,
-        "changedPixelRatio": 0.00012174079754601227,
+        "changedPixelRatio": 0.00018069401840490798,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1280x720.webp",
           "tracked": true,
@@ -25147,28 +25453,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 921600,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
           "tracked": true,
-          "bytes": 64102,
-          "sha256": "927f2083c265b3760b6863261a71c4f183a6bd8b129edd8bfa34e861df62cb45"
+          "bytes": 44324,
+          "sha256": "9542f74e13912ce0f64113b0fce309d17875dca29f95fb677bc13b88047229c9"
         }
       },
       "path": "target-authenticated/simulacao-tabelao-1280x720.webp",
-      "bytes": 64102,
-      "sha256": "927f2083c265b3760b6863261a71c4f183a6bd8b129edd8bfa34e861df62cb45",
+      "bytes": 44324,
+      "sha256": "9542f74e13912ce0f64113b0fce309d17875dca29f95fb677bc13b88047229c9",
       "width": 1280,
       "height": 720,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 286965,
         "totalPixels": 921600,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.311376953125,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
           "tracked": true,
@@ -25277,9 +25583,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 1150720,
-        "changedPixelRatio": 0.0022976918798665183,
+        "changedPixelRatio": 0.0022724902669632925,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1280x720.webp",
           "tracked": true,
@@ -25314,9 +25620,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2644,
+        "changedPixels": 2615,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.002868923611111111,
+        "changedPixelRatio": 0.002837456597222222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
           "tracked": true,
@@ -25351,9 +25657,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 5186,
+        "changedPixels": 5129,
         "totalPixels": 2937600,
-        "changedPixelRatio": 0.0017653867102396515,
+        "changedPixelRatio": 0.0017459831154684096,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1280x720.webp",
           "tracked": true,
@@ -25388,9 +25694,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2984,
+        "changedPixels": 2969,
         "totalPixels": 9229312,
-        "changedPixelRatio": 0.0003233177077554643,
+        "changedPixelRatio": 0.00032169245118162656,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
           "tracked": true,
@@ -25425,9 +25731,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2761,
+        "changedPixels": 2746,
         "totalPixels": 2481152,
-        "changedPixelRatio": 0.0011127895429219976,
+        "changedPixelRatio": 0.0011067439640940983,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1024x768.webp",
           "tracked": true,
@@ -25462,9 +25768,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2760,
+        "changedPixels": 2744,
         "totalPixels": 2359296,
-        "changedPixelRatio": 0.0011698404947916667,
+        "changedPixelRatio": 0.001163058810763889,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
           "tracked": true,
@@ -25499,9 +25805,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2761,
+        "changedPixels": 2746,
         "totalPixels": 2505728,
-        "changedPixelRatio": 0.0011018753831221904,
+        "changedPixelRatio": 0.0010958890988966082,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1024x768.webp",
           "tracked": true,
@@ -25536,9 +25842,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2760,
+        "changedPixels": 2744,
         "totalPixels": 2359296,
-        "changedPixelRatio": 0.0011698404947916667,
+        "changedPixelRatio": 0.001163058810763889,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1024x768.webp",
           "tracked": true,
@@ -25573,9 +25879,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2760,
+        "changedPixels": 2744,
         "totalPixels": 2334720,
-        "changedPixelRatio": 0.0011821546052631579,
+        "changedPixelRatio": 0.0011753015350877193,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1024x768.webp",
           "tracked": true,
@@ -25610,9 +25916,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2361,
+        "changedPixels": 2353,
         "totalPixels": 2185216,
-        "changedPixelRatio": 0.001080442391049672,
+        "changedPixelRatio": 0.0010767814257263354,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1024x768.webp",
           "tracked": true,
@@ -25647,9 +25953,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2361,
+        "changedPixels": 2353,
         "totalPixels": 3710976,
-        "changedPixelRatio": 0.0006362207677980133,
+        "changedPixelRatio": 0.0006340650006898455,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
           "tracked": true,
@@ -25684,9 +25990,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2361,
+        "changedPixels": 2353,
         "totalPixels": 1080320,
-        "changedPixelRatio": 0.002185463566350711,
+        "changedPixelRatio": 0.0021780583530805688,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
           "tracked": true,
@@ -25721,9 +26027,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2837,
+        "changedPixels": 2829,
         "totalPixels": 2643968,
-        "changedPixelRatio": 0.001073008447908598,
+        "changedPixelRatio": 0.001069982692680093,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
           "tracked": true,
@@ -25758,9 +26064,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2837,
+        "changedPixels": 2829,
         "totalPixels": 2392064,
-        "changedPixelRatio": 0.0011860050567208903,
+        "changedPixelRatio": 0.0011826606645976027,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1024x768.webp",
           "tracked": true,
@@ -25795,9 +26101,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2898,
+        "changedPixels": 2872,
         "totalPixels": 2163712,
-        "changedPixelRatio": 0.001339364943208708,
+        "changedPixelRatio": 0.0013273485565546616,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1024x768.webp",
           "tracked": true,
@@ -25832,9 +26138,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 120,
+        "changedPixels": 210,
         "totalPixels": 1751040,
-        "changedPixelRatio": 0.00006853070175438596,
+        "changedPixelRatio": 0.00011992872807017543,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1024x768.webp",
           "tracked": true,
@@ -25887,28 +26193,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
           "tracked": true,
-          "bytes": 58928,
-          "sha256": "514e4b64d7db2d805d5268bf74a874e370c109398daf25fb38a181228742975a"
+          "bytes": 45660,
+          "sha256": "1e05c13b878807cac9ebd259a4975a94b245775b4324aef1f92baa5ac631d7d8"
         }
       },
       "path": "target-authenticated/simulacao-tabelao-1024x768.webp",
-      "bytes": 58928,
-      "sha256": "514e4b64d7db2d805d5268bf74a874e370c109398daf25fb38a181228742975a",
+      "bytes": 45660,
+      "sha256": "1e05c13b878807cac9ebd259a4975a94b245775b4324aef1f92baa5ac631d7d8",
       "width": 1024,
       "height": 768,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 211048,
         "totalPixels": 786432,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.2683614095052083,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
           "tracked": true,
@@ -26017,9 +26323,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2361,
+        "changedPixels": 2353,
         "totalPixels": 969728,
-        "changedPixelRatio": 0.002434703339493136,
+        "changedPixelRatio": 0.0024264536034846883,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1024x768.webp",
           "tracked": true,
@@ -26054,9 +26360,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2361,
+        "changedPixels": 2353,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.003002166748046875,
+        "changedPixelRatio": 0.0029919942220052085,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1024x768.webp",
           "tracked": true,
@@ -26091,9 +26397,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 4968,
+        "changedPixels": 4940,
         "totalPixels": 2350080,
-        "changedPixelRatio": 0.002113970588235294,
+        "changedPixelRatio": 0.002102056100217865,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1024x768.webp",
           "tracked": true,
@@ -26128,9 +26434,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2666,
+        "changedPixels": 2657,
         "totalPixels": 7630848,
-        "changedPixelRatio": 0.0003493713935856146,
+        "changedPixelRatio": 0.00034819197027643583,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
           "tracked": true,
@@ -26165,9 +26471,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2439,
+        "changedPixels": 2430,
         "totalPixels": 2215680,
-        "changedPixelRatio": 0.0011007907279029462,
+        "changedPixelRatio": 0.0010967287694974004,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-768x1024.webp",
           "tracked": true,
@@ -26202,9 +26508,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2439,
+        "changedPixels": 2430,
         "totalPixels": 2233344,
-        "changedPixelRatio": 0.0010920843363136177,
+        "changedPixelRatio": 0.0010880545048143053,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-768x1024.webp",
           "tracked": true,
@@ -26239,9 +26545,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2439,
+        "changedPixels": 2430,
         "totalPixels": 2233344,
-        "changedPixelRatio": 0.0010920843363136177,
+        "changedPixelRatio": 0.0010880545048143053,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-768x1024.webp",
           "tracked": true,
@@ -26276,9 +26582,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2439,
+        "changedPixels": 2430,
         "totalPixels": 2233344,
-        "changedPixelRatio": 0.0010920843363136177,
+        "changedPixelRatio": 0.0010880545048143053,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-768x1024.webp",
           "tracked": true,
@@ -26313,9 +26619,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2439,
+        "changedPixels": 2430,
         "totalPixels": 2214912,
-        "changedPixelRatio": 0.0011011724167822468,
+        "changedPixelRatio": 0.0010971090499306518,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-768x1024.webp",
           "tracked": true,
@@ -26535,9 +26841,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2569,
+        "changedPixels": 2551,
         "totalPixels": 1827072,
-        "changedPixelRatio": 0.0014060748563822334,
+        "changedPixelRatio": 0.001396223027882864,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-768x1024.webp",
           "tracked": true,
@@ -26627,28 +26933,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
           "tracked": true,
-          "bytes": 46800,
-          "sha256": "b1b9798d58a7cec9657545186d736e3ab437a6a3a4fb5ea186c3cd6e46e54177"
+          "bytes": 42868,
+          "sha256": "ebb7755498bddd2cafb5e6ccff5c0a6101c4a12aab38f85434ec2f65251631a9"
         }
       },
       "path": "target-authenticated/simulacao-tabelao-768x1024.webp",
-      "bytes": 46800,
-      "sha256": "b1b9798d58a7cec9657545186d736e3ab437a6a3a4fb5ea186c3cd6e46e54177",
+      "bytes": 42868,
+      "sha256": "ebb7755498bddd2cafb5e6ccff5c0a6101c4a12aab38f85434ec2f65251631a9",
       "width": 768,
       "height": 1024,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 0,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 219010,
         "totalPixels": 786432,
-        "changedPixelRatio": 0,
+        "changedPixelRatio": 0.27848561604817706,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
           "tracked": true,
@@ -26868,9 +27174,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 664,
+        "changedPixels": 646,
         "totalPixels": 4888260,
-        "changedPixelRatio": 0.00013583565522292185,
+        "changedPixelRatio": 0.00013215336336446916,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
           "tracked": true,
@@ -26905,9 +27211,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.00030389876502187515,
+        "changedPixelRatio": 0.0002921304757157889,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-390x844.webp",
           "tracked": true,
@@ -26942,9 +27248,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1463280,
-        "changedPixelRatio": 0.00030001093433929254,
+        "changedPixelRatio": 0.00028839319884096004,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-390x844.webp",
           "tracked": true,
@@ -26979,9 +27285,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.00030194233520413775,
+        "changedPixelRatio": 0.0002902498074171894,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-390x844.webp",
           "tracked": true,
@@ -27016,9 +27322,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.00030194233520413775,
+        "changedPixelRatio": 0.0002902498074171894,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-390x844.webp",
           "tracked": true,
@@ -27053,9 +27359,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.00030389876502187515,
+        "changedPixelRatio": 0.0002921304757157889,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-390x844.webp",
           "tracked": true,
@@ -27275,9 +27581,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 598,
+        "changedPixels": 568,
         "totalPixels": 1430910,
-        "changedPixelRatio": 0.00041791587171799763,
+        "changedPixelRatio": 0.0003969501925348205,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-390x844.webp",
           "tracked": true,
@@ -27367,28 +27673,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-390x844.webp",
           "tracked": true,
-          "bytes": 62622,
-          "sha256": "f4b1ebe6248a39fe23014a6c076e13dfa0f7d55b1a452ba9ea687d0fc2f99209"
+          "bytes": 69908,
+          "sha256": "5d7ade1e1ca367b391a3531755bb2bac27fd6df9a1d17500a1c31bb10dabd36d"
         }
       },
       "path": "target-authenticated/simulacao-tabelao-390x844.webp",
-      "bytes": 62622,
-      "sha256": "f4b1ebe6248a39fe23014a6c076e13dfa0f7d55b1a452ba9ea687d0fc2f99209",
+      "bytes": 69908,
+      "sha256": "5d7ade1e1ca367b391a3531755bb2bac27fd6df9a1d17500a1c31bb10dabd36d",
       "width": 390,
       "height": 844,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 1682,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 86674,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.005109976910924778,
+        "changedPixelRatio": 0.26331875075950906,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-390x844.webp",
           "tracked": true,
@@ -27608,9 +27914,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 664,
+        "changedPixels": 646,
         "totalPixels": 4888260,
-        "changedPixelRatio": 0.00013583565522292185,
+        "changedPixelRatio": 0.00013215336336446916,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
           "tracked": true,
@@ -27645,9 +27951,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.00030389876502187515,
+        "changedPixelRatio": 0.0002921304757157889,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-oportunidades-dark-390x844.webp",
           "tracked": true,
@@ -27682,9 +27988,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1463280,
-        "changedPixelRatio": 0.00030001093433929254,
+        "changedPixelRatio": 0.00028839319884096004,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
           "tracked": true,
@@ -27719,9 +28025,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.00030194233520413775,
+        "changedPixelRatio": 0.0002902498074171894,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-visitas-dark-390x844.webp",
           "tracked": true,
@@ -27756,9 +28062,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1453920,
-        "changedPixelRatio": 0.00030194233520413775,
+        "changedPixelRatio": 0.0002902498074171894,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-pastas-dark-390x844.webp",
           "tracked": true,
@@ -27793,9 +28099,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1444560,
-        "changedPixelRatio": 0.00030389876502187515,
+        "changedPixelRatio": 0.0002921304757157889,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-vendas-dark-390x844.webp",
           "tracked": true,
@@ -28015,9 +28321,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 598,
+        "changedPixels": 568,
         "totalPixels": 1430910,
-        "changedPixelRatio": 0.00041791587171799763,
+        "changedPixelRatio": 0.0003969501925348205,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-metas-pontos-dark-390x844.webp",
           "tracked": true,
@@ -28070,7 +28376,7 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated",
+        "reason": "baseline_preserved",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
@@ -28087,16 +28393,16 @@
       "width": 390,
       "height": 844,
       "previousBaselineComparison": {
-        "passed": false,
-        "reason": "pixel_drift",
-        "changedPixels": 276526,
+        "passed": true,
+        "reason": "within_threshold",
+        "changedPixels": 0,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.8400960019443432,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
           "tracked": true,
-          "bytes": 32354,
-          "sha256": "ce5c6bcd7fd42e6af9035feedbfe210a6efbf336541357d95a0e04a19711b24c"
+          "bytes": 33262,
+          "sha256": "f7196b30c73e82d32a890dce1c545dabe3c4c7d4b6a74e10863795a595121875"
         }
       }
     },
@@ -28107,28 +28413,28 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabelao-dark-390x844.webp",
           "tracked": true,
-          "bytes": 75230,
-          "sha256": "c4c301ccb29a5d986b934bb0b98e222986e07d46ba79383f3ce97d4da4311871"
+          "bytes": 66934,
+          "sha256": "10a80860c836b0fb350b40c40f221bd8eb0ac1325745e225ac89cfda5f5edcc7"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/simulacao-tabelao-dark-390x844.webp",
-      "bytes": 75230,
-      "sha256": "c4c301ccb29a5d986b934bb0b98e222986e07d46ba79383f3ce97d4da4311871",
+      "bytes": 66934,
+      "sha256": "10a80860c836b0fb350b40c40f221bd8eb0ac1325745e225ac89cfda5f5edcc7",
       "width": 390,
       "height": 844,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 1697,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 168622,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.005155547454125653,
+        "changedPixelRatio": 0.5122797423745291,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabelao-dark-390x844.webp",
           "tracked": true,
@@ -28348,9 +28654,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 664,
+        "changedPixels": 646,
         "totalPixels": 4751250,
-        "changedPixelRatio": 0.000139752696658774,
+        "changedPixelRatio": 0.0001359642199421205,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
           "tracked": true,
@@ -28385,9 +28691,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1398000,
-        "changedPixelRatio": 0.0003140200286123033,
+        "changedPixelRatio": 0.00030185979971387696,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-375x812.webp",
           "tracked": true,
@@ -28422,9 +28728,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1407000,
-        "changedPixelRatio": 0.00031201137171286427,
+        "changedPixelRatio": 0.00029992892679459846,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-375x812.webp",
           "tracked": true,
@@ -28459,9 +28765,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1398000,
-        "changedPixelRatio": 0.0003140200286123033,
+        "changedPixelRatio": 0.00030185979971387696,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-375x812.webp",
           "tracked": true,
@@ -28496,9 +28802,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1398000,
-        "changedPixelRatio": 0.0003140200286123033,
+        "changedPixelRatio": 0.00030185979971387696,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-375x812.webp",
           "tracked": true,
@@ -28533,9 +28839,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1389000,
-        "changedPixelRatio": 0.0003160547156227502,
+        "changedPixelRatio": 0.00030381569474442044,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-375x812.webp",
           "tracked": true,
@@ -28755,9 +29061,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 595,
+        "changedPixels": 566,
         "totalPixels": 1399875,
-        "changedPixelRatio": 0.00042503794981694793,
+        "changedPixelRatio": 0.00040432181444771854,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-375x812.webp",
           "tracked": true,
@@ -28847,28 +29153,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 304500,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-375x812.webp",
           "tracked": true,
-          "bytes": 85476,
-          "sha256": "9b4a7d331d1e989739febf7c379c541689f675eb5eedf88af14fb36112df5e7a"
+          "bytes": 67698,
+          "sha256": "db7b3b6ec7180d4b518d4ba41a1d2215b03084a69ea0ce472897647affbcf2e1"
         }
       },
       "path": "target-authenticated/simulacao-tabelao-375x812.webp",
-      "bytes": 85476,
-      "sha256": "9b4a7d331d1e989739febf7c379c541689f675eb5eedf88af14fb36112df5e7a",
+      "bytes": 67698,
+      "sha256": "db7b3b6ec7180d4b518d4ba41a1d2215b03084a69ea0ce472897647affbcf2e1",
       "width": 375,
       "height": 812,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 1682,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 86135,
         "totalPixels": 304500,
-        "changedPixelRatio": 0.005523809523809524,
+        "changedPixelRatio": 0.2828735632183908,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-375x812.webp",
           "tracked": true,
@@ -29088,9 +29394,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 664,
+        "changedPixels": 646,
         "totalPixels": 4355200,
-        "changedPixelRatio": 0.00015246142542248346,
+        "changedPixelRatio": 0.00014832843497428362,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
           "tracked": true,
@@ -29125,9 +29431,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1277760,
-        "changedPixelRatio": 0.0003435699974956173,
+        "changedPixelRatio": 0.00033026546456298525,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-320x568.webp",
           "tracked": true,
@@ -29162,9 +29468,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1277120,
-        "changedPixelRatio": 0.00034374216988223503,
+        "changedPixelRatio": 0.000330430969681784,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-320x568.webp",
           "tracked": true,
@@ -29199,9 +29505,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1277760,
-        "changedPixelRatio": 0.0003435699974956173,
+        "changedPixelRatio": 0.00033026546456298525,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-320x568.webp",
           "tracked": true,
@@ -29236,9 +29542,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1269760,
-        "changedPixelRatio": 0.000345734627016129,
+        "changedPixelRatio": 0.00033234627016129033,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-320x568.webp",
           "tracked": true,
@@ -29273,9 +29579,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 439,
+        "changedPixels": 422,
         "totalPixels": 1262080,
-        "changedPixelRatio": 0.0003478384888438134,
+        "changedPixelRatio": 0.0003343686612576065,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-320x568.webp",
           "tracked": true,
@@ -29495,9 +29801,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 598,
+        "changedPixels": 563,
         "totalPixels": 1286720,
-        "changedPixelRatio": 0.00046474757523004226,
+        "changedPixelRatio": 0.00043754663019149467,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-320x568.webp",
           "tracked": true,
@@ -29587,28 +29893,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 181760,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-320x568.webp",
           "tracked": true,
-          "bytes": 48860,
-          "sha256": "a175c29b8624e5976395b4c98a7ad4353bbd2613353da74021831da291cbbf9a"
+          "bytes": 56044,
+          "sha256": "adc6e20479a4ce856b9ec46a880912b0668a2a6dcb1feadb9139a3059c2e0102"
         }
       },
       "path": "target-authenticated/simulacao-tabelao-320x568.webp",
-      "bytes": 48860,
-      "sha256": "a175c29b8624e5976395b4c98a7ad4353bbd2613353da74021831da291cbbf9a",
+      "bytes": 56044,
+      "sha256": "adc6e20479a4ce856b9ec46a880912b0668a2a6dcb1feadb9139a3059c2e0102",
       "width": 320,
       "height": 568,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 576,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 64929,
         "totalPixels": 181760,
-        "changedPixelRatio": 0.0031690140845070424,
+        "changedPixelRatio": 0.35722381161971833,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-320x568.webp",
           "tracked": true,
@@ -30613,44 +30919,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
         "tracked": true,
-        "bytes": 58928,
-        "sha256": "514e4b64d7db2d805d5268bf74a874e370c109398daf25fb38a181228742975a"
+        "bytes": 45660,
+        "sha256": "1e05c13b878807cac9ebd259a4975a94b245775b4324aef1f92baa5ac631d7d8"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
         "tracked": true,
-        "bytes": 64102,
-        "sha256": "927f2083c265b3760b6863261a71c4f183a6bd8b129edd8bfa34e861df62cb45"
+        "bytes": 44324,
+        "sha256": "9542f74e13912ce0f64113b0fce309d17875dca29f95fb677bc13b88047229c9"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
         "tracked": true,
-        "bytes": 77340,
-        "sha256": "1dd7e1073e09b63ba39c78d1e0bef8eecd9e1e6f8520becc1ef4e8e5fc01ae4c"
+        "bytes": 59276,
+        "sha256": "f7072d60dff026d14565fd8c55bb312ee8a77d131af8f75ffd86963cb6bc5f9b"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-320x568.webp",
         "tracked": true,
-        "bytes": 48860,
-        "sha256": "a175c29b8624e5976395b4c98a7ad4353bbd2613353da74021831da291cbbf9a"
+        "bytes": 56044,
+        "sha256": "adc6e20479a4ce856b9ec46a880912b0668a2a6dcb1feadb9139a3059c2e0102"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-375x812.webp",
         "tracked": true,
-        "bytes": 85476,
-        "sha256": "9b4a7d331d1e989739febf7c379c541689f675eb5eedf88af14fb36112df5e7a"
+        "bytes": 67698,
+        "sha256": "db7b3b6ec7180d4b518d4ba41a1d2215b03084a69ea0ce472897647affbcf2e1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-390x844.webp",
         "tracked": true,
-        "bytes": 62622,
-        "sha256": "f4b1ebe6248a39fe23014a6c076e13dfa0f7d55b1a452ba9ea687d0fc2f99209"
+        "bytes": 69908,
+        "sha256": "5d7ade1e1ca367b391a3531755bb2bac27fd6df9a1d17500a1c31bb10dabd36d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
         "tracked": true,
-        "bytes": 46800,
-        "sha256": "b1b9798d58a7cec9657545186d736e3ab437a6a3a4fb5ea186c3cd6e46e54177"
+        "bytes": 42868,
+        "sha256": "ebb7755498bddd2cafb5e6ccff5c0a6101c4a12aab38f85434ec2f65251631a9"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
@@ -30877,8 +31183,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabelao-dark-390x844.webp",
         "tracked": true,
-        "bytes": 75230,
-        "sha256": "c4c301ccb29a5d986b934bb0b98e222986e07d46ba79383f3ce97d4da4311871"
+        "bytes": 66934,
+        "sha256": "10a80860c836b0fb350b40c40f221bd8eb0ac1325745e225ac89cfda5f5edcc7"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
@@ -30955,24 +31261,24 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 80598,
-        "sha256": "cb6e621f590aa7f4eeea151daf7fbc2f259ab5497417caa6c79ecb7ca62d07d9"
+        "bytes": 59504,
+        "sha256": "646ae30695902317d9f6de9abaf8d679de5b75036bdb945dffbee44deb68d7c0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 69446,
-        "sha256": "1d3c62d33ea86f666a8d49dc04093ad8057f744e9f0f85e5c6586c4d9f12aa1d"
+        "bytes": 59518,
+        "sha256": "dac7f4b18037553736a44d2c14afbc688c48d8dff62b488d90d7d3cf2358b50c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
         "tracked": true,
-        "bytes": 77340,
-        "sha256": "1dd7e1073e09b63ba39c78d1e0bef8eecd9e1e6f8520becc1ef4e8e5fc01ae4c"
+        "bytes": 59276,
+        "sha256": "f7072d60dff026d14565fd8c55bb312ee8a77d131af8f75ffd86963cb6bc5f9b"
       }
     ],
     "fileCount": 193,
-    "manifestSha256": "4c0f3f83dd7c2a11e45f87587b9649b7c47b1575c95353fe2ae662d00d993acd"
+    "manifestSha256": "4ee7449621acea81b786b496ad592eaa903c57a2fcafae2958f020ed26733236"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -30983,8 +31289,8 @@
     "requested": true,
     "performed": true,
     "method": "same-filesystem transactional rename with rollback",
-    "previousBaselineManifestSha256": "c03c4b1677bda9e33b0e5222a62e6c9f619d761578d721a8dc9c99b2db755302",
-    "previousBaselineResultSha256": "a63e32e79c4824d0ac90b8e66f9a932bee7eacdc69dc7f20b7e3e99c5b6591cb"
+    "previousBaselineManifestSha256": "4c0f3f83dd7c2a11e45f87587b9649b7c47b1575c95353fe2ae662d00d993acd",
+    "previousBaselineResultSha256": "f6c029016071064ea4a1c2854edb6cce679c3d4a5ee532e764af48ad4ac6f82f"
   },
   "visualInspectionCoverage": {
     "responsiveScreenshots": 140,
@@ -30994,5 +31300,16 @@
     "changedPixelRatioThreshold": 0.01,
     "channelTolerance": 16
   },
-  "passed": true
+  "passed": true,
+  "reviewedCiArtifact": {
+    "runId": 37134880142,
+    "artifactId": 11278718828,
+    "sha256": "0c62d3c5da1fdcd64f4beaf54a62a5c05eded4b89c465e7764b1e7bab3942c46",
+    "pullRequestHead": "c6432d3d31b9e3e880b183c3fc7d9a1bbd953d20",
+    "captureTreeMatchesHead": true,
+    "reviewedRoutes": ["/app/simulacao/tabelao"],
+    "changedBaselines": 11,
+    "preservedBaselines": 182,
+    "reason": "Requested compact Tabelao header, Maps links, column order, gold prices and footer; all functional checks passed before review."
+  }
 }

@@ -2,6 +2,21 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Layout solicitado do Tabelao em 03/10/2026
+
+Onze capturas de `/app/simulacao/tabelao` revisadas e promovidas: sete viewports,
+tres temas desktop e escuro mobile. CI `37134880142`, artefato `11278718828`,
+captura limpa `9949368034252f31ee00e229b96ad18806636021`, arvore identica a
+`c6432d3d31b9e3e880b183c3fc7d9a1bbd953d20`. Hash do ZIP:
+`0c62d3c5da1fdcd64f4beaf54a62a5c05eded4b89c465e7764b1e7bab3942c46`.
+
+Passaram 140 checks responsivos, 80 de tema, 193 de acessibilidade, 100 de zoom,
+teclado, simuladores e documentacao. Vinte criterios novos do Tabelao e quatro de
+Maps aprovados. Promocao pelo helper transacional original apos conferir arvore,
+integridade, hashes e predicado funcional. Outras 182 imagens preservadas byte a
+byte. Limiares 1%/16 intactos. Diferencas refletem cabecalho compacto, colunas,
+precos dourados, links Maps e recursos finais com politica desabilitada.
+
 ## Documentacao disponivel no hub em 02/10/2026
 
 Sete capturas de `/app/simulacao` foram revisadas e promovidas apos a liberacao de

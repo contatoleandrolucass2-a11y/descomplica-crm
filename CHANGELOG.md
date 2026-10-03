@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-10-03 - Referencias revisadas do Tabelao
+
+- Atualiza somente 11 capturas do Tabelao para o layout solicitado, mantendo
+  outras 182 imagens e os limiares de comparacao.
+- CI aprovou os testes funcionais, banco, restore e auditoria sem vulnerabilidades.
+
+## 2026-10-03 - Dependencias de lint sem braces
+
+- Substitui o buscador de diretorios do plugin Next por tinyglobby, com patch
+  versionado e testes de compatibilidade. Mantem todas as regras de lint.
+- Remove a cadeia vulneravel do lockfile e inclui patches no build Docker.
+- Testes da regra mantem verificacao estrita de resultados presentes e validos.
+
+## 2026-10-03 - Estado da politica comercial do Tabelao
+
+- Confirma por solicitacao do usuario que Politica comercial permanece visivel,
+  desabilitada e sem redirecionamento. Nenhum destino e necessario nesta entrega.
+- A auditoria bloqueava a publicacao naquele momento; cadeia removida nesta data.
+
+## 2026-10-02 - Layout e enderecos do Tabelao
+
+- Compacta o cabecalho e alinha o icone de informacao ao titulo.
+- Reordena colunas e destaca o valor do imovel em dourado.
+- Adiciona links Google Maps aos enderecos da origem oficial existente.
+- Inclui recursos finais com icones e impressao da consulta completa.
+- Mantem textos legiveis e dourado de alto contraste na impressao dos tres temas.
+- Politica comercial permanece desabilitada e sem destino, conforme confirmacao.
+
 ## 2026-10-02 - Contorno dourado no Associativo
 
 - Escurece o dourado metalico da unidade selecionada.
