@@ -156,16 +156,22 @@ describe("archive theme color contract", () => {
         ).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("keeps metallic gold and its darkest stop readable for all guidance states", () => {
+  it("uses a darker antique gold stock selection with readable text", () => {
     const colors = declarations(
       "investor-archive.css",
       ".investor-page-shell.investor-associative-table-page",
     );
-    expect(colors["--associative-gold"]).toBe("#e9bd54");
+    expect(colors["--associative-gold"]).toBe("#b99545");
     const stops = colors["--associative-gold-metal"]!.match(/#[\da-f]{6}/gi)!;
     expect(stops.length).toBeGreaterThanOrEqual(3);
-    for (const background of [...stops, colors["--associative-gold-input"]!])
+    for (const background of stops) {
+      expect(rgb(background)[0]).toBeLessThanOrEqual(214 / 255);
       expect(contrast(colors["--associative-gold-ink"]!, background)).toBeGreaterThanOrEqual(4.5);
+    }
+    for (const theme of ["light", "balanced", "dark"])
+      expect(
+        contrast(colors["--associative-gold-edge"]!, content(theme)["--inv-color-panel"]!),
+      ).toBeGreaterThanOrEqual(3);
   });
 
   for (const theme of ["light", "balanced", "dark"]) {

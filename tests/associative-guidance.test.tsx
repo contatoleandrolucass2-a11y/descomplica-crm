@@ -7,8 +7,9 @@ import {
   assertAssociativeShimmer,
   assertAssociativeSummaryGaps,
   assertAssociativeWorkspaceGaps,
-  hasGuidanceGoldSurface,
-  isGuidanceGoldSurfaceColor,
+  hasGuidanceGoldBorder,
+  hasGuidanceThemeSurface,
+  assertAssociativeTransparentFields,
   isGuidanceGoldText,
 } from "../scripts/qa/associative-guidance.mjs";
 
@@ -28,8 +29,10 @@ describe("Associativo guidance regression gates", () => {
       expect(() => assertAssociativeWorkspaceGaps({ ...valid, ...patch })).toThrow();
     }
   });
-  it("accepts gold and rejects silver, blue, green, dark and transparent surfaces", () => {
-    expect(isGuidanceGoldSurfaceColor([233, 189, 84, 255])).toBe(true);
+  it("requires a gold border and rejects silver, blue, green and transparent edges", () => {
+    const gold = [159, 118, 40, 255];
+    expect(hasGuidanceGoldBorder({ borders: [gold], attentionBorder: [] })).toBe(true);
+    expect(hasGuidanceGoldBorder({ borders: [], attentionBorder: [{ color: gold }] })).toBe(true);
     for (const color of [
       [205, 213, 224, 255],
       [102, 228, 236, 255],
@@ -37,35 +40,40 @@ describe("Associativo guidance regression gates", () => {
       [80, 85, 90, 255],
       [233, 189, 84, 0],
     ]) {
-      expect(isGuidanceGoldSurfaceColor(color)).toBe(false);
+      expect(hasGuidanceGoldBorder({ borders: [color], attentionBorder: [] })).toBe(false);
     }
   });
 
-  it("requires a metallic gradient, not flat gold or the previous silver", () => {
-    const gold = {
-      background: [233, 189, 84, 255],
-      gradient: [
-        [248, 226, 160, 255],
-        [207, 158, 45, 255],
-      ],
-    };
-    expect(hasGuidanceGoldSurface(gold)).toBe(true);
-    expect(hasGuidanceGoldSurface({ ...gold, gradient: [] })).toBe(false);
-    expect(hasGuidanceGoldSurface({ ...gold, gradient: [gold.background, gold.background] })).toBe(
-      false,
-    );
-    expect(
-      hasGuidanceGoldSurface({ ...gold, gradient: [...gold.gradient, [205, 213, 224, 255]] }),
-    ).toBe(false);
+  it("keeps the theme surface and rejects gold or darker input fills", () => {
+    const theme = [10, 43, 71, 255];
+    const paint = { background: theme, themeSurface: theme, gradient: [] };
+    expect(hasGuidanceThemeSurface(paint)).toBe(true);
+    expect(hasGuidanceThemeSurface({ ...paint, background: [0, 0, 0, 0] })).toBe(true);
+    for (const background of [
+      [185, 149, 69, 255],
+      [7, 26, 49, 255],
+    ])
+      expect(hasGuidanceThemeSurface({ ...paint, background })).toBe(false);
+    expect(hasGuidanceThemeSurface({ ...paint, gradient: [[185, 149, 69, 255]] })).toBe(false);
+    const field = { label: "Financiamento", background: [0, 0, 0, 0], gradient: [] };
+    expect(() => assertAssociativeTransparentFields([field])).not.toThrow();
+    expect(() => assertAssociativeTransparentFields([])).toThrow();
+    expect(() =>
+      assertAssociativeTransparentFields([{ ...field, background: [7, 26, 49, 255] }]),
+    ).toThrow();
+    expect(() => assertAssociativeTransparentFields([{ ...field, gradient: ["gold"] }])).toThrow();
   });
 
   it("requires exactly 3s infinite shimmer only while current/required", () => {
     const animation = {
-      name: "associative-action-shine",
+      name: "associative-edge-shine",
       duration: 3000,
       iterations: "infinite",
       playState: "running",
       visibleDuringCycle: true,
+      edgeHeight: 2,
+      goldLine: true,
+      moving: true,
     };
     const active = { active: true, reducedMotion: false, animations: [animation] };
     expect(() => assertAssociativeShimmer(active)).not.toThrow();
@@ -76,6 +84,9 @@ describe("Associativo guidance regression gates", () => {
       { playState: "paused" },
       { name: "border-pulse" },
       { visibleDuringCycle: false },
+      { edgeHeight: 25 },
+      { goldLine: false },
+      { moving: false },
     ]) {
       expect(() =>
         assertAssociativeShimmer({ ...active, animations: [{ ...animation, ...patch }] }),

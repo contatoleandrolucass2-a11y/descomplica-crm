@@ -21,17 +21,31 @@ const activeRow = ".investor-associative-flow-panel li.investor-key-field.is-act
 const timeout = 5_000;
 export const associativeGuidanceWidths = [375, 1440];
 
-export function isGuidanceGoldSurfaceColor([r, g, b, alpha = 255]) {
-  return alpha >= 220 && r >= 200 && g >= 150 && r > g && g - b >= 35 && r - g <= 80;
+export function hasGuidanceGoldBorder(paint) {
+  return (
+    paint.borders.some(isGuidanceGold) ||
+    paint.attentionBorder.some((border) => isGuidanceGold(border.color))
+  );
 }
 
-export function hasGuidanceGoldSurface(paint) {
-  const brightness = paint.gradient.map((color) => (color[0] + color[1] + color[2]) / 3);
+export function hasGuidanceThemeSurface(paint) {
   return (
-    paint.gradient.length >= 2 &&
-    paint.gradient.every(isGuidanceGoldSurfaceColor) &&
-    Math.max(...brightness) - Math.min(...brightness) >= 20
+    paint.gradient.length === 0 &&
+    (paint.background[3] === 0 ||
+      paint.background.every((value, index) => value === paint.themeSurface[index]))
   );
+}
+
+export function assertAssociativeTransparentFields(fields) {
+  assert.ok(fields.length > 0, "Editable fields must be inspected");
+  for (const field of fields) {
+    assert.equal(
+      field.background[3],
+      0,
+      `${field.label}: empty/filled inputs must share the parent surface`,
+    );
+    assert.equal(field.gradient.length, 0, `${field.label}: inputs must not have a painted fill`);
+  }
 }
 
 export function isGuidanceGold([r, g, b, alpha = 255]) {
@@ -59,6 +73,13 @@ export function assertAssociativeShimmer({ active, reducedMotion, animations }) 
     assert.equal(animation.duration, 3000, "Guidance shimmer must last exactly 3s");
     assert.equal(animation.iterations, "infinite", "Guidance shimmer must repeat while required");
     assert.equal(animation.playState, "running", "Guidance shimmer must actually run");
+    assert.equal(
+      animation.edgeHeight,
+      2,
+      "Shimmer must stay in a 2px edge, never cover field text",
+    );
+    assert.equal(animation.goldLine, true, "The moving edge must be gold, not white or blue");
+    assert.equal(animation.moving, true, "The edge must travel rather than stay static");
     assert.equal(
       animation.visibleDuringCycle,
       true,
@@ -125,6 +146,7 @@ async function inspectPaint(locator) {
     };
     return {
       background: rgba(style.backgroundColor),
+      themeSurface: rgba(style.getPropertyValue("--inv-color-panel")),
       foreground: rgba(style.color),
       textFill: rgba(style.webkitTextFillColor || style.color),
       backgroundClip: style.backgroundClip,
@@ -134,6 +156,7 @@ async function inspectPaint(locator) {
           ? ["Top", "Right", "Bottom", "Left"].map((side) => ({
               width: Number.parseFloat(frame[`border${side}Width`]),
               style: frame[`border${side}Style`],
+              color: rgba(frame[`border${side}Color`]),
             }))
           : [],
       gradient: (style.backgroundImage.match(/rgba?\([^)]*\)/gu) ?? []).map(rgba),
@@ -185,16 +208,22 @@ async function checkCurrentQuestion(page, index) {
     );
     await expect(page.locator(`${root} ${activeRow}`)).toHaveCount(0);
     await expect
-      .poll(async () => hasGuidanceGoldSurface(await inspectPaint(cards.nth(index))), {
-        timeout,
-        message: `Current qualification card ${index + 1} must have a metallic gold surface`,
-      })
+      .poll(
+        async () => {
+          const paint = await inspectPaint(cards.nth(index));
+          return hasGuidanceGoldBorder(paint) && hasGuidanceThemeSurface(paint);
+        },
+        {
+          timeout,
+          message: `Current qualification card ${index + 1} needs a gold border with the normal theme surface`,
+        },
+      )
       .toBe(true);
   }
   for (let i = 0; i < 3; i += 1) {
     if (i === index) continue;
     await expect
-      .poll(async () => hasGuidanceGoldSurface(await inspectPaint(cards.nth(i))), {
+      .poll(async () => hasGuidanceGoldBorder(await inspectPaint(cards.nth(i))), {
         timeout,
         message: `Inactive qualification card ${i + 1} must not remain gold`,
       })
@@ -223,22 +252,49 @@ async function checkRequiredRow(page, label) {
         paint = await inspectPaint(rows);
         return (
           paint.contained &&
-          hasGuidanceGoldSurface(paint) &&
+          hasGuidanceThemeSurface(paint) &&
           paint.attentionBorder.length === 4 &&
           paint.attentionBorder.every(
-            (border) => border.width >= 2 && !["none", "hidden"].includes(border.style),
+            (border) =>
+              border.width >= 2 &&
+              !["none", "hidden"].includes(border.style) &&
+              isGuidanceGold(border.color),
           )
         );
       },
       {
         timeout,
-        message: `${label}: next required row must be gold without an external outline or shadow`,
+        message: `${label}: next required row needs only a contained gold border and normal surface`,
       },
     )
     .toBe(true);
   await checkGuidanceContrast(page);
   await checkGuidanceShimmer(page);
+  await checkTransparentFields(page);
   return { field: label, ...paint };
+}
+
+async function checkTransparentFields(page) {
+  const fields = await page
+    .locator(
+      `${root} .investor-associative-question-money input, ${root} .investor-associative-compact-account input`,
+    )
+    .evaluateAll((inputs) =>
+      inputs
+        .filter((input) => input.checkVisibility())
+        .map((input) => {
+          const style = getComputedStyle(input);
+          const rgba = style.backgroundColor.match(/[\d.]+/gu).map(Number);
+          return {
+            label: input.getAttribute("aria-label"),
+            value: input.value,
+            background: [...rgba.slice(0, 3), rgba.length === 4 ? rgba[3] * 255 : 255],
+            gradient: style.backgroundImage === "none" ? [] : [style.backgroundImage],
+          };
+        }),
+    );
+  assertAssociativeTransparentFields(fields);
+  return fields;
 }
 
 async function checkGuidanceContrast(page) {
@@ -426,11 +482,24 @@ async function checkGuidanceShimmer(page) {
               const maximumOpacity = opacityFrames.length
                 ? Math.max(...opacityFrames)
                 : Number(style.opacity);
+              const colors = (style.backgroundImage.match(/rgba?\([^)]*\)/gu) ?? [])
+                .map((color) => color.match(/[\d.]+/gu).map(Number))
+                .filter((color) => color.length === 3 || color[3] > 0);
+              const positions = animation.effect
+                .getKeyframes()
+                .map((frame) => frame.backgroundPosition ?? frame.backgroundPositionX);
               return {
                 name: animation.animationName,
                 duration: timing.duration,
                 iterations: timing.iterations === Infinity ? "infinite" : String(timing.iterations),
                 playState: animation.playState,
+                edgeHeight: Number.parseFloat(style.backgroundSize.split(" ")[1]),
+                goldLine:
+                  colors.length > 0 &&
+                  colors.every(
+                    ([r, g, b, a = 1]) => r >= 150 && g >= 90 && r > g && g - b >= 35 && a > 0,
+                  ),
+                moving: new Set(positions.filter(Boolean)).size > 1,
                 visibleDuringCycle:
                   maximumOpacity > 0 && style.display !== "none" && style.visibility === "visible",
               };
@@ -462,7 +531,7 @@ async function checkReducedGuidanceMotion(page, locator) {
 // Call only on an isolated synthetic page, after initial viewport checks and unit selection.
 export async function checkAssociativeGuidance(page, { onState = async () => {} } = {}) {
   const result = {
-    contract: "associative-guidance-gold-sequential-v3",
+    contract: "associative-guidance-gold-border-v4",
     questions: [],
     rows: [],
     passed: false,
@@ -572,11 +641,23 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
       page.getByRole("combobox", { name: "Selecione o Ranking", exact: true }),
     ).toHaveValue("");
     result.rankingMotion = await checkGuidanceShimmer(page);
+    await expect
+      .poll(
+        async () => {
+          const paint = await inspectPaint(
+            page.getByRole("combobox", { name: "Selecione o Ranking", exact: true }),
+          );
+          return hasGuidanceThemeSurface(paint) && hasGuidanceGoldBorder(paint);
+        },
+        { timeout, message: "Ranking must keep its theme surface and gold edge" },
+      )
+      .toBe(true);
     await page
       .getByRole("combobox", { name: "Selecione o Ranking", exact: true })
       .selectOption("gold");
     await expect(page.locator(`${root} ${activeRow}`)).toHaveCount(0);
     result.completedMotion = await checkGuidanceShimmer(page);
+    result.filledFields = await checkTransparentFields(page);
     await expect(
       page
         .locator(`${root} .investor-associative-approval-rule > span`)
