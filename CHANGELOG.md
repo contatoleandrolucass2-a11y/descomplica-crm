@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-03 - Brilho e alerta de reprovacao no Associativo
+
+- Remove o contorno dos campos e a moldura dourada fixa da linha ativa.
+- Mantem o fundo do tema e percorre o topo/rodape da linha com brilho de 3s.
+- Posiciona o dolar de 17px fora do resumo, a direita da ultima data.
+- Destaca reprovacao em vermelho-sangue metalico, com brilho de 3s no alerta
+  e texto branco legivel. Respeita navegacao por teclado e reduced motion.
+- Preserva calculos, sequencia e Tabelao; publicacao pendente dos gates.
+
 ## 2026-10-02 - Contorno dourado no Associativo
 
 - Escurece o dourado metalico da unidade selecionada.

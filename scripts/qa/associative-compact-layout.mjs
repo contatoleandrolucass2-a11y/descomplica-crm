@@ -99,20 +99,38 @@ export function assertAssociativeSummaryGaps({
 
 export function assertAssociativeCommissionGeometry(geometry) {
   assert.ok(
-    geometry.insideSummary && geometry.insideLastRow && geometry.insideWidth,
-    "Commission must remain inside the summary and the last Decrescente 10% row",
+    geometry.summarySibling &&
+      !geometry.insideSummary &&
+      !geometry.insideTable &&
+      !geometry.insideCell &&
+      geometry.lastRowIsDecreasing10 &&
+      geometry.insideWidth,
+    "Commission must be a summary sibling outside the section, table and cells, beside Decrescente 10%",
   );
   assert.ok(
-    geometry.dateGap >= 0 && geometry.dateGap <= 16 && geometry.centerDelta <= 2,
+    geometry.layoutDisplay === "grid" &&
+      geometry.columns.length === 2 &&
+      geometry.columns[0] > 0 &&
+      geometry.columns[1] === geometry.minimumTarget &&
+      geometry.layoutGap === 4 &&
+      Math.abs(geometry.summaryGap - 4) <= 1 &&
+      geometry.summaryFitsColumn &&
+      geometry.insideLayout,
+    "Commission wrapper must reserve a 24px/44px grid column with a 4px gap and no overflow",
+  );
+  assert.ok(
+    geometry.dateGap >= 0 && geometry.dateGap <= 16 && geometry.centerDelta <= 1,
     "Commission must sit immediately right of the last date, on the same line",
   );
   assert.ok(!geometry.overlaps, "Commission must not overlap dates, values or adjacent content");
   assert.ok(
-    geometry.iconOnly && Math.abs(geometry.iconSize - 18) <= 0.1,
-    "Commission must render only its 18px dollar icon",
+    geometry.iconOnly && Math.abs(geometry.iconSize - 17) <= 0.1,
+    "Commission must render only its 17px dollar icon",
   );
   assert.ok(
-    geometry.width >= geometry.minimumTarget && geometry.height >= geometry.minimumTarget,
+    [24, 44].includes(geometry.minimumTarget) &&
+      geometry.width === geometry.minimumTarget &&
+      geometry.height === geometry.minimumTarget,
     "Commission action must retain its pointer-specific target size",
   );
   assert.ok(
@@ -157,7 +175,8 @@ export async function checkAssociativeSummaryGeometry(page) {
 
 export async function checkAssociativeCommissionGeometry(commission) {
   const geometry = await commission.evaluate((button) => {
-    const summary = button.closest(".investor-associative-payment-summary");
+    const layout = button.closest(".investor-associative-payment-summary-layout");
+    const summary = layout?.querySelector(":scope > section.investor-associative-payment-summary");
     const row = summary?.querySelector(".is-decreasing:last-child");
     const date = row?.querySelector(".investor-associative-payment-last-date > time");
     const rect = button.getBoundingClientRect();
@@ -180,6 +199,10 @@ export async function checkAssociativeCommissionGeometry(commission) {
     const icon = button.querySelector('span[aria-hidden="true"]');
     const iconRect = icon ? textBounds(icon) : null;
     const style = getComputedStyle(button);
+    const layoutStyle = layout ? getComputedStyle(layout) : null;
+    const columns = layoutStyle?.gridTemplateColumns.split(" ").map(Number.parseFloat) ?? [];
+    const summaryRect = summary?.getBoundingClientRect();
+    const layoutRect = layout?.getBoundingClientRect();
     // Text ranges exclude blank grid space, but detect overlap with any rendered value/date.
     const content = [
       ...document.querySelectorAll(
@@ -190,11 +213,25 @@ export async function checkAssociativeCommissionGeometry(commission) {
     return {
       width: rect.width,
       height: rect.height,
-      minimumTarget: matchMedia("(pointer: coarse)").matches ? 44 : 18,
-      insideSummary: contains(summary),
-      insideLastRow:
-        contains(row) &&
-        /Decrescente\s+10%/u.test(row?.querySelector('[role="rowheader"]')?.textContent ?? ""),
+      minimumTarget: matchMedia("(pointer: coarse)").matches ? 44 : 24,
+      summarySibling: Boolean(summary && button.parentElement === summary.parentElement),
+      insideSummary: Boolean(button.closest(".investor-associative-payment-summary")),
+      insideTable: Boolean(button.closest('[role="table"], table')),
+      insideCell: Boolean(button.closest('[role="cell"], td, th')),
+      lastRowIsDecreasing10: /Decrescente\s+10%/u.test(
+        row?.querySelector('[role="rowheader"]')?.textContent ?? "",
+      ),
+      layoutDisplay: layoutStyle?.display,
+      columns,
+      layoutGap: Number.parseFloat(layoutStyle?.columnGap),
+      summaryGap: summaryRect ? rect.left - summaryRect.right : -1,
+      summaryFitsColumn: Boolean(
+        summaryRect &&
+        layoutRect &&
+        Math.abs(summaryRect.width - columns[0]) <= 1 &&
+        Math.abs(summaryRect.left - layoutRect.left) <= 1,
+      ),
+      insideLayout: contains(layout),
       insideWidth: rect.left >= 0 && rect.right <= innerWidth,
       dateGap: dateRect ? rect.left - dateRect.right : -1,
       centerDelta:

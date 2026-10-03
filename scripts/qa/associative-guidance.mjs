@@ -45,7 +45,51 @@ export function assertAssociativeTransparentFields(fields) {
       `${field.label}: empty/filled inputs must share the parent surface`,
     );
     assert.equal(field.gradient.length, 0, `${field.label}: inputs must not have a painted fill`);
+    if (field.ledger) {
+      assert.ok(
+        field.borderWidths.length === 4 && field.borderWidths.every((width) => width === 0),
+        `${field.label}: ledger inputs must have no border, including focused/filled states`,
+      );
+      assert.ok(
+        field.outlineWidth === 0 || field.outlineStyle === "none",
+        `${field.label}: ledger inputs must have no outline, including focused/filled states`,
+      );
+      assert.equal(field.boxShadow, "none", `${field.label}: ledger inputs must have no shadow`);
+      assert.equal(
+        field.compositionShadow,
+        "none",
+        `${field.label}: the surrounding composition must not restore a focus frame`,
+      );
+    }
   }
+}
+
+export function assertAssociativeLedgerRow(paint) {
+  assert.ok(hasGuidanceThemeSurface(paint), "Ledger row must retain its normal theme surface");
+  assert.ok(paint.contained, "Ledger row decoration must stay within the full row");
+  assert.ok(
+    paint.fixedBorders.every(
+      (border) =>
+        border.width === 0 ||
+        ["none", "hidden"].includes(border.style) ||
+        !isGuidanceGold(border.color),
+    ),
+    "Ledger row must not retain a fixed gold border or outline",
+  );
+  assert.equal(paint.boxShadow, "none", "Ledger row must not retain a fixed shadow");
+  assert.ok(
+    paint.attentionBorder.length === 4 &&
+      paint.attentionBorder.every((border) => border.width === 0),
+    "Ledger ::after must have no fixed border",
+  );
+}
+
+export function assertAssociativeKeyboardFocus(focus) {
+  assert.ok(focus.focusVisible, "Ledger input must receive keyboard-visible focus");
+  assert.ok(
+    focus.decoration.includes("underline") && focus.thickness === 2 && focus.alpha > 0,
+    "Keyboard focus must underline the ledger label with a visible 2px line",
+  );
 }
 
 export function isGuidanceGold([r, g, b, alpha = 255]) {
@@ -62,12 +106,13 @@ export function isGuidanceGoldText(paint) {
   );
 }
 
-export function assertAssociativeShimmer({ active, reducedMotion, animations }) {
+export function assertAssociativeShimmer({ active, reducedMotion, animations, ledger = false }) {
   if (!active || reducedMotion) {
     assert.equal(animations.length, 0, "Inactive/reduced-motion guidance must not shimmer");
     return;
   }
   assert.ok(animations.length > 0, "Current/required guidance must shimmer");
+  if (ledger) assert.equal(animations.length, 1, "Ledger must animate only its full-row ::after");
   for (const animation of animations) {
     assert.match(animation.name, /(?:shine|shimmer)/u, "Only the guidance shimmer may animate");
     assert.equal(animation.duration, 3000, "Guidance shimmer must last exactly 3s");
@@ -79,6 +124,19 @@ export function assertAssociativeShimmer({ active, reducedMotion, animations }) 
       "Shimmer must stay in a 2px edge, never cover field text",
     );
     assert.equal(animation.goldLine, true, "The moving edge must be gold, not white or blue");
+    if (ledger) {
+      assert.equal(animation.name, "associative-row-edge-shine");
+      assert.equal(animation.pseudo, "::after");
+      assert.equal(animation.fullRowExtent, true, "Ledger shimmer must cover the full row extent");
+      assert.equal(animation.backgroundCount, 2, "Ledger shimmer requires two gold backgrounds");
+      assert.deepEqual(animation.edgeHeights, [2, 2], "Both ledger edges must be exactly 2px");
+      assert.deepEqual(
+        animation.edgePositions,
+        ["0%", "100%"],
+        "Ledger edges must stay at top/bottom",
+      );
+      assert.equal(animation.noRepeat, true, "Ledger edges must not tile across the input");
+    }
     assert.equal(animation.moving, true, "The edge must travel rather than stay static");
     assert.equal(
       animation.visibleDuringCycle,
@@ -86,6 +144,38 @@ export function assertAssociativeShimmer({ active, reducedMotion, animations }) 
       "Guidance shimmer must not remain hidden throughout its cycle",
     );
   }
+}
+
+export function assertAssociativeRejectionPaint(paint) {
+  assert.deepEqual(
+    paint.gradient,
+    [
+      [101, 12, 23, 255],
+      [157, 24, 40, 255],
+      [116, 16, 28, 255],
+      [72, 8, 15, 255],
+    ],
+    "Rejection must use the four dark metallic blood-red stops",
+  );
+  assert.deepEqual(paint.foreground, [255, 255, 255, 255], "Rejection text must remain white");
+  assert.deepEqual(paint.textFill, [255, 255, 255, 255], "Rejection text fill must remain white");
+}
+
+export function assertAssociativeRejectionShimmer({ rejected, reducedMotion, animations }) {
+  if (!rejected || reducedMotion) {
+    assert.equal(animations.length, 0, "Non-rejected/reduced-motion footer must not shimmer");
+    return;
+  }
+  assert.equal(animations.length, 1, "Rejected footer must have one red shimmer");
+  const animation = animations[0];
+  assert.equal(animation.name, "associative-rejection-shine");
+  assert.equal(animation.pseudo, "::after");
+  assert.equal(animation.duration, 3000, "Rejection shimmer must last exactly 3s");
+  assert.equal(animation.iterations, "infinite");
+  assert.equal(animation.playState, "running");
+  assert.equal(animation.redLine, true, "Rejection shimmer must be red");
+  assert.equal(animation.moving, true, "Rejection shimmer must travel");
+  assert.equal(animation.visibleDuringCycle, true, "Rejection shimmer must be visible");
 }
 
 export function assertAssociativeMoneySpacing(measurements) {
@@ -134,6 +224,12 @@ async function inspectPaint(locator) {
     };
     const style = getComputedStyle(element);
     const frame = getComputedStyle(element, "::after");
+    const borderPaint = (css) =>
+      ["Top", "Right", "Bottom", "Left"].map((side) => ({
+        width: Number.parseFloat(css[`border${side}Width`]),
+        style: css[`border${side}Style`],
+        color: rgba(css[`border${side}Color`]),
+      }));
     const internal = (css) => {
       const outline = Number.parseFloat(css.outlineWidth) || 0;
       const shadows = css.boxShadow.split(/,(?![^()]*\))/u);
@@ -151,6 +247,20 @@ async function inspectPaint(locator) {
       textFill: rgba(style.webkitTextFillColor || style.color),
       backgroundClip: style.backgroundClip,
       leftBorderWidth: Number.parseFloat(style.borderLeftWidth),
+      boxShadow: style.boxShadow,
+      fixedBorders: [
+        style,
+        ...["::before", "::after"]
+          .map((pseudo) => getComputedStyle(element, pseudo))
+          .filter((css) => css.display !== "none" && !["none", "normal"].includes(css.content)),
+      ].flatMap((css) => [
+        ...borderPaint(css),
+        {
+          width: Number.parseFloat(css.outlineWidth),
+          style: css.outlineStyle,
+          color: rgba(css.outlineColor),
+        },
+      ]),
       attentionBorder:
         frame.display !== "none" && !["none", "normal"].includes(frame.content)
           ? ["Top", "Right", "Bottom", "Left"].map((side) => ({
@@ -250,21 +360,16 @@ async function checkRequiredRow(page, label) {
     .poll(
       async () => {
         paint = await inspectPaint(rows);
-        return (
-          paint.contained &&
-          hasGuidanceThemeSurface(paint) &&
-          paint.attentionBorder.length === 4 &&
-          paint.attentionBorder.every(
-            (border) =>
-              border.width >= 2 &&
-              !["none", "hidden"].includes(border.style) &&
-              isGuidanceGold(border.color),
-          )
-        );
+        try {
+          assertAssociativeLedgerRow(paint);
+          return true;
+        } catch {
+          return false;
+        }
       },
       {
         timeout,
-        message: `${label}: next required row needs only a contained gold border and normal surface`,
+        message: `${label}: next required row needs a normal surface with no fixed gold frame`,
       },
     )
     .toBe(true);
@@ -282,19 +387,63 @@ async function checkTransparentFields(page) {
     .evaluateAll((inputs) =>
       inputs
         .filter((input) => input.checkVisibility())
-        .map((input) => {
-          const style = getComputedStyle(input);
-          const rgba = style.backgroundColor.match(/[\d.]+/gu).map(Number);
-          return {
-            label: input.getAttribute("aria-label"),
-            value: input.value,
-            background: [...rgba.slice(0, 3), rgba.length === 4 ? rgba[3] * 255 : 255],
-            gradient: style.backgroundImage === "none" ? [] : [style.backgroundImage],
-          };
+        .flatMap((input) => {
+          const ledger = Boolean(input.closest(".investor-associative-compact-account"));
+          const wrapper = input.closest(
+            ".investor-associative-line-control, .investor-associative-installment-control",
+          );
+          return (ledger && wrapper ? [input, wrapper] : [input]).map((element) => {
+            const style = getComputedStyle(element);
+            const rgba = style.backgroundColor.match(/[\d.]+/gu).map(Number);
+            return {
+              label: `${input.getAttribute("aria-label")}${element === input ? "" : " wrapper"}`,
+              value: input.value,
+              background: [...rgba.slice(0, 3), rgba.length === 4 ? rgba[3] * 255 : 255],
+              gradient: style.backgroundImage === "none" ? [] : [style.backgroundImage],
+              ledger,
+              borderWidths: [
+                style.borderTopWidth,
+                style.borderRightWidth,
+                style.borderBottomWidth,
+                style.borderLeftWidth,
+              ].map(Number.parseFloat),
+              outlineWidth: Number.parseFloat(style.outlineWidth),
+              outlineStyle: style.outlineStyle,
+              boxShadow: style.boxShadow,
+              compositionShadow: ledger
+                ? getComputedStyle(input.closest(".investor-direct-step-composition")).boxShadow
+                : "none",
+            };
+          });
         }),
     );
   assertAssociativeTransparentFields(fields);
   return fields;
+}
+
+async function checkLedgerKeyboardFocus(page, input) {
+  // Establish keyboard modality before focusing each empty/filled ledger input.
+  await page.keyboard.press("Tab");
+  await input.focus();
+  await expect(input).toBeFocused();
+  const focus = await input.evaluate((element) => {
+    const label = element.closest("li").querySelector(".investor-direct-step-name strong");
+    const style = getComputedStyle(label);
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const context = canvas.getContext("2d");
+    context.fillStyle = style.textDecorationColor;
+    context.fillRect(0, 0, 1, 1);
+    return {
+      focusVisible: element.matches(":focus-visible"),
+      decoration: style.textDecorationLine,
+      thickness: Number.parseFloat(style.textDecorationThickness),
+      alpha: context.getImageData(0, 0, 1, 1).data[3],
+    };
+  });
+  assertAssociativeKeyboardFocus(focus);
+  await checkTransparentFields(page);
+  return focus;
 }
 
 async function checkGuidanceContrast(page) {
@@ -444,7 +593,7 @@ async function checkHover(page, locator, reducedMotion, allowScale = true) {
 async function checkGuidanceShimmer(page) {
   const measurements = await page
     .locator(
-      `${root} ${question}, ${root} .investor-key-field, ${root} .investor-associative-step-guide`,
+      `${root} ${question}, ${root} .investor-key-field, ${root} .investor-associative-step-guide, ${root} .investor-associative-approval > footer`,
     )
     .evaluateAll((elements) =>
       elements
@@ -455,6 +604,9 @@ async function checkGuidanceShimmer(page) {
             ".current, .is-active, .investor-associative-step-guide.guidance",
           ),
           reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+          ledger: element.matches(".investor-associative-compact-account li.investor-key-field"),
+          rejectionFooter: element.matches(".investor-associative-approval > footer"),
+          rejected: element.matches("footer.rejected"),
           animations: element
             .getAnimations({ subtree: true })
             .filter((animation) => {
@@ -488,16 +640,43 @@ async function checkGuidanceShimmer(page) {
               const positions = animation.effect
                 .getKeyframes()
                 .map((frame) => frame.backgroundPosition ?? frame.backgroundPositionX);
+              const sizes = style.backgroundSize
+                .split(",")
+                .map((size) => size.trim().split(/\s+/u));
+              const isRowOwner =
+                animation.effect.target === element && element.matches("li.investor-key-field");
               return {
                 name: animation.animationName,
                 duration: timing.duration,
                 iterations: timing.iterations === Infinity ? "infinite" : String(timing.iterations),
                 playState: animation.playState,
-                edgeHeight: Number.parseFloat(style.backgroundSize.split(" ")[1]),
+                pseudo: animation.effect.pseudoElement,
+                edgeHeight: Number.parseFloat(sizes[0][1]),
+                edgeHeights: sizes.map((size) => Number.parseFloat(size[1])),
+                edgePositions: style.backgroundPositionY
+                  .split(",")
+                  .map((position) => position.trim()),
+                backgroundCount: (style.backgroundImage.match(/linear-gradient\(/gu) ?? []).length,
+                noRepeat: style.backgroundRepeat
+                  .split(",")
+                  .every((repeat) => repeat.trim() === "no-repeat"),
+                fullRowExtent:
+                  isRowOwner &&
+                  style.transform === "none" &&
+                  [style.top, style.right, style.bottom, style.left].every(
+                    (offset) => Number.parseFloat(offset) === 0,
+                  ) &&
+                  Math.abs(Number.parseFloat(style.width) - element.clientWidth) <= 1 &&
+                  Math.abs(Number.parseFloat(style.height) - element.clientHeight) <= 1,
                 goldLine:
                   colors.length > 0 &&
                   colors.every(
                     ([r, g, b, a = 1]) => r >= 150 && g >= 90 && r > g && g - b >= 35 && a > 0,
+                  ),
+                redLine:
+                  colors.length > 0 &&
+                  colors.every(
+                    ([r, g, b, a = 1]) => r >= 150 && r > g * 1.5 && r > b * 1.5 && a > 0,
                   ),
                 moving: new Set(positions.filter(Boolean)).size > 1,
                 visibleDuringCycle:
@@ -509,7 +688,8 @@ async function checkGuidanceShimmer(page) {
   assert.ok(measurements.length >= 3, "Guidance animation owners must be present");
   for (const measurement of measurements) {
     try {
-      assertAssociativeShimmer(measurement);
+      if (measurement.rejectionFooter) assertAssociativeRejectionShimmer(measurement);
+      else assertAssociativeShimmer(measurement);
     } catch (error) {
       error.message = `${measurement.label}: ${error.message}`;
       throw error;
@@ -531,9 +711,10 @@ async function checkReducedGuidanceMotion(page, locator) {
 // Call only on an isolated synthetic page, after initial viewport checks and unit selection.
 export async function checkAssociativeGuidance(page, { onState = async () => {} } = {}) {
   const result = {
-    contract: "associative-guidance-gold-border-v4",
+    contract: "associative-guidance-row-edges-rejection-v5",
     questions: [],
     rows: [],
+    keyboardFocus: [],
     passed: false,
   };
   const field = (label) =>
@@ -619,15 +800,20 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
           page.locator(`${root} ${activeRow}`),
         );
       await expect(field(next)).toBeDisabled();
+      result.keyboardFocus.push(await checkLedgerKeyboardFocus(page, field(label)));
       if (label === "Financiamento") {
         await field(label).fill("0");
         await expect(field(next)).toBeDisabled();
         await expect(page.locator(`${root} ${activeRow}`)).toHaveCount(1);
       }
       await field(label).fill(value);
+      result.keyboardFocus.push(await checkLedgerKeyboardFocus(page, field(label)));
       await expect(field(next)).toBeEnabled();
     }
     result.rows.push(await checkRequiredRow(page, "Quantidade de parcelas"));
+    result.keyboardFocus.push(
+      await checkLedgerKeyboardFocus(page, field("Quantidade de parcelas")),
+    );
     result.moneyAfter = await checkAssociativeMoneySpacing(page);
     result.quantity = await checkQuantity(page);
     await field("Quantidade de parcelas").fill("1");
@@ -636,6 +822,9 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
       page.getByRole("combobox", { name: "Selecione o Ranking", exact: true }),
     ).toHaveCount(0);
     await field("Quantidade de parcelas").fill("84");
+    result.keyboardFocus.push(
+      await checkLedgerKeyboardFocus(page, field("Quantidade de parcelas")),
+    );
     await expect(field("Quantidade de parcelas")).not.toHaveAttribute("aria-invalid", "true");
     await expect(
       page.getByRole("combobox", { name: "Selecione o Ranking", exact: true }),
@@ -705,6 +894,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
         reduced: await checkHover(page, locator, "reduce"),
       };
     }
+    result.rejection = await checkRejection(page);
     result.passed = true;
     await onState("complete");
     return result;
@@ -718,10 +908,75 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
   }
 }
 
+async function checkRejection(page) {
+  const ranking = page.getByRole("combobox", { name: "Selecione o Ranking", exact: true });
+  const previousRanking = await ranking.inputValue();
+  const financing = page
+    .locator(`${root} input`)
+    .and(page.getByLabel("Financiamento", { exact: true }));
+  const previousFinancing = await financing.inputValue();
+  const footer = page.locator(`${root} .investor-associative-approval > footer`);
+  const previousMotion = await page.evaluate(
+    () => matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  try {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    // An eligible ranking with insufficient financing exercises the actual adjustment button.
+    await financing.fill("100");
+    await ranking.selectOption("gold");
+    await expect(footer).toHaveClass(/\brejected\b/u);
+    const trigger = footer.locator(".investor-associative-approval-trigger");
+    await expect(trigger).toBeVisible();
+    await expect(trigger).toHaveAccessibleName(/REPROVADO/u);
+    const failedCells = page.locator(`${root} .investor-associative-approval .failed-value`);
+    await expect(failedCells.first()).toBeVisible();
+    const paints = [];
+    for (const cell of await failedCells.all()) {
+      await expect(cell.locator(":scope > span")).toHaveCount(1);
+      await expect(cell.locator(":scope > span")).toHaveText((await cell.innerText()).trim());
+    }
+    const surfaces = page.locator(
+      `${root} .investor-associative-approval > footer.rejected, ${root} .investor-associative-approval .investor-associative-flow-status.rejected, ${root} .investor-associative-approval .failed-value > span`,
+    );
+    await expect(page.locator(`${root} .investor-associative-flow-status.rejected`)).toHaveCount(2);
+    for (const surface of await surfaces.all()) {
+      const paint = await inspectPaint(surface);
+      assertAssociativeRejectionPaint(paint);
+      paints.push(paint);
+    }
+    for (const text of await trigger.locator("span, small, strong").all()) {
+      const paint = await inspectPaint(text);
+      assert.deepEqual(
+        paint.foreground,
+        [255, 255, 255, 255],
+        "Rejection trigger text must remain white",
+      );
+      assert.deepEqual(
+        paint.textFill,
+        [255, 255, 255, 255],
+        "Rejection trigger text fill must remain white",
+      );
+    }
+    await checkGuidanceContrast(page);
+    const normal = await checkGuidanceShimmer(page);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const reduced = await checkGuidanceShimmer(page);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await ranking.selectOption("");
+    await expect(footer).toHaveCount(0);
+    const cleared = await checkGuidanceShimmer(page);
+    return { paints, normal, reduced, cleared };
+  } finally {
+    await financing.fill(previousFinancing);
+    await ranking.selectOption(previousRanking);
+    await page.emulateMedia({ reducedMotion: previousMotion ? "reduce" : "no-preference" });
+  }
+}
+
 export async function inspectAssociativeGuidanceContrast(page) {
   return page
     .locator(
-      `${root} ${question}.current .investor-associative-question-heading > span, ${root} ${question}.current > small, ${root} ${question}.current input:not([type="radio"]), ${root} ${question}.current .investor-associative-choice-row > button:not([aria-disabled="true"]), ${root} ${question}.current .investor-associative-yes-no label, ${root} ${activeRow} input, ${root} ${activeRow} .investor-direct-step-name strong, ${root} .investor-associative-commission-launcher > span`,
+      `${root} ${question}.current .investor-associative-question-heading > span, ${root} ${question}.current > small, ${root} ${question}.current input:not([type="radio"]), ${root} ${question}.current .investor-associative-choice-row > button:not([aria-disabled="true"]), ${root} ${question}.current .investor-associative-yes-no label, ${root} ${activeRow} input, ${root} ${activeRow} .investor-direct-step-name strong, ${root} .investor-associative-commission-launcher > span, ${root} .investor-associative-approval > footer.rejected :is(span, small, strong), ${root} .investor-associative-flow-status.rejected, ${root} .investor-associative-approval .failed-value > span`,
     )
     .evaluateAll((elements) => {
       const canvas = document.createElement("canvas");

@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-10-03 - Brilho nas linhas e reprovacao metalica
+
+- Branch codex/associativo-brilho-reprovacao, base 506b9e3. Pedido posterior
+  em seis capturas: campos sem contorno, brilho nas duas extremidades da linha,
+  dolar externo de 17px e reprovacao vermelho-sangue metalico com brilho de 3s.
+- Remove bordas/sombras de inputs e controles do ledger, inclusive o foco
+  herdado da composicao. Mantem indicacao de teclado no nome do campo.
+- Brilho dourado somente em duas faixas de 2px, sem moldura fixa; reprovacao
+  com contraste branco validado e efeito interrompido em reduced motion.
+- Dolar fora da secao/tabela, alvos de 24/44px, sem caixa; calculos,
+  sequencia, paleta-base, estoque e Tabelao preservados.
+- Lint, tipos e build aprovados. 30 testes focados, 46 testes de ferramentas
+  em repeticao serial e oito testes Node aprovados. Navegador: 6/6 jornadas
+  nos tres temas/desktop/celular, com contraste e geometria aprovados.
+  Suite integral Windows executada: seis falhas POSIX
+  e cinco timeouts; os timeouts passaram na repeticao sem relaxar limites.
+- CI/publicacao pendentes; braces segue bloqueando o audit. Atualizacao para
+  3.0.4 retornou E404 na consulta ao registro, sem alteracao de dependencias.
+- Evidencias: docs/audits/associativo-brilho-reprovacao-2026-10-03.md.
+
 ## 2026-10-02 - Dourado fechado e edicao sem preenchimento
 
 - Branch codex/associativo-contorno-dourado, base 3960724. Novo pedido em duas
