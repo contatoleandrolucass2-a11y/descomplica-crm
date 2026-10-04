@@ -4,7 +4,7 @@ Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
 ## Incremento dos 22 canvases em 04/10/2026
 
-O candidato em `codex/canvas-layout-parity` estende a composicao aprovada as 22
+O incremento em `codex/canvas-layout-parity` estende a composicao aprovada as 22
 rotas protegidas: Dashboard, cinco etapas, Ranking, Canal de Parcerias,
 Configuracoes e metas, hub e jornadas de Simulacao e as tres paginas de
 Administracao. Todas permanecem sob uma unica navbar global; headers de pagina
@@ -20,13 +20,14 @@ Permissao de rota nao habilita `simulator.caixa`: motor, endpoint de calculo,
 submissao, analise de credito e aprovacao bancaria continuam fail-closed, e o
 harness recusa explicitamente ativar essa chave de runtime.
 
-A execucao candidata deve cobrir 154 combinacoes responsivas
-(`22 rotas × 7 viewports = 154`), os temas Claro, Medio e Escuro, reflow/zoom,
-teclado, foco,
-`prefers-reduced-motion`, overflow, contraste e Axe. Resultados, comparacoes,
-promocao de baseline, gates, CI e publicacao permanecem pendentes ate a evidencia
-do SHA final. As contagens aprovadas de 21 rotas abaixo sao historicas e nao
-comprovam este candidato.
+A execucao limpa no SHA `a4c1717a1ac159804a1cda7b02ec3a3f48379b4a`
+aprovou 154 combinacoes responsivas (`22 rotas × 7 viewports`), 88 checks de
+tema, 209 auditorias de acessibilidade, 209 capturas/comparacoes, 110 checks de
+zoom e 40 combinacoes da navegacao. Teclado, foco, `prefers-reduced-motion`,
+overflow, contraste, identidade longa e estados dos simuladores tambem passaram.
+A baseline de 209 imagens foi promovida transacionalmente, incluindo oito
+evidencias da CAIXA; a conta e as fixtures locais efemeras foram removidas.
+Gates gerais, CI e publicacao continuam etapas separadas.
 
 O roteiro QA de continuidade do Associativo foi ajustado para aguardar cada
 campo habilitado e o valor persistido antes de seguir para o proximo. Entrada
@@ -185,10 +186,10 @@ Os harnesses de QA visual cobrem três fronteiras:
 Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
 cada imagem está em [`manifest.json`](./manifest.json).
-O último QA local autenticado aprovado está em
-[`authenticated-results.json`](./authenticated-results.json); suas 201 capturas
-históricas ficam em [`target-authenticated`](./target-authenticated/). Esse
-artefato cobre a matriz anterior de 21 rotas e não comprova o candidato atual.
+O ultimo QA local autenticado aprovado esta em
+[`authenticated-results.json`](./authenticated-results.json); suas 209 capturas
+ficam em [`target-authenticated`](./target-authenticated/). O artefato cobre as
+22 rotas do incremento, inclusive a CAIXA em estado protegido e bloqueado.
 
 A baseline canônica continua comprovando as rotas arquivadas dos simuladores.
 Quando uma única chave oficial é liberada para canário, o hub de simulação é

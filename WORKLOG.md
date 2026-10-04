@@ -43,18 +43,19 @@
   submissao e aprovacao bancaria permanecem fail-closed; o layout nao substitui
   Proxy, guard, grants ou RLS.
 - Os contratos cobrem os temas Claro, Medio e Escuro, sete viewports, zoom,
-  teclado, foco, reduced motion, overflow, contraste e Axe. A expectativa da
-  matriz candidata e 154 combinacoes responsivas
-  (`22 rotas × 7 viewports = 154`); resultado,
-  comparacoes, inventario de imagens e promocao da baseline ainda pendem da
-  execucao final.
+  teclado, foco, reduced motion, overflow, contraste e Axe. A captura limpa do
+  SHA `a4c1717a1ac159804a1cda7b02ec3a3f48379b4a` aprovou 154 combinacoes
+  responsivas (`22 rotas × 7 viewports`), 88 checks de tema, 209 auditorias de
+  acessibilidade, 209 capturas/comparacoes, 110 checks de zoom e 40 combinacoes
+  da navegacao dos simuladores. A baseline de 209 imagens foi promovida pelo
+  helper transacional; conta e fixtures locais efemeras foram removidas.
 - O roteiro `associative-calculation-continuity` agora diferencia campo vazio
   de zero e sincroniza a sequencia pelo estado habilitado/persistido. Conserva
   Financiamento R$ 190.000, Subsidio/FGTS/Cheque Moradia em R$ 0, Entrada de
   R$ 1.000 e 84 parcelas; nenhuma formula ou regra financeira foi alterada.
-- Gates obrigatorios (`pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build`),
-  matriz autenticada, CI, PR e publicacao nao foram declarados concluidos neste
-  registro e permanecem pendentes de evidencia do SHA final.
+- A matriz autenticada, contraste, hierarquia semantica, overflow mobile e
+  navegacao passaram. Gates obrigatorios finais, CI, PR e publicacao ainda
+  dependem da evidencia do SHA que incorporar esta baseline.
 
 ## 2026-10-04 - Associativo: calculo, origem e continuidade
 

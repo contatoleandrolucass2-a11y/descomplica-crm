@@ -30,7 +30,8 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-04: canvases aprovados cobrem 22 rotas protegidas
 
-- Status: pendente_validacao; fonte: `docs/qa/canvas-parity`, branch
+- Status: validado localmente, pendente CI/publicacao; fonte:
+  `docs/qa/canvas-parity`, branch
   `codex/canvas-layout-parity` e contratos locais de navegacao/QA.
 - Uma unica navbar global serve Dashboard, cinco etapas, Ranking, Canal,
   Configuracoes/metas, Simulacao e Administracao. Subrotas nao devem recriar
@@ -41,10 +42,11 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - CAIXA e uma rota protegida somente visual. O acesso exige permissao, enquanto
   motor, endpoint, submissao, analise e aprovacao bancaria permanecem
   fail-closed; o QA recusa habilitar `simulator.caixa` mesmo por flag.
-- A matriz candidata espera 154 combinacoes responsivas
-  (`22 rotas × 7 viewports = 154`), tres temas e verificacoes de reflow, zoom,
-  teclado, foco, reduced
-  motion, contraste e Axe. Resultado final, baseline, CI e publicacao pendentes.
+- A captura limpa do SHA `a4c1717a1ac159804a1cda7b02ec3a3f48379b4a`
+  aprovou 154 checks responsivos, 88 de tema, 209 de acessibilidade/comparacao,
+  110 de zoom e 40 combinacoes da navegacao. Baseline transacional com 209
+  imagens promovida; nenhuma conta ou fixture QA permaneceu no banco local.
+  CI e publicacao seguem pendentes.
 - O roteiro de continuidade aguarda campos habilitados e valores persistidos e
   interpreta vazio como ausencia, sem mudar valores do cenario, formulas ou
   regras financeiras.

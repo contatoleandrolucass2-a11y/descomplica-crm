@@ -30,9 +30,10 @@
 - Corrige o roteiro QA de continuidade do Associativo para aguardar cada campo
   habilitado e persistido antes de avancar; campo vazio passa a ser ausencia,
   nao zero. Valores do cenario e regras financeiras permanecem inalterados.
-- A matriz candidata passa a esperar 154 combinacoes responsivas
-  (`22 rotas × 7 viewports = 154`). Gates finais, baseline, CI e publicacao deste
-  incremento permanecem pendentes.
+- Promove a baseline revisada de 209 imagens a partir da arvore limpa em
+  `a4c1717`, apos 154 checks responsivos, 88 de tema, 209 de acessibilidade,
+  209 comparacoes, 110 de zoom e 40 combinacoes da navegacao aprovados. Gates
+  finais, CI e publicacao deste incremento continuam separados desta promocao.
 
 ## 2026-10-04 - Calculo e continuidade no Associativo
 
