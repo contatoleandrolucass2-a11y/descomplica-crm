@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  completeMissingInventoryUnitFacts,
   enrichInventoryReferenceFields,
   inventoryIdentityKey,
   uniqueInventoryReferences,
@@ -14,6 +15,67 @@ const reference = {
   progress: 0.42,
   completionDate: "2028-12-30",
 };
+
+describe("late facts for an existing Associativo proposal", () => {
+  const current = Object.freeze({
+    ...reference,
+    id: "selected-snapshot",
+    appraisal: null,
+    progress: null,
+    finalPrice: 234990,
+  });
+  it("fills only absent appraisal/progress, preserving price, delivery, ID and ordering", () => {
+    const other = { ...current, identifier: "ANOTHER-UNIT", id: "another" };
+    const late = { ...reference, finalPrice: 230000 };
+    const result = completeMissingInventoryUnitFacts([current, other], [late]);
+    expect(result).toEqual([
+      { ...current, appraisal: reference.appraisal, progress: reference.progress },
+      other,
+    ]);
+    expect(result[1]).toBe(other);
+    expect(current.appraisal).toBeNull();
+    expect(current.progress).toBeNull();
+  });
+  it("preserves known values including explicit source zero", () => {
+    const known = { ...current, appraisal: 0, progress: 0 };
+    expect(completeMissingInventoryUnitFacts([known], [reference])[0]).toBe(known);
+  });
+  it("rejects a reference with a conflicting or absent delivery date", () => {
+    for (const completionDate of ["2035-12-30", null, ""]) {
+      expect(
+        completeMissingInventoryUnitFacts([current], [{ ...reference, completionDate }])[0],
+      ).toBe(current);
+    }
+  });
+  it("accepts actual zero progress from the unique reference", () => {
+    expect(
+      completeMissingInventoryUnitFacts([current], [{ ...reference, progress: 0 }])[0]?.progress,
+    ).toBe(0);
+  });
+  it.each([NaN, Infinity, -1, 1.01, 15])("does not copy invalid source progress %s", (progress) => {
+    expect(
+      completeMissingInventoryUnitFacts([current], [{ ...reference, progress }])[0]?.progress,
+    ).toBeNull();
+  });
+  it.each([NaN, Infinity, -1, 0])("does not copy invalid source appraisal %s", (appraisal) => {
+    expect(
+      completeMissingInventoryUnitFacts([current], [{ ...reference, appraisal }])[0]?.appraisal,
+    ).toBeNull();
+  });
+  it("does not choose a neighbor or ambiguous unit", () => {
+    expect(completeMissingInventoryUnitFacts([current], [reference, reference])[0]).toBe(current);
+    expect(completeMissingInventoryUnitFacts([current, current], [reference])).toEqual([
+      current,
+      current,
+    ]);
+    expect(
+      completeMissingInventoryUnitFacts(
+        [current],
+        [{ ...reference, identifier: "ANOTHER-UNIT" }],
+      )[0],
+    ).toBe(current);
+  });
+});
 
 describe("inventory reference identity", () => {
   it("matches presentation-only differences without rewriting either source", () => {

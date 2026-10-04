@@ -10,7 +10,8 @@ import { buildDirectTableAmortizationSchedule, buildDirectTablePreKeysSchedule, 
 import { calculateInvestorFlow, distributeSignalBalance } from "@/lib/archive-investor/investor-calculator-rules.mjs";
 import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilters, reconcileInvestorFilters, sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
 import { loadInvestorInventory } from "@/lib/archive-investor/load-inventory";
-import { inventoryIdentityKey, uniqueInventoryReferences } from "@/lib/archive-investor/inventory-reference";
+import { completeMissingInventoryUnitFacts, inventoryIdentityKey, uniqueInventoryReferences } from "@/lib/archive-investor/inventory-reference";
+import { resolveAssociativeConstructionProgress } from "@/lib/archive-investor/associative-unit-facts";
 import { eligibleIntermediaryIndexes } from "@/lib/archive-investor/intermediary-fields";
 import { ASSOCIATIVE_APPROVAL_TIERS, calculateAssociativeApproval, findAssociativeApprovalPlan } from "@/lib/archive-investor/associative-approval-rules.mjs";
 import { buildAssociativeInstallmentMemory, buildAssociativePaymentComparison } from "@/lib/archive-investor/associative-installment-memory.mjs";
@@ -306,7 +307,7 @@ function inputName(label: string) {
   return label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-function MoneyInput({ id, value, onChange, label, describedBy, invalid = false, disabled = false, max, inputRef }: { id?: string; value: string; onChange: (value: string) => void; label: string; describedBy?: string; invalid?: boolean; disabled?: boolean; max?: number; inputRef?: Ref<HTMLInputElement> }) {
+function MoneyInput({ id, value, onChange, label, describedBy, placeholder = "0,00", invalid = false, disabled = false, max, inputRef }: { id?: string; value: string; onChange: (value: string) => void; label: string; describedBy?: string; placeholder?: string; invalid?: boolean; disabled?: boolean; max?: number; inputRef?: Ref<HTMLInputElement> }) {
   return <input
     id={id}
     ref={inputRef}
@@ -321,7 +322,7 @@ function MoneyInput({ id, value, onChange, label, describedBy, invalid = false, 
     value={value ? currencyInput.format(currencyInputNumber(value)) : ""}
     onFocus={(event) => event.currentTarget.select()}
     onChange={(event) => onChange(parseCurrencyInput(event.target.value))}
-    placeholder="0,00"
+    placeholder={placeholder}
     data-max={max}
   />;
 }
@@ -1117,7 +1118,7 @@ function AssociativeDocumentationPanel({
 
     {!appraisalFromReport ? <section className="investor-associative-documentation-input" aria-label="Avaliação bancária necessária">
       <label htmlFor="investor-documentation-appraisal">Avaliação bancária</label>
-      <div className="investor-associative-documentation-appraisal"><span aria-hidden="true">R$</span><MoneyInput id="investor-documentation-appraisal" label="Avaliação bancária" describedBy="investor-documentation-appraisal-help" value={appraisalOverride} onChange={onAppraisalOverrideChange} /></div>
+      <div className="investor-associative-documentation-appraisal"><span aria-hidden="true">R$</span><MoneyInput id="investor-documentation-appraisal" label="Avaliação bancária" placeholder="Não informada" describedBy="investor-documentation-appraisal-help" value={appraisalOverride} onChange={onAppraisalOverrideChange} /></div>
       <small id="investor-documentation-appraisal-help">O relatório da unidade não trouxe este valor.</small>
     </section> : null}
 
@@ -2051,7 +2052,7 @@ function AssociativeReadyProposalDialog({
         </output>
       </div> : <label className="investor-associative-ready-proposal-appraisal is-required" htmlFor="investor-associative-ready-proposal-appraisal-input">
         <span><strong>Avaliação bancária</strong><small id="investor-associative-ready-proposal-appraisal-help">A unidade não trouxe avaliação. Informe o valor oficial usado pelo banco.</small></span>
-        <span className="investor-associative-ready-proposal-appraisal-input"><b aria-hidden="true">R$</b><MoneyInput id="investor-associative-ready-proposal-appraisal-input" label="Avaliação bancária da proposta" describedBy="investor-associative-ready-proposal-appraisal-help" invalid={source.appraisal <= 0} value={appraisalOverride} onChange={onAppraisalOverrideChange} /></span>
+        <span className="investor-associative-ready-proposal-appraisal-input"><b aria-hidden="true">R$</b><MoneyInput id="investor-associative-ready-proposal-appraisal-input" label="Avaliação bancária da proposta" placeholder="Não informada" describedBy="investor-associative-ready-proposal-appraisal-help" invalid={source.appraisal <= 0} value={appraisalOverride} onChange={onAppraisalOverrideChange} /></span>
       </label>}
 
       {!proposal ? <section className="investor-associative-ready-proposal-blocked" role="alert">
@@ -2504,6 +2505,7 @@ export function InvestorCalculator({
   const [associativeCommissionChannel, setAssociativeCommissionChannel] = useState<"" | AssociativeCommissionChannel>("");
   const [associativeCommissionClassification, setAssociativeCommissionClassification] = useState("");
   const [documentationAppraisalOverride, setDocumentationAppraisalOverride] = useState("");
+  const [constructionProgressOverride, setConstructionProgressOverride] = useState("");
   const [signalFieldCount, setSignalFieldCount] = useState(0);
   const [signals, setSignals] = useState(["0", "0", "0"]);
   const [hiddenSignalIndexes, setHiddenSignalIndexes] = useState<number[]>([]);
@@ -2585,11 +2587,12 @@ export function InvestorCalculator({
       signal: controller.signal,
       canReplace: () => !inventoryProposalStarted.current,
       onInventory: applyInventory,
+      onReferenceFacts: annualMode ? (reference) => setInventory((current) => completeMissingInventoryUnitFacts(current, reference)) : undefined,
     }).catch(() => {
       if (!controller.signal.aborted) setInventoryStatus("error");
     });
     return () => controller.abort();
-  }, [directTable, inventoryReloadKey]);
+  }, [annualMode, directTable, inventoryReloadKey]);
 
   const activeFilters = useMemo(() => ({ businessUnit, project, plant, region, salePrice: salePriceFilter }), [businessUnit, project, plant, region, salePriceFilter]);
   const filterOptions = useMemo(() => buildInvestorFilterOptions(inventory, activeFilters), [inventory, activeFilters]);
@@ -2735,6 +2738,8 @@ export function InvestorCalculator({
   }, [inventory, activeFilters]);
 
   const selectedUnit = useMemo(() => inventory.find((item) => item.id === selectedUnitId) ?? null, [inventory, selectedUnitId]);
+  const associativeConstructionProgress = resolveAssociativeConstructionProgress(selectedUnit?.progress, constructionProgressOverride);
+  const associativeReportedProgress = resolveAssociativeConstructionProgress(selectedUnit?.progress, "");
   const result = useMemo(() => directTable ? calculateDirectTableFileFlow({
     selectedUnitId,
     developmentName: selectedUnit?.project,
@@ -2865,7 +2870,7 @@ export function InvestorCalculator({
     linearSchedule: associativeInstallmentSchedule,
     decreasingBlocks: result.custom.decreasing?.blocks ?? [],
     income: currencyInputNumber(income),
-    constructionProgress: selectedUnit?.progress ?? null,
+    constructionProgress: associativeConstructionProgress,
     baseDate,
     completionDate,
     entryPayment: result.custom.actValue >= 150
@@ -2877,7 +2882,7 @@ export function InvestorCalculator({
     annuals: result.custom.intermediaries
       .filter((annual: { value: number; approved: boolean; correctedValue: number }) => annual.value > 0 && annual.approved && annual.correctedValue > 0)
       .map((annual: { index: number; date: string; correctedValue: number }) => ({ index: annual.index, paymentDate: annual.date, correctedValue: annual.correctedValue, approved: true })),
-  }), [associativeInstallmentSchedule, baseDate, completionDate, income, result.context.monthlyDates, result.custom.actValue, result.custom.decreasing?.blocks, result.custom.desiredInstallments, result.custom.intermediaries, result.custom.signals, selectedUnit?.progress]);
+  }), [associativeConstructionProgress, associativeInstallmentSchedule, baseDate, completionDate, income, result.context.monthlyDates, result.custom.actValue, result.custom.decreasing?.blocks, result.custom.desiredInstallments, result.custom.intermediaries, result.custom.signals]);
   const signalsRequired = directTable
     ? directResult.custom.totalEntryValue < directResult.custom.minimumEntryValue
     : !annualMode && result.custom.actRate < 0.1;
@@ -3328,6 +3333,7 @@ export function InvestorCalculator({
     inventoryProposalStarted.current = true;
     setSelectedUnitId(item.id);
     setDocumentationAppraisalOverride("");
+    setConstructionProgressOverride("");
     setSalePrice(item.finalPrice ? String(item.finalPrice) : "");
     setCompletionDate(item.completionDate ?? "");
     if (!preserveAssociativeProposal) {
@@ -3634,7 +3640,7 @@ export function InvestorCalculator({
           linearSchedule: candidateLinearSchedule,
           decreasingBlocks: candidateResult.custom.decreasing.blocks,
           income: currencyInputNumber(income),
-          constructionProgress: selectedUnit?.progress ?? null,
+          constructionProgress: associativeConstructionProgress,
           baseDate,
           completionDate,
           entryPayment: { kind: "entry", label: "Entrada", paymentDate: baseDate, value: candidate.entry },
@@ -4121,6 +4127,19 @@ export function InvestorCalculator({
       </section>
 
       {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} sectionRef={directTable ? directJourneySectionRef : undefined} /> : null}
+      {selectedUnit && annualMode && (associativeReportedProgress === null || !(selectedUnit.appraisal > 0)) ? <section className="investor-associative-unit-facts" aria-labelledby="investor-unit-facts-title">
+        <div><h3 id="investor-unit-facts-title">Dados oficiais da unidade</h3><p>Há dados ausentes no estoque. Valores informados aqui valem somente para esta unidade nesta simulação.</p></div>
+        {associativeReportedProgress === null ? <div className="investor-associative-unit-fact">
+          <label htmlFor="investor-unit-progress">Andamento oficial da obra (%)</label>
+          <input id="investor-unit-progress" type="number" min="0" max="100" step="any" inputMode="decimal" autoComplete="off" value={constructionProgressOverride} placeholder="Não informado" aria-describedby="investor-unit-progress-status" aria-invalid={constructionProgressOverride !== "" && associativeConstructionProgress === null || undefined} onChange={(event) => setConstructionProgressOverride(event.target.value)} />
+          <small id="investor-unit-progress-status" role="status">{associativeConstructionProgress === null ? "Máximo mensal e aprovação aguardam o percentual oficial, de 0 a 100%." : "Percentual informado nesta simulação. Não altera o estoque."}</small>
+        </div> : null}
+        {!(selectedUnit.appraisal > 0) ? <div className="investor-associative-unit-fact">
+          <label htmlFor="investor-unit-appraisal">Avaliação bancária oficial (R$)</label>
+          <MoneyInput id="investor-unit-appraisal" label="Avaliação bancária oficial da unidade" placeholder="Não informada" describedBy="investor-unit-appraisal-status" value={documentationAppraisalOverride} onChange={setDocumentationAppraisalOverride} />
+          <small id="investor-unit-appraisal-status" role="status">{currencyInputNumber(documentationAppraisalOverride) > 0 ? "Avaliação informada nesta simulação. Não altera o estoque." : "Documentação e proposta final aguardam a avaliação oficial do banco."}</small>
+        </div> : null}
+      </section> : null}
       {selectedUnit && directTable && selectedUnit.completionDate && selectedUnit.completionDate <= baseDate ? <p className="investor-direct-context-warning" role="alert"><strong>Prazo da obra encerrado.</strong> A entrega em {formatDate(selectedUnit.completionDate)} não é futura em relação à data da simulação. A unidade permanece disponível para conferência, mas a auditoria exigirá ajuste; escolha outra unidade para montar uma proposta válida.</p> : null}
 
       {selectedUnit && annualMode ? <AssociativeQualificationPanel
@@ -4618,7 +4637,7 @@ export function InvestorCalculator({
                     comparisonReady={associativePaymentComparison.comparisonAvailable && Boolean(result.custom.decreasing?.ok)}
                     installmentComparisonReady={associativePaymentComparison.installmentComparisonAvailable && Boolean(result.custom.decreasing?.ok)}
                     comparisonUnavailableReason={associativePaymentComparison.installmentComparisonAvailable && !associativePaymentComparison.workEvolutionAvailable
-                      ? selectedUnit?.progress == null
+                      ? associativeConstructionProgress === null
                         ? "Andamento da obra não informado no estoque desta unidade. O comprometimento foi calculado; o máximo mensal e a aprovação dependem desse dado."
                         : "Confira a data de entrega da unidade para calcular a evolução de obra e validar o máximo da renda mensal."
                       : undefined}

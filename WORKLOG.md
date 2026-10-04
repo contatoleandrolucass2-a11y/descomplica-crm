@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-10-04 - Associativo: cobertura da origem e brilho integral
+
+- Fonte: nova conferencia solicitada pelo usuario, branch
+  `codex/associativo-origem-e-brilho-integral`, base `3e0f5d1`.
+- Leitura observacional do snapshot: 3301 registros, 3179 unidades visiveis,
+  84 sem andamento e 594 sem avaliacao positiva; entre as 2865 selecionaveis,
+  280 sem avaliacao positiva. As duas unidades apontadas ja chegam sem ambos.
+- Percentual oficial ausente pode ser informado explicitamente nesta simulacao;
+  zero e valido, vazio e invalido permanecem indisponiveis. O dado nao altera
+  estoque e nao e transferido ao trocar unidade. Avaliacao manual usa o mesmo
+  estado ja compartilhado pela documentacao e proposta final.
+- Oito etapas de continuidade/recuperacao passaram em 375 e 1440px nos tres
+  temas, incluindo complemento tardio sem alterar preco, unidade ou recursos.
+- Complemento automatico exige identidade unica e entrega igual; observacao
+  encontrou 54 avaliacoes compativeis, recusando quatro andamentos cuja entrega
+  diverge. Ausencias restantes dependem de fonte oficial, sem inferencia.
+- Corrige normalizacao silenciosa de datas inexistentes nos dois motores.
+  Matriz de 14.014 casos: zero divergencias, fontes e dominio delimitados.
+- Seis jornadas visuais com ponteiro preservado, 41 testes de efeitos/temas,
+  build, lint, tipos, formatacao e audit aprovados. Suite Windows: 1.888
+  aprovados, seis falhas POSIX e tres timeouts; repeticao isolada de ferramentas,
+  concorrencia e matriz aprovou 278 testes. CI Linux/publicacao pendentes.
+- Sem alteracao de politica comercial, fontes externas, banco ou n8n.
+  Limites e evidencia: `docs/audits/associativo-origem-brilho-2026-10-04.md`.
+
 ## 2026-10-04 - Associativo: calculo, origem e continuidade
 
 - Fonte: pedido de correcao dos percentuais, avaliacao e continuidade, com

@@ -46,6 +46,38 @@ type InventoryReferenceFields = InventoryIdentity & {
   completionDate?: string | null;
 };
 
+export function completeMissingInventoryUnitFacts<T extends InventoryReferenceFields>(
+  items: readonly T[],
+  reference: readonly InventoryReferenceFields[],
+): T[] {
+  const matches = uniqueInventoryReferences(items, reference);
+  return items.map((item) => {
+    const key = inventoryIdentityKey(item);
+    const source = key === null ? undefined : matches.get(key);
+    if (!source || !item.completionDate || source.completionDate !== item.completionDate)
+      return item;
+    const appraisal =
+      item.appraisal == null &&
+      typeof source.appraisal === "number" &&
+      Number.isFinite(source.appraisal) &&
+      source.appraisal > 0
+        ? source.appraisal
+        : item.appraisal;
+    const progress =
+      item.progress == null &&
+      typeof source.progress === "number" &&
+      Number.isFinite(source.progress) &&
+      source.progress >= 0 &&
+      source.progress <= 1
+        ? source.progress
+        : item.progress;
+    // A late source may complete absent facts, never replace the selected commercial proposal.
+    return appraisal === item.appraisal && progress === item.progress
+      ? item
+      : { ...item, appraisal, progress };
+  });
+}
+
 function hasInventoryIdentity<T>(value: T): value is T & InventoryReferenceFields {
   if (value === null || typeof value !== "object") return false;
   return (

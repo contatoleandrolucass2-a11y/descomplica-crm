@@ -148,15 +148,16 @@ describe("Associativo guidance regression gates", () => {
       expect(() => assertAssociativeKeyboardFocus({ ...focus, ...patch })).toThrow();
   });
 
-  it("requires a full-area 4.5s translucent sweep only while current/required", () => {
+  it("requires a full-area 3s translucent specular sweep only while current/required", () => {
     const animation = {
       name: "associative-pending-shine",
-      duration: 4500,
+      duration: 3000,
       iterations: "infinite",
       playState: "running",
       visibleDuringCycle: true,
       fullArea: true,
       translucent: true,
+      specularBand: true,
       behindText: true,
       pointerSafe: true,
       backgroundCount: 1,
@@ -169,6 +170,8 @@ describe("Associativo guidance regression gates", () => {
     expect(() => assertAssociativeShimmer({ ...active, animations: [] })).toThrow(/must shimmer/u);
     for (const patch of [
       { duration: 2600 },
+      { duration: 4500 },
+      { specularBand: false },
       { iterations: "2" },
       { playState: "paused" },
       { name: "border-pulse" },
@@ -195,12 +198,13 @@ describe("Associativo guidance regression gates", () => {
   it("requires one moving translucent sweep behind the entire ledger row", () => {
     const animation = {
       name: "associative-pending-shine",
-      duration: 4500,
+      duration: 3000,
       iterations: "infinite",
       playState: "running",
       visibleDuringCycle: true,
       fullArea: true,
       translucent: true,
+      specularBand: true,
       behindText: true,
       pointerSafe: true,
       goldLine: true,
@@ -403,7 +407,7 @@ describe("Associativo guidance regression gates", () => {
     }
   });
 
-  it("keeps commission below the full-width summary, aligned to the approval edges", () => {
+  it("keeps commission beside the last date inside the full-width summary panel", () => {
     const valid = {
       width: 44,
       height: 44,
@@ -415,13 +419,14 @@ describe("Associativo guidance regression gates", () => {
       lastRowIsDecreasing10: true,
       layoutDisplay: "grid",
       columns: [500],
-      layoutGap: 4,
-      summaryGap: 4,
+      layoutGap: 0,
+      tableGap: 5,
+      dateCenterDelta: 0,
       summaryFitsColumn: true,
       insideLayout: true,
       insideWidth: true,
       summaryEdgesAligned: true,
-      rightDelta: 0,
+      rightDelta: 4,
       overlaps: false,
       iconOnly: true,
       iconSize: 17,
@@ -449,13 +454,14 @@ describe("Associativo guidance regression gates", () => {
       { columns: [500, 24] },
       { layoutGap: 3 },
       { layoutGap: 5 },
-      { summaryGap: -1 },
-      { summaryGap: 6 },
+      { tableGap: 3 },
+      { dateCenterDelta: 1.01 },
       { summaryFitsColumn: false },
       { insideLayout: false },
       { insideWidth: false },
       { summaryEdgesAligned: false },
-      { rightDelta: 1.01 },
+      { rightDelta: 2.99 },
+      { rightDelta: 5.01 },
       { overlaps: true },
       { iconOnly: false },
       { iconSize: 18 },

@@ -120,7 +120,7 @@ export function assertAssociativeShimmer({ active, reducedMotion, animations, le
       "associative-pending-shine",
       "Only the pending shimmer may animate",
     );
-    assert.equal(animation.duration, 4500, "Guidance shimmer must last exactly 4.5s");
+    assert.equal(animation.duration, 3000, "Guidance shimmer must last exactly 3s");
     assert.equal(animation.iterations, "infinite", "Guidance shimmer must repeat while required");
     assert.equal(animation.playState, "running", "Guidance shimmer must actually run");
     assert.equal(
@@ -128,7 +128,12 @@ export function assertAssociativeShimmer({ active, reducedMotion, animations, le
       true,
       "Shimmer must span the full area, not narrow edge lines",
     );
-    assert.equal(animation.goldLine, true, "The moving sweep must be gold, not white or blue");
+    assert.equal(animation.goldLine, true, "The moving sweep must have warm gold shoulders");
+    assert.equal(
+      animation.specularBand,
+      true,
+      "The sweep must include a distinct pale specular band",
+    );
     assert.equal(
       animation.translucent,
       true,
@@ -545,13 +550,7 @@ async function checkQuantity(page) {
   return geometry;
 }
 
-async function checkHover(
-  page,
-  locator,
-  reducedMotion,
-  allowEffect = true,
-  actionTarget = locator,
-) {
+async function checkHover(page, locator, reducedMotion, actionTarget = locator) {
   await page.mouse.move(0, 0);
   await page.emulateMedia({ reducedMotion });
   try {
@@ -606,7 +605,7 @@ async function checkHover(
             independentTranslate: style.translate,
             specularEnabled:
               element.matches(
-                ".investor-guided-start, .investor-stock-clear, .investor-associative-choice-row > button, .investor-associative-choice-row > label, .investor-associative-payment-actions-bar > button, .investor-associative-payment-summary-actions > button",
+                "button, a[href], summary, .investor-associative-choice-row > label",
               ) && !element.matches(':disabled, [aria-disabled="true"], :has(input:disabled)'),
             animations: element
               .getAnimations({ subtree: true })
@@ -618,12 +617,15 @@ async function checkHover(
           };
         });
         const allowedAnimations =
-          reducedMotion === "reduce" || !allowEffect
+          reducedMotion === "reduce"
             ? motion.animations.length === 0
             : motion.animations.every(
                 ({ name, pseudo }) =>
-                  name === "associative-specular-orbit" && pseudo === "::before",
-              ) && motion.animations.length === (motion.specularEnabled ? 1 : 0);
+                  (name === "associative-specular-orbit" && pseudo === "::before") ||
+                  (name === "associative-selection-shine" && !pseudo),
+              ) &&
+              motion.animations.filter(({ name }) => name === "associative-specular-orbit")
+                .length === (motion.specularEnabled ? 1 : 0);
         return (
           allowedAnimations &&
           Math.abs(motion.scaleX - 1) < 0.001 &&
@@ -638,7 +640,11 @@ async function checkHover(
         message: `${reducedMotion}: hover must keep dimensions stable; only the specular rim may animate`,
       },
     )
-    .toBe(true);
+    .toBe(true)
+    .catch((error) => {
+      error.message += `\nMeasured motion: ${JSON.stringify(motion)}`;
+      throw error;
+    });
   return motion;
 }
 
@@ -715,7 +721,9 @@ async function checkGuidanceShimmer(page) {
                 playState: animation.playState,
                 pseudo: animation.effect.pseudoElement,
                 fullArea: sizes.length === 1 && sizes[0][1] === "100%",
-                translucent: colors.length > 0 && colors.every((color) => color[3] <= 0.2),
+                translucent:
+                  colors.length > 0 && colors.every((color) => color[3] > 0 && color[3] < 1),
+                specularBand: colors.some(([r, g, b]) => r >= 240 && g >= 225 && b >= 175),
                 behindText: !animation.effect.pseudoElement || Number(style.zIndex) <= 0,
                 pointerSafe: !animation.effect.pseudoElement || style.pointerEvents === "none",
                 backgroundCount: (style.backgroundImage.match(/linear-gradient\(/gu) ?? []).length,
@@ -732,7 +740,7 @@ async function checkGuidanceShimmer(page) {
                   Math.abs(Number.parseFloat(style.height) - element.clientHeight) <= 1,
                 goldLine:
                   colors.length > 0 &&
-                  colors.every(
+                  colors.some(
                     ([r, g, b, a = 1]) => r >= 150 && g >= 90 && r > g && g - b >= 35 && a > 0,
                   ),
                 redLine:
@@ -763,7 +771,7 @@ async function checkGuidanceShimmer(page) {
 async function checkReducedGuidanceMotion(page, locator, actionTarget = locator) {
   const normal = await checkGuidanceShimmer(page);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await checkHover(page, locator, "reduce", true, actionTarget);
+  await checkHover(page, locator, "reduce", actionTarget);
   const reduced = await checkGuidanceShimmer(page);
   await page.mouse.move(0, 0);
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -795,7 +803,7 @@ async function checkGuidancePixels(locator) {
   };
   try {
     const before = await captureAt(0);
-    const during = await captureAt(2250);
+    const during = await captureAt(1500);
     assert.deepEqual(before.info, during.info, "A sweep must not resize its field");
     const { width, height, channels } = before.info;
     const bands = [0, 0];
@@ -833,7 +841,7 @@ async function checkGuidancePixels(locator) {
 export async function checkAssociativeGuidance(page, { onState = async () => {} } = {}) {
   let stage = "initial";
   const result = {
-    contract: "associative-guidance-full-area-continuity-v6",
+    contract: "associative-guidance-full-area-continuity-v7",
     questions: [],
     rows: [],
     keyboardFocus: [],
@@ -1039,9 +1047,22 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
       ["commission", commission],
     ]) {
       result.motion[name] = {
-        normal: await checkHover(page, locator, "no-preference", hoverCapable),
+        normal: await checkHover(page, locator, "no-preference"),
         reduced: await checkHover(page, locator, "reduce"),
       };
+    }
+    stage = "footer-effects";
+    const footerActions = page
+      .locator(`${root} .investor-associative-resource-actions`)
+      .locator(":scope > button, :scope > a[href], :scope > .investor-learning-manual > button");
+    await expect(footerActions).toHaveCount(5);
+    result.footerEffects = [];
+    for (const action of await footerActions.all()) {
+      result.footerEffects.push({
+        name: (await action.getAttribute("aria-label")) || (await action.innerText()).trim(),
+        normal: await checkHover(page, action, "no-preference"),
+        reduced: await checkHover(page, action, "reduce"),
+      });
     }
     stage = "rejection";
     result.rejection = await checkRejection(page);
@@ -1166,6 +1187,8 @@ export async function inspectAssociativeGuidanceContrast(page) {
               ? (foregroundStyle.backgroundImage.match(/rgba?\([^)]*\)/gu) ?? []).map(rgba)
               : [foreground];
           let backgrounds = [];
+          const haloShadows =
+            foregroundStyle.textShadow.match(/rgb\(6, 31, 53\) -?[01]px -?[01]px 0px/gu) ?? [];
           for (let parent = element; parent; parent = parent.parentElement) {
             const style = getComputedStyle(parent);
             if (style.backgroundClip.includes("text")) continue;
@@ -1180,6 +1203,10 @@ export async function inspectAssociativeGuidanceContrast(page) {
               break;
             }
           }
+          // Eight opaque, zero-blur shadows form the glyph backdrop during the dark sweep.
+          // Its rendered coverage is checked by the opt-in associative-effects Chromium fixture.
+          const protectedHalo = haloShadows.length === 8;
+          if (protectedHalo) backgrounds = [[6, 31, 53, 255]];
           const ratios = backgrounds.flatMap((color) =>
             foregrounds.map((textColor) => {
               const alpha = textColor[3] / 255;
@@ -1201,6 +1228,7 @@ export async function inspectAssociativeGuidanceContrast(page) {
             foreground,
             foregrounds,
             backgrounds,
+            protectedHalo,
             minimumContrast: ratios.length ? Math.min(...ratios) : null,
           };
         });
@@ -1294,10 +1322,17 @@ export async function runAssociativeGuidancePreview(
                   requestAnimationFrame(() => requestAnimationFrame(resolve)),
                 ),
             );
-            await panel.screenshot({
+            // Oversized locator captures reset Chromium's touch emulation when resizing back.
+            await page.screenshot({
               path: path.join(output, filename),
               animations: "disabled",
+              fullPage: false,
             });
+            assert.equal(
+              await page.evaluate(() => matchMedia("(pointer: coarse)").matches),
+              mobile,
+              "Evidence capture must preserve the pointer mode",
+            );
             check.captures.push(filename);
             check.contrast[state] = await inspectAssociativeGuidanceContrast(page);
           };
@@ -1312,6 +1347,12 @@ export async function runAssociativeGuidancePreview(
               .getByRole("button")
               .click();
             check.guidance = await checkAssociativeGuidance(page, { onState: capture });
+            check.finalPointer = await page.evaluate(() => ({
+              coarse: matchMedia("(pointer: coarse)").matches,
+              maxTouchPoints: navigator.maxTouchPoints,
+            }));
+            assert.equal(check.finalPointer.coarse, mobile);
+            assert.equal(check.finalPointer.maxTouchPoints > 0, mobile);
             for (const [state, contrast] of Object.entries(check.contrast)) {
               assert.ok(
                 contrast.length > 0 && contrast.every((item) => item.minimumContrast >= 4.5),

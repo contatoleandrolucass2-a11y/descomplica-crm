@@ -58,6 +58,7 @@ export function assertAssociativeShimmer(measurement: {
     visibleDuringCycle: boolean;
     fullArea: boolean;
     translucent: boolean;
+    specularBand: boolean;
     behindText: boolean;
     pointerSafe: boolean;
     goldLine: boolean;
@@ -119,7 +120,8 @@ export function assertAssociativeCommissionGeometry(geometry: {
   layoutDisplay: string;
   columns: number[];
   layoutGap: number;
-  summaryGap: number;
+  tableGap: number;
+  dateCenterDelta: number;
   summaryFitsColumn: boolean;
   insideLayout: boolean;
   insideWidth: boolean;
@@ -145,6 +147,7 @@ export function inspectAssociativeGuidanceContrast(page: Page): Promise<
     index: number;
     foreground: number[];
     backgrounds: number[][];
+    protectedHalo: boolean;
     minimumContrast: number | null;
   }[]
 >;

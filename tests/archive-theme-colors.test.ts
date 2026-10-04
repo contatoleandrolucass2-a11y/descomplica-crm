@@ -114,12 +114,13 @@ describe("archive theme color contract", () => {
     expect(header("dark")["--header-bg"]).toBe("#071a31");
   });
 
-  it("inherits the Tabelao palette while keeping only the dark gold icon override", () => {
+  it("inherits the Tabelao palette with only local decorative overrides", () => {
     const overrides = declarations(
       "investor-archive.css",
       ':root[data-theme="dark"] .investor-page-shell.investor-associative-table-page',
     );
-    expect(overrides).toEqual({ "--associative-money-ink": "#e9bd54" });
+    expect(overrides["--associative-money-ink"]).toBe("#e9bd54");
+    expect(Object.keys(overrides).every((key) => key.startsWith("--associative-"))).toBe(true);
     const colors = {
       ...content("dark"),
       ...overrides,
@@ -163,10 +164,12 @@ describe("archive theme color contract", () => {
   it("reuses stock gold for both profile selections without changing theme tokens", () => {
     const selection = declarations(
       "investor-archive.css",
-      '.investor-page-shell.investor-associative-table-page .investor-associative-choice-row > :is(button[aria-pressed="true"], label:has(input:checked))',
+      '.investor-page-shell.investor-associative-table-page .investor-associative-choice-row > :is(button[aria-pressed="true"], label:has(input:checked)):not(:disabled):not([aria-disabled="true"]):not(:has(input:disabled))',
     );
-    expect(selection.color).toBe("var(--associative-gold-ink)");
-    expect(selection.background).toBe("var(--associative-gold-metal) var(--associative-gold)");
+    expect(selection.color).toBe("var(--inv-color-text)");
+    expect(selection.background).toBe(
+      "var(--associative-pending-sheen), var(--associative-selection-metal)",
+    );
     expect(selection["border-color"]).toBe("var(--associative-gold-edge)");
   });
 
@@ -175,20 +178,89 @@ describe("archive theme color contract", () => {
       "investor-archive.css",
       ".investor-page-shell.investor-associative-table-page",
     );
-    expect(colors["--associative-pending-sheen"]).toContain("14%, transparent");
-    const gold = rgb(colors["--associative-gold-shine"]!);
+    expect(colors["--associative-pending-sheen"]).toContain("49%");
+    expect(colors["--associative-pending-sheen"]).toContain("51%");
+    expect(colors["--associative-sheen-core-strength"]).toBe("70%");
     for (const theme of ["light", "balanced", "dark"]) {
       const themeColors = content(theme);
+      const effects = {
+        ...colors,
+        ...(theme === "dark"
+          ? declarations(
+              "investor-archive.css",
+              ':root[data-theme="dark"] .investor-page-shell.investor-associative-table-page',
+            )
+          : {}),
+      };
       for (const surface of ["page", "panel", "panel-muted", "panel-strong", "input"]) {
-        const mixed = rgb(themeColors[`--inv-color-${surface}`]!).map((channel, i) =>
-          Math.round((channel * 0.86 + gold[i]! * 0.14) * 255),
+        for (const [colorToken, strengthToken] of [
+          ["--associative-sheen-gold", "--associative-sheen-strength"],
+          ["--associative-sheen-core", "--associative-sheen-core-strength"],
+        ] as const) {
+          const gold = rgb(effects[colorToken]!);
+          const alpha = Number.parseFloat(effects[strengthToken]!) / 100;
+          const mixed = rgb(themeColors[`--inv-color-${surface}`]!).map((channel, i) =>
+            Math.round((channel * (1 - alpha) + gold[i]! * alpha) * 255),
+          );
+          // In dark mode the opaque glyph halo, verified in Chromium pixels, is the text backdrop.
+          const background =
+            theme === "dark"
+              ? "#061f35"
+              : `#${mixed.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
+          if (theme === "dark")
+            expect(effects["--associative-text-halo"]!.match(/#061f35/g)).toHaveLength(8);
+          for (const foreground of ["text", "muted", "accent"])
+            expect(
+              contrast(themeColors[`--inv-color-${foreground}`]!, background),
+              `${theme}: ${foreground} over pending ${surface}`,
+            ).toBeGreaterThanOrEqual(4.5);
+        }
+      }
+    }
+  });
+
+  it("keeps selected text readable across the gold-to-theme gradient and moving specular band", () => {
+    const base = declarations(
+      "investor-archive.css",
+      ".investor-page-shell.investor-associative-table-page",
+    );
+    for (const theme of ["light", "balanced", "dark"]) {
+      const palette = content(theme);
+      const effects = {
+        ...base,
+        ...(theme === "dark"
+          ? declarations(
+              "investor-archive.css",
+              ':root[data-theme="dark"] .investor-page-shell.investor-associative-table-page',
+            )
+          : {}),
+      };
+      for (let step = 0; step <= 20; step += 1) {
+        const gold = rgb(effects["--associative-selection-gold"]!);
+        const normal = rgb(palette["--inv-color-panel"]!);
+        const surface = gold.map(
+          (channel, i) => channel * (1 - step / 20) + (normal[i]! * step) / 20,
         );
-        const background = `#${mixed.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
-        for (const foreground of ["text", "muted", "accent"])
+        for (const [color, strength] of [
+          ["--associative-sheen-core", "--associative-sheen-core-strength"],
+          ["--associative-sheen-gold", "--associative-sheen-strength"],
+          ["--associative-sheen-gold", "0"],
+        ] as const) {
+          const sheen = rgb(effects[color]!);
+          const alpha = Number.parseFloat(effects[strength] ?? "0") / 100;
+          const painted = `#${surface
+            .map((channel, i) =>
+              Math.round((channel * (1 - alpha) + sheen[i]! * alpha) * 255)
+                .toString(16)
+                .padStart(2, "0"),
+            )
+            .join("")}`;
+          expect(effects["--associative-selection-gold"]).toBe("#b99545");
           expect(
-            contrast(themeColors[`--inv-color-${foreground}`]!, background),
-            `${theme}: ${foreground} over pending ${surface}`,
+            contrast(palette["--inv-color-text"]!, theme === "dark" ? "#061f35" : painted),
+            `${theme}: selection ${step}, ${color}`,
           ).toBeGreaterThanOrEqual(4.5);
+        }
       }
     }
   });

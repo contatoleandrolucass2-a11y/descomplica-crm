@@ -129,22 +129,34 @@
   min-height: var(--associative-stock-row-height) !important;
 }
 
+.investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within, .selected) {
+  background-image: var(--associative-selection-metal) !important;
+  background-color: var(--inv-color-panel) !important;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable.selected {
+  background-image: var(--associative-pending-sheen), var(--associative-selection-metal) !important;
+  background-size: 280% 100%, 100% 100% !important;
+  background-repeat: no-repeat !important;
+  animation: associative-selection-shine 3s ease-in-out infinite;
+}
+
 .investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within, .selected) > td {
-  color: var(--associative-gold-ink) !important;
-  background: var(--associative-gold-metal) var(--associative-gold) !important;
+  color: var(--inv-color-text) !important;
+  background: transparent !important;
   border-color: var(--associative-gold-edge) !important;
   box-shadow: inset 0 1px 0 #d5b96f, inset 0 -1px 0 #8b631c;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within, .selected) :is(.investor-stock-product-text, .investor-stock-price, .investor-stock-unit-button) {
-  color: var(--associative-gold-ink) !important;
+  color: var(--inv-color-text) !important;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within, .selected) .investor-stock-unit-button {
-  border-color: var(--associative-gold-ink);
+  border-color: var(--inv-color-text);
   background: transparent;
   box-shadow: none;
-  outline-color: var(--associative-gold-ink);
+  outline-color: var(--inv-color-text);
 }
 
 .investor-page-shell.investor-associative-table-page .investor-stock-panel > .investor-section-heading {
@@ -239,6 +251,104 @@
   margin-top: 0 !important;
 }
 
+.investor-page-shell.investor-associative-table-page .investor-associative-unit-facts {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) repeat(2, minmax(160px, 240px));
+  align-items: start;
+  gap: 12px 16px;
+  margin-block: 8px;
+  padding-block: 10px;
+  color: var(--inv-color-text);
+  border-block: 1px solid var(--inv-color-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-unit-facts:has(> .investor-associative-unit-fact:last-child:nth-child(2)) {
+  grid-template-columns: minmax(180px, 1fr) minmax(160px, 240px);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-unit-facts h3 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-unit-facts :is(p, small) {
+  margin: 0;
+  color: var(--inv-color-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-unit-fact {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  text-align: right;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-unit-fact label {
+  color: var(--inv-color-text);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+:root .investor-page-shell.investor-associative-table-page .investor-main .investor-associative-unit-fact input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 8px;
+  color: var(--inv-color-text);
+  border: 1px solid var(--inv-color-line);
+  border-radius: 4px;
+  background: transparent !important;
+  box-shadow: none;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-unit-fact input:focus-visible {
+  outline: 2px solid var(--inv-color-accent);
+  outline-offset: 2px;
+}
+
+:root .investor-page-shell.investor-associative-table-page .investor-main :is(.investor-associative-documentation-appraisal, .investor-associative-ready-proposal-appraisal-input) input {
+  background: transparent;
+  box-shadow: none;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .investor-page-shell.investor-associative-table-page .investor-associative-unit-facts,
+  .investor-page-shell.investor-associative-table-page .investor-associative-unit-facts:has(> .investor-associative-unit-fact:last-child:nth-child(2)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-associative-unit-facts > div:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 420px) {
+  .investor-page-shell.investor-associative-table-page .investor-associative-unit-facts,
+  .investor-page-shell.investor-associative-table-page .investor-associative-unit-facts:has(> .investor-associative-unit-fact:last-child:nth-child(2)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  :root .investor-page-shell.investor-associative-table-page .investor-main .investor-associative-unit-fact input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
 .investor-page-shell.investor-associative-table-page .investor-associative-flow-panel .investor-flow-form {
   --associative-workspace-gap: clamp(12px, 2vw, 28px);
   padding-inline: var(--associative-workspace-gap);
@@ -299,13 +409,27 @@
   --associative-gold-ink: #171209;
   --associative-gold-shine: #d5b96f;
   --associative-gold-metal: linear-gradient(180deg, #c4a255 0%, #b99545 42%, #a98032 54%, #d5b96f 100%);
-  --associative-pending-sheen: linear-gradient(100deg, transparent 36%, color-mix(in srgb, var(--associative-gold-shine) 14%, transparent) 50%, transparent 64%);
+  --associative-selection-gold: #b99545;
+  --associative-selection-metal: linear-gradient(90deg, var(--associative-selection-gold) 0%, var(--inv-color-panel) 100%);
+  --associative-sheen-gold: #d5b96f;
+  --associative-sheen-core: #ffffff;
+  --associative-sheen-strength: 58%;
+  --associative-sheen-core-strength: 70%;
+  --associative-pending-sheen: linear-gradient(105deg, transparent 32%, color-mix(in srgb, var(--associative-sheen-gold) var(--associative-sheen-strength), transparent) 44%, color-mix(in srgb, var(--associative-sheen-core) var(--associative-sheen-core-strength), transparent) 49%, color-mix(in srgb, var(--associative-sheen-core) var(--associative-sheen-core-strength), transparent) 51%, color-mix(in srgb, var(--associative-sheen-gold) var(--associative-sheen-strength), transparent) 56%, transparent 68%);
   --associative-money-ink: #965a0a;
   --associative-rejected-metal: linear-gradient(115deg, #650c17 0%, #9d1828 38%, #74101c 58%, #48080f 100%);
 }
 
 :root[data-theme="dark"] .investor-page-shell.investor-associative-table-page {
   --associative-money-ink: #e9bd54;
+  --associative-text-halo: -1px -1px 0 #061f35, 0 -1px 0 #061f35, 1px -1px 0 #061f35, -1px 0 0 #061f35, 1px 0 0 #061f35, -1px 1px 0 #061f35, 0 1px 0 #061f35, 1px 1px 0 #061f35;
+}
+
+/* Opaque one-pixel text halos protect dark-theme glyphs during the bright sweep. */
+:root[data-theme="dark"] .investor-page-shell.investor-associative-table-page .investor-stock-table tr.selectable:is(.selected, :hover, :focus-within) .investor-stock-unit-button,
+:root[data-theme="dark"] .investor-page-shell.investor-associative-table-page :is(.investor-stock-table tr.selectable:is(.selected, :hover, :focus-within), .investor-associative-choice-row > :is(button[aria-pressed="true"], label:has(input:checked)), .investor-associative-question.current, .investor-associative-compact-account li.investor-key-field.is-active, .investor-associative-step-guide.guidance > span, .investor-associative-approval-editable.is-active),
+:root[data-theme="dark"] .investor-page-shell.investor-associative-table-page :is(.investor-associative-question.current, .investor-associative-compact-account li.investor-key-field.is-active, .investor-associative-approval-editable.is-active) :is(input, select) {
+  text-shadow: var(--associative-text-halo);
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-question.current {
@@ -324,7 +448,7 @@
   background-image: var(--associative-pending-sheen);
   background-size: 280% 100%;
   background-repeat: no-repeat;
-  animation: associative-pending-shine 4.5s ease-in-out infinite;
+  animation: associative-pending-shine 3s ease-in-out infinite;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-question.current :is(.investor-associative-question-heading, .investor-associative-question-heading > span, .investor-associative-question-heading b, .investor-info-trigger, .investor-associative-question-money > span),
@@ -380,15 +504,18 @@
   outline-offset: 2px;
 }
 
-.investor-page-shell.investor-associative-table-page .investor-associative-choice-row > :is(button[aria-pressed="true"], label:has(input:checked)) {
-  color: var(--associative-gold-ink);
+.investor-page-shell.investor-associative-table-page .investor-associative-choice-row > :is(button[aria-pressed="true"], label:has(input:checked)):not(:disabled):not([aria-disabled="true"]):not(:has(input:disabled)) {
+  color: var(--inv-color-text);
   border-color: var(--associative-gold-edge);
-  background: var(--associative-gold-metal) var(--associative-gold);
+  background: var(--associative-pending-sheen), var(--associative-selection-metal);
+  background-size: 280% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  animation: associative-selection-shine 3s ease-in-out infinite;
   box-shadow: none;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-choice-row > label:has(input:checked) > span {
-  color: var(--associative-gold-ink);
+  color: var(--inv-color-text);
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-choice-row > :is(button:focus-visible, label:has(input:focus-visible)) {
@@ -427,7 +554,7 @@
   background-image: var(--associative-pending-sheen);
   background-size: 280% 100%;
   background-repeat: no-repeat;
-  animation: associative-pending-shine 4.5s ease-in-out infinite;
+  animation: associative-pending-shine 3s ease-in-out infinite;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field.is-active > .investor-direct-step-content {
@@ -535,7 +662,7 @@
   background-image: var(--associative-pending-sheen);
   background-size: 280% 100%;
   background-repeat: no-repeat;
-  animation: associative-pending-shine 4.5s ease-in-out infinite;
+  animation: associative-pending-shine 3s ease-in-out infinite;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-step-guide.guidance::before,
@@ -566,7 +693,7 @@
   background-size: 280% 100%;
   background-repeat: no-repeat;
   pointer-events: none;
-  animation: associative-pending-shine 4.5s ease-in-out infinite;
+  animation: associative-pending-shine 3s ease-in-out infinite;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-approval-editable.investor-key-field.is-active {
@@ -577,7 +704,12 @@
 
 @keyframes associative-pending-shine {
   0%, 24% { background-position: 150% 50%; }
-  76%, 100% { background-position: -90% 50%; }
+  76%, 100% { background-position: -50% 50%; }
+}
+
+@keyframes associative-selection-shine {
+  0%, 24% { background-position: 150% 50%, 0 0; }
+  76%, 100% { background-position: -50% 50%, 0 0; }
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-question.current.locked::after,
@@ -647,10 +779,12 @@
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-payment-summary-layout {
+  --associative-commission-target: 24px;
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: end;
-  gap: 4px;
+  gap: 0;
   min-width: 0;
 }
 
@@ -658,6 +792,23 @@
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
+}
+
+/* Keep the panel edges aligned; reserve the icon gutter inside its table area. */
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-summary .investor-associative-payment-table {
+  margin-right: calc(var(--associative-commission-target) + 8px);
+  border-right: 1px solid var(--inv-color-line);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-summary-layout > .investor-associative-commission-launcher,
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-summary-layout > .investor-associative-commission-launcher:hover {
+  position: absolute;
+  z-index: 1;
+  top: auto;
+  left: auto;
+  right: 4px;
+  bottom: 1px;
+  justify-content: center;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-payment-table-row.is-linear {
@@ -683,13 +834,20 @@
 
 .investor-page-shell.investor-associative-table-page .investor-associative-payment-table-row:last-child {
   height: auto;
-  min-height: 24px;
+  min-height: var(--associative-commission-target);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-table-row:last-child .investor-associative-payment-last-date {
+  box-sizing: border-box;
+  min-height: var(--associative-commission-target);
+  align-self: stretch;
 }
 
 @container associative-ledger (max-width: 520px) {
   .investor-page-shell.investor-associative-table-page .investor-associative-payment-summary-layout > .investor-associative-commission-launcher,
   .investor-page-shell.investor-associative-table-page .investor-associative-payment-summary-layout > .investor-associative-commission-launcher:hover {
     margin-bottom: 0;
+    bottom: 8px;
   }
 
   .investor-page-shell.investor-associative-table-page .investor-associative-payment-table-row {
@@ -832,12 +990,12 @@
   initial-value: 135deg;
 }
 
-.investor-page-shell.investor-associative-table-page :is(.investor-guided-start, .investor-stock-clear, .investor-associative-choice-row > button, .investor-associative-choice-row > label, .investor-associative-payment-actions-bar > button, .investor-associative-payment-summary-actions > button) {
+:where(.investor-page-shell.investor-associative-table-page) :where(button, a[href], summary, .investor-associative-choice-row > label):not(:where([data-protected-topbar] *)) {
   position: relative;
   isolation: isolate;
 }
 
-.investor-page-shell.investor-associative-table-page :is(.investor-guided-start, .investor-stock-clear, .investor-associative-choice-row > button, .investor-associative-choice-row > label, .investor-associative-payment-actions-bar > button, .investor-associative-payment-summary-actions > button)::before {
+.investor-page-shell.investor-associative-table-page :is(button, a[href], summary, .investor-associative-choice-row > label):not([data-protected-topbar] *)::before {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -846,18 +1004,18 @@
   border-radius: inherit;
   content: "";
   pointer-events: none;
-  background: conic-gradient(from var(--associative-specular-angle), transparent 0deg, var(--associative-gold-shine) 45deg, transparent 90deg 180deg, var(--associative-gold-shine) 225deg, transparent 270deg);
+  background: conic-gradient(from var(--associative-specular-angle), transparent 0deg, var(--associative-gold-shine) 30deg, #fff4ca 45deg, var(--associative-gold-shine) 60deg, transparent 90deg 180deg, var(--associative-gold-shine) 210deg, #fff4ca 225deg, var(--associative-gold-shine) 240deg, transparent 270deg);
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
   opacity: 0;
 }
 
-.investor-page-shell.investor-associative-table-page :is(.investor-guided-start, .investor-stock-clear, .investor-associative-choice-row > button, .investor-associative-choice-row > label, .investor-associative-payment-actions-bar > button, .investor-associative-payment-summary-actions > button):is(:hover, :focus-visible, :has(input:focus-visible)):not(:disabled):not([aria-disabled="true"]):not(:has(input:disabled))::before {
+.investor-page-shell.investor-associative-table-page :is(button, a[href], summary, .investor-associative-choice-row > label):not([data-protected-topbar] *):is(:hover, :focus-visible, :has(input:focus-visible)):not(:disabled):not([aria-disabled="true"]):not(:has(input:disabled))::before {
   opacity: 1;
-  animation: associative-specular-orbit 4.5s linear infinite;
+  animation: associative-specular-orbit 3s linear infinite;
 }
 
-.investor-page-shell.investor-associative-table-page :is(.investor-guided-start, .investor-stock-clear, .investor-associative-payment-actions-bar > button, .investor-associative-payment-summary-actions > button):focus-visible {
+.investor-page-shell.investor-associative-table-page :is(button, a[href], summary):not([data-protected-topbar] *):focus-visible {
   outline: 2px solid var(--inv-color-accent);
   outline-offset: 2px;
 }
@@ -867,15 +1025,17 @@
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .investor-page-shell.investor-associative-table-page :is(button, .investor-associative-choice-row > label) {
+  .investor-page-shell.investor-associative-table-page :is(button, a[href], summary, .investor-associative-choice-row > label) {
     transition: background-color .16s ease, border-color .16s ease;
   }
 
-  .investor-page-shell.investor-associative-table-page button:hover:not(:disabled):not([aria-disabled="true"]),
-  .investor-page-shell.investor-associative-table-page .investor-associative-choice-row > label:hover:not(:has(input:disabled)) {
-    transform: none;
-    scale: none;
-  }
+}
+
+.investor-page-shell.investor-associative-table-page button:hover:not(:disabled):not([aria-disabled="true"]),
+.investor-page-shell.investor-associative-table-page :is(a[href], summary):hover:not([aria-disabled="true"]),
+.investor-page-shell.investor-associative-table-page .investor-associative-choice-row > label:hover:not(:has(input:disabled)) {
+  transform: none;
+  scale: none;
 }
 
 @media (pointer: coarse) {
@@ -885,7 +1045,7 @@
   }
 
   .investor-page-shell.investor-associative-table-page .investor-associative-payment-summary-layout {
-    grid-template-columns: minmax(0, 1fr);
+    --associative-commission-target: 44px;
   }
 
   .investor-page-shell.investor-associative-table-page .investor-associative-commission-launcher,
@@ -933,8 +1093,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .investor-page-shell.investor-associative-table-page :is(.investor-guided-start, .investor-stock-clear, .investor-associative-choice-row > button, .investor-associative-choice-row > label, .investor-associative-payment-actions-bar > button, .investor-associative-payment-summary-actions > button)::before {
+  .investor-page-shell.investor-associative-table-page :is(button, a[href], summary, .investor-associative-choice-row > label):not([data-protected-topbar] *)::before {
     animation: none !important;
+    transition: none !important;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable.selected,
+  .investor-page-shell.investor-associative-table-page .investor-associative-choice-row > :is(button[aria-pressed="true"], label:has(input:checked)):not(:disabled):not([aria-disabled="true"]):not(:has(input:disabled)) {
+    animation: none;
+    background-image: var(--associative-selection-metal) !important;
+    background-size: 100% 100% !important;
   }
 
   .investor-page-shell.investor-associative-table-page .investor-associative-question.current::after,

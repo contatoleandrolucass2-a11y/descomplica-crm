@@ -36,6 +36,58 @@ function respond(url: string, payload: unknown, status = 200) {
 }
 
 describe("parallel inventory loading", () => {
+  it("offers only late live facts when an Associativo proposal prevents inventory replacement", async () => {
+    const onReferenceFacts = vi.fn();
+    let started = false;
+    const loading = loadInvestorInventory({
+      snapshotOnly: false,
+      signal: controller.signal,
+      canReplace: () => !started,
+      onInventory,
+      onReferenceFacts,
+    });
+    respond(snapshotUrl, snapshot);
+    await vi.waitFor(() => expect(onInventory).toHaveBeenCalledOnce());
+    started = true;
+    respond(liveUrl, live);
+    await loading;
+    expect(onInventory).toHaveBeenCalledOnce();
+    expect(onReferenceFacts).toHaveBeenCalledExactlyOnceWith(live.items);
+  });
+
+  it.each([true, false])(
+    "never delivers facts after abort (snapshot only: %s)",
+    async (snapshotOnly) => {
+      const onReferenceFacts = vi.fn();
+      const loading = loadInvestorInventory({
+        snapshotOnly,
+        signal: controller.signal,
+        canReplace: () => false,
+        onInventory,
+        onReferenceFacts,
+      });
+      controller.abort();
+      respond(snapshotUrl, snapshot);
+      if (!snapshotOnly) respond(liveUrl, live);
+      await loading.catch(() => undefined);
+      expect(onReferenceFacts).not.toHaveBeenCalled();
+    },
+  );
+
+  it("never supplements a snapshot-only Tabela Direta proposal", async () => {
+    const onReferenceFacts = vi.fn();
+    const loading = loadInvestorInventory({
+      snapshotOnly: true,
+      signal: controller.signal,
+      canReplace: () => false,
+      onInventory,
+      onReferenceFacts,
+    });
+    respond(snapshotUrl, snapshot);
+    await loading;
+    expect(onReferenceFacts).not.toHaveBeenCalled();
+    expect([...requests.keys()]).toEqual([snapshotUrl]);
+  });
   it("preserves missing unit facts when live stock replaces the synthetic reference", async () => {
     const referenceItem = {
       id: "synthetic-snapshot-1",
