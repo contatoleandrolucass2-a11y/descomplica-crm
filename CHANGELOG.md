@@ -12,6 +12,8 @@
   do manifesto; baselines antigas da CAIXA bloqueada foram eliminadas.
 - Mantém provas E2E contextuais e independentes para o card e o submenu
   bloqueados da CAIXA, sem transformar nenhum deles em link.
+- O smoke exige ausencia da navegacao comercial para perfis sem paginas e usa
+  a identidade propria de `/conta/seguranca` nesses casos.
 
 ## 2026-10-04 - Ajustes do Associativo publicados
 

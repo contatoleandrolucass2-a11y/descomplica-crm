@@ -897,32 +897,35 @@ for (const role of expectedRoles) {
         'header button[data-session-identity][aria-controls="protected-account-menu"]',
       );
       const accountPanel = page.locator("#protected-account-menu");
-      await expect(accountTrigger).toBeVisible();
-      await expect(accountTrigger).toHaveAttribute("aria-expanded", "false");
-      await accountTrigger.click();
-      await expect(accountTrigger).toHaveAttribute("aria-expanded", "true");
-      await expect(accountPanel).toBeVisible();
-      await expect(accountPanel.getByText("Conta conectada", { exact: true })).toBeVisible();
-      await expect(accountPanel.locator("[data-session-identity-label]")).toContainText(
-        accounts[role].email,
-      );
-      const accountAdminRoutes = await accountPanel
-        .locator('nav[aria-label="Administração"] a[href^="/"]')
-        .evaluateAll((links) =>
-          [
-            ...new Set(
-              links.map((link) => new URL(link.getAttribute("href")!, location.origin).pathname),
-            ),
-          ].sort(),
-        );
-      expect(accountAdminRoutes).toEqual(expectedAccountAdminRoutesByRole[role]);
-      await expect(accountPanel.locator('a[href="/conta/seguranca"]')).toHaveCount(1);
-      await page.keyboard.press("Escape");
-      await expect(accountTrigger).toBeFocused();
-      await expect(accountPanel).toBeHidden();
-
       if (expectedHomeForRole(role) === "/conta/seguranca") {
+        await expect(accountTrigger).toHaveCount(0);
+        await expect(accountPanel).toHaveCount(0);
+        await expect(page.locator('header nav[aria-label="Navegação principal"]')).toHaveCount(0);
         await expect(page.locator("[data-account-identity]")).toContainText(accounts[role].email);
+      } else {
+        await expect(accountTrigger).toBeVisible();
+        await expect(accountTrigger).toHaveAttribute("aria-expanded", "false");
+        await accountTrigger.click();
+        await expect(accountTrigger).toHaveAttribute("aria-expanded", "true");
+        await expect(accountPanel).toBeVisible();
+        await expect(accountPanel.getByText("Conta conectada", { exact: true })).toBeVisible();
+        await expect(accountPanel.locator("[data-session-identity-label]")).toContainText(
+          accounts[role].email,
+        );
+        const accountAdminRoutes = await accountPanel
+          .locator('nav[aria-label="Administração"] a[href^="/"]')
+          .evaluateAll((links) =>
+            [
+              ...new Set(
+                links.map((link) => new URL(link.getAttribute("href")!, location.origin).pathname),
+              ),
+            ].sort(),
+          );
+        expect(accountAdminRoutes).toEqual(expectedAccountAdminRoutesByRole[role]);
+        await expect(accountPanel.locator('a[href="/conta/seguranca"]')).toHaveCount(1);
+        await page.keyboard.press("Escape");
+        await expect(accountTrigger).toBeFocused();
+        await expect(accountPanel).toBeHidden();
       }
 
       const securityPage = await page.goto("/conta/seguranca");
