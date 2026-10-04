@@ -57,5 +57,16 @@ contagem comercial. Rotas shadow de read model continuam fora da navegação.
 ## Validação
 
 O baseline do SHA-base aprovou lint, TypeScript, 1.478 testes Vitest (1 ignorado),
-oito testes Node e build Next. Resultados integrados, matriz visual, CI e
-publicação serão anexados a este documento após os gates finais.
+oito testes Node e build Next. A captura integrada limpa no SHA `17354be` aprovou:
+
+- 147/147 checks responsivos das 21 páginas liberadas em sete viewports;
+- 84/84 checks de tema, 201/201 auditorias Axe e 201/201 comparações promovidas;
+- 105/105 checks de zoom, teclado, foco, identidade longa e reduced motion;
+- 40/40 combinações de navegação das quatro jornadas arquivadas;
+- Associativo, Documentação, Tabela Direta, Tabela Investidor e Tabelão em suas
+  validações funcionais específicas;
+- CAIXA bloqueada no hub, sem link, e acesso direto preservado como `403`;
+- conta e fixtures QA efêmeras removidas ao final.
+
+O gate não alterou banco, RLS, grants, dados, integrações ou políticas comerciais.
+CI, PR e publicação seguem o runbook automático depois da revisão independente.

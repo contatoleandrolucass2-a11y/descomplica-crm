@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-04 - Navegacao protegida unificada
+
+- Usa um unico cabecalho hierarquico em Dashboard, etapas, Ranking, Canal,
+  Configuracoes, Administracao e todas as jornadas de Simulacao.
+- Remove as barras internas dos simuladores e mantem links filtrados pelas
+  permissoes efetivas; CAIXA continua visivel como bloqueada e sem rota clicavel.
+- Preserva temas, conta, teclado, mobile e alvos de 44px. A matriz visual agora
+  cobre as 21 paginas liberadas, inclusive Documentacao.
+
 ## 2026-10-04 - Ajustes do Associativo publicados
 
 - Publica 7337b97 com campos sem contorno, brilho dourado de 3s nas duas

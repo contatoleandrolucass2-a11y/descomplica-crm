@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-04 - Navegacao protegida unificada validada
+
+- A topbar unica passa a atender todas as paginas protegidas; cinco simuladores
+  deixaram de montar navbar interna. Simulacao concentra as jornadas em submenu
+  autorizado no servidor e CAIXA permanece bloqueada, sem `href`.
+- Gate local limpo no SHA `17354be`: 147 checks responsivos, 84 de tema, 201
+  auditorias Axe/comparacoes, 105 checks de zoom e 40 combinacoes da navegacao
+  arquivada. Documentacao foi incorporada a matriz principal de 21 paginas.
+- Teclado, foco, identidade longa, cookies, tres temas, reduced motion e estados
+  dos simuladores passaram. O alvo de cookies permanece em 44px mesmo sob o CSS
+  legado de 14px. Conta e fixtures QA efemeras foram removidas.
+- Nenhuma migration, permissao, dado, integracao ou regra comercial foi alterada.
+  CI, PR e publicacao automatica ainda dependem dos gates finais deste SHA.
+
 ## 2026-10-04 - Associativo publicado e conferido
 
 - Publicada a imagem imutavel 7337b97 apos CI 37173712179 integralmente verde.

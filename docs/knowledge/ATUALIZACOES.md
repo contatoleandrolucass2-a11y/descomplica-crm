@@ -4,6 +4,20 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: shell unico validado em toda a matriz autenticada
+
+- Status: validado localmente, pendente CI/publicacao; fonte: branch
+  `codex/unified-protected-navigation`, resultado autenticado versionado e audit
+  `docs/audits/unified-protected-navigation-2026-10-03.md`.
+- Navegacao comercial vem do catalogo autorizado no servidor; quatro paginas
+  liberadas fora das 17 do banco exigem pai, permissao efetiva e gate convergentes.
+  CAIXA permanece sem caminho no item bloqueado e com guard direto fail-closed.
+- A matriz limpa aprovou 147 responsivos, 84 temas, 201 Axe/comparacoes e 105
+  zooms, alem de 40 combinacoes das jornadas arquivadas. Documentacao agora faz
+  parte das 21 paginas visuais liberadas e conserva a suite funcional dedicada.
+- CSS legado reduzia `2.75rem` para 38,5px; controles de cookies passaram a usar
+  minimo explicito de 44px. Nenhuma regra comercial, migration ou dado mudou.
+
 ## 2026-10-04: Associativo publicado com gates completos
 
 - Status: validado; fonte: PR #141, CI 37173712179 tentativa 2 e audit
