@@ -6,7 +6,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-04: separar ausencia de dados de resultado zero no Associativo
 
-- Status: pendente_validacao; fonte: codigo do forecast, handlers de selecao e
+- Status: validado e publicado; fonte: codigo do forecast, handlers de selecao e
   testes sinteticos da branch `codex/associativo-calculo-e-continuidade`.
 - Comprometimento precisa de renda e cronograma valido; maximo mensal tambem
   precisa da evolucao de obra. Ausencia deve permanecer `null`, com pendencia
@@ -17,11 +17,16 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   de venda nao e substituto de avaliacao bancaria. Resposta tardia nao pode
   sobrescrever uma proposta que o usuario ja iniciou.
 - Testes focados, build e cinco cenarios de continuidade no navegador aprovados.
-  Windows teve falhas POSIX e timeouts em ferramentas; CI Linux e publicacao
-  pendentes. Consultar o audit de 04/10/2026 antes de reutilizar o resultado.
+  Windows teve falhas POSIX e timeouts em ferramentas; CI Linux 37203612944
+  aprovou integralmente o PR #145. Consultar o audit de 04/10/2026.
 - CI 37202986207 aprovou Linux, banco e restore; E2E ainda exigia apagar ranking
   apos editar renda. Atualizado para continuidade com prova proporcional dos dois
   comprometimentos, mantendo a barreira de isolamento entre usuarios.
+- Main 106d626 aprovado na CI 37205634578 e publicado com imagem imutavel,
+  backup privado e CAS. Health, negacao anonima e conferencia autenticada sem
+  salvar dados aprovados. Ausencia genuina de informacao ainda bloqueia aprovacao.
+- Matriz: 147 responsivos, 84 temas, 201 Axe/capturas, 105 zooms e 40 jornadas
+  arquivadas; baseline intacta. Sem migration, mutacao de dados remotos ou n8n.
 
 ## 2026-10-04: shell unico validado em toda a matriz autenticada
 

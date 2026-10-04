@@ -23,6 +23,10 @@
 - CI 37202986207: Linux, banco e restore aprovados; E2E reteve contrato antigo
   de apagar ranking na edicao de renda. Atualizado para preservar respostas e
   verificar os dois percentuais pela nova renda, mantendo isolamento concorrente.
+- PR #145 integrado apos CI 37203612944 verde. Main 106d626 validado pela CI
+  37205634578 e publicado com imagem imutavel, backup e compare-and-swap.
+  Health, acesso anonimo negado e conferencia autenticada aprovados; aba de teste
+  encerrada sem salvar dados. Evidencia completa no audit, sem reinicio documental.
 
 ## 2026-10-04 - Navegacao protegida unificada validada
 

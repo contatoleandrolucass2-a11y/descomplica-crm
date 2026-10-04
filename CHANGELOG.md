@@ -14,6 +14,8 @@
   contraste, controles desabilitados e preferencia por movimento reduzido.
 - Alinha o E2E concorrente ao perfil persistente, exigindo recalculo dos dois
   comprometimentos sem reconfirmar escolhas e preservando isolamento entre usuarios.
+- Publicado no SHA `106d626` apos PR #145 e CI completa; verificacao de versao,
+  protecao anonima e continuidade na pagina publicada aprovadas.
 
 ## 2026-10-04 - Navegacao protegida unificada
 

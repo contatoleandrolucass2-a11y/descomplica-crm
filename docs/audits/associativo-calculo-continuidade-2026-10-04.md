@@ -66,11 +66,44 @@ inalterados. Nenhuma proposta, cliente ou estoque bruto foi exportado.
   banco e restore aprovados. E2E parou na expectativa antiga de apagar ranking
   ao editar renda. O contrato agora exige manter escolhas e recalcular ambos os
   comprometimentos proporcionalmente a nova renda, sem tocar no isolamento.
-  Nova execucao completa obrigatoria antes de publicar.
+  Nova execucao 37203612944 aprovada integralmente antes do merge do PR #145.
+- Main 106d626: CI 37205634578 integralmente aprovada, incluindo imagem unica,
+  dois perfis de runtime, restore, E2E concorrente e navegacao autenticada.
+- Matriz do SHA publicado: 147 verificacoes responsivas, 84 de tema, 201 Axe,
+  105 de zoom, 201 capturas e 40 combinacoes das jornadas arquivadas. Baseline
+  permaneceu intacta. Continuidade e cinco cenarios financeiros passaram em
+  375 e 1440 px; orientacao passou nos tres temas nessas duas larguras.
+- Artefato visual 11305920436, SHA-256
+  `65c8edc999ab3ebc3097704714dd8968c73db36cbbf722cc1e0b71ed2990f27c`.
 
 ## Publicacao
 
-Ainda nao publicada. Exige PR/CI, imagem imutavel do SHA final, backup,
-compare-and-swap da versao corrente, rollback preparado e verificacao posterior.
+Publicada em 04/10/2026 pelo PR #145, SHA
+`106d626850a6cc782ec198387074be9e8901dd78`, sem rebuild na VPS.
+
+- Imagem do artefato 11303864491, ZIP SHA-256
+  `fb0153a936f16a72a671088d907fb216f56a9ed43025eb4114604f98f6f1b7c4`.
+- Arquivo image.tar.gz SHA-256
+  `42fe707cdc02ace7510526946f0a9b65eebaf3234f9ce7b201c85eee40a6df04`.
+- Configuracao CI: `sha256:95f7eaccf78adbeee7beee9c8fc60a6ca7049662753da83172a889b85f2d705b`.
+  Manifesto no destino: `sha256:3b7db4fe776e740809e67ab1e5045ecaca999e035da7815b377c7ecad0cdc1df`.
+  Cadeia OCI, plataforma, label e 11 camadas comprovadas sobre o mesmo artefato.
+  `image:prove` validou novamente os dois perfis no destino, sem imprimir segredos.
+- Versao anterior `c73d1555ffa07277eaa93af7f76f663fa74647f0`, imagem
+  `sha256:15edc85ed8e3002697e9619caff78d27050b2c38bfde24d8ca190c1f87cb9c96`.
+- Checkout isolado em `/srv/descomplica-crm-releases/106d626850a6cc782ec198387074be9e8901dd78`;
+  checkout principal preservado. Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/106d626850a6cc782ec198387074be9e8901dd78.xTrDB5`.
+  Bind por compare-and-swap e rollback preparados. Nginx permaneceu identico.
+- Health local/publico confirmou o SHA, container healthy, inventario anonimo
+  negado com 401 e pagina protegida com 307. Smoke limitado: 12 GETs, concorrencia
+  maxima quatro, zero erros; nao e prova de capacidade de producao.
+- Conferencia autenticada em aba separada: avaliacao e andamento presentes,
+  percentuais calculados, renda e unidade editadas sem apagar respostas,
+  recursos ou 84 parcelas. Valores sinteticos nao salvos. Zero erros de navegador;
+  alinhamentos e selecoes douradas revisados. Aba temporaria encerrada.
+- Nenhuma migration, alteracao de Nginx, dados remotos, politica ou workflow n8n.
+  Este registro documental nao requer reiniciar a aplicacao.
+
 Nao ha promessa de ausencia absoluta de falhas: regressao automatizada e
 bloqueio de resultados incompletos reduzem o risco de uma aprovacao indevida.
