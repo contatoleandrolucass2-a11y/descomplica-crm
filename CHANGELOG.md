@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-04 - Dados oficiais e brilho integral no Associativo
+
+- Explicita dados ausentes da unidade antes do perfil e permite informar o
+  percentual oficial da obra para esta simulacao, sem presumir valores.
+- Mantem calculos independentes e impede aprovacao quando falta base obrigatoria;
+  dados manuais especificos do imovel nao sao transferidos ao trocar unidade.
+- Amplia testes de recuperacao, isolamento por unidade e matriz de calculos.
+- Completa fatos ausentes apos a chegada tardia da fonte compativel, sem trocar
+  a proposta; exige identidade unica e entrega igual. Datas inexistentes sao
+  rejeitadas nos motores Linear e Decrescente.
+- Brilho integral de 3s, selecoes com gradiente horizontal, reflexo nos controles
+  do Associativo e dolar junto da ultima data, com alvo de toque preservado.
+
 ## 2026-10-04 - Calculo e continuidade no Associativo
 
 - Preserva perfil e composicao financeira ao trocar a unidade ou editar renda

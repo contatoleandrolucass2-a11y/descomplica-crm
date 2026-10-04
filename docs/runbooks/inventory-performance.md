@@ -6,6 +6,15 @@
   A fonte viva aguarda a tentativa do snapshot para preservar o enriquecimento
   comercial. O snapshot fica utilizavel assim que chega. Falhas independentes
   permitem a fonte disponivel; a Tabela Direta aceita exclusivamente o snapshot.
+- No Associativo, depois de iniciada uma proposta, a resposta viva nao substitui
+  unidade, preco, entrega ou recursos. Pode apenas completar avaliacao/andamento
+  nulos quando a identidade comercial e unica e a data de entrega coincide.
+  Valores existentes (inclusive zero), ambiguidades, datas divergentes e dados
+  invalidos sao preservados/recusados. Cancelamento impede esse complemento.
+  Investidor, Direta e Tabelao nao usam esse callback de complemento tardio.
+- Ausencias restantes sao explicitas no Associativo. Valores oficiais podem ser
+  informados localmente para a simulacao, sem gravacao na origem; esses campos
+  especificos sao limpos ao trocar unidade, preservando perfil e composicao.
 - Navegar para outra pagina cancela as consultas. Cada consulta do cliente tem
   limite de 25 segundos; a origem no servidor tem limite de 20 segundos.
 - `GET /api/inventory` guarda somente o ultimo JSON validado em memoria por

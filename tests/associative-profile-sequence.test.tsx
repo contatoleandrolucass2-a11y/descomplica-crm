@@ -338,11 +338,13 @@ describe("Associativo unit selection continuity", () => {
     expect(test.setters.setSalePrice).toHaveBeenCalledWith("231990");
     expect(test.setters.setCompletionDate).toHaveBeenCalledWith("2035-12-30");
     expect(test.setters.setDocumentationAppraisalOverride).toHaveBeenCalledWith("");
+    expect(test.setters.setConstructionProgressOverride).toHaveBeenCalledWith("");
     const propertySetters = new Set([
       "setSelectedUnitId",
       "setSalePrice",
       "setCompletionDate",
       "setDocumentationAppraisalOverride",
+      "setConstructionProgressOverride",
     ]);
     for (const [name, setter] of Object.entries(test.setters)) {
       if (!propertySetters.has(name))

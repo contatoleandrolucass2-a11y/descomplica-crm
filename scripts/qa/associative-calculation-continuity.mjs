@@ -23,7 +23,7 @@ function buildInventory(withProgress, withAppraisal) {
   const reference = {
     source: "ESTOQUE SPC.xlsx",
     sourceKind: "versioned-snapshot",
-    qaFixture: { synthetic: true, contract: "associative-calculation-continuity-v1" },
+    qaFixture: { synthetic: true, contract: "associative-calculation-continuity-v3" },
     count: items.length,
     items,
   };
@@ -53,7 +53,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     "Continuity QA requires a local synthetic application",
   );
   const result = {
-    contract: "associative-calculation-continuity-v1",
+    contract: "associative-calculation-continuity-v3",
     synthetic: true,
     passed: false,
     stages: [],
@@ -62,6 +62,8 @@ export async function checkAssociativeCalculationContinuity(page) {
   let stage = "inventory-merge";
   let fixture = buildInventory(true, true);
   let inventoryRequests = { live: 0, reference: 0 };
+  let liveGate = Promise.resolve();
+  let releaseLive;
   const handler = async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -79,6 +81,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     if (source === null) return route.fallback();
     assert.equal(request.method(), "GET", "Inventory QA must be read-only");
     inventoryRequests[source] += 1;
+    if (source === "live") await liveGate;
     await route.fulfill({
       status: 200,
       contentType: "application/json; charset=utf-8",
@@ -117,7 +120,15 @@ export async function checkAssociativeCalculationContinuity(page) {
 
   async function reloadFixture() {
     inventoryRequests = { live: 0, reference: 0 };
+    const theme = await page.evaluate(() => document.documentElement.dataset.theme);
     await page.reload({ waitUntil: "networkidle" });
+    await page
+      .getByRole("group", { name: "Aparência da página", exact: true })
+      .getByRole("button", {
+        name: { light: "Claro", balanced: "Médio", dark: "Escuro" }[theme] ?? "Claro",
+        exact: true,
+      })
+      .click();
     await expect(page.locator(`${root} .investor-stock-product-text`).first()).toContainText(
       "Estoque vivo QA",
     );
@@ -214,16 +225,115 @@ export async function checkAssociativeCalculationContinuity(page) {
     ).toHaveCount(0);
     result.stages.push({ stage, commitment, maximumAvailable: false, approved: false });
 
+    stage = "official-progress-recovery";
+    const progress = page.getByLabel("Andamento oficial da obra (%)", { exact: true });
+    for (const percentage of ["0", "15", "100"]) {
+      await progress.fill(percentage);
+      await assertPositivePercentages("% Máximo da renda mensal");
+      await expect(rule("Status da proposta")).not.toContainText("PENDENTE");
+    }
+    await progress.fill("101");
+    await expect(progress).toHaveAttribute("aria-invalid", "true");
+    await expect(rule("% Máximo da renda mensal").locator('td[data-label="Linear"]')).toHaveText(
+      "—",
+    );
+    await progress.fill("15");
+    await selectUnit(1);
+    await assertAnswers(5_000);
+    await expect(progress).toHaveValue("");
+    await expect(rule("% Máximo da renda mensal").locator('td[data-label="Linear"]')).toHaveText(
+      "—",
+    );
+    result.stages.push({
+      stage,
+      percentages: [0, 15, 100],
+      invalidBlocked: true,
+      unitIsolation: true,
+    });
+
     stage = "missing-appraisal";
     fixture = buildInventory(true, false);
     await reloadFixture();
     await expect(unitFact("Avaliação bancária")).toHaveText("Não informada");
+    await expect(field("Avaliação bancária oficial da unidade")).toHaveAttribute(
+      "placeholder",
+      "Não informada",
+    );
     result.stages.push({ stage, appraisalAvailable: false });
+
+    stage = "official-appraisal-recovery";
+    await completeProposal();
+    await assertPositivePercentages("% Máximo da renda mensal");
+    const documentation = page.locator(`${root} .investor-associative-documentation`);
+    await expect(documentation).toHaveClass(/waiting/);
+    await field("Avaliação bancária oficial da unidade").fill("35000000");
+    await expect(documentation).toHaveClass(/ready/);
+    await expect(unitFact("Avaliação bancária")).toHaveText("Não informada");
+    await selectUnit(1);
+    await assertAnswers(5_000);
+    await expect(field("Avaliação bancária oficial da unidade")).toHaveValue("");
+    await expect(documentation).toHaveClass(/waiting/);
+    result.stages.push({
+      stage,
+      calculationRecovered: true,
+      inventoryUnchanged: true,
+      unitIsolation: true,
+    });
+
+    stage = "late-reference-facts";
+    fixture = buildInventory(true, true);
+    fixture.live.items = fixture.live.items.map((item, index) => ({
+      ...item,
+      appraisal: fixture.reference.items[index].appraisal,
+      progress: fixture.reference.items[index].progress,
+      completionDate: fixture.reference.items[index].completionDate,
+      finalPrice: item.finalPrice + 10_000,
+      finalWithKit: item.finalWithKit + 10_000,
+    }));
+    fixture.reference.items = fixture.reference.items.map((item) => ({
+      ...item,
+      appraisal: null,
+      progress: null,
+    }));
+    liveGate = new Promise((resolve) => {
+      releaseLive = resolve;
+    });
+    const lateTheme = await page.evaluate(() => document.documentElement.dataset.theme);
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page
+      .getByRole("group", { name: "Aparência da página", exact: true })
+      .getByRole("button", {
+        name: { light: "Claro", balanced: "Médio", dark: "Escuro" }[lateTheme] ?? "Claro",
+        exact: true,
+      })
+      .click();
+    await expect(page.locator(`${root} .investor-stock-product-text`).first()).toContainText(
+      "Referencia QA",
+    );
+    await selectUnit(0);
+    await completeProposal();
+    await expect(rule("% Máximo da renda mensal").locator('td[data-label="Linear"]')).toHaveText(
+      "—",
+    );
+    releaseLive();
+    await expect(unitFact("Avaliação bancária")).toHaveText(money.format(350_000));
+    await expect(unitFact("Andamento da obra")).toContainText("50");
+    await expect(page.locator(`${root} .investor-unit-price strong`)).toHaveText(
+      money.format(230_000),
+    );
+    await assertAnswers(5_000);
+    await assertPositivePercentages("% Máximo da renda mensal");
+    await expect(page.locator(`${root} .investor-stock-product-text`).first()).toContainText(
+      "Referencia QA",
+    );
+    await expect(page.locator(`${root} .investor-associative-unit-facts`)).toHaveCount(0);
+    result.stages.push({ stage, automaticRecovery: true, proposalPreserved: true });
     assert.equal(result.blockedExternalRequests, 0, "Unexpected external requests were blocked");
     result.passed = true;
   } catch (error) {
     result.error = `${stage}: ${error instanceof Error ? error.message : String(error)}`;
   } finally {
+    releaseLive?.();
     await page.unroute("**/*", handler);
   }
   return result;

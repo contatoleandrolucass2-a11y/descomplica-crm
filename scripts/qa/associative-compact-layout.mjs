@@ -32,31 +32,27 @@ export async function checkAssociativeWorkspaceGaps(page) {
 }
 
 async function stockRowIsGold(row) {
-  return row.evaluate((element) =>
-    [...element.cells].every((cell) => {
-      const style = getComputedStyle(cell);
-      const stops = (style.backgroundImage.match(/rgba?\([^)]*\)/gu) ?? []).map((color) =>
-        color.match(/[\d.]+/gu).map(Number),
-      );
-      return (
-        style.backgroundColor === "rgb(185, 149, 69)" &&
-        style.color === "rgb(23, 18, 9)" &&
-        stops.length >= 2 &&
-        stops.every(
-          ([r, g, b, alpha = 1]) =>
-            alpha === 1 &&
-            r >= 160 &&
-            r <= 214 &&
-            g >= 120 &&
-            g <= 186 &&
-            r > g &&
-            g - b >= 35 &&
-            r - g <= 80,
-        ) &&
-        Math.max(...stops.map(([r]) => r)) - Math.min(...stops.map(([r]) => r)) >= 20
-      );
-    }),
-  );
+  return row.evaluate((element) => {
+    const rowStyle = getComputedStyle(element);
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const context = canvas.getContext("2d");
+    context.fillStyle = rowStyle.getPropertyValue("--associative-selection-gold").trim();
+    context.fillRect(0, 0, 1, 1);
+    const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+    return (
+      rowStyle.backgroundImage.includes("linear-gradient(90deg,") &&
+      rowStyle.backgroundImage.includes(`rgb(${r}, ${g}, ${b})`) &&
+      [...element.cells].every((cell) => {
+        const style = getComputedStyle(cell);
+        return (
+          style.backgroundColor === "rgba(0, 0, 0, 0)" &&
+          style.backgroundImage === "none" &&
+          style.color === rowStyle.color
+        );
+      })
+    );
+  });
 }
 
 export async function checkAssociativeSelectedGoldPaint(page) {
@@ -111,15 +107,16 @@ export function assertAssociativeCommissionGeometry(geometry) {
     geometry.layoutDisplay === "grid" &&
       geometry.columns.length === 1 &&
       geometry.columns[0] > 0 &&
-      geometry.layoutGap === 4 &&
-      Math.abs(geometry.summaryGap - 4) <= 1 &&
+      geometry.layoutGap === 0 &&
+      geometry.tableGap >= 4 &&
+      geometry.dateCenterDelta <= 1 &&
       geometry.summaryFitsColumn &&
       geometry.insideLayout,
-    "Summary must retain the full wrapper width with the commission in the following row",
+    `Summary must retain full width with commission beside the table, centered on the last date: ${JSON.stringify(geometry)}`,
   );
   assert.ok(
-    geometry.summaryEdgesAligned && geometry.rightDelta <= 1,
-    "Summary edges must align with approval and commission must align with the right edge",
+    geometry.summaryEdgesAligned && geometry.rightDelta >= 3 && geometry.rightDelta <= 5,
+    "Summary edges must align with approval and contain the commission gutter",
   );
   assert.ok(!geometry.overlaps, "Commission must not overlap dates, values or adjacent content");
   assert.ok(
@@ -134,7 +131,7 @@ export function assertAssociativeCommissionGeometry(geometry) {
   );
   assert.ok(
     geometry.borderless && geometry.transparent,
-    "Commission must remain icon-only without a button box",
+    `Commission must remain icon-only without a button box: ${JSON.stringify(geometry)}`,
   );
 }
 
@@ -178,6 +175,10 @@ export async function checkAssociativeCommissionGeometry(commission) {
     const summary = layout?.querySelector(":scope > section.investor-associative-payment-summary");
     const row = summary?.querySelector(".is-decreasing:last-child");
     const date = row?.querySelector(".investor-associative-payment-last-date > time");
+    const tableRect = summary
+      ?.querySelector(".investor-associative-payment-table")
+      ?.getBoundingClientRect();
+    const dateRect = date?.getBoundingClientRect();
     const rect = button.getBoundingClientRect();
     const contains = (element) => {
       if (!element?.contains(button)) return false;
@@ -225,7 +226,10 @@ export async function checkAssociativeCommissionGeometry(commission) {
       layoutDisplay: layoutStyle?.display,
       columns,
       layoutGap: Number.parseFloat(layoutStyle?.columnGap),
-      summaryGap: summaryRect ? rect.top - summaryRect.bottom : -1,
+      tableGap: tableRect ? rect.left - tableRect.right : -1,
+      dateCenterDelta: dateRect
+        ? Math.abs(rect.top + rect.height / 2 - dateRect.top - dateRect.height / 2)
+        : Infinity,
       summaryFitsColumn: Boolean(
         summaryRect &&
         layoutRect &&

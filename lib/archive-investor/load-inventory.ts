@@ -7,6 +7,7 @@ type LoadInventoryOptions<T extends InventorySource> = {
   signal: AbortSignal;
   canReplace: () => boolean;
   onInventory: (payload: T, reference: T["items"]) => void;
+  onReferenceFacts?: (items: T["items"]) => void;
 };
 
 export async function loadInvestorInventory<T extends InventorySource>({
@@ -14,6 +15,7 @@ export async function loadInvestorInventory<T extends InventorySource>({
   signal,
   canReplace,
   onInventory,
+  onReferenceFacts,
 }: LoadInventoryOptions<T>): Promise<void> {
   let reference: T | null = null;
   let applied = false;
@@ -42,6 +44,7 @@ export async function loadInvestorInventory<T extends InventorySource>({
     if (signal.aborted) return;
     if (!canReplace()) {
       skipped = true;
+      if (payload !== reference) onReferenceFacts?.(payload.items);
       return;
     }
     const referenceItems = reference?.items ?? [];

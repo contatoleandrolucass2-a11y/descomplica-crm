@@ -4,6 +4,30 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
+
+- Status: pendente_validacao final/CI/publicacao; fonte: branch
+  `codex/associativo-origem-e-brilho-integral` e audit
+  `docs/audits/associativo-origem-brilho-2026-10-04.md`.
+- Consulta observacional encontrou 84 unidades visiveis sem andamento e 594
+  sem avaliacao positiva no snapshot. Ausencia real nao e defeito aritmetico e
+  nao autoriza inferir zero ou copiar dado de outra unidade.
+- Complemento tardio exige identidade unica e entrega igual, preenche somente
+  fatos nulos e preserva a proposta iniciada. API alternativa e mais antiga;
+  54 avaliacoes tem correspondencia compativel, quatro andamentos foram recusados
+  por divergencia de entrega. Unidades apontadas continuam exigindo fonte oficial.
+- Entrada manual de fatos oficiais fica isolada por unidade. Comprometimento
+  funciona sem andamento; maximo e aprovacao ficam pendentes sem esse dado.
+- Os dois motores rejeitam datas que JavaScript normalizaria para outro mes.
+  Matriz numerica usa oraculos independentes e publica somente agregados.
+- Capturas de elementos maiores que a viewport podem remover a emulacao de
+  toque no Chromium. Preview captura a viewport e verifica o ponteiro novamente,
+  sem alterar regras da aplicacao para fazer testes passarem.
+- Evidencias locais: 14.014 casos numericos sem divergencias, seis jornadas
+  visuais e seis jornadas de continuidade aprovadas, build/lint/tipos/audit
+  aprovados. Windows conserva seis falhas POSIX; timeouts passaram isoladamente.
+- Nenhuma migration, politica comercial, fonte externa ou workflow foi alterado.
+
 ## 2026-10-04: separar ausencia de dados de resultado zero no Associativo
 
 - Status: validado e publicado; fonte: codigo do forecast, handlers de selecao e
