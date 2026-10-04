@@ -48,10 +48,7 @@ const expectedProtectedRoutes = [
   "/admin/paginas",
 ];
 
-const futureSimulatorRoutes = new Set([
-  "/app/simulacao/calcular-documentacao",
-  "/app/simulacao/caixa",
-]);
+const futureSimulatorRoutes = new Set(["/app/simulacao/caixa"]);
 const expectedReleasedProtectedRoutes = expectedProtectedRoutes.filter(
   (route) => !futureSimulatorRoutes.has(route),
 );
@@ -279,7 +276,7 @@ describe("versioned reference parity catalog", () => {
     expect(visualHarness).toContain('method: "same-filesystem transactional rename with rollback"');
     expect(referenceQaReadme).toContain("Matriz autenticada aprovada no SHA de fechamento");
     expect(referenceQaReadme).toContain(
-      "A matriz aprovou 140 capturas responsivas, 53 capturas de tema, 193 auditorias",
+      "A matriz aprovou 147 capturas responsivas, 54 capturas de tema, 201 auditorias",
     );
   });
 

@@ -147,7 +147,7 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
           `Financing label and percentage must not collide at ${width}px/${theme}: ${JSON.stringify(financingHeading)}`,
         );
       }
-      if (width === 768 && theme === "dark") {
+      if (theme === "dark") {
         await expect
           .poll(
             () =>
@@ -167,7 +167,7 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
                 };
               }),
             {
-              message: "Documentation must settle on the final dark contrast colors at 768px",
+              message: `Documentation must settle on the final dark contrast colors at ${width}px`,
               timeout: 5_000,
             },
           )

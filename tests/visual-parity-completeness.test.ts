@@ -204,6 +204,16 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain(".every(([, value]) => value === true)");
   });
 
+  it("aguarda a hidratação antes de validar o menu global da conta", () => {
+    const script = source("scripts/qa/authenticated-visual.mjs");
+    expect(script).toContain("for (let attempt = 0; attempt < 3; attempt += 1)");
+    expect(script).toContain('trigger?.getAttribute("aria-expanded") === "true"');
+    expect(script).toContain("panel?.hidden === false");
+    expect(script).toContain("if (attempt === 2) throw error");
+    expect(script).toContain("await page.waitForTimeout(100)");
+    expect(script).toContain('await page.keyboard.press("Shift+Tab")');
+  });
+
   it("mantém o gatilho global de cookies visível e as categorias obrigatórias bloqueadas", () => {
     const script = source("scripts/qa/authenticated-visual.mjs");
     expect(script).toContain("const cookiePreferencesTrigger = page.getByRole");
@@ -212,6 +222,7 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain('["Essenciais", "Segurança"].every((label) =>');
     expect(script).toContain("checkbox.checked && checkbox.disabled");
     expect(script).toContain('name: "Fechar preferências"');
+    expect(script).toContain("await cookiePreferencesTrigger.waitFor({");
     expect(script).toContain("cookieBannerHidden: cookiePreferencesSafe");
     expect(script).not.toMatch(
       /getByRole\("button", \{ name: "Preferências de cookies", exact: true \}\)\.count\(\)\) ===\s*0/,
@@ -229,6 +240,9 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain('requiredEnvironment("QA_AUTH_SUPABASE_PUBLISHABLE_KEY")');
     expect(script).toContain("@local\\.invalid");
     expect(script).toContain('kind: "responsive"');
+    expect(script).toContain('"/app/simulacao/calcular-documentacao"');
+    expect(script).toContain("const dedicatedSimulatorRoutes = new Set([");
+    expect(script).toContain("!dedicatedSimulatorRoutes.has(route)");
     expect(script).toContain("responsiveScreenshots: routes.length * viewports.length");
     expect(script).toContain(
       "themeScreenshots: desktopThemeCaptureRoutes.size * themes.length + routes.length",

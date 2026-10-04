@@ -1,7 +1,7 @@
 # Navegação protegida unificada
 
-Data de referência: 2026-10-03  
-Branch: `codex/unified-protected-navigation`  
+Data de referência: 2026-10-03
+Branch: `codex/unified-protected-navigation`
 Base: `8e158cc9d13beeff0087064df6d9b58d87790379`
 
 ## Resultado esperado

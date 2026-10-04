@@ -194,9 +194,10 @@ describe("archive theme color contract", () => {
       "utf8",
     );
     const darkColorWait = visualHarness.indexOf(
-      'message: "Documentation must settle on the final dark contrast colors at 768px"',
+      "message: `Documentation must settle on the final dark contrast colors at ${width}px`",
     );
     expect(darkColorWait).toBeGreaterThan(-1);
+    expect(visualHarness).toContain('if (theme === "dark")');
     expect(visualHarness).toContain(".poll(");
     expect(visualHarness).toContain('surface: "rgb(15, 45, 65)"');
     expect(visualHarness).toContain('heading: "rgb(244, 251, 255)"');

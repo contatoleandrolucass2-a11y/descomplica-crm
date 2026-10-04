@@ -6,7 +6,7 @@ import path from "node:path";
 import process from "node:process";
 
 import AxeBuilder from "@axe-core/playwright";
-import { chromium } from "@playwright/test";
+import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
 import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
 import {
@@ -108,9 +108,10 @@ const routes = [
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
-  "/app/simulacao/tabelao",
+  "/app/simulacao/calcular-documentacao",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
+  "/app/simulacao/tabelao",
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
@@ -131,6 +132,10 @@ const archiveSimulatorRoutes = new Set([
   "/app/simulacao/tabelao",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
+]);
+const dedicatedSimulatorRoutes = new Set([
+  ...archiveSimulatorRoutes,
+  "/app/simulacao/calcular-documentacao",
 ]);
 
 function expectedEnabledSimulatorRoutes() {
@@ -856,14 +861,40 @@ async function inspectRoute(
         timeout: 25_000,
       });
   }
-  const isSimulatorWorkspace = route.startsWith("/app/simulacao/") && !isArchiveSimulator;
+  const isSimulatorWorkspace =
+    route.startsWith("/app/simulacao/") && !dedicatedSimulatorRoutes.has(route);
   const expectsEnabledSimulatorAction = enabledSimulatorRoutes.has(route);
   const accountTrigger = page.locator(
     'header button[data-session-identity][aria-controls="protected-account-menu"]',
   );
   const accountPanel = page.locator("#protected-account-menu");
-  if ((await accountTrigger.getAttribute("aria-expanded")) !== "true") {
+  await accountTrigger.waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (
+      (await accountTrigger.getAttribute("aria-expanded")) === "true" &&
+      (await accountPanel.isVisible())
+    ) {
+      break;
+    }
+
     await accountTrigger.click();
+    try {
+      await page.waitForFunction(
+        () => {
+          const trigger = document.querySelector(
+            'header button[data-session-identity][aria-controls="protected-account-menu"]',
+          );
+          const panel = document.querySelector("#protected-account-menu");
+          return trigger?.getAttribute("aria-expanded") === "true" && panel?.hidden === false;
+        },
+        undefined,
+        { timeout: 3_000 },
+      );
+      break;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await page.waitForTimeout(100);
+    }
   }
   await accountPanel.waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
   const snapshot = await page.evaluate((simulatorWorkspace) => {
@@ -1213,7 +1244,10 @@ async function checkKeyboard(page, origin) {
     (element) => document.activeElement === element,
   );
 
-  await page.keyboard.press("Tab");
+  // The account trigger is the last control in the sticky topbar. Walk backward
+  // to prove the keyboard sequence remains connected to the preceding theme/nav
+  // controls instead of depending on whether the current page has a later CTA.
+  await page.keyboard.press("Shift+Tab");
   const tabReachedInteractive = await page.evaluate(() =>
     document.activeElement?.matches("a, button, input, select, textarea"),
   );
@@ -3782,9 +3816,33 @@ async function checkTabelaoValidation(page, origin) {
     exact: true,
   });
   const cookiePreferencesBanner = page.locator('aside[aria-labelledby="cookie-consent-title"]');
+  const waitForCookiePreferencesClosed = async () => {
+    await cookiePreferencesBanner.waitFor({ state: "hidden", timeout: qaNavigationTimeout });
+    await cookiePreferencesTrigger.waitFor({
+      state: "visible",
+      timeout: qaNavigationTimeout,
+    });
+    await expect
+      .poll(
+        async () => {
+          const triggerCount = await cookiePreferencesTrigger.count();
+          return {
+            bannerHidden: !(await cookiePreferencesBanner.isVisible()),
+            triggerCount,
+            triggerVisible: triggerCount === 1 && (await cookiePreferencesTrigger.isVisible()),
+          };
+        },
+        {
+          timeout: qaNavigationTimeout,
+          message: "Cookie preferences must close into one visible trigger",
+        },
+      )
+      .toEqual({ bannerHidden: true, triggerCount: 1, triggerVisible: true });
+  };
+  await waitForCookiePreferencesClosed();
+  await cookiePreferencesTrigger.scrollIntoViewIfNeeded();
   const cookieTriggerSafe =
     (await cookiePreferencesTrigger.count()) === 1 &&
-    (await cookiePreferencesBanner.count()) === 0 &&
     (await cookiePreferencesTrigger.isVisible()) &&
     (await cookiePreferencesTrigger.isEnabled()) &&
     (await cookiePreferencesTrigger.evaluate((element) => {
@@ -3822,16 +3880,13 @@ async function checkTabelaoValidation(page, origin) {
       (await closePreferences.count()) === 1 &&
       (await closePreferences.isVisible()) &&
       (await closePreferences.isEnabled());
+    let cookiePreferencesClosed = false;
     if (closeControlSafe) {
       await closePreferences.click();
-      await cookiePreferencesBanner.waitFor({ state: "hidden", timeout: qaNavigationTimeout });
+      await waitForCookiePreferencesClosed();
+      cookiePreferencesClosed = true;
     }
-    cookiePreferencesSafe =
-      lockedSecurityCategories &&
-      closeControlSafe &&
-      (await cookiePreferencesBanner.count()) === 0 &&
-      (await cookiePreferencesTrigger.count()) === 1 &&
-      (await cookiePreferencesTrigger.isVisible());
+    cookiePreferencesSafe = lockedSecurityCategories && closeControlSafe && cookiePreferencesClosed;
   }
   const responsiveGrid = viewportChecks.every((check) =>
     Object.entries(check)

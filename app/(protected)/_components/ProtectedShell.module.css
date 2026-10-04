@@ -621,7 +621,7 @@
   white-space: nowrap;
 }
 
-@media (min-width: 1181px) and (max-width: 1380px) {
+@media (min-width: 1181px) and (max-width: 1500px) {
   .topbarInner {
     gap: 16px;
     padding-inline: 16px;
@@ -634,7 +634,7 @@
   .navigationLink,
   .navigationTrigger {
     gap: 6px;
-    /* Keep all five authorized roots inside the first desktop pixel (1181px).
+    /* Keep all five authorized roots inside the desktop shell through 1440px.
        Height remains 44px; only redundant horizontal breathing room contracts. */
     padding-inline: 5px;
     font-size: 12px;
