@@ -34,6 +34,9 @@
   `a4c1717`, apos 154 checks responsivos, 88 de tema, 209 de acessibilidade,
   209 comparacoes, 110 de zoom e 40 combinacoes da navegacao aprovados. Gates
   finais, CI e publicacao deste incremento continuam separados desta promocao.
+- Atualiza o smoke de release para distinguir acesso a pagina CAIXA de execucao
+  do motor: Master abre a composicao visual pelo Hub e menu, enquanto o CTA e a
+  API de calculo permanecem fail-closed. Demais perfis continuam negados.
 
 ## 2026-10-04 - Calculo e continuidade no Associativo
 

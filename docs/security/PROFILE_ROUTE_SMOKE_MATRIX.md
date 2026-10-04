@@ -4,9 +4,10 @@
 
 Esta matriz descreve o inventário HTTP de 22 rotas protegidas e deve ser validada
 com contas QA sintéticas. O catálogo PostgreSQL mantém exatamente 17 entradas em
-`app_pages`; o catálogo HTTP possui 20 rotas habilitadas, pois acrescenta Tabelão e as
-réplicas WF14 e WF15 protegidas pelo guard Master-only existente. As outras duas
-rotas de simuladores continuam no smoke para comprovar o `403` fail-closed.
+`app_pages`; o catálogo HTTP possui 22 rotas habilitadas para Master, pois
+acrescenta Tabelão, as réplicas WF14 e WF15, WF16/Documentação e a jornada
+visual CAIXA sob o guard Master-only existente. A execução dos motores continua
+um contrato separado da autorização das páginas.
 
 Perfis exigidos:
 
@@ -31,9 +32,10 @@ Produção e instalação limpa convergem para as mesmas 17 entradas de `app_pag
 A migration Auth/MFA remove somente as quatro identidades excedentes encontradas
 no restore (`WF16`, `CAIXA`, `WF14` e `WF15`), preserva `user_roles` e overrides
 e recompõe somente os vínculos herdados já existentes em produção. Neste
-candidato, Tabelão e as réplicas WF14 e WF15 acrescentam a 18ª, 19ª e 20ª rotas HTTP
-habilitadas pelo catálogo versionado, sem migration ou nova permissão de banco;
-WF16 e CAIXA formam as duas rotas HTTP bloqueadas restantes.
+candidato, as cinco jornadas complementares acrescentam da 18ª à 22ª rotas HTTP
+habilitadas pelo catálogo versionado, sem migration ou nova permissão de banco.
+CAIXA permanece fail-closed no motor, ainda que sua composição visual esteja
+acessível ao Master.
 
 | Rota protegida                            | `master` | `admin` | `broker`, `coordinator`, `real_estate` | `manager`, `house`, `partnership_channel`, `pending` | visitante |
 | ----------------------------------------- | -------: | ------: | -------------------------------------: | ---------------------------------------------------: | --------: |
@@ -51,8 +53,8 @@ WF16 e CAIXA formam as duas rotas HTTP bloqueadas restantes.
 | `/app/configuracoes/metas/pontos`         |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao`                          |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/associativo-fluxo-linear` |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/calcular-documentacao`    |      403 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/caixa`                    |      403 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/calcular-documentacao`    |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/simulacao/caixa`                    |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/tabela-direta`            |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/tabela-investidor`        |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/tabelao`                  |      200 |     403 |                                    403 |                                                  403 |  redirect |
@@ -66,11 +68,11 @@ como fixtures pelos nove perfis do smoke novo, mas entram no fingerprint do rehe
 Produção não possui overrides individuais; o processo continua preservando a tabela
 integralmente caso overrides sejam adicionados antes do cutover.
 
-Autorização de página e execução de motor são gates distintos. Os cinco `200`
-de simulação autorizam o hub, WF13, Tabelão e as réplicas WF14 e WF15. As outras duas
-rotas falham antes da renderização. Flags, allowlist, permissão de execução e
-política comercial continuam validadas separadamente; WF14 e WF15 não persistem
-nem chamam motor oficial.
+Autorização de página e execução de motor são gates distintos. Os sete `200` de
+simulação autorizam o hub, WF13, WF16/Documentação, CAIXA, Tabelão e as réplicas
+WF14 e WF15. Flags, allowlist, permissão de execução e política comercial
+continuam validadas separadamente; CAIXA não executa cálculo nem integração
+bancária e WF14/WF15 não persistem nem chamam motor oficial.
 
 ## Matriz de APIs somente leitura/fail-closed
 
@@ -82,6 +84,8 @@ nem chamam motor oficial.
 | `GET /api/inventory/regions?postalCode=01509020`        | 200, `no-store`       | 403                           | 401       |
 | `GET /api/official-simulator/associativo-fluxo-linear`  | 200                   | 403                           | 401       |
 | `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro  | 403                           | 401       |
+| `GET /api/official-simulator/caixa`                     | 200, execução `false` | 403                           | 401       |
+| `POST /api/official-simulator/caixa`                    | 503, fail-closed      | 503                           | 503       |
 | `POST /api/ingest/qlik`                                 | 404, flag desligada   | 404                           | 404       |
 | `POST /api/ingest/salesforce`                           | 404, flag desligada   | 404                           | 404       |
 | `POST /api/refresh/salesforce`                          | 404, flag desligada   | 404                           | 404       |

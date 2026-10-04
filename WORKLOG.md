@@ -56,6 +56,12 @@
 - A matriz autenticada, contraste, hierarquia semantica, overflow mobile e
   navegacao passaram. Gates obrigatorios finais, CI, PR e publicacao ainda
   dependem da evidencia do SHA que incorporar esta baseline.
+- O E2E de release foi reconciliado com o contrato vigente: Master acessa as 22
+  paginas protegidas, Admin conserva 14, Broker/Coordinator/Real Estate
+  conservam sete e Manager/House/Partnership Channel/Pending ficam sem paginas
+  comerciais. A pagina CAIXA e autorizada somente ao Master; CTA e motor
+  continuam bloqueados. Vinte cenarios passaram, um permaneceu ignorado pelo
+  proprio contrato e as dez identidades sinteticas foram removidas.
 
 ## 2026-10-04 - Associativo: calculo, origem e continuidade
 

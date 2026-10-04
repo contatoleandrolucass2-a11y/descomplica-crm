@@ -50,6 +50,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - O roteiro de continuidade aguarda campos habilitados e valores persistidos e
   interpreta vazio como ausencia, sem mudar valores do cenario, formulas ou
   regras financeiras.
+- O smoke de release deve tratar pagina e motor CAIXA como gates distintos. A
+  matriz local aprovou Master 22, Admin 14, tres papeis analiticos com sete e os
+  quatro papeis sem acesso comercial com zero; 20 cenarios E2E passaram, um foi
+  ignorado conforme o contrato e dez contas sinteticas foram removidas.
 
 ## 2026-10-04: separar ausencia de dados de resultado zero no Associativo
 
