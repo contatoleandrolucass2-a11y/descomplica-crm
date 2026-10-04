@@ -320,7 +320,6 @@ export async function checkAssociativeCompactStock(page) {
     const breadcrumb = document.querySelector('nav[aria-label="Breadcrumb"]');
     const breadcrumbBounds = breadcrumb?.getBoundingClientRect();
     const title = bounds(".simulation-canvas-title-row h1");
-    const titleRow = bounds(".simulation-canvas-title-row");
     const guide = bounds(".simulation-canvas-header-aside");
     const hint = bounds(".simulation-canvas-title-row .investor-info-mark");
     const button = bounds(".simulation-canvas-actions .investor-guided-start");
