@@ -240,4 +240,16 @@ describe("Associativo guidance regression gates", () => {
     expect(source).toContain("if (associativeGuidanceWidths.includes(viewport.width))");
     expect(source).toContain("Guidance widths must be exercised by the archive navigation matrix");
   });
+
+  it("hovers the enabled financing control while measuring its responsive active row", () => {
+    const source = readFileSync(
+      new URL("../scripts/qa/associative-guidance.mjs", import.meta.url),
+      "utf8",
+    );
+    expect(source).toMatch(
+      /checkReducedGuidanceMotion\(\s*page,\s*page\.locator\(`\$\{root\} \$\{activeRow\}`\),\s*field\(label\),\s*\)/u,
+    );
+    expect(source).toContain("error.safeHoverDiagnostics");
+    expect(source).toContain("hitWithinOwner");
+  });
 });

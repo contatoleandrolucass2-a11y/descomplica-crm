@@ -147,6 +147,14 @@
 }
 
 @media (max-width: 520px) {
+  .preferencesButton {
+    position: static;
+    display: block;
+    width: calc(100% - 1rem);
+    margin: 0.75rem auto;
+    border-radius: 0.75rem;
+  }
+
   .banner {
     right: 0.5rem;
     bottom: 0.5rem;

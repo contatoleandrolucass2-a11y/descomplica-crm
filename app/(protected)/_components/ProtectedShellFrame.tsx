@@ -1,35 +1,29 @@
-"use client";
-
 import type { ReactNode } from "react";
-import { usePathname } from "next/navigation";
 
-const ARCHIVE_SIMULATOR_ROUTES = new Set([
-  "/app/simulacao/associativo-fluxo-linear",
-  "/app/simulacao/tabela-direta",
-  "/app/simulacao/tabela-investidor",
-  "/app/simulacao/tabelao",
-  "/app/simulacao/calcular-documentacao",
-]);
+export const PROTECTED_CONTENT_ID = "protected-main-content";
 
 export function ProtectedShellFrame({
   children,
   chrome,
+  contentClassName,
   shellClassName,
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   chrome: ReactNode;
+  contentClassName?: string | undefined;
   shellClassName: string | undefined;
 }) {
-  const pathname = usePathname();
-
-  if (ARCHIVE_SIMULATOR_ROUTES.has(pathname)) {
-    return <>{children}</>;
-  }
-
   return (
-    <div className={shellClassName}>
+    <div className={shellClassName} data-protected-shell>
       {chrome}
-      {children}
+      <div
+        id={PROTECTED_CONTENT_ID}
+        className={contentClassName}
+        data-protected-main-content
+        tabIndex={-1}
+      >
+        {children}
+      </div>
     </div>
   );
 }

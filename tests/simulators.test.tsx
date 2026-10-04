@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -10,6 +11,23 @@ import {
 } from "../lib/crm/simulators/catalog";
 
 describe("simulator visual catalog", () => {
+  it("adds the released Tabelão to the hub only through its exact protected gate", () => {
+    const hub = readFileSync(
+      new URL("../app/(protected)/app/simulacao/page.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(hub).toContain('getProtectedPageGate("/app/simulacao/tabelao")');
+    expect(hub).toContain('tabelaoGate.pageKey === "crm.simulation.tabelao"');
+    expect(hub).toContain('tabelaoGate.permission === "crm.simulators.view"');
+    expect(hub).toContain("authorization.permissions.includes(tabelaoGate.permission)");
+    expect(hub).toContain('slug: "tabelao"');
+    expect(hub).toContain('title: "Simulador Tabelão"');
+    expect(hub).toContain('authorizedJourneyCount === 1 ? "jornada autorizada"');
+    expect(hub).toContain("<LockKeyhole");
+    expect(hub).not.toContain("🔒");
+  });
+
   it("maps the five user-approved simulator identities without inventing another route", () => {
     expect(SIMULATOR_LIST.map(({ slug, code }) => [slug, code])).toEqual([
       ["associativo-fluxo-linear", "WF13"],
@@ -35,7 +53,7 @@ describe("simulator visual catalog", () => {
     expect(markup).toContain(definition.title);
     expect(markup).toContain("Cálculo temporariamente indisponível — regra aguardando validação");
     expect(markup).toContain("Nenhuma fórmula é executada enquanto o gate permanece desligado");
-    expect(markup).toContain('aria-label="Ferramentas de simulação"');
+    expect(markup).not.toContain('aria-label="Ferramentas de simulação"');
     expect(markup).toContain('data-cta-state="enabled"');
     expect(markup).toContain('data-cta-state="blocked"');
     expect(markup).toContain('id="calculation-blocked-reason"');
@@ -163,11 +181,7 @@ describe("simulator visual catalog", () => {
 
   it("renders WF13 as actionable only when the server authorizes the Master canary", () => {
     const markup = renderToStaticMarkup(
-      <SimulatorWorkspace
-        definition={SIMULATORS["associativo-fluxo-linear"]}
-        executionEnabled
-        releasedSimulatorSlugs={["associativo-fluxo-linear"]}
-      />,
+      <SimulatorWorkspace definition={SIMULATORS["associativo-fluxo-linear"]} executionEnabled />,
     );
 
     expect(markup).toContain("Motor oficial em validação Master");
@@ -187,17 +201,8 @@ describe("simulator visual catalog", () => {
     expect(markup).toContain("Ranking no Bora Vender");
     expect(markup).toContain('<option value="NÃO ELEGÍVEL">NÃO ELEGÍVEL</option>');
     expect(markup).toContain("Nenhuma data anual disponível");
-    expect(markup).toContain('href="/app/simulacao/associativo-fluxo-linear"');
-    for (const blockedSlug of [
-      "calcular-documentacao",
-      "caixa",
-      "tabela-direta",
-      "tabela-investidor",
-    ]) {
-      expect(markup).not.toContain(`href="/app/simulacao/${blockedSlug}"`);
-    }
-    expect(markup.match(/data-release-state="blocked"/g)).toHaveLength(4);
-    expect(markup.match(/aria-label="[^\"]+ · Aguardando autorização"/g)).toHaveLength(4);
+    expect(markup).not.toContain('href="/app/simulacao/');
+    expect(markup).not.toContain('data-release-state="blocked"');
   });
 
   it("renders neutral tabs, repeaters, inventory pagination and local tools", () => {
@@ -208,6 +213,7 @@ describe("simulator visual catalog", () => {
 
     expect(caixaMarkup).toContain('role="tablist"');
     expect(caixaMarkup).toContain('role="tabpanel"');
+    expect(caixaMarkup).toContain('aria-label="Áreas da simulação"');
     expect(caixaMarkup).toContain("Adicionar proponente");
     expect(caixaMarkup).toContain("Adicionar período");
     expect(caixaMarkup).toContain("Limpar");

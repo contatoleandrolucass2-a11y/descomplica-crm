@@ -1,4 +1,3 @@
-import { ArchiveHeader } from "./archive-investor/ArchiveHeader";
 import { DocumentationCalculator } from "./archive-investor/DocumentationCalculator";
 import "./archive-investor/investor-archive.css";
 import "./archive-investor/documentation-accessibility.css";
@@ -13,7 +12,6 @@ export function DocumentationArchive() {
 
   return (
     <div className="goal-page-shell documentation-page-shell">
-      <ArchiveHeader />
       <DocumentationCalculator baseDate={baseDate} />
     </div>
   );

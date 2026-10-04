@@ -189,18 +189,20 @@ export async function checkTabelaoLayout(page) {
     .isVisible();
   await page.keyboard.press("Escape");
   await guide.waitFor({ state: "hidden" });
-  checks.footerTourReturnsFocus = await learn.evaluate(
-    (element) => document.activeElement === element,
-  );
+  checks.footerTourReturnsFocus = await learn.evaluate(async (element) => {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return document.activeElement === element;
+  });
   await learn.click();
   await guide.waitFor({ state: "visible" });
   await guide.getByRole("button", { name: "Próximo", exact: true }).click();
   await guide.getByRole("button", { name: "Próximo", exact: true }).click();
   await guide.getByRole("button", { name: "Concluir guia", exact: true }).click();
   await guide.waitFor({ state: "hidden" });
-  checks.footerTourCompletionReturnsFocus = await learn.evaluate(
-    (element) => document.activeElement === element,
-  );
+  checks.footerTourCompletionReturnsFocus = await learn.evaluate(async (element) => {
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return document.activeElement === element;
+  });
 
   checks.printInvoked = await page
     .locator(".tabelao-resources")
@@ -220,13 +222,16 @@ export async function checkTabelaoLayout(page) {
     });
   try {
     await page.emulateMedia({ media: "print" });
-    checks.printLayout = await page.evaluate(() => {
+    const printLayout = await page.evaluate(() => {
       const shell = document.querySelector(".tabelao-page-shell");
-      const table = shell.querySelector(".investor-stock-table");
-      const results = shell.querySelector(".investor-stock-results");
-      const panel = shell.querySelector(".investor-stock-panel");
-      const rows = [...table.querySelectorAll("tr[data-inventory-unit-id]")];
-      return (
+      const table = shell?.querySelector(".investor-stock-table");
+      const results = shell?.querySelector(".investor-stock-results");
+      const panel = shell?.querySelector(".investor-stock-panel");
+      const hero = shell?.querySelector(".investor-compact-hero");
+      const topbar = document.querySelector("[data-protected-topbar]");
+      const rows = [...(table?.querySelectorAll("tr[data-inventory-unit-id]") ?? [])];
+      const hiddenControls =
+        shell != null &&
         [
           ".tabelao-resources",
           ".investor-hero-guide",
@@ -236,19 +241,28 @@ export async function checkTabelaoLayout(page) {
           [...shell.querySelectorAll(selector)].every(
             (element) => getComputedStyle(element).display === "none",
           ),
-        ) &&
-        panel.checkVisibility() &&
-        shell.querySelector(".investor-compact-hero").checkVisibility() &&
-        rows.length > 0 &&
-        rows.every((row) => row.checkVisibility() && row.getBoundingClientRect().height > 0) &&
-        getComputedStyle(table).display === "table" &&
-        getComputedStyle(table).minWidth === "0px" &&
-        getComputedStyle(results).overflowX === "visible" &&
-        [...table.querySelectorAll("thead th")].every(
-          (cell) => getComputedStyle(cell).transform === "none",
-        )
-      );
+        );
+      return {
+        printApplicationChromeHidden: topbar == null || getComputedStyle(topbar).display === "none",
+        printControlsHidden: hiddenControls,
+        printContentVisible: panel?.checkVisibility() === true && hero?.checkVisibility() === true,
+        printRowsExpanded:
+          rows.length > 0 &&
+          rows.every((row) => row.checkVisibility() && row.getBoundingClientRect().height > 0),
+        printTableSemantics:
+          table != null &&
+          getComputedStyle(table).display === "table" &&
+          getComputedStyle(table).minWidth === "0px",
+        printOverflowVisible: results != null && getComputedStyle(results).overflowX === "visible",
+        printHeaderTransformsReset:
+          table != null &&
+          [...table.querySelectorAll("thead th")].every(
+            (cell) => getComputedStyle(cell).transform === "none",
+          ),
+      };
     });
+    Object.assign(checks, printLayout);
+    checks.printLayout = Object.values(printLayout).every(Boolean);
     for (const theme of ["light", "balanced", "dark"]) {
       await page.evaluate((value) => {
         document.documentElement.dataset.theme = value;
@@ -442,13 +456,13 @@ async function runSyntheticLayout() {
   const vitestRequire = createRequire(require.resolve("vitest/package.json"));
   const { build } = await import(pathToFileURL(vitestRequire.resolve("vite")).href);
   const entry = path.join(root, "scripts/qa/tabelao-qa-memory-entry.tsx").replaceAll("\\", "/");
-  const header = "\0tabelao-qa-header";
-  // Only the server-owned navigation is replaced; archive, widgets, table and CSS stay real.
+  // Archive, protected shell, widgets, table and CSS stay real; only data stays synthetic.
   const built = await build({
     root,
     configFile: false,
     envFile: false,
     logLevel: "error",
+    define: { "process.env.NODE_ENV": JSON.stringify("production") },
     resolve: { alias: { "@": root } },
     oxc: { jsx: { runtime: "automatic" } },
     plugins: [
@@ -457,16 +471,24 @@ async function runSyntheticLayout() {
         enforce: "pre",
         resolveId(id) {
           if (id.endsWith("tabelao-qa-memory-entry.tsx")) return entry;
-          if (id.replaceAll("\\", "/").endsWith("/ArchiveHeader")) return header;
         },
         load(id) {
-          if (id === header) return "export function ArchiveHeader() { return null; }";
           if (id === entry)
             return `
           import { createRoot } from "react-dom/client";
           import ${JSON.stringify(path.join(root, "app/globals.css").replaceAll("\\", "/"))};
+          import shellStyles from ${JSON.stringify(path.join(root, "app/(protected)/_components/ProtectedShell.module.css").replaceAll("\\", "/"))};
+          import { ProtectedShellFrame } from ${JSON.stringify(path.join(root, "app/(protected)/_components/ProtectedShellFrame.tsx").replaceAll("\\", "/"))};
           import { TabelaoArchive } from ${JSON.stringify(path.join(root, "app/(protected)/app/simulacao/_components/TabelaoArchive.tsx").replaceAll("\\", "/"))};
-          (async () => createRoot(document.getElementById("root")).render(await TabelaoArchive()))();
+          (async () => createRoot(document.getElementById("root")).render(
+            <ProtectedShellFrame
+              shellClassName={shellStyles.shell}
+              contentClassName={shellStyles.mainContent}
+              chrome={<header className={shellStyles.topbar} data-protected-topbar>QA protected navigation</header>}
+            >
+              {await TabelaoArchive()}
+            </ProtectedShellFrame>
+          ))();
         `;
         },
       },
@@ -485,10 +507,20 @@ async function runSyntheticLayout() {
   const script = output.find((file) => file.type === "chunk" && file.isEntry)?.fileName;
   assert.ok(script, "Synthetic bundle entry is required");
   const styles = [...files.keys()].filter((name) => name.endsWith(".css"));
+  const informationMark = await readFile(path.join(root, "public/information-at-mark.png"));
   const html = `<!doctype html><html lang="pt-BR" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${styles.map((name) => `<link rel="stylesheet" href="${name}">`).join("")}</head><body><div id="root"></div><script src="/${script}"></script></body></html>`;
   const items = buildTabelaoMapsFixture();
   const server = createServer((request, response) => {
     const url = new URL(request.url, "http://127.0.0.1");
+    if (url.pathname === "/favicon.ico") {
+      response.writeHead(204).end();
+      return;
+    }
+    if (url.pathname === "/information-at-mark.png") {
+      response.setHeader("Content-Type", "image/png");
+      response.end(informationMark);
+      return;
+    }
     if (url.pathname.startsWith("/api/inventory")) {
       const rows = url.pathname.endsWith("/snapshot") ? [] : items;
       response.setHeader("Content-Type", "application/json");
@@ -553,7 +585,7 @@ async function runLayoutBrowser(origin) {
     page.setDefaultTimeout(15_000);
     const errors = [];
     const failures = [];
-    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("pageerror", (error) => errors.push(error.stack ?? error.message));
     page.on("console", (message) => {
       if (message.type() === "error") errors.push(message.text());
     });
@@ -578,7 +610,15 @@ async function runLayoutBrowser(origin) {
     ]) {
       await page.setViewportSize({ width, height });
       await page.goto(`${origin}/app/simulacao/tabelao`);
-      await page.locator('tr[data-inventory-unit-id="qa-maps-6"]').waitFor({ state: "attached" });
+      try {
+        await page.locator('tr[data-inventory-unit-id="qa-maps-6"]').waitFor({ state: "attached" });
+      } catch (error) {
+        const state = await page.locator(".investor-empty-result").allTextContents();
+        throw new Error(
+          `Synthetic Tabelao did not render inventory (${JSON.stringify({ errors, state })})`,
+          { cause: error },
+        );
+      }
       await page.waitForFunction(() =>
         [...document.querySelectorAll("tr[data-inventory-unit-id]")].every(
           (row) => row.dataset.inventoryRegion !== "Localizando",

@@ -177,7 +177,7 @@ const viewports = [
 ];
 
 const themes = ["light", "balanced", "dark"];
-const themeLabels = { light: "Claro", balanced: "Equilibrado", dark: "Escuro" };
+const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
 const adminRoutes = ["/admin", "/admin/usuarios", "/admin/paginas"];
 const desktopThemeCaptureRoutes = new Set([
   "/app",
@@ -858,6 +858,14 @@ async function inspectRoute(
   }
   const isSimulatorWorkspace = route.startsWith("/app/simulacao/") && !isArchiveSimulator;
   const expectsEnabledSimulatorAction = enabledSimulatorRoutes.has(route);
+  const accountTrigger = page.locator(
+    'header button[data-session-identity][aria-controls="protected-account-menu"]',
+  );
+  const accountPanel = page.locator("#protected-account-menu");
+  if ((await accountTrigger.getAttribute("aria-expanded")) !== "true") {
+    await accountTrigger.click();
+  }
+  await accountPanel.waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
   const snapshot = await page.evaluate((simulatorWorkspace) => {
     const text = document.body.innerText;
     const root = document.documentElement;
@@ -870,14 +878,27 @@ async function inspectRoute(
     ].includes(window.location.pathname);
     const topbarInner = document.querySelector("header > div");
     const brand = topbarInner?.firstElementChild;
-    const navigation = document.querySelector('header nav[aria-label="Navegação autorizada"]');
+    const navigation = document.querySelector('header nav[aria-label="Navegação principal"]');
+    const mobileNavigationTrigger = document.querySelector(
+      'header button[aria-controls="authorized-navigation"]',
+    );
+    const navigationSurface = navigation?.getClientRects().length
+      ? navigation
+      : mobileNavigationTrigger;
     const identity = document.querySelector("[data-session-identity]");
     const identityLabel = document.querySelector("[data-session-identity-label]");
-    const actions = identity?.parentElement;
-    const accountLink = document.querySelector('header a[href="/conta/seguranca"]');
-    const actionChildren = actions ? [...actions.children] : [];
+    const accountPanel = document.querySelector("#protected-account-menu");
+    const accountLink = accountPanel?.querySelector('a[href="/conta/seguranca"]');
+    const themeSwitch = document.querySelector('[role="group"][aria-label="Aparência da página"]');
+    const actions = identity?.parentElement?.parentElement;
+    const actionChildren = [brand, navigationSurface, themeSwitch, identity, accountPanel].filter(
+      (element) => element instanceof HTMLElement,
+    );
     const elementLabel = (element, index) => {
-      if (element === identity) return "identity";
+      if (element === brand) return "brand";
+      if (element === navigationSurface) return "navigation";
+      if (element === identity) return "accountTrigger";
+      if (element === accountPanel) return "accountPanel";
       if (element === accountLink) return "accountLink";
       if (element.matches('[role="group"][aria-label="Aparência da página"]')) {
         return "themeSwitch";
@@ -888,6 +909,8 @@ async function inspectRoute(
     const rectanglesOverlap = (first, second) => {
       if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) return false;
       if (
+        first.getClientRects().length === 0 ||
+        second.getClientRects().length === 0 ||
         getComputedStyle(first).display === "none" ||
         getComputedStyle(second).display === "none"
       ) {
@@ -903,9 +926,6 @@ async function inspectRoute(
       );
     };
     const topbarCollisionPairs = [];
-    if (rectanglesOverlap(navigation, identity)) {
-      topbarCollisionPairs.push("navigation×identity");
-    }
     if (rectanglesOverlap(brand, actions)) {
       topbarCollisionPairs.push("brand×actions");
     }
@@ -925,6 +945,12 @@ async function inspectRoute(
         }
       }
     }
+    const accountPanelBox = accountPanel?.getBoundingClientRect();
+    const identityLabelBox = identityLabel?.getBoundingClientRect();
+    const identityStyle = identityLabel ? getComputedStyle(identityLabel) : null;
+    const navigationSurfaceBox = navigationSurface?.getBoundingClientRect();
+    const navigationVisible = Boolean(navigation?.getClientRects().length);
+    const themeButtons = themeSwitch ? [...themeSwitch.querySelectorAll("button")] : [];
     const blockedAction = simulatorForm?.querySelector('[data-cta-state="blocked"]');
     const associativeStock = document.querySelector(
       ".investor-associative-table-page .investor-stock-panel",
@@ -953,11 +979,62 @@ async function inspectRoute(
       theme: root.dataset.theme ?? null,
       horizontalOverflow: root.scrollWidth > root.clientWidth + 1,
       hasBrokenValue: /\b(?:NaN|undefined)\b/.test(text),
-      protectedShellPresent: Boolean(document.querySelector("header nav")),
+      protectedShellPresent: navigation instanceof HTMLElement,
       loginPresent: Boolean(document.querySelector('input[name="password"]')),
       reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
       topbarCollision: topbarCollisionPairs.length > 0,
       topbarCollisionPairs,
+      navigationGeometryReady: Boolean(
+        navigation instanceof HTMLElement &&
+        navigation.id === "authorized-navigation" &&
+        navigation.getAttribute("aria-label") === "Navegação principal" &&
+        navigationSurface instanceof HTMLElement &&
+        navigationSurfaceBox &&
+        navigationSurfaceBox.width > 0 &&
+        navigationSurfaceBox.height > 0 &&
+        navigationSurfaceBox.left >= -1 &&
+        navigationSurfaceBox.right <= innerWidth + 1 &&
+        navigationSurfaceBox.top >= -1 &&
+        navigationSurfaceBox.bottom <= innerHeight + 1 &&
+        navigationSurface.scrollWidth <= navigationSurface.clientWidth + 1 &&
+        (navigationVisible ||
+          (mobileNavigationTrigger instanceof HTMLButtonElement &&
+            mobileNavigationTrigger.getAttribute("aria-expanded") === "false" &&
+            navigation.getAttribute("data-open") === "false")),
+      ),
+      accountMenuReady: Boolean(
+        identity instanceof HTMLButtonElement &&
+        accountPanel instanceof HTMLElement &&
+        identityLabel instanceof HTMLElement &&
+        accountLink instanceof HTMLElement &&
+        identity.getAttribute("aria-controls") === accountPanel.id &&
+        identity.getAttribute("aria-expanded") === "true" &&
+        !accountPanel.hidden &&
+        accountPanel.textContent?.includes("Conta conectada") &&
+        identityLabel.textContent?.trim() &&
+        identityStyle?.overflowWrap === "anywhere" &&
+        accountPanelBox &&
+        accountPanelBox.width > 0 &&
+        accountPanelBox.height > 0 &&
+        accountPanelBox.left >= -1 &&
+        accountPanelBox.right <= innerWidth + 1 &&
+        accountPanelBox.top >= -1 &&
+        accountPanelBox.bottom <= innerHeight + 1 &&
+        accountPanel.scrollWidth <= accountPanel.clientWidth + 1 &&
+        identityLabelBox &&
+        identityLabelBox.width > 0 &&
+        identityLabelBox.left >= accountPanelBox.left - 1 &&
+        identityLabelBox.right <= accountPanelBox.right + 1 &&
+        identityLabel.scrollWidth <= identityLabel.clientWidth + 1 &&
+        accountLink.getClientRects().length > 0,
+      ),
+      themeControlsVisible:
+        themeButtons.length === 3 &&
+        ["Claro", "Médio", "Escuro"].every((label) =>
+          themeButtons.some(
+            (button) => button.textContent?.trim() === label && button.getClientRects().length > 0,
+          ),
+        ),
       associativeStockControlsPresent:
         window.location.pathname !== "/app/simulacao/associativo-fluxo-linear" ||
         Boolean(
@@ -991,11 +1068,6 @@ async function inspectRoute(
                   associativeDisclaimer.getBoundingClientRect().top,
               ) <= 1),
         ),
-      identityTruncationReady:
-        !identityLabel ||
-        getComputedStyle(identityLabel).display === "none" ||
-        (getComputedStyle(identityLabel).overflow === "hidden" &&
-          getComputedStyle(identityLabel).textOverflow === "ellipsis"),
       simulatorActionEnabled: Boolean(enabledAction) && !enabledAction?.disabled,
       simulatorFormActionPresent: simulatorForm?.hasAttribute("action") ?? false,
       blockedCalculationMessagePresent:
@@ -1017,6 +1089,8 @@ async function inspectRoute(
           unavailableStyle?.cursor === "not-allowed"),
     };
   }, isSimulatorWorkspace);
+  await accountTrigger.click();
+  await accountPanel.waitFor({ state: "hidden", timeout: qaRouteBootstrapTimeout });
 
   const simulatorStatePassed = !isSimulatorWorkspace
     ? !snapshot.simulatorActionEnabled && !snapshot.simulatorFormActionPresent
@@ -1041,11 +1115,13 @@ async function inspectRoute(
     !snapshot.loginPresent &&
     snapshot.reducedMotion &&
     !snapshot.topbarCollision &&
+    snapshot.navigationGeometryReady &&
+    snapshot.accountMenuReady &&
+    snapshot.themeControlsVisible &&
     snapshot.associativeStockControlsPresent &&
     !snapshot.associativeStockCollision &&
     snapshot.associativeStockTouchTargetReady &&
     snapshot.associativeClosingAligned &&
-    snapshot.identityTruncationReady &&
     simulatorStatePassed &&
     snapshot.unavailableActionDistinct &&
     consoleErrors.length === consoleStart &&
@@ -1071,7 +1147,17 @@ async function setTheme(page, theme) {
   let lastError = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      await page
+      const themeSwitch = page.getByRole("group", {
+        name: "Aparência da página",
+        exact: true,
+      });
+      await themeSwitch.waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
+      for (const label of Object.values(themeLabels)) {
+        await themeSwitch
+          .getByRole("button", { name: label, exact: true })
+          .waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
+      }
+      await themeSwitch
         .getByRole("button", { name: themeLabels[theme], exact: true })
         .click({ timeout: qaRouteBootstrapTimeout });
       await page.waitForFunction(
@@ -1093,20 +1179,54 @@ async function setTheme(page, theme) {
 
 async function checkKeyboard(page, origin) {
   await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
-  const summary = page.locator("summary").first();
-  await summary.focus();
+  const disclosure = page
+    .locator('header button[data-navigation-root-control][aria-controls^="authorized-navigation-"]')
+    .first();
+  const disclosurePanelId = await disclosure.getAttribute("aria-controls");
+  if (!disclosurePanelId) throw new Error("Navigation disclosure panel is missing.");
+  const disclosurePanel = page.locator(`#${disclosurePanelId}`);
+  await disclosure.focus();
   await page.keyboard.press("Enter");
-  const opened = await summary.evaluate((element) => element.parentElement?.hasAttribute("open"));
+  const opened =
+    (await disclosure.getAttribute("aria-expanded")) === "true" &&
+    (await disclosurePanel.isVisible());
   await page.keyboard.press("Escape");
-  const closed = await summary.evaluate((element) => !element.parentElement?.hasAttribute("open"));
-  const focusReturned = await summary.evaluate((element) => document.activeElement === element);
+  const closed =
+    (await disclosure.getAttribute("aria-expanded")) === "false" &&
+    (await disclosurePanel.isHidden());
+  const focusReturned = await disclosure.evaluate((element) => document.activeElement === element);
+
+  const accountTrigger = page.locator(
+    'header button[data-session-identity][aria-controls="protected-account-menu"]',
+  );
+  const accountPanel = page.locator("#protected-account-menu");
+  await accountTrigger.focus();
+  await page.keyboard.press("Enter");
+  const accountOpened =
+    (await accountTrigger.getAttribute("aria-expanded")) === "true" &&
+    (await accountPanel.isVisible());
+  await page.keyboard.press("Escape");
+  const accountClosed =
+    (await accountTrigger.getAttribute("aria-expanded")) === "false" &&
+    (await accountPanel.isHidden());
+  const accountFocusReturned = await accountTrigger.evaluate(
+    (element) => document.activeElement === element,
+  );
 
   await page.keyboard.press("Tab");
   const tabReachedInteractive = await page.evaluate(() =>
-    document.activeElement?.matches("a, button, input, select, textarea, summary"),
+    document.activeElement?.matches("a, button, input, select, textarea"),
   );
 
-  return { opened: Boolean(opened), closed: Boolean(closed), focusReturned, tabReachedInteractive };
+  return {
+    opened: Boolean(opened),
+    closed: Boolean(closed),
+    focusReturned,
+    accountOpened: Boolean(accountOpened),
+    accountClosed: Boolean(accountClosed),
+    accountFocusReturned,
+    tabReachedInteractive,
+  };
 }
 
 async function checkDeferredInventory(page, origin, proposalStarted = false) {
@@ -2087,7 +2207,7 @@ function readTabelaoVerticalRegions() {
 function readTabelaoPinnedHeader() {
   const table = document.querySelector(".investor-stock-table");
   const results = document.querySelector(".investor-stock-results");
-  const navigation = document.querySelector(".tabelao-page-shell > .topbar");
+  const navigation = document.querySelector("[data-protected-topbar]");
   const headers = [...(table?.querySelectorAll("thead th") ?? [])];
   const navigationBox = navigation?.getBoundingClientRect();
   const tableBox = table?.getBoundingClientRect();
@@ -2993,6 +3113,9 @@ async function checkTabelaoValidation(page, origin) {
       region: row.getAttribute("data-inventory-region"),
       parkingSpaces: row.getAttribute("data-inventory-parking-spaces"),
       price: row.querySelector(".investor-stock-price")?.textContent?.trim(),
+      priceCents: Number(
+        row.querySelector(".investor-stock-price")?.textContent?.replace(/\D/g, ""),
+      ),
       availableUnits: Number(
         row.querySelector(".tabelao-stock-quantity")?.textContent.trim().replaceAll(".", ""),
       ),
@@ -3023,18 +3146,37 @@ async function checkTabelaoValidation(page, origin) {
     const index = regionOrder.indexOf(region);
     return index < 0 ? regionOrder.length : index;
   };
+  const normalizeGroupName = (value) =>
+    String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLocaleLowerCase("pt-BR")
+      .replace(/\s+/g, " ")
+      .trim();
+  const compareGroupNames = (left, right) => {
+    const leftName = normalizeGroupName(left);
+    const rightName = normalizeGroupName(right);
+    return (
+      projectCollator.compare(leftName, rightName) ||
+      (leftName < rightName ? -1 : leftName > rightName ? 1 : 0)
+    );
+  };
+  const compareRegions = (left, right) =>
+    rankRegion(left) - rankRegion(right) ||
+    projectCollator.compare(String(left ?? ""), String(right ?? ""));
   const groupedProjects = rendered.every((row, index, rows) => {
     if (index === 0) return true;
     const previous = rows[index - 1];
     const groupOrder =
-      rankRegion(previous.region) - rankRegion(row.region) ||
-      projectCollator.compare(previous.project, row.project) ||
-      projectCollator.compare(previous.businessUnit, row.businessUnit);
+      compareRegions(previous.region, row.region) ||
+      compareGroupNames(previous.project, row.project) ||
+      compareGroupNames(previous.businessUnit, row.businessUnit);
     return (
       groupOrder < 0 ||
       (groupOrder === 0 &&
-        syntheticTabelaoInventory[index - 1].minimumPrice <=
-          syntheticTabelaoInventory[index].minimumPrice)
+        Number.isFinite(previous.priceCents) &&
+        Number.isFinite(row.priceCents) &&
+        previous.priceCents <= row.priceCents)
     );
   });
 
@@ -3635,9 +3777,62 @@ async function checkTabelaoValidation(page, origin) {
     .getByText(syntheticTabelaoCountLabel, { exact: true })
     .waitFor({ state: "visible", timeout: qaNavigationTimeout });
 
-  const cookieBannerHidden =
-    (await page.getByRole("button", { name: "Preferências de cookies", exact: true }).count()) ===
-    0;
+  const cookiePreferencesTrigger = page.getByRole("button", {
+    name: "Preferências de cookies",
+    exact: true,
+  });
+  const cookiePreferencesBanner = page.locator('aside[aria-labelledby="cookie-consent-title"]');
+  const cookieTriggerSafe =
+    (await cookiePreferencesTrigger.count()) === 1 &&
+    (await cookiePreferencesBanner.count()) === 0 &&
+    (await cookiePreferencesTrigger.isVisible()) &&
+    (await cookiePreferencesTrigger.isEnabled()) &&
+    (await cookiePreferencesTrigger.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return (
+        element instanceof HTMLButtonElement &&
+        element.type === "button" &&
+        element.hasAttribute("data-qa-visual-volatile") &&
+        box.width >= 44 &&
+        box.height >= 44 &&
+        box.left >= 0 &&
+        box.right <= innerWidth &&
+        box.top >= 0 &&
+        box.bottom <= innerHeight
+      );
+    }));
+  let cookiePreferencesSafe = false;
+  if (cookieTriggerSafe) {
+    await cookiePreferencesTrigger.click();
+    await cookiePreferencesBanner.waitFor({ state: "visible", timeout: qaNavigationTimeout });
+    const lockedSecurityCategories = await cookiePreferencesBanner.evaluate((banner) =>
+      ["Essenciais", "Segurança"].every((label) => {
+        const category = [...banner.querySelectorAll("label")].find(
+          (candidate) => candidate.querySelector("strong")?.textContent?.trim() === label,
+        );
+        const checkbox = category?.querySelector('input[type="checkbox"]');
+        return checkbox instanceof HTMLInputElement && checkbox.checked && checkbox.disabled;
+      }),
+    );
+    const closePreferences = cookiePreferencesBanner.getByRole("button", {
+      name: "Fechar preferências",
+      exact: true,
+    });
+    const closeControlSafe =
+      (await closePreferences.count()) === 1 &&
+      (await closePreferences.isVisible()) &&
+      (await closePreferences.isEnabled());
+    if (closeControlSafe) {
+      await closePreferences.click();
+      await cookiePreferencesBanner.waitFor({ state: "hidden", timeout: qaNavigationTimeout });
+    }
+    cookiePreferencesSafe =
+      lockedSecurityCategories &&
+      closeControlSafe &&
+      (await cookiePreferencesBanner.count()) === 0 &&
+      (await cookiePreferencesTrigger.count()) === 1 &&
+      (await cookiePreferencesTrigger.isVisible());
+  }
   const responsiveGrid = viewportChecks.every((check) =>
     Object.entries(check)
       .filter(([key]) => key !== "key")
@@ -3674,7 +3869,7 @@ async function checkTabelaoValidation(page, origin) {
     emptyStateVisible,
     errorStateAccessible,
     loadingStateVisible,
-    cookieBannerHidden,
+    cookieBannerHidden: cookiePreferencesSafe,
   };
 }
 
@@ -4739,12 +4934,12 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
       const simulationMenuUnclipped = await checkArchiveMenuPanel(
         responsivePage,
         "Simulação",
-        "site-menu-simulation",
+        "authorized-navigation-crm-simulation",
       );
       const settingsMenuUnclipped = await checkArchiveMenuPanel(
         responsivePage,
         "Configurações",
-        "site-menu-settings",
+        "authorized-navigation-crm-settings",
       );
       responsiveMenuChecks[`menuAndBodyUnclippedAt${viewport.width}`] =
         simulationMenuUnclipped && settingsMenuUnclipped;
@@ -4770,7 +4965,10 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     await historyPage.evaluate((marker) => {
       window.__authenticatedDirectTableSpaMarker = marker;
     }, spaMarker);
-    const directTableHubLink = historyPage.locator(`a[href="${directTablePath}"]`).first();
+    const directTableHubLink = historyPage
+      .locator("[data-protected-main-content]")
+      .locator(`a[href="${directTablePath}"]`)
+      .first();
     await directTableHubLink.waitFor({ state: "visible", timeout: 10_000 });
     await directTableHubLink.click();
     await historyPage.waitForURL((url) => url.pathname === directTablePath, {
@@ -4781,7 +4979,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
       () => window.__authenticatedDirectTableSpaMarker,
     );
 
-    await historyPage.locator('a.brand-link[href="/app"]').click();
+    await historyPage.locator('[data-protected-brand][href="/app"]').click();
     await historyPage.waitForURL((url) => url.pathname === "/app", {
       timeout: qaNavigationTimeout,
     });
@@ -5373,9 +5571,14 @@ async function run() {
           try {
             await persistNavigationProgress();
             archiveNavigation = await checkArchiveNavigation(navigationPage, origin, {
-              openRoute: (destination) =>
-                gotoWithServerRetry(navigationPage, destination, { waitUntil: "domcontentloaded" }),
-              onCheck: async (check) => {
+              openRoute: (destination, activePage) =>
+                gotoWithServerRetry(activePage, destination, { waitUntil: "domcontentloaded" }),
+              pageFactory: async () => {
+                const freshPage = configureQaPage(await context.newPage());
+                freshPage.setDefaultTimeout(archiveNavigationActionTimeout);
+                return freshPage;
+              },
+              onCheck: async (check, activePage) => {
                 archiveNavigation.checks.push(check);
                 currentStage = `archive-navigation:${check.route}:${check.width}:${check.failedStage ?? "complete"}`;
                 await persistNavigationProgress();
@@ -5390,14 +5593,14 @@ async function run() {
                   !remoteHomologation &&
                   fixtureVerification === "rls-marker-v1" &&
                   identityVerification.accountPolicy === "qa.*@local.invalid" &&
-                  navigationPage.url() === `${origin}${check.route}`;
+                  activePage.url() === `${origin}${check.route}`;
                 check.failureScreenshot = {
                   status: "skipped",
                   reason: "requires-verified-local-ci-fixture-on-expected-route",
                 };
                 if (safeFixtureCapture) {
                   try {
-                    const buffer = await navigationPage.screenshot({
+                    const buffer = await activePage.screenshot({
                       fullPage: false,
                       animations: "allow",
                       timeout: archiveNavigationActionTimeout,

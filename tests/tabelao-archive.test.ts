@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 // @ts-expect-error — módulo de filtros preservado da Tabela Direta em JavaScript.
 import * as investorFilterOptions from "@/lib/archive-investor/investor-filter-options.mjs";
 
@@ -51,13 +52,6 @@ describe("Tabelão protegido", () => {
       new URL("../app/(protected)/app/simulacao/_components/TabelaoClient.tsx", import.meta.url),
       "utf8",
     );
-    const menu = readFileSync(
-      new URL(
-        "../app/(protected)/app/simulacao/_components/archive-investor/SiteMenu.tsx",
-        import.meta.url,
-      ),
-      "utf8",
-    );
     const rootLayout = readFileSync(new URL("../app/layout.tsx", import.meta.url), "utf8");
     const cookieBanner = readFileSync(
       new URL("../app/_components/CookieConsentBanner.tsx", import.meta.url),
@@ -73,13 +67,21 @@ describe("Tabelão protegido", () => {
     );
 
     expect(page).toContain('await enforcePermission("crm.simulators.view")');
+    expect(page).toContain('getProtectedPageGate("/app/simulacao/tabelao")?.releaseEnabled');
+    expect(page).toContain("forbidden()");
     expect(page).toContain('alternates: { canonical: "/app/simulacao/tabelao" }');
     expect(page).toContain("<TabelaoArchive />");
-    expect(menu).toContain('href: "/app/simulacao/tabelao"');
-    expect(menu).toContain('aria-current={pathname === href ? "page" : undefined}');
+    expect(getProtectedPageGate("/app/simulacao/tabelao")).toEqual({
+      pageKey: "crm.simulation.tabelao",
+      path: "/app/simulacao/tabelao",
+      permission: "crm.simulators.view",
+      releaseEnabled: true,
+    });
     expect(archive).toContain(
       'className="app-shell simulation-page-shell investor-page-shell tabelao-page-shell"',
     );
+    expect(archive).not.toContain("ArchiveHeader");
+    expect(archive).not.toContain("SiteMenu");
     expect(archive).toContain('className="goal-page-hero investor-compact-hero"');
     expect(archive).toContain("<h1>Simulador Tabelão</h1>");
     expect(archive).toContain("<InvestorInfoHint");
@@ -99,10 +101,13 @@ describe("Tabelão protegido", () => {
     expect(client).not.toContain("investor-inventory.json");
     expect(client).not.toContain("isInvestorEligibleUnit");
     expect(client).toContain("Nenhuma fonte alternativa foi usada");
+    expect(client).toContain('document.querySelector<HTMLElement>("[data-protected-topbar]")');
+    expect(client).toContain('shell?.querySelector<HTMLElement>(":scope > .topbar")');
     expect(rootLayout).toContain("suppressHydrationWarning");
-    expect(cookieBanner).toContain('"/app/simulacao/tabelao"');
-    expect(protectedShell).toContain('"/app/simulacao/tabelao"');
-    expect(authorizedBreadcrumbs).toContain('"/app/simulacao/tabelao"');
+    expect(cookieBanner).not.toContain("ARCHIVE_SIMULATOR_ROUTES");
+    expect(protectedShell).toContain("data-protected-shell");
+    expect(protectedShell).not.toContain("usePathname");
+    expect(authorizedBreadcrumbs).not.toContain("ARCHIVE_SIMULATOR_ROUTES");
   });
 
   it("preserva sete selects e quatorze colunas compactas", () => {

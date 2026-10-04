@@ -1,11 +1,8 @@
-import Link from "next/link";
-
 import {
   InvestorCalculator,
   InvestorGuideLauncher,
   InvestorInfoHint,
 } from "./archive-investor/InvestorCalculator";
-import { ArchiveHeader } from "./archive-investor/ArchiveHeader";
 import "./archive-investor/investor-archive.css";
 
 const INVESTOR_DESCRIPTION =
@@ -14,17 +11,9 @@ const INVESTOR_DESCRIPTION =
 export function InvestorTableArchive() {
   return (
     <div className="app-shell simulation-page-shell investor-page-shell investor-standard-table-page">
-      <ArchiveHeader />
       <main className="investor-main">
         <section className="goal-page-hero investor-compact-hero">
           <div className="goal-hero-copy">
-            <nav className="documentation-breadcrumb" aria-label="Trilha de navegação">
-              <Link href="/app/simulacao" prefetch={false}>
-                Simulação
-              </Link>
-              <span aria-hidden="true">/</span>
-              <strong>Simulador Tabela Investidor</strong>
-            </nav>
             <p className="goal-kicker">Simulação comercial</p>
             <div className="investor-hero-title">
               <h1>Simulador Tabela Investidor</h1>

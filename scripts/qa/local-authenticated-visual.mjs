@@ -958,7 +958,19 @@ async function assertFreshProductionBuild() {
   }
 
   const inputs = [...new Set(stdout.split("\0").filter(Boolean))];
-  const inputStats = await Promise.all(inputs.map((file) => stat(path.join(repositoryRoot, file))));
+  const inputStats = await Promise.all(
+    inputs.map(async (file) => {
+      const inputPath = path.join(repositoryRoot, file);
+      try {
+        return await stat(inputPath);
+      } catch (error) {
+        if (error?.code !== "ENOENT") throw error;
+        // A tracked deletion is also a build input. Directory mtime records the
+        // removal without requiring the deleted path to remain on disk.
+        return await stat(path.dirname(inputPath));
+      }
+    }),
+  );
   if (inputStats.some((input) => input.mtimeMs > buildStat.mtimeMs)) {
     throw new Error("Production build is stale; run pnpm build before local visual QA.");
   }
@@ -1858,7 +1870,61 @@ export async function verifyFixturesThroughRls({ apiUrl, publishableKey, account
   }
 
   try {
-    const [
+    const fixtureQueryLabels = [
+      "profile",
+      "userRole",
+      "scopeGrants",
+      "dashboardSnapshot",
+      "rankingSnapshot",
+      "pointSettings",
+      "pointMetrics",
+      "funnelGoals",
+    ];
+    // Keep authenticated RLS probes sequential. The local GoTrue/PostgREST stack can
+    // otherwise race one request onto a stale auth snapshot and return a lone PGRST303
+    // while the remaining requests in the same batch succeed with the same session.
+    const profile = await client
+      .from("profiles")
+      .select("user_id,access_status,is_active")
+      .eq("user_id", account.id)
+      .single();
+    const userRole = await client
+      .from("user_roles")
+      .select("role_key")
+      .eq("user_id", account.id)
+      .single();
+    const scopeGrants = await client
+      .from("crm_user_reporting_scope_grants")
+      .select("reporting_scope_id,valid_from,valid_until,revoked_at")
+      .eq("user_id", account.id);
+    const dashboardSnapshot = await client
+      .from("crm_dashboard_snapshots")
+      .select("id,source")
+      .eq("snapshot_key", "global")
+      .eq("source", marker)
+      .single();
+    const rankingSnapshot = await client
+      .from("crm_ranking_snapshots")
+      .select("id,source,roulette_available")
+      .eq("snapshot_key", "global")
+      .eq("source", marker)
+      .single();
+    const pointSettings = await client
+      .from("crm_point_settings")
+      .select("updated_by")
+      .eq("setting_key", "default")
+      .eq("updated_by", account.id)
+      .single();
+    const pointMetrics = await client
+      .from("crm_point_metrics")
+      .select("metric_key")
+      .eq("setting_key", "default");
+    const funnelGoals = await client
+      .from("crm_funnel_goals")
+      .select("profile_key,updated_by")
+      .eq("updated_by", account.id);
+
+    const fixtureQueryResults = [
       profile,
       userRole,
       scopeGrants,
@@ -1867,54 +1933,21 @@ export async function verifyFixturesThroughRls({ apiUrl, publishableKey, account
       pointSettings,
       pointMetrics,
       funnelGoals,
-    ] = await Promise.all([
-      client
-        .from("profiles")
-        .select("user_id,access_status,is_active")
-        .eq("user_id", account.id)
-        .single(),
-      client.from("user_roles").select("role_key").eq("user_id", account.id).single(),
-      client
-        .from("crm_user_reporting_scope_grants")
-        .select("reporting_scope_id,valid_from,valid_until,revoked_at")
-        .eq("user_id", account.id),
-      client
-        .from("crm_dashboard_snapshots")
-        .select("id,source")
-        .eq("snapshot_key", "global")
-        .eq("source", marker)
-        .single(),
-      client
-        .from("crm_ranking_snapshots")
-        .select("id,source,roulette_available")
-        .eq("snapshot_key", "global")
-        .eq("source", marker)
-        .single(),
-      client
-        .from("crm_point_settings")
-        .select("updated_by")
-        .eq("setting_key", "default")
-        .eq("updated_by", account.id)
-        .single(),
-      client.from("crm_point_metrics").select("metric_key").eq("setting_key", "default"),
-      client.from("crm_funnel_goals").select("profile_key,updated_by").eq("updated_by", account.id),
-    ]);
-
+    ];
+    const failedFixtureQueries = fixtureQueryResults.flatMap((result, index) =>
+      result.error
+        ? [`${fixtureQueryLabels[index]}:${result.error.code || result.status || "failed"}`]
+        : [],
+    );
     if (
-      [
-        profile,
-        userRole,
-        scopeGrants,
-        dashboardSnapshot,
-        rankingSnapshot,
-        pointSettings,
-        pointMetrics,
-        funnelGoals,
-      ].some((result) => result.error) ||
+      failedFixtureQueries.length > 0 ||
       !dashboardSnapshot.data?.id ||
       !rankingSnapshot.data?.id
     ) {
-      throw new Error("Synthetic fixtures are not readable through QA RLS.");
+      const diagnostic = failedFixtureQueries.length
+        ? ` (${failedFixtureQueries.join(", ")})`
+        : " (required snapshot id missing)";
+      throw new Error(`Synthetic fixtures are not readable through QA RLS${diagnostic}.`);
     }
 
     const currentTime = Date.now();
@@ -1950,25 +1983,22 @@ export async function verifyFixturesThroughRls({ apiUrl, publishableKey, account
       throw new Error("Master QA global reporting scope validation failed.");
     }
 
-    const [dashboardViews, dashboardMetrics, dashboardDevelopments, rankingParticipants] =
-      await Promise.all([
-        client
-          .from("crm_dashboard_views")
-          .select("view_key")
-          .eq("snapshot_id", dashboardSnapshot.data.id),
-        client
-          .from("crm_dashboard_metrics")
-          .select("view_key,stage_key")
-          .eq("snapshot_id", dashboardSnapshot.data.id),
-        client
-          .from("crm_dashboard_top_developments")
-          .select("view_key,rank")
-          .eq("snapshot_id", dashboardSnapshot.data.id),
-        client
-          .from("crm_ranking_participants")
-          .select("period_key,broker_key,roulette,roulette_saturday,roulette_sunday")
-          .eq("snapshot_id", rankingSnapshot.data.id),
-      ]);
+    const dashboardViews = await client
+      .from("crm_dashboard_views")
+      .select("view_key")
+      .eq("snapshot_id", dashboardSnapshot.data.id);
+    const dashboardMetrics = await client
+      .from("crm_dashboard_metrics")
+      .select("view_key,stage_key")
+      .eq("snapshot_id", dashboardSnapshot.data.id);
+    const dashboardDevelopments = await client
+      .from("crm_dashboard_top_developments")
+      .select("view_key,rank")
+      .eq("snapshot_id", dashboardSnapshot.data.id);
+    const rankingParticipants = await client
+      .from("crm_ranking_participants")
+      .select("period_key,broker_key,roulette,roulette_saturday,roulette_sunday")
+      .eq("snapshot_id", rankingSnapshot.data.id);
 
     if (
       [dashboardViews, dashboardMetrics, dashboardDevelopments, rankingParticipants].some(

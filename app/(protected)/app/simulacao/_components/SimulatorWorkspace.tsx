@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   useEffect,
   useRef,
@@ -15,7 +14,6 @@ import {
   UnavailableValue,
 } from "@/app/(protected)/app/_components/analytics";
 import {
-  SIMULATOR_LIST,
   type SimulatorDefinition,
   type SimulatorField,
   type SimulatorSection,
@@ -487,12 +485,10 @@ export function SimulatorWorkspace({
   definition,
   executionEnabled = false,
   executionReason = UNAVAILABLE_MESSAGE,
-  releasedSimulatorSlugs = [],
 }: {
   definition: SimulatorDefinition;
   executionEnabled?: boolean;
   executionReason?: string;
-  releasedSimulatorSlugs?: readonly string[];
 }) {
   const [values, setValues] = useState<Record<string, string | boolean>>(() =>
     officialSimulatorInitialValues(definition.slug),
@@ -970,35 +966,6 @@ export function SimulatorWorkspace({
                 <strong>{executionAllowed ? "Validação Master" : "Aguardando validação"}</strong>
               </span>
             </div>
-          }
-          footer={
-            <nav aria-label="Ferramentas de simulação" className={styles.simulatorNav}>
-              <Link href="/app/simulacao" prefetch={false}>
-                Todas
-              </Link>
-              {SIMULATOR_LIST.map((simulator) =>
-                releasedSimulatorSlugs.includes(simulator.slug) ? (
-                  <Link
-                    key={simulator.slug}
-                    href={`/app/simulacao/${simulator.slug}`}
-                    prefetch={false}
-                    aria-current={simulator.slug === definition.slug ? "page" : undefined}
-                  >
-                    {simulator.code}
-                  </Link>
-                ) : (
-                  <span
-                    aria-label={`${simulator.code} · Aguardando autorização`}
-                    aria-disabled="true"
-                    className={styles.simulatorNavBlocked}
-                    data-release-state="blocked"
-                    key={simulator.slug}
-                  >
-                    {simulator.code}
-                  </span>
-                ),
-              )}
-            </nav>
           }
         />
 

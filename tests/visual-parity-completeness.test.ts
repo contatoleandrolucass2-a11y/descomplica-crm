@@ -157,6 +157,10 @@ describe("isolated authenticated visual QA contract", () => {
     expect(fixture).toContain("JSON.stringify(expectedDesc.slice(6, 12))");
     expect(fixture).toContain("new Set(rows.map((row) => row.dataset.inventoryRegion)).size === 1");
     expect(fixture).not.toContain("sortTabelaoInventory");
+    expect(script).toContain("const compareGroupNames = (left, right) =>");
+    expect(script).toContain("leftName < rightName ? -1 : leftName > rightName ? 1 : 0");
+    expect(script).toContain("previous.priceCents <= row.priceCents");
+    expect(script).not.toContain("syntheticTabelaoInventory[index - 1].minimumPrice");
     expect(script).toContain('"Localizando (0)"');
     expect(script).toContain('selectOption("localizacao indisponivel")');
     expect(script).not.toContain('"Não confirmada (0)"');
@@ -174,6 +178,12 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain('style.textOrientation === "upright"');
     expect(script).toContain('style.transform === "none"');
     expect(script).toContain("valid && regions.size === 5");
+    expect(script).toContain(
+      'const navigation = document.querySelector("[data-protected-topbar]")',
+    );
+    expect(script).not.toContain(
+      'const navigation = document.querySelector(".tabelao-page-shell > .topbar")',
+    );
     expect(script).toContain("Math.abs(box.top - visibleTop) > 2");
     expect(script).toContain("const clientLeft = frameBox.left + results.clientLeft");
     expect(script).toContain("const clientRight = clientLeft + results.clientWidth");
@@ -192,6 +202,20 @@ describe("isolated authenticated visual QA contract", () => {
       "initial.desktopLimitadorVisible = compactLayout.desktopLimitadorVisible",
     );
     expect(script).toContain(".every(([, value]) => value === true)");
+  });
+
+  it("mantém o gatilho global de cookies visível e as categorias obrigatórias bloqueadas", () => {
+    const script = source("scripts/qa/authenticated-visual.mjs");
+    expect(script).toContain("const cookiePreferencesTrigger = page.getByRole");
+    expect(script).toContain("(await cookiePreferencesTrigger.count()) === 1");
+    expect(script).toContain('element.hasAttribute("data-qa-visual-volatile")');
+    expect(script).toContain('["Essenciais", "Segurança"].every((label) =>');
+    expect(script).toContain("checkbox.checked && checkbox.disabled");
+    expect(script).toContain('name: "Fechar preferências"');
+    expect(script).toContain("cookieBannerHidden: cookiePreferencesSafe");
+    expect(script).not.toMatch(
+      /getByRole\("button", \{ name: "Preferências de cookies", exact: true \}\)\.count\(\)\) ===\s*0/,
+    );
   });
 
   it("requires a local Supabase QA identity and captures every responsive route", () => {
@@ -249,6 +273,7 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain('await projectFilter.selectOption("Todos")');
     expect(script).toContain('name: "Iniciar proposta com QA-0001"');
     expect(script).toContain('name: "Iniciar proposta com QA-0007"');
+    expect(script).toContain('.locator("[data-protected-main-content]")');
     expect(script).toContain('element.dispatchEvent(new Event("scroll"))');
     expect(script.match(/element\.dispatchEvent\(new Event\("scroll"\)\)/g)).toHaveLength(2);
     expect(script).toContain("await readyProposalUnitButton.click()");

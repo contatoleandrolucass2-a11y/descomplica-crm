@@ -16,6 +16,15 @@
   --shadow: 0 20px 60px rgba(25, 48, 80, 0.1);
 }
 
+/*
+ * O shell protegido global agora fornece a altura da viewport, a topbar e o breadcrumb.
+ * O `app-shell` legado não pode reservar outra viewport inteira dentro dele: isso gera
+ * rolagem vazia mesmo quando todo o conteúdo inicial do Associativo cabe na tela.
+ */
+.investor-page-shell.investor-associative-table-page {
+  min-height: 0;
+}
+
 /* Associativo: o titulo principal ja identifica a pagina; evite espaco duplicado no topo. */
 .investor-page-shell.investor-associative-table-page .investor-main {
   padding-top: 8px;
@@ -8242,15 +8251,6 @@ a {
   min-height:24px!important;
 }
 
-/* Configurações quebra para a segunda linha nessas larguras; o painel deve abrir para dentro da viewport. */
-@media (min-width:521px) and (max-width:900px) {
-  .investor-page-shell.investor-direct-table-page>.simulation-topbar #site-menu-settings {
-    right:auto;
-    left:0;
-    transform-origin:top left;
-  }
-}
-
 .investor-proposal-layout { display:grid; grid-template-columns:minmax(0,1fr); align-items:start; gap:20px; min-width:0; }
 .investor-proposal-layout>.investor-flow-panel,.investor-proposal-layout>.investor-result-panel { grid-column:1; align-self:start; min-width:0; width:100%; height:auto; }
 .investor-flow-panel,.investor-result-panel { background:linear-gradient(145deg,var(--inv-color-panel-muted, #0b2942),var(--inv-color-panel-muted, #0c3149)); }
@@ -11103,6 +11103,27 @@ a {
   align-items:center;
   justify-content:flex-end;
   gap:7px;
+}
+@media (max-width:360px) {
+  .documentation-values-panel .documentation-money-field > .documentation-money-heading {
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr);
+    align-items:start;
+    gap:4px;
+  }
+  .documentation-values-panel .documentation-money-field > .documentation-money-heading .documentation-money-heading-meta {
+    width:100%;
+    min-width:0;
+    justify-content:space-between;
+    gap:4px;
+    padding-right:6px;
+  }
+  .documentation-values-panel .documentation-money-field > .documentation-money-heading .documentation-money-heading-meta small {
+    min-width:0;
+    overflow-wrap:anywhere;
+    line-height:1.2;
+    white-space:normal;
+  }
 }
 .documentation-info-hint {
   position:relative;

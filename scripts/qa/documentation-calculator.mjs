@@ -84,6 +84,103 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
         () => document.documentElement.scrollWidth > innerWidth + 1,
       );
       assert.equal(overflow, false, `Documentation overflow at ${width}px/${theme}`);
+      let financingHeadingNoCollision = true;
+      if (width === 320) {
+        const financingHeading = await form
+          .getByRole("textbox", { name: "Financiamento", exact: true })
+          .locator(
+            "xpath=ancestor::*[contains(concat(' ', normalize-space(@class), ' '), ' documentation-money-field ')][1]",
+          )
+          .evaluate((field) => {
+            const heading = field.querySelector(".documentation-money-heading");
+            const label = heading?.querySelector(":scope > strong");
+            const metadata = heading?.querySelector(".documentation-money-heading-meta");
+            const note = metadata?.querySelector(":scope > small");
+            if (!heading || !label || !metadata || !note) return false;
+            const headingBounds = heading.getBoundingClientRect();
+            const labelBounds = label.getBoundingClientRect();
+            const metadataBounds = metadata.getBoundingClientRect();
+            const noteBounds = note.getBoundingClientRect();
+            const textCollides =
+              labelBounds.left < noteBounds.right &&
+              labelBounds.right > noteBounds.left &&
+              labelBounds.top < noteBounds.bottom &&
+              labelBounds.bottom > noteBounds.top;
+            const checks = {
+              grid: getComputedStyle(heading).display === "grid",
+              rowsSeparated: metadataBounds.top >= labelBounds.bottom - 1,
+              labelVisible: labelBounds.width > 0,
+              noteVisible: noteBounds.width > 0,
+              textDoesNotCollide: !textCollides,
+              labelContained:
+                labelBounds.left >= headingBounds.left - 1 &&
+                labelBounds.right <= headingBounds.right + 1,
+              noteContained:
+                noteBounds.left >= headingBounds.left - 1 &&
+                noteBounds.right <= headingBounds.right + 1,
+            };
+            const round = (value) => Math.round(value * 100) / 100;
+            return {
+              passed: Object.values(checks).every(Boolean),
+              checks,
+              bounds: Object.fromEntries(
+                Object.entries({
+                  heading: headingBounds,
+                  label: labelBounds,
+                  metadata: metadataBounds,
+                  note: noteBounds,
+                }).map(([name, rect]) => [
+                  name,
+                  {
+                    x: round(rect.x),
+                    y: round(rect.y),
+                    width: round(rect.width),
+                    height: round(rect.height),
+                  },
+                ]),
+              ),
+            };
+          });
+        financingHeadingNoCollision = financingHeading.passed;
+        assert.ok(
+          financingHeadingNoCollision,
+          `Financing label and percentage must not collide at ${width}px/${theme}: ${JSON.stringify(financingHeading)}`,
+        );
+      }
+      if (width === 768 && theme === "dark") {
+        await expect
+          .poll(
+            () =>
+              result.locator(".documentation-breakdown").evaluate((node) => {
+                const color = (selector) => {
+                  const element = node.querySelector(selector);
+                  return element ? getComputedStyle(element).color : null;
+                };
+                return {
+                  rootTheme: document.documentElement.dataset.theme ?? null,
+                  surface: getComputedStyle(node).backgroundColor,
+                  heading: color("h3"),
+                  term: color("dt"),
+                  value: color("dd"),
+                  totalTerm: color(".documentation-breakdown-total dt"),
+                  totalValue: color(".documentation-breakdown-total dd"),
+                };
+              }),
+            {
+              message: "Documentation must settle on the final dark contrast colors at 768px",
+              timeout: 5_000,
+            },
+          )
+          .toEqual({
+            rootTheme: "dark",
+            surface: "rgb(15, 45, 65)",
+            heading: "rgb(244, 251, 255)",
+            term: "rgb(180, 202, 216)",
+            value: "rgb(244, 251, 255)",
+            totalTerm: "rgb(34, 184, 197)",
+            totalValue: "rgb(244, 251, 255)",
+          });
+      }
       const accessibility = await new AxeBuilder({ page })
         .include(".documentation-page-shell")
         .analyze();
@@ -100,7 +197,13 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
         fullPage: true,
         animations: "disabled",
       });
-      matrix.push({ width, theme, overflow, accessibilityViolations: 0 });
+      matrix.push({
+        width,
+        theme,
+        overflow,
+        financingHeadingNoCollision,
+        accessibilityViolations: 0,
+      });
     }
   }
   // Browser zoom reflows the CSS viewport; CSS zoom alone does not update media queries.

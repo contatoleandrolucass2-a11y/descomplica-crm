@@ -8,10 +8,11 @@ export interface ProtectedPageGate {
 }
 
 // Covers the complete 22-route HTTP smoke inventory. Seventeen entries mirror
-// app_pages; Tabelão and WF14 are additional release-enabled replicas linked from
-// the simulator-local menu. Documentation is also released; CAIXA remains disabled. The
-// database remains authoritative for global navigation and RLS; this copy lets
-// Proxy return a real 403 before disabled code can stream.
+// app_pages; four additional simulator routes are released through the protected
+// server-built navigation only after the catalog parent and effective permission
+// are authorized. CAIXA remains a non-link blocked state. Database permissions,
+// route guards and RLS remain authoritative; this copy lets Proxy return a real
+// 403 before disabled code can stream.
 export const PROTECTED_PAGE_GATES = [
   {
     pageKey: "crm.dashboard",

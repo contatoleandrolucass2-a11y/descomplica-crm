@@ -226,34 +226,43 @@ export async function checkAssociativeCommissionGeometry(commission) {
   return geometry;
 }
 
-export async function checkCompactArchiveHeader(page) {
-  const result = await page.locator("header:has(#archive-navigation)").evaluate((header) => {
+export async function checkProtectedTopbar(page) {
+  await expect(page.locator("[data-protected-topbar]")).toHaveCount(1);
+  const result = await page.locator("[data-protected-topbar]").evaluate((header) => {
     const group = header.querySelector('[role="group"][aria-label="Aparência da página"]');
     const controls = [group, ...group.querySelectorAll("button")];
+    const selected = group.querySelector('[aria-pressed="true"]');
     return {
       height: header.getBoundingClientRect().height,
-      maximumHeight: innerWidth <= 600 ? 98 : 56,
-      textAndIconsOnly: controls.every((element) => {
-        const css = getComputedStyle(element);
+      maximumHeight: innerWidth <= 600 ? 100 : 56,
+      controlsContained: controls.every((element) => {
+        const control = element.getBoundingClientRect();
+        const bounds = header.getBoundingClientRect();
         return (
-          css.backgroundColor === "rgba(0, 0, 0, 0)" &&
-          css.backgroundImage === "none" &&
-          css.borderWidth === "0px" &&
-          css.boxShadow === "none"
+          control.width > 0 &&
+          control.height > 0 &&
+          control.left >= bounds.left - 1 &&
+          control.right <= bounds.right + 1 &&
+          control.top >= bounds.top - 1 &&
+          control.bottom <= bounds.bottom + 1
         );
       }),
       touchTargets: [...group.querySelectorAll("button")].every(
         (button) => button.getBoundingClientRect().height >= 44,
       ),
-      selectedUnderlined: getComputedStyle(
-        group.querySelector('[aria-pressed="true"]'),
-      ).textDecorationLine.includes("underline"),
+      selectedCued:
+        selected instanceof HTMLElement &&
+        getComputedStyle(selected).boxShadow !== "none" &&
+        selected.getAttribute("aria-pressed") === "true",
     };
   });
-  assert.ok(result.height <= result.maximumHeight, "Header must have compact vertical spacing");
-  assert.ok(result.textAndIconsOnly, "Theme selector must show text and icons without boxes");
+  assert.ok(
+    result.height <= result.maximumHeight,
+    "Protected topbar must have compact vertical spacing",
+  );
+  assert.ok(result.controlsContained, "Theme controls must remain inside the protected topbar");
   assert.ok(result.touchTargets, "Theme controls must retain 44px touch targets");
-  assert.ok(result.selectedUnderlined, "Selected theme must not depend on color alone");
+  assert.ok(result.selectedCued, "Selected theme must not depend on color alone");
   return result;
 }
 
@@ -261,7 +270,11 @@ export async function checkAssociativeCompactStock(page) {
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   const hero = await page.locator(".investor-associative-hero").evaluate((element) => {
     const bounds = (selector) => document.querySelector(selector).getBoundingClientRect();
-    const header = bounds("header:has(#archive-navigation)");
+    const protectedTopbar = bounds("[data-protected-topbar]");
+    const protectedContent = bounds("[data-protected-main-content]");
+    const main = bounds(".investor-main");
+    const breadcrumb = document.querySelector('nav[aria-label="Breadcrumb"]');
+    const breadcrumbBounds = breadcrumb?.getBoundingClientRect();
     const title = bounds(".investor-hero-title h1");
     const titleRow = bounds(".investor-hero-title");
     const guide = bounds(".investor-hero-guide");
@@ -272,8 +285,13 @@ export async function checkAssociativeCompactStock(page) {
     label.selectNodeContents(buttonElement);
     const stacked = getComputedStyle(element).gridTemplateColumns.split(" ").length === 1;
     return {
-      titleTopGap: title.top - header.bottom,
-      guideTopGap: guide.top - (stacked ? titleRow.bottom : header.bottom),
+      titleContentInset: title.top - main.top,
+      titleBelowProtectedTopbar: title.top >= protectedTopbar.bottom - 1,
+      titleInsideProtectedContent:
+        title.top >= protectedContent.top - 1 && title.bottom <= protectedContent.bottom + 1,
+      titleBelowBreadcrumb: !breadcrumbBounds || title.top >= breadcrumbBounds.bottom - 1,
+      stacked,
+      guideTopGap: stacked ? guide.top - titleRow.bottom : guide.top - titleRow.top,
       buttonHeight: button.height,
       expectedButtonHeight: matchMedia("(pointer: coarse)").matches ? 44 : 32,
       buttonFits: button.bottom <= element.getBoundingClientRect().bottom,
@@ -282,8 +300,17 @@ export async function checkAssociativeCompactStock(page) {
       guideLabelRemoved: !element.querySelector(".investor-hero-guide-information small"),
     };
   });
-  assert.ok(Math.abs(hero.titleTopGap - 8) <= 1, "Title must sit close to the menu divider");
-  assert.ok(Math.abs(hero.guideTopGap - 8) <= 1, "Guide must align at the top without excess gaps");
+  assert.ok(
+    Math.abs(hero.titleContentInset - 8) <= 1,
+    "Title must keep the compact inset of the simulator content",
+  );
+  assert.ok(hero.titleBelowProtectedTopbar, "Title must not overlap the protected topbar");
+  assert.ok(hero.titleInsideProtectedContent, "Title must remain inside protected content");
+  assert.ok(hero.titleBelowBreadcrumb, "Title must not overlap the authorized breadcrumb");
+  assert.ok(
+    Math.abs(hero.guideTopGap - (hero.stacked ? 8 : 0)) <= 1,
+    "Guide must align with the local simulator heading without excess gaps",
+  );
   assert.equal(
     hero.buttonHeight,
     hero.expectedButtonHeight,
