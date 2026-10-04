@@ -83,7 +83,11 @@ function AccountMenuState({ children, identity, role }: AccountMenuProps) {
         <span className={styles.accountAvatar} aria-hidden="true">
           {initials}
         </span>
-        <span className={styles.accountTriggerIdentity} aria-hidden="true">
+        <span
+          className={styles.accountTriggerIdentity}
+          aria-hidden="true"
+          data-session-identity-trigger-label
+        >
           {identity}
         </span>
         <ChevronDown

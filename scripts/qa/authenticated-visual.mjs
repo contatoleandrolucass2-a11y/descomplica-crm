@@ -110,8 +110,8 @@ const routes = [
   "/app/simulacao/associativo-fluxo-linear",
   "/app/simulacao/calcular-documentacao",
   "/app/simulacao/tabela-direta",
-  "/app/simulacao/tabela-investidor",
   "/app/simulacao/tabelao",
+  "/app/simulacao/tabela-investidor",
   "/admin",
   "/admin/usuarios",
   "/admin/paginas",
@@ -917,6 +917,7 @@ async function inspectRoute(
       ? navigation
       : mobileNavigationTrigger;
     const identity = document.querySelector("[data-session-identity]");
+    const identityTriggerLabel = document.querySelector("[data-session-identity-trigger-label]");
     const identityLabel = document.querySelector("[data-session-identity-label]");
     const accountPanel = document.querySelector("#protected-account-menu");
     const accountLink = accountPanel?.querySelector('a[href="/conta/seguranca"]');
@@ -979,6 +980,9 @@ async function inspectRoute(
     const accountPanelBox = accountPanel?.getBoundingClientRect();
     const identityLabelBox = identityLabel?.getBoundingClientRect();
     const identityStyle = identityLabel ? getComputedStyle(identityLabel) : null;
+    const identityTriggerLabelStyle = identityTriggerLabel
+      ? getComputedStyle(identityTriggerLabel)
+      : null;
     const navigationSurfaceBox = navigationSurface?.getBoundingClientRect();
     const navigationVisible = Boolean(navigation?.getClientRects().length);
     const themeButtons = themeSwitch ? [...themeSwitch.querySelectorAll("button")] : [];
@@ -1058,6 +1062,14 @@ async function inspectRoute(
         identityLabelBox.right <= accountPanelBox.right + 1 &&
         identityLabel.scrollWidth <= identityLabel.clientWidth + 1 &&
         accountLink.getClientRects().length > 0,
+      ),
+      identityTruncationReady: Boolean(
+        identityTriggerLabel instanceof HTMLElement &&
+        identityTriggerLabelStyle &&
+        (identityTriggerLabelStyle.display === "none" ||
+          (identityTriggerLabelStyle.overflow === "hidden" &&
+            identityTriggerLabelStyle.textOverflow === "ellipsis" &&
+            identityTriggerLabelStyle.whiteSpace === "nowrap")),
       ),
       themeControlsVisible:
         themeButtons.length === 3 &&
@@ -1148,6 +1160,7 @@ async function inspectRoute(
     !snapshot.topbarCollision &&
     snapshot.navigationGeometryReady &&
     snapshot.accountMenuReady &&
+    snapshot.identityTruncationReady &&
     snapshot.themeControlsVisible &&
     snapshot.associativeStockControlsPresent &&
     !snapshot.associativeStockCollision &&

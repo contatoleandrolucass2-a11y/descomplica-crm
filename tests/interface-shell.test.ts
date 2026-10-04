@@ -65,6 +65,7 @@ describe("protected interface shell", () => {
     expect(accountMenu).toContain("getIdentityInitials(identity)");
     expect(accountMenu).toContain("<ChevronDown");
     expect(accountMenu).toContain("aria-label={`Conta de ${identity}`}");
+    expect(accountMenu).toContain("data-session-identity-trigger-label");
     expect(shellStylesheet).toMatch(/\.accountProfile \{[\s\S]*overflow-wrap: anywhere/);
     expect(shellStylesheet).toContain("@media (max-width: 1180px)");
     expect(shellStylesheet).toMatch(

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const expectedReferenceRoutes = [
@@ -38,10 +39,10 @@ const expectedProtectedRoutes = [
   "/app/configuracoes/metas/pontos",
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
-  "/app/simulacao/tabelao",
   "/app/simulacao/calcular-documentacao",
   "/app/simulacao/caixa",
   "/app/simulacao/tabela-direta",
+  "/app/simulacao/tabelao",
   "/app/simulacao/tabela-investidor",
   "/admin",
   "/admin/usuarios",
@@ -499,6 +500,24 @@ describe("versioned reference parity catalog", () => {
     expect(authenticatedResults.baselineUsed.fileCount).toBe(visualEvidenceCount);
     expect(authenticatedResults.baselineUsed.files).toHaveLength(visualEvidenceCount);
     expect(authenticatedResults.baselineUsed.manifestSha256).toMatch(/^[a-f0-9]{64}$/);
+
+    const baselineRoot = path.resolve(
+      import.meta.dirname,
+      "../docs/qa/reference-parity/target-authenticated",
+    );
+    const baselineFiles = readdirSync(baselineRoot, { recursive: true, withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".webp"))
+      .map((entry) =>
+        path
+          .relative(baselineRoot, path.join(entry.parentPath, entry.name))
+          .split(path.sep)
+          .join("/"),
+      )
+      .sort();
+    const manifestedBaselineFiles = authenticatedResults.baselineUsed.files
+      .map(({ path: filePath }) => filePath.replace(/^.*target-authenticated\//, ""))
+      .sort();
+    expect(baselineFiles).toEqual(manifestedBaselineFiles);
 
     for (const screenshot of authenticatedResults.screenshots) {
       expect(screenshot.visualComparison.passed).toBe(true);
