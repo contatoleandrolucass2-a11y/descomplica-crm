@@ -75,6 +75,9 @@ PR #148. Preview combinado `50443`: 6/6 jornadas aprovadas. Revisao das capturas
 encontrou o badge do fluxo ampliado pelo canvas sobrepondo o titulo; a regra
 exclusiva do Associativo preserva o badge de 30px dentro de sua coluna de 30px.
 O QA agora verifica a separacao entre badge e texto nos titulos.
+Essa verificacao tambem detectou o badge do estoque mobile: ele preserva 28px
+na coluna de 28px. A declaracao TypeScript do gate de cabecalho foi ampliada
+para permitir sua execucao direta pelas fixtures de nomes completos.
 
 Cabecalho combinado: 78 testes focados e 126 cenarios aprovados. Em 320px,
 nome de 26 caracteres usa 58,17px de altura; nome de 34 usa 72,56px. O limite

@@ -11,3 +11,10 @@ export function checkAssociativeCommissionGeometry(
   commission: Locator,
 ): Promise<AssociativeCommissionGeometry>;
 export function checkAssociativeSelectedGoldPaint(page: Page): Promise<void>;
+export function checkProtectedTopbar(page: Page): Promise<{
+  height: number;
+  maximumHeight: number;
+  controlsContained: boolean;
+  touchTargets: boolean;
+  selectedCued: boolean;
+}>;

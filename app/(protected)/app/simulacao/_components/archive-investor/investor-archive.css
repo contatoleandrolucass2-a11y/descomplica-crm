@@ -23200,6 +23200,8 @@ body:has(.investor-page-shell) {
     .investor-stock-panel
     > .investor-section-heading
     > span {
+    width: 28px;
+    height: 28px;
     grid-column: 1;
     grid-row: 1;
   }

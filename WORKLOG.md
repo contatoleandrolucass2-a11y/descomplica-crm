@@ -5,6 +5,8 @@
 - Integracao posterior: PR #150 incorpora `77a07a7` (canvas do PR #148),
   mantendo ambas as mudancas. Preview combinado 6/6; 78 testes do cabecalho e
   126 geometrias. Nome longo pode ampliar apenas o espaco necessario do cabecalho.
+- Badges do fluxo e do estoque mobile respeitam suas colunas de 30/28px;
+  o novo QA rejeita sobreposicao entre badge e titulo.
 
 - Fonte: doze capturas do usuario; branch `codex/associativo-animacao-sequencial`,
   base `a4a9ef5`. Escopo visual; nenhum motor, taxa ou origem financeira alterado.
