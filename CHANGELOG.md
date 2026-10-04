@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-04 - Ajustes do Associativo publicados
+
+- Publica 7337b97 com campos sem contorno, brilho dourado de 3s nas duas
+  extremidades da linha, dolar externo e reprovacao vermelho-sangue metalica.
+- CI, imagem imutavel, backup, health e jornada autenticada conferidos.
+  Tabelao e regras financeiras preservados; dependencia de lint corrigida
+  pela base ja integrada. Registros posteriores nao reiniciam a aplicacao.
+
+## 2026-10-04 - QA de impressao sem leitura antecipada
+
+- Aguarda o layout de impressao estabilizar antes da verificacao, com limite
+  de cinco segundos e todos os criterios preservados. Sem mudanca na pagina
+  Tabelao ou necessidade de reinicio da aplicacao por este ajuste de ferramenta.
+
 ## 2026-10-03 - Validacao do brilho no CSS minificado
 
 - Corrige o QA para reconhecer 0px e 0% como o mesmo topo da linha, mantendo

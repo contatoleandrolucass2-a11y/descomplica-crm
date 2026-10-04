@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-04 - Associativo publicado e conferido
+
+- Publicada a imagem imutavel 7337b97 apos CI 37173712179 integralmente verde.
+  Remocao de braces incorporada da base, audit aprovado e Tabelao preservado.
+- Backup verificado, equivalencia OCI/11 camadas e dois perfis comprovados,
+  CAS oficial e health interno/publico aprovados; rollback nao necessario.
+- Checkout sujo da VPS preservado; release em checkout destacado limpo.
+  Troca aguardou recuperacao da memoria. Nenhuma migration ou mudanca de dados.
+- Smoke anonimo: 12 GETs sem erros. Jornada autenticada com valores ficticios,
+  sem salvar proposta, confirmou etapas, brilho 3s, campos, reprovacao e dolar.
+- PR #143 publica somente QA e registros; sem novo restart. Lint, tipos,
+  build, 89 focados e oito Node aprovados; Windows 1479 aprovados, seis falhas
+  POSIX e um ignorado. Suite Linux aprovada no validate. Fonte: audit da release.
+
+## 2026-10-04 - Estabilizacao do QA de impressao
+
+- PR #141 integrado em 7337b97 apos CI verde: 193 comparacoes e seis jornadas
+  de guidance v5 passaram sem promover imagens de referencia.
+- Primeira CI da main falhou somente na leitura imediata do layout de impressao
+  do Tabelao. Reproducao sintetica mostrou a transicao de min-width ainda ativa.
+- QA passa a aguardar o predicado integral por ate cinco segundos, sem remover
+  condicoes ou alterar Tabelao, estilos e runtime. Regressao cobre espera
+  limitada e conservacao dos criterios. Fonte: audit do Associativo.
+- Prova do bloco corrigido: 10/10 aprovadas; largura e transform persistentes
+  falharam por timeout. Predicado identico confirmado por AST; 89 testes focados
+  aprovados. Gates locais completos em andamento.
+- Uma repeticao do job da main foi solicitada no mesmo SHA; deploy ainda pendente.
+
 ## 2026-10-03 - Contrato de brilho compativel com CSS de producao
 
 - CI 37167561944 aprovou validacao e restore; QA autenticado detectou a
