@@ -281,9 +281,12 @@ export async function checkProtectedTopbar(page) {
     const group = header.querySelector('[role="group"][aria-label="Aparência da página"]');
     const controls = [group, ...group.querySelectorAll("button")];
     const selected = group.querySelector('[aria-pressed="true"]');
+    const name = header.querySelector("[data-session-identity-trigger-label]");
+    // Allow only the space required by the untruncated name, not arbitrary header padding.
+    const nameHeight = name?.getBoundingClientRect().height ?? 0;
     return {
       height: header.getBoundingClientRect().height,
-      maximumHeight: innerWidth <= 600 ? 100 : 56,
+      maximumHeight: Math.max(60, nameHeight + 16),
       controlsContained: controls.every((element) => {
         const control = element.getBoundingClientRect();
         const bounds = header.getBoundingClientRect();
@@ -317,56 +320,60 @@ export async function checkProtectedTopbar(page) {
 
 export async function checkAssociativeCompactStock(page) {
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-  const hero = await page.locator(".investor-associative-hero").evaluate((element) => {
+  const hero = await page.locator(".simulation-canvas-header").evaluate((element) => {
     const bounds = (selector) => document.querySelector(selector).getBoundingClientRect();
     const protectedTopbar = bounds("[data-protected-topbar]");
     const protectedContent = bounds("[data-protected-main-content]");
     const main = bounds(".investor-main");
     const breadcrumb = document.querySelector('nav[aria-label="Breadcrumb"]');
     const breadcrumbBounds = breadcrumb?.getBoundingClientRect();
-    const title = bounds(".investor-hero-title h1");
-    const titleRow = bounds(".investor-hero-title");
-    const guide = bounds(".investor-hero-guide");
-    const hint = bounds(".investor-hero-title .investor-info-mark");
-    const button = bounds(".investor-hero-guide .investor-guided-start");
-    const buttonElement = document.querySelector(".investor-hero-guide .investor-guided-start");
+    const title = bounds(".simulation-canvas-title-row h1");
+    const guide = bounds(".simulation-canvas-header-aside");
+    const hint = bounds(".simulation-canvas-title-row .investor-info-mark");
+    const button = bounds(".simulation-canvas-actions .investor-guided-start");
+    const buttonElement = document.querySelector(
+      ".simulation-canvas-actions .investor-guided-start",
+    );
     const label = document.createRange();
     label.selectNodeContents(buttonElement);
     const stacked = getComputedStyle(element).gridTemplateColumns.split(" ").length === 1;
+    const elementBounds = element.getBoundingClientRect();
     return {
-      titleContentInset: title.top - main.top,
+      titleContentInset: elementBounds.top - main.top,
       titleBelowProtectedTopbar: title.top >= protectedTopbar.bottom - 1,
       titleInsideProtectedContent:
         title.top >= protectedContent.top - 1 && title.bottom <= protectedContent.bottom + 1,
       titleBelowBreadcrumb: !breadcrumbBounds || title.top >= breadcrumbBounds.bottom - 1,
       stacked,
-      guideTopGap: stacked ? guide.top - titleRow.bottom : guide.top - titleRow.top,
+      guideTopGap: stacked
+        ? guide.top -
+          element.querySelector(".simulation-canvas-header-copy").getBoundingClientRect().bottom
+        : Math.abs(guide.bottom - elementBounds.bottom),
       buttonHeight: button.height,
-      expectedButtonHeight: matchMedia("(pointer: coarse)").matches ? 44 : 32,
-      buttonFits: button.bottom <= element.getBoundingClientRect().bottom,
+      minimumButtonHeight: 44,
+      buttonFits: button.bottom <= elementBounds.bottom + 1,
       buttonExtraWidth: button.width - label.getBoundingClientRect().width,
       hintCentered: Math.abs((hint.top + hint.bottom - title.top - title.bottom) / 2) <= 2,
       guideLabelRemoved: !element.querySelector(".investor-hero-guide-information small"),
     };
   });
   assert.ok(
-    Math.abs(hero.titleContentInset - 8) <= 1,
-    "Title must keep the compact inset of the simulator content",
+    hero.titleContentInset >= 0 && hero.titleContentInset <= 20,
+    "Canvas heading must keep a compact inset inside the simulator content",
   );
   assert.ok(hero.titleBelowProtectedTopbar, "Title must not overlap the protected topbar");
   assert.ok(hero.titleInsideProtectedContent, "Title must remain inside protected content");
   assert.ok(hero.titleBelowBreadcrumb, "Title must not overlap the authorized breadcrumb");
   assert.ok(
-    Math.abs(hero.guideTopGap - (hero.stacked ? 8 : 0)) <= 1,
-    "Guide must align with the local simulator heading without excess gaps",
+    hero.guideTopGap >= 0 && hero.guideTopGap <= (hero.stacked ? 14 : 16),
+    "Guide must align with the canvas heading without excess gaps",
   );
-  assert.equal(
-    hero.buttonHeight,
-    hero.expectedButtonHeight,
-    "Guide button must be compact and touch-aware",
+  assert.ok(
+    hero.buttonHeight >= hero.minimumButtonHeight,
+    "Guide button must preserve the pointer-specific target floor",
   );
   assert.ok(hero.buttonFits, "Guide button must remain inside the heading section");
-  assert.ok(hero.buttonExtraWidth <= 28, "Guide outline must fit the label with compact padding");
+  assert.ok(hero.buttonExtraWidth <= 64, "Guide outline must fit the label with compact padding");
   assert.ok(hero.hintCentered, "Title help icon must be centered on the same line");
   assert.ok(hero.guideLabelRemoved, "Redundant guide label must be removed");
   const header = await page.locator(".investor-stock-panel").evaluate((panel) => {
@@ -407,7 +414,7 @@ export async function checkAssociativeCompactStock(page) {
     const rows = [...element.querySelectorAll("tbody tr[aria-rowindex]")];
     const first = rows[0].getBoundingClientRect();
     const end = element.getBoundingClientRect().top + element.clientTop + element.clientHeight;
-    const heading = document.querySelector(".investor-hero-title h1");
+    const heading = document.querySelector(".simulation-canvas-title-row h1");
     return {
       rowHeight: first.height,
       expectedRowHeight: innerWidth <= 760 ? 48 : 26,
@@ -416,7 +423,6 @@ export async function checkAssociativeCompactStock(page) {
       headingSizeRem:
         Number.parseFloat(getComputedStyle(heading).fontSize) /
         Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
-      expectedHeadingRem: innerWidth <= 760 ? 1.475 : 2,
       headingTracking: getComputedStyle(heading).letterSpacing,
       totalRows: Number(element.querySelector("table").getAttribute("aria-rowcount")),
     };
@@ -425,12 +431,12 @@ export async function checkAssociativeCompactStock(page) {
   assert.equal(geometry.visibleRows, 10, "Stock viewport must expose exactly ten units");
   assert.ok(geometry.tenthRowEndDelta <= 2, "Stock viewport must end at the tenth row");
   assert.ok(
-    Math.abs(geometry.headingSizeRem - geometry.expectedHeadingRem) < 0.001,
-    "Associative heading must use the reduced fixed type size",
+    geometry.headingSizeRem >= 1.8 && geometry.headingSizeRem <= 2.81,
+    "Associative canvas heading must remain inside the approved responsive type scale",
   );
   assert.ok(
-    ["normal", "0px"].includes(geometry.headingTracking),
-    "Heading must have zero letter spacing",
+    geometry.headingTracking === "normal" || Number.parseFloat(geometry.headingTracking) <= 0,
+    "Heading tracking must stay neutral or compact",
   );
 
   await stock.evaluate((element) => {

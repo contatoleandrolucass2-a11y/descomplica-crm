@@ -151,7 +151,13 @@ function Audit({ audit }: { audit: DocumentationAuditItem[] }) {
   );
 }
 
-export function DocumentationCalculator({ baseDate }: { baseDate: string }) {
+export function DocumentationCalculator({
+  baseDate,
+  showHeroHeading = true,
+}: {
+  baseDate: string;
+  showHeroHeading?: boolean;
+}) {
   const [values, setValues] = useState<FormValues>({
     businessUnit: "",
     modality: "",
@@ -244,10 +250,12 @@ export function DocumentationCalculator({ baseDate }: { baseDate: string }) {
   return (
     <>
       <section className="goal-page-hero documentation-page-hero">
-        <div className="goal-hero-copy">
-          <p className="goal-kicker">Simulação comercial</p>
-          <h1>Calcular documentação</h1>
-        </div>
+        {showHeroHeading ? (
+          <div className="goal-hero-copy">
+            <p className="goal-kicker">Simulação comercial</p>
+            <h1>Calcular documentação</h1>
+          </div>
+        ) : null}
         <div className="goal-command-center documentation-command-center">
           <div className="documentation-growth-signal" aria-hidden="true">
             <span />

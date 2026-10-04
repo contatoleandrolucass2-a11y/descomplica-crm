@@ -43,7 +43,7 @@
   z-index: 86;
   top: 0;
   box-sizing: border-box;
-  min-height: 48px;
+  min-height: 58px;
   border-bottom: 1px solid var(--header-line);
   background: var(--header-bg);
   color: var(--header-text);
@@ -81,7 +81,7 @@
 }
 
 /* Legacy simulator CSS must never push a root link's keyboard ring outside
-   the 48px topbar, including at the 1181px desktop breakpoint. */
+   the compact global topbar, including at the 1181px desktop breakpoint. */
 .topbar [data-navigation-root-control]:focus-visible {
   outline: 2px solid var(--header-accent) !important;
   outline-offset: -2px !important;
@@ -95,10 +95,10 @@
   position: relative;
   display: grid;
   width: 100%;
-  min-height: 47px;
+  min-height: 57px;
   grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 28px;
+  gap: 20px;
   box-sizing: border-box;
   padding: 1px 24px;
 }
@@ -106,7 +106,7 @@
 .brand {
   display: inline-flex;
   min-width: 0;
-  min-height: 44px;
+  min-height: 52px;
   align-items: center;
   gap: 0;
   color: var(--header-text);
@@ -116,9 +116,9 @@
 
 .brandMark {
   display: block;
-  width: 22px;
-  height: 22px;
-  flex: 0 0 22px;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
   margin-inline-end: -2px;
   object-fit: contain;
   filter: var(--header-brand-shadow);
@@ -127,7 +127,7 @@
 
 .brandName {
   overflow: hidden;
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 760;
   line-height: 1.2;
   letter-spacing: 0;
@@ -157,7 +157,7 @@
 .navigationLink,
 .navigationTrigger {
   display: inline-flex;
-  min-height: 44px;
+  min-height: 52px;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -220,7 +220,7 @@
 .navigationPanel {
   position: absolute;
   z-index: 4;
-  top: calc(100% + 4px);
+  top: calc(100% + 1px);
   left: 0;
   display: grid;
   width: min(20rem, calc(100vw - 2rem));
@@ -230,7 +230,7 @@
   overscroll-behavior: contain;
   box-sizing: border-box;
   border: 1px solid var(--header-line);
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   background: var(--header-bg);
   padding: 6px;
   color: var(--header-text);
@@ -262,6 +262,51 @@
   font-weight: 600;
   line-height: 1.35;
   text-decoration: none;
+}
+
+.menuEyebrow {
+  display: block;
+  padding: 7px 10px 5px;
+  color: var(--header-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.menuFootnote {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 4px -6px -6px;
+  border-top: 1px solid var(--header-line);
+  padding: 10px 12px;
+  color: var(--header-muted);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.menuFootnote::before {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  content: "i";
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.mobileRootChevron {
+  display: none;
+  margin-left: auto;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
 }
 
 .menuLink:hover {
@@ -507,6 +552,10 @@
 }
 
 .themeSwitch {
+  min-width: 0;
+}
+
+.themeOptions {
   display: grid;
   grid-template-columns: repeat(3, minmax(70px, 1fr));
   gap: 2px;
@@ -640,7 +689,7 @@
     font-size: 12px;
   }
 
-  .themeSwitch {
+  .themeOptions {
     grid-template-columns: repeat(3, minmax(64px, 1fr));
   }
 
@@ -733,6 +782,10 @@
     width: 100%;
   }
 
+  .mobileRootChevron {
+    display: inline-block;
+  }
+
   .navigationLink,
   .navigationTrigger {
     min-height: 46px;
@@ -786,85 +839,83 @@
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 600px) {
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) minmax(0, max-content);
-    gap: 8px;
-    padding-inline: 16px;
-  }
-
-  .brand {
-    grid-column: 1 / -1;
-    justify-self: start;
-    max-width: calc(100% - 52px);
+    grid-template-columns: minmax(0, 1fr) 136px minmax(44px, max-content) 44px;
+    gap: 5px;
+    padding-inline: 12px;
   }
 
   .navigationRoot {
-    grid-column: 2;
+    grid-column: 4;
     grid-row: 1;
     justify-self: end;
   }
 
   .actions {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .themeSwitch {
-    width: 100%;
-    grid-column: 1;
-    grid-row: 2;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .navigation,
-  .accountPanel {
-    width: calc(100vw - 32px);
-    max-height: calc(100dvh - 102px);
-  }
-}
-
-@media (min-width: 601px) and (max-width: 760px) {
-  .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 44px auto minmax(0, max-content);
-    gap: 6px;
-  }
-
-  .brand {
-    grid-column: 1;
-    max-width: 100%;
-  }
-
-  .actions {
-    grid-column: 4;
-    grid-row: 1;
-  }
-
-  .themeSwitch {
-    width: auto;
     grid-column: 3;
     grid-row: 1;
-    grid-template-columns: repeat(3, minmax(70px, 1fr));
   }
 
   .accountTrigger {
-    max-width: 8rem;
+    max-width: min(8rem, 25vw);
+    padding-left: 8px;
+  }
+
+  .accountAvatar,
+  .accountChevron {
+    display: none;
+  }
+
+  .themeSwitch {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .themeOptions {
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    gap: 2px;
+  }
+
+  .themeOption {
+    min-height: 44px;
+    gap: 0;
+    padding-inline: 0;
+    font-size: 0;
+  }
+
+  .navigation {
+    right: auto;
+    left: 0;
+    width: 100%;
+    max-height: calc(100dvh - 58px);
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    padding: 12px;
+  }
+
+  .accountPanel {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 70px);
   }
 }
 
 @media (max-width: 340px) {
-  .brandName {
-    font-size: 18px;
-  }
-
   .topbarInner {
-    gap: 4px;
-    padding-inline: 10px;
+    grid-template-columns: minmax(0, 1fr) 136px minmax(44px, max-content) 44px;
+    gap: 2px;
+    padding-inline: 4px;
   }
 
-  .navigation,
+  .navigation {
+    left: 0;
+    width: 100%;
+  }
+
   .accountPanel {
-    width: calc(100vw - 20px);
+    width: calc(100vw - 8px);
   }
 
   .menuDisabled {
@@ -876,8 +927,18 @@
     justify-self: start;
   }
 
-  .themeOption svg {
-    display: none;
+  .themeOptions {
+    grid-template-columns: repeat(3, 44px);
+  }
+
+  .brandName {
+    font-size: 14px;
+  }
+
+  .brandMark {
+    width: 20px;
+    height: 20px;
+    flex-basis: 20px;
   }
 }
 

@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import { chromium } from "@playwright/test";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import { checkProtectedTopbar } from "../scripts/qa/associative-compact-layout.mjs";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/app" }));
 
@@ -53,7 +54,7 @@ const brand = readFileSync(new URL("../public/descomplica-symbol.png", import.me
 
 function fixture(displayName: string) {
   return renderToStaticMarkup(
-    <header className={styles.topbar}>
+    <header className={styles.topbar} data-protected-topbar>
       <div className={styles.topbarInner}>
         <a className={styles.brand} href="/app">
           {/* A data URI keeps this isolated fixture offline. */}
@@ -109,6 +110,11 @@ describe("account menu responsive layout", () => {
                   const labelBox = label.getBoundingClientRect();
                   const triggerBox = trigger.getBoundingClientRect();
                   const labelStyle = getComputedStyle(label);
+                  const themeButtons = Array.from(
+                    document.querySelectorAll<HTMLButtonElement>(
+                      '[role="group"][aria-label="Aparência da página"] button',
+                    ),
+                  );
                   const controls = Array.from(
                     document.querySelectorAll<HTMLElement>(
                       `.${classes.brandName}, .${classes.brandMark}, .${classes.topbar} button, .${classes.topbar} [data-navigation-root-control]`,
@@ -147,6 +153,18 @@ describe("account menu responsive layout", () => {
                     noPageOverflow: document.documentElement.scrollWidth <= innerWidth,
                     touchHeight: triggerBox.height,
                     controlCount: controls.length,
+                    mobileThemeIcons:
+                      themeButtons.length === 3 &&
+                      themeButtons.every((button) => {
+                        const box = button.getBoundingClientRect();
+                        const icon = button.querySelector("svg")?.getBoundingClientRect();
+                        return (
+                          getComputedStyle(button).fontSize === "0px" &&
+                          box.width >= 44 &&
+                          box.height >= 44 &&
+                          Boolean(icon && icon.width > 0 && icon.height > 0)
+                        );
+                      }),
                     collisions,
                   };
                 },
@@ -163,6 +181,19 @@ describe("account menu responsive layout", () => {
               expect(geometry.touchHeight, scenario).toBeGreaterThanOrEqual(44);
               expect(geometry.controlCount, scenario).toBeGreaterThanOrEqual(7);
               expect(geometry.collisions, scenario).toEqual([]);
+              await checkProtectedTopbar(page);
+              if (width === 320 && theme === "light" && displayName === "Mariana Silva") {
+                await page.locator("[data-protected-topbar]").evaluate((element) => {
+                  (element as HTMLElement).style.paddingBottom = "80px";
+                });
+                await expect(checkProtectedTopbar(page)).rejects.toThrow(
+                  "compact vertical spacing",
+                );
+                await page.locator("[data-protected-topbar]").evaluate((element) => {
+                  (element as HTMLElement).style.paddingBottom = "";
+                });
+              }
+              if (width <= 600) expect(geometry.mobileThemeIcons, scenario).toBe(true);
               if ([320, 1440].includes(width) && theme === "light") {
                 await page.screenshot({
                   path: `${output}/${width}-${displayName.split(" ")[0]}.png`,

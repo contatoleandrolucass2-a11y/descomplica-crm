@@ -31,6 +31,22 @@ export async function checkAssociativeMotion(page) {
   );
   const result = { contract: "associative-sequenced-motion-v1", groups: [], passed: false };
   try {
+    const headings = await page
+      .locator(`${root} .investor-section-heading`)
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const badge = element.querySelector(":scope > span")?.getBoundingClientRect();
+          const copy = element.querySelector(":scope > div")?.getBoundingClientRect();
+          return {
+            fits: !badge || !copy || badge.right <= copy.left,
+            text: element.textContent.trim().slice(0, 80),
+          };
+        }),
+      );
+    assert.ok(
+      headings.every((heading) => heading.fits),
+      `Section badges must not overlap their headings: ${JSON.stringify(headings)}`,
+    );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.mouse.move(0, 0);
     await page.evaluate(

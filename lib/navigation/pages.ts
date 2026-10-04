@@ -93,6 +93,13 @@ const SUPPLEMENTAL_SIMULATOR_PAGES: readonly SupplementalNavigationDefinition[] 
     description: "Calcule a documentação da proposta.",
     sortOrder: 60,
   },
+  {
+    key: "crm.simulation.caixa",
+    path: "/app/simulacao/caixa",
+    name: "CAIXA",
+    description: "Consulte a jornada visual; cálculo e envio permanecem bloqueados.",
+    sortOrder: 70,
+  },
 ] as const;
 
 export function extendAuthorizedNavigationWithReleasedPages(

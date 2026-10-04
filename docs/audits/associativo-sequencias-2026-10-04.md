@@ -4,6 +4,9 @@
 
 Pedido de doze ajustes visuais. Branch `codex/associativo-animacao-sequencial`,
 base `a4a9ef500c1b17cdc70547934e71405543097fc5`.
+Durante a validacao, o PR #148 integrou o canvas em `77a07a7`. O PR #150
+incorpora essa main, preservando a nova composicao e repetindo os testes sobre
+a combinacao. Resultados anteriores a essa integracao sao identificados abaixo.
 Nao altera formulas, taxas, datas, dados do estoque, propostas, auth, RLS ou n8n.
 O primeiro nome pertence ao cabecalho compartilhado; os efeitos e a remocao
 do breadcrumb sao exclusivos do Associativo.
@@ -36,7 +39,7 @@ do breadcrumb sao exclusivos do Associativo.
 
 ## Validacao
 
-- Preview isolado com componentes reais e estoque sintetico: 6/6 jornadas,
+- Antes da integracao do canvas, preview isolado com componentes reais e estoque sintetico: 6/6 jornadas,
   temas claro/medio/escuro em 1440px e 375px; Node 24.19.0 e Chromium
   151.0.7922.34 no Windows. Evidencia local: `test-results/guidance/65118-results.json`
   e 42 capturas referenciadas. Preview nao comprova autenticacao ou servidor.
@@ -67,6 +70,19 @@ do breadcrumb sao exclusivos do Associativo.
 
 ## Publicacao
 
-Pendente de validacao integral e CI. Aplicar o runbook automatic-publication:
+PR #150 aberto. A main `77a07a7` foi integrada sem remover a composicao do
+PR #148. Preview combinado `50443`: 6/6 jornadas aprovadas. Revisao das capturas
+encontrou o badge do fluxo ampliado pelo canvas sobrepondo o titulo; a regra
+exclusiva do Associativo preserva o badge de 30px dentro de sua coluna de 30px.
+O QA agora verifica a separacao entre badge e texto nos titulos.
+
+Cabecalho combinado: 78 testes focados e 126 cenarios aprovados. Em 320px,
+nome de 26 caracteres usa 58,17px de altura; nome de 34 usa 72,56px. O limite
+compacto permanece 60px, com excecao calculada somente pela altura real do nome
+mais 16px. Um teste negativo injeta 80px de padding e exige rejeicao, evitando
+aprovar espaco vazio arbitrario. Os 17 testes dos dois arquivos que exercitam
+esse contrato passaram, incluindo as 126 geometrias.
+
+Pendente de validacao integral da combinacao e CI. Aplicar o runbook automatic-publication:
 PR, imagem imutavel, backup, compare-and-swap, rollback e conferencia posterior.
 Nenhum dado oficial ausente na origem e preenchido por esta mudanca visual.

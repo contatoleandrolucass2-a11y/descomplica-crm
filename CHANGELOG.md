@@ -26,6 +26,31 @@
   com CI Linux e conferencia pos-publicacao aprovadas. Dados oficiais ausentes
   na origem continuam explicitamente pendentes, sem substituicao por estimativas.
 
+## 2026-10-04 - Paridade visual dos canvases protegidos
+
+- Aplica a composicao visual aprovada as 22 rotas protegidas, com uma unica
+  navbar global em Dashboard, cinco etapas, Ranking, Canal de Parcerias,
+  Configuracoes e metas, Simulacao e Administracao.
+- Mantem dados reais quando existe fonte validada e apresenta estado
+  indisponivel quando ela falta, sem transformar numeros ilustrativos dos
+  canvases em registros, metas ou resultados comerciais.
+- Libera a rota protegida da CAIXA somente para conferencia visual. Motor,
+  endpoint de calculo, envio, analise de credito e aprovacao bancaria continuam
+  bloqueados de forma independente e fail-closed.
+- Uniformiza densidade, hierarquia, paineis e estados nos temas Claro, Medio e
+  Escuro, com reflow responsivo, foco visivel, teclado, reduced motion e
+  contratos de acessibilidade preservados.
+- Corrige o roteiro QA de continuidade do Associativo para aguardar cada campo
+  habilitado e persistido antes de avancar; campo vazio passa a ser ausencia,
+  nao zero. Valores do cenario e regras financeiras permanecem inalterados.
+- Promove a baseline revisada de 209 imagens a partir da arvore limpa em
+  `a4c1717`, apos 154 checks responsivos, 88 de tema, 209 de acessibilidade,
+  209 comparacoes, 110 de zoom e 40 combinacoes da navegacao aprovados. Gates
+  finais, CI e publicacao deste incremento continuam separados desta promocao.
+- Atualiza o smoke de release para distinguir acesso a pagina CAIXA de execucao
+  do motor: Master abre a composicao visual pelo Hub e menu, enquanto o CTA e a
+  API de calculo permanecem fail-closed. Demais perfis continuam negados.
+
 ## 2026-10-04 - Calculo e continuidade no Associativo
 
 - Preserva perfil e composicao financeira ao trocar a unidade ou editar renda

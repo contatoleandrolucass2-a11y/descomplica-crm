@@ -169,6 +169,11 @@
   gap: 2px !important;
 }
 
+.investor-page-shell.investor-associative-table-page .investor-associative-flow-panel > .investor-flow-heading > span {
+  width: 30px;
+  height: 30px;
+}
+
 .investor-page-shell.investor-associative-table-page .investor-stock-title-row {
   display: flex;
   align-items: center;
@@ -1049,7 +1054,7 @@
 .investor-page-shell.investor-associative-table-page .investor-stock-filters > label:has(> select)::before {
   position: relative;
   grid-area: 2 / 1;
-  border-radius: 5px;
+  border-radius: 7px;
   min-width: 0;
 }
 

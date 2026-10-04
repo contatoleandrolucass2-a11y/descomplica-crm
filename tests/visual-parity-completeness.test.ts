@@ -65,10 +65,18 @@ describe("complete visual composition on the scoped v3 read model", () => {
     const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
 
     for (const label of [
-      "Ritmo de vendas",
+      "Dashboard comercial",
+      "Indicadores do funil",
+      "Funil do período",
+      "Oportunidades por empreendimento",
+      "Realizado e meta por etapa",
+      "Últimas atividades",
+      "Realizado frente ao esperado",
       "Realizado Funil",
+      "Diagnóstico, gargalo e plano de ação",
+      "Realizado e meta lado a lado",
+      "Realizados e referências temporais",
       "Corretores por gerente",
-      "Canal de contato: configuração institucional indisponível",
     ]) {
       expect(dashboard).toContain(label);
     }

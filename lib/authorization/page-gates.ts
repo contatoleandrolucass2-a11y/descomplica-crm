@@ -8,11 +8,12 @@ export interface ProtectedPageGate {
 }
 
 // Covers the complete 22-route HTTP smoke inventory. Seventeen entries mirror
-// app_pages; four additional simulator routes are released through the protected
+// app_pages; five additional simulator routes are released through the protected
 // server-built navigation only after the catalog parent and effective permission
-// are authorized. CAIXA remains a non-link blocked state. Database permissions,
-// route guards and RLS remain authoritative; this copy lets Proxy return a real
-// 403 before disabled code can stream.
+// are authorized. The CAIXA page is released only as a protected visual journey;
+// its independent runtime and execution gates remain fail-closed. Database
+// permissions, route guards and RLS remain authoritative; this copy lets Proxy
+// return a real 403 before unauthorized code can stream.
 export const PROTECTED_PAGE_GATES = [
   {
     pageKey: "crm.dashboard",
@@ -108,7 +109,7 @@ export const PROTECTED_PAGE_GATES = [
     pageKey: "crm.simulation.caixa",
     path: "/app/simulacao/caixa",
     permission: "crm.simulators.view",
-    releaseEnabled: false,
+    releaseEnabled: true,
   },
   {
     pageKey: "crm.simulation.wf14",

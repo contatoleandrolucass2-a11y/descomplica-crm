@@ -99,8 +99,9 @@ describe("Tabelão protegido", () => {
     );
     expect(archive).not.toContain("ArchiveHeader");
     expect(archive).not.toContain("SiteMenu");
-    expect(archive).toContain('className="goal-page-hero investor-compact-hero"');
-    expect(archive).toContain("<h1>Simulador Tabelão</h1>");
+    expect(archive).toContain("<SimulationCanvasHeader");
+    expect(archive).toContain('title="Simulador Tabelão"');
+    expect(archive).toContain('data-canvas-layout="simulator"');
     expect(archive).toContain("<InvestorInfoHint");
     expect(archive).toContain("<InvestorGuideLauncher compact />");
     expect(archive).not.toMatch(/documentation-breadcrumb|goal-kicker/);
@@ -154,11 +155,11 @@ describe("Tabelão protegido", () => {
       "Planta",
       "Vagas",
       "Estoque",
-      "% obra",
-      "Limitador",
+      "Valor do Imóvel",
       "Volta ao Caixa",
       "Avaliação",
-      "Valor do Imóvel",
+      "% obra",
+      "Limitador",
     ];
     const tableHeaderSource = client.slice(client.indexOf("<thead>"), client.indexOf("</thead>"));
     const renderedColumnLabels = [
@@ -186,11 +187,11 @@ describe("Tabelão protegido", () => {
       "investor-stock-col-plant",
       "tabelao-stock-col-parking",
       "tabelao-stock-col-quantity",
-      "tabelao-stock-col-progress",
-      "tabelao-stock-col-description",
+      "investor-stock-col-price",
       "tabelao-stock-col-cashback",
       "tabelao-stock-col-appraisal",
-      "investor-stock-col-price",
+      "tabelao-stock-col-progress",
+      "tabelao-stock-col-description",
     ]);
     for (const accessibleLabel of [
       "Data de entrega",

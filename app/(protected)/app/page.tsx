@@ -1,4 +1,12 @@
 import Link from "next/link";
+import {
+  BadgeCheck,
+  CalendarCheck2,
+  FolderCheck,
+  Handshake,
+  MapPin,
+  type LucideIcon,
+} from "lucide-react";
 
 import { enforcePermission } from "@/lib/authorization/enforce";
 import {
@@ -11,7 +19,11 @@ import {
   type DashboardStageKey,
   type DashboardViewKey,
 } from "@/lib/crm/dashboard/catalog";
-import { loadDashboardReadModel, type DashboardMetric } from "@/lib/crm/dashboard/data";
+import {
+  loadDashboardReadModel,
+  type DashboardMetric,
+  type DashboardReadModel,
+} from "@/lib/crm/dashboard/data";
 import {
   buildMonthlyFunnelSnapshots,
   buildOperationalComparisons,
@@ -59,6 +71,8 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 0,
 });
 
+const DATA_UNAVAILABLE_LABEL = "Dados indisponíveis";
+
 const STAGE_ACCENTS: Record<DashboardStageKey, ChartAccent> = {
   opportunities: "cyan",
   appointments: "blue",
@@ -67,23 +81,64 @@ const STAGE_ACCENTS: Record<DashboardStageKey, ChartAccent> = {
   sales: "emerald",
 };
 
-const DATA_UNAVAILABLE_LABEL = "Dado indisponível — integração pendente";
+const STAGE_ICONS: Record<DashboardStageKey, LucideIcon> = {
+  opportunities: Handshake,
+  appointments: CalendarCheck2,
+  visits: MapPin,
+  folders: FolderCheck,
+  sales: BadgeCheck,
+};
 
-function dashboardHref(view: DashboardViewKey, period: DashboardPeriodKey) {
-  return `/app?view=${encodeURIComponent(view)}&period=${encodeURIComponent(period)}`;
-}
+type StageSummaryRow = {
+  key: DashboardStageKey;
+  label: string;
+  current: number | null;
+  goal: number | null;
+  progress: number | null;
+};
+
+const summaryColumns: Array<AnalyticsColumn<StageSummaryRow>> = [
+  { key: "stage", label: "Etapa", render: (row) => row.label },
+  {
+    key: "current",
+    label: "Realizado",
+    align: "right",
+    render: (row) =>
+      row.current === null ? (
+        <UnavailableValue reason="Ainda não existe snapshot comercial validado." />
+      ) : (
+        numberFormatter.format(row.current)
+      ),
+  },
+  {
+    key: "goal",
+    label: "Meta",
+    align: "right",
+    render: (row) =>
+      row.goal === null ? (
+        <UnavailableValue reason="Meta oficial indisponível ou não definida para o período." />
+      ) : (
+        numberFormatter.format(row.goal)
+      ),
+  },
+  {
+    key: "progress",
+    label: "Atingimento",
+    align: "right",
+    render: (row) =>
+      row.progress === null ? (
+        <UnavailableValue reason="O atingimento exige meta oficial maior que zero." />
+      ) : (
+        percentFormatter.format(row.progress)
+      ),
+  },
+];
+
+const OPERATIONAL_STAGES = ["appointments", "visits", "folders", "sales"] as const;
 
 function optionalNumber(value: number | null, reason: string) {
   return value === null ? <UnavailableValue reason={reason} /> : numberFormatter.format(value);
 }
-
-interface RealizedRow {
-  key: DashboardStageKey;
-  label: string;
-  metric: DashboardMetric;
-}
-
-const OPERATIONAL_STAGES = ["appointments", "visits", "folders", "sales"] as const;
 
 const operationalColumns: Array<AnalyticsColumn<OperationalComparison>> = [
   {
@@ -91,8 +146,8 @@ const operationalColumns: Array<AnalyticsColumn<OperationalComparison>> = [
     label: "Comparativo",
     render: (row) => (
       <span>
-        <strong className="block text-slate-900">{row.label}</strong>
-        <span className="block text-xs text-slate-600">{row.comparison}</span>
+        <strong className="block text-[var(--analytics-ink)]">{row.label}</strong>
+        <span className="block text-xs text-[var(--analytics-muted)]">{row.comparison}</span>
       </span>
     ),
   },
@@ -138,52 +193,199 @@ const operationalColumns: Array<AnalyticsColumn<OperationalComparison>> = [
   },
 ];
 
-function DashboardCompletion({
+type TemporalRow = {
+  key: DashboardStageKey;
+  label: string;
+  metric: DashboardMetric | null;
+};
+
+function temporalColumns(goalsAvailable: boolean): Array<AnalyticsColumn<TemporalRow>> {
+  const unavailableReason = "A janela não existe no snapshot validado atual.";
+  const metricValue = (
+    row: TemporalRow,
+    key:
+      | "currentMonth"
+      | "previousMonth"
+      | "yearClosedMonthsAverage"
+      | "lastThreeClosedMonthsAverage"
+      | "lastFourteenDays"
+      | "lastSevenDays"
+      | "currentWeek"
+      | "currentToday",
+  ) => optionalNumber(row.metric?.[key] ?? null, unavailableReason);
+
+  return [
+    { key: "stage", label: "Etapa", render: (row) => row.label },
+    {
+      key: "month",
+      label: "Mês atual",
+      align: "right",
+      render: (row) => metricValue(row, "currentMonth"),
+    },
+    {
+      key: "previous-month",
+      label: "Mês anterior",
+      align: "right",
+      render: (row) => metricValue(row, "previousMonth"),
+    },
+    {
+      key: "year-average",
+      label: "Média dos meses encerrados no ano",
+      align: "right",
+      render: (row) => metricValue(row, "yearClosedMonthsAverage"),
+    },
+    {
+      key: "three-month-average",
+      label: "Média 3 meses",
+      align: "right",
+      render: (row) => metricValue(row, "lastThreeClosedMonthsAverage"),
+    },
+    {
+      key: "last-fourteen",
+      label: "Últimos 14 dias",
+      align: "right",
+      render: (row) => metricValue(row, "lastFourteenDays"),
+    },
+    {
+      key: "last-seven",
+      label: "Últimos 7 dias",
+      align: "right",
+      render: (row) => metricValue(row, "lastSevenDays"),
+    },
+    {
+      key: "week",
+      label: "Semana",
+      align: "right",
+      render: (row) => metricValue(row, "currentWeek"),
+    },
+    {
+      key: "today",
+      label: "Hoje",
+      align: "right",
+      render: (row) => metricValue(row, "currentToday"),
+    },
+    {
+      key: "goal",
+      label: "Meta mensal",
+      align: "right",
+      render: (row) => {
+        const goal = row.metric?.goalMonth ?? null;
+        return goalsAvailable && goal !== null && goal > 0 ? (
+          numberFormatter.format(goal)
+        ) : (
+          <UnavailableValue
+            reason={
+              goalsAvailable
+                ? "Meta não definida para esta etapa."
+                : "A fonte oficial de metas ainda não está disponível."
+            }
+          />
+        );
+      },
+    },
+  ];
+}
+
+function dashboardHref(view: DashboardViewKey, period: DashboardPeriodKey) {
+  return `/app?view=${encodeURIComponent(view)}&period=${encodeURIComponent(period)}`;
+}
+
+function stageMetric(
+  dashboard: DashboardReadModel | null,
+  view: DashboardViewKey,
+  stage: DashboardStageKey,
+): DashboardMetric | null {
+  return dashboard?.metrics[view][stage] ?? null;
+}
+
+function officialGoal(
+  dashboard: DashboardReadModel | null,
+  metric: DashboardMetric | null,
+  period: DashboardPeriodKey,
+) {
+  if (!dashboard || !metric) return null;
+  const value = availableCommercialValue(
+    dashboard.goalsAvailable,
+    metricValueForPeriod(metric, period).goal,
+  );
+  return value !== null && value > 0 ? value : null;
+}
+
+function generatedAtLabel(dashboard: DashboardReadModel | null) {
+  if (!dashboard) return DATA_UNAVAILABLE_LABEL;
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: dashboard.timezone,
+  }).format(new Date(dashboard.generatedAt));
+}
+
+function DashboardDetailSections({
+  dashboard,
   metrics,
   selectedPeriod,
-  goalsAvailable,
 }: {
+  dashboard: DashboardReadModel | null;
   metrics: Record<DashboardStageKey, DashboardMetric> | null;
   selectedPeriod: DashboardPeriodKey;
-  goalsAvailable: boolean;
 }) {
+  const stages = Object.entries(DASHBOARD_STAGES) as Array<
+    [DashboardStageKey, (typeof DASHBOARD_STAGES)[DashboardStageKey]]
+  >;
+  const goalsAvailable = dashboard?.goalsAvailable === true;
   const realizedSales = metrics
     ? metricValueForPeriod(metrics.sales, selectedPeriod).current
     : null;
+  const monthlySnapshots = metrics ? buildMonthlyFunnelSnapshots(metrics, goalsAvailable) : [];
+  const emptyFunnel = stages.map(([key, stage]) => ({
+    key,
+    label: stage.label,
+    value: null,
+    conversion: null,
+  }));
+  const temporalRows: TemporalRow[] = stages.map(([key, stage]) => ({
+    key,
+    label: stage.label,
+    metric: metrics?.[key] ?? null,
+  }));
 
   return (
     <>
       <section aria-labelledby="sales-pace-title">
         <SectionHeading
           id="sales-pace-title"
+          density="compact"
           kicker="Ritmo de vendas"
           title="Realizado frente ao esperado"
-          description="O realizado vem do snapshot selecionado; ritmo, sinal e esperado exigem calendário e meta oficial versionados."
+          description="O realizado vem do snapshot selecionado; ritmo e esperado exigem calendário e meta oficial versionados."
         />
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-3">
           <MetricCard
+            variant="compact"
             label="Vendas realizadas"
-            value={realizedSales === null ? "Indisponível" : numberFormatter.format(realizedSales)}
+            value={realizedSales === null ? "—" : numberFormatter.format(realizedSales)}
             detail={realizedSales === null ? DATA_UNAVAILABLE_LABEL : "Snapshot autorizado"}
             ratio={null}
             ratioLabel="Realizado"
             accent="emerald"
           />
           <MetricCard
+            variant="compact"
             label="Vendas esperadas até a data"
-            value="Indisponível"
+            value="—"
             detail="Calendário e meta oficial ausentes"
             ratio={null}
             ratioLabel="Indisponível"
             accent="cyan"
           />
-          <AnalyticsCard>
+          <AnalyticsCard density="compact">
             <DataState
               variant="unavailable"
               compact
               headingLevel="h3"
               title="Parecer de ritmo indisponível"
-              description="Nenhum texto positivo, neutro ou negativo é inferido sem o esperado oficial."
+              description="Nenhum parecer é inferido sem o esperado oficial."
             />
           </AnalyticsCard>
         </div>
@@ -192,35 +394,34 @@ function DashboardCompletion({
       <section className="min-w-0" aria-labelledby="operational-detail-title">
         <SectionHeading
           id="operational-detail-title"
+          density="compact"
           kicker="Detalhamento operacional"
           title="Realizado Funil"
-          description="Mês, 14 dias, 7 dias, semana e dia usam somente janelas presentes no mesmo snapshot. Corretores e gerentes aguardam fonte escopada."
+          description="Mês, 14 dias, 7 dias, semana e dia usam somente janelas presentes no mesmo snapshot."
         />
-        <div className="mb-4 grid gap-3 sm:grid-cols-2">
-          {(
-            [
-              ["Corretores", "Fonte de vínculos escopados indisponível"],
-              ["Gerentes", "Fonte de vínculos escopados indisponível"],
-            ] as const
-          ).map(([label, reason]) => (
-            <AnalyticsCard key={label}>
-              <p className="text-xs font-semibold tracking-wide text-cyan-700 uppercase">{label}</p>
-              <UnavailableValue reason={reason} />
+        <div className="mb-3 grid gap-3 sm:grid-cols-2">
+          {["Corretores", "Gerentes"].map((label) => (
+            <AnalyticsCard key={label} density="compact">
+              <p className="text-xs font-semibold tracking-wide text-[var(--analytics-cyan-strong)] uppercase">
+                {label}
+              </p>
+              <UnavailableValue reason="Fonte de vínculos escopados indisponível." />
             </AnalyticsCard>
           ))}
         </div>
-        <div className="grid min-w-0 gap-5">
+        <div className="grid min-w-0 gap-4 xl:grid-cols-2">
           {OPERATIONAL_STAGES.map((stageKey) => {
             const rows = metrics
               ? buildOperationalComparisons(metrics[stageKey], goalsAvailable)
               : [];
             return (
-              <AnalyticsCard key={stageKey} className="min-w-0">
-                <h3 className="mb-3 text-lg font-semibold text-slate-950">
+              <AnalyticsCard key={stageKey} density="compact" className="min-w-0">
+                <h3 className="mb-3 text-base font-semibold text-[var(--analytics-ink)]">
                   {DASHBOARD_STAGES[stageKey].label} realizados
                 </h3>
                 {rows.length > 0 ? (
                   <AnalyticsTable
+                    density="compact"
                     caption={`${DASHBOARD_STAGES[stageKey].label}: comparativos por intervalo`}
                     rows={rows}
                     columns={operationalColumns}
@@ -241,25 +442,128 @@ function DashboardCompletion({
         </div>
       </section>
 
-      <section aria-labelledby="manager-brokers-title">
+      <section aria-labelledby="commercial-diagnosis-title">
         <SectionHeading
-          id="manager-brokers-title"
-          kicker="Estrutura comercial"
-          title="Corretores por gerente"
-          description="Total ativo, participação, periodicidade e o grupo sem gerente dependem do roster oficial por IDs e vigência."
+          id="commercial-diagnosis-title"
+          density="compact"
+          kicker="Leitura operacional"
+          title="Diagnóstico, gargalo e plano de ação"
+          description="A composição permanece visível sem transformar volume agregado em recomendação comercial não validada."
         />
-        <DataState
-          variant="unavailable"
-          title="Distribuição indisponível"
-          description="Nenhum nome, vínculo ou quantidade é presumido. Aguardando fonte oficial escopada."
+        <div className="grid gap-3 lg:grid-cols-3">
+          {[
+            ["Diagnóstico comercial", "Leitura do período"],
+            ["Gargalo do funil", "Etapa crítica"],
+            ["Plano de ação", "Próximas ações"],
+          ].map(([kicker, title], index) => (
+            <AnalyticsCard key={kicker} density="compact" tone={index === 1 ? "navy" : "default"}>
+              <p
+                className={`text-xs font-semibold tracking-widest uppercase ${
+                  index === 1 ? "text-cyan-300" : "text-[var(--analytics-cyan-strong)]"
+                }`}
+              >
+                {kicker}
+              </p>
+              <h3
+                className={`mt-2 text-base font-semibold ${
+                  index === 1 ? "text-white" : "text-[var(--analytics-ink)]"
+                }`}
+              >
+                {title}
+              </h3>
+              <div className="mt-3">
+                <DataState
+                  variant="unavailable"
+                  compact
+                  headingLevel="h3"
+                  title={DATA_UNAVAILABLE_LABEL}
+                  description="Aguardando critério e fonte oficial versionados."
+                />
+              </div>
+            </AnalyticsCard>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="monthly-comparisons-title">
+        <SectionHeading
+          id="monthly-comparisons-title"
+          density="compact"
+          kicker="Comparativo mensal"
+          title="Realizado e meta lado a lado"
+          description="Histórico, planejamento e realizado usam apenas as janelas existentes no read model."
+        />
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {(monthlySnapshots.length > 0
+            ? monthlySnapshots
+            : [
+                "Média do ano — meses fechados",
+                "Média dos últimos três meses fechados",
+                "Mês atual",
+              ].map((label, index) => ({
+                key: `unavailable-${index}`,
+                label,
+                readings: emptyFunnel,
+              }))
+          ).map((snapshot, index) => (
+            <AnalyticsCard key={snapshot.key} density="compact">
+              <FunnelChart
+                variant="compact"
+                label={snapshot.label}
+                stages={snapshot.readings}
+                accent={index === monthlySnapshots.length - 1 ? "lime" : "cyan"}
+              />
+            </AnalyticsCard>
+          ))}
+          {["Mês anterior no mesmo intervalo de dias", "Meta esperada até hoje"].map((label) => (
+            <AnalyticsCard key={label} density="compact">
+              <h3 className="text-base font-semibold text-[var(--analytics-ink)]">{label}</h3>
+              <div className="mt-3">
+                <DataState
+                  variant="unavailable"
+                  compact
+                  headingLevel="h3"
+                  title={DATA_UNAVAILABLE_LABEL}
+                  description="A base ainda não fornece esse intervalo confirmado."
+                />
+              </div>
+            </AnalyticsCard>
+          ))}
+        </div>
+      </section>
+
+      <section className="min-w-0" aria-labelledby="temporal-series-title">
+        <SectionHeading
+          id="temporal-series-title"
+          density="compact"
+          kicker="Série validada"
+          title="Realizados e referências temporais"
+          description="Ausências do snapshot permanecem explícitas e nunca são convertidas em zero."
+        />
+        <AnalyticsTable
+          density="compact"
+          caption="Indicadores reais por etapa e janela temporal"
+          rows={temporalRows}
+          columns={temporalColumns(goalsAvailable)}
+          rowKey={(row) => row.key}
         />
       </section>
 
-      <footer className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600">
-        <strong className="text-slate-900">Descomplica CRM</strong>
-        <span> · Inteligência comercial consolidada do Salesforce</span>
-        <span className="block">Canal de contato: configuração institucional indisponível.</span>
-      </footer>
+      <section aria-labelledby="manager-brokers-title">
+        <SectionHeading
+          id="manager-brokers-title"
+          density="compact"
+          kicker="Estrutura comercial"
+          title="Corretores por gerente"
+          description="A distribuição depende do roster oficial por IDs, escopo e vigência."
+        />
+        <DataState
+          variant="unavailable"
+          compact
+          title="Distribuição indisponível"
+          description="Nenhum nome, vínculo ou quantidade é presumido."
+        />
+      </section>
     </>
   );
 }
@@ -270,6 +574,7 @@ export default async function AppHomePage({
   searchParams: Promise<{ view?: string | string[]; period?: string | string[] }>;
 }) {
   const authorization = await enforcePermission("crm.dashboard.view");
+  const canViewStages = authorization.permissions.includes("crm.stages.view");
   const canRefresh = authorization.permissions.includes("crm.salesforce.refresh");
   const ingestConfiguration = getSalesforceIngestConfiguration();
   const refreshConfiguration = getSalesforceRefreshConfiguration();
@@ -278,456 +583,66 @@ export default async function AppHomePage({
   const selectedPeriod: DashboardPeriodKey = isDashboardPeriod(query.period)
     ? query.period
     : "month";
+  const result = await loadDashboardReadModel();
+  const dashboard = result.status === "ready" ? result.dashboard : null;
   const stages = Object.entries(DASHBOARD_STAGES) as Array<
     [DashboardStageKey, (typeof DASHBOARD_STAGES)[DashboardStageKey]]
   >;
-  const result = await loadDashboardReadModel();
+  const metrics = dashboard?.metrics[selectedView] ?? null;
+  const funnel = metrics
+    ? buildPeriodFunnelReadings(metrics, selectedPeriod)
+    : stages.map(([key, stage]) => ({
+        key,
+        label: stage.label,
+        value: null,
+        conversion: null,
+      }));
+  const summaryRows = stages.map(([key, stage]): StageSummaryRow => {
+    const metric = stageMetric(dashboard, selectedView, key);
+    const current = metric ? metricValueForPeriod(metric, selectedPeriod).current : null;
+    const goal = officialGoal(dashboard, metric, selectedPeriod);
 
-  if (result.status === "empty") {
-    const emptyFunnel = stages.map(([key, stage]) => ({
+    return {
       key,
       label: stage.label,
-      value: null,
-      conversion: null,
-    }));
-    const emptyRows = stages.map(([key, stage]) => ({ key, label: stage.label }));
-    const emptyColumns: Array<AnalyticsColumn<(typeof emptyRows)[number]>> = [
-      { key: "stage", label: "Etapa", render: (row) => row.label },
-      ...[
-        "Mês atual",
-        "Mês anterior",
-        "Média dos meses encerrados no ano",
-        "Média 3 meses",
-        "Últimos 14 dias",
-        "Últimos 7 dias",
-        "Semana",
-        "Hoje",
-        "Meta mensal",
-      ].map((label, index) => ({
-        key: `unavailable-${index}`,
-        label,
-        align: "right" as const,
-        render: () => <UnavailableValue reason={DATA_UNAVAILABLE_LABEL} />,
-      })),
-    ];
-
-    return (
-      <main className="min-w-0 px-4 py-6 sm:px-6 sm:py-10">
-        <div className="mx-auto grid max-w-7xl min-w-0 grid-cols-1 gap-7">
-          <PageHeader
-            eyebrow="Visão consolidada"
-            title="Relatório completo da equipe"
-            description="Resultados separados por origem e atualizados pelo Salesforce. Dimensões sem fonte segura permanecem indisponíveis."
-            meta={
-              <div className="grid gap-3">
-                <dl className="grid gap-3">
-                  <div>
-                    <dt className="text-xs tracking-wide text-slate-300 uppercase">
-                      Atualizado em
-                    </dt>
-                    <dd className="mt-1 font-semibold text-white">{DATA_UNAVAILABLE_LABEL}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
-                    <dd className="mt-1 text-slate-100">{DATA_UNAVAILABLE_LABEL}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs tracking-wide text-slate-300 uppercase">
-                      Periodicidade
-                    </dt>
-                    <dd className="mt-1 text-slate-100">{DATA_UNAVAILABLE_LABEL}</dd>
-                  </div>
-                </dl>
-                {canRefresh ? (
-                  <div>
-                    <SalesforceRefreshButton available={refreshConfiguration.available} />
-                  </div>
-                ) : null}
-              </div>
-            }
-            footer={
-              authorization.permissions.includes("crm.stages.view") ? (
-                <nav aria-label="Etapas do funil" className="flex flex-wrap gap-2">
-                  <Link
-                    href={dashboardHref(selectedView, selectedPeriod)}
-                    prefetch={false}
-                    aria-current="page"
-                    className="inline-flex min-h-11 items-center rounded-xl bg-cyan-300 px-3 py-2 text-sm font-semibold text-[#082137]"
-                  >
-                    Visão Geral
-                  </Link>
-                  {CRM_STAGES.map((stage) => (
-                    <Link
-                      key={stage.slug}
-                      href={`/app/etapas/${stage.slug}?view=${selectedView}&period=${selectedPeriod}`}
-                      prefetch={false}
-                      className="inline-flex min-h-11 items-center rounded-xl bg-white/8 px-3 py-2 text-sm font-medium text-white ring-1 ring-white/15 hover:bg-white/15"
-                    >
-                      {stage.label}
-                    </Link>
-                  ))}
-                </nav>
-              ) : null
-            }
-          />
-
-          <FilterBar
-            label="Filtros autorizados do dashboard"
-            unavailableDimensions={["Canal de vendas", "Gerente", "Responsável", "Empresa"]}
-          >
-            <FilterGroup label="Visão">
-              {(Object.keys(DASHBOARD_VIEWS) as DashboardViewKey[]).map((viewKey) => (
-                <FilterLink
-                  key={viewKey}
-                  href={dashboardHref(viewKey, selectedPeriod)}
-                  active={selectedView === viewKey}
-                >
-                  {DASHBOARD_VIEWS[viewKey].label}
-                </FilterLink>
-              ))}
-            </FilterGroup>
-            <FilterGroup label="Período">
-              {(Object.keys(DASHBOARD_PERIODS) as DashboardPeriodKey[]).map((periodKey) => (
-                <FilterLink
-                  key={periodKey}
-                  href={dashboardHref(selectedView, periodKey)}
-                  active={selectedPeriod === periodKey}
-                >
-                  {DASHBOARD_PERIODS[periodKey].label}
-                </FilterLink>
-              ))}
-            </FilterGroup>
-          </FilterBar>
-
-          <DataState
-            variant="unavailable"
-            compact
-            title={DATA_UNAVAILABLE_LABEL}
-            description={
-              ingestConfiguration.available
-                ? "A ingestão autenticada está pronta, mas ainda não existe snapshot comercial validado."
-                : "A integração de dados está indisponível neste ambiente. Nenhum dado demonstrativo é exibido."
-            }
-          />
-
-          <section className="min-w-0" aria-labelledby="empty-funnel-indicators-title">
-            <SectionHeading
-              id="empty-funnel-indicators-title"
-              kicker="Pulso do funil"
-              title="Conversão por etapa"
-              description="Rosca = avanço entre etapas · Parecer = realizado frente à meta. Valores e pareceres aguardam snapshot oficial seguro."
-            />
-            <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
-              {stages.map(([stageKey, stage]) => (
-                <div key={stageKey} className="grid gap-2">
-                  <MetricCard
-                    label={stage.label}
-                    value="Indisponível"
-                    detail={DATA_UNAVAILABLE_LABEL}
-                    ratio={null}
-                    ratioLabel="Indisponível"
-                    accent={STAGE_ACCENTS[stageKey]}
-                  />
-                  {authorization.permissions.includes("crm.stages.view") ? (
-                    <Link
-                      href={`/app/etapas/${CRM_STAGES.find((item) => item.key === stageKey)?.slug ?? stageKey}`}
-                      prefetch={false}
-                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-cyan-200 bg-white px-3 py-2 text-sm font-semibold text-cyan-800"
-                    >
-                      Abrir análise
-                    </Link>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-            <AnalyticsCard className="min-w-0">
-              <SectionHeading
-                kicker="Relação entre volumes"
-                title="Funil do período"
-                description="Volumes e conversões permanecem indisponíveis até existir snapshot real validado."
-              />
-              <FunnelChart
-                label={`${DASHBOARD_VIEWS[selectedView].label}, ${DASHBOARD_PERIODS[selectedPeriod].label.toLocaleLowerCase("pt-BR")}`}
-                stages={emptyFunnel}
-              />
-            </AnalyticsCard>
-
-            <div className="grid min-w-0 grid-cols-1 gap-5">
-              <AnalyticsCard tone="navy" className="min-w-0">
-                <p className="text-xs font-semibold tracking-widest text-cyan-300 uppercase">
-                  Valor vendido
-                </p>
-                <div className="mt-4 text-slate-100">
-                  <UnavailableValue reason={DATA_UNAVAILABLE_LABEL} />
-                </div>
-              </AnalyticsCard>
-              <AnalyticsCard className="min-w-0">
-                <SectionHeading
-                  kicker="Ranking validado"
-                  title="Oportunidades por empreendimento"
-                  description="Nenhuma posição é inferida sem dados oficiais."
-                />
-                <DataState
-                  variant="unavailable"
-                  compact
-                  title={DATA_UNAVAILABLE_LABEL}
-                  description="O ranking aguarda entradas do snapshot autorizado."
-                />
-              </AnalyticsCard>
-            </div>
-          </section>
-
-          <section className="min-w-0" aria-labelledby="empty-commercial-diagnosis-title">
-            <SectionHeading
-              id="empty-commercial-diagnosis-title"
-              kicker="Leitura operacional"
-              title="Diagnóstico, gargalo e plano de ação"
-              description="Nenhuma leitura comercial é inferida sem dados e critérios oficiais validados."
-            />
-            <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-3">
-              {[
-                ["Diagnóstico comercial", "Leitura do período"],
-                ["Gargalo do funil", "Etapa crítica"],
-                ["Plano de ação", "Próximas ações"],
-              ].map(([kicker, title], index) => (
-                <AnalyticsCard
-                  key={kicker}
-                  tone={index === 1 ? "navy" : "default"}
-                  className="min-w-0"
-                >
-                  <p
-                    className={`text-xs font-semibold tracking-widest uppercase ${index === 1 ? "text-lime-300" : "text-cyan-700"}`}
-                  >
-                    {kicker}
-                  </p>
-                  <h3
-                    className={`mt-3 text-xl font-semibold ${index === 1 ? "text-white" : "text-slate-950"}`}
-                  >
-                    {title}
-                  </h3>
-                  <div className="mt-5">
-                    <DataState
-                      variant="unavailable"
-                      compact
-                      headingLevel="h3"
-                      title={DATA_UNAVAILABLE_LABEL}
-                      description="A fonte oficial ainda não está disponível."
-                    />
-                  </div>
-                </AnalyticsCard>
-              ))}
-            </div>
-          </section>
-
-          <section className="min-w-0" aria-labelledby="empty-monthly-comparisons-title">
-            <SectionHeading
-              id="empty-monthly-comparisons-title"
-              kicker="Comparativo mensal"
-              title="Realizado e meta lado a lado"
-              description="Histórico × planejamento × realizado. Médias fechadas e meta esperada aguardam intervalos confirmados pelo sistema."
-            />
-            <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {[
-                "Média do ano — meses fechados",
-                "Média dos últimos três meses fechados",
-                "Mês anterior no mesmo intervalo",
-                "Meta atual projetada para o mês",
-                "Meta esperada até hoje",
-                "Mês atual",
-              ].map((label, index) => (
-                <AnalyticsCard key={label} className="min-w-0">
-                  <FunnelChart
-                    label={label}
-                    stages={emptyFunnel}
-                    accent={index === 2 ? "lime" : "cyan"}
-                  />
-                </AnalyticsCard>
-              ))}
-            </div>
-          </section>
-
-          <section className="min-w-0" aria-labelledby="empty-realized-table-title">
-            <SectionHeading
-              id="empty-realized-table-title"
-              kicker="Série validada"
-              title="Realizados e referências temporais"
-              description="A estrutura temporal permanece auditável; células sem fonte não são convertidas em zero."
-            />
-            <AnalyticsTable
-              caption="Indicadores por etapa e janela temporal"
-              rows={emptyRows}
-              columns={emptyColumns}
-              rowKey={(row) => row.key}
-            />
-          </section>
-
-          <DashboardCompletion
-            metrics={null}
-            selectedPeriod={selectedPeriod}
-            goalsAvailable={false}
-          />
-        </div>
-      </main>
-    );
-  }
-
-  const { dashboard } = result;
-  const metrics = dashboard.metrics[selectedView];
-  const selectedFunnel = buildPeriodFunnelReadings(metrics, selectedPeriod);
-  const monthlySnapshots = buildMonthlyFunnelSnapshots(metrics, dashboard.goalsAvailable);
-  const realizedRows: RealizedRow[] = stages.map(([key, stage]) => ({
-    key,
-    label: stage.label,
-    metric: metrics[key],
-  }));
-  const unavailableReason = "A janela não existe no snapshot validado atual.";
-  const goalsReason = "A fonte oficial de metas ainda não está disponível.";
-  const realizedColumns: Array<AnalyticsColumn<RealizedRow>> = [
-    { key: "stage", label: "Etapa", render: (row) => row.label },
-    {
-      key: "month",
-      label: "Mês atual",
-      align: "right",
-      render: (row) => numberFormatter.format(row.metric.currentMonth),
-    },
-    {
-      key: "previous-month",
-      label: "Mês anterior",
-      align: "right",
-      render: (row) => optionalNumber(row.metric.previousMonth, unavailableReason),
-    },
-    {
-      key: "year-average",
-      label: "Média dos meses encerrados no ano",
-      align: "right",
-      render: (row) => optionalNumber(row.metric.yearClosedMonthsAverage, unavailableReason),
-    },
-    {
-      key: "three-month-average",
-      label: "Média 3 meses",
-      align: "right",
-      render: (row) => optionalNumber(row.metric.lastThreeClosedMonthsAverage, unavailableReason),
-    },
-    {
-      key: "last-fourteen",
-      label: "Últimos 14 dias",
-      align: "right",
-      render: (row) => optionalNumber(row.metric.lastFourteenDays, unavailableReason),
-    },
-    {
-      key: "last-seven",
-      label: "Últimos 7 dias",
-      align: "right",
-      render: (row) => optionalNumber(row.metric.lastSevenDays, unavailableReason),
-    },
-    {
-      key: "week",
-      label: "Semana",
-      align: "right",
-      render: (row) => numberFormatter.format(row.metric.currentWeek),
-    },
-    {
-      key: "today",
-      label: "Hoje",
-      align: "right",
-      render: (row) => numberFormatter.format(row.metric.currentToday),
-    },
-    {
-      key: "goal",
-      label: "Meta mensal",
-      align: "right",
-      render: (row) =>
-        dashboard.goalsAvailable && row.metric.goalMonth > 0 ? (
-          numberFormatter.format(row.metric.goalMonth)
-        ) : (
-          <UnavailableValue
-            reason={dashboard.goalsAvailable ? "Meta não definida." : goalsReason}
-          />
-        ),
-    },
-  ];
-  const salesValue = dashboard.salesValue[selectedView][selectedPeriod];
+      current,
+      goal,
+      progress: current === null || goal === null ? null : calculateProgress(current, goal),
+    };
+  });
+  const salesValue = dashboard?.salesValue[selectedView][selectedPeriod] ?? null;
 
   return (
-    <main className="min-w-0 px-4 py-6 sm:px-6 sm:py-10">
-      <div className="mx-auto grid max-w-7xl min-w-0 grid-cols-1 gap-7">
+    <main className="min-w-0 px-3 py-5 sm:px-5 sm:py-7">
+      <div className="mx-auto grid max-w-[100rem] min-w-0 grid-cols-1 gap-5">
         <PageHeader
-          eyebrow="Visão consolidada"
-          title="Relatório completo da equipe"
-          description="Resultados separados por origem e atualizados pelo Salesforce. Cada valor mantém o recorte autorizado do snapshot."
+          variant="compact"
+          title="Dashboard comercial"
+          description="Visão geral da operação comercial com os filtros e o snapshot autorizados."
           meta={
-            <div className="grid gap-3">
-              <dl className="grid gap-3">
-                <div>
-                  <dt className="text-xs tracking-wide text-slate-300 uppercase">Atualizado em</dt>
-                  <dd className="mt-1 font-semibold text-white">
-                    {new Intl.DateTimeFormat("pt-BR", {
-                      dateStyle: "short",
-                      timeStyle: "short",
-                      timeZone: dashboard.timezone,
-                    }).format(new Date(dashboard.generatedAt))}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs tracking-wide text-slate-300 uppercase">
-                    Data de referência
-                  </dt>
-                  <dd className="mt-1 font-semibold text-white">
-                    {new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(
-                      new Date(`${dashboard.referenceDate}T00:00:00Z`),
-                    )}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
-                  <dd className="mt-1 break-words text-slate-100">
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <dt className="text-xs tracking-wide uppercase">Atualizado em</dt>
+                <dd className="mt-1 font-semibold text-[var(--analytics-ink)]">
+                  {generatedAtLabel(dashboard)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs tracking-wide uppercase">Fonte</dt>
+                <dd className="mt-1 font-semibold break-words text-[var(--analytics-ink)]">
+                  {dashboard ? (
                     <CommercialSourceLabel value={dashboard.source} />
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs tracking-wide text-slate-300 uppercase">Periodicidade</dt>
-                  <dd className="mt-1 text-slate-100">
-                    Dado indisponível — contrato de sincronização pendente
-                  </dd>
-                </div>
-              </dl>
-              {canRefresh ? (
-                <div>
-                  <SalesforceRefreshButton available={refreshConfiguration.available} />
-                </div>
-              ) : null}
-            </div>
-          }
-          footer={
-            authorization.permissions.includes("crm.stages.view") ? (
-              <nav aria-label="Etapas do funil" className="flex flex-wrap gap-2">
-                <Link
-                  href={dashboardHref(selectedView, selectedPeriod)}
-                  prefetch={false}
-                  aria-current="page"
-                  className="inline-flex min-h-11 items-center rounded-xl bg-cyan-300 px-3 py-2 text-sm font-semibold text-[#082137]"
-                >
-                  Visão Geral
-                </Link>
-                {CRM_STAGES.map((stage) => (
-                  <Link
-                    key={stage.slug}
-                    href={`/app/etapas/${stage.slug}?view=${selectedView}&period=${selectedPeriod}`}
-                    prefetch={false}
-                    className="inline-flex min-h-11 items-center rounded-xl bg-white/8 px-3 py-2 text-sm font-medium text-white ring-1 ring-white/15 hover:bg-white/15"
-                  >
-                    {stage.label}
-                  </Link>
-                ))}
-              </nav>
-            ) : null
+                  ) : (
+                    DATA_UNAVAILABLE_LABEL
+                  )}
+                </dd>
+              </div>
+            </dl>
           }
         />
 
         <FilterBar
+          density="compact"
           label="Filtros autorizados do dashboard"
           unavailableDimensions={["Canal de vendas", "Gerente", "Responsável", "Empresa"]}
         >
@@ -755,55 +670,79 @@ export default async function AppHomePage({
           </FilterGroup>
         </FilterBar>
 
-        {!dashboard.goalsAvailable ? (
+        {canRefresh ? (
+          <div className="flex justify-end [&_span]:text-[var(--analytics-muted)]">
+            <SalesforceRefreshButton available={refreshConfiguration.available} />
+          </div>
+        ) : null}
+
+        {!dashboard ? (
+          <DataState
+            variant="unavailable"
+            compact
+            title={DATA_UNAVAILABLE_LABEL}
+            description={
+              ingestConfiguration.available
+                ? "A ingestão autenticada está pronta, mas ainda não existe snapshot comercial validado."
+                : "A integração de dados está indisponível neste ambiente. Nenhum dado demonstrativo é exibido."
+            }
+          />
+        ) : !dashboard.goalsAvailable ? (
           <DataState
             variant="unavailable"
             compact
             title={GOALS_UNAVAILABLE_LABEL}
-            description="Os realizados vêm do snapshot real. Metas, atingimento e arcos de progresso permanecem indisponíveis até existir fonte oficial segura."
+            description="Os realizados permanecem visíveis. Metas e atingimento ficam indisponíveis até existir fonte oficial segura."
           />
         ) : null}
 
-        <section aria-labelledby="funnel-indicators-title">
+        <section aria-labelledby="stage-summary-title">
           <SectionHeading
-            id="funnel-indicators-title"
-            kicker={`Pulso do funil · ${DASHBOARD_VIEWS[selectedView].label} · ${DASHBOARD_PERIODS[selectedPeriod].label}`}
-            title="Conversão por etapa"
-            description="Rosca = avanço entre etapas · Parecer = realizado frente à meta. O arco aparece somente quando existe meta oficial maior que zero."
+            id="stage-summary-title"
+            density="compact"
+            kicker={`${DASHBOARD_VIEWS[selectedView].label} · ${DASHBOARD_PERIODS[selectedPeriod].label}`}
+            title="Indicadores do funil"
+            description="Cada cartão mostra o volume real da etapa; meta e atingimento aparecem somente quando a fonte oficial permite."
           />
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            {stages.map(([stageKey, stage]) => {
-              const reading = metricValueForPeriod(metrics[stageKey], selectedPeriod);
-              const goal = availableCommercialValue(dashboard.goalsAvailable, reading.goal);
-              const progress =
-                goal !== null && goal > 0 ? calculateProgress(reading.current, goal) : null;
-              const goalDetail =
-                goal === null
+          <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            {summaryRows.map((row) => {
+              const stage = CRM_STAGES.find((item) => item.key === row.key);
+              const Icon = STAGE_ICONS[row.key];
+              const metric = stageMetric(dashboard, selectedView, row.key);
+              const rawGoal = metric ? metricValueForPeriod(metric, selectedPeriod).goal : null;
+              const detail = !dashboard
+                ? DATA_UNAVAILABLE_LABEL
+                : !dashboard.goalsAvailable
                   ? GOALS_UNAVAILABLE_LABEL
-                  : goal > 0
-                    ? `Meta: ${numberFormatter.format(goal)}`
-                    : "Meta não definida para o período";
+                  : row.goal === null
+                    ? rawGoal === 0
+                      ? "Meta não definida para o período"
+                      : "Meta indisponível"
+                    : `Meta: ${numberFormatter.format(row.goal)}`;
 
-              const stageSlug = CRM_STAGES.find((item) => item.key === stageKey)?.slug;
               return (
-                <div key={stageKey} className="grid gap-2">
+                <div className="grid gap-2" key={row.key}>
                   <MetricCard
-                    label={stage.label}
-                    value={numberFormatter.format(reading.current)}
-                    detail={goalDetail}
-                    ratio={progress}
+                    variant="compact"
+                    label={row.label}
+                    value={row.current === null ? "—" : numberFormatter.format(row.current)}
+                    detail={detail}
+                    ratio={row.progress}
                     ratioLabel={
-                      progress === null ? "Indisponível" : percentFormatter.format(progress)
+                      row.progress === null
+                        ? "Atingimento indisponível"
+                        : `${percentFormatter.format(row.progress)} da meta`
                     }
-                    accent={STAGE_ACCENTS[stageKey]}
+                    accent={STAGE_ACCENTS[row.key]}
+                    icon={<Icon strokeWidth={1.8} />}
                   />
-                  {authorization.permissions.includes("crm.stages.view") && stageSlug ? (
+                  {canViewStages && stage ? (
                     <Link
-                      href={`/app/etapas/${stageSlug}?view=${selectedView}&period=${selectedPeriod}`}
+                      href={`/app/etapas/${stage.slug}?view=${encodeURIComponent(selectedView)}&period=${encodeURIComponent(selectedPeriod)}`}
                       prefetch={false}
-                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-cyan-200 bg-white px-3 py-2 text-sm font-semibold text-cyan-800"
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-sm font-semibold text-[var(--analytics-cyan-strong)] hover:border-[var(--analytics-cyan-strong)]"
                     >
-                      Abrir análise
+                      Abrir etapa
                     </Link>
                   ) : null}
                 </div>
@@ -812,38 +751,43 @@ export default async function AppHomePage({
           </div>
         </section>
 
-        <section className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
-          <AnalyticsCard className="min-w-0">
+        <section className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(18rem,0.8fr)]">
+          <AnalyticsCard density="compact" className="min-w-0">
             <SectionHeading
+              density="compact"
               kicker="Relação entre volumes"
               title="Funil do período"
-              description="Razões sequenciais comparam volumes agregados da mesma base; não representam grupos individuais acompanhados no tempo."
+              description="As razões comparam volumes agregados da mesma base; não acompanham grupos individuais ao longo do tempo."
             />
             <FunnelChart
+              variant="compact"
               label={`${DASHBOARD_VIEWS[selectedView].label}, ${DASHBOARD_PERIODS[selectedPeriod].label.toLocaleLowerCase("pt-BR")}`}
-              stages={selectedFunnel}
+              stages={funnel}
             />
           </AnalyticsCard>
 
-          <div className="grid min-w-0 grid-cols-1 gap-5">
-            <AnalyticsCard tone="navy">
+          <div className="grid min-w-0 content-start gap-4">
+            <AnalyticsCard density="compact" tone="navy">
               <p className="text-xs font-semibold tracking-widest text-cyan-300 uppercase">
-                Valor vendido
+                Valor vendido no período
               </p>
-              <strong className="mt-3 block text-3xl font-semibold text-white">
-                {currencyFormatter.format(salesValue)}
+              <strong className="mt-2 block text-2xl font-semibold text-white">
+                {salesValue === null
+                  ? DATA_UNAVAILABLE_LABEL
+                  : currencyFormatter.format(salesValue)}
               </strong>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                Total validado para a visão e o período selecionados.
+              <p className="mt-2 text-xs leading-5 text-slate-300">
+                Total do snapshot para a visão e o período selecionados.
               </p>
             </AnalyticsCard>
-            <AnalyticsCard>
+            <AnalyticsCard density="compact">
               <SectionHeading
+                density="compact"
                 kicker="Ranking validado"
                 title="Oportunidades por empreendimento"
-                description="Ordem já calculada na ingestão; este componente não pontua nem reordena."
+                description="Ordem fornecida pelo snapshot da visão selecionada."
               />
-              {dashboard.topDevelopments[selectedView].length > 0 ? (
+              {dashboard && dashboard.topDevelopments[selectedView].length > 0 ? (
                 <RankingList
                   items={dashboard.topDevelopments[selectedView].map((development) => ({
                     id: `${selectedView}-${development.rank}`,
@@ -854,135 +798,61 @@ export default async function AppHomePage({
                 />
               ) : (
                 <DataState
-                  variant="empty"
+                  variant={dashboard ? "empty" : "unavailable"}
                   compact
-                  title="Sem empreendimentos classificados"
-                  description="O snapshot atual não trouxe entradas para este ranking."
+                  headingLevel="h3"
+                  title={dashboard ? "Sem empreendimentos classificados" : DATA_UNAVAILABLE_LABEL}
+                  description={
+                    dashboard
+                      ? "O snapshot atual não trouxe entradas para este ranking."
+                      : "O ranking aguarda um snapshot comercial validado."
+                  }
                 />
               )}
             </AnalyticsCard>
           </div>
         </section>
 
-        <section aria-labelledby="commercial-diagnosis-title">
+        <section aria-labelledby="latest-activities-title">
           <SectionHeading
-            id="commercial-diagnosis-title"
-            kicker="Leitura operacional"
-            title="Diagnóstico, gargalo e plano de ação"
-            description="Composição preservada sem transformar volume agregado em recomendação comercial não validada."
+            id="latest-activities-title"
+            density="compact"
+            kicker="Movimentações recentes"
+            title="Últimas atividades"
+            description="O feed só será exibido quando existir uma fonte oficial escopada e validada no servidor."
           />
-          <div className="grid gap-4 lg:grid-cols-3">
-            <AnalyticsCard>
-              <p className="text-xs font-semibold tracking-widest text-cyan-700 uppercase">
-                Diagnóstico comercial
-              </p>
-              <h3 className="mt-3 text-xl font-semibold text-slate-950">Leitura do período</h3>
-              <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">
-                Espaço reservado para diagnóstico derivado de regra comercial oficial.
-              </p>
-              <div className="mt-5">
-                <DataState
-                  variant="unavailable"
-                  compact
-                  headingLevel="h3"
-                  title="Dado indisponível — integração pendente"
-                  description="O snapshot atual não contém diagnóstico validado."
-                />
-              </div>
-            </AnalyticsCard>
-
-            <AnalyticsCard tone="navy">
-              <p className="text-xs font-semibold tracking-widest text-lime-300 uppercase">
-                Gargalo do funil
-              </p>
-              <h3 className="mt-3 text-xl font-semibold text-white">Etapa crítica</h3>
-              <p className="mt-2 min-h-12 text-sm leading-6 text-slate-300">
-                A interface não escolhe gargalos somente pela menor razão agregada.
-              </p>
-              <div className="mt-5 rounded-2xl border border-white/15 bg-white/5 p-5">
-                <strong className="block text-base text-white">
-                  Dado indisponível — integração pendente
-                </strong>
-                <span className="mt-2 block text-sm leading-6 text-slate-300">
-                  Critério oficial de diagnóstico ainda não versionado.
-                </span>
-              </div>
-            </AnalyticsCard>
-
-            <AnalyticsCard>
-              <p className="text-xs font-semibold tracking-widest text-cyan-700 uppercase">
-                Plano de ação
-              </p>
-              <h3 className="mt-3 text-xl font-semibold text-slate-950">Próximas ações</h3>
-              <p className="mt-2 min-h-12 text-sm leading-6 text-slate-600">
-                Recomendações só serão exibidas após validação por responsável comercial.
-              </p>
-              <div className="mt-5">
-                <DataState
-                  variant="unavailable"
-                  compact
-                  headingLevel="h3"
-                  title="Dado indisponível — integração pendente"
-                  description="Nenhuma ação automática foi inferida dos dados."
-                />
-              </div>
-            </AnalyticsCard>
-          </div>
+          <AnalyticsCard density="compact">
+            <DataState
+              variant="unavailable"
+              compact
+              headingLevel="h3"
+              title="Dados indisponíveis"
+              description="Nenhuma atividade é presumida ou reaproveitada de outra janela enquanto a fonte segura estiver ausente."
+            />
+          </AnalyticsCard>
         </section>
 
-        <section aria-labelledby="monthly-comparisons-title">
+        <section className="min-w-0" aria-labelledby="summary-table-title">
           <SectionHeading
-            id="monthly-comparisons-title"
-            kicker="Comparativo mensal"
-            title="Realizado e meta lado a lado"
-            description="Histórico × planejamento × realizado. Somente janelas existentes no read model; projeção proporcional exige fórmula oficial validada."
-          />
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {monthlySnapshots.map((snapshot, index) => (
-              <AnalyticsCard key={snapshot.key}>
-                <FunnelChart
-                  label={snapshot.label}
-                  stages={snapshot.readings}
-                  accent={index === monthlySnapshots.length - 1 ? "lime" : "cyan"}
-                />
-              </AnalyticsCard>
-            ))}
-            {["Mês anterior no mesmo intervalo de dias", "Meta esperada até hoje"].map((label) => (
-              <AnalyticsCard key={label}>
-                <h3 className="text-lg font-semibold text-slate-950">{label}</h3>
-                <div className="mt-4">
-                  <DataState
-                    variant="unavailable"
-                    compact
-                    headingLevel="h3"
-                    title={DATA_UNAVAILABLE_LABEL}
-                    description="A base ainda não fornece o intervalo confirmado pelo sistema."
-                  />
-                </div>
-              </AnalyticsCard>
-            ))}
-          </div>
-        </section>
-
-        <section className="min-w-0" aria-labelledby="realized-table-title">
-          <SectionHeading
-            id="realized-table-title"
-            kicker="Série validada"
-            title="Realizados e referências temporais"
-            description="Ausências do snapshot ficam explícitas e não são convertidas em zero ou substituídas por outra janela."
+            id="summary-table-title"
+            density="compact"
+            kicker="Leitura consolidada"
+            title="Realizado e meta por etapa"
+            description="Ausência permanece ausência; a interface não converte dado faltante em zero."
           />
           <AnalyticsTable
-            caption="Indicadores reais por etapa e janela temporal"
-            rows={realizedRows}
-            columns={realizedColumns}
+            density="compact"
+            caption={`Resumo do funil — ${DASHBOARD_VIEWS[selectedView].label}, ${DASHBOARD_PERIODS[selectedPeriod].label.toLocaleLowerCase("pt-BR")}`}
+            rows={summaryRows}
+            columns={summaryColumns}
             rowKey={(row) => row.key}
           />
         </section>
 
-        <DashboardCompletion
+        <DashboardDetailSections
+          dashboard={dashboard}
           metrics={metrics}
           selectedPeriod={selectedPeriod}
-          goalsAvailable={dashboard.goalsAvailable}
         />
       </div>
     </main>

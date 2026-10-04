@@ -19,19 +19,35 @@ const styles = readFileSync(
 
 describe("cabecalho do simulador Associativo", () => {
   it("remove os rotulos duplicados e preserva o titulo acessivel", () => {
-    expect(archive).toContain("investor-associative-hero");
-    expect(archive).toContain("<h1>Simulador Tabela Associativo</h1>");
+    expect(archive).toContain("<SimulationCanvasHeader");
+    expect(archive).toContain('title="Simulador Tabela Associativo"');
+    expect(archive).toContain('data-canvas-layout="simulator"');
     expect(archive).not.toContain('className="documentation-breadcrumb"');
     expect(archive).not.toContain('className="goal-kicker"');
     expect(archive).not.toContain("Simulação comercial");
   });
 
   it("compacta somente o espaco do cabecalho Associativo", () => {
-    expect(styles).toContain(
-      ".investor-page-shell.investor-associative-table-page .investor-associative-hero",
+    const canvasStyles = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css",
+        import.meta.url,
+      ),
+      "utf8",
     );
-    expect(styles).toMatch(/\.investor-associative-hero\s*\{[\s\S]*?padding-top:\s*0;/u);
-    expect(styles).toMatch(/\.investor-associative-hero\s*\{[\s\S]*?padding-bottom:\s*16px;/u);
+    expect(canvasStyles).toContain(".simulation-canvas-header");
+    expect(canvasStyles).toContain(
+      '.investor-page-shell[data-canvas-layout="simulator"] .investor-main',
+    );
+    expect(canvasStyles).toMatch(
+      /\.investor-page-shell\[data-canvas-layout="simulator"\] \.simulation-canvas-header\s*\{[\s\S]*?padding-bottom:\s*14px;/u,
+    );
+    expect(canvasStyles).toMatch(
+      /\.simulation-canvas-title-row h1\s*\{[\s\S]*?font-size:\s*clamp\(1\.85rem, 3vw, 2\.8rem\)/u,
+    );
+    expect(canvasStyles).toMatch(
+      /\.simulation-canvas-actions[\s\S]*?\.investor-guided-start\s*\{[\s\S]*?min-height:\s*44px\s*!important/u,
+    );
   });
 
   it("mantem aviso e rodape na mesma faixa responsiva", () => {

@@ -98,7 +98,7 @@ const expectedProtectedRoutes = [
   "/admin/paginas",
 ];
 
-const futureSimulatorRoutes = new Set(["/app/simulacao/caixa"]);
+const futureSimulatorRoutes = new Set<string>();
 const expectedReleasedProtectedRoutes = expectedProtectedRoutes.filter(
   (route) => !futureSimulatorRoutes.has(route),
 );
@@ -398,6 +398,36 @@ describe("current account display and protected header contract", () => {
           }
         }
         expect(cases).toBe(66);
+        await page.setViewportSize({ width: 320, height: 568 });
+        for (const name of [
+          "Mariana",
+          "AlexandrianaMaximilianaAna",
+          "AlexandrianaMaximilianaConstantina",
+        ]) {
+          await page.setContent(fixture(`${name} QA`));
+          await assertHeaderGeometry(page, true);
+          expect(await page.evaluate(inspectIdentity, name)).toMatchObject({
+            identityDisplayReady: true,
+          });
+          const sizing = await page.evaluate(() => {
+            const header = document.querySelector<HTMLElement>("[data-protected-topbar]")!;
+            const label = document.querySelector<HTMLElement>(
+              "[data-session-identity-trigger-label]",
+            )!;
+            const range = document.createRange();
+            range.selectNodeContents(label);
+            return {
+              width: innerWidth,
+              nameLength: label.textContent!.length,
+              headerHeight: header.getBoundingClientRect().height,
+              labelWidth: label.getBoundingClientRect().width,
+              labelHeight: label.getBoundingClientRect().height,
+              lines: range.getClientRects().length,
+            };
+          });
+          if (name.length <= 26) expect(sizing.headerHeight).toBeLessThanOrEqual(60);
+          process.stdout.write(`[account-header-sizing] ${JSON.stringify(sizing)}\n`);
+        }
         for (const mutation of [
           { text: "qa.header@local.invalid" },
           { text: "Maria" },

@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "approvedAt": "2026-10-04",
+  "policy": "Visual composition only; never authority for data, authorization, formulas or commercial policy.",
+  "assets": [
+    {
+      "path": "reference/dashboard-oportunidades.webp",
+      "sha256": "c7dbf6e14f7802fc9597d419dee04aa6dd6b48474c91926d3b52c1fbb86b88c4",
+      "source": "exec-0ef7db55-7bf2-40c7-a11f-8cd4f797418f.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/agendamentos-visitas.webp",
+      "sha256": "00853304b89bc3efcf03b5a93410a62a18b1bdc1016b9d22b3f88075cc31c992",
+      "source": "exec-9caa8fb4-bdc0-4dad-b35f-46853bae3c3e.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/pastas-vendas.webp",
+      "sha256": "a6db052f97f31b2a0c2a6bddcb6f46dd51de93d40f4b9479e20be1545cdc984f",
+      "source": "exec-8490a5f8-1f7f-4b52-a3fd-78ff86eae53a.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/ranking-canal-parcerias.webp",
+      "sha256": "e81e5862046159302a7504809e83c89fc9ee9bd7226b7f09922802babedceab7",
+      "source": "exec-48e4055f-1cea-466a-a8d1-969bdbc4b3a0.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/configuracoes-metas-funil.webp",
+      "sha256": "7f8153e677e15b11b6bd1f45e7efa3e9fa97b14f85c130e6ba25bb5e0ae3370e",
+      "source": "exec-29446c4f-4a67-4e42-bfd4-ce9304db41dc.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/metas-parcerias-pontos.webp",
+      "sha256": "d2ecff179ab79da08d52d4c730477b0b7f1bd57651b8381e8d57a0e75723a444",
+      "source": "exec-ff5df097-e72f-4f14-ad4d-8de4a691e0dc.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/hub-simulacao-associativo.webp",
+      "sha256": "c1230fb6def529b27849270da823c3233da84c705973ca2671e3da7df44611ea",
+      "source": "exec-4e5e8bc9-d1ee-4cd9-9980-1b3367306c30.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/documentacao-caixa.webp",
+      "sha256": "5094f436a1ee19378c4e37645583ccf3abd5aaf3fd62e4d3629b8b120bfe730e",
+      "source": "exec-d8a8d370-c6c9-4e9a-b53b-a58a4aaefafb.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/tabela-direta-investidor.webp",
+      "sha256": "cca8225d446b477dec2cc1da37218be5632fdae6dfd34983ede65a4a76dcf9f4",
+      "source": "exec-5d5b51d3-1099-48b3-9e99-8c2197f7e5b7.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/tabelao-administracao.webp",
+      "sha256": "b3388bf4a68f54de95a4b2246c50ecbe7b9f5ea600aca00a82d7af15487db9f1",
+      "source": "exec-9a7f7c25-cd59-4f6a-b9fa-93c9adfd1419.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/usuarios-catalogo-paginas.webp",
+      "sha256": "d024668bdc7009af6a1296df94316b112e7760abaeb459441550910237d253c1",
+      "source": "exec-b6cfc012-a6c0-4270-a54a-3957d95ba74b.png",
+      "status": "authoritative"
+    },
+    {
+      "path": "reference/navegacao-mobile.webp",
+      "sha256": "66e2228e663a7cc630cb0f808925fd13e82c60abef0beb76fec89308ce48cc6e",
+      "source": "exec-726414f3-d63f-4763-be51-57510692b34e.png",
+      "status": "navigation-contract"
+    },
+    {
+      "path": "reference/navegacao-dropdown.webp",
+      "sha256": "11b02e1e473702ee8f9044cdaeaa32fd0b91996ca696ddd9753cac5b5e6b9ceb",
+      "source": "exec-c89de7ee-ba79-4b7a-bf6a-9703d959aec0.png",
+      "status": "navigation-contract"
+    },
+    {
+      "path": "reference/dashboard-composicao-alternativa.webp",
+      "sha256": "4afdbb946d685fd0391516efc93b5a569d5e84ff0787afad74df251fa58285ac",
+      "source": "exec-381294e5-eee7-4355-8e29-f7a9651df060.png",
+      "status": "secondary"
+    },
+    {
+      "path": "reference/hub-simulacao-superseded.webp",
+      "sha256": "37feb91adde576bf26c6984f9d72c276798260104e8c797360e81b259900d18b",
+      "source": "exec-1d900c88-cfb0-4876-804e-31c322478020.png",
+      "status": "superseded-do-not-implement"
+    }
+  ]
+}

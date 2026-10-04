@@ -59,24 +59,26 @@ export function ThemeSwitch({ canPersist }: { canPersist: boolean }) {
 
   return (
     <div role="group" aria-label="Aparência da página" className={styles.themeSwitch}>
-      {THEME_MODES.map((mode) => {
-        const presentation = THEME_PRESENTATION[mode.key];
-        const Icon = presentation.icon;
+      <div className={styles.themeOptions}>
+        {THEME_MODES.map((mode) => {
+          const presentation = THEME_PRESENTATION[mode.key];
+          const Icon = presentation.icon;
 
-        return (
-          <button
-            key={mode.key}
-            type="button"
-            aria-pressed={theme === mode.key}
-            title={`Tema ${presentation.label.toLocaleLowerCase("pt-BR")}`}
-            onClick={() => selectTheme(mode.key)}
-            className={styles.themeOption}
-          >
-            <Icon aria-hidden="true" size={16} />
-            {presentation.label}
-          </button>
-        );
-      })}
+          return (
+            <button
+              key={mode.key}
+              type="button"
+              aria-pressed={theme === mode.key}
+              title={`Tema ${presentation.label.toLocaleLowerCase("pt-BR")}`}
+              onClick={() => selectTheme(mode.key)}
+              className={styles.themeOption}
+            >
+              <Icon aria-hidden="true" size={16} />
+              {presentation.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

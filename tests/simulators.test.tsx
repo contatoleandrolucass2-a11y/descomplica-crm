@@ -11,6 +11,31 @@ import {
 } from "../lib/crm/simulators/catalog";
 
 describe("simulator visual catalog", () => {
+  it("keeps compact simulator controls at the 44px touch-target floor", () => {
+    const stylesheet = readFileSync(
+      new URL("../app/(protected)/app/simulacao/simulators.module.css", import.meta.url),
+      "utf8",
+    );
+
+    expect(stylesheet).toMatch(/\.simulatorNav > a \{[\s\S]*min-height: 2\.75rem/);
+    expect(stylesheet).toMatch(
+      /\.caixaWorkspace \.field select,[\s\S]*\.caixaWorkspace \.choice \{[\s\S]*min-height: 2\.75rem/,
+    );
+  });
+
+  it("keeps simulator page headings out of the global banner landmark", () => {
+    const header = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/SimulationCanvasHeader.tsx",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+
+    expect(header).toContain("data-simulation-page-heading");
+    expect(header).not.toMatch(/<header\b/);
+  });
+
   it("adds the released Tabelão to the hub only through its exact protected gate", () => {
     const hub = readFileSync(
       new URL("../app/(protected)/app/simulacao/page.tsx", import.meta.url),
@@ -22,7 +47,8 @@ describe("simulator visual catalog", () => {
     expect(hub).toContain('tabelaoGate.permission === "crm.simulators.view"');
     expect(hub).toContain("authorization.permissions.includes(tabelaoGate.permission)");
     expect(hub).toContain('slug: "tabelao"');
-    expect(hub).toContain('title: "Simulador Tabelão"');
+    expect(hub).toContain('title: "Tabelão"');
+    expect(hub).toContain('title="Hub de Simulação"');
     expect(hub).toContain('authorizedJourneyCount === 1 ? "jornada autorizada"');
     expect(hub).toContain("<LockKeyhole");
     expect(hub).not.toContain("🔒");
