@@ -1110,8 +1110,11 @@ for (const role of expectedRoles) {
           page.locator('main a[href="/app/simulacao/calcular-documentacao"]'),
         ).toHaveCount(1);
         await expect(page.locator('main a[href="/app/simulacao/caixa"]')).toHaveCount(0);
-        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(1);
-        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(1);
+        const blockedSimulatorCard = page.locator('main article[data-release-state="blocked"]');
+        await expect(blockedSimulatorCard).toHaveCount(1);
+        await expect(
+          blockedSimulatorCard.getByText("Aguardando autorização", { exact: true }),
+        ).toHaveCount(1);
 
         const simulationDisclosure = page.getByRole("button", {
           name: "Simulação",
@@ -1124,6 +1127,9 @@ for (const role of expectedRoles) {
         await expect(simulationPanel.locator('a[href="/app/simulacao/caixa"]')).toHaveCount(0);
         await expect(
           simulationPanel.locator('[aria-disabled="true"]').filter({ hasText: "CAIXA" }),
+        ).toHaveCount(1);
+        await expect(
+          simulationPanel.getByText("Aguardando autorização", { exact: true }),
         ).toHaveCount(1);
         await page.keyboard.press("Escape");
         reportProgress("simulator-release-gates");

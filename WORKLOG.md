@@ -11,6 +11,8 @@
 - O contrato agora comprova truncamento da identidade em cada viewport e exige
   correspondencia exata entre as 201 imagens e o manifesto. Oito capturas
   antigas da CAIXA foram removidas; nenhuma evidencia orfa permanece.
+- O smoke E2E distingue o aviso bloqueado da CAIXA no card e no submenu, ambos
+  sem `href`; o acesso direto continua validado separadamente como negado.
 - Teclado, foco, identidade longa, cookies, tres temas, reduced motion e estados
   dos simuladores passaram. O alvo de cookies permanece em 44px mesmo sob o CSS
   legado de 14px. Conta e fixtures QA efemeras foram removidas.

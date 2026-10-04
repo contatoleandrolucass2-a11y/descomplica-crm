@@ -10,6 +10,8 @@
   cobre as 21 paginas liberadas, inclusive Documentacao.
 - Exige truncamento da identidade em todas as larguras e rejeita capturas fora
   do manifesto; baselines antigas da CAIXA bloqueada foram eliminadas.
+- Mantém provas E2E contextuais e independentes para o card e o submenu
+  bloqueados da CAIXA, sem transformar nenhum deles em link.
 
 ## 2026-10-04 - Ajustes do Associativo publicados
 
