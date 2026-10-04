@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
 
-import { DataState, PageHeader, SectionHeading } from "@/app/(protected)/app/_components/analytics";
+import { DataState, SectionHeading } from "@/app/(protected)/app/_components/analytics";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 import { SIMULATOR_LIST } from "@/lib/crm/simulators/catalog";
@@ -10,6 +10,7 @@ import {
   officialSimulatorExecutionIsEnabled,
 } from "@/lib/crm/simulators/official/config";
 
+import { SimulationCanvasHeader } from "./_components/SimulationCanvasHeader";
 import styles from "./simulators.module.css";
 
 export const metadata = { title: "Simulação" };
@@ -24,9 +25,9 @@ interface HubSimulator {
 
 const TABELAO_HUB_ITEM: HubSimulator = {
   slug: "tabelao",
-  code: "ESTOQUE SPC",
-  title: "Simulador Tabelão",
-  description: "Consulte o estoque SPC disponível na jornada autorizada.",
+  code: "CONSULTA",
+  title: "Tabelão",
+  description: "Consulta unificada de estoque para visão ampliada e análise comercial.",
 };
 
 function CalculatorIcon() {
@@ -92,23 +93,12 @@ export default async function SimulationHubPage() {
   return (
     <main className={styles.page}>
       <div className={styles.container}>
-        <PageHeader
+        <SimulationCanvasHeader
           eyebrow="Ferramentas comerciais"
-          title="Simulação"
-          description={
-            wf13Enabled
-              ? "WF13 disponível em validação Master. Demais motores permanecem bloqueados."
-              : "Interfaces completas para preparar propostas. Motores permanecem bloqueados até validação oficial de cada regra."
-          }
-          meta={
-            <div className={styles.headerStatus}>
-              <CalculatorIcon />
-              <span>
-                <small>Ferramentas disponíveis</small>
-                <strong>{authorizedJourneyLabel}</strong>
-              </span>
-            </div>
-          }
+          title="Hub de Simulação"
+          description="Acesse os simuladores para preparar propostas, validar cenários e apoiar a operação com informações das fontes identificadas e regras vigentes."
+          statusLabel={authorizedJourneyLabel}
+          statusTone={wf13Enabled ? "canary" : "default"}
         />
 
         {wf13Enabled ? (
@@ -128,12 +118,9 @@ export default async function SimulationHubPage() {
         )}
 
         <section aria-labelledby="simulation-tools-title">
-          <SectionHeading
-            id="simulation-tools-title"
-            kicker="Escolha uma jornada"
-            title="Ferramentas comerciais em um só lugar"
-            description="Cada tela preserva campos, seções, alertas e painel de resultado sem publicar cálculo não validado."
-          />
+          <h2 id="simulation-tools-title" className={styles.visuallyHidden}>
+            Ferramentas comerciais em um só lugar
+          </h2>
           <div className={styles.hubGrid}>
             {hubCards.map(({ simulator, releaseEnabled }) => {
               return releaseEnabled ? (

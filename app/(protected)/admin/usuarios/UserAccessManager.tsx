@@ -1,7 +1,16 @@
 "use client";
 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  ShieldCheck,
+  UserCheck,
+  UsersRound,
+} from "lucide-react";
 import { useActionState, useMemo, useState, type FormEvent } from "react";
 
+import { managementStyles } from "@/app/(protected)/_components/ManagementCanvas";
 import {
   PERMISSIONS,
   getPermissionLabel,
@@ -23,6 +32,7 @@ import {
 } from "./actions";
 
 const INITIAL_STATE: AdminActionState = { status: "idle", message: "" };
+const PAGE_SIZE = 10;
 
 export interface UserPermissionOverride {
   permissionKey: PermissionKey;
@@ -84,7 +94,7 @@ function ApprovalForm({
   );
   if (availableRoles.length === 0 || reportingScopes.length === 0) {
     return (
-      <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+      <p className="rounded-lg border border-[var(--analytics-warning)] bg-[color-mix(in_srgb,var(--analytics-warning)_9%,var(--analytics-surface))] p-3 text-sm text-[var(--analytics-warning-ink)]">
         Aprovação indisponível: falta papel atribuível ou escopo oficial ativo.
       </p>
     );
@@ -96,15 +106,15 @@ function ApprovalForm({
       onSubmit={(event) =>
         confirmChange(event, "A conta será aprovada somente com o papel e os escopos selecionados.")
       }
-      className="grid gap-3 rounded-xl border border-cyan-200 bg-cyan-50/60 p-4"
+      className="grid gap-3 rounded-xl border border-[var(--analytics-line)] bg-[var(--analytics-surface-muted)] p-4"
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="grid gap-1 text-sm font-medium text-slate-800">
+        <label className="grid gap-1 text-sm font-medium text-[var(--analytics-ink)]">
           Papel aprovado
           <select
             name="roleKey"
             required
-            className="min-h-11 rounded-lg border border-slate-300 px-3"
+            className="min-h-11 rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 text-[var(--analytics-ink)]"
           >
             {availableRoles.map((role) => (
               <option key={role} value={role}>
@@ -113,14 +123,14 @@ function ApprovalForm({
             ))}
           </select>
         </label>
-        <label className="grid gap-1 text-sm font-medium text-slate-800">
+        <label className="grid gap-1 text-sm font-medium text-[var(--analytics-ink)]">
           Escopo oficial
           <select
             name="reportingScopeIds"
             required
             multiple
             size={Math.min(5, reportingScopes.length)}
-            className="min-h-28 rounded-lg border border-slate-300 px-3 py-2"
+            className="min-h-28 rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-[var(--analytics-ink)]"
           >
             {reportingScopes.map((scope) => (
               <option key={scope.id} value={scope.id}>
@@ -130,25 +140,21 @@ function ApprovalForm({
           </select>
         </label>
       </div>
-      <label className="grid gap-1 text-sm font-medium text-slate-800">
+      <label className="grid gap-1 text-sm font-medium text-[var(--analytics-ink)]">
         Motivo da aprovação
         <input
           name="reason"
           required
           minLength={3}
           maxLength={240}
-          className="min-h-11 rounded-lg border border-slate-300 px-3"
+          className="min-h-11 rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 text-[var(--analytics-ink)]"
         />
       </label>
-      <p className="text-xs leading-5 text-slate-600">
+      <p className="text-xs leading-5 text-[var(--analytics-muted)]">
         O banco revalida identidade, hierarquia, compatibilidade e unicidade do escopo. Nenhuma
         associação é inferida pelo nome.
       </p>
-      <button
-        type="submit"
-        disabled={pending}
-        className="min-h-11 rounded-lg bg-cyan-800 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className={managementStyles.buttonPrimary}>
         {pending ? "Validando…" : "Aprovar acesso escopado"}
       </button>
       <ActionFeedback state={state} />
@@ -173,8 +179,10 @@ function ActionFeedback({ state }: { state: AdminActionState }) {
   return (
     <div
       role={state.status === "error" ? "alert" : "status"}
-      className={`rounded-lg px-3 py-2 text-sm ${
-        state.status === "error" ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"
+      className={`rounded-lg border px-3 py-2 text-sm ${
+        state.status === "error"
+          ? "border-[var(--analytics-danger)] bg-[color-mix(in_srgb,var(--analytics-danger)_8%,var(--analytics-surface))] text-[var(--analytics-danger-ink)]"
+          : "border-[var(--analytics-positive)] bg-[color-mix(in_srgb,var(--analytics-positive)_8%,var(--analytics-surface))] text-[var(--analytics-positive-ink)]"
       }`}
     >
       <p>{state.message}</p>
@@ -211,7 +219,10 @@ function RoleForm({ user, roles }: { user: ManagedUser; roles: RoleKey[] }) {
       className="grid gap-3"
     >
       <div>
-        <label className="text-sm font-medium text-slate-800" htmlFor={`role-${user.userId}`}>
+        <label
+          className="text-sm font-medium text-[var(--analytics-ink)]"
+          htmlFor={`role-${user.userId}`}
+        >
           Papel
         </label>
         <select
@@ -219,7 +230,7 @@ function RoleForm({ user, roles }: { user: ManagedUser; roles: RoleKey[] }) {
           name="roleKey"
           value={selectedRole}
           onChange={(event) => setSelectedRole(event.target.value as RoleKey)}
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-sm text-[var(--analytics-ink)]"
         >
           {roles.map((roleKey) => (
             <option key={roleKey} value={roleKey}>
@@ -227,11 +238,13 @@ function RoleForm({ user, roles }: { user: ManagedUser; roles: RoleKey[] }) {
             </option>
           ))}
         </select>
-        <p className="mt-1 text-xs text-slate-500">{ROLES[selectedRole].description}</p>
+        <p className="mt-1 text-xs text-[var(--analytics-muted)]">
+          {ROLES[selectedRole].description}
+        </p>
       </div>
       <div>
         <label
-          className="text-sm font-medium text-slate-800"
+          className="text-sm font-medium text-[var(--analytics-ink)]"
           htmlFor={`role-reason-${user.userId}`}
         >
           Motivo {elevation ? "(obrigatório para elevação)" : "(opcional)"}
@@ -242,18 +255,18 @@ function RoleForm({ user, roles }: { user: ManagedUser; roles: RoleKey[] }) {
           required={elevation}
           minLength={elevation ? 3 : undefined}
           maxLength={240}
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-sm text-[var(--analytics-ink)]"
         />
       </div>
-      <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">
-        <strong className="text-slate-800">Resumo:</strong> acessos adicionados:{" "}
+      <div className="rounded-lg bg-[var(--analytics-surface-muted)] p-3 text-xs text-[var(--analytics-muted)]">
+        <strong className="text-[var(--analytics-ink)]">Resumo:</strong> acessos adicionados:{" "}
         {formatPermissionList(change.added)}; acessos removidos:{" "}
         {formatPermissionList(change.removed)}.
       </div>
       <button
         type="submit"
         disabled={pending || unchanged}
-        className="min-h-11 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+        className={managementStyles.buttonPrimary}
       >
         {pending ? "Salvando…" : "Salvar papel"}
       </button>
@@ -280,7 +293,7 @@ function StatusForm({ user }: { user: ManagedUser }) {
     >
       <div>
         <label
-          className="text-sm font-medium text-slate-800"
+          className="text-sm font-medium text-[var(--analytics-ink)]"
           htmlFor={`status-reason-${user.userId}`}
         >
           Motivo {nextActive ? "(opcional)" : "(obrigatório para desativação)"}
@@ -291,14 +304,16 @@ function StatusForm({ user }: { user: ManagedUser }) {
           required={!nextActive}
           minLength={!nextActive ? 3 : undefined}
           maxLength={240}
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-sm text-[var(--analytics-ink)]"
         />
       </div>
-      <p className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">{summary}</p>
+      <p className="rounded-lg bg-[var(--analytics-surface-muted)] p-3 text-xs text-[var(--analytics-muted)]">
+        {summary}
+      </p>
       <button
         type="submit"
         disabled={pending}
-        className="min-h-11 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
+        className={user.isActive ? managementStyles.buttonDanger : managementStyles.buttonPrimary}
       >
         {pending ? "Salvando…" : user.isActive ? "Desativar usuário" : "Reativar usuário"}
       </button>
@@ -333,7 +348,7 @@ function PermissionOverrideForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
           <label
-            className="text-sm font-medium text-slate-800"
+            className="text-sm font-medium text-[var(--analytics-ink)]"
             htmlFor={`permission-${user.userId}`}
           >
             Permissão
@@ -343,7 +358,7 @@ function PermissionOverrideForm({
             name="permissionKey"
             value={permissionKey}
             onChange={(event) => setPermissionKey(event.target.value as PermissionKey)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-sm text-[var(--analytics-ink)]"
           >
             {permissions.map((key) => (
               <option key={key} value={key}>
@@ -351,10 +366,15 @@ function PermissionOverrideForm({
               </option>
             ))}
           </select>
-          <p className="mt-1 text-xs text-slate-500">{PERMISSIONS[permissionKey].description}</p>
+          <p className="mt-1 text-xs text-[var(--analytics-muted)]">
+            {PERMISSIONS[permissionKey].description}
+          </p>
         </div>
         <div>
-          <label className="text-sm font-medium text-slate-800" htmlFor={`effect-${user.userId}`}>
+          <label
+            className="text-sm font-medium text-[var(--analytics-ink)]"
+            htmlFor={`effect-${user.userId}`}
+          >
             Efeito
           </label>
           <select
@@ -362,7 +382,7 @@ function PermissionOverrideForm({
             name="effect"
             value={effect}
             onChange={(event) => setEffect(event.target.value as "allow" | "deny")}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-sm text-[var(--analytics-ink)]"
           >
             <option value="allow">Permitir individualmente</option>
             <option value="deny">Negar individualmente</option>
@@ -371,7 +391,7 @@ function PermissionOverrideForm({
       </div>
       <div>
         <label
-          className="text-sm font-medium text-slate-800"
+          className="text-sm font-medium text-[var(--analytics-ink)]"
           htmlFor={`override-reason-${user.userId}`}
         >
           Motivo da exceção (obrigatório)
@@ -382,15 +402,13 @@ function PermissionOverrideForm({
           required
           minLength={3}
           maxLength={240}
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-sm text-[var(--analytics-ink)]"
         />
       </div>
-      <p className="rounded-lg bg-slate-50 p-3 text-xs text-slate-600">{summary}</p>
-      <button
-        type="submit"
-        disabled={pending}
-        className="min-h-11 rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800 disabled:opacity-50"
-      >
+      <p className="rounded-lg bg-[var(--analytics-surface-muted)] p-3 text-xs text-[var(--analytics-muted)]">
+        {summary}
+      </p>
+      <button type="submit" disabled={pending} className={managementStyles.buttonPrimary}>
         {pending ? "Salvando…" : "Aplicar exceção"}
       </button>
       <ActionFeedback state={state} />
@@ -433,14 +451,10 @@ function RemoveOverrideForm({
           minLength={3}
           maxLength={240}
           placeholder="Motivo para remover (obrigatório)"
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="w-full rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-sm text-[var(--analytics-ink)]"
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="min-h-11 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-      >
+      <button type="submit" disabled={pending} className={managementStyles.buttonDanger}>
         {pending ? "Removendo…" : "Remover exceção"}
       </button>
       <div className="sm:col-span-2">
@@ -465,27 +479,26 @@ function UserRow({
     user.isManageable && (canManageRoles || canManagePermissions || canManageUsers);
 
   return (
-    <article className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+    <article className={`${managementStyles.panel} overflow-hidden`}>
       <details>
-        <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 px-4 py-4 marker:hidden sm:px-5">
+        <summary className="grid min-h-14 cursor-pointer list-none gap-2 px-4 py-3 marker:hidden sm:grid-cols-[minmax(14rem,1.4fr)_minmax(8rem,0.7fr)_minmax(8rem,0.7fr)_auto] sm:items-center">
           <div className="min-w-0">
-            <h2 className="truncate font-medium text-slate-950">
+            <h2 className="truncate font-semibold text-[var(--analytics-ink)]">
               {user.email ?? "E-mail não informado"}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
-              {user.roleKey ? getRoleLabel(user.roleKey) : "Sem papel"}
-              {user.isSelf ? " · Sua conta" : ""}
-            </p>
           </div>
+          <p className="text-sm text-[var(--analytics-ink)]">
+            {user.roleKey ? getRoleLabel(user.roleKey) : "Sem papel"}
+            {user.isSelf ? " · Sua conta" : ""}
+          </p>
           <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
             <span
-              className={`rounded-full px-2.5 py-1 ${
-                user.isActive ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800"
-              }`}
+              className={managementStyles.statusPill}
+              data-state={user.isActive ? "active" : "inactive"}
             >
               {user.isActive ? "Ativo" : "Inativo"}
             </span>
-            <span className="rounded-full bg-cyan-50 px-2.5 py-1 text-cyan-800">
+            <span className={managementStyles.statusPill} data-state={user.accessStatus}>
               {user.accessStatus === "pending"
                 ? "Aguardando aprovação"
                 : user.accessStatus === "approved"
@@ -494,27 +507,34 @@ function UserRow({
                     ? "Acesso suspenso"
                     : "Legado em revisão"}
             </span>
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <span className={managementStyles.statusPill}>
               {user.overrides.length} {user.overrides.length === 1 ? "exceção" : "exceções"}
             </span>
-            <span aria-hidden="true" className="text-lg text-slate-500">
+            <span aria-hidden="true" className="text-lg text-[var(--analytics-muted)]">
               ▾
             </span>
           </div>
         </summary>
 
-        <div className="border-t border-slate-200 px-4 py-5 sm:px-5">
+        <div className="border-t border-[var(--analytics-line)] px-4 py-5 sm:px-5">
           {user.accessStatus === "pending" && canApproveUsers && user.isManageable ? (
             <section className="mb-5" aria-label="Aprovação Master-only">
-              <h3 className="mb-2 font-semibold text-slate-900">Aprovação de acesso escopado</h3>
+              <h3 className="mb-2 font-semibold text-[var(--analytics-ink)]">
+                Aprovação de acesso escopado
+              </h3>
               <ApprovalForm user={user} roles={assignableRoles} reportingScopes={reportingScopes} />
             </section>
           ) : null}
           <section aria-labelledby={`role-title-${user.userId}`}>
-            <h3 id={`role-title-${user.userId}`} className="font-semibold text-slate-900">
+            <h3
+              id={`role-title-${user.userId}`}
+              className="font-semibold text-[var(--analytics-ink)]"
+            >
               {user.roleKey ? getRoleLabel(user.roleKey) : "Sem papel"}
             </h3>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-[var(--analytics-muted)]">
               {user.roleKey
                 ? ROLES[user.roleKey].description
                 : "A conta não possui um conjunto de acessos herdados."}
@@ -522,14 +542,22 @@ function UserRow({
           </section>
 
           <section className="mt-5" aria-labelledby={`inherited-title-${user.userId}`}>
-            <h3 id={`inherited-title-${user.userId}`} className="font-semibold text-slate-900">
+            <h3
+              id={`inherited-title-${user.userId}`}
+              className="font-semibold text-[var(--analytics-ink)]"
+            >
               Permissões herdadas do papel
             </h3>
             <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {inherited.map((permissionKey) => (
-                <li key={permissionKey} className="rounded-lg bg-slate-50 px-3 py-2 text-sm">
-                  <strong className="text-slate-800">{getPermissionLabel(permissionKey)}</strong>
-                  <p className="mt-0.5 text-xs text-slate-500">
+                <li
+                  key={permissionKey}
+                  className="rounded-lg bg-[var(--analytics-surface-muted)] px-3 py-2 text-sm"
+                >
+                  <strong className="text-[var(--analytics-ink)]">
+                    {getPermissionLabel(permissionKey)}
+                  </strong>
+                  <p className="mt-0.5 text-xs text-[var(--analytics-muted)]">
                     {PERMISSIONS[permissionKey].description}
                   </p>
                 </li>
@@ -538,19 +566,27 @@ function UserRow({
           </section>
 
           <section className="mt-5" aria-labelledby={`exceptions-title-${user.userId}`}>
-            <h3 id={`exceptions-title-${user.userId}`} className="font-semibold text-slate-900">
+            <h3
+              id={`exceptions-title-${user.userId}`}
+              className="font-semibold text-[var(--analytics-ink)]"
+            >
               Exceções individuais
             </h3>
             {user.overrides.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-600">Nenhuma exceção configurada.</p>
+              <p className="mt-2 text-sm text-[var(--analytics-muted)]">
+                Nenhuma exceção configurada.
+              </p>
             ) : (
               <ul className="mt-3 grid gap-2">
                 {user.overrides.map((override) => (
-                  <li key={override.permissionKey} className="rounded-lg bg-slate-50 p-3 text-sm">
-                    <strong className="text-slate-900">
+                  <li
+                    key={override.permissionKey}
+                    className="rounded-lg bg-[var(--analytics-surface-muted)] p-3 text-sm"
+                  >
+                    <strong className="text-[var(--analytics-ink)]">
                       {getPermissionLabel(override.permissionKey)}
                     </strong>
-                    <p className="mt-1 text-slate-600">
+                    <p className="mt-1 text-[var(--analytics-muted)]">
                       {override.effect === "allow" ? "Permitida" : "Negada"} individualmente
                       {override.reason ? ` — ${override.reason}` : ""}
                     </p>
@@ -563,11 +599,13 @@ function UserRow({
             )}
           </section>
 
-          <details className="mt-6 rounded-xl border border-slate-200 p-4">
-            <summary className="cursor-pointer font-semibold text-slate-900">
+          <details className="mt-6 rounded-xl border border-[var(--analytics-line)] p-4">
+            <summary className="cursor-pointer font-semibold text-[var(--analytics-ink)]">
               Configurações avançadas
             </summary>
-            <p className="mt-2 font-mono text-xs break-all text-slate-500">ID: {user.userId}</p>
+            <p className="mt-2 font-mono text-xs break-all text-[var(--analytics-muted)]">
+              ID: {user.userId}
+            </p>
             {hasControls ? (
               <div className="mt-5 grid gap-6 lg:grid-cols-2">
                 {canManageRoles ? <RoleForm user={user} roles={assignableRoles} /> : null}
@@ -579,7 +617,7 @@ function UserRow({
                 ) : null}
               </div>
             ) : (
-              <p className="mt-3 text-sm text-slate-600">
+              <p className="mt-3 text-sm text-[var(--analytics-muted)]">
                 Esta conta não pode ser alterada por você devido à hierarquia ou à proteção contra
                 autoelevação.
               </p>
@@ -593,47 +631,206 @@ function UserRow({
 
 export function UserAccessManager(props: UserAccessManagerProps) {
   const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<"all" | "active" | "inactive" | "pending">("all");
+  const [role, setRole] = useState<"all" | RoleKey | "unassigned">("all");
+  const [pageNumber, setPageNumber] = useState(1);
   const users = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("pt-BR");
-    if (!query) return props.users;
-
     return props.users.filter((user) => {
-      const role = user.roleKey ? getRoleLabel(user.roleKey) : "sem papel";
-      const status = user.isActive ? "ativo" : "inativo";
-      return `${user.email ?? ""} ${role} ${status}`.toLocaleLowerCase("pt-BR").includes(query);
+      const roleLabel = user.roleKey ? getRoleLabel(user.roleKey) : "sem papel";
+      const statusLabel = user.isActive ? "ativo" : "inativo";
+      const matchesSearch =
+        !query ||
+        `${user.email ?? ""} ${roleLabel} ${statusLabel}`
+          .toLocaleLowerCase("pt-BR")
+          .includes(query);
+      const matchesStatus =
+        status === "all" ||
+        (status === "active" && user.isActive) ||
+        (status === "inactive" && !user.isActive) ||
+        (status === "pending" && user.accessStatus === "pending");
+      const matchesRole =
+        role === "all" || (role === "unassigned" ? user.roleKey === null : user.roleKey === role);
+      return matchesSearch && matchesStatus && matchesRole;
     });
-  }, [props.users, search]);
+  }, [props.users, role, search, status]);
+  const roleOptions = useMemo(
+    () =>
+      [...new Set(props.users.flatMap((user) => (user.roleKey ? [user.roleKey] : [])))].sort(
+        (left, right) => getRoleLabel(left).localeCompare(getRoleLabel(right), "pt-BR"),
+      ),
+    [props.users],
+  );
+  const activeCount = props.users.filter((user) => user.isActive).length;
+  const pendingCount = props.users.filter((user) => user.accessStatus === "pending").length;
+  const adminCount = props.users.filter(
+    (user) => user.roleKey === "master" || user.roleKey === "admin",
+  ).length;
+  const pageCount = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
+  const currentPage = Math.min(pageNumber, pageCount);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const visibleUsers = users.slice(pageStart, pageStart + PAGE_SIZE);
+
+  function resetPage() {
+    setPageNumber(1);
+  }
 
   return (
-    <div className="mt-8">
-      <label className="font-medium text-slate-900" htmlFor="user-search">
-        Buscar usuário
-      </label>
-      <input
-        id="user-search"
-        type="search"
-        value={search}
-        onChange={(event) => setSearch(event.target.value)}
-        placeholder="E-mail, papel ou status"
-        className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 sm:max-w-xl"
-      />
-      <div data-qa-visual-volatile="user-results">
-        <p className="mt-2 text-sm text-slate-600" aria-live="polite">
-          {users.length} {users.length === 1 ? "usuário encontrado" : "usuários encontrados"}
-        </p>
-
-        {users.length > 0 ? (
-          <div className="mt-5 grid gap-3">
-            {users.map((user) => (
-              <UserRow key={user.userId} user={user} {...props} />
-            ))}
+    <>
+      <section aria-label="Resumo de usuários" className={managementStyles.summaryGrid}>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <UsersRound />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Usuários totais</span>
+            <strong className={managementStyles.summaryValue}>{props.users.length}</strong>
           </div>
-        ) : (
-          <p className="mt-6 rounded-xl bg-white p-5 text-slate-600 ring-1 ring-slate-200">
-            Nenhum usuário corresponde à busca.
+        </article>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <UserCheck />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Ativos</span>
+            <strong className={managementStyles.summaryValue}>{activeCount}</strong>
+          </div>
+        </article>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <ShieldCheck />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Aguardando aprovação</span>
+            <strong className={managementStyles.summaryValue}>{pendingCount}</strong>
+          </div>
+        </article>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <ShieldCheck />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Administradores</span>
+            <strong className={managementStyles.summaryValue}>{adminCount}</strong>
+          </div>
+        </article>
+      </section>
+
+      <section className={`${managementStyles.panel} ${managementStyles.panelPadded}`}>
+        <div className={managementStyles.toolbar}>
+          <label className={managementStyles.searchLabel} htmlFor="user-search">
+            <Search aria-hidden="true" />
+            <span className={managementStyles.searchCopy}>
+              <span>Buscar usuário</span>
+              <input
+                id="user-search"
+                type="search"
+                value={search}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  resetPage();
+                }}
+                placeholder="E-mail, papel ou status"
+                className={managementStyles.searchInput}
+              />
+            </span>
+          </label>
+          <label className={managementStyles.selectLabel}>
+            Status
+            <select
+              value={status}
+              onChange={(event) => {
+                setStatus(event.target.value as typeof status);
+                resetPage();
+              }}
+              className={managementStyles.select}
+            >
+              <option value="all">Todos</option>
+              <option value="active">Ativos</option>
+              <option value="inactive">Inativos</option>
+              <option value="pending">Aguardando aprovação</option>
+            </select>
+          </label>
+          <label className={managementStyles.selectLabel}>
+            Papel
+            <select
+              value={role}
+              onChange={(event) => {
+                setRole(event.target.value as typeof role);
+                resetPage();
+              }}
+              className={managementStyles.select}
+            >
+              <option value="all">Todos</option>
+              <option value="unassigned">Sem papel</option>
+              {roleOptions.map((roleKey) => (
+                <option key={roleKey} value={roleKey}>
+                  {getRoleLabel(roleKey)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section className={`${managementStyles.panel} ${managementStyles.panelPadded}`}>
+        <div className={managementStyles.sectionHeader}>
+          <div>
+            <p className={managementStyles.sectionKicker}>Controle de acesso</p>
+            <h2 className={managementStyles.sectionTitle}>Usuários cadastrados</h2>
+          </div>
+          <p className={managementStyles.muted} aria-live="polite">
+            {users.length} {users.length === 1 ? "usuário encontrado" : "usuários encontrados"}
           </p>
-        )}
-      </div>
-    </div>
+        </div>
+
+        <div className="mt-3 grid gap-2" data-qa-visual-volatile="user-results">
+          <div className="hidden grid-cols-[minmax(14rem,1.4fr)_minmax(8rem,0.7fr)_minmax(8rem,0.7fr)_auto] gap-2 px-4 text-xs font-semibold tracking-wide text-[var(--analytics-cyan-strong)] uppercase sm:grid">
+            <span>Usuário</span>
+            <span>Papel</span>
+            <span>Status</span>
+            <span>Ações</span>
+          </div>
+          {visibleUsers.length > 0 ? (
+            visibleUsers.map((user) => <UserRow key={user.userId} user={user} {...props} />)
+          ) : (
+            <p className={`${managementStyles.emptyState} ${managementStyles.panel}`}>
+              Nenhum usuário corresponde à busca.
+            </p>
+          )}
+        </div>
+
+        <div className={`mt-3 ${managementStyles.pagination}`}>
+          <span>
+            {users.length
+              ? `${pageStart + 1}–${Math.min(pageStart + PAGE_SIZE, users.length)} de ${users.length}`
+              : "0 resultados"}
+          </span>
+          <div className={managementStyles.paginationControls}>
+            <button
+              type="button"
+              className={managementStyles.pageButton}
+              disabled={currentPage === 1}
+              onClick={() => setPageNumber((value) => Math.max(1, value - 1))}
+              aria-label="Página anterior"
+            >
+              <ChevronLeft aria-hidden="true" className="size-4" />
+            </button>
+            <span className={managementStyles.pageButton} aria-current="page">
+              {currentPage}
+            </span>
+            <button
+              type="button"
+              className={managementStyles.pageButton}
+              disabled={currentPage === pageCount}
+              onClick={() => setPageNumber((value) => Math.min(pageCount, value + 1))}
+              aria-label="Próxima página"
+            >
+              <ChevronRight aria-hidden="true" className="size-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

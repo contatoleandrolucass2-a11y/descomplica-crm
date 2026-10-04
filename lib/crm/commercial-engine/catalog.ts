@@ -58,7 +58,10 @@ export const COMMERCIAL_ENGINE_CATALOG: Record<CommercialEngineKey, CommercialEn
   "simulator.caixa": {
     domain: "simulator",
     requiredPermission: "crm.simulators.execute",
-    interactive: true,
+    // The CAIXA screen is visual-only until an official, approved engine exists.
+    // Keeping this false also closes the generic commercial-engine endpoint,
+    // independently of runtime flags or database policy state.
+    interactive: false,
   },
   "goals.dv": {
     domain: "goals",

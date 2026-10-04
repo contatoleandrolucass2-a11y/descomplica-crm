@@ -16,6 +16,7 @@ import { calculateWf13, WF13_FORMULA, wf13InputSchema } from "@/lib/crm/simulato
 import goldenFixture from "./fixtures/wf13-reference-golden.json";
 
 const ENDPOINT = "https://crm.example.com/api/official-simulator/associativo-fluxo-linear";
+const CAIXA_ENDPOINT = "https://crm.example.com/api/official-simulator/caixa";
 const {
   annual1,
   annual2,
@@ -287,5 +288,52 @@ describe("endpoint oficial dos simuladores", () => {
     );
 
     expect(response.status).toBe(503);
+  });
+
+  it("mantém CAIXA fail-closed mesmo com a flag forçada", async () => {
+    const authorizePost = vi.fn();
+    const configuration: OfficialSimulatorRuntimeConfiguration = {
+      mode: "active",
+      enabledKeys: ["simulator.caixa"],
+    };
+    const post = await handleOfficialSimulatorPost(
+      new Request(CAIXA_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "https://crm.example.com",
+        },
+        body: JSON.stringify({ schemaVersion: 1, input: {} }),
+      }),
+      "caixa",
+      dependencies({ configuration: () => configuration, authorize: authorizePost }),
+    );
+
+    expect(post.status).toBe(503);
+    await expect(post.json()).resolves.toEqual({ error: "simulator_unavailable" });
+    expect(authorizePost).not.toHaveBeenCalled();
+
+    const status = await handleOfficialSimulatorStatus(
+      new Request(CAIXA_ENDPOINT),
+      "caixa",
+      dependencies({ configuration: () => configuration }),
+    );
+    expect(status.status).toBe(200);
+    await expect(status.json()).resolves.toMatchObject({
+      engineKey: "simulator.caixa",
+      executionEnabled: false,
+    });
+
+    const authorizeView = vi.fn(async () => ({
+      ok: false as const,
+      response: Response.json({ error: "forbidden" }, { status: 403 }),
+    }));
+    const forbiddenStatus = await handleOfficialSimulatorStatus(
+      new Request(CAIXA_ENDPOINT),
+      "caixa",
+      dependencies({ configuration: () => configuration, authorize: authorizeView }),
+    );
+    expect(forbiddenStatus.status).toBe(403);
+    expect(authorizeView).toHaveBeenCalledWith("crm.simulators.view");
   });
 });

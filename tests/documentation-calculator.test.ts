@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { DocumentationArchive } from "../app/(protected)/app/simulacao/_components/DocumentationArchive";
+import { DocumentationCalculator } from "../app/(protected)/app/simulacao/_components/archive-investor/DocumentationCalculator";
 import { calculateDocumentation } from "@/lib/archive-investor/documentation-calculator-rules.mjs";
 
 const input = {
@@ -76,5 +80,32 @@ describe("documentation replica financial cases from the reference", () => {
     expect(
       calculateDocumentation({ ...input, appraisalValue: 400000, financing: 240000.01 }),
     ).toMatchObject({ ok: false, errors: ["Financiamento não pode superar o valor da venda."] });
+  });
+});
+
+describe("documentation heading composition", () => {
+  it("keeps the calculator hero enabled by default and supports an explicit opt-out", () => {
+    const defaultMarkup = renderToStaticMarkup(
+      createElement(DocumentationCalculator, { baseDate: input.baseDate }),
+    );
+    const embeddedMarkup = renderToStaticMarkup(
+      createElement(DocumentationCalculator, {
+        baseDate: input.baseDate,
+        showHeroHeading: false,
+      }),
+    );
+
+    expect(defaultMarkup).toContain("documentation-page-hero");
+    expect(defaultMarkup.match(/<h1\b/g)).toHaveLength(1);
+    expect(embeddedMarkup).toContain("documentation-page-hero");
+    expect(embeddedMarkup).toContain("documentation-flow");
+    expect(embeddedMarkup.match(/<h1\b/g)).toBeNull();
+  });
+
+  it("renders one page heading when the calculator is embedded in the archive", () => {
+    const markup = renderToStaticMarkup(createElement(DocumentationArchive));
+
+    expect(markup.match(/<h1\b/g)).toHaveLength(1);
+    expect(markup).toContain("<h1>Calcular documentação</h1>");
   });
 });

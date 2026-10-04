@@ -854,6 +854,28 @@ describe("commercial engine HTTP boundary", () => {
     expect(response.status).toBe(404);
     expect(harness.authorize).not.toHaveBeenCalled();
   });
+
+  it("keeps the CAIXA visual route fail-closed even when runtime flags include its engine", async () => {
+    const harness = handlerHarness("active");
+    harness.dependencies.configuration = () => ({
+      mode: "active",
+      available: true,
+      enabledKeys: ["simulator.caixa"],
+      databaseUrl: DATABASE_URL,
+    });
+
+    const response = await handleCommercialEnginePost(
+      request(),
+      "simulator.caixa",
+      harness.dependencies,
+    );
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ error: "engine_unavailable" });
+    expect(harness.authorize).not.toHaveBeenCalled();
+    expect(harness.loadPolicy).not.toHaveBeenCalled();
+    expect(harness.recordExecution).not.toHaveBeenCalled();
+  });
 });
 
 describe("commercial policy verifier CLI and telemetry", () => {

@@ -3,6 +3,7 @@ import {
   InvestorGuideLauncher,
   InvestorInfoHint,
 } from "./archive-investor/InvestorCalculator";
+import { SimulationCanvasHeader } from "./SimulationCanvasHeader";
 import "./archive-investor/investor-archive.css";
 
 const DIRECT_TABLE_DESCRIPTION =
@@ -10,22 +11,25 @@ const DIRECT_TABLE_DESCRIPTION =
 
 export async function DirectTableArchive() {
   return (
-    <div className="app-shell simulation-page-shell investor-page-shell investor-direct-table-page">
+    <div
+      className="app-shell simulation-page-shell investor-page-shell investor-direct-table-page"
+      data-canvas-layout="simulator"
+    >
       <main className="investor-main">
-        <section className="goal-page-hero investor-compact-hero">
-          <div className="goal-hero-copy">
-            <p className="goal-kicker">Simulação comercial</p>
-            <div className="investor-hero-title">
-              <h1>Simulador Tabela Direta</h1>
-              <InvestorInfoHint
-                label="Tabela Direta"
-                title="Tabela Direta"
-                description={DIRECT_TABLE_DESCRIPTION}
-              />
-            </div>
-          </div>
-          <InvestorGuideLauncher />
-        </section>
+        <SimulationCanvasHeader
+          eyebrow="Simulação · WF14"
+          title="Simulador Tabela Direta"
+          description="Simulação comercial com estoque SPC e fluxo editável."
+          statusLabel="Estoque · fonte identificada"
+          titleAccessory={
+            <InvestorInfoHint
+              label="Tabela Direta"
+              title="Tabela Direta"
+              description={DIRECT_TABLE_DESCRIPTION}
+            />
+          }
+          actions={<InvestorGuideLauncher />}
+        />
         <InvestorCalculator directTable directVisualLayout={false} />
         <p className="simulation-disclaimer">
           Simulação de apoio comercial. Confirme dados da unidade e resultado no fluxo oficial antes

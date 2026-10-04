@@ -54,7 +54,7 @@ describe("authorized navigation component", () => {
     expect(markup).not.toContain("Não autorizada");
   });
 
-  it("renders CAIXA only as a blocked state without href", () => {
+  it("renders an explicitly disabled future journey without href", () => {
     const markup = renderToStaticMarkup(
       <AuthorizedNavigation
         pages={[
@@ -79,9 +79,9 @@ describe("authorized navigation component", () => {
         ]}
         disabledItems={[
           {
-            key: "crm.simulation.caixa",
-            name: "CAIXA",
-            description: "Jornada preservada até a autorização oficial.",
+            key: "crm.simulation.future",
+            name: "Jornada futura",
+            description: "Página ainda não liberada.",
             section: "simulation",
             parentKey: "crm.simulation",
             sortOrder: 70,
@@ -92,10 +92,41 @@ describe("authorized navigation component", () => {
     );
 
     expect(markup).toContain('aria-disabled="true"');
-    expect(markup).toContain("CAIXA");
+    expect(markup).toContain("Jornada futura");
     expect(markup).toContain("Aguardando autorização");
-    expect(markup).not.toContain('href="/app/simulacao/caixa"');
-    expect(markup).not.toContain('aria-controls="crm.simulation.caixa"');
+    expect(markup).not.toContain('href="/app/simulacao/future"');
+    expect(markup).not.toContain('aria-controls="crm.simulation.future"');
+  });
+
+  it("renders the protected CAIXA visual journey as an authorized link", () => {
+    const markup = renderToStaticMarkup(
+      <AuthorizedNavigation
+        pages={[
+          {
+            key: "crm.simulation",
+            path: "/app/simulacao",
+            name: "Simulação",
+            description: "Ferramentas comerciais",
+            section: "simulation",
+            parentKey: null,
+            sortOrder: 10,
+          },
+          {
+            key: "crm.simulation.caixa",
+            path: "/app/simulacao/caixa",
+            name: "CAIXA",
+            description: "Jornada visual protegida",
+            section: "simulation",
+            parentKey: "crm.simulation",
+            sortOrder: 70,
+          },
+        ]}
+      />,
+    );
+
+    expect(markup).toContain('href="/app/simulacao/caixa"');
+    expect(markup).toContain("CAIXA");
+    expect(markup).not.toContain('aria-disabled="true"');
   });
 
   it("does not render disabled or unauthorized labels whose parent was not authorized", () => {

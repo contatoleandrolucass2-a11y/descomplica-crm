@@ -1,0 +1,288 @@
+/* Shared simulator composition based on the approved canvases.
+   This layer changes presentation only; data sources and engines stay in their owners. */
+.simulation-canvas-header {
+  --canvas-accent: var(--analytics-cyan-strong, #16c7da);
+  --canvas-text: var(--analytics-ink, #102a43);
+  --canvas-muted: var(--analytics-muted, #60758a);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 18px;
+  min-width: 0;
+  padding: 2px 2px 12px;
+  color: var(--canvas-text);
+}
+
+.simulation-canvas-header-copy,
+.simulation-canvas-title-row {
+  min-width: 0;
+}
+
+.simulation-canvas-eyebrow {
+  margin: 0 0 6px;
+  color: var(--canvas-accent);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.simulation-canvas-title-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.simulation-canvas-title-row h1 {
+  max-width: 100%;
+  margin: 0;
+  color: var(--canvas-text);
+  font-size: clamp(1.85rem, 3vw, 2.8rem);
+  line-height: 1.03;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+
+.simulation-canvas-description {
+  max-width: 58rem;
+  margin: 5px 0 0;
+  color: var(--canvas-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.simulation-canvas-header-aside {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.simulation-canvas-status {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--canvas-accent);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--canvas-accent) 7%, transparent);
+  padding: 8px 13px;
+  color: var(--canvas-accent);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.055em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.simulation-canvas-status svg {
+  width: 21px;
+  flex: 0 0 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.simulation-canvas-status-blocked {
+  --canvas-accent: var(--analytics-warning, #e3a93b);
+}
+
+.simulation-canvas-status-canary {
+  --canvas-accent: var(--analytics-lime, #9fdc63);
+}
+
+.simulation-canvas-actions {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.investor-page-shell .simulation-canvas-header {
+  --canvas-accent: var(--inv-cyan, var(--inv-color-accent));
+  --canvas-text: var(--inv-text, var(--inv-color-text));
+  --canvas-muted: var(--inv-muted, var(--inv-color-muted));
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-main {
+  width: min(100% - 40px, 1540px);
+  padding-top: 16px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .simulation-canvas-header {
+  padding-bottom: 14px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"]
+  .simulation-canvas-title-row
+  > .investor-info-hint {
+  flex: 0 0 32px;
+  width: 32px;
+  min-height: 32px;
+  transform: none;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"]
+  .simulation-canvas-title-row
+  .investor-info-trigger {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"]
+  .simulation-canvas-actions
+  .investor-proposal-help-cta {
+  width: max-content;
+  max-width: min(26rem, 100%);
+}
+
+.investor-page-shell[data-canvas-layout="simulator"]
+  .simulation-canvas-actions
+  .investor-guided-start {
+  min-height: 44px !important;
+  box-sizing: border-box;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-stock-panel {
+  border-width: 1px;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(var(--inv-color-shadow-rgb, 20, 32, 48), 0.2);
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-section-heading,
+.investor-page-shell[data-canvas-layout="simulator"]
+  .investor-stock-panel
+  .investor-section-heading {
+  min-height: 64px;
+  padding: 12px 16px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-section-heading > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-section-heading h2,
+.investor-page-shell[data-canvas-layout="simulator"]
+  .investor-stock-panel
+  .investor-section-heading
+  h2 {
+  font-size: 0.86rem;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-section-heading p,
+.investor-page-shell[data-canvas-layout="simulator"]
+  .investor-stock-panel
+  .investor-section-heading
+  p {
+  font-size: 0.68rem;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-stock-filters {
+  gap: 10px;
+  margin: 8px 12px;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-stock-filters select {
+  min-height: 40px;
+  border-radius: 7px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-filter-heading > button {
+  min-height: 40px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"]:not(.tabelao-page-shell)
+  .investor-stock-results {
+  margin: 0 12px 12px;
+  border-radius: 9px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-stock-table th,
+.investor-page-shell[data-canvas-layout="simulator"] .investor-stock-table td {
+  height: 36px;
+}
+
+.investor-page-shell[data-canvas-layout="simulator"] .investor-page-closing {
+  margin-top: 12px;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] {
+  padding-top: 16px;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] > .simulation-canvas-header {
+  --canvas-accent: var(--doc-rank-accent, var(--analytics-cyan-strong, #16c7da));
+  --canvas-text: var(--doc-rank-text, var(--analytics-ink, #102a43));
+  --canvas-muted: var(--doc-rank-muted, var(--analytics-muted, #60758a));
+  width: min(100% - 40px, 1540px);
+  margin-inline: auto;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-page-hero {
+  display: none;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-page-main {
+  padding-top: 0;
+}
+
+@media (max-width: 760px) {
+  .simulation-canvas-header {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+  }
+
+  .simulation-canvas-header-aside,
+  .simulation-canvas-actions {
+    width: 100%;
+    justify-items: stretch;
+    justify-content: stretch;
+  }
+
+  .simulation-canvas-status {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .investor-page-shell[data-canvas-layout="simulator"] .investor-main,
+  .documentation-page-shell[data-canvas-layout="documentation"] > .simulation-canvas-header {
+    width: min(100% - 24px, 1540px);
+  }
+
+  .investor-page-shell[data-canvas-layout="simulator"]
+    .simulation-canvas-actions
+    .investor-proposal-help-cta {
+    width: 100%;
+    max-width: none;
+  }
+
+  .investor-page-shell[data-canvas-layout="simulator"] .investor-stock-filters {
+    margin-inline: 10px;
+  }
+
+  .investor-page-shell[data-canvas-layout="simulator"]:not(.tabelao-page-shell)
+    .investor-stock-results {
+    margin-inline: 10px;
+  }
+}
+
+@media print {
+  .simulation-canvas-status,
+  .simulation-canvas-actions {
+    display: none !important;
+  }
+
+  .simulation-canvas-header {
+    display: block;
+    color: #182a40;
+  }
+}

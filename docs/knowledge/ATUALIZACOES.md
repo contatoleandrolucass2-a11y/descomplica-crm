@@ -36,6 +36,33 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   usou a API alternativa, mais antiga, e nao atesta completude do snapshot.
 - Nenhuma migration, politica comercial, fonte externa ou workflow foi alterado.
 
+## 2026-10-04: canvases aprovados cobrem 22 rotas protegidas
+
+- Status: validado localmente, pendente CI/publicacao; fonte:
+  `docs/qa/canvas-parity`, branch
+  `codex/canvas-layout-parity` e contratos locais de navegacao/QA.
+- Uma unica navbar global serve Dashboard, cinco etapas, Ranking, Canal,
+  Configuracoes/metas, Simulacao e Administracao. Subrotas nao devem recriar
+  navegacao de aplicacao dentro do conteudo.
+- Canvases sao autoridade apenas de composicao. A tela mostra dados de fonte
+  validada ou indisponibilidade explicita; nomes, numeros e estados ilustrados
+  nao podem virar dados reais, formulas nem politica comercial.
+- CAIXA e uma rota protegida somente visual. O acesso exige permissao, enquanto
+  motor, endpoint, submissao, analise e aprovacao bancaria permanecem
+  fail-closed; o QA recusa habilitar `simulator.caixa` mesmo por flag.
+- A captura limpa do SHA `a4c1717a1ac159804a1cda7b02ec3a3f48379b4a`
+  aprovou 154 checks responsivos, 88 de tema, 209 de acessibilidade/comparacao,
+  110 de zoom e 40 combinacoes da navegacao. Baseline transacional com 209
+  imagens promovida; nenhuma conta ou fixture QA permaneceu no banco local.
+  CI e publicacao seguem pendentes.
+- O roteiro de continuidade aguarda campos habilitados e valores persistidos e
+  interpreta vazio como ausencia, sem mudar valores do cenario, formulas ou
+  regras financeiras.
+- O smoke de release deve tratar pagina e motor CAIXA como gates distintos. A
+  matriz local aprovou Master 22, Admin 14, tres papeis analiticos com sete e os
+  quatro papeis sem acesso comercial com zero; 20 cenarios E2E passaram, um foi
+  ignorado conforme o contrato e dez contas sinteticas foram removidas.
+
 ## 2026-10-04: separar ausencia de dados de resultado zero no Associativo
 
 - Status: validado e publicado; fonte: codigo do forecast, handlers de selecao e

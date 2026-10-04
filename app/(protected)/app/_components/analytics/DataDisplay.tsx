@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import Link from "next/link";
 
 import styles from "./analytics.module.css";
@@ -10,18 +10,20 @@ export function PageHeader({
   description,
   meta,
   footer,
+  variant = "hero",
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   description: string;
   meta?: ReactNode;
   footer?: ReactNode;
+  variant?: "hero" | "compact" | "stage";
 }) {
   return (
-    <header className={styles.pageHeader}>
+    <header className={styles.pageHeader} data-variant={variant === "hero" ? undefined : variant}>
       <div className={styles.pageHeaderBody}>
         <div>
-          <p className={styles.eyebrow}>{eyebrow}</p>
+          {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
           <h1 className={styles.pageTitle}>{title}</h1>
           <p className={styles.pageDescription}>{description}</p>
         </div>
@@ -32,21 +34,27 @@ export function PageHeader({
   );
 }
 
+type AnalyticsCardProps = Omit<ComponentPropsWithoutRef<"article">, "children"> & {
+  children: ReactNode;
+  tone?: "default" | "navy" | "subtle";
+  padded?: boolean;
+  density?: "default" | "compact";
+};
+
 export function AnalyticsCard({
   children,
   tone = "default",
   padded = true,
   className = "",
-}: {
-  children: ReactNode;
-  tone?: "default" | "navy" | "subtle";
-  padded?: boolean;
-  className?: string;
-}) {
+  density = "default",
+  ...articleProps
+}: AnalyticsCardProps) {
   return (
     <article
+      {...articleProps}
       className={`${styles.card} ${padded ? styles.cardPadding : ""} ${className}`}
       data-tone={tone}
+      data-density={density === "compact" ? density : undefined}
     >
       {children}
     </article>
@@ -59,15 +67,20 @@ export function SectionHeading({
   description,
   action,
   id,
+  density = "default",
 }: {
   kicker?: string;
   title: string;
   description?: string;
   action?: ReactNode;
   id?: string;
+  density?: "default" | "compact";
 }) {
   return (
-    <div className={styles.sectionHeading}>
+    <div
+      className={styles.sectionHeading}
+      data-density={density === "compact" ? density : undefined}
+    >
       <div>
         {kicker ? <p className={styles.sectionKicker}>{kicker}</p> : null}
         <h2 className={styles.sectionTitle} id={id}>
@@ -114,6 +127,8 @@ export function MetricCard({
   ratioLabel,
   ratioAriaLabel,
   accent = "cyan",
+  icon,
+  variant = "default",
 }: {
   label: string;
   value: string;
@@ -122,22 +137,39 @@ export function MetricCard({
   ratioLabel: string;
   ratioAriaLabel?: string;
   accent?: ChartAccent;
+  icon?: ReactNode;
+  variant?: "default" | "compact";
 }) {
   const ratioValue = ratio === null ? "Indisponível" : ratioLabel;
 
   return (
-    <article className={`${styles.card} ${styles.metricCard}`}>
-      <div>
+    <article
+      className={`${styles.card} ${styles.metricCard}`}
+      data-variant={variant === "compact" ? variant : undefined}
+    >
+      {icon && variant === "compact" ? (
+        <span className={styles.metricIcon} aria-hidden="true">
+          {icon}
+        </span>
+      ) : null}
+      <div className={styles.metricContent}>
         <p className={styles.metricLabel}>{label}</p>
         <strong className={styles.metricValue}>{value}</strong>
         <p className={styles.metricDetail}>{detail}</p>
+        {variant === "compact" ? (
+          <span className={styles.metricRatio} data-available={ratio !== null ? true : undefined}>
+            {ratioValue}
+          </span>
+        ) : null}
       </div>
-      <DonutChart
-        label={ratioAriaLabel ?? `Atingimento de ${label}`}
-        value={ratioValue}
-        ratio={ratio}
-        accent={accent}
-      />
+      {variant === "default" ? (
+        <DonutChart
+          label={ratioAriaLabel ?? `Atingimento de ${label}`}
+          value={ratioValue}
+          ratio={ratio}
+          accent={accent}
+        />
+      ) : null}
     </article>
   );
 }
@@ -146,13 +178,19 @@ export function FilterBar({
   label,
   children,
   unavailableDimensions = [],
+  density = "default",
 }: {
   label: string;
   children: ReactNode;
   unavailableDimensions?: string[];
+  density?: "default" | "compact";
 }) {
   return (
-    <section className={styles.filterBar} aria-label={label}>
+    <section
+      className={styles.filterBar}
+      aria-label={label}
+      data-density={density === "compact" ? density : undefined}
+    >
       <div className={styles.filterLayout}>
         {children}
         {unavailableDimensions.length > 0 ? (
@@ -212,15 +250,18 @@ export function AnalyticsTable<Row>({
   rows,
   columns,
   rowKey,
+  density = "default",
 }: {
   caption: string;
   rows: Row[];
   columns: Array<AnalyticsColumn<Row>>;
   rowKey: (row: Row) => string;
+  density?: "default" | "compact";
 }) {
   return (
     <div
       className={styles.tableWrap}
+      data-density={density === "compact" ? density : undefined}
       role="region"
       aria-label={`${caption} — tabela com rolagem horizontal`}
       tabIndex={0}

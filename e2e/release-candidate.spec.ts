@@ -323,11 +323,10 @@ const inheritedAnalyticalRoles = new Set<Role>([
   "real_estate",
 ]);
 const masterOnlyRoles = new Set<Role>(["master"]);
-const noRoles = new Set<Role>();
 const protectedSurfaces = [
   {
     path: "/app",
-    heading: "Relatório completo da equipe",
+    heading: "Dashboard comercial",
     allowed: inheritedAnalyticalRoles,
   },
   {
@@ -385,10 +384,10 @@ const protectedSurfaces = [
     heading: "Metas de pontos",
     allowed: adminRoles,
   },
-  { path: "/app/simulacao", heading: "Simulação", allowed: masterOnlyRoles },
+  { path: "/app/simulacao", heading: "Hub de Simulação", allowed: masterOnlyRoles },
   {
     path: "/app/simulacao/associativo-fluxo-linear",
-    heading: "Simulador Associativo",
+    heading: "Simulador Tabela Associativo",
     allowed: masterOnlyRoles,
   },
   {
@@ -396,7 +395,11 @@ const protectedSurfaces = [
     heading: "Calcular documentação",
     allowed: masterOnlyRoles,
   },
-  { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: noRoles },
+  {
+    path: "/app/simulacao/caixa",
+    heading: "Simulação CAIXA",
+    allowed: masterOnlyRoles,
+  },
   {
     path: "/app/simulacao/tabela-direta",
     heading: "Simulador Tabela Direta",
@@ -409,7 +412,7 @@ const protectedSurfaces = [
   },
   {
     path: "/app/simulacao/tabela-investidor",
-    heading: "Tabela Investidor",
+    heading: "Simulador Tabela Investidor",
     allowed: masterOnlyRoles,
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
@@ -443,6 +446,7 @@ const simulatorRoutes = [
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
   "/app/simulacao/calcular-documentacao",
+  "/app/simulacao/caixa",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabela-investidor",
   "/app/simulacao/tabelao",
@@ -644,13 +648,13 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      role === "master" ? 18 : role === "admin" ? 11 : inheritedAnalyticalRoles.has(role) ? 7 : 0,
+      role === "master" ? 19 : role === "admin" ? 11 : inheritedAnalyticalRoles.has(role) ? 7 : 0,
     );
     expect(expectedAccountAdminRoutesByRole[role], role).toHaveLength(adminRoles.has(role) ? 3 : 0);
   }
   expect(
     protectedSurfaces.find((surface) => surface.path === "/app/simulacao/caixa")?.allowed,
-  ).toBe(noRoles);
+  ).toBe(masterOnlyRoles);
 });
 
 test("anonymous boundaries and generic login failure stay closed", async ({ page }) => {
@@ -1107,17 +1111,14 @@ for (const role of expectedRoles) {
         const tabelaoCard = page.locator('main a[href="/app/simulacao/tabelao"]');
         await expect(tabelaoCard).toHaveCount(1);
         await expect(
-          tabelaoCard.getByRole("heading", { level: 2, name: "Simulador Tabelão", exact: true }),
+          tabelaoCard.getByRole("heading", { level: 2, name: "Tabelão", exact: true }),
         ).toBeVisible();
         await expect(
           page.locator('main a[href="/app/simulacao/calcular-documentacao"]'),
         ).toHaveCount(1);
-        await expect(page.locator('main a[href="/app/simulacao/caixa"]')).toHaveCount(0);
+        await expect(page.locator('main a[href="/app/simulacao/caixa"]')).toHaveCount(1);
         const blockedSimulatorCard = page.locator('main article[data-release-state="blocked"]');
-        await expect(blockedSimulatorCard).toHaveCount(1);
-        await expect(
-          blockedSimulatorCard.getByText("Aguardando autorização", { exact: true }),
-        ).toHaveCount(1);
+        await expect(blockedSimulatorCard).toHaveCount(0);
 
         const simulationDisclosure = page.getByRole("button", {
           name: "Simulação",
@@ -1127,13 +1128,10 @@ for (const role of expectedRoles) {
         const simulationPanel = page.locator("#authorized-navigation-crm-simulation");
         await expect(simulationPanel).toBeVisible();
         await expect(simulationPanel.locator('a[href="/app/simulacao/tabelao"]')).toHaveCount(1);
-        await expect(simulationPanel.locator('a[href="/app/simulacao/caixa"]')).toHaveCount(0);
+        await expect(simulationPanel.locator('a[href="/app/simulacao/caixa"]')).toHaveCount(1);
         await expect(
           simulationPanel.locator('[aria-disabled="true"]').filter({ hasText: "CAIXA" }),
-        ).toHaveCount(1);
-        await expect(
-          simulationPanel.getByText("Aguardando autorização", { exact: true }),
-        ).toHaveCount(1);
+        ).toHaveCount(0);
         await page.keyboard.press("Escape");
         reportProgress("simulator-release-gates");
       }
@@ -1166,7 +1164,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
 }) => {
   await withRolePage(browser, "master", async (page) => {
     const surfaces = [
-      ["/app", "Relatório completo da equipe"],
+      ["/app", "Dashboard comercial"],
       ["/app/etapas/oportunidades", "Oportunidades"],
       ["/app/etapas/agendamentos", "Agendamentos"],
       ["/app/etapas/visitas", "Visitas"],
@@ -1313,7 +1311,7 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("released simulators and documentation run only for Master while CAIXA stays blocked", async ({
+test("released simulator pages run only for Master while the CAIXA engine stays blocked", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
@@ -1379,17 +1377,26 @@ test("released simulators and documentation run only for Master while CAIXA stay
       simulationPanel.locator('a[href="/app/simulacao/calcular-documentacao"]'),
     ).toBeVisible();
     await expect(simulationPanel.locator('a[href="/app/simulacao/tabelao"]')).toBeVisible();
-    await expect(simulationPanel.locator('a[href="/app/simulacao/caixa"]')).toHaveCount(0);
+    await expect(simulationPanel.locator('a[href="/app/simulacao/caixa"]')).toBeVisible();
     await expect(
       simulationPanel.locator('[aria-disabled="true"]').filter({ hasText: "CAIXA" }),
-    ).toBeVisible();
+    ).toHaveCount(0);
 
     const caixa = await page.goto("/app/simulacao/caixa");
-    expect(caixa?.status()).toBe(403);
+    expect(caixa?.status()).toBe(200);
     await expect(
-      page.getByRole("heading", { level: 1, name: forbiddenHeading, exact: true }),
+      page.getByRole("heading", { level: 1, name: "Simulação CAIXA", exact: true }),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: /^Calcular/u })).toHaveCount(0);
+    await expect(page.getByText("Motor CAIXA bloqueado.", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Calcular simulação", exact: true }),
+    ).toBeDisabled();
+    const caixaStatus = await page.request.get("/api/official-simulator/caixa");
+    expect(caixaStatus.status()).toBe(200);
+    expect(await caixaStatus.json()).toMatchObject({
+      engineKey: "simulator.caixa",
+      executionEnabled: false,
+    });
 
     const directTable = await page.goto("/app/simulacao/tabela-direta");
     expect(directTable?.status()).toBe(200);
@@ -1931,7 +1938,7 @@ test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", 
       page.getByRole("button", { name: "Verificar e continuar", exact: true }).click(),
     ]);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Relatório completo da equipe" }),
+      page.getByRole("heading", { level: 1, name: "Dashboard comercial" }),
     ).toBeVisible();
 
     await page.goto("/conta/seguranca");

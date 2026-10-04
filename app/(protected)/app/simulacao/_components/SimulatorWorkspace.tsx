@@ -8,11 +8,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 
-import {
-  DataState,
-  PageHeader,
-  UnavailableValue,
-} from "@/app/(protected)/app/_components/analytics";
+import { DataState, UnavailableValue } from "@/app/(protected)/app/_components/analytics";
 import {
   type SimulatorDefinition,
   type SimulatorField,
@@ -33,6 +29,7 @@ import {
 import { validateWf13Installments } from "@/lib/crm/simulators/official/wf13-contract";
 import { generateWf13AnnualDates } from "@/lib/crm/simulators/official/wf13-policy";
 
+import { SimulationCanvasHeader } from "./SimulationCanvasHeader";
 import styles from "../simulators.module.css";
 
 const UNAVAILABLE_MESSAGE = "Cálculo temporariamente indisponível — regra aguardando validação";
@@ -506,6 +503,7 @@ export function SimulatorWorkspace({
         .filter((group): group is string => group !== undefined),
     ),
   );
+  const isCaixa = definition.slug === "caixa";
   const [requestedGroup, setRequestedGroup] = useState<string | undefined>(navigationGroups[0]);
   const activeGroup = navigationGroups.includes(requestedGroup ?? "")
     ? requestedGroup
@@ -952,21 +950,20 @@ export function SimulatorWorkspace({
   }
 
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${isCaixa ? styles.caixaPage : ""}`}>
       <div className={styles.container}>
-        <PageHeader
+        <SimulationCanvasHeader
           eyebrow={`Simulação · ${definition.code}`}
           title={definition.title}
           description={definition.description}
-          meta={
-            <div className={styles.headerStatus}>
-              <CalculatorIcon />
-              <span>
-                <small>Motor de cálculo</small>
-                <strong>{executionAllowed ? "Validação Master" : "Aguardando validação"}</strong>
-              </span>
-            </div>
+          statusLabel={
+            executionAllowed
+              ? "Canário Master · sem persistência"
+              : isCaixa
+                ? "Jornada visual · motor bloqueado"
+                : "Motor aguardando validação"
           }
+          statusTone={executionAllowed ? "canary" : isCaixa ? "blocked" : "default"}
         />
 
         {executionAllowed ? (
@@ -981,13 +978,17 @@ export function SimulatorWorkspace({
             variant="unavailable"
             compact
             title={UNAVAILABLE_MESSAGE}
-            description="Os campos permanecem disponíveis para conferência. Nenhum valor é calculado, persistido ou tratado como proposta comercial."
+            description={
+              isCaixa
+                ? "Campos disponíveis somente para conferência visual. Nenhum cálculo, envio à CAIXA, análise de crédito, validação documental ou aprovação bancária é executado."
+                : "Os campos permanecem disponíveis para conferência. Nenhum valor é calculado, persistido ou tratado como proposta comercial."
+            }
           />
         )}
 
-        <div className={styles.workspace}>
+        <div className={`${styles.workspace} ${isCaixa ? styles.caixaWorkspace : ""}`}>
           <form
-            className={styles.form}
+            className={`${styles.form} ${isCaixa ? styles.caixaForm : ""}`}
             aria-label={`Entradas de ${definition.title}`}
             noValidate
             onSubmit={(event) => {
@@ -1049,15 +1050,21 @@ export function SimulatorWorkspace({
                 })
               : definition.sections.map(renderSection)}
 
-            <div className={styles.actionBar}>
+            <div className={`${styles.actionBar} ${isCaixa ? styles.caixaActionBar : ""}`}>
               <p>
                 <strong>
-                  {executionAllowed ? "Cálculo disponível." : "Preenchimento disponível."}
+                  {executionAllowed
+                    ? "Cálculo disponível."
+                    : isCaixa
+                      ? "Motor CAIXA bloqueado."
+                      : "Preenchimento disponível."}
                 </strong>
                 <span>
                   {executionAllowed
                     ? "Execução no servidor sem persistir os dados informados."
-                    : "Nenhum cálculo ou envio ao servidor será executado."}
+                    : isCaixa
+                      ? "Nenhum cálculo, envio bancário, validação documental ou aprovação será executado."
+                      : "Nenhum cálculo ou envio ao servidor será executado."}
                 </span>
               </p>
               <div className={styles.simulatorNav}>
@@ -1120,6 +1127,9 @@ export function SimulatorWorkspace({
                     </button>
                     <span id="calculation-blocked-reason" className={styles.blockedReason}>
                       Motor bloqueado. {executionReason}.
+                      {isCaixa
+                        ? " Esta jornada não envia dados à CAIXA e não representa aprovação bancária."
+                        : ""}
                     </span>
                   </span>
                 )}
@@ -1135,7 +1145,10 @@ export function SimulatorWorkspace({
             ) : null}
           </form>
 
-          <aside className={styles.results} aria-labelledby="simulator-results-title">
+          <aside
+            className={`${styles.results} ${isCaixa ? styles.caixaResults : ""}`}
+            aria-labelledby="simulator-results-title"
+          >
             <div className={styles.resultsHeading}>
               <span className={styles.resultsIcon}>
                 <CalculatorIcon />
@@ -1212,7 +1225,9 @@ export function SimulatorWorkspace({
                   <span>
                     {executionAllowed
                       ? "O cálculo será executado sem persistir os dados informados."
-                      : "Nenhuma fórmula é executada enquanto o gate permanece desligado."}
+                      : isCaixa
+                        ? "Nenhuma fórmula é executada enquanto o gate permanece desligado. Também não há análise de crédito, validação documental ou aprovação bancária."
+                        : "Nenhuma fórmula é executada enquanto o gate permanece desligado."}
                   </span>
                 </>
               )}

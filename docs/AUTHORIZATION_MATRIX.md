@@ -94,13 +94,13 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 - início administrativo, usuários e catálogo de páginas.
 
 O inventário HTTP cobre 22 rotas protegidas: 17 correspondem ao catálogo
-PostgreSQL, Tabelão e as réplicas WF14 e WF15 são rotas adicionais habilitadas
-no catálogo HTTP versionado e WF16 e CAIXA permanecem bloqueados. Essas cinco
-rotas continuam sem linha em `app_pages`; WF16 e CAIXA retornam `403` mesmo ao
-Master. Tabelão, WF14 e WF15 permanecem fora de `app_pages` para não alterar o
-banco neste candidato, mas suas réplicas integrais estão publicadas no menu
-próprio de Simulação. O guard server-side das três exige a permissão existente
-`crm.simulators.view`.
+PostgreSQL e cinco jornadas complementares permanecem sem linha em `app_pages`:
+Tabelão, as réplicas WF14 e WF15, WF16/Documentação e CAIXA. As cinco são
+montadas no servidor somente depois que o hub e `crm.simulators.view` autorizam
+o Master; outros perfis recebem `403` no guard. A página CAIXA é exclusivamente
+visual: o acesso à rota não habilita `simulator.caixa`, cálculo, envio, análise
+de crédito ou aprovação bancária, que continuam fail-closed por contrato
+independente.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
 de integração pendente. A rota de produção continua exigindo

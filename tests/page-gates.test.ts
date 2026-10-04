@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
 
 describe("protected commercial page set", () => {
-  it("matches the exact approved twenty-one-page production set", () => {
+  it("matches the exact approved twenty-two-page protected set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -21,6 +21,7 @@ describe("protected commercial page set", () => {
         "crm.settings.partnerships|/app/configuracoes/metas/parcerias|crm.settings.manage",
         "crm.settings.points|/app/configuracoes/metas/pontos|crm.settings.manage",
         "crm.settings|/app/configuracoes|crm.settings.view",
+        "crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view",
         "crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view",
         "crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view",
         "crm.simulation.wf15|/app/simulacao/tabela-investidor|crm.simulators.view",
@@ -36,12 +37,12 @@ describe("protected commercial page set", () => {
     );
   });
 
-  it("keeps CAIXA as the only restore-only simulator route", () => {
+  it("keeps no protected page in a restore-only release state", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => !page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
         .sort(),
-    ).toEqual(["crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view"].sort());
+    ).toEqual([]);
   });
 
   it("keeps the full twenty-two-route smoke inventory unique", () => {
@@ -70,7 +71,7 @@ describe("protected commercial page set", () => {
       {
         path: "/app/simulacao/caixa",
         permission: "crm.simulators.view",
-        releaseEnabled: false,
+        releaseEnabled: true,
       },
       {
         path: "/app/simulacao/tabela-direta",
@@ -107,6 +108,9 @@ describe("protected commercial page set", () => {
     expect(layout).toContain('await enforcePermission("crm.simulators.view")');
     expect(dynamicPage).toContain('await enforcePermission("crm.simulators.view")');
     expect(dynamicPage).toContain("if (!pageGate?.releaseEnabled) forbidden()");
+    expect(dynamicPage).toContain('const visualOnly = simulator === "caixa"');
+    expect(dynamicPage.match(/!visualOnly &&/gu)).toHaveLength(2);
+    expect(dynamicPage).toContain("motor e integração bancária permanecem indisponíveis");
     expect(tabelaoPage).toContain('await enforcePermission("crm.simulators.view")');
     expect(tabelaoPage).toContain('getProtectedPageGate("/app/simulacao/tabelao")?.releaseEnabled');
     expect(tabelaoPage).toContain("forbidden()");

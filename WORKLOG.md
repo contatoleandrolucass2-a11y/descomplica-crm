@@ -32,6 +32,44 @@
 - Sem alteracao de politica comercial, fontes externas, banco ou n8n.
   Limites e evidencia: `docs/audits/associativo-origem-brilho-2026-10-04.md`.
 
+## 2026-10-04 - Paridade dos 22 canvases protegidos
+
+- Fonte: 15 referencias versionadas em `docs/qa/canvas-parity`, contrato das
+  22 rotas protegidas e implementacao corrente da branch
+  `codex/canvas-layout-parity`. Os canvases orientam composicao, nao dados,
+  autorizacao, formulas ou politica comercial.
+- O shell protegido continua sendo a unica navbar global. Foram alinhados os
+  layouts de Dashboard, cinco etapas, Ranking, Canal de Parcerias,
+  Configuracoes/metas, hub e jornadas de Simulacao, alem de Administracao,
+  Usuarios e Catalogo de paginas.
+- As superficies usam dados de fontes validadas ou deixam a indisponibilidade
+  explicita. Textos, nomes, metricas e estados ilustrados nas referencias nao
+  foram promovidos a dados reais nem a fixtures produtivas.
+- `/app/simulacao/caixa` integra a navegacao protegida para revisao visual por
+  perfil autorizado. `simulator.caixa` e recusado pelo QA e o motor, endpoint,
+  submissao e aprovacao bancaria permanecem fail-closed; o layout nao substitui
+  Proxy, guard, grants ou RLS.
+- Os contratos cobrem os temas Claro, Medio e Escuro, sete viewports, zoom,
+  teclado, foco, reduced motion, overflow, contraste e Axe. A captura limpa do
+  SHA `a4c1717a1ac159804a1cda7b02ec3a3f48379b4a` aprovou 154 combinacoes
+  responsivas (`22 rotas × 7 viewports`), 88 checks de tema, 209 auditorias de
+  acessibilidade, 209 capturas/comparacoes, 110 checks de zoom e 40 combinacoes
+  da navegacao dos simuladores. A baseline de 209 imagens foi promovida pelo
+  helper transacional; conta e fixtures locais efemeras foram removidas.
+- O roteiro `associative-calculation-continuity` agora diferencia campo vazio
+  de zero e sincroniza a sequencia pelo estado habilitado/persistido. Conserva
+  Financiamento R$ 190.000, Subsidio/FGTS/Cheque Moradia em R$ 0, Entrada de
+  R$ 1.000 e 84 parcelas; nenhuma formula ou regra financeira foi alterada.
+- A matriz autenticada, contraste, hierarquia semantica, overflow mobile e
+  navegacao passaram. Gates obrigatorios finais, CI, PR e publicacao ainda
+  dependem da evidencia do SHA que incorporar esta baseline.
+- O E2E de release foi reconciliado com o contrato vigente: Master acessa as 22
+  paginas protegidas, Admin conserva 14, Broker/Coordinator/Real Estate
+  conservam sete e Manager/House/Partnership Channel/Pending ficam sem paginas
+  comerciais. A pagina CAIXA e autorizada somente ao Master; CTA e motor
+  continuam bloqueados. Vinte cenarios passaram, um permaneceu ignorado pelo
+  proprio contrato e as dez identidades sinteticas foram removidas.
+
 ## 2026-10-04 - Associativo: calculo, origem e continuidade
 
 - Fonte: pedido de correcao dos percentuais, avaliacao e continuidade, com

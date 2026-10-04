@@ -66,11 +66,13 @@ export function Gauge({
   value,
   ratio,
   accent = "lime",
+  variant = "default",
 }: {
   label: string;
   value: string;
   ratio: number | null;
   accent?: ChartAccent;
+  variant?: "default" | "compact";
 }) {
   const progress = percentage(ratio);
   const accessibleValue = ratio === null ? "indisponível" : percentFormatter.format(ratio);
@@ -78,6 +80,7 @@ export function Gauge({
   return (
     <figure
       className={`${styles.gauge} ${ACCENT_CLASSES[accent]}`}
+      data-variant={variant === "compact" ? variant : undefined}
       aria-label={`${label}: ${accessibleValue}`}
     >
       <svg className={styles.gaugeSvg} viewBox="0 0 220 125" aria-hidden="true" focusable="false">
@@ -108,13 +111,18 @@ export function FunnelChart({
   label,
   stages,
   accent = "cyan",
+  variant = "default",
 }: {
   label: string;
   stages: FunnelStage[];
   accent?: ChartAccent;
+  variant?: "default" | "compact";
 }) {
   return (
-    <figure className={`${styles.funnel} ${ACCENT_CLASSES[accent]}`}>
+    <figure
+      className={`${styles.funnel} ${ACCENT_CLASSES[accent]}`}
+      data-variant={variant === "compact" ? variant : undefined}
+    >
       <figcaption className={styles.funnelCaption}>{label}</figcaption>
       <ol className={styles.funnelList} role="list">
         {stages.map((stage, index) => (
