@@ -216,6 +216,7 @@ describe("isolated authenticated visual QA contract", () => {
 
   it("mantém o gatilho global de cookies visível e as categorias obrigatórias bloqueadas", () => {
     const script = source("scripts/qa/authenticated-visual.mjs");
+    const styles = source("app/_components/CookieConsentBanner.module.css");
     expect(script).toContain("const cookiePreferencesTrigger = page.getByRole");
     expect(script).toContain("(await cookiePreferencesTrigger.count()) === 1");
     expect(script).toContain('element.hasAttribute("data-qa-visual-volatile")');
@@ -224,6 +225,7 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain('name: "Fechar preferências"');
     expect(script).toContain("await cookiePreferencesTrigger.waitFor({");
     expect(script).toContain("cookieBannerHidden: cookiePreferencesSafe");
+    expect(styles.match(/min-height: 44px/g)).toHaveLength(3);
     expect(script).not.toMatch(
       /getByRole\("button", \{ name: "Preferências de cookies", exact: true \}\)\.count\(\)\) ===\s*0/,
     );
