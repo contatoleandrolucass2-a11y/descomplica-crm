@@ -1340,6 +1340,8 @@ function AssociativeApprovalPanel({
   linearMaximumIncomeDate,
   decreasingMaximumIncomeDate,
   comparisonReady,
+  installmentComparisonReady = comparisonReady,
+  comparisonUnavailableReason,
   proposalValid,
   proposalError,
   financingReady,
@@ -1366,6 +1368,8 @@ function AssociativeApprovalPanel({
   linearMaximumIncomeDate?: string;
   decreasingMaximumIncomeDate?: string;
   comparisonReady: boolean;
+  installmentComparisonReady?: boolean;
+  comparisonUnavailableReason?: string;
   proposalValid: boolean;
   proposalError?: string;
   financingReady: boolean;
@@ -1380,8 +1384,9 @@ function AssociativeApprovalPanel({
 }) {
   const adjustmentsDialogRef = useRef<HTMLDialogElement>(null);
   const [preparedSuggestions, setPreparedSuggestions] = useState<Partial<Record<AssociativeFlow, AssociativeFlowSuggestion | null>>>({});
-  const approval = calculateAssociativeApproval({ tierId, income, realSaleValue, proSoluto, linearInstallment, decreasingInstallment, linearMaximumIncomePayment, decreasingMaximumIncomePayment, proposalValid, paymentComparisonValid: comparisonReady });
-  const commonApprovalInput = { tierId, income, realSaleValue, proSoluto, proposalValid, paymentComparisonValid: comparisonReady };
+  const formatRate = (value: number | null) => value == null ? "—" : percent.format(value);
+  const commonApprovalInput = { tierId, income, realSaleValue, proSoluto, proposalValid, paymentComparisonValid: comparisonReady, installmentComparisonValid: installmentComparisonReady };
+  const approval = calculateAssociativeApproval({ ...commonApprovalInput, linearInstallment, decreasingInstallment, linearMaximumIncomePayment, decreasingMaximumIncomePayment });
   const linearApproval = calculateAssociativeApproval({ ...commonApprovalInput, linearInstallment, decreasingInstallment: linearInstallment, linearMaximumIncomePayment, decreasingMaximumIncomePayment: linearMaximumIncomePayment });
   const decreasingApproval = calculateAssociativeApproval({ ...commonApprovalInput, linearInstallment: decreasingInstallment, decreasingInstallment, linearMaximumIncomePayment: decreasingMaximumIncomePayment, decreasingMaximumIncomePayment });
   const tier = approval.tier;
@@ -1392,7 +1397,7 @@ function AssociativeApprovalPanel({
       linearValue: approval.proSolutoRate,
       decreasingValue: approval.proSolutoRate,
       limit: tier?.proSolutoRate,
-      help: `Mostra quanto do imóvel ainda será parcelado após recursos, Entrada e Sinais. Anuais não entram nesta conta. Cálculo: ${money.format(proSoluto)} ÷ ${money.format(realSaleValue)} = ${percent.format(approval.proSolutoRate)}. O resultado precisa ficar igual ou abaixo do limite do Ranking.`,
+      help: `Mostra quanto do imóvel ainda será parcelado após recursos, Entrada e Sinais. Anuais não entram nesta conta. Cálculo: ${money.format(proSoluto)} ÷ ${money.format(realSaleValue)} = ${formatRate(approval.proSolutoRate)}. O resultado precisa ficar igual ou abaixo do limite do Ranking.`,
     },
     {
       id: "commitment",
@@ -1400,8 +1405,8 @@ function AssociativeApprovalPanel({
       linearValue: approval.linearCommitmentRate,
       decreasingValue: approval.decreasingCommitmentRate,
       limit: tier?.commitmentRate,
-      help: comparisonReady
-        ? `O sistema procura a maior parcela do cronograma e divide pela renda, sem somar a Evolução de Obra. Linear: ${money.format(linearInstallment ?? 0)} em ${formatPaymentDate(linearInstallmentDate)} = ${percent.format(approval.linearCommitmentRate)} da renda. Decrescente: ${money.format(decreasingInstallment ?? 0)} em ${formatPaymentDate(decreasingInstallmentDate)} = ${percent.format(approval.decreasingCommitmentRate)} da renda.`
+      help: installmentComparisonReady
+        ? `O sistema procura a maior parcela do cronograma e divide pela renda, sem somar a Evolução de Obra. Linear: ${money.format(linearInstallment ?? 0)} em ${formatPaymentDate(linearInstallmentDate)} = ${formatRate(approval.linearCommitmentRate)} da renda. Decrescente: ${money.format(decreasingInstallment ?? 0)} em ${formatPaymentDate(decreasingInstallmentDate)} = ${formatRate(approval.decreasingCommitmentRate)} da renda.`
         : "Complete a proposta para o sistema comparar as maiores parcelas dos fluxos Linear e Decrescente com a renda.",
     },
     {
@@ -1411,16 +1416,17 @@ function AssociativeApprovalPanel({
       decreasingValue: approval.decreasingMaximumIncomeRate,
       limit: tier?.annualIncomeLimitRate,
       help: comparisonReady
-        ? `O sistema procura o mês mais pesado: parcela corrigida + Evolução de Obra. Depois divide o total pela renda. Linear: ${money.format(linearMaximumIncomePayment ?? 0)} em ${formatPaymentDate(linearMaximumIncomeDate)} = ${percent.format(approval.linearMaximumIncomeRate)}. Decrescente: ${money.format(decreasingMaximumIncomePayment ?? 0)} em ${formatPaymentDate(decreasingMaximumIncomeDate)} = ${percent.format(approval.decreasingMaximumIncomeRate)}.`
-        : "Complete a proposta para comparar o mês mais pesado de cada fluxo com a renda familiar.",
+        ? `O sistema procura o mês mais pesado: parcela corrigida + Evolução de Obra. Depois divide o total pela renda. Linear: ${money.format(linearMaximumIncomePayment ?? 0)} em ${formatPaymentDate(linearMaximumIncomeDate)} = ${formatRate(approval.linearMaximumIncomeRate)}. Decrescente: ${money.format(decreasingMaximumIncomePayment ?? 0)} em ${formatPaymentDate(decreasingMaximumIncomeDate)} = ${formatRate(approval.decreasingMaximumIncomeRate)}.`
+        : comparisonUnavailableReason || "Complete a proposta para comparar o mês mais pesado de cada fluxo com a renda familiar.",
     },
   ];
-  const approvalReady = Boolean(financingReady && !entryPending && !entryRejected && tier && comparisonReady && proposalValid);
+  const calculationReady = comparisonReady && approval.status !== "pending";
+  const approvalReady = Boolean(financingReady && !entryPending && !entryRejected && tier && calculationReady && proposalValid);
   const tierRejectsAll = tier?.id === "not-eligible";
-  const linearFailures = rows.filter((row) => linearApproval.checks.some((check) => check.id === row.id && !check.ok));
-  const decreasingFailures = rows.filter((row) => decreasingApproval.checks.some((check) => check.id === row.id && !check.ok));
-  const linearStatus = approvalReady ? (tierRejectsAll || linearFailures.length > 0 ? "rejected" : "approved") : "pending";
-  const decreasingStatus = approvalReady ? (tierRejectsAll || decreasingFailures.length > 0 ? "rejected" : "approved") : "pending";
+  const linearFailures = rows.filter((row) => linearApproval.checks.some((check) => check.id === row.id && check.available && !check.ok));
+  const decreasingFailures = rows.filter((row) => decreasingApproval.checks.some((check) => check.id === row.id && check.available && !check.ok));
+  const linearStatus = approvalReady ? linearApproval.status : "pending";
+  const decreasingStatus = approvalReady ? decreasingApproval.status : "pending";
   const adjustmentFor = (flow: AssociativeFlow, suggestion: AssociativeFlowSuggestion | null | undefined) => {
     const status = flow === "linear" ? linearStatus : decreasingStatus;
     const failure = (flow === "linear" ? linearFailures : decreasingFailures)[0];
@@ -1457,7 +1463,7 @@ function AssociativeApprovalPanel({
     ? "guidance"
     : entryRejected || !proposalValid
       ? "rejected"
-      : !comparisonReady
+      : !calculationReady
         ? "guidance"
         : linearStatus === "approved" && decreasingStatus === "approved"
           ? "approved"
@@ -1466,8 +1472,8 @@ function AssociativeApprovalPanel({
             : "rejected";
   const feedbackLabel = feedbackTone === "approved" ? "APROVADO" : feedbackTone === "rejected" ? "REPROVADO" : feedbackTone === "partial" ? "1 FLUXO APROVADO" : "PRÓXIMA AÇÃO";
   const feedbackMessage = nextKeyAction
-    || (!comparisonReady
-      ? "Aguarde o cálculo completo das parcelas para validar o resultado."
+    || (!calculationReady
+      ? comparisonUnavailableReason || "Complete os dados da proposta para calcular as parcelas e validar o resultado."
       : linearStatus === "approved" && decreasingStatus === "approved"
         ? "Linear e Decrescente estão dentro da regra selecionada."
         : linearStatus !== decreasingStatus
@@ -1516,10 +1522,10 @@ function AssociativeApprovalPanel({
         const linearFailed = linearFailures.includes(row);
         const decreasingFailed = decreasingFailures.includes(row);
         const failed = linearFailed || decreasingFailed;
-        return <tr key={row.id} className={failed ? "failed" : row.limit != null ? "passed" : "pending"}>
+        return <tr key={row.id} className={failed ? "failed" : row.limit != null && row.linearValue != null && row.decreasingValue != null ? "passed" : "pending"}>
           <th scope="row"><span className="investor-associative-approval-rule"><span>{row.label}</span><InvestorInfoHint label={row.label} title={`Entenda ${row.label}`} description={row.help} /></span></th>
-          <td data-label="Linear" className={linearFailed ? "failed-value" : undefined}><span>{percent.format(row.linearValue)}</span></td>
-          <td data-label="Decrescente" className={decreasingFailed ? "failed-value" : undefined}><span>{percent.format(row.decreasingValue)}</span></td>
+          <td data-label="Linear" className={linearFailed ? "failed-value" : undefined}><span aria-label={row.linearValue == null ? "Não calculado: dados incompletos" : undefined}>{formatRate(row.linearValue)}</span></td>
+          <td data-label="Decrescente" className={decreasingFailed ? "failed-value" : undefined}><span aria-label={row.decreasingValue == null ? "Não calculado: dados incompletos" : undefined}>{formatRate(row.decreasingValue)}</span></td>
           <td data-label="Limite">{row.limit == null ? "—" : `≤ ${percent.format(row.limit)}`}</td>
         </tr>;
       })}
@@ -2133,6 +2139,7 @@ function AssociativeInstallmentDialog({
   uncorrectedBalance: number;
 }) {
   const { hasAnnuals, normalizedProgress, rows: comparisonRows } = comparison;
+  const formatAmount = (value: number | null) => value == null ? "—" : money.format(value);
   const [viewMode, setViewMode] = useState<"comparison" | "decreasing" | "linear">("comparison");
   const showLinear = viewMode !== "decreasing";
   const showDecreasing = viewMode !== "linear";
@@ -2167,8 +2174,8 @@ function AssociativeInstallmentDialog({
               <td className="is-work-column" data-label="% Obra">{item.constructionProgress == null ? "—" : percent.format(item.constructionProgress)}</td>
               <td className="is-work-column" data-label="Evolução Obra">{item.workEvolution == null ? "—" : money.format(item.workEvolution)}</td>
               {hasAnnuals ? <td className="is-annual-column" data-label="Anual">{item.annualPayment > 0 ? money.format(item.annualPayment) : "—"}</td> : null}
-              {showLinear ? <><td className="is-linear-column" data-label="Parcela Linear">{item.kind === "monthly" || item.kind === "entry" || item.kind === "signal" ? money.format(item.linearPayment) : "—"}</td><td className="is-linear-column is-linear-total" data-label="Total Linear">{item.kind === "monthly" ? <strong>{money.format(item.linearTotal)}</strong> : "—"}</td><td className="is-linear-column" data-label="% da Renda Linear">{item.kind === "monthly" && item.linearIncomeRate != null ? percent.format(item.linearIncomeRate) : "—"}</td></> : null}
-              {showDecreasing ? <><td className="is-decreasing-column" data-label="Decrescente">{item.kind === "monthly" ? money.format(item.decreasingPayment) : "—"}</td><td className="is-decreasing-column is-decreasing-total" data-label="Total Decrescente">{item.kind === "monthly" ? <strong>{money.format(item.decreasingTotal)}</strong> : "—"}</td><td className="is-decreasing-column" data-label="% da Renda Decrescente">{item.kind === "monthly" && item.decreasingIncomeRate != null ? percent.format(item.decreasingIncomeRate) : "—"}</td></> : null}
+              {showLinear ? <><td className="is-linear-column" data-label="Parcela Linear">{item.kind === "monthly" || item.kind === "entry" || item.kind === "signal" ? formatAmount(item.linearPayment) : "—"}</td><td className="is-linear-column is-linear-total" data-label="Total Linear">{item.kind === "monthly" ? <strong>{formatAmount(item.linearTotal)}</strong> : "—"}</td><td className="is-linear-column" data-label="% da Renda Linear">{item.kind === "monthly" && item.linearIncomeRate != null ? percent.format(item.linearIncomeRate) : "—"}</td></> : null}
+              {showDecreasing ? <><td className="is-decreasing-column" data-label="Decrescente">{item.kind === "monthly" ? formatAmount(item.decreasingPayment) : "—"}</td><td className="is-decreasing-column is-decreasing-total" data-label="Total Decrescente">{item.kind === "monthly" ? <strong>{formatAmount(item.decreasingTotal)}</strong> : "—"}</td><td className="is-decreasing-column" data-label="% da Renda Decrescente">{item.kind === "monthly" && item.decreasingIncomeRate != null ? percent.format(item.decreasingIncomeRate) : "—"}</td></> : null}
               <td data-label="Data Parcela"><time dateTime={item.paymentDate}>{formatDate(item.paymentDate)}</time></td>
             </tr>)}
           </tbody>
@@ -2421,7 +2428,8 @@ function enrichInventory(items: InventoryItem[], reference: InventoryItem[]) {
       streetNumber: item.streetNumber ?? source?.streetNumber ?? projectSource?.streetNumber ?? null,
       city: item.city ?? source?.city ?? projectSource?.city ?? null,
       state: item.state ?? source?.state ?? projectSource?.state ?? null,
-      progress: item.progress ?? source?.progress ?? projectSource?.progress ?? null,
+      progress: item.progress ?? source?.progress ?? null,
+      completionDate: item.completionDate ?? source?.completionDate ?? null,
       region: item.region ?? source?.region ?? null,
       unitType: item.unitType ?? source?.unitType ?? inferUnitType(item.product),
     };
@@ -3316,34 +3324,37 @@ export function InvestorCalculator({
     ) {
       return;
     }
+    const preserveAssociativeProposal = annualMode && Boolean(selectedUnitId);
     inventoryProposalStarted.current = true;
     setSelectedUnitId(item.id);
     setDocumentationAppraisalOverride("");
     setSalePrice(item.finalPrice ? String(item.finalPrice) : "");
     setCompletionDate(item.completionDate ?? "");
-    setDiscountAuthorized(false);
-    setDiscount("0");
-    setFinancing(annualMode ? "" : "0");
-    setSubsidy(annualMode ? "" : "0");
-    setFgts(annualMode ? "" : "0");
-    setHousingCheck(annualMode ? "" : "0");
-    setEntryValue(annualMode ? "" : item.finalPrice ? (Math.ceil(item.finalPrice * 10) / 100).toFixed(2) : "0");
-    setInstallments(annualMode ? "" : directVisualLayout ? "84" : "18");
-    setIncome("0");
-    setAssociativeManualModalityPreference(null);
-    setAssociativeModalityConfirmed(false);
-    setAssociativeFirstProperty("");
-    setAssociativeApprovalTier("");
-    setSignalFieldCount(0);
-    setSignals(["0", "0", "0"]);
-    setHiddenSignalIndexes([]);
-    setSignalDistributionMode(directTable || annualMode ? "manual" : "auto");
-    setIntermediaryFieldCount(0);
-    setIntermediaries(Array.from({ length: directTable ? 8 : annualMode ? 5 : 4 }, () => "0"));
-    setHiddenIntermediaryIndexes([]);
-    setSelectedDirectOption("");
-    setDirectProposalDirty(false);
-    setVisibleScenarioCodes([]);
+    if (!preserveAssociativeProposal) {
+      setDiscountAuthorized(false);
+      setDiscount("0");
+      setFinancing(annualMode ? "" : "0");
+      setSubsidy(annualMode ? "" : "0");
+      setFgts(annualMode ? "" : "0");
+      setHousingCheck(annualMode ? "" : "0");
+      setEntryValue(annualMode ? "" : item.finalPrice ? (Math.ceil(item.finalPrice * 10) / 100).toFixed(2) : "0");
+      setInstallments(annualMode ? "" : directVisualLayout ? "84" : "18");
+      setIncome("0");
+      setAssociativeManualModalityPreference(null);
+      setAssociativeModalityConfirmed(false);
+      setAssociativeFirstProperty("");
+      setAssociativeApprovalTier("");
+      setSignalFieldCount(0);
+      setSignals(["0", "0", "0"]);
+      setHiddenSignalIndexes([]);
+      setSignalDistributionMode(directTable || annualMode ? "manual" : "auto");
+      setIntermediaryFieldCount(0);
+      setIntermediaries(Array.from({ length: directTable ? 8 : annualMode ? 5 : 4 }, () => "0"));
+      setHiddenIntermediaryIndexes([]);
+      setSelectedDirectOption("");
+      setDirectProposalDirty(false);
+      setVisibleScenarioCodes([]);
+    }
     if (tourOpen) {
       if (annualMode) setTourOpen(false);
       else if (directTable) setTourStep((current) => {
@@ -3353,7 +3364,7 @@ export function InvestorCalculator({
       });
       else setTourStep((current) => tourSteps[current].target === "inventory" ? current + 1 : current);
     }
-    if (annualMode) window.setTimeout(() => guideToSection("qualification"), 0);
+    if (annualMode) window.setTimeout(() => guideToSection(preserveAssociativeProposal && associativeQualificationComplete ? "flow" : "qualification"), 0);
     if (directTable && !tourOpen) window.setTimeout(() => scrollToGuidedSection(directJourneySectionRef.current), 0);
     if (!directTable && !annualMode) window.setTimeout(() => scrollToGuidedSection(standardProposalSectionRef.current), 0);
   }
@@ -3389,12 +3400,6 @@ export function InvestorCalculator({
 
   function updateAssociativeIncome(value: string) {
     updateIncome(value);
-    if (moneyToCents(value) !== moneyToCents(income) || currencyInputNumber(value) <= 0) {
-      setAssociativeManualModalityPreference(null);
-      setAssociativeModalityConfirmed(false);
-      setAssociativeFirstProperty("");
-      setAssociativeApprovalTier("");
-    }
   }
 
   function updateAssociativeModality(value: string) {
@@ -3403,16 +3408,12 @@ export function InvestorCalculator({
     const preference = value === "MCMV" || value === "SBPE" ? value : null;
     setAssociativeManualModalityPreference(preference);
     setAssociativeModalityConfirmed(Boolean(preference));
-    if (preference !== associativeManualModalityPreference || !preference) {
-      setAssociativeFirstProperty("");
-      setAssociativeApprovalTier("");
-    }
   }
 
   function updateAssociativeFirstProperty(value: string) {
     if (!associativeFinancingModalityReady) return;
     setAssociativeFirstProperty(value);
-    if (value) window.setTimeout(() => {
+    if (value && !associativeQualificationComplete) window.setTimeout(() => {
       guideToSection("flow");
       window.requestAnimationFrame(() => {
         associativeFinancingInputRef.current?.focus({ preventScroll: true });
@@ -4615,6 +4616,12 @@ export function InvestorCalculator({
                     linearMaximumIncomeDate={associativePaymentComparison.highestLinearTotalRow?.paymentDate}
                     decreasingMaximumIncomeDate={associativePaymentComparison.highestDecreasingTotalRow?.paymentDate}
                     comparisonReady={associativePaymentComparison.comparisonAvailable && Boolean(result.custom.decreasing?.ok)}
+                    installmentComparisonReady={associativePaymentComparison.installmentComparisonAvailable && Boolean(result.custom.decreasing?.ok)}
+                    comparisonUnavailableReason={associativePaymentComparison.installmentComparisonAvailable && !associativePaymentComparison.workEvolutionAvailable
+                      ? selectedUnit?.progress == null
+                        ? "Andamento da obra não informado no estoque desta unidade. O comprometimento foi calculado; o máximo mensal e a aprovação dependem desse dado."
+                        : "Confira a data de entrega da unidade para calcular a evolução de obra e validar o máximo da renda mensal."
+                      : undefined}
                     proposalValid={result.ok && Boolean(result.custom.decreasing?.ok) && !associativeProposalError}
                     proposalError={associativeProposalError}
                     financingReady={associativeFinancingValueReady}

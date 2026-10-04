@@ -135,27 +135,32 @@ describe("Associativo guidance regression gates", () => {
       expect(() => assertAssociativeLedgerRow({ ...paint, ...patch })).toThrow();
   });
 
-  it("requires a visible 2px label underline for keyboard focus", () => {
-    const focus = { focusVisible: true, decoration: "underline", thickness: 2, alpha: 255 };
+  it("requires a visible bold label for keyboard focus without underline", () => {
+    const focus = { focusVisible: true, decoration: "none", weight: 700, alpha: 255 };
     expect(() => assertAssociativeKeyboardFocus(focus)).not.toThrow();
     for (const patch of [
       { focusVisible: false },
-      { decoration: "none" },
-      { thickness: 1 },
-      { thickness: 3 },
+      { decoration: "underline" },
+      { weight: 400 },
+      { weight: 600 },
       { alpha: 0 },
     ])
       expect(() => assertAssociativeKeyboardFocus({ ...focus, ...patch })).toThrow();
   });
 
-  it("requires exactly 3s infinite shimmer only while current/required", () => {
+  it("requires a full-area 4.5s translucent sweep only while current/required", () => {
     const animation = {
-      name: "associative-edge-shine",
-      duration: 3000,
+      name: "associative-pending-shine",
+      duration: 4500,
       iterations: "infinite",
       playState: "running",
       visibleDuringCycle: true,
-      edgeHeight: 2,
+      fullArea: true,
+      translucent: true,
+      behindText: true,
+      pointerSafe: true,
+      backgroundCount: 1,
+      noRepeat: true,
       goldLine: true,
       moving: true,
     };
@@ -168,7 +173,12 @@ describe("Associativo guidance regression gates", () => {
       { playState: "paused" },
       { name: "border-pulse" },
       { visibleDuringCycle: false },
-      { edgeHeight: 25 },
+      { fullArea: false },
+      { translucent: false },
+      { behindText: false },
+      { pointerSafe: false },
+      { backgroundCount: 2 },
+      { noRepeat: false },
       { goldLine: false },
       { moving: false },
     ]) {
@@ -182,31 +192,26 @@ describe("Associativo guidance regression gates", () => {
     }
   });
 
-  it("requires exactly two moving gold 2px edges on the full ledger row", () => {
+  it("requires one moving translucent sweep behind the entire ledger row", () => {
     const animation = {
-      name: "associative-row-edge-shine",
-      duration: 3000,
+      name: "associative-pending-shine",
+      duration: 4500,
       iterations: "infinite",
       playState: "running",
       visibleDuringCycle: true,
-      edgeHeight: 2,
+      fullArea: true,
+      translucent: true,
+      behindText: true,
+      pointerSafe: true,
       goldLine: true,
       moving: true,
       pseudo: "::after",
       fullRowExtent: true,
-      backgroundCount: 2,
-      edgeHeights: [2, 2],
-      edgePositions: ["0%", "100%"],
+      backgroundCount: 1,
       noRepeat: true,
     };
     const active = { active: true, reducedMotion: false, ledger: true, animations: [animation] };
     expect(() => assertAssociativeShimmer(active)).not.toThrow();
-    expect(() =>
-      assertAssociativeShimmer({
-        ...active,
-        animations: [{ ...animation, edgePositions: ["0px", "100%"] }],
-      }),
-    ).not.toThrow();
     for (const patch of [
       { name: "associative-edge-shine" },
       { duration: 2900 },
@@ -214,15 +219,12 @@ describe("Associativo guidance regression gates", () => {
       { playState: "paused" },
       { pseudo: "::before" },
       { fullRowExtent: false },
-      { backgroundCount: 1 },
+      { backgroundCount: 2 },
       { backgroundCount: 3 },
-      { edgeHeights: [2, 3] },
-      { edgeHeights: [2] },
-      { edgePositions: ["100%", "100%"] },
-      { edgePositions: ["0%", "50%"] },
-      { edgePositions: ["1px", "100%"] },
-      { edgePositions: ["0px", "1px"] },
-      { edgePositions: ["0px", "0px"] },
+      { fullArea: false },
+      { translucent: false },
+      { behindText: false },
+      { pointerSafe: false },
       { noRepeat: false },
       { moving: false },
       { goldLine: false },
@@ -401,7 +403,7 @@ describe("Associativo guidance regression gates", () => {
     }
   });
 
-  it("keeps the 17px commission icon outside the summary table in a 24px/44px grid column", () => {
+  it("keeps commission below the full-width summary, aligned to the approval edges", () => {
     const valid = {
       width: 44,
       height: 44,
@@ -412,14 +414,14 @@ describe("Associativo guidance regression gates", () => {
       summarySibling: true,
       lastRowIsDecreasing10: true,
       layoutDisplay: "grid",
-      columns: [500, 44],
+      columns: [500],
       layoutGap: 4,
       summaryGap: 4,
       summaryFitsColumn: true,
       insideLayout: true,
       insideWidth: true,
-      dateGap: 6,
-      centerDelta: 0,
+      summaryEdgesAligned: true,
+      rightDelta: 0,
       overlaps: false,
       iconOnly: true,
       iconSize: 17,
@@ -433,7 +435,7 @@ describe("Associativo guidance regression gates", () => {
         minimumTarget: 24,
         width: 24,
         height: 24,
-        columns: [500, 24],
+        columns: [500],
       }),
     ).not.toThrow();
     for (const patch of [
@@ -443,7 +445,7 @@ describe("Associativo guidance regression gates", () => {
       { summarySibling: false },
       { lastRowIsDecreasing10: false },
       { layoutDisplay: "flex" },
-      { columns: [500] },
+      { columns: [] },
       { columns: [500, 24] },
       { layoutGap: 3 },
       { layoutGap: 5 },
@@ -452,12 +454,12 @@ describe("Associativo guidance regression gates", () => {
       { summaryFitsColumn: false },
       { insideLayout: false },
       { insideWidth: false },
-      { dateGap: -1 },
-      { dateGap: 17 },
-      { centerDelta: 1.01 },
+      { summaryEdgesAligned: false },
+      { rightDelta: 1.01 },
       { overlaps: true },
       { iconOnly: false },
       { iconSize: 18 },
+      { iconSize: 0 },
       { width: 43 },
       { height: 43 },
       { width: 45 },

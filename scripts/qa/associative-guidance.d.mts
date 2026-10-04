@@ -35,7 +35,7 @@ export function assertAssociativeLedgerRow(paint: {
 export function assertAssociativeKeyboardFocus(focus: {
   focusVisible: boolean;
   decoration: string;
-  thickness: number;
+  weight: number;
   alpha: number;
 }): void;
 export function isGuidanceGold(color: number[]): boolean;
@@ -56,14 +56,15 @@ export function assertAssociativeShimmer(measurement: {
     iterations: string;
     playState: string;
     visibleDuringCycle: boolean;
-    edgeHeight: number;
+    fullArea: boolean;
+    translucent: boolean;
+    behindText: boolean;
+    pointerSafe: boolean;
     goldLine: boolean;
     moving: boolean;
     pseudo?: string;
     fullRowExtent?: boolean;
     backgroundCount?: number;
-    edgeHeights?: number[];
-    edgePositions?: string[];
     noRepeat?: boolean;
   }[];
 }): void;
@@ -122,8 +123,8 @@ export function assertAssociativeCommissionGeometry(geometry: {
   summaryFitsColumn: boolean;
   insideLayout: boolean;
   insideWidth: boolean;
-  dateGap: number;
-  centerDelta: number;
+  rightDelta: number;
+  summaryEdgesAligned: boolean;
   overlaps: boolean;
   iconOnly: boolean;
   iconSize: number;

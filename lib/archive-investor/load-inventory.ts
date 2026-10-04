@@ -1,3 +1,5 @@
+import { enrichInventoryReferenceFields } from "./inventory-reference";
+
 type InventorySource = { count: number; items: unknown[] };
 
 type LoadInventoryOptions<T extends InventorySource> = {
@@ -15,14 +17,17 @@ export async function loadInvestorInventory<T extends InventorySource>({
 }: LoadInventoryOptions<T>): Promise<void> {
   let reference: T | null = null;
   let applied = false;
+  let skipped = false;
 
   async function fetchInventory(source: string): Promise<T> {
+    const requestSignal = AbortSignal.any([signal, AbortSignal.timeout(25_000)]);
     const response = await fetch(source, {
       cache: "no-store",
-      signal: AbortSignal.any([signal, AbortSignal.timeout(25_000)]),
+      signal: requestSignal,
     });
     if (!response.ok) throw new Error("inventory_unavailable");
     const payload = (await response.json()) as T | null;
+    requestSignal.throwIfAborted();
     if (
       !payload ||
       !Array.isArray(payload.items) ||
@@ -34,8 +39,18 @@ export async function loadInvestorInventory<T extends InventorySource>({
   }
 
   function apply(payload: T) {
-    if (signal.aborted || (applied && !canReplace())) return;
-    onInventory(payload, reference?.items ?? []);
+    if (signal.aborted) return;
+    if (!canReplace()) {
+      skipped = true;
+      return;
+    }
+    const referenceItems = reference?.items ?? [];
+    onInventory(
+      payload === reference
+        ? payload
+        : { ...payload, items: enrichInventoryReferenceFields(payload.items, referenceItems) },
+      referenceItems,
+    );
     applied = true;
   }
 
@@ -58,5 +73,5 @@ export async function loadInvestorInventory<T extends InventorySource>({
   }
 
   await Promise.allSettled([snapshotRequest, loadLive()]);
-  if (!applied && !signal.aborted) throw new Error("inventory_unavailable");
+  if (!applied && !skipped && !signal.aborted) throw new Error("inventory_unavailable");
 }

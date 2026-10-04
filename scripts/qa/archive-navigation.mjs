@@ -4,6 +4,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 import sharp from "sharp";
 import { associativeGuidanceWidths, checkAssociativeGuidance } from "./associative-guidance.mjs";
+import { checkAssociativeCalculationContinuity } from "./associative-calculation-continuity.mjs";
 import {
   checkAssociativeClosingAlignment,
   checkAssociativeInitialViewport,
@@ -1003,6 +1004,17 @@ export async function checkArchiveNavigation(
                 check.associativeGuidance ??= {};
                 check.associativeGuidance[theme] = await checkAssociativeGuidance(page);
               }
+            }
+            if (associativeGuidanceWidths.includes(viewport.width)) {
+              stage = "associative-calculation-continuity";
+              check.associativeCalculationContinuity =
+                await checkAssociativeCalculationContinuity(page);
+              assert.equal(
+                check.associativeCalculationContinuity.passed,
+                true,
+                check.associativeCalculationContinuity.error ||
+                  "Associativo calculation continuity failed",
+              );
             }
           }
           stage = "header-surface-themes";

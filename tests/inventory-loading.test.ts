@@ -18,7 +18,10 @@ beforeEach(() => {
     vi.fn((url: string) => new Promise<Response>((resolve) => requests.set(url, resolve))),
   );
 });
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 function start(snapshotOnly = false, canReplace = () => true) {
   return loadInvestorInventory({
@@ -33,6 +36,97 @@ function respond(url: string, payload: unknown, status = 200) {
 }
 
 describe("parallel inventory loading", () => {
+  it("preserves missing unit facts when live stock replaces the synthetic reference", async () => {
+    const referenceItem = {
+      id: "synthetic-snapshot-1",
+      businessUnit: "Riva",
+      project: "Estilo Lapa",
+      identifier: "BL02-0715",
+      product: "Apartamento BL02-0715 - Estilo Lapa",
+      finalPrice: 230_000,
+      appraisal: 350_000,
+      progress: 0.42,
+      completionDate: "2028-12-30",
+    };
+    const liveItem = {
+      ...referenceItem,
+      id: "synthetic-live-1",
+      businessUnit: "RIVA",
+      project: " ESTILO LAPA ",
+      identifier: " bl02-0715 ",
+      finalPrice: 240_000,
+      appraisal: null,
+      progress: null,
+      completionDate: null,
+    };
+    const loading = start();
+    respond(snapshotUrl, { sourceKind: "versioned-snapshot", count: 1, items: [referenceItem] });
+    respond(liveUrl, { sourceKind: "live", count: 1, items: [liveItem] });
+    await loading;
+    expect(onInventory).toHaveBeenLastCalledWith(
+      {
+        sourceKind: "live",
+        count: 1,
+        items: [{ ...liveItem, appraisal: 350_000, progress: 0.42, completionDate: "2028-12-30" }],
+      },
+      [referenceItem],
+    );
+  });
+
+  it("does not replace an existing proposal with the first result of a reload", async () => {
+    const loading = start(false, () => false);
+    respond(snapshotUrl, snapshot);
+    respond(liveUrl, live);
+    await loading;
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+
+  it("rechecks proposal state after live arrives first and the reference is still pending", async () => {
+    let interacted = false;
+    const loading = start(false, () => !interacted);
+    respond(liveUrl, live);
+    await Promise.resolve();
+    interacted = true;
+    respond(snapshotUrl, snapshot);
+    await loading;
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+
+  it("keeps a proposal when the snapshot fails and live is the first available response", async () => {
+    const loading = start(false, () => false);
+    respond(snapshotUrl, null, 503);
+    respond(liveUrl, live);
+    await loading;
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+
+  it("ignores a late snapshot-only response after a proposal was started", async () => {
+    let interacted = false;
+    const loading = start(true, () => !interacted);
+    interacted = true;
+    respond(snapshotUrl, snapshot);
+    await loading;
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+
+  it("discards a reference body that finishes after its request timeout", async () => {
+    const timeout = new AbortController();
+    vi.spyOn(AbortSignal, "timeout").mockReturnValueOnce(timeout.signal);
+    let finishBody!: (payload: unknown) => void;
+    const body = new Promise((resolve) => {
+      finishBody = resolve;
+    });
+    const loading = start();
+    requests.get(snapshotUrl)!({ ok: true, json: () => body } as Response);
+    await Promise.resolve();
+    timeout.abort(new DOMException("The operation timed out", "TimeoutError"));
+    finishBody(snapshot);
+    respond(liveUrl, live);
+    await loading;
+    expect(onInventory).toHaveBeenCalledOnce();
+    expect(onInventory).toHaveBeenCalledWith(live, []);
+  });
+
   it("starts both sources together and preserves reference enrichment when live finishes first", async () => {
     const loading = start();
     expect([...requests.keys()]).toEqual([snapshotUrl, liveUrl]);
