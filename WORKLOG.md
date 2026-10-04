@@ -25,6 +25,37 @@
 - Sem alteracao de politica comercial, fontes externas, banco ou n8n.
   Limites e evidencia: `docs/audits/associativo-origem-brilho-2026-10-04.md`.
 
+## 2026-10-04 - Paridade dos 22 canvases protegidos
+
+- Fonte: 15 referencias versionadas em `docs/qa/canvas-parity`, contrato das
+  22 rotas protegidas e implementacao corrente da branch
+  `codex/canvas-layout-parity`. Os canvases orientam composicao, nao dados,
+  autorizacao, formulas ou politica comercial.
+- O shell protegido continua sendo a unica navbar global. Foram alinhados os
+  layouts de Dashboard, cinco etapas, Ranking, Canal de Parcerias,
+  Configuracoes/metas, hub e jornadas de Simulacao, alem de Administracao,
+  Usuarios e Catalogo de paginas.
+- As superficies usam dados de fontes validadas ou deixam a indisponibilidade
+  explicita. Textos, nomes, metricas e estados ilustrados nas referencias nao
+  foram promovidos a dados reais nem a fixtures produtivas.
+- `/app/simulacao/caixa` integra a navegacao protegida para revisao visual por
+  perfil autorizado. `simulator.caixa` e recusado pelo QA e o motor, endpoint,
+  submissao e aprovacao bancaria permanecem fail-closed; o layout nao substitui
+  Proxy, guard, grants ou RLS.
+- Os contratos cobrem os temas Claro, Medio e Escuro, sete viewports, zoom,
+  teclado, foco, reduced motion, overflow, contraste e Axe. A expectativa da
+  matriz candidata e 154 combinacoes responsivas
+  (`22 rotas × 7 viewports = 154`); resultado,
+  comparacoes, inventario de imagens e promocao da baseline ainda pendem da
+  execucao final.
+- O roteiro `associative-calculation-continuity` agora diferencia campo vazio
+  de zero e sincroniza a sequencia pelo estado habilitado/persistido. Conserva
+  Financiamento R$ 190.000, Subsidio/FGTS/Cheque Moradia em R$ 0, Entrada de
+  R$ 1.000 e 84 parcelas; nenhuma formula ou regra financeira foi alterada.
+- Gates obrigatorios (`pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build`),
+  matriz autenticada, CI, PR e publicacao nao foram declarados concluidos neste
+  registro e permanecem pendentes de evidencia do SHA final.
+
 ## 2026-10-04 - Associativo: calculo, origem e continuidade
 
 - Fonte: pedido de correcao dos percentuais, avaliacao e continuidade, com

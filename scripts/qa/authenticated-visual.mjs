@@ -109,6 +109,7 @@ const routes = [
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
   "/app/simulacao/calcular-documentacao",
+  "/app/simulacao/caixa",
   "/app/simulacao/tabela-direta",
   "/app/simulacao/tabelao",
   "/app/simulacao/tabela-investidor",
@@ -148,6 +149,10 @@ function expectedEnabledSimulatorRoutes() {
   const unknownKeys = enabledKeys.filter((key) => !simulatorRoutesByRuntimeKey.has(key));
   if (unknownKeys.length > 0) {
     throw new Error("Authenticated visual QA received an unknown simulator runtime key.");
+  }
+
+  if (enabledKeys.includes("simulator.caixa")) {
+    throw new Error("Authenticated visual QA refuses to enable the CAIXA visual-only journey.");
   }
 
   return new Set(enabledKeys.map((key) => simulatorRoutesByRuntimeKey.get(key)));
@@ -2018,11 +2023,11 @@ function readTabelaoCompactLayout() {
     "Planta",
     "Vagas",
     "Estoque",
-    "% obra",
-    "Limitador",
+    "Valor do Imóvel",
     "Volta ao Caixa",
     "Avaliação",
-    "Valor do Imóvel",
+    "% obra",
+    "Limitador",
   ];
   const headers = [...table.querySelectorAll("thead th")];
   const expectedFilters = [
@@ -2883,11 +2888,11 @@ async function checkTabelaoValidation(page, origin) {
               "Planta",
               "Vagas",
               "Estoque",
-              "% obra",
-              "Limitador",
+              "Valor do Imóvel",
               "Volta ao Caixa",
               "Avaliação",
-              "Valor do Imóvel",
+              "% obra",
+              "Limitador",
             ].every((label, index) => columnLabels[index] === label),
           filtersPresent:
             controls.length === 7 &&
@@ -2917,8 +2922,11 @@ async function checkTabelaoValidation(page, origin) {
           rowHeight: rowBox != null && rowBox.height >= rowHeight - 2,
           quantityColumn:
             columnLabels.indexOf("Estoque") === 8 &&
-            columnLabels.indexOf("% obra") === columnLabels.indexOf("Estoque") + 1 &&
-            columnLabels.indexOf("Valor do Imóvel") === 13 &&
+            columnLabels.indexOf("Valor do Imóvel") === 9 &&
+            columnLabels.indexOf("Volta ao Caixa") === 10 &&
+            columnLabels.indexOf("Avaliação") === 11 &&
+            columnLabels.indexOf("% obra") === 12 &&
+            columnLabels.indexOf("Limitador") === 13 &&
             Number(
               firstRow
                 ?.querySelector(".tabelao-stock-quantity")
@@ -5025,7 +5033,7 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     await gotoWithServerRetry(historyPage, `${origin}/app/simulacao`, {
       waitUntil: "domcontentloaded",
     });
-    await historyPage.getByRole("heading", { name: "Simulação", exact: true }).waitFor({
+    await historyPage.getByRole("heading", { name: "Hub de Simulação", exact: true }).waitFor({
       state: "visible",
       timeout: qaNavigationTimeout,
     });

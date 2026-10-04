@@ -3,6 +3,7 @@ import {
   InvestorGuideLauncher,
   InvestorInfoHint,
 } from "./archive-investor/InvestorCalculator";
+import { SimulationCanvasHeader } from "./SimulationCanvasHeader";
 import "./archive-investor/investor-archive.css";
 
 const INVESTOR_DESCRIPTION =
@@ -10,22 +11,25 @@ const INVESTOR_DESCRIPTION =
 
 export function InvestorTableArchive() {
   return (
-    <div className="app-shell simulation-page-shell investor-page-shell investor-standard-table-page">
+    <div
+      className="app-shell simulation-page-shell investor-page-shell investor-standard-table-page"
+      data-canvas-layout="simulator"
+    >
       <main className="investor-main">
-        <section className="goal-page-hero investor-compact-hero">
-          <div className="goal-hero-copy">
-            <p className="goal-kicker">Simulação comercial</p>
-            <div className="investor-hero-title">
-              <h1>Simulador Tabela Investidor</h1>
-              <InvestorInfoHint
-                label="Tabela Investidor"
-                title="Tabela Investidor"
-                description={INVESTOR_DESCRIPTION}
-              />
-            </div>
-          </div>
-          <InvestorGuideLauncher />
-        </section>
+        <SimulationCanvasHeader
+          eyebrow="Simulação · WF15"
+          title="Simulador Tabela Investidor"
+          description="Seleção de estoque e montagem da proposta para conferência comercial."
+          statusLabel="Estoque · fonte identificada"
+          titleAccessory={
+            <InvestorInfoHint
+              label="Tabela Investidor"
+              title="Tabela Investidor"
+              description={INVESTOR_DESCRIPTION}
+            />
+          }
+          actions={<InvestorGuideLauncher />}
+        />
         <InvestorCalculator />
         <p className="simulation-disclaimer">
           Simulação de apoio comercial. Confirme dados da unidade e resultado no fluxo oficial antes

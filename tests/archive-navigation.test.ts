@@ -126,6 +126,7 @@ describe("archive navigation evidence gate", () => {
     expect(gate).toContain('"Metas de parcerias", "/app/configuracoes/metas/parcerias"');
     expect(gate).toContain("exactAuthorizedRootNavigation");
     expect(gate).toContain("exactAuthorizedAccountNavigation");
+    expect(gate).toContain("width: 1280, height: 720");
     expect(gate).not.toContain("checkCompactArchiveHeader");
     expect(compact).toContain("checkProtectedTopbar");
     expect(compact).toContain("titleContentInset");

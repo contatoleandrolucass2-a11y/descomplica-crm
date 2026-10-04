@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+import {
+  ManagementPage,
+  ManagementPageHeader,
+  ManagementStatusBadge,
+} from "@/app/(protected)/_components/ManagementCanvas";
 import { createClient } from "@/lib/auth/supabase/server";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
@@ -143,29 +148,27 @@ export default async function UsersAdminPage() {
   });
 
   return (
-    <main className="px-4 py-10 sm:px-6 sm:py-12">
-      <div className="mx-auto max-w-6xl">
-        <h1 className="text-3xl font-semibold text-slate-950">Usuários e acessos</h1>
-        <p className="mt-2 max-w-3xl text-slate-600">
-          Consulte acessos herdados e exceções separadamente. Alterações respeitam a hierarquia,
-          impedem autoelevação e geram auditoria.
-        </p>
-
-        <UserAccessManager
-          users={users}
-          assignableRoles={assignableRoles}
-          manageablePermissions={manageablePermissions}
-          canManageRoles={canManageRoles}
-          canManagePermissions={canManagePermissions}
-          canManageUsers={canManageUsers}
-          canApproveUsers={context.roleKey === "master" && canManageRoles && canManageUsers}
-          reportingScopes={reportingScopes.map((scope) => ({
-            id: scope.id,
-            key: scope.scope_key,
-            type: scope.scope_type,
-          }))}
-        />
-      </div>
-    </main>
+    <ManagementPage>
+      <ManagementPageHeader
+        eyebrow="Administração"
+        title="Usuários e acessos"
+        description="Consulte acessos herdados e exceções separadamente. Alterações respeitam a hierarquia, impedem autoelevação e geram auditoria."
+        status={<ManagementStatusBadge>Acesso protegido</ManagementStatusBadge>}
+      />
+      <UserAccessManager
+        users={users}
+        assignableRoles={assignableRoles}
+        manageablePermissions={manageablePermissions}
+        canManageRoles={canManageRoles}
+        canManagePermissions={canManagePermissions}
+        canManageUsers={canManageUsers}
+        canApproveUsers={context.roleKey === "master" && canManageRoles && canManageUsers}
+        reportingScopes={reportingScopes.map((scope) => ({
+          id: scope.id,
+          key: scope.scope_key,
+          type: scope.scope_type,
+        }))}
+      />
+    </ManagementPage>
   );
 }

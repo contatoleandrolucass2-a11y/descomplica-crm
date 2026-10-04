@@ -21,6 +21,23 @@
   pointer-events: none;
 }
 
+.pageHeader[data-variant="compact"] {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--analytics-ink);
+  box-shadow: none;
+}
+
+.pageHeader[data-variant="compact"]::after {
+  display: none;
+}
+
+.pageHeader[data-variant="stage"] {
+  border-radius: 1.2rem;
+}
+
 .pageHeader :focus-visible,
 .card[data-tone="navy"] :focus-visible {
   outline-color: #7ceaf5;
@@ -35,6 +52,16 @@
   justify-content: space-between;
   gap: 1.5rem;
   padding: clamp(1.5rem, 4vw, 2.75rem);
+}
+
+.pageHeader[data-variant="compact"] .pageHeaderBody {
+  align-items: flex-end;
+  gap: 1rem 2rem;
+  padding: 0;
+}
+
+.pageHeader[data-variant="stage"] .pageHeaderBody {
+  padding: clamp(1.25rem, 3vw, 2rem);
 }
 
 .eyebrow {
@@ -55,12 +82,34 @@
   line-height: 0.98;
 }
 
+.pageHeader[data-variant="compact"] .pageTitle {
+  max-width: none;
+  margin-top: 0;
+  font-size: clamp(1.8rem, 4vw, 2.55rem);
+  line-height: 1.05;
+}
+
+.pageHeader[data-variant="stage"] .pageTitle {
+  font-size: clamp(1.9rem, 4vw, 3.1rem);
+}
+
 .pageDescription {
   max-width: 46rem;
   margin: 1rem 0 0;
   color: #c8dbe5;
   font-size: clamp(0.95rem, 2vw, 1.08rem);
   line-height: 1.65;
+}
+
+.pageHeader[data-variant="compact"] .pageDescription {
+  margin-top: 0.35rem;
+  color: var(--analytics-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.pageHeader[data-variant="stage"] .pageDescription {
+  margin-top: 0.65rem;
 }
 
 .pageHeaderMeta {
@@ -75,11 +124,26 @@
   backdrop-filter: blur(12px);
 }
 
+.pageHeader[data-variant="compact"] .pageHeaderMeta {
+  width: min(100%, 25rem);
+  border-color: var(--analytics-line);
+  border-radius: 0.85rem;
+  background: var(--analytics-surface);
+  padding: 0.7rem 0.85rem;
+  color: var(--analytics-muted);
+  box-shadow: 0 4px 14px rgb(8 33 55 / 5%);
+  backdrop-filter: none;
+}
+
 .pageHeaderFooter {
   position: relative;
   z-index: 1;
   border-top: 1px solid rgb(255 255 255 / 11%);
   padding: 1rem clamp(1.5rem, 4vw, 2.75rem) 1.25rem;
+}
+
+.pageHeader[data-variant="stage"] .pageHeaderFooter {
+  padding: 0.75rem clamp(1.25rem, 3vw, 2rem) 1rem;
 }
 
 .card {
@@ -117,6 +181,10 @@
   padding: clamp(1.2rem, 3vw, 1.75rem);
 }
 
+.card[data-density="compact"].cardPadding {
+  padding: clamp(0.95rem, 2vw, 1.25rem);
+}
+
 .sectionHeading {
   display: flex;
   flex-wrap: wrap;
@@ -124,6 +192,11 @@
   justify-content: space-between;
   gap: 0.75rem 1.5rem;
   margin-bottom: 1rem;
+}
+
+.sectionHeading[data-density="compact"] {
+  align-items: center;
+  margin-bottom: 0.75rem;
 }
 
 .sectionKicker {
@@ -144,12 +217,21 @@
   line-height: 1.15;
 }
 
+.sectionHeading[data-density="compact"] .sectionTitle {
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+}
+
 .sectionDescription {
   max-width: 46rem;
   margin: 0.45rem 0 0;
   color: var(--analytics-muted);
   font-size: 0.9rem;
   line-height: 1.55;
+}
+
+.sectionHeading[data-density="compact"] .sectionDescription {
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
 }
 
 .technicalDetails {
@@ -182,6 +264,52 @@
   padding: 1.15rem;
 }
 
+.metricCard[data-variant="compact"] {
+  min-height: 7.1rem;
+  grid-template-columns: 2.7rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.7rem;
+  border-radius: 1rem;
+  padding: 0.9rem;
+}
+
+.metricIcon {
+  display: grid;
+  width: 2.7rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--analytics-cyan) 48%, var(--analytics-line));
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--analytics-cyan) 10%, var(--analytics-surface));
+  color: var(--analytics-cyan-strong);
+}
+
+.metricIcon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.metricContent {
+  min-width: 0;
+}
+
+.metricRatio {
+  display: inline-flex;
+  margin-top: 0.5rem;
+  border-radius: 999px;
+  background: var(--analytics-surface-muted);
+  padding: 0.18rem 0.45rem;
+  color: var(--analytics-muted);
+  font-size: 0.65rem;
+  font-weight: 720;
+  line-height: 1.3;
+}
+
+.metricRatio[data-available="true"] {
+  background: color-mix(in srgb, var(--analytics-lime) 16%, var(--analytics-surface));
+  color: var(--analytics-ink);
+}
+
 .metricLabel {
   margin: 0;
   color: var(--analytics-muted);
@@ -201,11 +329,21 @@
   line-height: 1;
 }
 
+.metricCard[data-variant="compact"] .metricValue {
+  margin-top: 0.32rem;
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
+}
+
 .metricDetail {
   margin: 0.55rem 0 0;
   color: var(--analytics-muted);
   font-size: 0.76rem;
   line-height: 1.4;
+}
+
+.metricCard[data-variant="compact"] .metricDetail {
+  margin-top: 0.3rem;
+  font-size: 0.69rem;
 }
 
 .chartAccentCyan {
@@ -301,6 +439,14 @@
   text-align: center;
 }
 
+.gauge[data-variant="compact"] .gaugeSvg {
+  width: min(100%, 12rem);
+}
+
+.gauge[data-variant="compact"] .gaugeValue {
+  font-size: clamp(1.8rem, 5vw, 2.7rem);
+}
+
 .funnel {
   margin: 0;
 }
@@ -355,12 +501,40 @@
   text-align: right;
 }
 
+.funnel[data-variant="compact"] .funnelCaption {
+  margin-bottom: 0.7rem;
+  font-size: 0.77rem;
+}
+
+.funnel[data-variant="compact"] .funnelList {
+  gap: 0.32rem;
+}
+
+.funnel[data-variant="compact"] .funnelStep {
+  min-height: 2.7rem;
+  padding: 0.5rem 0.75rem;
+}
+
 .filterBar {
   border: 1px solid var(--analytics-line);
   border-radius: 1.25rem;
   background: var(--analytics-surface);
   padding: 1rem;
   box-shadow: 0 6px 18px rgb(8 33 55 / 5%);
+}
+
+.filterBar[data-density="compact"] {
+  border-radius: 0.95rem;
+  padding: 0.75rem;
+}
+
+.filterBar[data-density="compact"] .filterLayout {
+  gap: 0.7rem;
+}
+
+.filterBar[data-density="compact"] .filterLink {
+  min-height: 2.75rem;
+  padding: 0.45rem 0.72rem;
 }
 
 .filterLayout {
@@ -441,6 +615,20 @@
   border-radius: 1.2rem;
   background: var(--analytics-surface);
   box-shadow: 0 6px 18px rgb(8 33 55 / 5%);
+}
+
+.tableWrap[data-density="compact"] {
+  border-radius: 0.9rem;
+}
+
+.tableWrap[data-density="compact"] .table caption {
+  padding: 0.7rem 0.85rem;
+  font-size: 0.76rem;
+}
+
+.tableWrap[data-density="compact"] .table th,
+.tableWrap[data-density="compact"] .table td {
+  padding: 0.65rem 0.8rem;
 }
 
 .table {
@@ -658,6 +846,31 @@
 
   .pageHeaderMeta {
     width: 100%;
+  }
+
+  .pageHeader[data-variant="compact"] .pageHeaderBody {
+    align-items: stretch;
+  }
+
+  .pageHeader[data-variant="compact"] .pageHeaderMeta {
+    width: 100%;
+  }
+
+  .pageHeader[data-variant="stage"] .pageHeaderBody {
+    padding: 1.1rem;
+  }
+
+  .pageHeader[data-variant="stage"] .pageHeaderFooter {
+    padding-inline: 1.1rem;
+  }
+
+  .metricCard[data-variant="compact"] {
+    min-height: 6.8rem;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+  }
+
+  .metricIcon {
+    width: 2.5rem;
   }
 }
 

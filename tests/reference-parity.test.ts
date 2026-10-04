@@ -49,7 +49,7 @@ const expectedProtectedRoutes = [
   "/admin/paginas",
 ];
 
-const futureSimulatorRoutes = new Set(["/app/simulacao/caixa"]);
+const futureSimulatorRoutes = new Set<string>();
 const expectedReleasedProtectedRoutes = expectedProtectedRoutes.filter(
   (route) => !futureSimulatorRoutes.has(route),
 );

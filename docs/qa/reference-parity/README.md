@@ -2,6 +2,37 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Incremento dos 22 canvases em 04/10/2026
+
+O candidato em `codex/canvas-layout-parity` estende a composicao aprovada as 22
+rotas protegidas: Dashboard, cinco etapas, Ranking, Canal de Parcerias,
+Configuracoes e metas, hub e jornadas de Simulacao e as tres paginas de
+Administracao. Todas permanecem sob uma unica navbar global; headers de pagina
+organizam o conteudo, mas nao recriam navegacao de aplicacao.
+
+Os canvases aprovados definem geometria, densidade e hierarquia. A aplicacao
+continua usando dados de fontes validadas ou apresentando indisponibilidade
+explicita. Textos, nomes, numeros e estados ilustrados nao sao autoridade para
+registros comerciais, metas, formulas, permissoes ou politicas.
+
+`/app/simulacao/caixa` entra na matriz apenas como jornada visual protegida.
+Permissao de rota nao habilita `simulator.caixa`: motor, endpoint de calculo,
+submissao, analise de credito e aprovacao bancaria continuam fail-closed, e o
+harness recusa explicitamente ativar essa chave de runtime.
+
+A execucao candidata deve cobrir 154 combinacoes responsivas
+(`22 rotas × 7 viewports = 154`), os temas Claro, Medio e Escuro, reflow/zoom,
+teclado, foco,
+`prefers-reduced-motion`, overflow, contraste e Axe. Resultados, comparacoes,
+promocao de baseline, gates, CI e publicacao permanecem pendentes ate a evidencia
+do SHA final. As contagens aprovadas de 21 rotas abaixo sao historicas e nao
+comprovam este candidato.
+
+O roteiro QA de continuidade do Associativo foi ajustado para aguardar cada
+campo habilitado e o valor persistido antes de seguir para o proximo. Entrada
+vazia passa a ser ausencia, nao zero; valores do cenario, formulas e regras
+financeiras nao mudaram.
+
 ## Layout solicitado do Tabelao em 03/10/2026
 
 Onze capturas de `/app/simulacao/tabelao` revisadas e promovidas: sete viewports,
@@ -147,16 +178,17 @@ Os harnesses de QA visual cobrem três fronteiras:
 2. verificação sem sessão das 18 rotas CRM protegidas do catálogo, seguida
    de captura do login vazio em `1440×900`, `1280×720`, `768×1024` e
    `390×844`;
-3. QA autenticado complementar das 21 rotas liberadas em Supabase local
-   isolado, combinado ao smoke de autorização das 22 rotas versionadas, com
+3. QA autenticado complementar candidato das 22 rotas liberadas em Supabase
+   local isolado, combinado ao smoke de autorização das mesmas 22 rotas, com
    conta QA efêmera, fixtures sintéticas e motores de simulação bloqueados.
 
 Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
 cada imagem está em [`manifest.json`](./manifest.json).
-O QA local autenticado está em
+O último QA local autenticado aprovado está em
 [`authenticated-results.json`](./authenticated-results.json); suas 201 capturas
-ficam em [`target-authenticated`](./target-authenticated/).
+históricas ficam em [`target-authenticated`](./target-authenticated/). Esse
+artefato cobre a matriz anterior de 21 rotas e não comprova o candidato atual.
 
 A baseline canônica continua comprovando as rotas arquivadas dos simuladores.
 Quando uma única chave oficial é liberada para canário, o hub de simulação é
@@ -274,9 +306,10 @@ já estiverem ocupados; nenhum dado local existente é sobrescrito. O serviço
 local, o banco e a aplicação precisam usar endpoints loopback. Chave privilegiada
 nunca é enviada ao navegador ou ao harness de captura.
 
-### Matriz autenticada aprovada no SHA de fechamento
+### Matriz autenticada aprovada no SHA de fechamento — baseline anterior
 
-O harness executou a captura autenticada local, limpa e transacional com:
+O harness executou a captura autenticada local, limpa e transacional da matriz
+anterior de 21 rotas com:
 
 - sete viewports: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `390×844`,
   `375×812` e `320×568`;

@@ -113,6 +113,7 @@ function NavigationDisclosure({
         data-navigation-panel-for={group.page.key}
         hidden={!open}
       >
+        <span className={styles.menuEyebrow}>{group.page.name}</span>
         {entries.map((entry) => {
           if (entry.kind === "disabled") {
             return (
@@ -143,12 +144,13 @@ function NavigationDisclosure({
                 <AppPageIcon pageKey={entry.item.key} />
               </span>
               <span className={styles.menuCopy}>
-                <span>{entry.item.name}</span>
+                <span>{entry.item === group.page ? "Visão geral" : entry.item.name}</span>
                 <span className={styles.menuDescription}>{entry.item.description}</span>
               </span>
             </Link>
           );
         })}
+        <span className={styles.menuFootnote}>Somente páginas permitidas ao seu perfil.</span>
       </div>
     </div>
   );
@@ -357,6 +359,9 @@ function AuthorizedNavigationState({
                       <AppPageIcon pageKey={group.page.key} />
                     </span>
                     {group.page.name}
+                    <span className={styles.mobileRootChevron} aria-hidden="true">
+                      ›
+                    </span>
                   </Link>
                 )}
               </li>

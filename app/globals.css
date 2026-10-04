@@ -111,18 +111,18 @@ textarea {
 
 :root[data-theme="dark"] body,
 :root[data-theme="dark"] .bg-slate-50 {
-  background-color: #071c2a;
+  background-color: #061f35;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --analytics-page: #061723;
-  --analytics-surface: #0d2a40;
-  --analytics-surface-muted: #12364f;
-  --analytics-surface-strong: #1b4660;
+  --analytics-page: #061f35;
+  --analytics-surface: #0a2b47;
+  --analytics-surface-muted: #0c3655;
+  --analytics-surface-strong: #174a68;
   --analytics-ink: #f3fbff;
   --analytics-muted: #a9bfcd;
-  --analytics-line: #31556d;
+  --analytics-line: #2c7392;
   --analytics-navy: #030f18;
   --analytics-navy-raised: #113b59;
   --analytics-cyan: #3ad8ea;

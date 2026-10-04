@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import {
+  AnalyticsCard,
   AnalyticsSkeleton,
   AnalyticsTable,
   CommercialSourceLabel,
@@ -13,10 +14,22 @@ import {
   FunnelChart,
   Gauge,
   MetricCard,
+  PageHeader,
   RankingList,
 } from "../app/(protected)/app/_components/analytics";
 
 describe("analytical design system", () => {
+  it("forwards semantic labels and native article attributes", () => {
+    const markup = renderToStaticMarkup(
+      <AnalyticsCard aria-label="Prata: posição indisponível" data-testid="podium-card">
+        Posição indisponível
+      </AnalyticsCard>,
+    );
+
+    expect(markup).toContain('aria-label="Prata: posição indisponível"');
+    expect(markup).toContain('data-testid="podium-card"');
+  });
+
   it("keeps an unavailable goal distinct from a real zero", () => {
     const unavailable = renderToStaticMarkup(
       <MetricCard
@@ -47,6 +60,41 @@ describe("analytical design system", () => {
 
     expect(markup).toContain("140%");
     expect(markup).toContain('stroke-dasharray="100 0"');
+  });
+
+  it("offers compact dashboard variants without changing the default chart contract", () => {
+    const header = renderToStaticMarkup(
+      <PageHeader
+        variant="compact"
+        title="Dashboard comercial"
+        description="Visão geral da operação comercial."
+      />,
+    );
+    const metric = renderToStaticMarkup(
+      <MetricCard
+        variant="compact"
+        label="Visitas"
+        value="12"
+        detail="Meta: 10"
+        ratio={1.2}
+        ratioLabel="120% da meta"
+        icon={<span>ícone</span>}
+      />,
+    );
+    const funnel = renderToStaticMarkup(
+      <FunnelChart
+        variant="compact"
+        label="Funil compacto"
+        stages={[{ key: "a", label: "Entrada", value: 12, conversion: null }]}
+      />,
+    );
+
+    expect(header).toContain('data-variant="compact"');
+    expect(metric).toContain('data-variant="compact"');
+    expect(metric).toContain('aria-hidden="true"');
+    expect(metric).toContain("120% da meta");
+    expect(metric).not.toContain("<svg");
+    expect(funnel).toContain('data-variant="compact"');
   });
 
   it("renders real zero and unavailable funnel readings without substitution", () => {
@@ -192,5 +240,7 @@ describe("analytical design system", () => {
     expect(stylesheet).not.toContain(".funnelStep:nth-child");
     expect(stylesheet).toMatch(/\.rankingName \{[\s\S]*?overflow-wrap: anywhere/);
     expect(stylesheet).toMatch(/\.rankingName \{[\s\S]*?white-space: normal/);
+    expect(stylesheet).toContain('.metricCard[data-variant="compact"]');
+    expect(stylesheet).toContain('.pageHeader[data-variant="stage"]');
   });
 });

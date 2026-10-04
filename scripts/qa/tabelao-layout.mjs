@@ -9,9 +9,9 @@ import { runInNewContext } from "node:vm";
 // These DOM expectations are independent of the production presentation helpers.
 export function readTabelaoLayout() {
   const shell = document.querySelector(".tabelao-page-shell");
-  const hero = shell?.querySelector(".investor-compact-hero");
+  const hero = shell?.querySelector(".simulation-canvas-header");
   const title = hero?.querySelector("h1");
-  const hint = hero?.querySelector(".investor-hero-title > .investor-info-hint");
+  const hint = hero?.querySelector(".simulation-canvas-title-row > .investor-info-hint");
   const titleBox = title?.getBoundingClientRect();
   const hintBox = hint?.getBoundingClientRect();
   const resources = shell?.querySelector(".tabelao-resources");
@@ -40,11 +40,11 @@ export function readTabelaoLayout() {
     ["plant", "Planta", "investor-stock-col-plant"],
     ["parking", "Vagas", "tabelao-stock-col-parking", "Quantidade de vagas"],
     ["quantity", "Estoque", "tabelao-stock-col-quantity", "Unidades no estoque publicado"],
-    ["progress", "% obra", "tabelao-stock-col-progress", "Total do andamento da obra (%)"],
-    ["description", "Limitador", "tabelao-stock-col-description", "Outras descrições"],
+    ["price", "Valor do Imóvel", "investor-stock-col-price", "Menor valor do imóvel"],
     ["cashback", "Volta ao Caixa", "tabelao-stock-col-cashback", "Folga volta ao caixa"],
     ["appraisal", "Avaliação", "tabelao-stock-col-appraisal", "Valor de avaliação bancária"],
-    ["price", "Valor do Imóvel", "investor-stock-col-price", "Menor valor do imóvel"],
+    ["progress", "% obra", "tabelao-stock-col-progress", "Total do andamento da obra (%)"],
+    ["description", "Limitador", "tabelao-stock-col-description", "Outras descrições"],
   ];
   const headers = [...(table?.querySelectorAll("thead th") ?? [])];
   const cols = [...(table?.querySelectorAll("colgroup col") ?? [])];
@@ -56,10 +56,15 @@ export function readTabelaoLayout() {
   return {
     compactHeader:
       hero != null &&
+      hero.hasAttribute("data-simulation-page-heading") &&
       hero.querySelectorAll("h1").length === 1 &&
       title.textContent.trim() === "Simulador Tabelão" &&
-      hero.querySelector(".documentation-breadcrumb, .goal-kicker, .investor-hero-guide small") ==
-        null &&
+      hero.querySelector(".simulation-canvas-eyebrow")?.textContent.trim() ===
+        "Simulação · Consulta" &&
+      hero.querySelector(".simulation-canvas-description")?.textContent.trim() ===
+        "Simulação comercial de estoques com menor valor por tipologia." &&
+      hero.querySelector(".simulation-canvas-status")?.textContent.trim() ===
+        "Estoque · fonte identificada" &&
       hero.querySelector(".investor-guided-start")?.textContent.trim() ===
         "Iniciar passo a passo" &&
       hintBox?.width > 0 &&
@@ -154,7 +159,7 @@ export function readTabelaoPrintLayout({ readyOnly = false } = {}) {
   const table = shell?.querySelector(".investor-stock-table");
   const results = shell?.querySelector(".investor-stock-results");
   const panel = shell?.querySelector(".investor-stock-panel");
-  const hero = shell?.querySelector(".investor-compact-hero");
+  const hero = shell?.querySelector(".simulation-canvas-header");
   const topbar = document.querySelector("[data-protected-topbar]");
   const rows = [...(table?.querySelectorAll("tr[data-inventory-unit-id]") ?? [])];
   const hiddenControls =
@@ -164,6 +169,8 @@ export function readTabelaoPrintLayout({ readyOnly = false } = {}) {
       ".investor-hero-guide",
       ".investor-info-hint",
       ".investor-stock-filters",
+      ".simulation-canvas-status",
+      ".simulation-canvas-actions",
     ].every((selector) =>
       [...shell.querySelectorAll(selector)].every(
         (element) => getComputedStyle(element).display === "none",
@@ -267,9 +274,11 @@ export async function checkTabelaoLayout(page) {
     const printLayout = await page.waitForFunction(
       () => {
         const shell = document.querySelector(".tabelao-page-shell");
-        const table = shell.querySelector(".investor-stock-table");
-        const results = shell.querySelector(".investor-stock-results");
-        const panel = shell.querySelector(".investor-stock-panel");
+        const table = shell?.querySelector(".investor-stock-table");
+        const results = shell?.querySelector(".investor-stock-results");
+        const panel = shell?.querySelector(".investor-stock-panel");
+        const header = shell?.querySelector(".simulation-canvas-header");
+        if (!shell || !table || !results || !panel || !header) return false;
         const rows = [...table.querySelectorAll("tr[data-inventory-unit-id]")];
         return (
           [
@@ -277,13 +286,15 @@ export async function checkTabelaoLayout(page) {
             ".investor-hero-guide",
             ".investor-info-hint",
             ".investor-stock-filters",
+            ".simulation-canvas-status",
+            ".simulation-canvas-actions",
           ].every((selector) =>
             [...shell.querySelectorAll(selector)].every(
               (element) => getComputedStyle(element).display === "none",
             ),
           ) &&
           panel.checkVisibility() &&
-          shell.querySelector(".investor-compact-hero").checkVisibility() &&
+          header.checkVisibility() &&
           rows.length > 0 &&
           rows.every((row) => row.checkVisibility() && row.getBoundingClientRect().height > 0) &&
           getComputedStyle(table).display === "table" &&

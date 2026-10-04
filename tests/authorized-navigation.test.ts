@@ -292,6 +292,7 @@ describe("authorized hierarchical navigation", () => {
       "/app/simulacao/tabela-investidor",
       "/app/simulacao/tabelao",
       "/app/simulacao/calcular-documentacao",
+      "/app/simulacao/caixa",
     ]);
     expect(
       supplemental.every(
@@ -302,7 +303,7 @@ describe("authorized hierarchical navigation", () => {
           page.isActive,
       ),
     ).toBe(true);
-    expect(result.map((page) => page.path)).not.toContain("/app/simulacao/caixa");
+    expect(result.map((page) => page.path)).toContain("/app/simulacao/caixa");
   });
 
   it("does not expose supplemental labels without permission or an authorized root", () => {
@@ -372,21 +373,10 @@ describe("authorized hierarchical navigation", () => {
     );
   });
 
-  it("returns CAIXA only as a pathless blocked item for an authorized simulator root", () => {
+  it("does not duplicate CAIXA as a pathless item after its protected page is released", () => {
     const blocked = getDisabledNavigationItems(viewerContext, [simulationParent]);
 
-    expect(blocked).toEqual([
-      {
-        key: "crm.simulation.caixa",
-        name: "CAIXA",
-        description: "Jornada preservada até a autorização oficial.",
-        section: "simulation",
-        parentKey: "crm.simulation",
-        sortOrder: 70,
-        reason: "Aguardando autorização",
-      },
-    ]);
-    expect(blocked[0]).not.toHaveProperty("path");
+    expect(blocked).toEqual([]);
     expect(
       getDisabledNavigationItems({ ...viewerContext, permissions: ["pages.view"] }, [
         simulationParent,
@@ -424,11 +414,11 @@ describe("authorized hierarchical navigation", () => {
       section: "admin",
       permissionKey: "admin.access",
     };
-    const blockedCaixa: AppPage = {
+    const catalogCaixa: AppPage = {
       ...simulationParent,
       key: "crm.simulation.caixa",
       path: "/app/simulacao/caixa",
-      name: "CAIXA indevidamente ativa",
+      name: "CAIXA do catálogo",
       parentKey: simulationParent.key,
       sortOrder: 70,
     };
@@ -441,7 +431,7 @@ describe("authorized hierarchical navigation", () => {
       sortOrder: 30,
     };
     const { query } = configurePageCatalog(
-      [dashboard, simulationParent, admin, blockedCaixa, mismatchedGateIdentity].map((page) =>
+      [dashboard, simulationParent, admin, catalogCaixa, mismatchedGateIdentity].map((page) =>
         pageRow(page),
       ),
     );
@@ -454,13 +444,14 @@ describe("authorized hierarchical navigation", () => {
     expect(query.eq).toHaveBeenCalledWith("is_navigation", true);
     expect(query.eq).toHaveBeenCalledWith("is_active", true);
     expect(result.map((page) => page.name)).not.toContain("Administração sigilosa");
-    expect(result.map((page) => page.name)).not.toContain("CAIXA indevidamente ativa");
+    expect(result.map((page) => page.name)).toContain("CAIXA do catálogo");
     expect(result.map((page) => page.name)).not.toContain("Tabela Direta divergente");
-    expect(result.map((page) => page.key)).not.toContain("crm.simulation.caixa");
+    expect(result.map((page) => page.key)).toContain("crm.simulation.caixa");
     expect(result.map((page) => page.key)).not.toContain("crm.simulation.wf14-shadow");
     expect(result.map((page) => page.path)).toEqual([
       "/app",
       "/app/simulacao",
+      "/app/simulacao/caixa",
       "/app/simulacao/tabela-direta",
       "/app/simulacao/tabela-investidor",
       "/app/simulacao/tabelao",

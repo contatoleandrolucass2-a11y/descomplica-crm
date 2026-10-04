@@ -100,8 +100,10 @@ export async function checkAssociativeCalculationContinuity(page) {
       .locator("dd");
   const rule = (label) =>
     page.locator(`${approval} tbody tr`).filter({ has: page.getByText(label, { exact: true }) });
-  const moneyValue = async (label) =>
-    Number((await field(label).inputValue()).replace(/\D/g, "")) / 100;
+  const moneyValue = async (label) => {
+    const rawValue = (await field(label).inputValue()).trim();
+    return rawValue === "" ? null : Number(rawValue.replace(/\D/g, "")) / 100;
+  };
   const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
   const selectUnit = (index) =>
     page
@@ -110,13 +112,13 @@ export async function checkAssociativeCalculationContinuity(page) {
         exact: true,
       })
       .click();
-  const resources = {
-    Financiamento: 190_000,
-    Subsídio: 0,
-    FGTS: 0,
-    "Cheque Moradia": 0,
-    Entrada: 1_000,
-  };
+  const resources = [
+    { label: "Financiamento", amount: 190_000, next: "Subsídio" },
+    { label: "Subsídio", amount: 0, next: "FGTS" },
+    { label: "FGTS", amount: 0, next: "Cheque Moradia" },
+    { label: "Cheque Moradia", amount: 0, next: "Entrada" },
+    { label: "Entrada", amount: 1_000, next: "Quantidade de parcelas" },
+  ];
 
   async function reloadFixture() {
     inventoryRequests = { live: 0, reference: 0 };
@@ -141,9 +143,12 @@ export async function checkAssociativeCalculationContinuity(page) {
     await field("Renda Familiar").blur();
     await qualification.getByRole("button", { name: "MCMV", exact: true }).click();
     await qualification.getByRole("radio", { name: "Sim", exact: true }).check();
-    for (const [label, amount] of Object.entries(resources)) {
+    for (const { label, amount, next } of resources) {
+      await expect(field(label)).toBeEnabled();
       await field(label).fill(String(amount * 100));
-      await field(label).blur();
+      await expect(field(label)).not.toHaveValue("");
+      await expect.poll(() => moneyValue(label)).toBe(amount);
+      await expect(field(next)).toBeEnabled();
     }
     await field("Quantidade de parcelas").fill("84");
     await ranking.selectOption("bronze");
@@ -156,7 +161,7 @@ export async function checkAssociativeCalculationContinuity(page) {
       "true",
     );
     await expect(qualification.getByRole("radio", { name: "Sim", exact: true })).toBeChecked();
-    for (const [label, amount] of Object.entries(resources)) {
+    for (const { label, amount } of resources) {
       await expect.poll(() => moneyValue(label)).toBe(amount);
     }
     await expect(field("Quantidade de parcelas")).toHaveValue("84");

@@ -1,4 +1,5 @@
 import { InvestorGuideLauncher, InvestorInfoHint } from "./archive-investor/InvestorCalculator";
+import { SimulationCanvasHeader } from "./SimulationCanvasHeader";
 import "./archive-investor/investor-archive.css";
 import "./archive-investor/tabelao-layout.css";
 import { TabelaoClient } from "./TabelaoClient";
@@ -6,21 +7,25 @@ import { TabelaoResources } from "./TabelaoResources";
 
 export async function TabelaoArchive() {
   return (
-    <div className="app-shell simulation-page-shell investor-page-shell tabelao-page-shell">
+    <div
+      className="app-shell simulation-page-shell investor-page-shell tabelao-page-shell"
+      data-canvas-layout="simulator"
+    >
       <main className="investor-main">
-        <section className="goal-page-hero investor-compact-hero">
-          <div className="goal-hero-copy">
-            <div className="investor-hero-title">
-              <h1>Simulador Tabelão</h1>
-              <InvestorInfoHint
-                label="Tabelão"
-                title="Tabelão"
-                description="Todas as combinações de planta e quantidade de vagas de cada empreendimento, com uma unidade de menor valor por combinação, independentemente da metragem. Menor valor = Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela)."
-              />
-            </div>
-          </div>
-          <InvestorGuideLauncher compact />
-        </section>
+        <SimulationCanvasHeader
+          eyebrow="Simulação · Consulta"
+          title="Simulador Tabelão"
+          description="Simulação comercial de estoques com menor valor por tipologia."
+          statusLabel="Estoque · fonte identificada"
+          titleAccessory={
+            <InvestorInfoHint
+              label="Tabelão"
+              title="Tabelão"
+              description="Todas as combinações de planta e quantidade de vagas de cada empreendimento, com uma unidade de menor valor por combinação, independentemente da metragem. Menor valor = Valor Final Com Kit − (B.A. da Unidade + Folga de Tabela)."
+            />
+          }
+          actions={<InvestorGuideLauncher compact />}
+        />
         <TabelaoClient />
         <TabelaoResources />
         <div className="investor-page-closing">

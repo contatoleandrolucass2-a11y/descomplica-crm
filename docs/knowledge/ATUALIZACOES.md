@@ -28,6 +28,27 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   aprovados. Windows conserva seis falhas POSIX; timeouts passaram isoladamente.
 - Nenhuma migration, politica comercial, fonte externa ou workflow foi alterado.
 
+## 2026-10-04: canvases aprovados cobrem 22 rotas protegidas
+
+- Status: pendente_validacao; fonte: `docs/qa/canvas-parity`, branch
+  `codex/canvas-layout-parity` e contratos locais de navegacao/QA.
+- Uma unica navbar global serve Dashboard, cinco etapas, Ranking, Canal,
+  Configuracoes/metas, Simulacao e Administracao. Subrotas nao devem recriar
+  navegacao de aplicacao dentro do conteudo.
+- Canvases sao autoridade apenas de composicao. A tela mostra dados de fonte
+  validada ou indisponibilidade explicita; nomes, numeros e estados ilustrados
+  nao podem virar dados reais, formulas nem politica comercial.
+- CAIXA e uma rota protegida somente visual. O acesso exige permissao, enquanto
+  motor, endpoint, submissao, analise e aprovacao bancaria permanecem
+  fail-closed; o QA recusa habilitar `simulator.caixa` mesmo por flag.
+- A matriz candidata espera 154 combinacoes responsivas
+  (`22 rotas × 7 viewports = 154`), tres temas e verificacoes de reflow, zoom,
+  teclado, foco, reduced
+  motion, contraste e Axe. Resultado final, baseline, CI e publicacao pendentes.
+- O roteiro de continuidade aguarda campos habilitados e valores persistidos e
+  interpreta vazio como ausencia, sem mudar valores do cenario, formulas ou
+  regras financeiras.
+
 ## 2026-10-04: separar ausencia de dados de resultado zero no Associativo
 
 - Status: validado e publicado; fonte: codigo do forecast, handlers de selecao e

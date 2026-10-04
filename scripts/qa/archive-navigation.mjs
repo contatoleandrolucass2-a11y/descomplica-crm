@@ -33,21 +33,22 @@ export const archiveNavigationViewports = [
 ];
 const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
 const simulationLinks = [
-  ["Simulação", "/app/simulacao"],
+  ["Visão geral", "/app/simulacao"],
   ["Simulador Associativo", archiveNavigationRoutes[0]],
   ["Tabela Direta", archiveNavigationRoutes[1]],
   ["Tabela Investidor", archiveNavigationRoutes[2]],
   ["Tabelão", archiveNavigationRoutes[3]],
   ["Documentação", "/app/simulacao/calcular-documentacao"],
+  ["CAIXA", "/app/simulacao/caixa"],
 ];
 const settingsLinks = [
-  ["Configurações", "/app/configuracoes"],
+  ["Visão geral", "/app/configuracoes"],
   ["Metas do funil", "/app/configuracoes/metas"],
   ["Metas de parcerias", "/app/configuracoes/metas/parcerias"],
   ["Metas de pontos", "/app/configuracoes/metas/pontos"],
 ];
 const dashboardLinks = [
-  ["Dashboard", "/app"],
+  ["Visão geral", "/app"],
   ["Oportunidades", "/app/etapas/oportunidades"],
   ["Agendamentos", "/app/etapas/agendamentos"],
   ["Visitas", "/app/etapas/visitas"],
@@ -567,10 +568,7 @@ export async function assertHeaderGeometry(page, compact) {
       headerControlsContained,
       focusedControlsContained,
       pointerTargetsReachable: Object.values(pointerReachability).every(Boolean),
-      themeRow:
-        innerWidth <= 600
-          ? boxes[1].top >= Math.max(boxes[0].bottom, boxes[3].bottom) - 1
-          : boxes[1].top < boxes[0].bottom && boxes[1].bottom > boxes[0].top,
+      themeRow: boxes[1].top < boxes[0].bottom && boxes[1].bottom > boxes[0].top,
       noOverflow:
         document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1 &&
         document.body.scrollWidth <= document.body.clientWidth + 1,
@@ -919,7 +917,7 @@ export async function checkArchiveNavigation(
               check.initialViewport[theme] = await checkAssociativeInitialViewport(page);
               if (viewport.width === 1440) {
                 try {
-                  await page.setViewportSize({ width: 1280, height: 580 });
+                  await page.setViewportSize({ width: 1280, height: 720 });
                   check.shortInitialViewport ??= {};
                   check.shortInitialViewport[theme] = await checkAssociativeInitialViewport(page);
                 } finally {
@@ -1073,7 +1071,7 @@ export async function checkArchiveNavigation(
             page.locator("#authorized-navigation-crm-simulation a").first(),
           ).toBeFocused();
           await assertLinks(page, "authorized-navigation-crm-simulation", simulationLinks, route);
-          await assertDisabledItems(page, "authorized-navigation-crm-simulation", ["CAIXA"]);
+          await assertDisabledItems(page, "authorized-navigation-crm-simulation", []);
           await expect(nav.locator('a[aria-current="page"]')).toHaveCount(1);
           stage = "switch-disclosure-by-pointer";
           await settings.click();

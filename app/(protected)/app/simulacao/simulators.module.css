@@ -1,6 +1,6 @@
 .page {
   min-height: calc(100vh - 5rem);
-  padding: 1.5rem 1rem 3rem;
+  padding: 1.25rem 1.35rem 3rem;
   background-image:
     linear-gradient(var(--analytics-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--analytics-line) 1px, transparent 1px);
@@ -10,8 +10,8 @@
 
 .container {
   display: grid;
-  width: min(100%, 88rem);
-  gap: 1.25rem;
+  width: min(100%, 96rem);
+  gap: 1rem;
   margin-inline: auto;
 }
 
@@ -65,6 +65,40 @@
   grid-template-columns: minmax(0, 2fr) minmax(18rem, 0.9fr);
   align-items: start;
   gap: 1.25rem;
+}
+
+.simulatorNav {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.simulatorNav > a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.65rem;
+  background: var(--analytics-surface);
+  padding: 0.5rem 0.8rem;
+  color: var(--analytics-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.simulatorNav > a[aria-selected="true"] {
+  border-color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan) 12%, var(--analytics-surface));
+  color: var(--analytics-ink);
+}
+
+.simulatorNav > a:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .form {
@@ -711,19 +745,21 @@
 .hubGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .hubCard {
   position: relative;
   display: grid;
-  min-height: 13rem;
+  min-height: 9.15rem;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: start;
-  gap: 1rem;
-  padding: 1.25rem;
+  gap: 0.9rem;
+  border-radius: 0.85rem;
+  padding: 1rem;
   color: var(--analytics-ink);
   text-decoration: none;
+  box-shadow: none;
 }
 
 .hubCard:hover {
@@ -732,8 +768,8 @@
 }
 
 .hubCardBlocked {
-  border-style: dashed;
-  background: var(--analytics-surface-muted);
+  border-style: solid;
+  background: color-mix(in srgb, var(--analytics-surface-muted) 86%, transparent);
   cursor: not-allowed;
 }
 
@@ -743,19 +779,20 @@
 }
 
 .hubCard h2 {
-  font-size: 1.15rem;
+  font-size: 0.98rem;
 }
 
 .hubCard p {
-  margin-top: 0.45rem;
+  max-width: 34rem;
+  margin-top: 0.35rem;
   color: var(--analytics-muted);
   font-size: 0.8rem;
-  line-height: 1.55;
+  line-height: 1.45;
 }
 
 .hubCode {
   display: inline-flex;
-  margin-top: 1rem;
+  margin-top: 0.65rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--analytics-cyan) 13%, var(--analytics-surface));
   padding: 0.35rem 0.65rem;
@@ -767,7 +804,7 @@
 
 .hubBlocked {
   display: inline-flex;
-  margin-top: 0.7rem;
+  margin-top: 0.65rem;
   margin-left: 0.45rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--analytics-muted) 12%, var(--analytics-surface));
@@ -781,6 +818,76 @@
   color: var(--analytics-cyan-strong);
   font-size: 1.3rem;
   font-weight: 800;
+}
+
+.caixaPage {
+  background-image:
+    radial-gradient(
+      circle at 90% 6%,
+      color-mix(in srgb, var(--analytics-cyan) 8%, transparent),
+      transparent 25rem
+    ),
+    linear-gradient(var(--analytics-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--analytics-line) 1px, transparent 1px);
+}
+
+.caixaWorkspace {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.caixaForm {
+  gap: 0.75rem;
+}
+
+.caixaWorkspace .formSection,
+.caixaResults,
+.caixaActionBar {
+  border-radius: 0.8rem;
+  box-shadow: none;
+}
+
+.caixaWorkspace .sectionHeading {
+  align-items: center;
+  padding: 0.7rem 1rem;
+}
+
+.caixaWorkspace .sectionHeading > span {
+  width: 2rem;
+  border-radius: 0.55rem;
+}
+
+.caixaWorkspace .fieldGrid {
+  gap: 0.65rem 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.caixaWorkspace .field select,
+.caixaWorkspace .inputShell,
+.caixaWorkspace .choice {
+  min-height: 2.75rem;
+  border-radius: 0.55rem;
+}
+
+.caixaActionBar {
+  padding: 0.75rem 1rem;
+}
+
+.caixaActionBar .enabledAction {
+  border-color: var(--analytics-cyan-strong);
+  background: transparent;
+  color: var(--analytics-cyan);
+}
+
+.caixaActionBar .enabledAction:hover {
+  background: color-mix(in srgb, var(--analytics-cyan) 12%, transparent);
+}
+
+.caixaActionBar .blockedControl {
+  max-width: 22rem;
+}
+
+.caixaResults {
+  position: static;
 }
 
 .processGrid {
