@@ -1,5 +1,18 @@
 # Associativo: brilho e reprovacao metalica
 
+## Retomada com a Base Corrigida
+
+- Em novo pedido, usuario determinou incorporar a correcao e publicar.
+- Integra main `db1b62597987591d205deea796364c331fe2b3b5`, que inclui a
+  remocao de fast-glob/micromatch/braces via patch do plugin Next no PR #139.
+- CI da base `37144378453` integralmente aprovada. Isso nao dispensa a CI
+  da arvore combinada deste PR. Conflitos apenas documentais, ambos preservados.
+- A CI anterior deste PR (`37136181590`) confirmou testes Linux, lint e tipos;
+  falhou exclusivamente na auditoria. Registro de bloqueio abaixo e historico.
+- Instalacao congelada aprovada; `pnpm audit --audit-level high` retornou
+  nenhuma vulnerabilidade conhecida. Quarenta testes focados aprovados,
+  incluindo os dez do plugin Next real. Demais gates combinados em andamento.
+
 ## Escopo
 
 - Branch `codex/associativo-brilho-reprovacao`, base `506b9e3`.

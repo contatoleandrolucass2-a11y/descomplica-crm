@@ -24,6 +24,7 @@ minimumReleaseAgeExclude:
   - eslint-config-next@16.3.0
   - next@16.3.0
 overrides:
+  "@next/eslint-plugin-next@16.3.6>fast-glob": "-"
   "next-devtools-mcp>@modelcontextprotocol/sdk": 1.30.1
   "@babel/core@>=7.29.0 <7.29.6": 7.29.6
   "browserslist@<=4.28.6": 4.28.7
@@ -34,3 +35,9 @@ overrides:
   "postcss@>=8.5.0 <8.5.23": 8.5.23
   "sharp@<0.35.4": 0.35.4
   "js-yaml@>=4.0.0 <4.3.2": 4.3.2
+packageExtensions:
+  "@next/eslint-plugin-next@16.3.6":
+    dependencies:
+      tinyglobby: 0.2.17
+patchedDependencies:
+  "@next/eslint-plugin-next@16.3.6": patches/@next__eslint-plugin-next@16.3.6.patch

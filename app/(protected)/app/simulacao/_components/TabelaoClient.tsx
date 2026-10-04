@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  buildTabelaoMapsUrl,
+  formatTabelaoAddress as formatAddress,
   formatTabelaoDescription,
   formatTabelaoPlant,
 } from "@/lib/archive-investor/tabelao-presentation.mjs";
@@ -117,12 +119,6 @@ function formatMoneyValue(value?: number | null) {
 function formatProgress(value?: number | null) {
   const normalized = normalizeTabelaoProgress(value);
   return normalized === null ? "Não informado" : percent.format(normalized);
-}
-
-function formatAddress(item: InventoryItem) {
-  return [item.street, item.streetNumber, item.neighborhood]
-    .map((value) => value?.trim() || "Não informado")
-    .join(" / ");
 }
 
 function TabelaoRegionLabel({ region }: { region: string }) {
@@ -335,7 +331,11 @@ export function TabelaoClient() {
       groupTabelaoInventoryByProject(matchingInventory).map((group) => ({
         ...group,
         regionSpans: buildTabelaoCellSpans(group.items.map(resolveTabelaoRegion)),
-        addressSpans: buildTabelaoCellSpans(group.items.map(formatAddress)),
+        addressSpans: buildTabelaoCellSpans(
+          group.items.map((item) =>
+            JSON.stringify([formatAddress(item), buildTabelaoMapsUrl(item)]),
+          ),
+        ),
         classificationSpans: buildTabelaoCellSpans(
           group.items.map((item) => descriptiveLabel(item.classification)),
         ),
@@ -620,11 +620,11 @@ export function TabelaoClient() {
               <col className="investor-stock-col-plant" />
               <col className="tabelao-stock-col-parking" />
               <col className="tabelao-stock-col-quantity" />
-              <col className="investor-stock-col-price" />
-              <col className="tabelao-stock-col-cashback" />
-              <col className="tabelao-stock-col-appraisal" />
               <col className="tabelao-stock-col-progress" />
               <col className="tabelao-stock-col-description" />
+              <col className="tabelao-stock-col-cashback" />
+              <col className="tabelao-stock-col-appraisal" />
+              <col className="investor-stock-col-price" />
             </colgroup>
             <thead>
               <tr>
@@ -659,20 +659,20 @@ export function TabelaoClient() {
                 <th scope="col" id="tabelao-quantity" aria-label="Unidades no estoque publicado">
                   Estoque
                 </th>
-                <th scope="col" id="tabelao-price" aria-label="Menor valor do imóvel">
-                  Valor do imóvel
-                </th>
-                <th scope="col" id="tabelao-cashback" aria-label="Folga volta ao caixa">
-                  Volta ao caixa
-                </th>
-                <th scope="col" id="tabelao-appraisal" aria-label="Valor de avaliação bancária">
-                  Avaliação
-                </th>
                 <th scope="col" id="tabelao-progress" aria-label="Total do andamento da obra (%)">
                   % obra
                 </th>
                 <th scope="col" id="tabelao-description" aria-label="Outras descrições">
                   Limitador
+                </th>
+                <th scope="col" id="tabelao-cashback" aria-label="Folga volta ao caixa">
+                  Volta ao Caixa
+                </th>
+                <th scope="col" id="tabelao-appraisal" aria-label="Valor de avaliação bancária">
+                  Avaliação
+                </th>
+                <th scope="col" id="tabelao-price" aria-label="Menor valor do imóvel">
+                  Valor do Imóvel
                 </th>
               </tr>
             </thead>
@@ -717,6 +717,7 @@ export function TabelaoClient() {
                   const region = resolveTabelaoRegion(item);
                   const regionSpan = group.regionSpans[itemIndex] ?? 1;
                   const address = formatAddress(item);
+                  const mapsUrl = buildTabelaoMapsUrl(item);
                   const classification = formatTabelaoDescription(
                     descriptiveLabel(item.classification),
                   );
@@ -775,7 +776,19 @@ export function TabelaoClient() {
                           rowSpan={addressSpan}
                           title={address}
                         >
-                          <span className="tabelao-stock-wrapped-text">{address}</span>
+                          {mapsUrl ? (
+                            <a
+                              className="tabelao-stock-wrapped-text tabelao-address-link"
+                              href={mapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`Ver ${address} no Google Maps (nova aba)`}
+                            >
+                              {address}
+                            </a>
+                          ) : (
+                            <span className="tabelao-stock-wrapped-text">{address}</span>
+                          )}
                         </td>
                       ) : null}
                       <td
@@ -821,30 +834,6 @@ export function TabelaoClient() {
                         {item.availableUnits.toLocaleString("pt-BR")}
                       </td>
                       <td
-                        className="investor-stock-price"
-                        data-label="Valor do imóvel"
-                        headers={`tabelao-price ${groupHeaders}`}
-                        title={`Valor Final Com Kit ${money.format(item.finalWithKit!)} − (B.A. da Unidade ${money.format(item.unitBonus!)} + Folga de Tabela ${money.format(item.tableSlack!)}) = ${money.format(item.minimumPrice)}`}
-                      >
-                        {money.format(item.minimumPrice)}
-                      </td>
-                      <td
-                        className="tabelao-stock-money"
-                        data-label="Volta ao caixa"
-                        headers={`tabelao-cashback ${groupHeaders}`}
-                        title={formatMoneyValue(item.cashBackSlack)}
-                      >
-                        {formatMoneyValue(item.cashBackSlack)}
-                      </td>
-                      <td
-                        className="tabelao-stock-money"
-                        data-label="Avaliação"
-                        headers={`tabelao-appraisal ${groupHeaders}`}
-                        title={formatMoneyValue(item.appraisal)}
-                      >
-                        {formatMoneyValue(item.appraisal)}
-                      </td>
-                      <td
                         className="tabelao-stock-progress"
                         data-label="% obra"
                         headers={`tabelao-progress ${groupHeaders}`}
@@ -863,6 +852,30 @@ export function TabelaoClient() {
                           <span className="tabelao-stock-wrapped-text">{classification}</span>
                         </td>
                       ) : null}
+                      <td
+                        className="tabelao-stock-money"
+                        data-label="Volta ao Caixa"
+                        headers={`tabelao-cashback ${groupHeaders}`}
+                        title={formatMoneyValue(item.cashBackSlack)}
+                      >
+                        {formatMoneyValue(item.cashBackSlack)}
+                      </td>
+                      <td
+                        className="tabelao-stock-money"
+                        data-label="Avaliação"
+                        headers={`tabelao-appraisal ${groupHeaders}`}
+                        title={formatMoneyValue(item.appraisal)}
+                      >
+                        {formatMoneyValue(item.appraisal)}
+                      </td>
+                      <td
+                        className="investor-stock-price"
+                        data-label="Valor do Imóvel"
+                        headers={`tabelao-price ${groupHeaders}`}
+                        title={`Valor Final Com Kit ${money.format(item.finalWithKit!)} − (B.A. da Unidade ${money.format(item.unitBonus!)} + Folga de Tabela ${money.format(item.tableSlack!)}) = ${money.format(item.minimumPrice)}`}
+                      >
+                        {money.format(item.minimumPrice)}
+                      </td>
                     </tr>
                   );
                 })}

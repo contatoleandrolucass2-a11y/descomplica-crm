@@ -83,8 +83,17 @@ describe("Tabelão protegido", () => {
     expect(archive).toContain('className="goal-page-hero investor-compact-hero"');
     expect(archive).toContain("<h1>Simulador Tabelão</h1>");
     expect(archive).toContain("<InvestorInfoHint");
-    expect(archive).toContain("<InvestorGuideLauncher />");
+    expect(archive).toContain("<InvestorGuideLauncher compact />");
+    expect(archive).not.toMatch(/documentation-breadcrumb|goal-kicker/);
+    expect(archive).toContain('import "./archive-investor/tabelao-layout.css"');
     expect(archive).toContain("<TabelaoClient />");
+    expect(archive).toContain("<TabelaoResources />");
+    expect(archive.indexOf("<TabelaoResources />")).toBeGreaterThan(
+      archive.indexOf("<TabelaoClient />"),
+    );
+    expect(archive.indexOf("<TabelaoResources />")).toBeLessThan(
+      archive.indexOf('className="investor-page-closing"'),
+    );
     expect(archive).toContain('className="investor-page-footer"');
     expect(client).toContain('fetchInventoryPayload("/api/inventory"');
     expect(client).not.toContain("investor-inventory.json");
@@ -123,11 +132,11 @@ describe("Tabelão protegido", () => {
       "Planta",
       "Vagas",
       "Estoque",
-      "Valor do imóvel",
-      "Volta ao caixa",
-      "Avaliação",
       "% obra",
       "Limitador",
+      "Volta ao Caixa",
+      "Avaliação",
+      "Valor do Imóvel",
     ];
     const tableHeaderSource = client.slice(client.indexOf("<thead>"), client.indexOf("</thead>"));
     const renderedColumnLabels = [
@@ -143,13 +152,24 @@ describe("Tabelão protegido", () => {
     );
     expect(renderedCellLabels).toEqual(visibleColumnLabels);
     const columnSource = client.slice(client.indexOf("<colgroup>"), client.indexOf("</colgroup>"));
-    expect(columnSource.match(/<col className=/g)).toHaveLength(14);
-    expect(client.indexOf('className="tabelao-stock-col-region"')).toBeLessThan(
-      client.indexOf('className="investor-stock-col-business"'),
-    );
-    expect(client.indexOf('className="tabelao-stock-col-address"')).toBeLessThan(
-      client.indexOf('className="investor-stock-col-area"'),
-    );
+    expect(
+      [...columnSource.matchAll(/<col className="([^"]+)"/g)].map((match) => match[1]),
+    ).toEqual([
+      "tabelao-stock-col-region",
+      "investor-stock-col-business",
+      "tabelao-stock-col-project",
+      "tabelao-stock-col-address",
+      "investor-stock-col-area",
+      "investor-stock-col-date",
+      "investor-stock-col-plant",
+      "tabelao-stock-col-parking",
+      "tabelao-stock-col-quantity",
+      "tabelao-stock-col-progress",
+      "tabelao-stock-col-description",
+      "tabelao-stock-col-cashback",
+      "tabelao-stock-col-appraisal",
+      "investor-stock-col-price",
+    ]);
     for (const accessibleLabel of [
       "Data de entrega",
       "Unidades no estoque publicado",
@@ -328,7 +348,8 @@ describe("Tabelão protegido", () => {
     );
     expect(client).toContain("{group.businessUnit}");
     expect(client).toContain("{group.project}");
-    expect(client).toContain("[item.street, item.streetNumber, item.neighborhood]");
+    expect(client).toContain("formatTabelaoAddress as formatAddress");
+    expect(client).not.toContain("function formatAddress(");
     expect(filters).toContain('dimension === "plant"');
     expect(filters).toContain("formatTabelaoDescription(item.label)");
     expect(filters).toContain("value={item.value}");
@@ -349,7 +370,9 @@ describe("Tabelão protegido", () => {
       ),
       "utf8",
     );
-    expect(client).toContain("buildTabelaoCellSpans(group.items.map(formatAddress))");
+    expect(client).toMatch(
+      /addressSpans: buildTabelaoCellSpans\(\s*group\.items\.map\(\(item\) =>\s*JSON\.stringify\(\[formatAddress\(item\), buildTabelaoMapsUrl\(item\)\]\),?\s*\),?\s*\)/,
+    );
     expect(client).toContain("buildTabelaoCellSpans(group.items.map(resolveTabelaoRegion))");
     expect(client).toContain("const regionSpan = group.regionSpans[itemIndex] ?? 1");
     expect(client).toContain("rowSpan={regionSpan}");
@@ -466,5 +489,48 @@ describe("Tabelão protegido", () => {
     expect(
       sortInvestorInventoryBySalePrice(inventory, "desc").map((item: { id?: string }) => item.id),
     ).toEqual(["3", "2", "1"]);
+  });
+
+  it("amplia as provas DOM sem alterar os vinte critérios publicados do Tabelão", () => {
+    const script = readFileSync(
+      new URL("../scripts/qa/authenticated-visual.mjs", import.meta.url),
+      "utf8",
+    );
+    const validation = script.slice(
+      script.indexOf("async function checkTabelaoValidation("),
+      script.indexOf("async function checkDirectTableValidation("),
+    );
+    const result = validation.slice(validation.lastIndexOf("  return {"));
+    expect([...result.matchAll(/^    (\w+)(?=:|,)/gm)].map((match) => match[1])).toEqual([
+      "responsiveGrid",
+      "spotlightSized",
+      "placementClassApplied",
+      "guideReachedLastStep",
+      "guideCompletionReturnedFocus",
+      "guideEscapeReturnedFocus",
+      "exclusiveRows",
+      "netPrices",
+      "groupedProjects",
+      "liveAvailableBeforeLocationReference",
+      "locationReferenceApplied",
+      "locationMetadataFits",
+      "malformedPayloadRecoverable",
+      "malformedPayloadRetryRestoresInventory",
+      "completeLiveSkipsLocationReference",
+      "concurrentResponsesKeepFiltersIndependent",
+      "emptyStateVisible",
+      "errorStateAccessible",
+      "loadingStateVisible",
+      "cookieBannerHidden",
+    ]);
+    expect(validation).toContain("Object.assign(initial, await page.evaluate(readTabelaoLayout))");
+    expect(validation).toContain("await checkTabelaoLayout(page)");
+    expect(validation).toContain("await checkTabelaoMapsFixture(page)");
+    expect(validation).toContain(
+      "typographyAndLabels &&= Object.values(layoutAndResources).every(Boolean)",
+    );
+    expect(validation).toContain(
+      "regionOrderAndLayout &&= Object.values(mapsDestinations).every(Boolean)",
+    );
   });
 });

@@ -57,6 +57,141 @@ const unit = (id: string, fields: Partial<TabelaoInventoryItem> = {}) => ({
   ...fields,
 });
 
+describe.each(["unidade", "empreendimento"])(
+  "Contexto geografico da referencia por %s",
+  (scope) => {
+    const geography = { city: "S\u00e3o Teste", state: "SP", postalCode: "00001-234" };
+    const missingAddress = { street: null, streetNumber: null, neighborhood: null };
+    const referenceUnit = (fields: Partial<TabelaoInventoryItem> = {}) =>
+      unit("ref-qa", { identifier: scope === "unidade" ? "1" : "outra-unidade", ...fields });
+    const expectedAddress = { street: "Rua QA", streetNumber: "10", neighborhood: "Bairro QA" };
+
+    it.each([{ city: "Outra Cidade" }, { state: "RJ" }, { postalCode: "00009-999" }])(
+      "rejeita conflito conhecido em %j e preserva a origem",
+      (conflict) => {
+        const live = Object.freeze(
+          unit("1", { ...missingAddress, ...geography, neighborhood: "Bairro QA" }),
+        );
+        const reference = Object.freeze(referenceUnit({ ...geography, ...conflict }));
+        const before = structuredClone({ live, reference });
+        expect(enrichTabelaoLocationFields([live], [reference])).toEqual([live]);
+        expect({ live, reference }).toEqual(before);
+      },
+    );
+
+    it("compara CEP com e sem hifen, acentos da cidade e caixa da UF sem alterar valores", () => {
+      const live = unit("1", {
+        ...missingAddress,
+        ...geography,
+        city: " S\u00e3o  Teste ",
+        state: " sp ",
+      });
+      const reference = [
+        referenceUnit({ city: "SAO TESTE", state: "SP", postalCode: "00001234" }),
+        referenceUnit(geography),
+      ];
+      const expected = [{ ...live, ...expectedAddress }];
+      expect(enrichTabelaoLocationFields([live], reference)).toEqual(expected);
+      expect(enrichTabelaoLocationFields([live], [...reference].reverse())).toEqual(expected);
+    });
+
+    it.each([
+      {},
+      { city: null, state: null, postalCode: null },
+      { city: " ", state: "\t", postalCode: " " },
+    ])("preserva o caso legado com geografia ausente: %j", (missing) => {
+      for (const [liveGeography, referenceGeography] of [
+        [missing, geography],
+        [geography, missing],
+        [missing, missing],
+      ]) {
+        const live = unit("1", { ...missingAddress, ...liveGeography });
+        const reference = referenceUnit(referenceGeography);
+        expect(enrichTabelaoLocationFields([live], [reference])).toEqual([
+          { ...live, ...expectedAddress },
+        ]);
+      }
+    });
+
+    it.each([
+      [{ city: "Cidade A" }, { city: "Cidade B" }],
+      [{ state: "SP" }, { state: "RJ" }],
+      [{ postalCode: "00001-234" }, { postalCode: "00009-999" }],
+    ])("nao colapsa triplas iguais com geografias distintas: %j / %j", (first, second) => {
+      const live = unit("1", missingAddress);
+      const reference = [referenceUnit(first), referenceUnit(), referenceUnit(second)];
+      expect(enrichTabelaoLocationFields([live], reference)).toEqual([live]);
+      expect(enrichTabelaoLocationFields([live], [...reference].reverse())).toEqual([live]);
+    });
+
+    it("seleciona somente o contexto unico compativel com a cidade viva", () => {
+      const live = unit("1", { ...missingAddress, city: "Cidade A" });
+      const reference = [
+        referenceUnit({ city: "Cidade B", street: "Rua B" }),
+        referenceUnit({ city: "Cidade A", street: "Rua A" }),
+      ];
+      const expected = [{ ...live, ...expectedAddress, street: "Rua A" }];
+      expect(enrichTabelaoLocationFields([live], reference)).toEqual(expected);
+      expect(enrichTabelaoLocationFields([live], [...reference].reverse())).toEqual(expected);
+    });
+
+    it("aceita duplicatas sem conflito quando apenas uma possui geografia", () => {
+      const live = unit("1", missingAddress);
+      const reference = [referenceUnit(), referenceUnit(geography)];
+      const expected = [{ ...live, ...expectedAddress }];
+      expect(enrichTabelaoLocationFields([live], reference)).toEqual(expected);
+      expect(enrichTabelaoLocationFields([live], [...reference].reverse())).toEqual(expected);
+    });
+
+    it("preserva endereco vivo completo mesmo diante de referencia conflitante", () => {
+      const live = unit("1", geography);
+      expect(
+        enrichTabelaoLocationFields([live], [referenceUnit({ city: "Outra Cidade" })]),
+      ).toEqual([live]);
+    });
+  },
+);
+
+describe("Prioridade e identidade no enriquecimento geografico", () => {
+  it("prioriza referencia compativel da unidade mesmo com endereco distinto no projeto", () => {
+    const live = unit("1", {
+      street: null,
+      streetNumber: null,
+      neighborhood: null,
+      city: "Cidade QA",
+    });
+    const reference = [
+      unit("r2", { identifier: "2", city: "Cidade QA", street: "Rua do projeto" }),
+      unit("r1", { identifier: "1", city: "Cidade QA", street: "Rua da unidade" }),
+    ];
+    expect(enrichTabelaoLocationFields([live], reference)).toEqual([
+      { ...live, street: "Rua da unidade", streetNumber: "10", neighborhood: "Bairro QA" },
+    ]);
+  });
+
+  it("preserva a unidade golden, valores e fontes originais apos complementar o endereco", () => {
+    const source = Object.freeze([
+      Object.freeze(unit("101", { finalWithKit: 400_000 })),
+      Object.freeze(
+        unit("201", { street: null, streetNumber: null, neighborhood: null, city: "Cidade QA" }),
+      ),
+    ]);
+    const reference = Object.freeze([
+      Object.freeze(
+        unit("r201", { identifier: "201", city: "cidade qa", street: "Rua da referencia" }),
+      ),
+    ]);
+    const original = structuredClone({ source, reference });
+    const [golden] = buildTabelaoExclusiveInventory(source);
+    expect(golden).toMatchObject({ id: "201", minimumPrice: 285_000, availableUnits: 2 });
+    const enriched = enrichTabelaoLocationFields(source, reference);
+    expect(buildTabelaoExclusiveInventory(enriched)).toEqual([
+      { ...golden, street: "Rua da referencia", streetNumber: "10", neighborhood: "Bairro QA" },
+    ]);
+    expect({ source, reference }).toEqual(original);
+  });
+});
+
 describe("Menor valor por tipologia no Tabelão", () => {
   it("ordena regiões na sequência comercial, empreendimentos alfabeticamente e preços crescentes", () => {
     const regions: TabelaoRegionName[] = [

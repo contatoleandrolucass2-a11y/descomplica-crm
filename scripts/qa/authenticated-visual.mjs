@@ -9,6 +9,11 @@ import AxeBuilder from "@axe-core/playwright";
 import { chromium } from "@playwright/test";
 import sharp from "sharp";
 import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
+import {
+  checkTabelaoLayout,
+  checkTabelaoMapsFixture,
+  readTabelaoLayout,
+} from "./tabelao-layout.mjs";
 
 import {
   buildTabelaoExclusiveInventory,
@@ -1846,11 +1851,11 @@ function readTabelaoCompactLayout() {
     "Planta",
     "Vagas",
     "Estoque",
-    "Valor do imóvel",
-    "Volta ao caixa",
-    "Avaliação",
     "% obra",
     "Limitador",
+    "Volta ao Caixa",
+    "Avaliação",
+    "Valor do Imóvel",
   ];
   const headers = [...table.querySelectorAll("thead th")];
   const expectedFilters = [
@@ -2711,11 +2716,11 @@ async function checkTabelaoValidation(page, origin) {
               "Planta",
               "Vagas",
               "Estoque",
-              "Valor do imóvel",
-              "Volta ao caixa",
-              "Avaliação",
               "% obra",
               "Limitador",
+              "Volta ao Caixa",
+              "Avaliação",
+              "Valor do Imóvel",
             ].every((label, index) => columnLabels[index] === label),
           filtersPresent:
             controls.length === 7 &&
@@ -2744,7 +2749,9 @@ async function checkTabelaoValidation(page, origin) {
               (results?.getBoundingClientRect().top ?? 0) + 1,
           rowHeight: rowBox != null && rowBox.height >= rowHeight - 2,
           quantityColumn:
-            columnLabels.indexOf("Estoque") === columnLabels.indexOf("Valor do imóvel") - 1 &&
+            columnLabels.indexOf("Estoque") === 8 &&
+            columnLabels.indexOf("% obra") === columnLabels.indexOf("Estoque") + 1 &&
+            columnLabels.indexOf("Valor do Imóvel") === 13 &&
             Number(
               firstRow
                 ?.querySelector(".tabelao-stock-quantity")
@@ -2803,6 +2810,7 @@ async function checkTabelaoValidation(page, origin) {
     );
 
     const compactLayout = await page.evaluate(readTabelaoCompactLayout);
+    Object.assign(initial, await page.evaluate(readTabelaoLayout));
     initial.compactColumnWidths = compactLayout.compactColumnWidths;
     initial.columnsAligned = compactLayout.columnsAligned;
     initial.compactTextFullyVisible = compactLayout.compactTextFullyVisible;
@@ -3637,8 +3645,14 @@ async function checkTabelaoValidation(page, origin) {
   );
   process.stdout.write(`Tabelão QA: ${JSON.stringify(viewportChecks)}\n`);
   const regionParkingFlow = await checkTabelaoRegionParkingFixture(page);
-  const regionOrderAndLayout = await checkTabelaoRegionOrderFixture(page, requiredViewports);
-  const typographyAndLabels = await checkTabelaoTypographyFixture(page, requiredViewports);
+  let regionOrderAndLayout = await checkTabelaoRegionOrderFixture(page, requiredViewports);
+  let typographyAndLabels = await checkTabelaoTypographyFixture(page, requiredViewports);
+  const layoutAndResources = await checkTabelaoLayout(page);
+  const mapsDestinations = await checkTabelaoMapsFixture(page);
+  typographyAndLabels &&= Object.values(layoutAndResources).every(Boolean);
+  regionOrderAndLayout &&= Object.values(mapsDestinations).every(Boolean);
+  process.stdout.write(`Tabelão QA: layout e recursos ${JSON.stringify(layoutAndResources)}\n`);
+  process.stdout.write(`Tabelão QA: destinos Maps ${JSON.stringify(mapsDestinations)}\n`);
 
   return {
     responsiveGrid: responsiveGrid && typographyAndLabels,

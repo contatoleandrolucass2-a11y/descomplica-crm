@@ -4,6 +4,15 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-03: Integracao da base corrigida no Associativo
+
+- Status: pendente_validacao; fonte: pedido do usuario, PR #141 e main db1b625.
+- O bloqueio de braces foi removido na base pelo PR #139, com patch versionado
+  do plugin Next e tinyglobby. Incorporar essa solucao, sem aguardar 3.0.4,
+  ignorar advisory ou refazer o patch. Validar novamente a arvore combinada.
+- Preservados o Tabelao publicado e os ajustes exclusivos do Associativo.
+  CI anterior 37136181590 parou apenas no audit; novos gates ainda obrigatorios.
+
 ## 2026-10-03: Brilho sem contorno e reprovacao metalica
 
 - Status: pendente_validacao; branch codex/associativo-brilho-reprovacao.
@@ -25,6 +34,82 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Publicacao bloqueada: audit braces GHSA-vfj7-8cjw-p6xm; 3.0.4 indisponivel
   no registro consultado. Nao ignorar advisory nem alegar correcao aplicada.
 - Detalhes e pendencias: docs/audits/associativo-brilho-reprovacao-2026-10-03.md.
+
+## 2026-10-03: Tabelao publicado com evidencia de producao
+
+- Status: validado; fonte: PR #139, CI 37136895575, CI main 37144378453 e
+  verificacao HTTP/DOM autenticado em crm.descomplicapro.com.br.
+- Runtime publicado: 8e158cc9d13beeff0087064df6d9b58d87790379. Todos os gates
+  verdes; imagem imutavel comprovada por hashes/camadas e dois perfis no destino.
+- Backup privado e rollback preservados; CAS concluido. Health confirmou SHA,
+  acesso anonimo negado e pagina autenticada exibiu layout, ordem, dourado,
+  Maps e recursos. Politica comercial continua disabled, sem destino.
+- Endereco ausente na origem oficial continua sem link; nao inventar logradouro.
+  Alteracao nao muda origem do estoque, regra financeira, dados ou migrations.
+- Evidencias: docs/audits/tabelao-layout-maps-2026-10-02.md. Sem pendencia de
+  publicacao do runtime. Registro documental posterior nao exige restart.
+
+## 2026-10-03: Tabelao validado funcionalmente e referencias revisadas
+
+- Status: pendente_validacao final; fonte: CI 37134880142 e artefato 11278718828.
+- Build, lint, tipos, 1475 Vitest, oito Node, audit, banco, restore e E2E aprovados.
+- Matriz funcional integral aprovada. Somente 11 capturas do Tabelao divergiram;
+  revisao visual confirmou cabecalho compacto, Maps, ordem, dourado e rodape.
+- Promocao transacional conferiu arvore limpa, hashes e predicado funcional
+  original; 182 imagens preservadas, sem mudar tolerancias. Politica continua
+  desabilitada e sem destino. Pendencias: nova CI, imagem e verificacao de producao.
+- Evidencia: docs/audits/tabelao-layout-maps-2026-10-02.md; PR #139.
+
+## 2026-10-03: Substituicao do glob no lint Next
+
+- Status: pendente_validacao; fonte: codigo Next 16.3.6 e guia oficial tinyglobby.
+- getRootDirs e o unico consumidor do fast-glob no plugin. Patch pnpm troca por
+  tinyglobby 0.2.17 ja presente, com packageExtensions e remocao da cadeia antiga.
+- Desabilitar expandDirectories e preservar saidas relativas/absolutas e aliases
+  Windows 8.3. Testar a regra Next real, nao somente a ausencia no lockfile.
+- Docker precisa copiar patches antes do install. Auditar normalmente, sem ignore.
+- Dez testes focados passaram; primeira auditoria limpa. Lint local interrompido
+  sob baixa memoria. Conclusao depende da CI e demais gates.
+  Evidencias: docs/audits/next-eslint-glob-2026-10-03.md; PR #139.
+
+## 2026-10-03: Politica desabilitada e bloqueio de auditoria do Tabelao
+
+- Status: pendente_validacao; branch codex/tabelao-layout-maps, runtime 562465b.
+- Fonte: confirmacao direta do usuario e rechecagem do PR #139/CI 37086793201.
+- Politica comercial desabilitada e sem destino e o estado solicitado, nao uma
+  pendencia de documento. Componente e QA existentes ja preservam esse contrato.
+- CI aprovou formatacao, lint, tipos e testes; pnpm audit local tambem confirmou
+  GHSA-vfj7-8cjw-p6xm alto. npm latest de braces permanece 3.0.3, sem correcao
+  segundo GitHub Advisory. As ultimas versoes dos consumidores mantem a cadeia.
+- Sem mudanca de runtime ou dependencia, bypass, merge ou deploy. Evidencias:
+  docs/audits/tabelao-layout-maps-2026-10-02.md. Release segue pendente do gate.
+
+## 2026-10-02: Layout e Maps no Tabelao
+
+- Status: pendente_validacao; branch codex/tabelao-layout-maps, base 3960724.
+- Fonte: sete prints, rota explicitada pelo usuario e confirmacao de manter
+  a origem oficial atual para os enderecos.
+- O endpoint protegido de estoque repassa uma API externa; o complemento de
+  endereco vem do snapshot ESTOQUE SPC. Nao afirmar consulta direta ao banco.
+- URL Maps usa somente componentes presentes e URLSearchParams. Sem logradouro,
+  manter ausencia explicita sem link; rowspan deve comparar texto e destino.
+- Nova ordem exige colgroup, cabecalho, corpo e oraculos de QA consistentes.
+- CSS legado de impressao oculta investor-stock-panel. Restaurar somente no
+  Tabelao e verificar presenca de todas as linhas antes de aprovar Imprimir.
+  Conferir tambem textos descendentes e variaveis de tema: somente restaurar a
+  tabela deixa Empresa/Empreendimento claros sobre branco. QA exige 4,5:1;
+  capturas devem esperar o fim das transicoes antes de inspecionar o papel.
+- Enriquecimento compara cidade/UF/CEP conhecidos antes de completar endereco;
+  referencias ambiguas nao podem escolher arbitrariamente uma localizacao.
+- Lint, tipos e build iniciais aprovados; 283 testes de dados e 18 de interface
+  aprovados. Seis larguras, tres temas, Maps e impressao conferidos localmente.
+  Duas suites Windows interrompidas por timeouts/baixa memoria e falhas POSIX.
+  Gates completos pendentes. Politica depende de documento/destino do usuario.
+- CI 37086002430/PR #139: 1465 Vitest e oito Node aprovados; audit bloqueia
+  braces@3.0.3, GHSA-vfj7-8cjw-p6xm. Em 02/10, npm retornou E404 para 3.0.4
+  e GitHub Advisory informou nenhuma versao corrigida. Nao ignorar esse gate.
+  Publicacao, imagem e matriz visual autenticada continuam pendentes.
+- Evidencias: docs/audits/tabelao-layout-maps-2026-10-02.md. Sem migration ou n8n.
 
 ## 2026-10-02: Contorno dourado sem preenchimento nos editaveis
 
