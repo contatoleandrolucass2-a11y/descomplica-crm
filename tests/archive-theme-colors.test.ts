@@ -174,6 +174,23 @@ describe("archive theme color contract", () => {
       ).toBeGreaterThanOrEqual(3);
   });
 
+  it("keeps blood-red metallic rejection readable even at the brightest sheen", () => {
+    const colors = declarations(
+      "investor-archive.css",
+      ".investor-page-shell.investor-associative-table-page",
+    );
+    const stops = colors["--associative-rejected-metal"]!.match(/#[\da-f]{6}/gi)!;
+    expect(stops).toEqual(["#650c17", "#9d1828", "#74101c", "#48080f"]);
+    for (const stop of stops) {
+      expect(contrast("#ffffff", stop)).toBeGreaterThanOrEqual(4.5);
+      const sheen = rgb(stop).map((channel, i) =>
+        Math.round((channel * 0.76 + [1, 82 / 255, 100 / 255][i]! * 0.24) * 255),
+      );
+      const mixed = `#${sheen.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
+      expect(contrast("#ffffff", mixed)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
   for (const theme of ["light", "balanced", "dark"]) {
     it(`${theme}: preserves the white symbol contrast treatment without recoloring it`, () => {
       expect(header(theme)["--header-brand-shadow"]).toBe(

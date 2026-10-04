@@ -4,6 +4,43 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-03: Integracao da base corrigida no Associativo
+
+- CI combinada 37167561944 aprovou validate e restore, mas o guidance detectou
+  comparacao textual incorreta: CSS de producao serializa 0% como 0px. O QA
+  normaliza apenas esse zero equivalente, preservando topo/rodape exatos e
+  rejeitando 1px ou posicoes intermediarias. Quinze testes aprovados;
+  publicacao ainda exige nova CI completa. Fonte: audit do Associativo.
+
+- Status: pendente_validacao; fonte: pedido do usuario, PR #141 e main db1b625.
+- O bloqueio de braces foi removido na base pelo PR #139, com patch versionado
+  do plugin Next e tinyglobby. Incorporar essa solucao, sem aguardar 3.0.4,
+  ignorar advisory ou refazer o patch. Validar novamente a arvore combinada.
+- Preservados o Tabelao publicado e os ajustes exclusivos do Associativo.
+  CI anterior 37136181590 parou apenas no audit; novos gates ainda obrigatorios.
+
+## 2026-10-03: Brilho sem contorno e reprovacao metalica
+
+- Status: pendente_validacao; branch codex/associativo-brilho-reprovacao.
+- Fonte: seis capturas posteriores, CSS/JSX do Associativo e QA de guidance.
+- Pedido mais recente remove o contorno fixo somente do ledger: verificar
+  input, wrapper e composicao ancestral em vazio/preenchido/foco. Uma sombra
+  herdada de focus-within pode restaurar o contorno mesmo com input limpo.
+- Manter foco de teclado identificavel pelo nome sublinhado. Brilho de 3s
+  percorre duas faixas de 2px no topo e rodape da linha inteira; reduced
+  motion desativa animacao. Nunca alterar calculos para atender estilo.
+- Dolar precisa ser irmao externo do resumo, nao filho da celula de data.
+  Validar alvo 24/44px, icone 17px, distancia, alinhamento e hover no mobile.
+- Reprovacao usa gradiente #650c17/#9d1828/#74101c/#48080f, texto branco,
+  brilho vermelho e CTA escuro local, sem depender do fundo claro do tema.
+- 30 testes focados e oito Node aprovados. Cinco timeouts da suite integral
+  passaram na repeticao serial (46 testes); seis falhas POSIX exigem CI Linux.
+- Lint, tipos, build e 6/6 jornadas finais aprovados, incluindo contraste,
+  animacao/reduced motion, ausencia de contornos e dolar externo alinhado.
+- Publicacao bloqueada: audit braces GHSA-vfj7-8cjw-p6xm; 3.0.4 indisponivel
+  no registro consultado. Nao ignorar advisory nem alegar correcao aplicada.
+- Detalhes e pendencias: docs/audits/associativo-brilho-reprovacao-2026-10-03.md.
+
 ## 2026-10-03: Tabelao publicado com evidencia de producao
 
 - Status: validado; fonte: PR #139, CI 37136895575, CI main 37144378453 e

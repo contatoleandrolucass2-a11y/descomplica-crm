@@ -10,6 +10,10 @@ import {
   hasGuidanceGoldBorder,
   hasGuidanceThemeSurface,
   assertAssociativeTransparentFields,
+  assertAssociativeLedgerRow,
+  assertAssociativeKeyboardFocus,
+  assertAssociativeRejectionPaint,
+  assertAssociativeRejectionShimmer,
   isGuidanceGoldText,
 } from "../scripts/qa/associative-guidance.mjs";
 
@@ -55,13 +59,93 @@ describe("Associativo guidance regression gates", () => {
     ])
       expect(hasGuidanceThemeSurface({ ...paint, background })).toBe(false);
     expect(hasGuidanceThemeSurface({ ...paint, gradient: [[185, 149, 69, 255]] })).toBe(false);
-    const field = { label: "Financiamento", background: [0, 0, 0, 0], gradient: [] };
+    const field = {
+      label: "Financiamento",
+      background: [0, 0, 0, 0],
+      gradient: [],
+      ledger: true,
+      borderWidths: [0, 0, 0, 0],
+      outlineWidth: 0,
+      outlineStyle: "none",
+      boxShadow: "none",
+      compositionShadow: "none",
+    };
     expect(() => assertAssociativeTransparentFields([field])).not.toThrow();
     expect(() => assertAssociativeTransparentFields([])).toThrow();
     expect(() =>
       assertAssociativeTransparentFields([{ ...field, background: [7, 26, 49, 255] }]),
     ).toThrow();
     expect(() => assertAssociativeTransparentFields([{ ...field, gradient: ["gold"] }])).toThrow();
+    expect(() =>
+      assertAssociativeTransparentFields([{ ...field, outlineWidth: 2.666 }]),
+    ).not.toThrow();
+    for (const state of [
+      "empty",
+      "filled",
+      "focused",
+      "filled-focused",
+      "wrapper",
+      "wrapper-focused",
+    ]) {
+      for (const patch of [
+        { borderWidths: [0, 1, 0, 0] },
+        { borderWidths: [] },
+        { outlineWidth: 2, outlineStyle: "solid" },
+        { boxShadow: "inset 0 0 0 2px gold" },
+        { compositionShadow: "inset 0 0 0 1px cyan" },
+      ]) {
+        expect(() =>
+          assertAssociativeTransparentFields([{ ...field, label: state, ...patch }]),
+        ).toThrow();
+        // Qualification inputs retain their previous focus contract.
+        expect(() =>
+          assertAssociativeTransparentFields([{ ...field, ...patch, ledger: false }]),
+        ).not.toThrow();
+      }
+    }
+  });
+
+  it("keeps ledger rows on the theme surface without a fixed gold frame", () => {
+    const gold = { width: 2, style: "solid", color: [159, 118, 40, 255] };
+    const paint = {
+      background: [0, 0, 0, 0],
+      themeSurface: [10, 43, 71, 255],
+      gradient: [],
+      contained: true,
+      boxShadow: "none",
+      fixedBorders: [{ ...gold, width: 0 }],
+      attentionBorder: Array.from({ length: 4 }, () => ({ width: 0 })),
+    };
+    expect(() => assertAssociativeLedgerRow(paint)).not.toThrow();
+    expect(() =>
+      assertAssociativeLedgerRow({
+        ...paint,
+        fixedBorders: [{ ...gold, color: [80, 85, 90, 255] }],
+      }),
+    ).not.toThrow();
+    for (const patch of [
+      { background: [185, 149, 69, 255] },
+      { gradient: [[185, 149, 69, 255]] },
+      { contained: false },
+      { fixedBorders: [gold] },
+      { boxShadow: "inset 0 0 0 2px gold" },
+      { attentionBorder: [{ width: 2 }, { width: 0 }, { width: 0 }, { width: 0 }] },
+      { attentionBorder: [] },
+    ])
+      expect(() => assertAssociativeLedgerRow({ ...paint, ...patch })).toThrow();
+  });
+
+  it("requires a visible 2px label underline for keyboard focus", () => {
+    const focus = { focusVisible: true, decoration: "underline", thickness: 2, alpha: 255 };
+    expect(() => assertAssociativeKeyboardFocus(focus)).not.toThrow();
+    for (const patch of [
+      { focusVisible: false },
+      { decoration: "none" },
+      { thickness: 1 },
+      { thickness: 3 },
+      { alpha: 0 },
+    ])
+      expect(() => assertAssociativeKeyboardFocus({ ...focus, ...patch })).toThrow();
   });
 
   it("requires exactly 3s infinite shimmer only while current/required", () => {
@@ -95,6 +179,136 @@ describe("Associativo guidance regression gates", () => {
     for (const patch of [{ active: false }, { reducedMotion: true }]) {
       expect(() => assertAssociativeShimmer({ ...active, ...patch })).toThrow(/must not shimmer/u);
       expect(() => assertAssociativeShimmer({ ...active, ...patch, animations: [] })).not.toThrow();
+    }
+  });
+
+  it("requires exactly two moving gold 2px edges on the full ledger row", () => {
+    const animation = {
+      name: "associative-row-edge-shine",
+      duration: 3000,
+      iterations: "infinite",
+      playState: "running",
+      visibleDuringCycle: true,
+      edgeHeight: 2,
+      goldLine: true,
+      moving: true,
+      pseudo: "::after",
+      fullRowExtent: true,
+      backgroundCount: 2,
+      edgeHeights: [2, 2],
+      edgePositions: ["0%", "100%"],
+      noRepeat: true,
+    };
+    const active = { active: true, reducedMotion: false, ledger: true, animations: [animation] };
+    expect(() => assertAssociativeShimmer(active)).not.toThrow();
+    expect(() =>
+      assertAssociativeShimmer({
+        ...active,
+        animations: [{ ...animation, edgePositions: ["0px", "100%"] }],
+      }),
+    ).not.toThrow();
+    for (const patch of [
+      { name: "associative-edge-shine" },
+      { duration: 2900 },
+      { iterations: "2" },
+      { playState: "paused" },
+      { pseudo: "::before" },
+      { fullRowExtent: false },
+      { backgroundCount: 1 },
+      { backgroundCount: 3 },
+      { edgeHeights: [2, 3] },
+      { edgeHeights: [2] },
+      { edgePositions: ["100%", "100%"] },
+      { edgePositions: ["0%", "50%"] },
+      { edgePositions: ["1px", "100%"] },
+      { edgePositions: ["0px", "1px"] },
+      { edgePositions: ["0px", "0px"] },
+      { noRepeat: false },
+      { moving: false },
+      { goldLine: false },
+      { visibleDuringCycle: false },
+    ])
+      expect(() =>
+        assertAssociativeShimmer({ ...active, animations: [{ ...animation, ...patch }] }),
+      ).toThrow();
+    expect(() =>
+      assertAssociativeShimmer({ ...active, animations: [animation, animation] }),
+    ).toThrow();
+    expect(() => assertAssociativeShimmer({ ...active, animations: [] })).toThrow();
+    for (const patch of [{ active: false }, { reducedMotion: true }]) {
+      expect(() => assertAssociativeShimmer({ ...active, ...patch })).toThrow();
+      expect(() => assertAssociativeShimmer({ ...active, ...patch, animations: [] })).not.toThrow();
+    }
+  });
+
+  it("requires the same dark blood-red metallic gradient and white text for rejection surfaces", () => {
+    const paint = {
+      gradient: [
+        [101, 12, 23, 255],
+        [157, 24, 40, 255],
+        [116, 16, 28, 255],
+        [72, 8, 15, 255],
+      ],
+      foreground: [255, 255, 255, 255],
+      textFill: [255, 255, 255, 255],
+    };
+    expect(() => assertAssociativeRejectionPaint(paint)).not.toThrow();
+    for (let index = 0; index < paint.gradient.length; index += 1) {
+      for (const color of [
+        [255, 82, 100, 255],
+        [185, 149, 69, 255],
+        [101, 12, 23, 0],
+      ]) {
+        const gradient = paint.gradient.map((stop, i) => (i === index ? color : stop));
+        expect(() => assertAssociativeRejectionPaint({ ...paint, gradient })).toThrow();
+      }
+    }
+    for (const patch of [
+      { gradient: [] },
+      { gradient: paint.gradient.slice(0, 3) },
+      { gradient: [...paint.gradient].reverse() },
+      { foreground: [240, 240, 240, 255] },
+      { textFill: [0, 0, 0, 0] },
+    ])
+      expect(() => assertAssociativeRejectionPaint({ ...paint, ...patch })).toThrow();
+  });
+
+  it("runs the red footer shimmer for 3s infinitely only while rejected without reduced motion", () => {
+    const animation = {
+      name: "associative-rejection-shine",
+      pseudo: "::after",
+      duration: 3000,
+      iterations: "infinite",
+      playState: "running",
+      redLine: true,
+      moving: true,
+      visibleDuringCycle: true,
+    };
+    const rejected = { rejected: true, reducedMotion: false, animations: [animation] };
+    expect(() => assertAssociativeRejectionShimmer(rejected)).not.toThrow();
+    for (const patch of [
+      { name: "associative-edge-shine" },
+      { pseudo: "::before" },
+      { duration: 2600 },
+      { iterations: "1" },
+      { playState: "paused" },
+      { redLine: false },
+      { moving: false },
+      { visibleDuringCycle: false },
+    ])
+      expect(() =>
+        assertAssociativeRejectionShimmer({
+          ...rejected,
+          animations: [{ ...animation, ...patch }],
+        }),
+      ).toThrow();
+    for (const animations of [[], [animation, animation]])
+      expect(() => assertAssociativeRejectionShimmer({ ...rejected, animations })).toThrow();
+    for (const patch of [{ rejected: false }, { reducedMotion: true }]) {
+      expect(() => assertAssociativeRejectionShimmer({ ...rejected, ...patch })).toThrow();
+      expect(() =>
+        assertAssociativeRejectionShimmer({ ...rejected, ...patch, animations: [] }),
+      ).not.toThrow();
     }
   });
 
@@ -187,38 +401,67 @@ describe("Associativo guidance regression gates", () => {
     }
   });
 
-  it("keeps the 18px commission icon beside the last date with a 44px coarse target", () => {
+  it("keeps the 17px commission icon outside the summary table in a 24px/44px grid column", () => {
     const valid = {
       width: 44,
       height: 44,
       minimumTarget: 44,
-      insideSummary: true,
-      insideLastRow: true,
+      insideSummary: false,
+      insideTable: false,
+      insideCell: false,
+      summarySibling: true,
+      lastRowIsDecreasing10: true,
+      layoutDisplay: "grid",
+      columns: [500, 44],
+      layoutGap: 4,
+      summaryGap: 4,
+      summaryFitsColumn: true,
+      insideLayout: true,
       insideWidth: true,
       dateGap: 6,
       centerDelta: 0,
       overlaps: false,
       iconOnly: true,
-      iconSize: 18,
+      iconSize: 17,
       borderless: true,
       transparent: true,
     };
     expect(() => assertAssociativeCommissionGeometry(valid)).not.toThrow();
     expect(() =>
-      assertAssociativeCommissionGeometry({ ...valid, minimumTarget: 18, width: 18, height: 18 }),
+      assertAssociativeCommissionGeometry({
+        ...valid,
+        minimumTarget: 24,
+        width: 24,
+        height: 24,
+        columns: [500, 24],
+      }),
     ).not.toThrow();
     for (const patch of [
-      { insideSummary: false },
-      { insideLastRow: false },
+      { insideSummary: true },
+      { insideTable: true },
+      { insideCell: true },
+      { summarySibling: false },
+      { lastRowIsDecreasing10: false },
+      { layoutDisplay: "flex" },
+      { columns: [500] },
+      { columns: [500, 24] },
+      { layoutGap: 3 },
+      { layoutGap: 5 },
+      { summaryGap: -1 },
+      { summaryGap: 6 },
+      { summaryFitsColumn: false },
+      { insideLayout: false },
       { insideWidth: false },
       { dateGap: -1 },
       { dateGap: 17 },
-      { centerDelta: 3 },
+      { centerDelta: 1.01 },
       { overlaps: true },
       { iconOnly: false },
-      { iconSize: 24 },
+      { iconSize: 18 },
       { width: 43 },
       { height: 43 },
+      { width: 45 },
+      { minimumTarget: 18, width: 18, height: 18, columns: [500, 18] },
       { borderless: false },
       { transparent: false },
     ]) {

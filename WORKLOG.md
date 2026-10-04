@@ -1,5 +1,46 @@
 # Worklog
 
+## 2026-10-03 - Contrato de brilho compativel com CSS de producao
+
+- CI 37167561944 aprovou validacao e restore; QA autenticado detectou a
+  serializacao 0px do topo no CSS minificado, equivalente ao 0% da fonte.
+- Ajuste somente no teste: normaliza esse zero exato e preserva a exigencia
+  de duas faixas nas extremidades. Regressao rejeita deslocamento de 1px,
+  bordas sobrepostas e posicao intermediaria. Quinze casos aprovados.
+- Arvore integrada: lint, tipos, build, audit, oito Node e seis jornadas locais
+  aprovados. Suite Windows com seis falhas POSIX e dois timeouts; estes passaram
+  em repeticao serial de 22 casos. Suite completa aprovada na CI Linux.
+- Evidencia detalhada no audit do Associativo; nova CI obrigatoria antes do deploy.
+
+## 2026-10-03 - Retomada da publicacao do Associativo
+
+- Usuario solicitou incorporar a correcao e publicar. Integra origin/main
+  db1b625 ao PR #141, preservando a entrega do Tabelao e o patch de lint do PR #139.
+- Somente registros documentais conflitaram; mantidos os dois historicos.
+- A CI anterior 37136181590 aprovou lint, tipos e testes, mas parou no audit.
+  Instalacao congelada, audit sem vulnerabilidades e 40 testes focados aprovados.
+  CI completa e gates combinados em andamento.
+
+## 2026-10-03 - Brilho nas linhas e reprovacao metalica
+
+- Branch codex/associativo-brilho-reprovacao, base 506b9e3. Pedido posterior
+  em seis capturas: campos sem contorno, brilho nas duas extremidades da linha,
+  dolar externo de 17px e reprovacao vermelho-sangue metalico com brilho de 3s.
+- Remove bordas/sombras de inputs e controles do ledger, inclusive o foco
+  herdado da composicao. Mantem indicacao de teclado no nome do campo.
+- Brilho dourado somente em duas faixas de 2px, sem moldura fixa; reprovacao
+  com contraste branco validado e efeito interrompido em reduced motion.
+- Dolar fora da secao/tabela, alvos de 24/44px, sem caixa; calculos,
+  sequencia, paleta-base, estoque e Tabelao preservados.
+- Lint, tipos e build aprovados. 30 testes focados, 46 testes de ferramentas
+  em repeticao serial e oito testes Node aprovados. Navegador: 6/6 jornadas
+  nos tres temas/desktop/celular, com contraste e geometria aprovados.
+  Suite integral Windows executada: seis falhas POSIX
+  e cinco timeouts; os timeouts passaram na repeticao sem relaxar limites.
+- CI/publicacao pendentes; braces segue bloqueando o audit. Atualizacao para
+  3.0.4 retornou E404 na consulta ao registro, sem alteracao de dependencias.
+- Evidencias: docs/audits/associativo-brilho-reprovacao-2026-10-03.md.
+
 ## 2026-10-03 - Publicacao concluida do Tabelao
 
 - PR #139 integrado apos CI 37136895575 verde. Arvore de f618ba6 identica ao

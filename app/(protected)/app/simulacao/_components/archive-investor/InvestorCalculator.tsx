@@ -639,7 +639,7 @@ function AssociativePaymentSummary({
     })),
   ];
 
-  return <section className={`investor-associative-payment-summary${available ? " is-ready" : " is-locked"}`} aria-labelledby="investor-associative-payment-summary-title">
+  return <div className="investor-associative-payment-summary-layout"><section className={`investor-associative-payment-summary${available ? " is-ready" : " is-locked"}`} aria-labelledby="investor-associative-payment-summary-title">
     <header>
       <div>
         <div>
@@ -675,7 +675,7 @@ function AssociativePaymentSummary({
         <span role="columnheader">1ª mensal</span>
         <span role="columnheader">Última mensal</span>
       </div>
-      {rows.map((row, rowIndex) => <div key={row.key} className={`investor-associative-payment-table-row ${row.featured ? "is-linear" : "is-decreasing"}`} role="row">
+      {rows.map((row) => <div key={row.key} className={`investor-associative-payment-table-row ${row.featured ? "is-linear" : "is-decreasing"}`} role="row">
         <strong role="rowheader">{row.label}</strong>
         <span role="cell" data-label="Quantidade" aria-label={`${row.count} parcelas`}>{available ? row.count : "—"}</span>
         <span role="cell" data-label="Sem correção" aria-label={`Sem correção: ${available ? money.format(row.uncorrected) : "indisponível"}`}>{available ? money.format(row.uncorrected) : "—"}</span>
@@ -683,19 +683,18 @@ function AssociativePaymentSummary({
         <time role="cell" data-label="1ª mensal" aria-label={`Primeira mensal: ${available ? formatDate(row.firstDate) : "indisponível"}`} dateTime={available ? row.firstDate : undefined}>{available ? formatDate(row.firstDate) : "—"}</time>
         <span role="cell" data-label="Última mensal" className="investor-associative-payment-last-date">
           <time aria-label={`Última mensal: ${available ? formatDate(row.lastDate) : "indisponível"}`} dateTime={available ? row.lastDate : undefined}>{available ? formatDate(row.lastDate) : "—"}</time>
-          {!row.featured && rowIndex === rows.length - 1 ? <button
-            type="button"
-            className="investor-associative-commission-launcher"
-            aria-label="Abrir remuneração comercial"
-            title="Abrir remuneração comercial"
-            aria-haspopup="dialog"
-            aria-controls="investor-associative-commission-dialog"
-            onClick={onShowCommission}
-          ><span aria-hidden="true">$</span></button> : null}
         </span>
       </div>)}
     </div>
-  </section>;
+  </section><button
+    type="button"
+    className="investor-associative-commission-launcher"
+    aria-label="Abrir remuneração comercial"
+    title="Abrir remuneração comercial"
+    aria-haspopup="dialog"
+    aria-controls="investor-associative-commission-dialog"
+    onClick={onShowCommission}
+  ><span aria-hidden="true">$</span></button></div>;
 }
 
 const InvestorFilterOptions = memo(function InvestorFilterOptions({ options, currency = false }) {
@@ -1519,8 +1518,8 @@ function AssociativeApprovalPanel({
         const failed = linearFailed || decreasingFailed;
         return <tr key={row.id} className={failed ? "failed" : row.limit != null ? "passed" : "pending"}>
           <th scope="row"><span className="investor-associative-approval-rule"><span>{row.label}</span><InvestorInfoHint label={row.label} title={`Entenda ${row.label}`} description={row.help} /></span></th>
-          <td data-label="Linear" className={linearFailed ? "failed-value" : undefined}>{percent.format(row.linearValue)}</td>
-          <td data-label="Decrescente" className={decreasingFailed ? "failed-value" : undefined}>{percent.format(row.decreasingValue)}</td>
+          <td data-label="Linear" className={linearFailed ? "failed-value" : undefined}><span>{percent.format(row.linearValue)}</span></td>
+          <td data-label="Decrescente" className={decreasingFailed ? "failed-value" : undefined}><span>{percent.format(row.decreasingValue)}</span></td>
           <td data-label="Limite">{row.limit == null ? "—" : `≤ ${percent.format(row.limit)}`}</td>
         </tr>;
       })}
