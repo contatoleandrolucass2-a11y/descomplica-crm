@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-03 - Navegação protegida unificada
+
+- Substitui os cabeçalhos internos dos simuladores por um único cabeçalho
+  hierárquico para todas as páginas autenticadas.
+- Mantém os links derivados das permissões efetivas no servidor; simuladores
+  liberados exigem o mesmo gate de rota e a CAIXA permanece bloqueada sem link.
+- Reúne identidade, segurança, administração autorizada, temas e logout na área
+  de conta, com navegação responsiva, teclado, foco e movimento reduzido.
+- Preserva URLs, autenticação, guards, RLS, dados e regras comerciais existentes.
+
 ## 2026-10-03 - Referencias revisadas do Tabelao
 
 - Atualiza somente 11 capturas do Tabelao para o layout solicitado, mantendo

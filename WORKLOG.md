@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-03 - Shell protegido único
+
+- Branch `codex/unified-protected-navigation`, base `8e158cc`. O diagnóstico
+  confirmou que cinco simuladores contornavam o shell protegido e montavam um
+  `ArchiveHeader` com menu estático, criando duas arquiteturas de navegação.
+- A correção mantém um único layout autenticado. O catálogo filtrado por RLS e
+  permissão continua sendo a base; quatro simuladores fora das 17 páginas do
+  catálogo entram apenas quando o pai, a permissão efetiva e o gate liberado
+  convergem. CAIXA é apresentada sem `path`, como estado bloqueado.
+- Os cabeçalhos locais e a navegação redundante entre simuladores foram
+  removidos. Tabs contextuais, cálculos, estoque, formulários, URLs, proxy,
+  guards e políticas de banco permanecem inalterados.
+- Baseline no SHA-base aprovado: ESLint, TypeScript, 1.478 Vitest (1 ignorado),
+  oito testes Node e build Next. Validação integrada e evidências visuais serão
+  registradas após a consolidação dos arquivos concorrentes.
+
 ## 2026-10-03 - Revisao visual autenticada do Tabelao
 
 - CI 37134880142 em c6432d3: formatacao, lint, tipos, 1475 testes Vitest,
