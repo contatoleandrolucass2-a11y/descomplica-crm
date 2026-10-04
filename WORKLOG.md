@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-04 - Associativo publicado e conferido
+
+- Publicada a imagem imutavel 7337b97 apos CI 37173712179 integralmente verde.
+  Remocao de braces incorporada da base, audit aprovado e Tabelao preservado.
+- Backup verificado, equivalencia OCI/11 camadas e dois perfis comprovados,
+  CAS oficial e health interno/publico aprovados; rollback nao necessario.
+- Checkout sujo da VPS preservado; release em checkout destacado limpo.
+  Troca aguardou recuperacao da memoria. Nenhuma migration ou mudanca de dados.
+- Smoke anonimo: 12 GETs sem erros. Jornada autenticada com valores ficticios,
+  sem salvar proposta, confirmou etapas, brilho 3s, campos, reprovacao e dolar.
+- PR #143 publica somente QA e registros; sem novo restart. Lint, tipos,
+  build, 89 focados e oito Node aprovados; Windows 1479 aprovados, seis falhas
+  POSIX e um ignorado. Suite Linux aprovada no validate. Fonte: audit da release.
+
+## 2026-10-04 - Estabilizacao do QA de impressao
+
+- PR #141 integrado em 7337b97 apos CI verde: 193 comparacoes e seis jornadas
+  de guidance v5 passaram sem promover imagens de referencia.
+- Primeira CI da main falhou somente na leitura imediata do layout de impressao
+  do Tabelao. Reproducao sintetica mostrou a transicao de min-width ainda ativa.
+- QA passa a aguardar o predicado integral por ate cinco segundos, sem remover
+  condicoes ou alterar Tabelao, estilos e runtime. Regressao cobre espera
+  limitada e conservacao dos criterios. Fonte: audit do Associativo.
+- Prova do bloco corrigido: 10/10 aprovadas; largura e transform persistentes
+  falharam por timeout. Predicado identico confirmado por AST; 89 testes focados
+  aprovados. Gates locais completos em andamento.
+- Uma repeticao do job da main foi solicitada no mesmo SHA; deploy ainda pendente.
+
 ## 2026-10-03 - Shell protegido único
 
 - Branch `codex/unified-protected-navigation`, base `8e158cc`. O diagnóstico
@@ -15,6 +43,64 @@
 - Baseline no SHA-base aprovado: ESLint, TypeScript, 1.478 Vitest (1 ignorado),
   oito testes Node e build Next. Validação integrada e evidências visuais serão
   registradas após a consolidação dos arquivos concorrentes.
+
+## 2026-10-03 - Contrato de brilho compativel com CSS de producao
+
+- CI 37167561944 aprovou validacao e restore; QA autenticado detectou a
+  serializacao 0px do topo no CSS minificado, equivalente ao 0% da fonte.
+- Ajuste somente no teste: normaliza esse zero exato e preserva a exigencia
+  de duas faixas nas extremidades. Regressao rejeita deslocamento de 1px,
+  bordas sobrepostas e posicao intermediaria. Quinze casos aprovados.
+- Arvore integrada: lint, tipos, build, audit, oito Node e seis jornadas locais
+  aprovados. Suite Windows com seis falhas POSIX e dois timeouts; estes passaram
+  em repeticao serial de 22 casos. Suite completa aprovada na CI Linux.
+- Evidencia detalhada no audit do Associativo; nova CI obrigatoria antes do deploy.
+
+## 2026-10-03 - Retomada da publicacao do Associativo
+
+- Usuario solicitou incorporar a correcao e publicar. Integra origin/main
+  db1b625 ao PR #141, preservando a entrega do Tabelao e o patch de lint do PR #139.
+- Somente registros documentais conflitaram; mantidos os dois historicos.
+- A CI anterior 37136181590 aprovou lint, tipos e testes, mas parou no audit.
+  Instalacao congelada, audit sem vulnerabilidades e 40 testes focados aprovados.
+  CI completa e gates combinados em andamento.
+
+## 2026-10-03 - Brilho nas linhas e reprovacao metalica
+
+- Branch codex/associativo-brilho-reprovacao, base 506b9e3. Pedido posterior
+  em seis capturas: campos sem contorno, brilho nas duas extremidades da linha,
+  dolar externo de 17px e reprovacao vermelho-sangue metalico com brilho de 3s.
+- Remove bordas/sombras de inputs e controles do ledger, inclusive o foco
+  herdado da composicao. Mantem indicacao de teclado no nome do campo.
+- Brilho dourado somente em duas faixas de 2px, sem moldura fixa; reprovacao
+  com contraste branco validado e efeito interrompido em reduced motion.
+- Dolar fora da secao/tabela, alvos de 24/44px, sem caixa; calculos,
+  sequencia, paleta-base, estoque e Tabelao preservados.
+- Lint, tipos e build aprovados. 30 testes focados, 46 testes de ferramentas
+  em repeticao serial e oito testes Node aprovados. Navegador: 6/6 jornadas
+  nos tres temas/desktop/celular, com contraste e geometria aprovados.
+  Suite integral Windows executada: seis falhas POSIX
+  e cinco timeouts; os timeouts passaram na repeticao sem relaxar limites.
+- CI/publicacao pendentes; braces segue bloqueando o audit. Atualizacao para
+  3.0.4 retornou E404 na consulta ao registro, sem alteracao de dependencias.
+- Evidencias: docs/audits/associativo-brilho-reprovacao-2026-10-03.md.
+
+## 2026-10-03 - Publicacao concluida do Tabelao
+
+- PR #139 integrado apos CI 37136895575 verde. Arvore de f618ba6 identica ao
+  merge 8e158cc9d13beeff0087064df6d9b58d87790379.
+- CI main 37144378453 aprovou validate, release-gates, isolated-restore e
+  promotable-image. Imagem transferida somente depois dos quatro gates verdes.
+- ZIP, arquivo comprimido, manifest/config OCI e 11 camadas conferidos.
+  Perfis de homologacao/producao aprovados novamente no destino, sem rebuild.
+- Backup privado, imagem anterior preservada, Nginx valido, CAS e troca pelo
+  wrapper oficial. Health interno/publico confirmou a versao exata; APIs de
+  estoque retornaram 401 anonimo, Tabelao 307 para login. Sem rollback necessario.
+- Pagina autenticada de producao inspecionada: titulo, ordem, dourado, Maps e
+  rodape corretos. Politica comercial disabled confirmado no DOM. Sem exportar
+  estoque ou credenciais para o repositorio. Aba publicada deixada aberta.
+- Evidencias completas: docs/audits/tabelao-layout-maps-2026-10-02.md.
+  Este registro nao altera runtime nem requer nova troca de imagem.
 
 ## 2026-10-03 - Revisao visual autenticada do Tabelao
 

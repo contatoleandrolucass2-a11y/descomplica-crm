@@ -11,8 +11,33 @@ export function hasGuidanceThemeSurface(paint: {
   themeSurface: number[];
 }): boolean;
 export function assertAssociativeTransparentFields(
-  fields: { label: string; background: number[]; gradient: unknown[] }[],
+  fields: {
+    label: string;
+    background: number[];
+    gradient: unknown[];
+    ledger: boolean;
+    borderWidths: number[];
+    outlineWidth: number;
+    outlineStyle: string;
+    boxShadow: string;
+    compositionShadow: string;
+  }[],
 ): void;
+export function assertAssociativeLedgerRow(paint: {
+  background: number[];
+  gradient: number[][];
+  themeSurface: number[];
+  contained: boolean;
+  boxShadow: string;
+  fixedBorders: { width: number; style: string; color: number[] }[];
+  attentionBorder: { width: number }[];
+}): void;
+export function assertAssociativeKeyboardFocus(focus: {
+  focusVisible: boolean;
+  decoration: string;
+  thickness: number;
+  alpha: number;
+}): void;
 export function isGuidanceGold(color: number[]): boolean;
 export function isGuidanceGoldText(paint: {
   textFill: number[];
@@ -24,6 +49,7 @@ export function isGuidanceGoldText(paint: {
 export function assertAssociativeShimmer(measurement: {
   active: boolean;
   reducedMotion: boolean;
+  ledger?: boolean;
   animations: {
     name: string;
     duration: number;
@@ -33,6 +59,31 @@ export function assertAssociativeShimmer(measurement: {
     edgeHeight: number;
     goldLine: boolean;
     moving: boolean;
+    pseudo?: string;
+    fullRowExtent?: boolean;
+    backgroundCount?: number;
+    edgeHeights?: number[];
+    edgePositions?: string[];
+    noRepeat?: boolean;
+  }[];
+}): void;
+export function assertAssociativeRejectionPaint(paint: {
+  gradient: number[][];
+  foreground: number[];
+  textFill: number[];
+}): void;
+export function assertAssociativeRejectionShimmer(measurement: {
+  rejected: boolean;
+  reducedMotion: boolean;
+  animations: {
+    name: string;
+    pseudo: string;
+    duration: number;
+    iterations: string;
+    playState: string;
+    redLine: boolean;
+    moving: boolean;
+    visibleDuringCycle: boolean;
   }[];
 }): void;
 export function assertAssociativeMoneySpacing(
@@ -60,7 +111,16 @@ export function assertAssociativeCommissionGeometry(geometry: {
   height: number;
   minimumTarget: number;
   insideSummary: boolean;
-  insideLastRow: boolean;
+  insideTable: boolean;
+  insideCell: boolean;
+  summarySibling: boolean;
+  lastRowIsDecreasing10: boolean;
+  layoutDisplay: string;
+  columns: number[];
+  layoutGap: number;
+  summaryGap: number;
+  summaryFitsColumn: boolean;
+  insideLayout: boolean;
   insideWidth: boolean;
   dateGap: number;
   centerDelta: number;

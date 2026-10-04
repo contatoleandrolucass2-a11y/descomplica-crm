@@ -149,6 +149,47 @@ export function readTabelaoLayout() {
   };
 }
 
+export function readTabelaoPrintLayout({ readyOnly = false } = {}) {
+  const shell = document.querySelector(".tabelao-page-shell");
+  const table = shell?.querySelector(".investor-stock-table");
+  const results = shell?.querySelector(".investor-stock-results");
+  const panel = shell?.querySelector(".investor-stock-panel");
+  const hero = shell?.querySelector(".investor-compact-hero");
+  const topbar = document.querySelector("[data-protected-topbar]");
+  const rows = [...(table?.querySelectorAll("tr[data-inventory-unit-id]") ?? [])];
+  const hiddenControls =
+    shell != null &&
+    [
+      ".tabelao-resources",
+      ".investor-hero-guide",
+      ".investor-info-hint",
+      ".investor-stock-filters",
+    ].every((selector) =>
+      [...shell.querySelectorAll(selector)].every(
+        (element) => getComputedStyle(element).display === "none",
+      ),
+    );
+  const layout = {
+    printApplicationChromeHidden: topbar == null || getComputedStyle(topbar).display === "none",
+    printControlsHidden: hiddenControls,
+    printContentVisible: panel?.checkVisibility() === true && hero?.checkVisibility() === true,
+    printRowsExpanded:
+      rows.length > 0 &&
+      rows.every((row) => row.checkVisibility() && row.getBoundingClientRect().height > 0),
+    printTableSemantics:
+      table != null &&
+      getComputedStyle(table).display === "table" &&
+      getComputedStyle(table).minWidth === "0px",
+    printOverflowVisible: results != null && getComputedStyle(results).overflowX === "visible",
+    printHeaderTransformsReset:
+      table != null &&
+      [...table.querySelectorAll("thead th")].every(
+        (cell) => getComputedStyle(cell).transform === "none",
+      ),
+  };
+  return readyOnly && !Object.values(layout).every(Boolean) ? false : layout;
+}
+
 export async function checkTabelaoLayout(page) {
   const checks = await page.evaluate(readTabelaoLayout);
   const originalTheme = await page.evaluate(() =>
@@ -222,47 +263,47 @@ export async function checkTabelaoLayout(page) {
     });
   try {
     await page.emulateMedia({ media: "print" });
-    const printLayout = await page.evaluate(() => {
-      const shell = document.querySelector(".tabelao-page-shell");
-      const table = shell?.querySelector(".investor-stock-table");
-      const results = shell?.querySelector(".investor-stock-results");
-      const panel = shell?.querySelector(".investor-stock-panel");
-      const hero = shell?.querySelector(".investor-compact-hero");
-      const topbar = document.querySelector("[data-protected-topbar]");
-      const rows = [...(table?.querySelectorAll("tr[data-inventory-unit-id]") ?? [])];
-      const hiddenControls =
-        shell != null &&
-        [
-          ".tabelao-resources",
-          ".investor-hero-guide",
-          ".investor-info-hint",
-          ".investor-stock-filters",
-        ].every((selector) =>
-          [...shell.querySelectorAll(selector)].every(
-            (element) => getComputedStyle(element).display === "none",
-          ),
-        );
-      return {
-        printApplicationChromeHidden: topbar == null || getComputedStyle(topbar).display === "none",
-        printControlsHidden: hiddenControls,
-        printContentVisible: panel?.checkVisibility() === true && hero?.checkVisibility() === true,
-        printRowsExpanded:
+    // Print media can leave min-width in a transition until the next rendered frame.
+    const printLayout = await page.waitForFunction(
+      () => {
+        const shell = document.querySelector(".tabelao-page-shell");
+        const table = shell.querySelector(".investor-stock-table");
+        const results = shell.querySelector(".investor-stock-results");
+        const panel = shell.querySelector(".investor-stock-panel");
+        const rows = [...table.querySelectorAll("tr[data-inventory-unit-id]")];
+        return (
+          [
+            ".tabelao-resources",
+            ".investor-hero-guide",
+            ".investor-info-hint",
+            ".investor-stock-filters",
+          ].every((selector) =>
+            [...shell.querySelectorAll(selector)].every(
+              (element) => getComputedStyle(element).display === "none",
+            ),
+          ) &&
+          panel.checkVisibility() &&
+          shell.querySelector(".investor-compact-hero").checkVisibility() &&
           rows.length > 0 &&
-          rows.every((row) => row.checkVisibility() && row.getBoundingClientRect().height > 0),
-        printTableSemantics:
-          table != null &&
+          rows.every((row) => row.checkVisibility() && row.getBoundingClientRect().height > 0) &&
           getComputedStyle(table).display === "table" &&
-          getComputedStyle(table).minWidth === "0px",
-        printOverflowVisible: results != null && getComputedStyle(results).overflowX === "visible",
-        printHeaderTransformsReset:
-          table != null &&
+          getComputedStyle(table).minWidth === "0px" &&
+          getComputedStyle(results).overflowX === "visible" &&
           [...table.querySelectorAll("thead th")].every(
             (cell) => getComputedStyle(cell).transform === "none",
-          ),
-      };
-    });
-    Object.assign(checks, printLayout);
-    checks.printLayout = Object.values(printLayout).every(Boolean);
+          )
+        );
+      },
+      undefined,
+      { timeout: 5_000 },
+    );
+    checks.printLayout = await printLayout.jsonValue();
+    await printLayout.dispose();
+    {
+      const printLayout = await page.evaluate(readTabelaoPrintLayout);
+      Object.assign(checks, printLayout);
+      checks.printLayout = Object.values(printLayout).every(Boolean);
+    }
     for (const theme of ["light", "balanced", "dark"]) {
       await page.evaluate((value) => {
         document.documentElement.dataset.theme = value;

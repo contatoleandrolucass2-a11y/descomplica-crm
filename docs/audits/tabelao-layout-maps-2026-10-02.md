@@ -119,7 +119,42 @@ simuladores. A pagina publica de documentacao nao pertence a esta alteracao.
   11 referencias atualizadas, outras 182 byte a byte preservadas. Limiares
   permanecem 1% de pixels e tolerancia de canal 16. CI final/deploy pendentes.
 
-## Reversao da publicacao
+## Publicacao concluida em 03/10/2026
+
+- PR #139 integrado com protecoes, head f618ba68ac32eb7da5d96940aa3d650ebcf0a429
+  e CI [37136895575](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/37136895575)
+  verde. Merge `8e158cc9d13beeff0087064df6d9b58d87790379`, arvore identica.
+- CI main [37144378453](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/37144378453)
+  aprovou validate, release-gates, isolated-restore e promotable-image. Nenhum
+  gate ignorado. Nao houve rebuild na VPS nem alteracao em banco/n8n.
+- Artefato imutavel `11281592674`, ZIP SHA256
+  `dbef472b027aecdf900318c41c07849db50cdb0256282efed3d53dc4586f2b92`.
+  Arquivo image.tar.gz SHA256
+  `817e56d6900ab8ba9e47691f0178caec8b9b00b01b77f66b501a9a3612852f03`.
+- Config da CI: `sha256:de36c035cdcd43785ee389e5bdfdd37e343725dbf008b34a033623e402115601`.
+  Manifest/ID local: `sha256:9190939521727bda6f0baad406a432c2fa80224b894b0b9f523d79298aac9ecc`.
+  Comprovados index, manifest, config, tamanhos, hashes, plataforma linux/amd64,
+  revision e onze camadas, incluindo RootFS da imagem carregada.
+- `image:prove` reexecutado pelo script versionado: ambos os perfis usam a mesma
+  imagem e validam segredo sintetico sem imprimir valores. Nginx -t aprovado.
+- Anterior: `506b9e3a98f27f246c278287d0486a2e51e8a993`, image ID
+  `sha256:b8ca4df15442c152d15469a922722a5ed74d04f59a304e51d6928e1242b85352`.
+  Backup privado, no proprio servidor:
+  `/var/backups/descomplica-crm/releases/8e158cc9d13beeff0087064df6d9b58d87790379.O9F2cb`.
+  Ambiente e configuracao Nginx copiados e comparados, imagem anterior preservada.
+- CAS oficial e wrapper promoveram a imagem. Container healthy, health interno
+  e publico retornaram status ok e SHA exato. Estoque/snapshot anonimos: 401;
+  rota protegida: 307. Rollback preparado, nao necessario.
+- Chrome autenticado: estoque carregou; cabecalho, ordem das colunas, precos
+  dourados/negrito, links Maps e cinco recursos conferidos em DOM e capturas.
+  Politica comercial retornou disabled=true, sem link. Pagina deixada aberta.
+  Nenhum estoque bruto, captura privada, sessao ou credencial foi versionado.
+- Linhas sem logradouro na origem permanecem sem link, conforme contrato de
+  dados validado; nao criar endereco ficticio. Origem oficial mantida.
+- Pendencias anteriores de CI/imagem/deploy encerradas. Este registro posterior
+  e somente documental e nao requer restart nem substituicao da imagem publicada.
+
+## Rollback disponivel
 
 Seguir automatic-publication.md e o runbook de imagem promovivel. Reverter por
 imagem anterior com CAS; nao alterar estoque ou demais dados para reverter layout.

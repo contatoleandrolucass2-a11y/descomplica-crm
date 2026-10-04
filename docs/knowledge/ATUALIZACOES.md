@@ -4,6 +4,38 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: Associativo publicado com gates completos
+
+- Status: validado; fonte: PR #141, CI 37173712179 tentativa 2 e audit
+  `docs/audits/associativo-brilho-reprovacao-2026-10-03.md`.
+- Runtime publicado 7337b97; 193 comparacoes visuais, 193 auditorias,
+  40 navegacoes e seis jornadas v5 aprovadas. Sem promover baseline.
+- Braces removido na base ja validada; preservar o patch, nao ignorar audit.
+  Verificados hashes do artefato, equivalencia OCI/config/11 camadas e dois
+  perfis no destino. Backup, CAS e pos-check aprovados; rollback desnecessario.
+- Checkout principal da VPS sujo: usar checkout de release limpo, sem
+  alterar trabalho alheio. Pressao de memoria adiou a troca ate estabilizar.
+- Health e 12 GETs aprovados; jornada autenticada com dados ficticios sem
+  salvar confirmou UI. Nao prova capacidade nem autoriza alteracoes de dados.
+- PR #143 trata apenas QA/documentacao, sem necessidade de novo restart;
+  CI do SHA final desse registro ainda obrigatoria antes da integracao.
+
+## 2026-10-04: Aguardar o layout de impressao no QA
+
+- Status: pendente_validacao; fonte: CI 37173712179 e reproducao sintetica
+  com CSS completo do Tabelao, em Node 24.19/Chromium 151.
+- `emulateMedia` pode devolver o controle antes de uma transicao de min-width
+  terminar, mesmo com reduced motion (duracao 0.01ms). Cinco de seis leituras
+  imediatas falharam; seis de seis passaram apos 13-48ms com o mesmo predicado.
+- Usar polling limitado do contrato integral, nao espera fixa nem remocao de
+  assercoes. A correcao e exclusivamente de ferramenta; pagina de referencia,
+  CSS, limites visuais e regras financeiras permanecem iguais.
+- Predicado preservado por AST; bloco final passou 10/10 vezes, enquanto
+  largura e transform incorretos persistentes falharam por timeout nos probes.
+  Oitenta e nove testes focados aprovados; CI do ajuste de QA ainda pendente.
+- PR #141 ja integrado; CI do PR aprovou 193 capturas, 40 navegacoes e seis
+  jornadas v5. Publicacao depende da revalidacao final da main, registrada no audit.
+
 ## 2026-10-03: shell protegido único e navegação fail-closed
 
 - Status: pendente_validacao; fonte: código no SHA-base `8e158cc`, inventário de
@@ -17,6 +49,57 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   contém `path`; banco, proxy, guards e RLS não mudam.
 - Baseline: lint, tipos, 1.478 Vitest (1 ignorado), oito Node e build aprovados.
   Pendências: testes integrados, matriz visual/a11y, CI e publicação pelo runbook.
+
+## 2026-10-03: Integracao da base corrigida no Associativo
+
+- CI combinada 37167561944 aprovou validate e restore, mas o guidance detectou
+  comparacao textual incorreta: CSS de producao serializa 0% como 0px. O QA
+  normaliza apenas esse zero equivalente, preservando topo/rodape exatos e
+  rejeitando 1px ou posicoes intermediarias. Quinze testes aprovados;
+  publicacao ainda exige nova CI completa. Fonte: audit do Associativo.
+
+- Status: pendente_validacao; fonte: pedido do usuario, PR #141 e main db1b625.
+- O bloqueio de braces foi removido na base pelo PR #139, com patch versionado
+  do plugin Next e tinyglobby. Incorporar essa solucao, sem aguardar 3.0.4,
+  ignorar advisory ou refazer o patch. Validar novamente a arvore combinada.
+- Preservados o Tabelao publicado e os ajustes exclusivos do Associativo.
+  CI anterior 37136181590 parou apenas no audit; novos gates ainda obrigatorios.
+
+## 2026-10-03: Brilho sem contorno e reprovacao metalica
+
+- Status: pendente_validacao; branch codex/associativo-brilho-reprovacao.
+- Fonte: seis capturas posteriores, CSS/JSX do Associativo e QA de guidance.
+- Pedido mais recente remove o contorno fixo somente do ledger: verificar
+  input, wrapper e composicao ancestral em vazio/preenchido/foco. Uma sombra
+  herdada de focus-within pode restaurar o contorno mesmo com input limpo.
+- Manter foco de teclado identificavel pelo nome sublinhado. Brilho de 3s
+  percorre duas faixas de 2px no topo e rodape da linha inteira; reduced
+  motion desativa animacao. Nunca alterar calculos para atender estilo.
+- Dolar precisa ser irmao externo do resumo, nao filho da celula de data.
+  Validar alvo 24/44px, icone 17px, distancia, alinhamento e hover no mobile.
+- Reprovacao usa gradiente #650c17/#9d1828/#74101c/#48080f, texto branco,
+  brilho vermelho e CTA escuro local, sem depender do fundo claro do tema.
+- 30 testes focados e oito Node aprovados. Cinco timeouts da suite integral
+  passaram na repeticao serial (46 testes); seis falhas POSIX exigem CI Linux.
+- Lint, tipos, build e 6/6 jornadas finais aprovados, incluindo contraste,
+  animacao/reduced motion, ausencia de contornos e dolar externo alinhado.
+- Publicacao bloqueada: audit braces GHSA-vfj7-8cjw-p6xm; 3.0.4 indisponivel
+  no registro consultado. Nao ignorar advisory nem alegar correcao aplicada.
+- Detalhes e pendencias: docs/audits/associativo-brilho-reprovacao-2026-10-03.md.
+
+## 2026-10-03: Tabelao publicado com evidencia de producao
+
+- Status: validado; fonte: PR #139, CI 37136895575, CI main 37144378453 e
+  verificacao HTTP/DOM autenticado em crm.descomplicapro.com.br.
+- Runtime publicado: 8e158cc9d13beeff0087064df6d9b58d87790379. Todos os gates
+  verdes; imagem imutavel comprovada por hashes/camadas e dois perfis no destino.
+- Backup privado e rollback preservados; CAS concluido. Health confirmou SHA,
+  acesso anonimo negado e pagina autenticada exibiu layout, ordem, dourado,
+  Maps e recursos. Politica comercial continua disabled, sem destino.
+- Endereco ausente na origem oficial continua sem link; nao inventar logradouro.
+  Alteracao nao muda origem do estoque, regra financeira, dados ou migrations.
+- Evidencias: docs/audits/tabelao-layout-maps-2026-10-02.md. Sem pendencia de
+  publicacao do runtime. Registro documental posterior nao exige restart.
 
 ## 2026-10-03: Tabelao validado funcionalmente e referencias revisadas
 

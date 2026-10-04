@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-04 - Ajustes do Associativo publicados
+
+- Publica 7337b97 com campos sem contorno, brilho dourado de 3s nas duas
+  extremidades da linha, dolar externo e reprovacao vermelho-sangue metalica.
+- CI, imagem imutavel, backup, health e jornada autenticada conferidos.
+  Tabelao e regras financeiras preservados; dependencia de lint corrigida
+  pela base ja integrada. Registros posteriores nao reiniciam a aplicacao.
+
+## 2026-10-04 - QA de impressao sem leitura antecipada
+
+- Aguarda o layout de impressao estabilizar antes da verificacao, com limite
+  de cinco segundos e todos os criterios preservados. Sem mudanca na pagina
+  Tabelao ou necessidade de reinicio da aplicacao por este ajuste de ferramenta.
+
 ## 2026-10-03 - Navegação protegida unificada
 
 - Substitui os cabeçalhos internos dos simuladores por um único cabeçalho
@@ -9,6 +23,33 @@
 - Reúne identidade, segurança, administração autorizada, temas e logout na área
   de conta, com navegação responsiva, teclado, foco e movimento reduzido.
 - Preserva URLs, autenticação, guards, RLS, dados e regras comerciais existentes.
+
+## 2026-10-03 - Validacao do brilho no CSS minificado
+
+- Corrige o QA para reconhecer 0px e 0% como o mesmo topo da linha, mantendo
+  duas faixas de 2px nas extremidades e ciclo de 3s. Sem alteracao de runtime.
+
+## 2026-10-03 - Integracao da correcao de lint no Associativo
+
+- Incorpora a base db1b625, incluindo a remocao de braces ja validada no PR #139.
+- Preserva os ajustes visuais do Associativo e o Tabelao publicado; revalidacao
+  combinada e publicacao do PR #141 em andamento, sem dispensar gates.
+
+## 2026-10-03 - Brilho e alerta de reprovacao no Associativo
+
+- Remove o contorno dos campos e a moldura dourada fixa da linha ativa.
+- Mantem o fundo do tema e percorre o topo/rodape da linha com brilho de 3s.
+- Posiciona o dolar de 17px fora do resumo, a direita da ultima data.
+- Destaca reprovacao em vermelho-sangue metalico, com brilho de 3s no alerta
+  e texto branco legivel. Respeita navegacao por teclado e reduced motion.
+- Preserva calculos, sequencia e Tabelao; publicacao pendente dos gates.
+
+## 2026-10-03 - Tabelao publicado e verificado
+
+- Publica o PR #139 na versao 8e158cc e confirma layout, Maps, colunas,
+  valores dourados e recursos na pagina autenticada de producao.
+- Politica comercial permanece visivel, desabilitada e sem destino.
+- Registro posterior somente documental, sem novo deploy ou restart.
 
 ## 2026-10-03 - Referencias revisadas do Tabelao
 
