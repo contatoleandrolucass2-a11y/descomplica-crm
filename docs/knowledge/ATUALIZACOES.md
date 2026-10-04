@@ -15,6 +15,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - A matriz limpa aprovou 147 responsivos, 84 temas, 201 Axe/comparacoes e 105
   zooms, alem de 40 combinacoes das jornadas arquivadas. Documentacao agora faz
   parte das 21 paginas visuais liberadas e conserva a suite funcional dedicada.
+- A baseline fisica passou a ter exatamente as 201 imagens manifestadas; oito
+  evidencias antigas da CAIXA foram removidas. O teste falha se uma captura
+  orfa reaparecer e cada viewport comprova o truncamento da identidade longa.
 - CSS legado reduzia `2.75rem` para 38,5px; controles de cookies passaram a usar
   minimo explicito de 44px. Nenhuma regra comercial, migration ou dado mudou.
 

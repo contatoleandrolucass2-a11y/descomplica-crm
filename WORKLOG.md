@@ -5,9 +5,12 @@
 - A topbar unica passa a atender todas as paginas protegidas; cinco simuladores
   deixaram de montar navbar interna. Simulacao concentra as jornadas em submenu
   autorizado no servidor e CAIXA permanece bloqueada, sem `href`.
-- Gate local limpo no SHA `17354be`: 147 checks responsivos, 84 de tema, 201
+- Gate local limpo no SHA `54e09b`: 147 checks responsivos, 84 de tema, 201
   auditorias Axe/comparacoes, 105 checks de zoom e 40 combinacoes da navegacao
   arquivada. Documentacao foi incorporada a matriz principal de 21 paginas.
+- O contrato agora comprova truncamento da identidade em cada viewport e exige
+  correspondencia exata entre as 201 imagens e o manifesto. Oito capturas
+  antigas da CAIXA foram removidas; nenhuma evidencia orfa permanece.
 - Teclado, foco, identidade longa, cookies, tres temas, reduced motion e estados
   dos simuladores passaram. O alvo de cookies permanece em 44px mesmo sob o CSS
   legado de 14px. Conta e fixtures QA efemeras foram removidas.

@@ -316,6 +316,9 @@ Resultados aprovados:
 - 147 capturas rota×viewport e 54 amostras de tema, sem metadados;
 - 201/201 comparações contra o baseline versionado dentro do limiar máximo de 1%
   de pixels alterados, com tolerância de 16 níveis por canal.
+- inventário físico exato de 201 imagens: qualquer WebP fora do manifesto
+  reprova o teste; CAIXA permanece representada somente pelo card bloqueado do
+  hub e não possui baseline de rota direta.
 
 As capturas autenticadas usam somente identidades e valores sintéticos com
 prefixo QA. Elas permitem comparar composição, densidade, reflow e estados com

@@ -8,6 +8,8 @@
   permissoes efetivas; CAIXA continua visivel como bloqueada e sem rota clicavel.
 - Preserva temas, conta, teclado, mobile e alvos de 44px. A matriz visual agora
   cobre as 21 paginas liberadas, inclusive Documentacao.
+- Exige truncamento da identidade em todas as larguras e rejeita capturas fora
+  do manifesto; baselines antigas da CAIXA bloqueada foram eliminadas.
 
 ## 2026-10-04 - Ajustes do Associativo publicados
 
