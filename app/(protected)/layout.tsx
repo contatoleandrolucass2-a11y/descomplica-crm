@@ -93,7 +93,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
           <AuthorizedNavigation pages={navigationPages} disabledItems={disabledItems} />
           <ThemeSwitch canPersist={cookieConsent?.categories.functional === true} />
           <div className={styles.actions}>
-            <AccountMenu identity={identity} role={role}>
+            <AccountMenu identity={identity} displayName={user?.user_metadata?.name} role={role}>
               <Link href="/conta/seguranca" prefetch={false} className={styles.accountLink}>
                 <ShieldCheck aria-hidden="true" size={18} />
                 <span>

@@ -4,6 +4,24 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: cadencia visual e nome cadastrado
+
+- Status: pendente_validacao; fonte: pedido de doze ajustes visuais, branch
+  `codex/associativo-animacao-sequencial`, base `a4a9ef5`.
+- Animacoes CSS montadas em momentos distintos nao compartilham necessariamente
+  a fase. Alinhar somente novas animacoes a um relogio, sem timer de renderizacao,
+  preserva sincronia; grupos sequenciais iniciam juntos em sua propria montagem.
+- Movimento reduzido desliga decoracoes, nao a indicacao de foco. Botoes
+  desabilitados nao devem continuar chamando a acao por brilho automatico.
+- Pseudo-elementos exigem getAnimations com subtree e filtro por effect.target;
+  hover nao pode substituir o loop continuo, pois isso reinicia seu relogio.
+- O primeiro nome vem de `user_metadata.name`, preenchido no cadastro; email
+  permanece identidade da sessao, nao e usado para inventar o nome. Sem nome
+  valido, usar Conta. Essa apresentacao nao altera autorizacao.
+- Evidencias e pendencias: `docs/audits/associativo-sequencias-2026-10-04.md`.
+  Preview 6/6, 47 testes de efeitos, 76 do cabecalho e 126 cenarios geometricos;
+  CI Linux e publicacao pendentes. Nenhuma formula financeira alterada.
+
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 
 - Status: validado e publicado; fonte: PR #147, runtime

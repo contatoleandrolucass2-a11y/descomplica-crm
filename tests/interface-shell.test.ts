@@ -4,6 +4,11 @@ import { describe, expect, it } from "vitest";
 import { isThemeMode, THEME_MODES } from "../lib/interface/theme";
 
 describe("protected interface shell", () => {
+  it("passes the registered account name from the authorized server shell", () => {
+    const layout = readFileSync(new URL("../app/(protected)/layout.tsx", import.meta.url), "utf8");
+    expect(layout).toContain("displayName={user?.user_metadata?.name}");
+    expect(layout).toContain("await enforceAuthorization()");
+  });
   it("keeps the three migrated appearance modes", () => {
     expect(THEME_MODES.map((theme) => theme.key)).toEqual(["light", "balanced", "dark"]);
   });
@@ -56,15 +61,18 @@ describe("protected interface shell", () => {
       /\.topbar :is\(a, button\):focus-visible \{[\s\S]*outline: 2px solid var\(--header-accent\)/,
     );
     expect(shellStylesheet).toMatch(/\.actions \{[\s\S]*min-width: 0/);
-    expect(shellStylesheet).toMatch(/\.accountTrigger \{[\s\S]*width: 44px[\s\S]*height: 44px/);
-    expect(shellStylesheet).toMatch(/\.accountAvatar \{[\s\S]*border-radius: 999px/);
-    expect(shellStylesheet).toMatch(/\.accountTriggerIdentity \{[\s\S]*text-overflow: ellipsis/);
     expect(shellStylesheet).toMatch(
-      /@media \(max-width: 1180px\) \{[\s\S]*\.accountTriggerIdentity \{[\s\S]*display: none/,
+      /\.accountTrigger \{[\s\S]*min-width: 44px[\s\S]*min-height: 44px/,
     );
+    expect(shellStylesheet).toMatch(/\.accountAvatar \{[\s\S]*border-radius: 999px/);
+    const accountLabelRules = shellStylesheet.match(/\.accountTriggerIdentity \{([^}]+)\}/)?.[1];
+    expect(accountLabelRules).toContain("overflow-wrap: anywhere");
+    expect(accountLabelRules).toContain("white-space: normal");
+    expect(accountLabelRules).not.toMatch(/ellipsis|overflow: hidden|display: none/);
+    expect(shellStylesheet.match(/\.accountTriggerIdentity \{/g)).toHaveLength(1);
     expect(accountMenu).toContain("getIdentityInitials(identity)");
     expect(accountMenu).toContain("<ChevronDown");
-    expect(accountMenu).toContain("aria-label={`Conta de ${identity}`}");
+    expect(accountMenu).toContain("`Conta de ${firstName} (${identity})` : `Conta de ${identity}`");
     expect(accountMenu).toContain("data-session-identity-trigger-label");
     expect(shellStylesheet).toMatch(/\.accountProfile \{[\s\S]*overflow-wrap: anywhere/);
     expect(shellStylesheet).toContain("@media (max-width: 1180px)");
@@ -72,10 +80,10 @@ describe("protected interface shell", () => {
       /@media \(min-width: 1181px\) and \(max-width: 1500px\) \{[\s\S]*\.navigationLink,[\s\S]*\.navigationTrigger \{[\s\S]*padding-inline: 5px/,
     );
     expect(shellStylesheet).toMatch(
-      /@media \(max-width: 1180px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px auto 44px[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 2[\s\S]*\.actions \{[\s\S]*grid-column: 4[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 3/,
+      /@media \(max-width: 1180px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px auto minmax\(0, max-content\)[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 2[\s\S]*\.actions \{[\s\S]*grid-column: 4[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 3/,
     );
     expect(shellStylesheet).toMatch(
-      /@media \(max-width: 600px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 2[\s\S]*grid-row: 1[\s\S]*\.actions \{[\s\S]*grid-column: 2[\s\S]*grid-row: 2[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 1[\s\S]*grid-row: 2/,
+      /@media \(max-width: 760px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) minmax\(0, max-content\)[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 2[\s\S]*grid-row: 1[\s\S]*\.actions \{[\s\S]*grid-column: 2[\s\S]*grid-row: 2[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 1[\s\S]*grid-row: 2/,
     );
     expect(analyticsStylesheet).toMatch(
       /\.pageHeader :focus-visible,[\s\S]*outline-color: #7ceaf5/,

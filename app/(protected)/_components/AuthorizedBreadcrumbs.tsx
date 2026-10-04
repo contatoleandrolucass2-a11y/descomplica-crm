@@ -10,6 +10,12 @@ import styles from "./ProtectedShell.module.css";
 
 export function AuthorizedBreadcrumbs({ pages }: { pages: AppPage[] }) {
   const pathname = usePathname();
+  if (
+    pathname === "/app/simulacao/associativo-fluxo-linear" ||
+    pathname === "/app/simulacao/associativo-fluxo-linear/"
+  ) {
+    return null;
+  }
   const breadcrumbs = buildBreadcrumbs(pathname, pages);
   if (breadcrumbs.length === 0) return null;
 

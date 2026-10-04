@@ -4,6 +4,7 @@
 
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
+import { synchronizeAssociativeMotion } from "./associative-motion";
 import { ASSOCIATIVE_FIELD_GUIDE_SECTION, ASSOCIATIVE_POLICY_TOPICS, ASSOCIATIVE_PROFILE_HELP } from "./associative-learning-content";
 import { ASSOCIATIVE_FAQ_REFERENCE, ASSOCIATIVE_FAQ_SECTIONS, type AssociativeFaqSection } from "./associative-faq-content";
 import { buildDirectTableAmortizationSchedule, buildDirectTablePreKeysSchedule, buildDirectTableProposalPreset, calculateDirectTableFileFlow, DIRECT_TABLE_PROPOSAL_OPTIONS, isDirectTableProposalPresetComplete } from "@/lib/archive-investor/direct-table-file-rules.mjs";
@@ -667,7 +668,7 @@ function AssociativePaymentSummary({
         />
       </div>
     </header>
-    <div className="investor-associative-payment-table" role="table" aria-label="Comparativo das parcelas lineares e decrescentes">
+    <div className="investor-associative-payment-table" data-associative-motion-group="installments" role="table" aria-label="Comparativo das parcelas lineares e decrescentes">
       <div className="investor-associative-payment-table-head" role="row">
         <span role="columnheader">Resumo</span>
         <span role="columnheader">Qtd.</span>
@@ -1123,7 +1124,7 @@ function AssociativeDocumentationPanel({
     </section> : null}
 
     {result.ok ? <>
-      <div className="investor-associative-documentation-summary">
+      <div className="investor-associative-documentation-summary" data-associative-motion-group="documentation">
         <section className="investor-associative-documentation-plan" aria-label="Plano sugerido para a documentação">
           <small>Plano sugerido</small>
           <p><strong>{result.installments}x Parcelas de</strong> <span>{money.format(result.installmentValue)}</span></p>
@@ -2331,7 +2332,7 @@ export function InvestorLearningManual({ directTable = false, associative = fals
 }
 
 function PropertySummary({ item, label, associative = false, sectionRef }: { item: InventoryItem; label: string; associative?: boolean; sectionRef?: Ref<HTMLElement> }) {
-  return <article ref={sectionRef} tabIndex={sectionRef ? -1 : undefined} className={`investor-selected-unit investor-property-summary${associative ? " is-associative" : ""}${sectionRef ? " investor-guided-scroll-target" : ""}`} aria-label={label} data-tour="property-summary">
+  return <article ref={sectionRef} tabIndex={sectionRef ? -1 : undefined} className={`investor-selected-unit investor-property-summary${associative ? " is-associative" : ""}${sectionRef ? " investor-guided-scroll-target" : ""}`} aria-label={label} data-tour="property-summary" data-associative-motion-group={associative ? "property" : undefined}>
     <header>
       <div className="investor-unit-identity">
         <h2>Descrição do Imóvel</h2>
@@ -2447,6 +2448,11 @@ export function InvestorCalculator({
   const usesDirectDesign = directTable || directVisualLayout;
   const compactAssociativeStock = directVisualLayout && !directTable;
   const annualMode = directVisualLayout;
+  const motionRootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const root = motionRootRef.current?.closest<HTMLElement>(".investor-associative-table-page");
+    if (annualMode && root) return synchronizeAssociativeMotion(root);
+  }, [annualMode]);
   const tourSteps = directTable ? DIRECT_TABLE_TOUR_STEPS : directVisualLayout ? ASSOCIATIVE_TOUR_STEPS : INVESTOR_TOUR_STEPS;
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const inventoryReference = useRef<InventoryItem[]>([]);
@@ -3973,7 +3979,7 @@ export function InvestorCalculator({
   </div>;
 
   return (
-    <div className={`investor-workspace${usesDirectDesign ? " investor-direct-workspace" : ""}${directVisualLayout ? " investor-direct-design-copy" : ""}${directTable ? directPrintReady ? " investor-direct-print-ready" : " investor-direct-print-blocked" : ""}`}>
+    <div ref={motionRootRef} className={`investor-workspace${usesDirectDesign ? " investor-direct-workspace" : ""}${directVisualLayout ? " investor-direct-design-copy" : ""}${directTable ? directPrintReady ? " investor-direct-print-ready" : " investor-direct-print-blocked" : ""}`}>
       {directTable && !directPrintReady ? <section className="investor-direct-print-blocked-notice" aria-label="Impressão indisponível">
         <h2>Impressão indisponível</h2>
         <p>Corrija todas as pendências e obtenha o resultado APROVADO antes de imprimir a proposta da Tabela Direta.</p>

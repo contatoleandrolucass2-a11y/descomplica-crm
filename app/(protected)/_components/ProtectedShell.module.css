@@ -336,13 +336,14 @@
 .accountMenu {
   position: relative;
   min-width: 0;
+  max-width: 100%;
 }
 
 .accountTrigger {
   display: inline-flex;
   min-width: 44px;
   max-width: min(12rem, 14vw);
-  height: 44px;
+  min-height: 44px;
   align-items: center;
   justify-content: flex-start;
   gap: 7px;
@@ -374,13 +375,12 @@
 
 .accountTriggerIdentity {
   min-width: 0;
-  overflow: hidden;
   color: var(--header-text);
   font-size: 12px;
   font-weight: 650;
   line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .accountChevron {
@@ -651,7 +651,7 @@
 
 @media (max-width: 1180px) {
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 44px auto 44px;
+    grid-template-columns: minmax(0, 1fr) 44px auto minmax(0, max-content);
     gap: 12px;
     padding-inline: 20px;
   }
@@ -763,11 +763,7 @@
   }
 
   .accountTrigger {
-    width: 44px;
-    max-width: 44px;
-    justify-content: center;
-    gap: 0;
-    padding: 4px 2px;
+    max-width: min(10rem, 40vw);
   }
 
   .accountAvatar {
@@ -775,10 +771,6 @@
     height: 28px;
     flex-basis: 28px;
     font-size: 9px;
-  }
-
-  .accountTriggerIdentity {
-    display: none;
   }
 
   .accountChevron {
@@ -794,16 +786,23 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 760px) {
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 44px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, max-content);
     gap: 8px;
     padding-inline: 16px;
+  }
+
+  .brand {
+    grid-column: 1 / -1;
+    justify-self: start;
+    max-width: calc(100% - 52px);
   }
 
   .navigationRoot {
     grid-column: 2;
     grid-row: 1;
+    justify-self: end;
   }
 
   .actions {
@@ -825,13 +824,40 @@
   }
 }
 
+@media (min-width: 601px) and (max-width: 760px) {
+  .topbarInner {
+    grid-template-columns: minmax(0, 1fr) 44px auto minmax(0, max-content);
+    gap: 6px;
+  }
+
+  .brand {
+    grid-column: 1;
+    max-width: 100%;
+  }
+
+  .actions {
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  .themeSwitch {
+    width: auto;
+    grid-column: 3;
+    grid-row: 1;
+    grid-template-columns: repeat(3, minmax(70px, 1fr));
+  }
+
+  .accountTrigger {
+    max-width: 8rem;
+  }
+}
+
 @media (max-width: 340px) {
   .brandName {
     font-size: 18px;
   }
 
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 44px;
     gap: 4px;
     padding-inline: 10px;
   }

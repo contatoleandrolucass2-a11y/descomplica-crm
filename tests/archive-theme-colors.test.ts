@@ -178,8 +178,14 @@ describe("archive theme color contract", () => {
       "investor-archive.css",
       ".investor-page-shell.investor-associative-table-page",
     );
-    expect(colors["--associative-pending-sheen"]).toContain("49%");
-    expect(colors["--associative-pending-sheen"]).toContain("51%");
+    expect(colors["--associative-pending-sheen"]!.match(/[\d.]+%/gu)).toEqual([
+      "46%",
+      "48%",
+      "49.6%",
+      "50.4%",
+      "52%",
+      "54%",
+    ]);
     expect(colors["--associative-sheen-core-strength"]).toBe("70%");
     for (const theme of ["light", "balanced", "dark"]) {
       const themeColors = content(theme);

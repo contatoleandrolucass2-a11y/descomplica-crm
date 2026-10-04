@@ -348,7 +348,62 @@ async function verifyDedicatedLocalQaIdentity(supabaseUrl, publishableKey, email
     method: "POST",
     headers: { apikey: publishableKey, Authorization: `Bearer ${session.access_token}` },
   });
-  return { endpoint: supabaseUrl, accountPolicy: "qa.*@local.invalid" };
+  const registeredName = session.user?.user_metadata?.name;
+  const name = typeof registeredName === "string" ? registeredName.trim() : "";
+  const firstName = name && !name.includes("@") ? name.split(/\s+/u)[0] : "Conta";
+  return { endpoint: supabaseUrl, accountPolicy: "qa.*@local.invalid", firstName };
+}
+
+function inspectAccountIdentityDisplay(expectedFirstName) {
+  const label = document.querySelector("[data-session-identity-trigger-label]");
+  const trigger = document.querySelector("[data-session-identity]");
+  if (!(label instanceof HTMLElement) || !(trigger instanceof HTMLButtonElement)) {
+    return { identityDisplayContract: "registered-first-name-v1", identityDisplayReady: false };
+  }
+  const labelBox = label.getBoundingClientRect();
+  const triggerBox = trigger.getBoundingClientRect();
+  const style = getComputedStyle(label);
+  let visible = labelBox.width > 0 && labelBox.height > 0;
+  for (let ancestor = label; ancestor; ancestor = ancestor.parentElement) {
+    const ancestorStyle = getComputedStyle(ancestor);
+    visible &&=
+      ancestorStyle.display !== "none" &&
+      ancestorStyle.visibility === "visible" &&
+      Number(ancestorStyle.opacity) > 0;
+  }
+  const identityNameMatches =
+    typeof expectedFirstName === "string" &&
+    expectedFirstName.length > 0 &&
+    label.textContent?.trim() === expectedFirstName;
+  const identityTextFits =
+    label.scrollWidth <= label.clientWidth + 1 &&
+    label.scrollHeight <= label.clientHeight + 1 &&
+    labelBox.left >= triggerBox.left - 1 &&
+    labelBox.right <= triggerBox.right + 1 &&
+    labelBox.top >= triggerBox.top - 1 &&
+    labelBox.bottom <= triggerBox.bottom + 1 &&
+    triggerBox.left >= -1 &&
+    triggerBox.right <= innerWidth + 1 &&
+    triggerBox.top >= -1 &&
+    triggerBox.bottom <= innerHeight + 1;
+  const identityNoEllipsis = style.textOverflow !== "ellipsis";
+  const identityAccessibleNameMatches = Boolean(
+    identityNameMatches && trigger.getAttribute("aria-label")?.includes(expectedFirstName),
+  );
+  return {
+    identityDisplayContract: "registered-first-name-v1",
+    identityNameMatches,
+    identityVisible: visible,
+    identityTextFits,
+    identityNoEllipsis,
+    identityAccessibleNameMatches,
+    identityDisplayReady:
+      identityNameMatches &&
+      visible &&
+      identityTextFits &&
+      identityNoEllipsis &&
+      identityAccessibleNameMatches,
+  };
 }
 
 function routeKey(route) {
@@ -836,7 +891,7 @@ async function inspectRoute(
   expectedTheme,
   consoleErrors,
   pageErrors,
-  { waitForArchiveInventory = true } = {},
+  { waitForArchiveInventory = true, expectedAccountFirstName } = {},
 ) {
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
@@ -917,7 +972,6 @@ async function inspectRoute(
       ? navigation
       : mobileNavigationTrigger;
     const identity = document.querySelector("[data-session-identity]");
-    const identityTriggerLabel = document.querySelector("[data-session-identity-trigger-label]");
     const identityLabel = document.querySelector("[data-session-identity-label]");
     const accountPanel = document.querySelector("#protected-account-menu");
     const accountLink = accountPanel?.querySelector('a[href="/conta/seguranca"]');
@@ -980,9 +1034,6 @@ async function inspectRoute(
     const accountPanelBox = accountPanel?.getBoundingClientRect();
     const identityLabelBox = identityLabel?.getBoundingClientRect();
     const identityStyle = identityLabel ? getComputedStyle(identityLabel) : null;
-    const identityTriggerLabelStyle = identityTriggerLabel
-      ? getComputedStyle(identityTriggerLabel)
-      : null;
     const navigationSurfaceBox = navigationSurface?.getBoundingClientRect();
     const navigationVisible = Boolean(navigation?.getClientRects().length);
     const themeButtons = themeSwitch ? [...themeSwitch.querySelectorAll("button")] : [];
@@ -1063,14 +1114,6 @@ async function inspectRoute(
         identityLabel.scrollWidth <= identityLabel.clientWidth + 1 &&
         accountLink.getClientRects().length > 0,
       ),
-      identityTruncationReady: Boolean(
-        identityTriggerLabel instanceof HTMLElement &&
-        identityTriggerLabelStyle &&
-        (identityTriggerLabelStyle.display === "none" ||
-          (identityTriggerLabelStyle.overflow === "hidden" &&
-            identityTriggerLabelStyle.textOverflow === "ellipsis" &&
-            identityTriggerLabelStyle.whiteSpace === "nowrap")),
-      ),
       themeControlsVisible:
         themeButtons.length === 3 &&
         ["Claro", "Médio", "Escuro"].every((label) =>
@@ -1132,6 +1175,10 @@ async function inspectRoute(
           unavailableStyle?.cursor === "not-allowed"),
     };
   }, isSimulatorWorkspace);
+  Object.assign(
+    snapshot,
+    await page.evaluate(inspectAccountIdentityDisplay, expectedAccountFirstName),
+  );
   await accountTrigger.click();
   await accountPanel.waitFor({ state: "hidden", timeout: qaRouteBootstrapTimeout });
 
@@ -1160,7 +1207,7 @@ async function inspectRoute(
     !snapshot.topbarCollision &&
     snapshot.navigationGeometryReady &&
     snapshot.accountMenuReady &&
-    snapshot.identityTruncationReady &&
+    snapshot.identityDisplayReady &&
     snapshot.themeControlsVisible &&
     snapshot.associativeStockControlsPresent &&
     !snapshot.associativeStockCollision &&
@@ -5196,7 +5243,14 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
   return checks;
 }
 
-async function checkZoom(origin, email, password, browser, httpCredentials) {
+async function checkZoom(
+  origin,
+  email,
+  password,
+  browser,
+  httpCredentials,
+  expectedAccountFirstName,
+) {
   const checks = [];
   for (const level of zoomLevels) {
     const context = await browser.newContext({
@@ -5225,6 +5279,7 @@ async function checkZoom(origin, email, password, browser, httpCredentials) {
           viewport: `zoom-${level.percent}`,
           ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors, {
             waitForArchiveInventory: false,
+            expectedAccountFirstName,
           })),
         });
         await releaseRenderedRoute(page);
@@ -5513,12 +5568,8 @@ async function run() {
   const password = requiredEnvironment("QA_AUTH_PASSWORD");
   const supabaseUrl = parseLocalSupabaseUrl(requiredEnvironment("QA_AUTH_SUPABASE_URL"));
   const publishableKey = requiredEnvironment("QA_AUTH_SUPABASE_PUBLISHABLE_KEY");
-  const identityVerification = await verifyDedicatedLocalQaIdentity(
-    supabaseUrl,
-    publishableKey,
-    email,
-    password,
-  );
+  const { firstName: expectedAccountFirstName, ...identityVerification } =
+    await verifyDedicatedLocalQaIdentity(supabaseUrl, publishableKey, email, password);
   let browser = await chromium.launch({ headless: true });
   const routeChecks = [];
   const themeChecks = [];
@@ -5567,7 +5618,17 @@ async function run() {
         await login(page, origin, email, password);
         for (const route of routes) {
           currentStage = `responsive:${viewport.key}:${route}`;
-          const check = await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors);
+          const check = await inspectRoute(
+            page,
+            origin,
+            route,
+            "light",
+            consoleErrors,
+            pageErrors,
+            {
+              expectedAccountFirstName,
+            },
+          );
           routeChecks.push({ viewport: viewport.key, ...check });
           accessibilityChecks.push(await inspectAccessibility(page, route, viewport.key, "light"));
 
@@ -5712,6 +5773,7 @@ async function run() {
                 theme,
                 consoleErrors,
                 pageErrors,
+                { expectedAccountFirstName },
               );
               themeChecks.push({
                 matrix: "desktop-themes",
@@ -5794,6 +5856,7 @@ async function run() {
               "dark",
               consoleErrors,
               pageErrors,
+              { expectedAccountFirstName },
             );
             themeChecks.push({
               matrix: "mobile-dark",
@@ -5838,7 +5901,14 @@ async function run() {
     }
 
     currentStage = "zoom";
-    const zoom = await checkZoom(origin, email, password, browser, httpCredentials);
+    const zoom = await checkZoom(
+      origin,
+      email,
+      password,
+      browser,
+      httpCredentials,
+      expectedAccountFirstName,
+    );
     const functionalPassed = functionalChecksPassed({
       routeChecks,
       themeChecks,

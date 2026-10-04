@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-10-04 - Associativo: cadencia e sequencias visuais
+
+- Fonte: doze capturas do usuario; branch `codex/associativo-animacao-sequencial`,
+  base `a4a9ef5`. Escopo visual; nenhum motor, taxa ou origem financeira alterado.
+- Brilho branco/dourado mais fino e ciclo de 4,5s. Relogio comum preserva a
+  sincronia das selecoes e CTAs quando novos elementos sao montados.
+- Bordas sequenciais: contorno externo e nove informacoes do imovel; Linear e
+  quatro blocos Decrescentes. Plano sugerido e composicao recebem brilho em
+  sequencia. Filtros nativos recebem reflexo no hover/foco; guias e pagamentos
+  opcionais habilitados mantem loop continuo. Movimento reduzido e respeitado.
+- Dolar movido para fora da borda do resumo, no espaco interno do painel de fluxo,
+  alinhado a ultima data; resumo e aprovacao conservam as mesmas bordas.
+- Breadcrumb removido somente no Associativo. Menu da conta usa o primeiro nome
+  cadastrado integralmente, com fallback Conta quando nao houver nome valido.
+- Validacao local: 6/6 jornadas visuais, 47 testes focados dos efeitos e 76 do
+  cabecalho; 126 cenarios de geometria/nome. Suite geral: 1926 aprovados,
+  quatro skips condicionais e seis falhas POSIX no Windows, aguardando Linux.
+  Lint, tipos, build e audit aprovados; evidencia e limites em
+  `docs/audits/associativo-sequencias-2026-10-04.md`.
+
 ## 2026-10-04 - Associativo: cobertura da origem e brilho integral
 
 - Fonte: nova conferencia solicitada pelo usuario, branch
