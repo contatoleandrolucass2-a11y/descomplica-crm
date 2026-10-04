@@ -21,7 +21,14 @@
 - Seis jornadas visuais com ponteiro preservado, 41 testes de efeitos/temas,
   build, lint, tipos, formatacao e audit aprovados. Suite Windows: 1.888
   aprovados, seis falhas POSIX e tres timeouts; repeticao isolada de ferramentas,
-  concorrencia e matriz aprovou 278 testes. CI Linux/publicacao pendentes.
+  concorrencia e matriz aprovou 278 testes. CI Linux do PR #147 (`37220843131`)
+  e do main (`37222464725`) aprovadas, incluindo banco, restore, imagem e QA.
+- Runtime `f4dec82249c2b3e56beaaea518ec194ced81b480` publicado com artefato
+  imutavel, backup privado, CAS e rollback preparado. Health e negacao anonima
+  aprovados; conferencia autenticada calculou os dois percentuais e preservou
+  entradas ao trocar unidade. Nenhuma proposta salva ou enviada.
+- Registro final apenas documental, sem novo restart. A fonte oficial das
+  unidades incompletas continua pendente; nenhuma ausencia foi presumida.
 - Sem alteracao de politica comercial, fontes externas, banco ou n8n.
   Limites e evidencia: `docs/audits/associativo-origem-brilho-2026-10-04.md`.
 

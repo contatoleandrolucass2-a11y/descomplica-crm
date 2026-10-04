@@ -6,8 +6,8 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 
-- Status: pendente_validacao final/CI/publicacao; fonte: branch
-  `codex/associativo-origem-e-brilho-integral` e audit
+- Status: validado e publicado; fonte: PR #147, runtime
+  `f4dec82249c2b3e56beaaea518ec194ced81b480` e audit
   `docs/audits/associativo-origem-brilho-2026-10-04.md`.
 - Consulta observacional encontrou 84 unidades visiveis sem andamento e 594
   sem avaliacao positiva no snapshot. Ausencia real nao e defeito aritmetico e
@@ -26,6 +26,14 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Evidencias locais: 14.014 casos numericos sem divergencias, seis jornadas
   visuais e seis jornadas de continuidade aprovadas, build/lint/tipos/audit
   aprovados. Windows conserva seis falhas POSIX; timeouts passaram isoladamente.
+- CI Linux `37220843131` (PR) e `37222464725` (main) integralmente aprovadas:
+  banco, restore, E2E, imagem e QA visual, sem promover baseline. Publicacao
+  imutavel com backup/CAS; health, negacao anonima e jornada autenticada aprovados.
+- Queda do transporte SSH apos mensagem de sucesso nao prova rollback nem
+  autoriza repetir deploy: conferir versao, ID da imagem e health separadamente.
+  Neste caso, as tres verificacoes confirmaram a promocao concluida.
+- Pendencia: obter fonte oficial atual das duas unidades apontadas. O postcheck
+  usou a API alternativa, mais antiga, e nao atesta completude do snapshot.
 - Nenhuma migration, politica comercial, fonte externa ou workflow foi alterado.
 
 ## 2026-10-04: canvases aprovados cobrem 22 rotas protegidas
