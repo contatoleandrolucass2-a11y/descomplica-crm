@@ -38,6 +38,23 @@ const inventory = [
 ];
 
 describe("Tabelão protegido", () => {
+  it("aguarda o predicado integral de impressao com timeout finito", () => {
+    const qa = readFileSync(new URL("../scripts/qa/tabelao-layout.mjs", import.meta.url), "utf8");
+    const print = qa.slice(
+      qa.indexOf("const printLayout ="),
+      qa.indexOf("await printLayout.dispose()"),
+    );
+    expect(print).toContain("await page.waitForFunction(");
+    expect(print).toContain("timeout: 5_000");
+    expect(print).toContain('getComputedStyle(table).minWidth === "0px"');
+    expect(print).toContain('getComputedStyle(table).display === "table"');
+    expect(print).toContain('getComputedStyle(results).overflowX === "visible"');
+    expect(print).toContain('getComputedStyle(cell).transform === "none"');
+    expect(print).toContain("rows.every((row) => row.checkVisibility()");
+    expect(print).toContain("checks.printLayout = await printLayout.jsonValue()");
+    expect(print).not.toContain("catch");
+  });
+
   it("mantém rota, permissão, menu e fonte oficial", () => {
     const page = readFileSync(
       new URL("../app/(protected)/app/simulacao/tabelao/page.tsx", import.meta.url),

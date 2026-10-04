@@ -4,6 +4,22 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: Aguardar o layout de impressao no QA
+
+- Status: pendente_validacao; fonte: CI 37173712179 e reproducao sintetica
+  com CSS completo do Tabelao, em Node 24.19/Chromium 151.
+- `emulateMedia` pode devolver o controle antes de uma transicao de min-width
+  terminar, mesmo com reduced motion (duracao 0.01ms). Cinco de seis leituras
+  imediatas falharam; seis de seis passaram apos 13-48ms com o mesmo predicado.
+- Usar polling limitado do contrato integral, nao espera fixa nem remocao de
+  assercoes. A correcao e exclusivamente de ferramenta; pagina de referencia,
+  CSS, limites visuais e regras financeiras permanecem iguais.
+- Predicado preservado por AST; bloco final passou 10/10 vezes, enquanto
+  largura e transform incorretos persistentes falharam por timeout nos probes.
+  Oitenta e nove testes focados aprovados; CI do ajuste de QA ainda pendente.
+- PR #141 ja integrado; CI do PR aprovou 193 capturas, 40 navegacoes e seis
+  jornadas v5. Publicacao depende da revalidacao final da main, registrada no audit.
+
 ## 2026-10-03: Integracao da base corrigida no Associativo
 
 - CI combinada 37167561944 aprovou validate e restore, mas o guidance detectou

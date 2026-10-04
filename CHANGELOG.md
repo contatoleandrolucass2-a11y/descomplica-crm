@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-04 - QA de impressao sem leitura antecipada
+
+- Aguarda o layout de impressao estabilizar antes da verificacao, com limite
+  de cinco segundos e todos os criterios preservados. Sem mudanca na pagina
+  Tabelao ou necessidade de reinicio da aplicacao por este ajuste de ferramenta.
+
 ## 2026-10-03 - Validacao do brilho no CSS minificado
 
 - Corrige o QA para reconhecer 0px e 0% como o mesmo topo da linha, mantendo

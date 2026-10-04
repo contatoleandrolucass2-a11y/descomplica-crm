@@ -1,5 +1,40 @@
 # Associativo: brilho e reprovacao metalica
 
+## Integracao e Gate de Impressao em 04/10/2026
+
+- PR #141 integrado em `7337b97c08f8faf26684ae2abd9f9ae138ed3e67` apos CI
+  `37168835931` verde no HEAD `f62cad0`. Arvores Git identicas.
+- Artefato autenticado `11291385531`, captura limpa `eb58d17`, ZIP SHA-256
+  `8cf5334c3ad6f22c3452febfbc37951cf733011bd320192ba476e99780fa0924`.
+  Passaram 193 comparacoes, 193 auditorias de acessibilidade, 40 combinacoes
+  de navegacao e seis jornadas do contrato v5. Nenhuma baseline alterada.
+- Repeticao final local: lint, tipos, build, oito Node e seis jornadas com
+  CSS minificado aprovados. Suite Windows: 1478 aprovados, um ignorado e
+  seis falhas POSIX conhecidas; sem timeouts. Suite Linux aprovada na CI.
+- Main CI `37173712179`, primeira tentativa: validate, restore e imagem
+  aprovados. Release-gates falhou somente em `tabelaoValidation.responsiveGrid`,
+  especificamente `printLayout`; outros 19 criterios de layout/recursos,
+  Associativo e todas as 193 comparacoes visuais passaram.
+- Evidencia da tentativa: artefato `11292638877`, ZIP SHA-256
+  `5784f6d3d244bb527fa358c933a20873edbb0b09dac2a164fd44bba8dde84db5`.
+  Uma reexecucao do job falho foi solicitada no mesmo SHA, sem dispensar gate.
+- Reproducao isolada identificou leitura antecipada de `min-width` durante
+  a transicao para impressao: cinco de seis leituras imediatas falharam;
+  todas passaram entre 13 e 48ms aguardando o predicado completo. Inclui
+  `tabelao-layout.css`; rede bloqueada e nenhum JavaScript de aplicacao.
+  O log da CI nao identifica o subpredicado, portanto a atribuicao daquela
+  falha especifica a essa corrida e uma inferencia apoiada pela reproducao.
+- Correcao separada somente de QA: espera finita de cinco segundos pelo
+  mesmo predicado, preservando largura, visibilidade, linhas e cabecalhos.
+  Sem alteracao de pagina, CSS, calculos, snapshots ou limiares. O Tabelao
+  de referencia permanece intacto. Publicacao ainda depende dos gates finais.
+- Revisao independente confirmou por AST que o predicado foi preservado.
+  Nova prova: nove de dez leituras imediatas falharam; dez de dez passaram
+  com o bloco corrigido em 21-75ms. Defeitos persistentes de largura 1100px
+  e cabecalho deslocado falharam por timeout (500ms apenas nesses probes,
+  em memoria; codigo final permanece com 5000ms). Remover cada defeito
+  restaurou a aprovacao. Oitenta e nove testes focados aprovados.
+
 ## Retomada com a Base Corrigida
 
 - Em novo pedido, usuario determinou incorporar a correcao e publicar.

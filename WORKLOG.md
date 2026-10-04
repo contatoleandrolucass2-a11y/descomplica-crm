@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-04 - Estabilizacao do QA de impressao
+
+- PR #141 integrado em 7337b97 apos CI verde: 193 comparacoes e seis jornadas
+  de guidance v5 passaram sem promover imagens de referencia.
+- Primeira CI da main falhou somente na leitura imediata do layout de impressao
+  do Tabelao. Reproducao sintetica mostrou a transicao de min-width ainda ativa.
+- QA passa a aguardar o predicado integral por ate cinco segundos, sem remover
+  condicoes ou alterar Tabelao, estilos e runtime. Regressao cobre espera
+  limitada e conservacao dos criterios. Fonte: audit do Associativo.
+- Prova do bloco corrigido: 10/10 aprovadas; largura e transform persistentes
+  falharam por timeout. Predicado identico confirmado por AST; 89 testes focados
+  aprovados. Gates locais completos em andamento.
+- Uma repeticao do job da main foi solicitada no mesmo SHA; deploy ainda pendente.
+
 ## 2026-10-03 - Contrato de brilho compativel com CSS de producao
 
 - CI 37167561944 aprovou validacao e restore; QA autenticado detectou a
