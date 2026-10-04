@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-03 - Validacao do brilho no CSS minificado
+
+- Corrige o QA para reconhecer 0px e 0% como o mesmo topo da linha, mantendo
+  duas faixas de 2px nas extremidades e ciclo de 3s. Sem alteracao de runtime.
+
 ## 2026-10-03 - Integracao da correcao de lint no Associativo
 
 - Incorpora a base db1b625, incluindo a remocao de braces ja validada no PR #139.

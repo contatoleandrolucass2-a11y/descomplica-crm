@@ -6,6 +6,12 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-03: Integracao da base corrigida no Associativo
 
+- CI combinada 37167561944 aprovou validate e restore, mas o guidance detectou
+  comparacao textual incorreta: CSS de producao serializa 0% como 0px. O QA
+  normaliza apenas esse zero equivalente, preservando topo/rodape exatos e
+  rejeitando 1px ou posicoes intermediarias. Quinze testes aprovados;
+  publicacao ainda exige nova CI completa. Fonte: audit do Associativo.
+
 - Status: pendente_validacao; fonte: pedido do usuario, PR #141 e main db1b625.
 - O bloqueio de braces foi removido na base pelo PR #139, com patch versionado
   do plugin Next e tinyglobby. Incorporar essa solucao, sem aguardar 3.0.4,

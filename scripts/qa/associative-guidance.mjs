@@ -130,8 +130,9 @@ export function assertAssociativeShimmer({ active, reducedMotion, animations, le
       assert.equal(animation.fullRowExtent, true, "Ledger shimmer must cover the full row extent");
       assert.equal(animation.backgroundCount, 2, "Ledger shimmer requires two gold backgrounds");
       assert.deepEqual(animation.edgeHeights, [2, 2], "Both ledger edges must be exactly 2px");
+      // Production CSS serializes the equivalent top edge as 0px instead of 0%.
       assert.deepEqual(
-        animation.edgePositions,
+        (animation.edgePositions ?? []).map((position) => (position === "0px" ? "0%" : position)),
         ["0%", "100%"],
         "Ledger edges must stay at top/bottom",
       );

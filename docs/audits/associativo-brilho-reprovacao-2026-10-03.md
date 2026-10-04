@@ -13,6 +13,29 @@
   nenhuma vulnerabilidade conhecida. Quarenta testes focados aprovados,
   incluindo os dez do plugin Next real. Demais gates combinados em andamento.
 
+## Validacao da Arvore Combinada
+
+- SHA `30d1bf4`: lint, tipos, build, audit e oito testes Node aprovados.
+  Suite Windows: 1476 aprovados, um ignorado e oito falhas. Seis dependem de
+  modos POSIX/symlinks; os dois timeouts de knowledge passaram na repeticao
+  serial dos 22 casos, sem mudar os limites. CI Linux aprovou a suite completa.
+- Seis jornadas locais aprovadas novamente, incluindo desktop e mobile nos
+  tres temas. Capturas `59128-1440-dark-complete.png` e
+  `59128-375-light-complete.png` revisadas; artefatos sinteticos nao versionados.
+- CI `37167561944`: validate e isolated-restore aprovados; release-gates
+  parou no contrato de guidance, antes das comparacoes visuais. Artefato
+  `11290058414`, ZIP SHA-256
+  `8398e3ba6c4bc976d4da62302b36e00cd3d337be4fe8cac94f7de8a444dcc224`.
+  Captura `0e669f1d87f8838170d8c6ba1f5a7036158bd443`, arvore identica ao SHA acima.
+- Causa confirmada no CSS compilado: o minificador converte a coordenada
+  vertical `0%` em `0`, serializada pelo navegador como `0px`. O contrato
+  comparava strings, embora ambas representem exatamente o topo.
+- Correcao exclusiva do QA normaliza apenas `0px` para `0%`; exige novamente
+  topo `0%` e rodape `100%`. Testes rejeitam 1px, meio da linha e bordas
+  sobrepostas. Quinze testes de guidance aprovados. Nenhum limiar visual,
+  duracao, requisito de movimento ou regra de runtime foi alterado.
+- Publicacao permanece condicionada a nova CI integral aprovada.
+
 ## Escopo
 
 - Branch `codex/associativo-brilho-reprovacao`, base `506b9e3`.

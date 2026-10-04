@@ -201,6 +201,12 @@ describe("Associativo guidance regression gates", () => {
     };
     const active = { active: true, reducedMotion: false, ledger: true, animations: [animation] };
     expect(() => assertAssociativeShimmer(active)).not.toThrow();
+    expect(() =>
+      assertAssociativeShimmer({
+        ...active,
+        animations: [{ ...animation, edgePositions: ["0px", "100%"] }],
+      }),
+    ).not.toThrow();
     for (const patch of [
       { name: "associative-edge-shine" },
       { duration: 2900 },
@@ -214,6 +220,9 @@ describe("Associativo guidance regression gates", () => {
       { edgeHeights: [2] },
       { edgePositions: ["100%", "100%"] },
       { edgePositions: ["0%", "50%"] },
+      { edgePositions: ["1px", "100%"] },
+      { edgePositions: ["0px", "1px"] },
+      { edgePositions: ["0px", "0px"] },
       { noRepeat: false },
       { moving: false },
       { goldLine: false },

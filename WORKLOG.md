@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-03 - Contrato de brilho compativel com CSS de producao
+
+- CI 37167561944 aprovou validacao e restore; QA autenticado detectou a
+  serializacao 0px do topo no CSS minificado, equivalente ao 0% da fonte.
+- Ajuste somente no teste: normaliza esse zero exato e preserva a exigencia
+  de duas faixas nas extremidades. Regressao rejeita deslocamento de 1px,
+  bordas sobrepostas e posicao intermediaria. Quinze casos aprovados.
+- Arvore integrada: lint, tipos, build, audit, oito Node e seis jornadas locais
+  aprovados. Suite Windows com seis falhas POSIX e dois timeouts; estes passaram
+  em repeticao serial de 22 casos. Suite completa aprovada na CI Linux.
+- Evidencia detalhada no audit do Associativo; nova CI obrigatoria antes do deploy.
+
 ## 2026-10-03 - Retomada da publicacao do Associativo
 
 - Usuario solicitou incorporar a correcao e publicar. Integra origin/main
