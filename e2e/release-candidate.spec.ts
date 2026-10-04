@@ -1402,9 +1402,11 @@ test("released simulators and documentation run only for Master while CAIXA stay
     await expect(
       page.getByRole("heading", { level: 1, name: "Simulador Tabelão", exact: true }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("table", { name: "Menores valores por empreendimento, planta e vagas" }),
-    ).toBeVisible();
+    const tabelaoResults = page.getByRole("region", {
+      name: "Menores valores por empreendimento, planta e vagas",
+    });
+    await expect(tabelaoResults).toBeVisible();
+    await expect(tabelaoResults.getByRole("table")).toBeVisible();
 
     await page.goto("/app");
     const disclosure = page

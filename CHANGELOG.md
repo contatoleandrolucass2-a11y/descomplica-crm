@@ -14,6 +14,8 @@
   bloqueados da CAIXA, sem transformar nenhum deles em link.
 - O smoke exige ausencia da navegacao comercial para perfis sem paginas e usa
   a identidade propria de `/conta/seguranca` nesses casos.
+- A prova hospedada do Tabelao agora verifica separadamente a regiao nomeada e
+  a tabela interna, preservando a semantica acessivel do componente.
 
 ## 2026-10-04 - Ajustes do Associativo publicados
 

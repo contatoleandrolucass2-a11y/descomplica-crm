@@ -15,6 +15,8 @@
   sem `href`; o acesso direto continua validado separadamente como negado.
 - Perfis sem paginas comerciais passam a provar explicitamente que a tela de
   seguranca exibe a identidade, mas nao monta a navegacao principal protegida.
+- O smoke do Tabelao valida a regiao rolavel pelo nome acessivel e a tabela
+  semantica contida nela, refletindo a estrutura real do componente.
 - Teclado, foco, identidade longa, cookies, tres temas, reduced motion e estados
   dos simuladores passaram. O alvo de cookies permanece em 44px mesmo sob o CSS
   legado de 14px. Conta e fixtures QA efemeras foram removidas.
