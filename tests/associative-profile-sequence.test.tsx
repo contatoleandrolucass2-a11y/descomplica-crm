@@ -115,6 +115,8 @@ function harness() {
       currencyInputNumber,
       associativeIncomeReady: incomeReady,
       associativeFinancingModalityReady: modalityReady,
+      associativeQualificationComplete:
+        incomeReady && modalityReady && Boolean(state.firstProperty),
       associativeFinancingDecision: decision,
       associativeManualModalityPreference: state.preference,
       updateIncome: (value: string) => {
@@ -253,7 +255,7 @@ describe("Associativo profile confirmation sequence", () => {
     profile.step(3);
   });
 
-  it("resets confirmation, first property and ranking only when the income amount changes", () => {
+  it("preserves confirmation, first property and ranking when income changes or is temporarily cleared", () => {
     const profile = harness();
     profile.changeIncome("8000.00");
     profile.confirm("SBPE");
@@ -264,23 +266,111 @@ describe("Associativo profile confirmation sequence", () => {
     expect(profile.state.rank).toBe("gold");
     expect(profile.state.preference).toBe("SBPE");
     profile.changeIncome("8000.01");
-    profile.step(2);
+    profile.step(null);
     expect(profile.state).toMatchObject({
-      confirmed: false,
-      preference: null,
-      firstProperty: "",
-      rank: "",
+      confirmed: true,
+      preference: "SBPE",
+      firstProperty: "SIM",
+      rank: "gold",
     });
-    profile.confirm("SBPE");
-    profile.step(3);
-    profile.firstProperty("SIM");
     profile.changeIncome("");
     profile.step(1);
     expect(profile.state).toMatchObject({
-      confirmed: false,
-      preference: null,
-      firstProperty: "",
-      rank: "",
+      confirmed: true,
+      preference: "SBPE",
+      firstProperty: "SIM",
+      rank: "gold",
     });
+    profile.changeIncome("5000");
+    profile.step(null);
+  });
+
+  it("keeps answers while switching modality and recomputes forced eligibility", () => {
+    const profile = harness();
+    profile.changeIncome("5000");
+    profile.confirm("MCMV");
+    profile.firstProperty("SIM");
+    profile.state.rank = "bronze";
+    profile.confirm("SBPE");
+    profile.step(null);
+    expect(profile.state.firstProperty).toBe("SIM");
+    expect(profile.state.rank).toBe("bronze");
+    profile.confirm("MCMV");
+    profile.changeIncome("14000");
+    profile.step(null);
+    expect(profile.render().decision).toMatchObject({ forced: true, effectiveModality: "SBPE" });
+    expect(profile.state.firstProperty).toBe("SIM");
+    profile.changeIncome("5000");
+    expect(profile.render().decision.effectiveModality).toBe("MCMV");
+  });
+});
+
+describe("Associativo unit selection continuity", () => {
+  function selectHarness(selectedUnitId: string, annualMode = true, directTable = false) {
+    const declaration = functions.get("selectUnit")!;
+    const setters = Object.fromEntries(
+      [...declaration.matchAll(/\b(set[A-Z]\w*)\(/gu)].map((match) => [match[1], vi.fn()]),
+    );
+    const guideToSection = vi.fn();
+    const confirm = vi.fn(() => false);
+    const select = load<(item: Record<string, unknown>) => void>("selectUnit", {
+      ...setters,
+      selectedUnitId,
+      annualMode,
+      directTable,
+      directVisualLayout: false,
+      directProposalDirty: true,
+      associativeQualificationComplete: true,
+      inventoryProposalStarted: { current: false },
+      tourOpen: false,
+      guideToSection,
+      window: { confirm, setTimeout: (callback: () => void) => callback() },
+    });
+    return { setters, select, confirm, guideToSection };
+  }
+
+  const nextUnit = { id: "unit-2", finalPrice: 231990, completionDate: "2035-12-30" };
+
+  it("updates only property-specific data when switching an existing Associativo proposal", () => {
+    const test = selectHarness("unit-1");
+    test.select(nextUnit);
+    expect(test.setters.setSelectedUnitId).toHaveBeenCalledWith("unit-2");
+    expect(test.setters.setSalePrice).toHaveBeenCalledWith("231990");
+    expect(test.setters.setCompletionDate).toHaveBeenCalledWith("2035-12-30");
+    expect(test.setters.setDocumentationAppraisalOverride).toHaveBeenCalledWith("");
+    const propertySetters = new Set([
+      "setSelectedUnitId",
+      "setSalePrice",
+      "setCompletionDate",
+      "setDocumentationAppraisalOverride",
+    ]);
+    for (const [name, setter] of Object.entries(test.setters)) {
+      if (!propertySetters.has(name))
+        expect(setter, `${name} must preserve its existing value`).not.toHaveBeenCalled();
+    }
+    expect(test.guideToSection).toHaveBeenCalledWith("flow");
+    expect(test.confirm).not.toHaveBeenCalled();
+  });
+
+  it("initializes the profile and composition for the first selection", () => {
+    const test = selectHarness("");
+    test.select(nextUnit);
+    expect(test.setters.setIncome).toHaveBeenCalledWith("0");
+    expect(test.setters.setFinancing).toHaveBeenCalledWith("");
+    expect(test.setters.setAssociativeModalityConfirmed).toHaveBeenCalledWith(false);
+    expect(test.guideToSection).toHaveBeenCalledWith("qualification");
+  });
+
+  it("does nothing when reselecting the same unit", () => {
+    const test = selectHarness(nextUnit.id);
+    test.select(nextUnit);
+    for (const setter of Object.values(test.setters)) expect(setter).not.toHaveBeenCalled();
+  });
+
+  it("preserves the existing Tabela Direta discard confirmation", () => {
+    const test = selectHarness("unit-1", false, true);
+    test.select(nextUnit);
+    expect(test.confirm).toHaveBeenCalledOnce();
+    for (const setter of Object.values(test.setters)) expect(setter).not.toHaveBeenCalled();
   });
 });

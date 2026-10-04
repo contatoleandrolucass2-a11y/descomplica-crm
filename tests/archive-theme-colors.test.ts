@@ -160,6 +160,39 @@ describe("archive theme color contract", () => {
       ).toBeGreaterThanOrEqual(3);
   });
 
+  it("reuses stock gold for both profile selections without changing theme tokens", () => {
+    const selection = declarations(
+      "investor-archive.css",
+      '.investor-page-shell.investor-associative-table-page .investor-associative-choice-row > :is(button[aria-pressed="true"], label:has(input:checked))',
+    );
+    expect(selection.color).toBe("var(--associative-gold-ink)");
+    expect(selection.background).toBe("var(--associative-gold-metal) var(--associative-gold)");
+    expect(selection["border-color"]).toBe("var(--associative-gold-edge)");
+  });
+
+  it("preserves text contrast under the pending sweep in every theme", () => {
+    const colors = declarations(
+      "investor-archive.css",
+      ".investor-page-shell.investor-associative-table-page",
+    );
+    expect(colors["--associative-pending-sheen"]).toContain("14%, transparent");
+    const gold = rgb(colors["--associative-gold-shine"]!);
+    for (const theme of ["light", "balanced", "dark"]) {
+      const themeColors = content(theme);
+      for (const surface of ["page", "panel", "panel-muted", "panel-strong", "input"]) {
+        const mixed = rgb(themeColors[`--inv-color-${surface}`]!).map((channel, i) =>
+          Math.round((channel * 0.86 + gold[i]! * 0.14) * 255),
+        );
+        const background = `#${mixed.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
+        for (const foreground of ["text", "muted", "accent"])
+          expect(
+            contrast(themeColors[`--inv-color-${foreground}`]!, background),
+            `${theme}: ${foreground} over pending ${surface}`,
+          ).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
   it("keeps the WF16 dark composition readable on its navy result surface", () => {
     const dark = declarations(
       "investor-archive.css",

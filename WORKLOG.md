@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-10-04 - Associativo: calculo, origem e continuidade
+
+- Fonte: pedido de correcao dos percentuais, avaliacao e continuidade, com
+  dez referencias visuais. Branch `codex/associativo-calculo-e-continuidade`
+  iniciada em `c73d155`, preservando a nova navegacao protegida da base.
+- Corrige bloqueio indevido do comprometimento quando falta andamento da obra;
+  mantem maximo mensal e aprovacao pendentes enquanto a evolucao for desconhecida.
+- Mantem respostas e recursos em mudancas de renda, modalidade ou unidade.
+  Avaliacao manual e dados especificos do imovel nao sao transferidos entre unidades.
+- Enriquecimento do estoque exige identidade comercial unica. Sem substituir
+  ausencia por preco de venda, nem liberar proposta com calculo incompleto.
+- Validacao: 80 testes financeiros, 13 de perfil/renderizacao e 11 de
+  enriquecimento real aprovados. Lint, tipos, build e audit aprovados.
+- Seis jornadas desktop/mobile nos tres temas e cinco cenarios de continuidade
+  passaram. Acrescentada prova de pixels do brilho integral, em validacao final.
+- Suite Windows: 1596 aprovados, seis falhas POSIX e dois timeouts. Repeticao
+  serial de ferramentas: 43 aprovados e tres timeouts de conhecimento. Gates
+  nao foram reduzidos; CI Linux completa obrigatoria antes da publicacao.
+- Nenhuma alteracao em politica comercial, schema, dados remotos ou n8n.
+  Evidencias e limites em `docs/audits/associativo-calculo-continuidade-2026-10-04.md`.
+- CI 37202986207: Linux, banco e restore aprovados; E2E reteve contrato antigo
+  de apagar ranking na edicao de renda. Atualizado para preservar respostas e
+  verificar os dois percentuais pela nova renda, mantendo isolamento concorrente.
+
 ## 2026-10-04 - Navegacao protegida unificada validada
 
 - A topbar unica passa a atender todas as paginas protegidas; cinco simuladores

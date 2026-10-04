@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-04 - Calculo e continuidade no Associativo
+
+- Preserva perfil e composicao financeira ao trocar a unidade ou editar renda
+  e modalidade; recalcula preco, entrega e enquadramento sem apagar respostas.
+- Separa comprometimento da renda de evolucao de obra. Dados desconhecidos
+  aparecem como indisponiveis, nunca como zero nem aprovacao conclusiva.
+- Enriquece avaliacao, andamento e entrega a partir de referencia unica da
+  unidade; preserva valores vivos e recusa correspondencias ambiguas.
+- Amplia o brilho dourado para a area pendente em 4,5s, remove sublinhado,
+  destaca escolhas do perfil em dourado e alinha resumo, valores e icone dolar.
+- Inclui reflexo especular nos botoes do Associativo, com limites de foco,
+  contraste, controles desabilitados e preferencia por movimento reduzido.
+- Alinha o E2E concorrente ao perfil persistente, exigindo recalculo dos dois
+  comprometimentos sem reconfirmar escolhas e preservando isolamento entre usuarios.
+
 ## 2026-10-04 - Navegacao protegida unificada
 
 - Usa um unico cabecalho hierarquico em Dashboard, etapas, Ranking, Canal,

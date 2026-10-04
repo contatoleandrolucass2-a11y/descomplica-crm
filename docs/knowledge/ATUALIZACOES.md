@@ -4,6 +4,25 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: separar ausencia de dados de resultado zero no Associativo
+
+- Status: pendente_validacao; fonte: codigo do forecast, handlers de selecao e
+  testes sinteticos da branch `codex/associativo-calculo-e-continuidade`.
+- Comprometimento precisa de renda e cronograma valido; maximo mensal tambem
+  precisa da evolucao de obra. Ausencia deve permanecer `null`, com pendencia
+  explicita e aprovacao bloqueada, sem assumir andamento zero.
+- Trocar unidade atualiza apenas informacoes do imovel; respostas e recursos
+  permanecem. Revalidacao automatica nao significa reconfirmar ou apagar respostas.
+- Avaliacao so vem da origem ou referencia inequivoca da mesma unidade. Preco
+  de venda nao e substituto de avaliacao bancaria. Resposta tardia nao pode
+  sobrescrever uma proposta que o usuario ja iniciou.
+- Testes focados, build e cinco cenarios de continuidade no navegador aprovados.
+  Windows teve falhas POSIX e timeouts em ferramentas; CI Linux e publicacao
+  pendentes. Consultar o audit de 04/10/2026 antes de reutilizar o resultado.
+- CI 37202986207 aprovou Linux, banco e restore; E2E ainda exigia apagar ranking
+  apos editar renda. Atualizado para continuidade com prova proporcional dos dois
+  comprometimentos, mantendo a barreira de isolamento entre usuarios.
+
 ## 2026-10-04: shell unico validado em toda a matriz autenticada
 
 - Status: validado localmente, pendente CI/publicacao; fonte: branch

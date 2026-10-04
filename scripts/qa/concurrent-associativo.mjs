@@ -276,6 +276,24 @@ async function assertProposal(page, index, income = 5_000 + index * 100) {
   await dialog.waitFor({ state: "hidden" });
 }
 
+export function assertIncomeCommitmentRecalculated(before, after, oldIncome, newIncome) {
+  check(before.length === 2 && after.length === 2, "income_commitment_missing");
+  for (let index = 0; index < 2; index += 1) {
+    const previous = Number(before[index].replace("%", "").replace(",", "."));
+    const current = Number(after[index].replace("%", "").replace(",", "."));
+    // The fixture keeps each schedule fixed; only the income denominator changes.
+    check(
+      Number.isFinite(previous) &&
+        Number.isFinite(current) &&
+        previous > 0 &&
+        current > 0 &&
+        current < previous &&
+        Math.abs(current - (previous * oldIncome) / newIncome) <= 0.011,
+      "income_commitment_not_recalculated",
+    );
+  }
+}
+
 async function checkAnnualIncomeLimit(page, index) {
   const income = 5_200 + index * 100;
   const annual = page.getByRole("textbox", { name: "Anual 1", exact: true });
@@ -598,20 +616,39 @@ export async function runConcurrentAssociativo({
       "proposalIsolation",
       pages.slice(0, 2).map((page, index) => async () => {
         await assertProposal(page, index);
+        const commitment = page
+          .locator(".investor-associative-approval tbody tr")
+          .filter({ hasText: "% Comprometimento da Renda" })
+          .locator('td[data-label="Linear"], td[data-label="Decrescente"]');
+        const previousCommitment = await commitment.allTextContents();
         await page
           .getByRole("textbox", { name: "Renda Familiar", exact: true })
           .fill(String((5_200 + index * 100) * 100));
-        await page.getByRole("button", { name: "MCMV", exact: true }).click();
-        await page.getByRole("radio", { name: "Sim", exact: true }).check();
+        await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).blur();
+        check(
+          (await page
+            .getByRole("button", { name: "MCMV", exact: true })
+            .getAttribute("aria-pressed")) === "true",
+          "income_edit_reset_modality",
+        );
+        check(
+          await page.getByRole("radio", { name: "Sim", exact: true }).isChecked(),
+          "income_edit_reset_first_property",
+        );
         const ranking = page.getByRole("combobox", { name: "Selecione o Ranking", exact: true });
-        check((await ranking.inputValue()) === "", "income_edit_kept_stale_ranking");
+        check((await ranking.inputValue()) === "gold", "income_edit_reset_ranking");
+        assertIncomeCommitmentRecalculated(
+          previousCommitment,
+          await commitment.allTextContents(),
+          5_000 + index * 100,
+          5_200 + index * 100,
+        );
         check(
           (await page
             .getByRole("button", { name: "Proposta pronta - Bora Vender", exact: true })
-            .count()) === 0,
-          "income_edit_did_not_require_ranking_confirmation",
+            .count()) === 1,
+          "income_edit_lost_ready_proposal",
         );
-        await ranking.selectOption("gold");
       }),
       { concurrency: 2, timeoutMs: 90_000 },
     );

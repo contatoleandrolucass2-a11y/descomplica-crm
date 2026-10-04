@@ -105,27 +105,26 @@ export function assertAssociativeCommissionGeometry(geometry) {
       !geometry.insideCell &&
       geometry.lastRowIsDecreasing10 &&
       geometry.insideWidth,
-    "Commission must be a summary sibling outside the section, table and cells, beside Decrescente 10%",
+    "Commission must be a summary sibling outside the section, table and date cells",
   );
   assert.ok(
     geometry.layoutDisplay === "grid" &&
-      geometry.columns.length === 2 &&
+      geometry.columns.length === 1 &&
       geometry.columns[0] > 0 &&
-      geometry.columns[1] === geometry.minimumTarget &&
       geometry.layoutGap === 4 &&
       Math.abs(geometry.summaryGap - 4) <= 1 &&
       geometry.summaryFitsColumn &&
       geometry.insideLayout,
-    "Commission wrapper must reserve a 24px/44px grid column with a 4px gap and no overflow",
+    "Summary must retain the full wrapper width with the commission in the following row",
   );
   assert.ok(
-    geometry.dateGap >= 0 && geometry.dateGap <= 16 && geometry.centerDelta <= 1,
-    "Commission must sit immediately right of the last date, on the same line",
+    geometry.summaryEdgesAligned && geometry.rightDelta <= 1,
+    "Summary edges must align with approval and commission must align with the right edge",
   );
   assert.ok(!geometry.overlaps, "Commission must not overlap dates, values or adjacent content");
   assert.ok(
-    geometry.iconOnly && Math.abs(geometry.iconSize - 17) <= 0.1,
-    "Commission must render only its 17px dollar icon",
+    geometry.iconOnly && geometry.iconSize > 0 && geometry.iconSize <= 17,
+    "Commission must render only its dollar icon at no more than 17px",
   );
   assert.ok(
     [24, 44].includes(geometry.minimumTarget) &&
@@ -195,14 +194,16 @@ export async function checkAssociativeCommissionGeometry(commission) {
       range.selectNodeContents(element);
       return range.getBoundingClientRect();
     };
-    const dateRect = date ? textBounds(date) : null;
     const icon = button.querySelector('span[aria-hidden="true"]');
-    const iconRect = icon ? textBounds(icon) : null;
     const style = getComputedStyle(button);
     const layoutStyle = layout ? getComputedStyle(layout) : null;
     const columns = layoutStyle?.gridTemplateColumns.split(" ").map(Number.parseFloat) ?? [];
     const summaryRect = summary?.getBoundingClientRect();
     const layoutRect = layout?.getBoundingClientRect();
+    const approvalRect = layout
+      ?.closest(".investor-associative-results-stack")
+      ?.querySelector(".investor-associative-approval")
+      ?.getBoundingClientRect();
     // Text ranges exclude blank grid space, but detect overlap with any rendered value/date.
     const content = [
       ...document.querySelectorAll(
@@ -224,7 +225,7 @@ export async function checkAssociativeCommissionGeometry(commission) {
       layoutDisplay: layoutStyle?.display,
       columns,
       layoutGap: Number.parseFloat(layoutStyle?.columnGap),
-      summaryGap: summaryRect ? rect.left - summaryRect.right : -1,
+      summaryGap: summaryRect ? rect.top - summaryRect.bottom : -1,
       summaryFitsColumn: Boolean(
         summaryRect &&
         layoutRect &&
@@ -233,11 +234,13 @@ export async function checkAssociativeCommissionGeometry(commission) {
       ),
       insideLayout: contains(layout),
       insideWidth: rect.left >= 0 && rect.right <= innerWidth,
-      dateGap: dateRect ? rect.left - dateRect.right : -1,
-      centerDelta:
-        dateRect && iconRect
-          ? Math.abs((dateRect.top + dateRect.bottom - iconRect.top - iconRect.bottom) / 2)
-          : Infinity,
+      summaryEdgesAligned: Boolean(
+        summaryRect &&
+        approvalRect &&
+        Math.abs(summaryRect.left - approvalRect.left) <= 1 &&
+        Math.abs(summaryRect.right - approvalRect.right) <= 1,
+      ),
+      rightDelta: summaryRect ? Math.abs(rect.right - summaryRect.right) : Infinity,
       overlaps: content.some((element) => {
         const other = textBounds(element);
         return (
