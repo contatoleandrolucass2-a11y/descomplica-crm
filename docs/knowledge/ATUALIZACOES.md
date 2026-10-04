@@ -4,6 +4,22 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: Associativo publicado com gates completos
+
+- Status: validado; fonte: PR #141, CI 37173712179 tentativa 2 e audit
+  `docs/audits/associativo-brilho-reprovacao-2026-10-03.md`.
+- Runtime publicado 7337b97; 193 comparacoes visuais, 193 auditorias,
+  40 navegacoes e seis jornadas v5 aprovadas. Sem promover baseline.
+- Braces removido na base ja validada; preservar o patch, nao ignorar audit.
+  Verificados hashes do artefato, equivalencia OCI/config/11 camadas e dois
+  perfis no destino. Backup, CAS e pos-check aprovados; rollback desnecessario.
+- Checkout principal da VPS sujo: usar checkout de release limpo, sem
+  alterar trabalho alheio. Pressao de memoria adiou a troca ate estabilizar.
+- Health e 12 GETs aprovados; jornada autenticada com dados ficticios sem
+  salvar confirmou UI. Nao prova capacidade nem autoriza alteracoes de dados.
+- PR #143 trata apenas QA/documentacao, sem necessidade de novo restart;
+  CI do SHA final desse registro ainda obrigatoria antes da integracao.
+
 ## 2026-10-04: Aguardar o layout de impressao no QA
 
 - Status: pendente_validacao; fonte: CI 37173712179 e reproducao sintetica

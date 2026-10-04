@@ -1,5 +1,51 @@
 # Associativo: brilho e reprovacao metalica
 
+## Publicacao Confirmada em 04/10/2026
+
+- Publicado em producao `7337b97c08f8faf26684ae2abd9f9ae138ed3e67`,
+  aproximadamente 04:14 UTC (01:14 em Sao Paulo). PR #141 integrado;
+  CI `37173712179`, tentativa 2, com todos os quatro jobs aprovados.
+- Evidencia visual aprovada: artefato `11293077169`, ZIP SHA-256
+  `932747d988f89943ad74ce68b6e54f6912499bedf4b658a77e2d773fdb781606`.
+  Captura no SHA exato, checkout limpo; 193 comparacoes, 193 auditorias de
+  acessibilidade, 40 navegacoes e seis jornadas de guidance v5 aprovadas.
+  A tentativa anterior foi preservada; nao houve alteracao de baseline.
+- Imagem imutavel do artefato CI `11291804158`; ZIP SHA-256
+  `e48b74ef9dc49bdb8e03430cf58c062b57f5f470613afe4be50bf3b19113d481`.
+  Arquivo `image.tar.gz` SHA-256
+  `41d5967465b66ffa001f2a294c6740aa93d140d7e8bef1616fea8240bac8ed8c`.
+  Config digest da CI
+  `sha256:a2cf0697c1fafea98bcdc479648ae7921d243d76093943c77d5a774dda73c87c`;
+  manifesto/ID containerd no destino
+  `sha256:6e14381b9f7549d51fa59badbffffa5e839f21d3b11aa2bf896343276a6eddfe`.
+  Cadeia OCI/config, plataforma e 11 camadas equivalentes verificadas;
+  dois perfis sinteticos de runtime aprovados no destino. Sem rebuild/retag.
+- Versao anterior `8e158cc9d13beeff0087064df6d9b58d87790379`, imagem
+  `sha256:9190939521727bda6f0baad406a432c2fa80224b894b0b9f523d79298aac9ecc`.
+  Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/7337b97c08f8faf26684ae2abd9f9ae138ed3e67.YGlKaJ`.
+  CAS oficial, lock e rollback preparados; rollback nao foi necessario.
+- Checkout principal da VPS continha mudancas alheias, preservadas. Promocao
+  usou checkout destacado limpo em
+  `/srv/descomplica-crm-releases/7337b97c08f8faf26684ae2abd9f9ae138ed3e67`.
+  Compose, wrapper e Nginx sem alteracoes. Nenhuma migration, alteracao de
+  dados, workflow n8n ou carga de teste extensa na VPS.
+- Pressao transitoria de memoria adiou a troca. Apos recuperar cerca de
+  1,9 GB disponiveis e health local de 5ms, a promocao foi executada.
+  Container healthy, health interno/publico no SHA correto, APIs privadas
+  negadas com 401 e rota autenticada redirecionando com 307.
+- Smoke externo limitado: 12 GETs, concorrencia 4, zero erros, 148-677ms;
+  no-store, versao e bloqueio anonimo conferidos. Nao prova capacidade.
+- Conferencia autenticada em nova aba, com valores ficticios e sem salvar
+  proposta: sequencia 1 -> 2 -> 3, campos transparentes sem contorno,
+  brilho de 3s nas duas extremidades da linha, cessacao apos concluir,
+  reprovacao metalica com brilho de 3s e dolar externo de 17px aprovados.
+  Captura visual revisada, sem exportar estoque ou dados pessoais.
+- Correcao de QA do PR #143: lint, tipos, build, 89 testes focados e oito
+  testes Node aprovados. Suite Windows: 1479 aprovados, seis falhas POSIX
+  conhecidas e um ignorado; suite Linux aprovada no job validate. Publicacao
+  Git desta ferramenta/documentacao nao requer novo restart da aplicacao.
+
 ## Integracao e Gate de Impressao em 04/10/2026
 
 - PR #141 integrado em `7337b97c08f8faf26684ae2abd9f9ae138ed3e67` apos CI

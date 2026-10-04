@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-04 - Associativo publicado e conferido
+
+- Publicada a imagem imutavel 7337b97 apos CI 37173712179 integralmente verde.
+  Remocao de braces incorporada da base, audit aprovado e Tabelao preservado.
+- Backup verificado, equivalencia OCI/11 camadas e dois perfis comprovados,
+  CAS oficial e health interno/publico aprovados; rollback nao necessario.
+- Checkout sujo da VPS preservado; release em checkout destacado limpo.
+  Troca aguardou recuperacao da memoria. Nenhuma migration ou mudanca de dados.
+- Smoke anonimo: 12 GETs sem erros. Jornada autenticada com valores ficticios,
+  sem salvar proposta, confirmou etapas, brilho 3s, campos, reprovacao e dolar.
+- PR #143 publica somente QA e registros; sem novo restart. Lint, tipos,
+  build, 89 focados e oito Node aprovados; Windows 1479 aprovados, seis falhas
+  POSIX e um ignorado. Suite Linux aprovada no validate. Fonte: audit da release.
+
 ## 2026-10-04 - Estabilizacao do QA de impressao
 
 - PR #141 integrado em 7337b97 apos CI verde: 193 comparacoes e seis jornadas
