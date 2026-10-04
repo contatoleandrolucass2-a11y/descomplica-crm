@@ -12,6 +12,9 @@
   rejeitadas nos motores Linear e Decrescente.
 - Brilho integral de 3s, selecoes com gradiente horizontal, reflexo nos controles
   do Associativo e dolar junto da ultima data, com alvo de toque preservado.
+- Publicado no runtime `f4dec82249c2b3e56beaaea518ec194ced81b480` (PR #147),
+  com CI Linux e conferencia pos-publicacao aprovadas. Dados oficiais ausentes
+  na origem continuam explicitamente pendentes, sem substituicao por estimativas.
 
 ## 2026-10-04 - Calculo e continuidade no Associativo
 

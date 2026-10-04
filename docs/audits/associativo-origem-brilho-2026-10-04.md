@@ -86,7 +86,52 @@ Ausencia genuina nao deve virar zero, preco de venda ou dado da unidade vizinha.
 - Build final, lint, tipos, formatacao, audit e oito testes Node Salesforce
   aprovados. Suite Windows: 1.888 aprovados, dois skips existentes, seis falhas
   POSIX e tres timeouts. Repeticao isolada dos arquivos com timeout e matriz:
-  278 aprovados. CI Linux completa continua obrigatoria; gates nao reduzidos.
+  278 aprovados. CI Linux completa aprovada, conforme evidencia abaixo;
+  gates nao reduzidos.
+
+## CI E Publicacao
+
+- PR [#147](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/147)
+  aprovado pela CI `37220843131` e integrado em
+  `f4dec82249c2b3e56beaaea518ec194ced81b480`.
+- CI do main `37222464725`: validacao Linux, banco, restore isolado,
+  release gates e imagem promovivel aprovados. QA: 147 verificacoes responsivas,
+  84 de temas, 201 Axe, 201 capturas/comparacoes e 105 de zoom, alem de 40
+  combinacoes de navegacao arquivada. Nenhuma baseline foi promovida.
+- Artefato visual do main `11311686197`, ZIP SHA-256
+  `f51fcb420a37b1492171b379cba76921121cf30a42a0ff53256a1df295ab6546`.
+- Artefato de imagem `11310807042`, ZIP SHA-256
+  `d9a6fcda2c03670983042dfe99ab3bd80d8a522979963ef2c2938f69c17d45bc`.
+  `image.tar.gz` SHA-256:
+  `15db42c7ad9777826d84e8ea09a49bdfdc1f2112036974b2f50503c88e40c3ce`.
+- Config digest da imagem:
+  `sha256:5274f7bb9a7e37085619c425bee5603fa1b8211767d2bdaf882dcb1763275f14`.
+  ID/manifest OCI carregado no containerd:
+  `sha256:b8e9d14c02519911cecc70c23236a2fae558f7d0f73e3ef6bd57894c39152df1`.
+  Arquivo, config, label, plataforma e 11 camadas conferidos antes da promocao.
+- Publicacao com lock e compare-and-swap a partir de
+  `106d626850a6cc782ec198387074be9e8901dd78`, checkout destacado limpo em
+  `/srv/descomplica-crm-releases/f4dec82249c2b3e56beaaea518ec194ced81b480`.
+  O checkout principal remoto nao foi restaurado nem sobrescrito.
+- Backup verificado:
+  `/var/backups/descomplica-crm/releases/f4dec82249c2b3e56beaaea518ec194ced81b480.3p39VA`.
+  Diretorio root:root 0700 e manifesto 0600, hashes conferidos; imagem anterior
+  preservada para rollback. Configuracao Nginx sem alteracao.
+- O transporte SSH desconectou apos a mensagem de promocao concluida. Sem
+  repetir deploy, verificacoes independentes confirmaram container healthy,
+  imagem exata e health HTTP 200 com a nova versao. Smoke limitado: 12 GETs,
+  concorrencia quatro, zero erros; inventarios anonimos 401 e no-store.
+  Isso nao e benchmark nem prova de capacidade.
+- Conferencia autenticada limitada em 04/10/2026: renda, financiamento e entrada
+  sinteticos preservados ao trocar duas unidades disponiveis. Comprometimentos
+  14,13%/17,58% e maximos 44,13%/44,71% calculados; Ouro aprovado nos dois fluxos.
+  Gradiente publicado confirmado e controles de rodape com camada especular.
+  Nenhuma proposta foi salva, enviada ou usada para decisao de cliente.
+- Essa conferencia carregou 2.135 unidades visiveis da API de 07/08/2026;
+  nao representa completude do snapshot de 05/09 nem verifica novamente as
+  duas unidades ausentes dessa API. A pendencia da fonte oficial permanece.
+- Fechamento documental publicado separadamente no Git, sem nova promocao
+  da aplicacao: runtime permanece no SHA `f4dec82249c2b3e56beaaea518ec194ced81b480`.
 
 ## Limites
 
