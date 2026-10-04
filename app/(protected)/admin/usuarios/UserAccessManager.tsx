@@ -94,7 +94,7 @@ function ApprovalForm({
   );
   if (availableRoles.length === 0 || reportingScopes.length === 0) {
     return (
-      <p className="rounded-lg border border-[var(--analytics-warning)] bg-[color-mix(in_srgb,var(--analytics-warning)_9%,var(--analytics-surface))] p-3 text-sm text-[var(--analytics-warning)]">
+      <p className="rounded-lg border border-[var(--analytics-warning)] bg-[color-mix(in_srgb,var(--analytics-warning)_9%,var(--analytics-surface))] p-3 text-sm text-[var(--analytics-warning-ink)]">
         Aprovação indisponível: falta papel atribuível ou escopo oficial ativo.
       </p>
     );
@@ -181,8 +181,8 @@ function ActionFeedback({ state }: { state: AdminActionState }) {
       role={state.status === "error" ? "alert" : "status"}
       className={`rounded-lg border px-3 py-2 text-sm ${
         state.status === "error"
-          ? "border-[var(--analytics-danger)] bg-[color-mix(in_srgb,var(--analytics-danger)_8%,var(--analytics-surface))] text-[var(--analytics-danger)]"
-          : "border-[var(--analytics-positive)] bg-[color-mix(in_srgb,var(--analytics-positive)_8%,var(--analytics-surface))] text-[var(--analytics-positive)]"
+          ? "border-[var(--analytics-danger)] bg-[color-mix(in_srgb,var(--analytics-danger)_8%,var(--analytics-surface))] text-[var(--analytics-danger-ink)]"
+          : "border-[var(--analytics-positive)] bg-[color-mix(in_srgb,var(--analytics-positive)_8%,var(--analytics-surface))] text-[var(--analytics-positive-ink)]"
       }`}
     >
       <p>{state.message}</p>

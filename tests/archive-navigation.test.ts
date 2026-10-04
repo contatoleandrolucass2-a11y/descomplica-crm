@@ -7,18 +7,58 @@ import * as navigationQa from "../scripts/qa/archive-navigation.mjs";
 import { ProtectedShellFrame } from "../app/(protected)/_components/ProtectedShellFrame";
 
 const {
+  archiveMenuPanelPassed,
   archiveNavigationPassed,
   archiveNavigationRoutes,
   archiveNavigationViewports,
   archiveRootNavigationContract,
   parseArchivePreviewOrigin,
 } = navigationQa as {
+  archiveMenuPanelPassed: (measurement: unknown) => boolean;
   archiveNavigationPassed: (result: unknown, options?: { scope: string }) => boolean;
   archiveNavigationRoutes: string[];
   archiveNavigationViewports: { width: number; height: number }[];
   archiveRootNavigationContract: { name: string; tag: string; href: string | null }[];
   parseArchivePreviewOrigin: (value: string) => string;
 };
+
+function completeMenuPanelMeasurement(compact: boolean) {
+  return {
+    compact,
+    common: {
+      visible: true,
+      expanded: true,
+      controlPresent: true,
+      panelHasSize: true,
+      panelInsideViewportHorizontally: true,
+      controlInsideViewportHorizontally: true,
+      navigationHasNoHorizontalOverflow: true,
+      documentHasNoHorizontalOverflow: true,
+      bodyHasNoHorizontalOverflow: true,
+      horizontalAncestorsFit: true,
+    },
+    desktop: {
+      panelInsideViewportVertically: true,
+      controlInsideViewportVertically: true,
+      panelHasNoHorizontalOverflow: true,
+      panelHasNoVerticalOverflow: true,
+      verticalAncestorsFit: true,
+    },
+    compactDrawer: {
+      verticalScrollAncestorCount: 1,
+      panelEdges: { topReachable: true, bottomReachable: true },
+      items: [
+        {
+          horizontallyContained: true,
+          noOwnHorizontalOverflow: true,
+          verticallyReachable: true,
+          pageScrollStable: true,
+          scrollContainerUsedWhenNeeded: true,
+        },
+      ],
+    },
+  };
+}
 
 function completeResult() {
   return {
@@ -127,6 +167,10 @@ describe("archive navigation evidence gate", () => {
     expect(gate).toContain("exactAuthorizedRootNavigation");
     expect(gate).toContain("exactAuthorizedAccountNavigation");
     expect(gate).toContain("width: 1280, height: 720");
+    expect(gate).toContain('matchMedia("(max-width: 1180px)")');
+    expect(gate).toContain("scrollWithinVerticalAncestors");
+    expect(gate).not.toContain("element.scrollIntoView");
+    expect(gate).toContain("scrollContainerUsedWhenNeeded");
     expect(gate).not.toContain("checkCompactArchiveHeader");
     expect(compact).toContain("checkProtectedTopbar");
     expect(compact).toContain("titleContentInset");
@@ -143,6 +187,74 @@ describe("archive navigation evidence gate", () => {
       { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
       { name: "Configurações", tag: "BUTTON", href: null },
     ]);
+  });
+
+  it("accepts compact drawer content only when panel edges and items are scroll-reachable", () => {
+    const measurement = completeMenuPanelMeasurement(true);
+    expect(archiveMenuPanelPassed(measurement)).toBe(true);
+
+    expect(
+      archiveMenuPanelPassed({
+        ...measurement,
+        compactDrawer: { ...measurement.compactDrawer, verticalScrollAncestorCount: 0 },
+      }),
+    ).toBe(false);
+    expect(
+      archiveMenuPanelPassed({
+        ...measurement,
+        compactDrawer: {
+          ...measurement.compactDrawer,
+          panelEdges: { ...measurement.compactDrawer.panelEdges, topReachable: false },
+        },
+      }),
+    ).toBe(false);
+    expect(
+      archiveMenuPanelPassed({
+        ...measurement,
+        compactDrawer: {
+          ...measurement.compactDrawer,
+          items: [
+            {
+              ...measurement.compactDrawer.items[0],
+              scrollContainerUsedWhenNeeded: false,
+            },
+          ],
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects horizontal clipping at every width and preserves desktop containment", () => {
+    const compact = completeMenuPanelMeasurement(true);
+    expect(
+      archiveMenuPanelPassed({
+        ...compact,
+        common: { ...compact.common, horizontalAncestorsFit: false },
+      }),
+    ).toBe(false);
+    expect(
+      archiveMenuPanelPassed({
+        ...compact,
+        compactDrawer: {
+          ...compact.compactDrawer,
+          items: [
+            {
+              ...compact.compactDrawer.items[0],
+              noOwnHorizontalOverflow: false,
+            },
+          ],
+        },
+      }),
+    ).toBe(false);
+
+    const desktop = completeMenuPanelMeasurement(false);
+    expect(archiveMenuPanelPassed(desktop)).toBe(true);
+    expect(
+      archiveMenuPanelPassed({
+        ...desktop,
+        desktop: { ...desktop.desktop, panelInsideViewportVertically: false },
+      }),
+    ).toBe(false);
   });
 
   it("uses real keyboard traversal and keeps failure diagnostics sanitized", () => {

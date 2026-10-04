@@ -10,6 +10,10 @@
   margin-inline: auto;
 }
 
+.pageInner > * {
+  min-width: 0;
+}
+
 .pageHeader {
   display: flex;
   min-width: 0;
@@ -54,6 +58,7 @@
   display: inline-flex;
   min-height: 2.5rem;
   flex: 0 0 auto;
+  max-width: 100%;
   align-items: center;
   gap: 0.55rem;
   border: 1px solid var(--analytics-cyan-strong);
@@ -66,18 +71,19 @@
   letter-spacing: 0.035em;
   line-height: 1.2;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .statusBadge[data-tone="warning"] {
   border-color: var(--analytics-warning);
   background: color-mix(in srgb, var(--analytics-warning) 8%, var(--analytics-surface));
-  color: var(--analytics-warning);
+  color: var(--analytics-warning-ink);
 }
 
 .statusBadge[data-tone="positive"] {
   border-color: var(--analytics-positive);
   background: color-mix(in srgb, var(--analytics-positive) 8%, var(--analytics-surface));
-  color: var(--analytics-positive);
+  color: var(--analytics-positive-ink);
 }
 
 .panel {
@@ -319,7 +325,7 @@
 .buttonDanger {
   border: 1px solid var(--analytics-danger);
   background: color-mix(in srgb, var(--analytics-danger) 10%, var(--analytics-surface));
-  color: var(--analytics-danger);
+  color: var(--analytics-danger-ink);
 }
 
 .button:disabled,
@@ -401,6 +407,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
   border: 1px solid var(--analytics-line);
   border-radius: 999px;
   background: var(--analytics-surface-muted);
@@ -409,28 +416,30 @@
   font-size: 0.68rem;
   font-weight: 720;
   line-height: 1.2;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  text-align: center;
+  white-space: normal;
 }
 
 .statusPill[data-state="active"],
 .statusPill[data-state="approved"] {
   border-color: var(--analytics-positive);
   background: color-mix(in srgb, var(--analytics-positive) 9%, var(--analytics-surface));
-  color: var(--analytics-positive);
+  color: var(--analytics-positive-ink);
 }
 
 .statusPill[data-state="pending"],
 .statusPill[data-state="legacy_review"] {
   border-color: var(--analytics-warning);
   background: color-mix(in srgb, var(--analytics-warning) 9%, var(--analytics-surface));
-  color: var(--analytics-warning);
+  color: var(--analytics-warning-ink);
 }
 
 .statusPill[data-state="inactive"],
 .statusPill[data-state="suspended"] {
   border-color: var(--analytics-danger);
   background: color-mix(in srgb, var(--analytics-danger) 9%, var(--analytics-surface));
-  color: var(--analytics-danger);
+  color: var(--analytics-danger-ink);
 }
 
 .pagination {

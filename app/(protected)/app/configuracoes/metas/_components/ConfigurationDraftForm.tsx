@@ -82,8 +82,8 @@ export function ConfigurationDraftForm({
                   aria-live="polite"
                   className={`mt-2 rounded-lg border px-3 py-2 text-sm ${
                     state.status === "previewed" || state.status === "saved"
-                      ? "border-[var(--analytics-positive)] bg-[color-mix(in_srgb,var(--analytics-positive)_8%,var(--analytics-surface))] text-[var(--analytics-positive)]"
-                      : "border-[var(--analytics-danger)] bg-[color-mix(in_srgb,var(--analytics-danger)_8%,var(--analytics-surface))] text-[var(--analytics-danger)]"
+                      ? "border-[var(--analytics-positive)] bg-[color-mix(in_srgb,var(--analytics-positive)_8%,var(--analytics-surface))] text-[var(--analytics-positive-ink)]"
+                      : "border-[var(--analytics-danger)] bg-[color-mix(in_srgb,var(--analytics-danger)_8%,var(--analytics-surface))] text-[var(--analytics-danger-ink)]"
                   }`}
                 >
                   <strong>{state.message}</strong>

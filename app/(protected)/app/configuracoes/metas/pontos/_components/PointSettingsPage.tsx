@@ -150,8 +150,8 @@ export async function PointSettingsPage({
           role={notification === "saved" ? "status" : "alert"}
           className={`${managementStyles.panel} ${managementStyles.panelPadded} text-sm ${
             notification === "saved"
-              ? "text-[var(--analytics-positive)]"
-              : "text-[var(--analytics-danger)]"
+              ? "text-[var(--analytics-positive-ink)]"
+              : "text-[var(--analytics-danger-ink)]"
           }`}
         >
           {notification === "saved"
@@ -216,9 +216,6 @@ export async function PointSettingsPage({
                       {metric.label}
                     </th>
                     <td className="w-44">
-                      <label className="sr-only" htmlFor={`weight-${metric.formKey}`}>
-                        Peso de {metric.label}
-                      </label>
                       <input
                         required
                         id={`weight-${metric.formKey}`}
@@ -234,9 +231,6 @@ export async function PointSettingsPage({
                       />
                     </td>
                     <td className="w-44">
-                      <label className="sr-only" htmlFor={`target-${metric.formKey}`}>
-                        Objetivo de {metric.label}
-                      </label>
                       <input
                         required
                         id={`target-${metric.formKey}`}

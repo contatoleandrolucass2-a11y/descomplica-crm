@@ -73,6 +73,10 @@
   text-transform: uppercase;
 }
 
+.pageHeader[data-variant="compact"] .eyebrow {
+  color: var(--analytics-cyan-strong);
+}
+
 .pageTitle {
   max-width: 18ch;
   margin: 0.4rem 0 0;

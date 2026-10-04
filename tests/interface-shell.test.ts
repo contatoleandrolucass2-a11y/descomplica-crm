@@ -46,6 +46,9 @@ describe("protected interface shell", () => {
     expect(stylesheet.match(/--analytics-navy:/g)).toHaveLength(2);
     expect(stylesheet.match(/--analytics-cyan:/g)).toHaveLength(2);
     expect(stylesheet.match(/--analytics-lime:/g)).toHaveLength(2);
+    expect(stylesheet.match(/--analytics-positive-ink:/g)).toHaveLength(3);
+    expect(stylesheet.match(/--analytics-warning-ink:/g)).toHaveLength(3);
+    expect(stylesheet.match(/--analytics-danger-ink:/g)).toHaveLength(3);
     expect(stylesheet).toContain("@media (prefers-reduced-motion: reduce)");
     expect(stylesheet).toContain("transition-duration: 0.01ms !important");
     expect(stylesheet).toContain("animation-duration: 0.01ms !important");

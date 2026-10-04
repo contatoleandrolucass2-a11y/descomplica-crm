@@ -19,7 +19,7 @@ export function DocumentationArchive() {
         description="Composição para registrar modalidade, condição de compra e valores da operação."
         statusLabel="Cálculo local · validar no fluxo oficial"
       />
-      <DocumentationCalculator baseDate={baseDate} />
+      <DocumentationCalculator baseDate={baseDate} showHeroHeading={false} />
     </div>
   );
 }

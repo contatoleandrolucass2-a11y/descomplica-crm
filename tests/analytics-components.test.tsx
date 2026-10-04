@@ -242,5 +242,8 @@ describe("analytical design system", () => {
     expect(stylesheet).toMatch(/\.rankingName \{[\s\S]*?white-space: normal/);
     expect(stylesheet).toContain('.metricCard[data-variant="compact"]');
     expect(stylesheet).toContain('.pageHeader[data-variant="stage"]');
+    expect(stylesheet).toMatch(
+      /\.pageHeader\[data-variant="compact"\] \.eyebrow \{[\s\S]*?color: var\(--analytics-cyan-strong\)/,
+    );
   });
 });

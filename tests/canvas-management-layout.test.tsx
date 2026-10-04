@@ -49,6 +49,38 @@ describe("management canvas layout", () => {
     }
   });
 
+  it("contains mobile goal layouts and separates semantic ink from accents", () => {
+    const stylesheet = source("app/(protected)/_components/ManagementCanvas.module.css");
+    const funnel = source(
+      "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
+    );
+    const pointSettings = source(
+      "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
+    );
+    const draftForm = source(
+      "app/(protected)/app/configuracoes/metas/_components/ConfigurationDraftForm.tsx",
+    );
+    const userAccess = source("app/(protected)/admin/usuarios/UserAccessManager.tsx");
+
+    expect(stylesheet).toMatch(/\.pageInner > \* \{[\s\S]*?min-width: 0/);
+    expect(stylesheet).toMatch(
+      /\.statusPill \{[\s\S]*?max-width: 100%[\s\S]*?overflow-wrap: anywhere[\s\S]*?white-space: normal/,
+    );
+    expect(stylesheet).toMatch(
+      /\.statusBadge\[data-tone="positive"\] \{[\s\S]*?border-color: var\(--analytics-positive\)[\s\S]*?color: var\(--analytics-positive-ink\)/,
+    );
+    expect(funnel).toContain("w-full min-w-0 grid-cols-2");
+    expect(funnel).toContain("lg:w-auto lg:min-w-72");
+    expect(funnel).toContain("text-[var(--analytics-positive-ink)]");
+    for (const component of [funnel, pointSettings, draftForm, userAccess]) {
+      expect(component).not.toMatch(/text-\[var\(--analytics-(?:positive|warning|danger)\)\]/);
+    }
+    expect(pointSettings).toContain("aria-label={`Peso de ${metric.label}`}");
+    expect(pointSettings).toContain("aria-label={`Objetivo de ${metric.label}`}");
+    expect(pointSettings).not.toContain("htmlFor={`weight-${metric.formKey}`}");
+    expect(pointSettings).not.toContain("htmlFor={`target-${metric.formKey}`}");
+  });
+
   it("preserves server authorization and the existing mutation contracts", () => {
     const admin = source("app/(protected)/admin/page.tsx");
     const users = source("app/(protected)/admin/usuarios/page.tsx");

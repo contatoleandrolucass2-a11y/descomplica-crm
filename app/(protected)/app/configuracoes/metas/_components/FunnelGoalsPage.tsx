@@ -154,7 +154,7 @@ export async function FunnelGoalsPage({
               : "Base legada: somente leitura · Rascunho atual: indisponível"}
           </span>
         </div>
-        <dl className="grid min-w-72 grid-cols-2 overflow-hidden rounded-lg border border-[var(--analytics-line)]">
+        <dl className="grid w-full min-w-0 grid-cols-2 overflow-hidden rounded-lg border border-[var(--analytics-line)] lg:w-auto lg:min-w-72">
           <div className="px-3 py-2">
             <dt className="text-[0.62rem] font-bold tracking-wide text-[var(--analytics-cyan-strong)] uppercase">
               Competência
@@ -217,8 +217,8 @@ export async function FunnelGoalsPage({
           role={notification === "saved" ? "status" : "alert"}
           className={`${managementStyles.panel} px-4 py-3 text-sm ${
             notification === "saved"
-              ? "text-[var(--analytics-positive)]"
-              : "text-[var(--analytics-danger)]"
+              ? "text-[var(--analytics-positive-ink)]"
+              : "text-[var(--analytics-danger-ink)]"
           }`}
         >
           {notification === "saved"
@@ -316,7 +316,7 @@ export async function FunnelGoalsPage({
 
             <div className="px-4 py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[0.68rem] font-bold tracking-widest text-[var(--analytics-positive)] uppercase">
+                <p className="text-[0.68rem] font-bold tracking-widest text-[var(--analytics-positive-ink)] uppercase">
                   Sequência do funil
                 </p>
                 <p className="text-[0.65rem] text-[var(--analytics-muted)]">
@@ -358,7 +358,7 @@ export async function FunnelGoalsPage({
             className={`${managementStyles.panel} ${managementStyles.panelPadded}`}
           >
             <div className="flex items-start gap-3">
-              <span className="grid size-8 shrink-0 place-items-center rounded-full border border-[var(--analytics-positive)] text-xs font-bold text-[var(--analytics-positive)]">
+              <span className="grid size-8 shrink-0 place-items-center rounded-full border border-[var(--analytics-positive)] text-xs font-bold text-[var(--analytics-positive-ink)]">
                 03
               </span>
               <div>

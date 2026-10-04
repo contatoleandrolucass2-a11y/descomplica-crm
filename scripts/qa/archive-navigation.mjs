@@ -314,7 +314,33 @@ async function assertExactRootNavigation(page) {
   );
 }
 
-// Retains the legacy tablet assertions, including ancestor clipping and both axes.
+function allArchiveMenuPanelChecksPass(checks) {
+  return (
+    checks &&
+    typeof checks === "object" &&
+    Object.keys(checks).length > 0 &&
+    Object.values(checks).every((value) => value === true)
+  );
+}
+
+export function archiveMenuPanelPassed(measurement) {
+  if (!allArchiveMenuPanelChecksPass(measurement?.common)) return false;
+  if (!measurement.compact) return allArchiveMenuPanelChecksPass(measurement.desktop);
+
+  const drawer = measurement.compactDrawer;
+  return Boolean(
+    drawer &&
+    Number.isInteger(drawer.verticalScrollAncestorCount) &&
+    drawer.verticalScrollAncestorCount > 0 &&
+    allArchiveMenuPanelChecksPass(drawer.panelEdges) &&
+    Array.isArray(drawer.items) &&
+    drawer.items.length > 0 &&
+    drawer.items.every(allArchiveMenuPanelChecksPass),
+  );
+}
+
+// Desktop keeps the floating-panel containment contract. Compact widths instead
+// prove every drawer item and both panel edges are reachable through vertical scroll.
 export async function checkArchiveMenuPanel(page, triggerName, panelId) {
   await ensureArchiveNavigationOpen(page);
   const trigger = navigation(page).getByRole("button", { name: triggerName, exact: true });
@@ -322,55 +348,222 @@ export async function checkArchiveMenuPanel(page, triggerName, panelId) {
   await trigger.click();
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
   await expect(panel).toBeVisible();
-  const unclipped = await panel.evaluate((menuPanel) => {
+  const measurement = await panel.evaluate(async (menuPanel) => {
     const tolerance = 1;
     const rect = menuPanel.getBoundingClientRect();
     const control = document.querySelector(`[aria-controls="${menuPanel.id}"]`);
     const controlRect = control?.getBoundingClientRect();
     const menu = menuPanel.closest('nav[aria-label="Navegação principal"]');
+    const compact = matchMedia("(max-width: 1180px)").matches;
+    const clips = (value) => ["auto", "hidden", "scroll", "clip"].includes(value);
+    const scrolls = (value) => ["auto", "scroll"].includes(value);
+    const ancestors = [];
     let ancestor = menuPanel.parentElement;
-    let ancestorsFit = true;
     while (ancestor && ancestor !== document.documentElement) {
-      const style = getComputedStyle(ancestor);
-      const bounds = ancestor.getBoundingClientRect();
-      const clips = (value) => ["auto", "hidden", "scroll", "clip"].includes(value);
-      if (
-        (clips(style.overflowX) &&
-          (rect.left < bounds.left - tolerance || rect.right > bounds.right + tolerance)) ||
-        (clips(style.overflowY) &&
-          (rect.top < bounds.top - tolerance || rect.bottom > bounds.bottom + tolerance))
-      ) {
-        ancestorsFit = false;
-        break;
-      }
+      ancestors.push(ancestor);
       ancestor = ancestor.parentElement;
     }
-    return (
-      getComputedStyle(menuPanel).visibility === "visible" &&
-      Number(getComputedStyle(menuPanel).opacity) > 0 &&
-      control?.getAttribute("aria-expanded") === "true" &&
-      Boolean(controlRect) &&
-      rect.width > 0 &&
-      rect.height > 0 &&
-      rect.left >= -tolerance &&
-      rect.right <= innerWidth + tolerance &&
-      rect.top >= -tolerance &&
-      rect.bottom <= innerHeight + tolerance &&
-      controlRect.left >= -tolerance &&
-      controlRect.right <= innerWidth + tolerance &&
-      menu instanceof HTMLElement &&
-      menu.scrollWidth <= menu.clientWidth + tolerance &&
-      menuPanel.scrollWidth <= menuPanel.clientWidth + tolerance &&
-      menuPanel.scrollHeight <= menuPanel.clientHeight + tolerance &&
-      document.documentElement.scrollWidth <= document.documentElement.clientWidth + tolerance &&
-      document.body.scrollWidth <= document.body.clientWidth + tolerance &&
-      ancestorsFit
+    const horizontalAncestorsFit = (element) => {
+      const bounds = element.getBoundingClientRect();
+      if (bounds.left < -tolerance || bounds.right > innerWidth + tolerance) return false;
+      let parent = element.parentElement;
+      while (parent && parent !== document.documentElement) {
+        const style = getComputedStyle(parent);
+        const parentBounds = parent.getBoundingClientRect();
+        if (
+          clips(style.overflowX) &&
+          (bounds.left < parentBounds.left - tolerance ||
+            bounds.right > parentBounds.right + tolerance)
+        )
+          return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    };
+    const verticalAncestorsFit = ancestors.every((parent) => {
+      const style = getComputedStyle(parent);
+      if (!clips(style.overflowY)) return true;
+      const bounds = parent.getBoundingClientRect();
+      return rect.top >= bounds.top - tolerance && rect.bottom <= bounds.bottom + tolerance;
+    });
+    const common = {
+      visible:
+        getComputedStyle(menuPanel).visibility === "visible" &&
+        Number(getComputedStyle(menuPanel).opacity) > 0,
+      expanded: control?.getAttribute("aria-expanded") === "true",
+      controlPresent: Boolean(controlRect),
+      panelHasSize: rect.width > 0 && rect.height > 0,
+      panelInsideViewportHorizontally:
+        rect.left >= -tolerance && rect.right <= innerWidth + tolerance,
+      controlInsideViewportHorizontally: Boolean(
+        controlRect &&
+        controlRect.left >= -tolerance &&
+        controlRect.right <= innerWidth + tolerance,
+      ),
+      navigationHasNoHorizontalOverflow:
+        menu instanceof HTMLElement && menu.scrollWidth <= menu.clientWidth + tolerance,
+      documentHasNoHorizontalOverflow:
+        document.documentElement.scrollWidth <= document.documentElement.clientWidth + tolerance,
+      bodyHasNoHorizontalOverflow:
+        document.body.scrollWidth <= document.body.clientWidth + tolerance,
+      horizontalAncestorsFit: horizontalAncestorsFit(menuPanel),
+    };
+
+    if (!compact) {
+      return {
+        compact,
+        common,
+        desktop: {
+          panelInsideViewportVertically:
+            rect.top >= -tolerance && rect.bottom <= innerHeight + tolerance,
+          controlInsideViewportVertically: Boolean(
+            controlRect &&
+            controlRect.top >= -tolerance &&
+            controlRect.bottom <= innerHeight + tolerance,
+          ),
+          panelHasNoHorizontalOverflow: menuPanel.scrollWidth <= menuPanel.clientWidth + tolerance,
+          panelHasNoVerticalOverflow: menuPanel.scrollHeight <= menuPanel.clientHeight + tolerance,
+          verticalAncestorsFit,
+        },
+      };
+    }
+
+    const verticalScrollAncestors = ancestors.filter((parent) =>
+      scrolls(getComputedStyle(parent).overflowY),
     );
+    const savedWindowScroll = { x: scrollX, y: scrollY };
+    const savedAncestorScroll = ancestors.map((parent) => ({
+      parent,
+      left: parent.scrollLeft,
+      top: parent.scrollTop,
+    }));
+    const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+    const restoreScroll = async () => {
+      for (const saved of savedAncestorScroll) {
+        saved.parent.scrollLeft = saved.left;
+        saved.parent.scrollTop = saved.top;
+      }
+      window.scrollTo({
+        left: savedWindowScroll.x,
+        top: savedWindowScroll.y,
+        behavior: "instant",
+      });
+      await nextFrame();
+    };
+    const visibleVerticalBounds = (element) => {
+      let top = 0;
+      let bottom = innerHeight;
+      let parent = element.parentElement;
+      while (parent && parent !== document.documentElement) {
+        const style = getComputedStyle(parent);
+        if (clips(style.overflowY)) {
+          const bounds = parent.getBoundingClientRect();
+          const clientTop = bounds.top + parent.clientTop;
+          top = Math.max(top, clientTop);
+          bottom = Math.min(bottom, clientTop + parent.clientHeight);
+        }
+        parent = parent.parentElement;
+      }
+      return { top, bottom };
+    };
+    const scrollWithinVerticalAncestors = (element, block) => {
+      for (const parent of verticalScrollAncestors) {
+        const bounds = parent.getBoundingClientRect();
+        const clientTop = bounds.top + parent.clientTop;
+        const clientBottom = clientTop + parent.clientHeight;
+        const elementBounds = element.getBoundingClientRect();
+        let delta = 0;
+        if (block === "start") delta = elementBounds.top - clientTop;
+        else if (block === "end") delta = elementBounds.bottom - clientBottom;
+        else if (elementBounds.top < clientTop) delta = elementBounds.top - clientTop;
+        else if (elementBounds.bottom > clientBottom) delta = elementBounds.bottom - clientBottom;
+        parent.scrollTop += delta;
+      }
+    };
+    const verticalAncestorWasUsed = (before) =>
+      verticalScrollAncestors.some(
+        (parent, index) => Math.abs(parent.scrollTop - before[index]) > tolerance,
+      );
+    const measureReachability = async (element, block, edge = null) => {
+      await restoreScroll();
+      const beforeBounds = visibleVerticalBounds(element);
+      const beforeRect = element.getBoundingClientRect();
+      const beforeScroll = verticalScrollAncestors.map((parent) => parent.scrollTop);
+      const neededVerticalScroll = edge
+        ? edge === "top"
+          ? beforeRect.top < beforeBounds.top - tolerance ||
+            beforeRect.top > beforeBounds.bottom + tolerance
+          : beforeRect.bottom < beforeBounds.top - tolerance ||
+            beforeRect.bottom > beforeBounds.bottom + tolerance
+        : beforeRect.top < beforeBounds.top - tolerance ||
+          beforeRect.bottom > beforeBounds.bottom + tolerance;
+      scrollWithinVerticalAncestors(element, block);
+      await nextFrame();
+      const bounds = visibleVerticalBounds(element);
+      const currentRect = element.getBoundingClientRect();
+      const verticallyReachable = edge
+        ? edge === "top"
+          ? currentRect.top >= bounds.top - tolerance &&
+            currentRect.top <= bounds.bottom + tolerance
+          : currentRect.bottom >= bounds.top - tolerance &&
+            currentRect.bottom <= bounds.bottom + tolerance
+        : currentRect.top >= bounds.top - tolerance &&
+          currentRect.bottom <= bounds.bottom + tolerance;
+      const checks = {
+        horizontallyContained: horizontalAncestorsFit(element),
+        verticallyReachable,
+        pageScrollStable:
+          Math.abs(scrollX - savedWindowScroll.x) <= tolerance &&
+          Math.abs(scrollY - savedWindowScroll.y) <= tolerance,
+        scrollContainerUsedWhenNeeded:
+          !neededVerticalScroll || verticalAncestorWasUsed(beforeScroll),
+      };
+      if (!edge)
+        checks.noOwnHorizontalOverflow = element.scrollWidth <= element.clientWidth + tolerance;
+      return checks;
+    };
+
+    let panelTop;
+    let panelBottom;
+    let items;
+    try {
+      panelTop = await measureReachability(menuPanel, "start", "top");
+      panelBottom = await measureReachability(menuPanel, "end", "bottom");
+      const visibleItems = [...menuPanel.children].filter((item) => {
+        const style = getComputedStyle(item);
+        const bounds = item.getBoundingClientRect();
+        return (
+          style.display !== "none" &&
+          style.visibility !== "hidden" &&
+          bounds.width > 0 &&
+          bounds.height > 0
+        );
+      });
+      items = [];
+      for (const item of visibleItems) {
+        items.push(await measureReachability(item, "nearest"));
+      }
+    } finally {
+      await restoreScroll();
+    }
+
+    return {
+      compact,
+      common,
+      compactDrawer: {
+        verticalScrollAncestorCount: verticalScrollAncestors.length,
+        panelEdges: {
+          topReachable: Object.values(panelTop).every(Boolean),
+          bottomReachable: Object.values(panelBottom).every(Boolean),
+        },
+        items,
+      },
+    };
   });
   await trigger.click();
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await expect(panel).toBeHidden();
-  return unclipped;
+  return archiveMenuPanelPassed(measurement);
 }
 
 export async function assertHeaderGeometry(page, compact) {
