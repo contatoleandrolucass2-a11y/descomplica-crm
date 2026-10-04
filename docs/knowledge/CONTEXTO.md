@@ -1,9 +1,9 @@
 # Contexto do DESCOMPLICA-CRM
 
 status: validado
-atualizado_em: 2026-09-28
-verificado_em: 2026-09-28
-fonte: AGENTS.md, package.json, docs/runbooks/inventory-performance.md
+atualizado_em: 2026-10-03
+verificado_em: 2026-10-03
+fonte: AGENTS.md, package.json, app/(protected)/layout.tsx, lib/navigation/pages.ts
 
 ## Antes de trabalhar
 
@@ -39,6 +39,17 @@ fonte: AGENTS.md, package.json, docs/runbooks/inventory-performance.md
   proposta em andamento sao preservados. Tabela Direta usa somente snapshot.
 - Nao extrapolar o benchmark de facetas para o tempo total da pagina.
 - Nao alterar regras financeiras ao corrigir desempenho ou aparencia.
+
+## Navegacao protegida
+
+- Todas as paginas autenticadas usam o shell de `app/(protected)/layout.tsx`.
+  Nao criar cabeçalhos ou menus globais dentro de sub-rotas.
+- Links navegáveis vêm do catálogo autorizado no servidor. Rotas liberadas que
+  ainda não pertencem ao catálogo precisam convergir pai autorizado, permissão
+  efetiva e `releaseEnabled`; estado bloqueado não recebe `path` nem ancora.
+- Menu e visibilidade ajudam a descoberta, mas nunca substituem Proxy, guard,
+  RPC, grants ou RLS. Uma rota conhecida sem autorização continua falhando
+  fechada mesmo quando não aparece na interface.
 
 ## Limites permanentes
 

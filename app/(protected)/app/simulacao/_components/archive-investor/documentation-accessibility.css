@@ -6,3 +6,25 @@
 .documentation-page-shell .documentation-panel {
   overflow: clip;
 }
+
+/* Loaded after the legacy archive stylesheet so the dark summary cannot inherit
+   the fixed light-card inks at any responsive breakpoint. */
+:root[data-theme="dark"] .documentation-page-shell .documentation-breakdown h3 {
+  color: var(--doc-rank-text) !important;
+}
+
+:root[data-theme="dark"] .documentation-page-shell .documentation-breakdown dd {
+  color: var(--doc-rank-text) !important;
+}
+
+:root[data-theme="dark"] .documentation-page-shell .documentation-breakdown dt {
+  color: var(--doc-rank-muted) !important;
+}
+
+:root[data-theme="dark"] .documentation-page-shell .documentation-breakdown-total dt {
+  color: var(--doc-rank-accent) !important;
+}
+
+:root[data-theme="dark"] .documentation-page-shell .documentation-breakdown-total dd {
+  color: var(--doc-rank-text) !important;
+}

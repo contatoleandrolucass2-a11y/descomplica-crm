@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LockKeyhole } from "lucide-react";
 
 import { DataState, PageHeader, SectionHeading } from "@/app/(protected)/app/_components/analytics";
 import { enforcePermission } from "@/lib/authorization/enforce";
@@ -14,6 +15,20 @@ import styles from "./simulators.module.css";
 export const metadata = { title: "Simulação" };
 export const dynamic = "force-dynamic";
 
+interface HubSimulator {
+  slug: string;
+  code: string;
+  title: string;
+  description: string;
+}
+
+const TABELAO_HUB_ITEM: HubSimulator = {
+  slug: "tabelao",
+  code: "ESTOQUE SPC",
+  title: "Simulador Tabelão",
+  description: "Consulte o estoque SPC disponível na jornada autorizada.",
+};
+
 function CalculatorIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -27,7 +42,7 @@ function SimulatorCardContent({
   simulator,
   releaseEnabled,
 }: {
-  simulator: (typeof SIMULATOR_LIST)[number];
+  simulator: HubSimulator;
   releaseEnabled: boolean;
 }) {
   return (
@@ -42,7 +57,7 @@ function SimulatorCardContent({
         {!releaseEnabled ? <span className={styles.hubBlocked}>Aguardando autorização</span> : null}
       </span>
       <span className={styles.hubArrow} aria-hidden="true">
-        {releaseEnabled ? "↗" : "🔒"}
+        {releaseEnabled ? "↗" : <LockKeyhole size={18} strokeWidth={1.8} />}
       </span>
     </>
   );
@@ -55,10 +70,24 @@ export default async function SimulationHubPage() {
     "associativo-fluxo-linear",
     authorization,
   );
-  const authorizedJourneyCount = SIMULATOR_LIST.filter(
-    (simulator) =>
+  const simulatorCards = SIMULATOR_LIST.map((simulator) => ({
+    simulator,
+    releaseEnabled:
       getProtectedPageGate(`/app/simulacao/${simulator.slug}`)?.releaseEnabled === true,
-  ).length;
+  }));
+  const tabelaoGate = getProtectedPageGate("/app/simulacao/tabelao");
+  const tabelaoAuthorized =
+    tabelaoGate?.releaseEnabled === true &&
+    tabelaoGate.pageKey === "crm.simulation.tabelao" &&
+    tabelaoGate.permission === "crm.simulators.view" &&
+    authorization.permissions.includes(tabelaoGate.permission);
+  const hubCards = tabelaoAuthorized
+    ? [...simulatorCards, { simulator: TABELAO_HUB_ITEM, releaseEnabled: true }]
+    : simulatorCards;
+  const authorizedJourneyCount = hubCards.filter(({ releaseEnabled }) => releaseEnabled).length;
+  const authorizedJourneyLabel = `${authorizedJourneyCount} ${
+    authorizedJourneyCount === 1 ? "jornada autorizada" : "jornadas autorizadas"
+  }`;
 
   return (
     <main className={styles.page}>
@@ -76,7 +105,7 @@ export default async function SimulationHubPage() {
               <CalculatorIcon />
               <span>
                 <small>Ferramentas disponíveis</small>
-                <strong>{authorizedJourneyCount} jornada autorizada</strong>
+                <strong>{authorizedJourneyLabel}</strong>
               </span>
             </div>
           }
@@ -106,9 +135,7 @@ export default async function SimulationHubPage() {
             description="Cada tela preserva campos, seções, alertas e painel de resultado sem publicar cálculo não validado."
           />
           <div className={styles.hubGrid}>
-            {SIMULATOR_LIST.map((simulator) => {
-              const releaseEnabled =
-                getProtectedPageGate(`/app/simulacao/${simulator.slug}`)?.releaseEnabled === true;
+            {hubCards.map(({ simulator, releaseEnabled }) => {
               return releaseEnabled ? (
                 <Link
                   className={styles.hubCard}

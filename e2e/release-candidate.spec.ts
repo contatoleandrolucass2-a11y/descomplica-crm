@@ -395,7 +395,6 @@ const protectedSurfaces = [
     path: "/app/simulacao/calcular-documentacao",
     heading: "Calcular documentação",
     allowed: masterOnlyRoles,
-    genericNavigation: false,
   },
   { path: "/app/simulacao/caixa", heading: "Simulação CAIXA", allowed: noRoles },
   {
@@ -404,37 +403,101 @@ const protectedSurfaces = [
     allowed: masterOnlyRoles,
   },
   {
+    path: "/app/simulacao/tabelao",
+    heading: "Simulador Tabelão",
+    allowed: masterOnlyRoles,
+  },
+  {
     path: "/app/simulacao/tabela-investidor",
     heading: "Tabela Investidor",
     allowed: masterOnlyRoles,
-    genericNavigation: false,
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
   { path: "/admin/usuarios", heading: "Usuários e acessos", allowed: adminRoles },
   { path: "/admin/paginas", heading: "Catálogo de páginas", allowed: adminRoles },
 ] as const;
 
-function expectedRoutesForRole(role: Role) {
+function allowedDirectRoutesForRole(role: Role) {
   return protectedSurfaces
-    .filter(
-      (surface) =>
-        surface.allowed.has(role) &&
-        (!("genericNavigation" in surface) || surface.genericNavigation !== false),
-    )
+    .filter((surface) => surface.allowed.has(role))
     .map((surface) => surface.path)
     .sort();
 }
 
-const expectedCommercialPageCountByRole: Readonly<Record<Role, number>> = {
-  master: 18,
-  admin: 14,
-  broker: 7,
-  coordinator: 7,
-  real_estate: 7,
-  manager: 0,
-  house: 0,
-  partnership_channel: 0,
-  pending: 0,
+const analyticalRoutes = [
+  "/app",
+  "/app/etapas/agendamentos",
+  "/app/etapas/oportunidades",
+  "/app/etapas/pastas",
+  "/app/etapas/vendas",
+  "/app/etapas/visitas",
+  "/app/ranking",
+] as const;
+const settingsRoutes = [
+  "/app/configuracoes",
+  "/app/configuracoes/metas",
+  "/app/configuracoes/metas/parcerias",
+  "/app/configuracoes/metas/pontos",
+] as const;
+const simulatorRoutes = [
+  "/app/simulacao",
+  "/app/simulacao/associativo-fluxo-linear",
+  "/app/simulacao/calcular-documentacao",
+  "/app/simulacao/tabela-direta",
+  "/app/simulacao/tabela-investidor",
+  "/app/simulacao/tabelao",
+] as const;
+const administrationRoutes = ["/admin", "/admin/paginas", "/admin/usuarios"] as const;
+
+function sortedRouteSet(routes: readonly string[]) {
+  return [...routes].sort();
+}
+
+const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
+  master: sortedRouteSet([
+    ...analyticalRoutes,
+    "/app/canal-de-parcerias",
+    ...settingsRoutes,
+    ...simulatorRoutes,
+    ...administrationRoutes,
+  ]),
+  admin: sortedRouteSet([...analyticalRoutes, ...settingsRoutes, ...administrationRoutes]),
+  broker: sortedRouteSet(analyticalRoutes),
+  coordinator: sortedRouteSet(analyticalRoutes),
+  real_estate: sortedRouteSet(analyticalRoutes),
+  manager: [],
+  house: [],
+  partnership_channel: [],
+  pending: [],
+};
+
+const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
+  master: sortedRouteSet([
+    ...analyticalRoutes,
+    "/app/canal-de-parcerias",
+    ...settingsRoutes,
+    ...simulatorRoutes,
+  ]),
+  admin: sortedRouteSet([...analyticalRoutes, ...settingsRoutes]),
+  broker: sortedRouteSet(analyticalRoutes),
+  coordinator: sortedRouteSet(analyticalRoutes),
+  real_estate: sortedRouteSet(analyticalRoutes),
+  manager: [],
+  house: [],
+  partnership_channel: [],
+  pending: [],
+};
+
+const expectedAccountAdminRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
+  master: sortedRouteSet(administrationRoutes),
+  admin: sortedRouteSet(administrationRoutes),
+  manager: [],
+  broker: [],
+  coordinator: [],
+  real_estate: [],
+  house: [],
+  partnership_channel: [],
+  pending: [],
 };
 
 function expectedHomeForRole(role: Role) {
@@ -577,10 +640,17 @@ test.afterAll(() => {
 });
 
 test("the hosted profile matrix uses the exact approved commercial page sets", () => {
-  expect(protectedSurfaces).toHaveLength(21);
+  expect(protectedSurfaces).toHaveLength(22);
   for (const role of expectedRoles) {
-    expect(expectedRoutesForRole(role), role).toHaveLength(expectedCommercialPageCountByRole[role]);
+    expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
+    expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
+      role === "master" ? 18 : role === "admin" ? 11 : inheritedAnalyticalRoles.has(role) ? 7 : 0,
+    );
+    expect(expectedAccountAdminRoutesByRole[role], role).toHaveLength(adminRoles.has(role) ? 3 : 0);
   }
+  expect(
+    protectedSurfaces.find((surface) => surface.path === "/app/simulacao/caixa")?.allowed,
+  ).toBe(noRoles);
 });
 
 test("anonymous boundaries and generic login failure stay closed", async ({ page }) => {
@@ -823,12 +893,40 @@ for (const role of expectedRoles) {
 
       reportProgress("identity");
       await expect(page).toHaveURL((url) => url.pathname === expectedHomeForRole(role));
-      const identity = page.locator(
-        expectedHomeForRole(role) === "/conta/seguranca"
-          ? "[data-account-identity]"
-          : "[data-session-identity-label]",
+      const accountTrigger = page.locator(
+        'header button[data-session-identity][aria-controls="protected-account-menu"]',
       );
-      expect((await identity.textContent())?.includes(accounts[role].email)).toBe(true);
+      const accountPanel = page.locator("#protected-account-menu");
+      if (expectedHomeForRole(role) === "/conta/seguranca") {
+        await expect(accountTrigger).toHaveCount(0);
+        await expect(accountPanel).toHaveCount(0);
+        await expect(page.locator('header nav[aria-label="Navegação principal"]')).toHaveCount(0);
+        await expect(page.locator("[data-account-identity]")).toContainText(accounts[role].email);
+      } else {
+        await expect(accountTrigger).toBeVisible();
+        await expect(accountTrigger).toHaveAttribute("aria-expanded", "false");
+        await accountTrigger.click();
+        await expect(accountTrigger).toHaveAttribute("aria-expanded", "true");
+        await expect(accountPanel).toBeVisible();
+        await expect(accountPanel.getByText("Conta conectada", { exact: true })).toBeVisible();
+        await expect(accountPanel.locator("[data-session-identity-label]")).toContainText(
+          accounts[role].email,
+        );
+        const accountAdminRoutes = await accountPanel
+          .locator('nav[aria-label="Administração"] a[href^="/"]')
+          .evaluateAll((links) =>
+            [
+              ...new Set(
+                links.map((link) => new URL(link.getAttribute("href")!, location.origin).pathname),
+              ),
+            ].sort(),
+          );
+        expect(accountAdminRoutes).toEqual(expectedAccountAdminRoutesByRole[role]);
+        await expect(accountPanel.locator('a[href="/conta/seguranca"]')).toHaveCount(1);
+        await page.keyboard.press("Escape");
+        await expect(accountTrigger).toBeFocused();
+        await expect(accountPanel).toBeHidden();
+      }
 
       const securityPage = await page.goto("/conta/seguranca");
       expect(securityPage?.status()).toBe(200);
@@ -931,9 +1029,6 @@ for (const role of expectedRoles) {
       }
       reportProgress("api-gates");
 
-      const expectedNavigationRoutes = expectedRoutesForRole(role).filter(
-        (route) => route !== "/app/simulacao/tabela-direta",
-      );
       // This is an authorization matrix, not a load test. Keep requests serial
       // so a small release host cannot turn artificial bursts into database
       // statement timeouts while preserving every profile × route assertion.
@@ -986,7 +1081,7 @@ for (const role of expectedRoles) {
 
       await assertRenderedSurface(navigationSurface!);
 
-      const navigation = page.locator('header nav[aria-label="Navegação autorizada"]');
+      const navigation = page.locator('header nav[aria-label="Navegação principal"]');
       const navigationRoutes = await navigation
         .locator('a[href^="/"]')
         .evaluateAll((links) =>
@@ -996,7 +1091,7 @@ for (const role of expectedRoles) {
             ),
           ].sort(),
         );
-      expect(navigationRoutes).toEqual(expectedNavigationRoutes);
+      expect(navigationRoutes).toEqual(expectedHeaderRoutesByRole[role]);
       reportProgress("navigation");
 
       if (role === "master") {
@@ -1009,12 +1104,37 @@ for (const role of expectedRoles) {
         await expect(page.locator('main a[href="/app/simulacao/tabela-investidor"]')).toHaveCount(
           1,
         );
+        const tabelaoCard = page.locator('main a[href="/app/simulacao/tabelao"]');
+        await expect(tabelaoCard).toHaveCount(1);
+        await expect(
+          tabelaoCard.getByRole("heading", { level: 2, name: "Simulador Tabelão", exact: true }),
+        ).toBeVisible();
         await expect(
           page.locator('main a[href="/app/simulacao/calcular-documentacao"]'),
         ).toHaveCount(1);
         await expect(page.locator('main a[href="/app/simulacao/caixa"]')).toHaveCount(0);
-        await expect(page.locator('article[data-release-state="blocked"]')).toHaveCount(1);
-        await expect(page.getByText("Aguardando autorização", { exact: true })).toHaveCount(1);
+        const blockedSimulatorCard = page.locator('main article[data-release-state="blocked"]');
+        await expect(blockedSimulatorCard).toHaveCount(1);
+        await expect(
+          blockedSimulatorCard.getByText("Aguardando autorização", { exact: true }),
+        ).toHaveCount(1);
+
+        const simulationDisclosure = page.getByRole("button", {
+          name: "Simulação",
+          exact: true,
+        });
+        await simulationDisclosure.click();
+        const simulationPanel = page.locator("#authorized-navigation-crm-simulation");
+        await expect(simulationPanel).toBeVisible();
+        await expect(simulationPanel.locator('a[href="/app/simulacao/tabelao"]')).toHaveCount(1);
+        await expect(simulationPanel.locator('a[href="/app/simulacao/caixa"]')).toHaveCount(0);
+        await expect(
+          simulationPanel.locator('[aria-disabled="true"]').filter({ hasText: "CAIXA" }),
+        ).toHaveCount(1);
+        await expect(
+          simulationPanel.getByText("Aguardando autorização", { exact: true }),
+        ).toHaveCount(1);
+        await page.keyboard.press("Escape");
         reportProgress("simulator-release-gates");
       }
 
@@ -1254,8 +1374,14 @@ test("released simulators and documentation run only for Master while CAIXA stay
     ).toBeVisible();
     await expect(page.getByRole("button", { name: /^Calcular documentação Data/u })).toBeDisabled();
     await page.getByRole("button", { name: "Simulação", exact: true }).click();
+    const simulationPanel = page.locator("#authorized-navigation-crm-simulation");
     await expect(
-      page.locator('#archive-navigation a[href="/app/simulacao/calcular-documentacao"]'),
+      simulationPanel.locator('a[href="/app/simulacao/calcular-documentacao"]'),
+    ).toBeVisible();
+    await expect(simulationPanel.locator('a[href="/app/simulacao/tabelao"]')).toBeVisible();
+    await expect(simulationPanel.locator('a[href="/app/simulacao/caixa"]')).toHaveCount(0);
+    await expect(
+      simulationPanel.locator('[aria-disabled="true"]').filter({ hasText: "CAIXA" }),
     ).toBeVisible();
 
     const caixa = await page.goto("/app/simulacao/caixa");
@@ -1271,20 +1397,47 @@ test("released simulators and documentation run only for Master while CAIXA stay
       page.getByRole("heading", { level: 1, name: "Simulador Tabela Direta", exact: true }),
     ).toBeVisible();
 
+    const tabelao = await page.goto("/app/simulacao/tabelao");
+    expect(tabelao?.status()).toBe(200);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Simulador Tabelão", exact: true }),
+    ).toBeVisible();
+    const tabelaoResults = page.getByRole("region", {
+      name: "Menores valores por empreendimento, planta e vagas",
+    });
+    await expect(tabelaoResults).toBeVisible();
+    await expect(tabelaoResults.getByRole("table")).toBeVisible();
+
     await page.goto("/app");
-    const disclosure = page.locator("header summary").first();
+    const disclosure = page
+      .locator(
+        'header button[data-navigation-root-control][aria-controls^="authorized-navigation-"]',
+      )
+      .first();
+    const disclosurePanelId = await disclosure.getAttribute("aria-controls");
+    if (!disclosurePanelId) throw new Error("Navigation disclosure panel is missing.");
+    const disclosurePanel = page.locator(`#${disclosurePanelId}`);
+    await expect(disclosure).toBeVisible();
+    await expect(disclosurePanel).toBeHidden();
     await disclosure.focus();
     await page.keyboard.press("Enter");
-    await expect(disclosure.locator("xpath=..")).toHaveAttribute("open", "");
+    await expect(disclosure).toHaveAttribute("aria-expanded", "true");
+    await expect(disclosurePanel).toBeVisible();
     await page.keyboard.press("Escape");
+    await expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    await expect(disclosurePanel).toBeHidden();
     await expect(disclosure).toBeFocused();
 
+    const themeSwitch = page.getByRole("group", { name: "Aparência da página", exact: true });
+    await expect(themeSwitch).toBeVisible();
     for (const [label, theme] of [
-      ["Equilibrado", "balanced"],
+      ["Médio", "balanced"],
       ["Escuro", "dark"],
       ["Claro", "light"],
     ] as const) {
-      await page.getByRole("button", { name: label, exact: true }).click();
+      const themeButton = themeSwitch.getByRole("button", { name: label, exact: true });
+      await expect(themeButton).toBeVisible();
+      await themeButton.click();
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     }
   });
@@ -1300,15 +1453,22 @@ test("released simulators and documentation run only for Master while CAIXA stay
   });
 });
 
-test("long session identity truncates without overlapping navigation at 1440", async ({
+test("long session identity stays inside AccountMenu without overlapping navigation at 1440", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/app");
-    const identity = page.locator("[data-session-identity]");
+    const identity = page.locator(
+      'header button[data-session-identity][aria-controls="protected-account-menu"]',
+    );
+    const accountPanel = page.locator("#protected-account-menu");
     const identityLabel = page.locator("[data-session-identity-label]");
-    const navigation = page.getByRole("navigation", { name: "Navegação autorizada" });
+    const navigation = page.getByRole("navigation", { name: "Navegação principal" });
+    await identity.click();
+    await expect(identity).toHaveAttribute("aria-expanded", "true");
+    await expect(accountPanel).toBeVisible();
+    await expect(identityLabel).toBeVisible();
     await identityLabel.evaluate((element) => {
       element.textContent = `${"identidade-de-sessao-muito-longa-".repeat(8)}@qa.local.invalid`;
     });
@@ -1316,30 +1476,80 @@ test("long session identity truncates without overlapping navigation at 1440", a
     const metrics = await page.evaluate(() => {
       const label = document.querySelector<HTMLElement>("[data-session-identity-label]");
       const identityElement = document.querySelector<HTMLElement>("[data-session-identity]");
-      const navigationElement = document.querySelector<HTMLElement>(
-        'nav[aria-label="Navegação autorizada"]',
+      const accountPanelElement = document.querySelector<HTMLElement>("#protected-account-menu");
+      const themeSwitch = document.querySelector<HTMLElement>(
+        '[role="group"][aria-label="Aparência da página"]',
       );
-      if (!label || !identityElement || !navigationElement)
+      const navigationElement = document.querySelector<HTMLElement>(
+        'nav[aria-label="Navegação principal"]',
+      );
+      const topbar = document.querySelector<HTMLElement>("[data-protected-topbar]");
+      if (
+        !label ||
+        !identityElement ||
+        !accountPanelElement ||
+        !themeSwitch ||
+        !navigationElement ||
+        !topbar
+      ) {
         throw new Error("shell markers missing");
+      }
+      const overlaps = (first: DOMRect, second: DOMRect) =>
+        first.left < second.right &&
+        first.right > second.left &&
+        first.top < second.bottom &&
+        first.bottom > second.top;
       const style = getComputedStyle(label);
+      const labelBox = label.getBoundingClientRect();
       const identityBox = identityElement.getBoundingClientRect();
+      const accountPanelBox = accountPanelElement.getBoundingClientRect();
+      const themeSwitchBox = themeSwitch.getBoundingClientRect();
       const navigationBox = navigationElement.getBoundingClientRect();
+      const topbarBox = topbar.getBoundingClientRect();
       return {
-        overflow: style.overflow,
-        textOverflow: style.textOverflow,
-        truncated: label.scrollWidth > label.clientWidth,
-        separated: navigationBox.top >= identityBox.bottom,
+        accountPanelFits:
+          accountPanelBox.width > 0 &&
+          accountPanelBox.height > 0 &&
+          accountPanelBox.left >= -1 &&
+          accountPanelBox.right <= innerWidth + 1 &&
+          accountPanelBox.top >= -1 &&
+          accountPanelBox.bottom <= innerHeight + 1 &&
+          accountPanelElement.scrollWidth <= accountPanelElement.clientWidth + 1,
+        identityContained:
+          style.overflowWrap === "anywhere" &&
+          labelBox.width > 0 &&
+          labelBox.left >= accountPanelBox.left - 1 &&
+          labelBox.right <= accountPanelBox.right + 1 &&
+          label.scrollWidth <= label.clientWidth + 1,
+        navigationFits:
+          navigationBox.width > 0 &&
+          navigationBox.height > 0 &&
+          navigationBox.left >= topbarBox.left - 1 &&
+          navigationBox.right <= topbarBox.right + 1 &&
+          navigationElement.scrollWidth <= navigationElement.clientWidth + 1,
+        separated:
+          !overlaps(navigationBox, identityBox) &&
+          !overlaps(navigationBox, accountPanelBox) &&
+          !overlaps(navigationBox, themeSwitchBox),
+        themeButtonsVisible:
+          themeSwitch.querySelectorAll("button").length === 3 &&
+          [...themeSwitch.querySelectorAll("button")].every(
+            (button) => button.getClientRects().length > 0,
+          ),
         rootOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
       };
     });
 
     await expect(identity).toBeVisible();
+    await expect(identityLabel).toBeVisible();
+    await expect(accountPanel.getByText("Conta conectada", { exact: true })).toBeVisible();
     await expect(navigation).toBeVisible();
     expect(metrics).toEqual({
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      truncated: true,
+      accountPanelFits: true,
+      identityContained: true,
+      navigationFits: true,
       separated: true,
+      themeButtonsVisible: true,
       rootOverflow: false,
     });
   });

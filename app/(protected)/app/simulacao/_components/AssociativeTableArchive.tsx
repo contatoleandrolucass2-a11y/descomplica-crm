@@ -3,13 +3,11 @@ import {
   InvestorGuideLauncher,
   InvestorInfoHint,
 } from "./archive-investor/InvestorCalculator";
-import { ArchiveHeader } from "./archive-investor/ArchiveHeader";
 import "./archive-investor/investor-archive.css";
 
 export function AssociativeTableArchive() {
   return (
     <div className="app-shell simulation-page-shell investor-page-shell investor-associative-table-page">
-      <ArchiveHeader />
       <main className="investor-main">
         <section className="goal-page-hero investor-compact-hero investor-associative-hero">
           <div className="goal-hero-copy">

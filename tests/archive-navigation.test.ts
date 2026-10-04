@@ -1,29 +1,38 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 // @ts-expect-error Operational ESM script, also exercised directly by the CLI.
 import * as navigationQa from "../scripts/qa/archive-navigation.mjs";
+import { ProtectedShellFrame } from "../app/(protected)/_components/ProtectedShellFrame";
 
 const {
   archiveNavigationPassed,
   archiveNavigationRoutes,
   archiveNavigationViewports,
+  archiveRootNavigationContract,
   parseArchivePreviewOrigin,
 } = navigationQa as {
   archiveNavigationPassed: (result: unknown, options?: { scope: string }) => boolean;
   archiveNavigationRoutes: string[];
   archiveNavigationViewports: { width: number; height: number }[];
+  archiveRootNavigationContract: { name: string; tag: string; href: string | null }[];
   parseArchivePreviewOrigin: (value: string) => string;
 };
 
 function completeResult() {
   return {
     contract: "archive-navigation-v1",
+    shellContract: "unified-protected-shell-v1",
     scope: "header-and-content",
     checks: archiveNavigationRoutes.flatMap((route) =>
       archiveNavigationViewports.map(({ width }) => ({
         route,
         width,
         passed: true,
+        singleProtectedTopbar: true,
+        exactAuthorizedRootNavigation: true,
+        exactAuthorizedAccountNavigation: true,
         mainSurfaceChanges: true,
         themes: { light: true, balanced: true, dark: true },
       })),
@@ -32,19 +41,16 @@ function completeResult() {
 }
 
 describe("archive navigation evidence gate", () => {
-  it("keeps navigation above the privacy shortcut but below the consent panel", () => {
+  it("keeps the global topbar above the privacy shortcut but below the consent panel", () => {
     const header = readFileSync(
-      new URL(
-        "../app/(protected)/app/simulacao/_components/archive-investor/ArchiveHeader.module.css",
-        import.meta.url,
-      ),
+      new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url),
       "utf8",
     );
     const privacy = readFileSync(
       new URL("../app/_components/CookieConsentBanner.module.css", import.meta.url),
       "utf8",
     );
-    const headerLayer = Number(header.match(/\.header\.header\s*\{[\s\S]*?z-index:\s*(\d+)/)?.[1]);
+    const headerLayer = Number(header.match(/\.topbar\s*\{[\s\S]*?z-index:\s*(\d+)/)?.[1]);
     const shortcutLayer = Number(
       privacy.match(/\.preferencesButton\s*\{[\s\S]*?z-index:\s*(\d+)/)?.[1],
     );
@@ -52,10 +58,132 @@ describe("archive navigation evidence gate", () => {
     expect(headerLayer).toBeGreaterThan(shortcutLayer);
     expect(headerLayer).toBeLessThan(panelLayer);
   });
+
+  it("keeps every root keyboard ring inside the unified topbar", () => {
+    const header = readFileSync(
+      new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url),
+      "utf8",
+    );
+    const rule = header.match(
+      /\.topbar \[data-navigation-root-control\]:focus-visible\s*\{([\s\S]*?)\}/u,
+    )?.[1];
+
+    expect(rule).toContain("outline: 2px solid var(--header-accent) !important");
+    expect(rule).toContain("outline-offset: -2px !important");
+  });
+
+  it("renders one protected shell topbar on archive routes", () => {
+    const markup = renderToStaticMarkup(
+      createElement(
+        ProtectedShellFrame,
+        {
+          chrome: createElement("header", { "data-protected-topbar": true }, "Navegação"),
+          shellClassName: "protected-shell",
+        },
+        createElement("main", null, "Conteúdo do simulador"),
+      ),
+    );
+
+    expect(markup.match(/<header\b/g)).toHaveLength(1);
+    expect(markup).toContain("data-protected-topbar");
+    expect(markup).toContain("Conteúdo do simulador");
+    expect(markup).toContain("data-protected-shell");
+  });
+
+  it("does not render a local ArchiveHeader or SiteMenu in any archive surface", () => {
+    const sources = [
+      "AssociativeTableArchive.tsx",
+      "DirectTableArchive.tsx",
+      "DocumentationArchive.tsx",
+      "InvestorTableArchive.tsx",
+      "TabelaoArchive.tsx",
+      "SimulatorWorkspace.tsx",
+    ].map((file) =>
+      readFileSync(
+        new URL(`../app/(protected)/app/simulacao/_components/${file}`, import.meta.url),
+        "utf8",
+      ),
+    );
+
+    for (const source of sources) {
+      expect(source).not.toMatch(/ArchiveHeader|SiteMenu/);
+      expect(source).not.toMatch(/<header\b/);
+    }
+  });
+
+  it("binds the visual gate to the unified protected shell and its exact navigation contract", () => {
+    const gate = readFileSync(
+      new URL("../scripts/qa/archive-navigation.mjs", import.meta.url),
+      "utf8",
+    );
+    const compact = readFileSync(
+      new URL("../scripts/qa/associative-compact-layout.mjs", import.meta.url),
+      "utf8",
+    );
+
+    expect(gate).toContain('shellContract: "unified-protected-shell-v1"');
+    expect(gate).toContain("await ensureArchiveNavigationOpen(page);");
+    expect(gate).toContain('"Metas de parcerias", "/app/configuracoes/metas/parcerias"');
+    expect(gate).toContain("exactAuthorizedRootNavigation");
+    expect(gate).toContain("exactAuthorizedAccountNavigation");
+    expect(gate).not.toContain("checkCompactArchiveHeader");
+    expect(compact).toContain("checkProtectedTopbar");
+    expect(compact).toContain("titleContentInset");
+    expect(compact).not.toContain("Title must sit close to the menu divider");
+    expect(compact).toContain('"Virtual row height must match CSS"');
+    expect(compact).toContain('"Entire hovered row must be gold with dark readable text"');
+  });
+
+  it("keeps the five authorized roots in the approved visual and keyboard order", () => {
+    expect(archiveRootNavigationContract).toEqual([
+      { name: "Dashboard", tag: "BUTTON", href: null },
+      { name: "Simulação", tag: "BUTTON", href: null },
+      { name: "Ranking", tag: "A", href: "/app/ranking" },
+      { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
+      { name: "Configurações", tag: "BUTTON", href: null },
+    ]);
+  });
+
+  it("uses real keyboard traversal and keeps failure diagnostics sanitized", () => {
+    const gate = readFileSync(
+      new URL("../scripts/qa/archive-navigation.mjs", import.meta.url),
+      "utf8",
+    );
+
+    expect(gate).not.toContain("await simulation.focus();");
+    expect(gate).toContain('await page.keyboard.press("Tab");');
+    expect(gate).toContain("assertNavigationControlFocused");
+    expect(gate).toContain(
+      'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-dashboard"]',
+    );
+    expect(gate).toContain('kind: "protected-topbar-geometry"');
+    expect(gate).toContain("rootControlCount");
+  });
+
   it("requires complete route/viewport/theme evidence independently of the historical manifest", () => {
     expect(archiveNavigationPassed(completeResult())).toBe(true);
     expect(archiveNavigationPassed(null)).toBe(false);
-    expect(archiveNavigationPassed({ contract: "archive-navigation-v1", checks: [] })).toBe(false);
+    expect(
+      archiveNavigationPassed({
+        contract: "archive-navigation-v1",
+        shellContract: "unified-protected-shell-v1",
+        checks: [],
+      }),
+    ).toBe(false);
+  });
+
+  it("rejects historical evidence that predates the unified protected-shell contract", () => {
+    const historical = completeResult();
+    delete (historical as { shellContract?: string }).shellContract;
+    expect(archiveNavigationPassed(historical)).toBe(false);
+
+    const missingRootAuthorization = completeResult();
+    missingRootAuthorization.checks[0]!.exactAuthorizedRootNavigation = false;
+    expect(archiveNavigationPassed(missingRootAuthorization)).toBe(false);
+
+    const missingAccountAuthorization = completeResult();
+    missingAccountAuthorization.checks[0]!.exactAuthorizedAccountNavigation = false;
+    expect(archiveNavigationPassed(missingAccountAuthorization)).toBe(false);
   });
 
   it("rejects omitted and duplicated breakpoint evidence even if all recorded checks passed", () => {

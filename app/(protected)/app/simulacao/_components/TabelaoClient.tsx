@@ -178,7 +178,9 @@ export function TabelaoClient() {
     const heading = table?.tHead;
     if (!table || !heading) return;
     const shell = table.closest<HTMLElement>(".tabelao-page-shell");
-    const navigation = shell?.querySelector<HTMLElement>(":scope > .topbar");
+    const navigation =
+      document.querySelector<HTMLElement>("[data-protected-topbar]") ??
+      shell?.querySelector<HTMLElement>(":scope > .topbar");
     const viewport = window.visualViewport;
     let frame = 0;
     let previousOffset = -1;

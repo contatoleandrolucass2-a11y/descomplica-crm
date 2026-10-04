@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { forbidden } from "next/navigation";
 
 import { enforcePermission } from "@/lib/authorization/enforce";
+import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 
 import { TabelaoArchive } from "../_components/TabelaoArchive";
 
@@ -14,5 +16,6 @@ export const dynamic = "force-dynamic";
 
 export default async function TabelaoPage() {
   await enforcePermission("crm.simulators.view");
+  if (!getProtectedPageGate("/app/simulacao/tabelao")?.releaseEnabled) forbidden();
   return <TabelaoArchive />;
 }

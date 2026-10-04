@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { describe, it } from "vitest";
 
+import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+
 // @ts-expect-error — módulo de regras preservado do artefato anexado em JavaScript.
 import * as directTableRules from "../lib/archive-investor/direct-table-file-rules.mjs";
 // @ts-expect-error — módulo legado JavaScript exercitado pela fixture visual compartilhada.
@@ -174,13 +176,6 @@ describe("Tabela Direta integral do arquivo anexado", () => {
       ),
       "utf8",
     );
-    const menu = readFileSync(
-      new URL(
-        "../app/(protected)/app/simulacao/_components/archive-investor/SiteMenu.tsx",
-        import.meta.url,
-      ),
-      "utf8",
-    );
     const calculator = readFileSync(
       new URL(
         "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
@@ -193,8 +188,14 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.ok(archive.includes("investor-direct-table-page"));
     assert.match(archive, /<InvestorCalculator\s+directTable/);
     assert.ok(archive.includes("Simulador Tabela Direta"));
-    assert.ok(menu.includes('href: "/app/simulacao/tabela-direta"'));
-    assert.ok(!menu.includes('href="/simulacao/tabela-investidor?ficha=2"'));
+    assert.deepEqual(getProtectedPageGate("/app/simulacao/tabela-direta"), {
+      pageKey: "crm.simulation.wf14",
+      path: "/app/simulacao/tabela-direta",
+      permission: "crm.simulators.view",
+      releaseEnabled: true,
+    });
+    assert.ok(!archive.includes("ArchiveHeader"));
+    assert.ok(!archive.includes("SiteMenu"));
     assert.ok(calculator.includes("DIRECT_TABLE_PROPOSAL_OPTIONS"));
     assert.ok(calculator.includes("DIRECT_TABLE_PROPOSAL_GUIDE_STEPS"));
     assert.ok(calculator.includes("DIRECT_PERSON_DOCUMENTATION"));
@@ -460,11 +461,7 @@ describe("Tabela Direta integral do arquivo anexado", () => {
         ".investor-page-shell.investor-direct-table-page .investor-stock-unit-button",
       ),
     );
-    assert.ok(
-      styles.includes(
-        ".investor-page-shell.investor-direct-table-page>.simulation-topbar #site-menu-settings",
-      ),
-    );
+    assert.ok(!styles.includes("#site-menu-settings"));
     assert.ok(styles.includes("details.investor-proposal-audit"));
     assert.ok(styles.includes('background-image:url("/boravender-logo192.png")'));
     assert.ok(styles.includes('background-image:url("/salesforce-no-type-logo.svg")'));

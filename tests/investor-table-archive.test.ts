@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+
 // @ts-expect-error — módulo de regras preservado do artefato anexado em JavaScript.
 import { calculateInvestorFlow } from "@/lib/archive-investor/investor-calculator-rules.mjs";
 // @ts-expect-error — módulo de filtros preservado do artefato anexado em JavaScript.
@@ -56,13 +58,6 @@ describe("Tabela Investidor do arquivo anexado", () => {
       ),
       "utf8",
     );
-    const menu = readFileSync(
-      new URL(
-        "../app/(protected)/app/simulacao/_components/archive-investor/SiteMenu.tsx",
-        import.meta.url,
-      ),
-      "utf8",
-    );
     const calculator = readFileSync(
       new URL(
         "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
@@ -77,8 +72,14 @@ describe("Tabela Investidor do arquivo anexado", () => {
     expect(archive).toContain("<InvestorCalculator />");
     expect(archive).not.toContain("<InvestorLearningManual />");
     expect(archive).toContain("Simulador Tabela Investidor");
-    expect(menu).toContain('href: "/app/simulacao/tabela-investidor"');
-    expect(menu).not.toContain('href="/simulacao/tabela-investidor?ficha=3"');
+    expect(getProtectedPageGate("/app/simulacao/tabela-investidor")).toEqual({
+      pageKey: "crm.simulation.wf15",
+      path: "/app/simulacao/tabela-investidor",
+      permission: "crm.simulators.view",
+      releaseEnabled: true,
+    });
+    expect(archive).not.toContain("ArchiveHeader");
+    expect(archive).not.toContain("SiteMenu");
     expect(calculator).toContain("const inventoryWindowSize = 60");
     expect(calculator).toContain("aria-rowcount={matchingInventory.length + 1}");
     expect(calculator).toContain('className="investor-stock-spacer"');

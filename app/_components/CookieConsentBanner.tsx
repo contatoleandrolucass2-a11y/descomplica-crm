@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { saveCookieConsentAction } from "@/lib/privacy/actions";
@@ -9,18 +8,8 @@ import type { CookieConsent } from "@/lib/privacy/cookie-consent";
 
 import styles from "./CookieConsentBanner.module.css";
 
-const ARCHIVE_SIMULATOR_ROUTES = new Set([
-  "/app/simulacao/associativo-fluxo-linear",
-  "/app/simulacao/tabelao",
-  "/app/simulacao/tabela-investidor",
-  "/app/simulacao/calcular-documentacao",
-]);
-
 export function CookieConsentBanner({ consent }: { consent: CookieConsent | null }) {
-  const pathname = usePathname();
   const [open, setOpen] = useState(consent === null);
-
-  if (ARCHIVE_SIMULATOR_ROUTES.has(pathname)) return null;
 
   if (!open) {
     return (

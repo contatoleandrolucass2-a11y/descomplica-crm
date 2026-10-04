@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-04 - Navegacao protegida unificada
+
+- Usa um unico cabecalho hierarquico em Dashboard, etapas, Ranking, Canal,
+  Configuracoes, Administracao e todas as jornadas de Simulacao.
+- Remove as barras internas dos simuladores e mantem links filtrados pelas
+  permissoes efetivas; CAIXA continua visivel como bloqueada e sem rota clicavel.
+- Preserva temas, conta, teclado, mobile e alvos de 44px. A matriz visual agora
+  cobre as 21 paginas liberadas, inclusive Documentacao.
+- Exige truncamento da identidade em todas as larguras e rejeita capturas fora
+  do manifesto; baselines antigas da CAIXA bloqueada foram eliminadas.
+- Mantém provas E2E contextuais e independentes para o card e o submenu
+  bloqueados da CAIXA, sem transformar nenhum deles em link.
+- O smoke exige ausencia da navegacao comercial para perfis sem paginas e usa
+  a identidade propria de `/conta/seguranca` nesses casos.
+- A prova hospedada do Tabelao agora verifica separadamente a regiao nomeada e
+  a tabela interna, preservando a semantica acessivel do componente.
+
 ## 2026-10-04 - Ajustes do Associativo publicados
 
 - Publica 7337b97 com campos sem contorno, brilho dourado de 3s nas duas
@@ -13,6 +30,16 @@
 - Aguarda o layout de impressao estabilizar antes da verificacao, com limite
   de cinco segundos e todos os criterios preservados. Sem mudanca na pagina
   Tabelao ou necessidade de reinicio da aplicacao por este ajuste de ferramenta.
+
+## 2026-10-03 - Navegação protegida unificada
+
+- Substitui os cabeçalhos internos dos simuladores por um único cabeçalho
+  hierárquico para todas as páginas autenticadas.
+- Mantém os links derivados das permissões efetivas no servidor; simuladores
+  liberados exigem o mesmo gate de rota e a CAIXA permanece bloqueada sem link.
+- Reúne identidade, segurança, administração autorizada, temas e logout na área
+  de conta, com navegação responsiva, teclado, foco e movimento reduzido.
+- Preserva URLs, autenticação, guards, RLS, dados e regras comerciais existentes.
 
 ## 2026-10-03 - Validacao do brilho no CSS minificado
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, Printer } from "lucide-react";
-import Link from "next/link";
 import { useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import {
   calculateDocumentation,
@@ -246,11 +245,6 @@ export function DocumentationCalculator({ baseDate }: { baseDate: string }) {
     <>
       <section className="goal-page-hero documentation-page-hero">
         <div className="goal-hero-copy">
-          <nav className="documentation-breadcrumb" aria-label="Trilha de navegação">
-            <Link href="/app/simulacao">Simulação</Link>
-            <span aria-hidden="true">/</span>
-            <strong>Calcular documentação</strong>
-          </nav>
           <p className="goal-kicker">Simulação comercial</p>
           <h1>Calcular documentação</h1>
         </div>

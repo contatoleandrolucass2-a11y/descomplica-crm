@@ -4,6 +4,23 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: shell unico validado em toda a matriz autenticada
+
+- Status: validado localmente, pendente CI/publicacao; fonte: branch
+  `codex/unified-protected-navigation`, resultado autenticado versionado e audit
+  `docs/audits/unified-protected-navigation-2026-10-03.md`.
+- Navegacao comercial vem do catalogo autorizado no servidor; quatro paginas
+  liberadas fora das 17 do banco exigem pai, permissao efetiva e gate convergentes.
+  CAIXA permanece sem caminho no item bloqueado e com guard direto fail-closed.
+- A matriz limpa aprovou 147 responsivos, 84 temas, 201 Axe/comparacoes e 105
+  zooms, alem de 40 combinacoes das jornadas arquivadas. Documentacao agora faz
+  parte das 21 paginas visuais liberadas e conserva a suite funcional dedicada.
+- A baseline fisica passou a ter exatamente as 201 imagens manifestadas; oito
+  evidencias antigas da CAIXA foram removidas. O teste falha se uma captura
+  orfa reaparecer e cada viewport comprova o truncamento da identidade longa.
+- CSS legado reduzia `2.75rem` para 38,5px; controles de cookies passaram a usar
+  minimo explicito de 44px. Nenhuma regra comercial, migration ou dado mudou.
+
 ## 2026-10-04: Associativo publicado com gates completos
 
 - Status: validado; fonte: PR #141, CI 37173712179 tentativa 2 e audit
@@ -35,6 +52,20 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   Oitenta e nove testes focados aprovados; CI do ajuste de QA ainda pendente.
 - PR #141 ja integrado; CI do PR aprovou 193 capturas, 40 navegacoes e seis
   jornadas v5. Publicacao depende da revalidacao final da main, registrada no audit.
+
+## 2026-10-03: shell protegido único e navegação fail-closed
+
+- Status: pendente_validacao; fonte: código no SHA-base `8e158cc`, inventário de
+  22 gates protegidos e pedido visual aprovado pelo usuário.
+- Cinco simuladores renderizavam um cabeçalho local com links estáticos, enquanto
+  as demais páginas usavam o catálogo autorizado. A convergência deve remover o
+  shell interno, sem transformar visibilidade do menu em autorização.
+- Quatro simuladores liberados fora do catálogo de 17 páginas podem ser anexados
+  somente no servidor quando pai, permissão efetiva e `releaseEnabled` convergem.
+  CAIXA permanece visível apenas como bloqueada e seu modelo de apresentação não
+  contém `path`; banco, proxy, guards e RLS não mudam.
+- Baseline: lint, tipos, 1.478 Vitest (1 ignorado), oito Node e build aprovados.
+  Pendências: testes integrados, matriz visual/a11y, CI e publicação pelo runbook.
 
 ## 2026-10-03: Integracao da base corrigida no Associativo
 

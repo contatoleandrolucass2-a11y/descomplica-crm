@@ -7,7 +7,7 @@ import { associativeGuidanceWidths, checkAssociativeGuidance } from "./associati
 import {
   checkAssociativeClosingAlignment,
   checkAssociativeInitialViewport,
-  checkCompactArchiveHeader,
+  checkProtectedTopbar,
   checkAssociativeCompactStock,
   checkAssociativeSelectedGold,
 } from "./associative-compact-layout.mjs";
@@ -32,23 +32,58 @@ export const archiveNavigationViewports = [
 ];
 const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
 const simulationLinks = [
-  ["Visão geral", "/app/simulacao"],
-  ["Tabela Associativo", archiveNavigationRoutes[0]],
+  ["Simulação", "/app/simulacao"],
+  ["Simulador Associativo", archiveNavigationRoutes[0]],
   ["Tabela Direta", archiveNavigationRoutes[1]],
   ["Tabela Investidor", archiveNavigationRoutes[2]],
   ["Tabelão", archiveNavigationRoutes[3]],
-  ["CAIXA", "/app/simulacao/caixa"],
-  ["Calcular documentação", "/app/simulacao/calcular-documentacao"],
+  ["Documentação", "/app/simulacao/calcular-documentacao"],
 ];
 const settingsLinks = [
-  ["Visão geral", "/app/configuracoes"],
-  ["Configurar metas", "/app/configuracoes/metas"],
-  ["Metas por pontos", "/app/configuracoes/metas/pontos"],
+  ["Configurações", "/app/configuracoes"],
+  ["Metas do funil", "/app/configuracoes/metas"],
+  ["Metas de parcerias", "/app/configuracoes/metas/parcerias"],
+  ["Metas de pontos", "/app/configuracoes/metas/pontos"],
 ];
-const navigation = (page) => page.locator("#archive-navigation");
-const mobileTrigger = (page) => page.locator('button[aria-controls="archive-navigation"]');
+const dashboardLinks = [
+  ["Dashboard", "/app"],
+  ["Oportunidades", "/app/etapas/oportunidades"],
+  ["Agendamentos", "/app/etapas/agendamentos"],
+  ["Visitas", "/app/etapas/visitas"],
+  ["Pastas", "/app/etapas/pastas"],
+  ["Vendas", "/app/etapas/vendas"],
+];
+export const archiveRootNavigationContract = [
+  { name: "Dashboard", tag: "BUTTON", href: null },
+  { name: "Simulação", tag: "BUTTON", href: null },
+  { name: "Ranking", tag: "A", href: "/app/ranking" },
+  { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
+  { name: "Configurações", tag: "BUTTON", href: null },
+];
+const navigation = (page) => page.locator("#authorized-navigation");
+const mobileTrigger = (page) => page.locator('button[aria-controls="authorized-navigation"]');
+const accountTrigger = (page) => page.locator('button[aria-controls="protected-account-menu"]');
 const appearance = (page) => page.getByRole("group", { name: "Aparência da página", exact: true });
 export const archiveNavigationActionTimeout = 10_000;
+
+async function assertNavigationControlFocused(control, ariaControls) {
+  const focusState = await control.evaluate((element) => ({
+    focused: document.activeElement === element,
+    ariaControls: element.getAttribute("aria-controls"),
+    connected: element.isConnected,
+  }));
+  assert.deepEqual(
+    focusState,
+    { focused: true, ariaControls, connected: true },
+    `Keyboard focus must reach ${ariaControls}`,
+  );
+}
+
+async function assertRootAccessibleNames({ dashboard, settings, simulation }) {
+  await expect(dashboard).toHaveAccessibleName("Dashboard");
+  await expect(simulation).toHaveAccessibleName("Simulação");
+  await expect(settings).toHaveAccessibleName("Configurações");
+}
 
 export async function waitForArchiveHeaderTheme(page, theme, surfaces = {}) {
   let previous = null;
@@ -97,7 +132,7 @@ export async function waitForArchiveHeaderTheme(page, theme, surfaces = {}) {
         return settled;
       },
       {
-        message: "Archive header surface must settle on --header-bg for the selected theme",
+        message: "Protected topbar surface must settle on --header-bg for the selected theme",
         timeout: archiveNavigationActionTimeout,
         intervals: [50, 100, 100],
       },
@@ -109,9 +144,12 @@ export async function waitForArchiveHeaderTheme(page, theme, surfaces = {}) {
 export async function inspectArchiveNavigationFailure(page) {
   // Only geometry, CSS and allowlisted header state; never body text or arbitrary attributes.
   return page.evaluate(() => {
-    const nav = document.querySelector("#archive-navigation");
+    const nav = document.querySelector("#authorized-navigation");
     const header = nav?.closest("header");
-    const settings = header?.querySelector('[aria-controls="site-menu-settings"]');
+    const dashboard = header?.querySelector(
+      '[aria-controls="authorized-navigation-crm-dashboard"]',
+    );
+    const settings = header?.querySelector('[aria-controls="authorized-navigation-crm-settings"]');
     const inspect = (element) => {
       if (!element) return null;
       const rect = element.getBoundingClientRect();
@@ -135,6 +173,7 @@ export async function inspectArchiveNavigationFailure(page) {
     const hit = point ? document.elementFromPoint(point.x, point.y) : null;
     const active = header?.contains(document.activeElement) ? document.activeElement : null;
     const label = active?.getAttribute("aria-label");
+    const activeControls = active?.getAttribute("aria-controls");
     const safeLabels = [
       "Abrir navegação",
       "Fechar navegação",
@@ -147,17 +186,39 @@ export async function inspectArchiveNavigationFailure(page) {
       "Configurações",
       "Descomplica",
     ];
+    const safeControls = [
+      "authorized-navigation",
+      "authorized-navigation-crm-dashboard",
+      "authorized-navigation-crm-simulation",
+      "authorized-navigation-crm-settings",
+      "protected-account-menu",
+    ];
     return {
       viewport: { width: innerWidth, height: innerHeight, scrollX, scrollY },
+      pathname: location.pathname,
       navigation: inspect(nav),
+      dashboard: inspect(dashboard),
       settings: inspect(settings),
-      simulation: inspect(header?.querySelector('[aria-controls="site-menu-simulation"]')),
-      mobileTrigger: inspect(header?.querySelector('button[aria-controls="archive-navigation"]')),
+      simulation: inspect(
+        header?.querySelector('[aria-controls="authorized-navigation-crm-simulation"]'),
+      ),
+      account: inspect(header?.querySelector('[aria-controls="protected-account-menu"]')),
+      mobileTrigger: inspect(
+        header?.querySelector('button[aria-controls="authorized-navigation"]'),
+      ),
       settingsCenter: point,
       elementAtSettingsCenter: inspect(hit),
       settingsReceivesPointer: Boolean(hit && settings?.contains(hit)),
+      navigationContainsFocus: Boolean(
+        document.activeElement && nav?.contains(document.activeElement),
+      ),
+      rootControlCount: nav?.querySelectorAll("[data-navigation-root-control]").length ?? 0,
       activeHeaderElement: active
-        ? { tag: active.tagName, ariaLabel: safeLabels.includes(label) ? label : null }
+        ? {
+            tag: active.tagName,
+            ariaLabel: safeLabels.includes(label) ? label : null,
+            ariaControls: safeControls.includes(activeControls) ? activeControls : null,
+          }
         : null,
     };
   });
@@ -168,7 +229,7 @@ function sanitizedNavigationFailure(error) {
   if (error?.code === "ERR_ASSERTION") return firstLine;
   const timeout = firstLine.match(/^(?:locator|page)\.[a-zA-Z]+: Timeout \d+ms exceeded\.$/);
   if (timeout) return timeout[0];
-  if (firstLine === "Archive header surface must settle on --header-bg for the selected theme")
+  if (firstLine === "Protected topbar surface must settle on --header-bg for the selected theme")
     return firstLine;
   return "Navigation action or expectation failed; details omitted for privacy";
 }
@@ -184,21 +245,71 @@ export async function ensureArchiveNavigationOpen(page) {
 }
 
 async function assertOpenNavigationGeometry(page) {
-  const fits = await navigation(page).evaluate((element) => {
+  await ensureArchiveNavigationOpen(page);
+  const geometry = await navigation(page).evaluate((element) => {
     const rect = element.getBoundingClientRect();
-    return (
-      rect.width > 0 &&
-      rect.height > 0 &&
-      rect.left >= -1 &&
-      rect.top >= -1 &&
-      rect.right <= innerWidth + 1 &&
-      rect.bottom <= innerHeight + 1 &&
-      element.scrollWidth <= element.clientWidth + 1 &&
-      document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1 &&
-      document.body.scrollWidth <= document.body.clientWidth + 1
-    );
+    return {
+      checks: {
+        visibleSize: rect.width > 0 && rect.height > 0,
+        insideViewport:
+          rect.left >= -1 &&
+          rect.top >= -1 &&
+          rect.right <= innerWidth + 1 &&
+          rect.bottom <= innerHeight + 1,
+        navigationNoOverflow: element.scrollWidth <= element.clientWidth + 1,
+        documentNoOverflow:
+          document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+        bodyNoOverflow: document.body.scrollWidth <= document.body.clientWidth + 1,
+      },
+      navigation: {
+        width: rect.width,
+        height: rect.height,
+        scrollWidth: element.scrollWidth,
+        clientWidth: element.clientWidth,
+      },
+      document: {
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      },
+      body: { scrollWidth: document.body.scrollWidth, clientWidth: document.body.clientWidth },
+    };
   });
-  assert.equal(fits, true, "Open navigation must fit the viewport without horizontal overflow");
+  try {
+    assert.equal(
+      Object.values(geometry.checks).every(Boolean),
+      true,
+      "Open navigation must fit the viewport without horizontal overflow",
+    );
+  } catch (error) {
+    if (error && typeof error === "object") {
+      error.safeDiagnostics = { kind: "open-navigation-geometry", ...geometry };
+    }
+    throw error;
+  }
+}
+
+async function assertExactRootNavigation(page) {
+  await ensureArchiveNavigationOpen(page);
+  const snapshot = await navigation(page)
+    .locator("[data-navigation-root-control]")
+    .evaluateAll((controls) =>
+      controls.map((control) => {
+        const accessibleCopy = control.cloneNode(true);
+        accessibleCopy
+          .querySelectorAll('[aria-hidden="true"]')
+          .forEach((decorative) => decorative.remove());
+        return {
+          name: accessibleCopy.textContent?.replace(/\s+/gu, " ").trim() ?? "",
+          tag: control.tagName,
+          href: control instanceof HTMLAnchorElement ? control.getAttribute("href") : null,
+        };
+      }),
+    );
+  assert.deepEqual(
+    snapshot,
+    archiveRootNavigationContract,
+    "Protected shell must expose only the server-authorized root navigation",
+  );
 }
 
 // Retains the legacy tablet assertions, including ancestor clipping and both axes.
@@ -261,15 +372,23 @@ export async function checkArchiveMenuPanel(page, triggerName, panelId) {
 }
 
 export async function assertHeaderGeometry(page, compact) {
-  const header = page.locator("header").filter({ has: navigation(page) });
+  await expect(page.locator("[data-protected-topbar]")).toHaveCount(1);
+  await expect(navigation(page)).toHaveCount(1);
+  const header = page.locator("[data-protected-topbar]").filter({ has: navigation(page) });
   await expect(header).toHaveCount(1);
-  const geometry = await header.evaluate((element, isCompact) => {
-    const brand = element.querySelector('a.brand-link[href="/app"]');
+  const geometry = await header.evaluate(async (element, isCompact) => {
+    const brand = element.querySelector("[data-protected-brand]");
     const themes = element.querySelector('[role="group"][aria-label="Aparência da página"]');
-    const control = element.querySelector('button[aria-controls="archive-navigation"]');
-    const nav = element.querySelector("#archive-navigation");
-    const nodes = [brand, themes, isCompact ? control : nav];
-    if (nodes.some((node) => !node)) return { fits: false };
+    const account = element.querySelector('button[aria-controls="protected-account-menu"]');
+    const control = element.querySelector('button[aria-controls="authorized-navigation"]');
+    const nav = element.querySelector("#authorized-navigation");
+    const nodes = [brand, themes, account, isCompact ? control : nav];
+    if (nodes.some((node) => !node)) {
+      return {
+        checks: { elementsPresent: false },
+        missingElementCount: nodes.filter((node) => !node).length,
+      };
+    }
     const containedInHeader = (node, includeFocusOutline = false) => {
       const bounds = element.getBoundingClientRect();
       const rect = node.getBoundingClientRect();
@@ -290,34 +409,91 @@ export async function assertHeaderGeometry(page, compact) {
     // Only top-level controls belong inside the header; disclosure panels may extend beyond it.
     const activeNavItems = [
       ...nav.querySelectorAll(
-        ':scope > a[aria-current="page"], :scope > div > button[data-active="true"]',
+        '[data-navigation-root-control][aria-current="page"], [data-navigation-root-control][data-navigation-active="true"]',
       ),
     ];
+    const rootControls = [...nav.querySelectorAll("[data-navigation-root-control]")];
     const themeButtons = [...themes.querySelectorAll("button")];
-    const fixedControls = [brand, themes, ...themeButtons, ...(isCompact ? [control] : [])];
+    const fixedControls = [
+      brand,
+      themes,
+      ...themeButtons,
+      account,
+      ...(isCompact ? [control] : rootControls),
+    ];
     const activeNavContained =
       isCompact ||
       (activeNavItems.length === 1 && activeNavItems.every((node) => containedInHeader(node)));
     const headerControlsContained = fixedControls.every((node) => containedInHeader(node));
-    const focusTargets = [...themeButtons, ...(isCompact ? [control] : activeNavItems)];
+    const focusTargets = [
+      ...themeButtons.map((button, index) => [`theme-${index + 1}`, button]),
+      ["account", account],
+      ...(isCompact
+        ? [["mobile-trigger", control]]
+        : rootControls.map((node, index) => [`root-${index + 1}`, node])),
+    ];
     const previousFocus = document.activeElement;
     let focusedControlsContained;
+    let focusContainment;
     try {
-      focusedControlsContained = focusTargets.every((node) => {
+      const focusEntries = [];
+      for (const [name, node] of focusTargets) {
         node.focus({ preventScroll: true });
-        return (
-          document.activeElement === node &&
-          containedInHeader(node, true) &&
-          fixedControls.every((control) => containedInHeader(control)) &&
-          (isCompact || activeNavItems.every((control) => containedInHeader(control)))
-        );
-      });
+        // Chromium resolves :focus-visible and its author styles on the next
+        // rendering turn for anchors. Measure the painted state, not the
+        // transient user-agent outline from the synchronous focus call.
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        const style = getComputedStyle(node);
+        const rect = node.getBoundingClientRect();
+        const headerRect = element.getBoundingClientRect();
+        const checks = {
+          receivesFocus: document.activeElement === node,
+          focusRingContained: containedInHeader(node, true),
+          fixedControlsContained: fixedControls.every((control) => containedInHeader(control)),
+          activeNavigationContained:
+            isCompact || activeNavItems.every((control) => containedInHeader(control)),
+        };
+        focusEntries.push([
+          name,
+          {
+            ...checks,
+            passed: Object.values(checks).every(Boolean),
+            outline: {
+              style: style.outlineStyle,
+              width: style.outlineWidth,
+              offset: style.outlineOffset,
+            },
+            edgeInsets: {
+              top: rect.top - headerRect.top,
+              right: headerRect.right - rect.right,
+              bottom: headerRect.bottom - rect.bottom,
+              left: rect.left - headerRect.left,
+            },
+          },
+        ]);
+      }
+      focusContainment = Object.fromEntries(focusEntries);
+      focusedControlsContained = Object.values(focusContainment).every(({ passed }) => passed);
     } finally {
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
       if (previousFocus instanceof HTMLElement && previousFocus.isConnected)
         previousFocus.focus({ preventScroll: true });
     }
-    const boxes = nodes.map((node) => node.getBoundingClientRect());
+    const namedNodes = [
+      ["brand", brand],
+      ["themes", themes],
+      ["account", account],
+      [isCompact ? "mobile-trigger" : "navigation", isCompact ? control : nav],
+    ];
+    const boxes = namedNodes.map(([, node]) => node.getBoundingClientRect());
+    const pointerTargets = [
+      ["brand", brand],
+      ...themeButtons.map((button, index) => [`theme-${index + 1}`, button]),
+      ["account", account],
+      ...(isCompact
+        ? [["mobile-trigger", control]]
+        : rootControls.map((node, index) => [`root-${index + 1}`, node])),
+    ];
     const fits = boxes.every(
       (box) =>
         box.width > 0 &&
@@ -327,72 +503,137 @@ export async function assertHeaderGeometry(page, compact) {
         box.right <= innerWidth + 1 &&
         box.bottom <= innerHeight + 1,
     );
-    const overlaps = boxes.some((box, i) =>
-      boxes
-        .slice(i + 1)
-        .some(
-          (other) =>
-            box.left < other.right - 1 &&
-            box.right > other.left + 1 &&
-            box.top < other.bottom - 1 &&
-            box.bottom > other.top + 1,
-        ),
+    const overlappingPairs = namedNodes.flatMap(([name, node], index) => {
+      const box = node.getBoundingClientRect();
+      return namedNodes.slice(index + 1).flatMap(([otherName, otherNode]) => {
+        const other = otherNode.getBoundingClientRect();
+        return box.left < other.right - 1 &&
+          box.right > other.left + 1 &&
+          box.top < other.bottom - 1 &&
+          box.bottom > other.top + 1
+          ? [`${name}:${otherName}`]
+          : [];
+      });
+    });
+    const pointerReachability = Object.fromEntries(
+      pointerTargets.map(([name, node]) => {
+        const rect = node.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          rect.left + rect.width / 2,
+          rect.top + rect.height / 2,
+        );
+        return [name, Boolean(hit && node.contains(hit))];
+      }),
     );
-    return {
-      fits,
-      overlaps,
-      activeNavContained,
-      headerControlsContained,
-      focusedControlsContained,
-      themeRow:
-        innerWidth <= 600
-          ? boxes[1].top >= Math.max(boxes[0].bottom, boxes[2].bottom) - 1
-          : boxes[1].top < boxes[0].bottom && boxes[1].bottom > boxes[0].top,
-      noOverflow:
-        document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1 &&
-        document.body.scrollWidth <= document.body.clientWidth + 1,
-      brandTextFits: brand.scrollWidth <= brand.clientWidth + 1,
-      themeContentFits: [...themes.querySelectorAll("button")].every((button) => {
-        const box = button.getBoundingClientRect();
-        const content = [...button.childNodes].flatMap((node) => {
+    const themeContent = themeButtons.map((button) => {
+      const box = button.getBoundingClientRect();
+      const content = [...button.childNodes]
+        .flatMap((node) => {
           if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
             const range = document.createRange();
             range.selectNodeContents(node);
             return [...range.getClientRects()];
           }
-          return node instanceof Element ? [node.getBoundingClientRect()] : [];
-        });
-        return (
-          content.length >= 2 &&
+          if (!(node instanceof Element)) return [];
+          const style = getComputedStyle(node);
+          return style.display === "none" || style.visibility === "hidden"
+            ? []
+            : [node.getBoundingClientRect()];
+        })
+        .filter((rect) => rect.width > 0 && rect.height > 0)
+        .sort((left, right) => left.left - right.left);
+      return {
+        visiblePartCount: content.length,
+        contained:
+          content.length >= 1 &&
           content.every(
             (rect) =>
               rect.left >= box.left + 1 &&
               rect.right <= box.right - 1 &&
               rect.top >= box.top &&
               rect.bottom <= box.bottom,
-          ) &&
-          content[0].right <= content[1].left
-        );
-      }),
-      touchTrigger: !isCompact || (boxes[2].width >= 44 && boxes[2].height >= 44),
+          ),
+        separated: content.every(
+          (rect, index) => index === 0 || content[index - 1].right <= rect.left,
+        ),
+      };
+    });
+    const checks = {
+      elementsPresent: true,
+      fits,
+      overlaps: overlappingPairs.length > 0,
+      activeNavContained,
+      headerControlsContained,
+      focusedControlsContained,
+      pointerTargetsReachable: Object.values(pointerReachability).every(Boolean),
+      themeRow:
+        innerWidth <= 600
+          ? boxes[1].top >= Math.max(boxes[0].bottom, boxes[3].bottom) - 1
+          : boxes[1].top < boxes[0].bottom && boxes[1].bottom > boxes[0].top,
+      noOverflow:
+        document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1 &&
+        document.body.scrollWidth <= document.body.clientWidth + 1,
+      brandTextFits: brand.scrollWidth <= brand.clientWidth + 1,
+      accountTextContained: account.scrollWidth <= account.clientWidth + 1,
+      themeContentFits: themeContent.every(({ contained, separated }) => contained && separated),
+      accountTouchTarget: boxes[2].height >= 44,
+      touchTrigger: !isCompact || (boxes[3].width >= 44 && boxes[3].height >= 44),
+    };
+    const round = (value) => Math.round(value * 100) / 100;
+    return {
+      checks,
+      overlappingPairs,
+      pointerReachability,
+      focusContainment,
+      themeContent,
+      boxes: Object.fromEntries(
+        namedNodes.map(([name, node]) => {
+          const rect = node.getBoundingClientRect();
+          return [
+            name,
+            {
+              x: round(rect.x),
+              y: round(rect.y),
+              width: round(rect.width),
+              height: round(rect.height),
+            },
+          ];
+        }),
+      ),
+      headerOverflow: {
+        x: getComputedStyle(element).overflowX,
+        y: getComputedStyle(element).overflowY,
+      },
     };
   }, compact);
-  assert.deepEqual(
-    geometry,
-    {
-      fits: true,
-      overlaps: false,
-      activeNavContained: true,
-      headerControlsContained: true,
-      focusedControlsContained: true,
-      themeRow: true,
-      noOverflow: true,
-      brandTextFits: true,
-      themeContentFits: true,
-      touchTrigger: true,
-    },
-    "Archive header geometry failed",
-  );
+  try {
+    assert.deepEqual(
+      geometry.checks,
+      {
+        elementsPresent: true,
+        fits: true,
+        overlaps: false,
+        activeNavContained: true,
+        headerControlsContained: true,
+        focusedControlsContained: true,
+        pointerTargetsReachable: true,
+        themeRow: true,
+        noOverflow: true,
+        brandTextFits: true,
+        accountTextContained: true,
+        themeContentFits: true,
+        accountTouchTarget: true,
+        touchTrigger: true,
+      },
+      "Protected topbar geometry failed",
+    );
+  } catch (error) {
+    if (error && typeof error === "object") {
+      error.safeDiagnostics = { kind: "protected-topbar-geometry", ...geometry };
+    }
+    throw error;
+  }
+  return geometry;
 }
 
 async function assertLinks(page, panelId, entries, currentRoute) {
@@ -400,7 +641,11 @@ async function assertLinks(page, panelId, entries, currentRoute) {
   await expect(panel.getByRole("link")).toHaveCount(entries.length);
   await expect(panel).not.toHaveAttribute("role", "menu");
   for (const [label, href] of entries) {
-    const link = panel.getByRole("link", { name: label, exact: true });
+    const link = panel.locator(`a[href="${href}"]`);
+    const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    await expect(link).toHaveCount(1);
+    await expect(link).toHaveAccessibleName(new RegExp(`^${escapedLabel}(?:\\s|$)`, "u"));
+    await expect(link.getByText(label, { exact: true })).toHaveCount(1);
     await expect(link).toHaveAttribute("href", href);
     // Trial click scrolls the real disclosure and rejects obscured/unreachable links.
     await link.click({ trial: true });
@@ -434,7 +679,11 @@ async function assertDisabledItems(page, panelId, labels) {
     await expect(item).toHaveCount(1);
     assert.equal(
       await item.evaluate(
-        (element) => !element.matches("a[href], button:not(:disabled)") && element.tabIndex < 0,
+        (element) =>
+          !element.matches("a[href], button:not(:disabled)") &&
+          !element.closest("a[href]") &&
+          !element.querySelector("a[href]") &&
+          element.tabIndex < 0,
       ),
       true,
       "Future item must not navigate or receive tab focus",
@@ -461,7 +710,12 @@ async function inspectMainSurface(page) {
 }
 
 export function archiveNavigationPassed(result, { scope = "header-and-content" } = {}) {
-  if (result?.contract !== "archive-navigation-v1" || !Array.isArray(result.checks)) return false;
+  if (
+    result?.contract !== "archive-navigation-v1" ||
+    result?.shellContract !== "unified-protected-shell-v1" ||
+    !Array.isArray(result.checks)
+  )
+    return false;
   if (!["header-only", "header-and-content"].includes(scope) || result.scope !== scope)
     return false;
   const expected = archiveNavigationRoutes.flatMap((route) =>
@@ -475,6 +729,9 @@ export function archiveNavigationPassed(result, { scope = "header-and-content" }
     result.checks.every(
       (check) =>
         check.passed === true &&
+        check.singleProtectedTopbar === true &&
+        check.exactAuthorizedRootNavigation === true &&
+        check.exactAuthorizedAccountNavigation === true &&
         (scope === "header-only" || check.mainSurfaceChanges === true) &&
         Object.keys(themeLabels).every((theme) => check.themes?.[theme] === true),
     )
@@ -482,10 +739,11 @@ export function archiveNavigationPassed(result, { scope = "header-and-content" }
 }
 
 export async function checkArchiveNavigation(
-  page,
+  initialPage,
   origin,
   {
-    openRoute = (url) => page.goto(url, { waitUntil: "domcontentloaded" }),
+    openRoute = (url, activePage) => activePage.goto(url, { waitUntil: "domcontentloaded" }),
+    pageFactory,
     scope = "header-and-content",
     onCheck = () => {},
   } = {},
@@ -497,17 +755,40 @@ export async function checkArchiveNavigation(
     ),
     "Guidance widths must be exercised by the archive navigation matrix",
   );
-  const result = { contract: "archive-navigation-v1", scope, checks: [], passed: false };
+  const result = {
+    contract: "archive-navigation-v1",
+    shellContract: "unified-protected-shell-v1",
+    scope,
+    checks: [],
+    passed: false,
+  };
   const runtimeErrors = [];
   const onError = () => runtimeErrors.push(true);
   const onConsole = (message) => {
     if (message.type() === "error") onError();
   };
-  page.on("pageerror", onError);
-  page.on("console", onConsole);
+  let page = initialPage;
+  const rotatingPages = typeof pageFactory === "function";
+  const attachRuntimeListeners = (activePage) => {
+    activePage.on("pageerror", onError);
+    activePage.on("console", onConsole);
+  };
+  const detachRuntimeListeners = (activePage) => {
+    activePage.off("pageerror", onError);
+    activePage.off("console", onConsole);
+  };
+  attachRuntimeListeners(page);
+  let firstCheck = true;
   try {
     for (const route of archiveNavigationRoutes) {
       for (const viewport of archiveNavigationViewports) {
+        if (!firstCheck && rotatingPages) {
+          detachRuntimeListeners(page);
+          await page.close({ runBeforeUnload: false });
+          page = await pageFactory();
+          attachRuntimeListeners(page);
+        }
+        firstCheck = false;
         const check = {
           route,
           width: viewport.width,
@@ -517,12 +798,16 @@ export async function checkArchiveNavigation(
         };
         result.checks.push(check);
         const errorStart = runtimeErrors.length;
-        let stage = "load";
+        let stage = "load:navigate";
         try {
           await page.setViewportSize(viewport);
-          const response = await openRoute(`${origin}${route}`);
+          const response = await openRoute(`${origin}${route}`, page);
+          check.responseStatus = response?.status() ?? null;
+          stage = "load:status";
           assert.equal(response?.status(), 200, "Archive navigation route must return HTTP 200");
+          stage = "load:url";
           await expect(page).toHaveURL(`${origin}${route}`);
+          stage = "load:viewport";
           check.viewport = await page.evaluate(() => ({
             width: innerWidth,
             height: innerHeight,
@@ -537,20 +822,26 @@ export async function checkArchiveNavigation(
           const nav = navigation(page);
           const trigger = mobileTrigger(page);
           const compact = viewport.width <= 1180;
-          const brand = page.locator('header a.brand-link[href="/app"]');
-          const simulation = nav.getByRole("button", {
-            name: "Simulação",
-            exact: true,
-            includeHidden: true,
-          });
-          const settings = nav.getByRole("button", {
-            name: "Configurações",
-            exact: true,
-            includeHidden: true,
-          });
+          const brand = page.locator("[data-protected-brand]");
+          const dashboard = nav.locator(
+            'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-dashboard"]',
+          );
+          const simulation = nav.locator(
+            'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-simulation"]',
+          );
+          const settings = nav.locator(
+            'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-settings"]',
+          );
           const themes = appearance(page);
+          stage = "load:shell";
+          await expect(page.locator("[data-protected-shell]")).toHaveCount(1);
+          await expect(page.locator("[data-protected-topbar]")).toHaveCount(1);
+          check.singleProtectedTopbar = true;
+          stage = "load:brand";
           await expect(brand).toHaveAccessibleName(/Descomplica/);
+          stage = "load:navigation-label";
           await expect(nav).toHaveAttribute("aria-label", "Navegação principal");
+          stage = "load:theme-controls";
           await expect(themes.getByRole("button")).toHaveCount(3);
           stage = "closed-layout-and-tab-order";
           if (compact) {
@@ -558,14 +849,19 @@ export async function checkArchiveNavigation(
             await expect(trigger).toHaveAttribute("aria-expanded", "false");
             await expect(nav).toBeHidden();
             await brand.focus();
-            for (let i = 0; i < 5; i += 1) {
+            await page.keyboard.press("Tab");
+            await expect(trigger).toBeFocused();
+            for (const label of Object.values(themeLabels)) {
               await page.keyboard.press("Tab");
-              assert.equal(
-                await nav.evaluate((element) => element.contains(document.activeElement)),
-                false,
-                "Collapsed navigation must not receive tab focus",
-              );
+              await expect(themes.getByRole("button", { name: label, exact: true })).toBeFocused();
             }
+            await page.keyboard.press("Tab");
+            await expect(accountTrigger(page)).toBeFocused();
+            assert.equal(
+              await nav.evaluate((element) => element.contains(document.activeElement)),
+              false,
+              "Collapsed navigation must not receive tab focus",
+            );
           } else {
             await expect(trigger).toBeHidden();
             await expect(nav).toBeVisible();
@@ -602,7 +898,7 @@ export async function checkArchiveNavigation(
           check.headerSurfaces = {};
           check.mainSurfaces = {};
           for (const [theme, label] of Object.entries(themeLabels)) {
-            stage = `theme:${theme}`;
+            stage = `theme:${theme}:selection`;
             const button = themes.getByRole("button", { name: label, exact: true });
             await button.click();
             await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
@@ -611,10 +907,11 @@ export async function checkArchiveNavigation(
             await assertHeaderGeometry(page, compact);
             await waitForArchiveHeaderTheme(page, theme, check.headerSurfaces);
             check.compactHeader ??= {};
-            check.compactHeader[theme] = await checkCompactArchiveHeader(page);
+            check.compactHeader[theme] = await checkProtectedTopbar(page);
             if (scope === "header-and-content")
               check.mainSurfaces[theme] = await inspectMainSurface(page);
             if (scope === "header-and-content" && route === archiveNavigationRoutes[0]) {
+              stage = `theme:${theme}:associative-content`;
               check.compactStock ??= {};
               check.compactStock[theme] = await checkAssociativeCompactStock(page);
               check.initialViewport ??= {};
@@ -633,20 +930,65 @@ export async function checkArchiveNavigation(
               await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
             }
             if (viewport.width === 320 || viewport.width === 1181) {
+              stage = `theme:${theme}:accessible-disclosure:open-navigation`;
               await ensureArchiveNavigationOpen(page);
-              await simulation.click();
-              await expect(page.locator("#site-menu-simulation")).toBeVisible();
+              if (compact) {
+                stage = `theme:${theme}:accessible-disclosure:trigger-focus`;
+                await expect(trigger).toBeFocused();
+                await page.keyboard.press("Tab");
+                stage = `theme:${theme}:accessible-disclosure:dashboard-focus`;
+                await assertNavigationControlFocused(
+                  dashboard,
+                  "authorized-navigation-crm-dashboard",
+                );
+                await page.keyboard.press("Tab");
+                stage = `theme:${theme}:accessible-disclosure:simulation-focus`;
+                await assertNavigationControlFocused(
+                  simulation,
+                  "authorized-navigation-crm-simulation",
+                );
+              } else {
+                stage = `theme:${theme}:accessible-disclosure:brand-focus`;
+                await brand.focus();
+                await page.keyboard.press("Tab");
+                stage = `theme:${theme}:accessible-disclosure:dashboard-focus`;
+                await assertNavigationControlFocused(
+                  dashboard,
+                  "authorized-navigation-crm-dashboard",
+                );
+                await page.keyboard.press("Tab");
+                stage = `theme:${theme}:accessible-disclosure:simulation-focus`;
+                await assertNavigationControlFocused(
+                  simulation,
+                  "authorized-navigation-crm-simulation",
+                );
+              }
+              stage = `theme:${theme}:accessible-disclosure:open-submenu`;
+              await page.keyboard.press("Enter");
+              await expect(page.locator("#authorized-navigation-crm-simulation")).toBeVisible();
+              stage = `theme:${theme}:accessible-disclosure:axe`;
               const accessibility = await new AxeBuilder({ page })
-                .include("header:has(#archive-navigation)")
+                .include("[data-protected-topbar]")
                 .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
                 .analyze();
               assert.equal(
                 accessibility.violations.length,
                 0,
-                "Archive header accessibility failed",
+                "Protected topbar accessibility failed",
               );
-              await simulation.click();
-              if (compact) await trigger.click();
+              stage = `theme:${theme}:accessible-disclosure:close-submenu`;
+              await page.keyboard.press("Escape");
+              await assertNavigationControlFocused(
+                simulation,
+                "authorized-navigation-crm-simulation",
+              );
+              await expect(simulation).toHaveAttribute("aria-expanded", "false");
+              if (compact) {
+                stage = `theme:${theme}:accessible-disclosure:close-navigation`;
+                await page.keyboard.press("Escape");
+                await expect(nav).toBeHidden();
+                await expect(trigger).toBeFocused();
+              }
             }
             check.themes[theme] = true;
           }
@@ -688,44 +1030,61 @@ export async function checkArchiveNavigation(
             await expect(trigger).toHaveAccessibleName("Fechar navegação");
           }
           await ensureArchiveNavigationOpen(page);
+          await assertRootAccessibleNames({ dashboard, settings, simulation });
           await assertOpenNavigationGeometry(page);
-          for (const [label, href] of [
-            ["Dashboard", "/app"],
-            ["Ranking", "/app/ranking"],
-            ["Canal de Parcerias", "/app/canal-de-parcerias"],
-          ]) {
-            await expect(nav.getByRole("link", { name: label, exact: true })).toHaveAttribute(
-              "href",
-              href,
+          await assertExactRootNavigation(page);
+          check.exactAuthorizedRootNavigation = true;
+          if (compact) {
+            await expect(trigger).toBeFocused();
+            await page.keyboard.press("Tab");
+            await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
+            await page.keyboard.press("Tab");
+            await assertNavigationControlFocused(
+              simulation,
+              "authorized-navigation-crm-simulation",
+            );
+          } else {
+            await brand.focus();
+            await page.keyboard.press("Tab");
+            await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
+            await page.keyboard.press("Tab");
+            await assertNavigationControlFocused(
+              simulation,
+              "authorized-navigation-crm-simulation",
             );
           }
-          await simulation.focus();
-          await page.keyboard.press("Space");
+          await page.keyboard.press("ArrowDown");
           await expect(simulation).toHaveAttribute("aria-expanded", "true");
           await expect(nav).toBeVisible();
           if (compact) await expect(trigger).toHaveAttribute("aria-expanded", "true");
-          await page.keyboard.press("Tab");
-          await expect(page.locator("#site-menu-simulation a").first()).toBeFocused();
-          await assertLinks(page, "site-menu-simulation", simulationLinks, route);
-          await assertDisabledItems(page, "site-menu-simulation", []);
+          await expect(
+            page.locator("#authorized-navigation-crm-simulation a").first(),
+          ).toBeFocused();
+          await assertLinks(page, "authorized-navigation-crm-simulation", simulationLinks, route);
+          await assertDisabledItems(page, "authorized-navigation-crm-simulation", ["CAIXA"]);
           await expect(nav.locator('a[aria-current="page"]')).toHaveCount(1);
           stage = "switch-disclosure-by-pointer";
           await settings.click();
           await expect(simulation).toHaveAttribute("aria-expanded", "false");
-          await expect(page.locator("#site-menu-simulation")).toBeHidden();
+          await expect(page.locator("#authorized-navigation-crm-simulation")).toBeHidden();
           await expect(settings).toHaveAttribute("aria-expanded", "true");
           await expect(nav).toBeVisible();
-          await assertLinks(page, "site-menu-settings", settingsLinks, route);
-          await assertDisabledItems(page, "site-menu-settings", [
-            "Previsão final de semana",
-            "Discador",
-          ]);
+          await assertLinks(page, "authorized-navigation-crm-settings", settingsLinks, route);
+          await assertDisabledItems(page, "authorized-navigation-crm-settings", []);
+          await assertOpenNavigationGeometry(page);
+          stage = "dashboard-disclosure-and-authorized-links";
+          await dashboard.click();
+          await expect(settings).toHaveAttribute("aria-expanded", "false");
+          await expect(page.locator("#authorized-navigation-crm-settings")).toBeHidden();
+          await expect(dashboard).toHaveAttribute("aria-expanded", "true");
+          await assertLinks(page, "authorized-navigation-crm-dashboard", dashboardLinks, route);
+          await assertDisabledItems(page, "authorized-navigation-crm-dashboard", []);
           await assertOpenNavigationGeometry(page);
           stage = "escape-order";
           await page.keyboard.press("Escape");
-          await expect(settings).toHaveAttribute("aria-expanded", "false");
-          await expect(page.locator("#site-menu-settings")).toBeHidden();
-          await expect(settings).toBeFocused();
+          await expect(dashboard).toHaveAttribute("aria-expanded", "false");
+          await expect(page.locator("#authorized-navigation-crm-dashboard")).toBeHidden();
+          await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
           if (compact) {
             await expect(trigger).toHaveAttribute("aria-expanded", "true");
             await page.keyboard.press("Escape");
@@ -734,14 +1093,47 @@ export async function checkArchiveNavigation(
             stage = "outside-pointer-and-focus";
             await page.keyboard.press("Space");
             await expect(nav).toBeVisible();
-            await themes.getByRole("button", { name: "Claro", exact: true }).focus();
-            // Theme controls belong to the header wrapper; the brand is outside it.
+            await accountTrigger(page).focus();
+            await expect(nav).toBeHidden();
+            await ensureArchiveNavigationOpen(page);
             await brand.focus();
             await expect(nav).toBeHidden();
             await ensureArchiveNavigationOpen(page);
             await page.mouse.click(1, viewport.height - 1);
             await expect(nav).toBeHidden();
           }
+          stage = "account-keyboard-and-identity";
+          const account = accountTrigger(page);
+          await account.focus();
+          await page.keyboard.press("Space");
+          await expect(account).toHaveAttribute("aria-expanded", "true");
+          const accountPanel = page.locator("#protected-account-menu");
+          await expect(accountPanel).toBeVisible();
+          const securityLink = accountPanel.getByRole("link", { name: /Segurança/ });
+          await expect(securityLink).toHaveAttribute("href", "/conta/seguranca");
+          await page.keyboard.press("Tab");
+          await expect(securityLink).toBeFocused();
+          const accountLinks = await accountPanel
+            .getByRole("link")
+            .evaluateAll((links) => links.map((link) => link.getAttribute("href")).sort());
+          assert.deepEqual(
+            accountLinks,
+            ["/admin", "/admin/paginas", "/admin/usuarios", "/conta/seguranca"],
+            "Master account menu must expose only its authorized account and admin links",
+          );
+          check.exactAuthorizedAccountNavigation = true;
+          assert.equal(
+            await accountPanel.evaluate(
+              (element) =>
+                element.scrollWidth <= element.clientWidth + 1 &&
+                document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+            ),
+            true,
+            "Long account identity must not create horizontal overflow",
+          );
+          await page.keyboard.press("Escape");
+          await expect(accountPanel).toBeHidden();
+          await expect(account).toBeFocused();
           if (scope === "header-and-content") {
             stage = "resize-preserves-content-focus";
             const stock = page.locator(".investor-stock-results");
@@ -755,34 +1147,34 @@ export async function checkArchiveNavigation(
           await page.setViewportSize({ width: 1181, height: 900 });
           await expect(nav).toBeVisible();
           await simulation.click();
-          await expect(page.locator("#site-menu-simulation")).toBeVisible();
-          await page.locator("#site-menu-simulation a").first().focus();
+          await expect(page.locator("#authorized-navigation-crm-simulation")).toBeVisible();
+          await page.locator("#authorized-navigation-crm-simulation a").first().focus();
           await page.setViewportSize({ width: 1180, height: 900 });
           await expect(nav).toBeHidden();
           await expect(trigger).toBeFocused();
           await expect(simulation).toHaveAttribute("aria-expanded", "false");
           await ensureArchiveNavigationOpen(page);
           await simulation.click();
-          await page.locator("#site-menu-simulation a").first().focus();
+          await page.locator("#authorized-navigation-crm-simulation a").first().focus();
           stage = "resize-simulation-link-to-desktop";
           await page.setViewportSize({ width: 1181, height: 900 });
           await expect(nav).toBeVisible();
-          await expect(page.locator("#site-menu-simulation")).toBeHidden();
-          await expect(simulation).toBeFocused();
+          await expect(page.locator("#authorized-navigation-crm-simulation")).toBeHidden();
+          await assertNavigationControlFocused(simulation, "authorized-navigation-crm-simulation");
           await expect(trigger).toHaveAttribute("aria-expanded", "false");
           stage = "resize-settings-link-to-desktop";
           await page.setViewportSize({ width: 1180, height: 900 });
           await ensureArchiveNavigationOpen(page);
           await settings.click();
-          await page.locator("#site-menu-settings a").first().focus();
+          await page.locator("#authorized-navigation-crm-settings a").first().focus();
           await page.setViewportSize({ width: 1181, height: 900 });
-          await expect(page.locator("#site-menu-settings")).toBeHidden();
-          await expect(settings).toBeFocused();
+          await expect(page.locator("#authorized-navigation-crm-settings")).toBeHidden();
+          await assertNavigationControlFocused(settings, "authorized-navigation-crm-settings");
           stage = "resize-mobile-trigger-to-desktop";
           await page.setViewportSize({ width: 1180, height: 900 });
           await expect(trigger).toBeFocused();
           await page.setViewportSize({ width: 1181, height: 900 });
-          await expect(simulation).toBeFocused();
+          await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
           await expect(trigger).toBeHidden();
           stage = "navigate-and-brand";
           await page.setViewportSize(viewport);
@@ -792,11 +1184,13 @@ export async function checkArchiveNavigation(
             archiveNavigationRoutes[
               (archiveNavigationRoutes.indexOf(route) + 1) % archiveNavigationRoutes.length
             ];
-          await page.locator(`#site-menu-simulation a[href="${destination}"]`).click();
+          await page
+            .locator(`#authorized-navigation-crm-simulation a[href="${destination}"]`)
+            .click();
           await expect(page).toHaveURL(`${origin}${destination}`);
           await expect(appearance(page)).toBeVisible();
           if (compact) await expect(navigation(page)).toBeHidden();
-          await page.locator('header a.brand-link[href="/app"]').click();
+          await page.locator('[data-protected-brand][href="/app"]').click();
           await expect(page).toHaveURL(`${origin}/app`);
           assert.equal(
             runtimeErrors.length - errorStart,
@@ -807,12 +1201,16 @@ export async function checkArchiveNavigation(
         } catch (error) {
           check.failedStage = stage;
           check.failure = sanitizedNavigationFailure(error);
-          check.diagnostics = await inspectArchiveNavigationFailure(page).catch(() => ({
+          const runtimeDiagnostics = await inspectArchiveNavigationFailure(page).catch(() => ({
             unavailable: true,
           }));
+          check.diagnostics = {
+            ...runtimeDiagnostics,
+            ...(error?.safeDiagnostics ? { assertion: error.safeDiagnostics } : {}),
+          };
         }
         check.runtimeErrorCount = runtimeErrors.length - errorStart;
-        await onCheck(check);
+        await onCheck(check, page);
       }
     }
     result.passed = archiveNavigationPassed(result, { scope });
@@ -820,6 +1218,7 @@ export async function checkArchiveNavigation(
   } finally {
     page.off("pageerror", onError);
     page.off("console", onConsole);
+    if (rotatingPages && !page.isClosed()) await page.close({ runBeforeUnload: false });
   }
 }
 

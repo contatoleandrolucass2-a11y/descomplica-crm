@@ -1,5 +1,4 @@
 import { InvestorGuideLauncher, InvestorInfoHint } from "./archive-investor/InvestorCalculator";
-import { ArchiveHeader } from "./archive-investor/ArchiveHeader";
 import "./archive-investor/investor-archive.css";
 import "./archive-investor/tabelao-layout.css";
 import { TabelaoClient } from "./TabelaoClient";
@@ -8,7 +7,6 @@ import { TabelaoResources } from "./TabelaoResources";
 export async function TabelaoArchive() {
   return (
     <div className="app-shell simulation-page-shell investor-page-shell tabelao-page-shell">
-      <ArchiveHeader />
       <main className="investor-main">
         <section className="goal-page-hero investor-compact-hero">
           <div className="goal-hero-copy">

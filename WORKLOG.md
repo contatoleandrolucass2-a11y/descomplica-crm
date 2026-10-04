@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-10-04 - Navegacao protegida unificada validada
+
+- A topbar unica passa a atender todas as paginas protegidas; cinco simuladores
+  deixaram de montar navbar interna. Simulacao concentra as jornadas em submenu
+  autorizado no servidor e CAIXA permanece bloqueada, sem `href`.
+- Gate local limpo no SHA `54e09b`: 147 checks responsivos, 84 de tema, 201
+  auditorias Axe/comparacoes, 105 checks de zoom e 40 combinacoes da navegacao
+  arquivada. Documentacao foi incorporada a matriz principal de 21 paginas.
+- O contrato agora comprova truncamento da identidade em cada viewport e exige
+  correspondencia exata entre as 201 imagens e o manifesto. Oito capturas
+  antigas da CAIXA foram removidas; nenhuma evidencia orfa permanece.
+- O smoke E2E distingue o aviso bloqueado da CAIXA no card e no submenu, ambos
+  sem `href`; o acesso direto continua validado separadamente como negado.
+- Perfis sem paginas comerciais passam a provar explicitamente que a tela de
+  seguranca exibe a identidade, mas nao monta a navegacao principal protegida.
+- O smoke do Tabelao valida a regiao rolavel pelo nome acessivel e a tabela
+  semantica contida nela, refletindo a estrutura real do componente.
+- Teclado, foco, identidade longa, cookies, tres temas, reduced motion e estados
+  dos simuladores passaram. O alvo de cookies permanece em 44px mesmo sob o CSS
+  legado de 14px. Conta e fixtures QA efemeras foram removidas.
+- Nenhuma migration, permissao, dado, integracao ou regra comercial foi alterada.
+  CI, PR e publicacao automatica ainda dependem dos gates finais deste SHA.
+
 ## 2026-10-04 - Associativo publicado e conferido
 
 - Publicada a imagem imutavel 7337b97 apos CI 37173712179 integralmente verde.
@@ -27,6 +50,22 @@
   falharam por timeout. Predicado identico confirmado por AST; 89 testes focados
   aprovados. Gates locais completos em andamento.
 - Uma repeticao do job da main foi solicitada no mesmo SHA; deploy ainda pendente.
+
+## 2026-10-03 - Shell protegido único
+
+- Branch `codex/unified-protected-navigation`, base `8e158cc`. O diagnóstico
+  confirmou que cinco simuladores contornavam o shell protegido e montavam um
+  `ArchiveHeader` com menu estático, criando duas arquiteturas de navegação.
+- A correção mantém um único layout autenticado. O catálogo filtrado por RLS e
+  permissão continua sendo a base; quatro simuladores fora das 17 páginas do
+  catálogo entram apenas quando o pai, a permissão efetiva e o gate liberado
+  convergem. CAIXA é apresentada sem `path`, como estado bloqueado.
+- Os cabeçalhos locais e a navegação redundante entre simuladores foram
+  removidos. Tabs contextuais, cálculos, estoque, formulários, URLs, proxy,
+  guards e políticas de banco permanecem inalterados.
+- Baseline no SHA-base aprovado: ESLint, TypeScript, 1.478 Vitest (1 ignorado),
+  oito testes Node e build Next. Validação integrada e evidências visuais serão
+  registradas após a consolidação dos arquivos concorrentes.
 
 ## 2026-10-03 - Contrato de brilho compativel com CSS de producao
 

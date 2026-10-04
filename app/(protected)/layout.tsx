@@ -15,84 +15,122 @@
  * M7.2 Server Action. This stays a pure Server Component throughout.
  */
 
-import type { ReactNode } from "react";
-import Link from "next/link";
 import { cookies } from "next/headers";
+import Image from "next/image";
+import Link from "next/link";
+import { LogOut, ShieldCheck } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { enforceAuthorization } from "@/lib/authorization/enforce";
 import { logoutAction } from "@/lib/auth/actions/logout";
 import { getCurrentUser } from "@/lib/authorization/guards";
 import { getRoleLabel } from "@/lib/authorization/roles";
-import { getAuthorizedNavigation } from "@/lib/navigation/pages";
-import { getNavigationHome } from "@/lib/navigation/presentation";
+import { getAuthorizedNavigation, getDisabledNavigationItems } from "@/lib/navigation/pages";
+import { getAuthorizedAdminNavigation, getNavigationHome } from "@/lib/navigation/presentation";
 import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
 
+import { AccountMenu } from "./_components/AccountMenu";
+import { AppPageIcon } from "./_components/AppPageIcon";
 import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
 import { AuthorizedBreadcrumbs } from "./_components/AuthorizedBreadcrumbs";
-import { ProtectedShellFrame } from "./_components/ProtectedShellFrame";
+import { PROTECTED_CONTENT_ID, ProtectedShellFrame } from "./_components/ProtectedShellFrame";
 import styles from "./_components/ProtectedShell.module.css";
 import { ThemeSwitch } from "./_components/ThemeSwitch";
 
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   const context = await enforceAuthorization();
-  const user = await getCurrentUser();
-  const pages = await getAuthorizedNavigation(context);
-  const cookieStore = await cookies();
+  const [user, pages, cookieStore] = await Promise.all([
+    getCurrentUser(),
+    getAuthorizedNavigation(context),
+    cookies(),
+  ]);
   const cookieConsent = parseCookieConsent(cookieStore.get(COOKIE_CONSENT_COOKIE_NAME)?.value);
+  const disabledItems = getDisabledNavigationItems(context, pages);
+  const navigationPages = pages.filter((page) => page.section !== "admin");
+  const adminPages = getAuthorizedAdminNavigation(pages);
   const navigationHome = getNavigationHome(pages);
+  const identity = user?.email ?? "Usuário autenticado";
+  const role = getRoleLabel(context.roleKey);
   const brand = (
     <>
-      <span className={styles.brandMark} aria-hidden="true">
-        D
-      </span>
-      <span>
-        <span className={styles.brandName}>Descomplica CRM</span>
-        <span className={styles.role}>{getRoleLabel(context.roleKey)}</span>
+      <Image
+        className={styles.brandMark}
+        src="/descomplica-symbol.png"
+        alt=""
+        aria-hidden="true"
+        width={22}
+        height={22}
+        loading="eager"
+      />
+      <span className={styles.brandName} aria-hidden="true">
+        escomplica
       </span>
     </>
   );
 
   const chrome = (
     <>
-      <header className={styles.topbar}>
+      <a className={styles.skipLink} href={`#${PROTECTED_CONTENT_ID}`}>
+        Pular para o conteúdo
+      </a>
+      <header className={styles.topbar} data-protected-topbar>
         <div className={styles.topbarInner}>
           {navigationHome ? (
             <Link
               href={navigationHome.path}
               prefetch={false}
               className={styles.brand}
-              aria-label={`Descomplica CRM — ${navigationHome.name}`}
+              aria-label="Descomplica, início"
+              data-protected-brand
             >
               {brand}
             </Link>
           ) : (
-            <div className={styles.brand}>{brand}</div>
-          )}
-          <AuthorizedNavigation pages={pages} />
-          <div className={styles.actions}>
-            <div
-              className={styles.identity}
-              data-session-identity
-              aria-label={`Usuário autenticado: ${user?.email ?? "identidade protegida"}. Sessão ativa.`}
-              title={user?.email ?? undefined}
-            >
-              <span className={styles.identityLabel} data-session-identity-label>
-                {user?.email ?? "Usuário autenticado"}
-              </span>
-              <span className={styles.identityStatus}>
-                <span aria-hidden="true" />
-                Sessão ativa
-              </span>
+            <div className={styles.brand} aria-label="Descomplica" data-protected-brand>
+              {brand}
             </div>
-            <Link href="/conta/seguranca" prefetch={false} className={styles.accountLink}>
-              Segurança
-            </Link>
-            <ThemeSwitch canPersist={cookieConsent?.categories.functional === true} />
-            <form action={logoutAction}>
-              <button type="submit" className={styles.logout}>
-                Sair
-              </button>
-            </form>
+          )}
+          <AuthorizedNavigation pages={navigationPages} disabledItems={disabledItems} />
+          <ThemeSwitch canPersist={cookieConsent?.categories.functional === true} />
+          <div className={styles.actions}>
+            <AccountMenu identity={identity} role={role}>
+              <Link href="/conta/seguranca" prefetch={false} className={styles.accountLink}>
+                <ShieldCheck aria-hidden="true" size={18} />
+                <span>
+                  <strong>Segurança</strong>
+                  <small>Senha, MFA e sessões</small>
+                </span>
+              </Link>
+
+              {adminPages.length > 0 ? (
+                <nav className={styles.accountSection} aria-label="Administração">
+                  <span className={styles.accountSectionLabel}>Administração</span>
+                  {adminPages.map((page) => (
+                    <Link
+                      href={page.path}
+                      prefetch={false}
+                      className={styles.accountLink}
+                      key={page.key}
+                    >
+                      <span className={styles.accountLinkIcon}>
+                        <AppPageIcon pageKey={page.key} />
+                      </span>
+                      <span>
+                        <strong>{page.name}</strong>
+                        <small>{page.description}</small>
+                      </span>
+                    </Link>
+                  ))}
+                </nav>
+              ) : null}
+
+              <form action={logoutAction} className={styles.logoutForm}>
+                <button type="submit" className={styles.logout}>
+                  <LogOut aria-hidden="true" size={18} />
+                  Sair
+                </button>
+              </form>
+            </AccountMenu>
           </div>
         </div>
       </header>
@@ -101,7 +139,11 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
   );
 
   return (
-    <ProtectedShellFrame shellClassName={styles.shell} chrome={chrome}>
+    <ProtectedShellFrame
+      shellClassName={styles.shell}
+      contentClassName={styles.mainContent}
+      chrome={chrome}
+    >
       {children}
     </ProtectedShellFrame>
   );

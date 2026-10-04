@@ -540,10 +540,43 @@ async function checkQuantity(page) {
   return geometry;
 }
 
-async function checkHover(page, locator, reducedMotion, allowScale = true) {
+async function checkHover(page, locator, reducedMotion, allowScale = true, actionTarget = locator) {
   await page.mouse.move(0, 0);
   await page.emulateMedia({ reducedMotion });
-  await locator.hover();
+  try {
+    await actionTarget.hover();
+  } catch (error) {
+    error.safeHoverDiagnostics = await actionTarget
+      .evaluate((element) => {
+        const owner =
+          element.closest(".investor-key-field, .investor-associative-question") ?? element;
+        const rect = element.getBoundingClientRect();
+        const point = {
+          x: Math.min(innerWidth - 1, Math.max(0, rect.left + rect.width / 2)),
+          y: Math.min(innerHeight - 1, Math.max(0, rect.top + rect.height / 2)),
+        };
+        const hit = document.elementFromPoint(point.x, point.y);
+        const style = getComputedStyle(element);
+        return {
+          targetAttached: element.isConnected,
+          targetVisible: element.checkVisibility(),
+          targetDisabled: element.matches(":disabled"),
+          targetRect: {
+            x: rect.x,
+            y: rect.y,
+            width: rect.width,
+            height: rect.height,
+          },
+          viewport: { width: innerWidth, height: innerHeight, scrollY },
+          pointerEvents: style.pointerEvents,
+          hitTag: hit?.tagName ?? null,
+          hitWithinTarget: Boolean(hit && element.contains(hit)),
+          hitWithinOwner: Boolean(hit && owner.contains(hit)),
+        };
+      })
+      .catch(() => ({ unavailable: true }));
+    throw error;
+  }
   let motion;
   await expect
     .poll(
@@ -699,10 +732,10 @@ async function checkGuidanceShimmer(page) {
   return measurements;
 }
 
-async function checkReducedGuidanceMotion(page, locator) {
+async function checkReducedGuidanceMotion(page, locator, actionTarget = locator) {
   const normal = await checkGuidanceShimmer(page);
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await checkHover(page, locator, "reduce");
+  await checkHover(page, locator, "reduce", true, actionTarget);
   const reduced = await checkGuidanceShimmer(page);
   await page.mouse.move(0, 0);
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -711,6 +744,7 @@ async function checkReducedGuidanceMotion(page, locator) {
 
 // Call only on an isolated synthetic page, after initial viewport checks and unit selection.
 export async function checkAssociativeGuidance(page, { onState = async () => {} } = {}) {
+  let stage = "initial";
   const result = {
     contract: "associative-guidance-row-edges-rejection-v5",
     questions: [],
@@ -730,6 +764,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     () => matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   try {
+    stage = "reset";
     await page.emulateMedia({ reducedMotion: "no-preference" });
     // Clear in reverse dependency order so repeated theme checks exercise every gate again.
     for (const label of [
@@ -747,6 +782,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     await qualification.focus();
     await page.mouse.move(0, 0);
     await checkAssociativeSelectedGoldPaint(page);
+    stage = "profile";
     await onState("profile");
     result.questions.push(await checkCurrentQuestion(page, 0));
     result.currentCardMotion = await checkReducedGuidanceMotion(
@@ -762,6 +798,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     await expect(qualification.getByRole("radio", { name: "Sim", exact: true })).toBeDisabled();
     result.moneyBefore = await checkAssociativeMoneySpacing(page);
 
+    stage = "modality";
     await field("Renda Familiar").fill("800000");
     await field("Renda Familiar").blur();
     // A calculated modality is a suggestion, never confirmation of step 2.
@@ -778,6 +815,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     );
     result.questions.push(await checkCurrentQuestion(page, 2));
     await expect(qualification.getByRole("radio", { name: "Sim", exact: true })).toBeEnabled();
+    stage = "first-property";
     await onState("first-property");
     await expect(flow).toHaveAttribute("data-locked", "true");
     await expect(field("Financiamento")).toBeDisabled();
@@ -793,12 +831,14 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
       ["Entrada", "15000", "Quantidade de parcelas"],
     ];
     for (const [label, value, next] of steps) {
+      stage = `flow:${label}`;
       if (label === "Financiamento") await onState("financing");
       result.rows.push(await checkRequiredRow(page, label));
       if (label === "Financiamento")
         result.requiredRowMotion = await checkReducedGuidanceMotion(
           page,
           page.locator(`${root} ${activeRow}`),
+          field(label),
         );
       await expect(field(next)).toBeDisabled();
       result.keyboardFocus.push(await checkLedgerKeyboardFocus(page, field(label)));
@@ -817,6 +857,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     );
     result.moneyAfter = await checkAssociativeMoneySpacing(page);
     result.quantity = await checkQuantity(page);
+    stage = "ranking";
     await field("Quantidade de parcelas").fill("1");
     await expect(field("Quantidade de parcelas")).toHaveAttribute("aria-invalid", "true");
     await expect(
@@ -861,6 +902,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
 
     result.summary = await checkAssociativeSummaryGeometry(page);
     result.workspace = await checkAssociativeWorkspaceGaps(page);
+    stage = "commission";
     const commission = page.locator(`${root} .investor-associative-commission-launcher`);
     await expect(commission).toBeVisible();
     await expect(commission).toHaveAccessibleName("Abrir remuneração comercial");
@@ -895,12 +937,20 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
         reduced: await checkHover(page, locator, "reduce"),
       };
     }
+    stage = "rejection";
     result.rejection = await checkRejection(page);
+    stage = "complete";
     result.passed = true;
     await onState("complete");
     return result;
   } catch (error) {
     error.associativeGuidance = result;
+    error.safeDiagnostics = {
+      contract: result.contract,
+      stage,
+      questionChecks: result.questions.length,
+      rowChecks: result.rows.length,
+    };
     throw error;
   } finally {
     await page.emulateMedia({ reducedMotion: previousMotion ? "reduce" : "no-preference" });
@@ -1119,7 +1169,7 @@ export async function runAssociativeGuidancePreview(
               `${root} ${["profile", "modality", "first-property"].includes(state) ? ".investor-associative-qualification" : ".investor-associative-flow-panel"}`,
             );
             await panel.evaluate((element) => {
-              const header = document.querySelector("header:has(#archive-navigation)");
+              const header = document.querySelector("[data-protected-topbar]");
               window.scrollTo({
                 top: Math.max(
                   0,

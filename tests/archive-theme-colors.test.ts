@@ -1,20 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { createElement, type ComponentProps } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
-
-vi.mock("next/headers", () => ({
-  cookies: async () => ({ get: () => undefined }),
-}));
-vi.mock("next/image", () => ({
-  default: (props: ComponentProps<"img">) => createElement("img", props),
-}));
-vi.mock("../app/(protected)/app/simulacao/_components/archive-investor/SiteMenu", () => ({
-  SiteMenu: () => null,
-}));
-
-import { ArchiveHeader } from "../app/(protected)/app/simulacao/_components/archive-investor/ArchiveHeader";
+import { describe, expect, it } from "vitest";
 
 const require = createRequire(import.meta.url);
 const { parse } = createRequire(require.resolve("next/package.json"))("postcss") as {
@@ -28,15 +14,9 @@ const { parse } = createRequire(require.resolve("next/package.json"))("postcss")
   };
 };
 
-function declarations(file: string, selector: string) {
+function declarationsAt(file: URL, selector: string) {
   const values: Record<string, string> = {};
-  const css = readFileSync(
-    new URL(
-      `../app/(protected)/app/simulacao/_components/archive-investor/${file}`,
-      import.meta.url,
-    ),
-    "utf8",
-  );
+  const css = readFileSync(file, "utf8");
   parse(css).walkRules((rule) => {
     if (rule.selector === selector)
       rule.walkDecls(({ prop, value }) => {
@@ -45,6 +25,23 @@ function declarations(file: string, selector: string) {
   });
   expect(Object.keys(values).length, selector).toBeGreaterThan(0);
   return values;
+}
+
+function declarations(file: string, selector: string) {
+  return declarationsAt(
+    new URL(
+      `../app/(protected)/app/simulacao/_components/archive-investor/${file}`,
+      import.meta.url,
+    ),
+    selector,
+  );
+}
+
+function shellDeclarations(selector: string) {
+  return declarationsAt(
+    new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url),
+    selector,
+  );
 }
 
 const content = (theme: string) => ({
@@ -57,13 +54,8 @@ const content = (theme: string) => ({
       )),
 });
 const header = (theme: string) => ({
-  ...declarations("ArchiveHeader.module.css", ".header.header"),
-  ...(theme === "light"
-    ? {}
-    : declarations(
-        "ArchiveHeader.module.css",
-        `:global(:root[data-theme="${theme}"]) .header.header`,
-      )),
+  ...shellDeclarations(".topbar"),
+  ...(theme === "light" ? {} : shellDeclarations(`:global(:root[data-theme="${theme}"]) .topbar`)),
 });
 
 function rgb(hex: string) {
@@ -83,24 +75,21 @@ function contrast(a: string, b: string) {
 }
 
 describe("archive theme color contract", () => {
-  it("uses the supplied symbol as the first letter of the accessible home link", async () => {
-    const markup = renderToStaticMarkup(await ArchiveHeader());
-    const brand = markup.match(/<a\b[^>]*>[\s\S]*?<\/a>/)?.[0] ?? "";
-    const symbol = brand.match(/<img\b[^>]*>/)?.[0] ?? "";
+  it("uses the supplied symbol as the first letter of the accessible global home link", () => {
+    const layout = readFileSync(new URL("../app/(protected)/layout.tsx", import.meta.url), "utf8");
 
-    expect(brand).toContain('href="/app"');
-    expect(brand).toContain('aria-label="Descomplica, início"');
-    expect(brand.replace(/<[^>]*>/g, "").trim()).toBe("escomplica");
-    expect(brand.match(/<img\b/g)).toHaveLength(1);
-    expect(brand).toMatch(/<img\b[^>]*\/>\s*<span\b[^>]*>escomplica<\/span>/);
-    expect(symbol).toContain('src="/descomplica-symbol.png"');
-    expect(symbol).toContain('alt=""');
-    expect(symbol).toContain('aria-hidden="true"');
+    expect(layout).toContain("href={navigationHome.path}");
+    expect(layout).toContain('aria-label="Descomplica, início"');
+    expect(layout).toContain('src="/descomplica-symbol.png"');
+    expect(layout).toContain('alt=""');
+    expect(layout).toContain('aria-hidden="true"');
+    expect(layout).toContain("escomplica");
+    expect(layout).toContain("data-protected-brand");
     expect(existsSync(new URL("../public/descomplica-symbol.png", import.meta.url))).toBe(true);
   });
 
   it("keeps the symbol unframed and contained instead of restoring the blue badge", () => {
-    const brand = declarations("ArchiveHeader.module.css", ".header .brandMark");
+    const brand = shellDeclarations(".brandMark");
     expect(brand["object-fit"]).toBe("contain");
     expect(brand.width).toBe(brand.height);
     expect(brand.filter).toBe("var(--header-brand-shadow)");
@@ -108,10 +97,7 @@ describe("archive theme color contract", () => {
       Object.keys(brand).filter((property) => /^(background|border|box-shadow)/.test(property)),
     ).toEqual([]);
     const css = readFileSync(
-      new URL(
-        "../app/(protected)/app/simulacao/_components/archive-investor/ArchiveHeader.module.css",
-        import.meta.url,
-      ),
+      new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url),
       "utf8",
     );
     parse(css).walkRules(({ selector }) => {
@@ -172,6 +158,54 @@ describe("archive theme color contract", () => {
       expect(
         contrast(colors["--associative-gold-edge"]!, content(theme)["--inv-color-panel"]!),
       ).toBeGreaterThanOrEqual(3);
+  });
+
+  it("keeps the WF16 dark composition readable on its navy result surface", () => {
+    const dark = declarations(
+      "investor-archive.css",
+      ':root[data-theme="dark"] .documentation-page-shell',
+    );
+    const surface = "#0f2d41";
+    const selectors = [
+      [".documentation-breakdown h3", "--doc-rank-text"],
+      [".documentation-breakdown dd", "--doc-rank-text"],
+      [".documentation-breakdown dt", "--doc-rank-muted"],
+      [".documentation-breakdown-total dt", "--doc-rank-accent"],
+      [".documentation-breakdown-total dd", "--doc-rank-text"],
+    ] as const;
+
+    for (const [suffix, token] of selectors) {
+      const selector = `:root[data-theme="dark"] .documentation-page-shell ${suffix}`;
+      expect(declarations("documentation-accessibility.css", selector).color).toBe(`var(${token})`);
+      expect(contrast(dark[token]!, surface), selector).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(
+      readFileSync(
+        new URL(
+          "../app/(protected)/app/simulacao/_components/archive-investor/documentation-accessibility.css",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ).toContain("color: var(--doc-rank-text) !important");
+
+    const visualHarness = readFileSync(
+      new URL("../scripts/qa/documentation-calculator.mjs", import.meta.url),
+      "utf8",
+    );
+    const darkColorWait = visualHarness.indexOf(
+      "message: `Documentation must settle on the final dark contrast colors at ${width}px`",
+    );
+    expect(darkColorWait).toBeGreaterThan(-1);
+    expect(visualHarness).toContain('if (theme === "dark")');
+    expect(visualHarness).toContain(".poll(");
+    expect(visualHarness).toContain('surface: "rgb(15, 45, 65)"');
+    expect(visualHarness).toContain('heading: "rgb(244, 251, 255)"');
+    expect(visualHarness).toContain('term: "rgb(180, 202, 216)"');
+    expect(visualHarness).toContain('totalTerm: "rgb(34, 184, 197)"');
+    expect(darkColorWait).toBeLessThan(visualHarness.indexOf("const accessibility ="));
+    expect(visualHarness).not.toContain("document.styleSheets");
+    expect(visualHarness).not.toContain("Documentation dark contrast contract:");
   });
 
   it("keeps blood-red metallic rejection readable even at the brightest sheen", () => {

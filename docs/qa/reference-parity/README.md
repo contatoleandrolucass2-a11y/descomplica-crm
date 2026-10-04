@@ -147,15 +147,15 @@ Os harnesses de QA visual cobrem três fronteiras:
 2. verificação sem sessão das 18 rotas CRM protegidas do catálogo, seguida
    de captura do login vazio em `1440×900`, `1280×720`, `768×1024` e
    `390×844`;
-3. QA autenticado complementar das 20 rotas liberadas em Supabase local
-   isolado, combinado ao smoke de autorização das 21 rotas versionadas, com
+3. QA autenticado complementar das 21 rotas liberadas em Supabase local
+   isolado, combinado ao smoke de autorização das 22 rotas versionadas, com
    conta QA efêmera, fixtures sintéticas e motores de simulação bloqueados.
 
 Os resultados estruturados estão em [`results.json`](./results.json) e o
 manifest com viewport, navegador, política de sanitização, tamanho e SHA-256 de
 cada imagem está em [`manifest.json`](./manifest.json).
 O QA local autenticado está em
-[`authenticated-results.json`](./authenticated-results.json); suas 193 capturas
+[`authenticated-results.json`](./authenticated-results.json); suas 201 capturas
 ficam em [`target-authenticated`](./target-authenticated/).
 
 A baseline canônica continua comprovando as rotas arquivadas dos simuladores.
@@ -280,29 +280,29 @@ O harness executou a captura autenticada local, limpa e transacional com:
 
 - sete viewports: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `390×844`,
   `375×812` e `320×568`;
-- 20 rotas liberadas em tema claro nos sete viewports;
-- as 20 rotas liberadas em tema escuro móvel no viewport `390×844`;
-- verificações desktop dos temas claro, equilibrado e escuro nas 20 rotas, com
+- 21 rotas liberadas em tema claro nos sete viewports;
+- as 21 rotas liberadas em tema escuro móvel no viewport `390×844`;
+- verificações desktop dos temas claro, equilibrado e escuro nas 21 rotas, com
   capturas das três páginas administrativas, da Tabela Direta, da Tabela
   Investidor e das demais amostras visuais definidas pelo harness;
 - reflow equivalente a zoom de `80%`, `100%`, `125%`, `150%` e `200%`, sempre
   sobre canvas físico de `1440×900`;
-- reduced motion e Axe nas 140 combinações responsivas, nas 33 amostras desktop
-  de tema e nas 20 combinações mobile dark.
+- reduced motion e Axe nas 147 combinações responsivas, nas 33 amostras desktop
+  de tema e nas 21 combinações mobile dark.
 
-A matriz aprovou 140 capturas responsivas, 53 capturas de tema, 193 auditorias
-de acessibilidade, 193 comparações e 100 checks de zoom. A promoção ocorreu por
+A matriz aprovou 147 capturas responsivas, 54 capturas de tema, 201 auditorias
+de acessibilidade, 201 comparações e 105 checks de zoom. A promoção ocorreu por
 rename transacional com rollback, a partir de worktree limpa e sem alteração do
 fingerprint durante a captura.
 
 Resultados aprovados:
 
-- 140/140 checks responsivos: 20 rotas em sete viewports;
-- 80/80 checks de tema: 20 rotas nos três temas desktop e em mobile dark, com
-  53 capturas nas onze amostras desktop e nas 20 combinações mobile dark;
-- 193/193 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
+- 147/147 checks responsivos: 21 rotas em sete viewports;
+- 84/84 checks de tema: 21 rotas nos três temas desktop e em mobile dark, com
+  54 capturas nas onze amostras desktop e nas 21 combinações mobile dark;
+- 201/201 auditorias WCAG A/AA com Axe: matriz responsiva completa e amostras
   de tema, sem violações;
-- 100/100 checks de zoom: 20 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
+- 105/105 checks de zoom: 21 rotas em `80%`, `100%`, `125%`, `150%` e `200%`;
 - disclosure aberto por teclado, fechado com `Escape`, foco devolvido e `Tab`
   alcançando controle interativo;
 - campo obrigatório de simulador sinalizado após blur com `aria-invalid`,
@@ -313,9 +313,12 @@ Resultados aprovados:
 - zero colisão entre navegação e identidade de sessão, com truncamento pronto
   para nomes longos;
 - CTAs habilitado, bloqueado e indisponível com estilos computados distintos;
-- 140 capturas rota×viewport e 53 amostras de tema, sem metadados;
-- 193/193 comparações contra o baseline versionado dentro do limiar máximo de 1%
+- 147 capturas rota×viewport e 54 amostras de tema, sem metadados;
+- 201/201 comparações contra o baseline versionado dentro do limiar máximo de 1%
   de pixels alterados, com tolerância de 16 níveis por canal.
+- inventário físico exato de 201 imagens: qualquer WebP fora do manifesto
+  reprova o teste; CAIXA permanece representada somente pelo card bloqueado do
+  hub e não possui baseline de rota direta.
 
 As capturas autenticadas usam somente identidades e valores sintéticos com
 prefixo QA. Elas permitem comparar composição, densidade, reflow e estados com

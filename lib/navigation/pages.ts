@@ -4,8 +4,10 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/auth/supabase/server";
 import { requirePermission } from "@/lib/authorization/guards";
+import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
 import type { AuthorizationContext } from "@/lib/authorization/types";
+import type { DisabledNavigationItem } from "@/lib/navigation/presentation";
 
 const appPageRowSchema = z.object({
   key: z.string().min(1),
@@ -31,6 +33,103 @@ export interface AppPage {
   sortOrder: number;
   isNavigation: boolean;
   isActive: boolean;
+}
+
+interface SupplementalNavigationDefinition {
+  key: string;
+  path: string;
+  name: string;
+  description: string;
+  sortOrder: number;
+}
+
+const SIMULATION_PARENT_KEY = "crm.simulation";
+const SIMULATION_PARENT_PATH = "/app/simulacao";
+
+function hasAuthorizedSimulationRoot(pages: AppPage[]) {
+  return pages.some(
+    (page) =>
+      page.key === SIMULATION_PARENT_KEY &&
+      page.path === SIMULATION_PARENT_PATH &&
+      page.section === "simulation" &&
+      page.permissionKey === "crm.simulators.view" &&
+      page.parentKey === null &&
+      page.isNavigation &&
+      page.isActive,
+  );
+}
+
+/**
+ * Released simulator pages intentionally kept outside the 17-page database
+ * catalog are discoverable only after the authenticated catalog has authorized
+ * their parent and the route gate has authorized the caller's permission.
+ */
+const SUPPLEMENTAL_SIMULATOR_PAGES: readonly SupplementalNavigationDefinition[] = [
+  {
+    key: "crm.simulation.wf14",
+    path: "/app/simulacao/tabela-direta",
+    name: "Tabela Direta",
+    description: "Monte e compare fluxos da Tabela Direta.",
+    sortOrder: 30,
+  },
+  {
+    key: "crm.simulation.wf15",
+    path: "/app/simulacao/tabela-investidor",
+    name: "Tabela Investidor",
+    description: "Consulte a jornada comercial para investidores.",
+    sortOrder: 40,
+  },
+  {
+    key: "crm.simulation.tabelao",
+    path: "/app/simulacao/tabelao",
+    name: "Tabelão",
+    description: "Consulte o estoque SPC disponível.",
+    sortOrder: 50,
+  },
+  {
+    key: "crm.simulation.wf16",
+    path: "/app/simulacao/calcular-documentacao",
+    name: "Documentação",
+    description: "Calcule a documentação da proposta.",
+    sortOrder: 60,
+  },
+] as const;
+
+export function extendAuthorizedNavigationWithReleasedPages(
+  pages: AppPage[],
+  context: AuthorizationContext,
+): AppPage[] {
+  if (!hasAuthorizedSimulationRoot(pages)) return pages;
+
+  const occupiedKeys = new Set(pages.map((page) => page.key));
+  const occupiedPaths = new Set(pages.map((page) => page.path));
+  const supplementalPages: AppPage[] = [];
+
+  for (const definition of SUPPLEMENTAL_SIMULATOR_PAGES) {
+    const gate = getProtectedPageGate(definition.path);
+    if (
+      !gate?.releaseEnabled ||
+      gate.pageKey !== definition.key ||
+      !context.permissions.includes(gate.permission) ||
+      occupiedKeys.has(definition.key) ||
+      occupiedPaths.has(definition.path)
+    ) {
+      continue;
+    }
+
+    supplementalPages.push({
+      ...definition,
+      section: "simulation",
+      permissionKey: gate.permission,
+      parentKey: SIMULATION_PARENT_KEY,
+      isNavigation: true,
+      isActive: true,
+    });
+    occupiedKeys.add(definition.key);
+    occupiedPaths.add(definition.path);
+  }
+
+  return [...pages, ...supplementalPages];
 }
 
 function isPermissionKey(value: string): value is PermissionKey {
@@ -60,6 +159,16 @@ function parsePages(data: unknown): AppPage[] {
   });
 }
 
+function pageGateAuthorizesNavigation(page: AppPage, context: AuthorizationContext) {
+  const gate = getProtectedPageGate(page.path);
+  return (
+    gate?.releaseEnabled === true &&
+    gate.pageKey === page.key &&
+    gate.permission === page.permissionKey &&
+    context.permissions.includes(gate.permission)
+  );
+}
+
 async function queryPages(options: { navigationOnly: boolean; activeOnly: boolean }) {
   const supabase = await createClient();
   let query = supabase
@@ -87,7 +196,37 @@ export async function getAuthorizedNavigation(context: AuthorizationContext): Pr
   if (!context.permissions.includes("pages.view")) return [];
 
   const pages = await queryPages({ navigationOnly: true, activeOnly: true });
-  return pages.filter((page) => context.permissions.includes(page.permissionKey));
+  const authorizedPages = pages.filter((page) => pageGateAuthorizesNavigation(page, context));
+  return extendAuthorizedNavigationWithReleasedPages(authorizedPages, context);
+}
+
+export function getDisabledNavigationItems(
+  context: AuthorizationContext,
+  pages: AppPage[],
+): DisabledNavigationItem[] {
+  const caixaGate = getProtectedPageGate("/app/simulacao/caixa");
+
+  if (
+    !hasAuthorizedSimulationRoot(pages) ||
+    !caixaGate ||
+    caixaGate.releaseEnabled ||
+    caixaGate.pageKey !== "crm.simulation.caixa" ||
+    !context.permissions.includes(caixaGate.permission)
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      key: caixaGate.pageKey,
+      name: "CAIXA",
+      description: "Jornada preservada até a autorização oficial.",
+      section: "simulation",
+      parentKey: SIMULATION_PARENT_KEY,
+      sortOrder: 70,
+      reason: "Aguardando autorização",
+    },
+  ];
 }
 
 export async function getManageablePages(): Promise<AppPage[]> {
