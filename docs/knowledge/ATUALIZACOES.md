@@ -19,6 +19,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Testes focados, build e cinco cenarios de continuidade no navegador aprovados.
   Windows teve falhas POSIX e timeouts em ferramentas; CI Linux e publicacao
   pendentes. Consultar o audit de 04/10/2026 antes de reutilizar o resultado.
+- CI 37202986207 aprovou Linux, banco e restore; E2E ainda exigia apagar ranking
+  apos editar renda. Atualizado para continuidade com prova proporcional dos dois
+  comprometimentos, mantendo a barreira de isolamento entre usuarios.
 
 ## 2026-10-04: shell unico validado em toda a matriz autenticada
 

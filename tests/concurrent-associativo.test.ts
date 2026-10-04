@@ -16,6 +16,7 @@ const {
   syntheticProposal,
   selectConcurrentAccounts,
   browserStep,
+  assertIncomeCommitmentRecalculated,
 } = concurrentAssociativo;
 
 function envelope(index: number) {
@@ -31,6 +32,24 @@ function envelope(index: number) {
 }
 
 describe("Associativo concurrent assertions", () => {
+  it("requires both income commitments to recalculate without accepting stale or missing values", () => {
+    expect(() =>
+      assertIncomeCommitmentRecalculated(["14,13%", "17,58%"], ["13,59%", "16,90%"], 5_000, 5_200),
+    ).not.toThrow();
+    for (const after of [
+      ["14,13%", "17,58%"],
+      ["0,0%", "0,0%"],
+      ["—", "—"],
+      ["13,59%", "10,00%"],
+    ]) {
+      expect(() =>
+        assertIncomeCommitmentRecalculated(["14,13%", "17,58%"], after, 5_000, 5_200),
+      ).toThrow("income_commitment_not_recalculated");
+    }
+    expect(() => assertIncomeCommitmentRecalculated([], [], 5_000, 5_200)).toThrow(
+      "income_commitment_missing",
+    );
+  });
   it("reports only a fixed browser stage instead of raw Playwright call logs", async () => {
     await expect(
       browserStep("select_unit", () => {

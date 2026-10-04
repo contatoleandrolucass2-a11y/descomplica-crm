@@ -12,6 +12,8 @@
   destaca escolhas do perfil em dourado e alinha resumo, valores e icone dolar.
 - Inclui reflexo especular nos botoes do Associativo, com limites de foco,
   contraste, controles desabilitados e preferencia por movimento reduzido.
+- Alinha o E2E concorrente ao perfil persistente, exigindo recalculo dos dois
+  comprometimentos sem reconfirmar escolhas e preservando isolamento entre usuarios.
 
 ## 2026-10-04 - Navegacao protegida unificada
 

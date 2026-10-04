@@ -20,6 +20,9 @@
   nao foram reduzidos; CI Linux completa obrigatoria antes da publicacao.
 - Nenhuma alteracao em politica comercial, schema, dados remotos ou n8n.
   Evidencias e limites em `docs/audits/associativo-calculo-continuidade-2026-10-04.md`.
+- CI 37202986207: Linux, banco e restore aprovados; E2E reteve contrato antigo
+  de apagar ranking na edicao de renda. Atualizado para preservar respostas e
+  verificar os dois percentuais pela nova renda, mantendo isolamento concorrente.
 
 ## 2026-10-04 - Navegacao protegida unificada validada
 

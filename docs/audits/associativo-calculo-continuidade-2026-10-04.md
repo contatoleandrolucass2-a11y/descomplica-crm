@@ -60,8 +60,13 @@ inalterados. Nenhuma proposta, cliente ou estoque bruto foi exportado.
 - Cinco cenarios de continuidade aprovados em Chromium 151.0.7922.34, somente
   dados sinteticos e zero requisicoes externas: referencia, renda, troca de
   unidade, ausencia de obra, ausencia de avaliacao. Integrados ao gate de CI.
-- Prova adicional de pixels no brilho integral e CI: em andamento. Sem promover
-  baseline visual, reduzir gates ou fazer testes extensos na VPS.
+- Prova de pixels aprovada nas seis combinacoes: brilho no interior do perfil,
+  linha e classificacao. Sem promover baseline visual ou reduzir gates.
+- CI 37202986207: 1615 testes Vitest e oito Node aprovados, lint/tipos/build/audit,
+  banco e restore aprovados. E2E parou na expectativa antiga de apagar ranking
+  ao editar renda. O contrato agora exige manter escolhas e recalcular ambos os
+  comprometimentos proporcionalmente a nova renda, sem tocar no isolamento.
+  Nova execucao completa obrigatoria antes de publicar.
 
 ## Publicacao
 
