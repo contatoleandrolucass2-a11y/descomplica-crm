@@ -2,7 +2,7 @@
 
 - Fonte: cinco capturas do usuario em 05/10/2026.
 - Branch: `codex/associativo-saldo-anuais`, base `de57b6a`.
-- Status: implementado; validacao global e publicacao pendentes.
+- Status: implementado e validado localmente; CI integrada e publicacao pendentes.
 
 ## Causa e contrato financeiro
 
@@ -87,3 +87,13 @@ Nenhuma taxa, limite, politica, fonte de estoque, workflow ou dado remoto mudou.
   barra mobile. O cabecalho Associativo mantem somente o titulo; nao restaura
   os atalhos retirados pela outra entrega nem os tres textos removidos aqui.
   Regressao inicial integrada: 83 testes aprovados, tres condicionais ignorados.
+- Validacao integrada em `125e396`: lint, typecheck, build e roteiro React mobile
+  completos aprovados. Suite Windows: 1998 aprovados, cinco condicionais ignorados,
+  seis limitacoes POSIX e um timeout de DevTools; DevTools passou isolado (24/24),
+  assim como os oito testes Node. Nenhum gate foi afrouxado.
+- CI integrada `37364639266` nao iniciou: `validate` cancelado por falta de runner
+  hospedado, demais jobs ignorados. Anotacao: `The job was not acquired by Runner
+  of type hosted even after multiple attempts`. PR #156 aberto; nao houve deploy.
+  Fonte externa em 05/10/2026: https://www.githubstatus.com/incidents/3q1yb5m7ltvb,
+  incidente de atribuicao de runners iniciado as 19:11 UTC. Nova tentativa sera
+  feita sem alterar runner, permissoes, tolerancias ou gates.

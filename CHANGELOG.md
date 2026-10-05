@@ -9,6 +9,7 @@
 - Isola a medicao visual do brilho sem desativar efeitos na aplicacao.
 - Mantem a camada de pintura e mede seu interior arredondado, sem ruido dos cantos.
 - Preserva a atualizacao de canvas concorrente na integracao do Associativo.
+- Publicacao pendente da CI integrada, bloqueada por indisponibilidade de runner.
 
 ## 2026-10-04 - Recurso MKT
 

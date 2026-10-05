@@ -25,6 +25,10 @@
 - Integra a entrega concorrente `dcb88c9`, preservando o canvas e a troca de
   tema mobile; resolve cabecalho com apenas o titulo. Regressao integrada:
   83 testes aprovados e tres condicionais ignorados.
+- Lint/tipos/build e roteiro React integrado aprovados. Suite Windows: 1998
+  aprovados, seis falhas POSIX e timeout DevTools resolvido isoladamente (24/24).
+  Oito testes Node aprovados. CI `37364639266` cancelada antes de iniciar por
+  indisponibilidade de runner GitHub; PR #156 permanece sem merge/deploy.
 
 ## 2026-10-04 - Recurso MKT em Configuracoes
 

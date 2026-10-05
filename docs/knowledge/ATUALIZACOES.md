@@ -30,6 +30,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   posicoes fracionarias e prova negativa da pausa antiga, sem relaxar tolerancia.
 - Integra `dcb88c9` preservando canvas e temas mobile aprovados; o Associativo
   fica somente com o titulo no cabecalho. Revalidacao combinada obrigatoria.
+- Integracao local aprovada (lint/tipos/build, 83 testes focados, roteiro mobile,
+  oito Node); seis testes POSIX dependem da CI Linux. Timeout DevTools passou
+  isolado (24/24). CI `37364639266` nao obteve runner hospedado durante incidente
+  GitHub Actions `3q1yb5m7ltvb`, em 05/10/2026. PR #156 sem deploy; gates mantidos.
 
 ## 2026-10-04: Recurso MKT em Configuracoes
 
