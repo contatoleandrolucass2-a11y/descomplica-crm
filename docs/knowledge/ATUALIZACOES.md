@@ -69,9 +69,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-04: canvases aprovados cobrem 22 rotas protegidas
 
-- Status: validado localmente, pendente CI/publicacao; fonte:
-  `docs/qa/canvas-parity`, branch
-  `codex/canvas-layout-parity` e contratos locais de navegacao/QA.
+- Status: validado e publicado; fonte: PR #148, runtime
+  `77a07a73ec1629f1c4d9ae6b2b30d5bab8f79d2f`,
+  `docs/qa/canvas-parity` e
+  `docs/audits/canvas-layout-parity-2026-10-04.md`.
 - Uma unica navbar global serve Dashboard, cinco etapas, Ranking, Canal,
   Configuracoes/metas, Simulacao e Administracao. Subrotas nao devem recriar
   navegacao de aplicacao dentro do conteudo.
@@ -85,7 +86,6 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   aprovou 154 checks responsivos, 88 de tema, 209 de acessibilidade/comparacao,
   110 de zoom e 40 combinacoes da navegacao. Baseline transacional com 209
   imagens promovida; nenhuma conta ou fixture QA permaneceu no banco local.
-  CI e publicacao seguem pendentes.
 - O roteiro de continuidade aguarda campos habilitados e valores persistidos e
   interpreta vazio como ausencia, sem mudar valores do cenario, formulas ou
   regras financeiras.
@@ -93,6 +93,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   matriz local aprovou Master 22, Admin 14, tres papeis analiticos com sete e os
   quatro papeis sem acesso comercial com zero; 20 cenarios E2E passaram, um foi
   ignorado conforme o contrato e dez contas sinteticas foram removidas.
+- CI Linux do PR `37241474990` e do `main` `37243547805` aprovadas. Imagem da
+  CI foi verificada por checksum, manifesto, configuracao, revisao, 11 camadas
+  e dois perfis antes do CAS. Health, protecao anonima, headers e smoke HTTP
+  passaram; rollback preserva a imagem anterior sem tocar no banco.
+- Nenhuma migration, alteracao de dados, Nginx, DNS, integracao ou motor foi
+  ativada. A conferencia autenticada produtiva permanece com o usuario; os
+  gates de CI usaram identidades sinteticas isoladas e removidas.
 
 ## 2026-10-04: separar ausencia de dados de resultado zero no Associativo
 

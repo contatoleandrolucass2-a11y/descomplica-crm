@@ -105,14 +105,22 @@
   Financiamento R$ 190.000, Subsidio/FGTS/Cheque Moradia em R$ 0, Entrada de
   R$ 1.000 e 84 parcelas; nenhuma formula ou regra financeira foi alterada.
 - A matriz autenticada, contraste, hierarquia semantica, overflow mobile e
-  navegacao passaram. Gates obrigatorios finais, CI, PR e publicacao ainda
-  dependem da evidencia do SHA que incorporar esta baseline.
+  navegacao passaram. PR #148 foi atualizado sobre a `main`, aprovado pela CI
+  `37241474990` e integrado em
+  `77a07a73ec1629f1c4d9ae6b2b30d5bab8f79d2f`.
 - O E2E de release foi reconciliado com o contrato vigente: Master acessa as 22
   paginas protegidas, Admin conserva 14, Broker/Coordinator/Real Estate
   conservam sete e Manager/House/Partnership Channel/Pending ficam sem paginas
   comerciais. A pagina CAIXA e autorizada somente ao Master; CTA e motor
   continuam bloqueados. Vinte cenarios passaram, um permaneceu ignorado pelo
   proprio contrato e as dez identidades sinteticas foram removidas.
+- CI do `main` `37243547805` aprovou validacao, restore isolado, E2E, matriz
+  visual e imagem promovivel. O runtime foi publicado diretamente em producao
+  por imagem imutavel e CAS, com backup root-only, cinco healthchecks internos e
+  publicos, 22 redirects protegidos, cinco APIs 401, seis paginas publicas 200,
+  headers 7/7 e 12 leituras concorrentes sem 5xx. Container permaneceu healthy,
+  sem reinicios ou erros criticos. Evidencia completa em
+  `docs/audits/canvas-layout-parity-2026-10-04.md`.
 
 ## 2026-10-04 - Associativo: calculo, origem e continuidade
 

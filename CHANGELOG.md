@@ -55,6 +55,10 @@
 - Atualiza o smoke de release para distinguir acesso a pagina CAIXA de execucao
   do motor: Master abre a composicao visual pelo Hub e menu, enquanto o CTA e a
   API de calculo permanecem fail-closed. Demais perfis continuam negados.
+- Publicado no runtime `77a07a73ec1629f1c4d9ae6b2b30d5bab8f79d2f`
+  apos PR #148 e CI integral do `main`. Imagem imutavel, backup, CAS, health,
+  negacao anonima, headers e smoke HTTP foram aprovados; nenhuma migration,
+  alteracao de dados, Nginx ou DNS foi executada.
 
 ## 2026-10-04 - Calculo e continuidade no Associativo
 
