@@ -212,6 +212,39 @@ describe("account menu responsive layout", () => {
           }
         }
         expect(cases).toBe(60);
+        // Menus must use the actual parent height, including wrapped names.
+        for (const width of [320, 375, 600, 1180]) {
+          await page.setViewportSize({ width, height: 568 });
+          await page.setContent(
+            `<html><head><style>body{margin:0;font-family:Arial,sans-serif}*{box-sizing:border-box}${stylesheet.toString()}</style></head><body>${fixture("AlexandrianaMaximilianaConstantina Silva")}</body></html>`,
+          );
+          for (const selector of ["#authorized-navigation", "#protected-account-menu"]) {
+            const menu = page.locator(selector);
+            await menu.evaluate((element) => {
+              element.removeAttribute("hidden");
+              element.setAttribute("data-open", "true");
+              const content = document.createElement("div");
+              content.style.height = "1000px";
+              element.append(content);
+              const last = document.createElement("a");
+              last.href = "#last";
+              last.textContent = "Ultimo item";
+              last.style.cssText = "display:block;height:44px";
+              last.dataset.lastMenuItem = "true";
+              element.append(last);
+              element.scrollTop = element.scrollHeight;
+            });
+            const box = await menu.boundingBox();
+            const last = await menu.locator("[data-last-menu-item]").boundingBox();
+            expect(box!.y + box!.height, `${width}px / ${selector}`).toBeLessThanOrEqual(568);
+            expect(last!.y + last!.height, `${width}px / last item`).toBeLessThanOrEqual(568);
+            expect(last!.y).toBeGreaterThanOrEqual(box!.y);
+            await menu.evaluate((element) => {
+              element.setAttribute("hidden", "");
+              element.setAttribute("data-open", "false");
+            });
+          }
+        }
       } finally {
         await browser.close();
       }

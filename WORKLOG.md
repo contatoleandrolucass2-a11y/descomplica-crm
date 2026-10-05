@@ -2,6 +2,10 @@
 
 ## 2026-10-04 - Associativo: cadencia e sequencias visuais
 
+- A CI `37245218837` aprovou validacao Linux, banco e restauracao, mas revelou
+  menu cortado em 320px com nome longo. Menus agora descontam a altura real
+  do pai posicionado, sem altura fixa ou observador JavaScript. Regressao
+  verifica o ultimo item em 320/375/600/1180px; 28 testes focados passaram.
 - Integracao posterior: PR #150 incorpora `77a07a7` (canvas do PR #148),
   mantendo ambas as mudancas. Preview combinado 6/6; 78 testes do cabecalho e
   126 geometrias. Nome longo pode ampliar apenas o espaco necessario do cabecalho.

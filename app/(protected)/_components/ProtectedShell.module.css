@@ -754,7 +754,8 @@
     right: 0;
     display: none;
     width: min(360px, calc(100vw - 40px));
-    max-height: calc(100dvh - 58px);
+    /* The positioned parent grows when a complete first name wraps. */
+    max-height: calc(100dvh - 100% - 1px);
     overflow-y: auto;
     overscroll-behavior: contain;
     box-sizing: border-box;
@@ -835,7 +836,7 @@
     top: 100%;
     right: 0;
     width: min(22rem, calc(100vw - 40px));
-    max-height: calc(100dvh - 58px);
+    max-height: calc(100dvh - 100% - 1px);
   }
 }
 
@@ -889,7 +890,7 @@
     right: auto;
     left: 0;
     width: 100%;
-    max-height: calc(100dvh - 58px);
+    max-height: calc(100dvh - 100% - 1px);
     border-right: 0;
     border-left: 0;
     border-radius: 0;
@@ -898,7 +899,7 @@
 
   .accountPanel {
     width: calc(100vw - 24px);
-    max-height: calc(100dvh - 70px);
+    max-height: calc(100dvh - 100% - 13px);
   }
 }
 

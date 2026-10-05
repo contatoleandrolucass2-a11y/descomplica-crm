@@ -86,6 +86,16 @@ mais 16px. Um teste negativo injeta 80px de padding e exige rejeicao, evitando
 aprovar espaco vazio arbitrario. Os 17 testes dos dois arquivos que exercitam
 esse contrato passaram, incluindo as 126 geometrias.
 
-Pendente de validacao integral da combinacao e CI. Aplicar o runbook automatic-publication:
+Preview final combinado `52473`: 6/6 jornadas e 47 testes focados aprovados.
+Suite local integrada: 1944 aprovados, quatro skips e seis falhas POSIX no Windows.
+CI `37245218837`: validacao Linux (incluindo os testes POSIX), banco, E2E e
+restauracao isolada passaram. A matriz autenticada detectou links cortados no
+menu em 320px nas quatro rotas de simulacao: nome longo ampliava o cabecalho,
+mas o menu ainda descontava apenas 58px da altura da tela. Corrigido usando
+o tamanho real do pai posicionado; paineis de navegacao e conta exercitados
+em 320/375/600/1180px, incluindo ultimo item, com 28 testes focados aprovados.
+Nenhuma referencia visual foi promovida para ocultar essa falha funcional.
+
+Pendente de nova CI apos correcao. Aplicar o runbook automatic-publication:
 PR, imagem imutavel, backup, compare-and-swap, rollback e conferencia posterior.
 Nenhum dado oficial ausente na origem e preenchido por esta mudanca visual.

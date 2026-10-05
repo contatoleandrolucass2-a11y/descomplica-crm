@@ -18,6 +18,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - O primeiro nome vem de `user_metadata.name`, preenchido no cadastro; email
   permanece identidade da sessao, nao e usado para inventar o nome. Sem nome
   valido, usar Conta. Essa apresentacao nao altera autorizacao.
+- A CI `37245218837` detectou recorte do menu em 320px: nomes longos ampliam
+  o cabecalho. O limite dos paineis absolutos deve usar a altura real do pai
+  (`100%`), nao os 58px do caso compacto. Regressao inclui o ultimo item visivel.
 - Evidencias e pendencias: `docs/audits/associativo-sequencias-2026-10-04.md`.
   Preview 6/6, 47 testes de efeitos, 76 do cabecalho e 126 cenarios geometricos;
   CI Linux e publicacao pendentes. Nenhuma formula financeira alterada.

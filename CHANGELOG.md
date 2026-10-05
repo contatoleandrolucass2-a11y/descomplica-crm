@@ -9,6 +9,8 @@
 - Move o dolar para o espaco externo ao resumo, na altura da ultima data.
 - Remove a faixa de breadcrumb apenas no Associativo e exibe o primeiro nome
   cadastrado no menu da conta, sem reticencias.
+- Ajusta a altura dos menus mobile quando o nome completo amplia o cabecalho,
+  mantendo o ultimo item acessivel dentro da tela.
 
 ## 2026-10-04 - Dados oficiais e brilho integral no Associativo
 
