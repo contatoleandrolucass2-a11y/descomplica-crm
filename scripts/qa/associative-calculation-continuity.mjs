@@ -120,10 +120,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     { label: "Entrada", amount: 1_000, next: "Quantidade de parcelas" },
   ];
 
-  async function reloadFixture() {
-    inventoryRequests = { live: 0, reference: 0 };
-    const theme = await page.evaluate(() => document.documentElement.dataset.theme);
-    await page.reload({ waitUntil: "networkidle" });
+  async function restoreTheme(theme) {
     const themeGroup = page.getByRole("group", {
       name: "Aparência da página",
       exact: true,
@@ -131,18 +128,25 @@ export async function checkAssociativeCalculationContinuity(page) {
     if ((page.viewportSize()?.width ?? 1440) <= 600) {
       const cycle = themeGroup.locator("[data-theme-cycle-mobile]");
       for (let attempt = 0; attempt < 3; attempt += 1) {
-        if ((await page.locator("html").getAttribute("data-theme")) === theme) break;
+        if ((await page.locator("html").getAttribute("data-theme")) === theme) return;
         await cycle.click();
       }
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    } else {
-      await themeGroup
-        .getByRole("button", {
-          name: { light: "Claro", balanced: "Médio", dark: "Escuro" }[theme] ?? "Claro",
-          exact: true,
-        })
-        .click();
+      return;
     }
+    await themeGroup
+      .getByRole("button", {
+        name: { light: "Claro", balanced: "Médio", dark: "Escuro" }[theme] ?? "Claro",
+        exact: true,
+      })
+      .click();
+  }
+
+  async function reloadFixture() {
+    inventoryRequests = { live: 0, reference: 0 };
+    const theme = await page.evaluate(() => document.documentElement.dataset.theme);
+    await page.reload({ waitUntil: "networkidle" });
+    await restoreTheme(theme);
     await expect(page.locator(`${root} .investor-stock-product-text`).first()).toContainText(
       "Estoque vivo QA",
     );
@@ -322,13 +326,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     });
     const lateTheme = await page.evaluate(() => document.documentElement.dataset.theme);
     await page.reload({ waitUntil: "domcontentloaded" });
-    await page
-      .getByRole("group", { name: "Aparência da página", exact: true })
-      .getByRole("button", {
-        name: { light: "Claro", balanced: "Médio", dark: "Escuro" }[lateTheme] ?? "Claro",
-        exact: true,
-      })
-      .click();
+    await restoreTheme(lateTheme);
     await expect(page.locator(`${root} .investor-stock-product-text`).first()).toContainText(
       "Referencia QA",
     );
