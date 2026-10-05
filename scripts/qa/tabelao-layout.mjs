@@ -67,35 +67,16 @@ export function readTabelaoLayout() {
         "Estoque · fonte identificada" &&
       (!hint || hintBox?.width === 0) &&
       (!titleActions || titleActions.getBoundingClientRect().width === 0),
-    resourceOrder:
+    resourcesHiddenByCanvas:
       actions.length === expectedActions.length &&
       actions.every((action, index) => action.textContent.trim() === expectedActions[index]) &&
+      resources?.getClientRects().length === 0 &&
+      actions.every((action) => action.getClientRects().length === 0) &&
       Boolean(table?.compareDocumentPosition(resources) & Node.DOCUMENT_POSITION_FOLLOWING) &&
       Boolean(
         resources?.compareDocumentPosition(shell.querySelector(".investor-page-footer")) &
         Node.DOCUMENT_POSITION_FOLLOWING,
       ),
-    resourceIconsAndFit:
-      actions.length === 5 &&
-      actions.every((action) => {
-        const box = action.getBoundingClientRect();
-        const icon = action.querySelector("svg.lucide[aria-hidden='true']");
-        const range = document.createRange();
-        range.selectNodeContents(action.querySelector("span") ?? action);
-        return (
-          icon?.getBoundingClientRect().width > 0 &&
-          box.height >= 44 &&
-          box.left >= 0 &&
-          box.right <= innerWidth + 1 &&
-          [...range.getClientRects()].every(
-            (rect) =>
-              rect.left >= box.left - 1 &&
-              rect.right <= box.right + 1 &&
-              rect.top >= box.top - 1 &&
-              rect.bottom <= box.bottom + 1,
-          )
-        );
-      }),
     policyDisabled:
       actions[1]?.tagName === "BUTTON" &&
       actions[1].disabled === true &&
@@ -222,8 +203,8 @@ export async function checkTabelaoLayout(page) {
 
   const learn = page
     .locator(".tabelao-resources")
-    .getByRole("button", { name: "Aprenda +", exact: true });
-  await learn.click();
+    .getByRole("button", { name: "Aprenda +", exact: true, includeHidden: true });
+  await learn.evaluate((element) => element.click());
   const guide = page.locator("#investor-guided-tour");
   await guide.waitFor({ state: "visible" });
   await page.waitForFunction(
@@ -234,24 +215,24 @@ export async function checkTabelaoLayout(page) {
     .isVisible();
   await page.keyboard.press("Escape");
   await guide.waitFor({ state: "hidden" });
-  checks.footerTourReturnsFocus = await learn.evaluate(async (element) => {
+  checks.hiddenFooterStaysOutsideFocusOrder = await learn.evaluate(async (element) => {
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    return document.activeElement === element;
+    return element.getClientRects().length === 0 && document.activeElement !== element;
   });
-  await learn.click();
+  await learn.evaluate((element) => element.click());
   await guide.waitFor({ state: "visible" });
   await guide.getByRole("button", { name: "Próximo", exact: true }).click();
   await guide.getByRole("button", { name: "Próximo", exact: true }).click();
   await guide.getByRole("button", { name: "Concluir guia", exact: true }).click();
   await guide.waitFor({ state: "hidden" });
-  checks.footerTourCompletionReturnsFocus = await learn.evaluate(async (element) => {
+  checks.hiddenFooterCompletionStaysOutsideFocusOrder = await learn.evaluate(async (element) => {
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    return document.activeElement === element;
+    return element.getClientRects().length === 0 && document.activeElement !== element;
   });
 
   checks.printInvoked = await page
     .locator(".tabelao-resources")
-    .getByRole("button", { name: "Imprimir", exact: true })
+    .getByRole("button", { name: "Imprimir", exact: true, includeHidden: true })
     .evaluate((button) => {
       const original = window.print;
       let calls = 0;
@@ -526,6 +507,7 @@ async function runSyntheticLayout() {
             return `
           import { createRoot } from "react-dom/client";
           import ${JSON.stringify(path.join(root, "app/globals.css").replaceAll("\\", "/"))};
+          import ${JSON.stringify(path.join(root, "app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css").replaceAll("\\", "/"))};
           import shellStyles from ${JSON.stringify(path.join(root, "app/(protected)/_components/ProtectedShell.module.css").replaceAll("\\", "/"))};
           import { ProtectedShellFrame } from ${JSON.stringify(path.join(root, "app/(protected)/_components/ProtectedShellFrame.tsx").replaceAll("\\", "/"))};
           import { TabelaoArchive } from ${JSON.stringify(path.join(root, "app/(protected)/app/simulacao/_components/TabelaoArchive.tsx").replaceAll("\\", "/"))};
