@@ -98,7 +98,11 @@
 }
 
 .simulation-canvas-status-canary {
-  --canvas-accent: var(--analytics-lime, #9fdc63);
+  --canvas-accent: var(--analytics-positive-ink, #0b6b4d);
+}
+
+:root[data-theme="dark"] .simulation-canvas-status-canary {
+  --canvas-accent: var(--analytics-lime, #c8ee5b);
 }
 
 .simulation-canvas-actions {
