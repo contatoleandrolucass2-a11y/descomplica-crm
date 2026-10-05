@@ -31,9 +31,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   temas precisam de tracks intrinsecos; nomes flexiveis ocupam somente o restante.
   Fixtures sem filhos nao reproduzem a largura dos chevrons de grupos reais.
   Incluir grupos completos e testar hit-testing com fontes distintas.
+- CI `37253579651` confirmou a correcao: E2E, validacao Linux e todos os
+  contratos funcionais passaram. As 173 diferencas visuais foram revisadas e
+  promovidas; 36 capturas ja aprovadas conservaram seus bytes de referencia.
 - Evidencias e pendencias: `docs/audits/associativo-sequencias-2026-10-04.md`.
   Preview 6/6, 47 testes de efeitos, 76 do cabecalho e 126 cenarios geometricos;
-  CI Linux e publicacao pendentes. Nenhuma formula financeira alterada.
+  nova CI integral em verify e publicacao pendentes. Nenhuma formula
+  financeira alterada.
 
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 

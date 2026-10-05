@@ -2,6 +2,11 @@
 
 ## 2026-10-04 - Associativo: cadencia e sequencias visuais
 
+- CI `37253579651`: validacao Linux, restore, E2E e contratos funcionais do QA
+  aprovados. Candidato limpo `f8ea013c`: 154 responsivos, 88 temas, 209 auditorias,
+  110 zooms e 40 navegacoes; 173 comparacoes visuais divergentes, 36 aprovadas.
+  Revisao visual concluida: 173 referencias promovidas e 36 preservadas byte
+  a byte, sem reduzir tolerancias. Nova CI em verify e publicacao pendentes.
 - Diagnostico CI `37251923554`: Configuracoes interceptava o clique no tema
   Claro ao retornar ao Dashboard. A grade agora reserva o tamanho intrinseco
   da navegacao e dos temas; o nome respeita o espaco restante. A fixture local

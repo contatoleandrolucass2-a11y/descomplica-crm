@@ -125,3 +125,47 @@ o nome ao restante. A fixture inicial nao representava os tres grupos com
 chevrons; corrigida e ampliada com fontes system-ui/Verdana e hit-testing.
 Prova negativa restaura o layout anterior em 1280px e exige detectar a colisao.
 Nenhum clique forcado, timeout ampliado ou assert removido.
+
+## Candidato final e referencia visual
+
+CI `37253579651`, head `1ddd1f0a1231c2034a0105344a5616295b788c38`,
+captura limpa `f8ea013c08a59156d7b45f14966f2a82eaf13998`: validacao Linux,
+restauracao isolada, E2E e todos os contratos funcionais do QA autenticado
+passaram. Foram 154 verificacoes responsivas, 88 de temas, 209 de acessibilidade,
+110 de zoom e 40 combinacoes de navegacao. Comparacoes: 173 divergentes e 36
+aprovadas, mantendo tolerancia de canal 16 e limiar de pixels de 1%.
+O job release-gates ficou vermelho exclusivamente pelas comparacoes visuais.
+
+Artefato GitHub `11322586971`, nome
+`authenticated-visual-candidate-f8ea013c08a59156d7b45f14966f2a82eaf13998`;
+SHA-256 do ZIP
+`ac0ea4f30df123afa925b0fd830b12332ab8ba1cbc582bbd350a211aa7361232`.
+A verificacao previa confere manifesto e todas as 418 imagens de origem e
+candidato por hash, baseline versionada e inalterada durante a captura e os
+gates funcionais canonicos. A promocao permanece condicionada a revisao visual.
+
+Os 33 recortes do cabecalho foram conferidos em Dashboard, Associativo e
+Administracao, de 320 a 1440px e nos temas capturados. O nome sintetico extremo
+permanece completo por quebra de linha, sem interceptar os controles vizinhos.
+Os menus de 320px mantem o ultimo item acessivel. A remocao do breadcrumb
+permanece restrita ao Associativo. A main documental `2b713fa` foi integrada
+depois da captura sem alterar runtime; nova CI continua obrigatoria.
+
+Revisao independente concluida sobre os 209 pares: 18 folhas de topo/fim,
+31 pares de recortes detalhados e comparacao integral da sobreposicao corporal.
+Nenhuma nova regressao estrutural identificada; os recortes preexistentes nos
+funis de Metas/Parcerias permanecem fora deste escopo. Caudas de capturas de
+viewport nao comprovam o rodape inteiro, e esta revisao estatica nao substitui
+os testes dinamicos de efeitos e estados posteriores descritos acima.
+Evidencia local: `test-results/pr150-review-final/REVIEW.md` e `integrity.json`.
+
+Promocao canonica transacional concluida: 173 imagens revisadas atualizadas,
+36 referencias aprovadas preservadas byte a byte. Nenhum limiar, tolerancia,
+assert ou gate reduzido. Lint (um aviso em helper local ignorado), typecheck e
+build repetidos com sucesso apos integrar a main documental. Publicacao ainda
+pendente da nova CI em modo verify e da prova da imagem imutavel.
+
+Rodada local apos promocao: 1944 testes aprovados, quatro skips condicionais
+e as mesmas seis falhas POSIX no Windows, sem timeout adicional; os oito testes
+Node Salesforce passaram separadamente. Auditoria: nenhuma vulnerabilidade
+conhecida. A CI Linux continua sendo a prova obrigatoria para os testes POSIX.

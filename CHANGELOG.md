@@ -14,6 +14,9 @@
 - Aproveita o espaco disponivel no desktop para reduzir quebras de nomes longos.
 - Preserva o erro original dos testes E2E quando a limpeza do navegador falha.
 - Impede que nomes longos comprimam a navegacao sobre os botoes de tema.
+- Atualiza 173 referencias visuais revisadas e preserva as 36 ja aprovadas,
+  apos gates funcionais verdes; validacao integral e publicacao continuam
+  obrigatorias, sem alterar os limiares de comparacao.
 
 ## 2026-10-04 - Dados oficiais e brilho integral no Associativo
 
