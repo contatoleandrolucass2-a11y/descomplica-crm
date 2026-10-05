@@ -1523,6 +1523,9 @@ test("long session identity stays inside AccountMenu without overlapping navigat
       const themeSwitchBox = themeSwitch.getBoundingClientRect();
       const navigationBox = navigationElement.getBoundingClientRect();
       const topbarBox = topbar.getBoundingClientRect();
+      const desktopThemeButtons = themeSwitch.querySelectorAll(
+        "[data-theme-options-desktop] button",
+      );
       return {
         accountPanelFits:
           accountPanelBox.width > 0 &&
@@ -1549,10 +1552,8 @@ test("long session identity stays inside AccountMenu without overlapping navigat
           !overlaps(navigationBox, accountPanelBox) &&
           !overlaps(navigationBox, themeSwitchBox),
         themeButtonsVisible:
-          themeSwitch.querySelectorAll("button").length === 3 &&
-          [...themeSwitch.querySelectorAll("button")].every(
-            (button) => button.getClientRects().length > 0,
-          ),
+          desktopThemeButtons.length === 3 &&
+          [...desktopThemeButtons].every((button) => button.getClientRects().length > 0),
         rootOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
       };
     });
