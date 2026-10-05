@@ -387,7 +387,7 @@
 .accountTrigger {
   display: inline-flex;
   min-width: 44px;
-  max-width: min(12rem, 14vw);
+  max-width: min(20rem, 22vw);
   min-height: 44px;
   align-items: center;
   justify-content: flex-start;
@@ -694,7 +694,7 @@
   }
 
   .accountTrigger {
-    max-width: 8rem;
+    max-width: clamp(8rem, calc(100vw - 1050px), 20rem);
   }
 }
 

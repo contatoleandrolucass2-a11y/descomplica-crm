@@ -21,6 +21,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - A CI `37245218837` detectou recorte do menu em 320px: nomes longos ampliam
   o cabecalho. O limite dos paineis absolutos deve usar a altura real do pai
   (`100%`), nao os 58px do caso compacto. Regressao inclui o ultimo item visivel.
+- CI `37247029738`: contratos funcionais, acessibilidade e zoom passaram;
+  somente comparacoes com a referencia anterior divergiram. Revisao visual
+  ajustou a largura do nome no desktop; 44 testes focados aprovados.
 - Evidencias e pendencias: `docs/audits/associativo-sequencias-2026-10-04.md`.
   Preview 6/6, 47 testes de efeitos, 76 do cabecalho e 126 cenarios geometricos;
   CI Linux e publicacao pendentes. Nenhuma formula financeira alterada.

@@ -6,6 +6,11 @@
   menu cortado em 320px com nome longo. Menus agora descontam a altura real
   do pai posicionado, sem altura fixa ou observador JavaScript. Regressao
   verifica o ultimo item em 320/375/600/1180px; 28 testes focados passaram.
+- CI seguinte `37247029738`: todos os gates funcionais visuais passaram
+  (154 rotas responsivas, 88 temas, 209 auditorias, 110 zooms e navegacao).
+  Revisao das capturas motivou ampliar o nome no desktop conforme o espaco
+  disponivel; fixture de 34 caracteres usa no maximo duas linhas desde 1280px.
+  Os 44 testes focados passaram, incluindo 126 geometrias e menus completos.
 - Integracao posterior: PR #150 incorpora `77a07a7` (canvas do PR #148),
   mantendo ambas as mudancas. Preview combinado 6/6; 78 testes do cabecalho e
   126 geometrias. Nome longo pode ampliar apenas o espaco necessario do cabecalho.

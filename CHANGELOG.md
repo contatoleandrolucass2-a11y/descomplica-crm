@@ -11,6 +11,7 @@
   cadastrado no menu da conta, sem reticencias.
 - Ajusta a altura dos menus mobile quando o nome completo amplia o cabecalho,
   mantendo o ultimo item acessivel dentro da tela.
+- Aproveita o espaco disponivel no desktop para reduzir quebras de nomes longos.
 
 ## 2026-10-04 - Dados oficiais e brilho integral no Associativo
 

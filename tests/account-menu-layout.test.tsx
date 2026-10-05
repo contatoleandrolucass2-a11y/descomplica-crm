@@ -150,6 +150,7 @@ describe("account menu responsive layout", () => {
                     textFits:
                       label.scrollWidth <= label.clientWidth + 1 &&
                       label.scrollHeight <= label.clientHeight + 1,
+                    textLines: labelBox.height / Number.parseFloat(labelStyle.lineHeight),
                     noPageOverflow: document.documentElement.scrollWidth <= innerWidth,
                     touchHeight: triggerBox.height,
                     controlCount: controls.length,
@@ -177,6 +178,7 @@ describe("account menu responsive layout", () => {
               expect(geometry.labelWidth, scenario).toBeGreaterThan(0);
               expect(geometry.withinButton, scenario).toBe(true);
               expect(geometry.textFits, scenario).toBe(true);
+              if (width >= 1280) expect(geometry.textLines, scenario).toBeLessThanOrEqual(2.01);
               expect(geometry.noPageOverflow, scenario).toBe(true);
               expect(geometry.touchHeight, scenario).toBeGreaterThanOrEqual(44);
               expect(geometry.controlCount, scenario).toBeGreaterThanOrEqual(7);

@@ -96,6 +96,15 @@ o tamanho real do pai posicionado; paineis de navegacao e conta exercitados
 em 320/375/600/1180px, incluindo ultimo item, com 28 testes focados aprovados.
 Nenhuma referencia visual foi promovida para ocultar essa falha funcional.
 
+CI `37247029738`, candidato `62ab2de184874538c4d927f22226fd2f4be1af78`:
+154 verificacoes responsivas, 88 de temas, 209 de acessibilidade, 110 de zoom,
+navegacao e jornadas dos simuladores passaram. As 209 comparacoes visuais
+divergiram da referencia anterior. Antes de promover, a revisao constatou
+nome sintetico de 34 caracteres muito estreito no desktop. Sua largura agora
+aproveita o espaco disponivel, sem retirar os limites da navegacao; desde 1280px
+o teste exige no maximo duas linhas. Os 44 testes focados passaram, incluindo
+as 126 geometrias e os oito casos de menus com ultimo item dentro da tela.
+
 Pendente de nova CI apos correcao. Aplicar o runbook automatic-publication:
 PR, imagem imutavel, backup, compare-and-swap, rollback e conferencia posterior.
 Nenhum dado oficial ausente na origem e preenchido por esta mudanca visual.
