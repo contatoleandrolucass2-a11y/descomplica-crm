@@ -18,6 +18,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   Testes: `tests/marketing-resources.test.tsx`, navegacao e Proxy; jornada
   autenticada: `scripts/qa/marketing-resources.mjs`. CI Linux e publicacao no
   PR #152 pendentes; o preview nao substitui a prova de autenticacao.
+- CI `37255127701` aprovou validate e restore; E2E exigiu atualizar a lista
+  esperada de links. Nova rota agora participa da matriz de autorizacao dos
+  nove perfis, com acesso administrativo existente e negacao dos demais.
 
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 

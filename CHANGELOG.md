@@ -7,6 +7,7 @@
   Corretor/Gerente/Regional/Diretor e todos os destinos do print de referencia.
 - Recalcula valores locais preservando centavos e percentuais; permite restaurar
   os valores iniciais e explicita entradas invalidas.
+- Amplia a matriz E2E de autorizacao para a nova rota, mantendo os nove perfis.
 
 ## 2026-10-04 - Dados oficiais e brilho integral no Associativo
 

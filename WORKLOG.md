@@ -16,6 +16,9 @@
   temas), Axe sem violacoes, recalculo, erros, restauracao e teclado aprovados.
   Ajustado nome acessivel do icone de expectativa. CI Linux e jornada autenticada
   em andamento no PR #152; publicacao ainda pendente.
+- CI `37255127701`: validate e restauracao aprovados; matriz E2E antiga recusou
+  o novo link. Incluida rota MKT nas provas diretas dos nove perfis e nas listas
+  de navegacao de Master/Admin, sem ampliar permissao de outros perfis.
 
 ## 2026-10-04 - Associativo: cobertura da origem e brilho integral
 
