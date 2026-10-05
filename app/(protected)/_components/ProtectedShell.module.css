@@ -31,12 +31,12 @@
 
 .topbar {
   --header-bg: #ffffff;
-  --header-text: #242b32;
-  --header-muted: #57636d;
-  --header-line: #d9e0e3;
-  --header-hover: #f0f4f9;
-  --header-accent: #145bb5;
-  --header-active: #e4effd;
+  --header-text: #182a40;
+  --header-muted: #40536b;
+  --header-line: #7f95ad;
+  --header-hover: #eef3f8;
+  --header-accent: #0754a6;
+  --header-active: #dceafa;
   --header-selected: #ffffff;
   --header-brand-shadow: drop-shadow(0 0 0.75px #242b3299);
   position: sticky;
@@ -53,25 +53,25 @@
 }
 
 :global(:root[data-theme="balanced"]) .topbar {
-  --header-bg: #e8eef6;
-  --header-text: #24364d;
-  --header-muted: #465c76;
-  --header-line: #b8c9de;
-  --header-hover: #dbe6f3;
-  --header-accent: #124f9c;
-  --header-active: #cddff7;
-  --header-selected: #f9fbff;
+  --header-bg: #d9e1eb;
+  --header-text: #182a40;
+  --header-muted: #354a63;
+  --header-line: #7188a1;
+  --header-hover: #cdd9e8;
+  --header-accent: #084b92;
+  --header-active: #cbdff6;
+  --header-selected: #e7edf5;
 }
 
 :global(:root[data-theme="dark"]) .topbar {
   --header-bg: #071a31;
   --header-text: #f3fbff;
   --header-muted: #b2cad8;
-  --header-line: #31556d;
-  --header-hover: #102f4a;
+  --header-line: #3f7c9d;
+  --header-hover: #0e4163;
   --header-accent: #7dd3fc;
-  --header-active: #123b5c;
-  --header-selected: #194a70;
+  --header-active: #123d5d;
+  --header-selected: #0a2b47;
   --header-brand-shadow: none;
 }
 

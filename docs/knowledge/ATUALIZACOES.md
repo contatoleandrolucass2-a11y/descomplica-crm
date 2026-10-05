@@ -4,6 +4,24 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-05: temas precisam compartilhar tokens, nao paletas locais completas
+
+- Status: validado; fonte: auditoria das capturas autenticadas e branch
+  `codex/theme-color-calibration`.
+- Claro e Medio podem existir formalmente e ainda parecer o mesmo tema quando a
+  diferenca de luminosidade e pequena. Usar fundos `#f3f6fa` e `#d9e1eb`
+  produz separacao perceptivel mantendo a mesma hierarquia azul.
+- Um canvas que redefine todos os tokens semanticos interrompe a preferencia
+  global. Ranking, Canal e Configuracoes devem herdar a paleta da raiz; variaveis
+  locais ficam reservadas a identidades deliberadas, como o dourado do
+  Associativo, e precisam de contrato proprio.
+- Contraste calculado apenas sobre o token de texto nao basta quando o mesmo
+  azul tambem e fundo de CTA ou filtro. Axe em navegador encontrou essa
+  composicao e exigiu um azul de preenchimento mais claro, sem voltar ao verde.
+- Evidencias: `tests/theme-color-calibration.test.ts`, matriz autenticada em
+  `docs/qa/reference-parity/authenticated-results.json` e auditoria
+  `docs/audits/theme-color-calibration-2026-10-05.md`.
+
 ## 2026-10-04: Recurso MKT em Configuracoes
 
 - Status: validado; fonte: print do usuario, PR #152 e auditoria de publicacao.

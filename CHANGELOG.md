@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-05 - Calibracao dos temas Claro, Medio e Escuro
+
+- Diferencia as tres aparencias por luminosidade: Claro branco e limpo, Medio
+  cinza-azulado e Escuro navy, preservando a identidade azul/ciano aprovada.
+- Centraliza superfícies, textos, bordas, foco, destaques e estados nos tokens
+  semanticos, com contraste AA verificado para texto normal.
+- Remove a paleta escura fixa de Ranking, Canal de Parcerias e Configuracoes;
+  essas paginas agora respeitam de fato o tema selecionado.
+- Mantem os tons locais aprovados dos simuladores, inclusive o dourado do
+  Associativo, e corrige o texto secundario do cabecalho de Documentacao.
+- Nao altera rotas, dados, motores, autenticacao, RBAC, APIs, RLS ou schema.
+- Adiciona contrato automatizado das paletas e atualiza as referencias visuais
+  somente depois da matriz autenticada completa e da revisao das capturas.
+
 ## 2026-10-04 - Recurso MKT
 
 - Adiciona Recurso MKT em Configuracoes, no padrao visual da Tabela Associativo.
