@@ -9,6 +9,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
 import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
+import { checkMarketingResources } from "./marketing-resources.mjs";
 import {
   checkTabelaoLayout,
   checkTabelaoMapsFixture,
@@ -5769,6 +5770,21 @@ async function run() {
         }
 
         if (viewport.key === "desktop-1440x900") {
+          currentStage = "marketing-resources";
+          const marketingPage = configureQaPage(await context.newPage());
+          try {
+            const marketing = await checkMarketingResources(
+              marketingPage,
+              origin,
+              path.join(artifactRoot, "marketing"),
+            );
+            await writeFile(
+              path.join(artifactRoot, "marketing-results.json"),
+              JSON.stringify(marketing, null, 2),
+            );
+          } finally {
+            await marketingPage.close({ runBeforeUnload: false });
+          }
           currentStage = "documentation-calculator";
           const documentationPage = configureQaPage(await context.newPage());
           try {

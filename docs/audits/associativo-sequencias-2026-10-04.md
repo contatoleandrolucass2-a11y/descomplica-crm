@@ -1,5 +1,14 @@
 # Associativo: Sequencias Visuais
 
+## Estado final em 05/10/2026
+
+Runtime `e1ab14a8739153c56081e4f36a76e99f80fed8b2` publicado. PR #150 e CI
+do main aprovados. As pendencias de CI descritas cronologicamente abaixo foram
+superadas. O nome cadastrado inteiro esta implementado e validado nas fixtures;
+a sessao usada no postcheck nao forneceu nome valido, portanto mostra Conta.
+Foi solicitado ao usuario o nome e autorizacao especifica para alterar somente
+esse dado de perfil. Nenhuma conta foi modificada nem nome inferido do email.
+
 ## Escopo
 
 Pedido de doze ajustes visuais. Branch `codex/associativo-animacao-sequencial`,
@@ -169,3 +178,50 @@ Rodada local apos promocao: 1944 testes aprovados, quatro skips condicionais
 e as mesmas seis falhas POSIX no Windows, sem timeout adicional; os oito testes
 Node Salesforce passaram separadamente. Auditoria: nenhuma vulnerabilidade
 conhecida. A CI Linux continua sendo a prova obrigatoria para os testes POSIX.
+
+## Evidencia de publicacao
+
+- PR #150 integrado apos CI `37257462975` integralmente verde no head
+  `292641f8366c76e9c629ddd21ecde9ff24686ccd`, inclusive QA em modo verify.
+- Main `e1ab14a8739153c56081e4f36a76e99f80fed8b2`: CI `37259237555`
+  aprovou validate, release-gates, isolated-restore e promotable-image.
+- Artefato GitHub `11323174321`; SHA-256 do ZIP
+  `9e1b2700ec83eb5ea2aac6b7700aaab2a0119becb007e59f44c4167a938f7c38`.
+  Arquivo image.tar.gz:
+  `d2760448aaced488694a1be84d74efed0989a924cf0635f833118a02e6ed7b1b`.
+- Digest de configuracao da CI:
+  `sha256:6055b658e764d186aaed2c8d82dbcdfe1c26b68a71ea71ccd848c6811fceb459`.
+  Manifesto carregado no containerd:
+  `sha256:135dc775d6f2275a608572175c3686d99740fadffcf561fca99bb4d65a31ed4f`.
+  Cadeia OCI, plataforma, label e 11 camadas conferidas; dois perfis de runtime
+  aprovados sobre a mesma imagem. Nenhum rebuild na VPS.
+- Um comando de prova terminou com CR no caminho ao receber stdin do PowerShell;
+  falhou antes do bind. Reexecucao com caminho absoluto direto aprovou os dois
+  perfis. Nao houve tentativa de contornar ou omitir essa prova.
+- Checkout destacado e limpo em `/srv/descomplica-crm-releases/<SHA>`; checkout
+  principal preservado. Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/e1ab14a8739153c56081e4f36a76e99f80fed8b2.hKLoTg`.
+  CAS partiu de `77a07a73ec1629f1c4d9ae6b2b30d5bab8f79d2f`, com rollback
+  preparado e configuracao Nginx inalterada. Promocao concluiu com codigo zero.
+- Health local/publico e container saudaveis no SHA novo. Estoque/snapshot
+  anonimos negados (401), rota protegida redireciona (307). Smoke observacional:
+  12 GETs, concorrencia 4, zero erros; nao comprova capacidade de producao.
+
+Postcheck autenticado no Chrome, sem salvar/enviar proposta: cenario sintetico
+com renda 5000, financiamento 190000, entrada 1000 e 84 parcelas, usando uma
+unidade com avaliacao e andamento oficiais disponiveis. Comprometimento
+14,13%/17,58%, maximo 44,13%/44,71%; documentacao e resumo foram calculados.
+Ao trocar a unidade, renda, modalidade, primeiro imovel, recursos, entrada e
+quantidade permaneceram preenchidos. Nao se infere cobertura de todas as
+unidades a partir deste smoke; a matriz isolada continua sendo a prova ampla.
+
+CSS computado da pagina publicada confirmou 10 alvos/45s, 5 alvos/22,5s e
+2 alvos/9s, com defasagem de 4,5s, alem do CTA infinito de 4,5s. Dolar: alvo
+24px, icone 17px, gap 4px apos o resumo, diferenca vertical de centro 0,34px e
+espaco restante de 4,65px antes do painel no viewport observado. A API de
+animacoes nao estava exposta pelo navegador de automacao; nao foi contornada.
+Sincronia temporal e amostragem de dois ciclos foram comprovadas na CI/preview,
+nao reexecutadas via essa API em producao.
+
+Registro posterior somente documental, sem novo restart. Nenhuma alteracao
+de banco, credenciais, conta, politica financeira, estoque, DNS ou n8n.

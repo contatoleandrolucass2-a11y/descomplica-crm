@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-10-04 - Recurso MKT
+
+- Adiciona Recurso MKT em Configuracoes, no padrao visual da Tabela Associativo.
+- Inclui fundo de Marketing, custo por venda, expectativa, distribuicao por
+  Corretor/Gerente/Regional/Diretor e todos os destinos do print de referencia.
+- Recalcula valores locais preservando centavos e percentuais; permite restaurar
+  os valores iniciais e explicita entradas invalidas.
+- Amplia a matriz E2E de autorizacao para a nova rota, mantendo os nove perfis.
+- Explicita o nome acessivel dos atalhos de Configuracoes para navegacao assistiva.
+- QA da guia verifica a transicao de rota antes de conferir valores e temas.
+- Matriz visual do menu Configuracoes inclui o quinto link Recurso MKT.
+- Atualiza somente oito referencias revisadas de Configuracoes apos os gates
+  funcionais; preserva as outras 201 imagens e os limiares de comparacao.
+- Integra os canvases publicados pelo PR #154 e revisa novamente as oito
+  referencias afetadas, preservando a nova composicao e os gates de densidade.
+- Publica a guia no runtime `edbfcd13` apos CI integral, backup, CAS e smoke;
+  registra a prova de publicacao sem nova alteracao de runtime.
+
+## 2026-10-05 - Sequencias do Associativo publicadas
+
+- Publica os ajustes de brilho, sequencias, filtros, loops e posicionamento do
+  dolar no runtime `e1ab14a8739153c56081e4f36a76e99f80fed8b2`, apos CI integral.
+- Confere a jornada autenticada e a preservacao dos dados ao trocar unidade.
+  Nome cadastrado aparece inteiro; conta sem nome valido continua com Conta,
+  aguardando informacao e autorizacao do titular, sem deducao pelo email.
+- Registro posterior de evidencias, sem nova alteracao de runtime.
+
 ## 2026-10-05 - Correcao integral da paridade dos canvases
 
 - Corrige a causa da divergencia entre os canvases aprovados e a aplicacao: o
