@@ -18,6 +18,8 @@ import {
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
 
+import styles from "./ConfigurationCanvas.module.css";
+
 export const metadata = { title: "Configurações" };
 
 const SETTINGS = [
@@ -69,7 +71,7 @@ function SettingsCard({ setting, canManage }: { setting: Setting; canManage: boo
 
   return (
     <article
-      className={`${managementStyles.panel} h-full p-4 ${
+      className={`${styles.settingsCard} ${managementStyles.panel} h-full p-4 ${
         canManage ? "group-hover:border-cyan-500 group-focus-visible:border-cyan-500" : "opacity-80"
       }`}
     >
@@ -113,7 +115,7 @@ export default async function SettingsPage() {
   const canManage = hasPermission(context, "crm.settings.manage");
 
   return (
-    <ManagementPage>
+    <ManagementPage className={styles.canvas ?? ""}>
       <ManagementPageHeader
         title="Configurações do CRM"
         description="Centralize metas e regras comerciais em um único ponto de administração."
@@ -125,7 +127,7 @@ export default async function SettingsPage() {
       />
 
       <section
-        className={`${managementStyles.panel} ${managementStyles.panelStrong} grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_minmax(16rem,0.42fr)] md:items-center`}
+        className={`${styles.settingsGovernance} ${managementStyles.panel} ${managementStyles.panelStrong} grid gap-5 p-5 md:grid-cols-[minmax(0,1fr)_minmax(16rem,0.42fr)] md:items-center`}
         aria-labelledby="settings-governance-title"
       >
         <div>

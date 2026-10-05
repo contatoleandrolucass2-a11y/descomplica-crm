@@ -144,10 +144,15 @@ export async function checkAssociativeCalculationContinuity(page) {
     await qualification.getByRole("button", { name: "MCMV", exact: true }).click();
     await qualification.getByRole("radio", { name: "Sim", exact: true }).check();
     for (const { label, amount, next } of resources) {
-      await expect(field(label)).toBeEnabled();
-      await field(label).fill(String(amount * 100));
-      await expect(field(label)).not.toHaveValue("");
-      await expect.poll(() => moneyValue(label)).toBe(amount);
+      await expect
+        .poll(async () => {
+          const input = field(label);
+          if (!(await input.isEnabled())) return null;
+          await input.fill(String(amount * 100));
+          await input.blur();
+          return moneyValue(label);
+        })
+        .toBe(amount);
       await expect(field(next)).toBeEnabled();
     }
     await field("Quantidade de parcelas").fill("84");

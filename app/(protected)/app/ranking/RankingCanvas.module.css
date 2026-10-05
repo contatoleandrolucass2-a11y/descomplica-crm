@@ -1,0 +1,126 @@
+.canvas {
+  min-width: 0;
+}
+
+@media (min-width: 80rem) {
+  .canvas {
+    padding: 0.6rem 1rem 1rem;
+  }
+
+  .canvas > div {
+    max-width: none;
+    gap: 0.5rem;
+  }
+
+  .canvas > div > header h1 {
+    font-size: 1.65rem;
+  }
+
+  .canvas > div > header p {
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+
+  .canvas article[data-density="compact"] {
+    border-radius: 0.65rem;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .draftLink {
+    min-height: 2rem;
+  }
+
+  .pointsHeader {
+    padding-bottom: 0.45rem;
+  }
+
+  .pointsList {
+    margin-top: 0.5rem;
+  }
+
+  .pointsList > div {
+    min-height: 4rem;
+    padding: 0.55rem;
+  }
+
+  .pointsList dt {
+    min-height: 2rem;
+    font-size: 0.67rem;
+    line-height: 0.9rem;
+  }
+
+  .pointsList dd {
+    margin-top: 0.3rem;
+  }
+
+  .canvas [aria-label="Filtros autorizados do ranking"] {
+    border-radius: 0.65rem;
+    padding: 0.5rem 0.65rem;
+  }
+
+  .canvas [aria-label="Filtros autorizados do ranking"] a {
+    min-height: 2rem;
+    border-radius: 0.45rem;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.72rem;
+  }
+
+  .sectionHeading > div {
+    margin-bottom: 0.35rem;
+  }
+
+  .sectionHeading h2 {
+    margin-top: 0.05rem;
+    font-size: 1rem;
+  }
+
+  .sectionHeading p {
+    margin-top: 0.1rem;
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
+
+  .podiumCard {
+    padding: 0.55rem !important;
+  }
+
+  .podiumList {
+    gap: 0.55rem;
+  }
+
+  .podiumEntry {
+    min-height: 6.2rem;
+    padding: 0.55rem;
+  }
+
+  .podiumEntry > span:first-child {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.75rem;
+  }
+
+  .podiumEntry > p {
+    margin-top: 0.4rem;
+    font-size: 0.62rem;
+  }
+
+  .podiumEntry > h3 {
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+  }
+
+  .podiumEntry > div {
+    padding-top: 0.35rem;
+  }
+
+  .scoreboard [role="region"] table caption,
+  .scoreboard [role="region"] th,
+  .scoreboard [role="region"] td {
+    padding-block: 0.35rem;
+  }
+
+  .scoreboard [role="region"] table caption {
+    font-size: 0.68rem;
+  }
+}

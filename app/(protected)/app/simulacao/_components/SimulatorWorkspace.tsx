@@ -973,18 +973,16 @@ export function SimulatorWorkspace({
             title="Motor oficial em validação Master"
             description="O cálculo usa a versão oficial identificada na referência viva. O resultado não é persistido nem constitui proposta comercial."
           />
-        ) : (
+        ) : !isCaixa ? (
           <DataState
             variant="unavailable"
             compact
             title={UNAVAILABLE_MESSAGE}
             description={
-              isCaixa
-                ? "Campos disponíveis somente para conferência visual. Nenhum cálculo, envio à CAIXA, análise de crédito, validação documental ou aprovação bancária é executado."
-                : "Os campos permanecem disponíveis para conferência. Nenhum valor é calculado, persistido ou tratado como proposta comercial."
+              "Os campos permanecem disponíveis para conferência. Nenhum valor é calculado, persistido ou tratado como proposta comercial."
             }
           />
-        )}
+        ) : null}
 
         <div className={`${styles.workspace} ${isCaixa ? styles.caixaWorkspace : ""}`}>
           <form
@@ -1063,7 +1061,7 @@ export function SimulatorWorkspace({
                   {executionAllowed
                     ? "Execução no servidor sem persistir os dados informados."
                     : isCaixa
-                      ? "Nenhum cálculo, envio bancário, validação documental ou aprovação será executado."
+                      ? "Cálculo temporariamente indisponível — regra aguardando validação. Nenhum cálculo, envio bancário, validação documental ou aprovação será executado."
                       : "Nenhum cálculo ou envio ao servidor será executado."}
                 </span>
               </p>

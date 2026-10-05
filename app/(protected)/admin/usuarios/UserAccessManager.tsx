@@ -32,7 +32,7 @@ import {
 } from "./actions";
 
 const INITIAL_STATE: AdminActionState = { status: "idle", message: "" };
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
 export interface UserPermissionOverride {
   permissionKey: PermissionKey;
@@ -663,8 +663,8 @@ export function UserAccessManager(props: UserAccessManagerProps) {
   );
   const activeCount = props.users.filter((user) => user.isActive).length;
   const pendingCount = props.users.filter((user) => user.accessStatus === "pending").length;
-  const adminCount = props.users.filter(
-    (user) => user.roleKey === "master" || user.roleKey === "admin",
+  const revokedCount = props.users.filter(
+    (user) => !user.isActive || user.accessStatus === "suspended",
   ).length;
   const pageCount = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
   const currentPage = Math.min(pageNumber, pageCount);
@@ -676,47 +676,10 @@ export function UserAccessManager(props: UserAccessManagerProps) {
   }
 
   return (
-    <>
-      <section aria-label="Resumo de usuários" className={managementStyles.summaryGrid}>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <UsersRound />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Usuários totais</span>
-            <strong className={managementStyles.summaryValue}>{props.users.length}</strong>
-          </div>
-        </article>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <UserCheck />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Ativos</span>
-            <strong className={managementStyles.summaryValue}>{activeCount}</strong>
-          </div>
-        </article>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <ShieldCheck />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Aguardando aprovação</span>
-            <strong className={managementStyles.summaryValue}>{pendingCount}</strong>
-          </div>
-        </article>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <ShieldCheck />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Administradores</span>
-            <strong className={managementStyles.summaryValue}>{adminCount}</strong>
-          </div>
-        </article>
-      </section>
-
-      <section className={`${managementStyles.panel} ${managementStyles.panelPadded}`}>
+    <div className="admin-users-content">
+      <section
+        className={`${managementStyles.panel} ${managementStyles.panelPadded} admin-users-toolbar`}
+      >
         <div className={managementStyles.toolbar}>
           <label className={managementStyles.searchLabel} htmlFor="user-search">
             <Search aria-hidden="true" />
@@ -773,7 +736,51 @@ export function UserAccessManager(props: UserAccessManagerProps) {
         </div>
       </section>
 
-      <section className={`${managementStyles.panel} ${managementStyles.panelPadded}`}>
+      <section
+        aria-label="Resumo de usuários"
+        className={`${managementStyles.summaryGrid} admin-users-summary`}
+      >
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <UsersRound />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Total de usuários</span>
+            <strong className={managementStyles.summaryValue}>{props.users.length}</strong>
+          </div>
+        </article>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <UserCheck />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Com acesso ativo</span>
+            <strong className={managementStyles.summaryValue}>{activeCount}</strong>
+          </div>
+        </article>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <ShieldCheck />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Aguardando aprovação</span>
+            <strong className={managementStyles.summaryValue}>{pendingCount}</strong>
+          </div>
+        </article>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <ShieldCheck />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Acessos revogados</span>
+            <strong className={managementStyles.summaryValue}>{revokedCount}</strong>
+          </div>
+        </article>
+      </section>
+
+      <section
+        className={`${managementStyles.panel} ${managementStyles.panelPadded} admin-users-results`}
+      >
         <div className={managementStyles.sectionHeader}>
           <div>
             <p className={managementStyles.sectionKicker}>Controle de acesso</p>
@@ -831,6 +838,6 @@ export function UserAccessManager(props: UserAccessManagerProps) {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

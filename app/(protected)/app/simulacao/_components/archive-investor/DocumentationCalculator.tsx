@@ -332,6 +332,17 @@ export function DocumentationCalculator({
                 <p className="documentation-choice-prompt">Escolha a opção desejada</p>
               )}
             </fieldset>
+          </section>
+          <section
+            className={`goal-panel documentation-panel documentation-purchase-panel ${profileComplete ? "is-complete" : unlockedStep >= 1 ? "is-active" : "is-locked"}`}
+          >
+            <header>
+              <span>02</span>
+              <div>
+                <p>Tipo da compra</p>
+                <h2>Defina o financiamento</h2>
+              </div>
+            </header>
             <fieldset
               className={`documentation-choice-group ${unlockedStep < 1 ? "locked" : unlockedStep === 1 ? "current" : "complete"}`}
               disabled={unlockedStep < 1}
@@ -414,7 +425,7 @@ export function DocumentationCalculator({
             className={`goal-panel documentation-panel documentation-values-panel ${valuesComplete ? "is-complete" : unlockedStep >= 3 ? "is-active" : "is-locked"}`}
           >
             <header>
-              <span>02</span>
+              <span>03</span>
               <div>
                 <p>Estrutura financeira</p>
                 <h2>Informe os valores</h2>

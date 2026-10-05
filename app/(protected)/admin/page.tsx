@@ -1,4 +1,4 @@
-import { ArrowRight, PanelsTopLeft, ShieldCheck, UsersRound } from "lucide-react";
+import { ArrowRight, PanelsTopLeft, UsersRound } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -18,7 +18,7 @@ export default async function AdminHomePage() {
   const context = await enforcePermission("admin.access");
 
   return (
-    <ManagementPage>
+    <ManagementPage className="admin-canvas admin-home-page">
       <ManagementPageHeader
         eyebrow="Governança"
         title="Área administrativa"
@@ -26,26 +26,16 @@ export default async function AdminHomePage() {
         status={<ManagementStatusBadge>Acesso administrativo</ManagementStatusBadge>}
       />
 
-      <section className={`${managementStyles.panel} ${managementStyles.panelPadded}`}>
-        <div className={managementStyles.sectionHeader}>
-          <div>
-            <p className={managementStyles.sectionKicker}>Ferramentas autorizadas</p>
-            <h2 className={managementStyles.sectionTitle}>Gestão do CRM</h2>
-            <p className={managementStyles.sectionDescription}>
-              Cada destino mantém sua própria validação no servidor e no banco.
-            </p>
-          </div>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <ShieldCheck />
-          </span>
-        </div>
-
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
+      <section className="admin-home-links" aria-labelledby="admin-home-links-title">
+        <h2 id="admin-home-links-title" className="sr-only">
+          Gestão do CRM
+        </h2>
+        <div className="admin-home-grid">
           {hasPermission(context, "users.view") ? (
             <Link
               href="/admin/usuarios"
               prefetch={false}
-              className={`${managementStyles.panel} ${managementStyles.panelPadded} group flex min-h-36 items-start gap-3 no-underline transition hover:border-[var(--analytics-cyan-strong)]`}
+              className={`${managementStyles.panel} ${managementStyles.panelPadded} admin-home-card group flex items-start gap-3 no-underline transition hover:border-[var(--analytics-cyan-strong)]`}
             >
               <span className={managementStyles.iconFrame} aria-hidden="true">
                 <UsersRound />
@@ -67,7 +57,7 @@ export default async function AdminHomePage() {
             <Link
               href="/admin/paginas"
               prefetch={false}
-              className={`${managementStyles.panel} ${managementStyles.panelPadded} group flex min-h-36 items-start gap-3 no-underline transition hover:border-[var(--analytics-cyan-strong)]`}
+              className={`${managementStyles.panel} ${managementStyles.panelPadded} admin-home-card group flex items-start gap-3 no-underline transition hover:border-[var(--analytics-cyan-strong)]`}
             >
               <span className={managementStyles.iconFrame} aria-hidden="true">
                 <PanelsTopLeft />

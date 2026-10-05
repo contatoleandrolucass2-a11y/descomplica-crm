@@ -1,0 +1,222 @@
+.canvas {
+  min-width: 0;
+}
+
+.draftForm {
+  min-width: 0;
+}
+
+@media (min-width: 80rem) {
+  .canvas {
+    padding: 0.6rem 1rem 1rem;
+  }
+
+  .canvas > div {
+    max-width: none;
+    gap: 0.5rem;
+  }
+
+  .canvas > div > header h1 {
+    font-size: 1.65rem;
+  }
+
+  .canvas > div > header p {
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+
+  .settingsGovernance {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .settingsGovernance h2 {
+    font-size: 1.35rem;
+  }
+
+  .settingsGovernance > div:last-child {
+    padding: 0.75rem;
+  }
+
+  .settingsCard > div {
+    min-height: 11.5rem;
+  }
+
+  .settingsCard h3 {
+    margin-top: 0.8rem;
+    font-size: 1.05rem;
+  }
+
+  .settingsCard p {
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+
+  .settingsCard > div > div:last-child {
+    padding-top: 0.65rem;
+  }
+
+  .planningState {
+    padding-block: 0.45rem;
+  }
+
+  .goalProfiles a {
+    min-height: 2.8rem;
+    padding-block: 0.35rem;
+  }
+
+  .primaryGrid {
+    gap: 0.5rem;
+  }
+
+  .canvas section,
+  .canvas article {
+    scroll-margin-top: 4rem;
+  }
+
+  .canvas input[type="number"] {
+    min-height: 1.85rem;
+    height: 1.85rem;
+    padding-block: 0.2rem;
+    font-size: 0.75rem;
+  }
+
+  .canvas label:has(> span > input[type="number"]) {
+    gap: 0.25rem;
+    padding: 0.35rem 0.45rem;
+  }
+
+  .canvas label:has(> span > input[type="number"]) > span:first-child {
+    font-size: 0.62rem;
+    line-height: 0.8rem;
+  }
+
+  .primaryGrid h2,
+  .operations h2 {
+    font-size: 1rem;
+  }
+
+  .primaryGrid p,
+  .operations p {
+    font-size: 0.65rem;
+    line-height: 1.25;
+  }
+
+  .primaryGrid > section {
+    padding: 0.65rem;
+  }
+
+  .primaryGrid > section > div:first-child span:first-child {
+    width: 1.7rem;
+    height: 1.7rem;
+    font-size: 0.62rem;
+  }
+
+  .primaryGrid > section > div:first-child {
+    gap: 0.5rem;
+  }
+
+  .primaryGrid > section > div:last-child,
+  .primaryGrid > section > p + div {
+    margin-top: 0.45rem;
+  }
+
+  .funnelResult {
+    padding: 0 !important;
+  }
+
+  .funnelResult > div {
+    padding: 0.55rem 0.65rem;
+  }
+
+  .funnelResult ol {
+    margin-top: 0.4rem;
+    gap: 0.2rem;
+  }
+
+  .funnelResult li > div {
+    min-height: 1.55rem;
+    padding-block: 0.1rem;
+  }
+
+  .operations {
+    gap: 0.5rem;
+  }
+
+  .operations > article {
+    padding: 0.55rem 0.65rem;
+  }
+
+  .operations > article > div:first-child {
+    gap: 0.5rem;
+  }
+
+  .operations > article > div:last-child {
+    margin-top: 0.45rem;
+  }
+
+  .draftForm {
+    gap: 0.5rem;
+  }
+
+  .draftActions {
+    gap: 0.45rem;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .draftActions > div:first-child {
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.55fr);
+    gap: 0.65rem;
+  }
+
+  .draftActions p {
+    font-size: 0.68rem;
+    line-height: 1.35;
+  }
+
+  .draftActions input[type="text"] {
+    min-height: 2rem;
+    padding-block: 0.3rem;
+    font-size: 0.75rem;
+  }
+
+  .draftActions > div:last-child {
+    padding-top: 0.45rem;
+  }
+
+  .draftActions button {
+    min-height: 2rem;
+    padding-block: 0.3rem;
+    font-size: 0.7rem;
+  }
+
+  .pointSummary article {
+    padding: 0.45rem 0.6rem;
+  }
+
+  .pointSummary article > span {
+    width: 2.2rem;
+  }
+
+  .pointMatrix > div:first-child {
+    padding: 0.55rem 0.7rem;
+  }
+
+  .pointMatrix h2 {
+    font-size: 1rem;
+  }
+
+  .pointMatrix table th,
+  .pointMatrix table td {
+    padding-block: 0.28rem;
+  }
+
+  .pointMatrix table input {
+    min-height: 1.7rem;
+    height: 1.7rem;
+    padding-block: 0.15rem;
+    font-size: 0.75rem;
+  }
+}

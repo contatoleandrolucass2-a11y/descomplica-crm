@@ -41,6 +41,30 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   em 05/10 e promovidas transacionalmente apos conferencia de arvore e hashes.
   Preservadas outras 201 imagens e a proveniencia anterior, sem reduzir gates.
   Pendencias: CI integral depois da promocao e verificacao pos-publicacao.
+- CI `37263297496` integral aprovada em `393457d`. Resultado anterior nao
+  substitui a validacao depois da integracao de `afdb1c9` (PR #154), que alterou
+  composicoes e referencias. Preservar a baseline da main, validar a combinacao
+  e revisar somente as oito referencias afetadas pelo link solicitado.
+
+## 2026-10-05: baseline autorreferente nao comprova paridade com canvas
+
+- Status: pendente_validacao; fonte: auditoria visual do usuario, branch
+  `codex/canvas-layout-exact` e 11 canvases em `docs/qa/canvas-parity/reference`.
+- Uma captura gerada pela propria aplicacao detecta regressao em relacao ao
+  ultimo build, mas nao prova aderencia a uma referencia externa. O contrato
+  precisa mapear rota para canvas e verificar tambem a densidade estrutural.
+- Limite uniforme de altura e incorreto quando as referencias tem composicoes
+  distintas. O limite deve ser explicito por rota, sem usar `overflow: hidden`
+  e sem reduzir alvos de toque para fazer a tela caber.
+- Componentes analiticos extensos podem continuar implementados sem fazer parte
+  da composicao publicada. Sua reintroducao exige novo canvas e novo gate.
+- Dados, RBAC e layout sao contratos separados: aproximar a tela nao autoriza
+  copiar valores do mockup, remover guards nem liberar motores bloqueados.
+- Evidencia: `docs/audits/canvas-layout-correction-2026-10-05.md`.
+- Validacao local concluida: 154 cenarios responsivos, 88 de tema, 209
+  auditorias Axe e comparacoes, 110 verificacoes de zoom e 40 navegacoes, sem
+  falhas. CAIXA continua fail-closed e o Tabelao oculta os controles no modo de
+  impressao. Conta e fixtures efemeras foram removidas; nenhum remoto mudou.
 
 ## 2026-10-04: cadencia visual e nome cadastrado
 
