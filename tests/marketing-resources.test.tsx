@@ -83,4 +83,10 @@ describe("Recurso MKT", () => {
     );
     expect(source).toContain("forbidden()");
   });
+
+  it("uses the compact theme control in mobile visual QA", () => {
+    const source = readFileSync("scripts/qa/marketing-resources.mjs", "utf8");
+    expect(source).toContain('page.locator("[data-theme-cycle-mobile]")');
+    expect(source).toContain('toHaveAttribute("data-theme", theme)');
+  });
 });
