@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-05 - Sequencias do Associativo publicadas
+
+- Publica os ajustes de brilho, sequencias, filtros, loops e posicionamento do
+  dolar no runtime `e1ab14a8739153c56081e4f36a76e99f80fed8b2`, apos CI integral.
+- Confere a jornada autenticada e a preservacao dos dados ao trocar unidade.
+  Nome cadastrado aparece inteiro; conta sem nome valido continua com Conta,
+  aguardando informacao e autorizacao do titular, sem deducao pelo email.
+- Registro posterior de evidencias, sem nova alteracao de runtime.
+
 ## 2026-10-04 - Sequencias visuais do Associativo
 
 - Afina e desacelera o brilho sincronizado; adiciona sequencias no imovel,
