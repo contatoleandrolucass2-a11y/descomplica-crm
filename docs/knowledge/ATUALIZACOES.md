@@ -45,6 +45,12 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   substitui a validacao depois da integracao de `afdb1c9` (PR #154), que alterou
   composicoes e referencias. Preservar a baseline da main, validar a combinacao
   e revisar somente as oito referencias afetadas pelo link solicitado.
+- CI `37309490617`: validate, restore, nove perfis e todos os criterios
+  funcionais passaram na base combinada. Captura limpa `7818dcf`, arvore identica
+  a `af85930`; 12 cenarios MKT sem overflow ou violacoes Axe. Nova revisao das
+  oito diferencas de Configuracoes promovida transacionalmente, com hashes e
+  predicado original conferidos. Preservadas as outras 201 referencias da main
+  e os contratos de canvas. Pendencias: CI final e publicacao.
 
 ## 2026-10-05: baseline autorreferente nao comprova paridade com canvas
 

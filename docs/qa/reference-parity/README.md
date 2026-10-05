@@ -4,6 +4,14 @@ Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
 ## Recurso MKT em 05/10/2026
 
+Revisao complementar depois da integracao de `afdb1c9` (PR #154): CI
+`37309490617`, artefato `11346383547`, captura limpa
+`7818dcf32fe2eb0aa45c1d84f9334f54196633df`, arvore identica a `af85930`.
+Validate, restore, nove perfis e todos os checks funcionais passaram, inclusive
+os novos contratos de canvas e os 12 cenarios MKT. Somente oito diferencas de
+Configuracoes foram revisadas e promovidas; outras 201 imagens da main e
+limiares preservados. A CI final em verify ainda e obrigatoria.
+
 O novo link em Configuracoes alterou somente oito capturas dessa visao geral.
 CI `37260367645`, artefato `11324544557`, captura limpa
 `c81abd23616e3b24fcc15bde152cc858c4b5c7d0`, arvore identica a `1b68614`.

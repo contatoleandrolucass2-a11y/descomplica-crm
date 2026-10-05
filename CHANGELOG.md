@@ -13,6 +13,8 @@
 - Matriz visual do menu Configuracoes inclui o quinto link Recurso MKT.
 - Atualiza somente oito referencias revisadas de Configuracoes apos os gates
   funcionais; preserva as outras 201 imagens e os limiares de comparacao.
+- Integra os canvases publicados pelo PR #154 e revisa novamente as oito
+  referencias afetadas, preservando a nova composicao e os gates de densidade.
 
 ## 2026-10-05 - Correcao integral da paridade dos canvases
 

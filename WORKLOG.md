@@ -44,6 +44,11 @@
   Enquanto se aguardava a CI, PR #154 alterou o layout e as referencias na main.
   Integracao de `afdb1c9` preserva o novo produto e os resultados desse PR;
   Configuracoes precisa de nova revisao visual na base combinada.
+- CI `37309490617` em `af85930`: validate, restore, E2E e todos os criterios
+  funcionais aprovados; 12 cenarios MKT sem overflow ou violacoes Axe. Somente
+  oito referencias de Configuracoes divergiram. Captura limpa `7818dcf`, arvore
+  identica ao head; oito imagens revisadas e promovidas preservando as outras
+  201 referencias da main e todos os novos contratos de canvas. CI final pendente.
 
 ## 2026-10-05 - Correcao da paridade visual dos canvases
 
