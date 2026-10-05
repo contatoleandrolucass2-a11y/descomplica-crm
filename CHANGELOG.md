@@ -9,7 +9,8 @@
 - Isola a medicao visual do brilho sem desativar efeitos na aplicacao.
 - Mantem a camada de pintura e mede seu interior arredondado, sem ruido dos cantos.
 - Preserva a atualizacao de canvas concorrente na integracao do Associativo.
-- Publicacao pendente da CI integrada, bloqueada por indisponibilidade de runner.
+- Remove o aside vazio e atualiza o QA de geometria para o cabecalho sem rotulos.
+- Publicacao pendente da CI integrada; disponibilidade de runners recuperada.
 
 ## 2026-10-04 - Recurso MKT
 

@@ -1,8 +1,14 @@
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { chromium } from "@playwright/test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { SimulationCanvasHeader } from "@/app/(protected)/app/simulacao/_components/SimulationCanvasHeader";
+
+const { checkAssociativeCanvasHeading } = createRequire(import.meta.url)(
+  "../scripts/qa/associative-compact-layout.mjs",
+);
 
 const archive = readFileSync(
   new URL(
@@ -21,6 +27,42 @@ const styles = readFileSync(
 );
 
 describe("cabecalho do simulador Associativo", () => {
+  it.runIf(process.env.ASSOCIATIVE_EFFECTS_BROWSER === "1")(
+    "accepts the real title-only header and rejects every removed label",
+    async () => {
+      const browser = await chromium.launch({ headless: true });
+      try {
+        for (const width of [375, 1440]) {
+          const page = await browser.newPage({ viewport: { width, height: 900 } });
+          const header = renderToStaticMarkup(
+            createElement(SimulationCanvasHeader, { title: "Simulador Tabela Associativo" }),
+          );
+          await page.setContent(
+            `<style>body{margin:0}h1{margin:0}[data-protected-topbar]{height:58px}.investor-main{padding:10px}</style><header data-protected-topbar></header><main data-protected-main-content><div class="investor-main">${header}</div></main>`,
+          );
+          expect((await checkAssociativeCanvasHeading(page)).removedCopyAbsent).toBe(true);
+          for (const className of [
+            "simulation-canvas-eyebrow",
+            "simulation-canvas-description",
+            "simulation-canvas-status",
+            "simulation-canvas-header-aside",
+          ]) {
+            await page.locator(".simulation-canvas-header").evaluate((element, value) => {
+              const obsolete = document.createElement("div");
+              obsolete.className = value;
+              element.append(obsolete);
+            }, className);
+            await expect(checkAssociativeCanvasHeading(page)).rejects.toThrow();
+            await page.locator(`.${className}`).evaluate((element) => element.remove());
+          }
+          await page.close();
+        }
+      } finally {
+        await browser.close();
+      }
+    },
+  );
+
   it("omits optional copy without empty labels and preserves other simulators", () => {
     const compact = renderToStaticMarkup(
       createElement(SimulationCanvasHeader, { title: "Associativo" }),
@@ -28,6 +70,7 @@ describe("cabecalho do simulador Associativo", () => {
     expect(compact).toContain("<h1>Associativo</h1>");
     expect(compact).not.toMatch(/simulation-canvas-(eyebrow|description|status)/);
     expect(compact).not.toContain('role="status"');
+    expect(compact).not.toContain("simulation-canvas-header-aside");
     const complete = renderToStaticMarkup(
       createElement(SimulationCanvasHeader, {
         title: "Outra tabela",
@@ -39,6 +82,15 @@ describe("cabecalho do simulador Associativo", () => {
     expect(complete).toContain("Simulação");
     expect(complete).toContain("Descrição");
     expect(complete).toContain('role="status"');
+    expect(complete).toContain("simulation-canvas-header-aside");
+    const actionable = renderToStaticMarkup(
+      createElement(SimulationCanvasHeader, {
+        title: "Outra tabela",
+        actions: createElement("button", null, "Abrir"),
+      }),
+    );
+    expect(actionable).toContain("simulation-canvas-actions");
+    expect(actionable).toContain("Abrir");
   });
   it("remove os rotulos duplicados e preserva o titulo acessivel", () => {
     expect(archive).toContain("<SimulationCanvasHeader");

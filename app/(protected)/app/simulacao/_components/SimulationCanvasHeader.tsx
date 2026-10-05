@@ -41,18 +41,20 @@ export function SimulationCanvasHeader({
         {subtitle ? <p className="simulation-canvas-subtitle">{subtitle}</p> : null}
         {description ? <p className="simulation-canvas-description">{description}</p> : null}
       </div>
-      <div className="simulation-canvas-header-aside">
-        {statusLabel ? (
-          <span
-            className={`simulation-canvas-status simulation-canvas-status-${statusTone}`}
-            role="status"
-          >
-            <InformationIcon />
-            <span>{statusLabel}</span>
-          </span>
-        ) : null}
-        {actions ? <div className="simulation-canvas-actions">{actions}</div> : null}
-      </div>
+      {statusLabel || actions ? (
+        <div className="simulation-canvas-header-aside">
+          {statusLabel ? (
+            <span
+              className={`simulation-canvas-status simulation-canvas-status-${statusTone}`}
+              role="status"
+            >
+              <InformationIcon />
+              <span>{statusLabel}</span>
+            </span>
+          ) : null}
+          {actions ? <div className="simulation-canvas-actions">{actions}</div> : null}
+        </div>
+      ) : null}
     </div>
   );
 }

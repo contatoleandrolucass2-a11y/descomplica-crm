@@ -2,6 +2,11 @@
 
 ## 2026-10-05 - Saldo das anuais e ajudas do Associativo
 
+- Retomada da publicacao: CI Linux passou validate, banco, restore e E2E.
+  Ajustado contrato de geometria para a retirada dos tres rotulos solicitados.
+  Aside vazio nao e renderizado; regressao real preserva selos/acoes em outras
+  tabelas e rejeita reintroducao dos elementos removidos. CI completa pendente.
+
 - Fonte: cinco capturas do usuario; branch `codex/associativo-saldo-anuais`.
 - Corrige o saldo exibido para descontar anuais nominais em centavos, sem
   deducao dupla nas mensais nem alteracao do Pro-Soluto e politicas vigentes.

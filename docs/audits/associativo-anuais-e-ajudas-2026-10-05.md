@@ -97,3 +97,10 @@ of type hosted even after multiple attempts`. PR #156 aberto; nao houve deploy.
   Fonte externa em 05/10/2026: https://www.githubstatus.com/incidents/3q1yb5m7ltvb,
   incidente de atribuicao de runners iniciado as 19:11 UTC. Nova tentativa sera
   feita sem alterar runner, permissoes, tolerancias ou gates.
+- Retomada: CI `37366812102`, tentativa 2, aprovou validate, banco, restauracao
+  e autorizacao. O QA integrado encontrou um contrato antigo de geometria que
+  ainda exigia o selo removido pelo pedido. Agora exige ausencia dos tres
+  rotulos e do aside vazio, preservando as verificacoes de titulo e estoque.
+  O componente nao renderiza aside sem selo ou acoes; outros simuladores
+  preservam ambos. Regressao de navegador usa o cabecalho React real e rejeita
+  reintroduzir cada elemento. Nova CI completa segue obrigatoria.
