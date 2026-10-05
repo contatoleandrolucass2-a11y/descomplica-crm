@@ -116,3 +116,12 @@ esse erro e usa limites por acao de 15s e navegacao de 45s, sem aumentar limites
 Teste local com componentes, fonte real e CSS dos simuladores aprovou geometria,
 cliques de temas e menu em 1181/1280/1440/1920px; nao reproduziu o E2E completo.
 Publicacao continua bloqueada; causa do timeout ainda nao determinada.
+
+Diagnostico conclusivo posterior, CI `37251923554`: o clique em Claro era
+interceptado por Configuracoes no Dashboard. A ampliacao do nome reduzia a coluna
+de navegacao abaixo do conteudo; a coluna de temas tambem podia ficar menor que
+seus tres botoes. A grade agora preserva ambas as larguras intrinsecas e limita
+o nome ao restante. A fixture inicial nao representava os tres grupos com
+chevrons; corrigida e ampliada com fontes system-ui/Verdana e hit-testing.
+Prova negativa restaura o layout anterior em 1280px e exige detectar a colisao.
+Nenhum clique forcado, timeout ampliado ou assert removido.

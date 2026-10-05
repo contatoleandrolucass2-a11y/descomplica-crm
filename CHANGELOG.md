@@ -13,6 +13,7 @@
   mantendo o ultimo item acessivel dentro da tela.
 - Aproveita o espaco disponivel no desktop para reduzir quebras de nomes longos.
 - Preserva o erro original dos testes E2E quando a limpeza do navegador falha.
+- Impede que nomes longos comprimam a navegacao sobre os botoes de tema.
 
 ## 2026-10-04 - Dados oficiais e brilho integral no Associativo
 

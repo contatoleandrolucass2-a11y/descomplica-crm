@@ -27,6 +27,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - CI seguinte `37249431505` repetiu timeout de navegacao entre simuladores.
   A limpeza do contexto ocultava a operacao original; diagnostico preserva
   esse erro e limita acoes, sem ampliar timeout ou enfraquecer gates.
+- CI `37251923554` identificou Configuracoes interceptando Claro. O menu e os
+  temas precisam de tracks intrinsecos; nomes flexiveis ocupam somente o restante.
+  Fixtures sem filhos nao reproduzem a largura dos chevrons de grupos reais.
+  Incluir grupos completos e testar hit-testing com fontes distintas.
 - Evidencias e pendencias: `docs/audits/associativo-sequencias-2026-10-04.md`.
   Preview 6/6, 47 testes de efeitos, 76 do cabecalho e 126 cenarios geometricos;
   CI Linux e publicacao pendentes. Nenhuma formula financeira alterada.

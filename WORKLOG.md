@@ -2,6 +2,11 @@
 
 ## 2026-10-04 - Associativo: cadencia e sequencias visuais
 
+- Diagnostico CI `37251923554`: Configuracoes interceptava o clique no tema
+  Claro ao retornar ao Dashboard. A grade agora reserva o tamanho intrinseco
+  da navegacao e dos temas; o nome respeita o espaco restante. A fixture local
+  inclui os tres grupos expansiveis e verifica ponteiros com fontes diferentes,
+  incluindo prova negativa do layout antigo.
 - CI `37249431505` excedeu 360s no mesmo E2E de navegacao entre simuladores
   em duas tentativas. Sem assumir flakiness: preservar a falha original na
   limpeza do contexto e limitar acoes a 15s/navegacoes a 45s para diagnostico.

@@ -96,7 +96,7 @@
   display: grid;
   width: 100%;
   min-height: 57px;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(max-content, 1fr) max-content minmax(44px, max-content);
   align-items: center;
   gap: 20px;
   box-sizing: border-box;
@@ -387,7 +387,7 @@
 .accountTrigger {
   display: inline-flex;
   min-width: 44px;
-  max-width: min(20rem, 22vw);
+  max-width: min(20rem, 22vw, 100%);
   min-height: 44px;
   align-items: center;
   justify-content: flex-start;
@@ -694,7 +694,7 @@
   }
 
   .accountTrigger {
-    max-width: clamp(8rem, calc(100vw - 1050px), 20rem);
+    max-width: min(clamp(8rem, calc(100vw - 1050px), 20rem), 100%);
   }
 }
 
