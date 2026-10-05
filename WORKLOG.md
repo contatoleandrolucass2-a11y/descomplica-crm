@@ -19,6 +19,9 @@
 - As duas primeiras CIs passaram testes/banco/restore/autorizacao, mas bloquearam
   a metrica visual. Corrigida captura sem alterar rasterizacao da referencia;
   nove testes de efeitos, roteiro mobile real, lint e tipos passaram novamente.
+- Terceira CI isolou ruido restante nos cantos mobile. Reproduzido localmente
+  com CSS compilado/Geist; mascara passa a respeitar o pseudo-elemento arredondado.
+  Nove testes, roteiro mobile com fonte real, lint e tipos aprovados.
 
 ## 2026-10-04 - Recurso MKT em Configuracoes
 

@@ -24,9 +24,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Ao medir um efeito isolado, pausar e restaurar as animacoes vizinhas evita
   falsos pixels positivos. Prova React em 1440px e 375px passou, sem relaxar
   tolerancia. Matriz definida: 7285 casos, 250197 comparacoes, zero divergencias.
-- CI detectou ruido subpixel ao retirar `background-image` da referencia.
-  Manter a mesma camada e capturar o feixe fora do card estabiliza a comparacao;
-  regressao inclui posicao fracionaria e continua rejeitando a pausa antiga.
+- CI detectou ruido subpixel nos cantos. Manter a camada sozinho nao bastou:
+  CSS compilado e Geist reproduziram pixels fora do pseudo-elemento. A mascara
+  deve respeitar border-box, insets e raio reais; fixture inclui essas bases,
+  posicoes fracionarias e prova negativa da pausa antiga, sem relaxar tolerancia.
 
 ## 2026-10-04: Recurso MKT em Configuracoes
 

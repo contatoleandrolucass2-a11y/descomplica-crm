@@ -75,6 +75,8 @@ export async function checkAssociativeDocumentationHandoff(page) {
       const parent = elements[0].parentElement.getBoundingClientRect();
       return elements.map((element) => {
         const rect = element.getBoundingClientRect();
+        const border = getComputedStyle(element);
+        const shine = getComputedStyle(element, "::after");
         const textRects = [];
         const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
         while (walker.nextNode()) {
@@ -95,6 +97,21 @@ export async function checkAssociativeDocumentationHandoff(page) {
           width: rect.width,
           height: rect.height,
           textRects,
+          paint: {
+            x:
+              rect.left - parent.left + parseFloat(border.borderLeftWidth) + parseFloat(shine.left),
+            y: rect.top - parent.top + parseFloat(border.borderTopWidth) + parseFloat(shine.top),
+            width: parseFloat(shine.width),
+            height: parseFloat(shine.height),
+            radius: Math.max(
+              ...[
+                shine.borderTopLeftRadius,
+                shine.borderTopRightRadius,
+                shine.borderBottomLeftRadius,
+                shine.borderBottomRightRadius,
+              ].map(parseFloat),
+            ),
+          },
         };
       });
     });
@@ -113,8 +130,26 @@ export async function checkAssociativeDocumentationHandoff(page) {
     const baseline = await capture();
     const masks = bounds.map((rect) => {
       const offsets = [];
-      for (let y = Math.ceil(rect.y + 2); y < Math.floor(rect.y + rect.height - 2); y++) {
-        for (let x = Math.ceil(rect.x + 2); x < Math.floor(rect.x + rect.width - 2); x++) {
+      const paint = rect.paint;
+      const radius = Math.min(paint.radius, paint.width / 2, paint.height / 2);
+      assert.ok(
+        Object.values(paint).every(Number.isFinite),
+        "Shine paint bounds must be measurable",
+      );
+      for (let y = Math.ceil(paint.y + 2); y < Math.floor(paint.y + paint.height - 2); y++) {
+        for (let x = Math.ceil(paint.x + 2); x < Math.floor(paint.x + paint.width - 2); x++) {
+          // Rounded corners outside the pseudo-element are not part of the sweep.
+          const dx = Math.max(
+            radius - (x + 0.5 - paint.x),
+            0,
+            x + 0.5 - paint.x - (paint.width - radius),
+          );
+          const dy = Math.max(
+            radius - (y + 0.5 - paint.y),
+            0,
+            y + 0.5 - paint.y - (paint.height - radius),
+          );
+          if (dx > 0 && dy > 0 && dx * dx + dy * dy > Math.max(0, radius - 2) ** 2) continue;
           if (
             !rect.textRects.some(
               (text) => x >= text.left && x <= text.right && y >= text.top && y <= text.bottom,
@@ -123,6 +158,7 @@ export async function checkAssociativeDocumentationHandoff(page) {
             offsets.push((y * baseline.info.width + x) * baseline.info.channels);
         }
       }
+      assert.ok(offsets.length > 100, "Shine must have enough unobstructed interior pixels");
       return offsets;
     });
     const sample = async (time) => {
@@ -131,8 +167,10 @@ export async function checkAssociativeDocumentationHandoff(page) {
       }, time);
       const frame = await capture();
       assert.deepEqual(frame.info, baseline.info, "Documentation geometry must remain stable");
+      const sparsePixels = [];
       const painted = masks.map((offsets) => {
         let pixels = 0;
+        const points = [];
         for (const offset of offsets) {
           if (
             Math.max(
@@ -140,12 +178,19 @@ export async function checkAssociativeDocumentationHandoff(page) {
               Math.abs(frame.data[offset + 1] - baseline.data[offset + 1]),
               Math.abs(frame.data[offset + 2] - baseline.data[offset + 2]),
             ) >= 8
-          )
+          ) {
             pixels++;
+            if (points.length < 16)
+              points.push([
+                (offset / frame.info.channels) % frame.info.width,
+                Math.floor(offset / frame.info.channels / frame.info.width),
+              ]);
+          }
         }
+        sparsePixels.push(pixels < 100 ? points : []);
         return pixels;
       });
-      return { time, painted, visible: painted.map((pixels) => pixels >= 8) };
+      return { time, painted, sparsePixels, visible: painted.map((pixels) => pixels >= 8) };
     };
     const cycles = [];
     const frameMs = 1000 / 60;

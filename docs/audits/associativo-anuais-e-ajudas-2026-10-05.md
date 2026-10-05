@@ -75,3 +75,11 @@ Nenhuma taxa, limite, politica, fonte de estoque, workflow ou dado remoto mudou.
 - Repeticao com posicoes fracionarias: nove testes de efeitos aprovados,
   incluindo prova negativa da pausa antiga; roteiro React completo em 375x812,
   lint e typecheck aprovados. Nova CI ainda obrigatoria antes da baseline.
+- CI `37359896444` manteve o bloqueio mobile: conservar a camada nao bastou.
+  Reproducao local com CSS compilado e fonte Geist identificou 12 pixels nos
+  quatro cantos do plano. A mascara retangular incluia antialiasing fora do
+  pseudo-elemento arredondado. O QA agora calcula a area pintada com bordas,
+  insets e raio reais, excluindo esses cantos, sem aumentar tolerancias.
+- Fixture agora usa border-box como a aplicacao, alem de posicoes fracionarias.
+  Nove testes passaram, incluindo keyframes antigos rejeitados; roteiro real
+  com os estilos compilados em 375x812, lint e tipos tambem passaram.
