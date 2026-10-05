@@ -2,6 +2,33 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Recurso MKT em 05/10/2026
+
+Revisao complementar depois da integracao de `afdb1c9` (PR #154): CI
+`37309490617`, artefato `11346383547`, captura limpa
+`7818dcf32fe2eb0aa45c1d84f9334f54196633df`, arvore identica a `af85930`.
+Validate, restore, nove perfis e todos os checks funcionais passaram, inclusive
+os novos contratos de canvas e os 12 cenarios MKT. Somente oito diferencas de
+Configuracoes foram revisadas e promovidas; outras 201 imagens da main e
+limiares preservados. A CI final em verify ainda e obrigatoria.
+
+O novo link em Configuracoes alterou somente oito capturas dessa visao geral.
+CI `37260367645`, artefato `11324544557`, captura limpa
+`c81abd23616e3b24fcc15bde152cc858c4b5c7d0`, arvore identica a `1b68614`.
+Passaram validate, restore, E2E dos nove perfis, 154 checks responsivos,
+88 de tema, 209 Axe, 110 de zoom, teclado, simuladores e 40 menus.
+
+As oito diferencas foram revisadas e promovidas pelo helper transacional
+existente apos conferir hashes, arvore e o predicado funcional original.
+Outras 201 imagens e sua proveniencia anterior foram preservadas. Limiares
+de 1%/16 intactos; CI integral com as novas referencias permanece obrigatoria.
+`reviewedUpdates` e as oito entradas registram a origem desta revisao parcial.
+
+A nova rota `/app/configuracoes/recurso-mkt` tem QA autenticado separado:
+12 combinacoes de quatro larguras e tres temas, sem overflow ou violacoes Axe,
+com valores do print, recalculo, entradas invalidas, restauracao e teclado.
+Esse conjunto nao substitui nem altera as 209 referencias das 22 rotas antigas.
+
 ## Incremento dos 22 canvases em 04/10/2026
 
 O incremento em `codex/canvas-layout-parity` estende a composicao aprovada as 22

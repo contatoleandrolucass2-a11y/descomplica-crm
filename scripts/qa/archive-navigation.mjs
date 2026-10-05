@@ -46,6 +46,7 @@ const settingsLinks = [
   ["Metas do funil", "/app/configuracoes/metas"],
   ["Metas de parcerias", "/app/configuracoes/metas/parcerias"],
   ["Metas de pontos", "/app/configuracoes/metas/pontos"],
+  ["Recurso MKT", "/app/configuracoes/recurso-mkt"],
 ];
 const dashboardLinks = [
   ["Visão geral", "/app"],

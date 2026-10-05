@@ -25,7 +25,7 @@ describe("approved canvas parity contract", () => {
       ({ path }) => path,
     );
 
-    expect(releasedPaths).toHaveLength(22);
+    expect(releasedPaths).toHaveLength(23);
     for (const path of releasedPaths) expect(readme).toContain(`\`${path}\``);
     expect(readme).toContain("Existe uma única navbar global");
     expect(readme).toContain("crm.simulators.view");

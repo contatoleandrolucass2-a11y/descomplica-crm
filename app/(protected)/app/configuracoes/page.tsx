@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BarChart3,
+  Megaphone,
   Settings2,
   Trophy,
   UsersRound,
@@ -22,6 +23,14 @@ import styles from "./ConfigurationCanvas.module.css";
 export const metadata = { title: "Configurações" };
 
 const SETTINGS = [
+  {
+    href: "/app/configuracoes/recurso-mkt",
+    badge: "Marketing",
+    title: "Recurso MKT",
+    description: "Fundo de investimento de Marketing e distribuição dos recursos por responsável.",
+    detail: "Volta ao Caixa",
+    icon: Megaphone,
+  },
   {
     href: "/app/configuracoes/metas",
     badge: "Funil comercial",
@@ -185,6 +194,7 @@ export default async function SettingsPage() {
               <Link
                 key={setting.href}
                 href={setting.href}
+                aria-label={setting.title}
                 prefetch={false}
                 className="group block rounded-xl no-underline focus-visible:outline-offset-4"
               >

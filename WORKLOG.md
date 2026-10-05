@@ -1,5 +1,58 @@
 # Worklog
 
+## 2026-10-04 - Recurso MKT em Configuracoes
+
+- Fonte: print fornecido pelo usuario; branch `codex/recurso-mkt`, base `2b713fa`.
+- Nova guia no menu autorizado de Configuracoes e na visao geral, com guard de
+  servidor e Proxy usando `crm.settings.manage`, sem migration ou ACL nova.
+- Preserva fundo de R$ 2.500,00, custo de R$ 1.000,00, expectativa de duas vendas,
+  percentuais 40/30/20/10, destinos e cinco conversoes do anuncio campeao.
+- Reutiliza cabecalho, tokens e temas da Tabela Associativo. Ajustes de fundo e
+  custo sao locais; expectativa conta vendas inteiras. Rateio em centavos mantem
+  a soma exata; entradas ausentes ou invalidas ficam explicitamente pendentes.
+- Lint, tipos, build e 62 testes focados aprovados. Suite Windows: seis falhas
+  POSIX e tres timeouts existentes, alem da contagem de rotas corrigida e retestada.
+- Preview isolado do componente real: 12 cenarios (1440/1024/390/320px, tres
+  temas), Axe sem violacoes, recalculo, erros, restauracao e teclado aprovados.
+  Ajustado nome acessivel do icone de expectativa. CI Linux e jornada autenticada
+  em andamento no PR #152; publicacao ainda pendente.
+- CI `37255127701`: validate e restauracao aprovados; matriz E2E antiga recusou
+  o novo link. Incluida rota MKT nas provas diretas dos nove perfis e nas listas
+  de navegacao de Master/Admin, sem ampliar permissao de outros perfis.
+- CI `37255825356`: E2E dos nove perfis aprovado; QA MKT encontrou atalho sem
+  nome acessivel no card de Configuracoes. Rotulo explicito corrigido e coberto
+  por teste de renderizacao; capturas MKT tambem mascaram campos de identidade.
+- CI `37257361148`: navegacao geral segue aprovada; falha curta no helper MKT.
+  Diagnostico por etapas sem payload privado, seletor restrito ao card e espera
+  explicita da URL para distinguir seletor ambiguo de transicao do router.
+- Varredura adicional encontrou contrato de quatro itens em
+  `archive-navigation.mjs`; incluido o quinto link MKT com as mesmas provas de
+  nome, destino, clique e visibilidade em todas as larguras da matriz existente.
+- CI `37258678938`: MKT autenticado passou nos 12 cenarios, valores, recalculo,
+  erros, reset e teclado; restante bloqueado pelo contrato antigo de quatro
+  links. `main` atualizado para `e1ab14a` e integrado preservando ambas as notas
+  e as referencias revisadas do PR #150. Nova validacao combinada pendente.
+- CI `37260367645` na arvore limpa `c81abd2` (identica a `1b68614`) aprovou
+  lint, tipos, suite Linux, build, restore e E2E dos nove perfis. QA funcional:
+  154 responsivos, 88 temas, 209 Axe, 110 zooms, 40 menus e 12 cenarios MKT.
+  Somente oito referencias de Configuracoes divergiram com o novo card.
+- Em 05/10, as oito capturas foram inspecionadas e promovidas pelo helper
+  transacional existente, apos verificar arvore, predicado funcional e hashes.
+  Outras 201 imagens e evidencias anteriores preservadas; limiares intactos.
+  CI completa com as referencias atualizadas e publicacao ainda pendentes.
+- CI `37263297496` aprovou todos os gates no head `393457d`.
+  Enquanto se aguardava a CI, PR #154 alterou o layout e as referencias na main.
+  Integracao de `afdb1c9` preserva o novo produto e os resultados desse PR;
+  Configuracoes precisa de nova revisao visual na base combinada.
+- CI `37309490617` em `af85930`: validate, restore, E2E e todos os criterios
+  funcionais aprovados; 12 cenarios MKT sem overflow ou violacoes Axe. Somente
+  oito referencias de Configuracoes divergiram. Captura limpa `7818dcf`, arvore
+  identica ao head; oito imagens revisadas e promovidas preservando as outras
+  201 referencias da main e todos os novos contratos de canvas. CI final pendente.
+- Integra `89ac797` (registro documental do PR #153), sem nova alteracao de
+  produto ou referencias. A validacao funcional anterior permanece identificada
+  pelo seu SHA; os gates da CI serao repetidos no head combinado.
+
 ## 2026-10-05 - Publicacao das sequencias do Associativo
 
 - Runtime `e1ab14a8739153c56081e4f36a76e99f80fed8b2` publicado apos PR #150,

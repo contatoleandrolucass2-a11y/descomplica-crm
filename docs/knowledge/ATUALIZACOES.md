@@ -4,6 +4,54 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: Recurso MKT em Configuracoes
+
+- Status: pendente_validacao; fonte: print do usuario, branch `codex/recurso-mkt`.
+- Rota `/app/configuracoes/recurso-mkt` reutiliza o canvas e os tokens da Tabela
+  Associativo, com um unico shell protegido. Navegacao suplementar exige pai
+  Configuracoes autorizado, permissao de gestao e gate de release habilitado.
+- Fundo e custo ajustaveis somente no estado local, com rateio 40/30/20/10 e
+  expectativa de vendas inteiras arredondada para baixo. Sem gravacao de
+  politica, recurso ou configuracao ativa; sem migration ou workflow n8n.
+- Evidencias: 62 testes focados e lint/tipos/build locais aprovados; 12 capturas
+  do componente real em preview isolado, com Axe, controles e teclado aprovados.
+  Testes: `tests/marketing-resources.test.tsx`, navegacao e Proxy; jornada
+  autenticada: `scripts/qa/marketing-resources.mjs`. CI Linux e publicacao no
+  PR #152 pendentes; o preview nao substitui a prova de autenticacao.
+- CI `37255127701` aprovou validate e restore; E2E exigiu atualizar a lista
+  esperada de links. Nova rota agora participa da matriz de autorizacao dos
+  nove perfis, com acesso administrativo existente e negacao dos demais.
+- CI `37255825356` aprovou os nove perfis; seletores semanticos identificaram
+  que links envolvendo `article` nao recebiam nome acessivel do conteudo.
+  Usar rotulo explicito do titulo. Correcao coberta por renderizacao do card.
+- CI `37257361148`: falha residual curta exige prova adicional no helper,
+  sem alterar produto ou reduzir gates. Aguardar URL do router e registrar
+  somente etapas e classes estaticas de erro, nunca a mensagem bruta do browser.
+- A lista de links autorizados tambem aparece em `archive-navigation.mjs`.
+  Ao adicionar uma guia, atualizar esse contrato junto da matriz E2E; manter
+  contagem exata e provas de alcance de cada link, sem relaxar os limites.
+- CI `37258678938` comprovou os 12 cenarios autenticados MKT, teclado e
+  controles. Contrato antigo do menu impediu o restante; corrigido na branch.
+  Integracao de `e1ab14a` preserva as referencias e resultados do PR #150;
+  validacao combinada e publicacao continuam pendentes.
+- CI `37260367645`, captura limpa `c81abd2` com arvore identica a `1b68614`:
+  validate, restore, nove perfis E2E e todos os criterios funcionais aprovados.
+  154 responsivos, 88 temas, 209 Axe, 110 zooms, 40 menus e 12 cenarios MKT.
+  Somente oito diferencas esperadas da visao geral de Configuracoes; revisadas
+  em 05/10 e promovidas transacionalmente apos conferencia de arvore e hashes.
+  Preservadas outras 201 imagens e a proveniencia anterior, sem reduzir gates.
+  Pendencias: CI integral depois da promocao e verificacao pos-publicacao.
+- CI `37263297496` integral aprovada em `393457d`. Resultado anterior nao
+  substitui a validacao depois da integracao de `afdb1c9` (PR #154), que alterou
+  composicoes e referencias. Preservar a baseline da main, validar a combinacao
+  e revisar somente as oito referencias afetadas pelo link solicitado.
+- CI `37309490617`: validate, restore, nove perfis e todos os criterios
+  funcionais passaram na base combinada. Captura limpa `7818dcf`, arvore identica
+  a `af85930`; 12 cenarios MKT sem overflow ou violacoes Axe. Nova revisao das
+  oito diferencas de Configuracoes promovida transacionalmente, com hashes e
+  predicado original conferidos. Preservadas as outras 201 referencias da main
+  e os contratos de canvas. Pendencias: CI final e publicacao.
+
 ## 2026-10-05: baseline autorreferente nao comprova paridade com canvas
 
 - Status: pendente_validacao; fonte: auditoria visual do usuario, branch
