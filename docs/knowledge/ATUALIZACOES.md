@@ -1125,3 +1125,20 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   as seis falhas preexistentes ligadas a permissoes POSIX; consultar a CI Linux
   do PR para a validacao integral antes do merge.
 - Nenhuma alteracao de producao, conta, plugin comunitario ou regra financeira.
+
+## 2026-10-05: paridade visual exige referencia externa
+
+- Status: em validacao antes da publicacao.
+- Fonte: `docs/qa/canvas-parity/README.md`,
+  `docs/audits/canvas-layout-correction-2026-10-05.md` e
+  `scripts/qa/authenticated-visual.mjs`.
+- Uma baseline gerada pela propria aplicacao detecta regressao entre commits,
+  mas nao comprova que a tela corresponde a um canvas externo aprovado. O gate
+  anterior era autorreferente e permitiu promover uma composicao divergente.
+- A matriz autenticada passou a recortar a metade correta das 11 pranchas e
+  comparar as 22 rotas por distribuicao cromatica e estrutura de bordas, alem
+  de manter capturas internas, Axe, overflow, console, zoom, teclado,
+  reduced-motion, sete larguras e tres temas.
+- O contrato continua estrutural: canvases nao autorizam numeros, politicas,
+  rotas, grants ou motores. Dados e navegacao permanecem derivados dos loaders
+  e guards existentes; ausencia de fonte continua fail-closed.

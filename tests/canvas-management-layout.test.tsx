@@ -131,9 +131,10 @@ describe("management canvas layout", () => {
 
     expect(ranking).toContain("loadRankingReadModel");
     expect(ranking).toContain("Nenhuma pontuação oficial foi calculada");
-    expect(partnerships).toContain("const imobRows: ImobRankingRow[] = []");
-    expect(partnerships).toContain("const developmentRows: DevelopmentRankingRow[] = []");
     expect(partnerships).toContain("Dado indisponível — integração pendente");
+    expect(partnerships).toContain("Pódio das parcerias");
+    expect(partnerships).toContain("Totais do período");
+    expect(partnerships).not.toMatch(/ImobRankingRow|DevelopmentRankingRow/);
     expect(funnel).toContain('placeholder="—"');
     expect(funnel).toContain("refletem exclusivamente a última base legada carregada");
     expect(funnel).not.toContain("recalcula as etapas localmente");

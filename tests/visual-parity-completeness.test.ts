@@ -88,12 +88,13 @@ describe("complete visual composition on the scoped v3 read model", () => {
       "Personalizado",
       "Período personalizado",
       "Ranking das imobiliárias",
-      "Ranking dos Empreendimentos",
+      "Pódio das parcerias",
+      "Totais do período",
       "Aguardando conciliação das fontes",
     ]) {
       expect(partnerships).toContain(label);
     }
-    expect(partnerships).toContain("const SHOW_EXTENDED_PARTNERSHIP_RANKINGS = false");
+    expect(partnerships).not.toMatch(/Ranking dos Empreendimentos|SHOW_EXTENDED_PARTNERSHIP/);
     expect(partnerships).not.toMatch(/VGV[^\n]*[1-9][0-9.,]/);
   });
 

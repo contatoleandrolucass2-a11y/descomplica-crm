@@ -214,35 +214,37 @@ export default async function RankingPage({
           }
         />
 
-        <DataState
-          variant={isEmpty ? "empty" : "unavailable"}
-          compact
-          title={
-            isEmpty
-              ? "Aguardando dados"
-              : policyPending
-                ? "Ranking bloqueado por política"
-                : "Configuração necessária"
-          }
-          description={
-            isEmpty
-              ? "O read model está pronto, mas ainda não existe um snapshot real de atividades. Nenhum participante demonstrativo será exibido."
-              : policyPending
-                ? "A política oficial ainda não foi aprovada. Nenhuma pontuação oficial foi calculada."
-                : "Existe atividade para o ranking, mas ainda não há rascunho validado de pesos."
-          }
-          action={
-            !isEmpty && canManagePoints ? (
-              <Link
-                href="/app/configuracoes/metas/pontos"
-                prefetch={false}
-                className={`${styles.draftLink} inline-flex min-h-11 items-center justify-center rounded-lg bg-cyan-300 px-4 py-2 text-xs font-semibold text-[#082137] hover:bg-cyan-200`}
-              >
-                Preparar rascunho de pontuação
-              </Link>
-            ) : undefined
-          }
-        />
+        <div className={styles.rankingState}>
+          <DataState
+            variant={isEmpty ? "empty" : "unavailable"}
+            compact
+            title={
+              isEmpty
+                ? "Aguardando dados"
+                : policyPending
+                  ? "Ranking bloqueado por política"
+                  : "Configuração necessária"
+            }
+            description={
+              isEmpty
+                ? "O read model está pronto, mas ainda não existe um snapshot real de atividades. Nenhum participante demonstrativo será exibido."
+                : policyPending
+                  ? "A política oficial ainda não foi aprovada. Nenhuma pontuação oficial foi calculada."
+                  : "Existe atividade para o ranking, mas ainda não há rascunho validado de pesos."
+            }
+            action={
+              !isEmpty && canManagePoints ? (
+                <Link
+                  href="/app/configuracoes/metas/pontos"
+                  prefetch={false}
+                  className={`${styles.draftLink} inline-flex min-h-11 items-center justify-center rounded-lg bg-cyan-300 px-4 py-2 text-xs font-semibold text-[#082137] hover:bg-cyan-200`}
+                >
+                  Preparar rascunho de pontuação
+                </Link>
+              ) : undefined
+            }
+          />
+        </div>
 
         <section aria-labelledby="ranking-points-title">
           <AnalyticsCard tone="navy" density="compact">

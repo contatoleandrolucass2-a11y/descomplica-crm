@@ -279,14 +279,15 @@ export async function checkProtectedTopbar(page) {
   await expect(page.locator("[data-protected-topbar]")).toHaveCount(1);
   const result = await page.locator("[data-protected-topbar]").evaluate((header) => {
     const group = header.querySelector('[role="group"][aria-label="Aparência da página"]');
-    const controls = [group, ...group.querySelectorAll("button")];
+    const visibleButtons = [...group.querySelectorAll("button")].filter(
+      (button) => button.getClientRects().length > 0 && getComputedStyle(button).display !== "none",
+    );
+    const controls = [group, ...visibleButtons];
     const selected = group.querySelector('[aria-pressed="true"]');
-    const name = header.querySelector("[data-session-identity-trigger-label]");
-    // Allow only the space required by the untruncated name, not arbitrary header padding.
-    const nameHeight = name?.getBoundingClientRect().height ?? 0;
+    const mobileCycle = group.querySelector("[data-theme-cycle-mobile]");
     return {
       height: header.getBoundingClientRect().height,
-      maximumHeight: Math.max(60, nameHeight + 16),
+      maximumHeight: 60,
       controlsContained: controls.every((element) => {
         const control = element.getBoundingClientRect();
         const bounds = header.getBoundingClientRect();
@@ -299,13 +300,16 @@ export async function checkProtectedTopbar(page) {
           control.bottom <= bounds.bottom + 1
         );
       }),
-      touchTargets: [...group.querySelectorAll("button")].every(
-        (button) => button.getBoundingClientRect().height >= 44,
-      ),
+      touchTargets: visibleButtons.every((button) => button.getBoundingClientRect().height >= 44),
       selectedCued:
-        selected instanceof HTMLElement &&
-        getComputedStyle(selected).boxShadow !== "none" &&
-        selected.getAttribute("aria-pressed") === "true",
+        (selected instanceof HTMLElement &&
+          selected.getClientRects().length > 0 &&
+          getComputedStyle(selected).boxShadow !== "none" &&
+          selected.getAttribute("aria-pressed") === "true") ||
+        (mobileCycle instanceof HTMLButtonElement &&
+          mobileCycle.getClientRects().length > 0 &&
+          mobileCycle.getAttribute("aria-label")?.startsWith("Tema atual:") &&
+          Boolean(mobileCycle.querySelector("svg"))),
     };
   });
   assert.ok(
@@ -314,7 +318,7 @@ export async function checkProtectedTopbar(page) {
   );
   assert.ok(result.controlsContained, "Theme controls must remain inside the protected topbar");
   assert.ok(result.touchTargets, "Theme controls must retain 44px touch targets");
-  assert.ok(result.selectedCued, "Selected theme must not depend on color alone");
+  assert.ok(result.selectedCued, "Selected theme must have a non-color cue");
   return result;
 }
 

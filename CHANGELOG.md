@@ -1381,6 +1381,10 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Alterado
 
+- Recompõe as 22 páginas protegidas segundo os 11 canvases aprovados, mantém
+  uma única navbar global e adiciona ao QA autenticado uma comparação externa
+  por rota para impedir que uma baseline autorreferente aprove layout
+  divergente.
 - Estabiliza o smoke MFA hospedado ao aguardar janela TOTP útil antes de
   enrollment/challenge e ampliar somente o teto desse cenário para 180
   segundos, sem registrar chave, código ou credencial.

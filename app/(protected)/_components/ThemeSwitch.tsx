@@ -57,9 +57,13 @@ export function ThemeSwitch({ canPersist }: { canPersist: boolean }) {
     }
   }
 
+  const currentIndex = THEME_MODES.findIndex(({ key }) => key === theme);
+  const nextTheme = THEME_MODES[(currentIndex + 1) % THEME_MODES.length] ?? THEME_MODES[0];
+  const CurrentThemeIcon = THEME_PRESENTATION[theme].icon;
+
   return (
     <div role="group" aria-label="Aparência da página" className={styles.themeSwitch}>
-      <div className={styles.themeOptions}>
+      <div className={styles.themeOptions} data-theme-options-desktop>
         {THEME_MODES.map((mode) => {
           const presentation = THEME_PRESENTATION[mode.key];
           const Icon = presentation.icon;
@@ -79,6 +83,16 @@ export function ThemeSwitch({ canPersist }: { canPersist: boolean }) {
           );
         })}
       </div>
+      <button
+        type="button"
+        className={styles.mobileThemeCycle}
+        aria-label={`Tema atual: ${THEME_PRESENTATION[theme].label}. Alternar para ${THEME_PRESENTATION[nextTheme.key].label}.`}
+        title={`Tema ${THEME_PRESENTATION[theme].label.toLocaleLowerCase("pt-BR")}`}
+        onClick={() => selectTheme(nextTheme.key)}
+        data-theme-cycle-mobile
+      >
+        <CurrentThemeIcon aria-hidden="true" size={20} />
+      </button>
     </div>
   );
 }

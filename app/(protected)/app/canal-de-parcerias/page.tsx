@@ -8,12 +8,10 @@ import {
 } from "../../_components/ManagementCanvas";
 import {
   AnalyticsCard,
-  AnalyticsTable,
   DataState,
   FilterBar,
   FilterGroup,
   SectionHeading,
-  type AnalyticsColumn,
 } from "../_components/analytics";
 
 import styles from "./PartnershipsCanvas.module.css";
@@ -21,77 +19,6 @@ import styles from "./PartnershipsCanvas.module.css";
 export const metadata = { title: "Canal de Parcerias" };
 
 const INTEGRATION_PENDING_LABEL = "Dado indisponível — integração pendente";
-const SHOW_EXTENDED_PARTNERSHIP_RANKINGS = false;
-
-interface ImobRankingRow {
-  id: string;
-  position: string;
-  classification: string;
-  imob: string;
-  salesValue: string;
-  contracts: string;
-}
-
-interface DevelopmentRankingRow {
-  id: string;
-  position: string;
-  development: string;
-  salesValue: string;
-  contracts: string;
-  participation: string;
-  variation: string;
-}
-
-const imobColumns: Array<AnalyticsColumn<ImobRankingRow>> = [
-  { key: "position", label: "Posição", render: (row) => row.position },
-  { key: "classification", label: "Classificação", render: (row) => row.classification },
-  { key: "imob", label: "Nome", render: (row) => row.imob },
-  {
-    key: "sales-value",
-    label: "VGV",
-    align: "right",
-    render: (row) => row.salesValue,
-  },
-  {
-    key: "contracts",
-    label: "Contratos",
-    align: "right",
-    render: (row) => row.contracts,
-  },
-];
-
-const developmentColumns: Array<AnalyticsColumn<DevelopmentRankingRow>> = [
-  { key: "position", label: "Posição", render: (row) => row.position },
-  {
-    key: "development",
-    label: "Empreendimento",
-    render: (row) => row.development,
-  },
-  {
-    key: "sales-value",
-    label: "VGV",
-    align: "right",
-    render: (row) => row.salesValue,
-  },
-  {
-    key: "contracts",
-    label: "Contratos",
-    align: "right",
-    render: (row) => row.contracts,
-  },
-  {
-    key: "participation",
-    label: "Participação",
-    align: "right",
-    render: (row) => row.participation,
-  },
-  {
-    key: "variation",
-    label: "Variação",
-    align: "right",
-    render: (row) => row.variation,
-  },
-];
 
 function DisabledFilter({ label }: { label: string }) {
   return (
@@ -166,9 +93,6 @@ function PodiumPlaceholder({
 
 export default async function PartnershipsChannelPage() {
   await enforcePermission("crm.partnerships.view");
-
-  const imobRows: ImobRankingRow[] = [];
-  const developmentRows: DevelopmentRankingRow[] = [];
 
   return (
     <ManagementPage className={styles.canvas ?? ""}>
@@ -313,129 +237,16 @@ export default async function PartnershipsChannelPage() {
               <p className="text-xs font-semibold tracking-wide text-[var(--analytics-cyan-strong)] uppercase">
                 {label}
               </p>
-              <div className="mt-3">
-                <DataState
-                  variant="unavailable"
-                  compact
-                  headingLevel="h3"
-                  title={INTEGRATION_PENDING_LABEL}
-                  description="Aguardando população conciliada."
-                />
-              </div>
+              <strong className="mt-3 block text-sm text-[var(--analytics-ink)]">
+                {INTEGRATION_PENDING_LABEL}
+              </strong>
+              <p className="mt-1 text-xs text-[var(--analytics-muted)]">
+                Aguardando população conciliada.
+              </p>
             </AnalyticsCard>
           ))}
         </div>
       </section>
-
-      {SHOW_EXTENDED_PARTNERSHIP_RANKINGS ? (
-        <>
-          <div className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-2">
-            <section className="min-w-0" aria-labelledby="imob-ranking-title">
-              <AnalyticsCard density="compact" className="h-full">
-                <SectionHeading
-                  id="imob-ranking-title"
-                  kicker="Elite Partners — Top 10"
-                  title="Ranking das imobiliárias"
-                  description="Período, unidade e ordem serão apresentados pelo sistema."
-                  density="compact"
-                />
-                <label className="mb-4 grid gap-1 text-sm font-semibold text-[var(--analytics-ink)]">
-                  Pesquisar por imobiliária
-                  <input
-                    type="search"
-                    disabled
-                    placeholder="Integração pendente"
-                    className="min-h-11 cursor-not-allowed rounded-xl border border-dashed border-[var(--analytics-line)] bg-[var(--analytics-surface-muted)] px-3 text-[var(--analytics-muted)]"
-                  />
-                </label>
-                <AnalyticsTable
-                  caption="Ranking de imobiliárias parceiras"
-                  rows={imobRows}
-                  columns={imobColumns}
-                  rowKey={(row) => row.id}
-                  density="compact"
-                />
-                <div className="mt-4">
-                  <DataState
-                    variant="unavailable"
-                    compact
-                    headingLevel="h3"
-                    title={INTEGRATION_PENDING_LABEL}
-                    description="Nenhuma posição é inferida enquanto a fonte oficial de leitura não estiver conectada."
-                  />
-                </div>
-              </AnalyticsCard>
-            </section>
-
-            <section className="min-w-0" aria-labelledby="development-ranking-title">
-              <AnalyticsCard density="compact" className="h-full">
-                <SectionHeading
-                  id="development-ranking-title"
-                  kicker="Performance por produto — Top 10"
-                  title="Ranking dos Empreendimentos"
-                  description="Mesmo período, unidade, população e base do ranking das imobiliárias."
-                  density="compact"
-                />
-                <AnalyticsTable
-                  caption="Ranking de empreendimentos do canal"
-                  rows={developmentRows}
-                  columns={developmentColumns}
-                  rowKey={(row) => row.id}
-                  density="compact"
-                />
-                <div className="mt-4">
-                  <DataState
-                    variant="unavailable"
-                    compact
-                    headingLevel="h3"
-                    title={INTEGRATION_PENDING_LABEL}
-                    description="Nenhum resultado é inferido enquanto a fonte oficial de leitura não estiver conectada."
-                  />
-                </div>
-              </AnalyticsCard>
-            </section>
-          </div>
-
-          <section aria-labelledby="reconciliation-gate-title">
-            <AnalyticsCard tone="navy" density="compact">
-              <SectionHeading
-                id="reconciliation-gate-title"
-                kicker="Validação da conciliação"
-                title="Aguardando conciliação das fontes"
-                description="Período, unidade, população, totais e carga completa ainda não possuem evidência comum."
-                density="compact"
-              />
-              <dl className="mt-4 grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
-                <div>
-                  <dt className="text-xs tracking-wide text-cyan-300 uppercase">Motivo</dt>
-                  <dd className="mt-1">Fonte oficial de leitura não conectada.</dd>
-                </div>
-                <div>
-                  <dt className="text-xs tracking-wide text-cyan-300 uppercase">
-                    Última base válida
-                  </dt>
-                  <dd className="mt-1">{INTEGRATION_PENDING_LABEL}</dd>
-                </div>
-              </dl>
-              <button
-                type="button"
-                disabled
-                className="mt-5 min-h-11 cursor-not-allowed rounded-xl border border-white/20 bg-white/5 px-4 text-sm font-semibold text-white opacity-70"
-              >
-                Tentar novamente — fonte indisponível
-              </button>
-            </AnalyticsCard>
-          </section>
-
-          <footer
-            className={`${managementStyles.panel} ${managementStyles.panelPadded} text-sm text-[var(--analytics-muted)]`}
-          >
-            <strong className="text-[var(--analytics-ink)]">Descomplica CRM</strong>
-            <span> · Inteligência comercial do Canal de Parcerias</span>
-            <span className="block">Identificação institucional configurável: indisponível.</span>
-          </footer>
-        </>
-      ) : null}
     </ManagementPage>
   );
 }

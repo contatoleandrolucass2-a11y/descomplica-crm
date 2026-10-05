@@ -64,3 +64,21 @@ mas não é autoridade: ele contém jornadas que não existem no catálogo aprov
 Os arquivos WebP foram derivados localmente dos PNGs aprovados, sem metadados,
 redimensionados somente para armazenamento versionado. Integridade, fonte e
 papel de cada arquivo estão em [`manifest.json`](./manifest.json).
+
+## Gate contra a referencia externa
+
+O QA autenticado nao pode aprovar uma tela apenas porque ela coincide com uma
+captura anterior da propria aplicacao. Para cada uma das 22 rotas, o gate
+recorta a regiao correspondente do canvas aprovado e compara, em `1440x900` e
+tema Escuro, duas caracteristicas independentes:
+
+- composicao cromatica normalizada, para detectar troca de paleta, superficies
+  e distribuicao geral dos paineis;
+- estrutura de bordas normalizada, para detectar hierarquia, densidade e
+  geometria divergentes.
+
+Os hashes das referencias e as distancias medidas ficam no resultado
+versionado. A comparacao continua acompanhada por Axe, overflow, console,
+teclado, zoom, reduced-motion, sete larguras e os tres temas. As capturas
+internas seguem uteis para regressao, mas deixaram de ser autoridade unica de
+paridade.

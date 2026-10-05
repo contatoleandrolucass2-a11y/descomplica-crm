@@ -42,10 +42,14 @@ Documentacao e CAIXA.
 
 - A matriz autenticada cobre 22 rotas, sete viewports, tres temas, zoom,
   teclado, foco, reduced-motion, Axe e ausencia de overflow/erros de console.
-- A baseline autenticada foi promovida localmente em `2026-10-05T07:40:51Z`:
-  154 cenarios responsivos, 88 de tema, 209 auditorias Axe, 209 comparacoes e
-  110 verificacoes de zoom, sem falhas. A promocao atomica preservou o
-  manifesto e o resultado anteriores para rollback.
+- A baseline promovida em `2026-10-05T07:40:51Z` foi invalidada como prova de
+  paridade: ela comparava a aplicacao com capturas produzidas pela propria
+  aplicacao e, portanto, podia aprovar o layout errado de forma
+  autorreferente. Ela permanece apenas como evidencia historica.
+- O gate corrigido exige 22 comparacoes adicionais contra os canvases externos
+  aprovados, uma por rota, alem das capturas de regressao produzidas pela
+  aplicacao. A nova baseline somente pode ser promovida depois de todas essas
+  comparacoes passarem.
 - A navegacao dos quatro simuladores cobre 320, 375, 390, 600, 601, 768, 1024,
   1180, 1181 e 1440 px: 40/40 cenarios passaram. O Tabelao tambem oculta no
   modo de impressao os controles do novo cabecalho, preservando somente o

@@ -106,7 +106,7 @@ function pointerTargetsReachable(header: HTMLElement) {
 describe("account menu responsive layout", () => {
   // Browser fixtures are opt-in because the unit CI job has no Chromium installation.
   it.runIf(process.env.ACCOUNT_MENU_BROWSER === "1")(
-    "shows complete names without overlapping navigation or themes on desktop and mobile",
+    "keeps compact account identity without overlapping navigation or themes",
     async () => {
       const browser = await chromium.launch({ headless: true });
       const output = "test-results/account-menu";
@@ -130,6 +130,7 @@ describe("account menu responsive layout", () => {
                     "[data-session-identity-trigger-label]",
                   )!;
                   const trigger = label.closest("button")!;
+                  const avatar = trigger.querySelector<HTMLElement>("[data-session-avatar]")!;
                   const labelBox = label.getBoundingClientRect();
                   const triggerBox = trigger.getBoundingClientRect();
                   const labelStyle = getComputedStyle(label);
@@ -137,6 +138,9 @@ describe("account menu responsive layout", () => {
                     document.querySelectorAll<HTMLButtonElement>(
                       '[role="group"][aria-label="Aparência da página"] button',
                     ),
+                  );
+                  const visibleThemeButtons = themeButtons.filter(
+                    (button) => button.getClientRects().length > 0,
                   );
                   const controls = Array.from(
                     document.querySelectorAll<HTMLElement>(
@@ -163,32 +167,23 @@ describe("account menu responsive layout", () => {
                   return {
                     text: label.textContent,
                     display: labelStyle.display,
-                    textOverflow: labelStyle.textOverflow,
+                    position: labelStyle.position,
+                    overflow: labelStyle.overflow,
                     labelWidth: labelBox.width,
-                    withinButton:
-                      labelBox.left >= triggerBox.left &&
-                      labelBox.right <= triggerBox.right &&
-                      labelBox.top >= triggerBox.top &&
-                      labelBox.bottom <= triggerBox.bottom,
-                    textFits:
-                      label.scrollWidth <= label.clientWidth + 1 &&
-                      label.scrollHeight <= label.clientHeight + 1,
-                    textLines: labelBox.height / Number.parseFloat(labelStyle.lineHeight),
+                    labelHeight: labelBox.height,
+                    avatarVisible:
+                      avatar.getBoundingClientRect().width > 0 &&
+                      avatar.getBoundingClientRect().height > 0,
                     noPageOverflow: document.documentElement.scrollWidth <= innerWidth,
                     touchHeight: triggerBox.height,
                     controlCount: controls.length,
-                    mobileThemeIcons:
-                      themeButtons.length === 3 &&
-                      themeButtons.every((button) => {
-                        const box = button.getBoundingClientRect();
-                        const icon = button.querySelector("svg")?.getBoundingClientRect();
-                        return (
-                          getComputedStyle(button).fontSize === "0px" &&
-                          box.width >= 44 &&
-                          box.height >= 44 &&
-                          Boolean(icon && icon.width > 0 && icon.height > 0)
-                        );
-                      }),
+                    visibleThemeButtons: visibleThemeButtons.length,
+                    mobileThemeCycle:
+                      visibleThemeButtons.length === 1 &&
+                      visibleThemeButtons[0]?.hasAttribute("data-theme-cycle-mobile") &&
+                      visibleThemeButtons[0].getBoundingClientRect().width >= 44 &&
+                      visibleThemeButtons[0].getBoundingClientRect().height >= 44 &&
+                      Boolean(visibleThemeButtons[0].querySelector("svg")),
                     collisions,
                   };
                 },
@@ -197,11 +192,11 @@ describe("account menu responsive layout", () => {
               const scenario = `${width}px / ${theme} / ${displayName}`;
               expect(geometry.text, scenario).toBe(displayName.split(" ")[0]);
               expect(geometry.display, scenario).not.toBe("none");
-              expect(geometry.textOverflow, scenario).not.toBe("ellipsis");
-              expect(geometry.labelWidth, scenario).toBeGreaterThan(0);
-              expect(geometry.withinButton, scenario).toBe(true);
-              expect(geometry.textFits, scenario).toBe(true);
-              if (width >= 1280) expect(geometry.textLines, scenario).toBeLessThanOrEqual(2.01);
+              expect(geometry.position, scenario).toBe("absolute");
+              expect(geometry.overflow, scenario).toBe("hidden");
+              expect(geometry.labelWidth, scenario).toBeLessThanOrEqual(1);
+              expect(geometry.labelHeight, scenario).toBeLessThanOrEqual(1);
+              expect(geometry.avatarVisible, scenario).toBe(true);
               expect(geometry.noPageOverflow, scenario).toBe(true);
               expect(geometry.touchHeight, scenario).toBeGreaterThanOrEqual(44);
               expect(geometry.controlCount, scenario).toBeGreaterThanOrEqual(7);
@@ -218,7 +213,12 @@ describe("account menu responsive layout", () => {
                   (element as HTMLElement).style.paddingBottom = "";
                 });
               }
-              if (width <= 600) expect(geometry.mobileThemeIcons, scenario).toBe(true);
+              if (width <= 600) {
+                expect(geometry.visibleThemeButtons, scenario).toBe(1);
+                expect(geometry.mobileThemeCycle, scenario).toBe(true);
+              } else {
+                expect(geometry.visibleThemeButtons, scenario).toBe(3);
+              }
               if (width >= 1181 && displayName.startsWith("Alexandriana")) {
                 for (const family of ["system-ui", "Verdana, sans-serif"]) {
                   await page.locator("body").evaluate((body, font) => {

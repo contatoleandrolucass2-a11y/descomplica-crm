@@ -33,6 +33,16 @@ const fieldSteps = {
 type FieldName = keyof typeof fieldSteps;
 type FormValues = Record<FieldName, string>;
 
+const EMPTY_FORM_VALUES: FormValues = {
+  businessUnit: "",
+  modality: "",
+  firstProperty: "",
+  salePrice: "",
+  appraisalValue: "",
+  financing: "",
+  income: "",
+};
+
 function numeric(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -158,15 +168,7 @@ export function DocumentationCalculator({
   baseDate: string;
   showHeroHeading?: boolean;
 }) {
-  const [values, setValues] = useState<FormValues>({
-    businessUnit: "",
-    modality: "",
-    firstProperty: "",
-    salePrice: "",
-    appraisalValue: "",
-    financing: "",
-    income: "",
-  });
+  const [values, setValues] = useState<FormValues>(() => ({ ...EMPTY_FORM_VALUES }));
   const [submitted, setSubmitted] = useState(false);
   const [unlockedStep, setUnlockedStep] = useState(0);
   const result = useMemo(
@@ -234,6 +236,11 @@ export function DocumentationCalculator({
       setUnlockedStep((step) => Math.max(step, fieldSteps[field]));
     setValues((current) => ({ ...current, [field]: value }));
     setSubmitted(false);
+  }
+  function resetForm() {
+    setValues({ ...EMPTY_FORM_VALUES });
+    setSubmitted(false);
+    setUnlockedStep(0);
   }
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -516,7 +523,23 @@ export function DocumentationCalculator({
                 }
               />
             </div>
-            <div className="documentation-values-actions">
+          </section>
+          <div className="documentation-canvas-action-bar">
+            <p>
+              <strong>Preenchimento disponível</strong>
+              <span>Cálculo local; valide o resultado no fluxo oficial.</span>
+            </p>
+            <div className="documentation-canvas-actions">
+              <button type="button" className="documentation-secondary-action" onClick={resetForm}>
+                Limpar
+              </button>
+              <button
+                type="button"
+                className="documentation-secondary-action"
+                onClick={() => window.print()}
+              >
+                Imprimir estrutura
+              </button>
               <button
                 className="goal-save-button documentation-hero-submit documentation-values-submit"
                 type="submit"
@@ -532,7 +555,7 @@ export function DocumentationCalculator({
                 </span>
               </button>
             </div>
-          </section>
+          </div>
           {submitted && (
             <section
               className="goal-panel documentation-result-panel calculated"

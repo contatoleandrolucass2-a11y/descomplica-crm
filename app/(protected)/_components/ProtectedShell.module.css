@@ -96,9 +96,9 @@
   display: grid;
   width: 100%;
   min-height: 57px;
-  grid-template-columns: auto minmax(max-content, 1fr) max-content minmax(44px, max-content);
+  grid-template-columns: auto minmax(0, 1fr) max-content max-content;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
   box-sizing: border-box;
   padding: 1px 24px;
 }
@@ -184,7 +184,7 @@
 
 .navigationLink[aria-current="page"],
 .navigationTrigger[data-active="true"] {
-  background: var(--header-active);
+  background: color-mix(in srgb, var(--header-active) 48%, transparent);
   color: var(--header-accent);
   box-shadow: inset 0 -2px 0 var(--header-accent);
 }
@@ -385,18 +385,19 @@
 }
 
 .accountTrigger {
+  position: relative;
   display: inline-flex;
   min-width: 44px;
-  max-width: min(20rem, 22vw, 100%);
+  max-width: 64px;
   min-height: 44px;
   align-items: center;
   justify-content: flex-start;
   gap: 7px;
   box-sizing: border-box;
-  border: 1px solid var(--header-line);
+  border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
-  padding: 5px 8px 5px 5px;
+  padding: 4px;
   color: var(--header-text);
   font: inherit;
   cursor: pointer;
@@ -419,13 +420,14 @@
 }
 
 .accountTriggerIdentity {
-  min-width: 0;
-  color: var(--header-text);
-  font-size: 12px;
-  font-weight: 650;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-  white-space: normal;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .accountChevron {
@@ -561,6 +563,10 @@
   gap: 2px;
 }
 
+.mobileThemeCycle {
+  display: none;
+}
+
 .themeOption {
   display: inline-flex;
   min-width: 0;
@@ -694,13 +700,13 @@
   }
 
   .accountTrigger {
-    max-width: min(clamp(8rem, calc(100vw - 1050px), 20rem), 100%);
+    max-width: 64px;
   }
 }
 
 @media (max-width: 1180px) {
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 44px auto minmax(0, max-content);
+    grid-template-columns: minmax(0, 1fr) 44px auto 44px;
     gap: 12px;
     padding-inline: 20px;
   }
@@ -817,7 +823,7 @@
   }
 
   .accountTrigger {
-    max-width: min(10rem, 40vw);
+    max-width: 44px;
   }
 
   .accountAvatar {
@@ -842,7 +848,7 @@
 
 @media (max-width: 600px) {
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 136px minmax(44px, max-content) 44px;
+    grid-template-columns: minmax(0, 1fr) 44px 44px 44px;
     gap: 5px;
     padding-inline: 12px;
   }
@@ -859,13 +865,16 @@
   }
 
   .accountTrigger {
-    max-width: min(8rem, 25vw);
-    padding-left: 8px;
+    max-width: 44px;
+    padding: 4px;
   }
 
-  .accountAvatar,
   .accountChevron {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 
   .themeSwitch {
@@ -874,9 +883,26 @@
   }
 
   .themeOptions {
+    display: none;
+  }
+
+  .mobileThemeCycle {
     display: grid;
-    grid-template-columns: repeat(3, 44px);
-    gap: 2px;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--header-text);
+    cursor: pointer;
+  }
+
+  .mobileThemeCycle:hover,
+  .mobileThemeCycle:focus-visible {
+    border-color: var(--header-accent);
+    background: var(--header-active);
+    color: var(--header-accent);
   }
 
   .themeOption {
@@ -905,7 +931,7 @@
 
 @media (max-width: 340px) {
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 136px minmax(44px, max-content) 44px;
+    grid-template-columns: minmax(0, 1fr) 44px 44px 44px;
     gap: 2px;
     padding-inline: 4px;
   }
@@ -926,10 +952,6 @@
   .menuDisabled small {
     grid-column: 2;
     justify-self: start;
-  }
-
-  .themeOptions {
-    grid-template-columns: repeat(3, 44px);
   }
 
   .brandName {

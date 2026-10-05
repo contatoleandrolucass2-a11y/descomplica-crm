@@ -3464,3 +3464,23 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   build e matriz autenticada com 119 checks responsivos, 68 de tema, 160 de
   acessibilidade/comparação visual e 85 de zoom. A rota passou em 375×812,
   768×1024, 1024×768 e 1440×900, inclusive tema escuro e contraste AA.
+
+# 2026-10-05 — correção integral da paridade com os canvases
+
+- Causa confirmada: o gate anterior comparava a aplicação somente contra uma
+  baseline gerada pela própria aplicação. Por isso, validou regressão interna,
+  mas não comprovou correspondência com as imagens aprovadas pelo usuário.
+- As 22 rotas protegidas foram recompostas a partir das 11 pranchas versionadas
+  em `docs/qa/canvas-parity/reference/`, com uma única navbar global, densidade
+  navy/cyan e estados sem dados fictícios.
+- Autenticação, RBAC, guards, APIs, RLS, integrações, motores e banco não foram
+  alterados. A tela CAIXA permanece acessível somente pelo guard existente e
+  com cálculo bloqueado.
+- O QA autenticado agora compara cada rota diretamente com a metade correta do
+  canvas externo, além de manter sete larguras, três temas, zoom, teclado,
+  reduced-motion, Axe, console e overflow.
+- Resultado inicial: formato, lint e typecheck aprovados. A suíte funcional
+  passou 1.951 testes e 4 skips; a única falha esperada exige a regeneração da
+  evidência autenticada antiga (209 capturas) para a nova matriz (242
+  capturas). Os resultados finais, CI, PR e publicação serão registrados após
+  o gate visual real.

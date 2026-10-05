@@ -20,9 +20,8 @@ export default async function AdminHomePage() {
   return (
     <ManagementPage className="admin-canvas admin-home-page">
       <ManagementPageHeader
-        eyebrow="Governança"
         title="Área administrativa"
-        description="Gestão centralizada de acesso e navegação, limitada às permissões efetivas da sessão."
+        description="Gestão centralizada de acesso e navegação."
         status={<ManagementStatusBadge>Acesso administrativo</ManagementStatusBadge>}
       />
 
@@ -40,17 +39,15 @@ export default async function AdminHomePage() {
               <span className={managementStyles.iconFrame} aria-hidden="true">
                 <UsersRound />
               </span>
-              <span className="min-w-0 flex-1">
+              <span className="admin-home-card-copy min-w-0 flex-1">
                 <strong className="block text-lg text-[var(--analytics-ink)]">
                   Usuários e acessos
                 </strong>
                 <span className="mt-1 block text-sm leading-6 text-[var(--analytics-muted)]">
                   Atribua papéis e configure exceções de permissão auditadas.
                 </span>
-                <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--analytics-cyan-strong)]">
-                  Abrir gestão <ArrowRight aria-hidden="true" className="size-4" />
-                </span>
               </span>
+              <ArrowRight aria-hidden="true" className="admin-home-card-arrow size-5" />
             </Link>
           ) : null}
           {hasPermission(context, "pages.manage") ? (
@@ -62,17 +59,15 @@ export default async function AdminHomePage() {
               <span className={managementStyles.iconFrame} aria-hidden="true">
                 <PanelsTopLeft />
               </span>
-              <span className="min-w-0 flex-1">
+              <span className="admin-home-card-copy min-w-0 flex-1">
                 <strong className="block text-lg text-[var(--analytics-ink)]">
                   Catálogo de páginas
                 </strong>
                 <span className="mt-1 block text-sm leading-6 text-[var(--analytics-muted)]">
                   Controle quais superfícies aparecem na navegação autorizada.
                 </span>
-                <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[var(--analytics-cyan-strong)]">
-                  Abrir catálogo <ArrowRight aria-hidden="true" className="size-4" />
-                </span>
               </span>
+              <ArrowRight aria-hidden="true" className="admin-home-card-arrow size-5" />
             </Link>
           ) : null}
         </div>

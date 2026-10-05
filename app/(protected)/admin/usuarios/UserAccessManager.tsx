@@ -1,10 +1,14 @@
 "use client";
 
 import {
+  CircleX,
+  Clock3,
   ChevronLeft,
   ChevronRight,
+  Download,
+  Filter,
+  KeyRound,
   Search,
-  ShieldCheck,
   UserCheck,
   UsersRound,
 } from "lucide-react";
@@ -475,46 +479,48 @@ function UserRow({
   reportingScopes,
 }: UserAccessManagerProps & { user: ManagedUser }) {
   const inherited = user.roleKey ? ROLE_INHERITED_PERMISSIONS[user.roleKey] : [];
+  const effectivePermissions = new Set<PermissionKey>(inherited);
+  for (const override of user.overrides) {
+    if (override.effect === "allow") effectivePermissions.add(override.permissionKey);
+    else effectivePermissions.delete(override.permissionKey);
+  }
   const hasControls =
     user.isManageable && (canManageRoles || canManagePermissions || canManageUsers);
 
   return (
-    <article className={`${managementStyles.panel} overflow-hidden`}>
+    <article className={`${managementStyles.panel} admin-user-row overflow-hidden`}>
       <details>
-        <summary className="grid min-h-14 cursor-pointer list-none gap-2 px-4 py-3 marker:hidden sm:grid-cols-[minmax(14rem,1.4fr)_minmax(8rem,0.7fr)_minmax(8rem,0.7fr)_auto] sm:items-center">
-          <div className="min-w-0">
-            <h2 className="truncate font-semibold text-[var(--analytics-ink)]">
-              {user.email ?? "E-mail não informado"}
-            </h2>
+        <summary className="admin-user-row-summary cursor-pointer list-none marker:hidden">
+          <div className="admin-user-identity">
+            <span className="admin-user-avatar" aria-hidden="true">
+              {(user.email?.trim().charAt(0) || "?").toLocaleUpperCase("pt-BR")}
+            </span>
+            <strong>{user.isSelf ? "Conta atual" : "Usuário cadastrado"}</strong>
           </div>
-          <p className="text-sm text-[var(--analytics-ink)]">
+          <p className="admin-user-email">{user.email ?? "E-mail não informado"}</p>
+          <p className="admin-user-role">
             {user.roleKey ? getRoleLabel(user.roleKey) : "Sem papel"}
-            {user.isSelf ? " · Sua conta" : ""}
           </p>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+          <p className="admin-user-permissions">
+            {effectivePermissions.size}{" "}
+            {effectivePermissions.size === 1 ? "permissão" : "permissões"}
+          </p>
+          <div className="admin-user-status">
             <span
               className={managementStyles.statusPill}
-              data-state={user.isActive ? "active" : "inactive"}
+              data-state={!user.isActive ? "inactive" : user.accessStatus}
             >
-              {user.isActive ? "Ativo" : "Inativo"}
-            </span>
-            <span className={managementStyles.statusPill} data-state={user.accessStatus}>
-              {user.accessStatus === "pending"
-                ? "Aguardando aprovação"
-                : user.accessStatus === "approved"
-                  ? "Acesso aprovado"
-                  : user.accessStatus === "suspended"
-                    ? "Acesso suspenso"
-                    : "Legado em revisão"}
+              {!user.isActive || user.accessStatus === "suspended"
+                ? "Revogado"
+                : user.accessStatus === "pending"
+                  ? "Pendente"
+                  : user.accessStatus === "approved"
+                    ? "Ativo"
+                    : "Em revisão"}
             </span>
           </div>
-          <div className="flex items-center justify-end gap-2">
-            <span className={managementStyles.statusPill}>
-              {user.overrides.length} {user.overrides.length === 1 ? "exceção" : "exceções"}
-            </span>
-            <span aria-hidden="true" className="text-lg text-[var(--analytics-muted)]">
-              ▾
-            </span>
+          <div className="admin-user-actions">
+            <span aria-hidden="true">•••</span>
           </div>
         </summary>
 
@@ -698,41 +704,48 @@ export function UserAccessManager(props: UserAccessManagerProps) {
               />
             </span>
           </label>
-          <label className={managementStyles.selectLabel}>
-            Status
-            <select
-              value={status}
-              onChange={(event) => {
-                setStatus(event.target.value as typeof status);
-                resetPage();
-              }}
-              className={managementStyles.select}
-            >
-              <option value="all">Todos</option>
-              <option value="active">Ativos</option>
-              <option value="inactive">Inativos</option>
-              <option value="pending">Aguardando aprovação</option>
-            </select>
-          </label>
-          <label className={managementStyles.selectLabel}>
-            Papel
-            <select
-              value={role}
-              onChange={(event) => {
-                setRole(event.target.value as typeof role);
-                resetPage();
-              }}
-              className={managementStyles.select}
-            >
-              <option value="all">Todos</option>
-              <option value="unassigned">Sem papel</option>
-              {roleOptions.map((roleKey) => (
-                <option key={roleKey} value={roleKey}>
-                  {getRoleLabel(roleKey)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <details className="admin-users-filter-disclosure">
+            <summary className={managementStyles.button}>
+              <Filter aria-hidden="true" className="size-4" /> Mais filtros
+            </summary>
+            <div className="admin-users-filter-panel">
+              <label className={managementStyles.selectLabel}>
+                Status
+                <select
+                  value={status}
+                  onChange={(event) => {
+                    setStatus(event.target.value as typeof status);
+                    resetPage();
+                  }}
+                  className={managementStyles.select}
+                >
+                  <option value="all">Todos</option>
+                  <option value="active">Ativos</option>
+                  <option value="inactive">Inativos</option>
+                  <option value="pending">Aguardando aprovação</option>
+                </select>
+              </label>
+              <label className={managementStyles.selectLabel}>
+                Papel
+                <select
+                  value={role}
+                  onChange={(event) => {
+                    setRole(event.target.value as typeof role);
+                    resetPage();
+                  }}
+                  className={managementStyles.select}
+                >
+                  <option value="all">Todos</option>
+                  <option value="unassigned">Sem papel</option>
+                  {roleOptions.map((roleKey) => (
+                    <option key={roleKey} value={roleKey}>
+                      {getRoleLabel(roleKey)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </details>
         </div>
       </section>
 
@@ -760,7 +773,7 @@ export function UserAccessManager(props: UserAccessManagerProps) {
         </article>
         <article className={managementStyles.summaryCard}>
           <span className={managementStyles.iconFrame} aria-hidden="true">
-            <ShieldCheck />
+            <Clock3 />
           </span>
           <div>
             <span className={managementStyles.summaryLabel}>Aguardando aprovação</span>
@@ -769,7 +782,7 @@ export function UserAccessManager(props: UserAccessManagerProps) {
         </article>
         <article className={managementStyles.summaryCard}>
           <span className={managementStyles.iconFrame} aria-hidden="true">
-            <ShieldCheck />
+            <CircleX />
           </span>
           <div>
             <span className={managementStyles.summaryLabel}>Acessos revogados</span>
@@ -778,41 +791,49 @@ export function UserAccessManager(props: UserAccessManagerProps) {
         </article>
       </section>
 
-      <section
-        className={`${managementStyles.panel} ${managementStyles.panelPadded} admin-users-results`}
-      >
-        <div className={managementStyles.sectionHeader}>
-          <div>
-            <p className={managementStyles.sectionKicker}>Controle de acesso</p>
-            <h2 className={managementStyles.sectionTitle}>Usuários cadastrados</h2>
+      <section className={`${managementStyles.panel} admin-users-results`}>
+        <div className="admin-users-results-header">
+          <div className="admin-results-title">
+            <span className={managementStyles.iconFrame} aria-hidden="true">
+              <KeyRound />
+            </span>
+            <div>
+              <h2 className={managementStyles.sectionTitle}>Usuários</h2>
+              <p className={managementStyles.sectionDescription}>
+                Lista de usuários e seus acessos
+              </p>
+            </div>
           </div>
-          <p className={managementStyles.muted} aria-live="polite">
-            {users.length} {users.length === 1 ? "usuário encontrado" : "usuários encontrados"}
-          </p>
+          <div className="admin-results-actions">
+            <button type="button" className={managementStyles.button} disabled>
+              <Download aria-hidden="true" className="size-4" /> Exportar
+            </button>
+            <span className={managementStyles.button}>{PAGE_SIZE} por página</span>
+          </div>
         </div>
 
-        <div className="mt-3 grid gap-2" data-qa-visual-volatile="user-results">
-          <div className="hidden grid-cols-[minmax(14rem,1.4fr)_minmax(8rem,0.7fr)_minmax(8rem,0.7fr)_auto] gap-2 px-4 text-xs font-semibold tracking-wide text-[var(--analytics-cyan-strong)] uppercase sm:grid">
-            <span>Usuário</span>
-            <span>Papel</span>
-            <span>Status</span>
-            <span>Ações</span>
-          </div>
+        <div className="admin-users-table-head" aria-hidden="true">
+          <span>Usuário</span>
+          <span>E-mail</span>
+          <span>Papel</span>
+          <span>Permissões</span>
+          <span>Status</span>
+          <span>Ações</span>
+        </div>
+        <div className="admin-users-rows" data-qa-visual-volatile="user-results">
           {visibleUsers.length > 0 ? (
             visibleUsers.map((user) => <UserRow key={user.userId} user={user} {...props} />)
           ) : (
-            <p className={`${managementStyles.emptyState} ${managementStyles.panel}`}>
-              Nenhum usuário corresponde à busca.
-            </p>
+            <p className={managementStyles.emptyState}>Nenhum usuário corresponde à busca.</p>
           )}
         </div>
 
-        <div className={`mt-3 ${managementStyles.pagination}`}>
-          <span>
+        <div className={`admin-users-pagination ${managementStyles.pagination}`}>
+          <p aria-live="polite">
             {users.length
-              ? `${pageStart + 1}–${Math.min(pageStart + PAGE_SIZE, users.length)} de ${users.length}`
-              : "0 resultados"}
-          </span>
+              ? `Mostrando ${pageStart + 1}–${Math.min(pageStart + PAGE_SIZE, users.length)} de ${users.length} usuários`
+              : "0 usuários"}
+          </p>
           <div className={managementStyles.paginationControls}>
             <button
               type="button"

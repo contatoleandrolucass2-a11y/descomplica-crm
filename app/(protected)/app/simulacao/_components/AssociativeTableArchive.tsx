@@ -1,8 +1,4 @@
-import {
-  InvestorCalculator,
-  InvestorGuideLauncher,
-  InvestorInfoHint,
-} from "./archive-investor/InvestorCalculator";
+import { InvestorCalculator } from "./archive-investor/InvestorCalculator";
 import { SimulationCanvasHeader } from "./SimulationCanvasHeader";
 import "./archive-investor/investor-archive.css";
 
@@ -18,14 +14,6 @@ export function AssociativeTableArchive() {
           title="Simulador Tabela Associativo"
           description="Consulta de estoque e composição do fluxo linear para apoio à proposta."
           statusLabel="Estoque · fonte identificada"
-          titleAccessory={
-            <InvestorInfoHint
-              label="Tabela Associativo"
-              title="Tabela Associativo"
-              description="Fluxo linear com sinais, anuais, mensais pré e pós-obra e parcela corrigida."
-            />
-          }
-          actions={<InvestorGuideLauncher compact />}
         />
         <InvestorCalculator directTable={false} directVisualLayout />
         <div className="investor-page-closing">
