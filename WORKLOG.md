@@ -2,6 +2,10 @@
 
 ## 2026-10-04 - Associativo: cadencia e sequencias visuais
 
+- CI `37249431505` excedeu 360s no mesmo E2E de navegacao entre simuladores
+  em duas tentativas. Sem assumir flakiness: preservar a falha original na
+  limpeza do contexto e limitar acoes a 15s/navegacoes a 45s para diagnostico.
+  Nenhum timeout ampliado, assert removido ou publicacao liberada.
 - A CI `37245218837` aprovou validacao Linux, banco e restauracao, mas revelou
   menu cortado em 320px com nome longo. Menus agora descontam a altura real
   do pai posicionado, sem altura fixa ou observador JavaScript. Regressao

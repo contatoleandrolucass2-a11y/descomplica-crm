@@ -108,3 +108,11 @@ as 126 geometrias e os oito casos de menus com ultimo item dentro da tela.
 Pendente de nova CI apos correcao. Aplicar o runbook automatic-publication:
 PR, imagem imutavel, backup, compare-and-swap, rollback e conferencia posterior.
 Nenhum dado oficial ausente na origem e preenchido por esta mudanca visual.
+
+CI `37249431505`, tentativas 1 e 2: codigo, banco, restauracao e build passaram,
+mas o E2E de paginas de simuladores excedeu 360s. A matriz visual nao executou.
+O erro de context.close ocultava a operacao inicial. O diagnostico agora preserva
+esse erro e usa limites por acao de 15s e navegacao de 45s, sem aumentar limites.
+Teste local com componentes, fonte real e CSS dos simuladores aprovou geometria,
+cliques de temas e menu em 1181/1280/1440/1920px; nao reproduziu o E2E completo.
+Publicacao continua bloqueada; causa do timeout ainda nao determinada.
