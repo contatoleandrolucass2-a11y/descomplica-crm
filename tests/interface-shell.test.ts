@@ -44,6 +44,13 @@ describe("protected interface shell", () => {
       ),
       "utf8",
     );
+    const simulatorCanvasStylesheet = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
 
     expect(stylesheet).toContain(":root {");
     expect(stylesheet).toContain(':root[data-theme="balanced"]');
@@ -109,6 +116,12 @@ describe("protected interface shell", () => {
     );
     expect(investorStylesheet).toMatch(
       /\.documentation-values-panel \.documentation-money-field > \.documentation-money-heading \.documentation-money-heading-meta small \{[\s\S]*overflow-wrap:anywhere;[\s\S]*white-space:normal/,
+    );
+    expect(simulatorCanvasStylesheet).toMatch(
+      /\.simulation-canvas-status \{[\s\S]*?color: var\(--canvas-text\)/,
+    );
+    expect(simulatorCanvasStylesheet).toMatch(
+      /\.simulation-canvas-status svg \{[\s\S]*?color: var\(--canvas-accent\)/,
     );
   });
 });

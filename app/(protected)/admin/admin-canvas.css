@@ -77,8 +77,28 @@
 .admin-users-content,
 .admin-pages-content {
   display: grid;
+  width: 100%;
   min-width: 0;
+  max-width: 100%;
+  align-content: start;
   gap: 0.75rem;
+}
+
+.admin-pages-page,
+.admin-pages-page > div,
+.admin-pages-results,
+.admin-pages-results [class*="tableRegion"] {
+  width: 100%;
+  max-width: 100%;
+}
+
+.admin-pages-page {
+  overflow-x: hidden;
+}
+
+.admin-pages-content,
+.admin-pages-results {
+  contain: inline-size;
 }
 
 .admin-users-toolbar,
@@ -350,13 +370,20 @@
     flex-wrap: wrap;
   }
 
-  .admin-users-results,
+  .admin-users-results {
+    overflow-x: auto;
+  }
+
   .admin-pages-results {
+    overflow: hidden;
+  }
+
+  .admin-pages-results [class*="tableRegion"] {
     overflow-x: auto;
   }
 }
 
-@media (max-width: 48rem) {
+@media (max-width: 60rem) {
   .admin-canvas {
     padding: 0.7rem 0.75rem 1.5rem;
   }
@@ -406,5 +433,68 @@
   .admin-results-actions > *,
   .admin-pages-results-header > button {
     width: 100%;
+  }
+
+  .admin-pages-results [class*="tableRegion"] {
+    overflow: visible;
+  }
+
+  .admin-pages-results table {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-pages-results thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .admin-pages-results tbody {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.65rem;
+  }
+
+  .admin-pages-results tbody tr {
+    display: grid;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--analytics-line);
+    border-radius: 0.65rem;
+    background: var(--analytics-surface);
+  }
+
+  .admin-pages-results tbody :is(th, td) {
+    display: grid;
+    min-width: 0 !important;
+    grid-template-columns: minmax(5.75rem, 0.36fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 0.75rem;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-pages-results tbody :is(th, td)::before {
+    color: var(--analytics-cyan-strong);
+    content: attr(data-label);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .admin-pages-results tbody td:last-child {
+    border-bottom: 0;
+  }
+
+  .admin-pages-results .admin-page-action {
+    width: 44px;
+    min-width: 44px;
   }
 }

@@ -75,7 +75,7 @@
   border-radius: 9px;
   background: color-mix(in srgb, var(--canvas-accent) 7%, transparent);
   padding: 8px 13px;
-  color: var(--canvas-accent);
+  color: var(--canvas-text);
   font-size: 0.68rem;
   font-weight: 900;
   letter-spacing: 0.055em;
@@ -91,6 +91,7 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.7;
+  color: var(--canvas-accent);
 }
 
 .simulation-canvas-status-blocked {

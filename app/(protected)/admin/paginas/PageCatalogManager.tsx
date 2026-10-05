@@ -147,17 +147,19 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
 
                   return (
                     <tr key={page.key}>
-                      <th scope="row" className="min-w-64 text-left">
+                      <th scope="row" data-label="Página" className="min-w-64 text-left">
                         <strong className="block">{page.name}</strong>
                       </th>
-                      <td className="min-w-72">
+                      <td data-label="Descrição" className="min-w-72">
                         <span className="block">{page.description}</span>
                         <span className="mt-0.5 block text-[var(--analytics-muted)]">
                           {getPermissionLabel(page.permissionKey)} · {page.section}
                         </span>
                       </td>
-                      <td className="min-w-52 font-mono">{page.path}</td>
-                      <td>
+                      <td data-label="Rota" className="min-w-52 font-mono">
+                        {page.path}
+                      </td>
+                      <td data-label="Status">
                         <span
                           className={managementStyles.statusPill}
                           data-state={page.isActive ? "active" : "inactive"}
@@ -165,7 +167,7 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
                           {page.isActive ? "Ativa" : "Inativa"}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Ações">
                         <details className={managementStyles.disclosure}>
                           <summary
                             className={`${managementStyles.button} admin-page-action whitespace-nowrap`}
