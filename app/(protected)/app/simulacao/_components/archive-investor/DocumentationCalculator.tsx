@@ -544,6 +544,7 @@ export function DocumentationCalculator({
                 className="goal-save-button documentation-hero-submit documentation-values-submit"
                 type="submit"
                 form="documentation-calculator-form"
+                aria-label={`Calcular documentação Data da simulação: ${formatDate(baseDate)}`}
                 disabled={!profileComplete || !financialComplete}
               >
                 <span aria-hidden="true">
