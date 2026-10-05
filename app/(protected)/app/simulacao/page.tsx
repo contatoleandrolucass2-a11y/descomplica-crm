@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
 
-import { DataState, SectionHeading } from "@/app/(protected)/app/_components/analytics";
+import { DataState } from "@/app/(protected)/app/_components/analytics";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 import { SIMULATOR_LIST } from "@/lib/crm/simulators/catalog";
@@ -96,6 +96,7 @@ export default async function SimulationHubPage() {
         <SimulationCanvasHeader
           eyebrow="Ferramentas comerciais"
           title="Hub de Simulação"
+          subtitle="Ferramentas comerciais em um só lugar"
           description="Acesse os simuladores para preparar propostas, validar cenários e apoiar a operação com informações das fontes identificadas e regras vigentes."
           statusLabel={authorizedJourneyLabel}
           statusTone={wf13Enabled ? "canary" : "default"}
@@ -142,33 +143,6 @@ export default async function SimulationHubPage() {
                 </article>
               );
             })}
-          </div>
-        </section>
-
-        <section aria-labelledby="simulation-process-title">
-          <SectionHeading
-            id="simulation-process-title"
-            kicker="Fluxo seguro"
-            title="Da entrada ao resultado validado"
-          />
-          <div className={styles.processGrid}>
-            <article className={styles.processCard}>
-              <span>01</span>
-              <strong>Preencha a proposta</strong>
-              <small>Campos organizados para conferir as informações da proposta.</small>
-            </article>
-            <article className={styles.processCard}>
-              <span>02</span>
-              <strong>Aguarde regra oficial</strong>
-              <small>Motores não executam fórmulas importadas ou valores demonstrativos.</small>
-            </article>
-            <article className={styles.processCard}>
-              <span>03</span>
-              <strong>Conecte fonte validada</strong>
-              <small>
-                Resultados só serão liberados em incremento próprio, com contrato e testes.
-              </small>
-            </article>
           </div>
         </section>
       </div>

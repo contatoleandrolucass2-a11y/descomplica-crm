@@ -1,17 +1,13 @@
 .page {
   min-height: calc(100vh - 5rem);
-  padding: 1.25rem 1.35rem 3rem;
-  background-image:
-    linear-gradient(var(--analytics-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--analytics-line) 1px, transparent 1px);
-  background-size: 3rem 3rem;
-  background-position: -1px -1px;
+  padding: 0.75rem 1.25rem 2rem;
+  background: var(--analytics-page);
 }
 
 .container {
   display: grid;
   width: min(100%, 96rem);
-  gap: 1rem;
+  gap: 0.75rem;
   margin-inline: auto;
 }
 
@@ -751,12 +747,12 @@
 .hubCard {
   position: relative;
   display: grid;
-  min-height: 9.15rem;
+  min-height: 7.25rem;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: start;
   gap: 0.9rem;
   border-radius: 0.85rem;
-  padding: 1rem;
+  padding: 0.8rem;
   color: var(--analytics-ink);
   text-decoration: none;
   box-shadow: none;
@@ -779,20 +775,20 @@
 }
 
 .hubCard h2 {
-  font-size: 0.98rem;
+  font-size: 0.88rem;
 }
 
 .hubCard p {
   max-width: 34rem;
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
   color: var(--analytics-muted);
-  font-size: 0.8rem;
-  line-height: 1.45;
+  font-size: 0.74rem;
+  line-height: 1.4;
 }
 
 .hubCode {
   display: inline-flex;
-  margin-top: 0.65rem;
+  margin-top: 0.45rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--analytics-cyan) 13%, var(--analytics-surface));
   padding: 0.35rem 0.65rem;
@@ -804,7 +800,7 @@
 
 .hubBlocked {
   display: inline-flex;
-  margin-top: 0.65rem;
+  margin-top: 0.45rem;
   margin-left: 0.45rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--analytics-muted) 12%, var(--analytics-surface));
@@ -821,14 +817,7 @@
 }
 
 .caixaPage {
-  background-image:
-    radial-gradient(
-      circle at 90% 6%,
-      color-mix(in srgb, var(--analytics-cyan) 8%, transparent),
-      transparent 25rem
-    ),
-    linear-gradient(var(--analytics-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--analytics-line) 1px, transparent 1px);
+  background: var(--analytics-page);
 }
 
 .caixaWorkspace {
@@ -848,7 +837,7 @@
 
 .caixaWorkspace .sectionHeading {
   align-items: center;
-  padding: 0.7rem 1rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .caixaWorkspace .sectionHeading > span {
@@ -857,8 +846,8 @@
 }
 
 .caixaWorkspace .fieldGrid {
-  gap: 0.65rem 1rem;
-  padding: 0.75rem 1rem;
+  gap: 0.4rem 0.75rem;
+  padding: 0.55rem 0.75rem;
 }
 
 .caixaWorkspace .field select,
@@ -868,8 +857,18 @@
   border-radius: 0.55rem;
 }
 
+.caixaWorkspace .field {
+  gap: 0.2rem;
+  font-size: 0.72rem;
+}
+
+.caixaWorkspace .field small {
+  font-size: 0.62rem;
+  line-height: 1.25;
+}
+
 .caixaActionBar {
-  padding: 0.75rem 1rem;
+  padding: 0.55rem 0.75rem;
 }
 
 .caixaActionBar .enabledAction {
@@ -887,7 +886,7 @@
 }
 
 .caixaResults {
-  position: static;
+  display: none;
 }
 
 .processGrid {

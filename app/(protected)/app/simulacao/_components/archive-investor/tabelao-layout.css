@@ -201,7 +201,9 @@
       .investor-info-hint,
       .investor-stock-filters,
       .investor-guided-tour,
-      .investor-tour-spotlight
+      .investor-tour-spotlight,
+      .simulation-canvas-status,
+      .simulation-canvas-actions
     ) {
     display: none !important;
   }

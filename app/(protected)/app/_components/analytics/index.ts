@@ -1,5 +1,6 @@
 export { FunnelChart, Gauge, type FunnelStage, type ChartAccent } from "./Charts";
 export {
+  AnalyticsCanvas,
   AnalyticsCard,
   AnalyticsTable,
   CommercialSourceLabel,

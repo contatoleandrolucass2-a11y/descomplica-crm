@@ -1,5 +1,4 @@
-import { Activity, CalendarClock, CircleGauge, SlidersHorizontal, Trophy } from "lucide-react";
-import Link from "next/link";
+import { Activity, CalendarClock, CircleGauge, SlidersHorizontal } from "lucide-react";
 
 import {
   ManagementPage,
@@ -9,11 +8,11 @@ import {
 } from "@/app/(protected)/_components/ManagementCanvas";
 import { loadPointSettingsDraft } from "@/lib/crm/commercial-engine/draft-data";
 import { pointDraftValues } from "@/lib/crm/commercial-engine/drafts";
-import { GOAL_PROFILES } from "@/lib/crm/goals/catalog";
 import { POINT_METRICS } from "@/lib/crm/points/catalog";
 import { loadPointSettings } from "@/lib/crm/points/data";
 
 import { ConfigurationDraftForm } from "../../_components/ConfigurationDraftForm";
+import styles from "../../../ConfigurationCanvas.module.css";
 import { preparePointSettingsDraftAction } from "../actions";
 
 export async function PointSettingsPage({
@@ -49,7 +48,7 @@ export async function PointSettingsPage({
     : "Base legada: somente leitura · Rascunho atual: indisponível";
 
   return (
-    <ManagementPage>
+    <ManagementPage className={styles.canvas ?? ""}>
       <ManagementPageHeader
         eyebrow="Regras do ranking"
         title="Metas de pontos"
@@ -67,46 +66,10 @@ export async function PointSettingsPage({
         }
       />
 
-      <section className={`${managementStyles.panel} ${managementStyles.panelPadded}`}>
-        <div className={managementStyles.sectionHeader}>
-          <div>
-            <p className={managementStyles.sectionKicker}>Configurações comerciais</p>
-            <h2 className={managementStyles.sectionTitle}>Escolha o tipo de meta</h2>
-          </div>
-          <span className={managementStyles.muted}>{accessState}</span>
-        </div>
-        <nav aria-label="Tipo de meta" className="mt-3 grid gap-2 md:grid-cols-4">
-          {Object.values(GOAL_PROFILES).map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              prefetch={false}
-              className={`${managementStyles.button} min-h-14 justify-start`}
-            >
-              <span className="min-w-0 text-left">
-                <strong className="block text-[var(--analytics-ink)]">{item.label}</strong>
-                <span className="block truncate text-xs font-normal text-[var(--analytics-muted)]">
-                  {item.description}
-                </span>
-              </span>
-            </Link>
-          ))}
-          <Link
-            href="/app/configuracoes/metas/pontos"
-            prefetch={false}
-            aria-current="page"
-            className={`${managementStyles.buttonPrimary} min-h-14 justify-start`}
-          >
-            <Trophy aria-hidden="true" className="size-5 shrink-0" />
-            <span className="text-left">
-              <strong className="block">Metas de pontos</strong>
-              <span className="block text-xs font-normal opacity-75">Pontuação comercial</span>
-            </span>
-          </Link>
-        </nav>
-      </section>
-
-      <section aria-label="Resumo da configuração" className={managementStyles.summaryGrid}>
+      <section
+        aria-label={`Resumo da configuração. ${accessState}`}
+        className={`${styles.pointSummary} ${managementStyles.summaryGrid}`}
+      >
         <article className={managementStyles.summaryCard}>
           <span className={managementStyles.iconFrame} aria-hidden="true">
             <Activity />
@@ -179,7 +142,7 @@ export async function PointSettingsPage({
         saveLabel="Salvar rascunho de pontuação"
       >
         <input type="hidden" name="draftRevision" value={draft?.revision ?? 0} />
-        <section className={`${managementStyles.panel} overflow-hidden`}>
+        <section className={`${styles.pointMatrix} ${managementStyles.panel} overflow-hidden`}>
           <div className={`${managementStyles.panelPadded} ${managementStyles.sectionHeader}`}>
             <div>
               <p className={managementStyles.sectionKicker}>Matriz de pontuação</p>

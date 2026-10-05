@@ -14,6 +14,7 @@ function InformationIcon() {
 export function SimulationCanvasHeader({
   eyebrow,
   title,
+  subtitle,
   description,
   statusLabel,
   statusTone = "default",
@@ -22,6 +23,7 @@ export function SimulationCanvasHeader({
 }: {
   eyebrow: string;
   title: string;
+  subtitle?: string;
   description: string;
   statusLabel: string;
   statusTone?: CanvasHeaderTone;
@@ -36,6 +38,7 @@ export function SimulationCanvasHeader({
           <h1>{title}</h1>
           {titleAccessory}
         </div>
+        {subtitle ? <p className="simulation-canvas-subtitle">{subtitle}</p> : null}
         <p className="simulation-canvas-description">{description}</p>
       </div>
       <div className="simulation-canvas-header-aside">

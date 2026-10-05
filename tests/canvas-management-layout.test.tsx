@@ -100,6 +100,25 @@ describe("management canvas layout", () => {
     expect(pageManager).not.toMatch(/Exportar|download/i);
   });
 
+  it("matches the approved administration composition without changing access gates", () => {
+    const admin = source("app/(protected)/admin/page.tsx");
+    const users = source("app/(protected)/admin/usuarios/UserAccessManager.tsx");
+    const pages = source("app/(protected)/admin/paginas/PageCatalogManager.tsx");
+    const styles = source("app/(protected)/admin/admin-canvas.css");
+
+    expect(admin).toContain('className="admin-canvas admin-home-page"');
+    expect(admin).toContain('className="admin-home-grid"');
+    expect(admin).not.toContain("Ferramentas autorizadas");
+    expect(users.indexOf("admin-users-toolbar")).toBeLessThan(users.indexOf("admin-users-summary"));
+    expect(users).toContain("Acessos revogados");
+    expect(pages).toContain("Páginas cadastradas");
+    expect(pages).toContain('<th scope="col">Descrição</th>');
+    expect(pages).toContain('<th scope="col">Rota</th>');
+    expect(styles).toMatch(/\.admin-home-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2/);
+    expect(users).toContain("const PAGE_SIZE = 6");
+    expect(pages).toContain("const PAGE_SIZE = 8");
+  });
+
   it("renders unavailable commercial states without invented rankings or defaults", () => {
     const ranking = source("app/(protected)/app/ranking/page.tsx");
     const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");

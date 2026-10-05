@@ -15,7 +15,7 @@ export default async function PagesAdminPage() {
   const pages = await getManageablePages();
 
   return (
-    <ManagementPage>
+    <ManagementPage className="admin-canvas admin-pages-page">
       <ManagementPageHeader
         eyebrow="Administração"
         title="Catálogo de páginas"
