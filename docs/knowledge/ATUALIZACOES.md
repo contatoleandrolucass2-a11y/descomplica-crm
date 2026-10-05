@@ -4,6 +4,24 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-05: saldo nominal e base financeira do Associativo
+
+- Status: pendente_validacao; fonte: audit de anuais e ajudas de 05/10/2026,
+  codigo archive e pedido do usuario na branch `codex/associativo-saldo-anuais`.
+- `balanceBeforeCorrection` e Pro-Soluto, nao saldo exclusivo das mensais.
+  Ledger nominal usa valores digitados em centavos; motor archive subtrai
+  anuais corrigidas antes de calcular mensais. Nao substituir uma base pela
+  outra nem descontar anuais duas vezes para corrigir um rotulo de interface.
+- Archive e WF13 oficial possuem contratos diferentes; preservar ambos e os
+  oraculos existentes. Esta correcao expositiva nao autoriza mudar politica.
+- 33 testes iniciais e 364 testes da auditoria financeira aprovados; gates
+  globais, QA visual e publicacao ainda pendentes.
+- Validacao local concluida: lint/tipos/build, 81 regressoes finais, 13 testes
+  de brilho, nove etapas React e oito Node aprovados. Windows exige CI Linux
+  para seis testes POSIX; timeout de conhecimento passou isolado (22/22).
+- Keyframes alinhados ainda podem ter pausa invisivel. Medir pixels entre
+  cards detectou quase quatro segundos na versao antiga e 0 ms na correcao.
+
 ## 2026-10-04: Recurso MKT em Configuracoes
 
 - Status: validado; fonte: print do usuario, PR #152 e auditoria de publicacao.

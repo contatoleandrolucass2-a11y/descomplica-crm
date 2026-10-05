@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-05 - Saldo e comunicacao do Associativo
+
+- Desconta as anuais digitadas no campo Saldo parcelado e explica a diferenca
+  para a base de reajuste e o Pro-Soluto, preservando os motores financeiros.
+- Remove os tres rotulos indicados do cabecalho do Associativo.
+- Simplifica ajudas e corrige a passagem do brilho entre os cards documentais.
+
 ## 2026-10-04 - Recurso MKT
 
 - Adiciona Recurso MKT em Configuracoes, no padrao visual da Tabela Associativo.

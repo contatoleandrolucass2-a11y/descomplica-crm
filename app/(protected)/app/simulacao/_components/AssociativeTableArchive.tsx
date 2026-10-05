@@ -14,15 +14,12 @@ export function AssociativeTableArchive() {
     >
       <main className="investor-main">
         <SimulationCanvasHeader
-          eyebrow="Simulação · WF13"
           title="Simulador Tabela Associativo"
-          description="Consulta de estoque e composição do fluxo linear para apoio à proposta."
-          statusLabel="Estoque · fonte identificada"
           titleAccessory={
             <InvestorInfoHint
               label="Tabela Associativo"
               title="Tabela Associativo"
-              description="Fluxo linear com sinais, anuais, mensais pré e pós-obra e parcela corrigida."
+              description="Compare duas formas de pagar à construtora: parcelas iguais ou que diminuem por etapa. Informe entrada, sinais e anuais. Os valores incluem os reajustes da simulação e precisam de confirmação antes da compra."
             />
           }
           actions={<InvestorGuideLauncher compact />}

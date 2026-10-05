@@ -338,6 +338,96 @@ export async function checkAssociativeCalculationContinuity(page) {
     );
     await expect(page.locator(`${root} .investor-associative-unit-facts`)).toHaveCount(0);
     result.stages.push({ stage, automaticRecovery: true, proposalPreserved: true });
+
+    stage = "annual-ledger-reconciliation";
+    fixture = buildInventory(true, true);
+    for (const source of ["reference", "live"]) {
+      fixture[source].items[0].finalPrice = 233444.22;
+      fixture[source].items[0].finalWithKit = 233444.22;
+      fixture[source].items[0].unitBonus = 0;
+      fixture[source].items[0].tableSlack = 0;
+    }
+    await reloadFixture();
+    await completeProposal();
+    await field("Entrada").fill("150000");
+    await field("Entrada").blur();
+    const balance = page.locator(
+      `${root} .investor-associative-ledger [aria-label^="Saldo parcelado:"]`,
+    );
+    const afterResources = page.locator(
+      `${root} .investor-associative-ledger [aria-label^="Saldo após recursos:"]`,
+    );
+    await expect(afterResources).toHaveAttribute(
+      "aria-label",
+      `Saldo após recursos: ${money.format(43444.22)}`,
+    );
+    await expect(balance).toHaveAttribute(
+      "aria-label",
+      `Saldo parcelado: ${money.format(41944.22)}`,
+    );
+    const originalProSoluto = await rule("% Pró-Soluto").innerText();
+    const originalCommitment = await assertPositivePercentages("% Comprometimento da Renda");
+    const originalMaximum = await assertPositivePercentages("% Máximo da renda mensal");
+    const documentationTotal = await page
+      .locator(`${root} .investor-associative-documentation-summary`)
+      .innerText();
+    for (let index = 1; index <= 4; index += 1) {
+      await page.getByRole("button", { name: "Inserir Anual", exact: true }).click();
+      await expect(field(`Anual ${index}`)).toBeVisible();
+      if (index > 1) {
+        await field(`Anual ${index}`).fill("245000");
+        await field(`Anual ${index}`).blur();
+        await expect(balance).toHaveAttribute(
+          "aria-label",
+          `Saldo parcelado: ${money.format(41944.22 - (index - 1) * 2450)}`,
+        );
+      }
+    }
+    await expect(balance).toHaveAttribute(
+      "aria-label",
+      `Saldo parcelado: ${money.format(34594.22)}`,
+    );
+    await expect(rule("% Pró-Soluto")).toHaveText(originalProSoluto, { useInnerText: true });
+    const reducedCommitment = await assertPositivePercentages("% Comprometimento da Renda");
+    const reducedMaximum = await assertPositivePercentages("% Máximo da renda mensal");
+    const percentValue = (text) => Number(text.replace(/[^\d,.-]/g, "").replace(",", "."));
+    for (let index = 0; index < 2; index += 1) {
+      assert.ok(percentValue(reducedCommitment[index]) < percentValue(originalCommitment[index]));
+      assert.ok(percentValue(reducedMaximum[index]) < percentValue(originalMaximum[index]));
+    }
+    await expect(page.locator(`${root} .investor-associative-documentation-summary`)).toHaveText(
+      documentationTotal,
+      { useInnerText: true },
+    );
+    await expect(rule("Status da proposta")).not.toContainText("PENDENTE");
+    await expect(
+      page.locator(
+        `${root} .simulation-canvas-eyebrow, ${root} .simulation-canvas-description, ${root} .simulation-canvas-status`,
+      ),
+    ).toHaveCount(0);
+    for (let index = 4; index >= 2; index -= 1) {
+      await page
+        .getByRole("button", { name: `Ocultar Anual ${index} e zerar valor`, exact: true })
+        .click();
+    }
+    await expect(balance).toHaveAttribute(
+      "aria-label",
+      `Saldo parcelado: ${money.format(41944.22)}`,
+    );
+    await expect(rule("% Pró-Soluto")).toHaveText(originalProSoluto, { useInnerText: true });
+    assert.deepEqual(
+      await assertPositivePercentages("% Comprometimento da Renda"),
+      originalCommitment,
+    );
+    result.stages.push({
+      stage,
+      nominalBalance: 34594.22,
+      annualTotal: 7350,
+      unchangedProSoluto: true,
+      bothFlowsReduced: true,
+      documentationUnchanged: true,
+      clearedAnnualsRestoreBalance: true,
+    });
     assert.equal(result.blockedExternalRequests, 0, "Unexpected external requests were blocked");
     result.passed = true;
   } catch (error) {

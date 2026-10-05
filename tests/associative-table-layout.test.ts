@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { SimulationCanvasHeader } from "@/app/(protected)/app/simulacao/_components/SimulationCanvasHeader";
 
 const archive = readFileSync(
   new URL(
@@ -18,6 +21,25 @@ const styles = readFileSync(
 );
 
 describe("cabecalho do simulador Associativo", () => {
+  it("omits optional copy without empty labels and preserves other simulators", () => {
+    const compact = renderToStaticMarkup(
+      createElement(SimulationCanvasHeader, { title: "Associativo" }),
+    );
+    expect(compact).toContain("<h1>Associativo</h1>");
+    expect(compact).not.toMatch(/simulation-canvas-(eyebrow|description|status)/);
+    expect(compact).not.toContain('role="status"');
+    const complete = renderToStaticMarkup(
+      createElement(SimulationCanvasHeader, {
+        title: "Outra tabela",
+        eyebrow: "Simulação",
+        description: "Descrição",
+        statusLabel: "Estoque",
+      }),
+    );
+    expect(complete).toContain("Simulação");
+    expect(complete).toContain("Descrição");
+    expect(complete).toContain('role="status"');
+  });
   it("remove os rotulos duplicados e preserva o titulo acessivel", () => {
     expect(archive).toContain("<SimulationCanvasHeader");
     expect(archive).toContain('title="Simulador Tabela Associativo"');
@@ -25,6 +47,9 @@ describe("cabecalho do simulador Associativo", () => {
     expect(archive).not.toContain('className="documentation-breadcrumb"');
     expect(archive).not.toContain('className="goal-kicker"');
     expect(archive).not.toContain("Simulação comercial");
+    expect(archive).not.toContain("eyebrow=");
+    expect(archive).not.toContain("statusLabel=");
+    expect(archive).not.toContain("Consulta de estoque e composição");
   });
 
   it("compacta somente o espaco do cabecalho Associativo", () => {

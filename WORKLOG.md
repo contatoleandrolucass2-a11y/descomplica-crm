@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-05 - Saldo das anuais e ajudas do Associativo
+
+- Fonte: cinco capturas do usuario; branch `codex/associativo-saldo-anuais`.
+- Corrige o saldo exibido para descontar anuais nominais em centavos, sem
+  deducao dupla nas mensais nem alteracao do Pro-Soluto e politicas vigentes.
+- Remove os tres textos indicados, simplifica ajudas e ajusta a continuidade
+  visual do brilho dos cards de documentacao.
+- Audit: `docs/audits/associativo-anuais-e-ajudas-2026-10-05.md`.
+- 33 testes iniciais e auditoria financeira de 364 testes aprovados. Gates
+  globais, navegador, CI e publicacao pendentes.
+- Lint, typecheck, build, oito testes Node e nove etapas do preview React
+  aprovados. Suite Windows: 1997 aprovados, seis falhas POSIX e um timeout de
+  conhecimento resolvido na repeticao isolada (22/22). CI Linux segue obrigatoria antes de publicar.
+
 ## 2026-10-04 - Recurso MKT em Configuracoes
 
 - Fonte: print fornecido pelo usuario; branch `codex/recurso-mkt`, base `2b713fa`.
