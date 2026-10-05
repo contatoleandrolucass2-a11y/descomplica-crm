@@ -441,6 +441,7 @@
 }
 
 .documentation-page-shell[data-canvas-layout="documentation"] > .simulation-canvas-header {
+  --canvas-accent: var(--analytics-cyan-strong);
   box-sizing: border-box;
   width: min(100% - 32px, 1600px);
   grid-template-columns: minmax(0, 1fr) minmax(230px, auto);
@@ -694,6 +695,13 @@
   color: var(--analytics-ink);
   background: color-mix(in srgb, var(--analytics-cyan) 12%, var(--analytics-surface));
   box-shadow: none;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"]
+  .documentation-values-submit
+  .documentation-hero-submit-copy
+  small {
+  color: var(--analytics-muted);
 }
 
 .documentation-page-shell[data-canvas-layout="documentation"]
