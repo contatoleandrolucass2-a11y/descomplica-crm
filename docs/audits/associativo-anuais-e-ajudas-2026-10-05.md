@@ -93,7 +93,7 @@ Nenhuma taxa, limite, politica, fonte de estoque, workflow ou dado remoto mudou.
   assim como os oito testes Node. Nenhum gate foi afrouxado.
 - CI integrada `37364639266` nao iniciou: `validate` cancelado por falta de runner
   hospedado, demais jobs ignorados. Anotacao: `The job was not acquired by Runner
-  of type hosted even after multiple attempts`. PR #156 aberto; nao houve deploy.
+of type hosted even after multiple attempts`. PR #156 aberto; nao houve deploy.
   Fonte externa em 05/10/2026: https://www.githubstatus.com/incidents/3q1yb5m7ltvb,
   incidente de atribuicao de runners iniciado as 19:11 UTC. Nova tentativa sera
   feita sem alterar runner, permissoes, tolerancias ou gates.
