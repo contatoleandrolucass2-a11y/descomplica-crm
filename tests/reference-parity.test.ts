@@ -837,8 +837,8 @@ describe("versioned reference parity catalog", () => {
       accessibilityAudits: visualEvidenceCount,
       baselineComparisons: visualEvidenceCount,
       approvedCanvasComparisons: expectedReleasedProtectedRoutes.length,
-      approvedCanvasColorDistanceThreshold: 18,
-      approvedCanvasEdgeDistanceThreshold: 39,
+      approvedCanvasColorDistanceThreshold: 23,
+      approvedCanvasEdgeDistanceThreshold: 52,
       changedPixelRatioThreshold: 0.01,
       channelTolerance: 16,
     });

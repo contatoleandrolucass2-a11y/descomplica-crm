@@ -82,3 +82,10 @@ versionado. A comparacao continua acompanhada por Axe, overflow, console,
 teclado, zoom, reduced-motion, sete larguras e os tres temas. As capturas
 internas seguem uteis para regressao, mas deixaram de ser autoridade unica de
 paridade.
+
+Os limites normalizados sao `23` para composicao cromatica e `52` para bordas.
+Eles foram calibrados sobre as 22 regioes aprovadas para absorver apenas as
+diferencas inevitaveis entre canvas gerado e captura do navegador, como
+rasterizacao de fonte e altura de conteudo. A regressao pixel a pixel da
+aplicacao continua mais restritiva, com tolerancia de `1%` e diferenca maxima de
+`16` por canal.

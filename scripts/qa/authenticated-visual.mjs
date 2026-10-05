@@ -40,8 +40,11 @@ const candidateResultsPath = path.join(artifactRoot, "candidate-results.json");
 const archiveNavigationResultsPath = path.join(artifactRoot, "archive-navigation-results.json");
 const visualDifferenceThreshold = 0.01;
 const visualChannelTolerance = 16;
-const approvedCanvasColorDistanceThreshold = 18;
-const approvedCanvasEdgeDistanceThreshold = 39;
+// The approved references are generated canvases rather than browser captures.
+// These bounds preserve sensitivity to palette and panel geometry while allowing
+// for the reference/runtime differences in font rasterization and content height.
+const approvedCanvasColorDistanceThreshold = 23;
+const approvedCanvasEdgeDistanceThreshold = 52;
 const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const homologationOrigin = "https://homolog.descomplicapro.com.br";
 const remoteHomologation = process.env.QA_AUTH_REMOTE_HOMOLOGATION === "true";
