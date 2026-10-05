@@ -49,6 +49,24 @@
   oito referencias de Configuracoes divergiram. Captura limpa `7818dcf`, arvore
   identica ao head; oito imagens revisadas e promovidas preservando as outras
   201 referencias da main e todos os novos contratos de canvas. CI final pendente.
+- Integra `89ac797` (registro documental do PR #153), sem nova alteracao de
+  produto ou referencias. A validacao funcional anterior permanece identificada
+  pelo seu SHA; os gates da CI serao repetidos no head combinado.
+
+## 2026-10-05 - Publicacao das sequencias do Associativo
+
+- Runtime `e1ab14a8739153c56081e4f36a76e99f80fed8b2` publicado apos PR #150,
+  CI do PR `37257462975` e CI do main `37259237555` integralmente verdes.
+- Imagem imutavel conferida por hashes, OCI e dois perfis; backup privado, CAS
+  a partir de `77a07a7`, rollback preparado e health/negacao anonima aprovados.
+  Smoke HTTP: 12 requisicoes observacionais, zero erros, sem prova de capacidade.
+- Postcheck autenticado confirmou percentuais, documentacao, ciclos CSS,
+  alinhamento do dolar e preservacao do perfil/recursos ao trocar unidade.
+  Nenhuma proposta salva ou enviada. Evidencia completa no audit de 04/10.
+- Pendencia do print 12 nesta conta: sessao nao forneceu nome valido; fallback
+  Conta esta correto. Solicitados nome e autorizacao especifica para cadastro;
+  nenhuma mutacao de conta nem inferencia pelo email.
+- Este registro e apenas documental, sem outro restart ou mudanca de runtime.
 
 ## 2026-10-05 - Correcao da paridade visual dos canvases
 
