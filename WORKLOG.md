@@ -52,6 +52,15 @@
 - Integra `89ac797` (registro documental do PR #153), sem nova alteracao de
   produto ou referencias. A validacao funcional anterior permanece identificada
   pelo seu SHA; os gates da CI serao repetidos no head combinado.
+- Publicado em 05/10/2026 11:47 BRT: `edbfcd13`, depois dos gates completos
+  do PR `37314518298` e da main `37322433490`. Imagem aprovada pela CI,
+  identidade OCI/config/camadas comprovada, dois perfis validados, backup
+  privado verificado, CAS e rollback preparados. Cinco healthchecks HTTP 200
+  no SHA exato; container healthy, zero reinicios/OOM/padroes criticos.
+- Nova rota anonima responde 307 para login. Prova autenticada permanece na
+  CI sintetica; nenhuma conta pessoal usada para QA dessa guia em producao.
+  Evidencias em `docs/audits/recurso-mkt-2026-10-05.md`. Registro posterior
+  somente documental, sem novo restart; nenhuma migration, workflow ou dado remoto.
 
 ## 2026-10-05 - Publicacao das sequencias do Associativo
 
