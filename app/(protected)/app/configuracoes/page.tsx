@@ -192,6 +192,7 @@ export default async function SettingsPage() {
               <Link
                 key={setting.href}
                 href={setting.href}
+                aria-label={setting.title}
                 prefetch={false}
                 className="group block rounded-xl no-underline focus-visible:outline-offset-4"
               >

@@ -1,11 +1,22 @@
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { MarketingResources } from "@/app/(protected)/app/configuracoes/recurso-mkt/MarketingResources";
+import SettingsPage from "@/app/(protected)/app/configuracoes/page";
 import { calculateMarketingResources, parseMarketingMoney } from "@/lib/crm/marketing/resources";
 
+vi.mock("@/lib/authorization/enforce", () => ({
+  enforcePermission: vi.fn().mockResolvedValue({}),
+}));
+vi.mock("@/lib/authorization/guards", () => ({ hasPermission: vi.fn().mockReturnValue(true) }));
+
 describe("Recurso MKT", () => {
+  it("names the settings link for accessible navigation", async () => {
+    const markup = renderToStaticMarkup(await SettingsPage());
+    expect(markup).toContain('href="/app/configuracoes/recurso-mkt"');
+    expect(markup).toContain('aria-label="Recurso MKT"');
+  });
   it("preserves every amount and destination from the supplied reference", () => {
     expect(calculateMarketingResources(250_000, 100_000)).toEqual({
       allocations: [100_000, 75_000, 50_000, 25_000],

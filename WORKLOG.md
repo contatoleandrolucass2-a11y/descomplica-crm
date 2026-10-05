@@ -19,6 +19,9 @@
 - CI `37255127701`: validate e restauracao aprovados; matriz E2E antiga recusou
   o novo link. Incluida rota MKT nas provas diretas dos nove perfis e nas listas
   de navegacao de Master/Admin, sem ampliar permissao de outros perfis.
+- CI `37255825356`: E2E dos nove perfis aprovado; QA MKT encontrou atalho sem
+  nome acessivel no card de Configuracoes. Rotulo explicito corrigido e coberto
+  por teste de renderizacao; capturas MKT tambem mascaram campos de identidade.
 
 ## 2026-10-04 - Associativo: cobertura da origem e brilho integral
 

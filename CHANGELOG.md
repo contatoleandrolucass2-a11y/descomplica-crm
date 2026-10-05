@@ -8,6 +8,7 @@
 - Recalcula valores locais preservando centavos e percentuais; permite restaurar
   os valores iniciais e explicita entradas invalidas.
 - Amplia a matriz E2E de autorizacao para a nova rota, mantendo os nove perfis.
+- Explicita o nome acessivel dos atalhos de Configuracoes para navegacao assistiva.
 
 ## 2026-10-04 - Dados oficiais e brilho integral no Associativo
 

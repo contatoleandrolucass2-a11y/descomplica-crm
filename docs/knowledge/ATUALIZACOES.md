@@ -21,6 +21,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - CI `37255127701` aprovou validate e restore; E2E exigiu atualizar a lista
   esperada de links. Nova rota agora participa da matriz de autorizacao dos
   nove perfis, com acesso administrativo existente e negacao dos demais.
+- CI `37255825356` aprovou os nove perfis; seletores semanticos identificaram
+  que links envolvendo `article` nao recebiam nome acessivel do conteudo.
+  Usar rotulo explicito do titulo. Correcao coberta por renderizacao do card.
 
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 
