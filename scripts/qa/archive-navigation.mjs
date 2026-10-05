@@ -769,7 +769,22 @@ export async function assertHeaderGeometry(page, compact) {
         document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1 &&
         document.body.scrollWidth <= document.body.clientWidth + 1,
       brandTextFits: brand.scrollWidth <= brand.clientWidth + 1,
-      accountTextContained: account.scrollWidth <= account.clientWidth + 1,
+      accountTextContained: (() => {
+        const avatar = account.querySelector("[data-session-avatar]");
+        const identity = account.querySelector("[data-session-identity-trigger-label]");
+        if (!avatar || !identity) return false;
+        const accountBounds = account.getBoundingClientRect();
+        const avatarBounds = avatar.getBoundingClientRect();
+        const identityStyle = getComputedStyle(identity);
+        return (
+          avatarBounds.width > 0 &&
+          avatarBounds.height > 0 &&
+          avatarBounds.left >= accountBounds.left - 1 &&
+          avatarBounds.right <= accountBounds.right + 1 &&
+          identityStyle.position === "absolute" &&
+          identityStyle.overflow === "hidden"
+        );
+      })(),
       themeContentFits: themeContent.every(({ contained, separated }) => contained && separated),
       accountTouchTarget: boxes[2].height >= 44,
       touchTrigger: !isCompact || (boxes[3].width >= 44 && boxes[3].height >= 44),

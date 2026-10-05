@@ -332,14 +332,8 @@ export async function checkAssociativeCompactStock(page) {
     const breadcrumb = document.querySelector('nav[aria-label="Breadcrumb"]');
     const breadcrumbBounds = breadcrumb?.getBoundingClientRect();
     const title = bounds(".simulation-canvas-title-row h1");
-    const guide = bounds(".simulation-canvas-header-aside");
-    const hint = bounds(".simulation-canvas-title-row .investor-info-mark");
-    const button = bounds(".simulation-canvas-actions .investor-guided-start");
-    const buttonElement = document.querySelector(
-      ".simulation-canvas-actions .investor-guided-start",
-    );
-    const label = document.createRange();
-    label.selectNodeContents(buttonElement);
+    const aside = bounds(".simulation-canvas-header-aside");
+    const status = bounds(".simulation-canvas-status");
     const stacked = getComputedStyle(element).gridTemplateColumns.split(" ").length === 1;
     const elementBounds = element.getBoundingClientRect();
     return {
@@ -349,16 +343,15 @@ export async function checkAssociativeCompactStock(page) {
         title.top >= protectedContent.top - 1 && title.bottom <= protectedContent.bottom + 1,
       titleBelowBreadcrumb: !breadcrumbBounds || title.top >= breadcrumbBounds.bottom - 1,
       stacked,
-      guideTopGap: stacked
-        ? guide.top -
+      statusTopGap: stacked
+        ? aside.top -
           element.querySelector(".simulation-canvas-header-copy").getBoundingClientRect().bottom
-        : Math.abs(guide.bottom - elementBounds.bottom),
-      buttonHeight: button.height,
-      minimumButtonHeight: 44,
-      buttonFits: button.bottom <= elementBounds.bottom + 1,
-      buttonExtraWidth: button.width - label.getBoundingClientRect().width,
-      hintCentered: Math.abs((hint.top + hint.bottom - title.top - title.bottom) / 2) <= 2,
-      guideLabelRemoved: !element.querySelector(".investor-hero-guide-information small"),
+        : Math.abs(aside.bottom - elementBounds.bottom),
+      statusHeight: status.height,
+      minimumStatusHeight: 44,
+      statusFits: status.bottom <= elementBounds.bottom + 1,
+      titleAccessoryAbsent: !element.querySelector(".simulation-canvas-title-row > :not(h1)"),
+      nestedActionsAbsent: !element.querySelector(".simulation-canvas-actions"),
     };
   });
   assert.ok(
@@ -369,17 +362,16 @@ export async function checkAssociativeCompactStock(page) {
   assert.ok(hero.titleInsideProtectedContent, "Title must remain inside protected content");
   assert.ok(hero.titleBelowBreadcrumb, "Title must not overlap the authorized breadcrumb");
   assert.ok(
-    hero.guideTopGap >= 0 && hero.guideTopGap <= (hero.stacked ? 14 : 16),
-    "Guide must align with the canvas heading without excess gaps",
+    hero.statusTopGap >= 0 && hero.statusTopGap <= (hero.stacked ? 14 : 16),
+    "Status must align with the canvas heading without excess gaps",
   );
   assert.ok(
-    hero.buttonHeight >= hero.minimumButtonHeight,
-    "Guide button must preserve the pointer-specific target floor",
+    hero.statusHeight >= hero.minimumStatusHeight,
+    "Status must preserve the approved compact height",
   );
-  assert.ok(hero.buttonFits, "Guide button must remain inside the heading section");
-  assert.ok(hero.buttonExtraWidth <= 64, "Guide outline must fit the label with compact padding");
-  assert.ok(hero.hintCentered, "Title help icon must be centered on the same line");
-  assert.ok(hero.guideLabelRemoved, "Redundant guide label must be removed");
+  assert.ok(hero.statusFits, "Status must remain inside the heading section");
+  assert.ok(hero.titleAccessoryAbsent, "Canvas heading must not restore the removed title action");
+  assert.ok(hero.nestedActionsAbsent, "Canvas heading must not restore nested simulator actions");
   const header = await page.locator(".investor-stock-panel").evaluate((panel) => {
     const bounds = (selector) => panel.querySelector(selector).getBoundingClientRect();
     const heading = bounds(":scope > header");
