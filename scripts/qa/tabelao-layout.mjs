@@ -12,8 +12,8 @@ export function readTabelaoLayout() {
   const hero = shell?.querySelector(".simulation-canvas-header");
   const title = hero?.querySelector("h1");
   const hint = hero?.querySelector(".simulation-canvas-title-row > .investor-info-hint");
-  const titleBox = title?.getBoundingClientRect();
   const hintBox = hint?.getBoundingClientRect();
+  const titleActions = hero?.querySelector(".simulation-canvas-actions");
   const resources = shell?.querySelector(".tabelao-resources");
   const actions = [...(resources?.querySelectorAll(":scope > button, :scope > a") ?? [])];
   const expectedActions = [
@@ -65,11 +65,8 @@ export function readTabelaoLayout() {
         "Simulação comercial de estoques com menor valor por tipologia." &&
       hero.querySelector(".simulation-canvas-status")?.textContent.trim() ===
         "Estoque · fonte identificada" &&
-      hero.querySelector(".investor-guided-start")?.textContent.trim() ===
-        "Iniciar passo a passo" &&
-      hintBox?.width > 0 &&
-      hintBox.left >= titleBox.right - 1 &&
-      Math.abs((hintBox.top + hintBox.bottom - titleBox.top - titleBox.bottom) / 2) <= 2,
+      (!hint || hintBox?.width === 0) &&
+      (!titleActions || titleActions.getBoundingClientRect().width === 0),
     resourceOrder:
       actions.length === expectedActions.length &&
       actions.every((action, index) => action.textContent.trim() === expectedActions[index]) &&

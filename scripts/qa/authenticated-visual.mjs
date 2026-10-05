@@ -1550,10 +1550,8 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
         document.querySelectorAll(".investor-stock-table tbody tr.selectable").length > 0,
       fiveStockFiltersPresent: filters.length === 6,
       manualSelectionRequired: !selectedUnit,
-      guidePresent: Boolean(
-        [...document.querySelectorAll("button")].find((button) =>
-          button.textContent?.includes("Iniciar passo a passo"),
-        ),
+      nestedHeaderActionAbsent: !document.querySelector(
+        ".simulation-canvas-header .simulation-canvas-actions",
       ),
     };
   });
@@ -3277,11 +3275,17 @@ async function checkTabelaoValidation(page, origin) {
       const bounds = header.getBoundingClientRect();
       const status = header.querySelector(".simulation-canvas-status")?.getBoundingClientRect();
       return {
-        nestedGuideAbsent: !header.querySelector(".investor-guided-start"),
+        nestedGuideAbsent: (() => {
+          const launcher = header.querySelector(".investor-guided-start");
+          return !launcher || launcher.getClientRects().length === 0;
+        })(),
         singleGlobalNavigation:
           document.querySelectorAll("[data-protected-topbar]").length === 1 &&
           document.querySelectorAll('nav[aria-label="Navegação principal"]').length === 1,
-        titleActionsAbsent: !header.querySelector(".simulation-canvas-actions"),
+        titleActionsAbsent: (() => {
+          const actions = header.querySelector(".simulation-canvas-actions");
+          return !actions || actions.getClientRects().length === 0;
+        })(),
         previewStatusVisible:
           status != null &&
           status.width > 0 &&
