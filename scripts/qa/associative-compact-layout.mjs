@@ -100,7 +100,7 @@ export function assertAssociativeCommissionGeometry(geometry) {
       !geometry.insideTable &&
       !geometry.insideCell &&
       geometry.lastRowIsDecreasing10 &&
-      geometry.insideWidth,
+      geometry.insideViewport,
     "Commission must be a summary sibling outside the section, table and date cells",
   );
   assert.ok(
@@ -109,19 +109,21 @@ export function assertAssociativeCommissionGeometry(geometry) {
       geometry.columns[0] > 0 &&
       geometry.layoutGap === 0 &&
       geometry.tableGap >= 4 &&
+      geometry.tableMarginRight === 0 &&
       geometry.dateCenterDelta <= 1 &&
       geometry.summaryFitsColumn &&
-      geometry.insideLayout,
-    `Summary must retain full width with commission beside the table, centered on the last date: ${JSON.stringify(geometry)}`,
+      geometry.outsideSummary &&
+      geometry.insideFlow,
+    `Commission must sit outside the full-width summary, inside the flow, centered on the last date: ${JSON.stringify(geometry)}`,
   );
   assert.ok(
-    geometry.summaryEdgesAligned && geometry.rightDelta >= 3 && geometry.rightDelta <= 5,
-    "Summary edges must align with approval and contain the commission gutter",
+    geometry.summaryEdgesAligned && geometry.summaryGap >= 3 && geometry.summaryGap <= 5,
+    "Summary edges must align with approval, with a 4px external commission gap",
   );
   assert.ok(!geometry.overlaps, "Commission must not overlap dates, values or adjacent content");
   assert.ok(
-    geometry.iconOnly && geometry.iconSize > 0 && geometry.iconSize <= 17,
-    "Commission must render only its dollar icon at no more than 17px",
+    geometry.iconOnly && geometry.iconSize === 17,
+    "Commission must render only its 17px dollar icon",
   );
   assert.ok(
     [24, 44].includes(geometry.minimumTarget) &&
@@ -170,24 +172,24 @@ export async function checkAssociativeSummaryGeometry(page) {
 }
 
 export async function checkAssociativeCommissionGeometry(commission) {
+  await commission.scrollIntoViewIfNeeded();
   const geometry = await commission.evaluate((button) => {
     const layout = button.closest(".investor-associative-payment-summary-layout");
     const summary = layout?.querySelector(":scope > section.investor-associative-payment-summary");
     const row = summary?.querySelector(".is-decreasing:last-child");
     const date = row?.querySelector(".investor-associative-payment-last-date > time");
-    const tableRect = summary
-      ?.querySelector(".investor-associative-payment-table")
-      ?.getBoundingClientRect();
+    const table = summary?.querySelector(".investor-associative-payment-table");
+    const tableRect = table?.getBoundingClientRect();
     const dateRect = date?.getBoundingClientRect();
     const rect = button.getBoundingClientRect();
     const contains = (element) => {
       if (!element?.contains(button)) return false;
       const outer = element.getBoundingClientRect();
       return (
-        rect.left >= outer.left &&
-        rect.right <= outer.right &&
-        rect.top >= outer.top &&
-        rect.bottom <= outer.bottom
+        rect.left >= outer.left + element.clientLeft &&
+        rect.right <= outer.left + element.clientLeft + element.clientWidth &&
+        rect.top >= outer.top + element.clientTop &&
+        rect.bottom <= outer.top + element.clientTop + element.clientHeight
       );
     };
     const textBounds = (element) => {
@@ -227,6 +229,7 @@ export async function checkAssociativeCommissionGeometry(commission) {
       columns,
       layoutGap: Number.parseFloat(layoutStyle?.columnGap),
       tableGap: tableRect ? rect.left - tableRect.right : -1,
+      tableMarginRight: table ? Number.parseFloat(getComputedStyle(table).marginRight) : NaN,
       dateCenterDelta: dateRect
         ? Math.abs(rect.top + rect.height / 2 - dateRect.top - dateRect.height / 2)
         : Infinity,
@@ -236,15 +239,17 @@ export async function checkAssociativeCommissionGeometry(commission) {
         Math.abs(summaryRect.width - columns[0]) <= 1 &&
         Math.abs(summaryRect.left - layoutRect.left) <= 1,
       ),
-      insideLayout: contains(layout),
-      insideWidth: rect.left >= 0 && rect.right <= innerWidth,
+      outsideSummary: Boolean(summaryRect && rect.left >= summaryRect.right),
+      insideFlow: contains(button.closest(".investor-associative-flow-panel")),
+      insideViewport:
+        rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight,
       summaryEdgesAligned: Boolean(
         summaryRect &&
         approvalRect &&
         Math.abs(summaryRect.left - approvalRect.left) <= 1 &&
         Math.abs(summaryRect.right - approvalRect.right) <= 1,
       ),
-      rightDelta: summaryRect ? Math.abs(rect.right - summaryRect.right) : Infinity,
+      summaryGap: summaryRect ? rect.left - summaryRect.right : Infinity,
       overlaps: content.some((element) => {
         const other = textBounds(element);
         return (
@@ -276,9 +281,12 @@ export async function checkProtectedTopbar(page) {
     const group = header.querySelector('[role="group"][aria-label="Aparência da página"]');
     const controls = [group, ...group.querySelectorAll("button")];
     const selected = group.querySelector('[aria-pressed="true"]');
+    const name = header.querySelector("[data-session-identity-trigger-label]");
+    // Allow only the space required by the untruncated name, not arbitrary header padding.
+    const nameHeight = name?.getBoundingClientRect().height ?? 0;
     return {
       height: header.getBoundingClientRect().height,
-      maximumHeight: 60,
+      maximumHeight: Math.max(60, nameHeight + 16),
       controlsContained: controls.every((element) => {
         const control = element.getBoundingClientRect();
         const bounds = header.getBoundingClientRect();

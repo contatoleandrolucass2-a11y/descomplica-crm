@@ -138,7 +138,7 @@
   background-image: var(--associative-pending-sheen), var(--associative-selection-metal) !important;
   background-size: 280% 100%, 100% 100% !important;
   background-repeat: no-repeat !important;
-  animation: associative-selection-shine 3s ease-in-out infinite;
+  animation: associative-selection-shine 4.5s ease-in-out infinite;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-stock-table tbody tr.selectable:is(:hover, :focus-within, .selected) > td {
@@ -167,6 +167,11 @@
 
 .investor-page-shell.investor-associative-table-page .investor-stock-panel > .investor-section-heading > span + div {
   gap: 2px !important;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-flow-panel > .investor-flow-heading > span {
+  width: 30px;
+  height: 30px;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-stock-title-row {
@@ -362,6 +367,8 @@
 
 .investor-page-shell.investor-associative-table-page .investor-associative-results-stack {
   container: associative-ledger / inline-size;
+  --associative-commission-target: 24px;
+  margin-right: max(0px, calc(var(--associative-commission-target) + 8px - var(--associative-workspace-gap, 12px)));
 }
 
 @media (min-width: 1101px) {
@@ -415,7 +422,7 @@
   --associative-sheen-core: #ffffff;
   --associative-sheen-strength: 58%;
   --associative-sheen-core-strength: 70%;
-  --associative-pending-sheen: linear-gradient(105deg, transparent 32%, color-mix(in srgb, var(--associative-sheen-gold) var(--associative-sheen-strength), transparent) 44%, color-mix(in srgb, var(--associative-sheen-core) var(--associative-sheen-core-strength), transparent) 49%, color-mix(in srgb, var(--associative-sheen-core) var(--associative-sheen-core-strength), transparent) 51%, color-mix(in srgb, var(--associative-sheen-gold) var(--associative-sheen-strength), transparent) 56%, transparent 68%);
+  --associative-pending-sheen: linear-gradient(105deg, transparent 46%, color-mix(in srgb, var(--associative-sheen-gold) var(--associative-sheen-strength), transparent) 48%, color-mix(in srgb, var(--associative-sheen-core) var(--associative-sheen-core-strength), transparent) 49.6%, color-mix(in srgb, var(--associative-sheen-core) var(--associative-sheen-core-strength), transparent) 50.4%, color-mix(in srgb, var(--associative-sheen-gold) var(--associative-sheen-strength), transparent) 52%, transparent 54%);
   --associative-money-ink: #965a0a;
   --associative-rejected-metal: linear-gradient(115deg, #650c17 0%, #9d1828 38%, #74101c 58%, #48080f 100%);
 }
@@ -429,6 +436,10 @@
 :root[data-theme="dark"] .investor-page-shell.investor-associative-table-page .investor-stock-table tr.selectable:is(.selected, :hover, :focus-within) .investor-stock-unit-button,
 :root[data-theme="dark"] .investor-page-shell.investor-associative-table-page :is(.investor-stock-table tr.selectable:is(.selected, :hover, :focus-within), .investor-associative-choice-row > :is(button[aria-pressed="true"], label:has(input:checked)), .investor-associative-question.current, .investor-associative-compact-account li.investor-key-field.is-active, .investor-associative-step-guide.guidance > span, .investor-associative-approval-editable.is-active),
 :root[data-theme="dark"] .investor-page-shell.investor-associative-table-page :is(.investor-associative-question.current, .investor-associative-compact-account li.investor-key-field.is-active, .investor-associative-approval-editable.is-active) :is(input, select) {
+  text-shadow: var(--associative-text-halo);
+}
+
+:root[data-theme="dark"] .investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary > section {
   text-shadow: var(--associative-text-halo);
 }
 
@@ -448,7 +459,7 @@
   background-image: var(--associative-pending-sheen);
   background-size: 280% 100%;
   background-repeat: no-repeat;
-  animation: associative-pending-shine 3s ease-in-out infinite;
+  animation: associative-pending-shine 4.5s ease-in-out infinite;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-question.current :is(.investor-associative-question-heading, .investor-associative-question-heading > span, .investor-associative-question-heading b, .investor-info-trigger, .investor-associative-question-money > span),
@@ -510,7 +521,7 @@
   background: var(--associative-pending-sheen), var(--associative-selection-metal);
   background-size: 280% 100%, 100% 100%;
   background-repeat: no-repeat;
-  animation: associative-selection-shine 3s ease-in-out infinite;
+  animation: associative-selection-shine 4.5s ease-in-out infinite;
   box-shadow: none;
 }
 
@@ -554,7 +565,7 @@
   background-image: var(--associative-pending-sheen);
   background-size: 280% 100%;
   background-repeat: no-repeat;
-  animation: associative-pending-shine 3s ease-in-out infinite;
+  animation: associative-pending-shine 4.5s ease-in-out infinite;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-compact-account li.investor-key-field.is-active > .investor-direct-step-content {
@@ -662,7 +673,7 @@
   background-image: var(--associative-pending-sheen);
   background-size: 280% 100%;
   background-repeat: no-repeat;
-  animation: associative-pending-shine 3s ease-in-out infinite;
+  animation: associative-pending-shine 4.5s ease-in-out infinite;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-step-guide.guidance::before,
@@ -693,7 +704,7 @@
   background-size: 280% 100%;
   background-repeat: no-repeat;
   pointer-events: none;
-  animation: associative-pending-shine 3s ease-in-out infinite;
+  animation: associative-pending-shine 4.5s ease-in-out infinite;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-approval-editable.investor-key-field.is-active {
@@ -770,7 +781,7 @@
   background: linear-gradient(105deg, transparent 42%, rgba(255, 82, 100, .24) 50%, transparent 58%);
   background-size: 280% 100%;
   background-repeat: no-repeat;
-  animation: associative-rejection-shine 3s ease-in-out infinite;
+  animation: associative-rejection-shine 4.5s ease-in-out infinite;
 }
 
 @keyframes associative-rejection-shine {
@@ -779,7 +790,6 @@
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-payment-summary-layout {
-  --associative-commission-target: 24px;
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -794,10 +804,9 @@
   min-width: 0;
 }
 
-/* Keep the panel edges aligned; reserve the icon gutter inside its table area. */
+/* Keep the table and approval edges aligned; the dollar uses the outer flow gutter. */
 .investor-page-shell.investor-associative-table-page .investor-associative-payment-summary .investor-associative-payment-table {
-  margin-right: calc(var(--associative-commission-target) + 8px);
-  border-right: 1px solid var(--inv-color-line);
+  margin-right: 0;
 }
 
 .investor-page-shell.investor-associative-table-page .investor-associative-payment-summary-layout > .investor-associative-commission-launcher,
@@ -806,7 +815,7 @@
   z-index: 1;
   top: auto;
   left: auto;
-  right: 4px;
+  right: calc(-1 * var(--associative-commission-target) - 4px);
   bottom: 1px;
   justify-content: center;
 }
@@ -995,7 +1004,8 @@
   isolation: isolate;
 }
 
-.investor-page-shell.investor-associative-table-page :is(button, a[href], summary, .investor-associative-choice-row > label):not([data-protected-topbar] *)::before {
+.investor-page-shell.investor-associative-table-page :is(button, a[href], summary, .investor-associative-choice-row > label):not([data-protected-topbar] *)::before,
+.investor-page-shell.investor-associative-table-page :is(.investor-stock-filters > label, .investor-property-summary, .investor-property-summary > dl > div, .investor-associative-payment-table-row)::before {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -1010,9 +1020,9 @@
   opacity: 0;
 }
 
-.investor-page-shell.investor-associative-table-page :is(button, a[href], summary, .investor-associative-choice-row > label):not([data-protected-topbar] *):is(:hover, :focus-visible, :has(input:focus-visible)):not(:disabled):not([aria-disabled="true"]):not(:has(input:disabled))::before {
+.investor-page-shell.investor-associative-table-page :is(button, a[href], summary, .investor-associative-choice-row > label):not([data-protected-topbar] *):not(.investor-guided-start, .investor-associative-payment-actions-bar > button):is(:hover, :focus-visible, :has(input:focus-visible)):not(:disabled):not([aria-disabled="true"]):not(:has(input:disabled))::before {
   opacity: 1;
-  animation: associative-specular-orbit 3s linear infinite;
+  animation: associative-specular-orbit 4.5s linear infinite;
 }
 
 .investor-page-shell.investor-associative-table-page :is(button, a[href], summary):not([data-protected-topbar] *):focus-visible {
@@ -1022,6 +1032,106 @@
 
 @keyframes associative-specular-orbit {
   to { --associative-specular-angle: 495deg; }
+}
+
+/* Continuous CTAs share the page clock; disabled controls never call for action. */
+.investor-page-shell.investor-associative-table-page :is(.investor-guided-start, .investor-associative-payment-actions-bar > button):not(:disabled):not([aria-disabled="true"])::before {
+  opacity: 1;
+  animation: associative-loop-orbit 4.5s linear infinite;
+}
+
+@keyframes associative-loop-orbit {
+  to { --associative-specular-angle: 495deg; }
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-filters > label {
+  position: relative;
+  isolation: isolate;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-filters > label > span:first-child { grid-area: 1 / 1; }
+.investor-page-shell.investor-associative-table-page .investor-stock-filters > label > select { grid-area: 2 / 1; }
+.investor-page-shell.investor-associative-table-page .investor-stock-filters > label:has(> select)::before {
+  position: relative;
+  grid-area: 2 / 1;
+  border-radius: 7px;
+  min-width: 0;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-filters > label:is(:hover, :focus-within):not(:has(select:disabled))::before {
+  opacity: 1;
+  animation: associative-specular-orbit 4.5s linear infinite;
+}
+
+/* Each sequence has one active border, including the enclosing property border. */
+.investor-page-shell.investor-associative-table-page :is(.investor-property-summary, .investor-property-summary > dl > div, .investor-associative-payment-table-row, .investor-associative-documentation-summary > section) {
+  position: relative;
+  isolation: isolate;
+}
+
+.investor-page-shell.investor-associative-table-page :is(.investor-property-summary, .investor-property-summary > dl > div)::before {
+  animation: associative-property-orbit 45s linear infinite;
+  animation-delay: calc(var(--associative-sequence-index, 0) * 4.5s);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-property-summary::before { padding: 2px; }
+.investor-page-shell.investor-associative-table-page .investor-property-summary > dl > div:nth-child(1) { --associative-sequence-index: 1; }
+.investor-page-shell.investor-associative-table-page .investor-property-summary > dl > div:nth-child(2) { --associative-sequence-index: 2; }
+.investor-page-shell.investor-associative-table-page .investor-property-summary > dl > div:nth-child(3) { --associative-sequence-index: 3; }
+.investor-page-shell.investor-associative-table-page .investor-property-summary > dl > div:nth-child(4) { --associative-sequence-index: 4; }
+.investor-page-shell.investor-associative-table-page .investor-property-summary > dl > div:nth-child(5) { --associative-sequence-index: 5; }
+.investor-page-shell.investor-associative-table-page .investor-property-summary > dl > div:nth-child(6) { --associative-sequence-index: 6; }
+.investor-page-shell.investor-associative-table-page .investor-property-summary > dl > div:nth-child(7) { --associative-sequence-index: 7; }
+.investor-page-shell.investor-associative-table-page .investor-property-summary > dl > div:nth-child(8) { --associative-sequence-index: 8; }
+.investor-page-shell.investor-associative-table-page .investor-property-summary > dl > div:nth-child(9) { --associative-sequence-index: 9; }
+
+@keyframes associative-property-orbit {
+  0% { opacity: 0; --associative-specular-angle: 135deg; }
+  1%, 9% { opacity: 1; }
+  10%, 100% { opacity: 0; --associative-specular-angle: 495deg; }
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-summary.is-ready .investor-associative-payment-table-row::before {
+  animation: associative-installment-orbit 22.5s linear infinite;
+  animation-delay: calc(var(--associative-sequence-index, 0) * 4.5s);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-table-row:nth-child(3) { --associative-sequence-index: 1; }
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-table-row:nth-child(4) { --associative-sequence-index: 2; }
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-table-row:nth-child(5) { --associative-sequence-index: 3; }
+.investor-page-shell.investor-associative-table-page .investor-associative-payment-table-row:nth-child(6) { --associative-sequence-index: 4; }
+
+@keyframes associative-installment-orbit {
+  0% { opacity: 0; --associative-specular-angle: 135deg; }
+  2%, 18% { opacity: 1; }
+  20%, 100% { opacity: 0; --associative-specular-angle: 495deg; }
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary > section > * {
+  position: relative;
+  z-index: 1;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary > section::after {
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  content: "";
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background-image: var(--associative-pending-sheen);
+  background-size: 280% 100%;
+  background-repeat: no-repeat;
+  animation: associative-documentation-shine 9s ease-in-out infinite;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary > section:nth-child(2)::after { animation-delay: 4.5s; }
+
+@keyframes associative-documentation-shine {
+  0%, 12% { background-position: 150% 50%; opacity: 1; }
+  38% { background-position: -50% 50%; opacity: 1; }
+  50%, 100% { background-position: -50% 50%; opacity: 0; }
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
@@ -1044,7 +1154,7 @@
     min-height: 44px;
   }
 
-  .investor-page-shell.investor-associative-table-page .investor-associative-payment-summary-layout {
+  .investor-page-shell.investor-associative-table-page .investor-associative-results-stack {
     --associative-commission-target: 44px;
   }
 
@@ -1093,6 +1203,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .investor-page-shell.investor-associative-table-page :is(.investor-stock-filters > label, .investor-property-summary, .investor-property-summary > dl > div, .investor-associative-payment-table-row)::before,
+  .investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary > section::after {
+    animation: none !important;
+    opacity: 0;
+  }
   .investor-page-shell.investor-associative-table-page :is(button, a[href], summary, .investor-associative-choice-row > label):not([data-protected-topbar] *)::before {
     animation: none !important;
     transition: none !important;
@@ -23085,6 +23200,8 @@ body:has(.investor-page-shell) {
     .investor-stock-panel
     > .investor-section-heading
     > span {
+    width: 28px;
+    height: 28px;
     grid-column: 1;
     grid-row: 1;
   }

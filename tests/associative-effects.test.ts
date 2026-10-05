@@ -7,6 +7,7 @@ import {
   checkAssociativeCommissionGeometry,
   checkAssociativeSelectedGoldPaint,
 } from "../scripts/qa/associative-compact-layout.mjs";
+import { checkGuidanceShimmer } from "../scripts/qa/associative-guidance.mjs";
 
 const require = createRequire(import.meta.url);
 type Rule = {
@@ -41,7 +42,7 @@ describe("Associative decorative effects boundaries", () => {
     );
     expect(values(selection!)["background-size"]).toBe("280% 100%, 100% 100%");
     expect(values(selection!).animation).toBe(
-      "associative-selection-shine 3s ease-in-out infinite",
+      "associative-selection-shine 4.5s ease-in-out infinite",
     );
     const cells = rules.find((rule) =>
       rule.selector.includes("tr.selectable:is(:hover, :focus-within, .selected) > td"),
@@ -57,7 +58,7 @@ describe("Associative decorative effects boundaries", () => {
     for (const rule of animated) {
       expect(rule.selector).toContain(scope);
       const style = values(rule);
-      expect(style.animation).toBe("associative-pending-shine 3s ease-in-out infinite");
+      expect(style.animation).toBe("associative-pending-shine 4.5s ease-in-out infinite");
       expect(style["background-size"]).toBe("280% 100%");
       expect(style.background ?? style["background-image"]).toBe(
         "var(--associative-pending-sheen)",
@@ -69,14 +70,53 @@ describe("Associative decorative effects boundaries", () => {
     }
   });
 
-  it("keeps rejection separate at three seconds", () => {
+  it("keeps rejection separate at 4.5 seconds", () => {
     const rejection = rules.find((rule) =>
       values(rule).animation?.startsWith("associative-rejection-shine "),
     );
     expect(rejection?.selector).toContain("footer.rejected::after");
     expect(values(rejection!).animation).toBe(
-      "associative-rejection-shine 3s ease-in-out infinite",
+      "associative-rejection-shine 4.5s ease-in-out infinite",
     );
+  });
+
+  it("preserves the 24%-76% travel window for the existing sweeps", () => {
+    for (const name of [
+      "associative-pending-shine",
+      "associative-selection-shine",
+      "associative-rejection-shine",
+    ]) {
+      const frames = rules.filter((rule) => rule.parent.params === name);
+      expect(frames.map((frame) => frame.selector)).toEqual(["0%, 24%", "76%, 100%"]);
+      const selection = name === "associative-selection-shine";
+      expect(values(frames[0]!)["background-position"]).toBe(
+        selection ? "150% 50%, 0 0" : "150% 50%",
+      );
+      expect(values(frames[1]!)["background-position"]).toBe(
+        selection
+          ? "-50% 50%, 0 0"
+          : name === "associative-rejection-shine"
+            ? "-90% 50%"
+            : "-50% 50%",
+      );
+    }
+  });
+
+  it("loops enabled guide and payment action rims without requiring hover", () => {
+    const loop = rules.find((rule) =>
+      values(rule).animation?.startsWith("associative-loop-orbit "),
+    );
+    expect(loop?.selector).toContain(scope);
+    expect(loop?.selector).toContain(".investor-guided-start");
+    expect(loop?.selector).toContain(".investor-associative-payment-actions-bar > button");
+    expect(loop?.selector).toContain(":not(:disabled)");
+    expect(loop?.selector).toContain(':not([aria-disabled="true"])');
+    expect(loop?.selector).toMatch(/::before$/u);
+    expect(loop?.selector).not.toMatch(/:hover|:focus/u);
+    expect(values(loop!)).toMatchObject({
+      opacity: "1",
+      animation: "associative-loop-orbit 4.5s linear infinite",
+    });
   });
 
   it("gives enabled buttons and radio labels a masked rim without changing geometry", () => {
@@ -84,6 +124,7 @@ describe("Associative decorative effects boundaries", () => {
       values(rule).animation?.startsWith("associative-specular-orbit "),
     );
     expect(active?.selector).toContain(scope);
+    expect(values(active!).animation).toBe("associative-specular-orbit 4.5s linear infinite");
     for (const state of [
       ":hover",
       ":focus-visible",
@@ -167,12 +208,16 @@ describe("Associative CSS browser fixtures", () => {
                 <table class="investor-stock-table"><tbody><tr class="selectable selected" aria-selected="true"><td><button class="investor-stock-unit-button">101</button></td><td><span class="investor-stock-product-text">Unidade sintetica</span></td><td><strong class="investor-stock-price">R$ 300.000</strong></td></tr></tbody></table>
                 <section class="investor-associative-unit-facts"><div><h3>Dados oficiais ausentes</h3><p>Confirme os dados da unidade.</p></div><div class="investor-associative-unit-fact"><label for="progress">Evolucao da obra (%)</label><input id="progress" type="number" min="0" max="100" value="0"><small role="status">Percentual informado: 0%</small></div><div class="investor-associative-unit-fact"><label for="appraisal">Avaliacao bancaria</label><input id="appraisal" value="300.000,00"><small role="status">Avaliacao informada.</small></div></section>
                 <div class="investor-associative-choice-row"><button id="profile" aria-pressed="true">SBPE</button><button id="inactive" aria-pressed="false">Alternativa</button><label id="radio"><input type="radio" checked><span>Sim</span></label><button id="disabled" aria-pressed="true" disabled>Desabilitado</button><button id="aria-disabled" aria-disabled="true">Indisponivel</button></div>
+                <section class="investor-associative-question">Perfil concluido</section><section class="investor-associative-question">Modalidade concluida</section>
                 <section class="investor-associative-question current"><div class="investor-associative-question-heading"><span>Renda familiar</span></div><div class="investor-associative-question-money"><span>R$</span><input aria-label="Renda familiar" value="10.000,00"></div><small>Pendente</small></section>
+                <section class="investor-flow-panel investor-associative-flow-panel"><div class="investor-flow-form">
                 <div class="investor-associative-results-stack"><section class="investor-associative-approval">Aprovacao</section>
                   <div class="investor-associative-payment-summary-layout"><section class="investor-associative-payment-summary"><header><div><div><strong>Resumo das parcelas</strong><small>Dados sinteticos</small></div></div></header><div class="investor-associative-payment-table" role="table">
                     ${["Linear", "Decrescente 40%", "Decrescente 30%", "Decrescente 20%", "Decrescente 10%"].map((label, i) => `<div class="investor-associative-payment-table-row ${i ? "is-decreasing" : "is-linear"}" role="row"><strong role="rowheader">${label}</strong><span role="cell" data-label="Quantidade">12</span><span role="cell" data-label="Sem correcao">R$ 1.000</span><span role="cell" data-label="Com correcao">R$ 1.100</span><time role="cell" data-label="Primeira mensal">15/09/2032</time><span role="cell" data-label="Ultima mensal" class="investor-associative-payment-last-date"><time>15/09/2033</time></span></div>`).join("")}
                   </div></section><button class="investor-associative-commission-launcher" aria-label="Abrir remuneracao"><span aria-hidden="true">$</span></button></div>
-                </div>
+                </div></div></section>
+                <button class="investor-guided-start" id="guide">Guia</button><button class="investor-guided-start" id="guide-disabled" disabled>Guia indisponivel</button>
+                <div class="investor-associative-payment-actions-bar"><button id="payment-action">Parcelas</button><button id="payment-disabled" disabled>Indisponivel</button><button id="payment-aria-disabled" aria-disabled="true">Indisponivel</button></div>
                 <section class="investor-direct-resource-actions investor-associative-resource-actions"><button>Aprenda +</button><button>Doc Pessoa Fisica</button><button>Imprimir</button><a href="#bora">Bora Vendas</a><a href="#salesforce">Salesforce</a></section>
                 <dialog id="fixture-dialog"><button>Fechar modal</button><a href="#secondary">Acao secundaria</a></dialog>
               </main></div><div class="investor-page-shell investor-standard-table-page"><button id="other-simulator">Outro simulador</button></div></body></html>`);
@@ -191,13 +236,55 @@ describe("Associative CSS browser fixtures", () => {
                   await page
                     .locator(selector)
                     .evaluate((element) => getComputedStyle(element).animationDuration),
-                ).toBe("3s");
+                ).toBe("4.5s");
               }
               expect(
                 await page
                   .locator("#inactive")
                   .evaluate((element) => getComputedStyle(element).animationName),
               ).toBe("none");
+              for (const selector of ["#guide", "#payment-action"]) {
+                const loop = await page.locator(selector).evaluate((element) => {
+                  const style = getComputedStyle(element, "::before");
+                  return {
+                    hovered: element.matches(":hover, :focus-visible"),
+                    name: style.animationName,
+                    duration: style.animationDuration,
+                    iterations: style.animationIterationCount,
+                    playState: style.animationPlayState,
+                    opacity: style.opacity,
+                    pointerEvents: style.pointerEvents,
+                  };
+                });
+                expect(loop).toEqual({
+                  hovered: false,
+                  name: "associative-loop-orbit",
+                  duration: "4.5s",
+                  iterations: "infinite",
+                  playState: "running",
+                  opacity: "1",
+                  pointerEvents: "none",
+                });
+              }
+              const current = page.locator(".investor-associative-question.current");
+              // Give the same owner an independent decorative sequence: pending QA must count only its sweep.
+              await current.evaluate((element) =>
+                element.classList.add("investor-property-summary"),
+              );
+              expect(
+                await current.evaluate((element) =>
+                  element
+                    .getAnimations({ subtree: true })
+                    .map((animation) => (animation as CSSAnimation).animationName),
+                ),
+              ).toContain("associative-property-orbit");
+              const guidance = await checkGuidanceShimmer(page);
+              expect(guidance.find((measurement) => measurement.active)?.animations).toHaveLength(
+                1,
+              );
+              await current.evaluate((element) =>
+                element.classList.remove("investor-property-summary"),
+              );
               await expect
                 .poll(() =>
                   page
@@ -209,17 +296,34 @@ describe("Associative CSS browser fixtures", () => {
                 page.locator(".investor-associative-commission-launcher"),
               );
               expect(geometry.dateCenterDelta).toBeLessThanOrEqual(1);
+              expect(geometry.summaryGap).toBeCloseTo(4);
+              expect(
+                geometry.outsideSummary && geometry.insideFlow && geometry.insideViewport,
+              ).toBe(true);
+              expect(geometry.summaryEdgesAligned).toBe(true);
               for (const action of await page
                 .locator(
-                  ".investor-associative-resource-actions :is(button,a), #profile, .investor-associative-commission-launcher",
+                  ".investor-associative-resource-actions :is(button,a), #profile, #guide, #payment-action, .investor-associative-commission-launcher",
                 )
                 .all()) {
+                const expectedEffect = await action.evaluate((element) =>
+                  element.matches(
+                    ".investor-guided-start, .investor-associative-payment-actions-bar > button",
+                  )
+                    ? "associative-loop-orbit"
+                    : "associative-specular-orbit",
+                );
                 await action.hover();
                 expect(
                   await action.evaluate(
                     (element) => getComputedStyle(element, "::before").animationName,
                   ),
-                ).toBe("associative-specular-orbit");
+                ).toBe(expectedEffect);
+                expect(
+                  await action.evaluate(
+                    (element) => getComputedStyle(element, "::before").animationDuration,
+                  ),
+                ).toBe("4.5s");
                 await page.mouse.move(0, 0);
                 await page.keyboard.press("Tab");
                 await action.focus();
@@ -227,7 +331,7 @@ describe("Associative CSS browser fixtures", () => {
                   await action.evaluate(
                     (element) => getComputedStyle(element, "::before").animationName,
                   ),
-                ).toBe("associative-specular-orbit");
+                ).toBe(expectedEffect);
               }
               await page
                 .locator("#fixture-dialog")
@@ -238,7 +342,7 @@ describe("Associative CSS browser fixtures", () => {
                   await action.evaluate(
                     (element) => getComputedStyle(element, "::before").animationDuration,
                   ),
-                ).toBe("3s");
+                ).toBe("4.5s");
               }
               await page
                 .locator("#fixture-dialog")
@@ -246,6 +350,9 @@ describe("Associative CSS browser fixtures", () => {
               for (const selector of [
                 "#disabled",
                 "#aria-disabled",
+                "#guide-disabled",
+                "#payment-disabled",
+                "#payment-aria-disabled",
                 "[data-protected-topbar]",
                 "#other-simulator",
               ]) {
@@ -259,6 +366,12 @@ describe("Associative CSS browser fixtures", () => {
               const capture = async (time: number) => {
                 await selected.evaluate((element, currentTime) => {
                   for (const animation of element.getAnimations()) {
+                    if (
+                      !(animation instanceof CSSAnimation) ||
+                      animation.animationName !== "associative-selection-shine" ||
+                      (animation.effect as KeyframeEffect).target !== element
+                    )
+                      continue;
                     animation.pause();
                     animation.currentTime = currentTime;
                   }
@@ -274,7 +387,9 @@ describe("Associative CSS browser fixtures", () => {
                   .toBuffer({ resolveWithObject: true });
               };
               const before = await capture(0);
-              const during = await capture(1500);
+              const leading = await capture(2150);
+              const during = await capture(2250);
+              const trailing = await capture(2350);
               const textRects = await selected.evaluate((element) => {
                 const bounds = element.getBoundingClientRect();
                 const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
@@ -294,7 +409,15 @@ describe("Associative CSS browser fixtures", () => {
                 return rectangles;
               });
               expect(during.info).toEqual(before.info);
+              expect(leading.info).toEqual(before.info);
+              expect(trailing.info).toEqual(before.info);
               const bands = [0, 0];
+              const sampleBands = [
+                [0, 0],
+                [0, 0],
+                [0, 0],
+              ];
+              const samples = [leading, during, trailing];
               let maximumDelta = 0;
               let glyphPixels = 0;
               let protectedGlyphPixels = 0;
@@ -308,7 +431,21 @@ describe("Associative CSS browser fixtures", () => {
                     0,
                   );
                   maximumDelta = Math.max(maximumDelta, delta);
-                  if (delta >= 60) bands[y < during.info.height / 2 ? 0 : 1]! += 1;
+                  const half = y < during.info.height / 2 ? 0 : 1;
+                  let swept = false;
+                  for (const [index, sample] of samples.entries()) {
+                    const sampleDelta = [0, 1, 2].reduce(
+                      (total, channel) =>
+                        total +
+                        Math.abs(sample.data[offset + channel]! - before.data[offset + channel]!),
+                      0,
+                    );
+                    if (sampleDelta >= 60) {
+                      sampleBands[index]![half]! += 1;
+                      swept = true;
+                    }
+                  }
+                  if (swept) bands[half]! += 1;
                   if (
                     theme === "dark" &&
                     textRects.some(
@@ -342,8 +479,13 @@ describe("Associative CSS browser fixtures", () => {
                 `${width}/${theme}: sweep must be strongly visible`,
               ).toBeGreaterThan(theme === "dark" ? 150 : 90);
               expect(
+                sampleBands.every((sample) => sample.every((count) => count > 10)),
+                `${width}/${theme}: the narrow band must reach both interior halves in each frame`,
+              ).toBe(true);
+              // The thin band covers less area per frame; retain the coverage gate over its travel.
+              expect(
                 bands.every((count) => count > during.info.width),
-                `${width}/${theme}: both interior halves must change`,
+                `${width}/${theme}: both interior halves must change across the sweep`,
               ).toBe(true);
               if (theme === "dark") {
                 expect(glyphPixels, "Dark sweep must retain visible text glyphs").toBeGreaterThan(
@@ -372,6 +514,17 @@ describe("Associative CSS browser fixtures", () => {
                   .evaluate((element) => getComputedStyle(element).animationName),
               ).toBe("none");
               await page.emulateMedia({ reducedMotion: "reduce" });
+              for (const selector of ["#guide", "#payment-action"]) {
+                expect(
+                  await page
+                    .locator(selector)
+                    .evaluate((element) =>
+                      element
+                        .getAnimations({ subtree: true })
+                        .filter((animation) => animation instanceof CSSAnimation),
+                    ),
+                ).toEqual([]);
+              }
               await page.locator("#radio").hover();
               expect(
                 await page.locator("#radio").evaluate((element) =>

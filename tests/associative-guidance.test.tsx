@@ -148,10 +148,10 @@ describe("Associativo guidance regression gates", () => {
       expect(() => assertAssociativeKeyboardFocus({ ...focus, ...patch })).toThrow();
   });
 
-  it("requires a full-area 3s translucent specular sweep only while current/required", () => {
+  it("requires a full-area 4.5s translucent specular sweep only while current/required", () => {
     const animation = {
       name: "associative-pending-shine",
-      duration: 3000,
+      duration: 4500,
       iterations: "infinite",
       playState: "running",
       visibleDuringCycle: true,
@@ -170,7 +170,7 @@ describe("Associativo guidance regression gates", () => {
     expect(() => assertAssociativeShimmer({ ...active, animations: [] })).toThrow(/must shimmer/u);
     for (const patch of [
       { duration: 2600 },
-      { duration: 4500 },
+      { duration: 3000 },
       { specularBand: false },
       { iterations: "2" },
       { playState: "paused" },
@@ -198,7 +198,7 @@ describe("Associativo guidance regression gates", () => {
   it("requires one moving translucent sweep behind the entire ledger row", () => {
     const animation = {
       name: "associative-pending-shine",
-      duration: 3000,
+      duration: 4500,
       iterations: "infinite",
       playState: "running",
       visibleDuringCycle: true,
@@ -219,6 +219,7 @@ describe("Associativo guidance regression gates", () => {
     for (const patch of [
       { name: "associative-edge-shine" },
       { duration: 2900 },
+      { duration: 3000 },
       { iterations: "2" },
       { playState: "paused" },
       { pseudo: "::before" },
@@ -279,11 +280,11 @@ describe("Associativo guidance regression gates", () => {
       expect(() => assertAssociativeRejectionPaint({ ...paint, ...patch })).toThrow();
   });
 
-  it("runs the red footer shimmer for 3s infinitely only while rejected without reduced motion", () => {
+  it("runs the red footer shimmer for 4.5s infinitely only while rejected without reduced motion", () => {
     const animation = {
       name: "associative-rejection-shine",
       pseudo: "::after",
-      duration: 3000,
+      duration: 4500,
       iterations: "infinite",
       playState: "running",
       redLine: true,
@@ -296,6 +297,7 @@ describe("Associativo guidance regression gates", () => {
       { name: "associative-edge-shine" },
       { pseudo: "::before" },
       { duration: 2600 },
+      { duration: 3000 },
       { iterations: "1" },
       { playState: "paused" },
       { redLine: false },
@@ -407,7 +409,7 @@ describe("Associativo guidance regression gates", () => {
     }
   });
 
-  it("keeps commission beside the last date inside the full-width summary panel", () => {
+  it("keeps commission outside the aligned summary and approval, inside the flow and viewport", () => {
     const valid = {
       width: 44,
       height: 44,
@@ -421,12 +423,14 @@ describe("Associativo guidance regression gates", () => {
       columns: [500],
       layoutGap: 0,
       tableGap: 5,
+      tableMarginRight: 0,
       dateCenterDelta: 0,
       summaryFitsColumn: true,
-      insideLayout: true,
-      insideWidth: true,
+      outsideSummary: true,
+      insideFlow: true,
+      insideViewport: true,
       summaryEdgesAligned: true,
-      rightDelta: 4,
+      summaryGap: 4,
       overlaps: false,
       iconOnly: true,
       iconSize: 17,
@@ -455,16 +459,21 @@ describe("Associativo guidance regression gates", () => {
       { layoutGap: 3 },
       { layoutGap: 5 },
       { tableGap: 3 },
+      { tableMarginRight: 32 },
+      { tableMarginRight: 52 },
       { dateCenterDelta: 1.01 },
       { summaryFitsColumn: false },
-      { insideLayout: false },
-      { insideWidth: false },
+      { outsideSummary: false },
+      { insideFlow: false },
+      { insideViewport: false },
       { summaryEdgesAligned: false },
-      { rightDelta: 2.99 },
-      { rightDelta: 5.01 },
+      { summaryGap: 2.99 },
+      { summaryGap: 5.01 },
+      { summaryGap: -4 },
       { overlaps: true },
       { iconOnly: false },
       { iconSize: 18 },
+      { iconSize: 16 },
       { iconSize: 0 },
       { width: 43 },
       { height: 43 },

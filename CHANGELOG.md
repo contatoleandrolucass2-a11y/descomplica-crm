@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-10-04 - Sequencias visuais do Associativo
+
+- Afina e desacelera o brilho sincronizado; adiciona sequencias no imovel,
+  parcelas e resumo financeiro, com movimento reduzido respeitado.
+- Guias e botoes de pagamentos opcionais habilitados recebem reflexo continuo;
+  filtros recebem o mesmo reflexo no hover e no foco.
+- Move o dolar para o espaco externo ao resumo, na altura da ultima data.
+- Remove a faixa de breadcrumb apenas no Associativo e exibe o primeiro nome
+  cadastrado no menu da conta, sem reticencias.
+- Ajusta a altura dos menus mobile quando o nome completo amplia o cabecalho,
+  mantendo o ultimo item acessivel dentro da tela.
+- Aproveita o espaco disponivel no desktop para reduzir quebras de nomes longos.
+- Preserva o erro original dos testes E2E quando a limpeza do navegador falha.
+- Impede que nomes longos comprimam a navegacao sobre os botoes de tema.
+- Atualiza 173 referencias visuais revisadas e preserva as 36 ja aprovadas,
+  apos gates funcionais verdes; validacao integral e publicacao continuam
+  obrigatorias, sem alterar os limiares de comparacao.
+
 ## 2026-10-04 - Dados oficiais e brilho integral no Associativo
 
 - Explicita dados ausentes da unidade antes do perfil e permite informar o
