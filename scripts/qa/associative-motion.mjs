@@ -45,6 +45,26 @@ export async function checkAssociativeDocumentationHandoff(page) {
       return state;
     }),
   );
+  // Freeze unrelated paint (for example, a breathing help icon) during pixel comparisons.
+  const otherAnimations = await page.evaluateHandle(() =>
+    document
+      .getAnimations()
+      .filter(
+        (animation) =>
+          animation.animationName !== "associative-documentation-shine" &&
+          ["running", "paused"].includes(animation.playState),
+      )
+      .map((animation) => {
+        const state = {
+          animation,
+          startTime: animation.startTime,
+          currentTime: animation.currentTime,
+          playState: animation.playState,
+        };
+        animation.pause();
+        return state;
+      }),
+  );
   let hidden;
   try {
     const clocks = await saved.evaluate((states) => states.map(({ startTime }) => startTime));
@@ -198,6 +218,16 @@ export async function checkAssociativeDocumentationHandoff(page) {
       }
     });
     await saved.dispose();
+    await otherAnimations.evaluate((states) => {
+      for (const { animation, startTime, currentTime, playState } of states) {
+        if (playState === "paused") animation.currentTime = currentTime;
+        else {
+          animation.play();
+          animation.startTime = startTime;
+        }
+      }
+    });
+    await otherAnimations.dispose();
   }
 }
 

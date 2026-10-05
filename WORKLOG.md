@@ -13,6 +13,9 @@
 - Lint, typecheck, build, oito testes Node e nove etapas do preview React
   aprovados. Suite Windows: 1997 aprovados, seis falhas POSIX e um timeout de
   conhecimento resolvido na repeticao isolada (22/22). CI Linux segue obrigatoria antes de publicar.
+- Matriz sintetica: 7285 casos e 250197 comparacoes sem divergencias. Medicao
+  do brilho no React real passou em 1440px e 375px; QA congela/restaura outras
+  animacoes e conserva os limiares e a prova negativa dos keyframes antigos.
 
 ## 2026-10-04 - Recurso MKT em Configuracoes
 

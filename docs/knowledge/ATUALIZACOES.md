@@ -21,6 +21,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   para seis testes POSIX; timeout de conhecimento passou isolado (22/22).
 - Keyframes alinhados ainda podem ter pausa invisivel. Medir pixels entre
   cards detectou quase quatro segundos na versao antiga e 0 ms na correcao.
+- Ao medir um efeito isolado, pausar e restaurar as animacoes vizinhas evita
+  falsos pixels positivos. Prova React em 1440px e 375px passou, sem relaxar
+  tolerancia. Matriz definida: 7285 casos, 250197 comparacoes, zero divergencias.
 
 ## 2026-10-04: Recurso MKT em Configuracoes
 

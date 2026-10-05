@@ -59,3 +59,11 @@ Nenhuma taxa, limite, politica, fonte de estoque, workflow ou dado remoto mudou.
 - Brilho: 13/13 testes; nove combinacoes de viewport/tema, dois ciclos cada,
   intervalo pintado medido de 0 ms. Injetar keyframes antigos reproduz falha
   com 3986.71875 ms de intervalo. Reduced-motion e geometria preservados.
+- Matriz sintetica completa definida no repositorio: 7285 casos, 250197
+  comparacoes, 4301 calculaveis e 2984 bloqueios justificados; zero divergencias.
+  Nao representa todas as combinacoes possiveis nem validacao bancaria.
+- Tela React real em 1440px e 375px: passagem documental com 0 ms de pausa.
+  A medicao agora congela e restaura animacoes alheias para nao confundir
+  pequenos brilhos de outros elementos com o feixe documental. Regressao com
+  indicador pulsante e os keyframes antigos preserva a deteccao da pausa;
+  nove testes do arquivo de efeitos passaram novamente.

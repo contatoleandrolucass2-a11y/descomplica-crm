@@ -215,6 +215,15 @@ describe("Associative CSS browser fixtures", () => {
                 content:
                   "body{margin:0;padding:12px}.investor-page-shell{max-width:744px;margin:auto}",
               });
+              await page.locator(".investor-associative-documentation-plan").evaluate((plan) => {
+                const indicator = document.createElement("i");
+                indicator.className = "qa-unrelated-paint";
+                plan.append(indicator);
+              });
+              await page.addStyleTag({
+                content:
+                  ".qa-unrelated-paint{position:absolute!important;left:18px;bottom:8px;width:8px;height:8px;background:red;animation:qa-unrelated-pulse .1s steps(2) infinite}@keyframes qa-unrelated-pulse{to{background:blue}}",
+              });
               await page.addScriptTag({
                 content: `(${synchronizeAssociativeMotion.toString()})(document.querySelector('.investor-associative-table-page'))`,
               });
@@ -225,6 +234,11 @@ describe("Associative CSS browser fixtures", () => {
                   ),
               );
               const report = await checkAssociativeDocumentationHandoff(page);
+              expect(
+                await page
+                  .locator(".qa-unrelated-paint")
+                  .evaluate((indicator) => indicator.getAnimations()[0]?.playState),
+              ).toBe("running");
               console.info(JSON.stringify({ width, theme, ...report }));
               expect(report.cycles.every((cycle: { gapMs: number }) => cycle.gapMs === 0)).toBe(
                 true,
