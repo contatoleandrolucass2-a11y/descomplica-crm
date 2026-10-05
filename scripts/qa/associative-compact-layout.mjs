@@ -343,10 +343,10 @@ export async function checkAssociativeCompactStock(page) {
         title.top >= protectedContent.top - 1 && title.bottom <= protectedContent.bottom + 1,
       titleBelowBreadcrumb: !breadcrumbBounds || title.top >= breadcrumbBounds.bottom - 1,
       stacked,
-      statusTopGap: stacked
+      statusAlignment: stacked
         ? aside.top -
           element.querySelector(".simulation-canvas-header-copy").getBoundingClientRect().bottom
-        : Math.abs(aside.bottom - elementBounds.bottom),
+        : Math.abs(aside.top + aside.bottom - elementBounds.top - elementBounds.bottom) / 2,
       statusHeight: status.height,
       minimumStatusHeight: 44,
       statusFits: status.bottom <= elementBounds.bottom + 1,
@@ -362,7 +362,7 @@ export async function checkAssociativeCompactStock(page) {
   assert.ok(hero.titleInsideProtectedContent, "Title must remain inside protected content");
   assert.ok(hero.titleBelowBreadcrumb, "Title must not overlap the authorized breadcrumb");
   assert.ok(
-    hero.statusTopGap >= 0 && hero.statusTopGap <= (hero.stacked ? 14 : 16),
+    hero.statusAlignment >= 0 && hero.statusAlignment <= (hero.stacked ? 14 : 8),
     "Status must align with the canvas heading without excess gaps",
   );
   assert.ok(
@@ -427,7 +427,7 @@ export async function checkAssociativeCompactStock(page) {
   assert.equal(geometry.visibleRows, 10, "Stock viewport must expose exactly ten units");
   assert.ok(geometry.tenthRowEndDelta <= 2, "Stock viewport must end at the tenth row");
   assert.ok(
-    geometry.headingSizeRem >= 1.8 && geometry.headingSizeRem <= 2.81,
+    geometry.headingSizeRem >= 1.7 && geometry.headingSizeRem <= 2.36,
     "Associative canvas heading must remain inside the approved responsive type scale",
   );
   assert.ok(
