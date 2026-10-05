@@ -21,6 +21,12 @@
 - CAIXA passou com contraste AA e mensagem explicita junto ao CTA bloqueado.
   O Tabelao passou responsividade, estados, teclado e impressao sem controles
   interativos. Nenhum motor foi habilitado.
+- O E2E de release aprovou 20 cenarios e manteve um skip exclusivo de
+  homologacao remota. Foram validados nove perfis, 22 rotas, APIs, filtros,
+  logout, recuperacao, revogacao de sessoes e MFA AAL2; dez identidades
+  sinteticas foram removidas e nenhuma persistencia permaneceu. Duas
+  expectativas antigas foram alinhadas ao contrato vigente: ausencia do guia
+  superior no Associativo e contagem apenas dos tres temas desktop.
 - Evidencia: `docs/audits/canvas-layout-correction-2026-10-05.md`. Resultados de
   CI, SHA e deploy serao anexados ao fim da publicacao automatica.
 

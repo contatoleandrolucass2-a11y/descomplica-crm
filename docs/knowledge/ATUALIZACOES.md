@@ -26,6 +26,11 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   sem falhas. CAIXA continua fail-closed e o Tabelao oculta os controles no
   modo de impressao. Conta e fixtures efemeras foram removidas; nenhum remoto
   mudou nesta validacao.
+- O E2E de release aprovou 20 cenarios com um skip remoto previsto e removeu
+  dez identidades sinteticas. Expectativas antigas devem acompanhar a
+  composicao aprovada: o Associativo nao possui guia no cabecalho e o desktop
+  conta somente os tres botoes dentro de `data-theme-options-desktop`, sem
+  confundir o ciclo de tema mobile oculto.
 
 ## 2026-10-04: cadencia visual e nome cadastrado
 

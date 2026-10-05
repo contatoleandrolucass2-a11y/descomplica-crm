@@ -59,6 +59,10 @@ Documentacao e CAIXA.
   1180, 1181 e 1440 px: 40/40 cenarios passaram. O Tabelao tambem oculta no
   modo de impressao os controles do novo cabecalho, preservando somente o
   conteudo expansivo e legivel.
+- O E2E de release aprovou 20 cenarios e manteve um skip restrito ao ambiente
+  remoto. A matriz cobriu os nove perfis e as 22 rotas, alem de login/logout,
+  recuperacao, sessoes, MFA AAL1/AAL2, cookies, APIs e isolamento. As dez
+  identidades sinteticas foram removidas (`persisted=0`, `removed=10`).
 - Formatacao, lint, tipos, testes, build e release E2E permanecem gates de
   publicacao. Os resultados de CI, o SHA e a imagem publicada serao registrados
   no `WORKLOG.md` apos o deploy.
