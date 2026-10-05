@@ -10,8 +10,12 @@
 - Reutiliza cabecalho, tokens e temas da Tabela Associativo. Ajustes de fundo e
   custo sao locais; expectativa conta vendas inteiras. Rateio em centavos mantem
   a soma exata; entradas ausentes ou invalidas ficam explicitamente pendentes.
-- Testes numericos, navegacao/autorizacao e matriz de navegador de 12 cenarios
-  adicionados. Validacao local e CI em andamento; publicacao ainda pendente.
+- Lint, tipos, build e 61 testes focados aprovados. Suite Windows: seis falhas
+  POSIX e tres timeouts existentes, alem da contagem de rotas corrigida e retestada.
+- Preview isolado do componente real: 12 cenarios (1440/1024/390/320px, tres
+  temas), Axe sem violacoes, recalculo, erros, restauracao e teclado aprovados.
+  Ajustado nome acessivel do icone de expectativa. CI Linux e jornada autenticada
+  em andamento no PR #152; publicacao ainda pendente.
 
 ## 2026-10-04 - Associativo: cobertura da origem e brilho integral
 

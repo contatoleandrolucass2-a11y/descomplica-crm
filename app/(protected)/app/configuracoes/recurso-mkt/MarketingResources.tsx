@@ -124,6 +124,7 @@ export function MarketingResources() {
               <div className={styles.expectationLabel}>
                 <span>Expectativa de vendas</span>
                 <span
+                  role="img"
                   title="Vendas inteiras estimadas: fundo dividido pelo custo por venda, arredondado para baixo."
                   tabIndex={0}
                   aria-label="Expectativa calculada em vendas inteiras, arredondada para baixo."

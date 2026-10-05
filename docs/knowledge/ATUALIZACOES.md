@@ -13,8 +13,11 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Fundo e custo ajustaveis somente no estado local, com rateio 40/30/20/10 e
   expectativa de vendas inteiras arredondada para baixo. Sem gravacao de
   politica, recurso ou configuracao ativa; sem migration ou workflow n8n.
-- Evidencias: `tests/marketing-resources.test.tsx`, testes de navegacao e Proxy,
-  `scripts/qa/marketing-resources.mjs`. Gates e publicacao pendentes.
+- Evidencias: 61 testes focados e lint/tipos/build locais aprovados; 12 capturas
+  do componente real em preview isolado, com Axe, controles e teclado aprovados.
+  Testes: `tests/marketing-resources.test.tsx`, navegacao e Proxy; jornada
+  autenticada: `scripts/qa/marketing-resources.mjs`. CI Linux e publicacao no
+  PR #152 pendentes; o preview nao substitui a prova de autenticacao.
 
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 
