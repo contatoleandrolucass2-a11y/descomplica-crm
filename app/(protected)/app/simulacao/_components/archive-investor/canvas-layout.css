@@ -9,7 +9,7 @@
   align-items: end;
   gap: 18px;
   min-width: 0;
-  padding: 2px 2px 12px;
+  padding: 0 2px 10px;
   color: var(--canvas-text);
 }
 
@@ -43,17 +43,26 @@
   overflow-wrap: anywhere;
 }
 
+.simulation-canvas-subtitle {
+  margin: 3px 0 0;
+  color: var(--canvas-text);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
 .simulation-canvas-description {
   max-width: 58rem;
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: var(--canvas-muted);
   font-size: 0.86rem;
   line-height: 1.45;
 }
 
 .simulation-canvas-header-aside {
-  display: grid;
-  justify-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
   gap: 8px;
 }
 
@@ -85,7 +94,7 @@
 }
 
 .simulation-canvas-status-blocked {
-  --canvas-accent: var(--analytics-warning, #e3a93b);
+  --canvas-accent: var(--analytics-warning-ink, #7a4300);
 }
 
 .simulation-canvas-status-canary {
@@ -105,12 +114,12 @@
 }
 
 .investor-page-shell[data-canvas-layout="simulator"] .investor-main {
-  width: min(100% - 40px, 1540px);
-  padding-top: 16px;
+  width: min(100% - 32px, 1540px);
+  padding-top: 10px;
 }
 
 .investor-page-shell[data-canvas-layout="simulator"] .simulation-canvas-header {
-  padding-bottom: 14px;
+  padding-bottom: 10px;
 }
 
 .investor-page-shell[data-canvas-layout="simulator"]
@@ -147,22 +156,22 @@
 
 .investor-page-shell[data-canvas-layout="simulator"] .investor-stock-panel {
   border-width: 1px;
-  border-radius: 12px;
-  box-shadow: 0 12px 32px rgba(var(--inv-color-shadow-rgb, 20, 32, 48), 0.2);
+  border-radius: 10px;
+  box-shadow: none;
 }
 
 .investor-page-shell[data-canvas-layout="simulator"] .investor-section-heading,
 .investor-page-shell[data-canvas-layout="simulator"]
   .investor-stock-panel
   .investor-section-heading {
-  min-height: 64px;
-  padding: 12px 16px;
+  min-height: 52px;
+  padding: 8px 12px;
 }
 
 .investor-page-shell[data-canvas-layout="simulator"] .investor-section-heading > span {
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
 }
 
 .investor-page-shell[data-canvas-layout="simulator"] .investor-section-heading h2,
@@ -215,14 +224,14 @@
 }
 
 .documentation-page-shell[data-canvas-layout="documentation"] {
-  padding-top: 16px;
+  padding-top: 10px;
 }
 
 .documentation-page-shell[data-canvas-layout="documentation"] > .simulation-canvas-header {
   --canvas-accent: var(--doc-rank-accent, var(--analytics-cyan-strong, #16c7da));
   --canvas-text: var(--doc-rank-text, var(--analytics-ink, #102a43));
   --canvas-muted: var(--doc-rank-muted, var(--analytics-muted, #60758a));
-  width: min(100% - 40px, 1540px);
+  width: min(100% - 32px, 1540px);
   margin-inline: auto;
 }
 
@@ -272,6 +281,70 @@
   .investor-page-shell[data-canvas-layout="simulator"]:not(.tabelao-page-shell)
     .investor-stock-results {
     margin-inline: 10px;
+  }
+}
+
+/* Canvas approved for WF16: three compact stages, without changing calculator state or rules. */
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-studio {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-panel {
+  min-height: 0;
+  border-width: 1px;
+  border-color: var(--analytics-line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-purchase-panel {
+  border-top-color: var(--analytics-line);
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-panel > header {
+  padding-bottom: 7px;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-profile-panel,
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-purchase-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-purchase-panel {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 10px;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"]
+  .documentation-purchase-panel
+  > header,
+.documentation-page-shell[data-canvas-layout="documentation"]
+  .documentation-purchase-panel
+  > .doccalc-inline-alert {
+  grid-column: 1 / -1;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-choice-row,
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-money-field {
+  border-radius: 7px;
+  box-shadow: none;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-money-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-money-field.primary {
+  grid-column: auto;
+}
+
+@media (max-width: 760px) {
+  .documentation-page-shell[data-canvas-layout="documentation"] .documentation-purchase-panel,
+  .documentation-page-shell[data-canvas-layout="documentation"] .documentation-money-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

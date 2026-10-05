@@ -9,6 +9,8 @@ import {
   type CommercialDraftActionState,
 } from "@/lib/crm/commercial-engine/drafts";
 
+import styles from "../../ConfigurationCanvas.module.css";
+
 const BLOCKER_LABELS: Record<string, string> = {
   official_policy: "política ativa",
   owner: "responsável",
@@ -57,11 +59,11 @@ export function ConfigurationDraftForm({
   }
 
   return (
-    <form action={formAction} className="grid gap-3">
+    <form action={formAction} className={`${styles.draftForm} grid gap-3`}>
       {children}
       <section
         aria-label="Validação do rascunho"
-        className={`${managementStyles.panel} ${managementStyles.panelPadded} ${managementStyles.panelStrong} grid gap-3`}
+        className={`${styles.draftActions} ${managementStyles.panel} ${managementStyles.panelPadded} ${managementStyles.panelStrong} grid gap-3`}
       >
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,0.48fr)] lg:items-end">
           <div className="flex min-w-0 items-start gap-3">
@@ -113,6 +115,8 @@ export function ConfigurationDraftForm({
               maxLength={500}
               required
               placeholder="Descreva a finalidade desta revisão"
+              type="text"
+              autoComplete="off"
               className="min-h-11 rounded-lg border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-base font-normal text-[var(--analytics-ink)] outline-none focus:border-[var(--analytics-cyan-strong)] focus:ring-2 focus:ring-cyan-200"
             />
           </label>

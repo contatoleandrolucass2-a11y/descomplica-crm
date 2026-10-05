@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, ChevronLeft, ChevronRight, Search, ShieldCheck } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { managementStyles } from "@/app/(protected)/_components/ManagementCanvas";
@@ -9,7 +9,7 @@ import type { AppPage } from "@/lib/navigation/pages";
 
 import { setPageVisibilityAction } from "./actions";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 8;
 
 export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
   const [search, setSearch] = useState("");
@@ -44,54 +44,16 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
   const currentPage = Math.min(pageNumber, pageCount);
   const pageStart = (currentPage - 1) * PAGE_SIZE;
   const visiblePages = filteredPages.slice(pageStart, pageStart + PAGE_SIZE);
-  const activeCount = pages.filter((page) => page.isActive).length;
 
   function resetPage() {
     setPageNumber(1);
   }
 
   return (
-    <>
-      <section aria-label="Resumo do catálogo" className={managementStyles.summaryGrid}>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <BookOpen />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Páginas catalogadas</span>
-            <strong className={managementStyles.summaryValue}>{pages.length}</strong>
-          </div>
-        </article>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <ShieldCheck />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Ativas na navegação</span>
-            <strong className={managementStyles.summaryValue}>{activeCount}</strong>
-          </div>
-        </article>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <BookOpen />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Inativas</span>
-            <strong className={managementStyles.summaryValue}>{pages.length - activeCount}</strong>
-          </div>
-        </article>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <ShieldCheck />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Módulos</span>
-            <strong className={managementStyles.summaryValue}>{sections.length}</strong>
-          </div>
-        </article>
-      </section>
-
-      <section className={`${managementStyles.panel} ${managementStyles.panelPadded}`}>
+    <div className="admin-pages-content">
+      <section
+        className={`${managementStyles.panel} ${managementStyles.panelPadded} admin-pages-toolbar`}
+      >
         <div className={managementStyles.toolbar}>
           <label className={managementStyles.searchLabel} htmlFor="page-search">
             <Search aria-hidden="true" />
@@ -146,14 +108,17 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
         </div>
       </section>
 
-      <section className={managementStyles.panel} aria-labelledby="page-catalog-title">
+      <section
+        className={`${managementStyles.panel} admin-pages-results`}
+        aria-labelledby="page-catalog-title"
+      >
         <div className={managementStyles.panelPadded}>
           <p className={managementStyles.sectionKicker}>Governança de navegação</p>
           <h2 id="page-catalog-title" className={managementStyles.sectionTitle}>
-            Páginas e permissões
+            Páginas cadastradas
           </h2>
           <p className={managementStyles.sectionDescription}>
-            Desativar remove a entrada da navegação; a autorização da rota continua no servidor.
+            Rotas da aplicação e controle de navegação. A autorização da rota continua no servidor.
           </p>
         </div>
 
@@ -163,8 +128,8 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
             <thead>
               <tr>
                 <th scope="col">Página</th>
-                <th scope="col">Módulo</th>
-                <th scope="col">Permissão</th>
+                <th scope="col">Descrição</th>
+                <th scope="col">Rota</th>
                 <th scope="col">Status</th>
                 <th scope="col">Ação</th>
               </tr>
@@ -178,12 +143,14 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
                     <tr key={page.key}>
                       <th scope="row" className="min-w-64 text-left">
                         <strong className="block">{page.name}</strong>
-                        <span className="mt-0.5 block font-normal text-[var(--analytics-muted)]">
-                          {page.path}
-                        </span>
                       </th>
-                      <td>{page.section}</td>
-                      <td className="min-w-52">{getPermissionLabel(page.permissionKey)}</td>
+                      <td className="min-w-72">
+                        <span className="block">{page.description}</span>
+                        <span className="mt-0.5 block text-[var(--analytics-muted)]">
+                          {getPermissionLabel(page.permissionKey)} · {page.section}
+                        </span>
+                      </td>
+                      <td className="min-w-52 font-mono">{page.path}</td>
                       <td>
                         <span
                           className={managementStyles.statusPill}
@@ -268,6 +235,6 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

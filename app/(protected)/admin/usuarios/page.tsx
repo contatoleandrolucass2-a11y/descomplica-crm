@@ -148,7 +148,7 @@ export default async function UsersAdminPage() {
   });
 
   return (
-    <ManagementPage>
+    <ManagementPage className="admin-canvas admin-users-page">
       <ManagementPageHeader
         eyebrow="Administração"
         title="Usuários e acessos"

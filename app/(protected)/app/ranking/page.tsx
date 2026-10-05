@@ -32,6 +32,8 @@ import { loadRankingReadModel } from "@/lib/crm/ranking/data";
 import { buildRanking, type RankingLine } from "@/lib/crm/ranking/presentation";
 import { DATA_UNAVAILABLE_LABEL } from "@/lib/crm/source-availability";
 
+import styles from "./RankingCanvas.module.css";
+
 export const metadata = { title: "Ranking" };
 
 const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
@@ -106,19 +108,28 @@ function UnavailableRankingComposition({
   return (
     <>
       <section aria-labelledby="ranking-podium-title">
-        <SectionHeading
-          id="ranking-podium-title"
-          kicker="Top 3"
-          title="Disputa pelo topo"
-          description="A estrutura do pódio permanece visível sem inventar participantes ou pontuações."
+        <div className={styles.sectionHeading}>
+          <SectionHeading
+            id="ranking-podium-title"
+            kicker="Top 3"
+            title="Disputa pelo topo"
+            description="A estrutura do pódio permanece visível sem inventar participantes ou pontuações."
+            density="compact"
+          />
+        </div>
+        <AnalyticsCard
+          tone="navy"
           density="compact"
-        />
-        <AnalyticsCard tone="navy" density="compact" className="overflow-hidden">
-          <ol className="grid list-none items-stretch gap-3 p-0 lg:grid-cols-3" role="list">
+          className={`${styles.podiumCard} overflow-hidden`}
+        >
+          <ol
+            className={`${styles.podiumList} grid list-none items-stretch gap-3 p-0 lg:grid-cols-3`}
+            role="list"
+          >
             {PODIUM_PRESENTATION.map((presentation, index) => (
               <li
                 key={presentation.label}
-                className={`flex min-h-44 flex-col items-center rounded-xl border p-4 text-center ${presentation.cardClass}`}
+                className={`${styles.podiumEntry} flex min-h-44 flex-col items-center rounded-xl border p-4 text-center ${presentation.cardClass}`}
               >
                 <span
                   className={`grid size-12 place-items-center rounded-full text-base font-bold ring-4 ${presentation.markerClass}`}
@@ -131,9 +142,7 @@ function UnavailableRankingComposition({
                 >
                   {presentation.label}
                 </p>
-                <h3 className="mt-3 text-lg font-semibold text-white">
-                  <UnavailableValue reason="Dado indisponível — integração pendente" />
-                </h3>
+                <h3 className="mt-3 text-lg font-semibold text-white">—</h3>
                 <div className="mt-auto pt-3">
                   <UnavailableValue reason="Dado indisponível — integração pendente" />
                 </div>
@@ -143,14 +152,19 @@ function UnavailableRankingComposition({
         </AnalyticsCard>
       </section>
 
-      <section className="min-w-0" aria-labelledby="ranking-scoreboard-title">
-        <SectionHeading
-          id="ranking-scoreboard-title"
-          kicker="Placar completo"
-          title={`Desempenho por ${scope === "brokers" ? "corretor" : "gerente"}`}
-          description="Colunas preservadas; ausência de fonte não é convertida em zero."
-          density="compact"
-        />
+      <section
+        className={`${styles.scoreboard} min-w-0`}
+        aria-labelledby="ranking-scoreboard-title"
+      >
+        <div className={styles.sectionHeading}>
+          <SectionHeading
+            id="ranking-scoreboard-title"
+            kicker="Placar completo"
+            title={`Desempenho por ${scope === "brokers" ? "corretor" : "gerente"}`}
+            description="Colunas preservadas; ausência de fonte não é convertida em zero."
+            density="compact"
+          />
+        </div>
         <AnalyticsTable
           caption={`Ranking de ${RANKING_SCOPES[scope].label.toLocaleLowerCase("pt-BR")} — ${RANKING_PERIODS[period].label}`}
           rows={[{ key: "unavailable" }]}
@@ -184,7 +198,7 @@ export default async function RankingPage({
     const policyPending = result.status === "policy_pending";
 
     return (
-      <ManagementPage>
+      <ManagementPage className={styles.canvas ?? ""}>
         <ManagementPageHeader
           eyebrow="Desempenho comercial"
           title="Ranking por pontos"
@@ -202,6 +216,7 @@ export default async function RankingPage({
 
         <DataState
           variant={isEmpty ? "empty" : "unavailable"}
+          compact
           title={
             isEmpty
               ? "Aguardando dados"
@@ -221,7 +236,7 @@ export default async function RankingPage({
               <Link
                 href="/app/configuracoes/metas/pontos"
                 prefetch={false}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-cyan-300 px-5 py-2.5 text-sm font-semibold text-[#082137] hover:bg-cyan-200"
+                className={`${styles.draftLink} inline-flex min-h-11 items-center justify-center rounded-lg bg-cyan-300 px-4 py-2 text-xs font-semibold text-[#082137] hover:bg-cyan-200`}
               >
                 Preparar rascunho de pontuação
               </Link>
@@ -231,7 +246,7 @@ export default async function RankingPage({
 
         <section aria-labelledby="ranking-points-title">
           <AnalyticsCard tone="navy" density="compact">
-            <div className="border-b border-white/10 pb-4">
+            <div className={`${styles.pointsHeader} border-b border-white/10 pb-4`}>
               <p className="text-xs font-semibold tracking-[0.14em] text-cyan-300 uppercase">
                 Sem pontuação oficial
               </p>
@@ -239,7 +254,9 @@ export default async function RankingPage({
                 Pontos por ação
               </h2>
             </div>
-            <dl className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+            <dl
+              className={`${styles.pointsList} mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7`}
+            >
               {POINT_METRICS.map((metric, index) => (
                 <div
                   key={metric.key}
@@ -389,7 +406,7 @@ export default async function RankingPage({
   ];
 
   return (
-    <ManagementPage>
+    <ManagementPage className={styles.canvas ?? ""}>
       <ManagementPageHeader
         eyebrow="Desempenho comercial"
         title="Ranking por pontos"
@@ -428,7 +445,9 @@ export default async function RankingPage({
 
       <section aria-labelledby="ranking-points-title">
         <AnalyticsCard tone="navy" density="compact">
-          <div className="flex flex-wrap items-end justify-between gap-3 border-b border-white/10 pb-4">
+          <div
+            className={`${styles.pointsHeader} flex flex-wrap items-end justify-between gap-3 border-b border-white/10 pb-4`}
+          >
             <div>
               <p className="text-xs font-semibold tracking-[0.14em] text-cyan-300 uppercase">
                 Regra vigente
@@ -442,7 +461,9 @@ export default async function RankingPage({
             </p>
           </div>
 
-          <dl className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+          <dl
+            className={`${styles.pointsList} mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7`}
+          >
             {POINT_METRICS.map((metric, index) => {
               const rouletteUnavailable =
                 !result.rouletteAvailable && metric.key.startsWith("roulette");
@@ -535,24 +556,33 @@ export default async function RankingPage({
       ) : (
         <>
           <section aria-labelledby="ranking-podium-title">
-            <SectionHeading
-              id="ranking-podium-title"
-              kicker="Top 3"
-              title="Disputa pelo topo"
-              description={`Destaques reais de ${RANKING_SCOPES[scope].label.toLocaleLowerCase(
-                "pt-BR",
-              )} no período selecionado.`}
+            <div className={styles.sectionHeading}>
+              <SectionHeading
+                id="ranking-podium-title"
+                kicker="Top 3"
+                title="Disputa pelo topo"
+                description={`Destaques reais de ${RANKING_SCOPES[scope].label.toLocaleLowerCase(
+                  "pt-BR",
+                )} no período selecionado.`}
+                density="compact"
+              />
+            </div>
+            <AnalyticsCard
+              tone="navy"
               density="compact"
-            />
-            <AnalyticsCard tone="navy" density="compact" className="overflow-hidden">
-              <ol className="grid list-none items-stretch gap-3 p-0 lg:grid-cols-3" role="list">
+              className={`${styles.podiumCard} overflow-hidden`}
+            >
+              <ol
+                className={`${styles.podiumList} grid list-none items-stretch gap-3 p-0 lg:grid-cols-3`}
+                role="list"
+              >
                 {ranking.slice(0, 3).map((line, index) => {
                   const presentation = PODIUM_PRESENTATION[index]!;
 
                   return (
                     <li
                       key={line.key}
-                      className={`flex min-h-48 flex-col items-center rounded-xl border p-4 text-center ${presentation.cardClass}`}
+                      className={`${styles.podiumEntry} flex min-h-48 flex-col items-center rounded-xl border p-4 text-center ${presentation.cardClass}`}
                     >
                       <span
                         className={`grid size-12 place-items-center rounded-full text-base font-bold ring-4 ${presentation.markerClass}`}
@@ -592,40 +622,47 @@ export default async function RankingPage({
             </AnalyticsCard>
           </section>
 
-          <section className="min-w-0" aria-labelledby="ranking-scoreboard-title">
-            <SectionHeading
-              id="ranking-scoreboard-title"
-              kicker="Placar completo"
-              title={`Desempenho por ${scope === "brokers" ? "corretor" : "gerente"}`}
-              description="Produção, bônus e conversão permanecem separados para tornar a pontuação auditável."
-              action={
-                <dl className="grid w-full grid-cols-3 overflow-hidden rounded-xl border border-[var(--analytics-line)] bg-[var(--analytics-line)] sm:w-auto">
-                  <div className="min-w-24 bg-[var(--analytics-surface)] px-3 py-2">
-                    <dt className="text-[0.65rem] text-[var(--analytics-muted)]">Participantes</dt>
-                    <dd className="mt-0.5 font-semibold text-[var(--analytics-ink)]">
-                      {ranking.length}
-                    </dd>
-                  </div>
-                  <div className="min-w-24 bg-[var(--analytics-surface)] px-3 py-2">
-                    <dt className="text-[0.65rem] text-[var(--analytics-muted)]">
-                      Média de pontos
-                    </dt>
-                    <dd className="mt-0.5 font-semibold text-[var(--analytics-ink)]">
-                      {numberFormatter.format(averagePoints)}
-                    </dd>
-                  </div>
-                  <div className="min-w-24 bg-[var(--analytics-surface)] px-3 py-2">
-                    <dt className="text-[0.65rem] text-[var(--analytics-muted)]">
-                      Conversão média
-                    </dt>
-                    <dd className="mt-0.5 font-semibold text-[var(--analytics-ink)]">
-                      {percentFormatter.format(averageConversion)}
-                    </dd>
-                  </div>
-                </dl>
-              }
-              density="compact"
-            />
+          <section
+            className={`${styles.scoreboard} min-w-0`}
+            aria-labelledby="ranking-scoreboard-title"
+          >
+            <div className={styles.sectionHeading}>
+              <SectionHeading
+                id="ranking-scoreboard-title"
+                kicker="Placar completo"
+                title={`Desempenho por ${scope === "brokers" ? "corretor" : "gerente"}`}
+                description="Produção, bônus e conversão permanecem separados para tornar a pontuação auditável."
+                action={
+                  <dl className="grid w-full grid-cols-3 overflow-hidden rounded-xl border border-[var(--analytics-line)] bg-[var(--analytics-line)] sm:w-auto">
+                    <div className="min-w-24 bg-[var(--analytics-surface)] px-3 py-2">
+                      <dt className="text-[0.65rem] text-[var(--analytics-muted)]">
+                        Participantes
+                      </dt>
+                      <dd className="mt-0.5 font-semibold text-[var(--analytics-ink)]">
+                        {ranking.length}
+                      </dd>
+                    </div>
+                    <div className="min-w-24 bg-[var(--analytics-surface)] px-3 py-2">
+                      <dt className="text-[0.65rem] text-[var(--analytics-muted)]">
+                        Média de pontos
+                      </dt>
+                      <dd className="mt-0.5 font-semibold text-[var(--analytics-ink)]">
+                        {numberFormatter.format(averagePoints)}
+                      </dd>
+                    </div>
+                    <div className="min-w-24 bg-[var(--analytics-surface)] px-3 py-2">
+                      <dt className="text-[0.65rem] text-[var(--analytics-muted)]">
+                        Conversão média
+                      </dt>
+                      <dd className="mt-0.5 font-semibold text-[var(--analytics-ink)]">
+                        {percentFormatter.format(averageConversion)}
+                      </dd>
+                    </div>
+                  </dl>
+                }
+                density="compact"
+              />
+            </div>
             <AnalyticsTable
               caption={`Ranking completo de ${RANKING_SCOPES[scope].label.toLocaleLowerCase(
                 "pt-BR",

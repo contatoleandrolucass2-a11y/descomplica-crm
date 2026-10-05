@@ -118,6 +118,48 @@ const routes = [
   "/admin/paginas",
 ];
 
+const approvedCanvasByRoute = new Map([
+  ["/app", { asset: "dashboard-oportunidades.webp", region: "left" }],
+  ["/app/etapas/oportunidades", { asset: "dashboard-oportunidades.webp", region: "right" }],
+  ["/app/etapas/agendamentos", { asset: "agendamentos-visitas.webp", region: "left" }],
+  ["/app/etapas/visitas", { asset: "agendamentos-visitas.webp", region: "right" }],
+  ["/app/etapas/pastas", { asset: "pastas-vendas.webp", region: "left" }],
+  ["/app/etapas/vendas", { asset: "pastas-vendas.webp", region: "right" }],
+  ["/app/ranking", { asset: "ranking-canal-parcerias.webp", region: "left" }],
+  ["/app/canal-de-parcerias", { asset: "ranking-canal-parcerias.webp", region: "right" }],
+  ["/app/configuracoes", { asset: "configuracoes-metas-funil.webp", region: "left" }],
+  ["/app/configuracoes/metas", { asset: "configuracoes-metas-funil.webp", region: "right" }],
+  ["/app/configuracoes/metas/parcerias", { asset: "metas-parcerias-pontos.webp", region: "left" }],
+  ["/app/configuracoes/metas/pontos", { asset: "metas-parcerias-pontos.webp", region: "right" }],
+  ["/app/simulacao", { asset: "hub-simulacao-associativo.webp", region: "left" }],
+  [
+    "/app/simulacao/associativo-fluxo-linear",
+    { asset: "hub-simulacao-associativo.webp", region: "right" },
+  ],
+  ["/app/simulacao/calcular-documentacao", { asset: "documentacao-caixa.webp", region: "left" }],
+  ["/app/simulacao/caixa", { asset: "documentacao-caixa.webp", region: "right" }],
+  ["/app/simulacao/tabela-direta", { asset: "tabela-direta-investidor.webp", region: "left" }],
+  ["/app/simulacao/tabela-investidor", { asset: "tabela-direta-investidor.webp", region: "right" }],
+  ["/app/simulacao/tabelao", { asset: "tabelao-administracao.webp", region: "left" }],
+  ["/admin", { asset: "tabelao-administracao.webp", region: "right" }],
+  ["/admin/usuarios", { asset: "usuarios-catalogo-paginas.webp", region: "left" }],
+  ["/admin/paginas", { asset: "usuarios-catalogo-paginas.webp", region: "right" }],
+]);
+
+if (approvedCanvasByRoute.size !== routes.length) {
+  throw new Error("Every protected visual route must map to one approved canvas region.");
+}
+
+const canvasDensityLimitByRoute = new Map([
+  ["/app/etapas/agendamentos", 1500],
+  ["/app/etapas/visitas", 1500],
+  ["/app/etapas/pastas", 1350],
+  ["/app/etapas/vendas", 1350],
+  ["/app/simulacao/calcular-documentacao", 1200],
+  ["/app/simulacao/caixa", 1200],
+]);
+const defaultCanvasDensityLimit = 1125;
+
 const simulatorRoutesByRuntimeKey = new Map([
   ["simulator.wf13", "/app/simulacao/associativo-fluxo-linear"],
   ["simulator.wf16", "/app/simulacao/calcular-documentacao"],
@@ -898,6 +940,7 @@ async function inspectRoute(
   pageErrors,
   { waitForArchiveInventory = true, expectedAccountFirstName } = {},
 ) {
+  const approvedCanvas = approvedCanvasByRoute.get(route);
   const consoleStart = consoleErrors.length;
   const pageErrorStart = pageErrors.length;
   const response = await openInspectableRoute(
@@ -957,229 +1000,244 @@ async function inspectRoute(
     }
   }
   await accountPanel.waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
-  const snapshot = await page.evaluate((simulatorWorkspace) => {
-    const text = document.body.innerText;
-    const root = document.documentElement;
-    const simulatorForm = simulatorWorkspace ? document.querySelector("main form") : null;
-    const archiveSimulator = [
-      "/app/simulacao/associativo-fluxo-linear",
-      "/app/simulacao/tabelao",
-      "/app/simulacao/tabela-direta",
-      "/app/simulacao/tabela-investidor",
-    ].includes(window.location.pathname);
-    const topbarInner = document.querySelector("header > div");
-    const brand = topbarInner?.firstElementChild;
-    const navigation = document.querySelector('header nav[aria-label="Navegação principal"]');
-    const mobileNavigationTrigger = document.querySelector(
-      'header button[aria-controls="authorized-navigation"]',
-    );
-    const navigationSurface = navigation?.getClientRects().length
-      ? navigation
-      : mobileNavigationTrigger;
-    const identity = document.querySelector("[data-session-identity]");
-    const identityLabel = document.querySelector("[data-session-identity-label]");
-    const accountPanel = document.querySelector("#protected-account-menu");
-    const accountLink = accountPanel?.querySelector('a[href="/conta/seguranca"]');
-    const themeSwitch = document.querySelector('[role="group"][aria-label="Aparência da página"]');
-    const actions = identity?.parentElement?.parentElement;
-    const actionChildren = [brand, navigationSurface, themeSwitch, identity, accountPanel].filter(
-      (element) => element instanceof HTMLElement,
-    );
-    const elementLabel = (element, index) => {
-      if (element === brand) return "brand";
-      if (element === navigationSurface) return "navigation";
-      if (element === identity) return "accountTrigger";
-      if (element === accountPanel) return "accountPanel";
-      if (element === accountLink) return "accountLink";
-      if (element.matches('[role="group"][aria-label="Aparência da página"]')) {
-        return "themeSwitch";
-      }
-      if (element.matches("form")) return "logoutForm";
-      return `action-${index}`;
-    };
-    const rectanglesOverlap = (first, second) => {
-      if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) return false;
-      if (
-        first.getClientRects().length === 0 ||
-        second.getClientRects().length === 0 ||
-        getComputedStyle(first).display === "none" ||
-        getComputedStyle(second).display === "none"
-      ) {
-        return false;
-      }
-      const firstBox = first.getBoundingClientRect();
-      const secondBox = second.getBoundingClientRect();
-      return (
-        firstBox.left < secondBox.right &&
-        firstBox.right > secondBox.left &&
-        firstBox.top < secondBox.bottom &&
-        firstBox.bottom > secondBox.top
+  const snapshot = await page.evaluate(
+    ({ simulatorWorkspace, maxDesktopHeight }) => {
+      const text = document.body.innerText;
+      const root = document.documentElement;
+      const simulatorForm = simulatorWorkspace ? document.querySelector("main form") : null;
+      const archiveSimulator = [
+        "/app/simulacao/associativo-fluxo-linear",
+        "/app/simulacao/tabelao",
+        "/app/simulacao/tabela-direta",
+        "/app/simulacao/tabela-investidor",
+      ].includes(window.location.pathname);
+      const topbarInner = document.querySelector("header > div");
+      const brand = topbarInner?.firstElementChild;
+      const navigation = document.querySelector('header nav[aria-label="Navegação principal"]');
+      const mobileNavigationTrigger = document.querySelector(
+        'header button[aria-controls="authorized-navigation"]',
       );
-    };
-    const topbarCollisionPairs = [];
-    if (rectanglesOverlap(brand, actions)) {
-      topbarCollisionPairs.push("brand×actions");
-    }
-    for (let firstIndex = 0; firstIndex < actionChildren.length; firstIndex += 1) {
-      for (
-        let secondIndex = firstIndex + 1;
-        secondIndex < actionChildren.length;
-        secondIndex += 1
-      ) {
-        if (rectanglesOverlap(actionChildren[firstIndex], actionChildren[secondIndex])) {
-          topbarCollisionPairs.push(
-            `${elementLabel(actionChildren[firstIndex], firstIndex)}×${elementLabel(
-              actionChildren[secondIndex],
-              secondIndex,
-            )}`,
-          );
+      const navigationSurface = navigation?.getClientRects().length
+        ? navigation
+        : mobileNavigationTrigger;
+      const identity = document.querySelector("[data-session-identity]");
+      const identityLabel = document.querySelector("[data-session-identity-label]");
+      const accountPanel = document.querySelector("#protected-account-menu");
+      const accountLink = accountPanel?.querySelector('a[href="/conta/seguranca"]');
+      const themeSwitch = document.querySelector(
+        '[role="group"][aria-label="Aparência da página"]',
+      );
+      const actions = identity?.parentElement?.parentElement;
+      const actionChildren = [brand, navigationSurface, themeSwitch, identity, accountPanel].filter(
+        (element) => element instanceof HTMLElement,
+      );
+      const elementLabel = (element, index) => {
+        if (element === brand) return "brand";
+        if (element === navigationSurface) return "navigation";
+        if (element === identity) return "accountTrigger";
+        if (element === accountPanel) return "accountPanel";
+        if (element === accountLink) return "accountLink";
+        if (element.matches('[role="group"][aria-label="Aparência da página"]')) {
+          return "themeSwitch";
+        }
+        if (element.matches("form")) return "logoutForm";
+        return `action-${index}`;
+      };
+      const rectanglesOverlap = (first, second) => {
+        if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) return false;
+        if (
+          first.getClientRects().length === 0 ||
+          second.getClientRects().length === 0 ||
+          getComputedStyle(first).display === "none" ||
+          getComputedStyle(second).display === "none"
+        ) {
+          return false;
+        }
+        const firstBox = first.getBoundingClientRect();
+        const secondBox = second.getBoundingClientRect();
+        return (
+          firstBox.left < secondBox.right &&
+          firstBox.right > secondBox.left &&
+          firstBox.top < secondBox.bottom &&
+          firstBox.bottom > secondBox.top
+        );
+      };
+      const topbarCollisionPairs = [];
+      if (rectanglesOverlap(brand, actions)) {
+        topbarCollisionPairs.push("brand×actions");
+      }
+      for (let firstIndex = 0; firstIndex < actionChildren.length; firstIndex += 1) {
+        for (
+          let secondIndex = firstIndex + 1;
+          secondIndex < actionChildren.length;
+          secondIndex += 1
+        ) {
+          if (rectanglesOverlap(actionChildren[firstIndex], actionChildren[secondIndex])) {
+            topbarCollisionPairs.push(
+              `${elementLabel(actionChildren[firstIndex], firstIndex)}×${elementLabel(
+                actionChildren[secondIndex],
+                secondIndex,
+              )}`,
+            );
+          }
         }
       }
-    }
-    const accountPanelBox = accountPanel?.getBoundingClientRect();
-    const identityLabelBox = identityLabel?.getBoundingClientRect();
-    const identityStyle = identityLabel ? getComputedStyle(identityLabel) : null;
-    const navigationSurfaceBox = navigationSurface?.getBoundingClientRect();
-    const navigationVisible = Boolean(navigation?.getClientRects().length);
-    const themeButtons = themeSwitch ? [...themeSwitch.querySelectorAll("button")] : [];
-    const blockedAction = simulatorForm?.querySelector('[data-cta-state="blocked"]');
-    const associativeStock = document.querySelector(
-      ".investor-associative-table-page .investor-stock-panel",
-    );
-    const stockFilters = associativeStock?.querySelector(".investor-stock-filters");
-    const filterTitle = associativeStock?.querySelector(".investor-stock-title-row");
-    const clearFilters = associativeStock?.querySelector(".investor-stock-header-actions > button");
-    const firstFilter = stockFilters?.querySelector(":scope > label");
-    const stockSync = associativeStock?.querySelector(".investor-stock-sync");
-    const associativeClosing = document.querySelector(
-      ".investor-associative-table-page .investor-page-closing",
-    );
-    const associativeDisclaimer = associativeClosing?.querySelector(".simulation-disclaimer");
-    const associativeFooter = associativeClosing?.querySelector(".investor-page-footer");
-    const enabledAction = simulatorForm?.querySelector(
-      'button[type="submit"][data-cta-state="enabled"]',
-    );
-    const unavailableAction = simulatorForm?.querySelector('[data-cta-state="unavailable"]');
-    const blockedStyle = blockedAction ? getComputedStyle(blockedAction) : null;
-    const enabledStyle = enabledAction ? getComputedStyle(enabledAction) : null;
-    const unavailableStyle = unavailableAction ? getComputedStyle(unavailableAction) : null;
-    return {
-      pathname: window.location.pathname,
-      h1Count: document.querySelectorAll("h1").length,
-      mainCount: document.querySelectorAll("main").length,
-      theme: root.dataset.theme ?? null,
-      horizontalOverflow: root.scrollWidth > root.clientWidth + 1,
-      hasBrokenValue: /\b(?:NaN|undefined)\b/.test(text),
-      protectedShellPresent: navigation instanceof HTMLElement,
-      loginPresent: Boolean(document.querySelector('input[name="password"]')),
-      reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
-      topbarCollision: topbarCollisionPairs.length > 0,
-      topbarCollisionPairs,
-      navigationGeometryReady: Boolean(
-        navigation instanceof HTMLElement &&
-        navigation.id === "authorized-navigation" &&
-        navigation.getAttribute("aria-label") === "Navegação principal" &&
-        navigationSurface instanceof HTMLElement &&
-        navigationSurfaceBox &&
-        navigationSurfaceBox.width > 0 &&
-        navigationSurfaceBox.height > 0 &&
-        navigationSurfaceBox.left >= -1 &&
-        navigationSurfaceBox.right <= innerWidth + 1 &&
-        navigationSurfaceBox.top >= -1 &&
-        navigationSurfaceBox.bottom <= innerHeight + 1 &&
-        navigationSurface.scrollWidth <= navigationSurface.clientWidth + 1 &&
-        (navigationVisible ||
-          (mobileNavigationTrigger instanceof HTMLButtonElement &&
-            mobileNavigationTrigger.getAttribute("aria-expanded") === "false" &&
-            navigation.getAttribute("data-open") === "false")),
-      ),
-      accountMenuReady: Boolean(
-        identity instanceof HTMLButtonElement &&
-        accountPanel instanceof HTMLElement &&
-        identityLabel instanceof HTMLElement &&
-        accountLink instanceof HTMLElement &&
-        identity.getAttribute("aria-controls") === accountPanel.id &&
-        identity.getAttribute("aria-expanded") === "true" &&
-        !accountPanel.hidden &&
-        accountPanel.textContent?.includes("Conta conectada") &&
-        identityLabel.textContent?.trim() &&
-        identityStyle?.overflowWrap === "anywhere" &&
-        accountPanelBox &&
-        accountPanelBox.width > 0 &&
-        accountPanelBox.height > 0 &&
-        accountPanelBox.left >= -1 &&
-        accountPanelBox.right <= innerWidth + 1 &&
-        accountPanelBox.top >= -1 &&
-        accountPanelBox.bottom <= innerHeight + 1 &&
-        accountPanel.scrollWidth <= accountPanel.clientWidth + 1 &&
-        identityLabelBox &&
-        identityLabelBox.width > 0 &&
-        identityLabelBox.left >= accountPanelBox.left - 1 &&
-        identityLabelBox.right <= accountPanelBox.right + 1 &&
-        identityLabel.scrollWidth <= identityLabel.clientWidth + 1 &&
-        accountLink.getClientRects().length > 0,
-      ),
-      themeControlsVisible:
-        themeButtons.length === 3 &&
-        ["Claro", "Médio", "Escuro"].every((label) =>
-          themeButtons.some(
-            (button) => button.textContent?.trim() === label && button.getClientRects().length > 0,
+      const accountPanelBox = accountPanel?.getBoundingClientRect();
+      const identityLabelBox = identityLabel?.getBoundingClientRect();
+      const identityStyle = identityLabel ? getComputedStyle(identityLabel) : null;
+      const navigationSurfaceBox = navigationSurface?.getBoundingClientRect();
+      const navigationVisible = Boolean(navigation?.getClientRects().length);
+      const themeButtons = themeSwitch ? [...themeSwitch.querySelectorAll("button")] : [];
+      const blockedAction = simulatorForm?.querySelector('[data-cta-state="blocked"]');
+      const associativeStock = document.querySelector(
+        ".investor-associative-table-page .investor-stock-panel",
+      );
+      const stockFilters = associativeStock?.querySelector(".investor-stock-filters");
+      const filterTitle = associativeStock?.querySelector(".investor-stock-title-row");
+      const clearFilters = associativeStock?.querySelector(
+        ".investor-stock-header-actions > button",
+      );
+      const firstFilter = stockFilters?.querySelector(":scope > label");
+      const stockSync = associativeStock?.querySelector(".investor-stock-sync");
+      const associativeClosing = document.querySelector(
+        ".investor-associative-table-page .investor-page-closing",
+      );
+      const associativeDisclaimer = associativeClosing?.querySelector(".simulation-disclaimer");
+      const associativeFooter = associativeClosing?.querySelector(".investor-page-footer");
+      const enabledAction = simulatorForm?.querySelector(
+        'button[type="submit"][data-cta-state="enabled"]',
+      );
+      const unavailableAction = simulatorForm?.querySelector('[data-cta-state="unavailable"]');
+      const blockedStyle = blockedAction ? getComputedStyle(blockedAction) : null;
+      const enabledStyle = enabledAction ? getComputedStyle(enabledAction) : null;
+      const unavailableStyle = unavailableAction ? getComputedStyle(unavailableAction) : null;
+      return {
+        pathname: window.location.pathname,
+        h1Count: document.querySelectorAll("h1").length,
+        mainCount: document.querySelectorAll("main").length,
+        theme: root.dataset.theme ?? null,
+        horizontalOverflow: root.scrollWidth > root.clientWidth + 1,
+        pageScrollHeight: Math.max(root.scrollHeight, document.body.scrollHeight),
+        canvasDensityReady:
+          root.clientWidth !== 1440 ||
+          Math.max(root.scrollHeight, document.body.scrollHeight) <= maxDesktopHeight,
+        hasBrokenValue: /\b(?:NaN|undefined)\b/.test(text),
+        protectedShellPresent: navigation instanceof HTMLElement,
+        loginPresent: Boolean(document.querySelector('input[name="password"]')),
+        reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+        topbarCollision: topbarCollisionPairs.length > 0,
+        topbarCollisionPairs,
+        navigationGeometryReady: Boolean(
+          navigation instanceof HTMLElement &&
+          navigation.id === "authorized-navigation" &&
+          navigation.getAttribute("aria-label") === "Navegação principal" &&
+          navigationSurface instanceof HTMLElement &&
+          navigationSurfaceBox &&
+          navigationSurfaceBox.width > 0 &&
+          navigationSurfaceBox.height > 0 &&
+          navigationSurfaceBox.left >= -1 &&
+          navigationSurfaceBox.right <= innerWidth + 1 &&
+          navigationSurfaceBox.top >= -1 &&
+          navigationSurfaceBox.bottom <= innerHeight + 1 &&
+          navigationSurface.scrollWidth <= navigationSurface.clientWidth + 1 &&
+          (navigationVisible ||
+            (mobileNavigationTrigger instanceof HTMLButtonElement &&
+              mobileNavigationTrigger.getAttribute("aria-expanded") === "false" &&
+              navigation.getAttribute("data-open") === "false")),
+        ),
+        accountMenuReady: Boolean(
+          identity instanceof HTMLButtonElement &&
+          accountPanel instanceof HTMLElement &&
+          identityLabel instanceof HTMLElement &&
+          accountLink instanceof HTMLElement &&
+          identity.getAttribute("aria-controls") === accountPanel.id &&
+          identity.getAttribute("aria-expanded") === "true" &&
+          !accountPanel.hidden &&
+          accountPanel.textContent?.includes("Conta conectada") &&
+          identityLabel.textContent?.trim() &&
+          identityStyle?.overflowWrap === "anywhere" &&
+          accountPanelBox &&
+          accountPanelBox.width > 0 &&
+          accountPanelBox.height > 0 &&
+          accountPanelBox.left >= -1 &&
+          accountPanelBox.right <= innerWidth + 1 &&
+          accountPanelBox.top >= -1 &&
+          accountPanelBox.bottom <= innerHeight + 1 &&
+          accountPanel.scrollWidth <= accountPanel.clientWidth + 1 &&
+          identityLabelBox &&
+          identityLabelBox.width > 0 &&
+          identityLabelBox.left >= accountPanelBox.left - 1 &&
+          identityLabelBox.right <= accountPanelBox.right + 1 &&
+          identityLabel.scrollWidth <= identityLabel.clientWidth + 1 &&
+          accountLink.getClientRects().length > 0,
+        ),
+        themeControlsVisible:
+          themeButtons.length === 3 &&
+          ["Claro", "Médio", "Escuro"].every((label) =>
+            themeButtons.some(
+              (button) =>
+                button.textContent?.trim() === label && button.getClientRects().length > 0,
+            ),
           ),
-        ),
-      associativeStockControlsPresent:
-        window.location.pathname !== "/app/simulacao/associativo-fluxo-linear" ||
-        Boolean(
-          associativeStock &&
-          stockFilters &&
-          filterTitle &&
-          clearFilters &&
-          firstFilter &&
-          stockSync,
-        ),
-      associativeStockCollision:
-        rectanglesOverlap(filterTitle, clearFilters) ||
-        rectanglesOverlap(stockSync, clearFilters) ||
-        rectanglesOverlap(clearFilters, firstFilter) ||
-        rectanglesOverlap(stockSync, stockFilters),
-      associativeStockTouchTargetReady:
-        !associativeStock ||
-        root.clientWidth > 760 ||
-        (clearFilters?.getBoundingClientRect().height ?? 0) >= 44,
-      associativeClosingAligned:
-        window.location.pathname !== "/app/simulacao/associativo-fluxo-linear" ||
-        Boolean(
-          associativeClosing &&
-          associativeDisclaimer &&
-          associativeFooter &&
-          (root.clientWidth <= 760
-            ? associativeFooter.getBoundingClientRect().top >=
-              associativeDisclaimer.getBoundingClientRect().bottom
-            : Math.abs(
-                associativeFooter.getBoundingClientRect().top -
-                  associativeDisclaimer.getBoundingClientRect().top,
-              ) <= 1),
-        ),
-      simulatorActionEnabled: Boolean(enabledAction) && !enabledAction?.disabled,
-      simulatorFormActionPresent: simulatorForm?.hasAttribute("action") ?? false,
-      blockedCalculationMessagePresent:
-        !simulatorWorkspace ||
-        (archiveSimulator && Boolean(blockedAction?.disabled)) ||
-        text.includes("Cálculo temporariamente indisponível — regra aguardando validação"),
-      blockedActionDistinct:
-        !simulatorWorkspace ||
-        (archiveSimulator
-          ? Boolean(blockedAction?.disabled) && blockedStyle?.cursor === "not-allowed"
-          : Boolean(blockedAction?.querySelector("svg")) &&
-            Boolean(document.querySelector("#calculation-blocked-reason")) &&
-            blockedStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
-            blockedStyle?.cursor === "not-allowed"),
-      unavailableActionDistinct:
-        !unavailableAction ||
-        (unavailableStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
-          unavailableStyle?.borderStyle === "dashed" &&
-          unavailableStyle?.cursor === "not-allowed"),
-    };
-  }, isSimulatorWorkspace);
+        associativeStockControlsPresent:
+          window.location.pathname !== "/app/simulacao/associativo-fluxo-linear" ||
+          Boolean(
+            associativeStock &&
+            stockFilters &&
+            filterTitle &&
+            clearFilters &&
+            firstFilter &&
+            stockSync,
+          ),
+        associativeStockCollision:
+          rectanglesOverlap(filterTitle, clearFilters) ||
+          rectanglesOverlap(stockSync, clearFilters) ||
+          rectanglesOverlap(clearFilters, firstFilter) ||
+          rectanglesOverlap(stockSync, stockFilters),
+        associativeStockTouchTargetReady:
+          !associativeStock ||
+          root.clientWidth > 760 ||
+          (clearFilters?.getBoundingClientRect().height ?? 0) >= 44,
+        associativeClosingAligned:
+          window.location.pathname !== "/app/simulacao/associativo-fluxo-linear" ||
+          Boolean(
+            associativeClosing &&
+            associativeDisclaimer &&
+            associativeFooter &&
+            (root.clientWidth <= 760
+              ? associativeFooter.getBoundingClientRect().top >=
+                associativeDisclaimer.getBoundingClientRect().bottom
+              : Math.abs(
+                  associativeFooter.getBoundingClientRect().top -
+                    associativeDisclaimer.getBoundingClientRect().top,
+                ) <= 1),
+          ),
+        simulatorActionEnabled: Boolean(enabledAction) && !enabledAction?.disabled,
+        simulatorFormActionPresent: simulatorForm?.hasAttribute("action") ?? false,
+        blockedCalculationMessagePresent:
+          !simulatorWorkspace ||
+          (archiveSimulator && Boolean(blockedAction?.disabled)) ||
+          text.includes("Cálculo temporariamente indisponível — regra aguardando validação"),
+        blockedActionDistinct:
+          !simulatorWorkspace ||
+          (archiveSimulator
+            ? Boolean(blockedAction?.disabled) && blockedStyle?.cursor === "not-allowed"
+            : Boolean(blockedAction?.querySelector("svg")) &&
+              Boolean(document.querySelector("#calculation-blocked-reason")) &&
+              blockedStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
+              blockedStyle?.cursor === "not-allowed"),
+        unavailableActionDistinct:
+          !unavailableAction ||
+          (unavailableStyle?.backgroundColor !== enabledStyle?.backgroundColor &&
+            unavailableStyle?.borderStyle === "dashed" &&
+            unavailableStyle?.cursor === "not-allowed"),
+      };
+    },
+    {
+      simulatorWorkspace: isSimulatorWorkspace,
+      maxDesktopHeight: canvasDensityLimitByRoute.get(route) ?? defaultCanvasDensityLimit,
+    },
+  );
   Object.assign(
     snapshot,
     await page.evaluate(inspectAccountIdentityDisplay, expectedAccountFirstName),
@@ -1211,6 +1269,7 @@ async function inspectRoute(
     snapshot.reducedMotion &&
     !snapshot.topbarCollision &&
     snapshot.navigationGeometryReady &&
+    snapshot.canvasDensityReady &&
     snapshot.accountMenuReady &&
     snapshot.identityDisplayReady &&
     snapshot.themeControlsVisible &&
@@ -1225,6 +1284,7 @@ async function inspectRoute(
 
   return {
     route,
+    approvedCanvas,
     status: response?.status() ?? null,
     expectedSimulatorState: isSimulatorWorkspace
       ? expectsEnabledSimulatorAction

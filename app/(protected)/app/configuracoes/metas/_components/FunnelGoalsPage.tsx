@@ -19,6 +19,7 @@ import { funnelDraftValuesToGoals } from "@/lib/crm/commercial-engine/drafts";
 import { loadFunnelGoals, type FunnelGoals } from "@/lib/crm/goals/data";
 
 import { prepareFunnelGoalsDraftAction } from "../actions";
+import styles from "../../ConfigurationCanvas.module.css";
 import { ConfigurationDraftForm } from "./ConfigurationDraftForm";
 
 type GoalValues = Omit<FunnelGoals, "profileKey" | "effectiveMonth" | "updatedAt">;
@@ -124,7 +125,7 @@ export async function FunnelGoalsPage({
       : ["w-full", "w-[90%]", "w-[80%]", "w-[70%]"];
 
   return (
-    <ManagementPage>
+    <ManagementPage className={styles.canvas ?? ""}>
       <ManagementPageHeader
         title={pageTitle}
         description={
@@ -140,7 +141,7 @@ export async function FunnelGoalsPage({
       />
 
       <section
-        className={`${managementStyles.panel} ${managementStyles.panelStrong} grid gap-3 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center`}
+        className={`${styles.planningState} ${managementStyles.panel} ${managementStyles.panelStrong} grid gap-3 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center`}
         aria-label="Estado do planejamento comercial"
       >
         <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -174,7 +175,10 @@ export async function FunnelGoalsPage({
         </dl>
       </section>
 
-      <nav aria-label="Canal das metas" className="grid gap-2 sm:grid-cols-2 lg:max-w-3xl">
+      <nav
+        aria-label="Canal das metas"
+        className={`${styles.goalProfiles} grid gap-2 sm:grid-cols-2 lg:max-w-3xl`}
+      >
         {(
           Object.entries(GOAL_PROFILES) as Array<
             [GoalProfileKey, (typeof GOAL_PROFILES)[GoalProfileKey]]
@@ -245,7 +249,9 @@ export async function FunnelGoalsPage({
         saveLabel={`Salvar rascunho de ${monthLabel}`}
       >
         <input type="hidden" name="draftRevision" value={draft?.revision ?? 0} />
-        <div className="grid items-stretch gap-3 xl:grid-cols-[minmax(15rem,0.82fr)_minmax(25rem,1.35fr)_minmax(15rem,0.78fr)]">
+        <div
+          className={`${styles.primaryGrid} grid items-stretch gap-3 xl:grid-cols-[minmax(15rem,0.82fr)_minmax(25rem,1.35fr)_minmax(15rem,0.78fr)]`}
+        >
           <section
             aria-labelledby="conversion-title"
             className={`${managementStyles.panel} ${managementStyles.panelPadded}`}
@@ -283,7 +289,7 @@ export async function FunnelGoalsPage({
 
           <section
             aria-labelledby="funnel-result-title"
-            className={`${managementStyles.panel} ${managementStyles.panelStrong} overflow-hidden`}
+            className={`${styles.funnelResult} ${managementStyles.panel} ${managementStyles.panelStrong} overflow-hidden`}
           >
             <div className="grid gap-3 border-b border-[var(--analytics-line)] px-4 py-3 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-end">
               <div>
@@ -390,7 +396,10 @@ export async function FunnelGoalsPage({
           </section>
         </div>
 
-        <section className="grid gap-3 lg:grid-cols-2" aria-label="Parâmetros operacionais">
+        <section
+          className={`${styles.operations} grid gap-3 lg:grid-cols-2`}
+          aria-label="Parâmetros operacionais"
+        >
           <article className={`${managementStyles.panel} ${managementStyles.panelPadded}`}>
             <div className="flex items-start gap-3">
               <span className={managementStyles.iconFrame}>

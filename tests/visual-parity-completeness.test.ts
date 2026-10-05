@@ -80,6 +80,7 @@ describe("complete visual composition on the scoped v3 read model", () => {
     ]) {
       expect(dashboard).toContain(label);
     }
+    expect(dashboard).toContain("const SHOW_EXTENDED_DASHBOARD = false");
     for (const label of [
       "Mês atual",
       "Mês anterior",
@@ -92,6 +93,7 @@ describe("complete visual composition on the scoped v3 read model", () => {
     ]) {
       expect(partnerships).toContain(label);
     }
+    expect(partnerships).toContain("const SHOW_EXTENDED_PARTNERSHIP_RANKINGS = false");
     expect(partnerships).not.toMatch(/VGV[^\n]*[1-9][0-9.,]/);
   });
 
@@ -251,6 +253,13 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("@local\\.invalid");
     expect(script).toContain('kind: "responsive"');
     expect(script).toContain('"/app/simulacao/calcular-documentacao"');
+    expect(script).toContain("const approvedCanvasByRoute = new Map([");
+    expect(script).toContain("approvedCanvasByRoute.size !== routes.length");
+    expect(script).toContain("canvasDensityReady:");
+    expect(script).toContain("canvasDensityLimitByRoute");
+    expect(script).toContain("defaultCanvasDensityLimit");
+    expect(script).toContain("snapshot.canvasDensityReady &&");
+    expect(script).toContain("pageScrollHeight:");
     expect(script).toContain("const dedicatedSimulatorRoutes = new Set([");
     expect(script).toContain("!dedicatedSimulatorRoutes.has(route)");
     expect(script).toContain("responsiveScreenshots: routes.length * viewports.length");
