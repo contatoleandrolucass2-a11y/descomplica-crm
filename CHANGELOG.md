@@ -11,6 +11,8 @@
 - Explicita o nome acessivel dos atalhos de Configuracoes para navegacao assistiva.
 - QA da guia verifica a transicao de rota antes de conferir valores e temas.
 - Matriz visual do menu Configuracoes inclui o quinto link Recurso MKT.
+- Atualiza somente oito referencias revisadas de Configuracoes apos os gates
+  funcionais; preserva as outras 201 imagens e os limiares de comparacao.
 
 ## 2026-10-04 - Sequencias visuais do Associativo
 

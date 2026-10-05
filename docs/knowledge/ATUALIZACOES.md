@@ -34,6 +34,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   controles. Contrato antigo do menu impediu o restante; corrigido na branch.
   Integracao de `e1ab14a` preserva as referencias e resultados do PR #150;
   validacao combinada e publicacao continuam pendentes.
+- CI `37260367645`, captura limpa `c81abd2` com arvore identica a `1b68614`:
+  validate, restore, nove perfis E2E e todos os criterios funcionais aprovados.
+  154 responsivos, 88 temas, 209 Axe, 110 zooms, 40 menus e 12 cenarios MKT.
+  Somente oito diferencas esperadas da visao geral de Configuracoes; revisadas
+  em 05/10 e promovidas transacionalmente apos conferencia de arvore e hashes.
+  Preservadas outras 201 imagens e a proveniencia anterior, sem reduzir gates.
+  Pendencias: CI integral depois da promocao e verificacao pos-publicacao.
 
 ## 2026-10-04: cadencia visual e nome cadastrado
 

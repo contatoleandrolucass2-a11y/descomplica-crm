@@ -32,6 +32,14 @@
   erros, reset e teclado; restante bloqueado pelo contrato antigo de quatro
   links. `main` atualizado para `e1ab14a` e integrado preservando ambas as notas
   e as referencias revisadas do PR #150. Nova validacao combinada pendente.
+- CI `37260367645` na arvore limpa `c81abd2` (identica a `1b68614`) aprovou
+  lint, tipos, suite Linux, build, restore e E2E dos nove perfis. QA funcional:
+  154 responsivos, 88 temas, 209 Axe, 110 zooms, 40 menus e 12 cenarios MKT.
+  Somente oito referencias de Configuracoes divergiram com o novo card.
+- Em 05/10, as oito capturas foram inspecionadas e promovidas pelo helper
+  transacional existente, apos verificar arvore, predicado funcional e hashes.
+  Outras 201 imagens e evidencias anteriores preservadas; limiares intactos.
+  CI completa com as referencias atualizadas e publicacao ainda pendentes.
 
 ## 2026-10-04 - Associativo: cadencia e sequencias visuais
 
