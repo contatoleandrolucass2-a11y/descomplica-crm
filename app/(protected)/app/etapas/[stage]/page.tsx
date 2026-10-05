@@ -26,7 +26,6 @@ import {
   AnalyticsCard,
   AnalyticsTable,
   CommercialSourceLabel,
-  DataState,
   FilterBar,
   FilterGroup,
   FilterLink,
@@ -299,7 +298,7 @@ function StageComposition({
   const expandedHeader = stage.key === "appointments" || stage.key === "visits";
 
   return (
-    <main className="min-w-0 px-3 py-4 sm:px-5 sm:py-5">
+    <main className="min-w-0 px-3 py-3 sm:px-5">
       <AnalyticsCanvas kind="stage">
         <PageHeader
           variant={expandedHeader ? "stage" : "compact"}
@@ -319,29 +318,22 @@ function StageComposition({
         <StageFilters stage={stage} view={view} period={period} />
 
         {!dashboard ? (
-          <DataState
-            variant="unavailable"
-            compact
-            title={DATA_UNAVAILABLE_LABEL}
-            description="Ainda não existe snapshot comercial validado. Nenhum valor demonstrativo é exibido."
-          />
+          <p className="sr-only" role="status">
+            Ainda não existe snapshot comercial validado. Nenhum valor demonstrativo é exibido.
+          </p>
         ) : !dashboard.goalsAvailable ? (
-          <DataState
-            variant="unavailable"
-            compact
-            title={GOALS_UNAVAILABLE_LABEL}
-            description="Realizados continuam visíveis. Gauge, meta e gap ficam indisponíveis até existir uma fonte oficial segura."
-          />
+          <p className="sr-only" role="status">
+            {GOALS_UNAVAILABLE_LABEL}. Realizados continuam visíveis; gauge, meta e gap ficam
+            indisponíveis até existir uma fonte oficial segura.
+          </p>
         ) : sourceGoal !== null && sourceGoal <= 0 ? (
-          <DataState
-            variant="unavailable"
-            compact
-            title="Meta não definida para o período"
-            description="O snapshot trouxe meta igual a zero; esse valor não é tratado como alvo válido nem como progresso zero."
-          />
+          <p className="sr-only" role="status">
+            Meta não definida para o período. O snapshot trouxe meta igual a zero; esse valor não é
+            tratado como alvo válido nem como progresso zero.
+          </p>
         ) : null}
 
-        <section className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,0.65fr)]">
+        <section className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1.65fr)_minmax(18rem,1fr)]">
           <AnalyticsCard density="compact">
             <SectionHeading
               density="compact"
@@ -403,8 +395,8 @@ function StageComposition({
             <strong className="mt-2 block text-2xl font-semibold text-white">
               {stageIndex + 1} de {CRM_STAGES.length}
             </strong>
-            <dl className="mt-4 grid gap-3 text-sm">
-              <div className="border-b border-white/10 pb-3">
+            <dl className="mt-3 grid gap-2 text-sm">
+              <div className="border-b border-white/10 pb-2">
                 <dt className="text-slate-400">Visão aplicada</dt>
                 <dd className="mt-1 font-semibold text-white">{DASHBOARD_VIEWS[view].label}</dd>
               </div>
@@ -415,7 +407,7 @@ function StageComposition({
             </dl>
             <nav
               aria-label="Etapas adjacentes"
-              className="mt-5 grid grid-cols-2 gap-2 border-t border-white/10 pt-4"
+              className="mt-3 grid grid-cols-2 gap-2 border-t border-white/10 pt-3"
             >
               {previousStage ? (
                 <Link

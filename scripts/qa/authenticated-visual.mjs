@@ -32,6 +32,7 @@ import {
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const outputRoot = path.join(repositoryRoot, "docs/qa/reference-parity");
 const baselineScreenshotRoot = path.join(outputRoot, "target-authenticated");
+const approvedCanvasRoot = path.join(repositoryRoot, "docs/qa/canvas-parity/reference");
 const simulatorCanaryBaselineRoot = path.join(outputRoot, "target-authenticated-canary");
 const baselineResultsPath = path.join(outputRoot, "authenticated-results.json");
 const artifactRoot = path.join(repositoryRoot, "test-results/authenticated-visual");
@@ -40,6 +41,11 @@ const candidateResultsPath = path.join(artifactRoot, "candidate-results.json");
 const archiveNavigationResultsPath = path.join(artifactRoot, "archive-navigation-results.json");
 const visualDifferenceThreshold = 0.01;
 const visualChannelTolerance = 16;
+// The approved references are generated canvases rather than browser captures.
+// These bounds preserve sensitivity to palette and panel geometry while allowing
+// for the reference/runtime differences in font rasterization and content height.
+const approvedCanvasColorDistanceThreshold = 23;
+const approvedCanvasEdgeDistanceThreshold = 52;
 const accessibilityTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const homologationOrigin = "https://homolog.descomplicapro.com.br";
 const remoteHomologation = process.env.QA_AUTH_REMOTE_HOMOLOGATION === "true";
@@ -231,18 +237,7 @@ const viewports = [
 
 const themes = ["light", "balanced", "dark"];
 const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
-const adminRoutes = ["/admin", "/admin/usuarios", "/admin/paginas"];
-const desktopThemeCaptureRoutes = new Set([
-  "/app",
-  "/app/ranking",
-  "/app/configuracoes/metas",
-  "/app/configuracoes/metas/pontos",
-  "/app/simulacao/associativo-fluxo-linear",
-  "/app/simulacao/tabelao",
-  "/app/simulacao/tabela-direta",
-  "/app/simulacao/tabela-investidor",
-  ...adminRoutes,
-]);
+const desktopThemeCaptureRoutes = new Set(routes);
 const mobileDarkViewportKey = "mobile-390x844";
 const zoomLevels = [
   { percent: 80, width: 1800, height: 1125, deviceScaleFactor: 0.8 },
@@ -405,52 +400,45 @@ async function verifyDedicatedLocalQaIdentity(supabaseUrl, publishableKey, email
 function inspectAccountIdentityDisplay(expectedFirstName) {
   const label = document.querySelector("[data-session-identity-trigger-label]");
   const trigger = document.querySelector("[data-session-identity]");
-  if (!(label instanceof HTMLElement) || !(trigger instanceof HTMLButtonElement)) {
-    return { identityDisplayContract: "registered-first-name-v1", identityDisplayReady: false };
+  const avatar = document.querySelector("[data-session-avatar]");
+  if (
+    !(label instanceof HTMLElement) ||
+    !(trigger instanceof HTMLButtonElement) ||
+    !(avatar instanceof HTMLElement)
+  ) {
+    return { identityDisplayContract: "compact-account-avatar-v2", identityDisplayReady: false };
   }
   const labelBox = label.getBoundingClientRect();
   const triggerBox = trigger.getBoundingClientRect();
   const style = getComputedStyle(label);
-  let visible = labelBox.width > 0 && labelBox.height > 0;
-  for (let ancestor = label; ancestor; ancestor = ancestor.parentElement) {
-    const ancestorStyle = getComputedStyle(ancestor);
-    visible &&=
-      ancestorStyle.display !== "none" &&
-      ancestorStyle.visibility === "visible" &&
-      Number(ancestorStyle.opacity) > 0;
-  }
+  const avatarBox = avatar.getBoundingClientRect();
   const identityNameMatches =
     typeof expectedFirstName === "string" &&
     expectedFirstName.length > 0 &&
     label.textContent?.trim() === expectedFirstName;
-  const identityTextFits =
-    label.scrollWidth <= label.clientWidth + 1 &&
-    label.scrollHeight <= label.clientHeight + 1 &&
-    labelBox.left >= triggerBox.left - 1 &&
-    labelBox.right <= triggerBox.right + 1 &&
-    labelBox.top >= triggerBox.top - 1 &&
-    labelBox.bottom <= triggerBox.bottom + 1 &&
+  const identityCompact =
+    labelBox.width <= 1 &&
+    labelBox.height <= 1 &&
+    style.position === "absolute" &&
+    style.overflow === "hidden" &&
+    avatarBox.width > 0 &&
+    avatarBox.height > 0 &&
+    avatarBox.left >= triggerBox.left - 1 &&
+    avatarBox.right <= triggerBox.right + 1 &&
     triggerBox.left >= -1 &&
     triggerBox.right <= innerWidth + 1 &&
     triggerBox.top >= -1 &&
     triggerBox.bottom <= innerHeight + 1;
-  const identityNoEllipsis = style.textOverflow !== "ellipsis";
   const identityAccessibleNameMatches = Boolean(
     identityNameMatches && trigger.getAttribute("aria-label")?.includes(expectedFirstName),
   );
   return {
-    identityDisplayContract: "registered-first-name-v1",
+    identityDisplayContract: "compact-account-avatar-v2",
     identityNameMatches,
-    identityVisible: visible,
-    identityTextFits,
-    identityNoEllipsis,
+    identityCompact,
+    identityAvatarVisible: avatarBox.width > 0 && avatarBox.height > 0,
     identityAccessibleNameMatches,
-    identityDisplayReady:
-      identityNameMatches &&
-      visible &&
-      identityTextFits &&
-      identityNoEllipsis &&
-      identityAccessibleNameMatches,
+    identityDisplayReady: identityNameMatches && identityCompact && identityAccessibleNameMatches,
   };
 }
 
@@ -756,6 +744,70 @@ async function compareVisualBaseline(buffer, baselinePath, trackedFiles) {
     totalPixels: pixels,
     changedPixelRatio,
     baselineUsed,
+  };
+}
+
+function meanAbsolutePixelDistance(actual, expected) {
+  if (actual.length !== expected.length || actual.length === 0) return Number.POSITIVE_INFINITY;
+  let distance = 0;
+  for (let index = 0; index < actual.length; index += 1) {
+    distance += Math.abs(actual[index] - expected[index]);
+  }
+  return distance / actual.length;
+}
+
+async function normalizeCanvasReference(input, extract, edge) {
+  let pipeline = sharp(input);
+  if (extract) pipeline = pipeline.extract(extract);
+  pipeline = pipeline.resize(edge ? 128 : 96, edge ? 96 : 64, { fit: "fill" });
+  if (edge) {
+    pipeline = pipeline.grayscale().convolve({
+      width: 3,
+      height: 3,
+      kernel: [-1, -1, -1, -1, 8, -1, -1, -1, -1],
+      scale: 1,
+      offset: 0,
+    });
+  } else {
+    pipeline = pipeline.removeAlpha();
+  }
+  return pipeline.raw().toBuffer();
+}
+
+async function compareApprovedCanvas(buffer, approvedCanvas) {
+  const referencePath = path.join(approvedCanvasRoot, approvedCanvas.asset);
+  const reference = await readFile(referencePath);
+  const metadata = await sharp(reference).metadata();
+  if (!metadata.width || !metadata.height) {
+    throw new Error(`Approved canvas has no dimensions: ${approvedCanvas.asset}`);
+  }
+  const separatorInset = Math.min(2, Math.floor(metadata.width / 8));
+  const half = Math.floor(metadata.width / 2);
+  const left =
+    approvedCanvas.region === "left" ? 0 : Math.ceil(metadata.width / 2) + separatorInset;
+  const width = approvedCanvas.region === "left" ? half - separatorInset : metadata.width - left;
+  const extract = { left, top: 0, width, height: metadata.height };
+  const [actualColor, expectedColor, actualEdges, expectedEdges] = await Promise.all([
+    normalizeCanvasReference(buffer, null, false),
+    normalizeCanvasReference(reference, extract, false),
+    normalizeCanvasReference(buffer, null, true),
+    normalizeCanvasReference(reference, extract, true),
+  ]);
+  const colorDistance = meanAbsolutePixelDistance(actualColor, expectedColor);
+  const edgeDistance = meanAbsolutePixelDistance(actualEdges, expectedEdges);
+  const passed =
+    colorDistance <= approvedCanvasColorDistanceThreshold &&
+    edgeDistance <= approvedCanvasEdgeDistanceThreshold;
+  return {
+    passed,
+    reason: passed ? "approved_canvas_structure_within_threshold" : "approved_canvas_drift",
+    asset: `docs/qa/canvas-parity/reference/${approvedCanvas.asset}`,
+    region: approvedCanvas.region,
+    referenceSha256: createHash("sha256").update(reference).digest("hex"),
+    colorDistance,
+    colorDistanceThreshold: approvedCanvasColorDistanceThreshold,
+    edgeDistance,
+    edgeDistanceThreshold: approvedCanvasEdgeDistanceThreshold,
   };
 }
 
@@ -1173,13 +1225,20 @@ async function inspectRoute(
           accountLink.getClientRects().length > 0,
         ),
         themeControlsVisible:
-          themeButtons.length === 3 &&
-          ["Claro", "Médio", "Escuro"].every((label) =>
+          (root.clientWidth > 600 &&
+            ["Claro", "Médio", "Escuro"].every((label) =>
+              themeButtons.some(
+                (button) =>
+                  button.textContent?.trim() === label && button.getClientRects().length > 0,
+              ),
+            )) ||
+          (root.clientWidth <= 600 &&
+            themeButtons.filter((button) => button.getClientRects().length > 0).length === 1 &&
             themeButtons.some(
               (button) =>
-                button.textContent?.trim() === label && button.getClientRects().length > 0,
-            ),
-          ),
+                button.hasAttribute("data-theme-cycle-mobile") &&
+                button.getAttribute("aria-label")?.startsWith("Tema atual:"),
+            )),
         associativeStockControlsPresent:
           window.location.pathname !== "/app/simulacao/associativo-fluxo-linear" ||
           Boolean(
@@ -1309,14 +1368,24 @@ async function setTheme(page, theme) {
         exact: true,
       });
       await themeSwitch.waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
-      for (const label of Object.values(themeLabels)) {
+      if ((page.viewportSize()?.width ?? 1440) <= 600) {
+        const cycle = themeSwitch.locator("[data-theme-cycle-mobile]");
+        await cycle.waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
+        for (let cycleAttempt = 0; cycleAttempt < themes.length; cycleAttempt += 1) {
+          const current = await page.evaluate(() => document.documentElement.dataset.theme);
+          if (current === theme) break;
+          await cycle.click({ timeout: qaRouteBootstrapTimeout });
+        }
+      } else {
+        for (const label of Object.values(themeLabels)) {
+          await themeSwitch
+            .getByRole("button", { name: label, exact: true })
+            .waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
+        }
         await themeSwitch
-          .getByRole("button", { name: label, exact: true })
-          .waitFor({ state: "visible", timeout: qaRouteBootstrapTimeout });
+          .getByRole("button", { name: themeLabels[theme], exact: true })
+          .click({ timeout: qaRouteBootstrapTimeout });
       }
-      await themeSwitch
-        .getByRole("button", { name: themeLabels[theme], exact: true })
-        .click({ timeout: qaRouteBootstrapTimeout });
       await page.waitForFunction(
         (expected) => document.documentElement.dataset.theme === expected,
         theme,
@@ -1485,10 +1554,8 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
         document.querySelectorAll(".investor-stock-table tbody tr.selectable").length > 0,
       fiveStockFiltersPresent: filters.length === 6,
       manualSelectionRequired: !selectedUnit,
-      guidePresent: Boolean(
-        [...document.querySelectorAll("button")].find((button) =>
-          button.textContent?.includes("Iniciar passo a passo"),
-        ),
+      nestedHeaderActionAbsent: !document.querySelector(
+        ".simulation-canvas-header .simulation-canvas-actions",
       ),
     };
   });
@@ -3206,62 +3273,37 @@ async function checkTabelaoValidation(page, origin) {
     .getByText(syntheticTabelaoCountLabel, { exact: true })
     .waitFor({ state: "visible", timeout: qaNavigationTimeout });
 
-  const guideLauncher = page.getByRole("button", {
-    name: "Iniciar passo a passo",
-    exact: true,
-  });
-  await guideLauncher.click();
-  const guide = page.locator("#investor-guided-tour");
-  await guide.waitFor({ state: "visible" });
-  await page.waitForFunction(
-    () => document.activeElement === document.querySelector("#investor-guided-tour"),
-    undefined,
-    { timeout: 10_000 },
-  );
-  process.stdout.write("Tabelão QA: guia aberto com foco\n");
-  const spotlightSized = await page.locator(".investor-tour-spotlight").evaluate((element) => {
-    const box = element.getBoundingClientRect();
-    return box.width > 0 && box.height > 0;
-  });
-  let placementClassApplied = false;
-  for (let step = 1; step < 3; step += 1) {
-    await guide.getByRole("button", { name: "Próximo", exact: true }).click();
-    await page.waitForTimeout(80);
-    placementClassApplied ||= await guide.evaluate(
-      (element) => element.classList.contains("at-top") || element.classList.contains("at-left"),
-    );
-  }
-  const guideReachedLastStep = await guide
-    .getByRole("heading", { name: "Confira a unidade correta", exact: true })
-    .isVisible();
-  await guide.getByRole("button", { name: "Concluir guia", exact: true }).click();
-  await guide.waitFor({ state: "hidden" });
-  await page.waitForFunction(
-    () => document.activeElement === document.querySelector(".investor-guided-start"),
-    undefined,
-    { timeout: 10_000 },
-  );
-  const guideCompletionReturnedFocus = await guideLauncher.evaluate(
-    (element) => document.activeElement === element,
-  );
-  await guideLauncher.click();
-  await guide.waitFor({ state: "visible" });
-  await page.waitForFunction(
-    () => document.activeElement === document.querySelector("#investor-guided-tour"),
-    undefined,
-    { timeout: 10_000 },
-  );
-  await page.keyboard.press("Escape");
-  await guide.waitFor({ state: "hidden" });
-  await page.waitForFunction(
-    () => document.activeElement === document.querySelector(".investor-guided-start"),
-    undefined,
-    { timeout: 10_000 },
-  );
-  const guideEscapeReturnedFocus = await guideLauncher.evaluate(
-    (element) => document.activeElement === element,
-  );
-  process.stdout.write("Tabelão QA: guia concluído e Escape verificado\n");
+  const approvedCanvasHeader = await page
+    .locator(".simulation-canvas-header")
+    .evaluate((header) => {
+      const bounds = header.getBoundingClientRect();
+      const status = header.querySelector(".simulation-canvas-status")?.getBoundingClientRect();
+      return {
+        nestedGuideAbsent: (() => {
+          const launcher = header.querySelector(".investor-guided-start");
+          return !launcher || launcher.getClientRects().length === 0;
+        })(),
+        singleGlobalNavigation:
+          document.querySelectorAll("[data-protected-topbar]").length === 1 &&
+          document.querySelectorAll('nav[aria-label="Navegação principal"]').length === 1,
+        titleActionsAbsent: (() => {
+          const actions = header.querySelector(".simulation-canvas-actions");
+          return !actions || actions.getClientRects().length === 0;
+        })(),
+        previewStatusVisible:
+          status != null &&
+          status.width > 0 &&
+          status.height >= 44 &&
+          status.left >= bounds.left - 1 &&
+          status.right <= bounds.right + 1,
+        canvasHeaderCompact:
+          bounds.height <= 120 &&
+          bounds.left >= -1 &&
+          bounds.right <= innerWidth + 1 &&
+          document.documentElement.scrollWidth <= innerWidth + 1,
+      };
+    });
+  process.stdout.write("Tabelão QA: cabeçalho único do canvas verificado\n");
 
   const rendered = await page.locator("tr[data-inventory-unit-id]").evaluateAll((rows) =>
     rows.map((row) => ({
@@ -4035,11 +4077,11 @@ async function checkTabelaoValidation(page, origin) {
 
   return {
     responsiveGrid: responsiveGrid && typographyAndLabels,
-    spotlightSized,
-    placementClassApplied,
-    guideReachedLastStep,
-    guideCompletionReturnedFocus,
-    guideEscapeReturnedFocus,
+    nestedGuideAbsent: approvedCanvasHeader.nestedGuideAbsent,
+    singleGlobalNavigation: approvedCanvasHeader.singleGlobalNavigation,
+    titleActionsAbsent: approvedCanvasHeader.titleActionsAbsent,
+    previewStatusVisible: approvedCanvasHeader.previewStatusVisible,
+    canvasHeaderCompact: approvedCanvasHeader.canvasHeaderCompact,
     exclusiveRows: exclusiveRows && regionParkingFlow,
     netPrices,
     groupedProjects: groupedProjects && regionOrderAndLayout,
@@ -5426,6 +5468,11 @@ function functionalChecksPassed({
       routes.length * viewports.length +
         desktopThemeCaptureRoutes.size * themes.length +
         routes.length &&
+    screenshots.filter(({ approvedCanvasComparison }) => approvedCanvasComparison).length ===
+      routes.length &&
+    screenshots
+      .filter(({ approvedCanvasComparison }) => approvedCanvasComparison)
+      .every(({ approvedCanvasComparison }) => approvedCanvasComparison.passed) &&
     keyboard &&
     Object.values(keyboard).every(Boolean) &&
     simulatorValidation &&
@@ -5876,6 +5923,10 @@ async function run() {
                   "themes",
                   `${routeKey(route)}-${theme}-${viewport.width}x${viewport.height}.webp`,
                 );
+                const approvedCanvasComparison =
+                  theme === "dark"
+                    ? await compareApprovedCanvas(buffer, approvedCanvasByRoute.get(route))
+                    : undefined;
                 screenshots.push({
                   kind: "theme",
                   route,
@@ -5886,6 +5937,7 @@ async function run() {
                     visualBaselinePath(route, destination),
                     trackedFiles,
                   ),
+                  ...(approvedCanvasComparison ? { approvedCanvasComparison } : {}),
                   ...(await saveLosslessWebp(persistedBuffer, destination)),
                 });
               }
@@ -6067,6 +6119,9 @@ async function run() {
         themeScreenshots: desktopThemeCaptureRoutes.size * themes.length + routes.length,
         accessibilityAudits: accessibilityChecks.length,
         baselineComparisons: screenshots.length,
+        approvedCanvasComparisons: routes.length,
+        approvedCanvasColorDistanceThreshold,
+        approvedCanvasEdgeDistanceThreshold,
         changedPixelRatioThreshold: visualDifferenceThreshold,
         channelTolerance: visualChannelTolerance,
       },

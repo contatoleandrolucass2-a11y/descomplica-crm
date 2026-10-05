@@ -307,7 +307,7 @@ export async function checkAssociativeMotion(page) {
     );
     assert.ok(
       (await loops.count()) >= 4,
-      "Both guide CTAs and optional-payment actions must be inspected",
+      "The guide CTA and all optional-payment actions must be inspected",
     );
     result.loops = await loops.evaluateAll((elements) =>
       elements.map((element) => {

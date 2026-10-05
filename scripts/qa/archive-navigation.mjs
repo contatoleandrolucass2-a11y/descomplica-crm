@@ -610,7 +610,9 @@ export async function assertHeaderGeometry(page, compact) {
       ),
     ];
     const rootControls = [...nav.querySelectorAll("[data-navigation-root-control]")];
-    const themeButtons = [...themes.querySelectorAll("button")];
+    const themeButtons = [...themes.querySelectorAll("button")].filter(
+      (button) => button.getClientRects().length > 0 && getComputedStyle(button).display !== "none",
+    );
     const fixedControls = [
       brand,
       themes,
@@ -768,7 +770,22 @@ export async function assertHeaderGeometry(page, compact) {
         document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1 &&
         document.body.scrollWidth <= document.body.clientWidth + 1,
       brandTextFits: brand.scrollWidth <= brand.clientWidth + 1,
-      accountTextContained: account.scrollWidth <= account.clientWidth + 1,
+      accountTextContained: (() => {
+        const avatar = account.querySelector("[data-session-avatar]");
+        const identity = account.querySelector("[data-session-identity-trigger-label]");
+        if (!avatar || !identity) return false;
+        const accountBounds = account.getBoundingClientRect();
+        const avatarBounds = avatar.getBoundingClientRect();
+        const identityStyle = getComputedStyle(identity);
+        return (
+          avatarBounds.width > 0 &&
+          avatarBounds.height > 0 &&
+          avatarBounds.left >= accountBounds.left - 1 &&
+          avatarBounds.right <= accountBounds.right + 1 &&
+          identityStyle.position === "absolute" &&
+          identityStyle.overflow === "hidden"
+        );
+      })(),
       themeContentFits: themeContent.every(({ contained, separated }) => contained && separated),
       accountTouchTarget: boxes[2].height >= 44,
       touchTrigger: !isCompact || (boxes[3].width >= 44 && boxes[3].height >= 44),
@@ -1027,6 +1044,7 @@ export async function checkArchiveNavigation(
             'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-settings"]',
           );
           const themes = appearance(page);
+          const compactThemeSwitch = viewport.width <= 600;
           stage = "load:shell";
           await expect(page.locator("[data-protected-shell]")).toHaveCount(1);
           await expect(page.locator("[data-protected-topbar]")).toHaveCount(1);
@@ -1036,7 +1054,7 @@ export async function checkArchiveNavigation(
           stage = "load:navigation-label";
           await expect(nav).toHaveAttribute("aria-label", "Navegação principal");
           stage = "load:theme-controls";
-          await expect(themes.getByRole("button")).toHaveCount(3);
+          await expect(themes.locator("button:visible")).toHaveCount(compactThemeSwitch ? 1 : 3);
           stage = "closed-layout-and-tab-order";
           if (compact) {
             await expect(trigger).toHaveAccessibleName("Abrir navegação");
@@ -1045,9 +1063,19 @@ export async function checkArchiveNavigation(
             await brand.focus();
             await page.keyboard.press("Tab");
             await expect(trigger).toBeFocused();
-            for (const label of Object.values(themeLabels)) {
-              await page.keyboard.press("Tab");
-              await expect(themes.getByRole("button", { name: label, exact: true })).toBeFocused();
+            await page.keyboard.press("Tab");
+            if (compactThemeSwitch) {
+              await expect(themes.locator("[data-theme-cycle-mobile]")).toBeFocused();
+            } else {
+              await expect(
+                themes.getByRole("button", { name: themeLabels.light, exact: true }),
+              ).toBeFocused();
+              for (const label of [themeLabels.balanced, themeLabels.dark]) {
+                await page.keyboard.press("Tab");
+                await expect(
+                  themes.getByRole("button", { name: label, exact: true }),
+                ).toBeFocused();
+              }
             }
             await page.keyboard.press("Tab");
             await expect(accountTrigger(page)).toBeFocused();
@@ -1093,11 +1121,27 @@ export async function checkArchiveNavigation(
           check.mainSurfaces = {};
           for (const [theme, label] of Object.entries(themeLabels)) {
             stage = `theme:${theme}:selection`;
-            const button = themes.getByRole("button", { name: label, exact: true });
-            await button.click();
+            const button = compactThemeSwitch
+              ? themes.locator("[data-theme-cycle-mobile]")
+              : themes.getByRole("button", { name: label, exact: true });
+            if (compactThemeSwitch) {
+              for (let attempt = 0; attempt < Object.keys(themeLabels).length; attempt += 1) {
+                if ((await page.locator("html").getAttribute("data-theme")) === theme) break;
+                await button.click();
+              }
+            } else {
+              await button.click();
+            }
             await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-            await expect(button).toHaveAttribute("aria-pressed", "true");
-            await expect(themes.locator('[aria-pressed="true"]')).toHaveCount(1);
+            if (compactThemeSwitch) {
+              await expect(button).toHaveAttribute(
+                "aria-label",
+                new RegExp(`Tema atual: ${label}`),
+              );
+            } else {
+              await expect(button).toHaveAttribute("aria-pressed", "true");
+              await expect(themes.locator('[aria-pressed="true"]')).toHaveCount(1);
+            }
             await assertHeaderGeometry(page, compact);
             await waitForArchiveHeaderTheme(page, theme, check.headerSurfaces);
             check.compactHeader ??= {};
@@ -1189,7 +1233,15 @@ export async function checkArchiveNavigation(
           if (scope === "header-and-content" && route === archiveNavigationRoutes[0]) {
             for (const [theme, label] of Object.entries(themeLabels)) {
               stage = `selected-stock:${theme}`;
-              await themes.getByRole("button", { name: label, exact: true }).click();
+              if (compactThemeSwitch) {
+                const cycle = themes.locator("[data-theme-cycle-mobile]");
+                for (let attempt = 0; attempt < Object.keys(themeLabels).length; attempt += 1) {
+                  if ((await page.locator("html").getAttribute("data-theme")) === theme) break;
+                  await cycle.click();
+                }
+              } else {
+                await themes.getByRole("button", { name: label, exact: true }).click();
+              }
               await waitForArchiveHeaderTheme(page, theme);
               await checkAssociativeSelectedGold(page);
               if (associativeGuidanceWidths.includes(viewport.width)) {

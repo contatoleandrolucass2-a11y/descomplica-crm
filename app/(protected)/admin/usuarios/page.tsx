@@ -150,7 +150,6 @@ export default async function UsersAdminPage() {
   return (
     <ManagementPage className="admin-canvas admin-users-page">
       <ManagementPageHeader
-        eyebrow="Administração"
         title="Usuários e acessos"
         description="Consulte acessos herdados e exceções separadamente. Alterações respeitam a hierarquia, impedem autoelevação e geram auditoria."
         status={<ManagementStatusBadge>Acesso protegido</ManagementStatusBadge>}

@@ -17,9 +17,8 @@ export default async function PagesAdminPage() {
   return (
     <ManagementPage className="admin-canvas admin-pages-page">
       <ManagementPageHeader
-        eyebrow="Administração"
         title="Catálogo de páginas"
-        description="Ative ou desative entradas de navegação sem alterar a autorização protegida de cada rota."
+        description="Ative ou desative a navegação. A permissão da rota continua sendo validada no servidor."
         status={<ManagementStatusBadge>Governança do catálogo</ManagementStatusBadge>}
       />
       <PageCatalogManager pages={pages} />

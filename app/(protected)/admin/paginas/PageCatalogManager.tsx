@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, MoreHorizontal, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { managementStyles } from "@/app/(protected)/_components/ManagementCanvas";
@@ -112,14 +112,20 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
         className={`${managementStyles.panel} admin-pages-results`}
         aria-labelledby="page-catalog-title"
       >
-        <div className={managementStyles.panelPadded}>
-          <p className={managementStyles.sectionKicker}>Governança de navegação</p>
-          <h2 id="page-catalog-title" className={managementStyles.sectionTitle}>
-            Páginas cadastradas
-          </h2>
-          <p className={managementStyles.sectionDescription}>
-            Rotas da aplicação e controle de navegação. A autorização da rota continua no servidor.
-          </p>
+        <div className="admin-pages-results-header">
+          <div className="admin-results-title">
+            <span className={managementStyles.iconFrame} aria-hidden="true">
+              <FileText />
+            </span>
+            <div>
+              <h2 id="page-catalog-title" className={managementStyles.sectionTitle}>
+                Páginas cadastradas
+              </h2>
+              <p className={managementStyles.sectionDescription}>
+                Rotas da aplicação e controle de navegação
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className={managementStyles.tableRegion}>
@@ -131,7 +137,7 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
                 <th scope="col">Descrição</th>
                 <th scope="col">Rota</th>
                 <th scope="col">Status</th>
-                <th scope="col">Ação</th>
+                <th scope="col">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -141,17 +147,19 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
 
                   return (
                     <tr key={page.key}>
-                      <th scope="row" className="min-w-64 text-left">
+                      <th scope="row" data-label="Página" className="min-w-64 text-left">
                         <strong className="block">{page.name}</strong>
                       </th>
-                      <td className="min-w-72">
+                      <td data-label="Descrição" className="min-w-72">
                         <span className="block">{page.description}</span>
                         <span className="mt-0.5 block text-[var(--analytics-muted)]">
                           {getPermissionLabel(page.permissionKey)} · {page.section}
                         </span>
                       </td>
-                      <td className="min-w-52 font-mono">{page.path}</td>
-                      <td>
+                      <td data-label="Rota" className="min-w-52 font-mono">
+                        {page.path}
+                      </td>
+                      <td data-label="Status">
                         <span
                           className={managementStyles.statusPill}
                           data-state={page.isActive ? "active" : "inactive"}
@@ -159,10 +167,13 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
                           {page.isActive ? "Ativa" : "Inativa"}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Ações">
                         <details className={managementStyles.disclosure}>
-                          <summary className={`${managementStyles.button} whitespace-nowrap`}>
-                            Gerenciar
+                          <summary
+                            className={`${managementStyles.button} admin-page-action whitespace-nowrap`}
+                          >
+                            <MoreHorizontal aria-hidden="true" className="size-4" />
+                            <span className="sr-only">Gerenciar {page.name}</span>
                           </summary>
                           <form action={action} className={managementStyles.actionPanel}>
                             <p className="max-w-80 text-xs leading-5 text-[var(--analytics-muted)]">
@@ -207,8 +218,8 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
         <div className={`${managementStyles.panelPadded} ${managementStyles.pagination}`}>
           <span aria-live="polite">
             {filteredPages.length
-              ? `${pageStart + 1}–${Math.min(pageStart + PAGE_SIZE, filteredPages.length)} de ${filteredPages.length}`
-              : "0 resultados"}
+              ? `Mostrando ${pageStart + 1}–${Math.min(pageStart + PAGE_SIZE, filteredPages.length)} de ${filteredPages.length} páginas`
+              : "0 páginas"}
           </span>
           <div className={managementStyles.paginationControls}>
             <button

@@ -4,6 +4,21 @@ import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 
+async function selectTheme(page, theme, width) {
+  if (width > 600) {
+    const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
+    await page.getByRole("button", { name: themeLabels[theme], exact: true }).click();
+  } else {
+    const cycle = page.locator("[data-theme-cycle-mobile]");
+    await expect(cycle).toBeVisible();
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      if ((await page.locator("html").getAttribute("data-theme")) === theme) break;
+      await cycle.click();
+    }
+  }
+  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+}
+
 export async function checkMarketingResources(page, origin, outputDirectory) {
   await mkdir(outputDirectory, { recursive: true });
   const route = "/app/configuracoes/recurso-mkt";
@@ -66,8 +81,7 @@ export async function checkMarketingResources(page, origin, outputDirectory) {
       await page.setViewportSize({ width, height: 900 });
       for (const theme of ["light", "balanced", "dark"]) {
         checkpoint(`visual-${width}-${theme}`);
-        const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
-        await page.getByRole("button", { name: themeLabels[theme], exact: true }).click();
+        await selectTheme(page, theme, width);
         const overflow = await page.evaluate(
           () => document.documentElement.scrollWidth > innerWidth + 1,
         );
@@ -89,6 +103,7 @@ export async function checkMarketingResources(page, origin, outputDirectory) {
         await page.screenshot({
           path: path.join(outputDirectory, `recurso-mkt-${width}-${theme}.png`),
           fullPage: true,
+          animations: "disabled",
           mask: [page.locator("[data-session-identity], [data-account-identity]")],
         });
         checks.push({ width, theme, overflow: false, accessibilityViolations: 0 });

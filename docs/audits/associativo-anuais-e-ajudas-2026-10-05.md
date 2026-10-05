@@ -83,3 +83,7 @@ Nenhuma taxa, limite, politica, fonte de estoque, workflow ou dado remoto mudou.
 - Fixture agora usa border-box como a aplicacao, alem de posicoes fracionarias.
   Nove testes passaram, incluindo keyframes antigos rejeitados; roteiro real
   com os estilos compilados em 375x812, lint e tipos tambem passaram.
+- Integracao de `origin/main` em `dcb88c9`: preserva o canvas aprovado e a nova
+  barra mobile. O cabecalho Associativo mantem somente o titulo; nao restaura
+  os atalhos retirados pela outra entrega nem os tres textos removidos aqui.
+  Regressao inicial integrada: 83 testes aprovados, tres condicionais ignorados.

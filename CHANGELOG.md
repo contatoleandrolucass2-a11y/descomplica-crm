@@ -8,6 +8,7 @@
 - Simplifica ajudas e corrige a passagem do brilho entre os cards documentais.
 - Isola a medicao visual do brilho sem desativar efeitos na aplicacao.
 - Mantem a camada de pintura e mede seu interior arredondado, sem ruido dos cantos.
+- Preserva a atualizacao de canvas concorrente na integracao do Associativo.
 
 ## 2026-10-04 - Recurso MKT
 
@@ -47,6 +48,9 @@
   conserva motor e CTA bloqueados; nenhuma regra comercial foi presumida.
 - Mantem alvos de toque, teclado, foco, tres temas, reduced-motion e reflow
   responsivo. Nenhuma migration ou alteracao remota de dados faz parte do diff.
+- Integra a pagina Recurso MKT ja publicada na `main`, preservando seu guard e
+  sua matriz propria; atualiza somente as referencias de Configuracoes afetadas
+  pelo novo card, sem ampliar o contrato original dos 22 canvases.
 
 ## 2026-10-04 - Sequencias visuais do Associativo
 
@@ -1417,6 +1421,10 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 ### Alterado
 
+- Recompõe as 22 páginas protegidas segundo os 11 canvases aprovados, mantém
+  uma única navbar global e adiciona ao QA autenticado uma comparação externa
+  por rota para impedir que uma baseline autorreferente aprove layout
+  divergente.
 - Estabiliza o smoke MFA hospedado ao aguardar janela TOTP útil antes de
   enrollment/challenge e ampliar somente o teto desse cenário para 180
   segundos, sem registrar chave, código ou credencial.

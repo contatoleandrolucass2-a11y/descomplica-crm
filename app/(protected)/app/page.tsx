@@ -98,7 +98,26 @@ type StageSummaryRow = {
   progress: number | null;
 };
 
+type ActivityRow = {
+  key: string;
+  date: string;
+  type: string;
+  description: string;
+  client: string;
+  owner: string;
+  status: string;
+};
+
 const SHOW_EXTENDED_DASHBOARD = false;
+
+const activityColumns: Array<AnalyticsColumn<ActivityRow>> = [
+  { key: "date", label: "Data", render: (row) => row.date },
+  { key: "type", label: "Tipo", render: (row) => row.type },
+  { key: "description", label: "Descrição", render: (row) => row.description },
+  { key: "client", label: "Cliente", render: (row) => row.client },
+  { key: "owner", label: "Responsável", render: (row) => row.owner },
+  { key: "status", label: "Status", render: (row) => row.status },
+];
 
 const summaryColumns: Array<AnalyticsColumn<StageSummaryRow>> = [
   { key: "stage", label: "Etapa", render: (row) => row.label },
@@ -616,12 +635,12 @@ export default async function AppHomePage({
   const salesValue = dashboard?.salesValue[selectedView][selectedPeriod] ?? null;
 
   return (
-    <main className="min-w-0 px-3 py-4 sm:px-5 sm:py-5">
+    <main className="min-w-0 px-3 py-3 sm:px-5">
       <AnalyticsCanvas kind="dashboard">
         <PageHeader
           variant="compact"
           title="Dashboard comercial"
-          description="Visão geral da operação comercial com os filtros e o snapshot autorizados."
+          description="Visão geral da operação comercial."
           meta={
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <div>
@@ -680,23 +699,16 @@ export default async function AppHomePage({
         ) : null}
 
         {!dashboard ? (
-          <DataState
-            variant="unavailable"
-            compact
-            title={DATA_UNAVAILABLE_LABEL}
-            description={
-              ingestConfiguration.available
-                ? "A ingestão autenticada está pronta, mas ainda não existe snapshot comercial validado."
-                : "A integração de dados está indisponível neste ambiente. Nenhum dado demonstrativo é exibido."
-            }
-          />
+          <p className="sr-only" role="status">
+            {ingestConfiguration.available
+              ? "A ingestão autenticada está pronta, mas ainda não existe snapshot comercial validado."
+              : "A integração de dados está indisponível neste ambiente. Nenhum dado demonstrativo é exibido."}
+          </p>
         ) : !dashboard.goalsAvailable ? (
-          <DataState
-            variant="unavailable"
-            compact
-            title={GOALS_UNAVAILABLE_LABEL}
-            description="Os realizados permanecem visíveis. Metas e atingimento ficam indisponíveis até existir fonte oficial segura."
-          />
+          <p className="sr-only" role="status">
+            {GOALS_UNAVAILABLE_LABEL}. Os realizados permanecem visíveis; metas e atingimento ficam
+            indisponíveis até existir fonte oficial segura.
+          </p>
         ) : null}
 
         <section aria-labelledby="stage-summary-title">
@@ -756,13 +768,13 @@ export default async function AppHomePage({
           </div>
         </section>
 
-        <section className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.8fr)]">
+        <section className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-2">
           <AnalyticsCard density="compact" className="min-w-0">
             <SectionHeading
               density="compact"
               kicker="Relação entre volumes"
-              title="Funil do período"
-              description="As razões comparam volumes agregados da mesma base; não acompanham grupos individuais ao longo do tempo."
+              title="Funil comercial"
+              description="Funil do período: as razões comparam volumes agregados da mesma base, sem acompanhar grupos individuais ao longo do tempo."
             />
             <FunnelChart
               variant="compact"
@@ -771,20 +783,7 @@ export default async function AppHomePage({
             />
           </AnalyticsCard>
 
-          <div className="grid min-w-0 content-start gap-3">
-            <AnalyticsCard density="compact" tone="navy">
-              <p className="text-xs font-semibold tracking-widest text-cyan-300 uppercase">
-                Valor vendido no período
-              </p>
-              <strong className="mt-2 block text-2xl font-semibold text-white">
-                {salesValue === null
-                  ? DATA_UNAVAILABLE_LABEL
-                  : currencyFormatter.format(salesValue)}
-              </strong>
-              <p className="mt-2 text-xs leading-5 text-slate-300">
-                Total do snapshot para a visão e o período selecionados.
-              </p>
-            </AnalyticsCard>
+          <div className="grid min-w-0 content-start">
             <AnalyticsCard density="compact">
               <SectionHeading
                 density="compact"
@@ -827,18 +826,41 @@ export default async function AppHomePage({
               title="Últimas atividades"
               description="O feed só será exibido quando existir uma fonte oficial escopada e validada no servidor."
             />
-            <DataState
-              variant="unavailable"
-              compact
-              headingLevel="h3"
-              title="Dados indisponíveis"
-              description="Nenhuma atividade é presumida ou reaproveitada de outra janela enquanto a fonte segura estiver ausente."
+            <AnalyticsTable
+              density="compact"
+              caption="Últimas atividades comerciais"
+              captionVisible={false}
+              rows={[]}
+              columns={activityColumns}
+              rowKey={(row) => row.key}
+              emptyState={
+                <DataState
+                  variant="unavailable"
+                  compact
+                  headingLevel="h3"
+                  title="Dados indisponíveis"
+                  description="Nenhuma atividade é presumida ou reaproveitada de outra janela enquanto a fonte segura estiver ausente."
+                />
+              }
             />
           </AnalyticsCard>
         </section>
 
         {SHOW_EXTENDED_DASHBOARD ? (
           <>
+            <AnalyticsCard density="compact" tone="navy">
+              <p className="text-xs font-semibold tracking-widest text-cyan-300 uppercase">
+                Valor vendido no período
+              </p>
+              <strong className="mt-2 block text-2xl font-semibold text-white">
+                {salesValue === null
+                  ? DATA_UNAVAILABLE_LABEL
+                  : currencyFormatter.format(salesValue)}
+              </strong>
+              <p className="mt-2 text-xs leading-5 text-slate-300">
+                Total do snapshot para a visão e o período selecionados.
+              </p>
+            </AnalyticsCard>
             <section className="min-w-0" aria-labelledby="summary-table-title">
               <SectionHeading
                 id="summary-table-title"

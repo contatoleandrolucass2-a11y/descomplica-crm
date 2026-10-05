@@ -16,7 +16,7 @@
   max-width: 100rem;
   min-width: 0;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0.85rem;
+  gap: 0.65rem;
   margin-inline: auto;
 }
 
@@ -645,6 +645,21 @@
   padding: 0.65rem 0.8rem;
 }
 
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tableEmpty {
+  border-top: 1px solid var(--analytics-line);
+  padding: 0.65rem;
+}
+
 .table {
   width: 100%;
   min-width: 48rem;
@@ -859,12 +874,17 @@
 
 .canvas .pageHeader[data-variant="compact"] .pageHeaderMeta {
   width: min(100%, 22rem);
+  border-color: color-mix(in srgb, var(--analytics-cyan) 42%, var(--analytics-line));
+  border-radius: 0.55rem;
   padding: 0.55rem 0.7rem;
   font-size: 0.72rem;
+  box-shadow: none;
 }
 
 .canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] {
-  border-radius: 0.9rem;
+  border-color: color-mix(in srgb, var(--analytics-cyan) 42%, transparent);
+  border-radius: 0.55rem;
+  box-shadow: none;
 }
 
 .canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] .pageHeaderBody {
@@ -893,12 +913,13 @@
 }
 
 .canvas .card[data-density="compact"] {
-  border-radius: 0.8rem;
-  box-shadow: 0 4px 12px rgb(8 33 55 / 5%);
+  border-color: color-mix(in srgb, var(--analytics-cyan) 38%, var(--analytics-line));
+  border-radius: 0.55rem;
+  box-shadow: none;
 }
 
 .canvas .card[data-density="compact"].cardPadding {
-  padding: 0.75rem;
+  padding: 0.65rem;
 }
 
 .canvas .sectionHeading[data-density="compact"] {
@@ -924,7 +945,7 @@
   min-height: 5.4rem;
   grid-template-columns: 2.35rem minmax(0, 1fr);
   gap: 0.55rem;
-  border-radius: 0.75rem;
+  border-radius: 0.55rem;
   padding: 0.65rem;
 }
 
@@ -950,8 +971,10 @@
 }
 
 .canvas .filterBar[data-density="compact"] {
-  border-radius: 0.75rem;
+  border-color: color-mix(in srgb, var(--analytics-cyan) 38%, var(--analytics-line));
+  border-radius: 0.55rem;
   padding: 0.6rem;
+  box-shadow: none;
 }
 
 .canvas .filterBar[data-density="compact"] .filterLayout {
@@ -1001,8 +1024,15 @@
 
 .canvas .funnel[data-variant="compact"] .funnelStep {
   min-height: 2.2rem;
+  border-color: color-mix(in srgb, var(--analytics-cyan) 28%, var(--analytics-line));
   border-radius: 0.55rem;
   padding: 0.32rem 0.65rem;
+}
+
+.canvas .tableWrap[data-density="compact"] {
+  border-color: color-mix(in srgb, var(--analytics-cyan) 38%, var(--analytics-line));
+  border-radius: 0.55rem;
+  box-shadow: none;
 }
 
 .canvas .funnel[data-variant="compact"] .funnelStageLabel {
@@ -1057,6 +1087,7 @@
 }
 
 .canvas .stateCompact {
+  border-radius: 0.45rem;
   padding: 0.65rem 0.75rem;
 }
 

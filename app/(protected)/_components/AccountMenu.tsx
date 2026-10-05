@@ -84,7 +84,7 @@ function AccountMenuState({ children, identity, displayName, role }: AccountMenu
         data-session-identity
         onClick={() => setOpen((current) => !current)}
       >
-        <span className={styles.accountAvatar} aria-hidden="true">
+        <span className={styles.accountAvatar} aria-hidden="true" data-session-avatar>
           {initials}
         </span>
         <span

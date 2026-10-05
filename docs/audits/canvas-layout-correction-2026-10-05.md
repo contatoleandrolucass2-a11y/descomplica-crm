@@ -42,14 +42,33 @@ Documentacao e CAIXA.
 
 - A matriz autenticada cobre 22 rotas, sete viewports, tres temas, zoom,
   teclado, foco, reduced-motion, Axe e ausencia de overflow/erros de console.
-- A baseline autenticada foi promovida localmente em `2026-10-05T07:40:51Z`:
-  154 cenarios responsivos, 88 de tema, 209 auditorias Axe, 209 comparacoes e
-  110 verificacoes de zoom, sem falhas. A promocao atomica preservou o
-  manifesto e o resultado anteriores para rollback.
+- A baseline promovida em `2026-10-05T07:40:51Z` foi invalidada como prova de
+  paridade: ela comparava a aplicacao com capturas produzidas pela propria
+  aplicacao e, portanto, podia aprovar o layout errado de forma
+  autorreferente. Ela permanece apenas como evidencia historica.
+- O gate corrigido exige 22 comparacoes adicionais contra os canvases externos
+  aprovados, uma por rota, alem das capturas de regressao produzidas pela
+  aplicacao. A nova baseline somente pode ser promovida depois de todas essas
+  comparacoes passarem.
+- A baseline limpa foi promovida transacionalmente em
+  `2026-10-05T18:32:51Z`, sobre `8a15aa4` e a base integrada `de57b6a`: 154
+  combinacoes responsivas, 88 checks de tema, 242
+  auditorias Axe, 242 comparacoes de regressao, 22/22 comparacoes externas e
+  110 checks de zoom passaram. Nao houve erro de console ou de pagina; conta e
+  fixtures locais foram removidas ao final.
+- A pagina Recurso MKT, incorporada da `main`, passou em 12 combinacoes
+  autenticadas (1440, 1024, 390 e 320 px nos tres temas), teclado e Axe. Ela
+  permanece fora das 22 comparacoes externas porque possui referencia funcional
+  propria. Onze imagens de Configuracoes afetadas pelo card foram promovidas;
+  as outras 231 referencias permaneceram byte a byte.
 - A navegacao dos quatro simuladores cobre 320, 375, 390, 600, 601, 768, 1024,
   1180, 1181 e 1440 px: 40/40 cenarios passaram. O Tabelao tambem oculta no
   modo de impressao os controles do novo cabecalho, preservando somente o
   conteudo expansivo e legivel.
+- O E2E de release aprovou 20 cenarios e manteve um skip restrito ao ambiente
+  remoto. A matriz cobriu os nove perfis e as 22 rotas, alem de login/logout,
+  recuperacao, sessoes, MFA AAL1/AAL2, cookies, APIs e isolamento. As dez
+  identidades sinteticas foram removidas (`persisted=0`, `removed=10`).
 - Formatacao, lint, tipos, testes, build e release E2E permanecem gates de
-  publicacao. Os resultados finais e o SHA publicado sao registrados no
-  `WORKLOG.md` apos CI e deploy.
+  publicacao. Os resultados de CI, o SHA e a imagem publicada serao registrados
+  no `WORKLOG.md` apos o deploy.

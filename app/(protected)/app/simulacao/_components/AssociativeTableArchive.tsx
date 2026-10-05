@@ -1,8 +1,4 @@
-import {
-  InvestorCalculator,
-  InvestorGuideLauncher,
-  InvestorInfoHint,
-} from "./archive-investor/InvestorCalculator";
+import { InvestorCalculator } from "./archive-investor/InvestorCalculator";
 import { SimulationCanvasHeader } from "./SimulationCanvasHeader";
 import "./archive-investor/investor-archive.css";
 
@@ -13,17 +9,7 @@ export function AssociativeTableArchive() {
       data-canvas-layout="simulator"
     >
       <main className="investor-main">
-        <SimulationCanvasHeader
-          title="Simulador Tabela Associativo"
-          titleAccessory={
-            <InvestorInfoHint
-              label="Tabela Associativo"
-              title="Tabela Associativo"
-              description="Compare duas formas de pagar à construtora: parcelas iguais ou que diminuem por etapa. Informe entrada, sinais e anuais. Os valores incluem os reajustes da simulação e precisam de confirmação antes da compra."
-            />
-          }
-          actions={<InvestorGuideLauncher compact />}
-        />
+        <SimulationCanvasHeader title="Simulador Tabela Associativo" />
         <InvestorCalculator directTable={false} directVisualLayout />
         <div className="investor-page-closing">
           <p className="simulation-disclaimer">

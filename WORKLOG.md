@@ -22,6 +22,9 @@
 - Terceira CI isolou ruido restante nos cantos mobile. Reproduzido localmente
   com CSS compilado/Geist; mascara passa a respeitar o pseudo-elemento arredondado.
   Nove testes, roteiro mobile com fonte real, lint e tipos aprovados.
+- Integra a entrega concorrente `dcb88c9`, preservando o canvas e a troca de
+  tema mobile; resolve cabecalho com apenas o titulo. Regressao integrada:
+  83 testes aprovados e tres condicionais ignorados.
 
 ## 2026-10-04 - Recurso MKT em Configuracoes
 
@@ -106,20 +109,35 @@
   comparava a aplicacao com baselines geradas por ela mesma. Dashboard chegava
   a 4.408px e Canal a 1.731px em 1440px, embora os canvases definissem uma
   composicao compacta.
-- Branch `codex/canvas-layout-exact`, base `e1ab14a`. Foram corrigidas as 22
-  rotas sem alterar loaders, autorizacao, RLS, APIs, motores ou fontes.
+- Branch `codex/canvas-layout-parity-hotfix`, base inicial `afdb1c9` e base final
+  integrada `de57b6a`. Foram corrigidas as 22 rotas dos canvases sem alterar
+  loaders, autorizacao, RLS, APIs, motores ou fontes. A 23a pagina protegida,
+  Recurso MKT, foi preservada da `main` com sua matriz visual propria.
 - Dashboard conserva somente filtros, indicadores, funil, ranking e atividades
   na composicao publicada. Canal termina nos totais. Etapas seguem as variacoes
   de cada canvas. CAIXA permanece fail-closed com CTA bloqueado visivel.
 - O harness agora associa cada rota a um canvas e rejeita retorno a densidade
   extensa. Limites por rota representam as referencias verticais, sem reduzir
   requisitos de toque ou ocultar overflow.
-- Gate visual local aprovado: 154 responsivos, 88 temas, 209 auditorias Axe,
-  209 comparacoes, 110 verificacoes de zoom e 40 cenarios da navegacao dos
+- Gate visual local aprovado em `2026-10-05T17:33:34Z`: 154 responsivos, 88
+  temas, 242 auditorias Axe, 242 comparacoes de baseline, 22 comparacoes com os
+  canvases aprovados, 110 verificacoes de zoom e 40 cenarios da navegacao dos
   simuladores. A conta e as fixtures efemeras foram removidas pelo runner.
 - CAIXA passou com contraste AA e mensagem explicita junto ao CTA bloqueado.
   O Tabelao passou responsividade, estados, teclado e impressao sem controles
   interativos. Nenhum motor foi habilitado.
+- O E2E de release aprovou 20 cenarios e manteve um skip exclusivo de
+  homologacao remota. Foram validados nove perfis, 22 rotas, APIs, filtros,
+  logout, recuperacao, revogacao de sessoes e MFA AAL2; dez identidades
+  sinteticas foram removidas e nenhuma persistencia permaneceu. Duas
+  expectativas antigas foram alinhadas ao contrato vigente: ausencia do guia
+  superior no Associativo e contagem apenas dos tres temas desktop.
+- A captura combinada final em `8a15aa4`, `2026-10-05T18:32:51Z`, repetiu e
+  aprovou 154 cenarios responsivos, 88 de tema, 242 auditorias Axe, 242
+  comparacoes de baseline, 22/22 comparacoes externas, 110 verificacoes de
+  zoom e 40 navegacoes. Recurso MKT passou separadamente em 12 combinacoes de
+  largura/tema. Onze referencias de Configuracoes foram revistas e promovidas
+  transacionalmente; as demais 231 permaneceram inalteradas.
 - Evidencia: `docs/audits/canvas-layout-correction-2026-10-05.md`. Resultados de
   CI, SHA e deploy serao anexados ao fim da publicacao automatica.
 
@@ -3564,3 +3582,23 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   build e matriz autenticada com 119 checks responsivos, 68 de tema, 160 de
   acessibilidade/comparação visual e 85 de zoom. A rota passou em 375×812,
   768×1024, 1024×768 e 1440×900, inclusive tema escuro e contraste AA.
+
+# 2026-10-05 — correção integral da paridade com os canvases
+
+- Causa confirmada: o gate anterior comparava a aplicação somente contra uma
+  baseline gerada pela própria aplicação. Por isso, validou regressão interna,
+  mas não comprovou correspondência com as imagens aprovadas pelo usuário.
+- As 22 rotas protegidas foram recompostas a partir das 11 pranchas versionadas
+  em `docs/qa/canvas-parity/reference/`, com uma única navbar global, densidade
+  navy/cyan e estados sem dados fictícios.
+- Autenticação, RBAC, guards, APIs, RLS, integrações, motores e banco não foram
+  alterados. A tela CAIXA permanece acessível somente pelo guard existente e
+  com cálculo bloqueado.
+- O QA autenticado agora compara cada rota diretamente com a metade correta do
+  canvas externo, além de manter sete larguras, três temas, zoom, teclado,
+  reduced-motion, Axe, console e overflow.
+- Resultado inicial: formato, lint e typecheck aprovados. A suíte funcional
+  passou 1.951 testes e 4 skips; a única falha esperada exige a regeneração da
+  evidência autenticada antiga (209 capturas) para a nova matriz (242
+  capturas). Os resultados finais, CI, PR e publicação serão registrados após
+  o gate visual real.
