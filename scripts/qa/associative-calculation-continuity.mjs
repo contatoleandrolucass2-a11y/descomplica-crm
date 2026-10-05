@@ -124,13 +124,25 @@ export async function checkAssociativeCalculationContinuity(page) {
     inventoryRequests = { live: 0, reference: 0 };
     const theme = await page.evaluate(() => document.documentElement.dataset.theme);
     await page.reload({ waitUntil: "networkidle" });
-    await page
-      .getByRole("group", { name: "Aparência da página", exact: true })
-      .getByRole("button", {
-        name: { light: "Claro", balanced: "Médio", dark: "Escuro" }[theme] ?? "Claro",
-        exact: true,
-      })
-      .click();
+    const themeGroup = page.getByRole("group", {
+      name: "Aparência da página",
+      exact: true,
+    });
+    if ((page.viewportSize()?.width ?? 1440) <= 600) {
+      const cycle = themeGroup.locator("[data-theme-cycle-mobile]");
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        if ((await page.locator("html").getAttribute("data-theme")) === theme) break;
+        await cycle.click();
+      }
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    } else {
+      await themeGroup
+        .getByRole("button", {
+          name: { light: "Claro", balanced: "Médio", dark: "Escuro" }[theme] ?? "Claro",
+          exact: true,
+        })
+        .click();
+    }
     await expect(page.locator(`${root} .investor-stock-product-text`).first()).toContainText(
       "Estoque vivo QA",
     );
