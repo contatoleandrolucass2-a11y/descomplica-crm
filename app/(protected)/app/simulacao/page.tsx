@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { LockKeyhole } from "lucide-react";
 
-import { DataState } from "@/app/(protected)/app/_components/analytics";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 import { SIMULATOR_LIST } from "@/lib/crm/simulators/catalog";
@@ -42,9 +41,11 @@ function CalculatorIcon() {
 function SimulatorCardContent({
   simulator,
   releaseEnabled,
+  engineBlocked = false,
 }: {
   simulator: HubSimulator;
   releaseEnabled: boolean;
+  engineBlocked?: boolean;
 }) {
   return (
     <>
@@ -55,10 +56,12 @@ function SimulatorCardContent({
         <h2>{simulator.title}</h2>
         <p>{simulator.description}</p>
         <span className={styles.hubCode}>{simulator.code}</span>
-        {!releaseEnabled ? <span className={styles.hubBlocked}>Aguardando autorização</span> : null}
+        {!releaseEnabled || engineBlocked ? (
+          <span className={styles.hubBlocked}>Aguardando autorização</span>
+        ) : null}
       </span>
       <span className={styles.hubArrow} aria-hidden="true">
-        {releaseEnabled ? "↗" : <LockKeyhole size={18} strokeWidth={1.8} />}
+        {releaseEnabled && !engineBlocked ? "↗" : <LockKeyhole size={18} strokeWidth={1.8} />}
       </span>
     </>
   );
@@ -102,21 +105,23 @@ export default async function SimulationHubPage() {
           statusTone={wf13Enabled ? "canary" : "default"}
         />
 
-        {wf13Enabled ? (
-          <DataState
-            variant="warning"
-            compact
-            title="WF13 disponível em canário Master"
-            description="Simulador Associativo pode ser calculado sem persistência. Demais motores continuam indisponíveis."
-          />
-        ) : (
-          <DataState
-            variant="unavailable"
-            compact
-            title="Cálculos temporariamente indisponíveis"
-            description="As jornadas podem ser consultadas. Nenhuma fórmula, resultado ou regra não validada atua no runtime."
-          />
-        )}
+        <section className={styles.hubNotice} role="status" aria-live="polite">
+          <span className={styles.hubNoticeIcon} aria-hidden="true">
+            i
+          </span>
+          <span>
+            <strong>
+              {wf13Enabled
+                ? "WF13 disponível em canário Master"
+                : "Cálculos temporariamente indisponíveis"}
+            </strong>
+            <small>
+              {wf13Enabled
+                ? "Simulador Associativo pode ser calculado sem persistência. Demais motores continuam indisponíveis."
+                : "As jornadas podem ser consultadas. Nenhuma fórmula, resultado ou regra não validada atua no runtime."}
+            </small>
+          </span>
+        </section>
 
         <section aria-labelledby="simulation-tools-title">
           <h2 id="simulation-tools-title" className={styles.visuallyHidden}>
@@ -124,6 +129,7 @@ export default async function SimulationHubPage() {
           </h2>
           <div className={styles.hubGrid}>
             {hubCards.map(({ simulator, releaseEnabled }) => {
+              const engineBlocked = simulator.slug === "caixa";
               return releaseEnabled ? (
                 <Link
                   className={styles.hubCard}
@@ -131,7 +137,11 @@ export default async function SimulationHubPage() {
                   prefetch={false}
                   key={simulator.slug}
                 >
-                  <SimulatorCardContent simulator={simulator} releaseEnabled />
+                  <SimulatorCardContent
+                    simulator={simulator}
+                    releaseEnabled
+                    engineBlocked={engineBlocked}
+                  />
                 </Link>
               ) : (
                 <article

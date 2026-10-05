@@ -526,11 +526,11 @@ describe("Tabelão protegido", () => {
     const result = validation.slice(validation.lastIndexOf("  return {"));
     expect([...result.matchAll(/^    (\w+)(?=:|,)/gm)].map((match) => match[1])).toEqual([
       "responsiveGrid",
-      "spotlightSized",
-      "placementClassApplied",
-      "guideReachedLastStep",
-      "guideCompletionReturnedFocus",
-      "guideEscapeReturnedFocus",
+      "nestedGuideAbsent",
+      "singleGlobalNavigation",
+      "titleActionsAbsent",
+      "previewStatusVisible",
+      "canvasHeaderCompact",
       "exclusiveRows",
       "netPrices",
       "groupedProjects",

@@ -44,6 +44,13 @@ describe("protected interface shell", () => {
       ),
       "utf8",
     );
+    const simulatorCanvasStylesheet = readFileSync(
+      new URL(
+        "../app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
 
     expect(stylesheet).toContain(":root {");
     expect(stylesheet).toContain(':root[data-theme="balanced"]');
@@ -69,27 +76,28 @@ describe("protected interface shell", () => {
     );
     expect(shellStylesheet).toMatch(/\.accountAvatar \{[\s\S]*border-radius: 999px/);
     const accountLabelRules = shellStylesheet.match(/\.accountTriggerIdentity \{([^}]+)\}/)?.[1];
-    expect(accountLabelRules).toContain("overflow-wrap: anywhere");
-    expect(accountLabelRules).toContain("white-space: normal");
-    expect(accountLabelRules).not.toMatch(/ellipsis|overflow: hidden|display: none/);
+    expect(accountLabelRules).toContain("position: absolute");
+    expect(accountLabelRules).toContain("overflow: hidden");
+    expect(accountLabelRules).toContain("clip-path: inset(50%)");
     expect(shellStylesheet.match(/\.accountTriggerIdentity \{/g)).toHaveLength(1);
     expect(accountMenu).toContain("getIdentityInitials(identity)");
     expect(accountMenu).toContain("<ChevronDown");
     expect(accountMenu).toContain("`Conta de ${firstName} (${identity})` : `Conta de ${identity}`");
     expect(accountMenu).toContain("data-session-identity-trigger-label");
+    expect(accountMenu).toContain("data-session-avatar");
     expect(shellStylesheet).toMatch(/\.accountProfile \{[\s\S]*overflow-wrap: anywhere/);
     expect(shellStylesheet).toContain("@media (max-width: 1180px)");
     expect(shellStylesheet).toMatch(
       /@media \(min-width: 1181px\) and \(max-width: 1500px\) \{[\s\S]*\.navigationLink,[\s\S]*\.navigationTrigger \{[\s\S]*padding-inline: 5px/,
     );
     expect(shellStylesheet).toMatch(
-      /@media \(max-width: 1180px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px auto minmax\(0, max-content\)[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 2[\s\S]*\.actions \{[\s\S]*grid-column: 4[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 3/,
+      /@media \(max-width: 1180px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px auto 44px[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 2[\s\S]*\.actions \{[\s\S]*grid-column: 4[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 3/,
     );
     expect(shellStylesheet).toMatch(
-      /@media \(max-width: 600px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 136px minmax\(44px, max-content\) 44px[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 4[\s\S]*grid-row: 1[\s\S]*\.actions \{[\s\S]*grid-column: 3[\s\S]*grid-row: 1[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 2[\s\S]*grid-row: 1/,
+      /@media \(max-width: 600px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px 44px 44px[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 4[\s\S]*grid-row: 1[\s\S]*\.actions \{[\s\S]*grid-column: 3[\s\S]*grid-row: 1[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 2[\s\S]*grid-row: 1/,
     );
     expect(shellStylesheet).toMatch(
-      /@media \(max-width: 600px\) \{[\s\S]*\.themeOptions \{[\s\S]*grid-template-columns: repeat\(3, 44px\)[\s\S]*\.themeOption \{[\s\S]*font-size: 0/,
+      /@media \(max-width: 600px\) \{[\s\S]*\.themeOptions \{[\s\S]*display: none[\s\S]*\.mobileThemeCycle \{[\s\S]*display: grid[\s\S]*width: 44px[\s\S]*height: 44px/,
     );
     expect(shellStylesheet).toMatch(
       /@media \(max-width: 600px\) \{[\s\S]*\.navigation \{[\s\S]*left: 0;[\s\S]*width: 100%/,
@@ -108,6 +116,12 @@ describe("protected interface shell", () => {
     );
     expect(investorStylesheet).toMatch(
       /\.documentation-values-panel \.documentation-money-field > \.documentation-money-heading \.documentation-money-heading-meta small \{[\s\S]*overflow-wrap:anywhere;[\s\S]*white-space:normal/,
+    );
+    expect(simulatorCanvasStylesheet).toMatch(
+      /\.simulation-canvas-status \{[\s\S]*?color: var\(--canvas-text\)/,
+    );
+    expect(simulatorCanvasStylesheet).toMatch(
+      /\.simulation-canvas-status svg \{[\s\S]*?color: var\(--canvas-accent\)/,
     );
   });
 });

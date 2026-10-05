@@ -28,7 +28,7 @@ export async function TabelaoArchive() {
         />
         <TabelaoClient />
         <TabelaoResources />
-        <div className="investor-page-closing">
+        <div className="investor-page-closing" hidden>
           <p className="simulation-disclaimer">
             Consulta de apoio comercial. Confirme disponibilidade, valor e condição da unidade no
             fluxo oficial antes de formalizar a proposta.

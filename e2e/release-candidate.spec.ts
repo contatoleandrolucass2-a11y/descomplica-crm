@@ -1369,11 +1369,10 @@ test("released simulator pages run only for Master while the CAIXA engine stays 
     await expect(page.getByRole("region", { name: "Estoque completo de unidades" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Produto" })).toBeVisible();
     await expect(page.locator(".investor-stock-table tbody tr.selected")).toHaveCount(0);
-    await expect(
-      page
-        .getByLabel("Guia completo do simulador")
-        .getByRole("button", { name: "Iniciar passo a passo" }),
-    ).toBeVisible();
+    // The approved Associativo canvas keeps the stock header compact. The
+    // contextual guide is exposed after a unit is selected, not as a second
+    // title action above the inventory.
+    await expect(page.getByLabel("Guia completo do simulador")).toHaveCount(0);
 
     const investorResponse = await page.goto("/app/simulacao/tabela-investidor");
     expect(investorResponse?.status()).toBe(200);
@@ -1530,6 +1529,9 @@ test("long session identity stays inside AccountMenu without overlapping navigat
       const themeSwitchBox = themeSwitch.getBoundingClientRect();
       const navigationBox = navigationElement.getBoundingClientRect();
       const topbarBox = topbar.getBoundingClientRect();
+      const desktopThemeButtons = themeSwitch.querySelectorAll(
+        "[data-theme-options-desktop] button",
+      );
       return {
         accountPanelFits:
           accountPanelBox.width > 0 &&
@@ -1556,10 +1558,8 @@ test("long session identity stays inside AccountMenu without overlapping navigat
           !overlaps(navigationBox, accountPanelBox) &&
           !overlaps(navigationBox, themeSwitchBox),
         themeButtonsVisible:
-          themeSwitch.querySelectorAll("button").length === 3 &&
-          [...themeSwitch.querySelectorAll("button")].every(
-            (button) => button.getClientRects().length > 0,
-          ),
+          desktopThemeButtons.length === 3 &&
+          [...desktopThemeButtons].every((button) => button.getClientRects().length > 0),
         rootOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
       };
     });

@@ -114,7 +114,26 @@ describe("management canvas layout", () => {
     expect(pages).toContain("Páginas cadastradas");
     expect(pages).toContain('<th scope="col">Descrição</th>');
     expect(pages).toContain('<th scope="col">Rota</th>');
+    for (const label of ["Página", "Descrição", "Rota", "Status", "Ações"]) {
+      expect(pages).toContain(`data-label="${label}"`);
+    }
     expect(styles).toMatch(/\.admin-home-grid\s*\{[\s\S]*?grid-template-columns:\s*repeat\(2/);
+    expect(styles).toMatch(
+      /\.admin-pages-content \{[\s\S]*?max-width: 100%;[\s\S]*?align-content: start/,
+    );
+    expect(styles).toMatch(
+      /\.admin-pages-results \[class\*="tableRegion"\] \{[\s\S]*?width: 100%;[\s\S]*?max-width: 100%/,
+    );
+    expect(styles).toMatch(/\.admin-pages-page \{[\s\S]*?overflow-x: hidden/);
+    expect(styles).toMatch(
+      /\.admin-pages-content,[\s\S]*?\.admin-pages-results \{[\s\S]*?contain: inline-size/,
+    );
+    expect(styles).toMatch(
+      /@media \(max-width: 64rem\) \{[\s\S]*?\.admin-pages-results \{[\s\S]*?overflow: hidden[\s\S]*?\.admin-pages-results \[class\*="tableRegion"\] \{[\s\S]*?overflow-x: auto/,
+    );
+    expect(styles).toMatch(
+      /@media \(max-width: 60rem\) \{[\s\S]*?\.admin-pages-results table \{[\s\S]*?min-width: 0[\s\S]*?\.admin-pages-results tbody :is\(th, td\) \{[\s\S]*?min-width: 0 !important/,
+    );
     expect(users).toContain("const PAGE_SIZE = 6");
     expect(pages).toContain("const PAGE_SIZE = 8");
   });
@@ -131,9 +150,10 @@ describe("management canvas layout", () => {
 
     expect(ranking).toContain("loadRankingReadModel");
     expect(ranking).toContain("Nenhuma pontuação oficial foi calculada");
-    expect(partnerships).toContain("const imobRows: ImobRankingRow[] = []");
-    expect(partnerships).toContain("const developmentRows: DevelopmentRankingRow[] = []");
     expect(partnerships).toContain("Dado indisponível — integração pendente");
+    expect(partnerships).toContain("Pódio das parcerias");
+    expect(partnerships).toContain("Totais do período");
+    expect(partnerships).not.toMatch(/ImobRankingRow|DevelopmentRankingRow/);
     expect(funnel).toContain('placeholder="—"');
     expect(funnel).toContain("refletem exclusivamente a última base legada carregada");
     expect(funnel).not.toContain("recalcula as etapas localmente");

@@ -41,7 +41,10 @@ function accountIdentityEvidencePassed(check: {
   identityDisplayReady?: boolean;
   identityTruncationReady?: boolean;
 }) {
-  if (check.identityDisplayContract === "registered-first-name-v1") {
+  if (
+    check.identityDisplayContract === "compact-account-avatar-v2" ||
+    check.identityDisplayContract === "registered-first-name-v1"
+  ) {
     return check.identityDisplayReady === true;
   }
   // Retain the historical baseline's gate without treating it as evidence of the new contract.
@@ -272,6 +275,9 @@ const authenticatedResults = JSON.parse(
     themeScreenshots: number;
     accessibilityAudits: number;
     baselineComparisons: number;
+    approvedCanvasComparisons: number;
+    approvedCanvasColorDistanceThreshold: number;
+    approvedCanvasEdgeDistanceThreshold: number;
     changedPixelRatioThreshold: number;
     channelTolerance: number;
   };
@@ -285,6 +291,17 @@ const authenticatedResults = JSON.parse(
       changedPixelRatio: number | null;
       baselineUsed: { path: string; tracked: boolean; bytes: number | null; sha256: string | null };
     };
+    approvedCanvasComparison?: {
+      passed: boolean;
+      reason: string;
+      asset: string;
+      region: "left" | "right";
+      referenceSha256: string;
+      colorDistance: number;
+      colorDistanceThreshold: number;
+      edgeDistance: number;
+      edgeDistanceThreshold: number;
+    };
     previousBaselineComparison: {
       passed: boolean;
       reason: string;
@@ -296,7 +313,7 @@ const authenticatedResults = JSON.parse(
 
 describe("current account display and protected header contract", () => {
   it.runIf(process.env.ACCOUNT_MENU_BROWSER === "1")(
-    "keeps the brand hit area separate and rejects hidden, clipped or incorrect account names",
+    "keeps the brand hit area separate and rejects broken compact account identities",
     async () => {
       const require = createRequire(import.meta.url);
       const { parse } = createRequire(require.resolve("next/package.json"))("postcss") as {
@@ -431,11 +448,10 @@ describe("current account display and protected header contract", () => {
         for (const mutation of [
           { text: "qa.header@local.invalid" },
           { text: "Maria" },
-          { style: "display:none" },
-          { style: "visibility:hidden" },
-          { parentStyle: "opacity:0" },
-          { style: "text-overflow:ellipsis" },
-          { style: "width:8px;flex:0 0 8px;max-height:10px;overflow:hidden;white-space:nowrap" },
+          { style: "position:static;width:80px;height:20px" },
+          { style: "width:8px;height:8px;overflow:visible" },
+          { avatarStyle: "display:none" },
+          { avatarStyle: "transform:translateX(2000px)" },
           { ariaLabel: "Outra conta" },
           { parentStyle: "transform:translateX(2000px)" },
         ]) {
@@ -445,6 +461,10 @@ describe("current account display and protected header contract", () => {
             if (change.style) label.setAttribute("style", change.style);
             if (change.parentStyle) label.parentElement!.setAttribute("style", change.parentStyle);
             if (change.ariaLabel) label.parentElement!.setAttribute("aria-label", change.ariaLabel);
+            if (change.avatarStyle)
+              label
+                .parentElement!.querySelector("[data-session-avatar]")
+                ?.setAttribute("style", change.avatarStyle);
           }, mutation);
           expect(
             await page.evaluate(inspectIdentity, "Mariana"),
@@ -464,13 +484,13 @@ describe("versioned reference parity catalog", () => {
     expect(accountIdentityEvidencePassed({ identityTruncationReady: true })).toBe(true);
     expect(
       accountIdentityEvidencePassed({
-        identityDisplayContract: "registered-first-name-v1",
+        identityDisplayContract: "compact-account-avatar-v2",
         identityDisplayReady: true,
       }),
     ).toBe(true);
     expect(
       accountIdentityEvidencePassed({
-        identityDisplayContract: "registered-first-name-v1",
+        identityDisplayContract: "compact-account-avatar-v2",
         identityTruncationReady: true,
       }),
     ).toBe(false);
@@ -489,9 +509,9 @@ describe("versioned reference parity catalog", () => {
     expect(accountIdentityEvidencePassed({})).toBe(false);
   });
 
-  it("requires the whole visible account name in every current route inspection", () => {
+  it("requires a compact account avatar with the full accessible identity", () => {
     expect(visualHarness).not.toContain("identityTruncationReady");
-    expect(visualHarness).toContain('identityDisplayContract: "registered-first-name-v1"');
+    expect(visualHarness).toContain('identityDisplayContract: "compact-account-avatar-v2"');
     expect(visualHarness).toContain("snapshot.identityDisplayReady &&");
     expect(visualHarness).toContain(
       "page.evaluate(inspectAccountIdentityDisplay, expectedAccountFirstName)",
@@ -603,7 +623,12 @@ describe("versioned reference parity catalog", () => {
     expect(visualHarness).toContain('const mobileDarkViewportKey = "mobile-390x844"');
     expect(visualHarness).toContain('matrix: "mobile-dark"');
     expect(visualHarness).toContain('kind: "mobile-dark"');
-    expect(visualHarness).toContain("...adminRoutes");
+    expect(visualHarness).toContain(
+      "compareApprovedCanvas(buffer, approvedCanvasByRoute.get(route))",
+    );
+    expect(visualHarness).toContain("approvedCanvasColorDistanceThreshold");
+    expect(visualHarness).toContain("approvedCanvasEdgeDistanceThreshold");
+    expect(visualHarness).toContain("const desktopThemeCaptureRoutes = new Set(routes)");
     for (const route of ["/admin", "/admin/usuarios", "/admin/paginas"]) {
       expect(visualHarness).toContain(`"${route}"`);
     }
@@ -757,7 +782,7 @@ describe("versioned reference parity catalog", () => {
         (check) => check.passed && check.reducedMotion && !check.horizontalOverflow,
       ),
     ).toBe(true);
-    const desktopThemeScreenshotCount = 11 * 3;
+    const desktopThemeScreenshotCount = expectedReleasedProtectedRoutes.length * 3;
     const mobileDarkScreenshotCount = expectedReleasedProtectedRoutes.length;
     const themeScreenshotCount = desktopThemeScreenshotCount + mobileDarkScreenshotCount;
     const visualEvidenceCount = responsiveScreenshotCount + themeScreenshotCount;
@@ -811,10 +836,27 @@ describe("versioned reference parity catalog", () => {
       themeScreenshots: themeScreenshotCount,
       accessibilityAudits: visualEvidenceCount,
       baselineComparisons: visualEvidenceCount,
+      approvedCanvasComparisons: expectedReleasedProtectedRoutes.length,
+      approvedCanvasColorDistanceThreshold: 23,
+      approvedCanvasEdgeDistanceThreshold: 52,
       changedPixelRatioThreshold: 0.01,
       channelTolerance: 16,
     });
     expect(authenticatedResults.screenshots).toHaveLength(visualEvidenceCount);
+    const approvedCanvasComparisons = authenticatedResults.screenshots.filter(
+      ({ approvedCanvasComparison }) => approvedCanvasComparison,
+    );
+    expect(approvedCanvasComparisons).toHaveLength(expectedReleasedProtectedRoutes.length);
+    expect(
+      approvedCanvasComparisons.every(
+        ({ approvedCanvasComparison }) =>
+          approvedCanvasComparison?.passed &&
+          approvedCanvasComparison.reason === "approved_canvas_structure_within_threshold" &&
+          approvedCanvasComparison.colorDistance <=
+            approvedCanvasComparison.colorDistanceThreshold &&
+          approvedCanvasComparison.edgeDistance <= approvedCanvasComparison.edgeDistanceThreshold,
+      ),
+    ).toBe(true);
     expect(authenticatedResults.worktreeDirtyAtCapture).toBe(false);
     expect(authenticatedResults.worktreeFingerprint).toMatch(/^[a-f0-9]{64}$/);
     expect(authenticatedResults.worktreeFingerprintAlgorithm).toBe(

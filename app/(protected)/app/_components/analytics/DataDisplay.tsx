@@ -263,16 +263,20 @@ export interface AnalyticsColumn<Row> {
 
 export function AnalyticsTable<Row>({
   caption,
+  captionVisible = true,
   rows,
   columns,
   rowKey,
   density = "default",
+  emptyState,
 }: {
   caption: string;
+  captionVisible?: boolean;
   rows: Row[];
   columns: Array<AnalyticsColumn<Row>>;
   rowKey: (row: Row) => string;
   density?: "default" | "compact";
+  emptyState?: ReactNode;
 }) {
   return (
     <div
@@ -283,7 +287,7 @@ export function AnalyticsTable<Row>({
       tabIndex={0}
     >
       <table className={styles.table}>
-        <caption>{caption}</caption>
+        <caption className={captionVisible ? undefined : styles.visuallyHidden}>{caption}</caption>
         <thead>
           <tr>
             {columns.map((column) => (
@@ -316,6 +320,9 @@ export function AnalyticsTable<Row>({
           ))}
         </tbody>
       </table>
+      {rows.length === 0 && emptyState ? (
+        <div className={styles.tableEmpty}>{emptyState}</div>
+      ) : null}
     </div>
   );
 }

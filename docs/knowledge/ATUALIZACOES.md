@@ -61,8 +61,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-05: baseline autorreferente nao comprova paridade com canvas
 
-- Status: pendente_validacao; fonte: auditoria visual do usuario, branch
-  `codex/canvas-layout-exact` e 11 canvases em `docs/qa/canvas-parity/reference`.
+- Status: validado localmente; fonte: auditoria visual do usuario, branch
+  `codex/canvas-layout-parity-hotfix` e 11 canvases em
+  `docs/qa/canvas-parity/reference`.
 - Uma captura gerada pela propria aplicacao detecta regressao em relacao ao
   ultimo build, mas nao prova aderencia a uma referencia externa. O contrato
   precisa mapear rota para canvas e verificar tambem a densidade estrutural.
@@ -74,10 +75,21 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Dados, RBAC e layout sao contratos separados: aproximar a tela nao autoriza
   copiar valores do mockup, remover guards nem liberar motores bloqueados.
 - Evidencia: `docs/audits/canvas-layout-correction-2026-10-05.md`.
-- Validacao local concluida: 154 cenarios responsivos, 88 de tema, 209
-  auditorias Axe e comparacoes, 110 verificacoes de zoom e 40 navegacoes, sem
-  falhas. CAIXA continua fail-closed e o Tabelao oculta os controles no modo de
-  impressao. Conta e fixtures efemeras foram removidas; nenhum remoto mudou.
+- Validacao local combinada concluida em `2026-10-05T18:32:51Z`, no source SHA
+  `8a15aa4` sobre a base `de57b6a`: 154 cenarios
+  responsivos, 88 de tema, 242 auditorias Axe, 242 comparacoes de regressao,
+  22/22 comparacoes com os canvases, 110 verificacoes de zoom e 40 navegacoes,
+  sem falhas. CAIXA continua fail-closed e o Tabelao oculta os controles no
+  modo de impressao. Conta e fixtures efemeras foram removidas; nenhum remoto
+  mudou nesta validacao.
+- Recurso MKT permanece uma 23a pagina protegida com contrato proprio; passou
+  12 combinacoes de viewport/tema, teclado e Axe. Sua chegada altera somente as
+  referencias de Configuracoes que exibem o card, nao o conjunto dos 22 canvases.
+- O E2E de release aprovou 20 cenarios com um skip remoto previsto e removeu
+  dez identidades sinteticas. Expectativas antigas devem acompanhar a
+  composicao aprovada: o Associativo nao possui guia no cabecalho e o desktop
+  conta somente os tres botoes dentro de `data-theme-options-desktop`, sem
+  confundir o ciclo de tema mobile oculto.
 
 ## 2026-10-04: cadencia visual e nome cadastrado
 
@@ -1187,3 +1199,20 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   as seis falhas preexistentes ligadas a permissoes POSIX; consultar a CI Linux
   do PR para a validacao integral antes do merge.
 - Nenhuma alteracao de producao, conta, plugin comunitario ou regra financeira.
+
+## 2026-10-05: paridade visual exige referencia externa
+
+- Status: em validacao antes da publicacao.
+- Fonte: `docs/qa/canvas-parity/README.md`,
+  `docs/audits/canvas-layout-correction-2026-10-05.md` e
+  `scripts/qa/authenticated-visual.mjs`.
+- Uma baseline gerada pela propria aplicacao detecta regressao entre commits,
+  mas nao comprova que a tela corresponde a um canvas externo aprovado. O gate
+  anterior era autorreferente e permitiu promover uma composicao divergente.
+- A matriz autenticada passou a recortar a metade correta das 11 pranchas e
+  comparar as 22 rotas por distribuicao cromatica e estrutura de bordas, alem
+  de manter capturas internas, Axe, overflow, console, zoom, teclado,
+  reduced-motion, sete larguras e tres temas.
+- O contrato continua estrutural: canvases nao autorizam numeros, politicas,
+  rotas, grants ou motores. Dados e navegacao permanecem derivados dos loaders
+  e guards existentes; ausencia de fonte continua fail-closed.

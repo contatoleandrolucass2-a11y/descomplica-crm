@@ -874,13 +874,25 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     // A fresh journey must not depend on editing income destroying an existing proposal.
     const currentTheme = await page.evaluate(() => document.documentElement.dataset.theme);
     await page.reload({ waitUntil: "networkidle" });
-    await page
-      .getByRole("group", { name: "Aparência da página", exact: true })
-      .getByRole("button", {
-        name: { light: "Claro", balanced: "Médio", dark: "Escuro" }[currentTheme],
-        exact: true,
-      })
-      .click();
+    const themeGroup = page.getByRole("group", {
+      name: "Aparência da página",
+      exact: true,
+    });
+    if ((page.viewportSize()?.width ?? 1440) <= 600) {
+      const cycle = themeGroup.locator("[data-theme-cycle-mobile]");
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        if ((await page.locator("html").getAttribute("data-theme")) === currentTheme) break;
+        await cycle.click();
+      }
+      await expect(page.locator("html")).toHaveAttribute("data-theme", currentTheme);
+    } else {
+      await themeGroup
+        .getByRole("button", {
+          name: { light: "Claro", balanced: "Médio", dark: "Escuro" }[currentTheme],
+          exact: true,
+        })
+        .click();
+    }
     await page
       .locator(`${root} .investor-stock-table tbody tr.selectable`)
       .first()
@@ -1349,10 +1361,20 @@ export async function runAssociativeGuidancePreview(
             check.contrast[state] = await inspectAssociativeGuidanceContrast(page);
           };
           try {
-            await page
-              .getByRole("group", { name: "Aparência da página", exact: true })
-              .getByRole("button", { name: label, exact: true })
-              .click();
+            const themeGroup = page.getByRole("group", {
+              name: "Aparência da página",
+              exact: true,
+            });
+            if (mobile) {
+              const cycle = themeGroup.locator("[data-theme-cycle-mobile]");
+              for (let attempt = 0; attempt < 3; attempt += 1) {
+                if ((await page.locator("html").getAttribute("data-theme")) === theme) break;
+                await cycle.click();
+              }
+              await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+            } else {
+              await themeGroup.getByRole("button", { name: label, exact: true }).click();
+            }
             await page
               .locator(".investor-stock-table tbody tr.selectable")
               .first()
