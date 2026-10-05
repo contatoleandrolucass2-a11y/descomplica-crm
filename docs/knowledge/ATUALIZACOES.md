@@ -27,6 +27,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - CI `37257361148`: falha residual curta exige prova adicional no helper,
   sem alterar produto ou reduzir gates. Aguardar URL do router e registrar
   somente etapas e classes estaticas de erro, nunca a mensagem bruta do browser.
+- A lista de links autorizados tambem aparece em `archive-navigation.mjs`.
+  Ao adicionar uma guia, atualizar esse contrato junto da matriz E2E; manter
+  contagem exata e provas de alcance de cada link, sem relaxar os limites.
 
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 

@@ -25,6 +25,9 @@
 - CI `37257361148`: navegacao geral segue aprovada; falha curta no helper MKT.
   Diagnostico por etapas sem payload privado, seletor restrito ao card e espera
   explicita da URL para distinguir seletor ambiguo de transicao do router.
+- Varredura adicional encontrou contrato de quatro itens em
+  `archive-navigation.mjs`; incluido o quinto link MKT com as mesmas provas de
+  nome, destino, clique e visibilidade em todas as larguras da matriz existente.
 
 ## 2026-10-04 - Associativo: cobertura da origem e brilho integral
 
