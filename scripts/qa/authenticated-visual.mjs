@@ -3271,62 +3271,31 @@ async function checkTabelaoValidation(page, origin) {
     .getByText(syntheticTabelaoCountLabel, { exact: true })
     .waitFor({ state: "visible", timeout: qaNavigationTimeout });
 
-  const guideLauncher = page.getByRole("button", {
-    name: "Iniciar passo a passo",
-    exact: true,
-  });
-  await guideLauncher.click();
-  const guide = page.locator("#investor-guided-tour");
-  await guide.waitFor({ state: "visible" });
-  await page.waitForFunction(
-    () => document.activeElement === document.querySelector("#investor-guided-tour"),
-    undefined,
-    { timeout: 10_000 },
-  );
-  process.stdout.write("Tabelão QA: guia aberto com foco\n");
-  const spotlightSized = await page.locator(".investor-tour-spotlight").evaluate((element) => {
-    const box = element.getBoundingClientRect();
-    return box.width > 0 && box.height > 0;
-  });
-  let placementClassApplied = false;
-  for (let step = 1; step < 3; step += 1) {
-    await guide.getByRole("button", { name: "Próximo", exact: true }).click();
-    await page.waitForTimeout(80);
-    placementClassApplied ||= await guide.evaluate(
-      (element) => element.classList.contains("at-top") || element.classList.contains("at-left"),
-    );
-  }
-  const guideReachedLastStep = await guide
-    .getByRole("heading", { name: "Confira a unidade correta", exact: true })
-    .isVisible();
-  await guide.getByRole("button", { name: "Concluir guia", exact: true }).click();
-  await guide.waitFor({ state: "hidden" });
-  await page.waitForFunction(
-    () => document.activeElement === document.querySelector(".investor-guided-start"),
-    undefined,
-    { timeout: 10_000 },
-  );
-  const guideCompletionReturnedFocus = await guideLauncher.evaluate(
-    (element) => document.activeElement === element,
-  );
-  await guideLauncher.click();
-  await guide.waitFor({ state: "visible" });
-  await page.waitForFunction(
-    () => document.activeElement === document.querySelector("#investor-guided-tour"),
-    undefined,
-    { timeout: 10_000 },
-  );
-  await page.keyboard.press("Escape");
-  await guide.waitFor({ state: "hidden" });
-  await page.waitForFunction(
-    () => document.activeElement === document.querySelector(".investor-guided-start"),
-    undefined,
-    { timeout: 10_000 },
-  );
-  const guideEscapeReturnedFocus = await guideLauncher.evaluate(
-    (element) => document.activeElement === element,
-  );
-  process.stdout.write("Tabelão QA: guia concluído e Escape verificado\n");
+  const approvedCanvasHeader = await page
+    .locator(".simulation-canvas-header")
+    .evaluate((header) => {
+      const bounds = header.getBoundingClientRect();
+      const status = header.querySelector(".simulation-canvas-status")?.getBoundingClientRect();
+      return {
+        nestedGuideAbsent: !header.querySelector(".investor-guided-start"),
+        singleGlobalNavigation:
+          document.querySelectorAll("[data-protected-topbar]").length === 1 &&
+          document.querySelectorAll('nav[aria-label="Navegação principal"]').length === 1,
+        titleActionsAbsent: !header.querySelector(".simulation-canvas-actions"),
+        previewStatusVisible:
+          status != null &&
+          status.width > 0 &&
+          status.height >= 44 &&
+          status.left >= bounds.left - 1 &&
+          status.right <= bounds.right + 1,
+        canvasHeaderCompact:
+          bounds.height <= 120 &&
+          bounds.left >= -1 &&
+          bounds.right <= innerWidth + 1 &&
+          document.documentElement.scrollWidth <= innerWidth + 1,
+      };
+    });
+  process.stdout.write("Tabelão QA: cabeçalho único do canvas verificado\n");
 
   const rendered = await page.locator("tr[data-inventory-unit-id]").evaluateAll((rows) =>
     rows.map((row) => ({
@@ -4100,11 +4069,11 @@ async function checkTabelaoValidation(page, origin) {
 
   return {
     responsiveGrid: responsiveGrid && typographyAndLabels,
-    spotlightSized,
-    placementClassApplied,
-    guideReachedLastStep,
-    guideCompletionReturnedFocus,
-    guideEscapeReturnedFocus,
+    nestedGuideAbsent: approvedCanvasHeader.nestedGuideAbsent,
+    singleGlobalNavigation: approvedCanvasHeader.singleGlobalNavigation,
+    titleActionsAbsent: approvedCanvasHeader.titleActionsAbsent,
+    previewStatusVisible: approvedCanvasHeader.previewStatusVisible,
+    canvasHeaderCompact: approvedCanvasHeader.canvasHeaderCompact,
     exclusiveRows: exclusiveRows && regionParkingFlow,
     netPrices,
     groupedProjects: groupedProjects && regionOrderAndLayout,
