@@ -50,10 +50,15 @@ Documentacao e CAIXA.
   aprovados, uma por rota, alem das capturas de regressao produzidas pela
   aplicacao. A nova baseline somente pode ser promovida depois de todas essas
   comparacoes passarem.
+- A baseline limpa foi promovida transacionalmente em
+  `2026-10-05T17:33:34Z`: 154 combinacoes responsivas, 88 checks de tema, 242
+  auditorias Axe, 242 comparacoes de regressao, 22/22 comparacoes externas e
+  110 checks de zoom passaram. Nao houve erro de console ou de pagina; conta e
+  fixtures locais foram removidas ao final.
 - A navegacao dos quatro simuladores cobre 320, 375, 390, 600, 601, 768, 1024,
   1180, 1181 e 1440 px: 40/40 cenarios passaram. O Tabelao tambem oculta no
   modo de impressao os controles do novo cabecalho, preservando somente o
   conteudo expansivo e legivel.
 - Formatacao, lint, tipos, testes, build e release E2E permanecem gates de
-  publicacao. Os resultados finais e o SHA publicado sao registrados no
-  `WORKLOG.md` apos CI e deploy.
+  publicacao. Os resultados de CI, o SHA e a imagem publicada serao registrados
+  no `WORKLOG.md` apos o deploy.

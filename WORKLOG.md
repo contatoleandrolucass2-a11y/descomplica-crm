@@ -6,7 +6,7 @@
   comparava a aplicacao com baselines geradas por ela mesma. Dashboard chegava
   a 4.408px e Canal a 1.731px em 1440px, embora os canvases definissem uma
   composicao compacta.
-- Branch `codex/canvas-layout-exact`, base `e1ab14a`. Foram corrigidas as 22
+- Branch `codex/canvas-layout-parity-hotfix`, base `afdb1c9`. Foram corrigidas as 22
   rotas sem alterar loaders, autorizacao, RLS, APIs, motores ou fontes.
 - Dashboard conserva somente filtros, indicadores, funil, ranking e atividades
   na composicao publicada. Canal termina nos totais. Etapas seguem as variacoes
@@ -14,8 +14,9 @@
 - O harness agora associa cada rota a um canvas e rejeita retorno a densidade
   extensa. Limites por rota representam as referencias verticais, sem reduzir
   requisitos de toque ou ocultar overflow.
-- Gate visual local aprovado: 154 responsivos, 88 temas, 209 auditorias Axe,
-  209 comparacoes, 110 verificacoes de zoom e 40 cenarios da navegacao dos
+- Gate visual local aprovado em `2026-10-05T17:33:34Z`: 154 responsivos, 88
+  temas, 242 auditorias Axe, 242 comparacoes de baseline, 22 comparacoes com os
+  canvases aprovados, 110 verificacoes de zoom e 40 cenarios da navegacao dos
   simuladores. A conta e as fixtures efemeras foram removidas pelo runner.
 - CAIXA passou com contraste AA e mensagem explicita junto ao CTA bloqueado.
   O Tabelao passou responsividade, estados, teclado e impressao sem controles
