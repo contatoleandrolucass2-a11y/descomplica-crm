@@ -26,7 +26,8 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-04: cadencia visual e nome cadastrado
 
-- Status: pendente_validacao; fonte: pedido de doze ajustes visuais, branch
+- Status: validado e publicado em 05/10/2026; fonte: PR #150, runtime
+  `e1ab14a8739153c56081e4f36a76e99f80fed8b2`, pedido de doze ajustes e branch
   `codex/associativo-animacao-sequencial`, base `a4a9ef5`.
 - Animacoes CSS montadas em momentos distintos nao compartilham necessariamente
   a fase. Alinhar somente novas animacoes a um relogio, sem timer de renderizacao,
@@ -56,8 +57,14 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   promovidas; 36 capturas ja aprovadas conservaram seus bytes de referencia.
 - Evidencias e pendencias: `docs/audits/associativo-sequencias-2026-10-04.md`.
   Preview 6/6, 47 testes de efeitos, 76 do cabecalho e 126 cenarios geometricos;
-  nova CI integral em verify e publicacao pendentes. Nenhuma formula
-  financeira alterada.
+  CI do PR `37257462975` e do main `37259237555` integralmente aprovadas,
+  incluindo modo verify. Nenhuma formula financeira alterada.
+- Publicacao imutavel com hashes/OCI, dois perfis, backup, CAS e rollback.
+  Health, guards anonimos e jornada autenticada aprovados. Registro final
+  documental nao exige novo restart da aplicacao.
+- A sessao real usada no postcheck nao forneceu nome valido, apesar de as
+  fixtures exercitarem nomes completos. Nao inventar nome pelo email nem alterar
+  contas pela autorizacao de deploy. Solicitados dado e autorizacao especifica.
 
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 
