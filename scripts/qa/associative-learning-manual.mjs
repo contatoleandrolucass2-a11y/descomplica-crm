@@ -5,10 +5,16 @@ import { expect } from "@playwright/test";
 
 async function setArchiveTheme(page, theme) {
   const labels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
-  await page
-    .getByRole("group", { name: "Aparência da página" })
-    .getByRole("button", { name: labels[theme], exact: true })
-    .click();
+  const group = page.getByRole("group", { name: "Aparência da página" });
+  if ((page.viewportSize()?.width ?? 1440) <= 600) {
+    const cycle = group.locator("[data-theme-cycle-mobile]");
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      if ((await page.locator("html").getAttribute("data-theme")) === theme) break;
+      await cycle.click();
+    }
+  } else {
+    await group.getByRole("button", { name: labels[theme], exact: true }).click();
+  }
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
 }
 

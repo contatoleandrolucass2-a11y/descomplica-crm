@@ -1361,10 +1361,20 @@ export async function runAssociativeGuidancePreview(
             check.contrast[state] = await inspectAssociativeGuidanceContrast(page);
           };
           try {
-            await page
-              .getByRole("group", { name: "Aparência da página", exact: true })
-              .getByRole("button", { name: label, exact: true })
-              .click();
+            const themeGroup = page.getByRole("group", {
+              name: "Aparência da página",
+              exact: true,
+            });
+            if (mobile) {
+              const cycle = themeGroup.locator("[data-theme-cycle-mobile]");
+              for (let attempt = 0; attempt < 3; attempt += 1) {
+                if ((await page.locator("html").getAttribute("data-theme")) === theme) break;
+                await cycle.click();
+              }
+              await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+            } else {
+              await themeGroup.getByRole("button", { name: label, exact: true }).click();
+            }
             await page
               .locator(".investor-stock-table tbody tr.selectable")
               .first()
