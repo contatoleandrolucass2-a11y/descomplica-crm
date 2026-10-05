@@ -9,6 +9,7 @@
   os valores iniciais e explicita entradas invalidas.
 - Amplia a matriz E2E de autorizacao para a nova rota, mantendo os nove perfis.
 - Explicita o nome acessivel dos atalhos de Configuracoes para navegacao assistiva.
+- QA da guia verifica a transicao de rota antes de conferir valores e temas.
 
 ## 2026-10-04 - Dados oficiais e brilho integral no Associativo
 

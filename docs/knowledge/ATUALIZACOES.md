@@ -24,6 +24,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - CI `37255825356` aprovou os nove perfis; seletores semanticos identificaram
   que links envolvendo `article` nao recebiam nome acessivel do conteudo.
   Usar rotulo explicito do titulo. Correcao coberta por renderizacao do card.
+- CI `37257361148`: falha residual curta exige prova adicional no helper,
+  sem alterar produto ou reduzir gates. Aguardar URL do router e registrar
+  somente etapas e classes estaticas de erro, nunca a mensagem bruta do browser.
 
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 

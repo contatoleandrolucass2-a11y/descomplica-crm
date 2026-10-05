@@ -22,6 +22,9 @@
 - CI `37255825356`: E2E dos nove perfis aprovado; QA MKT encontrou atalho sem
   nome acessivel no card de Configuracoes. Rotulo explicito corrigido e coberto
   por teste de renderizacao; capturas MKT tambem mascaram campos de identidade.
+- CI `37257361148`: navegacao geral segue aprovada; falha curta no helper MKT.
+  Diagnostico por etapas sem payload privado, seletor restrito ao card e espera
+  explicita da URL para distinguir seletor ambiguo de transicao do router.
 
 ## 2026-10-04 - Associativo: cobertura da origem e brilho integral
 
