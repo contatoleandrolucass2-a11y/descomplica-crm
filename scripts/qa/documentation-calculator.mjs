@@ -4,6 +4,24 @@ import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 
+const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
+
+async function setTheme(page, theme, width) {
+  if (width <= 600) {
+    const cycle = page
+      .getByRole("group", { name: "Aparência da página", exact: true })
+      .locator("[data-theme-cycle-mobile]");
+    await expect(cycle).toBeVisible();
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      if ((await page.locator("html").getAttribute("data-theme")) === theme) return;
+      await cycle.click();
+    }
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    return;
+  }
+  await page.getByRole("button", { name: themeLabels[theme], exact: true }).click();
+}
+
 // The new page has its own behavioral matrix; historical image baselines stay intact.
 export async function checkDocumentationCalculator(page, origin, outputDirectory) {
   const route = "/app/simulacao/calcular-documentacao";
@@ -72,8 +90,7 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const theme of ["light", "balanced", "dark"]) {
-      const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
-      await page.getByRole("button", { name: themeLabels[theme], exact: true }).click();
+      await setTheme(page, theme, width);
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
       const profile = form.locator(".documentation-profile-panel");
