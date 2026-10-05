@@ -55,17 +55,18 @@ describe("protected interface shell", () => {
     expect(stylesheet).toContain(":root {");
     expect(stylesheet).toContain(':root[data-theme="balanced"]');
     expect(stylesheet).toContain(':root[data-theme="dark"]');
-    expect(stylesheet.match(/--analytics-navy:/g)).toHaveLength(2);
-    expect(stylesheet.match(/--analytics-cyan:/g)).toHaveLength(2);
-    expect(stylesheet.match(/--analytics-lime:/g)).toHaveLength(2);
+    expect(stylesheet.match(/--analytics-navy:/g)).toHaveLength(3);
+    expect(stylesheet.match(/--analytics-cyan:/g)).toHaveLength(3);
+    expect(stylesheet.match(/--analytics-lime:/g)).toHaveLength(3);
     expect(stylesheet.match(/--analytics-positive-ink:/g)).toHaveLength(3);
     expect(stylesheet.match(/--analytics-warning-ink:/g)).toHaveLength(3);
     expect(stylesheet.match(/--analytics-danger-ink:/g)).toHaveLength(3);
     expect(stylesheet).toContain("@media (prefers-reduced-motion: reduce)");
     expect(stylesheet).toContain("transition-duration: 0.01ms !important");
     expect(stylesheet).toContain("animation-duration: 0.01ms !important");
-    expect(stylesheet).toContain("--focus-ring: #006f85");
-    expect(stylesheet).toContain("--focus-ring: #7ceaf5");
+    expect(stylesheet).toContain("--focus-ring: #0754a6");
+    expect(stylesheet).toContain("--focus-ring: #084b92");
+    expect(stylesheet).toContain("--focus-ring: #5ce5f1");
     expect(stylesheet).toContain("outline: 3px solid var(--focus-ring)");
     expect(shellStylesheet).toMatch(
       /\.topbar :is\(a, button\):focus-visible \{[\s\S]*outline: 2px solid var\(--header-accent\)/,

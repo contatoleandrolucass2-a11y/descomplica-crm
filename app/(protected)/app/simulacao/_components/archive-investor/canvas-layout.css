@@ -447,6 +447,8 @@
 
 .documentation-page-shell[data-canvas-layout="documentation"] > .simulation-canvas-header {
   --canvas-accent: var(--analytics-cyan-strong);
+  --canvas-text: var(--analytics-ink);
+  --canvas-muted: var(--analytics-muted);
   box-sizing: border-box;
   width: min(100% - 32px, 1600px);
   grid-template-columns: minmax(0, 1fr) minmax(230px, auto);

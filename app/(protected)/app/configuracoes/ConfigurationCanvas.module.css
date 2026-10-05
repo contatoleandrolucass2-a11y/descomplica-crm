@@ -1,69 +1,14 @@
 .canvas {
-  --analytics-page: #062c48;
-  --analytics-surface: #0a3956;
-  --analytics-surface-muted: #0d4260;
-  --analytics-surface-strong: #15516e;
-  --analytics-ink: #f7fcff;
-  --analytics-muted: #c2d6e2;
-  --analytics-line: #188ba6;
-  --analytics-navy: #001b31;
-  --analytics-navy-raised: #073c59;
-  --analytics-cyan: #28d7e8;
-  --analytics-cyan-strong: #73eaf4;
-  --analytics-lime: #c8ee5b;
-  --analytics-positive: #70d981;
-  --analytics-positive-ink: #aaf0b5;
-  --analytics-warning: #efbd58;
-  --analytics-warning-ink: #ffdc91;
-  --analytics-danger: #ff7f86;
-  --analytics-danger-ink: #ffb5ba;
-  --analytics-shadow: 0 8px 20px rgb(0 8 20 / 20%);
-
   min-width: 0;
   min-height: calc(100dvh - 5rem);
   background:
-    radial-gradient(circle at 82% 0%, rgb(40 215 232 / 8%), transparent 30rem),
+    radial-gradient(
+      circle at 82% 0%,
+      color-mix(in srgb, var(--analytics-cyan) 10%, transparent),
+      transparent 30rem
+    ),
     var(--analytics-page);
   color: var(--analytics-ink);
-  color-scheme: dark;
-}
-
-:global(:root[data-theme="balanced"]) .canvas {
-  --analytics-page: #032640;
-  --analytics-surface: #073550;
-  --analytics-surface-muted: #0a3d59;
-  --analytics-surface-strong: #104864;
-  --analytics-muted: #b9cfdd;
-  --analytics-line: #10829e;
-  --analytics-navy: #00182d;
-  --analytics-navy-raised: #043650;
-  --analytics-cyan: #1ed4e6;
-  --analytics-cyan-strong: #68e7f2;
-  --analytics-positive: #78df88;
-  --analytics-positive-ink: #b7f4c0;
-  --analytics-warning: #f2c15c;
-  --analytics-warning-ink: #ffe09b;
-  --analytics-danger: #ff858c;
-  --analytics-danger-ink: #ffbbc0;
-}
-
-:global(:root[data-theme="dark"]) .canvas {
-  --analytics-page: #011f38;
-  --analytics-surface: #002b48;
-  --analytics-surface-muted: #05354f;
-  --analytics-surface-strong: #0b3c58;
-  --analytics-muted: #b1c9d8;
-  --analytics-line: #087d9b;
-  --analytics-navy: #00172b;
-  --analytics-navy-raised: #002d4a;
-  --analytics-cyan: #14d1e4;
-  --analytics-cyan-strong: #5ce5f1;
-  --analytics-positive: #82e091;
-  --analytics-positive-ink: #c1f6c8;
-  --analytics-warning: #f4c66a;
-  --analytics-warning-ink: #ffe4a3;
-  --analytics-danger: #ff8c92;
-  --analytics-danger-ink: #ffc0c4;
 }
 
 .canvas :is(a, button, input):focus-visible {
