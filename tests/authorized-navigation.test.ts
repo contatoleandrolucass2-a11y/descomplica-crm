@@ -119,6 +119,48 @@ beforeEach(() => {
 });
 
 describe("authorized hierarchical navigation", () => {
+  it("adds Recurso MKT only under the active authorized settings root with management permission", () => {
+    const settings: AppPage = {
+      ...simulationParent,
+      key: "crm.settings",
+      path: "/app/configuracoes",
+      name: "Configurações",
+      section: "settings",
+      permissionKey: "crm.settings.view",
+    };
+    const context: AuthorizationContext = {
+      ...viewerContext,
+      permissions: ["pages.view", "crm.settings.view", "crm.settings.manage"],
+    };
+    const result = extendAuthorizedNavigationWithReleasedPages([settings], context);
+    expect(result.map((page) => page.path)).toEqual([
+      "/app/configuracoes",
+      "/app/configuracoes/recurso-mkt",
+    ]);
+    expect(
+      buildBreadcrumbs("/app/configuracoes/recurso-mkt", result).map((page) => page.name),
+    ).toEqual(["Configurações", "Recurso MKT"]);
+    expect(extendAuthorizedNavigationWithReleasedPages([settings], viewerContext)).toEqual([
+      settings,
+    ]);
+    expect(extendAuthorizedNavigationWithReleasedPages([], context)).toEqual([]);
+    expect(
+      extendAuthorizedNavigationWithReleasedPages([{ ...settings, isActive: false }], context),
+    ).toHaveLength(1);
+    expect(
+      extendAuthorizedNavigationWithReleasedPages(
+        [{ ...settings, path: "/app/divergent" }],
+        context,
+      ),
+    ).toHaveLength(1);
+    expect(extendAuthorizedNavigationWithReleasedPages(result, context)).toEqual(result);
+    expect(
+      extendAuthorizedNavigationWithReleasedPages(
+        [settings, { ...settings, key: "crm.settings.marketing", path: "/app/collision" }],
+        context,
+      ),
+    ).toHaveLength(2);
+  });
   it("keeps the approved root order without creating unauthorized entries", () => {
     const authorizedRoots: NavigationItem[] = [
       {

@@ -88,6 +88,12 @@ export const PROTECTED_PAGE_GATES = [
     releaseEnabled: true,
   },
   {
+    pageKey: "crm.settings.marketing",
+    path: "/app/configuracoes/recurso-mkt",
+    permission: "crm.settings.manage",
+    releaseEnabled: true,
+  },
+  {
     pageKey: "crm.simulation",
     path: "/app/simulacao",
     permission: "crm.simulators.view",

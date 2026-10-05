@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-04 - Recurso MKT em Configuracoes
+
+- Fonte: print fornecido pelo usuario; branch `codex/recurso-mkt`, base `2b713fa`.
+- Nova guia no menu autorizado de Configuracoes e na visao geral, com guard de
+  servidor e Proxy usando `crm.settings.manage`, sem migration ou ACL nova.
+- Preserva fundo de R$ 2.500,00, custo de R$ 1.000,00, expectativa de duas vendas,
+  percentuais 40/30/20/10, destinos e cinco conversoes do anuncio campeao.
+- Reutiliza cabecalho, tokens e temas da Tabela Associativo. Ajustes de fundo e
+  custo sao locais; expectativa conta vendas inteiras. Rateio em centavos mantem
+  a soma exata; entradas ausentes ou invalidas ficam explicitamente pendentes.
+- Testes numericos, navegacao/autorizacao e matriz de navegador de 12 cenarios
+  adicionados. Validacao local e CI em andamento; publicacao ainda pendente.
+
 ## 2026-10-04 - Associativo: cobertura da origem e brilho integral
 
 - Fonte: nova conferencia solicitada pelo usuario, branch

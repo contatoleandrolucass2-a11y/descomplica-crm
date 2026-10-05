@@ -4,6 +4,18 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-04: Recurso MKT em Configuracoes
+
+- Status: pendente_validacao; fonte: print do usuario, branch `codex/recurso-mkt`.
+- Rota `/app/configuracoes/recurso-mkt` reutiliza o canvas e os tokens da Tabela
+  Associativo, com um unico shell protegido. Navegacao suplementar exige pai
+  Configuracoes autorizado, permissao de gestao e gate de release habilitado.
+- Fundo e custo ajustaveis somente no estado local, com rateio 40/30/20/10 e
+  expectativa de vendas inteiras arredondada para baixo. Sem gravacao de
+  politica, recurso ou configuracao ativa; sem migration ou workflow n8n.
+- Evidencias: `tests/marketing-resources.test.tsx`, testes de navegacao e Proxy,
+  `scripts/qa/marketing-resources.mjs`. Gates e publicacao pendentes.
+
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 
 - Status: validado e publicado; fonte: PR #147, runtime

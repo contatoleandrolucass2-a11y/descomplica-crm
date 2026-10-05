@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BarChart3,
+  Megaphone,
   Settings2,
   Trophy,
   UsersRound,
@@ -20,6 +21,14 @@ import { hasPermission } from "@/lib/authorization/guards";
 export const metadata = { title: "Configurações" };
 
 const SETTINGS = [
+  {
+    href: "/app/configuracoes/recurso-mkt",
+    badge: "Marketing",
+    title: "Recurso MKT",
+    description: "Fundo de investimento de Marketing e distribuição dos recursos por responsável.",
+    detail: "Volta ao Caixa",
+    icon: Megaphone,
+  },
   {
     href: "/app/configuracoes/metas",
     badge: "Funil comercial",

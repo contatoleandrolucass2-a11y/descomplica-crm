@@ -106,6 +106,40 @@ export function extendAuthorizedNavigationWithReleasedPages(
   pages: AppPage[],
   context: AuthorizationContext,
 ): AppPage[] {
+  const marketingGate = getProtectedPageGate("/app/configuracoes/recurso-mkt");
+  const settingsParent = pages.find(
+    (page) =>
+      page.key === "crm.settings" &&
+      page.path === "/app/configuracoes" &&
+      page.section === "settings" &&
+      page.permissionKey === "crm.settings.view" &&
+      page.parentKey === null &&
+      page.isActive &&
+      page.isNavigation,
+  );
+  if (
+    settingsParent &&
+    marketingGate?.releaseEnabled &&
+    marketingGate.pageKey === "crm.settings.marketing" &&
+    context.permissions.includes(marketingGate.permission) &&
+    !pages.some((page) => page.key === marketingGate.pageKey || page.path === marketingGate.path)
+  ) {
+    pages = [
+      ...pages,
+      {
+        key: marketingGate.pageKey,
+        path: marketingGate.path,
+        name: "Recurso MKT",
+        description: "Fundo de investimento de Marketing e distribuição dos recursos.",
+        section: "settings",
+        permissionKey: marketingGate.permission,
+        parentKey: settingsParent.key,
+        sortOrder: 50,
+        isActive: true,
+        isNavigation: true,
+      },
+    ];
+  }
   if (!hasAuthorizedSimulationRoot(pages)) return pages;
 
   const occupiedKeys = new Set(pages.map((page) => page.key));

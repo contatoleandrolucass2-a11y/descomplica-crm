@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-04 - Recurso MKT
+
+- Adiciona Recurso MKT em Configuracoes, no padrao visual da Tabela Associativo.
+- Inclui fundo de Marketing, custo por venda, expectativa, distribuicao por
+  Corretor/Gerente/Regional/Diretor e todos os destinos do print de referencia.
+- Recalcula valores locais preservando centavos e percentuais; permite restaurar
+  os valores iniciais e explicita entradas invalidas.
+
 ## 2026-10-04 - Dados oficiais e brilho integral no Associativo
 
 - Explicita dados ausentes da unidade antes do perfil e permite informar o

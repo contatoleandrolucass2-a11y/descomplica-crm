@@ -29,7 +29,13 @@ validadas; ausência de fonte deve aparecer como estado indisponível.
 - Layout não substitui autorização: Proxy, SSR, APIs, RPCs, grants e RLS
   continuam obrigatórios e falham fechados.
 
-## Mapeamento das 22 páginas
+## Mapeamento das páginas
+
+O pedido de 04/10/2026 acrescenta `/app/configuracoes/recurso-mkt` como 23a
+pagina protegida. A guia usa o padrao da Tabela Associativo e o print fornecido
+para fundo, custo, percentuais, destinos e conversoes. Os 22 canvases originais
+continuam preservados; a nova pagina tem matriz funcional e visual propria em
+`scripts/qa/marketing-resources.mjs`.
 
 | Canvas                           |   Região | Rota                                      |
 | -------------------------------- | -------: | ----------------------------------------- |
