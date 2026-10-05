@@ -6,7 +6,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-04: Recurso MKT em Configuracoes
 
-- Status: pendente_validacao; fonte: print do usuario, branch `codex/recurso-mkt`.
+- Status: validado; fonte: print do usuario, PR #152 e auditoria de publicacao.
 - Rota `/app/configuracoes/recurso-mkt` reutiliza o canvas e os tokens da Tabela
   Associativo, com um unico shell protegido. Navegacao suplementar exige pai
   Configuracoes autorizado, permissao de gestao e gate de release habilitado.
@@ -51,6 +51,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   oito diferencas de Configuracoes promovida transacionalmente, com hashes e
   predicado original conferidos. Preservadas as outras 201 referencias da main
   e os contratos de canvas. Pendencias: CI final e publicacao.
+- Fechamento em 05/10: CI do PR `37314518298` e da main `37322433490`
+  integralmente aprovadas. Runtime `edbfcd13` publicado as 11:47 BRT por imagem
+  imutavel comprovada, backup privado, CAS e rollback. Cinco healthchecks 200
+  no SHA exato; container healthy sem reinicios/OOM/padroes criticos. Rota sem
+  sessao retorna 307 para login; jornada MKT comprovada pela CI sintetica.
+  Fonte: `docs/audits/recurso-mkt-2026-10-05.md`. Sem migration, n8n, politica
+  ativa ou dados remotos alterados. Este fechamento documental nao reinicia o app.
 
 ## 2026-10-05: baseline autorreferente nao comprova paridade com canvas
 

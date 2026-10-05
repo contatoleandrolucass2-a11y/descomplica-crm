@@ -15,6 +15,8 @@
   funcionais; preserva as outras 201 imagens e os limiares de comparacao.
 - Integra os canvases publicados pelo PR #154 e revisa novamente as oito
   referencias afetadas, preservando a nova composicao e os gates de densidade.
+- Publica a guia no runtime `edbfcd13` apos CI integral, backup, CAS e smoke;
+  registra a prova de publicacao sem nova alteracao de runtime.
 
 ## 2026-10-05 - Sequencias do Associativo publicadas
 
