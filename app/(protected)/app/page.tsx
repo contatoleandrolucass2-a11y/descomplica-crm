@@ -41,6 +41,7 @@ import { CRM_STAGES } from "@/lib/crm/stages/catalog";
 
 import { SalesforceRefreshButton } from "./_components/SalesforceRefreshButton";
 import {
+  AnalyticsCanvas,
   AnalyticsCard,
   AnalyticsTable,
   CommercialSourceLabel,
@@ -96,6 +97,8 @@ type StageSummaryRow = {
   goal: number | null;
   progress: number | null;
 };
+
+const SHOW_EXTENDED_DASHBOARD = false;
 
 const summaryColumns: Array<AnalyticsColumn<StageSummaryRow>> = [
   { key: "stage", label: "Etapa", render: (row) => row.label },
@@ -613,8 +616,8 @@ export default async function AppHomePage({
   const salesValue = dashboard?.salesValue[selectedView][selectedPeriod] ?? null;
 
   return (
-    <main className="min-w-0 px-3 py-5 sm:px-5 sm:py-7">
-      <div className="mx-auto grid max-w-[100rem] min-w-0 grid-cols-1 gap-5">
+    <main className="min-w-0 px-3 py-4 sm:px-5 sm:py-5">
+      <AnalyticsCanvas kind="dashboard">
         <PageHeader
           variant="compact"
           title="Dashboard comercial"
@@ -670,9 +673,9 @@ export default async function AppHomePage({
           </FilterGroup>
         </FilterBar>
 
-        {canRefresh ? (
+        {canRefresh && refreshConfiguration.available ? (
           <div className="flex justify-end [&_span]:text-[var(--analytics-muted)]">
-            <SalesforceRefreshButton available={refreshConfiguration.available} />
+            <SalesforceRefreshButton available />
           </div>
         ) : null}
 
@@ -697,14 +700,10 @@ export default async function AppHomePage({
         ) : null}
 
         <section aria-labelledby="stage-summary-title">
-          <SectionHeading
-            id="stage-summary-title"
-            density="compact"
-            kicker={`${DASHBOARD_VIEWS[selectedView].label} · ${DASHBOARD_PERIODS[selectedPeriod].label}`}
-            title="Indicadores do funil"
-            description="Cada cartão mostra o volume real da etapa; meta e atingimento aparecem somente quando a fonte oficial permite."
-          />
-          <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          <h2 id="stage-summary-title" className="sr-only">
+            Indicadores do funil
+          </h2>
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5">
             {summaryRows.map((row) => {
               const stage = CRM_STAGES.find((item) => item.key === row.key);
               const Icon = STAGE_ICONS[row.key];
@@ -720,38 +719,44 @@ export default async function AppHomePage({
                       : "Meta indisponível"
                     : `Meta: ${numberFormatter.format(row.goal)}`;
 
+              const card = (
+                <MetricCard
+                  variant="compact"
+                  label={row.label}
+                  value={row.current === null ? "—" : numberFormatter.format(row.current)}
+                  detail={detail}
+                  ratio={row.progress}
+                  ratioLabel={
+                    row.progress === null
+                      ? "Atingimento indisponível"
+                      : `${percentFormatter.format(row.progress)} da meta`
+                  }
+                  accent={STAGE_ACCENTS[row.key]}
+                  icon={<Icon strokeWidth={1.8} />}
+                />
+              );
+
               return (
-                <div className="grid gap-2" key={row.key}>
-                  <MetricCard
-                    variant="compact"
-                    label={row.label}
-                    value={row.current === null ? "—" : numberFormatter.format(row.current)}
-                    detail={detail}
-                    ratio={row.progress}
-                    ratioLabel={
-                      row.progress === null
-                        ? "Atingimento indisponível"
-                        : `${percentFormatter.format(row.progress)} da meta`
-                    }
-                    accent={STAGE_ACCENTS[row.key]}
-                    icon={<Icon strokeWidth={1.8} />}
-                  />
+                <div className="min-w-0" key={row.key}>
                   {canViewStages && stage ? (
                     <Link
                       href={`/app/etapas/${stage.slug}?view=${encodeURIComponent(selectedView)}&period=${encodeURIComponent(selectedPeriod)}`}
                       prefetch={false}
-                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--analytics-line)] bg-[var(--analytics-surface)] px-3 py-2 text-sm font-semibold text-[var(--analytics-cyan-strong)] hover:border-[var(--analytics-cyan-strong)]"
+                      aria-label={`Abrir etapa ${row.label}`}
+                      className="block rounded-xl no-underline hover:brightness-[1.04]"
                     >
-                      Abrir etapa
+                      {card}
                     </Link>
-                  ) : null}
+                  ) : (
+                    card
+                  )}
                 </div>
               );
             })}
           </div>
         </section>
 
-        <section className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(18rem,0.8fr)]">
+        <section className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.8fr)]">
           <AnalyticsCard density="compact" className="min-w-0">
             <SectionHeading
               density="compact"
@@ -766,7 +771,7 @@ export default async function AppHomePage({
             />
           </AnalyticsCard>
 
-          <div className="grid min-w-0 content-start gap-4">
+          <div className="grid min-w-0 content-start gap-3">
             <AnalyticsCard density="compact" tone="navy">
               <p className="text-xs font-semibold tracking-widest text-cyan-300 uppercase">
                 Valor vendido no período
@@ -814,14 +819,14 @@ export default async function AppHomePage({
         </section>
 
         <section aria-labelledby="latest-activities-title">
-          <SectionHeading
-            id="latest-activities-title"
-            density="compact"
-            kicker="Movimentações recentes"
-            title="Últimas atividades"
-            description="O feed só será exibido quando existir uma fonte oficial escopada e validada no servidor."
-          />
           <AnalyticsCard density="compact">
+            <SectionHeading
+              id="latest-activities-title"
+              density="compact"
+              kicker="Movimentações recentes"
+              title="Últimas atividades"
+              description="O feed só será exibido quando existir uma fonte oficial escopada e validada no servidor."
+            />
             <DataState
               variant="unavailable"
               compact
@@ -832,29 +837,33 @@ export default async function AppHomePage({
           </AnalyticsCard>
         </section>
 
-        <section className="min-w-0" aria-labelledby="summary-table-title">
-          <SectionHeading
-            id="summary-table-title"
-            density="compact"
-            kicker="Leitura consolidada"
-            title="Realizado e meta por etapa"
-            description="Ausência permanece ausência; a interface não converte dado faltante em zero."
-          />
-          <AnalyticsTable
-            density="compact"
-            caption={`Resumo do funil — ${DASHBOARD_VIEWS[selectedView].label}, ${DASHBOARD_PERIODS[selectedPeriod].label.toLocaleLowerCase("pt-BR")}`}
-            rows={summaryRows}
-            columns={summaryColumns}
-            rowKey={(row) => row.key}
-          />
-        </section>
+        {SHOW_EXTENDED_DASHBOARD ? (
+          <>
+            <section className="min-w-0" aria-labelledby="summary-table-title">
+              <SectionHeading
+                id="summary-table-title"
+                density="compact"
+                kicker="Leitura consolidada"
+                title="Realizado e meta por etapa"
+                description="Ausência permanece ausência; a interface não converte dado faltante em zero."
+              />
+              <AnalyticsTable
+                density="compact"
+                caption={`Resumo do funil — ${DASHBOARD_VIEWS[selectedView].label}, ${DASHBOARD_PERIODS[selectedPeriod].label.toLocaleLowerCase("pt-BR")}`}
+                rows={summaryRows}
+                columns={summaryColumns}
+                rowKey={(row) => row.key}
+              />
+            </section>
 
-        <DashboardDetailSections
-          dashboard={dashboard}
-          metrics={metrics}
-          selectedPeriod={selectedPeriod}
-        />
-      </div>
+            <DashboardDetailSections
+              dashboard={dashboard}
+              metrics={metrics}
+              selectedPeriod={selectedPeriod}
+            />
+          </>
+        ) : null}
+      </AnalyticsCanvas>
     </main>
   );
 }

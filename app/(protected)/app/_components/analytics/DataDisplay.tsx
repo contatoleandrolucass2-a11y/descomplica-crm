@@ -4,6 +4,22 @@ import Link from "next/link";
 import styles from "./analytics.module.css";
 import { DonutChart, type ChartAccent } from "./Charts";
 
+export function AnalyticsCanvas({
+  children,
+  kind,
+  className = "",
+}: {
+  children: ReactNode;
+  kind: "dashboard" | "stage";
+  className?: string | undefined;
+}) {
+  return (
+    <div className={`${styles.canvas} ${className}`} data-canvas-kind={kind}>
+      {children}
+    </div>
+  );
+}
+
 export function PageHeader({
   eyebrow,
   title,
@@ -12,7 +28,7 @@ export function PageHeader({
   footer,
   variant = "hero",
 }: {
-  eyebrow?: string;
+  eyebrow?: string | undefined;
   title: string;
   description: string;
   meta?: ReactNode;

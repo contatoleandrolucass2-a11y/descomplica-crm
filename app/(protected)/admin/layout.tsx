@@ -12,6 +12,8 @@ import type { ReactNode } from "react";
 
 import { enforcePermission } from "@/lib/authorization/enforce";
 
+import "./admin-canvas.css";
+
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   await enforcePermission("admin.access");
 

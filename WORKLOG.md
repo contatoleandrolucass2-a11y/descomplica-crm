@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-10-05 - Correcao da paridade visual dos canvases
+
+- Diagnostico comprovado: as referencias estavam catalogadas, mas o QA visual
+  comparava a aplicacao com baselines geradas por ela mesma. Dashboard chegava
+  a 4.408px e Canal a 1.731px em 1440px, embora os canvases definissem uma
+  composicao compacta.
+- Branch `codex/canvas-layout-exact`, base `e1ab14a`. Foram corrigidas as 22
+  rotas sem alterar loaders, autorizacao, RLS, APIs, motores ou fontes.
+- Dashboard conserva somente filtros, indicadores, funil, ranking e atividades
+  na composicao publicada. Canal termina nos totais. Etapas seguem as variacoes
+  de cada canvas. CAIXA permanece fail-closed com CTA bloqueado visivel.
+- O harness agora associa cada rota a um canvas e rejeita retorno a densidade
+  extensa. Limites por rota representam as referencias verticais, sem reduzir
+  requisitos de toque ou ocultar overflow.
+- Gate visual local aprovado: 154 responsivos, 88 temas, 209 auditorias Axe,
+  209 comparacoes, 110 verificacoes de zoom e 40 cenarios da navegacao dos
+  simuladores. A conta e as fixtures efemeras foram removidas pelo runner.
+- CAIXA passou com contraste AA e mensagem explicita junto ao CTA bloqueado.
+  O Tabelao passou responsividade, estados, teclado e impressao sem controles
+  interativos. Nenhum motor foi habilitado.
+- Evidencia: `docs/audits/canvas-layout-correction-2026-10-05.md`. Resultados de
+  CI, SHA e deploy serao anexados ao fim da publicacao automatica.
+
 ## 2026-10-04 - Associativo: cadencia e sequencias visuais
 
 - CI `37253579651`: validacao Linux, restore, E2E e contratos funcionais do QA

@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-05 - Correcao integral da paridade dos canvases
+
+- Corrige a causa da divergencia entre os canvases aprovados e a aplicacao: o
+  gate agora relaciona as 22 rotas a referencias externas versionadas e limita
+  a densidade desktop, em vez de aprovar apenas uma captura da propria tela.
+- Ajusta Dashboard, cinco etapas, Ranking, Canal, Configuracoes/metas,
+  Simulacao e Administracao as composicoes aprovadas, mantendo uma unica navbar.
+- Preserva dados reais, estados indisponiveis, guards, RBAC, APIs e RLS. CAIXA
+  conserva motor e CTA bloqueados; nenhuma regra comercial foi presumida.
+- Mantem alvos de toque, teclado, foco, tres temas, reduced-motion e reflow
+  responsivo. Nenhuma migration ou alteracao remota de dados faz parte do diff.
+
 ## 2026-10-04 - Sequencias visuais do Associativo
 
 - Afina e desacelera o brilho sincronizado; adiciona sequencias no imovel,

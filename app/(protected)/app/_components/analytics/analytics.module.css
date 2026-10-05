@@ -10,6 +10,16 @@
   box-shadow: var(--analytics-shadow);
 }
 
+.canvas {
+  display: grid;
+  width: 100%;
+  max-width: 100rem;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.85rem;
+  margin-inline: auto;
+}
+
 .pageHeader::after {
   position: absolute;
   inset: auto -4rem -7rem auto;
@@ -828,6 +838,262 @@
   height: 5.5rem;
 }
 
+/*
+ * Approved dashboard/stage canvases use a denser analytical composition than
+ * the shared default. Keeping these overrides below `.canvas` prevents visual
+ * changes in ranking, settings and read-model surfaces that reuse the same
+ * primitives.
+ */
+.canvas .pageHeader[data-variant="compact"] .pageHeaderBody {
+  gap: 0.7rem 1.25rem;
+}
+
+.canvas .pageHeader[data-variant="compact"] .pageTitle {
+  font-size: clamp(1.55rem, 2.8vw, 2rem);
+}
+
+.canvas .pageHeader[data-variant="compact"] .pageDescription {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+}
+
+.canvas .pageHeader[data-variant="compact"] .pageHeaderMeta {
+  width: min(100%, 22rem);
+  padding: 0.55rem 0.7rem;
+  font-size: 0.72rem;
+}
+
+.canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] {
+  border-radius: 0.9rem;
+}
+
+.canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] .pageHeaderBody {
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
+}
+
+.canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] .pageTitle {
+  font-size: clamp(2rem, 3.1vw, 2.65rem);
+}
+
+.canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] .pageDescription {
+  margin-top: 0.45rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] .pageHeaderMeta {
+  width: min(100%, 19rem);
+  padding: 0.7rem 0.85rem;
+  font-size: 0.74rem;
+}
+
+.canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] .pageHeaderFooter {
+  padding: 0.6rem 1.25rem 0.75rem;
+}
+
+.canvas .card[data-density="compact"] {
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 12px rgb(8 33 55 / 5%);
+}
+
+.canvas .card[data-density="compact"].cardPadding {
+  padding: 0.75rem;
+}
+
+.canvas .sectionHeading[data-density="compact"] {
+  margin-bottom: 0.5rem;
+}
+
+.canvas .sectionHeading[data-density="compact"] .sectionKicker {
+  font-size: 0.68rem;
+}
+
+.canvas .sectionHeading[data-density="compact"] .sectionTitle {
+  margin-top: 0.15rem;
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+}
+
+.canvas .sectionHeading[data-density="compact"] .sectionDescription {
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.canvas .metricCard[data-variant="compact"] {
+  min-height: 5.4rem;
+  grid-template-columns: 2.35rem minmax(0, 1fr);
+  gap: 0.55rem;
+  border-radius: 0.75rem;
+  padding: 0.65rem;
+}
+
+.canvas .metricCard[data-variant="compact"] .metricIcon {
+  width: 2.35rem;
+  border-radius: 0.6rem;
+}
+
+.canvas .metricCard[data-variant="compact"] .metricValue {
+  margin-top: 0.2rem;
+  font-size: clamp(1.25rem, 2.1vw, 1.55rem);
+}
+
+.canvas .metricCard[data-variant="compact"] .metricDetail {
+  margin-top: 0.18rem;
+  font-size: 0.68rem;
+}
+
+.canvas .metricCard[data-variant="compact"] .metricRatio {
+  margin-top: 0.25rem;
+  padding: 0.12rem 0.35rem;
+  font-size: 0.65rem;
+}
+
+.canvas .filterBar[data-density="compact"] {
+  border-radius: 0.75rem;
+  padding: 0.6rem;
+}
+
+.canvas .filterBar[data-density="compact"] .filterLayout {
+  gap: 0.55rem 0.8rem;
+}
+
+.canvas .filterBar[data-density="compact"] .filterLegend {
+  margin-bottom: 0.3rem;
+  font-size: 0.68rem;
+}
+
+.canvas .filterBar[data-density="compact"] .filterOptions {
+  gap: 0.35rem;
+}
+
+.canvas .filterBar[data-density="compact"] .unavailableFilters {
+  gap: 0.35rem;
+  font-size: 0.68rem;
+}
+
+.canvas .filterBar[data-density="compact"] .unavailableFilter {
+  padding: 0.28rem 0.5rem;
+}
+
+.canvas .gauge[data-variant="compact"] .gaugeSvg {
+  width: min(100%, 9rem);
+}
+
+.canvas .gauge[data-variant="compact"] .gaugeValue {
+  margin-top: -0.45rem;
+  font-size: clamp(1.65rem, 3.5vw, 2.1rem);
+}
+
+.canvas .gauge[data-variant="compact"] .gaugeLabel {
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+}
+
+.canvas .funnel[data-variant="compact"] .funnelCaption {
+  margin-bottom: 0.45rem;
+  font-size: 0.7rem;
+}
+
+.canvas .funnel[data-variant="compact"] .funnelList {
+  gap: 0.22rem;
+}
+
+.canvas .funnel[data-variant="compact"] .funnelStep {
+  min-height: 2.2rem;
+  border-radius: 0.55rem;
+  padding: 0.32rem 0.65rem;
+}
+
+.canvas .funnel[data-variant="compact"] .funnelStageLabel {
+  font-size: 0.74rem;
+}
+
+.canvas .funnel[data-variant="compact"] .funnelStageMeta {
+  margin-top: 0.05rem;
+  font-size: 0.65rem;
+}
+
+.canvas .funnel[data-variant="compact"] .funnelStageValue {
+  font-size: 0.8rem;
+}
+
+.canvas .tableWrap[data-density="compact"] .table caption {
+  padding: 0.5rem 0.65rem;
+  font-size: 0.68rem;
+}
+
+.canvas .tableWrap[data-density="compact"] .table th,
+.canvas .tableWrap[data-density="compact"] .table td {
+  padding: 0.42rem 0.55rem;
+}
+
+.canvas .tableWrap[data-density="compact"] .table {
+  font-size: 0.72rem;
+}
+
+.canvas .tableWrap[data-density="compact"] .table thead th {
+  font-size: 0.65rem;
+}
+
+.canvas .rankingList {
+  gap: 0.25rem;
+}
+
+.canvas .rankingItem {
+  grid-template-columns: 1.8rem minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  padding: 0.35rem 0 0.45rem;
+}
+
+.canvas .rankingPosition {
+  width: 1.75rem;
+  font-size: 0.65rem;
+}
+
+.canvas .rankingName,
+.canvas .rankingValue {
+  font-size: 0.72rem;
+}
+
+.canvas .stateCompact {
+  padding: 0.65rem 0.75rem;
+}
+
+.canvas .stateCompact .stateLabel {
+  font-size: 0.65rem;
+}
+
+.canvas .stateCompact .stateTitle {
+  margin-top: 0.2rem;
+  font-size: 0.88rem;
+}
+
+.canvas .stateCompact .stateDescription {
+  margin-top: 0.2rem;
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.canvas .filterLink[aria-current="page"] {
+  border-color: var(--analytics-cyan);
+  background: var(--analytics-cyan);
+  color: #052336;
+}
+
+.canvas .metricValue,
+.canvas .gaugeValue,
+.canvas .funnelStageValue,
+.canvas .rankingValue,
+.canvas .alignRight {
+  font-variant-numeric: tabular-nums;
+}
+
+.canvas .pageTitle,
+.canvas .sectionTitle {
+  text-wrap: balance;
+}
+
 @keyframes skeletonPulse {
   from {
     background-position: 100% 0;
@@ -839,6 +1105,23 @@
 }
 
 @media (max-width: 42rem) {
+  .canvas {
+    gap: 0.75rem;
+  }
+
+  .canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] .pageHeaderBody {
+    padding: 1rem;
+  }
+
+  .canvas[data-canvas-kind="stage"] .pageHeader[data-variant="stage"] .pageHeaderFooter {
+    padding-inline: 1rem;
+  }
+
+  .canvas .metricCard[data-variant="compact"] {
+    min-height: 5.8rem;
+    grid-template-columns: 2.35rem minmax(0, 1fr);
+  }
+
   .metricCard {
     min-height: 9.5rem;
     grid-template-columns: minmax(0, 1fr) 5.3rem;

@@ -69,6 +69,7 @@ const appearance = (page) => page.getByRole("group", { name: "Aparência da pág
 export const archiveNavigationActionTimeout = 10_000;
 
 async function assertNavigationControlFocused(control, ariaControls) {
+  await expect(control).toBeFocused();
   const focusState = await control.evaluate((element) => ({
     focused: document.activeElement === element,
     ariaControls: element.getAttribute("aria-controls"),

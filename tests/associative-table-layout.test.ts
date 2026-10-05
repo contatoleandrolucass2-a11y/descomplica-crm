@@ -40,7 +40,7 @@ describe("cabecalho do simulador Associativo", () => {
       '.investor-page-shell[data-canvas-layout="simulator"] .investor-main',
     );
     expect(canvasStyles).toMatch(
-      /\.investor-page-shell\[data-canvas-layout="simulator"\] \.simulation-canvas-header\s*\{[\s\S]*?padding-bottom:\s*14px;/u,
+      /\.investor-page-shell\[data-canvas-layout="simulator"\] \.simulation-canvas-header\s*\{[\s\S]*?padding-bottom:\s*10px;/u,
     );
     expect(canvasStyles).toMatch(
       /\.simulation-canvas-title-row h1\s*\{[\s\S]*?font-size:\s*clamp\(1\.85rem, 3vw, 2\.8rem\)/u,

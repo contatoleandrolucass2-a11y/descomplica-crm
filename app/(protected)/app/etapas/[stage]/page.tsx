@@ -22,6 +22,7 @@ import { CRM_STAGES, getCrmStage, type CrmStage } from "@/lib/crm/stages/catalog
 import { buildStageComparisons, type StageComparison } from "@/lib/crm/stages/presentation";
 
 import {
+  AnalyticsCanvas,
   AnalyticsCard,
   AnalyticsTable,
   CommercialSourceLabel,
@@ -226,6 +227,36 @@ function generatedAtLabel(dashboard: DashboardReadModel | null) {
   }).format(new Date(dashboard.generatedAt));
 }
 
+function StageMetadata({
+  dashboard,
+  inverted,
+}: {
+  dashboard: DashboardReadModel | null;
+  inverted: boolean;
+}) {
+  const termClassName = inverted
+    ? "text-xs tracking-wide text-slate-300 uppercase"
+    : "text-xs tracking-wide text-[var(--analytics-muted)] uppercase";
+  const valueClassName = inverted
+    ? "mt-1 font-semibold text-white"
+    : "mt-1 font-semibold text-[var(--analytics-ink)]";
+
+  return (
+    <dl className={`grid gap-2 ${inverted ? "" : "grid-cols-2"}`}>
+      <div>
+        <dt className={termClassName}>Atualizado em</dt>
+        <dd className={valueClassName}>{generatedAtLabel(dashboard)}</dd>
+      </div>
+      <div>
+        <dt className={termClassName}>Fonte</dt>
+        <dd className={`${valueClassName} break-words`}>
+          {dashboard ? <CommercialSourceLabel value={dashboard.source} /> : DATA_UNAVAILABLE_LABEL}
+        </dd>
+      </div>
+    </dl>
+  );
+}
+
 function StageComposition({
   stage,
   view,
@@ -265,34 +296,24 @@ function StageComposition({
         value: null,
         conversion: null,
       }));
+  const expandedHeader = stage.key === "appointments" || stage.key === "visits";
 
   return (
-    <main className="min-w-0 px-3 py-5 sm:px-5 sm:py-7">
-      <div className="mx-auto grid max-w-[100rem] min-w-0 grid-cols-[minmax(0,1fr)] gap-5">
+    <main className="min-w-0 px-3 py-4 sm:px-5 sm:py-5">
+      <AnalyticsCanvas kind="stage">
         <PageHeader
-          variant="stage"
-          eyebrow={`Etapa ${String(stageIndex + 1).padStart(2, "0")} do funil`}
+          variant={expandedHeader ? "stage" : "compact"}
+          eyebrow={
+            expandedHeader ? `Etapa ${String(stageIndex + 1).padStart(2, "0")} do funil` : undefined
+          }
           title={stage.label}
           description={stage.description}
-          meta={
-            <dl className="grid gap-3">
-              <div>
-                <dt className="text-xs tracking-wide text-slate-300 uppercase">Atualizado em</dt>
-                <dd className="mt-1 font-semibold text-white">{generatedAtLabel(dashboard)}</dd>
-              </div>
-              <div>
-                <dt className="text-xs tracking-wide text-slate-300 uppercase">Fonte</dt>
-                <dd className="mt-1 break-words text-slate-100">
-                  {dashboard ? (
-                    <CommercialSourceLabel value={dashboard.source} />
-                  ) : (
-                    DATA_UNAVAILABLE_LABEL
-                  )}
-                </dd>
-              </div>
-            </dl>
+          meta={<StageMetadata dashboard={dashboard} inverted={expandedHeader} />}
+          footer={
+            expandedHeader ? (
+              <StageNavigation stage={stage} view={view} period={period} />
+            ) : undefined
           }
-          footer={<StageNavigation stage={stage} view={view} period={period} />}
         />
 
         <StageFilters stage={stage} view={view} period={period} />
@@ -320,7 +341,7 @@ function StageComposition({
           />
         ) : null}
 
-        <section className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,0.65fr)]">
+        <section className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,0.65fr)]">
           <AnalyticsCard density="compact">
             <SectionHeading
               density="compact"
@@ -330,7 +351,7 @@ function StageComposition({
             />
             <div className="grid items-center gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(11rem,0.65fr)]">
               <div>
-                <strong className="block text-4xl font-semibold tracking-tight text-[var(--analytics-ink)]">
+                <strong className="block text-3xl font-semibold tracking-tight text-[var(--analytics-ink)]">
                   {current === null ? "—" : numberFormatter.format(current)}
                 </strong>
                 <p className="mt-2 text-sm text-[var(--analytics-muted)]">
@@ -338,8 +359,8 @@ function StageComposition({
                     ? "Meta indisponível ou não definida"
                     : `Meta oficial: ${numberFormatter.format(goal)}`}
                 </p>
-                <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl bg-[var(--analytics-surface-muted)] p-3">
+                <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-lg bg-[var(--analytics-surface-muted)] p-2.5">
                     <dt className="text-xs text-[var(--analytics-muted)]">Gap matemático</dt>
                     <dd className="mt-1 font-semibold text-[var(--analytics-ink)]">
                       {gap === null ? (
@@ -349,7 +370,7 @@ function StageComposition({
                       )}
                     </dd>
                   </div>
-                  <div className="rounded-xl bg-[var(--analytics-surface-muted)] p-3">
+                  <div className="rounded-lg bg-[var(--analytics-surface-muted)] p-2.5">
                     <dt className="text-xs text-[var(--analytics-muted)]">
                       Relação com etapa anterior
                     </dt>
@@ -422,23 +443,25 @@ function StageComposition({
           </AnalyticsCard>
         </section>
 
-        <section className="min-w-0" aria-labelledby="full-funnel-title">
-          <AnalyticsCard density="compact">
-            <SectionHeading
-              id="full-funnel-title"
-              density="compact"
-              kicker="Contexto do período"
-              title="Funil completo"
-              description="As relações comparam volumes agregados; não acompanham o mesmo grupo ao longo do tempo."
-            />
-            <FunnelChart
-              variant="compact"
-              label={`${DASHBOARD_VIEWS[view].label}, ${periodConfig.label.toLocaleLowerCase("pt-BR")}`}
-              stages={funnel}
-              accent={STAGE_ACCENTS[stage.key]}
-            />
-          </AnalyticsCard>
-        </section>
+        {stage.key !== "opportunities" ? (
+          <section className="min-w-0" aria-labelledby="full-funnel-title">
+            <AnalyticsCard density="compact">
+              <SectionHeading
+                id="full-funnel-title"
+                density="compact"
+                kicker="Contexto do período"
+                title="Funil completo"
+                description="As relações comparam volumes agregados; não acompanham o mesmo grupo ao longo do tempo."
+              />
+              <FunnelChart
+                variant="compact"
+                label={`${DASHBOARD_VIEWS[view].label}, ${periodConfig.label.toLocaleLowerCase("pt-BR")}`}
+                stages={funnel}
+                accent={STAGE_ACCENTS[stage.key]}
+              />
+            </AnalyticsCard>
+          </section>
+        ) : null}
 
         <section className="min-w-0" aria-labelledby="period-comparison-title">
           <SectionHeading
@@ -456,7 +479,7 @@ function StageComposition({
             rowKey={(row) => row.label}
           />
         </section>
-      </div>
+      </AnalyticsCanvas>
     </main>
   );
 }
