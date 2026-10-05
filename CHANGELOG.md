@@ -38,6 +38,9 @@
   conserva motor e CTA bloqueados; nenhuma regra comercial foi presumida.
 - Mantem alvos de toque, teclado, foco, tres temas, reduced-motion e reflow
   responsivo. Nenhuma migration ou alteracao remota de dados faz parte do diff.
+- Integra a pagina Recurso MKT ja publicada na `main`, preservando seu guard e
+  sua matriz propria; atualiza somente as referencias de Configuracoes afetadas
+  pelo novo card, sem ampliar o contrato original dos 22 canvases.
 
 ## 2026-10-04 - Sequencias visuais do Associativo
 

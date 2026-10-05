@@ -83,8 +83,10 @@
   comparava a aplicacao com baselines geradas por ela mesma. Dashboard chegava
   a 4.408px e Canal a 1.731px em 1440px, embora os canvases definissem uma
   composicao compacta.
-- Branch `codex/canvas-layout-parity-hotfix`, base `afdb1c9`. Foram corrigidas as 22
-  rotas sem alterar loaders, autorizacao, RLS, APIs, motores ou fontes.
+- Branch `codex/canvas-layout-parity-hotfix`, base inicial `afdb1c9` e base final
+  integrada `de57b6a`. Foram corrigidas as 22 rotas dos canvases sem alterar
+  loaders, autorizacao, RLS, APIs, motores ou fontes. A 23a pagina protegida,
+  Recurso MKT, foi preservada da `main` com sua matriz visual propria.
 - Dashboard conserva somente filtros, indicadores, funil, ranking e atividades
   na composicao publicada. Canal termina nos totais. Etapas seguem as variacoes
   de cada canvas. CAIXA permanece fail-closed com CTA bloqueado visivel.
@@ -104,6 +106,12 @@
   sinteticas foram removidas e nenhuma persistencia permaneceu. Duas
   expectativas antigas foram alinhadas ao contrato vigente: ausencia do guia
   superior no Associativo e contagem apenas dos tres temas desktop.
+- A captura combinada final em `8a15aa4`, `2026-10-05T18:32:51Z`, repetiu e
+  aprovou 154 cenarios responsivos, 88 de tema, 242 auditorias Axe, 242
+  comparacoes de baseline, 22/22 comparacoes externas, 110 verificacoes de
+  zoom e 40 navegacoes. Recurso MKT passou separadamente em 12 combinacoes de
+  largura/tema. Onze referencias de Configuracoes foram revistas e promovidas
+  transacionalmente; as demais 231 permaneceram inalteradas.
 - Evidencia: `docs/audits/canvas-layout-correction-2026-10-05.md`. Resultados de
   CI, SHA e deploy serao anexados ao fim da publicacao automatica.
 

@@ -51,10 +51,16 @@ Documentacao e CAIXA.
   aplicacao. A nova baseline somente pode ser promovida depois de todas essas
   comparacoes passarem.
 - A baseline limpa foi promovida transacionalmente em
-  `2026-10-05T17:33:34Z`: 154 combinacoes responsivas, 88 checks de tema, 242
+  `2026-10-05T18:32:51Z`, sobre `8a15aa4` e a base integrada `de57b6a`: 154
+  combinacoes responsivas, 88 checks de tema, 242
   auditorias Axe, 242 comparacoes de regressao, 22/22 comparacoes externas e
   110 checks de zoom passaram. Nao houve erro de console ou de pagina; conta e
   fixtures locais foram removidas ao final.
+- A pagina Recurso MKT, incorporada da `main`, passou em 12 combinacoes
+  autenticadas (1440, 1024, 390 e 320 px nos tres temas), teclado e Axe. Ela
+  permanece fora das 22 comparacoes externas porque possui referencia funcional
+  propria. Onze imagens de Configuracoes afetadas pelo card foram promovidas;
+  as outras 231 referencias permaneceram byte a byte.
 - A navegacao dos quatro simuladores cobre 320, 375, 390, 600, 601, 768, 1024,
   1180, 1181 e 1440 px: 40/40 cenarios passaram. O Tabelao tambem oculta no
   modo de impressao os controles do novo cabecalho, preservando somente o

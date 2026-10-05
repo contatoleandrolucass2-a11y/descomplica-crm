@@ -75,12 +75,16 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Dados, RBAC e layout sao contratos separados: aproximar a tela nao autoriza
   copiar valores do mockup, remover guards nem liberar motores bloqueados.
 - Evidencia: `docs/audits/canvas-layout-correction-2026-10-05.md`.
-- Validacao local concluida em `2026-10-05T17:33:34Z`: 154 cenarios
+- Validacao local combinada concluida em `2026-10-05T18:32:51Z`, no source SHA
+  `8a15aa4` sobre a base `de57b6a`: 154 cenarios
   responsivos, 88 de tema, 242 auditorias Axe, 242 comparacoes de regressao,
   22/22 comparacoes com os canvases, 110 verificacoes de zoom e 40 navegacoes,
   sem falhas. CAIXA continua fail-closed e o Tabelao oculta os controles no
   modo de impressao. Conta e fixtures efemeras foram removidas; nenhum remoto
   mudou nesta validacao.
+- Recurso MKT permanece uma 23a pagina protegida com contrato proprio; passou
+  12 combinacoes de viewport/tema, teclado e Axe. Sua chegada altera somente as
+  referencias de Configuracoes que exibem o card, nao o conjunto dos 22 canvases.
 - O E2E de release aprovou 20 cenarios com um skip remoto previsto e removeu
   dez identidades sinteticas. Expectativas antigas devem acompanhar a
   composicao aprovada: o Associativo nao possui guia no cabecalho e o desktop
