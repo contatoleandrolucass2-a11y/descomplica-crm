@@ -65,7 +65,6 @@ export async function checkAssociativeDocumentationHandoff(page) {
         return state;
       }),
   );
-  let hidden;
   try {
     const clocks = await saved.evaluate((states) => states.map(({ startTime }) => startTime));
     assert.ok(
@@ -106,12 +105,12 @@ export async function checkAssociativeDocumentationHandoff(page) {
         .removeAlpha()
         .raw()
         .toBuffer({ resolveWithObject: true });
-    hidden = await page.addStyleTag({
-      content: `${root} .investor-associative-documentation-summary > section::after { background-image: none !important; }`,
+    // The sweep begins off-card. Keep its paint layer intact: removing the gradient
+    // can change subpixel rasterization even where the gradient is transparent.
+    await saved.evaluate((states) => {
+      for (const { animation } of states) animation.currentTime = 0;
     });
     const baseline = await capture();
-    await hidden.evaluate((element) => element.remove());
-    hidden = undefined;
     const masks = bounds.map((rect) => {
       const offsets = [];
       for (let y = Math.ceil(rect.y + 2); y < Math.floor(rect.y + rect.height - 2); y++) {
@@ -196,7 +195,7 @@ export async function checkAssociativeDocumentationHandoff(page) {
         samples
           .filter((item) => item.time >= first[0].time && item.time <= last[1].time)
           .every((item) => item.visible.some(Boolean)),
-        "Documentation sweep must not disappear between cards",
+        `Documentation sweep must not disappear between cards: ${JSON.stringify(samples)}`,
       );
       cycles.push(handoff);
     }
@@ -207,7 +206,6 @@ export async function checkAssociativeDocumentationHandoff(page) {
       passed: true,
     };
   } finally {
-    if (hidden) await hidden.evaluate((element) => element.remove());
     await saved.evaluate((states) => {
       for (const { animation, startTime, currentTime, playState } of states) {
         if (playState === "paused") animation.currentTime = currentTime;

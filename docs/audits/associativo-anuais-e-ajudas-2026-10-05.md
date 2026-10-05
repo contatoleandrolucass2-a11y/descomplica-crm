@@ -67,3 +67,11 @@ Nenhuma taxa, limite, politica, fonte de estoque, workflow ou dado remoto mudou.
   pequenos brilhos de outros elementos com o feixe documental. Regressao com
   indicador pulsante e os keyframes antigos preserva a deteccao da pausa;
   nove testes do arquivo de efeitos passaram novamente.
+- CI `37352840743` e `37356023067`: validate, banco, restauracao e autorizacao
+  passaram; medicao visual bloqueou publicacao. A segunda isolou oito pixels
+  constantes no plano mobile, sem relacao com a posicao do feixe. A referencia
+  agora usa o inicio fora dos cards, mantendo a camada de pintura intacta, em
+  vez de remover o gradiente e mudar sua rasterizacao. Tolerancias inalteradas.
+- Repeticao com posicoes fracionarias: nove testes de efeitos aprovados,
+  incluindo prova negativa da pausa antiga; roteiro React completo em 375x812,
+  lint e typecheck aprovados. Nova CI ainda obrigatoria antes da baseline.

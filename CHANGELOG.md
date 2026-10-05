@@ -7,6 +7,7 @@
 - Remove os tres rotulos indicados do cabecalho do Associativo.
 - Simplifica ajudas e corrige a passagem do brilho entre os cards documentais.
 - Isola a medicao visual do brilho sem desativar efeitos na aplicacao.
+- Mantem a camada de pintura da referencia visual para eliminar ruido subpixel.
 
 ## 2026-10-04 - Recurso MKT
 

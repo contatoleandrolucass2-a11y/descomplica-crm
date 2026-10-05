@@ -16,6 +16,9 @@
 - Matriz sintetica: 7285 casos e 250197 comparacoes sem divergencias. Medicao
   do brilho no React real passou em 1440px e 375px; QA congela/restaura outras
   animacoes e conserva os limiares e a prova negativa dos keyframes antigos.
+- As duas primeiras CIs passaram testes/banco/restore/autorizacao, mas bloquearam
+  a metrica visual. Corrigida captura sem alterar rasterizacao da referencia;
+  nove testes de efeitos, roteiro mobile real, lint e tipos passaram novamente.
 
 ## 2026-10-04 - Recurso MKT em Configuracoes
 

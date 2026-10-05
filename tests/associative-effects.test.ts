@@ -213,7 +213,7 @@ describe("Associative CSS browser fixtures", () => {
               await page.addStyleTag({ content: tokens + source.replace(/^@import[^;]+;/gm, "") });
               await page.addStyleTag({
                 content:
-                  "body{margin:0;padding:12px}.investor-page-shell{max-width:744px;margin:auto}",
+                  "body{margin:0;padding:12px}.investor-page-shell{max-width:744px;margin:auto}.investor-associative-documentation-summary{transform:translate(.375px,.375px)}",
               });
               await page.locator(".investor-associative-documentation-plan").evaluate((plan) => {
                 const indicator = document.createElement("i");
