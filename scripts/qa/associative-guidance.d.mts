@@ -108,7 +108,7 @@ export function assertAssociativeWorkspaceGaps(geometry: {
   paddingLeft: number;
   paddingRight: number;
 }): void;
-export function assertAssociativeCommissionGeometry(geometry: {
+export type AssociativeCommissionGeometry = {
   width: number;
   height: number;
   minimumTarget: number;
@@ -121,18 +121,28 @@ export function assertAssociativeCommissionGeometry(geometry: {
   columns: number[];
   layoutGap: number;
   tableGap: number;
+  tableMarginRight: number;
   dateCenterDelta: number;
   summaryFitsColumn: boolean;
-  insideLayout: boolean;
-  insideWidth: boolean;
-  rightDelta: number;
+  outsideSummary: boolean;
+  insideFlow: boolean;
+  insideViewport: boolean;
+  summaryGap: number;
   summaryEdgesAligned: boolean;
   overlaps: boolean;
   iconOnly: boolean;
   iconSize: number;
   borderless: boolean;
   transparent: boolean;
-}): void;
+};
+export function assertAssociativeCommissionGeometry(geometry: AssociativeCommissionGeometry): void;
+export function checkGuidanceShimmer(page: Page): Promise<
+  (Parameters<typeof assertAssociativeShimmer>[0] & {
+    label: string;
+    rejectionFooter: boolean;
+    rejected: boolean;
+  })[]
+>;
 export function checkAssociativeMoneySpacing(page: Page): Promise<{ gap: number; fits: boolean }[]>;
 export function checkAssociativeGuidance(
   page: Page,

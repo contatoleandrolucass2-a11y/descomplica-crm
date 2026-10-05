@@ -4,6 +4,8 @@ import { ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 
+import { getAccountFirstName } from "@/lib/navigation/account-identity";
+
 import styles from "./ProtectedShell.module.css";
 
 const ACCOUNT_PANEL_ID = "protected-account-menu";
@@ -11,6 +13,7 @@ const ACCOUNT_PANEL_ID = "protected-account-menu";
 interface AccountMenuProps {
   children: ReactNode;
   identity: string;
+  displayName?: unknown;
   role: string;
 }
 
@@ -30,11 +33,12 @@ export function AccountMenu(props: AccountMenuProps) {
   return <AccountMenuState key={pathname} {...props} />;
 }
 
-function AccountMenuState({ children, identity, role }: AccountMenuProps) {
+function AccountMenuState({ children, identity, displayName, role }: AccountMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const initials = getIdentityInitials(identity);
+  const firstName = getAccountFirstName(displayName);
 
   useEffect(() => {
     if (!open) return;
@@ -75,7 +79,7 @@ function AccountMenuState({ children, identity, role }: AccountMenuProps) {
         className={styles.accountTrigger}
         aria-controls={ACCOUNT_PANEL_ID}
         aria-expanded={open}
-        aria-label={`Conta de ${identity}`}
+        aria-label={firstName ? `Conta de ${firstName} (${identity})` : `Conta de ${identity}`}
         title={identity}
         data-session-identity
         onClick={() => setOpen((current) => !current)}
@@ -88,7 +92,7 @@ function AccountMenuState({ children, identity, role }: AccountMenuProps) {
           aria-hidden="true"
           data-session-identity-trigger-label
         >
-          {identity}
+          {firstName ?? "Conta"}
         </span>
         <ChevronDown
           className={styles.accountChevron}

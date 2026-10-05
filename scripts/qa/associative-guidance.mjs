@@ -4,6 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
+import { checkAssociativeMotion } from "./associative-motion.mjs";
 import {
   checkAssociativeCommissionGeometry,
   checkAssociativeSummaryGeometry,
@@ -120,7 +121,7 @@ export function assertAssociativeShimmer({ active, reducedMotion, animations, le
       "associative-pending-shine",
       "Only the pending shimmer may animate",
     );
-    assert.equal(animation.duration, 3000, "Guidance shimmer must last exactly 3s");
+    assert.equal(animation.duration, 4500, "Guidance shimmer must last exactly 4.5s");
     assert.equal(animation.iterations, "infinite", "Guidance shimmer must repeat while required");
     assert.equal(animation.playState, "running", "Guidance shimmer must actually run");
     assert.equal(
@@ -180,7 +181,7 @@ export function assertAssociativeRejectionShimmer({ rejected, reducedMotion, ani
   const animation = animations[0];
   assert.equal(animation.name, "associative-rejection-shine");
   assert.equal(animation.pseudo, "::after");
-  assert.equal(animation.duration, 3000, "Rejection shimmer must last exactly 3s");
+  assert.equal(animation.duration, 4500, "Rejection shimmer must last exactly 4.5s");
   assert.equal(animation.iterations, "infinite");
   assert.equal(animation.playState, "running");
   assert.equal(animation.redLine, true, "Rejection shimmer must be red");
@@ -609,10 +610,12 @@ async function checkHover(page, locator, reducedMotion, actionTarget = locator) 
               ) && !element.matches(':disabled, [aria-disabled="true"], :has(input:disabled)'),
             animations: element
               .getAnimations({ subtree: true })
+              .filter((animation) => animation.effect.target === element)
               .filter((animation) => animation.playState === "running" || animation.pending)
               .map((animation) => ({
                 name: animation.animationName,
                 pseudo: animation.effect.pseudoElement,
+                duration: animation.effect.getTiming().duration,
               })),
           };
         });
@@ -620,9 +623,10 @@ async function checkHover(page, locator, reducedMotion, actionTarget = locator) 
           reducedMotion === "reduce"
             ? motion.animations.length === 0
             : motion.animations.every(
-                ({ name, pseudo }) =>
-                  (name === "associative-specular-orbit" && pseudo === "::before") ||
-                  (name === "associative-selection-shine" && !pseudo),
+                ({ name, pseudo, duration }) =>
+                  duration === 4500 &&
+                  ((name === "associative-specular-orbit" && pseudo === "::before") ||
+                    (name === "associative-selection-shine" && !pseudo)),
               ) &&
               motion.animations.filter(({ name }) => name === "associative-specular-orbit")
                 .length === (motion.specularEnabled ? 1 : 0);
@@ -648,7 +652,7 @@ async function checkHover(page, locator, reducedMotion, actionTarget = locator) 
   return motion;
 }
 
-async function checkGuidanceShimmer(page) {
+export async function checkGuidanceShimmer(page) {
   const measurements = await page
     .locator(
       `${root} ${question}, ${root} .investor-key-field, ${root} .investor-associative-step-guide, ${root} .investor-associative-approval > footer`,
@@ -669,8 +673,14 @@ async function checkGuidanceShimmer(page) {
             .getAnimations({ subtree: true })
             .filter((animation) => {
               if (!(animation instanceof CSSAnimation)) return false;
+              if (
+                !["associative-pending-shine", "associative-rejection-shine"].includes(
+                  animation.animationName,
+                )
+              )
+                return false;
               const target = animation.effect.target;
-              // Help icons have their own motion contract; inspect only the guidance owners.
+              // Decorative sequences and help icons have separate motion contracts.
               return (
                 target === element ||
                 (element.matches(".investor-key-field") &&
@@ -803,7 +813,7 @@ async function checkGuidancePixels(locator) {
   };
   try {
     const before = await captureAt(0);
-    const during = await captureAt(1500);
+    const during = await captureAt(2250);
     assert.deepEqual(before.info, during.info, "A sweep must not resize its field");
     const { width, height, channels } = before.info;
     const bands = [0, 0];
@@ -841,7 +851,7 @@ async function checkGuidancePixels(locator) {
 export async function checkAssociativeGuidance(page, { onState = async () => {} } = {}) {
   let stage = "initial";
   const result = {
-    contract: "associative-guidance-full-area-continuity-v7",
+    contract: "associative-guidance-full-area-continuity-v8",
     questions: [],
     rows: [],
     keyboardFocus: [],
@@ -1066,6 +1076,8 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     }
     stage = "rejection";
     result.rejection = await checkRejection(page);
+    stage = "sequenced-motion";
+    result.sequencedMotion = await checkAssociativeMotion(page);
     stage = "complete";
     result.passed = true;
     await onState("complete");

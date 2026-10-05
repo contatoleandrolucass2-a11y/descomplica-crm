@@ -1830,6 +1830,7 @@ async function createEphemeralQaUser(adminClient, runId) {
     email_confirm: true,
     app_metadata: { qa_ephemeral: true, qa_run_id: runId },
     user_metadata: {
+      name: "AlexandrianaMaximilianaConstantina Visual QA",
       legal_acceptance: {
         termsAccepted: true,
         termsVersion: legalDocumentVersions.terms,

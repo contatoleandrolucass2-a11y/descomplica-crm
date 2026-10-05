@@ -559,6 +559,7 @@ async function withRolePage(browser: Browser, role: Role, run: (page: Page) => P
     ...qaTarget.contextOptions,
     ...(storageState ? { storageState } : {}),
   });
+  let failed = false;
   try {
     await constrainRemoteRequests(context);
     const page = await context.newPage();
@@ -571,8 +572,16 @@ async function withRolePage(browser: Browser, role: Role, run: (page: Page) => P
       roleStorageStates.set(role, await context.storageState());
     }
     await run(page);
+  } catch (error) {
+    failed = true;
+    throw error;
   } finally {
-    await context.close();
+    try {
+      await context.close();
+    } catch (error) {
+      // Preserve the original operation when timeout cleanup also fails.
+      if (!failed) throw error;
+    }
   }
 }
 
@@ -1321,6 +1330,8 @@ test("released simulator pages run only for Master while the CAIXA engine stays 
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
+    page.setDefaultTimeout(15_000);
+    page.setDefaultNavigationTimeout(45_000);
     await page.clock.setFixedTime(new Date("2026-08-06T12:00:00-03:00"));
     const status = await page.request.get("/api/official-simulator/associativo-fluxo-linear");
     expect(status.status()).toBe(200);

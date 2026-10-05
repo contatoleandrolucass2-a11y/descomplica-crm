@@ -13,7 +13,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Fundo e custo ajustaveis somente no estado local, com rateio 40/30/20/10 e
   expectativa de vendas inteiras arredondada para baixo. Sem gravacao de
   politica, recurso ou configuracao ativa; sem migration ou workflow n8n.
-- Evidencias: 61 testes focados e lint/tipos/build locais aprovados; 12 capturas
+- Evidencias: 62 testes focados e lint/tipos/build locais aprovados; 12 capturas
   do componente real em preview isolado, com Axe, controles e teclado aprovados.
   Testes: `tests/marketing-resources.test.tsx`, navegacao e Proxy; jornada
   autenticada: `scripts/qa/marketing-resources.mjs`. CI Linux e publicacao no
@@ -30,6 +30,45 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - A lista de links autorizados tambem aparece em `archive-navigation.mjs`.
   Ao adicionar uma guia, atualizar esse contrato junto da matriz E2E; manter
   contagem exata e provas de alcance de cada link, sem relaxar os limites.
+- CI `37258678938` comprovou os 12 cenarios autenticados MKT, teclado e
+  controles. Contrato antigo do menu impediu o restante; corrigido na branch.
+  Integracao de `e1ab14a` preserva as referencias e resultados do PR #150;
+  validacao combinada e publicacao continuam pendentes.
+
+## 2026-10-04: cadencia visual e nome cadastrado
+
+- Status: pendente_validacao; fonte: pedido de doze ajustes visuais, branch
+  `codex/associativo-animacao-sequencial`, base `a4a9ef5`.
+- Animacoes CSS montadas em momentos distintos nao compartilham necessariamente
+  a fase. Alinhar somente novas animacoes a um relogio, sem timer de renderizacao,
+  preserva sincronia; grupos sequenciais iniciam juntos em sua propria montagem.
+- Movimento reduzido desliga decoracoes, nao a indicacao de foco. Botoes
+  desabilitados nao devem continuar chamando a acao por brilho automatico.
+- Pseudo-elementos exigem getAnimations com subtree e filtro por effect.target;
+  hover nao pode substituir o loop continuo, pois isso reinicia seu relogio.
+- O primeiro nome vem de `user_metadata.name`, preenchido no cadastro; email
+  permanece identidade da sessao, nao e usado para inventar o nome. Sem nome
+  valido, usar Conta. Essa apresentacao nao altera autorizacao.
+- A CI `37245218837` detectou recorte do menu em 320px: nomes longos ampliam
+  o cabecalho. O limite dos paineis absolutos deve usar a altura real do pai
+  (`100%`), nao os 58px do caso compacto. Regressao inclui o ultimo item visivel.
+- CI `37247029738`: contratos funcionais, acessibilidade e zoom passaram;
+  somente comparacoes com a referencia anterior divergiram. Revisao visual
+  ajustou a largura do nome no desktop; 44 testes focados aprovados.
+- CI seguinte `37249431505` repetiu timeout de navegacao entre simuladores.
+  A limpeza do contexto ocultava a operacao original; diagnostico preserva
+  esse erro e limita acoes, sem ampliar timeout ou enfraquecer gates.
+- CI `37251923554` identificou Configuracoes interceptando Claro. O menu e os
+  temas precisam de tracks intrinsecos; nomes flexiveis ocupam somente o restante.
+  Fixtures sem filhos nao reproduzem a largura dos chevrons de grupos reais.
+  Incluir grupos completos e testar hit-testing com fontes distintas.
+- CI `37253579651` confirmou a correcao: E2E, validacao Linux e todos os
+  contratos funcionais passaram. As 173 diferencas visuais foram revisadas e
+  promovidas; 36 capturas ja aprovadas conservaram seus bytes de referencia.
+- Evidencias e pendencias: `docs/audits/associativo-sequencias-2026-10-04.md`.
+  Preview 6/6, 47 testes de efeitos, 76 do cabecalho e 126 cenarios geometricos;
+  nova CI integral em verify e publicacao pendentes. Nenhuma formula
+  financeira alterada.
 
 ## 2026-10-04: origem incompleta, recuperacao e prova numerica do Associativo
 

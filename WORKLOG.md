@@ -10,7 +10,7 @@
 - Reutiliza cabecalho, tokens e temas da Tabela Associativo. Ajustes de fundo e
   custo sao locais; expectativa conta vendas inteiras. Rateio em centavos mantem
   a soma exata; entradas ausentes ou invalidas ficam explicitamente pendentes.
-- Lint, tipos, build e 61 testes focados aprovados. Suite Windows: seis falhas
+- Lint, tipos, build e 62 testes focados aprovados. Suite Windows: seis falhas
   POSIX e tres timeouts existentes, alem da contagem de rotas corrigida e retestada.
 - Preview isolado do componente real: 12 cenarios (1440/1024/390/320px, tres
   temas), Axe sem violacoes, recalculo, erros, restauracao e teclado aprovados.
@@ -28,6 +28,59 @@
 - Varredura adicional encontrou contrato de quatro itens em
   `archive-navigation.mjs`; incluido o quinto link MKT com as mesmas provas de
   nome, destino, clique e visibilidade em todas as larguras da matriz existente.
+- CI `37258678938`: MKT autenticado passou nos 12 cenarios, valores, recalculo,
+  erros, reset e teclado; restante bloqueado pelo contrato antigo de quatro
+  links. `main` atualizado para `e1ab14a` e integrado preservando ambas as notas
+  e as referencias revisadas do PR #150. Nova validacao combinada pendente.
+
+## 2026-10-04 - Associativo: cadencia e sequencias visuais
+
+- CI `37253579651`: validacao Linux, restore, E2E e contratos funcionais do QA
+  aprovados. Candidato limpo `f8ea013c`: 154 responsivos, 88 temas, 209 auditorias,
+  110 zooms e 40 navegacoes; 173 comparacoes visuais divergentes, 36 aprovadas.
+  Revisao visual concluida: 173 referencias promovidas e 36 preservadas byte
+  a byte, sem reduzir tolerancias. Nova CI em verify e publicacao pendentes.
+- Diagnostico CI `37251923554`: Configuracoes interceptava o clique no tema
+  Claro ao retornar ao Dashboard. A grade agora reserva o tamanho intrinseco
+  da navegacao e dos temas; o nome respeita o espaco restante. A fixture local
+  inclui os tres grupos expansiveis e verifica ponteiros com fontes diferentes,
+  incluindo prova negativa do layout antigo.
+- CI `37249431505` excedeu 360s no mesmo E2E de navegacao entre simuladores
+  em duas tentativas. Sem assumir flakiness: preservar a falha original na
+  limpeza do contexto e limitar acoes a 15s/navegacoes a 45s para diagnostico.
+  Nenhum timeout ampliado, assert removido ou publicacao liberada.
+- A CI `37245218837` aprovou validacao Linux, banco e restauracao, mas revelou
+  menu cortado em 320px com nome longo. Menus agora descontam a altura real
+  do pai posicionado, sem altura fixa ou observador JavaScript. Regressao
+  verifica o ultimo item em 320/375/600/1180px; 28 testes focados passaram.
+- CI seguinte `37247029738`: todos os gates funcionais visuais passaram
+  (154 rotas responsivas, 88 temas, 209 auditorias, 110 zooms e navegacao).
+  Revisao das capturas motivou ampliar o nome no desktop conforme o espaco
+  disponivel; fixture de 34 caracteres usa no maximo duas linhas desde 1280px.
+  Os 44 testes focados passaram, incluindo 126 geometrias e menus completos.
+- Integracao posterior: PR #150 incorpora `77a07a7` (canvas do PR #148),
+  mantendo ambas as mudancas. Preview combinado 6/6; 78 testes do cabecalho e
+  126 geometrias. Nome longo pode ampliar apenas o espaco necessario do cabecalho.
+- Badges do fluxo e do estoque mobile respeitam suas colunas de 30/28px;
+  o novo QA rejeita sobreposicao entre badge e titulo.
+
+- Fonte: doze capturas do usuario; branch `codex/associativo-animacao-sequencial`,
+  base `a4a9ef5`. Escopo visual; nenhum motor, taxa ou origem financeira alterado.
+- Brilho branco/dourado mais fino e ciclo de 4,5s. Relogio comum preserva a
+  sincronia das selecoes e CTAs quando novos elementos sao montados.
+- Bordas sequenciais: contorno externo e nove informacoes do imovel; Linear e
+  quatro blocos Decrescentes. Plano sugerido e composicao recebem brilho em
+  sequencia. Filtros nativos recebem reflexo no hover/foco; guias e pagamentos
+  opcionais habilitados mantem loop continuo. Movimento reduzido e respeitado.
+- Dolar movido para fora da borda do resumo, no espaco interno do painel de fluxo,
+  alinhado a ultima data; resumo e aprovacao conservam as mesmas bordas.
+- Breadcrumb removido somente no Associativo. Menu da conta usa o primeiro nome
+  cadastrado integralmente, com fallback Conta quando nao houver nome valido.
+- Validacao local: 6/6 jornadas visuais, 47 testes focados dos efeitos e 76 do
+  cabecalho; 126 cenarios de geometria/nome. Suite geral: 1926 aprovados,
+  quatro skips condicionais e seis falhas POSIX no Windows, aguardando Linux.
+  Lint, tipos, build e audit aprovados; evidencia e limites em
+  `docs/audits/associativo-sequencias-2026-10-04.md`.
 
 ## 2026-10-04 - Associativo: cobertura da origem e brilho integral
 

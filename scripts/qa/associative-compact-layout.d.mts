@@ -1,5 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
-import type { assertAssociativeCommissionGeometry } from "./associative-guidance.mjs";
+import type { AssociativeCommissionGeometry } from "./associative-guidance.mjs";
 
 export {
   assertAssociativeCommissionGeometry,
@@ -9,5 +9,12 @@ export {
 
 export function checkAssociativeCommissionGeometry(
   commission: Locator,
-): Promise<Parameters<typeof assertAssociativeCommissionGeometry>[0]>;
+): Promise<AssociativeCommissionGeometry>;
 export function checkAssociativeSelectedGoldPaint(page: Page): Promise<void>;
+export function checkProtectedTopbar(page: Page): Promise<{
+  height: number;
+  maximumHeight: number;
+  controlsContained: boolean;
+  touchTargets: boolean;
+  selectedCued: boolean;
+}>;

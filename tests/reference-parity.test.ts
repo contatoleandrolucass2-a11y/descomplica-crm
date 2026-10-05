@@ -1,7 +1,56 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { chromium, type Page } from "@playwright/test";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import ts from "typescript";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({ usePathname: () => "/app" }));
+
+import { AccountMenu } from "../app/(protected)/_components/AccountMenu";
+import { AuthorizedNavigation } from "../app/(protected)/_components/AuthorizedNavigation";
+import { ThemeSwitch } from "../app/(protected)/_components/ThemeSwitch";
+import styles from "../app/(protected)/_components/ProtectedShell.module.css";
+// @ts-expect-error Operational ESM script, exercised against the real header below.
+import * as navigationQa from "../scripts/qa/archive-navigation.mjs";
+
+function readQaFunction(source: string, name: string, dependencies: Record<string, unknown> = {}) {
+  const parsed = ts.createSourceFile(
+    "qa.mjs",
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS,
+  );
+  const declaration = parsed.statements.find(
+    (node) => ts.isFunctionDeclaration(node) && node.name?.text === name,
+  );
+  if (!declaration) throw new Error(`Missing QA function: ${name}`);
+  // Isolate the actual function without starting the operational script or its network clients.
+  return new Function(
+    ...Object.keys(dependencies),
+    `${declaration.getText(parsed)}; return ${name};`,
+  )(...Object.values(dependencies));
+}
+
+function accountIdentityEvidencePassed(check: {
+  identityDisplayContract?: string;
+  identityDisplayReady?: boolean;
+  identityTruncationReady?: boolean;
+}) {
+  if (check.identityDisplayContract === "registered-first-name-v1") {
+    return check.identityDisplayReady === true;
+  }
+  // Retain the historical baseline's gate without treating it as evidence of the new contract.
+  return (
+    check.identityDisplayContract === undefined &&
+    check.identityDisplayReady === undefined &&
+    check.identityTruncationReady === true
+  );
+}
 
 const expectedReferenceRoutes = [
   "/",
@@ -150,7 +199,9 @@ const authenticatedResults = JSON.parse(
     reducedMotion: boolean;
     horizontalOverflow: boolean;
     topbarCollision: boolean;
-    identityTruncationReady: boolean;
+    identityDisplayContract?: string;
+    identityDisplayReady?: boolean;
+    identityTruncationReady?: boolean;
     blockedActionDistinct: boolean;
     unavailableActionDistinct: boolean;
     consoleErrorCount: number;
@@ -243,7 +294,295 @@ const authenticatedResults = JSON.parse(
   }>;
 };
 
+describe("current account display and protected header contract", () => {
+  it.runIf(process.env.ACCOUNT_MENU_BROWSER === "1")(
+    "keeps the brand hit area separate and rejects hidden, clipped or incorrect account names",
+    async () => {
+      const require = createRequire(import.meta.url);
+      const { parse } = createRequire(require.resolve("next/package.json"))("postcss") as {
+        parse: (source: string) => {
+          walkRules: (callback: (rule: { selector: string }) => void) => void;
+          toString: () => string;
+        };
+      };
+      const stylesheet = parse(
+        readFileSync(
+          new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url),
+          "utf8",
+        ),
+      );
+      stylesheet.walkRules((rule) => {
+        rule.selector = rule.selector
+          .replace(/:global\(([^)]+)\)/g, "$1")
+          .replace(/\.([a-zA-Z][\w-]*)/g, (_, name: string) => `.${styles[name]}`);
+      });
+      const brand = readFileSync(
+        new URL("../public/descomplica-symbol.png", import.meta.url),
+      ).toString("base64");
+      const pages = [
+        ["crm.dashboard", "/app", "Dashboard"],
+        ["crm.simulation", "/app/simulacao", "Simulacao"],
+        ["crm.ranking", "/app/ranking", "Ranking"],
+        ["crm.partnerships", "/app/canal-de-parcerias", "Canal de Parcerias"],
+        ["crm.settings", "/app/configuracoes", "Configuracoes"],
+      ].map(([key, path, name], sortOrder) => ({
+        key: key!,
+        path: path!,
+        name: name!,
+        sortOrder,
+        section: "crm",
+        description: "Navegacao sintetica",
+        parentKey: null,
+      }));
+      const fixture = (displayName: string, theme = "light") => {
+        const accountProps = {
+          identity: "qa.header@local.invalid",
+          displayName,
+          role: "Corretor",
+          children: null,
+        };
+        const markup = renderToStaticMarkup(
+          createElement(
+            "header",
+            {
+              className: styles.topbar,
+              "data-protected-topbar": true,
+            },
+            createElement(
+              "div",
+              { className: styles.topbarInner },
+              createElement(
+                "a",
+                { className: styles.brand, href: "/app", "data-protected-brand": true },
+                createElement("img", {
+                  className: styles.brandMark,
+                  src: `data:image/png;base64,${brand}`,
+                  alt: "",
+                }),
+                createElement("span", { className: styles.brandName }, "escomplica"),
+              ),
+              createElement(AuthorizedNavigation, { pages }),
+              createElement(ThemeSwitch, { canPersist: false }),
+              createElement(
+                "div",
+                { className: styles.actions },
+                createElement(AccountMenu, accountProps),
+              ),
+            ),
+          ),
+        );
+        return `<html data-theme="${theme}"><head><style>body{margin:0;font-family:Arial,sans-serif}*{box-sizing:border-box}${stylesheet}</style></head><body>${markup}</body></html>`;
+      };
+      const inspectIdentity = readQaFunction(visualHarness, "inspectAccountIdentityDisplay") as (
+        expectedFirstName: string,
+      ) => { identityDisplayReady: boolean };
+      const { assertHeaderGeometry } = navigationQa as {
+        assertHeaderGeometry: (page: Page, compact: boolean) => Promise<unknown>;
+      };
+      const browser = await chromium.launch({ headless: true });
+      try {
+        const page = await browser.newPage();
+        let cases = 0;
+        for (const width of [320, 375, 600, 601, 760, 768, 1180, 1181, 1280, 1440, 1920]) {
+          await page.setViewportSize({ width, height: 900 });
+          for (const theme of ["light", "balanced", "dark"]) {
+            for (const name of ["Mariana Silva", "AlexandrianaMaximilianaConstantina QA"]) {
+              await page.setContent(fixture(name, theme));
+              expect(
+                await page.evaluate(inspectIdentity, name.split(" ")[0]!),
+                `${width}/${theme}/${name}`,
+              ).toMatchObject({ identityDisplayReady: true });
+              await assertHeaderGeometry(page, width <= 1180);
+              cases++;
+            }
+          }
+        }
+        expect(cases).toBe(66);
+        await page.setViewportSize({ width: 320, height: 568 });
+        for (const name of [
+          "Mariana",
+          "AlexandrianaMaximilianaAna",
+          "AlexandrianaMaximilianaConstantina",
+        ]) {
+          await page.setContent(fixture(`${name} QA`));
+          await assertHeaderGeometry(page, true);
+          expect(await page.evaluate(inspectIdentity, name)).toMatchObject({
+            identityDisplayReady: true,
+          });
+          const sizing = await page.evaluate(() => {
+            const header = document.querySelector<HTMLElement>("[data-protected-topbar]")!;
+            const label = document.querySelector<HTMLElement>(
+              "[data-session-identity-trigger-label]",
+            )!;
+            const range = document.createRange();
+            range.selectNodeContents(label);
+            return {
+              width: innerWidth,
+              nameLength: label.textContent!.length,
+              headerHeight: header.getBoundingClientRect().height,
+              labelWidth: label.getBoundingClientRect().width,
+              labelHeight: label.getBoundingClientRect().height,
+              lines: range.getClientRects().length,
+            };
+          });
+          if (name.length <= 26) expect(sizing.headerHeight).toBeLessThanOrEqual(60);
+          process.stdout.write(`[account-header-sizing] ${JSON.stringify(sizing)}\n`);
+        }
+        for (const mutation of [
+          { text: "qa.header@local.invalid" },
+          { text: "Maria" },
+          { style: "display:none" },
+          { style: "visibility:hidden" },
+          { parentStyle: "opacity:0" },
+          { style: "text-overflow:ellipsis" },
+          { style: "width:8px;flex:0 0 8px;max-height:10px;overflow:hidden;white-space:nowrap" },
+          { ariaLabel: "Outra conta" },
+          { parentStyle: "transform:translateX(2000px)" },
+        ]) {
+          await page.setContent(fixture("Mariana Silva"));
+          await page.locator("[data-session-identity-trigger-label]").evaluate((label, change) => {
+            if (change.text) label.textContent = change.text;
+            if (change.style) label.setAttribute("style", change.style);
+            if (change.parentStyle) label.parentElement!.setAttribute("style", change.parentStyle);
+            if (change.ariaLabel) label.parentElement!.setAttribute("aria-label", change.ariaLabel);
+          }, mutation);
+          expect(
+            await page.evaluate(inspectIdentity, "Mariana"),
+            JSON.stringify(mutation),
+          ).toMatchObject({ identityDisplayReady: false });
+        }
+      } finally {
+        await browser.close();
+      }
+    },
+    90_000,
+  );
+});
+
 describe("versioned reference parity catalog", () => {
+  it("keeps historical evidence separate and requires the new gate for new captures", () => {
+    expect(accountIdentityEvidencePassed({ identityTruncationReady: true })).toBe(true);
+    expect(
+      accountIdentityEvidencePassed({
+        identityDisplayContract: "registered-first-name-v1",
+        identityDisplayReady: true,
+      }),
+    ).toBe(true);
+    expect(
+      accountIdentityEvidencePassed({
+        identityDisplayContract: "registered-first-name-v1",
+        identityTruncationReady: true,
+      }),
+    ).toBe(false);
+    expect(
+      accountIdentityEvidencePassed({
+        identityDisplayContract: "unknown",
+        identityDisplayReady: true,
+      }),
+    ).toBe(false);
+    expect(
+      accountIdentityEvidencePassed({
+        identityDisplayReady: true,
+        identityTruncationReady: true,
+      }),
+    ).toBe(false);
+    expect(accountIdentityEvidencePassed({})).toBe(false);
+  });
+
+  it("requires the whole visible account name in every current route inspection", () => {
+    expect(visualHarness).not.toContain("identityTruncationReady");
+    expect(visualHarness).toContain('identityDisplayContract: "registered-first-name-v1"');
+    expect(visualHarness).toContain("snapshot.identityDisplayReady &&");
+    expect(visualHarness).toContain(
+      "page.evaluate(inspectAccountIdentityDisplay, expectedAccountFirstName)",
+    );
+    const parsed = ts.createSourceFile(
+      "qa.mjs",
+      visualHarness,
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.JS,
+    );
+    const calls: ts.CallExpression[] = [];
+    function visit(node: ts.Node) {
+      if (ts.isCallExpression(node) && node.expression.getText(parsed) === "inspectRoute")
+        calls.push(node);
+      ts.forEachChild(node, visit);
+    }
+    visit(parsed);
+    expect(calls).toHaveLength(4);
+    for (const call of calls) {
+      expect(call.arguments[6]?.getText(parsed)).toContain("expectedAccountFirstName");
+    }
+  });
+
+  it.each([
+    ["  Mariana Silva  ", "Mariana"],
+    ["AlexandrianaMaximilianaConstantina QA", "AlexandrianaMaximilianaConstantina"],
+    [undefined, "Conta"],
+    ["email.alias@example.invalid", "Conta"],
+  ])("derives the QA expectation from verified metadata: %s", async (name, expected) => {
+    const email = "qa.first-name@local.invalid";
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        user: { email, user_metadata: { name } },
+        access_token: "synthetic-token",
+      }),
+    });
+    const verify = readQaFunction(visualHarness, "verifyDedicatedLocalQaIdentity", { fetch });
+    const result = await verify(
+      "http://127.0.0.1:54321",
+      "synthetic-key",
+      email,
+      "synthetic-password",
+    );
+    expect(result.firstName).toBe(expected);
+    expect(result.accountPolicy).toBe("qa.*@local.invalid");
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    [
+      "local-authenticated-visual.mjs",
+      "createEphemeralQaUser",
+      undefined,
+      "AlexandrianaMaximilianaConstantina Visual QA",
+    ],
+    [
+      "local-rls-api.mjs",
+      "createEphemeralAccount",
+      "master",
+      "AlexandrianaMaximilianaConstantina QA",
+    ],
+    ["local-rls-api.mjs", "createEphemeralAccount", "user", "Mariana QA"],
+  ])(
+    "gives %s %s %s an explicit synthetic name",
+    async (file, functionName, role, expectedName) => {
+      const source = readFileSync(new URL(`../scripts/qa/${file}`, import.meta.url), "utf8");
+      const createUser = vi.fn().mockResolvedValue({
+        data: { user: { id: "10000000-0000-4000-8000-000000000001" } },
+        error: null,
+      });
+      const createAccount = readQaFunction(source, functionName!, {
+        randomBytes,
+        legalDocumentVersions: { terms: "synthetic", privacy: "synthetic" },
+        assertUuid: (id: string) => id,
+        fail: (message: string) => {
+          throw new Error(message);
+        },
+      });
+      const client = { auth: { admin: { createUser } } };
+      if (role) await createAccount(client, role, "fixture-contract");
+      else await createAccount(client, "fixture-contract");
+      expect(createUser.mock.calls[0]?.[0].user_metadata.name).toBe(expectedName);
+      expect(createUser.mock.calls[0]?.[0].user_metadata.legal_acceptance).toMatchObject({
+        termsAccepted: true,
+        privacyAccepted: true,
+      });
+    },
+  );
+
   it("prepares the expanded authenticated visual matrix without weakening baseline safety", () => {
     const routeSource = visualHarness.match(/const routes = \[(.*?)\n\];/s)?.[1] ?? "";
     const configuredRoutes = [...routeSource.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
@@ -398,7 +737,7 @@ describe("versioned reference parity catalog", () => {
           check.reducedMotion &&
           !check.horizontalOverflow &&
           !check.topbarCollision &&
-          check.identityTruncationReady &&
+          accountIdentityEvidencePassed(check) &&
           check.blockedActionDistinct &&
           check.unavailableActionDistinct &&
           check.consoleErrorCount === 0 &&
