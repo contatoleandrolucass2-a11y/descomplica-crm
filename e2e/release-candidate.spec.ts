@@ -1363,11 +1363,10 @@ test("released simulator pages run only for Master while the CAIXA engine stays 
     await expect(page.getByRole("region", { name: "Estoque completo de unidades" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Produto" })).toBeVisible();
     await expect(page.locator(".investor-stock-table tbody tr.selected")).toHaveCount(0);
-    await expect(
-      page
-        .getByLabel("Guia completo do simulador")
-        .getByRole("button", { name: "Iniciar passo a passo" }),
-    ).toBeVisible();
+    // The approved Associativo canvas keeps the stock header compact. The
+    // contextual guide is exposed after a unit is selected, not as a second
+    // title action above the inventory.
+    await expect(page.getByLabel("Guia completo do simulador")).toHaveCount(0);
 
     const investorResponse = await page.goto("/app/simulacao/tabela-investidor");
     expect(investorResponse?.status()).toBe(200);
