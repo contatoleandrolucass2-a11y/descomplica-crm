@@ -14,6 +14,10 @@
   estreita de 2.500 px somente para a tela de usuarios, cuja altura medida foi
   2.486 px em 1440 px. Nenhum predicado funcional, de Axe, overflow, tema,
   teclado ou zoom foi removido.
+- A recaptura limpa no commit `f1df3d6` aprovou 154 cenarios responsivos, 88 de
+  tema, 242 auditorias Axe/comparacoes e 110 verificacoes de zoom. Somente as
+  onze referencias de `/admin/usuarios` mudaram; as outras 231 imagens foram
+  preservadas pelo promotor transacional.
 
 ## 2026-10-06 - Gates de release sincronizados com a nova matriz
 

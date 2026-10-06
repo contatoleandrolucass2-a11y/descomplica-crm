@@ -6,7 +6,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-06: baseline de tela longa deve preservar legibilidade interna
 
-- Status: pendente_validacao; fonte: candidato visual da CI `37507333920` e
+- Status: validado; fonte: candidato visual da CI `37507333920` e
   `scripts/qa/authenticated-visual.mjs`.
 - Uma mudanca intencional de altura nao torna toda diferenca aceitavel. Revisar
   as capturas completas revelou que a grade somente leitura usava a primeira
@@ -15,8 +15,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   desktop e empilha o selo no celular. O limite global de densidade permanece
   1.125 px; apenas `/admin/usuarios` admite 2.500 px para a matriz de 23
   permissoes, medida em 2.486 px no candidato anterior.
-- Promover somente as referencias dessa rota depois de nova captura limpa e
-  manter Axe, overflow, temas, teclado e zoom como gates obrigatorios.
+- A captura limpa no commit `f1df3d6` aprovou 154 cenarios responsivos, 88 de
+  tema, 242 auditorias Axe/comparacoes e 110 checks de zoom. O promotor mudou
+  somente as onze referencias de `/admin/usuarios` e preservou as outras 231.
+  Axe, overflow, temas, teclado e zoom permaneceram obrigatorios.
 
 ## 2026-10-06: gates de release também são consumidores da matriz de papéis
 

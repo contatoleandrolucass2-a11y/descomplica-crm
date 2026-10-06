@@ -4,8 +4,8 @@ Data: 2026-10-05
 
 Branch: `codex/roles-permissions-bulk-layout`
 
-Estado: implementação, hardening e matriz de release local concluídos; nenhuma
-migration remota aplicada.
+Estado: implementação, hardening, matriz de release local e baseline visual
+concluídos; nenhuma migration remota aplicada.
 
 ## Decisão funcional
 
@@ -114,7 +114,12 @@ autorização específica e os gates do runbook de publicação.
   referencia visual anterior de `/admin/usuarios`, menor que a nova matriz de
   23 permissoes. A revisao das capturas corrigiu os selos herdados comprimidos
   no modo somente leitura e adicionou limite de densidade de 2.500 px apenas
-  para essa rota; a nova captura limpa ainda deve ser promovida.
+  para essa rota.
+- A recaptura limpa no commit `f1df3d6` aprovou 154 cenarios responsivos, 88 de
+  tema, 242 auditorias Axe/comparacoes e 110 verificacoes de zoom. A promocao
+  transacional alterou somente as onze referencias de `/admin/usuarios` e
+  preservou as outras 231 imagens; a altura desktop ficou em 2.486 px, sem
+  overflow horizontal.
 - Reset completo, lint do schema e advisors de segurança/desempenho do banco:
   aprovados sem achados.
 - Jornada autenticada local em 1440×1000, tema Escuro e Corretor Imob
