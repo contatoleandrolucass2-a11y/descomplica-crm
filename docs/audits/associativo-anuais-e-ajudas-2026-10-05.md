@@ -122,3 +122,7 @@ of type hosted even after multiple attempts`. PR #156 aberto; nao houve deploy.
   1997 aprovados, seis condicionais, seis limitacoes POSIX e dois timeouts de
   conhecimento; repeticao isolada 22/22 aprovada. CI Linux passou a suite integral.
 - Merge, CI da main, imagem imutavel, backup e verificacao de producao pendentes.
+- A main avancou para `a22f4dc` (calibracao de temas) antes da publicacao.
+  Integracao preserva codigo e baseline completos dessa entrega; as 11 imagens
+  promovidas acima ficam no historico. A combinacao precisa de nova CI e captura,
+  sem reaproveitar imagens antigas para aprovar cores novas. Motores inalterados.

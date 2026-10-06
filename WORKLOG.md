@@ -9,6 +9,9 @@
 - Lint/tipos/build, 15 testes focados, oito Node aprovados. Suite Windows com
   seis limitacoes POSIX e dois timeouts resolvidos isoladamente (22/22).
 - Evidencias no audit de anuais e ajudas; CI final, merge e deploy pendentes.
+- Integra `a22f4dc` (temas) sem mudar motores. Mantem integralmente a baseline
+  dessa main para uma nova captura combinada; nao reutiliza imagens antigas
+  para aprovar cores novas. Documentacao das duas entregas preservada.
 
 ## 2026-10-05 - Saldo das anuais e ajudas do Associativo
 
@@ -44,6 +47,30 @@
   aprovados, seis falhas POSIX e timeout DevTools resolvido isoladamente (24/24).
   Oito testes Node aprovados. CI `37364639266` cancelada antes de iniciar por
   indisponibilidade de runner GitHub; PR #156 permanece sem merge/deploy.
+
+## 2026-10-05 - Calibracao integral dos tres temas
+
+- Branch `codex/theme-color-calibration`, base
+  `dcb88c9eeaed7879ef364a1c7ef83a762e30f709`. Escopo exclusivamente visual:
+  tokens globais, topbar e heranca dos canvases de Ranking, Canal e Configuracoes.
+- Diagnostico: Claro e Medio tinham luminosidade quase identica; tres canvases
+  redefiniam todos os tokens e permaneciam escuros independentemente da escolha.
+  A causa foi removida sem trocar componentes, estrutura, loaders ou autorizacao.
+- Paletas finais: Claro `#f3f6fa`, Medio `#d9e1eb` e Escuro `#061f35`; topbar
+  escura `#071a31` e simuladores arquivados preservados. Destaques gerais usam
+  azul/ciano; aviso e erro continuam semanticamente distintos.
+- O primeiro ensaio detectou contraste insuficiente no texto secundario de
+  Documentacao e depois nos preenchimentos azuis do Claro/Medio. Ambos foram
+  corrigidos nos tokens de origem; nenhum waiver ou reducao de gate foi usado.
+- Contrato novo confere luminosidade crescente, contraste minimo 4,5:1,
+  identidade azul e ausencia de paleta escura local nos tres canvases.
+- Matriz final validada pelo gate autenticado: 154 cenarios responsivos, 88 de
+  tema, 242 auditorias Axe, 242 comparacoes de baseline, 22 comparacoes com os
+  canvases aprovados, 110 verificacoes de zoom e 40 cenarios de navegacao dos
+  simuladores. O resultado versionado e a fonte da contagem; nenhum predicado
+  funcional ou de acessibilidade foi flexibilizado.
+- Nenhuma migration, dependencia, segredo, conta remota ou dado comercial foi
+  criado ou alterado. Integracoes e motores preservam o estado anterior.
 
 ## 2026-10-04 - Recurso MKT em Configuracoes
 

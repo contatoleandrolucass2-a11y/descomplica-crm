@@ -18,26 +18,26 @@
 
 :root {
   color-scheme: light;
-  --analytics-page: #edf5f8;
+  --analytics-page: #f3f6fa;
   --analytics-surface: #ffffff;
-  --analytics-surface-muted: #f4f8fa;
-  --analytics-surface-strong: #dce9ee;
-  --analytics-ink: #082137;
-  --analytics-muted: #536b7c;
-  --analytics-line: #cbdbe2;
-  --analytics-navy: #071f35;
-  --analytics-navy-raised: #0e3656;
-  --analytics-cyan: #16c7df;
-  --analytics-cyan-strong: #006f85;
-  --analytics-lime: #b6e43a;
-  --analytics-positive: #14865f;
-  --analytics-positive-ink: #0b6b4d;
-  --analytics-warning: #a76308;
-  --analytics-warning-ink: #7a4300;
-  --analytics-danger: #b4233c;
-  --analytics-danger-ink: #981b31;
-  --analytics-shadow: 0 18px 42px rgb(8 33 55 / 10%);
-  --focus-ring: #006f85;
+  --analytics-surface-muted: #eef3f8;
+  --analytics-surface-strong: #e3ebf5;
+  --analytics-ink: #182a40;
+  --analytics-muted: #40536b;
+  --analytics-line: #7f95ad;
+  --analytics-navy: #071a31;
+  --analytics-navy-raised: #123b5c;
+  --analytics-cyan: #38bdf8;
+  --analytics-cyan-strong: #0754a6;
+  --analytics-lime: #8dcaff;
+  --analytics-positive: #155eaf;
+  --analytics-positive-ink: #155eaf;
+  --analytics-warning: #8a4b00;
+  --analytics-warning-ink: #754509;
+  --analytics-danger: #a51f3a;
+  --analytics-danger-ink: #881d32;
+  --analytics-shadow: 0 18px 42px rgb(24 42 64 / 10%);
+  --focus-ring: #0754a6;
 }
 
 body {
@@ -88,31 +88,42 @@ textarea {
 
 :root[data-theme="balanced"] body,
 :root[data-theme="balanced"] .bg-slate-50 {
-  background-color: #e8f0f3;
+  background-color: #d9e1eb;
 }
 
 :root[data-theme="balanced"] {
-  --analytics-page: #dfecef;
-  --analytics-surface: #f8fbfc;
-  --analytics-surface-muted: #eaf2f4;
-  --analytics-surface-strong: #ccdde2;
-  --analytics-line: #b8ccd3;
-  --analytics-positive-ink: #086348;
-  --analytics-warning-ink: #703d00;
-  --analytics-danger-ink: #8f172d;
-  --analytics-shadow: 0 18px 42px rgb(8 33 55 / 14%);
+  --analytics-page: #d9e1eb;
+  --analytics-surface: #e7edf5;
+  --analytics-surface-muted: #dce5ef;
+  --analytics-surface-strong: #cdd9e8;
+  --analytics-ink: #182a40;
+  --analytics-muted: #354a63;
+  --analytics-line: #7188a1;
+  --analytics-navy: #071a31;
+  --analytics-navy-raised: #123b5c;
+  --analytics-cyan: #55b5ee;
+  --analytics-cyan-strong: #084b92;
+  --analytics-lime: #75b9ef;
+  --analytics-positive: #145297;
+  --analytics-positive-ink: #145297;
+  --analytics-warning: #7a4509;
+  --analytics-warning-ink: #693c07;
+  --analytics-danger: #971f38;
+  --analytics-danger-ink: #881d32;
+  --analytics-shadow: 0 18px 42px rgb(24 42 64 / 16%);
+  --focus-ring: #084b92;
 }
 
 :root[data-theme="balanced"] .bg-white {
-  background-color: #f8fbfc;
+  background-color: #e7edf5;
 }
 
 :root[data-theme="balanced"] .ring-slate-200 {
-  --tw-ring-color: #bfd0d8;
+  --tw-ring-color: #7188a1;
 }
 
 :root[data-theme="balanced"] .border-slate-200 {
-  border-color: #bfd0d8;
+  border-color: #7188a1;
 }
 
 :root[data-theme="dark"] body,
@@ -127,21 +138,21 @@ textarea {
   --analytics-surface-muted: #0c3655;
   --analytics-surface-strong: #174a68;
   --analytics-ink: #f3fbff;
-  --analytics-muted: #a9bfcd;
-  --analytics-line: #2c7392;
+  --analytics-muted: #b2cad8;
+  --analytics-line: #3f7c9d;
   --analytics-navy: #030f18;
   --analytics-navy-raised: #113b59;
-  --analytics-cyan: #3ad8ea;
-  --analytics-cyan-strong: #7ceaf5;
-  --analytics-lime: #c8ee5b;
-  --analytics-positive: #4ed4a7;
-  --analytics-positive-ink: #4ed4a7;
-  --analytics-warning: #f2b65f;
-  --analytics-warning-ink: #f2b65f;
-  --analytics-danger: #ff8293;
-  --analytics-danger-ink: #ff8293;
+  --analytics-cyan: #14d1e4;
+  --analytics-cyan-strong: #5ce5f1;
+  --analytics-lime: #8dcaff;
+  --analytics-positive: #8dcaff;
+  --analytics-positive-ink: #8dcaff;
+  --analytics-warning: #ffce8a;
+  --analytics-warning-ink: #ffce8a;
+  --analytics-danger: #ffb7c2;
+  --analytics-danger-ink: #ffb7c2;
   --analytics-shadow: 0 18px 42px rgb(0 0 0 / 28%);
-  --focus-ring: #7ceaf5;
+  --focus-ring: #5ce5f1;
 }
 
 :root[data-theme="dark"] .bg-white {
