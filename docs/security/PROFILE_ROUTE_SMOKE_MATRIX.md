@@ -2,12 +2,13 @@
 
 ## Contrato
 
-Esta matriz descreve o inventário HTTP de 22 rotas protegidas e deve ser validada
+Esta matriz descreve o inventário HTTP de 24 rotas protegidas e deve ser validada
 com contas QA sintéticas. O catálogo PostgreSQL mantém exatamente 17 entradas em
-`app_pages`; o catálogo HTTP possui 22 rotas habilitadas para Master, pois
-acrescenta Tabelão, as réplicas WF14 e WF15, WF16/Documentação e a jornada
-visual CAIXA sob o guard Master-only existente. A execução dos motores continua
-um contrato separado da autorização das páginas.
+`app_pages`; o catálogo HTTP possui 24 rotas habilitadas para Master, pois
+acrescenta Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15,
+WF16/Documentação e a jornada visual CAIXA. A execução dos motores e a leitura
+server-side da fonte pública de Repasse continuam contratos separados da
+autorização das páginas; o RBAC do CRM não privatiza a planilha externa.
 
 Perfis exigidos:
 
@@ -32,10 +33,11 @@ Produção e instalação limpa convergem para as mesmas 17 entradas de `app_pag
 A migration Auth/MFA remove somente as quatro identidades excedentes encontradas
 no restore (`WF16`, `CAIXA`, `WF14` e `WF15`), preserva `user_roles` e overrides
 e recompõe somente os vínculos herdados já existentes em produção. Neste
-candidato, as cinco jornadas complementares acrescentam da 18ª à 22ª rotas HTTP
+candidato, as sete jornadas complementares acrescentam da 18ª à 24ª rotas HTTP
 habilitadas pelo catálogo versionado, sem migration ou nova permissão de banco.
-CAIXA permanece fail-closed no motor, ainda que sua composição visual esteja
-acessível ao Master.
+Recurso MKT reutiliza `crm.settings.manage`; Repasse reutiliza
+`crm.partnerships.view` e permanece Master-only. CAIXA permanece fail-closed no
+motor, ainda que sua composição visual esteja acessível ao Master.
 
 | Rota protegida                            | `master` | `admin` | `broker`, `coordinator`, `real_estate` | `manager`, `house`, `partnership_channel`, `pending` | visitante |
 | ----------------------------------------- | -------: | ------: | -------------------------------------: | ---------------------------------------------------: | --------: |
@@ -47,7 +49,9 @@ acessível ao Master.
 | `/app/etapas/vendas`                      |      200 |     200 |                                    200 |                                                  403 |  redirect |
 | `/app/ranking`                            |      200 |     200 |                                    200 |                                                  403 |  redirect |
 | `/app/canal-de-parcerias`                 |      200 |     403 |                                    403 |                                                  403 |  redirect |
+| `/app/repasse`                            |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/configuracoes`                      |      200 |     200 |                                    403 |                                                  403 |  redirect |
+| `/app/configuracoes/recurso-mkt`          |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/app/configuracoes/metas`                |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/app/configuracoes/metas/parcerias`      |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/app/configuracoes/metas/pontos`         |      200 |     200 |                                    403 |                                                  403 |  redirect |
