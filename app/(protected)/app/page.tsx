@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { forbidden } from "next/navigation";
 import {
   BadgeCheck,
   CalendarCheck2,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { enforcePermission } from "@/lib/authorization/enforce";
+import { getAuthorizedDashboardViews } from "@/lib/authorization/dashboard-views";
 import {
   DASHBOARD_PERIODS,
   DASHBOARD_STAGES,
@@ -317,7 +319,7 @@ function stageMetric(
   view: DashboardViewKey,
   stage: DashboardStageKey,
 ): DashboardMetric | null {
-  return dashboard?.metrics[view][stage] ?? null;
+  return dashboard?.metrics[view]?.[stage] ?? null;
 }
 
 function officialGoal(
@@ -597,15 +599,23 @@ export default async function AppHomePage({
 }) {
   const authorization = await enforcePermission("crm.dashboard.view");
   const canViewStages = authorization.permissions.includes("crm.stages.view");
+  const canViewRanking = authorization.permissions.includes("crm.ranking.view");
   const canRefresh = authorization.permissions.includes("crm.salesforce.refresh");
   const ingestConfiguration = getSalesforceIngestConfiguration();
   const refreshConfiguration = getSalesforceRefreshConfiguration();
   const query = await searchParams;
-  const selectedView: DashboardViewKey = isDashboardView(query.view) ? query.view : "all";
+  const authorizedViews = getAuthorizedDashboardViews(authorization.permissions);
+  if (authorizedViews.length === 0) forbidden();
+  if (isDashboardView(query.view) && !authorizedViews.includes(query.view)) forbidden();
+  const selectedView: DashboardViewKey = isDashboardView(query.view)
+    ? query.view
+    : authorizedViews[0]!;
   const selectedPeriod: DashboardPeriodKey = isDashboardPeriod(query.period)
     ? query.period
     : "month";
-  const result = await loadDashboardReadModel();
+  const result = await loadDashboardReadModel([selectedView], {
+    includeTopDevelopments: canViewRanking,
+  });
   const dashboard = result.status === "ready" ? result.dashboard : null;
   const stages = Object.entries(DASHBOARD_STAGES) as Array<
     [DashboardStageKey, (typeof DASHBOARD_STAGES)[DashboardStageKey]]
@@ -632,7 +642,7 @@ export default async function AppHomePage({
       progress: current === null || goal === null ? null : calculateProgress(current, goal),
     };
   });
-  const salesValue = dashboard?.salesValue[selectedView][selectedPeriod] ?? null;
+  const salesValue = dashboard?.salesValue[selectedView]?.[selectedPeriod] ?? null;
 
   return (
     <main className="min-w-0 px-3 py-3 sm:px-5">
@@ -669,7 +679,7 @@ export default async function AppHomePage({
           unavailableDimensions={["Canal de vendas", "Gerente", "Responsável", "Empresa"]}
         >
           <FilterGroup label="Visão">
-            {(Object.keys(DASHBOARD_VIEWS) as DashboardViewKey[]).map((viewKey) => (
+            {authorizedViews.map((viewKey) => (
               <FilterLink
                 key={viewKey}
                 href={dashboardHref(viewKey, selectedPeriod)}
@@ -768,7 +778,9 @@ export default async function AppHomePage({
           </div>
         </section>
 
-        <section className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-2">
+        <section
+          className={`grid min-w-0 grid-cols-1 gap-3 ${canViewRanking ? "lg:grid-cols-2" : ""}`}
+        >
           <AnalyticsCard density="compact" className="min-w-0">
             <SectionHeading
               density="compact"
@@ -783,38 +795,40 @@ export default async function AppHomePage({
             />
           </AnalyticsCard>
 
-          <div className="grid min-w-0 content-start">
-            <AnalyticsCard density="compact">
-              <SectionHeading
-                density="compact"
-                kicker="Ranking validado"
-                title="Oportunidades por empreendimento"
-                description="Ordem fornecida pelo snapshot da visão selecionada."
-              />
-              {dashboard && dashboard.topDevelopments[selectedView].length > 0 ? (
-                <RankingList
-                  items={dashboard.topDevelopments[selectedView].map((development) => ({
-                    id: `${selectedView}-${development.rank}`,
-                    rank: development.rank,
-                    name: development.name,
-                    value: numberFormatter.format(development.total),
-                  }))}
+          {canViewRanking ? (
+            <div className="grid min-w-0 content-start">
+              <AnalyticsCard density="compact">
+                <SectionHeading
+                  density="compact"
+                  kicker="Ranking validado"
+                  title="Oportunidades por empreendimento"
+                  description="Ordem fornecida pelo snapshot da visão selecionada."
                 />
-              ) : (
-                <DataState
-                  variant={dashboard ? "empty" : "unavailable"}
-                  compact
-                  headingLevel="h3"
-                  title={dashboard ? "Sem empreendimentos classificados" : DATA_UNAVAILABLE_LABEL}
-                  description={
-                    dashboard
-                      ? "O snapshot atual não trouxe entradas para este ranking."
-                      : "O ranking aguarda um snapshot comercial validado."
-                  }
-                />
-              )}
-            </AnalyticsCard>
-          </div>
+                {dashboard && (dashboard.topDevelopments[selectedView]?.length ?? 0) > 0 ? (
+                  <RankingList
+                    items={(dashboard.topDevelopments[selectedView] ?? []).map((development) => ({
+                      id: `${selectedView}-${development.rank}`,
+                      rank: development.rank,
+                      name: development.name,
+                      value: numberFormatter.format(development.total),
+                    }))}
+                  />
+                ) : (
+                  <DataState
+                    variant={dashboard ? "empty" : "unavailable"}
+                    compact
+                    headingLevel="h3"
+                    title={dashboard ? "Sem empreendimentos classificados" : DATA_UNAVAILABLE_LABEL}
+                    description={
+                      dashboard
+                        ? "O snapshot atual não trouxe entradas para este ranking."
+                        : "O ranking aguarda um snapshot comercial validado."
+                    }
+                  />
+                )}
+              </AnalyticsCard>
+            </div>
+          ) : null}
         </section>
 
         <section aria-labelledby="latest-activities-title">

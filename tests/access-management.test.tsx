@@ -143,6 +143,10 @@ describe("catálogo localizado de acesso", () => {
       "master",
       "admin",
       "coordinator",
+      "manager_house",
+      "manager_imob",
+      "broker_house",
+      "broker_imob",
       "manager",
       "supervisor",
       "house",
@@ -157,29 +161,66 @@ describe("catálogo localizado de acesso", () => {
       "Master",
       "Administrador",
       "Coordenador",
-      "Gerente",
-      "Supervisor",
-      "House",
-      "Imobiliária",
-      "Canal de Parcerias",
-      "Líder de corretores",
-      "Corretor",
-      "Usuário",
+      "Gerente House",
+      "Gerente Imob",
+      "Corretor House",
+      "Corretor Imob",
+      "Gerente (legado)",
+      "Supervisor (legado)",
+      "House (legado)",
+      "Imobiliária (legado)",
+      "Canal de Parcerias (legado)",
+      "Líder de corretores (legado)",
+      "Corretor (legado)",
+      "Usuário (legado)",
       "Pendente",
     ]);
   });
 
-  it("nunca oferece Master como papel atribuível", () => {
-    expect(getAssignableRoleKeys(100)).not.toContain("master");
-    expect(getAssignableRoleKeys(80)).not.toContain("master");
-    expect(getAssignableRoleKeys(100)).not.toContain("pending");
+  it("oferece somente os seis papéis ativos não protegidos", () => {
+    expect(getAssignableRoleKeys(100)).toEqual([
+      "admin",
+      "coordinator",
+      "manager_house",
+      "manager_imob",
+      "broker_house",
+      "broker_imob",
+    ]);
+    expect(getAssignableRoleKeys(80)).toEqual([
+      "coordinator",
+      "manager_house",
+      "manager_imob",
+      "broker_house",
+      "broker_imob",
+    ]);
+    expect(
+      Object.entries(ROLES)
+        .filter(([, role]) => !role.assignable)
+        .map(([roleKey]) => roleKey),
+    ).toEqual([
+      "master",
+      "manager",
+      "supervisor",
+      "house",
+      "real_estate",
+      "partnership_channel",
+      "broker_lead",
+      "broker",
+      "user",
+      "pending",
+    ]);
   });
 
   it("mantém a matriz visual dos papéis alinhada ao catálogo protegido", () => {
-    const baseNavigationPermissions = [
-      "pages.view",
-      "crm.dashboard.view",
-      "crm.stages.view",
+    const baseNavigationPermissions = ["pages.view", "crm.dashboard.view", "crm.stages.view"];
+    const withCanalImobPermissions = [
+      ...baseNavigationPermissions,
+      "crm.dashboard.with_canal_imob.view",
+      "crm.partnerships.view",
+    ];
+    const withoutCanalImobPermissions = [
+      ...baseNavigationPermissions,
+      "crm.dashboard.without_canal_imob.view",
       "crm.ranking.view",
     ];
 
@@ -196,7 +237,7 @@ describe("catálogo localizado de acesso", () => {
           ].includes(permission),
       ),
     );
-    expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(20);
+    expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(23);
     expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual([
       "users.view",
       "users.manage",
@@ -208,32 +249,51 @@ describe("catálogo localizado de acesso", () => {
       "admin.access",
       "pages.manage",
       ...baseNavigationPermissions,
+      "crm.dashboard.all.view",
+      "crm.dashboard.with_canal_imob.view",
+      "crm.dashboard.without_canal_imob.view",
+      "crm.ranking.view",
+      "crm.partnerships.view",
       "crm.settings.view",
       "crm.settings.manage",
       "crm.salesforce.refresh",
       "crm.ingest.manage",
     ]);
+    for (const roleKey of ["coordinator", "manager_imob", "broker_imob"] as const) {
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(withCanalImobPermissions);
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.ranking.view");
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.settings.manage");
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("pages.manage");
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("permissions.manage");
+    }
+
+    for (const roleKey of ["manager_house", "broker_house"] as const) {
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(withoutCanalImobPermissions);
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.partnerships.view");
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.simulators.view");
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.settings.manage");
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("pages.manage");
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("permissions.manage");
+    }
+
     for (const roleKey of [
-      "coordinator",
+      "manager",
       "supervisor",
+      "house",
       "real_estate",
+      "partnership_channel",
       "broker_lead",
       "broker",
       "user",
+      "pending",
     ] as const) {
-      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(baseNavigationPermissions);
-      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.simulators.view");
-      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.settings.manage");
-    }
-
-    for (const roleKey of ["manager", "house", "partnership_channel", "pending"] as const) {
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual([]);
     }
   });
 
   it("resume acessos adicionados e removidos antes da troca de papel", () => {
     const elevation = summarizeRoleChange("user", "admin");
-    const downgrade = summarizeRoleChange("admin", "user");
+    const downgrade = summarizeRoleChange("admin", "broker_house");
 
     expect(elevation.added).toContain("admin.access");
     expect(elevation.removed).toEqual([]);
@@ -249,12 +309,17 @@ describe("catálogo localizado de acesso", () => {
     expect(visibleText).not.toMatch(/\b(View|Manage|Grant|Request|Access|Create)\b/);
   });
 
-  it("mantém o Canal de Parcerias como gate exclusivo do Master", () => {
+  it("mantém o Canal de Parcerias disponível somente para a matriz Imob autorizada", () => {
     expect(PERMISSIONS["crm.partnerships.view"]).toEqual({
       label: "Visualizar Canal de Parcerias",
-      description: "Acessa o Canal de Parcerias exclusivamente no perfil Master.",
-      minLevel: 100,
+      description: "Acessa o Canal de Parcerias quando concedido pelo papel.",
+      minLevel: 10,
     });
+    expect(ROLE_INHERITED_PERMISSIONS.coordinator).toContain("crm.partnerships.view");
+    expect(ROLE_INHERITED_PERMISSIONS.manager_imob).toContain("crm.partnerships.view");
+    expect(ROLE_INHERITED_PERMISSIONS.broker_imob).toContain("crm.partnerships.view");
+    expect(ROLE_INHERITED_PERMISSIONS.manager_house).not.toContain("crm.partnerships.view");
+    expect(ROLE_INHERITED_PERMISSIONS.broker_house).not.toContain("crm.partnerships.view");
   });
 
   it("mantém as páginas de simuladores exclusivas do Master durante o canário WF13", () => {
@@ -287,7 +352,7 @@ describe("catálogo localizado de acesso", () => {
             overrides: [],
           },
         ],
-        assignableRoles: ["admin", "user"],
+        assignableRoles: ["admin", "broker_house"],
         manageablePermissions: ["crm.dashboard.view"],
         canManageRoles: true,
         canManagePermissions: true,
@@ -305,6 +370,55 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).not.toContain("Salvar papel");
   });
 
+  it("oferece seleção múltipla com permitir, negar e restaurar em uma única ação", () => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        users: [
+          {
+            userId: "81000000-0000-4000-8000-000000000004",
+            email: "corretor-house@example.test",
+            isActive: true,
+            accessStatus: "approved",
+            roleKey: "broker_house",
+            isSelf: false,
+            isManageable: true,
+            overrides: [
+              {
+                permissionKey: "crm.dashboard.without_canal_imob.view",
+                effect: "deny",
+                reason: "Restrição sintética",
+              },
+            ],
+          },
+        ],
+        assignableRoles: ["coordinator", "manager_house", "broker_house"],
+        manageablePermissions: [
+          "crm.dashboard.view",
+          "crm.dashboard.with_canal_imob.view",
+          "crm.dashboard.without_canal_imob.view",
+        ],
+        canManageRoles: true,
+        canManagePermissions: true,
+        canManageUsers: true,
+        canApproveUsers: false,
+        reportingScopes: [],
+      }),
+    );
+
+    expect(markup).toContain("Buscar permissão");
+    expect(markup).toContain("Selecionar todas as filtradas");
+    expect(markup).toContain('name="permissionKeys"');
+    expect(markup.match(/name="permissionKeys"/g)?.length).toBeGreaterThan(1);
+    expect(markup).toContain('name="effect"');
+    expect(markup).toContain('value="allow"');
+    expect(markup).toContain('value="deny"');
+    expect(markup).toContain('value="inherit"');
+    expect(markup).toContain("Restaurar padrão");
+    expect(markup).toContain("Motivo da alteração em lote");
+    expect(markup).toContain("Salvar alterações");
+    expect(markup).not.toContain("Adicionar uma exceção");
+  });
+
   it("expõe aprovação pendente somente com papel, escopo oficial e motivo explícitos", () => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {
@@ -320,7 +434,7 @@ describe("catálogo localizado de acesso", () => {
             overrides: [],
           },
         ],
-        assignableRoles: ["coordinator", "broker"],
+        assignableRoles: ["coordinator", "broker_house"],
         manageablePermissions: [],
         canManageRoles: true,
         canManagePermissions: true,

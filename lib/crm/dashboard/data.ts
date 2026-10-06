@@ -84,9 +84,11 @@ export interface DashboardReadModel {
   timezone: string;
   source: string;
   goalsAvailable: boolean;
-  salesValue: Record<DashboardViewKey, { month: number; week: number; today: number }>;
-  metrics: Record<DashboardViewKey, Record<DashboardStageKey, DashboardMetric>>;
-  topDevelopments: Record<DashboardViewKey, Array<{ rank: number; name: string; total: number }>>;
+  salesValue: Partial<Record<DashboardViewKey, { month: number; week: number; today: number }>>;
+  metrics: Partial<Record<DashboardViewKey, Record<DashboardStageKey, DashboardMetric>>>;
+  topDevelopments: Partial<
+    Record<DashboardViewKey, Array<{ rank: number; name: string; total: number }>>
+  >;
 }
 
 export type DashboardLoadResult =
@@ -101,7 +103,15 @@ function isDashboardStageKey(value: string): value is DashboardStageKey {
   return Object.prototype.hasOwnProperty.call(DASHBOARD_STAGES, value);
 }
 
-export async function loadDashboardReadModel(): Promise<DashboardLoadResult> {
+export async function loadDashboardReadModel(
+  viewKeys: readonly DashboardViewKey[],
+  options: { includeTopDevelopments?: boolean } = {},
+): Promise<DashboardLoadResult> {
+  const requestedViews = [...new Set(viewKeys)];
+  if (requestedViews.length === 0) {
+    throw new Error("Nenhuma visão autorizada foi informada para o dashboard.");
+  }
+
   const supabase = await createClient();
   const snapshotResult = await supabase
     .from("crm_dashboard_snapshots")
@@ -113,22 +123,28 @@ export async function loadDashboardReadModel(): Promise<DashboardLoadResult> {
   if (!snapshotResult.data) return { status: "empty" };
 
   const snapshot = snapshotRowSchema.parse(snapshotResult.data);
+  const developmentsRequest = options.includeTopDevelopments
+    ? supabase
+        .from("crm_dashboard_top_developments")
+        .select("view_key,rank,name,total")
+        .eq("snapshot_id", snapshot.id)
+        .in("view_key", requestedViews)
+        .order("rank")
+    : Promise.resolve({ data: [], error: null });
   const [viewsResult, metricsResult, developmentsResult] = await Promise.all([
     supabase
       .from("crm_dashboard_views")
       .select("view_key,sales_value_month,sales_value_week,sales_value_today")
-      .eq("snapshot_id", snapshot.id),
+      .eq("snapshot_id", snapshot.id)
+      .in("view_key", requestedViews),
     supabase
       .from("crm_dashboard_metrics")
       .select(
         "view_key,stage_key,current_month,current_week,current_today,goal_month,goal_week,goal_today,previous_month,year_closed_months_average,last_three_closed_months_average,previous_fourteen_days,last_fourteen_days,previous_seven_days,last_seven_days,previous_week,yesterday",
       )
-      .eq("snapshot_id", snapshot.id),
-    supabase
-      .from("crm_dashboard_top_developments")
-      .select("view_key,rank,name,total")
       .eq("snapshot_id", snapshot.id)
-      .order("rank"),
+      .in("view_key", requestedViews),
+    developmentsRequest,
   ]);
 
   if (viewsResult.error || metricsResult.error || developmentsResult.error) {
@@ -142,7 +158,7 @@ export async function loadDashboardReadModel(): Promise<DashboardLoadResult> {
   const salesValue = {} as DashboardReadModel["salesValue"];
   const topDevelopments = {} as DashboardReadModel["topDevelopments"];
 
-  for (const viewKey of Object.keys(DASHBOARD_VIEWS) as DashboardViewKey[]) {
+  for (const viewKey of requestedViews) {
     const viewRow = viewRows.find((row) => row.view_key === viewKey);
     if (!viewRow || !isDashboardViewKey(viewRow.view_key)) {
       throw new Error("O resumo por visão do dashboard está incompleto.");

@@ -94,7 +94,7 @@ describe("management canvas layout", () => {
     expect(users).toContain('enforcePermission("users.view")');
     expect(userManager).toContain("assignRoleAction");
     expect(userManager).toContain("approveUserAccessAction");
-    expect(userManager).toContain("setPermissionOverrideAction");
+    expect(userManager).toContain("setPermissionOverridesBulkAction");
     expect(pages).toContain('enforcePermission("pages.manage")');
     expect(pageManager).toContain("setPageVisibilityAction.bind");
     expect(pageManager).not.toMatch(/Exportar|download/i);

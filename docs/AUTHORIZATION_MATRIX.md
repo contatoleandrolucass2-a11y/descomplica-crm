@@ -15,12 +15,29 @@ exceções individuais. Uma exceção `deny` vence `allow` e a permissão herdad
 Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 `legacy_review` falham fechados nas policies RLS.
 
-| Grupo de papéis                                                             | Páginas herdadas                                                                   | Administração                                       |
-| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `master`                                                                    | 17 do catálogo produtivo + réplica protegida WF14                                  | usuários, papéis, exceções e catálogo               |
-| `admin`                                                                     | 14: Dashboard, cinco etapas, Ranking, Configurações e três páginas administrativas | escopada; intake somente com `crm_people` confiável |
-| `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | 7: Dashboard, cinco etapas e Ranking                                               | nenhuma                                             |
-| `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                                             | nenhuma                                             |
+| Papel                      | Visão de dashboard                     | Ranking | Canal de Parcerias | Administração                                                |
+| -------------------------- | -------------------------------------- | :-----: | :----------------: | ------------------------------------------------------------ |
+| `master`                   | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         | integral e exclusiva para capacidades de Master              |
+| `admin`                    | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         | usuários abaixo do próprio nível, papéis, exceções e páginas |
+| `coordinator`              | Com Canal Imob                         |   Não   |        Sim         | nenhuma                                                      |
+| `manager_house`            | Sem Canal Imob                         |   Sim   |        Não         | nenhuma                                                      |
+| `manager_imob`             | Com Canal Imob                         |   Não   |        Sim         | nenhuma                                                      |
+| `broker_house`             | Sem Canal Imob                         |   Sim   |        Não         | nenhuma                                                      |
+| `broker_imob`              | Com Canal Imob                         |   Não   |        Sim         | nenhuma                                                      |
+| `pending` e papéis legados | nenhuma                                |   Não   |        Não         | nenhuma                                                      |
+
+Todos os sete papéis ativos recebem as páginas operacionais compatíveis com a
+linha. As três visões do dashboard possuem permissões próprias:
+`crm.dashboard.all.view`, `crm.dashboard.with_canal_imob.view` e
+`crm.dashboard.without_canal_imob.view`. A permissão genérica
+`crm.dashboard.view` continua sendo o gate da rota, mas não autoriza uma visão
+por si só.
+
+Os papéis `manager`, `supervisor`, `house`, `real_estate`,
+`partnership_channel`, `broker_lead`, `broker` e `user` são históricos: não
+aparecem como opções atribuíveis e não possuem grants herdados. Uma conta
+legada precisa ser reclassificada explicitamente; o sistema não deduz House ou
+Imob do nome anterior.
 
 As permissões administrativas respeitam hierarquia estrita: o ator somente
 modifica usuários e papéis abaixo do próprio nível. O próprio usuário não pode
@@ -30,11 +47,12 @@ com `auth_user_id` estável e pessoa dentro do escopo delegável do Admin. Nome,
 e-mail ou texto de gerente nunca resolve essa associação.
 
 Somente Master/Admin pode aprovar ou reativar contas; permissões individuais
-não transformam Coordenador/Gerente em aprovador. Gerente, Corretor,
-Imobiliária e House exigem exatamente um reporting scope ativo, inclusive em
-trocas de papel posteriores. Toda afiliação de pessoa não expirada — atual,
-futura ou ligada a equipe/organização inativa — participa da contenção para
-impedir expansão latente.
+não transformam Coordenador, Gerente ou Corretor em aprovador. Quando a
+foundation de escopos está presente, Gerentes e Corretores exigem exatamente
+um reporting scope ativo, inclusive em trocas de papel posteriores. Toda
+afiliação de pessoa não expirada — atual, futura ou ligada a
+equipe/organização inativa — participa da contenção para impedir expansão
+latente.
 
 As rotas de produção do Dashboard, cinco etapas, ranking e Canal de Parcerias
 continuam nos modelos v2 e nos gates existentes nesta PR. O v3 é uma superfície
@@ -58,10 +76,11 @@ Nenhum papel herda automaticamente as quatro permissões shadow nesta migration,
 inclusive Master. Os testes criam grants sintéticos locais e transitórios para
 provar a matriz, mas qualquer autorização real futura precisa ser explícita,
 auditada e aplicada em migration posterior compatível com a imagem anterior. O
-PR #49 preserva no v2 as permissões produtivas observadas: Dashboard, etapas e
-Ranking para Admin e os seis papéis operacionais legados; Configurações para
-Admin; Canal e simuladores continuam nos gates Master existentes. Papel, flag
-ou UI nunca substituem o gate no banco.
+O contrato v2 agora limita Dashboard por visão, mantém etapas para os papéis
+ativos e separa Ranking (House) de Canal de Parcerias (Coordenador/Imob).
+Configurações de metas e páginas permanecem com Master/Admin. Simuladores e
+capacidades comerciais exclusivas continuam nos gates Master existentes.
+Papel, flag ou UI nunca substituem o gate no banco.
 
 `get_crm_read_model_v3` falha fechado (`42501`) quando o dataset é desconhecido,
 a permissão correspondente falta, o escopo é nulo ou o grant exato não está
@@ -142,6 +161,9 @@ operação de dados mantém grants, RLS ou RPC próprios.
 
 - `assign_user_role`: atribui papel e audita.
 - `set_user_permission_override`: cria/atualiza exceção `allow` ou `deny` e audita.
+- `set_user_permission_overrides_bulk`: aplica `allow`, `deny` ou `inherit` a
+  várias permissões em uma transação, com locks determinísticos, validação
+  integral e auditoria.
 - `remove_user_permission_override`: remove exceção e audita.
 - `set_user_active`: desativa conta de nível inferior dentro do escopo;
   reativação é exclusiva de Master/Admin, revalida a fronteira após locks e
@@ -242,7 +264,8 @@ recebe somente `USAGE` no schema dedicado e `EXECUTE` nos dois entrypoints. A
 aplicação não usa Supabase SSR/service role para buscar policy ou gravar ledger.
 
 Cada detalhe de etapa e o dashboard de produção conservam `crm.stages.view` ou
-`crm.dashboard.view` e seus leitores v2. As versões shadow exigem
+`crm.dashboard.view`, somados à permissão da visão solicitada. Os leitores v2
+aplicam a mesma fronteira por `view_key` nas policies RLS. As versões shadow exigem
 `crm.read_model_v3.view` e reutilizam a mesma RPC, o mesmo run ativo e os mesmos
 filtros dimensionais. Um override `deny` continua prevalecendo; um `allow` v3
 sem grant de escopo e lineage efetivo não retorna dados.

@@ -739,6 +739,12 @@ values
     'crm.partnerships.view',
     'allow',
     'Synthetic Qlik reader without active scope'
+  ),
+  (
+    '71000000-0000-4000-8000-000000000002',
+    'crm.partnerships.view',
+    'deny',
+    'Synthetic scope without Qlik permission'
   );
 
 insert into private.crm_integration_owners (

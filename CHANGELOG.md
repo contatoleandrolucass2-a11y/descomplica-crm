@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-10-06 - Revalidação de escopo na edição em lote
+
+- Revalida o escopo administrável depois de bloquear o perfil alvo, impedindo
+  que uma mudança concorrente de escopo produza exceção ou auditoria com uma
+  decisão de autorização anterior.
+- Mantém a checagem anterior ao lock contra oráculos de metadados e preserva a
+  compatibilidade do schema produtivo legado, onde o helper de escopo ainda
+  não existe.
+- Adiciona contratos Vitest e pgTAP para exigir as duas validações na ordem
+  correta e uma prova concorrente local com resultado `42501`, zero override e
+  zero auditoria.
+
+## 2026-10-05 - Papéis por canal e permissões em lote
+
+- Substitui as opções genéricas por Coordenador, Gerente House, Gerente Imob,
+  Corretor House e Corretor Imob; papéis removidos ficam históricos, não
+  atribuíveis e sem acesso herdado.
+- Separa no servidor e no banco as visões Geral, Com Canal Imob e Sem Canal
+  Imob. Ranking permanece nos papéis House; Canal de Parcerias fica com
+  Coordenador e papéis Imob.
+- Mantém Administração abaixo de Master: um Administrador não altera a si nem
+  outro Administrador e os perfis operacionais não concedem permissões.
+- Reformula Usuários e acessos em duas colunas, com busca, seleção de conta,
+  matriz agrupada, seleção múltipla e aplicação atômica de permitir, negar ou
+  restaurar o padrão.
+- Adiciona RPC auditada para exceções em lote e RLS por visão do dashboard, sem
+  liberar simuladores, políticas comerciais ou tabelas Qlik.
+- Preserva contas legadas para reclassificação manual, sem presumir se cada uma
+  pertence ao canal House ou Imob.
+
 ## 2026-10-05 - Calibracao dos temas Claro, Medio e Escuro
 
 - Diferencia as tres aparencias por luminosidade: Claro branco e limpo, Medio

@@ -4,6 +4,45 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-06: autorização de escopo precisa ser repetida depois do lock
+
+- Status: validado localmente; fonte: revisão de segurança da RPC
+  `set_user_permission_overrides_bulk` e branch
+  `codex/roles-permissions-bulk-layout`.
+- Um precheck antes de `FOR UPDATE` evita oráculos de metadados, mas não prova
+  que o alvo continua gerenciável quando a transação retoma. Repetir a mesma
+  decisão depois do lock fecha a janela antes de qualquer leitura sensível,
+  override ou auditoria.
+- Triggers de linha são defesa adicional, não substituem o guard da RPC:
+  operações sem linha afetada, como `inherit` sem override, ainda podem chegar
+  ao retorno e à auditoria se a autorização não for revalidada no boundary.
+- Evidência focada: três Vitest e 57 pgTAP aprovados; prova local com duas
+  sessões retornou SQLSTATE `42501` após mudança concorrente de escopo e deixou
+  zero override e zero auditoria. O schema legado continua no ramo sem helper.
+  Fechamento: formato, lint, tipos, inventário, segredos, build, 1.980 Vitest,
+  oito testes Node e 1.099 pgTAP aprovados; lint e advisors do banco sem achados.
+
+## 2026-10-05: papéis por canal exigem permissão também no read model
+
+- Status: validado localmente; fonte: matriz aprovada de papéis e branch
+  `codex/roles-permissions-bulk-layout`.
+- Ocultar uma guia de dashboard não separa os dados. Geral, Com Canal Imob e
+  Sem Canal Imob precisam de chaves próprias, consulta server-side limitada e
+  policy RLS por `view_key` nas tabelas de resumo, métricas e destaques.
+- Papéis genéricos não provam o canal. Ao substituir Gerente/Corretor por House
+  e Imob, manter chaves antigas sem grants e exigir reclassificação explícita é
+  mais seguro que conceder ranking ou parcerias por inferência.
+- Exceções múltiplas devem chegar ao banco em uma RPC atômica. Validar todas as
+  permissões e a hierarquia antes da primeira escrita evita salvar apenas parte
+  da seleção e mantém uma trilha de auditoria coerente.
+- Produção pode estar atrás da árvore local de migrations. Uma convergência
+  nova precisa ser ensaiada tanto no reset completo quanto sobre o schema
+  remoto restaurado; `db push --include-all` e `migration repair` não resolvem
+  essa diferença.
+- Evidências: 1.980 testes Vitest, oito Node, 1.099 pgTAP, lint, tipos, build e
+  jornada autenticada sem violações Axe. Autorização da migration,
+  reclassificação das três contas legadas e publicação continuam pendentes.
+
 ## 2026-10-05: temas precisam compartilhar tokens, nao paletas locais completas
 
 - Status: validado; fonte: auditoria das capturas autenticadas e branch

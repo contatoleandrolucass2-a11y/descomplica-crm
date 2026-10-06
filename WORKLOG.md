@@ -1,5 +1,50 @@
 # Worklog
 
+## 2026-10-06 - Hardening da RPC em lote
+
+- A revisão de segurança do diff confirmou uma janela concorrente entre a
+  checagem inicial de `private.can_manage_user` e o lock do perfil alvo. No
+  schema completo, o trigger já protegia escritas com linha; o ramo `inherit`
+  sem override ainda podia registrar auditoria e sucesso fora do escopo atual.
+- A RPC agora mantém o precheck e repete a mesma decisão imediatamente após o
+  `FOR UPDATE`, antes de atividade, aprovação, hierarquia, overrides ou
+  auditoria. O helper continua opcional para suportar o schema produtivo
+  legado sem a foundation de escopos.
+- Contratos focados aprovados: três Vitest e 57 pgTAP. Uma prova real com duas
+  sessões no Supabase local moveu o alvo para fora do escopo enquanto o lote
+  aguardava o lock; a chamada terminou em SQLSTATE `42501` e persistiu zero
+  override e zero auditoria. O reset posterior removeu todas as fixtures.
+- Fechamento local aprovado: formato, lint, tipos, inventário, segredos, build,
+  1.980 Vitest, oito testes Node e 1.099 pgTAP; lint e advisors de segurança e
+  desempenho do banco não encontraram problemas.
+
+## 2026-10-05 - Papéis por canal e permissões em lote
+
+- Pedido consolidado em sete papéis de negócio: Master, Administrador,
+  Coordenador, Gerente House, Gerente Imob, Corretor House e Corretor Imob.
+  `pending` permanece interno; oito papéis genéricos/descontinuados deixam de
+  ser atribuíveis e perdem grants herdados.
+- A matriz separa Geral, Com Canal Imob e Sem Canal Imob. Coordenador e perfis
+  Imob veem Com Canal Imob e Parcerias; perfis House veem Sem Canal Imob e
+  Ranking. Apenas Master/Admin veem Geral e administram acessos.
+- A proteção de pares continua estrita: Administrador não cria, desativa nem
+  altera outro Administrador e não modifica o próprio acesso. Ações exclusivas
+  de Master e motores comerciais permanecem fechados.
+- A tela de usuários passa a usar lista + detalhe e edição múltipla de exceções,
+  com estados herdado/exceção explícitos e um único motivo por lote. A RPC
+  correspondente valida todas as chaves e confirma ou reverte o lote inteiro.
+- Preflight remoto somente leitura confirmou três contas em papéis legados
+  (`broker` 1, `user` 2), sem ler identidades. Elas não serão convertidas por
+  suposição; exigem reclassificação explícita para House ou Imob.
+- Produção ainda não possui a foundation local de onboarding/escopos. A
+  migration foi desenhada para o schema remoto atual e para o reset completo;
+  nenhuma mutação remota foi executada.
+- Gates locais aprovados: lint, tipos, formato, inventário, build, 1.980 testes
+  Vitest + oito Node e 1.099 pgTAP. Jornada autenticada 1440×1000 no tema
+  Escuro, com Corretor Imob selecionado, passou sem violações Axe. Cinco contas
+  e escopos sintéticos foram removidos e a limpeza foi comprovada por contagem
+  zero.
+
 ## 2026-10-05 - Calibracao integral dos tres temas
 
 - Branch `codex/theme-color-calibration`, base

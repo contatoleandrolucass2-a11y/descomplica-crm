@@ -281,11 +281,11 @@ update public.user_roles
 set role_key = case user_id
       when 'a1000000-0000-4000-8000-000000000002' then 'admin'
       when 'a1000000-0000-4000-8000-000000000003' then 'coordinator'
-      when 'a1000000-0000-4000-8000-000000000004' then 'manager'
-      when 'a1000000-0000-4000-8000-000000000005' then 'broker'
-      when 'a1000000-0000-4000-8000-000000000006' then 'real_estate'
-      when 'a1000000-0000-4000-8000-000000000007' then 'house'
-      when 'a1000000-0000-4000-8000-000000000008' then 'partnership_channel'
+      when 'a1000000-0000-4000-8000-000000000004' then 'manager_house'
+      when 'a1000000-0000-4000-8000-000000000005' then 'broker_house'
+      when 'a1000000-0000-4000-8000-000000000006' then 'broker_imob'
+      when 'a1000000-0000-4000-8000-000000000007' then 'manager_imob'
+      when 'a1000000-0000-4000-8000-000000000008' then 'coordinator'
       when 'a1000000-0000-4000-8000-000000000010' then 'admin'
     end,
     assigned_by = 'a1000000-0000-4000-8000-000000000001'
@@ -337,15 +337,15 @@ values
   ),
   (
     'a1000000-0000-4000-8000-000000000006',
-    '21000000-0000-4000-8000-000000000002',
+    '21000000-0000-4000-8000-000000000006',
     'a1000000-0000-4000-8000-000000000001',
-    'Synthetic organization B grant',
+    'Synthetic person B grant',
     now(),
     null
   ),
   (
     'a1000000-0000-4000-8000-000000000007',
-    '21000000-0000-4000-8000-000000000001',
+    '21000000-0000-4000-8000-000000000003',
     'a1000000-0000-4000-8000-000000000001',
     'Synthetic House A grant',
     now(),
@@ -412,14 +412,13 @@ select is(
   ),
   array[
     'admin:organization',
-    'broker:person',
+    'broker_house:person',
+    'broker_imob:person',
     'coordinator:portfolio',
     'coordinator:team',
-    'house:organization',
-    'manager:team',
-    'master:global',
-    'partnership_channel:portfolio',
-    'real_estate:organization'
+    'manager_house:team',
+    'manager_imob:team',
+    'master:global'
   ]::text[],
   'role catalog permits only explicit reporting-scope types'
 );
@@ -648,27 +647,27 @@ select set_config(
 select is(
   (select array_agg(organization_key order by organization_key) from public.crm_organizations),
   array['org-b']::text[],
-  'Real Estate organization scope sees only organization B'
+  'Corretor Imob person scope sees only organization B'
 );
 select is(
   (select array_agg(team_key order by team_key) from public.crm_teams),
   array['team-b']::text[],
-  'Real Estate organization scope sees only team B'
+  'Corretor Imob person scope sees only team B'
 );
 select is(
   (select array_agg(person_key order by person_key) from public.crm_people),
   array['person-b']::text[],
-  'Real Estate organization scope sees only person B'
+  'Corretor Imob person scope sees only person B'
 );
 select is(
   (select count(*) from public.crm_portfolios),
   0::bigint,
-  'Real Estate organization scope does not imply a portfolio scope'
+  'Corretor Imob person scope does not imply a portfolio scope'
 );
 select is(
   (select array_agg(scope_key order by scope_key) from public.crm_reporting_scopes),
-  array['organization-b', 'person-b', 'team-b']::text[],
-  'Real Estate discovers only reporting scopes derived from organization B'
+  array['person-b']::text[],
+  'Corretor Imob discovers only its own person scope'
 );
 
 select set_config(
@@ -680,27 +679,27 @@ select set_config(
 select is(
   (select array_agg(organization_key order by organization_key) from public.crm_organizations),
   array['org-a']::text[],
-  'House organization scope sees only organization A'
+  'Gerente Imob team scope sees only organization A'
 );
 select is(
   (select array_agg(team_key order by team_key) from public.crm_teams),
   array['team-a']::text[],
-  'House organization scope sees only team A'
+  'Gerente Imob team scope sees only team A'
 );
 select is(
   (select array_agg(person_key order by person_key) from public.crm_people),
   array['approval-bad', 'approval-good', 'person-a']::text[],
-  'House organization scope sees only person A'
+  'Gerente Imob team scope sees only person A'
 );
 select is(
   (select count(*) from public.crm_portfolios),
   0::bigint,
-  'House organization scope does not imply a portfolio scope'
+  'Gerente Imob team scope does not imply a portfolio scope'
 );
 select is(
   (select array_agg(scope_key order by scope_key) from public.crm_reporting_scopes),
-  array['approval-good', 'organization-a', 'person-a', 'team-a']::text[],
-  'House discovers only reporting scopes derived from organization A'
+  array['approval-good', 'person-a', 'team-a']::text[],
+  'Gerente Imob discovers only reporting scopes derived from team A'
 );
 
 select set_config(
@@ -712,22 +711,22 @@ select set_config(
 select is(
   (select array_agg(organization_key order by organization_key) from public.crm_organizations),
   array['org-a']::text[],
-  'Partnership Channel portfolio scope sees only organization A'
+  'Coordinator portfolio scope sees only organization A'
 );
 select is(
   (select array_agg(team_key order by team_key) from public.crm_teams),
   array['team-a']::text[],
-  'Partnership Channel portfolio scope sees only team A'
+  'Coordinator portfolio scope sees only team A'
 );
 select is(
   (select array_agg(person_key order by person_key) from public.crm_people),
   array['approval-bad', 'approval-good', 'person-a']::text[],
-  'Partnership Channel portfolio scope sees only person A'
+  'Coordinator portfolio scope sees only person A'
 );
 select is(
   (select array_agg(portfolio_key order by portfolio_key) from public.crm_portfolios),
   array['portfolio-a']::text[],
-  'Partnership Channel portfolio scope sees only portfolio A'
+  'Coordinator portfolio scope sees only portfolio A'
 );
 select is(
   (select array_agg(scope_key order by scope_key) from public.crm_reporting_scopes),
@@ -738,7 +737,7 @@ select is(
     'portfolio-a',
     'team-a'
   ]::text[],
-  'Partnership Channel discovers only scopes derived from portfolio A'
+  'Coordinator discovers only scopes derived from portfolio A'
 );
 
 select set_config(
@@ -788,7 +787,7 @@ set local role authenticated;
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000011',
-    'broker',
+    'broker_house',
     array['21000000-0000-4000-8000-000000000009']::uuid[],
     'Reject delegation from a finite actor grant'
   )$$,
@@ -873,7 +872,7 @@ set local role authenticated;
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000011',
-    'broker',
+    'broker_house',
     array['21000000-0000-4000-8000-000000000009']::uuid[],
     'Reject approval by an overridden Coordinator'
   )$$,
@@ -894,7 +893,7 @@ set local role authenticated;
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000006',
-    'real_estate',
+    'broker_imob',
     array['21000000-0000-4000-8000-000000000001']::uuid[],
     'Probe existing cross-organization target'
   )$$,
@@ -906,7 +905,7 @@ select throws_ok(
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000099',
-    'real_estate',
+    'broker_imob',
     array['21000000-0000-4000-8000-000000000001']::uuid[],
     'Probe nonexistent target'
   )$$,
@@ -918,7 +917,7 @@ select throws_ok(
 select throws_ok(
   $$select public.assign_user_role(
     'a1000000-0000-4000-8000-000000000006',
-    'real_estate',
+    'broker_imob',
     'Probe existing cross-organization target'
   )$$,
   '42501',
@@ -929,7 +928,7 @@ select throws_ok(
 select throws_ok(
   $$select public.assign_user_role(
     'a1000000-0000-4000-8000-000000000099',
-    'real_estate',
+    'broker_imob',
     'Probe nonexistent target'
   )$$,
   '42501',
@@ -962,7 +961,7 @@ select throws_ok(
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000011',
-    'broker',
+    'broker_house',
     array['21999999-0000-4000-8000-000000000099']::uuid[],
     'Reject unknown scope without disclosure'
   )$$,
@@ -974,7 +973,7 @@ select throws_ok(
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000012',
-    'broker',
+    'broker_house',
     array['21000000-0000-4000-8000-000000000010']::uuid[],
     'Reject future cross-organization affiliation'
   )$$,
@@ -986,7 +985,7 @@ select throws_ok(
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000012',
-    'partnership_channel',
+    'manager_house',
     array['21000000-0000-4000-8000-000000000001']::uuid[],
     'Reject incompatible scope type'
   )$$,
@@ -998,7 +997,7 @@ select throws_ok(
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000012',
-    'house',
+    'manager_house',
     array['21000000-0000-4000-8000-000000000002']::uuid[],
     'Reject wrong organization kind'
   )$$,
@@ -1010,7 +1009,7 @@ select throws_ok(
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000012',
-    'broker',
+    'broker_house',
     array['21000000-0000-4000-8000-000000000006']::uuid[],
     'Reject horizontal organization crossing'
   )$$,
@@ -1022,12 +1021,12 @@ select throws_ok(
 select throws_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000012',
-    'broker',
+    'broker_house',
     array['21000000-0000-4000-8000-000000000005']::uuid[],
     'Reject another Broker identity'
   )$$,
-  '22023',
-  'invalid_argument: Broker person scope must match target Auth user',
+  '23505',
+  'conflict: approved role requires compatible active scopes',
   'Admin cannot bind a pending Broker to another Auth identity'
 );
 
@@ -1053,7 +1052,7 @@ select set_config(
 select lives_ok(
   $$select public.approve_user_access(
     'a1000000-0000-4000-8000-000000000011',
-    'broker',
+    'broker_house',
     array['21000000-0000-4000-8000-000000000009']::uuid[],
     'Approved synthetic in-scope Broker'
   )$$,
@@ -1076,7 +1075,7 @@ select is(
     from public.user_roles
     where user_id = 'a1000000-0000-4000-8000-000000000011'
   ),
-  'broker',
+  'broker_house',
   'successful approval assigns the requested compatible role'
 );
 select is(
