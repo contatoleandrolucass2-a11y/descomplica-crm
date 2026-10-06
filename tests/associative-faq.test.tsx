@@ -129,7 +129,7 @@ describe("FAQ Associativo: material de referência de 30/09/2026", () => {
     expect(answer(20)).toContain("força SBPE");
     expect(answer(20)).toContain("primeira aquisição ou enquadramento no MCMV");
     expect(answer(23)).toContain(
-      "A fórmula relatada para D48 não deve ser apresentada como a fórmula atual",
+      "A fórmula relatada para D48 não é a fórmula atual desse indicador",
     );
     expect(answer(24)).toContain("escolhe a maior");
     expect(answer(25)).toContain("não inclui o valor da anual");

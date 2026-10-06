@@ -1107,6 +1107,11 @@
   20%, 100% { opacity: 0; --associative-specular-angle: 495deg; }
 }
 
+.investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary {
+  container-type: inline-size;
+  --associative-documentation-span: 100cqw;
+}
+
 .investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary > section > * {
   position: relative;
   z-index: 1;
@@ -1119,19 +1124,30 @@
   content: "";
   border-radius: inherit;
   pointer-events: none;
-  opacity: 0;
+  opacity: 1;
   background-image: var(--associative-pending-sheen);
-  background-size: 280% 100%;
+  background-size: calc(var(--associative-documentation-span) * 2.8) 100%;
   background-repeat: no-repeat;
-  animation: associative-documentation-shine 9s ease-in-out infinite;
+  animation: associative-documentation-shine 9s linear infinite;
 }
 
-.investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary > section:nth-child(2)::after { animation-delay: 4.5s; }
+/* Both card-sized windows reveal one shared sweep; only its horizontal origin differs. */
+.investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary > section:nth-child(2)::after {
+  --associative-documentation-anchor: 100%;
+  --associative-documentation-from: -.9;
+  --associative-documentation-to: 2.7;
+}
 
 @keyframes associative-documentation-shine {
-  0%, 12% { background-position: 150% 50%; opacity: 1; }
-  38% { background-position: -50% 50%; opacity: 1; }
-  50%, 100% { background-position: -50% 50%; opacity: 0; }
+  from { background-position: calc(var(--associative-documentation-anchor, 0%) + var(--associative-documentation-span) * var(--associative-documentation-from, -2.7)) 50%; }
+  to { background-position: calc(var(--associative-documentation-anchor, 0%) + var(--associative-documentation-span) * var(--associative-documentation-to, .9)) 50%; }
+}
+
+@media (max-width: 560px) {
+  .investor-page-shell.investor-associative-table-page .investor-associative-documentation-summary {
+    /* Stacked cards retain their order on a virtual two-card horizontal strip. */
+    --associative-documentation-span: 200cqw;
+  }
 }
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {

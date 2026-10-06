@@ -9,12 +9,7 @@ export function AssociativeTableArchive() {
       data-canvas-layout="simulator"
     >
       <main className="investor-main">
-        <SimulationCanvasHeader
-          eyebrow="Simulação · WF13"
-          title="Simulador Tabela Associativo"
-          description="Consulta de estoque e composição do fluxo linear para apoio à proposta."
-          statusLabel="Estoque · fonte identificada"
-        />
+        <SimulationCanvasHeader title="Simulador Tabela Associativo" />
         <InvestorCalculator directTable={false} directVisualLayout />
         <div className="investor-page-closing">
           <p className="simulation-disclaimer">

@@ -2,17 +2,17 @@ export const ASSOCIATIVE_PROFILE_HELP = {
   income: {
     title: "Qual renda devo informar?",
     description:
-      "Digite a renda mensal somada de todas as pessoas que participarão da compra, conforme os comprovantes aceitos pelo banco. Além do enquadramento municipal e da modalidade, ela é a base do % Comprometimento da Renda e do % Máximo da renda mensal. Também participa da estimativa de Evolução de Obra e do limite das anuais. Renda incorreta distorce esses resultados. A aprovação final depende da análise oficial.",
+      "Some quanto ganham por mês todas as pessoas que participarão da compra. Use os comprovantes aceitos pelo banco. Essa renda ajuda a verificar as regras da cidade e o tipo de financiamento. Ela também mostra quanto as parcelas usam da renda nos campos % Comprometimento da Renda e % Máximo da renda mensal. A renda entra no cálculo estimado da Evolução de Obra e no limite dos pagamentos anuais. Se a renda estiver errada, esses resultados também ficarão errados. A aprovação final depende da análise oficial.",
   },
   modality: {
     title: "Como a modalidade é escolhida?",
     description:
-      "O sistema verifica renda, valor do imóvel e primeiro imóvel. Se o perfil passar pela triagem local, começa em MCMV; quem for elegível pode escolher SBPE. Fora dessa triagem, usa SBPE. A escolha afeta o enquadramento e as estimativas de financiamento e documentação, mas não aprova crédito nem altera automaticamente o financiamento informado. Confirme as condições com a instituição financeira.",
+      "O sistema confere a renda, o valor do imóvel e a resposta sobre primeiro imóvel. Se atender às regras desta página, começa em MCMV (Minha Casa, Minha Vida). Nesse caso, também é possível escolher SBPE (Sistema Brasileiro de Poupança e Empréstimo). Se não atender, usa SBPE. A escolha muda as regras e as estimativas de financiamento e documentação. Ela não aprova crédito nem muda sozinha o valor que você informou em Financiamento. Confirme as condições com o banco.",
   },
   firstProperty: {
     title: "Quando devo marcar Sim?",
     description:
-      "Nesta triagem, marque Sim quando o cliente não possui outro imóvel residencial nem financiamento habitacional ativo; caso contrário, marque Não. A resposta participa da escolha MCMV/SBPE e das estimativas de ITBI e registro. Não representa, sozinha, prova de primeira aquisição nem garantia de isenção ou desconto: banco, prefeitura e cartório devem confirmar os requisitos e documentos.",
+      "Marque Sim se o cliente não tem outro imóvel residencial e não tem financiamento de moradia em andamento. Se tiver qualquer um deles, marque Não. A resposta ajuda a escolher MCMV ou SBPE e a estimar ITBI (imposto sobre a compra) e registro do imóvel. Ela não prova, sozinha, que esta é a primeira compra. Também não garante dispensa de pagamento ou desconto. Banco, prefeitura e cartório precisam conferir as regras e os documentos.",
   },
 } as const;
 
@@ -66,19 +66,19 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Tabela Associativo",
     location: "Título da página",
     detail:
-      "Apresenta a simulação associativa e a comparação dos fluxos. O resultado é preliminar e precisa de validação comercial e bancária.",
+      "Compara duas formas de pagar: Linear e Decrescente. O resultado é uma simulação. A equipe comercial e o banco ainda precisam conferir e aprovar a proposta.",
   },
   {
     label: "Passo a passo e guia da proposta",
     location: "Guia e cabeçalho de Monte a proposta",
     detail:
-      "O guia explica a sequência de preenchimento sem modificar os valores. Renda, modalidade e primeiro imóvel liberam o perfil; depois vêm Financiamento, Subsídio, FGTS, Cheque Moradia, Entrada, parcelas e Ranking. Zero confirma a ausência de um recurso opcional.",
+      "O guia mostra a ordem de preenchimento e não muda os valores. Primeiro, informe renda, modalidade e primeiro imóvel para completar o perfil. Depois, preencha Financiamento, Subsídio, FGTS, Cheque Moradia, Entrada, parcelas e Ranking. Digite zero para confirmar que não há um recurso opcional.",
   },
   {
     label: "Orientação dos filtros",
     location: "Escolha a unidade",
     detail:
-      "Os filtros localizam a unidade elegível. Confira identidade, planta, preço e entrega antes de iniciar a proposta; trocar a unidade muda as bases da simulação.",
+      "Use os filtros para encontrar uma unidade que atenda às condições da compra. Confira a identificação, a planta, o preço e a entrega antes de montar a proposta. Trocar a unidade muda os valores usados na simulação.",
   },
   {
     label: "Renda Familiar",
@@ -99,127 +99,127 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Valor real da venda",
     location: "Monte a proposta, primeira linha da composição",
     detail:
-      "Valor do imóvel com kit − B.A. da unidade − folga de tabela. A ajuda mostra a conta com os valores da unidade atual; esta linha antecede eventual desconto comercial.",
+      "A conta é: Valor do imóvel com kit − B.A. da unidade − folga de tabela. A ajuda mostra cada valor da unidade escolhida. O desconto comercial, se houver, ainda será retirado na próxima etapa.",
   },
   {
     label: "Desconto e Valor do imóvel",
     location: "Monte a proposta, após Inserir Desconto",
     detail:
-      "Desconto é opcional e precisa de autorização comercial. Valor real da venda − desconto = base usada pelos recursos e pagamentos. A ajuda apresenta essa subtração; clicar no botão não concede autorização de desconto.",
+      "O desconto é opcional e precisa de autorização comercial. A conta é: Valor real da venda − desconto = Valor do imóvel. Esse resultado será usado nos cálculos dos recursos e pagamentos. A ajuda mostra a conta. Clicar em Inserir Desconto não autoriza o desconto.",
   },
   {
     label: "Financiamento",
     location: "Monte a proposta, composição de recursos",
     detail:
-      "Informe somente o crédito aprovado pelo banco, maior que zero. Não some FGTS, subsídio, Cheque Moradia ou entrada. Libera Subsídio e reduz o saldo após recursos; a ajuda mostra o saldo atual.",
+      "Digite apenas o valor aprovado pelo banco, maior que zero. Não some FGTS, subsídio, Cheque Moradia ou entrada a esse valor. O financiamento reduz o Saldo após recursos e libera o campo Subsídio. A ajuda mostra quanto ainda falta pagar.",
   },
   {
     label: "Subsídio",
     location: "Monte a proposta, após Financiamento",
     detail:
-      "Informe o benefício confirmado ou zero se não houver. Reduz o saldo após recursos e libera FGTS. O enquadramento em MCMV não atribui automaticamente um subsídio.",
+      "Subsídio é uma ajuda para pagar o imóvel. Digite o valor confirmado ou zero, se não houver. Ele reduz o Saldo após recursos e libera o campo FGTS. Estar no MCMV não garante que o cliente receberá subsídio.",
   },
   {
     label: "FGTS",
     location: "Monte a proposta, após Subsídio",
     detail:
-      "Informe somente o valor autorizado para esta compra, ou zero. Reduz o saldo após recursos e libera Cheque Moradia. A possibilidade de uso depende das regras próprias do FGTS e da análise oficial.",
+      "Digite apenas o valor do FGTS autorizado para esta compra, ou zero. Ele reduz o Saldo após recursos e libera o campo Cheque Moradia. Ter saldo no FGTS não garante que ele possa ser usado. O uso depende das regras do FGTS e da análise oficial.",
   },
   {
     label: "Cheque Moradia",
     location: "Monte a proposta, após FGTS",
     detail:
-      "Informe o benefício confirmado ou zero. Reduz o saldo após recursos e libera Entrada. Não presuma concessão apenas porque o campo está disponível.",
+      "Digite o valor confirmado do Cheque Moradia ou zero, se não houver. Ele reduz o Saldo após recursos e libera o campo Entrada. O campo estar disponível não significa que o benefício foi aprovado.",
   },
   {
     label: "Saldo após recursos",
     location: "Monte a proposta, antes da Entrada",
     detail:
-      "Valor do imóvel após desconto − Financiamento − Subsídio − FGTS − Cheque Moradia. A ajuda detalha todos os valores dessa subtração; Entrada e Sinais ainda serão deduzidos.",
+      "É o que falta pagar depois dos recursos confirmados. A conta é: Valor do imóvel após desconto − Financiamento − Subsídio − FGTS − Cheque Moradia. A ajuda mostra cada valor. Entrada e Sinais ainda serão descontados.",
   },
   {
     label: "Entrada",
     location: "Monte a proposta, junto à data do pagamento",
     detail:
-      "Pagamento obrigatório de pelo menos R$ 150,00 na data exibida. Reduz o saldo parcelado; confira data, mínimo, validação e valor considerado na ajuda. Os ajustes sugeridos preservam a entrada já informada e só acrescentam o necessário.",
+      "É um pagamento obrigatório de pelo menos R$ 150,00 na data mostrada. Ele reduz o Pró-Soluto e o Saldo parcelado. Na ajuda, confira a data, o mínimo, se o valor foi aceito e quanto entrou na conta. Os ajustes sugeridos mantêm a entrada informada e só acrescentam o que falta.",
   },
   {
     label: "Sinal 1, Sinal 2 e Sinal 3",
     location: "Monte a proposta, após Inserir Sinal",
     detail:
-      "Até três pagamentos opcionais, com mínimo de R$ 150,00 cada. Preencha na sequência; do segundo em diante, o valor não pode superar o anterior. Cada ajuda mostra vencimento, motivo da validação, valor aceito e total dos sinais válidos. Ocultar um sinal pode zerar também os seguintes, conforme o aviso do botão.",
+      "Você pode incluir até três pagamentos extras, chamados sinais. Cada um deve ter pelo menos R$ 150,00. Preencha na ordem: o Sinal 2 não pode superar o Sinal 1, e o Sinal 3 não pode superar o Sinal 2. A ajuda mostra a data, se o valor foi aceito, o motivo e a soma dos sinais válidos. Ao ocultar um sinal, os seguintes também podem ser zerados. Confira o aviso do botão.",
   },
   {
     label: "Anual 1 a Anual 5",
     location: "Monte a proposta, após Inserir Anual",
     detail:
-      "Pagamentos opcionais em 15/12 até a entrega, sujeitos às vagas e limites exibidos. Cada anual nominal é limitada a 50% da renda mensal. A correção exibida é valor × 1,005 × 1,005 elevado aos meses do cronograma. A ajuda mostra data, meses, valor corrigido e status. Anuais válidas reduzem a base das mensais, não o Pró-Soluto nem o Saldo parcelado; ocultar zera o valor.",
+      "São pagamentos opcionais em 15/12 até a entrega. Confira quais datas estão disponíveis e os limites mostrados. Cada anual, antes da correção, pode ser de até 50% da renda mensal. A correção é: valor × 1,005 × 1,005 elevado aos meses do cronograma. A ajuda mostra a data, os meses, o valor corrigido e se a anual foi aceita. O Saldo parcelado desconta as anuais válidas pelos valores digitados, sem reajustes. Já o cálculo das mensais usa as anuais reajustadas para definir sua base. As anuais continuam dentro do Pró-Soluto: elas mudam a forma de pagar, sem reduzir esse total. Ao ocultar uma anual, seu valor é zerado.",
   },
   {
     label: "Saldo parcelado",
     location: "Monte a proposta, antes da quantidade de parcelas",
     detail:
-      "Saldo após recursos − Entrada − Sinais válidos = Pró-Soluto antes da correção. A ajuda também informa a base mensal após anuais. São valores diferentes: o saldo parcelado não diminui quando se insere uma anual.",
+      "Mostra quanto sobra depois dos pagamentos informados, sem reajustes. Primeiro: Saldo após recursos − Entrada − Sinais válidos = Pró-Soluto, antes da correção. Depois: Pró-Soluto − soma dos valores digitados nas anuais válidas = Saldo parcelado. Para calcular as mensais, o simulador faz uma conta separada: Pró-Soluto − total das anuais reajustadas. Depois, aplica a regra de reajuste das mensais. Por isso, dividir o Saldo parcelado pela quantidade de parcelas não mostra, sozinho, quanto será pago por mês. Não desconte as anuais de novo do Saldo parcelado. O Pró-Soluto continua incluindo as anuais.",
   },
   {
     label: "Qtd. de parcelas",
     location: "Monte a proposta, última linha",
     detail:
-      "Use um inteiro dentro do limite exibido, até 84. A ajuda informa parcelas antes/depois da entrega e valida a distribuição nos quatro blocos de 40%, 30%, 20% e 10%. O prazo altera o valor das mensais; não ignore a mensagem de quantidade inválida.",
+      "Digite uma quantidade sem vírgula, dentro do limite mostrado, até 84 parcelas. A ajuda mostra quantas vencem antes e depois da entrega. Também confere a divisão em quatro grupos: 40%, 30%, 20% e 10%. Mudar a quantidade muda o valor das mensais. Se aparecer quantidade inválida, corrija antes de continuar.",
   },
   {
     label: "% Pró-Soluto",
     location: "Parâmetros de aprovação, primeira regra",
     detail:
-      "Saldo parcelado ÷ valor real do imóvel após desconto × 100. É comum aos dois fluxos e comparado ao limite do Ranking. Anuais não reduzem esse percentual. A ajuda mostra numerador, denominador e resultado da proposta atual.",
+      "Mostra qual parte do valor do imóvel ficou no Pró-Soluto. A conta é: Pró-Soluto ÷ valor real do imóvel após desconto × 100. O Pró-Soluto é o Saldo após recursos menos Entrada e Sinais válidos, antes da correção. Ele inclui as anuais, por isso elas não reduzem esse percentual. Não use o Saldo parcelado nesta conta: ele já desconta as anuais válidas. O percentual é igual no Linear e no Decrescente e é comparado ao limite do Ranking. A ajuda mostra os dois valores da divisão e o resultado.",
   },
   {
     label: "% Comprometimento da Renda",
     location: "Parâmetros de aprovação, segunda regra",
     detail:
-      "Maior parcela mensal corrigida ÷ renda familiar × 100, sem Evolução de Obra. A ajuda identifica valor e data do pico de cada fluxo. Não usa apenas a primeira mensal e não representa a análise completa de endividamento do banco.",
+      "Mostra quanto a maior parcela mensal usa da renda. A conta é: Maior parcela mensal corrigida ÷ renda familiar × 100, sem Evolução de Obra. A ajuda mostra o valor e a data dessa parcela no Linear e no Decrescente. A conta procura a maior mensal, não apenas a primeira. Ela não substitui a análise do banco sobre todas as dívidas do cliente.",
   },
   {
     label: "% Máximo da renda mensal",
     location: "Parâmetros de aprovação, terceira regra",
     detail:
-      "É o indicador de máxima carga mensal: maior soma de mensal corrigida + Evolução de Obra, dividida pela renda familiar. A ajuda identifica os picos Linear e Decrescente. Não inclui o valor da anual, mesmo quando ela integra o total da mesma linha mensal no cronograma; revise também esse pagamento e as demais despesas do cliente.",
+      "Mostra o mês em que a mensal com Evolução de Obra mais usa a renda. A conta é: maior soma de mensal corrigida + Evolução de Obra, dividida pela renda familiar, vezes 100. A ajuda mostra o valor e a data no Linear e no Decrescente. Esse percentual não inclui o valor da anual. Ela pode estar somada ao total da mesma linha mensal no cronograma. Confira também se a anual e as outras despesas cabem no orçamento.",
   },
   {
     label: "Ranking, status e Repasse",
     location: "Parâmetros de aprovação",
     detail:
-      "O Ranking seleciona os limites comerciais. Cada fluxo tem seu próprio status; confira todas as regras, a memória e as mensagens. Repasse tem critério separado e não substitui aprovação da proposta. Ver ajustes necessários abre uma prévia; Aplicar estes valores é que modifica a composição.",
+      "O Ranking define os limites comerciais usados na análise. Linear e Decrescente têm resultados de aprovação separados. Confira todas as regras, os detalhes dos cálculos e os avisos. Repasse tem uma regra própria e não substitui a aprovação da proposta. Ver ajustes necessários só mostra uma sugestão. A proposta muda quando você clica em Aplicar estes valores.",
   },
   {
     label: "Resumo das parcelas",
     location: "Quadro abaixo de Parâmetros de aprovação",
     detail:
-      "Compara Linear e os quatro blocos Decrescentes, quantidade, valores sem/com correção e primeira/última data. A base mensal considera anuais válidas. A regra local utiliza 0,5% ao mês antes do mês de entrega e 1,5% a partir do mês de entrega; não são taxas do financiamento bancário. Exibir parcelas detalha vencimentos, Evolução de Obra, totais e percentuais da renda.",
+      "Compara o Linear com os quatro grupos do Decrescente. Mostra quantidade, valores antes e depois da correção e datas da primeira e da última parcela. O Saldo parcelado usa as anuais válidas pelos valores digitados, sem reajustes. O cálculo das mensais usa outra base: Pró-Soluto − total das anuais reajustadas. A regra de reajuste das mensais é aplicada separadamente. Ela usa 0,5% ao mês antes do mês de entrega e 1,5% a partir do mês de entrega. Essas não são as taxas do financiamento bancário. Exibir parcelas mostra datas de pagamento, Evolução de Obra, totais e percentuais da renda.",
   },
   {
     label: "Proposta pronta: Desconto, Valor de Contrato e B.A. da Unidade",
     location: "Proposta pronta - Bora Vender, resumo da proposta",
     detail:
-      "Valor de Contrato é a base calculada para formalização. Na faturada, Desconto é valor final com kit menos contrato; B.A. da Unidade é contrato menos valor real. Na comissão apartada, o desconto também deduz comissão/prêmio, e o B.A. usa o valor real líquido dessa remuneração. São bases próprias desse quadro: não substitua os números de Monte a proposta sem conciliar as duas composições.",
+      "Valor de Contrato é o valor calculado para preparar o contrato. Na proposta faturada, Desconto = valor final com kit − Valor de Contrato. B.A. da Unidade = Valor de Contrato − valor real. Na comissão apartada, a comissão é tratada em separado. Nesse caso, o desconto também retira comissão e prêmio. O B.A. usa o valor real depois de retirar essa remuneração. Esse quadro tem cálculos próprios. Confira as duas contas antes de substituir valores de Monte a proposta.",
   },
   {
     label: "Proposta pronta: recursos, Sinal CC, sinais, anuais e parcelas",
     location: "Proposta pronta - Bora Vender, linhas da composição",
     detail:
-      "As ajudas identificam o crédito considerado, Subsídio, FGTS, Cheque Moradia, Sinal CC (Entrada na assinatura), cada Sinal/Anual informado e a quantidade mensal. Pagamentos adicionais ativos também entram. Confira os valores faturados e apartados separadamente; uma linha sem valor positivo não representa benefício concedido.",
+      "As ajudas mostram o financiamento usado, Subsídio, FGTS, Cheque Moradia e Sinal CC, que é a Entrada na assinatura. Mostram também cada sinal, cada anual e a quantidade de parcelas mensais. Outros pagamentos ativos também entram na conta. Confira em separado a proposta faturada e a proposta com comissão apartada. Uma linha zerada ou sem valor positivo não significa que um benefício foi concedido.",
   },
   {
     label: "Comissão e prêmio",
     location: "Proposta pronta, quando houver comissão apartada; remuneração no ícone $",
     detail:
-      "O quadro apartada considera comissão e prêmio calculados pelo modelo comercial e pelo Ranking elegível. Remuneração não é recurso de FGTS, subsídio nem desconto automático concedido ao comprador. Confirme canal, classificação e modelo antes de apresentar o resultado.",
+      "Na proposta com comissão apartada, a comissão e o prêmio são calculados em separado. O cálculo segue o modelo comercial e o Ranking permitido para o caso. Esses valores pagam o trabalho da venda. Não são FGTS, subsídio ou desconto automático para o comprador. Confira o canal de venda, a classificação e o modelo antes de apresentar o resultado.",
   },
   {
     label: "Composição da documentação",
     location: "Resumo financeiro, ao lado de Composição",
     detail:
-      "Soma ITBI + Registro total + Despachante + Seguro Caixa. A ajuda mostra cada parcela da soma, modalidade efetiva, avaliação bancária, teto de financiamento estimado e regra de ITBI aplicada. A confirmação tributária e cartorária é externa; Exibir parcelas neste painel abre somente o plano da documentação.",
+      "A conta é: ITBI + Registro total + Despachante + Seguro Caixa. A ajuda mostra cada custo, a modalidade usada, a avaliação do banco e o limite estimado de financiamento. Também explica qual regra de ITBI foi usada. Prefeitura e cartório precisam confirmar os impostos e os custos de registro. Exibir parcelas neste quadro mostra somente os pagamentos da documentação.",
   },
 ] as const;
 
