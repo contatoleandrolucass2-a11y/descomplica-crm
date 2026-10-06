@@ -4,6 +4,22 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-06: build incremental pode ocultar CSS integrado entre worktrees
+
+- Status: pendente_validacao na CI; fonte: integracao de `a89a93c` na branch de
+  acessos e artefatos compilados em `.next/static`.
+- Depois do merge, o fonte continha o novo brilho continuo do Associativo, mas
+  o chunk CSS incremental ainda continha a regra antiga com `animation-delay:
+4.5s`. Mover o `.next` gerado e reconstruir do zero produziu o chunk correto;
+  o contrato de pixels focado e as dez larguras da navegacao passaram.
+- Capturas locais extensas nao devem ser avaliadas sob contencao extrema. Um
+  ensaio paralelo elevou a carga acima de 200 e causou timeout de teclado sem
+  mudanca no produto. Nessa situacao, preservar os gates, registrar a uniao de
+  promocoes limpas disjuntas e exigir o candidato integral da CI isolada.
+- O manifesto combinado identifica `e0e0ce9` para o Associativo e `f1df3d6`
+  para Usuarios. Seus hashes e 27 contratos de referencia passaram; a CI final
+  ainda deve comprovar todas as 242 comparacoes antes do merge.
+
 ## 2026-10-06: baseline de tela longa deve preservar legibilidade interna
 
 - Status: validado; fonte: candidato visual da CI `37507333920` e

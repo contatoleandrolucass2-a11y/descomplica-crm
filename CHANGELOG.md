@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-06 - Baseline combinada de Associativo e acessos
+
+- Integra as onze referencias do Associativo publicadas na `main` com as onze
+  referencias revisadas de `/admin/usuarios`, preservando as outras 220.
+- Registra no manifesto os dois commits de captura e exige uma comparacao
+  integral limpa na CI antes do merge, sem alterar tolerancias ou predicates.
+
 ## 2026-10-06 - Acabamento responsivo da matriz de acessos
 
 - Impede que os selos de permissao herdada sejam cortados na consulta somente

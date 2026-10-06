@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-06 - Integracao da baseline com a main
+
+- A `main` avancou para `a89a93c` com a correcao anual e visual do Associativo.
+  A branch integrou esse commit sem descartar a matriz de acessos; os conflitos
+  ficaram restritos a historicos, lockfile e manifesto visual.
+- O primeiro build incremental ainda continha o CSS anterior do Associativo,
+  com atraso de 4,5 s entre os cards. Um build integral sem `.next` confirmou o
+  CSS atual, sem o atraso, e a navegacao passou nas dez larguras de cada um dos
+  quatro simuladores, inclusive 375, 1180 e 1440 px.
+- A captura completa posterior sofreu timeout de teclado enquanto outro ensaio
+  elevava a carga do host acima de 200. Nenhuma referencia foi promovida nessa
+  tentativa. O manifesto combina explicitamente as duas promocoes limpas e
+  disjuntas: 11 imagens do Associativo em `e0e0ce9` e 11 de Usuarios em
+  `f1df3d6`; os hashes foram recalculados e 27 contratos passaram.
+- A uniao registra sua proveniencia no proprio resultado. A CI limpa precisa
+  recapturar todas as 242 comparacoes e permanece obrigatoria antes do merge.
+
 ## 2026-10-06 - Revisao visual da matriz de acessos
 
 - A CI `37507333920` aprovou validacao, restore, migrations, 1.099 pgTAP,

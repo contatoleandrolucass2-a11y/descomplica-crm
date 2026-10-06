@@ -120,6 +120,11 @@ autorização específica e os gates do runbook de publicação.
   transacional alterou somente as onze referencias de `/admin/usuarios` e
   preservou as outras 231 imagens; a altura desktop ficou em 2.486 px, sem
   overflow horizontal.
+- Depois da integracao de `a89a93c`, o manifesto preserva as onze referencias
+  de Usuarios dessa captura e as onze referencias do Associativo promovidas em
+  `e0e0ce9`, com proveniencia explicita e hashes recalculados. Vinte e sete
+  contratos de referencia passaram; a recaptura integral da CI segue
+  obrigatoria antes do merge porque o host local sofreu contencao externa.
 - Reset completo, lint do schema e advisors de segurança/desempenho do banco:
   aprovados sem achados.
 - Jornada autenticada local em 1440×1000, tema Escuro e Corretor Imob
