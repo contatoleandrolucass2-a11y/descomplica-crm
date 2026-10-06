@@ -4,6 +4,61 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-06: revalidar advisories antes da publicacao
+
+- Status: pendente_validacao integral; fonte: CI `37506185905` e advisories
+  oficiais registrados no audit de anuais e ajudas do Associativo.
+- Um lockfile validado no dia anterior pode receber alertas novos. Corrigidos
+  Sharp 0.35.5, source-map-js 1.2.2 e SDK MCP transitivo do Next 1.31.0;
+  auditoria voltou a zero, sem ignorar alertas nem reduzir gates.
+- Protocolo dos MCPs e docs locais aprovados; 34 testes focados aprovados.
+  Repetir CI Linux, imagem e QA integrado antes da publicacao.
+- CI `37507557118` aprovou Linux, banco, restore, autorizacao e contratos
+  funcionais. 11 capturas do Associativo revistas na combinacao atual e
+  promovidas, mantendo 231 por hash. CI final e publicacao ainda obrigatorias.
+
+## 2026-10-05: saldo nominal e base financeira do Associativo
+
+- Status: pendente_validacao; fonte: audit de anuais e ajudas de 05/10/2026,
+  codigo archive e pedido do usuario na branch `codex/associativo-saldo-anuais`.
+- `balanceBeforeCorrection` e Pro-Soluto, nao saldo exclusivo das mensais.
+  Ledger nominal usa valores digitados em centavos; motor archive subtrai
+  anuais corrigidas antes de calcular mensais. Nao substituir uma base pela
+  outra nem descontar anuais duas vezes para corrigir um rotulo de interface.
+- Archive e WF13 oficial possuem contratos diferentes; preservar ambos e os
+  oraculos existentes. Esta correcao expositiva nao autoriza mudar politica.
+- 33 testes iniciais e 364 testes da auditoria financeira aprovados; gates
+  globais, QA visual e publicacao ainda pendentes.
+- Validacao local concluida: lint/tipos/build, 81 regressoes finais, 13 testes
+  de brilho, nove etapas React e oito Node aprovados. Windows exige CI Linux
+  para seis testes POSIX; timeout de conhecimento passou isolado (22/22).
+- Keyframes alinhados ainda podem ter pausa invisivel. Medir pixels entre
+  cards detectou quase quatro segundos na versao antiga e 0 ms na correcao.
+- Ao medir um efeito isolado, pausar e restaurar as animacoes vizinhas evita
+  falsos pixels positivos. Prova React em 1440px e 375px passou, sem relaxar
+  tolerancia. Matriz definida: 7285 casos, 250197 comparacoes, zero divergencias.
+- CI detectou ruido subpixel nos cantos. Manter a camada sozinho nao bastou:
+  CSS compilado e Geist reproduziram pixels fora do pseudo-elemento. A mascara
+  deve respeitar border-box, insets e raio reais; fixture inclui essas bases,
+  posicoes fracionarias e prova negativa da pausa antiga, sem relaxar tolerancia.
+- Integra `dcb88c9` preservando canvas e temas mobile aprovados; o Associativo
+  fica somente com o titulo no cabecalho. Revalidacao combinada obrigatoria.
+- Integracao local aprovada (lint/tipos/build, 83 testes focados, roteiro mobile,
+  oito Node); seis testes POSIX dependem da CI Linux. Timeout DevTools passou
+  isolado (24/24). CI `37364639266` nao obteve runner hospedado durante incidente
+  GitHub Actions `3q1yb5m7ltvb`, em 05/10/2026. PR #156 sem deploy; gates mantidos.
+- Na retomada, CI Linux passou em validate, banco, restauracao e autorizacao.
+  Geometria do cabecalho ainda exigia o selo que o usuario retirou; contrato
+  atualizado exige ausencia dos tres rotulos e do aside vazio, sem reduzir
+  verificacoes de titulo, estoque ou navegacao. Publicacao ainda pendente.
+- Em 06/10, CI `37383133528` tentativa 2 aprovou todos os contratos funcionais.
+  11 capturas do Associativo revisadas por retirada do cabecalho; 231 referencias
+  preservadas. Promocao canonica com hashes e tolerancias originais. Repeticao
+  financeira: 7285 casos, 250197 comparacoes, zero erros; publicacao pendente.
+- Integracao posterior de `a22f4dc`: preserva temas e sua baseline integral.
+  Capturas anteriores do Associativo sao historico, nao prova da combinacao;
+  nova CI e revisao visual obrigatorias antes da publicacao.
+
 ## 2026-10-05: temas precisam compartilhar tokens, nao paletas locais completas
 
 - Status: validado; fonte: auditoria das capturas autenticadas e branch

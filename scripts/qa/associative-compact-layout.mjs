@@ -322,7 +322,7 @@ export async function checkProtectedTopbar(page) {
   return result;
 }
 
-export async function checkAssociativeCompactStock(page) {
+export async function checkAssociativeCanvasHeading(page) {
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
   const hero = await page.locator(".simulation-canvas-header").evaluate((element) => {
     const bounds = (selector) => document.querySelector(selector).getBoundingClientRect();
@@ -332,9 +332,6 @@ export async function checkAssociativeCompactStock(page) {
     const breadcrumb = document.querySelector('nav[aria-label="Breadcrumb"]');
     const breadcrumbBounds = breadcrumb?.getBoundingClientRect();
     const title = bounds(".simulation-canvas-title-row h1");
-    const aside = bounds(".simulation-canvas-header-aside");
-    const status = bounds(".simulation-canvas-status");
-    const stacked = getComputedStyle(element).gridTemplateColumns.split(" ").length === 1;
     const elementBounds = element.getBoundingClientRect();
     return {
       titleContentInset: elementBounds.top - main.top,
@@ -342,14 +339,10 @@ export async function checkAssociativeCompactStock(page) {
       titleInsideProtectedContent:
         title.top >= protectedContent.top - 1 && title.bottom <= protectedContent.bottom + 1,
       titleBelowBreadcrumb: !breadcrumbBounds || title.top >= breadcrumbBounds.bottom - 1,
-      stacked,
-      statusAlignment: stacked
-        ? aside.top -
-          element.querySelector(".simulation-canvas-header-copy").getBoundingClientRect().bottom
-        : Math.abs(aside.top + aside.bottom - elementBounds.top - elementBounds.bottom) / 2,
-      statusHeight: status.height,
-      minimumStatusHeight: 44,
-      statusFits: status.bottom <= elementBounds.bottom + 1,
+      removedCopyAbsent: !element.querySelector(
+        ".simulation-canvas-eyebrow, .simulation-canvas-description, .simulation-canvas-status",
+      ),
+      emptyAsideAbsent: !element.querySelector(".simulation-canvas-header-aside"),
       titleAccessoryAbsent: !element.querySelector(".simulation-canvas-title-row > :not(h1)"),
       nestedActionsAbsent: !element.querySelector(".simulation-canvas-actions"),
     };
@@ -362,16 +355,17 @@ export async function checkAssociativeCompactStock(page) {
   assert.ok(hero.titleInsideProtectedContent, "Title must remain inside protected content");
   assert.ok(hero.titleBelowBreadcrumb, "Title must not overlap the authorized breadcrumb");
   assert.ok(
-    hero.statusAlignment >= 0 && hero.statusAlignment <= (hero.stacked ? 14 : 8),
-    "Status must align with the canvas heading without excess gaps",
+    hero.removedCopyAbsent,
+    "Associative heading must not restore the three removed labels",
   );
-  assert.ok(
-    hero.statusHeight >= hero.minimumStatusHeight,
-    "Status must preserve the approved compact height",
-  );
-  assert.ok(hero.statusFits, "Status must remain inside the heading section");
+  assert.ok(hero.emptyAsideAbsent, "Removed status must not leave an empty aside");
   assert.ok(hero.titleAccessoryAbsent, "Canvas heading must not restore the removed title action");
   assert.ok(hero.nestedActionsAbsent, "Canvas heading must not restore nested simulator actions");
+  return hero;
+}
+
+export async function checkAssociativeCompactStock(page) {
+  const hero = await checkAssociativeCanvasHeading(page);
   const header = await page.locator(".investor-stock-panel").evaluate((panel) => {
     const bounds = (selector) => panel.querySelector(selector).getBoundingClientRect();
     const heading = bounds(":scope > header");

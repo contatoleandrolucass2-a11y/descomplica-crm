@@ -178,6 +178,15 @@ de configuracao Supabase, esperada neste checkout sem .env.local. Nao se copiou
 credencial de producao nem se contornou o guard. A CI fornece o ambiente
 sintetico isolado para os gates completos. Nenhum deploy foi realizado.
 
+## Revalidacao do SDK em 06/10/2026
+
+O override restrito ao Next DevTools usa agora SDK 1.31.0, correcao do
+[GHSA-6qxp-vccf-f47h](https://github.com/modelcontextprotocol/typescript-sdk/security/advisories/GHSA-6qxp-vccf-f47h).
+O registro anterior de 1.30.1 e historico. Nenhuma flag, conta, permissao ou
+allowlist foi ampliada. `pnpm devtools:check` aprovou initialize, tools/list e
+docs locais; 24 testes de DevTools aprovados com o novo SDK. Auditoria sem
+vulnerabilidades conhecidas. Validacao Linux segue exigida na CI do PR #156.
+
 ## Fontes
 
 - [npm: Next 0.4.0](https://registry.npmjs.org/next-devtools-mcp/0.4.0).

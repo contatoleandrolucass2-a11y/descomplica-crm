@@ -371,7 +371,7 @@ export const ASSOCIATIVE_FAQ_SECTIONS: readonly AssociativeFaqSection[] = [
           "É o indicador de quanto da operação permanece parcelado diretamente com a construtora, em relação à base de venda adotada na análise. Não é taxa de juros nem percentual financiado pelo banco.",
           "O material de referência fornecido descreve em Associativo!D48: % pró-soluto = (pró-soluto corrigido das mensais + anuais válidas nominais) ÷ (preço − bônus − desconto). Exemplo didático: R$ 45 mil de saldo considerado sobre base de R$ 250 mil representam 18%.",
           "A base desse indicador é interna e não deve ser confundida com o preço contratual para fins tributários. O material relata uma condição específica segundo a qual o bônus de adimplência, quando concedido, não reduz o preço de venda; confirme o contrato aplicável.",
-          "Há diferença na simulação desta página: o percentual de aprovação usa o pró-soluto após financiamento, subsídio, FGTS, Cheque Moradia, entrada e sinais válidos, dividido pelo valor real de venda. As anuais não reduzem esse pró-soluto nem o saldo parcelado; suas correções reduzem somente a base distribuída nas mensais. A fórmula relatada para D48 não deve ser apresentada como a fórmula atual do indicador.",
+          "Nesta página, o percentual de aprovação usa o Pró-Soluto após financiamento, subsídio, FGTS, Cheque Moradia, entrada e sinais válidos, dividido pelo valor real de venda. As anuais continuam dentro do Pró-Soluto. Já o Saldo parcelado desconta as anuais pelos valores digitados, sem reajustes. Para calcular as mensais, a regra desconta as anuais reajustadas de uma base separada. A fórmula relatada para D48 não é a fórmula atual desse indicador.",
         ],
       },
       {

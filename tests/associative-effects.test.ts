@@ -8,6 +8,7 @@ import {
   checkAssociativeSelectedGoldPaint,
 } from "../scripts/qa/associative-compact-layout.mjs";
 import { checkGuidanceShimmer } from "../scripts/qa/associative-guidance.mjs";
+import { synchronizeAssociativeMotion } from "../app/(protected)/app/simulacao/_components/archive-investor/associative-motion";
 
 const require = createRequire(import.meta.url);
 type Rule = {
@@ -177,6 +178,150 @@ describe("Associative decorative effects boundaries", () => {
 });
 
 describe("Associative CSS browser fixtures", () => {
+  it.runIf(process.env.ASSOCIATIVE_EFFECTS_BROWSER === "1")(
+    "measures the painted documentation handoff across themes, breakpoints and repeated cycles",
+    async () => {
+      const { checkAssociativeDocumentationHandoff } = await import(
+        new URL("../scripts/qa/associative-motion.mjs", import.meta.url).href
+      );
+      const tokens = readFileSync(
+        new URL(
+          "../app/(protected)/app/simulacao/_components/archive-investor/investor-theme-tokens.css",
+          import.meta.url,
+        ),
+        "utf8",
+      );
+      const browser = await chromium.launch({ headless: true });
+      const output = "test-results/associative-effects";
+      mkdirSync(output, { recursive: true });
+      try {
+        for (const width of [375, 1440, 320, 560, 561]) {
+          const context = await browser.newContext({
+            viewport: { width, height: 1000 },
+            reducedMotion: "no-preference",
+          });
+          try {
+            const page = await context.newPage();
+            for (const theme of width === 375 || width === 1440
+              ? ["light", "balanced", "dark"]
+              : ["dark"]) {
+              await page.setContent(`<html data-theme="${theme}"><body><div class="investor-page-shell investor-associative-table-page">
+                <div class="investor-associative-documentation-summary" data-associative-motion-group="documentation">
+                  <section class="investor-associative-documentation-plan"><small>Plano sugerido</small><p><strong>24x Parcelas de</strong> <span>R$ 500,00</span></p><small>1a parcela para <b>15/11/2026</b></small><div><small>Total da documentacao</small><strong>R$ 12.000,00</strong></div></section>
+                  <section class="investor-associative-documentation-breakdown"><header><h4>Composicao</h4></header><dl>${["ITBI", "Registro total", "Despachante", "Seguro Caixa", "Total da documentacao"].map((label, index) => `<div class="${index === 4 ? "total" : ""}"><dt>${label}</dt><dd>R$ 2.000,00</dd></div>`).join("")}</dl></section>
+                </div></div></body></html>`);
+              await page.addStyleTag({ content: tokens + source.replace(/^@import[^;]+;/gm, "") });
+              await page.addStyleTag({
+                content:
+                  "*,::before,::after{box-sizing:border-box}body{margin:0;padding:12px;font-family:Arial,sans-serif}.investor-page-shell{max-width:744px;margin:auto}.investor-associative-documentation-summary{transform:translate(.375px,.375px)}",
+              });
+              await page.locator(".investor-associative-documentation-plan").evaluate((plan) => {
+                const indicator = document.createElement("i");
+                indicator.className = "qa-unrelated-paint";
+                plan.append(indicator);
+              });
+              await page.addStyleTag({
+                content:
+                  ".qa-unrelated-paint{position:absolute!important;left:18px;bottom:8px;width:8px;height:8px;background:red;animation:qa-unrelated-pulse .1s steps(2) infinite}@keyframes qa-unrelated-pulse{to{background:blue}}",
+              });
+              await page.addScriptTag({
+                content: `(${synchronizeAssociativeMotion.toString()})(document.querySelector('.investor-associative-table-page'))`,
+              });
+              await page.evaluate(
+                () =>
+                  new Promise<void>((resolve) =>
+                    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+                  ),
+              );
+              const report = await checkAssociativeDocumentationHandoff(page);
+              expect(
+                await page
+                  .locator(".qa-unrelated-paint")
+                  .evaluate((indicator) => indicator.getAnimations()[0]?.playState),
+              ).toBe("running");
+              console.info(JSON.stringify({ width, theme, ...report }));
+              expect(report.cycles.every((cycle: { gapMs: number }) => cycle.gapMs === 0)).toBe(
+                true,
+              );
+              expect(
+                await page.evaluate(() => document.documentElement.scrollWidth),
+              ).toBeLessThanOrEqual(width);
+              const cards = page.locator(".investor-associative-documentation-summary > section");
+              const before = await cards.evaluateAll((elements) =>
+                elements.map((element) => ({
+                  width: element.getBoundingClientRect().width,
+                  height: element.getBoundingClientRect().height,
+                })),
+              );
+              await cards.evaluateAll((elements) => {
+                for (const element of elements)
+                  for (const animation of element.getAnimations({ subtree: true })) {
+                    animation.pause();
+                    animation.currentTime = 4500;
+                  }
+              });
+              await page.screenshot({
+                path: `${output}/${width}-${theme}-documentation-handoff.png`,
+                animations: "allow",
+              });
+              // A clock-correct but clipped/delayed shine must fail the painted-pixel contract.
+              if (width === 1440 && theme === "dark") {
+                const regression = await page.addStyleTag({
+                  content: `${scope} .investor-associative-documentation-summary > section::after { animation: associative-documentation-shine 9s ease-in-out infinite; background-size: 280% 100%; opacity: 0; } ${scope} .investor-associative-documentation-summary > section:nth-child(2)::after { animation-delay: 4.5s; } @keyframes associative-documentation-shine { 0%,12% { background-position:150% 50%;opacity:1; } 38% { background-position:-50% 50%;opacity:1; } 50%,100% { background-position:-50% 50%;opacity:0; } }`,
+                });
+                await cards.evaluateAll((elements) => {
+                  for (const element of elements)
+                    for (const animation of element.getAnimations({ subtree: true })) {
+                      animation.play();
+                      animation.startTime = 0;
+                    }
+                });
+                await expect(checkAssociativeDocumentationHandoff(page)).rejects.toThrow(
+                  "Invisible documentation handoff gap",
+                );
+                await regression.evaluate((element) => element.parentNode?.removeChild(element));
+              }
+              await page.emulateMedia({ reducedMotion: "reduce" });
+              await page.evaluate(
+                () =>
+                  new Promise<void>((resolve) =>
+                    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+                  ),
+              );
+              await expect
+                .poll(() =>
+                  cards.evaluateAll((elements) =>
+                    elements.map((element) => ({
+                      opacity: getComputedStyle(element, "::after").opacity,
+                      animations: element.getAnimations({ subtree: true }).length,
+                    })),
+                  ),
+                )
+                .toEqual([
+                  { opacity: "0", animations: 0 },
+                  { opacity: "0", animations: 0 },
+                ]);
+              expect(
+                await cards.evaluateAll((elements) =>
+                  elements.map((element) => ({
+                    width: element.getBoundingClientRect().width,
+                    height: element.getBoundingClientRect().height,
+                  })),
+                ),
+              ).toEqual(before);
+              await page.emulateMedia({ reducedMotion: "no-preference" });
+            }
+          } finally {
+            await context.close();
+          }
+        }
+      } finally {
+        await browser.close();
+      }
+    },
+    600_000,
+  );
+
   // The unit CI job has no browser installation; explicitly enable this focused visual fixture.
   it.runIf(process.env.ASSOCIATIVE_EFFECTS_BROWSER === "1")(
     "checks three themes at desktop/mobile: selection, actions, motion, input band and dollar geometry",

@@ -1,5 +1,68 @@
 # Worklog
 
+## 2026-10-06 - Correcao do gate de seguranca
+
+- CI `37506185905` aprovou lint/tipos/testes e bloqueou a auditoria com tres
+  alertas altos novos. Publicacao interrompida antes de qualquer deploy.
+- Sharp 0.35.5, source-map-js 1.2.2 e SDK MCP 1.31.0 instalados pelas versoes
+  corrigidas dos advisories oficiais; lockfile gerado por pnpm 11.20.0.
+- Auditoria sem vulnerabilidades conhecidas; protocolo dos dois DevTools e
+  docs locais aprovados. 34 testes focados aprovados; nova CI completa pendente.
+
+## 2026-10-06 - Validacao integrada do Associativo
+
+- CI `37507557118`: todos os contratos funcionais aprovados com temas atuais e
+  dependencias corrigidas. Captura `e0e0ce9a`, artefato `11435466969`: 11 imagens
+  do cabecalho revisadas e promovidas; 231 preservadas por hash. Limiares intactos.
+- Revalidacao local: lint/tipos/build, 2008 testes, oito Node e 34 focados passaram;
+  seis limitacoes POSIX e seis condicionais no Windows, suite Linux aprovada.
+
+- CI `37383133528` tentativa 2: validate/restore e gates funcionais aprovados.
+- Artefato `11379134553`: 11 capturas revisadas da retirada dos tres rotulos;
+  231 referencias preservadas por hash, sem alterar tolerancias.
+- Revalidacao financeira: 7285 casos e 250197 comparacoes, zero divergencias.
+- Lint/tipos/build, 15 testes focados, oito Node aprovados. Suite Windows com
+  seis limitacoes POSIX e dois timeouts resolvidos isoladamente (22/22).
+- Evidencias no audit de anuais e ajudas; CI final, merge e deploy pendentes.
+- Integra `a22f4dc` (temas) sem mudar motores. Mantem integralmente a baseline
+  dessa main para uma nova captura combinada; nao reutiliza imagens antigas
+  para aprovar cores novas. Documentacao das duas entregas preservada.
+
+## 2026-10-05 - Saldo das anuais e ajudas do Associativo
+
+- Retomada da publicacao: CI Linux passou validate, banco, restore e E2E.
+  Ajustado contrato de geometria para a retirada dos tres rotulos solicitados.
+  Aside vazio nao e renderizado; regressao real preserva selos/acoes em outras
+  tabelas e rejeita reintroducao dos elementos removidos. CI completa pendente.
+
+- Fonte: cinco capturas do usuario; branch `codex/associativo-saldo-anuais`.
+- Corrige o saldo exibido para descontar anuais nominais em centavos, sem
+  deducao dupla nas mensais nem alteracao do Pro-Soluto e politicas vigentes.
+- Remove os tres textos indicados, simplifica ajudas e ajusta a continuidade
+  visual do brilho dos cards de documentacao.
+- Audit: `docs/audits/associativo-anuais-e-ajudas-2026-10-05.md`.
+- 33 testes iniciais e auditoria financeira de 364 testes aprovados. Gates
+  globais, navegador, CI e publicacao pendentes.
+- Lint, typecheck, build, oito testes Node e nove etapas do preview React
+  aprovados. Suite Windows: 1997 aprovados, seis falhas POSIX e um timeout de
+  conhecimento resolvido na repeticao isolada (22/22). CI Linux segue obrigatoria antes de publicar.
+- Matriz sintetica: 7285 casos e 250197 comparacoes sem divergencias. Medicao
+  do brilho no React real passou em 1440px e 375px; QA congela/restaura outras
+  animacoes e conserva os limiares e a prova negativa dos keyframes antigos.
+- As duas primeiras CIs passaram testes/banco/restore/autorizacao, mas bloquearam
+  a metrica visual. Corrigida captura sem alterar rasterizacao da referencia;
+  nove testes de efeitos, roteiro mobile real, lint e tipos passaram novamente.
+- Terceira CI isolou ruido restante nos cantos mobile. Reproduzido localmente
+  com CSS compilado/Geist; mascara passa a respeitar o pseudo-elemento arredondado.
+  Nove testes, roteiro mobile com fonte real, lint e tipos aprovados.
+- Integra a entrega concorrente `dcb88c9`, preservando o canvas e a troca de
+  tema mobile; resolve cabecalho com apenas o titulo. Regressao integrada:
+  83 testes aprovados e tres condicionais ignorados.
+- Lint/tipos/build e roteiro React integrado aprovados. Suite Windows: 1998
+  aprovados, seis falhas POSIX e timeout DevTools resolvido isoladamente (24/24).
+  Oito testes Node aprovados. CI `37364639266` cancelada antes de iniciar por
+  indisponibilidade de runner GitHub; PR #156 permanece sem merge/deploy.
+
 ## 2026-10-05 - Calibracao integral dos tres temas
 
 - Branch `codex/theme-color-calibration`, base

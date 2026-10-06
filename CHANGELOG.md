@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-10-06 - Dependencias corrigidas para a publicacao
+
+- Atualiza Sharp para 0.35.5, source-map-js para 1.2.2 e o SDK MCP do Next
+  DevTools para 1.31.0, corrigindo tres alertas altos sem excecoes de auditoria.
+- Preserva Node 24.19.x, pnpm 11.20.x e os limites dos MCPs locais.
+
+## 2026-10-05 - Saldo e comunicacao do Associativo
+
+- Desconta as anuais digitadas no campo Saldo parcelado e explica a diferenca
+  para a base de reajuste e o Pro-Soluto, preservando os motores financeiros.
+- Remove os tres rotulos indicados do cabecalho do Associativo.
+- Simplifica ajudas e corrige a passagem do brilho entre os cards documentais.
+- Isola a medicao visual do brilho sem desativar efeitos na aplicacao.
+- Mantem a camada de pintura e mede seu interior arredondado, sem ruido dos cantos.
+- Preserva a atualizacao de canvas concorrente na integracao do Associativo.
+- Remove o aside vazio e atualiza o QA de geometria para o cabecalho sem rotulos.
+- Revisa e atualiza 11 capturas integradas do Associativo; preserva os temas da main.
+- Validacao funcional integrada aprovada; CI final e publicacao pendentes.
+
 ## 2026-10-05 - Calibracao dos temas Claro, Medio e Escuro
 
 - Diferencia as tres aparencias por luminosidade: Claro branco e limpo, Medio
