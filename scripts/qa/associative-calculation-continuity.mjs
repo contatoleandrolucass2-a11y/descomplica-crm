@@ -82,12 +82,17 @@ export async function checkAssociativeCalculationContinuity(page) {
     assert.equal(request.method(), "GET", "Inventory QA must be read-only");
     inventoryRequests[source] += 1;
     if (source === "live") await liveGate;
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json; charset=utf-8",
-      headers: { "cache-control": "no-store" },
-      body: JSON.stringify(fixture[source]),
-    });
+    try {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json; charset=utf-8",
+        headers: { "cache-control": "no-store" },
+        body: JSON.stringify(fixture[source]),
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Route is already handled")) return;
+      throw error;
+    }
   };
   const field = (label) =>
     page.locator(`${root} input`).and(page.getByLabel(label, { exact: true }));

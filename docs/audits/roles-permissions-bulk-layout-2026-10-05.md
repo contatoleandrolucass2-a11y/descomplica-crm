@@ -125,6 +125,19 @@ autorização específica e os gates do runbook de publicação.
   `e0e0ce9`, com proveniencia explicita e hashes recalculados. Vinte e sete
   contratos de referencia passaram; a recaptura integral da CI segue
   obrigatoria antes do merge porque o host local sofreu contencao externa.
+- A CI `37532674180` aprovou validate, restore, migrations, banco, advisors,
+  build, E2E e todos os checks funcionais da matriz visual. A unica divergencia
+  restante era a referencia de Usuarios em 375 px, 21 px mais alta porque o
+  e-mail sintetico ocupava tres linhas localmente e duas no runner.
+- O cabecalho movel passou a reservar duas linhas para o identificador. A
+  recaptura integral posterior aprovou 154 checks responsivos, 88 de tema, 242
+  auditorias Axe, 242 comparacoes e 110 checks de zoom, com zero falha. Somente
+  as referencias de Usuarios em 320 e 375 px mudaram; 375 px ficou em 5.172
+  px, igual ao candidato da CI.
+- A recaptura tambem comprovou o tratamento idempotente de uma resposta tardia
+  da fixture do Associativo: apenas `Route is already handled` e ignorado;
+  qualquer outro erro continua bloqueando o gate. A conta efemera e as fixtures
+  foram removidas ao final.
 - Reset completo, lint do schema e advisors de segurança/desempenho do banco:
   aprovados sem achados.
 - Jornada autenticada local em 1440×1000, tema Escuro e Corretor Imob
@@ -137,6 +150,6 @@ autorização específica e os gates do runbook de publicação.
 A revisão de segurança do diff encontrou uma janela concorrente de baixa
 probabilidade e a correção foi revisada sem bypass ou regressão concretos. As
 duas primeiras execuções de CI bloquearam corretamente advisories novos e,
-depois, contratos antigos de restore/E2E; nenhum gate foi ignorado. CI final,
-aplicação da migration e publicação permanecem separados; a migration remota
-exige autorização específica.
+depois, contratos antigos de restore/E2E; nenhum gate foi ignorado. A matriz
+visual local final esta aprovada. A nova CI, aplicação da migration e publicação
+permanecem separadas; a migration remota exige autorização específica.

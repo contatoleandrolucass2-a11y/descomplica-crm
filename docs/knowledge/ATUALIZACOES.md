@@ -4,6 +4,24 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-06: identificadores sinteticos nao podem variar a altura da baseline
+
+- Status: validado localmente; fonte: CI `37532674180`,
+  `admin-canvas.css` e matriz autenticada integral.
+- A CI aprovou todos os gates funcionais, mas um e-mail sintetico quebrou em
+  duas linhas no runner e em tres na referencia de 375 px. A diferenca de
+  21 px era geometrica, nao uma regressao de autorizacao.
+- Cabecalhos moveis com identificador variavel agora reservam duas linhas e
+  limitam o excesso, mantendo o texto completo na arvore acessivel. As
+  referencias de Usuarios em 320 e 375 px foram recapturadas.
+- Interceptacoes Playwright que aguardam uma fixture podem encontrar a rota ja
+  encerrada pela navegacao. Somente o erro exato `Route is already handled`
+  pode ser tratado como cancelamento tardio; os demais erros devem continuar
+  falhando o gate.
+- A recaptura integral aprovou 154 checks responsivos, 88 de tema, 242 Axe,
+  242 comparacoes e 110 de zoom. Capturas pesadas devem rodar sem outro gate
+  concorrente na VPS, que nao possui swap.
+
 ## 2026-10-06: build incremental pode ocultar CSS integrado entre worktrees
 
 - Status: pendente_validacao na CI; fonte: integracao de `a89a93c` na branch de

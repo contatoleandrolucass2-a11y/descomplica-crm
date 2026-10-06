@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-10-06 - Estabilizacao final da evidencia de acessos
+
+- A CI `37532674180` aprovou validacao, restore isolado, migrations, 1.099
+  pgTAP, advisors, build, 19 cenarios E2E e todos os contratos funcionais da
+  matriz visual. A unica divergencia era a altura de `/admin/usuarios` em
+  375 px: um e-mail sintetico ocupava duas linhas na CI e tres na referencia,
+  deslocando a captura em 21 px.
+- O cabecalho do usuario agora reserva exatamente duas linhas no mobile e
+  limita o excesso sem alterar o texto acessivel. O teste de layout fixa esse
+  contrato. Somente as referencias de Usuarios em 320 e 375 px mudaram; a
+  captura de 375 px passou de 5.193 para 5.172 px.
+- O ensaio local encontrou ainda uma corrida do Playwright ao responder uma
+  requisicao que a navegacao ja havia encerrado. A interceptacao agora ignora
+  somente `Route is already handled` e continua propagando qualquer outro
+  erro.
+- A recaptura integral, executada sem processo concorrente no host, aprovou
+  154 checks responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes
+  visuais e 110 checks de zoom. A promocao foi transacional e as fixtures e a
+  conta efemera foram removidas.
+
 ## 2026-10-06 - Integracao da baseline com a main
 
 - A `main` avancou para `a89a93c` com a correcao anual e visual do Associativo.

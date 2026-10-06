@@ -1285,6 +1285,15 @@
     flex-direction: column;
   }
 
+  .admin-user-detail-header h2 {
+    display: -webkit-box;
+    min-height: 2.5em;
+    max-height: 2.5em;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
   .admin-permission-option[data-editable="false"] {
     grid-template-columns: minmax(0, 1fr);
   }

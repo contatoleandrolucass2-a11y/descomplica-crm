@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-06 - Evidencia movel estabilizada
+
+- Limita o e-mail do cabecalho de Usuarios a duas linhas no celular, evitando
+  que o identificador sintetico altere a altura total entre ambientes.
+- Torna idempotente a resposta tardia da fixture de estoque no QA do
+  Associativo quando o navegador ja encerrou a requisicao durante uma
+  navegacao, sem suprimir outros erros.
+- Atualiza somente as referencias de Usuarios em 320 e 375 px apos a matriz
+  autenticada completa aprovar responsividade, temas, Axe, zoom e comparacoes.
+
 ## 2026-10-06 - Baseline combinada de Associativo e acessos
 
 - Integra as onze referencias do Associativo publicadas na `main` com as onze
