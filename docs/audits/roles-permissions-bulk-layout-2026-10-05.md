@@ -110,6 +110,11 @@ autorização específica e os gates do runbook de publicação.
   anônimas sem retornar linhas.
 - O ensaio isolado foi sincronizado com 1.099 pgTAP e os gates autenticados
   passaram a executar o build standalone, no mesmo formato da imagem Docker.
+- A CI `37507333920` aprovou todos esses gates e foi bloqueada somente pela
+  referencia visual anterior de `/admin/usuarios`, menor que a nova matriz de
+  23 permissoes. A revisao das capturas corrigiu os selos herdados comprimidos
+  no modo somente leitura e adicionou limite de densidade de 2.500 px apenas
+  para essa rota; a nova captura limpa ainda deve ser promovida.
 - Reset completo, lint do schema e advisors de segurança/desempenho do banco:
   aprovados sem achados.
 - Jornada autenticada local em 1440×1000, tema Escuro e Corretor Imob

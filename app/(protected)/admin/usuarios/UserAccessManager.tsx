@@ -610,6 +610,7 @@ function PermissionMatrix({
                       key={permissionKey}
                       className="admin-permission-option"
                       data-disabled={!canSelect}
+                      data-editable={editable}
                       data-selected={selected.has(permissionKey)}
                     >
                       {editable ? (

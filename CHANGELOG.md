@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-06 - Acabamento responsivo da matriz de acessos
+
+- Impede que os selos de permissao herdada sejam cortados na consulta somente
+  leitura: no desktop o texto cede espaco ao estado e, no celular, o estado
+  ocupa uma linha propria.
+- Reconhece a altura deliberada da matriz completa somente em
+  `/admin/usuarios`, preservando o limite de densidade das demais rotas e todos
+  os checks funcionais, visuais e de acessibilidade.
+
 ## 2026-10-06 - Gates da matriz de acessos
 
 - Sincroniza o ensaio de restore com os 1.099 testes pgTAP atuais.

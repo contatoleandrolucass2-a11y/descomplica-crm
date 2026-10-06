@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-06 - Revisao visual da matriz de acessos
+
+- A CI `37507333920` aprovou validacao, restore, migrations, 1.099 pgTAP,
+  advisors, build e os 19 cenarios E2E. O unico bloqueio ficou na matriz
+  visual de `/admin/usuarios`: as referencias anteriores terminavam antes da
+  nova matriz completa de 23 permissoes.
+- As onze capturas afetadas foram revisadas antes de qualquer promocao. A
+  revisao encontrou os selos de acesso herdado comprimidos no modo somente
+  leitura; a grade agora reserva a largura do selo no desktop e o move para
+  uma linha propria no celular.
+- O limite de densidade continua globalmente em 1.125 px e recebe uma excecao
+  estreita de 2.500 px somente para a tela de usuarios, cuja altura medida foi
+  2.486 px em 1440 px. Nenhum predicado funcional, de Axe, overflow, tema,
+  teclado ou zoom foi removido.
+
 ## 2026-10-06 - Gates de release sincronizados com a nova matriz
 
 - A segunda CI do PR (`37501848220`) aprovou validate, banco, build e advisors,

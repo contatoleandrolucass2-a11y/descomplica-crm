@@ -1053,6 +1053,16 @@
   cursor: pointer;
 }
 
+.admin-permission-option[data-editable="false"] {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.admin-permission-option[data-editable="false"] .admin-permission-state {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+}
+
 .admin-permission-option:nth-child(odd) {
   border-right: 1px solid var(--analytics-line);
 }
@@ -1102,6 +1112,7 @@
 
 .admin-permission-state {
   display: inline-flex;
+  max-width: 100%;
   min-height: 1.7rem;
   grid-column: 2;
   align-items: center;
@@ -1272,6 +1283,15 @@
   .admin-access-section-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-permission-option[data-editable="false"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .admin-permission-option[data-editable="false"] .admin-permission-state {
+    grid-column: 1;
+    grid-row: auto;
   }
 
   .admin-permission-toolbar > button,

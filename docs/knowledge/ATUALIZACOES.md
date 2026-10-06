@@ -4,6 +4,20 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-06: baseline de tela longa deve preservar legibilidade interna
+
+- Status: pendente_validacao; fonte: candidato visual da CI `37507333920` e
+  `scripts/qa/authenticated-visual.mjs`.
+- Uma mudanca intencional de altura nao torna toda diferenca aceitavel. Revisar
+  as capturas completas revelou que a grade somente leitura usava a primeira
+  coluna para o texto e deixava largura insuficiente ao selo na segunda.
+- A correcao explicita o modo editavel na linha: consulta usa texto + selo no
+  desktop e empilha o selo no celular. O limite global de densidade permanece
+  1.125 px; apenas `/admin/usuarios` admite 2.500 px para a matriz de 23
+  permissoes, medida em 2.486 px no candidato anterior.
+- Promover somente as referencias dessa rota depois de nova captura limpa e
+  manter Axe, overflow, temas, teclado e zoom como gates obrigatorios.
+
 ## 2026-10-06: gates de release também são consumidores da matriz de papéis
 
 - Status: validado localmente; fonte: CI `37501848220`,
