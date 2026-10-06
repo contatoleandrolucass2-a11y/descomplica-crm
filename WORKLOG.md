@@ -47,6 +47,23 @@
   oito perfis, sem incluir Repasse na baseline visual global que possui contrato
   dedicado. Nova CI pendente.
 
+## 2026-10-06 - Publicacao do saldo e ajudas do Associativo
+
+- PR #156 publicado no runtime `a89a93c07127b2ff1c5cdd4730a709fb1f973424`.
+  CI final do PR `37511669464` e da main `37515245924` aprovadas integralmente.
+- Mesma imagem comprovada por checksum, cadeia OCI/11 camadas e dois perfis
+  de runtime. Sharp 0.35.5/librsvg 2.63.2 aprovados no container sem rede.
+- Sobrecarga previa da VPS atrasou a preparacao; acesso e health recuperaram
+  antes da troca. Nenhum processo ou arquivo de outro trabalho foi removido.
+- Backup privado verificado, CAS da versao anterior e rollback preparados.
+  Health novo e guards aprovados; 12 requisicoes observacionais sem erros.
+- QA autenticado sintetico aprovado com 242 capturas; conferencia real no
+  Chrome aprovada apos login normal. Incluir/retirar anuais desconta/restaura
+  R$ 7.350,00, preservando Pro-Soluto e recalculando mensais/indicadores.
+  Brilho documental usa o mesmo ciclo de 9 s, sem atraso. Nenhuma proposta
+  gravada; teste removido ao recarregar. Registro documental posterior, sem
+  nova alteracao ou reinicio de runtime.
+
 ## 2026-10-06 - Correcao do gate de seguranca
 
 - CI `37506185905` aprovou lint/tipos/testes e bloqueou a auditoria com tres

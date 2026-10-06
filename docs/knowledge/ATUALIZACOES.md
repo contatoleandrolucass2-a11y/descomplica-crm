@@ -35,6 +35,22 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   inventário direto dos nove perfis: Repasse retorna `200` somente para Master e
   `403` para os demais; sua captura visual permanece no QA dedicado.
 
+## 2026-10-06: saldo do Associativo publicado com bases financeiras preservadas
+
+- Status: validado e publicado; fonte: PR #156, CI `37511669464`/`37515245924`
+  e `docs/audits/associativo-anuais-e-ajudas-2026-10-05.md`.
+- Runtime `a89a93c07127b2ff1c5cdd4730a709fb1f973424`; imagem/11 camadas e dois
+  perfis conferidos sem rebuild, backup/CAS/rollback e health/guards aprovados.
+- 7285 cenarios sinteticos/250197 comparacoes sem divergencias; 242 capturas
+  finais aprovadas. Isso nao equivale a todas as combinacoes nem aprovacao bancaria.
+- Sobrecarga de validacoes locais em outro checkout tornou SSH/HTTP lentos
+  antes do deploy. Aguardar recuperacao, medir health e preservar processos
+  alheios; suites extensas continuam exclusivas da CI/ambiente isolado.
+- Conferencia autenticada real aprovada apos login: incluir/retirar anuais
+  desconta/restaura R$ 7.350,00, preserva Pro-Soluto e recalcula indicadores.
+  CI sintetica e smoke publico aprovados. Nenhum dado remoto ou workflow n8n
+  foi alterado; os valores temporarios foram removidos ao recarregar a aba.
+
 ## 2026-10-06: revalidar advisories antes da publicacao
 
 - Status: pendente_validacao integral; fonte: CI `37506185905` e advisories
