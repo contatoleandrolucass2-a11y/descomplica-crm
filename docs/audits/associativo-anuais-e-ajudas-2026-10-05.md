@@ -2,7 +2,7 @@
 
 - Fonte: cinco capturas do usuario em 05/10/2026.
 - Branch: `codex/associativo-saldo-anuais`, base `de57b6a`.
-- Status: implementado e validado localmente; CI integrada e publicacao pendentes.
+- Status: validacao funcional integrada aprovada; referencias revisadas, CI final e publicacao pendentes.
 
 ## Causa e contrato financeiro
 
@@ -104,3 +104,21 @@ of type hosted even after multiple attempts`. PR #156 aberto; nao houve deploy.
   O componente nao renderiza aside sem selo ou acoes; outros simuladores
   preservam ambos. Regressao de navegador usa o cabecalho React real e rejeita
   reintroduzir cada elemento. Nova CI completa segue obrigatoria.
+
+## Revisao final em 06/10/2026
+
+- CI `37383133528`, tentativa 2, SHA `4a523345`: validate, restore e todos os
+  gates funcionais da matriz autenticada aprovados. A tentativa anterior teve
+  contraste transitorio em MKT; repeticao no mesmo codigo passou, sem alterar
+  a tela, desabilitar a regra ou mudar tolerancias.
+- Captura limpa `b8086bf6b953d908129b0c3b87398f28b764da1f`; artefato `11379134553`,
+  SHA-256 do ZIP `5818cd329c5e1fb7b52122eaac056fa5ce5b4b212946935d647075db883e992d`.
+  242 capturas, sem falhas de rotas, temas, teclado, zoom, axe ou canvas aprovado.
+  As 11 diferencas pertencem somente ao Associativo e a retirada do cabecalho.
+  Todas foram inspecionadas; 231 referencias preservadas por hash. Promocao
+  transacional canonica, limites de 1% e 16 por canal inalterados.
+- Revalidacao local: lint/tipos/build aprovados, 15 testes focados com navegador,
+  oito Node e 7285 cenarios/250197 comparacoes sem divergencias. Suite Windows:
+  1997 aprovados, seis condicionais, seis limitacoes POSIX e dois timeouts de
+  conhecimento; repeticao isolada 22/22 aprovada. CI Linux passou a suite integral.
+- Merge, CI da main, imagem imutavel, backup e verificacao de producao pendentes.

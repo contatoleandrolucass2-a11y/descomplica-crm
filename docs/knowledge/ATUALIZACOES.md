@@ -38,6 +38,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   Geometria do cabecalho ainda exigia o selo que o usuario retirou; contrato
   atualizado exige ausencia dos tres rotulos e do aside vazio, sem reduzir
   verificacoes de titulo, estoque ou navegacao. Publicacao ainda pendente.
+- Em 06/10, CI `37383133528` tentativa 2 aprovou todos os contratos funcionais.
+  11 capturas do Associativo revisadas por retirada do cabecalho; 231 referencias
+  preservadas. Promocao canonica com hashes e tolerancias originais. Repeticao
+  financeira: 7285 casos, 250197 comparacoes, zero erros; publicacao pendente.
 
 ## 2026-10-04: Recurso MKT em Configuracoes
 

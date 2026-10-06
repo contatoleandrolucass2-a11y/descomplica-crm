@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-06 - Validacao integrada do Associativo
+
+- CI `37383133528` tentativa 2: validate/restore e gates funcionais aprovados.
+- Artefato `11379134553`: 11 capturas revisadas da retirada dos tres rotulos;
+  231 referencias preservadas por hash, sem alterar tolerancias.
+- Revalidacao financeira: 7285 casos e 250197 comparacoes, zero divergencias.
+- Lint/tipos/build, 15 testes focados, oito Node aprovados. Suite Windows com
+  seis limitacoes POSIX e dois timeouts resolvidos isoladamente (22/22).
+- Evidencias no audit de anuais e ajudas; CI final, merge e deploy pendentes.
+
 ## 2026-10-05 - Saldo das anuais e ajudas do Associativo
 
 - Retomada da publicacao: CI Linux passou validate, banco, restore e E2E.

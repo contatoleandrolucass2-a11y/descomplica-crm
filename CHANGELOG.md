@@ -10,7 +10,8 @@
 - Mantem a camada de pintura e mede seu interior arredondado, sem ruido dos cantos.
 - Preserva a atualizacao de canvas concorrente na integracao do Associativo.
 - Remove o aside vazio e atualiza o QA de geometria para o cabecalho sem rotulos.
-- Publicacao pendente da CI integrada; disponibilidade de runners recuperada.
+- Atualiza apenas 11 referencias visuais revisadas do Associativo; preserva 231.
+- Validacao funcional integrada aprovada; CI final e publicacao pendentes.
 
 ## 2026-10-04 - Recurso MKT
 
