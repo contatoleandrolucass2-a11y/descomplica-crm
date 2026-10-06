@@ -158,3 +158,51 @@ of type hosted even after multiple attempts`. PR #156 aberto; nao houve deploy.
   2008 testes aprovados, seis condicionais e seis limitacoes POSIX no Windows.
   Oito testes Node, 34 focados, protocolo MCP e conversao Sharp PNG/WebP passaram.
   Suite integral Linux aprovada na CI. Sem alteracao de regras financeiras.
+
+## Publicacao em 06/10/2026
+
+- PR #156 integrado em `a89a93c07127b2ff1c5cdd4730a709fb1f973424`.
+  CI do PR `37511669464` e CI da main `37515245924` inteiramente aprovadas:
+  validate, banco, restore isolado, E2E, matriz autenticada e imagem promotable.
+- QA final do PR: captura limpa `da7a86a9681a0c8c7009423d6f5fbe811574b96a`,
+  artefato `11437446355`, ZIP SHA-256
+  `0a6224a947190b42eeccc35f1815d167e13544ca5df21795dae3b4f453bb7e87`.
+  242 capturas aprovadas, zero falhas de imagens, rotas ou temas; navegacao
+  archive aprovada. O caso nominal continua em R$ 34.594,22.
+- Artefato de imagem `11436493731`; ZIP SHA-256
+  `f2decefecd603445ba910c004e82b22bee79ccb205554e3a114032e1ee073955`.
+  Arquivo `image.tar.gz` verificado localmente e na VPS:
+  `fd625967c78fecc7816eff2a488223e9a03ecc0021f72f39c25bd8e8d5ff5fee`.
+- Config digest da CI:
+  `sha256:6dcd8884da2cf5252083033d6bdf48b50268f71c69b735968c7e0e421a6135f7`.
+  Manifesto carregado:
+  `sha256:39e6ea78fbb678fec1192ca546536ee0a7b2a82b9ea52374988056105bf7055a`.
+  Cadeia OCI e 11 camadas conferidas; mesma imagem, sem rebuild ou retag.
+  Dois perfis de runtime aprovados. Smoke nativo isolado sem rede confirmou
+  Sharp 0.35.5/librsvg 2.63.2 e conversao PNG/WebP de 8x8 pixels.
+- Antes da troca, SSH e HTTP ficaram temporariamente indisponiveis. A VPS
+  apresentou carga 209.82 e pressao de memoria/IO; havia validacao local de
+  outro checkout. Nenhum processo alheio foi encerrado. Acesso e health
+  recuperaram antes do deploy; health local medido em 0.014 s antes da troca.
+- Checkout limpo e separado em `/srv/descomplica-crm-releases/<SHA>`; trabalho
+  nao commitado em `/srv/descomplica-crm` preservado. Compose, wrapper e Nginx
+  mantidos. Sem migration, alteracao de dados, DNS ou workflows n8n.
+- Backup privado e checksums aprovados em
+  `/var/backups/descomplica-crm/releases/a89a93c07127b2ff1c5cdd4730a709fb1f973424.ZygxF4`.
+  Versao anterior `a22f4dc5580542b5a8e72f6a2b1c450974e45ed6`, imagem
+  `sha256:a10e0f8e30a3458b4a5673ff8f251e1d95a674deb5af2b6a90178c311b1c9677`.
+  CAS, lock de publicacao e rollback preparado; nenhuma reversao necessaria.
+- Pos-publicacao: container healthy, health local/publico no SHA novo;
+  estoque/snapshot anonimos 401 e rota protegida 307. Smoke adicional com
+  12 requisicoes, concorrencia 4, zero erros e no-store preservado. Nao e
+  teste de capacidade da producao.
+- Jornada autenticada real concluida depois do login normal do usuario, sem
+  contornar guard ou criar conta. Caso pontual com valores ficticios: tres
+  anuais de R$ 2.450,00 deduziram R$ 7.350,00 do saldo mensal; retirar as quatro
+  linhas (incluindo uma zerada) restaurou o saldo anterior. Pro-Soluto permaneceu
+  constante e comprometimento/maximo mensal recalcularam nos dois planos.
+- Resumo documental permaneceu calculado. Os dois cards usam a animacao
+  `associative-documentation-shine`, ciclo de 9 s e atraso de 0 s; continuidade
+  em pixels comprovada na CI. Cabecalho manteve somente o titulo solicitado.
+  Nenhuma proposta foi gravada, enviada ou impressa. A aba foi recarregada e
+  ficou aberta no estado inicial, sem valores temporarios do teste.
