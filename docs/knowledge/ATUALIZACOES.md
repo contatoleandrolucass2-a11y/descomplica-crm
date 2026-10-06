@@ -9,9 +9,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Status: pendente_validacao na CI; fonte: integracao de `a89a93c` na branch de
   acessos e artefatos compilados em `.next/static`.
 - Depois do merge, o fonte continha o novo brilho continuo do Associativo, mas
-  o chunk CSS incremental ainda continha a regra antiga com `animation-delay:
-4.5s`. Mover o `.next` gerado e reconstruir do zero produziu o chunk correto;
-  o contrato de pixels focado e as dez larguras da navegacao passaram.
+  o chunk CSS incremental ainda continha o atraso antigo de `4.5s` em
+  `animation-delay`. Mover o `.next` gerado e reconstruir do zero produziu o
+  chunk correto; o contrato de pixels focado e as dez larguras da navegacao
+  passaram.
 - Capturas locais extensas nao devem ser avaliadas sob contencao extrema. Um
   ensaio paralelo elevou a carga acima de 200 e causou timeout de teclado sem
   mudanca no produto. Nessa situacao, preservar os gates, registrar a uniao de
@@ -99,6 +100,22 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Evidências: 1.980 testes Vitest, oito Node, 1.099 pgTAP, lint, tipos, build e
   jornada autenticada sem violações Axe. Autorização da migration,
   reclassificação das três contas legadas e publicação continuam pendentes.
+
+## 2026-10-06: saldo do Associativo publicado com bases financeiras preservadas
+
+- Status: validado e publicado; fonte: PR #156, CI `37511669464`/`37515245924`
+  e `docs/audits/associativo-anuais-e-ajudas-2026-10-05.md`.
+- Runtime `a89a93c07127b2ff1c5cdd4730a709fb1f973424`; imagem/11 camadas e dois
+  perfis conferidos sem rebuild, backup/CAS/rollback e health/guards aprovados.
+- 7285 cenarios sinteticos/250197 comparacoes sem divergencias; 242 capturas
+  finais aprovadas. Isso nao equivale a todas as combinacoes nem aprovacao bancaria.
+- Sobrecarga de validacoes locais em outro checkout tornou SSH/HTTP lentos
+  antes do deploy. Aguardar recuperacao, medir health e preservar processos
+  alheios; suites extensas continuam exclusivas da CI/ambiente isolado.
+- Conferencia autenticada real aprovada apos login: incluir/retirar anuais
+  desconta/restaura R$ 7.350,00, preserva Pro-Soluto e recalcula indicadores.
+  CI sintetica e smoke publico aprovados. Nenhum dado remoto ou workflow n8n
+  foi alterado; os valores temporarios foram removidos ao recarregar a aba.
 
 ## 2026-10-06: revalidar advisories antes da publicacao
 

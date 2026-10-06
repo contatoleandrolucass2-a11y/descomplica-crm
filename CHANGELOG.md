@@ -60,6 +60,14 @@
 - Preserva contas legadas para reclassificação manual, sem presumir se cada uma
   pertence ao canal House ou Imob.
 
+## 2026-10-06 - Associativo publicado
+
+- Publica o saldo com anuais, as ajudas simplificadas, a retirada dos rotulos
+  solicitados e o brilho documental continuo no runtime `a89a93c0`.
+- CI integral, imagem imutavel, backup/CAS/rollback e health/guards aprovados.
+- Preserva motores financeiros, dados, autorizacao e trabalho paralelo na VPS.
+- Registro posterior de evidencias, sem nova alteracao de runtime.
+
 ## 2026-10-06 - Dependencias corrigidas para a publicacao
 
 - Atualiza Sharp para 0.35.5, source-map-js para 1.2.2 e o SDK MCP do Next
@@ -77,7 +85,7 @@
 - Preserva a atualizacao de canvas concorrente na integracao do Associativo.
 - Remove o aside vazio e atualiza o QA de geometria para o cabecalho sem rotulos.
 - Revisa e atualiza 11 capturas integradas do Associativo; preserva os temas da main.
-- Validacao funcional integrada aprovada; CI final e publicacao pendentes.
+- Validacao integrada e publicacao concluidas em 06/10/2026.
 
 ## 2026-10-05 - Calibracao dos temas Claro, Medio e Escuro
 
