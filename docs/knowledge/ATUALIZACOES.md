@@ -22,6 +22,14 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   `scripts/qa/repasse.mjs` e `docs/runbooks/repasse-google-sheet.md`. A matriz
   sintética passou 12 combinações de viewport/tema, Axe, teclado e quatro estados;
   credencial e privatização da fonte continuam pendentes e bloqueiam deploy.
+- O conector Drive disponível não tem permissão para compartilhar essa planilha
+  nem operação para revogar o acesso `anyone`; a VPS também não possui `gcloud`.
+  O proprietário deve privatizar a origem e provisionar a conta de serviço fora
+  do chat. Segredos entram diretamente no configurador root-only, nunca em texto,
+  argumento de processo, documentação ou Git.
+- Após integrar `main` em `a89a93c`, lint, tipos, 2027 testes Vitest, oito testes
+  Node e build das 44 rotas passaram localmente. Essa prova não substitui CI,
+  privatização, imagem promovível ou smoke de produção.
 
 ## 2026-10-06: revalidar advisories antes da publicacao
 

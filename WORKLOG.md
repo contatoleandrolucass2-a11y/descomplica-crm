@@ -31,6 +31,15 @@
   sem dado real. A matriz global avançou aos simuladores e encontrou seleções de
   tema intermitentes fora desta rota no banco local adiantado; nenhuma baseline
   foi promovida e esse ensaio não autoriza publicação.
+- Integração com `main` em `a89a93c` concluída no merge `c88ba5a`. Node 24.19.0
+  e pnpm 11.20.0; lint, typecheck, 2027 testes Vitest, oito testes Node e build
+  das 44 rotas passaram. Uma tentativa paralela de lint/tipos excedeu a memória
+  do host (`137`); a repetição sequencial de ambos passou sem alteração de código.
+- Diagnóstico de publicação confirmou a fonte ainda acessível anonimamente, sem
+  permissão de compartilhamento na identidade Google conectada e sem ferramenta
+  para revogar `anyone`. As duas variáveis `REPASSE_GOOGLE_*` também estão ausentes
+  do ambiente root-only da VPS. Nenhuma permissão, conta, segredo ou dado remoto
+  foi alterado; esses itens continuam bloqueando merge e deploy.
 
 ## 2026-10-06 - Correcao do gate de seguranca
 
