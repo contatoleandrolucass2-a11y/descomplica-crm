@@ -7,8 +7,8 @@ com contas QA sintéticas. O catálogo PostgreSQL mantém exatamente 17 entradas
 `app_pages`; o catálogo HTTP possui 24 rotas habilitadas para Master, pois
 acrescenta Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15,
 WF16/Documentação e a jornada visual CAIXA. A execução dos motores e a leitura
-da fonte privada de Repasse continuam contratos separados da autorização das
-páginas.
+server-side da fonte pública de Repasse continuam contratos separados da
+autorização das páginas; o RBAC do CRM não privatiza a planilha externa.
 
 Perfis exigidos:
 

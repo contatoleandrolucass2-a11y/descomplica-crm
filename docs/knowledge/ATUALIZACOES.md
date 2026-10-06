@@ -4,36 +4,45 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
-## 2026-10-06: consulta externa com dados pessoais exige origem privada
+## 2026-10-06: origem pública de repasse exige risco explícito e isolamento
 
-- Status: pendente_validacao; fonte: implementação e revisão independente da
-  consulta de repasse na branch `codex/repasse-map`.
-- Colocar autenticação no CRM não privatiza uma planilha cujo export aceita
-  leitura anônima. Antes de merge/publicação, remover o compartilhamento público
-  e usar conta de serviço exclusiva com escopo `spreadsheets.readonly`.
-- Para reduzir exposição, primeiro buscar metadados e somente a coluna de FIDs;
-  carregar as colunas pessoais apenas quando houver uma correspondência exata.
-  Duplicidade deve falhar antes da segunda leitura, e a segunda leitura precisa
-  revalidar unicidade e FID para impedir associação errada se linhas mudarem.
+- Status: pendente_validacao; fonte: implementação, revisão independente e decisão
+  expressa do responsável na branch `codex/repasse-map`.
+- Autenticação no CRM não privatiza uma planilha cujo export aceita leitura
+  anônima. O responsável decidiu manter esse compartilhamento em 06/10/2026;
+  portanto o risco de leitura fora do CRM é residual conhecido, não uma garantia
+  fornecida pelo RBAC Master-only.
+- O adapter server-only usa o datasource CSV público com documento, `gid`,
+  `headers=0` e intervalos fixos. `headers=0` evita que o Google infira cabeçalhos
+  e desloque os índices. Não há token, conta de serviço ou credencial Google no
+  runtime.
+- Para reduzir a projeção do CRM, primeiro buscar metadados e somente a coluna de
+  FIDs; carregar as colunas pessoais apenas quando houver uma correspondência
+  exata. Duplicidade deve falhar antes da segunda leitura, e a segunda leitura
+  precisa revalidar unicidade e FID se as linhas mudarem.
 - Server Action precisa repetir release gate e permissão, mesmo quando Proxy e
   página já validam. Nesta jornada a permissão existente Master-only
-  `crm.partnerships.view` limita o acesso sem migration remota.
+  `crm.partnerships.view` limita o acesso pela aplicação sem migration remota.
 - Evidências: `tests/repasse.test.ts`, `tests/repasse-action.test.ts`,
   `scripts/qa/repasse.mjs` e `docs/runbooks/repasse-google-sheet.md`. A matriz
-  sintética passou 12 combinações de viewport/tema, Axe, teclado e quatro estados;
-  credencial e privatização da fonte continuam pendentes e bloqueiam deploy.
-- O conector Drive disponível não tem permissão para compartilhar essa planilha
-  nem operação para revogar o acesso `anyone`; a VPS também não possui `gcloud`.
-  O proprietário deve privatizar a origem e provisionar a conta de serviço fora
-  do chat. Segredos entram diretamente no configurador root-only, nunca em texto,
-  argumento de processo, documentação ou Git.
+  sintética passou 12 combinações de viewport/tema, Axe, teclado e quatro estados.
+- O acesso e os dados remotos não foram modificados. Se a origem passar a privada,
+  o endpoint público deve falhar como indisponível até existir adapter autenticado;
+  não usar fallback que exponha segredos ao navegador.
+- A revisão de segurança do diff público terminou com cobertura completa e sem
+  achado reportável. Foram conferidos RBAC, SSRF/redirect, parser CSV, limites de
+  recursos e remoção de credenciais; 39 testes focados passaram. A limitação de
+  taxa da infraestrutura e a governança dos editores da planilha permanecem
+  controles operacionais externos, não garantias deste adapter.
 - Após integrar `main` em `a89a93c`, lint, tipos, 2027 testes Vitest, oito testes
-  Node e build das 44 rotas passaram localmente. Essa prova não substitui CI,
-  privatização, imagem promovível ou smoke de produção.
-- A primeira CI integrada provou build, banco e restore, e bloqueou porque a
-  lista esperada do smoke ainda tinha 23 rotas. Toda rota nova precisa entrar no
-  inventário direto dos nove perfis: Repasse retorna `200` somente para Master e
-  `403` para os demais; sua captura visual permanece no QA dedicado.
+  Node e build das 44 rotas passaram localmente. CI `37532954767` aprovou build,
+  banco, restore, autorização e matriz visual no SHA `a06ebad4`; a mudança de
+  adapter aprovou lint, tipos, 2.030 testes Vitest, oito testes Node, inventário
+  de recursos e build das 44 rotas no estado final local, mas ainda exige nova CI
+  e imagem promovível.
+- A primeira CI integrada detectou o inventário E2E antigo de 23 rotas. Toda rota
+  nova precisa entrar no contrato dos nove perfis: Repasse retorna `200` somente
+  para Master e `403` para os demais; sua captura visual permanece no QA dedicado.
 - Ao redimensionar uma página já renderizada, medir overflow no mesmo instante
   pode observar geometria intermediária. O QA deve aguardar fontes e amostras
   consecutivas estáveis de `innerWidth`, `clientWidth` e `scrollWidth`, e só então

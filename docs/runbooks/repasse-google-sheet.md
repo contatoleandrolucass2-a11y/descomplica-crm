@@ -8,18 +8,28 @@
   `NOME CLIENTE` e `MOTIVO`.
 - A célula `A1` informa a data da última atualização exibida pela página.
 
-A aplicação não escreve, reorganiza nem formata a planilha. A integração usa a
-Google Sheets API com escopo `spreadsheets.readonly` e conta de serviço somente
-no servidor. Primeiro lê `A1:F2` e apenas a coluna `A`; se houver exatamente um
-FID correspondente, relê a coluna `A` e busca `A:F` daquela linha no mesmo
-batch. O FID e a unicidade precisam permanecer iguais antes da projeção de B:F.
-O intervalo aberto `A3:A` evita falso `não encontrado` quando a planilha crescer;
-limites de linhas, bytes e schema convertem excesso em indisponibilidade.
+A aplicação não escreve, reorganiza nem formata a planilha. Por decisão expressa
+do responsável em 06/10/2026, a origem permanece publicada para leitura anônima.
+O servidor consulta o datasource Google Visualization fixo em
+`docs.google.com/spreadsheets/d/<id>/gviz/tq`, com `gid=798117742`, `headers=0`
+e saída CSV. Não há token, chave Google ou variável de credencial no runtime.
 
-O compartilhamento observado em 06/10/2026 ainda permitia leitura anônima do
-export. Esse estado bloqueia merge e publicação. A pessoa responsável pela conta
-deve remover o acesso público, compartilhar a planilha somente com a conta de
-serviço destinada à aplicação e autorizar especificamente essa mudança de acesso.
+Primeiro são lidos `A1:F2` e somente `A3:A`. Se houver exatamente um FID
+correspondente, o servidor relê `A3:A` e busca `A:F` daquela linha. O FID e a
+unicidade precisam permanecer iguais antes da projeção de B:F. O intervalo aberto
+evita falso `não encontrado` quando a planilha crescer; limites de linhas, bytes e
+schema convertem excesso em indisponibilidade.
+
+## Modelo de acesso
+
+- A rota do CRM e sua Server Action continuam Master-only. O navegador não recebe
+  o CSV, a URL da consulta nem linhas que não correspondam ao FID solicitado.
+- Essa autorização protege o fluxo do CRM, mas não privatiza a fonte. Enquanto o
+  compartilhamento público existir, pessoas com acesso ao endereço da planilha
+  podem consultá-la fora do CRM.
+- O risco residual foi mantido por decisão do responsável. Tornar a planilha
+  privada no futuro exige trocar o adapter e reintroduzir autenticação server-only
+  antes da mudança de compartilhamento, ou a consulta falhará como indisponível.
 
 ## Contrato de segurança
 
@@ -28,20 +38,20 @@ serviço destinada à aplicação e autorizar especificamente essa mudança de a
   `crm.partnerships.view`.
 - O gate de release também é revalidado na Server Action antes da autorização e
   de qualquer acesso à origem.
-- Entrada: somente 1 a 12 dígitos; o valor nunca compõe uma URL de destino.
-- Origem, planilha e aba são constantes server-only; redirects são rejeitados.
-- `REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL` e `REPASSE_GOOGLE_PRIVATE_KEY_BASE64` são
-  segredos obrigatórios do runtime. Ausência, chave inválida ou falta de acesso
-  falham fechado; nunca registrar seus valores ou incluí-los em imagem/artefato.
-- Consulta sem cache, timeout de 8 segundos e corpo limitado durante a leitura a
-  200.000 bytes.
+- Entrada: somente 1 a 12 dígitos; o valor nunca compõe a URL de destino.
+- Origem, planilha, aba e parâmetros são constantes server-only; redirects são
+  rejeitados.
+- Consulta sem cache, timeout de 8 segundos e corpo limitado a 200.000 bytes por
+  leitura.
+- O CSV aceita valores escapados, mas rejeita formato malformado, NUL, mais de seis
+  colunas ou mais de 50.000 linhas.
 - Os cabeçalhos `A2:F2` precisam corresponder exatamente ao contrato; mudança ou
   reordenação falha fechada antes de projetar qualquer registro.
 - A primeira leitura recebe apenas metadados e FIDs. Zero correspondências é
   `não encontrado`; duas ou mais indicam conflito e bloqueiam a leitura das
   colunas pessoais.
-- O navegador recebe apenas o DTO do registro exato; CSV e demais linhas não são
-  enviados. Erros externos viram mensagem recuperável sem detalhes da fonte.
+- O navegador recebe apenas o DTO do registro exato. Erros externos viram mensagem
+  recuperável sem detalhes da fonte.
 - FID, nome de cliente, motivo e conteúdo real da resposta não devem aparecer em
   logs, fixtures, screenshots versionadas ou notas de conhecimento. O QA visual
   usa somente um adaptador sintético restrito a loopback.
@@ -56,8 +66,7 @@ serviço destinada à aplicação e autorizar especificamente essa mudança de a
 
 ## Mudança da origem
 
-Se a aba, as colunas ou o modelo de compartilhamento mudarem, não ajustar
-por tentativa em produção. Atualizar o contrato e os testes com fixture sintética,
-validar uma consulta sem dados pessoais e repetir os gates de publicação. Antes de
-liberar, comprovar por requisição anônima que o export deixou de responder e por
-smoke autenticado que a conta de serviço enxerga somente a planilha autorizada.
+Se a aba, as colunas ou o modelo de compartilhamento mudarem, não ajustar por
+tentativa em produção. Atualizar o contrato e os testes com fixture sintética,
+validar os metadados sem registrar dados pessoais e repetir os gates de publicação.
+Acesso privado não possui fallback: precisa de um adapter autenticado aprovado.

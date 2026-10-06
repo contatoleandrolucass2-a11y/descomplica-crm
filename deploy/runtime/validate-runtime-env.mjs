@@ -1,4 +1,3 @@
-import { createPrivateKey } from "node:crypto";
 import { readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
@@ -56,40 +55,6 @@ function validateSecretFile(filePath) {
   }
 }
 
-function validateRepasseGoogleCredentials() {
-  const email = process.env.REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL ?? "";
-  if (!/^[a-z0-9._-]+@[a-z0-9-]+[.]iam[.]gserviceaccount[.]com$/u.test(email)) {
-    fail("REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL is invalid");
-  }
-
-  const encodedPrivateKey = process.env.REPASSE_GOOGLE_PRIVATE_KEY_BASE64 ?? "";
-  try {
-    if (
-      encodedPrivateKey.length < 1 ||
-      encodedPrivateKey.length > 32_768 ||
-      !/^[A-Za-z0-9+/]+={0,2}$/u.test(encodedPrivateKey)
-    ) {
-      fail("REPASSE_GOOGLE_PRIVATE_KEY_BASE64 is invalid");
-    }
-    const privateKey = Buffer.from(encodedPrivateKey, "base64");
-    if (
-      privateKey.toString("base64").replace(/=+$/u, "") !== encodedPrivateKey.replace(/=+$/u, "")
-    ) {
-      fail("REPASSE_GOOGLE_PRIVATE_KEY_BASE64 is invalid");
-    }
-    const key = createPrivateKey(privateKey);
-    if (key.type !== "private" || key.asymmetricKeyType !== "rsa") {
-      fail("REPASSE_GOOGLE_PRIVATE_KEY_BASE64 is invalid");
-    }
-    privateKey.fill(0);
-  } catch (error) {
-    if (error instanceof Error && error.message.startsWith("Runtime configuration invalid:")) {
-      throw error;
-    }
-    fail("REPASSE_GOOGLE_PRIVATE_KEY_BASE64 is invalid");
-  }
-}
-
 const homologationMode = exactBoolean("HOMOLOGATION_MODE", process.env.HOMOLOGATION_MODE);
 const publicSignupEnabled = exactBoolean(
   "PUBLIC_SIGNUP_ENABLED",
@@ -120,8 +85,6 @@ if (homologationMode) {
 ) {
   fail("production SUPABASE_URL must be an HTTPS Supabase project origin");
 }
-
-if (!homologationMode) validateRepasseGoogleCredentials();
 
 if (!/^[A-Za-z0-9._-]{20,2048}$/.test(process.env.SUPABASE_PUBLISHABLE_KEY ?? "")) {
   fail("SUPABASE_PUBLISHABLE_KEY is invalid");

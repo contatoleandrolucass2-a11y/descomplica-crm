@@ -5,8 +5,8 @@
 - Adiciona a guia protegida Repasse sob o Dashboard para consulta exata por FID.
 - Identifica claramente a assessoria M.A.P DE CAMPOS SOLUÇÕES e exibe fonte e
   data de atualização sem inventar valores ausentes.
-- Consulta a planilha privada pela Google Sheets API e uma conta de serviço
-  read-only, somente no servidor, sem cache, com timeout, limite de resposta em
+- Consulta o datasource CSV público da planilha somente no servidor, sem cache,
+  credencial Google ou nova dependência, com timeout, limite de resposta em
   streaming, validação de cabeçalhos, projeção mínima e bloqueio de FID duplicado.
 - Restringe a navegação e a consulta à permissão Master-only
   `crm.partnerships.view`, repete o gate na Server Action e mantém nomes e motivos
@@ -17,9 +17,9 @@
   preservando os mesmos limites e registrando somente diagnósticos sanitizados.
 - Entrega formulário, carregamento, inválido, não encontrado, conflito,
   indisponibilidade e resultado responsivo nos temas Claro, Médio e Escuro.
-- Não inclui migration, pacote novo, escrita na planilha ou mudança de acesso;
-  publicação permanece bloqueada enquanto a fonte com dados pessoais aceitar
-  leitura anônima.
+- Não inclui migration, pacote novo, escrita na planilha ou mudança de acesso.
+  O compartilhamento público foi mantido por decisão expressa do responsável;
+  o RBAC do CRM não substitui a política de acesso da origem externa.
 
 ## 2026-10-06 - Associativo publicado
 

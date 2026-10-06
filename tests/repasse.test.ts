@@ -1,18 +1,18 @@
-import { generateKeyPairSync } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { lookupRepasseByFid, RepasseSourceError } from "@/lib/crm/repasse/data";
 
-const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2_048 });
-const serviceAccountPrivateKey = privateKey.export({ format: "pem", type: "pkcs8" }).toString();
 const expectedHeaders = ["FID", "EMPREENDIMENTO", "ETAPA", "STATUS", "NOME CLIENTE", "MOTIVO"];
 
-function jsonResponse(payload: unknown, init?: ResponseInit) {
-  return new Response(JSON.stringify(payload), {
+function csvResponse(rows: Array<Array<string | number>>, init?: ResponseInit) {
+  const body = rows
+    .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))
+    .join("\r\n");
+  return new Response(body, {
     status: 200,
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "text/csv; charset=utf-8" },
     ...init,
   });
 }
@@ -22,78 +22,63 @@ function configureSource(options?: {
   recordRows?: Array<Array<string | number>>;
   verificationFidRows?: Array<Array<string | number>>;
   headers?: string[];
+  responseBody?: string;
+  responseContentType?: string;
 }) {
+  let fidReadCount = 0;
   const fetchMock = vi.fn((input: string | URL | Request, init?: RequestInit) => {
     const url = new URL(String(input));
-    expect(init).toMatchObject({ cache: "no-store", redirect: "error" });
-
-    if (url.origin === "https://oauth2.googleapis.com") {
-      expect(init?.method).toBe("POST");
-      expect(String(init?.body)).not.toContain(serviceAccountPrivateKey);
-      return Promise.resolve(
-        jsonResponse({
-          access_token: "synthetic-access-token",
-          expires_in: 3_600,
-          token_type: "Bearer",
-        }),
-      );
-    }
-
-    expect(url.origin).toBe("https://sheets.googleapis.com");
-    expect(init?.headers).toMatchObject({ Authorization: "Bearer synthetic-access-token" });
-    const ranges = url.searchParams.getAll("ranges");
-    if (ranges[0] === "'Table 1'!A1:F2") {
-      expect(ranges).toEqual(["'Table 1'!A1:F2", "'Table 1'!A3:A"]);
-      return Promise.resolve(
-        jsonResponse({
-          valueRanges: [
-            {
-              range: "'Table 1'!A1:F2",
-              majorDimension: "ROWS",
-              values: [
-                ["Relatório CCA - Assinatura - DATA DA ÚLTIMA ATUALIZAÇÃO: 06/10/2026"],
-                options?.headers ?? expectedHeaders,
-              ],
-            },
-            {
-              range: "'Table 1'!A3:A",
-              majorDimension: "ROWS",
-              values: options?.fidRows ?? [],
-            },
-          ],
-        }),
-      );
-    }
-
-    expect(ranges).toEqual(["'Table 1'!A3:A", "'Table 1'!A3:F3"]);
-    return Promise.resolve(
-      jsonResponse({
-        valueRanges: [
-          {
-            range: "'Table 1'!A3:A",
-            majorDimension: "ROWS",
-            values: options?.verificationFidRows ?? options?.fidRows ?? [],
-          },
-          {
-            range: "'Table 1'!A3:F3",
-            majorDimension: "ROWS",
-            values: options?.recordRows ?? [],
-          },
-        ],
-      }),
+    expect(url.origin).toBe("https://docs.google.com");
+    expect(url.pathname).toBe(
+      "/spreadsheets/d/1v0ST25OQrtd_LUXfGnX_9AI7GqNSQghADFzrE6k1DeE/gviz/tq",
     );
+    expect(url.searchParams.get("tqx")).toBe("out:csv");
+    expect(url.searchParams.get("gid")).toBe("798117742");
+    expect(url.searchParams.get("headers")).toBe("0");
+    expect(init).toMatchObject({ method: "GET", cache: "no-store", redirect: "error" });
+    const headers = new Headers(init?.headers);
+    expect(headers.get("accept")).toBe("text/csv");
+    expect(headers.has("authorization")).toBe(false);
+
+    if (options?.responseBody !== undefined) {
+      return Promise.resolve(
+        new Response(options.responseBody, {
+          status: 200,
+          headers: { "content-type": options.responseContentType ?? "text/csv" },
+        }),
+      );
+    }
+
+    const range = url.searchParams.get("range");
+    if (range === "A1:F2") {
+      return Promise.resolve(
+        csvResponse([
+          [
+            "Relatório CCA - Assinatura - DATA DA ÚLTIMA ATUALIZAÇÃO: 06/10/2026",
+            "",
+            "",
+            "",
+            "",
+            "",
+          ],
+          options?.headers ?? expectedHeaders,
+        ]),
+      );
+    }
+    if (range === "A3:A") {
+      fidReadCount += 1;
+      const rows =
+        fidReadCount > 1
+          ? (options?.verificationFidRows ?? options?.fidRows ?? [])
+          : (options?.fidRows ?? []);
+      return Promise.resolve(csvResponse(rows));
+    }
+    expect(range).toMatch(/^A\d+:F\d+$/u);
+    return Promise.resolve(csvResponse(options?.recordRows ?? []));
   });
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }
-
-beforeEach(() => {
-  vi.stubEnv("REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL", "repasse-reader@example.invalid");
-  vi.stubEnv(
-    "REPASSE_GOOGLE_PRIVATE_KEY_BASE64",
-    Buffer.from(serviceAccountPrivateKey).toString("base64"),
-  );
-});
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -101,17 +86,17 @@ afterEach(() => {
 });
 
 describe("consulta protegida de repasse", () => {
-  it("consulta somente a linha do FID exato e projeta o registro mínimo", async () => {
+  it("consulta somente a linha do FID exato e projeta CSV formatado", async () => {
     const fetchMock = configureSource({
       fidRows: [[123456]],
       recordRows: [
         [
           123456,
-          "Residencial Exemplo",
+          "Residencial, Exemplo",
           "Assinatura de contrato",
           "Repassado",
-          "Cliente Sintético",
-          "Repasse concluído.",
+          'Cliente "Sintético"',
+          "Repasse concluído.\nDocumentação validada.",
         ],
       ],
     });
@@ -120,14 +105,16 @@ describe("consulta protegida de repasse", () => {
       status: "ready",
       lastUpdated: "06/10/2026",
       record: {
-        empreendimento: "Residencial Exemplo",
+        empreendimento: "Residencial, Exemplo",
         etapa: "Assinatura de contrato",
         status: "Repassado",
-        nomeCliente: "Cliente Sintético",
-        motivo: "Repasse concluído.",
+        nomeCliente: 'Cliente "Sintético"',
+        motivo: "Repasse concluído.\nDocumentação validada.",
       },
     });
-    expect(fetchMock.mock.calls.some(([input]) => String(input).includes("A3%3AF3"))).toBe(true);
+    expect(
+      fetchMock.mock.calls.map(([input]) => new URL(String(input)).searchParams.get("range")),
+    ).toEqual(["A1:F2", "A3:A", "A3:A", "A3:F3"]);
   });
 
   it("distingue FID inexistente de duplicidade sem carregar colunas pessoais", async () => {
@@ -136,7 +123,14 @@ describe("consulta protegida de repasse", () => {
       status: "not_found",
       lastUpdated: "06/10/2026",
     });
-    expect(fetchMock.mock.calls.some(([input]) => String(input).includes("A3%3AF3"))).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(
+      fetchMock.mock.calls.some(
+        ([input]) =>
+          new URL(String(input)).searchParams.get("range")?.includes(":F") &&
+          new URL(String(input)).searchParams.get("range") !== "A1:F2",
+      ),
+    ).toBe(false);
 
     vi.unstubAllGlobals();
     fetchMock = configureSource({ fidRows: [[123456], [123456]] });
@@ -144,7 +138,7 @@ describe("consulta protegida de repasse", () => {
       status: "conflict",
       lastUpdated: "06/10/2026",
     });
-    expect(fetchMock.mock.calls.some(([input]) => String(input).includes("A3%3AF3"))).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("rejeita entrada fora do contrato antes de acessar a fonte", async () => {
@@ -178,6 +172,28 @@ describe("consulta protegida de repasse", () => {
     await expect(lookupRepasseByFid("123456")).rejects.toBeInstanceOf(RepasseSourceError);
   });
 
+  it("rejeita resposta pública que não seja CSV", async () => {
+    configureSource({
+      responseBody: "<html>indisponível</html>",
+      responseContentType: "text/html",
+    });
+
+    await expect(lookupRepasseByFid("123456")).rejects.toBeInstanceOf(RepasseSourceError);
+  });
+
+  it("rejeita CSV malformado e resposta acima do limite", async () => {
+    configureSource({
+      responseBody: '"campo sem fechamento',
+    });
+    await expect(lookupRepasseByFid("123456")).rejects.toBeInstanceOf(RepasseSourceError);
+
+    vi.unstubAllGlobals();
+    configureSource({
+      responseBody: "x".repeat(200_001),
+    });
+    await expect(lookupRepasseByFid("123456")).rejects.toBeInstanceOf(RepasseSourceError);
+  });
+
   it("revalida unicidade e FID antes de associar as colunas pessoais", async () => {
     configureSource({
       fidRows: [[123456]],
@@ -201,11 +217,15 @@ describe("consulta protegida de repasse", () => {
       new URL("../app/(protected)/app/repasse/actions.ts", import.meta.url),
       "utf8",
     );
+    const source = readFileSync(new URL("../lib/crm/repasse/data.ts", import.meta.url), "utf8");
 
     expect(page).toContain('await enforcePermission("crm.partnerships.view")');
     expect(page).toContain('getProtectedPageGate("/app/repasse")?.releaseEnabled');
     expect(action).toContain('await requirePermission("crm.partnerships.view")');
     expect(action).toContain("gate?.releaseEnabled !== true");
+    expect(source).toContain('GOOGLE_SHEETS_PUBLIC_ORIGIN = "https://docs.google.com"');
+    expect(source).toContain('url.searchParams.set("headers", "0")');
+    expect(source).not.toContain("REPASSE_GOOGLE_");
     expect(component).toContain("M.A.P DE CAMPOS SOLUÇÕES");
     expect(component).toContain('aria-live="polite"');
     expect(component).toContain("aria-invalid={invalid}");

@@ -57,8 +57,6 @@ readonly -a managed_keys=(
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   APP_ORIGIN
   AUTH_SESSION_COOKIE_SECRET_SOURCE
-  REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL
-  REPASSE_GOOGLE_PRIVATE_KEY_BASE64
   PUBLIC_SIGNUP_ENABLED
   SALESFORCE_INGEST_ENABLED
   SALESFORCE_REFRESH_ENABLED
@@ -174,34 +172,6 @@ validate_secret_key() {
 
 validate_machine_secret() {
   [[ "$1" =~ ^[A-Za-z0-9_-]{32,}$ ]]
-}
-
-validate_google_service_account_email() {
-  ((${#1} <= 254)) && [[ "$1" =~ ^[a-z0-9._-]+@[a-z0-9-]+\.iam\.gserviceaccount\.com$ ]]
-}
-
-validate_google_private_key_base64() {
-  node -e '
-    const { createPrivateKey } = require("node:crypto");
-    let input = "";
-    process.stdin.setEncoding("utf8");
-    process.stdin.on("data", chunk => { input += chunk; });
-    process.stdin.on("end", () => {
-      input = input.replace(/\r?\n$/, "");
-      try {
-        if (input.length < 1 || input.length > 32768 || !/^[A-Za-z0-9+/]+={0,2}$/.test(input)) {
-          process.exit(1);
-        }
-        const pem = Buffer.from(input, "base64");
-        const normalized = input.replace(/=+$/, "");
-        if (pem.toString("base64").replace(/=+$/, "") !== normalized) process.exit(1);
-        const key = createPrivateKey(pem);
-        process.exit(key.type === "private" && key.asymmetricKeyType === "rsa" ? 0 : 1);
-      } catch {
-        process.exit(1);
-      }
-    });
-  ' <<<"$1" >/dev/null 2>&1
 }
 
 validate_relay_key_id() {
@@ -470,19 +440,6 @@ prompt_value \
   yes \
   validate_publishable_key
 
-printf '\nA consulta de repasse exige uma conta de serviço Google com acesso somente\n'
-printf 'à planilha privada autorizada. A chave PKCS#8 deve ser informada em base64.\n'
-prompt_value \
-  REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL \
-  'REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL' \
-  no \
-  validate_google_service_account_email
-prompt_value \
-  REPASSE_GOOGLE_PRIVATE_KEY_BASE64 \
-  'REPASSE_GOOGLE_PRIVATE_KEY_BASE64' \
-  yes \
-  validate_google_private_key_base64
-
 ensure_session_cookie_secret
 
 if [[ "${values[SALESFORCE_INGEST_ENABLED]}" == "true" ]]; then
@@ -534,10 +491,6 @@ temporary_environment_file="$(mktemp --tmpdir="${environment_directory}" .produc
   printf 'APP_ORIGIN=%s\n' "${values[APP_ORIGIN]}"
   printf 'AUTH_SESSION_COOKIE_SECRET_SOURCE=%s\n' \
     "${values[AUTH_SESSION_COOKIE_SECRET_SOURCE]}"
-  printf 'REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL=%s\n' \
-    "${values[REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL]:-}"
-  printf 'REPASSE_GOOGLE_PRIVATE_KEY_BASE64=%s\n' \
-    "${values[REPASSE_GOOGLE_PRIVATE_KEY_BASE64]:-}"
   printf 'PUBLIC_SIGNUP_ENABLED=%s\n' "${values[PUBLIC_SIGNUP_ENABLED]}"
   printf 'SALESFORCE_INGEST_ENABLED=%s\n' "${values[SALESFORCE_INGEST_ENABLED]}"
   printf 'SALESFORCE_REFRESH_ENABLED=%s\n' "${values[SALESFORCE_REFRESH_ENABLED]}"

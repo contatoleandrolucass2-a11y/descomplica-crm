@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { generateKeyPairSync, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -97,19 +97,12 @@ async function main() {
   const secretSource = path.join(temporaryDirectory, "auth-session-secret");
 
   try {
-    const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2_048 });
-    const googlePrivateKeyFixture = Buffer.from(
-      privateKey.export({ format: "pem", type: "pkcs8" }),
-    ).toString("base64");
-    const googleServiceAccountFixture = "repasse-reader@release-proof.iam.gserviceaccount.com";
     await writeFile(secretSource, `${randomBytes(48).toString("base64url")}\n`, { mode: 0o640 });
     await chmod(secretSource, 0o640);
     const shared = [
       `IMAGE_TAG=${imageTag}`,
       `SUPABASE_PUBLISHABLE_KEY=${publishableFixture}`,
       `AUTH_SESSION_COOKIE_SECRET_SOURCE=${secretSource}`,
-      `REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL=${googleServiceAccountFixture}`,
-      `REPASSE_GOOGLE_PRIVATE_KEY_BASE64=${googlePrivateKeyFixture}`,
     ];
     await writeFile(
       productionEnvironment,
@@ -160,8 +153,6 @@ async function main() {
       AUTH_SESSION_COOKIE_SECRET_FILE: "/run/secrets/auth_session_cookie_secret",
       DEPLOYMENT_VERSION: imageTag,
       SUPABASE_PUBLISHABLE_KEY: publishableFixture,
-      REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL: googleServiceAccountFixture,
-      REPASSE_GOOGLE_PRIVATE_KEY_BASE64: googlePrivateKeyFixture,
     };
     await validateProfile(productionImage, proofCompose, secretSource, {
       ...commonRuntime,

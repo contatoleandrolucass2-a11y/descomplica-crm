@@ -10,21 +10,21 @@
 - A guia fica sob o Dashboard autorizado e exige a permissão Master-only
   `crm.partnerships.view` no Proxy, na página e na Server Action. O gate de release
   também é revalidado na ação. Assim o FID segue no corpo POST, não em URL ou referrer.
-- O DAL usa Sheets API read-only, planilha e aba fixas, conta de serviço
-  server-only, `no-store`, timeout de 8 segundos, leitura realmente limitada a
-  200 KB, bloqueio de redirects, validação dos seis cabeçalhos e DTO mínimo. A
-  primeira consulta traz apenas FIDs; B:F só é lido para uma correspondência
-  exata, com releitura da coluna e revalidação do FID antes de associar os dados.
-  O intervalo de FIDs é aberto até a última linha preenchida; excesso de bytes ou
-  schema falha fechado. Duplicidade falha antes dos dados pessoais.
+- O DAL consulta no servidor o datasource CSV público do Google, com documento,
+  `gid`, `headers=0` e intervalos fixos, `no-store`, timeout de 8 segundos, leitura
+  limitada a 200 KB, bloqueio de redirects, validação dos seis cabeçalhos e DTO
+  mínimo. A primeira consulta traz apenas FIDs; B:F só é lido para uma
+  correspondência exata, com releitura da coluna e revalidação do FID antes de
+  associar os dados. O intervalo de FIDs é aberto até a última linha preenchida;
+  excesso de bytes, linhas, colunas ou CSV inválido falha fechado. Duplicidade
+  falha antes dos dados pessoais.
 - A tela reutiliza tokens globais e troca tabela por blocos rotulados no celular.
   Claro, Médio e Escuro herdam superfícies, textos, bordas, foco e estados
   semânticos; cor nunca substitui o texto do status.
 - Sem migration, dependência, escrita remota, alteração de conta ou mudança de
-  compartilhamento. A revisão independente marcou a leitura anônima da planilha
-  com dados pessoais como bloqueio de publicação: privatização e credencial
-  server-only exigem autorização específica. Gates locais e PR serão registrados
-  após execução; deploy não será antecipado enquanto esse gate estiver aberto.
+  compartilhamento. Em 06/10/2026, o responsável decidiu manter a planilha
+  publicamente legível. O RBAC Master-only protege a jornada do CRM, mas não
+  privatiza a origem externa; esse risco residual fica explícito no runbook.
 - A jornada Repasse autenticada usou somente fixture loopback e aprovou `ready`,
   vazio, conflito, indisponível, teclado, ausência de overflow e Axe sem violações
   em 375/768/1024/1440 px nos três temas (12 combinações). Capturas inspecionadas
@@ -35,11 +35,16 @@
   e pnpm 11.20.0; lint, typecheck, 2027 testes Vitest, oito testes Node e build
   das 44 rotas passaram. Uma tentativa paralela de lint/tipos excedeu a memória
   do host (`137`); a repetição sequencial de ambos passou sem alteração de código.
-- Diagnóstico de publicação confirmou a fonte ainda acessível anonimamente, sem
-  permissão de compartilhamento na identidade Google conectada e sem ferramenta
-  para revogar `anyone`. As duas variáveis `REPASSE_GOOGLE_*` também estão ausentes
-  do ambiente root-only da VPS. Nenhuma permissão, conta, segredo ou dado remoto
-  foi alterado; esses itens continuam bloqueando merge e deploy.
+- Diagnóstico de publicação confirmou a fonte acessível anonimamente. Como o
+  responsável determinou que esse compartilhamento seja preservado, o adapter
+  passou a usar o endpoint público e as variáveis `REPASSE_GOOGLE_*` foram
+  removidas de Compose, validador, configurador e prova de imagem. Nenhuma
+  permissão, conta, segredo ou dado remoto foi alterado.
+- A revisão de segurança completa do diff público cobriu autorização, destino de
+  rede, parser CSV, limites de recursos e retirada das credenciais, sem achado
+  reportável. Três hipóteses foram validadas e descartadas como vulnerabilidade:
+  consistência entre snapshots, amplificação finita de leituras e segredo legado
+  inexistente no host. A suíte focada aprovou 39 testes.
 - CI `37521773216`: `validate` e `isolated-restore` passaram; `release-gates`
   encontrou o inventário E2E global ainda em 23 rotas, embora o link Repasse já
   estivesse corretamente visível ao Master. O contrato foi atualizado para 24
@@ -53,6 +58,11 @@
   agora aguarda fontes e geometria estável por frames consecutivos antes de
   executar as mesmas asserts; não altera CSS, baseline ou tolerância. Falhas
   futuras registram apenas viewport, tema, dimensões e geometria sanitizada.
+- CI `37532954767` aprovou `validate`, `isolated-restore` e `release-gates`,
+  incluindo a matriz visual completa, no SHA `a06ebad4`. A mudança posterior
+  para a origem pública aprovou localmente lint, tipos, 2.030 testes Vitest,
+  oito testes Node, inventário de recursos e build das 44 rotas. Uma nova CI
+  ainda é exigida antes do merge.
 
 ## 2026-10-06 - Publicacao do saldo e ajudas do Associativo
 

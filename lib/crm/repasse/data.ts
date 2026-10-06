@@ -1,16 +1,10 @@
 import "server-only";
 
-import { sign } from "node:crypto";
-
-import { z } from "zod";
-
 import type { RepasseRecord } from "./contracts";
 
 const REPASSE_SPREADSHEET_ID = "1v0ST25OQrtd_LUXfGnX_9AI7GqNSQghADFzrE6k1DeE";
-const REPASSE_SHEET_NAME = "Table 1";
-const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
-const GOOGLE_SHEETS_ORIGIN = "https://sheets.googleapis.com";
-const GOOGLE_SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
+const REPASSE_SHEET_GID = "798117742";
+const GOOGLE_SHEETS_PUBLIC_ORIGIN = "https://docs.google.com";
 const REPASSE_SOURCE_TIMEOUT_MS = 8_000;
 const REPASSE_SOURCE_MAX_BYTES = 200_000;
 const REPASSE_MAX_ROWS = 50_000;
@@ -30,27 +24,7 @@ const sourceDateFormatter = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "America/Sao_Paulo",
 });
 
-const tokenResponseSchema = z.object({
-  access_token: z.string().min(1),
-  expires_in: z.number().int().positive().max(3_600),
-  token_type: z.literal("Bearer"),
-});
-
-const sheetCellSchema = z.union([z.string(), z.number(), z.boolean()]);
-const sheetValuesSchema = z.object({
-  valueRanges: z
-    .array(
-      z.object({
-        range: z.string(),
-        majorDimension: z.literal("ROWS").optional(),
-        values: z.array(z.array(sheetCellSchema).max(6)).max(REPASSE_MAX_ROWS).optional(),
-      }),
-    )
-    .max(2),
-});
-
-type SheetCell = z.infer<typeof sheetCellSchema>;
-type SheetRow = SheetCell[];
+type SheetRow = string[];
 
 export type RepasseSourceResult =
   | { status: "not_found"; lastUpdated: string | null }
@@ -64,13 +38,10 @@ export class RepasseSourceError extends Error {
   }
 }
 
-let tokenCache: { value: string; expiresAt: number } | null = null;
-let tokenInFlight: Promise<string> | null = null;
-
 function cellText(row: SheetRow | undefined, index: number): string | null {
   const value = row?.[index];
   if (value === undefined) return null;
-  const text = String(value).trim();
+  const text = value.trim();
   return text === "" ? null : text;
 }
 
@@ -91,7 +62,7 @@ async function readBoundedBody(response: Response): Promise<string> {
       if (done) break;
       receivedBytes += value.byteLength;
       if (receivedBytes > REPASSE_SOURCE_MAX_BYTES) {
-        await reader.cancel();
+        void reader.cancel().catch(() => undefined);
         throw new RepasseSourceError();
       }
       chunks.push(value);
@@ -112,11 +83,12 @@ async function readBoundedBody(response: Response): Promise<string> {
   return new TextDecoder().decode(bytes);
 }
 
-async function fetchJson(url: URL | string, init: RequestInit) {
+async function fetchCsv(url: URL) {
   let response: Response;
   try {
     response = await fetch(url, {
-      ...init,
+      method: "GET",
+      headers: { Accept: "text/csv" },
       cache: "no-store",
       redirect: "error",
       signal: AbortSignal.timeout(REPASSE_SOURCE_TIMEOUT_MS),
@@ -125,105 +97,90 @@ async function fetchJson(url: URL | string, init: RequestInit) {
     throw new RepasseSourceError();
   }
   if (!response.ok) throw new RepasseSourceError();
-
-  try {
-    return JSON.parse(await readBoundedBody(response)) as unknown;
-  } catch (error) {
-    if (error instanceof RepasseSourceError) throw error;
-    throw new RepasseSourceError();
-  }
-}
-
-function base64UrlJson(value: object) {
-  return Buffer.from(JSON.stringify(value), "utf8").toString("base64url");
-}
-
-async function requestAccessToken() {
-  const email = process.env.REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
-  const encodedPrivateKey = process.env.REPASSE_GOOGLE_PRIVATE_KEY_BASE64?.trim();
-  if (!email || !encodedPrivateKey || encodedPrivateKey.length > 32_768) {
+  if (!response.headers.get("content-type")?.toLowerCase().startsWith("text/csv")) {
     throw new RepasseSourceError();
   }
 
-  let privateKey: string;
-  try {
-    privateKey = Buffer.from(encodedPrivateKey, "base64").toString("utf8").trim();
-  } catch {
-    throw new RepasseSourceError();
-  }
-  if (!privateKey.startsWith("-----BEGIN PRIVATE KEY-----")) throw new RepasseSourceError();
-
-  const issuedAt = Math.floor(Date.now() / 1_000);
-  const unsignedToken = [
-    base64UrlJson({ alg: "RS256", typ: "JWT" }),
-    base64UrlJson({
-      iss: email,
-      scope: GOOGLE_SHEETS_SCOPE,
-      aud: GOOGLE_TOKEN_URL,
-      iat: issuedAt,
-      exp: issuedAt + 3_600,
-    }),
-  ].join(".");
-
-  let signature: string;
-  try {
-    signature = sign("RSA-SHA256", Buffer.from(unsignedToken), privateKey).toString("base64url");
-  } catch {
-    throw new RepasseSourceError();
-  }
-
-  const body = new URLSearchParams({
-    grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-    assertion: `${unsignedToken}.${signature}`,
-  });
-  const parsed = tokenResponseSchema.safeParse(
-    await fetchJson(GOOGLE_TOKEN_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body,
-    }),
-  );
-  if (!parsed.success) throw new RepasseSourceError();
-
-  tokenCache = {
-    value: parsed.data.access_token,
-    expiresAt: Date.now() + parsed.data.expires_in * 1_000,
-  };
-  return tokenCache.value;
+  return readBoundedBody(response);
 }
 
-async function getAccessToken() {
-  if (tokenCache && tokenCache.expiresAt - Date.now() > 60_000) return tokenCache.value;
-  tokenInFlight ??= requestAccessToken().finally(() => {
-    tokenInFlight = null;
-  });
-  return tokenInFlight;
-}
-
-function buildValuesUrl(ranges: string[]) {
+function buildPublicRangeUrl(range: string) {
   const url = new URL(
-    `/v4/spreadsheets/${REPASSE_SPREADSHEET_ID}/values:batchGet`,
-    GOOGLE_SHEETS_ORIGIN,
+    `/spreadsheets/d/${REPASSE_SPREADSHEET_ID}/gviz/tq`,
+    GOOGLE_SHEETS_PUBLIC_ORIGIN,
   );
-  for (const range of ranges) url.searchParams.append("ranges", `'${REPASSE_SHEET_NAME}'!${range}`);
-  url.searchParams.set("majorDimension", "ROWS");
-  url.searchParams.set("valueRenderOption", "FORMATTED_VALUE");
-  url.searchParams.set("dateTimeRenderOption", "FORMATTED_STRING");
+  url.searchParams.set("tqx", "out:csv");
+  url.searchParams.set("gid", REPASSE_SHEET_GID);
+  url.searchParams.set("headers", "0");
+  url.searchParams.set("range", range);
   return url;
 }
 
-async function readRanges(ranges: string[]) {
-  const token = await getAccessToken();
-  const parsed = sheetValuesSchema.safeParse(
-    await fetchJson(buildValuesUrl(ranges), {
-      method: "GET",
-      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
-    }),
-  );
-  if (!parsed.success || parsed.data.valueRanges.length !== ranges.length) {
-    throw new RepasseSourceError();
+function parseCsv(sourceText: string, maximumColumns: number): SheetRow[] {
+  const source = sourceText.startsWith("\uFEFF") ? sourceText.slice(1) : sourceText;
+  if (source === "") return [];
+  if (source.includes("\0")) throw new RepasseSourceError();
+
+  const rows: SheetRow[] = [];
+  let row: SheetRow = [];
+  let field = "";
+  let state: "start" | "unquoted" | "quoted" | "after_quote" = "start";
+
+  const pushField = () => {
+    row.push(field);
+    if (row.length > maximumColumns) throw new RepasseSourceError();
+    field = "";
+    state = "start";
+  };
+  const pushRow = () => {
+    pushField();
+    rows.push(row);
+    if (rows.length > REPASSE_MAX_ROWS) throw new RepasseSourceError();
+    row = [];
+  };
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index]!;
+    if (state === "quoted") {
+      if (character !== '"') {
+        field += character;
+        continue;
+      }
+      if (source[index + 1] === '"') {
+        field += '"';
+        index += 1;
+        continue;
+      }
+      state = "after_quote";
+      continue;
+    }
+
+    if (character === ",") {
+      pushField();
+      continue;
+    }
+    if (character === "\r" || character === "\n") {
+      pushRow();
+      if (character === "\r" && source[index + 1] === "\n") index += 1;
+      continue;
+    }
+    if (state === "after_quote") throw new RepasseSourceError();
+    if (character === '"') {
+      if (state !== "start") throw new RepasseSourceError();
+      state = "quoted";
+      continue;
+    }
+    field += character;
+    state = "unquoted";
   }
-  return parsed.data.valueRanges.map((range) => range.values ?? []);
+
+  if (state === "quoted") throw new RepasseSourceError();
+  if (!source.endsWith("\n") && !source.endsWith("\r")) pushRow();
+  return rows;
+}
+
+async function readRange(range: string, maximumColumns: number) {
+  return parseCsv(await fetchCsv(buildPublicRangeUrl(range)), maximumColumns);
 }
 
 function parseLastUpdated(row: SheetRow | undefined): string | null {
@@ -301,10 +258,10 @@ export async function lookupRepasseByFid(fid: string): Promise<RepasseSourceResu
   const qaResult = localVisualQaResult(fid);
   if (qaResult) return qaResult;
 
-  const [metadataRows, fidRows] = await readRanges(["A1:F2", "A3:A"]);
-  validateSourceHeaders(metadataRows?.[1]);
-  const lastUpdated = parseLastUpdated(metadataRows?.[0]);
-  const matchingRowNumbers = (fidRows ?? []).flatMap((row, index) =>
+  const [metadataRows, fidRows] = await Promise.all([readRange("A1:F2", 6), readRange("A3:A", 1)]);
+  validateSourceHeaders(metadataRows[1]);
+  const lastUpdated = parseLastUpdated(metadataRows[0]);
+  const matchingRowNumbers = fidRows.flatMap((row, index) =>
     cellText(row, 0) === fid ? [index + 3] : [],
   );
 
@@ -312,17 +269,17 @@ export async function lookupRepasseByFid(fid: string): Promise<RepasseSourceResu
   if (matchingRowNumbers.length !== 1) return { status: "conflict", lastUpdated };
 
   const rowNumber = matchingRowNumbers[0]!;
-  const [verificationFidRows, recordRows] = await readRanges([
-    "A3:A",
-    `A${rowNumber}:F${rowNumber}`,
+  const [verificationFidRows, recordRows] = await Promise.all([
+    readRange("A3:A", 1),
+    readRange(`A${rowNumber}:F${rowNumber}`, 6),
   ]);
-  const verifiedMatches = (verificationFidRows ?? []).flatMap((row, index) =>
+  const verifiedMatches = verificationFidRows.flatMap((row, index) =>
     cellText(row, 0) === fid ? [index + 3] : [],
   );
   if (
     verifiedMatches.length !== 1 ||
     verifiedMatches[0] !== rowNumber ||
-    recordRows?.length !== 1 ||
+    recordRows.length !== 1 ||
     cellText(recordRows[0], 0) !== fid
   ) {
     throw new RepasseSourceError();
