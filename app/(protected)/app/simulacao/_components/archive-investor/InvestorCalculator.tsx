@@ -660,7 +660,7 @@ function AssociativePaymentSummary({
           label="Resumo das parcelas"
           title="Como este resumo é calculado"
             description={associativeHelp(
-              `Linear sem correção: base das mensais após anuais válidas ÷ ${installments || 0}.`,
+              `Linear sem correção: base das mensais ÷ ${installments || 0}. Nessa base, o simulador já retirou as anuais com reajuste. Por isso, ela pode diferir do Saldo parcelado, que usa os valores digitados.`,
               "Linear com correção: usa 0,5% ao mês antes do mês de entrega e 1,5% ao mês a partir do mês de entrega.",
               "Decrescente: separa o saldo em 4 blocos de 40%, 30%, 20% e 10%. As parcelas ficam menores a cada bloco.",
               "As datas seguem o mesmo calendário mensal da proposta.",
@@ -1133,7 +1133,7 @@ function AssociativeDocumentationPanel({
         </section>
 
         <section className="investor-associative-documentation-breakdown">
-          <header><h4>Composição</h4><InvestorInfoHint label="Composição da documentação" title="De onde vem o total?" description={associativeHelp(`O total soma ITBI, registro, despachante e Seguro Caixa. Modalidade usada: ${result.effectiveModality}.`, `Conta atual: ${money.format(result.itbi)} + ${money.format(result.totalRegistration)} + ${money.format(result.dispatchFee)} + ${money.format(result.caixaInsurance)} = ${money.format(result.totalCash)}.`, `Avaliação bancária: ${money.format(appraisalValue)}. Limite de financiamento: ${money.format(result.maximumFinancing)}. ${result.itbiRule}`)} /></header>
+          <header><h4>Composição</h4><InvestorInfoHint label="Composição da documentação" title="De onde vem o total?" description={associativeHelp(`Some o ITBI (imposto da compra), o registro no cartório, o despachante e o Seguro Caixa. Modalidade usada: ${result.effectiveModality}.`, `Conta: ${money.format(result.itbi)} + ${money.format(result.totalRegistration)} + ${money.format(result.dispatchFee)} + ${money.format(result.caixaInsurance)} = ${money.format(result.totalCash)}.`, `Valor avaliado pelo banco: ${money.format(appraisalValue)}. Financiamento máximo estimado: ${money.format(result.maximumFinancing)}. ${result.itbiRule} Confirme os custos com banco, prefeitura e cartório.`)} /></header>
           <dl>
             <div><dt>ITBI</dt><dd>{money.format(result.itbi)}</dd></div>
             <div><dt>Registro total</dt><dd>{money.format(result.totalRegistration)}</dd></div>
@@ -1399,7 +1399,7 @@ function AssociativeApprovalPanel({
       linearValue: approval.proSolutoRate,
       decreasingValue: approval.proSolutoRate,
       limit: tier?.proSolutoRate,
-      help: `Mostra quanto do imóvel ainda será parcelado após recursos, Entrada e Sinais. Anuais não entram nesta conta. Cálculo: ${money.format(proSoluto)} ÷ ${money.format(realSaleValue)} = ${formatRate(approval.proSolutoRate)}. O resultado precisa ficar igual ou abaixo do limite do Ranking.`,
+      help: `É a parte do preço que será paga à construtora nas mensais e anuais, sem reajuste. Por isso, inserir uma anual não diminui este percentual: só muda quando uma parte será paga. Conta: ${money.format(proSoluto)} ÷ ${money.format(realSaleValue)} = ${formatRate(approval.proSolutoRate)}. Precisa ficar dentro do limite do Ranking.`,
     },
     {
       id: "commitment",
@@ -1408,7 +1408,7 @@ function AssociativeApprovalPanel({
       decreasingValue: approval.decreasingCommitmentRate,
       limit: tier?.commitmentRate,
       help: installmentComparisonReady
-        ? `O sistema procura a maior parcela do cronograma e divide pela renda, sem somar a Evolução de Obra. Linear: ${money.format(linearInstallment ?? 0)} em ${formatPaymentDate(linearInstallmentDate)} = ${formatRate(approval.linearCommitmentRate)} da renda. Decrescente: ${money.format(decreasingInstallment ?? 0)} em ${formatPaymentDate(decreasingInstallmentDate)} = ${formatRate(approval.decreasingCommitmentRate)} da renda.`
+        ? `Mostra quanto da renda será usado na maior mensal com reajuste. Não soma anuais nem Evolução de Obra. Linear: ${money.format(linearInstallment ?? 0)} em ${formatPaymentDate(linearInstallmentDate)} = ${formatRate(approval.linearCommitmentRate)} da renda. Decrescente: ${money.format(decreasingInstallment ?? 0)} em ${formatPaymentDate(decreasingInstallmentDate)} = ${formatRate(approval.decreasingCommitmentRate)} da renda.`
         : "Complete a proposta para o sistema comparar as maiores parcelas dos fluxos Linear e Decrescente com a renda.",
     },
     {
@@ -1418,7 +1418,7 @@ function AssociativeApprovalPanel({
       decreasingValue: approval.decreasingMaximumIncomeRate,
       limit: tier?.annualIncomeLimitRate,
       help: comparisonReady
-        ? `O sistema procura o mês mais pesado: parcela corrigida + Evolução de Obra. Depois divide o total pela renda. Linear: ${money.format(linearMaximumIncomePayment ?? 0)} em ${formatPaymentDate(linearMaximumIncomeDate)} = ${formatRate(approval.linearMaximumIncomeRate)}. Decrescente: ${money.format(decreasingMaximumIncomePayment ?? 0)} em ${formatPaymentDate(decreasingMaximumIncomeDate)} = ${formatRate(approval.decreasingMaximumIncomeRate)}.`
+        ? `Mostra o mês com a maior soma de mensal com reajuste e Evolução de Obra. Essa evolução é uma estimativa da cobrança durante a construção. A soma é dividida pela renda. Linear: ${money.format(linearMaximumIncomePayment ?? 0)} em ${formatPaymentDate(linearMaximumIncomeDate)} = ${formatRate(approval.linearMaximumIncomeRate)}. Decrescente: ${money.format(decreasingMaximumIncomePayment ?? 0)} em ${formatPaymentDate(decreasingMaximumIncomeDate)} = ${formatRate(approval.decreasingMaximumIncomeRate)}. Anuais ficam fora deste indicador; reserve dinheiro para pagá-las também.`
         : comparisonUnavailableReason || "Complete a proposta para comparar o mês mais pesado de cada fluxo com a renda familiar.",
     },
   ];
@@ -2154,7 +2154,7 @@ function AssociativeInstallmentDialog({
         <p className="investor-associative-dialog-summary">
           <span>Entrada e sinais válidos aparecem primeiro.</span>
           <strong>{installments} mensais: {preInstallments} parcelas pré-chaves e {postInstallments} parcelas pós-chaves.</strong>
-          <span>Valores a pagar exibidos nesta tabela já estão corrigidos. Saldo parcelado antes da correção: <strong>{money.format(uncorrectedBalance)}</strong>. Anuais aparecem separadas e não reduzem esse saldo.</span>
+          <span>Os pagamentos desta tabela já incluem reajustes. Base usada para calcular as mensais: <strong>{money.format(uncorrectedBalance)}</strong>, já descontadas as anuais com reajuste. As anuais aparecem separadas para mostrar quando serão pagas.</span>
         </p>
         <nav className="investor-associative-comparison-tabs" aria-label="Exibição e impressão das parcelas">
           {[{ id: "comparison", label: "Tabela comparativa" }, { id: "decreasing", label: "Tabela Decrescente" }, { id: "linear", label: "Tabela Linear" }].map((item) => <button key={item.id} type="button" className={viewMode === item.id ? "active" : ""} aria-pressed={viewMode === item.id} onClick={() => setViewMode(item.id as typeof viewMode)}>{item.label}</button>)}
@@ -4029,7 +4029,7 @@ export function InvestorCalculator({
       <section className="investor-stock-panel" aria-labelledby="investor-stock-title">
         <header className="investor-section-heading">
           <span>01</span>
-          <div><p>Estoque SPC</p>{compactAssociativeStock ? <div className="investor-stock-title-row"><h2 id="investor-stock-title">Escolha a unidade</h2><InvestorInfoHint label="orientação dos filtros" title="Como usar os filtros?" description="Use os filtros para localizar uma unidade elegível para a Tabela Associativo. Vagas de garagem avulsas não são comercializadas nesta simulação." /></div> : <h2 id="investor-stock-title">Escolha a unidade</h2>}</div>
+          <div><p>Estoque SPC</p>{compactAssociativeStock ? <div className="investor-stock-title-row"><h2 id="investor-stock-title">Escolha a unidade</h2><InvestorInfoHint label="orientação dos filtros" title="Como usar os filtros?" description="Escolha os filtros para encontrar o imóvel. Confira a unidade, o preço e a entrega antes de começar. Esta simulação não vende vagas de garagem separadas do imóvel." /></div> : <h2 id="investor-stock-title">Escolha a unidade</h2>}</div>
           {compactAssociativeStock ? <div className="investor-stock-header-actions">
             {stockSync}
             <button className="investor-stock-clear" type="button" disabled={inventoryStatus !== "ready"} onClick={clearFilters}>Limpar filtros</button>
@@ -4437,7 +4437,7 @@ export function InvestorCalculator({
                       label="Valor real da venda"
                       fieldState="locked"
                       meta={associativeHelp(
-                        "É o preço usado na proposta. O sistema tira o B.A. da unidade e a folga de tabela do valor do imóvel com kit.",
+                        "É o preço usado na proposta. Do preço com kit, o sistema tira o bônus da unidade (B.A.) e a folga de tabela, que são os abatimentos já cadastrados para esse imóvel.",
                         `Conta atual: ${money.format(result.context.propertyValue)} − ${money.format(result.context.unitBonus)} − ${money.format(result.context.tableSlack)} = ${money.format(result.context.valueReal + result.context.discount)}.`,
                       )}
                       calculation={<AssociativeMoneyValue label="Valor real da venda" value={result.context.valueReal + result.context.discount} />}
@@ -4451,7 +4451,7 @@ export function InvestorCalculator({
                         fieldState="editable"
                         rowClassName="investor-associative-discount-line"
                         meta={associativeHelp(
-                          "Desconto comercial opcional. O valor informado reduz a base usada pelos recursos e pagamentos.",
+                          "Digite apenas o desconto autorizado pela empresa. Ele diminui o preço usado nesta proposta. O botão não autoriza um desconto por conta própria.",
                           `Conta atual: ${money.format(result.context.valueReal + result.context.discount)} − ${money.format(result.context.discount)} = ${money.format(result.context.valueReal)}.`,
                         )}
                         calculation={<AssociativeMoneyControl inputRef={discountInputRef} label="Desconto" value={discount} disabled={!associativeOptionalPaymentsUnlocked} onChange={setDiscount} />}
@@ -4462,7 +4462,7 @@ export function InvestorCalculator({
                         label="Valor do imóvel"
                         fieldState="locked"
                         meta={associativeHelp(
-                          "Valor após o desconto comercial. Esta é a base usada no financiamento e nos demais recursos.",
+                          "É o preço depois do desconto. Dele serão tirados o financiamento e os outros recursos da compra.",
                           `Conta atual: ${money.format(result.context.valueReal + result.context.discount)} − ${money.format(result.context.discount)} = ${money.format(result.context.valueReal)}.`,
                         )}
                         calculation={<AssociativeMoneyValue label="Valor do imóvel" value={result.context.valueReal} />}
@@ -4526,7 +4526,7 @@ export function InvestorCalculator({
                       meta={associativeHelp(
                         `Digite quanto o cliente pagará em ${formatDate(baseDate)}. O mínimo é ${money.format(150)}. Ajustes automáticos nunca diminuem este valor.`,
                         `Status atual: ${associativeEntryPending ? "entrada ainda não informada" : associativeEntryRejected ? "reprovada por ficar abaixo do mínimo" : "entrada válida"}.`,
-                        `Conta atual do saldo parcelado: ${money.format(result.context.balanceAfterResources)} − (${money.format(result.custom.actValue)} de entrada + ${money.format(result.custom.signalTotal)} de sinais válidos) = ${money.format(result.custom.balanceBeforeCorrection)}. As anuais não reduzem este saldo.`,
+                          `Depois da entrada e dos sinais, restam ${money.format(result.custom.balanceBeforeCorrection)} para pagar em mensais e anuais, antes dos reajustes. O Saldo parcelado também desconta as anuais válidas.`,
                       )}
                       calculation={<><AssociativeMoneyControl label="Entrada" describedBy="investor-entry-meta" invalid={associativeEntryUnlocked && associativeEntryRejected} disabled={!associativeEntryUnlocked} value={entryValue} onChange={updateEntryValue} /><span className="sr-only" id="investor-entry-meta" role={associativeEntryUnlocked && associativeEntryRejected ? "alert" : "status"} aria-live="polite" aria-atomic="true">{!associativeEntryUnlocked ? "Entrada bloqueada até concluir Financiamento, Subsídio, FGTS e Cheque Moradia" : associativeEntryPending ? "Informe a entrada" : associativeEntryRejected ? "Entrada reprovada" : "Entrada válida"}</span></>}
                       invalid={associativeEntryUnlocked && associativeEntryRejected}
@@ -4552,6 +4552,7 @@ export function InvestorCalculator({
                       return <AssociativeEditableAccountRow
                         key={index}
                         label={`Sinal ${index + 1}`}
+                        operator="−"
                         date={signal.date || undefined}
                         rowClassName="payment-group-child payment-group-child-signal"
                         fieldState="editable"
@@ -4581,15 +4582,16 @@ export function InvestorCalculator({
                       return <AssociativeEditableAccountRow
                         key={item.index}
                         label={`Anual ${item.index}`}
+                        operator="−"
                         date={item.date || undefined}
                         rowClassName="payment-group-child payment-group-child-annual"
                         fieldState="editable"
                         leadingAction={<button type="button" className="investor-associative-row-remove" aria-label={`Ocultar Anual ${item.index} e zerar valor`} title={`Ocultar Anual ${item.index}`} disabled={!associativeOptionalPaymentsUnlocked} onClick={() => hideIntermediaryField(index)}><span aria-hidden="true">×</span></button>}
                         meta={associativeHelp(
-                          `Pagamento opcional em ${item.date ? formatDate(item.date) : "data ainda indisponível"}. A anual não reduz o Pró-Soluto nem o Saldo parcelado; ela reduz somente a base distribuída nas mensais e ajuda nos indicadores de renda.`,
+                          `Pagamento extra em ${item.date ? formatDate(item.date) : "data ainda indisponível"}. Quando válido, sai do Saldo parcelado e deixa menos para dividir nas mensais. Não é desconto no preço e não diminui o Pró-Soluto. Limite por anual: ${money.format(associativeAnnualIncomeLimit)} (50% da renda).`,
                           active && item.approved
-                            ? `Fórmula: valor informado × 1,005 × 1,005^${result.custom.linear?.annualSchedule?.[index]?.months ?? 0}.`
-                            : "A anual só entra no cálculo quando possui valor e respeita as regras mostradas na tela.",
+                            ? "O valor a pagar recebe um reajuste inicial de 0,5% e mais 0,5% por mês até o vencimento."
+                            : "A anual só entra na conta quando tem valor e uma data válida. Confira também o limite da renda.",
                           active && item.approved
                             ? `Conta atual: ${money.format(item.value)} × 1,005 × 1,005^${result.custom.linear?.annualSchedule?.[index]?.months ?? 0} = ${money.format(item.correctedValue)}. Status: ${item.reason}.`
                             : `Conta atual: ${money.format(item.value)} considerada como ${money.format(0)} no total corrigido. Status: ${active ? item.reason : "não usada"}.`,
@@ -4600,7 +4602,7 @@ export function InvestorCalculator({
                       />;
                     })}
 
-                    <AssociativeEditableAccountRow number={18} operator="=" label="Saldo parcelado" fieldState="locked" meta={associativeHelp("É o Pró-Soluto antes da correção. Anuais não alteram este valor.", `Conta atual: saldo após recursos ${money.format(result.context.balanceAfterResources)} − entrada ${money.format(result.custom.actValue)} − sinais ${money.format(result.custom.signalTotal)} = ${money.format(result.custom.balanceBeforeCorrection)}. Base das mensais após anuais: ${money.format(result.custom.installmentBalanceBeforeCorrection)}.`)} calculation={<AssociativeMoneyValue label="Saldo parcelado" value={result.custom.balanceBeforeCorrection} />} total />
+                    <AssociativeEditableAccountRow number={18} operator="=" label="Saldo parcelado" fieldState="locked" meta={associativeHelp("É o que sobra para as mensais usando os valores digitados, sem reajustes. Entrada, sinais e anuais válidas já foram descontados.", `Conta: ${money.format(result.context.balanceAfterResources)} − ${money.format(result.custom.actValue)} de entrada − ${money.format(result.custom.signalTotal)} de sinais − ${money.format(result.custom.annualNominalTotal)} de anuais = ${money.format(result.custom.installmentNominalBalance)}.`, `Para calcular as parcelas, a regra usa as anuais com reajuste. Essa base é ${money.format(result.custom.installmentBalanceBeforeCorrection)}. O Pró-Soluto inclui mensais e anuais; por isso, não diminui ao inserir uma anual.`)} calculation={<AssociativeMoneyValue label="Saldo parcelado" value={result.custom.installmentNominalBalance} />} total />
 
                     <AssociativeEditableAccountRow
                       number={19}
@@ -4680,7 +4682,7 @@ export function InvestorCalculator({
                   installments={result.custom.desiredInstallments}
                   preInstallments={result.custom.preInstallments}
                   postInstallments={result.custom.postInstallments}
-                  uncorrectedBalance={result.custom.balanceBeforeCorrection}
+                  uncorrectedBalance={result.custom.installmentBalanceBeforeCorrection}
                 />
                 <AssociativeReadyProposalDialog
                   dialogRef={associativeReadyProposalDialog}

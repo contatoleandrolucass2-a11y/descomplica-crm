@@ -21,11 +21,11 @@ export function SimulationCanvasHeader({
   titleAccessory,
   actions,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   subtitle?: string;
-  description: string;
-  statusLabel: string;
+  description?: string;
+  statusLabel?: string;
   statusTone?: CanvasHeaderTone;
   titleAccessory?: ReactNode;
   actions?: ReactNode;
@@ -33,24 +33,28 @@ export function SimulationCanvasHeader({
   return (
     <div className="simulation-canvas-header" data-simulation-page-heading>
       <div className="simulation-canvas-header-copy">
-        <p className="simulation-canvas-eyebrow">{eyebrow}</p>
+        {eyebrow ? <p className="simulation-canvas-eyebrow">{eyebrow}</p> : null}
         <div className="simulation-canvas-title-row">
           <h1>{title}</h1>
           {titleAccessory}
         </div>
         {subtitle ? <p className="simulation-canvas-subtitle">{subtitle}</p> : null}
-        <p className="simulation-canvas-description">{description}</p>
+        {description ? <p className="simulation-canvas-description">{description}</p> : null}
       </div>
-      <div className="simulation-canvas-header-aside">
-        <span
-          className={`simulation-canvas-status simulation-canvas-status-${statusTone}`}
-          role="status"
-        >
-          <InformationIcon />
-          <span>{statusLabel}</span>
-        </span>
-        {actions ? <div className="simulation-canvas-actions">{actions}</div> : null}
-      </div>
+      {statusLabel || actions ? (
+        <div className="simulation-canvas-header-aside">
+          {statusLabel ? (
+            <span
+              className={`simulation-canvas-status simulation-canvas-status-${statusTone}`}
+              role="status"
+            >
+              <InformationIcon />
+              <span>{statusLabel}</span>
+            </span>
+          ) : null}
+          {actions ? <div className="simulation-canvas-actions">{actions}</div> : null}
+        </div>
+      ) : null}
     </div>
   );
 }
