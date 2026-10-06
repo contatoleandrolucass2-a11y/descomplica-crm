@@ -141,3 +141,20 @@ of type hosted even after multiple attempts`. PR #156 aberto; nao houve deploy.
   24.19.0/pnpm 11.20.0. Nenhuma excecao de auditoria ou politica foi adicionada.
 - Auditoria sem vulnerabilidades conhecidas; protocolos Next/Chrome e docs
   locais aprovados, 34 testes focados aprovados. Gates completos em repeticao.
+
+## Captura integrada com seguranca corrigida
+
+- CI `37507557118`, HEAD `651b8438`: validate, banco, restore, autorizacao e
+  todos os contratos funcionais da matriz autenticada aprovados. Somente as
+  11 referencias antigas do cabecalho Associativo divergiram, como esperado.
+- Captura limpa `e0e0ce9a1708e0fbd521342d890318338332bfc9`, artefato
+  `11435466969`, ZIP SHA-256
+  `78cde38884fed710e13fc07bf9bfa1cdd9d62386d7bfaf659856b3caa647d1e1`.
+  Todas as 11 imagens foram revistas em sete larguras e tres temas: titulo
+  preservado, sem textos retirados ou aside vazio, filtros e estoque integros.
+- Promocao canonica e transacional: 11 referencias atualizadas, 231 preservadas
+  por hash; limiares de 1% e 16 por canal inalterados. Nova CI final obrigatoria.
+- Revalidacao local com dependencias corrigidas: lint/tipos/build aprovados;
+  2008 testes aprovados, seis condicionais e seis limitacoes POSIX no Windows.
+  Oito testes Node, 34 focados, protocolo MCP e conversao Sharp PNG/WebP passaram.
+  Suite integral Linux aprovada na CI. Sem alteracao de regras financeiras.

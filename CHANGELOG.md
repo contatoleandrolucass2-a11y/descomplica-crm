@@ -16,7 +16,7 @@
 - Mantem a camada de pintura e mede seu interior arredondado, sem ruido dos cantos.
 - Preserva a atualizacao de canvas concorrente na integracao do Associativo.
 - Remove o aside vazio e atualiza o QA de geometria para o cabecalho sem rotulos.
-- Revisa 11 capturas do Associativo; nova captura integrada preserva os temas da main.
+- Revisa e atualiza 11 capturas integradas do Associativo; preserva os temas da main.
 - Validacao funcional integrada aprovada; CI final e publicacao pendentes.
 
 ## 2026-10-05 - Calibracao dos temas Claro, Medio e Escuro

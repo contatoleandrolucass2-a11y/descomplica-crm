@@ -13,6 +13,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   auditoria voltou a zero, sem ignorar alertas nem reduzir gates.
 - Protocolo dos MCPs e docs locais aprovados; 34 testes focados aprovados.
   Repetir CI Linux, imagem e QA integrado antes da publicacao.
+- CI `37507557118` aprovou Linux, banco, restore, autorizacao e contratos
+  funcionais. 11 capturas do Associativo revistas na combinacao atual e
+  promovidas, mantendo 231 por hash. CI final e publicacao ainda obrigatorias.
 
 ## 2026-10-05: saldo nominal e base financeira do Associativo
 

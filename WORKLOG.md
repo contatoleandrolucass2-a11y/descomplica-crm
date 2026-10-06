@@ -11,6 +11,12 @@
 
 ## 2026-10-06 - Validacao integrada do Associativo
 
+- CI `37507557118`: todos os contratos funcionais aprovados com temas atuais e
+  dependencias corrigidas. Captura `e0e0ce9a`, artefato `11435466969`: 11 imagens
+  do cabecalho revisadas e promovidas; 231 preservadas por hash. Limiares intactos.
+- Revalidacao local: lint/tipos/build, 2008 testes, oito Node e 34 focados passaram;
+  seis limitacoes POSIX e seis condicionais no Windows, suite Linux aprovada.
+
 - CI `37383133528` tentativa 2: validate/restore e gates funcionais aprovados.
 - Artefato `11379134553`: 11 capturas revisadas da retirada dos tres rotulos;
   231 referencias preservadas por hash, sem alterar tolerancias.
