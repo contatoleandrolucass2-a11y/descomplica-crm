@@ -126,3 +126,18 @@ of type hosted even after multiple attempts`. PR #156 aberto; nao houve deploy.
   Integracao preserva codigo e baseline completos dessa entrega; as 11 imagens
   promovidas acima ficam no historico. A combinacao precisa de nova CI e captura,
   sem reaproveitar imagens antigas para aprovar cores novas. Motores inalterados.
+
+## Correcao de seguranca em 06/10/2026
+
+- CI `37506185905`, SHA `6e37c58c`, aprovou lint/tipos/testes, mas detectou tres
+  alertas altos novos. Demais gates e publicacao foram bloqueados.
+- [Sharp GHSA-wq5f-xc86-pv6w](https://github.com/advisories/GHSA-wq5f-xc86-pv6w):
+  atualizado para 0.35.5, com dependencias nativas correspondentes.
+- [source-map-js GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q):
+  override minimo para 1.2.2 nos consumidores existentes.
+- [SDK MCP GHSA-6qxp-vccf-f47h](https://github.com/modelcontextprotocol/typescript-sdk/security/advisories/GHSA-6qxp-vccf-f47h):
+  override restrito ao Next DevTools atualizado para 1.31.0.
+- Versoes e integridades verificadas no registry; instalacao normal com Node
+  24.19.0/pnpm 11.20.0. Nenhuma excecao de auditoria ou politica foi adicionada.
+- Auditoria sem vulnerabilidades conhecidas; protocolos Next/Chrome e docs
+  locais aprovados, 34 testes focados aprovados. Gates completos em repeticao.

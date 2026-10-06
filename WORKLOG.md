@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-06 - Correcao do gate de seguranca
+
+- CI `37506185905` aprovou lint/tipos/testes e bloqueou a auditoria com tres
+  alertas altos novos. Publicacao interrompida antes de qualquer deploy.
+- Sharp 0.35.5, source-map-js 1.2.2 e SDK MCP 1.31.0 instalados pelas versoes
+  corrigidas dos advisories oficiais; lockfile gerado por pnpm 11.20.0.
+- Auditoria sem vulnerabilidades conhecidas; protocolo dos dois DevTools e
+  docs locais aprovados. 34 testes focados aprovados; nova CI completa pendente.
+
 ## 2026-10-06 - Validacao integrada do Associativo
 
 - CI `37383133528` tentativa 2: validate/restore e gates funcionais aprovados.

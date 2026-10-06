@@ -4,6 +4,16 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-06: revalidar advisories antes da publicacao
+
+- Status: pendente_validacao integral; fonte: CI `37506185905` e advisories
+  oficiais registrados no audit de anuais e ajudas do Associativo.
+- Um lockfile validado no dia anterior pode receber alertas novos. Corrigidos
+  Sharp 0.35.5, source-map-js 1.2.2 e SDK MCP transitivo do Next 1.31.0;
+  auditoria voltou a zero, sem ignorar alertas nem reduzir gates.
+- Protocolo dos MCPs e docs locais aprovados; 34 testes focados aprovados.
+  Repetir CI Linux, imagem e QA integrado antes da publicacao.
+
 ## 2026-10-05: saldo nominal e base financeira do Associativo
 
 - Status: pendente_validacao; fonte: audit de anuais e ajudas de 05/10/2026,

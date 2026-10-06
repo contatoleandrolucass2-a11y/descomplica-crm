@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-06 - Dependencias corrigidas para a publicacao
+
+- Atualiza Sharp para 0.35.5, source-map-js para 1.2.2 e o SDK MCP do Next
+  DevTools para 1.31.0, corrigindo tres alertas altos sem excecoes de auditoria.
+- Preserva Node 24.19.x, pnpm 11.20.x e os limites dos MCPs locais.
+
 ## 2026-10-05 - Saldo e comunicacao do Associativo
 
 - Desconta as anuais digitadas no campo Saldo parcelado e explica a diferenca
