@@ -72,6 +72,7 @@
       "skill": "descomplica-dados-integracoes",
       "routes": [
         "app/(protected)/app/page.tsx",
+        "app/(protected)/app/repasse/page.tsx",
         "app/(protected)/app/etapas/[stage]/page.tsx",
         "app/(protected)/app/ranking/page.tsx",
         "app/(protected)/app/canal-de-parcerias/page.tsx",
@@ -79,6 +80,9 @@
       ],
       "evidence": [
         "tests/dashboard.test.ts",
+        "tests/repasse.test.ts",
+        "tests/repasse-action.test.ts",
+        "scripts/qa/repasse.mjs",
         "tests/ranking.test.ts",
         "tests/source-availability.test.ts",
         "supabase/tests/partnerships_rbac_convergence.test.sql"

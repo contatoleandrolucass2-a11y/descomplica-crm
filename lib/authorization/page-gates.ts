@@ -7,8 +7,8 @@ export interface ProtectedPageGate {
   releaseEnabled: boolean;
 }
 
-// Covers the complete 22-route HTTP smoke inventory. Seventeen entries mirror
-// app_pages; five additional simulator routes are released through the protected
+// Covers the complete protected HTTP smoke inventory. Seventeen entries mirror
+// app_pages; released supplemental routes are exposed through the protected
 // server-built navigation only after the catalog parent and effective permission
 // are authorized. The CAIXA page is released only as a protected visual journey;
 // its independent runtime and execution gates remain fail-closed. Database
@@ -19,6 +19,12 @@ export const PROTECTED_PAGE_GATES = [
     pageKey: "crm.dashboard",
     path: "/app",
     permission: "crm.dashboard.view",
+    releaseEnabled: true,
+  },
+  {
+    pageKey: "crm.repasse",
+    path: "/app/repasse",
+    permission: "crm.partnerships.view",
     releaseEnabled: true,
   },
   {

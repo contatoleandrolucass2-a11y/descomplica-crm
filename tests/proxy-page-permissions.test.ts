@@ -41,6 +41,7 @@ afterEach(() => {
 describe("pre-stream page permission gates", () => {
   it.each([
     ["/app", "crm.dashboard.view"],
+    ["/app/repasse", "crm.partnerships.view"],
     ["/app/etapas/oportunidades", "crm.stages.view"],
     ["/app/ranking", "crm.ranking.view"],
     ["/app/canal-de-parcerias", "crm.partnerships.view"],

@@ -164,6 +164,7 @@ describe("archive navigation evidence gate", () => {
     expect(gate).toContain('shellContract: "unified-protected-shell-v1"');
     expect(gate).toContain("await ensureArchiveNavigationOpen(page);");
     expect(gate).toContain('"Metas de parcerias", "/app/configuracoes/metas/parcerias"');
+    expect(gate).toContain('["Repasse", "/app/repasse"]');
     expect(gate).toContain("exactAuthorizedRootNavigation");
     expect(gate).toContain("exactAuthorizedAccountNavigation");
     expect(gate).toContain("width: 1280, height: 720");

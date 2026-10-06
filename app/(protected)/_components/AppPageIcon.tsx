@@ -2,6 +2,7 @@ function iconCategory(pageKey: string) {
   if (pageKey.startsWith("crm.simulation")) return "calculator";
   if (pageKey.startsWith("crm.settings")) return "settings";
   if (pageKey.startsWith("crm.stage")) return "funnel";
+  if (pageKey === "crm.repasse") return "repasse";
   if (pageKey === "crm.ranking") return "trophy";
   if (pageKey === "crm.partnerships") return "partners";
   if (pageKey.startsWith("admin")) return "shield";
@@ -37,6 +38,11 @@ export function AppPageIcon({ pageKey }: { pageKey: string }) {
           <circle cx="8" cy="9" r="3" />
           <circle cx="17" cy="10" r="2.5" />
           <path d="M3.5 20v-1.5A4.5 4.5 0 0 1 8 14h1a4.5 4.5 0 0 1 4.5 4.5V20M14.5 15.5a4 4 0 0 1 6 3.5v1" />
+        </>
+      ) : null}
+      {category === "repasse" ? (
+        <>
+          <path d="M4 21h16M6 21V7l6-4 6 4v14M9 10h1M14 10h1M9 14h1M14 14h1M9 18h1M14 18h1" />
         </>
       ) : null}
       {category === "shield" ? (
