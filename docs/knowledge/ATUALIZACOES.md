@@ -21,6 +21,12 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   zero override e zero auditoria. O schema legado continua no ramo sem helper.
   Fechamento: formato, lint, tipos, inventário, segredos, build, 1.980 Vitest,
   oito testes Node e 1.099 pgTAP aprovados; lint e advisors do banco sem achados.
+- A CI pode passar localmente e receber advisories novos antes da publicação.
+  O audit do PR bloqueou `source-map-js` 1.2.1 e `sharp` 0.35.4; a consulta
+  local seguinte também encontrou o SDK MCP 1.30.1. Atualizar somente para as
+  versões corrigidas mínimas e repetir todos os gates, sem criar ignores.
+  `pnpm audit --audit-level high` passou sem vulnerabilidades conhecidas nas
+  versões 1.2.2, 0.35.5 e 1.31.0; suites obrigatórias foram repetidas.
 
 ## 2026-10-05: papéis por canal exigem permissão também no read model
 

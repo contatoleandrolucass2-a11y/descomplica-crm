@@ -89,6 +89,9 @@ autorização específica e os gates do runbook de publicação.
 
 - `pnpm lint`, `pnpm typecheck`, `pnpm format:check`,
   `pnpm resources:check` e `pnpm security:secrets`: aprovados.
+- `pnpm audit --audit-level high`: nenhuma vulnerabilidade conhecida depois de
+  atualizar `source-map-js` para 1.2.2, `sharp` para 0.35.5 e o SDK MCP
+  transitivo para 1.31.0.
 - `pnpm test`: 1.980 testes Vitest aprovados, sete skips previstos e oito
   testes Node aprovados.
 - `pnpm db:test`: 1.099 testes pgTAP em 27 arquivos, todos aprovados. A nova

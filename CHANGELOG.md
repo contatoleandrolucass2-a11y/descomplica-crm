@@ -11,6 +11,9 @@
 - Adiciona contratos Vitest e pgTAP para exigir as duas validações na ordem
   correta e uma prova concorrente local com resultado `42501`, zero override e
   zero auditoria.
+- Atualiza `sharp`, `source-map-js` transitivo e o SDK MCP transitivo para as
+  primeiras versões corrigidas depois que advisories novos bloquearam o gate
+  de auditoria da CI; nenhuma dependência nova foi adicionada.
 
 ## 2026-10-05 - Papéis por canal e permissões em lote
 

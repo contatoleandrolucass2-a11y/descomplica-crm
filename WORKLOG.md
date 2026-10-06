@@ -17,6 +17,13 @@
 - Fechamento local aprovado: formato, lint, tipos, inventário, segredos, build,
   1.980 Vitest, oito testes Node e 1.099 pgTAP; lint e advisors de segurança e
   desempenho do banco não encontraram problemas.
+- A primeira CI do PR foi bloqueada no audit por advisories publicados para
+  `source-map-js` 1.2.1 e `sharp` 0.35.4. A auditoria local atualizada também
+  expôs o SDK MCP 1.30.1. O candidato sobe apenas para as primeiras versões
+  corrigidas: 1.2.2, 0.35.5 e 1.31.0, respectivamente.
+- `pnpm audit --audit-level high` passou sem vulnerabilidades conhecidas após a
+  atualização. Formato, lint, tipos, 1.980 Vitest, oito testes Node, build,
+  1.099 pgTAP, inventário e varredura de segredos foram repetidos e aprovados.
 
 ## 2026-10-05 - Papéis por canal e permissões em lote
 
