@@ -220,5 +220,9 @@ describe("consulta protegida de repasse", () => {
     }
     for (const theme of ['"light"', '"balanced"', '"dark"']) expect(qa).toContain(theme);
     expect(qa).toContain('withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])');
+    expect(qa).toContain("await document.fonts.ready");
+    expect(qa).toContain("stableSamples >= 2");
+    expect(qa).toContain("requestAnimationFrame(sample)");
+    expect(qa).toContain("document.documentElement.scrollWidth > innerWidth + 1");
   });
 });

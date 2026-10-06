@@ -13,6 +13,8 @@
   fora da URL.
 - Inclui Repasse na matriz global de 24 rotas: Master exige `200` e link no
   cabeçalho; os outros oito perfis exigem `403` na rota direta.
+- Estabiliza fontes e geometria responsiva antes das medições de overflow e Axe,
+  preservando os mesmos limites e registrando somente diagnósticos sanitizados.
 - Entrega formulário, carregamento, inválido, não encontrado, conflito,
   indisponibilidade e resultado responsivo nos temas Claro, Médio e Escuro.
 - Não inclui migration, pacote novo, escrita na planilha ou mudança de acesso;

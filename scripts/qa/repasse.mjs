@@ -20,6 +20,33 @@ async function selectTheme(page, theme, width) {
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
 }
 
+async function settleResponsiveLayout(page) {
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await new Promise((resolve) => {
+      let previousSample = null;
+      let stableSamples = 0;
+      let sampledFrames = 0;
+      const sample = () => {
+        const currentSample = [
+          innerWidth,
+          document.documentElement.clientWidth,
+          document.documentElement.scrollWidth,
+        ].join(":");
+        stableSamples = currentSample === previousSample ? stableSamples + 1 : 0;
+        previousSample = currentSample;
+        sampledFrames += 1;
+        if (stableSamples >= 2 || sampledFrames >= 12) {
+          resolve();
+          return;
+        }
+        requestAnimationFrame(sample);
+      };
+      requestAnimationFrame(sample);
+    });
+  });
+}
+
 export async function checkRepasse(page, origin, outputDirectory) {
   await mkdir(outputDirectory, { recursive: true });
   const route = "/app/repasse";
@@ -63,9 +90,12 @@ export async function checkRepasse(page, origin, outputDirectory) {
       { width: 1440, height: 900 },
     ]) {
       await page.setViewportSize(viewport);
+      await settleResponsiveLayout(page);
       for (const theme of ["light", "balanced", "dark"]) {
         checkpoint(`visual-${viewport.width}x${viewport.height}-${theme}`);
         await selectTheme(page, theme, viewport.width);
+        await settleResponsiveLayout(page);
+        activeStage = `overflow-${viewport.width}x${viewport.height}-${theme}`;
         const overflow = await page.evaluate(() => {
           const present = document.documentElement.scrollWidth > innerWidth + 1;
           const offenders = present
@@ -83,21 +113,38 @@ export async function checkRepasse(page, origin, outputDirectory) {
                 .filter((item) => item.left < -1 || item.right > innerWidth + 1)
                 .slice(0, 8)
             : [];
-          return { present, offenders };
+          return {
+            present,
+            offenders,
+            innerWidth,
+            scrollWidth: document.documentElement.scrollWidth,
+          };
         });
+        if (overflow.present) {
+          process.stderr.write(
+            `[repasse] overflow viewport=${viewport.width}x${viewport.height} theme=${theme} inner=${overflow.innerWidth} scroll=${overflow.scrollWidth} offenders=${JSON.stringify(overflow.offenders)}\n`,
+          );
+        }
         assert.equal(
           overflow.present,
           false,
           `Repasse overflow at ${viewport.width}x${viewport.height} in ${theme}: ${JSON.stringify(overflow.offenders)}`,
         );
+        activeStage = `accessibility-${viewport.width}x${viewport.height}-${theme}`;
         const accessibility = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
           .analyze();
+        if (accessibility.violations.length > 0) {
+          process.stderr.write(
+            `[repasse] accessibility viewport=${viewport.width}x${viewport.height} theme=${theme} rules=${accessibility.violations.map((item) => item.id).join(",")}\n`,
+          );
+        }
         assert.equal(
           accessibility.violations.length,
           0,
           `Repasse accessibility at ${viewport.width}px in ${theme}: ${accessibility.violations.map((item) => item.id).join(", ")}`,
         );
+        activeStage = `screenshot-${viewport.width}x${viewport.height}-${theme}`;
         await page.screenshot({
           path: path.join(
             outputDirectory,

@@ -34,6 +34,11 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   lista esperada do smoke ainda tinha 23 rotas. Toda rota nova precisa entrar no
   inventário direto dos nove perfis: Repasse retorna `200` somente para Master e
   `403` para os demais; sua captura visual permanece no QA dedicado.
+- Ao redimensionar uma página já renderizada, medir overflow no mesmo instante
+  pode observar geometria intermediária. O QA deve aguardar fontes e amostras
+  consecutivas estáveis de `innerWidth`, `clientWidth` e `scrollWidth`, e só então
+  aplicar o limite original; nunca corrigir esse ruído com `overflow-x: hidden`,
+  baseline nova ou espera condicionada ao resultado desejado.
 
 ## 2026-10-06: saldo do Associativo publicado com bases financeiras preservadas
 

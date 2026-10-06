@@ -46,6 +46,13 @@
   rotas, link Master 21, acesso direto Master `200` e negação `403` para os outros
   oito perfis, sem incluir Repasse na baseline visual global que possui contrato
   dedicado. Nova CI pendente.
+- CI `37524840387`: `validate`, restore, banco, build e E2E das 24 rotas/nove
+  perfis passaram. O QA dedicado chegou ao resultado sintético e falhou 12 ms
+  depois de reduzir 1440 para 375 px, na primeira medição de overflow. Como a
+  mesma matriz havia aprovado as 12 combinações e nenhum CSS mudou, o harness
+  agora aguarda fontes e geometria estável por frames consecutivos antes de
+  executar as mesmas asserts; não altera CSS, baseline ou tolerância. Falhas
+  futuras registram apenas viewport, tema, dimensões e geometria sanitizada.
 
 ## 2026-10-06 - Publicacao do saldo e ajudas do Associativo
 
