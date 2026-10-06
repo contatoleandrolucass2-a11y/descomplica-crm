@@ -30,6 +30,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Após integrar `main` em `a89a93c`, lint, tipos, 2027 testes Vitest, oito testes
   Node e build das 44 rotas passaram localmente. Essa prova não substitui CI,
   privatização, imagem promovível ou smoke de produção.
+- A primeira CI integrada provou build, banco e restore, e bloqueou porque a
+  lista esperada do smoke ainda tinha 23 rotas. Toda rota nova precisa entrar no
+  inventário direto dos nove perfis: Repasse retorna `200` somente para Master e
+  `403` para os demais; sua captura visual permanece no QA dedicado.
 
 ## 2026-10-06: revalidar advisories antes da publicacao
 

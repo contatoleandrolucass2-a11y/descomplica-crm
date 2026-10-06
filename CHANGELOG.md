@@ -11,6 +11,8 @@
 - Restringe a navegação e a consulta à permissão Master-only
   `crm.partnerships.view`, repete o gate na Server Action e mantém nomes e motivos
   fora da URL.
+- Inclui Repasse na matriz global de 24 rotas: Master exige `200` e link no
+  cabeçalho; os outros oito perfis exigem `403` na rota direta.
 - Entrega formulário, carregamento, inválido, não encontrado, conflito,
   indisponibilidade e resultado responsivo nos temas Claro, Médio e Escuro.
 - Não inclui migration, pacote novo, escrita na planilha ou mudança de acesso;

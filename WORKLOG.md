@@ -40,6 +40,12 @@
   para revogar `anyone`. As duas variáveis `REPASSE_GOOGLE_*` também estão ausentes
   do ambiente root-only da VPS. Nenhuma permissão, conta, segredo ou dado remoto
   foi alterado; esses itens continuam bloqueando merge e deploy.
+- CI `37521773216`: `validate` e `isolated-restore` passaram; `release-gates`
+  encontrou o inventário E2E global ainda em 23 rotas, embora o link Repasse já
+  estivesse corretamente visível ao Master. O contrato foi atualizado para 24
+  rotas, link Master 21, acesso direto Master `200` e negação `403` para os outros
+  oito perfis, sem incluir Repasse na baseline visual global que possui contrato
+  dedicado. Nova CI pendente.
 
 ## 2026-10-06 - Correcao do gate de seguranca
 

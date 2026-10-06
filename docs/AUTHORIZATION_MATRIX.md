@@ -15,12 +15,12 @@ exceções individuais. Uma exceção `deny` vence `allow` e a permissão herdad
 Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 `legacy_review` falham fechados nas policies RLS.
 
-| Grupo de papéis                                                             | Páginas herdadas                                                                   | Administração                                       |
-| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `master`                                                                    | 17 do catálogo produtivo + réplica protegida WF14                                  | usuários, papéis, exceções e catálogo               |
-| `admin`                                                                     | 14: Dashboard, cinco etapas, Ranking, Configurações e três páginas administrativas | escopada; intake somente com `crm_people` confiável |
-| `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | 7: Dashboard, cinco etapas e Ranking                                               | nenhuma                                             |
-| `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                                             | nenhuma                                             |
+| Grupo de papéis                                                             | Páginas herdadas                                                   | Administração                                       |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------- |
+| `master`                                                                    | 24: 17 do catálogo produtivo + sete jornadas complementares        | usuários, papéis, exceções e catálogo               |
+| `admin`                                                                     | 15: sete analíticas, cinco de Configurações e três administrativas | escopada; intake somente com `crm_people` confiável |
+| `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | 7: Dashboard, cinco etapas e Ranking                               | nenhuma                                             |
+| `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                             | nenhuma                                             |
 
 As permissões administrativas respeitam hierarquia estrita: o ator somente
 modifica usuários e papéis abaixo do próprio nível. O próprio usuário não pode
@@ -93,14 +93,15 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 - hub de simulação e a jornada WF13;
 - início administrativo, usuários e catálogo de páginas.
 
-O inventário HTTP cobre 22 rotas protegidas: 17 correspondem ao catálogo
-PostgreSQL e cinco jornadas complementares permanecem sem linha em `app_pages`:
-Tabelão, as réplicas WF14 e WF15, WF16/Documentação e CAIXA. As cinco são
-montadas no servidor somente depois que o hub e `crm.simulators.view` autorizam
-o Master; outros perfis recebem `403` no guard. A página CAIXA é exclusivamente
-visual: o acesso à rota não habilita `simulator.caixa`, cálculo, envio, análise
-de crédito ou aprovação bancária, que continuam fail-closed por contrato
-independente.
+O inventário HTTP cobre 24 rotas protegidas: 17 correspondem ao catálogo
+PostgreSQL e sete jornadas complementares permanecem sem linha em `app_pages`:
+Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15, WF16/Documentação e
+CAIXA. Recurso MKT reutiliza `crm.settings.manage`; Repasse reutiliza a permissão
+Master-only `crm.partnerships.view`; as cinco jornadas de simulação passam pelo
+hub e por `crm.simulators.view`. Outros perfis recebem `403` no guard aplicável.
+A página CAIXA é exclusivamente visual: o acesso à rota não habilita
+`simulator.caixa`, cálculo, envio, análise de crédito ou aprovação bancária, que
+continuam fail-closed por contrato independente.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
 de integração pendente. A rota de produção continua exigindo
