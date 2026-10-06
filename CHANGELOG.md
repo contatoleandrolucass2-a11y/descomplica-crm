@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-06 - Consulta de repasse da assessoria M.A.P
+
+- Adiciona a guia protegida Repasse sob o Dashboard para consulta exata por FID.
+- Identifica claramente a assessoria M.A.P DE CAMPOS SOLUÇÕES e exibe fonte e
+  data de atualização sem inventar valores ausentes.
+- Consulta a planilha privada pela Google Sheets API e uma conta de serviço
+  read-only, somente no servidor, sem cache, com timeout, limite de resposta em
+  streaming, validação de cabeçalhos, projeção mínima e bloqueio de FID duplicado.
+- Restringe a navegação e a consulta à permissão Master-only
+  `crm.partnerships.view`, repete o gate na Server Action e mantém nomes e motivos
+  fora da URL.
+- Entrega formulário, carregamento, inválido, não encontrado, conflito,
+  indisponibilidade e resultado responsivo nos temas Claro, Médio e Escuro.
+- Não inclui migration, pacote novo, escrita na planilha ou mudança de acesso;
+  publicação permanece bloqueada enquanto a fonte com dados pessoais aceitar
+  leitura anônima.
+
 ## 2026-10-05 - Calibracao dos temas Claro, Medio e Escuro
 
 - Diferencia as tres aparencias por luminosidade: Claro branco e limpo, Medio

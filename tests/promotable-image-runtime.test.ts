@@ -55,6 +55,9 @@ describe("promotable image contract", () => {
       expect(releaseScript).toContain('DOCKER_HOST: "unix:///var/run/docker.sock"');
       expect(releaseScript).toContain('"/usr/bin/docker"');
     }
+    expect(proof).toContain('generateKeyPairSync("rsa", { modulusLength: 2_048 })');
+    expect(proof).toContain("REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL");
+    expect(proof).toContain("REPASSE_GOOGLE_PRIVATE_KEY_BASE64");
   });
 
   it("mounts the session HMAC through a runtime secret in both environments", async () => {

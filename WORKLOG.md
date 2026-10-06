@@ -1,5 +1,37 @@
 # Worklog
 
+## 2026-10-06 - Consulta de repasse por FID
+
+- Branch `codex/repasse-map`, base `a22f4dc`. A imagem fornecida pelo usuário foi
+  tratada como referência visual, e a planilha como fonte de dados somente leitura.
+- Contrato confirmado na aba `Table 1`: atualização em `A1` e colunas `A:F` para
+  FID, empreendimento, etapa, status, nome do cliente e motivo. Nenhum dado real
+  foi persistido em fixture, documentação ou artefato versionado.
+- A guia fica sob o Dashboard autorizado e exige a permissão Master-only
+  `crm.partnerships.view` no Proxy, na página e na Server Action. O gate de release
+  também é revalidado na ação. Assim o FID segue no corpo POST, não em URL ou referrer.
+- O DAL usa Sheets API read-only, planilha e aba fixas, conta de serviço
+  server-only, `no-store`, timeout de 8 segundos, leitura realmente limitada a
+  200 KB, bloqueio de redirects, validação dos seis cabeçalhos e DTO mínimo. A
+  primeira consulta traz apenas FIDs; B:F só é lido para uma correspondência
+  exata, com releitura da coluna e revalidação do FID antes de associar os dados.
+  O intervalo de FIDs é aberto até a última linha preenchida; excesso de bytes ou
+  schema falha fechado. Duplicidade falha antes dos dados pessoais.
+- A tela reutiliza tokens globais e troca tabela por blocos rotulados no celular.
+  Claro, Médio e Escuro herdam superfícies, textos, bordas, foco e estados
+  semânticos; cor nunca substitui o texto do status.
+- Sem migration, dependência, escrita remota, alteração de conta ou mudança de
+  compartilhamento. A revisão independente marcou a leitura anônima da planilha
+  com dados pessoais como bloqueio de publicação: privatização e credencial
+  server-only exigem autorização específica. Gates locais e PR serão registrados
+  após execução; deploy não será antecipado enquanto esse gate estiver aberto.
+- A jornada Repasse autenticada usou somente fixture loopback e aprovou `ready`,
+  vazio, conflito, indisponível, teclado, ausência de overflow e Axe sem violações
+  em 375/768/1024/1440 px nos três temas (12 combinações). Capturas inspecionadas
+  sem dado real. A matriz global avançou aos simuladores e encontrou seleções de
+  tema intermitentes fora desta rota no banco local adiantado; nenhuma baseline
+  foi promovida e esse ensaio não autoriza publicação.
+
 ## 2026-10-05 - Calibracao integral dos tres temas
 
 - Branch `codex/theme-color-calibration`, base

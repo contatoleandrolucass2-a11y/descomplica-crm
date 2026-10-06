@@ -4,6 +4,25 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-06: consulta externa com dados pessoais exige origem privada
+
+- Status: pendente_validacao; fonte: implementação e revisão independente da
+  consulta de repasse na branch `codex/repasse-map`.
+- Colocar autenticação no CRM não privatiza uma planilha cujo export aceita
+  leitura anônima. Antes de merge/publicação, remover o compartilhamento público
+  e usar conta de serviço exclusiva com escopo `spreadsheets.readonly`.
+- Para reduzir exposição, primeiro buscar metadados e somente a coluna de FIDs;
+  carregar as colunas pessoais apenas quando houver uma correspondência exata.
+  Duplicidade deve falhar antes da segunda leitura, e a segunda leitura precisa
+  revalidar unicidade e FID para impedir associação errada se linhas mudarem.
+- Server Action precisa repetir release gate e permissão, mesmo quando Proxy e
+  página já validam. Nesta jornada a permissão existente Master-only
+  `crm.partnerships.view` limita o acesso sem migration remota.
+- Evidências: `tests/repasse.test.ts`, `tests/repasse-action.test.ts`,
+  `scripts/qa/repasse.mjs` e `docs/runbooks/repasse-google-sheet.md`. A matriz
+  sintética passou 12 combinações de viewport/tema, Axe, teclado e quatro estados;
+  credencial e privatização da fonte continuam pendentes e bloqueiam deploy.
+
 ## 2026-10-05: temas precisam compartilhar tokens, nao paletas locais completas
 
 - Status: validado; fonte: auditoria das capturas autenticadas e branch
