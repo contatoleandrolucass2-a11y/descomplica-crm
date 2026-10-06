@@ -148,7 +148,7 @@ export function selectConcurrentAccounts(accounts) {
   const selected = [
     masters[0],
     masters[1],
-    accounts.find((account) => account.role === "broker"),
+    accounts.find((account) => account.role === "broker_house"),
     accounts.find((account) => account.role === "pending"),
   ];
   check(
@@ -371,7 +371,7 @@ export async function runConcurrentAssociativo({
       http: "real local Next/auth/calculator/synthetic snapshot",
       browserLiveInventory: "real protected endpoint with QA-only loopback synthetic upstream",
       productionUpstream: "not exercised",
-      isolation: "two distinct master users; broker and pending users denied",
+      isolation: "two distinct master users; broker_house and pending users denied",
       excluded:
         "real external inventory feed, production throughput, persisted proposals, twenty distinct identities",
     },

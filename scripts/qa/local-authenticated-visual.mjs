@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { execFile, spawn, spawnSync } from "node:child_process";
-import { lstat, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { createServer as createHttpServer, request as requestHttp } from "node:http";
 import { createServer as createNetServer } from "node:net";
 import os from "node:os";
@@ -1042,6 +1042,23 @@ async function validatePrivateDirectTableSnapshot() {
   }
 }
 
+async function prepareStandaloneRuntime() {
+  const runtimeRoot = path.join(repositoryRoot, ".next/standalone");
+  const serverPath = path.join(runtimeRoot, "server.js");
+  await stat(serverPath);
+  await Promise.all([
+    cp(path.join(repositoryRoot, "public"), path.join(runtimeRoot, "public"), {
+      recursive: true,
+      force: true,
+    }),
+    cp(path.join(repositoryRoot, ".next/static"), path.join(runtimeRoot, ".next/static"), {
+      recursive: true,
+      force: true,
+    }),
+  ]);
+  return { runtimeRoot, serverPath };
+}
+
 async function startLocalNextServer({
   hostname,
   port,
@@ -1052,14 +1069,17 @@ async function startLocalNextServer({
   inventorySnapshotSha256,
 }) {
   await assertFreshProductionBuild();
+  const { runtimeRoot, serverPath } = await prepareStandaloneRuntime();
 
-  const child = spawn("pnpm", ["start", "--hostname", hostname, "--port", String(port)], {
-    cwd: repositoryRoot,
+  const child = spawn(process.execPath, [serverPath], {
+    cwd: runtimeRoot,
     detached: true,
     env: {
       ...environmentSubset(["PATH", "HOME", "TZ", "NODE_OPTIONS", "LD_LIBRARY_PATH"]),
       ...environmentSubset(["OFFICIAL_SIMULATOR_RUNTIME_MODE", "OFFICIAL_SIMULATOR_ENABLED_KEYS"]),
       NODE_ENV: "production",
+      HOSTNAME: hostname,
+      PORT: String(port),
       APP_ORIGIN: origin,
       AUTH_LOCAL_INSECURE_LOOPBACK_QA: "true",
       QA_VISUAL_GOALS_REFERENCE_TIME: visualGoalsReferenceTime,
@@ -1263,31 +1283,37 @@ ${masterPreflight}
     with expected(role_key, permission_key) as (
       values
         ('admin', 'crm.dashboard.view'),
+        ('admin', 'crm.dashboard.all.view'),
+        ('admin', 'crm.dashboard.with_canal_imob.view'),
+        ('admin', 'crm.dashboard.without_canal_imob.view'),
         ('admin', 'crm.stages.view'),
         ('admin', 'crm.ranking.view'),
+        ('admin', 'crm.partnerships.view'),
         ('admin', 'pages.manage'),
         ('admin', 'crm.settings.view'),
         ('admin', 'crm.settings.manage'),
         ('admin', 'crm.salesforce.refresh'),
         ('admin', 'crm.ingest.manage'),
         ('coordinator', 'crm.dashboard.view'),
+        ('coordinator', 'crm.dashboard.with_canal_imob.view'),
         ('coordinator', 'crm.stages.view'),
-        ('coordinator', 'crm.ranking.view'),
-        ('supervisor', 'crm.dashboard.view'),
-        ('supervisor', 'crm.stages.view'),
-        ('supervisor', 'crm.ranking.view'),
-        ('real_estate', 'crm.dashboard.view'),
-        ('real_estate', 'crm.stages.view'),
-        ('real_estate', 'crm.ranking.view'),
-        ('broker_lead', 'crm.dashboard.view'),
-        ('broker_lead', 'crm.stages.view'),
-        ('broker_lead', 'crm.ranking.view'),
-        ('broker', 'crm.dashboard.view'),
-        ('broker', 'crm.stages.view'),
-        ('broker', 'crm.ranking.view'),
-        ('user', 'crm.dashboard.view'),
-        ('user', 'crm.stages.view'),
-        ('user', 'crm.ranking.view')
+        ('coordinator', 'crm.partnerships.view'),
+        ('manager_house', 'crm.dashboard.view'),
+        ('manager_house', 'crm.dashboard.without_canal_imob.view'),
+        ('manager_house', 'crm.stages.view'),
+        ('manager_house', 'crm.ranking.view'),
+        ('manager_imob', 'crm.dashboard.view'),
+        ('manager_imob', 'crm.dashboard.with_canal_imob.view'),
+        ('manager_imob', 'crm.stages.view'),
+        ('manager_imob', 'crm.partnerships.view'),
+        ('broker_house', 'crm.dashboard.view'),
+        ('broker_house', 'crm.dashboard.without_canal_imob.view'),
+        ('broker_house', 'crm.stages.view'),
+        ('broker_house', 'crm.ranking.view'),
+        ('broker_imob', 'crm.dashboard.view'),
+        ('broker_imob', 'crm.dashboard.with_canal_imob.view'),
+        ('broker_imob', 'crm.stages.view'),
+        ('broker_imob', 'crm.partnerships.view')
     ),
     actual as (
       select role_permission.role_key, role_permission.permission_key
@@ -1295,6 +1321,9 @@ ${masterPreflight}
       where role_permission.role_key <> 'master'
         and role_permission.permission_key = any(array[
           'crm.dashboard.view',
+          'crm.dashboard.all.view',
+          'crm.dashboard.with_canal_imob.view',
+          'crm.dashboard.without_canal_imob.view',
           'crm.stages.view',
           'crm.ranking.view',
           'crm.partnerships.view',
@@ -1321,7 +1350,10 @@ ${masterPreflight}
     join public.user_roles user_role on user_role.user_id = profile.user_id
     where profile.is_active
       and profile.access_status = 'approved'
-      and user_role.role_key = any(array['user', 'supervisor', 'broker_lead'])
+      and user_role.role_key = any(array[
+        'manager', 'supervisor', 'house', 'real_estate',
+        'partnership_channel', 'broker_lead', 'broker', 'user'
+      ])
   ) then
     raise exception 'approved legacy roles violate the local visual QA contract';
   end if;
@@ -1634,7 +1666,10 @@ begin
     where profile.user_id = ${userIdSql}
       and profile.is_active
       and profile.access_status = 'approved'
-      and user_role.role_key = any(array['user', 'supervisor', 'broker_lead'])
+      and user_role.role_key = any(array[
+        'manager', 'supervisor', 'house', 'real_estate',
+        'partnership_channel', 'broker_lead', 'broker', 'user'
+      ])
   ) then
     raise exception 'QA fixture approved a legacy role';
   end if;

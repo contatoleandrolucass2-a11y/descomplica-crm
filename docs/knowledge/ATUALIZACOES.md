@@ -4,6 +4,25 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-06: gates de release também são consumidores da matriz de papéis
+
+- Status: validado localmente; fonte: CI `37501848220`,
+  `scripts/qa/local-rls-api.mjs`, `e2e/release-candidate.spec.ts` e ensaio de
+  restore.
+- Alterar RBAC exige atualizar fixtures, escopos, conjuntos de rotas, menus e
+  contagens do QA de release. Manter papéis aposentados no harness pode bloquear
+  a CI corretamente, mesmo quando migrations e testes unitários passam.
+- A contagem consolidada do pgTAP é um contrato fail-closed do restore. Ela
+  deve acompanhar novos planos deliberados; o valor atual é 1.099 em 27
+  arquivos, sem alterar evidências históricas já versionadas.
+- Com `output: standalone`, gates locais devem iniciar `.next/standalone/server.js`
+  e preparar `public` e `.next/static`, reproduzindo a imagem Docker. Isso evita
+  depender do comportamento de compatibilidade de `next start`.
+- Evidência: 19 Playwright aprovados e um skip previsto, oito perfis em 23 rotas,
+  nove identidades sintéticas removidas, zero papel legado aprovado, oito
+  acessos anônimos negados e zero linha exposta. CI final e publicação seguem
+  pendentes.
+
 ## 2026-10-06: autorização de escopo precisa ser repetida depois do lock
 
 - Status: validado localmente; fonte: revisão de segurança da RPC

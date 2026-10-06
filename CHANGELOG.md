@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-06 - Gates da matriz de acessos
+
+- Sincroniza o ensaio de restore com os 1.099 testes pgTAP atuais.
+- Atualiza o QA RLS e a matriz Playwright para os seis papéis atribuíveis,
+  Master e o estado interno pendente, cobrindo as diferenças entre House e
+  Imob em Dashboard, Ranking e Canal de Parcerias.
+- Inicia os gates autenticados pelo runtime standalone produzido pelo Next,
+  igualando o caminho de execução local ao empacotamento da imagem Docker.
+- Mantém fixtures sintéticas, limpeza comprovada e negação de papéis
+  aposentados, sem reduzir testes ou criar exceções na CI.
+
 ## 2026-10-06 - Revalidação de escopo na edição em lote
 
 - Revalida o escopo administrável depois de bloquear o perfil alvo, impedindo

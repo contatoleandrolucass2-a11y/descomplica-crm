@@ -575,7 +575,7 @@ describe("versioned reference parity catalog", () => {
       "master",
       "AlexandrianaMaximilianaConstantina QA",
     ],
-    ["local-rls-api.mjs", "createEphemeralAccount", "user", "Mariana QA"],
+    ["local-rls-api.mjs", "createEphemeralAccount", "broker_house", "Mariana QA"],
   ])(
     "gives %s %s %s an explicit synthetic name",
     async (file, functionName, role, expectedName) => {

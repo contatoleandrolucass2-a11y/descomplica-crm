@@ -4,7 +4,8 @@ Data: 2026-10-05
 
 Branch: `codex/roles-permissions-bulk-layout`
 
-Estado: implementação e hardening local concluídos; nenhuma migration remota aplicada.
+Estado: implementação, hardening e matriz de release local concluídos; nenhuma
+migration remota aplicada.
 
 ## Decisão funcional
 
@@ -101,6 +102,14 @@ autorização específica e os gates do runbook de publicação.
   duas sessões moveu o alvo para fora do escopo enquanto a RPC aguardava o
   lock; o lote retornou SQLSTATE `42501`, sem override e sem auditoria.
 - `pnpm build`: aprovado no Next.js 16.3.6, com 43 páginas geradas.
+- `pnpm qa:e2e:release`: 19 cenários Playwright aprovados e um skip previsto.
+  Master, Administrador, Coordenador, Gerente House, Gerente Imob, Corretor
+  House, Corretor Imob e `pending` foram verificados em 23 rotas protegidas,
+  menus, APIs, recuperação de senha e MFA. O fechamento removeu as nove
+  identidades sintéticas, aprovou zero papel legado e negou oito superfícies
+  anônimas sem retornar linhas.
+- O ensaio isolado foi sincronizado com 1.099 pgTAP e os gates autenticados
+  passaram a executar o build standalone, no mesmo formato da imagem Docker.
 - Reset completo, lint do schema e advisors de segurança/desempenho do banco:
   aprovados sem achados.
 - Jornada autenticada local em 1440×1000, tema Escuro e Corretor Imob
@@ -111,6 +120,8 @@ autorização específica e os gates do runbook de publicação.
   marcadores temporários.
 
 A revisão de segurança do diff encontrou uma janela concorrente de baixa
-probabilidade e a correção foi revisada sem bypass ou regressão concretos. CI,
-PR, aplicação da migration e publicação permanecem separados; a migration
-remota exige autorização específica.
+probabilidade e a correção foi revisada sem bypass ou regressão concretos. As
+duas primeiras execuções de CI bloquearam corretamente advisories novos e,
+depois, contratos antigos de restore/E2E; nenhum gate foi ignorado. CI final,
+aplicação da migration e publicação permanecem separados; a migration remota
+exige autorização específica.

@@ -169,7 +169,7 @@ describe("Associativo concurrent assertions", () => {
   });
 
   it("selects four distinct identities, including two independently provisioned masters", () => {
-    const accounts = ["master", "broker", "pending", "master"].map((role, index) => ({
+    const accounts = ["master", "broker_house", "pending", "master"].map((role, index) => ({
       id: `10000000-0000-4000-8000-${String(index).padStart(12, "0")}`,
       role,
       email: `qa.rls-${role}-abcdef${index}@local.invalid`,

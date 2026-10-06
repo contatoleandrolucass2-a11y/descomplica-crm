@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-10-06 - Gates de release sincronizados com a nova matriz
+
+- A segunda CI do PR (`37501848220`) aprovou validate, banco, build e advisors,
+  mas bloqueou a publicação porque o ensaio de restore ainda esperava 1.042
+  pgTAP e o QA RLS/E2E ainda provisionava os nove papéis antigos.
+- O restore agora exige os 1.099 testes atuais. Os fixtures, escopos, páginas,
+  menus, rotas diretas e negações foram atualizados para Master, Administrador,
+  Coordenador, Gerente House, Gerente Imob, Corretor House, Corretor Imob e o
+  estado interno `pending`.
+- Os dois gates que sobem o build local passaram a usar o runtime standalone
+  gerado pelo Next, com os mesmos diretórios `public` e `.next/static` copiados
+  pela imagem produtiva.
+- A jornada real local concluiu 19 cenários Playwright e um skip previsto. Os
+  oito perfis atravessaram 23 rotas protegidas; recuperação, MFA, navegação,
+  RLS, Canal de Parcerias, Ranking e simuladores mantiveram as fronteiras. O
+  relatório final registrou nove identidades removidas, zero papel legado
+  aprovado, oito negações anônimas e zero linha anônima.
+
 ## 2026-10-06 - Hardening da RPC em lote
 
 - A revisão de segurança do diff confirmou uma janela concorrente entre a
