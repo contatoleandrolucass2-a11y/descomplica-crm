@@ -323,3 +323,14 @@ Ambiente: Windows/PowerShell, Node 24.19.0 e pnpm 11.20.0.
   Artefato `11467200284`, SHA-256 do ZIP
   `b80fe6a05f8026e62deb494fc2f7deb2c5ee5cdbeee062b4f21adb68f8737dd8`.
   Onze testes negativos/positivos da classificacao e 42 testes focados passaram.
+
+- CI `37587316857`: 40 navegacoes, incluindo continuidade financeira completa,
+  aprovadas. Teste global antigo dependia de iniciar proposta pelo snapshot
+  com resposta viva suspensa, contrariando a nova autoridade obrigatoria.
+  Teste atualizado para verificar bloqueio ate a resposta viva, selecao manual
+  e filtros depois dela. Preservacao da proposta continua no teste seguinte.
+  Cleanup aguarda fulfillment para nao gerar promessa rejeitada fora do teste.
+  Artefato `11467744909`, SHA-256 do ZIP
+  `12a99370849fde30539514c9e6f7afd34c829f474f4a4db20219bbe4adc05fa7`.
+  Restore falhou por porta ocupada no runner e foi solicitado novamente;
+  a proxima CI continua exigindo aprovacao integral no novo SHA.

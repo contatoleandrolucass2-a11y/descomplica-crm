@@ -38,6 +38,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   Teste negativo HTTP 503 precisa reconhecer o evento de console provocado por
   sua propria fixture. Excecao limitada ao evento exato, quantidade e janela
   controlada; nunca ignorar todos os erros de recurso. Repeticao integral pendente.
+- Ao mudar autoridade de dados, conferir tambem os testes globais de carregamento:
+  `checkDeferredInventory` ainda exigia selecao pelo snapshot no Associativo.
+  Atualizado para bloquear ate a fonte viva; continuidade preserva a verificacao
+  de valores ao trocar filtros. Fonte: CI `37587316857`, 40 navegacoes aprovadas.
 
 ## 2026-10-07: formulas do Associativo confrontadas com Salesforce
 

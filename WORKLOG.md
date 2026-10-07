@@ -33,6 +33,10 @@
   O erro de rede 503 injetado pelo teste foi contado como inesperado pelo
   harness externo. Classificacao agora exige mensagem/URL exatas, uma unica
   resposta sintetica e continuidade aprovada; outros erros nao sao excluidos.
+- CI `37587316857`: continuidade e 40 navegacoes aprovadas. Outra verificacao
+  antiga tentava iniciar proposta pelo snapshot antes do estoque vivo; ajustada
+  ao contrato atual e com espera da resposta pendente no cleanup. Restore teve
+  colisao de porta no runner, sem mutacao de producao. Nova CI integral exigida.
 
 ## 2026-10-07 - Auditoria das formulas Salesforce
 

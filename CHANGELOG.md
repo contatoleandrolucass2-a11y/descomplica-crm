@@ -13,6 +13,8 @@
   verifica a data historica dentro da propria linha da entrada.
 - QA de indisponibilidade identifica somente o erro 503 sintetico esperado;
   outros erros de console e JavaScript continuam bloqueando a publicacao.
+- QA de carregamento exige estoque vivo antes de selecionar unidade e mantem
+  as verificacoes de filtros e preservacao da proposta apos o carregamento.
 - Sugestoes preservam os pagamentos existentes e so acrescentam sinais antes
   de uma primeira mensal fixada; calendario automatico permanece disponivel.
 - Sem alteracao de dados remotos, limites comerciais, n8n ou financiamento bancario.
