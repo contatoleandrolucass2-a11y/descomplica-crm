@@ -408,8 +408,6 @@
   cursor: pointer;
   gap: 0.55rem;
   text-align: left;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 10rem;
 }
 
 .repasseCard:hover {
