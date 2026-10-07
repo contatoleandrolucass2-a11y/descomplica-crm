@@ -7,6 +7,8 @@
 - Torna idempotente a resposta tardia da fixture de estoque no QA do
   Associativo quando o navegador ja encerrou a requisicao durante uma
   navegacao, sem suprimir outros erros.
+- Aguarda explicitamente por ate 60 s a habilitacao de cada campo do fluxo
+  Associativo no gate visual, preservando todas as verificacoes funcionais.
 - Atualiza somente as referencias de Usuarios em 320 e 375 px apos a matriz
   autenticada completa aprovar responsividade, temas, Axe, zoom e comparacoes.
 

@@ -18,9 +18,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   encerrada pela navegacao. Somente o erro exato `Route is already handled`
   pode ser tratado como cancelamento tardio; os demais erros devem continuar
   falhando o gate.
+- Em host sem swap, a habilitacao sequencial do Associativo pode exceder 30 s
+  sob carga normal. O gate aguarda explicitamente ate 60 s por campo, sem
+  relaxar o estado esperado nem a continuidade do calculo.
 - A recaptura integral aprovou 154 checks responsivos, 88 de tema, 242 Axe,
-  242 comparacoes e 110 de zoom. Capturas pesadas devem rodar sem outro gate
-  concorrente na VPS, que nao possui swap.
+  242 comparacoes e 110 de zoom no commit `2fbb35b`, com arvore limpa no inicio
+  e `passed: true`. Capturas pesadas devem rodar sem outro gate concorrente na
+  VPS, que nao possui swap.
 
 ## 2026-10-06: build incremental pode ocultar CSS integrado entre worktrees
 

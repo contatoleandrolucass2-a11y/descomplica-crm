@@ -138,6 +138,10 @@ autorização específica e os gates do runbook de publicação.
   da fixture do Associativo: apenas `Route is already handled` e ignorado;
   qualquer outro erro continua bloqueando o gate. A conta efemera e as fixtures
   foram removidas ao final.
+- O registro final foi recapturado a partir do commit `2fbb35b`, com
+  `worktreeDirtyAtCapture: false` e `passed: true`. A habilitacao sequencial dos
+  campos do Associativo recebeu espera explicita de ate 60 s para absorver a
+  latencia medida no host, sem omitir campo, estado ou assercao de continuidade.
 - Reset completo, lint do schema e advisors de segurança/desempenho do banco:
   aprovados sem achados.
 - Jornada autenticada local em 1440×1000, tema Escuro e Corretor Imob

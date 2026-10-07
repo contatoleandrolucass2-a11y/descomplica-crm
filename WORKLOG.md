@@ -14,11 +14,13 @@
 - O ensaio local encontrou ainda uma corrida do Playwright ao responder uma
   requisicao que a navegacao ja havia encerrado. A interceptacao agora ignora
   somente `Route is already handled` e continua propagando qualquer outro
-  erro.
+  erro. A espera de habilitacao dos campos do Associativo passou a explicitar
+  60 s por etapa, cobrindo a latencia observada no host sem remover assercoes.
 - A recaptura integral, executada sem processo concorrente no host, aprovou
   154 checks responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes
   visuais e 110 checks de zoom. A promocao foi transacional e as fixtures e a
-  conta efemera foram removidas.
+  conta efemera foram removidas. O resultado identifica o commit de captura
+  `2fbb35b`, confirma `worktreeDirtyAtCapture: false` e registra `passed: true`.
 
 ## 2026-10-06 - Integracao da baseline com a main
 
