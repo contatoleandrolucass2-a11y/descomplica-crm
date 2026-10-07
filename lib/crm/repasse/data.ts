@@ -237,7 +237,7 @@ function normalizeStatus(value: string | null) {
 function boardColumn(status: string | null): RepasseBoardColumn {
   const normalized = normalizeStatus(status);
   if (/\b(?:DESIST\w*|DESISIT\w*|DISTRAT\w*)\b/u.test(normalized)) return "distrato";
-  if (/\bREPASSAD[AO]S?\b/u.test(normalized)) return "repassado";
+  if (/^REPASSAD[AO]S?$/u.test(normalized)) return "repassado";
   if (/\b(?:MAIS|ACIMA)\s+DE\s+20\s+DIAS\b/u.test(normalized)) {
     return "mais_de_20_dias";
   }

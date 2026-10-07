@@ -101,6 +101,9 @@ describe("consulta protegida de repasse", () => {
         [123457, "Residencial A", "Pasta", "AGUARDANDO REPASSE", "Cliente Sintético 2"],
         [123458, "Residencial B", "Contrato", "26 dias sem repasse", "Cliente Sintético 3"],
         [123459, "Residencial B", "Contrato", "DESISITENCIA", "Cliente Sintético 4"],
+        [123460, "Residencial C", "Pasta", "NÃO REPASSADO", "Cliente Sintético 5"],
+        [123461, "Residencial C", "Pasta", "REPASSADO COM PENDÊNCIA", "Cliente Sintético 6"],
+        [123462, "Residencial C", "Pasta", "AGUARDANDO REPASSADO", "Cliente Sintético 7"],
       ],
     });
 
@@ -142,6 +145,33 @@ describe("consulta protegida de repasse", () => {
           status: "DESISITENCIA",
           nomeCliente: "Cliente Sintético 4",
           column: "distrato",
+        },
+        {
+          sourceRow: 7,
+          fid: "123460",
+          empreendimento: "Residencial C",
+          etapa: "Pasta",
+          status: "NÃO REPASSADO",
+          nomeCliente: "Cliente Sintético 5",
+          column: "pendencia",
+        },
+        {
+          sourceRow: 8,
+          fid: "123461",
+          empreendimento: "Residencial C",
+          etapa: "Pasta",
+          status: "REPASSADO COM PENDÊNCIA",
+          nomeCliente: "Cliente Sintético 6",
+          column: "pendencia",
+        },
+        {
+          sourceRow: 9,
+          fid: "123462",
+          empreendimento: "Residencial C",
+          etapa: "Pasta",
+          status: "AGUARDANDO REPASSADO",
+          nomeCliente: "Cliente Sintético 7",
+          column: "pendencia",
         },
       ],
     });
