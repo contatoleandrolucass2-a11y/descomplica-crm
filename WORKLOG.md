@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-07 - Teste portátil do Chrome dedicado
+
+- O teste de descoberta do executável passou a controlar a inspeção de arquivos,
+  eliminando a dependência acidental do Chrome instalado no runner da CI.
+- Escopo restrito a injeção de dependência para teste; descoberta e validação em
+  runtime permanecem fail-closed.
+
 ## 2026-10-07 - Publisher Salesforce para n8n preparado
 
 - Autoridade preservada: os sete reports Salesforce continuam sendo a fonte; o

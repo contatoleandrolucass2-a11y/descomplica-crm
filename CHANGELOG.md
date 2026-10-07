@@ -1,5 +1,9 @@
 # Changelog
 
+- Corrige a validação portátil do launcher Salesforce: o teste de ausência do
+  Chrome agora injeta a inspeção do executável e não depende dos programas
+  instalados no runner da CI.
+
 ## 2026-10-07 - Publisher Salesforce para n8n fail-closed
 
 - Adiciona publisher local desligado por padrao que envia somente o payload

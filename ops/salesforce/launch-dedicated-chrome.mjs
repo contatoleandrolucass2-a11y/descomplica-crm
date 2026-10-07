@@ -138,6 +138,7 @@ export async function resolveChromeExecutable({
   platform = process.platform,
   env = process.env,
   homeDirectory = os.homedir(),
+  inspectExecutable = usableExecutable,
 } = {}) {
   const configuredValue = override ?? env.SALESFORCE_CHROME_EXECUTABLE;
   const configured =
@@ -148,7 +149,7 @@ export async function resolveChromeExecutable({
     if (!isAbsoluteForPlatform(configured, platform)) {
       throw new Error("SALESFORCE_CHROME_EXECUTABLE must be an absolute executable path");
     }
-    const executable = await usableExecutable(configured, platform);
+    const executable = await inspectExecutable(configured, platform);
     if (!executable) {
       throw new Error("SALESFORCE_CHROME_EXECUTABLE is not an executable file");
     }
@@ -156,7 +157,7 @@ export async function resolveChromeExecutable({
   }
 
   for (const candidate of chromeExecutableCandidates({ platform, env, homeDirectory })) {
-    const executable = await usableExecutable(candidate, platform);
+    const executable = await inspectExecutable(candidate, platform);
     if (executable) return executable;
   }
   throw new Error(

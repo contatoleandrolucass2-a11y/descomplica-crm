@@ -90,7 +90,12 @@ test("discovers only fixed absolute Chrome locations and requires an absolute ov
     /absolute executable path/,
   );
   await assert.rejects(
-    resolveChromeExecutable({ override: "", platform: "linux", env: {} }),
+    resolveChromeExecutable({
+      override: "",
+      platform: "linux",
+      env: {},
+      inspectExecutable: async () => undefined,
+    }),
     /Chrome executable not found/,
   );
 });
