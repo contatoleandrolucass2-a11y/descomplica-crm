@@ -9,7 +9,8 @@
 - Expoe calculo, entrada, primeiro juro e primeira mensal para conferir historicos;
   painel de aprovacao passa a usar o Pro-Soluto com a correcao da carencia.
 - Unifica motor legado e atualiza ajudas e oraculos sinteticos independentes.
-- QA diferencia o expansor de datas da ajuda e as parcelas da documentacao.
+- QA diferencia o expansor de datas da ajuda e as parcelas da documentacao;
+  verifica a data historica dentro da propria linha da entrada.
 - Sugestoes preservam os pagamentos existentes e so acrescentam sinais antes
   de uma primeira mensal fixada; calendario automatico permanece disponivel.
 - Sem alteracao de dados remotos, limites comerciais, n8n ou financiamento bancario.

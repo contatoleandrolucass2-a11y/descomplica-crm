@@ -397,7 +397,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     await expect(
       page
         .locator(`${root} .investor-associative-ledger li`)
-        .filter({ has: field("Entrada") })
+        .filter({ has: page.getByLabel("Entrada", { exact: true }) })
         .locator("time"),
     ).toHaveAttribute("datetime", historical.entry);
     await resetDates.click();

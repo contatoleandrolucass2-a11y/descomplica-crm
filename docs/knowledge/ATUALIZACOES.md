@@ -31,6 +31,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   primeira mensal fixada limita novos sinais. UI e sugestoes passaram a usar
   essas datas e o calendario canonico, preservando sinais ja digitados.
   Regressoes focadas aprovadas; release ainda depende da repeticao dos gates.
+- CI `37581613136` aprovou testes Linux, banco, E2E e restore. Seletores `has`
+  devem procurar descendentes da linha, sem incluir o ancestral da pagina.
+  Correcao reproduzida em Chromium sintetico; nova matriz integral pendente.
 
 ## 2026-10-07: formulas do Associativo confrontadas com Salesforce
 

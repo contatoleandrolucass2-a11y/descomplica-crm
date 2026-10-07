@@ -305,3 +305,11 @@ Ambiente: Windows/PowerShell, Node 24.19.0 e pnpm 11.20.0.
   falhas POSIX conhecidas no Windows. Os 15 testes Node Salesforce passaram.
   A CI Linux integral e a jornada autenticada continuam obrigatorias para
   este novo candidato; nao houve publicacao nesta etapa.
+
+- CI `37581613136`: 2.224 testes Linux e 15 Node aprovados, nove skips de
+  plataforma/fixtures existentes; banco, build, E2E e restore aprovados.
+  A continuidade passou pelas datas invalidas e historicas, mas o seletor da
+  data no ledger usava um ancestral externo dentro de `has`. Corrigido para
+  procurar o campo Entrada dentro da propria linha, sem remover a assercao.
+  Artefato `11465947336`, SHA-256 do ZIP
+  `3e5c543bb55600f355ae21d5467bca588e4229d435b027bb78da49ca0a0c8b4a`.

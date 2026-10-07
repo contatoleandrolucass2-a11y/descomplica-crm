@@ -26,6 +26,9 @@
   para limitar novos sinais antes da mensal, sem apagar pagamentos existentes.
 - Mais 25 regressoes de sugestoes e 13 de calendario; 416 testes de integracao
   e motores, 105 de sugestoes/aprovacao e 76 de paridade sintetica aprovados.
+- CI `37581613136`: 2.224 testes Linux e 15 Node aprovados; banco, E2E e restore
+  verdes. QA historico exigiu corrigir escopo relativo do seletor da entrada.
+  Falha anterior e seletor corrigido reproduzidos em Chromium local sintetico.
 
 ## 2026-10-07 - Auditoria das formulas Salesforce
 
