@@ -34,6 +34,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - CI `37581613136` aprovou testes Linux, banco, E2E e restore. Seletores `has`
   devem procurar descendentes da linha, sem incluir o ancestral da pagina.
   Correcao reproduzida em Chromium sintetico; nova matriz integral pendente.
+- CI `37584281089`: continuidade financeira completa aprovada em mobile/desktop.
+  Teste negativo HTTP 503 precisa reconhecer o evento de console provocado por
+  sua propria fixture. Excecao limitada ao evento exato, quantidade e janela
+  controlada; nunca ignorar todos os erros de recurso. Repeticao integral pendente.
 
 ## 2026-10-07: formulas do Associativo confrontadas com Salesforce
 

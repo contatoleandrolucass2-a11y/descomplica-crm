@@ -1,7 +1,8 @@
 # Associativo: reconstrucao das formulas Salesforce
 
-Data: 2026-10-07. Status: validado na amostra; implementacao e paridade global pendentes.
-Escopo: investigacao somente leitura. Nenhum motor, proposta ou politica foi alterado.
+Data: 2026-10-07. Status: implementado no candidato; publicacao pendente dos gates.
+Escopo: investigacao Salesforce somente leitura e correcao local autorizada do
+Associativo. Nenhuma proposta, politica ou dado remoto foi alterado.
 
 ## Fonte e alcance
 
@@ -313,3 +314,12 @@ Ambiente: Windows/PowerShell, Node 24.19.0 e pnpm 11.20.0.
   procurar o campo Entrada dentro da propria linha, sem remover a assercao.
   Artefato `11465947336`, SHA-256 do ZIP
   `3e5c543bb55600f355ae21d5467bca588e4229d435b027bb78da49ca0a0c8b4a`.
+
+- CI `37584281089`: continuidade aprovada nas 12 etapas em 375 e 1440px,
+  incluindo historicos, datas invalidas, fonte viva e conciliacao de anuais.
+  O harness externo contabilizou o unico 503 sintetico como erro inesperado.
+  Excecao limitada ao evento console exato da fixture, apos assercoes da UI,
+  quantidade de respostas e continuidade completas; nao abrange outros erros.
+  Artefato `11467200284`, SHA-256 do ZIP
+  `b80fe6a05f8026e62deb494fc2f7deb2c5ee5cdbeee062b4f21adb68f8737dd8`.
+  Onze testes negativos/positivos da classificacao e 42 testes focados passaram.

@@ -29,6 +29,10 @@
 - CI `37581613136`: 2.224 testes Linux e 15 Node aprovados; banco, E2E e restore
   verdes. QA historico exigiu corrigir escopo relativo do seletor da entrada.
   Falha anterior e seletor corrigido reproduzidos em Chromium local sintetico.
+- CI `37584281089`: as 12 etapas de continuidade passaram em 375 e 1440px.
+  O erro de rede 503 injetado pelo teste foi contado como inesperado pelo
+  harness externo. Classificacao agora exige mensagem/URL exatas, uma unica
+  resposta sintetica e continuidade aprovada; outros erros nao sao excluidos.
 
 ## 2026-10-07 - Auditoria das formulas Salesforce
 

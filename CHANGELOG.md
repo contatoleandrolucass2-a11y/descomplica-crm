@@ -11,6 +11,8 @@
 - Unifica motor legado e atualiza ajudas e oraculos sinteticos independentes.
 - QA diferencia o expansor de datas da ajuda e as parcelas da documentacao;
   verifica a data historica dentro da propria linha da entrada.
+- QA de indisponibilidade identifica somente o erro 503 sintetico esperado;
+  outros erros de console e JavaScript continuam bloqueando a publicacao.
 - Sugestoes preservam os pagamentos existentes e so acrescentam sinais antes
   de uma primeira mensal fixada; calendario automatico permanece disponivel.
 - Sem alteracao de dados remotos, limites comerciais, n8n ou financiamento bancario.

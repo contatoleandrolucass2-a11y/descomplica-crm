@@ -6,6 +6,15 @@ const root = ".investor-associative-table-page";
 const approval = `${root} .investor-associative-approval`;
 const expect = baseExpect.configure({ timeout: 30_000 });
 
+export function isExpectedInventoryUnavailableConsoleError(message, origin) {
+  return (
+    message.type() === "error" &&
+    message.location().url === `${origin}/api/inventory` &&
+    message.text() ===
+      "Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+  );
+}
+
 function buildInventory(withProgress, withAppraisal) {
   const base = JSON.parse(buildSyntheticDirectTableQaSnapshot()).items[0];
   const items = [0, 1].map((index) => ({
@@ -46,7 +55,10 @@ function buildInventory(withProgress, withAppraisal) {
   };
 }
 
-export async function checkAssociativeCalculationContinuity(page) {
+export async function checkAssociativeCalculationContinuity(
+  page,
+  { onExpectedConsoleError = () => {} } = {},
+) {
   const origin = new URL(page.url());
   assert.ok(
     ["127.0.0.1", "localhost", "[::1]"].includes(origin.hostname),
@@ -58,6 +70,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     passed: false,
     stages: [],
     blockedExternalRequests: 0,
+    expectedNetworkErrorCount: 0,
   };
   let stage = "inventory-merge";
   let fixture = buildInventory(true, true);
@@ -66,6 +79,16 @@ export async function checkAssociativeCalculationContinuity(page) {
   let liveStatus = 200;
   let liveGate = Promise.resolve();
   let releaseLive;
+  const expectedNetworkErrors = [];
+  const onConsole = (message) => {
+    if (
+      stage === "live-failure-blocks-calculation" &&
+      liveStatus === 503 &&
+      isExpectedInventoryUnavailableConsoleError(message, origin.origin)
+    ) {
+      expectedNetworkErrors.push(message);
+    }
+  };
   const handler = async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -569,6 +592,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     stage = "live-failure-blocks-calculation";
     fixture = buildInventory(true, true);
     liveStatus = 503;
+    page.on("console", onConsole);
     await reloadPage();
     await expect.poll(() => inventoryResponses.reference).toBeGreaterThan(0);
     await expect.poll(() => inventoryResponses.live).toBeGreaterThan(0);
@@ -580,6 +604,10 @@ export async function checkAssociativeCalculationContinuity(page) {
       0,
     );
     await assertNoProposal();
+    await expect.poll(() => expectedNetworkErrors.length).toBe(1);
+    assert.equal(inventoryResponses.live, 1, "Exactly one synthetic 503 response is expected");
+    page.off("console", onConsole);
+    result.expectedNetworkErrorCount = expectedNetworkErrors.length;
     result.stages.push({ stage, liveStatus, snapshotFallback: false, calculationBlocked: true });
     liveStatus = 200;
 
@@ -673,10 +701,12 @@ export async function checkAssociativeCalculationContinuity(page) {
       clearedAnnualsRestoreBalance: true,
     });
     assert.equal(result.blockedExternalRequests, 0, "Unexpected external requests were blocked");
+    for (const message of expectedNetworkErrors) onExpectedConsoleError(message);
     result.passed = true;
   } catch (error) {
     result.error = `${stage}: ${error instanceof Error ? error.message : String(error)}`;
   } finally {
+    page.off("console", onConsole);
     releaseLive?.();
     await page.unroute("**/*", handler);
   }
