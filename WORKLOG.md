@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-07 - Integracao da matriz de acessos com Repasse
+
+- A branch integrou a `main` `73b20d0`, que acrescentou a rota protegida
+  `/app/repasse` e elevou o inventario E2E de 23 para 24 rotas.
+- Repasse reutilizava `crm.partnerships.view` supondo que a chave fosse
+  exclusiva de Master. Na nova matriz, Administrador, Coordenador e perfis
+  Imob tambem recebem Parcerias; a integracao passou a exigir explicitamente o
+  papel `master` junto da permissao no Proxy, navegacao, pagina e Server Action.
+- O contrato dos oito perfis preserva Repasse com `200` somente para Master e
+  `403` para todos os demais, sem retirar Canal de Parcerias dos perfis Imob.
+  Os testes focados de pagina, acao, Proxy, navegacao e release aprovaram 79
+  casos; a matriz dedicada de Repasse continua separada da baseline global.
+
 ## 2026-10-06 - Estabilizacao final da evidencia de acessos
 
 - A CI `37532674180` aprovou validacao, restore isolado, migrations, 1.099
@@ -127,6 +140,71 @@
   Escuro, com Corretor Imob selecionado, passou sem violações Axe. Cinco contas
   e escopos sintéticos foram removidos e a limpeza foi comprovada por contagem
   zero.
+
+## 2026-10-06 - Consulta de repasse por FID
+
+- Branch `codex/repasse-map`, base `a22f4dc`. A imagem fornecida pelo usuário foi
+  tratada como referência visual, e a planilha como fonte de dados somente leitura.
+- Contrato confirmado na aba `Table 1`: atualização em `A1` e colunas `A:F` para
+  FID, empreendimento, etapa, status, nome do cliente e motivo. Nenhum dado real
+  foi persistido em fixture, documentação ou artefato versionado.
+- A guia fica sob o Dashboard autorizado e exige papel `master` junto de
+  `crm.partnerships.view` no Proxy, na página, na navegação e na Server Action.
+  O gate de release também é revalidado na ação. Assim o FID segue no corpo POST,
+  não em URL ou referrer.
+- O DAL consulta no servidor o datasource CSV público do Google, com documento,
+  `gid`, `headers=0` e intervalos fixos, `no-store`, timeout de 8 segundos, leitura
+  limitada a 200 KB, bloqueio de redirects, validação dos seis cabeçalhos e DTO
+  mínimo. A primeira consulta traz apenas FIDs; B:F só é lido para uma
+  correspondência exata, com releitura da coluna e revalidação do FID antes de
+  associar os dados. O intervalo de FIDs é aberto até a última linha preenchida;
+  excesso de bytes, linhas, colunas ou CSV inválido falha fechado. Duplicidade
+  falha antes dos dados pessoais.
+- A tela reutiliza tokens globais e troca tabela por blocos rotulados no celular.
+  Claro, Médio e Escuro herdam superfícies, textos, bordas, foco e estados
+  semânticos; cor nunca substitui o texto do status.
+- Sem migration, dependência, escrita remota, alteração de conta ou mudança de
+  compartilhamento. Em 06/10/2026, o responsável decidiu manter a planilha
+  publicamente legível. O RBAC Master-only protege a jornada do CRM, mas não
+  privatiza a origem externa; esse risco residual fica explícito no runbook.
+- A jornada Repasse autenticada usou somente fixture loopback e aprovou `ready`,
+  vazio, conflito, indisponível, teclado, ausência de overflow e Axe sem violações
+  em 375/768/1024/1440 px nos três temas (12 combinações). Capturas inspecionadas
+  sem dado real. A matriz global avançou aos simuladores e encontrou seleções de
+  tema intermitentes fora desta rota no banco local adiantado; nenhuma baseline
+  foi promovida e esse ensaio não autoriza publicação.
+- Integração com `main` em `a89a93c` concluída no merge `c88ba5a`. Node 24.19.0
+  e pnpm 11.20.0; lint, typecheck, 2027 testes Vitest, oito testes Node e build
+  das 44 rotas passaram. Uma tentativa paralela de lint/tipos excedeu a memória
+  do host (`137`); a repetição sequencial de ambos passou sem alteração de código.
+- Diagnóstico de publicação confirmou a fonte acessível anonimamente. Como o
+  responsável determinou que esse compartilhamento seja preservado, o adapter
+  passou a usar o endpoint público e as variáveis `REPASSE_GOOGLE_*` foram
+  removidas de Compose, validador, configurador e prova de imagem. Nenhuma
+  permissão, conta, segredo ou dado remoto foi alterado.
+- A revisão de segurança completa do diff público cobriu autorização, destino de
+  rede, parser CSV, limites de recursos e retirada das credenciais, sem achado
+  reportável. Três hipóteses foram validadas e descartadas como vulnerabilidade:
+  consistência entre snapshots, amplificação finita de leituras e segredo legado
+  inexistente no host. A suíte focada aprovou 39 testes.
+- CI `37521773216`: `validate` e `isolated-restore` passaram; `release-gates`
+  encontrou o inventário E2E global ainda em 23 rotas, embora o link Repasse já
+  estivesse corretamente visível ao Master. O contrato foi atualizado para 24
+  rotas, link Master 21, acesso direto Master `200` e negação `403` para os outros
+  oito perfis, sem incluir Repasse na baseline visual global que possui contrato
+  dedicado. Nova CI pendente.
+- CI `37524840387`: `validate`, restore, banco, build e E2E das 24 rotas/nove
+  perfis passaram. O QA dedicado chegou ao resultado sintético e falhou 12 ms
+  depois de reduzir 1440 para 375 px, na primeira medição de overflow. Como a
+  mesma matriz havia aprovado as 12 combinações e nenhum CSS mudou, o harness
+  agora aguarda fontes e geometria estável por frames consecutivos antes de
+  executar as mesmas asserts; não altera CSS, baseline ou tolerância. Falhas
+  futuras registram apenas viewport, tema, dimensões e geometria sanitizada.
+- CI `37532954767` aprovou `validate`, `isolated-restore` e `release-gates`,
+  incluindo a matriz visual completa, no SHA `a06ebad4`. A mudança posterior
+  para a origem pública aprovou localmente lint, tipos, 2.030 testes Vitest,
+  oito testes Node, inventário de recursos e build das 44 rotas. Uma nova CI
+  ainda é exigida antes do merge.
 
 ## 2026-10-06 - Publicacao do saldo e ajudas do Associativo
 

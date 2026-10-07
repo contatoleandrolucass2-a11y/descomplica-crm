@@ -15,16 +15,16 @@ exceções individuais. Uma exceção `deny` vence `allow` e a permissão herdad
 Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 `legacy_review` falham fechados nas policies RLS.
 
-| Papel                      | Visão de dashboard                     | Ranking | Canal de Parcerias | Administração                                                |
-| -------------------------- | -------------------------------------- | :-----: | :----------------: | ------------------------------------------------------------ |
-| `master`                   | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         | integral e exclusiva para capacidades de Master              |
-| `admin`                    | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         | usuários abaixo do próprio nível, papéis, exceções e páginas |
-| `coordinator`              | Com Canal Imob                         |   Não   |        Sim         | nenhuma                                                      |
-| `manager_house`            | Sem Canal Imob                         |   Sim   |        Não         | nenhuma                                                      |
-| `manager_imob`             | Com Canal Imob                         |   Não   |        Sim         | nenhuma                                                      |
-| `broker_house`             | Sem Canal Imob                         |   Sim   |        Não         | nenhuma                                                      |
-| `broker_imob`              | Com Canal Imob                         |   Não   |        Sim         | nenhuma                                                      |
-| `pending` e papéis legados | nenhuma                                |   Não   |        Não         | nenhuma                                                      |
+| Papel                      | Visão de dashboard                     | Ranking | Canal de Parcerias | Repasse | Administração                                                |
+| -------------------------- | -------------------------------------- | :-----: | :----------------: | :-----: | ------------------------------------------------------------ |
+| `master`                   | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         |   Sim   | integral e exclusiva para capacidades de Master              |
+| `admin`                    | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         |   Não   | usuários abaixo do próprio nível, papéis, exceções e páginas |
+| `coordinator`              | Com Canal Imob                         |   Não   |        Sim         |   Não   | nenhuma                                                      |
+| `manager_house`            | Sem Canal Imob                         |   Sim   |        Não         |   Não   | nenhuma                                                      |
+| `manager_imob`             | Com Canal Imob                         |   Não   |        Sim         |   Não   | nenhuma                                                      |
+| `broker_house`             | Sem Canal Imob                         |   Sim   |        Não         |   Não   | nenhuma                                                      |
+| `broker_imob`              | Com Canal Imob                         |   Não   |        Sim         |   Não   | nenhuma                                                      |
+| `pending` e papéis legados | nenhuma                                |   Não   |        Não         |   Não   | nenhuma                                                      |
 
 Todos os sete papéis ativos recebem as páginas operacionais compatíveis com a
 linha. As três visões do dashboard possuem permissões próprias:
@@ -38,6 +38,10 @@ Os papéis `manager`, `supervisor`, `house`, `real_estate`,
 aparecem como opções atribuíveis e não possuem grants herdados. Uma conta
 legada precisa ser reclassificada explicitamente; o sistema não deduz House ou
 Imob do nome anterior.
+
+Repasse é uma jornada complementar exclusivamente Master. Ela reutiliza
+`crm.partnerships.view`, mas a combinação de gate de página, navegação e Server
+Action não a libera aos demais papéis que usam Canal de Parcerias.
 
 As permissões administrativas respeitam hierarquia estrita: o ator somente
 modifica usuários e papéis abaixo do próprio nível. O próprio usuário não pode
@@ -112,14 +116,15 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 - hub de simulação e a jornada WF13;
 - início administrativo, usuários e catálogo de páginas.
 
-O inventário HTTP cobre 22 rotas protegidas: 17 correspondem ao catálogo
-PostgreSQL e cinco jornadas complementares permanecem sem linha em `app_pages`:
-Tabelão, as réplicas WF14 e WF15, WF16/Documentação e CAIXA. As cinco são
-montadas no servidor somente depois que o hub e `crm.simulators.view` autorizam
-o Master; outros perfis recebem `403` no guard. A página CAIXA é exclusivamente
-visual: o acesso à rota não habilita `simulator.caixa`, cálculo, envio, análise
-de crédito ou aprovação bancária, que continuam fail-closed por contrato
-independente.
+O inventário HTTP cobre 24 rotas protegidas: 17 correspondem ao catálogo
+PostgreSQL e sete jornadas complementares permanecem sem linha em `app_pages`:
+Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15, WF16/Documentação e
+CAIXA. Recurso MKT reutiliza `crm.settings.manage`; Repasse exige o papel
+`master` junto de `crm.partnerships.view`; as cinco jornadas de simulação passam
+pelo hub e por `crm.simulators.view`. Outros perfis recebem `403` no guard aplicável.
+A página CAIXA é exclusivamente visual: o acesso à rota não habilita
+`simulator.caixa`, cálculo, envio, análise de crédito ou aprovação bancária, que
+continuam fail-closed por contrato independente.
 
 O Canal de Parcerias possui composição visual protegida com estados explícitos
 de integração pendente. A rota de produção continua exigindo

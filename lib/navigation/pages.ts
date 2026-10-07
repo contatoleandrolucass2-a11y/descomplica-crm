@@ -45,6 +45,8 @@ interface SupplementalNavigationDefinition {
 
 const SIMULATION_PARENT_KEY = "crm.simulation";
 const SIMULATION_PARENT_PATH = "/app/simulacao";
+const DASHBOARD_PARENT_KEY = "crm.dashboard";
+const DASHBOARD_PARENT_PATH = "/app";
 
 function hasAuthorizedSimulationRoot(pages: AppPage[]) {
   return pages.some(
@@ -106,6 +108,43 @@ export function extendAuthorizedNavigationWithReleasedPages(
   pages: AppPage[],
   context: AuthorizationContext,
 ): AppPage[] {
+  const repasseGate = getProtectedPageGate("/app/repasse");
+  const dashboardParent = pages.find(
+    (page) =>
+      page.key === DASHBOARD_PARENT_KEY &&
+      page.path === DASHBOARD_PARENT_PATH &&
+      page.section === "crm" &&
+      page.permissionKey === "crm.dashboard.view" &&
+      page.parentKey === null &&
+      page.isActive &&
+      page.isNavigation,
+  );
+  if (
+    dashboardParent &&
+    repasseGate?.releaseEnabled &&
+    repasseGate.pageKey === "crm.repasse" &&
+    repasseGate.requiredRole === "master" &&
+    context.roleKey === repasseGate.requiredRole &&
+    context.permissions.includes(repasseGate.permission) &&
+    !pages.some((page) => page.key === repasseGate.pageKey || page.path === repasseGate.path)
+  ) {
+    pages = [
+      ...pages,
+      {
+        key: repasseGate.pageKey,
+        path: repasseGate.path,
+        name: "Repasse",
+        description: "Consulte o acompanhamento da assessoria por FID.",
+        section: "crm",
+        permissionKey: repasseGate.permission,
+        parentKey: dashboardParent.key,
+        sortOrder: 60,
+        isActive: true,
+        isNavigation: true,
+      },
+    ];
+  }
+
   const marketingGate = getProtectedPageGate("/app/configuracoes/recurso-mkt");
   const settingsParent = pages.find(
     (page) =>
@@ -206,6 +245,7 @@ function pageGateAuthorizesNavigation(page: AppPage, context: AuthorizationConte
     gate?.releaseEnabled === true &&
     gate.pageKey === page.key &&
     gate.permission === page.permissionKey &&
+    (!gate.requiredRole || context.roleKey === gate.requiredRole) &&
     context.permissions.includes(gate.permission)
   );
 }

@@ -4,6 +4,18 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: reutilizar permissao exige revisar o novo conjunto de grants
+
+- Status: validado localmente; fonte: integracao de `73b20d0`, matriz de papeis
+  e contratos de Repasse.
+- Uma rota Master-only reutilizava `crm.partnerships.view` porque, na base em
+  que nasceu, apenas Master tinha a chave. Depois da separacao House/Imob, essa
+  mesma permissao e legitima para Administrador, Coordenador e perfis Imob no
+  Canal de Parcerias.
+- O boundary de Repasse agora exige papel `master` mais a permissao no Proxy,
+  navegacao, pagina e Server Action. Assim excecoes ou grants de Parcerias nao
+  abrem a consulta de FID. O E2E deve manter 24 rotas por oito perfis.
+
 ## 2026-10-06: identificadores sinteticos nao podem variar a altura da baseline
 
 - Status: validado localmente; fonte: CI `37532674180`,
@@ -122,6 +134,52 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Evidências: 1.980 testes Vitest, oito Node, 1.099 pgTAP, lint, tipos, build e
   jornada autenticada sem violações Axe. Autorização da migration,
   reclassificação das três contas legadas e publicação continuam pendentes.
+
+## 2026-10-06: origem pública de repasse exige risco explícito e isolamento
+
+- Status: pendente_validacao; fonte: implementação, revisão independente e decisão
+  expressa do responsável na branch `codex/repasse-map`.
+- Autenticação no CRM não privatiza uma planilha cujo export aceita leitura
+  anônima. O responsável decidiu manter esse compartilhamento em 06/10/2026;
+  portanto o risco de leitura fora do CRM é residual conhecido, não uma garantia
+  fornecida pelo RBAC Master-only.
+- O adapter server-only usa o datasource CSV público com documento, `gid`,
+  `headers=0` e intervalos fixos. `headers=0` evita que o Google infira cabeçalhos
+  e desloque os índices. Não há token, conta de serviço ou credencial Google no
+  runtime.
+- Para reduzir a projeção do CRM, primeiro buscar metadados e somente a coluna de
+  FIDs; carregar as colunas pessoais apenas quando houver uma correspondência
+  exata. Duplicidade deve falhar antes da segunda leitura, e a segunda leitura
+  precisa revalidar unicidade e FID se as linhas mudarem.
+- Server Action precisa repetir release gate, papel `master` e permissão, mesmo
+  quando Proxy e página já validam. Nesta jornada `crm.partnerships.view` é
+  compartilhada com papéis Imob; somente a combinação explícita mantém Repasse
+  restrito sem migration remota.
+- Evidências: `tests/repasse.test.ts`, `tests/repasse-action.test.ts`,
+  `scripts/qa/repasse.mjs` e `docs/runbooks/repasse-google-sheet.md`. A matriz
+  sintética passou 12 combinações de viewport/tema, Axe, teclado e quatro estados.
+- O acesso e os dados remotos não foram modificados. Se a origem passar a privada,
+  o endpoint público deve falhar como indisponível até existir adapter autenticado;
+  não usar fallback que exponha segredos ao navegador.
+- A revisão de segurança do diff público terminou com cobertura completa e sem
+  achado reportável. Foram conferidos RBAC, SSRF/redirect, parser CSV, limites de
+  recursos e remoção de credenciais; 39 testes focados passaram. A limitação de
+  taxa da infraestrutura e a governança dos editores da planilha permanecem
+  controles operacionais externos, não garantias deste adapter.
+- Após integrar `main` em `a89a93c`, lint, tipos, 2027 testes Vitest, oito testes
+  Node e build das 44 rotas passaram localmente. CI `37532954767` aprovou build,
+  banco, restore, autorização e matriz visual no SHA `a06ebad4`; a mudança de
+  adapter aprovou lint, tipos, 2.030 testes Vitest, oito testes Node, inventário
+  de recursos e build das 44 rotas no estado final local, mas ainda exige nova CI
+  e imagem promovível.
+- A primeira CI integrada detectou o inventário E2E antigo de 23 rotas. Toda rota
+  nova precisa entrar no contrato dos oito perfis: Repasse retorna `200` somente
+  para Master e `403` para os demais; sua captura visual permanece no QA dedicado.
+- Ao redimensionar uma página já renderizada, medir overflow no mesmo instante
+  pode observar geometria intermediária. O QA deve aguardar fontes e amostras
+  consecutivas estáveis de `innerWidth`, `clientWidth` e `scrollWidth`, e só então
+  aplicar o limite original; nunca corrigir esse ruído com `overflow-x: hidden`,
+  baseline nova ou espera condicionada ao resultado desejado.
 
 ## 2026-10-06: saldo do Associativo publicado com bases financeiras preservadas
 

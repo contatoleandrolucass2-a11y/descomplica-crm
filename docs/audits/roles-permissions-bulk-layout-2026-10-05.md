@@ -142,6 +142,11 @@ autorização específica e os gates do runbook de publicação.
   `worktreeDirtyAtCapture: false` e `passed: true`. A habilitacao sequencial dos
   campos do Associativo recebeu espera explicita de ate 60 s para absorver a
   latencia medida no host, sem omitir campo, estado ou assercao de continuidade.
+- A integracao posterior da `main` `73b20d0` adicionou Repasse ao inventario.
+  Como `crm.partnerships.view` passa a ser legitima para Coordenador e perfis
+  Imob nesta matriz, Repasse recebeu um segundo predicado explicito de papel
+  `master` no Proxy, navegacao, pagina e Server Action. Os outros sete perfis
+  permanecem em `403`, sem perder o acesso devido ao Canal de Parcerias.
 - Reset completo, lint do schema e advisors de segurança/desempenho do banco:
   aprovados sem achados.
 - Jornada autenticada local em 1440×1000, tema Escuro e Corretor Imob

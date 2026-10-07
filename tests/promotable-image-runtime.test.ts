@@ -57,6 +57,24 @@ describe("promotable image contract", () => {
     }
   });
 
+  it("does not require private Google credentials for the public repasse sheet", async () => {
+    const sources = await Promise.all(
+      [
+        ".env.example",
+        "compose.yaml",
+        "deploy/production.env.example",
+        "deploy/runtime/validate-runtime-env.mjs",
+        "deploy/system/descomplica-configure-env",
+        "scripts/release/prove-promotable-image.mjs",
+      ].map((file) => readFile(path.join(repositoryRoot, file), "utf8")),
+    );
+
+    for (const source of sources) {
+      expect(source).not.toContain("REPASSE_GOOGLE_SERVICE_ACCOUNT_EMAIL");
+      expect(source).not.toContain("REPASSE_GOOGLE_PRIVATE_KEY_BASE64");
+    }
+  });
+
   it("mounts the session HMAC through a runtime secret in both environments", async () => {
     const [productionCompose, homologationCompose, productionExample, homologationExample] =
       await Promise.all([

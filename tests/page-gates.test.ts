@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
 
 describe("protected commercial page set", () => {
-  it("matches the exact approved twenty-three-page protected set", () => {
+  it("matches the exact approved twenty-four-page protected set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -16,6 +16,7 @@ describe("protected commercial page set", () => {
         "admin.users|/admin/usuarios|users.view",
         "crm.dashboard|/app|crm.dashboard.view",
         "crm.partnerships|/app/canal-de-parcerias|crm.partnerships.view",
+        "crm.repasse|/app/repasse|crm.partnerships.view",
         "crm.ranking|/app/ranking|crm.ranking.view",
         "crm.settings.goals|/app/configuracoes/metas|crm.settings.manage",
         "crm.settings.partnerships|/app/configuracoes/metas/parcerias|crm.settings.manage",
@@ -46,10 +47,18 @@ describe("protected commercial page set", () => {
     ).toEqual([]);
   });
 
-  it("keeps the full twenty-three-route smoke inventory unique", () => {
-    expect(PROTECTED_PAGE_GATES).toHaveLength(23);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(23);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(23);
+  it("keeps the full twenty-four-route smoke inventory unique", () => {
+    expect(PROTECTED_PAGE_GATES).toHaveLength(24);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(24);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(24);
+  });
+
+  it("keeps Repasse explicitly Master-only in addition to its permission", () => {
+    expect(PROTECTED_PAGE_GATES.find(({ path }) => path === "/app/repasse")).toMatchObject({
+      permission: "crm.partnerships.view",
+      releaseEnabled: true,
+      requiredRole: "master",
+    });
   });
 
   it("gates every supplemental simulator with the simulator permission and release state", () => {

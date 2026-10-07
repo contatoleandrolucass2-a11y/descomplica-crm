@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-07 - Repasse compativel com os novos papeis
+
+- Integra a rota Repasse da `main` sem ampliar seu publico quando Parcerias
+  passa a ser herdada por Coordenador e perfis Imob.
+- Exige papel `master` e `crm.partnerships.view` em conjunto no Proxy,
+  navegacao, pagina e Server Action; permissao isolada continua insuficiente.
+- Atualiza a matriz de smoke para os oito perfis atuais e 24 rotas protegidas.
+
 ## 2026-10-06 - Evidencia movel estabilizada
 
 - Limita o e-mail do cabecalho de Usuarios a duas linhas no celular, evitando
@@ -71,6 +79,27 @@
   liberar simuladores, políticas comerciais ou tabelas Qlik.
 - Preserva contas legadas para reclassificação manual, sem presumir se cada uma
   pertence ao canal House ou Imob.
+
+## 2026-10-06 - Consulta de repasse da assessoria M.A.P
+
+- Adiciona a guia protegida Repasse sob o Dashboard para consulta exata por FID.
+- Identifica claramente a assessoria M.A.P DE CAMPOS SOLUÇÕES e exibe fonte e
+  data de atualização sem inventar valores ausentes.
+- Consulta o datasource CSV público da planilha somente no servidor, sem cache,
+  credencial Google ou nova dependência, com timeout, limite de resposta em
+  streaming, validação de cabeçalhos, projeção mínima e bloqueio de FID duplicado.
+- Restringe navegação e consulta à combinação explícita de papel `master` com
+  `crm.partnerships.view`, repete o gate na Server Action e mantém nomes e
+  motivos fora da URL.
+- Inclui Repasse na matriz global de 24 rotas: Master exige `200` e link no
+  cabeçalho; os outros sete perfis exigem `403` na rota direta.
+- Estabiliza fontes e geometria responsiva antes das medições de overflow e Axe,
+  preservando os mesmos limites e registrando somente diagnósticos sanitizados.
+- Entrega formulário, carregamento, inválido, não encontrado, conflito,
+  indisponibilidade e resultado responsivo nos temas Claro, Médio e Escuro.
+- Não inclui migration, pacote novo, escrita na planilha ou mudança de acesso.
+  O compartilhamento público foi mantido por decisão expressa do responsável;
+  o RBAC do CRM não substitui a política de acesso da origem externa.
 
 ## 2026-10-06 - Associativo publicado
 
