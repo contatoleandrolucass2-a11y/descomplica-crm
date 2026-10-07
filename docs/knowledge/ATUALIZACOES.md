@@ -27,6 +27,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - CI `37577305243`: validate, E2E e restore verdes. QA de continuidade falhou
   por seletor com dois alvos (summary e ajuda). Corrigido escopo do seletor;
   nova verificacao integral pendente. Nunca contornar o gate por essa falha.
+- Revisao independente: historico exige datas do calculo e da entrada separadas;
+  primeira mensal fixada limita novos sinais. UI e sugestoes passaram a usar
+  essas datas e o calendario canonico, preservando sinais ja digitados.
+  Regressoes focadas aprovadas; release ainda depende da repeticao dos gates.
 
 ## 2026-10-07: formulas do Associativo confrontadas com Salesforce
 

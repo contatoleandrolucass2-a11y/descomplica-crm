@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 // @ts-expect-error -- Existing archive API has no TypeScript declaration.
+import { buildAssociativeSignalDates } from "@/lib/archive-investor/associative-linear-calculator-rules.mjs";
+// @ts-expect-error -- Existing archive API has no TypeScript declaration.
 import { calculateAssociativeLinear } from "@/lib/archive-investor/associative-linear-calculator-rules.mjs";
 // @ts-expect-error -- Existing archive API has no TypeScript declaration.
 import { calculateAssociativeDecreasing } from "@/lib/archive-investor/associative-decreasing-calculator-rules.mjs";
@@ -61,6 +63,36 @@ type Block = {
 const input = (overrides: Partial<LinearInput> = {}): LinearInput => ({
   ...SYNTHETIC,
   ...overrides,
+});
+
+describe("shared entry-to-signal calendar", () => {
+  it.each([
+    ["2026-01-16", ["2026-02-15", "2026-03-15", "2026-04-15"]],
+    ["2025-12-31", ["2026-01-15", "2026-02-15", "2026-03-15"]],
+    ["2026-02-28", ["2026-03-15", "2026-04-15", "2026-05-15"]],
+    ["", ["", "", ""]],
+    ["2026-02-30", ["", "", ""]],
+  ])("preserves canonical signals for entry %s", (entryDate, expected) => {
+    expect(buildAssociativeSignalDates(entryDate)).toEqual(expected);
+  });
+
+  it("only offers signals strictly before a fixed first monthly", () => {
+    const dates = buildAssociativeSignalDates("2026-01-16") as string[];
+    expect(dates.filter((date) => date < "2026-02-15")).toHaveLength(0);
+    expect(dates.filter((date) => date < "2026-03-15")).toHaveLength(1);
+    expect(dates.filter((date) => date < "2026-04-15")).toHaveLength(2);
+    expect(dates.filter((date) => date < "2026-05-15")).toHaveLength(3);
+    const calculated = calculateAssociativeLinear(
+      input({
+        signal1: 150,
+        signal2: 150,
+        signal3: 150,
+        firstInstallmentDate: "2026-05-15",
+      }),
+    );
+    expect(calculated.ok).toBe(true);
+    expect(calculated.signalDates).toEqual(dates);
+  });
 });
 const sum = (values: readonly number[]) => values.reduce((total, value) => total + value, 0);
 const cents = (value: number) => Math.round(value * 100);

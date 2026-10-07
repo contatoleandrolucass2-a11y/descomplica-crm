@@ -279,3 +279,29 @@ Ambiente: Windows/PowerShell, Node 24.19.0 e pnpm 11.20.0.
 - Artefato `11463448905`, ZIP SHA-256
   `f47ec91d19acdac3dc61026a731941e1e554cda9cc55770a49ac4b98aef1fd66`.
   Nenhuma baseline promovida nem teste enfraquecido. Nova CI obrigatoria.
+
+### Revisao de historicos e sugestoes
+
+- Revisao independente encontrou dois caminhos sem cobertura inicial: entrada
+  permanecia no dia atual ao informar uma mensal historica; busca de aprovacao
+  acrescentava sinais posteriores a uma mensal fixada, ignorando a alternativa
+  valida de concentrar o complemento na entrada.
+- UI agora expoe Data do calculo e Data da entrada separadamente. A primeira
+  alimenta o calendario da simulacao; a segunda alimenta entrada, sinais,
+  cronograma, sugestoes e quatro cenarios. Valor vazio nao recebe fallback.
+  Restaurar datas automaticas limpa as quatro substituicoes.
+- Calendario de sinais reutiliza a funcao canonica, sem duplicar vencimentos.
+  `maximumSignalCount` restringe apenas adicionais; sinais ja informados nao
+  sao apagados e continuam sujeitos a validacao de datas e sequencia.
+- 25 novas regressoes de sugestoes; 13 de calendario; seis do calendario de
+  sinais compartilhado. Suites focadas: 105 de aprovacao, 416 de integracao e
+  outros motores e 76 de paridade. QA inclui vazio, historico e restauracao.
+- Nenhuma alteracao da data oficial da obra, taxas ou limites comerciais.
+
+### Validacao local final da revisao
+
+- Lint, typecheck, build, formatacao e diff aprovados em Node 24.19.0.
+- Suite integral: 2.221 testes aprovados, seis ignorados e somente as seis
+  falhas POSIX conhecidas no Windows. Os 15 testes Node Salesforce passaram.
+  A CI Linux integral e a jornada autenticada continuam obrigatorias para
+  este novo candidato; nao houve publicacao nesta etapa.

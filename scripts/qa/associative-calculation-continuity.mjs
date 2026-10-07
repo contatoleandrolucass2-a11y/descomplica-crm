@@ -201,7 +201,7 @@ export async function checkAssociativeCalculationContinuity(page) {
       Math.max(0, (completionYear - monthlyYear) * 12 + completionMonth - monthlyMonth),
     );
     const post = installments - pre;
-    await expect(calendar.locator(".investor-associative-calendar-status > span")).toContainText(
+    await expect(calendar.locator(".investor-associative-calendar-periods")).toContainText(
       `${pre} pré-obra · ${post} pós-obra`,
     );
     return { completionDate, firstMonthly, pre, post };
@@ -316,6 +316,8 @@ export async function checkAssociativeCalculationContinuity(page) {
     await expect.poll(() => moneyValue("Sinal 1")).toBe(500);
     const automaticCalendar = await assertCalendarForUnit(1);
     const firstInterest = await field("Data do primeiro juro").inputValue();
+    const calculationDate = await field("Data do cálculo").inputValue();
+    const entryDate = await field("Data da entrada").inputValue();
     const signalDate = await page
       .locator(`${root} .payment-group-child-signal`)
       .filter({ has: page.getByLabel("Sinal 1", { exact: true }) })
@@ -330,6 +332,8 @@ export async function checkAssociativeCalculationContinuity(page) {
       exact: true,
     });
     const invalidDates = [
+      { label: "Data do cálculo", value: "", reason: "missing-calculation-date" },
+      { label: "Data da entrada", value: "", reason: "missing-entry-date" },
       {
         label: "Primeira mensal",
         value: `${automaticCalendar.firstMonthly.slice(0, 8)}06`,
@@ -350,6 +354,8 @@ export async function checkAssociativeCalculationContinuity(page) {
       await expect(field(invalid.label)).toHaveValue(invalid.value);
       await assertCalendarBlocked();
       await resetDates.click();
+      await expect(field("Data do cálculo")).toHaveValue(calculationDate);
+      await expect(field("Data da entrada")).toHaveValue(entryDate);
       await expect(field("Data do primeiro juro")).toHaveValue(firstInterest);
       await expect(field("Primeira mensal")).toHaveValue(automaticCalendar.firstMonthly);
       await expect(resetDates).toBeDisabled();
@@ -367,11 +373,43 @@ export async function checkAssociativeCalculationContinuity(page) {
     await resetDates.click();
     assert.deepEqual(await assertCalendarForUnit(1), automaticCalendar);
     await assertAnswers(6_000);
+
+    const historicalYear = Number(calculationDate.slice(0, 4)) - 1;
+    const historical = {
+      calculation: `${historicalYear}-01-16`,
+      entry: `${historicalYear}-01-20`,
+      interest: `${historicalYear - 1}-12-31`,
+      monthly: `${historicalYear}-03-15`,
+    };
+    for (const [label, value] of [
+      ["Data do cálculo", historical.calculation],
+      ["Data da entrada", historical.entry],
+      ["Data do primeiro juro", historical.interest],
+      ["Primeira mensal", historical.monthly],
+    ]) {
+      await field(label).fill(value);
+      await field(label).blur();
+      await expect(field(label)).toHaveValue(value);
+    }
+    const historicalCalendar = await assertCalendarForUnit(1);
+    assert.equal(historicalCalendar.firstMonthly, historical.monthly);
+    await expect(installmentsButton).toBeEnabled();
+    await expect(
+      page
+        .locator(`${root} .investor-associative-ledger li`)
+        .filter({ has: field("Entrada") })
+        .locator("time"),
+    ).toHaveAttribute("datetime", historical.entry);
+    await resetDates.click();
+    assert.deepEqual(await assertCalendarForUnit(1), automaticCalendar);
+    await expect(field("Data do cálculo")).toHaveValue(calculationDate);
+    await expect(field("Data da entrada")).toHaveValue(entryDate);
     result.stages.push({
       stage,
       invalidDatesBlocked: invalidDates.map(({ reason }) => reason),
       automaticCalendar,
       shiftedCalendar,
+      historicalCalendar,
       restored: true,
     });
 
@@ -520,7 +558,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     for (let index = 0; index < 2; index += 1) {
       await expect(
         page.getByRole("button", {
-          name: `QA-CONT-${index + 1} sem data de entrega`,
+          name: `QA-CONT-${index + 1} sem data de término da obra`,
           exact: true,
         }),
       ).toBeDisabled();

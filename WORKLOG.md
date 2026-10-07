@@ -20,6 +20,12 @@
   A continuidade parou em seletor ambiguo entre summary e ajuda; seletor foi
   delimitado ao expansor, assim como o botao de parcelas ao dialogo financeiro.
   Nenhuma assercao removida; repeticao integral obrigatoria antes da publicacao.
+- Revisao independente detectou dois casos de datas historicas: entrada presa
+  ao dia atual e busca sem opcao de aumentar somente a entrada. Data do calculo
+  e da entrada agora sao independentes; sugestoes usam o calendario canonico
+  para limitar novos sinais antes da mensal, sem apagar pagamentos existentes.
+- Mais 25 regressoes de sugestoes e 13 de calendario; 416 testes de integracao
+  e motores, 105 de sugestoes/aprovacao e 76 de paridade sintetica aprovados.
 
 ## 2026-10-07 - Auditoria das formulas Salesforce
 

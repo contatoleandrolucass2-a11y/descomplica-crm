@@ -9,6 +9,7 @@ import { ASSOCIATIVE_FIELD_GUIDE_SECTION, ASSOCIATIVE_POLICY_TOPICS, ASSOCIATIVE
 import { ASSOCIATIVE_FAQ_REFERENCE, ASSOCIATIVE_FAQ_SECTIONS, type AssociativeFaqSection } from "./associative-faq-content";
 import { buildDirectTableAmortizationSchedule, buildDirectTablePreKeysSchedule, buildDirectTableProposalPreset, calculateDirectTableFileFlow, DIRECT_TABLE_PROPOSAL_OPTIONS, isDirectTableProposalPresetComplete } from "@/lib/archive-investor/direct-table-file-rules.mjs";
 import { calculateInvestorFlow, distributeSignalBalance } from "@/lib/archive-investor/investor-calculator-rules.mjs";
+import { buildAssociativeSignalDates } from "@/lib/archive-investor/associative-linear-calculator-rules.mjs";
 import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilters, reconcileInvestorFilters, sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
 import { loadInvestorInventory } from "@/lib/archive-investor/load-inventory";
 import { completeMissingInventoryUnitFacts, inventoryIdentityKey, uniqueInventoryReferences } from "@/lib/archive-investor/inventory-reference";
@@ -2523,7 +2524,11 @@ export function InvestorCalculator({
   const [directProposalDirty, setDirectProposalDirty] = useState(false);
   const [directIncomeNotice, setDirectIncomeNotice] = useState("");
   const [visibleScenarioCodes, setVisibleScenarioCodes] = useState<string[]>([]);
-  const [baseDate] = useState(todayIso);
+  const [todayDate] = useState(todayIso);
+  const [associativeCalculationDate, setAssociativeCalculationDate] = useState<string | null>(null);
+  const [associativeEntryDate, setAssociativeEntryDate] = useState<string | null>(null);
+  const baseDate = annualMode ? associativeCalculationDate ?? todayDate : todayDate;
+  const entryDate = annualMode ? associativeEntryDate ?? baseDate : baseDate;
   const [associativeFirstInterestDate, setAssociativeFirstInterestDate] = useState<string | null>(null);
   const [associativeFirstMonthlyDate, setAssociativeFirstMonthlyDate] = useState<string | null>(null);
   const signalInputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -2782,13 +2787,14 @@ export function InvestorCalculator({
     entryValue,
     installments,
     annualMode,
+    entryDate: annualMode ? entryDate : undefined,
     firstInterestDate: annualMode ? associativeFirstInterestDate : undefined,
     firstInstallmentDate: annualMode ? associativeFirstMonthlyDate : undefined,
     income,
     signals,
     intermediaries,
     approvalTierId: associativeApprovalTier,
-  }), [directTable, annualMode, selectedUnitId, selectedUnit, baseDate, completionDate, salePrice, discountAuthorized, discount, financing, subsidy, fgts, housingCheck, entryValue, income, installments, signals, intermediaries, associativeApprovalTier, associativeFirstInterestDate, associativeFirstMonthlyDate]);
+  }), [directTable, annualMode, selectedUnitId, selectedUnit, baseDate, entryDate, completionDate, salePrice, discountAuthorized, discount, financing, subsidy, fgts, housingCheck, entryValue, income, installments, signals, intermediaries, associativeApprovalTier, associativeFirstInterestDate, associativeFirstMonthlyDate]);
   const directResult = result as DirectTableFlowResult;
   const directProposalOptionAvailability = useMemo(() => {
     if (!directTable || !selectedUnitId || result.context.valueReal <= 0) return new Map();
@@ -2885,7 +2891,7 @@ export function InvestorCalculator({
     baseDate,
     completionDate,
     entryPayment: result.custom.actValue >= 150
-      ? { kind: "entry", label: "Entrada", paymentDate: baseDate, value: result.custom.actValue }
+      ? { kind: "entry", label: "Entrada", paymentDate: entryDate, value: result.custom.actValue }
       : null,
     signals: result.custom.signals
       .filter((signal: { active: boolean; approved: boolean; value: number }) => signal.active && signal.approved && signal.value > 0)
@@ -2893,7 +2899,7 @@ export function InvestorCalculator({
     annuals: result.custom.intermediaries
       .filter((annual: { value: number; approved: boolean; correctedValue: number }) => annual.value > 0 && annual.approved && annual.correctedValue > 0)
       .map((annual: { index: number; date: string; correctedValue: number }) => ({ index: annual.index, paymentDate: annual.date, correctedValue: annual.correctedValue, approved: true })),
-  }), [associativeConstructionProgress, associativeInstallmentSchedule, baseDate, completionDate, income, result.context.monthlyDates, result.custom.actValue, result.custom.decreasing?.blocks, result.custom.desiredInstallments, result.custom.intermediaries, result.custom.signals]);
+  }), [associativeConstructionProgress, associativeInstallmentSchedule, baseDate, entryDate, completionDate, income, result.context.monthlyDates, result.custom.actValue, result.custom.decreasing?.blocks, result.custom.desiredInstallments, result.custom.intermediaries, result.custom.signals]);
   const signalsRequired = directTable
     ? directResult.custom.totalEntryValue < directResult.custom.minimumEntryValue
     : !annualMode && result.custom.actRate < 0.1;
@@ -2976,12 +2982,12 @@ export function InvestorCalculator({
   const associativeReleaseStatus = useMemo(() => calculateAssociativeReleaseStatus({
     vgv: result.context.valueReal,
     entryValue: result.custom.actValue,
-    entryDate: baseDate,
+    entryDate,
     referenceDate: baseDate,
     signals: result.custom.signals
       .filter((item: { active: boolean }) => item.active)
       .map((item: { value: number; date: string }) => ({ value: item.value, date: item.date })),
-  }), [baseDate, result.context.valueReal, result.custom.actValue, result.custom.signals]);
+  }), [baseDate, entryDate, result.context.valueReal, result.custom.actValue, result.custom.signals]);
   const associativeAnnualRuleFailure = annualMode
     ? result.custom.intermediaries.find((item: { value: number; approved: boolean }) => item.value > 0 && !item.approved)
     : undefined;
@@ -3605,6 +3611,8 @@ export function InvestorCalculator({
       annualMaximum: currencyInputNumber(income) * 0.5,
       currentEntry,
       currentSignals,
+      maximumSignalCount: associativeFirstMonthlyDate === null ? 3 : buildAssociativeSignalDates(entryDate)
+        .filter((date: string) => date && date < associativeFirstMonthlyDate).length,
       maximumPaymentAdditional: Math.max(0, result.custom.balanceBeforeCorrection - 0.01),
       evaluate: (candidate: { installments: number; annuals: number[]; entry: number; signals: number[] }) => {
         const candidateEntry = candidate.entry.toFixed(2);
@@ -3627,6 +3635,7 @@ export function InvestorCalculator({
           entryValue: candidateEntry,
           installments: String(candidate.installments),
           annualMode: true,
+          entryDate,
           firstInterestDate: associativeFirstInterestDate,
           firstInstallmentDate: associativeFirstMonthlyDate,
           income,
@@ -3656,7 +3665,7 @@ export function InvestorCalculator({
           constructionProgress: associativeConstructionProgress,
           baseDate,
           completionDate,
-          entryPayment: { kind: "entry", label: "Entrada", paymentDate: baseDate, value: candidate.entry },
+          entryPayment: { kind: "entry", label: "Entrada", paymentDate: entryDate, value: candidate.entry },
           signals: candidateResult.custom.signals
             .filter((signal: { active: boolean; approved: boolean; value: number }) => signal.active && signal.approved && signal.value > 0)
             .map((signal: { index: number; date: string; value: number }) => ({ kind: "signal", label: `Sinal ${signal.index}`, paymentDate: signal.date, value: signal.value })),
@@ -3891,7 +3900,7 @@ export function InvestorCalculator({
                   { key: "subsidy", label: "Subsídio", operator: "−", calculation: "Recurso informado no fluxo editável", result: `− ${money.format(scenario.subsidy)}`, meta: "Abate o saldo da venda" },
                   { key: "fgts", label: "FGTS", operator: "−", calculation: "Recurso informado no fluxo editável", result: `− ${money.format(scenario.fgts)}`, meta: "Abate o saldo da venda" },
                   { key: "housing-check", label: "Cheque Moradia", operator: "−", calculation: "Recurso informado no fluxo editável", result: `− ${money.format(scenario.housingCheck)}`, meta: "Abate o saldo da venda" },
-                  { key: "entry", label: "Entrada", operator: "−", calculation: `${money.format(linear.realSaleValue)} × ${percent.format(scenario.entryRate)}`, result: `− ${money.format(scenario.entry)}`, meta: `Pagamento em ${formatDate(baseDate)}` },
+                  { key: "entry", label: "Entrada", operator: "−", calculation: `${money.format(linear.realSaleValue)} × ${percent.format(scenario.entryRate)}`, result: `− ${money.format(scenario.entry)}`, meta: `Pagamento em ${formatDate(entryDate)}` },
                   ...scenario.signals.map((signal) => ({ key: `signal-${signal.index}`, label: `Sinal ${signal.index}`, operator: "−", calculation: "Complemento da entrada", result: `− ${money.format(signal.value)}`, meta: `Pagamento em ${formatDate(signal.date)}` })),
                   ...linear.annualSchedule.filter((annual) => annual.amount > 0 && annual.valid).map((annual) => ({ key: `annual-${annual.index}`, label: `Anual ${annual.index}`, operator: "↳", calculation: `${money.format(annual.amount)} corrigidos a 0,5% a.m.`, result: money.format(annual.corrected), meta: `Reduz somente a base mensal · pagamento em ${formatDate(annual.dueDate)}` })),
                   { key: "pro-soluto", label: "Pró-soluto", operator: "=", calculation: "Imóvel − financiamento − subsídio − FGTS − cheque − entrada − sinais", result: money.format(linear.proSoluto), meta: "Anuais não alteram este saldo" },
@@ -4111,7 +4120,7 @@ export function InvestorCalculator({
                 const selected = item.id === selectedUnitId;
                 const unavailableReason = [
                   !item.finalPrice ? "sem valor informado" : null,
-                  !item.completionDate ? "sem data de entrega" : null,
+                  !item.completionDate ? annualMode ? "sem data de término da obra" : "sem data de entrega" : null,
                 ].filter(Boolean).join(" e ");
                 return <tr
                   key={item.id}
@@ -4527,11 +4536,11 @@ export function InvestorCalculator({
                       number={9}
                       operator="−"
                       label="Entrada"
-                      date={baseDate}
+                      date={entryDate}
                       fieldState="editable"
                       rowClassName={`investor-key-field${associativeGuidanceStage === "entry" ? " is-active" : ""}`}
                       meta={associativeHelp(
-                        `Digite quanto o cliente pagará em ${formatDate(baseDate)}. O mínimo é ${money.format(150)}. Ajustes automáticos nunca diminuem este valor.`,
+                        `Digite quanto o cliente pagará em ${formatDate(entryDate)}. O mínimo é ${money.format(150)}. Ajustes automáticos nunca diminuem este valor.`,
                         `Status atual: ${associativeEntryPending ? "entrada ainda não informada" : associativeEntryRejected ? "reprovada por ficar abaixo do mínimo" : "entrada válida"}.`,
                           `Depois da entrada e dos sinais, restam ${money.format(result.custom.balanceBeforeCorrection)} para pagar em mensais e anuais, antes dos reajustes. O Saldo parcelado também desconta as anuais válidas.`,
                       )}
@@ -4637,13 +4646,15 @@ export function InvestorCalculator({
                   <summary>Datas do cálculo</summary>
                   <div className="investor-associative-calendar-fields">
                     <label>Data de término da obra<input type="date" aria-label="Data de término da obra" value={completionDate} readOnly /></label>
+                    <label>Data do cálculo<input type="date" aria-label="Data do cálculo" value={baseDate} onChange={(event) => setAssociativeCalculationDate(event.target.value)} /></label>
+                    <label>Data da entrada<input type="date" aria-label="Data da entrada" value={entryDate} onChange={(event) => setAssociativeEntryDate(event.target.value)} /></label>
                     <label>Data do primeiro juro<input type="date" aria-label="Data do primeiro juro" value={associativeFirstInterestDate ?? result.custom.linear?.firstInterestDate ?? ""} onChange={(event) => setAssociativeFirstInterestDate(event.target.value)} /></label>
                     <label>Primeira mensal<input type="date" aria-label="Primeira mensal" value={associativeFirstMonthlyDate ?? result.custom.linear?.firstInstallmentDate ?? ""} onChange={(event) => setAssociativeFirstMonthlyDate(event.target.value)} /></label>
                   </div>
                   <div className="investor-associative-calendar-status">
-                    <span>{result.custom.preInstallments} pré-obra · {result.custom.postInstallments} pós-obra · {result.custom.linear?.monthlyCorrectionMonths ?? 0} meses de correção inicial</span>
-                    <InvestorInfoHint label="datas do cálculo" title="Datas do cálculo" description="O término da obra vem do cadastro da unidade. O mês do término já usa juros pós-obra. Para conferir uma proposta antiga, informe a mesma data do primeiro juro e da primeira mensal que aparecem nela. A primeira mensal deve vir depois da entrada e dos sinais, no dia 5, 10 ou 15." />
-                    <button type="button" disabled={associativeFirstInterestDate === null && associativeFirstMonthlyDate === null} onClick={() => { setAssociativeFirstInterestDate(null); setAssociativeFirstMonthlyDate(null); }}>Restaurar datas automáticas</button>
+                    <span className="investor-associative-calendar-periods">{result.custom.preInstallments} pré-obra · {result.custom.postInstallments} pós-obra · {result.custom.linear?.monthlyCorrectionMonths ?? 0} meses de correção inicial</span>
+                    <InvestorInfoHint label="datas do cálculo" title="Datas do cálculo" description="O término da obra vem do cadastro da unidade. O mês do término já usa juros pós-obra. Para conferir uma proposta antiga, use as mesmas datas de cálculo, entrada, primeiro juro e primeira mensal. A primeira mensal deve vir depois da entrada e dos sinais, no dia 5, 10 ou 15." />
+                    <button type="button" disabled={associativeCalculationDate === null && associativeEntryDate === null && associativeFirstInterestDate === null && associativeFirstMonthlyDate === null} onClick={() => { setAssociativeCalculationDate(null); setAssociativeEntryDate(null); setAssociativeFirstInterestDate(null); setAssociativeFirstMonthlyDate(null); }}>Restaurar datas automáticas</button>
                   </div>
                 </details>
                 </div>
@@ -4674,7 +4685,7 @@ export function InvestorCalculator({
                     financingReady={associativeFinancingValueReady}
                     entryPending={associativeEntryPending}
                     entryRejected={associativeEntryRejected}
-                    currentEntryDate={baseDate}
+                    currentEntryDate={entryDate}
                     currentSignalPayments={result.custom.signals
                       .map((item: { index: number; date: string; value: number }) => ({ label: `Sinal ${item.index}`, date: item.date, value: item.value }))}
                     currentAnnualPayments={result.custom.intermediaries
