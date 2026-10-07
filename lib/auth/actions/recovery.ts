@@ -24,10 +24,15 @@ export async function requestPasswordRecoveryAction(
   const callbackUrl = getApplicationUrl("/auth/callback");
 
   if (parsed.success && callbackUrl) {
-    const supabase = await createClient({ persistence: { kind: "temporary" } });
-    await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-      redirectTo: callbackUrl.toString(),
-    });
+    try {
+      const supabase = await createClient({ persistence: { kind: "temporary" } });
+      await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+        redirectTo: callbackUrl.toString(),
+      });
+    } catch {
+      // Account state, provider failures and throttling deliberately share the
+      // same response to prevent enumeration through this public action.
+    }
   }
 
   return { status: "success", message: GENERIC_REQUEST_MESSAGE };

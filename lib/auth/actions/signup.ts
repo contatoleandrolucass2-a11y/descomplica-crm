@@ -6,16 +6,16 @@
  * Validates submission shape with `signupSchema`, then delegates account
  * creation to Supabase Auth via the SSR server client. Field-level
  * validation errors are returned per-field (they describe what the form
- * needs, not account state). Any Supabase-side failure collapses into a
- * single generic message — the client never sees Supabase error categories,
- * codes, or internal failure classifications.
+ * needs, not account state). Every Supabase-side outcome collapses into the
+ * same generic acknowledgement — the client never learns whether an account
+ * exists or sees provider error categories, codes, or failure classifications.
  *
  * Boundaries:
  * - No log output; no credentials or account state in logs.
  * - No Service Role; uses the SSR server client only.
  * - No profile row, role, or permission is created here — that remains the
  *   authorization engine's responsibility (M5), not the signup surface.
- * - Navigation after a successful call is left entirely to the caller.
+ * - Navigation after a valid submission is left entirely to the caller.
  */
 
 import type { SignupActionState, SignupFieldErrors } from "@/lib/auth/actions/signup-state";
@@ -56,26 +56,26 @@ export async function signupAction(
   }
 
   const { name, email, password } = parsed.data;
-  const supabase = await createClient();
-
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        name,
-        legal_acceptance: {
-          termsAccepted: true,
-          termsVersion: LEGAL_DOCUMENT_VERSIONS.terms,
-          privacyAccepted: true,
-          privacyVersion: LEGAL_DOCUMENT_VERSIONS.privacy,
+  try {
+    const supabase = await createClient();
+    await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+          legal_acceptance: {
+            termsAccepted: true,
+            termsVersion: LEGAL_DOCUMENT_VERSIONS.terms,
+            privacyAccepted: true,
+            privacyVersion: LEGAL_DOCUMENT_VERSIONS.privacy,
+          },
         },
       },
-    },
-  });
-
-  if (error) {
-    return { success: false, message: GENERIC_FAILURE_MESSAGE };
+    });
+  } catch {
+    // Existing accounts, provider failures and throttling deliberately share
+    // the same acknowledgement to prevent enumeration through this action.
   }
 
   return { success: true, message: GENERIC_SUCCESS_MESSAGE };

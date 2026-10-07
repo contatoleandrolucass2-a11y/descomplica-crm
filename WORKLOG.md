@@ -42,6 +42,37 @@
   sessao CDP, caminhos Windows, ACL, transformacao, scheduler e publisher; o
   comando real na VPS recusou root antes de iniciar Chrome.
 
+## 2026-10-07 - Diagnóstico de cadastro e recuperação por e-mail
+
+- A leitura agregada do Supabase produtivo encontrou 15 respostas `429` por
+  limite de e-mail: cinco em `/signup` e dez em `/recover`. No recorte havia
+  três cadastros e uma recuperação com resposta `200`, além de dois usos de
+  link inválido/expirado. O mailer padrão ativo limita o projeto a dois e-mails
+  por hora e não é adequado à entrega de produção.
+- As 19 chamadas observadas a cadastro/recuperação chegaram ao Auth com um único
+  IP remoto porque as Server Actions saem pela VPS. Isso não causou os `429`:
+  `/signup` e `/recover` que enviam e-mail compartilham
+  `rate_limit_email_sent` no projeto, sem divisão por IP.
+- O candidato mantém Server Actions, callback canônico, sessão temporária e
+  metadata dos aceites. Após a validação do formulário, signup e recovery dão o
+  mesmo aceite público para sucesso, conta ofuscada, erro retornado ou exceção
+  do provedor, fechando o oráculo de enumeração.
+- `Sb-Forwarded-For` foi descartado: não resolve o limite combinado de envio e
+  exigiria uma `sb_secret_` privilegiada sem benefício proporcional.
+- A solução operacional escolhida é Resend SMTP em subdomínio de Auth com
+  tracking desligado. Follow-up ficará em `relacionamento.*`, com domínio e
+  chave separados, consentimento e descadastro próprios.
+- Site URL e redirect de recovery foram corrigidos na documentação. O template
+  remoto deve permanecer em `ConfirmationURL`/PKCE; promover `TokenHash` antes
+  de provar scanners/prefetch pode consumir o link de uso único.
+- A migration `20260824230058_auth_mfa_legal_foundation` já está aplicada no
+  projeto produtivo. Esta correção não adiciona migration nem altera grants,
+  RLS ou dados. Lint, tipos, 2.248 testes Vitest, 41 testes Node, formatação e
+  build de 44 rotas foram aprovados após o rebase. DNS, SMTP,
+  `rate_limit_email_sent` e deploy ainda aguardam evidência e não são declarados
+  concluídos. O limite só deve subir depois do domínio verificado, com cooldown
+  individual de 60 segundos e proteção contra abuso preservados.
+
 ## 2026-10-07 - Exceção de permissão delegável por Master
 
 - A leitura agregada do Supabase produtivo confirmou 23 permissões e mostrou
