@@ -10,6 +10,47 @@
 - Esclarece na matriz que a exceção não altera o papel e adiciona cobertura no
   servidor, no banco e no contrato de restore.
 
+## 2026-10-07 - Associativo publicado e conferido
+
+- Publica a correcao da data de termino da obra e dos calculos Linear/Decrescente
+  na imagem imutavel `4d73412`, apos aprovacao integral dos gates.
+- Registra backup, verificacao autenticada do exemplo e evidencias financeiras,
+  mantendo os limites da amostra e sem alterar politicas ou propostas remotas.
+
+## 2026-10-07 - Calculo Associativo pela data oficial da unidade
+
+- Usa a Data de termino da obra do estoque vivo para separar pre e pos-obra,
+  sem permitir que uma copia antiga libere a simulacao.
+- Desconta anuais nominais uma vez, corrige capitalizacao dos quatro blocos
+  e distribui as parcelas restantes de forma equilibrada.
+- Expoe calculo, entrada, primeiro juro e primeira mensal para conferir historicos;
+  painel de aprovacao passa a usar o Pro-Soluto com a correcao da carencia.
+- Unifica motor legado e atualiza ajudas e oraculos sinteticos independentes.
+- QA diferencia o expansor de datas da ajuda e as parcelas da documentacao;
+  verifica a data historica dentro da propria linha da entrada.
+- QA de indisponibilidade identifica somente o erro 503 sintetico esperado;
+  outros erros de console e JavaScript continuam bloqueando a publicacao.
+- QA de carregamento exige estoque vivo antes de selecionar unidade e mantem
+  as verificacoes de filtros e preservacao da proposta apos o carregamento.
+- Sugestoes preservam os pagamentos existentes e so acrescentam sinais antes
+  de uma primeira mensal fixada; calendario automatico permanece disponivel.
+- Sem alteracao de dados remotos, limites comerciais, n8n ou financiamento bancario.
+
+## 2026-10-07 - Diagnostico das formulas do Associativo
+
+- Documenta a reconstrucao linear e decrescente confrontada com Salesforce,
+  incluindo datas da unidade, carencia, particao e capitalizacao dos blocos.
+- Diferencia inventario de oportunidades, comparacoes reais e prova sintetica.
+- Sem mudanca de runtime, dados, politicas ou implementacao financeira.
+
+## 2026-10-07 - Preferências de cookies contextuais
+
+- Remove o atalho flutuante permanente de cookies depois da primeira escolha.
+- Mantém o gerenciamento acessível no menu da conta e na Política de Cookies,
+  com retorno de foco ao controle que abriu o painel.
+- Adiciona estado de gravação e erro visível aos botões de consentimento, sem
+  alterar categorias obrigatórias, duração ou proteção do cookie.
+
 ## 2026-10-07 - Sessão manual Salesforce preparada
 
 - Adiciona execução candidata Salesforce a cada 30 minutos sobre Chrome

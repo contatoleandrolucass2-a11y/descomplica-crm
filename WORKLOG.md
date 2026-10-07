@@ -23,6 +23,102 @@
   tema no Associativo 375 px; a CI limpa permanece como gate visual oficial.
   PR e publicação permanecem como etapas de fechamento.
 
+## 2026-10-07 - Publicacao e prova final do Associativo
+
+- PR #165 integrado; runtime publicado `4d7341218e02ad59cd89bfa2cf2c188d1188b7c8`.
+- CI `37594420463` integral aprovada, incluindo banco, restore, imagem e QA
+  autenticado. 2.235 Vitest e 15 Node aprovados; nove skips existentes.
+- Imagem unica conferida por toda a cadeia de hashes e dois perfis isolados.
+  Promocao com backup, lock, CAS e rollback preparado; sem rebuild na VPS.
+- Health, versao, protecao anonima e exemplo historico na pagina publicada
+  conferidos. Termino da obra veio do estoque e permaneceu somente leitura.
+  Nenhuma proposta enviada/salva; screenshot local nao versionado.
+- Registro documental posterior nao requer outro deploy nem reinicio da app.
+  Fontes, digests, backup e limites da amostra constam no audit financeiro.
+- Registro conferido localmente: formatacao, lint, tipos e build aprovados;
+  2.232 testes Windows aprovados, seis skips e as mesmas seis falhas POSIX
+  documentadas. A versao publicada foi validada integralmente na CI Linux.
+
+## 2026-10-07 - Implementacao das formulas e data de termino da obra
+
+- Fonte confirmada: `estoque_spc.data_termino_obra` corresponde a `completionDate`
+  no proxy atual. Conferidos 2.243 pares identificador/data por checksum agregado,
+  sem exportar estoque. Associativo exige fonte viva; demais telas preservadas.
+- Mensais usam principal nominal, correcao inicial pelo calendario e VP pre/pos.
+  Decrescente corrige blocos 3/4 e restos; cronograma usa as mesmas quantidades.
+- Datas financeiras opcionais permitem conferir propostas historicas. Datas
+  invalidas bloqueiam o resultado. Indicador/sugestoes usam `correctedProSoluto`.
+- Adaptador TS reutiliza motor MJS; ajudas removem a deducao de anuais reajustadas.
+- Novos oraculos sinteticos independentes; verificacoes e limites completos em
+  `docs/audits/associativo-formulas-salesforce-2026-10-07.md`.
+- Validacao e publicacao em andamento; nenhum dado remoto ou workflow alterado.
+- Tipos/build aprovados, lint sem erros. Suite geral Windows: 2.168 aprovados,
+  seis ignorados e seis falhas POSIX conhecidas; CI Linux exigida. Mais 243
+  testes focados e 15 node:test aprovados; QA browser ampliado, pendente CI.
+- CI `37577305243`: validate integral Linux, E2E, banco e restore aprovados.
+  A continuidade parou em seletor ambiguo entre summary e ajuda; seletor foi
+  delimitado ao expansor, assim como o botao de parcelas ao dialogo financeiro.
+  Nenhuma assercao removida; repeticao integral obrigatoria antes da publicacao.
+- Revisao independente detectou dois casos de datas historicas: entrada presa
+  ao dia atual e busca sem opcao de aumentar somente a entrada. Data do calculo
+  e da entrada agora sao independentes; sugestoes usam o calendario canonico
+  para limitar novos sinais antes da mensal, sem apagar pagamentos existentes.
+- Mais 25 regressoes de sugestoes e 13 de calendario; 416 testes de integracao
+  e motores, 105 de sugestoes/aprovacao e 76 de paridade sintetica aprovados.
+- CI `37581613136`: 2.224 testes Linux e 15 Node aprovados; banco, E2E e restore
+  verdes. QA historico exigiu corrigir escopo relativo do seletor da entrada.
+  Falha anterior e seletor corrigido reproduzidos em Chromium local sintetico.
+- CI `37584281089`: as 12 etapas de continuidade passaram em 375 e 1440px.
+  O erro de rede 503 injetado pelo teste foi contado como inesperado pelo
+  harness externo. Classificacao agora exige mensagem/URL exatas, uma unica
+  resposta sintetica e continuidade aprovada; outros erros nao sao excluidos.
+- CI `37587316857`: continuidade e 40 navegacoes aprovadas. Outra verificacao
+  antiga tentava iniciar proposta pelo snapshot antes do estoque vivo; ajustada
+  ao contrato atual e com espera da resposta pendente no cleanup. Restore teve
+  colisao de porta no runner, sem mutacao de producao. Nova CI integral exigida.
+
+## 2026-10-07 - Auditoria das formulas Salesforce
+
+- Investigacao sem alterar motores ou dados remotos. Inventariadas 1.120
+  oportunidades em 24 empreendimentos; isso nao significa recalculo integral.
+- Reconstrucao confrontada com 20 mensais lineares e 52 valores decrescentes;
+  maior diferenca de bloco R$ 0,01. Datas individuais explicaram divergencias
+  que nao eram resolvidas pela data geral do empreendimento.
+- Documenta valor presente, carencia, particao equilibrada e capitalizacao
+  de todos os blocos. Registra discrepancia entre periodos usados nos valores
+  e segmentos visuais da fonte, sem escolher silenciosamente um total.
+- Validacao matematica independente: 130.662 casos sinteticos, sem dados
+  de clientes. Fonte e limites no audit de formulas Salesforce de 07/10/2026.
+- Gates locais: lint (um aviso local), tipos e build aprovados. Testes:
+  2.008 aprovados, seis falhos e seis ignorados; falhas POSIX/caminhos no
+  Windows registradas no audit. Etapa node:test encadeada nao executada.
+- Nenhuma proposta, workflow, politica ou aplicacao publicada nesta etapa.
+
+## 2026-10-07 - Preferências de cookies sem sobreposição permanente
+
+- O ensaio no navegador confirmou que a gravação existente fechava o painel,
+  mas sempre a substituía por um botão global fixo. Falhas da Server Action não
+  tinham estado pendente nem orientação visível, parecendo cliques sem efeito.
+- Depois da primeira escolha, o componente global agora permanece sem saída
+  visual. O gerenciamento foi movido para o menu da conta e para a Política de
+  Cookies, preservando acesso posterior sem cobrir simuladores ou ações.
+- A Server Action retorna sucesso ou falha recuperável; os formulários evitam
+  envio duplicado, fecham no sucesso e mantêm o erro anunciado por tecnologia
+  assistiva. A abertura foca o título e o fechamento restaura o acionador.
+- Categorias essenciais e de segurança continuam obrigatórias. Nome, duração,
+  `HttpOnly`, `SameSite=Lax`, `Secure` em HTTPS e separação dos consentimentos
+  não mudaram.
+- A prova no Chromium passou em `375x812`, `768x1024`, `1024x768` e
+  `1440x900`: painel contido, zero overflow ou erro de console, ausência do
+  atalho global, gravação, reabertura, fechamento e retorno de foco aprovados.
+- Validação local: formatação, ESLint, TypeScript, 2.051 testes Vitest com seis
+  skips condicionais, 15 testes Node Salesforce, build das 44 páginas,
+  inventário de recursos, Gitleaks e `git diff --check` aprovados.
+- A primeira CI preservava no E2E a expectativa antiga de um botão flutuante e
+  falhou corretamente antes da matriz visual. O contrato passou a abrir o
+  painel pelo controle contextual da Política de Cookies e a exigir contagem
+  zero para o atalho antigo, sem relaxar a gravação ou a leitura do cookie.
+
 ## 2026-10-07 - Preparação da sessão manual Salesforce
 
 - O modelo operacional foi fixado em Chrome dedicado com login e MFA manuais;

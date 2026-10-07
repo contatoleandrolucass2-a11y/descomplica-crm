@@ -69,7 +69,8 @@ describe("Associative payment and construction availability", () => {
       constructionProgress: null,
     });
     const principal = 231_990 - 190_000 - 1_000;
-    const correctedPrincipal = principal * 1.005;
+    // The first monthly is in the calculation month: no intervening correction month.
+    const correctedPrincipal = principal;
     const pmt = (capital: number, count: number) => (capital * 0.005) / (1 - 1.005 ** -count);
     const expectedLinear = pmt(correctedPrincipal, 84);
     const expectedDecreasing = pmt(correctedPrincipal * 0.4, 21);
@@ -77,7 +78,9 @@ describe("Associative payment and construction availability", () => {
     expect(flow.ok).toBe(true);
     expect(flow.custom.decreasing.ok).toBe(true);
     expect(linear.proSoluto).toBe(40_990);
-    expect(linear.correctedInstallmentBalance).toBeCloseTo(41_194.95, 8);
+    expect(linear.firstInterestDate).toBe("2026-09-30");
+    expect(linear.monthlyCorrectionMonths).toBe(0);
+    expect(linear.correctedInstallmentBalance).toBeCloseTo(principal, 8);
     expect([linear.preInstallments, linear.postInstallments]).toEqual([84, 0]);
     expect([flow.context.monthlyDates[0], flow.context.monthlyDates.at(-1)]).toEqual([
       "2026-10-15",
@@ -100,7 +103,7 @@ describe("Associative payment and construction availability", () => {
 
     const approval = calculateAssociativeApproval({
       ...approvalInput,
-      proSoluto: principal,
+      proSoluto: linear.correctedProSoluto,
       linearInstallment: comparison.highestLinearPayment,
       decreasingInstallment: comparison.highestDecreasingPayment,
       linearMaximumIncomePayment: comparison.highestLinearTotal,
@@ -109,9 +112,9 @@ describe("Associative payment and construction availability", () => {
       workEvolutionValid: comparison.workEvolutionAvailable,
       paymentComparisonValid: comparison.comparisonAvailable,
     });
-    expect(approval.proSolutoRate).toBeCloseTo(0.1766886503728609, 12);
-    expect(approval.linearCommitmentRate).toBeCloseTo(0.1203597343063272, 12);
-    expect(approval.decreasingCommitmentRate).toBeCloseTo(0.1657079363621542, 12);
+    expect(approval.proSolutoRate).toBeCloseTo((principal * 1.005) / 231_990, 12);
+    expect(approval.linearCommitmentRate).toBeCloseTo(expectedLinear / 5_000, 12);
+    expect(approval.decreasingCommitmentRate).toBeCloseTo(expectedDecreasing / 5_000, 12);
     expect(approval.linearMaximumIncomeRate).toBeNull();
     expect(approval.decreasingMaximumIncomeRate).toBeNull();
     expect(approval.annualIncomeRate).toBeNull();
@@ -213,15 +216,11 @@ describe("Associative payment and construction availability", () => {
         intermediaries: [0, 0, 0, 0, 0],
         approvalTierId: "bronze",
       });
-      const eligibleDate = completionDate > comparisonInput.baseDate;
-      expect(flow.ok).toBe(eligibleDate);
-      expect(flow.custom.linear.ok).toBe(eligibleDate);
-      if (!eligibleDate) {
-        expect(flow.errors).toContain("Data da obra futura");
-        expect(flow.custom.linear.errors).toContain(
-          "A data de término da obra deve ser posterior à data vigente.",
-        );
-      }
+      expect(flow.ok).toBe(true);
+      expect(flow.custom.linear.ok).toBe(true);
+      expect(flow.custom.linear.preInstallments).toBe(0);
+      expect(flow.custom.linear.postInstallments).toBe(84);
+      expect(flow.custom.linear.baseRate).toBe(0.015);
       const approval = calculateAssociativeApproval({
         ...approvalInput,
         proposalValid: flow.ok,
@@ -229,7 +228,7 @@ describe("Associative payment and construction availability", () => {
         workEvolutionValid: comparison.workEvolutionAvailable,
         paymentComparisonValid: comparison.comparisonAvailable,
       });
-      expect(approval.status).toBe(eligibleDate ? "approved" : "rejected");
+      expect(approval.status).toBe("approved");
     },
   );
 

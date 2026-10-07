@@ -20,6 +20,9 @@ export interface LinearInput {
   installments: NumericInput;
   entryDate: string;
   constructionEnd: string;
+  calculationDate?: string;
+  firstInterestDate?: string | null;
+  firstInstallmentDate?: string | null;
   salePrice: NumericInput;
   bonus: NumericInput;
   discount: NumericInput;
@@ -39,10 +42,13 @@ export interface LinearInput {
 }
 export interface LinearMetrics {
   firstInstallmentDate: string;
+  firstInterestDate: string;
+  monthlyCorrectionMonths: number;
   signalDates: string[];
   graceMonths: number;
   validInitialTotal: number;
   annualCorrectedTotal: number;
+  annualNominalTotal: number;
   realSaleValue: number;
   deductions: number;
   proSoluto: number;

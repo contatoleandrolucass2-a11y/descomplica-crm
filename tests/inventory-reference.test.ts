@@ -155,6 +155,28 @@ describe("unit facts from inventory references", () => {
     expect(enrichInventoryReferenceFields([live], [reference])).toEqual([live]);
   });
 
+  it.each([{ completionDate: null }, {}, { completionDate: "2035-12-30" }])(
+    "preserves the source delivery field %j when completion-date fallback is disabled",
+    (dateFields) => {
+      const live = Object.freeze({
+        businessUnit: reference.businessUnit,
+        project: reference.project,
+        identifier: reference.identifier,
+        id: "synthetic-live-1",
+        finalPrice: 240_000,
+        appraisal: null,
+        progress: null,
+        ...dateFields,
+      });
+      const [enriched] = enrichInventoryReferenceFields([live], [reference], {
+        allowCompletionDateFallback: false,
+      });
+      expect(enriched).toStrictEqual({ ...live, appraisal: 350_000, progress: 0.42 });
+      expect(live.appraisal).toBeNull();
+      expect(live.progress).toBeNull();
+    },
+  );
+
   it("does not guess a bank appraisal from the price or another unit in the same project", () => {
     const live = { ...missing, finalPrice: 240_000 };
     const otherUnit = { ...reference, identifier: "BL02-0716" };

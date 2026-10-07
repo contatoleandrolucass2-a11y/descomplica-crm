@@ -153,13 +153,13 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Anual 1 a Anual 5",
     location: "Monte a proposta, após Inserir Anual",
     detail:
-      "São pagamentos opcionais em 15/12 até a entrega. Confira quais datas estão disponíveis e os limites mostrados. Cada anual, antes da correção, pode ser de até 50% da renda mensal. A correção é: valor × 1,005 × 1,005 elevado aos meses do cronograma. A ajuda mostra a data, os meses, o valor corrigido e se a anual foi aceita. O Saldo parcelado desconta as anuais válidas pelos valores digitados, sem reajustes. Já o cálculo das mensais usa as anuais reajustadas para definir sua base. As anuais continuam dentro do Pró-Soluto: elas mudam a forma de pagar, sem reduzir esse total. Ao ocultar uma anual, seu valor é zerado.",
+      "São pagamentos opcionais em 15/12 até o término da obra. Cada anual pode ser de até 50% da renda mensal, antes da correção. O valor digitado sai do Saldo parcelado uma única vez. Os juros da anual aparecem no valor a pagar, sem tirar mais dinheiro da base das mensais. As anuais continuam dentro do Pró-Soluto: elas mudam a forma de pagar, sem reduzir esse total. Ao ocultar uma anual, seu valor é zerado.",
   },
   {
     label: "Saldo parcelado",
     location: "Monte a proposta, antes da quantidade de parcelas",
     detail:
-      "Mostra quanto sobra depois dos pagamentos informados, sem reajustes. Primeiro: Saldo após recursos − Entrada − Sinais válidos = Pró-Soluto, antes da correção. Depois: Pró-Soluto − soma dos valores digitados nas anuais válidas = Saldo parcelado. Para calcular as mensais, o simulador faz uma conta separada: Pró-Soluto − total das anuais reajustadas. Depois, aplica a regra de reajuste das mensais. Por isso, dividir o Saldo parcelado pela quantidade de parcelas não mostra, sozinho, quanto será pago por mês. Não desconte as anuais de novo do Saldo parcelado. O Pró-Soluto continua incluindo as anuais.",
+      "É o saldo que será dividido nas mensais. Conta: Saldo após recursos − Entrada − Sinais válidos − Anuais válidas pelos valores digitados. Depois, o sistema calcula os juros das mensais. Por isso, dividir esse saldo pela quantidade mostra só a parcela sem juros. Não desconte as anuais de novo. Elas continuam dentro do Pró-Soluto.",
   },
   {
     label: "Qtd. de parcelas",
@@ -171,7 +171,7 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "% Pró-Soluto",
     location: "Parâmetros de aprovação, primeira regra",
     detail:
-      "Mostra qual parte do valor do imóvel ficou no Pró-Soluto. A conta é: Pró-Soluto ÷ valor real do imóvel após desconto × 100. O Pró-Soluto é o Saldo após recursos menos Entrada e Sinais válidos, antes da correção. Ele inclui as anuais, por isso elas não reduzem esse percentual. Não use o Saldo parcelado nesta conta: ele já desconta as anuais válidas. O percentual é igual no Linear e no Decrescente e é comparado ao limite do Ranking. A ajuda mostra os dois valores da divisão e o resultado.",
+      "Mostra qual parte do preço será paga à construtora. Conta: Pró-Soluto com a correção inicial da carência ÷ valor real do imóvel após desconto × 100. O Pró-Soluto inclui mensais e anuais. Por isso, inserir uma anual não reduz esse percentual. Não use o Saldo parcelado nesta conta. O percentual é igual no Linear e no Decrescente e deve respeitar o limite do Ranking.",
   },
   {
     label: "% Comprometimento da Renda",
@@ -195,7 +195,7 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Resumo das parcelas",
     location: "Quadro abaixo de Parâmetros de aprovação",
     detail:
-      "Compara o Linear com os quatro grupos do Decrescente. Mostra quantidade, valores antes e depois da correção e datas da primeira e da última parcela. O Saldo parcelado usa as anuais válidas pelos valores digitados, sem reajustes. O cálculo das mensais usa outra base: Pró-Soluto − total das anuais reajustadas. A regra de reajuste das mensais é aplicada separadamente. Ela usa 0,5% ao mês antes do mês de entrega e 1,5% a partir do mês de entrega. Essas não são as taxas do financiamento bancário. Exibir parcelas mostra datas de pagamento, Evolução de Obra, totais e percentuais da renda.",
+      "Compara o Linear com os quatro grupos do Decrescente. Mostra quantidade, valores antes e depois dos juros e datas de pagamento. Os dois usam o Saldo parcelado, já descontadas as anuais nominais. A regra usa 0,5% ao mês antes do mês de término da obra e 1,5% a partir desse mês. O término vem do cadastro da unidade. Em Datas do cálculo, confira também o primeiro juro e a primeira mensal. Essas não são as taxas do financiamento bancário. Exibir parcelas mostra o cronograma e os percentuais da renda.",
   },
   {
     label: "Proposta pronta: Desconto, Valor de Contrato e B.A. da Unidade",

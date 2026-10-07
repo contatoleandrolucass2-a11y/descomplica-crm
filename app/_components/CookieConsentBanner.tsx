@@ -1,34 +1,78 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
-import { saveCookieConsentAction } from "@/lib/privacy/actions";
+import { saveCookieConsentAction, type CookieConsentActionState } from "@/lib/privacy/actions";
 import type { CookieConsent } from "@/lib/privacy/cookie-consent";
 
+import { COOKIE_PREFERENCES_OPEN_EVENT } from "./CookiePreferencesTrigger";
 import styles from "./CookieConsentBanner.module.css";
+
+const INITIAL_COOKIE_CONSENT_ACTION_STATE: CookieConsentActionState = {
+  status: "idle",
+  message: "",
+};
 
 export function CookieConsentBanner({ consent }: { consent: CookieConsent | null }) {
   const [open, setOpen] = useState(consent === null);
+  const [state, formAction, pending] = useActionState(
+    saveCookieConsentAction,
+    INITIAL_COOKIE_CONSENT_ACTION_STATE,
+  );
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
 
-  if (!open) {
-    return (
-      <button
-        type="button"
-        className={styles.preferencesButton}
-        onClick={() => setOpen(true)}
-        data-qa-visual-volatile
-      >
-        Preferências de cookies
-      </button>
-    );
+  useEffect(() => {
+    function openPreferences(event: Event) {
+      const eventOpener =
+        event instanceof CustomEvent && event.detail?.opener instanceof HTMLElement
+          ? event.detail.opener
+          : null;
+      const activeElement =
+        eventOpener ??
+        (document.activeElement instanceof HTMLElement ? document.activeElement : null);
+      const accountPanel = activeElement?.closest("#protected-account-menu");
+      const accountTrigger = accountPanel
+        ? document.querySelector<HTMLElement>(
+            '[aria-controls="protected-account-menu"][data-session-identity]',
+          )
+        : null;
+      openerRef.current = accountTrigger ?? activeElement;
+      setOpen(true);
+      requestAnimationFrame(() => titleRef.current?.focus());
+    }
+
+    window.addEventListener(COOKIE_PREFERENCES_OPEN_EVENT, openPreferences);
+    return () => window.removeEventListener(COOKIE_PREFERENCES_OPEN_EVENT, openPreferences);
+  }, []);
+
+  useEffect(() => {
+    if (state.status !== "saved") return;
+    const frame = requestAnimationFrame(() => {
+      setOpen(false);
+      openerRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [state]);
+
+  function closePreferences() {
+    setOpen(false);
+    requestAnimationFrame(() => openerRef.current?.focus());
   }
 
+  if (!open) return null;
+
   return (
-    <aside className={styles.banner} aria-labelledby="cookie-consent-title">
+    <aside
+      id="cookie-consent-panel"
+      className={styles.banner}
+      aria-labelledby="cookie-consent-title"
+      aria-busy={pending}
+    >
       <div className={styles.headingRow}>
         <div>
-          <h2 id="cookie-consent-title" className={styles.title}>
+          <h2 ref={titleRef} id="cookie-consent-title" className={styles.title} tabIndex={-1}>
             Preferências de cookies
           </h2>
           <p className={styles.copy}>
@@ -41,8 +85,9 @@ export function CookieConsentBanner({ consent }: { consent: CookieConsent | null
           <button
             type="button"
             className={styles.close}
-            onClick={() => setOpen(false)}
+            onClick={closePreferences}
             aria-label="Fechar preferências"
+            disabled={pending}
           >
             Fechar
           </button>
@@ -50,23 +95,29 @@ export function CookieConsentBanner({ consent }: { consent: CookieConsent | null
       </div>
 
       <div className={styles.actions}>
-        <form action={saveCookieConsentAction}>
+        <form action={formAction}>
           <input type="hidden" name="choice" value="all" />
-          <button type="submit" className={styles.primary}>
-            Aceitar todos
+          <button type="submit" className={styles.primary} disabled={pending}>
+            {pending ? "Salvando…" : "Aceitar todos"}
           </button>
         </form>
-        <form action={saveCookieConsentAction}>
+        <form action={formAction}>
           <input type="hidden" name="choice" value="essential" />
-          <button type="submit" className={styles.secondary}>
-            Somente essenciais
+          <button type="submit" className={styles.secondary} disabled={pending}>
+            {pending ? "Salvando…" : "Somente essenciais"}
           </button>
         </form>
       </div>
 
+      {state.status === "error" ? (
+        <p className={styles.error} role="status" aria-live="polite">
+          {state.message}
+        </p>
+      ) : null}
+
       <details className={styles.details} open={consent === null ? undefined : true}>
         <summary>Personalizar</summary>
-        <form action={saveCookieConsentAction}>
+        <form action={formAction}>
           <input type="hidden" name="choice" value="custom" />
           <div className={styles.categoryGrid}>
             <label className={styles.category}>
@@ -118,8 +169,8 @@ export function CookieConsentBanner({ consent }: { consent: CookieConsent | null
             </label>
           </div>
           <div className={styles.actions}>
-            <button type="submit" className={styles.primary}>
-              Salvar preferências
+            <button type="submit" className={styles.primary} disabled={pending}>
+              {pending ? "Salvando…" : "Salvar preferências"}
             </button>
           </div>
         </form>

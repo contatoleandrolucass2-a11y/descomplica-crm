@@ -4,8 +4,15 @@
 
 - Associativo e Investidor consultam snapshot e fonte viva simultaneamente.
   A fonte viva aguarda a tentativa do snapshot para preservar o enriquecimento
-  comercial. O snapshot fica utilizavel assim que chega. Falhas independentes
-  permitem a fonte disponivel; a Tabela Direta aceita exclusivamente o snapshot.
+  comercial. No Investidor, o snapshot fica utilizavel assim que chega e falhas
+  independentes permitem a fonte disponivel. No Associativo, `liveRequired`
+  impede selecao antes da fonte viva e propaga sua falha: snapshot sozinho nao
+  pode liberar calculo com data antiga. A Tabela Direta usa so o snapshot.
+- A data financeira do Associativo vem de `estoque_spc.data_termino_obra`,
+  exposta pela origem como `completionDate`. Conferencia em 07/10/2026:
+  2.243 identificadores/datas identicos por checksum agregado. Data ausente
+  na fonte viva nao pode ser preenchida pelo snapshot. O mes do termino ja
+  pertence ao pos-obra, independentemente do dia de vencimento da mensal.
 - No Associativo, depois de iniciada uma proposta, a resposta viva nao substitui
   unidade, preco, entrega ou recursos. Pode apenas completar avaliacao/andamento
   nulos quando a identidade comercial e unica e a data de entrega coincide.

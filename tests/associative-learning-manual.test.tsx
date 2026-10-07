@@ -123,44 +123,30 @@ describe("Associative learning manual", () => {
     expect(firstProperty).toContain("Banco, prefeitura e cartório precisam conferir");
   });
 
-  it("separates the displayed balance from the adjusted annual base used for monthly payments", () => {
+  it("uses one nominal annual deduction for the ledger and monthly principal", () => {
     const guide = new Map(ASSOCIATIVE_FIELD_GUIDE.map(({ label, detail }) => [label, detail]));
     const balance = guide.get("Saldo parcelado");
     expect(balance).toContain(
-      "Saldo após recursos − Entrada − Sinais válidos = Pró-Soluto, antes da correção",
+      "Saldo após recursos − Entrada − Sinais válidos − Anuais válidas pelos valores digitados",
     );
-    expect(balance).toContain(
-      "Pró-Soluto − soma dos valores digitados nas anuais válidas = Saldo parcelado",
-    );
-    expect(balance).toContain("sem reajustes");
-    expect(balance).toContain(
-      "Para calcular as mensais, o simulador faz uma conta separada: Pró-Soluto − total das anuais reajustadas",
-    );
-    expect(balance).toContain("Depois, aplica a regra de reajuste das mensais");
-    expect(balance).toContain(
-      "dividir o Saldo parcelado pela quantidade de parcelas não mostra, sozinho, quanto será pago por mês",
-    );
-    expect(balance).toContain("Não desconte as anuais de novo do Saldo parcelado");
-    expect(balance).toContain("O Pró-Soluto continua incluindo as anuais");
+    expect(balance).toContain("Depois, o sistema calcula os juros das mensais");
+    expect(balance).toContain("parcela sem juros");
+    expect(balance).toContain("Não desconte as anuais de novo");
+    expect(balance).toContain("continuam dentro do Pró-Soluto");
     const annuals = guide.get("Anual 1 a Anual 5");
+    expect(annuals).toContain("O valor digitado sai do Saldo parcelado uma única vez");
     expect(annuals).toContain(
-      "O Saldo parcelado desconta as anuais válidas pelos valores digitados, sem reajustes",
-    );
-    expect(annuals).toContain(
-      "o cálculo das mensais usa as anuais reajustadas para definir sua base",
+      "Os juros da anual aparecem no valor a pagar, sem tirar mais dinheiro da base das mensais",
     );
     expect(annuals).toContain("As anuais continuam dentro do Pró-Soluto");
     const summary = guide.get("Resumo das parcelas");
-    expect(summary).toContain(
-      "O Saldo parcelado usa as anuais válidas pelos valores digitados, sem reajustes",
-    );
-    expect(summary).toContain(
-      "O cálculo das mensais usa outra base: Pró-Soluto − total das anuais reajustadas",
-    );
-    expect(summary).toContain("A regra de reajuste das mensais é aplicada separadamente");
+    expect(summary).toContain("Os dois usam o Saldo parcelado, já descontadas as anuais nominais");
+    expect(summary).toContain("O término vem do cadastro da unidade");
+    expect(summary).toContain("primeiro juro e a primeira mensal");
     for (const text of [balance, annuals, summary]) {
       expect(text).not.toContain("não o Pró-Soluto nem o Saldo parcelado");
       expect(text).not.toContain("o saldo parcelado não diminui");
+      expect(text).not.toContain("Pró-Soluto − total das anuais reajustadas");
       expect(text).not.toContain(
         "Pró-Soluto − total corrigido das anuais válidas = Saldo parcelado",
       );
@@ -170,11 +156,11 @@ describe("Associative learning manual", () => {
   it("keeps annuals in the pro-soluto percentage and preserves payment limits and adjustment rules", () => {
     const guide = new Map(ASSOCIATIVE_FIELD_GUIDE.map(({ label, detail }) => [label, detail]));
     const proSoluto = guide.get("% Pró-Soluto");
-    expect(proSoluto).toContain("Pró-Soluto ÷ valor real do imóvel após desconto × 100");
     expect(proSoluto).toContain(
-      "Saldo após recursos menos Entrada e Sinais válidos, antes da correção",
+      "Pró-Soluto com a correção inicial da carência ÷ valor real do imóvel após desconto × 100",
     );
-    expect(proSoluto).toContain("Ele inclui as anuais, por isso elas não reduzem esse percentual");
+    expect(proSoluto).toContain("O Pró-Soluto inclui mensais e anuais");
+    expect(proSoluto).toContain("inserir uma anual não reduz esse percentual");
     expect(proSoluto).toContain("Não use o Saldo parcelado nesta conta");
     expect(proSoluto).toContain("igual no Linear e no Decrescente");
     expect(proSoluto).toContain("limite do Ranking");
@@ -187,14 +173,14 @@ describe("Associative learning manual", () => {
     expect(signals).toContain("Sinal 3 não pode superar o Sinal 2");
     expect(signals).toContain("os seguintes também podem ser zerados");
     const annuals = guide.get("Anual 1 a Anual 5");
-    expect(annuals).toContain("15/12 até a entrega");
-    expect(annuals).toContain("Cada anual, antes da correção, pode ser de até 50% da renda mensal");
-    expect(annuals).toContain("valor × 1,005 × 1,005 elevado aos meses do cronograma");
+    expect(annuals).toContain("15/12 até o término da obra");
+    expect(annuals).toContain("Cada anual pode ser de até 50% da renda mensal, antes da correção");
+    expect(annuals).toContain("Os juros da anual aparecem no valor a pagar");
     expect(annuals).toContain("Ao ocultar uma anual, seu valor é zerado");
     expect(guide.get("Qtd. de parcelas")).toContain("até 84 parcelas");
     expect(guide.get("Qtd. de parcelas")).toContain("40%, 30%, 20% e 10%");
     expect(guide.get("Resumo das parcelas")).toContain(
-      "0,5% ao mês antes do mês de entrega e 1,5% a partir do mês de entrega",
+      "0,5% ao mês antes do mês de término da obra e 1,5% a partir desse mês",
     );
     expect(guide.get("Resumo das parcelas")).toContain(
       "não são as taxas do financiamento bancário",

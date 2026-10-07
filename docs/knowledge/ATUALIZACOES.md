@@ -4,6 +4,103 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: Associativo publicado com data oficial e formulas conferidas
+
+- Status: validado e publicado. Fonte: PR #165, CI main `37594420463`, prova da
+  imagem imutavel `4d73412` e conferencia autenticada em producao.
+- Todos os gates aprovados: 2.235 testes Vitest, 15 Node, banco, restore e QA
+  autenticado com 242 comparacoes visuais, sem alterar baselines. Nove skips
+  de plataforma/fixtures existentes; falhas Windows nao foram mascaradas.
+- Backup, CAS, rollback preparado, health e negacao anonima verificados. Sem
+  mutacao comercial, migration, proxy ou n8n. Evidencias tecnicas no audit
+  `docs/audits/associativo-formulas-salesforce-2026-10-07.md`.
+- Comparar propostas historicas exige o mesmo primeiro juro e primeira mensal,
+  alem do termino da obra individual. Edicoes no calendario nativo precisam
+  efetivamente disparar a mudanca da interface antes de ler o novo resultado.
+- A nova versao encerra as pendencias de release do registro candidato abaixo.
+  Amostra de paridade continua limitada a 20 lineares e 52 valores decrescentes;
+  maior diferenca R$ 0,01, nao prova universal nem acesso ao codigo Salesforce.
+
+## 2026-10-07: data oficial e formulas implementadas no candidato
+
+- Status: pendente_validacao integral e publicacao.
+- Fonte: pedido do usuario e audit `associativo-formulas-salesforce-2026-10-07`.
+  `estoque_spc.data_termino_obra` e o campo financeiro; API o expoe como
+  `completionDate`. 2.243 pares identificador/data conferidos por checksum.
+- Associativo exige estoque vivo e nao completa data com snapshot. O proprio
+  mes do termino pertence ao pos-obra; obra concluida admite plano todo pos.
+- Principal mensal deduz anuais nominais; quatro blocos recebem juros acumulados
+  e particao floor(n/4) com resto nos primeiros. Datas/totais usam essa particao.
+- `Data 1o juros` observada no fim do mes anterior a `Data de Calculo`;
+  datas financeiras de proposta salva nao devem ser trocadas pela data atual.
+  UI permite conferir primeiro juro/primeira mensal e restaurar automaticas.
+- Indicador Pro-Soluto usa correcao propria da carencia, distinta de `k` mensal.
+  Limites comerciais e projecao bancaria local nao foram redefinidos.
+- 70 novos casos sinteticos do motor aprovados. Gates integrais/CI, navegador
+  e release permanecem pendentes; nao confundir amostra real com todo relatorio.
+- Tipos/build/lint aprovados; suite geral Windows 2.168 aprovados e seis falhas
+  POSIX conhecidas, seis ignorados. Matriz/integracao/ledger: 243 aprovados,
+  incluindo 7.285 cenarios. Aprovacao de release depende da CI Linux e navegador.
+- CI `37577305243`: validate, E2E e restore verdes. QA de continuidade falhou
+  por seletor com dois alvos (summary e ajuda). Corrigido escopo do seletor;
+  nova verificacao integral pendente. Nunca contornar o gate por essa falha.
+- Revisao independente: historico exige datas do calculo e da entrada separadas;
+  primeira mensal fixada limita novos sinais. UI e sugestoes passaram a usar
+  essas datas e o calendario canonico, preservando sinais ja digitados.
+  Regressoes focadas aprovadas; release ainda depende da repeticao dos gates.
+- CI `37581613136` aprovou testes Linux, banco, E2E e restore. Seletores `has`
+  devem procurar descendentes da linha, sem incluir o ancestral da pagina.
+  Correcao reproduzida em Chromium sintetico; nova matriz integral pendente.
+- CI `37584281089`: continuidade financeira completa aprovada em mobile/desktop.
+  Teste negativo HTTP 503 precisa reconhecer o evento de console provocado por
+  sua propria fixture. Excecao limitada ao evento exato, quantidade e janela
+  controlada; nunca ignorar todos os erros de recurso. Repeticao integral pendente.
+- Ao mudar autoridade de dados, conferir tambem os testes globais de carregamento:
+  `checkDeferredInventory` ainda exigia selecao pelo snapshot no Associativo.
+  Atualizado para bloquear ate a fonte viva; continuidade preserva a verificacao
+  de valores ao trocar filtros. Fonte: CI `37587316857`, 40 navegacoes aprovadas.
+
+## 2026-10-07: formulas do Associativo confrontadas com Salesforce
+
+- Status: validado na amostra; implementacao e paridade global pendentes.
+- Fonte: `docs/audits/associativo-formulas-salesforce-2026-10-07.md`, leitura
+  autenticada autorizada do relatorio de vendas e propostas relacionadas.
+- Inventario: 1.120 oportunidades em 24 empreendimentos, nao 1.120 calculos
+  recalculados. Comparacao: 20 lineares exatos; 52 valores decrescentes de
+  13 propostas, com maior diferenca de R$ 0,01, dentro da margem de R$ 0,05.
+- Data financeira da unidade pode diferir da data geral; o mes da entrega
+  ja entra no pos-obra. Preservar datas da memoria historica, sem misturar
+  resultado salvo com calendario atual da unidade.
+- Particao decrescente equilibrada distribui o resto nos primeiros blocos;
+  capitalizacao acumulada vale tambem para blocos 3/4 inteiramente pre.
+  A segmentacao visual Salesforce divergiu dos periodos de calculo em dois
+  prazos. Reconciliar quantidades e totais antes da implementacao.
+- 130.662 casos sinteticos independentes comprovaram fechamento por VP, nao
+  paridade Salesforce. Sem persistir clientes/propostas ou alterar motores.
+- Lint, tipos e build aprovados; suite geral com 2.008 testes aprovados e
+  seis falhas POSIX/caminhos em Windows, detalhadas no audit. Sem publicacao.
+- Pendentes: ultimo dia do mes e outras fronteiras nao observadas, ordem
+  interna exata dos centavos, implementacao e validacao integral do produto.
+
+## 2026-10-07: preferências de cookies contextuais e falhas observáveis
+
+- Status: validado localmente; fonte: `CookieConsentBanner`, menu da conta,
+  documento legal e QA autenticado.
+- Um consentimento já registrado não precisa manter um controle fixo sobre toda
+  página. O acesso posterior fica contextual no menu da conta e na Política de
+  Cookies, enquanto o banner inicial continua obrigatório até uma escolha.
+- Server Actions de preferências precisam retornar estado observável: durante a
+  gravação os envios ficam bloqueados; sucesso fecha o painel; falha mantém o
+  contexto e anuncia recuperação. O cookie continua `HttpOnly`, `SameSite=Lax`,
+  `Secure` em HTTPS e sem enfraquecer categorias essenciais ou de segurança.
+- O QA deve comprovar ausência do atalho flutuante, abertura contextual, foco,
+  fechamento e uma gravação real com dados sintéticos. O ensaio público passou
+  nos quatro viewports, sem overflow ou erro de navegador; lint, tipos, 2.051
+  testes Vitest, 15 testes Node, build de 44 páginas, inventário e Gitleaks
+  também passaram. A primeira CI bloqueou a expectativa E2E obsoleta do atalho
+  permanente; o gate agora exige o fluxo contextual e ausência do controle
+  antigo. Nova CI autenticada e publicação permanecem pendentes.
+
 ## 2026-10-07: sessão manual Salesforce com recarga fail-closed
 
 - Status: validado localmente, sem MFA, coleta real ou mutação remota.

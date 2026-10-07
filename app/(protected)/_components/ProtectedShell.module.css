@@ -511,6 +511,15 @@
   background: var(--header-hover);
 }
 
+.accountPreference {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .accountLinkIcon {
   width: 32px;
   height: 32px;

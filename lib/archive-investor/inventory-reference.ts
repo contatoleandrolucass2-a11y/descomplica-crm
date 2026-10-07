@@ -93,6 +93,7 @@ function hasInventoryIdentity<T>(value: T): value is T & InventoryReferenceField
 export function enrichInventoryReferenceFields<T>(
   items: readonly T[],
   reference: readonly unknown[],
+  { allowCompletionDateFallback = true }: { allowCompletionDateFallback?: boolean } = {},
 ): T[] {
   const referenceByKey = uniqueInventoryReferences(
     items.filter(hasInventoryIdentity),
@@ -104,12 +105,14 @@ export function enrichInventoryReferenceFields<T>(
     const source = key === null ? undefined : referenceByKey.get(key);
     if (!source) return item;
 
-    // Live values keep authority; absent facts require a unique unit, never a project or price.
+    // Absent facts require a unique unit; live-required delivery dates cannot use the snapshot.
     return {
       ...item,
       appraisal: item.appraisal ?? source.appraisal ?? null,
       progress: item.progress ?? source.progress ?? null,
-      completionDate: item.completionDate ?? source.completionDate ?? null,
+      ...(allowCompletionDateFallback
+        ? { completionDate: item.completionDate ?? source.completionDate ?? null }
+        : {}),
     };
   });
 }

@@ -23,9 +23,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function start(snapshotOnly = false, canReplace = () => true) {
+function start(snapshotOnly = false, canReplace = () => true, liveRequired = false) {
   return loadInvestorInventory({
     snapshotOnly,
+    liveRequired,
     signal: controller.signal,
     canReplace,
     onInventory,
@@ -34,6 +35,205 @@ function start(snapshotOnly = false, canReplace = () => true) {
 function respond(url: string, payload: unknown, status = 200) {
   requests.get(url)!(Response.json(payload, { status }));
 }
+
+describe("live-required inventory loading", () => {
+  it("keeps a completed snapshot out of inventory and late facts while live is pending", async () => {
+    const onReferenceFacts = vi.fn();
+    const loading = loadInvestorInventory({
+      snapshotOnly: false,
+      liveRequired: true,
+      signal: controller.signal,
+      canReplace: () => true,
+      onInventory,
+      onReferenceFacts,
+    });
+    expect([...requests.keys()]).toEqual([snapshotUrl, liveUrl]);
+    const readSnapshotBody = vi.fn().mockResolvedValue(snapshot);
+    requests.get(snapshotUrl)!({ ok: true, json: readSnapshotBody } as unknown as Response);
+    await vi.waitFor(() => expect(readSnapshotBody).toHaveResolvedWith(snapshot));
+    expect(onInventory).not.toHaveBeenCalled();
+    expect(onReferenceFacts).not.toHaveBeenCalled();
+    respond(liveUrl, live);
+    await loading;
+    expect(onInventory).toHaveBeenCalledExactlyOnceWith(live, snapshot.items);
+    expect(onReferenceFacts).not.toHaveBeenCalled();
+  });
+
+  it.each([{ completionDate: null }, {}])(
+    "keeps live completionDate authoritative with missing date %j and commercial fallback",
+    async (dateFields) => {
+      const referenceItem = {
+        id: "snapshot-unit",
+        businessUnit: "Riva",
+        project: "Estilo Lapa",
+        identifier: "BL02-0715",
+        finalPrice: 230_000,
+        appraisal: 350_000,
+        progress: 0.42,
+        completionDate: "2028-12-30",
+      };
+      const liveItem = {
+        id: "live-unit",
+        businessUnit: "RIVA",
+        project: " ESTILO LAPA ",
+        identifier: " bl02-0715 ",
+        finalPrice: 240_000,
+        appraisal: null,
+        progress: null,
+        ...dateFields,
+      };
+      const referenceItems = [referenceItem, { ...referenceItem, identifier: "SNAPSHOT-ONLY" }];
+      const loading = start(false, () => true, true);
+      respond(liveUrl, { sourceKind: "live", count: 1, items: [liveItem] });
+      respond(snapshotUrl, { count: 2, items: referenceItems });
+      await loading;
+      expect(onInventory).toHaveBeenCalledExactlyOnceWith(
+        {
+          sourceKind: "live",
+          count: 1,
+          items: [{ ...liveItem, appraisal: 350_000, progress: 0.42 }],
+        },
+        referenceItems,
+      );
+      expect(onInventory.mock.calls[0]?.[0].items[0].completionDate).toBe(
+        dateFields.completionDate,
+      );
+    },
+  );
+
+  it.each([401, 403, 502, 503])("rejects live HTTP %s despite a valid snapshot", async (status) => {
+    const loading = start(false, () => true, true);
+    respond(snapshotUrl, snapshot);
+    respond(liveUrl, null, status);
+    await expect(loading).rejects.toThrow("inventory_unavailable");
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+
+  it.each([null, {}, { count: 2, items: [] }, { count: 1, items: null }])(
+    "rejects invalid live payload %j despite a valid snapshot",
+    async (payload) => {
+      const loading = start(false, () => true, true);
+      respond(snapshotUrl, snapshot);
+      respond(liveUrl, payload);
+      await expect(loading).rejects.toThrow("inventory_payload_invalid");
+      expect(onInventory).not.toHaveBeenCalled();
+    },
+  );
+
+  it("propagates a live network failure without applying the pending snapshot later", async () => {
+    const failure = new TypeError("Failed to fetch");
+    vi.mocked(fetch)
+      .mockImplementationOnce(
+        (url) => new Promise<Response>((resolve) => requests.set(String(url), resolve)),
+      )
+      .mockRejectedValueOnce(failure);
+    const loading = start(false, () => true, true);
+    await expect(loading).rejects.toBe(failure);
+    const readSnapshotBody = vi.fn().mockResolvedValue(snapshot);
+    requests.get(snapshotUrl)!({ ok: true, json: readSnapshotBody } as unknown as Response);
+    await vi.waitFor(() => expect(readSnapshotBody).toHaveResolvedWith(snapshot));
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+
+  it("propagates a live JSON parsing failure", async () => {
+    const failure = new SyntaxError("Invalid JSON");
+    const loading = start(false, () => true, true);
+    respond(snapshotUrl, snapshot);
+    requests.get(liveUrl)!({ ok: true, json: () => Promise.reject(failure) } as Response);
+    await expect(loading).rejects.toBe(failure);
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+
+  it("propagates a live timeout even when its response body eventually completes", async () => {
+    const timeout = new AbortController();
+    const failure = new DOMException("The operation timed out", "TimeoutError");
+    vi.spyOn(AbortSignal, "timeout")
+      .mockReturnValueOnce(new AbortController().signal)
+      .mockReturnValueOnce(timeout.signal);
+    let finishBody!: (payload: unknown) => void;
+    const body = new Promise((resolve) => {
+      finishBody = resolve;
+    });
+    const readLiveBody = vi.fn(() => body);
+    const loading = start(false, () => true, true);
+    respond(snapshotUrl, snapshot);
+    requests.get(liveUrl)!({ ok: true, json: readLiveBody } as unknown as Response);
+    await vi.waitFor(() => expect(readLiveBody).toHaveBeenCalledOnce());
+    timeout.abort(failure);
+    finishBody(live);
+    await expect(loading).rejects.toBe(failure);
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+
+  it("does not deliver inventory or late facts after cancellation", async () => {
+    const onReferenceFacts = vi.fn();
+    const loading = loadInvestorInventory({
+      snapshotOnly: false,
+      liveRequired: true,
+      signal: controller.signal,
+      canReplace: () => false,
+      onInventory,
+      onReferenceFacts,
+    });
+    controller.abort();
+    respond(snapshotUrl, snapshot);
+    respond(liveUrl, live);
+    await expect(loading).rejects.toBe(controller.signal.reason);
+    expect(onInventory).not.toHaveBeenCalled();
+    expect(onReferenceFacts).not.toHaveBeenCalled();
+  });
+
+  it.each([503, 200])(
+    "accepts live when snapshot fails with HTTP %s or invalid JSON shape",
+    async (status) => {
+      const loading = start(false, () => true, true);
+      respond(snapshotUrl, null, status);
+      respond(liveUrl, live);
+      await loading;
+      expect(onInventory).toHaveBeenCalledExactlyOnceWith(live, []);
+    },
+  );
+
+  it("accepts empty live stock without exposing snapshot units", async () => {
+    const emptyLive = { count: 0, items: [] };
+    const loading = start(false, () => true, true);
+    respond(snapshotUrl, snapshot);
+    respond(liveUrl, emptyLive);
+    await loading;
+    expect(onInventory).toHaveBeenCalledExactlyOnceWith(emptyLive, snapshot.items);
+  });
+
+  it("offers only raw live facts when a proposal prevents replacement", async () => {
+    const onReferenceFacts = vi.fn();
+    const loading = loadInvestorInventory({
+      snapshotOnly: false,
+      liveRequired: true,
+      signal: controller.signal,
+      canReplace: () => false,
+      onInventory,
+      onReferenceFacts,
+    });
+    respond(snapshotUrl, snapshot);
+    respond(liveUrl, live);
+    await loading;
+    expect(onInventory).not.toHaveBeenCalled();
+    expect(onReferenceFacts).toHaveBeenCalledExactlyOnceWith(live.items);
+  });
+
+  it("does not suppress a live failure when a proposal prevents replacement", async () => {
+    const loading = start(false, () => false, true);
+    respond(snapshotUrl, snapshot);
+    respond(liveUrl, null, 503);
+    await expect(loading).rejects.toThrow("inventory_unavailable");
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+
+  it("rejects conflicting snapshotOnly and liveRequired options before fetching", async () => {
+    await expect(start(true, () => true, true)).rejects.toThrow("inventory_options_invalid");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(onInventory).not.toHaveBeenCalled();
+  });
+});
 
 describe("parallel inventory loading", () => {
   it("offers only late live facts when an Associativo proposal prevents inventory replacement", async () => {
@@ -133,16 +333,19 @@ describe("parallel inventory loading", () => {
     expect(onInventory).not.toHaveBeenCalled();
   });
 
-  it("rechecks proposal state after live arrives first and the reference is still pending", async () => {
-    let interacted = false;
-    const loading = start(false, () => !interacted);
-    respond(liveUrl, live);
-    await Promise.resolve();
-    interacted = true;
-    respond(snapshotUrl, snapshot);
-    await loading;
-    expect(onInventory).not.toHaveBeenCalled();
-  });
+  it.each([false, true])(
+    "rechecks proposal state after live arrives first and the reference is pending (liveRequired: %s)",
+    async (liveRequired) => {
+      let interacted = false;
+      const loading = start(false, () => !interacted, liveRequired);
+      respond(liveUrl, live);
+      await Promise.resolve();
+      interacted = true;
+      respond(snapshotUrl, snapshot);
+      await loading;
+      expect(onInventory).not.toHaveBeenCalled();
+    },
+  );
 
   it("keeps a proposal when the snapshot fails and live is the first available response", async () => {
     const loading = start(false, () => false);
