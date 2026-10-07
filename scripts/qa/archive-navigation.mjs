@@ -975,10 +975,13 @@ export async function checkArchiveNavigation(
     passed: false,
   };
   const runtimeErrors = [];
+  const expectedConsoleErrors = new WeakSet();
   const onError = () => runtimeErrors.push(true);
   const onConsole = (message) => {
-    if (message.type() === "error") onError();
+    if (message.type() === "error") runtimeErrors.push(message);
   };
+  const unexpectedErrorCount = (start) =>
+    runtimeErrors.slice(start).filter((error) => !expectedConsoleErrors.has(error)).length;
   let page = initialPage;
   const rotatingPages = typeof pageFactory === "function";
   const attachRuntimeListeners = (activePage) => {
@@ -1253,8 +1256,12 @@ export async function checkArchiveNavigation(
             }
             if (associativeGuidanceWidths.includes(viewport.width)) {
               stage = "associative-calculation-continuity";
-              check.associativeCalculationContinuity =
-                await checkAssociativeCalculationContinuity(page);
+              check.associativeCalculationContinuity = await checkAssociativeCalculationContinuity(
+                page,
+                {
+                  onExpectedConsoleError: (message) => expectedConsoleErrors.add(message),
+                },
+              );
               assert.equal(
                 check.associativeCalculationContinuity.passed,
                 true,
@@ -1451,7 +1458,7 @@ export async function checkArchiveNavigation(
           await page.locator('[data-protected-brand][href="/app"]').click();
           await expect(page).toHaveURL(`${origin}/app`);
           assert.equal(
-            runtimeErrors.length - errorStart,
+            unexpectedErrorCount(errorStart),
             0,
             "Archive navigation emitted browser errors",
           );
@@ -1467,7 +1474,7 @@ export async function checkArchiveNavigation(
             ...(error?.safeDiagnostics ? { assertion: error.safeDiagnostics } : {}),
           };
         }
-        check.runtimeErrorCount = runtimeErrors.length - errorStart;
+        check.runtimeErrorCount = unexpectedErrorCount(errorStart);
         await onCheck(check, page);
       }
     }

@@ -1460,85 +1460,84 @@ async function checkKeyboard(page, origin) {
   };
 }
 
-async function checkDeferredInventory(page, origin, proposalStarted = false) {
+async function checkDeferredInventory(page, origin) {
   let releaseLiveInventory;
   const liveInventoryGate = new Promise((resolve) => {
     releaseLiveInventory = resolve;
   });
   const liveInventoryUrl = `${origin}/api/inventory`;
   const source = JSON.parse(syntheticDirectTableSnapshot);
-  const liveItems = proposalStarted
-    ? source.items.filter((item) => item.id !== "qa-stock-0001")
-    : source.items;
+  let liveRequested = false;
+  let closing = false;
+  let routeFailure = null;
+  let fulfillment = Promise.resolve();
   const deferredLiveInventory = async (route) => {
-    await liveInventoryGate;
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        ...source,
-        items: liveItems,
-        count: liveItems.length,
-        sourceKind: "live",
-        generatedAt: "2026-09-28T12:00:00.000Z",
-      }),
-    });
+    liveRequested = true;
+    fulfillment = (async () => {
+      await liveInventoryGate;
+      try {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            ...source,
+            sourceKind: "live",
+            generatedAt: "2026-09-28T12:00:00.000Z",
+          }),
+        });
+      } catch (error) {
+        if (!closing || !String(error).includes("Route is already handled")) routeFailure = error;
+      }
+    })();
+    await fulfillment;
   };
   await page.route(liveInventoryUrl, deferredLiveInventory);
   // Release on failures too, so a failed assertion cannot leave a pending route.
   try {
+    const snapshotResponse = page.waitForResponse(`${origin}/api/inventory/snapshot`);
     await gotoWithServerRetry(page, `${origin}/app/simulacao/associativo-fluxo-linear`, {
       waitUntil: "domcontentloaded",
     });
+    await (await snapshotResponse).finished();
+    await expect.poll(() => liveRequested).toBe(true);
+    await expect(page.locator(".investor-stock-results")).toHaveAttribute("aria-busy", "true");
+    await expect(page.locator(".investor-stock-table tbody tr.selectable")).toHaveCount(0);
+    await expect(page.locator(".investor-associative-qualification")).toHaveCount(0);
+    await expect(page.locator(".investor-associative-ledger")).toHaveCount(0);
+    const responsePromise = page.waitForResponse(liveInventoryUrl);
+    releaseLiveInventory();
+    await (await responsePromise).finished();
+    await fulfillment;
+    if (routeFailure) throw routeFailure;
+    await expect(page.locator(".investor-stock-sync")).toContainText("Atualizado");
+    await expect(page.locator(".investor-stock-table tbody tr.selectable").first()).toBeVisible();
+    await expect(page.locator('.investor-stock-unit-button[aria-pressed="true"]')).toHaveCount(0);
     const projectFilter = page.getByRole("combobox", {
       name: "Nome do Empreendimento",
       exact: true,
     });
     await projectFilter.selectOption("Empreendimento QA 01");
-    if (proposalStarted) {
-      const unit = page.getByRole("button", { name: "Iniciar proposta com QA-0001", exact: true });
-      await unit.click();
-      const income = page.getByRole("textbox", { name: "Renda Familiar", exact: true });
-      await income.fill("500000");
-      await page.getByRole("button", { name: "MCMV", exact: true }).click();
-      await page.getByRole("radio", { name: "Sim", exact: true }).check();
-      const financing = page.getByRole("textbox", { name: "Financiamento", exact: true });
-      await financing.fill("19000000");
-      const before = [await income.inputValue(), await financing.inputValue()];
-      const responsePromise = page.waitForResponse(liveInventoryUrl);
-      releaseLiveInventory();
-      await (await responsePromise).finished();
-      await page.evaluate(
-        () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
-      );
-      return (
-        (await unit.getAttribute("aria-pressed")) === "true" &&
-        (await income.isVisible()) &&
-        (await financing.isVisible()) &&
-        JSON.stringify(before) ===
-          JSON.stringify([await income.inputValue(), await financing.inputValue()]) &&
-        (await page.locator(".investor-stock-sync").innerText()).includes("Arquivo")
-      );
-    }
     await page
       .getByRole("combobox", { name: "Ordenar unidades por valor do imóvel", exact: true })
       .selectOption("desc");
     await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
     await projectFilter.selectOption("Empreendimento QA 01");
-    releaseLiveInventory();
-    await page.waitForFunction(() =>
-      document.querySelector(".investor-stock-sync")?.textContent?.includes("Atualizado"),
-    );
-    return (await projectFilter.inputValue()) === "Empreendimento QA 01";
+    return {
+      liveRequiredBeforeSelection: true,
+      liveFiltersAvailableAfterLoad: (await projectFilter.inputValue()) === "Empreendimento QA 01",
+    };
   } finally {
+    closing = true;
     releaseLiveInventory();
+    await fulfillment;
     await page.unroute(liveInventoryUrl, deferredLiveInventory);
+    if (routeFailure) throw routeFailure;
   }
 }
 
 async function checkSimulatorValidation(page, origin, httpCredentials) {
-  const lateLivePreservesProposal = await checkDeferredInventory(page, origin, true);
-  const liveRefreshAfterFiltering = await checkDeferredInventory(page, origin);
+  const { liveRequiredBeforeSelection, liveFiltersAvailableAfterLoad } =
+    await checkDeferredInventory(page, origin);
   await page
     .getByRole("heading", { name: "Simulador Tabela Associativo", exact: true })
     .waitFor({ state: "visible" });
@@ -1980,8 +1979,8 @@ async function checkSimulatorValidation(page, origin, httpCredentials) {
   return {
     ...initialChecks,
     learningManualAccessible,
-    lateLivePreservesProposal,
-    liveRefreshAfterFiltering,
+    liveRequiredBeforeSelection,
+    liveFiltersAvailableAfterLoad,
     filterPreservesAssociativeProposal,
     financingFocusedAfterProfile,
     optionalPaymentsUnlockedAfterProfile,

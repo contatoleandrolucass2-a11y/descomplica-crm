@@ -245,6 +245,90 @@ describe("Associative defined scenario matrix", () => {
     },
   );
 
+  it.each([
+    {
+      entryDate: "2026-01-05",
+      calculationDate: "2026-01-05",
+      dates: {},
+      firstInterestDate: "2025-12-31",
+      firstInstallmentDate: "2026-01-15",
+      correction: 0,
+    },
+    {
+      entryDate: "2026-01-05",
+      calculationDate: "2026-02-16",
+      dates: {},
+      firstInterestDate: "2026-01-31",
+      firstInstallmentDate: "2026-03-15",
+      correction: 1,
+    },
+    {
+      entryDate: "2026-01-16",
+      calculationDate: "2026-01-16",
+      dates: { firstInterestDate: "2025-08-20", firstInstallmentDate: "2026-02-05" },
+      firstInterestDate: "2025-08-20",
+      firstInstallmentDate: "2026-02-05",
+      correction: 5,
+    },
+  ])("pins correction k=$correction to financial dates independently of entry", (scenario) => {
+    const raw = {
+      ...syntheticLinearInput({
+        entryDate: scenario.entryDate,
+        constructionEnd: "2035-12-30",
+        installments: 36,
+      }),
+      calculationDate: scenario.calculationDate,
+      ...scenario.dates,
+    };
+    const model = oracleLinear(raw);
+    expect(model.ok).toBe(true);
+    expect(model.metrics).toMatchObject({
+      firstInterestDate: scenario.firstInterestDate,
+      firstInstallmentDate: scenario.firstInstallmentDate,
+      monthlyCorrectionMonths: scenario.correction,
+    });
+    expect(model.metrics!.correctedInstallmentBalance).toBeCloseTo(
+      45000.06 * 1.005 ** scenario.correction,
+      8,
+    );
+    expect(checkLinearScenario(raw)).toMatchObject({ outcome: "calculable", mismatches: [] });
+  });
+
+  it("allows completed construction while retaining date and monthly-order validation", () => {
+    const raw = {
+      ...syntheticLinearInput({
+        entryDate: "2026-01-16",
+        constructionEnd: "2025-12-15",
+        installments: 36,
+      }),
+      firstInterestDate: "2025-12-15",
+      firstInstallmentDate: "2026-02-05",
+    };
+    expect(oracleLinear(raw).metrics).toMatchObject({
+      preInstallments: 0,
+      postInstallments: 36,
+      monthlyCorrectionMonths: 1,
+    });
+    expect(checkLinearScenario(raw)).toMatchObject({ outcome: "calculable", mismatches: [] });
+    for (const invalid of [
+      { ...raw, firstInstallmentDate: "2026-02-30" },
+      { ...raw, firstInterestDate: "2026-02-30" },
+      { ...raw, calculationDate: "2026-02-30" },
+    ]) {
+      expect(oracleLinear(invalid).causes).toContain("date.invalid");
+      expect(checkLinearScenario(invalid)).toMatchObject({
+        outcome: "justified_block",
+        mismatches: [],
+      });
+    }
+    const overlapping = { ...raw, firstInstallmentDate: "2026-01-15" };
+    expect(checkLinearScenario(overlapping)).toMatchObject({
+      outcome: "justified_block",
+      causes: ["monthly.before_entry"],
+      mismatches: [],
+    });
+  });
+
   it("keeps the wrapper strict and refuses malformed installment counts before schedule allocation", () => {
     for (const installments of [0, 85, -1, 1.5, "1e1", "84x", "", "4294967296"]) {
       const result = calculateInvestorFlow({
@@ -296,7 +380,7 @@ describe("Associative defined scenario matrix", () => {
     expect(compareMetrics({ status: "approved" }, { status: "pending" })).toEqual(["status"]);
   });
 
-  it("reconciles the archive golden by discounted cash flows, with unrounded intermediate amounts", () => {
+  it("recalculates preserved archive inputs with nominal annuals and discounted cash flows", () => {
     const input = syntheticLinearInput({
       entryDate: "2026-08-06",
       constructionEnd: "2032-12-31",
@@ -315,8 +399,10 @@ describe("Associative defined scenario matrix", () => {
     });
     const model = oracleLinear(input);
     expect(model.metrics!.annualCorrectedTotal).toBeCloseTo(13627.24708159291, 6);
-    expect(model.metrics!.correctedInstallmentBalance).toBeCloseTo(36921.076715246185, 6);
-    expect(model.metrics!.correctedInstallment).toBeCloseTo(542.701304331876, 6);
+    // P = 50,000 - 5 * 2,350; July interest to November monthly gives k = 3.
+    expect(model.metrics!.installmentBalance).toBe(38250);
+    expect(model.metrics!.correctedInstallmentBalance).toBeCloseTo(38826.62353125, 6);
+    expect(model.metrics!.correctedInstallment).toBeCloseTo(570.710854283148, 6);
     expect(checkLinearScenario(input).mismatches).toEqual([]);
     const form = Object.fromEntries(
       Object.entries(input).map(([key, value]) => [
@@ -338,7 +424,7 @@ describe("Associative defined scenario matrix", () => {
     },
   );
 
-  it("preserves print commitments 12.92% and 17.78% with missing unit facts", () => {
+  it("recalculates print commitments as 12.85% and 17.70% while preserving missing unit facts", () => {
     const facts = Object.freeze({ progress: null, appraisal: null });
     const raw = syntheticLinearInput({
       salePrice: 234990,
@@ -370,7 +456,8 @@ describe("Associative defined scenario matrix", () => {
     expect(flow.ok).toBe(true);
     expect(compareMetrics(flow.custom.linear, model)).toEqual([]);
     expect(model.proSoluto).toBe(43990);
-    expect(model.correctedInstallmentBalance).toBeCloseTo(44209.95, 8);
+    // September interest to October monthly gives k = 0, independently of ranking correction.
+    expect(model.correctedInstallmentBalance).toBeCloseTo(43990, 8);
     expect([model.preInstallments, model.postInstallments]).toEqual([84, 0]);
     expect(model.firstInstallmentDate).toBe("2026-10-15");
     const monthlyDates = Array.from({ length: 84 }, (_, index) =>
@@ -381,23 +468,21 @@ describe("Associative defined scenario matrix", () => {
       monthlyDates,
       ...flow.custom.linear,
     });
-    const blockPresentValue = discountWeights(21, 0).reduce((total, value) => total + value, 0);
-    const secondBlockCorrection = Array.from({ length: 21 }).reduce<number>(
-      (factor) => factor * 1.005,
-      1,
-    );
-    const expectedBlocks = [0.4, 0.3 * secondBlockCorrection, 0.2, 0.1].map((share) => ({
-      count: 21,
-      correctedInstallment: (44209.95 * share) / blockPresentValue,
-    }));
+    const discountedMonths = discountWeights(84, 0);
+    const expectedBlocks = [0.4, 0.3, 0.2, 0.1].map((share, index) => {
+      const blockPresentValue = discountedMonths
+        .slice(index * 21, (index + 1) * 21)
+        .reduce((total, value) => total + value, 0);
+      return { count: 21, correctedInstallment: (43990 * share) / blockPresentValue };
+    });
     const expectedDecreasing = Math.max(
       ...expectedBlocks.map((block) => block.correctedInstallment),
     );
     expect(compareMetrics(flow.custom.decreasing, { ok: true, blocks: expectedBlocks })).toEqual(
       [],
     );
-    expect(((model.correctedInstallment / income) * 100).toFixed(2)).toBe("12.92");
-    expect(((expectedDecreasing / income) * 100).toFixed(2)).toBe("17.78");
+    expect(((model.correctedInstallment / income) * 100).toFixed(2)).toBe("12.85");
+    expect(((expectedDecreasing / income) * 100).toFixed(2)).toBe("17.70");
 
     // These supplied percentages are synthetic hypotheses, not recovered source facts.
     for (const suppliedOfficialPercent of ["", "0", "15", "100"]) {
@@ -442,8 +527,8 @@ describe("Associative defined scenario matrix", () => {
       };
       const approval = calculateAssociativeApproval(approvalInput);
       expect(compareMetrics(approval, oracleApproval(approvalInput))).toEqual([]);
-      expect((approval.linearCommitmentRate * 100).toFixed(2)).toBe("12.92");
-      expect((approval.decreasingCommitmentRate * 100).toFixed(2)).toBe("17.78");
+      expect((approval.linearCommitmentRate * 100).toFixed(2)).toBe("12.85");
+      expect((approval.decreasingCommitmentRate * 100).toFixed(2)).toBe("17.70");
       expect(approval.status).toBe(hasProgress ? "rejected" : "pending");
       if (!hasProgress) {
         expect(comparison.highestLinearTotal).toBeNull();
@@ -493,7 +578,7 @@ describe("Associative defined scenario matrix", () => {
       inventory: [completeInventory()],
       includeSynthetic: false,
     });
-    expect(report.contract).toBe("associative-scenario-matrix-2");
+    expect(report.contract).toBe("associative-scenario-matrix-3");
     expect(report.outcomeConvention).toContain("calculable includes expected ranking rejection");
     expect(report.sections.inventory).toMatchObject({
       cases: 3,

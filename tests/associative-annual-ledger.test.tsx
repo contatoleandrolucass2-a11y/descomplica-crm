@@ -74,7 +74,7 @@ const dependencies = {
 };
 const renderBalance = new Function("result", ...Object.keys(dependencies), compiled);
 
-describe("Associativo annual ledger and unchanged calculation bases", () => {
+describe("Associativo annual ledger and nominal monthly principal", () => {
   it("subtracts three entered annuals in the displayed balance, not twice in the engine", () => {
     const result = calculateInvestorFlow(fixture);
     expect(result.ok).toBe(true);
@@ -86,11 +86,13 @@ describe("Associativo annual ledger and unchanged calculation bases", () => {
       (sum, months) => sum + 2450 * 1.005 ** (months + 1),
       0,
     );
-    expect(result.custom.installmentBalanceBeforeCorrection).toBeCloseTo(
-      41944.22 - correctedAnnuals,
-      8,
-    );
-    expect(result.custom.balance).toBeCloseTo((41944.22 - correctedAnnuals) * 1.005, 8);
+    expect(result.custom.linear.annualCorrectedTotal).toBeCloseTo(correctedAnnuals, 8);
+    expect(result.custom.installmentBalanceBeforeCorrection).toBeCloseTo(34594.22, 8);
+    // Interest starts on September 30; the first monthly is October 15, so k = 0.
+    expect(result.custom.linear.firstInterestDate).toBe("2026-09-30");
+    expect(result.custom.linear.firstInstallmentDate).toBe("2026-10-15");
+    expect(result.custom.linear.monthlyCorrectionMonths).toBe(0);
+    expect(result.custom.balance).toBeCloseTo(34594.22, 8);
     const html = renderToStaticMarkup(renderBalance(result, ...Object.values(dependencies)));
     expect(html).toContain(`<output>${money.format(34594.22)}</output>`);
     expect(html).toContain(money.format(7350));
@@ -122,6 +124,11 @@ describe("Associativo annual ledger and unchanged calculation bases", () => {
       expect(Math.round(result.custom.installmentNominalBalance * 100) + annualCents).toBe(
         Math.round(result.custom.balanceBeforeCorrection * 100),
       );
+      const monthlyPrincipal = (4344422 - 600000 - 150000 - 120006 - annualCents) / 100;
+      expect(result.custom.installmentBalanceBeforeCorrection).toBeCloseTo(monthlyPrincipal, 8);
+      expect(result.custom.linear.firstInstallmentDate).toBe("2027-01-15");
+      expect(result.custom.linear.monthlyCorrectionMonths).toBe(3);
+      expect(result.custom.balance).toBeCloseTo(monthlyPrincipal * 1.005 ** 3, 8);
     },
   );
 
@@ -141,8 +148,23 @@ describe("Associativo annual ledger and unchanged calculation bases", () => {
   it("restores the balance when annuals are cleared and blocks annuals covering the entire debt", () => {
     const cleared = calculateInvestorFlow({ ...fixture, intermediaries: [0, 0, 0, 0, 0] });
     expect(cleared.custom.installmentNominalBalance).toBe(41944.22);
+    expect(cleared.custom.balance).toBeCloseTo(41944.22, 8);
     const exceeded = calculateInvestorFlow({ ...fixture, intermediaries: [0, 50000, 0, 0, 0] });
     expect(exceeded.ok).toBe(false);
     expect(exceeded.custom.installmentNominalBalance).toBe(0);
+  });
+
+  it("preserves a positive monthly principal when only corrected annuals exceed the debt", () => {
+    const result = calculateInvestorFlow({
+      ...fixture,
+      income: 100000,
+      intermediaries: [41800, 0, 0, 0, 0],
+    });
+    expect(result.ok).toBe(true);
+    expect(result.custom.linear.annualCorrectedTotal).toBeGreaterThan(41944.22);
+    expect(result.custom.annualNominalTotal).toBe(41800);
+    expect(result.custom.installmentBalanceBeforeCorrection).toBeCloseTo(144.22, 8);
+    expect(result.custom.installmentNominalBalance).toBe(144.22);
+    expect(result.custom.balance).toBeCloseTo(144.22, 8);
   });
 });

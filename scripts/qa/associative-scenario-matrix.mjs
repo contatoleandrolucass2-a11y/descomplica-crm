@@ -15,7 +15,7 @@ import { buildAssociativeReadyProposal } from "../../lib/archive-investor/associ
 // Independent, pinned expectations. Never import production constants into an oracle.
 // These are repository contracts, not evidence of current bank eligibility.
 export const MATRIX_CONTRACT = Object.freeze({
-  version: "associative-scenario-matrix-2",
+  version: "associative-scenario-matrix-3",
   outcomeConvention:
     "calculable includes expected ranking rejection; causes retain ranking.rejected and expectedDecisions counts it separately; missing data and invalid proposals remain justified_block; mismatches remain real_error",
   rankingPolicy: "wf13-ranking-2026-08-18",
@@ -29,6 +29,7 @@ export const MATRIX_CONTRACT = Object.freeze({
   absoluteMoneyTolerance: 0.000001,
   relativeTolerance: 0.0000000001,
   sources: [
+    "docs/audits/associativo-formulas-salesforce-2026-10-07.md",
     "lib/crm/simulators/official/wf13-policy.ts",
     "lib/crm/simulators/official/wf13.ts",
     "lib/archive-investor/financing-modality-rules.mjs",
@@ -145,13 +146,17 @@ export function syntheticLinearInput(overrides = {}) {
   };
 }
 
-export function oracleLinear(input, today = input.entryDate) {
+export function oracleLinear(input, today = input.calculationDate ?? input.entryDate) {
   const causes = [];
   const entryDate = date(input.entryDate);
   const endDate = date(input.constructionEnd);
   const calculationDate = date(today);
   if (!entryDate || !endDate || !calculationDate) causes.push("date.invalid");
-  if (entryDate && endDate && endDate <= entryDate) causes.push("delivery.not_future");
+  if (
+    (input.firstInterestDate != null && !date(input.firstInterestDate)) ||
+    (input.firstInstallmentDate != null && !date(input.firstInstallmentDate))
+  )
+    causes.push("date.invalid");
   if (!input.stockMatch || !input.development || !input.product) causes.push("stock.unconfirmed");
   if (!input.policyConfirmed || !known(input.policyLimit) || Number(input.policyLimit) <= 0)
     causes.push("policy.pending");
@@ -204,7 +209,22 @@ export function oracleLinear(input, today = input.entryDate) {
     signalDates.push(previous);
   }
   const graceMonths = signalDates.filter(Boolean).length;
-  const first = Number(input.entry) >= 150 ? monthDate(lastPaymentDay(today, 30), graceMonths) : "";
+  const first =
+    input.firstInstallmentDate ??
+    (Number(input.entry) >= 150 ? monthDate(lastPaymentDay(today, 30), graceMonths) : "");
+  const firstInterestDate =
+    input.firstInterestDate ??
+    iso(
+      new Date(Date.UTC(calculationDate.getUTCFullYear(), calculationDate.getUTCMonth(), 1) - DAY),
+    );
+  if (first && ![5, 10, 15].includes(date(first).getUTCDate())) causes.push("monthly.day");
+  if (first && first <= input.entryDate) causes.push("monthly.before_entry");
+  const lastSignal = signalDates.filter(Boolean).at(-1);
+  if (first && lastSignal && first <= lastSignal) causes.push("monthly.before_signal");
+  if (first && firstInterestDate >= first) causes.push("interest.not_before_monthly");
+  const monthlyCorrectionMonths = first
+    ? Math.max(0, ordinal(first) - ordinal(firstInterestDate) - 1)
+    : 0;
   const annuals = Array.from({ length: 5 }, (_, index) => {
     const dueDate = `${calculationDate.getUTCFullYear() + index}-12-15`;
     const amount = Number(input[`annual${index + 1}`]);
@@ -214,8 +234,13 @@ export function oracleLinear(input, today = input.entryDate) {
       0,
       ordinal(dueDate) - ordinal(today) - Number(15 < calculationDate.getUTCDate()),
     );
-    return { dueDate, corrected: valid && amount > 0 ? compound(amount, 0.005, months + 1) : 0 };
+    return {
+      dueDate,
+      nominal: valid ? amount : 0,
+      corrected: valid && amount > 0 ? compound(amount, 0.005, months + 1) : 0,
+    };
   });
+  const annualNominalTotal = sum(annuals.map((item) => item.nominal));
   const annualCorrectedTotal = sum(annuals.map((item) => item.corrected));
   const realSaleValue = Number(input.salePrice) - Number(input.bonus) - Number(input.discount);
   const validInitialTotal = Number(input.entry) + sum(signals.filter((_, index) => usable[index]));
@@ -223,14 +248,18 @@ export function oracleLinear(input, today = input.entryDate) {
     sum([input.financing, input.subsidy, input.fgts, input.housingCheck].map(Number)) +
     validInitialTotal;
   const proSoluto = Math.max(0, realSaleValue - deductions);
-  const installmentBalance = Math.max(0, proSoluto - annualCorrectedTotal);
-  if (proSoluto > 0 && annualCorrectedTotal >= proSoluto) causes.push("annual.exhausts_balance");
+  const installmentBalance = Math.max(0, proSoluto - annualNominalTotal);
+  if (proSoluto > 0 && annualNominalTotal >= proSoluto) causes.push("annual.exhausts_balance");
   const preInstallments = first
     ? Math.min(n, Math.max(0, ordinal(input.constructionEnd) - ordinal(first)))
     : 0;
   const postInstallments = n - preInstallments;
   const baseRate = preInstallments > 0 ? 0.005 : 0.015;
-  const correctedInstallmentBalance = compound(installmentBalance, baseRate, graceMonths + 1);
+  const correctedInstallmentBalance = compound(
+    installmentBalance,
+    baseRate,
+    monthlyCorrectionMonths,
+  );
   const weights = discountWeights(preInstallments, postInstallments);
   const correctedInstallment = correctedInstallmentBalance / sum(weights);
   const prePercentage = sum(weights.slice(0, preInstallments)) / sum(weights);
@@ -239,10 +268,13 @@ export function oracleLinear(input, today = input.entryDate) {
     causes,
     metrics: {
       firstInstallmentDate: first,
+      firstInterestDate,
+      monthlyCorrectionMonths,
       signalDates,
       graceMonths,
       validInitialTotal,
       annualCorrectedTotal,
+      annualNominalTotal,
       realSaleValue,
       deductions,
       proSoluto,
@@ -502,7 +534,7 @@ function outcome(causes, mismatches, comparisons) {
   };
 }
 
-export function checkLinearScenario(input, today = input.entryDate) {
+export function checkLinearScenario(input, today = input.calculationDate ?? input.entryDate) {
   const expected = oracleLinear(input, today);
   const actual = calculateAssociativeLinear(input, { today });
   const metrics = expected.metrics ? compareMetrics(actual, expected.metrics) : [];
@@ -516,22 +548,23 @@ export function checkLinearScenario(input, today = input.entryDate) {
 
 export function checkDecreasingScenario(input) {
   const actual = calculateAssociativeDecreasing(input);
-  const regular = Math.round(input.installments / 4);
-  const counts = [regular, regular, regular, Math.max(0, input.installments - regular * 3)];
-  let elapsedPre = 0;
-  let elapsedPost = 0;
+  const regular = Math.floor(input.installments / 4);
+  const counts = Array.from(
+    { length: 4 },
+    (_, index) => regular + Number(index < input.installments % 4),
+  );
+  const weights = discountWeights(input.preInstallments, input.postInstallments);
+  let elapsed = 0;
   const blocks = [0.4, 0.3, 0.2, 0.1].map((share, index) => {
-    const pre = Math.max(0, Math.min(counts[index], input.preInstallments - elapsedPre));
+    const pre = Math.max(0, Math.min(counts[index], input.preInstallments - elapsed));
     const post = counts[index] - pre;
-    const unitPresentValue = sum(discountWeights(pre, post));
+    // Discount at the original valuation date, including every preceding block.
+    const unitPresentValue = sum(weights.slice(elapsed, elapsed + counts[index]));
     const levelPayment =
       unitPresentValue > 0 ? (input.correctedBalance * share) / unitPresentValue : 0;
-    const accumulatedCorrection = compound(compound(1, 0.005, elapsedPre), 0.015, elapsedPost);
-    // The pinned four-block contract applies prior correction to pre only in block 2.
-    const prePayment = pre > 0 ? levelPayment * (index === 1 ? accumulatedCorrection : 1) : 0;
-    const postPayment = post > 0 ? levelPayment * accumulatedCorrection : 0;
-    elapsedPre += pre;
-    elapsedPost += post;
+    const prePayment = pre > 0 ? levelPayment : 0;
+    const postPayment = post > 0 ? levelPayment : 0;
+    elapsed += counts[index];
     return {
       count: counts[index],
       preInstallments: pre,
@@ -540,7 +573,7 @@ export function checkDecreasingScenario(input) {
       base: input.correctedBalance * share,
       uncorrectedInstallment:
         counts[index] > 0 ? (input.uncorrectedBalance * share) / counts[index] : 0,
-      correctedInstallment: Math.max(prePayment, postPayment),
+      correctedInstallment: levelPayment,
       prePayment,
       postPayment,
     };

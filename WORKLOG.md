@@ -1,5 +1,60 @@
 # Worklog
 
+## 2026-10-07 - Implementacao das formulas e data de termino da obra
+
+- Fonte confirmada: `estoque_spc.data_termino_obra` corresponde a `completionDate`
+  no proxy atual. Conferidos 2.243 pares identificador/data por checksum agregado,
+  sem exportar estoque. Associativo exige fonte viva; demais telas preservadas.
+- Mensais usam principal nominal, correcao inicial pelo calendario e VP pre/pos.
+  Decrescente corrige blocos 3/4 e restos; cronograma usa as mesmas quantidades.
+- Datas financeiras opcionais permitem conferir propostas historicas. Datas
+  invalidas bloqueiam o resultado. Indicador/sugestoes usam `correctedProSoluto`.
+- Adaptador TS reutiliza motor MJS; ajudas removem a deducao de anuais reajustadas.
+- Novos oraculos sinteticos independentes; verificacoes e limites completos em
+  `docs/audits/associativo-formulas-salesforce-2026-10-07.md`.
+- Validacao e publicacao em andamento; nenhum dado remoto ou workflow alterado.
+- Tipos/build aprovados, lint sem erros. Suite geral Windows: 2.168 aprovados,
+  seis ignorados e seis falhas POSIX conhecidas; CI Linux exigida. Mais 243
+  testes focados e 15 node:test aprovados; QA browser ampliado, pendente CI.
+- CI `37577305243`: validate integral Linux, E2E, banco e restore aprovados.
+  A continuidade parou em seletor ambiguo entre summary e ajuda; seletor foi
+  delimitado ao expansor, assim como o botao de parcelas ao dialogo financeiro.
+  Nenhuma assercao removida; repeticao integral obrigatoria antes da publicacao.
+- Revisao independente detectou dois casos de datas historicas: entrada presa
+  ao dia atual e busca sem opcao de aumentar somente a entrada. Data do calculo
+  e da entrada agora sao independentes; sugestoes usam o calendario canonico
+  para limitar novos sinais antes da mensal, sem apagar pagamentos existentes.
+- Mais 25 regressoes de sugestoes e 13 de calendario; 416 testes de integracao
+  e motores, 105 de sugestoes/aprovacao e 76 de paridade sintetica aprovados.
+- CI `37581613136`: 2.224 testes Linux e 15 Node aprovados; banco, E2E e restore
+  verdes. QA historico exigiu corrigir escopo relativo do seletor da entrada.
+  Falha anterior e seletor corrigido reproduzidos em Chromium local sintetico.
+- CI `37584281089`: as 12 etapas de continuidade passaram em 375 e 1440px.
+  O erro de rede 503 injetado pelo teste foi contado como inesperado pelo
+  harness externo. Classificacao agora exige mensagem/URL exatas, uma unica
+  resposta sintetica e continuidade aprovada; outros erros nao sao excluidos.
+- CI `37587316857`: continuidade e 40 navegacoes aprovadas. Outra verificacao
+  antiga tentava iniciar proposta pelo snapshot antes do estoque vivo; ajustada
+  ao contrato atual e com espera da resposta pendente no cleanup. Restore teve
+  colisao de porta no runner, sem mutacao de producao. Nova CI integral exigida.
+
+## 2026-10-07 - Auditoria das formulas Salesforce
+
+- Investigacao sem alterar motores ou dados remotos. Inventariadas 1.120
+  oportunidades em 24 empreendimentos; isso nao significa recalculo integral.
+- Reconstrucao confrontada com 20 mensais lineares e 52 valores decrescentes;
+  maior diferenca de bloco R$ 0,01. Datas individuais explicaram divergencias
+  que nao eram resolvidas pela data geral do empreendimento.
+- Documenta valor presente, carencia, particao equilibrada e capitalizacao
+  de todos os blocos. Registra discrepancia entre periodos usados nos valores
+  e segmentos visuais da fonte, sem escolher silenciosamente um total.
+- Validacao matematica independente: 130.662 casos sinteticos, sem dados
+  de clientes. Fonte e limites no audit de formulas Salesforce de 07/10/2026.
+- Gates locais: lint (um aviso local), tipos e build aprovados. Testes:
+  2.008 aprovados, seis falhos e seis ignorados; falhas POSIX/caminhos no
+  Windows registradas no audit. Etapa node:test encadeada nao executada.
+- Nenhuma proposta, workflow, politica ou aplicacao publicada nesta etapa.
+
 ## 2026-10-07 - Preferências de cookies sem sobreposição permanente
 
 - O ensaio no navegador confirmou que a gravação existente fechava o painel,
