@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-07 - Associativo publicado e conferido
+
+- Publica a correcao da data de termino da obra e dos calculos Linear/Decrescente
+  na imagem imutavel `4d73412`, apos aprovacao integral dos gates.
+- Registra backup, verificacao autenticada do exemplo e evidencias financeiras,
+  mantendo os limites da amostra e sem alterar politicas ou propostas remotas.
+
 ## 2026-10-07 - Calculo Associativo pela data oficial da unidade
 
 - Usa a Data de termino da obra do estoque vivo para separar pre e pos-obra,

@@ -4,6 +4,23 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: Associativo publicado com data oficial e formulas conferidas
+
+- Status: validado e publicado. Fonte: PR #165, CI main `37594420463`, prova da
+  imagem imutavel `4d73412` e conferencia autenticada em producao.
+- Todos os gates aprovados: 2.235 testes Vitest, 15 Node, banco, restore e QA
+  autenticado com 242 comparacoes visuais, sem alterar baselines. Nove skips
+  de plataforma/fixtures existentes; falhas Windows nao foram mascaradas.
+- Backup, CAS, rollback preparado, health e negacao anonima verificados. Sem
+  mutacao comercial, migration, proxy ou n8n. Evidencias tecnicas no audit
+  `docs/audits/associativo-formulas-salesforce-2026-10-07.md`.
+- Comparar propostas historicas exige o mesmo primeiro juro e primeira mensal,
+  alem do termino da obra individual. Edicoes no calendario nativo precisam
+  efetivamente disparar a mudanca da interface antes de ler o novo resultado.
+- A nova versao encerra as pendencias de release do registro candidato abaixo.
+  Amostra de paridade continua limitada a 20 lineares e 52 valores decrescentes;
+  maior diferenca R$ 0,01, nao prova universal nem acesso ao codigo Salesforce.
+
 ## 2026-10-07: data oficial e formulas implementadas no candidato
 
 - Status: pendente_validacao integral e publicacao.
