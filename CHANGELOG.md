@@ -17,6 +17,7 @@
   incluindo datas da unidade, carencia, particao e capitalizacao dos blocos.
 - Diferencia inventario de oportunidades, comparacoes reais e prova sintetica.
 - Sem mudanca de runtime, dados, politicas ou implementacao financeira.
+
 ## 2026-10-07 - Preferências de cookies contextuais
 
 - Remove o atalho flutuante permanente de cookies depois da primeira escolha.

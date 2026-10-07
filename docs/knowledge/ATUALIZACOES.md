@@ -46,6 +46,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   seis falhas POSIX/caminhos em Windows, detalhadas no audit. Sem publicacao.
 - Pendentes: ultimo dia do mes e outras fronteiras nao observadas, ordem
   interna exata dos centavos, implementacao e validacao integral do produto.
+
 ## 2026-10-07: preferências de cookies contextuais e falhas observáveis
 
 - Status: validado localmente; fonte: `CookieConsentBanner`, menu da conta,

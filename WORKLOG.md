@@ -33,6 +33,7 @@
   2.008 aprovados, seis falhos e seis ignorados; falhas POSIX/caminhos no
   Windows registradas no audit. Etapa node:test encadeada nao executada.
 - Nenhuma proposta, workflow, politica ou aplicacao publicada nesta etapa.
+
 ## 2026-10-07 - Preferências de cookies sem sobreposição permanente
 
 - O ensaio no navegador confirmou que a gravação existente fechava o painel,
