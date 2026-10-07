@@ -70,10 +70,12 @@ import {
 } from "@/lib/crm/salesforce/config";
 import { applySecurityHeaders } from "@/lib/security/headers";
 import { isHomologationMode } from "@/lib/homologation/config";
-import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+import {
+  getProtectedPageGate,
+  pageGateAllowsRole,
+  type ProtectedPageGate,
+} from "@/lib/authorization/page-gates";
 import { NextResponse, type NextRequest } from "next/server";
-import type { PermissionKey } from "@/lib/authorization/permissions";
-import type { RoleKey } from "@/lib/authorization/roles";
 
 interface AuthorizationContextRow {
   permissions?: unknown;
@@ -84,12 +86,14 @@ interface AuthorizationContextRow {
 // forbidden() interrupt changes the status. Enforce the exact page permission
 // for the versioned route inventory in Proxy as well. Page guards, APIs and RLS
 // remain authoritative and still re-check the same key.
-function permissionRequiredBeforeStreaming(pathname: string): {
-  permission: PermissionKey;
-  releaseEnabled: boolean;
+type EarlyPermissionGate = Pick<
+  ProtectedPageGate,
+  "permission" | "releaseEnabled" | "allowedRoles"
+> & {
   requireAuthenticated?: boolean;
-  requiredRole?: RoleKey;
-} | null {
+};
+
+function permissionRequiredBeforeStreaming(pathname: string): EarlyPermissionGate | null {
   const pageGate = getProtectedPageGate(pathname);
   if (pageGate) return pageGate;
 
@@ -121,12 +125,7 @@ function forbiddenBeforeStreaming(request: NextRequest, sessionResponse: NextRes
 
 async function lacksEarlyPermission(
   supabase: Awaited<ReturnType<typeof updateSession>>["supabase"],
-  pageGate: {
-    permission: PermissionKey;
-    releaseEnabled: boolean;
-    requireAuthenticated?: boolean;
-    requiredRole?: RoleKey;
-  },
+  pageGate: EarlyPermissionGate,
 ) {
   const {
     data: { user },
@@ -149,7 +148,7 @@ async function lacksEarlyPermission(
   return (
     !Array.isArray(permissions) ||
     !permissions.includes(pageGate.permission) ||
-    (pageGate.requiredRole !== undefined && context.role_key !== pageGate.requiredRole)
+    !pageGateAllowsRole(pageGate, context.role_key)
   );
 }
 

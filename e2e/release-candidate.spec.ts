@@ -331,6 +331,7 @@ const partnershipRoles = new Set<Role>([
   "manager_imob",
   "broker_imob",
 ]);
+const repasseRoles = new Set<Role>(["master", "admin"]);
 const masterOnlyRoles = new Set<Role>(["master"]);
 const protectedSurfaces = [
   {
@@ -340,8 +341,8 @@ const protectedSurfaces = [
   },
   {
     path: "/app/repasse",
-    heading: "Consulta de repasse",
-    allowed: masterOnlyRoles,
+    heading: "Consulta de repasses",
+    allowed: repasseRoles,
   },
   {
     path: "/app/etapas/oportunidades",
@@ -496,6 +497,7 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     ...operationalRoutes,
     "/app/ranking",
     "/app/canal-de-parcerias",
+    "/app/repasse",
     ...settingsRoutes,
     ...administrationRoutes,
   ]),
@@ -520,6 +522,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     ...operationalRoutes,
     "/app/ranking",
     "/app/canal-de-parcerias",
+    "/app/repasse",
     ...settingsRoutes,
   ]),
   coordinator: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
@@ -694,12 +697,12 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      role === "master" ? 22 : role === "admin" ? 14 : activeOperationalRoles.has(role) ? 7 : 0,
+      role === "master" ? 22 : role === "admin" ? 15 : activeOperationalRoles.has(role) ? 7 : 0,
     );
     expect(expectedAccountAdminRoutesByRole[role], role).toHaveLength(adminRoles.has(role) ? 3 : 0);
   }
   expect(protectedSurfaces.find((surface) => surface.path === "/app/repasse")?.allowed).toBe(
-    masterOnlyRoles,
+    repasseRoles,
   );
   expect(
     protectedSurfaces.find((surface) => surface.path === "/app/simulacao/caixa")?.allowed,

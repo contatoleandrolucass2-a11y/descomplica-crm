@@ -47,6 +47,16 @@ async function settleResponsiveLayout(page) {
   });
 }
 
+async function openFidLookup(page) {
+  const lookupTab = page.getByRole("tab", { name: "Consulta por FID", exact: true });
+  await lookupTab.click();
+  const fid = page.getByRole("textbox", { name: "Número do FID", exact: true });
+  const submit = page.getByRole("button", { name: "Consultar repasse", exact: true });
+  await expect(fid).toBeVisible();
+  await expect(submit).toBeVisible();
+  return { fid, submit };
+}
+
 export async function checkRepasse(page, origin, outputDirectory) {
   await mkdir(outputDirectory, { recursive: true });
   const route = "/app/repasse";
@@ -61,28 +71,109 @@ export async function checkRepasse(page, origin, outputDirectory) {
     await page.goto(`${origin}${route}`);
     await expect(page).toHaveURL(`${origin}${route}`);
     await expect(
-      page.getByRole("heading", { name: "Consulta de repasse", exact: true }),
+      page.getByRole("heading", { name: "Consulta de repasses", exact: true }),
     ).toBeVisible();
     await expect(page.getByText("M.A.P DE CAMPOS SOLUÇÕES", { exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Resultado da consulta" })).toHaveCount(0);
 
-    const fid = page.getByRole("textbox", { name: "Número do FID", exact: true });
-    const submit = page.getByRole("button", { name: "Consultar repasse", exact: true });
-    checkpoint("constraint-validation");
-    await fid.fill("ABC");
-    assert.equal(await fid.evaluate((input) => input.checkValidity()), false);
-    await fid.fill("");
-    assert.equal(await fid.evaluate((input) => input.checkValidity()), false);
+    const overviewTab = page.getByRole("tab", { name: "Visão geral", exact: true });
+    const lookupTab = page.getByRole("tab", { name: "Consulta por FID", exact: true });
+    await expect(overviewTab).toBeVisible();
+    await expect(lookupTab).toBeVisible();
+    await expect(overviewTab).toHaveAttribute("aria-selected", "true");
+    await expect(lookupTab).toHaveAttribute("aria-selected", "false");
 
-    checkpoint("ready-local-fixture");
-    await fid.fill("900000000001");
-    await submit.click();
-    await expect(page.getByRole("heading", { name: "Resultado da consulta" })).toBeVisible();
-    await expect(page.getByText("Residencial Sintético", { exact: true })).toBeVisible();
-    await expect(page.getByText("Cliente Sintético", { exact: true })).toBeVisible();
-    await expect(page.getByText(/Data da última atualização:/u)).toBeVisible();
-    await expect(page.getByRole("link", { name: "Nova consulta", exact: true })).toBeVisible();
+    checkpoint("overview-local-fixture");
+    for (const heading of ["Repassado", "Pendência", "Mais de 20 dias", "Distrato / desistência"]) {
+      await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+    }
+    const boardCards = page.locator(
+      'button[aria-label*="Cliente Sintético"][aria-label*="FID 9000000000"]',
+    );
+    await expect(boardCards).toHaveCount(8);
 
+    const search = page.getByRole("textbox", { name: "Buscar cliente ou FID", exact: true });
+    const projectFilter = page.getByRole("combobox", {
+      name: "Filtrar por empreendimento",
+      exact: true,
+    });
+    const statusFilter = page.getByRole("combobox", {
+      name: "Filtrar por status",
+      exact: true,
+    });
+    await expect(search).toBeVisible();
+    await expect(projectFilter).toBeVisible();
+    await expect(statusFilter).toBeVisible();
+
+    checkpoint("overview-filters");
+    await search.fill("900000000010");
+    await expect(boardCards).toHaveCount(1);
+    await expect(
+      page.locator('button[aria-label*="Cliente Sintético 08"][aria-label*="FID 900000000010"]'),
+    ).toBeVisible();
+    await search.fill("");
+    await expect(boardCards).toHaveCount(8);
+    await search.fill("Cliente Sintético 03");
+    await expect(boardCards).toHaveCount(1);
+    await expect(
+      page.locator('button[aria-label*="Cliente Sintético 03"][aria-label*="FID 900000000005"]'),
+    ).toBeVisible();
+    await search.fill("");
+    await expect(boardCards).toHaveCount(8);
+
+    await projectFilter.selectOption({ label: "Residencial Sintético" });
+    await expect(boardCards).toHaveCount(4);
+    await projectFilter.selectOption({ index: 0 });
+    await expect(boardCards).toHaveCount(8);
+
+    for (const status of ["Repassado", "Pendência", "Mais de 20 dias", "Distrato / desistência"]) {
+      await statusFilter.selectOption({ label: status });
+      await expect(boardCards).toHaveCount(2);
+    }
+    await statusFilter.selectOption({ index: 0 });
+    await expect(boardCards).toHaveCount(8);
+
+    checkpoint("overview-detail");
+    const firstCard = page.locator(
+      'button[aria-label*="Cliente Sintético 01"][aria-label*="FID 900000000001"]',
+    );
+    await firstCard.click();
+    const detailDialog = page.getByRole("dialog", {
+      name: "Detalhes do repasse",
+      exact: true,
+    });
+    await expect(detailDialog).toBeVisible();
+    await expect(detailDialog).toContainText("900000000001");
+    await expect(detailDialog).toContainText("Repasse concluído em ambiente local de QA.");
+    const closeDetail = detailDialog.getByRole("button", {
+      name: "Fechar detalhes",
+      exact: true,
+    });
+    await expect(closeDetail).toBeFocused();
+    await closeDetail.click();
+    await expect(detailDialog).toBeHidden();
+    await expect(firstCard).toBeFocused();
+
+    checkpoint("overview-keyboard");
+    await firstCard.focus();
+    await page.keyboard.press("Enter");
+    await expect(detailDialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(detailDialog).toBeHidden();
+    await expect(firstCard).toBeFocused();
+
+    await overviewTab.focus();
+    await page.keyboard.press("Tab");
+    await expect(lookupTab).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("textbox", { name: "Número do FID", exact: true })).toBeVisible();
+    await expect(lookupTab).toHaveAttribute("aria-selected", "true");
+    await overviewTab.focus();
+    await page.keyboard.press("Enter");
+    await expect(boardCards).toHaveCount(8);
+    await expect(overviewTab).toHaveAttribute("aria-selected", "true");
+
+    checkpoint("overview-visual-matrix");
     for (const viewport of [
       { width: 375, height: 812 },
       { width: 768, height: 1024 },
@@ -158,14 +249,32 @@ export async function checkRepasse(page, origin, outputDirectory) {
       }
     }
 
+    checkpoint("constraint-validation");
+    let { fid, submit } = await openFidLookup(page);
+    await fid.fill("ABC");
+    assert.equal(await fid.evaluate((input) => input.checkValidity()), false);
+    await fid.fill("");
+    assert.equal(await fid.evaluate((input) => input.checkValidity()), false);
+
+    checkpoint("ready-local-fixture");
+    await fid.fill("900000000001");
+    await submit.click();
+    await expect(page.getByRole("heading", { name: "Resultado da consulta" })).toBeVisible();
+    await expect(page.getByText("Residencial Sintético", { exact: true })).toBeVisible();
+    await expect(page.getByText("Cliente Sintético", { exact: true })).toBeVisible();
+    await expect(page.getByText(/Data da última atualização:/u)).toBeVisible();
+    await expect(page.getByRole("link", { name: "Nova consulta", exact: true })).toBeVisible();
+
     checkpoint("not-found-local-fixture");
     await page.goto(`${origin}${route}`);
+    ({ fid, submit } = await openFidLookup(page));
     await fid.fill("0");
     await submit.click();
     await expect(page.getByRole("heading", { name: "Nenhum repasse localizado" })).toBeVisible();
 
     checkpoint("conflict-local-fixture");
     await page.goto(`${origin}${route}`);
+    ({ fid, submit } = await openFidLookup(page));
     await fid.fill("900000000002");
     await submit.click();
     await expect(
@@ -174,6 +283,7 @@ export async function checkRepasse(page, origin, outputDirectory) {
 
     checkpoint("unavailable-local-fixture");
     await page.goto(`${origin}${route}`);
+    ({ fid, submit } = await openFidLookup(page));
     await fid.fill("900000000003");
     await submit.click();
     await expect(
@@ -182,13 +292,19 @@ export async function checkRepasse(page, origin, outputDirectory) {
 
     checkpoint("keyboard");
     await page.goto(`${origin}${route}`);
+    ({ fid, submit } = await openFidLookup(page));
     await fid.focus();
     await page.keyboard.press("Tab");
     await expect(submit).toBeFocused();
 
     return {
       route,
-      sourceRead: "local loopback-only synthetic adapter; no external source request",
+      sourceRead:
+        "local loopback-only synthetic overview and detail adapter; no external source request",
+      overview: true,
+      filters: true,
+      detail: true,
+      tabs: true,
       constraintValidation: true,
       ready: true,
       notFound: true,

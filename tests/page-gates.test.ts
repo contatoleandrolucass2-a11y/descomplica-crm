@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
+import {
+  getProtectedPageGate,
+  pageGateAllowsRole,
+  PROTECTED_PAGE_GATES,
+} from "@/lib/authorization/page-gates";
 
 describe("protected commercial page set", () => {
   it("matches the exact approved twenty-five-page protected set", () => {
@@ -54,12 +58,24 @@ describe("protected commercial page set", () => {
     expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(25);
   });
 
-  it("keeps Repasse explicitly Master-only in addition to its permission", () => {
-    expect(PROTECTED_PAGE_GATES.find(({ path }) => path === "/app/repasse")).toMatchObject({
+  it("keeps Repasse restricted to Master and Admin in addition to its permission", () => {
+    const repasseGate = getProtectedPageGate("/app/repasse");
+    expect(repasseGate).toMatchObject({
       permission: "crm.partnerships.view",
       releaseEnabled: true,
-      requiredRole: "master",
+      allowedRoles: ["master", "admin"],
     });
+    if (!repasseGate) throw new Error("Repasse gate is missing.");
+
+    expect(pageGateAllowsRole(repasseGate, "master")).toBe(true);
+    expect(pageGateAllowsRole(repasseGate, "admin")).toBe(true);
+    expect(pageGateAllowsRole(repasseGate, "coordinator")).toBe(false);
+    expect(pageGateAllowsRole(repasseGate, "manager_imob")).toBe(false);
+    expect(pageGateAllowsRole(repasseGate, "broker_imob")).toBe(false);
+
+    const dashboardGate = getProtectedPageGate("/app");
+    if (!dashboardGate) throw new Error("Dashboard gate is missing.");
+    expect(pageGateAllowsRole(dashboardGate, "pending")).toBe(true);
   });
 
   it("gates every supplemental simulator with the simulator permission and release state", () => {

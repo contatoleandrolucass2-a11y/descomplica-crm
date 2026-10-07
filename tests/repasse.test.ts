@@ -2,7 +2,11 @@ import { readFileSync } from "node:fs";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { lookupRepasseByFid, RepasseSourceError } from "@/lib/crm/repasse/data";
+import {
+  listRepasseOverview,
+  lookupRepasseByFid,
+  RepasseSourceError,
+} from "@/lib/crm/repasse/data";
 
 const expectedHeaders = ["FID", "EMPREENDIMENTO", "ETAPA", "STATUS", "NOME CLIENTE", "MOTIVO"];
 
@@ -20,6 +24,7 @@ function csvResponse(rows: Array<Array<string | number>>, init?: ResponseInit) {
 function configureSource(options?: {
   fidRows?: Array<Array<string | number>>;
   recordRows?: Array<Array<string | number>>;
+  boardRows?: Array<Array<string | number>>;
   verificationFidRows?: Array<Array<string | number>>;
   headers?: string[];
   responseBody?: string;
@@ -73,6 +78,9 @@ function configureSource(options?: {
           : (options?.fidRows ?? []);
       return Promise.resolve(csvResponse(rows));
     }
+    if (range === "A3:E") {
+      return Promise.resolve(csvResponse(options?.boardRows ?? []));
+    }
     expect(range).toMatch(/^A\d+:F\d+$/u);
     return Promise.resolve(csvResponse(options?.recordRows ?? []));
   });
@@ -86,6 +94,71 @@ afterEach(() => {
 });
 
 describe("consulta protegida de repasse", () => {
+  it("lista o quadro sem carregar motivos e mantém categorias explícitas", async () => {
+    const fetchMock = configureSource({
+      boardRows: [
+        [123456, "Residencial A", "Assinatura", "REPASSADO ", "Cliente Sintético 1"],
+        [123457, "Residencial A", "Pasta", "AGUARDANDO REPASSE", "Cliente Sintético 2"],
+        [123458, "Residencial B", "Contrato", "26 dias sem repasse", "Cliente Sintético 3"],
+        [123459, "Residencial B", "Contrato", "DESISITENCIA", "Cliente Sintético 4"],
+      ],
+    });
+
+    await expect(listRepasseOverview()).resolves.toEqual({
+      lastUpdated: "06/10/2026",
+      records: [
+        {
+          sourceRow: 3,
+          fid: "123456",
+          empreendimento: "Residencial A",
+          etapa: "Assinatura",
+          status: "REPASSADO",
+          nomeCliente: "Cliente Sintético 1",
+          column: "repassado",
+        },
+        {
+          sourceRow: 4,
+          fid: "123457",
+          empreendimento: "Residencial A",
+          etapa: "Pasta",
+          status: "AGUARDANDO REPASSE",
+          nomeCliente: "Cliente Sintético 2",
+          column: "pendencia",
+        },
+        {
+          sourceRow: 5,
+          fid: "123458",
+          empreendimento: "Residencial B",
+          etapa: "Contrato",
+          status: "26 dias sem repasse",
+          nomeCliente: "Cliente Sintético 3",
+          column: "mais_de_20_dias",
+        },
+        {
+          sourceRow: 6,
+          fid: "123459",
+          empreendimento: "Residencial B",
+          etapa: "Contrato",
+          status: "DESISITENCIA",
+          nomeCliente: "Cliente Sintético 4",
+          column: "distrato",
+        },
+      ],
+    });
+    expect(
+      fetchMock.mock.calls.map(([input]) => new URL(String(input)).searchParams.get("range")),
+    ).toEqual(["A1:F2", "A3:E"]);
+    expect(fetchMock.mock.calls.some(([input]) => String(input).includes("A3:F"))).toBe(false);
+  });
+
+  it("mantém quadro vazio distinto de fonte indisponível", async () => {
+    configureSource({ boardRows: [] });
+    await expect(listRepasseOverview()).resolves.toEqual({
+      lastUpdated: "06/10/2026",
+      records: [],
+    });
+  });
+
   it("consulta somente a linha do FID exato e projeta CSV formatado", async () => {
     const fetchMock = configureSource({
       fidRows: [[123456]],
@@ -213,6 +286,10 @@ describe("consulta protegida de repasse", () => {
       new URL("../app/(protected)/app/repasse/RepasseLookup.tsx", import.meta.url),
       "utf8",
     );
+    const workspace = readFileSync(
+      new URL("../app/(protected)/app/repasse/RepasseWorkspace.tsx", import.meta.url),
+      "utf8",
+    );
     const action = readFileSync(
       new URL("../app/(protected)/app/repasse/actions.ts", import.meta.url),
       "utf8",
@@ -221,17 +298,25 @@ describe("consulta protegida de repasse", () => {
 
     expect(page).toContain('const context = await enforcePermission("crm.partnerships.view")');
     expect(page).toContain('getProtectedPageGate("/app/repasse")');
-    expect(page).toContain('context.roleKey !== "master"');
+    expect(page).toContain("pageGateAllowsRole(gate, context.roleKey)");
+    expect(page).toContain("await listRepasseOverview()");
     expect(action).toContain('const context = await requirePermission("crm.partnerships.view")');
     expect(action).toContain("gate?.releaseEnabled !== true");
-    expect(action).toContain('gate.requiredRole !== "master"');
-    expect(action).toContain("context.roleKey !== gate.requiredRole");
+    expect(action).toContain('gate.allowedRoles.includes("master")');
+    expect(action).toContain('gate.allowedRoles.includes("admin")');
+    expect(action).toContain("pageGateAllowsRole(gate, context.roleKey)");
     expect(source).toContain('GOOGLE_SHEETS_PUBLIC_ORIGIN = "https://docs.google.com"');
     expect(source).toContain('url.searchParams.set("headers", "0")');
     expect(source).not.toContain("REPASSE_GOOGLE_");
     expect(component).toContain("M.A.P DE CAMPOS SOLUÇÕES");
     expect(component).toContain('aria-live="polite"');
     expect(component).toContain("aria-invalid={invalid}");
+    expect(workspace).toContain("Consulta de repasses");
+    expect(workspace).toContain("Buscar cliente ou FID");
+    expect(workspace).toContain("Filtrar por empreendimento");
+    expect(workspace).toContain("Filtrar por status");
+    expect(workspace).toContain('aria-label="Detalhes do repasse"');
+    expect(workspace).toContain("getRepasseDetailAction(fid)");
     const qa = readFileSync(new URL("../scripts/qa/repasse.mjs", import.meta.url), "utf8");
     for (const viewport of [
       "375, height: 812",

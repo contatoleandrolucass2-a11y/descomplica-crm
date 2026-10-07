@@ -18,8 +18,10 @@ vi.mock("@/lib/authorization/page-gates", () => ({
     path: "/app/repasse",
     permission: "crm.partnerships.view",
     releaseEnabled: mocks.releaseEnabled,
-    requiredRole: "master",
+    allowedRoles: ["master", "admin"],
   }),
+  pageGateAllowsRole: (gate: { allowedRoles?: string[] }, roleKey: string) =>
+    gate.allowedRoles?.includes(roleKey) ?? true,
 }));
 vi.mock("next/navigation", () => ({
   forbidden: () => {
@@ -27,7 +29,7 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
-import { lookupRepasseAction } from "@/app/(protected)/app/repasse/actions";
+import { getRepasseDetailAction, lookupRepasseAction } from "@/app/(protected)/app/repasse/actions";
 
 function form(fid: string) {
   const data = new FormData();
@@ -64,7 +66,7 @@ describe("Server Action da consulta de repasse", () => {
     expect(mocks.lookupRepasseByFid).not.toHaveBeenCalled();
   });
 
-  it("nega perfil nao Master mesmo quando Parcerias esta permitida", async () => {
+  it("nega perfil fora da allowlist mesmo quando Parcerias esta permitida", async () => {
     mocks.requirePermission.mockResolvedValue({
       userId: "10000000-0000-4000-8000-000000000002",
       roleKey: "coordinator",
@@ -75,6 +77,31 @@ describe("Server Action da consulta de repasse", () => {
     );
     expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
     expect(mocks.lookupRepasseByFid).not.toHaveBeenCalled();
+  });
+
+  it("autoriza Administrador na consulta e no detalhe", async () => {
+    mocks.requirePermission.mockResolvedValue({
+      userId: "10000000-0000-4000-8000-000000000003",
+      roleKey: "admin",
+    });
+    mocks.lookupRepasseByFid.mockResolvedValue({
+      status: "ready",
+      lastUpdated: "06/10/2026",
+      record: {
+        empreendimento: "Residencial Sintético",
+        etapa: "Assinatura",
+        status: "Repassado",
+        nomeCliente: "Cliente Sintético",
+        motivo: "Concluído.",
+      },
+    });
+
+    await expect(getRepasseDetailAction("123456")).resolves.toMatchObject({
+      status: "ready",
+      fid: "123456",
+    });
+    expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
+    expect(mocks.lookupRepasseByFid).toHaveBeenCalledWith("123456");
   });
 
   it("retorna somente o DTO validado do FID exato", async () => {

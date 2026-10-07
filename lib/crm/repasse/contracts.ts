@@ -6,6 +6,23 @@ export interface RepasseRecord {
   motivo: string | null;
 }
 
+export type RepasseBoardColumn = "repassado" | "pendencia" | "mais_de_20_dias" | "distrato";
+
+export interface RepasseBoardRecord extends Omit<RepasseRecord, "motivo"> {
+  sourceRow: number;
+  fid: string | null;
+  column: RepasseBoardColumn;
+}
+
+export interface RepasseOverview {
+  lastUpdated: string | null;
+  records: RepasseBoardRecord[];
+}
+
+export type RepasseOverviewState =
+  | { status: "ready"; overview: RepasseOverview }
+  | { status: "unavailable"; message: string };
+
 export type RepasseLookupState =
   | { status: "idle" }
   | { status: "validation_error"; message: string }

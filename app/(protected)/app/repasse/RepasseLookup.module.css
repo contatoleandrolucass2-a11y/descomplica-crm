@@ -12,6 +12,21 @@
     var(--analytics-page);
 }
 
+.embedded {
+  min-width: 0;
+  color: var(--analytics-ink);
+}
+
+.embedded .lookupPanel,
+.embedded .resultPanel,
+.embedded .statePanel {
+  width: 100%;
+}
+
+.embedded .lookupPanel {
+  overflow: hidden;
+}
+
 .lookupPanel,
 .resultPanel,
 .statePanel {
