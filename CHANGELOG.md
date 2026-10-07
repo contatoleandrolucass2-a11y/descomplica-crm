@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-07 - Diagnostico das formulas do Associativo
+
+- Documenta a reconstrucao linear e decrescente confrontada com Salesforce,
+  incluindo datas da unidade, carencia, particao e capitalizacao dos blocos.
+- Diferencia inventario de oportunidades, comparacoes reais e prova sintetica.
+- Sem mudanca de runtime, dados, politicas ou implementacao financeira.
+
 ## 2026-10-06 - Associativo publicado
 
 - Publica o saldo com anuais, as ajudas simplificadas, a retirada dos rotulos

@@ -4,6 +4,28 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: formulas do Associativo confrontadas com Salesforce
+
+- Status: validado na amostra; implementacao e paridade global pendentes.
+- Fonte: `docs/audits/associativo-formulas-salesforce-2026-10-07.md`, leitura
+  autenticada autorizada do relatorio de vendas e propostas relacionadas.
+- Inventario: 1.120 oportunidades em 24 empreendimentos, nao 1.120 calculos
+  recalculados. Comparacao: 20 lineares exatos; 52 valores decrescentes de
+  13 propostas, com maior diferenca de R$ 0,01, dentro da margem de R$ 0,05.
+- Data financeira da unidade pode diferir da data geral; o mes da entrega
+  ja entra no pos-obra. Preservar datas da memoria historica, sem misturar
+  resultado salvo com calendario atual da unidade.
+- Particao decrescente equilibrada distribui o resto nos primeiros blocos;
+  capitalizacao acumulada vale tambem para blocos 3/4 inteiramente pre.
+  A segmentacao visual Salesforce divergiu dos periodos de calculo em dois
+  prazos. Reconciliar quantidades e totais antes da implementacao.
+- 130.662 casos sinteticos independentes comprovaram fechamento por VP, nao
+  paridade Salesforce. Sem persistir clientes/propostas ou alterar motores.
+- Lint, tipos e build aprovados; suite geral com 2.008 testes aprovados e
+  seis falhas POSIX/caminhos em Windows, detalhadas no audit. Sem publicacao.
+- Pendentes: ultimo dia do mes e outras fronteiras nao observadas, ordem
+  interna exata dos centavos, implementacao e validacao integral do produto.
+
 ## 2026-10-06: saldo do Associativo publicado com bases financeiras preservadas
 
 - Status: validado e publicado; fonte: PR #156, CI `37511669464`/`37515245924`

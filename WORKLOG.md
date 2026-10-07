@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-07 - Auditoria das formulas Salesforce
+
+- Investigacao sem alterar motores ou dados remotos. Inventariadas 1.120
+  oportunidades em 24 empreendimentos; isso nao significa recalculo integral.
+- Reconstrucao confrontada com 20 mensais lineares e 52 valores decrescentes;
+  maior diferenca de bloco R$ 0,01. Datas individuais explicaram divergencias
+  que nao eram resolvidas pela data geral do empreendimento.
+- Documenta valor presente, carencia, particao equilibrada e capitalizacao
+  de todos os blocos. Registra discrepancia entre periodos usados nos valores
+  e segmentos visuais da fonte, sem escolher silenciosamente um total.
+- Validacao matematica independente: 130.662 casos sinteticos, sem dados
+  de clientes. Fonte e limites no audit de formulas Salesforce de 07/10/2026.
+- Gates locais: lint (um aviso local), tipos e build aprovados. Testes:
+  2.008 aprovados, seis falhos e seis ignorados; falhas POSIX/caminhos no
+  Windows registradas no audit. Etapa node:test encadeada nao executada.
+- Nenhuma proposta, workflow, politica ou aplicacao publicada nesta etapa.
+
 ## 2026-10-06 - Publicacao do saldo e ajudas do Associativo
 
 - PR #156 publicado no runtime `a89a93c07127b2ff1c5cdd4730a709fb1f973424`.
