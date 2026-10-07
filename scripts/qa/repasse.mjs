@@ -84,15 +84,23 @@ export async function checkRepasse(page, origin, outputDirectory) {
     await expect(lookupTab).toHaveAttribute("aria-selected", "false");
 
     checkpoint("overview-local-fixture");
-    for (const heading of ["Repassado", "Pendência", "Mais de 20 dias", "Distrato / desistência"]) {
+    for (const [heading, stage] of [
+      ["Repassado", "repassado"],
+      ["Pendência", "pendencia"],
+      ["Mais de 20 dias", "mais-de-20-dias"],
+      ["Distrato / desistência", "distrato"],
+    ]) {
+      checkpoint(`overview-heading-${stage}`);
       await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
     }
+    checkpoint("overview-card-count");
     const boardCards = page.locator(
       'button[aria-label*="Cliente Sintético"][aria-label*="FID 9000000000"]',
     );
     await expect(boardCards).toHaveCount(8);
 
-    const search = page.getByRole("textbox", { name: "Buscar cliente ou FID", exact: true });
+    checkpoint("overview-filter-controls");
+    const search = page.getByRole("searchbox", { name: "Buscar cliente ou FID", exact: true });
     const projectFilter = page.getByRole("combobox", {
       name: "Filtrar por empreendimento",
       exact: true,
