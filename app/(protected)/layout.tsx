@@ -18,9 +18,10 @@
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { Cookie, LogOut, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { CookiePreferencesTrigger } from "@/app/_components/CookiePreferencesTrigger";
 import { enforceAuthorization } from "@/lib/authorization/enforce";
 import { logoutAction } from "@/lib/auth/actions/logout";
 import { getCurrentUser } from "@/lib/authorization/guards";
@@ -101,6 +102,16 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
                   <small>Senha, MFA e sessões</small>
                 </span>
               </Link>
+
+              <CookiePreferencesTrigger
+                className={`${styles.accountLink} ${styles.accountPreference}`}
+              >
+                <Cookie aria-hidden="true" size={18} />
+                <span>
+                  <strong>Cookies</strong>
+                  <small>Gerenciar preferências</small>
+                </span>
+              </CookiePreferencesTrigger>
 
               {adminPages.length > 0 ? (
                 <nav className={styles.accountSection} aria-label="Administração">

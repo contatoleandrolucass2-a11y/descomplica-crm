@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-10-07 - Preferências de cookies sem sobreposição permanente
+
+- O ensaio no navegador confirmou que a gravação existente fechava o painel,
+  mas sempre a substituía por um botão global fixo. Falhas da Server Action não
+  tinham estado pendente nem orientação visível, parecendo cliques sem efeito.
+- Depois da primeira escolha, o componente global agora permanece sem saída
+  visual. O gerenciamento foi movido para o menu da conta e para a Política de
+  Cookies, preservando acesso posterior sem cobrir simuladores ou ações.
+- A Server Action retorna sucesso ou falha recuperável; os formulários evitam
+  envio duplicado, fecham no sucesso e mantêm o erro anunciado por tecnologia
+  assistiva. A abertura foca o título e o fechamento restaura o acionador.
+- Categorias essenciais e de segurança continuam obrigatórias. Nome, duração,
+  `HttpOnly`, `SameSite=Lax`, `Secure` em HTTPS e separação dos consentimentos
+  não mudaram.
+- A prova no Chromium passou em `375x812`, `768x1024`, `1024x768` e
+  `1440x900`: painel contido, zero overflow ou erro de console, ausência do
+  atalho global, gravação, reabertura, fechamento e retorno de foco aprovados.
+- Validação local: formatação, ESLint, TypeScript, 2.051 testes Vitest com seis
+  skips condicionais, 15 testes Node Salesforce, build das 44 páginas,
+  inventário de recursos, Gitleaks e `git diff --check` aprovados.
+- A primeira CI preservava no E2E a expectativa antiga de um botão flutuante e
+  falhou corretamente antes da matriz visual. O contrato passou a abrir o
+  painel pelo controle contextual da Política de Cookies e a exigir contagem
+  zero para o atalho antigo, sem relaxar a gravação ou a leitura do cookie.
+
 ## 2026-10-07 - Preparação da sessão manual Salesforce
 
 - O modelo operacional foi fixado em Chrome dedicado com login e MFA manuais;
