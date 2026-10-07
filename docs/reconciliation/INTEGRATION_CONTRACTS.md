@@ -12,6 +12,11 @@ Foram esgotados código, workflows exportados, migrations, schemas, read models,
 fixtures, testes, documentação, refs Git, PRs e configurações locais acessíveis.
 Não foram alterados workflows nem sistemas remotos.
 
+Nesta etapa, o MCP n8n não estava disponível. O workflow candidato não foi
+validado, atualizado, relido ou ativado; não houve fallback REST. O publisher
+origem→n8n foi preparado localmente, mas permanece desligado e não muda a
+autoridade da fonte nem autoriza a primeira carga.
+
 Há contratos comprováveis para os sete relatórios Salesforce, o snapshot
 agregado v2 e o ranking Qlik v1 de imobiliárias. Não foi localizada fonte
 oficial tipada para estoque, perdas por SLA, empresas, gerentes, unidades ou
@@ -25,14 +30,14 @@ integração nem autorizam escrita.
 
 ## Mapa ponta a ponta
 
-| Fluxo               | Fonte/workflow                                             | Frequência                                                  | Destino interno                                        | Contrato e estado                                                                                 |
-| ------------------- | ---------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| Salesforce bruto    | Analytics Reports API `v61.0`; sete report IDs versionados | Legado comprovado a cada 30 min; candidata sem agenda ativa | Exportador local autorizado                            | Projeção tipada por relatório; sessão Chrome/MFA; candidata não ativa                             |
-| Salesforce agregado | `salesforce_n8n_v1`                                        | Somente após coleta completa                                | `POST /api/ingest/salesforce`                          | JSON v2, Bearer M2M, 1 MB, Zod estrito, RPC transacional; remoto contém última base válida        |
-| Refresh Salesforce  | Route Handler → webhook configurado                        | Manual, com lock/cooldown                                   | `POST /api/refresh/salesforce`                         | Sessão + permissão + mesma origem; capacidade desativada por padrão                               |
-| n8n candidato       | `Descomplica CRM - Salesforce Ingest Candidate (inactive)` | Nenhuma agenda                                              | Webhook candidato local do n8n                         | Aceita envelope direto ou `body`; valida forma/PII e responde 202; sem credencial ou node externo |
-| Qlik imobiliárias   | workflow n8n `r4DyPyOTDtoROXq0`; upstream Qlik separado    | agenda confirmada de 30 min; 47 runs/24h observados         | `POST /api/ingest/qlik` → `qlik_relay.ingest_snapshot` | v1, HMAC/replay/rate/gate; relay local off e RPC legada remota ainda exposta                      |
-| Estoque             | Alteração externa no workflow antigo `Funil de Vendas`     | Não comprovada                                              | Projeto Supabase antigo, fora deste CRM                | Sem export, schema, ID, endpoint ou baseline seguros; bloqueado                                   |
+| Fluxo               | Fonte/workflow                                             | Frequência                                                  | Destino interno                                                 | Contrato e estado                                                                                |
+| ------------------- | ---------------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Salesforce bruto    | Analytics Reports API `v61.0`; sete report IDs versionados | Legado comprovado a cada 30 min; candidata sem agenda ativa | Exportador local autorizado                                     | Projeção tipada por relatório; Chrome/CDP dedicado e MFA manual intencional; candidata não ativa |
+| Salesforce agregado | `salesforce_n8n_v1`                                        | Somente após coleta completa                                | Publisher local desligado → n8n → `POST /api/ingest/salesforce` | JSON v2; publisher envia só `.payload`; dois Bearers distintos; RPC transacional                 |
+| Refresh Salesforce  | Route Handler → webhook configurado                        | Manual, com lock/cooldown                                   | `POST /api/refresh/salesforce`                                  | Sessão + permissão + mesma origem; capacidade desativada por padrão                              |
+| n8n candidato       | `Descomplica CRM - Salesforce Ingest Candidate (inactive)` | Nenhuma agenda                                              | Webhook candidato local do n8n                                  | Parcial: responde 202, sem credencial/node CRM; incompatível com a confirmação final 200/201     |
+| Qlik imobiliárias   | workflow n8n `r4DyPyOTDtoROXq0`; upstream Qlik separado    | agenda confirmada de 30 min; 47 runs/24h observados         | `POST /api/ingest/qlik` → `qlik_relay.ingest_snapshot`          | v1, HMAC/replay/rate/gate; relay local off e RPC legada remota ainda exposta                     |
+| Estoque             | Alteração externa no workflow antigo `Funil de Vendas`     | Não comprovada                                              | Projeto Supabase antigo, fora deste CRM                         | Sem export, schema, ID, endpoint ou baseline seguros; bloqueado                                  |
 
 A cadência observada converge com a agenda de 30 minutos do workflow. O owner
 técnico foi identificado, mas owner operacional, backup e leitores `GET`
@@ -43,14 +48,17 @@ residuais ainda precisam ser resolvidos antes de rotação ou troca.
 ### Execução e paginação
 
 O exportador usa uma sessão `sid` já autenticada por Chrome/MFA; ele não renova
-nem contorna MFA. Para cada relatório, faz `describe`, inicia uma instância da
+nem contorna MFA. O MFA manual é intencional e precisa ocorrer em Chrome com
+perfil exclusivo e CDP em loopback; uma aba do Codex não é uma sessão CDP
+reutilizável. Para cada relatório, faz `describe`, inicia uma instância da
 Analytics API, consulta a cada 1,5 s e falha após 180 s. Se `allData=false`,
 divide recursivamente o intervalo de datas ao meio; limite atingido em um único
 dia falha fechado. Relatórios datados cobrem de 1º de janeiro até a data de
 referência. Corretores e contas Canal Imob não usam recorte de data.
 
-O resultado candidato é escrito atomicamente, com arquivo temporário e modo
-`0600`. Cookie, IDs brutos e PII não entram no payload agregado.
+O resultado candidato é escrito atomicamente, com arquivo temporário e proteção
+owner-only (`0600` POSIX ou ACL Windows). Cookie, IDs brutos e PII não entram no
+payload agregado.
 
 ### Relatórios e identidades
 
@@ -114,7 +122,20 @@ oportunidades únicas. Metas e roleta indisponíveis usam zero apenas como
 armazenamento técnico, acompanhado por flag `false`; a interface deve mostrar
 indisponibilidade.
 
-## Contrato Salesforce → CRM
+## Contrato Salesforce → n8n → CRM
+
+O candidato salvo contém `{ payload, diagnostics }`, mas o publisher envia
+somente `.payload`. A publicação nasce desligada, aceita somente URL HTTPS sem
+usuário, senha ou fragmento, limita o corpo a 1 MB e lê o Bearer origem→n8n de
+arquivo absoluto, regular, não simbólico e privado: sem permissões de
+grupo/outros (`0600`) no POSIX ou com ACL owner-only validada no Windows.
+Redirect, timeout, configuração insegura e resposta intermediária falham
+fechado.
+
+O Bearer origem→n8n autentica apenas a entrada do workflow. O node final usa um
+Bearer diferente para n8n→CRM. O n8n precisa aguardar o Route Handler e devolver
+ao publisher somente a confirmação final HTTP `200` ou `201`, JSON `ok=true` e o
+mesmo `requestId`; a resposta `202` atual da candidata não satisfaz o contrato.
 
 O endpoint recebe diretamente `schemaVersion: 2`, `requestId` UUID, workflow,
 dashboard e ranking opcional. O envelope `{body: payload}` pertence somente ao
@@ -132,6 +153,13 @@ Controles existentes:
   mais antigo é rejeitado sem substituir a última base válida;
 - run registra status e erro sanitizado, sem payload comercial;
 - resposta `201` nova, `200` replay, `400/401/413/422/429/503` conforme falha.
+
+O contrato pgTAP versionado exige que `service_role` não tenha acesso direto a
+tabelas públicas e possa executar somente três RPCs públicas de ingestão:
+`ingest_crm_imob_ranking_snapshot`, `ingest_crm_read_model_v3` e
+`ingest_crm_salesforce_snapshot`. Essa allowlist do schema local corrige a
+descrição antiga de “somente a RPC Salesforce”; não comprova, por si só, o
+estado remoto e nenhuma suíte pgTAP remota foi executada nesta etapa.
 
 O workflow n8n versionado permanece inativo e valida somente uma parte do
 contrato. Antes de ativação, ele deve reutilizar o schema v2 completo, receber
@@ -225,5 +253,9 @@ não dados fictícios nem regras de exclusão.
 4. reconciliar totais/IDs antes de publicar agregados escopados;
 5. formalizar owners, resolver leitores residuais e validar relay shadow/canário;
 6. obter contrato oficial de estoque e SLA;
-7. manter workflows remotos inalterados até backup restaurado, migrations
+7. completar o workflow n8n por MCP, com validação antes do update e releitura
+   posterior, sem ativá-lo durante a edição;
+8. manter `SALESFORCE_REFRESH_ENABLED=false` e bloquear primeira carga/agenda até
+   existir Chrome/CDP dedicado com MFA manual e reconciliação aprovada;
+9. manter workflows remotos inalterados até backup restaurado, migrations
    conciliadas e autorização explícita.

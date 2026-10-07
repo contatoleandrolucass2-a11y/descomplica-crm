@@ -13,6 +13,7 @@ test("accepts only loopback CDP endpoints without embedded credentials", () => {
     safeCdpEndpoint("ws://localhost:9222/devtools/browser/id"),
     "ws://localhost:9222/devtools/browser/id",
   );
+  assert.equal(safeCdpEndpoint("http://[::1]:9222"), "http://[::1]:9222/");
   assert.throws(() => safeCdpEndpoint("http://192.0.2.10:9222"), /must use loopback/);
   assert.throws(() => safeCdpEndpoint("http://user:secret@127.0.0.1:9222"), /must use loopback/);
 });

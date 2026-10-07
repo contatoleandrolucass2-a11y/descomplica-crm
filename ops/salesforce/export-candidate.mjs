@@ -1,11 +1,14 @@
 import { randomUUID } from "node:crypto";
-import { chmod, rename, writeFile } from "node:fs/promises";
+import { rename, rm, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { pathToFileURL } from "node:url";
 import process from "node:process";
 
 import { chromium } from "@playwright/test";
 
 import { refreshSalesforceSession, safeCdpEndpoint } from "./browser-session.mjs";
+import { publishSalesforceCandidate } from "./publish-candidate.mjs";
+import { hardenPrivateRegularFile } from "./private-file.mjs";
 import { buildSalesforceSnapshot } from "./transform.mjs";
 
 const SALESFORCE_ORIGIN = "https://direcional.my.salesforce.com";
@@ -235,17 +238,34 @@ function saoPauloReferenceDate() {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-async function atomicWrite(path, value) {
-  const temporary = `${path}.tmp-${process.pid}`;
-  await writeFile(temporary, JSON.stringify(value), { mode: 0o600, flag: "wx" });
-  await chmod(temporary, 0o600);
-  await rename(temporary, path);
+export function resolveReferenceDate(environment = process.env) {
+  return environment.SALESFORCE_REFERENCE_DATE?.trim() || saoPauloReferenceDate();
+}
+
+export function resolveCandidateOutputPath(environment = process.env, platform = process.platform) {
+  const outputPath = environment.SALESFORCE_CANDIDATE_OUTPUT;
+  const pathApi = platform === "win32" ? path.win32 : path.posix;
+  if (!outputPath || !pathApi.isAbsolute(outputPath)) {
+    throw new Error("absolute output path required");
+  }
+  return pathApi.normalize(outputPath);
+}
+
+export async function writeCandidateAtomically(filePath, value, privateFileOptions) {
+  const temporary = `${filePath}.tmp-${process.pid}-${randomUUID()}`;
+  try {
+    await writeFile(temporary, JSON.stringify(value), { mode: 0o600, flag: "wx" });
+    await hardenPrivateRegularFile(temporary, privateFileOptions);
+    await rename(temporary, filePath);
+  } catch (error) {
+    await rm(temporary, { force: true }).catch(() => {});
+    throw error;
+  }
 }
 
 export async function exportCandidate(environment = process.env) {
-  const outputPath = environment.SALESFORCE_CANDIDATE_OUTPUT;
-  if (!outputPath?.startsWith("/")) throw new Error("absolute output path required");
-  const referenceDate = environment.SALESFORCE_REFERENCE_DATE ?? saoPauloReferenceDate();
+  const outputPath = resolveCandidateOutputPath(environment);
+  const referenceDate = resolveReferenceDate(environment);
   const startDate = `${referenceDate.slice(0, 4)}-01-01`;
   const browser = await chromium.connectOverCDP(safeCdpEndpoint(environment.SALESFORCE_CDP_URL));
   try {
@@ -270,11 +290,17 @@ export async function exportCandidate(environment = process.env) {
       generatedAt,
       requestId: randomUUID(),
     });
-    await atomicWrite(outputPath, candidate);
+    await writeCandidateAtomically(outputPath, candidate);
     log("candidate written", {
       output: outputPath,
       payloadMetrics: candidate.payload.dashboard.metrics.length,
       rankingParticipants: candidate.payload.ranking.participants.length,
+    });
+    const publication = await publishSalesforceCandidate(candidate, environment);
+    log("candidate publication evaluated", {
+      published: publication.published,
+      status: publication.status,
+      requestId: candidate.payload.requestId,
     });
     return candidate;
   } finally {

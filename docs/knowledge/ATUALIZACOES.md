@@ -4,6 +4,31 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: publisher Salesforce para n8n preparado sem ativacao
+
+- Status: pendente de integracao remota e primeira carga. Fonte:
+  `ops/salesforce/publish-candidate.mjs`, testes Node e contratos documentais.
+- O publisher fail-closed nasce desligado, envia somente `.payload` por HTTPS,
+  le o Bearer origem→n8n de arquivo privado (`0600` POSIX ou ACL owner-only
+  Windows) e aceita apenas confirmacao final do CRM `200/201`, `ok=true` e o
+  mesmo `requestId`.
+- MFA manual em Chrome/CDP dedicado e intencional. Aba do Codex nao e sessao CDP
+  reutilizavel. `pnpm salesforce:chrome` prepara na estacao grafica um perfil
+  exclusivo e CDP loopback, sem root, headless ou `--no-sandbox`.
+- Os quatro comandos usam o mesmo `.env` local ignorado, aceitam caminhos
+  nativos Windows/macOS/Linux, exigem porta CDP coerente e protegem o candidato
+  atomicamente com permissao/ACL owner-only. Chromium Snap nao e selecionado.
+- MCP n8n indisponivel: nenhum workflow remoto foi validado, atualizado, relido
+  ou ativado. Refresh segue desligado; primeira carga e agenda permanecem
+  bloqueadas ate n8n completo, CDP dedicado e reconciliacao da requisicao unica.
+- As referencias historicas de 229 e 1.099 pgTAP estao desatualizadas; o HEAD
+  atual exige 1.104. O contrato versionado permite a `service_role` somente as
+  tres RPCs auditadas de ingestao Salesforce, Qlik e read model v3, sem acesso
+  direto a tabelas. Nenhum pgTAP remoto foi executado nesta etapa.
+- Evidencia local: 2.239 testes Vitest e 41/41 testes Node Salesforce aprovados;
+  lint, tipos, build de 44 rotas e inventario aprovados. Launcher recusou root
+  nesta VPS antes de iniciar processo, como projetado.
+
 ## 2026-10-07: Associativo publicado com data oficial e formulas conferidas
 
 - Status: validado e publicado. Fonte: PR #165, CI main `37594420463`, prova da

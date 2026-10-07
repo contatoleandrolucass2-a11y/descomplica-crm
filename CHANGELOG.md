@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-10-07 - Publisher Salesforce para n8n fail-closed
+
+- Adiciona publisher local desligado por padrao que envia somente o payload
+  agregado por HTTPS e le o Bearer origem→n8n de arquivo privado: `0600` no
+  POSIX ou ACL exclusiva do usuario no Windows.
+- Exige confirmacao final do CRM em HTTP `200/201`, com `ok=true` e o mesmo
+  `requestId`; aceite intermediario do n8n nao conclui a publicacao.
+- Mantem MFA manual intencional em Chrome/CDP dedicado, sem reutilizar aba do
+  Codex, e conserva refresh, primeira carga e agenda desligados.
+- Adiciona `pnpm salesforce:chrome` para abrir, na estação gráfica, Chrome
+  visível com perfil exclusivo dedicado e CDP apenas em loopback; o launcher
+  recusa root, ambiente sem tela, perfil pessoal e sandbox desativado.
+- Compartilha `ops/salesforce/.env` entre launcher, coleta, publisher e agenda;
+  aceita caminhos absolutos nativos de Windows/macOS/Linux, alinha a porta CDP e
+  protege atomicamente o candidato com permissao/ACL adequada ao sistema.
+- Registra que o MCP n8n estava indisponivel e nenhum workflow remoto foi
+  alterado ou ativado. Marca 229 e 1.099 pgTAP como referencias historicas,
+  aponta o sentinela atual de 1.104 e registra as tres RPCs auditadas de
+  ingestao permitidas a `service_role` no schema versionado.
+
 ## 2026-10-07 - Delegação explícita pelo Master
 
 - Permite que Master aplique uma exceção individual `Permitir` a Administrador
