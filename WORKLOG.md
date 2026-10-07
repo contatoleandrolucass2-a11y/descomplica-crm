@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-07 - Preparação da sessão manual Salesforce
+
+- O modelo operacional foi fixado em Chrome dedicado com login e MFA manuais;
+  não existe Connected App nem credencial de API própria da plataforma terceira.
+- O exportador agora aceita CDP somente em loopback, recarrega exclusivamente a
+  aba do workspace Direcional e lê o `sid` apenas da origem Salesforce exata.
+  Redirecionamento para login ou ausência do cookie falha fechado sem persistir
+  ou registrar seu valor.
+- `pnpm salesforce:export:watch` executa uma coleta imediatamente e agenda as
+  seguintes nos limites de cada meia hora, sempre aguardando o ciclo anterior.
+  Falha de sessão permanece recuperável após nova MFA manual.
+- O n8n remoto não foi alterado: o MCP correspondente não está disponível nesta
+  sessão e a candidata continua sem credencial, agenda ou node HTTP externo. O
+  observador gera somente arquivo local `0600`; ingestão e flags remotas seguem
+  desligadas.
+- Validação final: ESLint, TypeScript, 2.048 testes Vitest com seis skips
+  condicionais, 15 testes Node Salesforce, build de 44 páginas, inventário de
+  recursos, Gitleaks e `git diff --check` aprovados.
+
 ## 2026-10-07 - Matriz de acessos publicada
 
 - O PR #159 foi integrado em `main` no merge

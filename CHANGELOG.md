@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-07 - Sessão manual Salesforce preparada
+
+- Adiciona execução candidata Salesforce a cada 30 minutos sobre Chrome
+  dedicado e MFA manual, sem Connected App ou credencial de API própria.
+- Restringe CDP a loopback, recarrega somente o workspace Direcional e mantém o
+  `sid` em memória, com falha fechada quando nova autenticação é exigida.
+- Serializa as coletas para impedir sobreposição e mantém n8n, ingestão e flags
+  remotas desligados até os gates de publicação.
+
 ## 2026-10-07 - Matriz de acessos publicada
 
 - Aplica no Supabase produtivo os papeis Coordenador, Gerente House, Gerente

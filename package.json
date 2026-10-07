@@ -30,6 +30,8 @@
     "homologation:bind-runtime-release": "node scripts/homologation/bind-runtime-release.mjs",
     "homologation:qa": "node scripts/homologation/run-remote-qa.mjs",
     "mapping:reconcile": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/mappings/import.ts",
+    "salesforce:export": "node ops/salesforce/export-candidate.mjs",
+    "salesforce:export:watch": "node ops/salesforce/run-every-30-minutes.mjs",
     "commercial-policy:verify": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/commercial-policies/verify.ts",
     "access:master": "node ops/access/provision-master.mjs",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
