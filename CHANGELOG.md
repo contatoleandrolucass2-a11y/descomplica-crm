@@ -61,6 +61,13 @@
 - Não cria migration. Lint, tipos, 2.248 testes Vitest, 41 testes Node e build
   de 44 rotas foram aprovados; DNS, SMTP, limite de envio, configuração remota
   e deploy permanecem pendentes de evidência operacional.
+## 2026-10-07 - Restore isolado sem colisão de portas
+
+- Torna atômica a troca das portas padrão do Supabase nos ensaios locais.
+- Evita falso bloqueio quando uma porta aleatória coincide com outra porta
+  padrão ainda não processada.
+- Reutiliza o mesmo contrato nos ensaios isolado e de estado remoto, com teste
+  determinístico para a colisão observada na CI.
 
 ## 2026-10-07 - Delegação explícita pelo Master
 

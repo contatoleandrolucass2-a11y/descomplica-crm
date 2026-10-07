@@ -15,6 +15,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 
+import { patchLocalSupabaseConfig } from "./supabase-config.mjs";
+
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const sourceSupabaseRoot = path.join(repositoryRoot, "supabase");
 const expectedPgTapTests = 1104;
@@ -270,37 +272,6 @@ async function pinLocalDockerEndpoint() {
   });
 }
 
-function patchConfig(contents, projectId, ports) {
-  const replacements = new Map([
-    ["54320", String(ports.shadow)],
-    ["54321", String(ports.api)],
-    ["54322", String(ports.database)],
-    ["54323", String(ports.studio)],
-    ["54324", String(ports.mail)],
-    ["54327", String(ports.analytics)],
-    ["54329", String(ports.pooler)],
-    ["8083", String(ports.inspector)],
-  ]);
-  const projectMatches = contents.match(/^project_id\s*=.*$/gm) ?? [];
-  if (projectMatches.length !== 1) {
-    throw new Error("Supabase config must contain exactly one active project_id.");
-  }
-  let patched = contents.replace(/^project_id\s*=.*$/m, `project_id = "${projectId}"`);
-  for (const [current, replacement] of replacements) {
-    const occurrences = patched.split(current).length - 1;
-    if (occurrences !== 1) {
-      throw new Error(`Supabase config port ${current} must occur exactly once.`);
-    }
-    patched = patched.replaceAll(current, replacement);
-  }
-  const seedPattern = /(\[db\.seed\][\s\S]*?^\s*enabled\s*=\s*)true/m;
-  if (!seedPattern.test(patched)) {
-    throw new Error("Supabase config must contain one enabled db.seed section.");
-  }
-  patched = patched.replace(seedPattern, "$1false");
-  return patched;
-}
-
 function portBlocks() {
   const start = 50_000 + (Number.parseInt(randomBytes(2).toString("hex"), 16) % 12_000);
   const block = (offset) => ({
@@ -344,9 +315,11 @@ async function prepareProject(projectRoot, projectId, ports, includeMigrations) 
   }
   await Promise.all(copies);
   const config = await readFile(path.join(sourceSupabaseRoot, "config.toml"), "utf8");
-  await writeFile(path.join(supabaseRoot, "config.toml"), patchConfig(config, projectId, ports), {
-    mode: 0o600,
-  });
+  await writeFile(
+    path.join(supabaseRoot, "config.toml"),
+    patchLocalSupabaseConfig(config, projectId, ports),
+    { mode: 0o600 },
+  );
 }
 
 function exactDatabaseContainer(projectId) {

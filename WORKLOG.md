@@ -150,6 +150,20 @@
   `rate_limit_email_sent` e deploy ainda aguardam evidência e não são declarados
   concluídos. O limite só deve subir depois do domínio verificado, com cooldown
   individual de 60 segundos e proteção contra abuso preservados.
+## 2026-10-07 - Correção do falso bloqueio no restore isolado
+
+- A CI da `main` aprovou validação, E2E, matriz visual e imagem promovível da
+  correção de cookies, mas o restore isolado parou antes de iniciar o Supabase
+  com `Supabase config port 54327 must occur exactly once`.
+- O `config.toml` continha uma única porta `54327`. O sorteio do bloco efêmero
+  podia, porém, escolher esse mesmo número para uma porta processada antes; a
+  substituição sequencial voltava a contar o valor gerado como se fosse fonte.
+- A configuração agora valida as ocorrências no texto original e substitui as
+  oito portas em uma única passagem. Assim um valor gerado nunca é processado
+  novamente. O mesmo helper atende os dois ensaios de restauração.
+- Um teste determinístico fixa `shadow_port` em `54327`, comprova que analytics
+  recebe sua própria porta e preserva as validações de porta ausente ou
+  duplicada. A publicação permanece bloqueada até a nova CI aprovar o restore.
 
 ## 2026-10-07 - Exceção de permissão delegável por Master
 

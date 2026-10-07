@@ -131,6 +131,17 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   rotas foram aprovados apos o rebase. DNS, SMTP, `rate_limit_email_sent` e
   deploy permanecem pendentes. Subir o limite somente depois do dominio
   verificado, com cooldown individual de 60 segundos e protecao contra abuso.
+## 2026-10-07: substituições de portas aleatórias devem ser atômicas
+
+- Status: pendente de CI; fonte: `isolated-restore-rehearsal.mjs`,
+  `remote-state.mjs` e falha do job `isolated-restore` da CI `37575092037`.
+- Substituir portas padrão sequencialmente permite colisão: um valor aleatório
+  já inserido pode ser igual a outra porta padrão e ser contado ou substituído
+  de novo. O arquivo de origem permanece válido, mas o gate falha de modo
+  probabilístico antes de iniciar o ensaio.
+- Validar o texto original e aplicar todas as trocas em uma única passagem
+  elimina o encadeamento. O teste de regressão deve forçar uma porta gerada a
+  `54327`, além de preservar falha fechada para padrão ausente ou duplicado.
 
 ## 2026-10-07: Associativo publicado com data oficial e formulas conferidas
 
