@@ -1,5 +1,47 @@
 # Worklog
 
+## 2026-10-07 - Teste portátil do Chrome dedicado
+
+- O teste de descoberta do executável passou a controlar a inspeção de arquivos,
+  eliminando a dependência acidental do Chrome instalado no runner da CI.
+- Escopo restrito a injeção de dependência para teste; descoberta e validação em
+  runtime permanecem fail-closed.
+
+## 2026-10-07 - Publisher Salesforce para n8n preparado
+
+- Autoridade preservada: os sete reports Salesforce continuam sendo a fonte; o
+  Route Handler server-side valida flag, contrato e Bearer n8n→CRM antes de a
+  RPC transacional persistir o snapshot. Interface e n8n nao autorizam o banco.
+- O publisher local nasce desligado e envia somente `.payload` por HTTPS. O
+  Bearer origem→n8n vem de arquivo regular privado (`0600` no POSIX ou ACL
+  owner-only no Windows), separado do Bearer n8n→CRM. So aceita confirmacao CRM
+  `200/201`, `ok=true` e `requestId` igual.
+- MFA permanece manual e intencional em Chrome/CDP dedicado.
+  `pnpm salesforce:chrome` agora prepara perfil exclusivo, janela visivel e
+  CDP loopback na estacao grafica, recusando root, host sem tela e porta ocupada.
+  Uma aba do Codex nao pode ser reutilizada como CDP. A verificacao nesta VPS
+  root/sem sessao grafica falhou fechado antes de abrir processo, como previsto;
+  a coleta real ainda nao ocorreu.
+- Os quatro comandos Salesforce carregam o mesmo `ops/salesforce/.env`, ignorado
+  pelo Git. Caminhos absolutos nativos funcionam em Windows/macOS/Linux, a porta
+  da URL e do launcher nao pode divergir e o candidato recebe protecao atomica
+  owner-only adequada ao sistema. Chromium Snap foi excluido da descoberta
+  porque resolver seu launcher simbolico quebra a selecao do aplicativo.
+- O MCP n8n nao esta disponivel. Nenhum workflow remoto foi validado, atualizado,
+  relido ou ativado, e REST nao foi usado como fallback. Refresh, primeira carga
+  e agenda seguem desligados ate n8n completo, CDP dedicado e reconciliacao.
+- Os gates documentais antigos de 229 e 1.099 pgTAP foram marcados como
+  historicos; o sentinela do HEAD atual exige 1.104. A allowlist versionada da
+  `service_role` contem tres RPCs de ingestao auditadas, nao somente Salesforce.
+  Nenhum pgTAP remoto foi executado aqui.
+- Escopo documental: runbook, inventario de integracoes, contratos de
+  reconciliacao, conhecimento, changelog e worklog. Sem migration remota,
+  ingestao, refresh, deploy, segredo ou commit.
+- Verificacao: lint, tipos, 2.239 testes Vitest, 41/41 testes Node Salesforce,
+  build de 44 rotas e inventario aprovados. A cobertura Node inclui launcher,
+  sessao CDP, caminhos Windows, ACL, transformacao, scheduler e publisher; o
+  comando real na VPS recusou root antes de iniciar Chrome.
+
 ## 2026-10-07 - Exceção de permissão delegável por Master
 
 - A leitura agregada do Supabase produtivo confirmou 23 permissões e mostrou

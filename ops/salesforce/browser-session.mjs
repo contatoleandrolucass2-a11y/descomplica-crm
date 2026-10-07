@@ -3,7 +3,7 @@ const SALESFORCE_PAGE_HOSTS = new Set([
   "direcional.my.salesforce.com",
   "direcional.lightning.force.com",
 ]);
-const LOOPBACK_HOSTS = new Set(["127.0.0.1", "::1", "localhost"]);
+const LOOPBACK_HOSTS = new Set(["127.0.0.1", "::1", "[::1]", "localhost"]);
 
 function parsedUrl(value, errorMessage) {
   try {

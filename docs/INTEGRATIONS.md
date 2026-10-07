@@ -19,10 +19,24 @@ Com a capacidade desativada ou incompleta, nenhuma chamada externa ocorre.
 O produtor de produção usa a Analytics Reports API `v61.0` por uma sessão do
 Chrome aprovada com MFA. A frequência de 30 minutos não renova nem contorna o
 MFA: quando o cookie `sid` expirar, o exportador falha fechado e exige novo
-login interativo. A candidata versionada em `ops/salesforce` consulta os sete
-relatórios autorizados, preserva os `recordId` existentes somente em memória e
-descarta CPF, CNPJ, banco, telefone, e-mail e endereço antes de criar o snapshot
-agregado.
+login interativo. Esse MFA manual é intencional. Uma aba aberta ou controlada
+pelo Codex não é uma sessão CDP reutilizável; a coleta exige Chrome dedicado do
+operador, com perfil exclusivo e CDP restrito a loopback. A candidata versionada
+em `ops/salesforce` consulta os sete relatórios autorizados, preserva os
+`recordId` existentes somente em memória e descarta CPF, CNPJ, banco, telefone,
+e-mail e endereço antes de criar o snapshot agregado.
+
+`pnpm salesforce:chrome` prepara essa janela na estação gráfica do operador. O
+launcher usa perfil exclusivo, detecta Chrome por caminhos fixos e
+falha antes de abrir se estiver como root, sem tela, com caminho relativo ou com
+a porta CDP ocupada. Ele nunca copia cookie ou desabilita o sandbox. Launcher,
+coleta, publisher e agenda carregam o mesmo arquivo local
+`ops/salesforce/.env`, ignorado pelo Git; porta e URL CDP divergentes falham.
+
+O refresh é uma capacidade separada e permanece desligado por
+`SALESFORCE_REFRESH_ENABLED=false`. A primeira carga e a agenda de 30 minutos
+não podem começar até existir workflow n8n completo, sessão CDP dedicada e
+reconciliação aprovada da requisição única.
 
 ## Ingestão/n8n
 
@@ -33,6 +47,21 @@ antigo. O workflow de migração permanece inativo até receber credenciais
 dedicadas e passar pela reconciliação descrita em
 `docs/runbooks/salesforce-n8n-migration.md`. Detalhes do contrato ficam em
 `docs/INGESTION.md`.
+
+O publisher local origem→n8n permanece desligado por padrão. Quando
+explicitamente habilitado, envia somente `.payload` por HTTPS, sem credenciais
+na URL, e lê o Bearer origem→n8n de arquivo regular privado: `0600` no POSIX ou
+ACL owner-only validada no Windows. Esse segredo é distinto do Bearer n8n→CRM.
+A publicação só retorna sucesso se o n8n propagar a confirmação final do CRM em
+HTTP `200` ou `201`, com `ok=true` e o mesmo `requestId`; `202` intermediário
+falha fechado.
+
+O MCP n8n não está disponível nesta sessão. Nenhum workflow remoto foi validado,
+atualizado, relido ou ativado, e REST não foi usado como alternativa. A
+autoridade de escrita continua no Route Handler server-side: ele exige a flag de
+ingestão e o Bearer n8n→CRM antes de invocar a RPC transacional. No schema
+versionado atual, `service_role` não recebe acesso direto às tabelas e executa
+somente as RPCs auditadas de ingestão Salesforce, Qlik e read model v3.
 
 ## Qlik / ranking de imobiliárias
 
