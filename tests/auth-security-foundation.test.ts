@@ -27,7 +27,7 @@ import {
   parseCookieConsent,
   serializeCookieConsent,
 } from "../lib/privacy/cookie-consent";
-import { saveCookieConsentAction } from "../lib/privacy/actions";
+import { saveCookieConsentAction, type CookieConsentActionState } from "../lib/privacy/actions";
 import { getApplicationOrigin, getApplicationUrl } from "../lib/security/origin";
 
 describe("password and recovery schemas", () => {
@@ -85,9 +85,11 @@ describe("password and recovery schemas", () => {
 });
 
 describe("cookie consent", () => {
+  const idleConsentState: CookieConsentActionState = { status: "idle", message: "" };
+
   beforeEach(() => {
-    cookieSet.mockClear();
-    revalidatePath.mockClear();
+    cookieSet.mockReset();
+    revalidatePath.mockReset();
   });
 
   afterEach(() => vi.unstubAllEnvs());
@@ -127,7 +129,7 @@ describe("cookie consent", () => {
     const formData = new FormData();
     formData.set("choice", "essential");
 
-    await saveCookieConsentAction(formData);
+    const result = await saveCookieConsentAction(idleConsentState, formData);
 
     expect(cookieSet).toHaveBeenCalledWith(COOKIE_CONSENT_COOKIE_NAME, expect.any(String), {
       httpOnly: true,
@@ -137,6 +139,7 @@ describe("cookie consent", () => {
       secure: true,
     });
     expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
+    expect(result).toEqual({ status: "saved", message: "Preferências salvas." });
   });
 
   it("does not write consent when APP_ORIGIN is invalid", async () => {
@@ -145,10 +148,44 @@ describe("cookie consent", () => {
     const formData = new FormData();
     formData.set("choice", "all");
 
-    await saveCookieConsentAction(formData);
+    const result = await saveCookieConsentAction(idleConsentState, formData);
 
     expect(cookieSet).not.toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
+    expect(result.status).toBe("error");
+  });
+
+  it("returns visible recovery guidance when the choice is invalid", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("APP_ORIGIN", "https://crm.example.test");
+    const formData = new FormData();
+    formData.set("choice", "invalid");
+
+    const result = await saveCookieConsentAction(idleConsentState, formData);
+
+    expect(cookieSet).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      status: "error",
+      message: "Escolha inválida. Revise as preferências e tente novamente.",
+    });
+  });
+
+  it("returns visible recovery guidance when the consent cookie cannot be written", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("APP_ORIGIN", "https://crm.example.test");
+    cookieSet.mockImplementationOnce(() => {
+      throw new Error("simulated cookie write failure");
+    });
+    const formData = new FormData();
+    formData.set("choice", "all");
+
+    const result = await saveCookieConsentAction(idleConsentState, formData);
+
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      status: "error",
+      message: "Não foi possível salvar agora. Recarregue a página e tente novamente.",
+    });
   });
 });
 

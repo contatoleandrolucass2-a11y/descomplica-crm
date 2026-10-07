@@ -19,6 +19,34 @@ describe("protected interface shell", () => {
     expect(isThemeMode({ key: "dark" })).toBe(false);
   });
 
+  it("keeps cookie preferences contextual and reports action failures", () => {
+    const banner = readFileSync(
+      new URL("../app/_components/CookieConsentBanner.tsx", import.meta.url),
+      "utf8",
+    );
+    const trigger = readFileSync(
+      new URL("../app/_components/CookiePreferencesTrigger.tsx", import.meta.url),
+      "utf8",
+    );
+    const protectedLayout = readFileSync(
+      new URL("../app/(protected)/layout.tsx", import.meta.url),
+      "utf8",
+    );
+    const legalDocument = readFileSync(
+      new URL("../app/(legal)/_components/LegalDocument.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(banner).toContain("if (!open) return null");
+    expect(banner).toContain('aria-live="polite"');
+    expect(banner).toContain("disabled={pending}");
+    expect(trigger).toContain("data-cookie-preferences-trigger");
+    expect(protectedLayout).toContain("<CookiePreferencesTrigger");
+    expect(protectedLayout).toContain("Gerenciar preferências");
+    expect(legalDocument).toContain('documentKey === "cookies"');
+    expect(legalDocument).toContain("Gerenciar preferências de cookies");
+  });
+
   it("defines semantic analytical tokens for all three themes and reduced motion", () => {
     const stylesheet = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
     const shellStylesheet = readFileSync(
@@ -107,8 +135,9 @@ describe("protected interface shell", () => {
       /\.pageHeader :focus-visible,[\s\S]*outline-color: #7ceaf5/,
     );
     expect(privacyStylesheet).toMatch(
-      /@media \(max-width: 520px\) \{[\s\S]*\.preferencesButton \{[\s\S]*position: static;[\s\S]*width: calc\(100% - 1rem\)/,
+      /@media \(max-width: 520px\) \{[\s\S]*\.banner \{[\s\S]*width: calc\(100% - 1rem\)/,
     );
+    expect(privacyStylesheet).not.toContain(".preferencesButton");
     expect(investorStylesheet).toMatch(
       /\.investor-page-shell\.investor-associative-table-page \{[\s\S]*min-height: 0/,
     );

@@ -225,21 +225,25 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain('await page.keyboard.press("Shift+Tab")');
   });
 
-  it("mantém o gatilho global de cookies visível e as categorias obrigatórias bloqueadas", () => {
+  it("move as preferências para a conta e mantém as categorias obrigatórias bloqueadas", () => {
     const script = source("scripts/qa/authenticated-visual.mjs");
+    const releaseE2e = source("e2e/release-candidate.spec.ts");
     const styles = source("app/_components/CookieConsentBanner.module.css");
-    expect(script).toContain("const cookiePreferencesTrigger = page.getByRole");
+    const component = source("app/_components/CookieConsentBanner.tsx");
+    expect(script).toContain("#protected-account-menu [data-cookie-preferences-trigger]");
     expect(script).toContain("(await cookiePreferencesTrigger.count()) === 1");
-    expect(script).toContain('element.hasAttribute("data-qa-visual-volatile")');
+    expect(script).toContain('element.hasAttribute("data-cookie-preferences-trigger")');
     expect(script).toContain('["Essenciais", "Segurança"].every((label) =>');
     expect(script).toContain("checkbox.checked && checkbox.disabled");
     expect(script).toContain('name: "Fechar preferências"');
-    expect(script).toContain("await cookiePreferencesTrigger.waitFor({");
+    expect(script).toContain('name: "Somente essenciais"');
     expect(script).toContain("cookieBannerHidden: cookiePreferencesSafe");
-    expect(styles.match(/min-height: 44px/g)).toHaveLength(3);
-    expect(script).not.toMatch(
-      /getByRole\("button", \{ name: "Preferências de cookies", exact: true \}\)\.count\(\)\) ===\s*0/,
-    );
+    expect(styles.match(/min-height: 44px/g)).toHaveLength(2);
+    expect(styles).not.toContain(".preferencesButton");
+    expect(component).toContain("if (!open) return null");
+    expect(component).not.toContain("data-qa-visual-volatile");
+    expect(releaseE2e).toContain('name: "Gerenciar preferências de cookies"');
+    expect(releaseE2e).toContain("await expect(floatingPreferencesButton).toHaveCount(0)");
   });
 
   it("requires a local Supabase QA identity and captures every responsive route", () => {

@@ -68,7 +68,7 @@ function AccountMenuState({ children, identity, displayName, role }: AccountMenu
 
   function closeAfterAction(event: MouseEvent<HTMLDivElement>) {
     if (!(event.target instanceof Element)) return;
-    if (event.target.closest("a, button[type='submit']")) setOpen(false);
+    if (event.target.closest("a, button")) setOpen(false);
   }
 
   return (

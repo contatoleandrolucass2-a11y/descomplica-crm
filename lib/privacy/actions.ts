@@ -11,9 +11,22 @@ import {
 } from "./cookie-consent";
 import { getApplicationOrigin } from "../security/origin";
 
-export async function saveCookieConsentAction(formData: FormData): Promise<void> {
+export type CookieConsentActionState =
+  | { status: "idle"; message: "" }
+  | { status: "saved"; message: string }
+  | { status: "error"; message: string };
+
+export async function saveCookieConsentAction(
+  _previousState: CookieConsentActionState,
+  formData: FormData,
+): Promise<CookieConsentActionState> {
   const choice = formData.get("choice");
-  if (choice !== "all" && choice !== "essential" && choice !== "custom") return;
+  if (choice !== "all" && choice !== "essential" && choice !== "custom") {
+    return {
+      status: "error",
+      message: "Escolha inválida. Revise as preferências e tente novamente.",
+    };
+  }
 
   const consent = buildCookieConsent({
     functional: choice === "all" || (choice === "custom" && formData.get("functional") === "on"),
@@ -21,14 +34,27 @@ export async function saveCookieConsentAction(formData: FormData): Promise<void>
     analytics: choice === "all" || (choice === "custom" && formData.get("analytics") === "on"),
   });
   const origin = getApplicationOrigin();
-  if (!origin) return;
+  if (!origin) {
+    return {
+      status: "error",
+      message: "Não foi possível salvar agora. Recarregue a página e tente novamente.",
+    };
+  }
 
-  (await cookies()).set(COOKIE_CONSENT_COOKIE_NAME, serializeCookieConsent(consent), {
-    httpOnly: true,
-    maxAge: COOKIE_CONSENT_MAX_AGE_SECONDS,
-    path: "/",
-    sameSite: "lax",
-    secure: origin?.protocol === "https:",
-  });
-  revalidatePath("/", "layout");
+  try {
+    (await cookies()).set(COOKIE_CONSENT_COOKIE_NAME, serializeCookieConsent(consent), {
+      httpOnly: true,
+      maxAge: COOKIE_CONSENT_MAX_AGE_SECONDS,
+      path: "/",
+      sameSite: "lax",
+      secure: origin.protocol === "https:",
+    });
+    revalidatePath("/", "layout");
+    return { status: "saved", message: "Preferências salvas." };
+  } catch {
+    return {
+      status: "error",
+      message: "Não foi possível salvar agora. Recarregue a página e tente novamente.",
+    };
+  }
 }

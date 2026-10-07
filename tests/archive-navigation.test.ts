@@ -81,7 +81,7 @@ function completeResult() {
 }
 
 describe("archive navigation evidence gate", () => {
-  it("keeps the global topbar above the privacy shortcut but below the consent panel", () => {
+  it("keeps the global topbar below the consent panel without a fixed privacy shortcut", () => {
     const header = readFileSync(
       new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url),
       "utf8",
@@ -91,12 +91,9 @@ describe("archive navigation evidence gate", () => {
       "utf8",
     );
     const headerLayer = Number(header.match(/\.topbar\s*\{[\s\S]*?z-index:\s*(\d+)/)?.[1]);
-    const shortcutLayer = Number(
-      privacy.match(/\.preferencesButton\s*\{[\s\S]*?z-index:\s*(\d+)/)?.[1],
-    );
     const panelLayer = Number(privacy.match(/\.banner\s*\{[\s\S]*?z-index:\s*(\d+)/)?.[1]);
-    expect(headerLayer).toBeGreaterThan(shortcutLayer);
     expect(headerLayer).toBeLessThan(panelLayer);
+    expect(privacy).not.toContain(".preferencesButton");
   });
 
   it("keeps every root keyboard ring inside the unified topbar", () => {
