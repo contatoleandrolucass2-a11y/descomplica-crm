@@ -749,12 +749,14 @@ test("cookie choices, legal documents and browser-session lifetimes are explicit
       await expect(page.getByLabel(new RegExp(`^${optionalCategory}`))).not.toBeChecked();
     }
 
-    const preferencesButton = page.getByRole("button", {
+    const floatingPreferencesButton = page.getByRole("button", {
       name: "Preferências de cookies",
       exact: true,
     });
+    const preferencesPanel = page.locator('aside[aria-labelledby="cookie-consent-title"]');
     await page.getByRole("button", { name: "Somente essenciais", exact: true }).click();
-    await expect(preferencesButton).toBeVisible();
+    await expect(preferencesPanel).toBeHidden();
+    await expect(floatingPreferencesButton).toHaveCount(0);
     let consentCookie = (await consentContext.cookies()).find(
       (cookie) => cookie.name === "descomplica-cookie-consent",
     );
@@ -772,13 +774,20 @@ test("cookie choices, legal documents and browser-session lifetimes are explicit
       analytics: false,
     });
 
-    await preferencesButton.click();
+    await page.goto("/politica-de-cookies");
+    const contextualPreferencesButton = page.getByRole("button", {
+      name: "Gerenciar preferências de cookies",
+      exact: true,
+    });
+    await expect(contextualPreferencesButton).toBeVisible();
+    await contextualPreferencesButton.click();
     await expect(
       page.getByRole("heading", { level: 2, name: "Preferências de cookies" }),
     ).toBeVisible();
     await page.getByLabel(/^Funcionais/).check();
     await page.getByRole("button", { name: "Salvar preferências", exact: true }).click();
-    await expect(preferencesButton).toBeVisible();
+    await expect(preferencesPanel).toBeHidden();
+    await expect(contextualPreferencesButton).toBeVisible();
     consentCookie = (await consentContext.cookies()).find(
       (cookie) => cookie.name === "descomplica-cookie-consent",
     );
@@ -789,12 +798,13 @@ test("cookie choices, legal documents and browser-session lifetimes are explicit
       analytics: false,
     });
 
-    await preferencesButton.click();
+    await contextualPreferencesButton.click();
     await expect(
       page.getByRole("heading", { level: 2, name: "Preferências de cookies" }),
     ).toBeVisible();
     await page.getByRole("button", { name: "Aceitar todos", exact: true }).click();
-    await expect(preferencesButton).toBeVisible();
+    await expect(preferencesPanel).toBeHidden();
+    await expect(contextualPreferencesButton).toBeVisible();
     consentCookie = (await consentContext.cookies()).find(
       (cookie) => cookie.name === "descomplica-cookie-consent",
     );

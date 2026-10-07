@@ -19,7 +19,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   fechamento e uma gravação real com dados sintéticos. O ensaio público passou
   nos quatro viewports, sem overflow ou erro de navegador; lint, tipos, 2.051
   testes Vitest, 15 testes Node, build de 44 páginas, inventário e Gitleaks
-  também passaram. CI autenticada e publicação permanecem pendentes.
+  também passaram. A primeira CI bloqueou a expectativa E2E obsoleta do atalho
+  permanente; o gate agora exige o fluxo contextual e ausência do controle
+  antigo. Nova CI autenticada e publicação permanecem pendentes.
 
 ## 2026-10-07: sessão manual Salesforce com recarga fail-closed
 

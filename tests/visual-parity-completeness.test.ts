@@ -227,6 +227,7 @@ describe("isolated authenticated visual QA contract", () => {
 
   it("move as preferências para a conta e mantém as categorias obrigatórias bloqueadas", () => {
     const script = source("scripts/qa/authenticated-visual.mjs");
+    const releaseE2e = source("e2e/release-candidate.spec.ts");
     const styles = source("app/_components/CookieConsentBanner.module.css");
     const component = source("app/_components/CookieConsentBanner.tsx");
     expect(script).toContain("#protected-account-menu [data-cookie-preferences-trigger]");
@@ -241,6 +242,8 @@ describe("isolated authenticated visual QA contract", () => {
     expect(styles).not.toContain(".preferencesButton");
     expect(component).toContain("if (!open) return null");
     expect(component).not.toContain("data-qa-visual-volatile");
+    expect(releaseE2e).toContain('name: "Gerenciar preferências de cookies"');
+    expect(releaseE2e).toContain("await expect(floatingPreferencesButton).toHaveCount(0)");
   });
 
   it("requires a local Supabase QA identity and captures every responsive route", () => {

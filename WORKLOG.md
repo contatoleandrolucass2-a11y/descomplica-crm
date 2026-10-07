@@ -20,6 +20,10 @@
 - Validação local: formatação, ESLint, TypeScript, 2.051 testes Vitest com seis
   skips condicionais, 15 testes Node Salesforce, build das 44 páginas,
   inventário de recursos, Gitleaks e `git diff --check` aprovados.
+- A primeira CI preservava no E2E a expectativa antiga de um botão flutuante e
+  falhou corretamente antes da matriz visual. O contrato passou a abrir o
+  painel pelo controle contextual da Política de Cookies e a exigir contagem
+  zero para o atalho antigo, sem relaxar a gravação ou a leitura do cookie.
 
 ## 2026-10-07 - Preparação da sessão manual Salesforce
 
