@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-07 - Calculo Associativo pela data oficial da unidade
+
+- Usa a Data de termino da obra do estoque vivo para separar pre e pos-obra,
+  sem permitir que uma copia antiga libere a simulacao.
+- Desconta anuais nominais uma vez, corrige capitalizacao dos quatro blocos
+  e distribui as parcelas restantes de forma equilibrada.
+- Expoe primeiro juro/primeira mensal para conferir calendarios historicos;
+  painel de aprovacao passa a usar o Pro-Soluto com a correcao da carencia.
+- Unifica motor legado e atualiza ajudas e oraculos sinteticos independentes.
+- Sem alteracao de dados remotos, limites comerciais, n8n ou financiamento bancario.
+
 ## 2026-10-07 - Diagnostico das formulas do Associativo
 
 - Documenta a reconstrucao linear e decrescente confrontada com Salesforce,

@@ -1,6 +1,55 @@
 @import "tailwindcss";
 @import "./investor-theme-tokens.css";
 
+.investor-page-shell.investor-associative-table-page .investor-stock-table thead th.investor-stock-completion-heading {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  letter-spacing: 0;
+}
+
+.investor-associative-calendar {
+  margin-top: 12px;
+  font-size: 12px;
+}
+
+.investor-associative-calendar summary {
+  cursor: pointer;
+  padding: 8px 0;
+  font-weight: 700;
+}
+
+.investor-associative-calendar-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 8px;
+}
+
+.investor-associative-calendar-fields label {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.investor-associative-calendar-fields input {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.investor-associative-calendar-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+}
+
 :root {
   --ink: #11233f;
   --ink-soft: #53647d;

@@ -4,6 +4,27 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: data oficial e formulas implementadas no candidato
+
+- Status: pendente_validacao integral e publicacao.
+- Fonte: pedido do usuario e audit `associativo-formulas-salesforce-2026-10-07`.
+  `estoque_spc.data_termino_obra` e o campo financeiro; API o expoe como
+  `completionDate`. 2.243 pares identificador/data conferidos por checksum.
+- Associativo exige estoque vivo e nao completa data com snapshot. O proprio
+  mes do termino pertence ao pos-obra; obra concluida admite plano todo pos.
+- Principal mensal deduz anuais nominais; quatro blocos recebem juros acumulados
+  e particao floor(n/4) com resto nos primeiros. Datas/totais usam essa particao.
+- `Data 1o juros` observada no fim do mes anterior a `Data de Calculo`;
+  datas financeiras de proposta salva nao devem ser trocadas pela data atual.
+  UI permite conferir primeiro juro/primeira mensal e restaurar automaticas.
+- Indicador Pro-Soluto usa correcao propria da carencia, distinta de `k` mensal.
+  Limites comerciais e projecao bancaria local nao foram redefinidos.
+- 70 novos casos sinteticos do motor aprovados. Gates integrais/CI, navegador
+  e release permanecem pendentes; nao confundir amostra real com todo relatorio.
+- Tipos/build/lint aprovados; suite geral Windows 2.168 aprovados e seis falhas
+  POSIX conhecidas, seis ignorados. Matriz/integracao/ledger: 243 aprovados,
+  incluindo 7.285 cenarios. Aprovacao de release depende da CI Linux e navegador.
+
 ## 2026-10-07: formulas do Associativo confrontadas com Salesforce
 
 - Status: validado na amostra; implementacao e paridade global pendentes.

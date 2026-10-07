@@ -146,7 +146,7 @@ A escolha de como apresentar datas, quantidades e total contratado exige
 reconciliacao explicita na implementacao. A tolerancia por parcela nao
 autoriza silenciosamente um total diferente.
 
-## Diferencas do CRM atual
+## Diferencas do CRM antes da implementacao
 
 - `associative-linear-calculator-rules.mjs` deduz anuais corrigidas da base
   mensal; as referencias usam principal mensal nominal antes da correcao.
@@ -197,3 +197,74 @@ Ambiente: Windows/PowerShell, Node 24.19.0 e pnpm 11.20.0.
 - `git diff --check`: aprovado. Somente documentacao foi alterada.
 - Suite geral nao verde neste host; sem commit, publicacao ou reinicio de
   runtime nesta etapa. Nenhum teste foi enfraquecido para contornar as falhas.
+
+## Implementacao solicitada em 07/10/2026
+
+### Autoridade da data
+
+- O usuario confirmou o campo `Data de termino da obra`. Leitura somente de
+  metadados e agregados localizou `public.estoque_spc.data_termino_obra` no
+  estoque legado. A API existente o expoe como `completionDate` por unidade.
+- Conferencia de todos os 2.243 identificadores e datas da API com o banco:
+  contagens iguais, identificadores unicos, sem datas ausentes e checksum
+  MD5 agregado identico `c07f85bf14bd0c418ff7a9058162c5c4`. O checksum serve
+  para reconciliacao, nao para autenticacao. Nao houve exportacao de estoque
+  bruto, clientes, propostas, cookies ou credenciais.
+- Mantidos proxy protegido e autorizacao antes do cache. No Associativo,
+  snapshot nao libera selecao: a fonte viva e obrigatoria e uma data ausente
+  nela nao recebe fallback da copia antiga. Investidor/Direta preservam contrato.
+- A ficha identifica o campo correto. O mes do termino ja e pos-obra;
+  unidades concluidas podem formar um plano inteiramente pos-obra.
+
+### Calendario e contas
+
+- Nos registros inspecionados com os dois campos disponiveis, `Data 1o juros`
+  correspondeu ao ultimo dia do mes anterior a `Data de Calculo`. Propostas
+  salvas podem manter uma data de calculo anterior a data corrente.
+- O calendario automatico adota essa origem para uma nova simulacao. O grupo
+  `Datas do calculo` permite conferir e informar primeiro juro/primeira mensal
+  historicos, sem editar o termino da obra. Campos vazios ou datas impossiveis
+  invalidam a simulacao; restaurar automaticas recalcula pela data corrente.
+- `k = max(0, mesesCalendario(primeiroJuro, primeiraMensal) - 1)` para os
+  vencimentos suportados 5/10/15. A mensal deve suceder entrada e sinais.
+- Principal mensal desconta anuais nominais exatamente uma vez. Os pagamentos
+  anuais corrigidos continuam separados no cronograma. Linear resolve o VP
+  dos dois periodos; todos os quatro blocos acumulam juros anteriores.
+- Quantidades, datas e totais usam a particao matematica equilibrada, sem
+  copiar os segmentos visuais divergentes observados em 38/69 meses.
+- Painel e busca de sugestoes usam `correctedProSoluto` no indicador de
+  aprovacao, preservando a correcao propria da carencia. Nao substituir essa
+  correcao pelo `k` mensal nem alterar limites comerciais.
+- O adaptador TypeScript legado chama o motor canonico, evitando duas formulas
+  divergentes. Nao houve alteracao do motor oficial desativado nem de n8n.
+
+### Limites preservados
+
+- A prova real continua limitada a 20 lineares e 52 valores decrescentes.
+  Nao transforma o inventario de 1.120 oportunidades em 1.120 calculos validados.
+- Os limites de Ranking, as projecoes de evolucao de obra e os juros anuais
+  existentes nao receberam uma nova politica comercial. O maior desembolso
+  mensal continua sendo a maior mensal com evolucao, conforme contrato local;
+  isso nao representa uma prestacao bancaria real extraida do Salesforce.
+- Ordem interna de arredondamento da fonte permanece desconhecida. A margem
+  de R$ 0,05 vale por parcela, nunca para afrouxar aprovacao ou esconder
+  diferencas de total. Sem ajustes especificos para um cliente/proposta.
+
+### Validacao do candidato
+
+- Node 24.19.0 / pnpm 11.20.0 em Windows. Lint sem erros (um aviso em artefato
+  local ignorado); typecheck e build aprovados. Formatacao dos arquivos editados
+  e `git diff --check` aprovados.
+- 70 novos testes financeiros por VP independente; 78 testes de inventario;
+  243 testes de integracao/calendario/ledger/matriz, incluindo 7.285 cenarios.
+  Suites do adaptador e motores oficiais/Investidor: 113 aprovados.
+- Suite integral reexecutada com dois workers: 2.168 aprovados, seis ignorados
+  e as mesmas seis falhas de permissoes POSIX/caminhos no Windows, em quatro
+  suites ja listadas acima. A primeira execucao tambem detectou expectativas
+  antigas de ajuda/calendario, corrigidas, e dois timeouts Obsidian; a repeticao
+  confirmou as correcoes e nao repetiu os timeouts. Nada foi ignorado para
+  obter aprovacao. CI Linux integral permanece obrigatoria antes da promocao.
+- Etapa Salesforce `node --test` executada separadamente: 15 aprovados.
+- QA de navegador ampliado com estoque sintetico: fonte viva obrigatoria,
+  datas distintas por unidade, campos invalidos/vazios, restauracao automatica
+  e indisponibilidade HTTP 503. Execucao do navegador e release pendentes na CI.

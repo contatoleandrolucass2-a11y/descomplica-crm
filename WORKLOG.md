@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-07 - Implementacao das formulas e data de termino da obra
+
+- Fonte confirmada: `estoque_spc.data_termino_obra` corresponde a `completionDate`
+  no proxy atual. Conferidos 2.243 pares identificador/data por checksum agregado,
+  sem exportar estoque. Associativo exige fonte viva; demais telas preservadas.
+- Mensais usam principal nominal, correcao inicial pelo calendario e VP pre/pos.
+  Decrescente corrige blocos 3/4 e restos; cronograma usa as mesmas quantidades.
+- Datas financeiras opcionais permitem conferir propostas historicas. Datas
+  invalidas bloqueiam o resultado. Indicador/sugestoes usam `correctedProSoluto`.
+- Adaptador TS reutiliza motor MJS; ajudas removem a deducao de anuais reajustadas.
+- Novos oraculos sinteticos independentes; verificacoes e limites completos em
+  `docs/audits/associativo-formulas-salesforce-2026-10-07.md`.
+- Validacao e publicacao em andamento; nenhum dado remoto ou workflow alterado.
+- Tipos/build aprovados, lint sem erros. Suite geral Windows: 2.168 aprovados,
+  seis ignorados e seis falhas POSIX conhecidas; CI Linux exigida. Mais 243
+  testes focados e 15 node:test aprovados; QA browser ampliado, pendente CI.
+
 ## 2026-10-07 - Auditoria das formulas Salesforce
 
 - Investigacao sem alterar motores ou dados remotos. Inventariadas 1.120

@@ -4,6 +4,11 @@ type InventorySource = { count: number; items: unknown[] };
 
 type LoadInventoryOptions<T extends InventorySource> = {
   snapshotOnly: boolean;
+  /**
+   * Require live inventory and propagate failures; snapshot is commercial reference only.
+   * Preserve live completionDate, including null/absence. Incompatible with snapshotOnly.
+   */
+  liveRequired?: boolean;
   signal: AbortSignal;
   canReplace: () => boolean;
   onInventory: (payload: T, reference: T["items"]) => void;
@@ -12,11 +17,14 @@ type LoadInventoryOptions<T extends InventorySource> = {
 
 export async function loadInvestorInventory<T extends InventorySource>({
   snapshotOnly,
+  liveRequired = false,
   signal,
   canReplace,
   onInventory,
   onReferenceFacts,
 }: LoadInventoryOptions<T>): Promise<void> {
+  if (snapshotOnly && liveRequired) throw new Error("inventory_options_invalid");
+
   let reference: T | null = null;
   let applied = false;
   let skipped = false;
@@ -51,7 +59,12 @@ export async function loadInvestorInventory<T extends InventorySource>({
     onInventory(
       payload === reference
         ? payload
-        : { ...payload, items: enrichInventoryReferenceFields(payload.items, referenceItems) },
+        : {
+            ...payload,
+            items: enrichInventoryReferenceFields(payload.items, referenceItems, {
+              allowCompletionDateFallback: !liveRequired,
+            }),
+          },
       referenceItems,
     );
     applied = true;
@@ -59,7 +72,7 @@ export async function loadInvestorInventory<T extends InventorySource>({
 
   async function loadSnapshot() {
     reference = await fetchInventory("/api/inventory/snapshot");
-    apply(reference);
+    if (!liveRequired) apply(reference);
   }
 
   if (snapshotOnly) {
@@ -73,6 +86,11 @@ export async function loadInvestorInventory<T extends InventorySource>({
     // Fetch concurrently, but keep the commercial enrichment before selection.
     await snapshotRequest;
     apply(live);
+  }
+
+  if (liveRequired) {
+    await loadLive();
+    return;
   }
 
   await Promise.allSettled([snapshotRequest, loadLive()]);

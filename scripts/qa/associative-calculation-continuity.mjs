@@ -18,12 +18,12 @@ function buildInventory(withProgress, withAppraisal) {
     finalPrice: 230_000 + index * 20_000,
     appraisal: withAppraisal ? 350_000 + index * 20_000 : null,
     progress: withProgress ? 0.5 + index * 0.05 : null,
-    completionDate: `${new Date().getFullYear() + 3}-12-31`,
+    completionDate: `${new Date().getFullYear() + 6}-12-31`,
   }));
   const reference = {
     source: "ESTOQUE SPC.xlsx",
     sourceKind: "versioned-snapshot",
-    qaFixture: { synthetic: true, contract: "associative-calculation-continuity-v3" },
+    qaFixture: { synthetic: true, contract: "associative-calculation-continuity-v4" },
     count: items.length,
     items,
   };
@@ -40,7 +40,7 @@ function buildInventory(withProgress, withAppraisal) {
         product: `Apartamento QA-CONT-${index + 1} - Estoque vivo QA`,
         appraisal: null,
         progress: null,
-        completionDate: null,
+        completionDate: `${new Date().getFullYear() + 3 + index}-12-31`,
       })),
     },
   };
@@ -53,7 +53,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     "Continuity QA requires a local synthetic application",
   );
   const result = {
-    contract: "associative-calculation-continuity-v3",
+    contract: "associative-calculation-continuity-v4",
     synthetic: true,
     passed: false,
     stages: [],
@@ -62,6 +62,8 @@ export async function checkAssociativeCalculationContinuity(page) {
   let stage = "inventory-merge";
   let fixture = buildInventory(true, true);
   let inventoryRequests = { live: 0, reference: 0 };
+  let inventoryResponses = { live: 0, reference: 0 };
+  let liveStatus = 200;
   let liveGate = Promise.resolve();
   let releaseLive;
   const handler = async (route) => {
@@ -81,14 +83,17 @@ export async function checkAssociativeCalculationContinuity(page) {
     if (source === null) return route.fallback();
     assert.equal(request.method(), "GET", "Inventory QA must be read-only");
     inventoryRequests[source] += 1;
+    const status = source === "live" ? liveStatus : 200;
+    const payload = fixture[source];
     if (source === "live") await liveGate;
     try {
       await route.fulfill({
-        status: 200,
+        status,
         contentType: "application/json; charset=utf-8",
         headers: { "cache-control": "no-store" },
-        body: JSON.stringify(fixture[source]),
+        body: JSON.stringify(status === 200 ? payload : { error: "inventory_unavailable" }),
       });
+      inventoryResponses[source] += 1;
     } catch (error) {
       if (error instanceof Error && error.message.includes("Route is already handled")) return;
       throw error;
@@ -147,16 +152,68 @@ export async function checkAssociativeCalculationContinuity(page) {
       .click();
   }
 
-  async function reloadFixture() {
+  async function reloadPage(waitUntil = "networkidle") {
     inventoryRequests = { live: 0, reference: 0 };
+    inventoryResponses = { live: 0, reference: 0 };
     const theme = await page.evaluate(() => document.documentElement.dataset.theme);
-    await page.reload({ waitUntil: "networkidle" });
+    await page.reload({ waitUntil });
     await restoreTheme(theme);
+  }
+
+  async function reloadFixture() {
+    await reloadPage();
     await expect(page.locator(`${root} .investor-stock-product-text`).first()).toContainText(
       "Estoque vivo QA",
     );
     assert.ok(inventoryRequests.live > 0 && inventoryRequests.reference > 0);
     await selectUnit(0);
+  }
+
+  async function assertNoProposal() {
+    await expect(
+      page.locator(`${root} .investor-stock-table tr[aria-selected="true"]`),
+    ).toHaveCount(0);
+    await expect(qualification).toHaveCount(0);
+    await expect(page.locator(`${root} .investor-associative-ledger`)).toHaveCount(0);
+    await expect(page.locator(approval)).toHaveCount(0);
+  }
+
+  async function assertCalendarForUnit(index) {
+    const calendar = page.locator(`${root} details.investor-associative-calendar`);
+    if ((await calendar.getAttribute("open")) === null) {
+      await calendar.getByText("Datas do cálculo", { exact: true }).click();
+    }
+    const completionDate = fixture.live.items[index].completionDate;
+    assert.notEqual(completionDate, fixture.reference.items[index].completionDate);
+    await expect(field("Data de término da obra")).toHaveValue(completionDate);
+    await expect(field("Data de término da obra")).toHaveJSProperty("readOnly", true);
+    const firstMonthly = await field("Primeira mensal").inputValue();
+    assert.match(firstMonthly, /^\d{4}-\d{2}-(05|10|15)$/);
+    const [completionYear, completionMonth] = completionDate.split("-").map(Number);
+    const [monthlyYear, monthlyMonth] = firstMonthly.split("-").map(Number);
+    const installments = Number(await field("Quantidade de parcelas").inputValue());
+    // The construction-end month belongs to post-construction, independently of its day.
+    const pre = Math.min(
+      installments,
+      Math.max(0, (completionYear - monthlyYear) * 12 + completionMonth - monthlyMonth),
+    );
+    const post = installments - pre;
+    await expect(calendar.locator(".investor-associative-calendar-status > span")).toContainText(
+      `${pre} pré-obra · ${post} pós-obra`,
+    );
+    return { completionDate, firstMonthly, pre, post };
+  }
+
+  async function assertCalendarBlocked() {
+    await expect(
+      page.locator(`${approval} .investor-associative-flow-status.approved`),
+    ).toHaveCount(0);
+    await expect(
+      page.locator(
+        `${root} button[aria-controls="investor-associative-installments"]:enabled, ` +
+          `${root} button[aria-controls="investor-associative-ready-proposal"]:enabled`,
+      ),
+    ).toHaveCount(0);
   }
 
   async function completeProposal() {
@@ -219,8 +276,10 @@ export async function checkAssociativeCalculationContinuity(page) {
     await expect(unitFact("Andamento da obra")).toContainText("50");
     await completeProposal();
     await assertAnswers(5_000);
+    const firstCalendar = await assertCalendarForUnit(0);
     result.stages.push({
       stage,
+      calendar: firstCalendar,
       commitment: await assertPositivePercentages("% Comprometimento da Renda"),
       maximum: await assertPositivePercentages("% Máximo da renda mensal"),
     });
@@ -238,9 +297,81 @@ export async function checkAssociativeCalculationContinuity(page) {
     await expect(page.locator(`${root} .investor-unit-price strong`)).toHaveText(
       money.format(250_000),
     );
+    const secondCalendar = await assertCalendarForUnit(1);
+    assert.equal(secondCalendar.pre, firstCalendar.pre + 12);
+    assert.equal(secondCalendar.post, firstCalendar.post - 12);
     result.stages.push({
       stage,
+      calendar: secondCalendar,
       commitment: await assertPositivePercentages("% Comprometimento da Renda"),
+    });
+
+    stage = "calendar-validation-and-recovery";
+    await page.getByRole("button", { name: "Inserir Sinal", exact: true }).click();
+    await field("Sinal 1").fill("50000");
+    await field("Sinal 1").blur();
+    await expect.poll(() => moneyValue("Sinal 1")).toBe(500);
+    const automaticCalendar = await assertCalendarForUnit(1);
+    const firstInterest = await field("Data do primeiro juro").inputValue();
+    const signalDate = await page
+      .locator(`${root} .payment-group-child-signal`)
+      .filter({ has: page.getByLabel("Sinal 1", { exact: true }) })
+      .locator("time")
+      .getAttribute("datetime");
+    assert.match(signalDate, /^\d{4}-\d{2}-(05|10|15)$/);
+    assert.ok(automaticCalendar.firstMonthly > signalDate);
+    await expect(page.getByRole("button", { name: "Exibir parcelas", exact: true })).toBeEnabled();
+    const automaticStatus = await rule("Status da proposta").innerText();
+    const resetDates = page.getByRole("button", {
+      name: "Restaurar datas automáticas",
+      exact: true,
+    });
+    const invalidDates = [
+      {
+        label: "Primeira mensal",
+        value: `${automaticCalendar.firstMonthly.slice(0, 8)}06`,
+        reason: "invalid-payment-day",
+      },
+      { label: "Primeira mensal", value: signalDate, reason: "not-after-signal" },
+      { label: "Primeira mensal", value: "", reason: "missing-first-monthly" },
+      { label: "Data do primeiro juro", value: "", reason: "missing-first-interest" },
+      {
+        label: "Data do primeiro juro",
+        value: automaticCalendar.firstMonthly,
+        reason: "interest-not-before-monthly",
+      },
+    ];
+    for (const invalid of invalidDates) {
+      await field(invalid.label).fill(invalid.value);
+      await field(invalid.label).blur();
+      await expect(field(invalid.label)).toHaveValue(invalid.value);
+      await assertCalendarBlocked();
+      await resetDates.click();
+      await expect(field("Data do primeiro juro")).toHaveValue(firstInterest);
+      await expect(field("Primeira mensal")).toHaveValue(automaticCalendar.firstMonthly);
+      await expect(resetDates).toBeDisabled();
+      await expect(rule("Status da proposta")).toHaveText(automaticStatus, { useInnerText: true });
+      await expect(
+        page.getByRole("button", { name: "Exibir parcelas", exact: true }),
+      ).toBeEnabled();
+    }
+    const shiftedMonthly = new Date(`${automaticCalendar.firstMonthly}T00:00:00.000Z`);
+    shiftedMonthly.setUTCMonth(shiftedMonthly.getUTCMonth() + 1);
+    await field("Primeira mensal").fill(shiftedMonthly.toISOString().slice(0, 10));
+    await field("Primeira mensal").blur();
+    const shiftedCalendar = await assertCalendarForUnit(1);
+    assert.equal(shiftedCalendar.pre, automaticCalendar.pre - 1);
+    assert.equal(shiftedCalendar.post, automaticCalendar.post + 1);
+    await expect(page.getByRole("button", { name: "Exibir parcelas", exact: true })).toBeEnabled();
+    await resetDates.click();
+    assert.deepEqual(await assertCalendarForUnit(1), automaticCalendar);
+    await assertAnswers(6_000);
+    result.stages.push({
+      stage,
+      invalidDatesBlocked: invalidDates.map(({ reason }) => reason),
+      automaticCalendar,
+      shiftedCalendar,
+      restored: true,
     });
 
     stage = "missing-progress";
@@ -314,13 +445,12 @@ export async function checkAssociativeCalculationContinuity(page) {
       unitIsolation: true,
     });
 
-    stage = "late-reference-facts";
+    stage = "delayed-live-authority";
     fixture = buildInventory(true, true);
     fixture.live.items = fixture.live.items.map((item, index) => ({
       ...item,
       appraisal: fixture.reference.items[index].appraisal,
       progress: fixture.reference.items[index].progress,
-      completionDate: fixture.reference.items[index].completionDate,
       finalPrice: item.finalPrice + 10_000,
       finalWithKit: item.finalWithKit + 10_000,
     }));
@@ -332,30 +462,87 @@ export async function checkAssociativeCalculationContinuity(page) {
     liveGate = new Promise((resolve) => {
       releaseLive = resolve;
     });
-    const lateTheme = await page.evaluate(() => document.documentElement.dataset.theme);
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await restoreTheme(lateTheme);
+    const snapshotResponse = page.waitForResponse(
+      (response) => new URL(response.url()).pathname === "/api/inventory/snapshot",
+    );
+    await reloadPage("domcontentloaded");
+    await (await snapshotResponse).finished();
+    await expect.poll(() => inventoryResponses.reference).toBeGreaterThan(0);
+    await expect.poll(() => inventoryRequests.live).toBeGreaterThan(0);
+    await page.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    );
+    assert.equal(inventoryResponses.live, 0);
+    await expect(page.locator(`${root} .investor-stock-results`)).toHaveAttribute(
+      "aria-busy",
+      "true",
+    );
+    await expect(page.locator(`${root} .investor-stock-product-text`)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Iniciar proposta com QA-CONT-/ })).toHaveCount(
+      0,
+    );
+    await assertNoProposal();
+    releaseLive();
+    liveGate = Promise.resolve();
     await expect(page.locator(`${root} .investor-stock-product-text`).first()).toContainText(
-      "Referencia QA",
+      "Estoque vivo QA",
     );
     await selectUnit(0);
     await completeProposal();
-    await expect(rule("% Máximo da renda mensal").locator('td[data-label="Linear"]')).toHaveText(
-      "—",
-    );
-    releaseLive();
     await expect(unitFact("Avaliação bancária")).toHaveText(money.format(350_000));
     await expect(unitFact("Andamento da obra")).toContainText("50");
     await expect(page.locator(`${root} .investor-unit-price strong`)).toHaveText(
-      money.format(230_000),
+      money.format(240_000),
     );
     await assertAnswers(5_000);
     await assertPositivePercentages("% Máximo da renda mensal");
     await expect(page.locator(`${root} .investor-stock-product-text`).first()).toContainText(
-      "Referencia QA",
+      "Estoque vivo QA",
     );
     await expect(page.locator(`${root} .investor-associative-unit-facts`)).toHaveCount(0);
-    result.stages.push({ stage, automaticRecovery: true, proposalPreserved: true });
+    result.stages.push({
+      stage,
+      snapshotSelectable: false,
+      liveFactsApplied: true,
+      calendar: await assertCalendarForUnit(0),
+    });
+
+    stage = "missing-live-completion-date";
+    fixture = buildInventory(true, true);
+    fixture.live.items[0].completionDate = null;
+    delete fixture.live.items[1].completionDate;
+    await reloadPage();
+    await expect(page.locator(`${root} .investor-stock-product-text`)).toHaveCount(2);
+    await expect(
+      page.locator(`${root} .investor-stock-table td[data-label="Data de término da obra"]`),
+    ).toHaveText(["Não informada", "Não informada"]);
+    for (let index = 0; index < 2; index += 1) {
+      await expect(
+        page.getByRole("button", {
+          name: `QA-CONT-${index + 1} sem data de entrega`,
+          exact: true,
+        }),
+      ).toBeDisabled();
+    }
+    await assertNoProposal();
+    result.stages.push({ stage, nullAndAbsentBlocked: true, snapshotDateIgnored: true });
+
+    stage = "live-failure-blocks-calculation";
+    fixture = buildInventory(true, true);
+    liveStatus = 503;
+    await reloadPage();
+    await expect.poll(() => inventoryResponses.reference).toBeGreaterThan(0);
+    await expect.poll(() => inventoryResponses.live).toBeGreaterThan(0);
+    await expect(page.locator(`${root} .investor-empty-result`)).toContainText(
+      "Estoque indisponível.",
+    );
+    await expect(page.locator(`${root} .investor-stock-product-text`)).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Iniciar proposta com QA-CONT-/ })).toHaveCount(
+      0,
+    );
+    await assertNoProposal();
+    result.stages.push({ stage, liveStatus, snapshotFallback: false, calculationBlocked: true });
+    liveStatus = 200;
 
     stage = "annual-ledger-reconciliation";
     fixture = buildInventory(true, true);
