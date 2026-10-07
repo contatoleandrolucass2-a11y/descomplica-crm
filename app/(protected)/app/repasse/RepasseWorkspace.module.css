@@ -463,6 +463,7 @@
   color: var(--analytics-muted);
   font-size: 0.75rem;
   line-height: 1.35;
+  transition: none;
   gap: 0.4rem;
 }
 
