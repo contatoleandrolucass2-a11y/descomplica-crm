@@ -8,7 +8,10 @@ import { RepasseLookup } from "./RepasseLookup";
 export const metadata = { title: "Consulta de repasse" };
 
 export default async function RepassePage() {
-  await enforcePermission("crm.partnerships.view");
-  if (!getProtectedPageGate("/app/repasse")?.releaseEnabled) forbidden();
+  const context = await enforcePermission("crm.partnerships.view");
+  const gate = getProtectedPageGate("/app/repasse");
+  if (!gate?.releaseEnabled || gate.requiredRole !== "master" || context.roleKey !== "master") {
+    forbidden();
+  }
   return <RepasseLookup />;
 }

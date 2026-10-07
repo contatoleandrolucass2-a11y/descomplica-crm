@@ -5,64 +5,99 @@ export const ROLES = {
   master: {
     level: 100,
     label: "Master",
+    assignable: false,
     description:
       "Responsável máximo pelo sistema, com gestão integral e não atribuível pela interface.",
   },
   admin: {
     level: 80,
     label: "Administrador",
+    assignable: true,
     description:
-      "Mantém Dashboard, etapas, Ranking, Configurações e administração conforme as permissões herdadas.",
+      "Administra usuários de menor nível e acessa as funções operacionais, sem exercer funções exclusivas de Master.",
   },
   coordinator: {
     level: 60,
     label: "Coordenador",
-    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
+    assignable: true,
+    description: "Acessa a operação com Canal Imob e o Canal de Parcerias.",
+  },
+  manager_house: {
+    level: 55,
+    label: "Gerente House",
+    assignable: true,
+    description: "Acessa a operação sem Canal Imob e o Ranking.",
+  },
+  manager_imob: {
+    level: 54,
+    label: "Gerente Imob",
+    assignable: true,
+    description: "Acessa a operação com Canal Imob e o Canal de Parcerias.",
+  },
+  broker_house: {
+    level: 25,
+    label: "Corretor House",
+    assignable: true,
+    description: "Acessa a operação sem Canal Imob e o Ranking.",
+  },
+  broker_imob: {
+    level: 24,
+    label: "Corretor Imob",
+    assignable: true,
+    description: "Acessa a operação com Canal Imob e o Canal de Parcerias.",
   },
   manager: {
-    level: 55,
-    label: "Gerente",
-    description: "Papel técnico de gerente; não recebe permissões comerciais automaticamente.",
+    level: 53,
+    label: "Gerente (legado)",
+    assignable: false,
+    description: "Papel legado sem permissões herdadas; exige reclassificação manual.",
   },
   supervisor: {
     level: 50,
-    label: "Supervisor",
-    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
+    label: "Supervisor (legado)",
+    assignable: false,
+    description: "Papel legado sem permissões herdadas; exige reclassificação manual.",
   },
   house: {
     level: 45,
-    label: "House",
-    description: "Papel técnico de house; não recebe permissões comerciais automaticamente.",
+    label: "House (legado)",
+    assignable: false,
+    description: "Papel legado sem permissões herdadas; exige reclassificação manual.",
   },
   real_estate: {
     level: 40,
-    label: "Imobiliária",
-    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
+    label: "Imobiliária (legado)",
+    assignable: false,
+    description: "Papel legado sem permissões herdadas; exige reclassificação manual.",
   },
   partnership_channel: {
     level: 35,
-    label: "Canal de Parcerias",
-    description:
-      "Papel técnico do Canal de Parcerias; não recebe permissões comerciais automaticamente.",
+    label: "Canal de Parcerias (legado)",
+    assignable: false,
+    description: "Papel legado sem permissões herdadas; exige reclassificação manual.",
   },
   broker_lead: {
     level: 30,
-    label: "Líder de corretores",
-    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
+    label: "Líder de corretores (legado)",
+    assignable: false,
+    description: "Papel legado sem permissões herdadas; exige reclassificação manual.",
   },
   broker: {
     level: 20,
-    label: "Corretor",
-    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
+    label: "Corretor (legado)",
+    assignable: false,
+    description: "Papel legado sem permissões herdadas; exige reclassificação manual.",
   },
   user: {
     level: 10,
-    label: "Usuário",
-    description: "Mantém Dashboard, etapas e Ranking conforme as permissões herdadas.",
+    label: "Usuário (legado)",
+    assignable: false,
+    description: "Papel legado sem permissões herdadas; exige reclassificação manual.",
   },
   pending: {
     level: 1,
     label: "Pendente",
+    assignable: false,
     description:
       "Papel técnico de onboarding pendente; não recebe permissões comerciais automaticamente.",
   },
@@ -80,6 +115,6 @@ export function getRoleLabel(roleKey: RoleKey): string {
 
 export function getAssignableRoleKeys(actorLevel: number): RoleKey[] {
   return (Object.keys(ROLES) as RoleKey[]).filter(
-    (roleKey) => roleKey !== "master" && roleKey !== "pending" && ROLES[roleKey].level < actorLevel,
+    (roleKey) => ROLES[roleKey].assignable && ROLES[roleKey].level < actorLevel,
   );
 }

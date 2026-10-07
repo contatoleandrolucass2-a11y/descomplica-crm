@@ -18,6 +18,7 @@ vi.mock("@/lib/authorization/page-gates", () => ({
     path: "/app/repasse",
     permission: "crm.partnerships.view",
     releaseEnabled: mocks.releaseEnabled,
+    requiredRole: "master",
   }),
 }));
 vi.mock("next/navigation", () => ({
@@ -39,6 +40,7 @@ beforeEach(() => {
   mocks.releaseEnabled = true;
   mocks.requirePermission.mockResolvedValue({
     userId: "10000000-0000-4000-8000-000000000001",
+    roleKey: "master",
   });
 });
 
@@ -59,6 +61,19 @@ describe("Server Action da consulta de repasse", () => {
       "NEXT_FORBIDDEN",
     );
     expect(mocks.requirePermission).not.toHaveBeenCalled();
+    expect(mocks.lookupRepasseByFid).not.toHaveBeenCalled();
+  });
+
+  it("nega perfil nao Master mesmo quando Parcerias esta permitida", async () => {
+    mocks.requirePermission.mockResolvedValue({
+      userId: "10000000-0000-4000-8000-000000000002",
+      roleKey: "coordinator",
+    });
+
+    await expect(lookupRepasseAction({ status: "idle" }, form("123456"))).rejects.toThrow(
+      "NEXT_FORBIDDEN",
+    );
+    expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
     expect(mocks.lookupRepasseByFid).not.toHaveBeenCalled();
   });
 

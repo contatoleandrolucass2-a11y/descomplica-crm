@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { forbidden, notFound } from "next/navigation";
 
+import { getAuthorizedDashboardViews } from "@/lib/authorization/dashboard-views";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import {
   DASHBOARD_PERIODS,
@@ -114,10 +115,12 @@ function StageFilters({
   stage,
   view,
   period,
+  authorizedViews,
 }: {
   stage: CrmStage;
   view: DashboardViewKey;
   period: DashboardPeriodKey;
+  authorizedViews: readonly DashboardViewKey[];
 }) {
   return (
     <FilterBar
@@ -126,7 +129,7 @@ function StageFilters({
       unavailableDimensions={["Canal de vendas", "Gerente", "Responsável", "Empresa"]}
     >
       <FilterGroup label="Visão">
-        {(Object.keys(DASHBOARD_VIEWS) as DashboardViewKey[]).map((viewKey) => (
+        {authorizedViews.map((viewKey) => (
           <FilterLink
             key={viewKey}
             href={stageHref(stage.slug, viewKey, period)}
@@ -261,14 +264,17 @@ function StageComposition({
   view,
   period,
   dashboard,
+  authorizedViews,
 }: {
   stage: CrmStage;
   view: DashboardViewKey;
   period: DashboardPeriodKey;
   dashboard: DashboardReadModel | null;
+  authorizedViews: readonly DashboardViewKey[];
 }) {
   const periodConfig = DASHBOARD_PERIODS[period];
-  const metric = dashboard?.metrics[view][stage.key] ?? null;
+  const viewMetrics = dashboard?.metrics[view] ?? null;
+  const metric = viewMetrics?.[stage.key] ?? null;
   const current = metric?.[periodConfig.currentField] ?? null;
   const sourceGoal =
     dashboard && metric
@@ -281,14 +287,12 @@ function StageComposition({
   const previousStage = stageIndex > 0 ? CRM_STAGES[stageIndex - 1] : null;
   const nextStage = stageIndex < CRM_STAGES.length - 1 ? CRM_STAGES[stageIndex + 1] : null;
   const previousValue =
-    dashboard && previousStage
-      ? dashboard.metrics[view][previousStage.key][periodConfig.currentField]
-      : null;
+    viewMetrics && previousStage ? viewMetrics[previousStage.key][periodConfig.currentField] : null;
   const volumeRatio =
     current === null || previousValue === null ? null : calculateConversion(current, previousValue);
   const comparisons = metric ? buildStageComparisons(metric) : EMPTY_COMPARISONS;
-  const funnel = dashboard
-    ? buildPeriodFunnelReadings(dashboard.metrics[view], period)
+  const funnel = viewMetrics
+    ? buildPeriodFunnelReadings(viewMetrics, period)
     : CRM_STAGES.map((item) => ({
         key: item.key,
         label: item.label,
@@ -315,7 +319,7 @@ function StageComposition({
           }
         />
 
-        <StageFilters stage={stage} view={view} period={period} />
+        <StageFilters stage={stage} view={view} period={period} authorizedViews={authorizedViews} />
 
         {!dashboard ? (
           <p className="sr-only" role="status">
@@ -487,14 +491,17 @@ export default async function StagePage({
   params: Promise<{ stage: string }>;
   searchParams: Promise<{ view?: string | string[]; period?: string | string[] }>;
 }) {
-  await enforcePermission("crm.stages.view");
+  const authorization = await enforcePermission("crm.stages.view");
   const [{ stage: slug }, query] = await Promise.all([params, searchParams]);
   const stage = getCrmStage(slug);
   if (!stage) notFound();
 
-  const view: DashboardViewKey = isDashboardView(query.view) ? query.view : "all";
+  const authorizedViews = getAuthorizedDashboardViews(authorization.permissions);
+  if (authorizedViews.length === 0) forbidden();
+  if (isDashboardView(query.view) && !authorizedViews.includes(query.view)) forbidden();
+  const view: DashboardViewKey = isDashboardView(query.view) ? query.view : authorizedViews[0]!;
   const period: DashboardPeriodKey = isDashboardPeriod(query.period) ? query.period : "month";
-  const result = await loadDashboardReadModel();
+  const result = await loadDashboardReadModel([view]);
 
   return (
     <StageComposition
@@ -502,6 +509,7 @@ export default async function StagePage({
       view={view}
       period={period}
       dashboard={result.status === "ready" ? result.dashboard : null}
+      authorizedViews={authorizedViews}
     />
   );
 }

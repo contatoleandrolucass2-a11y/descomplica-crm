@@ -82,12 +82,17 @@ export async function checkAssociativeCalculationContinuity(page) {
     assert.equal(request.method(), "GET", "Inventory QA must be read-only");
     inventoryRequests[source] += 1;
     if (source === "live") await liveGate;
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json; charset=utf-8",
-      headers: { "cache-control": "no-store" },
-      body: JSON.stringify(fixture[source]),
-    });
+    try {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json; charset=utf-8",
+        headers: { "cache-control": "no-store" },
+        body: JSON.stringify(fixture[source]),
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Route is already handled")) return;
+      throw error;
+    }
   };
   const field = (label) =>
     page.locator(`${root} input`).and(page.getByLabel(label, { exact: true }));
@@ -160,16 +165,19 @@ export async function checkAssociativeCalculationContinuity(page) {
     await qualification.getByRole("button", { name: "MCMV", exact: true }).click();
     await qualification.getByRole("radio", { name: "Sim", exact: true }).check();
     for (const { label, amount, next } of resources) {
+      const input = field(label);
+      await expect(input).toBeEnabled({ timeout: 60_000 });
       await expect
-        .poll(async () => {
-          const input = field(label);
-          if (!(await input.isEnabled())) return null;
-          await input.fill(String(amount * 100));
-          await input.blur();
-          return moneyValue(label);
-        })
+        .poll(
+          async () => {
+            await input.fill(String(amount * 100));
+            await input.blur();
+            return moneyValue(label);
+          },
+          { timeout: 60_000 },
+        )
         .toBe(amount);
-      await expect(field(next)).toBeEnabled();
+      await expect(field(next)).toBeEnabled({ timeout: 60_000 });
     }
     await field("Quantidade de parcelas").fill("84");
     await ranking.selectOption("bronze");

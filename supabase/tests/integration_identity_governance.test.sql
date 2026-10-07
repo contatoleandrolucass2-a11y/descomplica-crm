@@ -163,7 +163,7 @@ values (
 );
 
 update public.user_roles
-set role_key = 'broker',
+set role_key = 'broker_house',
     assigned_by = '91000000-0000-4000-8000-000000000001'
 where user_id = '91000000-0000-4000-8000-000000000003';
 

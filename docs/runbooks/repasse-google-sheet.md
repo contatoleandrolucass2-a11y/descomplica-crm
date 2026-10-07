@@ -34,8 +34,9 @@ schema convertem excesso em indisponibilidade.
 ## Contrato de segurança
 
 - Rota: `/app/repasse`, filha do Dashboard na navegação autorizada.
-- Permissão Master-only repetida em Proxy, página e Server Action:
-  `crm.partnerships.view`.
+- Papel `master` e permissão `crm.partnerships.view` são exigidos em conjunto no
+  Proxy, na página, na navegação e na Server Action. A permissão isolada de
+  Parcerias não libera esta jornada.
 - O gate de release também é revalidado na Server Action antes da autorização e
   de qualquer acesso à origem.
 - Entrada: somente 1 a 12 dígitos; o valor nunca compõe a URL de destino.

@@ -219,10 +219,13 @@ describe("consulta protegida de repasse", () => {
     );
     const source = readFileSync(new URL("../lib/crm/repasse/data.ts", import.meta.url), "utf8");
 
-    expect(page).toContain('await enforcePermission("crm.partnerships.view")');
-    expect(page).toContain('getProtectedPageGate("/app/repasse")?.releaseEnabled');
-    expect(action).toContain('await requirePermission("crm.partnerships.view")');
+    expect(page).toContain('const context = await enforcePermission("crm.partnerships.view")');
+    expect(page).toContain('getProtectedPageGate("/app/repasse")');
+    expect(page).toContain('context.roleKey !== "master"');
+    expect(action).toContain('const context = await requirePermission("crm.partnerships.view")');
     expect(action).toContain("gate?.releaseEnabled !== true");
+    expect(action).toContain('gate.requiredRole !== "master"');
+    expect(action).toContain("context.roleKey !== gate.requiredRole");
     expect(source).toContain('GOOGLE_SHEETS_PUBLIC_ORIGIN = "https://docs.google.com"');
     expect(source).toContain('url.searchParams.set("headers", "0")');
     expect(source).not.toContain("REPASSE_GOOGLE_");

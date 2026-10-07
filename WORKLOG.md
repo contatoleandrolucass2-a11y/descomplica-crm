@@ -1,5 +1,146 @@
 # Worklog
 
+## 2026-10-07 - Integracao da matriz de acessos com Repasse
+
+- A branch integrou a `main` `73b20d0`, que acrescentou a rota protegida
+  `/app/repasse` e elevou o inventario E2E de 23 para 24 rotas.
+- Repasse reutilizava `crm.partnerships.view` supondo que a chave fosse
+  exclusiva de Master. Na nova matriz, Administrador, Coordenador e perfis
+  Imob tambem recebem Parcerias; a integracao passou a exigir explicitamente o
+  papel `master` junto da permissao no Proxy, navegacao, pagina e Server Action.
+- O contrato dos oito perfis preserva Repasse com `200` somente para Master e
+  `403` para todos os demais, sem retirar Canal de Parcerias dos perfis Imob.
+  Os testes focados de pagina, acao, Proxy, navegacao e release aprovaram 79
+  casos; a matriz dedicada de Repasse continua separada da baseline global.
+
+## 2026-10-06 - Estabilizacao final da evidencia de acessos
+
+- A CI `37532674180` aprovou validacao, restore isolado, migrations, 1.099
+  pgTAP, advisors, build, 19 cenarios E2E e todos os contratos funcionais da
+  matriz visual. A unica divergencia era a altura de `/admin/usuarios` em
+  375 px: um e-mail sintetico ocupava duas linhas na CI e tres na referencia,
+  deslocando a captura em 21 px.
+- O cabecalho do usuario agora reserva exatamente duas linhas no mobile e
+  limita o excesso sem alterar o texto acessivel. O teste de layout fixa esse
+  contrato. Somente as referencias de Usuarios em 320 e 375 px mudaram; a
+  captura de 375 px passou de 5.193 para 5.172 px.
+- O ensaio local encontrou ainda uma corrida do Playwright ao responder uma
+  requisicao que a navegacao ja havia encerrado. A interceptacao agora ignora
+  somente `Route is already handled` e continua propagando qualquer outro
+  erro. A espera de habilitacao dos campos do Associativo passou a explicitar
+  60 s por etapa, cobrindo a latencia observada no host sem remover assercoes.
+- A recaptura integral, executada sem processo concorrente no host, aprovou
+  154 checks responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes
+  visuais e 110 checks de zoom. A promocao foi transacional e as fixtures e a
+  conta efemera foram removidas. O resultado identifica o commit de captura
+  `2fbb35b`, confirma `worktreeDirtyAtCapture: false` e registra `passed: true`.
+
+## 2026-10-06 - Integracao da baseline com a main
+
+- A `main` avancou para `a89a93c` com a correcao anual e visual do Associativo.
+  A branch integrou esse commit sem descartar a matriz de acessos; os conflitos
+  ficaram restritos a historicos, lockfile e manifesto visual.
+- O primeiro build incremental ainda continha o CSS anterior do Associativo,
+  com atraso de 4,5 s entre os cards. Um build integral sem `.next` confirmou o
+  CSS atual, sem o atraso, e a navegacao passou nas dez larguras de cada um dos
+  quatro simuladores, inclusive 375, 1180 e 1440 px.
+- A captura completa posterior sofreu timeout de teclado enquanto outro ensaio
+  elevava a carga do host acima de 200. Nenhuma referencia foi promovida nessa
+  tentativa. O manifesto combina explicitamente as duas promocoes limpas e
+  disjuntas: 11 imagens do Associativo em `e0e0ce9` e 11 de Usuarios em
+  `f1df3d6`; os hashes foram recalculados e 27 contratos passaram.
+- A uniao registra sua proveniencia no proprio resultado. A CI limpa precisa
+  recapturar todas as 242 comparacoes e permanece obrigatoria antes do merge.
+
+## 2026-10-06 - Revisao visual da matriz de acessos
+
+- A CI `37507333920` aprovou validacao, restore, migrations, 1.099 pgTAP,
+  advisors, build e os 19 cenarios E2E. O unico bloqueio ficou na matriz
+  visual de `/admin/usuarios`: as referencias anteriores terminavam antes da
+  nova matriz completa de 23 permissoes.
+- As onze capturas afetadas foram revisadas antes de qualquer promocao. A
+  revisao encontrou os selos de acesso herdado comprimidos no modo somente
+  leitura; a grade agora reserva a largura do selo no desktop e o move para
+  uma linha propria no celular.
+- O limite de densidade continua globalmente em 1.125 px e recebe uma excecao
+  estreita de 2.500 px somente para a tela de usuarios, cuja altura medida foi
+  2.486 px em 1440 px. Nenhum predicado funcional, de Axe, overflow, tema,
+  teclado ou zoom foi removido.
+- A recaptura limpa no commit `f1df3d6` aprovou 154 cenarios responsivos, 88 de
+  tema, 242 auditorias Axe/comparacoes e 110 verificacoes de zoom. Somente as
+  onze referencias de `/admin/usuarios` mudaram; as outras 231 imagens foram
+  preservadas pelo promotor transacional.
+
+## 2026-10-06 - Gates de release sincronizados com a nova matriz
+
+- A segunda CI do PR (`37501848220`) aprovou validate, banco, build e advisors,
+  mas bloqueou a publicação porque o ensaio de restore ainda esperava 1.042
+  pgTAP e o QA RLS/E2E ainda provisionava os nove papéis antigos.
+- O restore agora exige os 1.099 testes atuais. Os fixtures, escopos, páginas,
+  menus, rotas diretas e negações foram atualizados para Master, Administrador,
+  Coordenador, Gerente House, Gerente Imob, Corretor House, Corretor Imob e o
+  estado interno `pending`.
+- Os dois gates que sobem o build local passaram a usar o runtime standalone
+  gerado pelo Next, com os mesmos diretórios `public` e `.next/static` copiados
+  pela imagem produtiva.
+- A jornada real local concluiu 19 cenários Playwright e um skip previsto. Os
+  oito perfis atravessaram 23 rotas protegidas; recuperação, MFA, navegação,
+  RLS, Canal de Parcerias, Ranking e simuladores mantiveram as fronteiras. O
+  relatório final registrou nove identidades removidas, zero papel legado
+  aprovado, oito negações anônimas e zero linha anônima.
+
+## 2026-10-06 - Hardening da RPC em lote
+
+- A revisão de segurança do diff confirmou uma janela concorrente entre a
+  checagem inicial de `private.can_manage_user` e o lock do perfil alvo. No
+  schema completo, o trigger já protegia escritas com linha; o ramo `inherit`
+  sem override ainda podia registrar auditoria e sucesso fora do escopo atual.
+- A RPC agora mantém o precheck e repete a mesma decisão imediatamente após o
+  `FOR UPDATE`, antes de atividade, aprovação, hierarquia, overrides ou
+  auditoria. O helper continua opcional para suportar o schema produtivo
+  legado sem a foundation de escopos.
+- Contratos focados aprovados: três Vitest e 57 pgTAP. Uma prova real com duas
+  sessões no Supabase local moveu o alvo para fora do escopo enquanto o lote
+  aguardava o lock; a chamada terminou em SQLSTATE `42501` e persistiu zero
+  override e zero auditoria. O reset posterior removeu todas as fixtures.
+- Fechamento local aprovado: formato, lint, tipos, inventário, segredos, build,
+  1.980 Vitest, oito testes Node e 1.099 pgTAP; lint e advisors de segurança e
+  desempenho do banco não encontraram problemas.
+- A primeira CI do PR foi bloqueada no audit por advisories publicados para
+  `source-map-js` 1.2.1 e `sharp` 0.35.4. A auditoria local atualizada também
+  expôs o SDK MCP 1.30.1. O candidato sobe apenas para as primeiras versões
+  corrigidas: 1.2.2, 0.35.5 e 1.31.0, respectivamente.
+- `pnpm audit --audit-level high` passou sem vulnerabilidades conhecidas após a
+  atualização. Formato, lint, tipos, 1.980 Vitest, oito testes Node, build,
+  1.099 pgTAP, inventário e varredura de segredos foram repetidos e aprovados.
+
+## 2026-10-05 - Papéis por canal e permissões em lote
+
+- Pedido consolidado em sete papéis de negócio: Master, Administrador,
+  Coordenador, Gerente House, Gerente Imob, Corretor House e Corretor Imob.
+  `pending` permanece interno; oito papéis genéricos/descontinuados deixam de
+  ser atribuíveis e perdem grants herdados.
+- A matriz separa Geral, Com Canal Imob e Sem Canal Imob. Coordenador e perfis
+  Imob veem Com Canal Imob e Parcerias; perfis House veem Sem Canal Imob e
+  Ranking. Apenas Master/Admin veem Geral e administram acessos.
+- A proteção de pares continua estrita: Administrador não cria, desativa nem
+  altera outro Administrador e não modifica o próprio acesso. Ações exclusivas
+  de Master e motores comerciais permanecem fechados.
+- A tela de usuários passa a usar lista + detalhe e edição múltipla de exceções,
+  com estados herdado/exceção explícitos e um único motivo por lote. A RPC
+  correspondente valida todas as chaves e confirma ou reverte o lote inteiro.
+- Preflight remoto somente leitura confirmou três contas em papéis legados
+  (`broker` 1, `user` 2), sem ler identidades. Elas não serão convertidas por
+  suposição; exigem reclassificação explícita para House ou Imob.
+- Produção ainda não possui a foundation local de onboarding/escopos. A
+  migration foi desenhada para o schema remoto atual e para o reset completo;
+  nenhuma mutação remota foi executada.
+- Gates locais aprovados: lint, tipos, formato, inventário, build, 1.980 testes
+  Vitest + oito Node e 1.099 pgTAP. Jornada autenticada 1440×1000 no tema
+  Escuro, com Corretor Imob selecionado, passou sem violações Axe. Cinco contas
+  e escopos sintéticos foram removidos e a limpeza foi comprovada por contagem
+  zero.
+
 ## 2026-10-06 - Consulta de repasse por FID
 
 - Branch `codex/repasse-map`, base `a22f4dc`. A imagem fornecida pelo usuário foi
@@ -7,9 +148,10 @@
 - Contrato confirmado na aba `Table 1`: atualização em `A1` e colunas `A:F` para
   FID, empreendimento, etapa, status, nome do cliente e motivo. Nenhum dado real
   foi persistido em fixture, documentação ou artefato versionado.
-- A guia fica sob o Dashboard autorizado e exige a permissão Master-only
-  `crm.partnerships.view` no Proxy, na página e na Server Action. O gate de release
-  também é revalidado na ação. Assim o FID segue no corpo POST, não em URL ou referrer.
+- A guia fica sob o Dashboard autorizado e exige papel `master` junto de
+  `crm.partnerships.view` no Proxy, na página, na navegação e na Server Action.
+  O gate de release também é revalidado na ação. Assim o FID segue no corpo POST,
+  não em URL ou referrer.
 - O DAL consulta no servidor o datasource CSV público do Google, com documento,
   `gid`, `headers=0` e intervalos fixos, `no-store`, timeout de 8 segundos, leitura
   limitada a 200 KB, bloqueio de redirects, validação dos seis cabeçalhos e DTO

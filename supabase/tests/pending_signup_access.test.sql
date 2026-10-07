@@ -181,7 +181,7 @@ select throws_ok(
 select throws_ok(
   $$select public.approve_user_access(
     '91000000-0000-4000-8000-000000000001',
-    'broker',
+    'broker_house',
     array['00000000-0000-4000-8000-000000000001']::uuid[],
     'Self approval attempt'
   )$$,
@@ -301,12 +301,12 @@ select is(
   (
     public.approve_user_access(
       '91000000-0000-4000-8000-000000000003',
-      'real_estate',
+      'admin',
       array['93000000-0000-4000-8000-000000000001']::uuid[],
       'Reconcile inactive legacy fixture'
     ) ->> 'role_key'
   ),
-  'real_estate',
+  'admin',
   'Master reconciles an inactive legacy-review account through guarded approval'
 );
 
@@ -327,7 +327,7 @@ select is(
     from public.user_roles
     where user_id = '91000000-0000-4000-8000-000000000003'
   ),
-  'real_estate',
+  'admin',
   'legacy reconciliation assigns the requested compatible role'
 );
 

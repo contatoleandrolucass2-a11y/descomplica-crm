@@ -1,5 +1,85 @@
 # Changelog
 
+## 2026-10-07 - Repasse compativel com os novos papeis
+
+- Integra a rota Repasse da `main` sem ampliar seu publico quando Parcerias
+  passa a ser herdada por Coordenador e perfis Imob.
+- Exige papel `master` e `crm.partnerships.view` em conjunto no Proxy,
+  navegacao, pagina e Server Action; permissao isolada continua insuficiente.
+- Atualiza a matriz de smoke para os oito perfis atuais e 24 rotas protegidas.
+
+## 2026-10-06 - Evidencia movel estabilizada
+
+- Limita o e-mail do cabecalho de Usuarios a duas linhas no celular, evitando
+  que o identificador sintetico altere a altura total entre ambientes.
+- Torna idempotente a resposta tardia da fixture de estoque no QA do
+  Associativo quando o navegador ja encerrou a requisicao durante uma
+  navegacao, sem suprimir outros erros.
+- Aguarda explicitamente por ate 60 s a habilitacao de cada campo do fluxo
+  Associativo no gate visual, preservando todas as verificacoes funcionais.
+- Atualiza somente as referencias de Usuarios em 320 e 375 px apos a matriz
+  autenticada completa aprovar responsividade, temas, Axe, zoom e comparacoes.
+
+## 2026-10-06 - Baseline combinada de Associativo e acessos
+
+- Integra as onze referencias do Associativo publicadas na `main` com as onze
+  referencias revisadas de `/admin/usuarios`, preservando as outras 220.
+- Registra no manifesto os dois commits de captura e exige uma comparacao
+  integral limpa na CI antes do merge, sem alterar tolerancias ou predicates.
+
+## 2026-10-06 - Acabamento responsivo da matriz de acessos
+
+- Impede que os selos de permissao herdada sejam cortados na consulta somente
+  leitura: no desktop o texto cede espaco ao estado e, no celular, o estado
+  ocupa uma linha propria.
+- Reconhece a altura deliberada da matriz completa somente em
+  `/admin/usuarios`, preservando o limite de densidade das demais rotas e todos
+  os checks funcionais, visuais e de acessibilidade.
+
+## 2026-10-06 - Gates da matriz de acessos
+
+- Sincroniza o ensaio de restore com os 1.099 testes pgTAP atuais.
+- Atualiza o QA RLS e a matriz Playwright para os seis papéis atribuíveis,
+  Master e o estado interno pendente, cobrindo as diferenças entre House e
+  Imob em Dashboard, Ranking e Canal de Parcerias.
+- Inicia os gates autenticados pelo runtime standalone produzido pelo Next,
+  igualando o caminho de execução local ao empacotamento da imagem Docker.
+- Mantém fixtures sintéticas, limpeza comprovada e negação de papéis
+  aposentados, sem reduzir testes ou criar exceções na CI.
+
+## 2026-10-06 - Revalidação de escopo na edição em lote
+
+- Revalida o escopo administrável depois de bloquear o perfil alvo, impedindo
+  que uma mudança concorrente de escopo produza exceção ou auditoria com uma
+  decisão de autorização anterior.
+- Mantém a checagem anterior ao lock contra oráculos de metadados e preserva a
+  compatibilidade do schema produtivo legado, onde o helper de escopo ainda
+  não existe.
+- Adiciona contratos Vitest e pgTAP para exigir as duas validações na ordem
+  correta e uma prova concorrente local com resultado `42501`, zero override e
+  zero auditoria.
+- Atualiza `sharp`, `source-map-js` transitivo e o SDK MCP transitivo para as
+  primeiras versões corrigidas depois que advisories novos bloquearam o gate
+  de auditoria da CI; nenhuma dependência nova foi adicionada.
+
+## 2026-10-05 - Papéis por canal e permissões em lote
+
+- Substitui as opções genéricas por Coordenador, Gerente House, Gerente Imob,
+  Corretor House e Corretor Imob; papéis removidos ficam históricos, não
+  atribuíveis e sem acesso herdado.
+- Separa no servidor e no banco as visões Geral, Com Canal Imob e Sem Canal
+  Imob. Ranking permanece nos papéis House; Canal de Parcerias fica com
+  Coordenador e papéis Imob.
+- Mantém Administração abaixo de Master: um Administrador não altera a si nem
+  outro Administrador e os perfis operacionais não concedem permissões.
+- Reformula Usuários e acessos em duas colunas, com busca, seleção de conta,
+  matriz agrupada, seleção múltipla e aplicação atômica de permitir, negar ou
+  restaurar o padrão.
+- Adiciona RPC auditada para exceções em lote e RLS por visão do dashboard, sem
+  liberar simuladores, políticas comerciais ou tabelas Qlik.
+- Preserva contas legadas para reclassificação manual, sem presumir se cada uma
+  pertence ao canal House ou Imob.
+
 ## 2026-10-06 - Consulta de repasse da assessoria M.A.P
 
 - Adiciona a guia protegida Repasse sob o Dashboard para consulta exata por FID.
@@ -8,11 +88,11 @@
 - Consulta o datasource CSV público da planilha somente no servidor, sem cache,
   credencial Google ou nova dependência, com timeout, limite de resposta em
   streaming, validação de cabeçalhos, projeção mínima e bloqueio de FID duplicado.
-- Restringe a navegação e a consulta à permissão Master-only
-  `crm.partnerships.view`, repete o gate na Server Action e mantém nomes e motivos
-  fora da URL.
+- Restringe navegação e consulta à combinação explícita de papel `master` com
+  `crm.partnerships.view`, repete o gate na Server Action e mantém nomes e
+  motivos fora da URL.
 - Inclui Repasse na matriz global de 24 rotas: Master exige `200` e link no
-  cabeçalho; os outros oito perfis exigem `403` na rota direta.
+  cabeçalho; os outros sete perfis exigem `403` na rota direta.
 - Estabiliza fontes e geometria responsiva antes das medições de overflow e Axe,
   preservando os mesmos limites e registrando somente diagnósticos sanitizados.
 - Entrega formulário, carregamento, inválido, não encontrado, conflito,

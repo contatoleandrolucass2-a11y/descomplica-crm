@@ -119,7 +119,7 @@ beforeEach(() => {
 });
 
 describe("authorized hierarchical navigation", () => {
-  it("adds Repasse only under the active Dashboard for users with partnership access", () => {
+  it("adds Repasse only under the active Dashboard for Master with partnership access", () => {
     const dashboard: AppPage = {
       ...simulationParent,
       key: "crm.dashboard",
@@ -130,6 +130,7 @@ describe("authorized hierarchical navigation", () => {
     };
     const context: AuthorizationContext = {
       ...viewerContext,
+      roleKey: "master",
       permissions: ["pages.view", "crm.dashboard.view", "crm.partnerships.view"],
     };
     const result = extendAuthorizedNavigationWithReleasedPages([dashboard], context);
@@ -139,6 +140,12 @@ describe("authorized hierarchical navigation", () => {
       "Dashboard",
       "Repasse",
     ]);
+    expect(
+      extendAuthorizedNavigationWithReleasedPages([dashboard], {
+        ...context,
+        roleKey: "coordinator",
+      }),
+    ).toEqual([dashboard]);
     expect(
       extendAuthorizedNavigationWithReleasedPages([dashboard], {
         ...context,

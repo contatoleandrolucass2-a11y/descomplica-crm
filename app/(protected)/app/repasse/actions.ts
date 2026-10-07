@@ -21,11 +21,13 @@ export async function lookupRepasseAction(
   if (
     gate?.releaseEnabled !== true ||
     gate.pageKey !== "crm.repasse" ||
-    gate.permission !== "crm.partnerships.view"
+    gate.permission !== "crm.partnerships.view" ||
+    gate.requiredRole !== "master"
   ) {
     forbidden();
   }
-  await requirePermission("crm.partnerships.view");
+  const context = await requirePermission("crm.partnerships.view");
+  if (context.roleKey !== gate.requiredRole) forbidden();
 
   const parsed = fidSchema.safeParse(formData.get("fid"));
   if (!parsed.success) {

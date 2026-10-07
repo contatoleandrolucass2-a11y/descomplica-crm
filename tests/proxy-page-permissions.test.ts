@@ -13,7 +13,7 @@ import { proxy } from "@/proxy";
 
 const origin = "https://crm.example.test";
 
-function configureSession(permissions: string[]) {
+function configureSession(permissions: string[], roleKey = "master") {
   const response = NextResponse.next();
   response.headers.set("Cache-Control", "private, no-store");
   response.cookies.set("rotated-session-proof", "opaque", {
@@ -26,7 +26,7 @@ function configureSession(permissions: string[]) {
     data: { user: { id: "81000000-0000-4000-8000-000000000001" } },
     error: null,
   });
-  mocks.rpc.mockResolvedValue({ data: [{ permissions }], error: null });
+  mocks.rpc.mockResolvedValue({ data: [{ permissions, role_key: roleKey }], error: null });
   mocks.updateSession.mockResolvedValue({
     response,
     supabase: { auth: { getUser: mocks.getUser }, rpc: mocks.rpc },
@@ -87,6 +87,15 @@ describe("pre-stream page permission gates", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("keeps Repasse Master-only when another role has partnership access", async () => {
+    configureSession(["crm.partnerships.view"], "coordinator");
+
+    const response = await proxy(new NextRequest(`${origin}/app/repasse`));
+
+    expect(response.status).toBe(403);
+    expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);
   });
 
   it("lets the removed legacy public snapshot path resolve as a normal 404", async () => {

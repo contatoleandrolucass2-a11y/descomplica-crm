@@ -7,6 +7,7 @@ import { createClient } from "@/lib/auth/supabase/server";
 import { requirePermission } from "@/lib/authorization/guards";
 import {
   requireCanAssignRole,
+  requireCanGrantAllPermissions,
   requireCanGrantPermission,
   requireCanManageTargetLevel,
 } from "@/lib/authorization/hierarchy";
@@ -81,7 +82,7 @@ export async function assignRoleAction(
     const userId = userIdSchema.parse(targetUserId);
     const roleKeyInput = z.string().parse(formData.get("roleKey"));
 
-    if (!isRoleKey(roleKeyInput) || roleKeyInput === "master") {
+    if (!isRoleKey(roleKeyInput) || !ROLES[roleKeyInput].assignable) {
       return failure("Esse papel não pode ser atribuído pela interface.");
     }
     if (userId === actor.userId) return failure("Você não pode alterar o próprio papel.");
@@ -145,6 +146,55 @@ export async function setPermissionOverrideAction(
     if (error) return failure();
     refreshUsersAdmin();
     return { status: "success", message: "Exceção individual atualizada e auditada." };
+  } catch (error) {
+    if (error instanceof z.ZodError) return failure(error.issues[0]?.message);
+    return failure("Operação não autorizada ou inválida.");
+  }
+}
+
+export async function setPermissionOverridesBulkAction(
+  targetUserId: string,
+  _previousState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  try {
+    const actor = await requirePermission("permissions.manage");
+    const userId = userIdSchema.parse(targetUserId);
+    const permissionKeys = z
+      .array(z.string())
+      .min(1)
+      .max(100)
+      .parse(formData.getAll("permissionKeys"));
+    const effect = z.enum(["allow", "deny", "inherit"]).parse(formData.get("effect"));
+    const reason = readRequiredReason(formData);
+
+    if (new Set(permissionKeys).size !== permissionKeys.length) {
+      return failure("Selecione cada permissão apenas uma vez.");
+    }
+    if (!permissionKeys.every(isPermissionKey)) return failure("Permissão inválida.");
+    if (userId === actor.userId) return failure("Você não pode alterar o próprio acesso.");
+
+    const typedPermissionKeys = permissionKeys as PermissionKey[];
+    const { supabase, target } = await getTargetContext(userId);
+    requireCanManageTargetLevel(actor, target.level);
+    requireCanGrantAllPermissions(actor, typedPermissionKeys);
+
+    const { error } = await supabase.rpc("set_user_permission_overrides_bulk", {
+      target_user_id: userId,
+      permission_keys: typedPermissionKeys,
+      effect,
+      reason,
+    });
+
+    if (error) return failure();
+    refreshUsersAdmin();
+    return {
+      status: "success",
+      message:
+        effect === "inherit"
+          ? "Exceções removidas; voltou a valer a regra de cada papel."
+          : "Exceções individuais atualizadas e auditadas.",
+    };
   } catch (error) {
     if (error instanceof z.ZodError) return failure(error.issues[0]?.message);
     return failure("Operação não autorizada ou inválida.");
@@ -226,8 +276,6 @@ export async function approveUserAccessAction(
   try {
     const actor = await requirePermission("users.manage");
     await requirePermission("roles.manage");
-    if (actor.roleKey !== "master") return failure("A aprovação é exclusiva do perfil Master.");
-
     const userId = userIdSchema.parse(targetUserId);
     const roleKeyInput = z.string().parse(formData.get("roleKey"));
     const reportingScopeIds = z
@@ -236,7 +284,7 @@ export async function approveUserAccessAction(
       .max(20)
       .parse(formData.getAll("reportingScopeIds"));
     const reason = readRequiredReason(formData);
-    if (!isRoleKey(roleKeyInput) || ["master", "pending", "user"].includes(roleKeyInput)) {
+    if (!isRoleKey(roleKeyInput) || !ROLES[roleKeyInput].assignable) {
       return failure("Esse papel não pode ser aprovado pela interface.");
     }
     if (userId === actor.userId) return failure("Você não pode aprovar a própria conta.");

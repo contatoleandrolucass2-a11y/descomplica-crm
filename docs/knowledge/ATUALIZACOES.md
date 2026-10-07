@@ -4,6 +4,137 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: reutilizar permissao exige revisar o novo conjunto de grants
+
+- Status: validado localmente; fonte: integracao de `73b20d0`, matriz de papeis
+  e contratos de Repasse.
+- Uma rota Master-only reutilizava `crm.partnerships.view` porque, na base em
+  que nasceu, apenas Master tinha a chave. Depois da separacao House/Imob, essa
+  mesma permissao e legitima para Administrador, Coordenador e perfis Imob no
+  Canal de Parcerias.
+- O boundary de Repasse agora exige papel `master` mais a permissao no Proxy,
+  navegacao, pagina e Server Action. Assim excecoes ou grants de Parcerias nao
+  abrem a consulta de FID. O E2E deve manter 24 rotas por oito perfis.
+
+## 2026-10-06: identificadores sinteticos nao podem variar a altura da baseline
+
+- Status: validado localmente; fonte: CI `37532674180`,
+  `admin-canvas.css` e matriz autenticada integral.
+- A CI aprovou todos os gates funcionais, mas um e-mail sintetico quebrou em
+  duas linhas no runner e em tres na referencia de 375 px. A diferenca de
+  21 px era geometrica, nao uma regressao de autorizacao.
+- Cabecalhos moveis com identificador variavel agora reservam duas linhas e
+  limitam o excesso, mantendo o texto completo na arvore acessivel. As
+  referencias de Usuarios em 320 e 375 px foram recapturadas.
+- Interceptacoes Playwright que aguardam uma fixture podem encontrar a rota ja
+  encerrada pela navegacao. Somente o erro exato `Route is already handled`
+  pode ser tratado como cancelamento tardio; os demais erros devem continuar
+  falhando o gate.
+- Em host sem swap, a habilitacao sequencial do Associativo pode exceder 30 s
+  sob carga normal. O gate aguarda explicitamente ate 60 s por campo, sem
+  relaxar o estado esperado nem a continuidade do calculo.
+- A recaptura integral aprovou 154 checks responsivos, 88 de tema, 242 Axe,
+  242 comparacoes e 110 de zoom no commit `2fbb35b`, com arvore limpa no inicio
+  e `passed: true`. Capturas pesadas devem rodar sem outro gate concorrente na
+  VPS, que nao possui swap.
+
+## 2026-10-06: build incremental pode ocultar CSS integrado entre worktrees
+
+- Status: pendente_validacao na CI; fonte: integracao de `a89a93c` na branch de
+  acessos e artefatos compilados em `.next/static`.
+- Depois do merge, o fonte continha o novo brilho continuo do Associativo, mas
+  o chunk CSS incremental ainda continha o atraso antigo de `4.5s` em
+  `animation-delay`. Mover o `.next` gerado e reconstruir do zero produziu o
+  chunk correto; o contrato de pixels focado e as dez larguras da navegacao
+  passaram.
+- Capturas locais extensas nao devem ser avaliadas sob contencao extrema. Um
+  ensaio paralelo elevou a carga acima de 200 e causou timeout de teclado sem
+  mudanca no produto. Nessa situacao, preservar os gates, registrar a uniao de
+  promocoes limpas disjuntas e exigir o candidato integral da CI isolada.
+- O manifesto combinado identifica `e0e0ce9` para o Associativo e `f1df3d6`
+  para Usuarios. Seus hashes e 27 contratos de referencia passaram; a CI final
+  ainda deve comprovar todas as 242 comparacoes antes do merge.
+
+## 2026-10-06: baseline de tela longa deve preservar legibilidade interna
+
+- Status: validado; fonte: candidato visual da CI `37507333920` e
+  `scripts/qa/authenticated-visual.mjs`.
+- Uma mudanca intencional de altura nao torna toda diferenca aceitavel. Revisar
+  as capturas completas revelou que a grade somente leitura usava a primeira
+  coluna para o texto e deixava largura insuficiente ao selo na segunda.
+- A correcao explicita o modo editavel na linha: consulta usa texto + selo no
+  desktop e empilha o selo no celular. O limite global de densidade permanece
+  1.125 px; apenas `/admin/usuarios` admite 2.500 px para a matriz de 23
+  permissoes, medida em 2.486 px no candidato anterior.
+- A captura limpa no commit `f1df3d6` aprovou 154 cenarios responsivos, 88 de
+  tema, 242 auditorias Axe/comparacoes e 110 checks de zoom. O promotor mudou
+  somente as onze referencias de `/admin/usuarios` e preservou as outras 231.
+  Axe, overflow, temas, teclado e zoom permaneceram obrigatorios.
+
+## 2026-10-06: gates de release também são consumidores da matriz de papéis
+
+- Status: validado localmente; fonte: CI `37501848220`,
+  `scripts/qa/local-rls-api.mjs`, `e2e/release-candidate.spec.ts` e ensaio de
+  restore.
+- Alterar RBAC exige atualizar fixtures, escopos, conjuntos de rotas, menus e
+  contagens do QA de release. Manter papéis aposentados no harness pode bloquear
+  a CI corretamente, mesmo quando migrations e testes unitários passam.
+- A contagem consolidada do pgTAP é um contrato fail-closed do restore. Ela
+  deve acompanhar novos planos deliberados; o valor atual é 1.099 em 27
+  arquivos, sem alterar evidências históricas já versionadas.
+- Com `output: standalone`, gates locais devem iniciar `.next/standalone/server.js`
+  e preparar `public` e `.next/static`, reproduzindo a imagem Docker. Isso evita
+  depender do comportamento de compatibilidade de `next start`.
+- Evidência: 19 Playwright aprovados e um skip previsto, oito perfis em 23 rotas,
+  nove identidades sintéticas removidas, zero papel legado aprovado, oito
+  acessos anônimos negados e zero linha exposta. CI final e publicação seguem
+  pendentes.
+
+## 2026-10-06: autorização de escopo precisa ser repetida depois do lock
+
+- Status: validado localmente; fonte: revisão de segurança da RPC
+  `set_user_permission_overrides_bulk` e branch
+  `codex/roles-permissions-bulk-layout`.
+- Um precheck antes de `FOR UPDATE` evita oráculos de metadados, mas não prova
+  que o alvo continua gerenciável quando a transação retoma. Repetir a mesma
+  decisão depois do lock fecha a janela antes de qualquer leitura sensível,
+  override ou auditoria.
+- Triggers de linha são defesa adicional, não substituem o guard da RPC:
+  operações sem linha afetada, como `inherit` sem override, ainda podem chegar
+  ao retorno e à auditoria se a autorização não for revalidada no boundary.
+- Evidência focada: três Vitest e 57 pgTAP aprovados; prova local com duas
+  sessões retornou SQLSTATE `42501` após mudança concorrente de escopo e deixou
+  zero override e zero auditoria. O schema legado continua no ramo sem helper.
+  Fechamento: formato, lint, tipos, inventário, segredos, build, 1.980 Vitest,
+  oito testes Node e 1.099 pgTAP aprovados; lint e advisors do banco sem achados.
+- A CI pode passar localmente e receber advisories novos antes da publicação.
+  O audit do PR bloqueou `source-map-js` 1.2.1 e `sharp` 0.35.4; a consulta
+  local seguinte também encontrou o SDK MCP 1.30.1. Atualizar somente para as
+  versões corrigidas mínimas e repetir todos os gates, sem criar ignores.
+  `pnpm audit --audit-level high` passou sem vulnerabilidades conhecidas nas
+  versões 1.2.2, 0.35.5 e 1.31.0; suites obrigatórias foram repetidas.
+
+## 2026-10-05: papéis por canal exigem permissão também no read model
+
+- Status: validado localmente; fonte: matriz aprovada de papéis e branch
+  `codex/roles-permissions-bulk-layout`.
+- Ocultar uma guia de dashboard não separa os dados. Geral, Com Canal Imob e
+  Sem Canal Imob precisam de chaves próprias, consulta server-side limitada e
+  policy RLS por `view_key` nas tabelas de resumo, métricas e destaques.
+- Papéis genéricos não provam o canal. Ao substituir Gerente/Corretor por House
+  e Imob, manter chaves antigas sem grants e exigir reclassificação explícita é
+  mais seguro que conceder ranking ou parcerias por inferência.
+- Exceções múltiplas devem chegar ao banco em uma RPC atômica. Validar todas as
+  permissões e a hierarquia antes da primeira escrita evita salvar apenas parte
+  da seleção e mantém uma trilha de auditoria coerente.
+- Produção pode estar atrás da árvore local de migrations. Uma convergência
+  nova precisa ser ensaiada tanto no reset completo quanto sobre o schema
+  remoto restaurado; `db push --include-all` e `migration repair` não resolvem
+  essa diferença.
+- Evidências: 1.980 testes Vitest, oito Node, 1.099 pgTAP, lint, tipos, build e
+  jornada autenticada sem violações Axe. Autorização da migration,
+  reclassificação das três contas legadas e publicação continuam pendentes.
+
 ## 2026-10-06: origem pública de repasse exige risco explícito e isolamento
 
 - Status: pendente_validacao; fonte: implementação, revisão independente e decisão
@@ -20,9 +151,10 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   FIDs; carregar as colunas pessoais apenas quando houver uma correspondência
   exata. Duplicidade deve falhar antes da segunda leitura, e a segunda leitura
   precisa revalidar unicidade e FID se as linhas mudarem.
-- Server Action precisa repetir release gate e permissão, mesmo quando Proxy e
-  página já validam. Nesta jornada a permissão existente Master-only
-  `crm.partnerships.view` limita o acesso pela aplicação sem migration remota.
+- Server Action precisa repetir release gate, papel `master` e permissão, mesmo
+  quando Proxy e página já validam. Nesta jornada `crm.partnerships.view` é
+  compartilhada com papéis Imob; somente a combinação explícita mantém Repasse
+  restrito sem migration remota.
 - Evidências: `tests/repasse.test.ts`, `tests/repasse-action.test.ts`,
   `scripts/qa/repasse.mjs` e `docs/runbooks/repasse-google-sheet.md`. A matriz
   sintética passou 12 combinações de viewport/tema, Axe, teclado e quatro estados.
@@ -41,7 +173,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   de recursos e build das 44 rotas no estado final local, mas ainda exige nova CI
   e imagem promovível.
 - A primeira CI integrada detectou o inventário E2E antigo de 23 rotas. Toda rota
-  nova precisa entrar no contrato dos nove perfis: Repasse retorna `200` somente
+  nova precisa entrar no contrato dos oito perfis: Repasse retorna `200` somente
   para Master e `403` para os demais; sua captura visual permanece no QA dedicado.
 - Ao redimensionar uma página já renderizada, medir overflow no mesmo instante
   pode observar geometria intermediária. O QA deve aguardar fontes e amostras

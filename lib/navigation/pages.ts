@@ -123,6 +123,8 @@ export function extendAuthorizedNavigationWithReleasedPages(
     dashboardParent &&
     repasseGate?.releaseEnabled &&
     repasseGate.pageKey === "crm.repasse" &&
+    repasseGate.requiredRole === "master" &&
+    context.roleKey === repasseGate.requiredRole &&
     context.permissions.includes(repasseGate.permission) &&
     !pages.some((page) => page.key === repasseGate.pageKey || page.path === repasseGate.path)
   ) {
@@ -243,6 +245,7 @@ function pageGateAuthorizesNavigation(page: AppPage, context: AuthorizationConte
     gate?.releaseEnabled === true &&
     gate.pageKey === page.key &&
     gate.permission === page.permissionKey &&
+    (!gate.requiredRole || context.roleKey === gate.requiredRole) &&
     context.permissions.includes(gate.permission)
   );
 }

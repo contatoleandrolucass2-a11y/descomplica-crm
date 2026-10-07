@@ -2,11 +2,11 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 42 arquivos de
-migration: 34 etapas canônicas e sete versões remotas reconciliadas por markers
-ou convergências seguras. Nenhuma regra, política ou valor comercial é seedado.
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 44 arquivos de
+migration entre etapas canônicas, markers históricos sanitizados e
+convergências forward. Nenhuma regra, política ou valor comercial é seedado.
 O rebuild contém 39 tabelas públicas,
-17 privadas, 12 papéis, 26 permissões e 17 páginas autorizadas. Cinco jornadas
+20 privadas, 16 papéis, 29 permissões e 17 páginas autorizadas. Cinco jornadas
 de simulação permanecem fora de `app_pages`: Tabelão, as réplicas WF14 e WF15,
 WF16/Documentação e CAIXA. O catálogo HTTP versionado acrescenta essas rotas
 somente ao Master depois de autorizar o hub e `crm.simulators.view`, sem
@@ -59,6 +59,8 @@ nenhum cutover Qlik ou do read model v3 foi realizado.
 33. `20260824230058_auth_mfa_legal_foundation.sql`: recuperação de senha, MFA, sessão lembrada, consentimentos legais privados e convergência exata do catálogo produtivo de 17 páginas.
 34. `20260824230100_role_isolation_net_fail_closed.sql`: isolamento fail-closed das funções Auth/MFA por identidade, AAL e grants mínimos, sem alterar integrações ou motores.
 35. `20260901204113_multi_master_source_controlled.sql`: remove somente a unicidade legada de Master, preserva lookup indexado e restringe toda nova promoção ao bootstrap owner-only, versionado e auditado.
+36. `20260902004415_rename_wf13_simulador_associativo.sql`: converge o nome técnico da jornada WF13 sem alterar o gate Master-only.
+37. `20261005234936_reconcile_roles_dashboard_views_and_bulk_overrides.sql`: cria os papéis House/Imob explícitos, aposenta opções genéricas sem auto-mapeamento, separa as três visões do dashboard por RLS e adiciona a RPC auditada de exceções em lote, com revalidação opcional de escopo após o lock do perfil alvo.
 
 ## Desenvolvimento local
 

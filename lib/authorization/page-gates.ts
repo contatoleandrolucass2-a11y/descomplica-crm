@@ -1,10 +1,12 @@
 import type { PermissionKey } from "./permissions";
+import type { RoleKey } from "./roles";
 
 export interface ProtectedPageGate {
   pageKey: string;
   path: string;
   permission: PermissionKey;
   releaseEnabled: boolean;
+  requiredRole?: RoleKey;
 }
 
 // Covers the complete protected HTTP smoke inventory. Seventeen entries mirror
@@ -26,6 +28,7 @@ export const PROTECTED_PAGE_GATES = [
     path: "/app/repasse",
     permission: "crm.partnerships.view",
     releaseEnabled: true,
+    requiredRole: "master",
   },
   {
     pageKey: "crm.stage.opportunities",

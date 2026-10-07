@@ -53,6 +53,14 @@ describe("protected commercial page set", () => {
     expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(24);
   });
 
+  it("keeps Repasse explicitly Master-only in addition to its permission", () => {
+    expect(PROTECTED_PAGE_GATES.find(({ path }) => path === "/app/repasse")).toMatchObject({
+      permission: "crm.partnerships.view",
+      releaseEnabled: true,
+      requiredRole: "master",
+    });
+  });
+
   it("gates every supplemental simulator with the simulator permission and release state", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) =>

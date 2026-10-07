@@ -296,9 +296,9 @@ values
 update public.user_roles
 set role_key = case user_id
       when '81000000-0000-4000-8000-000000000002' then 'admin'
-      when '81000000-0000-4000-8000-000000000003' then 'manager'
-      when '81000000-0000-4000-8000-000000000004' then 'broker'
-      when '81000000-0000-4000-8000-000000000005' then 'broker'
+      when '81000000-0000-4000-8000-000000000003' then 'manager_house'
+      when '81000000-0000-4000-8000-000000000004' then 'broker_house'
+      when '81000000-0000-4000-8000-000000000005' then 'broker_house'
     end,
     assigned_by = '81000000-0000-4000-8000-000000000001'
 where user_id between
@@ -1909,16 +1909,16 @@ select is(
        'crm.dashboard.view', 'crm.stages.view', 'crm.ranking.view',
        'crm.partnerships.view'
      )),
-  'admin:crm.dashboard.view,admin:crm.ranking.view,admin:crm.stages.view,'
-    || 'broker:crm.dashboard.view,broker:crm.ranking.view,broker:crm.stages.view,'
-    || 'broker_lead:crm.dashboard.view,broker_lead:crm.ranking.view,'
-    || 'broker_lead:crm.stages.view,coordinator:crm.dashboard.view,'
-    || 'coordinator:crm.ranking.view,coordinator:crm.stages.view,'
-    || 'real_estate:crm.dashboard.view,real_estate:crm.ranking.view,'
-    || 'real_estate:crm.stages.view,supervisor:crm.dashboard.view,'
-    || 'supervisor:crm.ranking.view,supervisor:crm.stages.view,'
-    || 'user:crm.dashboard.view,user:crm.ranking.view,user:crm.stages.view',
-  'v3 work preserves the exact production v2 read baseline without partnerships'
+  'admin:crm.dashboard.view,admin:crm.partnerships.view,admin:crm.ranking.view,'
+    || 'admin:crm.stages.view,broker_house:crm.dashboard.view,'
+    || 'broker_house:crm.ranking.view,broker_house:crm.stages.view,'
+    || 'broker_imob:crm.dashboard.view,broker_imob:crm.partnerships.view,'
+    || 'broker_imob:crm.stages.view,coordinator:crm.dashboard.view,'
+    || 'coordinator:crm.partnerships.view,coordinator:crm.stages.view,'
+    || 'manager_house:crm.dashboard.view,manager_house:crm.ranking.view,'
+    || 'manager_house:crm.stages.view,manager_imob:crm.dashboard.view,'
+    || 'manager_imob:crm.partnerships.view,manager_imob:crm.stages.view',
+  'v3 work preserves the exact active House and Imob production v2 read baseline'
 );
 select is(
   (select string_agg(key || ':' || permission_key, ',' order by key)

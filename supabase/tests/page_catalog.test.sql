@@ -11,8 +11,8 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  18::bigint,
-  'eighteen platform and CRM permissions are seeded'
+  21::bigint,
+  'twenty-one platform and CRM permissions are seeded'
 );
 
 select is(
@@ -74,8 +74,8 @@ select is(
     from public.role_permissions rp
     where rp.permission_key = 'crm.partnerships.view'
   ),
-  array['master']::text[],
-  'only master inherits the dedicated partnership permission automatically'
+  array['admin', 'broker_imob', 'coordinator', 'manager_imob', 'master']::text[],
+  'Master, Admin, Coordinator and Imob roles inherit the partnership permission'
 );
 
 select is(
@@ -236,21 +236,29 @@ values (
   'real_estate'
 );
 
+insert into public.crm_teams (id, organization_id, team_key, name)
+values (
+  '12500000-0000-4000-8000-000000000001',
+  '12000000-0000-4000-8000-000000000001',
+  'page-catalog-house-team',
+  'Page Catalog House Team'
+);
+
 insert into public.crm_reporting_scopes (
   id,
   scope_key,
   scope_type,
-  organization_id
+  team_id
 )
 values (
   '13000000-0000-4000-8000-000000000001',
-  'page-catalog-real-estate',
-  'organization',
-  '12000000-0000-4000-8000-000000000001'
+  'page-catalog-house-team',
+  'team',
+  '12500000-0000-4000-8000-000000000001'
 );
 
 update public.user_roles
-set role_key = 'real_estate',
+set role_key = 'manager_house',
     assigned_by = '10000000-0000-0000-0000-000000000002'
 where user_id = '10000000-0000-0000-0000-000000000001';
 
@@ -289,7 +297,7 @@ select is(
     'crm.stage.sales',
     'crm.ranking'
   ]::text[],
-  'scoped real-estate role sees only its seven inherited production pages'
+  'scoped Gerente House sees only its seven inherited production pages'
 );
 
 select throws_ok(
