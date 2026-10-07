@@ -732,6 +732,10 @@
   --repasse-red-ink: #ffacb9;
 }
 
+:global(:root[data-theme="dark"]) .cardMeta {
+  color: var(--analytics-ink);
+}
+
 @keyframes repasse-drawer-in {
   from {
     opacity: 0;

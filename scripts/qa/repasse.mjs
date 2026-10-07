@@ -23,6 +23,11 @@ async function selectTheme(page, theme, width) {
 async function settleResponsiveLayout(page) {
   await page.evaluate(async () => {
     await document.fonts.ready;
+    const finiteAnimations = document.getAnimations().filter((animation) => {
+      const endTime = Number(animation.effect?.getComputedTiming().endTime);
+      return Number.isFinite(endTime) && animation.playState !== "finished";
+    });
+    await Promise.all(finiteAnimations.map((animation) => animation.finished.catch(() => null)));
     await new Promise((resolve) => {
       let previousSample = null;
       let stableSamples = 0;
@@ -234,8 +239,28 @@ export async function checkRepasse(page, origin, outputDirectory) {
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
           .analyze();
         if (accessibility.violations.length > 0) {
+          const targetNodes = accessibility.violations.flatMap((violation) =>
+            violation.nodes.slice(0, 6).map((node) => ({ violation, node })),
+          );
+          const targets = await Promise.all(
+            targetNodes.map(async ({ violation, node }) => ({
+              rule: violation.id,
+              target: node.target,
+              data: node.any.map((check) => check.data),
+              computed: await page.locator(String(node.target[0])).evaluate((element) => {
+                const rootStyle = getComputedStyle(document.documentElement);
+                return {
+                  theme: document.documentElement.dataset.theme,
+                  color: getComputedStyle(element).color,
+                  parentColor: getComputedStyle(element.parentElement).color,
+                  analyticsInk: rootStyle.getPropertyValue("--analytics-ink").trim(),
+                  analyticsMuted: rootStyle.getPropertyValue("--analytics-muted").trim(),
+                };
+              }),
+            })),
+          );
           process.stderr.write(
-            `[repasse] accessibility viewport=${viewport.width}x${viewport.height} theme=${theme} rules=${accessibility.violations.map((item) => item.id).join(",")}\n`,
+            `[repasse] accessibility viewport=${viewport.width}x${viewport.height} theme=${theme} rules=${accessibility.violations.map((item) => item.id).join(",")} targets=${JSON.stringify(targets)}\n`,
           );
         }
         assert.equal(
