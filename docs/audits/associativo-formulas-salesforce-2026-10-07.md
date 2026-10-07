@@ -1,6 +1,6 @@
 # Associativo: reconstrucao das formulas Salesforce
 
-Data: 2026-10-07. Status: implementado no candidato; publicacao pendente dos gates.
+Data: 2026-10-07. Status: publicado e verificado na imagem `4d73412`.
 Escopo: investigacao Salesforce somente leitura e correcao local autorizada do
 Associativo. Nenhuma proposta, politica ou dado remoto foi alterado.
 
@@ -334,3 +334,38 @@ Ambiente: Windows/PowerShell, Node 24.19.0 e pnpm 11.20.0.
   `12a99370849fde30539514c9e6f7afd34c829f474f4a4db20219bbe4adc05fa7`.
   Restore falhou por porta ocupada no runner e foi solicitado novamente;
   a proxima CI continua exigindo aprovacao integral no novo SHA.
+
+## Publicacao e verificacao final
+
+- PR [#165](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/165)
+  integrado com protecoes preservadas. SHA publicado:
+  `4d7341218e02ad59cd89bfa2cf2c188d1188b7c8`.
+- CI da main [37594420463](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/37594420463):
+  `validate`, `release-gates`, `isolated-restore` e `promotable-image` aprovados.
+  Lint, tipos, build, 2.235 testes Vitest e 15 Node aprovados; nove skips
+  existentes de plataforma/fixtures. Banco, autorizacao e restore isolado verdes.
+- QA autenticado final: 154 capturas responsivas, 88 de tema, 242 auditorias de
+  acessibilidade, 242 comparacoes com baseline e 110 verificacoes de zoom.
+  Nenhuma baseline alterada nem tolerancia visual ampliada. Continuidade
+  financeira completa aprovada, inclusive historico e indisponibilidade do estoque.
+- Artefato de imagem `11470342102`, construida somente na CI. SHA-256 do arquivo
+  `image.tar.gz`: `b283325fe03c8005c02764790e02f5c07297a8ad58d00a7f45bb0c05568f292e`.
+  Configuracao/ID CI: `sha256:eed7133a63839617d26b3adb91010264e7b90f0a4451a5cfc79f35f0244a7591`.
+  Manifesto/ID local: `sha256:e8a348a160f095c66486a3a98c07c90d175f49bde3ecba0a9debcc992c11daca`.
+  Verificados checksum, revision, manifestos, configuracao, camadas e RootFS.
+  Dois perfis de runtime aprovados na mesma imagem com fixtures isoladas.
+- Promocao serializada por lock e CAS, com backup privado verificado e rollback
+  preparado. Imagem anterior `3bcc3c4a4ad892df4e127bb53a4a5696c9d6dbed`.
+  Backup em
+  `/var/backups/descomplica-crm/releases/4d7341218e02ad59cd89bfa2cf2c188d1188b7c8.Vhj0Gt`.
+  Sem rebuild na VPS, migration, alteracao de proxy, n8n ou dados comerciais.
+- Health local/publico confirmou a nova versao; container saudavel. Estoque e
+  snapshot negaram acesso anonimo com 401; pagina protegida redirecionou com 307.
+- Conferencia autenticada em producao confirmou termino da obra somente leitura,
+  separacao pre/pos, deducao unica das anuais e resultado do exemplo autorizado
+  com as mesmas datas historicas. Nenhum erro de console capturado; nenhuma
+  proposta enviada/salva. Evidencia visual mantida localmente fora do Git.
+- As pendencias de CI descritas nas etapas anteriores sao historicas e foram
+  encerradas pelo run final acima. Permanecem os limites da amostra Salesforce
+  e do arredondamento interno declarados neste documento, sem alegar paridade
+  de todas as oportunidades inventariadas.

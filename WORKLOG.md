@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-07 - Publicacao e prova final do Associativo
+
+- PR #165 integrado; runtime publicado `4d7341218e02ad59cd89bfa2cf2c188d1188b7c8`.
+- CI `37594420463` integral aprovada, incluindo banco, restore, imagem e QA
+  autenticado. 2.235 Vitest e 15 Node aprovados; nove skips existentes.
+- Imagem unica conferida por toda a cadeia de hashes e dois perfis isolados.
+  Promocao com backup, lock, CAS e rollback preparado; sem rebuild na VPS.
+- Health, versao, protecao anonima e exemplo historico na pagina publicada
+  conferidos. Termino da obra veio do estoque e permaneceu somente leitura.
+  Nenhuma proposta enviada/salva; screenshot local nao versionado.
+- Registro documental posterior nao requer outro deploy nem reinicio da app.
+  Fontes, digests, backup e limites da amostra constam no audit financeiro.
+- Registro conferido localmente: formatacao, lint, tipos e build aprovados;
+  2.232 testes Windows aprovados, seis skips e as mesmas seis falhas POSIX
+  documentadas. A versao publicada foi validada integralmente na CI Linux.
+
 ## 2026-10-07 - Implementacao das formulas e data de termino da obra
 
 - Fonte confirmada: `estoque_spc.data_termino_obra` corresponde a `completionDate`
