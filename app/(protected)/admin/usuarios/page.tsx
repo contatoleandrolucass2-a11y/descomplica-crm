@@ -8,6 +8,7 @@ import {
 import { createClient } from "@/lib/auth/supabase/server";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
+import { canGrantPermission } from "@/lib/authorization/hierarchy";
 import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
 import { ROLES, getAssignableRoleKeys, type RoleKey } from "@/lib/authorization/roles";
 
@@ -111,9 +112,7 @@ export default async function UsersAdminPage() {
   const rolesByUser = new Map(assignments.map((row) => [row.user_id, row.role_key]));
   const assignableRoles = getAssignableRoleKeys(context.level);
   const manageablePermissions = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
-    (permissionKey) =>
-      context.permissions.includes(permissionKey) &&
-      PERMISSIONS[permissionKey].minLevel < context.level,
+    (permissionKey) => canGrantPermission(context, permissionKey),
   );
   const users: ManagedUser[] = profiles.map((profile) => {
     const rawRoleKey = rolesByUser.get(profile.user_id);
@@ -161,6 +160,7 @@ export default async function UsersAdminPage() {
         manageablePermissions={manageablePermissions}
         canManageRoles={canManageRoles}
         canManagePermissions={canManagePermissions}
+        isMasterPermissionManager={context.roleKey === "master"}
         canManageUsers={canManageUsers}
         canApproveUsers={canApproveUsers}
         reportingScopes={reportingScopes.map((scope) => ({

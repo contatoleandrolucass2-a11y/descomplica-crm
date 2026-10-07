@@ -38,14 +38,18 @@ export function requireCanAssignRole(actor: AuthorizationContext, targetRoleKey:
   }
 }
 
-// Rule 3: an actor can only grant a permission it holds AND whose minLevel is
-// strictly below its own level. Equality is NOT allowed — an admin (level 80)
-// cannot grant a permission with minLevel 80 (e.g. permissions.manage).
+// Rule 3: an actor can only grant a permission it holds. Master may delegate
+// any held permission to a strictly lower target even when minLevel equals the
+// Master level. Other roles still require minLevel strictly below their level.
+// Target hierarchy is checked separately by requireCanManageTargetLevel.
 export function canGrantPermission(
   actor: AuthorizationContext,
   permission: PermissionKey,
 ): boolean {
-  return actor.permissions.includes(permission) && actor.level > PERMISSIONS[permission].minLevel;
+  return (
+    actor.permissions.includes(permission) &&
+    (actor.roleKey === "master" || actor.level > PERMISSIONS[permission].minLevel)
+  );
 }
 
 export function requireCanGrantPermission(

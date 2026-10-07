@@ -131,6 +131,7 @@ interface UserAccessManagerProps {
   manageablePermissions: PermissionKey[];
   canManageRoles: boolean;
   canManagePermissions: boolean;
+  isMasterPermissionManager: boolean;
   canManageUsers: boolean;
   canApproveUsers: boolean;
   reportingScopes: Array<{
@@ -711,6 +712,7 @@ function UserDetail({
   manageablePermissions,
   canManageRoles,
   canManagePermissions,
+  isMasterPermissionManager,
   canManageUsers,
   canApproveUsers,
   reportingScopes,
@@ -790,10 +792,18 @@ function UserDetail({
               {user.overrides.length} {user.overrides.length === 1 ? "exceção" : "exceções"}
             </span>
           </div>
-          <p className="admin-permission-intro">
-            <strong>Permissões herdadas do papel</strong> e <strong>Exceções individuais</strong>{" "}
-            aparecem na mesma matriz. Selecione várias linhas e salve uma única vez.
-          </p>
+          {isMasterPermissionManager && user.isManageable ? (
+            <p className="admin-permission-intro">
+              <strong>Herdada: negada</strong> é apenas o padrão do papel. Como Master, você pode
+              selecionar essas permissões e aplicar <strong>Permitir</strong> para criar uma exceção
+              individual em qualquer usuário abaixo do seu nível. O papel do usuário não muda.
+            </p>
+          ) : (
+            <p className="admin-permission-intro">
+              <strong>Permissões herdadas do papel</strong> e <strong>Exceções individuais</strong>{" "}
+              aparecem na mesma matriz. Selecione várias linhas e salve uma única vez.
+            </p>
+          )}
           <PermissionMatrix
             key={user.userId}
             user={user}

@@ -50,6 +50,14 @@ o intake de alvo ainda sem grant exige linha ativa e confiável em `crm_people`,
 com `auth_user_id` estável e pessoa dentro do escopo delegável do Admin. Nome,
 e-mail ou texto de gerente nunca resolve essa associação.
 
+`Herdada: negada` descreve somente o padrão do papel. Um Master pode criar uma
+exceção individual `allow` para qualquer permissão que possua em um
+Administrador ou usuário de nível inferior, inclusive quando a permissão tem
+`min_level = 100`. A exceção não altera o papel do destinatário e não pode ser
+repassada por um Administrador quando o `min_level` continua acima do seu nível.
+As proteções contra autoalteração, outro Master e pares Administradores
+permanecem estritas.
+
 Somente Master/Admin pode aprovar ou reativar contas; permissões individuais
 não transformam Coordenador, Gerente ou Corretor em aprovador. Quando a
 foundation de escopos está presente, Gerentes e Corretores exigem exatamente
@@ -138,8 +146,8 @@ vigência e organização dentro do escopo aprovado; ela não é a fonte da pág
 v3.
 
 O hub, WF13, Tabelão e as réplicas WF14 e WF15 exigem `crm.simulators.view`. Durante o
-canário WF13, essa permissão é nível 100 e pertence somente ao Master, sem
-overrides diretos. O gate de página permanece separado de
+canário WF13, essa permissão é nível 100 e pertence ao Master por herança; um
+Master pode concedê-la como exceção individual a um usuário inferior. O gate de página permanece separado de
 `crm.simulators.execute`; possuir um não substitui o outro. Somente o motor
 oficial WF13 pode executar quando sua flag explícita também está ativa. As
 réplicas WF14 e WF15 calculam no navegador, sem persistência ou integração. O
@@ -219,8 +227,9 @@ Elevação de papel, desativação de conta e criação/remoção de exceções 
 motivo não vazio. A validação roda em trigger `BEFORE INSERT` do log de auditoria
 dentro da mesma transação das RPCs: uma tentativa sem motivo reverte papel,
 status ou exceção integralmente. Toda troca de papel exige motivo; reativação
-mantém motivo opcional. As regras de sessão ativa, anti-autoelevação,
-hierarquia e `can_grant_permission` não mudaram.
+mantém motivo opcional. As regras de sessão ativa, anti-autoelevação e
+hierarquia permanecem; `can_grant_permission` possui apenas a exceção explícita
+de nível para Master descrita acima.
 
 Identidade de reporting scope e organização da equipe são imutáveis. Mudanças
 de pessoa/Auth, memberships e carteira/organização exigem suspender os perfis

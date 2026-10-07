@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-07 - Delegação explícita pelo Master
+
+- Permite que Master aplique uma exceção individual `Permitir` a Administrador
+  ou qualquer usuário de nível inferior mesmo quando o papel mostra
+  `Herdada: negada` e a permissão possui nível mínimo 100.
+- Mantém a exigência de que o Master possua a permissão, a hierarquia estrita e
+  os bloqueios contra autoalteração, outro Master e pares Administradores.
+- Esclarece na matriz que a exceção não altera o papel e adiciona cobertura no
+  servidor, no banco e no contrato de restore.
+
 ## 2026-10-07 - Associativo publicado e conferido
 
 - Publica a correcao da data de termino da obra e dos calculos Linear/Decrescente

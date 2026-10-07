@@ -356,6 +356,7 @@ describe("catálogo localizado de acesso", () => {
         manageablePermissions: ["crm.dashboard.view"],
         canManageRoles: true,
         canManagePermissions: true,
+        isMasterPermissionManager: false,
         canManageUsers: true,
         canApproveUsers: false,
         reportingScopes: [],
@@ -399,6 +400,7 @@ describe("catálogo localizado de acesso", () => {
         ],
         canManageRoles: true,
         canManagePermissions: true,
+        isMasterPermissionManager: true,
         canManageUsers: true,
         canApproveUsers: false,
         reportingScopes: [],
@@ -416,6 +418,10 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toContain("Restaurar padrão");
     expect(markup).toContain("Motivo da alteração em lote");
     expect(markup).toContain("Salvar alterações");
+    expect(markup).toContain("Herdada: negada");
+    expect(markup).toContain("Como Master");
+    expect(markup).toContain("qualquer usuário abaixo do seu nível");
+    expect(markup).toContain("O papel do usuário não muda");
     expect(markup).not.toContain("Adicionar uma exceção");
   });
 
@@ -438,6 +444,7 @@ describe("catálogo localizado de acesso", () => {
         manageablePermissions: [],
         canManageRoles: true,
         canManagePermissions: true,
+        isMasterPermissionManager: false,
         canManageUsers: true,
         canApproveUsers: true,
         reportingScopes: [
