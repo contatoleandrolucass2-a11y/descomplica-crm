@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-07 - Preferências de cookies contextuais
+
+- Remove o atalho flutuante permanente de cookies depois da primeira escolha.
+- Mantém o gerenciamento acessível no menu da conta e na Política de Cookies,
+  com retorno de foco ao controle que abriu o painel.
+- Adiciona estado de gravação e erro visível aos botões de consentimento, sem
+  alterar categorias obrigatórias, duração ou proteção do cookie.
+
 ## 2026-10-07 - Sessão manual Salesforce preparada
 
 - Adiciona execução candidata Salesforce a cada 30 minutos sobre Chrome

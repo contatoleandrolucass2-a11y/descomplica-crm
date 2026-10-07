@@ -4,6 +4,23 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: preferências de cookies contextuais e falhas observáveis
+
+- Status: validado localmente; fonte: `CookieConsentBanner`, menu da conta,
+  documento legal e QA autenticado.
+- Um consentimento já registrado não precisa manter um controle fixo sobre toda
+  página. O acesso posterior fica contextual no menu da conta e na Política de
+  Cookies, enquanto o banner inicial continua obrigatório até uma escolha.
+- Server Actions de preferências precisam retornar estado observável: durante a
+  gravação os envios ficam bloqueados; sucesso fecha o painel; falha mantém o
+  contexto e anuncia recuperação. O cookie continua `HttpOnly`, `SameSite=Lax`,
+  `Secure` em HTTPS e sem enfraquecer categorias essenciais ou de segurança.
+- O QA deve comprovar ausência do atalho flutuante, abertura contextual, foco,
+  fechamento e uma gravação real com dados sintéticos. O ensaio público passou
+  nos quatro viewports, sem overflow ou erro de navegador; lint, tipos, 2.051
+  testes Vitest, 15 testes Node, build de 44 páginas, inventário e Gitleaks
+  também passaram. CI autenticada e publicação permanecem pendentes.
+
 ## 2026-10-07: sessão manual Salesforce com recarga fail-closed
 
 - Status: validado localmente, sem MFA, coleta real ou mutação remota.

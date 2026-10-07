@@ -10,6 +10,14 @@ O shell combina autenticação server-side com dois componentes client-side pequ
 
 O tema não altera autorização, dados ou cookies de sessão. A preferência é aplicada em `data-theme` no elemento `html`; tokens globais ajustam superfícies, texto, bordas e campos sem copiar os milhares de estilos legados.
 
+As preferências de cookies aparecem como painel somente enquanto ainda não há
+uma escolha. Depois de salvar, não existe atalho flutuante sobre o conteúdo: o
+painel pode ser reaberto pelo menu da conta ou pela Política de Cookies. Os
+envios bloqueiam repetição durante a gravação, fecham o painel depois do sucesso
+e mostram uma orientação recuperável quando a preferência não puder ser salva.
+Ao abrir e fechar pelo teclado, o foco vai ao título do painel e retorna ao
+controle contextual.
+
 O CSS inclui foco visível e respeita `prefers-reduced-motion`. A topbar usa a
 identidade navy/cyan/lime e a navegação quebra em múltiplas linhas no reflow.
 Grupos usam `details`/`summary`, funcionam sem hover, fecham com `Escape` e

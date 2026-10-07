@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CookiePreferencesTrigger } from "@/app/_components/CookiePreferencesTrigger";
 import {
   getLegalDocument,
   LEGAL_DOCUMENT_LINKS,
@@ -29,6 +30,11 @@ export function LegalDocument({ documentKey }: { documentKey: LegalDocumentKey }
             {document.title}
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700">{document.summary}</p>
+          {documentKey === "cookies" ? (
+            <CookiePreferencesTrigger className="mt-5 inline-flex min-h-11 items-center rounded-lg bg-slate-950 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-cyan-700">
+              Gerenciar preferências de cookies
+            </CookiePreferencesTrigger>
+          ) : null}
           <dl className="mt-6 grid gap-3 rounded-xl bg-slate-100 p-4 text-sm sm:grid-cols-3">
             <div>
               <dt className="font-semibold text-slate-950">Versão</dt>

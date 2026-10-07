@@ -973,8 +973,8 @@ async function login(page, origin, email, password) {
   if (await acceptAllCookies.isVisible()) {
     await acceptAllCookies.click();
     await page
-      .getByRole("button", { name: "Preferências de cookies", exact: true })
-      .waitFor({ state: "visible" });
+      .locator('aside[aria-labelledby="cookie-consent-title"]')
+      .waitFor({ state: "hidden" });
   }
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Senha").fill(password);
@@ -3984,36 +3984,40 @@ async function checkTabelaoValidation(page, origin) {
     .getByText(syntheticTabelaoCountLabel, { exact: true })
     .waitFor({ state: "visible", timeout: qaNavigationTimeout });
 
-  const cookiePreferencesTrigger = page.getByRole("button", {
-    name: "Preferências de cookies",
-    exact: true,
-  });
+  const cookiePreferencesTrigger = page.locator(
+    "#protected-account-menu [data-cookie-preferences-trigger]",
+  );
   const cookiePreferencesBanner = page.locator('aside[aria-labelledby="cookie-consent-title"]');
   const waitForCookiePreferencesClosed = async () => {
     await cookiePreferencesBanner.waitFor({ state: "hidden", timeout: qaNavigationTimeout });
-    await cookiePreferencesTrigger.waitFor({
-      state: "visible",
-      timeout: qaNavigationTimeout,
-    });
     await expect
       .poll(
         async () => {
-          const triggerCount = await cookiePreferencesTrigger.count();
           return {
             bannerHidden: !(await cookiePreferencesBanner.isVisible()),
-            triggerCount,
-            triggerVisible: triggerCount === 1 && (await cookiePreferencesTrigger.isVisible()),
+            floatingTriggerCount: await page
+              .getByRole("button", { name: "Preferências de cookies", exact: true })
+              .count(),
           };
         },
         {
           timeout: qaNavigationTimeout,
-          message: "Cookie preferences must close into one visible trigger",
+          message: "Cookie preferences must close without a persistent floating trigger",
         },
       )
-      .toEqual({ bannerHidden: true, triggerCount: 1, triggerVisible: true });
+      .toEqual({ bannerHidden: true, floatingTriggerCount: 0 });
+  };
+  const revealCookiePreferencesTrigger = async () => {
+    const accountTrigger = page.locator(
+      'header button[data-session-identity][aria-controls="protected-account-menu"]',
+    );
+    const accountPanel = page.locator("#protected-account-menu");
+    if (!(await accountPanel.isVisible())) await accountTrigger.click();
+    await accountPanel.waitFor({ state: "visible", timeout: qaNavigationTimeout });
+    await cookiePreferencesTrigger.waitFor({ state: "visible", timeout: qaNavigationTimeout });
   };
   await waitForCookiePreferencesClosed();
-  await cookiePreferencesTrigger.scrollIntoViewIfNeeded();
+  await revealCookiePreferencesTrigger();
   const cookieTriggerSafe =
     (await cookiePreferencesTrigger.count()) === 1 &&
     (await cookiePreferencesTrigger.isVisible()) &&
@@ -4023,7 +4027,7 @@ async function checkTabelaoValidation(page, origin) {
       return (
         element instanceof HTMLButtonElement &&
         element.type === "button" &&
-        element.hasAttribute("data-qa-visual-volatile") &&
+        element.hasAttribute("data-cookie-preferences-trigger") &&
         box.width >= 44 &&
         box.height >= 44 &&
         box.left >= 0 &&
@@ -4059,7 +4063,29 @@ async function checkTabelaoValidation(page, origin) {
       await waitForCookiePreferencesClosed();
       cookiePreferencesClosed = true;
     }
-    cookiePreferencesSafe = lockedSecurityCategories && closeControlSafe && cookiePreferencesClosed;
+    await revealCookiePreferencesTrigger();
+    await cookiePreferencesTrigger.click();
+    await cookiePreferencesBanner.waitFor({ state: "visible", timeout: qaNavigationTimeout });
+    const essentialChoice = cookiePreferencesBanner.getByRole("button", {
+      name: "Somente essenciais",
+      exact: true,
+    });
+    const essentialChoiceSafe =
+      (await essentialChoice.count()) === 1 &&
+      (await essentialChoice.isVisible()) &&
+      (await essentialChoice.isEnabled());
+    let cookiePreferencesSaved = false;
+    if (essentialChoiceSafe) {
+      await essentialChoice.click();
+      await waitForCookiePreferencesClosed();
+      cookiePreferencesSaved = true;
+    }
+    cookiePreferencesSafe =
+      lockedSecurityCategories &&
+      closeControlSafe &&
+      cookiePreferencesClosed &&
+      essentialChoiceSafe &&
+      cookiePreferencesSaved;
   }
   const responsiveGrid = viewportChecks.every((check) =>
     Object.entries(check)
