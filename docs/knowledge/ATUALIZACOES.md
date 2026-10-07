@@ -4,6 +4,23 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: matriz de acessos publicada com convergencia remota
+
+- Status: validado e publicado; fonte: PR #159, CI `37556958745`, migration
+  `20261005234936_reconcile_roles_dashboard_views_and_bulk_overrides.sql` e
+  runtime `3bcc3c4a4ad892df4e127bb53a4a5696c9d6dbed`.
+- A aplicacao via MCP registra uma versao baseada no horario remoto
+  (`20261007021254`) mesmo quando o SQL vem de um arquivo versionado anterior.
+  Preservar ambos no registro de release e o hash do SQL; nao fabricar
+  alinhamento com `migration repair`.
+- Sem backup fisico/PITR disponivel, foi criado backup logico privado antes da
+  migration, com schema, dados, papeis, historico, permissoes `0600` e checksums.
+  A imagem foi promovida por CAS e validada por health, ID/label OCI, container
+  saudavel, rotas anonimas redirecionadas e Data API/RPC anonimas negadas.
+- A convergencia nao decide House ou Imob para identidades antigas. Uma conta
+  `broker` e duas `user` continuam sem grants herdados ate reclassificacao
+  explicita; nenhuma identidade foi lida ou convertida durante a publicacao.
+
 ## 2026-10-07: reutilizar permissao exige revisar o novo conjunto de grants
 
 - Status: validado localmente; fonte: integracao de `73b20d0`, matriz de papeis

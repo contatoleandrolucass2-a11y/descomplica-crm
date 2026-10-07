@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-07 - Matriz de acessos publicada
+
+- Aplica no Supabase produtivo os papeis Coordenador, Gerente House, Gerente
+  Imob, Corretor House e Corretor Imob, com as visoes Geral, Com Canal Imob,
+  Sem Canal Imob, Ranking e Parcerias separadas no banco.
+- Ativa a edicao multipla e atomica de excecoes de permissao, mantendo
+  Administrador abaixo de Master e bloqueando alteracoes em pares do mesmo
+  nivel ou superior.
+- Publica o novo layout de Usuarios na imagem imutavel `3bcc3c4`, com backup,
+  CAS, rollback preparado, health, rotas protegidas e negacao anonima
+  verificados.
+- Mantem uma conta `broker` e duas `user` sem acesso herdado e sem conversao
+  automatica; a classificacao House ou Imob continua sendo uma decisao manual.
+
 ## 2026-10-07 - Repasse compativel com os novos papeis
 
 - Integra a rota Repasse da `main` sem ampliar seu publico quando Parcerias

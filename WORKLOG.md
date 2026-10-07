@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-07 - Matriz de acessos publicada
+
+- O PR #159 foi integrado em `main` no merge
+  `3bcc3c4a4ad892df4e127bb53a4a5696c9d6dbed`. A CI `37556958745`
+  aprovou validacao, restore isolado, imagem promovivel e gates de release.
+- Antes da mudanca remota, foi criado o backup logico privado
+  `20261007T021140Z-rbac-prechange`, com papeis, schema, dados publicos e
+  historico de migrations protegidos por modo `0600` e manifestos SHA-256
+  aprovados. O backup fisico/PITR gerenciado nao estava habilitado.
+- Com autorizacao especifica do responsavel, a migration de convergencia foi
+  aplicada ao projeto `descomplica-crm-production`. O MCP registrou a entrada
+  remota `20261007021254_reconcile_roles_dashboard_views_and_bulk_overrides`;
+  o SQL aplicado corresponde ao arquivo versionado
+  `20261005234936_reconcile_roles_dashboard_views_and_bulk_overrides.sql`,
+  SHA-256 `9254cbc3d7ede37b38c90f5fc90c437fe542e95b8575863dd765fb94e2208c20`.
+- A verificacao agregada confirmou a matriz dos sete papeis, zero grant herdado
+  nos papeis aposentados, RLS por `view_key`, RPC em lote executavel somente por
+  `authenticated` e ausencia de acesso direto de `anon`, `authenticated` ou
+  `service_role` as tabelas Qlik brutas. As contas legadas permaneceram uma em
+  `broker` e duas em `user`, sem leitura de identidade nem reclassificacao.
+- A imagem imutavel foi promovida por compare-and-swap de `73b20d0` para
+  `3bcc3c4`. O container ficou `healthy`, com zero reinicios e image ID
+  `sha256:f6e968640a724c3a4b5a28e170b77812c9d8f645ba8018e5f900bbbee85871e4`.
+  Health publico retornou o SHA novo; `/admin/usuarios`, `/app` e
+  `/app/repasse` redirecionaram anonimos ao login, e Data API/RPC em lote
+  negaram anonimos com HTTP 401. O rollback permaneceu preparado e nao foi
+  necessario.
+
 ## 2026-10-07 - Integracao da matriz de acessos com Repasse
 
 - A branch integrou a `main` `73b20d0`, que acrescentou a rota protegida

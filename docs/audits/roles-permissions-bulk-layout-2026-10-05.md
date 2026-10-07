@@ -160,5 +160,51 @@ A revisão de segurança do diff encontrou uma janela concorrente de baixa
 probabilidade e a correção foi revisada sem bypass ou regressão concretos. As
 duas primeiras execuções de CI bloquearam corretamente advisories novos e,
 depois, contratos antigos de restore/E2E; nenhum gate foi ignorado. A matriz
-visual local final esta aprovada. A nova CI, aplicação da migration e publicação
-permanecem separadas; a migration remota exige autorização específica.
+visual local final foi aprovada antes da publicação.
+
+## Publicação em produção
+
+O responsável autorizou explicitamente a migration e o deploy. O PR #159 foi
+integrado no merge `3bcc3c4a4ad892df4e127bb53a4a5696c9d6dbed`; a CI
+`37556958745` aprovou `validate`, `isolated-restore`, `promotable-image` e
+`release-gates` no mesmo SHA.
+
+O backup lógico privado `20261007T021140Z-rbac-prechange` preserva papéis,
+schema, dados públicos e histórico de migrations em arquivos `root:root 0600`,
+com o manifesto SHA-256 aprovado. O projeto informou backup físico vazio e PITR
+desabilitado, por isso esse backup lógico foi criado antes da mudança. Seus
+dados permanecem fora do Git e não foram impressos.
+
+A migration remota foi aplicada com sucesso em
+`descomplica-crm-production` (`hnncxuerlcsaahdxoswb`). O conector registrou a
+versão remota `20261007021254` com o nome
+`reconcile_roles_dashboard_views_and_bulk_overrides`; o SQL aplicado é o mesmo
+arquivo versionado sob `20261005234936`, com SHA-256
+`9254cbc3d7ede37b38c90f5fc90c437fe542e95b8575863dd765fb94e2208c20`. Nenhum
+`migration repair` foi usado.
+
+As verificações posteriores confirmaram:
+
+- sete papéis de negócio na matriz e somente seis atribuíveis abaixo de Master;
+- Administrador não atribui Administrador e pode atribuir Gerente Imob;
+- papéis aposentados e `pending` com zero permissão herdada;
+- uma conta `broker` e duas `user` preservadas para classificação manual;
+- RLS habilitada e policies por `view_key` nas três tabelas de dashboard;
+- RPC em lote com `search_path` vazio, limite de 10 segundos e `EXECUTE`
+  somente para `authenticated`, com hierarquia e revalidação de escopo;
+- nenhum grant direto de `anon`, `authenticated` ou `service_role` nas tabelas
+  Qlik `crm_imob_ranking_runs` e `crm_imob_ranking_entries`.
+
+Os advisors remotos mantiveram avisos globais anteriores: tabelas privadas com
+RLS sem policy, RPCs `SECURITY DEFINER` publicadas deliberadamente para seus
+papéis e proteção contra senhas vazadas desabilitada. O novo RPC aparece no
+aviso de funções autenticadas porque esse é o contrato intencional; seus guards,
+ACL e negações foram conferidos. Não houve alteração oportunista nesses itens.
+
+A imagem promovível do SHA `3bcc3c4` foi validada pelo ID
+`sha256:f6e968640a724c3a4b5a28e170b77812c9d8f645ba8018e5f900bbbee85871e4`
+e promovida por CAS sobre `73b20d0`. O container ficou saudável, com zero
+reinícios. O health externo retornou `status=ok` e o SHA novo; as três rotas
+protegidas amostradas retornaram `307` para login, e a tabela de dashboard e a
+RPC em lote retornaram `401` a chamadas anônimas. O rollback ficou preparado e
+não foi executado.
