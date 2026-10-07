@@ -89,6 +89,23 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   para Usuarios. Seus hashes e 27 contratos de referencia passaram; a CI final
   ainda deve comprovar todas as 242 comparacoes antes do merge.
 
+# 2026-10-07: negacao herdada nao bloqueia delegacao explicita do Master
+
+- Status: validado em banco isolado; fonte: `lib/authorization/hierarchy.ts`, migration
+  `20261007050255_allow_master_permission_overrides.sql` e matriz pgTAP.
+- `Herdada: negada` e o default do papel alvo, nao uma proibicao absoluta. Um
+  Master pode aplicar `allow` para permissao que possui a qualquer alvo de
+  nivel inferior, inclusive quando `min_level = 100`.
+- A excecao nao muda o papel. Admin continua sem alterar pares e nao propaga
+  capacidade de nivel Master recebida por override; alvo Master e o proprio
+  ator continuam bloqueados pela hierarquia.
+- O contrato consolidado do restore passa a 1.104 pgTAP em 27 arquivos. Reset,
+  duas execucoes pgTAP, backup/restore logico, lint, advisors, ACLs, owners e
+  fingerprint canonico passaram em dois projetos PostgreSQL 17 descartaveis.
+- Aplicacao local: formato, lint, tipos, 2.049 Vitest, 15 testes Node, audit e
+  build de 44 paginas aprovados. A matriz visual longa terminou em timeout de
+  tema do Associativo 375 px; nao foi reduzida e segue obrigatoria na CI limpa.
+
 ## 2026-10-06: baseline de tela longa deve preservar legibilidade interna
 
 - Status: validado; fonte: candidato visual da CI `37507333920` e

@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-10-07 - Exceção de permissão delegável por Master
+
+- A leitura agregada do Supabase produtivo confirmou 23 permissões e mostrou
+  que o Master podia delegar 21; `crm.simulators.view` e
+  `crm.simulators.execute`, ambas com `min_level = 100`, eram rejeitadas pelo
+  teste de nível estritamente menor.
+- O helper da aplicação e `public.can_grant_permission` passam a aceitar a
+  igualdade de nível somente para papel `master`, desde que ele possua
+  `permissions.manage` e a própria permissão solicitada. O alvo continua sendo
+  validado separadamente e precisa estar estritamente abaixo do ator.
+- A tela explica que `Herdada: negada` é o padrão do papel e que `Permitir`
+  cria uma exceção individual sem promover o usuário. O Administrador não pode
+  propagar uma permissão de nível Master recebida por override.
+- Testes focados iniciais: 27 Vitest aprovados. O ensaio isolado em dois
+  projetos PostgreSQL 17 aprovou reset das 45 migrations, 1.104 pgTAP na
+  origem, backup/restore lógico, mais 1.104 pgTAP no destino, lint, advisors,
+  owners, ACLs e fingerprint canônico equivalente. O fechamento local aprovou
+  formato, lint, tipos, 2.049 Vitest, 15 testes Node, audit sem vulnerabilidades
+  altas e build das 44 páginas. A matriz visual longa percorreu as jornadas de
+  arquivo e gerou a captura de Usuários sem quebra, mas terminou por timeout de
+  tema no Associativo 375 px; a CI limpa permanece como gate visual oficial.
+  PR e publicação permanecem como etapas de fechamento.
+
 ## 2026-10-07 - Preparação da sessão manual Salesforce
 
 - O modelo operacional foi fixado em Chrome dedicado com login e MFA manuais;

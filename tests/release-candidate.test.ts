@@ -19,12 +19,12 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 44-version manifest", async () => {
+  it("keeps a unique, ordered 45-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(44);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(44);
+    expect(migrations).toHaveLength(45);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(45);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
   });
@@ -65,7 +65,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1099;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1104;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

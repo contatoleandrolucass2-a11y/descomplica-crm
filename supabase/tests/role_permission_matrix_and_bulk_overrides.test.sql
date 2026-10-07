@@ -1,6 +1,6 @@
 begin;
 
-select plan(57);
+select plan(62);
 
 select has_column(
   'public',
@@ -552,6 +552,13 @@ from public.crm_dashboard_snapshots snapshot
 cross join unnest(array['all', 'with_canal_imob', 'without_canal_imob']) as views(view_key)
 where snapshot.snapshot_key = 'matrix';
 
+select ok(
+  public.can_grant_permission(
+    'a3000000-0000-4000-8000-000000000001',
+    'crm.simulators.view'
+  ),
+  'Master can delegate a held permission whose minimum level equals Master'
+);
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;
@@ -564,7 +571,43 @@ select is(
 select is((select count(*) from public.crm_dashboard_metrics), 15::bigint, 'Master reads all dashboard metrics');
 select is((select count(*) from public.crm_dashboard_top_developments), 3::bigint, 'Master reads all ranked developments');
 
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk(
+    'a3000000-0000-4000-8000-000000000002',
+    array['crm.simulators.view'],
+    'allow',
+    'Master delegation to Administrator test'
+  )$$,
+  'Master can allow an inherited-denied permission for an Administrator'
+);
+select is(
+  (
+    select effect
+    from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000002'
+      and permission_key = 'crm.simulators.view'
+  ),
+  'allow',
+  'Master delegation persists as an explicit allow without changing the target role'
+);
+select is(
+  (
+    select role_key
+    from public.user_roles
+    where user_id = 'a3000000-0000-4000-8000-000000000002'
+  ),
+  'admin',
+  'permission delegation does not promote the Administrator role'
+);
+
 reset role;
+select ok(
+  not public.can_grant_permission(
+    'a3000000-0000-4000-8000-000000000002',
+    'crm.simulators.view'
+  ),
+  'Administrator cannot propagate a Master-level permission received by override'
+);
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000002', true);
 set local role authenticated;
 
@@ -574,7 +617,6 @@ select is(
   'Administrator reads all dashboard views'
 );
 select is((select count(*) from public.crm_dashboard_top_developments), 3::bigint, 'Administrator reads every ranked dashboard view');
-
 reset role;
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000004', true);
 set local role authenticated;
