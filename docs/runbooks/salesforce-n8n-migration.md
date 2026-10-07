@@ -20,6 +20,40 @@ o último processamento completo observado no transformador foi às 16:04 UTC de
 6 de agosto. A candidata usa API para todos os sete relatórios e valida o fim da
 coleta antes de produzir o snapshot.
 
+## Sessão manual e ciclo de 30 minutos
+
+A extração candidata não depende de Connected App, client secret ou refresh
+token do Salesforce. O operador autentica manualmente, inclusive por MFA, em um
+Chrome com perfil exclusivo para esta integração. O exportador reutiliza o
+`sid` somente em memória para chamar a Analytics Reports API; o cookie não é
+gravado em arquivo, log, n8n ou banco.
+
+O Chrome deve executar na mesma máquina do exportador, manter uma aba aberta em
+`direcional.my.salesforce.com` ou `direcional.lightning.force.com` e expor CDP
+somente em `127.0.0.1`, `::1` ou `localhost`. Perfil pessoal, CDP remoto e
+credencial embutida na URL são rejeitados. Antes de cada coleta, o exportador
+recarrega a aba e confirma novamente o cookie da origem exata. Redirecionamento
+para login ou ausência do `sid` falha fechado e pede nova autenticação manual.
+
+O ciclo local pode ser iniciado com:
+
+```bash
+pnpm salesforce:export:watch
+```
+
+Ele executa imediatamente e depois nos limites de cada meia hora. Uma coleta
+termina antes da próxima começar, portanto duas extrações não se sobrepõem. Uma
+falha de sessão não encerra o observador: depois que o operador concluir nova
+MFA na aba dedicada, o próximo ciclo pode prosseguir. A recarga periódica reduz
+expiração por inatividade, mas não contorna timeout absoluto ou revogação
+definidos pelo terceiro.
+
+`ops/salesforce/export.env.example` documenta somente a URL CDP local, o caminho
+absoluto do candidato protegido e a data opcional de referência. O ciclo ainda
+gera apenas o arquivo candidato. Publicação no CRM continua bloqueada até o
+workflow n8n receber, pelo MCP autorizado, validação completa e o único envio
+HTTP autenticado descrito nos gates abaixo.
+
 ## Fonte autorizada
 
 | Chave         | Report ID            | Identidade usada na transformação                  |

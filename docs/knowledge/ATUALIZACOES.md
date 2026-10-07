@@ -4,6 +4,23 @@ Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
+## 2026-10-07: sessão manual Salesforce com recarga fail-closed
+
+- Status: validado localmente, sem MFA, coleta real ou mutação remota.
+- Fonte: `ops/salesforce/browser-session.mjs`,
+  `ops/salesforce/run-every-30-minutes.mjs` e runbook Salesforce/n8n.
+- A integração aceita Chrome dedicado com MFA manual; não presume Connected App
+  nem autenticação automática. CDP fica restrito a loopback e o `sid` permanece
+  somente em memória.
+- Cada ciclo recarrega a aba do workspace, confirma a sessão da origem exata e
+  falha fechado ao chegar ao login. A agenda de meia hora é serial e continua
+  pronta para recuperar depois de nova MFA, sem contornar timeout absoluto.
+- O n8n candidato permanece inativo e sem envio ao CRM. Alteração remota exige
+  MCP n8n, validação prévia e releitura; ausência da ferramenta não autoriza REST.
+- ESLint, TypeScript, 2.048 testes Vitest com seis skips condicionais, 15 testes
+  Node Salesforce, build de 44 páginas, inventário, Gitleaks e diff aprovados.
+  Primeira coleta real, alteração n8n e flags remotas permanecem pendentes.
+
 ## 2026-10-07: matriz de acessos publicada com convergencia remota
 
 - Status: validado e publicado; fonte: PR #159, CI `37556958745`, migration
