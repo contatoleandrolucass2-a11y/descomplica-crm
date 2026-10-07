@@ -102,6 +102,9 @@ export async function checkAssociativeCalculationContinuity(page) {
   const field = (label) =>
     page.locator(`${root} input`).and(page.getByLabel(label, { exact: true }));
   const qualification = page.locator(`${root} .investor-associative-qualification`);
+  const installmentsButton = page.locator(
+    `${root} button[aria-controls="investor-associative-installments"]`,
+  );
   const ranking = page.getByRole("combobox", { name: "Selecione o Ranking", exact: true });
   const unitFact = (label) =>
     page
@@ -181,7 +184,7 @@ export async function checkAssociativeCalculationContinuity(page) {
   async function assertCalendarForUnit(index) {
     const calendar = page.locator(`${root} details.investor-associative-calendar`);
     if ((await calendar.getAttribute("open")) === null) {
-      await calendar.getByText("Datas do cálculo", { exact: true }).click();
+      await calendar.locator(":scope > summary").click();
     }
     const completionDate = fixture.live.items[index].completionDate;
     assert.notEqual(completionDate, fixture.reference.items[index].completionDate);
@@ -320,7 +323,7 @@ export async function checkAssociativeCalculationContinuity(page) {
       .getAttribute("datetime");
     assert.match(signalDate, /^\d{4}-\d{2}-(05|10|15)$/);
     assert.ok(automaticCalendar.firstMonthly > signalDate);
-    await expect(page.getByRole("button", { name: "Exibir parcelas", exact: true })).toBeEnabled();
+    await expect(installmentsButton).toBeEnabled();
     const automaticStatus = await rule("Status da proposta").innerText();
     const resetDates = page.getByRole("button", {
       name: "Restaurar datas automáticas",
@@ -351,9 +354,7 @@ export async function checkAssociativeCalculationContinuity(page) {
       await expect(field("Primeira mensal")).toHaveValue(automaticCalendar.firstMonthly);
       await expect(resetDates).toBeDisabled();
       await expect(rule("Status da proposta")).toHaveText(automaticStatus, { useInnerText: true });
-      await expect(
-        page.getByRole("button", { name: "Exibir parcelas", exact: true }),
-      ).toBeEnabled();
+      await expect(installmentsButton).toBeEnabled();
     }
     const shiftedMonthly = new Date(`${automaticCalendar.firstMonthly}T00:00:00.000Z`);
     shiftedMonthly.setUTCMonth(shiftedMonthly.getUTCMonth() + 1);
@@ -362,7 +363,7 @@ export async function checkAssociativeCalculationContinuity(page) {
     const shiftedCalendar = await assertCalendarForUnit(1);
     assert.equal(shiftedCalendar.pre, automaticCalendar.pre - 1);
     assert.equal(shiftedCalendar.post, automaticCalendar.post + 1);
-    await expect(page.getByRole("button", { name: "Exibir parcelas", exact: true })).toBeEnabled();
+    await expect(installmentsButton).toBeEnabled();
     await resetDates.click();
     assert.deepEqual(await assertCalendarForUnit(1), automaticCalendar);
     await assertAnswers(6_000);

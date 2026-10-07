@@ -268,3 +268,14 @@ Ambiente: Windows/PowerShell, Node 24.19.0 e pnpm 11.20.0.
 - QA de navegador ampliado com estoque sintetico: fonte viva obrigatoria,
   datas distintas por unidade, campos invalidos/vazios, restauracao automatica
   e indisponibilidade HTTP 503. Execucao do navegador e release pendentes na CI.
+
+### Primeira conferencia integral na CI
+
+- CI `37577305243`, candidato `96081a7`, captura limpa `9f0c6640`: validacao
+  Linux, seguranca de dependencias, banco, E2E e restore isolado aprovados.
+- A nova continuidade parou antes das assercoes de calendario: o seletor de
+  texto encontrou tanto o summary quanto o titulo da ajuda. Escopo corrigido
+  para o summary; parcelas financeiras diferenciadas das de documentacao.
+- Artefato `11463448905`, ZIP SHA-256
+  `f47ec91d19acdac3dc61026a731941e1e554cda9cc55770a49ac4b98aef1fd66`.
+  Nenhuma baseline promovida nem teste enfraquecido. Nova CI obrigatoria.

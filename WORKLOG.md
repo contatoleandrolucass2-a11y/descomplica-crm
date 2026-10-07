@@ -16,6 +16,10 @@
 - Tipos/build aprovados, lint sem erros. Suite geral Windows: 2.168 aprovados,
   seis ignorados e seis falhas POSIX conhecidas; CI Linux exigida. Mais 243
   testes focados e 15 node:test aprovados; QA browser ampliado, pendente CI.
+- CI `37577305243`: validate integral Linux, E2E, banco e restore aprovados.
+  A continuidade parou em seletor ambiguo entre summary e ajuda; seletor foi
+  delimitado ao expansor, assim como o botao de parcelas ao dialogo financeiro.
+  Nenhuma assercao removida; repeticao integral obrigatoria antes da publicacao.
 
 ## 2026-10-07 - Auditoria das formulas Salesforce
 

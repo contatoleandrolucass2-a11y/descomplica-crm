@@ -24,6 +24,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - Tipos/build/lint aprovados; suite geral Windows 2.168 aprovados e seis falhas
   POSIX conhecidas, seis ignorados. Matriz/integracao/ledger: 243 aprovados,
   incluindo 7.285 cenarios. Aprovacao de release depende da CI Linux e navegador.
+- CI `37577305243`: validate, E2E e restore verdes. QA de continuidade falhou
+  por seletor com dois alvos (summary e ajuda). Corrigido escopo do seletor;
+  nova verificacao integral pendente. Nunca contornar o gate por essa falha.
 
 ## 2026-10-07: formulas do Associativo confrontadas com Salesforce
 

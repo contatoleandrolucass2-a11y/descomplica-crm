@@ -9,6 +9,7 @@
 - Expoe primeiro juro/primeira mensal para conferir calendarios historicos;
   painel de aprovacao passa a usar o Pro-Soluto com a correcao da carencia.
 - Unifica motor legado e atualiza ajudas e oraculos sinteticos independentes.
+- QA diferencia o expansor de datas da ajuda e as parcelas da documentacao.
 - Sem alteracao de dados remotos, limites comerciais, n8n ou financiamento bancario.
 
 ## 2026-10-07 - Diagnostico das formulas do Associativo
