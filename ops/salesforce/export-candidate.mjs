@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { chmod, rename, writeFile } from "node:fs/promises";
+import { pathToFileURL } from "node:url";
 import process from "node:process";
 
-import { chromium } from "playwright-core";
+import { chromium } from "@playwright/test";
 
+import { refreshSalesforceSession, safeCdpEndpoint } from "./browser-session.mjs";
 import { buildSalesforceSnapshot } from "./transform.mjs";
 
 const SALESFORCE_ORIGIN = "https://direcional.my.salesforce.com";
@@ -240,25 +242,21 @@ async function atomicWrite(path, value) {
   await rename(temporary, path);
 }
 
-async function main() {
-  const outputPath = process.env.SALESFORCE_CANDIDATE_OUTPUT;
+export async function exportCandidate(environment = process.env) {
+  const outputPath = environment.SALESFORCE_CANDIDATE_OUTPUT;
   if (!outputPath?.startsWith("/")) throw new Error("absolute output path required");
-  const referenceDate = process.env.SALESFORCE_REFERENCE_DATE ?? saoPauloReferenceDate();
+  const referenceDate = environment.SALESFORCE_REFERENCE_DATE ?? saoPauloReferenceDate();
   const startDate = `${referenceDate.slice(0, 4)}-01-01`;
-  const browser = await chromium.connectOverCDP(
-    process.env.SALESFORCE_CDP_URL ?? "http://127.0.0.1:9222",
-  );
+  const browser = await chromium.connectOverCDP(safeCdpEndpoint(environment.SALESFORCE_CDP_URL));
   try {
     const context = browser.contexts()[0];
-    const cookies = await context.cookies();
-    const session = cookies.find(
-      (cookie) => cookie.name === "sid" && cookie.domain.includes("salesforce.com"),
-    );
-    if (!session?.value) throw new Error("Salesforce session unavailable");
+    if (!context) throw new Error("Salesforce browser context unavailable");
+    const sessionId = await refreshSalesforceSession(context);
+    log("Salesforce session refreshed");
     const reports = {};
     for (const definition of REPORTS) {
       reports[definition.key] = await collectReport(
-        session.value,
+        sessionId,
         definition,
         startDate,
         referenceDate,
@@ -278,12 +276,15 @@ async function main() {
       payloadMetrics: candidate.payload.dashboard.metrics.length,
       rankingParticipants: candidate.payload.ranking.participants.length,
     });
+    return candidate;
   } finally {
     await browser.close().catch(() => {});
   }
 }
 
-main().catch((error) => {
-  log("candidate failed", { error: error.message });
-  process.exitCode = 1;
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  exportCandidate().catch((error) => {
+    log("candidate failed", { error: error.message });
+    process.exitCode = 1;
+  });
+}

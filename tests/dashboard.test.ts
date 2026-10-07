@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import {
+  DASHBOARD_VIEW_PERMISSIONS,
+  getAuthorizedDashboardViews,
+} from "../lib/authorization/dashboard-views";
 import { isDashboardPeriod, isDashboardView } from "../lib/crm/dashboard/catalog";
 import {
   buildMonthlyFunnelSnapshots,
@@ -42,6 +46,24 @@ describe("dashboard query catalog", () => {
     expect(isDashboardView("internal")).toBe(false);
     expect(isDashboardPeriod("week")).toBe(true);
     expect(isDashboardPeriod(["week"])).toBe(false);
+  });
+
+  it("mapeia cada visão para uma permissão dedicada e falha fechada", () => {
+    expect(DASHBOARD_VIEW_PERMISSIONS).toEqual({
+      all: "crm.dashboard.all.view",
+      with_canal_imob: "crm.dashboard.with_canal_imob.view",
+      without_canal_imob: "crm.dashboard.without_canal_imob.view",
+    });
+    expect(
+      getAuthorizedDashboardViews(["crm.dashboard.view", "crm.dashboard.with_canal_imob.view"]),
+    ).toEqual(["with_canal_imob"]);
+    expect(
+      getAuthorizedDashboardViews([
+        "crm.dashboard.without_canal_imob.view",
+        "crm.dashboard.all.view",
+      ]),
+    ).toEqual(["all", "without_canal_imob"]);
+    expect(getAuthorizedDashboardViews(["crm.dashboard.view"])).toEqual([]);
   });
 });
 

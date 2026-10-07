@@ -57,6 +57,21 @@ export const PERMISSIONS = {
     description: "Consulta os indicadores do CRM.",
     minLevel: 10,
   },
+  "crm.dashboard.all.view": {
+    label: "Visualizar dashboard Geral",
+    description: "Consulta a visão consolidada de todos os canais.",
+    minLevel: 10,
+  },
+  "crm.dashboard.with_canal_imob.view": {
+    label: "Visualizar dashboard com Canal Imob",
+    description: "Consulta somente os indicadores associados ao Canal Imob.",
+    minLevel: 10,
+  },
+  "crm.dashboard.without_canal_imob.view": {
+    label: "Visualizar dashboard sem Canal Imob",
+    description: "Consulta somente os indicadores sem Canal Imob.",
+    minLevel: 10,
+  },
   "crm.stages.view": {
     label: "Visualizar etapas",
     description: "Consulta oportunidades, agendamentos, visitas, pastas e vendas.",
@@ -69,8 +84,8 @@ export const PERMISSIONS = {
   },
   "crm.partnerships.view": {
     label: "Visualizar Canal de Parcerias",
-    description: "Acessa o Canal de Parcerias exclusivamente no perfil Master.",
-    minLevel: 100,
+    description: "Acessa o Canal de Parcerias quando concedido pelo papel.",
+    minLevel: 10,
   },
   "crm.read_model_v3.view": {
     label: "Visualizar read model v3",

@@ -10,13 +10,13 @@ select is(
 
 select is(
   (select min_level from public.permissions where key = 'crm.partnerships.view'),
-  100,
-  'only the Master level may manage the partnership permission'
+  10,
+  'the partnership permission can be inherited by approved operational roles'
 );
 
 select is(
   (select description from public.permissions where key = 'crm.partnerships.view'),
-  'Visualizar o Canal de Parcerias',
+  'Visualizar o Canal de Parcerias quando concedido pelo papel',
   'the partnership permission has the approved commercial label'
 );
 
@@ -26,8 +26,8 @@ select is(
     from public.role_permissions
     where permission_key = 'crm.partnerships.view'
   ),
-  array['master']::text[],
-  'only Master inherits the partnership permission'
+  array['admin', 'broker_imob', 'coordinator', 'manager_imob', 'master']::text[],
+  'only Master, Admin, Coordinator and Imob roles inherit the partnership permission'
 );
 
 select is(
@@ -35,10 +35,22 @@ select is(
     select count(*)
     from public.role_permissions
     where permission_key = 'crm.partnerships.view'
-      and role_key <> 'master'
+      and role_key in (
+        'manager_house',
+        'broker_house',
+        'manager',
+        'supervisor',
+        'house',
+        'real_estate',
+        'partnership_channel',
+        'broker_lead',
+        'broker',
+        'user',
+        'pending'
+      )
   ),
   0::bigint,
-  'no non-Master role inherits the partnership permission'
+  'House, retired and pending roles do not inherit the partnership permission'
 );
 
 select is(

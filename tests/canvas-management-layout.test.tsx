@@ -94,7 +94,7 @@ describe("management canvas layout", () => {
     expect(users).toContain('enforcePermission("users.view")');
     expect(userManager).toContain("assignRoleAction");
     expect(userManager).toContain("approveUserAccessAction");
-    expect(userManager).toContain("setPermissionOverrideAction");
+    expect(userManager).toContain("setPermissionOverridesBulkAction");
     expect(pages).toContain('enforcePermission("pages.manage")');
     expect(pageManager).toContain("setPageVisibilityAction.bind");
     expect(pageManager).not.toMatch(/Exportar|download/i);
@@ -133,6 +133,9 @@ describe("management canvas layout", () => {
     );
     expect(styles).toMatch(
       /@media \(max-width: 60rem\) \{[\s\S]*?\.admin-pages-results table \{[\s\S]*?min-width: 0[\s\S]*?\.admin-pages-results tbody :is\(th, td\) \{[\s\S]*?min-width: 0 !important/,
+    );
+    expect(styles).toMatch(
+      /@media \(max-width: 40rem\) \{[\s\S]*?\.admin-user-detail-header h2 \{[\s\S]*?min-height: 2\.5em[\s\S]*?-webkit-line-clamp: 2/,
     );
     expect(users).toContain("const PAGE_SIZE = 6");
     expect(pages).toContain("const PAGE_SIZE = 8");

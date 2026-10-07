@@ -49,6 +49,14 @@ const roots = [
 }));
 const pages = [
   ...roots,
+  {
+    ...roots[0]!,
+    key: "crm.repasse",
+    path: "/app/repasse",
+    name: "Repasse",
+    parentKey: "crm.dashboard",
+    sortOrder: 60,
+  },
   ...roots
     .filter((page) => ["crm.dashboard", "crm.simulation", "crm.settings"].includes(page.key))
     .map((page) => ({

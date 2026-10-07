@@ -20,13 +20,18 @@ const manifest = JSON.parse(readFileSync(new URL("manifest.json", root), "utf8")
 };
 
 describe("approved canvas parity contract", () => {
-  it("maps every released protected page to an approved visual region", () => {
+  it("preserves every approved canvas and routes Repasse to its dedicated visual contract", () => {
     const releasedPaths = PROTECTED_PAGE_GATES.filter(({ releaseEnabled }) => releaseEnabled).map(
       ({ path }) => path,
     );
+    const canvasPaths = releasedPaths.filter((path) => path !== "/app/repasse");
+    const repasseReadme = readFileSync(new URL("../repasse/README.md", root), "utf8");
 
-    expect(releasedPaths).toHaveLength(23);
-    for (const path of releasedPaths) expect(readme).toContain(`\`${path}\``);
+    expect(releasedPaths).toHaveLength(24);
+    expect(canvasPaths).toHaveLength(23);
+    for (const path of canvasPaths) expect(readme).toContain(`\`${path}\``);
+    expect(repasseReadme).toContain("`/app/repasse`");
+    expect(repasseReadme).toContain("Claro, Médio e Escuro");
     expect(readme).toContain("Existe uma única navbar global");
     expect(readme).toContain("crm.simulators.view");
     expect(readme).toContain("motor, endpoint de cálculo, submissão e aprovação");

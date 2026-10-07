@@ -19,12 +19,12 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 43-version manifest", async () => {
+  it("keeps a unique, ordered 44-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(43);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(43);
+    expect(migrations).toHaveLength(44);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(44);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
   });
@@ -42,6 +42,38 @@ describe("release-candidate migration train", () => {
 });
 
 describe("release-candidate activation defaults", () => {
+  it("keeps restore and browser gates synchronized with the released access matrix", async () => {
+    const [restoreHarness, rlsHarness, browserHarness, visualHarness] = await Promise.all([
+      readFile(path.join(repositoryRoot, "scripts/release/isolated-restore-rehearsal.mjs"), "utf8"),
+      readFile(path.join(repositoryRoot, "scripts/qa/local-rls-api.mjs"), "utf8"),
+      readFile(path.join(repositoryRoot, "e2e/release-candidate.spec.ts"), "utf8"),
+      readFile(path.join(repositoryRoot, "scripts/qa/local-authenticated-visual.mjs"), "utf8"),
+    ]);
+    const expectedRoles = [
+      "master",
+      "admin",
+      "coordinator",
+      "manager_house",
+      "manager_imob",
+      "broker_house",
+      "broker_imob",
+      "pending",
+    ];
+    const readRoleBlock = (source: string, declaration: string) => {
+      const block =
+        source.match(new RegExp(`const ${declaration} = \\[([\\s\\S]*?)\\];`))?.[1] ?? "";
+      return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
+    };
+
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1099;");
+    expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
+    expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
+    for (const harness of [rlsHarness, visualHarness]) {
+      expect(harness).toContain('path.join(repositoryRoot, ".next/standalone")');
+      expect(harness).toContain("spawn(process.execPath, [serverPath]");
+    }
+  });
+
   it("ships all new runtime capabilities off and without credentials", async () => {
     const example = await readFile(
       path.join(repositoryRoot, "deploy/production.env.example"),

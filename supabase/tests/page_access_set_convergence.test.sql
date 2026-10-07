@@ -113,6 +113,7 @@ select is(
     'admin.pages',
     'admin.users',
     'crm.dashboard',
+    'crm.partnerships',
     'crm.ranking',
     'crm.settings',
     'crm.settings.goals',
@@ -124,7 +125,7 @@ select is(
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Admin retains the exact fourteen-page inherited set'
+  'Admin retains the exact fifteen-page inherited set including partnerships'
 );
 
 select is(
@@ -134,12 +135,12 @@ select is(
     where page.is_active
       and exists (
         select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'broker'
+        where role_permission.role_key = 'broker_house'
           and role_permission.permission_key = 'pages.view'
       )
       and exists (
         select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'broker'
+        where role_permission.role_key = 'broker_house'
           and role_permission.permission_key = page.permission_key
       )
   ),
@@ -152,7 +153,7 @@ select is(
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'broker retains the exact seven-page inherited set'
+  'Corretor House retains the exact seven-page inherited set'
 );
 
 select is(
@@ -162,25 +163,25 @@ select is(
     where page.is_active
       and exists (
         select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'broker_lead'
+        where role_permission.role_key = 'broker_imob'
           and role_permission.permission_key = 'pages.view'
       )
       and exists (
         select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'broker_lead'
+        where role_permission.role_key = 'broker_imob'
           and role_permission.permission_key = page.permission_key
       )
   ),
   array[
     'crm.dashboard',
-    'crm.ranking',
+    'crm.partnerships',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'broker_lead retains the exact seven-page inherited set'
+  'Corretor Imob retains the exact seven-page inherited set'
 );
 
 select is(
@@ -201,14 +202,14 @@ select is(
   ),
   array[
     'crm.dashboard',
-    'crm.ranking',
+    'crm.partnerships',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'coordinator retains the exact seven-page inherited set'
+  'Coordinator retains the exact seven-page Imob inherited set'
 );
 
 select is(
@@ -218,12 +219,12 @@ select is(
     where page.is_active
       and exists (
         select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'real_estate'
+        where role_permission.role_key = 'manager_house'
           and role_permission.permission_key = 'pages.view'
       )
       and exists (
         select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'real_estate'
+        where role_permission.role_key = 'manager_house'
           and role_permission.permission_key = page.permission_key
       )
   ),
@@ -236,7 +237,7 @@ select is(
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'real_estate retains the exact seven-page inherited set'
+  'Gerente House retains the exact seven-page inherited set'
 );
 
 select is(
@@ -246,75 +247,54 @@ select is(
     where page.is_active
       and exists (
         select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'supervisor'
+        where role_permission.role_key = 'manager_imob'
           and role_permission.permission_key = 'pages.view'
       )
       and exists (
         select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'supervisor'
+        where role_permission.role_key = 'manager_imob'
           and role_permission.permission_key = page.permission_key
       )
   ),
   array[
     'crm.dashboard',
-    'crm.ranking',
+    'crm.partnerships',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'supervisor retains the exact seven-page inherited set'
-);
-
-select is(
-  (
-    select array_agg(page.key order by page.key)
-    from public.app_pages page
-    where page.is_active
-      and exists (
-        select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'user'
-          and role_permission.permission_key = 'pages.view'
-      )
-      and exists (
-        select 1 from public.role_permissions role_permission
-        where role_permission.role_key = 'user'
-          and role_permission.permission_key = page.permission_key
-      )
-  ),
-  array[
-    'crm.dashboard',
-    'crm.ranking',
-    'crm.stage.appointments',
-    'crm.stage.folders',
-    'crm.stage.opportunities',
-    'crm.stage.sales',
-    'crm.stage.visits'
-  ]::text[],
-  'user retains the exact seven-page inherited set'
+  'Gerente Imob retains the exact seven-page inherited set'
 );
 
 select is(
   (
     select count(*)
-    from public.roles role
-    cross join public.app_pages page
-    where role.key in ('manager', 'house', 'partnership_channel', 'pending')
-      and page.is_active
-      and exists (
-        select 1 from public.role_permissions role_permission
-        where role_permission.role_key = role.key
-          and role_permission.permission_key = 'pages.view'
-      )
-      and exists (
-        select 1 from public.role_permissions role_permission
-        where role_permission.role_key = role.key
-          and role_permission.permission_key = page.permission_key
-      )
+    from public.role_permissions
+    where role_key in (
+      'manager',
+      'supervisor',
+      'house',
+      'real_estate',
+      'partnership_channel',
+      'broker_lead',
+      'broker',
+      'user'
+    )
   ),
   0::bigint,
-  'future and pending roles inherit zero commercial pages'
+  'retired roles inherit zero production pages'
+);
+
+select is(
+  (
+    select count(*)
+    from public.role_permissions
+    where role_key = 'pending'
+  ),
+  0::bigint,
+  'pending role inherits zero production pages'
 );
 
 select * from finish();

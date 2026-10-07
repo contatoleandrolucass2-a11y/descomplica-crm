@@ -17,12 +17,11 @@ import { isRecoveryTokenHash } from "../lib/auth/recovery-token";
 const expectedRoles = [
   "master",
   "admin",
-  "manager",
-  "broker",
   "coordinator",
-  "real_estate",
-  "house",
-  "partnership_channel",
+  "manager_house",
+  "manager_imob",
+  "broker_house",
+  "broker_imob",
   "pending",
 ] as const;
 
@@ -315,54 +314,69 @@ const genericLoginFailure =
   "Não foi possível autenticar. Verifique suas credenciais e tente novamente.";
 const forbiddenHeading = "Você não possui acesso a esta página";
 const adminRoles = new Set<Role>(["master", "admin"]);
-const inheritedAnalyticalRoles = new Set<Role>([
+const activeOperationalRoles = new Set<Role>([
   "master",
   "admin",
-  "broker",
   "coordinator",
-  "real_estate",
+  "manager_house",
+  "manager_imob",
+  "broker_house",
+  "broker_imob",
+]);
+const rankingRoles = new Set<Role>(["master", "admin", "manager_house", "broker_house"]);
+const partnershipRoles = new Set<Role>([
+  "master",
+  "admin",
+  "coordinator",
+  "manager_imob",
+  "broker_imob",
 ]);
 const masterOnlyRoles = new Set<Role>(["master"]);
 const protectedSurfaces = [
   {
     path: "/app",
     heading: "Dashboard comercial",
-    allowed: inheritedAnalyticalRoles,
+    allowed: activeOperationalRoles,
+  },
+  {
+    path: "/app/repasse",
+    heading: "Consulta de repasse",
+    allowed: masterOnlyRoles,
   },
   {
     path: "/app/etapas/oportunidades",
     heading: "Oportunidades",
-    allowed: inheritedAnalyticalRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/etapas/agendamentos",
     heading: "Agendamentos",
-    allowed: inheritedAnalyticalRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/etapas/visitas",
     heading: "Visitas",
-    allowed: inheritedAnalyticalRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/etapas/pastas",
     heading: "Pastas",
-    allowed: inheritedAnalyticalRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/etapas/vendas",
     heading: "Vendas",
-    allowed: inheritedAnalyticalRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/ranking",
     heading: "Ranking por pontos",
-    allowed: inheritedAnalyticalRoles,
+    allowed: rankingRoles,
   },
   {
     path: "/app/canal-de-parcerias",
     heading: "Ranking das imobiliárias",
-    allowed: masterOnlyRoles,
+    allowed: partnershipRoles,
   },
   {
     path: "/app/configuracoes",
@@ -432,14 +446,13 @@ function allowedDirectRoutesForRole(role: Role) {
     .sort();
 }
 
-const analyticalRoutes = [
+const operationalRoutes = [
   "/app",
   "/app/etapas/agendamentos",
   "/app/etapas/oportunidades",
   "/app/etapas/pastas",
   "/app/etapas/vendas",
   "/app/etapas/visitas",
-  "/app/ranking",
 ] as const;
 const settingsRoutes = [
   "/app/configuracoes",
@@ -465,53 +478,65 @@ function sortedRouteSet(routes: readonly string[]) {
 
 const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
   master: sortedRouteSet([
-    ...analyticalRoutes,
+    ...operationalRoutes,
+    "/app/ranking",
     "/app/canal-de-parcerias",
+    "/app/repasse",
     ...settingsRoutes,
     ...simulatorRoutes,
     ...administrationRoutes,
   ]),
-  admin: sortedRouteSet([...analyticalRoutes, ...settingsRoutes, ...administrationRoutes]),
-  broker: sortedRouteSet(analyticalRoutes),
-  coordinator: sortedRouteSet(analyticalRoutes),
-  real_estate: sortedRouteSet(analyticalRoutes),
-  manager: [],
-  house: [],
-  partnership_channel: [],
+  admin: sortedRouteSet([
+    ...operationalRoutes,
+    "/app/ranking",
+    "/app/canal-de-parcerias",
+    ...settingsRoutes,
+    ...administrationRoutes,
+  ]),
+  coordinator: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
+  manager_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
+  manager_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
+  broker_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
+  broker_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
   pending: [],
 };
 
 const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
   master: sortedRouteSet([
-    ...analyticalRoutes,
+    ...operationalRoutes,
+    "/app/ranking",
     "/app/canal-de-parcerias",
+    "/app/repasse",
     ...settingsRoutes,
     ...simulatorRoutes,
   ]),
-  admin: sortedRouteSet([...analyticalRoutes, ...settingsRoutes]),
-  broker: sortedRouteSet(analyticalRoutes),
-  coordinator: sortedRouteSet(analyticalRoutes),
-  real_estate: sortedRouteSet(analyticalRoutes),
-  manager: [],
-  house: [],
-  partnership_channel: [],
+  admin: sortedRouteSet([
+    ...operationalRoutes,
+    "/app/ranking",
+    "/app/canal-de-parcerias",
+    ...settingsRoutes,
+  ]),
+  coordinator: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
+  manager_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
+  manager_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
+  broker_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
+  broker_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
   pending: [],
 };
 
 const expectedAccountAdminRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
   master: sortedRouteSet(administrationRoutes),
   admin: sortedRouteSet(administrationRoutes),
-  manager: [],
-  broker: [],
   coordinator: [],
-  real_estate: [],
-  house: [],
-  partnership_channel: [],
+  manager_house: [],
+  manager_imob: [],
+  broker_house: [],
+  broker_imob: [],
   pending: [],
 };
 
 function expectedHomeForRole(role: Role) {
-  if (inheritedAnalyticalRoles.has(role)) return "/app";
+  if (activeOperationalRoles.has(role)) return "/app";
   return "/conta/seguranca";
 }
 
@@ -659,14 +684,17 @@ test.afterAll(() => {
 });
 
 test("the hosted profile matrix uses the exact approved commercial page sets", () => {
-  expect(protectedSurfaces).toHaveLength(23);
+  expect(protectedSurfaces).toHaveLength(24);
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      role === "master" ? 20 : role === "admin" ? 12 : inheritedAnalyticalRoles.has(role) ? 7 : 0,
+      role === "master" ? 21 : role === "admin" ? 13 : activeOperationalRoles.has(role) ? 7 : 0,
     );
     expect(expectedAccountAdminRoutesByRole[role], role).toHaveLength(adminRoles.has(role) ? 3 : 0);
   }
+  expect(protectedSurfaces.find((surface) => surface.path === "/app/repasse")?.allowed).toBe(
+    masterOnlyRoles,
+  );
   expect(
     protectedSurfaces.find((surface) => surface.path === "/app/simulacao/caixa")?.allowed,
   ).toBe(masterOnlyRoles);
@@ -960,7 +988,7 @@ for (const role of expectedRoles) {
       reportProgress("account-security");
 
       const dashboardApi = await page.request.get("/api/dashboard/status");
-      if (inheritedAnalyticalRoles.has(role)) {
+      if (activeOperationalRoles.has(role)) {
         expect(dashboardApi.status()).toBe(200);
         expect(dashboardApi.headers()["cache-control"]).toContain("no-store");
       } else {

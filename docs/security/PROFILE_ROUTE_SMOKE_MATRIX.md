@@ -2,23 +2,23 @@
 
 ## Contrato
 
-Esta matriz descreve o inventário HTTP de 22 rotas protegidas e deve ser validada
+Esta matriz descreve o inventário HTTP de 24 rotas protegidas e deve ser validada
 com contas QA sintéticas. O catálogo PostgreSQL mantém exatamente 17 entradas em
-`app_pages`; o catálogo HTTP possui 22 rotas habilitadas para Master, pois
-acrescenta Tabelão, as réplicas WF14 e WF15, WF16/Documentação e a jornada
-visual CAIXA sob o guard Master-only existente. A execução dos motores continua
-um contrato separado da autorização das páginas.
+`app_pages`; o catálogo HTTP possui 24 rotas habilitadas para Master, pois
+acrescenta Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15,
+WF16/Documentação e a jornada visual CAIXA. A execução dos motores e a leitura
+server-side da fonte pública de Repasse continuam contratos separados da
+autorização das páginas; o RBAC do CRM não privatiza a planilha externa.
 
 Perfis exigidos:
 
 - `master`;
 - `admin`;
-- `manager`;
-- `broker`;
 - `coordinator`;
-- `real_estate`;
-- `house`;
-- `partnership_channel`;
+- `manager_house`;
+- `manager_imob`;
+- `broker_house`;
+- `broker_imob`;
 - `pending`.
 
 Legenda:
@@ -32,41 +32,43 @@ Produção e instalação limpa convergem para as mesmas 17 entradas de `app_pag
 A migration Auth/MFA remove somente as quatro identidades excedentes encontradas
 no restore (`WF16`, `CAIXA`, `WF14` e `WF15`), preserva `user_roles` e overrides
 e recompõe somente os vínculos herdados já existentes em produção. Neste
-candidato, as cinco jornadas complementares acrescentam da 18ª à 22ª rotas HTTP
+candidato, as sete jornadas complementares acrescentam da 18ª à 24ª rotas HTTP
 habilitadas pelo catálogo versionado, sem migration ou nova permissão de banco.
-CAIXA permanece fail-closed no motor, ainda que sua composição visual esteja
-acessível ao Master.
+Recurso MKT reutiliza `crm.settings.manage`; Repasse exige papel `master` e
+`crm.partnerships.view` em conjunto. CAIXA permanece fail-closed no motor, ainda
+que sua composição visual esteja acessível ao Master.
 
-| Rota protegida                            | `master` | `admin` | `broker`, `coordinator`, `real_estate` | `manager`, `house`, `partnership_channel`, `pending` | visitante |
-| ----------------------------------------- | -------: | ------: | -------------------------------------: | ---------------------------------------------------: | --------: |
-| `/app`                                    |      200 |     200 |                                    200 |                                                  403 |  redirect |
-| `/app/etapas/oportunidades`               |      200 |     200 |                                    200 |                                                  403 |  redirect |
-| `/app/etapas/agendamentos`                |      200 |     200 |                                    200 |                                                  403 |  redirect |
-| `/app/etapas/visitas`                     |      200 |     200 |                                    200 |                                                  403 |  redirect |
-| `/app/etapas/pastas`                      |      200 |     200 |                                    200 |                                                  403 |  redirect |
-| `/app/etapas/vendas`                      |      200 |     200 |                                    200 |                                                  403 |  redirect |
-| `/app/ranking`                            |      200 |     200 |                                    200 |                                                  403 |  redirect |
-| `/app/canal-de-parcerias`                 |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/configuracoes`                      |      200 |     200 |                                    403 |                                                  403 |  redirect |
-| `/app/configuracoes/metas`                |      200 |     200 |                                    403 |                                                  403 |  redirect |
-| `/app/configuracoes/metas/parcerias`      |      200 |     200 |                                    403 |                                                  403 |  redirect |
-| `/app/configuracoes/metas/pontos`         |      200 |     200 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao`                          |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/associativo-fluxo-linear` |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/calcular-documentacao`    |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/caixa`                    |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/tabela-direta`            |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/tabela-investidor`        |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/app/simulacao/tabelao`                  |      200 |     403 |                                    403 |                                                  403 |  redirect |
-| `/admin`                                  |      200 |     200 |                                    403 |                                                  403 |  redirect |
-| `/admin/usuarios`                         |      200 |     200 |                                    403 |                                                  403 |  redirect |
-| `/admin/paginas`                          |      200 |     200 |                                    403 |                                                  403 |  redirect |
+| Rota protegida                            | `master` | `admin` | `coordinator`, `manager_imob`, `broker_imob` | `manager_house`, `broker_house` | `pending` e legados | visitante |
+| ----------------------------------------- | -------: | ------: | -------------------------------------------: | ------------------------------: | ------------------: | --------: |
+| `/app`                                    |      200 |     200 |                                          200 |                             200 |                 403 |  redirect |
+| `/app/etapas/oportunidades`               |      200 |     200 |                                          200 |                             200 |                 403 |  redirect |
+| `/app/etapas/agendamentos`                |      200 |     200 |                                          200 |                             200 |                 403 |  redirect |
+| `/app/etapas/visitas`                     |      200 |     200 |                                          200 |                             200 |                 403 |  redirect |
+| `/app/etapas/pastas`                      |      200 |     200 |                                          200 |                             200 |                 403 |  redirect |
+| `/app/etapas/vendas`                      |      200 |     200 |                                          200 |                             200 |                 403 |  redirect |
+| `/app/ranking`                            |      200 |     200 |                                          403 |                             200 |                 403 |  redirect |
+| `/app/canal-de-parcerias`                 |      200 |     200 |                                          200 |                             403 |                 403 |  redirect |
+| `/app/repasse`                            |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/configuracoes`                      |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/configuracoes/recurso-mkt`          |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/configuracoes/metas`                |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/configuracoes/metas/parcerias`      |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/configuracoes/metas/pontos`         |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao`                          |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/associativo-fluxo-linear` |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/calcular-documentacao`    |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/caixa`                    |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/tabela-direta`            |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/tabela-investidor`        |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/tabelao`                  |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/admin`                                  |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/admin/usuarios`                         |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/admin/paginas`                          |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 
-Os papéis produtivos legados `supervisor`, `broker_lead` e `user` conservam as mesmas
-sete páginas de `broker`, `coordinator` e `real_estate`. Eles não são criados nem usados
-como fixtures pelos nove perfis do smoke novo, mas entram no fingerprint do rehearsal.
-Produção não possui overrides individuais; o processo continua preservando a tabela
-integralmente caso overrides sejam adicionados antes do cutover.
+Os papéis `manager`, `supervisor`, `house`, `real_estate`,
+`partnership_channel`, `broker_lead`, `broker` e `user` permanecem somente como
+histórico, sem grants herdados e fora das opções atribuíveis. O smoke exige
+negação para todos eles; contas existentes precisam de reclassificação explícita.
 
 Autorização de página e execução de motor são gates distintos. Os sete `200` de
 simulação autorizam o hub, WF13, WF16/Documentação, CAIXA, Tabelão e as réplicas
@@ -76,7 +78,7 @@ bancária e WF14/WF15 não persistem nem chamam motor oficial.
 
 ## Matriz de APIs somente leitura/fail-closed
 
-| Contrato                                                | `master`              | outros oito perfis            | visitante |
+| Contrato                                                | `master`              | outros sete perfis            | visitante |
 | ------------------------------------------------------- | --------------------- | ----------------------------- | --------- |
 | `GET /api/dashboard/status`                             | 200                   | conforme `crm.dashboard.view` | 401       |
 | `GET /api/inventory`                                    | 200, `no-store`       | 403                           | 401       |
@@ -93,7 +95,7 @@ bancária e WF14/WF15 não persistem nem chamam motor oficial.
 | `GET /api/health`                                       | 200, sem dado privado | 200                           | 200       |
 
 Os quatro `POST` em `404` retornam antes de qualquer escrita ou chamada externa. O smoke
-os repete nos nove perfis para provar o default-off; WF13 é o único motor executado, com
+os repete nos oito perfis para provar o default-off; WF13 é o único motor executado, com
 fixture sintética já versionada e apenas na sessão `master`.
 Os dois `GET` de estoque repetem `crm.simulators.view`: somente Master recebe os
 dados neste candidato, sempre com cabeçalhos `no-store`; demais perfis recebem
@@ -111,7 +113,7 @@ dados neste candidato, sempre com cabeçalhos `no-store`; demais perfis recebem
 | sessão inválida/revogada | redirect `/login`           | redirect `/login`           | redirect `/login`           | 401 ou fail-closed               |
 
 `/conta/seguranca` depende somente de identidade autenticada e assurance, portanto deve
-ser acessível aos nove perfis sem conceder permissão comercial. Remoção de fator só pode
+ser acessível aos oito perfis sem conceder permissão comercial. Remoção de fator só pode
 ser concluída em AAL2. A remoção revoga antes as outras sessões do mesmo usuário; um
 segundo navegador AAL1 recebe `403 mfa_required` antes da remoção. Depois da revogação,
 ele perde `current_session_is_live`, recebe `401` e é enviado ao login, mesmo enquanto o
@@ -122,23 +124,21 @@ JWT local ainda não expirou.
 Para cada perfil, o E2E deve:
 
 1. autenticar e confirmar a identidade/papel esperados;
-2. verificar a página inicial autorizada (`/app` para `master`, `admin`, `broker`,
-   `coordinator` e `real_estate`; superfície auth-only para os quatro perfis sem página);
+2. verificar `/app` para os sete papéis ativos e uma superfície auth-only para `pending`;
 3. comparar o menu com o catálogo permitido;
-4. abrir diretamente cada uma das 21 URLs — 18 habilitadas e três bloqueadas —
-   e comparar o resultado com a tabela;
+4. abrir diretamente cada uma das 24 URLs e comparar o resultado com a tabela;
 5. testar os Route Handlers vinculados às permissões sem gravar dados;
 6. abrir `/conta/seguranca` e provar o estado MFA aplicável;
 7. executar logout e confirmar bloqueio ao voltar, recarregar e reabrir URL protegida.
 
 O `403` é verificado no response HTTP direto e na navegação do navegador. O Proxy
-antecipa a permissão exata das 21 rotas versionadas antes que uma loading boundary
+antecipa a permissão exata das 24 rotas versionadas antes que uma loading boundary
 possa mascará-la com `200` streamed; layout, página, APIs e RLS repetem o gate. Conteúdo
 e título da página negada também devem permanecer ausentes. Para Admin, as três páginas
 de metas carregam a base legada somente leitura e exibem explicitamente o rascunho como
 indisponível, pois política comercial continua Master-only.
 
-Além dos nove perfis, o gate deve cobrir recuperação de senha com resposta genérica,
+Além dos oito perfis, o gate deve cobrir recuperação de senha com resposta genérica,
 link válido/expirado, senha forte, revogação de sessões, enrollment/challenge/removal
 TOTP, sessão temporária e lembrada, banner/personalização de cookies, documentos,
 aceites legais separados e visitante anônimo.

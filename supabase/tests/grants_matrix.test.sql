@@ -349,6 +349,7 @@ select is(
     'set_crm_commercial_engine_gate',
     'set_user_active',
     'set_user_permission_override',
+    'set_user_permission_overrides_bulk',
     'upsert_crm_funnel_goals'
   ]::name[],
   'authenticated can execute only the audited browser and RLS functions'

@@ -73,9 +73,11 @@ import { isHomologationMode } from "@/lib/homologation/config";
 import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 import { NextResponse, type NextRequest } from "next/server";
 import type { PermissionKey } from "@/lib/authorization/permissions";
+import type { RoleKey } from "@/lib/authorization/roles";
 
 interface AuthorizationContextRow {
   permissions?: unknown;
+  role_key?: unknown;
 }
 
 // Cache Components can stream a shared protected shell before a page-level
@@ -86,6 +88,7 @@ function permissionRequiredBeforeStreaming(pathname: string): {
   permission: PermissionKey;
   releaseEnabled: boolean;
   requireAuthenticated?: boolean;
+  requiredRole?: RoleKey;
 } | null {
   const pageGate = getProtectedPageGate(pathname);
   if (pageGate) return pageGate;
@@ -122,6 +125,7 @@ async function lacksEarlyPermission(
     permission: PermissionKey;
     releaseEnabled: boolean;
     requireAuthenticated?: boolean;
+    requiredRole?: RoleKey;
   },
 ) {
   const {
@@ -140,8 +144,13 @@ async function lacksEarlyPermission(
   }
   if (data.length !== 1) return true;
 
-  const permissions = (data[0] as AuthorizationContextRow).permissions;
-  return !Array.isArray(permissions) || !permissions.includes(pageGate.permission);
+  const context = data[0] as AuthorizationContextRow;
+  const permissions = context.permissions;
+  return (
+    !Array.isArray(permissions) ||
+    !permissions.includes(pageGate.permission) ||
+    (pageGate.requiredRole !== undefined && context.role_key !== pageGate.requiredRole)
+  );
 }
 
 function unavailableSalesforceResponse(request: NextRequest): NextResponse | null {

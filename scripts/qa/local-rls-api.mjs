@@ -1,6 +1,6 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { execFile, spawn, spawnSync } from "node:child_process";
-import { chmod, link, mkdtemp, open, rm, stat } from "node:fs/promises";
+import { chmod, cp, link, mkdtemp, open, rm, stat } from "node:fs/promises";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -27,52 +27,62 @@ const loopbackHosts = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const requiredRoles = [
   "master",
   "admin",
-  "manager",
-  "broker",
   "coordinator",
-  "real_estate",
-  "house",
-  "partnership_channel",
+  "manager_house",
+  "manager_imob",
+  "broker_house",
+  "broker_imob",
   "pending",
 ];
-const legacyRoles = new Set(["user", "supervisor", "broker_lead"]);
+const legacyRoles = new Set([
+  "manager",
+  "supervisor",
+  "house",
+  "real_estate",
+  "partnership_channel",
+  "broker_lead",
+  "broker",
+  "user",
+]);
 const simulatorPageKeys = ["crm.simulation", "crm.simulation.wf13"];
 const inheritedAnalyticalPageKeys = [
   "crm.dashboard",
-  "crm.ranking",
   "crm.stage.appointments",
   "crm.stage.folders",
   "crm.stage.opportunities",
   "crm.stage.sales",
   "crm.stage.visits",
 ];
+const rankingPageKeys = ["crm.ranking"];
+const partnershipPageKeys = ["crm.partnerships"];
 const administrativeCommercialPageKeys = [
   "crm.settings",
   "crm.settings.goals",
   "crm.settings.partnerships",
   "crm.settings.points",
 ];
-const masterOnlyCommercialPageKeys = ["crm.partnerships"];
 const masterAdministrativePageKeys = ["admin.home", "admin.pages", "admin.users"];
 const expectedPageKeysByRole = {
   master: [
     ...masterAdministrativePageKeys,
     ...inheritedAnalyticalPageKeys,
+    ...rankingPageKeys,
     ...administrativeCommercialPageKeys,
-    ...masterOnlyCommercialPageKeys,
+    ...partnershipPageKeys,
     ...simulatorPageKeys,
   ].sort(),
   admin: [
     ...masterAdministrativePageKeys,
     ...inheritedAnalyticalPageKeys,
+    ...rankingPageKeys,
     ...administrativeCommercialPageKeys,
+    ...partnershipPageKeys,
   ].sort(),
-  manager: [],
-  broker: [...inheritedAnalyticalPageKeys].sort(),
-  coordinator: [...inheritedAnalyticalPageKeys].sort(),
-  real_estate: [...inheritedAnalyticalPageKeys].sort(),
-  house: [],
-  partnership_channel: [],
+  coordinator: [...inheritedAnalyticalPageKeys, ...partnershipPageKeys].sort(),
+  manager_house: [...inheritedAnalyticalPageKeys, ...rankingPageKeys].sort(),
+  manager_imob: [...inheritedAnalyticalPageKeys, ...partnershipPageKeys].sort(),
+  broker_house: [...inheritedAnalyticalPageKeys, ...rankingPageKeys].sort(),
+  broker_imob: [...inheritedAnalyticalPageKeys, ...partnershipPageKeys].sort(),
   pending: [],
 };
 const positivePageRoles = new Set(
@@ -410,12 +420,30 @@ async function assertLoopbackServerReady(origin) {
   fail("Local Next.js production server did not become ready within 90 seconds for browser E2E.");
 }
 
+async function prepareStandaloneRuntime() {
+  const runtimeRoot = path.join(repositoryRoot, ".next/standalone");
+  const serverPath = path.join(runtimeRoot, "server.js");
+  await stat(serverPath);
+  await Promise.all([
+    cp(path.join(repositoryRoot, "public"), path.join(runtimeRoot, "public"), {
+      recursive: true,
+      force: true,
+    }),
+    cp(path.join(repositoryRoot, ".next/static"), path.join(runtimeRoot, ".next/static"), {
+      recursive: true,
+      force: true,
+    }),
+  ]);
+  return { runtimeRoot, serverPath };
+}
+
 async function startLocalNextServer(local, inventoryFixture, inventoryUpstream) {
   await assertFreshProductionBuild();
   const port = await reserveLoopbackPort();
   const origin = `http://127.0.0.1:${port}`;
-  const child = spawn("pnpm", ["start", "--hostname", "127.0.0.1", "--port", String(port)], {
-    cwd: repositoryRoot,
+  const { runtimeRoot, serverPath } = await prepareStandaloneRuntime();
+  const child = spawn(process.execPath, [serverPath], {
+    cwd: runtimeRoot,
     detached: true,
     env: {
       ...environmentSubset(["PATH", "HOME", "TZ", "NODE_OPTIONS", "LD_LIBRARY_PATH"]),
@@ -427,6 +455,8 @@ async function startLocalNextServer(local, inventoryFixture, inventoryUpstream) 
         .filter(Boolean)
         .join(" "),
       NEXT_TELEMETRY_DISABLED: "1",
+      HOSTNAME: "127.0.0.1",
+      PORT: String(port),
       QA_E2E_LOCAL_ONLY: "true",
       QA_CONCURRENT_INVENTORY_ORIGIN: inventoryUpstream.origin,
       APP_ORIGIN: origin,
@@ -644,10 +674,10 @@ begin
   if (
     select count(*) from public.roles
     where key = any(array[
-      'master', 'admin', 'manager', 'broker', 'coordinator',
-      'real_estate', 'house', 'partnership_channel', 'pending'
+      'master', 'admin', 'coordinator', 'manager_house',
+      'manager_imob', 'broker_house', 'broker_imob', 'pending'
     ])
-  ) <> 9 then
+  ) <> 8 then
     raise exception 'required local QA roles are unavailable';
   end if;
 
@@ -657,7 +687,10 @@ begin
     join public.user_roles user_role on user_role.user_id = profile.user_id
     where profile.is_active
       and profile.access_status = 'approved'
-      and user_role.role_key = any(array['user', 'supervisor', 'broker_lead'])
+      and user_role.role_key = any(array[
+        'manager', 'supervisor', 'house', 'real_estate',
+        'partnership_channel', 'broker_lead', 'broker', 'user'
+      ])
   ) then
     raise exception 'approved legacy roles violate the local QA contract';
   end if;
@@ -666,31 +699,37 @@ begin
     with expected(role_key, permission_key) as (
       values
         ('admin', 'crm.dashboard.view'),
+        ('admin', 'crm.dashboard.all.view'),
+        ('admin', 'crm.dashboard.with_canal_imob.view'),
+        ('admin', 'crm.dashboard.without_canal_imob.view'),
         ('admin', 'crm.stages.view'),
         ('admin', 'crm.ranking.view'),
+        ('admin', 'crm.partnerships.view'),
         ('admin', 'pages.manage'),
         ('admin', 'crm.settings.view'),
         ('admin', 'crm.settings.manage'),
         ('admin', 'crm.salesforce.refresh'),
         ('admin', 'crm.ingest.manage'),
         ('coordinator', 'crm.dashboard.view'),
+        ('coordinator', 'crm.dashboard.with_canal_imob.view'),
         ('coordinator', 'crm.stages.view'),
-        ('coordinator', 'crm.ranking.view'),
-        ('supervisor', 'crm.dashboard.view'),
-        ('supervisor', 'crm.stages.view'),
-        ('supervisor', 'crm.ranking.view'),
-        ('real_estate', 'crm.dashboard.view'),
-        ('real_estate', 'crm.stages.view'),
-        ('real_estate', 'crm.ranking.view'),
-        ('broker_lead', 'crm.dashboard.view'),
-        ('broker_lead', 'crm.stages.view'),
-        ('broker_lead', 'crm.ranking.view'),
-        ('broker', 'crm.dashboard.view'),
-        ('broker', 'crm.stages.view'),
-        ('broker', 'crm.ranking.view'),
-        ('user', 'crm.dashboard.view'),
-        ('user', 'crm.stages.view'),
-        ('user', 'crm.ranking.view')
+        ('coordinator', 'crm.partnerships.view'),
+        ('manager_house', 'crm.dashboard.view'),
+        ('manager_house', 'crm.dashboard.without_canal_imob.view'),
+        ('manager_house', 'crm.stages.view'),
+        ('manager_house', 'crm.ranking.view'),
+        ('manager_imob', 'crm.dashboard.view'),
+        ('manager_imob', 'crm.dashboard.with_canal_imob.view'),
+        ('manager_imob', 'crm.stages.view'),
+        ('manager_imob', 'crm.partnerships.view'),
+        ('broker_house', 'crm.dashboard.view'),
+        ('broker_house', 'crm.dashboard.without_canal_imob.view'),
+        ('broker_house', 'crm.stages.view'),
+        ('broker_house', 'crm.ranking.view'),
+        ('broker_imob', 'crm.dashboard.view'),
+        ('broker_imob', 'crm.dashboard.with_canal_imob.view'),
+        ('broker_imob', 'crm.stages.view'),
+        ('broker_imob', 'crm.partnerships.view')
     ),
     actual as (
       select role_permission.role_key, role_permission.permission_key
@@ -698,6 +737,9 @@ begin
       where role_permission.role_key <> 'master'
         and role_permission.permission_key = any(array[
           'crm.dashboard.view',
+          'crm.dashboard.all.view',
+          'crm.dashboard.with_canal_imob.view',
+          'crm.dashboard.without_canal_imob.view',
           'crm.stages.view',
           'crm.ranking.view',
           'crm.partnerships.view',
@@ -728,6 +770,7 @@ function createFixtures(runKey) {
   const teamA = { id: randomUUID(), key: `${runKey}-team-a` };
   const teamB = { id: randomUUID(), key: `${runKey}-team-b` };
   const personA = { id: randomUUID(), key: `${runKey}-person-a` };
+  const personB = { id: randomUUID(), key: `${runKey}-person-b` };
   const pendingPerson = { id: randomUUID(), key: `${runKey}-person-pending` };
   const portfolioA = { id: randomUUID(), key: `${runKey}-portfolio-a` };
   const portfolioB = { id: randomUUID(), key: `${runKey}-portfolio-b` };
@@ -737,6 +780,7 @@ function createFixtures(runKey) {
     teamA: { id: randomUUID(), key: `${runKey}-scope-team-a` },
     teamB: { id: randomUUID(), key: `${runKey}-scope-team-b` },
     personA: { id: randomUUID(), key: `${runKey}-scope-person-a` },
+    personB: { id: randomUUID(), key: `${runKey}-scope-person-b` },
     pendingPerson: { id: randomUUID(), key: `${runKey}-scope-person-pending` },
     portfolioA: { id: randomUUID(), key: `${runKey}-scope-portfolio-a` },
     portfolioB: { id: randomUUID(), key: `${runKey}-scope-portfolio-b` },
@@ -748,11 +792,13 @@ function createFixtures(runKey) {
     teamA,
     teamB,
     personA,
+    personB,
     pendingPerson,
     portfolioA,
     portfolioB,
     reportingScopes,
-    teamMembershipId: randomUUID(),
+    teamMembershipAId: randomUUID(),
+    teamMembershipBId: randomUUID(),
     pendingCurrentMembershipId: randomUUID(),
     pendingFutureMembershipId: randomUUID(),
     portfolioOrganizationAId: randomUUID(),
@@ -769,12 +815,11 @@ function setupSql(accounts, fixtures) {
   const masterId = sqlUuid(byRole.master.id);
   const approvedAssignments = [
     ["admin", fixtures.reportingScopes.organizationA.id],
-    ["manager", fixtures.reportingScopes.teamA.id],
-    ["broker", fixtures.reportingScopes.personA.id],
     ["coordinator", fixtures.reportingScopes.portfolioB.id],
-    ["real_estate", fixtures.reportingScopes.organizationB.id],
-    ["house", fixtures.reportingScopes.organizationA.id],
-    ["partnership_channel", fixtures.reportingScopes.portfolioA.id],
+    ["manager_house", fixtures.reportingScopes.teamA.id],
+    ["manager_imob", fixtures.reportingScopes.teamB.id],
+    ["broker_house", fixtures.reportingScopes.personA.id],
+    ["broker_imob", fixtures.reportingScopes.personB.id],
   ];
   const assignmentValues = approvedAssignments
     .map(
@@ -803,8 +848,14 @@ values
   (
     ${sqlUuid(fixtures.personA.id)},
     ${sqlLiteral(fixtures.personA.key)},
-    'Synthetic local RLS QA person',
-    ${sqlUuid(byRole.broker.id)}
+    'Synthetic local RLS QA House person',
+    ${sqlUuid(byRole.broker_house.id)}
+  ),
+  (
+    ${sqlUuid(fixtures.personB.id)},
+    ${sqlLiteral(fixtures.personB.key)},
+    'Synthetic local RLS QA Imob person',
+    ${sqlUuid(byRole.broker_imob.id)}
   ),
   (
     ${sqlUuid(fixtures.pendingPerson.id)},
@@ -822,9 +873,16 @@ insert into public.crm_team_memberships (
 )
 values
   (
-    ${sqlUuid(fixtures.teamMembershipId)},
+    ${sqlUuid(fixtures.teamMembershipAId)},
     ${sqlUuid(fixtures.teamA.id)},
     ${sqlUuid(fixtures.personA.id)},
+    'broker',
+    now() - interval '1 hour'
+  ),
+  (
+    ${sqlUuid(fixtures.teamMembershipBId)},
+    ${sqlUuid(fixtures.teamB.id)},
+    ${sqlUuid(fixtures.personB.id)},
     'broker',
     now() - interval '1 hour'
   ),
@@ -868,6 +926,7 @@ values
   (${sqlUuid(fixtures.reportingScopes.teamA.id)}, ${sqlLiteral(fixtures.reportingScopes.teamA.key)}, 'team', null, ${sqlUuid(fixtures.teamA.id)}, null, null),
   (${sqlUuid(fixtures.reportingScopes.teamB.id)}, ${sqlLiteral(fixtures.reportingScopes.teamB.key)}, 'team', null, ${sqlUuid(fixtures.teamB.id)}, null, null),
   (${sqlUuid(fixtures.reportingScopes.personA.id)}, ${sqlLiteral(fixtures.reportingScopes.personA.key)}, 'person', null, null, null, ${sqlUuid(fixtures.personA.id)}),
+  (${sqlUuid(fixtures.reportingScopes.personB.id)}, ${sqlLiteral(fixtures.reportingScopes.personB.key)}, 'person', null, null, null, ${sqlUuid(fixtures.personB.id)}),
   (${sqlUuid(fixtures.reportingScopes.pendingPerson.id)}, ${sqlLiteral(fixtures.reportingScopes.pendingPerson.key)}, 'person', null, null, null, ${sqlUuid(fixtures.pendingPerson.id)}),
   (${sqlUuid(fixtures.reportingScopes.portfolioA.id)}, ${sqlLiteral(fixtures.reportingScopes.portfolioA.key)}, 'portfolio', null, null, ${sqlUuid(fixtures.portfolioA.id)}, null),
   (${sqlUuid(fixtures.reportingScopes.portfolioB.id)}, ${sqlLiteral(fixtures.reportingScopes.portfolioB.key)}, 'portfolio', null, null, ${sqlUuid(fixtures.portfolioB.id)}, null);
@@ -932,7 +991,7 @@ begin
     where profile.user_id = any(${sqlUuidArray(accounts.map((account) => account.id))})
       and profile.is_active
       and profile.access_status = 'approved'
-  ) <> 8 then
+  ) <> 7 then
     raise exception 'approved local QA profile fixture count is invalid';
   end if;
 
@@ -985,7 +1044,7 @@ begin
       and scope_grant.valid_from <= now()
       and scope_grant.valid_until is null
       and reporting_scope.is_active
-  ) <> 8 then
+  ) <> 7 then
     raise exception 'local QA active reporting-scope grant count is invalid';
   end if;
 
@@ -1005,7 +1064,7 @@ begin
     join public.crm_reporting_scopes reporting_scope
       on reporting_scope.id = scope_grant.reporting_scope_id
      and reporting_scope.is_active
-  ) <> 7 then
+  ) <> 6 then
     raise exception 'local QA role-to-scope assignment is invalid';
   end if;
 
@@ -1016,7 +1075,10 @@ begin
     where profile.user_id = any(${sqlUuidArray(accounts.map((account) => account.id))})
       and profile.is_active
       and profile.access_status = 'approved'
-      and user_role.role_key = any(array['user', 'supervisor', 'broker_lead'])
+      and user_role.role_key = any(array[
+        'manager', 'supervisor', 'house', 'real_estate',
+        'partnership_channel', 'broker_lead', 'broker', 'user'
+      ])
   ) then
     raise exception 'local QA approved a legacy role';
   end if;
@@ -1040,11 +1102,12 @@ function fixtureObjectIds(fixtures) {
   return {
     organizations: [fixtures.organizationA.id, fixtures.organizationB.id],
     teams: [fixtures.teamA.id, fixtures.teamB.id],
-    people: [fixtures.personA.id, fixtures.pendingPerson.id],
+    people: [fixtures.personA.id, fixtures.personB.id, fixtures.pendingPerson.id],
     portfolios: [fixtures.portfolioA.id, fixtures.portfolioB.id],
     reportingScopes: Object.values(fixtures.reportingScopes).map((scope) => scope.id),
     teamMemberships: [
-      fixtures.teamMembershipId,
+      fixtures.teamMembershipAId,
+      fixtures.teamMembershipBId,
       fixtures.pendingCurrentMembershipId,
       fixtures.pendingFutureMembershipId,
     ],
@@ -1387,7 +1450,7 @@ async function verifyDualAffiliationApprovalDenied(local, adminAccount, pendingA
       pathname: "/rest/v1/rpc/approve_user_access",
       body: {
         target_user_id: pendingAccount.id,
-        target_role_key: "broker",
+        target_role_key: "broker_house",
         reporting_scope_ids: [fixtures.reportingScopes.pendingPerson.id],
         reason: "Reject synthetic dual-affiliation approval",
       },
@@ -1417,12 +1480,11 @@ function expectedOrganizationsByRole(fixtures) {
   return {
     master: [fixtures.organizationA.id, fixtures.organizationB.id],
     admin: [fixtures.organizationA.id],
-    manager: [fixtures.organizationA.id],
-    broker: [fixtures.organizationA.id],
     coordinator: [fixtures.organizationB.id],
-    real_estate: [fixtures.organizationB.id],
-    house: [fixtures.organizationA.id],
-    partnership_channel: [fixtures.organizationA.id],
+    manager_house: [fixtures.organizationA.id],
+    manager_imob: [fixtures.organizationB.id],
+    broker_house: [fixtures.organizationA.id],
+    broker_imob: [fixtures.organizationB.id],
     pending: [],
   };
 }

@@ -119,6 +119,48 @@ beforeEach(() => {
 });
 
 describe("authorized hierarchical navigation", () => {
+  it("adds Repasse only under the active Dashboard for Master with partnership access", () => {
+    const dashboard: AppPage = {
+      ...simulationParent,
+      key: "crm.dashboard",
+      path: "/app",
+      name: "Dashboard",
+      section: "crm",
+      permissionKey: "crm.dashboard.view",
+    };
+    const context: AuthorizationContext = {
+      ...viewerContext,
+      roleKey: "master",
+      permissions: ["pages.view", "crm.dashboard.view", "crm.partnerships.view"],
+    };
+    const result = extendAuthorizedNavigationWithReleasedPages([dashboard], context);
+
+    expect(result.map((page) => page.path)).toEqual(["/app", "/app/repasse"]);
+    expect(buildBreadcrumbs("/app/repasse", result).map((page) => page.name)).toEqual([
+      "Dashboard",
+      "Repasse",
+    ]);
+    expect(
+      extendAuthorizedNavigationWithReleasedPages([dashboard], {
+        ...context,
+        roleKey: "coordinator",
+      }),
+    ).toEqual([dashboard]);
+    expect(
+      extendAuthorizedNavigationWithReleasedPages([dashboard], {
+        ...context,
+        permissions: ["pages.view", "crm.dashboard.view"],
+      }),
+    ).toEqual([dashboard]);
+    expect(
+      extendAuthorizedNavigationWithReleasedPages(
+        [{ ...dashboard, path: "/app/divergent" }],
+        context,
+      ),
+    ).toHaveLength(1);
+    expect(extendAuthorizedNavigationWithReleasedPages(result, context)).toEqual(result);
+  });
+
   it("adds Recurso MKT only under the active authorized settings root with management permission", () => {
     const settings: AppPage = {
       ...simulationParent,

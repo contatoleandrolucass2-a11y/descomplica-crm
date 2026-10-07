@@ -307,12 +307,12 @@ update public.user_roles
 set role_key = case user_id
       when 'a2000000-0000-4000-8000-000000000002' then 'admin'
       when 'a2000000-0000-4000-8000-000000000003' then 'admin'
-      when 'a2000000-0000-4000-8000-000000000004' then 'broker'
-      when 'a2000000-0000-4000-8000-000000000005' then 'broker'
+      when 'a2000000-0000-4000-8000-000000000004' then 'broker_house'
+      when 'a2000000-0000-4000-8000-000000000005' then 'broker_house'
       when 'a2000000-0000-4000-8000-000000000006' then 'admin'
       when 'a2000000-0000-4000-8000-000000000011' then 'admin'
       when 'a2000000-0000-4000-8000-000000000012' then 'coordinator'
-      when 'a2000000-0000-4000-8000-000000000014' then 'broker'
+      when 'a2000000-0000-4000-8000-000000000014' then 'broker_house'
     end,
     assigned_by = 'a2000000-0000-4000-8000-000000000001'
 where user_id in (
@@ -442,55 +442,22 @@ values
 
 select is(
   (
-    select string_agg(
-      role_key || ':' || permission_key,
-      ','
-      order by role_key, permission_key
-    )
+    select count(*)
     from public.role_permissions
     where role_key in (
-        'admin', 'broker', 'broker_lead', 'coordinator',
-        'real_estate', 'supervisor', 'user'
-      )
-      and permission_key in (
-        'admin.access',
-        'audit.view',
-        'crm.dashboard.view',
-        'crm.ingest.manage',
-        'crm.stages.view',
-        'crm.ranking.view',
-        'pages.manage',
-        'pages.view',
-        'permissions.manage',
-        'permissions.view',
-        'roles.manage',
-        'roles.view',
-        'crm.settings.view',
-        'crm.settings.manage',
-        'crm.salesforce.refresh',
-        'users.manage',
-        'users.view'
-      )
+      'manager',
+      'supervisor',
+      'house',
+      'real_estate',
+      'partnership_channel',
+      'broker_lead',
+      'broker',
+      'user',
+      'pending'
+    )
   ),
-  'admin:admin.access,admin:audit.view,admin:crm.dashboard.view,'
-    || 'admin:crm.ingest.manage,admin:crm.ranking.view,'
-    || 'admin:crm.salesforce.refresh,admin:crm.settings.manage,'
-    || 'admin:crm.settings.view,admin:crm.stages.view,admin:pages.manage,'
-    || 'admin:pages.view,admin:permissions.manage,admin:permissions.view,'
-    || 'admin:roles.manage,admin:roles.view,admin:users.manage,'
-    || 'admin:users.view,broker:crm.dashboard.view,broker:crm.ranking.view,'
-    || 'broker:crm.stages.view,broker:pages.view,'
-    || 'broker_lead:crm.dashboard.view,broker_lead:crm.ranking.view,'
-    || 'broker_lead:crm.stages.view,broker_lead:pages.view,'
-    || 'coordinator:crm.dashboard.view,coordinator:crm.ranking.view,'
-    || 'coordinator:crm.stages.view,coordinator:pages.view,'
-    || 'real_estate:crm.dashboard.view,real_estate:crm.ranking.view,'
-    || 'real_estate:crm.stages.view,real_estate:pages.view,'
-    || 'supervisor:crm.dashboard.view,supervisor:crm.ranking.view,'
-    || 'supervisor:crm.stages.view,supervisor:pages.view,'
-    || 'user:crm.dashboard.view,user:crm.ranking.view,'
-    || 'user:crm.stages.view,user:pages.view',
-  'clean installs preserve the exact inherited production RBAC baseline'
+  0::bigint,
+  'clean installs keep every retired and pending role without inherited permissions'
 );
 
 select is(
@@ -537,7 +504,7 @@ set local role authenticated;
 select throws_ok(
   $$select public.approve_user_access(
     'a2000000-0000-4000-8000-000000000007',
-    'house',
+    'manager_house',
     array['22000000-0000-4000-8000-000000000001']::uuid[],
     'Attempt child-to-parent delegation expansion'
   )$$,
@@ -624,7 +591,7 @@ select set_config('request.jwt.claim.sub', 'a2000000-0000-4000-8000-000000000002
 select throws_ok(
   $$select public.approve_user_access(
     'a2000000-0000-4000-8000-000000000007',
-    'broker',
+    'broker_house',
     array['22000000-0000-4000-8000-000000000007']::uuid[],
     'Reject latent cross-organization membership'
   )$$,
@@ -859,7 +826,7 @@ select set_config('request.jwt.claim.sub', 'a2000000-0000-4000-8000-000000000002
 select throws_ok(
   $$select public.approve_user_access(
     'a2000000-0000-4000-8000-000000000015',
-    'manager',
+    'manager_house',
     array['22000000-0000-4000-8000-000000000003']::uuid[],
     'Admin cannot replace stale foreign scope'
   )$$,
@@ -872,7 +839,7 @@ select set_config('request.jwt.claim.sub', 'a2000000-0000-4000-8000-000000000001
 select lives_ok(
   $$select public.approve_user_access(
     'a2000000-0000-4000-8000-000000000015',
-    'manager',
+    'manager_house',
     array['22000000-0000-4000-8000-000000000003']::uuid[],
     'Master replaces stale foreign scope'
   )$$,
@@ -898,7 +865,7 @@ select set_config('request.jwt.claim.sub', 'a2000000-0000-4000-8000-000000000001
 select lives_ok(
   $$select public.approve_user_access(
     'a2000000-0000-4000-8000-000000000008',
-    'manager',
+    'manager_house',
     array['22000000-0000-4000-8000-000000000003']::uuid[],
     'Replace scheduled future scope'
   )$$,
@@ -921,7 +888,7 @@ select set_config('request.jwt.claim.sub', 'a2000000-0000-4000-8000-000000000001
 select throws_ok(
   $$select public.approve_user_access(
     'a2000000-0000-4000-8000-000000000009',
-    'manager',
+    'manager_house',
     array['22000000-0000-4000-8000-000000000003']::uuid[],
     'Reject inherited permission exception'
   )$$,
@@ -967,7 +934,7 @@ select set_config('request.jwt.claim.sub', 'a2000000-0000-4000-8000-000000000001
 select throws_ok(
   $$select public.assign_user_role(
     'a2000000-0000-4000-8000-000000000010',
-    'manager',
+    'manager_house',
     'Reject role incompatible with two active scopes'
   )$$,
   '23505',
@@ -1032,7 +999,7 @@ select lives_ok(
 select throws_ok(
   $$select public.assign_user_role(
     'a2000000-0000-4000-8000-000000000007',
-    'broker',
+    'broker_house',
     'Attempt to bypass pending approval'
   )$$,
   '23505',

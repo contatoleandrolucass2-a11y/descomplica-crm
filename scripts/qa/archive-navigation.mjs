@@ -55,6 +55,7 @@ const dashboardLinks = [
   ["Visitas", "/app/etapas/visitas"],
   ["Pastas", "/app/etapas/pastas"],
   ["Vendas", "/app/etapas/vendas"],
+  ["Repasse", "/app/repasse"],
 ];
 export const archiveRootNavigationContract = [
   { name: "Dashboard", tag: "BUTTON", href: null },

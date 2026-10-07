@@ -65,6 +65,7 @@ insert into public.crm_reporting_scopes (
   scope_key,
   scope_type,
   organization_id,
+  team_id,
   person_id
 ) values
   (
@@ -72,6 +73,7 @@ insert into public.crm_reporting_scopes (
     'access-organization',
     'organization',
     '82000000-0000-4000-8000-000000000001',
+    null,
     null
   ),
   (
@@ -79,7 +81,16 @@ insert into public.crm_reporting_scopes (
     'access-person',
     'person',
     null,
+    null,
     '83000000-0000-4000-8000-000000000001'
+  ),
+  (
+    '84000000-0000-4000-8000-000000000003',
+    'access-team',
+    'team',
+    null,
+    '83500000-0000-4000-8000-000000000001',
+    null
   );
 
 insert into public.crm_user_reporting_scope_grants (
@@ -90,7 +101,7 @@ insert into public.crm_user_reporting_scope_grants (
 ) values
   (
     '81000000-0000-4000-8000-000000000002',
-    '84000000-0000-4000-8000-000000000001',
+    '84000000-0000-4000-8000-000000000003',
     '81000000-0000-4000-8000-000000000001',
     'Scoped role-change test'
   ),
@@ -103,8 +114,8 @@ insert into public.crm_user_reporting_scope_grants (
 
 update public.user_roles
 set role_key = case user_id
-      when '81000000-0000-4000-8000-000000000002' then 'real_estate'
-      when '81000000-0000-4000-8000-000000000003' then 'broker'
+      when '81000000-0000-4000-8000-000000000002' then 'manager_imob'
+      when '81000000-0000-4000-8000-000000000003' then 'broker_house'
     end,
     assigned_by = '81000000-0000-4000-8000-000000000001'
 where user_id in (
@@ -129,7 +140,7 @@ set local role authenticated;
 select throws_ok(
   $$select public.assign_user_role(
     '81000000-0000-4000-8000-000000000002',
-    'admin',
+    'coordinator',
     null
   )$$,
   '22023',
@@ -143,17 +154,17 @@ select is(
     from public.user_roles
     where user_id = '81000000-0000-4000-8000-000000000002'
   ),
-  'real_estate',
+  'manager_imob',
   'failed elevation leaves the role unchanged'
 );
 
 select lives_ok(
   $$select public.assign_user_role(
     '81000000-0000-4000-8000-000000000002',
-    'admin',
-    'Responsabilidade administrativa aprovada'
+    'coordinator',
+    'Responsabilidade de coordenação aprovada'
   )$$,
-  'Master can elevate a lower user with a reason'
+  'Master can elevate a lower user to a compatible scoped role with a reason'
 );
 
 select is(
@@ -162,22 +173,22 @@ select is(
     from public.user_roles
     where user_id = '81000000-0000-4000-8000-000000000002'
   ),
-  'admin',
-  'approved elevation assigns the admin role'
+  'coordinator',
+  'approved elevation assigns the coordinator role'
 );
 
 select ok(
   public.has_permission(
     '81000000-0000-4000-8000-000000000002',
-    'admin.access'
+    'crm.partnerships.view'
   ),
-  'admin receives access to the administrative panel'
+  'coordinator receives access to the partnership channel'
 );
 
 select lives_ok(
   $$select public.assign_user_role(
     '81000000-0000-4000-8000-000000000002',
-    'real_estate',
+    'manager_imob',
     'Responsabilidade administrativa encerrada'
   )$$,
   'role downgrade remains explicitly audited'
@@ -189,7 +200,7 @@ select is(
     from public.user_roles
     where user_id = '81000000-0000-4000-8000-000000000002'
   ),
-  'real_estate',
+  'manager_imob',
   'downgrade restores the scoped Real Estate role'
 );
 
@@ -342,7 +353,7 @@ select is(
     from public.user_roles
     where user_id = '81000000-0000-4000-8000-000000000003'
   ),
-  'broker',
+  'broker_house',
   'self-elevation attempt leaves the role unchanged'
 );
 
@@ -365,7 +376,7 @@ select is(
     from public.user_roles
     where user_id = '81000000-0000-4000-8000-000000000002'
   ),
-  'real_estate',
+  'manager_imob',
   'protected Master assignment leaves the target role unchanged'
 );
 

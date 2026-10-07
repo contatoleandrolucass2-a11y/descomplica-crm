@@ -228,8 +228,8 @@ select ok(
 select ok(
   pg_catalog.pg_get_functiondef(
     'public.can_assign_role(uuid,text)'::regprocedure
-  ) ~ $$target_role_key <> 'master'$$,
-  'database role assignment explicitly excludes Master'
+  ) ~ $$role_entry.is_assignable$$,
+  'database role assignment requires an explicitly assignable role'
 );
 
 select * from finish();

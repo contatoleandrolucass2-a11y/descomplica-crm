@@ -5,6 +5,17 @@ const BASE_NAVIGATION_PERMISSIONS = [
   "pages.view",
   "crm.dashboard.view",
   "crm.stages.view",
+] as const satisfies readonly PermissionKey[];
+
+const WITH_CANAL_IMOB_PERMISSIONS = [
+  ...BASE_NAVIGATION_PERMISSIONS,
+  "crm.dashboard.with_canal_imob.view",
+  "crm.partnerships.view",
+] as const satisfies readonly PermissionKey[];
+
+const WITHOUT_CANAL_IMOB_PERMISSIONS = [
+  ...BASE_NAVIGATION_PERMISSIONS,
+  "crm.dashboard.without_canal_imob.view",
   "crm.ranking.view",
 ] as const satisfies readonly PermissionKey[];
 
@@ -30,6 +41,11 @@ const ADMIN_PERMISSIONS = [
   "admin.access",
   "pages.manage",
   ...BASE_NAVIGATION_PERMISSIONS,
+  "crm.dashboard.all.view",
+  "crm.dashboard.with_canal_imob.view",
+  "crm.dashboard.without_canal_imob.view",
+  "crm.ranking.view",
+  "crm.partnerships.view",
   "crm.settings.view",
   "crm.settings.manage",
   "crm.salesforce.refresh",
@@ -43,15 +59,19 @@ const NO_INHERITED_PERMISSIONS = [] as const satisfies readonly PermissionKey[];
 export const ROLE_INHERITED_PERMISSIONS: Record<RoleKey, readonly PermissionKey[]> = {
   master: MASTER_PERMISSIONS,
   admin: ADMIN_PERMISSIONS,
-  coordinator: BASE_NAVIGATION_PERMISSIONS,
+  coordinator: WITH_CANAL_IMOB_PERMISSIONS,
+  manager_house: WITHOUT_CANAL_IMOB_PERMISSIONS,
+  manager_imob: WITH_CANAL_IMOB_PERMISSIONS,
+  broker_house: WITHOUT_CANAL_IMOB_PERMISSIONS,
+  broker_imob: WITH_CANAL_IMOB_PERMISSIONS,
   manager: NO_INHERITED_PERMISSIONS,
-  supervisor: BASE_NAVIGATION_PERMISSIONS,
+  supervisor: NO_INHERITED_PERMISSIONS,
   house: NO_INHERITED_PERMISSIONS,
-  real_estate: BASE_NAVIGATION_PERMISSIONS,
+  real_estate: NO_INHERITED_PERMISSIONS,
   partnership_channel: NO_INHERITED_PERMISSIONS,
-  broker_lead: BASE_NAVIGATION_PERMISSIONS,
-  broker: BASE_NAVIGATION_PERMISSIONS,
-  user: BASE_NAVIGATION_PERMISSIONS,
+  broker_lead: NO_INHERITED_PERMISSIONS,
+  broker: NO_INHERITED_PERMISSIONS,
+  user: NO_INHERITED_PERMISSIONS,
   pending: NO_INHERITED_PERMISSIONS,
 };
 

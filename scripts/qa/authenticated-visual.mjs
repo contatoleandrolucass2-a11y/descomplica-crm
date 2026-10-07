@@ -10,6 +10,7 @@ import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
 import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
 import { checkMarketingResources } from "./marketing-resources.mjs";
+import { checkRepasse } from "./repasse.mjs";
 import {
   checkTabelaoLayout,
   checkTabelaoMapsFixture,
@@ -158,6 +159,7 @@ if (approvedCanvasByRoute.size !== routes.length) {
 }
 
 const canvasDensityLimitByRoute = new Map([
+  ["/admin/usuarios", 2500],
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
   ["/app/etapas/pastas", 1350],
@@ -5770,6 +5772,21 @@ async function run() {
         }
 
         if (viewport.key === "desktop-1440x900") {
+          currentStage = "repasse";
+          const repassePage = configureQaPage(await context.newPage());
+          try {
+            const repasse = await checkRepasse(
+              repassePage,
+              origin,
+              path.join(artifactRoot, "repasse"),
+            );
+            await writeFile(
+              path.join(artifactRoot, "repasse-results.json"),
+              JSON.stringify(repasse, null, 2),
+            );
+          } finally {
+            await repassePage.close({ runBeforeUnload: false });
+          }
           currentStage = "marketing-resources";
           const marketingPage = configureQaPage(await context.newPage());
           try {
