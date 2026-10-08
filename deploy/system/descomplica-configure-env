@@ -60,6 +60,8 @@ readonly -a managed_keys=(
   PUBLIC_SIGNUP_ENABLED
   SALESFORCE_INGEST_ENABLED
   SALESFORCE_REFRESH_ENABLED
+  SALESFORCE_STATUS_ENABLED
+  SALESFORCE_STATUS_SECRET
   CRM_READ_MODEL_V3_SHADOW_ENABLED
   QLIK_RELAY_MODE
   QLIK_RELAY_WRITE_ENABLED
@@ -416,6 +418,7 @@ printf 'Valores secretos são lidos sem eco e nunca são exibidos no resumo.\n\n
 
 prompt_capability SALESFORCE_INGEST_ENABLED 'Ativar a ingestão Salesforce?'
 prompt_capability SALESFORCE_REFRESH_ENABLED 'Ativar a atualização Salesforce sob demanda?'
+prompt_capability SALESFORCE_STATUS_ENABLED 'Ativar a telemetria do coletor Salesforce?'
 prompt_capability \
   CRM_READ_MODEL_V3_SHADOW_ENABLED \
   'Ativar as rotas autenticadas shadow do read model v3?'
@@ -463,6 +466,10 @@ if [[ "${values[SALESFORCE_REFRESH_ENABLED]}" == "true" ]]; then
   ensure_machine_secret SALESFORCE_REFRESH_SECRET
 fi
 
+if [[ "${values[SALESFORCE_STATUS_ENABLED]}" == "true" ]]; then
+  ensure_machine_secret SALESFORCE_STATUS_SECRET
+fi
+
 if [[ -n "${values[MASTER_USER_ID]:-}" ]]; then
   if validate_master_user_id "${values[MASTER_USER_ID]}"; then
     printf 'MASTER_USER_ID existente foi preservado.\n'
@@ -494,6 +501,8 @@ temporary_environment_file="$(mktemp --tmpdir="${environment_directory}" .produc
   printf 'PUBLIC_SIGNUP_ENABLED=%s\n' "${values[PUBLIC_SIGNUP_ENABLED]}"
   printf 'SALESFORCE_INGEST_ENABLED=%s\n' "${values[SALESFORCE_INGEST_ENABLED]}"
   printf 'SALESFORCE_REFRESH_ENABLED=%s\n' "${values[SALESFORCE_REFRESH_ENABLED]}"
+  printf 'SALESFORCE_STATUS_ENABLED=%s\n' "${values[SALESFORCE_STATUS_ENABLED]}"
+  printf 'SALESFORCE_STATUS_SECRET=%s\n' "${values[SALESFORCE_STATUS_SECRET]:-}"
   printf 'CRM_READ_MODEL_V3_SHADOW_ENABLED=%s\n' \
     "${values[CRM_READ_MODEL_V3_SHADOW_ENABLED]}"
   printf 'QLIK_RELAY_MODE=%s\n' "${values[QLIK_RELAY_MODE]}"

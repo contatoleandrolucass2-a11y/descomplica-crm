@@ -14,12 +14,39 @@ type RuntimeEnvironment = Partial<
     | "SALESFORCE_REFRESH_ENABLED"
     | "SALESFORCE_REFRESH_SECRET"
     | "SALESFORCE_REFRESH_URL"
+    | "SALESFORCE_STATUS_ENABLED"
+    | "SALESFORCE_STATUS_SECRET"
     | "SUPABASE_SECRET_KEY"
   >
 >;
 
 type DisabledCapability = { enabled: false; available: false };
 type MisconfiguredCapability = { enabled: true; available: false };
+
+export type SalesforceStatusConfiguration =
+  | DisabledCapability
+  | MisconfiguredCapability
+  | {
+      enabled: true;
+      available: true;
+      statusSecret: string;
+    };
+
+export function getSalesforceStatusConfiguration(
+  environment: RuntimeEnvironment = process.env,
+): SalesforceStatusConfiguration {
+  if (!isExplicitlyEnabled(environment.SALESFORCE_STATUS_ENABLED)) {
+    return { enabled: false, available: false };
+  }
+  if (
+    !isValidMachineSecret(environment.SALESFORCE_STATUS_SECRET) ||
+    environment.SALESFORCE_STATUS_SECRET.length > 4096 ||
+    /[\r\n\0]/u.test(environment.SALESFORCE_STATUS_SECRET)
+  ) {
+    return { enabled: true, available: false };
+  }
+  return { enabled: true, available: true, statusSecret: environment.SALESFORCE_STATUS_SECRET };
+}
 
 export type SalesforceIngestConfiguration =
   | DisabledCapability
