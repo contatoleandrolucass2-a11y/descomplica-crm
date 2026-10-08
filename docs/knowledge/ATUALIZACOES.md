@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-08: Conectar Sistemas validado para revisão final
+
+- Fonte: CI 37720363346, artefato 11526388631 e captura limpa f3a209d,
+  com árvore idêntica a 4a21e26. Status: validado funcionalmente; CI final das
+  referências revisadas e publicação pendentes no PR #172.
+- Validate, restore com 1.104 pgTAP antes/depois e E2E dos oito perfis passaram.
+  Matriz visual: 154 checks responsivos, 88 de tema, 242 Axe/comparações,
+  110 de zoom e nove cenários próprios da guia sem overflow ou violações.
+- Onze diferenças intencionais de Configurações foram inspecionadas e
+  promovidas pelo helper transacional original. Outras 231 imagens e limites
+  1%/16 preservados, com proveniência registrada em reviewedUpdates.
+- Testes locais finais: lint/tipos/build e 66 testes focados aprovados;
+  2.247 testes Windows aprovados, seis falhas POSIX preexistentes e nove skips.
+  Os mesmos gates de teste passaram no Linux da CI.
+- Não há nova migration em relação à produção aad1536. Resultado de merge,
+  imagem aprovada, backup e health ficará no PR #172. Autonomia Salesforce
+  continua dependente de MFA dedicado, n8n e primeira carga reconciliada.
+
 ## 2026-10-08: Gates da guia Conectar Sistemas
 
 - Fonte: CI 37718756017, revisão independente Chromium/axe no HEAD 2e80626.

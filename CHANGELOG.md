@@ -2,6 +2,9 @@
 
 ## 2026-10-08
 
+- Validados acesso nos oito perfis e nove cenários de Conectar Sistemas;
+  revisadas onze referências de Configurações, preservando as outras 231.
+
 - Corrigido o contraste das mensagens Salesforce na nova guia e ampliada a
   matriz E2E para verificar sua navegação e autorização nos oito perfis.
 

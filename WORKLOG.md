@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-08: Validação visual de Conectar Sistemas
+
+- CI 37720363346 aprovou validate, restore (1.104 pgTAP antes/depois), E2E
+  dos oito perfis e todos os critérios funcionais do QA visual. Restaram somente
+  onze diferenças intencionais da nova entrada em Configurações.
+- Artefato 11526388631 e captura limpa f3a209d, com árvore igual a 4a21e26:
+  154 checks responsivos, 88 de tema, 242 Axe/comparações e 110 de zoom.
+  Nove cenários específicos da nova guia sem overflow ou violações Axe.
+- Inspeção das imagens e promoção transacional das onze referências; 231
+  imagens e limiares 1%/16 preservados. Verificação final da CI ainda exigida.
+- Reexecução local: lint, tipos e build aprovados; 66 testes focados aprovados.
+  Suíte Windows: 2.247 aprovados, seis falhas POSIX em arquivos intactos e nove
+  skips. A suíte Linux da CI passou, sem relaxar os testes POSIX.
+- Comparação com produção aad1536 confirmou ausência de novas migrations.
+  Publicação usa imagem imutável da CI, backup, CAS/lock e rollback, sem rebuild
+  na VPS. Evidência final de versão e health será registrada no PR #172.
+- Primeira carga Salesforce, MFA dedicado e ativação da agenda continuam
+  pendentes; nenhum workflow n8n ou dado remoto foi alterado.
+
 ## 2026-10-08: Correções dos gates do PR #172
 
 - CI 37718756017 aprovou validate, restore isolado, banco e build. O E2E
