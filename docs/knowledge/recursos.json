@@ -168,6 +168,7 @@
         "app/api/ingest/qlik/route.ts",
         "app/api/ingest/salesforce/route.ts",
         "app/api/refresh/salesforce/route.ts",
+        "app/api/salesforce/status/route.ts",
         "app/api/health/route.ts"
       ],
       "evidence": [

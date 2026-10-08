@@ -36,6 +36,76 @@ coleta antes de produzir o snapshot.
 
 ## Sessão manual e ciclo de 30 minutos
 
+### Estado exibido no CRM
+
+`Conectar Sistemas` separa a autenticacao, a exportacao completa e a publicacao
+confirmada. Abrir o Salesforce pelo link da pagina nao conecta o coletor. O
+operador continua responsavel por usuario, senha e MFA no Chrome dedicado.
+
+O monitor testa a Analytics API com a sessao desse Chrome e envia somente
+estado, horarios e contagens dos sete reports a `POST /api/salesforce/status`.
+Nao envia senha, cookie, token Salesforce, conteudo de relatorio ou mensagens
+de erro do terceiro. O endpoint exige Bearer proprio, JSON estrito de ate 8 KiB,
+observacoes recentes e ordenadas. A leitura exige `crm.settings.manage`.
+
+Configurar o mesmo segredo aleatorio exclusivo (32 a 4096 caracteres) em:
+
+- CRM: `SALESFORCE_STATUS_ENABLED=true` e `SALESFORCE_STATUS_SECRET`, somente no servidor.
+- Coletor: `SALESFORCE_STATUS_ENABLED=true`, `SALESFORCE_CRM_ORIGIN` HTTPS e
+  `SALESFORCE_STATUS_SECRET_FILE`, caminho absoluto de arquivo privado.
+
+Esse segredo nao e o Bearer de ingestao nem o do n8n. Os exemplos versionados
+permanecem desativados e sem segredos. O monitor integrado ao observador de
+30 minutos envia uma verificacao a cada 45 segundos, apos cada resposta.
+`pnpm salesforce:monitor` verifica apenas a sessao, sem exportar/publicar.
+Nao executar o monitor isolado simultaneamente com o monitor do observador:
+um unico coletor e a autoridade desse estado.
+
+O estado e efemero no processo Node da aplicacao, com validade de 120 segundos.
+Sem novas verificacoes ele muda para sinal vencido. Reinicio ou rotacao do
+segredo volta a aguardar verificacao; isso nao apaga o snapshot no Supabase.
+Horarios/contagens no painel sao evidencias do processo atual, nao um historico
+duravel. Esta implementacao atende uma replica Node, como no compose atual;
+antes de escalar para multiplas replicas, mover o recibo a um armazenamento
+compartilhado com as mesmas garantias de ordem e expiracao.
+
+`Conectado` prova acesso ao report de verificacao, nao a todos os reports nem
+a publicacao. Os sete reports so recebem contagens apos uma exportacao completa.
+`Ultima publicacao` so avanca quando o publisher recebeu a confirmacao final
+do CRM para o mesmo requestId. Uma falha posterior preserva essa evidencia
+historica e sinaliza a falha atual, sem declarar a base atualizada.
+
+### Continuidade e limites
+
+O coletor e o Chrome precisam permanecer ligados na mesma maquina. Com o PC
+desligado, somente um servidor com sessao grafica dedicada e login/MFA manual
+aprovado pelo operador pode manter essa modalidade em execucao. Um servidor
+headless ou n8n sozinho nao substitui essa sessao. Nao instalar ambiente grafico,
+copiar perfil pessoal ou enfraquecer MFA para contornar esse requisito.
+
+A autenticacao pode expirar ou ser revogada. Nesse caso, a coleta interrompe a
+publicacao e o operador precisa autenticar novamente. Nao existe garantia de
+sessao permanente. Ver
+[seguranca de sessao Salesforce](https://help.salesforce.com/s/articleView?id=sf.security_overview_sessions.htm&type=5)
+e [execucao assincrona de reports](https://developer.salesforce.com/docs/analytics/salesforce-analytics-rest-api/guide/sforce-analytics-rest-api-get-reportdata.html).
+
+Cada coleta cancela a extracao apos um prazo de 25 minutos, com timeout por requisicao e
+tentativas limitadas apenas para leituras idempotentes. Iniciar uma instancia
+de report nao e repetido automaticamente apos resposta ambigua. Resultados
+truncados, `allData` ausente/falso sem particao valida, formato inconsistente ou
+falha em qualquer fonte bloqueiam o candidato. Nenhuma carga parcial deve
+substituir os dados existentes. A gravacao atomica e sua limpeza precisam
+terminar antes de liberar o lock, mesmo apos cancelamento; I/O de disco pendente
+nao autoriza iniciar outro escritor. Falha de rede depois do envio nao prova
+que o CRM recusou a carga: o estado e publicacao nao confirmada ate reconciliar
+o requestId, sem repetir o envio com identidade nova por causa desse erro.
+
+Um lock exclusivo ao lado do candidato impede outro processo de coletar para
+o mesmo destino. Se houver interrupcao forcada, conferir que nenhum coletor
+esta ativo antes de remover manualmente esse lock. Nao ha desbloqueio por idade
+ou remocao automatica de lock pertencente a outro processo. Usar sempre o mesmo
+caminho canonico de candidato para esta integracao.
+
 A extração candidata não depende de Connected App, client secret ou refresh
 token do Salesforce. O operador autentica manualmente, inclusive por MFA, em um
 Chrome com perfil exclusivo para esta integração. Esse MFA manual é uma decisão
@@ -54,7 +124,7 @@ substitui o Chrome dedicado iniciado pelo operador com depuração em loopback.
 
 Na estação gráfica do operador, copiar a configuração local, ajustar caminhos
 absolutos nativos e criar o diretório pai privado do candidato. O arquivo
-`ops/salesforce/.env` é ignorado pelo Git e é carregado pelos quatro comandos:
+`ops/salesforce/.env` é ignorado pelo Git e é carregado pelos comandos Salesforce:
 
 ```bash
 cp ops/salesforce/export.env.example ops/salesforce/.env

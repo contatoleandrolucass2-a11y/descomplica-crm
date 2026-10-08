@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-10-08: Sessao verificada e coleta Salesforce protegida
+
+- Layout de Conectar Sistemas alinhado ao canvas compacto da Tabela Associativo,
+  mantendo permissoes, temas, links oficiais e os sete reports da fonte atual.
+- Status autenticado do coletor com prova de API, expiracao em 120 segundos,
+  contagens e publicacao confirmada separadas do login. Sem senhas/cookies no CRM.
+- Coleta com lock entre processos, prazo total, retries limitados de GET e
+  rejeicao de resultados truncados ou estruturalmente invalidos antes do envio.
+- Sem migration ou alteracao de dados remotos. n8n MCP indisponivel neste chat;
+  workflow nao alterado por REST nem ativado. Sessao dedicada, host permanente,
+  pareamento do monitor e primeira carga reconciliada continuam pendentes.
+- Lint, typecheck, build (45 rotas), inventario e Gitleaks aprovados. QA
+  sintetico: nove combinacoes de tema/largura, zoom 200%, seis estados,
+  polling/timeout/cleanup e Axe aprovados; 21 testes Vitest focados e 13 Node
+  de monitor/agenda aprovados. Revisao independente encontrou corrida de I/O
+  no cancelamento, corrigida aguardando escrita/limpeza antes de liberar o lock.
+  Os 36 testes de extracao/retry/lock passaram em serie, incluindo regressao A/B.
+- Suite Windows: 2.259 aprovados, nove falhas e nove skips; seis falhas POSIX
+  preexistentes e tres timeouts. Reteste isolado Obsidian/DevTools passou 46/46.
+  Node integral manteve oito falhas Windows em testes preexistentes; CI Linux
+  deve validar o SHA final integral antes da publicacao da aplicacao.
+- Nao confundir entrega do codigo com ativacao operacional da integracao.
+
 ## 2026-10-08: Validação visual de Conectar Sistemas
 
 - CI 37720363346 aprovou validate, restore (1.104 pgTAP antes/depois), E2E

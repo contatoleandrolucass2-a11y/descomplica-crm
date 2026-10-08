@@ -2,6 +2,11 @@
 
 ## 2026-10-08
 
+- Alinha Conectar Sistemas ao layout da Tabela Associativo e adiciona estado
+  verificado do coletor, com expiracao e distincao entre login e publicacao.
+- Protege a exportacao Salesforce com lock, prazos e validacao de completude;
+  falhas nao autorizam substituir o snapshot anterior. Monitor nasce desligado.
+
 - Validados acesso nos oito perfis e nove cenários de Conectar Sistemas;
   revisadas onze referências de Configurações, preservando as outras 231.
 

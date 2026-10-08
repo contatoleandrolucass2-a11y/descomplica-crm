@@ -9,56 +9,116 @@ import { chromium } from "@playwright/test";
 import { refreshSalesforceSession, safeCdpEndpoint } from "./browser-session.mjs";
 import { publishSalesforceCandidate } from "./publish-candidate.mjs";
 import { hardenPrivateRegularFile } from "./private-file.mjs";
+import { acquireExportLock } from "./export-lock.mjs";
+import {
+  collectReportRows,
+  validateProjectedRows,
+  validateReportDate,
+} from "./report-collection.mjs";
+import {
+  SalesforceAuthenticationError,
+  SalesforceCollectionError,
+  safeSalesforceError,
+  throwIfSalesforceAborted,
+  withSalesforceSignal,
+} from "./report-request.mjs";
 import { buildSalesforceSnapshot } from "./transform.mjs";
 
-const SALESFORCE_ORIGIN = "https://direcional.my.salesforce.com";
-const API_VERSION = "v61.0";
-const REPORTS = [
-  { key: "opportunities", id: "00OU600000DrfDeMAJ", dated: true },
+export const REPORTS = [
+  {
+    key: "opportunities",
+    id: "00OU600000DrfDeMAJ",
+    dated: true,
+    requiredColumns: [
+      "Opportunity.Name",
+      "Opportunity.CreatedDate",
+      "Opportunity.Contato_Corretor_Proprietario1__c.Name",
+      "Opportunity.Gerente_de_vendas__c",
+      "Opportunity.Imobiliaria__c.Name",
+      "Opportunity.Unidade_De_Neg_cio__c",
+      "Opportunity.Empreendimento__c.Name",
+    ],
+  },
   {
     key: "appointments",
     id: "00OU600000ELaA6MAL",
     dated: true,
     dateColumn: "Activity.CreatedDate",
+    requiredColumns: [
+      "Activity.Codigo_do_agendamento__c",
+      "Activity.CreatedDate",
+      "Activity.Corretor__c.Name",
+      "Activity.Gerente_de_Vendas__c",
+      ["Activity.Imobiliaria__c.Name", "Activity.Nome_da_imobiliaria__c"],
+      "Activity.PDV__c.Name",
+      "Activity.Account.AccountSource",
+      "Activity.Account.Campanha__c.Name__lookup",
+    ],
   },
-  { key: "visits", id: "00OU600000EboNZMAZ", dated: true },
-  { key: "folders", id: "00OU600000EjufWMAR", dated: true },
-  { key: "sales", id: "00OU600000EjFyyMAF", dated: true },
-  { key: "brokers", id: "00OTT000009j0l32AA", dated: false },
-  { key: "imobAccounts", id: "00OU6000006RqzxMAC", dated: false },
+  {
+    key: "visits",
+    id: "00OU600000EboNZMAZ",
+    dated: true,
+    requiredColumns: [
+      "Activity.Codigo_do_agendamento__c",
+      "Activity.Data_de_comparecimento__c",
+      "Activity.Corretor__c.Name",
+      "Activity.Gerente_de_Vendas__c",
+      ["Activity.Imobiliaria__c.Name", "Activity.Nome_da_imobiliaria__c"],
+      "Activity.PDV__c.Name",
+      "Activity.Account.AccountSource",
+      "Activity.Account.Campanha__c.Name__lookup",
+    ],
+  },
+  {
+    key: "folders",
+    id: "00OU600000EjufWMAR",
+    dated: true,
+    requiredColumns: [
+      "Avaliacao_credito__c.Name",
+      "Avaliacao_credito__c.Oportunidade__c.Gerente_regional__c",
+      "Avaliacao_credito__c.Oportunidade__c.Name",
+      "Avaliacao_credito__c.CreatedDate",
+      "Avaliacao_credito__c.Corretor__c.Name",
+      "Avaliacao_credito__c.Nome_Imobili_ria__c.Comissionado_generico_3__c.Name",
+      "Avaliacao_credito__c.Imobiliaria__c",
+      "Avaliacao_credito__c.Empreendimento__c.UnidadeDeNegocio__c",
+      "Avaliacao_credito__c.Empreendimento__c.Name",
+      "Avaliacao_credito__c.Status__c",
+    ],
+  },
+  {
+    key: "sales",
+    id: "00OU600000EjFyyMAF",
+    dated: true,
+    requiredColumns: [
+      "Opportunity.Name",
+      "Opportunity.DataVenda__c",
+      "Opportunity.Contato_Corretor_Proprietario1__c.Name",
+      "Opportunity.Imobiliaria__c.Comissionado_generico_3__c.Name",
+      "Opportunity.Imobiliaria__c.Name",
+      "Opportunity.Unidade_De_Neg_cio__c",
+      "Opportunity.Empreendimento__c.Name",
+      "Opportunity.Valor_Real_de_Venda__c",
+    ],
+  },
+  {
+    key: "brokers",
+    id: "00OTT000009j0l32AA",
+    dated: false,
+    requiredColumns: ["Contact.Name", "Contact.Status_Corretor__c"],
+  },
+  {
+    key: "imobAccounts",
+    id: "00OU6000006RqzxMAC",
+    dated: false,
+    requiredColumns: ["Account.Name"],
+  },
 ];
 
 function log(message, details = {}) {
   process.stdout.write(
     `${JSON.stringify({ time: new Date().toISOString(), message, ...details })}\n`,
-  );
-}
-
-function cellValue(cell) {
-  if (cell?.label !== undefined && cell.label !== null && cell.label !== "") return cell.label;
-  return cell?.value ?? "";
-}
-
-function rowsFrom(result) {
-  const columns = result.reportMetadata?.detailColumns ?? [];
-  const tabular = result.factMap?.["T!T"]?.rows;
-  const facts =
-    Array.isArray(tabular) && tabular.length > 0
-      ? [result.factMap["T!T"]]
-      : Object.values(result.factMap ?? {}).filter((fact) => Array.isArray(fact?.rows));
-  return facts.flatMap((fact) =>
-    (fact.rows ?? []).map((row) =>
-      Object.fromEntries(
-        columns.map((column, index) => [
-          column,
-          {
-            value: cellValue(row.dataCells?.[index]),
-            raw: row.dataCells?.[index]?.value ?? null,
-            recordId: row.dataCells?.[index]?.recordId ?? null,
-          },
-        ]),
-      ),
-    ),
   );
 }
 
@@ -143,88 +203,15 @@ function project(key, rows) {
       status: field(row, "Contact.Status_Corretor__c"),
     }));
   }
-  return [
-    ...new Map(
-      rows.map((row) => {
-        const accountId = recordId(row, "Account.Name");
-        return [accountId, { accountId, name: field(row, "Account.Name") }];
-      }),
-    ).values(),
-  ].filter((account) => account.accountId && account.name);
+  return rows.map((row) => ({
+    accountId: recordId(row, "Account.Name"),
+    name: field(row, "Account.Name"),
+  }));
 }
 
-function splitRange(start, end) {
-  const startDate = new Date(`${start}T12:00:00Z`);
-  const endDate = new Date(`${end}T12:00:00Z`);
-  const days = Math.floor((endDate - startDate) / 86_400_000);
-  if (days < 1) return null;
-  const leftEnd = new Date(startDate);
-  leftEnd.setUTCDate(leftEnd.getUTCDate() + Math.floor(days / 2));
-  const rightStart = new Date(leftEnd);
-  rightStart.setUTCDate(rightStart.getUTCDate() + 1);
-  return [
-    [start, leftEnd.toISOString().slice(0, 10)],
-    [rightStart.toISOString().slice(0, 10), end],
-  ];
-}
-
-async function executeReport(sessionId, definition, range) {
-  const endpoint = `${SALESFORCE_ORIGIN}/services/data/${API_VERSION}/analytics/reports/${definition.id}`;
-  const headers = { Authorization: `Bearer ${sessionId}`, "Content-Type": "application/json" };
-  const describeResponse = await fetch(`${endpoint}/describe`, { headers });
-  if (!describeResponse.ok) throw new Error(`describe failed for ${definition.key}`);
-  const describe = await describeResponse.json();
-  const metadata = describe.reportMetadata;
-  if (range) {
-    if (!metadata?.standardDateFilter?.column) {
-      throw new Error(`missing date filter for ${definition.key}`);
-    }
-    metadata.standardDateFilter = {
-      ...metadata.standardDateFilter,
-      column: definition.dateColumn ?? metadata.standardDateFilter.column,
-      durationValue: "CUSTOM",
-      startDate: range[0],
-      endDate: range[1],
-    };
-  }
-  const startResponse = await fetch(`${endpoint}/instances`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ reportMetadata: metadata }),
-  });
-  if (!startResponse.ok) throw new Error(`start failed for ${definition.key}`);
-  const started = await startResponse.json();
-  const instanceId = started.id ?? started.instanceId;
-  if (!instanceId) throw new Error(`missing instance for ${definition.key}`);
-  const deadline = Date.now() + 180_000;
-  while (Date.now() < deadline) {
-    await new Promise((resolve) => setTimeout(resolve, 1_500));
-    const response = await fetch(`${endpoint}/instances/${instanceId}?includeDetails=true`, {
-      headers,
-    });
-    if (!response.ok) throw new Error(`result failed for ${definition.key}`);
-    const result = await response.json();
-    if (result.status === "Success" || result.factMap) return result;
-    if (result.status === "Error") throw new Error(`report failed for ${definition.key}`);
-  }
-  throw new Error(`report timeout for ${definition.key}`);
-}
-
-async function collectReport(sessionId, definition, startDate, endDate) {
-  const queue = definition.dated ? [[startDate, endDate]] : [null];
-  const rows = [];
-  while (queue.length) {
-    const range = queue.shift();
-    const result = await executeReport(sessionId, definition, range);
-    if (result.allData === false && range) {
-      const halves = splitRange(range[0], range[1]);
-      if (!halves) throw new Error(`row limit on one day for ${definition.key}`);
-      queue.unshift(...halves);
-      continue;
-    }
-    rows.push(...rowsFrom(result));
-  }
-  return project(definition.key, rows);
+export async function collectReport(sessionId, definition, startDate, endDate, options = {}) {
+  const rows = await collectReportRows(sessionId, definition, startDate, endDate, options);
+  return validateProjectedRows(definition.key, project(definition.key, rows));
 }
 
 function saoPauloReferenceDate() {
@@ -239,23 +226,27 @@ function saoPauloReferenceDate() {
 }
 
 export function resolveReferenceDate(environment = process.env) {
-  return environment.SALESFORCE_REFERENCE_DATE?.trim() || saoPauloReferenceDate();
+  return validateReportDate(
+    environment.SALESFORCE_REFERENCE_DATE?.trim() || saoPauloReferenceDate(),
+  );
 }
 
 export function resolveCandidateOutputPath(environment = process.env, platform = process.platform) {
   const outputPath = environment.SALESFORCE_CANDIDATE_OUTPUT;
   const pathApi = platform === "win32" ? path.win32 : path.posix;
   if (!outputPath || !pathApi.isAbsolute(outputPath)) {
-    throw new Error("absolute output path required");
+    throw new SalesforceCollectionError("SALESFORCE_EXPORT_CONFIG");
   }
   return pathApi.normalize(outputPath);
 }
 
-export async function writeCandidateAtomically(filePath, value, privateFileOptions) {
+export async function writeCandidateAtomically(filePath, value, privateFileOptions, signal) {
   const temporary = `${filePath}.tmp-${process.pid}-${randomUUID()}`;
   try {
-    await writeFile(temporary, JSON.stringify(value), { mode: 0o600, flag: "wx" });
+    throwIfSalesforceAborted(signal);
+    await writeFile(temporary, JSON.stringify(value), { mode: 0o600, flag: "wx", signal });
     await hardenPrivateRegularFile(temporary, privateFileOptions);
+    throwIfSalesforceAborted(signal);
     await rename(temporary, filePath);
   } catch (error) {
     await rm(temporary, { force: true }).catch(() => {});
@@ -263,15 +254,69 @@ export async function writeCandidateAtomically(filePath, value, privateFileOptio
   }
 }
 
-export async function exportCandidate(environment = process.env) {
+export async function publishCandidatePayload(candidate, environment, signal) {
+  try {
+    return await withSalesforceSignal(
+      () =>
+        publishSalesforceCandidate(candidate, environment, {
+          fetch: async (url, init) => {
+            throwIfSalesforceAborted(signal);
+            return fetch(url, {
+              ...init,
+              signal: signal ? AbortSignal.any([signal, init.signal]) : init.signal,
+            });
+          },
+        }),
+      signal,
+    );
+  } catch {
+    throwIfSalesforceAborted(signal);
+    throw new SalesforceCollectionError("publication_failed");
+  }
+}
+
+export async function exportCandidate(environment = process.env, options = {}) {
   const outputPath = resolveCandidateOutputPath(environment);
   const referenceDate = resolveReferenceDate(environment);
   const startDate = `${referenceDate.slice(0, 4)}-01-01`;
-  const browser = await chromium.connectOverCDP(safeCdpEndpoint(environment.SALESFORCE_CDP_URL));
+  throwIfSalesforceAborted(options.signal);
+  const cycleTimeoutMs = Math.min(options.cycleTimeoutMs ?? 25 * 60_000, 25 * 60_000);
+  if (!Number.isFinite(cycleTimeoutMs) || cycleTimeoutMs <= 0)
+    throw new SalesforceCollectionError("SALESFORCE_TIMEOUT");
+  const controller = new AbortController();
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, controller.signal])
+    : controller.signal;
+  // Leave time to disconnect CDP and release ownership before the 25-minute cycle limit.
+  const timer = setTimeout(
+    () => controller.abort(new SalesforceCollectionError("SALESFORCE_TIMEOUT")),
+    Math.max(1, cycleTimeoutMs - 5_000),
+  );
+  let releaseLock;
+  let browser;
   try {
+    releaseLock = await acquireExportLock(outputPath);
+    throwIfSalesforceAborted(signal);
+    const connection = chromium.connectOverCDP(safeCdpEndpoint(environment.SALESFORCE_CDP_URL), {
+      timeout: 30_000,
+    });
+    void connection.then(
+      (connected) => {
+        if (signal.aborted) void connected.close().catch(() => {});
+      },
+      () => {},
+    );
+    browser = await withSalesforceSignal(() => connection, signal);
     const context = browser.contexts()[0];
     if (!context) throw new Error("Salesforce browser context unavailable");
-    const sessionId = await refreshSalesforceSession(context);
+    let sessionId;
+    try {
+      sessionId = await withSalesforceSignal(() => refreshSalesforceSession(context), signal);
+    } catch (error) {
+      if (error?.message?.endsWith("manual login required"))
+        throw new SalesforceAuthenticationError();
+      throw error;
+    }
     log("Salesforce session refreshed");
     const reports = {};
     for (const definition of REPORTS) {
@@ -280,6 +325,7 @@ export async function exportCandidate(environment = process.env) {
         definition,
         startDate,
         referenceDate,
+        { signal },
       );
       log("report collected", { report: definition.key, rows: reports[definition.key].length });
     }
@@ -290,27 +336,49 @@ export async function exportCandidate(environment = process.env) {
       generatedAt,
       requestId: randomUUID(),
     });
-    await writeCandidateAtomically(outputPath, candidate);
+    await writeCandidateAtomically(outputPath, candidate, undefined, signal);
+    throwIfSalesforceAborted(signal);
     log("candidate written", {
-      output: outputPath,
       payloadMetrics: candidate.payload.dashboard.metrics.length,
       rankingParticipants: candidate.payload.ranking.participants.length,
     });
-    const publication = await publishSalesforceCandidate(candidate, environment);
+    await withSalesforceSignal(async () => options.onCollected?.(candidate), signal);
+    const publication = await publishCandidatePayload(candidate, environment, signal);
     log("candidate publication evaluated", {
       published: publication.published,
       status: publication.status,
       requestId: candidate.payload.requestId,
     });
     return candidate;
+  } catch (error) {
+    throwIfSalesforceAborted(signal);
+    if (error instanceof SalesforceCollectionError) throw error;
+    throw new SalesforceCollectionError("SALESFORCE_EXPORT_FAILED");
   } finally {
-    await browser.close().catch(() => {});
+    try {
+      if (browser)
+        await withSalesforceSignal(() => browser.close(), AbortSignal.timeout(4_000)).catch(
+          () => {},
+        );
+    } finally {
+      clearTimeout(timer);
+      await releaseLock?.();
+    }
   }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  exportCandidate().catch((error) => {
-    log("candidate failed", { error: error.message });
-    process.exitCode = 1;
-  });
+  const controller = new AbortController();
+  const cancel = () => controller.abort();
+  process.once("SIGINT", cancel);
+  process.once("SIGTERM", cancel);
+  exportCandidate(process.env, { signal: controller.signal })
+    .catch((error) => {
+      log("candidate failed", safeSalesforceError(error));
+      process.exitCode = 1;
+    })
+    .finally(() => {
+      process.removeListener("SIGINT", cancel);
+      process.removeListener("SIGTERM", cancel);
+    });
 }

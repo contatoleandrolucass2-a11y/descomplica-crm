@@ -34,6 +34,7 @@
     "salesforce:export": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/export-candidate.mjs",
     "salesforce:publish": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/publish-candidate.mjs",
     "salesforce:export:watch": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/run-every-30-minutes.mjs",
+    "salesforce:monitor": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/connection-monitor.mjs",
     "commercial-policy:verify": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/commercial-policies/verify.ts",
     "access:master": "node ops/access/provision-master.mjs",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",

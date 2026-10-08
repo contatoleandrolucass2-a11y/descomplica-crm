@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-08: Telemetria da sessao e integridade da coleta Salesforce
+
+- Fonte: pedido atual do usuario, branch `codex/salesforce-collector-status`,
+  contrato `connection-contract.ts`, monitor e testes de coleta versionados.
+  Status: implementado e validado localmente no escopo; gates Linux pendentes.
+- Login/MFA continuam manuais no Chrome dedicado. O CRM so confirma conexao
+  depois da prova de API recebida do coletor; nao infere sessao a partir do link.
+- Recibo efemero de uma replica Node, TTL de 120 segundos e reset apos restart.
+  Nao e historico persistente nem prova de publicacao. Escala horizontal exige
+  armazenamento compartilhado antes da ativacao em multiplas replicas.
+- Lock exclusivo e fail-closed para report incompleto; GET transitorio admite
+  retry limitado, criacao de instancia nao. Segredos e dados brutos nao entram
+  na telemetria. Regras de transformacao e IDs dos sete reports preservados.
+- Pendencias operacionais: MCP n8n ausente, host do coletor/login dedicado,
+  segredos privados e reconciliacao da primeira carga. Nenhum workflow remoto,
+  migration, MFA ou dado remoto foi modificado nesta etapa.
+- Evidencias: lint, tipos, build com 45 rotas, inventario e Gitleaks aprovados;
+  21 testes focados da tela/status e 13 Node monitor/agenda; QA Chromium em nove
+  cenarios, zoom 200%, estados e polling. Suite Windows registrou seis falhas
+  POSIX e tres timeouts fora do escopo; os timeouts passaram em reteste 46/46.
+  Node integral possui oito falhas Windows preexistentes. A corrida de I/O no
+  cancelamento foi corrigida com await da escrita/limpeza antes do unlock;
+  36 testes de extracao/retry/lock passaram, incluindo regressao A/B. CI Linux
+  final permanece obrigatoria para publicacao.
+
 ## 2026-10-08: Conectar Sistemas validado para revisão final
 
 - Fonte: CI 37720363346, artefato 11526388631 e captura limpa f3a209d,
