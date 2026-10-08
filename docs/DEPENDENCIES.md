@@ -60,7 +60,7 @@ O CRM usava npm e `package-lock.json`; o artefato final não os contém. O pacot
 | ----------------------- | ------: | ------------------------------------------- |
 | `@supabase/ssr`         |  0.12.4 | clientes browser/server e cookies SSR       |
 | `@supabase/supabase-js` | 2.112.0 | Auth e API PostgreSQL                       |
-| `next`                  |  16.3.6 | framework App Router e build standalone     |
+| `next`                  |  16.3.8 | framework App Router e build standalone     |
 | `react`                 |  19.2.8 | interface                                   |
 | `react-dom`             |  19.2.8 | renderização Next.js                        |
 | `sharp`                 |  0.35.3 | otimização de imagens no runtime standalone |

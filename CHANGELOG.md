@@ -24,6 +24,24 @@
   aponta o sentinela atual de 1.104 e registra as tres RPCs auditadas de
   ingestao permitidas a `service_role` no schema versionado.
 
+## 2026-10-07 - Entrega de e-mail Auth
+
+- Prepara SMTP customizado do Resend para cadastro e recuperação, com domínio
+  transacional separado de follow-up e tracking desligado.
+- Mantém signup e recovery no servidor, captura falhas do provedor e preserva
+  cookies, anti-enumeração, callback e aceites legais.
+- Não introduz `Sb-Forwarded-For` nem chave `sb_secret_`: o limite de envio é
+  combinado no projeto e não muda com o IP de origem.
+- Corrige a documentação da Site URL, redirect de recovery e estado remoto da
+  migration Auth/MFA. O template produtivo continua em `ConfirmationURL`/PKCE
+  até prova contra scanners e prefetch.
+- Atualiza apenas o runtime Next.js de 16.3.6 para 16.3.8, patch oficial do
+  advisory alto de SSRF na otimização de imagens detectado pela CI; mantém o
+  `eslint-config-next` 16.3.6 e seu patch versionado.
+- Não cria migration. Lint, tipos, 2.248 testes Vitest, 41 testes Node e build
+  de 44 rotas foram aprovados; DNS, SMTP, limite de envio, configuração remota
+  e deploy permanecem pendentes de evidência operacional.
+
 ## 2026-10-07 - Delegação explícita pelo Master
 
 - Permite que Master aplique uma exceção individual `Permitir` a Administrador

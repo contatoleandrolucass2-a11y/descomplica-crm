@@ -45,6 +45,30 @@ alterou credencial, grant, environment ou estado remoto.
 9. Usuários inativos não recebem contexto de autorização; o helper efetivo de permissões também os bloqueia dentro da RLS.
 10. Alterações de papel, exceção, status e visibilidade passam por RPCs auditadas e respeitam hierarquia estrita.
 11. Refresh autenticado exige `Origin` da aplicação, permissão dedicada, lock transacional e cooldown. Ingestão exige Bearer dedicado, comparação constante, corpo de até 1 MB, schema versionado, idempotência e cota global por minuto.
+12. Não usar `Sb-Forwarded-For` nem introduzir uma `sb_secret_` no Auth público
+    para contornar limite de envio: `/signup` e `/recover` compartilham
+    `rate_limit_email_sent` no projeto, portanto o IP não resolve esse gargalo e
+    a credencial privilegiada só ampliaria a superfície de risco.
+13. Após validar o formulário, cadastro e recuperação retornam o mesmo aceite
+    público para conta existente, sucesso, rejeição do provedor ou throttling;
+    também preservam callback canônico, cookies temporários `HttpOnly` e o ledger
+    legal. E-mail de Auth usa domínio transacional separado, sem tracking;
+    follow-up usa outro domínio e chave. O template direto por `TokenHash` não
+    deve ser promovido até provar que scanners/prefetch não consomem o link de
+    uso único.
+
+## Estado do e-mail de autenticação em 2026-10-07
+
+Os logs agregados do projeto produtivo mostraram `429` no cadastro e na
+recuperação enquanto o mailer padrão do Supabase estava ativo. O único IP da VPS
+observado nas chamadas das Server Actions não foi a causa: o limite que enviou
+`email rate limit exceeded` é combinado e project-wide. O candidato mantém
+validação, anti-enumeração, cookies e aceites no servidor e apenas captura falhas
+do provedor sem mudar as respostas públicas.
+
+Resend SMTP, registros DNS, `rate_limit_email_sent` e deploy não são considerados
+concluídos sem evidência operacional. A mudança de aplicação não introduz
+credencial privilegiada nem altera schema, grants, RLS ou migrations.
 
 ## Verificações locais
 

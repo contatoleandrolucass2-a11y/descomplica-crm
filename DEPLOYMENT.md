@@ -145,18 +145,61 @@ Somente o valor literal `true` ativa cada capacidade.
 No painel Supabase, em **Authentication → URL Configuration**, a configuração
 de produção atual é estritamente:
 
-| Campo                         | Valor/caminho necessário                    |
-| ----------------------------- | ------------------------------------------- |
-| Site URL                      | `https://crm.descomplicapro.com.br`         |
-| Login por senha               | nenhum redirect Supabase; página `/login`   |
-| Confirmação de cadastro       | Site URL, pois `signUp` não define redirect |
-| Callback OAuth/magic link     | inexistente no código atual                 |
-| Recuperação/troca de senha    | inexistente no código atual                 |
-| Additional Redirect URLs prod | nenhuma URL adicional                       |
+| Campo                         | Valor/caminho necessário                          |
+| ----------------------------- | ------------------------------------------------- |
+| Site URL                      | `https://crm.descomplicapro.com.br`               |
+| Login por senha               | nenhum redirect Supabase; página `/login`         |
+| Confirmação de cadastro       | Site URL, pois `signUp` não define redirect       |
+| Callback OAuth/magic link     | inexistente no código atual                       |
+| Recuperação/troca de senha    | `/auth/callback` → `/redefinir-senha`             |
+| Additional Redirect URLs prod | `https://crm.descomplicapro.com.br/auth/callback` |
 
-Não autorize wildcard de produção nem caminhos hipotéticos. Quando callback,
-OAuth, magic link ou recuperação forem implementados, o respectivo caminho
-exato deverá entrar na allowlist no mesmo incremento.
+Não autorize wildcard de produção nem caminhos hipotéticos. O callback de
+recuperação já existe e sua URL exata precisa permanecer na allowlist. OAuth e
+magic link continuam fora do contrato atual.
+
+## E-mail do Auth e Resend
+
+O diagnóstico de 2026-10-07 encontrou o mailer padrão do Supabase, limitado a
+dois e-mails por hora e sem garantia de entrega, além de respostas `429` em
+cadastro e recuperação. `/signup` e `/recover` compartilham o limite
+`rate_limit_email_sent` do projeto quando enviam e-mail; ele não é um limite por
+IP. A correção escolhida é SMTP customizado do Resend para o Auth e ajuste
+controlado desse limite; ela não requer migration nem chave privilegiada.
+
+Antes de promover a release:
+
+1. validar no Resend um subdomínio transacional exclusivo, por exemplo
+   `auth.descomplicapro.com.br`, usando somente os registros DNS fornecidos pelo
+   provedor;
+2. manter click/open tracking desligado para confirmação e recuperação e não
+   compartilhar domínio, remetente ou chave com follow-up comercial;
+3. guardar a senha SMTP por canal privado e configurar o Supabase Auth com os
+   valores exatos fornecidos pelo Resend;
+4. confirmar a Site URL e o redirect exato da tabela acima;
+5. manter em produção o template padrão `ConfirmationURL`/PKCE. O template
+   direto por `TokenHash` continua restrito ao harness local até uma prova
+   específica contra scanners e prefetch de links;
+6. ajustar `rate_limit_email_sent` apenas depois de o domínio e o SMTP estarem
+   verificados, preservando o cooldown individual de 60 segundos, proteção
+   contra abuso e a vazão contratada;
+7. executar cadastro e recovery sintéticos e conferir latência, callback,
+   redefinição, anti-enumeração e ausência de segredos/tokens nos logs.
+
+Os logs também mostraram um único IP remoto nas chamadas originadas pelas Server
+Actions, mas isso não causou os `email rate limit exceeded`: o limite combinado
+de envio é project-wide. Por não trazer benefício para este gargalo,
+`Sb-Forwarded-For` não será habilitado e nenhuma `sb_secret_` será introduzida no
+fluxo público de Auth.
+
+Follow-up usa outro subdomínio, como `relacionamento.descomplicapro.com.br`, e a
+API do Resend com chave própria. Não passa pelo SMTP do Supabase Auth e só pode
+ser ativado com consentimento e descadastro documentados. Plano comercial, DNS,
+SMTP, limites, chaves e deploy permanecem pendentes até haver evidência.
+
+Rollback do SMTP restaura o provedor anterior, mas o mailer padrão de dois
+e-mails por hora não serve como solução de capacidade. Restaure também o limite
+anterior se a entrega customizada falhar.
 
 Para rollback antes da nova pilha de migrations, selecione uma imagem imutável
 que permaneça no host e não faça novo build. Depois que as novas permission

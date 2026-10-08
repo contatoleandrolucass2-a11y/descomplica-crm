@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  signUp: vi.fn(),
   createClient: vi.fn(),
+  signUp: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/supabase/server", () => ({ createClient: mocks.createClient }));
@@ -10,6 +10,11 @@ vi.mock("@/lib/homologation/config", () => ({ isPublicSignupEnabled: () => true 
 
 import { signupAction } from "../lib/auth/actions/signup";
 import { LEGAL_DOCUMENT_VERSIONS } from "../lib/legal/documents";
+
+const GENERIC_ACKNOWLEDGEMENT = {
+  success: true,
+  message: "Cadastro recebido. Verifique seu e-mail ou faça login se sua conta já estiver ativa.",
+};
 
 function validRegistration(): FormData {
   const formData = new FormData();
@@ -24,8 +29,8 @@ function validRegistration(): FormData {
 
 describe("signup legal acceptance bridge", () => {
   beforeEach(() => {
-    mocks.signUp.mockReset();
     mocks.createClient.mockReset();
+    mocks.signUp.mockReset();
     mocks.createClient.mockResolvedValue({ auth: { signUp: mocks.signUp } });
     mocks.signUp.mockResolvedValue({ error: null });
   });
@@ -62,14 +67,27 @@ describe("signup legal acceptance bridge", () => {
     });
   });
 
-  it("collapses backend failures into the generic registration response", async () => {
-    mocks.signUp.mockResolvedValue({ error: new Error("internal detail") });
+  it("returns the same public acknowledgement when Auth resolves with a provider error", async () => {
+    mocks.signUp.mockResolvedValue({ error: new Error("internal provider detail") });
 
     const result = await signupAction({ success: false, message: "" }, validRegistration());
 
-    expect(result).toEqual({
-      success: false,
-      message: "Não foi possível concluir o cadastro. Tente novamente em instantes.",
-    });
+    expect(result).toEqual(GENERIC_ACKNOWLEDGEMENT);
+  });
+
+  it("returns the same public acknowledgement when the Auth client throws", async () => {
+    mocks.createClient.mockRejectedValue(new Error("network or runtime failure"));
+
+    const result = await signupAction({ success: false, message: "" }, validRegistration());
+
+    expect(result).toEqual(GENERIC_ACKNOWLEDGEMENT);
+  });
+
+  it("returns the same public acknowledgement when sign-up throws", async () => {
+    mocks.signUp.mockRejectedValue(new Error("transport failure"));
+
+    const result = await signupAction({ success: false, message: "" }, validRegistration());
+
+    expect(result).toEqual(GENERIC_ACKNOWLEDGEMENT);
   });
 });

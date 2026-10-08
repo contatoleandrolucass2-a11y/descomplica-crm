@@ -29,6 +29,33 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   lint, tipos, build de 44 rotas e inventario aprovados. Launcher recusou root
   nesta VPS antes de iniciar processo, como projetado.
 
+## 2026-10-07: mailer bloqueou signup/recovery
+
+- Status: pendente_validacao e ativacao operacional. Fonte: logs agregados do
+  Supabase produtivo, codigo das Server Actions, configuracao Nginx/Compose e
+  documentacao oficial de limites do Supabase.
+- Foram observados 15 `429` (`/signup`: cinco; `/recover`: dez) e um unico IP
+  remoto nas 19 chamadas do recorte. O mailer padrao estava limitado a dois
+  e-mails/hora. O IP da VPS e apenas observacional: o limite de envio combinado
+  de `/signup` e `/recover` e project-wide.
+- Preservar o servidor como autoridade de validacao, cookies, callback,
+  anti-enumeracao e aceite legal. Depois de validar o formulario, sucesso, conta
+  ofuscada, erro retornado e excecao do provedor precisam do mesmo aceite
+  publico. Nao introduzir `Sb-Forwarded-For` ou `sb_secret_`: nao ha beneficio
+  para esse limite e a credencial aumentaria o risco.
+- Resend SMTP transacional usa subdominio de Auth e tracking off. Follow-up usa
+  `relacionamento.*`, outra chave e controles proprios. Manter
+  `ConfirmationURL`/PKCE em producao ate provar o template `TokenHash` contra
+  scanners/prefetch.
+- A CI revelou o advisory alto `GHSA-cjq9-62q9-8jv4` no runtime Next.js 16.3.6.
+  Subir somente `next` para o patch oficial 16.3.8 remove a cadeia vulneravel e
+  preserva o `eslint-config-next` 16.3.6 com seu patch versionado de glob.
+- A migration Auth/MFA ja esta aplicada; este incremento nao requer migration.
+  Lint, tipos, 2.248 testes Vitest, 41 testes Node, formatacao e build de 44
+  rotas foram aprovados apos o rebase. DNS, SMTP, `rate_limit_email_sent` e
+  deploy permanecem pendentes. Subir o limite somente depois do dominio
+  verificado, com cooldown individual de 60 segundos e protecao contra abuso.
+
 ## 2026-10-07: Associativo publicado com data oficial e formulas conferidas
 
 - Status: validado e publicado. Fonte: PR #165, CI main `37594420463`, prova da

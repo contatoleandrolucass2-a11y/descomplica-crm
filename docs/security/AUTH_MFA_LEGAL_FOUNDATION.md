@@ -2,10 +2,11 @@
 
 ## Estado e limites deste incremento
 
-Esta fundação foi implementada e validada somente no ambiente local. A migration
-`20260824230058_auth_mfa_legal_foundation.sql` ainda não foi aplicada em ambiente
-remoto. Nenhum usuário, fator, sessão, grant ou dado de homologação ou produção foi
-alterado.
+Esta fundação foi validada localmente e a migration
+`20260824230058_auth_mfa_legal_foundation.sql` já consta no histórico do projeto
+Supabase produtivo. A correção de entrega de e-mail preparada em
+2026-10-07 não cria nem aplica migration, não muda grants/RLS e não altera usuário,
+fator, sessão ou dado comercial.
 
 Ela adiciona recuperação de senha, MFA TOTP, duração explícita da sessão, consentimento
 de cookies, documentos legais versionados e um ledger privado de aceites. Não ativa
@@ -17,13 +18,16 @@ integrações, read model v3, relay, motores ou políticas comerciais.
    independentemente da existência ou elegibilidade da conta.
 2. O servidor chama `resetPasswordForEmail` somente após validar a entrada e resolver
    um callback fixo a partir de `APP_ORIGIN`. Nenhum host, protocolo ou caminho vindo da
-   requisição é usado para construir o callback.
-3. O template próprio de recovery monta diretamente `/auth/callback` com o `TokenHash`.
+   requisição é usado para construir o callback. Falhas síncronas ou assíncronas do
+   provedor são capturadas sem alterar a resposta pública genérica.
+3. O template próprio versionado para o harness local monta diretamente
+   `/auth/callback` com o `TokenHash`.
    O callback aceita somente SHA-224 em 56 caracteres hexadecimais, puro no fluxo
    implícito ou com o prefixo oficial `pkce_`, e `type=recovery`; verifica por
    `verifyOtp` via POST/body e nunca envia o hash em uma query ao gateway do Auth.
-   Em projeto hospedado que ainda usa o template padrão `ConfirmationURL`, o callback
-   também aceita exclusivamente o auth code UUID v4 emitido pelo fluxo PKCE atual e
+   Em produção, o template padrão `ConfirmationURL`/PKCE deve ser preservado enquanto
+   não houver prova de que scanners e prefetch não consomem o link de uso único. Nesse
+   contrato hospedado, o callback também aceita exclusivamente o auth code UUID v4 e
    o troca por sessão com `exchangeCodeForSession`. O retorno precisa declarar
    `redirectType=recovery`; em ambos os contratos, a sessão só prossegue quando as
    claims confirmam método de recuperação recente. Códigos de login, magic link ou
@@ -69,6 +73,31 @@ exatamente a `${APP_ORIGIN}/auth/callback`. Wildcards ou origem derivada de `Hos
 `config.toml` local permite exclusivamente `http://127.0.0.1:*/auth/callback` porque o
 E2E reserva uma porta loopback efêmera; essa exceção não pertence à configuração de
 homologação ou produção e continua condicionada ao launcher local fail-closed.
+
+## Entrega de e-mail
+
+Em 2026-10-07, os logs produtivos mostraram 15 respostas
+`email rate limit exceeded`: cinco em `/signup` e dez em `/recover`. As 19
+requisições observadas nesses endpoints chegaram com um único IP remoto porque
+as Server Actions originavam a chamada ao Supabase na VPS. Essa observação não é
+causal: `/signup` e `/recover` que enviam e-mail compartilham o limite
+`rate_limit_email_sent` do projeto, independentemente do IP. O mailer padrão
+ativo tinha limite documentado de dois e-mails por hora e não oferece SLA de
+produção. Isso explica a falha intermitente sem apontar problema nos triggers de
+perfil ou aceite legal.
+
+O candidato mantém cadastro e recuperação no servidor. Após validar o
+formulário, sucesso, conta ofuscada, erro retornado e exceção do provedor recebem
+o mesmo aceite público, evitando um oráculo de existência. `Sb-Forwarded-For`
+foi descartado porque não altera o limite combinado de envio; introduzir uma
+chave `sb_secret_` privilegiada não teria benefício e ampliaria o risco.
+
+O SMTP transacional escolhido é Resend em subdomínio exclusivo de Auth, com
+tracking de abertura/clique desligado. Follow-up pertence a outro subdomínio,
+remetente e chave de API e não usa o SMTP do Supabase. DNS, credenciais SMTP,
+`rate_limit_email_sent` e deploy permanecem pendentes até prova operacional. O
+limite só deve subir após o domínio verificado, preservando cooldown individual
+de 60 segundos e proteção contra abuso.
 
 ## MFA TOTP e níveis de garantia
 
@@ -148,35 +177,39 @@ procedimentos de titulares permanecem explicitamente pendentes de revisão jurí
 Nenhuma entidade ou informação de contato foi presumida. As versões atuais são drafts
 técnicos e não devem ser promovidas como texto jurídico aprovado.
 
-## Operação e ativação futura
+## Operação remota e pendências
 
-Antes de qualquer ativação remota:
+Antes de ativar a correção de entrega:
 
 1. obter aprovação jurídica e versionar novos textos quando necessário;
 2. provisionar `APP_ORIGIN` e o valor lógico do segredo HMAC por canal privado,
    materializando-o no secret store root-only e declarando somente
    `AUTH_SESSION_COOKIE_SECRET_SOURCE` no arquivo de ambiente;
-3. configurar redirects exatos, SMTP, TOTP e o template recovery com `TokenHash` no
-   projeto Supabase de destino;
+3. validar o domínio transacional e configurar SMTP customizado, tracking off,
+   Site URL e redirect exato no projeto Supabase, preservando inicialmente o
+   template padrão `ConfirmationURL`/PKCE;
 4. comprovar backup e restore isolado;
 5. executar reset local, pgTAP, lint, typecheck, testes, build e E2E completos;
 6. provar os nove perfis, sessão temporária/lembrada, recovery, AAL1/AAL2, APIs e RLS;
 7. inspecionar logs para confirmar ausência de códigos, tokens e parâmetros sensíveis;
-8. aplicar somente a migration aprovada, monitorar 401/403/5xx e manter rollback da
-   aplicação preparado.
+8. provar cadastro e recovery sintéticos e só então ajustar
+   `rate_limit_email_sent`, preservando o cooldown individual de 60 segundos e
+   proteção contra abuso;
+9. promover a imagem monitorando `429`, latência, 401/403/5xx e mantendo
+   rollback preparado.
 
 ## Rollback e limitações
 
-- Antes de migration remota, rollback é remover a imagem candidata e restaurar a
-  configuração anterior; o banco permanece intacto.
-- Depois da migration, não reabrir acesso removendo a policy restritiva, restaurando
+- A migration desta fundação já está aplicada. Não reabrir acesso removendo a
+  policy restritiva, restaurando
   grants amplos ou aceitando sessão revogada. Correção deve ser roll-forward por nova
   migration testada. Rollback do aplicativo precisa manter compatibilidade com os
   helpers de sessão/AAL ou falhar fechado.
 - Rotacionar o arquivo-fonte do segredo HMAC invalida markers de duração lembrada, mas
   não substitui revogação de sessão no Supabase.
 - Entrega de e-mail depende de SMTP e redirects configurados; indisponibilidade deve ser
-  registrada como bloqueio, nunca testada em produção como substituto.
+  registrada como bloqueio, nunca testada em produção como substituto. O mailer padrão
+  de dois e-mails por hora não é fallback de capacidade.
 - O gate local fixa Supabase CLI 2.115.0, que contém a correção de resolução/reload
   do `content_path` do template Auth. O asset HTML não contém segredo e precisa
   permanecer legível pelo processo não-root (`0644`); o preparo impõe esse modo.
