@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-08: Conectar Sistemas preparado para PR
+
+- Portada a guia Salesforce sobre a main 089daa1, preservando a integração do
+  PR #169 e excluindo os commits antigos de bootstrap Windows.
+- Menu Configurações e rota protegidos por crm.settings.manage; refresh mantém
+  crm.salesforce.refresh. Navegação suplementar segue Recurso MKT, sem migration.
+- Estados da tela identificam configuração, não sessão ou agenda comprovadas.
+- Testes cobrem autorização, navegação, ausência de segredos e refresh. Gates
+  locais e CI serão registrados no PR; primeira coleta e ativação remota pendentes.
+
 ## 2026-10-07 - Teste portátil do Chrome dedicado
 
 - O teste de descoberta do executável passou a controlar a inspeção de arquivos,

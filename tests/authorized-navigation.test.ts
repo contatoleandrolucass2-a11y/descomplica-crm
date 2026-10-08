@@ -161,7 +161,7 @@ describe("authorized hierarchical navigation", () => {
     expect(extendAuthorizedNavigationWithReleasedPages(result, context)).toEqual(result);
   });
 
-  it("adds Recurso MKT only under the active authorized settings root with management permission", () => {
+  it("adds settings tools only under the active authorized root with management permission", () => {
     const settings: AppPage = {
       ...simulationParent,
       key: "crm.settings",
@@ -178,10 +178,14 @@ describe("authorized hierarchical navigation", () => {
     expect(result.map((page) => page.path)).toEqual([
       "/app/configuracoes",
       "/app/configuracoes/recurso-mkt",
+      "/app/configuracoes/conectar-sistemas",
     ]);
     expect(
       buildBreadcrumbs("/app/configuracoes/recurso-mkt", result).map((page) => page.name),
     ).toEqual(["Configurações", "Recurso MKT"]);
+    expect(
+      buildBreadcrumbs("/app/configuracoes/conectar-sistemas", result).map((page) => page.name),
+    ).toEqual(["Configurações", "Conectar Sistemas"]);
     expect(extendAuthorizedNavigationWithReleasedPages([settings], viewerContext)).toEqual([
       settings,
     ]);
@@ -201,7 +205,14 @@ describe("authorized hierarchical navigation", () => {
         [settings, { ...settings, key: "crm.settings.marketing", path: "/app/collision" }],
         context,
       ),
-    ).toHaveLength(2);
+    ).toHaveLength(3);
+    const collision = extendAuthorizedNavigationWithReleasedPages(
+      [settings, { ...settings, key: "crm.settings.connected_systems", path: "/app/collision" }],
+      context,
+    );
+    expect(collision.some((page) => page.path === "/app/configuracoes/conectar-sistemas")).toBe(
+      false,
+    );
   });
   it("keeps the approved root order without creating unauthorized entries", () => {
     const authorizedRoots: NavigationItem[] = [

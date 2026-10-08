@@ -10,6 +10,7 @@ import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
 import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
 import { checkMarketingResources } from "./marketing-resources.mjs";
+import { checkConnectedSystems } from "./connected-systems.mjs";
 import { checkRepasse } from "./repasse.mjs";
 import {
   checkTabelaoLayout,
@@ -5826,6 +5827,21 @@ async function run() {
             );
           } finally {
             await marketingPage.close({ runBeforeUnload: false });
+          }
+          currentStage = "connected-systems";
+          const systemsPage = configureQaPage(await context.newPage());
+          try {
+            const systems = await checkConnectedSystems(
+              systemsPage,
+              origin,
+              path.join(artifactRoot, "connected-systems"),
+            );
+            await writeFile(
+              path.join(artifactRoot, "connected-systems-results.json"),
+              JSON.stringify(systems, null, 2),
+            );
+          } finally {
+            await systemsPage.close({ runBeforeUnload: false });
           }
           currentStage = "documentation-calculator";
           const documentationPage = configureQaPage(await context.newPage());

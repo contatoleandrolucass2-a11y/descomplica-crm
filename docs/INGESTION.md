@@ -1,5 +1,27 @@
 # Ingestão e atualização Salesforce
 
+## Conectar Sistemas
+
+A guia `/app/configuracoes/conectar-sistemas` fica em Configurações e exige
+`crm.settings.manage` no servidor e no Proxy. A navegação segue o mesmo padrão
+suplementar de Recurso MKT: pai autorizado, permissão efetiva e gate liberado.
+Não altera o catálogo de 17 páginas no banco nem exige migration.
+
+A tela mostra somente o estado de configuração da ingestão e do refresh.
+Isso não comprova sessão Salesforce válida, agenda ativa ou carga reconciliada.
+O botão de atualização exige também `crm.salesforce.refresh`. Usuário, senha,
+MFA e segredos permanecem fora desta tela.
+
+O coletor, o publisher e a agenda de 30 minutos já foram integrados no PR #169.
+Esta guia reutiliza esses contratos e não os substitui. A operação autônoma
+continua dependendo de Chrome/CDP dedicado com MFA aprovado, integração n8n
+concluída, segredos privados e primeira coleta reconciliada. A sessão pode exigir
+nova aprovação humana; a página não promete renovação indefinida.
+
+Sem confirmação final da ingestão, os dados vigentes são preservados. O runbook
+`docs/runbooks/salesforce-n8n-migration.md` documenta ativação, conferência e
+substituição transacional dos snapshots.
+
 ## Contrato v3 aditivo
 
 As rotas Salesforce atuais continuam em `schemaVersion: 2` e permanecem

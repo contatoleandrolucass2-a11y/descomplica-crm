@@ -2,10 +2,10 @@
 
 ## Contrato
 
-Esta matriz descreve o inventário HTTP de 24 rotas protegidas e deve ser validada
+Esta matriz descreve o inventário HTTP de 25 rotas protegidas e deve ser validada
 com contas QA sintéticas. O catálogo PostgreSQL mantém exatamente 17 entradas em
-`app_pages`; o catálogo HTTP possui 24 rotas habilitadas para Master, pois
-acrescenta Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15,
+`app_pages`; o catálogo HTTP possui 25 rotas habilitadas para Master, pois
+acrescenta Conectar Sistemas, Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15,
 WF16/Documentação e a jornada visual CAIXA. A execução dos motores e a leitura
 server-side da fonte pública de Repasse continuam contratos separados da
 autorização das páginas; o RBAC do CRM não privatiza a planilha externa.
@@ -32,9 +32,9 @@ Produção e instalação limpa convergem para as mesmas 17 entradas de `app_pag
 A migration Auth/MFA remove somente as quatro identidades excedentes encontradas
 no restore (`WF16`, `CAIXA`, `WF14` e `WF15`), preserva `user_roles` e overrides
 e recompõe somente os vínculos herdados já existentes em produção. Neste
-candidato, as sete jornadas complementares acrescentam da 18ª à 24ª rotas HTTP
+candidato, as oito jornadas complementares acrescentam da 18ª à 25ª rotas HTTP
 habilitadas pelo catálogo versionado, sem migration ou nova permissão de banco.
-Recurso MKT reutiliza `crm.settings.manage`; Repasse exige papel `master` e
+Conectar Sistemas e Recurso MKT reutilizam `crm.settings.manage`; Repasse exige papel `master` e
 `crm.partnerships.view` em conjunto. CAIXA permanece fail-closed no motor, ainda
 que sua composição visual esteja acessível ao Master.
 
@@ -51,6 +51,7 @@ que sua composição visual esteja acessível ao Master.
 | `/app/repasse`                            |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes`                      |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/recurso-mkt`          |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/configuracoes/conectar-sistemas`    |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/metas`                |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/metas/parcerias`      |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/metas/pontos`         |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
@@ -126,13 +127,13 @@ Para cada perfil, o E2E deve:
 1. autenticar e confirmar a identidade/papel esperados;
 2. verificar `/app` para os sete papéis ativos e uma superfície auth-only para `pending`;
 3. comparar o menu com o catálogo permitido;
-4. abrir diretamente cada uma das 24 URLs e comparar o resultado com a tabela;
+4. abrir diretamente cada uma das 25 URLs e comparar o resultado com a tabela;
 5. testar os Route Handlers vinculados às permissões sem gravar dados;
 6. abrir `/conta/seguranca` e provar o estado MFA aplicável;
 7. executar logout e confirmar bloqueio ao voltar, recarregar e reabrir URL protegida.
 
 O `403` é verificado no response HTTP direto e na navegação do navegador. O Proxy
-antecipa a permissão exata das 24 rotas versionadas antes que uma loading boundary
+antecipa a permissão exata das 25 rotas versionadas antes que uma loading boundary
 possa mascará-la com `200` streamed; layout, página, APIs e RLS repetem o gate. Conteúdo
 e título da página negada também devem permanecer ausentes. Para Admin, as três páginas
 de metas carregam a base legada somente leitura e exibem explicitamente o rascunho como

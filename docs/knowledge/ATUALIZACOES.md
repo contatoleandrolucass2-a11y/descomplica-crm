@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-08: Conectar Sistemas na base atual
+
+- Fonte: main 089daa1, integração fc34548 (PR #169), branch original bc6c0ab.
+- Status: pendente_validacao no novo candidato de PR.
+- A branch original continha oito commits Windows anteriores à entrega; o PR
+  usa branch nova baseada na main e mantém coletor/publisher/agenda do PR #169.
+- Guia suplementar sob Configurações, conforme Recurso MKT, com
+  crm.settings.manage no servidor/Proxy e crm.salesforce.refresh para a ação.
+  Catálogo PostgreSQL permanece com 17 páginas e sem migration adicional.
+- Estado configurado não comprova sessão MFA nem sincronização ativa. Testes
+  focam autorização, navegação, segredos e refresh; gates finais pendentes.
+- Operação real ainda exige integração remota, sessão dedicada aprovada e
+  reconciliação da primeira carga. Nenhum dado remoto foi modificado nesta etapa.
+
 Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.

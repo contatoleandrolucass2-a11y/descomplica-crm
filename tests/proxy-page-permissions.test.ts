@@ -50,6 +50,7 @@ describe("pre-stream page permission gates", () => {
     ["/app/configuracoes/metas/parcerias", "crm.settings.manage"],
     ["/app/configuracoes/metas/pontos", "crm.settings.manage"],
     ["/app/configuracoes/recurso-mkt", "crm.settings.manage"],
+    ["/app/configuracoes/conectar-sistemas", "crm.settings.manage"],
     ["/app/simulacao", "crm.simulators.view"],
     ["/app/simulacao/associativo-fluxo-linear", "crm.simulators.view"],
     ["/app/simulacao/tabela-direta", "crm.simulators.view"],

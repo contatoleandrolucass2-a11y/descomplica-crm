@@ -164,12 +164,15 @@
       "agent": "crm-dados",
       "skill": "descomplica-dados-integracoes",
       "routes": [
+        "app/(protected)/app/configuracoes/conectar-sistemas/page.tsx",
         "app/api/ingest/qlik/route.ts",
         "app/api/ingest/salesforce/route.ts",
         "app/api/refresh/salesforce/route.ts",
         "app/api/health/route.ts"
       ],
       "evidence": [
+        "tests/connected-systems.test.tsx",
+        "scripts/qa/connected-systems.mjs",
         "tests/qlik-relay.test.ts",
         "tests/ingestion.test.ts",
         "tests/health-route.test.ts",

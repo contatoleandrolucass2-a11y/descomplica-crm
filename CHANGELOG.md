@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-08
+
+- Adicionada a guia Conectar Sistemas em Configurações, com acesso Salesforce,
+  relatórios previstos, configuração de ingestão e controle autorizado de refresh.
+- Integrada ao menu e aos gates atuais sem migration; preservada a agenda e o
+  publisher Salesforce do PR #169, com ativação operacional ainda pendente.
+
 - Corrige a validação portátil do launcher Salesforce: o teste de ausência do
   Chrome agora injeta a inspeção do executável e não depende dos programas
   instalados no runner da CI.

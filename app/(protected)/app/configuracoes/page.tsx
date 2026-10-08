@@ -3,6 +3,7 @@ import {
   ArrowRight,
   BarChart3,
   Megaphone,
+  Plug,
   Settings2,
   Trophy,
   UsersRound,
@@ -23,6 +24,14 @@ import styles from "./ConfigurationCanvas.module.css";
 export const metadata = { title: "Configurações" };
 
 const SETTINGS = [
+  {
+    href: "/app/configuracoes/conectar-sistemas",
+    badge: "Integrações",
+    title: "Conectar Sistemas",
+    description: "Salesforce e atualização dos relatórios do CRM.",
+    detail: "Conexão Salesforce",
+    icon: Plug,
+  },
   {
     href: "/app/configuracoes/recurso-mkt",
     badge: "Marketing",

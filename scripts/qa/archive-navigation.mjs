@@ -47,6 +47,7 @@ const settingsLinks = [
   ["Metas de parcerias", "/app/configuracoes/metas/parcerias"],
   ["Metas de pontos", "/app/configuracoes/metas/pontos"],
   ["Recurso MKT", "/app/configuracoes/recurso-mkt"],
+  ["Conectar Sistemas", "/app/configuracoes/conectar-sistemas"],
 ];
 const dashboardLinks = [
   ["Visão geral", "/app"],

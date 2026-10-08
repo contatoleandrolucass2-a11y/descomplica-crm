@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
 
 describe("protected commercial page set", () => {
-  it("matches the exact approved twenty-four-page protected set", () => {
+  it("matches the exact approved twenty-five-page protected set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -22,6 +22,7 @@ describe("protected commercial page set", () => {
         "crm.settings.partnerships|/app/configuracoes/metas/parcerias|crm.settings.manage",
         "crm.settings.points|/app/configuracoes/metas/pontos|crm.settings.manage",
         "crm.settings.marketing|/app/configuracoes/recurso-mkt|crm.settings.manage",
+        "crm.settings.connected_systems|/app/configuracoes/conectar-sistemas|crm.settings.manage",
         "crm.settings|/app/configuracoes|crm.settings.view",
         "crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view",
         "crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view",
@@ -47,10 +48,10 @@ describe("protected commercial page set", () => {
     ).toEqual([]);
   });
 
-  it("keeps the full twenty-four-route smoke inventory unique", () => {
-    expect(PROTECTED_PAGE_GATES).toHaveLength(24);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(24);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(24);
+  it("keeps the full twenty-five-route smoke inventory unique", () => {
+    expect(PROTECTED_PAGE_GATES).toHaveLength(25);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(25);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(25);
   });
 
   it("keeps Repasse explicitly Master-only in addition to its permission", () => {

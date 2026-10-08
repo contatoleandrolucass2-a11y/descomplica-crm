@@ -179,6 +179,30 @@ export function extendAuthorizedNavigationWithReleasedPages(
       },
     ];
   }
+  const systemsGate = getProtectedPageGate("/app/configuracoes/conectar-sistemas");
+  if (
+    settingsParent &&
+    systemsGate?.releaseEnabled &&
+    systemsGate.pageKey === "crm.settings.connected_systems" &&
+    context.permissions.includes(systemsGate.permission) &&
+    !pages.some((page) => page.key === systemsGate.pageKey || page.path === systemsGate.path)
+  ) {
+    pages = [
+      ...pages,
+      {
+        key: systemsGate.pageKey,
+        path: systemsGate.path,
+        name: "Conectar Sistemas",
+        description: "Salesforce e atualização dos relatórios",
+        section: "settings",
+        permissionKey: systemsGate.permission,
+        parentKey: settingsParent.key,
+        sortOrder: 60,
+        isActive: true,
+        isNavigation: true,
+      },
+    ];
+  }
   if (!hasAuthorizedSimulationRoot(pages)) return pages;
 
   const occupiedKeys = new Set(pages.map((page) => page.key));

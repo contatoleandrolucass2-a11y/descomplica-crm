@@ -103,6 +103,12 @@ export const PROTECTED_PAGE_GATES = [
     releaseEnabled: true,
   },
   {
+    pageKey: "crm.settings.connected_systems",
+    path: "/app/configuracoes/conectar-sistemas",
+    permission: "crm.settings.manage",
+    releaseEnabled: true,
+  },
+  {
     pageKey: "crm.simulation",
     path: "/app/simulacao",
     permission: "crm.simulators.view",
