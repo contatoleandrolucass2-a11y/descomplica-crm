@@ -3,14 +3,21 @@
 ## 2026-10-08: Conectar Sistemas na base atual
 
 - Fonte: main 089daa1, integração fc34548 (PR #169), branch original bc6c0ab.
-- Status: pendente_validacao no novo candidato de PR.
+- Status: PR #172 aberto; gates completos e operação remota pendentes.
 - A branch original continha oito commits Windows anteriores à entrega; o PR
   usa branch nova baseada na main e mantém coletor/publisher/agenda do PR #169.
 - Guia suplementar sob Configurações, conforme Recurso MKT, com
   crm.settings.manage no servidor/Proxy e crm.salesforce.refresh para a ação.
   Catálogo PostgreSQL permanece com 17 páginas e sem migration adicional.
-- Estado configurado não comprova sessão MFA nem sincronização ativa. Testes
-  focam autorização, navegação, segredos e refresh; gates finais pendentes.
+- Estado configurado não comprova sessão MFA nem sincronização ativa.
+- Evidências: lint, tipos e build aprovados; 60 testes focados aprovados. Suíte
+  Windows com 2.242 aprovados, 11 falhos e nove skips, incluindo um contrato
+  da nova rota já corrigido e revalidado. Demais falhas: seis POSIX e quatro
+  timeouts em arquivos intactos da main. Reexecução dos timeouts com dois
+  workers: 61 aprovados e um skip. Node Salesforce: oito falhas locais.
+- CI Linux 37718470536/job validate passou no SHA 38946ef, incluindo testes,
+  auditoria e build. Banco, restore e harness autenticado permanecem pendentes; nenhum baseline
+  histórico foi sobrescrito para aprovar a nova tela.
 - Operação real ainda exige integração remota, sessão dedicada aprovada e
   reconciliação da primeira carga. Nenhum dado remoto foi modificado nesta etapa.
 

@@ -7,8 +7,18 @@
 - Menu Configurações e rota protegidos por crm.settings.manage; refresh mantém
   crm.salesforce.refresh. Navegação suplementar segue Recurso MKT, sem migration.
 - Estados da tela identificam configuração, não sessão ou agenda comprovadas.
-- Testes cobrem autorização, navegação, ausência de segredos e refresh. Gates
-  locais e CI serão registrados no PR; primeira coleta e ativação remota pendentes.
+- Lint, tipos e build aprovados; 60 testes focados em seis arquivos aprovados.
+- Suíte integral Windows: 2.242 aprovados, 11 falhos e nove skips. O contrato
+  visual da nova rota foi corrigido e revalidado nos testes focados; restaram
+  seis falhas POSIX e quatro timeouts em arquivos intactos da main. Os timeouts
+  não repetiram com dois workers: 61 aprovados e um skip em três arquivos. A suite
+  Node Salesforce também registrou oito falhas de arquivos/permissões/execução
+  no Windows; o código do coletor permanece idêntico ao PR #169.
+- PR #172 aberto como rascunho. CI Linux 37718470536 aprovou o job validate
+  no SHA 38946ef: formato, lint, tipos, testes, audit, compressão e build.
+  Banco, restore e navegador ainda pendentes. Matriz autenticada ganhou
+  nove capturas previstas (três larguras, três temas), overflow e axe.
+- Primeira coleta, validação autenticada e ativação remota permanecem pendentes.
 
 ## 2026-10-07 - Teste portátil do Chrome dedicado
 

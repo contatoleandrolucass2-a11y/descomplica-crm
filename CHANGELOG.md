@@ -6,6 +6,8 @@
   relatórios previstos, configuração de ingestão e controle autorizado de refresh.
 - Integrada ao menu e aos gates atuais sem migration; preservada a agenda e o
   publisher Salesforce do PR #169, com ativação operacional ainda pendente.
+- Evidências do PR #172 registradas: validação principal Linux aprovada e
+  verificações de banco, restore e navegador ainda pendentes.
 
 - Corrige a validação portátil do launcher Salesforce: o teste de ausência do
   Chrome agora injeta a inspeção do executável e não depende dos programas
