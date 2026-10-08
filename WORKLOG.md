@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-10-07 — Conectar Sistemas Salesforce
+
+- Criada a rota `/app/configuracoes/conectar-sistemas` com gate
+  `crm.settings.manage`, cards de status para ingestão/refresh e botão de
+  refresh apenas quando `crm.salesforce.refresh` estiver efetiva.
+- Acrescentada migration `20261007190000_salesforce_connected_systems_page.sql`
+  para incluir a guia no catálogo `app_pages` abaixo de Configurações.
+- Adicionado `ops/salesforce/run-every-30-minutes.mjs` para rodar ciclos seriais
+  de 30 minutos usando o exportador candidato e postar somente o payload v2 no
+  endpoint de ingestão M2M.
+- Ajustado `export-candidate.mjs` para aceitar caminhos absolutos Windows via
+  `path.isAbsolute`.
+- Validação local: `pnpm lint` aprovado com um warning preexistente em
+  `outputs/spreadsheet-vendas-imob/build_comparativo_dashboard.mjs`; `pnpm
+  typecheck`, `pnpm test` (604 Vitest aprovados, quatro skips e oito testes Node
+  Salesforce aprovados) e `pnpm build` passaram. Sync final executado antes da
+  resposta.
+
 ## 2026-09-24 — bootstrap local do Windows e seleção segura de modelo
 
 - Adicionada política `.gitattributes` para LF, normalização segura do checkout

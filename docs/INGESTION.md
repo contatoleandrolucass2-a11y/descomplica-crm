@@ -103,6 +103,37 @@ somente `requestId` e `requestedAt`, mais o Bearer dedicado.
 
 Status HTTP do provedor não é repassado livremente: sucesso retorna `202`, concorrência/cooldown retorna `409`/`429`, capacidade desligada retorna `404`, configuração incompleta com a capacidade ligada retorna `503` e falha do provedor retorna erro genérico `502`.
 
+## Conectar Sistemas
+
+A guia `/app/configuracoes/conectar-sistemas` é a máscara operacional da
+integração Salesforce. Ela exige `crm.settings.manage`, aparece abaixo de
+Configurações e mostra apenas estado seguro: URLs institucionais, flags
+server-side, relatórios autorizados e o botão de refresh quando o perfil possui
+`crm.salesforce.refresh`. Usuário, senha, cookie `sid`, Bearer M2M e secret key
+continuam fora do navegador.
+
+Para execução autônoma, `ops/salesforce/run-every-30-minutes.mjs` roda ciclos
+seriais de 30 minutos por padrão. Cada ciclo chama
+`ops/salesforce/export-candidate.mjs`, que usa a sessão Salesforce já aprovada
+em Chrome dedicado via CDP, grava um candidato temporário e envia somente
+`candidate.payload` para `/api/ingest/salesforce` com `SALESFORCE_INGEST_SECRET`.
+O runner não renova nem contorna MFA: quando a sessão expira ou volta ao login,
+o ciclo falha fechado e aguarda nova autenticação manual.
+
+Variáveis do runner:
+
+```dotenv
+APP_ORIGIN=https://crm.descomplicapro.com.br
+SALESFORCE_INGEST_SECRET=
+SALESFORCE_CDP_URL=http://127.0.0.1:9222
+SALESFORCE_CRM_INGEST_URL=
+SALESFORCE_RUN_INTERVAL_MS=1800000
+```
+
+Use `SALESFORCE_RUN_ONCE=true` para uma coleta única de validação local. A
+primeira coleta real deve ser reconciliada com as contagens esperadas antes de
+ativar uma agenda permanente.
+
 ## Variáveis e rotação
 
 ```dotenv
@@ -119,6 +150,8 @@ SUPABASE_SECRET_KEY=
 SALESFORCE_INGEST_SECRET=
 SALESFORCE_REFRESH_URL=
 SALESFORCE_REFRESH_SECRET=
+SALESFORCE_CRM_INGEST_URL=
+SALESFORCE_RUN_INTERVAL_MS=
 ```
 
 Com a flag de ingestão em `true`, `SUPABASE_SECRET_KEY` e

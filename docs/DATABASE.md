@@ -2,11 +2,11 @@
 
 ## Estado atual
 
-O schema versionado usa PostgreSQL 17 no Supabase local. Existem 42 arquivos de
+O schema versionado usa PostgreSQL 17 no Supabase local. Existem 44 arquivos de
 migration: 34 etapas canônicas e sete versões remotas reconciliadas por markers
 ou convergências seguras. Nenhuma regra, política ou valor comercial é seedado.
 O rebuild contém 39 tabelas públicas,
-17 privadas, 12 papéis, 26 permissões e 17 páginas autorizadas. Quatro rotas de
+17 privadas, 12 papéis, 26 permissões e 18 páginas autorizadas. Quatro rotas de
 simuladores permanecem fora de `app_pages`: a réplica WF14 é a rota HTTP
 adicional habilitada pelo catálogo versionado e pelo guard existente, sem
 migration; WF16, CAIXA e WF15 continuam futuras e respondem `403` para todo
@@ -58,6 +58,7 @@ nenhum cutover Qlik ou do read model v3 foi realizado.
 33. `20260824230058_auth_mfa_legal_foundation.sql`: recuperação de senha, MFA, sessão lembrada, consentimentos legais privados e convergência exata do catálogo produtivo de 17 páginas.
 34. `20260824230100_role_isolation_net_fail_closed.sql`: isolamento fail-closed das funções Auth/MFA por identidade, AAL e grants mínimos, sem alterar integrações ou motores.
 35. `20260901204113_multi_master_source_controlled.sql`: remove somente a unicidade legada de Master, preserva lookup indexado e restringe toda nova promoção ao bootstrap owner-only, versionado e auditado.
+36. `20261007190000_salesforce_connected_systems_page.sql`: adiciona a guia Conectar Sistemas ao catálogo de Configurações, usando `crm.settings.manage` e sem novos grants de dados.
 
 ## Desenvolvimento local
 

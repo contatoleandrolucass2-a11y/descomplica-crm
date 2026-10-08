@@ -2,9 +2,9 @@
 
 ## Contrato
 
-Esta matriz descreve o inventário HTTP de 22 rotas protegidas e deve ser validada
-com contas QA sintéticas. O catálogo PostgreSQL mantém exatamente 17 entradas em
-`app_pages`; o catálogo HTTP possui 20 rotas habilitadas, pois acrescenta Tabelão e as
+Esta matriz descreve o inventário HTTP de 23 rotas protegidas e deve ser validada
+com contas QA sintéticas. O catálogo PostgreSQL mantém exatamente 18 entradas em
+`app_pages`; o catálogo HTTP possui 21 rotas habilitadas, pois acrescenta Tabelão e as
 réplicas WF14 e WF15 protegidas pelo guard Master-only existente. As outras duas
 rotas de simuladores continuam no smoke para comprovar o `403` fail-closed.
 
@@ -27,11 +27,11 @@ Legenda:
 - `redirect`: sem sessão vai para `/login`; fator verificado ainda em AAL1 vai para
   `/mfa`; sessão de recovery vai para `/redefinir-senha`.
 
-Produção e instalação limpa convergem para as mesmas 17 entradas de `app_pages`.
+Produção e instalação limpa convergem para as mesmas 18 entradas de `app_pages`.
 A migration Auth/MFA remove somente as quatro identidades excedentes encontradas
 no restore (`WF16`, `CAIXA`, `WF14` e `WF15`), preserva `user_roles` e overrides
 e recompõe somente os vínculos herdados já existentes em produção. Neste
-candidato, Tabelão e as réplicas WF14 e WF15 acrescentam a 18ª, 19ª e 20ª rotas HTTP
+candidato, Tabelão e as réplicas WF14 e WF15 acrescentam a 19ª, 20ª e 21ª rotas HTTP
 habilitadas pelo catálogo versionado, sem migration ou nova permissão de banco;
 WF16 e CAIXA formam as duas rotas HTTP bloqueadas restantes.
 
@@ -49,6 +49,7 @@ WF16 e CAIXA formam as duas rotas HTTP bloqueadas restantes.
 | `/app/configuracoes/metas`                |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/app/configuracoes/metas/parcerias`      |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/app/configuracoes/metas/pontos`         |      200 |     200 |                                    403 |                                                  403 |  redirect |
+| `/app/configuracoes/conectar-sistemas`    |      200 |     200 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao`                          |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/associativo-fluxo-linear` |      200 |     403 |                                    403 |                                                  403 |  redirect |
 | `/app/simulacao/calcular-documentacao`    |      403 |     403 |                                    403 |                                                  403 |  redirect |

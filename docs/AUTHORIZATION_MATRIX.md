@@ -17,7 +17,7 @@ Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 
 | Grupo de papéis                                                             | Páginas herdadas                                                                   | Administração                                       |
 | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `master`                                                                    | 17 do catálogo produtivo + réplica protegida WF14                                  | usuários, papéis, exceções e catálogo               |
+| `master`                                                                    | 18 do catálogo produtivo + réplica protegida WF14                                  | usuários, papéis, exceções e catálogo               |
 | `admin`                                                                     | 14: Dashboard, cinco etapas, Ranking, Configurações e três páginas administrativas | escopada; intake somente com `crm_people` confiável |
 | `coordinator`, `supervisor`, `real_estate`, `broker_lead`, `broker`, `user` | 7: Dashboard, cinco etapas e Ranking                                               | nenhuma                                             |
 | `manager`, `house`, `partnership_channel`, `pending`                        | nenhuma permissão comercial automática                                             | nenhuma                                             |
@@ -85,15 +85,15 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 
 ## Catálogo
 
-`public.app_pages` contém exatamente os 17 registros aprovados em produção:
+`public.app_pages` contém exatamente os 18 registros aprovados em produção:
 
 - dashboard, cinco etapas e ranking;
 - Canal de Parcerias protegido em `/app/canal-de-parcerias`;
-- configurações, metas do funil, parcerias e pontos;
+- configurações, metas do funil, parcerias, pontos e Conectar Sistemas;
 - hub de simulação e a jornada WF13;
 - início administrativo, usuários e catálogo de páginas.
 
-O inventário HTTP cobre 22 rotas protegidas: 17 correspondem ao catálogo
+O inventário HTTP cobre 23 rotas protegidas: 18 correspondem ao catálogo
 PostgreSQL, Tabelão e as réplicas WF14 e WF15 são rotas adicionais habilitadas
 no catálogo HTTP versionado e WF16 e CAIXA permanecem bloqueados. Essas cinco
 rotas continuam sem linha em `app_pages`; WF16 e CAIXA retornam `403` mesmo ao
@@ -248,6 +248,10 @@ filtros dimensionais. Um override `deny` continua prevalecendo; um `allow` v3
 sem grant de escopo e lineage efetivo não retorna dados.
 
 `crm_ingestion_runs` não concede acesso direto a navegador algum. O controle Salesforce só é renderizado com `crm.salesforce.refresh`; quando a capacidade está desativada ou incompleta, ele permanece desabilitado e não chama o endpoint. O status exige `crm.dashboard.view`. A ingestão usa credencial de máquina separada da sessão humana e sua função possui grant exclusivo.
+
+A guia `crm.settings.connected_systems` usa `crm.settings.manage` porque altera
+operação e governança de integração. Ela pode exibir o botão de refresh somente
+quando a permissão específica `crm.salesforce.refresh` também estiver efetiva.
 
 ## Matriz de grants da Data API
 

@@ -17,14 +17,14 @@ select is(
 
 select is(
   (select count(*) from public.app_pages),
-  17::bigint,
+  18::bigint,
   'the catalog contains exactly the approved production pages'
 );
 
 select is(
   (select count(*) from public.app_pages where is_active and is_navigation),
-  17::bigint,
-  'exactly the approved seventeen production pages are active navigation entries'
+  18::bigint,
+  'exactly the approved eighteen production pages are active navigation entries'
 );
 
 select is(
@@ -351,7 +351,7 @@ select lives_ok(
 
 select is(
   (select count(*) from public.list_app_pages_for_management()),
-  17::bigint,
+  18::bigint,
   'page manager RPC returns active and inactive catalog entries'
 );
 

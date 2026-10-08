@@ -7,7 +7,7 @@ export interface ProtectedPageGate {
   releaseEnabled: boolean;
 }
 
-// Covers the complete 22-route HTTP smoke inventory. Seventeen entries mirror
+// Covers the complete 23-route HTTP smoke inventory. Eighteen entries mirror
 // app_pages; Tabelão and WF14 are additional release-enabled replicas linked from
 // the simulator-local menu, and two future simulator routes remain disabled. The
 // database remains authoritative for global navigation and RLS; this copy lets
@@ -82,6 +82,12 @@ export const PROTECTED_PAGE_GATES = [
   {
     pageKey: "crm.settings.points",
     path: "/app/configuracoes/metas/pontos",
+    permission: "crm.settings.manage",
+    releaseEnabled: true,
+  },
+  {
+    pageKey: "crm.settings.connected_systems",
+    path: "/app/configuracoes/conectar-sistemas",
     permission: "crm.settings.manage",
     releaseEnabled: true,
   },

@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-07 — Conectar Sistemas Salesforce
+
+- Adiciona a guia **Conectar Sistemas** em Configurações, com máscara
+  operacional para Salesforce, estado seguro das capacidades de ingestão/refresh
+  e lista dos sete relatórios autorizados.
+- Registra a rota no catálogo `app_pages`, nos gates HTTP e na documentação de
+  autorização, sem expor usuário, senha, cookie, Bearer ou secret key ao
+  navegador.
+- Adiciona runner Salesforce serial de 30 minutos para exportar o candidato,
+  enviar o payload v2 ao endpoint M2M e falhar fechado quando a sessão MFA
+  expirar.
+
 ## 2026-09-24 — preparação do projeto local no Windows
 
 - Padroniza arquivos textuais em LF no Windows e limita a asserção de permissão

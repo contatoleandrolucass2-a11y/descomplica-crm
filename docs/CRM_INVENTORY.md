@@ -43,6 +43,7 @@ existe.
 | REF-10 | `/configuracoes/metas`                | Metas do funil          | `/app/configuracoes/metas`                | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
 | REF-11 | `/configuracoes/metas/parcerias`      | Metas de parcerias      | `/app/configuracoes/metas/parcerias`      | `crm.settings.manage`   | Preview e rascunho versionado; ativação inexistente     |
 | REF-12 | `/configuracoes/metas/pontos`         | Pesos e metas de pontos | `/app/configuracoes/metas/pontos`         | `crm.settings.manage`   | Preview e rascunho versionado; ranking segue bloqueado  |
+| REF-12B | `/configuracoes/conectar-sistemas`   | Conectar Sistemas       | `/app/configuracoes/conectar-sistemas`    | `crm.settings.manage`   | Máscara Salesforce e estado seguro da ingestão           |
 | REF-13 | `/simulacao`                          | Índice de simuladores   | `/app/simulacao`                          | `crm.simulators.view`   | Hub visual; WF13 canário e réplicas WF14 e WF15         |
 | REF-14 | `/simulacao/associativo-fluxo-linear` | Simulador Associativo   | `/app/simulacao/associativo-fluxo-linear` | `crm.simulators.view`   | Fórmula `wf13-1.3.0`; execução isolada Master-only      |
 | REF-15 | `/simulacao/calcular-documentacao`    | Documentação WF16       | `/app/simulacao/calcular-documentacao`    | `crm.simulators.view`   | Formulário e resultado visuais; cálculo indisponível    |
@@ -69,7 +70,7 @@ até o proprietário autorizar privatização ou purge separado do repositório.
 
 ## Catálogo versionado de páginas do sistema seguro
 
-O catálogo PostgreSQL possui exatamente 17 páginas produtivas. A consulta
+O catálogo PostgreSQL possui exatamente 18 páginas produtivas. A consulta
 `getAuthorizedNavigation` seleciona apenas entradas ativas e navegáveis e, em
 seguida, aplica a permissão efetiva do contexto autenticado.
 
@@ -87,6 +88,7 @@ seguida, aplica a permissão efetiva do contexto autenticado.
 | `crm.settings.goals`        | `/app/configuracoes/metas`                | `crm.settings`   | `crm.settings.manage`   |
 | `crm.settings.partnerships` | `/app/configuracoes/metas/parcerias`      | `crm.settings`   | `crm.settings.manage`   |
 | `crm.settings.points`       | `/app/configuracoes/metas/pontos`         | `crm.settings`   | `crm.settings.manage`   |
+| `crm.settings.connected_systems` | `/app/configuracoes/conectar-sistemas` | `crm.settings` | `crm.settings.manage` |
 | `crm.simulation`            | `/app/simulacao`                          | —                | `crm.simulators.view`   |
 | `crm.simulation.wf13`       | `/app/simulacao/associativo-fluxo-linear` | `crm.simulation` | `crm.simulators.view`   |
 | `admin.home`                | `/admin`                                  | —                | `admin.access`          |
@@ -98,7 +100,7 @@ fazem parte de `app_pages`. Elas permanecem separadas do catálogo comercial.
 
 ### Rotas shadow do read model v3
 
-O catálogo produtivo de 17 páginas e as 18 rotas oficiais acima permanecem
+O catálogo produtivo de 18 páginas e as rotas oficiais acima permanecem
 inventários distintos. Para
 QA local autenticada, o v3 acrescenta superfícies não navegáveis em
 `/app/read-model-v3`, cinco detalhes em `/app/read-model-v3/etapas/[stage]`,

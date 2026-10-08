@@ -33,6 +33,13 @@ const SETTINGS = [
     description: "Ajuste pesos e pontuações usados para orientar o ranking comercial.",
     detail: "Regras de pontuação",
   },
+  {
+    href: "/app/configuracoes/conectar-sistemas",
+    badge: "Integrações",
+    title: "Conectar Sistemas",
+    description: "Acompanhe a conexão Salesforce e o ciclo de exportação para o Supabase.",
+    detail: "Salesforce e ingestão",
+  },
 ] as const;
 
 type Setting = (typeof SETTINGS)[number];
@@ -118,7 +125,7 @@ export default async function SettingsPage() {
             title="Escolha o que deseja configurar"
             description="Cada área concentra uma parte específica do planejamento e das regras comerciais."
           />
-          <div className="grid gap-5 lg:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {SETTINGS.map((setting) =>
               canManage ? (
                 <Link

@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { chmod, rename, writeFile } from "node:fs/promises";
+import path from "node:path";
 import process from "node:process";
 
 import { chromium } from "playwright-core";
@@ -242,7 +243,7 @@ async function atomicWrite(path, value) {
 
 async function main() {
   const outputPath = process.env.SALESFORCE_CANDIDATE_OUTPUT;
-  if (!outputPath?.startsWith("/")) throw new Error("absolute output path required");
+  if (!outputPath || !path.isAbsolute(outputPath)) throw new Error("absolute output path required");
   const referenceDate = process.env.SALESFORCE_REFERENCE_DATE ?? saoPauloReferenceDate();
   const startDate = `${referenceDate.slice(0, 4)}-01-01`;
   const browser = await chromium.connectOverCDP(

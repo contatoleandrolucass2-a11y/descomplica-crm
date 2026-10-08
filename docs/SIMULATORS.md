@@ -62,7 +62,7 @@ composição. Esse comportamento é exclusivo de WF15 e não altera a Tabela Dir
 
 O hub está em `/app/simulacao`. As cinco jornadas e a consulta Tabelão exigem
 `crm.simulators.view` no guard server-side. O catálogo PostgreSQL permanece com
-17 páginas; Tabelão, WF14 e WF15 estão implementados neste candidato pelo
+18 páginas; Tabelão, WF14 e WF15 estão implementados neste candidato pelo
 catálogo HTTP versionado, sem migration. A navegação continua recebendo somente
 as páginas filtradas pelo contexto de autorização. No canário atual, essa
 permissão é exclusiva do Master e não possui override direto. O acesso à página
