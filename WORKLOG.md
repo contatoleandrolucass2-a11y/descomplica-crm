@@ -65,6 +65,10 @@
 - Site URL e redirect de recovery foram corrigidos na documentação. O template
   remoto deve permanecer em `ConfirmationURL`/PKCE; promover `TokenHash` antes
   de provar scanners/prefetch pode consumir o link de uso único.
+- A primeira CI do PR encontrou o advisory alto `GHSA-cjq9-62q9-8jv4` no
+  Next.js 16.3.6. O runtime subiu para o patch oficial 16.3.8; o
+  `eslint-config-next` 16.3.6 e seu patch de glob permanecem isolados porque não
+  fazem parte da cadeia vulnerável.
 - A migration `20260824230058_auth_mfa_legal_foundation` já está aplicada no
   projeto produtivo. Esta correção não adiciona migration nem altera grants,
   RLS ou dados. Lint, tipos, 2.248 testes Vitest, 41 testes Node, formatação e

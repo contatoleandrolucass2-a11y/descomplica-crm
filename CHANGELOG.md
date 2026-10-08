@@ -35,6 +35,9 @@
 - Corrige a documentação da Site URL, redirect de recovery e estado remoto da
   migration Auth/MFA. O template produtivo continua em `ConfirmationURL`/PKCE
   até prova contra scanners e prefetch.
+- Atualiza apenas o runtime Next.js de 16.3.6 para 16.3.8, patch oficial do
+  advisory alto de SSRF na otimização de imagens detectado pela CI; mantém o
+  `eslint-config-next` 16.3.6 e seu patch versionado.
 - Não cria migration. Lint, tipos, 2.248 testes Vitest, 41 testes Node e build
   de 44 rotas foram aprovados; DNS, SMTP, limite de envio, configuração remota
   e deploy permanecem pendentes de evidência operacional.

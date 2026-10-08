@@ -47,6 +47,9 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   `relacionamento.*`, outra chave e controles proprios. Manter
   `ConfirmationURL`/PKCE em producao ate provar o template `TokenHash` contra
   scanners/prefetch.
+- A CI revelou o advisory alto `GHSA-cjq9-62q9-8jv4` no runtime Next.js 16.3.6.
+  Subir somente `next` para o patch oficial 16.3.8 remove a cadeia vulneravel e
+  preserva o `eslint-config-next` 16.3.6 com seu patch versionado de glob.
 - A migration Auth/MFA ja esta aplicada; este incremento nao requer migration.
   Lint, tipos, 2.248 testes Vitest, 41 testes Node, formatacao e build de 44
   rotas foram aprovados apos o rebase. DNS, SMTP, `rate_limit_email_sent` e
