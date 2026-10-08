@@ -1,5 +1,17 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-08: Gates da guia Conectar Sistemas
+
+- Fonte: CI 37718756017, revisão independente Chromium/axe no HEAD 2e80626.
+- Status: pendente_validacao. Validate, restore e banco aprovados; E2E falhou
+  porque esperava o menu anterior. A matriz passa a incluir a 25a rota e
+  conserva os bloqueios dos perfis sem crm.settings.manage.
+- O refresh herdado tinha contraste 1,37:1 no claro e 1,12:1 no médio.
+  Mensagens da nova página passam a usar analytics-muted sem alterar os
+  consumidores existentes; regressão coberta para ambos os estados.
+- Publicação depende da nova CI. Integração real, MFA dedicado e primeira
+  reconciliação continuam pendentes; não houve alteração de dados remotos.
+
 ## 2026-10-08: Conectar Sistemas na base atual
 
 - Fonte: main 089daa1, integração fc34548 (PR #169), branch original bc6c0ab.

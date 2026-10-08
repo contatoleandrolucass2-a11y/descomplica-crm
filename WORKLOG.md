@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-08: Correções dos gates do PR #172
+
+- CI 37718756017 aprovou validate, restore isolado, banco e build. O E2E
+  encontrou o menu esperado sem a nova guia; matriz atualizada para 25 rotas,
+  com acesso de Master/Admin e bloqueio dos demais perfis.
+- Revisão independente confirmou contraste insuficiente nas mensagens do
+  refresh em temas claro/médio. A nova página usa o token analytics-muted;
+  demais consumidores preservam a aparência anterior. Testes cobrem mensagem
+  indisponível e região de feedback dinâmico.
+- Revalidação e publicação pendentes dos gates completos. Nenhum dado remoto
+  ou workflow n8n foi alterado.
+
 ## 2026-10-08: Conectar Sistemas preparado para PR
 
 - Portada a guia Salesforce sobre a main 089daa1, preservando a integração do

@@ -61,6 +61,7 @@ describe("connected systems", () => {
     expect(markup).toContain("Configuração incompleta");
     expect(markup).toContain("disabled");
     expect(markup).toContain("Atualização indisponível");
+    expect(markup).toContain('class="max-w-xs text-xs text-[var(--analytics-muted)]"');
   });
 
   it("allows the existing refresh control only with permission and complete configuration", async () => {
@@ -68,6 +69,9 @@ describe("connected systems", () => {
     mocks.refresh.mockReturnValue({ enabled: true, available: true });
     const markup = renderToStaticMarkup(await ConnectedSystemsPage());
     expect(markup).toContain("Atualizar Salesforce");
+    expect(markup).toContain(
+      'aria-live="polite" class="max-w-xs text-xs text-[var(--analytics-muted)]"',
+    );
     expect(mocks.permission).toHaveBeenCalledWith({}, "crm.salesforce.refresh");
   });
 });

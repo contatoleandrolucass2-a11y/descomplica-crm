@@ -2,6 +2,9 @@
 
 ## 2026-10-08
 
+- Corrigido o contraste das mensagens Salesforce na nova guia e ampliada a
+  matriz E2E para verificar sua navegação e autorização nos oito perfis.
+
 - Adicionada a guia Conectar Sistemas em Configurações, com acesso Salesforce,
   relatórios previstos, configuração de ingestão e controle autorizado de refresh.
 - Integrada ao menu e aos gates atuais sem migration; preservada a agenda e o

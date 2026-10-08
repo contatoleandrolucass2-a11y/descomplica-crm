@@ -94,7 +94,10 @@ export default async function ConnectedSystemsPage() {
             carga deve ser conferida antes de ativar a atualização contínua.
           </p>
           {hasPermission(context, "crm.salesforce.refresh") ? (
-            <SalesforceRefreshButton available={refresh.available} />
+            <SalesforceRefreshButton
+              available={refresh.available}
+              messageClassName="text-[var(--analytics-muted)]"
+            />
           ) : (
             <p className="text-sm text-[var(--analytics-muted)]">
               Seu perfil não pode solicitar atualização.
