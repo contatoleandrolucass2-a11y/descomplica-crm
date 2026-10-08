@@ -1,5 +1,56 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-08: Conectar Sistemas validado para revisão final
+
+- Fonte: CI 37720363346, artefato 11526388631 e captura limpa f3a209d,
+  com árvore idêntica a 4a21e26. Status: validado funcionalmente; CI final das
+  referências revisadas e publicação pendentes no PR #172.
+- Validate, restore com 1.104 pgTAP antes/depois e E2E dos oito perfis passaram.
+  Matriz visual: 154 checks responsivos, 88 de tema, 242 Axe/comparações,
+  110 de zoom e nove cenários próprios da guia sem overflow ou violações.
+- Onze diferenças intencionais de Configurações foram inspecionadas e
+  promovidas pelo helper transacional original. Outras 231 imagens e limites
+  1%/16 preservados, com proveniência registrada em reviewedUpdates.
+- Testes locais finais: lint/tipos/build e 66 testes focados aprovados;
+  2.247 testes Windows aprovados, seis falhas POSIX preexistentes e nove skips.
+  Os mesmos gates de teste passaram no Linux da CI.
+- Não há nova migration em relação à produção aad1536. Resultado de merge,
+  imagem aprovada, backup e health ficará no PR #172. Autonomia Salesforce
+  continua dependente de MFA dedicado, n8n e primeira carga reconciliada.
+
+## 2026-10-08: Gates da guia Conectar Sistemas
+
+- Fonte: CI 37718756017, revisão independente Chromium/axe no HEAD 2e80626.
+- Status: pendente_validacao. Validate, restore e banco aprovados; E2E falhou
+  porque esperava o menu anterior. A matriz passa a incluir a 25a rota e
+  conserva os bloqueios dos perfis sem crm.settings.manage.
+- O refresh herdado tinha contraste 1,37:1 no claro e 1,12:1 no médio.
+  Mensagens da nova página passam a usar analytics-muted sem alterar os
+  consumidores existentes; regressão coberta para ambos os estados.
+- Publicação depende da nova CI. Integração real, MFA dedicado e primeira
+  reconciliação continuam pendentes; não houve alteração de dados remotos.
+
+## 2026-10-08: Conectar Sistemas na base atual
+
+- Fonte: main 089daa1, integração fc34548 (PR #169), branch original bc6c0ab.
+- Status: PR #172 aberto; gates completos e operação remota pendentes.
+- A branch original continha oito commits Windows anteriores à entrega; o PR
+  usa branch nova baseada na main e mantém coletor/publisher/agenda do PR #169.
+- Guia suplementar sob Configurações, conforme Recurso MKT, com
+  crm.settings.manage no servidor/Proxy e crm.salesforce.refresh para a ação.
+  Catálogo PostgreSQL permanece com 17 páginas e sem migration adicional.
+- Estado configurado não comprova sessão MFA nem sincronização ativa.
+- Evidências: lint, tipos e build aprovados; 60 testes focados aprovados. Suíte
+  Windows com 2.242 aprovados, 11 falhos e nove skips, incluindo um contrato
+  da nova rota já corrigido e revalidado. Demais falhas: seis POSIX e quatro
+  timeouts em arquivos intactos da main. Reexecução dos timeouts com dois
+  workers: 61 aprovados e um skip. Node Salesforce: oito falhas locais.
+- CI Linux 37718470536/job validate passou no SHA 38946ef, incluindo testes,
+  auditoria e build. Banco, restore e harness autenticado permanecem pendentes; nenhum baseline
+  histórico foi sobrescrito para aprovar a nova tela.
+- Operação real ainda exige integração remota, sessão dedicada aprovada e
+  reconciliação da primeira carga. Nenhum dado remoto foi modificado nesta etapa.
+
 Registrar uma entrada curta por resultado tecnico relevante. Usar data real,
 fonte, status (rascunho, pendente_validacao, validado ou arquivado), evidencias
 e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.

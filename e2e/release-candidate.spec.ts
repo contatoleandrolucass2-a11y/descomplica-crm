@@ -384,6 +384,11 @@ const protectedSurfaces = [
     allowed: adminRoles,
   },
   {
+    path: "/app/configuracoes/conectar-sistemas",
+    heading: "Conectar Sistemas",
+    allowed: adminRoles,
+  },
+  {
     path: "/app/configuracoes/recurso-mkt",
     heading: "Recurso MKT",
     allowed: adminRoles,
@@ -456,6 +461,7 @@ const operationalRoutes = [
 ] as const;
 const settingsRoutes = [
   "/app/configuracoes",
+  "/app/configuracoes/conectar-sistemas",
   "/app/configuracoes/recurso-mkt",
   "/app/configuracoes/metas",
   "/app/configuracoes/metas/parcerias",
@@ -684,11 +690,11 @@ test.afterAll(() => {
 });
 
 test("the hosted profile matrix uses the exact approved commercial page sets", () => {
-  expect(protectedSurfaces).toHaveLength(24);
+  expect(protectedSurfaces).toHaveLength(25);
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      role === "master" ? 21 : role === "admin" ? 13 : activeOperationalRoles.has(role) ? 7 : 0,
+      role === "master" ? 22 : role === "admin" ? 14 : activeOperationalRoles.has(role) ? 7 : 0,
     );
     expect(expectedAccountAdminRoutesByRole[role], role).toHaveLength(adminRoles.has(role) ? 3 : 0);
   }

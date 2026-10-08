@@ -1,5 +1,56 @@
 # Worklog
 
+## 2026-10-08: Validação visual de Conectar Sistemas
+
+- CI 37720363346 aprovou validate, restore (1.104 pgTAP antes/depois), E2E
+  dos oito perfis e todos os critérios funcionais do QA visual. Restaram somente
+  onze diferenças intencionais da nova entrada em Configurações.
+- Artefato 11526388631 e captura limpa f3a209d, com árvore igual a 4a21e26:
+  154 checks responsivos, 88 de tema, 242 Axe/comparações e 110 de zoom.
+  Nove cenários específicos da nova guia sem overflow ou violações Axe.
+- Inspeção das imagens e promoção transacional das onze referências; 231
+  imagens e limiares 1%/16 preservados. Verificação final da CI ainda exigida.
+- Reexecução local: lint, tipos e build aprovados; 66 testes focados aprovados.
+  Suíte Windows: 2.247 aprovados, seis falhas POSIX em arquivos intactos e nove
+  skips. A suíte Linux da CI passou, sem relaxar os testes POSIX.
+- Comparação com produção aad1536 confirmou ausência de novas migrations.
+  Publicação usa imagem imutável da CI, backup, CAS/lock e rollback, sem rebuild
+  na VPS. Evidência final de versão e health será registrada no PR #172.
+- Primeira carga Salesforce, MFA dedicado e ativação da agenda continuam
+  pendentes; nenhum workflow n8n ou dado remoto foi alterado.
+
+## 2026-10-08: Correções dos gates do PR #172
+
+- CI 37718756017 aprovou validate, restore isolado, banco e build. O E2E
+  encontrou o menu esperado sem a nova guia; matriz atualizada para 25 rotas,
+  com acesso de Master/Admin e bloqueio dos demais perfis.
+- Revisão independente confirmou contraste insuficiente nas mensagens do
+  refresh em temas claro/médio. A nova página usa o token analytics-muted;
+  demais consumidores preservam a aparência anterior. Testes cobrem mensagem
+  indisponível e região de feedback dinâmico.
+- Revalidação e publicação pendentes dos gates completos. Nenhum dado remoto
+  ou workflow n8n foi alterado.
+
+## 2026-10-08: Conectar Sistemas preparado para PR
+
+- Portada a guia Salesforce sobre a main 089daa1, preservando a integração do
+  PR #169 e excluindo os commits antigos de bootstrap Windows.
+- Menu Configurações e rota protegidos por crm.settings.manage; refresh mantém
+  crm.salesforce.refresh. Navegação suplementar segue Recurso MKT, sem migration.
+- Estados da tela identificam configuração, não sessão ou agenda comprovadas.
+- Lint, tipos e build aprovados; 60 testes focados em seis arquivos aprovados.
+- Suíte integral Windows: 2.242 aprovados, 11 falhos e nove skips. O contrato
+  visual da nova rota foi corrigido e revalidado nos testes focados; restaram
+  seis falhas POSIX e quatro timeouts em arquivos intactos da main. Os timeouts
+  não repetiram com dois workers: 61 aprovados e um skip em três arquivos. A suite
+  Node Salesforce também registrou oito falhas de arquivos/permissões/execução
+  no Windows; o código do coletor permanece idêntico ao PR #169.
+- PR #172 aberto como rascunho. CI Linux 37718470536 aprovou o job validate
+  no SHA 38946ef: formato, lint, tipos, testes, audit, compressão e build.
+  Banco, restore e navegador ainda pendentes. Matriz autenticada ganhou
+  nove capturas previstas (três larguras, três temas), overflow e axe.
+- Primeira coleta, validação autenticada e ativação remota permanecem pendentes.
+
 ## 2026-10-07 - Teste portátil do Chrome dedicado
 
 - O teste de descoberta do executável passou a controlar a inspeção de arquivos,

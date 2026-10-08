@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-08
+
+- Validados acesso nos oito perfis e nove cenários de Conectar Sistemas;
+  revisadas onze referências de Configurações, preservando as outras 231.
+
+- Corrigido o contraste das mensagens Salesforce na nova guia e ampliada a
+  matriz E2E para verificar sua navegação e autorização nos oito perfis.
+
+- Adicionada a guia Conectar Sistemas em Configurações, com acesso Salesforce,
+  relatórios previstos, configuração de ingestão e controle autorizado de refresh.
+- Integrada ao menu e aos gates atuais sem migration; preservada a agenda e o
+  publisher Salesforce do PR #169, com ativação operacional ainda pendente.
+- Evidências do PR #172 registradas: validação principal Linux aprovada e
+  verificações de banco, restore e navegador ainda pendentes.
+
 - Corrige a validação portátil do launcher Salesforce: o teste de ausência do
   Chrome agora injeta a inspeção do executável e não depende dos programas
   instalados no runner da CI.

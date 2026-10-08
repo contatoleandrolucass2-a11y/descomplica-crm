@@ -24,14 +24,19 @@ describe("approved canvas parity contract", () => {
     const releasedPaths = PROTECTED_PAGE_GATES.filter(({ releaseEnabled }) => releaseEnabled).map(
       ({ path }) => path,
     );
-    const canvasPaths = releasedPaths.filter((path) => path !== "/app/repasse");
+    const canvasPaths = releasedPaths.filter(
+      (path) => !["/app/repasse", "/app/configuracoes/conectar-sistemas"].includes(path),
+    );
     const repasseReadme = readFileSync(new URL("../repasse/README.md", root), "utf8");
+    const systemsReadme = readFileSync(new URL("../connected-systems/README.md", root), "utf8");
 
-    expect(releasedPaths).toHaveLength(24);
+    expect(releasedPaths).toHaveLength(25);
     expect(canvasPaths).toHaveLength(23);
     for (const path of canvasPaths) expect(readme).toContain(`\`${path}\``);
     expect(repasseReadme).toContain("`/app/repasse`");
     expect(repasseReadme).toContain("Claro, Médio e Escuro");
+    expect(systemsReadme).toContain("`/app/configuracoes/conectar-sistemas`");
+    expect(systemsReadme).toContain("Claro, Médio e Escuro");
     expect(readme).toContain("Existe uma única navbar global");
     expect(readme).toContain("crm.simulators.view");
     expect(readme).toContain("motor, endpoint de cálculo, submissão e aprovação");

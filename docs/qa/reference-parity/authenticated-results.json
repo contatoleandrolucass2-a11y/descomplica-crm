@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "capturedAt": "2026-10-07T00:40:07.964Z",
-  "captureCommit": "2fbb35b182fd34c24ddf6baaa8d6907f3482003e",
+  "capturedAt": "2026-10-08T03:26:02.417Z",
+  "captureCommit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
   "worktreeDirtyAtCapture": false,
   "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
   "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
@@ -3420,7 +3420,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1603,
+      "pageScrollHeight": 1873,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4050,7 +4050,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2213,
+      "pageScrollHeight": 2157,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4095,7 +4095,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1729,
+      "pageScrollHeight": 1673,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4140,7 +4140,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2500,
+      "pageScrollHeight": 2444,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4185,7 +4185,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2500,
+      "pageScrollHeight": 2444,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4230,7 +4230,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2096,
+      "pageScrollHeight": 2040,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4275,7 +4275,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2096,
+      "pageScrollHeight": 2040,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4320,7 +4320,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2620,
+      "pageScrollHeight": 2564,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4365,7 +4365,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3135,
+      "pageScrollHeight": 3079,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4410,7 +4410,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1796,
+      "pageScrollHeight": 2010,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4455,7 +4455,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3298,
+      "pageScrollHeight": 3242,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4500,7 +4500,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2928,
+      "pageScrollHeight": 2872,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4545,7 +4545,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1643,
+      "pageScrollHeight": 1587,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4590,7 +4590,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1453,
+      "pageScrollHeight": 1397,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4635,7 +4635,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1327,
+      "pageScrollHeight": 1271,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4680,7 +4680,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1851,
+      "pageScrollHeight": 1795,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4725,7 +4725,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2043,
+      "pageScrollHeight": 1987,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4770,7 +4770,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1478,
+      "pageScrollHeight": 1422,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4815,7 +4815,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1554,
+      "pageScrollHeight": 1498,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4860,7 +4860,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1633,
+      "pageScrollHeight": 1577,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4905,7 +4905,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 940,
+      "pageScrollHeight": 884,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4950,7 +4950,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 5216,
+      "pageScrollHeight": 5160,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4995,7 +4995,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3187,
+      "pageScrollHeight": 3131,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5040,7 +5040,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2213,
+      "pageScrollHeight": 2157,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5085,7 +5085,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1729,
+      "pageScrollHeight": 1673,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5130,7 +5130,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2500,
+      "pageScrollHeight": 2444,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5175,7 +5175,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2500,
+      "pageScrollHeight": 2444,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5220,7 +5220,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2096,
+      "pageScrollHeight": 2040,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5265,7 +5265,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2096,
+      "pageScrollHeight": 2040,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5310,7 +5310,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2620,
+      "pageScrollHeight": 2564,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5355,7 +5355,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3264,
+      "pageScrollHeight": 3208,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5400,7 +5400,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1796,
+      "pageScrollHeight": 2010,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5445,7 +5445,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3338,
+      "pageScrollHeight": 3282,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5490,7 +5490,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2967,
+      "pageScrollHeight": 2911,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5531,321 +5531,6 @@
       "expectedSimulatorState": "not-applicable",
       "simulatorStatePassed": true,
       "pathname": "/app/configuracoes/metas/pontos",
-      "h1Count": 1,
-      "mainCount": 1,
-      "theme": "light",
-      "horizontalOverflow": false,
-      "pageScrollHeight": 1667,
-      "canvasDensityReady": true,
-      "hasBrokenValue": false,
-      "protectedShellPresent": true,
-      "loginPresent": false,
-      "reducedMotion": true,
-      "topbarCollision": false,
-      "topbarCollisionPairs": [],
-      "navigationGeometryReady": true,
-      "accountMenuReady": true,
-      "themeControlsVisible": true,
-      "associativeStockControlsPresent": true,
-      "associativeStockCollision": false,
-      "associativeStockTouchTargetReady": true,
-      "associativeClosingAligned": true,
-      "simulatorActionEnabled": false,
-      "simulatorFormActionPresent": false,
-      "blockedCalculationMessagePresent": true,
-      "blockedActionDistinct": true,
-      "unavailableActionDistinct": true,
-      "identityDisplayContract": "compact-account-avatar-v2",
-      "identityNameMatches": true,
-      "identityCompact": true,
-      "identityAvatarVisible": true,
-      "identityAccessibleNameMatches": true,
-      "identityDisplayReady": true,
-      "consoleErrorCount": 0,
-      "pageErrorCount": 0,
-      "passed": true
-    },
-    {
-      "viewport": "mobile-375x812",
-      "route": "/app/simulacao",
-      "approvedCanvas": {
-        "asset": "hub-simulacao-associativo.webp",
-        "region": "left"
-      },
-      "status": 200,
-      "expectedSimulatorState": "not-applicable",
-      "simulatorStatePassed": true,
-      "pathname": "/app/simulacao",
-      "h1Count": 1,
-      "mainCount": 1,
-      "theme": "light",
-      "horizontalOverflow": false,
-      "pageScrollHeight": 1488,
-      "canvasDensityReady": true,
-      "hasBrokenValue": false,
-      "protectedShellPresent": true,
-      "loginPresent": false,
-      "reducedMotion": true,
-      "topbarCollision": false,
-      "topbarCollisionPairs": [],
-      "navigationGeometryReady": true,
-      "accountMenuReady": true,
-      "themeControlsVisible": true,
-      "associativeStockControlsPresent": true,
-      "associativeStockCollision": false,
-      "associativeStockTouchTargetReady": true,
-      "associativeClosingAligned": true,
-      "simulatorActionEnabled": false,
-      "simulatorFormActionPresent": false,
-      "blockedCalculationMessagePresent": true,
-      "blockedActionDistinct": true,
-      "unavailableActionDistinct": true,
-      "identityDisplayContract": "compact-account-avatar-v2",
-      "identityNameMatches": true,
-      "identityCompact": true,
-      "identityAvatarVisible": true,
-      "identityAccessibleNameMatches": true,
-      "identityDisplayReady": true,
-      "consoleErrorCount": 0,
-      "pageErrorCount": 0,
-      "passed": true
-    },
-    {
-      "viewport": "mobile-375x812",
-      "route": "/app/simulacao/associativo-fluxo-linear",
-      "approvedCanvas": {
-        "asset": "hub-simulacao-associativo.webp",
-        "region": "right"
-      },
-      "status": 200,
-      "expectedSimulatorState": "not-applicable",
-      "simulatorStatePassed": true,
-      "pathname": "/app/simulacao/associativo-fluxo-linear",
-      "h1Count": 1,
-      "mainCount": 1,
-      "theme": "light",
-      "horizontalOverflow": false,
-      "pageScrollHeight": 1344,
-      "canvasDensityReady": true,
-      "hasBrokenValue": false,
-      "protectedShellPresent": true,
-      "loginPresent": false,
-      "reducedMotion": true,
-      "topbarCollision": false,
-      "topbarCollisionPairs": [],
-      "navigationGeometryReady": true,
-      "accountMenuReady": true,
-      "themeControlsVisible": true,
-      "associativeStockControlsPresent": true,
-      "associativeStockCollision": false,
-      "associativeStockTouchTargetReady": true,
-      "associativeClosingAligned": true,
-      "simulatorActionEnabled": false,
-      "simulatorFormActionPresent": false,
-      "blockedCalculationMessagePresent": true,
-      "blockedActionDistinct": true,
-      "unavailableActionDistinct": true,
-      "identityDisplayContract": "compact-account-avatar-v2",
-      "identityNameMatches": true,
-      "identityCompact": true,
-      "identityAvatarVisible": true,
-      "identityAccessibleNameMatches": true,
-      "identityDisplayReady": true,
-      "consoleErrorCount": 0,
-      "pageErrorCount": 0,
-      "passed": true
-    },
-    {
-      "viewport": "mobile-375x812",
-      "route": "/app/simulacao/calcular-documentacao",
-      "approvedCanvas": {
-        "asset": "documentacao-caixa.webp",
-        "region": "left"
-      },
-      "status": 200,
-      "expectedSimulatorState": "not-applicable",
-      "simulatorStatePassed": true,
-      "pathname": "/app/simulacao/calcular-documentacao",
-      "h1Count": 1,
-      "mainCount": 1,
-      "theme": "light",
-      "horizontalOverflow": false,
-      "pageScrollHeight": 1884,
-      "canvasDensityReady": true,
-      "hasBrokenValue": false,
-      "protectedShellPresent": true,
-      "loginPresent": false,
-      "reducedMotion": true,
-      "topbarCollision": false,
-      "topbarCollisionPairs": [],
-      "navigationGeometryReady": true,
-      "accountMenuReady": true,
-      "themeControlsVisible": true,
-      "associativeStockControlsPresent": true,
-      "associativeStockCollision": false,
-      "associativeStockTouchTargetReady": true,
-      "associativeClosingAligned": true,
-      "simulatorActionEnabled": false,
-      "simulatorFormActionPresent": false,
-      "blockedCalculationMessagePresent": true,
-      "blockedActionDistinct": true,
-      "unavailableActionDistinct": true,
-      "identityDisplayContract": "compact-account-avatar-v2",
-      "identityNameMatches": true,
-      "identityCompact": true,
-      "identityAvatarVisible": true,
-      "identityAccessibleNameMatches": true,
-      "identityDisplayReady": true,
-      "consoleErrorCount": 0,
-      "pageErrorCount": 0,
-      "passed": true
-    },
-    {
-      "viewport": "mobile-375x812",
-      "route": "/app/simulacao/caixa",
-      "approvedCanvas": {
-        "asset": "documentacao-caixa.webp",
-        "region": "right"
-      },
-      "status": 200,
-      "expectedSimulatorState": "blocked",
-      "simulatorStatePassed": true,
-      "pathname": "/app/simulacao/caixa",
-      "h1Count": 1,
-      "mainCount": 1,
-      "theme": "light",
-      "horizontalOverflow": false,
-      "pageScrollHeight": 2062,
-      "canvasDensityReady": true,
-      "hasBrokenValue": false,
-      "protectedShellPresent": true,
-      "loginPresent": false,
-      "reducedMotion": true,
-      "topbarCollision": false,
-      "topbarCollisionPairs": [],
-      "navigationGeometryReady": true,
-      "accountMenuReady": true,
-      "themeControlsVisible": true,
-      "associativeStockControlsPresent": true,
-      "associativeStockCollision": false,
-      "associativeStockTouchTargetReady": true,
-      "associativeClosingAligned": true,
-      "simulatorActionEnabled": false,
-      "simulatorFormActionPresent": false,
-      "blockedCalculationMessagePresent": true,
-      "blockedActionDistinct": true,
-      "unavailableActionDistinct": true,
-      "identityDisplayContract": "compact-account-avatar-v2",
-      "identityNameMatches": true,
-      "identityCompact": true,
-      "identityAvatarVisible": true,
-      "identityAccessibleNameMatches": true,
-      "identityDisplayReady": true,
-      "consoleErrorCount": 0,
-      "pageErrorCount": 0,
-      "passed": true
-    },
-    {
-      "viewport": "mobile-375x812",
-      "route": "/app/simulacao/tabela-direta",
-      "approvedCanvas": {
-        "asset": "tabela-direta-investidor.webp",
-        "region": "left"
-      },
-      "status": 200,
-      "expectedSimulatorState": "not-applicable",
-      "simulatorStatePassed": true,
-      "pathname": "/app/simulacao/tabela-direta",
-      "h1Count": 1,
-      "mainCount": 1,
-      "theme": "light",
-      "horizontalOverflow": false,
-      "pageScrollHeight": 1456,
-      "canvasDensityReady": true,
-      "hasBrokenValue": false,
-      "protectedShellPresent": true,
-      "loginPresent": false,
-      "reducedMotion": true,
-      "topbarCollision": false,
-      "topbarCollisionPairs": [],
-      "navigationGeometryReady": true,
-      "accountMenuReady": true,
-      "themeControlsVisible": true,
-      "associativeStockControlsPresent": true,
-      "associativeStockCollision": false,
-      "associativeStockTouchTargetReady": true,
-      "associativeClosingAligned": true,
-      "simulatorActionEnabled": false,
-      "simulatorFormActionPresent": false,
-      "blockedCalculationMessagePresent": true,
-      "blockedActionDistinct": true,
-      "unavailableActionDistinct": true,
-      "identityDisplayContract": "compact-account-avatar-v2",
-      "identityNameMatches": true,
-      "identityCompact": true,
-      "identityAvatarVisible": true,
-      "identityAccessibleNameMatches": true,
-      "identityDisplayReady": true,
-      "consoleErrorCount": 0,
-      "pageErrorCount": 0,
-      "passed": true
-    },
-    {
-      "viewport": "mobile-375x812",
-      "route": "/app/simulacao/tabelao",
-      "approvedCanvas": {
-        "asset": "tabelao-administracao.webp",
-        "region": "left"
-      },
-      "status": 200,
-      "expectedSimulatorState": "not-applicable",
-      "simulatorStatePassed": true,
-      "pathname": "/app/simulacao/tabelao",
-      "h1Count": 1,
-      "mainCount": 1,
-      "theme": "light",
-      "horizontalOverflow": false,
-      "pageScrollHeight": 1568,
-      "canvasDensityReady": true,
-      "hasBrokenValue": false,
-      "protectedShellPresent": true,
-      "loginPresent": false,
-      "reducedMotion": true,
-      "topbarCollision": false,
-      "topbarCollisionPairs": [],
-      "navigationGeometryReady": true,
-      "accountMenuReady": true,
-      "themeControlsVisible": true,
-      "associativeStockControlsPresent": true,
-      "associativeStockCollision": false,
-      "associativeStockTouchTargetReady": true,
-      "associativeClosingAligned": true,
-      "simulatorActionEnabled": false,
-      "simulatorFormActionPresent": false,
-      "blockedCalculationMessagePresent": true,
-      "blockedActionDistinct": true,
-      "unavailableActionDistinct": true,
-      "identityDisplayContract": "compact-account-avatar-v2",
-      "identityNameMatches": true,
-      "identityCompact": true,
-      "identityAvatarVisible": true,
-      "identityAccessibleNameMatches": true,
-      "identityDisplayReady": true,
-      "consoleErrorCount": 0,
-      "pageErrorCount": 0,
-      "passed": true
-    },
-    {
-      "viewport": "mobile-375x812",
-      "route": "/app/simulacao/tabela-investidor",
-      "approvedCanvas": {
-        "asset": "tabela-direta-investidor.webp",
-        "region": "right"
-      },
-      "status": 200,
-      "expectedSimulatorState": "not-applicable",
-      "simulatorStatePassed": true,
-      "pathname": "/app/simulacao/tabela-investidor",
       "h1Count": 1,
       "mainCount": 1,
       "theme": "light",
@@ -5882,6 +5567,321 @@
     },
     {
       "viewport": "mobile-375x812",
+      "route": "/app/simulacao",
+      "approvedCanvas": {
+        "asset": "hub-simulacao-associativo.webp",
+        "region": "left"
+      },
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "pageScrollHeight": 1432,
+      "canvasDensityReady": true,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "navigationGeometryReady": true,
+      "accountMenuReady": true,
+      "themeControlsVisible": true,
+      "associativeStockControlsPresent": true,
+      "associativeStockCollision": false,
+      "associativeStockTouchTargetReady": true,
+      "associativeClosingAligned": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "identityDisplayContract": "compact-account-avatar-v2",
+      "identityNameMatches": true,
+      "identityCompact": true,
+      "identityAvatarVisible": true,
+      "identityAccessibleNameMatches": true,
+      "identityDisplayReady": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-375x812",
+      "route": "/app/simulacao/associativo-fluxo-linear",
+      "approvedCanvas": {
+        "asset": "hub-simulacao-associativo.webp",
+        "region": "right"
+      },
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/associativo-fluxo-linear",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "pageScrollHeight": 1288,
+      "canvasDensityReady": true,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "navigationGeometryReady": true,
+      "accountMenuReady": true,
+      "themeControlsVisible": true,
+      "associativeStockControlsPresent": true,
+      "associativeStockCollision": false,
+      "associativeStockTouchTargetReady": true,
+      "associativeClosingAligned": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "identityDisplayContract": "compact-account-avatar-v2",
+      "identityNameMatches": true,
+      "identityCompact": true,
+      "identityAvatarVisible": true,
+      "identityAccessibleNameMatches": true,
+      "identityDisplayReady": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-375x812",
+      "route": "/app/simulacao/calcular-documentacao",
+      "approvedCanvas": {
+        "asset": "documentacao-caixa.webp",
+        "region": "left"
+      },
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/calcular-documentacao",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "pageScrollHeight": 1828,
+      "canvasDensityReady": true,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "navigationGeometryReady": true,
+      "accountMenuReady": true,
+      "themeControlsVisible": true,
+      "associativeStockControlsPresent": true,
+      "associativeStockCollision": false,
+      "associativeStockTouchTargetReady": true,
+      "associativeClosingAligned": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "identityDisplayContract": "compact-account-avatar-v2",
+      "identityNameMatches": true,
+      "identityCompact": true,
+      "identityAvatarVisible": true,
+      "identityAccessibleNameMatches": true,
+      "identityDisplayReady": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-375x812",
+      "route": "/app/simulacao/caixa",
+      "approvedCanvas": {
+        "asset": "documentacao-caixa.webp",
+        "region": "right"
+      },
+      "status": 200,
+      "expectedSimulatorState": "blocked",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/caixa",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "pageScrollHeight": 2006,
+      "canvasDensityReady": true,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "navigationGeometryReady": true,
+      "accountMenuReady": true,
+      "themeControlsVisible": true,
+      "associativeStockControlsPresent": true,
+      "associativeStockCollision": false,
+      "associativeStockTouchTargetReady": true,
+      "associativeClosingAligned": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "identityDisplayContract": "compact-account-avatar-v2",
+      "identityNameMatches": true,
+      "identityCompact": true,
+      "identityAvatarVisible": true,
+      "identityAccessibleNameMatches": true,
+      "identityDisplayReady": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-375x812",
+      "route": "/app/simulacao/tabela-direta",
+      "approvedCanvas": {
+        "asset": "tabela-direta-investidor.webp",
+        "region": "left"
+      },
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-direta",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "pageScrollHeight": 1400,
+      "canvasDensityReady": true,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "navigationGeometryReady": true,
+      "accountMenuReady": true,
+      "themeControlsVisible": true,
+      "associativeStockControlsPresent": true,
+      "associativeStockCollision": false,
+      "associativeStockTouchTargetReady": true,
+      "associativeClosingAligned": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "identityDisplayContract": "compact-account-avatar-v2",
+      "identityNameMatches": true,
+      "identityCompact": true,
+      "identityAvatarVisible": true,
+      "identityAccessibleNameMatches": true,
+      "identityDisplayReady": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-375x812",
+      "route": "/app/simulacao/tabelao",
+      "approvedCanvas": {
+        "asset": "tabelao-administracao.webp",
+        "region": "left"
+      },
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabelao",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "pageScrollHeight": 1512,
+      "canvasDensityReady": true,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "navigationGeometryReady": true,
+      "accountMenuReady": true,
+      "themeControlsVisible": true,
+      "associativeStockControlsPresent": true,
+      "associativeStockCollision": false,
+      "associativeStockTouchTargetReady": true,
+      "associativeClosingAligned": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "identityDisplayContract": "compact-account-avatar-v2",
+      "identityNameMatches": true,
+      "identityCompact": true,
+      "identityAvatarVisible": true,
+      "identityAccessibleNameMatches": true,
+      "identityDisplayReady": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-375x812",
+      "route": "/app/simulacao/tabela-investidor",
+      "approvedCanvas": {
+        "asset": "tabela-direta-investidor.webp",
+        "region": "right"
+      },
+      "status": 200,
+      "expectedSimulatorState": "not-applicable",
+      "simulatorStatePassed": true,
+      "pathname": "/app/simulacao/tabela-investidor",
+      "h1Count": 1,
+      "mainCount": 1,
+      "theme": "light",
+      "horizontalOverflow": false,
+      "pageScrollHeight": 1555,
+      "canvasDensityReady": true,
+      "hasBrokenValue": false,
+      "protectedShellPresent": true,
+      "loginPresent": false,
+      "reducedMotion": true,
+      "topbarCollision": false,
+      "topbarCollisionPairs": [],
+      "navigationGeometryReady": true,
+      "accountMenuReady": true,
+      "themeControlsVisible": true,
+      "associativeStockControlsPresent": true,
+      "associativeStockCollision": false,
+      "associativeStockTouchTargetReady": true,
+      "associativeClosingAligned": true,
+      "simulatorActionEnabled": false,
+      "simulatorFormActionPresent": false,
+      "blockedCalculationMessagePresent": true,
+      "blockedActionDistinct": true,
+      "unavailableActionDistinct": true,
+      "identityDisplayContract": "compact-account-avatar-v2",
+      "identityNameMatches": true,
+      "identityCompact": true,
+      "identityAvatarVisible": true,
+      "identityAccessibleNameMatches": true,
+      "identityDisplayReady": true,
+      "consoleErrorCount": 0,
+      "pageErrorCount": 0,
+      "passed": true
+    },
+    {
+      "viewport": "mobile-375x812",
       "route": "/admin",
       "approvedCanvas": {
         "asset": "tabelao-administracao.webp",
@@ -5895,7 +5895,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 908,
+      "pageScrollHeight": 852,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5940,7 +5940,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 5337,
+      "pageScrollHeight": 5281,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5985,7 +5985,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3237,
+      "pageScrollHeight": 3181,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6030,7 +6030,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2339,
+      "pageScrollHeight": 2283,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6075,7 +6075,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1829,
+      "pageScrollHeight": 1773,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6120,7 +6120,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2615,
+      "pageScrollHeight": 2559,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6165,7 +6165,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2615,
+      "pageScrollHeight": 2559,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6210,7 +6210,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2218,
+      "pageScrollHeight": 2162,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6255,7 +6255,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2218,
+      "pageScrollHeight": 2162,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6300,7 +6300,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2687,
+      "pageScrollHeight": 2631,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6345,7 +6345,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3305,
+      "pageScrollHeight": 3249,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6390,7 +6390,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1921,
+      "pageScrollHeight": 2135,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6435,7 +6435,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3473,
+      "pageScrollHeight": 3417,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6480,7 +6480,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3103,
+      "pageScrollHeight": 3047,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6525,7 +6525,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1710,
+      "pageScrollHeight": 1654,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6570,7 +6570,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1603,
+      "pageScrollHeight": 1547,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6615,7 +6615,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1360,
+      "pageScrollHeight": 1304,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6660,7 +6660,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2034,
+      "pageScrollHeight": 1978,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6705,7 +6705,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2098,
+      "pageScrollHeight": 2042,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6750,7 +6750,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1314,
+      "pageScrollHeight": 1258,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6795,7 +6795,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1568,
+      "pageScrollHeight": 1512,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6840,7 +6840,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1440,
+      "pageScrollHeight": 1384,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6885,7 +6885,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 664,
+      "pageScrollHeight": 608,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6930,7 +6930,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 5596,
+      "pageScrollHeight": 5540,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6975,7 +6975,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 3396,
+      "pageScrollHeight": 3340,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10059,7 +10059,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2213,
+      "pageScrollHeight": 2157,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10105,7 +10105,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1729,
+      "pageScrollHeight": 1673,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10151,7 +10151,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2500,
+      "pageScrollHeight": 2444,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10197,7 +10197,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2500,
+      "pageScrollHeight": 2444,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10243,7 +10243,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2096,
+      "pageScrollHeight": 2040,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10289,7 +10289,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2096,
+      "pageScrollHeight": 2040,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10335,7 +10335,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2620,
+      "pageScrollHeight": 2564,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10381,7 +10381,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 3135,
+      "pageScrollHeight": 3079,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10427,7 +10427,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1796,
+      "pageScrollHeight": 2010,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10473,7 +10473,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 3298,
+      "pageScrollHeight": 3242,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10519,7 +10519,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2928,
+      "pageScrollHeight": 2872,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10565,7 +10565,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1643,
+      "pageScrollHeight": 1587,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10611,7 +10611,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1453,
+      "pageScrollHeight": 1397,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10657,7 +10657,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1327,
+      "pageScrollHeight": 1271,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10703,7 +10703,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1851,
+      "pageScrollHeight": 1795,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10749,7 +10749,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2043,
+      "pageScrollHeight": 1987,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10795,7 +10795,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1478,
+      "pageScrollHeight": 1422,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10841,7 +10841,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1554,
+      "pageScrollHeight": 1498,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10887,7 +10887,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1633,
+      "pageScrollHeight": 1577,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10933,7 +10933,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 940,
+      "pageScrollHeight": 884,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10979,7 +10979,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 5216,
+      "pageScrollHeight": 5160,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -11025,7 +11025,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 3187,
+      "pageScrollHeight": 3131,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -13253,8 +13253,8 @@
     "manualSelectionRequired": true,
     "nestedHeaderActionAbsent": true,
     "learningManualAccessible": true,
-    "lateLivePreservesProposal": true,
-    "liveRefreshAfterFiltering": true,
+    "liveRequiredBeforeSelection": true,
+    "liveFiltersAvailableAfterLoad": true,
     "filterPreservesAssociativeProposal": true,
     "financingFocusedAfterProfile": true,
     "optionalPaymentsUnlockedAfterProfile": true,
@@ -13531,7 +13531,7 @@
             "width": 320,
             "height": 568,
             "initial": true,
-            "overflow": 792,
+            "overflow": 736,
             "footerBottom": 1296.3125,
             "clipping": false
           },
@@ -13539,7 +13539,7 @@
             "width": 320,
             "height": 568,
             "initial": true,
-            "overflow": 792,
+            "overflow": 736,
             "footerBottom": 1296.3125,
             "clipping": false
           },
@@ -13547,7 +13547,7 @@
             "width": 320,
             "height": 568,
             "initial": true,
-            "overflow": 792,
+            "overflow": 736,
             "footerBottom": 1296.3125,
             "clipping": false
           }
@@ -13761,7 +13761,7 @@
             "width": 375,
             "height": 812,
             "initial": true,
-            "overflow": 532,
+            "overflow": 476,
             "footerBottom": 1279.515625,
             "clipping": false
           },
@@ -13769,7 +13769,7 @@
             "width": 375,
             "height": 812,
             "initial": true,
-            "overflow": 532,
+            "overflow": 476,
             "footerBottom": 1279.515625,
             "clipping": false
           },
@@ -13777,7 +13777,7 @@
             "width": 375,
             "height": 812,
             "initial": true,
-            "overflow": 532,
+            "overflow": 476,
             "footerBottom": 1279.515625,
             "clipping": false
           }
@@ -14481,7 +14481,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3201, 3043],
+              "changedPixels": [3165, 3043],
               "passed": true
             },
             "currentCardMotion": {
@@ -14725,7 +14725,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4243, 982],
+              "changedPixels": [4177, 982],
               "passed": true
             },
             "requiredRowMotion": {
@@ -16650,28 +16650,28 @@
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 825.2,
+                  "start": 160.9,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 825.2,
+                  "start": 160.9,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 825.2,
+                  "start": 160.9,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 825.2,
+                  "start": 160.9,
                   "opacity": "1"
                 }
               ],
@@ -17414,7 +17414,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3599, 3429],
+              "changedPixels": [3547, 3429],
               "passed": true
             },
             "currentCardMotion": {
@@ -17658,7 +17658,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4742, 1107],
+              "changedPixels": [4714, 1107],
               "passed": true
             },
             "requiredRowMotion": {
@@ -19583,28 +19583,28 @@
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 350.162,
+                  "start": 173.732,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 350.162,
+                  "start": 173.732,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 350.162,
+                  "start": 173.732,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 350.162,
+                  "start": 173.732,
                   "opacity": "1"
                 }
               ],
@@ -20347,7 +20347,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3600, 3195],
+              "changedPixels": [3533, 3195],
               "passed": true
             },
             "currentCardMotion": {
@@ -20591,7 +20591,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4819, 1118],
+              "changedPixels": [4766, 1118],
               "passed": true
             },
             "requiredRowMotion": {
@@ -22516,28 +22516,28 @@
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 813.422,
+                  "start": 160.2,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 813.422,
+                  "start": 160.2,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 813.422,
+                  "start": 160.2,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 813.422,
+                  "start": 160.2,
                   "opacity": "1"
                 }
               ],
@@ -22604,12 +22604,18 @@
           }
         },
         "associativeCalculationContinuity": {
-          "contract": "associative-calculation-continuity-v3",
+          "contract": "associative-calculation-continuity-v4",
           "synthetic": true,
           "passed": true,
           "stages": [
             {
               "stage": "inventory-merge",
+              "calendar": {
+                "completionDate": "2029-12-31",
+                "firstMonthly": "2026-11-05",
+                "pre": 37,
+                "post": 47
+              },
               "commitment": ["12,73%", "15,77%"],
               "maximum": ["42,73%", "43,22%"]
             },
@@ -22619,7 +22625,44 @@
             },
             {
               "stage": "unit-continuity",
-              "commitment": ["16,04%", "19,88%"]
+              "calendar": {
+                "completionDate": "2030-12-31",
+                "firstMonthly": "2026-11-05",
+                "pre": 49,
+                "post": 35
+              },
+              "commitment": ["15,31%", "19,88%"]
+            },
+            {
+              "stage": "calendar-validation-and-recovery",
+              "invalidDatesBlocked": [
+                "missing-calculation-date",
+                "missing-entry-date",
+                "invalid-payment-day",
+                "not-after-signal",
+                "missing-first-monthly",
+                "missing-first-interest",
+                "interest-not-before-monthly"
+              ],
+              "automaticCalendar": {
+                "completionDate": "2030-12-31",
+                "firstMonthly": "2026-12-05",
+                "pre": 48,
+                "post": 36
+              },
+              "shiftedCalendar": {
+                "completionDate": "2030-12-31",
+                "firstMonthly": "2027-01-05",
+                "pre": 47,
+                "post": 37
+              },
+              "historicalCalendar": {
+                "completionDate": "2030-12-31",
+                "firstMonthly": "2025-03-15",
+                "pre": 69,
+                "post": 15
+              },
+              "restored": true
             },
             {
               "stage": "missing-progress",
@@ -22644,9 +22687,26 @@
               "unitIsolation": true
             },
             {
-              "stage": "late-reference-facts",
-              "automaticRecovery": true,
-              "proposalPreserved": true
+              "stage": "delayed-live-authority",
+              "snapshotSelectable": false,
+              "liveFactsApplied": true,
+              "calendar": {
+                "completionDate": "2029-12-31",
+                "firstMonthly": "2026-11-05",
+                "pre": 37,
+                "post": 47
+              }
+            },
+            {
+              "stage": "missing-live-completion-date",
+              "nullAndAbsentBlocked": true,
+              "snapshotDateIgnored": true
+            },
+            {
+              "stage": "live-failure-blocks-calculation",
+              "liveStatus": 503,
+              "snapshotFallback": false,
+              "calculationBlocked": true
             },
             {
               "stage": "annual-ledger-reconciliation",
@@ -22658,7 +22718,8 @@
               "clearedAnnualsRestoreBalance": true
             }
           ],
-          "blockedExternalRequests": 0
+          "blockedExternalRequests": 0,
+          "expectedNetworkErrorCount": 1
         },
         "mainSurfaceChanges": true,
         "exactAuthorizedRootNavigation": true,
@@ -22849,7 +22910,7 @@
             "width": 390,
             "height": 844,
             "initial": true,
-            "overflow": 483,
+            "overflow": 427,
             "footerBottom": 1262.71875,
             "clipping": false
           },
@@ -22857,7 +22918,7 @@
             "width": 390,
             "height": 844,
             "initial": true,
-            "overflow": 483,
+            "overflow": 427,
             "footerBottom": 1262.71875,
             "clipping": false
           },
@@ -22865,7 +22926,7 @@
             "width": 390,
             "height": 844,
             "initial": true,
-            "overflow": 483,
+            "overflow": 427,
             "footerBottom": 1262.71875,
             "clipping": false
           }
@@ -25205,7 +25266,7 @@
             "profilePixels": {
               "width": 452,
               "height": 117,
-              "changedPixels": [4855, 4675],
+              "changedPixels": [4836, 4681],
               "passed": true
             },
             "currentCardMotion": {
@@ -25449,7 +25510,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1065, 1061],
+              "changedPixels": [1030, 1022],
               "passed": true
             },
             "requiredRowMotion": {
@@ -25868,7 +25929,7 @@
             "rankingPixels": {
               "width": 244,
               "height": 30,
-              "changedPixels": [495, 482],
+              "changedPixels": [491, 490],
               "passed": true
             },
             "completedMotion": [
@@ -27374,28 +27435,28 @@
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 519.832,
+                  "start": 159.7,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 519.832,
+                  "start": 159.7,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 519.832,
+                  "start": 159.7,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 519.832,
+                  "start": 159.7,
                   "opacity": "1"
                 }
               ],
@@ -28138,7 +28199,7 @@
             "profilePixels": {
               "width": 452,
               "height": 117,
-              "changedPixels": [5437, 5267],
+              "changedPixels": [5429, 5261],
               "passed": true
             },
             "currentCardMotion": {
@@ -28382,7 +28443,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1154, 1161],
+              "changedPixels": [1139, 1135],
               "passed": true
             },
             "requiredRowMotion": {
@@ -28801,7 +28862,7 @@
             "rankingPixels": {
               "width": 244,
               "height": 30,
-              "changedPixels": [562, 541],
+              "changedPixels": [553, 549],
               "passed": true
             },
             "completedMotion": [
@@ -30307,28 +30368,28 @@
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 567.356,
+                  "start": 175.566,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 567.356,
+                  "start": 175.566,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 567.356,
+                  "start": 175.566,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 567.356,
+                  "start": 175.566,
                   "opacity": "1"
                 }
               ],
@@ -31071,7 +31132,7 @@
             "profilePixels": {
               "width": 452,
               "height": 117,
-              "changedPixels": [5498, 5322],
+              "changedPixels": [5499, 5318],
               "passed": true
             },
             "currentCardMotion": {
@@ -31315,7 +31376,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1129, 1161],
+              "changedPixels": [1112, 1119],
               "passed": true
             },
             "requiredRowMotion": {
@@ -31734,7 +31795,7 @@
             "rankingPixels": {
               "width": 244,
               "height": 30,
-              "changedPixels": [494, 422],
+              "changedPixels": [463, 453],
               "passed": true
             },
             "completedMotion": [
@@ -33240,28 +33301,28 @@
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 582.498,
+                  "start": 143.3,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 582.498,
+                  "start": 143.3,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 582.498,
+                  "start": 143.3,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 582.498,
+                  "start": 143.3,
                   "opacity": "1"
                 }
               ],
@@ -33328,12 +33389,18 @@
           }
         },
         "associativeCalculationContinuity": {
-          "contract": "associative-calculation-continuity-v3",
+          "contract": "associative-calculation-continuity-v4",
           "synthetic": true,
           "passed": true,
           "stages": [
             {
               "stage": "inventory-merge",
+              "calendar": {
+                "completionDate": "2029-12-31",
+                "firstMonthly": "2026-11-05",
+                "pre": 37,
+                "post": 47
+              },
               "commitment": ["12,73%", "15,77%"],
               "maximum": ["42,73%", "43,22%"]
             },
@@ -33343,7 +33410,44 @@
             },
             {
               "stage": "unit-continuity",
-              "commitment": ["16,04%", "19,88%"]
+              "calendar": {
+                "completionDate": "2030-12-31",
+                "firstMonthly": "2026-11-05",
+                "pre": 49,
+                "post": 35
+              },
+              "commitment": ["15,31%", "19,88%"]
+            },
+            {
+              "stage": "calendar-validation-and-recovery",
+              "invalidDatesBlocked": [
+                "missing-calculation-date",
+                "missing-entry-date",
+                "invalid-payment-day",
+                "not-after-signal",
+                "missing-first-monthly",
+                "missing-first-interest",
+                "interest-not-before-monthly"
+              ],
+              "automaticCalendar": {
+                "completionDate": "2030-12-31",
+                "firstMonthly": "2026-12-05",
+                "pre": 48,
+                "post": 36
+              },
+              "shiftedCalendar": {
+                "completionDate": "2030-12-31",
+                "firstMonthly": "2027-01-05",
+                "pre": 47,
+                "post": 37
+              },
+              "historicalCalendar": {
+                "completionDate": "2030-12-31",
+                "firstMonthly": "2025-03-15",
+                "pre": 69,
+                "post": 15
+              },
+              "restored": true
             },
             {
               "stage": "missing-progress",
@@ -33368,9 +33472,26 @@
               "unitIsolation": true
             },
             {
-              "stage": "late-reference-facts",
-              "automaticRecovery": true,
-              "proposalPreserved": true
+              "stage": "delayed-live-authority",
+              "snapshotSelectable": false,
+              "liveFactsApplied": true,
+              "calendar": {
+                "completionDate": "2029-12-31",
+                "firstMonthly": "2026-11-05",
+                "pre": 37,
+                "post": 47
+              }
+            },
+            {
+              "stage": "missing-live-completion-date",
+              "nullAndAbsentBlocked": true,
+              "snapshotDateIgnored": true
+            },
+            {
+              "stage": "live-failure-blocks-calculation",
+              "liveStatus": 503,
+              "snapshotFallback": false,
+              "calculationBlocked": true
             },
             {
               "stage": "annual-ledger-reconciliation",
@@ -33382,7 +33503,8 @@
               "clearedAnnualsRestoreBalance": true
             }
           ],
-          "blockedExternalRequests": 0
+          "blockedExternalRequests": 0,
+          "expectedNetworkErrorCount": 1
         },
         "mainSurfaceChanges": true,
         "exactAuthorizedRootNavigation": true,
@@ -39698,7 +39820,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1554,
+        "pageScrollHeight": 1824,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -40710,7 +40832,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1668,
+        "pageScrollHeight": 1938,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -41645,10 +41767,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1321920,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
+          "tracked": true,
+          "bytes": 180038,
+          "sha256": "deda8b7a8edca5cb307c164e39f21405332bf2ebd34d036b18c39003c70d47f5"
+        }
+      },
+      "path": "target-authenticated/configuracoes-1440x900.webp",
+      "bytes": 180038,
+      "sha256": "deda8b7a8edca5cb307c164e39f21405332bf2ebd34d036b18c39003c70d47f5",
+      "width": 1440,
+      "height": 918,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 31965,
+        "totalPixels": 1321920,
+        "changedPixelRatio": 0.02418073710965868,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
           "tracked": true,
@@ -41656,23 +41796,10 @@
           "sha256": "9125f9e92f9aae21f4efb51be92444bfb241345b2e7d2a2a8736c3e9dc2cdb99"
         }
       },
-      "path": "target-authenticated/configuracoes-1440x900.webp",
-      "bytes": 168906,
-      "sha256": "9125f9e92f9aae21f4efb51be92444bfb241345b2e7d2a2a8736c3e9dc2cdb99",
-      "width": 1440,
-      "height": 918,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 101,
-        "totalPixels": 1321920,
-        "changedPixelRatio": 0.00007640401839748245,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
-          "tracked": true,
-          "bytes": 168906,
-          "sha256": "9125f9e92f9aae21f4efb51be92444bfb241345b2e7d2a2a8736c3e9dc2cdb99"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -42459,10 +42586,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1321920,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 180038,
+          "sha256": "deda8b7a8edca5cb307c164e39f21405332bf2ebd34d036b18c39003c70d47f5"
+        }
+      },
+      "path": "target-authenticated/themes/configuracoes-light-1440x900.webp",
+      "bytes": 180038,
+      "sha256": "deda8b7a8edca5cb307c164e39f21405332bf2ebd34d036b18c39003c70d47f5",
+      "width": 1440,
+      "height": 918,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 31965,
+        "totalPixels": 1321920,
+        "changedPixelRatio": 0.02418073710965868,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-light-1440x900.webp",
           "tracked": true,
@@ -42470,23 +42615,10 @@
           "sha256": "9125f9e92f9aae21f4efb51be92444bfb241345b2e7d2a2a8736c3e9dc2cdb99"
         }
       },
-      "path": "target-authenticated/themes/configuracoes-light-1440x900.webp",
-      "bytes": 168906,
-      "sha256": "9125f9e92f9aae21f4efb51be92444bfb241345b2e7d2a2a8736c3e9dc2cdb99",
-      "width": 1440,
-      "height": 918,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 101,
-        "totalPixels": 1321920,
-        "changedPixelRatio": 0.00007640401839748245,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-light-1440x900.webp",
-          "tracked": true,
-          "bytes": 168906,
-          "sha256": "9125f9e92f9aae21f4efb51be92444bfb241345b2e7d2a2a8736c3e9dc2cdb99"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -43273,10 +43405,28 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1321920,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 174698,
+          "sha256": "a6e5a6d72f12820da4a43daadccd14c4fe0dd4ec8419421949b7413c77a99aab"
+        }
+      },
+      "path": "target-authenticated/themes/configuracoes-balanced-1440x900.webp",
+      "bytes": 174698,
+      "sha256": "a6e5a6d72f12820da4a43daadccd14c4fe0dd4ec8419421949b7413c77a99aab",
+      "width": 1440,
+      "height": 918,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 31810,
+        "totalPixels": 1321920,
+        "changedPixelRatio": 0.02406348341805858,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
           "tracked": true,
@@ -43284,23 +43434,10 @@
           "sha256": "b23c1c9935f9da659aed37ba0abe76bd1ed5baacffcb08afdc6b960c14fb9d82"
         }
       },
-      "path": "target-authenticated/themes/configuracoes-balanced-1440x900.webp",
-      "bytes": 164456,
-      "sha256": "b23c1c9935f9da659aed37ba0abe76bd1ed5baacffcb08afdc6b960c14fb9d82",
-      "width": 1440,
-      "height": 918,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 101,
-        "totalPixels": 1321920,
-        "changedPixelRatio": 0.00007640401839748245,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
-          "tracked": true,
-          "bytes": 164456,
-          "sha256": "b23c1c9935f9da659aed37ba0abe76bd1ed5baacffcb08afdc6b960c14fb9d82"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -44175,15 +44312,15 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1321920,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 175826,
-          "sha256": "fa968a62052e29589222add824f913301c2dcf21a9af4c3237532ccdc170fe52"
+          "bytes": 186420,
+          "sha256": "aa7d072233edaa24f0974aaa68b10892cd11037ce8bca02c2fb8e1cc987f8130"
         }
       },
       "approvedCanvasComparison": {
@@ -44192,28 +44329,33 @@
         "asset": "docs/qa/canvas-parity/reference/configuracoes-metas-funil.webp",
         "region": "left",
         "referenceSha256": "7f8153e677e15b11b6bd1f45e7efa3e9fa97b14f85c130e6ba25bb5e0ae3370e",
-        "colorDistance": 15.719346788194445,
+        "colorDistance": 15.560926649305555,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 40.279378255208336,
+        "edgeDistance": 41.366943359375,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/configuracoes-dark-1440x900.webp",
-      "bytes": 175826,
-      "sha256": "fa968a62052e29589222add824f913301c2dcf21a9af4c3237532ccdc170fe52",
+      "bytes": 186420,
+      "sha256": "aa7d072233edaa24f0974aaa68b10892cd11037ce8bca02c2fb8e1cc987f8130",
       "width": 1440,
       "height": 918,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 95,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 125445,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.00007186516581941418,
+        "changedPixelRatio": 0.09489606027596224,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-dark-1440x900.webp",
           "tracked": true,
           "bytes": 175826,
           "sha256": "fa968a62052e29589222add824f913301c2dcf21a9af4c3237532ccdc170fe52"
         }
+      },
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -45143,10 +45285,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1104640,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
+          "tracked": true,
+          "bytes": 184902,
+          "sha256": "b393bc3c6d2b8a5ead3c74087bd102947fb6838e5977c4cf1d817539e2d35252"
+        }
+      },
+      "path": "target-authenticated/configuracoes-1280x720.webp",
+      "bytes": 184902,
+      "sha256": "b393bc3c6d2b8a5ead3c74087bd102947fb6838e5977c4cf1d817539e2d35252",
+      "width": 1280,
+      "height": 863,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 31905,
+        "totalPixels": 1104640,
+        "changedPixelRatio": 0.02888271292004635,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
           "tracked": true,
@@ -45154,23 +45314,10 @@
           "sha256": "ccbdba3dc3f7cf76d9d274e9f93846a9628afe3b1c4942629b3d0182a1076712"
         }
       },
-      "path": "target-authenticated/configuracoes-1280x720.webp",
-      "bytes": 173866,
-      "sha256": "ccbdba3dc3f7cf76d9d274e9f93846a9628afe3b1c4942629b3d0182a1076712",
-      "width": 1280,
-      "height": 863,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 101,
-        "totalPixels": 1104640,
-        "changedPixelRatio": 0.00009143250289687138,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
-          "tracked": true,
-          "bytes": 173866,
-          "sha256": "ccbdba3dc3f7cf76d9d274e9f93846a9628afe3b1c4942629b3d0182a1076712"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -45957,10 +46104,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1021952,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
+          "tracked": true,
+          "bytes": 159194,
+          "sha256": "602e80a3a90aaebed0ad7e91f1fbb912f9ff35e97f3d9612b796bf9bb323d3df"
+        }
+      },
+      "path": "target-authenticated/configuracoes-1024x768.webp",
+      "bytes": 159194,
+      "sha256": "602e80a3a90aaebed0ad7e91f1fbb912f9ff35e97f3d9612b796bf9bb323d3df",
+      "width": 1024,
+      "height": 998,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 37040,
+        "totalPixels": 1021952,
+        "changedPixelRatio": 0.03624436372745491,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
           "tracked": true,
@@ -45968,23 +46133,10 @@
           "sha256": "2ea6243498b5d589fdc80bc2a97ae48a4d681bd26b9c42c34ff36bf39dac052a"
         }
       },
-      "path": "target-authenticated/configuracoes-1024x768.webp",
-      "bytes": 152036,
-      "sha256": "2ea6243498b5d589fdc80bc2a97ae48a4d681bd26b9c42c34ff36bf39dac052a",
-      "width": 1024,
-      "height": 998,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 79,
-        "totalPixels": 1021952,
-        "changedPixelRatio": 0.00007730304358717434,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
-          "tracked": true,
-          "bytes": 152036,
-          "sha256": "2ea6243498b5d589fdc80bc2a97ae48a4d681bd26b9c42c34ff36bf39dac052a"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -46771,10 +46923,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1231104,
+        "totalPixels": 1438464,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-768x1024.webp",
+          "tracked": true,
+          "bytes": 190912,
+          "sha256": "754367aee623042cd8629b8c90543b5983fa80d2e46545a9c7f38a0ae471ce06"
+        }
+      },
+      "path": "target-authenticated/configuracoes-768x1024.webp",
+      "bytes": 190912,
+      "sha256": "754367aee623042cd8629b8c90543b5983fa80d2e46545a9c7f38a0ae471ce06",
+      "width": 768,
+      "height": 1873,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 768,
+          "height": 1603
+        },
+        "actual": {
+          "width": 768,
+          "height": 1873
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-768x1024.webp",
           "tracked": true,
@@ -46782,23 +46958,10 @@
           "sha256": "c50fd7c6b279795b2d1c2a0c44b78fa997d1a359b66fe1e3a78153cd20429b47"
         }
       },
-      "path": "target-authenticated/configuracoes-768x1024.webp",
-      "bytes": 178808,
-      "sha256": "c50fd7c6b279795b2d1c2a0c44b78fa997d1a359b66fe1e3a78153cd20429b47",
-      "width": 768,
-      "height": 1603,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 79,
-        "totalPixels": 1231104,
-        "changedPixelRatio": 0.00006417004574755667,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-768x1024.webp",
-          "tracked": true,
-          "bytes": 178808,
-          "sha256": "c50fd7c6b279795b2d1c2a0c44b78fa997d1a359b66fe1e3a78153cd20429b47"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -47585,10 +47748,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 678600,
+        "totalPixels": 783900,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-390x844.webp",
+          "tracked": true,
+          "bytes": 167354,
+          "sha256": "2a17f8fdbf085645e42c26539ff29cd404e66a1ea0d4a2046a0ec5b2c2da39bd"
+        }
+      },
+      "path": "target-authenticated/configuracoes-390x844.webp",
+      "bytes": 167354,
+      "sha256": "2a17f8fdbf085645e42c26539ff29cd404e66a1ea0d4a2046a0ec5b2c2da39bd",
+      "width": 390,
+      "height": 2010,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 1740
+        },
+        "actual": {
+          "width": 390,
+          "height": 2010
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-390x844.webp",
           "tracked": true,
@@ -47596,23 +47783,10 @@
           "sha256": "8623f229261dc04579c81200a57e56afe938baa5a84ce2a1d3e76047a9ac59ee"
         }
       },
-      "path": "target-authenticated/configuracoes-390x844.webp",
-      "bytes": 153858,
-      "sha256": "8623f229261dc04579c81200a57e56afe938baa5a84ce2a1d3e76047a9ac59ee",
-      "width": 390,
-      "height": 1740,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 79,
-        "totalPixels": 678600,
-        "changedPixelRatio": 0.00011641615089890952,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-390x844.webp",
-          "tracked": true,
-          "bytes": 153858,
-          "sha256": "8623f229261dc04579c81200a57e56afe938baa5a84ce2a1d3e76047a9ac59ee"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -48399,10 +48573,34 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 678600,
+        "totalPixels": 783900,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 170058,
+          "sha256": "6ff874930d625c2e51fe816eea476573334986f311ae3aa5593ae1bd080f7885"
+        }
+      },
+      "path": "target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
+      "bytes": 170058,
+      "sha256": "6ff874930d625c2e51fe816eea476573334986f311ae3aa5593ae1bd080f7885",
+      "width": 390,
+      "height": 2010,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 1740
+        },
+        "actual": {
+          "width": 390,
+          "height": 2010
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
           "tracked": true,
@@ -48410,23 +48608,10 @@
           "sha256": "828791c3e2b22455805f6100a532f025cdf4e91ec5f57d93fc62fd2f02ab10b4"
         }
       },
-      "path": "target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
-      "bytes": 157254,
-      "sha256": "828791c3e2b22455805f6100a532f025cdf4e91ec5f57d93fc62fd2f02ab10b4",
-      "width": 390,
-      "height": 1740,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 79,
-        "totalPixels": 678600,
-        "changedPixelRatio": 0.00011641615089890952,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
-          "tracked": true,
-          "bytes": 157254,
-          "sha256": "828791c3e2b22455805f6100a532f025cdf4e91ec5f57d93fc62fd2f02ab10b4"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -49213,10 +49398,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 652500,
+        "totalPixels": 753750,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-375x812.webp",
+          "tracked": true,
+          "bytes": 165442,
+          "sha256": "a082380f902d9ecfd88116caf766b0d74eb9d64dc74f105bceb141d29d62dc95"
+        }
+      },
+      "path": "target-authenticated/configuracoes-375x812.webp",
+      "bytes": 165442,
+      "sha256": "a082380f902d9ecfd88116caf766b0d74eb9d64dc74f105bceb141d29d62dc95",
+      "width": 375,
+      "height": 2010,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 375,
+          "height": 1740
+        },
+        "actual": {
+          "width": 375,
+          "height": 2010
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-375x812.webp",
           "tracked": true,
@@ -49224,23 +49433,10 @@
           "sha256": "02bc545475cc420ab22aa59da91b1b12a29f280dc3cbc9349ef49ca75e37dc59"
         }
       },
-      "path": "target-authenticated/configuracoes-375x812.webp",
-      "bytes": 152536,
-      "sha256": "02bc545475cc420ab22aa59da91b1b12a29f280dc3cbc9349ef49ca75e37dc59",
-      "width": 375,
-      "height": 1740,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 79,
-        "totalPixels": 652500,
-        "changedPixelRatio": 0.0001210727969348659,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-375x812.webp",
-          "tracked": true,
-          "bytes": 152536,
-          "sha256": "02bc545475cc420ab22aa59da91b1b12a29f280dc3cbc9349ef49ca75e37dc59"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -50027,10 +50223,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 596800,
+        "totalPixels": 683200,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-320x568.webp",
+          "tracked": true,
+          "bytes": 171010,
+          "sha256": "c4bb3328c23f6af4b2f66edd5f35670dc6802c1d46820625ca7bd4778928511f"
+        }
+      },
+      "path": "target-authenticated/configuracoes-320x568.webp",
+      "bytes": 171010,
+      "sha256": "c4bb3328c23f6af4b2f66edd5f35670dc6802c1d46820625ca7bd4778928511f",
+      "width": 320,
+      "height": 2135,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 320,
+          "height": 1865
+        },
+        "actual": {
+          "width": 320,
+          "height": 2135
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-320x568.webp",
           "tracked": true,
@@ -50038,23 +50258,10 @@
           "sha256": "8fb19735da99dfe8b813d6b18137cf22c5673232ff17dbb6ee3d547ca31fda69"
         }
       },
-      "path": "target-authenticated/configuracoes-320x568.webp",
-      "bytes": 157126,
-      "sha256": "8fb19735da99dfe8b813d6b18137cf22c5673232ff17dbb6ee3d547ca31fda69",
-      "width": 320,
-      "height": 1865,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 79,
-        "totalPixels": 596800,
-        "changedPixelRatio": 0.00013237265415549598,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-320x568.webp",
-          "tracked": true,
-          "bytes": 157126,
-          "sha256": "8fb19735da99dfe8b813d6b18137cf22c5673232ff17dbb6ee3d547ca31fda69"
-        }
+      "sourceCapture": {
+        "commit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "capturedAt": "2026-10-08T03:26:02.417Z",
+        "worktreeDirty": false
       }
     },
     {
@@ -50719,44 +50926,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
         "tracked": true,
-        "bytes": 152036,
-        "sha256": "2ea6243498b5d589fdc80bc2a97ae48a4d681bd26b9c42c34ff36bf39dac052a"
+        "bytes": 159194,
+        "sha256": "602e80a3a90aaebed0ad7e91f1fbb912f9ff35e97f3d9612b796bf9bb323d3df"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
         "tracked": true,
-        "bytes": 173866,
-        "sha256": "ccbdba3dc3f7cf76d9d274e9f93846a9628afe3b1c4942629b3d0182a1076712"
+        "bytes": 184902,
+        "sha256": "b393bc3c6d2b8a5ead3c74087bd102947fb6838e5977c4cf1d817539e2d35252"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
         "tracked": true,
-        "bytes": 168906,
-        "sha256": "9125f9e92f9aae21f4efb51be92444bfb241345b2e7d2a2a8736c3e9dc2cdb99"
+        "bytes": 180038,
+        "sha256": "deda8b7a8edca5cb307c164e39f21405332bf2ebd34d036b18c39003c70d47f5"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-320x568.webp",
         "tracked": true,
-        "bytes": 157126,
-        "sha256": "8fb19735da99dfe8b813d6b18137cf22c5673232ff17dbb6ee3d547ca31fda69"
+        "bytes": 171010,
+        "sha256": "c4bb3328c23f6af4b2f66edd5f35670dc6802c1d46820625ca7bd4778928511f"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-375x812.webp",
         "tracked": true,
-        "bytes": 152536,
-        "sha256": "02bc545475cc420ab22aa59da91b1b12a29f280dc3cbc9349ef49ca75e37dc59"
+        "bytes": 165442,
+        "sha256": "a082380f902d9ecfd88116caf766b0d74eb9d64dc74f105bceb141d29d62dc95"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-390x844.webp",
         "tracked": true,
-        "bytes": 153858,
-        "sha256": "8623f229261dc04579c81200a57e56afe938baa5a84ce2a1d3e76047a9ac59ee"
+        "bytes": 167354,
+        "sha256": "2a17f8fdbf085645e42c26539ff29cd404e66a1ea0d4a2046a0ec5b2c2da39bd"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-768x1024.webp",
         "tracked": true,
-        "bytes": 178808,
-        "sha256": "c50fd7c6b279795b2d1c2a0c44b78fa997d1a359b66fe1e3a78153cd20429b47"
+        "bytes": 190912,
+        "sha256": "754367aee623042cd8629b8c90543b5983fa80d2e46545a9c7f38a0ae471ce06"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
@@ -51547,20 +51754,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 164456,
-        "sha256": "b23c1c9935f9da659aed37ba0abe76bd1ed5baacffcb08afdc6b960c14fb9d82"
+        "bytes": 174698,
+        "sha256": "a6e5a6d72f12820da4a43daadccd14c4fe0dd4ec8419421949b7413c77a99aab"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 175826,
-        "sha256": "fa968a62052e29589222add824f913301c2dcf21a9af4c3237532ccdc170fe52"
+        "bytes": 186420,
+        "sha256": "aa7d072233edaa24f0974aaa68b10892cd11037ce8bca02c2fb8e1cc987f8130"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-light-1440x900.webp",
         "tracked": true,
-        "bytes": 168906,
-        "sha256": "9125f9e92f9aae21f4efb51be92444bfb241345b2e7d2a2a8736c3e9dc2cdb99"
+        "bytes": 180038,
+        "sha256": "deda8b7a8edca5cb307c164e39f21405332bf2ebd34d036b18c39003c70d47f5"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-balanced-1440x900.webp",
@@ -51751,8 +51958,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
         "tracked": true,
-        "bytes": 157254,
-        "sha256": "828791c3e2b22455805f6100a532f025cdf4e91ec5f57d93fc62fd2f02ab10b4"
+        "bytes": 170058,
+        "sha256": "6ff874930d625c2e51fe816eea476573334986f311ae3aa5593ae1bd080f7885"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-metas-dark-390x844.webp",
@@ -52002,7 +52209,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "a72ad1d15cd5d1f7c108840eb776d36955a5cb36fe3dea45dccb0a9cdb783b52"
+    "manifestSha256": "60b99dcdb8a606673205f272284aab298e61c219105132954158142f99ae5367"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -52014,7 +52221,7 @@
     "performed": true,
     "method": "same-filesystem transactional rename with rollback",
     "previousBaselineManifestSha256": "a72ad1d15cd5d1f7c108840eb776d36955a5cb36fe3dea45dccb0a9cdb783b52",
-    "previousBaselineResultSha256": "957fc040867f69556ad31115774265fdb79567329e13328880f2770a28e09a5b"
+    "previousBaselineResultSha256": "4a6cf40c3c49532a0b7c6d7371fceaf8fa1ea7309ecd7dd7d55e3a7213cb3a97"
   },
   "visualInspectionCoverage": {
     "responsiveScreenshots": 154,
@@ -52027,5 +52234,27 @@
     "changedPixelRatioThreshold": 0.01,
     "channelTolerance": 16
   },
-  "passed": true
+  "passed": true,
+  "reviewedUpdates": [
+    {
+      "pullRequest": 172,
+      "sourceCommit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+      "sourceResultSha256": "0221a2aa9f517a837ee9853713d6e411d6edbca6d23b97874072be414cd2f1b7",
+      "previousCaptureCommit": "2fbb35b182fd34c24ddf6baaa8d6907f3482003e",
+      "updatedPaths": [
+        "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/configuracoes-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/configuracoes-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/configuracoes-768x1024.webp",
+        "docs/qa/reference-parity/target-authenticated/configuracoes-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/configuracoes-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/configuracoes-320x568.webp"
+      ],
+      "preservedImages": 231
+    }
+  ]
 }

@@ -13,7 +13,13 @@ const MESSAGES: Record<State, string> = {
   error: "Não foi possível solicitar a atualização agora.",
 };
 
-export function SalesforceRefreshButton({ available }: { available: boolean }) {
+export function SalesforceRefreshButton({
+  available,
+  messageClassName = "text-slate-300",
+}: {
+  available: boolean;
+  messageClassName?: string;
+}) {
   const [state, setState] = useState<State>("idle");
 
   if (!available) {
@@ -26,7 +32,7 @@ export function SalesforceRefreshButton({ available }: { available: boolean }) {
         >
           Atualização indisponível
         </button>
-        <span className="max-w-xs text-xs text-slate-300">
+        <span className={`max-w-xs text-xs ${messageClassName}`}>
           Recurso indisponível neste ambiente.
         </span>
       </div>
@@ -65,7 +71,7 @@ export function SalesforceRefreshButton({ available }: { available: boolean }) {
       >
         Atualizar Salesforce
       </button>
-      <span aria-live="polite" className="max-w-xs text-xs text-slate-300">
+      <span aria-live="polite" className={`max-w-xs text-xs ${messageClassName}`}>
         {MESSAGES[state]}
       </span>
     </div>

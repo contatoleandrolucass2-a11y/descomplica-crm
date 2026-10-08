@@ -124,10 +124,12 @@ aparece entre as opções atribuíveis, mesmo para o próprio Master.
 - hub de simulação e a jornada WF13;
 - início administrativo, usuários e catálogo de páginas.
 
-O inventário HTTP cobre 24 rotas protegidas: 17 correspondem ao catálogo
-PostgreSQL e sete jornadas complementares permanecem sem linha em `app_pages`:
-Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15, WF16/Documentação e
-CAIXA. Recurso MKT reutiliza `crm.settings.manage`; Repasse exige o papel
+O inventário HTTP cobre 25 rotas protegidas: 17 correspondem ao catálogo
+PostgreSQL e oito jornadas complementares permanecem sem linha em `app_pages`:
+Conectar Sistemas, Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15,
+WF16/Documentação e CAIXA. Conectar Sistemas e Recurso MKT reutilizam
+`crm.settings.manage`; o refresh exige também `crm.salesforce.refresh`.
+Repasse exige o papel
 `master` junto de `crm.partnerships.view`; as cinco jornadas de simulação passam
 pelo hub e por `crm.simulators.view`. Outros perfis recebem `403` no guard aplicável.
 A página CAIXA é exclusivamente visual: o acesso à rota não habilita

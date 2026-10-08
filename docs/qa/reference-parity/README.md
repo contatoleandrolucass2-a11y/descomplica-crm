@@ -2,6 +2,23 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Conectar Sistemas em 08/10/2026
+
+CI `37720363346`, artefato `11526388631`, captura limpa
+`f3a209d28d6e7cac55af19ead398282aa5a5439b`, árvore idêntica ao HEAD `4a21e26`.
+SHA-256 do ZIP: `ccca202929608952c52395309f442402616c9f726ba28714ef72b3384e482309`.
+
+Validate, restore e E2E dos oito perfis passaram. O predicado funcional original
+confirmou 154 checks responsivos, 88 de tema, 242 auditorias Axe, 110 de zoom,
+teclado, menus e simuladores. A nova guia passou também em nove combinações
+320/768/1440 × claro/médio/escuro, sem overflow ou violações Axe.
+
+As onze diferenças da visão geral de Configurações correspondem ao novo item
+Conectar Sistemas e foram inspecionadas antes da promoção pelo helper
+transacional existente. As outras 231 referências foram preservadas byte a
+byte, assim como os limites de 1%/16. `reviewedUpdates` registra origem e
+arquivos atualizados. A CI final em verify continua obrigatória antes do merge.
+
 ## Recurso MKT em 05/10/2026
 
 Revisao complementar depois da integracao de `afdb1c9` (PR #154): CI
