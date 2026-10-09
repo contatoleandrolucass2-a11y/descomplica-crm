@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-10-09: Guia completo da pagina Associativo
+
+- Fonte: pedido e dois prints do usuario. Branch `codex/guia-pagina-associativo`.
+- Botao no rodape direito do quadro de estoque, com a classe visual existente.
+  Guia independente do preenchimento, com 36 etapas, anterior/proximo, fechar,
+  progresso, foco, retorno ao acionador e posicionamento responsivo.
+- Cobertura: estoque/filtros, ficha, qualificacao, recursos, sinais/anuais,
+  datas, aprovacao, repasse, cronogramas, proposta pronta, remuneracao,
+  documentacao, manual, documentos, impressao e plataformas externas.
+- Sem nova rota, pacote, regra financeira, integracao, permissao ou migration.
+- PR #174: validate Linux aprovado na primeira CI; o roteiro de clique em
+  320px foi corrigido para rolar ate a area livre, sem force ou remoção de checks.
+  Reteste 320x568 passou nos tres temas e dois estados, com 36 passos por estado.
+- Validacao integral e publicacao: em andamento; evidencias em
+  `docs/audits/associativo-guia-pagina-2026-10-09.md`.
+- Matriz dedicada: 18 cenarios/648 etapas aprovados; seis viewports iniciais
+  com estoque completo aprovados. CI `37889190061` aprovou validate, restore,
+  banco, guia, E2E e todos os checks funcionais. Sete referencias visuais do
+  Associativo revisadas; 235 preservadas. Nova CI verify obrigatoria.
+- CI verify `37892455623` integralmente aprovada. Integrada a main `4e16a61`
+  (PR #168) sem conflitos; nova validacao conjunta exigida pelo merge protegido.
+
 ## 2026-10-08: Sessao verificada e coleta Salesforce protegida
 
 - Layout de Conectar Sistemas alinhado ao canvas compacto da Tabela Associativo,

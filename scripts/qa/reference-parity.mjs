@@ -816,6 +816,9 @@ if (command === "reference") {
   await captureReference();
 } else if (command === "boundary") {
   await captureAnonymousBoundary();
+} else if (command === "associative-page-guide") {
+  const { runSyntheticAssociativePageGuide } = await import("./associative-page-guide.mjs");
+  await runSyntheticAssociativePageGuide();
 } else {
   throw new Error(`Unknown command: ${command}`);
 }
