@@ -83,7 +83,7 @@ function NewLookupLink() {
   );
 }
 
-export function RepasseLookup() {
+export function RepasseLookup({ embedded = false }: { embedded?: boolean } = {}) {
   const [state, formAction, pending] = useActionState(lookupRepasseAction, initialState);
   const inputRef = useRef<HTMLInputElement>(null);
   const invalid = state.status === "validation_error";
@@ -95,19 +95,21 @@ export function RepasseLookup() {
   const describedBy = invalid ? "repasse-fid-help repasse-fid-error" : "repasse-fid-help";
 
   return (
-    <main className={styles.page}>
-      <section className={styles.lookupPanel} aria-labelledby="repasse-page-title">
-        <header className={styles.panelHeader}>
-          <span className={styles.headerIcon} aria-hidden="true">
-            <Building2 />
-          </span>
-          <div>
-            <p className={styles.eyebrow}>
-              Assessoria <span translate="no">M.A.P DE CAMPOS SOLUÇÕES</span>
-            </p>
-            <h1 id="repasse-page-title">Consulta de repasse</h1>
-          </div>
-        </header>
+    <div className={embedded ? styles.embedded : styles.page}>
+      <section className={styles.lookupPanel} aria-label="Consulta individual de repasse">
+        {!embedded ? (
+          <header className={styles.panelHeader}>
+            <span className={styles.headerIcon} aria-hidden="true">
+              <Building2 />
+            </span>
+            <div>
+              <p className={styles.eyebrow}>
+                Assessoria <span translate="no">M.A.P DE CAMPOS SOLUÇÕES</span>
+              </p>
+              <h1 id="repasse-page-title">Consulta de repasse</h1>
+            </div>
+          </header>
+        ) : null}
 
         <div className={styles.formArea} id="consulta-repasse">
           <div className={styles.formCard}>
@@ -208,6 +210,6 @@ export function RepasseLookup() {
           </article>
         ) : null}
       </section>
-    </main>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/auth/supabase/server";
 import { requirePermission } from "@/lib/authorization/guards";
-import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+import { getProtectedPageGate, pageGateAllowsRole } from "@/lib/authorization/page-gates";
 import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
 import type { AuthorizationContext } from "@/lib/authorization/types";
 import type { DisabledNavigationItem } from "@/lib/navigation/presentation";
@@ -123,8 +123,7 @@ export function extendAuthorizedNavigationWithReleasedPages(
     dashboardParent &&
     repasseGate?.releaseEnabled &&
     repasseGate.pageKey === "crm.repasse" &&
-    repasseGate.requiredRole === "master" &&
-    context.roleKey === repasseGate.requiredRole &&
+    pageGateAllowsRole(repasseGate, context.roleKey) &&
     context.permissions.includes(repasseGate.permission) &&
     !pages.some((page) => page.key === repasseGate.pageKey || page.path === repasseGate.path)
   ) {
@@ -134,7 +133,7 @@ export function extendAuthorizedNavigationWithReleasedPages(
         key: repasseGate.pageKey,
         path: repasseGate.path,
         name: "Repasse",
-        description: "Consulte o acompanhamento da assessoria por FID.",
+        description: "Acompanhe os repasses da assessoria.",
         section: "crm",
         permissionKey: repasseGate.permission,
         parentKey: dashboardParent.key,
@@ -160,6 +159,7 @@ export function extendAuthorizedNavigationWithReleasedPages(
     settingsParent &&
     marketingGate?.releaseEnabled &&
     marketingGate.pageKey === "crm.settings.marketing" &&
+    pageGateAllowsRole(marketingGate, context.roleKey) &&
     context.permissions.includes(marketingGate.permission) &&
     !pages.some((page) => page.key === marketingGate.pageKey || page.path === marketingGate.path)
   ) {
@@ -214,6 +214,7 @@ export function extendAuthorizedNavigationWithReleasedPages(
     if (
       !gate?.releaseEnabled ||
       gate.pageKey !== definition.key ||
+      !pageGateAllowsRole(gate, context.roleKey) ||
       !context.permissions.includes(gate.permission) ||
       occupiedKeys.has(definition.key) ||
       occupiedPaths.has(definition.path)
@@ -269,7 +270,7 @@ function pageGateAuthorizesNavigation(page: AppPage, context: AuthorizationConte
     gate?.releaseEnabled === true &&
     gate.pageKey === page.key &&
     gate.permission === page.permissionKey &&
-    (!gate.requiredRole || context.roleKey === gate.requiredRole) &&
+    pageGateAllowsRole(gate, context.roleKey) &&
     context.permissions.includes(gate.permission)
   );
 }

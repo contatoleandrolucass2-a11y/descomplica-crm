@@ -34,9 +34,11 @@ no restore (`WF16`, `CAIXA`, `WF14` e `WF15`), preserva `user_roles` e overrides
 e recompõe somente os vínculos herdados já existentes em produção. Neste
 candidato, as oito jornadas complementares acrescentam da 18ª à 25ª rotas HTTP
 habilitadas pelo catálogo versionado, sem migration ou nova permissão de banco.
-Conectar Sistemas e Recurso MKT reutilizam `crm.settings.manage`; Repasse exige papel `master` e
-`crm.partnerships.view` em conjunto. CAIXA permanece fail-closed no motor, ainda
-que sua composição visual esteja acessível ao Master.
+Conectar Sistemas e Recurso MKT reutilizam `crm.settings.manage`. Repasse exige
+papel `master` ou `admin` e `crm.partnerships.view` em conjunto. A allowlist
+continua negando explicitamente `coordinator`, `manager_imob` e `broker_imob`,
+mesmo quando esses papéis possuem acesso ao Canal de Parcerias. CAIXA permanece
+fail-closed no motor, ainda que sua composição visual esteja acessível ao Master.
 
 | Rota protegida                            | `master` | `admin` | `coordinator`, `manager_imob`, `broker_imob` | `manager_house`, `broker_house` | `pending` e legados | visitante |
 | ----------------------------------------- | -------: | ------: | -------------------------------------------: | ------------------------------: | ------------------: | --------: |
@@ -48,7 +50,7 @@ que sua composição visual esteja acessível ao Master.
 | `/app/etapas/vendas`                      |      200 |     200 |                                          200 |                             200 |                 403 |  redirect |
 | `/app/ranking`                            |      200 |     200 |                                          403 |                             200 |                 403 |  redirect |
 | `/app/canal-de-parcerias`                 |      200 |     200 |                                          200 |                             403 |                 403 |  redirect |
-| `/app/repasse`                            |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/repasse`                            |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes`                      |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/recurso-mkt`          |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/conectar-sistemas`    |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |

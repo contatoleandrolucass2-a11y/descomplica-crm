@@ -4,7 +4,7 @@ import { z } from "zod";
 import { forbidden } from "next/navigation";
 
 import { requirePermission } from "@/lib/authorization/guards";
-import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+import { getProtectedPageGate, pageGateAllowsRole } from "@/lib/authorization/page-gates";
 import type { RepasseLookupState } from "@/lib/crm/repasse/contracts";
 import { lookupRepasseByFid } from "@/lib/crm/repasse/data";
 
@@ -13,23 +13,25 @@ const fidSchema = z.preprocess(
   z.string().regex(/^[0-9]{1,12}$/u),
 );
 
-export async function lookupRepasseAction(
-  _state: RepasseLookupState,
-  formData: FormData,
-): Promise<RepasseLookupState> {
+async function authorizeRepasseAccess() {
   const gate = getProtectedPageGate("/app/repasse");
   if (
     gate?.releaseEnabled !== true ||
     gate.pageKey !== "crm.repasse" ||
     gate.permission !== "crm.partnerships.view" ||
-    gate.requiredRole !== "master"
+    gate.allowedRoles?.length !== 2 ||
+    !gate.allowedRoles.includes("master") ||
+    !gate.allowedRoles.includes("admin")
   ) {
     forbidden();
   }
   const context = await requirePermission("crm.partnerships.view");
-  if (context.roleKey !== gate.requiredRole) forbidden();
+  if (!pageGateAllowsRole(gate, context.roleKey)) forbidden();
+}
 
-  const parsed = fidSchema.safeParse(formData.get("fid"));
+async function lookupRepasse(fid: unknown): Promise<RepasseLookupState> {
+  await authorizeRepasseAccess();
+  const parsed = fidSchema.safeParse(fid);
   if (!parsed.success) {
     return {
       status: "validation_error",
@@ -68,4 +70,15 @@ export async function lookupRepasseAction(
         "A consulta está temporariamente indisponível. Aguarde alguns instantes e tente novamente.",
     };
   }
+}
+
+export async function lookupRepasseAction(
+  _state: RepasseLookupState,
+  formData: FormData,
+): Promise<RepasseLookupState> {
+  return lookupRepasse(formData.get("fid"));
+}
+
+export async function getRepasseDetailAction(fid: string): Promise<RepasseLookupState> {
+  return lookupRepasse(fid);
 }

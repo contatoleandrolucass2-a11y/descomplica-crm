@@ -1,6 +1,11 @@
 import "server-only";
 
-import type { RepasseRecord } from "./contracts";
+import type {
+  RepasseBoardColumn,
+  RepasseBoardRecord,
+  RepasseOverview,
+  RepasseRecord,
+} from "./contracts";
 
 const REPASSE_SPREADSHEET_ID = "1v0ST25OQrtd_LUXfGnX_9AI7GqNSQghADFzrE6k1DeE";
 const REPASSE_SHEET_GID = "798117742";
@@ -219,6 +224,42 @@ function parseRecord(row: SheetRow | undefined): RepasseRecord {
   };
 }
 
+function normalizeStatus(value: string | null) {
+  return (
+    value
+      ?.normalize("NFD")
+      .replace(/[\u0300-\u036f]/gu, "")
+      .trim()
+      .toUpperCase() ?? ""
+  );
+}
+
+function boardColumn(status: string | null): RepasseBoardColumn {
+  const normalized = normalizeStatus(status);
+  if (/\b(?:DESIST\w*|DESISIT\w*|DISTRAT\w*)\b/u.test(normalized)) return "distrato";
+  if (/^REPASSAD[AO]S?$/u.test(normalized)) return "repassado";
+  if (/\b(?:MAIS|ACIMA)\s+DE\s+20\s+DIAS\b/u.test(normalized)) {
+    return "mais_de_20_dias";
+  }
+  const duration = normalized.match(/\b(\d{1,4})\s+DIAS\b/u);
+  if (duration && Number(duration[1]) > 20) return "mais_de_20_dias";
+  return "pendencia";
+}
+
+function parseBoardRecord(row: SheetRow, sourceRow: number): RepasseBoardRecord | null {
+  if (row.every((_, index) => cellText(row, index) === null)) return null;
+  const status = cellText(row, 3);
+  return {
+    sourceRow,
+    fid: cellText(row, 0),
+    empreendimento: cellText(row, 1),
+    etapa: cellText(row, 2),
+    status,
+    nomeCliente: cellText(row, 4),
+    column: boardColumn(status),
+  };
+}
+
 function isLoopbackUrl(value: string | undefined) {
   if (!value) return false;
   try {
@@ -250,6 +291,83 @@ function localVisualQaResult(fid: string): RepasseSourceResult | null {
       nomeCliente: "Cliente Sintético",
       motivo: "Repasse concluído em ambiente local de QA.",
     },
+  };
+}
+
+function localVisualQaOverview(): RepasseOverview | null {
+  if (
+    process.env.AUTH_LOCAL_INSECURE_LOOPBACK_QA !== "true" ||
+    !isLoopbackUrl(process.env.APP_ORIGIN) ||
+    !isLoopbackUrl(process.env.SUPABASE_URL)
+  ) {
+    return null;
+  }
+
+  const records = [
+    [
+      "900000000001",
+      "Residencial Sintético",
+      "Assinatura de contrato",
+      "Repassado",
+      "Cliente Sintético 01",
+    ],
+    ["900000000004", "Parque Modelo", "Montagem de pasta", "Repassado", "Cliente Sintético 02"],
+    [
+      "900000000005",
+      "Residencial Sintético",
+      "Análise de crédito",
+      "Em análise",
+      "Cliente Sintético 03",
+    ],
+    [
+      "900000000006",
+      "Parque Modelo",
+      "Assinatura de contrato",
+      "Aguardando PJ",
+      "Cliente Sintético 04",
+    ],
+    [
+      "900000000007",
+      "Residencial Sintético",
+      "Assinatura de contrato",
+      "26 dias sem repasse",
+      "Cliente Sintético 05",
+    ],
+    ["900000000008", "Parque Modelo", "Montagem de pasta", "31 dias", "Cliente Sintético 06"],
+    [
+      "900000000009",
+      "Residencial Sintético",
+      "Assinatura não realizada",
+      "Desistência",
+      "Cliente Sintético 07",
+    ],
+    ["900000000010", "Parque Modelo", "Negociação financeira", "Distrato", "Cliente Sintético 08"],
+  ];
+
+  return {
+    lastUpdated: "06/10/2026",
+    records: records.flatMap((row, index) => {
+      const record = parseBoardRecord(row, index + 3);
+      return record ? [record] : [];
+    }),
+  };
+}
+
+export async function listRepasseOverview(): Promise<RepasseOverview> {
+  const qaOverview = localVisualQaOverview();
+  if (qaOverview) return qaOverview;
+
+  const [metadataRows, boardRows] = await Promise.all([
+    readRange("A1:F2", 6),
+    readRange("A3:E", 5),
+  ]);
+  validateSourceHeaders(metadataRows[1]);
+  return {
+    lastUpdated: parseLastUpdated(metadataRows[0]),
+    records: boardRows.flatMap((row, index) => {
+      const record = parseBoardRecord(row, index + 3);
+      return record ? [record] : [];
+    }),
   };
 }
 

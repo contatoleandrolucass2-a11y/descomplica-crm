@@ -18,7 +18,7 @@ Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 | Papel                      | Visão de dashboard                     | Ranking | Canal de Parcerias | Repasse | Administração                                                |
 | -------------------------- | -------------------------------------- | :-----: | :----------------: | :-----: | ------------------------------------------------------------ |
 | `master`                   | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         |   Sim   | integral e exclusiva para capacidades de Master              |
-| `admin`                    | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         |   Não   | usuários abaixo do próprio nível, papéis, exceções e páginas |
+| `admin`                    | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         |   Sim   | usuários abaixo do próprio nível, papéis, exceções e páginas |
 | `coordinator`              | Com Canal Imob                         |   Não   |        Sim         |   Não   | nenhuma                                                      |
 | `manager_house`            | Sem Canal Imob                         |   Sim   |        Não         |   Não   | nenhuma                                                      |
 | `manager_imob`             | Com Canal Imob                         |   Não   |        Sim         |   Não   | nenhuma                                                      |
@@ -39,7 +39,7 @@ aparecem como opções atribuíveis e não possuem grants herdados. Uma conta
 legada precisa ser reclassificada explicitamente; o sistema não deduz House ou
 Imob do nome anterior.
 
-Repasse é uma jornada complementar exclusivamente Master. Ela reutiliza
+Repasse é uma jornada complementar de Master e Administrador. Ela reutiliza
 `crm.partnerships.view`, mas a combinação de gate de página, navegação e Server
 Action não a libera aos demais papéis que usam Canal de Parcerias.
 
@@ -129,9 +129,9 @@ PostgreSQL e oito jornadas complementares permanecem sem linha em `app_pages`:
 Conectar Sistemas, Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15,
 WF16/Documentação e CAIXA. Conectar Sistemas e Recurso MKT reutilizam
 `crm.settings.manage`; o refresh exige também `crm.salesforce.refresh`.
-Repasse exige o papel
-`master` junto de `crm.partnerships.view`; as cinco jornadas de simulação passam
-pelo hub e por `crm.simulators.view`. Outros perfis recebem `403` no guard aplicável.
+Repasse exige o papel `master` ou `admin` junto de `crm.partnerships.view`; as
+cinco jornadas de simulação passam pelo hub e por `crm.simulators.view`. Outros
+perfis recebem `403` no guard aplicável.
 A página CAIXA é exclusivamente visual: o acesso à rota não habilita
 `simulator.caixa`, cálculo, envio, análise de crédito ou aprovação bancária, que
 continuam fail-closed por contrato independente.

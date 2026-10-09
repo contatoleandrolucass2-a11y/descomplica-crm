@@ -71,6 +71,11 @@ promocao transacional pelo helper existente. Sete referencias atualizadas,
 235 imagens e sua proveniencia preservadas. Limiares de 1%/16 inalterados.
 CI final em verify, merge e publicacao continuam pendentes.
 
+CI final `37892455623`, HEAD `4477eb9`: validate, restore e release-gates
+aprovados integralmente em verify. O merge protegido identificou a main mais
+recente `4e16a61` (PR #168, Repasse); essa atualizacao foi integrada sem conflitos
+e sem alterar seu escopo. Nova CI conjunta obrigatoria antes da publicacao.
+
 ## Publicacao
 
 Pendente dos gates, PR/CI, artefato imutavel, backup, CAS e verificacao final.
