@@ -15,6 +15,8 @@
 - Confere estoque completo em desktop/notebook e atualiza sete referencias
   visuais revisadas do Associativo, preservando as outras 235.
 - Integra a atualizacao aprovada de Repasse antes da validacao conjunta do guia.
+- Publica o guia no release `c20c9d2`, com CI completa e conferencia da
+  abertura, navegacao e fechamento na pagina real.
 
 ## 2026-10-08
 

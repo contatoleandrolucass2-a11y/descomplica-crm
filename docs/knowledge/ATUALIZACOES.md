@@ -18,6 +18,10 @@
 
 ## 2026-10-09: Apresentacao da pagina Associativo
 
+- Estado final: publicado em `c20c9d2` pelo PR #174. CI main `37898684744`
+  integralmente aprovada, prova da imagem e dois perfis, backup, CAS e health
+  confirmados. Abertura/avanco/retorno/Escape/reabertura conferidos em sessao real,
+  sem selecionar unidade ou modificar valores; nenhum erro de console.
 - Fonte: pedido do usuario, branch `codex/guia-pagina-associativo`, componente
   `AssociativePageGuide` e catalogo `associative-page-guide-content.ts`.
 - O novo Guia passo a passo fica no rodape direito do estoque, exclusivo do
