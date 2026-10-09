@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-09
+
+- Adiciona Guia passo a passo no canto inferior direito do estoque Associativo,
+  com o mesmo acabamento e brilho do botao existente.
+- Apresentacao de 36 etapas com destaques, navegacao, fechamento por teclado e
+  explicacao das areas ainda indisponiveis, sem modificar os dados da simulacao.
+
 ## 2026-10-08
 
 - Alinha Conectar Sistemas ao layout da Tabela Associativo e adiciona estado

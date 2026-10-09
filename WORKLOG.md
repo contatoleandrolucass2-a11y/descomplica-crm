@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-09: Guia completo da pagina Associativo
+
+- Fonte: pedido e dois prints do usuario. Branch `codex/guia-pagina-associativo`.
+- Botao no rodape direito do quadro de estoque, com a classe visual existente.
+  Guia independente do preenchimento, com 36 etapas, anterior/proximo, fechar,
+  progresso, foco, retorno ao acionador e posicionamento responsivo.
+- Cobertura: estoque/filtros, ficha, qualificacao, recursos, sinais/anuais,
+  datas, aprovacao, repasse, cronogramas, proposta pronta, remuneracao,
+  documentacao, manual, documentos, impressao e plataformas externas.
+- Sem nova rota, pacote, regra financeira, integracao, permissao ou migration.
+- Validacao e publicacao: em andamento; evidencias em
+  `docs/audits/associativo-guia-pagina-2026-10-09.md`.
+
 ## 2026-10-08: Sessao verificada e coleta Salesforce protegida
 
 - Layout de Conectar Sistemas alinhado ao canvas compacto da Tabela Associativo,

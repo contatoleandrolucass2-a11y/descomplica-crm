@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./investor-theme-tokens.css";
+@import "./associative-page-guide.css";
 
 .investor-page-shell.investor-associative-table-page .investor-stock-table thead th.investor-stock-completion-heading {
   white-space: normal;

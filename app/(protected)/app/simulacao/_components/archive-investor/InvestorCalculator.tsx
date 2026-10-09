@@ -4,6 +4,7 @@
 
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
+import { AssociativePageGuide } from "./AssociativePageGuide";
 import { synchronizeAssociativeMotion } from "./associative-motion";
 import { ASSOCIATIVE_FIELD_GUIDE_SECTION, ASSOCIATIVE_POLICY_TOPICS, ASSOCIATIVE_PROFILE_HELP } from "./associative-learning-content";
 import { ASSOCIATIVE_FAQ_REFERENCE, ASSOCIATIVE_FAQ_SECTIONS, type AssociativeFaqSection } from "./associative-faq-content";
@@ -4146,6 +4147,7 @@ export function InvestorCalculator({
           </table>
         </div>
 
+        {compactAssociativeStock ? <AssociativePageGuide rootRef={motionRootRef} onStart={() => setTourOpen(false)} /> : null}
       </section>
 
       {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} sectionRef={directTable ? directJourneySectionRef : undefined} /> : null}

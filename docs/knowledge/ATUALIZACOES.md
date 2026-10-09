@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-09: Apresentacao da pagina Associativo
+
+- Fonte: pedido do usuario, branch `codex/guia-pagina-associativo`, componente
+  `AssociativePageGuide` e catalogo `associative-page-guide-content.ts`.
+- O novo Guia passo a passo fica no rodape direito do estoque, exclusivo do
+  Associativo. Nao substitui o manual nem o passo a passo do preenchimento.
+- A apresentacao nao altera dados para revelar secoes. Quando falta unidade ou
+  preenchimento, explica o requisito e destaca a secao disponivel mais proxima.
+- Portal dentro do workspace preserva os tokens de tema sem ficar preso ao
+  overflow da tabela. Observadores acompanham scroll, resize e conteudo dinamico;
+  Escape respeita dialogs nativos abertos e a saida devolve foco ao acionador.
+- Status: implementado, validacao local/CI e publicacao em andamento. Evidencias,
+  limites e resultado final em `docs/audits/associativo-guia-pagina-2026-10-09.md`.
+
 ## 2026-10-08: Telemetria da sessao e integridade da coleta Salesforce
 
 - Fonte: pedido atual do usuario, branch `codex/salesforce-collector-status`,
