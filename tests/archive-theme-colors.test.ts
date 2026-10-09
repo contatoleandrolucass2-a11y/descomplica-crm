@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
@@ -77,24 +77,31 @@ function contrast(a: string, b: string) {
 describe("archive theme color contract", () => {
   it("uses the supplied symbol as the first letter of the accessible global home link", () => {
     const layout = readFileSync(new URL("../app/(protected)/layout.tsx", import.meta.url), "utf8");
+    const mark = readFileSync(
+      new URL("../app/(protected)/_components/DescomplicaBrandMark.tsx", import.meta.url),
+      "utf8",
+    );
 
     expect(layout).toContain("href={navigationHome.path}");
     expect(layout).toContain('aria-label="Descomplica, início"');
-    expect(layout).toContain('src="/descomplica-symbol.png"');
-    expect(layout).toContain('alt=""');
-    expect(layout).toContain('aria-hidden="true"');
+    expect(layout).toContain("<DescomplicaBrandMark");
     expect(layout).toContain("escomplica");
     expect(layout).toContain("data-protected-brand");
-    expect(existsSync(new URL("../public/descomplica-symbol.png", import.meta.url))).toBe(true);
+    expect(mark).toContain('viewBox="0 0 1254 1254"');
+    expect(mark).toContain('fill="currentColor"');
+    expect(mark).toContain('fill="#d21f31"');
+    expect(mark).toContain('aria-hidden="true"');
+    expect(mark).toContain('focusable="false"');
   });
 
-  it("keeps the symbol unframed and contained instead of restoring the blue badge", () => {
+  it("keeps the vector symbol unframed and in the same color as the wordmark", () => {
     const brand = shellDeclarations(".brandMark");
-    expect(brand["object-fit"]).toBe("contain");
     expect(brand.width).toBe(brand.height);
-    expect(brand.filter).toBe("var(--header-brand-shadow)");
+    expect(brand.color).toBe("inherit");
     expect(
-      Object.keys(brand).filter((property) => /^(background|border|box-shadow)/.test(property)),
+      Object.keys(brand).filter((property) =>
+        /^(background|border|box-shadow|filter)$/.test(property),
+      ),
     ).toEqual([]);
     const css = readFileSync(
       new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url),
@@ -337,10 +344,10 @@ describe("archive theme color contract", () => {
   });
 
   for (const theme of ["light", "balanced", "dark"]) {
-    it(`${theme}: preserves the white symbol contrast treatment without recoloring it`, () => {
-      expect(header(theme)["--header-brand-shadow"]).toBe(
-        theme === "dark" ? "none" : "drop-shadow(0 0 0.75px #242b3299)",
-      );
+    it(`${theme}: colors the vector D with the same token as the wordmark`, () => {
+      expect(header(theme)["--header-text"]).toBe(theme === "dark" ? "#f3fbff" : "#182a40");
+      expect(shellDeclarations(".brand").color).toBe("var(--header-text)");
+      expect(shellDeclarations(".brandMark").color).toBe("inherit");
     });
 
     it(`${theme}: uses blue accents and positive states, without green theme tokens`, () => {

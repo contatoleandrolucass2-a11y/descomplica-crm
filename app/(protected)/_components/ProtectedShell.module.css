@@ -38,7 +38,6 @@
   --header-accent: #0754a6;
   --header-active: #dceafa;
   --header-selected: #ffffff;
-  --header-brand-shadow: drop-shadow(0 0 0.75px #242b3299);
   position: sticky;
   z-index: 86;
   top: 0;
@@ -72,7 +71,6 @@
   --header-accent: #7dd3fc;
   --header-active: #123d5d;
   --header-selected: #0a2b47;
-  --header-brand-shadow: none;
 }
 
 .topbar :is(a, button):focus-visible {
@@ -120,8 +118,7 @@
   height: 24px;
   flex: 0 0 24px;
   margin-inline-end: -2px;
-  object-fit: contain;
-  filter: var(--header-brand-shadow);
+  color: inherit;
   transform: translateY(-1px);
 }
 
