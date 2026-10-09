@@ -2,6 +2,10 @@
 
 ## 2026-10-09
 
+- Substitui o símbolo PNG do cabeçalho protegido por uma marca SVG vetorial.
+  O “D” agora herda a mesma cor de “escomplica” nos temas Claro, Médio e
+  Escuro, enquanto a seta vermelha e a geometria compacta permanecem iguais.
+
 - Adiciona Guia passo a passo no canto inferior direito do estoque Associativo,
   com o mesmo acabamento e brilho do botao existente.
 - Apresentacao de 36 etapas com destaques, navegacao, fechamento por teclado e

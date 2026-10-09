@@ -9,6 +9,7 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/app" }));
 
 import { AccountMenu } from "../app/(protected)/_components/AccountMenu";
 import { AuthorizedNavigation } from "../app/(protected)/_components/AuthorizedNavigation";
+import { DescomplicaBrandMark } from "../app/(protected)/_components/DescomplicaBrandMark";
 import { ThemeSwitch } from "../app/(protected)/_components/ThemeSwitch";
 import styles from "../app/(protected)/_components/ProtectedShell.module.css";
 
@@ -68,18 +69,12 @@ const pages = [
     })),
 ];
 
-const brand = readFileSync(new URL("../public/descomplica-symbol.png", import.meta.url)).toString(
-  "base64",
-);
-
 function fixture(displayName: string) {
   return renderToStaticMarkup(
     <header className={styles.topbar} data-protected-topbar>
       <div className={styles.topbarInner}>
         <a className={styles.brand} href="/app">
-          {/* A data URI keeps this isolated fixture offline. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={styles.brandMark} src={`data:image/png;base64,${brand}`} alt="" />
+          <DescomplicaBrandMark className={styles.brandMark} />
           <span className={styles.brandName}>escomplica</span>
         </a>
         <AuthorizedNavigation pages={pages} />

@@ -12,6 +12,7 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/app" }));
 
 import { AccountMenu } from "../app/(protected)/_components/AccountMenu";
 import { AuthorizedNavigation } from "../app/(protected)/_components/AuthorizedNavigation";
+import { DescomplicaBrandMark } from "../app/(protected)/_components/DescomplicaBrandMark";
 import { ThemeSwitch } from "../app/(protected)/_components/ThemeSwitch";
 import styles from "../app/(protected)/_components/ProtectedShell.module.css";
 // @ts-expect-error Operational ESM script, exercised against the real header below.
@@ -333,9 +334,6 @@ describe("current account display and protected header contract", () => {
           .replace(/:global\(([^)]+)\)/g, "$1")
           .replace(/\.([a-zA-Z][\w-]*)/g, (_, name: string) => `.${styles[name]}`);
       });
-      const brand = readFileSync(
-        new URL("../public/descomplica-symbol.png", import.meta.url),
-      ).toString("base64");
       const pages = [
         ["crm.dashboard", "/app", "Dashboard"],
         ["crm.simulation", "/app/simulacao", "Simulacao"],
@@ -371,10 +369,8 @@ describe("current account display and protected header contract", () => {
               createElement(
                 "a",
                 { className: styles.brand, href: "/app", "data-protected-brand": true },
-                createElement("img", {
+                createElement(DescomplicaBrandMark, {
                   className: styles.brandMark,
-                  src: `data:image/png;base64,${brand}`,
-                  alt: "",
                 }),
                 createElement("span", { className: styles.brandName }, "escomplica"),
               ),

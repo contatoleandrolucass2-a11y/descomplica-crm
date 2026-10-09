@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-10-09: Marca vetorial com cor coerente entre temas
+
+- Fonte: comparativo visual fornecido pelo usuário e implementação atual do
+  cabeçalho protegido. O PNG tinha o corpo branco fixo e dependia de sombra
+  para continuar visível no tema claro.
+- O novo `DescomplicaBrandMark` reproduz o símbolo em SVG inline. O corpo do
+  “D” usa `currentColor`, herdando `--header-text` (`#182a40` no Claro/Médio e
+  `#f3fbff` no Escuro); a seta permanece em `#d21f31`.
+- Link acessível, texto “escomplica”, dimensões e responsividade foram
+  preservados. Autenticação, permissões, rotas, dados e banco não mudaram.
+- Prévia Chromium sintética em 320 px foi inspecionada nos temas Claro e
+  Escuro. A suíte opt-in também expôs uma asserção anterior, fora do símbolo,
+  no breakpoint de 1181 px; o gate padrão não a executa.
+- Validação local aprovada após integrar `origin/main`: Prettier, `pnpm lint`,
+  `pnpm typecheck`, 2.285 testes
+  Vitest e 83 testes Node, além do `pnpm build` com 45 rotas. CI, PR e publicação
+  seguem o runbook automático após esta sincronização.
+
 ## 2026-10-09: Guia completo da pagina Associativo
 
 - Fonte: pedido e dois prints do usuario. Branch `codex/guia-pagina-associativo`.

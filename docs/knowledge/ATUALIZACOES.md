@@ -1,5 +1,21 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-09: símbolo da marca deve herdar o token do texto
+
+- Fonte: imagens de referência do usuário, `ProtectedShell.module.css` e
+  `DescomplicaBrandMark.tsx`. Status: validado localmente; CI/publicação
+  pendentes.
+- Um PNG com o corpo branco preservava o tema Escuro, mas exigia sombra e não
+  podia acompanhar `--header-text` no Claro/Médio. A marca inline usa SVG com
+  `currentColor` somente no “D” e mantém a seta vermelha fixa.
+- O componente vetorial também deve ser reutilizado nas fixtures para que o QA
+  exerça a mesma geometria do runtime, sem uma cópia raster em data URI.
+- Prévia Chromium sintética em 320 px foi inspecionada em Claro/Escuro. A suíte
+  opt-in encontrou uma asserção preexistente fora do símbolo em 1181 px, não
+  executada pelo gate padrão. Após integrar `origin/main`, Prettier, lint,
+  tipos, 2.285 testes Vitest, 83 testes Node e build de 45 rotas passaram; CI e
+  publicação estão pendentes.
+
 ## 2026-10-09: Apresentacao da pagina Associativo
 
 - Fonte: pedido do usuario, branch `codex/guia-pagina-associativo`, componente

@@ -16,7 +16,6 @@
  */
 
 import { cookies } from "next/headers";
-import Image from "next/image";
 import Link from "next/link";
 import { Cookie, LogOut, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
@@ -34,6 +33,7 @@ import { AccountMenu } from "./_components/AccountMenu";
 import { AppPageIcon } from "./_components/AppPageIcon";
 import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
 import { AuthorizedBreadcrumbs } from "./_components/AuthorizedBreadcrumbs";
+import { DescomplicaBrandMark } from "./_components/DescomplicaBrandMark";
 import { PROTECTED_CONTENT_ID, ProtectedShellFrame } from "./_components/ProtectedShellFrame";
 import styles from "./_components/ProtectedShell.module.css";
 import { ThemeSwitch } from "./_components/ThemeSwitch";
@@ -54,15 +54,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
   const role = getRoleLabel(context.roleKey);
   const brand = (
     <>
-      <Image
-        className={styles.brandMark}
-        src="/descomplica-symbol.png"
-        alt=""
-        aria-hidden="true"
-        width={22}
-        height={22}
-        loading="eager"
-      />
+      <DescomplicaBrandMark className={styles.brandMark} />
       <span className={styles.brandName} aria-hidden="true">
         escomplica
       </span>
