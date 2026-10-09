@@ -259,7 +259,10 @@ export function AssociativePageGuide({
                     onClick={
                       index === ASSOCIATIVE_PAGE_GUIDE_STEPS.length - 1
                         ? close
-                        : () => setIndex((current) => current + 1)
+                        : () =>
+                            setIndex((current) =>
+                              Math.min(ASSOCIATIVE_PAGE_GUIDE_STEPS.length - 1, current + 1),
+                            )
                     }
                   >
                     {index === ASSOCIATIVE_PAGE_GUIDE_STEPS.length - 1 ? (

@@ -6,6 +6,8 @@
   com o mesmo acabamento e brilho do botao existente.
 - Apresentacao de 36 etapas com destaques, navegacao, fechamento por teclado e
   explicacao das areas ainda indisponiveis, sem modificar os dados da simulacao.
+- Valida os controles reais com rolagem no espaco livre em celulares e limita
+  o avanco a ultima etapa mesmo com acionamentos rapidos.
 
 ## 2026-10-08
 

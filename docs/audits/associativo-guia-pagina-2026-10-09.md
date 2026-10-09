@@ -43,6 +43,13 @@ O guia existente de preenchimento e Aprenda + continuam disponiveis.
   e loopback. Esta integrado ao gate Linux antes da matriz autenticada; evidencia
   local nao equivale a prova de auth/RLS ou publicacao. Matriz browser em andamento.
 
+PR #174, primeira CI `37888409221`: validate passou. O novo gate browser reteve
+o clique sintetico em filtro sob o painel flutuante em 320px. O roteiro passou
+a navegar ate a etapa de filtros e rolar o controle para a area livre, conferindo
+`elementFromPoint` antes do clique real. Sem `force`, remocao de verificacoes ou
+alteracao de baselines. Reteste local em 320x568 aprovou os tres temas e os dois
+estados, com 36 etapas cada. Nova matriz integral e CI pendentes.
+
 ## Publicacao
 
 Pendente dos gates, PR/CI, artefato imutavel, backup, CAS e verificacao final.

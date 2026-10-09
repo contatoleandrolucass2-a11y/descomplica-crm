@@ -136,6 +136,38 @@ async function fillSyntheticProposal(page) {
   await expect(page.locator(".investor-associative-ledger")).toBeVisible();
 }
 
+async function scrollOutsideGuide(control) {
+  // Playwright's default center scroll can land underneath a fixed non-modal panel.
+  await control.evaluate((element, id) => {
+    element.scrollIntoView({ block: "center", inline: "nearest", behavior: "instant" });
+    const topbar = document.querySelector("[data-protected-topbar]")?.getBoundingClientRect();
+    const panel = document.getElementById(id).getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
+    const availableTop = Math.max(0, topbar?.bottom ?? 0) + 8;
+    const availableBottom = panel.top - 8;
+    if (availableBottom - availableTop >= rect.height) {
+      window.scrollBy({
+        top: rect.top + rect.height / 2 - (availableTop + availableBottom) / 2,
+        behavior: "instant",
+      });
+    }
+  }, guideId);
+  await expect
+    .poll(
+      () =>
+        control.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          const hit = document.elementFromPoint(
+            rect.left + rect.width / 2,
+            rect.top + rect.height / 2,
+          );
+          return hit === element || element.contains(hit);
+        }),
+      { message: "Page control must be reachable by pointer with the guide open" },
+    )
+    .toBe(true);
+}
+
 // The caller must provide the real exported step catalog and a synthetic, isolated page.
 export async function checkAssociativePageGuide(
   page,
@@ -352,20 +384,36 @@ export async function checkAssociativePageGuide(
           await next.click();
           await assertStep(index, noUnit);
         }
+        const filtersStep = steps.findIndex((step) => step.id === "filters");
+        assert.ok(filtersStep >= 0 && filtersStep < inventoryStep);
+        for (let index = inventoryStep - 1; index >= filtersStep; index -= 1) {
+          await previous.click();
+          await assertStep(index, noUnit);
+        }
+        await scrollOutsideGuide(project);
         await project.click();
         await expect(project).toBeFocused();
-        await assertStep(inventoryStep, noUnit);
+        await project.selectOption("Empreendimento QA 02");
+        await expect(project).toHaveValue("Empreendimento QA 02");
+        await expect(dialog).toBeVisible();
+        await expect(dialog).toHaveAttribute("data-step-id", steps[filtersStep].id);
+        await project.selectOption("Empreendimento QA 01");
+        await assertStep(filtersStep, noUnit);
         await project.press("Tab");
         assert.equal(
           await dialog.evaluate((element) => element.contains(document.activeElement)),
           false,
           "A non-modal guide must not trap keyboard focus inside itself",
         );
+        for (let index = filtersStep + 1; index <= inventoryStep; index += 1) {
+          await next.click();
+          await assertStep(index, noUnit);
+        }
         const unit = page.getByRole("button", {
           name: "Iniciar proposta com QA-0001",
           exact: true,
         });
-        await unit.evaluate((element) => element.scrollIntoView({ block: "start" }));
+        await scrollOutsideGuide(unit);
         await unit.click();
         await expect(unit).toHaveAttribute("aria-pressed", "true");
         await expect(dialog).toBeVisible();
@@ -374,7 +422,9 @@ export async function checkAssociativePageGuide(
         ).toBeVisible();
         await assertAssociativePageGuideGeometry(dialog);
         // Escape must work while focus belongs to the page outside the guide.
-        await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).click();
+        const income = page.getByRole("textbox", { name: "Renda Familiar", exact: true });
+        await scrollOutsideGuide(income);
+        await income.click();
         await closeWithEscape(await readProposalState(page));
         checkpoint = `${scenario}:fill-proposal`;
         await fillSyntheticProposal(page);

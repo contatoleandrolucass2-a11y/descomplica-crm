@@ -10,7 +10,10 @@
   datas, aprovacao, repasse, cronogramas, proposta pronta, remuneracao,
   documentacao, manual, documentos, impressao e plataformas externas.
 - Sem nova rota, pacote, regra financeira, integracao, permissao ou migration.
-- Validacao e publicacao: em andamento; evidencias em
+- PR #174: validate Linux aprovado na primeira CI; o roteiro de clique em
+  320px foi corrigido para rolar ate a area livre, sem force ou remoção de checks.
+  Reteste 320x568 passou nos tres temas e dois estados, com 36 passos por estado.
+- Validacao integral e publicacao: em andamento; evidencias em
   `docs/audits/associativo-guia-pagina-2026-10-09.md`.
 
 ## 2026-10-08: Sessao verificada e coleta Salesforce protegida
