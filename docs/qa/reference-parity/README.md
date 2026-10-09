@@ -2,6 +2,25 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Guia da pagina Associativo em 09/10/2026
+
+CI `37889190061`, artefato `11598453651`, captura limpa
+`4c6ad9a4da8b7fe36bf8161888be4a521a21be09`, arvore identica ao HEAD `fba599b`.
+SHA-256 do ZIP: `7c56783832bcc5224bb4de4e68b99b1f2d25ce512aab1f9ff0607a42365cc081`.
+
+Validate, restore, banco, novo guia e E2E/autorizacao passaram. O predicado
+funcional original confirmou 154 checks responsivos, 88 de tema, 242 auditorias
+Axe, 110 de zoom, teclado, menus e simuladores. A matriz dedicada local percorreu
+648 etapas em 18 cenarios; o estoque completo passou tambem em seis combinacoes
+de desktop/notebook e tema, sem overflow e sem alterar o predicado original.
+
+As sete diferencas do Associativo correspondem ao novo acionador e espaco abaixo
+do estoque. A captura escura incorpora tambem o rotulo de termino da obra ja
+presente na main. Apos inspecao, conferidos hashes e origem, foram promovidas
+pelo helper transacional existente; 235 imagens e proveniencia preservadas.
+Limites de 1%/16 inalterados. `reviewedUpdates` registra esta revisao parcial.
+Nova CI integral em verify permanece obrigatoria antes do merge.
+
 ## Conectar Sistemas em 08/10/2026
 
 CI `37720363346`, artefato `11526388631`, captura limpa

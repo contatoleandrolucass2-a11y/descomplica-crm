@@ -15,6 +15,10 @@
   Reteste 320x568 passou nos tres temas e dois estados, com 36 passos por estado.
 - Validacao integral e publicacao: em andamento; evidencias em
   `docs/audits/associativo-guia-pagina-2026-10-09.md`.
+- Matriz dedicada: 18 cenarios/648 etapas aprovados; seis viewports iniciais
+  com estoque completo aprovados. CI `37889190061` aprovou validate, restore,
+  banco, guia, E2E e todos os checks funcionais. Sete referencias visuais do
+  Associativo revisadas; 235 preservadas. Nova CI verify obrigatoria.
 
 ## 2026-10-08: Sessao verificada e coleta Salesforce protegida
 

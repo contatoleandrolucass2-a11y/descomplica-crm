@@ -8,6 +8,7 @@ import { isDeepStrictEqual } from "node:util";
 import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
+import { checkAssociativeInitialViewport } from "./associative-compact-layout.mjs";
 
 const rootSelector = ".investor-associative-table-page";
 const guideId = "associative-page-guide";
@@ -166,6 +167,97 @@ async function scrollOutsideGuide(control) {
       { message: "Page control must be reachable by pointer with the guide open" },
     )
     .toBe(true);
+}
+
+export async function checkAssociativeFullStockInitialViewport(
+  page,
+  artifactRoot,
+  { themes = ["light", "balanced", "dark"], diagnoseShortViewport = false } = {},
+) {
+  const checks = [];
+  const matrix = [
+    { width: 1440, height: 900, required: true },
+    { width: 1280, height: 720, required: true },
+    ...(diagnoseShortViewport ? [{ width: 1280, height: 580, required: false }] : []),
+  ];
+  if (artifactRoot) await mkdir(artifactRoot, { recursive: true });
+
+  async function measure(scenario, required) {
+    const geometry = await page.locator(rootSelector).evaluate((root) => {
+      const bounds = (selector) =>
+        document.querySelector(selector)?.getBoundingClientRect().toJSON() ?? null;
+      const stock = root.querySelector(".investor-stock-results");
+      return {
+        viewport: { width: innerWidth, height: innerHeight },
+        scrollY,
+        overflow: document.documentElement.scrollHeight - innerHeight,
+        horizontalOverflow: document.documentElement.scrollWidth - innerWidth,
+        topbar: bounds("[data-protected-topbar]"),
+        main: bounds(".investor-main"),
+        stockPanel: bounds(".investor-stock-panel"),
+        stockResults: bounds(".investor-stock-results"),
+        launcher: bounds(".associative-page-guide-launcher"),
+        footer: bounds(".investor-page-closing"),
+        totalUnits: Number(stock.querySelector("table").getAttribute("aria-rowcount")) - 1,
+        renderedRows: stock.querySelectorAll("tbody tr[aria-rowindex]").length,
+        stockScrollHeight: stock.scrollHeight,
+        stockClientHeight: stock.clientHeight,
+        filters: [...root.querySelectorAll(".investor-stock-filters select")].map((select) => ({
+          label: select.getAttribute("aria-label") || select.closest("label").textContent,
+          value: select.value,
+        })),
+      };
+    });
+    let result;
+    let error;
+    try {
+      result = await checkAssociativeInitialViewport(page);
+    } catch (failure) {
+      error = failure.message;
+    }
+    const check = { scenario, required, passed: !error, geometry, result, error };
+    checks.push(check);
+    if (artifactRoot) await page.screenshot({ path: path.join(artifactRoot, `${scenario}.png`) });
+    process.stdout.write(`Associative initial viewport: ${JSON.stringify(check)}\n`);
+    return check;
+  }
+
+  for (const { required, ...viewport } of matrix) {
+    await page.setViewportSize(viewport);
+    for (const theme of themes) {
+      await page.reload({ waitUntil: "networkidle" });
+      await setTheme(page, theme);
+      await expect(
+        page.getByRole("combobox", { name: "Nome do Empreendimento", exact: true }),
+      ).toHaveValue("Todos");
+      await expect(page.locator(`${rootSelector} .investor-stock-results table`)).toHaveAttribute(
+        "aria-rowcount",
+        "13",
+      );
+      await expect(page.locator(".investor-property-summary")).toHaveCount(0);
+      await expect(page.locator(`#${guideId}`)).toHaveCount(0);
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+      const scenario = `${viewport.width}x${viewport.height}-${theme}-full-stock-initial`;
+      const check = await measure(scenario, required);
+      if (!required && !check.passed) {
+        // Diagnostic counterfactual only; never remove the launcher in a required gate.
+        await page
+          .locator(".associative-page-guide-launcher")
+          .evaluate((element) => element.remove());
+        await measure(`${scenario}-without-launcher-diagnostic`, false);
+      }
+    }
+  }
+  const result = {
+    passed: checks.filter((check) => check.required).every((check) => check.passed),
+    checks,
+  };
+  if (artifactRoot)
+    await writeFile(
+      path.join(artifactRoot, "initial-viewport.json"),
+      `${JSON.stringify(result, null, 2)}\n`,
+    );
+  return result;
 }
 
 // The caller must provide the real exported step catalog and a synthetic, isolated page.
@@ -646,7 +738,15 @@ export async function runSyntheticAssociativePageGuide(options) {
     });
     await page.goto(`${origin}${routePath}`, { waitUntil: "networkidle" });
     const steps = await page.evaluate(() => window.qaPageGuideSteps);
-    const result = await checkAssociativePageGuide(page, artifactRoot, steps, options);
+    const initialViewport = await checkAssociativeFullStockInitialViewport(
+      page,
+      artifactRoot,
+      options,
+    );
+    const result =
+      options?.initialViewportOnly || !initialViewport.passed
+        ? { passed: initialViewport.passed }
+        : await checkAssociativePageGuide(page, artifactRoot, steps, options);
     const evidence = {
       environment:
         "loopback component preview; real archive and styles; synthetic inventory; no auth/RLS proof",
@@ -654,6 +754,7 @@ export async function runSyntheticAssociativePageGuide(options) {
       node: process.version,
       elapsedMs: Math.round(performance.now() - startedAt),
       ...result,
+      initialViewport,
       passed: result.passed && errors.length === 0 && externalRequests === 0,
       consoleErrors: errors,
       blockedExternalRequests: externalRequests,
@@ -665,6 +766,10 @@ export async function runSyntheticAssociativePageGuide(options) {
     process.stdout.write(`${JSON.stringify(evidence, null, 2)}\n`);
     assert.deepEqual(errors, [], "Synthetic guide preview console/page errors");
     assert.equal(externalRequests, 0, "Guide must not request external services");
+    assert.ok(
+      initialViewport.passed,
+      "Full-stock initial viewport must pass the original layout gate",
+    );
     return evidence;
   } finally {
     if (browser) await browser.close();

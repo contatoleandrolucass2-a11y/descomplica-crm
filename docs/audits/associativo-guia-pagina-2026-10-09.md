@@ -48,7 +48,28 @@ o clique sintetico em filtro sob o painel flutuante em 320px. O roteiro passou
 a navegar ate a etapa de filtros e rolar o controle para a area livre, conferindo
 `elementFromPoint` antes do clique real. Sem `force`, remocao de verificacoes ou
 alteracao de baselines. Reteste local em 320x568 aprovou os tres temas e os dois
-estados, com 36 etapas cada. Nova matriz integral e CI pendentes.
+estados, com 36 etapas cada.
+
+Matriz local integral aprovada: 18 cenarios, 648 visitas aos 36 passos,
+1440x900/375x812/320x568, tres temas e estados sem unidade/com proposta.
+Preservacao de campos, selecao e filtros, teclado, reabertura, geometrias, Axe e
+ausencia de erros de console confirmadas. Estoque completo antes dos filtros:
+seis combinacoes adicionais 1440x900/1280x720 e tres temas passaram no predicado
+original de viewport inicial, sem overflow. O roteiro agora integra essa prova.
+
+CI `37889190061`, HEAD `fba599b`: validate Linux, restore isolado, banco,
+advisors, build, gate do guia e E2E/autorizacao passaram. Na matriz autenticada,
+o predicado funcional original aprovou 154 checks responsivos, 88 de tema,
+242 de acessibilidade, 110 de zoom, teclado, menus e simuladores. Apenas sete
+comparacoes visuais do Associativo falharam pela inclusao do acionador.
+
+Captura limpa `4c6ad9a4da8b7fe36bf8161888be4a521a21be09`, arvore identica ao
+HEAD acima; artefato `11598453651`, ZIP SHA-256
+`7c56783832bcc5224bb4de4e68b99b1f2d25ce512aab1f9ff0607a42365cc081`.
+Imagens inspecionadas, hashes de todas as candidatas/baselines conferidos e
+promocao transacional pelo helper existente. Sete referencias atualizadas,
+235 imagens e sua proveniencia preservadas. Limiares de 1%/16 inalterados.
+CI final em verify, merge e publicacao continuam pendentes.
 
 ## Publicacao
 

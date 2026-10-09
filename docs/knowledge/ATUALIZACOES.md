@@ -13,6 +13,10 @@
   Escape respeita dialogs nativos abertos e a saida devolve foco ao acionador.
 - Status: implementado, validacao local/CI e publicacao em andamento. Evidencias,
   limites e resultado final em `docs/audits/associativo-guia-pagina-2026-10-09.md`.
+- CI `37889190061`: validate/restore/banco/E2E e predicado funcional completo
+  aprovados. Guia local: 18 cenarios, 648 etapas e seis verificacoes do estoque
+  completo. Sete diferencas visuais esperadas revisadas, 235 imagens preservadas;
+  nova CI verify e publicacao pendentes. Nenhum gate reduzido.
 
 ## 2026-10-08: Telemetria da sessao e integridade da coleta Salesforce
 
