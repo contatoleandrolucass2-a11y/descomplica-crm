@@ -2,6 +2,9 @@
 
 ## 2026-10-09: Guia completo da pagina Associativo
 
+- Resultado final: publicado no release `c20c9d2` pelo PR #174, CI main
+  `37898684744` integralmente aprovada, imagem comprovada, backup/CAS e health
+  conferidos. Guia aberto e navegacao validada na sessao real sem alterar dados.
 - Fonte: pedido e dois prints do usuario. Branch `codex/guia-pagina-associativo`.
 - Botao no rodape direito do quadro de estoque, com a classe visual existente.
   Guia independente do preenchimento, com 36 etapas, anterior/proximo, fechar,
