@@ -90,14 +90,26 @@ describe("pre-stream page permission gates", () => {
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
-  it("keeps Repasse Master-only when another role has partnership access", async () => {
-    configureSession(["crm.partnerships.view"], "coordinator");
+  it.each(["master", "admin"])("allows Repasse for %s with partnership access", async (roleKey) => {
+    configureSession(["crm.partnerships.view"], roleKey);
 
     const response = await proxy(new NextRequest(`${origin}/app/repasse`));
 
-    expect(response.status).toBe(403);
-    expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("x-middleware-next")).toBe("1");
   });
+
+  it.each(["coordinator", "manager_imob", "broker_imob"])(
+    "denies Repasse for %s even with partnership access",
+    async (roleKey) => {
+      configureSession(["crm.partnerships.view"], roleKey);
+
+      const response = await proxy(new NextRequest(`${origin}/app/repasse`));
+
+      expect(response.status).toBe(403);
+      expect(response.headers.get("x-middleware-rewrite")).toBe(`${origin}/unauthorized`);
+    },
+  );
 
   it("lets the removed legacy public snapshot path resolve as a normal 404", async () => {
     configureSession([]);

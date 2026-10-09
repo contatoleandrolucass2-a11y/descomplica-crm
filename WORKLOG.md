@@ -151,6 +151,44 @@
   concluídos. O limite só deve subir depois do domínio verificado, com cooldown
   individual de 60 segundos e proteção contra abuso preservados.
 
+## 2026-10-07 - Gestão de repasses para Master e Administrador
+
+- A rota `/app/repasse` ganhou uma visão geral em Kanban, com totais, busca por
+  cliente ou FID e filtros por empreendimento e status. A consulta individual
+  por FID permanece disponível em uma segunda aba.
+- A carga inicial usa somente `A:E`; o motivo em `F` é buscado pela Server
+  Action apenas quando o usuário abre um cartão com FID válido. A planilha
+  pública permanece inalterada e não recebe escrita, formatação ou credencial.
+- A classificação usa texto existente: repassado em verde, pendências em
+  amarelo, desistência/distrato em vermelho e laranja somente quando o status
+  informa duração superior a 20 dias. A data global não é usada para inventar
+  idade por cliente.
+- Proxy, navegação, página e ações agora permitem apenas `master` e `admin` com
+  `crm.partnerships.view`; Coordenador e perfis Imob continuam negados mesmo
+  quando herdam a permissão de Parcerias.
+- O QA sintético cobre oito cartões, filtros, detalhe, teclado, estados da
+  consulta, quatro viewports e os temas Claro, Médio e Escuro. Testes focais de
+  dados, autorização e UI foram aprovados; CI e publicação seguem como gates.
+
+## 2026-10-07 - Correção do falso bloqueio no restore isolado
+
+- A CI da `main` aprovou validação, E2E, matriz visual e imagem promovível da
+  correção de cookies, mas o restore isolado parou antes de iniciar o Supabase
+  com `Supabase config port 54327 must occur exactly once`.
+- O `config.toml` continha uma única porta `54327`. O sorteio do bloco efêmero
+  podia, porém, escolher esse mesmo número para uma porta processada antes; a
+  substituição sequencial voltava a contar o valor gerado como se fosse fonte.
+- A configuração agora valida as ocorrências no texto original e substitui as
+  oito portas em uma única passagem. Assim um valor gerado nunca é processado
+  novamente. O mesmo helper atende os dois ensaios de restauração.
+- Um teste determinístico fixa `shadow_port` em `54327`, comprova que analytics
+  recebe sua própria porta e preserva as validações de porta ausente ou
+  duplicada. A publicação permanece bloqueada até a nova CI aprovar o restore.
+- O ensaio local completo aprovou 44 migrations, 1.099 testes pgTAP nos bancos
+  fonte e restaurado, lint, advisors, backup lógico, restore, owners,
+  privilégios e fingerprints. Usou dois projetos efêmeros e zero mutação
+  remota; a nova CI continua sendo o gate para publicação.
+
 ## 2026-10-07 - Exceção de permissão delegável por Master
 
 - A leitura agregada do Supabase produtivo confirmou 23 permissões e mostrou

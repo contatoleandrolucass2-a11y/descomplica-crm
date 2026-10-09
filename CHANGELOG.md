@@ -62,6 +62,24 @@
   de 44 rotas foram aprovados; DNS, SMTP, limite de envio, configuração remota
   e deploy permanecem pendentes de evidência operacional.
 
+## 2026-10-07 - Gestão de repasses em Kanban
+
+- Amplia Repasse para Master e Administrador, mantendo permissão e allowlist
+  explícitas no Proxy, na navegação, na página e nas Server Actions.
+- Organiza os clientes da planilha pública em cartões por status, com busca,
+  filtros por empreendimento e status e detalhe sob demanda pelo FID exato.
+- Preserva a consulta individual e os temas Claro, Médio e Escuro; verde indica
+  repassado, amarelo pendência, vermelho distrato/desistência e laranja somente
+  prazo superior a 20 dias explicitamente informado pela fonte.
+
+## 2026-10-07 - Restore isolado sem colisão de portas
+
+- Torna atômica a troca das portas padrão do Supabase nos ensaios locais.
+- Evita falso bloqueio quando uma porta aleatória coincide com outra porta
+  padrão ainda não processada.
+- Reutiliza o mesmo contrato nos ensaios isolado e de estado remoto, com teste
+  determinístico para a colisão observada na CI.
+
 ## 2026-10-07 - Delegação explícita pelo Master
 
 - Permite que Master aplique uma exceção individual `Permitir` a Administrador

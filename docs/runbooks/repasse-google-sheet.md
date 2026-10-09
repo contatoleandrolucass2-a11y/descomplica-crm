@@ -1,4 +1,4 @@
-# Consulta de repasse por FID
+# Visão geral e consulta de repasse
 
 ## Fonte
 
@@ -14,7 +14,11 @@ O servidor consulta o datasource Google Visualization fixo em
 `docs.google.com/spreadsheets/d/<id>/gviz/tq`, com `gid=798117742`, `headers=0`
 e saída CSV. Não há token, chave Google ou variável de credencial no runtime.
 
-Primeiro são lidos `A1:F2` e somente `A3:A`. Se houver exatamente um FID
+Na visão gerencial são lidos `A1:F2` e `A3:E`: FID, empreendimento, etapa,
+status e nome do cliente alimentam cartões somente leitura. O motivo não integra
+essa carga e só é projetado depois que um cartão ou FID exato é consultado.
+
+Na consulta individual, primeiro são lidos `A1:F2` e somente `A3:A`. Se houver exatamente um FID
 correspondente, o servidor relê `A3:A` e busca `A:F` daquela linha. O FID e a
 unicidade precisam permanecer iguais antes da projeção de B:F. O intervalo aberto
 evita falso `não encontrado` quando a planilha crescer; limites de linhas, bytes e
@@ -22,8 +26,11 @@ schema convertem excesso em indisponibilidade.
 
 ## Modelo de acesso
 
-- A rota do CRM e sua Server Action continuam Master-only. O navegador não recebe
-  o CSV, a URL da consulta nem linhas que não correspondam ao FID solicitado.
+- A rota, a visão gerencial e suas Server Actions exigem papel `master` ou
+  `admin`, além da permissão efetiva. Coordenador e perfis Imob continuam
+  negados mesmo quando possuem a mesma permissão usada pelo Canal de Parcerias.
+- O navegador não recebe o CSV nem a URL da consulta. A visão gerencial recebe
+  somente A:E; o motivo da coluna F é devolvido apenas para o FID selecionado.
 - Essa autorização protege o fluxo do CRM, mas não privatiza a fonte. Enquanto o
   compartilhamento público existir, pessoas com acesso ao endereço da planilha
   podem consultá-la fora do CRM.
@@ -34,9 +41,9 @@ schema convertem excesso em indisponibilidade.
 ## Contrato de segurança
 
 - Rota: `/app/repasse`, filha do Dashboard na navegação autorizada.
-- Papel `master` e permissão `crm.partnerships.view` são exigidos em conjunto no
-  Proxy, na página, na navegação e na Server Action. A permissão isolada de
-  Parcerias não libera esta jornada.
+- Papel `master` ou `admin` e permissão `crm.partnerships.view` são exigidos em
+  conjunto no Proxy, na página, na navegação e nas Server Actions. A permissão
+  isolada de Parcerias não libera esta jornada.
 - O gate de release também é revalidado na Server Action antes da autorização e
   de qualquer acesso à origem.
 - Entrada: somente 1 a 12 dígitos; o valor nunca compõe a URL de destino.
@@ -53,6 +60,11 @@ schema convertem excesso em indisponibilidade.
   colunas pessoais.
 - O navegador recebe apenas o DTO do registro exato. Erros externos viram mensagem
   recuperável sem detalhes da fonte.
+- O quadro classifica `REPASSADO` como verde, desistência/distrato como vermelho,
+  duração textual explicitamente superior a 20 dias como laranja e os demais
+  estados como pendência amarela. A fonte atual não possui data individual de
+  início; por isso o CRM não calcula prazo a partir da data global nem inventa
+  registros laranja.
 - FID, nome de cliente, motivo e conteúdo real da resposta não devem aparecer em
   logs, fixtures, screenshots versionadas ou notas de conhecimento. O QA visual
   usa somente um adaptador sintético restrito a loopback.

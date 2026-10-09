@@ -5,6 +5,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 
+import { patchLocalSupabaseConfig } from "../../release/supabase-config.mjs";
+
 const repositoryRoot = path.resolve(import.meta.dirname, "../../..");
 const sourceSupabaseRoot = path.join(repositoryRoot, "supabase");
 const migrationManifestPath = path.join(
@@ -210,24 +212,6 @@ function portBlocks() {
   return { source: block(0), target: block(16) };
 }
 
-function patchConfig(contents, projectId, ports) {
-  const replacements = new Map([
-    ["54320", String(ports.shadow)],
-    ["54321", String(ports.api)],
-    ["54322", String(ports.database)],
-    ["54323", String(ports.studio)],
-    ["54324", String(ports.mail)],
-    ["54327", String(ports.analytics)],
-    ["54329", String(ports.pooler)],
-    ["8083", String(ports.inspector)],
-  ]);
-  let patched = contents.replace(/^project_id\s*=.*$/m, `project_id = "${projectId}"`);
-  for (const [current, replacement] of replacements)
-    patched = patched.replaceAll(current, replacement);
-  patched = patched.replace(/(\[db\.seed\][\s\S]*?^\s*enabled\s*=\s*)true/m, "$1false");
-  return patched;
-}
-
 async function prepareProject(projectRoot, projectId, ports) {
   const supabaseRoot = path.join(projectRoot, "supabase");
   await mkdir(path.join(supabaseRoot, "migrations"), { recursive: true, mode: 0o700 });
@@ -236,9 +220,11 @@ async function prepareProject(projectRoot, projectId, ports) {
   });
   await writeFile(path.join(supabaseRoot, "seed.sql"), "-- disabled\n", { mode: 0o600 });
   const config = await readFile(path.join(sourceSupabaseRoot, "config.toml"), "utf8");
-  await writeFile(path.join(supabaseRoot, "config.toml"), patchConfig(config, projectId, ports), {
-    mode: 0o600,
-  });
+  await writeFile(
+    path.join(supabaseRoot, "config.toml"),
+    patchLocalSupabaseConfig(config, projectId, ports),
+    { mode: 0o600 },
+  );
 }
 
 function databaseContainer(projectId) {

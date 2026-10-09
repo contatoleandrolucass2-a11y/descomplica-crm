@@ -119,7 +119,7 @@ beforeEach(() => {
 });
 
 describe("authorized hierarchical navigation", () => {
-  it("adds Repasse only under the active Dashboard for Master with partnership access", () => {
+  it("adds Repasse only under the active Dashboard for Master or Admin with partnership access", () => {
     const dashboard: AppPage = {
       ...simulationParent,
       key: "crm.dashboard",
@@ -136,6 +136,9 @@ describe("authorized hierarchical navigation", () => {
     const result = extendAuthorizedNavigationWithReleasedPages([dashboard], context);
 
     expect(result.map((page) => page.path)).toEqual(["/app", "/app/repasse"]);
+    expect(result.find((page) => page.path === "/app/repasse")?.description).toBe(
+      "Acompanhe os repasses da assessoria.",
+    );
     expect(buildBreadcrumbs("/app/repasse", result).map((page) => page.name)).toEqual([
       "Dashboard",
       "Repasse",
@@ -143,9 +146,17 @@ describe("authorized hierarchical navigation", () => {
     expect(
       extendAuthorizedNavigationWithReleasedPages([dashboard], {
         ...context,
-        roleKey: "coordinator",
-      }),
-    ).toEqual([dashboard]);
+        roleKey: "admin",
+      }).map((page) => page.path),
+    ).toEqual(["/app", "/app/repasse"]);
+    for (const roleKey of ["coordinator", "manager_imob", "broker_imob"] as const) {
+      expect(
+        extendAuthorizedNavigationWithReleasedPages([dashboard], {
+          ...context,
+          roleKey,
+        }),
+      ).toEqual([dashboard]);
+    }
     expect(
       extendAuthorizedNavigationWithReleasedPages([dashboard], {
         ...context,

@@ -6,7 +6,17 @@ export interface ProtectedPageGate {
   path: string;
   permission: PermissionKey;
   releaseEnabled: boolean;
-  requiredRole?: RoleKey;
+  allowedRoles?: readonly RoleKey[];
+}
+
+export function pageGateAllowsRole(
+  gate: Pick<ProtectedPageGate, "allowedRoles">,
+  roleKey: unknown,
+): boolean {
+  return (
+    gate.allowedRoles === undefined ||
+    gate.allowedRoles.some((allowedRole) => allowedRole === roleKey)
+  );
 }
 
 // Covers the complete protected HTTP smoke inventory. Seventeen entries mirror
@@ -28,7 +38,7 @@ export const PROTECTED_PAGE_GATES = [
     path: "/app/repasse",
     permission: "crm.partnerships.view",
     releaseEnabled: true,
-    requiredRole: "master",
+    allowedRoles: ["master", "admin"],
   },
   {
     pageKey: "crm.stage.opportunities",

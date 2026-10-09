@@ -132,6 +132,37 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   deploy permanecem pendentes. Subir o limite somente depois do dominio
   verificado, com cooldown individual de 60 segundos e protecao contra abuso.
 
+## 2026-10-07: quadro de repasses deve separar listagem e detalhe
+
+- Status: validado localmente, pendente de CI; fonte: `RepasseWorkspace`,
+  `data.ts`, Server Actions e QA sintético de Repasse.
+- A visão geral projeta somente `A:E`; a coluna de motivo permanece fora da
+  carga e só é lida pelo FID exato ao abrir o detalhe. Isso reduz exposição e
+  mantém o contrato existente da planilha pública sem exigir mudança de
+  compartilhamento.
+- Como a fonte não possui data individual de início, atraso laranja exige uma
+  duração superior a 20 dias escrita no próprio status. Não derivar idade da
+  data global de atualização nem fabricar cartões atrasados.
+- `crm.partnerships.view` é compartilhada por outros papéis. O acesso gerencial
+  de Repasse combina essa permissão com allowlist exata de `master` e `admin`
+  em todos os boundaries; Coordenador e perfis Imob continuam negados.
+
+## 2026-10-07: substituições de portas aleatórias devem ser atômicas
+
+- Status: validado localmente, pendente de CI; fonte:
+  `isolated-restore-rehearsal.mjs`, `remote-state.mjs` e falha do job
+  `isolated-restore` da CI `37575092037`.
+- Substituir portas padrão sequencialmente permite colisão: um valor aleatório
+  já inserido pode ser igual a outra porta padrão e ser contado ou substituído
+  de novo. O arquivo de origem permanece válido, mas o gate falha de modo
+  probabilístico antes de iniciar o ensaio.
+- Validar o texto original e aplicar todas as trocas em uma única passagem
+  elimina o encadeamento. O teste de regressão deve forçar uma porta gerada a
+  `54327`, além de preservar falha fechada para padrão ausente ou duplicado.
+- O ensaio completo posterior aprovou 44 migrations, 1.099 testes pgTAP em cada
+  banco, lint, advisors, backup, restore, owners, privilégios e fingerprints em
+  dois projetos locais efêmeros, sem mutação remota.
+
 ## 2026-10-07: Associativo publicado com data oficial e formulas conferidas
 
 - Status: validado e publicado. Fonte: PR #165, CI main `37594420463`, prova da
