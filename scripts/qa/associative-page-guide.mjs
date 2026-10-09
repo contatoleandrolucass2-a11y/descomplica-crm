@@ -441,30 +441,47 @@ export async function checkAssociativePageGuide(
           .selectOption("desc");
         await expect(page.locator(".investor-property-summary")).toHaveCount(0);
         await expect(
-          page.locator(".investor-stock-panel").getByRole("button", {
+          page.locator(".simulation-canvas-title-row").getByRole("button", {
             name: "Guia passo a passo",
             exact: true,
           }),
         ).toHaveCount(1);
+        await expect(
+          page.locator(".investor-stock-panel .associative-page-guide-launcher"),
+        ).toHaveCount(0);
+        await expect(launcher).toHaveCount(1);
         await launcher.scrollIntoViewIfNeeded();
         assert.ok(
           await launcher.evaluate((element) => {
-            const panel = element.closest(".investor-stock-panel").getBoundingClientRect();
+            const row = element.closest(".simulation-canvas-title-row");
+            const panel = row.getBoundingClientRect();
             const rect = element.getBoundingClientRect();
-            const results = element
-              .closest(".investor-stock-panel")
-              .querySelector(".investor-stock-results")
-              .getBoundingClientRect();
+            const title = row.querySelector("h1").getBoundingClientRect();
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            const text = range.getBoundingClientRect();
+            const besideTitle =
+              rect.left >= title.right &&
+              Math.abs(rect.top + rect.bottom - (title.top + title.bottom)) <= 2;
+            const belowTitle = rect.top >= title.bottom;
+            const touch = matchMedia("(max-width: 760px), (pointer: coarse)").matches;
             return (
               rect.left >= panel.left &&
               rect.right <= panel.right + 1 &&
-              rect.top >= results.bottom - 1 &&
+              rect.top >= panel.top - 1 &&
               rect.bottom <= panel.bottom + 1 &&
-              panel.right - rect.right <= 32
+              panel.right - rect.right <= 2 &&
+              (window.innerWidth >= 1024 ? besideTitle : besideTitle || belowTitle) &&
+              rect.width - text.width >= 24 &&
+              rect.width - text.width <= 40 &&
+              rect.height >= (touch ? 44 : 36) &&
+              element.scrollWidth <= element.clientWidth
             );
           }),
-          "Guide launcher must sit inside the stock panel, below the stock, aligned right",
+          "Guide must fit its text, align to the title's right and wrap without overlap on mobile",
         );
+        if (artifactRoot)
+          await page.screenshot({ path: path.join(artifactRoot, `${scenario}-header.png`) });
         await walk(`${scenario}-no-unit`);
 
         checkpoint = `${scenario}:interact-with-open-guide`;

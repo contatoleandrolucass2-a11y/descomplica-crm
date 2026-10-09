@@ -1,5 +1,18 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-09: Posicao atual do guia Associativo
+
+- Fonte: pedido mais recente do usuario e componentes da branch
+  `codex/guia-associativo-cabecalho`. Status: implementado, validacao em andamento.
+- Guia passo a passo agora pertence ao cabecalho, a direita do titulo, e nao
+  ao rodape do estoque. Largura acompanha o texto, sem dimensao fixa de 260px.
+- Cabecalho opcional no InvestorCalculator reutiliza SimulationCanvasHeader e
+  mantem a referencia do guia no mesmo proprietario do estado. Outros simuladores
+  continuam com seus cabecalhos anteriores; motores e os 36 passos nao mudam.
+- QA deve conferir o acionador no titulo, preservar a rejeicao dos rotulos
+  anteriormente removidos e testar quebra em 320px/375px sem sobreposicao.
+- Testes, CI e release registrados na auditoria especifica deste ajuste.
+
 ## 2026-10-09: símbolo da marca deve herdar o token do texto
 
 - Fonte: imagens de referência do usuário, `ProtectedShell.module.css` e

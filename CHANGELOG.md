@@ -2,6 +2,10 @@
 
 ## 2026-10-09
 
+- Move Guia passo a passo para a direita do titulo do Associativo, com largura
+  ajustada ao texto e quebra de linha em telas estreitas. Preserva os 36 passos
+  e o brilho existente; remove o acionador do rodape do estoque.
+
 - Substitui o símbolo PNG do cabeçalho protegido por uma marca SVG vetorial.
   O “D” agora herda a mesma cor de “escomplica” nos temas Claro, Médio e
   Escuro, enquanto a seta vermelha e a geometria compacta permanecem iguais.

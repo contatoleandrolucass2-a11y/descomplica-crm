@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-09: Guia do Associativo no cabecalho
+
+- Fonte: novo pedido e dois prints do usuario. Branch
+  `codex/guia-associativo-cabecalho`; substitui a posicao inferior antes pedida.
+- Cabecalho e acionador compartilham a mesma linha, com largura intrinseca e
+  quebra responsiva. O guia permanece unico e ligado ao mesmo estado da pagina.
+- Nenhuma regra financeira, dado, permissao, rota ou dependencia alterada.
+- Testes atualizados verificam a nova posicao, largura em funcao do texto,
+  ausencia do botao antigo, area de toque e preservacao dos 36 passos.
+- Validacao e publicacao em andamento. Evidencias em
+  `docs/audits/associativo-guia-cabecalho-2026-10-09.md`.
+
 ## 2026-10-09: Marca vetorial com cor coerente entre temas
 
 - Fonte: comparativo visual fornecido pelo usuário e implementação atual do
