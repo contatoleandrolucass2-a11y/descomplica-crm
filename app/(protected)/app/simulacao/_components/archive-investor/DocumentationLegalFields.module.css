@@ -1,0 +1,158 @@
+.legalFields,
+.legalNotes {
+  --legal-text: var(--inv-color-text, var(--analytics-ink));
+  --legal-muted: var(--inv-color-muted, var(--analytics-muted));
+  --legal-line: var(--inv-color-border, var(--analytics-line));
+  --legal-surface: var(--inv-color-panel, var(--analytics-surface));
+  --legal-accent: var(--inv-color-accent, var(--analytics-cyan-strong));
+  min-width: 0;
+  color: var(--legal-text);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.legalFields {
+  grid-column: 1 / -1;
+  margin-block: 12px;
+  padding-block: 12px;
+  border-block: 1px solid var(--legal-line);
+}
+
+.legalFields h3 {
+  margin: 0 0 8px;
+  color: var(--legal-text);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+.legalFields .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+  margin-block: 12px;
+}
+
+.legalFields .field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--legal-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+.legalFields .field input,
+.legalFields .field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--legal-line);
+  border-radius: 6px;
+  background: var(--legal-surface);
+  color: var(--legal-text);
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.legalFields .field input::placeholder {
+  color: var(--legal-muted);
+  opacity: 1;
+}
+
+.legalFields .confirmation {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  min-height: 44px;
+  padding-block: 10px;
+  color: var(--legal-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.legalFields .confirmation input {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--legal-accent);
+}
+
+.legalFields .help,
+.legalFields .pending,
+.legalNotes p,
+.legalNotes li,
+.legalNotes summary {
+  margin-block: 6px;
+  color: var(--legal-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.legalFields .pending {
+  color: var(--legal-text);
+  font-weight: 600;
+}
+
+.legalNotes {
+  padding-block: 12px;
+  border-top: 1px solid var(--legal-line);
+}
+
+.legalNotes ul {
+  padding-left: 20px;
+  list-style: disc;
+}
+
+.legalNotes summary {
+  width: fit-content;
+  padding-block: 8px;
+  color: var(--legal-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.legalNotes a {
+  color: var(--legal-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legalFields :is(input, select):focus-visible,
+.legalNotes :is(summary, a):focus-visible {
+  outline: 2px solid var(--legal-accent);
+  outline-offset: 3px;
+}
+
+@media print {
+  .legalFields,
+  .legalNotes {
+    --legal-text: #111;
+    --legal-muted: #333;
+    --legal-line: #777;
+    --legal-surface: #fff;
+  }
+
+  .legalFields .field,
+  .legalNotes p,
+  .legalNotes li {
+    break-inside: avoid;
+  }
+
+  .legalNotes details::details-content {
+    content-visibility: visible;
+  }
+}

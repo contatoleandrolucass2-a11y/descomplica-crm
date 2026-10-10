@@ -3,6 +3,10 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
+import {
+  fillDocumentationLegalContext,
+  legalConfirmationLabel,
+} from "./documentation-legal-context.mjs";
 
 const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
 
@@ -58,18 +62,56 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
   await form.getByRole("textbox", { name: "Renda familiar", exact: true }).fill("500000");
   await submit.click();
   const result = page.locator("#resultado-documentacao");
+  await expect(result.getByRole("alert")).toContainText("Confirme as bases");
+  await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+  await expect(form.locator(".documentation-values-panel")).not.toHaveClass(/\bis-complete\b/);
+  const registryTable = form.getByLabel("Tabela de registro conferida", { exact: true });
+  await expect(registryTable).toHaveValue("");
+  const legalContext = await fillDocumentationLegalContext(form, { itbiBase: 240000 });
+  await submit.click();
   await expect(form.locator(".documentation-values-panel")).toHaveClass(/\bis-complete\b/);
   await expect(form.locator(".documentation-money-field.primary.complete")).toHaveCount(1);
   await expect(page.locator(".documentation-flow li.complete")).toHaveCount(3);
   await expect(result.getByRole("heading", { name: "Resumo financeiro" })).toBeVisible();
   await expect(result.locator(".documentation-plan-line")).toContainText("40x Parcelas de");
-  await expect(result.locator(".documentation-plan-total")).toContainText("3.951,99");
-  await expect(result.locator(".documentation-plan-line")).toContainText("132,10");
+  await expect(result.locator(".documentation-plan-total")).toContainText("3.535,79");
+  await expect(result.locator(".documentation-plan-line")).toContainText("118,19");
+  await expect(
+    result.getByRole("region", { name: "Regras, fontes e vigência da documentação" }),
+  ).toContainText("sp-capital-2026.1");
   await result.getByText("Auditoria do cálculo", { exact: true }).click();
-  await expect(result.locator(".documentation-audit li.ok")).toHaveCount(7);
+  await expect(result.locator(".documentation-audit li.ok")).toHaveCount(8);
+  await expect(result.locator(".documentation-audit")).toContainText("Condições legais e vigência");
+
+  await registryTable.selectOption("QUINTO_SP_2026");
+  await expect(form.getByLabel(legalConfirmationLabel, { exact: true })).not.toBeChecked();
+  await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+  await submit.click();
+  await expect(result.locator(".documentation-plan-total")).toContainText("3.536,34");
+  for (const unsupported of ["OTHER", ""]) {
+    await registryTable.selectOption(unsupported);
+    await expect(form.getByLabel(legalConfirmationLabel, { exact: true })).not.toBeChecked();
+    await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+    await submit.click();
+    await expect(result.getByRole("alert")).toContainText(/tabela/i);
+    await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+  }
+  await registryTable.selectOption("ARISP_2");
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+  await submit.click();
+  await expect(result.locator(".documentation-plan-total")).toContainText("3.535,79");
+
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).uncheck();
+  await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+  await submit.click();
+  await expect(result.locator(".documentation-plan-total")).toContainText("3.535,79");
 
   await form.getByRole("textbox", { name: "Financiamento", exact: true }).fill("20100000");
   await expect(result).toHaveCount(0);
+  await expect(form.getByLabel(legalConfirmationLabel, { exact: true })).not.toBeChecked();
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
   await submit.click();
   await expect(result.getByRole("alert")).toContainText(
     "Financiamento supera teto de 80% da avaliação bancária.",
@@ -80,10 +122,77 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
   await expect(form.getByRole("radio", { name: /^até 90% SBPE/ })).toBeChecked();
   await expect(form.getByRole("radio", { name: "até 80% MCMV", exact: true })).toBeDisabled();
   await form.getByRole("textbox", { name: "Renda familiar", exact: true }).fill("");
+  await fillDocumentationLegalContext(form, {
+    program: "NONE",
+    firstAcquisition: "NAO",
+    itbiBase: 240000,
+  });
   await submit.click();
   await expect(result.locator(".documentation-plan-line")).toContainText("36x Parcelas de");
-  await expect(result.locator(".documentation-breakdown")).toContainText("10.186,21");
+  await expect(result.locator(".documentation-breakdown")).toContainText("10.363,15");
+  await expect(result.locator(".documentation-plan-line")).toContainText("374,65");
   await expect(result.getByRole("button", { name: "Imprimir" })).toBeVisible();
+
+  await form.getByLabel("Município do imóvel", { exact: true }).selectOption("other");
+  await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+  await submit.click();
+  await expect(result.getByRole("alert")).toContainText("somente para o município de São Paulo");
+  await form.getByLabel("Município do imóvel", { exact: true }).selectOption("sao-paulo-sp");
+  await form.getByLabel("Data do registro", { exact: true }).fill("2027-01-01");
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+  await submit.click();
+  await expect(result.getByRole("alert")).toContainText("Registro: tabela validada");
+  await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+  await form.getByLabel("Data do registro", { exact: true }).fill("2026-10-10");
+  await form.getByLabel("Data do contrato de financiamento", { exact: true }).fill("2026-10-03");
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+  await submit.click();
+  await expect(result.getByRole("alert")).toContainText("posterior à transmissão");
+  await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+  await form.getByLabel("Data do contrato de financiamento", { exact: true }).fill("2026-10-01");
+  await form
+    .getByLabel("Outros benefícios fiscais ou de registro?", { exact: true })
+    .selectOption("OTHER");
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+  await submit.click();
+  await expect(result.getByRole("alert")).toContainText("FMH, COHAB, CDHU, ZEIS");
+  await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+  await form
+    .getByLabel("Outros benefícios fiscais ou de registro?", { exact: true })
+    .selectOption("NONE");
+  await form.getByLabel("Base de cálculo do ITBI (R$)", { exact: true }).fill("23999999");
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+  await submit.click();
+  await expect(result.getByRole("alert")).toContainText("abaixo do preço de compra");
+  await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+
+  await form.getByRole("textbox", { name: "Valor do imóvel", exact: true }).fill("23052000");
+  await fillDocumentationLegalContext(form, {
+    program: "NONE",
+    firstAcquisition: "NAO",
+    funding: "FGTS",
+    firstTransfer: "SIM",
+    itbiBase: 230520,
+  });
+  await submit.click();
+  await expect(result.getByRole("alert")).toContainText("FGTS fora do MCMV");
+  await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
+  await form.getByLabel("Programa habitacional", { exact: true }).selectOption("MCMV");
+  await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
+  await submit.click();
+  await expect(result.locator(".documentation-plan-total")).toContainText("3.639,94");
+  await expect(
+    result.locator(".documentation-breakdown").getByText("Registro conjunto", { exact: true }),
+  ).toHaveCount(0);
+  await form.getByRole("textbox", { name: "Valor do imóvel", exact: true }).fill("24000000");
+  await fillDocumentationLegalContext(form, {
+    program: "NONE",
+    firstAcquisition: "NAO",
+    itbiBase: 240000,
+  });
+  await submit.click();
+  await expect(result.locator(".documentation-plan-total")).toContainText("10.363,15");
 
   const matrix = [];
   await mkdir(outputDirectory, { recursive: true });
@@ -247,6 +356,18 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
     sequentialUnlock: true,
     mcmvIncomeRequired: true,
     goldenMcmv: true,
+    legalContext,
+    legalContextRequired: true,
+    legalConfirmationInvalidated: true,
+    registryTableRequired: true,
+    registryTableExactCentDifference: true,
+    unsupportedMunicipalityBlocked: true,
+    unsupportedRegistrationDateBlocked: true,
+    contractAfterTransmissionBlocked: true,
+    specialRegimeBlocked: true,
+    baseBelowSalePriceBlocked: true,
+    pendingFgtsFirstTransferBlocked: true,
+    mcmvRegistrationPrecedence: true,
     financingLimit: true,
     automaticSbpe: true,
     rivaWithoutIncome: true,

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-10
+
+- Atualiza ITBI e registro da capital paulista para a politica validada de
+  2026, com isencao por primeira aquisicao ou MCMV e regime contratual explicito.
+- Substitui tabela anterior e fator fixo de registro por faixas atuais e
+  beneficios legais, sem acumular descontos. Discrimina compra e alienacao.
+- Exige dados fiscais confirmados e bloqueia municipios, vigencias e beneficios
+  especiais nao validados. Preserva despachante, seguro, juros e pro-soluto.
+- Diferencia os totais publicados pela ARISP e pelo 5o RI; exige confirmacao
+  da tabela aplicavel com o cartorio e nao presume repasse unico de ISS.
+- Acrescenta fontes, alertas, verificador de vigencia na CI e runbook de
+  manutencao; atualiza ajuda e conhecimento compartilhado.
+
 ## 2026-10-09
 
 - Move Guia passo a passo para a direita do titulo do Associativo, com largura

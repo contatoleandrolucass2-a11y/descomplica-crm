@@ -6,6 +6,10 @@ import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
 import { checkAssociativeMotion } from "./associative-motion.mjs";
 import {
+  fillDocumentationLegalContext,
+  legalConfirmationLabel,
+} from "./documentation-legal-context.mjs";
+import {
   checkAssociativeCommissionGeometry,
   checkAssociativeSummaryGeometry,
   checkAssociativeWorkspaceGaps,
@@ -1055,6 +1059,10 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
       .toBe(true);
     await checkGuidanceContrast(page);
     result.commission = await checkAssociativeCommissionGeometry(commission);
+    const documentation = page.locator(`${root} .investor-associative-documentation`);
+    await expect(documentation).toHaveClass(/waiting/);
+    result.legalContext = await fillDocumentationLegalContext(documentation);
+    await expect(documentation).toHaveClass(/ready/);
     await onState("summary");
     await commission.click();
     await expect(page.locator("#investor-associative-commission-dialog")).toBeVisible();
@@ -1089,6 +1097,11 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     stage = "rejection";
     result.rejection = await checkRejection(page);
     stage = "sequenced-motion";
+    await expect(
+      documentation.getByLabel(legalConfirmationLabel, { exact: true }),
+    ).not.toBeChecked();
+    await documentation.getByLabel(legalConfirmationLabel, { exact: true }).check();
+    await expect(documentation).toHaveClass(/ready/);
     result.sequencedMotion = await checkAssociativeMotion(page);
     stage = "complete";
     result.passed = true;

@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-10: ITBI e registro de Sao Paulo com vigencia e contrato fiscal
+
+- Pedido autorizado: corrigir, validar, publicar e sincronizar conhecimento.
+- Remove a isencao restrita a MCMV e os fatores arbitrarios de registro;
+  usa politica 2026 com 48 faixas, fontes e enquadramentos explicitos.
+- Compra e garantia sao discriminadas; cidade, datas, bases, tabela da serventia
+  e beneficios precisam de confirmacao independente do perfil comercial.
+- Mantem despachante, seguro, juros e fluxo comercial. Sem mudancas em banco,
+  n8n, permissoes ou dados de clientes.
+- Fontes conferidas; validacao e publicacao em andamento. Evidencias em
+  `docs/audits/itbi-registro-sp-2026-10-10.md`.
+
 ## 2026-10-09: Guia do Associativo no cabecalho
 
 - Fonte: novo pedido e dois prints do usuario. Branch

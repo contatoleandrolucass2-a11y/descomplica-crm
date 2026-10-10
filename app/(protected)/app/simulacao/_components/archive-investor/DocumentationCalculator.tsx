@@ -9,6 +9,11 @@ import {
   type DocumentationAuditItem,
 } from "@/lib/archive-investor/documentation-calculator-rules.mjs";
 import { useDismissiblePopover } from "./useDismissiblePopover";
+import {
+  DocumentationLegalFields,
+  DocumentationLegalNotes,
+  useDocumentationLegalContext,
+} from "./DocumentationLegalFields";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const decimal = new Intl.NumberFormat("pt-BR", {
@@ -171,9 +176,15 @@ export function DocumentationCalculator({
   const [values, setValues] = useState<FormValues>(() => ({ ...EMPTY_FORM_VALUES }));
   const [submitted, setSubmitted] = useState(false);
   const [unlockedStep, setUnlockedStep] = useState(0);
+  const { legalContext, onLegalChange, resetLegalContext } = useDocumentationLegalContext({
+    baseDate,
+    salePrice: values.salePrice,
+    reviewKey: JSON.stringify([baseDate, values]),
+  });
   const result = useMemo(
-    () => calculateDocumentation({ ...values, baseDate, requestedFirstInstallment: "" }),
-    [values, baseDate],
+    () =>
+      calculateDocumentation({ ...values, baseDate, legalContext, requestedFirstInstallment: "" }),
+    [values, baseDate, legalContext],
   );
   const modality = result.effectiveModality || values.modality;
   const financingRate =
@@ -239,6 +250,7 @@ export function DocumentationCalculator({
   }
   function resetForm() {
     setValues({ ...EMPTY_FORM_VALUES });
+    resetLegalContext();
     setSubmitted(false);
     setUnlockedStep(0);
   }
@@ -423,8 +435,8 @@ export function DocumentationCalculator({
             </fieldset>
             {values.firstProperty === "NAO" && (
               <p className="doccalc-inline-alert smart-rule">
-                <strong>SBPE aplicado automaticamente.</strong> A condição informada não permite
-                MCMV, isenção de ITBI ou descontos de primeiro imóvel.
+                <strong>SBPE aplicado automaticamente.</strong> Os benefícios fiscais dependem da
+                conferência dos dados fiscais da documentação.
               </p>
             )}
           </section>
@@ -524,6 +536,7 @@ export function DocumentationCalculator({
               />
             </div>
           </section>
+          <DocumentationLegalFields value={legalContext} onChange={onLegalChange} />
           <div className="documentation-canvas-action-bar">
             <p>
               <strong>Preenchimento disponível</strong>
@@ -603,10 +616,27 @@ export function DocumentationCalculator({
                           <dt>ITBI</dt>
                           <dd>{currency.format(result.itbi)}</dd>
                         </div>
-                        <div>
-                          <dt>Registro total</dt>
-                          <dd>{currency.format(result.totalRegistration)}</dd>
-                        </div>
+                        {result.registrationCombined ? (
+                          <div>
+                            <dt>Registro conjunto</dt>
+                            <dd>{currency.format(result.totalRegistration)}</dd>
+                          </div>
+                        ) : (
+                          <>
+                            <div>
+                              <dt>Registro de compra e venda</dt>
+                              <dd>{currency.format(result.purchaseRegistration)}</dd>
+                            </div>
+                            <div>
+                              <dt>Registro da alienação fiduciária</dt>
+                              <dd>{currency.format(result.lienRegistration)}</dd>
+                            </div>
+                            <div>
+                              <dt>Subtotal de registro</dt>
+                              <dd>{currency.format(result.totalRegistration)}</dd>
+                            </div>
+                          </>
+                        )}
                         <div>
                           <dt>Despachante</dt>
                           <dd>{currency.format(result.dispatchFee)}</dd>
@@ -624,8 +654,9 @@ export function DocumentationCalculator({
                   </div>
                   <p className="documentation-interest">
                     Tabela Price · juros fixos de{" "}
-                    {percent.format(OFFICIAL_PARAMETERS.monthlyInterest)} ao mês · {result.itbiRule}
+                    {percent.format(OFFICIAL_PARAMETERS.monthlyInterest)} ao mês
                   </p>
+                  <DocumentationLegalNotes result={result} legalContext={legalContext} />
                   <Audit audit={result.audit} />
                 </div>
               ) : (
