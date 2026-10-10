@@ -2,6 +2,10 @@
 
 ## 2026-10-09: Guia do Associativo no cabecalho
 
+- Resultado final: publicado no release `7a70e93` pelo PR #176, com CI main
+  `38011126950` integralmente aprovada, imagem comprovada, backup/CAS e health.
+  Cabecalho, abertura, avanco, Escape e retorno da consulta de estoque conferidos
+  na sessao real, sem editar a proposta.
 - Fonte: novo pedido e dois prints do usuario. Branch
   `codex/guia-associativo-cabecalho`; substitui a posicao inferior antes pedida.
 - Cabecalho e acionador compartilham a mesma linha, com largura intrinseca e
@@ -11,7 +15,7 @@
   ausencia do botao antigo, area de toque e preservacao dos 36 passos.
 - Lint, tipos, build e 18 cenarios completos do guia passaram. CI Linux aprovou
   suite integral, banco, restore e E2E; 11 referencias visuais revisadas e
-  atualizadas, com 231 preservadas. Reteste final e publicacao pendentes.
+  atualizadas, com 231 preservadas. Reteste final e publicacao concluidos.
   Limitacoes POSIX/timeouts locais registradas; nenhuma verificacao removida.
   Evidencias em
   `docs/audits/associativo-guia-cabecalho-2026-10-09.md`.

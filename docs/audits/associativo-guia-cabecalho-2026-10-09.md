@@ -50,3 +50,31 @@ O roteiro do guia tambem retorna ao topo antes da captura do cabecalho, para
 nao registrar a rolagem residual da selecao de filtros como corte do titulo.
 
 CI final em verify, integracao e publicacao pendentes.
+
+## Publicacao concluida
+
+PR #176 integrado sem bypass apos CI final `38008213156` aprovada.
+Release `7a70e93e2a1cf8536b7c391893f2e9bcb9fc3c0d`, CI main `38011126950`
+com os quatro jobs aprovados: validate, release-gates, isolated-restore e
+promotable-image. Reteste local final do guia tambem aprovou os 18 cenarios.
+
+- Artefato `11653395680`; ZIP SHA-256
+  `3b8dbafd21f110f0709fb1e52c41fc6473f0f07e55cadd60ca049bd5c7bbead4`.
+- Imagem compactada SHA-256
+  `adeced0d9ec7dd87b52e9a83b965c261402bcbcc6d28f7f2d61037034d106460`.
+- Config ID da CI `sha256:23f34fa412c3c75749d2a3898b4b37ed44cab8e2b860a075b0913ff405998001`;
+  manifesto/ID local `sha256:94e49f9acc172c5328747e7aaf1fe8931114c428c71604cd1591e4afad389d8f`.
+  Cadeia OCI, configuracao, camadas e label verificadas; dois perfis de runtime
+  comprovados com a mesma imagem. Sem rebuild na VPS.
+- Versao anterior `04a3fd55397a1761a49c7e4144f19d45896e7419`, preservada para
+  rollback. Promocao pelo helper existente com lock, backup e CAS.
+  Backup: `/var/backups/descomplica-crm/releases/7a70e93e2a1cf8536b7c391893f2e9bcb9fc3c0d.CQDkLh`.
+- Health local e publico confirmaram o SHA; container saudavel, APIs de estoque
+  anonimas negadas com 401, pagina protegida com 307 e Nginx preservado.
+- Sessao real: botao de aproximadamente 147px para o texto, alinhado ao titulo;
+  abertura, avanco e Escape aprovados, sem erros de console. Nenhum dado de
+  proposta alterado. A primeira leitura mostrou estoque indisponivel depois
+  de interrupcao do navegador; Tentar novamente recuperou a consulta. Nao foi
+  necessario mudar dados ou configuracao. Captura final local ignorada pelo Git.
+
+Registros de pendencia anteriores descrevem as etapas, nao o estado final.

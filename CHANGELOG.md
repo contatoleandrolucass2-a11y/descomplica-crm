@@ -7,6 +7,8 @@
   e o brilho existente; remove o acionador do rodape do estoque.
 - Confere o guia em 18 cenarios e atualiza 11 referencias visuais revisadas,
   mantendo as outras 231 imagens e os limites de comparacao.
+- Publica o ajuste no release `7a70e93`, com CI completa e verificacao do
+  cabecalho e funcionamento do guia na pagina real.
 
 - Substitui o símbolo PNG do cabeçalho protegido por uma marca SVG vetorial.
   O “D” agora herda a mesma cor de “escomplica” nos temas Claro, Médio e
