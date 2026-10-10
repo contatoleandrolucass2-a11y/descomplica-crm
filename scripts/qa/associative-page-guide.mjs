@@ -451,12 +451,16 @@ export async function checkAssociativePageGuide(
         ).toHaveCount(0);
         await expect(launcher).toHaveCount(1);
         await launcher.scrollIntoViewIfNeeded();
+        await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
         assert.ok(
           await launcher.evaluate((element) => {
             const row = element.closest(".simulation-canvas-title-row");
             const panel = row.getBoundingClientRect();
             const rect = element.getBoundingClientRect();
             const title = row.querySelector("h1").getBoundingClientRect();
+            const topbar = document
+              .querySelector("[data-protected-topbar]")
+              .getBoundingClientRect();
             const range = document.createRange();
             range.selectNodeContents(element);
             const text = range.getBoundingClientRect();
@@ -467,6 +471,7 @@ export async function checkAssociativePageGuide(
             const touch = matchMedia("(max-width: 760px), (pointer: coarse)").matches;
             return (
               rect.left >= panel.left &&
+              title.top >= topbar.bottom &&
               rect.right <= panel.right + 1 &&
               rect.top >= panel.top - 1 &&
               rect.bottom <= panel.bottom + 1 &&

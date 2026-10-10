@@ -9,7 +9,11 @@
 - Nenhuma regra financeira, dado, permissao, rota ou dependencia alterada.
 - Testes atualizados verificam a nova posicao, largura em funcao do texto,
   ausencia do botao antigo, area de toque e preservacao dos 36 passos.
-- Validacao e publicacao em andamento. Evidencias em
+- Lint, tipos, build e 18 cenarios completos do guia passaram. CI Linux aprovou
+  suite integral, banco, restore e E2E; 11 referencias visuais revisadas e
+  atualizadas, com 231 preservadas. Reteste final e publicacao pendentes.
+  Limitacoes POSIX/timeouts locais registradas; nenhuma verificacao removida.
+  Evidencias em
   `docs/audits/associativo-guia-cabecalho-2026-10-09.md`.
 
 ## 2026-10-09: Marca vetorial com cor coerente entre temas
