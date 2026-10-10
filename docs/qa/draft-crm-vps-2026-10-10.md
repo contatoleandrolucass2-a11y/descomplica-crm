@@ -6,8 +6,9 @@ Data: 10/10/2026. Branch de desenvolvimento: `codex/aplicar-draft-crm-vps`.
 
 Integracao implementada e aprovada nos gates locais, E2E de release e promocao
 visual autenticada listados neste documento. A verificacao pos-commit em modo
-`verify` tambem foi concluida e aprovada. PR, CI do SHA candidato e publicacao
-protegida continuam pendentes; producao nao foi publicada.
+`verify` tambem foi concluida e aprovada. O PR #178 esta aberto e a CI do SHA
+candidato foi integralmente aprovada. Revisao, merge, imagem imutavel e
+publicacao protegida continuam pendentes; producao nao foi publicada.
 
 ## Proveniencia do draft
 
@@ -100,6 +101,21 @@ pelo coordenador da integracao em 10/10/2026:
 | `pnpm qa:e2e:release`          | 19 aprovados; um skip previsto; Associativo concorrente verde                        |
 | `pnpm qa:visual:authenticated` | Modo `verify` aprovado; fixtures efemeras removidas                                  |
 
+## PR e CI candidata
+
+| Evidencia         | Resultado                                                                                                                       |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Pull request      | [#178](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/178), branch `codex/aplicar-draft-crm-vps`            |
+| SHA validado      | `4a8bfc8d51707f9183ddc9ea5d414c357ffb5823`                                                                                      |
+| GitHub Actions    | [CI 38094977306](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38094977306), concluida com sucesso |
+| Jobs obrigatorios | `validate`, `release-gates` e `isolated-restore` aprovados; `promotable-image` ignorado como previsto em PR                     |
+
+A CI repetiu formatacao, lint, tipos, testes, audit, build, replay de migrations,
+pgTAP, advisors, E2E de autorizacao, matriz visual autenticada e ensaio de
+restore isolado. O PR estava `CLEAN` depois dessa execucao. O commit documental
+subsequente nao altera o runtime e deve manter a propria CI verde antes da
+revisao final.
+
 ## QA visual autenticado
 
 | Verificacao                    | Resultado                         |
@@ -131,15 +147,16 @@ repetiu e aprovou 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
 comparacoes candidato/baseline e 110 de zoom. As fixtures efemeras foram
 removidas ao final.
 
-Essas evidencias comprovam o ambiente autenticado local e os artefatos
-promovidos. Nao comprovam CI do SHA candidato nem estado de producao.
+Essas evidencias comprovam o ambiente autenticado local, os artefatos promovidos
+e a CI do SHA candidato acima. Nao comprovam merge, imagem publicavel nem estado
+de producao.
 
 ## Pendencias de release
 
-- Fixar o SHA candidato, abrir/revisar o PR e exigir CI verde no mesmo SHA.
+- Revisar e integrar o PR somente com a CI do commit final verde.
 - Seguir `docs/runbooks/automatic-publication.md`: comprovar imagem imutavel,
   registrar versao anterior, backup e rollback, promover por compare-and-swap e
   conferir health, versao, negacao anonima e jornadas afetadas.
-- Preencher este registro com IDs de CI/PR, SHA/imagem e resultado da
-  publicacao. Ate la, o status permanece `pendente_validacao` e producao segue
-  nao publicada.
+- Preencher este registro com SHA/imagem e resultado da publicacao caso uma
+  etapa posterior seja autorizada a concluir o deploy. Ate la, o status e
+  `validado_no_pr`, com `publicacao_pendente`, e producao segue nao publicada.

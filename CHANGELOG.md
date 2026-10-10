@@ -23,7 +23,9 @@
 - Aprova `pnpm qa:visual:authenticated` pos-commit em modo `verify`: 154 checks
   responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes
   candidato/baseline e 110 de zoom; fixtures efemeras removidas.
-- PR, CI e publicacao em producao continuam pendentes.
+- Abre o PR #178 e aprova a CI `38094977306` no SHA candidato `4a8bfc8`, com
+  validacao, release gates e restore isolado; revisao, merge e publicacao em
+  producao continuam pendentes.
 
 ## 2026-10-09
 

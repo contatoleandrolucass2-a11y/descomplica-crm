@@ -51,9 +51,11 @@
   passou com 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
   comparacoes candidato/baseline e 110 de zoom. As fixtures efemeras foram
   removidas ao final.
-- Estado: E2E, promocao visual e verificacao pos-commit aprovados. PR, CI do SHA
-  candidato, imagem imutavel, backup/rollback, publicacao por CAS e verificacao
-  de producao continuam pendentes; producao nao foi publicada. Evidencias em
+- Estado: E2E, promocao visual e verificacao pos-commit aprovados. O PR #178 foi
+  aberto e a CI `38094977306` aprovou `validate`, `release-gates` e
+  `isolated-restore` no SHA `4a8bfc8`. Revisao/merge, imagem imutavel,
+  backup/rollback, publicacao por CAS e verificacao de producao continuam
+  pendentes; producao nao foi publicada. Evidencias em
   `docs/qa/draft-crm-vps-2026-10-10.md`.
 
 ## 2026-10-09: Guia do Associativo no cabecalho

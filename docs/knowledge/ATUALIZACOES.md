@@ -2,7 +2,7 @@
 
 ## 2026-10-10: Integracao do draft aprovado para a VPS
 
-- Status: `pendente_validacao`. Fonte:
+- Status: `validado_no_pr`; `publicacao_pendente`. Fonte:
   `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps`, manifesto
   SHA-256 `c113f793b50efc36c08a0c2757980725af252d01c474f7ffd9ed773566242e18`
   e previa final SHA-256
@@ -38,8 +38,10 @@
 - A verificacao pos-commit `pnpm qa:visual:authenticated`, em modo `verify`,
   passou com 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
   comparacoes candidato/baseline e 110 de zoom; as fixtures efemeras foram
-  removidas. PR, CI do candidato e publicacao protegida permanecem pendentes;
-  producao nao foi publicada.
+  removidas. O PR #178 ficou `CLEAN`; a CI `38094977306` aprovou os jobs
+  `validate`, `release-gates` e `isolated-restore` no SHA `4a8bfc8`. Revisao,
+  merge, imagem imutavel e publicacao protegida permanecem pendentes; producao
+  nao foi publicada.
 - Registro completo: `docs/qa/draft-crm-vps-2026-10-10.md`.
 
 ## 2026-10-09: Posicao atual do guia Associativo
