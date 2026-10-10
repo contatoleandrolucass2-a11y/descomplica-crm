@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "capturedAt": "2026-10-09T06:03:03.384Z",
-  "captureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
+  "capturedAt": "2026-10-09T21:01:19.793Z",
+  "captureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
   "worktreeDirtyAtCapture": false,
   "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
   "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
@@ -35,7 +35,7 @@
   "artifacts": {
     "baselineScreenshots": "docs/qa/reference-parity/target-authenticated",
     "baselineResult": "docs/qa/reference-parity/authenticated-results.json",
-    "candidateDiagnostics": "test-results/pr174-candidate/authenticated-visual"
+    "candidateDiagnostics": "test-results/pr176-candidate/authenticated-visual"
   },
   "viewports": [
     {
@@ -13453,7 +13453,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -13482,7 +13482,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -13511,7 +13511,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -13683,7 +13683,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -13712,7 +13712,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -13741,7 +13741,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -14481,7 +14481,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3163, 3043],
+              "changedPixels": [3193, 3043],
               "passed": true
             },
             "currentCardMotion": {
@@ -14725,7 +14725,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4207, 982],
+              "changedPixels": [4173, 982],
               "passed": true
             },
             "requiredRowMotion": {
@@ -16650,35 +16650,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 156.2,
+                  "start": 169.2,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 156.2,
+                  "start": 169.2,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 156.2,
+                  "start": 169.2,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 156.2,
+                  "start": 169.2,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 156.2,
+                  "start": 169.2,
                   "opacity": "1"
                 }
               ],
@@ -17421,7 +17421,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3571, 3429],
+              "changedPixels": [3573, 3429],
               "passed": true
             },
             "currentCardMotion": {
@@ -17665,7 +17665,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4726, 1104],
+              "changedPixels": [4692, 1104],
               "passed": true
             },
             "requiredRowMotion": {
@@ -19590,35 +19590,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.6,
+                  "start": 233.5,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.6,
+                  "start": 233.5,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.6,
+                  "start": 233.5,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.6,
+                  "start": 233.5,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.6,
+                  "start": 233.5,
                   "opacity": "1"
                 }
               ],
@@ -20361,7 +20361,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3538, 3195],
+              "changedPixels": [3545, 3195],
               "passed": true
             },
             "currentCardMotion": {
@@ -20605,7 +20605,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4780, 1119],
+              "changedPixels": [4742, 1119],
               "passed": true
             },
             "requiredRowMotion": {
@@ -22530,35 +22530,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 197.632,
+                  "start": 234,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 197.632,
+                  "start": 234,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 197.632,
+                  "start": 234,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 197.632,
+                  "start": 234,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 197.632,
+                  "start": 234,
                   "opacity": "1"
                 }
               ],
@@ -22853,7 +22853,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -22882,7 +22882,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -22911,7 +22911,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23083,7 +23083,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23112,7 +23112,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23141,7 +23141,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23161,24 +23161,24 @@
             "width": 600,
             "height": 800,
             "initial": true,
-            "overflow": 280,
-            "footerBottom": 1072.09375,
+            "overflow": 239,
+            "footerBottom": 1031.265625,
             "clipping": false
           },
           "balanced": {
             "width": 600,
             "height": 800,
             "initial": true,
-            "overflow": 280,
-            "footerBottom": 1072.09375,
+            "overflow": 239,
+            "footerBottom": 1031.265625,
             "clipping": false
           },
           "dark": {
             "width": 600,
             "height": 800,
             "initial": true,
-            "overflow": 280,
-            "footerBottom": 1072.09375,
+            "overflow": 239,
+            "footerBottom": 1031.265625,
             "clipping": false
           }
         },
@@ -23313,7 +23313,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23342,7 +23342,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23371,7 +23371,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23391,24 +23391,24 @@
             "width": 601,
             "height": 800,
             "initial": true,
-            "overflow": 280,
-            "footerBottom": 1072.09375,
+            "overflow": 239,
+            "footerBottom": 1031.265625,
             "clipping": false
           },
           "balanced": {
             "width": 601,
             "height": 800,
             "initial": true,
-            "overflow": 280,
-            "footerBottom": 1072.09375,
+            "overflow": 239,
+            "footerBottom": 1031.265625,
             "clipping": false
           },
           "dark": {
             "width": 601,
             "height": 800,
             "initial": true,
-            "overflow": 280,
-            "footerBottom": 1072.09375,
+            "overflow": 239,
+            "footerBottom": 1031.265625,
             "clipping": false
           }
         },
@@ -23543,7 +23543,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23572,7 +23572,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23601,7 +23601,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23622,7 +23622,7 @@
             "height": 1024,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 693.34375,
+            "footerBottom": 656.109375,
             "clipping": false
           },
           "balanced": {
@@ -23630,7 +23630,7 @@
             "height": 1024,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 693.34375,
+            "footerBottom": 656.109375,
             "clipping": false
           },
           "dark": {
@@ -23638,7 +23638,7 @@
             "height": 1024,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 693.34375,
+            "footerBottom": 656.109375,
             "clipping": false
           }
         },
@@ -23773,7 +23773,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23802,7 +23802,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23831,7 +23831,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -23852,7 +23852,7 @@
             "height": 768,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 693.953125,
+            "footerBottom": 656.109375,
             "clipping": false
           },
           "balanced": {
@@ -23860,7 +23860,7 @@
             "height": 768,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 693.953125,
+            "footerBottom": 656.109375,
             "clipping": false
           },
           "dark": {
@@ -23868,7 +23868,7 @@
             "height": 768,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 693.953125,
+            "footerBottom": 656.109375,
             "clipping": false
           }
         },
@@ -24003,7 +24003,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -24032,7 +24032,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -24061,7 +24061,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -24082,7 +24082,7 @@
             "height": 800,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 597.875,
+            "footerBottom": 556.109375,
             "clipping": false
           },
           "balanced": {
@@ -24090,7 +24090,7 @@
             "height": 800,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 597.875,
+            "footerBottom": 556.109375,
             "clipping": false
           },
           "dark": {
@@ -24098,7 +24098,7 @@
             "height": 800,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 597.875,
+            "footerBottom": 556.109375,
             "clipping": false
           }
         },
@@ -24233,7 +24233,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -24262,7 +24262,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -24291,7 +24291,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -24312,7 +24312,7 @@
             "height": 800,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 597.90625,
+            "footerBottom": 556.109375,
             "clipping": false
           },
           "balanced": {
@@ -24320,7 +24320,7 @@
             "height": 800,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 597.90625,
+            "footerBottom": 556.109375,
             "clipping": false
           },
           "dark": {
@@ -24328,7 +24328,7 @@
             "height": 800,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 597.90625,
+            "footerBottom": 556.109375,
             "clipping": false
           }
         },
@@ -24463,7 +24463,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -24492,7 +24492,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -24521,7 +24521,7 @@
               "titleBelowBreadcrumb": true,
               "removedCopyAbsent": true,
               "emptyAsideAbsent": true,
-              "titleAccessoryAbsent": true,
+              "obsoleteTitleAccessoryAbsent": true,
               "nestedActionsAbsent": true
             },
             "header": {
@@ -24542,7 +24542,7 @@
             "height": 900,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 602,
+            "footerBottom": 556.109375,
             "clipping": false
           },
           "balanced": {
@@ -24550,7 +24550,7 @@
             "height": 900,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 602,
+            "footerBottom": 556.109375,
             "clipping": false
           },
           "dark": {
@@ -24558,7 +24558,7 @@
             "height": 900,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 602,
+            "footerBottom": 556.109375,
             "clipping": false
           }
         },
@@ -24568,7 +24568,7 @@
             "height": 720,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 600.40625,
+            "footerBottom": 556.109375,
             "clipping": false
           },
           "balanced": {
@@ -24576,7 +24576,7 @@
             "height": 720,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 600.40625,
+            "footerBottom": 556.109375,
             "clipping": false
           },
           "dark": {
@@ -24584,7 +24584,7 @@
             "height": 720,
             "initial": true,
             "overflow": 0,
-            "footerBottom": 600.40625,
+            "footerBottom": 556.109375,
             "clipping": false
           }
         },
@@ -25287,7 +25287,7 @@
             "profilePixels": {
               "width": 452,
               "height": 117,
-              "changedPixels": [4830, 4681],
+              "changedPixels": [4839, 4678],
               "passed": true
             },
             "currentCardMotion": {
@@ -25531,7 +25531,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1032, 1033],
+              "changedPixels": [1049, 1045],
               "passed": true
             },
             "requiredRowMotion": {
@@ -27456,35 +27456,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 135.298,
+                  "start": 259.966,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 135.298,
+                  "start": 259.966,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 135.298,
+                  "start": 259.966,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 135.298,
+                  "start": 259.966,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 135.298,
+                  "start": 259.966,
                   "opacity": "1"
                 }
               ],
@@ -28227,7 +28227,7 @@
             "profilePixels": {
               "width": 452,
               "height": 117,
-              "changedPixels": [5422, 5263],
+              "changedPixels": [5449, 5263],
               "passed": true
             },
             "currentCardMotion": {
@@ -28471,7 +28471,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1142, 1141],
+              "changedPixels": [1157, 1156],
               "passed": true
             },
             "requiredRowMotion": {
@@ -30396,35 +30396,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 191.132,
+                  "start": 485.398,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 191.132,
+                  "start": 485.398,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 191.132,
+                  "start": 485.398,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 191.132,
+                  "start": 485.398,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 191.132,
+                  "start": 485.398,
                   "opacity": "1"
                 }
               ],
@@ -31167,7 +31167,7 @@
             "profilePixels": {
               "width": 452,
               "height": 117,
-              "changedPixels": [5497, 5321],
+              "changedPixels": [5508, 5322],
               "passed": true
             },
             "currentCardMotion": {
@@ -31411,7 +31411,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1124, 1126],
+              "changedPixels": [1110, 1140],
               "passed": true
             },
             "requiredRowMotion": {
@@ -33336,35 +33336,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 165.798,
+                  "start": 192.03,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 165.798,
+                  "start": 192.03,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 165.798,
+                  "start": 192.03,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 165.798,
+                  "start": 192.03,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 165.798,
+                  "start": 192.03,
                   "opacity": "1"
                 }
               ],
@@ -40092,7 +40092,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 701,
+        "pageScrollHeight": 664,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -41104,7 +41104,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1080,
+        "pageScrollHeight": 1039,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -42006,36 +42006,36 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
-          "bytes": 43496,
-          "sha256": "0f1a4a31d4e3da84d30d09d8f3234f9817bebea35f42ee034d18a573e1f67e98"
+          "bytes": 46796,
+          "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
-      "bytes": 43496,
-      "sha256": "0f1a4a31d4e3da84d30d09d8f3234f9817bebea35f42ee034d18a573e1f67e98",
+      "bytes": 46796,
+      "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 22472,
+        "changedPixels": 136376,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.017339506172839508,
+        "changedPixelRatio": 0.10522839506172839,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
-          "bytes": 41536,
-          "sha256": "e8df70701c6eec49de76600b9bedbc9673b7c80473f8c8fe7ce763488023cda5"
+          "bytes": 43496,
+          "sha256": "0f1a4a31d4e3da84d30d09d8f3234f9817bebea35f42ee034d18a573e1f67e98"
         }
       },
       "promotionSource": {
-        "pullRequest": 174,
-        "ciRun": "37889190061",
-        "artifactId": "11598453651",
-        "artifactSha256": "7c56783832bcc5224bb4de4e68b99b1f2d25ce512aab1f9ff0607a42365cc081",
-        "sourceCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
-        "sourceResultSha256": "76b5fd6d3e8c9267e33aff295ba0765311331279b8353500119264bceb498537",
-        "previousCaptureCommit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
         "updatedPaths": [
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
@@ -42043,9 +42043,13 @@
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp"
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
         ],
-        "preservedImages": 235
+        "preservedImages": 231
       }
     },
     {
@@ -42844,36 +42848,36 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
           "tracked": true,
-          "bytes": 43496,
-          "sha256": "0f1a4a31d4e3da84d30d09d8f3234f9817bebea35f42ee034d18a573e1f67e98"
+          "bytes": 46796,
+          "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a"
         }
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
-      "bytes": 43496,
-      "sha256": "0f1a4a31d4e3da84d30d09d8f3234f9817bebea35f42ee034d18a573e1f67e98",
+      "bytes": 46796,
+      "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 22472,
+        "changedPixels": 136376,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.017339506172839508,
+        "changedPixelRatio": 0.10522839506172839,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
           "tracked": true,
-          "bytes": 41536,
-          "sha256": "e8df70701c6eec49de76600b9bedbc9673b7c80473f8c8fe7ce763488023cda5"
+          "bytes": 43496,
+          "sha256": "0f1a4a31d4e3da84d30d09d8f3234f9817bebea35f42ee034d18a573e1f67e98"
         }
       },
       "promotionSource": {
-        "pullRequest": 174,
-        "ciRun": "37889190061",
-        "artifactId": "11598453651",
-        "artifactSha256": "7c56783832bcc5224bb4de4e68b99b1f2d25ce512aab1f9ff0607a42365cc081",
-        "sourceCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
-        "sourceResultSha256": "76b5fd6d3e8c9267e33aff295ba0765311331279b8353500119264bceb498537",
-        "previousCaptureCommit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
         "updatedPaths": [
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
@@ -42881,9 +42885,13 @@
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp"
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
         ],
-        "preservedImages": 235
+        "preservedImages": 231
       }
     },
     {
@@ -43682,36 +43690,36 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 42906,
-          "sha256": "c61d3ca025192cb549c97475a96cabd7a9016be269057c2e1ed43c1401797866"
+          "bytes": 47186,
+          "sha256": "fbd2468c9fc69bdedc9506a670c5b8ce2ab1fe88b39cb93bce86b9a69b5ded65"
         }
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
-      "bytes": 42906,
-      "sha256": "c61d3ca025192cb549c97475a96cabd7a9016be269057c2e1ed43c1401797866",
+      "bytes": 47186,
+      "sha256": "fbd2468c9fc69bdedc9506a670c5b8ce2ab1fe88b39cb93bce86b9a69b5ded65",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 16184,
+        "changedPixels": 122701,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.012487654320987654,
+        "changedPixelRatio": 0.0946766975308642,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 41396,
-          "sha256": "76e9e8e5c5800bf83efc50e888be6993c0b58de6ba05098121c513c91546e9a1"
+          "bytes": 42906,
+          "sha256": "c61d3ca025192cb549c97475a96cabd7a9016be269057c2e1ed43c1401797866"
         }
       },
       "promotionSource": {
-        "pullRequest": 174,
-        "ciRun": "37889190061",
-        "artifactId": "11598453651",
-        "artifactSha256": "7c56783832bcc5224bb4de4e68b99b1f2d25ce512aab1f9ff0607a42365cc081",
-        "sourceCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
-        "sourceResultSha256": "76b5fd6d3e8c9267e33aff295ba0765311331279b8353500119264bceb498537",
-        "previousCaptureCommit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
         "updatedPaths": [
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
@@ -43719,9 +43727,13 @@
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp"
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
         ],
-        "preservedImages": 235
+        "preservedImages": 231
       }
     },
     {
@@ -44663,8 +44675,8 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 45060,
-          "sha256": "b13e146f411d04f6428a2e7bd2474e58d85b8db7c16db33b8798ff57d22553c2"
+          "bytes": 45504,
+          "sha256": "791fc2e8c8221fb22b31de9ac9c971e2a560e005fc03af8761aca2357ea4c392"
         }
       },
       "approvedCanvasComparison": {
@@ -44673,37 +44685,37 @@
         "asset": "docs/qa/canvas-parity/reference/hub-simulacao-associativo.webp",
         "region": "right",
         "referenceSha256": "c1230fb6def529b27849270da823c3233da84c705973ca2671e3da7df44611ea",
-        "colorDistance": 13.202582465277779,
+        "colorDistance": 13.092664930555555,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 36.498779296875,
+        "edgeDistance": 37.595703125,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
-      "bytes": 45060,
-      "sha256": "b13e146f411d04f6428a2e7bd2474e58d85b8db7c16db33b8798ff57d22553c2",
+      "bytes": 45504,
+      "sha256": "791fc2e8c8221fb22b31de9ac9c971e2a560e005fc03af8761aca2357ea4c392",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 74975,
+        "changedPixels": 185079,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.05785108024691358,
+        "changedPixelRatio": 0.14280787037037038,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 43434,
-          "sha256": "5e3acd764a70b466ef2e158eb7a351e488fbb0faacb47a1f7a602c03ce89d3c3"
+          "bytes": 45060,
+          "sha256": "b13e146f411d04f6428a2e7bd2474e58d85b8db7c16db33b8798ff57d22553c2"
         }
       },
       "promotionSource": {
-        "pullRequest": 174,
-        "ciRun": "37889190061",
-        "artifactId": "11598453651",
-        "artifactSha256": "7c56783832bcc5224bb4de4e68b99b1f2d25ce512aab1f9ff0607a42365cc081",
-        "sourceCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
-        "sourceResultSha256": "76b5fd6d3e8c9267e33aff295ba0765311331279b8353500119264bceb498537",
-        "previousCaptureCommit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
         "updatedPaths": [
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
@@ -44711,9 +44723,13 @@
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp"
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
         ],
-        "preservedImages": 235
+        "preservedImages": 231
       }
     },
     {
@@ -45600,36 +45616,36 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "tracked": true,
-          "bytes": 47010,
-          "sha256": "49a7a779f0fa524755db4ce6d0376088d9cc1e438fc6fdce556b94dfbb6e6e4d"
+          "bytes": 45468,
+          "sha256": "fd2dd7727272d4fa97ad0507f5a1d61b4c85b030c9c9b1e2150331dd06241924"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
-      "bytes": 47010,
-      "sha256": "49a7a779f0fa524755db4ce6d0376088d9cc1e438fc6fdce556b94dfbb6e6e4d",
+      "bytes": 45468,
+      "sha256": "fd2dd7727272d4fa97ad0507f5a1d61b4c85b030c9c9b1e2150331dd06241924",
       "width": 1280,
       "height": 720,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 22152,
+        "changedPixels": 145492,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.024036458333333333,
+        "changedPixelRatio": 0.1578689236111111,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "tracked": true,
-          "bytes": 45464,
-          "sha256": "ec3d9601c63a5c9d70f88043c4cc6ee6a642b6a208a9fc20dd80aefea4f721c0"
+          "bytes": 47010,
+          "sha256": "49a7a779f0fa524755db4ce6d0376088d9cc1e438fc6fdce556b94dfbb6e6e4d"
         }
       },
       "promotionSource": {
-        "pullRequest": 174,
-        "ciRun": "37889190061",
-        "artifactId": "11598453651",
-        "artifactSha256": "7c56783832bcc5224bb4de4e68b99b1f2d25ce512aab1f9ff0607a42365cc081",
-        "sourceCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
-        "sourceResultSha256": "76b5fd6d3e8c9267e33aff295ba0765311331279b8353500119264bceb498537",
-        "previousCaptureCommit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
         "updatedPaths": [
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
@@ -45637,9 +45653,13 @@
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp"
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
         ],
-        "preservedImages": 235
+        "preservedImages": 231
       }
     },
     {
@@ -46438,36 +46458,36 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
-          "bytes": 37154,
-          "sha256": "5acaaa2410ee96b50517a806ff3bacf24cc41ef8963d3c4b8be23742a33d3d48"
+          "bytes": 40432,
+          "sha256": "2648667cb87abbbc88b750ecfb2739b86fac43bf9f5c3d675f215ec5d2081f87"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-      "bytes": 37154,
-      "sha256": "5acaaa2410ee96b50517a806ff3bacf24cc41ef8963d3c4b8be23742a33d3d48",
+      "bytes": 40432,
+      "sha256": "2648667cb87abbbc88b750ecfb2739b86fac43bf9f5c3d675f215ec5d2081f87",
       "width": 1024,
       "height": 768,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 21596,
+        "changedPixels": 166434,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.027460734049479168,
+        "changedPixelRatio": 0.21163177490234375,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
-          "bytes": 36112,
-          "sha256": "871c22be4fa67a4eaf7722a961593f3e788aa38f6a2378f59e8584b5eac97f66"
+          "bytes": 37154,
+          "sha256": "5acaaa2410ee96b50517a806ff3bacf24cc41ef8963d3c4b8be23742a33d3d48"
         }
       },
       "promotionSource": {
-        "pullRequest": 174,
-        "ciRun": "37889190061",
-        "artifactId": "11598453651",
-        "artifactSha256": "7c56783832bcc5224bb4de4e68b99b1f2d25ce512aab1f9ff0607a42365cc081",
-        "sourceCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
-        "sourceResultSha256": "76b5fd6d3e8c9267e33aff295ba0765311331279b8353500119264bceb498537",
-        "previousCaptureCommit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
         "updatedPaths": [
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
@@ -46475,9 +46495,13 @@
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp"
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
         ],
-        "preservedImages": 235
+        "preservedImages": 231
       }
     },
     {
@@ -47282,36 +47306,36 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
           "tracked": true,
-          "bytes": 39514,
-          "sha256": "149ebe3a2ed4223e2b09611027e325d56048e02873fd681401acb9770df6bfdd"
+          "bytes": 37680,
+          "sha256": "ba5a5661413ad6f8bd159f92b9d7b7b017ce50e41b01339112b946a1ae61d8b5"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
-      "bytes": 39514,
-      "sha256": "149ebe3a2ed4223e2b09611027e325d56048e02873fd681401acb9770df6bfdd",
+      "bytes": 37680,
+      "sha256": "ba5a5661413ad6f8bd159f92b9d7b7b017ce50e41b01339112b946a1ae61d8b5",
       "width": 768,
       "height": 1024,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 21084,
+        "changedPixels": 137294,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.0268096923828125,
+        "changedPixelRatio": 0.1745783487955729,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
           "tracked": true,
-          "bytes": 38122,
-          "sha256": "6c0b333f1dca16c4bd61b6476defaf2f78b9b306bf8cfecb090d9dc203a68312"
+          "bytes": 39514,
+          "sha256": "149ebe3a2ed4223e2b09611027e325d56048e02873fd681401acb9770df6bfdd"
         }
       },
       "promotionSource": {
-        "pullRequest": 174,
-        "ciRun": "37889190061",
-        "artifactId": "11598453651",
-        "artifactSha256": "7c56783832bcc5224bb4de4e68b99b1f2d25ce512aab1f9ff0607a42365cc081",
-        "sourceCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
-        "sourceResultSha256": "76b5fd6d3e8c9267e33aff295ba0765311331279b8353500119264bceb498537",
-        "previousCaptureCommit": "f3a209d28d6e7cac55af19ead398282aa5a5439b",
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
         "updatedPaths": [
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
@@ -47319,9 +47343,13 @@
           "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp"
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
         ],
-        "preservedImages": 235
+        "preservedImages": 231
       }
     },
     {
@@ -48119,10 +48147,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "tracked": true,
+          "bytes": 26964,
+          "sha256": "1615745ad5b2ff6a1ff83eb8ccf54d876c906c6013646f34704ea500fb8c09bf"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+      "bytes": 26964,
+      "sha256": "1615745ad5b2ff6a1ff83eb8ccf54d876c906c6013646f34704ea500fb8c09bf",
+      "width": 390,
+      "height": 844,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 80448,
+        "totalPixels": 329160,
+        "changedPixelRatio": 0.24440393729493257,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
           "tracked": true,
@@ -48130,23 +48176,28 @@
           "sha256": "60354f95423e7cf8bcc53b551f69d065641d31955d8bb5fc08910fac64710cc7"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
-      "bytes": 26588,
-      "sha256": "60354f95423e7cf8bcc53b551f69d065641d31955d8bb5fc08910fac64710cc7",
-      "width": 390,
-      "height": 844,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 34,
-        "totalPixels": 329160,
-        "changedPixelRatio": 0.00010329323125531656,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
-          "tracked": true,
-          "bytes": 26588,
-          "sha256": "60354f95423e7cf8bcc53b551f69d065641d31955d8bb5fc08910fac64710cc7"
-        }
+      "promotionSource": {
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -48944,10 +48995,28 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 29228,
+          "sha256": "1b06737135ca0adfa4199fd0a58955e0496aff3b4266a0afcbebe37303de4296"
+        }
+      },
+      "path": "target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+      "bytes": 29228,
+      "sha256": "1b06737135ca0adfa4199fd0a58955e0496aff3b4266a0afcbebe37303de4296",
+      "width": 390,
+      "height": 844,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 93887,
+        "totalPixels": 329160,
+        "changedPixelRatio": 0.2852321059667031,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
           "tracked": true,
@@ -48955,23 +49024,28 @@
           "sha256": "2ca89fa6b3c412102f5c16758409ce7b909cc70549ac33fcaba9818cb8f2e10f"
         }
       },
-      "path": "target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
-      "bytes": 28988,
-      "sha256": "2ca89fa6b3c412102f5c16758409ce7b909cc70549ac33fcaba9818cb8f2e10f",
-      "width": 390,
-      "height": 844,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 33,
-        "totalPixels": 329160,
-        "changedPixelRatio": 0.0001002551950419249,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
-          "tracked": true,
-          "bytes": 28988,
-          "sha256": "2ca89fa6b3c412102f5c16758409ce7b909cc70549ac33fcaba9818cb8f2e10f"
-        }
+      "promotionSource": {
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -49769,10 +49843,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 304500,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "tracked": true,
+          "bytes": 27020,
+          "sha256": "522fb081059cc9d7d1b982b5ecde75353e555074625945b61550eed5a19f7637"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+      "bytes": 27020,
+      "sha256": "522fb081059cc9d7d1b982b5ecde75353e555074625945b61550eed5a19f7637",
+      "width": 375,
+      "height": 812,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 75928,
+        "totalPixels": 304500,
+        "changedPixelRatio": 0.24935303776683088,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
           "tracked": true,
@@ -49780,23 +49872,28 @@
           "sha256": "3af5bfb915846fc47b1ecb0c3d1a69f4a871976cfee29513093252b752ebd1fe"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
-      "bytes": 26704,
-      "sha256": "3af5bfb915846fc47b1ecb0c3d1a69f4a871976cfee29513093252b752ebd1fe",
-      "width": 375,
-      "height": 812,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 34,
-        "totalPixels": 304500,
-        "changedPixelRatio": 0.0001116584564860427,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
-          "tracked": true,
-          "bytes": 26704,
-          "sha256": "3af5bfb915846fc47b1ecb0c3d1a69f4a871976cfee29513093252b752ebd1fe"
-        }
+      "promotionSource": {
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -50594,10 +50691,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 181760,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
+          "tracked": true,
+          "bytes": 29370,
+          "sha256": "b5c7beeec51bc2456e241d12e1318f1357e768fdc3c6453b72cde1e71ac08af0"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
+      "bytes": 29370,
+      "sha256": "b5c7beeec51bc2456e241d12e1318f1357e768fdc3c6453b72cde1e71ac08af0",
+      "width": 320,
+      "height": 568,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 36925,
+        "totalPixels": 181760,
+        "changedPixelRatio": 0.2031525088028169,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
           "tracked": true,
@@ -50605,23 +50720,28 @@
           "sha256": "848ecf342bba8980cccfedbdf8dc033858cf5619c3eb0caed3960d531db40648"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
-      "bytes": 27904,
-      "sha256": "848ecf342bba8980cccfedbdf8dc033858cf5619c3eb0caed3960d531db40648",
-      "width": 320,
-      "height": 568,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 34,
-        "totalPixels": 181760,
-        "changedPixelRatio": 0.00018705985915492957,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
-          "tracked": true,
-          "bytes": 27904,
-          "sha256": "848ecf342bba8980cccfedbdf8dc033858cf5619c3eb0caed3960d531db40648"
-        }
+      "promotionSource": {
+        "pullRequest": 176,
+        "ciRun": "37986779336",
+        "artifactId": "11645226430",
+        "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+        "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+        "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -51605,44 +51725,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
         "tracked": true,
-        "bytes": 37154,
-        "sha256": "5acaaa2410ee96b50517a806ff3bacf24cc41ef8963d3c4b8be23742a33d3d48"
+        "bytes": 40432,
+        "sha256": "2648667cb87abbbc88b750ecfb2739b86fac43bf9f5c3d675f215ec5d2081f87"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
         "tracked": true,
-        "bytes": 47010,
-        "sha256": "49a7a779f0fa524755db4ce6d0376088d9cc1e438fc6fdce556b94dfbb6e6e4d"
+        "bytes": 45468,
+        "sha256": "fd2dd7727272d4fa97ad0507f5a1d61b4c85b030c9c9b1e2150331dd06241924"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
         "tracked": true,
-        "bytes": 43496,
-        "sha256": "0f1a4a31d4e3da84d30d09d8f3234f9817bebea35f42ee034d18a573e1f67e98"
+        "bytes": 46796,
+        "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
         "tracked": true,
-        "bytes": 27904,
-        "sha256": "848ecf342bba8980cccfedbdf8dc033858cf5619c3eb0caed3960d531db40648"
+        "bytes": 29370,
+        "sha256": "b5c7beeec51bc2456e241d12e1318f1357e768fdc3c6453b72cde1e71ac08af0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
         "tracked": true,
-        "bytes": 26704,
-        "sha256": "3af5bfb915846fc47b1ecb0c3d1a69f4a871976cfee29513093252b752ebd1fe"
+        "bytes": 27020,
+        "sha256": "522fb081059cc9d7d1b982b5ecde75353e555074625945b61550eed5a19f7637"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
         "tracked": true,
-        "bytes": 26588,
-        "sha256": "60354f95423e7cf8bcc53b551f69d065641d31955d8bb5fc08910fac64710cc7"
+        "bytes": 26964,
+        "sha256": "1615745ad5b2ff6a1ff83eb8ccf54d876c906c6013646f34704ea500fb8c09bf"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
         "tracked": true,
-        "bytes": 39514,
-        "sha256": "149ebe3a2ed4223e2b09611027e325d56048e02873fd681401acb9770df6bfdd"
+        "bytes": 37680,
+        "sha256": "ba5a5661413ad6f8bd159f92b9d7b7b017ce50e41b01339112b946a1ae61d8b5"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
@@ -52199,8 +52319,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
         "tracked": true,
-        "bytes": 28988,
-        "sha256": "2ca89fa6b3c412102f5c16758409ce7b909cc70549ac33fcaba9818cb8f2e10f"
+        "bytes": 29228,
+        "sha256": "1b06737135ca0adfa4199fd0a58955e0496aff3b4266a0afcbebe37303de4296"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-caixa-dark-390x844.webp",
@@ -52259,20 +52379,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 42906,
-        "sha256": "c61d3ca025192cb549c97475a96cabd7a9016be269057c2e1ed43c1401797866"
+        "bytes": 47186,
+        "sha256": "fbd2468c9fc69bdedc9506a670c5b8ce2ab1fe88b39cb93bce86b9a69b5ded65"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 45060,
-        "sha256": "b13e146f411d04f6428a2e7bd2474e58d85b8db7c16db33b8798ff57d22553c2"
+        "bytes": 45504,
+        "sha256": "791fc2e8c8221fb22b31de9ac9c971e2a560e005fc03af8761aca2357ea4c392"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
         "tracked": true,
-        "bytes": 43496,
-        "sha256": "0f1a4a31d4e3da84d30d09d8f3234f9817bebea35f42ee034d18a573e1f67e98"
+        "bytes": 46796,
+        "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-balanced-1440x900.webp",
@@ -52384,7 +52504,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "0123fe3478fd45e9478d857c457cd02a9924a1ccdb852b4c376143a0fc10355c"
+    "manifestSha256": "3e6e7750edb8d0fb4e4c1dd9a2116b7364f276d515565b7a0052e9135a8b71c6"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -52395,8 +52515,8 @@
     "requested": true,
     "performed": true,
     "method": "same-filesystem transactional rename with rollback",
-    "previousBaselineManifestSha256": "60b99dcdb8a606673205f272284aab298e61c219105132954158142f99ae5367",
-    "previousBaselineResultSha256": "192daf492c5da692e28d4a12fd28e1b867829e5989f212996450f52f63470c82"
+    "previousBaselineManifestSha256": "0123fe3478fd45e9478d857c457cd02a9924a1ccdb852b4c376143a0fc10355c",
+    "previousBaselineResultSha256": "3276eb4577ec98b36233ef3255462f62dcfe93cd733745a226428ec685418d6b"
   },
   "visualInspectionCoverage": {
     "responsiveScreenshots": 154,
@@ -52449,6 +52569,29 @@
         "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp"
       ],
       "preservedImages": 235
+    },
+    {
+      "pullRequest": 176,
+      "ciRun": "37986779336",
+      "artifactId": "11645226430",
+      "artifactSha256": "60c7698d714bc960df60ca083fcace6f124dc573ec57fb6884f07d9e637de772",
+      "sourceCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+      "sourceResultSha256": "dbc4cf9d38e8b47c96ab0730da847d889bfa8fcfa5dc59f7fe371f8115439150",
+      "previousCaptureCommit": "4c6ad9a4da8b7fe36bf8161888be4a521a21be09",
+      "updatedPaths": [
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
+      ],
+      "preservedImages": 231
     }
   ]
 }

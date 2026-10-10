@@ -5,6 +5,7 @@
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
 import { AssociativePageGuide } from "./AssociativePageGuide";
+import { SimulationCanvasHeader } from "../SimulationCanvasHeader";
 import { synchronizeAssociativeMotion } from "./associative-motion";
 import { ASSOCIATIVE_FIELD_GUIDE_SECTION, ASSOCIATIVE_POLICY_TOPICS, ASSOCIATIVE_PROFILE_HELP } from "./associative-learning-content";
 import { ASSOCIATIVE_FAQ_REFERENCE, ASSOCIATIVE_FAQ_SECTIONS, type AssociativeFaqSection } from "./associative-faq-content";
@@ -2443,9 +2444,11 @@ function enrichInventory(items: InventoryItem[], reference: InventoryItem[], off
 export function InvestorCalculator({
   directTable = false,
   directVisualLayout = false,
+  pageTitle,
 }: {
   directTable?: boolean;
   directVisualLayout?: boolean;
+  pageTitle?: string;
 }) {
   const usesDirectDesign = directTable || directVisualLayout;
   const compactAssociativeStock = directVisualLayout && !directTable;
@@ -3996,6 +3999,8 @@ export function InvestorCalculator({
   </div>;
 
   return (
+    <>
+    {pageTitle ? <SimulationCanvasHeader title={pageTitle} titleAccessory={compactAssociativeStock ? <AssociativePageGuide rootRef={motionRootRef} onStart={() => setTourOpen(false)} /> : undefined} /> : null}
     <div ref={motionRootRef} className={`investor-workspace${usesDirectDesign ? " investor-direct-workspace" : ""}${directVisualLayout ? " investor-direct-design-copy" : ""}${directTable ? directPrintReady ? " investor-direct-print-ready" : " investor-direct-print-blocked" : ""}`}>
       {directTable && !directPrintReady ? <section className="investor-direct-print-blocked-notice" aria-label="Impressão indisponível">
         <h2>Impressão indisponível</h2>
@@ -4147,7 +4152,6 @@ export function InvestorCalculator({
           </table>
         </div>
 
-        {compactAssociativeStock ? <AssociativePageGuide rootRef={motionRootRef} onStart={() => setTourOpen(false)} /> : null}
       </section>
 
       {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} sectionRef={directTable ? directJourneySectionRef : undefined} /> : null}
@@ -4911,5 +4915,6 @@ export function InvestorCalculator({
         </div>
       ) : null}
     </div>
+    </>
   );
 }

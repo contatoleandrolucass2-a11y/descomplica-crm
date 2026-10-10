@@ -1,14 +1,25 @@
+.investor-page-shell.investor-associative-table-page .simulation-canvas-title-row {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+
 .investor-page-shell.investor-associative-table-page .associative-page-guide-launcher {
   display: flex;
+  flex: 0 0 auto;
+  max-width: 100%;
   justify-content: flex-end;
-  padding: 0 16px 12px;
+  margin-left: auto;
 }
 
 .investor-page-shell.investor-associative-table-page .associative-page-guide-launcher > button {
-  width: 260px;
+  width: max-content;
+  min-width: 0;
   max-width: 100%;
   min-height: 36px;
   margin: 0;
+  padding: 8px 16px;
+  white-space: nowrap;
 }
 
 .investor-page-shell.investor-associative-table-page .associative-guide-active-target {

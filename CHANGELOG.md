@@ -2,6 +2,12 @@
 
 ## 2026-10-09
 
+- Move Guia passo a passo para a direita do titulo do Associativo, com largura
+  ajustada ao texto e quebra de linha em telas estreitas. Preserva os 36 passos
+  e o brilho existente; remove o acionador do rodape do estoque.
+- Confere o guia em 18 cenarios e atualiza 11 referencias visuais revisadas,
+  mantendo as outras 231 imagens e os limites de comparacao.
+
 - Substitui o símbolo PNG do cabeçalho protegido por uma marca SVG vetorial.
   O “D” agora herda a mesma cor de “escomplica” nos temas Claro, Médio e
   Escuro, enquanto a seta vermelha e a geometria compacta permanecem iguais.
@@ -15,6 +21,8 @@
 - Confere estoque completo em desktop/notebook e atualiza sete referencias
   visuais revisadas do Associativo, preservando as outras 235.
 - Integra a atualizacao aprovada de Repasse antes da validacao conjunta do guia.
+- Publica o guia no release `c20c9d2`, com CI completa e conferencia da
+  abertura, navegacao e fechamento na pagina real.
 
 ## 2026-10-08
 

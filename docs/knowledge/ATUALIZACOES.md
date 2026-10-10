@@ -1,5 +1,21 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-09: Posicao atual do guia Associativo
+
+- Fonte: pedido mais recente do usuario e componentes da branch
+  `codex/guia-associativo-cabecalho`. Status: validado localmente e na primeira
+  matriz funcional da CI; comparacoes visuais atualizadas apos revisao.
+- Guia passo a passo agora pertence ao cabecalho, a direita do titulo, e nao
+  ao rodape do estoque. Largura acompanha o texto, sem dimensao fixa de 260px.
+- Cabecalho opcional no InvestorCalculator reutiliza SimulationCanvasHeader e
+  mantem a referencia do guia no mesmo proprietario do estado. Outros simuladores
+  continuam com seus cabecalhos anteriores; motores e os 36 passos nao mudam.
+- QA deve conferir o acionador no titulo, preservar a rejeicao dos rotulos
+  anteriormente removidos e testar quebra em 320px/375px sem sobreposicao.
+- Testes, CI e release registrados na auditoria especifica deste ajuste.
+- PR #176: 11 referencias mudam, inclusive celulares agora com o acionador no
+  primeiro viewport; 231 preservadas. CI final em verify/publicacao pendentes.
+
 ## 2026-10-09: símbolo da marca deve herdar o token do texto
 
 - Fonte: imagens de referência do usuário, `ProtectedShell.module.css` e
@@ -18,6 +34,10 @@
 
 ## 2026-10-09: Apresentacao da pagina Associativo
 
+- Estado final: publicado em `c20c9d2` pelo PR #174. CI main `37898684744`
+  integralmente aprovada, prova da imagem e dois perfis, backup, CAS e health
+  confirmados. Abertura/avanco/retorno/Escape/reabertura conferidos em sessao real,
+  sem selecionar unidade ou modificar valores; nenhum erro de console.
 - Fonte: pedido do usuario, branch `codex/guia-pagina-associativo`, componente
   `AssociativePageGuide` e catalogo `associative-page-guide-content.ts`.
 - O novo Guia passo a passo fica no rodape direito do estoque, exclusivo do

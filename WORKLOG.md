@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-09: Guia do Associativo no cabecalho
+
+- Fonte: novo pedido e dois prints do usuario. Branch
+  `codex/guia-associativo-cabecalho`; substitui a posicao inferior antes pedida.
+- Cabecalho e acionador compartilham a mesma linha, com largura intrinseca e
+  quebra responsiva. O guia permanece unico e ligado ao mesmo estado da pagina.
+- Nenhuma regra financeira, dado, permissao, rota ou dependencia alterada.
+- Testes atualizados verificam a nova posicao, largura em funcao do texto,
+  ausencia do botao antigo, area de toque e preservacao dos 36 passos.
+- Lint, tipos, build e 18 cenarios completos do guia passaram. CI Linux aprovou
+  suite integral, banco, restore e E2E; 11 referencias visuais revisadas e
+  atualizadas, com 231 preservadas. Reteste final e publicacao pendentes.
+  Limitacoes POSIX/timeouts locais registradas; nenhuma verificacao removida.
+  Evidencias em
+  `docs/audits/associativo-guia-cabecalho-2026-10-09.md`.
+
 ## 2026-10-09: Marca vetorial com cor coerente entre temas
 
 - Fonte: comparativo visual fornecido pelo usuário e implementação atual do
@@ -20,6 +36,9 @@
 
 ## 2026-10-09: Guia completo da pagina Associativo
 
+- Resultado final: publicado no release `c20c9d2` pelo PR #174, CI main
+  `37898684744` integralmente aprovada, imagem comprovada, backup/CAS e health
+  conferidos. Guia aberto e navegacao validada na sessao real sem alterar dados.
 - Fonte: pedido e dois prints do usuario. Branch `codex/guia-pagina-associativo`.
 - Botao no rodape direito do quadro de estoque, com a classe visual existente.
   Guia independente do preenchimento, com 36 etapas, anterior/proximo, fechar,

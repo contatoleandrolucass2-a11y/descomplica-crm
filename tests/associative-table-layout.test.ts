@@ -5,6 +5,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { SimulationCanvasHeader } from "@/app/(protected)/app/simulacao/_components/SimulationCanvasHeader";
+import { AssociativePageGuide } from "@/app/(protected)/app/simulacao/_components/archive-investor/AssociativePageGuide";
 
 const { checkAssociativeCanvasHeading } = createRequire(import.meta.url)(
   "../scripts/qa/associative-compact-layout.mjs",
@@ -28,19 +29,32 @@ const styles = readFileSync(
 
 describe("cabecalho do simulador Associativo", () => {
   it.runIf(process.env.ASSOCIATIVE_EFFECTS_BROWSER === "1")(
-    "accepts the real title-only header and rejects every removed label",
+    "accepts the requested guide beside the title and rejects every removed label",
     async () => {
       const browser = await chromium.launch({ headless: true });
       try {
         for (const width of [375, 1440]) {
           const page = await browser.newPage({ viewport: { width, height: 900 } });
           const header = renderToStaticMarkup(
-            createElement(SimulationCanvasHeader, { title: "Simulador Tabela Associativo" }),
+            createElement(SimulationCanvasHeader, {
+              title: "Simulador Tabela Associativo",
+              titleAccessory: createElement(AssociativePageGuide, {
+                rootRef: { current: null },
+                onStart: () => {},
+              }),
+            }),
           );
           await page.setContent(
             `<style>body{margin:0}h1{margin:0}[data-protected-topbar]{height:58px}.investor-main{padding:10px}</style><header data-protected-topbar></header><main data-protected-main-content><div class="investor-main">${header}</div></main>`,
           );
           expect((await checkAssociativeCanvasHeading(page)).removedCopyAbsent).toBe(true);
+          await page.locator(".simulation-canvas-title-row").evaluate((element) => {
+            element.append(document.createElement("button"));
+          });
+          await expect(checkAssociativeCanvasHeading(page)).rejects.toThrow();
+          await page
+            .locator(".simulation-canvas-title-row > button")
+            .evaluate((element) => element.remove());
           for (const className of [
             "simulation-canvas-eyebrow",
             "simulation-canvas-description",
@@ -93,8 +107,8 @@ describe("cabecalho do simulador Associativo", () => {
     expect(actionable).toContain("Abrir");
   });
   it("remove os rotulos duplicados e preserva o titulo acessivel", () => {
-    expect(archive).toContain("<SimulationCanvasHeader");
-    expect(archive).toContain('title="Simulador Tabela Associativo"');
+    expect(archive).toContain("<InvestorCalculator");
+    expect(archive).toContain('pageTitle="Simulador Tabela Associativo"');
     expect(archive).toContain('data-canvas-layout="simulator"');
     expect(archive).not.toContain('className="documentation-breadcrumb"');
     expect(archive).not.toContain('className="goal-kicker"');

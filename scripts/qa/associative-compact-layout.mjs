@@ -343,7 +343,9 @@ export async function checkAssociativeCanvasHeading(page) {
         ".simulation-canvas-eyebrow, .simulation-canvas-description, .simulation-canvas-status",
       ),
       emptyAsideAbsent: !element.querySelector(".simulation-canvas-header-aside"),
-      titleAccessoryAbsent: !element.querySelector(".simulation-canvas-title-row > :not(h1)"),
+      obsoleteTitleAccessoryAbsent: !element.querySelector(
+        ".simulation-canvas-title-row > :not(h1):not(.associative-page-guide-launcher)",
+      ),
       nestedActionsAbsent: !element.querySelector(".simulation-canvas-actions"),
     };
   });
@@ -359,7 +361,10 @@ export async function checkAssociativeCanvasHeading(page) {
     "Associative heading must not restore the three removed labels",
   );
   assert.ok(hero.emptyAsideAbsent, "Removed status must not leave an empty aside");
-  assert.ok(hero.titleAccessoryAbsent, "Canvas heading must not restore the removed title action");
+  assert.ok(
+    hero.obsoleteTitleAccessoryAbsent,
+    "Canvas heading may only add the requested page guide next to the title",
+  );
   assert.ok(hero.nestedActionsAbsent, "Canvas heading must not restore nested simulator actions");
   return hero;
 }
