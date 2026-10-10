@@ -1,5 +1,61 @@
 # Worklog
 
+## 2026-10-10: Draft aprovado do CRM integrado para release
+
+- Fonte: pacote `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps`.
+  A referencia final `outputs/modelo-site.html` tem SHA-256
+  `a30980e6f2b790b648348d602e1cb07c9de6f0718ce6450ddb58e034f4f1c698`;
+  o manifesto conferido tem SHA-256
+  `c113f793b50efc36c08a0c2757980725af252d01c474f7ffd9ed773566242e18`.
+- O shell protegido adota a marca horizontal completa por tema e a navegacao
+  aprovada: Simulacao abre o hub diretamente, Configuracoes fica no menu da
+  conta e Administracao agrupa Usuarios, Paginas e Integracoes. O antigo nome
+  Conectar Sistemas permanece apenas na URL compativel.
+- Dashboard, etapas do funil, Ranking, Parcerias, Configuracoes, Recurso MKT,
+  Administracao, Usuarios e Integracoes receberam o canvas compacto e
+  responsivo dos temas Claro, Medio e Escuro. O hub conserva seis ferramentas
+  em duas colunas no desktop e uma no celular; Documentacao e CAIXA ganharam a
+  apresentacao aprovada sem habilitar motores indisponiveis.
+- Integracoes usa logos do pacote e mostra somente evidencias reais. Salesforce
+  distingue sessao, coleta e publicacao; n8n e Supabase ficam como nao
+  verificados quando nao ha fonte de status. Quantidades e estados ficticios da
+  previa nao foram transportados.
+- Usuarios agora carrega paginas reais de seis contas no servidor, busca e
+  filtra sem carregar o diretorio inteiro e continua com carregamento por
+  rolagem, fallback manual, erro e fim da lista. Permissoes herdadas e excecoes
+  sao apresentadas separadamente, mantendo guards, hierarquia e autorizacao no
+  servidor/banco.
+- Preservacao estrutural aplicada a
+  `/app/simulacao/associativo-fluxo-linear`, `/app/simulacao/tabela-direta`,
+  `/app/simulacao/tabela-investidor` e `/app/simulacao/tabelao`: componentes,
+  campos e motores existentes nao foram redesenhados. Os estilos novos do hub,
+  Documentacao e CAIXA foram escopados fora desses quatro destinos. A matriz
+  autenticada aprovou 40 checks de navegacao dessas quatro rotas; o Associativo
+  recebeu ainda revisao manual de 30 capturas.
+- Gates comprovados pelo coordenador: `pnpm format:check`, `pnpm lint`,
+  `pnpm typecheck` e `pnpm resources:check` aprovados; `pnpm test` com 124
+  arquivos, 2.292 aprovados e seis ignorados, mais 83 testes Node operacionais;
+  `pnpm build` aprovado no Next.js 16.3.8 com 45 rotas.
+- `pnpm qa:e2e:release` passou 19 cenarios e ignorou um previsto; o gate
+  concorrente do Associativo tambem ficou verde. O QA visual autenticado aprovou
+  154 checks responsivos, 88 de tema, 242 Axe, 242 comparacoes, 110 de zoom e 22
+  canvases aprovados. A promocao da baseline registrou `performed: true` e
+  `eligible: true`.
+- `/admin/usuarios` mediu 2.592 px em 1.440 px de largura. O teto estrito foi
+  calibrado de 2.500 para 2.600 px para comportar a matriz completa de 23
+  permissoes e seus badges de acesso efetivo; a pagina permaneceu dentro do novo
+  limite na promocao autenticada.
+- O QA sintetico de Integracoes passou em nove combinacoes de tema/largura, seis
+  estados, zoom de 200% e carregamento dos SVGs.
+- A verificacao pos-commit `pnpm qa:visual:authenticated`, em modo `verify`,
+  passou com 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
+  comparacoes candidato/baseline e 110 de zoom. As fixtures efemeras foram
+  removidas ao final.
+- Estado: E2E, promocao visual e verificacao pos-commit aprovados. PR, CI do SHA
+  candidato, imagem imutavel, backup/rollback, publicacao por CAS e verificacao
+  de producao continuam pendentes; producao nao foi publicada. Evidencias em
+  `docs/qa/draft-crm-vps-2026-10-10.md`.
+
 ## 2026-10-09: Guia do Associativo no cabecalho
 
 - Fonte: novo pedido e dois prints do usuario. Branch
