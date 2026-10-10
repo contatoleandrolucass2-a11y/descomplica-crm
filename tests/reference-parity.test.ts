@@ -372,7 +372,6 @@ describe("current account display and protected header contract", () => {
                 createElement(DescomplicaBrandMark, {
                   className: styles.brandMark,
                 }),
-                createElement("span", { className: styles.brandName }, "escomplica"),
               ),
               createElement(AuthorizedNavigation, { pages }),
               createElement(ThemeSwitch, { canPersist: false }),

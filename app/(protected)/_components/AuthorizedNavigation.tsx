@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent }
 import {
   buildNavigationGroups,
   isNavigationGroupActive,
+  isNavigationRootActive,
   type DisabledNavigationItem,
   type NavigationGroup,
   type NavigationItem,
@@ -39,7 +40,7 @@ function groupEntries(
   disabledItems: DisabledNavigationItem[],
 ): NavigationEntry[] {
   return [
-    { kind: "link" as const, item: group.page },
+    ...(group.includeOverview ? [{ kind: "link" as const, item: group.page }] : []),
     ...group.children.map((item) => ({ kind: "link" as const, item })),
     ...disabledItems
       .filter((item) => item.parentKey === group.page.key && item.section === group.page.section)
@@ -328,10 +329,12 @@ function AuthorizedNavigationState({
       >
         <ul className={styles.navigationList}>
           {groups.map((group) => {
+            const directToHub = group.page.key === "crm.simulation";
             const hasDisabledChildren = disabledItems.some(
               (item) => item.parentKey === group.page.key && item.section === group.page.section,
             );
-            const hasChildren = group.children.length > 0 || hasDisabledChildren;
+            const hasChildren = !directToHub && (group.children.length > 0 || hasDisabledChildren);
+            const activeRoot = isNavigationRootActive(pathname, group.page);
 
             return (
               <li className={styles.navigationItem} key={group.page.key}>
@@ -352,6 +355,7 @@ function AuthorizedNavigationState({
                     prefetch={false}
                     aria-current={pathname === group.page.path ? "page" : undefined}
                     className={styles.navigationLink}
+                    data-active={activeRoot || undefined}
                     data-navigation-root-control
                     onClick={closeNavigation}
                   >

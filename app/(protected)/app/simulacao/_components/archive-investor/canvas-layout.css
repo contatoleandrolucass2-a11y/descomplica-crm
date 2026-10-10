@@ -112,6 +112,47 @@
   min-width: 0;
 }
 
+.simulation-tool-navigation {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.simulation-tool-navigation a {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--analytics-line);
+  border-radius: 6px;
+  background: var(--analytics-surface);
+  padding: 7px 11px;
+  color: var(--analytics-ink);
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.simulation-tool-navigation a[aria-current="page"] {
+  border-color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan) 8%, var(--analytics-surface));
+  color: var(--analytics-cyan-strong);
+}
+
+.simulation-tool-navigation a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .simulation-tool-navigation a {
+    min-height: 44px;
+  }
+}
+
 .investor-page-shell .simulation-canvas-header {
   --canvas-accent: var(--inv-cyan, var(--inv-color-accent));
   --canvas-text: var(--inv-text, var(--inv-color-text));
@@ -708,7 +749,7 @@
   .documentation-values-submit
   .documentation-hero-submit-copy
   small {
-  color: var(--analytics-muted);
+  color: var(--analytics-ink);
 }
 
 .documentation-page-shell[data-canvas-layout="documentation"]
@@ -831,5 +872,156 @@
 @media print {
   .documentation-canvas-action-bar {
     display: none !important;
+  }
+}
+
+/* Approved WF16 presentation; scoped away from the four archived simulators. */
+.documentation-page-shell[data-canvas-layout="documentation"] {
+  --analytics-page: #f5f6f8;
+  --analytics-surface: #ffffff;
+  --analytics-surface-muted: #f8f9fb;
+  --analytics-ink: #242a33;
+  --analytics-muted: #68727f;
+  --analytics-line: #d2dce7;
+  --analytics-cyan: #1c65a5;
+  --analytics-cyan-strong: #1c65a5;
+  --analytics-lime: #8dcaff;
+  --focus-ring: #1c65a5;
+
+  min-height: calc(100dvh - 3.625rem);
+  padding: 18px 28px 32px;
+}
+
+:root[data-theme="balanced"] .documentation-page-shell[data-canvas-layout="documentation"] {
+  --analytics-page: #e6ecf2;
+  --analytics-surface: #f5f8fb;
+  --analytics-surface-muted: #eaf0f6;
+  --analytics-ink: #213549;
+  --analytics-muted: #566c81;
+  --analytics-line: #c5d2e0;
+  --analytics-cyan: #1b609b;
+  --analytics-cyan-strong: #1b609b;
+  --focus-ring: #1b609b;
+}
+
+:root[data-theme="dark"] .documentation-page-shell[data-canvas-layout="documentation"] {
+  --analytics-page: #061f31;
+  --analytics-surface: #09283d;
+  --analytics-surface-muted: #0c3048;
+  --analytics-ink: #e6f0f7;
+  --analytics-muted: #a2bed1;
+  --analytics-line: #285d75;
+  --analytics-cyan: #59c8dd;
+  --analytics-cyan-strong: #59c8dd;
+  --analytics-lime: #8dcaff;
+  --focus-ring: #59c8dd;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] > .simulation-canvas-header,
+.documentation-page-shell[data-canvas-layout="documentation"] > .simulation-tool-navigation,
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-page-main {
+  width: min(100%, 88.75rem);
+  margin-inline: auto;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] > .simulation-canvas-header {
+  position: static;
+  grid-template-columns: minmax(0, 1fr) auto;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0 0 10px;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] > .simulation-canvas-header::after {
+  display: none;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"]
+  > .simulation-canvas-header
+  .simulation-canvas-title-row
+  h1 {
+  font-size: clamp(1.55rem, 2.4vw, 1.8rem);
+  font-weight: 720;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .simulation-canvas-eyebrow {
+  margin-bottom: 4px;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .simulation-canvas-description {
+  font-size: 0.76rem;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .simulation-canvas-status {
+  min-height: 32px;
+  border-radius: 5px;
+  padding: 6px 10px;
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] > .simulation-tool-navigation {
+  margin-bottom: 10px;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-page-main {
+  padding-top: 0;
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-panel {
+  border-color: var(--analytics-line);
+  border-radius: 7px;
+  background: var(--analytics-surface);
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-panel > header {
+  border-color: var(--analytics-line);
+  background: color-mix(in srgb, var(--analytics-cyan) 5%, var(--analytics-surface));
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-panel > header > span {
+  border-color: var(--analytics-line);
+  background: transparent;
+  color: var(--analytics-cyan-strong);
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-choice-row,
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-money-input {
+  border-color: var(--analytics-line);
+  background: var(--analytics-surface-muted);
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"]
+  .documentation-choice-row
+  label.selected {
+  border-color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan) 8%, var(--analytics-surface));
+}
+
+.documentation-page-shell[data-canvas-layout="documentation"] .documentation-canvas-action-bar {
+  border-color: var(--analytics-line);
+  border-radius: 7px;
+}
+
+@media (max-width: 760px) {
+  .documentation-page-shell[data-canvas-layout="documentation"] {
+    padding: 14px 12px 24px;
+  }
+
+  .documentation-page-shell[data-canvas-layout="documentation"] > .simulation-canvas-header {
+    width: 100%;
+    grid-template-columns: 1fr;
+    padding-inline: 0;
+  }
+
+  .documentation-page-shell[data-canvas-layout="documentation"] > .simulation-tool-navigation,
+  .documentation-page-shell[data-canvas-layout="documentation"] .documentation-page-main {
+    width: 100%;
   }
 }

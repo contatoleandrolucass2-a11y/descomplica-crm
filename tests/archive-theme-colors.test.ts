@@ -75,29 +75,41 @@ function contrast(a: string, b: string) {
 }
 
 describe("archive theme color contract", () => {
-  it("uses the supplied symbol as the first letter of the accessible global home link", () => {
+  it("uses the approved full horizontal wordmark in the accessible global home link", () => {
     const layout = readFileSync(new URL("../app/(protected)/layout.tsx", import.meta.url), "utf8");
     const mark = readFileSync(
       new URL("../app/(protected)/_components/DescomplicaBrandMark.tsx", import.meta.url),
+      "utf8",
+    );
+    const lightWordmark = readFileSync(
+      new URL("../public/brand/descomplica-wordmark-light.svg", import.meta.url),
+      "utf8",
+    );
+    const darkWordmark = readFileSync(
+      new URL("../public/brand/descomplica-wordmark-dark.svg", import.meta.url),
       "utf8",
     );
 
     expect(layout).toContain("href={navigationHome.path}");
     expect(layout).toContain('aria-label="Descomplica, início"');
     expect(layout).toContain("<DescomplicaBrandMark");
-    expect(layout).toContain("escomplica");
+    expect(layout).not.toContain("brandName");
     expect(layout).toContain("data-protected-brand");
-    expect(mark).toContain('viewBox="0 0 1254 1254"');
-    expect(mark).toContain('fill="currentColor"');
-    expect(mark).toContain('fill="#d21f31"');
+    expect(mark).toContain('src="/brand/descomplica-wordmark-light.svg"');
+    expect(mark).toContain('src="/brand/descomplica-wordmark-dark.svg"');
     expect(mark).toContain('aria-hidden="true"');
-    expect(mark).toContain('focusable="false"');
+    for (const wordmark of [lightWordmark, darkWordmark]) {
+      expect(wordmark).toContain('viewBox="273 211 1671 285"');
+      expect(wordmark).toContain('fill="#d41424"');
+    }
+    expect(lightWordmark).toContain('fill="#252e38"');
+    expect(darkWordmark).toContain('fill="#ffffff"');
   });
 
-  it("keeps the vector symbol unframed and in the same color as the wordmark", () => {
+  it("keeps the horizontal wordmark unframed at its approved aspect ratio", () => {
     const brand = shellDeclarations(".brandMark");
-    expect(brand.width).toBe(brand.height);
-    expect(brand.color).toBe("inherit");
+    expect(Number.parseFloat(brand.width!) / Number.parseFloat(brand.height!)).toBeGreaterThan(5);
+    expect(brand["line-height"]).toBe("0");
     expect(
       Object.keys(brand).filter((property) =>
         /^(background|border|box-shadow|filter)$/.test(property),
@@ -344,10 +356,22 @@ describe("archive theme color contract", () => {
   });
 
   for (const theme of ["light", "balanced", "dark"]) {
-    it(`${theme}: colors the vector D with the same token as the wordmark`, () => {
+    it(`${theme}: selects the approved wordmark variant`, () => {
       expect(header(theme)["--header-text"]).toBe(theme === "dark" ? "#f3fbff" : "#182a40");
       expect(shellDeclarations(".brand").color).toBe("var(--header-text)");
-      expect(shellDeclarations(".brandMark").color).toBe("inherit");
+      expect(shellDeclarations(".brandMark [data-brand-wordmark-dark]").display).toBe("none");
+      if (theme === "dark") {
+        expect(
+          shellDeclarations(
+            ':global(:root[data-theme="dark"]) .brandMark [data-brand-wordmark-light]',
+          ).display,
+        ).toBe("none");
+        expect(
+          shellDeclarations(
+            ':global(:root[data-theme="dark"]) .brandMark [data-brand-wordmark-dark]',
+          ).display,
+        ).toBe("block");
+      }
     });
 
     it(`${theme}: uses blue accents and positive states, without green theme tokens`, () => {

@@ -51,7 +51,7 @@ describe("connected systems", () => {
       refreshUrl: new URL("https://private.example.test/webhook"),
     });
     const markup = renderToStaticMarkup(await ConnectedSystemsPage());
-    expect(markup).toContain("Sessão não verificada");
+    expect(markup).toContain("Não verificado");
     expect(markup).toContain("Configurada");
     expect(markup).not.toContain("private-");
     expect(markup).not.toContain("private.example.test");
@@ -98,7 +98,7 @@ describe("connected systems", () => {
   it("renders seven report links without fabricating counts, dates or a schedule", async () => {
     mocks.status.mockReturnValue({ enabled: false, available: false });
     const markup = renderToStaticMarkup(await ConnectedSystemsPage());
-    expect(markup).toContain("Status não configurado");
+    expect(markup).toContain("Não conectado");
     expect(markup.match(/lightning\/r\/Report\//g)).toHaveLength(7);
     expect(markup.match(/Sem dados/g)).toHaveLength(7);
     expect(markup).toContain("Sem agenda confirmada");

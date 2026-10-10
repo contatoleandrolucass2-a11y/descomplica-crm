@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import AxeBuilder from "@axe-core/playwright";
@@ -10,12 +10,13 @@ import { chromium, expect } from "@playwright/test";
 export async function checkConnectedSystems(page, origin, outputDirectory) {
   await mkdir(outputDirectory, { recursive: true });
   await page.goto(`${origin}/app/configuracoes`);
+  await page.getByRole("button", { name: "Administração", exact: true }).click();
   await page
-    .locator('[aria-labelledby="settings-areas-title"]')
-    .getByRole("link", { name: "Conectar Sistemas", exact: true })
+    .locator('[data-navigation-panel-for="admin.home"]')
+    .getByRole("link", { name: /^Integrações\b/ })
     .click();
   await expect(page).toHaveURL(`${origin}/app/configuracoes/conectar-sistemas`);
-  await expect(page.getByRole("heading", { name: "Conectar Sistemas", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Integrações", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Abrir Salesforce", exact: true })).toHaveAttribute(
     "href",
     "https://direcional.my.salesforce.com/",
@@ -37,12 +38,12 @@ export async function checkConnectedSystems(page, origin, outputDirectory) {
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth > window.innerWidth + 1,
       );
-      assert.equal(overflow, false, `Conectar Sistemas overflow at ${width}px in ${theme}`);
+      assert.equal(overflow, false, `Integrações overflow at ${width}px in ${theme}`);
       const result = await new AxeBuilder({ page }).include("main").analyze();
       assert.deepEqual(
         result.violations.map((item) => item.id),
         [],
-        `Conectar Sistemas axe ${theme}/${width}`,
+        `Integrações axe ${theme}/${width}`,
       );
       await page.screenshot({
         path: path.join(outputDirectory, `${theme}-${width}.png`),
@@ -56,6 +57,7 @@ export async function checkConnectedSystems(page, origin, outputDirectory) {
 
 async function runSynthetic() {
   const root = path.resolve(import.meta.dirname, "../..");
+  const nextImageStub = "\0connected-systems-next-image";
   const require = createRequire(import.meta.url);
   const vitestRequire = createRequire(require.resolve("vitest/package.json"));
   const { build } = await import(pathToFileURL(vitestRequire.resolve("vite")).href);
@@ -73,9 +75,20 @@ async function runSynthetic() {
         name: "connected-systems-synthetic",
         enforce: "pre",
         resolveId(id) {
+          if (id === "next/image") return nextImageStub;
           if (id.endsWith("connected-systems-memory.tsx")) return entry;
         },
         load(id) {
+          if (id === nextImageStub)
+            return `
+              import { createElement } from "react";
+              export default function Image({ src, ...props }) {
+                return createElement("img", {
+                  ...props,
+                  src: typeof src === "string" ? src : src.src,
+                });
+              }
+            `;
           if (id === entry)
             return `
           import { createRoot } from "react-dom/client";
@@ -107,6 +120,18 @@ async function runSynthetic() {
   const files = new Map(
     output.map((file) => [`/${file.fileName}`, file.type === "chunk" ? file.code : file.source]),
   );
+  for (const asset of [
+    "n8n-dark.svg",
+    "n8n-light.svg",
+    "salesforce.svg",
+    "supabase-dark.svg",
+    "supabase-light.svg",
+  ]) {
+    files.set(
+      `/integrations/${asset}`,
+      await readFile(path.join(root, "public/integrations", asset)),
+    );
+  }
   const script = output.find((file) => file.type === "chunk" && file.isEntry)?.fileName;
   assert.ok(script);
   const css = [...files.keys()].filter((file) => file.endsWith(".css"));
@@ -121,7 +146,11 @@ async function runSynthetic() {
     if (files.has(url.pathname)) {
       response.setHeader(
         "Content-Type",
-        url.pathname.endsWith(".css") ? "text/css" : "text/javascript",
+        url.pathname.endsWith(".css")
+          ? "text/css"
+          : url.pathname.endsWith(".svg")
+            ? "image/svg+xml"
+            : "text/javascript",
       );
       response.end(files.get(url.pathname));
       return;
@@ -201,9 +230,23 @@ async function runSynthetic() {
     });
     await page.clock.install();
     await page.goto(origin);
+    await page.evaluate(() => new Promise((resolve) => queueMicrotask(resolve)));
+    assert.deepEqual(errors, [], "Connected systems synthetic render errors");
     const status = page.locator('[role="status"][data-state]');
     const verify = page.getByRole("button", { name: "Verificar conexão", exact: true });
-    await expect(status).toHaveText("Coletor conectado");
+    await expect(status).toHaveText("Conectado");
+    await expect(page.locator("img")).toHaveCount(5);
+    assert.deepEqual(
+      await page
+        .locator("img")
+        .evaluateAll((images) =>
+          images
+            .filter((image) => !image.complete || image.naturalWidth === 0)
+            .map((image) => image.src),
+        ),
+      [],
+      "Connected systems logos must load",
+    );
     await expect(page.getByText("Sem publicação confirmada", { exact: true })).toBeVisible();
     await expect(page.getByRole("row", { name: /Oportunidades/ })).toContainText("0");
     await expect(page.getByRole("row", { name: /Agendamentos/ })).toContainText("1.234");
@@ -244,7 +287,7 @@ async function runSynthetic() {
     await expect(publication.getByText("Publicação não confirmada", { exact: true })).toBeVisible();
     await expect(collection.locator("dd")).toHaveText("Concluída");
     await expect(page.getByRole("row", { name: /Agendamentos/ })).toContainText("1.334");
-    await expect(page.locator('time[datetime="2026-10-08T15:00:00.000Z"]')).toHaveCount(9);
+    await expect(page.locator('time[datetime="2026-10-08T15:00:00.000Z"]')).toHaveCount(10);
     await expect(publication.locator("time")).toHaveAttribute(
       "datetime",
       collected.lastPublishedAt,
@@ -322,11 +365,11 @@ async function runSynthetic() {
     });
 
     for (const [state, label] of [
-      ["waiting", "Sessão não verificada"],
-      ["reauth_required", "Reconexão necessária"],
-      ["stale", "Confirmação expirada"],
-      ["unavailable", "Status indisponível"],
-      ["unconfigured", "Status não configurado"],
+      ["waiting", "Não verificado"],
+      ["reauth_required", "Não conectado"],
+      ["stale", "Suspenso"],
+      ["unavailable", "Não conectado"],
+      ["unconfigured", "Não conectado"],
     ]) {
       snapshot = { ...base, state };
       await verify.click();
@@ -337,7 +380,7 @@ async function runSynthetic() {
     await expect(page.locator('time[datetime="2026-10-08T14:59:00.000Z"]')).toBeVisible();
     statusCode = 503;
     await verify.click();
-    await expect(status).toHaveText("Status indisponível");
+    await expect(status).toHaveText("Não conectado");
     await expect(page.getByText("Sem dados", { exact: true })).toHaveCount(7);
     statusCode = 200;
     for (const invalid of [
@@ -348,15 +391,15 @@ async function runSynthetic() {
       snapshot = invalid;
       await verify.click();
       await expect(verify).toBeEnabled();
-      await expect(status).toHaveText("Status indisponível");
+      await expect(status).toHaveText("Não conectado");
     }
     snapshot = base;
     await verify.click();
-    await expect(status).toHaveText("Coletor conectado");
+    await expect(status).toHaveText("Conectado");
     await page.clock.pauseAt(new Date());
     snapshot = { ...base, state: "stale" };
     await page.clock.runFor(15_000);
-    await expect(status).toHaveText("Confirmação expirada");
+    await expect(status).toHaveText("Suspenso");
     await expect(verify).toBeEnabled();
     hold = true;
     const beforeHold = requests;
@@ -366,7 +409,7 @@ async function runSynthetic() {
     assert.equal(requests, beforeHold + 1, "No overlapping polling");
     await expect(verify).toBeDisabled();
     await page.clock.runFor(1_000);
-    await expect(status).toHaveText("Status indisponível");
+    await expect(status).toHaveText("Não conectado");
     hold = false;
     release();
     await page.evaluate(() => {
@@ -381,9 +424,9 @@ async function runSynthetic() {
       Object.defineProperty(document, "hidden", { configurable: true, value: false });
       document.dispatchEvent(new Event("visibilitychange"));
     });
-    await expect(status).toHaveText("Coletor conectado");
+    await expect(status).toHaveText("Conectado");
     await page.evaluate(() => window.qaRender({ canRefresh: false, statusConfigured: false }));
-    await expect(status).toHaveText("Status não configurado");
+    await expect(status).toHaveText("Não conectado");
     await expect(
       page.getByRole("button", { name: "Atualizar Salesforce", exact: true }),
     ).toHaveCount(0);

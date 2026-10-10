@@ -2,8 +2,6 @@
 
 import {
   Check,
-  ChevronLeft,
-  ChevronRight,
   CircleMinus,
   CircleX,
   Clock3,
@@ -13,7 +11,16 @@ import {
   UserCheck,
   UsersRound,
 } from "lucide-react";
-import { useActionState, useCallback, useMemo, useState, type FormEvent } from "react";
+import {
+  startTransition,
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 
 import { managementStyles } from "@/app/(protected)/_components/ManagementCanvas";
 import {
@@ -21,19 +28,25 @@ import {
   getPermissionLabel,
   type PermissionKey,
 } from "@/lib/authorization/permissions";
-import {
-  ROLE_INHERITED_PERMISSIONS,
-  summarizeRoleChange,
-} from "@/lib/authorization/access-presentation";
+import { summarizeRoleChange } from "@/lib/authorization/access-presentation";
 import { ROLES, getRoleLabel, type RoleKey } from "@/lib/authorization/roles";
 
 import {
   assignRoleAction,
   approveUserAccessAction,
+  loadUsersPageAction,
   setPermissionOverridesBulkAction,
   setUserActiveAction,
   type AdminActionState,
 } from "./actions";
+import type {
+  ManagedUser,
+  UserDirectoryStatusFilter,
+  UserDirectorySummary,
+  UserPermissionOverride,
+} from "./user-directory-types";
+
+export type { ManagedUser } from "./user-directory-types";
 
 const INITIAL_STATE: AdminActionState = { status: "idle", message: "" };
 const PAGE_SIZE = 6;
@@ -108,25 +121,12 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
   },
 ];
 
-export interface UserPermissionOverride {
-  permissionKey: PermissionKey;
-  effect: "allow" | "deny";
-  reason: string | null;
-}
-
-export interface ManagedUser {
-  userId: string;
-  email: string | null;
-  isActive: boolean;
-  accessStatus: "pending" | "approved" | "suspended" | "legacy_review";
-  roleKey: RoleKey | null;
-  isSelf: boolean;
-  isManageable: boolean;
-  overrides: UserPermissionOverride[];
-}
-
 interface UserAccessManagerProps {
   users: ManagedUser[];
+  initialHasMore?: boolean;
+  initialNextOffset?: number | null;
+  initialTotalCount?: number | null;
+  summary?: UserDirectorySummary | null;
   assignableRoles: RoleKey[];
   manageablePermissions: PermissionKey[];
   canManageRoles: boolean;
@@ -162,11 +162,11 @@ function getVisibleRoleLabel(roleKey: RoleKey | null): string {
 }
 
 function getInheritedPermissions(user: ManagedUser): readonly PermissionKey[] {
-  if (!user.roleKey) return [];
-  return ROLE_INHERITED_PERMISSIONS[user.roleKey] ?? [];
+  return user.inheritedPermissions;
 }
 
 function getEffectivePermissionCount(user: ManagedUser): number {
+  if (!user.isActive || user.accessStatus !== "approved" || !user.roleKey) return 0;
   const effectivePermissions = new Set<PermissionKey>(getInheritedPermissions(user));
   for (const override of user.overrides) {
     if (override.effect === "allow") effectivePermissions.add(override.permissionKey);
@@ -209,20 +209,33 @@ function ActionFeedback({ state }: { state: AdminActionState }) {
   );
 }
 
+function useRefreshAfterMutation(state: AdminActionState, onMutationSuccess: () => void) {
+  const handledState = useRef<AdminActionState | null>(null);
+
+  useEffect(() => {
+    if (state.status !== "success" || handledState.current === state) return;
+    handledState.current = state;
+    onMutationSuccess();
+  }, [onMutationSuccess, state]);
+}
+
 function ApprovalForm({
   user,
   roles,
   reportingScopes,
+  onMutationSuccess,
 }: {
   user: ManagedUser;
   roles: RoleKey[];
   reportingScopes: UserAccessManagerProps["reportingScopes"];
+  onMutationSuccess: () => void;
 }) {
   const availableRoles = roles.filter((role) => APPROVABLE_ROLE_KEYS.has(role));
   const [state, action, pending] = useActionState(
     approveUserAccessAction.bind(null, user.userId),
     INITIAL_STATE,
   );
+  useRefreshAfterMutation(state, onMutationSuccess);
 
   if (availableRoles.length === 0 || reportingScopes.length === 0) {
     return (
@@ -291,7 +304,15 @@ function ApprovalForm({
   );
 }
 
-function RoleForm({ user, roles }: { user: ManagedUser; roles: RoleKey[] }) {
+function RoleForm({
+  user,
+  roles,
+  onMutationSuccess,
+}: {
+  user: ManagedUser;
+  roles: RoleKey[];
+  onMutationSuccess: () => void;
+}) {
   const currentAssignableRole =
     user.roleKey && roles.includes(user.roleKey) ? user.roleKey : undefined;
   const initialRole = currentAssignableRole ?? roles[0]!;
@@ -300,6 +321,7 @@ function RoleForm({ user, roles }: { user: ManagedUser; roles: RoleKey[] }) {
     assignRoleAction.bind(null, user.userId),
     INITIAL_STATE,
   );
+  useRefreshAfterMutation(state, onMutationSuccess);
   const change = summarizeRoleChange(user.roleKey, selectedRole);
   const elevation = ROLES[selectedRole].level > (user.roleKey ? ROLES[user.roleKey].level : 0);
   const unchanged = user.roleKey === selectedRole;
@@ -364,12 +386,19 @@ function RoleForm({ user, roles }: { user: ManagedUser; roles: RoleKey[] }) {
   );
 }
 
-function StatusForm({ user }: { user: ManagedUser }) {
+function StatusForm({
+  user,
+  onMutationSuccess,
+}: {
+  user: ManagedUser;
+  onMutationSuccess: () => void;
+}) {
   const nextActive = !user.isActive;
   const [state, action, pending] = useActionState(
     setUserActiveAction.bind(null, user.userId, nextActive),
     INITIAL_STATE,
   );
+  useRefreshAfterMutation(state, onMutationSuccess);
   const summary = nextActive
     ? "A conta será reativada e voltará a usar os acessos efetivos do papel e das exceções."
     : "A conta será desativada e todos os acessos serão suspensos.";
@@ -418,7 +447,11 @@ function getPermissionState(
   permissionKey: PermissionKey,
   inherited: ReadonlySet<PermissionKey>,
   override: UserPermissionOverride | undefined,
+  hasApprovedAccess: boolean,
 ) {
+  if (!hasApprovedAccess) {
+    return { key: "account-inactive", label: "Conta sem acesso", permitted: false } as const;
+  }
   if (override?.effect === "allow") {
     return { key: "override-allow", label: "Exceção permitida", permitted: true } as const;
   }
@@ -435,10 +468,12 @@ function PermissionMatrix({
   user,
   manageablePermissions,
   editable,
+  onMutationSuccess,
 }: {
   user: ManagedUser;
   manageablePermissions: PermissionKey[];
   editable: boolean;
+  onMutationSuccess: () => void;
 }) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<PermissionKey>>(() => new Set());
@@ -461,8 +496,11 @@ function PermissionMatrix({
     [user.userId],
   );
   const [state, action, pending] = useActionState(submitOverrides, INITIAL_STATE);
+  useRefreshAfterMutation(state, onMutationSuccess);
   const manageable = useMemo(() => new Set(manageablePermissions), [manageablePermissions]);
   const inherited = useMemo(() => new Set<PermissionKey>(getInheritedPermissions(user)), [user]);
+  const hasApprovedAccess =
+    user.isActive && user.accessStatus === "approved" && user.roleKey !== null;
   const overrides = useMemo(
     () => new Map(user.overrides.map((override) => [override.permissionKey, override])),
     [user.overrides],
@@ -534,6 +572,15 @@ function PermissionMatrix({
       onSubmit={(event) => confirmChange(event, confirmation)}
       className="admin-permission-form"
     >
+      {manageablePermissions.map((permissionKey) => (
+        <input
+          key={permissionKey}
+          type="hidden"
+          name="permissionKeys"
+          value={permissionKey}
+          disabled={!selected.has(permissionKey)}
+        />
+      ))}
       <div className="admin-permission-toolbar">
         <label className="admin-permission-search" htmlFor={`permission-search-${user.userId}`}>
           <Search aria-hidden="true" />
@@ -604,26 +651,27 @@ function PermissionMatrix({
               <div className="admin-permission-grid">
                 {group.permissions.map((permissionKey) => {
                   const override = overrides.get(permissionKey);
-                  const permissionState = getPermissionState(permissionKey, inherited, override);
+                  const permissionState = getPermissionState(
+                    permissionKey,
+                    inherited,
+                    override,
+                    hasApprovedAccess,
+                  );
                   const canSelect = editable && manageable.has(permissionKey);
                   return (
-                    <label
+                    <div
                       key={permissionKey}
                       className="admin-permission-option"
                       data-disabled={!canSelect}
                       data-editable={editable}
                       data-selected={selected.has(permissionKey)}
                     >
-                      {editable ? (
-                        <input
-                          type="checkbox"
-                          name="permissionKeys"
-                          value={permissionKey}
-                          checked={selected.has(permissionKey)}
-                          onChange={() => togglePermission(permissionKey)}
-                          disabled={!canSelect || pending}
-                        />
-                      ) : null}
+                      <input
+                        type="checkbox"
+                        checked={permissionState.permitted}
+                        disabled
+                        aria-label={`Acesso efetivo: ${getPermissionLabel(permissionKey)}`}
+                      />
                       <span className="admin-permission-option-copy">
                         <strong>{getPermissionLabel(permissionKey)}</strong>
                         <small>{PERMISSIONS[permissionKey].description}</small>
@@ -631,6 +679,19 @@ function PermissionMatrix({
                           <small className="admin-permission-override-reason">
                             Motivo atual: {override.reason}
                           </small>
+                        ) : null}
+                        {canSelect ? (
+                          <button
+                            type="button"
+                            className={managementStyles.button}
+                            aria-pressed={selected.has(permissionKey)}
+                            onClick={() => togglePermission(permissionKey)}
+                            disabled={pending}
+                          >
+                            {selected.has(permissionKey)
+                              ? "Remover da alteração"
+                              : "Incluir na alteração"}
+                          </button>
                         ) : null}
                       </span>
                       <span className="admin-permission-state" data-state={permissionState.key}>
@@ -641,7 +702,7 @@ function PermissionMatrix({
                         )}
                         {permissionState.label}
                       </span>
-                    </label>
+                    </div>
                   );
                 })}
               </div>
@@ -716,7 +777,8 @@ function UserDetail({
   canManageUsers,
   canApproveUsers,
   reportingScopes,
-}: UserAccessManagerProps & { user: ManagedUser }) {
+  onMutationSuccess,
+}: UserAccessManagerProps & { user: ManagedUser; onMutationSuccess: () => void }) {
   const status = getUserStatus(user);
   const hasAnyMutation =
     user.isManageable && (canManageRoles || canManagePermissions || canManageUsers);
@@ -751,7 +813,12 @@ function UserDetail({
                 <h3 id={`approval-${user.userId}`}>Aprovação de acesso escopado</h3>
               </div>
             </div>
-            <ApprovalForm user={user} roles={assignableRoles} reportingScopes={reportingScopes} />
+            <ApprovalForm
+              user={user}
+              roles={assignableRoles}
+              reportingScopes={reportingScopes}
+              onMutationSuccess={onMutationSuccess}
+            />
           </section>
         ) : null}
 
@@ -761,10 +828,19 @@ function UserDetail({
               <p>Papel e responsabilidades</p>
               <h3 id={`role-title-${user.userId}`}>Papel do usuário</h3>
             </div>
-            <span className="admin-section-count">{getEffectivePermissionCount(user)} acessos</span>
+            <span className="admin-section-count">
+              {user.permissionDetailsAvailable !== false
+                ? `${getEffectivePermissionCount(user)} acessos`
+                : "Acessos restritos"}
+            </span>
           </div>
           {user.isManageable && canManageRoles && assignableRoles.length > 0 ? (
-            <RoleForm key={user.userId} user={user} roles={assignableRoles} />
+            <RoleForm
+              key={user.userId}
+              user={user}
+              roles={assignableRoles}
+              onMutationSuccess={onMutationSuccess}
+            />
           ) : (
             <div className="admin-current-role">
               <strong>{getVisibleRoleLabel(user.roleKey)}</strong>
@@ -789,34 +865,48 @@ function UserDetail({
               <h3 id={`permissions-title-${user.userId}`}>Permissões e exceções</h3>
             </div>
             <span className="admin-section-count">
-              {user.overrides.length} {user.overrides.length === 1 ? "exceção" : "exceções"}
+              {user.permissionDetailsAvailable !== false
+                ? `${user.overrides.length} ${user.overrides.length === 1 ? "exceção" : "exceções"}`
+                : "Detalhes restritos"}
             </span>
           </div>
           {isMasterPermissionManager && user.isManageable ? (
             <p className="admin-permission-intro">
-              <strong>Herdada: negada</strong> é apenas o padrão do papel. Como Master, você pode
-              selecionar essas permissões e aplicar <strong>Permitir</strong> para criar uma exceção
-              individual em qualquer usuário abaixo do seu nível. O papel do usuário não muda.
+              As caixas mostram o <strong>acesso efetivo</strong>, após papel e exceções. Como
+              Master, use <strong>Incluir na alteração</strong> e aplique <strong>Permitir</strong>{" "}
+              para criar uma exceção individual em qualquer usuário abaixo do seu nível. O papel do
+              usuário não muda.
             </p>
           ) : (
             <p className="admin-permission-intro">
-              <strong>Permissões herdadas do papel</strong> e <strong>Exceções individuais</strong>{" "}
-              aparecem na mesma matriz. Selecione várias linhas e salve uma única vez.
+              As caixas mostram o <strong>acesso efetivo</strong>. A origem identifica
+              <strong> Permissões herdadas do papel</strong> e <strong>Exceções individuais</strong>
+              ; os botões de alteração formam um lote separado.
             </p>
           )}
-          <PermissionMatrix
-            key={user.userId}
-            user={user}
-            manageablePermissions={manageablePermissions}
-            editable={canEditPermissions}
-          />
+          {user.permissionDetailsAvailable !== false ? (
+            <PermissionMatrix
+              key={user.userId}
+              user={user}
+              manageablePermissions={manageablePermissions}
+              editable={canEditPermissions}
+              onMutationSuccess={onMutationSuccess}
+            />
+          ) : (
+            <p className="admin-permission-readonly-note" role="status">
+              Detalhes de acesso efetivo indisponíveis: este perfil não pode consultar exceções
+              individuais. Nenhuma permissão é presumida.
+            </p>
+          )}
         </section>
 
         <details className="admin-advanced-settings">
           <summary>Configurações avançadas</summary>
           <div>
             <p className="admin-user-id">ID: {user.userId}</p>
-            {user.isManageable && canManageUsers ? <StatusForm user={user} /> : null}
+            {user.isManageable && canManageUsers ? (
+              <StatusForm user={user} onMutationSuccess={onMutationSuccess} />
+            ) : null}
             {!hasAnyMutation ? (
               <p className="admin-form-help">
                 Esta conta não pode ser alterada por você devido à hierarquia ou à proteção contra
@@ -832,57 +922,196 @@ function UserDetail({
 
 export function UserAccessManager(props: UserAccessManagerProps) {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<"all" | "active" | "inactive" | "pending">("all");
-  const [role, setRole] = useState<"all" | RoleKey | "unassigned">("all");
-  const [pageNumber, setPageNumber] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [status, setStatus] = useState<UserDirectoryStatusFilter>("all");
+  const [users, setUsers] = useState(props.users);
+  const [hasMore, setHasMore] = useState(props.initialHasMore ?? false);
+  const [nextOffset, setNextOffset] = useState<number | null>(
+    props.initialNextOffset ?? (props.initialHasMore ? PAGE_SIZE : null),
+  );
+  const [totalCount, setTotalCount] = useState<number | null>(
+    props.initialTotalCount ?? props.users.length,
+  );
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(
     props.users[0]?.userId ?? null,
   );
-  const users = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase("pt-BR");
-    return props.users.filter((user) => {
-      const roleLabel = getVisibleRoleLabel(user.roleKey);
-      const statusLabel = getUserStatus(user).label;
-      const matchesSearch =
-        !query ||
-        `${user.email ?? ""} ${roleLabel} ${statusLabel}`
-          .toLocaleLowerCase("pt-BR")
-          .includes(query);
-      const matchesStatus =
-        status === "all" ||
-        (status === "active" && user.isActive && user.accessStatus === "approved") ||
-        (status === "inactive" && (!user.isActive || user.accessStatus === "suspended")) ||
-        (status === "pending" && user.accessStatus === "pending");
-      const matchesRole =
-        role === "all" || (role === "unassigned" ? user.roleKey === null : user.roleKey === role);
-      return matchesSearch && matchesStatus && matchesRole;
-    });
-  }, [props.users, role, search, status]);
-  const roleOptions = useMemo(
-    () =>
-      [...new Set(props.users.flatMap((user) => (user.roleKey ? [user.roleKey] : [])))]
-        .filter((roleKey) => ACTIVE_ROLE_KEYS.has(roleKey))
-        .sort((left, right) => getRoleLabel(left).localeCompare(getRoleLabel(right), "pt-BR")),
-    [props.users],
-  );
-  const activeCount = props.users.filter(
+  const listRef = useRef<HTMLUListElement>(null);
+  const sentinelRef = useRef<HTMLLIElement>(null);
+  const loadingRef = useRef(false);
+  const requestGenerationRef = useRef(0);
+  const filterEffectReadyRef = useRef(false);
+  const initialUsersSignature = JSON.stringify(props.users);
+  const previousInitialUsersSignatureRef = useRef(initialUsersSignature);
+
+  const fallbackActiveCount = props.users.filter(
     (user) => user.isActive && user.accessStatus === "approved",
   ).length;
-  const pendingCount = props.users.filter((user) => user.accessStatus === "pending").length;
-  const revokedCount = props.users.filter(
+  const fallbackPendingCount = props.users.filter((user) => user.accessStatus === "pending").length;
+  const fallbackRevokedCount = props.users.filter(
     (user) =>
       user.accessStatus === "suspended" || (!user.isActive && user.accessStatus !== "pending"),
   ).length;
-  const pageCount = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
-  const currentPage = Math.min(pageNumber, pageCount);
-  const pageStart = (currentPage - 1) * PAGE_SIZE;
-  const visibleUsers = users.slice(pageStart, pageStart + PAGE_SIZE);
-  const selectedUser =
-    visibleUsers.find((user) => user.userId === selectedUserId) ?? visibleUsers[0] ?? null;
+  const summaryTotal = props.summary
+    ? (props.summary.total ?? "—")
+    : (props.initialTotalCount ?? props.users.length);
+  const activeCount = props.summary ? (props.summary.active ?? "—") : fallbackActiveCount;
+  const pendingCount = props.summary ? (props.summary.pending ?? "—") : fallbackPendingCount;
+  const revokedCount = props.summary ? (props.summary.revoked ?? "—") : fallbackRevokedCount;
+  const selectedUser = users.find((user) => user.userId === selectedUserId) ?? users[0] ?? null;
 
-  function resetPage() {
-    setPageNumber(1);
-  }
+  const fetchPage = useCallback(
+    async ({
+      offset,
+      replace,
+      query,
+      statusFilter,
+    }: {
+      offset: number;
+      replace: boolean;
+      query: string;
+      statusFilter: UserDirectoryStatusFilter;
+    }) => {
+      if (!replace && loadingRef.current) return;
+      const generation = ++requestGenerationRef.current;
+      loadingRef.current = true;
+      setLoading(true);
+      setLoadError(null);
+      if (replace) {
+        setUsers([]);
+        setSelectedUserId(null);
+        setHasMore(false);
+        setNextOffset(null);
+        setTotalCount(null);
+      }
+
+      try {
+        const result = await loadUsersPageAction({
+          offset,
+          search: query,
+          status: statusFilter,
+        });
+        if (generation !== requestGenerationRef.current) return;
+        if (result.status === "error") {
+          setLoadError(result.message);
+          return;
+        }
+
+        setUsers((current) => {
+          if (replace) return result.page.users;
+          const merged = new Map(current.map((user) => [user.userId, user]));
+          for (const user of result.page.users) merged.set(user.userId, user);
+          return [...merged.values()];
+        });
+        setSelectedUserId((current) => current ?? result.page.users[0]?.userId ?? null);
+        setHasMore(result.page.hasMore);
+        setNextOffset(result.page.nextOffset);
+        setTotalCount(result.page.totalCount);
+      } catch {
+        if (generation === requestGenerationRef.current) {
+          setLoadError("Não foi possível carregar mais usuários. Tente novamente.");
+        }
+      } finally {
+        if (generation === requestGenerationRef.current) {
+          loadingRef.current = false;
+          setLoading(false);
+        }
+      }
+    },
+    [],
+  );
+
+  const loadMore = useCallback(() => {
+    if (!hasMore || nextOffset === null || loadingRef.current) return;
+    startTransition(() => {
+      void fetchPage({
+        offset: nextOffset,
+        replace: false,
+        query: debouncedSearch,
+        statusFilter: status,
+      });
+    });
+  }, [debouncedSearch, fetchPage, hasMore, nextOffset, status]);
+
+  const refreshDirectory = useCallback(() => {
+    startTransition(() => {
+      void fetchPage({
+        offset: 0,
+        replace: true,
+        query: debouncedSearch,
+        statusFilter: status,
+      });
+    });
+  }, [debouncedSearch, fetchPage, status]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => window.clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    if (!filterEffectReadyRef.current) {
+      filterEffectReadyRef.current = true;
+      return;
+    }
+    startTransition(() => {
+      void fetchPage({
+        offset: 0,
+        replace: true,
+        query: debouncedSearch,
+        statusFilter: status,
+      });
+    });
+  }, [debouncedSearch, fetchPage, status]);
+
+  useEffect(() => {
+    if (previousInitialUsersSignatureRef.current === initialUsersSignature) return;
+    previousInitialUsersSignatureRef.current = initialUsersSignature;
+    if (search || status !== "all" || loadingRef.current) return;
+
+    const initialIds = new Set(props.users.map((user) => user.userId));
+    setUsers((current) => [
+      ...props.users,
+      ...current.filter((user) => !initialIds.has(user.userId)),
+    ]);
+    setSelectedUserId((current) => current ?? props.users[0]?.userId ?? null);
+    setHasMore(props.initialHasMore ?? false);
+    setNextOffset(props.initialNextOffset ?? (props.initialHasMore ? PAGE_SIZE : null));
+    setTotalCount(props.initialTotalCount ?? props.users.length);
+  }, [
+    initialUsersSignature,
+    props.initialHasMore,
+    props.initialNextOffset,
+    props.initialTotalCount,
+    props.users,
+    search,
+    status,
+  ]);
+
+  useEffect(() => {
+    const root = listRef.current;
+    const sentinel = sentinelRef.current;
+    if (
+      !root ||
+      !sentinel ||
+      !hasMore ||
+      loading ||
+      loadError ||
+      typeof IntersectionObserver === "undefined"
+    ) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) loadMore();
+      },
+      { root, rootMargin: "0px 0px 160px" },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadError, loadMore, loading]);
 
   return (
     <div className="admin-users-content">
@@ -896,7 +1125,7 @@ export function UserAccessManager(props: UserAccessManagerProps) {
           </span>
           <div>
             <span className={managementStyles.summaryLabel}>Total de usuários</span>
-            <strong className={managementStyles.summaryValue}>{props.users.length}</strong>
+            <strong className={managementStyles.summaryValue}>{summaryTotal}</strong>
           </div>
         </article>
         <article className={managementStyles.summaryCard}>
@@ -950,12 +1179,9 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                   name="userSearch"
                   type="search"
                   value={search}
-                  onChange={(event) => {
-                    setSearch(event.target.value);
-                    resetPage();
-                  }}
+                  onChange={(event) => setSearch(event.target.value)}
                   autoComplete="off"
-                  placeholder="E-mail, papel ou status…"
+                  placeholder="E-mail…"
                 />
               </span>
             </label>
@@ -965,10 +1191,7 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                 <select
                   name="userStatusFilter"
                   value={status}
-                  onChange={(event) => {
-                    setStatus(event.target.value as typeof status);
-                    resetPage();
-                  }}
+                  onChange={(event) => setStatus(event.target.value as UserDirectoryStatusFilter)}
                   autoComplete="off"
                 >
                   <option value="all">Todos</option>
@@ -977,36 +1200,17 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                   <option value="pending">Pendentes</option>
                 </select>
               </label>
-              <label>
-                <span>Papel</span>
-                <select
-                  name="userRoleFilter"
-                  value={role}
-                  onChange={(event) => {
-                    setRole(event.target.value as typeof role);
-                    resetPage();
-                  }}
-                  autoComplete="off"
-                >
-                  <option value="all">Todos</option>
-                  <option value="unassigned">Sem papel</option>
-                  {roleOptions.map((roleKey) => (
-                    <option key={roleKey} value={roleKey}>
-                      {getRoleLabel(roleKey)}
-                    </option>
-                  ))}
-                </select>
-              </label>
             </div>
           </div>
 
           <ul
+            ref={listRef}
             className="admin-users-list"
             aria-label="Resultados de usuários"
             data-qa-visual-volatile="user-results"
           >
-            {visibleUsers.length > 0 ? (
-              visibleUsers.map((user) => {
+            {users.length > 0 ? (
+              users.map((user) => {
                 const userStatus = getUserStatus(user);
                 const permissionCount = getEffectivePermissionCount(user);
                 return (
@@ -1026,7 +1230,9 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                         <strong>{user.email ?? "E-mail não informado"}</strong>
                         <span>{getVisibleRoleLabel(user.roleKey)}</span>
                         <small>
-                          {permissionCount} {permissionCount === 1 ? "permissão" : "permissões"}
+                          {user.permissionDetailsAvailable !== false
+                            ? `${permissionCount} ${permissionCount === 1 ? "permissão" : "permissões"}`
+                            : "Acessos restritos"}
                         </small>
                       </span>
                       <span className={managementStyles.statusPill} data-state={userStatus.key}>
@@ -1039,46 +1245,71 @@ export function UserAccessManager(props: UserAccessManagerProps) {
             ) : (
               <li>
                 <p className={managementStyles.emptyState}>
-                  Nenhum usuário corresponde aos filtros.
+                  {loading
+                    ? "Carregando usuários…"
+                    : loadError
+                      ? "A lista não pôde ser carregada."
+                      : "Nenhum usuário corresponde aos filtros."}
                 </p>
               </li>
             )}
+            {hasMore || loading ? (
+              <li ref={sentinelRef} className="admin-users-load-sentinel">
+                {loading && users.length > 0 ? (
+                  <p role="status" aria-live="polite">
+                    Carregando mais usuários…
+                  </p>
+                ) : null}
+              </li>
+            ) : null}
           </ul>
 
           <footer className={`admin-users-pagination ${managementStyles.pagination}`}>
             <p aria-live="polite">
-              {users.length
-                ? `${pageStart + 1}–${Math.min(pageStart + PAGE_SIZE, users.length)} de ${users.length}`
-                : "0 usuários"}
+              {totalCount === null
+                ? `${users.length} ${users.length === 1 ? "usuário carregado" : "usuários carregados"}`
+                : `${users.length} de ${totalCount}`}
             </p>
             <div className={managementStyles.paginationControls}>
-              <button
-                type="button"
-                className={managementStyles.pageButton}
-                disabled={currentPage === 1}
-                onClick={() => setPageNumber((value) => Math.max(1, value - 1))}
-                aria-label="Página anterior"
-              >
-                <ChevronLeft aria-hidden="true" />
-              </button>
-              <span className={managementStyles.pageButton} aria-current="page">
-                {currentPage}
-              </span>
-              <button
-                type="button"
-                className={managementStyles.pageButton}
-                disabled={currentPage === pageCount}
-                onClick={() => setPageNumber((value) => Math.min(pageCount, value + 1))}
-                aria-label="Próxima página"
-              >
-                <ChevronRight aria-hidden="true" />
-              </button>
+              {loadError ? <span role="alert">{loadError}</span> : null}
+              {hasMore || loadError ? (
+                <button
+                  type="button"
+                  className={managementStyles.button}
+                  disabled={loading}
+                  onClick={() => {
+                    if (users.length === 0) {
+                      void fetchPage({
+                        offset: 0,
+                        replace: true,
+                        query: debouncedSearch,
+                        statusFilter: status,
+                      });
+                    } else {
+                      loadMore();
+                    }
+                  }}
+                >
+                  {loading
+                    ? "Carregando…"
+                    : loadError
+                      ? "Tentar novamente"
+                      : "Carregar mais usuários"}
+                </button>
+              ) : users.length > 0 ? (
+                <span>Fim da lista.</span>
+              ) : null}
             </div>
           </footer>
         </aside>
 
         {selectedUser ? (
-          <UserDetail key={selectedUser.userId} user={selectedUser} {...props} />
+          <UserDetail
+            key={selectedUser.userId}
+            user={selectedUser}
+            onMutationSuccess={refreshDirectory}
+            {...props}
+          />
         ) : (
           <section className="admin-user-detail admin-user-detail-empty" id="selected-user-panel">
             <ShieldCheck aria-hidden="true" />

@@ -10,26 +10,13 @@ import { enforcePermission } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
 import { canGrantPermission } from "@/lib/authorization/hierarchy";
 import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
-import { ROLES, getAssignableRoleKeys, type RoleKey } from "@/lib/authorization/roles";
+import { getAssignableRoleKeys } from "@/lib/authorization/roles";
 
-import { UserAccessManager, type ManagedUser } from "./UserAccessManager";
+import { UserAccessManager } from "./UserAccessManager";
+import { isMissingOnboardingFoundation, loadUserDirectoryPage } from "./user-directory";
 
 export const metadata = { title: "Usuários e acessos" };
 
-const profileSchema = z.object({
-  user_id: z.string().uuid(),
-  email: z.string().nullable(),
-  is_active: z.boolean(),
-  created_at: z.string(),
-  access_status: z.enum(["pending", "approved", "suspended", "legacy_review"]),
-});
-const roleAssignmentSchema = z.object({ user_id: z.string().uuid(), role_key: z.string() });
-const overrideSchema = z.object({
-  user_id: z.string().uuid(),
-  permission_key: z.string(),
-  effect: z.enum(["allow", "deny"]),
-  reason: z.string().nullable(),
-});
 const reportingScopeSchema = z.object({
   id: z.string().uuid(),
   scope_key: z.string(),
@@ -37,54 +24,17 @@ const reportingScopeSchema = z.object({
   is_active: z.boolean(),
 });
 
-function isRoleKey(value: string | undefined): value is RoleKey {
-  return value !== undefined && Object.prototype.hasOwnProperty.call(ROLES, value);
-}
-
-function isPermissionKey(value: string): value is PermissionKey {
-  return Object.prototype.hasOwnProperty.call(PERMISSIONS, value);
-}
-
-function isMissingOnboardingFoundation(code: string | undefined) {
-  return code === "PGRST204" || code === "PGRST205" || code === "42703" || code === "42P01";
-}
-
 export default async function UsersAdminPage() {
   const context = await enforcePermission("users.view");
+  const initialPage = await loadUserDirectoryPage(
+    context,
+    { offset: 0, search: "", status: "all" },
+    { includeSummary: true },
+  );
   const supabase = await createClient();
-  // These reads each execute scoped RLS policies. Keeping them serial avoids
-  // multiplying policy work against the same small PostgREST pool while
-  // preserving the exact rows and authorization boundary.
-  const profilesResult = await supabase
-    .from("profiles")
-    .select("user_id,email,is_active,created_at,access_status")
-    .order("created_at", { ascending: false });
-  const rolesResult = await supabase.from("user_roles").select("user_id,role_key");
-  const overridesResult = await supabase
-    .from("user_permission_overrides")
-    .select("user_id,permission_key,effect,reason");
-
-  // The approved app-first train must remain readable before the additive
-  // onboarding foundation reaches production. Fall back only for the exact
-  // missing-column/table states; all authorization and transport errors fail.
-  let profileRows: unknown = profilesResult.data ?? [];
-  let profileError = profilesResult.error;
-  const onboardingFoundationAvailable = !isMissingOnboardingFoundation(profilesResult.error?.code);
-  if (!onboardingFoundationAvailable) {
-    const legacyProfilesResult = await supabase
-      .from("profiles")
-      .select("user_id,email,is_active,created_at")
-      .order("created_at", { ascending: false });
-    profileError = legacyProfilesResult.error;
-    profileRows = (legacyProfilesResult.data ?? []).map((profile) => ({
-      ...profile,
-      access_status: "legacy_review",
-    }));
-  }
-
-  if (profileError || rolesResult.error || overridesResult.error) {
-    throw new Error("Não foi possível carregar a administração de usuários.");
-  }
+  // The paged loader keeps the pre-foundation fallback fail-closed by mapping
+  // legacy rows to `access_status: "legacy_review"`; other database errors fail.
+  const onboardingFoundationAvailable = initialPage.onboardingFoundationAvailable;
 
   const canManageRoles = hasPermission(context, "roles.manage");
   const canManagePermissions = hasPermission(context, "permissions.manage");
@@ -103,49 +53,13 @@ export default async function UsersAdminPage() {
   }
   const canApproveUsers = canAttemptApproval && !scopesResult.error;
 
-  const profiles = z.array(profileSchema).parse(profileRows);
-  const assignments = z.array(roleAssignmentSchema).parse(rolesResult.data ?? []);
-  const overrides = z.array(overrideSchema).parse(overridesResult.data ?? []);
   const reportingScopes = z
     .array(reportingScopeSchema)
     .parse(scopesResult.error ? [] : (scopesResult.data ?? []));
-  const rolesByUser = new Map(assignments.map((row) => [row.user_id, row.role_key]));
   const assignableRoles = getAssignableRoleKeys(context.level);
   const manageablePermissions = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
     (permissionKey) => canGrantPermission(context, permissionKey),
   );
-  const users: ManagedUser[] = profiles.map((profile) => {
-    const rawRoleKey = rolesByUser.get(profile.user_id);
-    if (rawRoleKey !== undefined && !isRoleKey(rawRoleKey)) {
-      throw new Error("O catálogo de papéis da aplicação está desatualizado.");
-    }
-
-    const roleKey = isRoleKey(rawRoleKey) ? rawRoleKey : null;
-    const targetLevel = roleKey ? ROLES[roleKey].level : 0;
-    const userOverrides = overrides
-      .filter((row) => row.user_id === profile.user_id)
-      .map((override) => {
-        if (!isPermissionKey(override.permission_key)) {
-          throw new Error("O catálogo de permissões da aplicação está desatualizado.");
-        }
-        return {
-          permissionKey: override.permission_key,
-          effect: override.effect,
-          reason: override.reason,
-        };
-      });
-
-    return {
-      userId: profile.user_id,
-      email: profile.email,
-      isActive: profile.is_active,
-      accessStatus: profile.access_status,
-      roleKey,
-      isSelf: profile.user_id === context.userId,
-      isManageable: profile.user_id !== context.userId && targetLevel < context.level,
-      overrides: userOverrides,
-    };
-  });
 
   return (
     <ManagementPage className="admin-canvas admin-users-page">
@@ -155,7 +69,11 @@ export default async function UsersAdminPage() {
         status={<ManagementStatusBadge>Acesso protegido</ManagementStatusBadge>}
       />
       <UserAccessManager
-        users={users}
+        users={initialPage.users}
+        initialHasMore={initialPage.hasMore}
+        initialNextOffset={initialPage.nextOffset}
+        initialTotalCount={initialPage.totalCount}
+        summary={initialPage.summary}
         assignableRoles={assignableRoles}
         manageablePermissions={manageablePermissions}
         canManageRoles={canManageRoles}

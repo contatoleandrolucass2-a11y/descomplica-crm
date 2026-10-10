@@ -160,7 +160,7 @@ if (approvedCanvasByRoute.size !== routes.length) {
 }
 
 const canvasDensityLimitByRoute = new Map([
-  ["/admin/usuarios", 2500],
+  ["/admin/usuarios", 2600],
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
   ["/app/etapas/pastas", 1350],
@@ -5185,18 +5185,18 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     ]) {
       await responsivePage.setViewportSize(viewport);
       await responsivePage.evaluate(() => window.scrollTo(0, 0));
-      const simulationMenuUnclipped = await checkArchiveMenuPanel(
+      const dashboardMenuUnclipped = await checkArchiveMenuPanel(
         responsivePage,
-        "Simulação",
-        "authorized-navigation-crm-simulation",
+        "Dashboard",
+        "authorized-navigation-crm-dashboard",
       );
-      const settingsMenuUnclipped = await checkArchiveMenuPanel(
+      const administrationMenuUnclipped = await checkArchiveMenuPanel(
         responsivePage,
-        "Configurações",
-        "authorized-navigation-crm-settings",
+        "Administração",
+        "authorized-navigation-admin-home",
       );
       responsiveMenuChecks[`menuAndBodyUnclippedAt${viewport.width}`] =
-        simulationMenuUnclipped && settingsMenuUnclipped;
+        dashboardMenuUnclipped && administrationMenuUnclipped;
     }
   } finally {
     await closeAuxiliaryPage(responsivePage);

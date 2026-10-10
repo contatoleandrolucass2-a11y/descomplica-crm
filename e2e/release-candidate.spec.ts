@@ -386,7 +386,7 @@ const protectedSurfaces = [
   },
   {
     path: "/app/configuracoes/conectar-sistemas",
-    heading: "Conectar Sistemas",
+    heading: "Integrações",
     allowed: adminRoles,
   },
   {
@@ -460,9 +460,10 @@ const operationalRoutes = [
   "/app/etapas/vendas",
   "/app/etapas/visitas",
 ] as const;
+const connectedSystemsRoute = "/app/configuracoes/conectar-sistemas";
 const settingsRoutes = [
   "/app/configuracoes",
-  "/app/configuracoes/conectar-sistemas",
+  connectedSystemsRoute,
   "/app/configuracoes/recurso-mkt",
   "/app/configuracoes/metas",
   "/app/configuracoes/metas/parcerias",
@@ -478,6 +479,11 @@ const simulatorRoutes = [
   "/app/simulacao/tabelao",
 ] as const;
 const administrationRoutes = ["/admin", "/admin/paginas", "/admin/usuarios"] as const;
+const administrationNavigationRoutes = [
+  "/admin/usuarios",
+  "/admin/paginas",
+  connectedSystemsRoute,
+] as const;
 
 function sortedRouteSet(routes: readonly string[]) {
   return [...routes].sort();
@@ -515,15 +521,15 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
-    ...settingsRoutes,
-    ...simulatorRoutes,
+    "/app/simulacao",
+    ...administrationNavigationRoutes,
   ]),
   admin: sortedRouteSet([
     ...operationalRoutes,
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
-    ...settingsRoutes,
+    ...administrationNavigationRoutes,
   ]),
   coordinator: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
   manager_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
@@ -533,16 +539,63 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
   pending: [],
 };
 
-const expectedAccountAdminRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
-  master: sortedRouteSet(administrationRoutes),
-  admin: sortedRouteSet(administrationRoutes),
-  coordinator: [],
-  manager_house: [],
-  manager_imob: [],
-  broker_house: [],
-  broker_imob: [],
-  pending: [],
-};
+function expectedAccountSettingsRoutesForRole(role: Role) {
+  const authorizedRoutes = new Set(expectedDirectRoutesByRole[role]);
+  const presentsIntegrationsInAdministration = authorizedRoutes.has("/admin");
+
+  return sortedRouteSet(
+    settingsRoutes.filter(
+      (route) =>
+        authorizedRoutes.has(route) &&
+        (route !== connectedSystemsRoute || !presentsIntegrationsInAdministration),
+    ),
+  );
+}
+
+interface ExpectedPrimaryNavigationRoot {
+  name: string;
+  tag: "A" | "BUTTON";
+  href: string | null;
+  controls: string | null;
+}
+
+function expectedPrimaryNavigationRootsForRole(role: Role) {
+  const authorizedRoutes = new Set(expectedDirectRoutesByRole[role]);
+  const roots: ExpectedPrimaryNavigationRoot[] = [];
+
+  if (authorizedRoutes.has("/app")) {
+    roots.push({
+      name: "Dashboard",
+      tag: "BUTTON",
+      href: null,
+      controls: "authorized-navigation-crm-dashboard",
+    });
+  }
+  if (authorizedRoutes.has("/app/simulacao")) {
+    roots.push({ name: "Simulação", tag: "A", href: "/app/simulacao", controls: null });
+  }
+  if (authorizedRoutes.has("/app/ranking")) {
+    roots.push({ name: "Ranking", tag: "A", href: "/app/ranking", controls: null });
+  }
+  if (authorizedRoutes.has("/app/canal-de-parcerias")) {
+    roots.push({
+      name: "Canal de Parcerias",
+      tag: "A",
+      href: "/app/canal-de-parcerias",
+      controls: null,
+    });
+  }
+  if (authorizedRoutes.has("/admin")) {
+    roots.push({
+      name: "Administração",
+      tag: "BUTTON",
+      href: null,
+      controls: "authorized-navigation-admin-home",
+    });
+  }
+
+  return roots;
+}
 
 function expectedHomeForRole(role: Role) {
   if (activeOperationalRoles.has(role)) return "/app";
@@ -697,9 +750,22 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      role === "master" ? 22 : role === "admin" ? 15 : activeOperationalRoles.has(role) ? 7 : 0,
+      role === "master" ? 13 : role === "admin" ? 12 : activeOperationalRoles.has(role) ? 7 : 0,
     );
-    expect(expectedAccountAdminRoutesByRole[role], role).toHaveLength(adminRoles.has(role) ? 3 : 0);
+    expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
+      adminRoles.has(role) ? 5 : 0,
+    );
+    expect(expectedPrimaryNavigationRootsForRole(role), role).toHaveLength(
+      role === "master" ? 5 : role === "admin" ? 4 : activeOperationalRoles.has(role) ? 2 : 0,
+    );
+
+    const directRoutes = expectedDirectRoutesByRole[role];
+    expect(expectedAccountSettingsRoutesForRole(role).includes(connectedSystemsRoute), role).toBe(
+      directRoutes.includes(connectedSystemsRoute) && !directRoutes.includes("/admin"),
+    );
+    expect(expectedHeaderRoutesByRole[role].includes(connectedSystemsRoute), role).toBe(
+      directRoutes.includes(connectedSystemsRoute) && directRoutes.includes("/admin"),
+    );
   }
   expect(protectedSurfaces.find((surface) => surface.path === "/app/repasse")?.allowed).toBe(
     repasseRoles,
@@ -978,8 +1044,15 @@ for (const role of expectedRoles) {
         await expect(accountPanel.locator("[data-session-identity-label]")).toContainText(
           accounts[role].email,
         );
-        const accountAdminRoutes = await accountPanel
-          .locator('nav[aria-label="Administração"] a[href^="/"]')
+        const expectedAccountSettingsRoutes = expectedAccountSettingsRoutesForRole(role);
+        const accountSettingsNavigation = accountPanel.locator(
+          'nav[aria-label="Configurações no menu da conta"]',
+        );
+        await expect(accountSettingsNavigation).toHaveCount(
+          expectedAccountSettingsRoutes.length > 0 ? 1 : 0,
+        );
+        const accountSettingsRoutes = await accountSettingsNavigation
+          .locator('a[href^="/"]')
           .evaluateAll((links) =>
             [
               ...new Set(
@@ -987,8 +1060,20 @@ for (const role of expectedRoles) {
               ),
             ].sort(),
           );
-        expect(accountAdminRoutes).toEqual(expectedAccountAdminRoutesByRole[role]);
+        expect(accountSettingsRoutes).toEqual(expectedAccountSettingsRoutes);
         await expect(accountPanel.locator('a[href="/conta/seguranca"]')).toHaveCount(1);
+        const accountRoutes = await accountPanel
+          .locator('a[href^="/"]')
+          .evaluateAll((links) =>
+            [
+              ...new Set(
+                links.map((link) => new URL(link.getAttribute("href")!, location.origin).pathname),
+              ),
+            ].sort(),
+          );
+        expect(accountRoutes).toEqual(
+          sortedRouteSet(["/conta/seguranca", ...expectedAccountSettingsRoutes]),
+        );
         await page.keyboard.press("Escape");
         await expect(accountTrigger).toBeFocused();
         await expect(accountPanel).toBeHidden();
@@ -1158,6 +1243,61 @@ for (const role of expectedRoles) {
           ].sort(),
         );
       expect(navigationRoutes).toEqual(expectedHeaderRoutesByRole[role]);
+
+      const navigationRoots = await navigation
+        .locator("[data-navigation-root-control]")
+        .evaluateAll((controls) =>
+          controls.map((control) => {
+            const accessibleCopy = control.cloneNode(true) as HTMLElement;
+            accessibleCopy
+              .querySelectorAll('[aria-hidden="true"]')
+              .forEach((decorative) => decorative.remove());
+            return {
+              name: accessibleCopy.textContent?.replace(/\s+/gu, " ").trim() ?? "",
+              tag: control.tagName,
+              href: control instanceof HTMLAnchorElement ? control.getAttribute("href") : null,
+              controls: control.getAttribute("aria-controls"),
+            };
+          }),
+        );
+      expect(navigationRoots).toEqual(expectedPrimaryNavigationRootsForRole(role));
+      await expect(navigation.locator('a[href="/admin"]')).toHaveCount(0);
+
+      const administrationTrigger = navigation.getByRole("button", {
+        name: "Administração",
+        exact: true,
+      });
+      const administrationPanel = page.locator("#authorized-navigation-admin-home");
+      if (expectedDirectRoutesByRole[role].includes("/admin")) {
+        await expect(administrationTrigger).toHaveCount(1);
+        await expect(administrationTrigger).toHaveAttribute("aria-expanded", "false");
+        await expect(administrationPanel).toBeHidden();
+        await administrationTrigger.click();
+        await expect(administrationTrigger).toHaveAttribute("aria-expanded", "true");
+        await expect(administrationPanel).toBeVisible();
+        const administrationLinks = await administrationPanel
+          .locator('a[href^="/"]')
+          .evaluateAll((links) =>
+            links.map((link) => ({
+              name:
+                link.querySelector("span:nth-child(2) > span:first-child")?.textContent?.trim() ??
+                "",
+              path: new URL(link.getAttribute("href")!, location.origin).pathname,
+            })),
+          );
+        expect(administrationLinks).toEqual([
+          { name: "Usuários", path: "/admin/usuarios" },
+          { name: "Páginas", path: "/admin/paginas" },
+          { name: "Integrações", path: connectedSystemsRoute },
+        ]);
+        await expect(administrationPanel.locator('a[href="/admin"]')).toHaveCount(0);
+        await page.keyboard.press("Escape");
+        await expect(administrationPanel).toBeHidden();
+        await expect(administrationTrigger).toBeFocused();
+      } else {
+        await expect(administrationTrigger).toHaveCount(0);
+        await expect(administrationPanel).toHaveCount(0);
+      }
       reportProgress("navigation");
 
       if (role === "master") {
@@ -1182,19 +1322,26 @@ for (const role of expectedRoles) {
         const blockedSimulatorCard = page.locator('main article[data-release-state="blocked"]');
         await expect(blockedSimulatorCard).toHaveCount(0);
 
-        const simulationDisclosure = page.getByRole("button", {
-          name: "Simulação",
-          exact: true,
-        });
-        await simulationDisclosure.click();
-        const simulationPanel = page.locator("#authorized-navigation-crm-simulation");
-        await expect(simulationPanel).toBeVisible();
-        await expect(simulationPanel.locator('a[href="/app/simulacao/tabelao"]')).toHaveCount(1);
-        await expect(simulationPanel.locator('a[href="/app/simulacao/caixa"]')).toHaveCount(1);
+        const simulationHubLink = page
+          .locator('header nav[aria-label="Navegação principal"]')
+          .getByRole("link", { name: "Simulação", exact: true });
+        await expect(simulationHubLink).toHaveAttribute("href", "/app/simulacao");
         await expect(
-          simulationPanel.locator('[aria-disabled="true"]').filter({ hasText: "CAIXA" }),
+          page
+            .locator('header nav[aria-label="Navegação principal"]')
+            .getByRole("button", { name: "Simulação", exact: true }),
         ).toHaveCount(0);
-        await page.keyboard.press("Escape");
+        await expect(page.locator("#authorized-navigation-crm-simulation")).toHaveCount(0);
+        await expect(
+          page.locator(
+            'header nav[aria-label="Navegação principal"] a[href="/app/simulacao/tabelao"]',
+          ),
+        ).toHaveCount(0);
+        await expect(
+          page.locator(
+            'header nav[aria-label="Navegação principal"] a[href="/app/simulacao/caixa"]',
+          ),
+        ).toHaveCount(0);
         reportProgress("simulator-release-gates");
       }
 
@@ -1434,16 +1581,17 @@ test("released simulator pages run only for Master while the CAIXA engine stays 
       page.getByRole("heading", { level: 1, name: "Calcular documentação", exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("button", { name: /^Calcular documentação Data/u })).toBeDisabled();
-    await page.getByRole("button", { name: "Simulação", exact: true }).click();
-    const simulationPanel = page.locator("#authorized-navigation-crm-simulation");
+    const simulationHubLink = page
+      .locator('header nav[aria-label="Navegação principal"]')
+      .getByRole("link", { name: "Simulação", exact: true });
+    await expect(simulationHubLink).toHaveAttribute("href", "/app/simulacao");
+    await expect(simulationHubLink).toHaveAttribute("data-active", "true");
     await expect(
-      simulationPanel.locator('a[href="/app/simulacao/calcular-documentacao"]'),
-    ).toBeVisible();
-    await expect(simulationPanel.locator('a[href="/app/simulacao/tabelao"]')).toBeVisible();
-    await expect(simulationPanel.locator('a[href="/app/simulacao/caixa"]')).toBeVisible();
-    await expect(
-      simulationPanel.locator('[aria-disabled="true"]').filter({ hasText: "CAIXA" }),
+      page
+        .locator('header nav[aria-label="Navegação principal"]')
+        .getByRole("button", { name: "Simulação", exact: true }),
     ).toHaveCount(0);
+    await expect(page.locator("#authorized-navigation-crm-simulation")).toHaveCount(0);
 
     const caixa = await page.goto("/app/simulacao/caixa");
     expect(caixa?.status()).toBe(200);

@@ -1,12 +1,194 @@
 .page {
-  width: min(100% - 32px, 1540px);
+  --analytics-page: #f5f6f8;
+  --analytics-surface: #ffffff;
+  --analytics-surface-muted: #f8f9fb;
+  --analytics-ink: #242a33;
+  --analytics-muted: #68727f;
+  --analytics-line: #d2dce7;
+  --analytics-cyan: #1c65a5;
+  --analytics-cyan-strong: #1c65a5;
+  --analytics-positive-ink: #176642;
+  --analytics-warning-ink: #755100;
+  --analytics-danger-ink: #982034;
+  --focus-ring: #1c65a5;
+
+  width: min(100%, 1420px);
   min-width: 0;
   margin-inline: auto;
-  padding-block: 8px 16px;
+  padding: 18px 28px 32px;
+  background: var(--analytics-page);
   color: var(--analytics-ink);
   font-size: 0.8125rem;
   line-height: 1.45;
   letter-spacing: 0;
+}
+
+:global(:root[data-theme="balanced"]) .page {
+  --analytics-page: #e6ecf2;
+  --analytics-surface: #f5f8fb;
+  --analytics-surface-muted: #eaf0f6;
+  --analytics-ink: #213549;
+  --analytics-muted: #566c81;
+  --analytics-line: #c5d2e0;
+  --analytics-cyan: #1b609b;
+  --analytics-cyan-strong: #1b609b;
+  --focus-ring: #1b609b;
+}
+
+:global(:root[data-theme="dark"]) .page {
+  --analytics-page: #061f31;
+  --analytics-surface: #09283d;
+  --analytics-surface-muted: #0c3048;
+  --analytics-ink: #e6f0f7;
+  --analytics-muted: #a2bed1;
+  --analytics-line: #285d75;
+  --analytics-cyan: #59c8dd;
+  --analytics-cyan-strong: #59c8dd;
+  --analytics-positive-ink: #78ddb2;
+  --analytics-warning-ink: #f4ca64;
+  --analytics-danger-ink: #ffb2ba;
+  --focus-ring: #59c8dd;
+}
+
+.pageHeader,
+.servicesHeading,
+.salesforceDetailsHeading {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+}
+
+.pageHeader {
+  margin-bottom: 22px;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  font-size: clamp(1.55rem, 2.4vw, 1.8rem);
+  font-weight: 720;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.pageHeader p,
+.servicesHeading p,
+.salesforceDetailsHeading p {
+  margin: 4px 0 0;
+  color: var(--analytics-muted);
+  font-size: 0.76rem;
+}
+
+.services {
+  margin-bottom: 18px;
+}
+
+.servicesHeading {
+  margin-bottom: 10px;
+}
+
+.servicesHeading h2,
+.salesforceDetailsHeading h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 680;
+}
+
+.servicesHeading > span {
+  color: var(--analytics-muted);
+  font-size: 0.7rem;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.serviceCard {
+  min-width: 0;
+  border: 1px solid var(--analytics-line);
+  border-radius: 7px;
+  background: var(--analytics-surface);
+  padding: 16px;
+}
+
+.serviceLogoArea {
+  position: relative;
+  display: flex;
+  height: 54px;
+  align-items: center;
+}
+
+.serviceLogo {
+  width: auto;
+  max-width: min(100%, 181px);
+  height: auto;
+  max-height: 42px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.salesforceLogo {
+  max-width: 74px;
+  max-height: 52px;
+}
+
+.logoDark {
+  display: none;
+}
+
+:global(:root[data-theme="dark"]) .logoLight {
+  display: none;
+}
+
+:global(:root[data-theme="dark"]) .logoDark {
+  display: block;
+}
+
+.serviceCard h3 {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  font-weight: 680;
+}
+
+.serviceCard > p {
+  min-height: 2.5rem;
+  margin: 4px 0 0;
+  color: var(--analytics-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.serviceHealth {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+  border-top: 1px solid var(--analytics-line);
+  padding-top: 12px;
+}
+
+.serviceHealth small {
+  color: var(--analytics-muted);
+  font-size: 0.64rem;
+}
+
+.salesforceDetails {
+  border: 1px solid var(--analytics-line);
+  border-radius: 7px;
+  background: var(--analytics-surface);
+  padding: 0 16px 12px;
+}
+
+.salesforceDetailsHeading {
+  border-bottom: 1px solid var(--analytics-line);
+  padding: 14px 0;
 }
 
 .page :global(.simulation-canvas-header) {
@@ -93,8 +275,28 @@
   color: var(--analytics-positive-ink);
 }
 .status[data-state="unavailable"],
+.status[data-state="unconfigured"],
 .status[data-state="reauth_required"] {
   color: var(--analytics-danger-ink);
+}
+
+.status[data-state="stale"] {
+  border-radius: 4px;
+  background: #080b10;
+  padding: 3px 6px;
+  color: #ffffff;
+}
+
+.status[data-state="extracting"] {
+  border-radius: 4px;
+  background: #ffdf63;
+  padding: 3px 6px;
+  color: #4e3a00;
+}
+
+.status[data-state="unverified"],
+.status[data-state="waiting"] {
+  color: var(--analytics-muted);
 }
 
 .connection {
@@ -248,13 +450,23 @@
 }
 @media (max-width: 760px) {
   .page {
-    width: calc(100% - 24px);
+    width: 100%;
+    padding: 14px 12px 24px;
+  }
+  .servicesGrid {
+    grid-template-columns: 1fr;
   }
   .metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .table {
     min-width: 660px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1040px) {
+  .servicesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (pointer: coarse) {
