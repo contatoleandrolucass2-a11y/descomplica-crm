@@ -219,7 +219,7 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Composição da documentação",
     location: "Resumo financeiro, ao lado de Composição",
     detail:
-      "A conta é: ITBI + Registro total + Despachante + Seguro Caixa. Confira os dados fiscais antes do cálculo. O quadro separa compra e venda e alienação, ou informa quando a tabela prevê uma cobrança conjunta. As regras, fontes e datas de vigência aparecem abaixo. Prefeitura e cartório precisam confirmar os impostos e os custos de registro. Exibir parcelas neste quadro mostra somente os pagamentos da documentação.",
+      "A conta é: ITBI + Registro total + Despachante + Seguro Caixa. Confira os dados fiscais antes do cálculo. O quadro separa compra e venda e alienação. Quando há dúvida entre cobrança conjunta e outro benefício, o cálculo fica pendente de confirmação do cartório. As regras, fontes e datas de vigência aparecem abaixo. Prefeitura e cartório precisam confirmar os impostos e os custos de registro. Exibir parcelas neste quadro mostra somente os pagamentos da documentação.",
   },
 ] as const;
 

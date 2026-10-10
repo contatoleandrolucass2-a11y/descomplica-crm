@@ -50,5 +50,8 @@ parcelamento documental, regras do pro-soluto, n8n e banco fora do escopo.
   sem intervalo invisivel entre os cards. Evidencia local em
   `test-results/documentation-legal-preview/2026-10-10T23-13-44.671Z/result.json`.
 - Nao houve migration nem alteracao de contas, permissoes ou dados remotos.
+- CI inicial `38094607547`, commit `727662d`: validate Linux passou, inclusive
+  suite completa, fontes e build. Ajuda refinada antes da nova rodada para
+  explicitar que a sobreposicao da cobranca conjunta permanece bloqueada.
 - Resultado continua estimativa sujeita a guia e enquadramento oficial, nao
   promessa de cobranca definitiva ou de beneficio sem documentos.

@@ -10,6 +10,7 @@
   especiais nao validados. Preserva despachante, seguro, juros e pro-soluto.
 - Diferencia os totais publicados pela ARISP e pelo 5o RI; exige confirmacao
   da tabela aplicavel com o cartorio e nao presume repasse unico de ISS.
+- Ajuda explicita que sobreposicao de cobranca conjunta exige cartorio.
 - Acrescenta fontes, alertas, verificador de vigencia na CI e runbook de
   manutencao; atualiza ajuda e conhecimento compartilhado.
 

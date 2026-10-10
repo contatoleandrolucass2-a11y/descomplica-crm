@@ -11,6 +11,8 @@
   n8n, permissoes ou dados de clientes.
 - Fontes conferidas; validacao e publicacao em andamento. Evidencias em
   `docs/audits/itbi-registro-sp-2026-10-10.md`.
+- Primeira validacao Linux passou no PR #177; ajuda alinhada ao bloqueio de
+  cobranca conjunta antes da validacao final de navegador.
 
 ## 2026-10-09: Guia do Associativo no cabecalho
 
