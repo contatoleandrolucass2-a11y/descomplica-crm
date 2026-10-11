@@ -113,17 +113,17 @@ async function checkLegalPrintContrast(page) {
     if (region.checkboxAccentContrast !== null)
       assert.ok(region.checkboxAccentContrast >= 3, "Printed confirmation needs 3:1 contrast");
   }
-  const accessibility = await new AxeBuilder({ page })
+  const printAccessibility = await new AxeBuilder({ page })
     .include(selectors[0])
     .include(selectors[1])
     .withRules(["color-contrast"])
     .analyze();
-  assert.deepEqual(accessibility.violations, [], "Scoped print color-contrast violations");
+  assert.deepEqual(printAccessibility.violations, [], "Scoped print color-contrast violations");
   return {
     regions,
     axeViolations: 0,
     // The computed-color assertion also covers details content that Axe may consider collapsed.
-    axeIncomplete: accessibility.incomplete.map(({ id, nodes }) => ({ id, nodes: nodes.length })),
+    axeIncomplete: printAccessibility.incomplete.map(({ id, nodes }) => ({ id, nodes: nodes.length })),
   };
 }
 

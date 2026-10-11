@@ -72,3 +72,7 @@ parcelamento documental, regras do pro-soluto, n8n e banco fora do escopo.
   na tela nem formulas.
 - Resultado continua estimativa sujeita a guia e enquadramento oficial, nao
   promessa de cobranca definitiva ou de beneficio sem documentos.
+- CI `38098284425`, HEAD `63ac726`: 2439 testes passaram, um contrato estatico
+  encontrou a nova variavel de auditoria de print antes da auditoria de tela.
+  Nome diferenciado para preservar a verificacao original de ordem. Nenhuma
+  regra ou limite de contraste foi alterado; nova CI obrigatoria.

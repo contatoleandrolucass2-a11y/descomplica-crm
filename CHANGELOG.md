@@ -13,6 +13,8 @@
 - Ajuda explicita que sobreposicao de cobranca conjunta exige cartorio.
 - Organiza a conferencia fiscal em secao expansivel para preservar a densidade
   inicial da pagina, mantendo preenchimento e confirmacao obrigatorios.
+- Mantem dados fiscais legiveis na impressao com conferencia independente
+  do contraste de tela.
 - Acrescenta fontes, alertas, verificador de vigencia na CI e runbook de
   manutencao; atualiza ajuda e conhecimento compartilhado.
 

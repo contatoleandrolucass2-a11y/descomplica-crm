@@ -16,6 +16,9 @@
 - Matriz autenticada confirmou ausencia de erros de acessibilidade, mas
   apontou altura excessiva da tela inicial documental. Correcao de densidade
   usa secao fiscal expansivel sem excluir campos ou afrouxar o gate.
+- CI seguinte aprovou 2439 testes e detectou colisao nominal entre auditorias
+  de tela e impressao no contrato estatico. Variavel de print diferenciada;
+  ordem, contraste e exigencias da auditoria de tela permanecem intactos.
 
 ## 2026-10-09: Guia do Associativo no cabecalho
 
