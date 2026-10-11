@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-11: Publicacao do ITBI e registro confirmada
+
+- PR #177 e CI final aprovados; imagem imutavel da release `1de9f5a` publicada
+  com backup verificado, prova de identidade e CAS da versao anterior.
+- Health e container saudaveis; API anonima 401 e rotas protegidas 307. Novos
+  campos fiscais conferidos em sessao autenticada, sem alterar propostas.
+- Evidencias, digests, retry de auditoria e limites registrados no audit e no
+  conhecimento. Esta etapa altera somente documentos, sem novo restart.
+
 ## 2026-10-10: Draft aprovado do CRM integrado para release
 
 - Fonte: pacote `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps`.
@@ -65,6 +74,33 @@
   do SHA corrigido e obrigatoria. A reproducao local com outra identidade
   aleatoria aprovou novamente 154 checks responsivos, 88 de tema, 242 Axe, 242
   comparacoes e 110 de zoom; Usuarios voltou a 1.024 x 4.082 px.
+- A reconciliacao com `main` preserva a politica fiscal SP/2026 publicada no PR
+  #177. O status do Salesforce agora prioriza reautenticacao necessaria ou
+  indisponibilidade sobre `cycle=running`; 225 testes focados e o verificador
+  de fontes publicas passaram antes do merge local.
+
+## 2026-10-10: ITBI e registro de Sao Paulo com vigencia e contrato fiscal
+
+- Pedido autorizado: corrigir, validar, publicar e sincronizar conhecimento.
+- Remove a isencao restrita a MCMV e os fatores arbitrarios de registro;
+  usa politica 2026 com 48 faixas, fontes e enquadramentos explicitos.
+- Compra e garantia sao discriminadas; cidade, datas, bases, tabela da serventia
+  e beneficios precisam de confirmacao independente do perfil comercial.
+- Mantem despachante, seguro, juros e fluxo comercial. Sem mudancas em banco,
+  n8n, permissoes ou dados de clientes.
+- Fontes conferidas; validacao e publicacao em andamento. Evidencias em
+  `docs/audits/itbi-registro-sp-2026-10-10.md`.
+- Primeira validacao Linux passou no PR #177; ajuda alinhada ao bloqueio de
+  cobranca conjunta antes da validacao final de navegador.
+- Matriz autenticada confirmou ausencia de erros de acessibilidade, mas
+  apontou altura excessiva da tela inicial documental. Correcao de densidade
+  usa secao fiscal expansivel sem excluir campos ou afrouxar o gate.
+- CI seguinte aprovou 2439 testes e detectou colisao nominal entre auditorias
+  de tela e impressao no contrato estatico. Variavel de print diferenciada;
+  ordem, contraste e exigencias da auditoria de tela permanecem intactos.
+- CI `38098773619` aprovou os gates funcionais completos; onze imagens da
+  documentacao revisadas e atualizadas com proveniencia, 231 preservadas.
+  Revalidacao das referencias e publicacao continuam pendentes.
 
 ## 2026-10-09: Guia do Associativo no cabecalho
 

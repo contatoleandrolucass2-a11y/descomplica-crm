@@ -18,6 +18,7 @@ vi.mock("@/lib/crm/salesforce/config", () => ({
 }));
 
 import ConnectedSystemsPage from "@/app/(protected)/app/configuracoes/conectar-sistemas/page";
+import { getSalesforceServiceStatus } from "@/app/(protected)/app/configuracoes/conectar-sistemas/ConnectedSystemsPanel";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -106,5 +107,22 @@ describe("connected systems", () => {
     expect(markup).not.toContain("30 minutos");
     expect(markup).toContain('aria-label="Verificar conexão"');
     expect(markup).toContain('data-simulation-page-heading="true"');
+  });
+
+  it.each(["reauth_required", "unavailable"] as const)(
+    "prioritizes the %s connection state over a running extraction cycle",
+    (state) => {
+      expect(getSalesforceServiceStatus({ state, cycle: "running" })).toEqual({
+        state,
+        label: "Não conectado",
+      });
+    },
+  );
+
+  it("keeps the extraction status for a running cycle with a valid connection", () => {
+    expect(getSalesforceServiceStatus({ state: "connected", cycle: "running" })).toEqual({
+      state: "extracting",
+      label: "Extraindo",
+    });
   });
 });

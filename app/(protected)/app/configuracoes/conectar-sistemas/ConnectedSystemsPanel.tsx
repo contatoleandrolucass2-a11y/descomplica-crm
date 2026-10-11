@@ -88,6 +88,20 @@ function Timestamp({ value, empty = "Sem registro" }: { value: string | null; em
   );
 }
 
+export function getSalesforceServiceStatus(
+  snapshot: Pick<SalesforceConnectionSnapshot, "cycle" | "state">,
+) {
+  const connection = STATES[snapshot.state];
+  const connectionStateHasPriority =
+    snapshot.state === "reauth_required" || snapshot.state === "unavailable";
+  const isExtracting = snapshot.cycle === "running" && !connectionStateHasPriority;
+
+  return {
+    state: isExtracting ? "extracting" : snapshot.state,
+    label: isExtracting ? "Extraindo" : connection.label,
+  };
+}
+
 export function ConnectedSystemsPanel({
   ingestLabel,
   refreshAvailable,
@@ -168,8 +182,7 @@ export function ConnectedSystemsPanel({
 
   const connection = STATES[snapshot.state];
   const StatusIcon = connection.icon;
-  const salesforceState = snapshot.cycle === "running" ? "extracting" : snapshot.state;
-  const salesforceLabel = snapshot.cycle === "running" ? "Extraindo" : connection.label;
+  const { state: salesforceState, label: salesforceLabel } = getSalesforceServiceStatus(snapshot);
   const hasReports = snapshot.reports !== null;
   const publicationFailed = snapshot.errorCode === "publication_failed";
   const cycleLabel =

@@ -36,6 +36,7 @@
     "salesforce:export:watch": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/run-every-30-minutes.mjs",
     "salesforce:monitor": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/connection-monitor.mjs",
     "commercial-policy:verify": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/commercial-policies/verify.ts",
+    "documentation:verify-sources": "node scripts/verify-documentation-sources.mjs",
     "access:master": "node ops/access/provision-master.mjs",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "knowledge:install": "node scripts/knowledge/obsidian.mjs install",

@@ -48,6 +48,9 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Verify current documentation fee sources
+        run: pnpm documentation:verify-sources
+
       - name: Audit high and critical vulnerabilities
         run: pnpm audit --audit-level high
 

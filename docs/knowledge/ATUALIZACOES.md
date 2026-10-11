@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-11: ITBI e registro publicados com estimativa fiscal condicionada
+
+- Fonte: PR #177, CI `38101674797` e CI main `38103844760`, verificacao publica
+  de health e sessao autenticada. Status: publicado no SHA
+  `1de9f5af9a4fe528b081c4c7b546e4ff667f2b9d`.
+- Todos os gates passaram. A primeira tentativa da main teve interrupcao do
+  auditor Axe em Repasse sem diagnostico conclusivo; o mesmo job/SHA passou na
+  repeticao, sem modificar criterios. Nao transformar retry em excecao ao gate.
+- Imagem unica validada e promovida com backup e CAS; saude e protecoes de acesso
+  confirmadas. Registro tecnico completo em `docs/audits/itbi-registro-sp-2026-10-10.md`.
+- Tabelas dependem da serventia e do enquadramento confirmado. O resultado nao
+  substitui guia ou orcamento oficial; casos nao cobertos permanecem bloqueados.
+  Nao assumir vigencia de 2027 nem alterar despachante, seguro ou juros.
+
 ## 2026-10-10: Integracao do draft aprovado para a VPS
 
 - Status: `validado_no_pr`; `publicacao_pendente`. Fonte:
@@ -50,7 +64,41 @@
   identidade, remover cobertura ou esconder o valor de tecnologias assistivas.
   A reproducao local com outra identidade passou as 242 comparacoes e mediu
   novamente 4.082 px no caso de 1.024 px.
+- Estados de conexao e extracao Salesforce sao independentes. Quando coexistem,
+  `reauth_required` ou `unavailable` deve prevalecer visualmente sobre
+  `cycle=running`; "Extraindo" continua reservado a uma conexao utilizavel.
 - Registro completo: `docs/qa/draft-crm-vps-2026-10-10.md`.
+
+## 2026-10-10: ITBI e registro dependem do contrato fiscal, nao do perfil comercial
+
+- Fonte: pedido autorizado, Prefeitura SP (ITBI 2513/2517), ARISP tabela 2026
+  ISS 2%, tabela do 5o RI, Lei SP 11.331 e Leis federais 11.977/6.015. Branch
+  `codex/itbi-registro-vigente`. Status: publicado em 11/10/2026, conforme registro acima.
+- Isencao de 2026 ate R$ 245.527,77: pessoa fisica, uso somente residencial e
+  primeira aquisicao **ou** MCMV. SBPE nao elimina isencao; a triagem comercial
+  nao comprova primeira aquisicao, programa ou sistema do contrato.
+- Aliquota reduzida depende de SFH/PAR/HIS/consorcio, valor e data do contrato.
+  Data da transmissao, registro, entrega e primeira parcela sao distintas.
+- Registro usa bases proprias e beneficios nao cumulativos; antigo fator fixo
+  `0.620879` removido. ARISP/ISS 2% e 5o RI publicam totais diferentes; tabela
+  aplicavel deve ser confirmada com o cartorio, sem inferencia pela cidade.
+- Beneficio FGTS depende da origem do financiamento, nao do uso de saldo
+  pessoal na entrada. Compra e garantia aparecem no resumo. Sobreposicao de
+  FGTS fora do MCMV/item 14.4 e SFH com base superior ao preco ficam pendentes
+  de analise do cartorio; nao escolher automaticamente o menor valor.
+- Parametros, fontes, limites, atualizacao e testes em
+  `docs/runbooks/documentation-fees-sp.md`; evidencias e release em
+  `docs/audits/itbi-registro-sp-2026-10-10.md`.
+- Verificacao Web na CI bloqueia limites/tabelas alterados, fonte indisponivel ou
+  vigencia vencida. Runtime nao faz pesquisa a cada calculo e nao assume 2027.
+- Preservados despachante, seguro, juros, parcelamento e fluxo comercial.
+- CI `38098773619` aprovou banco, restore, E2E e predicado funcional visual;
+  onze imagens documentais revisadas, 231 preservadas. Publicacao depende
+  de nova CI contra as referencias atualizadas e imagem imutavel da main.
+- QA autenticado exige altura inicial de Calcular Documentacao de ate 1200 px
+  em desktop 1440. Dados fiscais extensos precisam de disclosure acessivel,
+  mantendo validacao obrigatoria e o acesso aos campos; nao elevar o limite
+  nem promover baseline com falha funcional. Evidencia: CI `38094894492`.
 
 ## 2026-10-09: Posicao atual do guia Associativo
 
