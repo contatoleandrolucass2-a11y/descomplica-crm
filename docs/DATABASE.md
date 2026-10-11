@@ -61,6 +61,8 @@ nenhum cutover Qlik ou do read model v3 foi realizado.
 35. `20260901204113_multi_master_source_controlled.sql`: remove somente a unicidade legada de Master, preserva lookup indexado e restringe toda nova promoção ao bootstrap owner-only, versionado e auditado.
 36. `20260902004415_rename_wf13_simulador_associativo.sql`: converge o nome técnico da jornada WF13 sem alterar o gate Master-only.
 37. `20261005234936_reconcile_roles_dashboard_views_and_bulk_overrides.sql`: cria os papéis House/Imob explícitos, aposenta opções genéricas sem auto-mapeamento, separa as três visões do dashboard por RLS e adiciona a RPC auditada de exceções em lote, com revalidação opcional de escopo após o lock do perfil alvo.
+38. `20261007050255_allow_master_permission_overrides.sql`: permite ao Master delegar permissões que possui a alvos inferiores, preservando hierarquia estrita, autoalteração e bloqueio de outro Master.
+39. `20261011143218_protect_administrator_accounts_and_enable_simulator_view.sql`: concede a visualização dos simuladores ao Administrador, mantém execução/política exclusivas do Master e adiciona fronteira explícita por papel em atribuição, perfil, exceções e reporting scopes. A migration aceita tanto o contrato produtivo compacto quanto a instalação limpa escopada.
 
 ## Desenvolvimento local
 
@@ -77,7 +79,7 @@ pnpm db:stop
 
 O reset é destrutivo para o banco local. Não use comandos equivalentes contra ambiente remoto sem backup e autorização.
 
-`supabase test db` planeja 1.042 testes pgTAP em 26 arquivos. A cobertura inclui
+`supabase test db` planeja 1.141 testes pgTAP em 27 arquivos. A cobertura inclui
 52 casos da fundação Auth/MFA/legal, 12 do isolamento fail-closed e 12 da
 convergência exata de páginas, além das suítes existentes de autorização,
 dashboard, Qlik, Salesforce, read models e runtime comercial. Ela verifica nomes,

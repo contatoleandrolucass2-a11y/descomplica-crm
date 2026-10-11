@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-10-11: Correcao de temas e fronteira de Administrador candidata
+
+- Ranking e Canal de Parcerias foram alinhados ao draft nos temas Claro e
+  Medio, removendo superficies navy residuais; o tema Escuro preserva o navy.
+- Administrador passou a visualizar os quatro simuladores, sem executar o fluxo
+  oficial nem receber capacidades de Master. Criacao/promocao, desativacao,
+  papel e excecoes de permissao de outra conta Administrador ficam restritos ao
+  Master na UI, Server Actions/RPCs e banco.
+- A migration convergente preserva os schemas compacto e escopado, nao altera
+  as tabelas Qlik e remove apenas `allow` de Administrador nas tres capacidades
+  exclusivas do plano de controle. Outros papeis e overrides `deny` permanecem
+  inalterados.
+- Reset limpo das 46 migrations, pgTAP direcionado 153/153, regressoes 214/214
+  e pgTAP completo 1.141/1.141 foram aprovados na origem e depois do restore.
+  A cobertura explicita inclui remocao e bulk `inherit` de override, alem de
+  `INSERT`/`DELETE` direto de escopo contra outro Administrador.
+- A primeira promocao visual bloqueou corretamente a pagina de Usuarios com
+  2.676 px. O aviso foi integrado ao cabecalho existente e a medicao final
+  voltou a 2.592 px, sem elevar o teto de 2.600 px. A matriz aprovou 154 checks
+  responsivos, 88 de tema, 242 Axe, 242 comparacoes, 110 de zoom, 40 checks dos
+  simuladores e 30 capturas do Associativo. Somente 24 referencias esperadas
+  mudaram: Ranking, Parcerias e Usuarios; nenhuma outra tela divergiu.
+- Gates integrados, verificacao visual pos-commit, migration remota e
+  publicacao ainda estao em andamento; esta entrada nao os antecipa.
+
 ## 2026-10-11: Runtime do layout promovido; aceite pendente
 
 - PR #178 integrado apos a CI candidata `38133737505`; revisao final sem novos

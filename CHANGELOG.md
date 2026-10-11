@@ -2,6 +2,13 @@
 
 ## 2026-10-11
 
+- Corrige superficies escuras residuais de Ranking e Canal de Parcerias nos
+  temas Claro e Medio, preservando o tema Escuro aprovado.
+- Libera ao Administrador a visualizacao dos quatro simuladores sem ampliar a
+  execucao oficial, a politica comercial ou qualquer capacidade de Master.
+- Reserva ao Master a administracao de contas Administrador, com bloqueio de
+  criacao/promocao, desativacao, papel e excecoes na interface, servidor, RPCs
+  e triggers do banco.
 - Promove o runtime do layout aprovado do CRM na release `ac3d7893`, com imagem
   imutavel, backup verificado, CAS, rollback preparado e saude confirmada; o
   aceite final permanece pendente da jornada autenticada em producao.

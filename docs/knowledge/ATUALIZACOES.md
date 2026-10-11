@@ -1,5 +1,27 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-11: Temas sem ilhas escuras e Administrador como classe protegida
+
+- Fonte: draft aprovado de 10/10/2026, migration
+  `20261011143218_protect_administrator_accounts_and_enable_simulator_view`,
+  matriz de autorizacao e testes versionados. Status: candidato; publicacao e
+  verificacao remota devem ser registradas somente depois dos respectivos
+  gates.
+- Tema nao e apenas preferencia global: componentes com superfice navy propria
+  precisam de override semantico explicito tanto em `light` quanto em
+  `balanced`. O tema `dark` continua usando a regra-base navy.
+- Administrador pode operar o CRM e visualizar os simuladores, mas nao recebe
+  automaticamente capacidades exclusivas do plano de controle. Visualizacao,
+  execucao oficial e gestao de politica comercial sao permissoes distintas.
+- Contas Administrador sao administradas somente por Master. A regra precisa
+  convergir em apresentacao, Server Actions, RPCs e triggers para impedir
+  bypass por chamada direta; esconder controles nunca e uma fronteira de
+  autorizacao.
+- A limpeza de privilegios deve ser cirurgica: remover apenas overrides `allow`
+  de Administrador para capacidades Master-only, preservando `deny` e qualquer
+  override de outros papeis. As tabelas Qlik e os quatro motores financeiros
+  ficam fora desse escopo.
+
 ## 2026-10-11: ITBI e registro publicados com estimativa fiscal condicionada
 
 - Fonte: PR #177, CI `38101674797` e CI main `38103844760`, verificacao publica

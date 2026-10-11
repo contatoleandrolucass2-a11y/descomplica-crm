@@ -29,6 +29,43 @@ O `approvedPreviewSHA256` do manifesto coincide com o hash calculado de
 `javascriptSyntaxCheck: passed` descrevem somente a previa transportavel; nao
 substituem testes do CRM integrado.
 
+## Correcao incremental de tema e fronteira Administrador — 11/10/2026
+
+- Ranking e Canal de Parcerias deixam de manter ilhas navy nos temas Claro e
+  Medio. As superficies agora usam os tokens semanticos claros/cinza-azulados
+  do draft; o tema Escuro conserva o navy aprovado.
+- Administrador herda a visualizacao do hub e das quatro rotas de simulacao,
+  sem receber execucao oficial, gestao de politica comercial ou funcao de
+  Master. O status oficial continua `executeAllowed: false` e a tentativa de
+  execucao continua negada.
+- Contas Administrador formam uma classe protegida: somente uma identidade com
+  papel Master pode criar ou promover para Administrador, alterar seu papel ou
+  estado, desativar a conta e conceder, trocar ou remover suas excecoes de
+  permissao. Nenhuma identidade pode atribuir o papel Master por esse fluxo.
+- A fronteira e aplicada na interface, nas Server Actions/RPCs e por triggers
+  no banco. A migration remove somente overrides `allow` de Administrador nas
+  tres capacidades exclusivas do plano de controle; overrides `deny` de
+  Administrador e overrides de outros papeis sao preservados.
+- A instalacao limpa das 46 migrations foi aprovada. O pgTAP direcionado
+  aprovou 153/153 assercoes, as regressoes relacionadas 214/214 e a suite
+  completa 1.141/1.141 em 27 arquivos, tanto na origem quanto no restore.
+  Quatro casos adicionais exercitam remocao e bulk `inherit` de override e
+  `INSERT`/`DELETE` direto de escopo contra outro Administrador.
+- A primeira promocao visual rejeitou corretamente a pagina de Usuarios com
+  2.676 px. O aviso foi condensado no cabecalho existente, sem retirar a
+  explicacao acessivel; a medicao final retornou a 2.592 px e manteve o teto
+  estrito de 2.600 px.
+- A matriz autenticada atualizada aprovou 154 checks responsivos, 88 de tema,
+  242 Axe, 242 comparacoes, 110 de zoom, 40 checks dos quatro simuladores e 30
+  capturas do Associativo. Foram promovidas somente 24 referencias esperadas:
+  nove de Ranking, nove de Parcerias e seis de Usuarios; `other=0`.
+- A inspecao humana cobriu Ranking e Parcerias em Claro e Escuro no desktop e
+  mobile, e em Medio no desktop. Claro e Medio ficaram sem ilhas navy; Escuro
+  preservou as superficies navy aprovadas. Usuarios permaneceu responsivo e
+  sem overflow horizontal em 390 px.
+- Nenhuma tabela Qlik, formula financeira, campo ou motor dos quatro
+  simuladores foi alterado nesta correcao.
+
 ## Assets incorporados
 
 | Asset no CRM                                  | SHA-256 no CRM                                                     | SHA-256 na fonte                                                   | Observacao                                     |
