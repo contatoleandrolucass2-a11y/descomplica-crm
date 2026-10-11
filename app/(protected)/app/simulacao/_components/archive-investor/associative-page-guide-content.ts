@@ -263,7 +263,7 @@ export const ASSOCIATIVE_PAGE_GUIDE_STEPS: readonly [
     selector: ".investor-associative-documentation",
     fallback: proposal,
     description:
-      "O Resumo financeiro da documentação reúne ITBI, registro, despachante e seguro. Confira o total, o plano sugerido e o primeiro vencimento. Os botões desse quadro mostram as parcelas da documentação e permitem imprimir. Dados bancários ausentes precisam ser informados antes.",
+      "O Resumo financeiro da documentação reúne ITBI, registro, despachante e seguro. Informe os dados bancários ausentes e confira os dados fiscais: cidade, datas, bases e condições do contrato. Sem essa conferência, o cálculo documental fica pendente. Confira os dois registros, as regras aplicadas, o total e o primeiro vencimento. Os botões desse quadro mostram as parcelas da documentação e permitem imprimir.",
   },
   {
     id: "manual",

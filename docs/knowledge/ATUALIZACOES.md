@@ -1,5 +1,36 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-10: ITBI e registro dependem do contrato fiscal, nao do perfil comercial
+
+- Fonte: pedido autorizado, Prefeitura SP (ITBI 2513/2517), ARISP tabela 2026
+  ISS 2%, tabela do 5o RI, Lei SP 11.331 e Leis federais 11.977/6.015. Branch
+  `codex/itbi-registro-vigente`. Status: implementacao e validacao em andamento.
+- Isencao de 2026 ate R$ 245.527,77: pessoa fisica, uso somente residencial e
+  primeira aquisicao **ou** MCMV. SBPE nao elimina isencao; a triagem comercial
+  nao comprova primeira aquisicao, programa ou sistema do contrato.
+- Aliquota reduzida depende de SFH/PAR/HIS/consorcio, valor e data do contrato.
+  Data da transmissao, registro, entrega e primeira parcela sao distintas.
+- Registro usa bases proprias e beneficios nao cumulativos; antigo fator fixo
+  `0.620879` removido. ARISP/ISS 2% e 5o RI publicam totais diferentes; tabela
+  aplicavel deve ser confirmada com o cartorio, sem inferencia pela cidade.
+- Beneficio FGTS depende da origem do financiamento, nao do uso de saldo
+  pessoal na entrada. Compra e garantia aparecem no resumo. Sobreposicao de
+  FGTS fora do MCMV/item 14.4 e SFH com base superior ao preco ficam pendentes
+  de analise do cartorio; nao escolher automaticamente o menor valor.
+- Parametros, fontes, limites, atualizacao e testes em
+  `docs/runbooks/documentation-fees-sp.md`; evidencias e release em
+  `docs/audits/itbi-registro-sp-2026-10-10.md`.
+- Verificacao Web na CI bloqueia limites/tabelas alterados, fonte indisponivel ou
+  vigencia vencida. Runtime nao faz pesquisa a cada calculo e nao assume 2027.
+- Preservados despachante, seguro, juros, parcelamento e fluxo comercial.
+- CI `38098773619` aprovou banco, restore, E2E e predicado funcional visual;
+  onze imagens documentais revisadas, 231 preservadas. Publicacao depende
+  de nova CI contra as referencias atualizadas e imagem imutavel da main.
+- QA autenticado exige altura inicial de Calcular Documentacao de ate 1200 px
+  em desktop 1440. Dados fiscais extensos precisam de disclosure acessivel,
+  mantendo validacao obrigatoria e o acesso aos campos; nao elevar o limite
+  nem promover baseline com falha funcional. Evidencia: CI `38094894492`.
+
 ## 2026-10-09: Posicao atual do guia Associativo
 
 - Fonte: pedido mais recente do usuario e componentes da branch

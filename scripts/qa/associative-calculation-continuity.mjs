@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { expect as baseExpect } from "@playwright/test";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
+import {
+  fillDocumentationLegalContext,
+  legalConfirmationLabel,
+} from "./documentation-legal-context.mjs";
 
 const root = ".investor-associative-table-page";
 const approval = `${root} .investor-associative-approval`;
@@ -494,15 +498,29 @@ export async function checkAssociativeCalculationContinuity(
     const documentation = page.locator(`${root} .investor-associative-documentation`);
     await expect(documentation).toHaveClass(/waiting/);
     await field("Avaliação bancária oficial da unidade").fill("35000000");
+    await expect(documentation).toHaveClass(/waiting/);
+    await expect(documentation.locator(".investor-associative-documentation-summary")).toHaveCount(
+      0,
+    );
+    const legalContext = await fillDocumentationLegalContext(documentation);
     await expect(documentation).toHaveClass(/ready/);
     await expect(unitFact("Avaliação bancária")).toHaveText("Não informada");
     await selectUnit(1);
     await assertAnswers(5_000);
     await expect(field("Avaliação bancária oficial da unidade")).toHaveValue("");
     await expect(documentation).toHaveClass(/waiting/);
+    await expect(
+      documentation.getByLabel(legalConfirmationLabel, { exact: true }),
+    ).not.toBeChecked();
+    await expect(documentation.locator(".investor-associative-documentation-summary")).toHaveCount(
+      0,
+    );
     result.stages.push({
       stage,
       calculationRecovered: true,
+      legalContext,
+      legalContextRequired: true,
+      legalConfirmationResetOnUnitChange: true,
       inventoryUnchanged: true,
       unitIsolation: true,
     });
@@ -640,6 +658,10 @@ export async function checkAssociativeCalculationContinuity(
     const originalProSoluto = await rule("% Pró-Soluto").innerText();
     const originalCommitment = await assertPositivePercentages("% Comprometimento da Renda");
     const originalMaximum = await assertPositivePercentages("% Máximo da renda mensal");
+    await fillDocumentationLegalContext(
+      page.locator(`${root} .investor-associative-documentation`),
+    );
+    await expect(page.locator(`${root} .investor-associative-documentation`)).toHaveClass(/ready/);
     const documentationTotal = await page
       .locator(`${root} .investor-associative-documentation-summary`)
       .innerText();

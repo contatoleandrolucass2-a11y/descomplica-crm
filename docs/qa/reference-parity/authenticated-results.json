@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "capturedAt": "2026-10-09T21:01:19.793Z",
-  "captureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+  "capturedAt": "2026-10-11T01:10:57.463Z",
+  "captureCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
   "worktreeDirtyAtCapture": false,
   "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
   "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
@@ -35,7 +35,7 @@
   "artifacts": {
     "baselineScreenshots": "docs/qa/reference-parity/target-authenticated",
     "baselineResult": "docs/qa/reference-parity/authenticated-results.json",
-    "candidateDiagnostics": "test-results/pr176-candidate/authenticated-visual"
+    "candidateDiagnostics": "test-results/pr177-visual-38098773619/authenticated-visual"
   },
   "viewports": [
     {
@@ -720,7 +720,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1159,
+      "pageScrollHeight": 1183,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -1710,7 +1710,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1159,
+      "pageScrollHeight": 1183,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -2700,7 +2700,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1153,
+      "pageScrollHeight": 1176,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -3690,7 +3690,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1182,
+      "pageScrollHeight": 1206,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4680,7 +4680,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1795,
+      "pageScrollHeight": 1817,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5670,7 +5670,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1828,
+      "pageScrollHeight": 1874,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6660,7 +6660,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1978,
+      "pageScrollHeight": 2009,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -7667,7 +7667,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1159,
+      "pageScrollHeight": 1183,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -8679,7 +8679,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1159,
+      "pageScrollHeight": 1183,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -9691,7 +9691,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1159,
+      "pageScrollHeight": 1183,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10703,7 +10703,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1795,
+      "pageScrollHeight": 1817,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -14481,7 +14481,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3193, 3043],
+              "changedPixels": [3189, 3043],
               "passed": true
             },
             "currentCardMotion": {
@@ -14725,7 +14725,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4173, 982],
+              "changedPixels": [4190, 982],
               "passed": true
             },
             "requiredRowMotion": {
@@ -15523,6 +15523,24 @@
               "borderless": true,
               "transparent": true
             },
+            "legalContext": {
+              "municipality": "sao-paulo-sp",
+              "transactionDate": "2026-10-02",
+              "financingContractDate": "2026-10-01",
+              "registrationDate": "2026-10-10",
+              "registryTable": "ARISP_2",
+              "specialRegime": "NONE",
+              "naturalPerson": "SIM",
+              "residential": "SIM",
+              "firstAcquisition": "SIM",
+              "program": "MCMV",
+              "financingSystem": "SFH",
+              "funding": "OTHER",
+              "firstTransfer": "",
+              "iptuValue": 0,
+              "itbiBase": 230000,
+              "basesConfirmed": true
+            },
             "motion": {
               "hoverCapable": true,
               "modality": {
@@ -16650,35 +16668,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 169.2,
+                  "start": 210.7,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 169.2,
+                  "start": 210.7,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 169.2,
+                  "start": 210.7,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 169.2,
+                  "start": 210.7,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 169.2,
+                  "start": 210.7,
                   "opacity": "1"
                 }
               ],
@@ -16689,14 +16707,14 @@
                   {
                     "cycle": 0,
                     "lastLeftVisibleMs": 4823.4375,
-                    "firstRightVisibleMs": 4134.375,
+                    "firstRightVisibleMs": 4085.15625,
                     "gapMs": 0,
                     "samples": 20
                   },
                   {
                     "cycle": 1,
                     "lastLeftVisibleMs": 13823.4375,
-                    "firstRightVisibleMs": 13134.375,
+                    "firstRightVisibleMs": 13085.15625,
                     "gapMs": 0,
                     "samples": 20
                   }
@@ -17421,7 +17439,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3573, 3429],
+              "changedPixels": [3579, 3429],
               "passed": true
             },
             "currentCardMotion": {
@@ -17665,7 +17683,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4692, 1104],
+              "changedPixels": [4702, 1104],
               "passed": true
             },
             "requiredRowMotion": {
@@ -18463,6 +18481,24 @@
               "borderless": true,
               "transparent": true
             },
+            "legalContext": {
+              "municipality": "sao-paulo-sp",
+              "transactionDate": "2026-10-02",
+              "financingContractDate": "2026-10-01",
+              "registrationDate": "2026-10-10",
+              "registryTable": "ARISP_2",
+              "specialRegime": "NONE",
+              "naturalPerson": "SIM",
+              "residential": "SIM",
+              "firstAcquisition": "SIM",
+              "program": "MCMV",
+              "financingSystem": "SFH",
+              "funding": "OTHER",
+              "firstTransfer": "",
+              "iptuValue": 0,
+              "itbiBase": 230000,
+              "basesConfirmed": true
+            },
             "motion": {
               "hoverCapable": true,
               "modality": {
@@ -19590,35 +19626,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 233.5,
+                  "start": 186.1,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 233.5,
+                  "start": 186.1,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 233.5,
+                  "start": 186.1,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 233.5,
+                  "start": 186.1,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 233.5,
+                  "start": 186.1,
                   "opacity": "1"
                 }
               ],
@@ -19629,14 +19665,14 @@
                   {
                     "cycle": 0,
                     "lastLeftVisibleMs": 4823.4375,
-                    "firstRightVisibleMs": 4141.40625,
+                    "firstRightVisibleMs": 4085.15625,
                     "gapMs": 0,
                     "samples": 20
                   },
                   {
                     "cycle": 1,
                     "lastLeftVisibleMs": 13823.4375,
-                    "firstRightVisibleMs": 13141.40625,
+                    "firstRightVisibleMs": 13085.15625,
                     "gapMs": 0,
                     "samples": 20
                   }
@@ -20361,7 +20397,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3545, 3195],
+              "changedPixels": [3572, 3195],
               "passed": true
             },
             "currentCardMotion": {
@@ -20605,7 +20641,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4742, 1119],
+              "changedPixels": [4757, 1119],
               "passed": true
             },
             "requiredRowMotion": {
@@ -21403,6 +21439,24 @@
               "borderless": true,
               "transparent": true
             },
+            "legalContext": {
+              "municipality": "sao-paulo-sp",
+              "transactionDate": "2026-10-02",
+              "financingContractDate": "2026-10-01",
+              "registrationDate": "2026-10-10",
+              "registryTable": "ARISP_2",
+              "specialRegime": "NONE",
+              "naturalPerson": "SIM",
+              "residential": "SIM",
+              "firstAcquisition": "SIM",
+              "program": "MCMV",
+              "financingSystem": "SFH",
+              "funding": "OTHER",
+              "firstTransfer": "",
+              "iptuValue": 0,
+              "itbiBase": 230000,
+              "basesConfirmed": true
+            },
             "motion": {
               "hoverCapable": true,
               "modality": {
@@ -22530,35 +22584,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 234,
+                  "start": 202.232,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 234,
+                  "start": 202.232,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 234,
+                  "start": 202.232,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 234,
+                  "start": 202.232,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 234,
+                  "start": 202.232,
                   "opacity": "1"
                 }
               ],
@@ -22569,14 +22623,14 @@
                   {
                     "cycle": 0,
                     "lastLeftVisibleMs": 4823.4375,
-                    "firstRightVisibleMs": 4134.375,
+                    "firstRightVisibleMs": 4078.125,
                     "gapMs": 0,
                     "samples": 20
                   },
                   {
                     "cycle": 1,
                     "lastLeftVisibleMs": 13823.4375,
-                    "firstRightVisibleMs": 13134.375,
+                    "firstRightVisibleMs": 13078.125,
                     "gapMs": 0,
                     "samples": 20
                   }
@@ -22704,6 +22758,26 @@
             {
               "stage": "official-appraisal-recovery",
               "calculationRecovered": true,
+              "legalContext": {
+                "municipality": "sao-paulo-sp",
+                "transactionDate": "2026-10-02",
+                "financingContractDate": "2026-10-01",
+                "registrationDate": "2026-10-10",
+                "registryTable": "ARISP_2",
+                "specialRegime": "NONE",
+                "naturalPerson": "SIM",
+                "residential": "SIM",
+                "firstAcquisition": "SIM",
+                "program": "MCMV",
+                "financingSystem": "SFH",
+                "funding": "OTHER",
+                "firstTransfer": "",
+                "iptuValue": 0,
+                "itbiBase": 230000,
+                "basesConfirmed": true
+              },
+              "legalContextRequired": true,
+              "legalConfirmationResetOnUnitChange": true,
               "inventoryUnchanged": true,
               "unitIsolation": true
             },
@@ -25531,7 +25605,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1049, 1045],
+              "changedPixels": [1044, 1049],
               "passed": true
             },
             "requiredRowMotion": {
@@ -26329,6 +26403,24 @@
               "borderless": true,
               "transparent": true
             },
+            "legalContext": {
+              "municipality": "sao-paulo-sp",
+              "transactionDate": "2026-10-02",
+              "financingContractDate": "2026-10-01",
+              "registrationDate": "2026-10-10",
+              "registryTable": "ARISP_2",
+              "specialRegime": "NONE",
+              "naturalPerson": "SIM",
+              "residential": "SIM",
+              "firstAcquisition": "SIM",
+              "program": "MCMV",
+              "financingSystem": "SFH",
+              "funding": "OTHER",
+              "firstTransfer": "",
+              "iptuValue": 0,
+              "itbiBase": 230000,
+              "basesConfirmed": true
+            },
             "motion": {
               "hoverCapable": true,
               "modality": {
@@ -27456,35 +27548,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 259.966,
+                  "start": 231.466,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 259.966,
+                  "start": 231.466,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 259.966,
+                  "start": 231.466,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 259.966,
+                  "start": 231.466,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 259.966,
+                  "start": 231.466,
                   "opacity": "1"
                 }
               ],
@@ -27494,15 +27586,15 @@
                 "cycles": [
                   {
                     "cycle": 0,
-                    "lastLeftVisibleMs": 4668.75,
-                    "firstRightVisibleMs": 4078.125,
+                    "lastLeftVisibleMs": 4689.84375,
+                    "firstRightVisibleMs": 4064.0625,
                     "gapMs": 0,
                     "samples": 20
                   },
                   {
                     "cycle": 1,
-                    "lastLeftVisibleMs": 13668.75,
-                    "firstRightVisibleMs": 13078.125,
+                    "lastLeftVisibleMs": 13689.84375,
+                    "firstRightVisibleMs": 13064.0625,
                     "gapMs": 0,
                     "samples": 20
                   }
@@ -28227,7 +28319,7 @@
             "profilePixels": {
               "width": 452,
               "height": 117,
-              "changedPixels": [5449, 5263],
+              "changedPixels": [5437, 5263],
               "passed": true
             },
             "currentCardMotion": {
@@ -28471,7 +28563,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1157, 1156],
+              "changedPixels": [1158, 1159],
               "passed": true
             },
             "requiredRowMotion": {
@@ -29269,6 +29361,24 @@
               "borderless": true,
               "transparent": true
             },
+            "legalContext": {
+              "municipality": "sao-paulo-sp",
+              "transactionDate": "2026-10-02",
+              "financingContractDate": "2026-10-01",
+              "registrationDate": "2026-10-10",
+              "registryTable": "ARISP_2",
+              "specialRegime": "NONE",
+              "naturalPerson": "SIM",
+              "residential": "SIM",
+              "firstAcquisition": "SIM",
+              "program": "MCMV",
+              "financingSystem": "SFH",
+              "funding": "OTHER",
+              "firstTransfer": "",
+              "iptuValue": 0,
+              "itbiBase": 230000,
+              "basesConfirmed": true
+            },
             "motion": {
               "hoverCapable": true,
               "modality": {
@@ -30396,35 +30506,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 485.398,
+                  "start": 255.19799999999998,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 485.398,
+                  "start": 255.19799999999998,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 485.398,
+                  "start": 255.19799999999998,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 485.398,
+                  "start": 255.19799999999998,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 485.398,
+                  "start": 255.19799999999998,
                   "opacity": "1"
                 }
               ],
@@ -30434,15 +30544,15 @@
                 "cycles": [
                   {
                     "cycle": 0,
-                    "lastLeftVisibleMs": 4668.75,
-                    "firstRightVisibleMs": 4085.15625,
+                    "lastLeftVisibleMs": 4689.84375,
+                    "firstRightVisibleMs": 4064.0625,
                     "gapMs": 0,
                     "samples": 20
                   },
                   {
                     "cycle": 1,
-                    "lastLeftVisibleMs": 13668.75,
-                    "firstRightVisibleMs": 13085.15625,
+                    "lastLeftVisibleMs": 13689.84375,
+                    "firstRightVisibleMs": 13064.0625,
                     "gapMs": 0,
                     "samples": 20
                   }
@@ -31411,7 +31521,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1110, 1140],
+              "changedPixels": [1095, 1129],
               "passed": true
             },
             "requiredRowMotion": {
@@ -32208,6 +32318,24 @@
               "iconSize": 17,
               "borderless": true,
               "transparent": true
+            },
+            "legalContext": {
+              "municipality": "sao-paulo-sp",
+              "transactionDate": "2026-10-02",
+              "financingContractDate": "2026-10-01",
+              "registrationDate": "2026-10-10",
+              "registryTable": "ARISP_2",
+              "specialRegime": "NONE",
+              "naturalPerson": "SIM",
+              "residential": "SIM",
+              "firstAcquisition": "SIM",
+              "program": "MCMV",
+              "financingSystem": "SFH",
+              "funding": "OTHER",
+              "firstTransfer": "",
+              "iptuValue": 0,
+              "itbiBase": 230000,
+              "basesConfirmed": true
             },
             "motion": {
               "hoverCapable": true,
@@ -33336,35 +33464,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 192.03,
+                  "start": 269.632,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 192.03,
+                  "start": 269.632,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 192.03,
+                  "start": 269.632,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 192.03,
+                  "start": 269.632,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 192.03,
+                  "start": 269.632,
                   "opacity": "1"
                 }
               ],
@@ -33374,15 +33502,15 @@
                 "cycles": [
                   {
                     "cycle": 0,
-                    "lastLeftVisibleMs": 4675.78125,
-                    "firstRightVisibleMs": 4078.125,
+                    "lastLeftVisibleMs": 4689.84375,
+                    "firstRightVisibleMs": 4064.0625,
                     "gapMs": 0,
                     "samples": 20
                   },
                   {
                     "cycle": 1,
-                    "lastLeftVisibleMs": 13675.78125,
-                    "firstRightVisibleMs": 13078.125,
+                    "lastLeftVisibleMs": 13689.84375,
+                    "firstRightVisibleMs": 13064.0625,
                     "gapMs": 0,
                     "samples": 20
                   }
@@ -33510,6 +33638,26 @@
             {
               "stage": "official-appraisal-recovery",
               "calculationRecovered": true,
+              "legalContext": {
+                "municipality": "sao-paulo-sp",
+                "transactionDate": "2026-10-02",
+                "financingContractDate": "2026-10-01",
+                "registrationDate": "2026-10-10",
+                "registryTable": "ARISP_2",
+                "specialRegime": "NONE",
+                "naturalPerson": "SIM",
+                "residential": "SIM",
+                "firstAcquisition": "SIM",
+                "program": "MCMV",
+                "financingSystem": "SFH",
+                "funding": "OTHER",
+                "firstTransfer": "",
+                "iptuValue": 0,
+                "itbiBase": 230000,
+                "basesConfirmed": true
+              },
+              "legalContextRequired": true,
+              "legalConfirmationResetOnUnitChange": true,
               "inventoryUnchanged": true,
               "unitIsolation": true
             },
@@ -37102,7 +37250,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1165,
+        "pageScrollHeight": 1183,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -38114,7 +38262,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1159,
+        "pageScrollHeight": 1183,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -39126,7 +39274,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1157,
+        "pageScrollHeight": 1180,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -40138,7 +40286,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1151,
+        "pageScrollHeight": 1174,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -41150,7 +41298,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1737,
+        "pageScrollHeight": 1759,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -42059,10 +42207,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1668960,
+        "totalPixels": 1703520,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "tracked": true,
+          "bytes": 203434,
+          "sha256": "42e7a855bd09361d120ad1ead760fa598d5eee95f89d88aee201a0ae9035907b"
+        }
+      },
+      "path": "target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+      "bytes": 203434,
+      "sha256": "42e7a855bd09361d120ad1ead760fa598d5eee95f89d88aee201a0ae9035907b",
+      "width": 1440,
+      "height": 1183,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 1159
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1183
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
           "tracked": true,
@@ -42070,23 +42242,28 @@
           "sha256": "3ab1450e456da92f4e24bcf8bc8e1093d4c848d79eca185c1e456dfa19971e9e"
         }
       },
-      "path": "target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
-      "bytes": 201106,
-      "sha256": "3ab1450e456da92f4e24bcf8bc8e1093d4c848d79eca185c1e456dfa19971e9e",
-      "width": 1440,
-      "height": 1159,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 123,
-        "totalPixels": 1668960,
-        "changedPixelRatio": 0.00007369859073914294,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
-          "tracked": true,
-          "bytes": 201106,
-          "sha256": "3ab1450e456da92f4e24bcf8bc8e1093d4c848d79eca185c1e456dfa19971e9e"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -42901,10 +43078,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1668960,
+        "totalPixels": 1703520,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 203434,
+          "sha256": "42e7a855bd09361d120ad1ead760fa598d5eee95f89d88aee201a0ae9035907b"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+      "bytes": 203434,
+      "sha256": "42e7a855bd09361d120ad1ead760fa598d5eee95f89d88aee201a0ae9035907b",
+      "width": 1440,
+      "height": 1183,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 1159
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1183
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
           "tracked": true,
@@ -42912,23 +43113,28 @@
           "sha256": "3ab1450e456da92f4e24bcf8bc8e1093d4c848d79eca185c1e456dfa19971e9e"
         }
       },
-      "path": "target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
-      "bytes": 201106,
-      "sha256": "3ab1450e456da92f4e24bcf8bc8e1093d4c848d79eca185c1e456dfa19971e9e",
-      "width": 1440,
-      "height": 1159,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 123,
-        "totalPixels": 1668960,
-        "changedPixelRatio": 0.00007369859073914294,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
-          "tracked": true,
-          "bytes": 201106,
-          "sha256": "3ab1450e456da92f4e24bcf8bc8e1093d4c848d79eca185c1e456dfa19971e9e"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -43743,10 +43949,34 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1668960,
+        "totalPixels": 1703520,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 218284,
+          "sha256": "d2bbe58d08eb6a18cc11d0f464e151e3663685b9ae9da4c585cb71b001b518e1"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+      "bytes": 218284,
+      "sha256": "d2bbe58d08eb6a18cc11d0f464e151e3663685b9ae9da4c585cb71b001b518e1",
+      "width": 1440,
+      "height": 1183,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 1159
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1183
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
           "tracked": true,
@@ -43754,23 +43984,28 @@
           "sha256": "3229cf22828e88df777a3a6ca4bc2d08611367eb6d19e956650c5183d0bf0b0c"
         }
       },
-      "path": "target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
-      "bytes": 217712,
-      "sha256": "3229cf22828e88df777a3a6ca4bc2d08611367eb6d19e956650c5183d0bf0b0c",
-      "width": 1440,
-      "height": 1159,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 122,
-        "totalPixels": 1668960,
-        "changedPixelRatio": 0.00007309941520467836,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
-          "tracked": true,
-          "bytes": 217712,
-          "sha256": "3229cf22828e88df777a3a6ca4bc2d08611367eb6d19e956650c5183d0bf0b0c"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -44739,15 +44974,15 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1668960,
+        "totalPixels": 1703520,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 213990,
-          "sha256": "e830c9aa42a6640dce109ec4b7014c390964bae078e152fcba66abf945f53ca7"
+          "bytes": 214074,
+          "sha256": "a045b5ed2e81f124a845dbfb874b551a1c51b83937922631f9948d578569322e"
         }
       },
       "approvedCanvasComparison": {
@@ -44756,28 +44991,57 @@
         "asset": "docs/qa/canvas-parity/reference/documentacao-caixa.webp",
         "region": "left",
         "referenceSha256": "5094f436a1ee19378c4e37645583ccf3abd5aaf3fd62e4d3629b8b120bfe730e",
-        "colorDistance": 16.500868055555557,
+        "colorDistance": 16.469401041666668,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 40.252522786458336,
+        "edgeDistance": 39.54736328125,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
-      "bytes": 213990,
-      "sha256": "e830c9aa42a6640dce109ec4b7014c390964bae078e152fcba66abf945f53ca7",
+      "bytes": 214074,
+      "sha256": "a045b5ed2e81f124a845dbfb874b551a1c51b83937922631f9948d578569322e",
       "width": 1440,
-      "height": 1159,
+      "height": 1183,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 118,
-        "totalPixels": 1668960,
-        "changedPixelRatio": 0.00007070271306682006,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 1159
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1183
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
           "tracked": true,
           "bytes": 213990,
           "sha256": "e830c9aa42a6640dce109ec4b7014c390964bae078e152fcba66abf945f53ca7"
         }
+      },
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -45669,10 +45933,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1483520,
+        "totalPixels": 1514240,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "tracked": true,
+          "bytes": 196684,
+          "sha256": "11603e6e4b0d08fc5cadf194871e3166ede83e1f8fd3109cdb70a21f6799ff95"
+        }
+      },
+      "path": "target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+      "bytes": 196684,
+      "sha256": "11603e6e4b0d08fc5cadf194871e3166ede83e1f8fd3109cdb70a21f6799ff95",
+      "width": 1280,
+      "height": 1183,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1280,
+          "height": 1159
+        },
+        "actual": {
+          "width": 1280,
+          "height": 1183
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
           "tracked": true,
@@ -45680,23 +45968,28 @@
           "sha256": "e79e3c8311cb50749e22b50b3274d2e4902c25bf2480b2bf1cc5f93198073063"
         }
       },
-      "path": "target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
-      "bytes": 195062,
-      "sha256": "e79e3c8311cb50749e22b50b3274d2e4902c25bf2480b2bf1cc5f93198073063",
-      "width": 1280,
-      "height": 1159,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 123,
-        "totalPixels": 1483520,
-        "changedPixelRatio": 0.00008291091458153581,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
-          "tracked": true,
-          "bytes": 195062,
-          "sha256": "e79e3c8311cb50749e22b50b3274d2e4902c25bf2480b2bf1cc5f93198073063"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -46511,10 +46804,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1180672,
+        "totalPixels": 1204224,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "tracked": true,
+          "bytes": 177212,
+          "sha256": "586aac3c45241bb2d50bb6aece13590cfccbb3c01a0eeba56640058f2b41bd11"
+        }
+      },
+      "path": "target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+      "bytes": 177212,
+      "sha256": "586aac3c45241bb2d50bb6aece13590cfccbb3c01a0eeba56640058f2b41bd11",
+      "width": 1024,
+      "height": 1176,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1024,
+          "height": 1153
+        },
+        "actual": {
+          "width": 1024,
+          "height": 1176
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
           "tracked": true,
@@ -46522,23 +46839,28 @@
           "sha256": "abf1724966c094973d1b290aa77d8e1b560548e91f47ab3950e9f6f3e3266b99"
         }
       },
-      "path": "target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
-      "bytes": 177924,
-      "sha256": "abf1724966c094973d1b290aa77d8e1b560548e91f47ab3950e9f6f3e3266b99",
-      "width": 1024,
-      "height": 1153,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 49,
-        "totalPixels": 1180672,
-        "changedPixelRatio": 0.000041501788811795316,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
-          "tracked": true,
-          "bytes": 177924,
-          "sha256": "abf1724966c094973d1b290aa77d8e1b560548e91f47ab3950e9f6f3e3266b99"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -47359,10 +47681,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 907776,
+        "totalPixels": 926208,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "tracked": true,
+          "bytes": 173788,
+          "sha256": "8810861811ae02e388c52fe2c014e1fb77d5faa47587ee4819a8511b209b2b7e"
+        }
+      },
+      "path": "target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+      "bytes": 173788,
+      "sha256": "8810861811ae02e388c52fe2c014e1fb77d5faa47587ee4819a8511b209b2b7e",
+      "width": 768,
+      "height": 1206,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 768,
+          "height": 1182
+        },
+        "actual": {
+          "width": 768,
+          "height": 1206
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
           "tracked": true,
@@ -47370,23 +47716,28 @@
           "sha256": "e9b35eead83e39ed45916037d795042f7a1521ae2c94b1cff1ebafcd8115507d"
         }
       },
-      "path": "target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
-      "bytes": 171554,
-      "sha256": "e9b35eead83e39ed45916037d795042f7a1521ae2c94b1cff1ebafcd8115507d",
-      "width": 768,
-      "height": 1182,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 49,
-        "totalPixels": 907776,
-        "changedPixelRatio": 0.00005397807388606881,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
-          "tracked": true,
-          "bytes": 171554,
-          "sha256": "e9b35eead83e39ed45916037d795042f7a1521ae2c94b1cff1ebafcd8115507d"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -48207,10 +48558,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 700050,
+        "totalPixels": 708630,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "tracked": true,
+          "bytes": 172134,
+          "sha256": "9d58d1abd7d599d2151ce71ba663a08d054d06a8b15f0d014589a32de6270a8a"
+        }
+      },
+      "path": "target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+      "bytes": 172134,
+      "sha256": "9d58d1abd7d599d2151ce71ba663a08d054d06a8b15f0d014589a32de6270a8a",
+      "width": 390,
+      "height": 1817,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 1795
+        },
+        "actual": {
+          "width": 390,
+          "height": 1817
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
           "tracked": true,
@@ -48218,23 +48593,28 @@
           "sha256": "769676a419196a4eb8e30505344a95ccc5596372e83a8d82780aa7c83b983a33"
         }
       },
-      "path": "target-authenticated/simulacao-calcular-documentacao-390x844.webp",
-      "bytes": 171354,
-      "sha256": "769676a419196a4eb8e30505344a95ccc5596372e83a8d82780aa7c83b983a33",
-      "width": 390,
-      "height": 1795,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 328,
-        "totalPixels": 700050,
-        "changedPixelRatio": 0.00046853796157417325,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
-          "tracked": true,
-          "bytes": 171354,
-          "sha256": "769676a419196a4eb8e30505344a95ccc5596372e83a8d82780aa7c83b983a33"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -49055,10 +49435,34 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 700050,
+        "totalPixels": 708630,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 191360,
+          "sha256": "001db4a4f9aa3edc2a0de3336e1643f81174674ee134e2754e0a03e86aeadb84"
+        }
+      },
+      "path": "target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+      "bytes": 191360,
+      "sha256": "001db4a4f9aa3edc2a0de3336e1643f81174674ee134e2754e0a03e86aeadb84",
+      "width": 390,
+      "height": 1817,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 1795
+        },
+        "actual": {
+          "width": 390,
+          "height": 1817
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
           "tracked": true,
@@ -49066,23 +49470,28 @@
           "sha256": "a09674761b9bb79d0d59340c88b96ea86d01f9f0fbc14420ce6155cbe9702d0e"
         }
       },
-      "path": "target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
-      "bytes": 188310,
-      "sha256": "a09674761b9bb79d0d59340c88b96ea86d01f9f0fbc14420ce6155cbe9702d0e",
-      "width": 390,
-      "height": 1795,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 324,
-        "totalPixels": 700050,
-        "changedPixelRatio": 0.0004628240839940004,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
-          "tracked": true,
-          "bytes": 188310,
-          "sha256": "a09674761b9bb79d0d59340c88b96ea86d01f9f0fbc14420ce6155cbe9702d0e"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -49903,10 +50312,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 685500,
+        "totalPixels": 702750,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "tracked": true,
+          "bytes": 169476,
+          "sha256": "201fd85571fde1eed2f65f42b0b52a6b158b23719faabb8d65bcf7fc87e9fc0d"
+        }
+      },
+      "path": "target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+      "bytes": 169476,
+      "sha256": "201fd85571fde1eed2f65f42b0b52a6b158b23719faabb8d65bcf7fc87e9fc0d",
+      "width": 375,
+      "height": 1874,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 375,
+          "height": 1828
+        },
+        "actual": {
+          "width": 375,
+          "height": 1874
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
           "tracked": true,
@@ -49914,23 +50347,28 @@
           "sha256": "825fb1e43ce5d1e41e45afd3fc9f9190d727550702b01e2ec31bd976ba367584"
         }
       },
-      "path": "target-authenticated/simulacao-calcular-documentacao-375x812.webp",
-      "bytes": 168148,
-      "sha256": "825fb1e43ce5d1e41e45afd3fc9f9190d727550702b01e2ec31bd976ba367584",
-      "width": 375,
-      "height": 1828,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 110,
-        "totalPixels": 685500,
-        "changedPixelRatio": 0.00016046681254558716,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
-          "tracked": true,
-          "bytes": 168148,
-          "sha256": "825fb1e43ce5d1e41e45afd3fc9f9190d727550702b01e2ec31bd976ba367584"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -50751,10 +51189,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 632960,
+        "totalPixels": 642880,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp",
+          "tracked": true,
+          "bytes": 170680,
+          "sha256": "172193bd355b3df52aa106aa9bf0d362eb49985ec841b932646a7137e16156d5"
+        }
+      },
+      "path": "target-authenticated/simulacao-calcular-documentacao-320x568.webp",
+      "bytes": 170680,
+      "sha256": "172193bd355b3df52aa106aa9bf0d362eb49985ec841b932646a7137e16156d5",
+      "width": 320,
+      "height": 2009,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 320,
+          "height": 1978
+        },
+        "actual": {
+          "width": 320,
+          "height": 2009
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp",
           "tracked": true,
@@ -50762,23 +51224,28 @@
           "sha256": "9d119c01b61a0599e593ed9d3794eb0c73696c572444db08653758fd06c070d7"
         }
       },
-      "path": "target-authenticated/simulacao-calcular-documentacao-320x568.webp",
-      "bytes": 168186,
-      "sha256": "9d119c01b61a0599e593ed9d3794eb0c73696c572444db08653758fd06c070d7",
-      "width": 320,
-      "height": 1978,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 404,
-        "totalPixels": 632960,
-        "changedPixelRatio": 0.0006382709807886755,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp",
-          "tracked": true,
-          "bytes": 168186,
-          "sha256": "9d119c01b61a0599e593ed9d3794eb0c73696c572444db08653758fd06c070d7"
-        }
+      "promotionSource": {
+        "pullRequest": 177,
+        "ciRun": "38098773619",
+        "artifactId": "11688070826",
+        "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+        "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+        "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+        "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+        "updatedPaths": [
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+          "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
+        ],
+        "preservedImages": 231
       }
     },
     {
@@ -51809,44 +52276,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
         "tracked": true,
-        "bytes": 177924,
-        "sha256": "abf1724966c094973d1b290aa77d8e1b560548e91f47ab3950e9f6f3e3266b99"
+        "bytes": 177212,
+        "sha256": "586aac3c45241bb2d50bb6aece13590cfccbb3c01a0eeba56640058f2b41bd11"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
         "tracked": true,
-        "bytes": 195062,
-        "sha256": "e79e3c8311cb50749e22b50b3274d2e4902c25bf2480b2bf1cc5f93198073063"
+        "bytes": 196684,
+        "sha256": "11603e6e4b0d08fc5cadf194871e3166ede83e1f8fd3109cdb70a21f6799ff95"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
         "tracked": true,
-        "bytes": 201106,
-        "sha256": "3ab1450e456da92f4e24bcf8bc8e1093d4c848d79eca185c1e456dfa19971e9e"
+        "bytes": 203434,
+        "sha256": "42e7a855bd09361d120ad1ead760fa598d5eee95f89d88aee201a0ae9035907b"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp",
         "tracked": true,
-        "bytes": 168186,
-        "sha256": "9d119c01b61a0599e593ed9d3794eb0c73696c572444db08653758fd06c070d7"
+        "bytes": 170680,
+        "sha256": "172193bd355b3df52aa106aa9bf0d362eb49985ec841b932646a7137e16156d5"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
         "tracked": true,
-        "bytes": 168148,
-        "sha256": "825fb1e43ce5d1e41e45afd3fc9f9190d727550702b01e2ec31bd976ba367584"
+        "bytes": 169476,
+        "sha256": "201fd85571fde1eed2f65f42b0b52a6b158b23719faabb8d65bcf7fc87e9fc0d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
         "tracked": true,
-        "bytes": 171354,
-        "sha256": "769676a419196a4eb8e30505344a95ccc5596372e83a8d82780aa7c83b983a33"
+        "bytes": 172134,
+        "sha256": "9d58d1abd7d599d2151ce71ba663a08d054d06a8b15f0d014589a32de6270a8a"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
         "tracked": true,
-        "bytes": 171554,
-        "sha256": "e9b35eead83e39ed45916037d795042f7a1521ae2c94b1cff1ebafcd8115507d"
+        "bytes": 173788,
+        "sha256": "8810861811ae02e388c52fe2c014e1fb77d5faa47587ee4819a8511b209b2b7e"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-1024x768.webp",
@@ -52331,8 +52798,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
         "tracked": true,
-        "bytes": 188310,
-        "sha256": "a09674761b9bb79d0d59340c88b96ea86d01f9f0fbc14420ce6155cbe9702d0e"
+        "bytes": 191360,
+        "sha256": "001db4a4f9aa3edc2a0de3336e1643f81174674ee134e2754e0a03e86aeadb84"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
@@ -52421,20 +52888,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 217712,
-        "sha256": "3229cf22828e88df777a3a6ca4bc2d08611367eb6d19e956650c5183d0bf0b0c"
+        "bytes": 218284,
+        "sha256": "d2bbe58d08eb6a18cc11d0f464e151e3663685b9ae9da4c585cb71b001b518e1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 213990,
-        "sha256": "e830c9aa42a6640dce109ec4b7014c390964bae078e152fcba66abf945f53ca7"
+        "bytes": 214074,
+        "sha256": "a045b5ed2e81f124a845dbfb874b551a1c51b83937922631f9948d578569322e"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
         "tracked": true,
-        "bytes": 201106,
-        "sha256": "3ab1450e456da92f4e24bcf8bc8e1093d4c848d79eca185c1e456dfa19971e9e"
+        "bytes": 203434,
+        "sha256": "42e7a855bd09361d120ad1ead760fa598d5eee95f89d88aee201a0ae9035907b"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-dark-1440x900.webp",
@@ -52504,7 +52971,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "3e6e7750edb8d0fb4e4c1dd9a2116b7364f276d515565b7a0052e9135a8b71c6"
+    "manifestSha256": "4fdc5d4080ac3d943ab6fedd1bf3b964d006c3f944ac8d05ba1de9c173c04494"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -52515,8 +52982,8 @@
     "requested": true,
     "performed": true,
     "method": "same-filesystem transactional rename with rollback",
-    "previousBaselineManifestSha256": "0123fe3478fd45e9478d857c457cd02a9924a1ccdb852b4c376143a0fc10355c",
-    "previousBaselineResultSha256": "3276eb4577ec98b36233ef3255462f62dcfe93cd733745a226428ec685418d6b"
+    "previousBaselineManifestSha256": "3e6e7750edb8d0fb4e4c1dd9a2116b7364f276d515565b7a0052e9135a8b71c6",
+    "previousBaselineResultSha256": "3e89a78e562b9417eed8746a1d7b7a387f6431db3cae22a3e6227f7bcf5c5e36"
   },
   "visualInspectionCoverage": {
     "responsiveScreenshots": 154,
@@ -52590,6 +53057,29 @@
         "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
         "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
         "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
+      ],
+      "preservedImages": 231
+    },
+    {
+      "pullRequest": 177,
+      "ciRun": "38098773619",
+      "artifactId": "11688070826",
+      "artifactSha256": "f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f",
+      "sourceCommit": "194c5e5dda2ca45dfc899f9461bd7d840e7124ac",
+      "sourceResultSha256": "87eb7c7d33c1293a537234358009834fea16a0e817b3092b3e8258d7aef4de78",
+      "previousCaptureCommit": "ba192ecf7e8e355f8560b0de4c2817024f520044",
+      "updatedPaths": [
+        "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp"
       ],
       "preservedImages": 231
     }
