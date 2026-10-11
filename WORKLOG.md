@@ -19,6 +19,200 @@
   permissões POSIX 0600/0700, symlink de homologação e timeouts DevTools/
   Obsidian. O contador de rotas do contrato visual foi corrigido e revalidado.
 
+## 2026-10-11: Correcao de temas e fronteira de Administrador publicada
+
+- Ranking e Canal de Parcerias foram alinhados ao draft nos temas Claro e
+  Medio, removendo superficies navy residuais; o tema Escuro preserva o navy.
+- Administrador passou a visualizar os quatro simuladores, sem executar o fluxo
+  oficial nem receber capacidades de Master. Criacao/promocao, desativacao,
+  papel e excecoes de permissao de outra conta Administrador ficam restritos ao
+  Master na UI, Server Actions/RPCs e banco.
+- A migration convergente preserva os schemas compacto e escopado, nao altera
+  as tabelas Qlik e remove apenas `allow` de Administrador nas tres capacidades
+  exclusivas do plano de controle. Outros papeis e overrides `deny` permanecem
+  inalterados.
+- Reset limpo das 46 migrations, pgTAP direcionado 153/153, regressoes 214/214
+  e pgTAP completo 1.141/1.141 foram aprovados na origem e depois do restore.
+  A cobertura explicita inclui remocao e bulk `inherit` de override, alem de
+  `INSERT`/`DELETE` direto de escopo contra outro Administrador.
+- A primeira promocao visual bloqueou corretamente a pagina de Usuarios com
+  2.676 px. O aviso foi integrado ao cabecalho existente e a medicao final
+  voltou a 2.592 px, sem elevar o teto de 2.600 px. A matriz aprovou 154 checks
+  responsivos, 88 de tema, 242 Axe, 242 comparacoes, 110 de zoom, 40 checks dos
+  simuladores e 30 capturas do Associativo. Somente 24 referencias esperadas
+  mudaram: Ranking, Parcerias e Usuarios; nenhuma outra tela divergiu.
+- Gates locais finais aprovados: formato, lint, tipos, inventario, audit sem
+  vulnerabilidades conhecidas, 126 arquivos Vitest com 2.463 aprovados e seis
+  ignorados, 83 testes Node, build de 45 rotas e E2E com 19 aprovados e um skip
+  previsto. A revisao de seguranca independente nao encontrou achados no diff.
+- O `verify` visual pos-commit repetiu 154 checks responsivos, 88 de tema, 242
+  Axe, 242 comparacoes e 110 de zoom sem regravar a baseline; conta e fixtures
+  efemeras foram removidas.
+- O PR #181 teve a primeira CI candidata `38158141843` integralmente verde no
+  SHA `9327288a6c0e99f6ae8be626d82d9e06c8aec3a3`, incluindo validate, restore
+  isolado e todos os gates de release.
+- Antes da escrita remota, o backup logico privado foi verificado em
+  `/var/backups/descomplica-crm/20261011-admin-boundary-prechange.hm5P7J`; o
+  manifesto tem SHA-256
+  `4ec0ef67f7982963344881c70421af4cb41ad95517653839b38ebf4d10538950`.
+  A migration foi aplicada isoladamente como versão remota
+  `20261011174323_protect_administrator_accounts_and_enable_simulator_view`.
+- O pos-check remoto confirmou os tres triggers de fronteira compativeis com
+  o schema presente, zero ACL direta nas tabelas Qlik, `crm.simulators.view`
+  somente para Administrador/Master, zero capacidade de plano de controle para
+  Administrador e preservacao das tres excecoes operacionais de Coordenador.
+  Os helpers novos permanecem fora da Data API.
+- A producao possui somente uma conta Administrador; por isso nao foi criada
+  uma segunda conta para fabricar um teste entre pares. Em transacao revertida,
+  o Administrador existente foi bloqueado ao tentar alterar a propria conta e o
+  Master foi autorizado; o caso exato Administrador-contra-Administrador segue
+  comprovado no pgTAP e no E2E isolado executados nesta VPS.
+- Os advisors remotos nao apontaram regressao criada pela migration. Seguiram
+  10 avisos `INFO` de RLS sem policy, tres RPCs `SECURITY DEFINER` para `anon`,
+  17 para `authenticated`, um aviso de protecao de senha vazada e, em
+  performance, dez foreign keys sem indice e dois indices ainda nao usados.
+- A CI final do PR #181 (`38161298050`) aprovou validate, restore isolado e
+  release-gates no head `43f6ffde386336c4c0efe12ad0eefa474f7dd882`. O
+  merge protegido gerou a release
+  `6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2`; a CI de `main`
+  `38163173310` aprovou os quatro jobs, incluindo a imagem promovivel.
+- O artefato `11711780026` teve `image.tar.gz` SHA-256
+  `13d6d7333c1e3fdc1e75f841fc904af81cdc8eeb826f522b7dd40dbcd3a1ae51`.
+  Configuracao CI `sha256:9e172428`, manifesto/imagem local
+  `sha256:e68a6141`, label, `linux/amd64`, 11 camadas e 11 `diff_ids` foram
+  reconciliados. `image:prove` aprovou os dois perfis sem rebuild ou segredo.
+- O backup privado da aplicacao foi verificado em
+  `/var/backups/descomplica-crm/releases/6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2.Ba84ee`,
+  com manifesto SHA-256
+  `b3eb1965f88ac761dfede67a4c238f821bdd541a9bffecbb1f82fa02736ab579`.
+  O CAS partiu de `ac3d7893`; rollback ficou preparado e nao foi necessario.
+- O container publicou o SHA novo, ficou `healthy`, sem restart/OOM e com
+  failing streak zero. Cinco healths locais e cinco publicos passaram; sete
+  rotas protegidas retornaram 307, seis APIs anonimas 401, sete assets 200,
+  sete headers de seguranca foram preservados, HTTP redirecionou para HTTPS e
+  os logs nao continham padrao critico.
+- A matriz autenticada desktop/mobile foi executada com identidades sinteticas
+  isoladas e removidas nesta VPS e na CI. Nenhuma sessao produtiva autenticada
+  foi improvisada; o pos-check hospedado foi observacional e anonimo.
+- O fechamento documental repetiu formato, inventario, lint, tipos, 2.463
+  testes Vitest, 83 testes Node e build de 45 rotas. O host continua sem vault
+  Obsidian configurado; `knowledge:sync` retornou `not-configured` e o
+  conhecimento versionado permanece como fonte.
+
+## 2026-10-11: Runtime do layout promovido; aceite pendente
+
+- PR #178 integrado apos a CI candidata `38133737505`; revisao final sem novos
+  apontamentos. A CI de `main` `38136053837` aprovou os quatro jobs, inclusive
+  banco, restore, E2E, matriz visual e imagem imutavel.
+- Release `ac3d7893c1e679298f54c1f1f8b57d03568715c2` promovida sem rebuild. Config
+  da CI `sha256:3b4432d`, manifesto/imagem local `sha256:d21f8ac`; revision,
+  plataforma, onze camadas e dois perfis de runtime comprovados.
+- Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/ac3d7893c1e679298f54c1f1f8b57d03568715c2.NW7yqB`.
+  CAS partiu de `1de9f5a`; rollback ficou pronto e nao foi necessario.
+- Container saudavel, sem restart/OOM; health local e publico no SHA novo,
+  APIs anonimas 401, rotas protegidas 307, sete assets 200, headers preservados
+  e logs iniciais sem padrao critico.
+- Os quatro simuladores mantiveram 40 checks autenticados antes da publicacao e
+  suas rotas protegidas responderam corretamente no pos-check anonimo. Como nao
+  havia sessao produtiva autenticada conscientemente disponibilizada para
+  controle interativo, a jornada autenticada pos-deploy do gate 7 permanece
+  pendente; nao foram improvisados login, cookie, conta ou `storageState`.
+- Nao houve migration, nova conta, mudanca de acesso nem mutacao de dados
+  remotos. O deploy esta ativo e saudavel, mas a release nao deve ser tratada
+  como integralmente aceita ate a jornada autenticada observacional.
+- Conhecimento atualizado nos documentos versionados. O host nao possui vault
+  Obsidian configurado; a sincronizacao externa permanece pendente, sem instalar
+  ou conectar armazenamento sem autorizacao.
+
+## 2026-10-11: Publicacao do ITBI e registro confirmada
+
+- PR #177 e CI final aprovados; imagem imutavel da release `1de9f5a` publicada
+  com backup verificado, prova de identidade e CAS da versao anterior.
+- Health e container saudaveis; API anonima 401 e rotas protegidas 307. Novos
+  campos fiscais conferidos em sessao autenticada, sem alterar propostas.
+- Evidencias, digests, retry de auditoria e limites registrados no audit e no
+  conhecimento. Esta etapa altera somente documentos, sem novo restart.
+
+## 2026-10-10: Draft aprovado do CRM integrado para release
+
+- Fonte: pacote `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps`.
+  A referencia final `outputs/modelo-site.html` tem SHA-256
+  `a30980e6f2b790b648348d602e1cb07c9de6f0718ce6450ddb58e034f4f1c698`;
+  o manifesto conferido tem SHA-256
+  `c113f793b50efc36c08a0c2757980725af252d01c474f7ffd9ed773566242e18`.
+- O shell protegido adota a marca horizontal completa por tema e a navegacao
+  aprovada: Simulacao abre o hub diretamente, Configuracoes fica no menu da
+  conta e Administracao agrupa Usuarios, Paginas e Integracoes. O antigo nome
+  Conectar Sistemas permanece apenas na URL compativel.
+- Dashboard, etapas do funil, Ranking, Parcerias, Configuracoes, Recurso MKT,
+  Administracao, Usuarios e Integracoes receberam o canvas compacto e
+  responsivo dos temas Claro, Medio e Escuro. O hub conserva seis ferramentas
+  em duas colunas no desktop e uma no celular; Documentacao e CAIXA ganharam a
+  apresentacao aprovada sem habilitar motores indisponiveis.
+- Integracoes usa logos do pacote e mostra somente evidencias reais. Salesforce
+  distingue sessao, coleta e publicacao; n8n e Supabase ficam como nao
+  verificados quando nao ha fonte de status. Quantidades e estados ficticios da
+  previa nao foram transportados.
+- Usuarios agora carrega paginas reais de seis contas no servidor, busca e
+  filtra sem carregar o diretorio inteiro e continua com carregamento por
+  rolagem, fallback manual, erro e fim da lista. Permissoes herdadas e excecoes
+  sao apresentadas separadamente, mantendo guards, hierarquia e autorizacao no
+  servidor/banco.
+- Preservacao estrutural aplicada a
+  `/app/simulacao/associativo-fluxo-linear`, `/app/simulacao/tabela-direta`,
+  `/app/simulacao/tabela-investidor` e `/app/simulacao/tabelao`: componentes,
+  campos e motores existentes nao foram redesenhados. Os estilos novos do hub,
+  Documentacao e CAIXA foram escopados fora desses quatro destinos. A matriz
+  autenticada aprovou 40 checks de navegacao dessas quatro rotas; o Associativo
+  recebeu ainda revisao manual de 30 capturas.
+- Gates comprovados pelo coordenador: `pnpm format:check`, `pnpm lint`,
+  `pnpm typecheck` e `pnpm resources:check` aprovados; `pnpm test` com 124
+  arquivos, 2.292 aprovados e seis ignorados, mais 83 testes Node operacionais;
+  `pnpm build` aprovado no Next.js 16.3.8 com 45 rotas.
+- `pnpm qa:e2e:release` passou 19 cenarios e ignorou um previsto; o gate
+  concorrente do Associativo tambem ficou verde. O QA visual autenticado aprovou
+  154 checks responsivos, 88 de tema, 242 Axe, 242 comparacoes, 110 de zoom e 22
+  canvases aprovados. A promocao da baseline registrou `performed: true` e
+  `eligible: true`.
+- `/admin/usuarios` mediu 2.592 px em 1.440 px de largura. O teto estrito foi
+  calibrado de 2.500 para 2.600 px para comportar a matriz completa de 23
+  permissoes e seus badges de acesso efetivo; a pagina permaneceu dentro do novo
+  limite na promocao autenticada.
+- O QA sintetico de Integracoes passou em nove combinacoes de tema/largura, seis
+  estados, zoom de 200% e carregamento dos SVGs.
+- A verificacao pos-commit `pnpm qa:visual:authenticated`, em modo `verify`,
+  passou com 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
+  comparacoes candidato/baseline e 110 de zoom. As fixtures efemeras foram
+  removidas ao final.
+- Na etapa intermediaria, E2E, promocao visual e verificacao pos-commit estavam
+  aprovados. O PR #178 foi aberto e a CI `38094977306` aprovou `validate`,
+  `release-gates` e `isolated-restore` no SHA `4a8bfc8`; revisao, merge e
+  publicacao ainda estavam pendentes naquele ponto. O fechamento esta no topo
+  deste Worklog e as evidencias completas em
+  `docs/qa/draft-crm-vps-2026-10-10.md`.
+- A CI documental `38096802698` manteve `validate`, `isolated-restore`, E2E,
+  banco e 241 comparacoes visuais verdes, mas bloqueou uma captura de Usuarios
+  em 1.024 px: o e-mail sintetico aleatorio ocupou uma linha em vez de duas e
+  alterou somente a altura total em 21 px. O cabecalho intermediario passou a
+  reservar e limitar duas linhas, com texto integral no DOM e `title`; nova CI
+  do SHA corrigido e obrigatoria. A reproducao local com outra identidade
+  aleatoria aprovou novamente 154 checks responsivos, 88 de tema, 242 Axe, 242
+  comparacoes e 110 de zoom; Usuarios voltou a 1.024 x 4.082 px.
+- A reconciliacao com `main` preserva a politica fiscal SP/2026 publicada no PR
+  #177. O status do Salesforce agora prioriza reautenticacao necessaria ou
+  indisponibilidade sobre `cycle=running`; 225 testes focados e o verificador
+  de fontes publicas passaram antes do merge local.
+- No commit limpo `bd8c5f6`, lint, tipos, 2.453 testes Vitest, seis skips
+  previstos, 83 testes Node, fontes, inventario e build de 45 rotas passaram.
+  A matriz autenticada combinada aprovou 154 responsivos, 88 temas, 242 Axe,
+  242 comparacoes, 110 zoom, os 40 checks dos simuladores e 30 capturas do
+  Associativo. Somente onze referencias de Documentacao foram promovidas; 231
+  permaneceram intactas e a altura desktop ficou em 1.191/1.200 px.
+- A verificacao pos-commit `4111089`, em modo `verify`, repetiu 154 checks
+  responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes e 110 de zoom;
+  conta e fixtures efemeras foram removidas ao final.
+
 ## 2026-10-10: ITBI e registro de Sao Paulo com vigencia e contrato fiscal
 
 - Pedido autorizado: corrigir, validar, publicar e sincronizar conhecimento.

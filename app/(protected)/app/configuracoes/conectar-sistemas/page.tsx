@@ -8,7 +8,7 @@ import {
 
 import { ConnectedSystemsPanel } from "./ConnectedSystemsPanel";
 
-export const metadata = { title: "Conectar Sistemas" };
+export const metadata = { title: "Integrações" };
 
 export default async function ConnectedSystemsPage() {
   const context = await enforcePermission("crm.settings.manage");

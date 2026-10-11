@@ -9,10 +9,13 @@ import {
   requireCanAssignRole,
   requireCanGrantAllPermissions,
   requireCanGrantPermission,
-  requireCanManageTargetLevel,
+  requireCanManageTargetRole,
 } from "@/lib/authorization/hierarchy";
 import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
 import { ROLES, type RoleKey } from "@/lib/authorization/roles";
+
+import { loadUserDirectoryPage } from "./user-directory";
+import type { LoadUsersPageActionResult, LoadUsersPageInput } from "./user-directory-types";
 
 const userIdSchema = z.string().uuid();
 const optionalReasonSchema = z.string().trim().max(240).optional();
@@ -26,6 +29,11 @@ const targetContextSchema = z.object({
   role_key: z.string(),
   level: z.number().int(),
   permissions: z.array(z.string()),
+});
+const loadUsersPageInputSchema = z.object({
+  offset: z.number().int().min(0).max(1_000_000),
+  search: z.string().trim().max(100).optional(),
+  status: z.enum(["all", "active", "inactive", "pending"]).optional(),
 });
 
 export interface AdminActionState {
@@ -72,6 +80,31 @@ async function getTargetContext(targetUserId: string) {
   return { supabase, target: parsed.data[0] };
 }
 
+export async function loadUsersPageAction(
+  input: LoadUsersPageInput,
+): Promise<LoadUsersPageActionResult> {
+  // Server Actions are public POST entry points. Re-check the permission on
+  // every page request; visibility of the control is not an authorization gate.
+  const context = await requirePermission("users.view");
+  const parsedInput = loadUsersPageInputSchema.safeParse(input);
+  if (!parsedInput.success) {
+    return { status: "error", message: "Os filtros da lista são inválidos." };
+  }
+
+  try {
+    const normalizedInput: LoadUsersPageInput = { offset: parsedInput.data.offset };
+    if (parsedInput.data.search !== undefined) normalizedInput.search = parsedInput.data.search;
+    if (parsedInput.data.status !== undefined) normalizedInput.status = parsedInput.data.status;
+    const page = await loadUserDirectoryPage(context, normalizedInput);
+    return { status: "success", page };
+  } catch {
+    return {
+      status: "error",
+      message: "Não foi possível carregar mais usuários. Tente novamente.",
+    };
+  }
+}
+
 export async function assignRoleAction(
   targetUserId: string,
   _previousState: AdminActionState,
@@ -91,7 +124,7 @@ export async function assignRoleAction(
     if (!isRoleKey(target.role_key)) return failure();
     if (target.role_key === roleKeyInput) return failure("Selecione um papel diferente do atual.");
 
-    requireCanManageTargetLevel(actor, target.level);
+    requireCanManageTargetRole(actor, target.role_key, target.level);
     requireCanAssignRole(actor, roleKeyInput);
 
     const reason =
@@ -133,7 +166,8 @@ export async function setPermissionOverrideAction(
     if (userId === actor.userId) return failure("Você não pode alterar o próprio acesso.");
 
     const { supabase, target } = await getTargetContext(userId);
-    requireCanManageTargetLevel(actor, target.level);
+    if (!isRoleKey(target.role_key)) return failure();
+    requireCanManageTargetRole(actor, target.role_key, target.level);
     requireCanGrantPermission(actor, permissionKeyInput);
 
     const { error } = await supabase.rpc("set_user_permission_override", {
@@ -176,7 +210,8 @@ export async function setPermissionOverridesBulkAction(
 
     const typedPermissionKeys = permissionKeys as PermissionKey[];
     const { supabase, target } = await getTargetContext(userId);
-    requireCanManageTargetLevel(actor, target.level);
+    if (!isRoleKey(target.role_key)) return failure();
+    requireCanManageTargetRole(actor, target.role_key, target.level);
     requireCanGrantAllPermissions(actor, typedPermissionKeys);
 
     const { error } = await supabase.rpc("set_user_permission_overrides_bulk", {
@@ -216,7 +251,8 @@ export async function removePermissionOverrideAction(
     if (userId === actor.userId) return failure("Você não pode alterar o próprio acesso.");
 
     const { supabase, target } = await getTargetContext(userId);
-    requireCanManageTargetLevel(actor, target.level);
+    if (!isRoleKey(target.role_key)) return failure();
+    requireCanManageTargetRole(actor, target.role_key, target.level);
     requireCanGrantPermission(actor, permissionKeyInput);
 
     const { error } = await supabase.rpc("remove_user_permission_override", {
@@ -246,7 +282,8 @@ export async function setUserActiveAction(
     if (userId === actor.userId) return failure("Você não pode alterar o próprio status.");
 
     const { supabase, target } = await getTargetContext(userId);
-    requireCanManageTargetLevel(actor, target.level);
+    if (!isRoleKey(target.role_key)) return failure();
+    requireCanManageTargetRole(actor, target.role_key, target.level);
 
     const reason = nextActive ? readOptionalReason(formData) : readRequiredReason(formData);
     const { error } = await supabase.rpc("set_user_active", {
@@ -288,6 +325,7 @@ export async function approveUserAccessAction(
       return failure("Esse papel não pode ser aprovado pela interface.");
     }
     if (userId === actor.userId) return failure("Você não pode aprovar a própria conta.");
+    requireCanAssignRole(actor, roleKeyInput);
 
     const supabase = await createClient();
     const { error } = await supabase.rpc("approve_user_access", {

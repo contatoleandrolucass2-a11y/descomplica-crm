@@ -46,6 +46,7 @@ const ADMIN_PERMISSIONS = [
   "crm.dashboard.without_canal_imob.view",
   "crm.ranking.view",
   "crm.partnerships.view",
+  "crm.simulators.view",
   "crm.settings.view",
   "crm.settings.manage",
   "crm.salesforce.refresh",

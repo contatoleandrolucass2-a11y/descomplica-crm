@@ -11,7 +11,7 @@ select is(
 select is(
   (select min_level from public.permissions where key = 'crm.simulators.view'),
   100,
-  'the WF13 page gate is managed only at Master level'
+  'the WF13 page permission remains delegable only at Master level'
 );
 
 select is(
@@ -20,8 +20,8 @@ select is(
     from public.role_permissions
     where permission_key = 'crm.simulators.view'
   ),
-  array['master']::text[],
-  'only Master inherits the WF13 page permission'
+  array['admin', 'master']::text[],
+  'Administrator and Master inherit the WF13 page permission'
 );
 
 select is(
@@ -29,10 +29,10 @@ select is(
     select count(*)
     from public.role_permissions
     where permission_key = 'crm.simulators.view'
-      and role_key <> 'master'
+      and role_key not in ('admin', 'master')
   ),
   0::bigint,
-  'no non-Master role inherits the WF13 page permission'
+  'no role below Administrator inherits the WF13 page permission'
 );
 
 select is(
@@ -42,7 +42,7 @@ select is(
     where permission_key = 'crm.simulators.view'
   ),
   0::bigint,
-  'no direct override bypasses the Master-only page gate'
+  'no direct override is needed for the inherited Administrator and Master page gate'
 );
 
 select is(

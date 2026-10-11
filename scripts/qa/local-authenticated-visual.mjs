@@ -1289,6 +1289,7 @@ ${masterPreflight}
         ('admin', 'crm.stages.view'),
         ('admin', 'crm.ranking.view'),
         ('admin', 'crm.partnerships.view'),
+        ('admin', 'crm.simulators.view'),
         ('admin', 'pages.manage'),
         ('admin', 'crm.settings.view'),
         ('admin', 'crm.settings.manage'),

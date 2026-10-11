@@ -129,9 +129,10 @@ O hub está em `/app/simulacao`. As cinco jornadas e a consulta Tabelão exigem
 `crm.simulators.view` no guard server-side. O catálogo PostgreSQL permanece com
 17 páginas; Tabelão, WF14 e WF15 estão implementados neste candidato pelo
 catálogo HTTP versionado, sem migration. A navegação continua recebendo somente
-as páginas filtradas pelo contexto de autorização. No canário atual, essa
-permissão é exclusiva do Master e não possui override direto. O acesso à página
-e a execução são gates independentes: WF13 também exige
+as páginas filtradas pelo contexto de autorização. Master e Administrador
+herdam a permissão visual; ela permanece com `min_level = 100`, portanto um
+Administrador não consegue delegá-la a papéis inferiores. O acesso à página e
+a execução são gates independentes: WF13 também exige
 `crm.simulators.execute`, flag e chave oficiais. WF14 e WF15 são renderizados
 somente após o mesmo guard `crm.simulators.view`, não persistem propostas nem
 habilitam motores oficiais.
@@ -167,7 +168,8 @@ habilitam motores oficiais.
   planta e área, pelo líquido com kit e os dois abatimentos. Dados inválidos são
   contabilizados explicitamente; não geram um falso menor preço.
 - WF13 só envia ao Route Handler same-origin quando flag, chave, permissão e
-  papel Master coincidem.
+  papel Master coincidem. Administrador consulta inventário e status, mas o
+  status retorna `executionEnabled: false` e o POST oficial responde `403`.
 - Hub e rota do simulador são renderizados por requisição. O cliente consulta
   um status autenticado e `no-store` para substituir com segurança qualquer
   estado visual aberto antes da ativação; esse status retorna

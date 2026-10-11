@@ -4,6 +4,13 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const repositoryRoot = process.cwd();
+const administratorProtectionMigration =
+  "20261011143218_protect_administrator_accounts_and_enable_simulator_view.sql";
+const administratorMasterOnlyPermissions = [
+  "crm.simulators.execute",
+  "crm.commercial_engine.execute",
+  "crm.commercial_policy.manage",
+];
 const markerNames = [
   "20260808235856_grant_imob_ranking_service_role.sql",
   "20260809004414_add_atomic_imob_ranking_publish_rpc.sql",
@@ -19,14 +26,53 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 45-version manifest", async () => {
+  it("keeps a unique, ordered 46-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(45);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(45);
+    expect(migrations).toHaveLength(46);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(46);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
+    expect(migrations.at(-1)).toBe(administratorProtectionMigration);
+  });
+
+  it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
+    const sql = await readFile(
+      path.join(repositoryRoot, "supabase/migrations", administratorProtectionMigration),
+      "utf8",
+    );
+    const preflight = sql.match(/do \$migration\$[\s\S]*?\$migration\$;/)?.[0] ?? "";
+
+    expect(preflight).not.toContain("crm_user_reporting_scope_grants");
+    expect(preflight).not.toContain("private.current_user_is_master");
+    expect(sql).toContain("values ('admin', 'crm.simulators.view')");
+    expect(sql).toContain("target_role_key <> 'admin'");
+    expect(sql).toContain("actor_role.role_key = 'master'");
+    expect(sql).toContain("column_entry.column_name = 'access_status'");
+    expect(sql).toMatch(
+      /if to_regclass\('public\.crm_user_reporting_scope_grants'\) is not null then/,
+    );
+    expect(sql).toContain("v_expected_trigger_count integer := 3 + case");
+
+    const staleAllowCleanup =
+      sql.match(
+        /delete from public\.user_permission_overrides permission_override[\s\S]*?;/,
+      )?.[0] ?? "";
+    expect(staleAllowCleanup).toContain("target_role.role_key = 'admin'");
+    expect(staleAllowCleanup).toContain("permission_override.effect = 'allow'");
+    for (const permission of administratorMasterOnlyPermissions) {
+      expect(staleAllowCleanup).toContain(`'${permission}'`);
+    }
+
+    for (const triggerName of [
+      "administrator_account_boundary_roles",
+      "administrator_account_boundary_profiles",
+      "administrator_account_boundary_permission_overrides",
+      "administrator_account_boundary_reporting_scopes",
+    ]) {
+      expect(sql).toContain(triggerName);
+    }
   });
 
   it.each(markerNames)("keeps %s as a sanitized executable no-op", async (name) => {
@@ -65,7 +111,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1104;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1141;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

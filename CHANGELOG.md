@@ -10,8 +10,72 @@
 - Atualiza gates, navegação, inventário de recursos, contrato visual e matriz
   de smoke de rotas protegidas para 27 URLs.
 
+- Corrige superficies escuras residuais de Ranking e Canal de Parcerias nos
+  temas Claro e Medio, preservando o tema Escuro aprovado.
+- Libera ao Administrador a visualizacao dos quatro simuladores sem ampliar a
+  execucao oficial, a politica comercial ou qualquer capacidade de Master.
+- Reserva ao Master a administracao de contas Administrador, com bloqueio de
+  criacao/promocao, desativacao, papel e excecoes na interface, servidor, RPCs
+  e triggers do banco.
+- Aprova a matriz visual pos-commit sem regravar referencias, o E2E dos oito
+  perfis, 1.141 testes pgTAP na origem/restore e os gates completos de
+  aplicacao; a revisao independente nao encontrou achados de seguranca.
+- Aplica isoladamente a fronteira de Administrador no banco remoto como versao
+  `20261011174323`, depois de backup privado verificado, e confirma grants,
+  triggers, matriz de atribuicao e preservacao das excecoes dos outros papeis.
+- Registra a limitacao honesta do ensaio produtivo: existe somente um
+  Administrador, portanto o bloqueio entre pares foi exercitado no pgTAP/E2E da
+  VPS; a conta existente foi bloqueada em transacao revertida e o Master passou
+  pelo mesmo guard sem persistir alteracao.
+- Publica a correcao de temas e a fronteira de Administrador na release
+  `6b3e5ffd`, pelo artefato imutavel aprovado da CI de `main`, com prova OCI,
+  backup privado, CAS e rollback preparado.
+- Confirma no pos-deploy health local/publico, container sem restart/OOM,
+  protecoes anonimas das rotas e APIs, assets, headers, redirecionamento HTTPS e
+  logs sem padrao critico; nenhum rebuild foi executado na VPS.
+- Promove o runtime do layout aprovado do CRM na release `ac3d7893`, com imagem
+  imutavel, backup verificado, CAS, rollback preparado e saude confirmada; o
+  aceite final permanece pendente da jornada autenticada em producao.
+- Repete na CI de `main` banco, restore, E2E e a matriz visual; preserva os
+  quatro simuladores e confirma guardas anonimos depois do deploy.
+- Confirma publicacao da politica fiscal SP/2026 no PR #177 e registra
+  validacao, backup, identidade da imagem e verificacoes pos-publicacao.
+- Atualiza conhecimento Git/Obsidian sem modificar o runtime ja publicado.
+- Faz reautenticacao necessaria e indisponibilidade do Salesforce prevalecerem
+  sobre um ciclo de extracao simultaneo, com regressao para os estados combinados.
+- Reconcilia o layout aprovado com a politica fiscal SP/2026 e promove somente
+  as onze referencias combinadas de Documentacao, preservando outras 231.
+
 ## 2026-10-10
 
+- Integra o draft aprovado do CRM nos temas Claro, Medio e Escuro, com marca
+  horizontal completa, navegacao compacta e os canvases comerciais responsivos.
+- Faz Simulacao abrir diretamente o hub de seis ferramentas, move Configuracoes
+  para o menu da conta e agrupa Usuarios, Paginas e Integracoes em Administracao.
+- Renomeia Conectar Sistemas para Integracoes na interface, aplica os logos do
+  pacote e preserva estados reais ou nao verificados, sem importar dados
+  demonstrativos da previa.
+- Pagina o diretorio de Usuarios no servidor, com busca, filtro, rolagem
+  continua, fallback manual e representacao do acesso efetivo herdado.
+- Preserva campos, componentes e motores de Associativo, Tabela Direta, Tabela
+  Investidor e Tabelao; os novos estilos de hub, Documentacao e CAIXA ficam
+  escopados fora dessas quatro jornadas.
+- Aprova o E2E de release com 19 cenarios e um skip previsto, incluindo o
+  Associativo concorrente, e promove a baseline autenticada de 242 comparacoes.
+- Confere 154 checks responsivos, 88 de tema, 242 Axe, 110 de zoom, 22 canvases,
+  40 navegacoes dos quatro simuladores e 30 capturas manuais do Associativo.
+- Calibra de 2.500 para 2.600 px o teto estrito de `/admin/usuarios`: a pagina
+  mediu 2.592 px em 1.440 px ao exibir as 23 permissoes e badges efetivos.
+- Aprova `pnpm qa:visual:authenticated` pos-commit em modo `verify`: 154 checks
+  responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes
+  candidato/baseline e 110 de zoom; fixtures efemeras removidas.
+- Registra a abertura do PR #178 e a CI intermediaria `38094977306` no SHA
+  `4a8bfc8`; o merge e a promocao do runtime constam na entrada de 11/10, com o
+  aceite final ainda pendente.
+- Estabiliza em duas linhas o e-mail da conta no cabecalho de Usuarios entre
+  961 px e 1.152 px, mantendo o valor completo no DOM e em `title`. A segunda
+  CI havia exposto uma variacao de 21 px causada apenas pelo sufixo aleatorio do
+  fixture visual em 1.024 px; as outras 241 comparacoes permaneceram aprovadas.
 - Atualiza ITBI e registro da capital paulista para a politica validada de
   2026, com isencao por primeira aquisicao ou MCMV e regime contratual explicito.
 - Substitui tabela anterior e fator fixo de registro por faixas atuais e

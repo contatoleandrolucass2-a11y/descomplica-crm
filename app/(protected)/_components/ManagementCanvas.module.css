@@ -315,7 +315,7 @@
 .buttonPrimary {
   border: 1px solid var(--analytics-cyan);
   background: var(--analytics-cyan);
-  color: #082137;
+  color: var(--analytics-on-accent, #082137);
 }
 
 .buttonPrimary:hover:not(:disabled) {
@@ -564,5 +564,192 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Approved CRM draft — commercial and administrative surfaces only. */
+.page {
+  --analytics-page: #f5f6f8;
+  --analytics-surface: #ffffff;
+  --analytics-surface-muted: #f8f9fb;
+  --analytics-surface-strong: #edf3fc;
+  --analytics-ink: #242a33;
+  --analytics-muted: #4b5664;
+  --analytics-line: #d2dce7;
+  --analytics-navy: #0b2234;
+  --analytics-navy-raised: #12334a;
+  --analytics-cyan: #1c65a5;
+  --analytics-cyan-strong: #1c65a5;
+  --analytics-on-accent: #ffffff;
+  --analytics-positive: #1f7a55;
+  --analytics-positive-ink: #176642;
+  --analytics-warning: #9a6a00;
+  --analytics-warning-ink: #755100;
+  --analytics-danger: #aa263a;
+  --analytics-danger-ink: #982034;
+  --analytics-shadow: none;
+  --focus-ring: #1c65a5;
+
+  min-height: calc(100dvh - 3.625rem);
+  background: var(--analytics-page);
+  color: var(--analytics-ink);
+  padding: 1.1rem clamp(1rem, 2vw, 1.75rem) 2rem;
+}
+
+:global(:root[data-theme="balanced"]) .page {
+  --analytics-page: #e6ecf2;
+  --analytics-surface: #f5f8fb;
+  --analytics-surface-muted: #eaf0f6;
+  --analytics-surface-strong: #dfeaf5;
+  --analytics-ink: #213549;
+  --analytics-muted: #42586d;
+  --analytics-line: #c5d2e0;
+  --analytics-navy: #0b263a;
+  --analytics-navy-raised: #153b55;
+  --analytics-cyan: #1b609b;
+  --analytics-cyan-strong: #1b609b;
+  --analytics-on-accent: #ffffff;
+  --analytics-positive-ink: #176642;
+  --analytics-warning-ink: #705000;
+  --analytics-danger-ink: #982034;
+  --focus-ring: #1b609b;
+}
+
+:global(:root[data-theme="dark"]) .page {
+  --analytics-page: #061f31;
+  --analytics-surface: #09283d;
+  --analytics-surface-muted: #0c3048;
+  --analytics-surface-strong: #103c52;
+  --analytics-ink: #e6f0f7;
+  --analytics-muted: #a2bed1;
+  --analytics-line: #285d75;
+  --analytics-navy: #041724;
+  --analytics-navy-raised: #0b3147;
+  --analytics-cyan: #59c8dd;
+  --analytics-cyan-strong: #59c8dd;
+  --analytics-on-accent: #082137;
+  --analytics-positive: #57c89a;
+  --analytics-positive-ink: #78ddb2;
+  --analytics-warning: #f4ca64;
+  --analytics-warning-ink: #f4ca64;
+  --analytics-danger: #ff9ca6;
+  --analytics-danger-ink: #ffb2ba;
+  --focus-ring: #59c8dd;
+}
+
+.pageInner {
+  width: min(100%, 88.75rem);
+  gap: 0.9rem;
+}
+
+.pageHeader {
+  align-items: center;
+  gap: 0.65rem 1rem;
+}
+
+.pageTitle {
+  font-size: clamp(1.55rem, 2.4vw, 1.8rem);
+  font-weight: 720;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.pageDescription {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.statusBadge {
+  min-height: 2rem;
+  gap: 0.4rem;
+  border-radius: 0.35rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.statusBadge svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.panel,
+.summaryCard,
+.searchLabel,
+.selectLabel,
+.tableRegion {
+  border-radius: 0.45rem;
+  box-shadow: none;
+}
+
+.panelPadded {
+  padding: 1rem;
+}
+
+.panelStrong {
+  border-color: var(--analytics-line);
+  background: var(--analytics-surface);
+}
+
+.sectionKicker {
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.sectionTitle {
+  margin-top: 0.15rem;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  font-weight: 690;
+}
+
+.sectionDescription {
+  margin-top: 0.2rem;
+  font-size: 0.76rem;
+}
+
+.iconFrame {
+  width: 2.25rem;
+  border-color: color-mix(in srgb, var(--analytics-cyan-strong) 42%, var(--analytics-line));
+  border-radius: 0.4rem;
+  background: color-mix(in srgb, var(--analytics-cyan) 7%, var(--analytics-surface));
+}
+
+.iconFrame svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.button,
+.buttonPrimary,
+.buttonDanger {
+  min-height: 2.25rem;
+  border-radius: 0.35rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.74rem;
+}
+
+.tableRegion {
+  border-color: var(--analytics-line);
+}
+
+.table th,
+.table td {
+  padding: 0.55rem 0.65rem;
+}
+
+@media (max-width: 42rem) {
+  .page {
+    padding: 0.9rem 0.75rem 1.5rem;
+  }
+
+  .pageHeader {
+    align-items: flex-start;
+  }
+
+  .statusBadge {
+    min-height: 1.9rem;
   }
 }

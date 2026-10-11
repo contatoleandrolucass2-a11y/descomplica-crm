@@ -48,39 +48,39 @@ function PodiumPlaceholder({
       tone={featured ? "navy" : "default"}
       density="compact"
       aria-label={`${classification}: posição indisponível`}
-      className={`${styles.podiumCard} relative flex min-h-48 flex-col items-center justify-center overflow-hidden text-center`}
+      className={`${styles.podiumCard} ${featured ? styles.featuredPodium : ""} relative flex min-h-48 flex-col items-center justify-center overflow-hidden text-center`}
     >
       <span
         aria-hidden="true"
-        className={`grid size-14 place-items-center rounded-full border border-dashed ${
+        className={`${featured ? styles.podiumMarkerFeatured : ""} grid size-14 place-items-center rounded-full border border-dashed ${
           featured
             ? "border-cyan-200/50 bg-white/5 ring-8 ring-white/5"
             : "border-[var(--analytics-line)] bg-[var(--analytics-surface-muted)] ring-8 ring-[var(--analytics-surface-muted)]"
         }`}
       >
         <span
-          className={`block h-5 w-8 rounded-full ${
+          className={`${featured ? styles.podiumMarkerCoreFeatured : ""} block h-5 w-8 rounded-full ${
             featured ? "bg-cyan-200/20" : "bg-[var(--analytics-line)]"
           }`}
         />
       </span>
       <div className={styles.podiumCopy}>
         <p
-          className={`mt-4 text-xs font-semibold tracking-[0.16em] uppercase ${
+          className={`${featured ? styles.podiumLabelFeatured : ""} mt-4 text-xs font-semibold tracking-[0.16em] uppercase ${
             featured ? "text-cyan-300" : "text-[var(--analytics-cyan-strong)]"
           }`}
         >
           {classification} · posição do pódio
         </p>
         <h3
-          className={`mt-3 max-w-64 text-lg font-semibold ${
+          className={`${featured ? styles.podiumNameFeatured : ""} mt-3 max-w-64 text-lg font-semibold ${
             featured ? "text-white" : "text-[var(--analytics-ink)]"
           }`}
         >
           {INTEGRATION_PENDING_LABEL}
         </h3>
         <p
-          className={`${styles.podiumDescription} mt-3 max-w-72 text-sm leading-6 ${
+          className={`${styles.podiumDescription} ${featured ? styles.podiumDescriptionFeatured : ""} mt-3 max-w-72 text-sm leading-6 ${
             featured ? "text-slate-300" : "text-[var(--analytics-muted)]"
           }`}
         >

@@ -38,7 +38,8 @@ Conectar Sistemas, Recurso MKT, Gestão e Rotina reutilizam `crm.settings.manage
 Repasse exige papel `master` ou `admin` e `crm.partnerships.view` em conjunto. A allowlist
 continua negando explicitamente `coordinator`, `manager_imob` e `broker_imob`,
 mesmo quando esses papéis possuem acesso ao Canal de Parcerias. CAIXA permanece
-fail-closed no motor, ainda que sua composição visual esteja acessível ao Master.
+fail-closed no motor, ainda que sua composição visual esteja acessível a Master
+e Administrador.
 
 | Rota protegida                            | `master` | `admin` | `coordinator`, `manager_imob`, `broker_imob` | `manager_house`, `broker_house` | `pending` e legados | visitante |
 | ----------------------------------------- | -------: | ------: | -------------------------------------------: | ------------------------------: | ------------------: | --------: |
@@ -59,13 +60,13 @@ fail-closed no motor, ainda que sua composição visual esteja acessível ao Mas
 | `/app/configuracoes/metas`                |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/metas/parcerias`      |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/metas/pontos`         |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
-| `/app/simulacao`                          |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
-| `/app/simulacao/associativo-fluxo-linear` |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
-| `/app/simulacao/calcular-documentacao`    |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
-| `/app/simulacao/caixa`                    |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
-| `/app/simulacao/tabela-direta`            |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
-| `/app/simulacao/tabela-investidor`        |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
-| `/app/simulacao/tabelao`                  |      200 |     403 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao`                          |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/associativo-fluxo-linear` |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/calcular-documentacao`    |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/caixa`                    |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/tabela-direta`            |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/tabela-investidor`        |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/simulacao/tabelao`                  |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/admin`                                  |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/admin/usuarios`                         |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/admin/paginas`                          |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
@@ -76,35 +77,36 @@ histórico, sem grants herdados e fora das opções atribuíveis. O smoke exige
 negação para todos eles; contas existentes precisam de reclassificação explícita.
 
 Autorização de página e execução de motor são gates distintos. Os sete `200` de
-simulação autorizam o hub, WF13, WF16/Documentação, CAIXA, Tabelão e as réplicas
-WF14 e WF15. Flags, allowlist, permissão de execução e política comercial
-continuam validadas separadamente; CAIXA não executa cálculo nem integração
-bancária e WF14/WF15 não persistem nem chamam motor oficial.
+simulação autorizam Master e Administrador no hub, WF13, WF16/Documentação,
+CAIXA, Tabelão e nas réplicas WF14 e WF15. Flags, allowlist, permissão de
+execução e política comercial continuam validadas separadamente; Administrador
+não executa o POST oficial, CAIXA não executa cálculo nem integração bancária e
+WF14/WF15 não persistem nem chamam motor oficial.
 
 ## Matriz de APIs somente leitura/fail-closed
 
-| Contrato                                                | `master`              | outros sete perfis            | visitante |
-| ------------------------------------------------------- | --------------------- | ----------------------------- | --------- |
-| `GET /api/dashboard/status`                             | 200                   | conforme `crm.dashboard.view` | 401       |
-| `GET /api/inventory`                                    | 200, `no-store`       | 403                           | 401       |
-| `GET /api/inventory/snapshot`                           | 200, `no-store`       | 403                           | 401       |
-| `GET /api/inventory/regions?postalCode=01509020`        | 200, `no-store`       | 403                           | 401       |
-| `GET /api/official-simulator/associativo-fluxo-linear`  | 200                   | 403                           | 401       |
-| `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro  | 403                           | 401       |
-| `GET /api/official-simulator/caixa`                     | 200, execução `false` | 403                           | 401       |
-| `POST /api/official-simulator/caixa`                    | 503, fail-closed      | 503                           | 503       |
-| `POST /api/ingest/qlik`                                 | 404, flag desligada   | 404                           | 404       |
-| `POST /api/ingest/salesforce`                           | 404, flag desligada   | 404                           | 404       |
-| `POST /api/refresh/salesforce`                          | 404, flag desligada   | 404                           | 404       |
-| `POST /api/commercial-engine/simulator.wf14`            | 404, motor desligado  | 404                           | 404       |
-| `GET /api/health`                                       | 200, sem dado privado | 200                           | 200       |
+| Contrato                                                | `master`              | `admin`               | outros seis perfis            | visitante |
+| ------------------------------------------------------- | --------------------- | --------------------- | ----------------------------- | --------- |
+| `GET /api/dashboard/status`                             | 200                   | 200                   | conforme `crm.dashboard.view` | 401       |
+| `GET /api/inventory`                                    | 200, `no-store`       | 200, `no-store`       | 403                           | 401       |
+| `GET /api/inventory/snapshot`                           | 200, `no-store`       | 200, `no-store`       | 403                           | 401       |
+| `GET /api/inventory/regions?postalCode=01509020`        | 200, `no-store`       | 200, `no-store`       | 403                           | 401       |
+| `GET /api/official-simulator/associativo-fluxo-linear`  | 200                   | 200, execução `false` | 403                           | 401       |
+| `POST /api/official-simulator/associativo-fluxo-linear` | 200, fixture de ouro  | 403                   | 403                           | 401       |
+| `GET /api/official-simulator/caixa`                     | 200, execução `false` | 200, execução `false` | 403                           | 401       |
+| `POST /api/official-simulator/caixa`                    | 503, fail-closed      | 503, fail-closed      | 503                           | 503       |
+| `POST /api/ingest/qlik`                                 | 404, flag desligada   | 404                   | 404                           | 404       |
+| `POST /api/ingest/salesforce`                           | 404, flag desligada   | 404                   | 404                           | 404       |
+| `POST /api/refresh/salesforce`                          | 404, flag desligada   | 404                   | 404                           | 404       |
+| `POST /api/commercial-engine/simulator.wf14`            | 404, motor desligado  | 404                   | 404                           | 404       |
+| `GET /api/health`                                       | 200, sem dado privado | 200                   | 200                           | 200       |
 
 Os quatro `POST` em `404` retornam antes de qualquer escrita ou chamada externa. O smoke
 os repete nos oito perfis para provar o default-off; WF13 é o único motor executado, com
 fixture sintética já versionada e apenas na sessão `master`.
-Os dois `GET` de estoque repetem `crm.simulators.view`: somente Master recebe os
-dados neste candidato, sempre com cabeçalhos `no-store`; demais perfis recebem
-`403` e o visitante sem sessão recebe `401`.
+Os dois `GET` de estoque repetem `crm.simulators.view`: Master e Administrador
+recebem os dados, sempre com cabeçalhos `no-store`; demais perfis recebem `403`
+e o visitante sem sessão recebe `401`.
 
 ## Rotas de conta e autenticação
 

@@ -30,6 +30,7 @@ import { validateWf13Installments } from "@/lib/crm/simulators/official/wf13-con
 import { generateWf13AnnualDates } from "@/lib/crm/simulators/official/wf13-policy";
 
 import { SimulationCanvasHeader } from "./SimulationCanvasHeader";
+import { SimulationToolNavigation } from "./SimulationToolNavigation";
 import styles from "../simulators.module.css";
 
 const UNAVAILABLE_MESSAGE = "Cálculo temporariamente indisponível — regra aguardando validação";
@@ -966,6 +967,8 @@ export function SimulatorWorkspace({
           statusTone={executionAllowed ? "canary" : isCaixa ? "blocked" : "default"}
         />
 
+        {isCaixa ? <SimulationToolNavigation current="caixa" /> : null}
+
         {executionAllowed ? (
           <DataState
             variant="warning"
@@ -973,16 +976,18 @@ export function SimulatorWorkspace({
             title="Motor oficial em validação Master"
             description="O cálculo usa a versão oficial identificada na referência viva. O resultado não é persistido nem constitui proposta comercial."
           />
-        ) : !isCaixa ? (
+        ) : (
           <DataState
             variant="unavailable"
             compact
-            title={UNAVAILABLE_MESSAGE}
+            title={isCaixa ? "Cálculo temporariamente indisponível" : UNAVAILABLE_MESSAGE}
             description={
-              "Os campos permanecem disponíveis para conferência. Nenhum valor é calculado, persistido ou tratado como proposta comercial."
+              isCaixa
+                ? "Os campos permanecem disponíveis para conferência. Nenhum cálculo, envio bancário ou aprovação será executado."
+                : "Os campos permanecem disponíveis para conferência. Nenhum valor é calculado, persistido ou tratado como proposta comercial."
             }
           />
-        ) : null}
+        )}
 
         <div className={`${styles.workspace} ${isCaixa ? styles.caixaWorkspace : ""}`}>
           <form

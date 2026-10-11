@@ -194,7 +194,7 @@ export function extendAuthorizedNavigationWithReleasedPages(
       {
         key: systemsGate.pageKey,
         path: systemsGate.path,
-        name: "Conectar Sistemas",
+        name: "Integrações",
         description: "Salesforce e atualização dos relatórios",
         section: "settings",
         permissionKey: systemsGate.permission,

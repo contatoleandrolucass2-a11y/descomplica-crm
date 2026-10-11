@@ -714,6 +714,18 @@
   min-width: 0;
 }
 
+.admin-users-load-sentinel {
+  min-height: 1px;
+  padding: 0.55rem 0.75rem;
+  color: var(--analytics-muted);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.admin-users-load-sentinel:empty {
+  padding: 0;
+}
+
 .admin-user-option {
   display: grid;
   width: 100%;
@@ -814,6 +826,36 @@
   min-width: 0;
   gap: 0.85rem;
   padding: 0.85rem;
+}
+
+.admin-user-detail-badges {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.admin-protected-account-badge {
+  display: inline-flex;
+  min-height: 1.7rem;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid var(--analytics-warning);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--analytics-warning) 9%, var(--analytics-surface));
+  padding: 0.18rem 0.48rem;
+  color: var(--analytics-warning-ink);
+  font-size: 0.66rem;
+  font-weight: 760;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.admin-protected-account-badge > svg {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .admin-access-section,
@@ -1044,7 +1086,7 @@
 .admin-permission-option {
   display: grid;
   min-width: 0;
-  min-height: 5.5rem;
+  min-height: 4.25rem;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: 0.6rem;
@@ -1104,6 +1146,14 @@
   color: var(--analytics-muted);
   font-size: 0.68rem;
   line-height: 1.35;
+}
+
+@media (min-width: 64.01rem) {
+  .admin-permission-option-copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .admin-permission-override-reason {
@@ -1245,6 +1295,17 @@
   }
 }
 
+@media (min-width: 60.0625rem) and (max-width: 72rem) {
+  .admin-user-detail-header h2 {
+    display: -webkit-box;
+    min-height: 2.5em;
+    max-height: 2.5em;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
 @media (max-width: 60rem) {
   .admin-users-workspace {
     grid-template-columns: minmax(0, 1fr);
@@ -1283,6 +1344,10 @@
   .admin-access-section-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-user-detail-badges {
+    justify-content: flex-start;
   }
 
   .admin-user-detail-header h2 {

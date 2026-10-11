@@ -2,6 +2,24 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Layout aprovado e politica fiscal combinados em 11/10/2026
+
+O PR #178 foi reconciliado com a politica fiscal SP/2026 publicada pelo PR
+#177 no commit limpo `bd8c5f69162824f9fa06a560d78a0a2888570df6`. A matriz
+autenticada aprovou 154 checks responsivos, 88 de tema, 242 auditorias Axe, 242
+comparacoes, 110 checks de zoom, 40 navegacoes dos quatro simuladores e 30
+capturas manuais do Associativo.
+
+Somente as onze referencias de Calcular Documentacao diferiram da baseline do
+layout. Elas foram inspecionadas em 1.440 px no tema claro e em 390 px no tema
+escuro e promovidas pelo helper transacional; as outras 231 imagens foram
+preservadas. O canvas documental mediu 1.191 px em desktop, abaixo do limite
+funcional de 1.200 px, e manteve os campos fiscais no disclosure acessivel.
+
+`reviewedUpdates` preserva a proveniencia do PR #177 e registra a captura
+combinada do PR #178. Limites de 1%/16 permanecem inalterados. A CI integral em
+modo `verify` continua obrigatoria antes do merge.
+
 ## Guia da pagina Associativo em 09/10/2026
 
 CI `37889190061`, artefato `11598453651`, captura limpa

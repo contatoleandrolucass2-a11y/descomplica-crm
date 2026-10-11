@@ -54,8 +54,8 @@ select is(
         )
     ) = 5
   ),
-  array['master']::text[],
-  'only Master inherits all global v2 CRM read permissions'
+  array['admin', 'master']::text[],
+  'Administrator and Master inherit all global v2 CRM page-read permissions'
 );
 
 select is(

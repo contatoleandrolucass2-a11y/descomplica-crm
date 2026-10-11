@@ -1,4 +1,4 @@
-import { ArrowRight, PanelsTopLeft, UsersRound } from "lucide-react";
+import { ArrowRight, PanelsTopLeft, PlugZap, UsersRound } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -65,6 +65,24 @@ export default async function AdminHomePage() {
                 </strong>
                 <span className="mt-1 block text-sm leading-6 text-[var(--analytics-muted)]">
                   Controle quais superfícies aparecem na navegação autorizada.
+                </span>
+              </span>
+              <ArrowRight aria-hidden="true" className="admin-home-card-arrow size-5" />
+            </Link>
+          ) : null}
+          {hasPermission(context, "crm.settings.manage") ? (
+            <Link
+              href="/app/configuracoes/conectar-sistemas"
+              prefetch={false}
+              className={`${managementStyles.panel} ${managementStyles.panelPadded} admin-home-card group flex items-start gap-3 no-underline transition hover:border-[var(--analytics-cyan-strong)]`}
+            >
+              <span className={managementStyles.iconFrame} aria-hidden="true">
+                <PlugZap />
+              </span>
+              <span className="admin-home-card-copy min-w-0 flex-1">
+                <strong className="block text-lg text-[var(--analytics-ink)]">Integrações</strong>
+                <span className="mt-1 block text-sm leading-6 text-[var(--analytics-muted)]">
+                  Consulte conexões e a atualização confirmada dos sistemas do CRM.
                 </span>
               </span>
               <ArrowRight aria-hidden="true" className="admin-home-card-arrow size-5" />
