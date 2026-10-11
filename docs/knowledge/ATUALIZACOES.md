@@ -1,10 +1,24 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-11: ITBI e registro publicados com estimativa fiscal condicionada
+
+- Fonte: PR #177, CI `38101674797` e CI main `38103844760`, verificacao publica
+  de health e sessao autenticada. Status: publicado no SHA
+  `1de9f5af9a4fe528b081c4c7b546e4ff667f2b9d`.
+- Todos os gates passaram. A primeira tentativa da main teve interrupcao do
+  auditor Axe em Repasse sem diagnostico conclusivo; o mesmo job/SHA passou na
+  repeticao, sem modificar criterios. Nao transformar retry em excecao ao gate.
+- Imagem unica validada e promovida com backup e CAS; saude e protecoes de acesso
+  confirmadas. Registro tecnico completo em `docs/audits/itbi-registro-sp-2026-10-10.md`.
+- Tabelas dependem da serventia e do enquadramento confirmado. O resultado nao
+  substitui guia ou orcamento oficial; casos nao cobertos permanecem bloqueados.
+  Nao assumir vigencia de 2027 nem alterar despachante, seguro ou juros.
+
 ## 2026-10-10: ITBI e registro dependem do contrato fiscal, nao do perfil comercial
 
 - Fonte: pedido autorizado, Prefeitura SP (ITBI 2513/2517), ARISP tabela 2026
   ISS 2%, tabela do 5o RI, Lei SP 11.331 e Leis federais 11.977/6.015. Branch
-  `codex/itbi-registro-vigente`. Status: implementacao e validacao em andamento.
+  `codex/itbi-registro-vigente`. Status: publicado em 11/10/2026, conforme registro acima.
 - Isencao de 2026 ate R$ 245.527,77: pessoa fisica, uso somente residencial e
   primeira aquisicao **ou** MCMV. SBPE nao elimina isencao; a triagem comercial
   nao comprova primeira aquisicao, programa ou sistema do contrato.
