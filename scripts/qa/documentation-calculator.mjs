@@ -123,7 +123,10 @@ async function checkLegalPrintContrast(page) {
     regions,
     axeViolations: 0,
     // The computed-color assertion also covers details content that Axe may consider collapsed.
-    axeIncomplete: printAccessibility.incomplete.map(({ id, nodes }) => ({ id, nodes: nodes.length })),
+    axeIncomplete: printAccessibility.incomplete.map(({ id, nodes }) => ({
+      id,
+      nodes: nodes.length,
+    })),
   };
 }
 
