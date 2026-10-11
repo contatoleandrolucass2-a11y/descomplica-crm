@@ -76,3 +76,14 @@ parcelamento documental, regras do pro-soluto, n8n e banco fora do escopo.
   encontrou a nova variavel de auditoria de print antes da auditoria de tela.
   Nome diferenciado para preservar a verificacao original de ordem. Nenhuma
   regra ou limite de contraste foi alterado; nova CI obrigatoria.
+- CI `38098773619`, HEAD `58e9448`, captura limpa `194c5e5` com arvore identica:
+  validate, restore, banco/advisors, guia e autorizacao/E2E aprovados. O predicado
+  funcional original aprovou todas as rotas, temas, acessibilidade, teclado,
+  simuladores e zoom. Altura desktop documental de 1183 px, abaixo de 1200.
+- Onze capturas da documentacao foram revisadas em todos os tamanhos e temas,
+  sem sobreposicao ou truncamento novo; 231 imagens e seus metadados anteriores
+  preservados. Promocao transacional pelo helper original, sem mudar limites.
+  Artefato `11688070826`, SHA-256
+  `f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f`;
+  hashes de todas as imagens e da referencia anterior conferidos. Nova CI
+  contra as referencias revisadas e publicacao em producao ainda pendentes.

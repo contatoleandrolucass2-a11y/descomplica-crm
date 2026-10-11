@@ -19,6 +19,9 @@
 - CI seguinte aprovou 2439 testes e detectou colisao nominal entre auditorias
   de tela e impressao no contrato estatico. Variavel de print diferenciada;
   ordem, contraste e exigencias da auditoria de tela permanecem intactos.
+- CI `38098773619` aprovou os gates funcionais completos; onze imagens da
+  documentacao revisadas e atualizadas com proveniencia, 231 preservadas.
+  Revalidacao das referencias e publicacao continuam pendentes.
 
 ## 2026-10-09: Guia do Associativo no cabecalho
 

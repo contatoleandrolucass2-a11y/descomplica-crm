@@ -15,6 +15,8 @@
   inicial da pagina, mantendo preenchimento e confirmacao obrigatorios.
 - Mantem dados fiscais legiveis na impressao com conferencia independente
   do contraste de tela.
+- Atualiza onze referencias visuais da documentacao apos revisao e aprovacao
+  dos gates funcionais, preservando as outras 231 capturas.
 - Acrescenta fontes, alertas, verificador de vigencia na CI e runbook de
   manutencao; atualiza ajuda e conhecimento compartilhado.
 
