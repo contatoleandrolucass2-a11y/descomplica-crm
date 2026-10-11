@@ -24,6 +24,13 @@
   administração e configurações da versão atual. Revisão independente detectou
   atividades omitidas na planilha; fechamento recupera o conteúdo integral,
   trata falha ao salvar e inclui QA dedicada de edição, teclado e temas.
+- Node 24.19.0/pnpm 11.20.0: lint, tipos, formatação, build de 47 rotas e
+  71 testes focados (incluindo Chromium) passaram. Gitleaks não encontrou segredos.
+  Windows integral: 2.457 aprovados, oito falhas (seis POSIX e dois timeouts de
+  conhecimento); o reteste isolado de conhecimento aprovou 22/22.
+- CI Linux 38181426038 aprovou validate, restore, banco, advisors, build e E2E
+  por perfil. Capitalização herdada em caixa alta foi corrigida no fechamento,
+  com verificação de estilo computado; o SHA final exige nova CI integral.
 
 ## 2026-10-11: Correcao de temas e fronteira de Administrador publicada
 

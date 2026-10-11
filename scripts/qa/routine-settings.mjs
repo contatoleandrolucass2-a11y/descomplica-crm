@@ -127,6 +127,16 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           `Rotina must not overflow at ${width}px in ${theme}`,
         );
         await expect(page.getByRole("heading", { name: "Rotina", exact: true })).toBeVisible();
+        const capitalization = await page
+          .locator(".simulation-canvas-eyebrow, .simulation-canvas-status")
+          .evaluateAll((elements) =>
+            elements.map((element) => getComputedStyle(element).textTransform),
+          );
+        assert.deepEqual(
+          capitalization,
+          ["none", "none"],
+          "Routine labels must retain sentence case",
+        );
         const result = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
           .analyze();

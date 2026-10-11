@@ -7,6 +7,9 @@
 - Cria a classificação inicial de Gerente regional house com layout da Tabela
   Associativo, opções das demais funções nulas, inserção de linhas e salvamento
   local no navegador.
+- Preserva 26 linhas e 74 atividades da referência. Trata erros de armazenamento,
+  confirma restauração, sinaliza alterações pendentes e oferece abas por teclado.
+- Mantém a capitalização em frase normal também nos estilos herdados do cabeçalho.
 - Atualiza gates, navegação, inventário de recursos, contrato visual e matriz
   de smoke de rotas protegidas para 27 URLs.
 

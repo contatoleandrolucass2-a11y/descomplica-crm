@@ -19,6 +19,20 @@
 .page :global(.simulation-canvas-eyebrow),
 .page :global(.simulation-canvas-status) {
   letter-spacing: 0;
+  text-transform: none;
+}
+
+.hub :is(p, span, h1, h2, h3) {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.hub h1 {
+  font-size: 28px;
+}
+
+.hub h2 {
+  font-size: 22px;
 }
 
 .headerActions {

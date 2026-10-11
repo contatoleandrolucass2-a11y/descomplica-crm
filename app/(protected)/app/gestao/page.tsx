@@ -12,6 +12,7 @@ import { enforcePermission } from "@/lib/authorization/enforce";
 import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 
 import styles from "../configuracoes/ConfigurationCanvas.module.css";
+import routineStyles from "./rotina/RoutineSettings.module.css";
 
 export const metadata = { title: "Gestão" };
 
@@ -21,7 +22,7 @@ export default async function ManagementHubPage() {
   const routineReleased = getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled === true;
 
   return (
-    <ManagementPage className={styles.canvas ?? ""}>
+    <ManagementPage className={`${styles.canvas ?? ""} ${routineStyles.hub}`}>
       <ManagementPageHeader
         eyebrow="Gestão"
         title="Gestão"

@@ -25,6 +25,14 @@
   acrescentando Gestao antes de Administracao. A revisao da planilha encontrou
   atividades omitidas; recuperacao integral, feedback de armazenamento,
   teclado e QA autenticada dedicada foram incluidos no fechamento.
+- Validacao do candidato `d72c9cc`: CI Linux `38181426038` aprovou validate,
+  restore isolado, banco/advisors e E2E por perfil. O fechamento remove
+  `text-transform: uppercase` herdado dos cabecalhos de Gestao/Rotina e
+  confere o estilo computado na QA. Nova CI integral exigida no SHA final.
+- Windows com Node 24.19.0: 2.457 testes aprovados, seis falhas POSIX e dois
+  timeouts de conhecimento. Reteste isolado de conhecimento: 22/22 aprovados.
+  Nao houve skips novos para esconder as falhas; testes opcionais do componente
+  em Chromium foram executados localmente, e a jornada autenticada roda na CI.
 
 ## 2026-10-11: Temas sem ilhas escuras e Administrador como classe protegida
 
