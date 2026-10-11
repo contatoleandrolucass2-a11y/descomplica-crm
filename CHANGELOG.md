@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-11
+
+- Confirma publicacao da politica fiscal SP/2026 no PR #177 e registra
+  validacao, backup, identidade da imagem e verificacoes pos-publicacao.
+- Atualiza conhecimento Git/Obsidian sem modificar o runtime ja publicado.
+
 ## 2026-10-10
 
 - Atualiza ITBI e registro da capital paulista para a politica validada de

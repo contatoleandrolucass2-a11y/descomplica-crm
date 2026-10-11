@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-11: Publicacao do ITBI e registro confirmada
+
+- PR #177 e CI final aprovados; imagem imutavel da release `1de9f5a` publicada
+  com backup verificado, prova de identidade e CAS da versao anterior.
+- Health e container saudaveis; API anonima 401 e rotas protegidas 307. Novos
+  campos fiscais conferidos em sessao autenticada, sem alterar propostas.
+- Evidencias, digests, retry de auditoria e limites registrados no audit e no
+  conhecimento. Esta etapa altera somente documentos, sem novo restart.
+
 ## 2026-10-10: ITBI e registro de Sao Paulo com vigencia e contrato fiscal
 
 - Pedido autorizado: corrigir, validar, publicar e sincronizar conhecimento.

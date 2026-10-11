@@ -87,3 +87,34 @@ parcelamento documental, regras do pro-soluto, n8n e banco fora do escopo.
   `f3c6d7ea02ede1204a35d67b93f70d6c77f353b744621e8c33eb90fd9b255c9f`;
   hashes de todas as imagens e da referencia anterior conferidos. Nova CI
   contra as referencias revisadas e publicacao em producao ainda pendentes.
+
+## Publicacao confirmada em 11/10/2026
+
+- PR #177 integrado apos CI `38101674797` integralmente verde. Release
+  `1de9f5af9a4fe528b081c4c7b546e4ff667f2b9d`, sem alteracao de arvore no merge.
+- CI da main `38103844760`: validate, imagem e restore passaram. A primeira
+  execucao de release-gates interrompeu o Axe de Repasse antes de registrar
+  violacoes; diagnostico sanitizado nao permite determinar a causa completa.
+  Reexecucao somente do job falho, no mesmo SHA e sem relaxar nenhuma regra,
+  passou integralmente, incluindo as 242 comparacoes visuais. Todos os jobs
+  da release estavam aprovados antes do download da imagem.
+- Artefato imutavel `11688274550`; checksum do arquivo conferido antes do load.
+  ID de configuracao da CI
+  `sha256:4ce03be562cf954e135d0c06364caf81f9bae607dc53d293d8b81feb01e2c99c`.
+  ID local/manifesto OCI
+  `sha256:4ad95ae561bf9d159acbc348c851894fa538133c8fa6d666abc89d06f3ba36e2`.
+  Cadeia index/manifest/config, plataforma linux/amd64, label, manifesto legado
+  e onze camadas/rootfs conferidos. Dois perfis de runtime aprovados no destino;
+  nenhuma recompilacao na VPS.
+- Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/1de9f5af9a4fe528b081c4c7b546e4ff667f2b9d.TQUpuU`.
+  CAS partiu de `7a70e93e2a1cf8536b7c391893f2e9bcb9fc3c0d`, imagem anterior
+  `sha256:94e49f9acc172c5328747e7aaf1fe8931114c428c71604cd1591e4afad389d8f`.
+  Rollback preparado antes da troca; nao foi necessario utiliza-lo.
+- Container saudavel; health publico retornou `ok` e o SHA publicado. API de
+  estoque anonima respondeu 401; as duas rotas afetadas responderam 307 sem
+  autenticacao. Na sessao autenticada do navegador, Calcular Documentacao abriu
+  e exibiu os campos fiscais e as duas tabelas. Nenhum dado de proposta foi
+  salvo ou enviado e nenhuma declaracao fiscal foi marcada em nome do usuario.
+- Conhecimento sincronizado no Obsidian pelos hooks e pelo runtime. Este
+  registro final e documental: nao requer outro restart da aplicacao.
