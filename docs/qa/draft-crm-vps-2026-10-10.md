@@ -162,6 +162,34 @@ Essas evidencias comprovam o ambiente autenticado local, os artefatos promovidos
 e a CI do SHA candidato acima. Nao comprovam merge, imagem publicavel nem estado
 de producao.
 
+## Reconciliacao com `main` em 11/10/2026
+
+`main` avancou com a politica fiscal SP/2026 do PR #177. O merge local
+`bd8c5f69162824f9fa06a560d78a0a2888570df6` preservou esse motor, campos,
+fontes e testes e manteve o layout aprovado. A observacao P2 aberta em
+Integracoes foi corrigida: `reauth_required` e `unavailable` agora prevalecem
+sobre um ciclo de extracao simultaneo; `Extraindo` permanece apenas para uma
+conexao utilizavel.
+
+No candidato combinado passaram `pnpm lint`, `pnpm typecheck`,
+`pnpm resources:check`, `pnpm documentation:verify-sources`, `pnpm build` com
+45 rotas, 126 arquivos Vitest com 2.453 testes aprovados e seis ignorados, e 83
+testes Node operacionais. A matriz autenticada em modo `update-baseline` passou
+154 checks responsivos, 88 de tema, 242 Axe, 242 comparacoes e 110 de zoom;
+tambem repetiu os 40 checks dos quatro simuladores e as 30 capturas manuais do
+Associativo.
+
+Somente onze capturas de Calcular Documentacao diferiram. As versoes combinadas
+foram revisadas em 1.440 px/Claro e 390 px/Escuro e promovidas
+transacionalmente; 231 imagens permaneceram byte a byte. A tela documental
+mediu 1.191 px em desktop, nove pixels abaixo do teto funcional de 1.200 px.
+O manifesto final preserva a proveniencia do PR #177 e registra a revisao do PR
+#178 sem reduzir os limites de 1%/16.
+
+A verificacao pos-commit `4111089`, em modo `verify`, repetiu os 154 checks
+responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes e 110 de zoom;
+terminou verde e removeu a conta e as fixtures efemeras.
+
 ## Pendencias de release
 
 - Revisar e integrar o PR somente com a CI do commit final verde.

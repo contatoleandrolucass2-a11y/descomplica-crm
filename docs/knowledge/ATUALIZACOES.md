@@ -67,6 +67,13 @@
 - Estados de conexao e extracao Salesforce sao independentes. Quando coexistem,
   `reauth_required` ou `unavailable` deve prevalecer visualmente sobre
   `cycle=running`; "Extraindo" continua reservado a uma conexao utilizavel.
+- A combinacao com a politica fiscal do PR #177 alterou somente as onze
+  referencias de Calcular Documentacao; 231 ficaram intactas. A captura desktop
+  combinada mediu 1.191 px sob teto de 1.200 px, com 242 Axe/comparacoes, 40
+  checks dos quatro simuladores e 30 capturas manuais do Associativo aprovados.
+- A verificacao pos-commit `4111089`, em modo `verify`, repetiu 154 checks
+  responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes e 110 de zoom;
+  terminou verde e removeu a conta e as fixtures efemeras.
 - Registro completo: `docs/qa/draft-crm-vps-2026-10-10.md`.
 
 ## 2026-10-10: ITBI e registro dependem do contrato fiscal, nao do perfil comercial

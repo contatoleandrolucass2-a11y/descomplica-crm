@@ -78,6 +78,15 @@
   #177. O status do Salesforce agora prioriza reautenticacao necessaria ou
   indisponibilidade sobre `cycle=running`; 225 testes focados e o verificador
   de fontes publicas passaram antes do merge local.
+- No commit limpo `bd8c5f6`, lint, tipos, 2.453 testes Vitest, seis skips
+  previstos, 83 testes Node, fontes, inventario e build de 45 rotas passaram.
+  A matriz autenticada combinada aprovou 154 responsivos, 88 temas, 242 Axe,
+  242 comparacoes, 110 zoom, os 40 checks dos simuladores e 30 capturas do
+  Associativo. Somente onze referencias de Documentacao foram promovidas; 231
+  permaneceram intactas e a altura desktop ficou em 1.191/1.200 px.
+- A verificacao pos-commit `4111089`, em modo `verify`, repetiu 154 checks
+  responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes e 110 de zoom;
+  conta e fixtures efemeras foram removidas ao final.
 
 ## 2026-10-10: ITBI e registro de Sao Paulo com vigencia e contrato fiscal
 

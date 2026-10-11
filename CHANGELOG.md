@@ -7,6 +7,8 @@
 - Atualiza conhecimento Git/Obsidian sem modificar o runtime ja publicado.
 - Faz reautenticacao necessaria e indisponibilidade do Salesforce prevalecerem
   sobre um ciclo de extracao simultaneo, com regressao para os estados combinados.
+- Reconcilia o layout aprovado com a politica fiscal SP/2026 e promove somente
+  as onze referencias combinadas de Documentacao, preservando outras 231.
 
 ## 2026-10-10
 
