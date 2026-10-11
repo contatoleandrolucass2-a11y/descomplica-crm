@@ -1265,6 +1265,17 @@
   }
 }
 
+@media (min-width: 60.0625rem) and (max-width: 72rem) {
+  .admin-user-detail-header h2 {
+    display: -webkit-box;
+    min-height: 2.5em;
+    max-height: 2.5em;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
 @media (max-width: 60rem) {
   .admin-users-workspace {
     grid-template-columns: minmax(0, 1fr);

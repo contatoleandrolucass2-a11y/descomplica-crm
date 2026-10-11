@@ -57,6 +57,14 @@
   backup/rollback, publicacao por CAS e verificacao de producao continuam
   pendentes; producao nao foi publicada. Evidencias em
   `docs/qa/draft-crm-vps-2026-10-10.md`.
+- A CI documental `38096802698` manteve `validate`, `isolated-restore`, E2E,
+  banco e 241 comparacoes visuais verdes, mas bloqueou uma captura de Usuarios
+  em 1.024 px: o e-mail sintetico aleatorio ocupou uma linha em vez de duas e
+  alterou somente a altura total em 21 px. O cabecalho intermediario passou a
+  reservar e limitar duas linhas, com texto integral no DOM e `title`; nova CI
+  do SHA corrigido e obrigatoria. A reproducao local com outra identidade
+  aleatoria aprovou novamente 154 checks responsivos, 88 de tema, 242 Axe, 242
+  comparacoes e 110 de zoom; Usuarios voltou a 1.024 x 4.082 px.
 
 ## 2026-10-09: Guia do Associativo no cabecalho
 

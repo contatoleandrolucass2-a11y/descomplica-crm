@@ -26,6 +26,10 @@
 - Abre o PR #178 e aprova a CI `38094977306` no SHA candidato `4a8bfc8`, com
   validacao, release gates e restore isolado; revisao, merge e publicacao em
   producao continuam pendentes.
+- Estabiliza em duas linhas o e-mail da conta no cabecalho de Usuarios entre
+  961 px e 1.152 px, mantendo o valor completo no DOM e em `title`. A segunda
+  CI havia exposto uma variacao de 21 px causada apenas pelo sufixo aleatorio do
+  fixture visual em 1.024 px; as outras 241 comparacoes permaneceram aprovadas.
 
 ## 2026-10-09
 

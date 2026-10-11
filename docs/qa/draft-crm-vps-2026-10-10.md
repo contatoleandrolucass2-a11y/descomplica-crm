@@ -116,6 +116,17 @@ restore isolado. O PR estava `CLEAN` depois dessa execucao. O commit documental
 subsequente nao altera o runtime e deve manter a propria CI verde antes da
 revisao final.
 
+A reexecucao documental `38096802698` preservou `validate`, `isolated-restore`,
+banco, E2E e 241 das 242 comparacoes. Ela bloqueou somente
+`/admin/usuarios` em 1.024 x 768: o e-mail sintetico aleatorio coube em uma linha
+em vez de duas, mudando a altura da captura de 4.082 para 4.061 px. A tela nao
+teve perda funcional nem divergencia nos quatro simuladores. O cabecalho de
+Usuarios foi estabilizado em duas linhas nesse intervalo responsivo, com o e-mail
+integral preservado no DOM e em `title`. A reproducao local posterior, com outra
+identidade aleatoria, aprovou 154 checks responsivos, 88 de tema, 242 Axe, 242
+comparacoes e 110 de zoom; a captura voltou a 1.024 x 4.082 px e ficou dentro da
+baseline. O SHA corrigido exige nova CI verde.
+
 ## QA visual autenticado
 
 | Verificacao                    | Resultado                         |

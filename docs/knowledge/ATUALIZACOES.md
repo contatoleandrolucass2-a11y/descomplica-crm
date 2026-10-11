@@ -42,6 +42,14 @@
   `validate`, `release-gates` e `isolated-restore` no SHA `4a8bfc8`. Revisao,
   merge, imagem imutavel e publicacao protegida permanecem pendentes; producao
   nao foi publicada.
+- A reexecucao documental `38096802698` expôs uma nao determinacao real do QA:
+  em 1.024 px, caracteres aleatorios do e-mail sintetico alternavam o cabecalho
+  de Usuarios entre uma e duas linhas, com 21 px de diferenca. As outras 241
+  comparacoes e todos os gates funcionais passaram. Reservar e limitar duas
+  linhas somente no intervalo de duas colunas estabiliza a geometria sem trocar
+  identidade, remover cobertura ou esconder o valor de tecnologias assistivas.
+  A reproducao local com outra identidade passou as 242 comparacoes e mediu
+  novamente 4.082 px no caso de 1.024 px.
 - Registro completo: `docs/qa/draft-crm-vps-2026-10-10.md`.
 
 ## 2026-10-09: Posicao atual do guia Associativo

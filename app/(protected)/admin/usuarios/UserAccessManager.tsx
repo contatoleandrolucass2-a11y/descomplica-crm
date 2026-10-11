@@ -795,7 +795,7 @@ function UserDetail({
           </span>
           <div>
             <p>{user.isSelf ? "Conta atual" : "Usuário selecionado"}</p>
-            <h2>{user.email ?? "E-mail não informado"}</h2>
+            <h2 title={user.email ?? undefined}>{user.email ?? "E-mail não informado"}</h2>
             <span>{getVisibleRoleLabel(user.roleKey)}</span>
           </div>
         </div>
