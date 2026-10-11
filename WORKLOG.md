@@ -1,6 +1,6 @@
 # Worklog
 
-## 2026-10-11: Correcao de temas e fronteira de Administrador aplicada no banco
+## 2026-10-11: Correcao de temas e fronteira de Administrador publicada
 
 - Ranking e Canal de Parcerias foram alinhados ao draft nos temas Claro e
   Medio, removendo superficies navy residuais; o tema Escuro preserva o navy.
@@ -51,9 +51,34 @@
 - Os advisors remotos nao apontaram regressao criada pela migration. Seguiram
   10 avisos `INFO` de RLS sem policy, tres RPCs `SECURITY DEFINER` para `anon`,
   17 para `authenticated`, um aviso de protecao de senha vazada e, em
-  performance, dez foreign keys sem indice e dois indices ainda nao usados. A
-  publicacao do runtime permanece condicionada ao merge e a imagem imutavel da
-  CI de `main`.
+  performance, dez foreign keys sem indice e dois indices ainda nao usados.
+- A CI final do PR #181 (`38161298050`) aprovou validate, restore isolado e
+  release-gates no head `43f6ffde386336c4c0efe12ad0eefa474f7dd882`. O
+  merge protegido gerou a release
+  `6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2`; a CI de `main`
+  `38163173310` aprovou os quatro jobs, incluindo a imagem promovivel.
+- O artefato `11711780026` teve `image.tar.gz` SHA-256
+  `13d6d7333c1e3fdc1e75f841fc904af81cdc8eeb826f522b7dd40dbcd3a1ae51`.
+  Configuracao CI `sha256:9e172428`, manifesto/imagem local
+  `sha256:e68a6141`, label, `linux/amd64`, 11 camadas e 11 `diff_ids` foram
+  reconciliados. `image:prove` aprovou os dois perfis sem rebuild ou segredo.
+- O backup privado da aplicacao foi verificado em
+  `/var/backups/descomplica-crm/releases/6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2.Ba84ee`,
+  com manifesto SHA-256
+  `b3eb1965f88ac761dfede67a4c238f821bdd541a9bffecbb1f82fa02736ab579`.
+  O CAS partiu de `ac3d7893`; rollback ficou preparado e nao foi necessario.
+- O container publicou o SHA novo, ficou `healthy`, sem restart/OOM e com
+  failing streak zero. Cinco healths locais e cinco publicos passaram; sete
+  rotas protegidas retornaram 307, seis APIs anonimas 401, sete assets 200,
+  sete headers de seguranca foram preservados, HTTP redirecionou para HTTPS e
+  os logs nao continham padrao critico.
+- A matriz autenticada desktop/mobile foi executada com identidades sinteticas
+  isoladas e removidas nesta VPS e na CI. Nenhuma sessao produtiva autenticada
+  foi improvisada; o pos-check hospedado foi observacional e anonimo.
+- O fechamento documental repetiu formato, inventario, lint, tipos, 2.463
+  testes Vitest, 83 testes Node e build de 45 rotas. O host continua sem vault
+  Obsidian configurado; `knowledge:sync` retornou `not-configured` e o
+  conhecimento versionado permanece como fonte.
 
 ## 2026-10-11: Runtime do layout promovido; aceite pendente
 

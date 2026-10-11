@@ -4,9 +4,10 @@
 
 - Fonte: draft aprovado de 10/10/2026, migration
   `20261011143218_protect_administrator_accounts_and_enable_simulator_view`,
-  matriz de autorizacao, PR #181 e CI candidata `38158141843`. Status: banco
-  remoto aplicado e verificado como versao `20261011174323`; publicacao do
-  runtime ainda depende do merge e da imagem imutavel da CI de `main`.
+  matriz de autorizacao, PR #181, CI final `38161298050` e CI de `main`
+  `38163173310`. Status: banco remoto aplicado como versao `20261011174323` e
+  runtime publicado na release
+  `6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2`.
 - Tema nao e apenas preferencia global: componentes com superfice navy propria
   precisam de override semantico explicito tanto em `light` quanto em
   `balanced`. O tema `dark` continua usando a regra-base navy.
@@ -30,6 +31,15 @@
   uma unica conta Administrador, o ensaio remoto usou a propria conta dentro de
   transacao revertida e confirmou o bloqueio; o caso entre dois Administradores
   ficou apoiado pelo pgTAP e E2E isolado executados na VPS.
+- A publicacao deve consumir o artefato da CI sem rebuild. Nesta release, o tar
+  aprovado tem SHA-256
+  `13d6d7333c1e3fdc1e75f841fc904af81cdc8eeb826f522b7dd40dbcd3a1ae51`,
+  configuracao CI `sha256:9e172428` e manifesto local `sha256:e68a6141`; a
+  cadeia de 11 camadas e os dois perfis de runtime foram comprovados.
+- CAS partiu de `ac3d7893`; backup privado e rollback foram preparados. O
+  container permaneceu saudavel, sem restart/OOM, com health local/publico,
+  protecoes anonimas, assets e headers aprovados. A matriz autenticada usou
+  identidades sinteticas isoladas; nenhuma sessao produtiva foi improvisada.
 
 ## 2026-10-11: ITBI e registro publicados com estimativa fiscal condicionada
 
