@@ -160,7 +160,7 @@ if (approvedCanvasByRoute.size !== routes.length) {
 }
 
 const canvasDensityLimitByRoute = new Map([
-  ["/admin/usuarios", 2600],
+  ["/admin/usuarios", 1200],
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
   ["/app/etapas/pastas", 1350],

@@ -1,5 +1,27 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-11: Usuarios deve permanecer mestre-detalhe compacto
+
+- Fonte: draft aprovado `modelo-site.html#users`, implementação real de
+  `/admin/usuarios` e matriz visual autenticada. Status: validado localmente;
+  publicação registrada no Worklog quando concluída.
+- Preservar contratos não basta para paridade visual. Quatro cards de resumo e
+  cinco grupos expandidos mudaram a tarefa de escolher uma pessoa e revisar um
+  grupo por vez, produzindo 2.592 px onde o draft usa mestre-detalhe compacto.
+- O contrato estável da tela é: diretório à esquerda, busca e filtros em chips,
+  detalhe à direita, quatro abas (Comercial, Simuladores, Configurações e
+  Administração), uma aba renderizada por vez e ações salvas pelo mesmo fluxo
+  auditável do servidor.
+- Catálogos reais podem ter mais itens que a demonstração. No desktop, limitar
+  a região de permissões e mantê-la rolável/focável preserva todos os acessos e
+  a densidade; no mobile, remover o limite interno mantém o fluxo vertical.
+- O gate desktop de Usuários é 1.200 px. A captura aprovada mediu 1.187 px. Axe
+  deve bloquear qualquer região rolável sem foco; `role=tabpanel`, nome pela
+  aba e `tabIndex=0` compõem o contrato acessível.
+- Dados, nomes e estados do draft continuam demonstrativos. A interface usa
+  somente o diretório e a autorização reais, preservando a administração de
+  contas Administrador exclusivamente pelo Master em todas as camadas.
+
 ## 2026-10-11: Temas sem ilhas escuras e Administrador como classe protegida
 
 - Fonte: draft aprovado de 10/10/2026, migration

@@ -2,6 +2,15 @@
 
 ## 2026-10-11
 
+- Recompõe Usuários e acessos conforme o draft aprovado: mestre-detalhe
+  compacto, diretório com filtros em chips, quatro abas de acesso, painel
+  rolável no desktop e empilhamento responsivo no mobile.
+- Remove os quatro indicadores que alongavam a tela, reduz o teto visual de
+  2.600 para 1.200 px e preserva paginação, herança, exceções, auditoria e a
+  fronteira exclusiva do Master sobre contas Administrador.
+- Promove onze referências autenticadas exclusivas de Usuários após 154 checks
+  responsivos, 88 de tema, 242 Axe, 242 comparações e 110 checks de zoom; os
+  quatro simuladores permaneceram cobertos e inalterados.
 - Corrige superficies escuras residuais de Ranking e Canal de Parcerias nos
   temas Claro e Medio, preservando o tema Escuro aprovado.
 - Libera ao Administrador a visualizacao dos quatro simuladores sem ampliar a
