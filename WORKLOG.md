@@ -22,8 +22,14 @@
   responsivos, 88 de tema, 242 Axe, 242 comparacoes, 110 de zoom, 40 checks dos
   simuladores e 30 capturas do Associativo. Somente 24 referencias esperadas
   mudaram: Ranking, Parcerias e Usuarios; nenhuma outra tela divergiu.
-- Gates integrados, verificacao visual pos-commit, migration remota e
-  publicacao ainda estao em andamento; esta entrada nao os antecipa.
+- Gates locais finais aprovados: formato, lint, tipos, inventario, audit sem
+  vulnerabilidades conhecidas, 126 arquivos Vitest com 2.463 aprovados e seis
+  ignorados, 83 testes Node, build de 45 rotas e E2E com 19 aprovados e um skip
+  previsto. A revisao de seguranca independente nao encontrou achados no diff.
+- O `verify` visual pos-commit repetiu 154 checks responsivos, 88 de tema, 242
+  Axe, 242 comparacoes e 110 de zoom sem regravar a baseline; conta e fixtures
+  efemeras foram removidas. Migration remota e publicacao ainda estao em
+  andamento; esta entrada nao as antecipa.
 
 ## 2026-10-11: Runtime do layout promovido; aceite pendente
 

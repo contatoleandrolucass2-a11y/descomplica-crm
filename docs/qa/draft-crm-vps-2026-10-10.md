@@ -63,6 +63,16 @@ substituem testes do CRM integrado.
   mobile, e em Medio no desktop. Claro e Medio ficaram sem ilhas navy; Escuro
   preservou as superficies navy aprovadas. Usuarios permaneceu responsivo e
   sem overflow horizontal em 390 px.
+- Os gates finais desta correcao aprovaram formato, lint, tipos, inventario,
+  audit sem vulnerabilidades conhecidas, 126 arquivos Vitest com 2.463 testes
+  aprovados e seis ignorados, 83 testes Node e o build de 45 rotas. O E2E de
+  release aprovou 19 cenarios e manteve um skip previsto.
+- Depois da promocao em arvore limpa, o modo `verify` repetiu 154 checks
+  responsivos, 88 de tema, 242 Axe, 242 comparacoes e 110 de zoom sem atualizar
+  nenhuma referencia. A conta e as fixtures sinteticas foram removidas.
+- A revisao independente do diff nao encontrou achados de seguranca. O ensaio
+  de banco repetiu lint, advisors, backup/restore e 1.141/1.141 testes na origem
+  e na restauracao.
 - Nenhuma tabela Qlik, formula financeira, campo ou motor dos quatro
   simuladores foi alterado nesta correcao.
 

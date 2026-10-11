@@ -9,6 +9,9 @@
 - Reserva ao Master a administracao de contas Administrador, com bloqueio de
   criacao/promocao, desativacao, papel e excecoes na interface, servidor, RPCs
   e triggers do banco.
+- Aprova a matriz visual pos-commit sem regravar referencias, o E2E dos oito
+  perfis, 1.141 testes pgTAP na origem/restore e os gates completos de
+  aplicacao; a revisao independente nao encontrou achados de seguranca.
 - Promove o runtime do layout aprovado do CRM na release `ac3d7893`, com imagem
   imutavel, backup verificado, CAS, rollback preparado e saude confirmada; o
   aceite final permanece pendente da jornada autenticada em producao.
