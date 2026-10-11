@@ -1061,7 +1061,7 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 
 ## 2026-10-02: Contorno dourado sem preenchimento nos editaveis
 
-- Status: pendente_validacao; branch codex/associativo-contorno-dourado.
+- Status: validado; PR #138, runtime 506b9e3.
 - Fonte: duas capturas e pedido posterior do usuario, CSS e QA de guidance.
 - A direcao nova substitui o preenchimento dourado das etapas por contorno;
   apenas a selecao do estoque preserva preenchimento metalico, mais escuro.
@@ -1074,7 +1074,18 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
   caixas escuras, brilho branco/azul, faixa larga ou estatica. Contraste >=4.5
   para texto e >=3 para contorno nos tres temas; nenhuma tolerancia relaxada.
 - 28 testes focados, lint, tipos, build, 8 Node e 6/6 jornadas aprovados.
-  Windows com 6 falhas POSIX conhecidas; CI Linux e publicacao pendentes.
+  Windows com 6 falhas POSIX conhecidas; CI Linux PR 37082276489 e main
+  37084410555 integralmente verdes. Nenhuma referencia visual alterada.
+- Imagem imutavel comprovada em 11 camadas e dois perfis; backup/CAS/rollback
+  preparados. Health exato e 12 GETs sem erro. No navegador publicado, fundo
+  normal #0a2b47, borda #9f7628, input transparente inclusive preenchido e
+  associative-edge-shine de 3s/2px confirmados; selecao descartada por reload.
+- Evidencias na auditoria vinculada ao WORKLOG. Fechamento documental no Git
+  e sincronizacao local; nao exige novo deploy nem prova carga de producao.
+- Pendencia posterior: PR documental #140 bloqueado no audit da CI
+  37086964349 por GHSA-vfj7-8cjw-p6xm, braces 3.0.3 via eslint-config-next.
+  Nao houve bypass, mudanca de dependencia ou novo deploy. Correcao dessa
+  dependencia exige validacao propria; entrega visual permanece publicada.
 
 ## 2026-10-02: Paleta do Tabelao como referencia do Associativo
 
