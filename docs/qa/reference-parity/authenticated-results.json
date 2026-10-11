@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "capturedAt": "2026-10-11T16:40:26.252Z",
-  "captureCommit": "dcd835f82bd26f39a8d3ce1e9ba126be94cc8e5a",
+  "capturedAt": "2026-10-11T22:44:22.938Z",
+  "captureCommit": "74a7573ab4626e675883fc4d6c63ce4097f8c06f",
   "worktreeDirtyAtCapture": false,
   "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
   "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
@@ -990,7 +990,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2592,
+      "pageScrollHeight": 1187,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -1980,7 +1980,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2606,
+      "pageScrollHeight": 1204,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -2970,7 +2970,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 4097,
+      "pageScrollHeight": 1234,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -3960,7 +3960,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 4457,
+      "pageScrollHeight": 1934,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -4950,7 +4950,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 5889,
+      "pageScrollHeight": 2482,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -5940,7 +5940,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 6010,
+      "pageScrollHeight": 2515,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -6930,7 +6930,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 6307,
+      "pageScrollHeight": 2696,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -7943,7 +7943,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2592,
+      "pageScrollHeight": 1187,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -8955,7 +8955,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2592,
+      "pageScrollHeight": 1187,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -9967,7 +9967,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2592,
+      "pageScrollHeight": 1187,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -10979,7 +10979,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 5889,
+      "pageScrollHeight": 2482,
       "canvasDensityReady": true,
       "hasBrokenValue": false,
       "protectedShellPresent": true,
@@ -14481,7 +14481,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3194, 3043],
+              "changedPixels": [3234, 3043],
               "passed": true
             },
             "currentCardMotion": {
@@ -14725,7 +14725,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4245, 982],
+              "changedPixels": [4196, 982],
               "passed": true
             },
             "requiredRowMotion": {
@@ -16668,35 +16668,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 204.4,
+                  "start": 230.332,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 204.4,
+                  "start": 230.332,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 204.4,
+                  "start": 230.332,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 204.4,
+                  "start": 230.332,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 204.4,
+                  "start": 230.332,
                   "opacity": "1"
                 }
               ],
@@ -17683,7 +17683,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4708, 1104],
+              "changedPixels": [4738, 1104],
               "passed": true
             },
             "requiredRowMotion": {
@@ -19626,35 +19626,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 228.464,
+                  "start": 172.6,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 228.464,
+                  "start": 172.6,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 228.464,
+                  "start": 172.6,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 228.464,
+                  "start": 172.6,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 228.464,
+                  "start": 172.6,
                   "opacity": "1"
                 }
               ],
@@ -20397,7 +20397,7 @@
             "profilePixels": {
               "width": 277,
               "height": 125,
-              "changedPixels": [3556, 3195],
+              "changedPixels": [3600, 3195],
               "passed": true
             },
             "currentCardMotion": {
@@ -20641,7 +20641,7 @@
             "rowPixels": {
               "width": 283,
               "height": 152,
-              "changedPixels": [4738, 1119],
+              "changedPixels": [4776, 1119],
               "passed": true
             },
             "requiredRowMotion": {
@@ -22584,35 +22584,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.1,
+                  "start": 294.8,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.1,
+                  "start": 294.8,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.1,
+                  "start": 294.8,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.1,
+                  "start": 294.8,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 170.1,
+                  "start": 294.8,
                   "opacity": "1"
                 }
               ],
@@ -25605,7 +25605,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1049, 1049],
+              "changedPixels": [1051, 1049],
               "passed": true
             },
             "requiredRowMotion": {
@@ -27548,35 +27548,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 220.9,
+                  "start": 263.3,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 220.9,
+                  "start": 263.3,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 220.9,
+                  "start": 263.3,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 220.9,
+                  "start": 263.3,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 220.9,
+                  "start": 263.3,
                   "opacity": "1"
                 }
               ],
@@ -28319,7 +28319,7 @@
             "profilePixels": {
               "width": 452,
               "height": 117,
-              "changedPixels": [5443, 5263],
+              "changedPixels": [5448, 5263],
               "passed": true
             },
             "currentCardMotion": {
@@ -28563,7 +28563,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1152, 1154],
+              "changedPixels": [1155, 1157],
               "passed": true
             },
             "requiredRowMotion": {
@@ -30506,35 +30506,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 255.03200000000004,
+                  "start": 270.432,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 255.03200000000004,
+                  "start": 270.432,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 255.03200000000004,
+                  "start": 270.432,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 255.03200000000004,
+                  "start": 270.432,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 255.03200000000004,
+                  "start": 270.432,
                   "opacity": "1"
                 }
               ],
@@ -31277,7 +31277,7 @@
             "profilePixels": {
               "width": 452,
               "height": 117,
-              "changedPixels": [5508, 5322],
+              "changedPixels": [5507, 5322],
               "passed": true
             },
             "currentCardMotion": {
@@ -31521,7 +31521,7 @@
             "rowPixels": {
               "width": 659,
               "height": 24,
-              "changedPixels": [1111, 1138],
+              "changedPixels": [1095, 1129],
               "passed": true
             },
             "requiredRowMotion": {
@@ -33464,35 +33464,35 @@
                   "name": "Guia passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 249.3,
+                  "start": 300.4,
                   "opacity": "1"
                 },
                 {
                   "name": "Iniciar passo a passo",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 249.3,
+                  "start": 300.4,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Sinal",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 249.3,
+                  "start": 300.4,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Anual",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 249.3,
+                  "start": 300.4,
                   "opacity": "1"
                 },
                 {
                   "name": "Inserir Desconto",
                   "duration": 4500,
                   "iterations": "Infinity",
-                  "start": 249.3,
+                  "start": 300.4,
                   "opacity": "1"
                 }
               ],
@@ -37526,7 +37526,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 2574,
+        "pageScrollHeight": 1187,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -38538,7 +38538,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 2592,
+        "pageScrollHeight": 1187,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -39550,7 +39550,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 3921,
+        "pageScrollHeight": 1238,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -40562,7 +40562,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 4403,
+        "pageScrollHeight": 1898,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -41574,7 +41574,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 4472,
+        "pageScrollHeight": 1934,
         "canvasDensityReady": true,
         "hasBrokenValue": false,
         "protectedShellPresent": true,
@@ -41680,9 +41680,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 256,
+        "changedPixels": 223,
         "totalPixels": 1614240,
-        "changedPixelRatio": 0.0001585885617999802,
+        "changedPixelRatio": 0.0001381455050054515,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
           "tracked": true,
@@ -41717,9 +41717,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1440x900.webp",
           "tracked": true,
@@ -41754,9 +41754,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1440x900.webp",
           "tracked": true,
@@ -41791,9 +41791,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1440x900.webp",
           "tracked": true,
@@ -41828,9 +41828,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1440x900.webp",
           "tracked": true,
@@ -41865,9 +41865,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1440x900.webp",
           "tracked": true,
@@ -41902,9 +41902,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 50,
+        "changedPixels": 49,
         "totalPixels": 1487520,
-        "changedPixelRatio": 0.00003361299343874368,
+        "changedPixelRatio": 0.00003294073356996881,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
           "tracked": true,
@@ -41939,9 +41939,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 50,
+        "changedPixels": 49,
         "totalPixels": 1404000,
-        "changedPixelRatio": 0.00003561253561253561,
+        "changedPixelRatio": 0.0000349002849002849,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
           "tracked": true,
@@ -41976,9 +41976,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.000026476640038731543,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
           "tracked": true,
@@ -42013,9 +42013,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.000026476640038731543,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1440x900.webp",
           "tracked": true,
@@ -42050,9 +42050,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.000026476640038731543,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1440x900.webp",
           "tracked": true,
@@ -42087,9 +42087,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 259,
+        "changedPixels": 227,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.0001959271362866134,
+        "changedPixelRatio": 0.000171719922536916,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1440x900.webp",
           "tracked": true,
@@ -42124,9 +42124,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1353600,
-        "changedPixelRatio": 0.000025856973995271868,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1440x900.webp",
           "tracked": true,
@@ -42161,9 +42161,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 11086,
+        "changedPixels": 11003,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008554012345679013,
+        "changedPixelRatio": 0.00848996913580247,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
@@ -42198,9 +42198,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 40,
+        "changedPixels": 126,
         "totalPixels": 1715040,
-        "changedPixelRatio": 0.000023323071182013246,
+        "changedPixelRatio": 0.00007346767422334173,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
           "tracked": true,
@@ -42235,9 +42235,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 125,
+        "changedPixels": 0,
         "totalPixels": 1722240,
-        "changedPixelRatio": 0.00007257989594946117,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1440x900.webp",
           "tracked": true,
@@ -42272,9 +42272,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 11439,
+        "changedPixels": 11517,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008826388888888889,
+        "changedPixelRatio": 0.008886574074074075,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-1440x900.webp",
           "tracked": true,
@@ -42309,9 +42309,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 11439,
+        "changedPixels": 11517,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008826388888888889,
+        "changedPixelRatio": 0.008886574074074075,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
           "tracked": true,
@@ -42346,9 +42346,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 11439,
+        "changedPixels": 11517,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008826388888888889,
+        "changedPixelRatio": 0.008886574074074075,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1440x900.webp",
           "tracked": true,
@@ -42383,9 +42383,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1353600,
-        "changedPixelRatio": 0.000025856973995271868,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1440x900.webp",
           "tracked": true,
@@ -42403,31 +42403,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 3732480,
+        "totalPixels": 1709280,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1440x900.webp",
           "tracked": true,
-          "bytes": 119120,
-          "sha256": "35da7783008d5eb124b5a5990f3fdbabd654c3bcc1b3e83d27101a7bafc4cf0d"
+          "bytes": 82120,
+          "sha256": "1d2171a5620ed4c5db5930289a335533a3545ddbfc86fc040fd2170b160bf40e"
         }
       },
       "path": "target-authenticated/admin-usuarios-1440x900.webp",
-      "bytes": 119120,
-      "sha256": "35da7783008d5eb124b5a5990f3fdbabd654c3bcc1b3e83d27101a7bafc4cf0d",
+      "bytes": 82120,
+      "sha256": "1d2171a5620ed4c5db5930289a335533a3545ddbfc86fc040fd2170b160bf40e",
       "width": 1440,
-      "height": 2592,
+      "height": 1187,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 7765,
-        "totalPixels": 3732480,
-        "changedPixelRatio": 0.002080386231138546,
+        "changedPixels": 3693,
+        "totalPixels": 1709280,
+        "changedPixelRatio": 0.0021605588317888235,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1440x900.webp",
           "tracked": true,
-          "bytes": 119120,
-          "sha256": "35da7783008d5eb124b5a5990f3fdbabd654c3bcc1b3e83d27101a7bafc4cf0d"
+          "bytes": 82120,
+          "sha256": "1d2171a5620ed4c5db5930289a335533a3545ddbfc86fc040fd2170b160bf40e"
         }
       }
     },
@@ -42457,9 +42457,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1393920,
-        "changedPixelRatio": 0.00002510904499540863,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1440x900.webp",
           "tracked": true,
@@ -42494,9 +42494,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 256,
+        "changedPixels": 223,
         "totalPixels": 1614240,
-        "changedPixelRatio": 0.0001585885617999802,
+        "changedPixelRatio": 0.0001381455050054515,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
           "tracked": true,
@@ -42531,9 +42531,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-oportunidades-light-1440x900.webp",
           "tracked": true,
@@ -42568,9 +42568,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-light-1440x900.webp",
           "tracked": true,
@@ -42605,9 +42605,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-visitas-light-1440x900.webp",
           "tracked": true,
@@ -42642,9 +42642,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-pastas-light-1440x900.webp",
           "tracked": true,
@@ -42679,9 +42679,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012489020641194554,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-vendas-light-1440x900.webp",
           "tracked": true,
@@ -42716,9 +42716,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 50,
+        "changedPixels": 49,
         "totalPixels": 1487520,
-        "changedPixelRatio": 0.00003361299343874368,
+        "changedPixelRatio": 0.00003294073356996881,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
           "tracked": true,
@@ -42753,9 +42753,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 50,
+        "changedPixels": 49,
         "totalPixels": 1404000,
-        "changedPixelRatio": 0.00003561253561253561,
+        "changedPixelRatio": 0.0000349002849002849,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
           "tracked": true,
@@ -42790,9 +42790,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.000026476640038731543,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-light-1440x900.webp",
           "tracked": true,
@@ -42827,9 +42827,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.000026476640038731543,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-light-1440x900.webp",
           "tracked": true,
@@ -42864,9 +42864,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.000026476640038731543,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-parcerias-light-1440x900.webp",
           "tracked": true,
@@ -42901,9 +42901,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 259,
+        "changedPixels": 227,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.0001959271362866134,
+        "changedPixelRatio": 0.000171719922536916,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-light-1440x900.webp",
           "tracked": true,
@@ -42938,9 +42938,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1353600,
-        "changedPixelRatio": 0.000025856973995271868,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-light-1440x900.webp",
           "tracked": true,
@@ -42975,9 +42975,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 11086,
+        "changedPixels": 11003,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008554012345679013,
+        "changedPixelRatio": 0.00848996913580247,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
           "tracked": true,
@@ -43012,9 +43012,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 40,
+        "changedPixels": 126,
         "totalPixels": 1715040,
-        "changedPixelRatio": 0.000023323071182013246,
+        "changedPixelRatio": 0.00007346767422334173,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
           "tracked": true,
@@ -43049,9 +43049,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 125,
+        "changedPixels": 0,
         "totalPixels": 1722240,
-        "changedPixelRatio": 0.00007257989594946117,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-light-1440x900.webp",
           "tracked": true,
@@ -43086,9 +43086,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 11439,
+        "changedPixels": 11517,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008826388888888889,
+        "changedPixelRatio": 0.008886574074074075,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-direta-light-1440x900.webp",
           "tracked": true,
@@ -43123,9 +43123,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 11439,
+        "changedPixels": 11517,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008826388888888889,
+        "changedPixelRatio": 0.008886574074074075,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
           "tracked": true,
@@ -43160,9 +43160,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 11439,
+        "changedPixels": 11517,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008826388888888889,
+        "changedPixelRatio": 0.008886574074074075,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-light-1440x900.webp",
           "tracked": true,
@@ -43197,9 +43197,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1353600,
-        "changedPixelRatio": 0.000025856973995271868,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-light-1440x900.webp",
           "tracked": true,
@@ -43217,31 +43217,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 3732480,
+        "totalPixels": 1709280,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-light-1440x900.webp",
           "tracked": true,
-          "bytes": 119120,
-          "sha256": "35da7783008d5eb124b5a5990f3fdbabd654c3bcc1b3e83d27101a7bafc4cf0d"
+          "bytes": 82120,
+          "sha256": "1d2171a5620ed4c5db5930289a335533a3545ddbfc86fc040fd2170b160bf40e"
         }
       },
       "path": "target-authenticated/themes/admin-usuarios-light-1440x900.webp",
-      "bytes": 119120,
-      "sha256": "35da7783008d5eb124b5a5990f3fdbabd654c3bcc1b3e83d27101a7bafc4cf0d",
+      "bytes": 82120,
+      "sha256": "1d2171a5620ed4c5db5930289a335533a3545ddbfc86fc040fd2170b160bf40e",
       "width": 1440,
-      "height": 2592,
+      "height": 1187,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 7765,
-        "totalPixels": 3732480,
-        "changedPixelRatio": 0.002080386231138546,
+        "changedPixels": 3693,
+        "totalPixels": 1709280,
+        "changedPixelRatio": 0.0021605588317888235,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-light-1440x900.webp",
           "tracked": true,
-          "bytes": 119120,
-          "sha256": "35da7783008d5eb124b5a5990f3fdbabd654c3bcc1b3e83d27101a7bafc4cf0d"
+          "bytes": 82120,
+          "sha256": "1d2171a5620ed4c5db5930289a335533a3545ddbfc86fc040fd2170b160bf40e"
         }
       }
     },
@@ -43271,9 +43271,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1393920,
-        "changedPixelRatio": 0.00002510904499540863,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-light-1440x900.webp",
           "tracked": true,
@@ -43308,9 +43308,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 249,
+        "changedPixels": 220,
         "totalPixels": 1614240,
-        "changedPixelRatio": 0.00015425215581326196,
+        "changedPixelRatio": 0.00013628704529685797,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
           "tracked": true,
@@ -43345,9 +43345,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 184,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012626262626262626,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-oportunidades-balanced-1440x900.webp",
           "tracked": true,
@@ -43382,9 +43382,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 184,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012626262626262626,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-balanced-1440x900.webp",
           "tracked": true,
@@ -43419,9 +43419,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 184,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012626262626262626,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-visitas-balanced-1440x900.webp",
           "tracked": true,
@@ -43456,9 +43456,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 184,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012626262626262626,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-pastas-balanced-1440x900.webp",
           "tracked": true,
@@ -43493,9 +43493,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 184,
+        "changedPixels": 145,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.00012626262626262626,
+        "changedPixelRatio": 0.00009950043917435222,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-vendas-balanced-1440x900.webp",
           "tracked": true,
@@ -43604,9 +43604,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 37,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.00002798959089808763,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
           "tracked": true,
@@ -43641,9 +43641,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 37,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.00002798959089808763,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-balanced-1440x900.webp",
           "tracked": true,
@@ -43678,9 +43678,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 37,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.00002798959089808763,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-parcerias-balanced-1440x900.webp",
           "tracked": true,
@@ -43715,9 +43715,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 258,
+        "changedPixels": 226,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.00019517066085693535,
+        "changedPixelRatio": 0.00017096344710723795,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-balanced-1440x900.webp",
           "tracked": true,
@@ -43752,9 +43752,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 37,
+        "changedPixels": 0,
         "totalPixels": 1353600,
-        "changedPixelRatio": 0.00002733451536643026,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-balanced-1440x900.webp",
           "tracked": true,
@@ -43789,9 +43789,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 6322,
+        "changedPixels": 6239,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.004878086419753087,
+        "changedPixelRatio": 0.004814043209876543,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
           "tracked": true,
@@ -43826,9 +43826,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 41,
+        "changedPixels": 126,
         "totalPixels": 1715040,
-        "changedPixelRatio": 0.00002390614796156358,
+        "changedPixelRatio": 0.00007346767422334173,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
           "tracked": true,
@@ -43863,9 +43863,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 125,
+        "changedPixels": 0,
         "totalPixels": 1722240,
-        "changedPixelRatio": 0.00007257989594946117,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-balanced-1440x900.webp",
           "tracked": true,
@@ -43900,9 +43900,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 8479,
+        "changedPixels": 8557,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0065424382716049384,
+        "changedPixelRatio": 0.006602623456790123,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-direta-balanced-1440x900.webp",
           "tracked": true,
@@ -43937,9 +43937,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 8479,
+        "changedPixels": 8557,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0065424382716049384,
+        "changedPixelRatio": 0.006602623456790123,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-balanced-1440x900.webp",
           "tracked": true,
@@ -43974,9 +43974,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 8479,
+        "changedPixels": 8557,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.0065424382716049384,
+        "changedPixelRatio": 0.006602623456790123,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-balanced-1440x900.webp",
           "tracked": true,
@@ -44011,9 +44011,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 37,
+        "changedPixels": 0,
         "totalPixels": 1353600,
-        "changedPixelRatio": 0.00002733451536643026,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
           "tracked": true,
@@ -44031,31 +44031,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 3732480,
+        "totalPixels": 1709280,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 119374,
-          "sha256": "8d3ed9b2b23282cbc3425f28483ab9bcac0622fa03a434861a073102d5a8266f"
+          "bytes": 82402,
+          "sha256": "7627c2e1aec0bbef407d894fb2533489254885df44027479f15a94f52e350415"
         }
       },
       "path": "target-authenticated/themes/admin-usuarios-balanced-1440x900.webp",
-      "bytes": 119374,
-      "sha256": "8d3ed9b2b23282cbc3425f28483ab9bcac0622fa03a434861a073102d5a8266f",
+      "bytes": 82402,
+      "sha256": "7627c2e1aec0bbef407d894fb2533489254885df44027479f15a94f52e350415",
       "width": 1440,
-      "height": 2592,
+      "height": 1187,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 7733,
-        "totalPixels": 3732480,
-        "changedPixelRatio": 0.002071812842935528,
+        "changedPixels": 3674,
+        "totalPixels": 1709280,
+        "changedPixelRatio": 0.0021494430403444726,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 119374,
-          "sha256": "8d3ed9b2b23282cbc3425f28483ab9bcac0622fa03a434861a073102d5a8266f"
+          "bytes": 82402,
+          "sha256": "7627c2e1aec0bbef407d894fb2533489254885df44027479f15a94f52e350415"
         }
       }
     },
@@ -44085,9 +44085,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 37,
+        "changedPixels": 0,
         "totalPixels": 1393920,
-        "changedPixelRatio": 0.00002654384756657484,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-balanced-1440x900.webp",
           "tracked": true,
@@ -44120,9 +44120,9 @@
         "asset": "docs/qa/canvas-parity/reference/dashboard-oportunidades.webp",
         "region": "left",
         "referenceSha256": "c7dbf6e14f7802fc9597d419dee04aa6dd6b48474c91926d3b52c1fbb86b88c4",
-        "colorDistance": 14.571180555555555,
+        "colorDistance": 14.571940104166666,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 36.92919921875,
+        "edgeDistance": 36.937093098958336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/dashboard-dark-1440x900.webp",
@@ -44133,9 +44133,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 250,
+        "changedPixels": 220,
         "totalPixels": 1614240,
-        "changedPixelRatio": 0.00015487164238279315,
+        "changedPixelRatio": 0.00013628704529685797,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
           "tracked": true,
@@ -44168,9 +44168,9 @@
         "asset": "docs/qa/canvas-parity/reference/dashboard-oportunidades.webp",
         "region": "right",
         "referenceSha256": "c7dbf6e14f7802fc9597d419dee04aa6dd6b48474c91926d3b52c1fbb86b88c4",
-        "colorDistance": 14.422688802083334,
+        "colorDistance": 14.42333984375,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 41.557047526041664,
+        "edgeDistance": 41.559407552083336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/etapas-oportunidades-dark-1440x900.webp",
@@ -44181,9 +44181,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.0001255764163372859,
+        "changedPixelRatio": 0.00010087285902503294,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-oportunidades-dark-1440x900.webp",
           "tracked": true,
@@ -44218,7 +44218,7 @@
         "referenceSha256": "00853304b89bc3efcf03b5a93410a62a18b1bdc1016b9d22b3f88075cc31c992",
         "colorDistance": 14.54812282986111,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 40.588053385416664,
+        "edgeDistance": 40.588297526041664,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/etapas-agendamentos-dark-1440x900.webp",
@@ -44229,9 +44229,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.0001255764163372859,
+        "changedPixelRatio": 0.00010087285902503294,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-dark-1440x900.webp",
           "tracked": true,
@@ -44266,7 +44266,7 @@
         "referenceSha256": "00853304b89bc3efcf03b5a93410a62a18b1bdc1016b9d22b3f88075cc31c992",
         "colorDistance": 14.044108072916666,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 39.404541015625,
+        "edgeDistance": 39.403157552083336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/etapas-visitas-dark-1440x900.webp",
@@ -44277,9 +44277,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.0001255764163372859,
+        "changedPixelRatio": 0.00010087285902503294,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-visitas-dark-1440x900.webp",
           "tracked": true,
@@ -44312,9 +44312,9 @@
         "asset": "docs/qa/canvas-parity/reference/pastas-vendas.webp",
         "region": "left",
         "referenceSha256": "a6db052f97f31b2a0c2a6bddcb6f46dd51de93d40f4b9479e20be1545cdc984f",
-        "colorDistance": 13.658094618055555,
+        "colorDistance": 13.658637152777779,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 36.315755208333336,
+        "edgeDistance": 36.315185546875,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/etapas-pastas-dark-1440x900.webp",
@@ -44325,9 +44325,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.0001255764163372859,
+        "changedPixelRatio": 0.00010087285902503294,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-pastas-dark-1440x900.webp",
           "tracked": true,
@@ -44360,9 +44360,9 @@
         "asset": "docs/qa/canvas-parity/reference/pastas-vendas.webp",
         "region": "right",
         "referenceSha256": "a6db052f97f31b2a0c2a6bddcb6f46dd51de93d40f4b9479e20be1545cdc984f",
-        "colorDistance": 13.671929253472221,
+        "colorDistance": 13.672471788194445,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 36.300374348958336,
+        "edgeDistance": 36.29931640625,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/etapas-vendas-dark-1440x900.webp",
@@ -44373,9 +44373,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1457280,
-        "changedPixelRatio": 0.0001255764163372859,
+        "changedPixelRatio": 0.00010087285902503294,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-vendas-dark-1440x900.webp",
           "tracked": true,
@@ -44408,9 +44408,9 @@
         "asset": "docs/qa/canvas-parity/reference/ranking-canal-parcerias.webp",
         "region": "left",
         "referenceSha256": "e81e5862046159302a7504809e83c89fc9ee9bd7226b7f09922802babedceab7",
-        "colorDistance": 20.452256944444443,
+        "colorDistance": 20.452473958333332,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 38.735107421875,
+        "edgeDistance": 38.735595703125,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/ranking-dark-1440x900.webp",
@@ -44421,9 +44421,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 34,
+        "changedPixels": 0,
         "totalPixels": 1487520,
-        "changedPixelRatio": 0.0000228568355383457,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-dark-1440x900.webp",
           "tracked": true,
@@ -44456,9 +44456,9 @@
         "asset": "docs/qa/canvas-parity/reference/ranking-canal-parcerias.webp",
         "region": "right",
         "referenceSha256": "e81e5862046159302a7504809e83c89fc9ee9bd7226b7f09922802babedceab7",
-        "colorDistance": 17.343912760416668,
+        "colorDistance": 17.34396701388889,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 41.5673828125,
+        "edgeDistance": 41.568929036458336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
@@ -44469,9 +44469,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 34,
+        "changedPixels": 0,
         "totalPixels": 1404000,
-        "changedPixelRatio": 0.000024216524216524217,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
           "tracked": true,
@@ -44504,9 +44504,9 @@
         "asset": "docs/qa/canvas-parity/reference/configuracoes-metas-funil.webp",
         "region": "left",
         "referenceSha256": "7f8153e677e15b11b6bd1f45e7efa3e9fa97b14f85c130e6ba25bb5e0ae3370e",
-        "colorDistance": 14.65256076388889,
+        "colorDistance": 14.652723524305555,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 38.016438802083336,
+        "edgeDistance": 38.0166015625,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/configuracoes-dark-1440x900.webp",
@@ -44517,9 +44517,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 34,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.000025720164609053497,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-dark-1440x900.webp",
           "tracked": true,
@@ -44552,9 +44552,9 @@
         "asset": "docs/qa/canvas-parity/reference/configuracoes-metas-funil.webp",
         "region": "right",
         "referenceSha256": "7f8153e677e15b11b6bd1f45e7efa3e9fa97b14f85c130e6ba25bb5e0ae3370e",
-        "colorDistance": 18.085069444444443,
+        "colorDistance": 18.085123697916668,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 48.500651041666664,
+        "edgeDistance": 48.5009765625,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/configuracoes-metas-dark-1440x900.webp",
@@ -44565,9 +44565,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 34,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.000025720164609053497,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-dark-1440x900.webp",
           "tracked": true,
@@ -44600,9 +44600,9 @@
         "asset": "docs/qa/canvas-parity/reference/metas-parcerias-pontos.webp",
         "region": "left",
         "referenceSha256": "d2ecff179ab79da08d52d4c730477b0b7f1bd57651b8381e8d57a0e75723a444",
-        "colorDistance": 22.10910373263889,
+        "colorDistance": 22.109049479166668,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 47.430501302083336,
+        "edgeDistance": 47.431966145833336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/configuracoes-metas-parcerias-dark-1440x900.webp",
@@ -44613,9 +44613,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 34,
+        "changedPixels": 0,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.000025720164609053497,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-parcerias-dark-1440x900.webp",
           "tracked": true,
@@ -44648,9 +44648,9 @@
         "asset": "docs/qa/canvas-parity/reference/metas-parcerias-pontos.webp",
         "region": "right",
         "referenceSha256": "d2ecff179ab79da08d52d4c730477b0b7f1bd57651b8381e8d57a0e75723a444",
-        "colorDistance": 14.96799045138889,
+        "colorDistance": 14.96994357638889,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 36.665120442708336,
+        "edgeDistance": 36.663981119791664,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/configuracoes-metas-pontos-dark-1440x900.webp",
@@ -44661,9 +44661,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 259,
+        "changedPixels": 230,
         "totalPixels": 1321920,
-        "changedPixelRatio": 0.0001959271362866134,
+        "changedPixelRatio": 0.00017398934882595013,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-metas-pontos-dark-1440x900.webp",
           "tracked": true,
@@ -44696,9 +44696,9 @@
         "asset": "docs/qa/canvas-parity/reference/hub-simulacao-associativo.webp",
         "region": "left",
         "referenceSha256": "c1230fb6def529b27849270da823c3233da84c705973ca2671e3da7df44611ea",
-        "colorDistance": 14.133843315972221,
+        "colorDistance": 14.133951822916666,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 38.901041666666664,
+        "edgeDistance": 38.901204427083336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-dark-1440x900.webp",
@@ -44709,9 +44709,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 34,
+        "changedPixels": 0,
         "totalPixels": 1353600,
-        "changedPixelRatio": 0.000025118203309692672,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-dark-1440x900.webp",
           "tracked": true,
@@ -44744,9 +44744,9 @@
         "asset": "docs/qa/canvas-parity/reference/hub-simulacao-associativo.webp",
         "region": "right",
         "referenceSha256": "c1230fb6def529b27849270da823c3233da84c705973ca2671e3da7df44611ea",
-        "colorDistance": 13.10134548611111,
+        "colorDistance": 13.10177951388889,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 37.395426432291664,
+        "edgeDistance": 37.398030598958336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
@@ -44757,9 +44757,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 11041,
+        "changedPixels": 10964,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.00851929012345679,
+        "changedPixelRatio": 0.008459876543209876,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
@@ -44792,9 +44792,9 @@
         "asset": "docs/qa/canvas-parity/reference/documentacao-caixa.webp",
         "region": "left",
         "referenceSha256": "5094f436a1ee19378c4e37645583ccf3abd5aaf3fd62e4d3629b8b120bfe730e",
-        "colorDistance": 16.55978732638889,
+        "colorDistance": 16.559733072916668,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 36.921061197916664,
+        "edgeDistance": 36.921142578125,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
@@ -44805,9 +44805,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 118,
         "totalPixels": 1715040,
-        "changedPixelRatio": 0.000020407687284261593,
+        "changedPixelRatio": 0.00006880305998693908,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
           "tracked": true,
@@ -44840,9 +44840,9 @@
         "asset": "docs/qa/canvas-parity/reference/documentacao-caixa.webp",
         "region": "right",
         "referenceSha256": "5094f436a1ee19378c4e37645583ccf3abd5aaf3fd62e4d3629b8b120bfe730e",
-        "colorDistance": 13.60519748263889,
+        "colorDistance": 13.60546875,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 37.958170572916664,
+        "edgeDistance": 37.960856119791664,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-caixa-dark-1440x900.webp",
@@ -44853,9 +44853,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 121,
+        "changedPixels": 0,
         "totalPixels": 1722240,
-        "changedPixelRatio": 0.00007025733927907841,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-dark-1440x900.webp",
           "tracked": true,
@@ -44888,9 +44888,9 @@
         "asset": "docs/qa/canvas-parity/reference/tabela-direta-investidor.webp",
         "region": "left",
         "referenceSha256": "cca8225d446b477dec2cc1da37218be5632fdae6dfd34983ede65a4a76dcf9f4",
-        "colorDistance": 15.282389322916666,
+        "colorDistance": 15.282660590277779,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 40.271240234375,
+        "edgeDistance": 40.271728515625,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-tabela-direta-dark-1440x900.webp",
@@ -44901,9 +44901,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 12221,
+        "changedPixels": 12294,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.009429783950617283,
+        "changedPixelRatio": 0.009486111111111112,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-direta-dark-1440x900.webp",
           "tracked": true,
@@ -44936,9 +44936,9 @@
         "asset": "docs/qa/canvas-parity/reference/tabelao-administracao.webp",
         "region": "left",
         "referenceSha256": "b3388bf4a68f54de95a4b2246c50ecbe7b9f5ea600aca00a82d7af15487db9f1",
-        "colorDistance": 16.98822699652778,
+        "colorDistance": 16.98828125,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 49.449055989583336,
+        "edgeDistance": 49.450520833333336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
@@ -44949,9 +44949,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 12221,
+        "changedPixels": 12294,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.009429783950617283,
+        "changedPixelRatio": 0.009486111111111112,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
           "tracked": true,
@@ -44984,9 +44984,9 @@
         "asset": "docs/qa/canvas-parity/reference/tabela-direta-investidor.webp",
         "region": "right",
         "referenceSha256": "cca8225d446b477dec2cc1da37218be5632fdae6dfd34983ede65a4a76dcf9f4",
-        "colorDistance": 15.417371961805555,
+        "colorDistance": 15.417317708333334,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 39.69775390625,
+        "edgeDistance": 39.699055989583336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-tabela-investidor-dark-1440x900.webp",
@@ -44997,9 +44997,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 12221,
+        "changedPixels": 12294,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.009429783950617283,
+        "changedPixelRatio": 0.009486111111111112,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-dark-1440x900.webp",
           "tracked": true,
@@ -45032,9 +45032,9 @@
         "asset": "docs/qa/canvas-parity/reference/tabelao-administracao.webp",
         "region": "right",
         "referenceSha256": "b3388bf4a68f54de95a4b2246c50ecbe7b9f5ea600aca00a82d7af15487db9f1",
-        "colorDistance": 9.730631510416666,
+        "colorDistance": 9.73095703125,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 19.546875,
+        "edgeDistance": 19.547037760416668,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/admin-dark-1440x900.webp",
@@ -45045,9 +45045,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 34,
+        "changedPixels": 0,
         "totalPixels": 1353600,
-        "changedPixelRatio": 0.000025118203309692672,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-dark-1440x900.webp",
           "tracked": true,
@@ -45065,13 +45065,13 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 3732480,
+        "totalPixels": 1709280,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 122222,
-          "sha256": "22ac25fc9b737ace2381acbdee6d4c2e2c84f3add9f0eb519266d2d0d4dadee9"
+          "bytes": 83130,
+          "sha256": "91a8ea75ef6a2d38725d79412e1d81512d4a6a72df08ce399b7aac111603ccd9"
         }
       },
       "approvedCanvasComparison": {
@@ -45080,27 +45080,27 @@
         "asset": "docs/qa/canvas-parity/reference/usuarios-catalogo-paginas.webp",
         "region": "left",
         "referenceSha256": "d024668bdc7009af6a1296df94316b112e7760abaeb459441550910237d253c1",
-        "colorDistance": 14.616048177083334,
+        "colorDistance": 14.288628472222221,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 41.506998697916664,
+        "edgeDistance": 37.206380208333336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/admin-usuarios-dark-1440x900.webp",
-      "bytes": 122222,
-      "sha256": "22ac25fc9b737ace2381acbdee6d4c2e2c84f3add9f0eb519266d2d0d4dadee9",
+      "bytes": 83130,
+      "sha256": "91a8ea75ef6a2d38725d79412e1d81512d4a6a72df08ce399b7aac111603ccd9",
       "width": 1440,
-      "height": 2592,
+      "height": 1187,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 7195,
-        "totalPixels": 3732480,
-        "changedPixelRatio": 0.0019276727537722907,
+        "changedPixels": 3694,
+        "totalPixels": 1709280,
+        "changedPixelRatio": 0.002161143873443789,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 122222,
-          "sha256": "22ac25fc9b737ace2381acbdee6d4c2e2c84f3add9f0eb519266d2d0d4dadee9"
+          "bytes": 83130,
+          "sha256": "91a8ea75ef6a2d38725d79412e1d81512d4a6a72df08ce399b7aac111603ccd9"
         }
       }
     },
@@ -45128,9 +45128,9 @@
         "asset": "docs/qa/canvas-parity/reference/usuarios-catalogo-paginas.webp",
         "region": "right",
         "referenceSha256": "d024668bdc7009af6a1296df94316b112e7760abaeb459441550910237d253c1",
-        "colorDistance": 14.629340277777779,
+        "colorDistance": 14.629286024305555,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 35.49951171875,
+        "edgeDistance": 35.498291015625,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/admin-paginas-dark-1440x900.webp",
@@ -45141,9 +45141,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 34,
+        "changedPixels": 0,
         "totalPixels": 1393920,
-        "changedPixelRatio": 0.00002439164370982553,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-dark-1440x900.webp",
           "tracked": true,
@@ -45178,9 +45178,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 256,
+        "changedPixels": 223,
         "totalPixels": 1434880,
-        "changedPixelRatio": 0.0001784121320249777,
+        "changedPixelRatio": 0.00015541369313113292,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
           "tracked": true,
@@ -45215,9 +45215,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1295360,
-        "changedPixelRatio": 0.00014050148221343874,
+        "changedPixelRatio": 0.00011193799407114625,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1280x720.webp",
           "tracked": true,
@@ -45252,9 +45252,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1295360,
-        "changedPixelRatio": 0.00014050148221343874,
+        "changedPixelRatio": 0.00011193799407114625,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1280x720.webp",
           "tracked": true,
@@ -45289,9 +45289,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1295360,
-        "changedPixelRatio": 0.00014050148221343874,
+        "changedPixelRatio": 0.00011193799407114625,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1280x720.webp",
           "tracked": true,
@@ -45326,9 +45326,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1295360,
-        "changedPixelRatio": 0.00014050148221343874,
+        "changedPixelRatio": 0.00011193799407114625,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1280x720.webp",
           "tracked": true,
@@ -45363,9 +45363,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 145,
         "totalPixels": 1295360,
-        "changedPixelRatio": 0.00014050148221343874,
+        "changedPixelRatio": 0.00011193799407114625,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1280x720.webp",
           "tracked": true,
@@ -45400,9 +45400,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 50,
+        "changedPixels": 49,
         "totalPixels": 1322240,
-        "changedPixelRatio": 0.00003781461761858664,
+        "changedPixelRatio": 0.000037058325266214906,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1280x720.webp",
           "tracked": true,
@@ -45437,9 +45437,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 50,
+        "changedPixels": 49,
         "totalPixels": 1269760,
-        "changedPixelRatio": 0.00003937752016129032,
+        "changedPixelRatio": 0.00003858996975806451,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
           "tracked": true,
@@ -45474,9 +45474,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 944640,
-        "changedPixelRatio": 0.000037051151761517613,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
           "tracked": true,
@@ -45511,9 +45511,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1167360,
-        "changedPixelRatio": 0.000029982182017543858,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1280x720.webp",
           "tracked": true,
@@ -45548,9 +45548,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1167360,
-        "changedPixelRatio": 0.000029982182017543858,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1280x720.webp",
           "tracked": true,
@@ -45585,9 +45585,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 259,
+        "changedPixels": 227,
         "totalPixels": 990720,
-        "changedPixelRatio": 0.00026142603359173127,
+        "changedPixelRatio": 0.00022912629198966407,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1280x720.webp",
           "tracked": true,
@@ -45622,9 +45622,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 986880,
-        "changedPixelRatio": 0.00003546530479896239,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1280x720.webp",
           "tracked": true,
@@ -45659,9 +45659,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 130,
+        "changedPixels": 0,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.00014105902777777776,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "tracked": true,
@@ -45696,9 +45696,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 40,
+        "changedPixels": 126,
         "totalPixels": 1524480,
-        "changedPixelRatio": 0.000026238455079764903,
+        "changedPixelRatio": 0.00008265113350125945,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
           "tracked": true,
@@ -45733,9 +45733,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 125,
+        "changedPixels": 0,
         "totalPixels": 1530880,
-        "changedPixelRatio": 0.00008165238294314381,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
           "tracked": true,
@@ -45770,9 +45770,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 125,
+        "changedPixels": 0,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.00013563368055555556,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-1280x720.webp",
           "tracked": true,
@@ -45807,9 +45807,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 125,
+        "changedPixels": 0,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.00013563368055555556,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
           "tracked": true,
@@ -45844,9 +45844,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 125,
+        "changedPixels": 0,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.00013563368055555556,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1280x720.webp",
           "tracked": true,
@@ -45881,9 +45881,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 972800,
-        "changedPixelRatio": 0.00003597861842105263,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1280x720.webp",
           "tracked": true,
@@ -45901,31 +45901,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 3335680,
+        "totalPixels": 1541120,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
           "tracked": true,
-          "bytes": 116348,
-          "sha256": "05d114776704147cc0723252419321975914360c463c9902c576369374ef0664"
+          "bytes": 80996,
+          "sha256": "f5c7b0288dd4a620b2379c8872b0610856b9f31398c5323290b0ea0c79488570"
         }
       },
       "path": "target-authenticated/admin-usuarios-1280x720.webp",
-      "bytes": 116348,
-      "sha256": "05d114776704147cc0723252419321975914360c463c9902c576369374ef0664",
+      "bytes": 80996,
+      "sha256": "f5c7b0288dd4a620b2379c8872b0610856b9f31398c5323290b0ea0c79488570",
       "width": 1280,
-      "height": 2606,
+      "height": 1204,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 7615,
-        "totalPixels": 3335680,
-        "changedPixelRatio": 0.0022828928434382193,
+        "changedPixels": 3680,
+        "totalPixels": 1541120,
+        "changedPixelRatio": 0.002387873754152824,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
           "tracked": true,
-          "bytes": 116348,
-          "sha256": "05d114776704147cc0723252419321975914360c463c9902c576369374ef0664"
+          "bytes": 80996,
+          "sha256": "f5c7b0288dd4a620b2379c8872b0610856b9f31398c5323290b0ea0c79488570"
         }
       }
     },
@@ -45955,9 +45955,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 35,
+        "changedPixels": 0,
         "totalPixels": 1237760,
-        "changedPixelRatio": 0.00002827688728024819,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1280x720.webp",
           "tracked": true,
@@ -45992,9 +45992,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 254,
+        "changedPixels": 223,
         "totalPixels": 1274880,
-        "changedPixelRatio": 0.00019923443775100402,
+        "changedPixelRatio": 0.0001749184236947791,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
           "tracked": true,
@@ -46029,9 +46029,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 180,
+        "changedPixels": 145,
         "totalPixels": 1656832,
-        "changedPixelRatio": 0.00010864106922126082,
+        "changedPixelRatio": 0.00008751641687268232,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1024x768.webp",
           "tracked": true,
@@ -46066,9 +46066,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 180,
+        "changedPixels": 145,
         "totalPixels": 1656832,
-        "changedPixelRatio": 0.00010864106922126082,
+        "changedPixelRatio": 0.00008751641687268232,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
           "tracked": true,
@@ -46103,9 +46103,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 180,
+        "changedPixels": 145,
         "totalPixels": 1656832,
-        "changedPixelRatio": 0.00010864106922126082,
+        "changedPixelRatio": 0.00008751641687268232,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-1024x768.webp",
           "tracked": true,
@@ -46140,9 +46140,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 180,
+        "changedPixels": 145,
         "totalPixels": 1656832,
-        "changedPixelRatio": 0.00010864106922126082,
+        "changedPixelRatio": 0.00008751641687268232,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-1024x768.webp",
           "tracked": true,
@@ -46177,9 +46177,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 180,
+        "changedPixels": 145,
         "totalPixels": 1656832,
-        "changedPixelRatio": 0.00010864106922126082,
+        "changedPixelRatio": 0.00008751641687268232,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-1024x768.webp",
           "tracked": true,
@@ -46214,9 +46214,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 1437696,
-        "changedPixelRatio": 0.000026431178774928775,
+        "changedPixelRatio": 0.000025040064102564102,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1024x768.webp",
           "tracked": true,
@@ -46251,9 +46251,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 1744896,
-        "changedPixelRatio": 0.000021777802230046948,
+        "changedPixelRatio": 0.000020631602112676056,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
           "tracked": true,
@@ -46288,9 +46288,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 804864,
-        "changedPixelRatio": 0.00004100071564885496,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
           "tracked": true,
@@ -46325,9 +46325,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 2014208,
-        "changedPixelRatio": 0.000016383610828673106,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
           "tracked": true,
@@ -46362,9 +46362,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1793024,
-        "changedPixelRatio": 0.000018404661621930327,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-1024x768.webp",
           "tracked": true,
@@ -46399,9 +46399,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 260,
+        "changedPixels": 232,
         "totalPixels": 1150976,
-        "changedPixelRatio": 0.00022589524021352314,
+        "changedPixelRatio": 0.00020156806049822064,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-1024x768.webp",
           "tracked": true,
@@ -46436,9 +46436,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 827392,
-        "changedPixelRatio": 0.00003988435952970297,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1024x768.webp",
           "tracked": true,
@@ -46473,9 +46473,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 1979,
+        "changedPixels": 1977,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.0025164286295572915,
+        "changedPixelRatio": 0.002513885498046875,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
@@ -46510,9 +46510,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 84,
+        "changedPixels": 83,
         "totalPixels": 1219584,
-        "changedPixelRatio": 0.00006887594458438287,
+        "changedPixelRatio": 0.00006805599286314021,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
           "tracked": true,
@@ -46547,9 +46547,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 21,
+        "changedPixels": 0,
         "totalPixels": 1224704,
-        "changedPixelRatio": 0.0000171470004180602,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
           "tracked": true,
@@ -46584,9 +46584,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3769,
+        "changedPixels": 3774,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.004792531331380208,
+        "changedPixelRatio": 0.00479888916015625,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-1024x768.webp",
           "tracked": true,
@@ -46621,9 +46621,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3769,
+        "changedPixels": 3774,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.004792531331380208,
+        "changedPixelRatio": 0.00479888916015625,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1024x768.webp",
           "tracked": true,
@@ -46658,9 +46658,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3769,
+        "changedPixels": 3774,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.004792531331380208,
+        "changedPixelRatio": 0.00479888916015625,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1024x768.webp",
           "tracked": true,
@@ -46695,9 +46695,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 827392,
-        "changedPixelRatio": 0.00003988435952970297,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1024x768.webp",
           "tracked": true,
@@ -46715,31 +46715,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 4195328,
+        "totalPixels": 1263616,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1024x768.webp",
           "tracked": true,
-          "bytes": 119254,
-          "sha256": "35b0e2491df379fb734d1116f763c28c527e4e1eeef4bba9c0f26fd44428a24c"
+          "bytes": 77126,
+          "sha256": "678a629e0fefc4e742e49cb5f9906c6b39c8db265b654557edf8db2b8e4e4438"
         }
       },
       "path": "target-authenticated/admin-usuarios-1024x768.webp",
-      "bytes": 119254,
-      "sha256": "35b0e2491df379fb734d1116f763c28c527e4e1eeef4bba9c0f26fd44428a24c",
+      "bytes": 77126,
+      "sha256": "678a629e0fefc4e742e49cb5f9906c6b39c8db265b654557edf8db2b8e4e4438",
       "width": 1024,
-      "height": 4097,
+      "height": 1234,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3474,
-        "totalPixels": 4195328,
-        "changedPixelRatio": 0.0008280639797412741,
+        "changedPixels": 3676,
+        "totalPixels": 1263616,
+        "changedPixelRatio": 0.0029091116288492706,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1024x768.webp",
           "tracked": true,
-          "bytes": 119254,
-          "sha256": "35b0e2491df379fb734d1116f763c28c527e4e1eeef4bba9c0f26fd44428a24c"
+          "bytes": 77126,
+          "sha256": "678a629e0fefc4e742e49cb5f9906c6b39c8db265b654557edf8db2b8e4e4438"
         }
       }
     },
@@ -46769,9 +46769,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 980992,
-        "changedPixelRatio": 0.00003363941805845512,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1024x768.webp",
           "tracked": true,
@@ -46806,9 +46806,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 254,
+        "changedPixels": 223,
         "totalPixels": 1338624,
-        "changedPixelRatio": 0.00018974708357238478,
+        "changedPixelRatio": 0.00016658897494740868,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
           "tracked": true,
@@ -46843,9 +46843,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1412352,
-        "changedPixelRatio": 0.000129571098423056,
+        "changedPixelRatio": 0.00010408170201196303,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-768x1024.webp",
           "tracked": true,
@@ -46880,9 +46880,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1412352,
-        "changedPixelRatio": 0.000129571098423056,
+        "changedPixelRatio": 0.00010408170201196303,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-768x1024.webp",
           "tracked": true,
@@ -46917,9 +46917,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1412352,
-        "changedPixelRatio": 0.000129571098423056,
+        "changedPixelRatio": 0.00010408170201196303,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-768x1024.webp",
           "tracked": true,
@@ -46954,9 +46954,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1412352,
-        "changedPixelRatio": 0.000129571098423056,
+        "changedPixelRatio": 0.00010408170201196303,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-768x1024.webp",
           "tracked": true,
@@ -46991,9 +46991,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 1412352,
-        "changedPixelRatio": 0.000129571098423056,
+        "changedPixelRatio": 0.00010408170201196303,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-768x1024.webp",
           "tracked": true,
@@ -47028,9 +47028,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 1565952,
-        "changedPixelRatio": 0.000024266388752656532,
+        "changedPixelRatio": 0.000022989210397253557,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-768x1024.webp",
           "tracked": true,
@@ -47065,9 +47065,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 1774080,
-        "changedPixelRatio": 0.00002141955266955267,
+        "changedPixelRatio": 0.000020292207792207792,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-768x1024.webp",
           "tracked": true,
@@ -47102,9 +47102,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 969984,
-        "changedPixelRatio": 0.000034021179730799686,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-768x1024.webp",
           "tracked": true,
@@ -47139,9 +47139,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1799424,
-        "changedPixelRatio": 0.000018339201877934273,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-768x1024.webp",
           "tracked": true,
@@ -47176,9 +47176,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1562880,
-        "changedPixelRatio": 0.000021114864864864866,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-768x1024.webp",
           "tracked": true,
@@ -47213,9 +47213,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 260,
+        "changedPixels": 232,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.00028211805555555553,
+        "changedPixelRatio": 0.0002517361111111111,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-768x1024.webp",
           "tracked": true,
@@ -47250,9 +47250,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 955392,
-        "changedPixelRatio": 0.00003454079581993569,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-768x1024.webp",
           "tracked": true,
@@ -47287,9 +47287,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 1979,
+        "changedPixels": 1977,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.0025164286295572915,
+        "changedPixelRatio": 0.002513885498046875,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
           "tracked": true,
@@ -47324,9 +47324,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 84,
+        "changedPixels": 83,
         "totalPixels": 923904,
-        "changedPixelRatio": 0.0000909185369908562,
+        "changedPixelRatio": 0.00008983617345525076,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
           "tracked": true,
@@ -47361,9 +47361,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 21,
+        "changedPixels": 0,
         "totalPixels": 1382400,
-        "changedPixelRatio": 0.000015190972222222222,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp",
           "tracked": true,
@@ -47398,9 +47398,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3513,
+        "changedPixels": 3518,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.004467010498046875,
+        "changedPixelRatio": 0.004473368326822917,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-768x1024.webp",
           "tracked": true,
@@ -47435,9 +47435,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3513,
+        "changedPixels": 3518,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.004467010498046875,
+        "changedPixelRatio": 0.004473368326822917,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-768x1024.webp",
           "tracked": true,
@@ -47472,9 +47472,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3513,
+        "changedPixels": 3518,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.004467010498046875,
+        "changedPixelRatio": 0.004473368326822917,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-768x1024.webp",
           "tracked": true,
@@ -47509,9 +47509,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 817152,
-        "changedPixelRatio": 0.000040384163533834584,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-768x1024.webp",
           "tracked": true,
@@ -47529,31 +47529,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 3356928,
+        "totalPixels": 1264128,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-768x1024.webp",
           "tracked": true,
-          "bytes": 112158,
-          "sha256": "b0d302653cd4eae852915b411007d52e776449d83ec4b7571352b2e2a3e91616"
+          "bytes": 78382,
+          "sha256": "327fd4921ed615e53dcc9f9c4c061e434c982a127b91041479a1388c76e081b1"
         }
       },
       "path": "target-authenticated/admin-usuarios-768x1024.webp",
-      "bytes": 112158,
-      "sha256": "b0d302653cd4eae852915b411007d52e776449d83ec4b7571352b2e2a3e91616",
+      "bytes": 78382,
+      "sha256": "327fd4921ed615e53dcc9f9c4c061e434c982a127b91041479a1388c76e081b1",
       "width": 768,
-      "height": 4371,
+      "height": 1646,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3474,
-        "totalPixels": 3356928,
-        "changedPixelRatio": 0.0010348747426218257,
+        "changedPixels": 3679,
+        "totalPixels": 1264128,
+        "changedPixelRatio": 0.002910306551235318,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-768x1024.webp",
           "tracked": true,
-          "bytes": 112158,
-          "sha256": "b0d302653cd4eae852915b411007d52e776449d83ec4b7571352b2e2a3e91616"
+          "bytes": 78382,
+          "sha256": "327fd4921ed615e53dcc9f9c4c061e434c982a127b91041479a1388c76e081b1"
         }
       }
     },
@@ -47583,9 +47583,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 2572800,
-        "changedPixelRatio": 0.000012826492537313432,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-768x1024.webp",
           "tracked": true,
@@ -47620,9 +47620,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 254,
+        "changedPixels": 223,
         "totalPixels": 765570,
-        "changedPixelRatio": 0.00033177893595621565,
+        "changedPixelRatio": 0.0002912862311741578,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
           "tracked": true,
@@ -47657,9 +47657,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 886860,
-        "changedPixelRatio": 0.00020634598471010082,
+        "changedPixelRatio": 0.0001657533319802449,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-390x844.webp",
           "tracked": true,
@@ -47694,9 +47694,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 879840,
-        "changedPixelRatio": 0.0002079923622476814,
+        "changedPixelRatio": 0.000167075831969449,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-390x844.webp",
           "tracked": true,
@@ -47731,9 +47731,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 886860,
-        "changedPixelRatio": 0.00020634598471010082,
+        "changedPixelRatio": 0.0001657533319802449,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-390x844.webp",
           "tracked": true,
@@ -47768,9 +47768,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 879840,
-        "changedPixelRatio": 0.0002079923622476814,
+        "changedPixelRatio": 0.000167075831969449,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-390x844.webp",
           "tracked": true,
@@ -47805,9 +47805,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 879840,
-        "changedPixelRatio": 0.0002079923622476814,
+        "changedPixelRatio": 0.000167075831969449,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-390x844.webp",
           "tracked": true,
@@ -47842,9 +47842,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 998790,
-        "changedPixelRatio": 0.000038046035703200875,
+        "changedPixelRatio": 0.00003604361277145346,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-390x844.webp",
           "tracked": true,
@@ -47879,9 +47879,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 1197690,
-        "changedPixelRatio": 0.000031727742571116064,
+        "changedPixelRatio": 0.000030057861383162586,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-390x844.webp",
           "tracked": true,
@@ -47916,9 +47916,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 622050,
-        "changedPixelRatio": 0.00005305039787798409,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-390x844.webp",
           "tracked": true,
@@ -47953,9 +47953,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1244880,
-        "changedPixelRatio": 0.000026508579140158086,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-390x844.webp",
           "tracked": true,
@@ -47990,9 +47990,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1088880,
-        "changedPixelRatio": 0.000030306369847917125,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-390x844.webp",
           "tracked": true,
@@ -48027,9 +48027,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 261,
+        "changedPixels": 230,
         "totalPixels": 595920,
-        "changedPixelRatio": 0.00043797825211437777,
+        "changedPixelRatio": 0.000385957846690831,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-390x844.webp",
           "tracked": true,
@@ -48064,9 +48064,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 530400,
-        "changedPixelRatio": 0.00006221719457013575,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-390x844.webp",
           "tracked": true,
@@ -48101,9 +48101,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 1667,
+        "changedPixels": 1665,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.005064406367723903,
+        "changedPixelRatio": 0.00505833029529712,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
           "tracked": true,
@@ -48138,9 +48138,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 84,
+        "changedPixels": 83,
         "totalPixels": 721890,
-        "changedPixelRatio": 0.00011636121846818768,
+        "changedPixelRatio": 0.00011497596586737591,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
           "tracked": true,
@@ -48175,9 +48175,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 21,
+        "changedPixels": 0,
         "totalPixels": 841620,
-        "changedPixelRatio": 0.00002495187851999715,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-390x844.webp",
           "tracked": true,
@@ -48212,9 +48212,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2616,
+        "changedPixels": 2621,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.007947502734232592,
+        "changedPixelRatio": 0.00796269291529955,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-390x844.webp",
           "tracked": true,
@@ -48249,9 +48249,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2616,
+        "changedPixels": 2621,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.007947502734232592,
+        "changedPixelRatio": 0.00796269291529955,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-390x844.webp",
           "tracked": true,
@@ -48286,9 +48286,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2616,
+        "changedPixels": 2621,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.007947502734232592,
+        "changedPixelRatio": 0.00796269291529955,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-390x844.webp",
           "tracked": true,
@@ -48323,9 +48323,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 344760,
-        "changedPixelRatio": 0.00009571876087713192,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-390x844.webp",
           "tracked": true,
@@ -48343,31 +48343,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 2254200,
+        "totalPixels": 883740,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-390x844.webp",
           "tracked": true,
-          "bytes": 108856,
-          "sha256": "854f4e1314af5e4d5b4212e6302211c747da0244b625ba9a3aea559379d25afe"
+          "bytes": 73998,
+          "sha256": "ce8dd2141736bc4937fb170dcef6244978d34a3780d94f3f39ad890852af2756"
         }
       },
       "path": "target-authenticated/admin-usuarios-390x844.webp",
-      "bytes": 108856,
-      "sha256": "854f4e1314af5e4d5b4212e6302211c747da0244b625ba9a3aea559379d25afe",
+      "bytes": 73998,
+      "sha256": "ce8dd2141736bc4937fb170dcef6244978d34a3780d94f3f39ad890852af2756",
       "width": 390,
-      "height": 5780,
+      "height": 2266,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3474,
-        "totalPixels": 2254200,
-        "changedPixelRatio": 0.0015411232366249667,
+        "changedPixels": 3675,
+        "totalPixels": 883740,
+        "changedPixelRatio": 0.004158462896326974,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-390x844.webp",
           "tracked": true,
-          "bytes": 108856,
-          "sha256": "854f4e1314af5e4d5b4212e6302211c747da0244b625ba9a3aea559379d25afe"
+          "bytes": 73998,
+          "sha256": "ce8dd2141736bc4937fb170dcef6244978d34a3780d94f3f39ad890852af2756"
         }
       }
     },
@@ -48397,9 +48397,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1195740,
-        "changedPixelRatio": 0.000027597972803452254,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-390x844.webp",
           "tracked": true,
@@ -48434,9 +48434,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 246,
+        "changedPixels": 220,
         "totalPixels": 765570,
-        "changedPixelRatio": 0.00032132920568987813,
+        "changedPixelRatio": 0.00028736758232428126,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
           "tracked": true,
@@ -48471,9 +48471,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 149,
         "totalPixels": 886860,
-        "changedPixelRatio": 0.00020521841102316037,
+        "changedPixelRatio": 0.0001680084793541258,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-oportunidades-dark-390x844.webp",
           "tracked": true,
@@ -48508,9 +48508,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 149,
         "totalPixels": 879840,
-        "changedPixelRatio": 0.00020685579196217494,
+        "changedPixelRatio": 0.0001693489725404619,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
           "tracked": true,
@@ -48545,9 +48545,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 149,
         "totalPixels": 886860,
-        "changedPixelRatio": 0.00020521841102316037,
+        "changedPixelRatio": 0.0001680084793541258,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-visitas-dark-390x844.webp",
           "tracked": true,
@@ -48582,9 +48582,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 149,
         "totalPixels": 879840,
-        "changedPixelRatio": 0.00020685579196217494,
+        "changedPixelRatio": 0.0001693489725404619,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-pastas-dark-390x844.webp",
           "tracked": true,
@@ -48619,9 +48619,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 182,
+        "changedPixels": 149,
         "totalPixels": 879840,
-        "changedPixelRatio": 0.00020685579196217494,
+        "changedPixelRatio": 0.0001693489725404619,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-vendas-dark-390x844.webp",
           "tracked": true,
@@ -48656,9 +48656,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 30,
+        "changedPixels": 0,
         "totalPixels": 998790,
-        "changedPixelRatio": 0.000030036343976211215,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/ranking-dark-390x844.webp",
           "tracked": true,
@@ -48693,9 +48693,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 30,
+        "changedPixels": 0,
         "totalPixels": 1197690,
-        "changedPixelRatio": 0.000025048217819302158,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
           "tracked": true,
@@ -48730,9 +48730,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 30,
+        "changedPixels": 0,
         "totalPixels": 622050,
-        "changedPixelRatio": 0.000048227634434530984,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
           "tracked": true,
@@ -48767,9 +48767,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 30,
+        "changedPixels": 0,
         "totalPixels": 1244880,
-        "changedPixelRatio": 0.000024098708309234624,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-metas-dark-390x844.webp",
           "tracked": true,
@@ -48804,9 +48804,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 30,
+        "changedPixels": 0,
         "totalPixels": 1088880,
-        "changedPixelRatio": 0.000027551245316288297,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-metas-parcerias-dark-390x844.webp",
           "tracked": true,
@@ -48841,9 +48841,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 257,
+        "changedPixels": 230,
         "totalPixels": 595920,
-        "changedPixelRatio": 0.0004312659417371459,
+        "changedPixelRatio": 0.000385957846690831,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-metas-pontos-dark-390x844.webp",
           "tracked": true,
@@ -48878,9 +48878,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 30,
+        "changedPixels": 0,
         "totalPixels": 530400,
-        "changedPixelRatio": 0.00005656108597285068,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
           "tracked": true,
@@ -48952,9 +48952,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 85,
+        "changedPixels": 82,
         "totalPixels": 721890,
-        "changedPixelRatio": 0.00011774647106899943,
+        "changedPixelRatio": 0.00011359071326656415,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
           "tracked": true,
@@ -48989,9 +48989,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 19,
+        "changedPixels": 0,
         "totalPixels": 841620,
-        "changedPixelRatio": 0.000022575509137140278,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-caixa-dark-390x844.webp",
           "tracked": true,
@@ -49026,9 +49026,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2547,
+        "changedPixels": 2551,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.007737878235508568,
+        "changedPixelRatio": 0.007750030380362134,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabela-direta-dark-390x844.webp",
           "tracked": true,
@@ -49063,9 +49063,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2547,
+        "changedPixels": 2551,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.007737878235508568,
+        "changedPixelRatio": 0.007750030380362134,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabelao-dark-390x844.webp",
           "tracked": true,
@@ -49100,9 +49100,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2547,
+        "changedPixels": 2551,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.007737878235508568,
+        "changedPixelRatio": 0.007750030380362134,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabela-investidor-dark-390x844.webp",
           "tracked": true,
@@ -49137,9 +49137,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 30,
+        "changedPixels": 0,
         "totalPixels": 344760,
-        "changedPixelRatio": 0.0000870170553428472,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-dark-390x844.webp",
           "tracked": true,
@@ -49157,31 +49157,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 2254200,
+        "totalPixels": 883740,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp",
           "tracked": true,
-          "bytes": 110490,
-          "sha256": "7d548ba8003df295a3eea6684b038efdf2897e7b2aaeb18415b534d4c58fdea1"
+          "bytes": 74648,
+          "sha256": "b77dd38d8cfdf46d33552e405bfdf279164dfaa736856fb5301463bb31b771cc"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp",
-      "bytes": 110490,
-      "sha256": "7d548ba8003df295a3eea6684b038efdf2897e7b2aaeb18415b534d4c58fdea1",
+      "bytes": 74648,
+      "sha256": "b77dd38d8cfdf46d33552e405bfdf279164dfaa736856fb5301463bb31b771cc",
       "width": 390,
-      "height": 5780,
+      "height": 2266,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3476,
-        "totalPixels": 2254200,
-        "changedPixelRatio": 0.0015420104693461094,
+        "changedPixels": 3685,
+        "totalPixels": 883740,
+        "changedPixelRatio": 0.004169778441623102,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp",
           "tracked": true,
-          "bytes": 110490,
-          "sha256": "7d548ba8003df295a3eea6684b038efdf2897e7b2aaeb18415b534d4c58fdea1"
+          "bytes": 74648,
+          "sha256": "b77dd38d8cfdf46d33552e405bfdf279164dfaa736856fb5301463bb31b771cc"
         }
       }
     },
@@ -49211,9 +49211,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 30,
+        "changedPixels": 0,
         "totalPixels": 1195740,
-        "changedPixelRatio": 0.000025089066184956597,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-paginas-dark-390x844.webp",
           "tracked": true,
@@ -49248,9 +49248,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 254,
+        "changedPixels": 223,
         "totalPixels": 748875,
-        "changedPixelRatio": 0.00033917542981138374,
+        "changedPixelRatio": 0.0002977800033383408,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
           "tracked": true,
@@ -49285,9 +49285,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 865875,
-        "changedPixelRatio": 0.00021134690342139453,
+        "changedPixelRatio": 0.00016977046340407103,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-375x812.webp",
           "tracked": true,
@@ -49322,9 +49322,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 859125,
-        "changedPixelRatio": 0.0002130074203404627,
+        "changedPixelRatio": 0.00017110432125709297,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-375x812.webp",
           "tracked": true,
@@ -49359,9 +49359,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 865875,
-        "changedPixelRatio": 0.00021134690342139453,
+        "changedPixelRatio": 0.00016977046340407103,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-375x812.webp",
           "tracked": true,
@@ -49396,9 +49396,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 859125,
-        "changedPixelRatio": 0.0002130074203404627,
+        "changedPixelRatio": 0.00017110432125709297,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-375x812.webp",
           "tracked": true,
@@ -49433,9 +49433,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 859125,
-        "changedPixelRatio": 0.0002130074203404627,
+        "changedPixelRatio": 0.00017110432125709297,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-375x812.webp",
           "tracked": true,
@@ -49470,9 +49470,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 960375,
-        "changedPixelRatio": 0.00003956787713132891,
+        "changedPixelRatio": 0.000037485357282311596,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-375x812.webp",
           "tracked": true,
@@ -49507,9 +49507,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 1189125,
-        "changedPixelRatio": 0.00003195627036686639,
+        "changedPixelRatio": 0.000030274361400189216,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-375x812.webp",
           "tracked": true,
@@ -49544,9 +49544,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 598125,
-        "changedPixelRatio": 0.000055172413793103446,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-375x812.webp",
           "tracked": true,
@@ -49581,9 +49581,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1206000,
-        "changedPixelRatio": 0.00002736318407960199,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-375x812.webp",
           "tracked": true,
@@ -49618,9 +49618,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1066125,
-        "changedPixelRatio": 0.000030953218431234614,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-375x812.webp",
           "tracked": true,
@@ -49655,9 +49655,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 261,
+        "changedPixels": 230,
         "totalPixels": 582000,
-        "changedPixelRatio": 0.00044845360824742267,
+        "changedPixelRatio": 0.0003951890034364261,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-375x812.webp",
           "tracked": true,
@@ -49692,9 +49692,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 510000,
-        "changedPixelRatio": 0.00006470588235294117,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-375x812.webp",
           "tracked": true,
@@ -49729,9 +49729,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 1667,
+        "changedPixels": 1665,
         "totalPixels": 304500,
-        "changedPixelRatio": 0.005474548440065681,
+        "changedPixelRatio": 0.005467980295566503,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
           "tracked": true,
@@ -49766,9 +49766,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 84,
+        "changedPixels": 83,
         "totalPixels": 703125,
-        "changedPixelRatio": 0.00011946666666666667,
+        "changedPixelRatio": 0.00011804444444444445,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
           "tracked": true,
@@ -49803,9 +49803,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 21,
+        "changedPixels": 0,
         "totalPixels": 825375,
-        "changedPixelRatio": 0.000025442980463425717,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-375x812.webp",
           "tracked": true,
@@ -49840,9 +49840,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2601,
+        "changedPixels": 2606,
         "totalPixels": 304500,
-        "changedPixelRatio": 0.008541871921182265,
+        "changedPixelRatio": 0.008558292282430213,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-375x812.webp",
           "tracked": true,
@@ -49877,9 +49877,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2601,
+        "changedPixels": 2606,
         "totalPixels": 304500,
-        "changedPixelRatio": 0.008541871921182265,
+        "changedPixelRatio": 0.008558292282430213,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-375x812.webp",
           "tracked": true,
@@ -49914,9 +49914,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 2601,
+        "changedPixels": 2606,
         "totalPixels": 304500,
-        "changedPixelRatio": 0.008541871921182265,
+        "changedPixelRatio": 0.008558292282430213,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-375x812.webp",
           "tracked": true,
@@ -49951,9 +49951,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 319500,
-        "changedPixelRatio": 0.00010328638497652582,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-375x812.webp",
           "tracked": true,
@@ -49971,31 +49971,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 2212875,
+        "totalPixels": 862125,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-375x812.webp",
           "tracked": true,
-          "bytes": 108702,
-          "sha256": "229d8da4630b90e66318b020d436fc454a2502cc44bc56365c6f0428616a915c"
+          "bytes": 73854,
+          "sha256": "f1df7c8fdf8db5af79bc986d06697df75a8a814b90fa22239250d28260f19367"
         }
       },
       "path": "target-authenticated/admin-usuarios-375x812.webp",
-      "bytes": 108702,
-      "sha256": "229d8da4630b90e66318b020d436fc454a2502cc44bc56365c6f0428616a915c",
+      "bytes": 73854,
+      "sha256": "f1df7c8fdf8db5af79bc986d06697df75a8a814b90fa22239250d28260f19367",
       "width": 375,
-      "height": 5901,
+      "height": 2299,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 3415,
-        "totalPixels": 2212875,
-        "changedPixelRatio": 0.0015432412585437497,
+        "changedPixels": 3459,
+        "totalPixels": 862125,
+        "changedPixelRatio": 0.004012179208351457,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-375x812.webp",
           "tracked": true,
-          "bytes": 108702,
-          "sha256": "229d8da4630b90e66318b020d436fc454a2502cc44bc56365c6f0428616a915c"
+          "bytes": 73854,
+          "sha256": "f1df7c8fdf8db5af79bc986d06697df75a8a814b90fa22239250d28260f19367"
         }
       }
     },
@@ -50025,9 +50025,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1168500,
-        "changedPixelRatio": 0.000028241335044929398,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-375x812.webp",
           "tracked": true,
@@ -50062,9 +50062,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 260,
+        "changedPixels": 222,
         "totalPixels": 674880,
-        "changedPixelRatio": 0.00038525367472735895,
+        "changedPixelRatio": 0.0003289473684210526,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
           "tracked": true,
@@ -50099,9 +50099,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 749120,
-        "changedPixelRatio": 0.00024428662964545066,
+        "changedPixelRatio": 0.00019623024348568987,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-320x568.webp",
           "tracked": true,
@@ -50136,9 +50136,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 749120,
-        "changedPixelRatio": 0.00024428662964545066,
+        "changedPixelRatio": 0.00019623024348568987,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-320x568.webp",
           "tracked": true,
@@ -50173,9 +50173,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 749120,
-        "changedPixelRatio": 0.00024428662964545066,
+        "changedPixelRatio": 0.00019623024348568987,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-visitas-320x568.webp",
           "tracked": true,
@@ -50210,9 +50210,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 749120,
-        "changedPixelRatio": 0.00024428662964545066,
+        "changedPixelRatio": 0.00019623024348568987,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-pastas-320x568.webp",
           "tracked": true,
@@ -50247,9 +50247,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 183,
+        "changedPixels": 147,
         "totalPixels": 749120,
-        "changedPixelRatio": 0.00024428662964545066,
+        "changedPixelRatio": 0.00019623024348568987,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-vendas-320x568.webp",
           "tracked": true,
@@ -50284,9 +50284,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 840000,
-        "changedPixelRatio": 0.00004523809523809524,
+        "changedPixelRatio": 0.000042857142857142856,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-320x568.webp",
           "tracked": true,
@@ -50321,9 +50321,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 38,
+        "changedPixels": 36,
         "totalPixels": 1035840,
-        "changedPixelRatio": 0.00003668520234785295,
+        "changedPixelRatio": 0.00003475440222428174,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-320x568.webp",
           "tracked": true,
@@ -50358,9 +50358,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 519040,
-        "changedPixelRatio": 0.00006357891491985203,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-320x568.webp",
           "tracked": true,
@@ -50395,9 +50395,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1065920,
-        "changedPixelRatio": 0.000030959171419993996,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-320x568.webp",
           "tracked": true,
@@ -50432,9 +50432,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 945600,
-        "changedPixelRatio": 0.00003489847715736041,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-parcerias-320x568.webp",
           "tracked": true,
@@ -50469,9 +50469,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 261,
+        "changedPixels": 230,
         "totalPixels": 504320,
-        "changedPixelRatio": 0.0005175285532994923,
+        "changedPixelRatio": 0.0004560596446700508,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-pontos-320x568.webp",
           "tracked": true,
@@ -50506,9 +50506,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 480320,
-        "changedPixelRatio": 0.00006870419720186542,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-320x568.webp",
           "tracked": true,
@@ -50543,9 +50543,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 1279,
+        "changedPixels": 1277,
         "totalPixels": 181760,
-        "changedPixelRatio": 0.0070367517605633804,
+        "changedPixelRatio": 0.00702574823943662,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
           "tracked": true,
@@ -50580,9 +50580,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 84,
+        "changedPixels": 83,
         "totalPixels": 636480,
-        "changedPixelRatio": 0.0001319758672699849,
+        "changedPixelRatio": 0.00013040472599296128,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp",
           "tracked": true,
@@ -50617,9 +50617,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 21,
+        "changedPixels": 0,
         "totalPixels": 722240,
-        "changedPixelRatio": 0.00002907620735489588,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-320x568.webp",
           "tracked": true,
@@ -50654,9 +50654,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 21,
+        "changedPixels": 0,
         "totalPixels": 181760,
-        "changedPixelRatio": 0.00011553697183098591,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-320x568.webp",
           "tracked": true,
@@ -50691,9 +50691,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 21,
+        "changedPixels": 0,
         "totalPixels": 181760,
-        "changedPixelRatio": 0.00011553697183098591,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-320x568.webp",
           "tracked": true,
@@ -50728,9 +50728,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 21,
+        "changedPixels": 0,
         "totalPixels": 181760,
-        "changedPixelRatio": 0.00011553697183098591,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-320x568.webp",
           "tracked": true,
@@ -50765,9 +50765,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 229760,
-        "changedPixelRatio": 0.00014362813370473538,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-320x568.webp",
           "tracked": true,
@@ -50785,31 +50785,31 @@
         "passed": true,
         "reason": "baseline_preserved",
         "changedPixels": 0,
-        "totalPixels": 1983360,
+        "totalPixels": 793600,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-320x568.webp",
           "tracked": true,
-          "bytes": 106688,
-          "sha256": "5c75fb134f231f1574d1a68fe222a59edf46d922d8a7351a1c498c270872ddeb"
+          "bytes": 71604,
+          "sha256": "221e2f6311f8103ed2aab5d6de7bba77d48c0f3b8589f179282db2ef9dc059ae"
         }
       },
       "path": "target-authenticated/admin-usuarios-320x568.webp",
-      "bytes": 106688,
-      "sha256": "5c75fb134f231f1574d1a68fe222a59edf46d922d8a7351a1c498c270872ddeb",
+      "bytes": 71604,
+      "sha256": "221e2f6311f8103ed2aab5d6de7bba77d48c0f3b8589f179282db2ef9dc059ae",
       "width": 320,
-      "height": 6198,
+      "height": 2480,
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 646,
-        "totalPixels": 1983360,
-        "changedPixelRatio": 0.0003257099064214263,
+        "changedPixels": 708,
+        "totalPixels": 793600,
+        "changedPixelRatio": 0.0008921370967741936,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-320x568.webp",
           "tracked": true,
-          "bytes": 106688,
-          "sha256": "5c75fb134f231f1574d1a68fe222a59edf46d922d8a7351a1c498c270872ddeb"
+          "bytes": 71604,
+          "sha256": "221e2f6311f8103ed2aab5d6de7bba77d48c0f3b8589f179282db2ef9dc059ae"
         }
       }
     },
@@ -50839,9 +50839,9 @@
       "previousBaselineComparison": {
         "passed": true,
         "reason": "within_threshold",
-        "changedPixels": 33,
+        "changedPixels": 0,
         "totalPixels": 1041280,
-        "changedPixelRatio": 0.000031691763982790413,
+        "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-320x568.webp",
           "tracked": true,
@@ -50947,44 +50947,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1024x768.webp",
         "tracked": true,
-        "bytes": 119254,
-        "sha256": "35b0e2491df379fb734d1116f763c28c527e4e1eeef4bba9c0f26fd44428a24c"
+        "bytes": 77126,
+        "sha256": "678a629e0fefc4e742e49cb5f9906c6b39c8db265b654557edf8db2b8e4e4438"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
         "tracked": true,
-        "bytes": 116348,
-        "sha256": "05d114776704147cc0723252419321975914360c463c9902c576369374ef0664"
+        "bytes": 80996,
+        "sha256": "f5c7b0288dd4a620b2379c8872b0610856b9f31398c5323290b0ea0c79488570"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1440x900.webp",
         "tracked": true,
-        "bytes": 119120,
-        "sha256": "35da7783008d5eb124b5a5990f3fdbabd654c3bcc1b3e83d27101a7bafc4cf0d"
+        "bytes": 82120,
+        "sha256": "1d2171a5620ed4c5db5930289a335533a3545ddbfc86fc040fd2170b160bf40e"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-320x568.webp",
         "tracked": true,
-        "bytes": 106688,
-        "sha256": "5c75fb134f231f1574d1a68fe222a59edf46d922d8a7351a1c498c270872ddeb"
+        "bytes": 71604,
+        "sha256": "221e2f6311f8103ed2aab5d6de7bba77d48c0f3b8589f179282db2ef9dc059ae"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-375x812.webp",
         "tracked": true,
-        "bytes": 108702,
-        "sha256": "229d8da4630b90e66318b020d436fc454a2502cc44bc56365c6f0428616a915c"
+        "bytes": 73854,
+        "sha256": "f1df7c8fdf8db5af79bc986d06697df75a8a814b90fa22239250d28260f19367"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-390x844.webp",
         "tracked": true,
-        "bytes": 108856,
-        "sha256": "854f4e1314af5e4d5b4212e6302211c747da0244b625ba9a3aea559379d25afe"
+        "bytes": 73998,
+        "sha256": "ce8dd2141736bc4937fb170dcef6244978d34a3780d94f3f39ad890852af2756"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-768x1024.webp",
         "tracked": true,
-        "bytes": 112158,
-        "sha256": "b0d302653cd4eae852915b411007d52e776449d83ec4b7571352b2e2a3e91616"
+        "bytes": 78382,
+        "sha256": "327fd4921ed615e53dcc9f9c4c061e434c982a127b91041479a1388c76e081b1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
@@ -51823,20 +51823,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 119374,
-        "sha256": "8d3ed9b2b23282cbc3425f28483ab9bcac0622fa03a434861a073102d5a8266f"
+        "bytes": 82402,
+        "sha256": "7627c2e1aec0bbef407d894fb2533489254885df44027479f15a94f52e350415"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 122222,
-        "sha256": "22ac25fc9b737ace2381acbdee6d4c2e2c84f3add9f0eb519266d2d0d4dadee9"
+        "bytes": 83130,
+        "sha256": "91a8ea75ef6a2d38725d79412e1d81512d4a6a72df08ce399b7aac111603ccd9"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-light-1440x900.webp",
         "tracked": true,
-        "bytes": 119120,
-        "sha256": "35da7783008d5eb124b5a5990f3fdbabd654c3bcc1b3e83d27101a7bafc4cf0d"
+        "bytes": 82120,
+        "sha256": "1d2171a5620ed4c5db5930289a335533a3545ddbfc86fc040fd2170b160bf40e"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
@@ -52051,8 +52051,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp",
         "tracked": true,
-        "bytes": 110490,
-        "sha256": "7d548ba8003df295a3eea6684b038efdf2897e7b2aaeb18415b534d4c58fdea1"
+        "bytes": 74648,
+        "sha256": "b77dd38d8cfdf46d33552e405bfdf279164dfaa736856fb5301463bb31b771cc"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
@@ -52314,7 +52314,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "7c0128f6137bc54263cdc366ac0f2a87c1a6a7d73df91f711618a3ee4b019d95"
+    "manifestSha256": "7750db90dd47a3eda91688902738541abc7864ca9d19413f496697ac3d81d86b"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -52325,8 +52325,8 @@
     "requested": true,
     "performed": true,
     "method": "same-filesystem transactional rename with rollback",
-    "previousBaselineManifestSha256": "7c0128f6137bc54263cdc366ac0f2a87c1a6a7d73df91f711618a3ee4b019d95",
-    "previousBaselineResultSha256": "effc62f2ce4bd460e63d3176a04077b0b53194a624e6530eb0575058258fd9cd"
+    "previousBaselineManifestSha256": "7750db90dd47a3eda91688902738541abc7864ca9d19413f496697ac3d81d86b",
+    "previousBaselineResultSha256": "e854514347b0b174dccbd6320d7a425f8eb4aeeec903f78b9ce924b73e0ae462"
   },
   "visualInspectionCoverage": {
     "responsiveScreenshots": 154,

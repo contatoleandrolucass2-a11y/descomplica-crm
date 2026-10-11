@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  Check,
-  CircleMinus,
-  CircleX,
-  Clock3,
-  KeyRound,
-  Search,
-  ShieldCheck,
-  UserCheck,
-  UsersRound,
-} from "lucide-react";
+import { Check, CircleMinus, CircleX, Search, ShieldCheck } from "lucide-react";
 import {
   startTransition,
   useActionState,
@@ -42,7 +32,6 @@ import {
 import type {
   ManagedUser,
   UserDirectoryStatusFilter,
-  UserDirectorySummary,
   UserPermissionOverride,
 } from "./user-directory-types";
 
@@ -79,24 +68,10 @@ interface PermissionGroup {
 
 const PERMISSION_GROUPS: PermissionGroup[] = [
   {
-    id: "administration",
-    label: "Administração",
+    id: "commercial",
+    label: "Comercial",
     matches: (key) =>
-      key.startsWith("users.") ||
-      key.startsWith("permissions.") ||
-      key.startsWith("roles.") ||
-      key.startsWith("audit.") ||
-      key.startsWith("admin."),
-  },
-  {
-    id: "navigation",
-    label: "Navegação e páginas",
-    matches: (key) => key.startsWith("pages."),
-  },
-  {
-    id: "crm",
-    label: "CRM e canais",
-    matches: (key) =>
+      key === "pages.view" ||
       key.startsWith("crm.dashboard.") ||
       key.startsWith("crm.stages.") ||
       key.startsWith("crm.ranking.") ||
@@ -105,7 +80,7 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "simulators",
-    label: "Simuladores e políticas comerciais",
+    label: "Simuladores",
     matches: (key) =>
       key.startsWith("crm.simulators.") ||
       key.startsWith("crm.commercial_engine.") ||
@@ -113,11 +88,22 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "settings",
-    label: "Configurações e dados",
+    label: "Configurações",
     matches: (key) =>
       key.startsWith("crm.settings.") ||
       key.startsWith("crm.salesforce.") ||
       key.startsWith("crm.ingest."),
+  },
+  {
+    id: "administration",
+    label: "Administração",
+    matches: (key) =>
+      key.startsWith("users.") ||
+      key.startsWith("permissions.") ||
+      key.startsWith("roles.") ||
+      key.startsWith("audit.") ||
+      key.startsWith("admin.") ||
+      key === "pages.manage",
   },
 ];
 
@@ -126,7 +112,6 @@ interface UserAccessManagerProps {
   initialHasMore?: boolean;
   initialNextOffset?: number | null;
   initialTotalCount?: number | null;
-  summary?: UserDirectorySummary | null;
   assignableRoles: RoleKey[];
   manageablePermissions: PermissionKey[];
   canManageRoles: boolean;
@@ -434,15 +419,6 @@ function StatusForm({
   );
 }
 
-function getPermissionGroup(permissionKey: PermissionKey): Pick<PermissionGroup, "id" | "label"> {
-  return (
-    PERMISSION_GROUPS.find((group) => group.matches(permissionKey)) ?? {
-      id: "other",
-      label: "Outras permissões",
-    }
-  );
-}
-
 function getPermissionState(
   permissionKey: PermissionKey,
   inherited: ReadonlySet<PermissionKey>,
@@ -476,6 +452,15 @@ function PermissionMatrix({
   onMutationSuccess: () => void;
 }) {
   const [search, setSearch] = useState("");
+  const [activeGroup, setActiveGroup] = useState(() => {
+    const firstRelevantPermission =
+      getInheritedPermissions(user)[0] ??
+      user.overrides[0]?.permissionKey ??
+      manageablePermissions[0];
+    return firstRelevantPermission
+      ? (PERMISSION_GROUPS.find((group) => group.matches(firstRelevantPermission))?.id ?? "other")
+      : PERMISSION_GROUPS[0]!.id;
+  });
   const [selected, setSelected] = useState<Set<PermissionKey>>(() => new Set());
   const [effect, setEffect] = useState<BulkEffect>("allow");
   const [reason, setReason] = useState("");
@@ -515,17 +500,34 @@ function PermissionMatrix({
         .includes(query);
     });
   }, [search]);
-  const groupedPermissions = useMemo(() => {
-    const groups = new Map<string, { label: string; permissions: PermissionKey[] }>();
-    for (const permissionKey of filteredPermissions) {
-      const group = getPermissionGroup(permissionKey);
-      const current = groups.get(group.id);
-      if (current) current.permissions.push(permissionKey);
-      else groups.set(group.id, { label: group.label, permissions: [permissionKey] });
+  const permissionTabs = useMemo(() => {
+    const tabs = PERMISSION_GROUPS.map((group) => ({
+      id: group.id,
+      label: group.label,
+      permissions: filteredPermissions.filter(group.matches),
+      total: ALL_PERMISSIONS.filter(group.matches).length,
+    }));
+    const knownPermissions = new Set(
+      PERMISSION_GROUPS.flatMap((group) => ALL_PERMISSIONS.filter(group.matches)),
+    );
+    const otherPermissions = filteredPermissions.filter(
+      (permissionKey) => !knownPermissions.has(permissionKey),
+    );
+    const otherTotal = ALL_PERMISSIONS.filter(
+      (permissionKey) => !knownPermissions.has(permissionKey),
+    ).length;
+    if (otherTotal > 0) {
+      tabs.push({
+        id: "other",
+        label: "Outras",
+        permissions: otherPermissions,
+        total: otherTotal,
+      });
     }
-    return [...groups.entries()];
+    return tabs;
   }, [filteredPermissions]);
-  const selectableFiltered = filteredPermissions.filter((permissionKey) =>
+  const activeTab = permissionTabs.find((group) => group.id === activeGroup) ?? permissionTabs[0]!;
+  const selectableFiltered = activeTab.permissions.filter((permissionKey) =>
     manageable.has(permissionKey),
   );
   const allFilteredSelected =
@@ -585,7 +587,7 @@ function PermissionMatrix({
         <label className="admin-permission-search" htmlFor={`permission-search-${user.userId}`}>
           <Search aria-hidden="true" />
           <span>
-            <span>Buscar permissão</span>
+            <span>Buscar acesso</span>
             <input
               id={`permission-search-${user.userId}`}
               name="permissionSearch"
@@ -593,7 +595,7 @@ function PermissionMatrix({
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               autoComplete="off"
-              placeholder="Nome ou função…"
+              placeholder="Buscar acesso ou função…"
             />
           </span>
         </label>
@@ -604,9 +606,27 @@ function PermissionMatrix({
             onClick={toggleFiltered}
             disabled={selectableFiltered.length === 0 || pending}
           >
-            {allFilteredSelected ? "Limpar filtradas" : "Selecionar todas as filtradas"}
+            {allFilteredSelected ? "Limpar seleção" : "Selecionar grupo"}
           </button>
         ) : null}
+      </div>
+
+      <div className="admin-permission-tabs" role="tablist" aria-label="Grupos de acesso">
+        {permissionTabs.map((group) => (
+          <button
+            key={group.id}
+            id={`permission-tab-${user.userId}-${group.id}`}
+            type="button"
+            role="tab"
+            aria-selected={activeTab.id === group.id}
+            aria-controls={`permission-panel-${user.userId}-${group.id}`}
+            data-selected={activeTab.id === group.id}
+            onClick={() => setActiveGroup(group.id)}
+          >
+            <span>{group.label}</span>
+            <small>{group.total}</small>
+          </button>
+        ))}
       </div>
 
       {editable ? (
@@ -635,81 +655,77 @@ function PermissionMatrix({
       ) : null}
 
       <div className="admin-permission-groups">
-        {groupedPermissions.length > 0 ? (
-          groupedPermissions.map(([groupId, group]) => (
-            <section
-              key={groupId}
-              className="admin-permission-group"
-              aria-labelledby={`permission-group-${user.userId}-${groupId}`}
-            >
-              <div className="admin-permission-group-header">
-                <h4 id={`permission-group-${user.userId}-${groupId}`}>{group.label}</h4>
-                <span>
-                  {group.permissions.length} {group.permissions.length === 1 ? "item" : "itens"}
-                </span>
-              </div>
-              <div className="admin-permission-grid">
-                {group.permissions.map((permissionKey) => {
-                  const override = overrides.get(permissionKey);
-                  const permissionState = getPermissionState(
-                    permissionKey,
-                    inherited,
-                    override,
-                    hasApprovedAccess,
-                  );
-                  const canSelect = editable && manageable.has(permissionKey);
-                  return (
-                    <div
-                      key={permissionKey}
-                      className="admin-permission-option"
-                      data-disabled={!canSelect}
-                      data-editable={editable}
-                      data-selected={selected.has(permissionKey)}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={permissionState.permitted}
-                        disabled
-                        aria-label={`Acesso efetivo: ${getPermissionLabel(permissionKey)}`}
-                      />
-                      <span className="admin-permission-option-copy">
-                        <strong>{getPermissionLabel(permissionKey)}</strong>
-                        <small>{PERMISSIONS[permissionKey].description}</small>
-                        {override?.reason ? (
-                          <small className="admin-permission-override-reason">
-                            Motivo atual: {override.reason}
-                          </small>
-                        ) : null}
-                        {canSelect ? (
-                          <button
-                            type="button"
-                            className={managementStyles.button}
-                            aria-pressed={selected.has(permissionKey)}
-                            onClick={() => togglePermission(permissionKey)}
-                            disabled={pending}
-                          >
-                            {selected.has(permissionKey)
-                              ? "Remover da alteração"
-                              : "Incluir na alteração"}
-                          </button>
-                        ) : null}
-                      </span>
-                      <span className="admin-permission-state" data-state={permissionState.key}>
-                        {permissionState.permitted ? (
-                          <Check aria-hidden="true" />
-                        ) : (
-                          <CircleMinus aria-hidden="true" />
-                        )}
-                        {permissionState.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          ))
+        {activeTab.permissions.length > 0 ? (
+          <section
+            className="admin-permission-group"
+            id={`permission-panel-${user.userId}-${activeTab.id}`}
+            role="tabpanel"
+            tabIndex={0}
+            aria-labelledby={`permission-tab-${user.userId}-${activeTab.id}`}
+          >
+            <div className="admin-permission-grid">
+              {activeTab.permissions.map((permissionKey) => {
+                const override = overrides.get(permissionKey);
+                const permissionState = getPermissionState(
+                  permissionKey,
+                  inherited,
+                  override,
+                  hasApprovedAccess,
+                );
+                const canSelect = editable && manageable.has(permissionKey);
+                return (
+                  <div
+                    key={permissionKey}
+                    className="admin-permission-option"
+                    data-disabled={!canSelect}
+                    data-editable={editable}
+                    data-selected={selected.has(permissionKey)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={permissionState.permitted}
+                      disabled
+                      aria-label={`Acesso efetivo: ${getPermissionLabel(permissionKey)}`}
+                    />
+                    <span className="admin-permission-option-copy">
+                      <strong>{getPermissionLabel(permissionKey)}</strong>
+                      <small>{PERMISSIONS[permissionKey].description}</small>
+                      {override?.reason ? (
+                        <small className="admin-permission-override-reason">
+                          Motivo atual: {override.reason}
+                        </small>
+                      ) : null}
+                      {canSelect ? (
+                        <button
+                          type="button"
+                          className={managementStyles.button}
+                          aria-pressed={selected.has(permissionKey)}
+                          onClick={() => togglePermission(permissionKey)}
+                          disabled={pending}
+                        >
+                          {selected.has(permissionKey)
+                            ? "Remover da alteração"
+                            : "Incluir na alteração"}
+                        </button>
+                      ) : null}
+                    </span>
+                    <span className="admin-permission-state" data-state={permissionState.key}>
+                      {permissionState.permitted ? (
+                        <Check aria-hidden="true" />
+                      ) : (
+                        <CircleMinus aria-hidden="true" />
+                      )}
+                      {permissionState.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
         ) : (
-          <p className={managementStyles.emptyState}>Nenhuma permissão corresponde à busca.</p>
+          <p className={managementStyles.emptyState}>
+            Nenhum acesso deste grupo corresponde à busca.
+          </p>
         )}
       </div>
 
@@ -746,7 +762,7 @@ function PermissionMatrix({
               onClick={clearDraft}
               disabled={pending || (selected.size === 0 && reason.length === 0)}
             >
-              Cancelar
+              Descartar
             </button>
             <button
               type="submit"
@@ -842,11 +858,14 @@ function UserDetail({
           </section>
         ) : null}
 
-        <section className="admin-access-section" aria-labelledby={`role-title-${user.userId}`}>
+        <section
+          className="admin-access-section admin-profile-section"
+          aria-labelledby={`role-title-${user.userId}`}
+        >
           <div className="admin-access-section-heading">
             <div>
-              <p>Papel e responsabilidades</p>
-              <h3 id={`role-title-${user.userId}`}>Papel do usuário</h3>
+              <p>Perfil</p>
+              <h3 id={`role-title-${user.userId}`}>{getVisibleRoleLabel(user.roleKey)}</h3>
             </div>
             <span className="admin-section-count">
               {user.permissionDetailsAvailable !== false
@@ -855,12 +874,15 @@ function UserDetail({
             </span>
           </div>
           {user.isManageable && canManageRoles && assignableRoles.length > 0 ? (
-            <RoleForm
-              key={user.userId}
-              user={user}
-              roles={assignableRoles}
-              onMutationSuccess={onMutationSuccess}
-            />
+            <details className="admin-role-editor">
+              <summary>Alterar papel</summary>
+              <RoleForm
+                key={user.userId}
+                user={user}
+                roles={assignableRoles}
+                onMutationSuccess={onMutationSuccess}
+              />
+            </details>
           ) : (
             <div className="admin-current-role">
               <strong>{getVisibleRoleLabel(user.roleKey)}</strong>
@@ -882,24 +904,25 @@ function UserDetail({
           <div className="admin-access-section-heading">
             <div>
               <p>Acessos efetivos</p>
-              <h3 id={`permissions-title-${user.userId}`}>Permissões e exceções</h3>
+              <h3 id={`permissions-title-${user.userId}`}>O que pode acessar</h3>
             </div>
             <span className="admin-section-count">
               {user.permissionDetailsAvailable !== false
-                ? `${user.overrides.length} ${user.overrides.length === 1 ? "exceção" : "exceções"}`
+                ? `${getEffectivePermissionCount(user)} acessos`
                 : "Detalhes restritos"}
             </span>
           </div>
           {isMasterPermissionManager && user.isManageable ? (
             <p className="admin-permission-intro">
-              As caixas mostram o <strong>acesso efetivo</strong>, após papel e exceções. Como
-              Master, use <strong>Incluir na alteração</strong> e aplique <strong>Permitir</strong>{" "}
-              para criar uma exceção individual em qualquer usuário abaixo do seu nível. O papel do
-              usuário não muda.
+              Marque os acessos que deseja alterar. As caixas mostram o{" "}
+              <strong>acesso efetivo</strong>, após papel e exceções. Como Master, use{" "}
+              <strong>Incluir na alteração</strong> e aplique <strong>Permitir</strong> para criar
+              uma exceção individual em qualquer usuário abaixo do seu nível. O papel do usuário não
+              muda.
             </p>
           ) : (
             <p className="admin-permission-intro">
-              As caixas mostram o <strong>acesso efetivo</strong>. A origem identifica
+              Consulte o <strong>acesso efetivo</strong>. A origem identifica
               <strong> Permissões herdadas do papel</strong> e <strong>Exceções individuais</strong>
               ; os botões de alteração formam um lote separado.
             </p>
@@ -918,6 +941,13 @@ function UserDetail({
               individuais. Nenhuma permissão é presumida.
             </p>
           )}
+          <p className="admin-access-catalog-note">
+            <ShieldCheck aria-hidden="true" />
+            <span>
+              A lista segue o catálogo autorizado do CRM. Novas capacidades só aparecem quando
+              versionadas e continuam sem acesso por padrão.
+            </span>
+          </p>
         </section>
 
         <details className="admin-advanced-settings">
@@ -960,20 +990,6 @@ export function UserAccessManager(props: UserAccessManagerProps) {
   const initialUsersSignature = JSON.stringify(props.users);
   const previousInitialUsersSignatureRef = useRef(initialUsersSignature);
 
-  const fallbackActiveCount = props.users.filter(
-    (user) => user.isActive && user.accessStatus === "approved",
-  ).length;
-  const fallbackPendingCount = props.users.filter((user) => user.accessStatus === "pending").length;
-  const fallbackRevokedCount = props.users.filter(
-    (user) =>
-      user.accessStatus === "suspended" || (!user.isActive && user.accessStatus !== "pending"),
-  ).length;
-  const summaryTotal = props.summary
-    ? (props.summary.total ?? "—")
-    : (props.initialTotalCount ?? props.users.length);
-  const activeCount = props.summary ? (props.summary.active ?? "—") : fallbackActiveCount;
-  const pendingCount = props.summary ? (props.summary.pending ?? "—") : fallbackPendingCount;
-  const revokedCount = props.summary ? (props.summary.revoked ?? "—") : fallbackRevokedCount;
   const selectedUser = users.find((user) => user.userId === selectedUserId) ?? users[0] ?? null;
 
   const fetchPage = useCallback(
@@ -1130,65 +1146,18 @@ export function UserAccessManager(props: UserAccessManagerProps) {
 
   return (
     <div className="admin-users-content">
-      <section
-        aria-label="Resumo de usuários"
-        className={`${managementStyles.summaryGrid} admin-users-summary`}
-      >
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <UsersRound />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Total de usuários</span>
-            <strong className={managementStyles.summaryValue}>{summaryTotal}</strong>
-          </div>
-        </article>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <UserCheck />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Com acesso ativo</span>
-            <strong className={managementStyles.summaryValue}>{activeCount}</strong>
-          </div>
-        </article>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <Clock3 />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Aguardando aprovação</span>
-            <strong className={managementStyles.summaryValue}>{pendingCount}</strong>
-          </div>
-        </article>
-        <article className={managementStyles.summaryCard}>
-          <span className={managementStyles.iconFrame} aria-hidden="true">
-            <CircleX />
-          </span>
-          <div>
-            <span className={managementStyles.summaryLabel}>Acessos revogados</span>
-            <strong className={managementStyles.summaryValue}>{revokedCount}</strong>
-          </div>
-        </article>
-      </section>
-
       <div className="admin-users-workspace">
         <aside className="admin-users-directory" aria-labelledby="users-directory-title">
           <header className="admin-users-directory-header">
-            <span className={managementStyles.iconFrame} aria-hidden="true">
-              <KeyRound />
-            </span>
-            <div>
-              <h2 id="users-directory-title">Usuários</h2>
-              <p>Selecione uma conta para revisar os acessos.</p>
-            </div>
+            <h2 id="users-directory-title">Pessoas</h2>
+            <span>{totalCount ?? users.length}</span>
           </header>
 
           <div className="admin-users-directory-controls">
             <label className="admin-directory-search" htmlFor="user-search">
               <Search aria-hidden="true" />
               <span>
-                <span>Buscar usuário</span>
+                <span>Buscar pessoa</span>
                 <input
                   id="user-search"
                   name="userSearch"
@@ -1196,25 +1165,29 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   autoComplete="off"
-                  placeholder="E-mail…"
+                  placeholder="Buscar nome ou e-mail"
                 />
               </span>
             </label>
-            <div className="admin-directory-filters">
-              <label>
-                <span>Status</span>
-                <select
-                  name="userStatusFilter"
-                  value={status}
-                  onChange={(event) => setStatus(event.target.value as UserDirectoryStatusFilter)}
-                  autoComplete="off"
+            <div className="admin-directory-filter-chips" aria-label="Filtrar por status">
+              {(
+                [
+                  ["all", "Todos"],
+                  ["active", "Ativos"],
+                  ["inactive", "Revogados"],
+                  ["pending", "Pendentes"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={status === value}
+                  data-selected={status === value}
+                  onClick={() => setStatus(value)}
                 >
-                  <option value="all">Todos</option>
-                  <option value="active">Ativos</option>
-                  <option value="inactive">Revogados</option>
-                  <option value="pending">Pendentes</option>
-                </select>
-              </label>
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -1227,7 +1200,6 @@ export function UserAccessManager(props: UserAccessManagerProps) {
             {users.length > 0 ? (
               users.map((user) => {
                 const userStatus = getUserStatus(user);
-                const permissionCount = getEffectivePermissionCount(user);
                 return (
                   <li key={user.userId}>
                     <button
@@ -1244,14 +1216,13 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                       <span className="admin-user-option-copy">
                         <strong>{user.email ?? "E-mail não informado"}</strong>
                         <span>{getVisibleRoleLabel(user.roleKey)}</span>
-                        <small>
-                          {user.permissionDetailsAvailable !== false
-                            ? `${permissionCount} ${permissionCount === 1 ? "permissão" : "permissões"}`
-                            : "Acessos restritos"}
-                        </small>
                       </span>
-                      <span className={managementStyles.statusPill} data-state={userStatus.key}>
-                        {userStatus.label}
+                      <span
+                        className="admin-user-status-dot"
+                        data-state={userStatus.key}
+                        title={userStatus.label}
+                      >
+                        <span className="sr-only">{userStatus.label}</span>
                       </span>
                     </button>
                   </li>

@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-10-11: Usuarios alinhado ao mestre-detalhe aprovado
+
+- A comparação direta com
+  `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps/outputs/modelo-site.html#users`
+  confirmou que a publicação anterior havia preservado contratos reais, mas
+  incluído quatro indicadores e renderizado todos os grupos de permissão em
+  sequência. O resultado media 2.592 px e descaracterizava o fluxo compacto.
+- A tela agora usa diretório de Pessoas com busca, chips de status e lista
+  paginada à esquerda; perfil, status e acessos ficam no detalhe à direita. As
+  permissões são organizadas em Comercial, Simuladores, Configurações e
+  Administração, com somente uma aba visível por vez.
+- Perfis com muitos acessos usam uma região rolável focável no desktop. Em
+  mobile, diretório e detalhe são empilhados e a página mantém fluxo vertical,
+  sem overflow horizontal. Claro, Médio e Escuro usam exclusivamente tokens
+  semânticos; nenhuma ilha navy foi adicionada ao tema Claro.
+- Os contratos reais foram preservados: papel exige motivo quando aplicável,
+  exceções continuam em lote com permitir/negar/restaurar, alterações exigem
+  confirmação e auditoria, e as configurações de status permanecem avançadas.
+  A interface continua sem permitir que Administrador altere outra conta
+  Administrador; servidor, RPCs, triggers e RLS não foram modificados.
+- O limite autenticado de `/admin/usuarios` caiu de 2.600 para 1.200 px. A
+  captura desktop mediu 1.187 px. Uma primeira tentativa com 1.370 px foi
+  bloqueada pelo gate; a seguinte revelou `scrollable-region-focusable` e só
+  passou após tornar o `tabpanel` rolável acessível pelo teclado.
+- A promoção final atualizou somente onze referências de Usuários. A matriz
+  aprovou 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
+  comparações e 110 de zoom. Os quatro simuladores passaram a navegação em dez
+  larguras cada; o Associativo repetiu 30 capturas manuais. Conta e fixtures
+  sintéticas foram removidas.
+- Evidências detalhadas: `docs/qa/users-layout-parity-2026-10-11.md`.
+
 ## 2026-10-11: Correcao de temas e fronteira de Administrador publicada
 
 - Ranking e Canal de Parcerias foram alinhados ao draft nos temas Claro e
