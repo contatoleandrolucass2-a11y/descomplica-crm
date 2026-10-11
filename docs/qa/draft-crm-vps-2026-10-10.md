@@ -73,6 +73,28 @@ substituem testes do CRM integrado.
 - A revisao independente do diff nao encontrou achados de seguranca. O ensaio
   de banco repetiu lint, advisors, backup/restore e 1.141/1.141 testes na origem
   e na restauracao.
+- A primeira CI do PR #181 (`38158141843`) passou validate, restore isolado e
+  release-gates no SHA `9327288a6c0e99f6ae8be626d82d9e06c8aec3a3`.
+- O backup remoto anterior a mudanca foi mantido privado em
+  `/var/backups/descomplica-crm/20261011-admin-boundary-prechange.hm5P7J`; o
+  manifesto verificado tem SHA-256
+  `4ec0ef67f7982963344881c70421af4cb41ad95517653839b38ebf4d10538950`.
+  A migration local foi aplicada isoladamente no ledger remoto como
+  `20261011174323_protect_administrator_accounts_and_enable_simulator_view`.
+- O pos-check remoto confirmou triggers de papel, perfil e overrides, zero ACL
+  direta nas tabelas Qlik, visao dos simuladores somente para
+  Administrador/Master, zero permissao Master-only herdada pelo Administrador e
+  preservacao das tres excecoes de execucao pertencentes a Coordenadores.
+- Como o ambiente possui uma unica conta Administrador, nao foi criada uma
+  identidade produtiva adicional. Um teste transacional revertido confirmou que
+  o Administrador existente nao altera sua propria conta e que o Master pode
+  exercer o mesmo fluxo. O caso exato entre dois Administradores foi aprovado
+  no pgTAP e no E2E isolado desta VPS.
+- Os advisors remotos posteriores mantiveram apenas grupos preexistentes: dez
+  avisos `INFO` de RLS sem policy, tres RPCs `SECURITY DEFINER` para `anon`, 17
+  para `authenticated` e um aviso de protecao de senha vazada. Performance
+  manteve dez foreign keys sem indice e dois indices ainda nao usados, todos
+  informativos. Os helpers adicionados pela migration nao aparecem na Data API.
 - Nenhuma tabela Qlik, formula financeira, campo ou motor dos quatro
   simuladores foi alterado nesta correcao.
 

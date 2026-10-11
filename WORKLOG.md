@@ -1,6 +1,6 @@
 # Worklog
 
-## 2026-10-11: Correcao de temas e fronteira de Administrador candidata
+## 2026-10-11: Correcao de temas e fronteira de Administrador aplicada no banco
 
 - Ranking e Canal de Parcerias foram alinhados ao draft nos temas Claro e
   Medio, removendo superficies navy residuais; o tema Escuro preserva o navy.
@@ -28,8 +28,32 @@
   previsto. A revisao de seguranca independente nao encontrou achados no diff.
 - O `verify` visual pos-commit repetiu 154 checks responsivos, 88 de tema, 242
   Axe, 242 comparacoes e 110 de zoom sem regravar a baseline; conta e fixtures
-  efemeras foram removidas. Migration remota e publicacao ainda estao em
-  andamento; esta entrada nao as antecipa.
+  efemeras foram removidas.
+- O PR #181 teve a primeira CI candidata `38158141843` integralmente verde no
+  SHA `9327288a6c0e99f6ae8be626d82d9e06c8aec3a3`, incluindo validate, restore
+  isolado e todos os gates de release.
+- Antes da escrita remota, o backup logico privado foi verificado em
+  `/var/backups/descomplica-crm/20261011-admin-boundary-prechange.hm5P7J`; o
+  manifesto tem SHA-256
+  `4ec0ef67f7982963344881c70421af4cb41ad95517653839b38ebf4d10538950`.
+  A migration foi aplicada isoladamente como versão remota
+  `20261011174323_protect_administrator_accounts_and_enable_simulator_view`.
+- O pos-check remoto confirmou os tres triggers de fronteira compativeis com
+  o schema presente, zero ACL direta nas tabelas Qlik, `crm.simulators.view`
+  somente para Administrador/Master, zero capacidade de plano de controle para
+  Administrador e preservacao das tres excecoes operacionais de Coordenador.
+  Os helpers novos permanecem fora da Data API.
+- A producao possui somente uma conta Administrador; por isso nao foi criada
+  uma segunda conta para fabricar um teste entre pares. Em transacao revertida,
+  o Administrador existente foi bloqueado ao tentar alterar a propria conta e o
+  Master foi autorizado; o caso exato Administrador-contra-Administrador segue
+  comprovado no pgTAP e no E2E isolado executados nesta VPS.
+- Os advisors remotos nao apontaram regressao criada pela migration. Seguiram
+  10 avisos `INFO` de RLS sem policy, tres RPCs `SECURITY DEFINER` para `anon`,
+  17 para `authenticated`, um aviso de protecao de senha vazada e, em
+  performance, dez foreign keys sem indice e dois indices ainda nao usados. A
+  publicacao do runtime permanece condicionada ao merge e a imagem imutavel da
+  CI de `main`.
 
 ## 2026-10-11: Runtime do layout promovido; aceite pendente
 

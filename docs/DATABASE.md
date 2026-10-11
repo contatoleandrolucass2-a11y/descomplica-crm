@@ -19,8 +19,9 @@ markers locais sem o SQL inseguro, além de migrations locais ainda não
 aplicadas. A exposição Qlik remota segue incompatível com a allowlist. A matriz
 completa, hashes e ordem segura estão em
 [`docs/reconciliation/MIGRATION_MATRIX.md`](reconciliation/MIGRATION_MATRIX.md).
-Somente os gates isolados P0 Qlik e RBAC do Canal foram aplicados remotamente;
-nenhum cutover Qlik ou do read model v3 foi realizado.
+Os gates isolados P0 Qlik, RBAC do Canal e a fronteira de Administrador foram
+aplicados remotamente; esta ultima consta no ledger como `20261011174323`.
+Nenhum cutover Qlik ou do read model v3 foi realizado.
 
 ## Migrations
 
@@ -64,6 +65,13 @@ nenhum cutover Qlik ou do read model v3 foi realizado.
 38. `20261007050255_allow_master_permission_overrides.sql`: permite ao Master delegar permissões que possui a alvos inferiores, preservando hierarquia estrita, autoalteração e bloqueio de outro Master.
 39. `20261011143218_protect_administrator_accounts_and_enable_simulator_view.sql`: concede a visualização dos simuladores ao Administrador, mantém execução/política exclusivas do Master e adiciona fronteira explícita por papel em atribuição, perfil, exceções e reporting scopes. A migration aceita tanto o contrato produtivo compacto quanto a instalação limpa escopada.
 
+A migration 39 foi aplicada isoladamente no remoto como versão
+`20261011174323`, depois de backup lógico privado com manifesto SHA-256
+`4ec0ef67f7982963344881c70421af4cb41ad95517653839b38ebf4d10538950`.
+O pos-check confirmou zero acesso direto às tabelas Qlik, helpers de fronteira
+fora da Data API, visão dos simuladores somente para Administrador/Master e
+preservação das exceções pertencentes a outros papéis.
+
 ## Desenvolvimento local
 
 ```bash
@@ -100,12 +108,16 @@ RLS e grants são camadas complementares. Cada nova tabela exposta precisa:
 - teste com usuário autorizado e não autorizado;
 - auditoria para alterações administrativas.
 
-O advisor de segurança mantém apenas o `INFO` intencional de
-`crm_ingestion_runs` com RLS e sem policy, pois a tabela não integra a Data API.
-Os avisos informativos de foreign keys sem índice e índices ainda não usados
-permanecem registrados para avaliação separada; esta correção de grants não
-altera índices. As policies permissivas duplicadas da base de login foram
-consolidadas sem alterar a regra self-or-manager.
+No remoto compacto, o advisor de segurança mantém quatro grupos preexistentes:
+dez ocorrências `INFO` de RLS sem policy, três RPCs `SECURITY DEFINER`
+executáveis por `anon`, 17 por `authenticated` e o aviso de proteção de senha
+vazada desativada. Nenhum helper criado pela migration 39 aparece entre as RPCs
+expostas. Os advisors de performance mantêm somente dez avisos informativos de
+foreign keys sem índice e dois índices ainda não usados; esta correção de grants
+não altera índices. Na instalação limpa, `crm_ingestion_runs` segue como o
+`INFO` intencional de RLS sem policy porque a tabela não integra a Data API. As
+policies permissivas duplicadas da base de login foram consolidadas sem alterar
+a regra self-or-manager.
 
 Os grants são normalizados explicitamente para que projetos anteriores e novos
 convirjam. `PUBLIC`/`anon` não acessam objetos da aplicação; `authenticated`

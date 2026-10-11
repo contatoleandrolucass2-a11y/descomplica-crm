@@ -59,16 +59,17 @@ convergência forward compatível com os dois estados.
 |    32 | `20260814045436_wf13_master_page_access_convergence`                      |  Sim  |  Não   | `aced7dc4e1b3cd5aa828ae1c5846715600c8b46844c45eef9db6dd9946dee787` | —                                                                  | Cria `crm.simulators.view` Master-only e converge hub/rota WF13 com o guard; depende da migration 31.         | Hotfix forward isolado; candidato                           | Aplicar somente esta versão após restore/CI; não usar `--include-all` nem liberar outro motor.                   |
 |    44 | `20261005234936_reconcile_roles_dashboard_views_and_bulk_overrides`       |  Sim  |  Sim   | `9254cbc3d7ede37b38c90f5fc90c437fe542e95b8575863dd765fb94e2208c20` | versão remota `20261007021254`                                     | Papéis House/Imob, três permissões de visão, RLS por `view_key` e RPC atômica de exceções em lote.            | Convergência forward aplicada e verificada                  | Estado produtivo compacto preservado; instalação limpa mantém a foundation escopada.                             |
 |    45 | `20261007050255_allow_master_permission_overrides`                        |  Sim  |  Sim   | `41940b592fe7f5b67521a6ee57f19682fbb4170dd55266e499b827a1a88c1c8e` | versão remota `20261007164040`                                     | Permite delegação explícita pelo Master sem alterar papel ou furar hierarquia.                                | Aplicada e verificada                                       | Permissões exclusivas do plano de controle permanecem sujeitas às fronteiras posteriores.                        |
-|    46 | `20261011143218_protect_administrator_accounts_and_enable_simulator_view` |  Sim  |  Não   | `5547cb56819a3ff3de86c01e6c84cb7747ec55bfb50a6ade1c8e1d1b468578fb` | —                                                                  | Protege contas Administrador em UI/RPC/trigger e libera somente a visão dos simuladores.                      | Candidata compatível com schema compacto e escopado         | Aplicar isoladamente após backup, CI e preflight; execução e políticas continuam Master-only.                    |
+|    46 | `20261011143218_protect_administrator_accounts_and_enable_simulator_view` |  Sim  |  Sim   | `5547cb56819a3ff3de86c01e6c84cb7747ec55bfb50a6ade1c8e1d1b468578fb` | versão remota `20261011174323`                                     | Protege contas Administrador em UI/RPC/trigger e libera somente a visão dos simuladores.                      | Aplicada isoladamente e verificada no schema compacto       | Execução e políticas continuam Master-only; Qlik e exceções de outros papéis foram preservados.                  |
 
 As quatro versões antes somente remotas agora têm markers locais no-op. A
 diferença de hashes é intencional: o SQL remoto sensível/inseguro não foi
 copiado; forma e ACL seguras convergem por migrations posteriores. Não há versão
-“não identificada”. As versões 14, 15, 19, 21–27, 32 e 46 continuam somente locais;
-nenhuma foi aplicada ao projeto remoto. As versões 28–30, 44 e 45 foram aplicadas
+“não identificada”. As versões 14, 15, 19, 21–27 e 32 continuam somente locais;
+nenhuma foi aplicada ao projeto remoto. As versões 28–30, 44–46 foram aplicadas
 isoladamente nos gates P0 e RBAC. O gate de execução 31 foi aplicado como versão
-remota `20260813192928`; as versões 32 e 46 permanecem candidatas, cada uma com
-gate e autorização próprios. As
+remota `20260813192928`; a versão 32 permanece candidata, com gate e autorização
+próprios. A versão 46 foi aplicada como `20261011174323` depois de backup e
+preflight, sem tocar no contrato Qlik. As
 versões remotas inseguras `20260813142723` e `20260813142835` permanecem apenas
 na trilha remota e não são autoridade para o schema nem devem ser copiadas.
 

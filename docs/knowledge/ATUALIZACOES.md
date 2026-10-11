@@ -4,9 +4,9 @@
 
 - Fonte: draft aprovado de 10/10/2026, migration
   `20261011143218_protect_administrator_accounts_and_enable_simulator_view`,
-  matriz de autorizacao e testes versionados. Status: candidato; publicacao e
-  verificacao remota devem ser registradas somente depois dos respectivos
-  gates.
+  matriz de autorizacao, PR #181 e CI candidata `38158141843`. Status: banco
+  remoto aplicado e verificado como versao `20261011174323`; publicacao do
+  runtime ainda depende do merge e da imagem imutavel da CI de `main`.
 - Tema nao e apenas preferencia global: componentes com superfice navy propria
   precisam de override semantico explicito tanto em `light` quanto em
   `balanced`. O tema `dark` continua usando a regra-base navy.
@@ -21,6 +21,15 @@
   de Administrador para capacidades Master-only, preservando `deny` e qualquer
   override de outros papeis. As tabelas Qlik e os quatro motores financeiros
   ficam fora desse escopo.
+- Antes da migration remota, criar e validar backup privado. Nesta aplicacao, o
+  manifesto do backup tem SHA-256
+  `4ec0ef67f7982963344881c70421af4cb41ad95517653839b38ebf4d10538950`; o
+  pos-check confirmou zero grant Qlik direto e zero exposicao Data API dos
+  helpers novos.
+- Nao criar identidades produtivas apenas para completar um teste. Como havia
+  uma unica conta Administrador, o ensaio remoto usou a propria conta dentro de
+  transacao revertida e confirmou o bloqueio; o caso entre dois Administradores
+  ficou apoiado pelo pgTAP e E2E isolado executados na VPS.
 
 ## 2026-10-11: ITBI e registro publicados com estimativa fiscal condicionada
 
