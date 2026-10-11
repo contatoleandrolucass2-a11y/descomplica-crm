@@ -2,8 +2,9 @@
 
 ## 2026-10-11
 
-- Publica o layout aprovado do CRM na release `ac3d7893`, com imagem imutavel,
-  backup verificado, CAS, rollback preparado e saude confirmada.
+- Promove o runtime do layout aprovado do CRM na release `ac3d7893`, com imagem
+  imutavel, backup verificado, CAS, rollback preparado e saude confirmada; o
+  aceite final permanece pendente da jornada autenticada em producao.
 - Repete na CI de `main` banco, restore, E2E e a matriz visual; preserva os
   quatro simuladores e confirma guardas anonimos depois do deploy.
 - Confirma publicacao da politica fiscal SP/2026 no PR #177 e registra
@@ -38,7 +39,8 @@
   responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes
   candidato/baseline e 110 de zoom; fixtures efemeras removidas.
 - Registra a abertura do PR #178 e a CI intermediaria `38094977306` no SHA
-  `4a8bfc8`; o merge e a publicacao concluidos constam na entrada de 11/10.
+  `4a8bfc8`; o merge e a promocao do runtime constam na entrada de 11/10, com o
+  aceite final ainda pendente.
 - Estabiliza em duas linhas o e-mail da conta no cabecalho de Usuarios entre
   961 px e 1.152 px, mantendo o valor completo no DOM e em `title`. A segunda
   CI havia exposto uma variacao de 21 px causada apenas pelo sufixo aleatorio do

@@ -1,6 +1,6 @@
 # Worklog
 
-## 2026-10-11: Layout aprovado do CRM publicado
+## 2026-10-11: Runtime do layout promovido; aceite pendente
 
 - PR #178 integrado apos a CI candidata `38133737505`; revisao final sem novos
   apontamentos. A CI de `main` `38136053837` aprovou os quatro jobs, inclusive
@@ -15,8 +15,13 @@
   APIs anonimas 401, rotas protegidas 307, sete assets 200, headers preservados
   e logs iniciais sem padrao critico.
 - Os quatro simuladores mantiveram 40 checks autenticados antes da publicacao e
-  suas rotas protegidas responderam corretamente depois. Nao houve migration,
-  nova sessao em producao nem mutacao de dados remotos.
+  suas rotas protegidas responderam corretamente no pos-check anonimo. Como nao
+  havia sessao produtiva autenticada conscientemente disponibilizada para
+  controle interativo, a jornada autenticada pos-deploy do gate 7 permanece
+  pendente; nao foram improvisados login, cookie, conta ou `storageState`.
+- Nao houve migration, nova conta, mudanca de acesso nem mutacao de dados
+  remotos. O deploy esta ativo e saudavel, mas a release nao deve ser tratada
+  como integralmente aceita ate a jornada autenticada observacional.
 - Conhecimento atualizado nos documentos versionados. O host nao possui vault
   Obsidian configurado; a sincronizacao externa permanece pendente, sem instalar
   ou conectar armazenamento sem autorizacao.

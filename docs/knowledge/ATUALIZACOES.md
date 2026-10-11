@@ -16,7 +16,7 @@
 
 ## 2026-10-10: Integracao do draft aprovado para a VPS
 
-- Status: `publicado` no SHA
+- Status: `runtime_publicado`; `aceite_pendente_jornada_autenticada` no SHA
   `ac3d7893c1e679298f54c1f1f8b57d03568715c2`. Fonte: PR #178, CI candidata
   `38133737505`, CI de `main` `38136053837` e
   `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps`, manifesto
@@ -86,8 +86,10 @@
   negacao anonima e rotas protegidas ficaram verdes, sem restart ou OOM.
   Rollback nao foi necessario.
 - Nao houve migration nem mutacao de dados remotos. A cobertura autenticada foi
-  concluida antes do deploy; a verificacao de producao permaneceu anonima para
-  nao criar sessao ou alterar proposta.
+  concluida antes do deploy; a verificacao de producao permaneceu anonima. Sem
+  uma sessao produtiva ja autenticada e conscientemente disponibilizada, nao se
+  improvisam login, cookie, `storageState` ou conta: o gate 7 e o aceite final da
+  release permanecem pendentes.
 - Registro completo: `docs/qa/draft-crm-vps-2026-10-10.md`.
 
 ## 2026-10-10: ITBI e registro dependem do contrato fiscal, nao do perfil comercial

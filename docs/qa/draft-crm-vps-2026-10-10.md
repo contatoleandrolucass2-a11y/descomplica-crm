@@ -7,9 +7,10 @@ Data: 10/10/2026. Branch de desenvolvimento: `codex/aplicar-draft-crm-vps`.
 Integracao implementada e aprovada nos gates locais, E2E de release e promocao
 visual autenticada listados neste documento. A verificacao pos-commit em modo
 `verify` tambem foi concluida e aprovada. O PR #178 foi integrado e a imagem
-imutavel da `main` foi publicada em producao por CAS no SHA
+imutavel da `main` foi promovida em producao por CAS no SHA
 `ac3d7893c1e679298f54c1f1f8b57d03568715c2`. Backup, rollback e verificacoes
-pos-publicacao estao registrados abaixo.
+anonimas pos-publicacao estao registrados abaixo. O aceite da release permanece
+pendente da jornada autenticada observacional exigida pelo gate 7.
 
 ## Proveniencia do draft
 
@@ -191,7 +192,7 @@ A verificacao pos-commit `4111089`, em modo `verify`, repetiu os 154 checks
 responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes e 110 de zoom;
 terminou verde e removeu a conta e as fixtures efemeras.
 
-## Publicacao confirmada em 11/10/2026
+## Promocao tecnica executada em 11/10/2026
 
 - O PR #178 foi integrado no merge
   `ac3d7893c1e679298f54c1f1f8b57d03568715c2`. A CI de `main`
@@ -224,8 +225,24 @@ terminou verde e removeu a conta e as fixtures efemeras.
   critico.
 - Nao houve migration, mudanca de DNS, conta, n8n ou dado remoto. As jornadas
   autenticadas foram comprovadas antes do deploy na CI e no QA local; a
-  observacao de producao foi deliberadamente anonima, sem criar sessao ou
-  alterar proposta.
+  observacao de producao foi deliberadamente anonima. Sem uma sessao produtiva
+  ja autenticada e conscientemente disponibilizada para controle interativo,
+  nao foram improvisados login, cookie, `storageState` ou conta.
 - O conhecimento foi atualizado nos documentos versionados. O comando
   `pnpm knowledge:sync` retornou `not-configured`; a sincronizacao externa com
   Obsidian permanece pendente neste host.
+
+## Pendencia para aceite da release
+
+- O runtime esta ativo e saudavel no SHA publicado, mas o gate 7 de
+  `docs/runbooks/automatic-publication.md` permanece aberto: os `307` comprovam
+  os guards, nao a renderizacao autenticada com a configuracao e os dados de
+  producao.
+- Para fechar o aceite, usar uma sessao produtiva ja autenticada e
+  conscientemente disponibilizada no navegador controlado pelo usuario. O smoke
+  deve ser somente observacional nas telas alteradas e nos quatro simuladores,
+  sem enviar formularios, calcular, salvar propostas, alterar tema persistido,
+  usuarios, integracoes ou qualquer dado remoto.
+- Ate essa evidencia existir, o estado correto e `runtime_publicado`, com
+  `aceite_pendente_jornada_autenticada`; a release nao esta integralmente
+  encerrada.
