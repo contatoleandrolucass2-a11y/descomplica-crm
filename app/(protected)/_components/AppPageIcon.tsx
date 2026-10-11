@@ -1,6 +1,7 @@
+import { ClipboardList } from "lucide-react";
+
 function iconCategory(pageKey: string) {
   if (pageKey.startsWith("crm.simulation")) return "calculator";
-  if (pageKey.startsWith("crm.management")) return "management";
   if (pageKey.startsWith("crm.settings")) return "settings";
   if (pageKey.startsWith("crm.stage")) return "funnel";
   if (pageKey === "crm.repasse") return "repasse";
@@ -11,6 +12,9 @@ function iconCategory(pageKey: string) {
 }
 
 export function AppPageIcon({ pageKey }: { pageKey: string }) {
+  if (pageKey.startsWith("crm.management")) {
+    return <ClipboardList aria-hidden="true" />;
+  }
   const category = iconCategory(pageKey);
 
   return (
@@ -25,12 +29,6 @@ export function AppPageIcon({ pageKey }: { pageKey: string }) {
         <>
           <circle cx="12" cy="12" r="3" />
           <path d="M19 12a7 7 0 0 0-.08-1l2-1.45-2-3.46-2.25.96a7.5 7.5 0 0 0-1.73-1L14.67 3h-4l-.27 3.05a7.5 7.5 0 0 0-1.73 1l-2.25-.96-2 3.46L6.42 11a7 7 0 0 0 0 2l-2 1.45 2 3.46 2.25-.96a7.5 7.5 0 0 0 1.73 1l.27 3.05h4l.27-3.05a7.5 7.5 0 0 0 1.73-1l2.25.96 2-3.46L18.92 13c.05-.33.08-.66.08-1Z" />
-        </>
-      ) : null}
-      {category === "management" ? (
-        <>
-          <rect x="5" y="4" width="14" height="17" rx="2" />
-          <path d="M9 4V2.75h6V4M8.5 9h7M8.5 13h7M8.5 17h4" />
         </>
       ) : null}
       {category === "funnel" ? <path d="M4 5h16l-6.25 7.1V19l-3.5 2v-8.9L4 5Z" /> : null}

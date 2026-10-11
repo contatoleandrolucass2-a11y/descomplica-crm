@@ -11,13 +11,19 @@
   vendas, Coordenador de parcerias e Corretor.
 - Somente Gerente regional house recebe rotina inicial revisada em português
   brasileiro. Demais funções permanecem nulas por enquanto.
+- Conferência completa da fonte preserva 26 linhas preenchidas e 74 atividades,
+  com repetições e alinhamento original por dia; revisão não resume os detalhes.
 - A rotina é editável, permite inserir linhas e salvar alterações no
   `localStorage` do navegador. Sem migration, banco, dados remotos ou n8n.
 - Gates locais aprovados: `pnpm lint`, `pnpm typecheck`, `pnpm build` e testes
   focados de rota, navegação, inventário, contrato visual e componente.
 - `pnpm test` completo falhou em cenários já incompatíveis com este Windows:
-  permissões POSIX 0600/0700, symlink de homologação e timeouts DevTools/
-  Obsidian. O contador de rotas do contrato visual foi corrigido e revalidado.
+  seis falhas de permissões POSIX 0600/0700 e symlink de homologação.
+  O contador de rotas do contrato visual foi corrigido e revalidado.
+- Publicação retomada no PR #183; integração com main 7cbca83 preserva temas,
+  administração e configurações da versão atual. Revisão independente detectou
+  atividades omitidas na planilha; fechamento recupera o conteúdo integral,
+  trata falha ao salvar e inclui QA dedicada de edição, teclado e temas.
 
 ## 2026-10-11: Correcao de temas e fronteira de Administrador publicada
 

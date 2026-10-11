@@ -1225,7 +1225,10 @@ export async function checkArchiveNavigation(
               await page.keyboard.press("Tab");
               await assertNavigationLinkFocused(partnerships, "/app/canal-de-parcerias");
               await page.keyboard.press("Tab");
-              await assertNavigationControlFocused(management, "authorized-navigation-crm-management");
+              await assertNavigationControlFocused(
+                management,
+                "authorized-navigation-crm-management",
+              );
               await page.keyboard.press("Tab");
               stage = `theme:${theme}:accessible-disclosure:administration-focus`;
               await assertNavigationControlFocused(

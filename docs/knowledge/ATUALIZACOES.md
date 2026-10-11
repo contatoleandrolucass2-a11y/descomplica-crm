@@ -11,12 +11,20 @@
 - A rotina inicial cobre apenas Gerente regional house. Gerente regional imob,
   Gerente house, Coordenador de vendas, Coordenador de parcerias e Corretor
   ficam nulos ate receberem classificacao propria.
+- Fonte conferida por XML da planilha: 26 linhas preenchidas e 74 atividades,
+  incluindo repeticoes e alinhamento por dia. Textos revisados sem reduzir os
+  detalhes operacionais. A linha Excel 29, totalmente vazia, nao vira atividade.
 - Edicao, insercao de linhas e botao Salvar gravam no `localStorage` do
   navegador. Nao houve migration, escrita remota, n8n ou nova permissao de banco.
 - Validacoes locais aprovadas: lint, typecheck, build e testes focados de
   componente, rota, navegacao, inventario e contrato visual. `pnpm test`
-  completo no Windows manteve falhas ambientais/preexistentes de modo POSIX,
-  symlink, DevTools e Obsidian; a falha de contador de rotas foi corrigida.
+  completo no Windows manteve seis falhas de modo POSIX e symlink; a falha de
+  contador de rotas foi corrigida. A CI Linux e a referencia desses testes.
+- Em 11/10, a publicacao foi retomada no PR #183. Integracao de `main`
+  `7cbca83` preserva Administracao no menu principal e Configuracoes na conta,
+  acrescentando Gestao antes de Administracao. A revisao da planilha encontrou
+  atividades omitidas; recuperacao integral, feedback de armazenamento,
+  teclado e QA autenticada dedicada foram incluidos no fechamento.
 
 ## 2026-10-11: Temas sem ilhas escuras e Administrador como classe protegida
 

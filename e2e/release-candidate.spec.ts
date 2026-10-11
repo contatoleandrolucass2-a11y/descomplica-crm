@@ -409,6 +409,8 @@ const protectedSurfaces = [
     heading: "Metas de pontos",
     allowed: adminRoles,
   },
+  { path: "/app/gestao", heading: "Gestão", allowed: adminRoles },
+  { path: "/app/gestao/rotina", heading: "Rotina", allowed: adminRoles },
   { path: "/app/simulacao", heading: "Hub de Simulação", allowed: simulatorViewRoles },
   {
     path: "/app/simulacao/associativo-fluxo-linear",
@@ -469,6 +471,7 @@ const settingsRoutes = [
   "/app/configuracoes/metas/parcerias",
   "/app/configuracoes/metas/pontos",
 ] as const;
+const managementRoutes = ["/app/gestao", "/app/gestao/rotina"] as const;
 const simulatorRoutes = [
   "/app/simulacao",
   "/app/simulacao/associativo-fluxo-linear",
@@ -496,6 +499,7 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/canal-de-parcerias",
     "/app/repasse",
     ...settingsRoutes,
+    ...managementRoutes,
     ...simulatorRoutes,
     ...administrationRoutes,
   ]),
@@ -505,6 +509,7 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/canal-de-parcerias",
     "/app/repasse",
     ...settingsRoutes,
+    ...managementRoutes,
     ...simulatorRoutes,
     ...administrationRoutes,
   ]),
@@ -523,6 +528,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/canal-de-parcerias",
     "/app/repasse",
     "/app/simulacao",
+    ...managementRoutes,
     ...administrationNavigationRoutes,
   ]),
   admin: sortedRouteSet([
@@ -531,6 +537,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/canal-de-parcerias",
     "/app/repasse",
     "/app/simulacao",
+    ...managementRoutes,
     ...administrationNavigationRoutes,
   ]),
   coordinator: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
@@ -585,6 +592,14 @@ function expectedPrimaryNavigationRootsForRole(role: Role) {
       tag: "A",
       href: "/app/canal-de-parcerias",
       controls: null,
+    });
+  }
+  if (authorizedRoutes.has("/app/gestao")) {
+    roots.push({
+      name: "Gestão",
+      tag: "BUTTON",
+      href: null,
+      controls: "authorized-navigation-crm-management",
     });
   }
   if (authorizedRoutes.has("/admin")) {
@@ -748,20 +763,24 @@ test.afterAll(() => {
 });
 
 test("the hosted profile matrix uses the exact approved commercial page sets", () => {
-  expect(protectedSurfaces).toHaveLength(25);
+  expect(protectedSurfaces).toHaveLength(27);
+  expect(new Set(protectedSurfaces.map((surface) => surface.path)).size).toBe(27);
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 13 : activeOperationalRoles.has(role) ? 7 : 0,
+      adminRoles.has(role) ? 15 : activeOperationalRoles.has(role) ? 7 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
     );
     expect(expectedPrimaryNavigationRootsForRole(role), role).toHaveLength(
-      adminRoles.has(role) ? 5 : activeOperationalRoles.has(role) ? 2 : 0,
+      adminRoles.has(role) ? 6 : activeOperationalRoles.has(role) ? 2 : 0,
     );
 
     const directRoutes = expectedDirectRoutesByRole[role];
+    for (const route of managementRoutes) {
+      expect(directRoutes.includes(route), `${role}: ${route}`).toBe(adminRoles.has(role));
+    }
     expect(expectedAccountSettingsRoutesForRole(role).includes(connectedSystemsRoute), role).toBe(
       directRoutes.includes(connectedSystemsRoute) && !directRoutes.includes("/admin"),
     );

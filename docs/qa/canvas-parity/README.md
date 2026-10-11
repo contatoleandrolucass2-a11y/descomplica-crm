@@ -54,7 +54,7 @@ testes funcionais proprios.
 | `configuracoes-metas-funil.webp` | esquerda | `/app/configuracoes`                      |
 | `configuracoes-metas-funil.webp` |  direita | `/app/configuracoes/metas`                |
 | `configuracoes-metas-funil.webp` | derivada | `/app/gestao`                             |
-| `configuracoes-metas-funil.webp` | derivada | `/app/gestao/rotina`                      |
+| `hub-simulacao-associativo.webp` | derivada | `/app/gestao/rotina`                      |
 | `metas-parcerias-pontos.webp`    | esquerda | `/app/configuracoes/metas/parcerias`      |
 | `metas-parcerias-pontos.webp`    |  direita | `/app/configuracoes/metas/pontos`         |
 | `hub-simulacao-associativo.webp` | esquerda | `/app/simulacao`                          |
@@ -67,6 +67,12 @@ testes funcionais proprios.
 | `tabelao-administracao.webp`     |  direita | `/admin`                                  |
 | `usuarios-catalogo-paginas.webp` | esquerda | `/admin/usuarios`                         |
 | `usuarios-catalogo-paginas.webp` |  direita | `/admin/paginas`                          |
+
+Gestão > Rotina reutiliza os tokens da Tabela Associativo. Sua rotina é uma
+nova superfície, validada pelo roteiro `scripts/qa/routine-settings.mjs`, com
+edição, inserção, persistência local, teclado, temas, Axe e capturas responsivas.
+A referência derivada identifica a origem visual; não afirma reprodução
+pixel a pixel de uma tela de rotina que não existia no canvas aprovado.
 
 `navegacao-dropdown.webp` e `navegacao-mobile.webp` são contratos adicionais
 da navbar única. `dashboard-composicao-alternativa.webp` é referência secundária

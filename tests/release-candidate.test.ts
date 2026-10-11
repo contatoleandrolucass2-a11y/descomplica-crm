@@ -1,7 +1,11 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
+import { runInNewContext } from "node:vm";
 
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
+
+import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
 
 const repositoryRoot = process.cwd();
 const administratorProtectionMigration =
@@ -88,6 +92,102 @@ describe("release-candidate migration train", () => {
 });
 
 describe("release-candidate activation defaults", () => {
+  it("converges the browser matrix with Gestão access and the released route inventory", async () => {
+    const source = await readFile(
+      path.join(repositoryRoot, "e2e/release-candidate.spec.ts"),
+      "utf8",
+    );
+    const tree = ts.createSourceFile("release-candidate.spec.ts", source, ts.ScriptTarget.Latest);
+    const declarationNames = new Set([
+      "expectedRoles",
+      "adminRoles",
+      "activeOperationalRoles",
+      "rankingRoles",
+      "partnershipRoles",
+      "repasseRoles",
+      "simulatorViewRoles",
+      "protectedSurfaces",
+      "operationalRoutes",
+      "connectedSystemsRoute",
+      "settingsRoutes",
+      "managementRoutes",
+      "simulatorRoutes",
+      "administrationRoutes",
+      "administrationNavigationRoutes",
+      "expectedDirectRoutesByRole",
+      "expectedHeaderRoutesByRole",
+      "allowedDirectRoutesForRole",
+      "sortedRouteSet",
+      "expectedAccountSettingsRoutesForRole",
+      "expectedPrimaryNavigationRootsForRole",
+    ]);
+    // Evaluate only the pure matrix declarations, without loading browser setup or credentials.
+    const declarations = tree.statements
+      .filter((statement) =>
+        ts.isFunctionDeclaration(statement)
+          ? declarationNames.has(statement.name?.text ?? "")
+          : ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(
+              (declaration) =>
+                ts.isIdentifier(declaration.name) && declarationNames.has(declaration.name.text),
+            ),
+      )
+      .map((statement) => statement.getText(tree))
+      .join("\n");
+    const matrix = runInNewContext(
+      ts.transpileModule(
+        `${declarations}\n({ expectedRoles, protectedSurfaces, expectedDirectRoutesByRole, expectedHeaderRoutesByRole, allowedDirectRoutesForRole, expectedAccountSettingsRoutesForRole, expectedPrimaryNavigationRootsForRole })`,
+        { compilerOptions: { target: ts.ScriptTarget.ES2022 } },
+      ).outputText,
+      {},
+      { timeout: 1000 },
+    );
+    const surfacePaths = matrix.protectedSurfaces.map((surface: { path: string }) => surface.path);
+    expect(surfacePaths).toHaveLength(27);
+    expect(new Set(surfacePaths).size).toBe(27);
+    expect([...surfacePaths].sort()).toEqual(
+      PROTECTED_PAGE_GATES.filter((gate) => gate.releaseEnabled)
+        .map((gate) => gate.path)
+        .sort(),
+    );
+    for (const role of matrix.expectedRoles) {
+      const administrative = role === "master" || role === "admin";
+      expect(matrix.allowedDirectRoutesForRole(role), role).toEqual(
+        matrix.expectedDirectRoutesByRole[role],
+      );
+      for (const route of ["/app/gestao", "/app/gestao/rotina"]) {
+        expect(matrix.expectedDirectRoutesByRole[role].includes(route), `${role}: ${route}`).toBe(
+          administrative,
+        );
+        expect(matrix.expectedHeaderRoutesByRole[role].includes(route), `${role}: ${route}`).toBe(
+          administrative,
+        );
+        expect(matrix.expectedAccountSettingsRoutesForRole(role)).not.toContain(route);
+      }
+      const roots = matrix.expectedPrimaryNavigationRootsForRole(role);
+      expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
+      if (administrative) {
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(15);
+        expect(roots.map((root: { name: string }) => root.name)).toEqual([
+          "Dashboard",
+          "Simulação",
+          "Ranking",
+          "Canal de Parcerias",
+          "Gestão",
+          "Administração",
+        ]);
+        expect(roots[4]).toEqual({
+          name: "Gestão",
+          tag: "BUTTON",
+          href: null,
+          controls: "authorized-navigation-crm-management",
+        });
+      } else {
+        expect(roots.some((root: { name: string }) => root.name === "Gestão")).toBe(false);
+      }
+    }
+  });
+
   it("keeps restore and browser gates synchronized with the released access matrix", async () => {
     const [restoreHarness, rlsHarness, browserHarness, visualHarness] = await Promise.all([
       readFile(path.join(repositoryRoot, "scripts/release/isolated-restore-rehearsal.mjs"), "utf8"),

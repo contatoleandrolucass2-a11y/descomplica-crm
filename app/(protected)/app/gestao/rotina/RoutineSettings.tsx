@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { CalendarCheck2, Plus, RotateCcw, Save, Sparkles } from "lucide-react";
 
 import { SimulationCanvasHeader } from "@/app/(protected)/app/simulacao/_components/SimulationCanvasHeader";
@@ -31,36 +31,30 @@ type RoleKey =
 type RoutineRow = Record<Weekday, string>;
 type RoutineState = Record<RoleKey, RoutineRow[]>;
 
-const roles: Array<{ key: RoleKey; label: string; description: string }> = [
+const roles: Array<{ key: RoleKey; label: string }> = [
   {
     key: "regional-house",
     label: "Gerente regional house",
-    description: "Rotina classificada para acompanhamento semanal.",
   },
   {
     key: "regional-imob",
     label: "Gerente regional imob",
-    description: "Aguardando classificação.",
   },
   {
     key: "gerente-house",
     label: "Gerente house",
-    description: "Aguardando classificação.",
   },
   {
     key: "coordenador-vendas",
     label: "Coordenador de vendas",
-    description: "Aguardando classificação.",
   },
   {
     key: "coordenador-parcerias",
     label: "Coordenador de parcerias",
-    description: "Aguardando classificação.",
   },
   {
     key: "corretor",
     label: "Corretor",
-    description: "Aguardando classificação.",
   },
 ];
 
@@ -84,12 +78,22 @@ const regionalHouseRows: RoutineRow[] = [
     Domingo: "",
   },
   {
+    "Segunda-feira": "",
+    "Terça-feira": "",
+    "Quarta-feira": "",
+    "Quinta-feira":
+      "Realizar uma preleção com o time, motivando a equipe a buscar a meta traçada para o dia.",
+    "Sexta-feira": "",
+    Sábado: "Analisar o número de visitas nesse dia.",
+    Domingo: "",
+  },
+  {
     "Segunda-feira": "Verificar se existem leads parados.",
     "Terça-feira": "Verificar se existem leads parados.",
     "Quarta-feira": "Verificar se existem leads parados.",
     "Quinta-feira": "Verificar se existem leads parados.",
     "Sexta-feira": "Verificar se existem leads parados.",
-    Sábado: "Olhar o número de visitas nesse dia.",
+    Sábado: "",
     Domingo: "",
   },
   {
@@ -102,21 +106,36 @@ const regionalHouseRows: RoutineRow[] = [
     Domingo: "",
   },
   {
-    "Segunda-feira": "Analisar o Volta ao Caixa de marketing e comparar com o tamanho do time.",
+    "Segunda-feira": "Analisar o volta ao caixa de marketing e comparar com o tamanho do time.",
     "Terça-feira": "Verificar repasse e prazos.",
     "Quarta-feira": "Analisar o planejamento da ação externa e acompanhar o resultado final.",
     "Quinta-feira": "Preparar a base para a geração do ofertão.",
-    "Sexta-feira": "Analisar o Volta ao Caixa de marketing e comparar com o tamanho do time.",
+    "Sexta-feira": "Analisar o volta ao caixa de marketing e comparar com o tamanho do time.",
+    Sábado: "",
+    Domingo: "",
+  },
+  {
+    "Segunda-feira": "",
+    "Terça-feira":
+      "Analisar o número de agendamentos do dia anterior. Se estiver abaixo da meta, orientar o gerente sobre quantos agendamentos ainda faltam.",
+    "Quarta-feira":
+      "Analisar o número de agendamentos do dia anterior. Se estiver abaixo da meta, orientar o gerente sobre quantos agendamentos ainda faltam.",
+    "Quinta-feira":
+      "Analisar o número de agendamentos do dia anterior. Se estiver abaixo da meta, orientar o gerente sobre quantos agendamentos ainda faltam.",
+    "Sexta-feira":
+      "Analisar o número de agendamentos do dia anterior. Se estiver abaixo da meta, orientar o gerente sobre quantos agendamentos ainda faltam.",
     Sábado: "",
     Domingo: "",
   },
   {
     "Segunda-feira": "Analisar a quantidade de leads do dia em relação ao tamanho do time.",
     "Terça-feira": "Analisar o planejamento da ação externa e acompanhar o resultado final.",
-    "Quarta-feira": "Analisar o funil de vendas e conferir se cada conversão está dentro da média.",
+    "Quarta-feira":
+      "Analisar o funil de vendas e conferir se cada etapa está de acordo com a média.",
     "Quinta-feira":
       "Cobrar retorno dos agendamentos da semana passada que não compareceram e direcionar para o final de semana.",
-    "Sexta-feira": "Analisar o funil de vendas e conferir se cada conversão está dentro da média.",
+    "Sexta-feira":
+      "Analisar o funil de vendas e conferir se cada etapa está de acordo com a média.",
     Sábado: "",
     Domingo: "",
   },
@@ -125,33 +144,33 @@ const regionalHouseRows: RoutineRow[] = [
     "Terça-feira": "Treinamento de processos.",
     "Quarta-feira": "",
     "Quinta-feira":
-      "Conferir agendamentos com o gerente. Cada corretor deve buscar no mínimo dois agendamentos no dia.",
-    "Sexta-feira": "Treinamento Acelera.",
+      "Conferir os agendamentos com o gerente. Cada corretor deve fazer no mínimo dois agendamentos no dia. Se estiver abaixo da meta, orientar ações para alcançar o número esperado nessa data.",
+    "Sexta-feira": "Treinamento acelera.",
     Sábado: "",
     Domingo: "",
   },
   {
     "Segunda-feira":
-      "Programa retenção. Analisar a frequência da semana anterior e ajustar a roleta semanal.",
-    "Terça-feira": "Medir equipe sem Creci e criar plano de ação.",
-    "Quarta-feira": "Acompanhar prazos de atendimento e cobrar atualização no sistema.",
+      "Programa retenção. Analisar a frequência dos corretores no programa na semana anterior e ajustar a roleta semanal.",
+    "Terça-feira": "Analisar o percentual da equipe sem Creci e criar um plano de ação.",
+    "Quarta-feira": "Acompanhar os prazos de atendimento e cobrar atualização no sistema.",
     "Quinta-feira":
-      "Comparar a conversão de agendamentos para visitas e orientar melhorias na qualidade dos agendamentos.",
-    "Sexta-feira": "Acompanhar prazos de atendimento e cobrar atualização no sistema.",
+      "Comparar com o gerente a conversão de agendamentos para visitas e orientar melhorias na qualidade dos agendamentos.",
+    "Sexta-feira": "Acompanhar os prazos de atendimento e cobrar atualização no sistema.",
     Sábado: "",
     Domingo: "",
   },
   {
     "Segunda-feira":
-      "Leads do gerente. Analisar a frequência da semana anterior e ajustar a roleta semanal.",
+      "Leads do gerente. Analisar a frequência dos corretores na semana anterior e ajustar a roleta semanal.",
     "Terça-feira":
-      "Olhar contratos gerados, assinatura do cliente, pagamento do sinal e possíveis falhas no comissionamento.",
+      "Verificar se o cliente assinou o contrato e pagou o sinal. Identificar falhas no comissionamento da cadeia: corretor, gerente regional e diretor. Se houver falha, acionar o coordenador que gerou o contrato para resolver.",
     "Quarta-feira":
-      "Olhar o painel de oportunidades e montar plano de ação para clientes que não evoluíram para venda.",
+      "Analisar no painel de oportunidades os rankings com datas iguais ou posteriores à última consulta do CPF que não evoluíram para venda. Realizar uma nova consulta do CPF e criar um plano de ação para o cliente.",
     "Quinta-feira":
-      "Observar vestimenta, comportamento e rotina dos corretores. Acompanhar ligações e mensagens para orientar ajustes.",
+      "Observar vestimenta, comportamento e rotina dos corretores. Acompanhar de perto ligações e mensagens e orientar os ajustes necessários.",
     "Sexta-feira":
-      "Olhar fichas aprovadas sem reversão para venda e buscar soluções para converter o cliente.",
+      "Analisar os detalhes de cada ficha aprovada que ainda não gerou venda e buscar soluções para converter o cliente.",
     Sábado: "",
     Domingo: "",
   },
@@ -163,32 +182,35 @@ const regionalHouseRows: RoutineRow[] = [
     "Quinta-feira":
       "Analisar o plano de ação elaborado na segunda-feira e identificar necessidade de ajuste de rota.",
     "Sexta-feira":
-      "Olhar fichas reprovadas com a CCA e o corretor para buscar reversão do processo.",
+      "Analisar os detalhes de cada ficha reprovada com a CCA e o corretor para buscar reversão do processo.",
     Sábado: "",
     Domingo: "",
   },
   {
     "Segunda-feira":
-      "Analisar percentual de leads perdidos em aguardando atendimento e em atendimento.",
+      "Analisar o percentual de leads perdidos em aguardando atendimento e em atendimento.",
     "Terça-feira": "",
     "Quarta-feira": "",
     "Quinta-feira": "",
-    "Sexta-feira": "Olhar fichas em rascunho. Processo em rascunho precisa de ação imediata.",
-    Sábado: "",
-    Domingo: "",
-  },
-  {
-    "Segunda-feira": "Analisar números previstos para o final de semana contra o realizado.",
-    "Terça-feira": "",
-    "Quarta-feira": "",
-    "Quinta-feira": "",
-    "Sexta-feira": "Olhar vendas futuras e facilitadas e buscar antecipar o repasse do cliente.",
+    "Sexta-feira":
+      "Analisar fichas em rascunho. Não deve haver processo com esse status sem ação para avançar.",
     Sábado: "",
     Domingo: "",
   },
   {
     "Segunda-feira":
-      "Verificar evidências do plano de ação em agendamento, visita, pasta e venda. Analisar evolução.",
+      "Analisar o percentual de leads perdidos em aguardando atendimento e em atendimento.",
+    "Terça-feira": "",
+    "Quarta-feira": "",
+    "Quinta-feira": "",
+    "Sexta-feira":
+      "Analisar vendas futuras e facilitadas e buscar soluções para antecipar o repasse do cliente.",
+    Sábado: "",
+    Domingo: "",
+  },
+  {
+    "Segunda-feira":
+      "Analisar os números previstos para o final de semana em comparação com o realizado.",
     "Terça-feira": "",
     "Quarta-feira": "",
     "Quinta-feira": "",
@@ -198,7 +220,7 @@ const regionalHouseRows: RoutineRow[] = [
   },
   {
     "Segunda-feira":
-      "Analisar número de agendamentos. Comparar semana anterior, mês vigente e indicador do dia.",
+      "Verificar evidências do plano de ação em agendamento, visita, pasta e venda. Analisar a evolução.",
     "Terça-feira": "",
     "Quarta-feira": "",
     "Quinta-feira": "",
@@ -208,7 +230,7 @@ const regionalHouseRows: RoutineRow[] = [
   },
   {
     "Segunda-feira":
-      "Analisar número de visitas. Comparar semana anterior, mês vigente e indicador do dia.",
+      "Analisar o número de agendamentos realizados na semana anterior e no mês vigente e comparar com o indicador do dia.",
     "Terça-feira": "",
     "Quarta-feira": "",
     "Quinta-feira": "",
@@ -218,7 +240,7 @@ const regionalHouseRows: RoutineRow[] = [
   },
   {
     "Segunda-feira":
-      "Analisar número de pastas. Comparar semana anterior, mês vigente e indicador do dia.",
+      "Analisar o número de visitas realizadas na semana anterior e no mês vigente e comparar com o indicador do dia.",
     "Terça-feira": "",
     "Quarta-feira": "",
     "Quinta-feira": "",
@@ -228,16 +250,7 @@ const regionalHouseRows: RoutineRow[] = [
   },
   {
     "Segunda-feira":
-      "Analisar número de vendas. Comparar semana anterior, mês vigente e indicador do dia.",
-    "Terça-feira": "",
-    "Quarta-feira": "",
-    "Quinta-feira": "",
-    "Sexta-feira": "",
-    Sábado: "",
-    Domingo: "",
-  },
-  {
-    "Segunda-feira": "Analisar planejado contra realizado e criar plano de ação da semana vigente.",
+      "Analisar o número de pastas realizadas na semana anterior e no mês vigente e comparar com o indicador do dia.",
     "Terça-feira": "",
     "Quarta-feira": "",
     "Quinta-feira": "",
@@ -247,16 +260,7 @@ const regionalHouseRows: RoutineRow[] = [
   },
   {
     "Segunda-feira":
-      "Acompanhar tamanho da equipe, tempo de casa, produtividade, agendamentos, visitas, pastas e vendas.",
-    "Terça-feira": "",
-    "Quarta-feira": "",
-    "Quinta-feira": "",
-    "Sexta-feira": "",
-    Sábado: "",
-    Domingo: "",
-  },
-  {
-    "Segunda-feira": "Analisar turnover de cada equipe e ajustar rota para reduzir ao máximo.",
+      "Analisar o número de vendas realizadas na semana anterior e no mês vigente e comparar com o indicador do dia.",
     "Terça-feira": "",
     "Quarta-feira": "",
     "Quinta-feira": "",
@@ -266,7 +270,7 @@ const regionalHouseRows: RoutineRow[] = [
   },
   {
     "Segunda-feira":
-      "Cobrar descredenciamento de corretores com mais de 30 dias sem agendamento ou visita.",
+      "Analisar planejado contra realizado e criar um plano de ação da semana vigente.",
     "Terça-feira": "",
     "Quarta-feira": "",
     "Quinta-feira": "",
@@ -276,7 +280,36 @@ const regionalHouseRows: RoutineRow[] = [
   },
   {
     "Segunda-feira":
-      "Ajustar escala de folga dos gerentes e acompanhar escala dos corretores para prever o time no plantão.",
+      "Acompanhar o tamanho da equipe. Comparar a quantidade de corretores com o tempo de casa do gerente e analisar a equipe produtiva em agendamentos, visitas, pastas e vendas.",
+    "Terça-feira": "",
+    "Quarta-feira": "",
+    "Quinta-feira": "",
+    "Sexta-feira": "",
+    Sábado: "",
+    Domingo: "",
+  },
+  {
+    "Segunda-feira": "Analisar o turnover de cada equipe e ajustar a rota para reduzir ao máximo.",
+    "Terça-feira": "",
+    "Quarta-feira": "",
+    "Quinta-feira": "",
+    "Sexta-feira": "",
+    Sábado: "",
+    Domingo: "",
+  },
+  {
+    "Segunda-feira":
+      "Cobrar do gerente o descredenciamento de corretores com mais de 30 dias sem agendamento ou visita.",
+    "Terça-feira": "",
+    "Quarta-feira": "",
+    "Quinta-feira": "",
+    "Sexta-feira": "",
+    Sábado: "",
+    Domingo: "",
+  },
+  {
+    "Segunda-feira":
+      "Ajustar a escala de folga dos gerentes e acompanhar a escala dos corretores para prever o time no plantão e seus dias.",
     "Terça-feira": "",
     "Quarta-feira": "",
     "Quinta-feira": "",
@@ -299,12 +332,12 @@ const regionalHouseRows: RoutineRow[] = [
     Domingo: "",
   },
   {
-    "Segunda-feira": "Postar conteúdo no Store, redes sociais e status.",
-    "Terça-feira": "Postar conteúdo no Store, redes sociais e status.",
-    "Quarta-feira": "Postar conteúdo no Store, redes sociais e status.",
+    "Segunda-feira": "Publicar conteúdo nos stories, nas redes sociais e no status.",
+    "Terça-feira": "Publicar conteúdo nos stories, nas redes sociais e no status.",
+    "Quarta-feira": "Publicar conteúdo nos stories, nas redes sociais e no status.",
     "Quinta-feira":
-      "Preencher e analisar resultado. Ajustar rota quando os números não forem satisfatórios.",
-    "Sexta-feira": "Postar conteúdo no Store, redes sociais e status.",
+      "Preencher e analisar o resultado. Ajustar a rota quando os números não forem satisfatórios.",
+    "Sexta-feira": "Publicar conteúdo nos stories, nas redes sociais e no status.",
     Sábado: "",
     Domingo: "",
   },
@@ -352,18 +385,24 @@ export function RoutineSettings() {
   const [routine, setRoutine] = useState<RoutineState>(defaultRoutine);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [storageError, setStorageError] = useState<string | null>(null);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
     const loadStoredRoutine = window.setTimeout(() => {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
+      try {
+        const stored = window.localStorage.getItem(STORAGE_KEY);
+        if (stored) {
           setRoutine(normalizeStoredRoutine(JSON.parse(stored)));
-        } catch {
-          setRoutine(defaultRoutine);
         }
+      } catch {
+        setStorageError(
+          "Não foi possível carregar a rotina salva neste navegador. A rotina inicial está sendo exibida.",
+        );
+      } finally {
+        setHasLoaded(true);
       }
-      setHasLoaded(true);
     }, 0);
 
     return () => window.clearTimeout(loadStoredRoutine);
@@ -380,37 +419,85 @@ export function RoutineSettings() {
   );
 
   function updateCell(rowIndex: number, weekday: Weekday, value: string) {
+    if (!hasLoaded) return;
     setRoutine((current) => ({
       ...current,
       [activeRole]: current[activeRole].map((row, index) =>
         index === rowIndex ? { ...row, [weekday]: value } : row,
       ),
     }));
+    setHasUnsavedChanges(true);
   }
 
   function addRow() {
+    if (!hasLoaded) return;
     setRoutine((current) => ({
       ...current,
       [activeRole]: [...current[activeRole], emptyRow()],
     }));
+    setHasUnsavedChanges(true);
   }
 
   function resetActiveRole() {
+    if (!hasLoaded) return;
+    if (
+      !window.confirm(
+        `Restaurar a rotina de ${activeRoleInfo.label.toLowerCase()}? As alterações desta função serão descartadas.`,
+      )
+    )
+      return;
     setRoutine((current) => ({
       ...current,
       [activeRole]: defaultRoutine[activeRole],
     }));
-    setSavedAt(null);
+    setHasUnsavedChanges(true);
   }
 
   function saveRoutine() {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(routine));
-    setSavedAt(
-      new Intl.DateTimeFormat("pt-BR", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }).format(new Date()),
-    );
+    if (!hasLoaded) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(routine));
+      setSavedAt(
+        new Intl.DateTimeFormat("pt-BR", {
+          dateStyle: "short",
+          timeStyle: "short",
+        }).format(new Date()),
+      );
+      setHasUnsavedChanges(false);
+      setStorageError(null);
+    } catch {
+      setSavedAt(null);
+      setHasUnsavedChanges(true);
+      setStorageError(
+        "Não foi possível salvar a rotina neste navegador. As alterações continuam não salvas.",
+      );
+    }
+  }
+
+  function handleRoleKeyDown(event: KeyboardEvent<HTMLButtonElement>, roleIndex: number) {
+    if (!hasLoaded) return;
+    let nextIndex: number;
+    switch (event.key) {
+      case "ArrowRight":
+      case "ArrowDown":
+        nextIndex = (roleIndex + 1) % roles.length;
+        break;
+      case "ArrowLeft":
+      case "ArrowUp":
+        nextIndex = (roleIndex - 1 + roles.length) % roles.length;
+        break;
+      case "Home":
+        nextIndex = 0;
+        break;
+      case "End":
+        nextIndex = roles.length - 1;
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+    setActiveRole(roles[nextIndex]!.key);
+    tabRefs.current[nextIndex]?.focus();
   }
 
   return (
@@ -428,11 +515,17 @@ export function RoutineSettings() {
                 className={styles.secondaryAction}
                 aria-label="Restaurar rotina da função ativa"
                 title="Restaurar rotina da função ativa"
+                disabled={!hasLoaded}
                 onClick={resetActiveRole}
               >
                 <RotateCcw size={18} aria-hidden="true" />
               </button>
-              <button type="button" className={styles.primaryAction} onClick={saveRoutine}>
+              <button
+                type="button"
+                className={styles.primaryAction}
+                disabled={!hasLoaded}
+                onClick={saveRoutine}
+              >
                 <Save size={17} aria-hidden="true" />
                 Salvar alterações
               </button>
@@ -447,24 +540,33 @@ export function RoutineSettings() {
             </span>
             <div>
               <p className={styles.kicker}>Rotina comercial</p>
-              <h2 id="routine-overview-title">Gerente regional house</h2>
+              <h2 id="routine-overview-title">{activeRoleInfo.label}</h2>
               <p>
-                Conteúdo inicial revisado a partir da planilha de referência. As demais funções
-                ficam sem classificação até receberem rotina própria.
+                {activeSummary.filled
+                  ? `${activeSummary.filled} ${activeSummary.filled === 1 ? "atividade" : "atividades"} em ${activeSummary.rows} ${activeSummary.rows === 1 ? "linha" : "linhas"} na semana.`
+                  : "Nenhuma atividade cadastrada para esta função."}
               </p>
             </div>
           </div>
           <div className={styles.saveState} role="status" aria-live="polite">
             <Sparkles size={18} aria-hidden="true" />
             <span>
-              {savedAt
-                ? `Último salvamento local em ${savedAt}.`
-                : hasLoaded
-                  ? "Ajuste a rotina e salve quando terminar."
-                  : "Carregando rotina."}
+              {!hasLoaded
+                ? "Carregando rotina."
+                : hasUnsavedChanges
+                  ? "Alterações não salvas."
+                  : savedAt
+                    ? `Último salvamento local em ${savedAt}.`
+                    : "Nenhuma alteração pendente."}
             </span>
           </div>
         </section>
+
+        {storageError ? (
+          <p className={styles.storageError} role="alert">
+            {storageError}
+          </p>
+        ) : null}
 
         <section className={styles.rolesPanel} aria-labelledby="routine-options-title">
           <div className={styles.sectionHeading}>
@@ -475,14 +577,22 @@ export function RoutineSettings() {
             <span>{roles.length} funções</span>
           </div>
           <div className={styles.roleTabs} role="tablist" aria-label="Opções de rotina">
-            {roles.map((role) => (
+            {roles.map((role, roleIndex) => (
               <button
                 key={role.key}
+                ref={(element) => {
+                  tabRefs.current[roleIndex] = element;
+                }}
+                id={`routine-tab-${role.key}`}
                 type="button"
                 role="tab"
                 aria-selected={activeRole === role.key}
+                aria-controls={`routine-panel-${role.key}`}
+                tabIndex={hasLoaded && activeRole === role.key ? 0 : -1}
+                disabled={!hasLoaded}
                 className={styles.roleTab}
                 onClick={() => setActiveRole(role.key)}
+                onKeyDown={(event) => handleRoleKeyDown(event, roleIndex)}
               >
                 <strong>{role.label}</strong>
                 <span>
@@ -493,72 +603,97 @@ export function RoutineSettings() {
           </div>
         </section>
 
-        <section className={styles.tablePanel} aria-labelledby="routine-table-title">
-          <div className={styles.tableToolbar}>
-            <div>
-              <p className={styles.kicker}>{activeRoleInfo.label}</p>
-              <h2 id="routine-table-title">Classificação da semana</h2>
-              <p>{activeRoleInfo.description}</p>
-            </div>
-            <div className={styles.tableStats} aria-label="Resumo da rotina ativa">
-              <span>{activeSummary.rows} linhas</span>
-              <span>{activeSummary.filled} atividades</span>
-              <button type="button" className={styles.addButton} onClick={addRow}>
-                <Plus size={17} aria-hidden="true" />
-                Inserir linha
-              </button>
-            </div>
-          </div>
+        {roles.map((role) => (
+          <section
+            key={role.key}
+            id={`routine-panel-${role.key}`}
+            role="tabpanel"
+            aria-labelledby={`routine-tab-${role.key}`}
+            aria-busy={!hasLoaded}
+            tabIndex={0}
+            hidden={activeRole !== role.key}
+            className={styles.tablePanel}
+          >
+            {activeRole === role.key ? (
+              <>
+                <div className={styles.tableToolbar}>
+                  <div>
+                    <p className={styles.kicker}>{activeRoleInfo.label}</p>
+                    <h2 id="routine-table-title">Classificação da semana</h2>
+                  </div>
+                  <div className={styles.tableStats} aria-label="Resumo da rotina ativa">
+                    <span>{activeSummary.rows} linhas</span>
+                    <span>{activeSummary.filled} atividades</span>
+                    <button
+                      type="button"
+                      className={styles.addButton}
+                      disabled={!hasLoaded}
+                      onClick={addRow}
+                    >
+                      <Plus size={17} aria-hidden="true" />
+                      Inserir linha
+                    </button>
+                  </div>
+                </div>
 
-          {activeRows.length ? (
-            <div className={styles.tableScroll}>
-              <table className={styles.routineTable}>
-                <caption>
-                  Rotina semanal editável para {activeRoleInfo.label.toLowerCase()}.
-                </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Linha</th>
-                    {weekdays.map((weekday) => (
-                      <th key={weekday} scope="col">
-                        {weekday}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeRows.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      <th scope="row">{rowIndex + 1}</th>
-                      {weekdays.map((weekday) => (
-                        <td key={weekday} data-label={weekday}>
-                          <textarea
-                            aria-label={`${weekday}, linha ${rowIndex + 1}`}
-                            value={row[weekday]}
-                            onChange={(event) => updateCell(rowIndex, weekday, event.target.value)}
-                            placeholder="Adicionar atividade"
-                            rows={3}
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className={styles.emptyState}>
-              <h3>{activeRoleInfo.label}</h3>
-              <p>
-                Rotina nula por enquanto. Insira uma linha quando quiser iniciar a classificação.
-              </p>
-              <button type="button" className={styles.primaryAction} onClick={addRow}>
-                <Plus size={17} aria-hidden="true" />
-                Inserir primeira linha
-              </button>
-            </div>
-          )}
-        </section>
+                {activeRows.length ? (
+                  <div className={styles.tableScroll}>
+                    <table className={styles.routineTable}>
+                      <caption>
+                        Rotina semanal editável para {activeRoleInfo.label.toLowerCase()}.
+                      </caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">Linha</th>
+                          {weekdays.map((weekday) => (
+                            <th key={weekday} scope="col">
+                              {weekday}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeRows.map((row, rowIndex) => (
+                          <tr key={rowIndex}>
+                            <th scope="row">{rowIndex + 1}</th>
+                            {weekdays.map((weekday) => (
+                              <td key={weekday} data-label={weekday}>
+                                <textarea
+                                  aria-label={`${weekday}, linha ${rowIndex + 1}`}
+                                  disabled={!hasLoaded}
+                                  value={row[weekday]}
+                                  onChange={(event) =>
+                                    updateCell(rowIndex, weekday, event.target.value)
+                                  }
+                                  placeholder="Adicionar atividade"
+                                  rows={3}
+                                />
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className={styles.emptyState}>
+                    <h3>{activeRoleInfo.label}</h3>
+                    <p>Nenhuma atividade cadastrada.</p>
+                    <button
+                      type="button"
+                      className={styles.primaryAction}
+                      disabled={!hasLoaded}
+                      onClick={addRow}
+                    >
+                      <Plus size={17} aria-hidden="true" />
+                      Inserir primeira linha
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : null}
+          </section>
+        ))}
       </main>
     </div>
   );

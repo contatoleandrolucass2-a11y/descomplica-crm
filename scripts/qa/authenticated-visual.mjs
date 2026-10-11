@@ -10,6 +10,7 @@ import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
 import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
 import { checkMarketingResources } from "./marketing-resources.mjs";
+import { checkRoutineSettings } from "./routine-settings.mjs";
 import { checkConnectedSystems } from "./connected-systems.mjs";
 import { checkRepasse } from "./repasse.mjs";
 import {
@@ -5827,6 +5828,21 @@ async function run() {
             );
           } finally {
             await marketingPage.close({ runBeforeUnload: false });
+          }
+          currentStage = "routine-settings";
+          const routinePage = configureQaPage(await context.newPage());
+          try {
+            const routine = await checkRoutineSettings(
+              routinePage,
+              origin,
+              path.join(artifactRoot, "routine"),
+            );
+            await writeFile(
+              path.join(artifactRoot, "routine-results.json"),
+              JSON.stringify(routine, null, 2),
+            );
+          } finally {
+            await routinePage.close({ runBeforeUnload: false });
           }
           currentStage = "connected-systems";
           const systemsPage = configureQaPage(await context.newPage());
