@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-10-11: Runtime do layout promovido; aceite pendente
+
+- PR #178 integrado apos a CI candidata `38133737505`; revisao final sem novos
+  apontamentos. A CI de `main` `38136053837` aprovou os quatro jobs, inclusive
+  banco, restore, E2E, matriz visual e imagem imutavel.
+- Release `ac3d7893c1e679298f54c1f1f8b57d03568715c2` promovida sem rebuild. Config
+  da CI `sha256:3b4432d`, manifesto/imagem local `sha256:d21f8ac`; revision,
+  plataforma, onze camadas e dois perfis de runtime comprovados.
+- Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/ac3d7893c1e679298f54c1f1f8b57d03568715c2.NW7yqB`.
+  CAS partiu de `1de9f5a`; rollback ficou pronto e nao foi necessario.
+- Container saudavel, sem restart/OOM; health local e publico no SHA novo,
+  APIs anonimas 401, rotas protegidas 307, sete assets 200, headers preservados
+  e logs iniciais sem padrao critico.
+- Os quatro simuladores mantiveram 40 checks autenticados antes da publicacao e
+  suas rotas protegidas responderam corretamente no pos-check anonimo. Como nao
+  havia sessao produtiva autenticada conscientemente disponibilizada para
+  controle interativo, a jornada autenticada pos-deploy do gate 7 permanece
+  pendente; nao foram improvisados login, cookie, conta ou `storageState`.
+- Nao houve migration, nova conta, mudanca de acesso nem mutacao de dados
+  remotos. O deploy esta ativo e saudavel, mas a release nao deve ser tratada
+  como integralmente aceita ate a jornada autenticada observacional.
+- Conhecimento atualizado nos documentos versionados. O host nao possui vault
+  Obsidian configurado; a sincronizacao externa permanece pendente, sem instalar
+  ou conectar armazenamento sem autorizacao.
+
 ## 2026-10-11: Publicacao do ITBI e registro confirmada
 
 - PR #177 e CI final aprovados; imagem imutavel da release `1de9f5a` publicada
@@ -60,11 +86,11 @@
   passou com 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
   comparacoes candidato/baseline e 110 de zoom. As fixtures efemeras foram
   removidas ao final.
-- Estado: E2E, promocao visual e verificacao pos-commit aprovados. O PR #178 foi
-  aberto e a CI `38094977306` aprovou `validate`, `release-gates` e
-  `isolated-restore` no SHA `4a8bfc8`. Revisao/merge, imagem imutavel,
-  backup/rollback, publicacao por CAS e verificacao de producao continuam
-  pendentes; producao nao foi publicada. Evidencias em
+- Na etapa intermediaria, E2E, promocao visual e verificacao pos-commit estavam
+  aprovados. O PR #178 foi aberto e a CI `38094977306` aprovou `validate`,
+  `release-gates` e `isolated-restore` no SHA `4a8bfc8`; revisao, merge e
+  publicacao ainda estavam pendentes naquele ponto. O fechamento esta no topo
+  deste Worklog e as evidencias completas em
   `docs/qa/draft-crm-vps-2026-10-10.md`.
 - A CI documental `38096802698` manteve `validate`, `isolated-restore`, E2E,
   banco e 241 comparacoes visuais verdes, mas bloqueou uma captura de Usuarios

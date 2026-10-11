@@ -6,9 +6,11 @@ Data: 10/10/2026. Branch de desenvolvimento: `codex/aplicar-draft-crm-vps`.
 
 Integracao implementada e aprovada nos gates locais, E2E de release e promocao
 visual autenticada listados neste documento. A verificacao pos-commit em modo
-`verify` tambem foi concluida e aprovada. O PR #178 esta aberto e a CI do SHA
-candidato foi integralmente aprovada. Revisao, merge, imagem imutavel e
-publicacao protegida continuam pendentes; producao nao foi publicada.
+`verify` tambem foi concluida e aprovada. O PR #178 foi integrado e a imagem
+imutavel da `main` foi promovida em producao por CAS no SHA
+`ac3d7893c1e679298f54c1f1f8b57d03568715c2`. Backup, rollback e verificacoes
+anonimas pos-publicacao estao registrados abaixo. O aceite da release permanece
+pendente da jornada autenticada observacional exigida pelo gate 7.
 
 ## Proveniencia do draft
 
@@ -106,15 +108,15 @@ pelo coordenador da integracao em 10/10/2026:
 | Evidencia         | Resultado                                                                                                                       |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | Pull request      | [#178](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/178), branch `codex/aplicar-draft-crm-vps`            |
-| SHA validado      | `4a8bfc8d51707f9183ddc9ea5d414c357ffb5823`                                                                                      |
-| GitHub Actions    | [CI 38094977306](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38094977306), concluida com sucesso |
+| SHA validado      | `78ed7063e010bb8fcacb0e6339a01f65d80cca0c`                                                                                      |
+| GitHub Actions    | [CI 38133737505](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38133737505), concluida com sucesso |
 | Jobs obrigatorios | `validate`, `release-gates` e `isolated-restore` aprovados; `promotable-image` ignorado como previsto em PR                     |
 
 A CI repetiu formatacao, lint, tipos, testes, audit, build, replay de migrations,
 pgTAP, advisors, E2E de autorizacao, matriz visual autenticada e ensaio de
 restore isolado. O PR estava `CLEAN` depois dessa execucao. O commit documental
-subsequente nao altera o runtime e deve manter a propria CI verde antes da
-revisao final.
+final nao alterou o runtime depois dessa passagem, e a revisao Codex do SHA
+`78ed706` terminou sem novos apontamentos.
 
 A reexecucao documental `38096802698` preservou `validate`, `isolated-restore`,
 banco, E2E e 241 das 242 comparacoes. Ela bloqueou somente
@@ -125,7 +127,7 @@ Usuarios foi estabilizado em duas linhas nesse intervalo responsivo, com o e-mai
 integral preservado no DOM e em `title`. A reproducao local posterior, com outra
 identidade aleatoria, aprovou 154 checks responsivos, 88 de tema, 242 Axe, 242
 comparacoes e 110 de zoom; a captura voltou a 1.024 x 4.082 px e ficou dentro da
-baseline. O SHA corrigido exige nova CI verde.
+baseline. A CI final citada na tabela repetiu todos esses gates e ficou verde.
 
 ## QA visual autenticado
 
@@ -158,9 +160,9 @@ repetiu e aprovou 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
 comparacoes candidato/baseline e 110 de zoom. As fixtures efemeras foram
 removidas ao final.
 
-Essas evidencias comprovam o ambiente autenticado local, os artefatos promovidos
-e a CI do SHA candidato acima. Nao comprovam merge, imagem publicavel nem estado
-de producao.
+Essas evidencias comprovam o ambiente autenticado local e a CI do SHA candidato.
+O merge, a imagem publicavel e o estado de producao sao comprovados na secao de
+publicacao abaixo.
 
 ## Reconciliacao com `main` em 11/10/2026
 
@@ -190,12 +192,57 @@ A verificacao pos-commit `4111089`, em modo `verify`, repetiu os 154 checks
 responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes e 110 de zoom;
 terminou verde e removeu a conta e as fixtures efemeras.
 
-## Pendencias de release
+## Promocao tecnica executada em 11/10/2026
 
-- Revisar e integrar o PR somente com a CI do commit final verde.
-- Seguir `docs/runbooks/automatic-publication.md`: comprovar imagem imutavel,
-  registrar versao anterior, backup e rollback, promover por compare-and-swap e
-  conferir health, versao, negacao anonima e jornadas afetadas.
-- Preencher este registro com SHA/imagem e resultado da publicacao caso uma
-  etapa posterior seja autorizada a concluir o deploy. Ate la, o status e
-  `validado_no_pr`, com `publicacao_pendente`, e producao segue nao publicada.
+- O PR #178 foi integrado no merge
+  `ac3d7893c1e679298f54c1f1f8b57d03568715c2`. A CI de `main`
+  [38136053837](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38136053837)
+  aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image`; banco, build, E2E e matriz visual passaram novamente.
+- O artefato imutavel `11700958880` teve digest de API
+  `sha256:381b2a36ab493fdb5106b7a7757c65d6b3d5181f41d3304b3265e906dc8d660e`
+  e o arquivo `image.tar.gz` conferiu com SHA-256
+  `ba05b30f37eb06040a54224ab11e9ae269ba104d5960be67d962c1a3d00180e5`.
+  A revision, a plataforma `linux/amd64`, a label, a config da CI
+  `sha256:3b4432df62d0645b80c1d6ebb3f010781fc6567c799fc6b9f6177d52b7fa9b86`
+  e as onze camadas foram comprovadas antes do load.
+- O armazenamento containerd representa a mesma imagem pelo manifesto OCI
+  `sha256:d21f8ac853c33f0756082bdbe750eb1d4f9d81dbcdce92591e54090d215c9860`.
+  Os dois perfis de runtime passaram no destino com a mesma imagem, sem rebuild
+  e sem imprimir segredos.
+- O backup privado esta em
+  `/var/backups/descomplica-crm/releases/ac3d7893c1e679298f54c1f1f8b57d03568715c2.NW7yqB`;
+  seu `SHA256SUMS` tem SHA-256
+  `c86e487b11cf9a864a2b88474f229ebca2ca47b6167004d8a382c6782118b354`.
+  O CAS partiu de `1de9f5af9a4fe528b081c4c7b546e4ff667f2b9d`, imagem
+  `sha256:4ad95ae561bf9d159acbc348c851894fa538133c8fa6d666abc89d06f3ba36e2`;
+  rollback foi preparado e nao precisou ser usado.
+- O container iniciou em `2026-10-11T12:15:11Z`, ficou saudavel na terceira
+  sondagem, sem restart nem OOM. Health local e publico retornaram o novo SHA;
+  APIs anonimas permaneceram `401`, as rotas protegidas e os quatro simuladores
+  retornaram `307`, sete assets retornaram `200` e os headers de seguranca e
+  `no-store` foram preservados. Seis linhas iniciais de log nao continham padrao
+  critico.
+- Nao houve migration, mudanca de DNS, conta, n8n ou dado remoto. As jornadas
+  autenticadas foram comprovadas antes do deploy na CI e no QA local; a
+  observacao de producao foi deliberadamente anonima. Sem uma sessao produtiva
+  ja autenticada e conscientemente disponibilizada para controle interativo,
+  nao foram improvisados login, cookie, `storageState` ou conta.
+- O conhecimento foi atualizado nos documentos versionados. O comando
+  `pnpm knowledge:sync` retornou `not-configured`; a sincronizacao externa com
+  Obsidian permanece pendente neste host.
+
+## Pendencia para aceite da release
+
+- O runtime esta ativo e saudavel no SHA publicado, mas o gate 7 de
+  `docs/runbooks/automatic-publication.md` permanece aberto: os `307` comprovam
+  os guards, nao a renderizacao autenticada com a configuracao e os dados de
+  producao.
+- Para fechar o aceite, usar uma sessao produtiva ja autenticada e
+  conscientemente disponibilizada no navegador controlado pelo usuario. O smoke
+  deve ser somente observacional nas telas alteradas e nos quatro simuladores,
+  sem enviar formularios, calcular, salvar propostas, alterar tema persistido,
+  usuarios, integracoes ou qualquer dado remoto.
+- Ate essa evidencia existir, o estado correto e `runtime_publicado`, com
+  `aceite_pendente_jornada_autenticada`; a release nao esta integralmente
+  encerrada.
