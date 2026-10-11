@@ -349,7 +349,9 @@ describe("catálogo localizado de acesso", () => {
             roleKey: "user",
             isSelf: true,
             isManageable: false,
+            inheritedPermissions: [],
             overrides: [],
+            permissionDetailsAvailable: true,
           },
         ],
         assignableRoles: ["admin", "broker_house"],
@@ -383,6 +385,7 @@ describe("catálogo localizado de acesso", () => {
             roleKey: "broker_house",
             isSelf: false,
             isManageable: true,
+            inheritedPermissions: ["crm.dashboard.view", "crm.dashboard.without_canal_imob.view"],
             overrides: [
               {
                 permissionKey: "crm.dashboard.without_canal_imob.view",
@@ -390,6 +393,7 @@ describe("catálogo localizado de acesso", () => {
                 reason: "Restrição sintética",
               },
             ],
+            permissionDetailsAvailable: true,
           },
         ],
         assignableRoles: ["coordinator", "manager_house", "broker_house"],
@@ -409,6 +413,12 @@ describe("catálogo localizado de acesso", () => {
 
     expect(markup).toContain("Buscar permissão");
     expect(markup).toContain("Selecionar todas as filtradas");
+    expect(markup).toContain('aria-label="Acesso efetivo: Visualizar dashboard"');
+    expect(markup).toMatch(
+      /<input(?=[^>]*type="checkbox")(?=[^>]*aria-label="Acesso efetivo: Visualizar dashboard")(?=[^>]*checked="")[^>]*>/,
+    );
+    expect(markup).toContain('aria-pressed="false"');
+    expect(markup).toContain("Incluir na alteração");
     expect(markup).toContain('name="permissionKeys"');
     expect(markup.match(/name="permissionKeys"/g)?.length).toBeGreaterThan(1);
     expect(markup).toContain('name="effect"');
@@ -437,7 +447,9 @@ describe("catálogo localizado de acesso", () => {
             roleKey: "pending",
             isSelf: false,
             isManageable: true,
+            inheritedPermissions: [],
             overrides: [],
+            permissionDetailsAvailable: true,
           },
         ],
         assignableRoles: ["coordinator", "broker_house"],

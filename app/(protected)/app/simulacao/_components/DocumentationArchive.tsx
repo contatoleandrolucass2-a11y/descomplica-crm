@@ -1,5 +1,6 @@
 import { DocumentationCalculator } from "./archive-investor/DocumentationCalculator";
 import { SimulationCanvasHeader } from "./SimulationCanvasHeader";
+import { SimulationToolNavigation } from "./SimulationToolNavigation";
 import "./archive-investor/investor-archive.css";
 import "./archive-investor/documentation-accessibility.css";
 
@@ -19,6 +20,7 @@ export function DocumentationArchive() {
         description="Composição para registrar modalidade, condição de compra e valores da operação."
         statusLabel="Cálculo local · validar no fluxo oficial"
       />
+      <SimulationToolNavigation current="documentation" />
       <DocumentationCalculator baseDate={baseDate} showHeroHeading={false} />
     </div>
   );

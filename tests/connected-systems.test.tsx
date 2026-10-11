@@ -18,6 +18,7 @@ vi.mock("@/lib/crm/salesforce/config", () => ({
 }));
 
 import ConnectedSystemsPage from "@/app/(protected)/app/configuracoes/conectar-sistemas/page";
+import { getSalesforceServiceStatus } from "@/app/(protected)/app/configuracoes/conectar-sistemas/ConnectedSystemsPanel";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -51,7 +52,7 @@ describe("connected systems", () => {
       refreshUrl: new URL("https://private.example.test/webhook"),
     });
     const markup = renderToStaticMarkup(await ConnectedSystemsPage());
-    expect(markup).toContain("Sessão não verificada");
+    expect(markup).toContain("Não verificado");
     expect(markup).toContain("Configurada");
     expect(markup).not.toContain("private-");
     expect(markup).not.toContain("private.example.test");
@@ -98,7 +99,7 @@ describe("connected systems", () => {
   it("renders seven report links without fabricating counts, dates or a schedule", async () => {
     mocks.status.mockReturnValue({ enabled: false, available: false });
     const markup = renderToStaticMarkup(await ConnectedSystemsPage());
-    expect(markup).toContain("Status não configurado");
+    expect(markup).toContain("Não conectado");
     expect(markup.match(/lightning\/r\/Report\//g)).toHaveLength(7);
     expect(markup.match(/Sem dados/g)).toHaveLength(7);
     expect(markup).toContain("Sem agenda confirmada");
@@ -106,5 +107,22 @@ describe("connected systems", () => {
     expect(markup).not.toContain("30 minutos");
     expect(markup).toContain('aria-label="Verificar conexão"');
     expect(markup).toContain('data-simulation-page-heading="true"');
+  });
+
+  it.each(["reauth_required", "unavailable"] as const)(
+    "prioritizes the %s connection state over a running extraction cycle",
+    (state) => {
+      expect(getSalesforceServiceStatus({ state, cycle: "running" })).toEqual({
+        state,
+        label: "Não conectado",
+      });
+    },
+  );
+
+  it("keeps the extraction status for a running cycle with a valid connection", () => {
+    expect(getSalesforceServiceStatus({ state: "connected", cycle: "running" })).toEqual({
+      state: "extracting",
+      label: "Extraindo",
+    });
   });
 });

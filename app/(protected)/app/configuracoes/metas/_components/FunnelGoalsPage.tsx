@@ -343,7 +343,7 @@ export async function FunnelGoalsPage({
                       <div
                         className={`grid min-h-9 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-1.5 [clip-path:polygon(2%_0,98%_0,94%_100%,6%_100%)] ${
                           isSalesStage || isFirstStage
-                            ? "bg-[var(--analytics-cyan)] text-[#082137]"
+                            ? "bg-[var(--analytics-cyan)] text-[var(--analytics-on-accent)]"
                             : "border border-[var(--analytics-line)] bg-[var(--analytics-surface-muted)] text-[var(--analytics-ink)]"
                         }`}
                       >

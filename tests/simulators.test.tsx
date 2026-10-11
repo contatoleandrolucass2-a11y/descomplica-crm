@@ -93,7 +93,13 @@ describe("simulator visual catalog", () => {
     expect(markup).toContain(definition.title);
     expect(markup).toContain("Cálculo temporariamente indisponível — regra aguardando validação");
     expect(markup).toContain("Nenhuma fórmula é executada enquanto o gate permanece desligado");
-    expect(markup).not.toContain('aria-label="Ferramentas de simulação"');
+    if (definition.slug === "caixa") {
+      expect(markup).toContain('aria-label="Ferramentas de simulação"');
+      expect(markup).toContain("Todas as ferramentas");
+      expect(markup).toContain('aria-current="page" href="/app/simulacao/caixa"');
+    } else {
+      expect(markup).not.toContain('aria-label="Ferramentas de simulação"');
+    }
     expect(markup).toContain('data-cta-state="enabled"');
     expect(markup).toContain('data-cta-state="blocked"');
     expect(markup).toContain('id="calculation-blocked-reason"');

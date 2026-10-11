@@ -26,14 +26,23 @@ export interface DisabledNavigationItem {
 export interface NavigationGroup {
   page: NavigationItem;
   children: NavigationItem[];
+  includeOverview: boolean;
 }
+
+const ADMIN_ROOT_KEY = "admin.home";
+const ADMIN_ROOT_PATH = "/admin";
+const CONNECTED_SYSTEMS_KEY = "crm.settings.connected_systems";
+const CONNECTED_SYSTEMS_PATH = "/app/configuracoes/conectar-sistemas";
+const SETTINGS_ROOT_KEY = "crm.settings";
+const SETTINGS_ROOT_PATH = "/app/configuracoes";
+const SIMULATION_ROOT_KEY = "crm.simulation";
 
 const ROOT_NAVIGATION_ORDER = new Map([
   ["/app", 10],
   ["/app/simulacao", 20],
   ["/app/ranking", 30],
   ["/app/canal-de-parcerias", 40],
-  ["/app/configuracoes", 50],
+  [ADMIN_ROOT_PATH, 50],
 ]);
 
 function comparePages(left: NavigationItem, right: NavigationItem) {
@@ -57,7 +66,112 @@ export function buildNavigationGroups(pages: NavigationItem[]): NavigationGroup[
   return rootPages.map((page) => ({
     page,
     children: pages.filter((candidate) => candidate.parentKey === page.key).sort(comparePages),
+    includeOverview: page.key !== ADMIN_ROOT_KEY,
   }));
+}
+
+/**
+ * Builds the approved top-level navigation without widening authorization.
+ * Settings stay in the account menu, simulation children stay in their hub,
+ * and the already-authorized integrations route is presented under Admin.
+ */
+export function getPrimaryNavigation(pages: NavigationItem[]): NavigationItem[] {
+  const adminRoot = pages.find(
+    (page) =>
+      page.key === ADMIN_ROOT_KEY &&
+      page.path === ADMIN_ROOT_PATH &&
+      page.section === "admin" &&
+      page.parentKey === null,
+  );
+  const primary: NavigationItem[] = [];
+
+  for (const page of pages) {
+    if (page.key === CONNECTED_SYSTEMS_KEY) {
+      if (
+        adminRoot &&
+        page.path === CONNECTED_SYSTEMS_PATH &&
+        page.section === "settings" &&
+        page.parentKey === SETTINGS_ROOT_KEY
+      ) {
+        primary.push({
+          ...page,
+          section: "admin",
+          parentKey: adminRoot.key,
+          sortOrder: 40,
+        });
+      }
+      continue;
+    }
+
+    if (
+      page.key === SETTINGS_ROOT_KEY ||
+      page.section === "settings" ||
+      page.parentKey === SETTINGS_ROOT_KEY ||
+      page.parentKey === SIMULATION_ROOT_KEY
+    ) {
+      continue;
+    }
+
+    primary.push(page);
+  }
+
+  return primary;
+}
+
+export function getAuthorizedSettingsNavigation(pages: NavigationItem[]) {
+  const root = pages.find(
+    (page) =>
+      page.key === SETTINGS_ROOT_KEY &&
+      page.path === SETTINGS_ROOT_PATH &&
+      page.section === "settings" &&
+      page.parentKey === null,
+  );
+  if (!root) return [];
+  const integrationsPresentedInAdmin = pages.some(
+    (page) =>
+      page.key === ADMIN_ROOT_KEY &&
+      page.path === ADMIN_ROOT_PATH &&
+      page.section === "admin" &&
+      page.parentKey === null,
+  );
+
+  return [
+    root,
+    ...pages
+      .filter(
+        (page) =>
+          page.parentKey === root.key &&
+          page.section === "settings" &&
+          (!integrationsPresentedInAdmin || page.key !== CONNECTED_SYSTEMS_KEY),
+      )
+      .sort(comparePages),
+  ];
+}
+
+/** Keeps breadcrumb ownership consistent with the approved Admin grouping. */
+export function getBreadcrumbNavigation(pages: NavigationItem[]): NavigationItem[] {
+  const adminRoot = pages.find(
+    (page) =>
+      page.key === ADMIN_ROOT_KEY &&
+      page.path === ADMIN_ROOT_PATH &&
+      page.section === "admin" &&
+      page.parentKey === null,
+  );
+  if (!adminRoot) return pages;
+
+  return pages.map((page) =>
+    page.key === CONNECTED_SYSTEMS_KEY &&
+    page.path === CONNECTED_SYSTEMS_PATH &&
+    page.section === "settings" &&
+    page.parentKey === SETTINGS_ROOT_KEY
+      ? {
+          ...page,
+          section: "admin",
+          parentKey: adminRoot.key,
+          sortOrder: 40,
+        }
+      : page,
+  );
 }
 
 export function getNavigationHome(pages: NavigationItem[]) {
@@ -66,20 +180,28 @@ export function getNavigationHome(pages: NavigationItem[]) {
 }
 
 export function getAuthorizedAdminNavigation(pages: NavigationItem[]) {
-  const root = pages.find(
+  const primary = getPrimaryNavigation(pages);
+  const root = primary.find(
     (page) =>
-      page.key === "admin.home" &&
-      page.path === "/admin" &&
+      page.key === ADMIN_ROOT_KEY &&
+      page.path === ADMIN_ROOT_PATH &&
       page.section === "admin" &&
       page.parentKey === null,
   );
   if (!root) return [];
 
-  return [root, ...pages.filter((page) => page.parentKey === root.key).sort(comparePages)];
+  return [root, ...primary.filter((page) => page.parentKey === root.key).sort(comparePages)];
 }
 
 export function isNavigationGroupActive(pathname: string, group: NavigationGroup) {
   return pathname === group.page.path || group.children.some((child) => pathname === child.path);
+}
+
+export function isNavigationRootActive(pathname: string, page: NavigationItem) {
+  return (
+    pathname === page.path ||
+    (page.key === SIMULATION_ROOT_KEY && pathname.startsWith(`${page.path}/`))
+  );
 }
 
 export function buildBreadcrumbs(pathname: string, pages: NavigationItem[]): NavigationItem[] {

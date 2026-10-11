@@ -11,8 +11,12 @@ import {
   buildBreadcrumbs,
   buildNavigationGroups,
   getAuthorizedAdminNavigation,
+  getAuthorizedSettingsNavigation,
+  getBreadcrumbNavigation,
   getNavigationHome,
+  getPrimaryNavigation,
   isNavigationGroupActive,
+  isNavigationRootActive,
   type NavigationItem,
 } from "../lib/navigation/presentation";
 import {
@@ -196,7 +200,7 @@ describe("authorized hierarchical navigation", () => {
     ).toEqual(["Configurações", "Recurso MKT"]);
     expect(
       buildBreadcrumbs("/app/configuracoes/conectar-sistemas", result).map((page) => page.name),
-    ).toEqual(["Configurações", "Conectar Sistemas"]);
+    ).toEqual(["Configurações", "Integrações"]);
     expect(extendAuthorizedNavigationWithReleasedPages([settings], viewerContext)).toEqual([
       settings,
     ]);
@@ -284,6 +288,103 @@ describe("authorized hierarchical navigation", () => {
     expect(buildNavigationGroups(authorizedRoots).flatMap(({ page }) => page)).toHaveLength(
       authorizedRoots.length,
     );
+  });
+
+  it("keeps Simulation direct, Settings in the account and Admin grouped in the navbar", () => {
+    const settings: NavigationItem = {
+      key: "crm.settings",
+      path: "/app/configuracoes",
+      name: "Configurações",
+      description: "Metas e pontuação",
+      section: "settings",
+      parentKey: null,
+      sortOrder: 10,
+    };
+    const goals: NavigationItem = {
+      ...settings,
+      key: "crm.settings.goals",
+      path: "/app/configuracoes/metas",
+      name: "Metas do funil",
+      parentKey: settings.key,
+      sortOrder: 20,
+    };
+    const integrations: NavigationItem = {
+      ...settings,
+      key: "crm.settings.connected_systems",
+      path: "/app/configuracoes/conectar-sistemas",
+      name: "Integrações",
+      parentKey: settings.key,
+      sortOrder: 60,
+    };
+    const simulationChild: NavigationItem = {
+      ...simulationParent,
+      key: "crm.simulation.wf14",
+      path: "/app/simulacao/tabela-direta",
+      name: "Tabela Direta",
+      parentKey: simulationParent.key,
+      sortOrder: 30,
+    };
+    const admin: NavigationItem = {
+      key: "admin.home",
+      path: "/admin",
+      name: "Administração",
+      description: "Gestão do CRM",
+      section: "admin",
+      parentKey: null,
+      sortOrder: 10,
+    };
+    const users: NavigationItem = {
+      ...admin,
+      key: "admin.users",
+      path: "/admin/usuarios",
+      name: "Usuários",
+      parentKey: admin.key,
+      sortOrder: 20,
+    };
+    const catalog: NavigationItem = {
+      ...admin,
+      key: "admin.pages",
+      path: "/admin/paginas",
+      name: "Páginas",
+      parentKey: admin.key,
+      sortOrder: 30,
+    };
+
+    const source = [
+      settings,
+      goals,
+      integrations,
+      simulationParent,
+      simulationChild,
+      admin,
+      users,
+      catalog,
+    ];
+    const primary = getPrimaryNavigation(source);
+    const groups = buildNavigationGroups(primary);
+
+    expect(groups.map(({ page }) => page.path)).toEqual(["/app/simulacao", "/admin"]);
+    expect(groups[0]?.children).toEqual([]);
+    expect(groups[1]?.includeOverview).toBe(false);
+    expect(groups[1]?.children.map((page) => [page.name, page.path])).toEqual([
+      ["Usuários", "/admin/usuarios"],
+      ["Páginas", "/admin/paginas"],
+      ["Integrações", "/app/configuracoes/conectar-sistemas"],
+    ]);
+    expect(getAuthorizedSettingsNavigation(source).map((page) => page.path)).toEqual([
+      "/app/configuracoes",
+      "/app/configuracoes/metas",
+    ]);
+    expect(
+      getAuthorizedSettingsNavigation([settings, integrations]).map((page) => page.path),
+    ).toEqual(["/app/configuracoes", "/app/configuracoes/conectar-sistemas"]);
+    expect(
+      buildBreadcrumbs("/app/configuracoes/conectar-sistemas", getBreadcrumbNavigation(source)).map(
+        (page) => page.name,
+      ),
+    ).toEqual(["Administração", "Integrações"]);
+    expect(isNavigationRootActive("/app/simulacao/tabelao", simulationParent)).toBe(true);
+    expect(isNavigationRootActive("/app/ranking/detalhe", simulationParent)).toBe(false);
   });
 
   it("groups only children whose authorized parent is present", () => {

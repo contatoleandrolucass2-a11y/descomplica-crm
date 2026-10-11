@@ -17,7 +17,7 @@
 
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { Cookie, LogOut, ShieldCheck } from "lucide-react";
+import { ChevronDown, Cookie, LogOut, Settings, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { CookiePreferencesTrigger } from "@/app/_components/CookiePreferencesTrigger";
@@ -26,7 +26,12 @@ import { logoutAction } from "@/lib/auth/actions/logout";
 import { getCurrentUser } from "@/lib/authorization/guards";
 import { getRoleLabel } from "@/lib/authorization/roles";
 import { getAuthorizedNavigation, getDisabledNavigationItems } from "@/lib/navigation/pages";
-import { getAuthorizedAdminNavigation, getNavigationHome } from "@/lib/navigation/presentation";
+import {
+  getAuthorizedSettingsNavigation,
+  getBreadcrumbNavigation,
+  getNavigationHome,
+  getPrimaryNavigation,
+} from "@/lib/navigation/presentation";
 import { COOKIE_CONSENT_COOKIE_NAME, parseCookieConsent } from "@/lib/privacy/cookie-consent";
 
 import { AccountMenu } from "./_components/AccountMenu";
@@ -47,19 +52,13 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
   ]);
   const cookieConsent = parseCookieConsent(cookieStore.get(COOKIE_CONSENT_COOKIE_NAME)?.value);
   const disabledItems = getDisabledNavigationItems(context, pages);
-  const navigationPages = pages.filter((page) => page.section !== "admin");
-  const adminPages = getAuthorizedAdminNavigation(pages);
+  const navigationPages = getPrimaryNavigation(pages);
+  const breadcrumbPages = getBreadcrumbNavigation(pages);
+  const settingsPages = getAuthorizedSettingsNavigation(pages);
   const navigationHome = getNavigationHome(pages);
   const identity = user?.email ?? "Usuário autenticado";
   const role = getRoleLabel(context.roleKey);
-  const brand = (
-    <>
-      <DescomplicaBrandMark className={styles.brandMark} />
-      <span className={styles.brandName} aria-hidden="true">
-        escomplica
-      </span>
-    </>
-  );
+  const brand = <DescomplicaBrandMark className={styles.brandMark} />;
 
   const chrome = (
     <>
@@ -105,26 +104,39 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
                 </span>
               </CookiePreferencesTrigger>
 
-              {adminPages.length > 0 ? (
-                <nav className={styles.accountSection} aria-label="Administração">
-                  <span className={styles.accountSectionLabel}>Administração</span>
-                  {adminPages.map((page) => (
-                    <Link
-                      href={page.path}
-                      prefetch={false}
-                      className={styles.accountLink}
-                      key={page.key}
-                    >
-                      <span className={styles.accountLinkIcon}>
-                        <AppPageIcon pageKey={page.key} />
-                      </span>
-                      <span>
-                        <strong>{page.name}</strong>
-                        <small>{page.description}</small>
-                      </span>
-                    </Link>
-                  ))}
-                </nav>
+              {settingsPages.length > 0 ? (
+                <details className={styles.accountSettings} open>
+                  <summary className={styles.accountSettingsSummary}>
+                    <Settings aria-hidden="true" size={18} />
+                    <span>Configurações</span>
+                    <ChevronDown
+                      className={styles.accountSettingsChevron}
+                      aria-hidden="true"
+                      size={16}
+                    />
+                  </summary>
+                  <nav
+                    className={styles.accountSettingsLinks}
+                    aria-label="Configurações no menu da conta"
+                  >
+                    {settingsPages.map((page, index) => (
+                      <Link
+                        href={page.path}
+                        prefetch={false}
+                        className={styles.accountLink}
+                        key={page.key}
+                      >
+                        <span className={styles.accountLinkIcon}>
+                          <AppPageIcon pageKey={page.key} />
+                        </span>
+                        <span>
+                          <strong>{index === 0 ? "Visão geral" : page.name}</strong>
+                          <small>{page.description}</small>
+                        </span>
+                      </Link>
+                    ))}
+                  </nav>
+                </details>
               ) : null}
 
               <form action={logoutAction} className={styles.logoutForm}>
@@ -137,7 +149,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
           </div>
         </div>
       </header>
-      <AuthorizedBreadcrumbs pages={pages} />
+      <AuthorizedBreadcrumbs pages={breadcrumbPages} />
     </>
   );
 

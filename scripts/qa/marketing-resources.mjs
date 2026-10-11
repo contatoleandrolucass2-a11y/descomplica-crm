@@ -17,6 +17,12 @@ async function selectTheme(page, theme, width) {
     }
   }
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+  await page.waitForFunction(() =>
+    document
+      .getAnimations({ subtree: true })
+      .filter((animation) => animation instanceof CSSTransition)
+      .every((transition) => transition.playState !== "running" && !transition.pending),
+  );
 }
 
 export async function checkMarketingResources(page, origin, outputDirectory) {
@@ -32,8 +38,8 @@ export async function checkMarketingResources(page, origin, outputDirectory) {
     checkpoint("settings-link");
     await page.goto(`${origin}/app/configuracoes`);
     checkpoint("settings-loaded");
-    const settings = page.locator('[aria-labelledby="settings-areas-title"]');
-    await settings.getByRole("link", { name: "Recurso MKT", exact: true }).click();
+    await expect(page.locator('[aria-labelledby="settings-areas-title"]')).toBeVisible();
+    await page.getByRole("link", { name: "Recurso MKT", exact: true }).click();
     checkpoint("link-clicked");
     await expect(page.getByRole("heading", { name: "Recurso MKT", exact: true })).toBeVisible();
     checkpoint("heading-visible");
@@ -90,15 +96,22 @@ export async function checkMarketingResources(page, origin, outputDirectory) {
         const accessibility = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
           .analyze();
+        const accessibilityViolations = accessibility.violations.map(({ id, nodes }) => ({
+          id,
+          nodes: nodes.map(({ target, failureSummary }) => ({ target, failureSummary })),
+        }));
         if (accessibility.violations.length) {
           checkpoint(
             `accessibility-rules:${accessibility.violations.map((item) => item.id).join(",")}`,
           );
+          process.stderr.write(
+            `[marketing-resources] accessibility-details=${JSON.stringify(accessibilityViolations)}\n`,
+          );
         }
-        assert.equal(
-          accessibility.violations.length,
-          0,
-          `Recurso MKT accessibility at ${width}px in ${theme}: ${accessibility.violations.map((item) => item.id).join(", ")}`,
+        assert.deepEqual(
+          accessibilityViolations,
+          [],
+          `Recurso MKT accessibility at ${width}px in ${theme}`,
         );
         await page.screenshot({
           path: path.join(outputDirectory, `recurso-mkt-${width}-${theme}.png`),

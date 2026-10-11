@@ -60,6 +60,7 @@ import {
   type AnalyticsColumn,
   type ChartAccent,
 } from "./_components/analytics";
+import styles from "./_components/analytics/analytics.module.css";
 
 export const metadata = { title: "Dashboard comercial" };
 
@@ -645,7 +646,7 @@ export default async function AppHomePage({
   const salesValue = dashboard?.salesValue[selectedView]?.[selectedPeriod] ?? null;
 
   return (
-    <main className="min-w-0 px-3 py-3 sm:px-5">
+    <main className={styles.canvasMain}>
       <AnalyticsCanvas kind="dashboard">
         <PageHeader
           variant="compact"
@@ -703,7 +704,7 @@ export default async function AppHomePage({
         </FilterBar>
 
         {canRefresh && refreshConfiguration.available ? (
-          <div className="flex justify-end [&_span]:text-[var(--analytics-muted)]">
+          <div className={styles.refreshRow}>
             <SalesforceRefreshButton available />
           </div>
         ) : null}
@@ -725,7 +726,7 @@ export default async function AppHomePage({
           <h2 id="stage-summary-title" className="sr-only">
             Indicadores do funil
           </h2>
-          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5">
+          <div className={styles.dashboardMetricGrid}>
             {summaryRows.map((row) => {
               const stage = CRM_STAGES.find((item) => item.key === row.key);
               const Icon = STAGE_ICONS[row.key];
@@ -759,13 +760,13 @@ export default async function AppHomePage({
               );
 
               return (
-                <div className="min-w-0" key={row.key}>
+                <div className={styles.dashboardMetricCell} key={row.key}>
                   {canViewStages && stage ? (
                     <Link
                       href={`/app/etapas/${stage.slug}?view=${encodeURIComponent(selectedView)}&period=${encodeURIComponent(selectedPeriod)}`}
                       prefetch={false}
                       aria-label={`Abrir etapa ${row.label}`}
-                      className="block rounded-xl no-underline hover:brightness-[1.04]"
+                      className={styles.dashboardMetricLink}
                     >
                       {card}
                     </Link>
@@ -779,7 +780,7 @@ export default async function AppHomePage({
         </section>
 
         <section
-          className={`grid min-w-0 grid-cols-1 gap-3 ${canViewRanking ? "lg:grid-cols-2" : ""}`}
+          className={canViewRanking ? styles.dashboardPanelGrid : styles.dashboardPanelGridSingle}
         >
           <AnalyticsCard density="compact" className="min-w-0">
             <SectionHeading
@@ -796,7 +797,7 @@ export default async function AppHomePage({
           </AnalyticsCard>
 
           {canViewRanking ? (
-            <div className="grid min-w-0 content-start">
+            <div className={styles.dashboardRanking}>
               <AnalyticsCard density="compact">
                 <SectionHeading
                   density="compact"
