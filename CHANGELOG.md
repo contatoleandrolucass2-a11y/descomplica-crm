@@ -19,6 +19,12 @@
   Administrador, portanto o bloqueio entre pares foi exercitado no pgTAP/E2E da
   VPS; a conta existente foi bloqueada em transacao revertida e o Master passou
   pelo mesmo guard sem persistir alteracao.
+- Publica a correcao de temas e a fronteira de Administrador na release
+  `6b3e5ffd`, pelo artefato imutavel aprovado da CI de `main`, com prova OCI,
+  backup privado, CAS e rollback preparado.
+- Confirma no pos-deploy health local/publico, container sem restart/OOM,
+  protecoes anonimas das rotas e APIs, assets, headers, redirecionamento HTTPS e
+  logs sem padrao critico; nenhum rebuild foi executado na VPS.
 - Promove o runtime do layout aprovado do CRM na release `ac3d7893`, com imagem
   imutavel, backup verificado, CAS, rollback preparado e saude confirmada; o
   aceite final permanece pendente da jornada autenticada em producao.

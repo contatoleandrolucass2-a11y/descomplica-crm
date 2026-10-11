@@ -5,12 +5,13 @@ Data: 10/10/2026. Branch de desenvolvimento: `codex/aplicar-draft-crm-vps`.
 ## Estado
 
 Integracao implementada e aprovada nos gates locais, E2E de release e promocao
-visual autenticada listados neste documento. A verificacao pos-commit em modo
-`verify` tambem foi concluida e aprovada. O PR #178 foi integrado e a imagem
-imutavel da `main` foi promovida em producao por CAS no SHA
-`ac3d7893c1e679298f54c1f1f8b57d03568715c2`. Backup, rollback e verificacoes
-anonimas pos-publicacao estao registrados abaixo. O aceite da release permanece
-pendente da jornada autenticada observacional exigida pelo gate 7.
+visual autenticada listados neste documento. O PR #178 publicou a integracao
+inicial no SHA `ac3d7893c1e679298f54c1f1f8b57d03568715c2`. A correcao incremental
+de temas e da fronteira de Administrador foi integrada pelo PR #181 e promovida
+por CAS no SHA `6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2`. Backup, rollback e
+verificacoes anonimas pos-publicacao estao registrados abaixo. A jornada
+autenticada foi comprovada com identidades sinteticas isoladas e removidas na
+VPS/CI; nenhuma sessao produtiva foi improvisada para a verificacao hospedada.
 
 ## Proveniencia do draft
 
@@ -97,6 +98,38 @@ substituem testes do CRM integrado.
   informativos. Os helpers adicionados pela migration nao aparecem na Data API.
 - Nenhuma tabela Qlik, formula financeira, campo ou motor dos quatro
   simuladores foi alterado nesta correcao.
+
+### Publicacao incremental
+
+- A CI final do PR #181 `38161298050` aprovou os tres jobs no head
+  `43f6ffde386336c4c0efe12ad0eefa474f7dd882`. Depois do merge protegido, a CI
+  de `main` `38163173310` aprovou validate, restore isolado, release-gates e
+  promotable-image no SHA `6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2`.
+- O artefato `11711780026`,
+  `promotable-image-6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2`, foi baixado sem rebuild.
+  `image.tar.gz` tem SHA-256
+  `13d6d7333c1e3fdc1e75f841fc904af81cdc8eeb826f522b7dd40dbcd3a1ae51`.
+- A configuracao produzida pela CI e
+  `sha256:9e1724288af7f5cfb23d62f63c6ad39c1985bbbb84c5882fff7ee43591418a0a`;
+  o manifesto/ID do Docker local e
+  `sha256:e68a6141543a2fe9a16de68cc78b4bbef866ca48d683e06cae446b20044d461f`.
+  Index OCI, configuracao, manifesto legado, tag, plataforma `linux/amd64`, 11
+  camadas e 11 `diff_ids` foram conferidos; `image:prove` aprovou os dois
+  perfis de runtime sobre a mesma imagem.
+- O backup privado de configuracao foi verificado em
+  `/var/backups/descomplica-crm/releases/6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2.Ba84ee`;
+  o manifesto tem SHA-256
+  `b3eb1965f88ac761dfede67a4c238f821bdd541a9bffecbb1f82fa02736ab579`.
+  O CAS partiu de `ac3d7893c1e679298f54c1f1f8b57d03568715c2`; rollback foi preparado e
+  nao utilizado.
+- O pos-deploy confirmou container `healthy`, zero restart/OOM e failing streak
+  zero. Cinco healths locais e cinco publicos retornaram a versao nova; sete
+  rotas protegidas responderam 307, seis APIs anonimas 401, sete assets 200,
+  sete headers de seguranca permaneceram presentes e HTTP redirecionou para
+  HTTPS. Nginx passou na validacao e os logs nao mostraram padrao critico.
+- A matriz desktop/mobile e os tres temas foram comprovados no ambiente
+  isolado desta VPS e repetidos na CI. O smoke hospedado foi anonimo; nenhuma
+  credencial, cookie ou conta produtiva foi criada ou reutilizada.
 
 ## Assets incorporados
 
