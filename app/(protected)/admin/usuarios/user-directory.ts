@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/auth/supabase/server";
 import { ROLE_INHERITED_PERMISSIONS } from "@/lib/authorization/access-presentation";
+import { canManageTargetRole } from "@/lib/authorization/hierarchy";
 import type { AuthorizationContext } from "@/lib/authorization/types";
 import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
 import { ROLES, type RoleKey } from "@/lib/authorization/roles";
@@ -267,7 +268,11 @@ export async function loadUserDirectoryPage(
       accessStatus: profile.access_status,
       roleKey,
       isSelf: profile.user_id === context.userId,
-      isManageable: profile.user_id !== context.userId && targetLevel < context.level,
+      isManageable:
+        profile.user_id !== context.userId &&
+        (roleKey === null
+          ? context.roleKey === "master"
+          : canManageTargetRole(context, roleKey, targetLevel)),
       inheritedPermissions: roleKey ? [...ROLE_INHERITED_PERMISSIONS[roleKey]] : [],
       overrides: overridesByUser.get(profile.user_id) ?? [],
       permissionDetailsAvailable: canViewAllOverrides || profile.user_id === context.userId,

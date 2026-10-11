@@ -828,6 +828,36 @@
   padding: 0.85rem;
 }
 
+.admin-user-detail-badges {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.admin-protected-account-badge {
+  display: inline-flex;
+  min-height: 1.7rem;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid var(--analytics-warning);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--analytics-warning) 9%, var(--analytics-surface));
+  padding: 0.18rem 0.48rem;
+  color: var(--analytics-warning-ink);
+  font-size: 0.66rem;
+  font-weight: 760;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.admin-protected-account-badge > svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
 .admin-access-section,
 .admin-advanced-settings {
   min-width: 0;
@@ -1314,6 +1344,10 @@
   .admin-access-section-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin-user-detail-badges {
+    justify-content: flex-start;
   }
 
   .admin-user-detail-header h2 {

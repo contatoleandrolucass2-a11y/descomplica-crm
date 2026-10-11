@@ -113,8 +113,11 @@ export function getRoleLabel(roleKey: RoleKey): string {
   return ROLES[roleKey].label;
 }
 
-export function getAssignableRoleKeys(actorLevel: number): RoleKey[] {
+export function getAssignableRoleKeys(actorRoleKey: RoleKey, actorLevel: number): RoleKey[] {
   return (Object.keys(ROLES) as RoleKey[]).filter(
-    (roleKey) => ROLES[roleKey].assignable && ROLES[roleKey].level < actorLevel,
+    (roleKey) =>
+      ROLES[roleKey].assignable &&
+      (roleKey !== "admin" || actorRoleKey === "master") &&
+      ROLES[roleKey].level < actorLevel,
   );
 }

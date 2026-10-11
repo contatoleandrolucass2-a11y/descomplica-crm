@@ -110,7 +110,8 @@ export const PERMISSIONS = {
   },
   "crm.simulators.view": {
     label: "Visualizar simuladores",
-    description: "Acessa as interfaces de simulação autorizadas para o perfil Master.",
+    description:
+      "Acessa as interfaces de simulação autorizadas; a execução oficial possui controle separado.",
     minLevel: 100,
   },
   "crm.simulators.execute": {

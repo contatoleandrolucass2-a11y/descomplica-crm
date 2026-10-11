@@ -27,9 +27,39 @@ export function requireCanManageTargetLevel(
   }
 }
 
+// Administrator accounts are a protected resource, not merely another numeric
+// level. Keeping this rule explicit prevents a future level/catalog change from
+// turning peer administration back on accidentally. Master accounts remain
+// outside normal account-management flows altogether.
+export function canManageTargetRole(
+  actor: AuthorizationContext,
+  targetRoleKey: RoleKey,
+  targetLevel: number = ROLES[targetRoleKey].level,
+): boolean {
+  if (targetRoleKey === "master") return false;
+  if (targetRoleKey === "admin" && actor.roleKey !== "master") return false;
+  return canManageTargetLevel(actor, targetLevel);
+}
+
+export function requireCanManageTargetRole(
+  actor: AuthorizationContext,
+  targetRoleKey: RoleKey,
+  targetLevel: number = ROLES[targetRoleKey].level,
+): void {
+  if (!canManageTargetRole(actor, targetRoleKey, targetLevel)) {
+    throw new AuthorizationError("FORBIDDEN", "Operation not allowed.");
+  }
+}
+
 // Rule 2: an actor can only assign a role strictly below its own level.
 export function canAssignRole(actor: AuthorizationContext, targetRoleKey: RoleKey): boolean {
-  return actor.level > ROLES[targetRoleKey].level;
+  const targetRole = ROLES[targetRoleKey];
+  return (
+    targetRole.assignable &&
+    targetRoleKey !== "master" &&
+    (targetRoleKey !== "admin" || actor.roleKey === "master") &&
+    actor.level > targetRole.level
+  );
 }
 
 export function requireCanAssignRole(actor: AuthorizationContext, targetRoleKey: RoleKey): void {
@@ -41,7 +71,8 @@ export function requireCanAssignRole(actor: AuthorizationContext, targetRoleKey:
 // Rule 3: an actor can only grant a permission it holds. Master may delegate
 // any held permission to a strictly lower target even when minLevel equals the
 // Master level. Other roles still require minLevel strictly below their level.
-// Target hierarchy is checked separately by requireCanManageTargetLevel.
+// Target hierarchy and the protected Administrator role are checked separately
+// by requireCanManageTargetRole.
 export function canGrantPermission(
   actor: AuthorizationContext,
   permission: PermissionKey,
