@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { mkdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -132,6 +133,33 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
 
   afterEach(async () => {
     await page?.close();
+  });
+
+  it("keeps complete activity text readable across desktop and mobile widths", async () => {
+    await openRoutine();
+    await mkdir("test-results/routine-preview", { recursive: true });
+    for (const width of [1440, 390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      await browserExpect
+        .poll(() =>
+          page
+            .locator("textarea")
+            .evaluateAll((fields) =>
+              fields.every((field) => field.scrollHeight <= field.clientHeight + 1),
+            ),
+        )
+        .toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
+        false,
+      );
+      const table = page.getByRole("region", { name: "Tabela de rotina semanal", exact: true });
+      if (width < 1180) {
+        expect(await table.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
+          true,
+        );
+      }
+      await page.screenshot({ path: `test-results/routine-preview/rotina-${width}.png` });
+    }
   });
 
   afterAll(async () => {

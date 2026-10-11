@@ -82,41 +82,15 @@
   cursor: not-allowed;
 }
 
-.page :is(button, textarea, [role="tabpanel"]):focus-visible {
+.page :is(button, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--inv-color-accent);
   outline-offset: 3px;
 }
 
-.hero,
 .rolesPanel,
 .tablePanel {
   min-width: 0;
   border-top: 1px solid var(--inv-color-line);
-}
-
-.hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.34fr);
-  gap: 18px;
-  padding: 18px;
-}
-
-.heroCopy {
-  display: flex;
-  min-width: 0;
-  gap: 14px;
-}
-
-.iconFrame {
-  display: grid;
-  width: 46px;
-  height: 46px;
-  flex: 0 0 46px;
-  place-items: center;
-  border: 1px solid var(--inv-color-accent);
-  border-radius: 8px;
-  color: var(--inv-color-accent);
-  background: color-mix(in srgb, var(--inv-color-accent) 10%, var(--inv-color-panel));
 }
 
 .kicker {
@@ -127,7 +101,6 @@
   line-height: 1.4;
 }
 
-.hero h2,
 .sectionHeading h2,
 .tableToolbar h2,
 .emptyState h3 {
@@ -138,7 +111,6 @@
   line-height: 1.2;
 }
 
-.hero p,
 .tableToolbar p,
 .emptyState p {
   margin: 6px 0 0;
@@ -151,7 +123,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  align-self: stretch;
+  min-height: 32px;
+  justify-content: flex-end;
+  margin-top: 8px;
   color: var(--inv-color-muted);
   font-size: 13px;
   line-height: 1.45;
@@ -295,6 +269,13 @@
   text-align: center;
 }
 
+.routineTable tr > th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--inv-color-panel);
+}
+
 .routineTable tbody th {
   color: var(--inv-color-muted);
   font-size: 13px;
@@ -354,23 +335,23 @@
     font-size: 28px;
   }
 
-  .headerActions,
+  .headerActions {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    width: 100%;
+  }
+
   .primaryAction {
     width: 100%;
   }
 
-  .hero,
   .sectionHeading,
   .tableToolbar {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .hero {
-    display: grid;
-  }
-
   .roleTabs {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .tableToolbar,
@@ -381,59 +362,5 @@
 
   .tableStats {
     justify-content: flex-start;
-  }
-
-  .tableScroll {
-    overflow: visible;
-  }
-
-  .routineTable,
-  .routineTable tbody,
-  .routineTable tr,
-  .routineTable th,
-  .routineTable td {
-    display: block;
-  }
-
-  .routineTable {
-    min-width: 0;
-  }
-
-  .routineTable thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  .routineTable tr {
-    border-bottom: 1px solid var(--inv-color-line);
-    padding: 12px;
-  }
-
-  .routineTable tbody th {
-    width: auto;
-    margin-bottom: 10px;
-    border: 0;
-    text-align: left;
-  }
-
-  .routineTable tbody th::before {
-    content: "Linha ";
-  }
-
-  .routineTable td {
-    border: 0;
-    padding: 8px 0;
-  }
-
-  .routineTable td::before {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--inv-color-accent);
-    font-size: 12px;
-    font-weight: 800;
-    content: attr(data-label);
   }
 }

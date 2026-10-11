@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { CalendarCheck2, Plus, RotateCcw, Save, Sparkles } from "lucide-react";
+import { Plus, RotateCcw, Save, Sparkles } from "lucide-react";
 
 import { SimulationCanvasHeader } from "@/app/(protected)/app/simulacao/_components/SimulationCanvasHeader";
 import "@/app/(protected)/app/simulacao/_components/archive-investor/investor-theme-tokens.css";
@@ -380,6 +380,23 @@ function countFilledCells(rows: RoutineRow[]) {
   );
 }
 
+function fitRoutineFields(table: HTMLTableElement | null) {
+  if (!table) return;
+  const fields = Array.from(table.querySelectorAll("textarea"));
+  // Batch measurements so typing does not trigger a layout for every cell.
+  fields.forEach((field) => {
+    field.style.height = "auto";
+  });
+  const heights = fields.map((field) => {
+    const style = getComputedStyle(field);
+    const borders = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+    return Math.max(86, field.scrollHeight + borders);
+  });
+  fields.forEach((field, index) => {
+    field.style.height = `${heights[index]}px`;
+  });
+}
+
 export function RoutineSettings() {
   const [activeRole, setActiveRole] = useState<RoleKey>("regional-house");
   const [routine, setRoutine] = useState<RoutineState>(defaultRoutine);
@@ -388,6 +405,7 @@ export function RoutineSettings() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [storageError, setStorageError] = useState<string | null>(null);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const tableRef = useRef<HTMLTableElement | null>(null);
 
   useEffect(() => {
     const loadStoredRoutine = window.setTimeout(() => {
@@ -410,6 +428,22 @@ export function RoutineSettings() {
 
   const activeRows = routine[activeRole];
   const activeRoleInfo = roles.find((role) => role.key === activeRole) ?? roles[0]!;
+  useEffect(() => {
+    fitRoutineFields(tableRef.current);
+  }, [activeRows]);
+
+  useEffect(() => {
+    const table = tableRef.current;
+    if (!table) return;
+    let previousWidth = 0;
+    const observer = new ResizeObserver(() => {
+      if (table.clientWidth === previousWidth) return;
+      previousWidth = table.clientWidth;
+      fitRoutineFields(table);
+    });
+    observer.observe(table);
+    return () => observer.disconnect();
+  }, [activeRole, activeRows.length]);
   const activeSummary = useMemo(
     () => ({
       rows: activeRows.length,
@@ -533,34 +567,18 @@ export function RoutineSettings() {
           }
         />
 
-        <section className={styles.hero} aria-labelledby="routine-overview-title">
-          <div className={styles.heroCopy}>
-            <span className={styles.iconFrame}>
-              <CalendarCheck2 size={22} aria-hidden="true" />
-            </span>
-            <div>
-              <p className={styles.kicker}>Rotina comercial</p>
-              <h2 id="routine-overview-title">{activeRoleInfo.label}</h2>
-              <p>
-                {activeSummary.filled
-                  ? `${activeSummary.filled} ${activeSummary.filled === 1 ? "atividade" : "atividades"} em ${activeSummary.rows} ${activeSummary.rows === 1 ? "linha" : "linhas"} na semana.`
-                  : "Nenhuma atividade cadastrada para esta função."}
-              </p>
-            </div>
-          </div>
-          <div className={styles.saveState} role="status" aria-live="polite">
-            <Sparkles size={18} aria-hidden="true" />
-            <span>
-              {!hasLoaded
-                ? "Carregando rotina."
-                : hasUnsavedChanges
-                  ? "Alterações não salvas."
-                  : savedAt
-                    ? `Último salvamento local em ${savedAt}.`
-                    : "Nenhuma alteração pendente."}
-            </span>
-          </div>
-        </section>
+        <div className={styles.saveState} role="status" aria-live="polite">
+          <Sparkles size={18} aria-hidden="true" />
+          <span>
+            {!hasLoaded
+              ? "Carregando rotina."
+              : hasUnsavedChanges
+                ? "Alterações não salvas."
+                : savedAt
+                  ? `Último salvamento local em ${savedAt}.`
+                  : "Nenhuma alteração pendente."}
+          </span>
+        </div>
 
         {storageError ? (
           <p className={styles.storageError} role="alert">
@@ -618,12 +636,15 @@ export function RoutineSettings() {
               <>
                 <div className={styles.tableToolbar}>
                   <div>
-                    <p className={styles.kicker}>{activeRoleInfo.label}</p>
-                    <h2 id="routine-table-title">Classificação da semana</h2>
+                    <p className={styles.kicker}>Classificação da semana</p>
+                    <h2 id="routine-table-title">{activeRoleInfo.label}</h2>
+                    <p>
+                      {activeSummary.filled
+                        ? `${activeSummary.filled} ${activeSummary.filled === 1 ? "atividade" : "atividades"} em ${activeSummary.rows} ${activeSummary.rows === 1 ? "linha" : "linhas"} na semana.`
+                        : "Nenhuma atividade cadastrada para esta função."}
+                    </p>
                   </div>
-                  <div className={styles.tableStats} aria-label="Resumo da rotina ativa">
-                    <span>{activeSummary.rows} linhas</span>
-                    <span>{activeSummary.filled} atividades</span>
+                  <div className={styles.tableStats} aria-label="Ações da rotina">
                     <button
                       type="button"
                       className={styles.addButton}
@@ -637,8 +658,13 @@ export function RoutineSettings() {
                 </div>
 
                 {activeRows.length ? (
-                  <div className={styles.tableScroll}>
-                    <table className={styles.routineTable}>
+                  <div
+                    className={styles.tableScroll}
+                    role="region"
+                    aria-label="Tabela de rotina semanal"
+                    tabIndex={0}
+                  >
+                    <table ref={tableRef} className={styles.routineTable}>
                       <caption>
                         Rotina semanal editável para {activeRoleInfo.label.toLowerCase()}.
                       </caption>
@@ -665,7 +691,6 @@ export function RoutineSettings() {
                                   onChange={(event) =>
                                     updateCell(rowIndex, weekday, event.target.value)
                                   }
-                                  placeholder="Adicionar atividade"
                                   rows={3}
                                 />
                               </td>

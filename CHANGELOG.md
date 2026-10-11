@@ -10,6 +10,8 @@
 - Preserva 26 linhas e 74 atividades da referência. Trata erros de armazenamento,
   confirma restauração, sinaliza alterações pendentes e oferece abas por teclado.
 - Mantém a capitalização em frase normal também nos estilos herdados do cabeçalho.
+- Exibe as atividades completas em campos com altura automática e preserva a
+  tabela semanal em rolagem horizontal acessível no celular.
 - Atualiza gates, navegação, inventário de recursos, contrato visual e matriz
   de smoke de rotas protegidas para 27 URLs.
 

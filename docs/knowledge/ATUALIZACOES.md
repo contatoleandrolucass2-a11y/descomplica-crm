@@ -33,6 +33,12 @@
   timeouts de conhecimento. Reteste isolado de conhecimento: 22/22 aprovados.
   Nao houve skips novos para esconder as falhas; testes opcionais do componente
   em Chromium foram executados localmente, e a jornada autenticada roda na CI.
+- A captura autenticada do candidato anterior aprovou 15 combinacoes de largura
+  e tema, com zero overflow global ou violacao Axe, alem dos controles. A revisao
+  visual identificou texto escondido por scroll interno e uma pagina mobile
+  excessivamente alta. O fechamento usa medidas em lote para altura dos campos,
+  duas colunas nas opcoes mobile e tabela com pan horizontal e coluna de linhas
+  fixa. Nova QA exige texto completo, alcance de todos os dias e foco visivel.
 
 ## 2026-10-11: Temas sem ilhas escuras e Administrador como classe protegida
 

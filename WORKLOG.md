@@ -31,6 +31,11 @@
 - CI Linux 38181426038 aprovou validate, restore, banco, advisors, build e E2E
   por perfil. Capitalização herdada em caixa alta foi corrigida no fechamento,
   com verificação de estilo computado; o SHA final exige nova CI integral.
+- Capturas autenticadas de 1440/1024/720/390/320 nos três temas aprovaram
+  edição, inserção, salvar/recarregar, teclado, restauração e Axe. Revisão visual
+  encontrou textos longos com rolagem interna e empilhamento excessivo no
+  celular; campos passaram a crescer com o conteúdo, as opções ficaram mais
+  compactas e a tabela preserva a semana em rolagem horizontal acessível.
 
 ## 2026-10-11: Correcao de temas e fronteira de Administrador publicada
 

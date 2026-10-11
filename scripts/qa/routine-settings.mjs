@@ -137,6 +137,28 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           ["none", "none"],
           "Routine labels must retain sentence case",
         );
+        await expect
+          .poll(() =>
+            page
+              .locator("textarea")
+              .evaluateAll((fields) =>
+                fields.every((field) => field.scrollHeight <= field.clientHeight + 1),
+              ),
+          )
+          .toBe(true);
+        if (width < 1180) {
+          const scroll = page.getByRole("region", {
+            name: "Tabela de rotina semanal",
+            exact: true,
+          });
+          const scrolling = await scroll.evaluate((element) => {
+            element.scrollLeft = element.scrollWidth;
+            const reachedEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 1;
+            element.scrollLeft = 0;
+            return reachedEnd;
+          });
+          assert.equal(scrolling, true, "Every weekday must remain reachable within the table");
+        }
         const result = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
           .analyze();
