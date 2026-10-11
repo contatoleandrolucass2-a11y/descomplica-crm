@@ -47,6 +47,8 @@ const SIMULATION_PARENT_KEY = "crm.simulation";
 const SIMULATION_PARENT_PATH = "/app/simulacao";
 const DASHBOARD_PARENT_KEY = "crm.dashboard";
 const DASHBOARD_PARENT_PATH = "/app";
+const MANAGEMENT_PARENT_KEY = "crm.management";
+const MANAGEMENT_PARENT_PATH = "/app/gestao";
 
 function hasAuthorizedSimulationRoot(pages: AppPage[]) {
   return pages.some(
@@ -198,6 +200,66 @@ export function extendAuthorizedNavigationWithReleasedPages(
         permissionKey: systemsGate.permission,
         parentKey: settingsParent.key,
         sortOrder: 60,
+        isActive: true,
+        isNavigation: true,
+      },
+    ];
+  }
+  const managementGate = getProtectedPageGate(MANAGEMENT_PARENT_PATH);
+  if (
+    settingsParent &&
+    managementGate?.releaseEnabled &&
+    managementGate.pageKey === MANAGEMENT_PARENT_KEY &&
+    pageGateAllowsRole(managementGate, context.roleKey) &&
+    context.permissions.includes(managementGate.permission) &&
+    !pages.some((page) => page.key === managementGate.pageKey || page.path === managementGate.path)
+  ) {
+    pages = [
+      ...pages,
+      {
+        key: managementGate.pageKey,
+        path: managementGate.path,
+        name: "Gestão",
+        description: "Rotinas e acompanhamento operacional.",
+        section: "management",
+        permissionKey: managementGate.permission,
+        parentKey: null,
+        sortOrder: 50,
+        isActive: true,
+        isNavigation: true,
+      },
+    ];
+  }
+  const managementParent = pages.find(
+    (page) =>
+      page.key === MANAGEMENT_PARENT_KEY &&
+      page.path === MANAGEMENT_PARENT_PATH &&
+      page.section === "management" &&
+      page.permissionKey === "crm.settings.manage" &&
+      page.parentKey === null &&
+      page.isActive &&
+      page.isNavigation,
+  );
+  const routineGate = getProtectedPageGate("/app/gestao/rotina");
+  if (
+    managementParent &&
+    routineGate?.releaseEnabled &&
+    routineGate.pageKey === "crm.management.routine" &&
+    pageGateAllowsRole(routineGate, context.roleKey) &&
+    context.permissions.includes(routineGate.permission) &&
+    !pages.some((page) => page.key === routineGate.pageKey || page.path === routineGate.path)
+  ) {
+    pages = [
+      ...pages,
+      {
+        key: routineGate.pageKey,
+        path: routineGate.path,
+        name: "Rotina",
+        description: "Classificação semanal da rotina por função.",
+        section: "management",
+        permissionKey: routineGate.permission,
+        parentKey: managementParent.key,
+        sortOrder: 10,
         isActive: true,
         isNavigation: true,
       },

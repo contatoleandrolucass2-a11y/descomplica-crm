@@ -49,6 +49,10 @@ const settingsLinks = [
   ["Recurso MKT", "/app/configuracoes/recurso-mkt"],
   ["Conectar Sistemas", "/app/configuracoes/conectar-sistemas"],
 ];
+const managementLinks = [
+  ["Visão geral", "/app/gestao"],
+  ["Rotina", "/app/gestao/rotina"],
+];
 const dashboardLinks = [
   ["Visão geral", "/app"],
   ["Oportunidades", "/app/etapas/oportunidades"],
@@ -63,6 +67,7 @@ export const archiveRootNavigationContract = [
   { name: "Simulação", tag: "BUTTON", href: null },
   { name: "Ranking", tag: "A", href: "/app/ranking" },
   { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
+  { name: "Gestão", tag: "BUTTON", href: null },
   { name: "Configurações", tag: "BUTTON", href: null },
 ];
 const navigation = (page) => page.locator("#authorized-navigation");
@@ -85,9 +90,10 @@ async function assertNavigationControlFocused(control, ariaControls) {
   );
 }
 
-async function assertRootAccessibleNames({ dashboard, settings, simulation }) {
+async function assertRootAccessibleNames({ dashboard, management, settings, simulation }) {
   await expect(dashboard).toHaveAccessibleName("Dashboard");
   await expect(simulation).toHaveAccessibleName("Simulação");
+  await expect(management).toHaveAccessibleName("Gestão");
   await expect(settings).toHaveAccessibleName("Configurações");
 }
 
@@ -156,6 +162,9 @@ export async function inspectArchiveNavigationFailure(page) {
       '[aria-controls="authorized-navigation-crm-dashboard"]',
     );
     const settings = header?.querySelector('[aria-controls="authorized-navigation-crm-settings"]');
+    const management = header?.querySelector(
+      '[aria-controls="authorized-navigation-crm-management"]',
+    );
     const inspect = (element) => {
       if (!element) return null;
       const rect = element.getBoundingClientRect();
@@ -190,12 +199,14 @@ export async function inspectArchiveNavigationFailure(page) {
       "Escuro",
       "Simulação",
       "Configurações",
+      "Gestão",
       "Descomplica",
     ];
     const safeControls = [
       "authorized-navigation",
       "authorized-navigation-crm-dashboard",
       "authorized-navigation-crm-simulation",
+      "authorized-navigation-crm-management",
       "authorized-navigation-crm-settings",
       "protected-account-menu",
     ];
@@ -205,6 +216,7 @@ export async function inspectArchiveNavigationFailure(page) {
       navigation: inspect(nav),
       dashboard: inspect(dashboard),
       settings: inspect(settings),
+      management: inspect(management),
       simulation: inspect(
         header?.querySelector('[aria-controls="authorized-navigation-crm-simulation"]'),
       ),
@@ -1048,6 +1060,9 @@ export async function checkArchiveNavigation(
           const settings = nav.locator(
             'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-settings"]',
           );
+          const management = nav.locator(
+            'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-management"]',
+          );
           const themes = appearance(page);
           const compactThemeSwitch = viewport.width <= 600;
           stage = "load:shell";
@@ -1296,7 +1311,7 @@ export async function checkArchiveNavigation(
             await expect(trigger).toHaveAccessibleName("Fechar navegação");
           }
           await ensureArchiveNavigationOpen(page);
-          await assertRootAccessibleNames({ dashboard, settings, simulation });
+          await assertRootAccessibleNames({ dashboard, management, settings, simulation });
           await assertOpenNavigationGeometry(page);
           await assertExactRootNavigation(page);
           check.exactAuthorizedRootNavigation = true;
@@ -1338,10 +1353,18 @@ export async function checkArchiveNavigation(
           await assertLinks(page, "authorized-navigation-crm-settings", settingsLinks, route);
           await assertDisabledItems(page, "authorized-navigation-crm-settings", []);
           await assertOpenNavigationGeometry(page);
-          stage = "dashboard-disclosure-and-authorized-links";
-          await dashboard.click();
+          stage = "management-disclosure-and-authorized-links";
+          await management.click();
           await expect(settings).toHaveAttribute("aria-expanded", "false");
           await expect(page.locator("#authorized-navigation-crm-settings")).toBeHidden();
+          await expect(management).toHaveAttribute("aria-expanded", "true");
+          await assertLinks(page, "authorized-navigation-crm-management", managementLinks, route);
+          await assertDisabledItems(page, "authorized-navigation-crm-management", []);
+          await assertOpenNavigationGeometry(page);
+          stage = "dashboard-disclosure-and-authorized-links";
+          await dashboard.click();
+          await expect(management).toHaveAttribute("aria-expanded", "false");
+          await expect(page.locator("#authorized-navigation-crm-management")).toBeHidden();
           await expect(dashboard).toHaveAttribute("aria-expanded", "true");
           await assertLinks(page, "authorized-navigation-crm-dashboard", dashboardLinks, route);
           await assertDisabledItems(page, "authorized-navigation-crm-dashboard", []);

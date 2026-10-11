@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-11
+
+- Adiciona o menu Gestão com submenu Rotina, protegido por
+  `crm.settings.manage` e exposto no menu suplementar autorizado.
+- Cria a classificação inicial de Gerente regional house com layout da Tabela
+  Associativo, opções das demais funções nulas, inserção de linhas e salvamento
+  local no navegador.
+- Atualiza gates, navegação, inventário de recursos, contrato visual e matriz
+  de smoke de rotas protegidas para 27 URLs.
+
 ## 2026-10-10
 
 - Atualiza ITBI e registro da capital paulista para a politica validada de

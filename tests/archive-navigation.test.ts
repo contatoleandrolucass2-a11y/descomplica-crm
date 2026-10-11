@@ -161,6 +161,7 @@ describe("archive navigation evidence gate", () => {
     expect(gate).toContain('shellContract: "unified-protected-shell-v1"');
     expect(gate).toContain("await ensureArchiveNavigationOpen(page);");
     expect(gate).toContain('"Metas de parcerias", "/app/configuracoes/metas/parcerias"');
+    expect(gate).toContain('"Rotina", "/app/gestao/rotina"');
     expect(gate).toContain('["Repasse", "/app/repasse"]');
     expect(gate).toContain("exactAuthorizedRootNavigation");
     expect(gate).toContain("exactAuthorizedAccountNavigation");
@@ -177,12 +178,13 @@ describe("archive navigation evidence gate", () => {
     expect(compact).toContain('"Entire hovered row must be gold with dark readable text"');
   });
 
-  it("keeps the five authorized roots in the approved visual and keyboard order", () => {
+  it("keeps the six authorized roots in the approved visual and keyboard order", () => {
     expect(archiveRootNavigationContract).toEqual([
       { name: "Dashboard", tag: "BUTTON", href: null },
       { name: "Simulação", tag: "BUTTON", href: null },
       { name: "Ranking", tag: "A", href: "/app/ranking" },
       { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
+      { name: "Gestão", tag: "BUTTON", href: null },
       { name: "Configurações", tag: "BUTTON", href: null },
     ]);
   });

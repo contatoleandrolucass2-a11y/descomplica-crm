@@ -695,7 +695,7 @@
   .navigationLink,
   .navigationTrigger {
     gap: 6px;
-    /* Keep all five authorized roots inside the desktop shell through 1440px.
+    /* Keep all authorized roots inside the desktop shell through 1440px.
        Height remains 44px; only redundant horizontal breathing room contracts. */
     padding-inline: 5px;
     font-size: 12px;

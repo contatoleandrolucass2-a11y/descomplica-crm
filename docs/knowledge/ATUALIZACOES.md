@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-11: Menu Gestao e submenu Rotina
+
+- Fonte: pedido do usuario, print do menu principal e planilha `TESTE1.xlsx`
+  tratada somente como dado. Status: implementado localmente; publicacao
+  pendente de gates Linux/CI.
+- Nova raiz `/app/gestao` e submenu `/app/gestao/rotina` usam
+  `crm.settings.manage`, aparecem no menu suplementar autorizado e reaproveitam
+  os tokens da Tabela Associativo.
+- A rotina inicial cobre apenas Gerente regional house. Gerente regional imob,
+  Gerente house, Coordenador de vendas, Coordenador de parcerias e Corretor
+  ficam nulos ate receberem classificacao propria.
+- Edicao, insercao de linhas e botao Salvar gravam no `localStorage` do
+  navegador. Nao houve migration, escrita remota, n8n ou nova permissao de banco.
+- Validacoes locais aprovadas: lint, typecheck, build e testes focados de
+  componente, rota, navegacao, inventario e contrato visual. `pnpm test`
+  completo no Windows manteve falhas ambientais/preexistentes de modo POSIX,
+  symlink, DevTools e Obsidian; a falha de contador de rotas foi corrigida.
+
 ## 2026-10-10: ITBI e registro dependem do contrato fiscal, nao do perfil comercial
 
 - Fonte: pedido autorizado, Prefeitura SP (ITBI 2513/2517), ARISP tabela 2026

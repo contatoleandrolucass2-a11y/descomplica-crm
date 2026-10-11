@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-11: Menu Gestão e submenu Rotina
+
+- Fonte: pedido do usuário, print do menu principal e planilha de referência
+  `TESTE1.xlsx` usada somente como dado de conteúdo.
+- Criada a raiz `/app/gestao` e o submenu `/app/gestao/rotina`, com gate
+  `crm.settings.manage`, mantendo a rotina editável fora de Configurações.
+- A tela reutiliza tokens e composição da Tabela Associativo. Inclui opções
+  Gerente regional house, Gerente regional imob, Gerente house, Coordenador de
+  vendas, Coordenador de parcerias e Corretor.
+- Somente Gerente regional house recebe rotina inicial revisada em português
+  brasileiro. Demais funções permanecem nulas por enquanto.
+- A rotina é editável, permite inserir linhas e salvar alterações no
+  `localStorage` do navegador. Sem migration, banco, dados remotos ou n8n.
+- Gates locais aprovados: `pnpm lint`, `pnpm typecheck`, `pnpm build` e testes
+  focados de rota, navegação, inventário, contrato visual e componente.
+- `pnpm test` completo falhou em cenários já incompatíveis com este Windows:
+  permissões POSIX 0600/0700, symlink de homologação e timeouts DevTools/
+  Obsidian. O contador de rotas do contrato visual foi corrigido e revalidado.
+
 ## 2026-10-10: ITBI e registro de Sao Paulo com vigencia e contrato fiscal
 
 - Pedido autorizado: corrigir, validar, publicar e sincronizar conhecimento.

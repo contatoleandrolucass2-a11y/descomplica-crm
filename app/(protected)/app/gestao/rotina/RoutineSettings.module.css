@@ -1,0 +1,422 @@
+.page {
+  min-width: 0;
+  color: var(--inv-color-text);
+  background: var(--inv-color-page);
+  letter-spacing: 0;
+}
+
+.main {
+  width: min(100% - 40px, 1600px);
+  margin: 0 auto;
+  padding: 16px 0 24px;
+}
+
+.page :global(.simulation-canvas-title-row h1) {
+  font-size: 32px;
+  letter-spacing: 0;
+}
+
+.page :global(.simulation-canvas-eyebrow),
+.page :global(.simulation-canvas-status) {
+  letter-spacing: 0;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.primaryAction,
+.secondaryAction,
+.addButton {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--inv-color-accent);
+  border-radius: 7px;
+  padding: 8px 14px;
+  color: var(--inv-color-text);
+  background: color-mix(in srgb, var(--inv-color-accent) 12%, var(--inv-color-panel));
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.secondaryAction {
+  width: 44px;
+  padding: 0;
+  background: var(--inv-color-panel);
+}
+
+.addButton {
+  min-height: 38px;
+  padding-inline: 12px;
+}
+
+.primaryAction:hover,
+.secondaryAction:hover,
+.addButton:hover {
+  background: var(--inv-color-accent-soft);
+}
+
+.page :is(button, textarea):focus-visible {
+  outline: 2px solid var(--inv-color-accent);
+  outline-offset: 3px;
+}
+
+.hero,
+.rolesPanel,
+.tablePanel {
+  min-width: 0;
+  border: 1px solid var(--inv-color-line);
+  border-radius: 10px;
+  background: var(--inv-color-panel);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.34fr);
+  gap: 18px;
+  padding: 18px;
+}
+
+.heroCopy {
+  display: flex;
+  min-width: 0;
+  gap: 14px;
+}
+
+.iconFrame {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  place-items: center;
+  border: 1px solid var(--inv-color-accent);
+  border-radius: 8px;
+  color: var(--inv-color-accent);
+  background: color-mix(in srgb, var(--inv-color-accent) 10%, var(--inv-color-panel));
+}
+
+.kicker {
+  margin: 0;
+  color: var(--inv-color-accent);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.hero h2,
+.sectionHeading h2,
+.tableToolbar h2,
+.emptyState h3 {
+  margin: 2px 0 0;
+  color: var(--inv-color-text);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.hero p,
+.tableToolbar p,
+.emptyState p {
+  margin: 6px 0 0;
+  color: var(--inv-color-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.saveState {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  border: 1px solid var(--inv-color-line);
+  border-radius: 8px;
+  background: var(--inv-color-panel-muted);
+  padding: 14px;
+  color: var(--inv-color-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.saveState svg {
+  flex: 0 0 auto;
+  color: var(--inv-color-accent);
+}
+
+.rolesPanel,
+.tablePanel {
+  margin-top: 18px;
+}
+
+.sectionHeading,
+.tableToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--inv-color-line);
+  background: color-mix(in srgb, var(--inv-color-accent) 7%, var(--inv-color-panel));
+  padding: 14px 16px;
+}
+
+.sectionHeading > span {
+  flex: 0 0 auto;
+  border: 1px solid var(--inv-color-line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  color: var(--inv-color-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.roleTabs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px;
+}
+
+.roleTab {
+  min-width: 0;
+  min-height: 78px;
+  border: 1px solid var(--inv-color-line);
+  border-radius: 8px;
+  background: var(--inv-color-panel-muted);
+  padding: 10px;
+  color: var(--inv-color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.roleTab[aria-selected="true"] {
+  border-color: var(--inv-color-accent);
+  background: color-mix(in srgb, var(--inv-color-accent) 14%, var(--inv-color-panel));
+}
+
+.roleTab strong,
+.roleTab span {
+  display: block;
+}
+
+.roleTab strong {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.roleTab span {
+  margin-top: 8px;
+  color: var(--inv-color-muted);
+  font-size: 12px;
+}
+
+.tableStats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tableStats > span {
+  border: 1px solid var(--inv-color-line);
+  border-radius: 999px;
+  padding: 5px 10px;
+  color: var(--inv-color-muted);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.routineTable {
+  width: 100%;
+  min-width: 1180px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.routineTable caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.routineTable th,
+.routineTable td {
+  border-bottom: 1px solid var(--inv-color-line);
+  border-left: 1px solid color-mix(in srgb, var(--inv-color-line) 55%, transparent);
+  padding: 10px;
+  vertical-align: top;
+}
+
+.routineTable th:first-child,
+.routineTable td:first-child {
+  border-left: 0;
+}
+
+.routineTable thead th {
+  color: var(--inv-color-accent);
+  background: var(--inv-color-panel-muted);
+  font-size: 12px;
+  font-weight: 850;
+  text-align: left;
+}
+
+.routineTable thead th:first-child,
+.routineTable tbody th {
+  width: 58px;
+  text-align: center;
+}
+
+.routineTable tbody th {
+  color: var(--inv-color-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.routineTable textarea {
+  display: block;
+  width: 100%;
+  min-height: 86px;
+  resize: vertical;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  padding: 8px;
+  color: var(--inv-color-text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.routineTable textarea:hover,
+.routineTable textarea:focus {
+  border-color: var(--inv-color-accent);
+  background: var(--inv-color-input);
+}
+
+.routineTable textarea::placeholder {
+  color: var(--inv-color-muted);
+}
+
+.emptyState {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 46px 18px;
+  text-align: center;
+}
+
+.emptyState p {
+  max-width: 34rem;
+}
+
+@media (max-width: 1180px) {
+  .roleTabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .main {
+    width: calc(100% - 24px);
+    padding-top: 12px;
+  }
+
+  .page :global(.simulation-canvas-title-row h1) {
+    font-size: 28px;
+  }
+
+  .headerActions,
+  .primaryAction {
+    width: 100%;
+  }
+
+  .hero,
+  .sectionHeading,
+  .tableToolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero {
+    display: grid;
+  }
+
+  .roleTabs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tableToolbar,
+  .sectionHeading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tableStats {
+    justify-content: flex-start;
+  }
+
+  .tableScroll {
+    overflow: visible;
+  }
+
+  .routineTable,
+  .routineTable tbody,
+  .routineTable tr,
+  .routineTable th,
+  .routineTable td {
+    display: block;
+  }
+
+  .routineTable {
+    min-width: 0;
+  }
+
+  .routineTable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .routineTable tr {
+    border-bottom: 1px solid var(--inv-color-line);
+    padding: 12px;
+  }
+
+  .routineTable tbody th {
+    width: auto;
+    margin-bottom: 10px;
+    border: 0;
+    text-align: left;
+  }
+
+  .routineTable tbody th::before {
+    content: "Linha ";
+  }
+
+  .routineTable td {
+    border: 0;
+    padding: 8px 0;
+  }
+
+  .routineTable td::before {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--inv-color-accent);
+    font-size: 12px;
+    font-weight: 800;
+    content: attr(data-label);
+  }
+}

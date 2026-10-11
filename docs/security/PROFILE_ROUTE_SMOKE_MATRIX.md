@@ -2,11 +2,11 @@
 
 ## Contrato
 
-Esta matriz descreve o inventário HTTP de 25 rotas protegidas e deve ser validada
+Esta matriz descreve o inventário HTTP de 27 rotas protegidas e deve ser validada
 com contas QA sintéticas. O catálogo PostgreSQL mantém exatamente 17 entradas em
-`app_pages`; o catálogo HTTP possui 25 rotas habilitadas para Master, pois
-acrescenta Conectar Sistemas, Recurso MKT, Repasse, Tabelão, as réplicas WF14 e WF15,
-WF16/Documentação e a jornada visual CAIXA. A execução dos motores e a leitura
+`app_pages`; o catálogo HTTP possui 27 rotas habilitadas para Master, pois
+acrescenta Conectar Sistemas, Recurso MKT, Gestão, Rotina, Repasse, Tabelão, as
+réplicas WF14 e WF15, WF16/Documentação e a jornada visual CAIXA. A execução dos motores e a leitura
 server-side da fonte pública de Repasse continuam contratos separados da
 autorização das páginas; o RBAC do CRM não privatiza a planilha externa.
 
@@ -32,10 +32,10 @@ Produção e instalação limpa convergem para as mesmas 17 entradas de `app_pag
 A migration Auth/MFA remove somente as quatro identidades excedentes encontradas
 no restore (`WF16`, `CAIXA`, `WF14` e `WF15`), preserva `user_roles` e overrides
 e recompõe somente os vínculos herdados já existentes em produção. Neste
-candidato, as oito jornadas complementares acrescentam da 18ª à 25ª rotas HTTP
+candidato, as dez jornadas complementares acrescentam da 18ª à 27ª rotas HTTP
 habilitadas pelo catálogo versionado, sem migration ou nova permissão de banco.
-Conectar Sistemas e Recurso MKT reutilizam `crm.settings.manage`. Repasse exige
-papel `master` ou `admin` e `crm.partnerships.view` em conjunto. A allowlist
+Conectar Sistemas, Recurso MKT, Gestão e Rotina reutilizam `crm.settings.manage`.
+Repasse exige papel `master` ou `admin` e `crm.partnerships.view` em conjunto. A allowlist
 continua negando explicitamente `coordinator`, `manager_imob` e `broker_imob`,
 mesmo quando esses papéis possuem acesso ao Canal de Parcerias. CAIXA permanece
 fail-closed no motor, ainda que sua composição visual esteja acessível ao Master.
@@ -54,6 +54,8 @@ fail-closed no motor, ainda que sua composição visual esteja acessível ao Mas
 | `/app/configuracoes`                      |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/recurso-mkt`          |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/conectar-sistemas`    |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/gestao`                             |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
+| `/app/gestao/rotina`                      |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/metas`                |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/metas/parcerias`      |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
 | `/app/configuracoes/metas/pontos`         |      200 |     200 |                                          403 |                             403 |                 403 |  redirect |
@@ -129,13 +131,13 @@ Para cada perfil, o E2E deve:
 1. autenticar e confirmar a identidade/papel esperados;
 2. verificar `/app` para os sete papéis ativos e uma superfície auth-only para `pending`;
 3. comparar o menu com o catálogo permitido;
-4. abrir diretamente cada uma das 25 URLs e comparar o resultado com a tabela;
+4. abrir diretamente cada uma das 27 URLs e comparar o resultado com a tabela;
 5. testar os Route Handlers vinculados às permissões sem gravar dados;
 6. abrir `/conta/seguranca` e provar o estado MFA aplicável;
 7. executar logout e confirmar bloqueio ao voltar, recarregar e reabrir URL protegida.
 
 O `403` é verificado no response HTTP direto e na navegação do navegador. O Proxy
-antecipa a permissão exata das 25 rotas versionadas antes que uma loading boundary
+antecipa a permissão exata das 27 rotas versionadas antes que uma loading boundary
 possa mascará-la com `200` streamed; layout, página, APIs e RLS repetem o gate. Conteúdo
 e título da página negada também devem permanecer ausentes. Para Admin, as três páginas
 de metas carregam a base legada somente leitura e exibem explicitamente o rascunho como
