@@ -159,7 +159,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await page.addInitScript(
       ({ key, settings }) => {
         if (settings.stored !== undefined) localStorage.setItem(key, settings.stored);
-        const fixtureWindow = window as FixtureWindow;
+        const fixtureWindow = window as unknown as FixtureWindow;
         fixtureWindow.routineFailSave = settings.setError ?? false;
         fixtureWindow.routineReadCount = 0;
         const getItem = Storage.prototype.getItem;
@@ -175,14 +175,14 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
           return setItem.call(this, key, value);
         };
         if (settings.holdLoad) {
-          const setTimeout = window.setTimeout.bind(window);
+          const setTimeout = fixtureWindow.setTimeout.bind(fixtureWindow);
           let held = true;
           const callbacks: Array<() => void> = [];
           fixtureWindow.resumeRoutineLoad = () => {
             held = false;
             callbacks.splice(0).forEach((callback) => callback());
           };
-          window.setTimeout = (handler, timeout, ...args) =>
+          fixtureWindow.setTimeout = (handler, timeout, ...args) =>
             setTimeout(
               typeof handler === "function" && timeout === 0
                 ? () => {
@@ -215,14 +215,18 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     });
     await browserExpect(page.getByText("Carregando rotina.")).toBeVisible();
     expect(await page.locator("button:enabled, textarea:enabled").count()).toBe(0);
-    expect(await page.evaluate(() => (window as FixtureWindow).routineReadCount)).toBe(0);
-    await page.evaluate(() => (window as FixtureWindow).resumeRoutineLoad());
+    expect(await page.evaluate(() => (window as unknown as FixtureWindow).routineReadCount)).toBe(
+      0,
+    );
+    await page.evaluate(() => (window as unknown as FixtureWindow).resumeRoutineLoad());
     const cell = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
     await browserExpect(cell).toHaveValue("Rotina recuperada");
     await cell.fill("Edição após carregar");
     await browserExpect(page.getByText(dirtyMessage, { exact: true })).toBeVisible();
     await browserExpect(cell).toHaveValue("Edição após carregar");
-    expect(await page.evaluate(() => (window as FixtureWindow).routineReadCount)).toBe(1);
+    expect(await page.evaluate(() => (window as unknown as FixtureWindow).routineReadCount)).toBe(
+      1,
+    );
   });
 
   it("saves changes across roles and restores them on reload", async () => {
@@ -281,7 +285,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browserExpect(page.getByText(savedMessage, { exact: false })).toBeVisible();
     await cell.fill("Versão ainda não salva QA");
     await page.evaluate(() => {
-      (window as FixtureWindow).routineFailSave = true;
+      (window as unknown as FixtureWindow).routineFailSave = true;
     });
     await page.getByRole("button", { name: "Salvar alterações" }).click();
     await browserExpect(page.getByRole("alert")).toContainText(saveError);
@@ -291,7 +295,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     const stored = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), storageKey);
     expect(stored["regional-house"][0]["Segunda-feira"]).toBe("Versão salva QA");
     await page.evaluate(() => {
-      (window as FixtureWindow).routineFailSave = false;
+      (window as unknown as FixtureWindow).routineFailSave = false;
     });
     await page.getByRole("button", { name: "Salvar alterações" }).click();
     await browserExpect(page.getByRole("alert")).toHaveCount(0);
