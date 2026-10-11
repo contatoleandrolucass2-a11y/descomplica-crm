@@ -16,7 +16,9 @@
 
 ## 2026-10-10: Integracao do draft aprovado para a VPS
 
-- Status: `validado_no_pr`; `publicacao_pendente`. Fonte:
+- Status: `publicado` no SHA
+  `ac3d7893c1e679298f54c1f1f8b57d03568715c2`. Fonte: PR #178, CI candidata
+  `38133737505`, CI de `main` `38136053837` e
   `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps`, manifesto
   SHA-256 `c113f793b50efc36c08a0c2757980725af252d01c474f7ffd9ed773566242e18`
   e previa final SHA-256
@@ -52,10 +54,10 @@
 - A verificacao pos-commit `pnpm qa:visual:authenticated`, em modo `verify`,
   passou com 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
   comparacoes candidato/baseline e 110 de zoom; as fixtures efemeras foram
-  removidas. O PR #178 ficou `CLEAN`; a CI `38094977306` aprovou os jobs
+  removidas. Em uma etapa intermediaria, o PR #178 ficou `CLEAN`; a CI
+  `38094977306` aprovou os jobs
   `validate`, `release-gates` e `isolated-restore` no SHA `4a8bfc8`. Revisao,
-  merge, imagem imutavel e publicacao protegida permanecem pendentes; producao
-  nao foi publicada.
+  merge, imagem imutavel e publicacao ainda estavam pendentes naquele ponto.
 - A reexecucao documental `38096802698` expôs uma nao determinacao real do QA:
   em 1.024 px, caracteres aleatorios do e-mail sintetico alternavam o cabecalho
   de Usuarios entre uma e duas linhas, com 21 px de diferenca. As outras 241
@@ -74,6 +76,18 @@
 - A verificacao pos-commit `4111089`, em modo `verify`, repetiu 154 checks
   responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes e 110 de zoom;
   terminou verde e removeu a conta e as fixtures efemeras.
+- O PR #178 foi integrado sem novos apontamentos. A CI `38136053837` repetiu os
+  quatro jobs na `main`; o artefato `11700958880` foi conferido por revision,
+  checksum, config, plataforma e onze camadas antes do load. O ID local
+  containerd `sha256:d21f8ac` foi provado contra a config CI
+  `sha256:3b4432d`, sem rebuild, e os dois perfis de runtime passaram.
+- Backup privado, CAS e rollback foram preparados. A producao saiu de
+  `1de9f5a` para `ac3d7893`; container, health local/publico, headers, assets,
+  negacao anonima e rotas protegidas ficaram verdes, sem restart ou OOM.
+  Rollback nao foi necessario.
+- Nao houve migration nem mutacao de dados remotos. A cobertura autenticada foi
+  concluida antes do deploy; a verificacao de producao permaneceu anonima para
+  nao criar sessao ou alterar proposta.
 - Registro completo: `docs/qa/draft-crm-vps-2026-10-10.md`.
 
 ## 2026-10-10: ITBI e registro dependem do contrato fiscal, nao do perfil comercial
