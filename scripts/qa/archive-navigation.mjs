@@ -32,23 +32,6 @@ export const archiveNavigationViewports = [
   { width: 1440, height: 900 },
 ];
 const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
-const simulationLinks = [
-  ["Visão geral", "/app/simulacao"],
-  ["Simulador Associativo", archiveNavigationRoutes[0]],
-  ["Tabela Direta", archiveNavigationRoutes[1]],
-  ["Tabela Investidor", archiveNavigationRoutes[2]],
-  ["Tabelão", archiveNavigationRoutes[3]],
-  ["Documentação", "/app/simulacao/calcular-documentacao"],
-  ["CAIXA", "/app/simulacao/caixa"],
-];
-const settingsLinks = [
-  ["Visão geral", "/app/configuracoes"],
-  ["Metas do funil", "/app/configuracoes/metas"],
-  ["Metas de parcerias", "/app/configuracoes/metas/parcerias"],
-  ["Metas de pontos", "/app/configuracoes/metas/pontos"],
-  ["Recurso MKT", "/app/configuracoes/recurso-mkt"],
-  ["Conectar Sistemas", "/app/configuracoes/conectar-sistemas"],
-];
 const dashboardLinks = [
   ["Visão geral", "/app"],
   ["Oportunidades", "/app/etapas/oportunidades"],
@@ -58,12 +41,25 @@ const dashboardLinks = [
   ["Vendas", "/app/etapas/vendas"],
   ["Repasse", "/app/repasse"],
 ];
+const administrationLinks = [
+  ["Usuários", "/admin/usuarios"],
+  ["Páginas", "/admin/paginas"],
+  ["Integrações", "/app/configuracoes/conectar-sistemas"],
+];
+const accountLinks = [
+  "/app/configuracoes",
+  "/app/configuracoes/metas",
+  "/app/configuracoes/metas/parcerias",
+  "/app/configuracoes/metas/pontos",
+  "/app/configuracoes/recurso-mkt",
+  "/conta/seguranca",
+];
 export const archiveRootNavigationContract = [
   { name: "Dashboard", tag: "BUTTON", href: null },
-  { name: "Simulação", tag: "BUTTON", href: null },
+  { name: "Simulação", tag: "A", href: "/app/simulacao" },
   { name: "Ranking", tag: "A", href: "/app/ranking" },
   { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
-  { name: "Configurações", tag: "BUTTON", href: null },
+  { name: "Administração", tag: "BUTTON", href: null },
 ];
 const navigation = (page) => page.locator("#authorized-navigation");
 const mobileTrigger = (page) => page.locator('button[aria-controls="authorized-navigation"]');
@@ -85,10 +81,24 @@ async function assertNavigationControlFocused(control, ariaControls) {
   );
 }
 
-async function assertRootAccessibleNames({ dashboard, settings, simulation }) {
+async function assertNavigationLinkFocused(link, href) {
+  await expect(link).toBeFocused();
+  const focusState = await link.evaluate((element) => ({
+    focused: document.activeElement === element,
+    href: element.getAttribute("href"),
+    connected: element.isConnected,
+  }));
+  assert.deepEqual(
+    focusState,
+    { focused: true, href, connected: true },
+    `Keyboard focus must reach ${href}`,
+  );
+}
+
+async function assertRootAccessibleNames({ administration, dashboard, simulation }) {
   await expect(dashboard).toHaveAccessibleName("Dashboard");
   await expect(simulation).toHaveAccessibleName("Simulação");
-  await expect(settings).toHaveAccessibleName("Configurações");
+  await expect(administration).toHaveAccessibleName("Administração");
 }
 
 export async function waitForArchiveHeaderTheme(page, theme, surfaces = {}) {
@@ -155,7 +165,9 @@ export async function inspectArchiveNavigationFailure(page) {
     const dashboard = header?.querySelector(
       '[aria-controls="authorized-navigation-crm-dashboard"]',
     );
-    const settings = header?.querySelector('[aria-controls="authorized-navigation-crm-settings"]');
+    const administration = header?.querySelector(
+      '[aria-controls="authorized-navigation-admin-home"]',
+    );
     const inspect = (element) => {
       if (!element) return null;
       const rect = element.getBoundingClientRect();
@@ -174,7 +186,7 @@ export async function inspectArchiveNavigationFailure(page) {
           : null,
       };
     };
-    const rect = settings?.getBoundingClientRect();
+    const rect = administration?.getBoundingClientRect();
     const point = rect ? { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 } : null;
     const hit = point ? document.elementFromPoint(point.x, point.y) : null;
     const active = header?.contains(document.activeElement) ? document.activeElement : null;
@@ -189,14 +201,13 @@ export async function inspectArchiveNavigationFailure(page) {
       "Médio",
       "Escuro",
       "Simulação",
-      "Configurações",
+      "Administração",
       "Descomplica",
     ];
     const safeControls = [
       "authorized-navigation",
       "authorized-navigation-crm-dashboard",
-      "authorized-navigation-crm-simulation",
-      "authorized-navigation-crm-settings",
+      "authorized-navigation-admin-home",
       "protected-account-menu",
     ];
     return {
@@ -204,17 +215,15 @@ export async function inspectArchiveNavigationFailure(page) {
       pathname: location.pathname,
       navigation: inspect(nav),
       dashboard: inspect(dashboard),
-      settings: inspect(settings),
-      simulation: inspect(
-        header?.querySelector('[aria-controls="authorized-navigation-crm-simulation"]'),
-      ),
+      administration: inspect(administration),
+      simulation: inspect(header?.querySelector('a[href="/app/simulacao"]')),
       account: inspect(header?.querySelector('[aria-controls="protected-account-menu"]')),
       mobileTrigger: inspect(
         header?.querySelector('button[aria-controls="authorized-navigation"]'),
       ),
-      settingsCenter: point,
-      elementAtSettingsCenter: inspect(hit),
-      settingsReceivesPointer: Boolean(hit && settings?.contains(hit)),
+      administrationCenter: point,
+      elementAtAdministrationCenter: inspect(hit),
+      administrationReceivesPointer: Boolean(hit && administration?.contains(hit)),
       navigationContainsFocus: Boolean(
         document.activeElement && nav?.contains(document.activeElement),
       ),
@@ -608,7 +617,7 @@ export async function assertHeaderGeometry(page, compact) {
     // Only top-level controls belong inside the header; disclosure panels may extend beyond it.
     const activeNavItems = [
       ...nav.querySelectorAll(
-        '[data-navigation-root-control][aria-current="page"], [data-navigation-root-control][data-navigation-active="true"]',
+        '[data-navigation-root-control][aria-current="page"], [data-navigation-root-control][data-navigation-active="true"], [data-navigation-root-control][data-active="true"]',
       ),
     ];
     const rootControls = [...nav.querySelectorAll("[data-navigation-root-control]")];
@@ -1042,11 +1051,13 @@ export async function checkArchiveNavigation(
           const dashboard = nav.locator(
             'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-dashboard"]',
           );
-          const simulation = nav.locator(
-            'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-simulation"]',
+          const simulation = nav.locator('a[data-navigation-root-control][href="/app/simulacao"]');
+          const ranking = nav.locator('a[data-navigation-root-control][href="/app/ranking"]');
+          const partnerships = nav.locator(
+            'a[data-navigation-root-control][href="/app/canal-de-parcerias"]',
           );
-          const settings = nav.locator(
-            'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-settings"]',
+          const administration = nav.locator(
+            'button[data-navigation-root-control][aria-controls="authorized-navigation-admin-home"]',
           );
           const themes = appearance(page);
           const compactThemeSwitch = viewport.width <= 600;
@@ -1186,10 +1197,7 @@ export async function checkArchiveNavigation(
                 );
                 await page.keyboard.press("Tab");
                 stage = `theme:${theme}:accessible-disclosure:simulation-focus`;
-                await assertNavigationControlFocused(
-                  simulation,
-                  "authorized-navigation-crm-simulation",
-                );
+                await assertNavigationLinkFocused(simulation, "/app/simulacao");
               } else {
                 stage = `theme:${theme}:accessible-disclosure:brand-focus`;
                 await brand.focus();
@@ -1201,14 +1209,21 @@ export async function checkArchiveNavigation(
                 );
                 await page.keyboard.press("Tab");
                 stage = `theme:${theme}:accessible-disclosure:simulation-focus`;
-                await assertNavigationControlFocused(
-                  simulation,
-                  "authorized-navigation-crm-simulation",
-                );
+                await assertNavigationLinkFocused(simulation, "/app/simulacao");
               }
+              await page.keyboard.press("Tab");
+              await assertNavigationLinkFocused(ranking, "/app/ranking");
+              await page.keyboard.press("Tab");
+              await assertNavigationLinkFocused(partnerships, "/app/canal-de-parcerias");
+              await page.keyboard.press("Tab");
+              stage = `theme:${theme}:accessible-disclosure:administration-focus`;
+              await assertNavigationControlFocused(
+                administration,
+                "authorized-navigation-admin-home",
+              );
               stage = `theme:${theme}:accessible-disclosure:open-submenu`;
               await page.keyboard.press("Enter");
-              await expect(page.locator("#authorized-navigation-crm-simulation")).toBeVisible();
+              await expect(page.locator("#authorized-navigation-admin-home")).toBeVisible();
               stage = `theme:${theme}:accessible-disclosure:axe`;
               const accessibility = await new AxeBuilder({ page })
                 .include("[data-protected-topbar]")
@@ -1222,10 +1237,10 @@ export async function checkArchiveNavigation(
               stage = `theme:${theme}:accessible-disclosure:close-submenu`;
               await page.keyboard.press("Escape");
               await assertNavigationControlFocused(
-                simulation,
-                "authorized-navigation-crm-simulation",
+                administration,
+                "authorized-navigation-admin-home",
               );
-              await expect(simulation).toHaveAttribute("aria-expanded", "false");
+              await expect(administration).toHaveAttribute("aria-expanded", "false");
               if (compact) {
                 stage = `theme:${theme}:accessible-disclosure:close-navigation`;
                 await page.keyboard.press("Escape");
@@ -1296,7 +1311,7 @@ export async function checkArchiveNavigation(
             await expect(trigger).toHaveAccessibleName("Fechar navegação");
           }
           await ensureArchiveNavigationOpen(page);
-          await assertRootAccessibleNames({ dashboard, settings, simulation });
+          await assertRootAccessibleNames({ administration, dashboard, simulation });
           await assertOpenNavigationGeometry(page);
           await assertExactRootNavigation(page);
           check.exactAuthorizedRootNavigation = true;
@@ -1305,43 +1320,33 @@ export async function checkArchiveNavigation(
             await page.keyboard.press("Tab");
             await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
             await page.keyboard.press("Tab");
-            await assertNavigationControlFocused(
-              simulation,
-              "authorized-navigation-crm-simulation",
-            );
+            await assertNavigationLinkFocused(simulation, "/app/simulacao");
           } else {
             await brand.focus();
             await page.keyboard.press("Tab");
             await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
             await page.keyboard.press("Tab");
-            await assertNavigationControlFocused(
-              simulation,
-              "authorized-navigation-crm-simulation",
-            );
+            await assertNavigationLinkFocused(simulation, "/app/simulacao");
           }
+          await page.keyboard.press("Tab");
+          await assertNavigationLinkFocused(ranking, "/app/ranking");
+          await page.keyboard.press("Tab");
+          await assertNavigationLinkFocused(partnerships, "/app/canal-de-parcerias");
+          await page.keyboard.press("Tab");
+          await assertNavigationControlFocused(administration, "authorized-navigation-admin-home");
           await page.keyboard.press("ArrowDown");
-          await expect(simulation).toHaveAttribute("aria-expanded", "true");
+          await expect(administration).toHaveAttribute("aria-expanded", "true");
           await expect(nav).toBeVisible();
           if (compact) await expect(trigger).toHaveAttribute("aria-expanded", "true");
-          await expect(
-            page.locator("#authorized-navigation-crm-simulation a").first(),
-          ).toBeFocused();
-          await assertLinks(page, "authorized-navigation-crm-simulation", simulationLinks, route);
-          await assertDisabledItems(page, "authorized-navigation-crm-simulation", []);
-          await expect(nav.locator('a[aria-current="page"]')).toHaveCount(1);
+          await expect(page.locator("#authorized-navigation-admin-home a").first()).toBeFocused();
+          await assertLinks(page, "authorized-navigation-admin-home", administrationLinks, route);
+          await assertDisabledItems(page, "authorized-navigation-admin-home", []);
+          await expect(nav.locator('a[aria-current="page"]')).toHaveCount(0);
+          await expect(simulation).toHaveAttribute("data-active", "true");
           stage = "switch-disclosure-by-pointer";
-          await settings.click();
-          await expect(simulation).toHaveAttribute("aria-expanded", "false");
-          await expect(page.locator("#authorized-navigation-crm-simulation")).toBeHidden();
-          await expect(settings).toHaveAttribute("aria-expanded", "true");
-          await expect(nav).toBeVisible();
-          await assertLinks(page, "authorized-navigation-crm-settings", settingsLinks, route);
-          await assertDisabledItems(page, "authorized-navigation-crm-settings", []);
-          await assertOpenNavigationGeometry(page);
-          stage = "dashboard-disclosure-and-authorized-links";
           await dashboard.click();
-          await expect(settings).toHaveAttribute("aria-expanded", "false");
-          await expect(page.locator("#authorized-navigation-crm-settings")).toBeHidden();
+          await expect(administration).toHaveAttribute("aria-expanded", "false");
+          await expect(page.locator("#authorized-navigation-admin-home")).toBeHidden();
           await expect(dashboard).toHaveAttribute("aria-expanded", "true");
           await assertLinks(page, "authorized-navigation-crm-dashboard", dashboardLinks, route);
           await assertDisabledItems(page, "authorized-navigation-crm-dashboard", []);
@@ -1379,13 +1384,13 @@ export async function checkArchiveNavigation(
           await expect(securityLink).toHaveAttribute("href", "/conta/seguranca");
           await page.keyboard.press("Tab");
           await expect(securityLink).toBeFocused();
-          const accountLinks = await accountPanel
+          const authorizedAccountLinks = await accountPanel
             .getByRole("link")
             .evaluateAll((links) => links.map((link) => link.getAttribute("href")).sort());
           assert.deepEqual(
-            accountLinks,
-            ["/admin", "/admin/paginas", "/admin/usuarios", "/conta/seguranca"],
-            "Master account menu must expose only its authorized account and admin links",
+            authorizedAccountLinks,
+            [...accountLinks].sort(),
+            "Master account menu must expose only Security and its authorized settings links",
           );
           check.exactAuthorizedAccountNavigation = true;
           assert.equal(
@@ -1412,30 +1417,32 @@ export async function checkArchiveNavigation(
           stage = "resize-reset";
           await page.setViewportSize({ width: 1181, height: 900 });
           await expect(nav).toBeVisible();
-          await simulation.click();
-          await expect(page.locator("#authorized-navigation-crm-simulation")).toBeVisible();
-          await page.locator("#authorized-navigation-crm-simulation a").first().focus();
+          await dashboard.click();
+          await expect(page.locator("#authorized-navigation-crm-dashboard")).toBeVisible();
+          await page.locator("#authorized-navigation-crm-dashboard a").first().focus();
           await page.setViewportSize({ width: 1180, height: 900 });
           await expect(nav).toBeHidden();
           await expect(trigger).toBeFocused();
-          await expect(simulation).toHaveAttribute("aria-expanded", "false");
+          await expect(dashboard).toHaveAttribute("aria-expanded", "false");
           await ensureArchiveNavigationOpen(page);
-          await simulation.click();
-          await page.locator("#authorized-navigation-crm-simulation a").first().focus();
-          stage = "resize-simulation-link-to-desktop";
+          await administration.click();
+          await page.locator("#authorized-navigation-admin-home a").first().focus();
+          stage = "resize-administration-link-to-desktop";
           await page.setViewportSize({ width: 1181, height: 900 });
           await expect(nav).toBeVisible();
-          await expect(page.locator("#authorized-navigation-crm-simulation")).toBeHidden();
-          await assertNavigationControlFocused(simulation, "authorized-navigation-crm-simulation");
+          await expect(page.locator("#authorized-navigation-admin-home")).toBeHidden();
+          await assertNavigationControlFocused(administration, "authorized-navigation-admin-home");
           await expect(trigger).toHaveAttribute("aria-expanded", "false");
-          stage = "resize-settings-link-to-desktop";
+          stage = "resize-simulation-link-to-desktop";
           await page.setViewportSize({ width: 1180, height: 900 });
           await ensureArchiveNavigationOpen(page);
-          await settings.click();
-          await page.locator("#authorized-navigation-crm-settings a").first().focus();
+          await expect(trigger).toBeFocused();
+          await page.keyboard.press("Tab");
+          await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
+          await page.keyboard.press("Tab");
+          await assertNavigationLinkFocused(simulation, "/app/simulacao");
           await page.setViewportSize({ width: 1181, height: 900 });
-          await expect(page.locator("#authorized-navigation-crm-settings")).toBeHidden();
-          await assertNavigationControlFocused(settings, "authorized-navigation-crm-settings");
+          await assertNavigationLinkFocused(simulation, "/app/simulacao");
           stage = "resize-mobile-trigger-to-desktop";
           await page.setViewportSize({ width: 1180, height: 900 });
           await expect(trigger).toBeFocused();
@@ -1446,13 +1453,15 @@ export async function checkArchiveNavigation(
           await page.setViewportSize(viewport);
           await ensureArchiveNavigationOpen(page);
           await simulation.click();
+          await expect(page).toHaveURL(`${origin}/app/simulacao`);
+          await expect(page.locator("main[data-simulation-hub]")).toBeVisible();
           const destination =
             archiveNavigationRoutes[
               (archiveNavigationRoutes.indexOf(route) + 1) % archiveNavigationRoutes.length
             ];
-          await page
-            .locator(`#authorized-navigation-crm-simulation a[href="${destination}"]`)
-            .click();
+          const simulatorCard = page.locator(`main[data-simulation-hub] a[href="${destination}"]`);
+          await expect(simulatorCard).toHaveCount(1);
+          await simulatorCard.click();
           await expect(page).toHaveURL(`${origin}${destination}`);
           await expect(appearance(page)).toBeVisible();
           if (compact) await expect(navigation(page)).toBeHidden();

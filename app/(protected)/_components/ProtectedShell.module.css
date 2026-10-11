@@ -78,6 +78,11 @@
   outline-offset: -2px;
 }
 
+.topbar summary:focus-visible {
+  outline: 2px solid var(--header-accent);
+  outline-offset: -2px;
+}
+
 /* Legacy simulator CSS must never push a root link's keyboard ring outside
    the compact global topbar, including at the 1181px desktop breakpoint. */
 .topbar [data-navigation-root-control]:focus-visible {
@@ -85,7 +90,7 @@
   outline-offset: -2px !important;
 }
 
-.topbar :is(a, button) {
+.topbar :is(a, button, summary) {
   touch-action: manipulation;
 }
 
@@ -96,7 +101,7 @@
   min-height: 57px;
   grid-template-columns: auto minmax(0, 1fr) max-content max-content;
   align-items: center;
-  gap: 14px;
+  gap: 24px;
   box-sizing: border-box;
   padding: 1px 24px;
 }
@@ -106,29 +111,38 @@
   min-width: 0;
   min-height: 52px;
   align-items: center;
-  gap: 0;
   color: var(--header-text);
   text-decoration: none;
   white-space: nowrap;
 }
 
 .brandMark {
+  position: relative;
   display: block;
-  width: 24px;
-  height: 24px;
-  flex: 0 0 24px;
-  margin-inline-end: -2px;
-  color: inherit;
-  transform: translateY(-1px);
+  width: 176px;
+  height: 31px;
+  flex: 0 0 176px;
+  line-height: 0;
 }
 
-.brandName {
-  overflow: hidden;
-  font-size: 21px;
-  font-weight: 760;
-  line-height: 1.2;
-  letter-spacing: 0;
-  text-overflow: ellipsis;
+.brandMark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brandMark [data-brand-wordmark-dark] {
+  display: none;
+}
+
+:global(:root[data-theme="dark"]) .brandMark [data-brand-wordmark-light] {
+  display: none;
+}
+
+:global(:root[data-theme="dark"]) .brandMark [data-brand-wordmark-dark] {
+  display: block;
 }
 
 .navigationRoot,
@@ -154,19 +168,19 @@
 .navigationLink,
 .navigationTrigger {
   display: inline-flex;
-  min-height: 52px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
   gap: 8px;
   box-sizing: border-box;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
-  padding: 10px;
+  padding: 9px 11px;
   color: var(--header-muted);
   font: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   line-height: 1.3;
   text-decoration: none;
   white-space: nowrap;
@@ -180,10 +194,10 @@
 }
 
 .navigationLink[aria-current="page"],
+.navigationLink[data-active="true"],
 .navigationTrigger[data-active="true"] {
-  background: color-mix(in srgb, var(--header-active) 48%, transparent);
+  background: var(--header-active);
   color: var(--header-accent);
-  box-shadow: inset 0 -2px 0 var(--header-accent);
 }
 
 .navigationIcon,
@@ -197,7 +211,7 @@
 .navigationIcon svg,
 .menuIcon svg,
 .accountLinkIcon svg {
-  width: 18px;
+  width: 16px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -220,18 +234,18 @@
   top: calc(100% + 1px);
   left: 0;
   display: grid;
-  width: min(20rem, calc(100vw - 2rem));
+  width: min(315px, calc(100vw - 2rem));
   max-height: calc(100dvh - 6rem);
-  gap: 2px;
+  gap: 1px;
   overflow-y: auto;
   overscroll-behavior: contain;
   box-sizing: border-box;
   border: 1px solid var(--header-line);
-  border-radius: 0 0 8px 8px;
+  border-radius: 5px;
   background: var(--header-bg);
-  padding: 6px;
+  padding: 5px;
   color: var(--header-text);
-  box-shadow: 0 12px 30px #00000024;
+  box-shadow: 0 8px 24px #10182818;
 }
 
 .navigationItem:last-child .navigationPanel {
@@ -247,16 +261,16 @@
 .menuLink,
 .menuDisabled {
   display: grid;
-  min-height: 44px;
+  min-height: 54px;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   box-sizing: border-box;
-  border-radius: 4px;
-  padding: 8px 10px;
+  border-radius: 3px;
+  padding: 9px 11px;
   color: var(--header-text);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 550;
   line-height: 1.35;
   text-decoration: none;
 }
@@ -266,8 +280,8 @@
   padding: 7px 10px 5px;
   color: var(--header-muted);
   font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.09em;
+  font-weight: 600;
+  letter-spacing: 0.07em;
   line-height: 1.2;
   text-transform: uppercase;
 }
@@ -313,16 +327,13 @@
 .menuLink[aria-current="page"] {
   background: var(--header-active);
   color: var(--header-accent);
-  box-shadow: inset 3px 0 0 var(--header-accent);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .menuIcon {
-  width: 32px;
+  width: 28px;
   aspect-ratio: 1;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--header-active) 72%, transparent);
-  color: var(--header-accent);
+  color: var(--header-muted);
 }
 
 .menuCopy,
@@ -446,20 +457,20 @@
 .accountPanel {
   position: absolute;
   z-index: 5;
-  top: calc(100% + 4px);
+  top: calc(100% + 10px);
   right: 0;
   display: grid;
-  width: min(22rem, calc(100vw - 2rem));
+  width: min(326px, calc(100vw - 2rem));
   max-height: calc(100dvh - 4rem);
   overflow-y: auto;
   overscroll-behavior: contain;
   box-sizing: border-box;
   border: 1px solid var(--header-line);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--header-bg);
   padding: 6px;
   color: var(--header-text);
-  box-shadow: 0 12px 30px #00000024;
+  box-shadow: 0 10px 26px #10182822;
 }
 
 .accountProfile {
@@ -478,6 +489,60 @@
   letter-spacing: 0.07em;
   line-height: 1.3;
   text-transform: uppercase;
+}
+
+.accountSettings {
+  margin-top: 4px;
+  border-top: 1px solid var(--header-line);
+  padding-top: 4px;
+}
+
+.accountSettingsSummary {
+  display: grid;
+  min-height: 44px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+  padding: 8px 10px;
+  color: var(--header-text);
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.35;
+  list-style: none;
+  cursor: pointer;
+}
+
+.accountSettingsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.accountSettingsSummary:hover {
+  background: var(--header-hover);
+}
+
+.accountSettingsSummary > svg:first-child {
+  color: var(--header-accent);
+}
+
+.accountSettingsChevron {
+  color: var(--header-muted);
+  transition: transform 160ms ease-out;
+}
+
+.accountSettings[open] .accountSettingsChevron {
+  transform: rotate(180deg);
+}
+
+.accountSettingsLinks {
+  display: grid;
+  gap: 1px;
+  padding: 2px 0 4px 22px;
+}
+
+.accountSettingsLinks .accountLink {
+  min-height: 43px;
+  padding: 8px 9px;
 }
 
 .accountProfile strong {
@@ -701,12 +766,24 @@
     font-size: 12px;
   }
 
+  .brandMark {
+    width: 154px;
+    height: 27px;
+    flex-basis: 154px;
+  }
+
   .themeOptions {
     grid-template-columns: repeat(3, minmax(64px, 1fr));
   }
 
   .accountTrigger {
     max-width: 64px;
+  }
+}
+
+@media (min-width: 1181px) and (max-width: 1250px) {
+  .navigationIcon {
+    display: none;
   }
 }
 
@@ -720,6 +797,12 @@
   .brand {
     grid-column: 1;
     grid-row: 1;
+  }
+
+  .brandMark {
+    width: 154px;
+    height: 27px;
+    flex-basis: 154px;
   }
 
   .navigationRoot {
@@ -859,6 +942,12 @@
     padding-inline: 12px;
   }
 
+  .brandMark {
+    width: 140px;
+    height: 25px;
+    flex-basis: 140px;
+  }
+
   .navigationRoot {
     grid-column: 4;
     grid-row: 1;
@@ -960,20 +1049,17 @@
     justify-self: start;
   }
 
-  .brandName {
-    font-size: 14px;
-  }
-
   .brandMark {
-    width: 20px;
-    height: 20px;
-    flex-basis: 20px;
+    width: 118px;
+    height: 21px;
+    flex-basis: 118px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .chevron,
-  .accountChevron {
+  .accountChevron,
+  .accountSettingsChevron {
     transition: none;
   }
 }

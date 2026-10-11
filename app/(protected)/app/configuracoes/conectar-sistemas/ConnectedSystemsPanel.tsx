@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   CircleCheck,
   CircleHelp,
@@ -11,13 +12,11 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 import { SalesforceRefreshButton } from "@/app/(protected)/app/_components/SalesforceRefreshButton";
-import { SimulationCanvasHeader } from "@/app/(protected)/app/simulacao/_components/SimulationCanvasHeader";
 import {
   emptySalesforceConnectionSnapshot as emptySnapshot,
   salesforceConnectionSnapshotSchema,
   type SalesforceConnectionSnapshot,
 } from "@/lib/crm/salesforce/connection-contract";
-import "@/app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css";
 
 import styles from "./ConnectedSystemsPanel.module.css";
 
@@ -33,32 +32,32 @@ const REPORTS = [
 
 const STATES = {
   unconfigured: {
-    label: "Status não configurado",
+    label: "Não conectado",
     note: "Monitoramento do coletor indisponível neste ambiente.",
     icon: CircleHelp,
   },
   waiting: {
-    label: "Sessão não verificada",
+    label: "Não verificado",
     note: "Aguardando confirmação do coletor.",
     icon: CircleHelp,
   },
   connected: {
-    label: "Coletor conectado",
+    label: "Conectado",
     note: "Sessão confirmada pelo coletor.",
     icon: CircleCheck,
   },
   reauth_required: {
-    label: "Reconexão necessária",
+    label: "Não conectado",
     note: "Reautorize a sessão no navegador dedicado do coletor.",
     icon: Unplug,
   },
   unavailable: {
-    label: "Status indisponível",
+    label: "Não conectado",
     note: "Não foi possível confirmar a sessão do coletor.",
     icon: Unplug,
   },
   stale: {
-    label: "Confirmação expirada",
+    label: "Suspenso",
     note: "Aguardando nova prova de sessão do coletor.",
     icon: CirclePause,
   },
@@ -169,6 +168,8 @@ export function ConnectedSystemsPanel({
 
   const connection = STATES[snapshot.state];
   const StatusIcon = connection.icon;
+  const salesforceState = snapshot.cycle === "running" ? "extracting" : snapshot.state;
+  const salesforceLabel = snapshot.cycle === "running" ? "Extraindo" : connection.label;
   const hasReports = snapshot.reports !== null;
   const publicationFailed = snapshot.errorCode === "publication_failed";
   const cycleLabel =
@@ -184,179 +185,278 @@ export function ConnectedSystemsPanel({
 
   return (
     <main className={styles.page} data-connected-systems>
-      <SimulationCanvasHeader
-        title="Conectar Sistemas"
-        subtitle="Salesforce"
-        titleAccessory={
+      <header className={styles.pageHeader} data-simulation-page-heading>
+        <div>
+          <h1>Integrações</h1>
+          <p>Sistemas conectados ao CRM e evidências operacionais disponíveis.</p>
+        </div>
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={styles.iconButton}
+            aria-label="Verificar conexão"
+            title="Verificar conexão do Salesforce"
+            disabled={checking}
+            onClick={() => verifyRef.current?.()}
+          >
+            <RefreshCw
+              size={17}
+              aria-hidden="true"
+              className={checking ? styles.spinning : undefined}
+            />
+          </button>
+          <a
+            href="https://direcional.my.salesforce.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.button}
+          >
+            Abrir Salesforce <ExternalLink size={16} aria-hidden="true" />
+          </a>
+        </div>
+      </header>
+
+      <section className={styles.services} aria-labelledby="services-title">
+        <div className={styles.servicesHeading}>
+          <div>
+            <h2 id="services-title">Serviços</h2>
+            <p>O estado só é afirmado quando existe uma fonte real de evidência.</p>
+          </div>
+          <span>3 serviços</span>
+        </div>
+        <div className={styles.servicesGrid}>
+          <article className={styles.serviceCard}>
+            <div className={styles.serviceLogoArea}>
+              <Image
+                className={`${styles.serviceLogo} ${styles.salesforceLogo}`}
+                src="/integrations/salesforce.svg"
+                width={92}
+                height={64}
+                alt="Salesforce"
+              />
+            </div>
+            <h3>Salesforce</h3>
+            <p>Origem dos sete relatórios comerciais acompanhados pelo CRM.</p>
+            <div className={styles.serviceHealth}>
+              <span className={styles.status} data-state={salesforceState}>
+                <StatusIcon size={15} aria-hidden="true" />
+                {salesforceLabel}
+              </span>
+              <small>
+                <Timestamp value={snapshot.checkedAt} empty="Sem verificação" />
+              </small>
+            </div>
+          </article>
+
+          <article className={styles.serviceCard}>
+            <div className={styles.serviceLogoArea}>
+              <Image
+                className={`${styles.serviceLogo} ${styles.logoLight}`}
+                src="/integrations/n8n-light.svg"
+                width={148}
+                height={40}
+                alt="n8n"
+              />
+              <Image
+                className={`${styles.serviceLogo} ${styles.logoDark}`}
+                src="/integrations/n8n-dark.svg"
+                width={148}
+                height={40}
+                alt=""
+                aria-hidden="true"
+              />
+            </div>
+            <h3>n8n</h3>
+            <p>Fluxos de integração e atualização de dados.</p>
+            <div className={styles.serviceHealth}>
+              <span className={styles.status} data-state="unverified">
+                <CircleHelp size={15} aria-hidden="true" />
+                Não verificado
+              </span>
+              <small>Fonte de status não exposta</small>
+            </div>
+          </article>
+
+          <article className={styles.serviceCard}>
+            <div className={styles.serviceLogoArea}>
+              <Image
+                className={`${styles.serviceLogo} ${styles.logoLight}`}
+                src="/integrations/supabase-light.svg"
+                width={181}
+                height={36}
+                alt="Supabase"
+              />
+              <Image
+                className={`${styles.serviceLogo} ${styles.logoDark}`}
+                src="/integrations/supabase-dark.svg"
+                width={181}
+                height={36}
+                alt=""
+                aria-hidden="true"
+              />
+            </div>
+            <h3>Supabase</h3>
+            <p>Banco de dados e autenticação do CRM.</p>
+            <div className={styles.serviceHealth}>
+              <span className={styles.status} data-state="unverified">
+                <CircleHelp size={15} aria-hidden="true" />
+                Não verificado
+              </span>
+              <small>Fonte de status não exposta</small>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section className={styles.salesforceDetails} aria-labelledby="salesforce-details-title">
+        <div className={styles.salesforceDetailsHeading}>
+          <div>
+            <h2 id="salesforce-details-title">Salesforce e relatórios</h2>
+            <p>Monitoramento operacional com evidência recebida do coletor.</p>
+          </div>
           <span role="status" className={styles.status} data-state={snapshot.state}>
             <StatusIcon size={16} aria-hidden="true" />
             {connection.label}
           </span>
-        }
-        actions={
-          <div className={styles.actions}>
-            <button
-              type="button"
-              className={styles.iconButton}
-              aria-label="Verificar conexão"
-              title="Verificar conexão"
-              disabled={checking}
-              onClick={() => verifyRef.current?.()}
-            >
-              <RefreshCw
-                size={17}
-                aria-hidden="true"
-                className={checking ? styles.spinning : undefined}
-              />
-            </button>
+        </div>
+
+        <section className={styles.connection} aria-label="Sessão do coletor">
+          <div className={styles.connectionCopy}>
+            <p>{connection.note}</p>
+            <span className={styles.muted}>Autenticação manual com MFA</span>
+          </div>
+          <span className={styles.checked}>
+            Última verificação: <Timestamp value={snapshot.checkedAt} />
+          </span>
+        </section>
+
+        <dl className={styles.metrics}>
+          <div>
+            <dt>Coleta</dt>
+            <dd>{cycleLabel}</dd>
+          </div>
+          <div>
+            <dt>Última coleta</dt>
+            <dd>
+              <Timestamp value={snapshot.lastExportAt} />
+            </dd>
+          </div>
+          <div>
+            <dt>Última publicação no CRM</dt>
+            <dd>
+              {publicationFailed ? (
+                <span className={styles.status} data-state="unavailable">
+                  Publicação não confirmada
+                </span>
+              ) : null}
+              {!publicationFailed || snapshot.lastPublishedAt ? (
+                <Timestamp value={snapshot.lastPublishedAt} empty="Sem publicação confirmada" />
+              ) : null}
+            </dd>
+          </div>
+          <div>
+            <dt>Próxima execução</dt>
+            <dd>
+              <Timestamp value={snapshot.nextRunAt} empty="Sem agenda confirmada" />
+            </dd>
+          </div>
+        </dl>
+
+        <section className={styles.reports} aria-labelledby="reports-title">
+          <header className={styles.sectionHeader}>
+            <div className={styles.sectionTitle}>
+              <h2 id="reports-title">Relatórios</h2>
+              <span>7 relatórios previstos</span>
+            </div>
+            <div className={styles.refreshAction}>
+              {canRefresh ? (
+                <SalesforceRefreshButton
+                  available={refreshAvailable}
+                  messageClassName={styles.muted ?? ""}
+                />
+              ) : (
+                <span className={styles.muted}>Sem permissão para atualizar</span>
+              )}
+            </div>
+          </header>
+          <div
+            className={styles.tableScroll}
+            role="region"
+            aria-label="Relatórios do Salesforce"
+            tabIndex={0}
+          >
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th scope="col">Relatório</th>
+                  <th scope="col" className={styles.count}>
+                    Linhas coletadas
+                  </th>
+                  <th scope="col">Última coleta</th>
+                  <th scope="col">Horário da coleta</th>
+                  <th scope="col">
+                    <span className="sr-only">Abrir relatório</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {REPORTS.map((report) => {
+                  const result = snapshot.reports?.find((item) => item.key === report.key);
+                  return (
+                    <tr key={report.key}>
+                      <th scope="row">{report.name}</th>
+                      <td className={styles.count}>
+                        {result ? result.rows.toLocaleString("pt-BR") : "Sem dados"}
+                      </td>
+                      <td>
+                        {result && snapshot.lastExportAt ? "Coletado" : "Sem coleta confirmada"}
+                      </td>
+                      <td>
+                        <Timestamp value={result ? snapshot.lastExportAt : null} />
+                      </td>
+                      <td>
+                        <a
+                          className={styles.reportLink}
+                          href={`https://direcional.lightning.force.com/lightning/r/Report/${report.id}/view`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Abrir ${report.name} no Salesforce`}
+                          title={`Abrir ${report.name} no Salesforce`}
+                        >
+                          <ExternalLink size={16} aria-hidden="true" />
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <footer className={styles.footer}>
+            <span>
+              {hasReports
+                ? "Contagens da coleta informada. Publicação no CRM verificada separadamente."
+                : "Aguardando contagens do coletor."}
+            </span>
             <a
-              href="https://direcional.my.salesforce.com/"
+              href="https://direcional.lightning.force.com/lightning"
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.button}
             >
-              Abrir Salesforce <ExternalLink size={16} aria-hidden="true" />
+              Console de vendas <ExternalLink size={14} aria-hidden="true" />
             </a>
-          </div>
-        }
-      />
-
-      <section className={styles.connection} aria-label="Sessão do coletor">
-        <div className={styles.connectionCopy}>
-          <p>{connection.note}</p>
-          <span className={styles.muted}>Autenticação manual com MFA</span>
-        </div>
-        <span className={styles.checked}>
-          Última verificação: <Timestamp value={snapshot.checkedAt} />
-        </span>
-      </section>
-
-      <dl className={styles.metrics}>
-        <div>
-          <dt>Coleta</dt>
-          <dd>{cycleLabel}</dd>
-        </div>
-        <div>
-          <dt>Última coleta</dt>
-          <dd>
-            <Timestamp value={snapshot.lastExportAt} />
-          </dd>
-        </div>
-        <div>
-          <dt>Última publicação no CRM</dt>
-          <dd>
-            {publicationFailed ? (
-              <span className={styles.status} data-state="unavailable">
-                Publicação não confirmada
-              </span>
-            ) : null}
-            {!publicationFailed || snapshot.lastPublishedAt ? (
-              <Timestamp value={snapshot.lastPublishedAt} empty="Sem publicação confirmada" />
-            ) : null}
-          </dd>
-        </div>
-        <div>
-          <dt>Próxima execução</dt>
-          <dd>
-            <Timestamp value={snapshot.nextRunAt} empty="Sem agenda confirmada" />
-          </dd>
-        </div>
-      </dl>
-
-      <section className={styles.reports} aria-labelledby="reports-title">
-        <header className={styles.sectionHeader}>
-          <div className={styles.sectionTitle}>
-            <h2 id="reports-title">Relatórios</h2>
-            <span>7 relatórios previstos</span>
-          </div>
-          <div className={styles.refreshAction}>
-            {canRefresh ? (
-              <SalesforceRefreshButton
-                available={refreshAvailable}
-                messageClassName={styles.muted ?? ""}
-              />
-            ) : (
-              <span className={styles.muted}>Sem permissão para atualizar</span>
-            )}
-          </div>
-        </header>
-        <div
-          className={styles.tableScroll}
-          role="region"
-          aria-label="Relatórios do Salesforce"
-          tabIndex={0}
-        >
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th scope="col">Relatório</th>
-                <th scope="col" className={styles.count}>
-                  Linhas coletadas
-                </th>
-                <th scope="col">Última coleta</th>
-                <th scope="col">Horário da coleta</th>
-                <th scope="col">
-                  <span className="sr-only">Abrir relatório</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {REPORTS.map((report) => {
-                const result = snapshot.reports?.find((item) => item.key === report.key);
-                return (
-                  <tr key={report.key}>
-                    <th scope="row">{report.name}</th>
-                    <td className={styles.count}>
-                      {result ? result.rows.toLocaleString("pt-BR") : "Sem dados"}
-                    </td>
-                    <td>
-                      {result && snapshot.lastExportAt ? "Coletado" : "Sem coleta confirmada"}
-                    </td>
-                    <td>
-                      <Timestamp value={result ? snapshot.lastExportAt : null} />
-                    </td>
-                    <td>
-                      <a
-                        className={styles.reportLink}
-                        href={`https://direcional.lightning.force.com/lightning/r/Report/${report.id}/view`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Abrir ${report.name} no Salesforce`}
-                        title={`Abrir ${report.name} no Salesforce`}
-                      >
-                        <ExternalLink size={16} aria-hidden="true" />
-                      </a>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <footer className={styles.footer}>
+          </footer>
+        </section>
+        <div className={styles.configuration}>
           <span>
-            {hasReports
-              ? "Contagens da coleta informada. Publicação no CRM verificada separadamente."
-              : "Aguardando contagens do coletor."}
+            Ingestão no CRM: <strong>{ingestLabel}</strong>
           </span>
-          <a
-            href="https://direcional.lightning.force.com/lightning"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Console de vendas <ExternalLink size={14} aria-hidden="true" />
-          </a>
-        </footer>
+          <span>
+            Atualização manual: <strong>{refreshAvailable ? "Disponível" : "Indisponível"}</strong>
+          </span>
+          <span>Horários de Brasília</span>
+        </div>
       </section>
-      <div className={styles.configuration}>
-        <span>
-          Ingestão no CRM: <strong>{ingestLabel}</strong>
-        </span>
-        <span>
-          Atualização manual: <strong>{refreshAvailable ? "Disponível" : "Indisponível"}</strong>
-        </span>
-        <span>Horários de Brasília</span>
-      </div>
     </main>
   );
 }

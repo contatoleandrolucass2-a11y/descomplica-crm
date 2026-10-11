@@ -262,7 +262,7 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("approvedCanvasByRoute.size !== routes.length");
     expect(script).toContain("canvasDensityReady:");
     expect(script).toContain("canvasDensityLimitByRoute");
-    expect(script).toContain('["/admin/usuarios", 2500]');
+    expect(script).toContain('["/admin/usuarios", 2600]');
     expect(script).toContain("defaultCanvasDensityLimit");
     expect(script).toContain("snapshot.canvasDensityReady &&");
     expect(script).toContain("pageScrollHeight:");

@@ -137,6 +137,10 @@ describe("management canvas layout", () => {
     expect(styles).toMatch(
       /@media \(max-width: 40rem\) \{[\s\S]*?\.admin-user-detail-header h2 \{[\s\S]*?min-height: 2\.5em[\s\S]*?-webkit-line-clamp: 2/,
     );
+    expect(styles).toMatch(
+      /@media \(min-width: 60\.0625rem\) and \(max-width: 72rem\) \{[\s\S]*?\.admin-user-detail-header h2 \{[\s\S]*?min-height: 2\.5em[\s\S]*?max-height: 2\.5em[\s\S]*?-webkit-line-clamp: 2/,
+    );
+    expect(users).toContain("<h2 title={user.email ?? undefined}>");
     expect(users).toContain("const PAGE_SIZE = 6");
     expect(pages).toContain("const PAGE_SIZE = 8");
   });

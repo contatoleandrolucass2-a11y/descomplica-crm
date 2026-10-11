@@ -1,13 +1,7 @@
 .canvas {
   min-width: 0;
   min-height: calc(100dvh - 5rem);
-  background:
-    radial-gradient(
-      circle at 82% 0%,
-      color-mix(in srgb, var(--analytics-cyan) 10%, transparent),
-      transparent 30rem
-    ),
-    var(--analytics-page);
+  background: var(--analytics-page);
   color: var(--analytics-ink);
 }
 
@@ -19,7 +13,7 @@
 
 .canvas article[data-tone="navy"] {
   border-color: var(--analytics-line);
-  background: linear-gradient(135deg, rgb(40 215 232 / 5%), transparent 48%), var(--analytics-navy);
+  background: var(--analytics-navy);
 }
 
 .canvas :is(button, input):focus-visible {

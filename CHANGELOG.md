@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-10-10
+
+- Integra o draft aprovado do CRM nos temas Claro, Medio e Escuro, com marca
+  horizontal completa, navegacao compacta e os canvases comerciais responsivos.
+- Faz Simulacao abrir diretamente o hub de seis ferramentas, move Configuracoes
+  para o menu da conta e agrupa Usuarios, Paginas e Integracoes em Administracao.
+- Renomeia Conectar Sistemas para Integracoes na interface, aplica os logos do
+  pacote e preserva estados reais ou nao verificados, sem importar dados
+  demonstrativos da previa.
+- Pagina o diretorio de Usuarios no servidor, com busca, filtro, rolagem
+  continua, fallback manual e representacao do acesso efetivo herdado.
+- Preserva campos, componentes e motores de Associativo, Tabela Direta, Tabela
+  Investidor e Tabelao; os novos estilos de hub, Documentacao e CAIXA ficam
+  escopados fora dessas quatro jornadas.
+- Aprova o E2E de release com 19 cenarios e um skip previsto, incluindo o
+  Associativo concorrente, e promove a baseline autenticada de 242 comparacoes.
+- Confere 154 checks responsivos, 88 de tema, 242 Axe, 110 de zoom, 22 canvases,
+  40 navegacoes dos quatro simuladores e 30 capturas manuais do Associativo.
+- Calibra de 2.500 para 2.600 px o teto estrito de `/admin/usuarios`: a pagina
+  mediu 2.592 px em 1.440 px ao exibir as 23 permissoes e badges efetivos.
+- Aprova `pnpm qa:visual:authenticated` pos-commit em modo `verify`: 154 checks
+  responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes
+  candidato/baseline e 110 de zoom; fixtures efemeras removidas.
+- Abre o PR #178 e aprova a CI `38094977306` no SHA candidato `4a8bfc8`, com
+  validacao, release gates e restore isolado; revisao, merge e publicacao em
+  producao continuam pendentes.
+- Estabiliza em duas linhas o e-mail da conta no cabecalho de Usuarios entre
+  961 px e 1.152 px, mantendo o valor completo no DOM e em `title`. A segunda
+  CI havia exposto uma variacao de 21 px causada apenas pelo sufixo aleatorio do
+  fixture visual em 1.024 px; as outras 241 comparacoes permaneceram aprovadas.
+
 ## 2026-10-09
 
 - Move Guia passo a passo para a direita do titulo do Associativo, com largura

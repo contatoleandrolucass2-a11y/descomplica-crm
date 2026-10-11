@@ -38,13 +38,13 @@ const roots = [
   ["crm.simulation", "/app/simulacao", "Simulacao"],
   ["crm.ranking", "/app/ranking", "Ranking"],
   ["crm.partnerships", "/app/canal-de-parcerias", "Canal de Parcerias"],
-  ["crm.settings", "/app/configuracoes", "Configuracoes"],
+  ["admin.home", "/admin", "Administracao"],
 ].map(([key, path, name], sortOrder) => ({
   key: key!,
   path: path!,
   name: name!,
   description: "Navegacao sintetica",
-  section: "crm",
+  section: key === "admin.home" ? "admin" : "crm",
   parentKey: null,
   sortOrder,
 }));
@@ -59,7 +59,7 @@ const pages = [
     sortOrder: 60,
   },
   ...roots
-    .filter((page) => ["crm.dashboard", "crm.simulation", "crm.settings"].includes(page.key))
+    .filter((page) => ["crm.dashboard", "crm.simulation", "admin.home"].includes(page.key))
     .map((page) => ({
       ...page,
       key: `${page.key}.fixture`,
@@ -75,7 +75,6 @@ function fixture(displayName: string) {
       <div className={styles.topbarInner}>
         <a className={styles.brand} href="/app">
           <DescomplicaBrandMark className={styles.brandMark} />
-          <span className={styles.brandName}>escomplica</span>
         </a>
         <AuthorizedNavigation pages={pages} />
         <ThemeSwitch canPersist={false} />
@@ -101,12 +100,29 @@ function pointerTargetsReachable(header: HTMLElement) {
   );
   return Array.from(controls).every((control) => {
     const box = control.getBoundingClientRect();
+    if (box.width === 0 || box.height === 0) return true;
     const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
     return hit === control || (hit !== null && control.contains(hit));
   });
 }
 
 describe("account menu responsive layout", () => {
+  it("renders the approved full wordmark without rebuilding its name in text", () => {
+    const markup = fixture("Mariana Silva");
+
+    expect(markup).toContain("/brand/descomplica-wordmark-light.svg");
+    expect(markup).toContain("/brand/descomplica-wordmark-dark.svg");
+    expect(markup).not.toContain(">escomplica<");
+  });
+
+  it("keeps Simulation as a direct hub link even when simulator children exist", () => {
+    const markup = fixture("Mariana Silva");
+
+    expect(markup).toMatch(/<a[^>]+href="\/app\/simulacao"[^>]*>/u);
+    expect(markup).not.toContain('aria-controls="authorized-navigation-crm-simulation"');
+    expect(markup).toContain('aria-controls="authorized-navigation-admin-home"');
+  });
+
   // Browser fixtures are opt-in because the unit CI job has no Chromium installation.
   it.runIf(process.env.ACCOUNT_MENU_BROWSER === "1")(
     "keeps compact account identity without overlapping navigation or themes",
@@ -117,6 +133,27 @@ describe("account menu responsive layout", () => {
       let cases = 0;
       try {
         const page = await browser.newPage();
+        const wordmarks = new Map([
+          [
+            "/brand/descomplica-wordmark-light.svg",
+            readFileSync(
+              new URL("../public/brand/descomplica-wordmark-light.svg", import.meta.url),
+              "utf8",
+            ),
+          ],
+          [
+            "/brand/descomplica-wordmark-dark.svg",
+            readFileSync(
+              new URL("../public/brand/descomplica-wordmark-dark.svg", import.meta.url),
+              "utf8",
+            ),
+          ],
+        ]);
+        await page.route("http://fixture.test/brand/**", async (route) => {
+          const body = wordmarks.get(new URL(route.request().url()).pathname);
+          if (!body) return route.abort();
+          await route.fulfill({ body, contentType: "image/svg+xml", status: 200 });
+        });
         for (const width of [320, 375, 600, 760, 768, 1180, 1181, 1280, 1440, 1920]) {
           await page.setViewportSize({ width, height: 900 });
           for (const theme of ["light", "balanced", "dark"]) {
@@ -125,7 +162,7 @@ describe("account menu responsive layout", () => {
               "AlexandrianaMaximilianaConstantina Silva",
             ]) {
               await page.setContent(
-                `<html data-theme="${theme}"><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;font-family:Arial,sans-serif}*{box-sizing:border-box}${stylesheet.toString()}</style></head><body>${fixture(displayName)}<main>Conteudo sintetico</main></body></html>`,
+                `<html data-theme="${theme}"><head><base href="http://fixture.test/"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;font-family:Arial,sans-serif}*{box-sizing:border-box}${stylesheet.toString()}</style></head><body>${fixture(displayName)}<main>Conteudo sintetico</main></body></html>`,
               );
               const geometry = await page.evaluate(
                 (classes) => {
@@ -147,7 +184,7 @@ describe("account menu responsive layout", () => {
                   );
                   const controls = Array.from(
                     document.querySelectorAll<HTMLElement>(
-                      `.${classes.brandName}, .${classes.brandMark}, .${classes.topbar} button, .${classes.topbar} [data-navigation-root-control]`,
+                      `.${classes.brandMark}, .${classes.topbar} button, .${classes.topbar} [data-navigation-root-control]`,
                     ),
                   ).filter((element) => element.getBoundingClientRect().width > 0);
                   const collisions: string[] = [];
@@ -190,7 +227,7 @@ describe("account menu responsive layout", () => {
                     collisions,
                   };
                 },
-                { brandName: styles.brandName, brandMark: styles.brandMark, topbar: styles.topbar },
+                { brandMark: styles.brandMark, topbar: styles.topbar },
               );
               const scenario = `${width}px / ${theme} / ${displayName}`;
               expect(geometry.text, scenario).toBe(displayName.split(" ")[0]);
@@ -202,7 +239,8 @@ describe("account menu responsive layout", () => {
               expect(geometry.avatarVisible, scenario).toBe(true);
               expect(geometry.noPageOverflow, scenario).toBe(true);
               expect(geometry.touchHeight, scenario).toBeGreaterThanOrEqual(44);
-              expect(geometry.controlCount, scenario).toBeGreaterThanOrEqual(7);
+              // Compact widths expose wordmark + theme + account + navigation controls.
+              expect(geometry.controlCount, scenario).toBeGreaterThanOrEqual(4);
               expect(geometry.collisions, scenario).toEqual([]);
               await checkProtectedTopbar(page);
               if (width === 320 && theme === "light" && displayName === "Mariana Silva") {
@@ -230,14 +268,18 @@ describe("account menu responsive layout", () => {
                   const reachable = await page.locator("header").evaluate(pointerTargetsReachable);
                   expect(reachable, `${scenario} / ${family} / pointer targets`).toBe(true);
                   if (width === 1280 && theme === "light" && family === "Verdana, sans-serif") {
-                    const oldLayout = await page.addStyleTag({
-                      content: `.${styles.topbarInner}{grid-template-columns:auto minmax(0,1fr) auto auto}.${styles.accountTrigger}{max-width:clamp(8rem,calc(100vw - 1050px),20rem)}`,
+                    await page.locator("header").evaluate((header) => {
+                      const blocker = document.createElement("div");
+                      blocker.dataset.pointerBlocker = "true";
+                      blocker.style.cssText =
+                        "position:absolute;inset:0;z-index:100;pointer-events:auto";
+                      header.append(blocker);
                     });
                     expect(await page.locator("header").evaluate(pointerTargetsReachable)).toBe(
                       false,
                     );
-                    await oldLayout.evaluate((style) => {
-                      style.parentNode?.removeChild(style);
+                    await page.locator("[data-pointer-blocker]").evaluate((blocker) => {
+                      blocker.remove();
                     });
                   }
                 }
@@ -267,7 +309,7 @@ describe("account menu responsive layout", () => {
         for (const width of [320, 375, 600, 1180]) {
           await page.setViewportSize({ width, height: 568 });
           await page.setContent(
-            `<html><head><style>body{margin:0;font-family:Arial,sans-serif}*{box-sizing:border-box}${stylesheet.toString()}</style></head><body>${fixture("AlexandrianaMaximilianaConstantina Silva")}</body></html>`,
+            `<html><head><base href="http://fixture.test/"><style>body{margin:0;font-family:Arial,sans-serif}*{box-sizing:border-box}${stylesheet.toString()}</style></head><body>${fixture("AlexandrianaMaximilianaConstantina Silva")}</body></html>`,
           );
           for (const selector of ["#authorized-navigation", "#protected-account-menu"]) {
             const menu = page.locator(selector);

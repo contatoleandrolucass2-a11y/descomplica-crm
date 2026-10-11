@@ -2,11 +2,10 @@ import Link from "next/link";
 import {
   ArrowRight,
   BarChart3,
-  Megaphone,
-  Plug,
   Settings2,
   Trophy,
   UsersRound,
+  WalletCards,
   type LucideIcon,
 } from "lucide-react";
 
@@ -25,48 +24,28 @@ export const metadata = { title: "Configurações" };
 
 const SETTINGS = [
   {
-    href: "/app/configuracoes/conectar-sistemas",
-    badge: "Integrações",
-    title: "Conectar Sistemas",
-    description: "Salesforce e atualização dos relatórios do CRM.",
-    detail: "Conexão Salesforce",
-    icon: Plug,
-  },
-  {
-    href: "/app/configuracoes/recurso-mkt",
-    badge: "Marketing",
-    title: "Recurso MKT",
-    description: "Fundo de investimento de Marketing e distribuição dos recursos por responsável.",
-    detail: "Volta ao Caixa",
-    icon: Megaphone,
-  },
-  {
     href: "/app/configuracoes/metas",
-    badge: "Funil comercial",
     title: "Metas do funil",
-    description: "Defina metas mensais, semanais e diárias para acompanhar o ritmo comercial.",
+    description: "Defina conversões, metas mensais e capacidade da equipe.",
     detail: "Planejamento de vendas",
     icon: BarChart3,
   },
   {
     href: "/app/configuracoes/metas/parcerias",
-    badge: "Canal parceiro",
     title: "Metas de parcerias",
-    description: "Organize os objetivos do canal de parceiros e mantenha a cadência alinhada.",
+    description: "Organize os objetivos do canal e a produção das imobiliárias.",
     detail: "Planejamento de parcerias",
     icon: UsersRound,
   },
   {
     href: "/app/configuracoes/metas/pontos",
-    badge: "Ranking",
     title: "Metas de pontos",
-    description: "Ajuste pesos e pontuações usados para orientar o ranking comercial.",
+    description: "Ajuste os pesos e objetivos de cada atividade comercial.",
     detail: "Regras de pontuação",
     icon: Trophy,
   },
 ] as const satisfies ReadonlyArray<{
   href: string;
-  badge: string;
   title: string;
   description: string;
   detail: string;
@@ -88,9 +67,6 @@ function SettingsCard({ setting, canManage }: { setting: Setting; canManage: boo
         <div className="flex items-start gap-3">
           <span className={managementStyles.iconFrame}>
             <Icon aria-hidden="true" />
-          </span>
-          <span className="pt-2 text-[0.68rem] font-bold tracking-[0.11em] text-[var(--analytics-cyan-strong)] uppercase">
-            {setting.badge}
           </span>
         </div>
 
@@ -127,7 +103,7 @@ export default async function SettingsPage() {
     <ManagementPage className={styles.canvas ?? ""}>
       <ManagementPageHeader
         title="Configurações do CRM"
-        description="Centralize metas e regras comerciais em um único ponto de administração."
+        description="Centralize metas e regras comerciais em um único ponto."
         status={
           <ManagementStatusBadge tone={canManage ? "positive" : "warning"}>
             {canManage ? "Gestão autorizada" : "Somente leitura"}
@@ -140,15 +116,15 @@ export default async function SettingsPage() {
         aria-labelledby="settings-governance-title"
       >
         <div>
-          <p className={managementStyles.sectionKicker}>Governança comercial</p>
+          <p className={managementStyles.sectionKicker}>Gestão comercial</p>
           <h2
             id="settings-governance-title"
             className="mt-1 text-2xl font-semibold text-[var(--analytics-ink)]"
           >
-            Configurações do CRM
+            Planejamento da operação
           </h2>
           <p className="mt-2 text-sm leading-6 text-[var(--analytics-muted)]">
-            Centralize metas e regras comerciais em um único ponto de administração.
+            Metas do funil, parcerias e pontuação da equipe.
           </p>
         </div>
         <div className="rounded-xl border border-[var(--analytics-line)] bg-[var(--analytics-surface-muted)] p-4">
@@ -165,8 +141,8 @@ export default async function SettingsPage() {
               </strong>
               <p className="mt-1 text-xs leading-5 text-[var(--analytics-muted)]">
                 {canManage
-                  ? "As áreas administrativas estão disponíveis para edição."
-                  : "Os atalhos administrativos estão ocultos para este perfil."}
+                  ? "As áreas autorizadas estão disponíveis para edição."
+                  : "As áreas permanecem disponíveis apenas para consulta."}
               </p>
             </div>
           </div>
@@ -179,7 +155,7 @@ export default async function SettingsPage() {
           role="status"
         >
           <strong className="text-[var(--analytics-ink)]">
-            Configurações administrativas indisponíveis.
+            Edição de configurações indisponível.
           </strong>{" "}
           As áreas permanecem visíveis somente para referência.
         </div>
@@ -188,12 +164,11 @@ export default async function SettingsPage() {
       <section aria-labelledby="settings-areas-title" className="grid gap-3 pt-1">
         <div className={managementStyles.sectionHeader}>
           <div>
-            <p className={managementStyles.sectionKicker}>Áreas administrativas</p>
             <h2 id="settings-areas-title" className={managementStyles.sectionTitle}>
               Escolha o que deseja configurar
             </h2>
             <p className={managementStyles.sectionDescription}>
-              Cada área concentra uma parte específica do planejamento e das regras comerciais.
+              Cada área reúne seus campos de planejamento e regras comerciais.
             </p>
           </div>
         </div>
@@ -214,6 +189,39 @@ export default async function SettingsPage() {
             ),
           )}
         </div>
+      </section>
+
+      <section aria-label="Recurso de marketing">
+        {canManage ? (
+          <Link
+            href="/app/configuracoes/recurso-mkt"
+            prefetch={false}
+            aria-label="Recurso MKT"
+            className={`${styles.marketingResource} ${managementStyles.panel} group no-underline`}
+          >
+            <span className={managementStyles.iconFrame} aria-hidden="true">
+              <WalletCards />
+            </span>
+            <span className={styles.marketingResourceCopy}>
+              <strong>Recurso MKT</strong>
+              <span>Fundo de investimento de Marketing e distribuição dos recursos.</span>
+            </span>
+            <span className={styles.marketingResourceAction}>
+              Abrir <ArrowRight size={16} aria-hidden="true" />
+            </span>
+          </Link>
+        ) : (
+          <div className={`${styles.marketingResource} ${managementStyles.panel} opacity-80`}>
+            <span className={managementStyles.iconFrame} aria-hidden="true">
+              <WalletCards />
+            </span>
+            <span className={styles.marketingResourceCopy}>
+              <strong>Recurso MKT</strong>
+              <span>Fundo de investimento de Marketing e distribuição dos recursos.</span>
+            </span>
+            <span className={styles.marketingResourceAction}>Indisponível</span>
+          </div>
+        )}
       </section>
     </ManagementPage>
   );

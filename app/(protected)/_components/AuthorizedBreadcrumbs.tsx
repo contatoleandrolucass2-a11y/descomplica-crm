@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import type { AppPage } from "@/lib/navigation/pages";
-import { buildBreadcrumbs } from "@/lib/navigation/presentation";
+import { buildBreadcrumbs, type NavigationItem } from "@/lib/navigation/presentation";
 
 import styles from "./ProtectedShell.module.css";
 
-export function AuthorizedBreadcrumbs({ pages }: { pages: AppPage[] }) {
+export function AuthorizedBreadcrumbs({ pages }: { pages: NavigationItem[] }) {
   const pathname = usePathname();
   if (
     pathname === "/app/simulacao/associativo-fluxo-linear" ||

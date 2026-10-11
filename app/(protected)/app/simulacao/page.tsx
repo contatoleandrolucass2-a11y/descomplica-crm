@@ -94,7 +94,7 @@ export default async function SimulationHubPage() {
   }`;
 
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${styles.hubPage}`} data-simulation-hub>
       <div className={styles.container}>
         <SimulationCanvasHeader
           eyebrow="Ferramentas comerciais"
