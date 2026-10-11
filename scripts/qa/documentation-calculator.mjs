@@ -4,8 +4,10 @@ import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 import {
+  checkDocumentationHiddenRequiredField,
   fillDocumentationLegalContext,
   legalConfirmationLabel,
+  openDocumentationLegalContext,
 } from "./documentation-legal-context.mjs";
 
 const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
@@ -26,14 +28,138 @@ async function setTheme(page, theme, width) {
   await page.getByRole("button", { name: themeLabels[theme], exact: true }).click();
 }
 
+async function checkLegalPrintContrast(page) {
+  const selectors = [
+    "#documentation-calculator-form details[data-documentation-legal]",
+    '#resultado-documentacao [aria-label="Regras, fontes e vigência da documentação"]',
+  ];
+  const regions = await page.locator(selectors.join(", ")).evaluateAll((roots) => {
+    const white = "rgb(255, 255, 255)";
+    const contrastOnWhite = (color) => {
+      const rgb = color.match(/^rgb\((\d+), (\d+), (\d+)\)$/);
+      if (!rgb) return 0;
+      const linear = rgb.slice(1).map((channel) => {
+        const value = Number(channel) / 255;
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+      });
+      return 1.05 / (0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2] + 0.05);
+    };
+    return roots.map((root) => {
+      const controls = [...root.querySelectorAll('input:not([type="checkbox"]), select')];
+      const elements = new Set(controls);
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) {
+        const element = walker.currentNode.parentElement;
+        if (
+          walker.currentNode.textContent.trim() &&
+          element.tagName !== "OPTION" &&
+          element.checkVisibility()
+        )
+          elements.add(element);
+      }
+      const text = [...elements].map((element) => {
+        const style = getComputedStyle(element);
+        let opaqueWhiteBackground = false;
+        for (let parent = element; parent && root.contains(parent); parent = parent.parentElement) {
+          const backdrop = getComputedStyle(parent);
+          if (backdrop.backgroundImage !== "none" || Number(backdrop.opacity) !== 1) break;
+          if (backdrop.backgroundColor === white) {
+            opaqueWhiteBackground = true;
+            break;
+          }
+          if (backdrop.backgroundColor !== "rgba(0, 0, 0, 0)") break;
+        }
+        return {
+          name:
+            element.getAttribute("aria-label") ||
+            element.textContent.trim().slice(0, 100) ||
+            element.type,
+          color: style.webkitTextFillColor || style.color,
+          contrast: contrastOnWhite(style.webkitTextFillColor || style.color),
+          opaqueWhiteBackground,
+        };
+      });
+      const checkbox = root.querySelector('input[type="checkbox"]');
+      return {
+        name: root.getAttribute("aria-label") || "Dados fiscais da documentação",
+        background: getComputedStyle(root).backgroundColor,
+        controls: controls.length,
+        whiteControls: controls.every(
+          (control) => getComputedStyle(control).backgroundColor === white,
+        ),
+        textSamples: text.length,
+        minimumContrast: Math.min(...text.map(({ contrast }) => contrast)),
+        failures: text.filter((item) => !item.opaqueWhiteBackground || item.contrast < 4.5),
+        checkboxAccentContrast: checkbox
+          ? contrastOnWhite(getComputedStyle(checkbox).accentColor)
+          : null,
+      };
+    });
+  });
+  assert.equal(regions.length, 2, "Both fiscal print regions must be present");
+  for (const region of regions) {
+    assert.equal(
+      region.background,
+      "rgb(255, 255, 255)",
+      `${region.name}: opaque white print background`,
+    );
+    assert.ok(region.whiteControls, `${region.name}: white print controls`);
+    assert.ok(region.textSamples >= 10, `${region.name}: fiscal text must actually be measured`);
+    assert.deepEqual(
+      region.failures,
+      [],
+      `${region.name}: all fiscal text needs 4.5:1 print contrast`,
+    );
+    if (region.checkboxAccentContrast !== null)
+      assert.ok(region.checkboxAccentContrast >= 3, "Printed confirmation needs 3:1 contrast");
+  }
+  const accessibility = await new AxeBuilder({ page })
+    .include(selectors[0])
+    .include(selectors[1])
+    .withRules(["color-contrast"])
+    .analyze();
+  assert.deepEqual(accessibility.violations, [], "Scoped print color-contrast violations");
+  return {
+    regions,
+    axeViolations: 0,
+    // The computed-color assertion also covers details content that Axe may consider collapsed.
+    axeIncomplete: accessibility.incomplete.map(({ id, nodes }) => ({ id, nodes: nodes.length })),
+  };
+}
+
 // The new page has its own behavioral matrix; historical image baselines stay intact.
 export async function checkDocumentationCalculator(page, origin, outputDirectory) {
   const route = "/app/simulacao/calcular-documentacao";
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(`${origin}${route}`);
   await expect(
     page.getByRole("heading", { name: "Calcular documentação", exact: true }),
   ).toBeVisible();
   const form = page.locator("#documentation-calculator-form");
+  const legalDisclosure = form.locator("details[data-documentation-legal]");
+  const legalSummary = legalDisclosure.locator(":scope > summary");
+  await expect(legalDisclosure).toHaveJSProperty("open", false);
+  await expect(legalSummary).toBeVisible();
+  await expect(legalSummary).toContainText(/dados fiscais/i);
+  await expect(legalSummary.getByRole("status")).toHaveText("Pendente");
+  await expect(form.getByLabel("Município do imóvel", { exact: true })).toBeHidden();
+  await page.evaluate(() => document.fonts.ready);
+  const initialDensity = await page.evaluate(() => ({
+    width: document.documentElement.clientWidth,
+    height: Math.max(document.documentElement.scrollHeight, document.body.scrollHeight),
+  }));
+  // Same document-height limit as authenticated-visual for this route at 1440px.
+  assert.equal(initialDensity.width, 1440);
+  assert.ok(
+    initialDensity.height <= 1200,
+    `Documentation initial density: ${initialDensity.height}px > 1200px`,
+  );
+  await mkdir(outputDirectory, { recursive: true });
+  await page.screenshot({
+    path: path.join(outputDirectory, "documentation-initial-collapsed.png"),
+    fullPage: true,
+    animations: "disabled",
+  });
   await expect(form.locator(".documentation-profile-panel")).toHaveClass(/\bis-active\b/);
   await expect(form.locator(".documentation-choice-group.current")).toHaveCount(1);
   await expect(form.locator(".documentation-choice-group.locked")).toHaveCount(2);
@@ -65,6 +191,9 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
   await expect(result.getByRole("alert")).toContainText("Confirme as bases");
   await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
   await expect(form.locator(".documentation-values-panel")).not.toHaveClass(/\bis-complete\b/);
+  await expect(legalDisclosure).toHaveJSProperty("open", true);
+  await expect(form.getByLabel("Município do imóvel", { exact: true })).toBeFocused();
+  await checkDocumentationHiddenRequiredField(form);
   const registryTable = form.getByLabel("Tabela de registro conferida", { exact: true });
   await expect(registryTable).toHaveValue("");
   const legalContext = await fillDocumentationLegalContext(form, { itbiBase: 240000 });
@@ -82,6 +211,13 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
   await result.getByText("Auditoria do cálculo", { exact: true }).click();
   await expect(result.locator(".documentation-audit li.ok")).toHaveCount(8);
   await expect(result.locator(".documentation-audit")).toContainText("Condições legais e vigência");
+
+  await legalSummary.click();
+  await expect(legalDisclosure).toHaveJSProperty("open", false);
+  await expect(legalSummary.getByRole("status")).toHaveText("Confirmado");
+  await expect(result.locator(".documentation-plan-total")).toContainText("3.535,79");
+  await openDocumentationLegalContext(form);
+  await expect(registryTable).toHaveValue("ARISP_2");
 
   await registryTable.selectOption("QUINTO_SP_2026");
   await expect(form.getByLabel(legalConfirmationLabel, { exact: true })).not.toBeChecked();
@@ -103,6 +239,7 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
   await expect(result.locator(".documentation-plan-total")).toContainText("3.535,79");
 
   await form.getByLabel(legalConfirmationLabel, { exact: true }).uncheck();
+  await expect(legalSummary.getByRole("status")).toHaveText("Pendente");
   await expect(result.locator(".documentation-plan-total")).toHaveCount(0);
   await form.getByLabel(legalConfirmationLabel, { exact: true }).check();
   await submit.click();
@@ -344,13 +481,58 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
     animations: "disabled",
   });
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.emulateMedia({ media: "print" });
-  await expect(result).toBeVisible();
-  await page.screenshot({
-    path: path.join(outputDirectory, "documentation-print.png"),
-    fullPage: true,
+  if (await legalDisclosure.evaluate((element) => element.open)) await legalSummary.click();
+  await expect(legalDisclosure).toHaveJSProperty("open", false);
+  await expect(registryTable).toBeHidden();
+  const printState = async () => ({
+    total: await result.locator(".documentation-plan-total").textContent(),
+    breakdown: await result.locator(".documentation-breakdown").textContent(),
+    fields: await legalDisclosure.locator("input, select").evaluateAll((controls) =>
+      controls.map((control) => ({
+        value: control.value,
+        checked: control instanceof HTMLInputElement ? control.checked : null,
+      })),
+    ),
   });
-  await page.emulateMedia({ media: "screen", reducedMotion: "reduce" });
+  const confirmedState = await printState();
+  assert.ok(confirmedState.fields.length >= 15, "Print must preserve all fiscal declarations");
+  const legalNotes = result.getByRole("region", {
+    name: "Regras, fontes e vigência da documentação",
+    exact: true,
+  });
+  const printContrast = [];
+  for (const theme of ["light", "balanced", "dark"]) {
+    await setTheme(page, theme, 1440);
+    await page.emulateMedia({ media: "print" });
+    await expect(result).toBeVisible();
+    await expect(legalDisclosure).toHaveJSProperty("open", false);
+    for (const control of await legalDisclosure.locator("input, select").all())
+      await expect(control).toBeVisible();
+    await expect(legalNotes).toBeVisible();
+    await expect(legalNotes.getByRole("link").first()).toBeVisible();
+    await expect(result.locator(".documentation-plan-total")).toContainText("10.363,15");
+    assert.deepEqual(
+      await printState(),
+      confirmedState,
+      "Printing must preserve the confirmed calculation",
+    );
+    printContrast.push({ theme, ...(await checkLegalPrintContrast(page)) });
+    await page.screenshot({
+      path: path.join(
+        outputDirectory,
+        theme === "dark" ? "documentation-print.png" : `documentation-print-${theme}.png`,
+      ),
+      fullPage: true,
+    });
+    await page.emulateMedia({ media: "screen", reducedMotion: "reduce" });
+    await expect(legalDisclosure).toHaveJSProperty("open", false);
+    await expect(registryTable).toBeHidden();
+    assert.deepEqual(
+      await printState(),
+      confirmedState,
+      "Returning to screen must preserve fiscal state",
+    );
+  }
   return {
     passed: true,
     sequentialUnlock: true,
@@ -358,6 +540,10 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
     goldenMcmv: true,
     legalContext,
     legalContextRequired: true,
+    legalDisclosureInitiallyClosed: true,
+    legalDisclosurePreservesConfirmedResult: true,
+    hiddenRequiredFieldRevealed: true,
+    initialDensity: { ...initialDensity, maxHeight: 1200, passed: true },
     legalConfirmationInvalidated: true,
     registryTableRequired: true,
     registryTableExactCentDifference: true,
@@ -375,6 +561,12 @@ export async function checkDocumentationCalculator(page, origin, outputDirectory
     hintsKeyboard: true,
     audit: true,
     printSurface: true,
+    printClosedDisclosure: {
+      passed: true,
+      fields: confirmedState.fields.length,
+      preservedCalculation: true,
+      contrast: printContrast,
+    },
     zoom200: { passed: true, method: "Equivalent 720x450 CSS layout for a 1440x900 viewport" },
     matrix,
   };

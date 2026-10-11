@@ -1,8 +1,33 @@
+import { expect } from "@playwright/test";
+
 export const legalConfirmationLabel =
   "Conferi as bases, as datas e o enquadramento fiscal com os documentos da compra.";
 
+export async function openDocumentationLegalContext(scope) {
+  const disclosure = scope.locator("details[data-documentation-legal]");
+  await expect(disclosure).toHaveCount(1);
+  if (!(await disclosure.evaluate((element) => element.open)))
+    await disclosure.locator(":scope > summary").click();
+  await expect(disclosure).toHaveJSProperty("open", true);
+}
+
+export async function checkDocumentationHiddenRequiredField(scope) {
+  const disclosure = scope.locator("details[data-documentation-legal]");
+  const summary = disclosure.locator(":scope > summary");
+  if (await disclosure.evaluate((element) => element.open)) await summary.click();
+  const required = disclosure.locator(":is(input, select):required:invalid").first();
+  await expect(required).toHaveCount(1);
+  await expect(required).toHaveAttribute("required", "");
+  await expect(required).toBeHidden();
+  expect(await required.evaluate((element) => element.reportValidity())).toBe(false);
+  await expect(disclosure).toHaveJSProperty("open", true);
+  await expect(required).toBeVisible();
+  await expect(required).toBeFocused();
+}
+
 // Synthetic contract declarations, independent of the simulator's commercial profile.
 export async function fillDocumentationLegalContext(scope, overrides = {}) {
+  await openDocumentationLegalContext(scope);
   const context = {
     municipality: "sao-paulo-sp",
     transactionDate: "2026-10-02",

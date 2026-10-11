@@ -11,6 +11,7 @@ import {
 import { useDismissiblePopover } from "./useDismissiblePopover";
 import {
   DocumentationLegalFields,
+  revealDocumentationLegalInvalidField,
   DocumentationLegalNotes,
   useDocumentationLegalContext,
 } from "./DocumentationLegalFields";
@@ -258,6 +259,7 @@ export function DocumentationCalculator({
     event.preventDefault();
     if (!profileComplete || !financialComplete) return;
     setSubmitted(true);
+    if (revealDocumentationLegalInvalidField(event.currentTarget)) return;
     requestAnimationFrame(() =>
       document.querySelector("#resultado-documentacao")?.scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
@@ -455,7 +457,7 @@ export function DocumentationCalculator({
                 {displayedProgress}%
               </small>
             </header>
-            <p className="goal-panel-note">Valores usados para validar teto e calcular taxas.</p>
+            <DocumentationLegalFields value={legalContext} onChange={onLegalChange} />
             <div className="documentation-money-list">
               <MoneyField
                 fieldName="salePrice"
@@ -536,7 +538,6 @@ export function DocumentationCalculator({
               />
             </div>
           </section>
-          <DocumentationLegalFields value={legalContext} onChange={onLegalChange} />
           <div className="documentation-canvas-action-bar">
             <p>
               <strong>Preenchimento disponível</strong>

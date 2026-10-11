@@ -9,8 +9,10 @@ import { chromium, expect } from "@playwright/test";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
 import {
+  checkDocumentationHiddenRequiredField,
   fillDocumentationLegalContext,
   legalConfirmationLabel,
+  openDocumentationLegalContext,
 } from "./documentation-legal-context.mjs";
 import { checkAssociativeDocumentationHandoff } from "./associative-motion.mjs";
 
@@ -41,6 +43,7 @@ async function setTheme(page, theme) {
 }
 
 export async function checkDocumentationLegalGeometry(scope) {
+  await openDocumentationLegalContext(scope);
   const region = scope.getByRole("region", { name: "Dados fiscais da documentação", exact: true });
   await expect(region).toBeVisible();
   const geometry = await region.evaluate((root) => {
@@ -160,12 +163,20 @@ async function checkAssociativeLegalFlow(page, origin) {
   await expect(documentation).toHaveClass(/waiting/);
   await expect(summary).toHaveCount(0);
   await expect(installments).toBeDisabled();
+  const disclosure = documentation.locator("details[data-documentation-legal]");
+  await expect(disclosure).toHaveJSProperty("open", false);
+  await expect(disclosure.locator(":scope > summary")).toBeVisible();
+  await expect(disclosure.locator(":scope > summary")).toContainText(/dados fiscais/i);
+  await expect(disclosure.getByRole("status")).toHaveText("Pendente");
+  await expect(documentation.getByLabel("Município do imóvel", { exact: true })).toBeHidden();
+  await checkDocumentationHiddenRequiredField(documentation);
   await expect(
     documentation.getByLabel("Tabela de registro conferida", { exact: true }),
   ).toHaveValue("");
   const legalContext = await fillDocumentationLegalContext(documentation, { itbiBase: 230000 });
   await expect(documentation).toHaveClass(/ready/);
   await expect(summary).toContainText("3.432,05");
+  await expect(disclosure.getByRole("status")).toHaveText("Confirmado");
   await expect(installments).toBeEnabled();
   await installments.click();
   const dialog = page.locator("#investor-associative-documentation-installments");
@@ -236,6 +247,8 @@ async function checkAssociativeLegalFlow(page, origin) {
     passed: true,
     legalContext,
     incompleteBlocked: true,
+    legalDisclosureInitiallyClosed: true,
+    hiddenRequiredFieldRevealed: true,
     explicitZeroIptu: true,
     pendingFgtsBlocked: true,
     mcmvPrecedence: true,
@@ -323,6 +336,8 @@ export async function runDocumentationLegalPreview() {
   await mkdir(artifactRoot, { recursive: true });
   const evidence = {
     environment: "loopback synthetic real-component preview; no auth or RLS services",
+    shell:
+      "Real ProtectedLayout, navigation, account menu and breadcrumbs; synthetic session boundaries only",
     node: process.version,
     simulatedDate: "2026-10-10",
     passed: false,
@@ -341,38 +356,88 @@ export async function runDocumentationLegalPreview() {
   const entry = path
     .join(root, "scripts/qa/documentation-legal-preview-memory.tsx")
     .replaceAll("\\", "/");
+  const pages = [
+    ["crm.dashboard", "/app", "Dashboard", "crm", null],
+    ["crm.simulation", "/app/simulacao", "Simuladores", "simulation", null],
+    ["crm.ranking", "/app/ranking", "Ranking", "crm", null],
+    ["crm.partnerships", "/app/canal-de-parcerias", "Canal de Parcerias", "crm", null],
+    ["crm.settings", "/app/configuracoes", "Configurações", "crm", null],
+    ["crm.simulation.wf16", calculatorRoute, "Documentação", "simulation", "crm.simulation"],
+    ["crm.simulation.wf13", associativeRoute, "Associativo", "simulation", "crm.simulation"],
+  ].map(([key, route, name, section, parentKey], index) => ({
+    key,
+    path: route,
+    name,
+    section,
+    parentKey,
+    description: "Fixture sintética de navegação",
+    permissionKey: "crm.simulators.view",
+    sortOrder: (index + 1) * 10,
+    isNavigation: true,
+    isActive: true,
+  }));
+  // Render the actual layout; replace only server/session boundaries, as in protected-shell tests.
+  const boundaries = new Map([
+    ["next/headers", "export async function cookies() { return { get: () => undefined }; }"],
+    [
+      "@/lib/authorization/enforce",
+      "export async function enforceAuthorization() { return { roleKey: 'user', permissions: [], level: 10 }; }",
+    ],
+    [
+      "@/lib/authorization/guards",
+      "export async function getCurrentUser() { return { email: 'documentation.qa@nonexistent.invalid', user_metadata: { name: 'QA Documentação' } }; }",
+    ],
+    ["@/lib/auth/actions/logout", "export const logoutAction = '/qa-logout-disabled';"],
+    [
+      "@/lib/navigation/pages",
+      `export async function getAuthorizedNavigation() { return ${JSON.stringify(pages)}; } export function getDisabledNavigationItems() { return []; }`,
+    ],
+  ]);
+  const virtualBoundaries = new Map(
+    [...boundaries].map(([id, source], index) => [
+      `\0documentation-session-${index}`,
+      { id, source },
+    ]),
+  );
   const built = await build({
     root,
     configFile: false,
     envFile: false,
     logLevel: "error",
-    define: { "process.env.NODE_ENV": JSON.stringify("production") },
-    resolve: { alias: { "@": root } },
+    define: { "process.env.NODE_ENV": JSON.stringify("production"), "process.env": "{}" },
+    resolve: {
+      alias: [
+        ...[...virtualBoundaries].map(([replacement, { id }]) => ({ find: id, replacement })),
+        { find: "@", replacement: root },
+      ],
+    },
     oxc: { jsx: { runtime: "automatic" } },
     plugins: [
       {
         name: "documentation-legal-preview",
         enforce: "pre",
         resolveId(id) {
+          if (virtualBoundaries.has(id)) return id;
           if (id.endsWith("documentation-legal-preview-memory.tsx")) return entry;
         },
         load(id) {
+          if (virtualBoundaries.has(id)) return virtualBoundaries.get(id).source;
           if (id === entry)
             return `
         import { createRoot } from "react-dom/client";
         import { DocumentationArchive } from "@/app/(protected)/app/simulacao/_components/DocumentationArchive";
         import { AssociativeTableArchive } from "@/app/(protected)/app/simulacao/_components/AssociativeTableArchive";
-        import { ProtectedShellFrame } from "@/app/(protected)/_components/ProtectedShellFrame";
-        import { ThemeSwitch } from "@/app/(protected)/_components/ThemeSwitch";
-        import shellStyles from "@/app/(protected)/_components/ProtectedShell.module.css";
+        import ProtectedLayout from "@/app/(protected)/layout";
+        import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime.js";
         import "@/app/globals.css";
         import "@/app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css";
-        createRoot(document.getElementById("root")).render(
-          <ProtectedShellFrame shellClassName={shellStyles.shell} contentClassName={shellStyles.mainContent}
-            chrome={<header className={shellStyles.topbar} data-protected-topbar>QA sintético<ThemeSwitch canPersist={false} /></header>}>
-            {location.pathname === "${calculatorRoute}" ? <DocumentationArchive /> : <AssociativeTableArchive />}
-          </ProtectedShellFrame>
-        );`;
+        void (async () => {
+          const children = location.pathname === "${calculatorRoute}" ? <DocumentationArchive /> : <AssociativeTableArchive />;
+          const shell = await ProtectedLayout({ children });
+          createRoot(document.getElementById("root")).render(
+            <PathnameContext.Provider value={location.pathname}>{shell}</PathnameContext.Provider>
+          );
+        })();`;
         },
       },
     ],

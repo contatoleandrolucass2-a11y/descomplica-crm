@@ -23,6 +23,10 @@
 - Verificacao Web na CI bloqueia limites/tabelas alterados, fonte indisponivel ou
   vigencia vencida. Runtime nao faz pesquisa a cada calculo e nao assume 2027.
 - Preservados despachante, seguro, juros, parcelamento e fluxo comercial.
+- QA autenticado exige altura inicial de Calcular Documentacao de ate 1200 px
+  em desktop 1440. Dados fiscais extensos precisam de disclosure acessivel,
+  mantendo validacao obrigatoria e o acesso aos campos; nao elevar o limite
+  nem promover baseline com falha funcional. Evidencia: CI `38094894492`.
 
 ## 2026-10-09: Posicao atual do guia Associativo
 

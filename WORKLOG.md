@@ -13,6 +13,9 @@
   `docs/audits/itbi-registro-sp-2026-10-10.md`.
 - Primeira validacao Linux passou no PR #177; ajuda alinhada ao bloqueio de
   cobranca conjunta antes da validacao final de navegador.
+- Matriz autenticada confirmou ausencia de erros de acessibilidade, mas
+  apontou altura excessiva da tela inicial documental. Correcao de densidade
+  usa secao fiscal expansivel sem excluir campos ou afrouxar o gate.
 
 ## 2026-10-09: Guia do Associativo no cabecalho
 

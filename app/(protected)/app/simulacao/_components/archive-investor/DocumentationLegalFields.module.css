@@ -14,17 +14,31 @@
 .legalFields {
   grid-column: 1 / -1;
   margin-block: 12px;
-  padding-block: 12px;
   border-block: 1px solid var(--legal-line);
 }
 
-.legalFields h3 {
-  margin: 0 0 8px;
+:global(.documentation-values-panel) > .legalFields {
+  margin: 0;
+  border: 0;
+}
+
+.legalFields > .summary {
+  box-sizing: border-box;
+  min-height: 44px;
+  padding-block: 10px;
   color: var(--legal-text);
   font-size: 15px;
   font-weight: 700;
-  line-height: 1.4;
+  line-height: 24px;
   letter-spacing: 0;
+  cursor: pointer;
+}
+
+.legalFields .status {
+  margin-inline-start: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  white-space: nowrap;
 }
 
 .legalFields .grid {
@@ -131,19 +145,37 @@
   text-underline-offset: 3px;
 }
 
-.legalFields :is(input, select):focus-visible,
+.legalFields :is(input, select, summary):focus-visible,
 .legalNotes :is(summary, a):focus-visible {
   outline: 2px solid var(--legal-accent);
   outline-offset: 3px;
 }
 
 @media print {
+  :global(.documentation-page-shell .documentation-studio)
+    > :global(.documentation-values-panel):has(.legalFields input[type="checkbox"]:checked) {
+    display: block !important;
+  }
+
   .legalFields,
   .legalNotes {
     --legal-text: #111;
     --legal-muted: #333;
     --legal-line: #777;
     --legal-surface: #fff;
+    --legal-accent: #111;
+    box-sizing: border-box;
+    padding: 12px;
+    background: #fff !important;
+    color: #111 !important;
+    print-color-adjust: exact;
+  }
+
+  .legalFields .field :is(input, select) {
+    border-color: #777 !important;
+    background: #fff !important;
+    color: #111 !important;
+    box-shadow: none !important;
   }
 
   .legalFields .field,
@@ -152,6 +184,7 @@
     break-inside: avoid;
   }
 
+  .legalFields::details-content,
   .legalNotes details::details-content {
     content-visibility: visible;
   }

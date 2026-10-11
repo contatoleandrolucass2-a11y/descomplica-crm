@@ -53,5 +53,22 @@ parcelamento documental, regras do pro-soluto, n8n e banco fora do escopo.
 - CI inicial `38094607547`, commit `727662d`: validate Linux passou, inclusive
   suite completa, fontes e build. Ajuda refinada antes da nova rodada para
   explicitar que a sobreposicao da cobranca conjunta permanece bloqueada.
+- CI `38094894492`, HEAD `7c343bd`, captura limpa `863a8b1` com arvore identica:
+  validate, restore, banco/advisors, guia e autorizacao/E2E aprovados. As 242
+  auditorias de acessibilidade passaram. Falha funcional restrita a densidade
+  inicial de Calcular Documentacao: 1782 px para limite de 1200 px em desktop.
+  Onze referencias visuais dessa tela diferiram; outras 231 passaram. Nao
+  promover estas capturas enquanto houver falha funcional. Correcao mantem
+  todos os dados fiscais em secao expansivel, sem relaxar limites do QA.
+- Correcao local de densidade: preview sintetico com 1151 px em 1440, summary
+  de 45 px, validacao revela e foca campos pendentes. Impressao preserva dados
+  e fontes mesmo com disclosure fechado. Duas telas em 320/1440 passaram
+  Axe, geometria e teclado; lint/tipos/build/formatacao e 216 testes focados
+  aprovados novamente. Evidencias em `test-results/fiscal-ui/disclosure-result.json`
+  e `disclosure-density.json`. Revalidacao autenticada da CI continua obrigatoria.
+- Harness com cabecalho equivalente ao real mediu 1183 px. A impressao no tema
+  escuro mostrou baixo contraste fiscal; regras de print restritas aos campos
+  e notas fiscais agora usam fundo branco e texto escuro, sem alterar temas
+  na tela nem formulas.
 - Resultado continua estimativa sujeita a guia e enquadramento oficial, nao
   promessa de cobranca definitiva ou de beneficio sem documentos.

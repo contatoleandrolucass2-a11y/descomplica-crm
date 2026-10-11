@@ -11,6 +11,8 @@
 - Diferencia os totais publicados pela ARISP e pelo 5o RI; exige confirmacao
   da tabela aplicavel com o cartorio e nao presume repasse unico de ISS.
 - Ajuda explicita que sobreposicao de cobranca conjunta exige cartorio.
+- Organiza a conferencia fiscal em secao expansivel para preservar a densidade
+  inicial da pagina, mantendo preenchimento e confirmacao obrigatorios.
 - Acrescenta fontes, alertas, verificador de vigencia na CI e runbook de
   manutencao; atualiza ajuda e conhecimento compartilhado.
 
