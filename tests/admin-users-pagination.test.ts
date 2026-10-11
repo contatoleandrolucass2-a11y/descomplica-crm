@@ -216,6 +216,39 @@ describe("paginação server-side da administração de usuários", () => {
     });
   });
 
+  it("não torna outro Administrador gerenciável por Admin com nível numérico maior", async () => {
+    const row = profile(1);
+    const results = currentSchemaResults([row], 1);
+    results.user_roles = [{ data: [{ user_id: row.user_id, role_key: "admin" }], error: null }];
+    setupClient(results);
+    mocks.requirePermission.mockResolvedValue({
+      ...actor,
+      roleKey: "admin",
+      level: 999,
+    });
+
+    const result = await loadUsersPageAction({ offset: 0 });
+
+    expect(result).toMatchObject({
+      status: "success",
+      page: { users: [{ roleKey: "admin", isManageable: false }] },
+    });
+  });
+
+  it("torna outro Administrador gerenciável para o Master", async () => {
+    const row = profile(1);
+    const results = currentSchemaResults([row], 1);
+    results.user_roles = [{ data: [{ user_id: row.user_id, role_key: "admin" }], error: null }];
+    setupClient(results);
+
+    const result = await loadUsersPageAction({ offset: 0 });
+
+    expect(result).toMatchObject({
+      status: "success",
+      page: { users: [{ roleKey: "admin", isManageable: true }] },
+    });
+  });
+
   it("não consulta dados quando users.view falha", async () => {
     mocks.requirePermission.mockRejectedValueOnce(new Error("FORBIDDEN"));
 

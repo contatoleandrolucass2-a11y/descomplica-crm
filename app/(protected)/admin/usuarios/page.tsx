@@ -56,7 +56,7 @@ export default async function UsersAdminPage() {
   const reportingScopes = z
     .array(reportingScopeSchema)
     .parse(scopesResult.error ? [] : (scopesResult.data ?? []));
-  const assignableRoles = getAssignableRoleKeys(context.level);
+  const assignableRoles = getAssignableRoleKeys(context.roleKey, context.level);
   const manageablePermissions = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
     (permissionKey) => canGrantPermission(context, permissionKey),
   );

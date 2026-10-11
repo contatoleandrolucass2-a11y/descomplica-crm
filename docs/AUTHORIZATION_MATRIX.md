@@ -15,16 +15,16 @@ exceções individuais. Uma exceção `deny` vence `allow` e a permissão herdad
 Somente perfil `approved` e ativo recebe contexto; `pending`, `suspended` e
 `legacy_review` falham fechados nas policies RLS.
 
-| Papel                      | Visão de dashboard                     | Ranking | Canal de Parcerias | Repasse | Administração                                                |
-| -------------------------- | -------------------------------------- | :-----: | :----------------: | :-----: | ------------------------------------------------------------ |
-| `master`                   | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         |   Sim   | integral e exclusiva para capacidades de Master              |
-| `admin`                    | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         |   Sim   | usuários abaixo do próprio nível, papéis, exceções e páginas |
-| `coordinator`              | Com Canal Imob                         |   Não   |        Sim         |   Não   | nenhuma                                                      |
-| `manager_house`            | Sem Canal Imob                         |   Sim   |        Não         |   Não   | nenhuma                                                      |
-| `manager_imob`             | Com Canal Imob                         |   Não   |        Sim         |   Não   | nenhuma                                                      |
-| `broker_house`             | Sem Canal Imob                         |   Sim   |        Não         |   Não   | nenhuma                                                      |
-| `broker_imob`              | Com Canal Imob                         |   Não   |        Sim         |   Não   | nenhuma                                                      |
-| `pending` e papéis legados | nenhuma                                |   Não   |        Não         |   Não   | nenhuma                                                      |
+| Papel                      | Visão de dashboard                     | Ranking | Canal de Parcerias | Simuladores | Repasse | Administração                                                |
+| -------------------------- | -------------------------------------- | :-----: | :----------------: | :---------: | :-----: | ------------------------------------------------------------ |
+| `master`                   | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         |     Sim     |   Sim   | integral e exclusiva para capacidades de Master              |
+| `admin`                    | Geral, Com Canal Imob e Sem Canal Imob |   Sim   |        Sim         | Sim, visual |   Sim   | usuários abaixo do próprio nível, papéis, exceções e páginas |
+| `coordinator`              | Com Canal Imob                         |   Não   |        Sim         |     Não     |   Não   | nenhuma                                                      |
+| `manager_house`            | Sem Canal Imob                         |   Sim   |        Não         |     Não     |   Não   | nenhuma                                                      |
+| `manager_imob`             | Com Canal Imob                         |   Não   |        Sim         |     Não     |   Não   | nenhuma                                                      |
+| `broker_house`             | Sem Canal Imob                         |   Sim   |        Não         |     Não     |   Não   | nenhuma                                                      |
+| `broker_imob`              | Com Canal Imob                         |   Não   |        Sim         |     Não     |   Não   | nenhuma                                                      |
+| `pending` e papéis legados | nenhuma                                |   Não   |        Não         |     Não     |   Não   | nenhuma                                                      |
 
 Todos os sete papéis ativos recebem as páginas operacionais compatíveis com a
 linha. As três visões do dashboard possuem permissões próprias:
@@ -51,12 +51,21 @@ com `auth_user_id` estável e pessoa dentro do escopo delegável do Admin. Nome,
 e-mail ou texto de gerente nunca resolve essa associação.
 
 `Herdada: negada` descreve somente o padrão do papel. Um Master pode criar uma
-exceção individual `allow` para qualquer permissão que possua em um
-Administrador ou usuário de nível inferior, inclusive quando a permissão tem
-`min_level = 100`. A exceção não altera o papel do destinatário e não pode ser
-repassada por um Administrador quando o `min_level` continua acima do seu nível.
-As proteções contra autoalteração, outro Master e pares Administradores
-permanecem estritas.
+exceção individual `allow` para uma permissão delegável que possua em um
+Administrador ou usuário de nível inferior. Três capacidades formam o plano de
+controle exclusivo do Master e nunca podem virar `allow` de Administrador:
+`crm.simulators.execute`, `crm.commercial_engine.execute` e
+`crm.commercial_policy.manage`. A exceção não altera o papel do destinatário e
+não pode ser repassada por um Administrador quando o `min_level` continua acima
+do seu nível.
+
+Administrador é uma classe de conta protegida, independentemente do nível
+numérico. Somente um ator com papel real `master` pode criar ou promover uma
+conta para `admin`, trocar o papel, status, escopos ou exceções de outro
+Administrador. O próprio usuário e contas Master continuam fora desses fluxos.
+A interface remove os controles, as Server Actions revalidam papel e alvo, as
+RPCs repetem a hierarquia e triggers privados bloqueiam escrita direta nas
+tabelas de papel, perfil, override e, quando disponível, reporting scope.
 
 Somente Master/Admin pode aprovar ou reativar contas; permissões individuais
 não transformam Coordenador, Gerente ou Corretor em aprovador. Quando a
@@ -147,9 +156,10 @@ continua separada e só retorna entries com ID Qlik mapeado, owner ativo,
 vigência e organização dentro do escopo aprovado; ela não é a fonte da página
 v3.
 
-O hub, WF13, Tabelão e as réplicas WF14 e WF15 exigem `crm.simulators.view`. Durante o
-canário WF13, essa permissão é nível 100 e pertence ao Master por herança; um
-Master pode concedê-la como exceção individual a um usuário inferior. O gate de página permanece separado de
+O hub, WF13, Tabelão e as réplicas WF14 e WF15 exigem
+`crm.simulators.view`. A permissão continua em nível 100, mas passa a ser
+herdada por Master e Administrador; assim, somente Master pode delegá-la e
+Administrador não consegue propagá-la. O gate de página permanece separado de
 `crm.simulators.execute`; possuir um não substitui o outro. Somente o motor
 oficial WF13 pode executar quando sua flag explícita também está ativa. As
 réplicas WF14 e WF15 calculam no navegador, sem persistência ou integração. O

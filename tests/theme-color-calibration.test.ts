@@ -26,6 +26,24 @@ function declarationsAt(file: URL, selector: string) {
   return values;
 }
 
+function declarationsIncluding(file: URL, selector: string) {
+  const values: Record<string, string> = {};
+  parse(readFileSync(file, "utf8")).walkRules((rule) => {
+    if (
+      rule.selector
+        .split(",")
+        .map((candidate) => candidate.trim())
+        .includes(selector)
+    ) {
+      rule.walkDecls(({ prop, value }) => {
+        values[prop] = value;
+      });
+    }
+  });
+  expect(Object.keys(values).length, selector).toBeGreaterThan(0);
+  return values;
+}
+
 function rgb(hex: string) {
   expect(hex).toMatch(/^#[\da-f]{6}$/i);
   return [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16) / 255);
@@ -45,6 +63,11 @@ function contrast(foreground: string, background: string) {
 
 const globals = new URL("../app/globals.css", import.meta.url);
 const shell = new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url);
+const ranking = new URL("../app/(protected)/app/ranking/RankingCanvas.module.css", import.meta.url);
+const partnerships = new URL(
+  "../app/(protected)/app/canal-de-parcerias/PartnershipsCanvas.module.css",
+  import.meta.url,
+);
 
 const globalTheme = (theme: "light" | "balanced" | "dark") => ({
   ...declarationsAt(globals, ":root"),
@@ -144,6 +167,56 @@ describe("three-theme color calibration", () => {
       expect(stylesheet).not.toContain("color-scheme: dark");
       expect(stylesheet).toContain("var(--analytics-page)");
       expect(stylesheet).toContain("var(--analytics-cyan)");
+    }
+  });
+
+  it("uses clear semantic surfaces for Ranking and Partnerships in Claro and Médio", () => {
+    for (const stylesheet of [ranking, partnerships]) {
+      expect(declarationsAt(stylesheet, '.canvas article[data-tone="navy"]')).toMatchObject({
+        "border-color": "var(--analytics-line)",
+        background: "var(--analytics-navy)",
+      });
+      for (const theme of ["light", "balanced"]) {
+        expect(
+          declarationsIncluding(
+            stylesheet,
+            `:global(:root[data-theme="${theme}"]) .canvas article[data-tone="navy"]`,
+          ),
+        ).toMatchObject({
+          "border-color": "var(--analytics-line)",
+          color: "var(--analytics-ink)",
+        });
+      }
+    }
+
+    for (const theme of ["light", "balanced"]) {
+      expect(
+        declarationsIncluding(
+          ranking,
+          `:global(:root[data-theme="${theme}"]) .canvas article[data-tone="navy"]`,
+        ).background,
+      ).toBe("var(--analytics-surface)");
+      expect(
+        declarationsIncluding(
+          partnerships,
+          `:global(:root[data-theme="${theme}"]) .canvas article[data-tone="navy"]`,
+        ).background,
+      ).toBe("var(--analytics-surface-strong)");
+      expect(
+        declarationsIncluding(ranking, `:global(:root[data-theme="${theme}"]) .canvas .pointItem`),
+      ).toMatchObject({
+        "border-color": "var(--analytics-line)",
+        background: "var(--analytics-surface-muted)",
+      });
+      expect(
+        declarationsIncluding(
+          partnerships,
+          `:global(:root[data-theme="${theme}"]) .canvas .featuredPodium`,
+        ),
+      ).toMatchObject({
+        "border-color": "var(--analytics-cyan-strong)",
+        "box-shadow": "inset 0 3px 0 var(--analytics-cyan-strong)",
+      });
     }
   });
 

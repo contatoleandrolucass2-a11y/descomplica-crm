@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { canGrantPermission, canManageTargetLevel } from "@/lib/authorization/hierarchy";
+import {
+  canAssignRole,
+  canGrantPermission,
+  canManageTargetLevel,
+  canManageTargetRole,
+} from "@/lib/authorization/hierarchy";
 import type { AuthorizationContext } from "@/lib/authorization/types";
 
 function actor(overrides: Partial<AuthorizationContext>): AuthorizationContext {
@@ -47,5 +52,20 @@ describe("hierarquia de delegação de permissões", () => {
 
     expect(canManageTargetLevel(master, 80)).toBe(true);
     expect(canManageTargetLevel(master, 100)).toBe(false);
+  });
+
+  it("protege Administradores mesmo quando outro Administrador recebe nível numérico maior", () => {
+    const elevatedAdmin = actor({ level: 999 });
+
+    expect(canManageTargetLevel(elevatedAdmin, 80)).toBe(true);
+    expect(canManageTargetRole(elevatedAdmin, "admin", 80)).toBe(false);
+    expect(canAssignRole(elevatedAdmin, "admin")).toBe(false);
+  });
+
+  it("permite somente ao Master gerenciar e atribuir o papel Administrador", () => {
+    const master = actor({ roleKey: "master", level: 100 });
+
+    expect(canManageTargetRole(master, "admin", 80)).toBe(true);
+    expect(canAssignRole(master, "admin")).toBe(true);
   });
 });

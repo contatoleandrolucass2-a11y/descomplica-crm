@@ -785,6 +785,13 @@ function UserDetail({
   const canEditPermissions =
     user.isManageable && canManagePermissions && manageablePermissions.length > 0;
   const roleIsActive = user.roleKey ? ACTIVE_ROLE_KEYS.has(user.roleKey) : false;
+  const protectedAdministratorAccount =
+    user.roleKey === "admin" && !user.isSelf && !isMasterPermissionManager;
+  const mutationBlockMessage = user.isSelf
+    ? "Você não pode alterar seu próprio papel, permissões ou status."
+    : protectedAdministratorAccount
+      ? "Somente o Master pode alterar papel, permissões ou status de outro Administrador."
+      : "Esta conta não pode ser alterada por você devido à hierarquia de acesso.";
 
   return (
     <article id="selected-user-panel" className="admin-user-detail">
@@ -799,9 +806,22 @@ function UserDetail({
             <span>{getVisibleRoleLabel(user.roleKey)}</span>
           </div>
         </div>
-        <span className={managementStyles.statusPill} data-state={status.key}>
-          {status.label}
-        </span>
+        <div className="admin-user-detail-badges">
+          <span className={managementStyles.statusPill} data-state={status.key}>
+            {status.label}
+          </span>
+          {!hasAnyMutation ? (
+            <span
+              className="admin-protected-account-badge"
+              role="status"
+              aria-label={mutationBlockMessage}
+              title={mutationBlockMessage}
+            >
+              <ShieldCheck aria-hidden="true" />
+              {protectedAdministratorAccount ? "Protegida pelo Master" : "Conta protegida"}
+            </span>
+          ) : null}
+        </div>
       </header>
 
       <div className="admin-user-detail-body">
@@ -907,12 +927,7 @@ function UserDetail({
             {user.isManageable && canManageUsers ? (
               <StatusForm user={user} onMutationSuccess={onMutationSuccess} />
             ) : null}
-            {!hasAnyMutation ? (
-              <p className="admin-form-help">
-                Esta conta não pode ser alterada por você devido à hierarquia ou à proteção contra
-                autoelevação.
-              </p>
-            ) : null}
+            {!hasAnyMutation ? <p className="admin-form-help">{mutationBlockMessage}</p> : null}
           </div>
         </details>
       </div>

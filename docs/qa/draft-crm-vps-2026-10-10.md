@@ -29,6 +29,75 @@ O `approvedPreviewSHA256` do manifesto coincide com o hash calculado de
 `javascriptSyntaxCheck: passed` descrevem somente a previa transportavel; nao
 substituem testes do CRM integrado.
 
+## Correcao incremental de tema e fronteira Administrador — 11/10/2026
+
+- Ranking e Canal de Parcerias deixam de manter ilhas navy nos temas Claro e
+  Medio. As superficies agora usam os tokens semanticos claros/cinza-azulados
+  do draft; o tema Escuro conserva o navy aprovado.
+- Administrador herda a visualizacao do hub e das quatro rotas de simulacao,
+  sem receber execucao oficial, gestao de politica comercial ou funcao de
+  Master. O status oficial continua `executeAllowed: false` e a tentativa de
+  execucao continua negada.
+- Contas Administrador formam uma classe protegida: somente uma identidade com
+  papel Master pode criar ou promover para Administrador, alterar seu papel ou
+  estado, desativar a conta e conceder, trocar ou remover suas excecoes de
+  permissao. Nenhuma identidade pode atribuir o papel Master por esse fluxo.
+- A fronteira e aplicada na interface, nas Server Actions/RPCs e por triggers
+  no banco. A migration remove somente overrides `allow` de Administrador nas
+  tres capacidades exclusivas do plano de controle; overrides `deny` de
+  Administrador e overrides de outros papeis sao preservados.
+- A instalacao limpa das 46 migrations foi aprovada. O pgTAP direcionado
+  aprovou 153/153 assercoes, as regressoes relacionadas 214/214 e a suite
+  completa 1.141/1.141 em 27 arquivos, tanto na origem quanto no restore.
+  Quatro casos adicionais exercitam remocao e bulk `inherit` de override e
+  `INSERT`/`DELETE` direto de escopo contra outro Administrador.
+- A primeira promocao visual rejeitou corretamente a pagina de Usuarios com
+  2.676 px. O aviso foi condensado no cabecalho existente, sem retirar a
+  explicacao acessivel; a medicao final retornou a 2.592 px e manteve o teto
+  estrito de 2.600 px.
+- A matriz autenticada atualizada aprovou 154 checks responsivos, 88 de tema,
+  242 Axe, 242 comparacoes, 110 de zoom, 40 checks dos quatro simuladores e 30
+  capturas do Associativo. Foram promovidas somente 24 referencias esperadas:
+  nove de Ranking, nove de Parcerias e seis de Usuarios; `other=0`.
+- A inspecao humana cobriu Ranking e Parcerias em Claro e Escuro no desktop e
+  mobile, e em Medio no desktop. Claro e Medio ficaram sem ilhas navy; Escuro
+  preservou as superficies navy aprovadas. Usuarios permaneceu responsivo e
+  sem overflow horizontal em 390 px.
+- Os gates finais desta correcao aprovaram formato, lint, tipos, inventario,
+  audit sem vulnerabilidades conhecidas, 126 arquivos Vitest com 2.463 testes
+  aprovados e seis ignorados, 83 testes Node e o build de 45 rotas. O E2E de
+  release aprovou 19 cenarios e manteve um skip previsto.
+- Depois da promocao em arvore limpa, o modo `verify` repetiu 154 checks
+  responsivos, 88 de tema, 242 Axe, 242 comparacoes e 110 de zoom sem atualizar
+  nenhuma referencia. A conta e as fixtures sinteticas foram removidas.
+- A revisao independente do diff nao encontrou achados de seguranca. O ensaio
+  de banco repetiu lint, advisors, backup/restore e 1.141/1.141 testes na origem
+  e na restauracao.
+- A primeira CI do PR #181 (`38158141843`) passou validate, restore isolado e
+  release-gates no SHA `9327288a6c0e99f6ae8be626d82d9e06c8aec3a3`.
+- O backup remoto anterior a mudanca foi mantido privado em
+  `/var/backups/descomplica-crm/20261011-admin-boundary-prechange.hm5P7J`; o
+  manifesto verificado tem SHA-256
+  `4ec0ef67f7982963344881c70421af4cb41ad95517653839b38ebf4d10538950`.
+  A migration local foi aplicada isoladamente no ledger remoto como
+  `20261011174323_protect_administrator_accounts_and_enable_simulator_view`.
+- O pos-check remoto confirmou triggers de papel, perfil e overrides, zero ACL
+  direta nas tabelas Qlik, visao dos simuladores somente para
+  Administrador/Master, zero permissao Master-only herdada pelo Administrador e
+  preservacao das tres excecoes de execucao pertencentes a Coordenadores.
+- Como o ambiente possui uma unica conta Administrador, nao foi criada uma
+  identidade produtiva adicional. Um teste transacional revertido confirmou que
+  o Administrador existente nao altera sua propria conta e que o Master pode
+  exercer o mesmo fluxo. O caso exato entre dois Administradores foi aprovado
+  no pgTAP e no E2E isolado desta VPS.
+- Os advisors remotos posteriores mantiveram apenas grupos preexistentes: dez
+  avisos `INFO` de RLS sem policy, tres RPCs `SECURITY DEFINER` para `anon`, 17
+  para `authenticated` e um aviso de protecao de senha vazada. Performance
+  manteve dez foreign keys sem indice e dois indices ainda nao usados, todos
+  informativos. Os helpers adicionados pela migration nao aparecem na Data API.
+- Nenhuma tabela Qlik, formula financeira, campo ou motor dos quatro
+  simuladores foi alterado nesta correcao.
+
 ## Assets incorporados
 
 | Asset no CRM                                  | SHA-256 no CRM                                                     | SHA-256 na fonte                                                   | Observacao                                     |

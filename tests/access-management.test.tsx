@@ -178,7 +178,7 @@ describe("catálogo localizado de acesso", () => {
   });
 
   it("oferece somente os seis papéis ativos não protegidos", () => {
-    expect(getAssignableRoleKeys(100)).toEqual([
+    expect(getAssignableRoleKeys("master", 100)).toEqual([
       "admin",
       "coordinator",
       "manager_house",
@@ -186,13 +186,14 @@ describe("catálogo localizado de acesso", () => {
       "broker_house",
       "broker_imob",
     ]);
-    expect(getAssignableRoleKeys(80)).toEqual([
+    expect(getAssignableRoleKeys("admin", 80)).toEqual([
       "coordinator",
       "manager_house",
       "manager_imob",
       "broker_house",
       "broker_imob",
     ]);
+    expect(getAssignableRoleKeys("admin", 999)).not.toContain("admin");
     expect(
       Object.entries(ROLES)
         .filter(([, role]) => !role.assignable)
@@ -254,6 +255,7 @@ describe("catálogo localizado de acesso", () => {
       "crm.dashboard.without_canal_imob.view",
       "crm.ranking.view",
       "crm.partnerships.view",
+      "crm.simulators.view",
       "crm.settings.view",
       "crm.settings.manage",
       "crm.salesforce.refresh",
@@ -322,17 +324,20 @@ describe("catálogo localizado de acesso", () => {
     expect(ROLE_INHERITED_PERMISSIONS.broker_house).not.toContain("crm.partnerships.view");
   });
 
-  it("mantém as páginas de simuladores exclusivas do Master durante o canário WF13", () => {
+  it("permite ao Administrador visualizar simuladores sem herdar execução Master", () => {
     expect(PERMISSIONS["crm.simulators.view"]).toEqual({
       label: "Visualizar simuladores",
-      description: "Acessa as interfaces de simulação autorizadas para o perfil Master.",
+      description:
+        "Acessa as interfaces de simulação autorizadas; a execução oficial possui controle separado.",
       minLevel: 100,
     });
     expect(ROLE_INHERITED_PERMISSIONS.master).toContain("crm.simulators.view");
+    expect(ROLE_INHERITED_PERMISSIONS.admin).toContain("crm.simulators.view");
+    expect(ROLE_INHERITED_PERMISSIONS.admin).not.toContain("crm.simulators.execute");
 
     for (const roleKey of Object.keys(ROLE_INHERITED_PERMISSIONS).filter(
-      (roleKey) => roleKey !== "master",
-    ) as Array<Exclude<keyof typeof ROLE_INHERITED_PERMISSIONS, "master">>) {
+      (roleKey) => roleKey !== "master" && roleKey !== "admin",
+    ) as Array<Exclude<keyof typeof ROLE_INHERITED_PERMISSIONS, "master" | "admin">>) {
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.simulators.view");
     }
   });
@@ -369,8 +374,97 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toContain("Permissões herdadas do papel");
     expect(markup).toContain("Exceções individuais");
     expect(markup).toContain("Configurações avançadas");
-    expect(markup).toContain("proteção contra autoelevação");
+    expect(markup).toContain("Você não pode alterar seu próprio papel, permissões ou status.");
     expect(markup).not.toContain("Salvar papel");
+  });
+
+  it("explica a proteção de outro Administrador e não renderiza controles mutáveis", () => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        users: [
+          {
+            userId: "81000000-0000-4000-8000-000000000005",
+            email: "admin-protegido@example.test",
+            isActive: true,
+            accessStatus: "approved",
+            roleKey: "admin",
+            isSelf: false,
+            isManageable: false,
+            inheritedPermissions: [...ROLE_INHERITED_PERMISSIONS.admin],
+            overrides: [],
+            permissionDetailsAvailable: true,
+          },
+        ],
+        assignableRoles: [
+          "coordinator",
+          "manager_house",
+          "manager_imob",
+          "broker_house",
+          "broker_imob",
+        ],
+        manageablePermissions: ["crm.dashboard.view"],
+        canManageRoles: true,
+        canManagePermissions: true,
+        isMasterPermissionManager: false,
+        canManageUsers: true,
+        canApproveUsers: true,
+        reportingScopes: [],
+      }),
+    );
+
+    expect(markup).toContain('class="admin-protected-account-badge" role="status"');
+    expect(markup).toContain("Protegida pelo Master");
+    expect(markup).toContain(
+      "Somente o Master pode alterar papel, permissões ou status de outro Administrador.",
+    );
+    expect(markup).not.toContain("Salvar papel");
+    expect(markup).not.toContain("Incluir na alteração");
+    expect(markup).not.toContain("Desativar usuário");
+    expect(markup).not.toContain('name="roleKey"');
+    expect(markup).not.toContain('name="effect"');
+  });
+
+  it("mantém os controles de outro Administrador disponíveis para o Master", () => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        users: [
+          {
+            userId: "81000000-0000-4000-8000-000000000006",
+            email: "admin-gerenciavel@example.test",
+            isActive: true,
+            accessStatus: "approved",
+            roleKey: "admin",
+            isSelf: false,
+            isManageable: true,
+            inheritedPermissions: [...ROLE_INHERITED_PERMISSIONS.admin],
+            overrides: [],
+            permissionDetailsAvailable: true,
+          },
+        ],
+        assignableRoles: [
+          "admin",
+          "coordinator",
+          "manager_house",
+          "manager_imob",
+          "broker_house",
+          "broker_imob",
+        ],
+        manageablePermissions: ["crm.dashboard.view"],
+        canManageRoles: true,
+        canManagePermissions: true,
+        isMasterPermissionManager: true,
+        canManageUsers: true,
+        canApproveUsers: true,
+        reportingScopes: [],
+      }),
+    );
+
+    expect(markup).not.toContain("Somente o Master pode alterar");
+    expect(markup).toContain("Salvar papel");
+    expect(markup).toContain("Incluir na alteração");
+    expect(markup).toContain("Desativar usuário");
+    expect(markup).toContain('name="roleKey"');
+    expect(markup).toContain('name="effect"');
   });
 
   it("oferece seleção múltipla com permitir, negar e restaurar em uma única ação", () => {

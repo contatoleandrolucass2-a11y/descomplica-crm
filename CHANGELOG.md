@@ -2,6 +2,23 @@
 
 ## 2026-10-11
 
+- Corrige superficies escuras residuais de Ranking e Canal de Parcerias nos
+  temas Claro e Medio, preservando o tema Escuro aprovado.
+- Libera ao Administrador a visualizacao dos quatro simuladores sem ampliar a
+  execucao oficial, a politica comercial ou qualquer capacidade de Master.
+- Reserva ao Master a administracao de contas Administrador, com bloqueio de
+  criacao/promocao, desativacao, papel e excecoes na interface, servidor, RPCs
+  e triggers do banco.
+- Aprova a matriz visual pos-commit sem regravar referencias, o E2E dos oito
+  perfis, 1.141 testes pgTAP na origem/restore e os gates completos de
+  aplicacao; a revisao independente nao encontrou achados de seguranca.
+- Aplica isoladamente a fronteira de Administrador no banco remoto como versao
+  `20261011174323`, depois de backup privado verificado, e confirma grants,
+  triggers, matriz de atribuicao e preservacao das excecoes dos outros papeis.
+- Registra a limitacao honesta do ensaio produtivo: existe somente um
+  Administrador, portanto o bloqueio entre pares foi exercitado no pgTAP/E2E da
+  VPS; a conta existente foi bloqueada em transacao revertida e o Master passou
+  pelo mesmo guard sem persistir alteracao.
 - Promove o runtime do layout aprovado do CRM na release `ac3d7893`, com imagem
   imutavel, backup verificado, CAS, rollback preparado e saude confirmada; o
   aceite final permanece pendente da jornada autenticada em producao.

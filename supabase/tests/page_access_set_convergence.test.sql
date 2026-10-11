@@ -119,13 +119,15 @@ select is(
     'crm.settings.goals',
     'crm.settings.partnerships',
     'crm.settings.points',
+    'crm.simulation',
+    'crm.simulation.wf13',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Admin retains the exact fifteen-page inherited set including partnerships'
+  'Admin inherits the exact seventeen-page set including simulator view routes'
 );
 
 select is(
