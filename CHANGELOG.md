@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Operacao privada na VPS
+
+- Confirma inicializacao e reinicio do navegador Salesforce nao-root.
+- Acrescenta preflight de leitura do codigo e dependencias pelo monitor,
+  preservando os limites de acesso e os arquivos originais do host.
+
 ## 2026-10-12: Sessao remota Salesforce
 
 - Prepara Chrome dedicado supervisionado na VPS, independente do PC.

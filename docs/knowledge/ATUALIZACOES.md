@@ -1,5 +1,45 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Navegador VPS ativo; autenticacao do operador pendente
+
+- Fontes: PR #189, CI 38253951491, SSH/systemd, probe de metadados,
+  noVNC em loopback e health/ledger consultados ate 2026-10-12T14:05:23Z.
+- PR integrado como caac544641b23a4d2568906f639a84a8215a1c5c. CI do PR
+  aprovada: validate, isolated-restore e release-gates; imagem nao se aplica
+  ao evento PR. Linux aprovou 2473 testes Vitest (22 skips), 100 Node
+  Salesforce e 94 de release, alem de lint, tipos, build e matriz visual.
+- Servicos instalados na revisao aprovada 1a94998; diff contra o merge
+  caac544 confirmou igualdade em ops/salesforce, scripts/release e lockfile.
+  Navegador ativo/habilitado como descomplica-salesforce; Chrome 155.0.8059.39
+  com CDP 127.0.0.1:9222, sem no-sandbox. Reinicio controlado antes do login
+  recuperou CDP. Console temporario ativo em 127.0.0.1:6080; VNC somente
+  127.0.0.1/[::1]:5909. Tunel SSH local aberto para o operador.
+- Excecoes do host: primeira inicializacao falhou em CHDIR porque o pai das
+  releases era 0750 root:root. Instalado pacote oficial acl e concedido apenas
+  --x ao usuario dedicado nesse pai. Sem inclusao no grupo root. Dependencias
+  pnpm tinham arquivos 0600/hardlinks: copia independente passou a ser legivel,
+  com original preservado fora do checkout. Import do monitor nao-root passou.
+  Rever acesso ao trocar a release; nao repetir chmod sobre store compartilhado.
+- Probe nao-root em 2026-10-12T13:55:21Z retornou reauth_required/session_expired.
+  Isso confirma ausencia de prova autenticada, nao falha de senha do operador.
+  Usuario informou disponibilidade, mas login/MFA ainda nao foram confirmados.
+  Console exige senha propria via canal SSH; nenhuma credencial foi registrada.
+- Monitor continua inativo; pareamento privado nao aplicado. Ingestao e refresh
+  continuam desligados. Sem exportacao, workflow n8n, migration ou escrita de
+  snapshot nesta etapa. Nao declarar conectado por janela aberta ou MFA isolada.
+- Producao mudou por outra publicacao durante os testes: health/ledger agora
+  indicam 83592abf431ad357f0649209c03b08fc4039472b, deployment
+  48a08b2c-d4fe-4331-a710-5fdcb46f6d4c, publicado em
+  2026-10-12T13:19:10.060Z; sem pendencia. Nao atribuir essa publicacao a este PR.
+- Main CI 38258310602 em caac544: validate, isolated-restore e promotable-image
+  aprovados; release-gates ainda executava matriz visual na consulta final.
+  Nao baixada/carregada imagem nem reiniciado CRM. Retomar somente apos CI
+  completa e nova observacao de main/ledger/health, com CAS e coordenador.
+- Pendencias: operador autenticar no console, confirmar prova Salesforce,
+  parear status com backup privado, promover imagem aprovada e validar CRM.
+  Encerrar console/tunel depois da autenticacao, preservando navegador. N8n
+  e agenda de 30 minutos continuam explicitamente para etapa posterior.
+
 ## 2026-10-12: Candidato de sessao remota Salesforce
 
 - Fonte: branch codex/salesforce-vps-session, inspecao SSH observacional da VPS,

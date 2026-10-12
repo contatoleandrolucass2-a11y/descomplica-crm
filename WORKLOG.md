@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-12: Validacao operacional da sessao VPS
+
+- PR #189 integrado apos CI 38253951491 aprovada, inclusive matriz visual.
+- Chrome dedicado ativo como usuario nao-root, com CDP e console em loopback;
+  reinicio controlado recuperou o navegador antes do login do operador.
+- Corrigidas condicoes locais de permissao: ACL de travessia apenas no pai
+  das releases e copia independente das dependencias para leitura nao-root.
+  Originais preservados, sem ampliar grupo root ou permissao de segredos.
+- Monitor importado como usuario dedicado; prova anterior ao login retornou
+  reauth_required, sem exportacao. Pareamento e MFA continuam em validacao.
+
 ## 2026-10-12: Sessao Salesforce dedicada na VPS
 
 - Escopo solicitado: preparar navegador permanente na VPS, com login/MFA do
