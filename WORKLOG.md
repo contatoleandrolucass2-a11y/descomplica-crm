@@ -32,6 +32,12 @@
   local antes de exercitar a tela; ele não foi contado como evidência. O bloco
   `finally` resetou o banco local e removeu integralmente as identidades. As
   evidências válidas são a matriz autenticada, Vitest e pgTAP descritos acima.
+- Gates finais aprovados: formato, lint, tipos, inventário, audit sem
+  vulnerabilidades conhecidas, OSV e gitleaks sem achados, 126 arquivos Vitest
+  com 2.464 aprovados e seis ignorados, 83 testes Node, E2E de release com 19
+  aprovados e um skip previsto e restore isolado das 47 migrations. Origem e
+  restore repetiram os 1.151 pgTAP, lint/advisors e o mesmo fingerprint. O
+  `verify` visual pós-commit repetiu 154/88/242/242/110 sem regravar a baseline.
 - Evidências detalhadas: `docs/qa/users-permission-checkbox-2026-10-12.md`.
 
 ## 2026-10-11: Usuarios alinhado ao mestre-detalhe aprovado

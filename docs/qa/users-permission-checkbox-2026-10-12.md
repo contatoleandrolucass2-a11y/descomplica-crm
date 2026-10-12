@@ -41,6 +41,15 @@ alteração` e sem seletor separado Permitir/Negar/Restaurar.
   overflow horizontal, regressão de acessibilidade ou erro de console.
 - Os quatro simuladores repetiram todos os breakpoints; o Associativo aprovou
   30 capturas manuais e o Tabelão repetiu filtros, tabela, impressão e mapas.
+- Suíte completa: 126 arquivos Vitest com 2.464 aprovados e seis ignorados, 83
+  testes Node e E2E de release com 19 aprovados e um skip previsto. O E2E
+  confirmou as 25 rotas por perfil, Administrador sem capacidades de Master,
+  MFA e limpeza das nove identidades sintéticas.
+- Restore isolado: 47 migrations, 27 arquivos e 1.151 pgTAP aprovados tanto na
+  origem quanto no banco restaurado, com grants/owners e fingerprint
+  preservados. `pnpm audit`, OSV e gitleaks não encontraram achados.
+- O `verify` visual pós-commit repetiu 154/88/242/242/110 sem promover ou
+  regravar referências.
 
 ## Limite registrado
 
