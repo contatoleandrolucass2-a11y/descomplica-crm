@@ -1,0 +1,27 @@
+[Unit]
+Description=Descomplica Salesforce private VNC console
+After=descomplica-salesforce-browser.service
+Requisite=descomplica-salesforce-browser.service
+PartOf=descomplica-salesforce-console.target
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+[Service]
+Type=exec
+User=descomplica-salesforce
+Group=descomplica-salesforce
+UMask=0077
+ExecStart=/usr/bin/x11vnc -display :99 -auth /run/descomplica-salesforce/Xauthority -localhost -rfbport 5909 -rfbauth /var/lib/descomplica-salesforce/vnc.passwd -forever -shared -nosel -noprimary -noclipboard -nosetclipboard -nolookup -quiet
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=256M
+TasksMax=32
+LimitCORE=0
+StandardOutput=null
+StandardError=null

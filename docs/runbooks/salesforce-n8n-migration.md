@@ -80,8 +80,11 @@ historica e sinaliza a falha atual, sem declarar a base atualizada.
 O coletor e o Chrome precisam permanecer ligados na mesma maquina. Com o PC
 desligado, somente um servidor com sessao grafica dedicada e login/MFA manual
 aprovado pelo operador pode manter essa modalidade em execucao. Um servidor
-headless ou n8n sozinho nao substitui essa sessao. Nao instalar ambiente grafico,
-copiar perfil pessoal ou enfraquecer MFA para contornar esse requisito.
+headless ou n8n sozinho nao substitui essa sessao. Nao copiar perfil pessoal
+nem enfraquecer MFA. O pedido de 12/10/2026 autoriza preparar a sessao grafica
+dedicada na VPS; procedimento, limites e gates estao em
+[Sessao Salesforce na VPS](salesforce-vps-session.md). Essa etapa nao ativa
+n8n nem a exportacao dos relatórios.
 
 A autenticacao pode expirar ou ser revogada. Nesse caso, a coleta interrompe a
 publicacao e o operador precisa autenticar novamente. Nao existe garantia de
