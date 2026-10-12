@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Console remoto ativado em producao
+
+- Publica o console da VPS dentro do CRM, com acesso Master e monitor de sessao.
+- Registra CI, prova da imagem, publicacao protegida e smoke HTTP/WSS.
+- Login/MFA permanece uma acao do operador; exportacoes nao foram ativadas.
+
 ## 2026-10-12: Validacao visual do console
 
 - Aguarda transicoes de tema na matriz sintetica e detalha falhas de contraste.

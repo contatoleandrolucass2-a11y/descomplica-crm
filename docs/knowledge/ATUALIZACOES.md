@@ -1,5 +1,49 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Console integrado publicado e aguardando MFA
+
+- Fonte: PR #193, CI main 38279467083, coordenador release:production e
+  verificacao real Chrome/SSH. Publicado SHA 1dd58c46e53281943ea68378efc4e8b3473c395c
+  em 17:21:17.777Z (14:21:17 Brasilia), deployment
+  2e8e59b5-338a-4e2f-bfae-0168197374a1, manifesto 9058387683fb6f9133ebd2da2409ec1d574777af9474dbf645b5d4032e0d6651.
+  Sem operacao pendente; health local/publico confirmados pelo coordenador.
+- Pareamento privado concluido sob as tres travas de producao, com backup
+  root-only e CAS. Senha tecnica VNC e segredo do monitor nao foram impressos.
+  Nginx validado e recarregado; gateway e monitor habilitados no boot. Browser
+  continua ativo desde 13:50:14Z, sem reinicio nesta publicacao.
+- Listeners VNC 5909, gateway 6081 e CDP 9222 somente loopback. Websockify
+  legado 6080 parado. Nenhum DNS, firewall, migration ou dado comercial alterado.
+- Smoke HTTPS: sonda anonima 401; bootstrap sem Origin ou origem externa 403;
+  bootstrap anonimo same-origin 401; WSS anonimo 401 e origem externa 403.
+  Restricao nao-Master validada na suite, sem criar contas remotas de teste.
+- CRM real abriu noVNC e mostrou Console conectado e login real Salesforce.
+  Fechar por Escape e reabrir preservou Chrome. Tela ociosa inicial despertou
+  com entrada; console nao implica Salesforce autenticado. Monitor recebeu
+  reauth_required com horario recente, sem inventar conectado ou contagens.
+- Pendente de usuario: inserir credenciais diretamente no console e aprovar
+  MFA. Handoff solicitado; prova Salesforce conectada ainda nao confirmada.
+  Sessao sujeita a expiracao/revogacao/politicas Salesforce. Reavaliar apos login.
+  N8n, agenda de exportacao, refresh e ingestao continuam desligados.
+- Excecoes anteriores: testes POSIX no Windows substituidos por execucao Linux
+  integral aprovada, nao por dispensa; HTTP403 externo passou em repeticao;
+  corrida visual de transicoes CSS corrigida com espera por estado final.
+  Evidencias locais de RFB sintetico nao sao prova de autenticacao Salesforce.
+
+## 2026-10-12: Publicacao do console integrado, conferencia previa
+
+- PR #193 integrado em main 1dd58c46e53281943ea68378efc4e8b3473c395c.
+  CI do PR 38274814847 aprovada; CI push/main 38279467083 com os quatro jobs
+  aprovados, incluindo matriz visual, restauracao e imagem imutavel.
+- Artefato 11760841505, ZIP SHA256 3765322864dd4e41c4da4368aa3ea4608ff454209dfd8e30f4dbd7f28b6182ec.
+  Arquivo da imagem conferido; 11 camadas equivalentes entre config CI
+  031cc43c e manifesto local 90583876. image:prove aprovou os dois perfis.
+- Conferencia SSH anterior a mutacao: producao ainda 83592ab, deployment
+  48a08b2c-d4fe-4331-a710-5fdcb46f6d4c, publicada 13:19:10.060Z, sem pendencia.
+  Usuario dedicado importa ws na copia independente das dependencias; nao
+  recebeu acesso ao cache privado root. Nenhum rebuild na VPS.
+- Pareamento, promocao, ativacao e login/MFA ainda pendentes nesta conferencia.
+  N8n, exportacoes e escrita de dados comerciais permanecem fora do escopo.
+
 ## 2026-10-12: Primeiro gate do PR #193
 
 - Evidencia 38273862007/job114896148359: status do console medido em #6d7886

@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-12: Ativacao do console na VPS
+
+- PR #193 integrado, CI main 38279467083 integralmente aprovada e imagem
+  imutavel 1dd58c4 publicada pelo coordenador em 17:21:17.777Z.
+- Gateway/monitor habilitados, Nginx validado, backups privados preservados.
+  Console real aberto no CRM; navegador persistente nao reiniciado.
+- Smoke HTTP/WSS negou anonimato e origem externa. Handoff para login/MFA
+  do usuario; Salesforce conectado ainda depende dessa prova. Sem n8n/exportacao.
+- Evidencia completa em docs/knowledge/ATUALIZACOES.md. Esta etapa documental
+  nao requer novo restart da aplicacao nem altera a versao runtime publicada.
+
 ## 2026-10-12: Estabilizacao da matriz do console
 
 - CI 38271515539: validate aprovado; release-gates interrompido por contraste
