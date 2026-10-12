@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-12: Rotina semanal e diaria compacta
+
+- Centraliza as atividades, remove domingo da exibicao e conserva o schema
+  local de sete dias para nao apagar conteudo previamente salvo.
+- Adiciona Semana/Hoje, com dia de Sao Paulo atualizado automaticamente,
+  linhas vazias editaveis e foco na nova linha. Titulo e dias permanecem
+  fixos dentro da area de rolagem, inclusive com quebra responsiva da barra.
+- Remove breadcrumb somente da Rotina, resumos, status ocioso e restauracao.
+  Preserva seis funcoes, armazenamento local e protecao contra saida sem salvar.
+- Validacao e publicacao em andamento; referencia externa e Associativo intactos.
+- Lint, tipos, build, inventario e nove testes de breadcrumbs aprovados.
+  Suite Windows: 2469 aprovados, 25 skips, seis falhas de modos POSIX;
+  gates Linux permanecem obrigatorios antes de publicar.
+- Chromium isolado: 19/19 aprovados, incluindo modos, domingo legado,
+  navegacao, persistencia, centralizacao e cabecalhos fixos sem sobreposicao.
+
 ## 2026-10-12: Planilha de Rotina publicada
 
 - PR #188 integrado e versao `83592ab` publicada pelo coordenador em
@@ -14,6 +30,7 @@
 - Helper externo encontrou Docker ainda starting apos o deploy concluido;
   releitura confirmou healthy, sem reinicios. Evidencia detalhada no conhecimento.
 - Fechamento apenas documental, com sincronizacao do Obsidian, sem novo deploy.
+
 ## 2026-10-12: Sessao Salesforce dedicada na VPS
 
 - Escopo solicitado: preparar navegador permanente na VPS, com login/MFA do

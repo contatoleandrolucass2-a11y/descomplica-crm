@@ -74,6 +74,13 @@ edição, inserção, persistência local, teclado, temas, Axe e capturas respon
 A referência derivada identifica a origem visual; não afirma reprodução
 pixel a pixel de uma tela de rotina que não existia no canvas aprovado.
 
+O pedido de 12/10/2026 define a Rotina compacta com modos Semana e Hoje,
+seis dias visiveis (segunda a sabado), textos centralizados e cabecalhos
+fixos na area de rolagem. Hoje segue America/Sao_Paulo; domingo exibe estado
+sem rotina. O schema local preserva domingos anteriores sem exibi-los.
+Testar troca de modos, virada do dia, insercao com foco, salvamento,
+cabecalhos sem sobreposicao, teclado e temas sem alterar o Associativo.
+
 `navegacao-dropdown.webp` e `navegacao-mobile.webp` são contratos adicionais
 da navbar única. `dashboard-composicao-alternativa.webp` é referência secundária
 de densidade. `hub-simulacao-superseded.webp` foi preservado para rastreabilidade,

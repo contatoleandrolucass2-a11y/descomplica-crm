@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Rotina semanal e diaria compacta
+
+- Alterna entre planilha de segunda a sabado e atividades do dia atual.
+- Compacta cabecalho, abas e celulas, com texto centralizado e titulos fixos.
+- Mantem edicao, insercao e salvamento local, sem apagar domingos antigos.
+
 ## 2026-10-12: Planilha de Rotina em producao
 
 - Publica a grade continua e o destaque do dia na versao `83592ab`, apos CI
@@ -8,6 +14,7 @@
   das 26 linhas/74 atividades. Salvamento continua local ao navegador.
 - Registra evidencias e excecoes verificadas no conhecimento do projeto;
   fechamento documental nao reinicia a aplicacao.
+
 ## 2026-10-12: Sessao remota Salesforce
 
 - Prepara Chrome dedicado supervisionado na VPS, independente do PC.

@@ -50,13 +50,24 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
   };
 
   try {
+    await page.clock.setFixedTime(new Date("2026-10-12T15:00:00Z"));
     await page.goto(`${origin}/app/gestao`);
     await page.getByRole("link", { name: "Rotina", exact: true }).last().click();
     await expect(page).toHaveURL(`${origin}${route}`);
-    const save = page.getByRole("button", { name: "Salvar alterações", exact: true });
+    const save = page.getByRole("button", { name: "Salva alterações", exact: true });
     await expect(save).toBeEnabled();
-    await expect(page.getByRole("tab")).toHaveCount(6);
-    const house = page.getByRole("tab", { name: /^Gerente regional house/ });
+    await expect(page.getByRole("tab")).toHaveText(roleLabels);
+    const modes = page.getByRole("group", { name: "Visualização da rotina", exact: true });
+    await expect(modes.getByRole("button", { name: "Semana", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(page.locator("thead th")).toHaveCount(7);
+    await expect(page.locator("caption")).toHaveText(
+      "Rotina semanal editável para gerente regional house.",
+    );
+    await expect(page.getByRole("textbox", { name: /Domingo/ })).toHaveCount(0);
+    const house = page.getByRole("tab", { name: "Gerente regional house", exact: true });
     await expect(house).toHaveAttribute("aria-selected", "true");
     const initialRows = await page.locator("tbody tr").count();
     assert.equal(initialRows, 26, "Complete house routine must retain the reference rows");
@@ -67,7 +78,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
 
     checkpoint("edit-insert-save-reload");
     const first = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
-    const original = await first.inputValue();
+
     await first.fill("Atividade sintética de validação.");
     await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
     await expect(page.locator("tbody tr")).toHaveCount(initialRows + 1);
@@ -85,13 +96,11 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
 
     checkpoint("empty-roles-and-keyboard");
     for (const label of roleLabels.slice(1)) {
-      const tab = page.getByRole("tab", { name: new RegExp(`^${label}`) });
+      const tab = page.getByRole("tab", { name: label, exact: true });
       await tab.click();
       await expect(tab).toHaveAttribute("aria-selected", "true");
       await expect(page.locator("tbody tr")).toHaveCount(0);
-      await expect(
-        page.getByRole("button", { name: "Inserir primeira linha", exact: true }),
-      ).toBeVisible();
+      await expect(page.getByRole("button", { name: "Inserir linha", exact: true })).toBeVisible();
     }
     await house.click();
     await house.focus();
@@ -101,20 +110,51 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
     await expect(house).toBeFocused();
     await expect(house).toHaveAttribute("aria-selected", "true");
 
-    checkpoint("restore-confirmation");
-    await first.fill("Ajuste ainda não salvo.");
-    page.once("dialog", (dialog) => dialog.dismiss());
-    await page
-      .getByRole("button", { name: "Restaurar rotina da função ativa", exact: true })
-      .click();
-    await expect(first).toHaveValue("Ajuste ainda não salvo.");
-    page.once("dialog", (dialog) => dialog.accept());
-    await page
-      .getByRole("button", { name: "Restaurar rotina da função ativa", exact: true })
-      .click();
-    await expect(first).toHaveValue(original);
-    await expect(page.locator("tbody tr")).toHaveCount(initialRows);
+    checkpoint("daily-mode-and-sunday-storage");
+    await modes.getByRole("button", { name: "Hoje", exact: true }).click();
+    await expect(modes.getByRole("button", { name: "Hoje", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(
+      page.getByRole("region", { name: "Tabela de rotina do dia", exact: true }),
+    ).toBeVisible();
+    await expect(page.locator("thead th")).toHaveCount(2);
+    await expect(page.locator("caption")).toHaveText(
+      "Rotina do dia editável para gerente regional house.",
+    );
+    await expect(first).toHaveValue("Atividade sintética de validação.");
+    await first.fill("");
+    await expect(first).toBeVisible();
+    await first.fill("Atividade diária sintética.");
     await save.click();
+    await page.evaluate((key) => {
+      const value = JSON.parse(localStorage.getItem(key));
+      value["regional-house"][0].Domingo = "Domingo legado QA";
+      localStorage.setItem(key, JSON.stringify(value));
+    }, storageKey);
+    await page.reload();
+    await expect(save).toBeEnabled();
+    await modes.getByRole("button", { name: "Hoje", exact: true }).click();
+    await page.clock.setFixedTime(new Date("2026-10-11T15:00:00Z"));
+    await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+    await expect(page.getByText("Sem rotina aos domingos.", { exact: true })).toBeVisible();
+    await expect(page.getByRole("textbox")).toHaveCount(0);
+    await modes.getByRole("button", { name: "Semana", exact: true }).click();
+    await save.click();
+    assert.equal(
+      await page.evaluate(
+        (key) => JSON.parse(localStorage.getItem(key))["regional-house"][0].Domingo,
+        storageKey,
+      ),
+      "Domingo legado QA",
+    );
+    await expect(page.getByRole("textbox", { name: /Domingo/ })).toHaveCount(0);
+    await page.evaluate((key) => localStorage.removeItem(key), storageKey);
+    await page.clock.setFixedTime(new Date("2026-10-12T15:00:00Z"));
+    await page.reload();
+    await expect(save).toBeEnabled();
+    await expect(page.locator("tbody tr")).toHaveCount(initialRows);
 
     for (const width of [1440, 1024, 720, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
@@ -126,7 +166,9 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           false,
           `Rotina must not overflow at ${width}px in ${theme}`,
         );
-        await expect(page.getByRole("heading", { name: "Rotina", exact: true })).toBeVisible();
+        await expect(
+          page.getByRole("heading", { name: "Rotina semanal e diária", exact: true }),
+        ).toBeVisible();
         await expect(page.locator('thead [aria-current="date"]')).toHaveCount(1);
         await expect(page.locator("tbody td[data-today]")).toHaveCount(initialRows);
         const editorStyle = await page
@@ -149,16 +191,10 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           },
           "Routine editors must remain continuous spreadsheet cells under global styles",
         );
-        const capitalization = await page
-          .locator(".simulation-canvas-eyebrow, .simulation-canvas-status")
-          .evaluateAll((elements) =>
-            elements.map((element) => getComputedStyle(element).textTransform),
-          );
-        assert.deepEqual(
-          capitalization,
-          ["none", "none"],
-          "Routine labels must retain sentence case",
-        );
+        await expect(
+          page.locator(".simulation-canvas-eyebrow, .simulation-canvas-status"),
+        ).toHaveCount(0);
+        await expect(page.getByRole("button", { name: /Restaurar/ })).toHaveCount(0);
         await expect
           .poll(() =>
             page
@@ -168,7 +204,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
               ),
           )
           .toBe(true);
-        if (width < 1180) {
+        if (width < 960) {
           const scroll = page.getByRole("region", {
             name: "Tabela de rotina semanal",
             exact: true,
@@ -198,7 +234,72 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           animations: "disabled",
           mask: [page.locator("[data-session-identity], [data-account-identity]")],
         });
-        checks.push({ width, theme, overflow: false, accessibilityViolations: 0 });
+        checks.push({ width, theme, mode: "Semana", overflow: false, accessibilityViolations: 0 });
+        const weekly = page.getByRole("region", { name: "Tabela de rotina semanal", exact: true });
+        const insert = weekly.getByRole("button", { name: "Inserir linha", exact: true });
+        assert.equal(await insert.evaluate((element) => element.closest("table") === null), true);
+        await weekly.evaluate((element) => {
+          element.scrollTop = 0;
+        });
+        const beforeInsert = await insert.boundingBox();
+        const beforeHeader = await weekly.locator("thead th").first().boundingBox();
+        await weekly.evaluate((element) => {
+          element.scrollTop = 300;
+        });
+        const afterInsert = await insert.boundingBox();
+        const afterHeader = await weekly.locator("thead th").first().boundingBox();
+        assert.ok(beforeInsert && afterInsert && beforeHeader && afterHeader);
+        assert.ok(
+          Math.abs(beforeInsert.y - afterInsert.y) <= 2,
+          "Routine toolbar must remain sticky",
+        );
+        assert.ok(
+          Math.abs(beforeHeader.y - afterHeader.y) <= 2,
+          "Routine day header must remain sticky",
+        );
+        assert.ok(
+          afterHeader.y >= afterInsert.y + afterInsert.height,
+          "Day header must stay below toolbar",
+        );
+        await weekly.evaluate((element) => {
+          element.scrollLeft = element.scrollWidth;
+        });
+        const horizontalInsert = await insert.boundingBox();
+        assert.ok(horizontalInsert);
+        assert.ok(
+          Math.abs(horizontalInsert.x - afterInsert.x) <= 2,
+          "Routine toolbar must remain fixed during horizontal scroll",
+        );
+        await modes.getByRole("button", { name: "Hoje", exact: true }).click();
+        const daily = page.getByRole("region", { name: "Tabela de rotina do dia", exact: true });
+        await expect
+          .poll(() => daily.evaluate((element) => [element.scrollTop, element.scrollLeft]))
+          .toEqual([0, 0]);
+        await expect(daily.locator("thead th")).toHaveCount(2);
+        assert.equal(
+          await daily.evaluate((element) => element.scrollWidth > element.clientWidth + 1),
+          false,
+          "Daily mode must fit without horizontal scroll",
+        );
+        const dailyAxe = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+          .analyze();
+        assert.deepEqual(
+          dailyAxe.violations.map(({ id, nodes }) => ({
+            id,
+            targets: nodes.map(({ target }) => target),
+          })),
+          [],
+          `Daily routine accessibility at ${width}px in ${theme}`,
+        );
+        await page.screenshot({
+          path: path.join(outputDirectory, `rotina-hoje-${width}-${theme}.png`),
+          fullPage: true,
+          animations: "disabled",
+          mask: [page.locator("[data-session-identity], [data-account-identity]")],
+        });
+        checks.push({ width, theme, mode: "Hoje", overflow: false, accessibilityViolations: 0 });
+        await modes.getByRole("button", { name: "Semana", exact: true }).click();
       }
     }
     assert.deepEqual(errors, [], "Rotina must not produce runtime errors");
@@ -209,7 +310,8 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
       insertion: true,
       persistence: true,
       keyboard: true,
-      reset: true,
+      modes: true,
+      sundayStoragePreserved: true,
       checks,
       passed: true,
     };
@@ -217,6 +319,11 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
     process.stderr.write(`[routine-settings] failed-stage=${stage}\n`);
     throw error;
   } finally {
-    await page.evaluate((key) => window.localStorage.removeItem(key), storageKey).catch(() => {});
+    try {
+      // Playwright clocks are context-wide; restore advancing time for later checks.
+      await page.clock.setSystemTime(new Date());
+    } finally {
+      await page.evaluate((key) => window.localStorage.removeItem(key), storageKey).catch(() => {});
+    }
   }
 }

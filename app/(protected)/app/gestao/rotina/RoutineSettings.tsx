@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { Plus, RotateCcw, Save, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { CalendarDays, ListChecks, Plus, Save } from "lucide-react";
 
-import { SimulationCanvasHeader } from "@/app/(protected)/app/simulacao/_components/SimulationCanvasHeader";
 import "@/app/(protected)/app/simulacao/_components/archive-investor/investor-theme-tokens.css";
 import "@/app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css";
 import styles from "./RoutineSettings.module.css";
@@ -21,6 +20,8 @@ const weekdays = [
 ] as const;
 
 type Weekday = (typeof weekdays)[number];
+// Keep the stored seven-day schema compatible; Sunday is no longer displayed.
+const scheduleDays = weekdays.filter((day) => day !== "Domingo");
 type RoleKey =
   | "regional-house"
   | "regional-imob"
@@ -373,13 +374,6 @@ function normalizeStoredRoutine(value: unknown): RoutineState {
   }, {} as RoutineState);
 }
 
-function countFilledCells(rows: RoutineRow[]) {
-  return rows.reduce(
-    (total, row) => total + weekdays.filter((weekday) => row[weekday].trim().length > 0).length,
-    0,
-  );
-}
-
 function fitRoutineFields(table: HTMLTableElement | null) {
   if (!table) return;
   const fields = Array.from(table.querySelectorAll("textarea"));
@@ -390,7 +384,7 @@ function fitRoutineFields(table: HTMLTableElement | null) {
   const heights = fields.map((field) => {
     const style = getComputedStyle(field);
     const borders = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
-    return Math.max(44, field.scrollHeight + borders);
+    return Math.max(32, field.scrollHeight + borders);
   });
   fields.forEach((field, index) => {
     field.style.height = `${heights[index]}px`;
@@ -423,8 +417,13 @@ export function RoutineSettings() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [storageError, setStorageError] = useState<string | null>(null);
   const [today, setToday] = useState<string | null>(null);
+  const [view, setView] = useState<"week" | "day">("week");
+  const [editedCells, setEditedCells] = useState<Set<string>>(() => new Set());
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const tableRef = useRef<HTMLTableElement | null>(null);
+  const toolbarRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const pendingRow = useRef<number | null>(null);
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat("pt-BR", {
@@ -591,9 +590,38 @@ export function RoutineSettings() {
 
   const activeRows = routine[activeRole];
   const activeRoleInfo = roles.find((role) => role.key === activeRole) ?? roles[0]!;
+  const currentDay = scheduleDays.find((day) => day.toLocaleLowerCase("pt-BR") === today);
+  const visibleDays = view === "week" ? scheduleDays : currentDay ? [currentDay] : [];
+  const visibleRows = activeRows
+    .map((row, index) => ({ row, index }))
+    .filter(
+      ({ row, index }) =>
+        view === "week" ||
+        (currentDay &&
+          (row[currentDay].trim() ||
+            weekdays.every((day) => !row[day].trim()) ||
+            editedCells.has(`${activeRole}:${currentDay}:${index}`))),
+    );
   useEffect(() => {
     fitRoutineFields(tableRef.current);
-  }, [activeRows]);
+    if (pendingRow.current !== null) {
+      tableRef.current
+        ?.querySelector<HTMLTextAreaElement>(`textarea[data-row="${pendingRow.current}"]`)
+        ?.focus();
+      pendingRow.current = null;
+    }
+  }, [activeRows, view, today]);
+
+  useEffect(() => {
+    const toolbar = toolbarRef.current;
+    const scroll = scrollRef.current;
+    if (!toolbar || !scroll) return;
+    const observer = new ResizeObserver(() => {
+      scroll.style.setProperty("--routine-toolbar-height", `${toolbar.offsetHeight}px`);
+    });
+    observer.observe(toolbar);
+    return () => observer.disconnect();
+  }, [activeRole]);
 
   useEffect(() => {
     const table = tableRef.current;
@@ -606,17 +634,11 @@ export function RoutineSettings() {
     });
     observer.observe(table);
     return () => observer.disconnect();
-  }, [activeRole, activeRows.length]);
-  const activeSummary = useMemo(
-    () => ({
-      rows: activeRows.length,
-      filled: countFilledCells(activeRows),
-    }),
-    [activeRows],
-  );
+  }, [activeRole, activeRows.length, view, currentDay]);
 
   function updateCell(rowIndex: number, weekday: Weekday, value: string) {
     if (!hasLoaded) return;
+    setEditedCells((current) => new Set(current).add(`${activeRole}:${weekday}:${rowIndex}`));
     setRoutine((current) => ({
       ...current,
       [activeRole]: current[activeRole].map((row, index) =>
@@ -628,6 +650,7 @@ export function RoutineSettings() {
 
   function addRow() {
     if (!hasLoaded) return;
+    pendingRow.current = activeRows.length;
     setRoutine((current) => ({
       ...current,
       [activeRole]: [...current[activeRole], emptyRow()],
@@ -635,19 +658,9 @@ export function RoutineSettings() {
     setHasUnsavedChanges(true);
   }
 
-  function resetActiveRole() {
-    if (!hasLoaded) return;
-    if (
-      !window.confirm(
-        `Restaurar a rotina de ${activeRoleInfo.label.toLowerCase()}? As alterações desta função serão descartadas.`,
-      )
-    )
-      return;
-    setRoutine((current) => ({
-      ...current,
-      [activeRole]: defaultRoutine[activeRole],
-    }));
-    setHasUnsavedChanges(true);
+  function changeView(nextView: "week" | "day") {
+    setView(nextView);
+    scrollRef.current?.scrollTo({ top: 0, left: 0 });
   }
 
   function saveRoutine() {
@@ -700,48 +713,29 @@ export function RoutineSettings() {
   return (
     <div className={`investor-page-shell ${styles.page}`}>
       <main className={`investor-main ${styles.main}`}>
-        <SimulationCanvasHeader
-          eyebrow="Gestão"
-          title="Rotina"
-          description="Classificação semanal das rotinas comerciais por função."
-          statusLabel="Rotina editável"
-          actions={
-            <div className={styles.headerActions}>
-              <button
-                type="button"
-                className={styles.secondaryAction}
-                aria-label="Restaurar rotina da função ativa"
-                title="Restaurar rotina da função ativa"
-                disabled={!hasLoaded}
-                onClick={resetActiveRole}
-              >
-                <RotateCcw size={18} aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className={styles.primaryAction}
-                disabled={!hasLoaded}
-                onClick={saveRoutine}
-              >
-                <Save size={17} aria-hidden="true" />
-                Salvar alterações
-              </button>
-            </div>
-          }
-        />
-
-        <div className={styles.saveState} role="status" aria-live="polite">
-          <Sparkles size={18} aria-hidden="true" />
-          <span>
-            {!hasLoaded
-              ? "Carregando rotina."
-              : hasUnsavedChanges
-                ? "Alterações não salvas."
-                : savedAt
-                  ? `Último salvamento local em ${savedAt}.`
-                  : "Nenhuma alteração pendente."}
-          </span>
-        </div>
+        <header className={styles.pageHeader}>
+          <h1>Rotina semanal e diária</h1>
+          <div className={styles.headerActions}>
+            <button
+              type="button"
+              className={styles.primaryAction}
+              disabled={!hasLoaded}
+              onClick={saveRoutine}
+            >
+              <Save size={17} aria-hidden="true" />
+              Salva alterações
+            </button>
+            <span className={styles.saveState} role="status" aria-live="polite">
+              {!hasLoaded
+                ? "Carregando rotina."
+                : hasUnsavedChanges
+                  ? "Alterações não salvas."
+                  : savedAt
+                    ? `Último salvamento local em ${savedAt}.`
+                    : ""}
+            </span>
+          </div>
+        </header>
 
         {storageError ? (
           <p className={styles.storageError} role="alert">
@@ -749,14 +743,7 @@ export function RoutineSettings() {
           </p>
         ) : null}
 
-        <section className={styles.rolesPanel} aria-labelledby="routine-options-title">
-          <div className={styles.sectionHeading}>
-            <div>
-              <p className={styles.kicker}>Opções</p>
-              <h2 id="routine-options-title">Escolha a função</h2>
-            </div>
-            <span>{roles.length} funções</span>
-          </div>
+        <section className={styles.rolesPanel} aria-label="Funções">
           <div className={styles.roleTabs} role="tablist" aria-label="Opções de rotina">
             {roles.map((role, roleIndex) => (
               <button
@@ -776,9 +763,6 @@ export function RoutineSettings() {
                 onKeyDown={(event) => handleRoleKeyDown(event, roleIndex)}
               >
                 <strong>{role.label}</strong>
-                <span>
-                  {routine[role.key].length ? `${routine[role.key].length} linhas` : "Nulo"}
-                </span>
               </button>
             ))}
           </div>
@@ -796,22 +780,44 @@ export function RoutineSettings() {
             className={styles.tablePanel}
           >
             {activeRole === role.key ? (
-              <>
-                <div className={styles.tableToolbar}>
-                  <div>
-                    <p className={styles.kicker}>Classificação da semana</p>
-                    <h2 id="routine-table-title">{activeRoleInfo.label}</h2>
-                    <p>
-                      {activeSummary.filled
-                        ? `${activeSummary.filled} ${activeSummary.filled === 1 ? "atividade" : "atividades"} em ${activeSummary.rows} ${activeSummary.rows === 1 ? "linha" : "linhas"} na semana.`
-                        : "Nenhuma atividade cadastrada para esta função."}
-                    </p>
-                  </div>
+              <div
+                ref={scrollRef}
+                className={styles.tableScroll}
+                role="region"
+                aria-label={
+                  view === "week" ? "Tabela de rotina semanal" : "Tabela de rotina do dia"
+                }
+                tabIndex={0}
+              >
+                <div ref={toolbarRef} className={styles.tableToolbar}>
+                  <h2 id="routine-table-title">{activeRoleInfo.label}</h2>
                   <div className={styles.tableStats} aria-label="Ações da rotina">
+                    <div
+                      className={styles.viewToggle}
+                      role="group"
+                      aria-label="Visualização da rotina"
+                    >
+                      <button
+                        type="button"
+                        aria-pressed={view === "week"}
+                        onClick={() => changeView("week")}
+                      >
+                        <CalendarDays size={16} aria-hidden="true" />
+                        Semana
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={view === "day"}
+                        onClick={() => changeView("day")}
+                      >
+                        <ListChecks size={16} aria-hidden="true" />
+                        Hoje
+                      </button>
+                    </div>
                     <button
                       type="button"
                       className={styles.addButton}
-                      disabled={!hasLoaded}
+                      disabled={!hasLoaded || (view === "day" && !currentDay)}
                       onClick={addRow}
                     >
                       <Plus size={17} aria-hidden="true" />
@@ -820,81 +826,83 @@ export function RoutineSettings() {
                   </div>
                 </div>
 
-                {activeRows.length ? (
-                  <div
-                    className={styles.tableScroll}
-                    role="region"
-                    aria-label="Tabela de rotina semanal"
-                    tabIndex={0}
-                  >
-                    <table ref={tableRef} className={styles.routineTable}>
-                      <caption>
-                        Rotina semanal editável para {activeRoleInfo.label.toLowerCase()}.
-                      </caption>
-                      <thead>
-                        <tr>
-                          <th scope="col">Linha</th>
-                          {weekdays.map((weekday) => (
-                            <th
+                {visibleRows.length && visibleDays.length ? (
+                  <table ref={tableRef} className={styles.routineTable} data-view={view}>
+                    <caption>
+                      Rotina {view === "week" ? "semanal" : "do dia"} editável para{" "}
+                      {activeRoleInfo.label.toLowerCase()}.
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col">
+                          <span className={styles.srOnly}>Linha</span>
+                        </th>
+                        {visibleDays.map((weekday) => (
+                          <th
+                            key={weekday}
+                            scope="col"
+                            data-today={weekday.toLocaleLowerCase("pt-BR") === today || undefined}
+                            aria-current={
+                              weekday.toLocaleLowerCase("pt-BR") === today ? "date" : undefined
+                            }
+                          >
+                            <span className={styles.dayHeading}>{weekday}</span>
+                            {weekday.toLocaleLowerCase("pt-BR") === today ? (
+                              <span className={styles.todayBadge}>Hoje</span>
+                            ) : null}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visibleRows.map(({ row, index: rowIndex }) => (
+                        <tr key={rowIndex}>
+                          <th scope="row">{rowIndex + 1}</th>
+                          {visibleDays.map((weekday) => (
+                            <td
                               key={weekday}
-                              scope="col"
+                              data-label={weekday}
                               data-today={weekday.toLocaleLowerCase("pt-BR") === today || undefined}
-                              aria-current={
-                                weekday.toLocaleLowerCase("pt-BR") === today ? "date" : undefined
-                              }
                             >
-                              <span className={styles.dayHeading}>{weekday}</span>
-                              {weekday.toLocaleLowerCase("pt-BR") === today ? (
-                                <span className={styles.todayBadge}>Hoje</span>
-                              ) : null}
-                            </th>
+                              <textarea
+                                data-row={rowIndex}
+                                aria-label={`${weekday}, linha ${rowIndex + 1}`}
+                                disabled={!hasLoaded}
+                                value={row[weekday]}
+                                onChange={(event) =>
+                                  updateCell(rowIndex, weekday, event.target.value)
+                                }
+                                rows={1}
+                              />
+                            </td>
                           ))}
                         </tr>
-                      </thead>
-                      <tbody>
-                        {activeRows.map((row, rowIndex) => (
-                          <tr key={rowIndex}>
-                            <th scope="row">{rowIndex + 1}</th>
-                            {weekdays.map((weekday) => (
-                              <td
-                                key={weekday}
-                                data-label={weekday}
-                                data-today={
-                                  weekday.toLocaleLowerCase("pt-BR") === today || undefined
-                                }
-                              >
-                                <textarea
-                                  aria-label={`${weekday}, linha ${rowIndex + 1}`}
-                                  disabled={!hasLoaded}
-                                  value={row[weekday]}
-                                  onChange={(event) =>
-                                    updateCell(rowIndex, weekday, event.target.value)
-                                  }
-                                  rows={1}
-                                />
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      ))}
+                    </tbody>
+                  </table>
                 ) : (
                   <div className={styles.emptyState}>
-                    <h3>{activeRoleInfo.label}</h3>
-                    <p>Nenhuma atividade cadastrada.</p>
-                    <button
-                      type="button"
-                      className={styles.primaryAction}
-                      disabled={!hasLoaded}
-                      onClick={addRow}
-                    >
-                      <Plus size={17} aria-hidden="true" />
-                      Inserir primeira linha
-                    </button>
+                    <p>
+                      {view === "day" && !currentDay
+                        ? today
+                          ? "Sem rotina aos domingos."
+                          : "Carregando rotina."
+                        : "Nenhuma atividade cadastrada."}
+                    </p>
+                    {view === "week" || currentDay ? (
+                      <button
+                        type="button"
+                        className={styles.primaryAction}
+                        disabled={!hasLoaded}
+                        onClick={addRow}
+                      >
+                        <Plus size={17} aria-hidden="true" />
+                        Inserir primeira linha
+                      </button>
+                    ) : null}
                   </div>
                 )}
-              </>
+              </div>
             ) : null}
           </section>
         ))}

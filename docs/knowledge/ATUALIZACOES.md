@@ -1,5 +1,31 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Abertura da Rotina semanal e diaria compacta
+
+- Fontes atuais: git fetch origin, GitHub PR #190 e GET publico
+  https://crm.descomplicapro.com.br/api/health. Main caac544 integra #189;
+  producao saudavel permanece em 83592ab. PR documental #190 tem CI aprovada,
+  mas conflito documental com main; ambos os historicos foram preservados
+  nesta branch codex/rotina-semana-hoje, sem alterar outro checkout.
+- Escopo solicitado: centralizacao, seis dias visiveis, modos Semana/Hoje,
+  cabecalho fixo e remocao de rotulos redundantes. Preservar armazenamento,
+  dados antigos de domingo e protecao de alteracoes nao salvas.
+- Consulta inicial e sincronizacao nao comprovam implementacao nem deploy.
+- Implementacao local: seis dias visiveis, modos Semana/Hoje, centralizacao,
+  cabecalho fixo no scroll e foco na linha inserida. Domingo legado permanece
+  no armazenamento local. Nao ha nova persistencia compartilhada no servidor.
+- Validacao Windows Node 24.19.0/pnpm 11.20.0: lint, typecheck, build das 47
+  rotas, resources:check e nove testes de breadcrumbs aprovados. pnpm test:
+  2469 aprovados, 25 skips e seis falhas POSIX em quatro arquivos (backup e
+  retirada canario, commercial-engine e mapping-import). Nenhum skip novo
+  para contornar esses erros; CI Linux continua obrigatoria.
+- Capturas sinteticas Semana/Hoje e rolagem em desktop/mobile inspecionadas;
+  a pagina autenticada e a publicacao dependem dos gates seguintes.
+- Suite Chromium isolada concluida: 19/19 aprovados. Revisao detectou linha
+  preenchida somente no domingo legado aparecendo vazia em Hoje; filtro
+  corrigido para preservar o dado e omitir a linha nessa visao. Cobertura
+  verifica virada Sao Paulo, geometria sticky, foco, persistencia e navegacao.
+
 ## 2026-10-12: Planilha de Rotina publicada e conferida
 
 - Status final: publicada a versao `83592abf431ad357f0649209c03b08fc4039472b`.
@@ -70,6 +96,7 @@
   falha comprovada da restauracao, pois ela nao chegou a executar. Repeticao
   do job enquanto a execucao global ainda estava ativa foi recusada pelo
   GitHub. Aguardar conclusao e repetir apenas o job falho, sem alterar gates.
+
 ## 2026-10-12: Candidato de sessao remota Salesforce
 
 - Fonte: branch codex/salesforce-vps-session, inspecao SSH observacional da VPS,
