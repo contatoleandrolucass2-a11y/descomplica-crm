@@ -1,5 +1,6 @@
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
+import { getSalesforceConsoleConfiguration } from "@/lib/crm/salesforce/console-config";
 import {
   getSalesforceIngestConfiguration,
   getSalesforceRefreshConfiguration,
@@ -24,6 +25,9 @@ export default async function ConnectedSystemsPage() {
       refreshAvailable={refresh.available}
       canRefresh={hasPermission(context, "crm.salesforce.refresh")}
       statusConfigured={status.available}
+      consoleAvailable={
+        context.roleKey === "master" && getSalesforceConsoleConfiguration().available
+      }
     />
   );
 }

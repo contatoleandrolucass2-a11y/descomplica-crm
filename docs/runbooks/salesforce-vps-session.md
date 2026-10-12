@@ -17,9 +17,11 @@ Salesforce em uma imitacao no CRM nem copiar cookies/perfis pessoais.
 - Chrome oficial, com sandbox nativo, perfil privado persistente 0700.
 - Xvfb autenticado por Xauthority 0700/0600, sem listener TCP.
 - CDP somente 127.0.0.1:9222, nunca encaminhado para o PC ou internet.
-- Console noVNC temporario: 127.0.0.1:6080, VNC 5909 com senha propria.
-  Transporte criptografado pelo SSH existente. Sem DNS, proxy publico ou
-  porta adicional no firewall. A senha VNC nao e a senha Salesforce.
+- Console integrado noVNC no CRM: HTTPS/WSS na origem existente, gateway
+  127.0.0.1:6081 e VNC 127.0.0.1:5909 com senha tecnica propria.
+  Somente Master autorizado no servidor. Nao expor VNC/CDP ao publico.
+- Console legado via SSH em 127.0.0.1:6080 fica reservado a manutencao;
+  nao executa junto com o console integrado. Nenhum DNS ou firewall novo.
 - Clipboard do VNC desativado. Senhas de servico nao entram em argumentos,
   URLs, Git, evidencias, logs nem n8n.
 - Navegador supervisionado por systemd, com reinicio limitado e perfil
@@ -27,7 +29,8 @@ Salesforce em uma imitacao no CRM nem copiar cookies/perfis pessoais.
   nao ha loop ilimitado nem promessa de disponibilidade absoluta.
 
 VNC classico limita a senha a oito caracteres e nao cifra o transporte.
-Por isso loopback + SSH sao requisitos, nao opcoes. A senha e aleatoria;
+Por isso loopback + TLS (console integrado) ou SSH (manutencao) sao requisitos.
+A senha tecnica e aleatoria;
 o arquivo codificado tambem deve ser tratado como segredo. Root e processos
 do usuario dedicado continuam no dominio de confianca. Nao oferecer essa
 conta a outros usuarios nem expor CDP em interfaces de rede.
@@ -59,7 +62,67 @@ Chrome/Xvfb usam a mesma unidade; o supervisor espera o processo Chrome.
 Fechamento ou falha reinicia a unidade inteira; systemd encerra o cgroup para
 nao deixar Xvfb ou Chrome orfaos. Nao excluir locks de perfil automaticamente.
 
-## Login manual
+## Console integrado no CRM
+
+O botao Conectar Salesforce abre o navegador real da VPS dentro de um dialogo
+do CRM. O operador digita usuario/senha na pagina Salesforce e aprova MFA.
+Nao ha formulario intermediario, iframe Salesforce, copia do perfil pessoal,
+armazenamento da senha Salesforce no CRM nem dependencia do n8n.
+
+Contrato de acesso:
+
+- POST /api/salesforce/console exige Origin exatamente APP_ORIGIN, sessao
+  CRM valida, MFA exigida pelo CRM, crm.settings.manage e role master. Nao
+  aceita corpo nem destinos. Retorna a credencial tecnica VNC em memoria do
+  cliente, somente com no-store; nunca em props SSR, URL ou localStorage.
+- O WebSocket /salesforce-console/socket passa pelo Nginx TLS e pelo gateway.
+  O gateway valida origem/caminho/cookie antes de abrir VNC e consulta GET
+  /api/salesforce/console/authorize pelo loopback fixo da aplicacao. Repete a
+  verificacao a cada 30 segundos; falha, timeout ou perda de permissao fecham
+  a conexao. O guard existente consulta o contexto no banco, incluindo sessao
+  viva e MFA. Nenhuma conta de servico substitui a identidade do operador.
+  Essa sonda nao renova tokens: o proxy nao faz refresh nessa rota e o cliente
+  Supabase bloqueia /auth/v1/token antes da rede. Cookie vencido fecha o
+  console; reabrir pelo botao renova a sessao no navegador, sem reutilizar
+  refresh tokens antigos no gateway ou capturar Set-Cookie remotamente.
+- Uma conexao por vez, duracao maxima de dez minutos, sem clipboard. Abrir
+  outra aba nao toma o console em uso. Fechar o dialogo desconecta apenas a
+  tela: Chrome/perfil continuam na VPS. Isso nao prolonga a sessao Salesforce.
+- Autenticacao VNC confirma somente o console. Conectado no Salesforce exige
+  prova recente do monitor existente; expiracao exige nova acao do operador.
+
+Preparacao operacional, somente apos PR/CI no SHA exato:
+
+1. Instalar dependencias do lockfile no checkout root-owned aprovado. Conferir
+   que o usuario dedicado consegue importar ws sem conceder escrita no codigo
+   ou acesso ao cache privado root. Nao executar build/testes pesados na VPS.
+2. Instalar a unidade gateway versionada com o caminho do release aprovado e
+   EnvironmentFile privado com SALESFORCE_CONSOLE_ORIGIN=https://crm.descomplicapro.com.br.
+   Validar com systemd-analyze verify. Conferir browser e VNC no loopback.
+3. Parear SALESFORCE_CONSOLE_PASSWORD com a senha VNC tecnica existente por
+   leitura local protegida, sem imprimir. Habilitar SALESFORCE_CONSOLE_ENABLED
+   somente na configuracao privada; defaults permanecem false. Fazer backup
+   privado e CAS, preservar as outras variaveis e parear o monitor conforme
+   a secao abaixo. Nunca usar a senha Salesforce nessa variavel.
+4. Promover a imagem aprovada exclusivamente pelo coordenador de release.
+   Configuracao alterada nao implica container atualizado. Nao contornar gates.
+5. Instalar apenas o bloco salesforce-console do template HTTPS no Nginx real,
+   preservando outros blocos, com backup, nginx -t e reload. Parar o websockify
+   legado; habilitar gateway e monitor. O gateway requer VNC e browser.
+6. Validar anonimo/nao-Master/origem externa negados, console sintetico em QA,
+   login/MFA manual em producao e prova real no status. Nao salvar screenshots
+   com senha, dados de clientes ou conteudo privado do Salesforce.
+
+Rollback do acesso: parar/desabilitar gateway, remover somente o bloco Nginx
+adicionado e validar/recarregar. Preservar Chrome, perfil e segredos. Reversao
+do codigo CRM continua pelo fluxo PR/CI/release; nao reiniciar app diretamente.
+Uma falha do gateway nao deve derrubar o navegador ou alterar dados comerciais.
+
+## Login manual de manutencao via SSH
+
+Fluxo legado reservado ao operador SSH. Parar o gateway antes de usa-lo para
+nao abrir duas sessoes sobre o mesmo desktop. Nao parar console.target durante
+uso do gateway: esse target tambem controla a unidade VNC compartilhada.
 
 Na VPS, abrir o console apenas durante a autenticacao:
 

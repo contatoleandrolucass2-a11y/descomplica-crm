@@ -1,5 +1,74 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Primeiro gate do PR #193
+
+- Evidencia 38273862007/job114896148359: status do console medido em #6d7886
+  sobre branco (4.48), enquanto o token final e #68727f. A espera por uma leva
+  de animation.finished nao cobriu novas transicoes herdadas. QA passa a
+  consultar estilos e aguardar zero CSSTransition pendentes em toda a arvore.
+  Contraste minimo 4.5 preservado; produto e cores nao foram alterados.
+- Repeticao 38272615268: fonte Prefeitura retornou 403 transitorio, sem
+  dispensar a consulta; reexecucao aprovada. Job validate verde. Release-gates
+  114892885508 falhou antes do console, Axe dark/320 na pagina base. A mesma
+  espera por transicoes foi estendida a ambas as matrizes, sem excluir regras.
+- Fonte: GitHub Actions 38271515539, job validate aprovado e release-gates
+  114888030823 reprovado em Console axe light/320, color-contrast, 15:41Z.
+- A repeticao local completa passou. O teste trocava dark -> light e aguardava
+  100ms no relogio simulado, enquanto globals.css aplica transicoes de 160ms
+  no compositor. QA agora aguarda animation.finished e inclui nos erros o
+  elemento e failureSummary; nenhuma regra axe foi excluida.
+- Confirmacao definitiva depende da repeticao Linux. Producao nao alterada;
+  pareamento, gateway, Nginx e login continuam pendentes dos gates.
+
+## 2026-10-12: Candidato do console integrado Salesforce
+
+- Fonte: branch codex/salesforce-console-integrado, base main caac544,
+  revisao independente e testes sinteticos locais em Node 24.19.0/pnpm 11.20.0.
+- Implementado noVNC dentro do CRM, bootstrap exclusivo Master e WSS na
+  origem existente, bridge 127.0.0.1:6081 -> 5909, uma sessao por vez e dez
+  minutos de acesso. Login/MFA continuam na pagina real da VPS; nao ha senha
+  Salesforce em API/formulario proprio, Git, n8n ou Supabase.
+- Sonda de autorizacao revalida identidade, sessao viva, MFA e permissao a
+  cada 30s. Correcao da revisao: nao renovar cookies congelados no gateway.
+  A rota da sonda dispensa refresh do proxy e bloqueia /auth/v1/token antes
+  da rede no SDK. Expiracao fecha a tela; bootstrap normal renova no browser.
+  Fonte: SDK instalado e supabase.com/docs/guides/auth/sessions, 12/10/2026.
+- Instalador confere seis units; gateway opt-in por --with-console-gateway,
+  ambiente privado e boot habilitado apenas na operacao autorizada. Revisao
+  corrigiu a antiga allowlist de cinco units. Nenhum servico remoto alterado
+  ainda por este candidato; Chrome/VNC existentes ativos, monitor inativo.
+- Aprovados: typecheck, build (49 rotas), 66 testes focados de auth/API/SDK,
+  41 testes Node de gateway/instalacao, audit sem vulnerabilidade conhecida e
+  resources:check. Matriz visual usa RFB sintetico e noVNC real, nao Salesforce.
+- pnpm test no Windows: 2503 testes aprovados, 22 skips e 11 falhas em seis
+  arquivos (modos POSIX e timeouts DevTools/Obsidian). Suite Node completa:
+  126/137 passaram; restricoes de arquivos/ACL e timeout de exportacao em
+  fixtures. Um teste novo de cancelamento dependia da chegada ao servidor
+  antes do timeout; corrigido para comprovar ClientRequest destruido e
+  repeticao focada aprovada. Nenhum skip/timeout de producao foi relaxado.
+- Gitleaks apontou nonce publico RFC em teste, nao segredo. Fixture agora
+  gera os bytes sinteticos; repeticao redigida sem achados. Lint aprovado
+  com um warning em helper output nao versionado. Evidencia
+  definitiva da suite POSIX depende da CI Linux, sem dispensa dos gates.
+- Pendente: PR/CI, imagem imutavel, pareamento privado, gateway/Nginx,
+  promocao pelo coordenador e login/MFA do operador. Health 15:19Z continua
+  ok/83592ab. N8n, exportacao, agenda e escritas comerciais continuam fora.
+
+## 2026-10-12: Abertura da integracao do console Salesforce
+
+- Fonte: origin/main caac544, CI 38258310602 com quatro jobs aprovados,
+  PR #191 documental aberto e health publico em 2026-10-12T15:04:32Z.
+- Runtime publicado continua ok/83592ab; nao confundir main, checkout e site.
+  Nova branch codex/salesforce-console-integrado parte de main. Checkout
+  primario e output local alheio preservados.
+- Escopo solicitado: conectar pelo proprio CRM ao navegador persistente da
+  VPS; login/MFA feitos pelo operador, prova real pelo monitor. N8n, agenda
+  de exportacao e escrita Supabase continuam fora desta etapa.
+- Modelo em implementacao: console restrito a Master e permissao de
+  configuracoes, HTTPS/WSS, bridge apenas loopback e revalidacao da sessao CRM.
+  Nenhuma senha Salesforce sera coletada em formulario proprio ou persistida
+  pelo CRM. Producao so apos testes, PR/CI, imagem, backup e coordenador.
+
 ## 2026-10-12: Candidato de sessao remota Salesforce
 
 - Fonte: branch codex/salesforce-vps-session, inspecao SSH observacional da VPS,

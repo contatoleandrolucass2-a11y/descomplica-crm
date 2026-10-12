@@ -1,0 +1,45 @@
+[Unit]
+Description=Descomplica Salesforce authenticated console gateway
+After=descomplica-salesforce-browser.service descomplica-salesforce-vnc.service
+Requires=descomplica-salesforce-browser.service descomplica-salesforce-vnc.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=descomplica-salesforce
+Group=descomplica-salesforce
+WorkingDirectory=@RELEASE@
+# Provision root-owned 0600; systemd reads this before dropping privileges.
+EnvironmentFile=/etc/descomplica-salesforce/gateway.env
+Environment=NODE_ENV=production
+ExecStart=/usr/local/bin/node ops/salesforce/console-gateway.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET
+IPAddressDeny=any
+IPAddressAllow=127.0.0.1/32
+MemoryMax=128M
+TasksMax=32
+LimitNOFILE=128
+LimitCORE=0
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-10-12: Estabilizacao da matriz do console
+
+- CI 38271515539: validate aprovado; release-gates interrompido por contraste
+  no tema claro/320px. Nenhuma promocao realizada.
+- QA aguarda as transicoes reais de tema antes do axe e registra os elementos
+  e cores da falha. Mantidas todas as assercoes de acessibilidade.
+- Repeticao 38272615268: validate aprovado; mesma corrida tambem na matriz
+  da pagina anterior ao console. Espera compartilhada aplicada as duas matrizes.
+- Log 38273862007 confirmou cor intermediaria #6d7886 em vez de #68727f.
+  Espera agora cobre transicoes herdadas iniciadas apos a primeira leva.
+
+## 2026-10-12: Console Salesforce integrado ao CRM
+
+- Implementacao solicitada: autenticar manualmente no Chrome persistente da
+  VPS pelo CRM, sem depender do PC apos o login. Nenhuma automacao n8n,
+  exportacao ou escrita comercial/Supabase nesta etapa.
+- Console noVNC com bootstrap Master, origem exata, gateway loopback com
+  revalidacao de sessao, limite de tempo/conexao e prova Salesforce separada.
+- Senha Salesforce nao entra no formulario/API do CRM. A credencial tecnica
+  VNC permanece privada no servidor e transita apenas ao Master autorizado.
+- Validacoes e publicacao em andamento; evidencias finais em ATUALIZACOES.
+
 ## 2026-10-12: Sessao Salesforce dedicada na VPS
 
 - Escopo solicitado: preparar navegador permanente na VPS, com login/MFA do

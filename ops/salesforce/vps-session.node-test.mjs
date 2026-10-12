@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
 const read = (file) => readFile(new URL(`./vps/${file}`, import.meta.url), "utf8");
@@ -72,4 +72,33 @@ test("prerequisites verify the official signing key without global upgrades", as
     installer,
     /apt-get (?:upgrade|dist-upgrade)|trusted=yes|--allow-unauthenticated/,
   );
+});
+
+test("installer allowlist matches all versioned units and gateway installation is opt-in", async () => {
+  const installer = await read("install-session.sh");
+  const entries = await readdir(new URL("./vps/", import.meta.url));
+  const expected = entries.filter((file) => /\.(service|target)$/.test(file)).sort();
+  const match = installer.match(/readonly units=\(\s*([^)]+)\)/);
+  assert.ok(match, "Explicit unit allowlist required");
+  const units = match[1].trim().split(/\s+/).sort();
+  assert.deepEqual(units, expected);
+  assert.equal(units.length, 6);
+  assert.equal(new Set(units).size, units.length);
+  assert.ok(units.includes("descomplica-salesforce-gateway.service"));
+  assert.match(installer, /\[--with-console-gateway\]/);
+  assert.match(installer, /^install_gateway=false$/m);
+  assert.match(installer, /\[\[ \$2 == --with-console-gateway \]\] \|\| fail/);
+  assert.match(
+    installer,
+    /if \[\[ \$unit == descomplica-salesforce-gateway\.service && \$install_gateway != true \]\]; then\s+continue/,
+  );
+  assert.match(installer, /if \[\[ \$install_gateway == true \]\]; then\s+ports\+=\(6081\)/);
+  assert.match(installer, /node_modules\/ws\/wrapper\.mjs/);
+  assert.match(
+    installer,
+    /if \[\[ \$install_gateway == true \]\]; then\s+printf '%s\\n' 'SALESFORCE_CONSOLE_ORIGIN=https:\/\/crm\.descomplicapro\.com\.br' > \/etc\/descomplica-salesforce\/gateway\.env\s+chmod 0600 \/etc\/descomplica-salesforce\/gateway\.env/,
+  );
+  assert.match(installer, /cmp -- "\$source_dir\/\$unit"/);
+  assert.match(installer, /\[\[ -f "\$source_dir\/\$unit" && ! -L "\$source_dir\/\$unit" \]\]/);
+  assert.doesNotMatch(installer, /systemctl (?:enable|start|restart)/);
 });

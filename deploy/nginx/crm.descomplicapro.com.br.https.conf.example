@@ -56,6 +56,23 @@ server {
         proxy_send_timeout 60s;
     }
 
+    # BEGIN salesforce-console
+    # Only the authenticated gateway can reach VNC. Never proxy CDP or port 5909.
+    location = /salesforce-console/socket {
+        access_log off;
+        error_log /dev/null crit;
+        proxy_pass http://127.0.0.1:6081;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Origin $http_origin;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_buffering off;
+        proxy_read_timeout 75s;
+        proxy_send_timeout 75s;
+    }
+    # END salesforce-console
+
     # BEGIN inventory-transfer
     # Inventory has no user-specific secrets or reflected input in its JSON body.
     location ~ ^/api/inventory(?:/snapshot)?$ {

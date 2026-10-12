@@ -35,8 +35,11 @@ import {
   type SessionPersistence,
 } from "@/lib/auth/session-persistence";
 import { getSupabaseRuntimeConfiguration } from "@/lib/auth/supabase/runtime";
+import { readOnlySessionFetch } from "./read-only-session";
 
-export async function createClient(options: { persistence?: SessionPersistence } = {}) {
+export async function createClient(
+  options: { persistence?: SessionPersistence; allowSessionRefresh?: boolean } = {},
+) {
   const configuration = getSupabaseRuntimeConfiguration();
   const cookieStore = await cookies();
   const persistence =
@@ -44,11 +47,13 @@ export async function createClient(options: { persistence?: SessionPersistence }
     resolveSessionPersistence(cookieStore.get(SESSION_PERSISTENCE_COOKIE_NAME)?.value);
 
   return createServerClient(configuration.url, configuration.publishableKey, {
+    ...(options.allowSessionRefresh === false ? { global: { fetch: readOnlySessionFetch() } } : {}),
     cookies: {
       getAll() {
         return cookieStore.getAll();
       },
       setAll(cookiesToSet) {
+        if (options.allowSessionRefresh === false) return;
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(

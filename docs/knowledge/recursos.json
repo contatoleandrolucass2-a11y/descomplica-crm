@@ -172,10 +172,14 @@
         "app/api/ingest/salesforce/route.ts",
         "app/api/refresh/salesforce/route.ts",
         "app/api/salesforce/status/route.ts",
+        "app/api/salesforce/console/route.ts",
+        "app/api/salesforce/console/authorize/route.ts",
         "app/api/health/route.ts"
       ],
       "evidence": [
         "tests/connected-systems.test.tsx",
+        "tests/salesforce-console-api.test.ts",
+        "ops/salesforce/console-gateway.node-test.mjs",
         "scripts/qa/connected-systems.mjs",
         "tests/qlik-relay.test.ts",
         "tests/ingestion.test.ts",
