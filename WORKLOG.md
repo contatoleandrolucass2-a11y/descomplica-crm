@@ -14,6 +14,15 @@
 - Helper externo encontrou Docker ainda starting apos o deploy concluido;
   releitura confirmou healthy, sem reinicios. Evidencia detalhada no conhecimento.
 - Fechamento apenas documental, com sincronizacao do Obsidian, sem novo deploy.
+## 2026-10-12: Sessao Salesforce dedicada na VPS
+
+- Escopo solicitado: preparar navegador permanente na VPS, com login/MFA do
+  operador. N8n, exportacao recorrente e ingestao ficam fora desta etapa.
+- Servicos separados para navegador supervisionado, console SSH-only e
+  monitor existente. Perfil privado persistente, sem root/no-sandbox.
+- Instalacao opt-in, sem sobrescrever perfil, configuracao ou segredo;
+  console temporario e monitor desligado ate pareamento confirmado.
+- Validacao e provisionamento em andamento; resultados no conhecimento curado.
 
 ## 2026-10-12: Redesenho da planilha de Rotina
 

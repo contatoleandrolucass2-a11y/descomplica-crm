@@ -70,6 +70,48 @@
   falha comprovada da restauracao, pois ela nao chegou a executar. Repeticao
   do job enquanto a execucao global ainda estava ativa foi recusada pelo
   GitHub. Aguardar conclusao e repetir apenas o job falho, sem alterar gates.
+## 2026-10-12: Candidato de sessao remota Salesforce
+
+- Fonte: branch codex/salesforce-vps-session, inspecao SSH observacional da VPS,
+  scripts em ops/salesforce/vps e testes sinteticos do supervisor.
+- VPS Ubuntu 24.04/systemd 255, Node 24.19.0 e pnpm 11.20.0 confirmados.
+  Dependencias oficiais instaladas; Chrome 155.0.8059.39. Keyring conferido:
+  somente a chave primaria Google aprovada e suas subchaves. Nenhum servico
+  existente reiniciado; health permanece ok/7c6dce5.
+- Implementado supervisor opt-in, instalador de primeira instancia, usuario
+  sem shell, perfil privado, VNC com senha e console apenas loopback/SSH.
+  Instalador recusa unidade extra, compara unidades com o SHA e verifica
+  runtime absoluto. Revisao corrigiu esses pontos e rejeicao de chave extra.
+- Validacao: lint, typecheck, build (47 rotas), resources:check, formatacao,
+  bash -n e systemd-analyze verify das unidades renderizadas aprovados.
+  Gitleaks do diretorio Salesforce: nenhum achado. Treze testes novos do
+  supervisor e quatro de contrato VPS passaram.
+- Windows: Vitest 2465 aprovados, 22 skips, oito falhas (seis POSIX, dois
+  timeouts). Repeticao isolada: DevTools passou; Obsidian preservou um timeout
+  de 30s, 45/46 aprovados. Node Salesforce: 92/100 aprovados, oito falhas
+  preexistentes de modos/caminhos Windows. Nenhuma assercao reduzida.
+- Excecao local: build concorrente produziu lock; repeticao isolada passou.
+  CI Linux do candidato continua obrigatoria; resultados Windows nao a
+  substituem. Reavaliar falhas no SHA aprovado em Linux.
+- Pendencias: PR/CI, instalacao/ativacao dos servicos, login/MFA do operador,
+  pareamento privado do status e aplicacao pelo coordenador de release.
+  Nao houve exportacao real, alteracao n8n ou escrita Supabase.
+
+## 2026-10-12: Abertura da sessao Salesforce na VPS
+
+- Fontes observacionais: git fetch origin main, GitHub PRs #173/#178 e CI
+  37777133589, docs de main e GET publico /api/health em 12/10/2026.
+- Checkout primario preservado em bc6c0ab, com configuracao local alheia.
+  Worktree reutilizado em codex/salesforce-vps-session, base main 83592ab.
+  Producao responde status ok, versao 7c6dce5; nao confundir com main/local.
+- PR #173 integrado em 683948f com CI aprovada no head baa2833; PR #178
+  integrado em ac3d789. Esses resultados nao aprovam alteracoes novas.
+- Escopo atual solicitado: sessao dedicada na VPS Hostinger, login e MFA
+  manuais pelo operador. N8n, exportacao e escrita de snapshots ficam para
+  etapa posterior. Ainda nao houve provisionamento nem prova de conexao.
+- Pendencias: inspecao da VPS, acesso grafico privado, supervisao e pareamento
+  do monitor. Expiracao/revogacao Salesforce continuam exigindo o operador;
+  nenhuma promessa de sessao permanente nem transferencia de perfil pessoal.
 
 ## 2026-10-12: Planilha de Rotina implementada, aguardando CI
 

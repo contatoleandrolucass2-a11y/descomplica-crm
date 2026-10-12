@@ -8,6 +8,12 @@
   das 26 linhas/74 atividades. Salvamento continua local ao navegador.
 - Registra evidencias e excecoes verificadas no conhecimento do projeto;
   fechamento documental nao reinicia a aplicacao.
+## 2026-10-12: Sessao remota Salesforce
+
+- Prepara Chrome dedicado supervisionado na VPS, independente do PC.
+- Adiciona console privado via SSH, login/MFA manual e perfil persistente.
+- Mantem monitor separado das exportacoes, com ativacao por prova real.
+- Documenta instalacao, reautenticacao, limites e rollback sem apagar perfil.
 
 ## 2026-10-12: Rotina em planilha
 
