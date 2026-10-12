@@ -1,5 +1,24 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Consulta sobre login remoto dentro do CRM
+
+- Fontes consultadas em 2026-10-12T14:52Z: origin/main, runbook Salesforce,
+  CI 38258310602, health publico e documentacao oficial noVNC.
+- Main permanece caac544; os quatro jobs dessa CI agora estao aprovados.
+  Health publico continua ok/83592ab: aprovacao da CI nao equivale a deploy.
+  Checkout documental em codex/salesforce-vps-evidencias, base 9020360.
+- Usuario esclareceu que deseja abrir o login/MFA remoto dentro do CRM,
+  sem depender do console SSH separado. N8n nao e dependencia dessa etapa.
+- Proposta tecnica, ainda nao implementada: console web restrito por
+  autorizacao no servidor, HTTPS/WSS e acesso temporario; pagina real do
+  Salesforce no navegador da VPS; persistencia privada de sessao, nao senha
+  armazenada pelo CRM; estado conectado somente com prova recente do monitor.
+- O console atual segue o modelo privado por SSH. Publicar o acesso web
+  exige implementar e validar o intermediario autenticado; nao basta expor
+  noVNC, VNC ou CDP nem copiar o formulario Salesforce. Sem mudanca de runtime,
+  credenciais, proxy, DNS, banco ou workflow nesta consulta. Login nao foi
+  comprovado pelos prints. A agenda de exportacao permanece etapa posterior.
+
 ## 2026-10-12: Navegador VPS ativo; autenticacao do operador pendente
 
 - Fontes: PR #189, CI 38253951491, SSH/systemd, probe de metadados,

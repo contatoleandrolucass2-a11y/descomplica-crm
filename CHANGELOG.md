@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Escopo do login integrado
+
+- Documenta proposta de acesso ao navegador remoto pela tela do CRM, com
+  autorizacao e verificacao real da sessao, sem dependencia de n8n nesta etapa.
+- Atualiza evidencia de CI; nenhuma funcionalidade ou deploy adicional.
+
 ## 2026-10-12: Operacao privada na VPS
 
 - Confirma inicializacao e reinicio do navegador Salesforce nao-root.

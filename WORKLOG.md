@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-12: Esclarecimento do acesso Salesforce pelo CRM
+
+- Confirmado que n8n nao e requisito para login remoto/MFA e status de conexao.
+- Registrada proposta de console web autenticado e persistencia de sessao,
+  sem coletar/salvar senha Salesforce no CRM. Integracao web ainda pendente.
+- CI de main caac544 agora integralmente aprovada; runtime continua 83592ab.
+  Consulta observacional/documental, sem nova publicacao de aplicacao.
+
 ## 2026-10-12: Validacao operacional da sessao VPS
 
 - PR #189 integrado apos CI 38253951491 aprovada, inclusive matriz visual.
