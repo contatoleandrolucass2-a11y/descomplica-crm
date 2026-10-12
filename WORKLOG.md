@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-12: Sincronizacao do teste de timeout do gateway
+
+- Aguarda de forma limitada o cancelamento observado no servidor depois do
+  fechamento do cliente, como no teste vizinho de desconexao. Mantem a
+  assercao de abort e adiciona ausencia de conexao ao backend antes de autorizar.
+- Nao altera gateway, autenticacao, prazos de runtime ou gates de publicacao.
+
+## 2026-10-12: Evidencias finais e bloqueio de publicacao da Rotina
+
+- PR #192 integrado em 5bf6213 com CI 38282502810 aprovada e 30 combinacoes
+  visuais da Rotina verificadas. Suite Chromium isolada: 22/22.
+- CI de main 38285832880 falhou duas vezes no teste de timeout do gateway
+  Salesforce. Imagem nao gerada; deploy nao executado. Detalhes e criterio
+  de desbloqueio em docs/knowledge/ATUALIZACOES.md.
+- Health final ok em 1dd58c4, diferente do main integrado. Salvamento continua
+  local ao navegador. Referencia externa e Associativo nao foram alterados.
+
 ## 2026-10-12: Rotina semanal e diaria compacta
 
 - Centraliza as atividades, remove domingo da exibicao e conserva o schema
