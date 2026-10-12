@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run && node --test ops/salesforce/*.node-test.mjs",
+    "test": "vitest run && node --test ops/salesforce/*.node-test.mjs && pnpm test:release",
     "test:watch": "vitest",
     "qa:browser:install": "playwright install chromium",
     "qa:visual:reference": "node scripts/qa/reference-parity.mjs reference",
@@ -62,7 +62,9 @@
     "image:prove": "node scripts/release/prove-promotable-image.mjs",
     "release:bind-production-image": "node scripts/release/bind-production-image.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "release:production": "node scripts/release/production-release.mjs",
+    "test:release": "node --test scripts/release/*.node-test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",

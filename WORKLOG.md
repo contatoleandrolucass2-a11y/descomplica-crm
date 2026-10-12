@@ -1,5 +1,44 @@
 # Worklog
 
+## 2026-10-12: Consulta ao vivo e exclusão mútua na publicação
+
+- Pedido: conferir a última publicação no próprio minuto do deploy, pois mais
+  de uma pessoa desenvolve o CRM. Implementação isolada na branch
+  `codex/deploy-live-version-guard`, baseada em `f84867d`; checkout da VPS
+  consultado somente para leitura, sem mudanças de produção.
+- Inventário: a CI valida e gera a imagem; a promoção existente separa o bind
+  de `IMAGE_TAG` do Compose. O lock cobre apenas o bind e o health não contém
+  a data do último deploy. Nenhum runner de deploy ou environment configurado
+  foi encontrado no GitHub durante o levantamento.
+- Plano: coordenador único com lock durante publicação/verificação/rollback,
+  registro durável de deployment ID e data real, CAS, consulta ao vivo de
+  GitHub/runtime no minuto da troca, testes de concorrência e atualização dos
+  procedimentos e do Obsidian. Ausência de histórico confiável bloqueia o
+  primeiro deploy até importar evidência verificável.
+- Implementação: comando único `release:production`, lock compartilhado por
+  descritor, CAS, registro privado durável, checagem da CI/main exatos e
+  observação no minuto/até 60 s tanto no bind quanto antes de iniciar Compose.
+  Noop não republica; falha mantém intenção e recuperação aceita apenas a
+  imagem anterior registrada. O comando antigo de bind e mutações diretas no
+  wrapper não contornam o gate.
+- Revisão independente removeu rollback genérico que permitiria pular a CI e
+  preservou data/ID quando uma tentativa abortada deixou o container anterior
+  executando. Testes cobrem ABA, timeout, CAS, relógio regressivo, persistência,
+  processos concorrentes, SIGKILL, descritor herdado e entrada legada recusada.
+- Node 24.19.0, pnpm 11.20.0, instalação frozen, resources doctor, formato,
+  lint, tipos, build e fontes documentais aprovados. Vitest: 126 arquivos,
+  2.461 testes aprovados e nove skips da plataforma; Salesforce Node: 83.
+  Guard: 81 testes aprovados em Linux isolado, sem skips, sem rede e sem acesso
+  à VPS. Audit, Gitleaks e OSV sem achados; actionlint aprovado.
+- O baseline macOS expôs caminhos temporários com alias e grupo herdado
+  diferentes do esperado por testes POSIX existentes. A suíte completa passou
+  usando o caminho real do TMPDIR do usuário, sem alterar testes de terceiros.
+- `knowledge:sync` retornou `not-configured` neste clone; documentação curada
+  versionada atualizada e DEPLOY-001 no cofre Obsidian do usuário atualizado
+  diretamente. Nenhum ledger ou runtime de produção foi alterado. Ativação
+  exige evidência real da última publicação e adoção por todos os publicadores;
+  integração com Docker Compose em produção não foi executada nesta tarefa.
+
 ## 2026-10-12: Caixas diretas e padrão do perfil em Usuários
 
 - A comparação com o contrato do draft aprovado em

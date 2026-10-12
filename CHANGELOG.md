@@ -2,6 +2,15 @@
 
 ## 2026-10-12
 
+- Adiciona promoção protegida com consulta ao vivo de versão/data, CI e `main`
+  no minuto da publicação; trava compartilhada cobre CAS, Compose e health.
+- Bloqueia duplicidade, divergências e tentativas interrompidas; recuperação
+  aceita somente a imagem anterior da pendência e preserva a data se o
+  runtime anterior continuou ativo. Comandos antigos não contornam o gate.
+- Inclui testes do guard na CI Linux. Ativação exige adotar o comando na VPS
+  e importar evidência da última publicação; nenhum deploy é disparado por
+  esta alteração de ferramentas.
+
 - Faz a caixa de cada acesso em Usuários representar diretamente o rascunho:
   um clique marca ou desmarca, o tique permanece visível nos três temas e o
   resumo identifica alterações ainda não salvas.

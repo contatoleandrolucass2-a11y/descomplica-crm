@@ -141,9 +141,10 @@ describe("production image binding", () => {
       "node scripts/release/bind-production-image.mjs",
     );
     expect(source).toContain('const destination = "/etc/descomplica-crm/production.env"');
-    expect(source).toContain(
-      'const lockPath = "/etc/descomplica-crm/.production-image-binding.lock"',
-    );
+    expect(source).toContain('import { assertHeldLock } from "./production-release-lock.mjs"');
+    expect(source).toContain("await assertHeldLock(lock)");
+    expect(source).toContain("await beforeWrite()");
+    expect(source).toContain("Standalone image binding is disabled");
     expect(source).toContain("process.getuid?.() !== 0");
     expect(source).toContain('arguments_[0] !== "--expected-old-sha"');
     expect(source).toContain('arguments_[2] !== "--new-sha"');
@@ -169,8 +170,7 @@ describe("production image binding", () => {
     expect(source).toContain("await assertEnvironmentUnchanged(originalContents)");
     expect(source).toContain("await assertEnvironmentUnchanged(transformedContents)");
     expect(source).toContain("restoreEnvironmentAfterFailedPostcondition");
-    expect(source).toContain('"--exclusive"');
-    expect(source).toContain('"--timeout"');
+    expect(source).not.toContain("--production-image-binding-lock-held");
     expect(source.indexOf("await handle.sync()")).toBeLessThan(
       source.indexOf("await rename(temporary, destination)"),
     );
