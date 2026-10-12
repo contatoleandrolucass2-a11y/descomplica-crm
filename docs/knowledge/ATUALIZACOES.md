@@ -1,5 +1,15 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Integracao final da Rotina com main atualizado
+
+- Main avancou para 1dd58c4 (PR #193) durante a tarefa. Conflitos restritos
+  a WORKLOG, CHANGELOG e este historico foram resolvidos preservando ambos
+  os conteudos; nenhuma edicao no trabalho Salesforce. Health observado
+  continuava ok/83592ab. Build local atualizado passou com 49 rotas.
+- Lint passou com um warning herdado em scripts/qa/connected-systems.mjs:18.
+  CI 38281759395 bloqueou formatacao dos tres documentos mesclados; aplicar
+  Prettier sem mudar conteudo e repetir gates, sem publicar antes da aprovacao.
+
 ## 2026-10-12: Abertura da Rotina semanal e diaria compacta
 
 - Fontes atuais: git fetch origin, GitHub PR #190 e GET publico
@@ -128,6 +138,7 @@
   falha comprovada da restauracao, pois ela nao chegou a executar. Repeticao
   do job enquanto a execucao global ainda estava ativa foi recusada pelo
   GitHub. Aguardar conclusao e repetir apenas o job falho, sem alterar gates.
+
 ## 2026-10-12: Primeiro gate do PR #193
 
 - Evidencia 38273862007/job114896148359: status do console medido em #6d7886
