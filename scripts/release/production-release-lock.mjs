@@ -4,6 +4,11 @@ import { lstat, open, realpath } from "node:fs/promises";
 import path from "node:path";
 
 export const productionLockPath = "/etc/descomplica-crm/.production-image-binding.lock";
+export const productionLockPaths = Object.freeze([
+  "/etc/descomplica-crm/.production-deploy.lock",
+  "/etc/descomplica-crm/.production-release.lock",
+  productionLockPath,
+]);
 const heldLocks = new WeakMap();
 
 export async function validatePrivateDirectory(directory, owner = 0) {
@@ -85,6 +90,11 @@ export async function assertHeldLock(token, expectedPath = productionLockPath) {
   }
   validatePrivateFile(opened, lock.owner);
   validatePrivateFile(current, lock.owner);
+  for (const companion of lock.companions ?? []) {
+    const entry = heldLocks.get(companion);
+    if (!entry) throw new Error("A companion release lock was lost.");
+    await assertHeldLock(companion, entry.lockPath);
+  }
 }
 
 export function inheritedLockDescriptor(token) {
@@ -93,9 +103,36 @@ export function inheritedLockDescriptor(token) {
   return lock.handle.fd;
 }
 
+export function inheritedLockDescriptors(token) {
+  const lock = heldLocks.get(token);
+  if (!lock) throw new Error("A live release lock is required.");
+  return [lock.handle.fd, ...(lock.companions ?? []).map(inheritedLockDescriptor)];
+}
+
+export async function withFileLocks(paths, action, owner = 0) {
+  if (!Array.isArray(paths) || !paths.length || new Set(paths).size !== paths.length) {
+    throw new Error("Distinct release lock paths are required.");
+  }
+  const tokens = [];
+  async function acquire(index) {
+    return withFileLock(
+      paths[index],
+      async (token) => {
+        tokens.push(token);
+        if (index + 1 < paths.length) return acquire(index + 1);
+        heldLocks.get(token).companions = tokens.slice(0, -1);
+        await assertHeldLock(token, paths[index]);
+        return action(token);
+      },
+      owner,
+    );
+  }
+  return acquire(0);
+}
+
 export function withProductionLock(action) {
   if (process.platform !== "linux" || process.getuid?.() !== 0) {
     throw new Error("Production release requires Linux and root.");
   }
-  return withFileLock(productionLockPath, action);
+  return withFileLocks(productionLockPaths, action);
 }

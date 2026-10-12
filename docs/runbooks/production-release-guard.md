@@ -13,11 +13,16 @@ o artefato imutável; este comando é a etapa protegida de promoção na VPS.
 Este trabalho não cria credenciais SSH, runners ou deploy automático no GitHub.
 
 O comando exige Linux, root e o checkout limpo do SHA candidato. Todos os
-publicadores devem usar esta versão do comando no mesmo host. A trava fixa
-`/etc/descomplica-crm/.production-image-binding.lock` cobre toda a operação,
-inclusive verificação e recuperação. Outra tentativa falha imediatamente e
+publicadores devem usar esta versão do comando no mesmo host. O coordenador
+adquire, em ordem fixa, as três travas encontradas nos fluxos existentes:
+`/etc/descomplica-crm/.production-deploy.lock`,
+`/etc/descomplica-crm/.production-release.lock` e
+`/etc/descomplica-crm/.production-image-binding.lock`. Mantém as três durante
+toda a operação, inclusive verificação e recuperação. Outra tentativa falha imediatamente e
 deve recomeçar depois, com estado atualizado; não há cancelamento do dono.
-O descritor é herdado pelo processo Docker. Não apagar o arquivo de lock.
+Os três descritores são herdados pelo processo Docker. Não apagar arquivos de
+lock nem envolver o coordenador em outro `flock` sobre esses caminhos; ele
+próprio realiza a aquisição, sem marcadores que dispensem o bloqueio.
 
 O registro `/etc/descomplica-crm/production-release.json` é privado,
 `root:root 0600`, escrito por rename atômico e fsync. Seu `release` contém

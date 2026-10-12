@@ -6,7 +6,7 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   assertHeldLock,
-  inheritedLockDescriptor,
+  inheritedLockDescriptors,
   waitForProcess,
 } from "./production-release-lock.mjs";
 
@@ -200,7 +200,9 @@ export async function runtimeCompose(invocation, lock, beforeStart) {
     {
       cwd: repositoryRoot,
       env: dockerEnvironment,
-      stdio: lock ? ["inherit", "inherit", "inherit", inheritedLockDescriptor(lock)] : "inherit",
+      stdio: lock
+        ? ["inherit", "inherit", "inherit", ...inheritedLockDescriptors(lock)]
+        : "inherit",
     },
   );
   await waitForProcess(child, "Docker Compose failed; secret not printed.");

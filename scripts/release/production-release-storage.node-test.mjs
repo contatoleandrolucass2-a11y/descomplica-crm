@@ -5,8 +5,14 @@ import { chmod, link, mkdtemp, readFile, realpath, rm, symlink, writeFile } from
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
-import { assertHeldLock, withFileLock } from "./production-release-lock.mjs";
+import {
+  assertHeldLock,
+  inheritedLockDescriptors,
+  withFileLock,
+  withFileLocks,
+} from "./production-release-lock.mjs";
 import { privateJsonStore } from "./private-json-store.mjs";
 
 const owner = process.getuid();
@@ -58,38 +64,78 @@ test("a forged lock token never authorizes a production mutation", async () => {
 
 const linuxOnly = {
   skip: process.platform !== "linux" ? "Real flock requires Linux; mandatory on CI Ubuntu." : false,
+  timeout: 10_000,
 };
 const lockModule = pathToFileURL(
   path.join(import.meta.dirname, "production-release-lock.mjs"),
 ).href;
 
-async function holder(file, inheritedChild = false) {
+async function holder(files, inheritedChild = false) {
+  const paths = Array.isArray(files) ? files : [files];
   const code = `
     import { spawn } from 'node:child_process';
-    import { withFileLock, inheritedLockDescriptor } from ${JSON.stringify(lockModule)};
-    await withFileLock(process.argv[1], async token => {
+    import { withFileLocks, inheritedLockDescriptors } from ${JSON.stringify(lockModule)};
+    await withFileLocks(JSON.parse(process.argv[1]), async token => {
       let child;
+      const descriptors = inheritedLockDescriptors(token);
       if (${inheritedChild}) {
         child = spawn(process.execPath, ['-e', 'setInterval(()=>{},1000)'], {
-          stdio: ['ignore','ignore','ignore',inheritedLockDescriptor(token)]
+          stdio: ['ignore','ignore','ignore',...descriptors]
         });
       }
-      process.stdout.write(String(child?.pid ?? 0)+'\\n');
+      process.stdout.write(JSON.stringify({ inheritedPid: child?.pid ?? 0, descriptorCount: descriptors.length })+String.fromCharCode(10));
       await new Promise(resolve => process.stdin.once('data',resolve));
       child?.kill();
     }, process.getuid());
   `;
-  const child = spawn(process.execPath, ["--input-type=module", "-e", code, file], {
-    stdio: ["pipe", "pipe", "pipe"],
-  });
+  const child = spawn(
+    process.execPath,
+    ["--input-type=module", "-e", code, JSON.stringify(paths)],
+    {
+      stdio: ["pipe", "pipe", "pipe"],
+    },
+  );
   const closed = once(child, "close");
   const result = await Promise.race([
-    once(child.stdout, "data").then(([data]) => Number(data.toString().trim())),
+    once(child.stdout, "data").then(([data]) => JSON.parse(data.toString().trim())),
     closed.then(() => {
       throw new Error("Lock holder exited before acquiring flock.");
     }),
   ]);
-  return { child, closed, inheritedPid: result };
+  return { child, closed, ...result };
+}
+
+function terminateHolder(holder) {
+  holder.child.kill("SIGKILL");
+  if (holder.inheritedPid > 0) {
+    try {
+      process.kill(holder.inheritedPid, "SIGKILL");
+    } catch (error) {
+      if (error.code !== "ESRCH") throw error;
+    }
+  }
+}
+
+async function threeLockPaths(t) {
+  const directory = await fixture(t);
+  return [
+    ".production-deploy.lock",
+    ".production-release.lock",
+    ".production-image-binding.lock",
+  ].map((name) => path.join(directory, name));
+}
+
+async function assertEventuallyUnlocked(files) {
+  const deadline = Date.now() + 3_000;
+  while (true) {
+    try {
+      await withFileLocks(files, (token) => assertHeldLock(token, files.at(-1)), owner);
+      return;
+    } catch (error) {
+      if (!/holds the lock/u.test(error.message) || Date.now() >= deadline) throw error;
+      await delay(10);
+    }
+  }
 }
 
 test("two real processes contend; kernel lock releases on SIGKILL", linuxOnly, async (t) => {
@@ -111,14 +157,9 @@ test(
   async (t) => {
     const file = path.join(await fixture(t), "release.lock");
     const first = await holder(file, true);
-    t.after(() => {
-      first.child.kill("SIGKILL");
-      try {
-        process.kill(first.inheritedPid, "SIGKILL");
-      } catch {
-        /* already exited */
-      }
-    });
+    t.after(() => terminateHolder(first));
+    assert.equal(Number.isSafeInteger(first.inheritedPid) && first.inheritedPid > 0, true);
+    assert.equal(first.descriptorCount, 1);
     first.child.kill("SIGKILL");
     await first.closed;
     await assert.rejects(
@@ -148,5 +189,146 @@ test(
       },
       owner,
     );
+  },
+);
+
+test(
+  "a multi-lock guard holds all three paths against independent competing writers",
+  linuxOnly,
+  async (t) => {
+    const files = await threeLockPaths(t);
+    const first = await holder(files);
+    t.after(() => terminateHolder(first));
+    assert.equal(first.descriptorCount, 3);
+    for (const file of files) {
+      await assert.rejects(
+        withFileLock(
+          file,
+          () => assert.fail(`A competing writer entered ${path.basename(file)}.`),
+          owner,
+        ),
+        /holds the lock/u,
+      );
+    }
+    first.child.stdin.end("release\n");
+    assert.deepEqual(await first.closed, [0, null]);
+    await withFileLocks(
+      files,
+      async (token) => {
+        await assertHeldLock(token, files.at(-1));
+        const descriptors = inheritedLockDescriptors(token);
+        assert.equal(descriptors.length, 3);
+        assert.equal(new Set(descriptors).size, 3);
+        assert.equal(
+          descriptors.every((descriptor) => Number.isSafeInteger(descriptor) && descriptor >= 0),
+          true,
+        );
+      },
+      owner,
+    );
+  },
+);
+
+test(
+  "contention on the second or third path releases every previously acquired lock",
+  linuxOnly,
+  async (t) => {
+    for (const blockedIndex of [1, 2]) {
+      const files = await threeLockPaths(t);
+      const blocker = await holder(files[blockedIndex]);
+      t.after(() => terminateHolder(blocker));
+      await assert.rejects(
+        withFileLocks(files, () => assert.fail("The callback ran without all three locks."), owner),
+        /holds the lock/u,
+      );
+      for (const file of files.filter((_, index) => index !== blockedIndex)) {
+        await withFileLock(file, (token) => assertHeldLock(token, file), owner);
+      }
+      await assert.rejects(
+        withFileLock(
+          files[blockedIndex],
+          () => assert.fail("The competing holder lost its lock."),
+          owner,
+        ),
+        /holds the lock/u,
+      );
+      blocker.child.stdin.end("release\n");
+      assert.deepEqual(await blocker.closed, [0, null]);
+      await withFileLocks(files, (token) => assertHeldLock(token, files.at(-1)), owner);
+    }
+  },
+);
+
+test(
+  "invalid second or third lock permissions release every previously acquired lock",
+  linuxOnly,
+  async (t) => {
+    for (const invalidIndex of [1, 2]) {
+      const files = await threeLockPaths(t);
+      await writeFile(files[invalidIndex], "", { mode: 0o644 });
+      await assert.rejects(
+        withFileLocks(
+          files,
+          () => assert.fail("The callback ran with an invalid companion lock."),
+          owner,
+        ),
+        /0600/u,
+      );
+      for (const file of files.filter((_, index) => index !== invalidIndex)) {
+        await withFileLock(file, (token) => assertHeldLock(token, file), owner);
+      }
+      await chmod(files[invalidIndex], 0o600);
+      await withFileLocks(files, (token) => assertHeldLock(token, files.at(-1)), owner);
+    }
+  },
+);
+
+test(
+  "the primary token rejects replacement of either companion lock path",
+  linuxOnly,
+  async (t) => {
+    for (const replacedIndex of [0, 1]) {
+      const files = await threeLockPaths(t);
+      await withFileLocks(
+        files,
+        async (token) => {
+          await assertHeldLock(token, files.at(-1));
+          await rm(files[replacedIndex]);
+          await writeFile(files[replacedIndex], "", { mode: 0o600 });
+          await assert.rejects(assertHeldLock(token, files.at(-1)), /inode changed/u);
+        },
+        owner,
+      );
+    }
+  },
+);
+
+test(
+  "all three inherited locks survive coordinator SIGKILL until the Docker-like child exits",
+  linuxOnly,
+  async (t) => {
+    const files = await threeLockPaths(t);
+    const first = await holder(files, true);
+    t.after(() => terminateHolder(first));
+    assert.equal(first.descriptorCount, 3);
+    assert.equal(Number.isSafeInteger(first.inheritedPid) && first.inheritedPid > 0, true);
+    first.child.kill("SIGKILL");
+    assert.deepEqual(await first.closed, [null, "SIGKILL"]);
+    for (const file of files) {
+      await assert.rejects(
+        withFileLock(file, () => assert.fail(`Orphaned child lost ${path.basename(file)}.`), owner),
+        /holds the lock/u,
+      );
+    }
+    await assert.rejects(
+      withFileLocks(
+        files,
+        () => assert.fail("A second release entered while the child was alive."),
+        owner,
+      ),
+      /holds the lock/u,
+    );
+    process.kill(first.inheritedPid, "SIGKILL");
+    await assertEventuallyUnlocked(files);
   },
 );

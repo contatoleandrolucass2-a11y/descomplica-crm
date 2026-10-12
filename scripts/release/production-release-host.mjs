@@ -11,7 +11,7 @@ import {
   verifyReleaseBoundary,
 } from "./bind-production-image.mjs";
 import { runtimeCompose } from "./compose-with-runtime-secret.mjs";
-import { assertHeldLock, inheritedLockDescriptor } from "./production-release-lock.mjs";
+import { assertHeldLock } from "./production-release-lock.mjs";
 import { assertFreshObservation, validateDeploymentState } from "./production-release-policy.mjs";
 import { privateJsonStore } from "./private-json-store.mjs";
 
@@ -162,9 +162,8 @@ export function productionHost(lock) {
       ) {
         throw new Error("Production start requires the exact pending release.");
       }
-      // Compose inherits the lock descriptor. If this coordinator is killed,
-      // a still-running Docker child continues to hold the same host lock.
-      inheritedLockDescriptor(lock);
+      // Compose inherits all lock descriptors. If this coordinator is killed,
+      // a still-running Docker child continues to hold all three host locks.
       await runtimeCompose(
         ["production", "up", "-d", "--no-build", "--remove-orphans"],
         lock,
