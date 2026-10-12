@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-10-12: Caixas diretas e padrão do perfil em Usuários
+
+- A comparação com o contrato do draft aprovado em
+  `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps/outputs/modelo-site.html#users`
+  mostrou uma divergência funcional: a publicação exibia o acesso efetivo em
+  uma caixa desabilitada e exigia o botão separado `Incluir na alteração`,
+  seguido de Permitir/Negar/Restaurar. No draft, a própria caixa forma o
+  rascunho e o tique acompanha imediatamente o estado desejado.
+- A matriz agora alterna diretamente entre acesso liberado e negado, sinaliza
+  o item alterado, mantém o estado efetivo salvo como origem e oferece
+  `Usar padrão do perfil`. Esse botão prepara `inherit` para todas as exceções
+  atuais editáveis e descarta mudanças transitórias sem exceção, preservando o
+  papel do usuário.
+- O Server Action separa o rascunho em `allow`, `deny` e `inherit`. A nova RPC
+  `apply_user_permission_access_draft` executa os três grupos na mesma
+  transação e delega cada grupo à RPC protegida já existente, que continua
+  revalidando ator, alvo, hierarquia, escopo, concessão e auditoria. A função
+  nova é `SECURITY INVOKER`, executável somente por `authenticated`; não houve
+  mudança em grants Qlik nem nas regras dos simuladores.
+- Reset limpo aplicou as 47 migrations. `pnpm db:test` aprovou 27 arquivos e
+  1.151 testes, incluindo lote misto atômico, restauração do padrão, duplicata,
+  grants mínimos e bloqueio contra conta Administrador. Cinco arquivos de
+  teste direcionado aprovaram 55 casos e o build Next.js gerou as 45 rotas.
+- A promoção visual atualizou somente as onze referências esperadas de
+  Usuários. A matriz autenticada aprovou 154 checks responsivos, 88 de tema,
+  242 Axe, 242 comparações e 110 checks de zoom. Associativo, Tabela Direta,
+  Tabela Investidor e Tabelão passaram novamente todos os breakpoints e seus
+  ensaios próprios.
+- Um ensaio adicional com duas identidades sintéticas foi encerrado no login
+  local antes de exercitar a tela; ele não foi contado como evidência. O bloco
+  `finally` resetou o banco local e removeu integralmente as identidades. As
+  evidências válidas são a matriz autenticada, Vitest e pgTAP descritos acima.
+- Evidências detalhadas: `docs/qa/users-permission-checkbox-2026-10-12.md`.
+
 ## 2026-10-11: Usuarios alinhado ao mestre-detalhe aprovado
 
 - A comparação direta com

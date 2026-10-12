@@ -323,6 +323,7 @@ select is(
   array[
     'apply_crm_commercial_policy_import',
     'apply_crm_source_identity_mapping_import',
+    'apply_user_permission_access_draft',
     'approve_user_access',
     'assign_user_role',
     'begin_crm_salesforce_refresh',
