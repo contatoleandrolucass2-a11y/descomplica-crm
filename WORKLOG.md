@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-12: Redesenho da planilha de Rotina
+
+- Escopo: apenas Gestao > Rotina e seus testes. Referencia externa consultada
+  em leitura; nenhum formulario ou configuracao desse site foi alterado.
+- Grade continua, editor transparente sem borda/arredondamento, altura minima
+  de 44 px e autoajuste integral dos textos. Destaque de hoje em Sao Paulo,
+  renovado a cada 30 segundos e ao voltar a aba.
+- Conteudo inicial preservado: seis funcoes, 26 linhas e 74 atividades.
+  Persistencia continua local ao navegador; nenhuma migration ou dado remoto.
+- Validacao e publicacao em andamento; evidencias finais no conhecimento curado.
+
 ## 2026-10-12: Publicacao de Gestao > Rotina concluida
 
 - PR #183 integrado; candidato `d679d8e` e main

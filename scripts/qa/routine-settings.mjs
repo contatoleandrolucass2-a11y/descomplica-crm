@@ -127,6 +127,28 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           `Rotina must not overflow at ${width}px in ${theme}`,
         );
         await expect(page.getByRole("heading", { name: "Rotina", exact: true })).toBeVisible();
+        await expect(page.locator('thead [aria-current="date"]')).toHaveCount(1);
+        await expect(page.locator("tbody td[data-today]")).toHaveCount(initialRows);
+        const editorStyle = await page
+          .locator("textarea")
+          .first()
+          .evaluate((field) => {
+            const css = getComputedStyle(field);
+            return {
+              radius: css.borderRadius,
+              background: css.backgroundColor,
+              resize: css.resize,
+            };
+          });
+        assert.deepEqual(
+          editorStyle,
+          {
+            radius: "0px",
+            background: "rgba(0, 0, 0, 0)",
+            resize: "none",
+          },
+          "Routine editors must remain continuous spreadsheet cells under global styles",
+        );
         const capitalization = await page
           .locator(".simulation-canvas-eyebrow, .simulation-canvas-status")
           .evaluateAll((elements) =>

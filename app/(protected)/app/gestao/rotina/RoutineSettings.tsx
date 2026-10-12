@@ -390,7 +390,7 @@ function fitRoutineFields(table: HTMLTableElement | null) {
   const heights = fields.map((field) => {
     const style = getComputedStyle(field);
     const borders = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
-    return Math.max(86, field.scrollHeight + borders);
+    return Math.max(44, field.scrollHeight + borders);
   });
   fields.forEach((field, index) => {
     field.style.height = `${heights[index]}px`;
@@ -422,8 +422,25 @@ export function RoutineSettings() {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [storageError, setStorageError] = useState<string | null>(null);
+  const [today, setToday] = useState<string | null>(null);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const tableRef = useRef<HTMLTableElement | null>(null);
+
+  useEffect(() => {
+    const formatter = new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      weekday: "long",
+    });
+    const refresh = () => setToday(formatter.format(new Date()));
+    const initial = window.setTimeout(refresh, 0);
+    const interval = window.setInterval(refresh, 30_000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearTimeout(initial);
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, []);
 
   useEffect(() => {
     const loadStoredRoutine = window.setTimeout(() => {
@@ -818,8 +835,18 @@ export function RoutineSettings() {
                         <tr>
                           <th scope="col">Linha</th>
                           {weekdays.map((weekday) => (
-                            <th key={weekday} scope="col">
-                              {weekday}
+                            <th
+                              key={weekday}
+                              scope="col"
+                              data-today={weekday.toLocaleLowerCase("pt-BR") === today || undefined}
+                              aria-current={
+                                weekday.toLocaleLowerCase("pt-BR") === today ? "date" : undefined
+                              }
+                            >
+                              <span className={styles.dayHeading}>{weekday}</span>
+                              {weekday.toLocaleLowerCase("pt-BR") === today ? (
+                                <span className={styles.todayBadge}>Hoje</span>
+                              ) : null}
                             </th>
                           ))}
                         </tr>
@@ -829,7 +856,13 @@ export function RoutineSettings() {
                           <tr key={rowIndex}>
                             <th scope="row">{rowIndex + 1}</th>
                             {weekdays.map((weekday) => (
-                              <td key={weekday} data-label={weekday}>
+                              <td
+                                key={weekday}
+                                data-label={weekday}
+                                data-today={
+                                  weekday.toLocaleLowerCase("pt-BR") === today || undefined
+                                }
+                              >
                                 <textarea
                                   aria-label={`${weekday}, linha ${rowIndex + 1}`}
                                   disabled={!hasLoaded}
@@ -837,7 +870,7 @@ export function RoutineSettings() {
                                   onChange={(event) =>
                                     updateCell(rowIndex, weekday, event.target.value)
                                   }
-                                  rows={3}
+                                  rows={1}
                                 />
                               </td>
                             ))}
