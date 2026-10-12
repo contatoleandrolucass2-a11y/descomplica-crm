@@ -374,7 +374,11 @@ test("bounded auth timeout releases a pending reservation", async (t) => {
     first.once("close", resolve);
   });
   await ended;
+  // Client close can precede the server's socket-close cleanup.
+  if (!signal?.aborted) t.diagnostic("Client closed before server auth cancellation settled");
+  await until(() => signal?.aborted);
   assert.equal(signal.aborted, true);
+  assert.equal(f.connections(), 0);
   const next = await f.open();
   assert.equal(next.readyState, WebSocket.OPEN);
 });

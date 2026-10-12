@@ -1,5 +1,14 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Retomada da publicacao da Rotina
+
+- Conferencia de abertura: GitHub main permanece 5bf6213; GET publico
+  /api/health retorna ok/1dd58c4. CI main 38285832880 segue falha na segunda
+  tentativa; PR documental #195 tambem falhou em validate (38287348337).
+  Checkout limpo em codex/rotina-compacta-evidencias antes desta nota.
+- Investigar a ordem de fechamento/cancelamento do gateway antes de editar.
+  Publicacao continua condicionada a todos os gates, imagem imutavel e CAS.
+
 ## 2026-10-12: Rotina integrada; publicacao bloqueada pela CI de main
 
 - PR #192 integrado em main 5bf62134b1a7290f042cd68e29019aa69bc9ac64.
