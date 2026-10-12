@@ -9,6 +9,20 @@ import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 import { WebSocketServer } from "ws";
 
+async function settleTheme(page) {
+  // CSS transitions use the compositor clock, not Playwright's mocked timers.
+  await page.evaluate(async () => {
+    // Flush styles so the changed theme has created its transitions.
+    getComputedStyle(document.body).color;
+    await Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation instanceof CSSTransition)
+        .map((animation) => animation.finished.catch(() => {})),
+    );
+  });
+}
+
 export async function checkConnectedSystems(page, origin, outputDirectory) {
   await mkdir(outputDirectory, { recursive: true });
   await page.goto(`${origin}/app/configuracoes`);
@@ -40,6 +54,7 @@ export async function checkConnectedSystems(page, origin, outputDirectory) {
     await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     for (const width of [320, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
+      await settleTheme(page);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth > window.innerWidth + 1,
       );
@@ -259,12 +274,7 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
     for (const width of [320, 768, 1440]) {
       await page.setViewportSize({ width, height: width === 320 ? 640 : 900 });
       await page.clock.runFor(100);
-      // Theme transitions use the compositor clock, not Playwright's mocked timers.
-      await page.evaluate(async () => {
-        await Promise.all(
-          document.getAnimations().map((animation) => animation.finished.catch(() => {})),
-        );
-      });
+      await settleTheme(page);
       const rect = await canvas.boundingBox();
       assert.ok(
         rect &&
@@ -685,6 +695,7 @@ async function runSynthetic() {
       await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme);
       for (const width of [320, 768, 1440]) {
         await page.setViewportSize({ width, height: 900 });
+        await settleTheme(page);
         await page.screenshot({
           path: path.join(directory, `${theme}-${width}.png`),
           fullPage: true,
@@ -713,7 +724,7 @@ async function runSynthetic() {
         assert.deepEqual(
           axe.violations.map(({ id, nodes }) => ({
             id,
-            elements: nodes.map(({ target }) => target),
+            elements: nodes.map(({ target, failureSummary }) => ({ target, failureSummary })),
           })),
           [],
           `Axe: ${theme}/${width}`,

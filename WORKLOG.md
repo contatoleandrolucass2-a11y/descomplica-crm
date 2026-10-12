@@ -6,6 +6,8 @@
   no tema claro/320px. Nenhuma promocao realizada.
 - QA aguarda as transicoes reais de tema antes do axe e registra os elementos
   e cores da falha. Mantidas todas as assercoes de acessibilidade.
+- Repeticao 38272615268: validate aprovado; mesma corrida tambem na matriz
+  da pagina anterior ao console. Espera compartilhada aplicada as duas matrizes.
 
 ## 2026-10-12: Console Salesforce integrado ao CRM
 

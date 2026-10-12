@@ -3,6 +3,7 @@
 ## 2026-10-12: Validacao visual do console
 
 - Aguarda transicoes de tema na matriz sintetica e detalha falhas de contraste.
+- Sincroniza tambem a matriz da pagina de integracoes antes de abrir o console.
 
 ## 2026-10-12: Conexao Salesforce pela VPS no CRM
 

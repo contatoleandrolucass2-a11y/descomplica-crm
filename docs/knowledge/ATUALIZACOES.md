@@ -2,6 +2,10 @@
 
 ## 2026-10-12: Primeiro gate do PR #193
 
+- Repeticao 38272615268: fonte Prefeitura retornou 403 transitorio, sem
+  dispensar a consulta; reexecucao aprovada. Job validate verde. Release-gates
+  114892885508 falhou antes do console, Axe dark/320 na pagina base. A mesma
+  espera por transicoes foi estendida a ambas as matrizes, sem excluir regras.
 - Fonte: GitHub Actions 38271515539, job validate aprovado e release-gates
   114888030823 reprovado em Console axe light/320, color-contrast, 15:41Z.
 - A repeticao local completa passou. O teste trocava dark -> light e aguardava
