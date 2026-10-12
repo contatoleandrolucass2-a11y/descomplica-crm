@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12: Conexao Salesforce pela VPS no CRM
+
+- Adiciona console remoto protegido para o Master autenticar no Salesforce
+  e aprovar a MFA, mantendo o navegador dedicado na VPS.
+- Separa acesso ao console da confirmacao real de conexao Salesforce.
+- Mantem n8n, exportacao e ingestao desligados nesta etapa.
+
 ## 2026-10-12: Sessao remota Salesforce
 
 - Prepara Chrome dedicado supervisionado na VPS, independente do PC.

@@ -62,6 +62,8 @@ readonly -a managed_keys=(
   SALESFORCE_REFRESH_ENABLED
   SALESFORCE_STATUS_ENABLED
   SALESFORCE_STATUS_SECRET
+  SALESFORCE_CONSOLE_ENABLED
+  SALESFORCE_CONSOLE_PASSWORD
   CRM_READ_MODEL_V3_SHADOW_ENABLED
   QLIK_RELAY_MODE
   QLIK_RELAY_WRITE_ENABLED
@@ -503,6 +505,9 @@ temporary_environment_file="$(mktemp --tmpdir="${environment_directory}" .produc
   printf 'SALESFORCE_REFRESH_ENABLED=%s\n' "${values[SALESFORCE_REFRESH_ENABLED]}"
   printf 'SALESFORCE_STATUS_ENABLED=%s\n' "${values[SALESFORCE_STATUS_ENABLED]}"
   printf 'SALESFORCE_STATUS_SECRET=%s\n' "${values[SALESFORCE_STATUS_SECRET]:-}"
+  # Preserve the separately provisioned remote console; never collect Salesforce credentials.
+  printf 'SALESFORCE_CONSOLE_ENABLED=%s\n' "${values[SALESFORCE_CONSOLE_ENABLED]:-false}"
+  printf 'SALESFORCE_CONSOLE_PASSWORD=%s\n' "${values[SALESFORCE_CONSOLE_PASSWORD]:-}"
   printf 'CRM_READ_MODEL_V3_SHADOW_ENABLED=%s\n' \
     "${values[CRM_READ_MODEL_V3_SHADOW_ENABLED]}"
   printf 'QLIK_RELAY_MODE=%s\n' "${values[QLIK_RELAY_MODE]}"

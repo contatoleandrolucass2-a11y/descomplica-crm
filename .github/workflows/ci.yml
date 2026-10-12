@@ -89,6 +89,9 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Salesforce console with synthetic RFB authentication and pixels
+        run: node scripts/qa/connected-systems.mjs --synthetic
+
       - name: Associative page guide with synthetic inventory
         run: node scripts/qa/reference-parity.mjs associative-page-guide
 
@@ -137,6 +140,7 @@ jobs:
           path: |
             test-results/authenticated-visual
             test-results/associative-page-guide
+            output/playwright/connected-systems
           if-no-files-found: warn
           retention-days: 14
 

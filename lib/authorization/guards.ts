@@ -33,8 +33,8 @@ interface AuthorizationContextRow {
 // Both the protected layout and its nested permission guards need the same
 // verified identity. Sharing the client and user prevents duplicate Auth calls
 // and guarantees MFA/RPC checks observe the same refreshed session.
-const getCurrentAuthState = cache(async () => {
-  const supabase = await createClient();
+const getCurrentAuthState = cache(async (allowSessionRefresh = true) => {
+  const supabase = await createClient(allowSessionRefresh ? {} : { allowSessionRefresh: false });
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -42,7 +42,7 @@ const getCurrentAuthState = cache(async () => {
 });
 
 export async function getCurrentUser() {
-  return (await getCurrentAuthState()).user;
+  return (await getCurrentAuthState(true)).user;
 }
 
 function isRoleKey(value: string): value is RoleKey {
@@ -59,8 +59,8 @@ function isPermissionKey(value: string): value is PermissionKey {
 // the login page correctly recognizes the still-valid Supabase session.
 // Throws a generic FORBIDDEN error without leaking onboarding/profile details.
 export const getCurrentAuthorizationContext = cache(
-  async (): Promise<AuthorizationContext | null> => {
-    const { supabase, user } = await getCurrentAuthState();
+  async (allowSessionRefresh = true): Promise<AuthorizationContext | null> => {
+    const { supabase, user } = await getCurrentAuthState(allowSessionRefresh);
 
     if (!user) {
       return null;
@@ -121,8 +121,12 @@ export const getCurrentAuthorizationContext = cache(
 
 // Like getCurrentAuthorizationContext but throws UNAUTHENTICATED when there is
 // no resolvable context.
-export async function requireAuthorization(): Promise<AuthorizationContext> {
-  const context = await getCurrentAuthorizationContext();
+export async function requireAuthorization(
+  allowSessionRefresh = true,
+): Promise<AuthorizationContext> {
+  const context = allowSessionRefresh
+    ? await getCurrentAuthorizationContext()
+    : await getCurrentAuthorizationContext(false);
 
   if (!context) {
     throw new AuthorizationError("UNAUTHENTICATED", "Authentication required.");
@@ -149,8 +153,11 @@ export function hasAnyPermission(
   return permissions.some((p) => context.permissions.includes(p));
 }
 
-export async function requirePermission(permission: PermissionKey): Promise<AuthorizationContext> {
-  const context = await requireAuthorization();
+export async function requirePermission(
+  permission: PermissionKey,
+  allowSessionRefresh = true,
+): Promise<AuthorizationContext> {
+  const context = await requireAuthorization(allowSessionRefresh);
 
   if (!hasPermission(context, permission)) {
     throw new AuthorizationError("FORBIDDEN", "Access denied.");

@@ -7,10 +7,14 @@ const mocks = vi.hoisted(() => ({
   ingest: vi.fn(),
   refresh: vi.fn(),
   status: vi.fn(),
+  console: vi.fn(),
 }));
 
 vi.mock("@/lib/authorization/enforce", () => ({ enforcePermission: mocks.enforce }));
 vi.mock("@/lib/authorization/guards", () => ({ hasPermission: mocks.permission }));
+vi.mock("@/lib/crm/salesforce/console-config", () => ({
+  getSalesforceConsoleConfiguration: mocks.console,
+}));
 vi.mock("@/lib/crm/salesforce/config", () => ({
   getSalesforceIngestConfiguration: mocks.ingest,
   getSalesforceRefreshConfiguration: mocks.refresh,
@@ -27,6 +31,7 @@ beforeEach(() => {
   mocks.ingest.mockReturnValue({ enabled: false, available: false });
   mocks.refresh.mockReturnValue({ enabled: false, available: false });
   mocks.status.mockReturnValue({ enabled: true, available: true });
+  mocks.console.mockReturnValue({ available: false });
 });
 
 describe("connected systems", () => {
@@ -37,6 +42,7 @@ describe("connected systems", () => {
     expect(mocks.ingest).not.toHaveBeenCalled();
     expect(mocks.refresh).not.toHaveBeenCalled();
     expect(mocks.status).not.toHaveBeenCalled();
+    expect(mocks.console).not.toHaveBeenCalled();
   });
 
   it("does not expose secrets or imply a connected session from configuration alone", async () => {
@@ -93,8 +99,30 @@ describe("connected systems", () => {
       canRefresh: false,
       refreshAvailable: false,
       statusConfigured: true,
+      consoleAvailable: false,
     });
   });
+
+  it.each([
+    ["master", true, true],
+    ["master", false, false],
+    ["admin", true, false],
+    ["corretor", true, false],
+  ])(
+    "limits the console to Master with complete configuration (%s/%s)",
+    async (roleKey, available, expected) => {
+      mocks.enforce.mockResolvedValue({ roleKey });
+      mocks.console.mockReturnValue({ available, password: "private-console" });
+      const page = await ConnectedSystemsPage();
+      expect(page.props.consoleAvailable).toBe(expected);
+      const markup = renderToStaticMarkup(page);
+      expect(markup).toContain("Conectar Salesforce");
+      expect(markup).toContain("Abrir no navegador");
+      expect(markup).not.toContain("private-console");
+      expect(markup).not.toContain("<dialog");
+      expect(markup).not.toContain('type="password"');
+    },
+  );
 
   it("renders seven report links without fabricating counts, dates or a schedule", async () => {
     mocks.status.mockReturnValue({ enabled: false, available: false });
