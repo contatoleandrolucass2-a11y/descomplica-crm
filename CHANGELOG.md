@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-12: Conhecimento e Rotina
+
+- Exige conferencia atual de site/GitHub e sincronizacao do Obsidian antes de
+  cada novo chat do CRM, com resultados e excecoes documentados no encerramento.
+- Protege edicoes pendentes da Rotina ao sair, recarregar ou voltar no historico
+  e remove o link do hub quando a rotina estiver indisponivel.
+- Corrige a verificacao de menus flutuantes no breakpoint de 1181 px, mantendo
+  a rejeicao de overflow, recorte e texto excedente sem trocar referencias.
+
 ## 2026-10-12
 
 - Faz a caixa de cada acesso em Usuários representar diretamente o rascunho:
@@ -30,7 +39,6 @@
   tabela semanal em rolagem horizontal acessível no celular.
 - Atualiza gates, navegação, inventário de recursos, contrato visual e matriz
   de smoke de rotas protegidas para 27 URLs.
-
 
 - Recompõe Usuários e acessos conforme o draft aprovado: mestre-detalhe
   compacto, diretório com filtros em chips, quatro abas de acesso, painel

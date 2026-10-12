@@ -283,6 +283,39 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browserExpect(page.getByText(dirtyMessage, { exact: true })).toHaveCount(0);
   });
 
+  it("protects pending edits on links, reload and history, then permits a saved exit", async () => {
+    await openRoutine();
+    await page.evaluate(() => {
+      history.pushState({}, "", "/app/gestao/rotina");
+      const link = document.createElement("a");
+      link.href = "/app/gestao";
+      link.textContent = "Voltar para gestão";
+      document.body.prepend(link);
+    });
+    const cell = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
+    await cell.fill("Edição protegida QA");
+    let prompts = 0;
+    page.on("dialog", async (dialog) => {
+      prompts++;
+      await dialog.dismiss();
+    });
+    await page.getByRole("link", { name: "Voltar para gestão" }).click();
+    expect(prompts).toBe(1);
+    await browserExpect(page).toHaveURL("http://routine.test/app/gestao/rotina");
+    await browserExpect(cell).toHaveValue("Edição protegida QA");
+    await page.evaluate(() => history.back());
+    await browserExpect.poll(() => prompts).toBe(2);
+    await browserExpect(page).toHaveURL("http://routine.test/app/gestao/rotina");
+    await page.reload({ timeout: 2_000 }).catch(() => {});
+    await browserExpect.poll(() => prompts).toBe(3);
+    await browserExpect(cell).toHaveValue("Edição protegida QA");
+    await page.getByRole("button", { name: "Salvar alterações" }).click();
+    await browserExpect(page.getByText(dirtyMessage, { exact: true })).toHaveCount(0);
+    await page.getByRole("link", { name: "Voltar para gestão" }).click();
+    await browserExpect(page).toHaveURL("http://routine.test/app/gestao");
+    expect(prompts).toBe(3);
+  });
+
   it("marks inserted rows and later edits as unsaved instead of showing old success", async () => {
     await openRoutine();
     await page.getByRole("button", { name: "Salvar alterações" }).click();

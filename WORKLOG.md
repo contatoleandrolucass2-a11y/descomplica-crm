@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-10-12: Conhecimento atual por chat e fechamento da Rotina
+
+- Pedido do usuario persistido em AGENTS.md, CONTEXTO.md, FERRAMENTAS.md,
+  runbook de Obsidian e perfil crm-memoria: consultar GitHub/site, confrontar
+  branch/SHA/CI/versao, registrar contexto curado e sincronizar antes da demanda.
+  Encerramento exige resultado, verificacoes e excecoes com causa, evidencia,
+  limites, aplicacao e criterio de reavaliacao, seguido de nova sincronizacao.
+- A orientacao local limitada ao Git comum e a nota ad_hoc autorizada foram
+  atualizadas para as conversas futuras. O fluxo usa instrucoes ao agente e o
+  runtime existente; nao depende de um hook nativo de abertura de chat.
+- Conferencia inicial de GitHub e health: main/site em `f84867d`, saudavel.
+  Conhecimento sincronizado antes de retomar a demanda. Integracao preservou os
+  PRs #184/#185 de Usuarios e suas evidencias; mudancas dessa area vieram de main.
+- Rotina protege edicoes pendentes nos links, recarregamento e historico, conforme
+  o padrao existente da Tabela Direta. O hub nao oferece link para a rotina com
+  gate desligado. Testes de servidor e navegador: 16/16 aprovados; tipos e
+  inventario aprovados. Gates completos e nova CI ainda em verificacao.
+- O candidato anterior `b08ba26` aprovou validate/restore, mas falhou na matriz
+  autenticada de navegacao. Publicacao permanece pendente enquanto houver gate
+  falho; o fechamento apura a causa sem reduzir os criterios de aceite.
+- Diagnostico do artefato da CI: quatro falhas iguais, nos quatro simuladores
+  em 1181 px. O menu flutuante cabia na viewport e aumentava o scrollWidth do
+  nav; o gate agora distingue essa extensao medida de overflow real, sem
+  alterar tolerancia ou referencias. Dezenove regressoes direcionadas passaram.
+- Lint, tipos, recursos e build de 47 rotas aprovados. Suite Windows: 2.462
+  aprovados, 19 skips previstos e 11 falhas (seis POSIX e cinco timeouts).
+  Retestes de conhecimento/DevTools: 46/46; referencia: 15 aprovados e um skip.
+  Testes Node do Salesforce tambem executados separadamente; falharam nos
+  contratos POSIX/arquivos privados e executavel deste Windows.
+  O gate Linux continua obrigatorio antes de merge/publicacao.
+
 ## 2026-10-11: Menu Gestão e submenu Rotina
 
 - Fonte: pedido do usuário, print do menu principal e planilha de referência

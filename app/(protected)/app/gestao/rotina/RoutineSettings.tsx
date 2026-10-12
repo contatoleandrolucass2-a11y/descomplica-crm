@@ -397,6 +397,21 @@ function fitRoutineFields(table: HTMLTableElement | null) {
   });
 }
 
+type RoutineNavigationEvent = Event & {
+  hashChange: boolean;
+  destination: { url: string };
+  navigationType: string;
+};
+
+type RoutineBrowserNavigation = {
+  currentEntry?: { index: number };
+  addEventListener: (type: "navigate", listener: (event: RoutineNavigationEvent) => void) => void;
+  removeEventListener: (
+    type: "navigate",
+    listener: (event: RoutineNavigationEvent) => void,
+  ) => void;
+};
+
 export function RoutineSettings() {
   const [activeRole, setActiveRole] = useState<RoleKey>("regional-house");
   const [routine, setRoutine] = useState<RoutineState>(defaultRoutine);
@@ -425,6 +440,120 @@ export function RoutineSettings() {
 
     return () => window.clearTimeout(loadStoredRoutine);
   }, []);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const protectedLocation = new URL(window.location.href);
+    const protectedHistoryState = window.history.state;
+    const browserNavigation = (window as Window & { navigation?: RoutineBrowserNavigation })
+      .navigation;
+    const protectedHistoryIndex = browserNavigation?.currentEntry?.index;
+    let restoringHistory = false;
+    let navigationApproved = false;
+    let approvalTimeout: number | undefined;
+    const confirmDiscard = () =>
+      window.confirm("Existem alterações não salvas na rotina. Sair sem salvar?");
+    const approveNavigation = () => {
+      navigationApproved = true;
+      window.clearTimeout(approvalTimeout);
+      approvalTimeout = window.setTimeout(() => {
+        navigationApproved = false;
+      }, 1_000);
+    };
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (navigationApproved) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    const confirmInternalNavigation = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        !(event.target instanceof Element)
+      )
+        return;
+      const anchor = event.target.closest<HTMLAnchorElement>("a[href]");
+      if (
+        !anchor ||
+        (anchor.target && anchor.target !== "_self") ||
+        anchor.hasAttribute("download")
+      )
+        return;
+      const destination = new URL(anchor.href, window.location.href);
+      if (destination.origin !== protectedLocation.origin) return;
+      if (
+        destination.pathname === protectedLocation.pathname &&
+        destination.search === protectedLocation.search
+      )
+        return;
+      if (!confirmDiscard()) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      approveNavigation();
+    };
+    const confirmNavigationApi = (event: RoutineNavigationEvent) => {
+      if (navigationApproved || event.hashChange || !event.cancelable) return;
+      const destination = new URL(event.destination.url);
+      if (destination.origin !== protectedLocation.origin) return;
+      if (
+        event.navigationType !== "reload" &&
+        destination.pathname === protectedLocation.pathname &&
+        destination.search === protectedLocation.search
+      )
+        return;
+      if (!confirmDiscard()) {
+        event.preventDefault();
+        return;
+      }
+      approveNavigation();
+    };
+    const confirmHistoryNavigation = (event: PopStateEvent) => {
+      if (restoringHistory) {
+        restoringHistory = false;
+        return;
+      }
+      if (navigationApproved) return;
+      const destination = new URL(window.location.href);
+      if (
+        destination.pathname === protectedLocation.pathname &&
+        destination.search === protectedLocation.search
+      )
+        return;
+      if (confirmDiscard()) {
+        approveNavigation();
+        return;
+      }
+      event.stopImmediatePropagation();
+      const destinationHistoryIndex = browserNavigation?.currentEntry?.index;
+      if (
+        Number.isInteger(protectedHistoryIndex) &&
+        Number.isInteger(destinationHistoryIndex) &&
+        protectedHistoryIndex !== destinationHistoryIndex
+      ) {
+        restoringHistory = true;
+        window.history.go(protectedHistoryIndex! - destinationHistoryIndex!);
+        return;
+      }
+      window.history.pushState(protectedHistoryState, "", protectedLocation.href);
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    browserNavigation?.addEventListener("navigate", confirmNavigationApi);
+    window.addEventListener("popstate", confirmHistoryNavigation, true);
+    document.addEventListener("click", confirmInternalNavigation, true);
+    return () => {
+      window.clearTimeout(approvalTimeout);
+      window.removeEventListener("beforeunload", warnBeforeUnload);
+      browserNavigation?.removeEventListener("navigate", confirmNavigationApi);
+      window.removeEventListener("popstate", confirmHistoryNavigation, true);
+      document.removeEventListener("click", confirmInternalNavigation, true);
+    };
+  }, [hasUnsavedChanges]);
 
   const activeRows = routine[activeRole];
   const activeRoleInfo = roles.find((role) => role.key === activeRole) ?? roles[0]!;

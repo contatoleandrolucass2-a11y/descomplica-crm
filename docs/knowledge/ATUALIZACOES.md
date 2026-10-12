@@ -13,10 +13,51 @@
   dos comentarios de revisao ainda pendentes.
 - O usuario determinou consultar site/GitHub e sincronizar o Obsidian antes
   de tratar cada novo chat, e registrar resultados e excecoes ao encerrar.
-  A regra sera persistida nos documentos do projeto e na orientacao local
+  A regra foi persistida nos documentos do projeto e na orientacao local
   limitada a este Git comum. Fontes indisponiveis exigem registro explicito;
   uma excecao documentada nao concede novas permissoes.
 - Esta entrada registra consulta de fontes; nao comprova novos testes.
+
+## 2026-10-12: Excecoes e protecao de edicoes precisam de evidencia propria
+
+- Fonte: AGENTS.md, runbook de Obsidian, perfil crm-memoria e review do PR #183.
+  Status: protocolo e correcoes implementados localmente; CI/publicacao pendentes.
+- Atualizar conhecimento significa confrontar fontes atuais e reutilizar notas
+  verificadas. Nao equivale a treinar o modelo ou validar uma versao publicada.
+  Excecoes duraveis precisam de causa, evidencia, escopo/limites, quando aplicar
+  e criterio de reavaliacao; nunca ampliam permissao ou regra comercial.
+- Aviso de alteracoes pendentes sozinho nao evita perda por navegacao. Rotina
+  usa confirmacao para links, Navigation API/historico e beforeunload, conforme
+  o padrao da Tabela Direta; cancela a saida e preserva a edicao, e libera apos
+  salvar. A API de navegacao requer tipos locais neste componente porque o
+  contrato DOM da versao instalada nao fornece NavigateEvent.
+- Um gate desligado precisa remover a ancora, nao apenas exibir aviso. O hub
+  de Gestao conserva o cartao indisponivel sem href; o servidor continua negando
+  a rota. Testes de servidor e Chromium: 16/16 aprovados; tipos e recursos
+  aprovados. Lint, suite completa, build e nova CI ainda em verificacao.
+- Fechamento local: lint, tipos, recursos e build de 47 rotas aprovados. Suite
+  Windows: 2.462 aprovados, 19 skips previstos e 11 falhas (seis POSIX e cinco
+  timeouts). Reteste isolado de conhecimento/DevTools: 46/46; referencia:
+  15 aprovados e um skip. Nao alterar contratos POSIX para obter verde neste
+  host; a CI Linux e a referencia e permanece gate obrigatorio.
+  Testes Node do Salesforce foram executados separadamente e tambem falharam
+  em contratos POSIX/arquivos privados e executavel deste host Windows.
+
+## 2026-10-12: Menu flutuante nao equivale a overflow da pagina
+
+- Fonte: CI `38184457031`, artefato `11719861187`, JSON de navegacao e reproducao
+  em Chromium com CSS real. Status: causa confirmada e correcao local validada;
+  matriz autenticada do candidato final ainda pendente.
+- As quatro falhas ocorreram em 1181 x 800 nos quatro simuladores. O nav tinha
+  clientWidth 654 e scrollWidth 668; o painel terminava em x=854, dentro dos
+  1181 px da viewport. Documento/body nao excediam a largura e nao havia erro
+  de runtime. A assercao isolada sobre scrollWidth do nav era insuficiente.
+- Aplicar a excecao somente para a extensao medida de um painel flutuante no
+  desktop. Exigir controles dentro do nav, painel dentro da viewport, texto
+  sem overflow e ancestrais sem recorte; mobile continua limitado ao container.
+  Tolerancia permanece 1 px. Dezenove regressoes passaram; nao houve promocao
+  de baseline. Reavaliar quando mudar o posicionamento, o breakpoint ou o CSS
+  de overflow do cabecalho. Esta regra e de geometria QA, nao autorizacao.
 
 ## 2026-10-11: Menu Gestao e submenu Rotina
 

@@ -20,6 +20,37 @@ export default async function ManagementHubPage() {
   await enforcePermission("crm.settings.manage");
   if (!getProtectedPageGate("/app/gestao")?.releaseEnabled) forbidden();
   const routineReleased = getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled === true;
+  const routineCard = (
+    <article
+      className={`${styles.settingsCard} ${managementStyles.panel} h-full p-4 ${routineReleased ? "group-hover:border-cyan-500 group-focus-visible:border-cyan-500" : "opacity-70"}`}
+    >
+      <div className="flex h-full min-h-36 flex-col">
+        <div className="flex items-start gap-3">
+          <span className={managementStyles.iconFrame}>
+            <CalendarCheck2 aria-hidden="true" />
+          </span>
+          <span className="pt-2 text-xs font-bold text-[var(--analytics-cyan-strong)]">Gestão</span>
+        </div>
+        <h3 className="mt-4 text-xl font-semibold text-[var(--analytics-ink)]">Rotina</h3>
+        <p className="mt-2 text-sm leading-6 text-[var(--analytics-muted)]">
+          Gerente regional house
+        </p>
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--analytics-line)] pt-4 text-sm">
+          <span className="text-[var(--analytics-muted)]">
+            {routineReleased ? "Rotina comercial" : "Indisponível"}
+          </span>
+          {routineReleased ? (
+            <span
+              className="grid size-9 shrink-0 place-items-center rounded-full border border-[var(--analytics-cyan-strong)] text-[var(--analytics-cyan-strong)]"
+              aria-hidden="true"
+            >
+              <ArrowRight size={17} />
+            </span>
+          ) : null}
+        </div>
+      </div>
+    </article>
+  );
 
   return (
     <ManagementPage className={`${styles.canvas ?? ""} ${routineStyles.hub}`}>
@@ -43,40 +74,18 @@ export default async function ManagementHubPage() {
           </div>
         </div>
         <div className="grid gap-3 lg:grid-cols-3">
-          <Link
-            href="/app/gestao/rotina"
-            aria-label="Rotina"
-            prefetch={false}
-            className="group block rounded-lg no-underline focus-visible:outline-offset-4"
-          >
-            <article
-              className={`${styles.settingsCard} ${managementStyles.panel} h-full p-4 group-hover:border-cyan-500 group-focus-visible:border-cyan-500`}
+          {routineReleased ? (
+            <Link
+              href="/app/gestao/rotina"
+              aria-label="Rotina"
+              prefetch={false}
+              className="group block rounded-lg no-underline focus-visible:outline-offset-4"
             >
-              <div className="flex h-full min-h-36 flex-col">
-                <div className="flex items-start gap-3">
-                  <span className={managementStyles.iconFrame}>
-                    <CalendarCheck2 aria-hidden="true" />
-                  </span>
-                  <span className="pt-2 text-xs font-bold text-[var(--analytics-cyan-strong)]">
-                    Gestão
-                  </span>
-                </div>
-                <h3 className="mt-4 text-xl font-semibold text-[var(--analytics-ink)]">Rotina</h3>
-                <p className="mt-2 text-sm leading-6 text-[var(--analytics-muted)]">
-                  Gerente regional house
-                </p>
-                <div className="mt-auto flex items-center justify-between gap-3 border-t border-[var(--analytics-line)] pt-4 text-sm">
-                  <span className="text-[var(--analytics-muted)]">Rotina comercial</span>
-                  <span
-                    className="grid size-9 shrink-0 place-items-center rounded-full border border-[var(--analytics-cyan-strong)] text-[var(--analytics-cyan-strong)]"
-                    aria-hidden="true"
-                  >
-                    <ArrowRight size={17} />
-                  </span>
-                </div>
-              </div>
-            </article>
-          </Link>
+              {routineCard}
+            </Link>
+          ) : (
+            <div aria-disabled="true">{routineCard}</div>
+          )}
         </div>
       </section>
     </ManagementPage>

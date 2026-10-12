@@ -265,11 +265,62 @@ export async function ensureArchiveNavigationOpen(page) {
   await expect(navigation(page)).toBeVisible();
 }
 
+export function archiveNavigationHorizontalFit({
+  compact,
+  navigation,
+  rootControls,
+  panels,
+  viewportWidth,
+}) {
+  const fits = (box, left, right) =>
+    box.left >= left - 1 && box.right <= right + 1 && box.scrollWidth <= box.clientWidth + 1;
+  // A desktop disclosure contributes to scrollWidth while floating beyond the nav track.
+  const contentWidth = compact
+    ? navigation.clientWidth
+    : Math.max(navigation.clientWidth, ...panels.map((panel) => panel.right - navigation.left));
+  return (
+    navigation.scrollWidth <= contentWidth + 1 &&
+    rootControls.length > 0 &&
+    rootControls.every((control) => fits(control, navigation.left, navigation.right)) &&
+    panels.every((panel) => fits(panel, 0, viewportWidth) && panel.horizontalAncestorsFit === true)
+  );
+}
+
 async function assertOpenNavigationGeometry(page) {
   await ensureArchiveNavigationOpen(page);
   const geometry = await navigation(page).evaluate((element) => {
     const rect = element.getBoundingClientRect();
+    const measure = (node) => {
+      const bounds = node.getBoundingClientRect();
+      return {
+        left: bounds.left,
+        right: bounds.right,
+        scrollWidth: node.scrollWidth,
+        clientWidth: node.clientWidth,
+      };
+    };
     return {
+      compact: matchMedia("(max-width: 1180px)").matches,
+      viewportWidth: innerWidth,
+      rootControls: [...element.querySelectorAll("[data-navigation-root-control]")].map(measure),
+      panels: [...element.querySelectorAll("[data-navigation-panel-for]:not([hidden])")].map(
+        (panel) => {
+          const bounds = panel.getBoundingClientRect();
+          let horizontalAncestorsFit = true;
+          let parent = panel.parentElement;
+          while (parent && parent !== document.documentElement) {
+            const style = getComputedStyle(parent);
+            const parentBounds = parent.getBoundingClientRect();
+            if (
+              ["auto", "hidden", "scroll", "clip"].includes(style.overflowX) &&
+              (bounds.left < parentBounds.left - 1 || bounds.right > parentBounds.right + 1)
+            )
+              horizontalAncestorsFit = false;
+            parent = parent.parentElement;
+          }
+          return { ...measure(panel), horizontalAncestorsFit };
+        },
+      ),
       checks: {
         visibleSize: rect.width > 0 && rect.height > 0,
         insideViewport:
@@ -277,16 +328,14 @@ async function assertOpenNavigationGeometry(page) {
           rect.top >= -1 &&
           rect.right <= innerWidth + 1 &&
           rect.bottom <= innerHeight + 1,
-        navigationNoOverflow: element.scrollWidth <= element.clientWidth + 1,
         documentNoOverflow:
           document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
         bodyNoOverflow: document.body.scrollWidth <= document.body.clientWidth + 1,
       },
       navigation: {
+        ...measure(element),
         width: rect.width,
         height: rect.height,
-        scrollWidth: element.scrollWidth,
-        clientWidth: element.clientWidth,
       },
       document: {
         scrollWidth: document.documentElement.scrollWidth,
@@ -295,6 +344,7 @@ async function assertOpenNavigationGeometry(page) {
       body: { scrollWidth: document.body.scrollWidth, clientWidth: document.body.clientWidth },
     };
   });
+  geometry.checks.navigationNoOverflow = archiveNavigationHorizontalFit(geometry);
   try {
     assert.equal(
       Object.values(geometry.checks).every(Boolean),
