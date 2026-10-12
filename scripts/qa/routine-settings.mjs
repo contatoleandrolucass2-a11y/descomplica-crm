@@ -284,10 +284,25 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           .poll(() => daily.evaluate((element) => [element.scrollTop, element.scrollLeft]))
           .toEqual([0, 0]);
         await expect(daily.locator("thead th")).toHaveCount(2);
-        assert.equal(
-          await daily.evaluate((element) => element.scrollWidth > element.clientWidth + 1),
-          false,
-          "Daily mode must fit without horizontal scroll",
+        const dailySize = () =>
+          daily.evaluate((element) => ({
+            width: element.clientWidth,
+            scrollWidth: element.scrollWidth,
+          }));
+        process.stdout.write(
+          `[routine-daily-size-initial] ${JSON.stringify({ width, theme, ...(await dailySize()) })}\n`,
+        );
+        await expect
+          .poll(
+            async () => {
+              const size = await dailySize();
+              return size.scrollWidth > size.width + 1;
+            },
+            { message: "Daily mode must fit without horizontal scroll" },
+          )
+          .toBe(false);
+        process.stdout.write(
+          `[routine-daily-size-settled] ${JSON.stringify({ width, theme, ...(await dailySize()) })}\n`,
         );
         checkpoint(`daily-accessibility-${width}-${theme}`);
         await page.waitForFunction(() =>

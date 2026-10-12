@@ -21,6 +21,9 @@
 - CI 38267645863 falhou na matriz Rotina 720/claro, com causa ainda nao
   comprovada. Adiciona diagnosticos sanitizados e espera do fim de transicoes
   no QA diario, sem reduzir assercoes. Nova CI obrigatoria antes de publicar.
+- CI 38271094364 comprovou sticky e localizou a falha na largura ao trocar
+  para Hoje em 720px. QA aguarda o layout com a mesma tolerancia de 1px e
+  registra medidas iniciais/finais; nenhuma regra de overflow foi removida.
 
 ## 2026-10-12: Planilha de Rotina publicada
 

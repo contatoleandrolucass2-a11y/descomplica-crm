@@ -35,6 +35,12 @@
   sequencia anterior da CI, nao comprova causa. Instrumentacao adiciona
   somente etapas fixas/geometria/IDs Axe e espera transicoes antes do Axe
   diario. Mesmas assercoes e tolerancias; publicacao bloqueada ate CI verde.
+- CI instrumentada 38271094364 delimitou a falha em daily-layout-720-light:
+  sticky vertical/horizontal passou (0px na barra, -0,1875px no cabecalho).
+  A falha precede o Axe diario. Medicao de largura agora registra valores
+  inicial/final e aguarda a mesma condicao sem overflow por expect.poll,
+  mantendo tolerancia de 1px. Causa de eventual largura transitoria ainda
+  nao comprovada; uma nova CI aprovada e necessaria.
 
 ## 2026-10-12: Planilha de Rotina publicada e conferida
 
