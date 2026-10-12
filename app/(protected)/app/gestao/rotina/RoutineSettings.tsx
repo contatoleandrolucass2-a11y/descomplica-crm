@@ -399,15 +399,18 @@ function fitRoutineFields(table: HTMLTableElement | null) {
 
 type RoutineNavigationEvent = Event & {
   hashChange: boolean;
-  destination: { url: string };
+  destination: { url: string; sameDocument: boolean };
   navigationType: string;
 };
 
 type RoutineBrowserNavigation = {
   currentEntry?: { index: number };
-  addEventListener: (type: "navigate", listener: (event: RoutineNavigationEvent) => void) => void;
+  addEventListener: (
+    type: "navigate" | "navigatesuccess" | "navigateerror",
+    listener: (event: RoutineNavigationEvent) => void,
+  ) => void;
   removeEventListener: (
-    type: "navigate",
+    type: "navigate" | "navigatesuccess" | "navigateerror",
     listener: (event: RoutineNavigationEvent) => void,
   ) => void;
 };
@@ -449,19 +452,21 @@ export function RoutineSettings() {
       .navigation;
     const protectedHistoryIndex = browserNavigation?.currentEntry?.index;
     let restoringHistory = false;
-    let navigationApproved = false;
-    let approvalTimeout: number | undefined;
+    let approvedDestination: string | null = null;
+    let unloadApproved = false;
+    const destinationKey = (destination: URL) =>
+      destination.origin + destination.pathname + destination.search;
     const confirmDiscard = () =>
       window.confirm("Existem alterações não salvas na rotina. Sair sem salvar?");
-    const approveNavigation = () => {
-      navigationApproved = true;
-      window.clearTimeout(approvalTimeout);
-      approvalTimeout = window.setTimeout(() => {
-        navigationApproved = false;
-      }, 1_000);
+    const approveNavigation = (destination: URL) => {
+      approvedDestination = destinationKey(destination);
+    };
+    const clearApproval = () => {
+      approvedDestination = null;
+      unloadApproved = false;
     };
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (navigationApproved) return;
+      if (unloadApproved) return;
       event.preventDefault();
       event.returnValue = "";
     };
@@ -490,15 +495,19 @@ export function RoutineSettings() {
         destination.search === protectedLocation.search
       )
         return;
+      if (approvedDestination === destinationKey(destination)) return;
       if (!confirmDiscard()) {
         event.preventDefault();
         event.stopPropagation();
         return;
       }
-      approveNavigation();
+      approveNavigation(destination);
     };
     const confirmNavigationApi = (event: RoutineNavigationEvent) => {
-      if (navigationApproved || event.hashChange || !event.cancelable) return;
+      if (event.hashChange || !event.cancelable) return;
+      // App Router commits history with the render; cancelling pushState cannot undo that render.
+      if (event.destination.sameDocument && ["push", "replace"].includes(event.navigationType))
+        return;
       const destination = new URL(event.destination.url);
       if (destination.origin !== protectedLocation.origin) return;
       if (
@@ -507,26 +516,31 @@ export function RoutineSettings() {
         destination.search === protectedLocation.search
       )
         return;
+      if (approvedDestination === destinationKey(destination)) {
+        unloadApproved = !event.destination.sameDocument;
+        return;
+      }
       if (!confirmDiscard()) {
         event.preventDefault();
         return;
       }
-      approveNavigation();
+      approveNavigation(destination);
+      unloadApproved = !event.destination.sameDocument;
     };
     const confirmHistoryNavigation = (event: PopStateEvent) => {
       if (restoringHistory) {
         restoringHistory = false;
         return;
       }
-      if (navigationApproved) return;
       const destination = new URL(window.location.href);
       if (
         destination.pathname === protectedLocation.pathname &&
         destination.search === protectedLocation.search
       )
         return;
+      if (approvedDestination === destinationKey(destination)) return;
       if (confirmDiscard()) {
-        approveNavigation();
+        approveNavigation(destination);
         return;
       }
       event.stopImmediatePropagation();
@@ -544,16 +558,19 @@ export function RoutineSettings() {
     };
     window.addEventListener("beforeunload", warnBeforeUnload);
     browserNavigation?.addEventListener("navigate", confirmNavigationApi);
+    browserNavigation?.addEventListener("navigatesuccess", clearApproval);
+    browserNavigation?.addEventListener("navigateerror", clearApproval);
     window.addEventListener("popstate", confirmHistoryNavigation, true);
     document.addEventListener("click", confirmInternalNavigation, true);
     return () => {
-      window.clearTimeout(approvalTimeout);
       window.removeEventListener("beforeunload", warnBeforeUnload);
       browserNavigation?.removeEventListener("navigate", confirmNavigationApi);
+      browserNavigation?.removeEventListener("navigatesuccess", clearApproval);
+      browserNavigation?.removeEventListener("navigateerror", clearApproval);
       window.removeEventListener("popstate", confirmHistoryNavigation, true);
       document.removeEventListener("click", confirmInternalNavigation, true);
     };
-  }, [hasUnsavedChanges]);
+  }, [hasUnsavedChanges, routine]);
 
   const activeRows = routine[activeRole];
   const activeRoleInfo = roles.find((role) => role.key === activeRole) ?? roles[0]!;

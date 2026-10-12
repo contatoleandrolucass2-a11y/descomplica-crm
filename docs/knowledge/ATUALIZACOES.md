@@ -1,5 +1,26 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Confirmacao de saida nao pode cancelar o commit React
+
+- Fonte: revisao independente, `next/dist/client/components/app-router.js`,
+  RoutineSettings e regressao em Chromium. Status: correcao local validada;
+  novo candidato CI ainda pendente. Suite de navegador/servidor: 17/17.
+- Uma aprovacao expirada apos um segundo permitia repetir o aviso em um
+  history.pushState atrasado por 1,5 s. Recusar o segundo aviso impedia a URL
+  de acompanhar a navegacao. A regressao falhou antes e passou apos a correcao.
+- O HistoryUpdater do App Router atualiza pushState/replaceState durante
+  useInsertionEffect; cancelar esse evento nao desfaz o render React. Proteger
+  o gesto de saida antes desse commit e nunca cancelar push/replace
+  same-document nesse listener. Reload/traverse e beforeunload mantem guards.
+- A aprovacao acompanha o destino, encerra em sucesso/erro ou nova edicao e
+  dispensa prazo arbitrario. Reavaliar ao mudar Next.js, navegacao do shell ou
+  suporte da Navigation API. Essa excecao de fase de navegacao nao autoriza
+  sair de uma edicao sem confirmacao nem enfraquecer a autorizacao do servidor.
+- CI `38202252671` da versao anterior `dbc9e13` aprovou validate/restore na
+  tentativa 2. O HTTP 403 municipal da tentativa 1 foi transitorio: verificador
+  original passou localmente e depois na CI. Nao houve troca de politica,
+  fonte, hash ou gate; aprovacao anterior nao valida o fix novo.
+
 ## 2026-10-12: Conferencia atual antes de retomar a demanda
 
 - Fonte: `git fetch origin`, GitHub PR #183/CI `38184457031` e GET observacional

@@ -24,6 +24,15 @@
   em 1181 px. O menu flutuante cabia na viewport e aumentava o scrollWidth do
   nav; o gate agora distingue essa extensao medida de overflow real, sem
   alterar tolerancia ou referencias. Dezenove regressoes direcionadas passaram.
+- Revisao final encontrou uma aprovacao de saida com prazo de um segundo.
+  Chromium reproduziu o segundo aviso ao atrasar o pushState por 1,5 s. A
+  aprovacao agora acompanha o destino e termina em sucesso/erro ou nova edicao;
+  o guard nao cancela push/replace same-document durante o commit React.
+  Suite de navegador/servidor passou 17/17, com regressao vermelha antes do fix.
+- CI `38202252671` reexecutada aprovou validate e restore no candidato
+  `dbc9e13`. A primeira tentativa falhou por HTTP 403 transitorio da fonte
+  municipal; o mesmo verificador passou localmente e na tentativa 2, sem
+  trocar politica, fontes ou gates. A correcao final exige novo candidato CI.
 - Lint, tipos, recursos e build de 47 rotas aprovados. Suite Windows: 2.462
   aprovados, 19 skips previstos e 11 falhas (seis POSIX e cinco timeouts).
   Retestes de conhecimento/DevTools: 46/46; referencia: 15 aprovados e um skip.

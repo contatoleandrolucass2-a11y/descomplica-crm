@@ -316,6 +316,32 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     expect(prompts).toBe(3);
   });
 
+  it("confirms a slow client navigation only once before the delayed history update", async () => {
+    await openRoutine();
+    await page.evaluate(() => {
+      const link = document.createElement("a");
+      link.href = "/app/gestao";
+      link.textContent = "Navegação lenta";
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        setTimeout(() => history.pushState({}, "", link.href), 1_500);
+      });
+      document.body.prepend(link);
+    });
+    await page
+      .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
+      .fill("Edição QA");
+    let prompts = 0;
+    page.on("dialog", async (dialog) => {
+      prompts++;
+      if (prompts === 1) await dialog.accept();
+      else await dialog.dismiss();
+    });
+    await page.getByRole("link", { name: "Navegação lenta" }).click();
+    await browserExpect(page).toHaveURL("http://routine.test/app/gestao");
+    expect(prompts).toBe(1);
+  });
+
   it("marks inserted rows and later edits as unsaved instead of showing old success", async () => {
     await openRoutine();
     await page.getByRole("button", { name: "Salvar alterações" }).click();

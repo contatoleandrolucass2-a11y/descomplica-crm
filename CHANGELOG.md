@@ -6,6 +6,8 @@
   cada novo chat do CRM, com resultados e excecoes documentados no encerramento.
 - Protege edicoes pendentes da Rotina ao sair, recarregar ou voltar no historico
   e remove o link do hub quando a rotina estiver indisponivel.
+- Vincula a confirmacao de saida ao destino e evita um segundo aviso durante
+  a atualizacao do historico em navegacao lenta do App Router.
 - Corrige a verificacao de menus flutuantes no breakpoint de 1181 px, mantendo
   a rejeicao de overflow, recorte e texto excedente sem trocar referencias.
 
