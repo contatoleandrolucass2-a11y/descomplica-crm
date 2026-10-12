@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-12: Verificacao da atividade Salesforce
+
+- Confirmados browser e monitor ativos/habilitados na VPS, sem reinicios.
+  Sonda autenticada somente de metadados retornou connected em 18:16:48Z.
+- Documentado intervalo existente de 45 segundos mais duracao do ciclo;
+  nao e garantia de sessao permanente nem depende de movimentar o mouse.
+- Clarificados limites e gates para futura orquestracao n8n de 30 minutos.
+  Nenhuma exportacao, ingestao, politica de sessao ou servico foi alterado.
+
 ## 2026-10-12: Ativacao do console na VPS
 
 - PR #193 integrado, CI main 38279467083 integralmente aprovada e imagem

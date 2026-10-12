@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: Continuidade da sessao Salesforce
+
+- Documenta a atividade autenticada existente no monitor da VPS e seus limites.
+- Distingue conexao verificada de automacao n8n e publicacao dos relatórios.
+
 ## 2026-10-12: Console remoto ativado em producao
 
 - Publica o console da VPS dentro do CRM, com acesso Master e monitor de sessao.

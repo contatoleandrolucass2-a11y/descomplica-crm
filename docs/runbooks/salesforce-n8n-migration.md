@@ -77,6 +77,30 @@ historica e sinaliza a falha atual, sem declarar a base atualizada.
 
 ### Continuidade e limites
 
+O monitor existente realiza uma leitura autenticada dos metadados de um report
+e aguarda 45 segundos depois da verificacao e do envio do estado. O intervalo
+real inclui a duracao dessas requisicoes: nao e um prazo rigido de um minuto.
+Essa atividade ocorre na VPS, sem depender do PC do operador. Nao sao
+necessarios movimentos de mouse ou cliques artificiais, que nao comprovam
+atividade autenticada no servidor e podem acionar comandos na tela.
+
+Uma resposta conectada comprova acesso naquele instante, nao renovacao
+indefinida da sessao de interface. API e interface podem ter tipos de sessao
+distintos; expiracao, revogacao e nova MFA continuam sujeitas as politicas da
+organizacao. Nao alterar essas politicas para atender ao monitor. Fontes:
+[tipos de sessao](https://help.salesforce.com/s/articleView?id=sf.security_user_session_info.htm&language=en_US&type=5)
+e [limites de sessao](https://help.salesforce.com/s/articleView?id=000395202&language=en_US&type=1).
+
+O n8n nao e necessario para esse monitor. Pode orquestrar o coletor da VPS
+a cada 30 minutos, mas nao herda a sessao por abrir a pagina do CRM. Antes de
+ativar a agenda, configurar o disparo autenticado do coletor, validar os sete
+reports, conciliar a primeira carga e confirmar a publicacao final. Manter
+CDP e credenciais Salesforce fora do n8n e da internet publica; escolher uma
+unica autoridade de agenda/status, sem dois agendadores concorrentes. O
+snapshot anterior deve permanecer disponivel quando uma coleta falhar. O
+[Schedule Trigger](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.scheduletrigger/)
+permite intervalos em minutos, mas sua presenca nao prova o fluxo ponta a ponta.
+
 O coletor e o Chrome precisam permanecer ligados na mesma maquina. Com o PC
 desligado, somente um servidor com sessao grafica dedicada e login/MFA manual
 aprovado pelo operador pode manter essa modalidade em execucao. Um servidor

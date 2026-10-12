@@ -1,5 +1,44 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Conferencia de atividade da sessao Salesforce
+
+- Abertura em 18:15Z: checkout codex/salesforce-console-vps-evidencias em
+  892c31cec3a6f17f01a8374d746a651cd8341a38; origin/main em
+  5bf62134b1a7290f042cd68e29019aa69bc9ac64. Git fetch e GitHub PR #194
+  confirmam PR documental aberto, CI 38284524348 concluida com sucesso.
+  Health publico ok/1dd58c46e53281943ea68378efc4e8b3473c395c: a versao
+  publicada e distinta de main e do checkout documental.
+- Fontes: Git local/remoto, API publica GitHub, /api/health e systemctl via
+  SSH observacional. Browser e monitor ativos, ambos sem reinicios; monitor
+  ativo desde 17:21:31Z. Codigo de main aguarda 45 segundos apos cada ciclo.
+  Nenhum dado exportado nesta verificacao.
+- Sonda existente executada como usuario dedicado, sem imprimir credenciais,
+  retornou connected em 18:16:48.651Z e 18:18:02.464Z. Browser e monitor
+  habilitados no boot. Intervalo configurado no arquivo realmente executado:
+  45 segundos depois do ciclo; a duracao de rede impede afirmar prazo rigido
+  de um minuto. Sem cliques artificiais, alteracao de politica ou novo daemon.
+- Decisao: preservar o monitor ja ativo. API acessivel nao comprova renovacao
+  indefinida da sessao de interface. Fontes oficiais Salesforce de tipos e
+  limites de sessao e n8n Schedule Trigger vinculadas no runbook atualizado.
+  N8n pode orquestrar o coletor, mas esta tarefa nao configura nem ativa fluxos,
+  exportacoes ou ingestao. Validar sete reports e primeira carga antes da agenda.
+- Limite de verificacao: guia Chrome anterior fechada e nova guia respondeu
+  timeout no controle do navegador. Nao houve captura visual nova; a prova
+  atual e a resposta sanitizada da sonda na VPS, nao apenas o print do usuario.
+  Reavaliar a UI quando o controle estiver disponivel. Nenhuma alteracao de
+  confianca, perfil ou permissao para contornar essa indisponibilidade.
+- Testes focados connection-monitor.node-test.mjs: oito aprovados. Node
+  24.19.0/pnpm 11.20.0: lint aprovado com um aviso preexistente, typecheck e
+  build aprovados. pnpm test: 2522 passaram, 22 skips e seis falhas em quatro
+  arquivos de contratos POSIX/permissoes/caminhos no Windows. Os estagios Node
+  e release encadeados nao rodaram apos a falha Vitest; nao afirmar suite verde.
+  Formatacao dos quatro documentos e git diff --check aprovados.
+- Conferencia final: health permanece ok/1dd58c4. CI push/main 38285832880 de
+  5bf6213 esta em failure, sem investigar escopo externo nesta tarefa; essa
+  revisao nao foi promovida aqui. PR documental #194 tinha CI verde em 892c31c;
+  o novo registro exige sua propria CI, sem aproveitar a aprovacao anterior.
+  Publicacao limitada ao Git, sem deploy, coleta, migration ou restart.
+
 ## 2026-10-12: Console integrado publicado e aguardando MFA
 
 - Fonte: PR #193, CI main 38279467083, coordenador release:production e
