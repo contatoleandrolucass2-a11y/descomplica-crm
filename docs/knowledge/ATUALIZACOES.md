@@ -1,5 +1,45 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Planilha de Rotina implementada, aguardando CI
+
+- Fonte visual: navegador Chrome, consulta somente leitura a
+  https://descomplicapro.com.br/configuracoes/metas/parcerias. Estilos computados
+  confirmaram Geist, superficie #0e2135, grade #29435b e destaque em gradiente
+  #176f8a/#123b63 com bordas #62d8ff. Nenhum ajuste na referencia externa.
+- Implementacao restrita a Gestao > Rotina: celulas continuas, sem caixas
+  individuais, texto integral com autoaltura e dia atual em America/Sao_Paulo.
+  Selo Hoje e aria-current indicam o destaque tambem sem depender apenas da cor.
+  Conteudo, abas, salvar local, inserir e protecao de alteracoes preservados.
+- Evidencias locais: lint, typecheck, build e resources:check aprovados.
+  Chromium: 16 testes aprovados em repeticao isolada, incluindo sete dias,
+  virada de meia-noite local, tres temas, mobile e desktop. Capturas em
+  test-results/routine-preview, sem dados reais. Primeira execucao teve timeout
+  ao fechar Chromium durante carga concorrente; segunda terminou normalmente.
+- pnpm test no Windows: 2464 aprovados, 22 ignorados e nove falhas. Seis sao
+  verificacoes POSIX de permissoes/ownership; tres sao timeouts em Obsidian e
+  DevTools, com repeticao isolada em andamento. Linux CI continua obrigatoria;
+  nenhum gate foi reduzido nem falha marcada artificialmente como sucesso.
+- CI anterior 38221618183: artefato comprova falha na etapa connected-systems,
+  enquanto Rotina passou em 15 combinacoes. Mensagem sanitizada nao preservou
+  a assercao original; corrida durante transicao de tema e apenas hipotese.
+- Limites: sem alteracao de backend/dados; salvamento permanece neste navegador.
+  Novo layout ainda nao publicado. Integracao, CI e promocao pendentes.
+
+## 2026-10-12: Abertura da revisao visual da Rotina
+
+- Fonte: git fetch origin, GitHub CI `38221618183` e health publico consultados
+  em `2026-10-12T11:46:19Z`. Main/local em `2a18956` (fechamento documental);
+  site HTTP 200, status ok, versao publicada `7c6dce5`.
+- CI de main documental aprovou validate, restore e imagem, mas falhou na
+  matriz visual. Causa ainda nao apurada; nao reutilizar essa rodada como
+  aprovacao de interface. A versao publicada conserva sua CI anterior aprovada.
+- Novo pedido: Rotina com aparencia de planilha, celulas continuas e destaque
+  do dia atual inspirado no segundo print. Conteudo, edicao, inserir e salvar
+  devem permanecer. O site descomplicapro.com.br/configuracoes/metas/parcerias
+  foi autorizado somente para consulta visual; nenhuma alteracao nesse destino.
+- Status: conferencia inicial concluida, implementacao e novos testes pendentes.
+  Consulta web da referencia sofreu timeout; navegador sera a alternativa de leitura.
+
 ## 2026-10-12: Rotina publicada e conhecimento sincronizado
 
 - Status: integrado e publicado. Esta conclusao sucede os estados pendentes

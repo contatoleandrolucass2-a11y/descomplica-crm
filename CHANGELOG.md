@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-12: Rotina em planilha
+
+- Substitui caixas individuais por celulas continuas, linhas autoajustaveis e
+  foco na celula, preservando todas as atividades e o salvamento local.
+- Destaca o dia atual no fuso de Sao Paulo com coluna ciano e selo Hoje,
+  inspirado na referencia de metas de parcerias consultada somente em leitura.
+- Confere a virada do dia, os sete dias e o estilo da grade nos tres temas.
+
 ## 2026-10-12: Rotina publicada
 
 - Publica Gestao > Rotina na versao `7c6dce5`, com CI integral aprovada,

@@ -166,10 +166,89 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browser?.close();
   });
 
+  it("highlights the Sao Paulo weekday and rolls over at local midnight", async () => {
+    await openRoutine({ clock: "2026-10-12T02:59:50Z" });
+    await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+    await browserExpect(page.locator('thead [aria-current="date"]')).toContainText("Domingo");
+    await page.clock.fastForward(31_000);
+    await browserExpect(page.locator('thead [aria-current="date"]')).toContainText("Segunda-feira");
+    for (const [offset, day] of [
+      "Segunda-feira",
+      "Terça-feira",
+      "Quarta-feira",
+      "Quinta-feira",
+      "Sexta-feira",
+      "Sábado",
+      "Domingo",
+    ].entries()) {
+      await page.clock.setSystemTime(new Date(Date.UTC(2026, 9, 12 + offset, 15)));
+      await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+      await browserExpect(page.locator('thead [aria-current="date"]')).toContainText(day);
+      await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(26);
+      expect(
+        await page
+          .locator("tbody td[data-today]")
+          .evaluateAll(
+            (cells, day) => cells.every((cell) => cell.getAttribute("data-label") === day),
+            day,
+          ),
+      ).toBe(true);
+    }
+  });
+
+  it("renders continuous spreadsheet cells in every theme without hiding text", async () => {
+    await openRoutine();
+    await mkdir("test-results/routine-preview", { recursive: true });
+    for (const theme of ["light", "balanced", "dark"]) {
+      await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), theme);
+      for (const width of [1440, 390]) {
+        await page.setViewportSize({ width, height: 1000 });
+        await browserExpect
+          .poll(() =>
+            page
+              .locator("textarea")
+              .evaluateAll((fields) =>
+                fields.every((field) => field.scrollHeight <= field.clientHeight + 1),
+              ),
+          )
+          .toBe(true);
+        const style = await page
+          .locator("textarea")
+          .first()
+          .evaluate((field) => {
+            const css = getComputedStyle(field);
+            return {
+              radius: css.borderRadius,
+              border: css.borderTopWidth,
+              background: css.backgroundColor,
+              resize: css.resize,
+            };
+          });
+        expect(style).toEqual({
+          radius: "0px",
+          border: "0px",
+          background: "rgba(0, 0, 0, 0)",
+          resize: "none",
+        });
+        await page.locator("thead").scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: `test-results/routine-preview/planilha-${theme}-${width}.png`,
+        });
+      }
+    }
+  });
+
   async function openRoutine(
-    options: { stored?: string; getError?: boolean; setError?: boolean; holdLoad?: boolean } = {},
+    options: {
+      stored?: string;
+      getError?: boolean;
+      setError?: boolean;
+      holdLoad?: boolean;
+      clock?: string;
+    } = {},
   ) {
     page = await browser.newPage();
+    if (options.clock) await page.clock.install({ time: new Date(options.clock) });
     const errors: string[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.route("http://routine.test/**", (route) => {
