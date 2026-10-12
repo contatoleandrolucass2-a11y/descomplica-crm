@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: Validacao da Rotina compacta
+
+- Registra aprovacao do PR #192 e bloqueio posterior da publicacao na CI de
+  main por teste de timeout do gateway Salesforce. Sem novo deploy da Rotina.
+
 ## 2026-10-12: Rotina semanal e diaria compacta
 
 - Alterna entre planilha de segunda a sabado e atividades do dia atual.

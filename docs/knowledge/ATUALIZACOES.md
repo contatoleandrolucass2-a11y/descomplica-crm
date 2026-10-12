@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Rotina integrada; publicacao bloqueada pela CI de main
+
+- PR #192 integrado em main 5bf62134b1a7290f042cd68e29019aa69bc9ac64.
+  CI do PR 38282502810 aprovada em validate, release-gates e isolated-restore.
+  Artefato visual 11763311230 confirma 30 combinacoes da Rotina e 26 linhas;
+  capturas de Semana desktop e Hoje mobile inspecionadas. Suite Chromium
+  isolada: 22/22. Build atualizado: 49 rotas; lint e typecheck aprovados.
+- CI de main 38285832880 falhou duas vezes no teste existente
+  ops/salesforce/console-gateway.node-test.mjs:377, bounded auth timeout
+  releases a pending reservation: signal.aborted era false ao encerrar o
+  cliente. Jobs 114933859265 e 114936201184. Teste isolado local passou;
+  isso nao invalida a falha Linux nem comprova sua causa. Ha timers de socket
+  e autorizacao concorrentes, mas a causalidade exige investigacao especifica.
+- Nenhum gate foi relaxado. Imagem promotable nao foi produzida e nao houve
+  deploy desta entrega. Revisar o bloqueio somente apos corrigir/reproduzir o
+  teste e aprovar todos os gates do SHA a publicar. PR #190 encerrado como
+  substituido, com registros preservados no #192.
+- Conferencia final via GitHub e GET /api/health em 12/10/2026: main 5bf6213,
+  site saudavel em 1dd58c46e53281943ea68378efc4e8b3473c395c (publicacao
+  externa a esta tarefa). Nao confundir versao integrada com publicada.
+  Edicoes da Rotina continuam locais ao navegador, sem persistencia compartilhada.
+- Suite Windows final: 2523 aprovados, 27 skips, seis falhas POSIX e dois
+  timeouts de project-devtools; repeticao isolada deste ultimo passou 24/24.
+  CI Linux aprovada do PR permanece a evidencia integral anterior ao merge.
+
 ## 2026-10-12: Integracao final da Rotina com main atualizado
 
 - Main avancou para 1dd58c4 (PR #193) durante a tarefa. Conflitos restritos
