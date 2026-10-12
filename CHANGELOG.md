@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-12: Validacao visual do console
+
+- Aguarda transicoes de tema na matriz sintetica e detalha falhas de contraste.
+
 ## 2026-10-12: Conexao Salesforce pela VPS no CRM
 
 - Adiciona console remoto protegido para o Master autenticar no Salesforce

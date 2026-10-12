@@ -259,6 +259,12 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
     for (const width of [320, 768, 1440]) {
       await page.setViewportSize({ width, height: width === 320 ? 640 : 900 });
       await page.clock.runFor(100);
+      // Theme transitions use the compositor clock, not Playwright's mocked timers.
+      await page.evaluate(async () => {
+        await Promise.all(
+          document.getAnimations().map((animation) => animation.finished.catch(() => {})),
+        );
+      });
       const rect = await canvas.boundingBox();
       assert.ok(
         rect &&
@@ -272,12 +278,15 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
         false,
       );
       const axe = await new AxeBuilder({ page }).include("dialog").analyze();
+      await page.screenshot({ path: path.join(directory, `console-${theme}-${width}.png`) });
       assert.deepEqual(
-        axe.violations.map(({ id }) => id),
+        axe.violations.map(({ id, nodes }) => ({
+          id,
+          nodes: nodes.map(({ target, failureSummary }) => ({ target, failureSummary })),
+        })),
         [],
         `Console axe ${theme}/${width}`,
       );
-      await page.screenshot({ path: path.join(directory, `console-${theme}-${width}.png`) });
     }
   }
   await page.keyboard.press("Tab");

@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-12: Estabilizacao da matriz do console
+
+- CI 38271515539: validate aprovado; release-gates interrompido por contraste
+  no tema claro/320px. Nenhuma promocao realizada.
+- QA aguarda as transicoes reais de tema antes do axe e registra os elementos
+  e cores da falha. Mantidas todas as assercoes de acessibilidade.
+
 ## 2026-10-12: Console Salesforce integrado ao CRM
 
 - Implementacao solicitada: autenticar manualmente no Chrome persistente da

@@ -1,5 +1,16 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Primeiro gate do PR #193
+
+- Fonte: GitHub Actions 38271515539, job validate aprovado e release-gates
+  114888030823 reprovado em Console axe light/320, color-contrast, 15:41Z.
+- A repeticao local completa passou. O teste trocava dark -> light e aguardava
+  100ms no relogio simulado, enquanto globals.css aplica transicoes de 160ms
+  no compositor. QA agora aguarda animation.finished e inclui nos erros o
+  elemento e failureSummary; nenhuma regra axe foi excluida.
+- Confirmacao definitiva depende da repeticao Linux. Producao nao alterada;
+  pareamento, gateway, Nginx e login continuam pendentes dos gates.
+
 ## 2026-10-12: Candidato do console integrado Salesforce
 
 - Fonte: branch codex/salesforce-console-integrado, base main caac544,
