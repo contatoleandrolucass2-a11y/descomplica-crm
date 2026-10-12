@@ -8,6 +8,8 @@
   e cores da falha. Mantidas todas as assercoes de acessibilidade.
 - Repeticao 38272615268: validate aprovado; mesma corrida tambem na matriz
   da pagina anterior ao console. Espera compartilhada aplicada as duas matrizes.
+- Log 38273862007 confirmou cor intermediaria #6d7886 em vez de #68727f.
+  Espera agora cobre transicoes herdadas iniciadas apos a primeira leva.
 
 ## 2026-10-12: Console Salesforce integrado ao CRM
 

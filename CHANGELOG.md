@@ -4,6 +4,7 @@
 
 - Aguarda transicoes de tema na matriz sintetica e detalha falhas de contraste.
 - Sincroniza tambem a matriz da pagina de integracoes antes de abrir o console.
+- Confere o fim das transicoes herdadas antes de medir contraste.
 
 ## 2026-10-12: Conexao Salesforce pela VPS no CRM
 

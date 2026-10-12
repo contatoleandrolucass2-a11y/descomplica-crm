@@ -11,16 +11,19 @@ import { WebSocketServer } from "ws";
 
 async function settleTheme(page) {
   // CSS transitions use the compositor clock, not Playwright's mocked timers.
-  await page.evaluate(async () => {
-    // Flush styles so the changed theme has created its transitions.
-    getComputedStyle(document.body).color;
-    await Promise.all(
-      document
-        .getAnimations()
-        .filter((animation) => animation instanceof CSSTransition)
-        .map((animation) => animation.finished.catch(() => {})),
-    );
-  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        // Inherited colors can start descendant transitions after the first batch ends.
+        for (const element of document.querySelectorAll("body *")) getComputedStyle(element).color;
+        return document
+          .getAnimations()
+          .filter(
+            (animation) => animation instanceof CSSTransition && animation.playState !== "finished",
+          ).length;
+      }),
+    )
+    .toBe(0);
 }
 
 export async function checkConnectedSystems(page, origin, outputDirectory) {

@@ -2,6 +2,11 @@
 
 ## 2026-10-12: Primeiro gate do PR #193
 
+- Evidencia 38273862007/job114896148359: status do console medido em #6d7886
+  sobre branco (4.48), enquanto o token final e #68727f. A espera por uma leva
+  de animation.finished nao cobriu novas transicoes herdadas. QA passa a
+  consultar estilos e aguardar zero CSSTransition pendentes em toda a arvore.
+  Contraste minimo 4.5 preservado; produto e cores nao foram alterados.
 - Repeticao 38272615268: fonte Prefeitura retornou 403 transitorio, sem
   dispensar a consulta; reexecucao aprovada. Job validate verde. Release-gates
   114892885508 falhou antes do console, Axe dark/320 na pagina base. A mesma
