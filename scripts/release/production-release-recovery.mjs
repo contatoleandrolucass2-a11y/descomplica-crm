@@ -4,8 +4,8 @@ import { assertFreshObservation, validateDeploymentState } from "./production-re
 // Caller holds the shared host lock. A pending transaction survives crashes;
 // recovery can only restore that transaction's exact recorded previous image.
 export async function recoverRelease(deploymentId, io) {
-  const state = validateDeploymentState(await io.readState(), io.now());
-  const pending = state.inProgress;
+  let state = validateDeploymentState(await io.readState(), io.now());
+  let pending = state.inProgress;
   const previous = state.release;
   if (
     !pending ||
@@ -15,7 +15,9 @@ export async function recoverRelease(deploymentId, io) {
   )
     throw new Error("Recovery requires the exact pending deployment and previous release.");
 
-  const boundarySha = pending.operation === "deploy" ? pending.targetSha : pending.expectedSha;
+  // A recovery always runs from the candidate checkout that created this intent.
+  // The rollback phase changes neither the candidate nor the recorded previous image.
+  const boundarySha = pending.targetSha;
   await io.prepare(
     {
       operation: "rollback",
@@ -40,6 +42,25 @@ export async function recoverRelease(deploymentId, io) {
     )
       throw new Error("Recovery found an unrelated production container.");
   }
+  const previousRunning =
+    observation.container?.containerSha === previous.sha &&
+    observation.container?.containerImageId === previous.imageId &&
+    observation.container?.running === true;
+  const abortUnstartedDeployment = previousRunning && pending.operation === "deploy";
+  if (!abortUnstartedDeployment) {
+    // Persist the recovery phase before changing production. If recovery dies
+    // after restoring the previous image, a retry must issue a new receipt rather
+    // than mistake that restored image for an unstarted deployment.
+    const recoveringState = {
+      ...state,
+      inProgress: { ...pending, operation: "rollback" },
+    };
+    validateDeploymentState(recoveringState, io.now());
+    await io.writeState(state, recoveringState);
+    state = recoveringState;
+    pending = recoveringState.inProgress;
+    assertFreshObservation(observation, io.now());
+  }
   let beforeWriteCompleted = false;
   await io.bind(
     {
@@ -56,23 +77,21 @@ export async function recoverRelease(deploymentId, io) {
     },
   );
   if (!beforeWriteCompleted) throw new Error("Recovery before-write validation is required.");
-  if (
-    observation.container?.containerSha === previous.sha &&
-    observation.container?.containerImageId === previous.imageId &&
-    observation.container?.running === true
-  ) {
+  if (abortUnstartedDeployment) {
     await io.verify(previous.sha, previous.imageId);
     await io.writeState(state, { ...state, inProgress: null });
     return { status: "aborted", release: previous };
   }
-  let beforeStartCompleted = false;
-  await io.up(pending, previous.sha, async () => {
-    if (beforeStartCompleted) throw new Error("Recovery before-start validation must run once.");
-    await io.writeState(state, state);
-    assertFreshObservation(observation, io.now());
-    beforeStartCompleted = true;
-  });
-  if (!beforeStartCompleted) throw new Error("Recovery before-start validation is required.");
+  if (!previousRunning) {
+    let beforeStartCompleted = false;
+    await io.up(pending, previous.sha, async () => {
+      if (beforeStartCompleted) throw new Error("Recovery before-start validation must run once.");
+      await io.writeState(state, state);
+      assertFreshObservation(observation, io.now());
+      beforeStartCompleted = true;
+    });
+    if (!beforeStartCompleted) throw new Error("Recovery before-start validation is required.");
+  }
   await io.verify(previous.sha, previous.imageId);
   const restoredDeploymentId = io.id();
   const completedAt = io.now();

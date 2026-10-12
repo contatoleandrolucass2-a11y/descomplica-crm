@@ -52,12 +52,13 @@ function harness({ environment = "target", container = "target", healthyPrevious
     clock: minute + 10_000,
     state: pendingState(),
     environmentSha: environment === "previous" ? previousSha : targetSha,
-    container:
+    container: structuredClone(
       container === "missing"
         ? null
         : container === "previous"
           ? previousContainer
           : targetContainer,
+    ),
     healthSha: healthy ? previousSha : null,
     publicHealthSha: healthy ? previousSha : null,
     events: [],
@@ -118,6 +119,7 @@ function harness({ environment = "target", container = "target", healthyPrevious
       system.container = structuredClone(previousContainer);
       system.healthSha = previousSha;
       system.publicHealthSha = previousSha;
+      await system.hooks.afterUp?.();
     },
     verify: async (sha, imageId) => {
       system.events.push("verify");
@@ -130,7 +132,11 @@ function harness({ environment = "target", container = "target", healthyPrevious
       assert.equal(system.publicHealthSha, previousSha);
     },
     writeState: async (expected, next) => {
-      const kind = isDeepStrictEqual(expected, next) ? "cas" : "complete";
+      const kind = isDeepStrictEqual(expected, next)
+        ? "cas"
+        : next.inProgress === null
+          ? "complete"
+          : "recovery-marker";
       system.events.push(kind);
       await system.hooks.write?.(kind, expected, next);
       if (!isDeepStrictEqual(system.state, expected)) throw new Error("Recovery CAS rejected.");
@@ -145,8 +151,10 @@ function harness({ environment = "target", container = "target", healthyPrevious
   return system;
 }
 
-function assertPending(system) {
-  assert.deepEqual(system.state, pendingState());
+function assertPending(system, operation = "rollback") {
+  const expected = pendingState();
+  expected.inProgress.operation = operation;
+  assert.deepEqual(system.state, expected);
 }
 
 test("recovers every previous/target environment with a previous/target/missing container", async () => {
@@ -168,6 +176,7 @@ test("recovers every previous/target environment with a previous/target/missing 
         assert.equal(result.status, "aborted");
         assert.deepEqual(result.release, pendingState().release);
         assert.equal(system.events.includes("up"), false);
+        assert.equal(system.events.includes("recovery-marker"), false);
         assert.equal(system.idCalls, 0);
       } else {
         assert.equal(result.status, "recovered");
@@ -209,9 +218,8 @@ test("recovery uses only the exact recorded previous image and the pending check
   for (const operation of ["deploy", "rollback"]) {
     const system = harness();
     system.state.inProgress.operation = operation;
-    const boundarySha = operation === "deploy" ? targetSha : previousSha;
-    system.hooks.prepare = (options) => assert.equal(options.expectedSha, boundarySha);
-    system.hooks.bind = (options) => assert.equal(options.boundarySha, boundarySha);
+    system.hooks.prepare = (options) => assert.equal(options.expectedSha, targetSha);
+    system.hooks.bind = (options) => assert.equal(options.boundarySha, targetSha);
     await recoverRelease(pendingId, system.io);
   }
 });
@@ -254,7 +262,7 @@ test("unrelated environment or container identity blocks recovery before mutatio
     await assert.rejects(recoverRelease(pendingId, system.io), /unrelated/);
     assert.equal(system.events.includes("bind"), false);
     assert.equal(system.writes.length, 0);
-    assertPending(system);
+    assertPending(system, "deploy");
   }
 });
 
@@ -265,7 +273,7 @@ test("stale observations and minute changes before writing keep the pending tran
       system.clock = minute + 60_000;
     };
     await assert.rejects(recoverRelease(pendingId, system.io), /publication minute/);
-    assertPending(system);
+    assertPending(system, phase === "observe" ? "deploy" : "rollback");
     assert.equal(system.events.includes("environment-write"), false);
     assert.equal(system.events.includes("container-start"), false);
   }
@@ -333,7 +341,7 @@ test("aborting an unstarted release still requires health verification before cl
     throw new Error("Previous release health changed after observation.");
   };
   await assert.rejects(recoverRelease(pendingId, system.io), /health changed/);
-  assertPending(system);
+  assertPending(system, "deploy");
   assert.equal(system.events.includes("up"), false);
 });
 
@@ -381,4 +389,141 @@ test("the final recovery receipt cannot overwrite an intent changed after health
   await assert.rejects(recoverRelease(pendingId, system.io), /CAS rejected/);
   assert.equal(system.state.inProgress.deploymentId, unrelatedId);
   assert.deepEqual(system.state.release, pendingState().release);
+});
+
+test("persists the recovery phase before binding or starting and preserves the original intent", async () => {
+  const system = harness();
+  system.hooks.bind = (options) => {
+    assertPending(system);
+    assert.equal(options.boundarySha, targetSha);
+  };
+  system.hooks.up = () => assertPending(system);
+  await recoverRelease(pendingId, system.io);
+  const marker = system.writes.find((write) => write.kind === "recovery-marker");
+  assert.deepEqual(marker.expected, pendingState());
+  const marked = pendingState();
+  marked.inProgress.operation = "rollback";
+  assert.deepEqual(marker.next, marked);
+  assert.equal(system.events.indexOf("recovery-marker") < system.events.indexOf("bind"), true);
+  assert.equal(system.events.indexOf("recovery-marker") < system.events.indexOf("up"), true);
+});
+
+test("a retry after the previous image starts records recovery without starting that image again", async () => {
+  const system = harness();
+  system.hooks.afterUp = () => {
+    throw new Error("Coordinator died after the previous image started.");
+  };
+  await assert.rejects(recoverRelease(pendingId, system.io), /Coordinator died/);
+  assertPending(system);
+  assert.equal(system.container.containerSha, previousSha);
+  assert.equal(system.container.running, true);
+  assert.equal(system.events.filter((event) => event === "up").length, 1);
+  assert.equal(system.idCalls, 0);
+
+  delete system.hooks.afterUp;
+  system.clock += 60_000;
+  system.hooks.prepare = (options) => assert.equal(options.expectedSha, targetSha);
+  system.hooks.bind = (options) => assert.equal(options.boundarySha, targetSha);
+  const result = await recoverRelease(pendingId, system.io);
+  assert.equal(result.status, "recovered");
+  assert.equal(result.release.deploymentId, recoveryId);
+  assert.equal(result.release.deployedAt, new Date(system.clock).toISOString());
+  assert.notEqual(result.release.deploymentId, previousId);
+  assert.notEqual(result.release.deployedAt, pendingState().release.deployedAt);
+  assert.equal(system.events.filter((event) => event === "up").length, 1);
+  assert.equal(system.state.inProgress, null);
+});
+
+test("a persisted recovery marker survives a lost acknowledgement before bind", async () => {
+  const system = harness();
+  const writeState = system.io.writeState;
+  system.io.writeState = async (expected, next) => {
+    await writeState(expected, next);
+    if (expected.inProgress?.operation === "deploy" && next.inProgress?.operation === "rollback") {
+      throw new Error("Recovery marker acknowledgement was lost.");
+    }
+  };
+  await assert.rejects(recoverRelease(pendingId, system.io), /acknowledgement was lost/);
+  assertPending(system);
+  assert.equal(system.events.includes("bind"), false);
+  assert.equal(system.events.includes("up"), false);
+  system.io.writeState = writeState;
+  const result = await recoverRelease(pendingId, system.io);
+  assert.equal(result.status, "recovered");
+  assert.equal(system.events.filter((event) => event === "up").length, 1);
+});
+
+test("a crash after the marker but before binding resumes from the candidate checkout", async () => {
+  const system = harness();
+  system.hooks.bind = () => {
+    throw new Error("Coordinator died before binding.");
+  };
+  await assert.rejects(recoverRelease(pendingId, system.io), /before binding/);
+  assertPending(system);
+  assert.equal(system.events.includes("up"), false);
+  delete system.hooks.bind;
+  system.hooks.prepare = (options) => assert.equal(options.expectedSha, targetSha);
+  system.hooks.bind = (options) => assert.equal(options.boundarySha, targetSha);
+  assert.equal((await recoverRelease(pendingId, system.io)).status, "recovered");
+});
+
+test("verification and final CAS failures resume with a new receipt without repeating Compose", async () => {
+  for (const phase of ["verify", "complete"]) {
+    const system = harness();
+    if (phase === "verify") {
+      system.hooks.verify = () => {
+        throw new Error("Recovery health verification interrupted.");
+      };
+    } else {
+      system.hooks.write = (kind) => {
+        if (kind === "complete") throw new Error("Recovery final CAS interrupted.");
+      };
+    }
+    await assert.rejects(recoverRelease(pendingId, system.io), /interrupted/);
+    assertPending(system);
+    assert.equal(system.container.containerSha, previousSha);
+    assert.equal(system.container.running, true);
+    delete system.hooks.verify;
+    delete system.hooks.write;
+    system.clock += 60_000;
+    const result = await recoverRelease(pendingId, system.io);
+    assert.equal(result.status, "recovered");
+    assert.equal(result.release.deploymentId, recoveryId);
+    assert.equal(result.release.deployedAt, new Date(system.clock).toISOString());
+    assert.equal(system.events.filter((event) => event === "up").length, 1);
+    assert.equal(system.state.inProgress, null);
+  }
+});
+
+test("a marker write failure leaves the original deploy intent and performs no production mutation", async () => {
+  const system = harness();
+  system.hooks.write = (kind) => {
+    if (kind === "recovery-marker") throw new Error("Recovery marker write failed.");
+  };
+  await assert.rejects(recoverRelease(pendingId, system.io), /marker write failed/);
+  assertPending(system, "deploy");
+  assert.equal(system.events.includes("bind"), false);
+  assert.equal(system.events.includes("up"), false);
+});
+
+test("expiration during the marker CAS leaves a resumable recovery phase without binding", async () => {
+  const system = harness();
+  system.hooks.write = (kind) => {
+    if (kind === "recovery-marker") system.clock = minute + 60_000;
+  };
+  await assert.rejects(recoverRelease(pendingId, system.io), /publication minute/);
+  assertPending(system);
+  assert.equal(system.events.includes("bind"), false);
+  assert.equal(system.events.includes("up"), false);
+});
+
+test("the marker CAS cannot replace another publisher's pending transaction", async () => {
+  const system = harness();
+  system.hooks.write = (kind) => {
+    if (kind === "recovery-marker") system.state.inProgress.deploymentId = unrelatedId;
+  };
+  await assert.rejects(recoverRelease(pendingId, system.io), /CAS rejected/);
+  assert.equal(system.state.inProgress.deploymentId, unrelatedId);
+  assert.equal(system.state.inProgress.operation, "deploy");
+  assert.equal(system.events.includes("bind"), false);
 });

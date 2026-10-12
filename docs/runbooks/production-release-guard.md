@@ -116,13 +116,22 @@ sudo pnpm release:production status
 sudo pnpm release:production recover --deployment-id "$pending_deployment_id"
 ```
 
-A recuperação usa a mesma trava e aceita somente o ambiente/container da
+A recuperação usa as mesmas travas e aceita somente o ambiente/container da
 tentativa ou da versão anterior registrada; divergência externa bloqueia. Ela
 restaura por CAS a imagem anterior, verifica ambos os health e só então limpa
-a pendência. Se o container anterior continuou executando, verifica sua saúde
+a pendência. Se o container anterior continuou executando desde a tentativa
+inicial, verifica sua saúde
 e preserva deployment ID/data originais (`aborted`), inclusive diante de um
-timeout HTTP transitório. Se precisou restabelecer o runtime, grava novo
-deployment ID e horário de conclusão (`recovered`). Falha mantém a pendência.
+timeout HTTP transitório. Antes de restabelecer o runtime, persiste
+`inProgress.operation: rollback` por CAS. Os campos `targetSha`/`targetImageId`
+continuam identificando o candidato original; `release` identifica a versão
+anterior a restaurar. O checkout exigido continua sendo o candidato original.
+
+Ao retomar essa fase, mesmo que a imagem anterior já esteja executando, verifica
+a saúde e grava novo deployment ID e horário da conclusão verificada
+(`recovered`), sem repetir o Compose. Esse horário não é uma estimativa do
+primeiro `up` interrompido. Assim, uma sequência A → B → A não reutiliza o
+recibo de A após uma interrupção. Falha mantém a pendência e a fase persistida.
 
 Não há `rollback` genérico capaz de publicar uma imagem sem CI. Depois de uma
 release concluída, a correção/reversão segue PR, CI completa em `main` e nova

@@ -28,7 +28,7 @@
 - Node 24.19.0, pnpm 11.20.0, instalação frozen, resources doctor, formato,
   lint, tipos, build e fontes documentais aprovados. Vitest: 126 arquivos,
   2.461 testes aprovados e nove skips da plataforma; Salesforce Node: 83.
-  Guard: 86 testes aprovados em Linux isolado, sem skips, sem rede e sem acesso
+  Guard: 94 testes aprovados em Linux isolado, sem skips, sem rede e sem acesso
   à VPS. Audit, Gitleaks e OSV sem achados; actionlint aprovado.
 - O baseline macOS expôs caminhos temporários com alias e grupo herdado
   diferentes do esperado por testes POSIX existentes. A suíte completa passou
@@ -44,6 +44,11 @@
   coordenador adquire as três e transmite todos os descritores ao Docker para
   respeitar os fluxos anteriores. O health servia `f84867d`; nenhum ledger da
   data real existia no caminho esperado. Não foi fabricada data de bootstrap.
+- A recuperação agora persiste sua fase antes de bind/Compose. Se houver uma
+  interrupção após restaurar a imagem anterior, a retomada verifica a saúde e
+  grava novo ID e horário de conclusão, sem repetir o Compose. Oito regressões
+  adicionais cobrem falhas antes/depois da restauração e do CAS final; uma
+  sequência A → B → A não reaproveita o recibo antigo após um crash.
 
 ## 2026-10-12: Caixas diretas e padrão do perfil em Usuários
 
