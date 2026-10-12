@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-12: Planilha de Rotina publicada
+
+- PR #188 integrado e versao `83592ab` publicada pelo coordenador em
+  `2026-10-12T13:19:10.060Z`, deployment `48a08b2c-d4fe-4331-a710-5fdcb46f6d4c`.
+- CI do PR `38246693168` aprovada; CI final `38250580690`, tentativa 2,
+  aprovou os quatro jobs. Preparacao do pnpm falhou na primeira tentativa do
+  restore; repeticao isolada passou sem alterar os gates.
+- Imagem imutavel, 11 camadas, dois perfis e backup verificados. Health na
+  versao nova, container saudavel e acessos anonimos negados.
+- Smoke autenticado confirmou a grade continua, coluna Hoje, seis funcoes,
+  26 linhas e 74 atividades. Nenhuma mutacao no navegador de producao.
+- Helper externo encontrou Docker ainda starting apos o deploy concluido;
+  releitura confirmou healthy, sem reinicios. Evidencia detalhada no conhecimento.
+- Fechamento apenas documental, com sincronizacao do Obsidian, sem novo deploy.
+
 ## 2026-10-12: Redesenho da planilha de Rotina
 
 - Escopo: apenas Gestao > Rotina e seus testes. Referencia externa consultada

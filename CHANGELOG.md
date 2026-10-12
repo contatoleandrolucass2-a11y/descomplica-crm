@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-12: Planilha de Rotina em producao
+
+- Publica a grade continua e o destaque do dia na versao `83592ab`, apos CI
+  integral, verificacao da imagem, backup e promocao protegida.
+- Confirma a interface autenticada, health, container saudavel e preservacao
+  das 26 linhas/74 atividades. Salvamento continua local ao navegador.
+- Registra evidencias e excecoes verificadas no conhecimento do projeto;
+  fechamento documental nao reinicia a aplicacao.
+
 ## 2026-10-12: Rotina em planilha
 
 - Substitui caixas individuais por celulas continuas, linhas autoajustaveis e

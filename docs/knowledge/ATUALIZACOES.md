@@ -1,5 +1,76 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Planilha de Rotina publicada e conferida
+
+- Status final: publicada a versao `83592abf431ad357f0649209c03b08fc4039472b`.
+  Este registro sucede os estados pendentes abaixo, mantidos como historico.
+  Fontes: PR #188, CI `38250580690` tentativa 2, recibo do coordenador,
+  Docker, health publico e navegador autenticado consultado apenas em leitura.
+- Os quatro jobs da CI passaram. A repeticao isolada resolveu a falha de
+  preparacao do pnpm sem alterar codigo, versoes ou gates. Artefato visual
+  `11748444223` confirma o SHA final e a Rotina aprovada em 15 combinacoes.
+- Imagem CI `11746764327`, SHA-256 do arquivo comprimido
+  `610258d148e30c716b90a6cc8a53c51674bf088f743bc74e9e60be9236b2ec14`.
+  Configuracao/ID da CI:
+  `sha256:bce888c6dcf2e4f7f1a9652d2d6dbd27832b666faa6f7ddd595245c765ef0166`.
+  Manifesto OCI/ID Docker de destino:
+  `sha256:a1a74432612b3fa18a335cdd59a52781046fe19d02ebfbdbe428e7db539879eb`.
+  Cadeia criptografica de 11 camadas e dois perfis de runtime comprovados;
+  nenhuma recompilacao na VPS.
+- Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/83592abf431ad357f0649209c03b08fc4039472b.BUEwDm`;
+  hash do manifesto
+  `893abcbc51b1f835ca92b1e60d872337acde832caff964a08337d8a85999b599`.
+- Promocao pelo coordenador concluida em `2026-10-12T13:19:10.060Z`
+  (10:19:10.060, America/Sao_Paulo), deployment ID
+  `48a08b2c-d4fe-4331-a710-5fdcb46f6d4c`, sem pendencia. Versao anterior
+  `7c6dce5` preservada. Travas, consulta atual de main/CI, CAS e health mantidos.
+- Excecao do helper externo: encerrou com exit 1 APOS o recibo de sucesso,
+  porque a verificacao Docker imediata ainda encontrou `starting false 0`.
+  A releitura confirmou `healthy false 0`, sem OOM, reinicio ou pendencia.
+  Demais verificacoes foram executadas separadamente: health na versao nova,
+  inventory anonimo 401 e rotas de Gestao/Rotina 307. Nao houve nova promocao
+  nem recuperacao desnecessaria de uma publicacao ja concluida. Esse diagnostico
+  vale para esta execucao; nao prova a causa do helper antigo de `7c6dce5`.
+- Smoke autenticado: seis funcoes, 26 linhas, 74 atividades, Salvar habilitado,
+  segunda-feira marcada Hoje e todos os editores transparentes, sem borda
+  arredondada ou texto recortado. Inspecao visual da grade publicada concluida.
+  Nenhuma edicao, insercao ou salvamento realizado no navegador de producao.
+- Limites preservados: salvamento local ao navegador; referencia externa
+  inalterada; nenhuma migration, dado de cliente, conta ou regra financeira.
+  Fechamento documental publicado no Git e sincronizado ao Obsidian sem
+  reiniciar a aplicacao novamente.
+
+## 2026-10-12: Grade de Rotina integrada e validada
+
+- PR #188 integrado em `83592abf431ad357f0649209c03b08fc4039472b`.
+  CI do candidato `38246693168` aprovada; artefato `11747187938`, capturado
+  no merge sintetico `44d323ecfbc8cac738da1862e82691eb179c9d05` em
+  `2026-10-12T12:39:21Z`. Nao confundir SHA de captura, head do PR e main.
+- Evidencia: authenticated-visual/routine-results.json confirma 26 linhas,
+  edicao, insercao, persistencia, teclado e restauracao. Quinze combinacoes
+  de largura/tema, sem overflow ou violacoes de acessibilidade. Capturas
+  claro/escuro desktop e medio mobile inspecionadas; grade continua e coluna
+  Hoje preservam texto completo. Dados de QA exclusivamente sinteticos.
+- Repeticao isolada dos timeouts Windows: Obsidian e DevTools, 46 testes
+  aprovados. Os seis erros restantes da suite local sao restricoes POSIX;
+  a suite integral Linux da CI passou sem afrouxar permissoes ou assertions.
+- Revisao independente do diff nao encontrou bug confirmado. Teste de
+  virada do dia exige ROUTINE_SETTINGS_BROWSER=1 e foi executado localmente;
+  pnpm test padrao nao habilita esse grupo. Matriz autenticada cobre a grade.
+- Falha antiga em Integrações nao foi reproduzida: harness sintetico terminou
+  com exit 0, nove combinacoes e seis estados aprovados. Corrida de transicao
+  continua hipotese, nao causa confirmada. A nova CI completa passou tambem
+  nessa area, sem alteracao no codigo de Integrações.
+- CI de main `38250580690` em andamento. Runtime ainda em `7c6dce5`;
+  checkout limpo preparado na VPS, sem troca de imagem ou restart ate aqui.
+- Excecao observada no job `114816701144`: Enable pnpm falhou antes das
+  dependencias/testes, em `2026-10-12T12:44:39Z`, com ERR_ASSERTION
+  `assert(!this.paused)` em `Parser.finish`/Undici do Node 24.19.0. Nao e uma
+  falha comprovada da restauracao, pois ela nao chegou a executar. Repeticao
+  do job enquanto a execucao global ainda estava ativa foi recusada pelo
+  GitHub. Aguardar conclusao e repetir apenas o job falho, sem alterar gates.
+
 ## 2026-10-12: Planilha de Rotina implementada, aguardando CI
 
 - Fonte visual: navegador Chrome, consulta somente leitura a
