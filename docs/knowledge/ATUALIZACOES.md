@@ -58,6 +58,33 @@
   duas colunas nas opcoes mobile e tabela com pan horizontal e coluna de linhas
   fixa. Nova QA exige texto completo, alcance de todos os dias e foco visivel.
 
+## 2026-10-12: Caixa de acesso e o proprio rascunho
+
+- Fonte: draft aprovado `modelo-site.html#users`, implementação de
+  `/admin/usuarios`, migration
+  `20261012113000_apply_user_permission_access_draft.sql`, pgTAP e matriz visual
+  autenticada. Status: validado localmente; publicação é registrada no Worklog
+  somente depois da promoção.
+- Não separar o estado efetivo da ação pretendida com um segundo seletor. Na
+  tela aprovada, marcado significa acesso desejado e desmarcado significa sem
+  acesso; clicar na própria caixa deve atualizar o rascunho e continuar
+  exibindo claramente o tique.
+- O rascunho precisa distinguir três efeitos de armazenamento: `allow` quando
+  a caixa marcada diverge do papel, `deny` quando a caixa desmarcada diverge do
+  papel e `inherit` quando volta ao padrão. Voltar ao mesmo efeito salvo remove
+  a alteração pendente.
+- `Usar padrão do perfil` não troca o papel. Ele prepara `inherit` para as
+  exceções individuais atuais e remove mudanças transitórias sem exceção,
+  fazendo a caixa refletir novamente a matriz herdada.
+- Um rascunho misto deve ser persistido atomicamente. A RPC de composição pode
+  ser `SECURITY INVOKER`, mas cada grupo continua passando pela RPC guardada
+  que revalida autorização e grava auditoria. Interface nunca substitui a
+  proteção do servidor/banco, especialmente para contas Administrador.
+- Evidência visual precisa cobrir Claro, Médio, Escuro e mobile; a presença do
+  tique também deve ser confirmada nas referências, sem introduzir ilhas
+  escuras no tema Claro. Os quatro simuladores permanecem fora do escopo da
+  mudança e devem repetir seus gates antes da publicação.
+
 ## 2026-10-11: Usuarios deve permanecer mestre-detalhe compacto
 
 - Fonte: draft aprovado `modelo-site.html#users`, implementação real de

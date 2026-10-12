@@ -70,30 +70,30 @@ describe("ações administrativas em lote", () => {
     });
   });
 
-  it("envia todas as permissões selecionadas para uma única RPC atômica", async () => {
+  it("envia marcações, desmarcações e herança para uma única RPC atômica", async () => {
     const formData = new FormData();
-    formData.append("permissionKeys", "crm.dashboard.view");
-    formData.append("permissionKeys", "crm.dashboard.with_canal_imob.view");
-    formData.set("effect", "deny");
-    formData.set("reason", "Restrição sintética em lote");
+    formData.append("allowPermissionKeys", "crm.dashboard.with_canal_imob.view");
+    formData.append("denyPermissionKeys", "crm.dashboard.view");
+    formData.set("reason", "Ajuste sintético em lote");
 
     const result = await setPermissionOverridesBulkAction(targetUserId, idleState, formData);
 
     expect(result).toEqual({
       status: "success",
-      message: "Exceções individuais atualizadas e auditadas.",
+      message: "Acessos atualizados e auditados. O papel do usuário foi preservado.",
     });
     expect(mocks.requirePermission).toHaveBeenCalledWith("permissions.manage");
     expect(mocks.requireCanManageTargetRole).toHaveBeenCalledWith(actor, "broker_house", 25);
     expect(mocks.requireCanGrantAllPermissions).toHaveBeenCalledWith(actor, [
-      "crm.dashboard.view",
       "crm.dashboard.with_canal_imob.view",
+      "crm.dashboard.view",
     ]);
-    expect(mocks.rpc).toHaveBeenCalledWith("set_user_permission_overrides_bulk", {
+    expect(mocks.rpc).toHaveBeenCalledWith("apply_user_permission_access_draft", {
       target_user_id: targetUserId,
-      permission_keys: ["crm.dashboard.view", "crm.dashboard.with_canal_imob.view"],
-      effect: "deny",
-      reason: "Restrição sintética em lote",
+      allow_permission_keys: ["crm.dashboard.with_canal_imob.view"],
+      deny_permission_keys: ["crm.dashboard.view"],
+      inherit_permission_keys: [],
+      reason: "Ajuste sintético em lote",
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/admin/usuarios");
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/", "layout");
@@ -101,27 +101,25 @@ describe("ações administrativas em lote", () => {
 
   it("restaura a herança pelo mesmo contrato em lote", async () => {
     const formData = new FormData();
-    formData.append("permissionKeys", "crm.dashboard.view");
-    formData.set("effect", "inherit");
+    formData.append("inheritPermissionKeys", "crm.dashboard.view");
     formData.set("reason", "Retorno à matriz do papel");
 
     const result = await setPermissionOverridesBulkAction(targetUserId, idleState, formData);
 
     expect(result).toEqual({
       status: "success",
-      message: "Exceções removidas; voltou a valer a regra de cada papel.",
+      message: "Acessos atualizados e auditados. O papel do usuário foi preservado.",
     });
     expect(mocks.rpc).toHaveBeenCalledWith(
-      "set_user_permission_overrides_bulk",
-      expect.objectContaining({ effect: "inherit" }),
+      "apply_user_permission_access_draft",
+      expect.objectContaining({ inherit_permission_keys: ["crm.dashboard.view"] }),
     );
   });
 
   it("rejeita duplicatas antes de consultar ou alterar o alvo", async () => {
     const formData = new FormData();
-    formData.append("permissionKeys", "crm.dashboard.view");
-    formData.append("permissionKeys", "crm.dashboard.view");
-    formData.set("effect", "allow");
+    formData.append("allowPermissionKeys", "crm.dashboard.view");
+    formData.append("denyPermissionKeys", "crm.dashboard.view");
     formData.set("reason", "Duplicata sintética");
 
     const result = await setPermissionOverridesBulkAction(targetUserId, idleState, formData);
@@ -136,8 +134,7 @@ describe("ações administrativas em lote", () => {
 
   it("bloqueia alteração do próprio acesso antes da RPC", async () => {
     const formData = new FormData();
-    formData.append("permissionKeys", "crm.dashboard.view");
-    formData.set("effect", "deny");
+    formData.append("denyPermissionKeys", "crm.dashboard.view");
     formData.set("reason", "Autoalteração sintética");
 
     const result = await setPermissionOverridesBulkAction(actor.userId, idleState, formData);

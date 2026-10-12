@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-12
+
+- Faz a caixa de cada acesso em Usuários representar diretamente o rascunho:
+  um clique marca ou desmarca, o tique permanece visível nos três temas e o
+  resumo identifica alterações ainda não salvas.
+- Adiciona `Usar padrão do perfil`, que remove as exceções individuais
+  aplicáveis e restaura a matriz herdada do papel selecionado sem trocar o
+  papel da conta.
+- Persiste marcações, desmarcações e restaurações em uma única transação por
+  meio de RPC autenticada, mantendo hierarquia, auditoria e a proteção
+  exclusiva do Master sobre contas Administrador no banco.
+- Aprova 1.151 testes pgTAP, testes direcionados de interface/Server Action e a
+  matriz visual autenticada com 154 checks responsivos, 88 de tema, 242 Axe,
+  242 comparações e 110 checks de zoom; os quatro simuladores permanecem
+  inalterados e cobertos.
+
 ## 2026-10-11
 
 - Adiciona o menu Gestão com submenu Rotina, protegido por

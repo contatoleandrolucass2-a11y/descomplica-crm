@@ -371,8 +371,8 @@ describe("catálogo localizado de acesso", () => {
     );
 
     expect(markup).toContain("Buscar pessoa");
-    expect(markup).toContain("Permissões herdadas do papel");
-    expect(markup).toContain("Exceções individuais");
+    expect(markup).toContain("permissões herdadas do papel");
+    expect(markup).toContain("exceções individuais");
     expect(markup).toContain("Configurações avançadas");
     expect(markup).toContain("Você não pode alterar seu próprio papel, permissões ou status.");
     expect(markup).not.toContain("Salvar papel");
@@ -461,13 +461,14 @@ describe("catálogo localizado de acesso", () => {
 
     expect(markup).not.toContain("Somente o Master pode alterar");
     expect(markup).toContain("Salvar papel");
-    expect(markup).toContain("Incluir na alteração");
+    expect(markup).toContain("Clique na caixa para marcar ou desmarcar.");
+    expect(markup).toContain("Usar padrão do perfil");
     expect(markup).toContain("Desativar usuário");
     expect(markup).toContain('name="roleKey"');
-    expect(markup).toContain('name="effect"');
+    expect(markup).not.toContain('name="effect"');
   });
 
-  it("oferece seleção múltipla com permitir, negar e restaurar em uma única ação", () => {
+  it("mostra o acesso efetivo em caixas diretas e oferece o padrão do perfil", () => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {
         users: [
@@ -506,29 +507,23 @@ describe("catálogo localizado de acesso", () => {
     );
 
     expect(markup).toContain("Buscar acesso");
-    expect(markup).toContain("Selecionar grupo");
     expect(markup).toContain('role="tablist"');
     expect(markup).toContain('aria-selected="true"');
     expect(markup).toContain('role="tabpanel" tabindex="0"');
-    expect(markup).toContain('aria-label="Acesso efetivo: Visualizar dashboard"');
+    expect(markup).toContain('aria-label="Acesso a Visualizar dashboard"');
     expect(markup).toMatch(
-      /<input(?=[^>]*type="checkbox")(?=[^>]*aria-label="Acesso efetivo: Visualizar dashboard")(?=[^>]*checked="")[^>]*>/,
+      /<input(?=[^>]*type="checkbox")(?=[^>]*aria-label="Acesso a Visualizar dashboard")(?=[^>]*checked="")[^>]*>/,
     );
-    expect(markup).toContain('aria-pressed="false"');
-    expect(markup).toContain("Incluir na alteração");
-    expect(markup).toContain('name="permissionKeys"');
-    expect(markup.match(/name="permissionKeys"/g)?.length).toBeGreaterThan(1);
-    expect(markup).toContain('name="effect"');
-    expect(markup).toContain('value="allow"');
-    expect(markup).toContain('value="deny"');
-    expect(markup).toContain('value="inherit"');
-    expect(markup).toContain("Restaurar padrão");
+    expect(markup).toContain("Clique na caixa para marcar ou desmarcar.");
+    expect(markup).toContain('name="inheritPermissionKeys"');
+    expect(markup).not.toContain('name="effect"');
+    expect(markup).toContain("Usar padrão do perfil");
+    expect(markup).toContain("O padrão considera o papel Corretor House.");
     expect(markup).toContain("Motivo da alteração em lote");
     expect(markup).toContain("Salvar alterações");
     expect(markup).toContain("Herdada: negada");
-    expect(markup).toContain("Como Master");
-    expect(markup).toContain("qualquer usuário abaixo do seu nível");
-    expect(markup).toContain("O papel do usuário não muda");
+    expect(markup).toContain("Marcado: acesso liberado. Desmarcado: sem acesso.");
+    expect(markup).toContain("o papel do usuário não muda");
     expect(markup).not.toContain("Adicionar uma exceção");
   });
 

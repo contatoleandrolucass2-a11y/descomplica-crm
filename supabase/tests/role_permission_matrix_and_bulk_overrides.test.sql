@@ -1,6 +1,6 @@
 begin;
 
-select plan(99);
+select plan(109);
 
 select has_column(
   'public',
@@ -221,6 +221,40 @@ select ok(
     'execute'
   ),
   'service_role cannot bypass the authenticated bulk RPC contract'
+);
+
+select has_function(
+  'public',
+  'apply_user_permission_access_draft',
+  array['uuid', 'text[]', 'text[]', 'text[]', 'text'],
+  'atomic mixed permission access draft RPC exists'
+);
+
+select ok(
+  has_function_privilege(
+    'authenticated',
+    'public.apply_user_permission_access_draft(uuid,text[],text[],text[],text)',
+    'execute'
+  ),
+  'authenticated can invoke the guarded mixed access draft RPC'
+);
+
+select ok(
+  not has_function_privilege(
+    'anon',
+    'public.apply_user_permission_access_draft(uuid,text[],text[],text[],text)',
+    'execute'
+  ),
+  'anon cannot invoke the mixed access draft RPC'
+);
+
+select ok(
+  not has_function_privilege(
+    'service_role',
+    'public.apply_user_permission_access_draft(uuid,text[],text[],text[],text)',
+    'execute'
+  ),
+  'service_role cannot bypass the mixed access draft contract'
 );
 
 select is(
@@ -878,6 +912,18 @@ select throws_ok(
   'Administrator cannot change another Administrator permissions'
 );
 select throws_ok(
+  $$select public.apply_user_permission_access_draft(
+    'a3000000-0000-4000-8000-000000000003',
+    array[]::text[],
+    array['crm.dashboard.view'],
+    array[]::text[],
+    'Peer mixed access draft attempt'
+  )$$,
+  '42501',
+  null,
+  'Administrator cannot change another Administrator through the checkbox draft RPC'
+);
+select throws_ok(
   $$select public.set_user_permission_override(
     'a3000000-0000-4000-8000-000000000003',
     'crm.dashboard.view',
@@ -1013,6 +1059,18 @@ select throws_ok(
   '22023',
   null,
   'bulk mutation rejects duplicate permission keys'
+);
+select throws_ok(
+  $$select public.apply_user_permission_access_draft(
+    'a3000000-0000-4000-8000-000000000007',
+    array['crm.dashboard.view'],
+    array['crm.dashboard.view'],
+    array[]::text[],
+    'Duplicate mixed access draft test'
+  )$$,
+  '22023',
+  null,
+  'mixed access draft rejects a permission repeated across effect groups'
 );
 select throws_ok(
   $$select public.set_user_permission_overrides_bulk(
@@ -1174,6 +1232,45 @@ select throws_ok(
 );
 
 set local role authenticated;
+
+select lives_ok(
+  $$select public.apply_user_permission_access_draft(
+    'a3000000-0000-4000-8000-000000000007',
+    array['crm.dashboard.with_canal_imob.view'],
+    array['pages.view'],
+    array[]::text[],
+    'Direct checkbox mixed draft test'
+  )$$,
+  'Administrator can save checked and unchecked permissions in one atomic draft'
+);
+select is(
+  (
+    select string_agg(concat(permission_key, ':', effect), ',' order by permission_key)
+    from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000007'
+  ),
+  'crm.dashboard.with_canal_imob.view:allow,pages.view:deny',
+  'mixed access draft persists each checkbox with its intended effect'
+);
+select lives_ok(
+  $$select public.apply_user_permission_access_draft(
+    'a3000000-0000-4000-8000-000000000007',
+    array[]::text[],
+    array[]::text[],
+    array['crm.dashboard.with_canal_imob.view', 'pages.view'],
+    'Restore selected profile defaults test'
+  )$$,
+  'Administrator can restore the selected profile defaults atomically'
+);
+select is(
+  (
+    select count(*)
+    from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000007'
+  ),
+  0::bigint,
+  'profile default restore removes every changed override'
+);
 
 select lives_ok(
   $$select public.set_user_permission_overrides_bulk(

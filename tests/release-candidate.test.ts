@@ -10,6 +10,7 @@ import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
 const repositoryRoot = process.cwd();
 const administratorProtectionMigration =
   "20261011143218_protect_administrator_accounts_and_enable_simulator_view.sql";
+const permissionAccessDraftMigration = "20261012113000_apply_user_permission_access_draft.sql";
 const administratorMasterOnlyPermissions = [
   "crm.simulators.execute",
   "crm.commercial_engine.execute",
@@ -30,15 +31,15 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 46-version manifest", async () => {
+  it("keeps a unique, ordered 47-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(46);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(46);
+    expect(migrations).toHaveLength(47);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(47);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
-    expect(migrations.at(-1)).toBe(administratorProtectionMigration);
+    expect(migrations.at(-1)).toBe(permissionAccessDraftMigration);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -211,7 +212,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1141;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1151;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {
