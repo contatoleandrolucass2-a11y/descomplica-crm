@@ -15,6 +15,9 @@
   gates Linux permanecem obrigatorios antes de publicar.
 - Chromium isolado: 19/19 aprovados, incluindo modos, domingo legado,
   navegacao, persistencia, centralizacao e cabecalhos fixos sem sobreposicao.
+- Revisao corrigiu o foco da visao Hoje nos temas claros; regressao por
+  teclado passou nos tres temas. Tipagem do teste ajustada para consultar
+  animacoes no elemento raiz, com typecheck e repeticao focal aprovados.
 
 ## 2026-10-12: Planilha de Rotina publicada
 

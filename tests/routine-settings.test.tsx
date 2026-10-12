@@ -272,7 +272,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       await page.keyboard.press("Tab");
       await browserExpect(page.locator("textarea").first()).toBeFocused();
       await page.waitForFunction(() =>
-        document
+        document.documentElement
           .getAnimations({ subtree: true })
           .every((animation) => animation.playState !== "running" && !animation.pending),
       );
