@@ -116,6 +116,11 @@ describe("management canvas layout", () => {
     expect(users).toContain('role="tablist"');
     expect(users).toContain("admin-permission-tabs");
     expect(users).toContain("O que pode acessar");
+    expect(users).toContain("getDraftChecked(permissionKey)");
+    expect(users).toContain("onChange={() => togglePermission(permissionKey)}");
+    expect(users).toContain("Usar padrão do perfil");
+    expect(users).toContain("restoreRoleDefaults");
+    expect(users).not.toContain("admin-permission-effects");
     expect(users).toContain("Salvar alterações");
     expect(users).not.toContain("Total de usuários");
     expect(users).toContain('label: "Comercial"');
@@ -159,6 +164,10 @@ describe("management canvas layout", () => {
     expect(styles).toMatch(
       /\.admin-permission-group \{[\s\S]*?max-height: 21\.5rem[\s\S]*?overflow-y: auto/,
     );
+    expect(styles).toMatch(
+      /\.admin-permission-option > input \{[\s\S]*?appearance: none[\s\S]*?cursor: pointer/,
+    );
+    expect(styles).toContain(".admin-permission-role-default-button");
     expect(styles).toMatch(
       /@media \(max-width: 60rem\) \{[\s\S]*?\.admin-users-workspace \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/,
     );

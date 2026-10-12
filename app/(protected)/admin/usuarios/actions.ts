@@ -194,14 +194,21 @@ export async function setPermissionOverridesBulkAction(
   try {
     const actor = await requirePermission("permissions.manage");
     const userId = userIdSchema.parse(targetUserId);
-    const permissionKeys = z
+    const allowPermissionKeys = z.array(z.string()).parse(formData.getAll("allowPermissionKeys"));
+    const denyPermissionKeys = z.array(z.string()).parse(formData.getAll("denyPermissionKeys"));
+    const inheritPermissionKeys = z
       .array(z.string())
-      .min(1)
-      .max(100)
-      .parse(formData.getAll("permissionKeys"));
-    const effect = z.enum(["allow", "deny", "inherit"]).parse(formData.get("effect"));
+      .parse(formData.getAll("inheritPermissionKeys"));
+    const permissionKeys = [
+      ...allowPermissionKeys,
+      ...denyPermissionKeys,
+      ...inheritPermissionKeys,
+    ];
     const reason = readRequiredReason(formData);
 
+    if (permissionKeys.length < 1 || permissionKeys.length > 100) {
+      return failure("Selecione entre 1 e 100 permissões.");
+    }
     if (new Set(permissionKeys).size !== permissionKeys.length) {
       return failure("Selecione cada permissão apenas uma vez.");
     }
@@ -214,10 +221,11 @@ export async function setPermissionOverridesBulkAction(
     requireCanManageTargetRole(actor, target.role_key, target.level);
     requireCanGrantAllPermissions(actor, typedPermissionKeys);
 
-    const { error } = await supabase.rpc("set_user_permission_overrides_bulk", {
+    const { error } = await supabase.rpc("apply_user_permission_access_draft", {
       target_user_id: userId,
-      permission_keys: typedPermissionKeys,
-      effect,
+      allow_permission_keys: allowPermissionKeys,
+      deny_permission_keys: denyPermissionKeys,
+      inherit_permission_keys: inheritPermissionKeys,
       reason,
     });
 
@@ -225,10 +233,7 @@ export async function setPermissionOverridesBulkAction(
     refreshUsersAdmin();
     return {
       status: "success",
-      message:
-        effect === "inherit"
-          ? "Exceções removidas; voltou a valer a regra de cada papel."
-          : "Exceções individuais atualizadas e auditadas.",
+      message: "Acessos atualizados e auditados. O papel do usuário foi preservado.",
     };
   } catch (error) {
     if (error instanceof z.ZodError) return failure(error.issues[0]?.message);

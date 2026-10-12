@@ -5,6 +5,10 @@ import { describe, expect, it } from "vitest";
 const migrationPath =
   "supabase/migrations/20261005234936_reconcile_roles_dashboard_views_and_bulk_overrides.sql";
 const migration = readFileSync(migrationPath, "utf8");
+const accessDraftMigration = readFileSync(
+  "supabase/migrations/20261012113000_apply_user_permission_access_draft.sql",
+  "utf8",
+);
 
 describe("segurança da reconciliação de papéis", () => {
   it("preserva os grants existentes do Master sem herdar todo o catálogo", () => {
@@ -55,5 +59,20 @@ describe("segurança da reconciliação de papéis", () => {
     expect(scopeChecks).toHaveLength(2);
     expect(scopeChecks[0]).toBeLessThan(targetLock ?? -1);
     expect(scopeChecks[1]).toBeGreaterThan(targetLock ?? Number.MAX_SAFE_INTEGER);
+  });
+
+  it("aplica marcações mistas em uma transação sem criar novo bypass de autorização", () => {
+    expect(accessDraftMigration).toContain("security invoker");
+    expect(
+      accessDraftMigration.match(/:= public\.set_user_permission_overrides_bulk\(/g),
+    ).toHaveLength(3);
+    expect(accessDraftMigration).toMatch(
+      /revoke all privileges[\s\S]*?from public, anon, authenticated, service_role;/,
+    );
+    expect(accessDraftMigration).toMatch(/grant execute[\s\S]*?to authenticated;/);
+    expect(accessDraftMigration).toContain(
+      "or array_position(v_permission_keys, null) is not null",
+    );
+    expect(accessDraftMigration).toContain("count(distinct requested.permission_key)");
   });
 });

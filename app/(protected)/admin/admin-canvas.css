@@ -1106,6 +1106,13 @@
   background: var(--analytics-surface);
 }
 
+.admin-permission-toolbar-hint {
+  display: inline-flex;
+  align-items: center;
+  color: var(--analytics-muted);
+  font-size: 0.7rem;
+}
+
 .admin-permission-tabs {
   display: flex;
   min-width: 0;
@@ -1153,64 +1160,6 @@
 .admin-permission-tabs button[data-selected="true"] small {
   background: color-mix(in srgb, var(--analytics-cyan) 14%, var(--analytics-surface));
   color: var(--analytics-cyan-strong);
-}
-
-.admin-permission-effects {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  border: 0;
-  padding: 0;
-}
-
-.admin-permission-effects legend {
-  width: 100%;
-  margin-bottom: 0.1rem;
-  color: var(--analytics-ink);
-  font-size: 0.72rem;
-  font-weight: 720;
-}
-
-.admin-permission-effects label {
-  display: inline-flex;
-  min-height: 2.35rem;
-  flex: 1 1 9rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  border: 1px solid var(--analytics-line);
-  border-radius: 0.6rem;
-  background: var(--analytics-surface);
-  padding: 0.4rem 0.55rem;
-  color: var(--analytics-muted);
-  cursor: pointer;
-  font-size: 0.74rem;
-  font-weight: 720;
-  touch-action: manipulation;
-}
-
-.admin-permission-effects label:hover,
-.admin-permission-effects label[data-selected="true"] {
-  border-color: var(--analytics-cyan-strong);
-  background: color-mix(in srgb, var(--analytics-cyan) 9%, var(--analytics-surface));
-  color: var(--analytics-ink);
-}
-
-.admin-permission-effects label:focus-within {
-  border-color: var(--analytics-cyan-strong);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--analytics-cyan) 26%, transparent);
-}
-
-.admin-permission-effects input {
-  width: 1rem;
-  height: 1rem;
-  accent-color: var(--analytics-cyan-strong);
-}
-
-.admin-permission-effects svg {
-  width: 1rem;
-  height: 1rem;
 }
 
 .admin-permission-groups {
@@ -1280,8 +1229,13 @@
 }
 
 .admin-permission-option:not([data-disabled="true"]):hover,
-.admin-permission-option[data-selected="true"] {
+.admin-permission-option[data-changed="true"] {
   background: color-mix(in srgb, var(--analytics-cyan) 7%, var(--analytics-surface));
+}
+
+.admin-permission-option:not([data-disabled="true"]):focus-within {
+  background: color-mix(in srgb, var(--analytics-cyan) 7%, var(--analytics-surface));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--analytics-cyan) 30%, transparent);
 }
 
 .admin-permission-option[data-disabled="true"] {
@@ -1289,10 +1243,47 @@
 }
 
 .admin-permission-option > input {
-  width: 1.1rem;
-  height: 1.1rem;
-  margin-top: 0.1rem;
-  accent-color: var(--analytics-cyan-strong);
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  appearance: none;
+  place-items: center;
+  margin: 0;
+  border: 1.5px solid var(--analytics-line);
+  border-radius: 0.28rem;
+  background: var(--analytics-surface);
+  color: var(--analytics-on-accent, #082137);
+  cursor: pointer;
+}
+
+.admin-permission-option > input::before {
+  width: 0.62rem;
+  height: 0.34rem;
+  border-bottom: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  content: "";
+  opacity: 0;
+  transform: translateY(-0.06rem) rotate(-45deg);
+}
+
+.admin-permission-option > input:checked {
+  border-color: var(--analytics-cyan);
+  background: var(--analytics-cyan);
+}
+
+.admin-permission-option > input:checked::before {
+  opacity: 1;
+}
+
+.admin-permission-option > input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.admin-permission-option > input:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 
 .admin-permission-option-copy {
@@ -1330,6 +1321,16 @@
   font-style: italic;
 }
 
+.admin-permission-change-dot {
+  display: inline-block;
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-left: 0.42rem;
+  border-radius: 999px;
+  background: var(--analytics-cyan-strong);
+  vertical-align: middle;
+}
+
 .admin-permission-state {
   display: inline-flex;
   max-width: 100%;
@@ -1354,7 +1355,8 @@
 }
 
 .admin-permission-state[data-state="override-allow"],
-.admin-permission-state[data-state="inherited-allow"] {
+.admin-permission-state[data-state="inherited-allow"],
+.admin-permission-state[data-state="draft-allow"] {
   border-color: var(--analytics-positive);
   background: color-mix(in srgb, var(--analytics-positive) 9%, var(--analytics-surface));
   color: var(--analytics-positive-ink);
@@ -1366,9 +1368,77 @@
   color: var(--analytics-danger-ink);
 }
 
+.admin-permission-state[data-state="draft-deny"] {
+  border-color: var(--analytics-danger);
+  background: color-mix(in srgb, var(--analytics-danger) 9%, var(--analytics-surface));
+  color: var(--analytics-danger-ink);
+}
+
+.admin-permission-state[data-state="draft-inherit"] {
+  border-color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan) 8%, var(--analytics-surface));
+  color: var(--analytics-cyan-strong);
+}
+
 .admin-permission-state[data-state="inherited-deny"] {
   border-color: var(--analytics-line);
   color: var(--analytics-muted);
+}
+
+.admin-permission-role-default {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.6rem;
+  background: var(--analytics-surface-muted);
+  padding: 0.55rem 0.7rem;
+  color: var(--analytics-muted);
+  font-size: 0.7rem;
+}
+
+.admin-permission-role-default > span {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.admin-permission-role-default svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+}
+
+.admin-permission-role-default-button {
+  min-height: 2.25rem;
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  padding: 0.35rem 0.2rem;
+  color: var(--analytics-cyan-strong);
+  font: inherit;
+  font-weight: 760;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.admin-permission-role-default-button:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+}
+
+.admin-permission-role-default-button:focus-visible {
+  border-radius: 0.25rem;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.admin-permission-role-default-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .admin-permission-footer {
@@ -1574,13 +1644,25 @@
     -webkit-line-clamp: 2;
   }
 
+  .admin-permission-option,
   .admin-permission-option[data-editable="false"] {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
+  .admin-permission-option .admin-permission-state,
   .admin-permission-option[data-editable="false"] .admin-permission-state {
     grid-column: 2;
     grid-row: auto;
+  }
+
+  .admin-permission-role-default {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-permission-role-default-button {
+    width: 100%;
+    text-align: left;
   }
 
   .admin-permission-toolbar > button,

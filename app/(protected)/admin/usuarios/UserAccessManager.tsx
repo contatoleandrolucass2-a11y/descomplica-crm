@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CircleMinus, CircleX, Search, ShieldCheck } from "lucide-react";
+import { Check, CircleMinus, Search, ShieldCheck } from "lucide-react";
 import {
   startTransition,
   useActionState,
@@ -461,8 +461,7 @@ function PermissionMatrix({
       ? (PERMISSION_GROUPS.find((group) => group.matches(firstRelevantPermission))?.id ?? "other")
       : PERMISSION_GROUPS[0]!.id;
   });
-  const [selected, setSelected] = useState<Set<PermissionKey>>(() => new Set());
-  const [effect, setEffect] = useState<BulkEffect>("allow");
+  const [draftEffects, setDraftEffects] = useState<Map<PermissionKey, BulkEffect>>(() => new Map());
   const [reason, setReason] = useState("");
   const submitOverrides = useCallback(
     async (previousState: AdminActionState, formData: FormData) => {
@@ -472,8 +471,7 @@ function PermissionMatrix({
         formData,
       );
       if (nextState.status === "success") {
-        setSelected(new Set());
-        setEffect("allow");
+        setDraftEffects(new Map());
         setReason("");
       }
       return nextState;
@@ -527,46 +525,65 @@ function PermissionMatrix({
     return tabs;
   }, [filteredPermissions]);
   const activeTab = permissionTabs.find((group) => group.id === activeGroup) ?? permissionTabs[0]!;
-  const selectableFiltered = activeTab.permissions.filter((permissionKey) =>
-    manageable.has(permissionKey),
-  );
-  const allFilteredSelected =
-    selectableFiltered.length > 0 &&
-    selectableFiltered.every((permissionKey) => selected.has(permissionKey));
-  const selectedLabels = [...selected].map(getPermissionLabel);
-  const effectLabel =
-    effect === "allow" ? "permitir" : effect === "deny" ? "negar" : "restaurar o padrão de";
+  const changedLabels = [...draftEffects].map(([permissionKey, draftEffect]) => {
+    const checked =
+      draftEffect === "allow" || (draftEffect === "inherit" && inherited.has(permissionKey));
+    return `${getPermissionLabel(permissionKey)}: ${checked ? "com acesso" : "sem acesso"}`;
+  });
 
-  function togglePermission(permissionKey: PermissionKey) {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (next.has(permissionKey)) next.delete(permissionKey);
-      else next.add(permissionKey);
+  function getSavedEffect(permissionKey: PermissionKey): BulkEffect {
+    return overrides.get(permissionKey)?.effect ?? "inherit";
+  }
+
+  function getDraftChecked(permissionKey: PermissionKey): boolean {
+    const draftEffect = draftEffects.get(permissionKey);
+    if (draftEffect === "allow") return true;
+    if (draftEffect === "deny") return false;
+    if (draftEffect === "inherit") return inherited.has(permissionKey);
+    return getPermissionState(
+      permissionKey,
+      inherited,
+      overrides.get(permissionKey),
+      hasApprovedAccess,
+    ).permitted;
+  }
+
+  function stageEffect(permissionKey: PermissionKey, nextEffect: BulkEffect) {
+    setDraftEffects((current) => {
+      const next = new Map(current);
+      if (nextEffect === getSavedEffect(permissionKey)) next.delete(permissionKey);
+      else next.set(permissionKey, nextEffect);
       return next;
     });
   }
 
-  function toggleFiltered() {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (allFilteredSelected) {
-        for (const permissionKey of selectableFiltered) next.delete(permissionKey);
-      } else {
-        for (const permissionKey of selectableFiltered) next.add(permissionKey);
+  function togglePermission(permissionKey: PermissionKey) {
+    const nextChecked = !getDraftChecked(permissionKey);
+    const inheritedChecked = inherited.has(permissionKey);
+    const nextEffect =
+      nextChecked === inheritedChecked ? "inherit" : nextChecked ? "allow" : "deny";
+    stageEffect(permissionKey, nextEffect);
+  }
+
+  function restoreRoleDefaults() {
+    setDraftEffects((current) => {
+      const next = new Map(current);
+      for (const permissionKey of manageablePermissions) {
+        if (overrides.has(permissionKey)) next.set(permissionKey, "inherit");
+        else next.delete(permissionKey);
       }
       return next;
     });
   }
 
   function clearDraft() {
-    setSelected(new Set());
-    setEffect("allow");
+    setDraftEffects(new Map());
     setReason("");
   }
 
-  const confirmation = `${selected.size} ${
-    selected.size === 1 ? "permissão será alterada" : "permissões serão alteradas"
-  }: ${selectedLabels.join(", ")}. A ação será ${effectLabel}. O papel não será alterado.`;
+  const confirmation = `${draftEffects.size} ${
+    draftEffects.size === 1 ? "permissão será alterada" : "permissões serão alteradas"
+  }: ${changedLabels.join(", ")}. O papel não será alterado.`;
 
   return (
     <form
@@ -578,9 +595,9 @@ function PermissionMatrix({
         <input
           key={permissionKey}
           type="hidden"
-          name="permissionKeys"
+          name={`${draftEffects.get(permissionKey) ?? "inherit"}PermissionKeys`}
           value={permissionKey}
-          disabled={!selected.has(permissionKey)}
+          disabled={!draftEffects.has(permissionKey)}
         />
       ))}
       <div className="admin-permission-toolbar">
@@ -600,14 +617,9 @@ function PermissionMatrix({
           </span>
         </label>
         {editable ? (
-          <button
-            type="button"
-            className={managementStyles.button}
-            onClick={toggleFiltered}
-            disabled={selectableFiltered.length === 0 || pending}
-          >
-            {allFilteredSelected ? "Limpar seleção" : "Selecionar grupo"}
-          </button>
+          <span className="admin-permission-toolbar-hint">
+            Clique na caixa para marcar ou desmarcar.
+          </span>
         ) : null}
       </div>
 
@@ -629,31 +641,6 @@ function PermissionMatrix({
         ))}
       </div>
 
-      {editable ? (
-        <fieldset className="admin-permission-effects">
-          <legend>Aplicar às permissões selecionadas</legend>
-          {(
-            [
-              ["allow", "Permitir", Check],
-              ["deny", "Negar", CircleX],
-              ["inherit", "Restaurar padrão", CircleMinus],
-            ] as const
-          ).map(([value, label, Icon]) => (
-            <label key={value} data-selected={effect === value}>
-              <input
-                type="radio"
-                name="effect"
-                value={value}
-                checked={effect === value}
-                onChange={() => setEffect(value)}
-              />
-              <Icon aria-hidden="true" />
-              <span>{label}</span>
-            </label>
-          ))}
-        </fieldset>
-      ) : null}
-
       <div className="admin-permission-groups">
         {activeTab.permissions.length > 0 ? (
           <section
@@ -673,51 +660,57 @@ function PermissionMatrix({
                   hasApprovedAccess,
                 );
                 const canSelect = editable && manageable.has(permissionKey);
+                const checked = getDraftChecked(permissionKey);
+                const changed = draftEffects.has(permissionKey);
+                const draftEffect = draftEffects.get(permissionKey);
+                const displayedState = changed
+                  ? {
+                      key: `draft-${draftEffect}`,
+                      label:
+                        draftEffect === "inherit"
+                          ? "Padrão do perfil"
+                          : checked
+                            ? "Não salvo: com acesso"
+                            : "Não salvo: sem acesso",
+                    }
+                  : permissionState;
                 return (
-                  <div
+                  <label
                     key={permissionKey}
                     className="admin-permission-option"
                     data-disabled={!canSelect}
                     data-editable={editable}
-                    data-selected={selected.has(permissionKey)}
+                    data-selected={checked}
+                    data-changed={changed}
                   >
                     <input
                       type="checkbox"
-                      checked={permissionState.permitted}
-                      disabled
-                      aria-label={`Acesso efetivo: ${getPermissionLabel(permissionKey)}`}
+                      checked={checked}
+                      disabled={!canSelect || pending}
+                      onChange={() => togglePermission(permissionKey)}
+                      aria-label={`Acesso a ${getPermissionLabel(permissionKey)}`}
                     />
                     <span className="admin-permission-option-copy">
-                      <strong>{getPermissionLabel(permissionKey)}</strong>
+                      <strong>
+                        {getPermissionLabel(permissionKey)}
+                        {changed ? (
+                          <span className="admin-permission-change-dot" title="Alteração não salva">
+                            <span className="sr-only"> · Alteração não salva</span>
+                          </span>
+                        ) : null}
+                      </strong>
                       <small>{PERMISSIONS[permissionKey].description}</small>
                       {override?.reason ? (
                         <small className="admin-permission-override-reason">
                           Motivo atual: {override.reason}
                         </small>
                       ) : null}
-                      {canSelect ? (
-                        <button
-                          type="button"
-                          className={managementStyles.button}
-                          aria-pressed={selected.has(permissionKey)}
-                          onClick={() => togglePermission(permissionKey)}
-                          disabled={pending}
-                        >
-                          {selected.has(permissionKey)
-                            ? "Remover da alteração"
-                            : "Incluir na alteração"}
-                        </button>
-                      ) : null}
                     </span>
-                    <span className="admin-permission-state" data-state={permissionState.key}>
-                      {permissionState.permitted ? (
-                        <Check aria-hidden="true" />
-                      ) : (
-                        <CircleMinus aria-hidden="true" />
-                      )}
-                      {permissionState.label}
+                    <span className="admin-permission-state" data-state={displayedState.key}>
+                      {checked ? <Check aria-hidden="true" /> : <CircleMinus aria-hidden="true" />}
+                      {displayedState.label}
                     </span>
-                  </div>
+                  </label>
                 );
               })}
             </div>
@@ -730,50 +723,66 @@ function PermissionMatrix({
       </div>
 
       {editable ? (
-        <div className="admin-permission-footer">
-          <label htmlFor={`override-reason-${user.userId}`}>
-            <span>Motivo da alteração em lote</span>
-            <input
-              id={`override-reason-${user.userId}`}
-              name="reason"
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              required
-              minLength={3}
-              maxLength={240}
-              autoComplete="off"
-              placeholder="Explique por que estas permissões serão alteradas…"
-            />
-          </label>
-          <div className="admin-permission-summary" role="status" aria-live="polite">
-            <strong>Resumo</strong>
+        <>
+          <div className="admin-permission-role-default">
             <span>
-              {selected.size === 0
-                ? "Nenhuma permissão selecionada."
-                : `${selected.size} ${
-                    selected.size === 1 ? "permissão selecionada" : "permissões selecionadas"
-                  } para ${effectLabel}.`}
+              <ShieldCheck aria-hidden="true" />O padrão considera o papel{" "}
+              {getVisibleRoleLabel(user.roleKey)}.
             </span>
-          </div>
-          <div className="admin-permission-submit-actions">
             <button
               type="button"
-              className={managementStyles.button}
-              onClick={clearDraft}
-              disabled={pending || (selected.size === 0 && reason.length === 0)}
+              className="admin-permission-role-default-button"
+              onClick={restoreRoleDefaults}
+              disabled={pending || manageablePermissions.length === 0}
             >
-              Descartar
-            </button>
-            <button
-              type="submit"
-              className={managementStyles.buttonPrimary}
-              disabled={pending || selected.size === 0}
-            >
-              {pending ? "Salvando…" : "Salvar alterações"}
+              Usar padrão do perfil
             </button>
           </div>
-          <ActionFeedback state={state} />
-        </div>
+          <div className="admin-permission-footer">
+            <label htmlFor={`override-reason-${user.userId}`}>
+              <span>Motivo da alteração em lote</span>
+              <input
+                id={`override-reason-${user.userId}`}
+                name="reason"
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+                required
+                minLength={3}
+                maxLength={240}
+                autoComplete="off"
+                placeholder="Explique por que estas permissões serão alteradas…"
+              />
+            </label>
+            <div className="admin-permission-summary" role="status" aria-live="polite">
+              <strong>Resumo</strong>
+              <span>
+                {draftEffects.size === 0
+                  ? "Todos os ajustes estão salvos."
+                  : `${draftEffects.size} ${
+                      draftEffects.size === 1 ? "alteração não salva" : "alterações não salvas"
+                    }.`}
+              </span>
+            </div>
+            <div className="admin-permission-submit-actions">
+              <button
+                type="button"
+                className={managementStyles.button}
+                onClick={clearDraft}
+                disabled={pending || (draftEffects.size === 0 && reason.length === 0)}
+              >
+                Descartar
+              </button>
+              <button
+                type="submit"
+                className={managementStyles.buttonPrimary}
+                disabled={pending || draftEffects.size === 0}
+              >
+                {pending ? "Salvando…" : "Salvar alterações"}
+              </button>
+            </div>
+            <ActionFeedback state={state} />
+          </div>
+        </>
       ) : (
         <p className="admin-permission-readonly-note">
           Esta matriz é somente para consulta. A hierarquia atual não permite alterar este usuário.
@@ -799,7 +808,11 @@ function UserDetail({
   const hasAnyMutation =
     user.isManageable && (canManageRoles || canManagePermissions || canManageUsers);
   const canEditPermissions =
-    user.isManageable && canManagePermissions && manageablePermissions.length > 0;
+    user.isManageable &&
+    user.isActive &&
+    user.accessStatus === "approved" &&
+    canManagePermissions &&
+    manageablePermissions.length > 0;
   const roleIsActive = user.roleKey ? ACTIVE_ROLE_KEYS.has(user.roleKey) : false;
   const protectedAdministratorAccount =
     user.roleKey === "admin" && !user.isSelf && !isMasterPermissionManager;
@@ -914,17 +927,14 @@ function UserDetail({
           </div>
           {isMasterPermissionManager && user.isManageable ? (
             <p className="admin-permission-intro">
-              Marque os acessos que deseja alterar. As caixas mostram o{" "}
-              <strong>acesso efetivo</strong>, após papel e exceções. Como Master, use{" "}
-              <strong>Incluir na alteração</strong> e aplique <strong>Permitir</strong> para criar
-              uma exceção individual em qualquer usuário abaixo do seu nível. O papel do usuário não
-              muda.
+              <strong>Marcado: acesso liberado. Desmarcado: sem acesso.</strong> As caixas mostram o
+              resultado do papel e das exceções individuais. Clique para ajustar o rascunho; o papel
+              do usuário não muda.
             </p>
           ) : (
             <p className="admin-permission-intro">
-              Consulte o <strong>acesso efetivo</strong>. A origem identifica
-              <strong> Permissões herdadas do papel</strong> e <strong>Exceções individuais</strong>
-              ; os botões de alteração formam um lote separado.
+              <strong>Marcado: acesso liberado. Desmarcado: sem acesso.</strong> A origem identifica
+              permissões herdadas do papel e exceções individuais.
             </p>
           )}
           {user.permissionDetailsAvailable !== false ? (
